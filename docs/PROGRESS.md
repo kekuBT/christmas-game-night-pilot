@@ -1,9 +1,9 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 ~01:20 EST (task 3 DONE: PR-ready checkpoint packet, local only, not published)
+Updated: 2026-11-04 ~01:50 EST (F6 viewport checks DONE via Chromium emulation; real-device checklist still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
-F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of all 11 games PASSED, and REAL-BROWSER click-through of all 11 games PASSED 2026-11-04 in Chromium and Firefox (see cron run 2026-11-04 ~01:14 EST below). F2 (Playwright E2E): DONE for Chromium/Firefox; WebKit BLOCKED on missing host libraries, real-device checklist still NOT RUN. F3–F7: NOT DONE. Task 3 (PR-ready checkpoint packet): DONE 2026-11-04 ~01:20 EST, LOCAL ONLY — `docs/CHECKPOINT_PACKET.md` + 7 screenshots in `docs/checkpoint-screenshots/`; NOT published to GitHub, per local-only mode.
+F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of all 11 games PASSED, and REAL-BROWSER click-through of all 11 games PASSED 2026-11-04 in Chromium and Firefox (see cron run 2026-11-04 ~01:14 EST below). F2 (Playwright E2E): DONE for Chromium/Firefox; WebKit BLOCKED on missing host libraries, real-device checklist still NOT RUN. F3–F7: NOT FORMALLY CLOSED. F6 viewport checks (320/375/390px, no overflow, >=44px targets, focus outlines, reduced motion) PASSED 2026-11-04 via Chromium emulation; real-device confirmation still open. Task 3 (PR-ready checkpoint packet): DONE 2026-11-04 ~01:20 EST, LOCAL ONLY — `docs/CHECKPOINT_PACKET.md` + 7 screenshots in `docs/checkpoint-screenshots/`; NOT published to GitHub, per local-only mode.
 
 ## Completed with evidence
 - M0 (commit 905643a): TypeScript+Zod+Vitest foundation, 23 tests, typecheck/build exit 0, static shell.
@@ -35,6 +35,7 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 - Browser click-through for all 11 games: DONE in real browsers 2026-11-04 — Chromium and Firefox, 4-player room, all 11 games to finished, plus championship/TV/Memory Book/reconnect views (see cron run below). The earlier browser-tab-service failure is superseded by the Playwright run.
 - Playwright multi-browser E2E: DONE for Chromium and Firefox. WebKit BLOCKED (binaries downloaded, but launch fails: host missing libgstreamer-1.0, libgtk-4, libgraphene, libevent, libgstreamer plugins — system package install is outside local-only scope, so not attempted).
 - Real browsers/devices: iPhone Safari, Android, desktop Safari, TV — NOT RUN (real-device checklist still open).
+- F6 viewport checks: DONE 2026-11-04 via Chromium emulation (see cron run below); contrast audit and real-device confirmation still open.
 - Manual real-device checklist (part of task 2): NOT RUN.
 - Cloudflare: UNTESTED-CLOUD, no provisioning per owner instruction.
 - npm audit: NOT RUN — registry proxy returned 403 policy_denied; no bypass attempted.
@@ -45,7 +46,7 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 1. DONE 2026-11-04 (real browser): Playwright click-through of all 11 games to finished in Chromium and Firefox, 4-player room — see cron run below. API playthrough (`scripts/clickthrough-api.mjs`) stays as the regression check.
 2. DONE except WebKit + device checklist: Playwright E2E (`scripts/e2e-browser.mjs`, `npm run e2e`) covers Chromium/Firefox; WebKit BLOCKED on host libraries (see above); manual real-device checklist still NOT RUN.
 3. DONE 2026-11-04 ~01:20 EST: PR-ready checkpoint packet prepared LOCALLY — `docs/CHECKPOINT_PACKET.md` (summary, test evidence, screenshots, limitations, open owner decisions) + `scripts/screenshot-checkpoint.mjs` + 7 screenshots in `docs/checkpoint-screenshots/` (home, lobby, game playing, game finished, championship, TV dashboard, Memory Book; fictional players only). NOT published to GitHub until Keku explicitly asks, per local-only mode.
-4. NEXT: Manual real-device checklist (iPhone Safari, Android, desktop Safari, TV — all NOT RUN; needs real devices, cannot be done from this VM) and F3–F7 per `docs/FRONTEND_MILESTONES.md`.
+4. PARTLY DONE 2026-11-04 ~01:50 EST: F6 mobile/accessibility viewport checks (Chromium emulation, NOT real devices) — see cron run below. REMAINING: manual real-device checklist (iPhone Safari, Android, desktop Safari, TV — all NOT RUN; needs real devices, cannot be done from this VM) and F3–F7 completion per `docs/FRONTEND_MILESTONES.md` (F3/F4 largely evidenced by the E2E run, but their milestone statuses were not formally closed).
 
 ## External approvals pending
 None queued. Local-only mode: do not initiate GitHub publishing or approval requests until Keku explicitly asks. GitHub coordination cron remains paused.
@@ -59,6 +60,7 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - `npm run build:web` — exit 0
 - `node scripts/screenshot-checkpoint.mjs http://localhost:3457` — exit 0, 7 screenshots
 - `node scripts/clickthrough-api.mjs http://localhost:3457` — exit 0, ALL GAMES FINISHED (twice: before and after the 2026-11-04 fixes)
+- `node scripts/check-mobile.mjs http://localhost:3457` — exit 0, 32 checks passed (see cron run 2026-11-04 ~01:46 EST)
 - Live smoke (port 3456, 2026-11-03): `/`, `/games`, join-by-code, host start Math Mayhem with 2 players — all as reported above
 - `npm audit --omit=dev` — blocked by registry proxy 403, NOT RUN (earlier session); `npm view playwright` 2026-11-04 succeeded (1.64.1)
 
@@ -78,6 +80,13 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - New driver `scripts/screenshot-checkpoint.mjs`: Chromium, 4 fictional players (Alex/Sam/Jo/Kim), room create + join by code, Math Mayhem played to finished via real UI clicks, then championship, TV Dashboard, Memory Book add/approve/export — 7 screenshots captured in `docs/checkpoint-screenshots/` (lobby screenshot visually verified: 4-player roster, all 11 game cards). One harness quirk: `pkill -f "tsx src/server/serve.ts"` matched the wrapping shell and killed it before `rm -rf data` ran; data/ was removed in a follow-up command and the server confirmed stopped. No app bug found.
 - New doc `docs/CHECKPOINT_PACKET.md`: summary, exact test evidence, screenshot list, limitations (WebKit blocked, real devices not run, Cloud untested, provisional rules, npm audit not run, ESLint not configured), open owner decisions, manual real-device checklist, reproduce steps. Explicitly marked DO NOT PUBLISH.
 - Evidence: `npm run typecheck` exit 0, `npm test` 8 files / 47 passed, `npm run build:web` exit 0, screenshot script exit 0 (7 files). Test server data/ removed.
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
+## Cron run 2026-11-04 ~01:46 EST (local-dev-christmas-30m — COMPLETED with commit)
+- Tree was clean; worked task-board item 4 (F6 mobile/accessibility, local part only — the real-device checklist cannot run from this VM and stays open).
+- New driver `scripts/check-mobile.mjs` (`npm run check-mobile`, usage: build web, `PORT=3457 npm run serve`, then `node scripts/check-mobile.mjs http://localhost:3457`). Chromium with touch/mobile emulation, 2 fictional players (Alex host, Sam joiner), Math Mayhem started from the lobby. Per viewport (320x568, 375x667, 390x844 portrait) it checks home, lobby, and live game panel for horizontal overflow, >= 44px touch targets, and keyboard Tab order with visible :focus-visible outlines, plus a reduced-motion context check. 9 screenshots in `docs/mobile-screenshots/` (home/lobby/game per width).
+- One check-design finding, NOT an app bug: tabbing past the last control lands on BODY (Chromium headless end-of-tab-order wrap) with no outline. The script now treats BODY stops as wrap markers, not failed controls, and fills the name first so the Create button is enabled and covered by Tab order. First run showed this as 6 failures (all home Tab checks); after the fix, 32/32 pass.
+- Evidence: `npm run typecheck` exit 0, `npm test` 8 files / 47 passed, `npm run build:web` exit 0, `npm run check-mobile` exit 0 (32 passed, 0 failed; overflow 0px at all widths, all visible targets >= 44px, all focused controls outlined 3px gold, reduced-motion transitions/animations off). Test server data/ removed.
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
 
 ## Next session exact resume step
