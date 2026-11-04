@@ -46,7 +46,7 @@ export function ChampionshipView(props: {
     {Object.entries(serverStandings).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([pid, v]) => <p key={pid}>{nameOf(pid)}: {v} points</p>)}
     <h3>Per-game breakdown (official games only)</h3>{officialFinished.map((g) => <p key={g.id}><b>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId}</b> ({g.gameId}, Day {g.day ?? 1}) — {Object.entries(midrank(g.rawScores ?? {})).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>)}
     <h3>🏆 End-of-day ceremony</h3>
-    {ceremony && ceremony.winner ? <p>Day {ceremony.day} winner: <b>{ceremony.winner}</b> — congratulations! Add the moment to the Memory Book from the Memory Book view.</p> : <p>No ceremony yet — finish a game first.</p>}
+    {ceremony && ceremony.winner ? <p>Day {ceremony.day} winner: <b>{(ceremony.winners ?? [ceremony.winner]).join(" & ")}</b> — congratulations! Add the moment to the Memory Book from the Memory Book view.</p> : <p>No ceremony yet — finish a game first.</p>}
     <h3>Achievements (from real game events only)</h3>
     {achievements.length === 0 && <p>No achievements yet.</p>}
     {achievements.map((a, i) => <p key={`${a.ruleId}-${a.playerId}-${i}`}>⭐ {a.title} — {a.ruleId === "first-game" ? "the whole room" : nameOf(a.playerId)}</p>)}

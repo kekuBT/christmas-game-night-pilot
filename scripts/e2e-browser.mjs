@@ -177,7 +177,10 @@ async function runBrowser(browserName, games) {
     await host.goto(BASE, { waitUntil: "domcontentloaded" });
     await host.getByPlaceholder("e.g. Ada").fill(NAMES[0]);
     await host.getByRole("button", { name: "Create a room (host)" }).click();
-    await host.locator("header .pill").waitFor({ timeout: 15000 });
+    // Wait for the real code, not just the pill element: before the first
+    // projection poll lands the pill reads "Code: …", which used to race
+    // this read and fail the run with "unexpected room code: …".
+    await host.locator("header .pill", { hasText: /Code: [A-Z0-9]{6}/ }).waitFor({ timeout: 15000 });
     const code = (await host.locator("header .pill").textContent()).replace("Code:", "").trim();
     if (!/^[A-Z0-9]{6}$/.test(code)) throw new Error(`unexpected room code: ${code}`);
     console.log(`[${browserName}] room code ${code}`);

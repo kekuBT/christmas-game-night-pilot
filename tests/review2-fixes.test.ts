@@ -118,16 +118,14 @@ describe("review #6: role-aware Impostor projections over HTTP", () => {
 });
 
 describe("review #5: export layout helpers (long content)", () => {
-  it("paginateBlocks never puts a block past the page bottom, and starts long entries on a fresh page", async () => {
-    const { paginateBlocks } = await import("../apps/web/src/components/exportLayout.js");
-    // 10 blocks of 60 units on a 280-unit page starting at y=32: pages hold
-    // at most 4 blocks (32+4*60=272), so 10 blocks need 3 pages.
-    const pages = paginateBlocks(Array(10).fill(60), 280, 32);
+  it("paginateLines never puts a line past the page bottom, and splits long entries across pages", async () => {
+    const { paginateLines } = await import("../apps/web/src/components/exportLayout.js");
+    // 10 lines of 60 units on a 280-unit page starting at y=32: pages hold
+    // at most 4 lines (32+4*60=272), so 10 lines need 3 pages.
+    const pages = paginateLines(Array(10).fill(60), 280, 32);
     expect(pages.length).toBe(3);
     expect(pages.flat()).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    // A single block taller than a page still gets its own page, not dropped.
-    expect(paginateBlocks([400], 280, 32)).toEqual([[0]]);
-    expect(paginateBlocks([], 280, 32)).toEqual([[]]);
+    expect(paginateLines([], 280, 32)).toEqual([[]]);
   });
   it("selectShareEntries surfaces the overflow instead of silently clipping", async () => {
     const { selectShareEntries } = await import("../apps/web/src/components/exportLayout.js");

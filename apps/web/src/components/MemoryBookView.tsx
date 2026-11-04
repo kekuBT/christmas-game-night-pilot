@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import { selectShareEntries, paginateBlocks } from "./exportLayout.js";
+import { selectShareEntries, paginateLines, canvasNoteY } from "./exportLayout.js";
 import type { LedgerEvent, MemoryEntry } from "../types.js";
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
@@ -26,28 +26,26 @@ export function MemoryBookView(props: {
     doc.setFontSize(20);
     doc.text("Christmas Memory Book", 14, 20);
     doc.setFontSize(12);
-    // Build blocks first, then paginate with the tested helper: a block
-    // starts on a new page if it does not fit in the remaining space, so
-    // long content can never overflow a page (review 5769121221 #5).
-    const blocks = approved.map((e) => {
-      const lines = doc.splitTextToSize(`${e.text} (Day ${e.day})`, 180);
-      const facts = e.derivedFacts.map((f) => doc.splitTextToSize(`From the ledger: ${f}`, 180));
-      return { lines, facts, height: lines.length * 7 + 4 + facts.reduce((s, fl) => s + fl.length * 7 + 2, 0) + 4 };
-    });
-    const pages = paginateBlocks(blocks.map((b) => b.height), 280, 32);
+    // Flatten to individual lines, then paginate lines (review 5769441799
+    // P2): a single oversized entry is split across pages at line
+    // boundaries instead of overflowing one page. Each line is 7 units
+    // tall, plus a 4-unit gap after each entry.
+    const lines: { text: string; height: number }[] = [];
+    for (const e of approved) {
+      for (const l of doc.splitTextToSize(`${e.text} (Day ${e.day})`, 180)) lines.push({ text: l, height: 7 });
+      for (const f of e.derivedFacts) {
+        for (const l of doc.splitTextToSize(`From the ledger: ${f}`, 180)) lines.push({ text: l, height: 7 });
+      }
+      lines.push({ text: "", height: 4 });
+    }
+    const pages = paginateLines(lines.map((l) => l.height), 280, 32);
     for (const page of pages) {
       let y = 32;
       for (const idx of page) {
-        const b = blocks[idx]!;
-        doc.text(b.lines, 14, y);
-        y += b.lines.length * 7 + 4;
-        for (const fl of b.facts) {
-          doc.text(fl, 14, y);
-          y += fl.length * 7 + 2;
-        }
-        y += 4;
+        const l = lines[idx]!;
+        if (l.text) doc.text(l.text, 14, y);
+        y += l.height;
       }
-      // addPage between pages, not after the last one.
       if (page !== pages[pages.length - 1]) doc.addPage();
     }
     if (approved.length === 0) doc.text("No approved entries yet.", 14, 32);
@@ -67,6 +65,7 @@ export function MemoryBookView(props: {
     // clipping the rest (review 5769121221 #5). The full set is always in
     // the markdown and PDF exports.
     const { shown, overflow } = selectShareEntries(approved);
+    let truncated = false;
     for (const e of shown) {
       const words = e.text.split(" ");
       let line = "";
@@ -76,9 +75,10 @@ export function MemoryBookView(props: {
       }
       if (line) { ctx.fillText(line, 60, y); y += 48; }
       y += 24;
-      if (y > 980) break;
+      if (y > 980) { truncated = true; break; }
     }
-    if (overflow > 0) { ctx.fillText(`…and ${overflow} more in the PDF export.`, 60, y + 24); }
+    if (truncated) { ctx.fillText("…entry continues in the PDF export.", 60, canvasNoteY(y + 24)); }
+    else if (overflow > 0) { ctx.fillText(`…and ${overflow} more in the PDF export.`, 60, canvasNoteY(y + 24)); }
     if (approved.length === 0) ctx.fillText("No approved entries yet.", 60, 200);
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/png");

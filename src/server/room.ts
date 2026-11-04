@@ -1,6 +1,6 @@
 import { createHash, randomInt } from "node:crypto";
 import { getGame } from "../games/registry.js";
-import { midrankScore } from "../scoring/championship.js";
+import { dayScore, midrankScore } from "../scoring/championship.js";
 import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
 import { evaluateAchievements, dayCeremony } from "./achievements.js";
 import { generateMathQuestions, scoreMathAnswer, type MathQuestion } from "../games/math.js";
@@ -547,9 +547,34 @@ export class RoomEngine {
     return evaluateAchievements(this.ledger, rawScoresByGame);
   }
 
+  /**
+   * End-of-day ceremony for the CURRENT day only (review 5769441799):
+   * standings are that day's 75/25 day scores from finished official
+   * non-timed-out games started that day, not the multi-day championship
+   * total. A player who dominates Day 2 is the Day 2 winner even if
+   * someone else leads overall. No finished official game that day means
+   * no winner yet (winner null), never an invented one.
+   */
   ceremony() {
-    const results = this.championshipResults();
-    const standings = results.map((r) => ({ playerId: r.playerId, displayName: this.players.get(r.playerId)?.displayName ?? r.playerId, base: r.total }));
+    const days = new Map<string, PlayerDay>();
+    for (const g of this.games.values()) {
+      if (g.status !== "finished" || !g.official || g.timedOut) continue;
+      if ((g.day ?? 1) !== this.championshipDay) continue;
+      const all = Object.values(g.rawScores);
+      if (all.length < 2) continue;
+      const isTeam = getGame(g.gameId).modes.includes("team");
+      for (const [pid, pts] of Object.entries(g.rawScores)) {
+        const entry = days.get(pid) ?? { playerId: pid, day: this.championshipDay, soloScores: [], teamScores: [] };
+        const score = midrankScore(pts, all);
+        if (isTeam) entry.teamScores.push(score); else entry.soloScores.push(score);
+        days.set(pid, entry);
+      }
+    }
+    const standings = [...days.values()].map((d) => ({
+      playerId: d.playerId,
+      displayName: this.players.get(d.playerId)?.displayName ?? d.playerId,
+      base: dayScore({ soloScores: d.soloScores, teamScores: d.teamScores }).score,
+    }));
     return dayCeremony(this.championshipDay, standings);
   }
 
@@ -721,6 +746,7 @@ export class RoomEngine {
       name: this.name,
       hostId: this.hostId,
       cohosts: [...this.cohosts],
+      championshipDay: this.championshipDay,
       players: [...this.players.values()],
       games: [...this.games.values()],
       ledger: this.ledger,
@@ -737,6 +763,9 @@ export class RoomEngine {
     engine.joinCode = data["joinCode"] as string;
     engine.hostId = data["hostId"] as string | null;
     engine.cohosts = new Set(data["cohosts"] as string[]);
+    // Migration default: snapshots written before championshipDay was
+    // serialized (review 5769441799) have no field and resume at day 1.
+    engine.championshipDay = typeof data["championshipDay"] === "number" ? data["championshipDay"] : 1;
     engine.players = new Map((data["players"] as RoomPlayer[]).map((p) => [p.id, p]));
     engine.games = new Map((data["games"] as GameInstance[]).map((g) => [g.id, g]));
     engine.ledger = data["ledger"] as LedgerEvent[];

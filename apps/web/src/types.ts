@@ -64,6 +64,7 @@ export interface Achievement {
 export interface Ceremony {
   day: number;
   winner: string | null;
+  winners?: string[];
   standings: { playerId: string; displayName: string; base: number }[];
 }
 
