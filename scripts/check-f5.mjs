@@ -267,7 +267,13 @@ try {
   // per-question (math:math-1…), so a substring scan for "math-mayhem"
   // misses it even though its finish event exists. Count finish events
   // and cross-check finished game ids through the TV projection instead.
-  const ledger = await (await fetch(`${BASE}/rooms/${roomId}/ledger`)).json();
+  // Ledger is room-member-only since the PR #3 auth fix: fetch it through
+  // the host page so the session token from sessionStorage is sent.
+  const ledger = await host.evaluate(async (rid) => {
+    const token = sessionStorage.getItem("cgn_token");
+    const r = await fetch(`/rooms/${rid}/ledger`, { headers: token ? { "x-session-token": token } : {} });
+    return r.json();
+  }, roomId);
   const finishedCount = (Array.isArray(ledger) ? ledger : [])
     .filter((e) => e.type === "game-finished").length;
   check("ledger holds one game-finished event per playlist game",

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { dayCeremony, evaluateAchievements } from "../src/server/achievements.js";
 import { buildHub } from "../src/server/hub.js";
@@ -25,17 +26,27 @@ describe("M4 Hub / Memory Book / Achievements", () => {
   it("memory book requires real ledger events, approve/revoke controls export", () => {
     const engine = new RoomEngine("Book Room");
     const host = engine.join("Host", { asHost: true }).player.id;
-    engine.join("Guest");
+    const guest = engine.join("Guest").player.id;
     const game = engine.startGame(host, "math-mayhem", { seed: 1 });
     const book = new MemoryBook();
     expect(() => book.addFromLedger(1, "Fake result", ["evt-nonexistent"], engine.ledger)).toThrow();
-    const entry = book.addFromLedger(1, "Math Mayhem was played.", [engine.ledger[0]!.eventId], engine.ledger);
+    expect(() => book.addFromLedger(1, "No source", [], engine.ledger)).toThrow();
+    expect(() => book.addFromLedger(1, "Joined, not finished", [engine.ledger[0]!.eventId], engine.ledger)).toThrow();
+    for (const pid of [host, guest]) {
+      for (const q of game.questions!) {
+        engine.submitIntent({ kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: engine.id, gameInstanceId: game.id, action: "submit-math-answer", payload: { questionId: q.id, chosenIndex: q.correctIndex } }, pid);
+      }
+    }
+    expect(game.status).toBe("finished");
+    const finishedEvt = engine.ledger.find((e) => e.type === "game-finished")!;
+    const entry = book.addFromLedger(1, "Math Mayhem was played.", [finishedEvt.eventId], engine.ledger);
+    expect(entry.derivedFacts.length).toBeGreaterThan(0);
     expect(book.exportMarkdown("Book Room")).not.toContain("Math Mayhem was played.");
     book.approve(entry.id, host);
     expect(book.exportMarkdown("Book Room")).toContain("Math Mayhem was played.");
+    expect(book.exportMarkdown("Book Room")).toContain("From the ledger");
     book.revoke(entry.id);
     expect(book.exportMarkdown("Book Room")).not.toContain("Math Mayhem was played.");
-    expect(game.status).toBe("playing"); // unrelated, just sanity
   });
 
   it("achievements are ledger-grounded and ceremony picks the leader", () => {

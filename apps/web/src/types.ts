@@ -1,0 +1,146 @@
+// Typed server/client projection contracts for the browser app.
+// These mirror src/server/room.ts project() output. Game-specific state
+// (state, questions) stays as unknown/Record<string, unknown> and is narrowed
+// per game in App.tsx; the top-level contract — players, games, standings,
+// me/myGames — is fully typed and checked by apps/web/tsconfig.json.
+
+export type GameStatus = "lobby" | "playing" | "revealed" | "finished";
+
+export interface PublicPlayer {
+  id: string;
+  displayName: string;
+  avatar: string;
+  isHost: boolean;
+  isCohost: boolean;
+  connected: boolean;
+}
+
+export interface PublicGame {
+  id: string;
+  gameId: string;
+  official: boolean;
+  status: GameStatus;
+  timedOut: boolean;
+  deadlineAt?: number;
+  players: string[];
+  state?: unknown;
+  questions?: { id: string; prompt: string; options: string[]; correctAnswer?: number }[];
+  rawScores?: Record<string, number>;
+}
+
+export interface PlayerGame {
+  id: string;
+  gameId: string;
+  status: GameStatus;
+  myAnswers: Record<string, number | null>;
+  myScore: number;
+  state?: unknown;
+  questions?: { id: string; prompt: string; options: string[] }[];
+  rawScores?: Record<string, number>;
+}
+
+export interface Projection {
+  roomId: string;
+  joinCode: string;
+  name: string;
+  players: PublicPlayer[];
+  games: PublicGame[];
+  officialStandings: Record<string, number>;
+  seq: number;
+  me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean };
+  myGames?: PlayerGame[];
+  hostView?: boolean;
+}
+
+export interface RegistryGame {
+  id: string;
+  title: string;
+  minPlayers: number;
+  maxPlayers: number;
+  defaultDurationMinutes: number;
+  tutorial: string;
+}
+
+export interface MemoryEntry {
+  id: string;
+  day: number;
+  text: string;
+  sourceEventIds: string[];
+  approved: boolean;
+  approvedBy?: string;
+  derivedFacts: string[];
+}
+
+export interface LedgerEvent {
+  eventId: string;
+  seq: number;
+  type: string;
+  playerId?: string;
+  gameInstanceId?: string;
+  points?: number;
+  reason?: string;
+  official?: boolean;
+  createdAt: number;
+}
+
+export interface JoinResponse {
+  roomId: string;
+  joinCode: string;
+  playerId: string;
+  displayName: string;
+  isHost: boolean;
+  recoveryToken: string;
+  sessionToken?: string;
+  name?: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  prompt: string;
+  options: string[];
+  speakers?: string[];
+}
+
+/** Game-specific state, as projected by the server. All fields optional: each game uses a subset. */
+export interface GameState {
+  category?: string;
+  role?: string;
+  word?: string;
+  phase?: string;
+  clues?: Record<string, string>;
+  myVote?: string;
+  winner?: string;
+  revealedWord?: string;
+  prompt?: string;
+  roundIndex?: number;
+  myCaption?: string;
+  captions?: { id: string; text: string }[];
+  tiles?: { id: string; text: string }[];
+  myState?: { mistakes: number; solved: string[]; guessed: string[] };
+  actor?: string;
+  teamScores?: number[];
+  passesThisTurn?: number;
+  myGuess?: number;
+  unit?: string;
+  events?: { id: string; event: string }[];
+  myGuesses?: Record<string, number>;
+  questions?: QuizQuestion[];
+  myAnswers?: Record<string, number>;
+}
+
+/** Narrow an unknown JSON value to a record, or return an empty record. */
+export function asRecord(v: unknown): Record<string, unknown> {
+  return typeof v === "object" && v !== null ? (v as Record<string, unknown>) : {};
+}
+
+export function asString(v: unknown, fallback = ""): string {
+  return typeof v === "string" ? v : fallback;
+}
+
+export function asNumber(v: unknown, fallback = 0): number {
+  return typeof v === "number" ? v : fallback;
+}
+
+export function asStringArray(v: unknown): string[] {
+  return Array.isArray(v) && v.every((x) => typeof x === "string") ? (v as string[]) : [];
+}
