@@ -496,7 +496,7 @@ export class RoomEngine {
                   : g.gameId === "guess-the-year"
                     ? { events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })) }
                     : g.gameId === "word-connections"
-                      ? { tiles: CONNECTIONS_BOARD.tiles }
+                      ? { tiles: CONNECTIONS_BOARD.tiles.map((t) => ({ id: t.id, text: t.text })) }
                       : g.gameId === "category-sprint"
                         ? { roundIndex: (g.extra as { roundIndex: number }).roundIndex, category: SPRINT_CATEGORIES[(g.extra as { roundIndex: number }).roundIndex % SPRINT_CATEGORIES.length]?.name }
                         : undefined,
@@ -550,7 +550,7 @@ export class RoomEngine {
                           myGuesses: (g.extra as { guesses: Record<string, Record<string, number>> }).guesses[actorId] ?? {},
                         }
                       : g.gameId === "word-connections"
-                        ? { tiles: CONNECTIONS_BOARD.tiles, myState: (g.extra as { playerStates: Record<string, ConnectionsPlayerState> }).playerStates[actorId] }
+                        ? { tiles: CONNECTIONS_BOARD.tiles.map((t) => ({ id: t.id, text: t.text })), myState: (g.extra as { playerStates: Record<string, ConnectionsPlayerState> }).playerStates[actorId] }
                         : g.gameId === "category-sprint"
                           ? { roundIndex: (g.extra as { roundIndex: number }).roundIndex, category: SPRINT_CATEGORIES[(g.extra as { roundIndex: number }).roundIndex % SPRINT_CATEGORIES.length]?.name }
                           : undefined,

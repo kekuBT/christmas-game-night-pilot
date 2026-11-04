@@ -206,7 +206,7 @@ function GamePanel(props: { game: Any; players: Any[]; nameOf: (id: string) => s
         {st.phase === "vote" && st.myVote && <p className="ok">Voted.</p>}
       </div>}
       {game.gameId === "word-connections" && <div className="card"><p>Mistakes: {st.myState?.mistakes ?? 0} / 4 · Solved: {(st.myState?.solved ?? []).join(", ") || "none"}</p>
-        <div className="grid">{(st.tiles ?? []).map((t: Any) => <button key={t.id} className={selectedTiles.includes(t.id) ? "tile sel" : "tile"} onClick={() => setSelectedTiles(selectedTiles.includes(t.id) ? selectedTiles.filter((x) => x !== t.id) : selectedTiles.length < 4 ? [...selectedTiles, t.id] : selectedTiles)}>{t.word ?? t.label ?? t.id}</button>)}</div>
+        <div className="grid">{(st.tiles ?? []).map((t: Any) => <button key={t.id} className={selectedTiles.includes(t.id) ? "tile sel" : "tile"} onClick={() => setSelectedTiles(selectedTiles.includes(t.id) ? selectedTiles.filter((x) => x !== t.id) : selectedTiles.length < 4 ? [...selectedTiles, t.id] : selectedTiles)}>{t.text ?? t.id}</button>)}</div>
         <div className="row"><button disabled={selectedTiles.length !== 4} onClick={() => { intent(gid, "connections-guess", { tileIds: selectedTiles }); setSelectedTiles([]); }}>Submit group of 4</button></div>
       </div>}
       {game.gameId === "category-sprint" && <div className="card"><p>Round {st.roundIndex + 1} of 3 · Category: <b>{st.category}</b></p><p className="muted">Enter up to 5 examples, comma-separated. Unique answers score more.</p>
