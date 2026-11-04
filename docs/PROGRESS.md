@@ -263,3 +263,10 @@ Open this file, confirm local git status in `~/workspace/christmas-game-night-pi
 - Browser: scripts/check-m6.mjs 9/9 (landing steps, lobby, intro, gameplay, waiting with counts, results, back to lobby, reactions); E2E Chromium 12/12 after driver learned Show Mode (L30); M6 screenshots 8/8 in docs/m6-screenshots/ (landing, lobby, intro, trivia tiles, waiting, results, reactions, impostor role).
 - Real bugs found and fixed during M6: (1) GamePanel sat inside the lobby-phase fragment so gameplay phase hid it; (2) myProgressDone missed Trivia answers (extra.answers) and state questions; (3) stale 3461 server (pre-reactions build) masked the reactions route until killed and restarted; (4) waiting-as-replacement hid phase changes (L26).
 - Exact next task: M6.4 — apply the shared design system + per-game personalities to the remaining games, restyle championship/TV/Memory Book as stage views, then M6.5 polish and M6.6 verification + full visual review package (iPhone + TV/desktop). No GitHub action taken for M6; branch still holds 6ee074f.
+
+## M6 visual freeze — 2026-11-04 ~10:27 EST (owner direction)
+- Visual direction changed: owner is not satisfied with the current look (too monochromatic, heavily green, prototype-like). Do NOT continue propagating the current design system across remaining games.
+- Preserved: all M6 functionality, Show Mode, reactions, gameplay interactions, automated tests; code stays committed locally at f0584c6. No GitHub action.
+- New constraint (L31): no large UI restyling or visual-theme decisions until the owner supplies approved visual references and a design system.
+- Handoff written: docs/DESIGN_HANDOFF.md — frontend structure, current styling approach (plain CSS, tokens, layout, motion), constraints a new design must accommodate (server-authoritative, per-player vs TV projections, secret handling, touch/accessibility floors, $0 assets, performance envelope, stable test hooks), and the nonvisual backlog.
+- Exact next task (nonvisual only): per-game abstention semantics refinement (L13), host-recovery edge cases, deadline/timeout behaviour, WS reconnect robustness; M6.4 restyle is ON HOLD.
