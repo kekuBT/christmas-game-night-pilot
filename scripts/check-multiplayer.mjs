@@ -101,6 +101,8 @@ try {
   check("lobby roster: 4 players joined", true);
 
   // --- Simultaneous play: Math Mayhem on all four pages at once. ---
+    await host.getByTestId("choose-game").click();
+  await host.getByTestId("select-game-math-mayhem").click();
   await host.locator('[data-testid="start-official-math-mayhem"]').click();
   let allSeeGame = true;
   for (const { page, name } of pages) {
@@ -159,6 +161,8 @@ try {
   // was once lost (heading never arrived) even though the button exists.
   let impostorStarted = false;
   for (let attempt = 0; attempt < 2 && !impostorStarted; attempt++) {
+        await host.getByTestId("choose-game").click();
+    await host.getByTestId("select-game-impostor").click();
     await host.locator('[data-testid="start-official-impostor"]').click();
     try {
       await host.getByRole("heading", { name: "Now playing: impostor" }).waitFor({ timeout: 20000 });

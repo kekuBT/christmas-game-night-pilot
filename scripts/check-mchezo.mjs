@@ -110,6 +110,28 @@ try {
     await joinRoom(p, name, codeB);
     guestsB.push(p);
   }
+  // Phase 2.1 lobby simplification: guests see no setup controls; the host
+  // sees one mode control + one chooser, and the primary Start follows both.
+  check("guest sees no game-setup controls",
+    (await guestsB[0].getByTestId("choose-game").count()) === 0 &&
+    (await guestsB[0].getByTestId("mode-official").count()) === 0);
+  check("host sees chooser and mode controls",
+    (await hostB.getByTestId("choose-game").count()) === 1 &&
+    (await hostB.getByTestId("mode-official").count()) === 1);
+  await hostB.getByTestId("choose-game").click();
+  check("chooser lists all 11 games",
+    (await hostB.locator('[data-testid^="select-game-"]').count()) === 11);
+  await hostB.getByTestId("select-game-math-mayhem").click();
+  check("chooser sets up next to Math Mayhem",
+    (await hostB.locator(".mz-upnext__name").textContent()) === "Math Mayhem");
+  await hostB.getByTestId("mode-practice").click();
+  check("practice mode moves the Start testid",
+    (await hostB.getByTestId("start-practice-math-mayhem").count()) === 1);
+  await hostB.getByTestId("mode-official").click();
+  await hostB.getByTestId("choose-game").click();
+  await hostB.getByTestId("select-game-trivia").click();
+  check("chooser returns up next to Trivia Showdown",
+    (await hostB.locator(".mz-upnext__name").textContent()) === "Trivia Showdown");
   await hostB.getByTestId("start-official-trivia").click();
   // Intro auto-advances in 8s; the question screen follows.
   await hostB.locator(".mz-question").waitFor({ timeout: 30000 });
@@ -135,6 +157,9 @@ try {
   check("results screen after all players finish", true);
   check("results show standings list", (await hostB.locator(".mz-standings").count()) === 1);
   check("results show question picker", (await hostB.getByRole("button", { name: /^Q10 / }).count()) === 1);
+  const resultsText = await hostB.locator("body").textContent();
+  check("results separate this question from the game total and rank",
+    resultsText.includes("This question:") && resultsText.includes("Your game total:") && resultsText.includes("Game rank:"));
   await hostB.getByRole("button", { name: /^Q2 / }).click();
   await sleep(500);
   check("question picker switches the inspected question", true);

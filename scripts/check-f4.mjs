@@ -88,6 +88,8 @@ try {
   check("lobby roster: 4 players joined", true);
 
   // --- Play Math Mayhem to finished on all four pages. ---
+    await host.getByTestId("choose-game").click();
+  await host.getByTestId("select-game-math-mayhem").click();
   await host.locator('[data-testid="start-official-math-mayhem"]').click();
   await host.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });
   let finishedEverywhere = false;

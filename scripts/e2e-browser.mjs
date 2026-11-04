@@ -237,6 +237,8 @@ async function runBrowser(browserName, games) {
     for (const gameId of games) {
       const label = `${gameId}`;
       try {
+                await host.getByTestId("choose-game").click();
+        await host.getByTestId(`select-game-${gameId}`).click();
         await host.locator(`[data-testid="start-official-${gameId}"]`).click();
         // Show Mode / Mchezo intro: every player sees an intro screen
         // first. Dismiss it on every page (or wait for its auto-advance)
@@ -286,11 +288,9 @@ async function runBrowser(browserName, games) {
       await host.getByText("Championship standings").waitFor({ timeout: 15000 });
       await host.getByRole("button", { name: "Lobby & Games" }).click();
       await host.getByRole("button", { name: "TV stage" }).click();
-      // Full runs played Trivia, so the TV view is the Mchezo stage; smoke
-      // runs (math + closest only) have no Trivia subject, so the app
-      // falls through to the old TV Dashboard instead. Accept either —
-      // the smoke views check previously assumed Trivia had been played
-      // and timed out on the stage region when it had not.
+      // TV subject is the LATEST game overall (Phase 2.1 lifecycle fix):
+      // full runs end on Math Mayhem, so the TV view is the old dashboard;
+      // a run ending on Trivia would show the Mchezo stage. Accept either.
       try {
         await host.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
         await host.getByRole("button", { name: "Back to phone view" }).click();

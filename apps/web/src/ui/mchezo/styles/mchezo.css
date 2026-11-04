@@ -55,7 +55,7 @@
   appearance: none; border: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   background: var(--mz-key-bg); color: var(--mz-key-fg); box-shadow: 0 var(--mz-key-depth) 0 var(--mz-key-edge);
   border-radius: 20px; font-family: var(--mz-font-display); font-weight: 700; letter-spacing: -0.01em;
-  transition: transform 90ms ease, box-shadow 90ms ease, background-color .2s ease;
+  transition: transform 90ms ease, box-shadow 90ms ease;
   margin-bottom: var(--mz-key-depth); touch-action: manipulation; user-select: none;
 }
 .mz-key:active:not(:disabled) { transform: translateY(var(--mz-key-depth)); box-shadow: 0 0 0 var(--mz-key-edge); }
@@ -67,7 +67,7 @@
 .mz-key--surface { --mz-key-bg: var(--mz-surface-2); --mz-key-fg: var(--mz-text); --mz-key-edge: var(--mz-line); font-family: var(--mz-font-body); --mz-key-depth: 4px; }
 .mz-key--ghost { --mz-key-bg: transparent; --mz-key-fg: var(--mz-text); --mz-key-edge: transparent; }
 .mz-key--reaction { flex: 1 1 0; min-width: 44px; min-height: 52px; border-radius: 16px; padding: 0; }
-[data-mz-motion="reduced"] .mz-key { transition: background-color .16s linear, box-shadow .16s linear; }
+[data-mz-motion="reduced"] .mz-key { transition: box-shadow .16s linear; }
 [data-mz-motion="reduced"] .mz-key:active:not(:disabled) { transform: none; box-shadow: 0 0 0 3px var(--mz-highlight); }
 
 /* reaction tones */

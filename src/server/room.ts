@@ -839,6 +839,23 @@ export class RoomEngine {
     return out;
   }
 
+  /**
+   * Post-finish trivia only: points a correct answer to each question is
+   * worth, computed with the exact scorer call scoreQuizGame uses
+   * (scoreTrivia with the fixed 3000ms reference). These are per-question
+   * values, not per-player scores — the client multiplies by correctness.
+   * Never sent while playing: the values alone would not leak the key, but
+   * they are meaningless before the reveal and ride with answerCounts.
+   */
+  private quizQuestionPoints(game: GameInstance): Record<string, number> {
+    const extra = game.extra as { questions: TriviaQuestion[] };
+    const out: Record<string, number> = {};
+    for (const q of extra.questions ?? []) {
+      out[q.id] = scoreTrivia(q, q.correctIndex, 3000);
+    }
+    return out;
+  }
+
   /** The ONLY pathway to outbound state. Never include secrets for the wrong audience. */
   project(audience: Audience, actorId?: string): Record<string, unknown> {
     const publicPlayers = [...this.players.values()].map((p) => ({
@@ -899,6 +916,7 @@ export class RoomEngine {
       // option index, computed from stored answers. No player identities —
       // the room can see HOW it answered, never WHO answered what.
       answerCounts: g.status === "finished" && g.gameId === "trivia" ? this.quizAnswerCounts(g) : undefined,
+      questionPoints: g.status === "finished" && g.gameId === "trivia" ? this.quizQuestionPoints(g) : undefined,
       rawScores: g.status === "finished" || g.status === "revealed" ? g.rawScores : undefined,
     }));
     const base: Record<string, unknown> = {

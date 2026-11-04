@@ -93,6 +93,28 @@ describe("Mchezo trivia secrecy", () => {
     expect(JSON.stringify(tv.json)).not.toMatch(/"answers"\s*:/);
   });
 
+  it("finished trivia exposes per-question point values consistent with raw scores", async () => {
+    const { roomId, players } = await makeRoom(4);
+    const gameId = await startTrivia(roomId, players[0]!.token);
+    const proj = await get(`/rooms/${roomId}/projection?audience=player`, players[0]!.token);
+    const myGames = proj.json["myGames"] as { id: string; state: { questions: { id: string }[] } }[];
+    const qids = myGames.find((g) => g.id === gameId)!.state.questions.map((q) => q.id);
+    await answerAll(roomId, gameId, players, qids);
+    const tv = await get(`/rooms/${roomId}/projection?audience=tv`);
+    const games = tv.json["games"] as { id: string; status: string; state: { questions: { id: string; correctIndex?: number }[] }; questionPoints?: Record<string, number>; rawScores?: Record<string, number> }[];
+    const finished = games.find((g) => g.id === gameId)!;
+    expect(Object.keys(finished.questionPoints ?? {})).toHaveLength(10);
+    // Every player answered option 0 to every question, so each player's
+    // raw score must equal the sum of point values for questions whose
+    // correct option is 0 — the client-side "points from this question"
+    // display derives from these same values.
+    const correctZero = finished.state.questions.filter((q) => q.correctIndex === 0).map((q) => q.id);
+    const expected = correctZero.reduce((sum, qid) => sum + (finished.questionPoints?.[qid] ?? 0), 0);
+    for (const p of players) {
+      expect(finished.rawScores?.[p.id]).toBe(expected);
+    }
+  });
+
   it("a second answer to the same question is rejected (server-side lock)", async () => {
     const { roomId, players } = await makeRoom(2);
     const gameId = await startTrivia(roomId, players[0]!.token);

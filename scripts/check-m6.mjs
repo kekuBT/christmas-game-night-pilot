@@ -44,6 +44,8 @@ try {
   pass("host sees guest seat in Circle lobby");
 
   // Host starts Math Mayhem (official) — game card is in the lobby extra.
+    await host.getByTestId("choose-game").click();
+  await host.getByTestId("select-game-math-mayhem").click();
   await host.getByTestId("start-official-math-mayhem").click();
   await host.getByTestId("show-intro").waitFor({ timeout: 15000 });
   pass("show intro appears on game start");

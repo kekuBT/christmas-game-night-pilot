@@ -31,6 +31,8 @@ export interface PublicGame {
   rawScores?: Record<string, number>;
   /** Post-finish aggregate only (trivia): per-question counts per option index. No identities. */
   answerCounts?: Record<string, number[]>;
+  /** Post-finish only (trivia): points a correct answer to each question is worth. Per-question values, not scores. */
+  questionPoints?: Record<string, number>;
 }
 
 export interface PlayerGame {

@@ -68,6 +68,8 @@ await host.getByRole("button", { name: "React 🎉" }).click();
 await host.getByTestId("recent-reactions").waitFor({ timeout: 15000 });
 await host.screenshot({ path: "docs/m6-screenshots/07-reactions.png" });
 // Impostor role card (flipped).
+await host.getByTestId("choose-game").click();
+await host.getByTestId("select-game-impostor").click();
 await host.getByTestId("start-official-impostor").click();
 try { await host.getByTestId("show-start-playing").waitFor({ timeout: 15000 }); await host.getByTestId("show-start-playing").click(); }
 catch { /* intro already auto-advanced */ }

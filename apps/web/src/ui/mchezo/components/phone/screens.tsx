@@ -97,6 +97,9 @@ export interface LobbyScreenProps {
   onNudge: (playerId: string) => void;
   nudgedBy?: readonly string[];
   onStart?: () => void;
+  /** Integration: stable hook for the primary Start action, so its test
+      id follows the up-next game and the chosen official/practice mode. */
+  startTestId?: string;
   minPlayers?: number;
   capacity?: number;
   /** Integration slot: host game picker, QR invite, cohost controls, and
@@ -149,7 +152,7 @@ export function LobbyScreen(p: LobbyScreenProps) {
       {p.isHost && p.onTvChange && <BigScreenToggle on={p.tvConnected} onChange={p.onTvChange} />}
       {p.isHost ? (
         <>
-          <Keycap block disabled={!canStart} onClick={p.onStart}>{canStart ? `Start ${p.nextGame.name}` : `Waiting for players (${connected}/${min})`}</Keycap>
+          <Keycap block disabled={!canStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? `Start ${p.nextGame.name}` : `Waiting for players (${connected}/${min})`}</Keycap>
           <p className="mz-foot">Tap someone to nudge them. You’re hosting.</p>
         </>
       ) : (

@@ -1,0 +1,237 @@
+// Leaderboard scenarios (Phase 2.1 §4): all-tied, pair ties, middle ties,
+// rank changes across games, and a disconnected player — phone results vs
+// TV leaderboard vs the server's raw scores, which are authoritative.
+// Usage: build:web, serve on a port, then:
+//   node scripts/check-leaderboard.mjs <baseUrl>
+import { chromium } from "playwright";
+
+const BASE = process.argv[2] ?? "http://localhost:3461";
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let failures = 0;
+function check(name, ok, detail = "") {
+  console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`);
+  if (!ok) failures++;
+}
+
+async function createRoom(page, name) {
+  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.getByPlaceholder("e.g. Auntie June").fill(name);
+  await page.getByRole("button", { name: "Host a game" }).click();
+  const chip = page.getByRole("button", { name: /^Share room code / });
+  await chip.waitFor({ timeout: 15000 });
+  let code = "";
+  for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
+    code = ((await chip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
+    if (!/^[A-Z0-9]{6}$/.test(code)) await sleep(500);
+  }
+  return code;
+}
+async function joinRoom(page, name, code) {
+  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.getByPlaceholder("e.g. Auntie June").fill(name);
+  await page.locator(".mz-code__input").fill(code);
+  await page.getByRole("button", { name: "Join the game" }).click();
+  await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
+}
+async function roomIdOf(page) {
+  return page.evaluate(() => sessionStorage.getItem("cgn_roomId"));
+}
+// Answer every question with the same option index (0-3).
+async function answerOption(page, optionIndex) {
+  for (let i = 0; i < 12; i++) {
+    if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }).catch(() => false)) return;
+    const slab = page.locator(".mz-slab:not([disabled])").nth(optionIndex);
+    if (await slab.isVisible({ timeout: 1500 }).catch(() => false)) { await slab.click(); await sleep(200); }
+    const next = page.getByRole("button", { name: "Next question" });
+    if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click(); await sleep(200); }
+    const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
+    if (await doneBtn.isVisible({ timeout: 1000 }).catch(() => false)) { await doneBtn.click(); await sleep(200); }
+  }
+}
+// Answer only the first n questions, then stop (used before disconnecting).
+async function answerFirstN(page, n, optionIndex = 0) {
+  for (let i = 0; i < n; i++) {
+    const slab = page.locator(".mz-slab:not([disabled])").nth(optionIndex);
+    if (await slab.isVisible({ timeout: 15000 }).catch(() => false)) { await slab.click(); await sleep(200); }
+    const next = page.getByRole("button", { name: "Next question" });
+    if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click(); await sleep(200); }
+  }
+}
+async function tvProj(roomId) {
+  return (await fetch(`${BASE}/rooms/${roomId}/projection?audience=tv`)).json();
+}
+// Server ranking rule (mirrors rankStandings): score desc, name asc, shared ranks.
+function expectedRanking(rawScores, players) {
+  const byId = new Map(players.map((p) => [p.id, p.displayName]));
+  const rows = Object.entries(rawScores)
+    .map(([id, score]) => ({ id, name: byId.get(id) ?? id, score }))
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+  rows.forEach((r, i) => { r.rank = i > 0 && rows[i - 1].score === r.score ? rows[i - 1].rank : i + 1; });
+  return rows;
+}
+async function phoneRows(page, hostName) {
+  const rows = [];
+  for (const li of await page.locator(".mz-standings li").all()) {
+    const rank = parseInt((await li.locator(".mz-standings__rank").textContent()) ?? "0", 10);
+    let name = (await li.locator(".mz-standings__name").textContent()) ?? "";
+    if (name === "You") name = hostName;
+    const score = parseInt(((await li.locator(".mz-standings__score").textContent()) ?? "0").replace(/,/g, ""), 10);
+    rows.push({ rank, name, score });
+  }
+  return rows;
+}
+async function tvRows(page) {
+  await page.waitForTimeout(3000); // leaderboard phase settles to "after"
+  const rows = [];
+  for (const li of await page.locator(".mz-tv-row").all()) {
+    rows.push({
+      rank: parseInt((await li.getAttribute("data-rank")) ?? "0", 10),
+      name: (await li.locator(".mz-tv-row__name").textContent()) ?? "",
+      score: parseInt((await li.getAttribute("data-score")) ?? "0", 10),
+    });
+  }
+  return rows;
+}
+// Phone results show top 2 + you (handoff limit); every visible row must
+// still match the server ranking exactly.
+function checkPhoneMatches(name, visible, expected) {
+  const ok = visible.every((v) => {
+    const e = expected.find((x) => x.name === v.name);
+    return e && e.rank === v.rank && e.score === v.score;
+  }) && visible.length > 0;
+  check(name, ok, `visible=${visible.map((v) => `${v.name}:${v.rank}:${v.score}`).join(" ")}`);
+}
+function checkTvMatches(name, visible, expected) {
+  const ok = visible.length === expected.length && visible.every((v, i) => {
+    const e = expected[i];
+    return e && e.name === v.name && e.rank === v.rank && e.score === v.score;
+  });
+  check(name, ok, `tv=${visible.map((v) => `${v.name}:${v.rank}:${v.score}`).join(" ")} | server=${expected.map((v) => `${v.name}:${v.rank}:${v.score}`).join(" ")}`);
+}
+
+const browser = await chromium.launch();
+try {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const host = await ctx.newPage();
+  const code = await createRoom(host, "Ada");
+  const roomId = await roomIdOf(host);
+  const P = {};
+  for (const name of ["Bea", "Cal", "Dee"]) {
+    const p = await ctx.newPage();
+    await joinRoom(p, name, code);
+    P[name] = p;
+  }
+  const tvCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const tv = await tvCtx.newPage();
+  await joinRoom(tv, "TV", code);
+
+  async function playGame(actions) {
+    // actions: { page, kind: "option"|"abstain" }[]; host starts from lobby.
+    await host.getByTestId("start-official-trivia").click();
+    await host.locator(".mz-question").waitFor({ timeout: 30000 });
+    for (const a of actions) {
+      if (a.kind === "abstain") await a.page.getByRole("button", { name: "Sit this game out" }).click();
+      else await answerOption(a.page, a.option);
+    }
+    await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });
+    const proj = await tvProj(roomId);
+    const game = (proj.games ?? []).filter((g) => g.gameId === "trivia" && g.status === "finished").at(-1);
+    const expected = expectedRanking(game.rawScores, proj.players);
+    // TV page: results -> lobby -> TV stage -> leaderboard.
+    await tv.getByRole("button", { name: "Back to lobby" }).click();
+    await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
+    await tv.getByRole("button", { name: "TV stage" }).click();
+    await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+    const tvs = await tvRows(tv);
+    const phones = await phoneRows(host, "Ada");
+    await tv.getByRole("button", { name: "Back to phone view" }).click();
+    await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
+    await host.getByRole("button", { name: "Back to lobby" }).click();
+    await host.getByRole("heading", { name: "You’re in, Ada." }).waitFor({ timeout: 15000 });
+    return { expected, tvs, phones, proj };
+  }
+
+  // Game 1: everyone answers identically -> all tied.
+  {
+    const { expected, tvs, phones } = await playGame([
+      { page: host, kind: "option", option: 0 },
+      { page: P.Bea, kind: "option", option: 0 },
+      { page: P.Cal, kind: "option", option: 0 },
+      { page: P.Dee, kind: "option", option: 0 },
+      { page: tv, kind: "abstain" },
+    ]);
+    check("all tied: every player shares rank 1", expected.filter((r) => r.name !== "TV").every((r) => r.rank === 1));
+    checkTvMatches("all tied: TV leaderboard matches server", tvs, expected);
+    checkPhoneMatches("all tied: phone rows match server", phones, expected);
+  }
+  // Game 2: two pairs answer identically -> two shared ranks.
+  {
+    const { expected, tvs, phones } = await playGame([
+      { page: host, kind: "option", option: 0 },
+      { page: P.Bea, kind: "option", option: 0 },
+      { page: P.Cal, kind: "option", option: 1 },
+      { page: P.Dee, kind: "option", option: 1 },
+      { page: tv, kind: "abstain" },
+    ]);
+    const ranks = new Map(expected.map((r) => [r.name, r.rank]));
+    const pairsShare = ranks.get("Ada") === ranks.get("Bea") && ranks.get("Cal") === ranks.get("Dee") && ranks.get("Ada") !== ranks.get("Cal");
+    check("pair ties: Ada=Bea and Cal=Dee share ranks, pairs differ", pairsShare,
+      [...ranks.entries()].map(([n, r]) => `${n}:${r}`).join(" "));
+    checkTvMatches("pair ties: TV leaderboard matches server", tvs, expected);
+    checkPhoneMatches("pair ties: phone rows match server", phones, expected);
+  }
+  // Rank changes: alternate Ada/Bea options across games until the order flips.
+  let orderA = null, orderB = null, attempts = 0;
+  while (attempts < 6 && !(orderA && orderB && orderA !== orderB)) {
+    attempts++;
+    const swap = attempts % 2 === 0;
+    const { expected } = await playGame([
+      { page: host, kind: "option", option: swap ? 1 : 0 },
+      { page: P.Bea, kind: "option", option: swap ? 0 : 1 },
+      { page: P.Cal, kind: "abstain" },
+      { page: P.Dee, kind: "abstain" },
+      { page: tv, kind: "abstain" },
+    ]);
+    const order = (() => {
+      const a = expected.find((r) => r.name === "Ada");
+      const b = expected.find((r) => r.name === "Bea");
+      if (!a || !b) return "missing";
+      if (a.rank < b.rank) return "Ada>Bea";
+      if (b.rank < a.rank) return "Bea>Ada";
+      return "tied";
+    })();
+    if (!orderA) orderA = order;
+    else if (order !== orderA && order !== "tied" && orderA !== "tied" && !orderB) orderB = order;
+    if (orderA && orderB) break;
+  }
+  check("rank changes: Ada/Bea order flips across games", !!orderA && !!orderB && orderA !== orderB, `${orderA} -> ${orderB} (${attempts} games)`);
+  // Disconnected player: Dee answers 3, closes the page; game still finishes.
+  {
+    await host.getByTestId("start-official-trivia").click();
+    await host.locator(".mz-question").waitFor({ timeout: 30000 });
+    await answerFirstN(P.Dee, 3, 0);
+    await P.Dee.close();
+    await answerOption(host, 0);
+    await answerOption(P.Bea, 0);
+    await answerOption(P.Cal, 0);
+    await tv.getByRole("button", { name: "Sit this game out" }).click();
+    await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });
+    const proj = await tvProj(roomId);
+    const game = (proj.games ?? []).filter((g) => g.gameId === "trivia" && g.status === "finished").at(-1);
+    const expected = expectedRanking(game.rawScores, proj.players);
+    const dee = proj.players.find((p) => p.displayName === "Dee");
+    check("disconnected player: game finishes without Dee", game.status === "finished" && dee.connected === false);
+    check("disconnected player: Dee keeps a partial score in standings",
+      expected.some((r) => r.name === "Dee"), `Dee=${game.rawScores[dee.id]}`);
+    await tv.getByRole("button", { name: "Back to lobby" }).click();
+    await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
+    await tv.getByRole("button", { name: "TV stage" }).click();
+    await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+    const tvs = await tvRows(tv);
+    checkTvMatches("disconnected player: TV leaderboard includes Dee with server score", tvs, expected);
+  }
+  console.log(failures === 0 ? "LEADERBOARD ALL PASSED" : `LEADERBOARD FAILED: ${failures} failed`);
+  process.exit(failures === 0 ? 0 : 1);
+} finally {
+  await browser.close();
+}

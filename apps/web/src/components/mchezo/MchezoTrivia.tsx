@@ -193,10 +193,19 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
   const myChoice = q ? myAnswers[q.id] : undefined;
   const correctIdx = q?.correctIndex;
   const correct = myChoice === undefined || correctIdx === undefined ? null : myChoice === correctIdx;
+  // Points earned from THIS question only, from the server's own
+  // per-question values (finished trivia only). The game total and rank
+  // below are whole-game figures — deliberately kept separate so a wrong
+  // answer on one question never reads as a bad game result.
+  const qValue = q ? publicGame?.questionPoints?.[q.id] : undefined;
+  const earned = qValue === undefined ? undefined : correct ? qValue : 0;
+  const tiedWith = meRank ? ranked.filter((r) => r.rank === meRank.rank).length - 1 : 0;
+  const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
   return (
     <PhoneRevealScreen
       correct={correct}
       correctLabel={correctIdx !== undefined && q ? q.options[correctIdx] ?? "" : "—"}
+      points={earned}
       rank={meRank?.rank}
       tvConnected={false}
       options={(q?.options ?? []).map((label, i) => ({ id: String(i), label }))}
@@ -209,7 +218,8 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
       onNext={onBackToLobby}
       extra={
         <div>
-          <p className="mz-foot">Your game total: <b>{game.myScore}</b> points. Pick a question to see how the room answered it.</p>
+          <p className="mz-foot">This question: {myChoice === undefined ? "you didn't answer" : `you answered ${q?.options[myChoice] ?? "—"}`} — {correct === null ? "no result" : correct ? `correct, +${earned ?? 0} points` : "not correct, +0 points"}.</p>
+          <p className="mz-foot">Your game total: <b>{game.myScore}</b> points · Game rank: <b>{meRank ? ordinal(meRank.rank) : "—"}</b>{tiedWith > 0 ? `, tied with ${tiedWith} other${tiedWith === 1 ? "" : "s"}` : ""}. The rank is for the whole game, not this question.</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {questions.map((qq, i) => {
               const mine = myAnswers[qq.id];
@@ -221,7 +231,7 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
               );
             })}
           </div>
-          <p className="mz-foot">Standings above are this game&apos;s raw scores, ranked with shared ranks for ties. Family Cup totals live in Championship.</p>
+          <p className="mz-foot">Standings below are whole-game totals, ranked with shared ranks for ties — not this question&apos;s points. Family Cup totals live in Championship. Pick a question above to see how the room answered it.</p>
         </div>
       }
     />

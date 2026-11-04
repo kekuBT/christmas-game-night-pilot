@@ -72,6 +72,10 @@ export function App() {
   // Mchezo lobby: the host-chosen "up next" game (default: Trivia, the
   // Phase 2 featured game). The lobby Start button starts this game.
   const [upNextId, setUpNextId] = useState("trivia");
+  // Phase 2.1 lobby simplification: one mode for the single Start action,
+  // and one compact chooser instead of per-game official/practice buttons.
+  const [gameMode, setGameMode] = useState<"official" | "practice">("official");
+  const [chooserOpen, setChooserOpen] = useState(false);
   const [numInput, setNumInput] = useState("");
   const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
@@ -197,7 +201,7 @@ export function App() {
           extra={
             <div style={{ padding: "0 16px 16px" }}>
               {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
-              <p className="mz-foot">No account needed. Joining needs the 6-character code from the host; creating a room makes you the host. Hosts start games from the lobby, everyone plays on their own phone, and the TV stage shows only public scores.</p>
+              <p className="mz-foot">No account needed — just the 6-character code from the host.</p>
             </div>
           }
         />
@@ -246,21 +250,26 @@ export function App() {
   const triviaFinished = latestFinished?.gameId === "trivia";
   const lobbyExtra = (
     <div>
-      <div className="mz-card" style={{ marginTop: 12 }}>
-        <span className="mz-kicker">Choose a game</span>
-        <p className="mz-foot">Up next is {upNext?.title ?? "—"}. The host or cohost starts games; everyone else waits for the start.</p>
-        {games.map((g) => (
-          <div key={g.id} style={{ padding: "8px 0", borderTop: "1px solid var(--mz-line)" }}>
-            <p style={{ margin: "4px 0" }}><b>{g.title}</b> <span className="mz-muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min</span></p>
-            <p className="mz-foot" style={{ margin: "4px 0" }}>{g.tutorial}</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              <button type="button" className="mz-chip-btn" data-testid={`start-official-${g.id}`} onClick={() => startGame(g.id, true)} disabled={!(me?.isHost || me?.isCohost)}>Start (official)</button>
-              <button type="button" className="mz-chip-btn" data-testid={`start-practice-${g.id}`} onClick={() => startGame(g.id, false)} disabled={!(me?.isHost || me?.isCohost)}>Start (practice)</button>
-              {(me?.isHost || me?.isCohost) && <button type="button" className="mz-chip-btn" onClick={() => setUpNextId(g.id)}>Set as up next</button>}
-            </div>
+      {(me?.isHost || me?.isCohost) && (
+        <div className="mz-card" style={{ marginTop: 12 }}>
+          <span className="mz-kicker">Game setup</span>
+          <p className="mz-foot" style={{ margin: "4px 0" }}>Up next is {upNext?.title ?? "—"}. Official games count toward the Family Cup; practice games do not.</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }} role="group" aria-label="Game mode">
+            <button type="button" className="mz-chip-btn" data-testid="mode-official" aria-pressed={gameMode === "official"} onClick={() => setGameMode("official")}>Official</button>
+            <button type="button" className="mz-chip-btn" data-testid="mode-practice" aria-pressed={gameMode === "practice"} onClick={() => setGameMode("practice")}>Practice</button>
+            <button type="button" className="mz-chip-btn" data-testid="choose-game" aria-expanded={chooserOpen} onClick={() => setChooserOpen((o) => !o)}>{chooserOpen ? "Close game list" : "Choose a different game"}</button>
           </div>
-        ))}
-      </div>
+          {chooserOpen && (
+            <div style={{ marginTop: 8 }}>
+              {games.map((g) => (
+                <button key={g.id} type="button" className="mz-chip-btn" data-testid={`select-game-${g.id}`} aria-current={g.id === upNext?.id ? "true" : undefined} onClick={() => { setUpNextId(g.id); setChooserOpen(false); }} style={{ display: "block", width: "100%", textAlign: "left", marginBottom: 6 }}>
+                  {g.title} <span className="mz-muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min</span>{g.id === upNext?.id ? " · Up next" : ""}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <div className="mz-card" style={{ marginTop: 12 }}>
         <span className="mz-kicker">Invite by QR</span>
         <p className="mz-foot">Scan to join this room. The 6-character code below works too — that is the manual-code fallback.</p>
@@ -311,7 +320,8 @@ export function App() {
           onReact={mzReact}
           onNudge={mzNudge}
           nudgedBy={proj?.nudgedBy}
-          onStart={upNext ? () => startGame(upNext.id, true) : undefined}
+          onStart={upNext ? () => startGame(upNext.id, gameMode === "official") : undefined}
+          startTestId={upNext ? `start-${gameMode}-${upNext.id}` : undefined}
           minPlayers={upNext?.minPlayers ?? 2}
           capacity={10}
           extra={lobbyExtra}
@@ -362,13 +372,20 @@ export function App() {
     );
   }
   if (view === "tv") {
-    // Trivia TV stage (Mchezo) when a Trivia game is the TV subject;
-    // every other state keeps the existing TV Dashboard below.
-    const tvGame = [...(proj?.games ?? [])].reverse().find((g) => g.gameId === "trivia" && (g.status === "playing" || g.status === "finished"));
+    // TV subject = the LATEST game overall, not the latest Trivia game.
+    // The old rule (latest playing/finished Trivia anywhere in history)
+    // let stale Trivia results take over the TV after the room moved on
+    // to another game. Now: Trivia stage only while Trivia is the latest
+    // event; any newer game returns the TV to the dashboard, which shows
+    // Now playing + Recent games + Family Cup standings. The host's game
+    // actions (start/finish) therefore drive every TV viewer's screen
+    // through server state alone — no per-device phase is consulted.
+    const latestGame = (proj?.games ?? []).at(-1);
+    const tvGame = latestGame?.gameId === "trivia" && (latestGame.status === "playing" || latestGame.status === "finished") ? latestGame : undefined;
     if (tvGame) {
       return (
         <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion} as="bare">
-          <MchezoTvStage publicGame={tvGame} players={players} joinCode={proj?.joinCode ?? "…"} onBack={() => setView("lobby")} />
+          <MchezoTvStage key={tvGame.id} publicGame={tvGame} players={players} joinCode={proj?.joinCode ?? "…"} onBack={() => setView("lobby")} />
         </MchezoProvider>
       );
     }

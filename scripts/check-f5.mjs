@@ -247,6 +247,8 @@ try {
   const finishedGames = [];
   for (const gameId of gameIds) {
     try {
+            await host.getByTestId("choose-game").click();
+      await host.getByTestId(`select-game-${gameId}`).click();
       await host.locator(`[data-testid="start-official-${gameId}"]`).click();
       for (const { page } of pages) {
         if (gameId === "trivia") await page.locator(".mz-question").waitFor({ timeout: 30000 });
@@ -316,22 +318,24 @@ try {
   check("championship per-game breakdown present after full day",
     champText.includes("Per-game breakdown"));
 
-  // From Championship view the nav row still says "TV Dashboard", but the
-  // view it opens is the Mchezo TV stage whenever a Trivia game has
-  // finished in this room (App TV branch: latest finished Trivia game is
-  // the TV subject). The old dashboard's "Recent games" list has no
-  // Mchezo equivalent yet, so assert the stage instead of the old list.
+  // TV subject is the LATEST game overall (Phase 2.1 lifecycle fix): the
+  // playlist ends on Math Mayhem, so the TV view is the old dashboard
+  // with Now playing + Recent games — not the stale Trivia stage. The
+  // stage itself is covered by the dedicated TV lifecycle driver.
   await host.getByRole("button", { name: "TV Dashboard" }).click();
-  await host.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+  await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   await sleep(1500);
   const tvText = await host.locator("body").textContent();
-  check("TV stage shows the finished Trivia leaderboard after the full day",
-    tvText.includes("Trivia Showdown") && tvText.includes("This game's standings"),
-    tvText.slice(0, 120));
+  // TV Dashboard "Recent games" is intentionally the last 5 by design
+  // (src/server/hub.ts and App.tsx both slice(-5)); assert exactly those.
+  const recentFive = gameIds.slice(-5);
+  check("TV Dashboard shows the 5 most recent finished games",
+    recentFive.every((id) => tvText.includes(id)),
+    recentFive.filter((id) => !tvText.includes(id)).join(", ") || "all 5 listed");
 
-  // The Mchezo TV stage has no Memory Book button; return to the phone
-  // view first (lobby, where the extra carries Memory Book).
-  await host.getByRole("button", { name: "Back to phone view" }).click();
+  // The old dashboard's nav returns to the lobby, where the extra carries
+  // Memory Book.
+  await host.getByRole("button", { name: "Lobby & Games" }).click();
   await host.getByRole("heading", { name: `You’re in, ${NAMES[0]}.` }).waitFor({ timeout: 15000 });
   const HIGHLIGHT = "F5 day highlight: full playlist finished";
   await host.getByRole("button", { name: "Memory Book" }).click();

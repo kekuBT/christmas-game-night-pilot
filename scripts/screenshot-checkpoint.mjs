@@ -44,6 +44,8 @@ try {
   for (const n of NAMES) await host.getByText(n, { exact: true }).first().waitFor({ timeout: 15000 });
   await host.screenshot({ path: `${OUT}/02-lobby-4-players.png`, fullPage: true });
 
+    await host.getByTestId("choose-game").click();
+  await host.getByTestId("select-game-math-mayhem").click();
   await host.locator('[data-testid="start-official-math-mayhem"]').click();
   for (const { page } of pages) {
     await page.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });

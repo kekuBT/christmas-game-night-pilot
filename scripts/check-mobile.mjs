@@ -133,6 +133,8 @@ try {
     check(`${vp.width}px lobby: all targets >= 44px`, bad.length === 0, bad.slice(0, 5).join("; "));
 
     // Live game panel: host starts Math Mayhem (2 players), both answer one question.
+        await host.getByTestId("choose-game").click();
+    await host.getByTestId("select-game-math-mayhem").click();
     await host.locator('[data-testid="start-official-math-mayhem"]').click();
     await host.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });
     await host.screenshot({ path: join(OUT, `${vp.width}-game.png`) });
