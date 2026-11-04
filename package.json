@@ -12,10 +12,14 @@
   },
   "description": "Christmas Game Night / The Family Cup — local multiplayer implementation (M0 foundation). Local-only; no deployment, no paid services.",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
     "playwright": "^1.64.1",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
+    "typescript-eslint": "^8.72.1",
     "vitest": "^2.1.0"
   },
   "engines": {
@@ -27,6 +31,7 @@
     "build": "tsc -p tsconfig.json",
     "dev:demo": "tsx src/server/demo.ts",
     "test": "vitest run",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "build:web": "vite build --config apps/web/vite.config.ts",
     "e2e": "node scripts/e2e-browser.mjs",

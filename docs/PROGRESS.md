@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 ~03:50 EST (F7 DONE: clean-install all gates exit 0; F1–F5 + F7 closed, F6 emulation-only, real-device checklist + family-member acceptance still NOT RUN)
+Updated: 2026-11-04 ~04:15 EST (ESLint DONE: `npm run lint` exit 0; npm audit re-confirmed BLOCKED by registry proxy 403; real-device checklist + family-member acceptance still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -38,8 +38,8 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 - F6 viewport checks: DONE 2026-11-04 via Chromium emulation (see cron run below); contrast audit and real-device confirmation still open.
 - Manual real-device checklist (part of task 2): NOT RUN.
 - Cloudflare: UNTESTED-CLOUD, no provisioning per owner instruction.
-- npm audit: NOT RUN — registry proxy returned 403 policy_denied; no bypass attempted.
-- ESLint: NOT CONFIGURED.
+- npm audit: NOT RUN — registry proxy returned 403 policy_denied; re-tried 2026-11-04 ~04:15 EST, still blocked; no bypass attempted.
+- ESLint: CONFIGURED 2026-11-04 ~04:15 EST (`npm run lint` exit 0, zero errors; see cron run below).
 - Autonomous local-development cron `local-dev-christmas-30m`: CREATED and ENABLED, interval@30m; it has now completed and committed runs (2026-11-04 00:15 EST and ~01:14 EST). GitHub coordination cron `hourly-github-coordination-christmas-pilot` remains DISABLED.
 
 ## Task board (next three)
@@ -48,7 +48,8 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 3. DONE 2026-11-04 ~01:20 EST: PR-ready checkpoint packet prepared LOCALLY — `docs/CHECKPOINT_PACKET.md` (summary, test evidence, screenshots, limitations, open owner decisions) + `scripts/screenshot-checkpoint.mjs` + 7 screenshots in `docs/checkpoint-screenshots/` (home, lobby, game playing, game finished, championship, TV dashboard, Memory Book; fictional players only). NOT published to GitHub until Keku explicitly asks, per local-only mode.
 4. PARTLY DONE 2026-11-04 ~01:50 EST: F6 mobile/accessibility viewport checks (Chromium emulation, NOT real devices) — see cron run below. REMAINING: manual real-device checklist (iPhone Safari, Android, desktop Safari, TV — all NOT RUN; needs real devices, cannot be done from this VM) and F5/F7 completion per `docs/FRONTEND_MILESTONES.md` (F4 closed 2026-11-04 ~03:05 EST).
 5. DONE 2026-11-04 ~03:30 EST: F5 formally closed — see cron run below. REMAINING NEXT: F7 clean-install, and the manual real-device checklist.
-6. DONE 2026-11-04 ~03:50 EST: F7 formally closed — see cron run below. REMAINING NEXT (all need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room), plus contrast audit (F6 remainder). Local-only follow-ups that ARE doable: ESLint setup, npm audit retry (registry proxy 403 earlier), WebKit host-library question (system install outside local-only scope — owner decision, not attempted).
+6. DONE 2026-11-04 ~03:50 EST: F7 formally closed — see cron run below. REMAINING NEXT (all need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room), plus contrast audit (F6 remainder). Local-only follow-ups that WERE doable: ESLint setup — DONE 2026-11-04 ~04:15 EST (see cron run below); npm audit retry — RE-TRIED 2026-11-04 ~04:15 EST, still BLOCKED by registry proxy 403 (installs work, audit POST denied by policy, no bypass attempted); WebKit host-library question (system install outside local-only scope — owner decision, not attempted).
+7. NEXT LOCAL-ONLY CANDIDATE (not yet done): F6 contrast audit (automated, via computed styles in Chromium emulation — real-device confirmation still separate and open), or a docs-only release-readiness packet. Everything else remaining needs real devices / a family member.
 
 ## External approvals pending
 None queued. Local-only mode: do not initiate GitHub publishing or approval requests until Keku explicitly asks. GitHub coordination cron remains paused.
@@ -57,6 +58,8 @@ None queued. Local-only mode: do not initiate GitHub publishing or approval requ
 See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula, Geography modes, Finale, host recovery, AI, and photo policy remain PROVISIONAL / OPEN-OWNER.
 
 ## Last commands actually run
+- `npm run lint` — exit 0, 0 errors (2026-11-04 ~04:15 EST)
+- `npm audit` / `npm audit --omit=dev` — BLOCKED, registry proxy 403 policy_denied (2026-11-04 ~04:15 EST)
 - `npm run typecheck` — exit 0
 - `npm test` — 8 files, 48 tests passed (was 47; +1 WS connected test, 2026-11-04 ~02:45 EST)
 - `npm run build:web` — exit 0
@@ -129,5 +132,16 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - Docs updated in this run: `docs/SECURITY_AUDIT.md` rewritten with the final F7 test matrix (clean-install evidence, all browser-driver results, explicit NOT RUN list: WebKit host libs, real iPhone/Android/desktop-Safari/TV, manual real-device checklist, family-member acceptance test, npm audit proxy 403, ESLint not configured, Cloudflare unprovisioned, join-limiter load test) and `docs/FRONTEND_MILESTONES.md` F7 marked DONE, F6 marked PARTLY DONE (emulation 32/32, contrast + real-device confirmation still open).
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
 
+## Cron run 2026-11-04 ~04:15 EST (local-dev-christmas-30m — COMPLETED with commit)
+- Tree was clean; worked task-board item 6's local follow-up (ESLint setup, previously "NOT CONFIGURED").
+- Installed ESLint 9 + @eslint/js + typescript-eslint + globals as devDependencies (93 packages; registry installs work fine) and added flat config `eslint.config.mjs` (ignores dist/docs/node_modules; Node globals for src/tests/scripts, browser globals for apps/web/src, plus browser globals inside driver scripts' page.evaluate callbacks) and `npm run lint` script.
+- First lint run: 20 errors, all FIXED properly (no blanket disables):
+  1. `apps/web/src/App.tsx`: loose server-JSON alias changed from `Record<string, any>` to `Record<string, unknown>` (file is outside the tsc scope in tsconfig.json — src + tests only, pre-existing, unchanged); 6 `catch (e: any)` clauses narrowed to `e instanceof Error ? e.message : "Request failed"`; `(crypto as any).randomUUID` replaced with a `typeof crypto.randomUUID === "function"` check; 2 empty catch blocks given explanatory comments. No runtime behavior change except the error-message fallback for non-Error throws.
+  2. `src/games/caption.ts` / `src/games/closest.ts`: intentionally unused contract parameters renamed to `_playerIds` / `_isTv` with an `argsIgnorePattern: ^_` rule (every projection takes actorId/isTv; call sites unchanged).
+  3. `scripts/check-mobile.mjs`: browser globals added to the scripts config (document/window/getComputedStyle inside page.evaluate run in the page).
+- Evidence: `npm run lint` exit 0 (0 errors), `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run build:web` exit 0, E2E smoke (Chromium, `--games=smoke`) 3/3 passed after the App.tsx edits. Test server data/ removed, port confirmed closed.
+- npm audit RETRIED in this run and still BLOCKED: `npm audit` (with and without `--omit=dev`) returns 403 policy_denied from the registry proxy (`POST /-/npm/v1/security/audits/quick not permitted by policy`); installs succeed, so this is a proxy-policy block on the audit endpoint only. No bypass attempted. `docs/SECURITY_AUDIT.md` updated (ESLint row now PASS, NOT RUN list updated).
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
 ## Next session exact resume step
-Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then: the remaining product gates need real devices / a family member and CANNOT run from this VM — manual real-device checklist (iPhone Safari, Android, desktop Safari, TV) and the family-member acceptance test (no dev tools, no developer in the room), plus the F6 contrast audit. Local-only follow-ups available to the next cron run: ESLint setup, npm audit retry (registry proxy returned 403 earlier; no bypass), or a docs-only release-readiness packet. Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
+Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then: the remaining product gates need real devices / a family member and CANNOT run from this VM — manual real-device checklist (iPhone Safari, Android, desktop Safari, TV) and the family-member acceptance test (no dev tools, no developer in the room), plus the F6 contrast audit (an automated Chromium-emulation contrast check is the next local-only candidate). npm audit stays BLOCKED by registry proxy policy; do not bypass it. Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.

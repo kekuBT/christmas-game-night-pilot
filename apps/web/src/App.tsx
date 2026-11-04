@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Any = Record<string, any>;
-const uuid = () => (crypto as any).randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+// Server JSON is untyped; this file is outside the tsc scope in tsconfig.json
+// (src + tests only, pre-existing), so values stay loose here and are narrowed
+// only at the catch boundary below.
+type Any = Record<string, unknown>;
+const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 async function post(path: string, body: Any) {
   const r = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));
@@ -62,8 +65,8 @@ export function App() {
       const proto = location.protocol === "https:" ? "wss" : "ws";
       const ws = new WebSocket(`${proto}://${location.host}/?roomId=${roomId}&actorId=${playerId}&audience=player`);
       wsRef.current = ws;
-      ws.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection") setProj(m.state); } catch {} };
-    } catch {}
+      ws.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection") setProj(m.state); } catch { /* ignore malformed WS frame; polling continues */ } };
+    } catch { /* ignore WS setup failure; polling continues */ }
     return () => { clearInterval(t); wsRef.current?.close(); };
   }, [roomId, playerId, refresh]);
 
@@ -76,32 +79,32 @@ export function App() {
       const r = await post("/rooms", { name: "Christmas Game Night" });
       const j = await post(`/rooms/${r.roomId}/join`, { displayName: name || "Player 1", asHost: true });
       await saveSession({ ...j, roomId: r.roomId }); setMsg(`Room created. Code: ${r.joinCode}`);
-    } catch (e: any) { setErr(e.message); }
+    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
   async function joinRoom() {
     setErr(""); try {
       const j = await post("/rooms/join-by-code", { joinCode: code, displayName: name || "Player" });
       await saveSession(j); setMsg("Joined room.");
-    } catch (e: any) { setErr(e.message); }
+    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
   async function reconnect() {
     setErr(""); try {
       if (!roomId || !playerId || !token) return;
       await post(`/rooms/${roomId}/reconnect`, { playerId, recoveryToken: token }); await refresh(); setMsg("Reconnected to your player slot.");
-    } catch (e: any) { setErr(e.message); }
+    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
   async function startGame(gameId: string, official: boolean) {
-    setErr(""); try { await post(`/rooms/${roomId}/games`, { hostId: playerId, gameId, official }); await refresh(); setView("lobby"); } catch (e: any) { setErr(e.message); }
+    setErr(""); try { await post(`/rooms/${roomId}/games`, { hostId: playerId, gameId, official }); await refresh(); setView("lobby"); } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
   async function intent(gameInstanceId: string, action: string, payload: Any) {
     setErr(""); try {
       const r = await post(`/rooms/${roomId}/intents`, { actorId: playerId, intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId, gameInstanceId, action, payload } });
       if (!r.accepted) setErr(`Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
       await refresh();
-    } catch (e: any) { setErr(e.message); }
+    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
   async function loadMemory() {
-    try { setBook(await get(`/rooms/${roomId}/memory`)); setLedger(await get(`/rooms/${roomId}/ledger`)); } catch (e: any) { setErr(e.message); }
+    try { setBook(await get(`/rooms/${roomId}/memory`)); setLedger(await get(`/rooms/${roomId}/ledger`)); } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
   useEffect(() => { if (view === "memory" && roomId) loadMemory(); }, [view, roomId]);
 

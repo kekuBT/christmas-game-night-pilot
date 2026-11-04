@@ -79,7 +79,7 @@ export function closestTotalScores(state: ClosestState): Record<string, number> 
   return total;
 }
 
-export function projectClosest(state: ClosestState, actorId: string, isTv: boolean): Record<string, unknown> {
+export function projectClosest(state: ClosestState, actorId: string, _isTv: boolean): Record<string, unknown> {
   const q = state.questions[state.questionIndex]!;
   const revealed = state.phase === "finished";
   return {

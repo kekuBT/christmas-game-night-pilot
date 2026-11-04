@@ -48,7 +48,7 @@ export function submitCaption(state: CaptionState, playerId: string, caption: st
   round.captions[playerId] = caption;
 }
 
-export function submitCaptionVote(state: CaptionState, playerId: string, captionAuthorId: string, playerIds: string[]): void {
+export function submitCaptionVote(state: CaptionState, playerId: string, captionAuthorId: string, _playerIds: string[]): void {
   if (state.phase !== "vote") throw new Error("PHASE_CLOSED");
   if (playerId === captionAuthorId) throw new Error("OWN_VOTE");
   const round = currentRound(state);

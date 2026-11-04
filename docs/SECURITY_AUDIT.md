@@ -34,7 +34,7 @@ build:web exit 0 (34 modules). The /tmp clone was deleted after the run.
 | Real Android / desktop Safari / TV browsers | NOT RUN | Same as above |
 | Manual real-device checklist | NOT RUN | Needs real devices + a family member with no dev tools; cannot be done from this VM |
 | Cloudflare Workers / DO / D1 | NOT RUN — UNTESTED-CLOUD | No account provisioning, per owner instruction |
-| ESLint | NOT CONFIGURED | Typecheck + tests are the gates that passed; lint remains a follow-up |
+| ESLint | PASS (2026-11-04) | `npm run lint` exit 0, zero errors; ESLint 9 flat config + typescript-eslint, `npm run lint` script added (see cron run 2026-11-04 ~04:15 EST in PROGRESS.md) |
 
 ## Known limitations for owner review
 
@@ -55,6 +55,7 @@ No private-state leak, score forgery, duplicated official scoring, or data-loss 
 Nothing below has been run, claimed, or worked around: Playwright WebKit
 (host libraries), real iPhone Safari, real Android, desktop Safari, TV
 browsers, the manual real-device checklist, the family-member acceptance
-test, npm audit (registry proxy 403), ESLint (not configured), Cloudflare
+test, npm audit (registry proxy 403, re-confirmed 2026-11-04), Cloudflare
 deployment (not provisioned), and load testing of the join rate limiter.
+ESLint was configured and passes as of 2026-11-04 (see table above).
 No merge, deploy, spend, or GitHub publish has happened.
