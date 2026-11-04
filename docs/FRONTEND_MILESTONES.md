@@ -31,10 +31,12 @@
 ## F6 — Mobile and accessibility
 - Acceptance: Phone layout at 320px, 375px, and 390px portrait with no horizontal scroll, touch targets >=44px, visible focus, keyboard navigation for join/lobby/game selection, reduced-motion parity, and readable contrast for the Midnight Christmas palette.
 - Test: Viewport checklist with screenshots. Real iPhone Safari is NOT RUN until a real device is available; WebKit is not a substitute.
+- Status: PARTLY DONE 2026-11-04 — `scripts/check-mobile.mjs` 32/32 via Chromium emulation (no overflow, >=44px targets, visible focus, reduced motion). Contrast audit and real-device confirmation still OPEN; F6 is NOT formally closed until a real device runs.
 
 ## F7 — Release readiness
 - Acceptance: Clean install + typecheck + tests + web build all pass from a clean checkout; `docs/SECURITY_AUDIT.md` is updated with the final test matrix; every NOT RUN item is listed explicitly; no merge, deploy, spend, or publish has happened without owner approval.
 - Test: `npm install && npm run typecheck && npm test && npm run build && npm run build:web` — all exit 0.
+- Status: DONE 2026-11-04 — fresh-clone clean install (107 packages, Node v24.22.1) with typecheck, 8 files / 48 tests, server build, and web build (34 modules) ALL exit 0; `docs/SECURITY_AUDIT.md` updated with the final test matrix and an explicit NOT RUN list. Remaining open items are NOT part of F7's gate but block a finished-product claim: manual real-device checklist, family-member acceptance test, WebKit, npm audit, ESLint, Cloudflare (see SECURITY_AUDIT.md).
 
 ## Final acceptance criteria (owner, family-member test)
 A family member, with no developer tools and no developer in the room, must be able to:

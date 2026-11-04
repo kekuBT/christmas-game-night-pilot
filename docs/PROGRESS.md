@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 ~03:30 EST (F5 DONE: full-day browser playlist 30/30 incl. per-game TV leak scans; real-device checklist still NOT RUN)
+Updated: 2026-11-04 ~03:50 EST (F7 DONE: clean-install all gates exit 0; F1–F5 + F7 closed, F6 emulation-only, real-device checklist + family-member acceptance still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -48,6 +48,7 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 3. DONE 2026-11-04 ~01:20 EST: PR-ready checkpoint packet prepared LOCALLY — `docs/CHECKPOINT_PACKET.md` (summary, test evidence, screenshots, limitations, open owner decisions) + `scripts/screenshot-checkpoint.mjs` + 7 screenshots in `docs/checkpoint-screenshots/` (home, lobby, game playing, game finished, championship, TV dashboard, Memory Book; fictional players only). NOT published to GitHub until Keku explicitly asks, per local-only mode.
 4. PARTLY DONE 2026-11-04 ~01:50 EST: F6 mobile/accessibility viewport checks (Chromium emulation, NOT real devices) — see cron run below. REMAINING: manual real-device checklist (iPhone Safari, Android, desktop Safari, TV — all NOT RUN; needs real devices, cannot be done from this VM) and F5/F7 completion per `docs/FRONTEND_MILESTONES.md` (F4 closed 2026-11-04 ~03:05 EST).
 5. DONE 2026-11-04 ~03:30 EST: F5 formally closed — see cron run below. REMAINING NEXT: F7 clean-install, and the manual real-device checklist.
+6. DONE 2026-11-04 ~03:50 EST: F7 formally closed — see cron run below. REMAINING NEXT (all need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room), plus contrast audit (F6 remainder). Local-only follow-ups that ARE doable: ESLint setup, npm audit retry (registry proxy 403 earlier), WebKit host-library question (system install outside local-only scope — owner decision, not attempted).
 
 ## External approvals pending
 None queued. Local-only mode: do not initiate GitHub publishing or approval requests until Keku explicitly asks. GitHub coordination cron remains paused.
@@ -65,6 +66,7 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - `node scripts/check-multiplayer.mjs http://localhost:3457` — exit 0, 12 checks passed (see cron run 2026-11-04 ~02:45 EST)
 - `node scripts/check-f4.mjs http://localhost:3457` — exit 0, 11 checks passed (see cron run 2026-11-04 ~03:05 EST)
 - `node scripts/check-f5.mjs http://localhost:3457` — exit 0, 30/30 passed (see cron run 2026-11-04 ~03:30 EST)
+- F7 clean-install (fresh clone to /tmp, 2026-11-04 ~03:50 EST): `npm install` exit 0 (107 packages), `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run build` exit 0, `npm run build:web` exit 0 (34 modules); /tmp clone deleted after
 - `node scripts/e2e-browser.mjs http://localhost:3457 --browser=chromium --games=smoke` — exit 0, 3/3 passed (regression after WS connected fix)
 - Live smoke (port 3456, 2026-11-03): `/`, `/games`, join-by-code, host start Math Mayhem with 2 players — all as reported above
 - `npm audit --omit=dev` — blocked by registry proxy 403, NOT RUN (earlier session); `npm view playwright` 2026-11-04 succeeded (1.64.1)
@@ -121,5 +123,11 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - Evidence: `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run build:web` exit 0, `npm run check-f5` exit 0 (30/30: 11 leak-free scans, 11 finished-without-sticking, all-finished, 11/11 ledger finish events, TV projection all finished, championship standings + breakdown, TV recent 5, Memory Book export). No app code changed in this run (driver + docs only). Test server data/ removed.
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
 
+## Cron run 2026-11-04 ~03:50 EST (local-dev-christmas-30m — COMPLETED with commit)
+- Tree was clean; worked task-board item 6 (F7 formal close-out).
+- Clean-install proof via a fresh clone, NOT the working tree: `git clone` of the local repo to /tmp, `npm install` (107 packages, Node v24.22.1, npm 10.9.4), then `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run build` exit 0, `npm run build:web` exit 0 (34 modules, dist/index.html + assets). /tmp clone deleted after the run. Main-tree re-run the same morning: typecheck exit 0, tests 48 passed, build:web exit 0. No code changes needed — all gates passed first try.
+- Docs updated in this run: `docs/SECURITY_AUDIT.md` rewritten with the final F7 test matrix (clean-install evidence, all browser-driver results, explicit NOT RUN list: WebKit host libs, real iPhone/Android/desktop-Safari/TV, manual real-device checklist, family-member acceptance test, npm audit proxy 403, ESLint not configured, Cloudflare unprovisioned, join-limiter load test) and `docs/FRONTEND_MILESTONES.md` F7 marked DONE, F6 marked PARTLY DONE (emulation 32/32, contrast + real-device confirmation still open).
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
 ## Next session exact resume step
-Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then work F7 (clean-install: fresh `npm install` + typecheck + tests + `npm run build` + `npm run build:web` all exit 0, SECURITY_AUDIT.md updated with the final test matrix, every NOT RUN item listed explicitly), and the manual real-device checklist (iPhone Safari, Android, desktop, TV — all still NOT RUN; needs real devices). Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
+Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then: the remaining product gates need real devices / a family member and CANNOT run from this VM — manual real-device checklist (iPhone Safari, Android, desktop Safari, TV) and the family-member acceptance test (no dev tools, no developer in the room), plus the F6 contrast audit. Local-only follow-ups available to the next cron run: ESLint setup, npm audit retry (registry proxy returned 403 earlier; no bypass), or a docs-only release-readiness packet. Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
