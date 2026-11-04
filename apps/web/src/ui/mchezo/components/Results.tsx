@@ -100,11 +100,13 @@ export function StandingsList({ ranked, youId, limit = 3, players }: { ranked: r
       {rows.map((r) => {
         const you = r.playerId === youId;
         const gap = me && !top.includes(me) && r === me;
+        const away = r.player.connection === 'disconnected';
         return (
           <li key={r.playerId} className={['mz-standings__row', you ? 'mz-standings__row--you' : '', gap ? 'mz-standings__row--gap' : ''].join(' ')}>
             <span className="mz-standings__rank">{r.rank}</span>
-            <PlayerToken player={r.player} index={players.indexOf(r.player)} size={32} badge={null} />
+            <PlayerToken player={r.player} index={players.indexOf(r.player)} size={32} badge={away ? 'offline' : null} />
             <span className="mz-standings__name">{you ? 'You' : r.player.name}</span>
+            {away && <span className="mz-standings__away">Away</span>}
             {!!r.delta && <span className="mz-standings__gain">+{formatScore(r.delta)}</span>}
             <span className="mz-standings__score">{formatScore(r.score)}</span>
           </li>

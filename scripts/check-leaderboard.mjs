@@ -230,6 +230,53 @@ try {
     const tvs = await tvRows(tv);
     checkTvMatches("disconnected player: TV leaderboard includes Dee with server score", tvs, expected);
   }
+  // Away marker (§4b): Cal answers everything, disconnects, everyone else
+  // abstains. Cal is the only scorer (rank 1), so his row is visible on
+  // every phone's truncated standings as well as on the full TV board.
+  {
+    // Previous section left TV on the stage; return it to the phone view
+    // first, or it has no abstain button for this game.
+    await tv.getByRole("button", { name: "Back to phone view" }).click();
+    await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
+    await host.getByRole("button", { name: "Back to lobby" }).click();
+    await host.getByRole("heading", { name: "You’re in, Ada." }).waitFor({ timeout: 15000 });
+    await host.getByTestId("start-official-trivia").click();
+    await host.locator(".mz-question").waitFor({ timeout: 30000 });
+    await answerOption(P.Cal, 0);
+    await P.Cal.close();
+    await host.getByRole("button", { name: "Sit this game out" }).click();
+    await P.Bea.getByRole("button", { name: "Sit this game out" }).click();
+    await tv.getByRole("button", { name: "Sit this game out" }).click();
+    await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });
+    const proj = await tvProj(roomId);
+    const game = (proj.games ?? []).filter((g) => g.gameId === "trivia" && g.status === "finished").at(-1);
+    const expected = expectedRanking(game.rawScores, proj.players);
+    const cal = proj.players.find((p) => p.displayName === "Cal");
+    check("away marker: Cal disconnected with a positive score", cal.connected === false && game.rawScores[cal.id] > 0, `Cal=${game.rawScores[cal.id]}`);
+    check("away marker: Cal ranks 1st as the only scorer", expected.find((r) => r.name === "Cal")?.rank === 1,
+      expected.map((r) => `${r.name}:${r.rank}:${r.score}`).join(" "));
+    let phoneAway = false;
+    for (const li of await host.locator(".mz-standings li").all()) {
+      const name = (await li.locator(".mz-standings__name").textContent()) ?? "";
+      if (name === "Cal") phoneAway = ((await li.locator(".mz-standings__away").textContent().catch(() => "")) ?? "").trim() === "Away";
+    }
+    check("away marker: host phone results mark Cal Away", phoneAway);
+    await tv.getByRole("button", { name: "Back to lobby" }).click();
+    await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
+    await tv.getByRole("button", { name: "TV stage" }).click();
+    await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+    await tv.waitForTimeout(3000);
+    let tvAway = false;
+    for (const li of await tv.locator(".mz-tv-row").all()) {
+      const name = (await li.locator(".mz-tv-row__name").textContent()) ?? "";
+      if (name === "Cal") tvAway = ((await li.locator(".mz-tv-row__away").textContent().catch(() => "")) ?? "").trim() === "Away";
+    }
+    check("away marker: TV leaderboard marks Cal Away", tvAway);
+    await tv.getByRole("button", { name: "Back to phone view" }).click();
+    await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
+    await host.getByRole("button", { name: "Back to lobby" }).click();
+    await host.getByRole("heading", { name: "You’re in, Ada." }).waitFor({ timeout: 15000 });
+  }
   console.log(failures === 0 ? "LEADERBOARD ALL PASSED" : `LEADERBOARD FAILED: ${failures} failed`);
   process.exit(failures === 0 ? 0 : 1);
 } finally {

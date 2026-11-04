@@ -195,14 +195,16 @@ export function TVLeaderboard({ players, scores, phase, kicker, title }: { playe
           const row = list[pos];
           const lead = showAfter && row.rank === 1;
           const m = move.get(r.playerId) ?? 0;
+          const away = r.player.connection === 'disconnected';
           return (
             <li key={r.playerId} className={['mz-tv-row', lead ? 'mz-tv-row--lead' : ''].join(' ')} style={{ top: pos * rowH }} data-rank={row.rank} data-score={row.score}>
               <span className="mz-tv-row__rank">{row.rank}</span>
-              <PlayerToken player={r.player} index={players.indexOf(r.player)} size={60} badge={null} />
+              <PlayerToken player={r.player} index={players.indexOf(r.player)} size={60} badge={away ? 'offline' : null} />
               <div className="mz-tv-row__bar">
                 <span className="mz-tv-row__fill" style={{ width: `${(row.score / max) * 100}%` }} />
                 <span className="mz-tv-row__label">
                   <span className="mz-tv-row__name">{r.player.name}</span>
+                  {away && <span className="mz-tv-row__away">Away</span>}
                   {phase !== 'before' && !!r.delta && <span className="mz-tv-row__gain">+{formatScore(r.delta)}</span>}
                   {showAfter && m !== 0 && <span className={['mz-tv-row__move', m > 0 ? 'mz-tv-row__move--up' : ''].join(' ')} aria-label={m > 0 ? `up ${m}` : `down ${-m}`}>{m > 0 ? `▲ ${m}` : `▼ ${-m}`}</span>}
                 </span>
