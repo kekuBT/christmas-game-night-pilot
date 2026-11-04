@@ -815,6 +815,26 @@ export class RoomEngine {
     return { accepted: true, result: { points, total: game.rawScores[actorId] } };
   }
 
+  /**
+   * Post-finish aggregate for trivia: per-question counts per option index.
+   * Identities are never included — a count of 3 on option B says nothing
+   * about which three players chose it. Only ever called for finished games.
+   */
+  private quizAnswerCounts(game: GameInstance): Record<string, number[]> {
+    const extra = game.extra as { questions: Record<string, unknown>[]; answers: Record<string, Record<string, number>> };
+    const out: Record<string, number[]> = {};
+    for (const q of extra.questions ?? []) {
+      const options = (q["options"] as unknown[] | undefined) ?? [];
+      const counts = options.map(() => 0);
+      for (const pid of Object.keys(extra.answers ?? {})) {
+        const idx = (extra.answers[pid] ?? {})[String(q["id"])];
+        if (typeof idx === "number" && idx >= 0 && idx < counts.length) counts[idx]! += 1;
+      }
+      out[String(q["id"])] = counts;
+    }
+    return out;
+  }
+
   /** The ONLY pathway to outbound state. Never include secrets for the wrong audience. */
   project(audience: Audience, actorId?: string): Record<string, unknown> {
     const publicPlayers = [...this.players.values()].map((p) => ({
@@ -849,7 +869,15 @@ export class RoomEngine {
                   ? {
                       questions: (
                         (g.extra as { questions: Record<string, unknown>[] }).questions ?? []
-                      ).map((q) => ({ id: q["id"], prompt: q["prompt"] ?? q["quote"], options: q["options"] })),
+                      ).map((q) => ({
+                        id: q["id"],
+                        prompt: q["prompt"] ?? q["quote"],
+                        options: q["options"],
+                        // Post-finish only, trivia only: the correct answer is
+                        // public once the game is finished (scores already are).
+                        // Never exposed while playing — that would leak the key.
+                        ...(g.status === "finished" && g.gameId === "trivia" ? { correctIndex: q["correctIndex"] } : {}),
+                      })),
                     }
                   : g.gameId === "guess-the-year"
                     ? { events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })) }
@@ -863,6 +891,10 @@ export class RoomEngine {
         g.status === "finished"
           ? g.questions?.map((q) => ({ id: q.id, prompt: q.prompt, options: q.options, correctAnswer: q.correctAnswer }))
           : undefined,
+      // Post-finish aggregate only, trivia only: per-question counts per
+      // option index, computed from stored answers. No player identities —
+      // the room can see HOW it answered, never WHO answered what.
+      answerCounts: g.status === "finished" && g.gameId === "trivia" ? this.quizAnswerCounts(g) : undefined,
       rawScores: g.status === "finished" || g.status === "revealed" ? g.rawScores : undefined,
     }));
     const base: Record<string, unknown> = {
@@ -906,7 +938,13 @@ export class RoomEngine {
                     ? {
                         questions: (
                           (g.extra as { questions: Record<string, unknown>[] }).questions ?? []
-                        ).map((q) => ({ id: q["id"], prompt: q["prompt"] ?? q["quote"], options: q["options"] ?? q["speakers"] })),
+                        ).map((q) => ({
+                          id: q["id"],
+                          prompt: q["prompt"] ?? q["quote"],
+                          options: q["options"] ?? q["speakers"],
+                          // Same post-finish-only rule as the public branch.
+                          ...(g.status === "finished" && g.gameId === "trivia" ? { correctIndex: q["correctIndex"] } : {}),
+                        })),
                         myAnswers: (g.extra as { answers: Record<string, Record<string, number>> }).answers[actorId] ?? {},
                       }
                     : g.gameId === "guess-the-year"

@@ -20,10 +20,15 @@ try {
   const host = await hostCtx.newPage();
   await host.goto(BASE, { waitUntil: "domcontentloaded" });
   await host.screenshot({ path: `${OUT}/01-home.png` });
-  await host.getByPlaceholder("e.g. Ada").fill(NAMES[0]);
-  await host.getByRole("button", { name: "Create a room (host)" }).click();
-  await host.locator("header .pill").waitFor({ timeout: 15000 });
-  const code = (await host.locator("header .pill").textContent()).replace("Code:", "").trim();
+  await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
+  await host.getByRole("button", { name: "Host a game" }).click();
+  const shareChip = host.getByRole("button", { name: /^Share room code / });
+    await shareChip.waitFor({ timeout: 15000 });
+    let code = "";
+    for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
+      code = ((await shareChip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
+      if (!/^[A-Z0-9]{6}$/.test(code)) await new Promise((r) => setTimeout(r, 500));
+    }
   if (!/^[A-Z0-9]{6}$/.test(code)) throw new Error(`unexpected room code: ${code}`);
   const pages = [{ page: host, name: NAMES[0] }];
   for (let i = 1; i < NAMES.length; i++) {
@@ -31,10 +36,10 @@ try {
     const p = await ctx.newPage();
     pages.push({ page: p, name: NAMES[i] });
     await p.goto(BASE, { waitUntil: "domcontentloaded" });
-    await p.getByPlaceholder("e.g. Ada").fill(NAMES[i]);
-    await p.getByPlaceholder("e.g. K7M2Q9").fill(code);
-    await p.getByRole("button", { name: "Join room" }).click();
-    await p.getByText(`Playing as ${NAMES[i]}`).waitFor({ timeout: 15000 });
+    await p.getByPlaceholder("e.g. Auntie June").fill(NAMES[i]);
+    await p.locator(".mz-code__input").fill(code);
+    await p.getByRole("button", { name: "Join the game" }).click();
+    await p.getByRole("heading", { name: `You’re in, ${NAMES[i]}.` }).waitFor({ timeout: 15000 });
   }
   for (const n of NAMES) await host.getByText(n, { exact: true }).first().waitFor({ timeout: 15000 });
   await host.screenshot({ path: `${OUT}/02-lobby-4-players.png`, fullPage: true });

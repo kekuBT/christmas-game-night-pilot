@@ -39,7 +39,13 @@ function ratio(fg, bg) {
 }
 const parseRgb = (s) => {
   const m = s.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+  if (m) return [Number(m[1]), Number(m[2]), Number(m[3])];
+  // CSS Color 4 `color(srgb r g b [/ a])` — used by Mchezo for the seat
+  // name overlay. Values are 0-1; alpha is ignored because the overlay
+  // sits over the dark ground, so the unblended dark value is the
+  // conservative side for a light foreground.
+  const c = s.match(/color\(srgb\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)/);
+  return c ? [Math.round(Number(c[1]) * 255), Math.round(Number(c[2]) * 255), Math.round(Number(c[3]) * 255)] : null;
 };
 
 async function sampleView(page, view) {
@@ -125,21 +131,26 @@ try {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const host = await ctx.newPage();
   await host.goto(BASE, { waitUntil: "domcontentloaded" });
-  await host.getByPlaceholder("e.g. Ada").waitFor({ timeout: 15000 });
+  await host.getByPlaceholder("e.g. Auntie June").waitFor({ timeout: 15000 });
   console.log("\n== home ==");
   report("home", await sampleView(host, "home"));
 
-  await host.getByPlaceholder("e.g. Ada").fill("Alex");
-  await host.getByRole("button", { name: "Create a room (host)" }).click();
-  await host.locator("header .pill").waitFor({ timeout: 15000 });
-  const code = (await host.locator("header .pill").textContent()).replace("Code:", "").trim();
+  await host.getByPlaceholder("e.g. Auntie June").fill("Alex");
+  await host.getByRole("button", { name: "Host a game" }).click();
+  const shareChip = host.getByRole("button", { name: /^Share room code / });
+  await shareChip.waitFor({ timeout: 15000 });
+  let code = "";
+  for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
+    code = ((await shareChip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
+    if (!/^[A-Z0-9]{6}$/.test(code)) await new Promise((r) => setTimeout(r, 500));
+  }
   const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const joiner = await ctx2.newPage();
   await joiner.goto(BASE, { waitUntil: "domcontentloaded" });
-  await joiner.getByPlaceholder("e.g. Ada").fill("Sam");
-  await joiner.getByPlaceholder("e.g. K7M2Q9").fill(code);
-  await joiner.getByRole("button", { name: "Join room" }).click();
-  await joiner.getByText("Playing as Sam").waitFor({ timeout: 15000 });
+  await joiner.getByPlaceholder("e.g. Auntie June").fill("Sam");
+  await joiner.locator(".mz-code__input").fill(code);
+  await joiner.getByRole("button", { name: "Join the game" }).click();
+  await joiner.getByRole("heading", { name: "You’re in, Sam." }).waitFor({ timeout: 15000 });
   console.log("\n== lobby ==");
   report("lobby", await sampleView(host, "lobby"));
 
@@ -151,16 +162,22 @@ try {
   // Every player must answer each question before the game advances, so
   // drive both pages until the panel reports finished (same pattern as
   // check-f4.mjs, which loops all players).
+  // A finished page shows ShowResults instead of the panel, so accept
+  // either as finished (same pattern as check-f4.mjs).
   const panel = host.locator('[data-testid="game-panel"]');
   const deadline = Date.now() + 120_000;
   while (Date.now() < deadline) {
     const t = await panel.textContent().catch(() => "");
     if (t.includes("Status: finished")) break;
+    if (await host.getByTestId("show-results").isVisible({ timeout: 500 }).catch(() => false)) break;
     await answerQuiz(host);
     await answerQuiz(joiner);
     await sleep(700);
   }
-  await host.getByText("Status: finished").waitFor({ timeout: 20000 });
+  await Promise.race([
+    host.getByText("Status: finished").waitFor({ timeout: 20000 }).catch(() => {}),
+    host.getByTestId("show-results").waitFor({ timeout: 20000 }).catch(() => {}),
+  ]);
   console.log("\n== game finished ==");
   report("game-finished", await sampleView(host, "game-finished"));
 

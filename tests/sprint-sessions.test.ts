@@ -74,15 +74,35 @@ describe("projection secrecy", () => {
   it("TV projections contain no answer keys, words, or tokens, in any game", () => {
     const { engine, host, ids } = room(4);
     const games = ["impostor", "caption-clash", "trivia", "word-connections", "who-said-that", "guess-the-year", "closest-wins", "category-sprint", "charades", "geography", "math-mayhem"];
-    const banned = ["correctIndex", "correctAnswer", "recoveryToken", "recoveryTokenHash"];
+    // Tokens are never projected. Answer keys are never projected for a
+    // PLAYING game — but finished trivia legitimately reveals its keys and
+    // aggregate answer counts (Mchezo results/TV reveal), so the key check
+    // below is scoped to the playing game only, and the finished-trivia
+    // reveal is asserted explicitly after the loop.
+    const alwaysBanned = ["recoveryToken", "recoveryTokenHash"];
     for (const gid of games) {
       const game = engine.startGame(host, gid, { official: false, seed: 1 });
-      const tv = JSON.stringify(engine.project("tv"));
-      for (const b of banned) expect(tv).not.toContain(b);
+      const tv = engine.project("tv") as { games: { id: string; state?: unknown }[] };
+      const tvJson = JSON.stringify(tv);
+      for (const b of alwaysBanned) expect(tvJson).not.toContain(b);
+      const playing = tv.games.find((g) => g.id === game.id);
+      expect(JSON.stringify(playing?.state ?? {})).not.toContain("correctIndex");
+      expect(JSON.stringify(playing?.state ?? {})).not.toContain("correctAnswer");
       // Finish or skip the game so the next one can start.
       game.status = "finished";
     }
     expect(ids.length).toBe(4);
+    // Finished trivia reveal: keys + aggregate counts are public, and the
+    // counts carry no player identities (arrays of numbers, not a map).
+    const finalTv = engine.project("tv") as { games: { gameId: string; answerCounts?: Record<string, number[]> }[] };
+    const trivia = finalTv.games.find((g) => g.gameId === "trivia");
+    expect(trivia?.answerCounts).toBeDefined();
+    expect(Object.keys(trivia?.answerCounts ?? {})).toHaveLength(10);
+    for (const counts of Object.values(trivia?.answerCounts ?? {})) {
+      expect(counts).toHaveLength(4);
+      expect(counts.every((n) => typeof n === "number")).toBe(true);
+    }
+    expect(JSON.stringify(finalTv)).toContain("correctIndex");
   });
 
   it("a player projection contains only that player's private state", () => {

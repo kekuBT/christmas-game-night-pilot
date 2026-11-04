@@ -3,12 +3,17 @@ import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, Pu
 import { GamePanel } from "./components/GamePanel.js";
 import { ChampionshipView } from "./components/ChampionshipView.js";
 import { MemoryBookView } from "./components/MemoryBookView.js";
-import { LivingLobby } from "./components/LivingLobby.js";
 import { Reactions } from "./components/Reactions.js";
 import { ShowIntro, ShowResults, ShowWaiting } from "./components/ShowMode.js";
 import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js";
 import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
+// Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
+import { LandingScreen, LobbyScreen, MchezoProvider, themes } from "./ui/mchezo/index.js";
+import type { ReactionId } from "./ui/mchezo/index.js";
+import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
+import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
+import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mchezo/adapters.js";
 import QRCode from "qrcode";
 
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
@@ -64,6 +69,9 @@ export function App() {
   const [introDismissed, setIntroDismissed] = useState<string | null>(sessionStorage.getItem("cgn_intro_dismissed"));
   const [resultsDismissed, setResultsDismissed] = useState<string | null>(sessionStorage.getItem("cgn_results_dismissed"));
   const settings = useExperienceSettings();
+  // Mchezo lobby: the host-chosen "up next" game (default: Trivia, the
+  // Phase 2 featured game). The lobby Start button starts this game.
+  const [upNextId, setUpNextId] = useState("trivia");
   const [numInput, setNumInput] = useState("");
   const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
@@ -177,19 +185,24 @@ export function App() {
   }, [proj?.joinCode]);
 
   if (!roomId || !playerId) {
-    return <div className="wrap"><header><h1>🎄 Christmas Game Night</h1></header>
-      <div className="card"><h2>Join the family game night</h2>
-        <p className="muted">No account needed. Three steps and you are playing.</p>
-        <p><b>Step 1 — Your name.</b> This is how everyone sees you.</p>
-        <label>Your name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ada" /></label>
-        <p><b>Step 2 — Join a room, or create one.</b> Joining needs the 6-letter code from the host. Creating makes you the host.</p>
-        <label>Room code (only if joining)<input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="e.g. K7M2Q9" /></label>
-        {!name && <p className="muted">Enter your name first — then both buttons work.</p>}
-        <div className="row"><button onClick={joinRoom} disabled={!code || !name}>Join room</button><button className="secondary" onClick={createRoom} disabled={!name}>Create a room (host)</button></div>
-        {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
-      </div>
-      <div className="card"><h2>How it works</h2><p>Host starts a game from the lobby. Everyone plays on their own phone, the TV view shows only public scores, and the Memory Book only records results from real games.</p></div>
-    </div>;
+    return (
+      <MchezoProvider theme={themes.everyday}>
+        <LandingScreen
+          code={code}
+          onCodeChange={(c) => setCode(c)}
+          name={name}
+          onNameChange={setName}
+          onJoin={joinRoom}
+          onHost={createRoom}
+          extra={
+            <div style={{ padding: "0 16px 16px" }}>
+              {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
+              <p className="mz-foot">No account needed. Joining needs the 6-character code from the host; creating a room makes you the host. Hosts start games from the lobby, everyone plays on their own phone, and the TV stage shows only public scores.</p>
+            </div>
+          }
+        />
+      </MchezoProvider>
+    );
   }
 
   const players: PublicPlayer[] = proj?.players ?? [];
@@ -216,6 +229,150 @@ export function App() {
   function dismissIntro(id: string) { sessionStorage.setItem("cgn_intro_dismissed", id); setIntroDismissed(id); }
   function dismissResults(id: string) { sessionStorage.setItem("cgn_results_dismissed", id); setResultsDismissed(id); }
 
+  // ---- Mchezo integrated views (Phase 2) ----
+  // Everyday theme throughout: Mchezo is year-round; the Christmas Family
+  // Cup is a seasonal event shown as data (below), not as the platform skin.
+  const mzReducedMotion = settings.anim === "full" ? undefined : true;
+  const mzPlayers = toMzPlayers(players);
+  const mzReactions = toMzReactions(proj?.reactions, players);
+  const mzReact = async (r: ReactionId) => {
+    try { await post(`/rooms/${roomId}/reactions`, { emoji: reactionIdToEmoji(r) }); await refresh(); } catch { /* non-fatal */ }
+  };
+  const mzNudge = async (targetId: string) => {
+    try { await post(`/rooms/${roomId}/nudge`, { targetId }); await refresh(); } catch { /* non-fatal */ }
+  };
+  const upNext = games.find((g) => g.id === upNextId) ?? games[0];
+  const triviaPlaying = playingGame?.gameId === "trivia";
+  const triviaFinished = latestFinished?.gameId === "trivia";
+  const lobbyExtra = (
+    <div>
+      <div className="mz-card" style={{ marginTop: 12 }}>
+        <span className="mz-kicker">Choose a game</span>
+        <p className="mz-foot">Up next is {upNext?.title ?? "—"}. The host or cohost starts games; everyone else waits for the start.</p>
+        {games.map((g) => (
+          <div key={g.id} style={{ padding: "8px 0", borderTop: "1px solid var(--mz-line)" }}>
+            <p style={{ margin: "4px 0" }}><b>{g.title}</b> <span className="mz-muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min</span></p>
+            <p className="mz-foot" style={{ margin: "4px 0" }}>{g.tutorial}</p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              <button type="button" className="mz-chip-btn" data-testid={`start-official-${g.id}`} onClick={() => startGame(g.id, true)} disabled={!(me?.isHost || me?.isCohost)}>Start (official)</button>
+              <button type="button" className="mz-chip-btn" data-testid={`start-practice-${g.id}`} onClick={() => startGame(g.id, false)} disabled={!(me?.isHost || me?.isCohost)}>Start (practice)</button>
+              {(me?.isHost || me?.isCohost) && <button type="button" className="mz-chip-btn" onClick={() => setUpNextId(g.id)}>Set as up next</button>}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mz-card" style={{ marginTop: 12 }}>
+        <span className="mz-kicker">Invite by QR</span>
+        <p className="mz-foot">Scan to join this room. The 6-character code below works too — that is the manual-code fallback.</p>
+        {(location.hostname === "localhost" || location.hostname === "127.0.0.1") && <p>⚠️ This QR points to {location.origin}, which only works on this device. A phone scanning it will be sent to its own localhost and cannot join. Open the app from a LAN-reachable address (or the approved deployed domain) so the QR works, or share the 6-character code instead.</p>}
+        {qrUrl && <img src={qrUrl} alt={`QR code to join room ${proj?.joinCode ?? ""}`} width={220} height={220} />}
+        <p>Room code: <b>{proj?.joinCode ?? "…"}</b></p>
+      </div>
+      {(me?.isHost || me?.isCohost) && players.filter((p) => p.id !== playerId).length > 0 && (
+        <div className="mz-card" style={{ marginTop: 12 }}>
+          <span className="mz-kicker">Cohost</span>
+          {players.filter((p) => p.id !== playerId).map((p) => (
+            <div key={p.id} style={{ display: "flex", gap: 8, alignItems: "center", padding: "4px 0" }}>
+              <span>{p.displayName}</span>
+              <button type="button" className="mz-chip-btn" onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/cohost`, { targetId: p.id }); await refresh(); }}>Make cohost</button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+        <button type="button" className="mz-chip-btn" onClick={() => setView("championship")}>Championship</button>
+        <button type="button" className="mz-chip-btn" onClick={() => setView("tv")}>TV stage</button>
+        <button type="button" className="mz-chip-btn" onClick={() => setView("memory")}>Memory Book</button>
+        <button type="button" className="mz-chip-btn" onClick={reconnect}>Reconnect</button>
+      </div>
+      <SettingsBar sound={settings.sound} anim={settings.anim} onToggleSound={settings.toggleSound} onSetAnim={settings.setAnimSetting} />
+      {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
+    </div>
+  );
+
+  if (view === "lobby" && isLobbyPhase) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <LobbyScreen
+          session={{
+            roomCode: proj?.joinCode ?? "…",
+            sessionLabel: proj?.name ?? "Mchezo",
+            // Family Cup event data: 7 days is the approved championship
+            // length; the current day comes from the server projection.
+            championship: { name: "Family Cup", unitLabel: "Day", current: proj?.championshipDay ?? 1, total: 7 },
+          }}
+          players={mzPlayers}
+          youId={playerId ?? ""}
+          isHost={!!(me?.isHost || me?.isCohost)}
+          nextGame={{ name: upNext?.title ?? "Trivia Showdown", kind: "Party game", accentIndex: 3 }}
+          tvConnected={false}
+          onTvChange={(on) => { if (on) setView("tv"); }}
+          reactions={mzReactions}
+          onReact={mzReact}
+          onNudge={mzNudge}
+          nudgedBy={proj?.nudgedBy}
+          onStart={upNext ? () => startGame(upNext.id, true) : undefined}
+          minPlayers={upNext?.minPlayers ?? 2}
+          capacity={10}
+          extra={lobbyExtra}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "intro" && triviaPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoTriviaIntro title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} onStart={() => dismissIntro(playingGame.id)} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && triviaPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoTriviaPlay
+          game={playingGame}
+          publicGame={publicPlaying}
+          players={players}
+          playerId={playerId ?? ""}
+          gamesTitle={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          intent={intent}
+          post={post}
+          onBackToLobby={() => dismissResults(playingGame.id)}
+          roomId={roomId ?? ""}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && triviaFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoTriviaResults
+          game={latestFinished}
+          publicGame={publicFinished}
+          players={players}
+          playerId={playerId ?? ""}
+          gamesTitle={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId}
+          intent={intent}
+          post={post}
+          onBackToLobby={() => dismissResults(latestFinished.id)}
+          roomId={roomId ?? ""}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "tv") {
+    // Trivia TV stage (Mchezo) when a Trivia game is the TV subject;
+    // every other state keeps the existing TV Dashboard below.
+    const tvGame = [...(proj?.games ?? [])].reverse().find((g) => g.gameId === "trivia" && (g.status === "playing" || g.status === "finished"));
+    if (tvGame) {
+      return (
+        <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion} as="bare">
+          <MchezoTvStage publicGame={tvGame} players={players} joinCode={proj?.joinCode ?? "…"} onBack={() => setView("lobby")} />
+        </MchezoProvider>
+      );
+    }
+  }
+
   return <div className={`wrap anim-${settings.anim}`}>
     <header><h1>🎄 Christmas Game Night</h1><span className="pill">Code: {proj?.joinCode ?? "…"}</span></header>
     <p className="muted">Playing as <b>{me?.displayName ?? "…"}</b>{me?.isHost ? " (host)" : ""} · Room: {proj?.name ?? ""}</p>
@@ -235,27 +392,6 @@ export function App() {
     </>}
     {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} onBack={() => dismissResults(latestFinished.id)} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GamePanel game={playingGame} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
-    {view === "lobby" && isLobbyPhase && <>
-      <LivingLobby players={players} myId={playerId} />
-      <div className="card"><h2>Invite by QR</h2><p className="muted">Scan to join this room. The 6-character code below works too — that is the manual-code fallback.</p>
-        {(location.hostname === "localhost" || location.hostname === "127.0.0.1") && <p>⚠️ This QR points to {location.origin}, which only works on this device. A phone scanning it will be sent to its own localhost and cannot join. Open the app from a LAN-reachable address (or the approved deployed domain) so the QR works, or share the 6-character code instead.</p>}
-        {qrUrl && <img src={qrUrl} alt={`QR code to join room ${proj?.joinCode ?? ""}`} width={220} height={220} />}
-        <p>Room code: <b>{proj?.joinCode ?? "…"}</b></p>
-      </div>
-      <div className="card"><h2>Players</h2>{players.map((p) => <span key={p.id} className="pill">{p.displayName}{p.isHost ? " 👑" : ""}{p.isCohost ? " ⭐" : ""}{p.connected ? "" : " (away)"}</span>)}
-        {(me?.isHost || me?.isCohost) && players.filter((p) => p.id !== playerId).map((p) => <div key={p.id} className="row"><span>{p.displayName}</span><button className="secondary" onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/cohost`, { targetId: p.id }); await refresh(); }}>Make cohost</button></div>)}
-      </div>
-      <div className="card"><h2>Start a game</h2><p className="muted">The host or cohost starts games. Tutorials are shown below each game.</p>
-        {!(me?.isHost || me?.isCohost) && players.some((p) => p.isHost && !p.connected) && <p className="muted">The host is away — only a connected host or cohost can start a game. The host returns by reopening the room with their session.</p>}
-        {games.map((g) => <div key={g.id} className="card" data-testid={`game-card-${g.id}`}><b>{g.title}</b> <span className="muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min</span>
-          <p>{g.tutorial}</p><div className="row"><button data-testid={`start-official-${g.id}`} onClick={() => startGame(g.id, true)} disabled={!(me?.isHost || me?.isCohost)}>Start (official)</button><button data-testid={`start-practice-${g.id}`} className="secondary" onClick={() => startGame(g.id, false)} disabled={!(me?.isHost || me?.isCohost)}>Start (practice)</button></div></div>)}
-      </div>
-      {(proj?.games ?? []).filter((g) => g.status === "playing" && g.deadlineAt !== undefined && Date.now() > g.deadlineAt).map((g) => (me?.isHost || me?.isCohost) ? <div key={g.id} className="card"><p>Game {g.gameId} has passed its deadline and may be stalled.</p><button onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/games/${g.id}/skip`, {}); await refresh(); }}>Skip timed-out game (no scores invented)</button></div> : null)}
-      {finished.length > 0 && <div className="card" data-testid="finished-games"><h2>Finished games</h2>{finished.map((g) => <p key={g.id}><b>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId}</b> — {Object.entries(g.rawScores ?? {}).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>)}</div>}
-      <SettingsBar sound={settings.sound} anim={settings.anim} onToggleSound={settings.toggleSound} onSetAnim={settings.setAnimSetting} />
-      <Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} />
-    </>}
-
     {view === "championship" && <ChampionshipView proj={proj} games={games} players={players} nameOf={nameOf} midrank={midrank} post={post} refresh={refresh} meIsHostOrCohost={!!(me?.isHost || me?.isCohost)} />}
 
     {view === "tv" && <div className="card"><h2>TV Dashboard — public only</h2><p className="muted">This view never shows answer keys, secret words, or other players' prompts.</p>

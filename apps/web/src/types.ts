@@ -29,6 +29,8 @@ export interface PublicGame {
   state?: unknown;
   questions?: { id: string; prompt: string; options: string[]; correctAnswer?: number }[];
   rawScores?: Record<string, number>;
+  /** Post-finish aggregate only (trivia): per-question counts per option index. No identities. */
+  answerCounts?: Record<string, number[]>;
 }
 
 export interface PlayerGame {
@@ -86,6 +88,8 @@ export interface Projection {
   seq: number;
   reactions?: { emoji: string; sender: string; ts: number }[];
   reactionsMuted?: boolean;
+  /** Player ids that nudged me in the last 10s (ephemeral, target-only). */
+  nudgedBy?: string[];
   me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean };
   myGames?: PlayerGame[];
   hostView?: boolean;
@@ -141,6 +145,8 @@ export interface QuizQuestion {
   prompt: string;
   options: string[];
   speakers?: string[];
+  /** Only present in finished-game projections (post-reveal). Never while playing. */
+  correctIndex?: number;
 }
 
 /** Game-specific state, as projected by the server. All fields optional: each game uses a subset. */

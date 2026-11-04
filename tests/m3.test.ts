@@ -47,7 +47,18 @@ describe("Trivia / Who Said / Geography / Year", () => {
     expect(game.status).toBe("finished");
     // 10 questions × (100 + 20 speed in engine? engine uses 3000ms elapsed, so +20) = 1200
     for (const pid of players) expect(game.rawScores[pid]).toBe(1200);
-    expect(JSON.stringify(engine.project("tv"))).not.toContain("correctIndex");
+    // Finished trivia reveals its keys + aggregate counts (Mchezo results);
+    // while playing, neither may appear — see the new mchezo test file.
+    const tv = engine.project("tv") as { games: { gameId: string; state?: { questions?: { correctIndex?: number }[] }; answerCounts?: Record<string, number[]> }[] };
+    const finished = tv.games.find((g) => g.gameId === "trivia");
+    expect(finished?.state?.questions?.every((q) => typeof q.correctIndex === "number")).toBe(true);
+    expect(Object.keys(finished?.answerCounts ?? {})).toHaveLength(10);
+    // Everyone answered correctly: each question's correct option holds all 4.
+    for (const q of (game.extra as { questions: { id: string; correctIndex: number }[] }).questions) {
+      const counts = finished?.answerCounts?.[q.id] ?? [];
+      expect(counts[q.correctIndex]).toBe(4);
+      expect(counts.reduce((a, b) => a + b, 0)).toBe(4);
+    }
   });
 
   it("year: exact scores 100, 5 years off scores 50", () => {

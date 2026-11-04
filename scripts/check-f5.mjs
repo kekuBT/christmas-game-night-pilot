@@ -63,6 +63,12 @@ async function panelText(page) {
   catch { return ""; }
 }
 async function panelFinished(page, gameId) {
+  if (gameId === "trivia") {
+    try { return await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }); } catch { return false; }
+  }
+  // M6 Show Mode: a finished game shows the results screen instead of the
+  // finished panel (same pattern as check-f4.mjs).
+  try { if (await page.getByTestId("show-results").isVisible({ timeout: 500 })) return true; } catch { /* not on results */ }
   const t = await panelText(page);
   // Heading must match the game: right after a previous game finishes, the
   // panel still shows that finished game until the new game's projection
@@ -74,6 +80,14 @@ async function panelFinished(page, gameId) {
 // Mirrors the driver in scripts/e2e-browser.mjs; returns true if it did
 // anything (or the panel is already finished).
 async function act(page, gameId, name) {
+  if (gameId === "trivia") {
+    if (await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500)) return true;
+    const slab = page.locator(".mz-slab:not([disabled])").first();
+    if (await isVisible(slab, 1000)) { await slab.click(); await sleep(300); return true; }
+    const next = page.getByRole("button", { name: "Next question" });
+    if (await isVisible(next, 1000)) { await next.click(); await sleep(300); return true; }
+    return false;
+  }
   const panel = page.locator('[data-testid="game-panel"]');
   if (!(await isVisible(panel, 3000))) return false;
   if ((await panelText(page)).includes("Status: finished")) return true;
@@ -199,10 +213,15 @@ try {
   const host = await hostCtx.newPage();
   pages.push({ page: host, name: NAMES[0] });
   await host.goto(BASE, { waitUntil: "domcontentloaded" });
-  await host.getByPlaceholder("e.g. Ada").fill(NAMES[0]);
-  await host.getByRole("button", { name: "Create a room (host)" }).click();
-  await host.locator("header .pill").waitFor({ timeout: 15000 });
-  const code = (await host.locator("header .pill").textContent()).replace("Code:", "").trim();
+  await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
+  await host.getByRole("button", { name: "Host a game" }).click();
+  const shareChip = host.getByRole("button", { name: /^Share room code / });
+  await shareChip.waitFor({ timeout: 15000 });
+  let code = "";
+  for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
+    code = ((await shareChip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
+    if (!/^[A-Z0-9]{6}$/.test(code)) await new Promise((r) => setTimeout(r, 500));
+  }
   if (!/^[A-Z0-9]{6}$/.test(code)) throw new Error(`unexpected room code: ${code}`);
   const roomId = await host.evaluate(() => sessionStorage.getItem("cgn_roomId"));
   if (!roomId) throw new Error("host sessionStorage has no cgn_roomId");
@@ -212,12 +231,13 @@ try {
     const p = await ctx.newPage();
     pages.push({ page: p, name: NAMES[i] });
     await p.goto(BASE, { waitUntil: "domcontentloaded" });
-    await p.getByPlaceholder("e.g. Ada").fill(NAMES[i]);
-    await p.getByPlaceholder("e.g. K7M2Q9").fill(code);
-    await p.getByRole("button", { name: "Join room" }).click();
-    await p.getByText(`Playing as ${NAMES[i]}`).waitFor({ timeout: 15000 });
+    await p.getByPlaceholder("e.g. Auntie June").fill(NAMES[i]);
+    await p.locator(".mz-code__input").fill(code);
+    await p.getByRole("button", { name: "Join the game" }).click();
+    await p.getByRole("heading", { name: `You’re in, ${NAMES[i]}.` }).waitFor({ timeout: 15000 });
   }
-  for (const n of NAMES) await host.getByText(n, { exact: true }).first().waitFor({ timeout: 15000 });
+  await host.getByRole("heading", { name: `You’re in, ${NAMES[0]}.` }).waitFor({ timeout: 15000 });
+  for (const n of NAMES.slice(1)) await host.getByText(n, { exact: true }).first().waitFor({ timeout: 15000 });
   check("lobby roster: 4 players joined", true);
 
   const registry = await (await fetch(`${BASE}/games`)).json();
@@ -229,7 +249,8 @@ try {
     try {
       await host.locator(`[data-testid="start-official-${gameId}"]`).click();
       for (const { page } of pages) {
-        await page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 });
+        if (gameId === "trivia") await page.locator(".mz-question").waitFor({ timeout: 30000 });
+        else await page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 });
       }
       // Leak scan BEFORE driving any answers, while the game is playing.
       await tvLeakCheck(gameId, roomId);
@@ -244,6 +265,8 @@ try {
         await sleep(700);
       }
       if (!finished && !(await panelFinished(host, gameId))) throw new Error("did not reach Status: finished in 180s");
+      try { await host.getByRole("button", { name: "Back to lobby" }).click({ timeout: 3000 }); } catch { /* not Mchezo results */ }
+      try { await host.getByTestId("show-back-to-lobby").click({ timeout: 3000 }); } catch { /* already in lobby */ }
       finishedGames.push(gameId);
       console.log(`OK ${gameId}: finished`);
       check(`day playlist: ${gameId} finished without sticking`, true);
@@ -293,17 +316,23 @@ try {
   check("championship per-game breakdown present after full day",
     champText.includes("Per-game breakdown"));
 
+  // From Championship view the nav row still says "TV Dashboard", but the
+  // view it opens is the Mchezo TV stage whenever a Trivia game has
+  // finished in this room (App TV branch: latest finished Trivia game is
+  // the TV subject). The old dashboard's "Recent games" list has no
+  // Mchezo equivalent yet, so assert the stage instead of the old list.
   await host.getByRole("button", { name: "TV Dashboard" }).click();
-  await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
+  await host.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
   await sleep(1500);
   const tvText = await host.locator("body").textContent();
-  // TV Dashboard "Recent games" is intentionally the last 5 by design
-  // (src/server/hub.ts and App.tsx both slice(-5)); assert exactly those.
-  const recentFive = gameIds.slice(-5);
-  check("TV Dashboard shows the 5 most recent finished games",
-    recentFive.every((id) => tvText.includes(id)),
-    recentFive.filter((id) => !tvText.includes(id)).join(", ") || "all 5 listed");
+  check("TV stage shows the finished Trivia leaderboard after the full day",
+    tvText.includes("Trivia Showdown") && tvText.includes("This game's standings"),
+    tvText.slice(0, 120));
 
+  // The Mchezo TV stage has no Memory Book button; return to the phone
+  // view first (lobby, where the extra carries Memory Book).
+  await host.getByRole("button", { name: "Back to phone view" }).click();
+  await host.getByRole("heading", { name: `You’re in, ${NAMES[0]}.` }).waitFor({ timeout: 15000 });
   const HIGHLIGHT = "F5 day highlight: full playlist finished";
   await host.getByRole("button", { name: "Memory Book" }).click();
   await host.getByText("Christmas Memory Book").waitFor({ timeout: 15000 });

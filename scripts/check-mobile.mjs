@@ -95,7 +95,8 @@ try {
     });
     const host = await ctx.newPage();
     await host.goto(BASE, { waitUntil: "domcontentloaded" });
-    await host.getByPlaceholder("e.g. Ada").waitFor({ timeout: 15000 });
+    await host.getByPlaceholder("e.g. Auntie June").waitFor({ timeout: 15000 });
+    await host.waitForTimeout(1200); // entrance animation settles
     await host.screenshot({ path: join(OUT, `${vp.width}-home.png`) });
 
     let o = await overflow(host);
@@ -104,21 +105,27 @@ try {
     check(`${vp.width}px home: all targets >= 44px`, bad.length === 0, bad.slice(0, 5).join("; "));
     // Enable the host button so keyboard order covers a button too (Join
     // stays disabled without a code, which correctly excludes it).
-    await host.getByPlaceholder("e.g. Ada").fill("Alex");
+    await host.getByPlaceholder("e.g. Auntie June").fill("Alex");
     await tabFocus(host, `${vp.width}px home`);
 
     // Lobby: host creates, one joiner joins by code.
-    await host.getByPlaceholder("e.g. Ada").fill("Alex");
-    await host.getByRole("button", { name: "Create a room (host)" }).click();
-    await host.locator("header .pill").waitFor({ timeout: 15000 });
-    const code = (await host.locator("header .pill").textContent()).replace("Code:", "").trim();
+    await host.getByPlaceholder("e.g. Auntie June").fill("Alex");
+    await host.getByRole("button", { name: "Host a game" }).click();
+    const shareChip = host.getByRole("button", { name: /^Share room code / });
+    await shareChip.waitFor({ timeout: 15000 });
+    let code = "";
+    for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
+      code = ((await shareChip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
+      if (!/^[A-Z0-9]{6}$/.test(code)) await new Promise((r) => setTimeout(r, 500));
+    }
     const ctx2 = await browser.newContext({ viewport: vp, hasTouch: true, isMobile: true });
     const joiner = await ctx2.newPage();
     await joiner.goto(BASE, { waitUntil: "domcontentloaded" });
-    await joiner.getByPlaceholder("e.g. Ada").fill("Sam");
-    await joiner.getByPlaceholder("e.g. K7M2Q9").fill(code);
-    await joiner.getByRole("button", { name: "Join room" }).click();
-    await joiner.getByText("Playing as Sam").waitFor({ timeout: 15000 });
+    await joiner.getByPlaceholder("e.g. Auntie June").fill("Sam");
+    await joiner.locator(".mz-code__input").fill(code);
+    await joiner.getByRole("button", { name: "Join the game" }).click();
+    await joiner.getByRole("heading", { name: "You’re in, Sam." }).waitFor({ timeout: 15000 });
+    await host.waitForTimeout(1200); // seat arrival animation (900ms) settles
     await host.screenshot({ path: join(OUT, `${vp.width}-lobby.png`) });
     o = await overflow(host);
     check(`${vp.width}px lobby: no horizontal overflow`, o.scrollWidth <= o.innerWidth, `scrollWidth=${o.scrollWidth} innerWidth=${o.innerWidth}`);
@@ -147,11 +154,14 @@ try {
     const m = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const btn = document.querySelector("button");
     const cs = btn ? getComputedStyle(btn) : null;
-    return { m, transition: cs?.transitionDuration, animation: cs?.animationName };
+    return { m, transition: cs?.transitionDuration, property: cs?.transitionProperty, animation: cs?.animationName };
   });
   check("reduced-motion media query matches", rmOk.m === true);
-  check("reduced-motion disables transitions/animations", rmOk.transition === "0s" && (rmOk.animation === "none" || rmOk.animation === ""),
-    `transition=${rmOk.transition} animation=${rmOk.animation}`);
+  // No transition actually runs when the property is none (index.css sets
+  // `transition: none` under reduced motion) or the duration is 0s.
+  check("reduced-motion disables transitions/animations",
+    (rmOk.property === "none" || rmOk.transition === "0s") && (rmOk.animation === "none" || rmOk.animation === ""),
+    `transition=${rmOk.transition} property=${rmOk.property} animation=${rmOk.animation}`);
   await rmCtx.close();
 } finally {
   await browser.close();

@@ -1,13 +1,14 @@
 // WS auto-reconnect browser check (Chromium, 2 fictional players).
 // Usage: build:web, serve on a port, then: node scripts/check-ws-reconnect.mjs <baseUrl>
 // What it proves, through the real UI only:
-//   1. Host + guest both connected (no "(away)" pill).
+//   1. Host + guest both connected (Circle lobby shows the guest seat).
 //   2. The guest's WebSocket is dropped mid-session (Playwright intercepts
 //      the guest's first WS connection and closes it once, via
 //      routeWebSocket; later connections pass through untouched).
-//   3. The server marks the guest "(away)" (its WS close handler fires),
-//      then the client's auto-reconnect reopens the socket and the
-//      "(away)" marker clears WITHOUT any manual Reconnect click.
+//   3. The server marks the guest away (Circle seat shows "Away" and the
+//      lobby line says "reconnecting"; its WS close handler fires), then
+//      the client's auto-reconnect reopens the socket and the away marker
+//      clears WITHOUT any manual Reconnect click.
 //   4. The host can then start Trivia (min 2 connected players), which
 //      would fail while the guest was still marked away.
 // Checks: 4. Fictional test players only; run against a local server only.
@@ -36,15 +37,20 @@ const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
 try {
   const host = await ctx.newPage();
   await host.goto(BASE, { waitUntil: "domcontentloaded" });
-  await host.getByPlaceholder("e.g. Ada").fill("Ada");
-  await host.getByRole("button", { name: "Create a room (host)" }).click();
-  await host.locator("header .pill", { hasText: /Code: [A-Z0-9]{6}/ }).waitFor({ timeout: 15000 });
-  const code = (await host.locator("header .pill").textContent()).replace("Code:", "").trim();
+  await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
+  await host.getByRole("button", { name: "Host a game" }).click();
+  const shareChip = host.getByRole("button", { name: /^Share room code / });
+  await shareChip.waitFor({ timeout: 15000 });
+  let code = "";
+  for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
+    code = ((await shareChip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
+    if (!/^[A-Z0-9]{6}$/.test(code)) await new Promise((r) => setTimeout(r, 500));
+  }
 
   const guest = await ctx.newPage();
   await guest.goto(BASE, { waitUntil: "domcontentloaded" });
-  await guest.getByPlaceholder("e.g. Ada").fill("Bea");
-  await guest.getByPlaceholder("e.g. K7M2Q9").fill(code);
+  await guest.getByPlaceholder("e.g. Auntie June").fill("Bea");
+  await guest.locator(".mz-code__input").fill(code);
   // Intercept ONLY the guest's player WS, before it is created (join click
   // is what creates it). First connection: proxy to the real server, then
   // close it once after 800ms. Later connections pass through untouched,
@@ -60,37 +66,38 @@ try {
       }
     },
   );
-  await guest.getByRole("button", { name: "Join room" }).click();
-  await guest.getByTestId("living-lobby").waitFor({ timeout: 15000 });
+  await guest.getByRole("button", { name: "Join the game" }).click();
+  await guest.getByRole("heading", { name: "You’re in, Bea." }).waitFor({ timeout: 15000 });
 
-  const guestPillOnHost = () => host.locator(".pill", { hasText: "Bea" });
-  const pillText = async () => {
-    try { return (await guestPillOnHost().first().textContent()) ?? ""; } catch { return ""; }
+  // Host's Circle lobby: the guest seat name, and the lobby status line.
+  const hostLobbyText = async () => {
+    try { return (await host.locator("body").textContent()) ?? ""; } catch { return ""; }
   };
-  if (await waitFor(async () => !(await pillText()).includes("(away)"), 15000, "initial connected")) {
+  if (await waitFor(async () => (await hostLobbyText()).includes("Bea") && !(await hostLobbyText()).includes("reconnecting"), 15000, "initial connected")) {
     pass("both players connected before drop");
-  } else fail("both players connected before drop", await pillText());
+  } else fail("both players connected before drop");
 
   // The drop should mark the guest away on the host's view (server WS
   // close handler), via the 2s polling fallback even with WS dead.
-  if (await waitFor(async () => (await pillText()).includes("(away)"), 20000, "away after drop")) {
-    pass("guest marked (away) after socket drop");
-  } else fail("guest marked (away) after socket drop", await pillText());
+  if (await waitFor(async () => (await hostLobbyText()).includes("reconnecting"), 20000, "away after drop")) {
+    pass("guest marked away after socket drop");
+  } else fail("guest marked away after socket drop");
 
   // Auto-reconnect (first retry after 1s backoff) must clear the marker
   // with NO manual Reconnect click on either page.
   if (await waitFor(async () => {
-    const t = await pillText();
-    return t.includes("Bea") && !t.includes("(away)");
+    const t = await hostLobbyText();
+    return t.includes("Bea") && !t.includes("reconnecting");
   }, 30000, "reconnected")) {
-    pass("guest auto-reconnected, (away) cleared, no manual click");
-  } else fail("guest auto-reconnected, (away) cleared, no manual click", await pillText());
+    pass("guest auto-reconnected, away cleared, no manual click");
+  } else fail("guest auto-reconnected, away cleared, no manual click");
 
   // Functional proof: Trivia needs 2 connected players. While the guest
-  // was away this start would fail; now it must reach the show intro.
+  // was away this start would fail; now it must reach a Trivia question
+  // (Mchezo intro auto-advances in 8s, so wait for the question screen).
   await host.getByTestId("start-official-trivia").click();
   try {
-    await host.getByTestId("show-intro").waitFor({ timeout: 15000 });
+    await host.locator(".mz-question").waitFor({ timeout: 30000 });
     pass("host can start Trivia after reconnect (2 connected players)");
   } catch (e) {
     fail("host can start Trivia after reconnect (2 connected players)", String(e).slice(0, 200));

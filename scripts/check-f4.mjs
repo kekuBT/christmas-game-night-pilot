@@ -37,6 +37,13 @@ async function panelText(page) {
   try { return await page.locator('[data-testid="game-panel"]').textContent({ timeout: 2000 }); }
   catch { return ""; }
 }
+async function pageFinished(page) {
+  const t = await panelText(page);
+  if (t.includes("Now playing: math-mayhem") && t.includes("Status: finished")) return true;
+  try { if (await page.getByTestId("show-results").isVisible({ timeout: 500 })) return true; } catch { /* not on results */ }
+  try { if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 })) return true; } catch { /* not on results */ }
+  return false;
+}
 async function answerQuiz(page) {
   const panel = page.locator('[data-testid="game-panel"]');
   let guard = 40;
@@ -55,10 +62,15 @@ try {
   const host = await hostCtx.newPage();
   pages.push({ page: host, name: NAMES[0] });
   await host.goto(BASE, { waitUntil: "domcontentloaded" });
-  await host.getByPlaceholder("e.g. Ada").fill(NAMES[0]);
-  await host.getByRole("button", { name: "Create a room (host)" }).click();
-  await host.locator("header .pill").waitFor({ timeout: 15000 });
-  const code = (await host.locator("header .pill").textContent()).replace("Code:", "").trim();
+  await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
+  await host.getByRole("button", { name: "Host a game" }).click();
+  const shareChip = host.getByRole("button", { name: /^Share room code / });
+  await shareChip.waitFor({ timeout: 15000 });
+  let code = "";
+  for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
+    code = ((await shareChip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
+    if (!/^[A-Z0-9]{6}$/.test(code)) await new Promise((r) => setTimeout(r, 500));
+  }
   if (!/^[A-Z0-9]{6}$/.test(code)) throw new Error(`unexpected room code: ${code}`);
 
   for (let i = 1; i < NAMES.length; i++) {
@@ -66,12 +78,13 @@ try {
     const p = await ctx.newPage();
     pages.push({ page: p, name: NAMES[i] });
     await p.goto(BASE, { waitUntil: "domcontentloaded" });
-    await p.getByPlaceholder("e.g. Ada").fill(NAMES[i]);
-    await p.getByPlaceholder("e.g. K7M2Q9").fill(code);
-    await p.getByRole("button", { name: "Join room" }).click();
-    await p.getByText(`Playing as ${NAMES[i]}`).waitFor({ timeout: 15000 });
+    await p.getByPlaceholder("e.g. Auntie June").fill(NAMES[i]);
+    await p.locator(".mz-code__input").fill(code);
+    await p.getByRole("button", { name: "Join the game" }).click();
+    await p.getByRole("heading", { name: `You’re in, ${NAMES[i]}.` }).waitFor({ timeout: 15000 });
   }
-  for (const n of NAMES) await host.getByText(n, { exact: true }).first().waitFor({ timeout: 15000 });
+  await host.getByRole("heading", { name: `You’re in, ${NAMES[0]}.` }).waitFor({ timeout: 15000 });
+  for (const n of NAMES.slice(1)) await host.locator(".mz-circle__seats").getByText(n, { exact: true }).waitFor({ timeout: 15000 });
   check("lobby roster: 4 players joined", true);
 
   // --- Play Math Mayhem to finished on all four pages. ---
@@ -80,9 +93,9 @@ try {
   let finishedEverywhere = false;
   const deadline = Date.now() + 120_000;
   while (Date.now() < deadline) {
-    const texts = [];
-    for (const { page } of pages) texts.push(await panelText(page));
-    if (texts.every((t) => t.includes("Now playing: math-mayhem") && t.includes("Status: finished"))) {
+    const dones = [];
+    for (const { page } of pages) dones.push(await pageFinished(page));
+    if (dones.every(Boolean)) {
       finishedEverywhere = true;
       break;
     }

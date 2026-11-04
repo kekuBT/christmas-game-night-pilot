@@ -53,12 +53,38 @@ async function panelFinished(page, gameId) {
   // M6 Show Mode: a finished game shows the results screen instead of the
   // finished panel. The results screen only ever shows the latest finished
   // game, so its presence means the game just played is finished.
-  return await isVisible(page.getByTestId("show-results"), 500);
+  if (await isVisible(page.getByTestId("show-results"), 500)) return true;
+  // Mchezo Trivia results: PhoneRevealScreen's "Back to lobby" button only
+  // appears on the results screen, never during play.
+  if (gameId === "trivia") return await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500);
+  return false;
+}
+
+// Mchezo Trivia play: AnswerGrid slabs, then "Next question", until the
+// results screen's "Back to lobby" button appears.
+async function actTrivia(page) {
+  let guard = 60;
+  while (guard-- > 0) {
+    if (await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500)) return true;
+    // Last answer locked and no questions left: this page is done — the
+    // "Waiting for the game to finish" keycap clears the lock into the
+    // all-answered waiting screen. Without this, the loop burns its whole
+    // guard here while other players are still answering.
+    const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
+    if (await isVisible(doneBtn, 500)) { await doneBtn.click(); await sleep(400); return true; }
+    const next = page.getByRole("button", { name: "Next question" });
+    if (await isVisible(next, 500)) { await next.click(); await sleep(400); continue; }
+    const slabs = page.locator(".mz-slab:not([disabled])");
+    if ((await slabs.count()) > 0) { await slabs.first().click(); await sleep(500); continue; }
+    await sleep(500);
+  }
+  return false;
 }
 
 // One action pass for a single player page, for the game currently playing.
 // Returns true if it did anything (or the panel is already finished).
 async function act(page, gameId, name) {
+  if (gameId === "trivia") return await actTrivia(page);
   const panel = page.locator('[data-testid="game-panel"]');
   if (!(await isVisible(panel, 3000))) return false;
   if ((await panelText(page)).includes("Status: finished")) return true;
@@ -179,13 +205,16 @@ async function runBrowser(browserName, games) {
     const host = await hostCtx.newPage();
     pages.push({ page: host, name: NAMES[0] });
     await host.goto(BASE, { waitUntil: "domcontentloaded" });
-    await host.getByPlaceholder("e.g. Ada").fill(NAMES[0]);
-    await host.getByRole("button", { name: "Create a room (host)" }).click();
-    // Wait for the real code, not just the pill element: before the first
-    // projection poll lands the pill reads "Code: …", which used to race
-    // this read and fail the run with "unexpected room code: …".
-    await host.locator("header .pill", { hasText: /Code: [A-Z0-9]{6}/ }).waitFor({ timeout: 15000 });
-    const code = (await host.locator("header .pill").textContent()).replace("Code:", "").trim();
+    await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
+    await host.getByRole("button", { name: "Host a game" }).click();
+    // Mchezo lobby: the room code lives on the share chip's aria-label.
+    const shareChip = host.getByRole("button", { name: /^Share room code / });
+    await shareChip.waitFor({ timeout: 15000 });
+    let code = "";
+    for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
+      code = ((await shareChip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
+      if (!/^[A-Z0-9]{6}$/.test(code)) await new Promise((r) => setTimeout(r, 500));
+    }
     if (!/^[A-Z0-9]{6}$/.test(code)) throw new Error(`unexpected room code: ${code}`);
     console.log(`[${browserName}] room code ${code}`);
     // Three more players join by code.
@@ -194,23 +223,31 @@ async function runBrowser(browserName, games) {
       const p = await ctx.newPage();
       pages.push({ page: p, name: NAMES[i] });
       await p.goto(BASE, { waitUntil: "domcontentloaded" });
-      await p.getByPlaceholder("e.g. Ada").fill(NAMES[i]);
-      await p.getByPlaceholder("e.g. K7M2Q9").fill(code);
-      await p.getByRole("button", { name: "Join room" }).click();
-      await p.getByText(`Playing as ${NAMES[i]}`).waitFor({ timeout: 15000 });
+      await p.getByPlaceholder("e.g. Auntie June").fill(NAMES[i]);
+      await p.locator(".mz-code__input").fill(code);
+      await p.getByRole("button", { name: "Join the game" }).click();
+      await p.getByRole("heading", { name: `You’re in, ${NAMES[i]}.` }).waitFor({ timeout: 15000 });
     }
-    // Roster check on the host page.
-    for (const n of NAMES) await host.getByText(n, { exact: true }).first().waitFor({ timeout: 15000 });
+    // Roster check on the host page. Mchezo seats show "You" for yourself,
+    // so the host's own name is checked via the lobby heading instead.
+    await host.getByRole("heading", { name: `You’re in, ${NAMES[0]}.` }).waitFor({ timeout: 15000 });
+    for (const n of NAMES.slice(1)) await host.getByText(n, { exact: true }).first().waitFor({ timeout: 15000 });
     console.log(`[${browserName}] lobby roster: 4 players joined`);
 
     for (const gameId of games) {
       const label = `${gameId}`;
       try {
         await host.locator(`[data-testid="start-official-${gameId}"]`).click();
-        // M6 Show Mode: every player sees an intro screen first. Dismiss it
-        // on every page (or wait for its auto-advance) before waiting for
-        // the gameplay panel; otherwise the heading wait below times out.
+        // Show Mode / Mchezo intro: every player sees an intro screen
+        // first. Dismiss it on every page (or wait for its auto-advance)
+        // before waiting for gameplay; otherwise the wait below times out.
         for (const { page } of pages) {
+          if (gameId === "trivia") {
+            // Mchezo Trivia intro is an 8s countdown with no dismiss button;
+            // the question screen appears when it ends.
+            await page.locator(".mz-question").first().waitFor({ timeout: 30000 });
+            continue;
+          }
           const intro = page.getByTestId("show-start-playing");
           try { await intro.waitFor({ state: "visible", timeout: 15000 }); await intro.click(); }
           catch { /* intro already auto-advanced; panel wait below covers it */ }
@@ -227,9 +264,11 @@ async function runBrowser(browserName, games) {
           await sleep(700);
         }
         if (!finished && !(await panelFinished(host, gameId))) throw new Error("did not reach Status: finished in 180s");
-        // M6: dismiss the results screen so the lobby (and the next game's
-        // start button) is visible again.
-        try { await host.getByTestId("show-back-to-lobby").click({ timeout: 3000 }); } catch { /* already in lobby */ }
+        // Dismiss the results screen so the lobby (and the next game's
+        // start button) is visible again: M6 results use the testid, Mchezo
+        // Trivia results use the "Back to lobby" button.
+        try { await host.getByTestId("show-back-to-lobby").click({ timeout: 3000 }); }
+        catch { try { await host.getByRole("button", { name: "Back to lobby" }).click({ timeout: 3000 }); } catch { /* already in lobby */ } }
         console.log(`[${browserName}] OK ${label}: finished`);
         results.push({ gameId, status: "finished" });
       } catch (e) {
@@ -239,11 +278,16 @@ async function runBrowser(browserName, games) {
     }
 
     // Championship + TV + Memory Book + reconnect, on the host page.
+    // Note: after the games we are in the Mchezo lobby, so navigation uses
+    // the lobby-extra buttons; TV shows the Mchezo stage (a Trivia game is
+    // the latest subject), not the old dashboard.
     try {
       await host.getByRole("button", { name: "Championship" }).click();
       await host.getByText("Championship standings").waitFor({ timeout: 15000 });
-      await host.getByRole("button", { name: "TV Dashboard" }).click();
-      await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
+      await host.getByRole("button", { name: "Lobby & Games" }).click();
+      await host.getByRole("button", { name: "TV stage" }).click();
+      await host.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+      await host.getByRole("button", { name: "Back to phone view" }).click();
       await host.getByRole("button", { name: "Memory Book" }).click();
       await host.getByPlaceholder("e.g. Ada won Math Mayhem in a tie-break").fill("E2E highlight: Alex won Math Mayhem");
       await host.getByRole("button", { name: "Add from last finished game" }).click();

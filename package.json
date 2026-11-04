@@ -45,6 +45,9 @@
     "check-f4": "node scripts/check-f4.mjs",
     "check-f5": "node scripts/check-f5.mjs",
     "check-contrast": "node scripts/check-contrast.mjs",
+    "check-mchezo": "node scripts/check-mchezo.mjs",
+    "check-m6": "node scripts/check-m6.mjs",
+    "screenshot-mchezo": "node scripts/screenshot-mchezo.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",
     "serve": "tsx src/server/serve.ts",
     "typecheck:web": "tsc -p apps/web/tsconfig.json --noEmit"

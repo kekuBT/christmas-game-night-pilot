@@ -1,0 +1,59 @@
+/* GENERATED from src/tokens/tokens.ts — do not edit by hand.
+   For non-React surfaces. React apps get these via <MchezoProvider>. */
+:root, [data-mz-theme="everyday"] {
+  --mz-ground: #16111D;
+  --mz-surface-1: #211A2B;
+  --mz-surface-2: #2D2539;
+  --mz-line: #7A6E8E;
+  --mz-text: #F7F1E8;
+  --mz-text-muted: #C7BED2;
+  --mz-on-accent: #16111D;
+  --mz-brand: #FF6B4A;
+  --mz-brand-deep: #B8432A;
+  --mz-success: #3CCFB4;
+  --mz-highlight: #FFC94A;
+  --mz-spotlight: rgba(154,165,255,.18);
+  --mz-font-display: 'Unbounded', 'Inter Display', 'Inter', system-ui, sans-serif;
+  --mz-font-body: 'Figtree', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mz-depth-key: 6px;
+  --mz-depth-slab: 7px;
+  --mz-ease-out: cubic-bezier(.2,.9,.2,1);
+  --mz-ease-spring: cubic-bezier(.3,1.35,.5,1);
+  --mz-answer-0: #FF6B4A;
+  --mz-answer-0-deep: #B8432A;
+  --mz-answer-1: #FFC94A;
+  --mz-answer-1-deep: #B88A1F;
+  --mz-answer-2: #3CCFB4;
+  --mz-answer-2-deep: #1E8F7B;
+  --mz-answer-3: #9AA5FF;
+  --mz-answer-3-deep: #5D67C2;
+}
+
+[data-mz-theme="christmas"] {
+  --mz-ground: #0E1A16;
+  --mz-surface-1: #16261F;
+  --mz-surface-2: #20352B;
+  --mz-line: #5E8A74;
+  --mz-text: #F7F1E8;
+  --mz-text-muted: #BFD0C5;
+  --mz-on-accent: #16111D;
+  --mz-brand: #F2545B;
+  --mz-brand-deep: #A33238;
+  --mz-success: #7FD6A8;
+  --mz-highlight: #F2C14E;
+  --mz-spotlight: rgba(242,193,78,.16);
+  --mz-font-display: 'Unbounded', 'Inter Display', 'Inter', system-ui, sans-serif;
+  --mz-font-body: 'Figtree', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mz-depth-key: 6px;
+  --mz-depth-slab: 7px;
+  --mz-ease-out: cubic-bezier(.2,.9,.2,1);
+  --mz-ease-spring: cubic-bezier(.3,1.35,.5,1);
+  --mz-answer-0: #F2545B;
+  --mz-answer-0-deep: #A33238;
+  --mz-answer-1: #F2C14E;
+  --mz-answer-1-deep: #A8822A;
+  --mz-answer-2: #7FD6A8;
+  --mz-answer-2-deep: #3E8F66;
+  --mz-answer-3: #A9D8F0;
+  --mz-answer-3-deep: #5E93B0;
+}

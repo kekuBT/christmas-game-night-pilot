@@ -50,11 +50,17 @@ export class LocalServer {
   private reactions = new Map<string, { emoji: string; sender: string; ts: number }[]>();
   private reactionStamps = new Map<string, number[]>();
   private reactionsMuted = new Map<string, boolean>();
+  /** Ephemeral nudges (see the /nudge endpoint): never persisted, never ledger. */
+  private nudges = new Map<string, { fromId: string; targetId: string; ts: number }[]>();
+  private nudgeStamps = new Map<string, number[]>();
   static readonly REACTION_SET = ["🎄", "❄️", "🎉", "👏", "😂", "🔥"];
   private projectFor(room: RoomEngine, audience: "player" | "tv" | "host" | "cohost", actorId?: string): Record<string, unknown> {
     const now = Date.now();
     const recent = (this.reactions.get(room.id) ?? []).filter((r) => now - r.ts < 15000);
-    return { ...room.project(audience, actorId), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false };
+    const nudgedBy = actorId
+      ? [...new Set((this.nudges.get(room.id) ?? []).filter((n) => n.targetId === actorId && now - n.ts < 10000).map((n) => n.fromId))]
+      : [];
+    return { ...room.project(audience, actorId), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy };
   }
   private dataDir: string;
   private http = createServer((req, res) => void this.handleHttp(req, res));
@@ -460,6 +466,31 @@ export class LocalServer {
           this.reactionsMuted.set(room.id, body["muted"] === true);
           this.broadcast(room.id);
           this.send(res, 200, { ok: true, muted: this.reactionsMuted.get(room.id) });
+          return;
+        }
+        // Ephemeral nudges (Mchezo lobby): same pattern as reactions — in
+        // memory only, never in the ledger, never scored, expiring. The
+        // target alone sees who nudged them (nudgedBy in their projection).
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "nudge") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const body = await this.readBody(req);
+          const targetId = String(body["targetId"] ?? "");
+          const target = room.players.get(targetId);
+          if (!target || targetId === player.id) { this.send(res, 400, { error: "Invalid nudge target" }); return; }
+          const now = Date.now();
+          const key = `${room.id}:${player.id}`;
+          const stamps = (this.nudgeStamps.get(key) ?? []).filter((t) => now - t < 60000);
+          if (stamps.length > 0 && now - stamps[stamps.length - 1]! < 3000) {
+            this.send(res, 429, { error: "Nudge rate limit: wait a moment" }); return;
+          }
+          stamps.push(now);
+          this.nudgeStamps.set(key, stamps);
+          const list = this.nudges.get(room.id) ?? [];
+          list.push({ fromId: player.id, targetId, ts: now });
+          this.nudges.set(room.id, list.slice(-50));
+          this.broadcast(room.id);
+          this.send(res, 201, { ok: true });
           return;
         }
         if (req.method === "POST" && parts.length === 3 && parts[2] === "intents") {
