@@ -2,6 +2,35 @@ import { createHash } from "node:crypto";
 import { getGame } from "../games/registry.js";
 import { generateMathQuestions, scoreMathAnswer, type MathQuestion } from "../games/math.js";
 import {
+  allCluesIn,
+  impostorScores,
+  initImpostor,
+  projectImpostor,
+  resolveVote,
+  submitClue,
+  submitGuess,
+  submitVote,
+  type ImpostorState,
+} from "../games/impostor.js";
+import {
+  captionTotalScores,
+  currentRound,
+  initCaption,
+  projectCaption,
+  submitCaption,
+  submitCaptionVote,
+  type CaptionState,
+} from "../games/caption.js";
+import {
+  advanceClosest,
+  allGuessed,
+  closestTotalScores,
+  initClosest,
+  projectClosest,
+  submitClosestGuess,
+  type ClosestState,
+} from "../games/closest.js";
+import {
   createJoinCode,
   createRecoveryToken,
   dedupeKey,
@@ -48,6 +77,7 @@ export interface GameInstance {
   startedAt?: number;
   deadlineAt?: number;
   seed: number;
+  extra?: unknown;
 }
 
 /**
@@ -155,6 +185,14 @@ export class RoomEngine {
       startedAt: Date.now(),
       deadlineAt: Date.now() + 5 * 60 * 1000,
       seed,
+      extra:
+        gameId === "impostor"
+          ? initImpostor(playerIds, seed)
+          : gameId === "caption-clash"
+            ? initCaption(seed)
+            : gameId === "closest-wins"
+              ? initClosest()
+              : undefined,
     };
     this.games.set(id, instance);
     this.log("game-started", { gameInstanceId: id, actor: hostId });
@@ -174,11 +212,90 @@ export class RoomEngine {
     let result: { accepted: boolean; reason?: string; result?: unknown };
     if (intent.action === "submit-math-answer") {
       result = this.submitMathAnswer(intent, actorId, now);
+    } else if (
+      intent.action === "impostor-clue" ||
+      intent.action === "impostor-vote" ||
+      intent.action === "impostor-guess" ||
+      intent.action === "caption-submit" ||
+      intent.action === "caption-vote" ||
+      intent.action === "closest-guess"
+    ) {
+      result = this.submitSocialIntent(intent, actorId);
     } else {
       result = { accepted: false, reason: "UNKNOWN_ACTION" };
     }
     this.seenIntents.set(key, { accepted: result.accepted, result });
     return result;
+  }
+
+  private submitSocialIntent(intent: ReturnType<typeof IntentSchema.parse>, actorId: string) {
+    const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
+    if (!game || game.status !== "playing") return { accepted: false, reason: "PHASE_CLOSED" };
+    if (!game.players.includes(actorId)) return { accepted: false, reason: "NOT_IN_GAME" };
+    try {
+      if (game.gameId === "impostor") {
+        const state = game.extra as ImpostorState;
+        if (intent.action === "impostor-clue") {
+          const clue = sanitizeText(intent.payload["clue"], 140);
+          if (!clue) return { accepted: false, reason: "INVALID_PAYLOAD" };
+          submitClue(state, actorId, clue);
+          if (allCluesIn(state, game.players)) state.phase = "vote";
+        } else if (intent.action === "impostor-vote") {
+          submitVote(state, actorId, String(intent.payload["suspectId"] ?? ""), game.players);
+          if (Object.keys(state.votes).length >= game.players.length) {
+            resolveVote(state);
+            if (state.phase === "finished") this.finishGame(game, impostorScores(state, game.players));
+          }
+        } else if (intent.action === "impostor-guess") {
+          submitGuess(state, actorId, String(intent.payload["guess"] ?? ""));
+          this.finishGame(game, impostorScores(state, game.players));
+        }
+      } else if (game.gameId === "caption-clash") {
+        const state = game.extra as CaptionState;
+        if (intent.action === "caption-submit") {
+          const caption = sanitizeText(intent.payload["caption"], 140);
+          if (!caption) return { accepted: false, reason: "INVALID_PAYLOAD" };
+          submitCaption(state, actorId, caption);
+          if (Object.keys(currentRound(state).captions).length >= game.players.length) state.phase = "vote";
+        } else if (intent.action === "caption-vote") {
+          submitCaptionVote(state, actorId, String(intent.payload["captionId"] ?? ""), game.players);
+          if (Object.keys(currentRound(state).votes).length >= game.players.length) {
+            if (state.roundIndex + 1 >= state.rounds.length) {
+              state.phase = "finished";
+              this.finishGame(game, captionTotalScores(state));
+            } else {
+              state.roundIndex += 1;
+              state.phase = "caption";
+            }
+          }
+        }
+      } else if (game.gameId === "closest-wins") {
+        const state = game.extra as ClosestState;
+        if (intent.action === "closest-guess") {
+          const value = intent.payload["value"];
+          if (typeof value !== "number") return { accepted: false, reason: "INVALID_PAYLOAD" };
+          submitClosestGuess(state, actorId, value);
+          if (allGuessed(state, game.players)) {
+            advanceClosest(state);
+            if (state.phase === "finished") this.finishGame(game, closestTotalScores(state));
+          }
+        }
+      } else {
+        return { accepted: false, reason: "UNKNOWN_ACTION" };
+      }
+    } catch (err) {
+      return { accepted: false, reason: err instanceof Error ? err.message : "INVALID_ACTION" };
+    }
+    return { accepted: true, result: { gameStatus: game.status } };
+  }
+
+  private finishGame(game: GameInstance, scores: Record<string, number>): void {
+    game.rawScores = scores;
+    game.status = "finished";
+    for (const [pid, pts] of Object.entries(scores)) {
+      this.log("score-awarded", { playerId: pid, gameInstanceId: game.id, points: pts, reason: `game:${game.gameId}` });
+    }
+    this.log("game-finished", { gameInstanceId: game.id });
   }
 
   private submitMathAnswer(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now: number) {
@@ -227,6 +344,14 @@ export class RoomEngine {
       official: g.official,
       status: g.status,
       players: g.players,
+      state:
+        g.gameId === "impostor"
+          ? projectImpostor(g.extra as ImpostorState, "", true)
+          : g.gameId === "caption-clash"
+            ? projectCaption(g.extra as CaptionState, "", true)
+            : g.gameId === "closest-wins"
+              ? projectClosest(g.extra as ClosestState, "", true)
+              : undefined,
       // Public questions: prompt + options only, no correctIndex/correctAnswer, and only after finish for Math.
       questions:
         g.status === "finished"
@@ -255,6 +380,14 @@ export class RoomEngine {
         status: g.status,
         myAnswers: g.answers[actorId] ?? {},
         myScore: g.rawScores[actorId] ?? 0,
+        state:
+          g.gameId === "impostor"
+            ? projectImpostor(g.extra as ImpostorState, actorId, false)
+            : g.gameId === "caption-clash"
+              ? projectCaption(g.extra as CaptionState, actorId, false)
+              : g.gameId === "closest-wins"
+                ? projectClosest(g.extra as ClosestState, actorId, false)
+                : undefined,
         questions:
           g.status === "playing"
             ? g.questions?.map((q) => ({ id: q.id, prompt: q.prompt, options: q.options }))
