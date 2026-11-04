@@ -48,6 +48,7 @@
     "check-mchezo": "node scripts/check-mchezo.mjs",
     "check-m6": "node scripts/check-m6.mjs",
     "check-tv-spectator": "node scripts/check-tv-spectator.mjs",
+    "check-spectator": "node scripts/check-spectator.mjs",
     "check-leaderboard": "node scripts/check-leaderboard.mjs",
     "check-tv-lifecycle": "node scripts/check-tv-lifecycle.mjs",
     "screenshot-mchezo": "node scripts/screenshot-mchezo.mjs",

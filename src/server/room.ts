@@ -80,6 +80,20 @@ export interface RoomPlayer {
   joinedAt: number;
 }
 
+/**
+ * A spectator is a server-recognized viewer, NOT a player. Spectators are
+ * stored separately from `players` so they can never occupy a seat, count
+ * toward the 10-player cap, join a game's player list, block completion,
+ * earn scores, or appear in standings. Only the token hash is stored;
+ * the raw token is returned once at spectate time and never persisted.
+ */
+export interface Spectator {
+  id: string;
+  tokenHash: string;
+  connected: boolean;
+  joinedAt: number;
+}
+
 export interface LedgerEvent {
   eventId: string;
   seq: number;
@@ -132,6 +146,9 @@ export class RoomEngine {
   joinCode: string;
   name: string;
   players = new Map<string, RoomPlayer>();
+  /** Viewers only. Deliberately disjoint from `players`: no seat, no score,
+   *  no completion blocking, no attendance. See `Spectator` above. */
+  spectators = new Map<string, Spectator>();
   hostId: string | null = null;
   cohosts = new Set<string>();
   championshipDay = 1;
@@ -141,6 +158,7 @@ export class RoomEngine {
   private seenIntents = new Map<string, { accepted: boolean; result: unknown }>();
   private nextPlayer = 1;
   private nextGame = 1;
+  private nextSpectator = 1;
 
   constructor(name: string) {
     this.id = `room-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6)}`;
@@ -194,6 +212,44 @@ export class RoomEngine {
   disconnect(playerId: string): void {
     const p = this.players.get(playerId);
     if (p) p.connected = false;
+  }
+
+  /** Register a spectator: no player record, no seat, no name required.
+   *  The returned token is the spectator's only credential; only its hash
+   *  is kept. Spectators never appear in `players`, so every player-count,
+   *  completion, and standings computation ignores them by construction. */
+  addSpectator(): { spectator: Spectator; token: string } {
+    const token = createRecoveryToken();
+    const spectator: Spectator = {
+      id: `spectator-${this.nextSpectator++}`,
+      tokenHash: hashToken(token),
+      connected: true,
+      joinedAt: Date.now(),
+    };
+    this.spectators.set(spectator.id, spectator);
+    this.log("spectator-joined", { actor: spectator.id });
+    return { spectator, token };
+  }
+
+  spectatorByToken(token: string): Spectator | null {
+    if (!token) return null;
+    const hash = hashToken(token);
+    for (const s of this.spectators.values()) {
+      if (s.tokenHash === hash) return s;
+    }
+    return null;
+  }
+
+  setSpectatorConnected(spectatorId: string, connected: boolean): void {
+    const s = this.spectators.get(spectatorId);
+    if (s) s.connected = connected;
+  }
+
+  /** Currently connected spectators only — the "watching now" count. */
+  spectatorCount(): number {
+    let n = 0;
+    for (const s of this.spectators.values()) if (s.connected) n++;
+    return n;
   }
 
   grantCohost(actorId: string, targetId: string): void {
@@ -931,6 +987,9 @@ export class RoomEngine {
       achievements: this.achievements(),
       ceremony: this.ceremony(),
       seq: this.seq,
+      /** Connected spectators only. Players and spectators are disjoint
+       *  sets, so this count never inflates attendance or seat counts. */
+      spectatorCount: this.spectatorCount(),
     };
     if (audience === "tv") {
       return base; // TV gets public only, never recovery tokens, never pre-reveal answers.
@@ -1006,11 +1065,13 @@ export class RoomEngine {
       cohosts: [...this.cohosts],
       championshipDay: this.championshipDay,
       players: [...this.players.values()],
+      spectators: [...this.spectators.values()],
       games: [...this.games.values()],
       ledger: this.ledger,
       seq: this.seq,
       seenIntents: [...this.seenIntents.entries()],
       nextPlayer: this.nextPlayer,
+      nextSpectator: this.nextSpectator,
       nextGame: this.nextGame,
     };
   }
@@ -1025,11 +1086,15 @@ export class RoomEngine {
     // serialized (review 5769441799) have no field and resume at day 1.
     engine.championshipDay = typeof data["championshipDay"] === "number" ? data["championshipDay"] : 1;
     engine.players = new Map((data["players"] as RoomPlayer[]).map((p) => [p.id, p]));
+    // Migration default: snapshots written before spectators existed have
+    // no spectators field and resume with none — never with phantom viewers.
+    engine.spectators = new Map(((data["spectators"] as Spectator[] | undefined) ?? []).map((s) => [s.id, s]));
     engine.games = new Map((data["games"] as GameInstance[]).map((g) => [g.id, g]));
     engine.ledger = data["ledger"] as LedgerEvent[];
     engine.seq = data["seq"] as number;
     engine.seenIntents = new Map(data["seenIntents"] as [string, { accepted: boolean; result: unknown }][]);
     engine.nextPlayer = data["nextPlayer"] as number;
+    engine.nextSpectator = typeof data["nextSpectator"] === "number" ? data["nextSpectator"] : 1;
     engine.nextGame = data["nextGame"] as number;
     return engine;
   }

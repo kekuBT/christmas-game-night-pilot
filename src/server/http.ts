@@ -17,7 +17,9 @@ export interface ServerOptions {
 interface SocketMeta {
   roomId: string;
   actorId: string;
-  audience: "player" | "tv" | "host" | "cohost";
+  audience: "player" | "tv" | "host" | "cohost" | "spectator";
+  /** Set only for spectator sockets: the viewer whose presence this socket holds. */
+  spectatorId?: string;
 }
 
 /**
@@ -54,13 +56,16 @@ export class LocalServer {
   private nudges = new Map<string, { fromId: string; targetId: string; ts: number }[]>();
   private nudgeStamps = new Map<string, number[]>();
   static readonly REACTION_SET = ["🎄", "❄️", "🎉", "👏", "😂", "🔥"];
-  private projectFor(room: RoomEngine, audience: "player" | "tv" | "host" | "cohost", actorId?: string): Record<string, unknown> {
+  private projectFor(room: RoomEngine, audience: "player" | "tv" | "host" | "cohost" | "spectator", actorId?: string): Record<string, unknown> {
     const now = Date.now();
     const recent = (this.reactions.get(room.id) ?? []).filter((r) => now - r.ts < 15000);
     const nudgedBy = actorId
       ? [...new Set((this.nudges.get(room.id) ?? []).filter((n) => n.targetId === actorId && now - n.ts < 10000).map((n) => n.fromId))]
       : [];
-    return { ...room.project(audience, actorId), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy };
+    // Spectators receive exactly the public TV projection — never a player
+    // view, never private state. The engine's "tv" audience is that projection.
+    const engineAudience = audience === "spectator" ? "tv" : audience;
+    return { ...room.project(engineAudience, actorId), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy };
   }
   private dataDir: string;
   private http = createServer((req, res) => void this.handleHttp(req, res));
@@ -139,6 +144,9 @@ export class LocalServer {
           // players counted toward startGame and blocked games from
           // advancing until a deadline/host-skip.
           for (const p of room.players.values()) p.connected = false;
+          // Same for spectators: no socket exists after a restart, so a
+          // restored connected=true would inflate the watching count.
+          for (const s of room.spectators.values()) s.connected = false;
           this.rooms.set(room.id, room);
           // Restore the host-claim token for this room, if one was persisted.
           try {
@@ -260,6 +268,26 @@ export class LocalServer {
         this.send(res, 201, { roomId: room.id, joinCode: room.joinCode, playerId: player.id, displayName: player.displayName, isHost: player.isHost, recoveryToken, sessionToken: recoveryToken });
         return;
       }
+      if (req.method === "POST" && parts.length === 2 && parts[0] === "rooms" && parts[1] === "spectate-by-code") {
+        const body = await this.readBody(req);
+        const code = String(body["joinCode"] ?? "").trim().toUpperCase();
+        const room = [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === code);
+        if (!room) {
+          this.send(res, 404, { error: "Room not found for that code" });
+          return;
+        }
+        if (!this.checkJoinRate(room.id)) {
+          this.send(res, 429, { error: "Too many join attempts" });
+          return;
+        }
+        // Code-gated, seat-free viewing: creates a spectator record only.
+        // No player, no display name, no game membership, no host rights.
+        const { spectator, token } = room.addSpectator();
+        this.persist(room);
+        this.broadcast(room.id);
+        this.send(res, 201, { roomId: room.id, joinCode: room.joinCode, spectatorId: spectator.id, spectatorToken: token });
+        return;
+      }
       if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html" || url.pathname.startsWith("/assets/"))) {
         this.serveStatic(url.pathname, res);
         return;
@@ -286,10 +314,24 @@ export class LocalServer {
           return;
         }
         if (req.method === "GET" && parts.length === 3 && parts[2] === "projection") {
-          const requested = (url.searchParams.get("audience") ?? "tv") as "player" | "tv" | "host" | "cohost";
+          const requested = (url.searchParams.get("audience") ?? "tv") as "player" | "tv" | "host" | "cohost" | "spectator";
           if (requested === "tv") {
             // TV is the only public projection; client-supplied actorId is ignored.
             this.send(res, 200, this.projectFor(room, "tv"));
+            return;
+          }
+          if (requested === "spectator") {
+            // Spectator projection: same safe TV data, but gated on the
+            // spectator token issued by spectate-by-code. A player session
+            // token is NOT accepted here, and vice versa — the two
+            // credentials are disjoint by design.
+            const specToken = req.headers["x-spectator-token"];
+            const spectator = typeof specToken === "string" ? room.spectatorByToken(specToken) : null;
+            if (!spectator) {
+              this.send(res, 401, { error: "Spectator token required" });
+              return;
+            }
+            this.send(res, 200, this.projectFor(room, "spectator"));
             return;
           }
           const player = this.requireSession(room, req, res);
@@ -524,9 +566,28 @@ export class LocalServer {
     // header (Sec-WebSocket-Protocol: cgn-session-<token>), NOT in the URL:
     // URL tokens leak into server logs, browser history, and referers. The
     // query-string sessionToken form was removed in the completion sprint.
+    // Spectator sockets present cgn-spectator-<token> instead: same
+    // no-intent rule as TV, but with a server-tracked presence record, so
+    // the room can show a real watching count and a spectator's disconnect
+    // is observable. A spectator token is never a player token.
     let actorId = "";
     let audience: SocketMeta["audience"] = requestedAudience;
-    if (requestedAudience === "tv") {
+    let spectatorId: string | undefined;
+    if (requestedAudience === "spectator") {
+      const offered = String(req.headers["sec-websocket-protocol"] ?? "");
+      const specToken = offered
+        .split(",")
+        .map((p) => p.trim())
+        .find((p) => p.startsWith("cgn-spectator-"))
+        ?.slice("cgn-spectator-".length) ?? "";
+      const spectator = room.spectatorByToken(specToken);
+      if (!spectator) {
+        ws.close(1008, "Spectator token required");
+        return;
+      }
+      spectatorId = spectator.id;
+      actorId = "";
+    } else if (requestedAudience === "tv") {
       actorId = "";
     } else {
       const offered = String(req.headers["sec-websocket-protocol"] ?? "");
@@ -551,7 +612,7 @@ export class LocalServer {
       actorId = player.id;
       audience = requestedAudience;
     }
-    const meta: SocketMeta = { roomId, actorId, audience };
+    const meta: SocketMeta = { roomId, actorId, audience, spectatorId };
     const entry = { ws, meta };
     this.sockets.add(entry);
     // An open socket means the player is connected again. Before this fix,
@@ -562,6 +623,10 @@ export class LocalServer {
     if (actorId && audience !== "tv") {
       const player = room.players.get(actorId);
       if (player) player.connected = true;
+    }
+    if (spectatorId) {
+      room.setSpectatorConnected(spectatorId, true);
+      this.broadcast(roomId);
     }
     ws.send(JSON.stringify({ kind: "projection", state: this.projectFor(room, audience, actorId || undefined) }));
     ws.on("message", (data) => {
@@ -584,6 +649,18 @@ export class LocalServer {
     });
     ws.on("close", () => {
       this.sockets.delete(entry);
+      // Spectator presence: clear only when this viewer's last socket
+      // closes, so a reload (new socket before old close) keeps them counted.
+      if (spectatorId) {
+        const stillWatching = [...this.sockets].some(
+          (s) => s.meta.roomId === roomId && s.meta.spectatorId === spectatorId,
+        );
+        if (!stillWatching) {
+          room.setSpectatorConnected(spectatorId, false);
+          this.broadcast(roomId);
+        }
+        return;
+      }
       // Only mark disconnected when no socket for this player remains: on a
       // reload the new socket may open before the old one closes, and the
       // old close must not undo the new connection.

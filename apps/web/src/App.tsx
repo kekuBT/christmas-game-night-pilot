@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicPlayer, RegistryGame } from "./types.js";
+import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicPlayer, RegistryGame, SpectateResponse } from "./types.js";
 import { GamePanel } from "./components/GamePanel.js";
 import { ChampionshipView } from "./components/ChampionshipView.js";
 import { MemoryBookView } from "./components/MemoryBookView.js";
@@ -55,6 +55,11 @@ export function App() {
   const [roomId, setRoomId] = useState<string | null>(sessionStorage.getItem("cgn_roomId"));
   const [playerId, setPlayerId] = useState<string | null>(sessionStorage.getItem("cgn_playerId"));
   const [token, setToken] = useState<string | null>(sessionStorage.getItem("cgn_token"));
+  // Spectator session (Milestone B): seat-free viewing, stored separately
+  // from any player session. A tab holding both shows the player view;
+  // spectating never creates or disturbs a player seat.
+  const [specRoomId, setSpecRoomId] = useState<string | null>(sessionStorage.getItem("cgn_spec_roomId"));
+  const [specToken, setSpecToken] = useState<string | null>(sessionStorage.getItem("cgn_spec_token"));
   const [proj, setProj] = useState<Projection | null>(null);
   const [games, setGames] = useState<RegistryGame[]>([]);
   const [view, setView] = useState<"lobby" | "championship" | "tv" | "memory">("lobby");
@@ -162,6 +167,61 @@ export function App() {
       await saveSession(j); setMsg("Joined room.");
     } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
+  async function spectate() {
+    setErr(""); try {
+      const s = await post<SpectateResponse>("/rooms/spectate-by-code", { joinCode: code });
+      sessionStorage.setItem("cgn_spec_roomId", s.roomId); sessionStorage.setItem("cgn_spec_token", s.spectatorToken);
+      setSpecRoomId(s.roomId); setSpecToken(s.spectatorToken); setMsg("Watching — no seat taken.");
+    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
+  }
+  function stopWatching() {
+    sessionStorage.removeItem("cgn_spec_roomId"); sessionStorage.removeItem("cgn_spec_token");
+    setSpecRoomId(null); setSpecToken(null); setProj(null); setMsg("Stopped watching.");
+  }
+  // Spectator live updates: poll + WebSocket on the spectator credential.
+  // A 401 means the spectator token is gone (server restart without a
+  // persisted spectator record is the known case) — drop back to landing
+  // with an explanation instead of polling a dead session forever.
+  useEffect(() => {
+    if (!specRoomId || !specToken || roomId) return;
+    let stopped = false;
+    const poll = async () => {
+      try {
+        const r = await fetch(`/rooms/${specRoomId}/projection?audience=spectator`, { headers: { "x-spectator-token": specToken } });
+        if (r.status === 401) { if (!stopped) { stopWatching(); setErr("Spectator session expired — enter the code again to keep watching."); } return; }
+        if (!r.ok) return;
+        setProj(await r.json());
+      } catch { /* poll retry */ }
+    };
+    poll();
+    const t = setInterval(poll, 2000);
+    let attempt = 0;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    let ws: WebSocket | null = null;
+    const connect = () => {
+      if (stopped) return;
+      try {
+        const proto = location.protocol === "https:" ? "wss" : "ws";
+        const next = new WebSocket(`${proto}://${location.host}/?roomId=${specRoomId}&audience=spectator`, [`cgn-spectator-${specToken}`]);
+        ws = next;
+        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection") setProj(m.state); } catch { /* ignore malformed WS frame; polling continues */ } };
+        next.onclose = (e) => {
+          if (stopped || e.code === 1008) return;
+          attempt += 1;
+          retryTimer = setTimeout(connect, wsReconnectDelayMs(attempt));
+        };
+      } catch {
+        if (!stopped) { attempt += 1; retryTimer = setTimeout(connect, wsReconnectDelayMs(attempt)); }
+      }
+    };
+    connect();
+    return () => {
+      stopped = true;
+      clearInterval(t);
+      if (retryTimer !== undefined) clearTimeout(retryTimer);
+      ws?.close();
+    };
+  }, [specRoomId, specToken, roomId]);
   async function reconnect() {
     setErr(""); try {
       if (!roomId || !playerId || !token) return;
@@ -188,7 +248,9 @@ export function App() {
     QRCode.toDataURL(url, { width: 220, margin: 2 }).then(setQrUrl).catch(() => {});
   }, [proj?.joinCode]);
 
-  if (!roomId || !playerId) {
+  // Landing shows unless a player session exists — or a spectator session
+  // does (spectator tabs skip landing and render the TV-only branch below).
+  if ((!roomId || !playerId) && !(specRoomId && specToken)) {
     return (
       <MchezoProvider theme={themes.everyday}>
         <LandingScreen
@@ -198,6 +260,7 @@ export function App() {
           onNameChange={setName}
           onJoin={joinRoom}
           onHost={createRoom}
+          onSpectate={spectate}
           extra={
             <div style={{ padding: "0 16px 16px" }}>
               {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
@@ -206,6 +269,53 @@ export function App() {
           }
         />
       </MchezoProvider>
+    );
+  }
+
+  // ---- Spectator-only view (Milestone B) ----
+  // A tab with a spectator session and NO player session renders TV only:
+  // the same latest-game TV rule as the player TV branch, but with no
+  // lobby, no game controls, no reactions, and a Stop watching exit.
+  // Spectators never hold a playerId, so nothing here can start a game,
+  // submit an intent, or appear in a seat.
+  if (!playerId && specRoomId && specToken) {
+    const specPlayers: PublicPlayer[] = proj?.players ?? [];
+    const specNameOf = (id: string): string => specPlayers.find((p) => p.id === id)?.displayName ?? id;
+    const specLatest = (proj?.games ?? []).at(-1);
+    const specTvGame = specLatest?.gameId === "trivia" && (specLatest.status === "playing" || specLatest.status === "finished") ? specLatest : undefined;
+    if (!proj) {
+      return (
+        <MchezoProvider theme={themes.everyday}>
+          <div style={{ padding: 24 }}>
+            <p className="mz-foot">Finding the game…</p>
+            <button type="button" className="mz-chip-btn" onClick={stopWatching}>Stop watching</button>
+            {err && <p className="err">{err}</p>}
+          </div>
+        </MchezoProvider>
+      );
+    }
+    if (specTvGame) {
+      return (
+        <MchezoProvider theme={themes.everyday} as="bare">
+          <MchezoTvStage key={specTvGame.id} publicGame={specTvGame} players={specPlayers} joinCode={proj.joinCode ?? "…"} onBack={stopWatching} spectatorCount={proj.spectatorCount} backLabel="Stop watching" />
+        </MchezoProvider>
+      );
+    }
+    return (
+      <div className="wrap">
+        <header><h1>🎄 Christmas Game Night</h1><span className="pill">Code: {proj.joinCode ?? "…"}</span></header>
+        <p className="muted">Watching as a spectator — no seat taken, no scores, no controls.</p>
+        {(proj.spectatorCount ?? 0) > 0 && <p className="muted" data-testid="tv-watching-count">👁 {proj.spectatorCount} watching</p>}
+        <div className="card"><h2>TV Dashboard — public only</h2><p className="muted">This view never shows answer keys, secret words, or other players' prompts.</p>
+          <p>Players: {specPlayers.map((p) => p.displayName).join(", ") || "—"}</p>
+          <h3>Standings (Family Cup totals)</h3>{(proj.championship ?? []).map((r) => <p key={r.playerId}>{specNameOf(r.playerId)}: {r.total} points{r.eligible ? "" : " (not yet qualified)"}</p>)}
+          <h3>Now playing</h3>{(proj.games ?? []).filter((g) => g.status === "playing").map((g) => <p key={g.id}>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId} — players: {g.players.map(specNameOf).join(", ")}</p>)}
+          {(proj.games ?? []).filter((g) => g.status === "playing").length === 0 && <p className="muted">No game in progress — the lobby is choosing the next game.</p>}
+          <h3>Recent games</h3>{(proj.games ?? []).slice(-5).map((g) => <p key={g.id}>{g.gameId} — {g.status}{g.rawScores ? ` — ${Object.entries(g.rawScores).map(([pid, v]) => `${specNameOf(pid)}: ${v}`).join(" · ")}` : ""}</p>)}
+        </div>
+        <div style={{ marginTop: 12 }}><button type="button" className="mz-chip-btn" onClick={stopWatching}>Stop watching</button></div>
+        {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
+      </div>
     );
   }
 
@@ -423,6 +533,6 @@ export function App() {
       <Reactions proj={proj} post={post} canMute={false} />
     </div>}
 
-    {view === "memory" && <MemoryBookView roomId={roomId} book={book} ledger={ledger} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} />}
+    {view === "memory" && <MemoryBookView roomId={roomId ?? ""} book={book} ledger={ledger} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} />}
   </div>;
 }

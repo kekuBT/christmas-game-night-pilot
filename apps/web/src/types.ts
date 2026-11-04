@@ -90,6 +90,8 @@ export interface Projection {
   seq: number;
   reactions?: { emoji: string; sender: string; ts: number }[];
   reactionsMuted?: boolean;
+  /** Connected spectators only. Never part of player counts or standings. */
+  spectatorCount?: number;
   /** Player ids that nudged me in the last 10s (ephemeral, target-only). */
   nudgedBy?: string[];
   me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean };
@@ -140,6 +142,14 @@ export interface JoinResponse {
   sessionToken?: string;
   name?: string;
   hostClaimToken?: string;
+}
+
+/** Seat-free viewing credential. No playerId: spectators are not players. */
+export interface SpectateResponse {
+  roomId: string;
+  joinCode: string;
+  spectatorId: string;
+  spectatorToken: string;
 }
 
 export interface QuizQuestion {

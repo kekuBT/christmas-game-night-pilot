@@ -34,24 +34,58 @@ spend, or any GitHub action. Budget: $0 new spending. No runtime AI.
   - Ten games still on the previous visual design.
   - Identity persistence / lifetime tracking unaudited.
 
-## Milestone B — True spectator mode (IN PROGRESS)
+## Milestone B — True spectator mode (COMPLETE, local only)
 
-Design notes (to be completed as implementation lands):
+- Server role: spectators live in their own `spectators` map on
+  `RoomEngine` (`src/server/room.ts`), addressed by a dedicated token
+  (hash stored, raw token returned once) disjoint from player session
+  tokens in both directions. Spectators never enter `players`, so seat
+  cap, game membership, completion, standings, and attendance ignore
+  them by construction. Presence via spectator WebSocket sockets
+  (`cgn-spectator-<token>` subprotocol, empty actorId so intents are
+  rejected SESSION_REQUIRED); `spectatorCount` (connected only) in
+  every projection. Snapshot restore marks spectators disconnected;
+  old snapshots migrate to zero spectators. Legacy unauthenticated
+  `audience=tv` path unchanged (same safe projection, uncounted).
+- HTTP (`src/server/http.ts`): `POST /rooms/spectate-by-code`
+  (code-gated, rate-limited, no player created);
+  `GET /rooms/:id/projection?audience=spectator` (spectator token
+  required; player tokens rejected); spectator WS audience.
+- Client: landing "Watch as spectator — no seat needed" (code only);
+  spectator tabs render TV only (Mchezo stage or dashboard) with Stop
+  watching, no lobby/reactions/game controls; `spectatorCount` shown
+  as "N watching" on TV; a tab holding both sessions shows the player
+  view. Files: `apps/web/src/App.tsx`, `.../MchezoTv.tsx`,
+  `.../ui/mchezo/components/phone/screens.tsx`, `apps/web/src/types.ts`.
+- Decision L40 in `docs/DECISIONS.md`.
+- Evidence: `tests/spectator.test.ts` 7/7 (engine + HTTP + WS);
+  `scripts/check-spectator.mjs` ALL PASSED (seat-free, full-room
+  admission, mid-game join, refresh, disconnect count, second-tab
+  player TV, stop watching); screenshot
+  `docs/mchezo-screenshots/09-spectator-dashboard.png`.
+- Driver fix during gates (not an app bug): `check-leaderboard`
+  pair-ties scenario was seed-flaky — a 5/5 correct-answer split ties
+  all four players. Game 2 now starts via API with seed 1 (verified
+  5/3 split in `generateTrivia`), other games still start from the UI.
+  After the fix: 5 consecutive sequential passes; one earlier failure
+  occurred while e2e/f5 browsers ran concurrently and did not
+  reproduce sequentially — recorded, not hidden.
+- Full gates on this tree: typecheck exit 0, lint exit 0, 27 files /
+  267 tests, build exit 0; drivers mchezo, spectator, tv-spectator,
+  tv-lifecycle, m6, ws-reconnect, abstain, f4 11/11, multiplayer
+  12/12, mobile 32/32, contrast 64/64, leaderboard, e2e 12/12,
+  f5 30/30 — all green.
 
-- Spectators must be server-recognized, seat-free, score-free,
-  completion-neutral, and limited to an explicitly safe public
-  projection. No host controls, no private data, no unrevealed answers.
-- Key files under study: `src/server/room.ts` (join/activePlayers/
-  projections), `src/server/http.ts` (routes, session tokens),
-  `apps/web/src/App.tsx` (TV view switching).
+## Milestone C — TV presentation + results (IN PROGRESS)
 
 ## Work completed
 
 - Milestone A: baseline verified (see above). No code changes.
+- Milestone B: true spectator mode (see above).
 
 ## Local commits created (this assignment)
 
-- (none yet)
+- `6f48f8f` Milestone A: verified Phase 2.1 baseline + autonomous development log.
 
 ## Blockers
 
@@ -72,6 +106,7 @@ Design notes (to be completed as implementation lands):
 
 ## Next recommended action
 
-- Finish Milestone B: implement the spectator session end-to-end
-  (server role + projection + client TV entry + driver coverage),
-  then commit and continue to Milestone C.
+- Finish Milestone C: TV leaderboard quality (realistic nonzero
+  scenarios), rank-movement wiring, Away indicators on results, phone
+  results organization, and TV entry during an active game — then
+  commit and continue to Milestone D.

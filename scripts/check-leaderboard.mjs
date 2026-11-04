@@ -125,9 +125,23 @@ try {
   const tv = await tvCtx.newPage();
   await joinRoom(tv, "TV", code);
 
-  async function playGame(actions) {
+  async function playGame(actions, seed) {
     // actions: { page, kind: "option"|"abstain" }[]; host starts from lobby.
-    await host.getByTestId("start-official-trivia").click();
+    // A fixed seed is used only where the scenario needs a deterministic
+    // correct-answer split (game 2: option-0 vs option-1 pairs must score
+    // differently). Random seeds made that shape a ~1-in-5 flake: a 5/5
+    // split ties all four players and the "pairs differ" check fails
+    // through no app fault. Seed 1 splits 5/3 (verified against
+    // generateTrivia). All other games still start from the UI.
+    if (seed !== undefined) {
+      await host.evaluate(async ({ roomId, seed }) => {
+        const token = sessionStorage.getItem("cgn_token");
+        const r = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": token }, body: JSON.stringify({ gameId: "trivia", official: true, seed }) });
+        if (!r.ok) throw new Error(`seeded start failed: ${r.status}`);
+      }, { roomId, seed });
+    } else {
+      await host.getByTestId("start-official-trivia").click();
+    }
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     for (const a of actions) {
       if (a.kind === "abstain") await a.page.getByRole("button", { name: "Sit this game out" }).click();
@@ -165,6 +179,7 @@ try {
     checkPhoneMatches("all tied: phone rows match server", phones, expected);
   }
   // Game 2: two pairs answer identically -> two shared ranks.
+  // Seeded (see playGame): the pair-ties shape needs an uneven split.
   {
     const { expected, tvs, phones } = await playGame([
       { page: host, kind: "option", option: 0 },
@@ -172,7 +187,7 @@ try {
       { page: P.Cal, kind: "option", option: 1 },
       { page: P.Dee, kind: "option", option: 1 },
       { page: tv, kind: "abstain" },
-    ]);
+    ], 1);
     const ranks = new Map(expected.map((r) => [r.name, r.rank]));
     const pairsShare = ranks.get("Ada") === ranks.get("Bea") && ranks.get("Cal") === ranks.get("Dee") && ranks.get("Ada") !== ranks.get("Cal");
     check("pair ties: Ada=Bea and Cal=Dee share ranks, pairs differ", pairsShare,

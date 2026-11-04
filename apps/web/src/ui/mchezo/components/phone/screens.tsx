@@ -36,6 +36,8 @@ export interface LandingScreenProps {
   onNameChange: (n: string) => void;
   onJoin: () => void;
   onHost?: () => void;
+  /** Seat-free TV viewing: needs only the room code, never a player seat. */
+  onSpectate?: () => void;
   /** Integration adaptation: our room codes are 6 alphanumeric characters,
       not the handoff demo's 4 letters. Defaults preserve our room system. */
   codeLength?: number;
@@ -45,9 +47,10 @@ export interface LandingScreenProps {
   extra?: ReactNode;
 }
 
-export function LandingScreen({ code, onCodeChange, name, onNameChange, onJoin, onHost, codeLength = 6, codePattern = /[^A-Z0-9]/g, session, extra }: LandingScreenProps) {
+export function LandingScreen({ code, onCodeChange, name, onNameChange, onJoin, onHost, onSpectate, codeLength = 6, codePattern = /[^A-Z0-9]/g, session, extra }: LandingScreenProps) {
   const nameId = useId();
   const ok = code.length === codeLength && name.trim().length > 0;
+  const canSpectate = code.length === codeLength;
   return (
     <PhoneScreen label="Join a game">
       <header className="mz-topbar">
@@ -77,6 +80,11 @@ export function LandingScreen({ code, onCodeChange, name, onNameChange, onJoin, 
         </div>
         <Keycap type="submit" block disabled={!ok}>Join the game</Keycap>
       </form>
+      {onSpectate && (
+        <button type="button" className="mz-chip-btn" data-testid="watch-spectator" disabled={!canSpectate} onClick={onSpectate} style={{ alignSelf: "center", marginTop: 4 }}>
+          Watch as spectator — no seat needed
+        </button>
+      )}
       {extra}
     </PhoneScreen>
   );

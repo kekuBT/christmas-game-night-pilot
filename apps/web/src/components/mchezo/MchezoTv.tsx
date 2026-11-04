@@ -12,11 +12,15 @@ import type { GameState, PublicGame, PublicPlayer } from "../../types.js";
 import { asRecord } from "../../types.js";
 import { toMzPlayers } from "./adapters.js";
 
-export function MchezoTvStage({ publicGame, players, joinCode, onBack }: {
+export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectatorCount, backLabel }: {
   publicGame: PublicGame;
   players: PublicPlayer[];
   joinCode: string;
   onBack: () => void;
+  /** Connected spectators (server count). Shown only when positive. */
+  spectatorCount?: number;
+  /** Spectators have no phone view to return to — they stop watching. */
+  backLabel?: string;
 }) {
   const mzPlayers = toMzPlayers(players);
   const st = asRecord(publicGame.state) as GameState;
@@ -101,7 +105,8 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack }: {
           onNext={() => { setAuto(false); setStage(stage === "question" ? "reveal" : stage === "reveal" ? "leaderboard" : "question"); }}
           onPrev={() => { setAuto(false); setStage(stage === "leaderboard" ? "reveal" : stage === "reveal" ? "question" : "leaderboard"); }}
         />
-        <button type="button" className="mz-chip-btn" style={{ marginTop: 12 }} onClick={onBack}>Back to phone view</button>
+        <button type="button" className="mz-chip-btn" style={{ marginTop: 12 }} onClick={onBack}>{backLabel ?? "Back to phone view"}</button>
+        {(spectatorCount ?? 0) > 0 && <p className="mz-foot" data-testid="tv-watching-count">👁 {spectatorCount} watching</p>}
       </div>
     </div>
   );
