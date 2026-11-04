@@ -106,7 +106,7 @@ describe("PR #3 review fixes", () => {
     const proj = await get(`/rooms/${roomId}/projection?audience=player`, guest.token);
     const myGames = proj.json["myGames"] as { id: string; questions: { id: string }[] }[];
     const questions = myGames.find((g) => g.id === gameId)?.questions ?? [];
-    const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&audience=player&sessionToken=${encodeURIComponent(guest.token)}`);
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&audience=player`, [`cgn-session-${guest.token}`]);
     const acks: string[] = [];
     ws.on("message", (d) => acks.push(d.toString()));
     await new Promise<void>((resolve) => ws.on("open", () => resolve()));

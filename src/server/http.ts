@@ -346,6 +346,25 @@ export class LocalServer {
           this.send(res, 200, { ok: true, timedOut: true });
           return;
         }
+        if (req.method === "POST" && parts.length === 5 && parts[2] === "games" && parts[4] === "override") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const body = await this.readBody(req);
+          room.overrideScore(player.id, String(parts[3]), String(body["playerId"] ?? ""), Number(body["points"]), String(body["reason"] ?? ""));
+          this.persist(room);
+          this.broadcast(room.id);
+          this.send(res, 200, { ok: true });
+          return;
+        }
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "day") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const day = room.advanceDay(player.id);
+          this.persist(room);
+          this.broadcast(room.id);
+          this.send(res, 200, { ok: true, day });
+          return;
+        }
         if (req.method === "POST" && parts.length === 3 && parts[2] === "intents") {
           const player = this.requireSession(room, req, res);
           if (!player) return;
@@ -373,15 +392,22 @@ export class LocalServer {
       return;
     }
     // TV sockets are public and may not submit intents. Player/host/cohost
-    // sockets must present a session token; the actor is derived from it,
-    // never from a client-supplied actorId query parameter.
+    // sockets must present a session token in the WebSocket subprotocol
+    // header (Sec-WebSocket-Protocol: cgn-session-<token>), NOT in the URL:
+    // URL tokens leak into server logs, browser history, and referers. The
+    // query-string sessionToken form was removed in the completion sprint.
     let actorId = "";
     let audience: SocketMeta["audience"] = requestedAudience;
     if (requestedAudience === "tv") {
       actorId = "";
     } else {
-      const token = url.searchParams.get("sessionToken") ?? "";
-      const player = [...room.players.values()].find((p) => p.recoveryTokenHash === hashToken(token));
+      const offered = String(req.headers["sec-websocket-protocol"] ?? "");
+      const token = offered
+        .split(",")
+        .map((p) => p.trim())
+        .find((p) => p.startsWith("cgn-session-"))
+        ?.slice("cgn-session-".length) ?? "";
+      const player = token ? [...room.players.values()].find((p) => p.recoveryTokenHash === hashToken(token)) : undefined;
       if (!player) {
         ws.close(1008, "Session token required");
         return;

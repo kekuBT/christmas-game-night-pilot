@@ -90,7 +90,7 @@ describe("M1 HTTP + WebSocket adapter", () => {
 
     const messages: string[] = [];
     const hostToken = hostJoin.json["recoveryToken"] as string;
-    const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&audience=host&sessionToken=${encodeURIComponent(hostToken)}`);
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&audience=host`, [`cgn-session-${hostToken}`]);
     ws.on("message", (data) => messages.push(data.toString()));
     await new Promise<void>((resolve) => ws.on("open", () => resolve()));
     // Wait a tick for the initial projection
@@ -113,7 +113,7 @@ describe("M1 HTTP + WebSocket adapter", () => {
       return players.find((p) => p.id === id)?.connected ?? false;
     };
     const openWs = async (_id: string): Promise<WebSocket> => {
-      const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&audience=player&sessionToken=${encodeURIComponent(guestToken)}`);
+      const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&audience=player`, [`cgn-session-${guestToken}`]);
       await new Promise<void>((resolve) => ws.on("open", () => resolve()));
       return ws;
     };
