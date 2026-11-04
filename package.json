@@ -40,6 +40,7 @@
     "e2e": "node scripts/e2e-browser.mjs",
     "check-mobile": "node scripts/check-mobile.mjs",
     "check-ws-reconnect": "node scripts/check-ws-reconnect.mjs",
+    "check-abstain": "node scripts/check-abstain.mjs",
     "check-multiplayer": "node scripts/check-multiplayer.mjs",
     "check-f4": "node scripts/check-f4.mjs",
     "check-f5": "node scripts/check-f5.mjs",

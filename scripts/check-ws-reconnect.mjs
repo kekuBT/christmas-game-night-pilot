@@ -20,7 +20,7 @@ function fail(name, detail) { results.push([name, false]); console.log("FAIL", n
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Poll a predicate until it is true or the timeout elapses.
-async function waitFor(fn, timeoutMs, label) {
+async function waitFor(fn, timeoutMs, _label) {
   const deadline = Date.now() + timeoutMs;
   let last = false;
   while (Date.now() < deadline) {

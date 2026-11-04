@@ -7,6 +7,10 @@ export interface ImpostorState {
   phase: "clue" | "vote" | "guess" | "finished";
   clues: Record<string, string>;
   votes: Record<string, string>;
+  /** Players who explicitly abstained from giving a clue this game. */
+  abstainedClues: string[];
+  /** Players who explicitly abstained from voting this game. */
+  abstainedVotes: string[];
   guess?: string;
   guessCorrect?: boolean;
   convictedId?: string | null;
@@ -26,21 +30,45 @@ export function initImpostor(playerIds: string[], seed: number): ImpostorState {
   const rng = seededRng(seed);
   const pack = PACK[Math.floor(rng() * PACK.length)]!;
   const impostorId = playerIds[Math.floor(rng() * playerIds.length)]!;
-  return { word: pack.word, category: pack.category, impostorId, phase: "clue", clues: {}, votes: {} };
+  return { word: pack.word, category: pack.category, impostorId, phase: "clue", clues: {}, votes: {}, abstainedClues: [], abstainedVotes: [] };
 }
 
 export function submitClue(state: ImpostorState, playerId: string, clue: string): void {
   if (state.phase !== "clue") throw new Error("PHASE_CLOSED");
+  if ((state.abstainedClues ?? []).includes(playerId)) throw new Error("ALREADY_ABSTAINED");
   if (state.clues[playerId] !== undefined) throw new Error("ALREADY_SUBMITTED");
   state.clues[playerId] = clue;
 }
 
+/** Abstaining from a clue counts toward the clue threshold but submits nothing. */
+export function abstainClue(state: ImpostorState, playerId: string): void {
+  if (state.phase !== "clue") throw new Error("PHASE_CLOSED");
+  if (state.clues[playerId] !== undefined) throw new Error("ALREADY_SUBMITTED");
+  state.abstainedClues ??= [];
+  if (state.abstainedClues.includes(playerId)) throw new Error("ALREADY_ABSTAINED");
+  state.abstainedClues.push(playerId);
+}
+
 export function allCluesIn(state: ImpostorState, playerIds: string[]): boolean {
-  return playerIds.every((p) => state.clues[p] !== undefined);
+  return playerIds.every((p) => state.clues[p] !== undefined || (state.abstainedClues ?? []).includes(p));
+}
+
+/** Abstaining from a vote counts toward the vote threshold but votes for nobody. */
+export function abstainVote(state: ImpostorState, playerId: string): void {
+  if (state.phase !== "vote") throw new Error("PHASE_CLOSED");
+  if (state.votes[playerId] !== undefined) throw new Error("ALREADY_VOTED");
+  state.abstainedVotes ??= [];
+  if (state.abstainedVotes.includes(playerId)) throw new Error("ALREADY_ABSTAINED");
+  state.abstainedVotes.push(playerId);
+}
+
+export function allVotesIn(state: ImpostorState, playerIds: string[]): boolean {
+  return playerIds.every((p) => state.votes[p] !== undefined || (state.abstainedVotes ?? []).includes(p));
 }
 
 export function submitVote(state: ImpostorState, playerId: string, suspectId: string, playerIds: string[]): void {
   if (state.phase !== "vote") throw new Error("PHASE_CLOSED");
+  if ((state.abstainedVotes ?? []).includes(playerId)) throw new Error("ALREADY_ABSTAINED");
   if (playerId === suspectId) throw new Error("SELF_VOTE");
   if (!playerIds.includes(suspectId)) throw new Error("UNKNOWN_PLAYER");
   if (state.votes[playerId] !== undefined) throw new Error("ALREADY_VOTED");
@@ -111,6 +139,8 @@ export function projectImpostor(state: ImpostorState, actorId: string, isTv: boo
     word: !isImpostor ? state.word : undefined,
     clues: state.clues,
     myVote: state.votes[actorId],
+    // Own abstention only, never who else abstained (vote privacy).
+    myAbstained: state.phase === "clue" ? (state.abstainedClues ?? []).includes(actorId) : state.phase === "vote" ? (state.abstainedVotes ?? []).includes(actorId) : false,
     winner: state.phase === "finished" ? state.winner : undefined,
     revealedWord: state.phase === "finished" ? state.word : undefined,
   };

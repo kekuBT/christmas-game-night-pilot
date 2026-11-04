@@ -37,6 +37,8 @@ export interface PlayerGame {
   status: GameStatus;
   myAnswers: Record<string, number | null>;
   myScore: number;
+  /** True when this player sat out the rest of this whole-game game. */
+  abstained?: boolean;
   state?: unknown;
   questions?: { id: string; prompt: string; options: string[] }[];
   rawScores?: Record<string, number>;
@@ -149,6 +151,7 @@ export interface GameState {
   phase?: string;
   clues?: Record<string, string>;
   myVote?: string;
+  myAbstained?: boolean;
   winner?: string;
   revealedWord?: string;
   prompt?: string;

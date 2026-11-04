@@ -10,6 +10,8 @@ export interface ClosestState {
   questions: ClosestQuestion[];
   questionIndex: number;
   guesses: Record<string, Record<string, number>>; // questionId -> playerId -> guess
+  /** questionId -> players who explicitly abstained on that question (score 0 for it). */
+  abstained: Record<string, string[]>;
   phase: "playing" | "finished";
 }
 
@@ -25,22 +27,35 @@ export const CLOSEST_QUESTIONS: ClosestQuestion[] = [
 ];
 
 export function initClosest(): ClosestState {
-  return { questions: CLOSEST_QUESTIONS, questionIndex: 0, guesses: {}, phase: "playing" };
+  return { questions: CLOSEST_QUESTIONS, questionIndex: 0, guesses: {}, abstained: {}, phase: "playing" };
 }
 
 export function submitClosestGuess(state: ClosestState, playerId: string, value: number): void {
   if (state.phase !== "playing") throw new Error("PHASE_CLOSED");
   if (!Number.isFinite(value)) throw new Error("INVALID_GUESS");
   const q = state.questions[state.questionIndex]!;
+  if ((state.abstained[q.id] ?? []).includes(playerId)) throw new Error("ALREADY_ABSTAINED");
   const perQ = (state.guesses[q.id] ??= {});
   if (perQ[playerId] !== undefined) throw new Error("ALREADY_GUESSED");
   perQ[playerId] = value;
 }
 
+/** Abstaining on a question counts toward advancement but scores 0 for it. */
+export function abstainClosest(state: ClosestState, playerId: string): void {
+  if (state.phase !== "playing") throw new Error("PHASE_CLOSED");
+  const q = state.questions[state.questionIndex]!;
+  if ((state.guesses[q.id] ?? {})[playerId] !== undefined) throw new Error("ALREADY_GUESSED");
+  state.abstained ??= {};
+  const perQ = (state.abstained[q.id] ??= []);
+  if (perQ.includes(playerId)) throw new Error("ALREADY_ABSTAINED");
+  perQ.push(playerId);
+}
+
 export function allGuessed(state: ClosestState, playerIds: string[]): boolean {
   const q = state.questions[state.questionIndex]!;
   const perQ = state.guesses[q.id] ?? {};
-  return playerIds.every((p) => perQ[p] !== undefined);
+  const abs = state.abstained?.[q.id] ?? [];
+  return playerIds.every((p) => perQ[p] !== undefined || abs.includes(p));
 }
 
 export function advanceClosest(state: ClosestState): void {
@@ -88,6 +103,7 @@ export function projectClosest(state: ClosestState, actorId: string, _isTv: bool
     prompt: q.prompt,
     unit: q.unit,
     myGuess: state.guesses[q.id]?.[actorId],
+    myAbstained: (state.abstained?.[q.id] ?? []).includes(actorId),
     answer: revealed ? q.answer : undefined,
     source: revealed ? q.source : undefined,
     guesses: revealed ? state.guesses[q.id] : undefined,

@@ -5,7 +5,10 @@ import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
 import { evaluateAchievements, dayCeremony } from "./achievements.js";
 import { generateMathQuestions, scoreMathAnswer, type MathQuestion } from "../games/math.js";
 import {
+  abstainClue,
+  abstainVote,
   allCluesIn,
+  allVotesIn,
   impostorScores,
   initImpostor,
   projectImpostor,
@@ -16,8 +19,11 @@ import {
   type ImpostorState,
 } from "../games/impostor.js";
 import {
+  abstainCaption,
+  abstainCaptionVote,
+  allCaptionVotesIn,
+  allCaptionsIn,
   captionTotalScores,
-  currentRound,
   initCaption,
   projectCaption,
   submitCaption,
@@ -25,6 +31,7 @@ import {
   type CaptionState,
 } from "../games/caption.js";
 import {
+  abstainClosest,
   advanceClosest,
   allGuessed,
   closestTotalScores,
@@ -106,6 +113,11 @@ export interface GameInstance {
    *  Used only for a privacy-safe waiting count (count, never identities or
    *  answers, in projections). Old snapshots lack it and are treated as []. */
   submittedPlayers?: string[];
+  /** Whole-game abstainers (quiz/math/connections/sprint): they sat out the
+   *  rest of the game, score 0 for unanswered items, and count as done for
+   *  advancement. Phase games (impostor/caption/closest) record abstentions
+   *  per phase in their own state instead. */
+  abstained?: string[];
   extra?: unknown;
 }
 
@@ -275,6 +287,8 @@ export class RoomEngine {
     let result: { accepted: boolean; reason?: string; result?: unknown };
     if (intent.action === "submit-math-answer") {
       result = this.submitMathAnswer(intent, actorId, now);
+    } else if (intent.action === "abstain") {
+      result = this.submitAbstain(intent, actorId, now);
     } else if (
       intent.action === "impostor-clue" ||
       intent.action === "impostor-vote" ||
@@ -312,6 +326,10 @@ export class RoomEngine {
     // accepted into a game that should already have closed or been skipped.
     if (game.deadlineAt && now > game.deadlineAt) return { accepted: false, reason: "PHASE_CLOSED" };
     if (!game.players.includes(actorId)) return { accepted: false, reason: "NOT_IN_GAME" };
+    // Whole-game abstainers sat out the rest: later answers are rejected,
+    // not silently scored. Phase games never set game.abstained, so this
+    // only affects quiz/math/connections/sprint.
+    if ((game.abstained ?? []).includes(actorId)) return { accepted: false, reason: "ALREADY_ABSTAINED" };
     try {
       if (game.gameId === "impostor") {
         const state = game.extra as ImpostorState;
@@ -322,7 +340,7 @@ export class RoomEngine {
           if (allCluesIn(state, this.activePlayers(game))) state.phase = "vote";
         } else if (intent.action === "impostor-vote") {
           submitVote(state, actorId, String(intent.payload["suspectId"] ?? ""), game.players);
-          if (Object.keys(state.votes).length >= this.activePlayers(game).length) {
+          if (allVotesIn(state, this.activePlayers(game))) {
             resolveVote(state);
             if (state.phase === "finished") this.finishGame(game, impostorScores(state, game.players));
           }
@@ -336,18 +354,10 @@ export class RoomEngine {
           const caption = sanitizeText(intent.payload["caption"], 140);
           if (!caption) return { accepted: false, reason: "INVALID_PAYLOAD" };
           submitCaption(state, actorId, caption);
-          if (Object.keys(currentRound(state).captions).length >= this.activePlayers(game).length) state.phase = "vote";
+          if (allCaptionsIn(state, this.activePlayers(game))) state.phase = "vote";
         } else if (intent.action === "caption-vote") {
           submitCaptionVote(state, actorId, String(intent.payload["captionId"] ?? ""), game.players);
-          if (Object.keys(currentRound(state).votes).length >= this.activePlayers(game).length) {
-            if (state.roundIndex + 1 >= state.rounds.length) {
-              state.phase = "finished";
-              this.finishGame(game, captionTotalScores(state));
-            } else {
-              state.roundIndex += 1;
-              state.phase = "caption";
-            }
-          }
+          if (allCaptionVotesIn(state, this.activePlayers(game))) this.advanceCaptionRound(game, state);
         }
       } else if (game.gameId === "closest-wins") {
         const state = game.extra as ClosestState;
@@ -379,19 +389,7 @@ export class RoomEngine {
         const perPlayer = (state.answers[actorId] ??= {});
         if (perPlayer[qid] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
         perPlayer[qid] = chosen;
-        const allDone = this.activePlayers(game).every((pid) => Object.keys(state.answers[pid] ?? {}).length >= state.questions.length);
-        if (allDone) {
-          const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
-          for (const pid of game.players) {
-            for (const q of state.questions) {
-              const chosenIdx = state.answers[pid]?.[q.id] ?? null;
-              if (game.gameId === "trivia") scores[pid] = (scores[pid] ?? 0) + scoreTrivia(q as TriviaQuestion, chosenIdx, 3000);
-              else if (game.gameId === "who-said-that") scores[pid] = (scores[pid] ?? 0) + scoreWhoSaid(q as WhoSaidQuestion, chosenIdx);
-              else scores[pid] = (scores[pid] ?? 0) + scoreGeography(q as GeographyQuestion, chosenIdx);
-            }
-          }
-          this.finishGame(game, scores);
-        }
+        if (this.quizAllDone(game, state)) this.finishGame(game, this.scoreQuizGame(game, state));
       } else if (game.gameId === "guess-the-year") {
         const state = game.extra as { events: YearEvent[]; guesses: Record<string, Record<string, number>> };
         if (intent.action !== "year-guess") return { accepted: false, reason: "UNKNOWN_ACTION" };
@@ -403,14 +401,7 @@ export class RoomEngine {
         const perPlayer = (state.guesses[actorId] ??= {});
         if (perPlayer[eid] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
         perPlayer[eid] = value;
-        const allDone = this.activePlayers(game).every((pid) => Object.keys(state.guesses[pid] ?? {}).length >= state.events.length);
-        if (allDone) {
-          const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
-          for (const pid of game.players) {
-            for (const e of state.events) scores[pid] = (scores[pid] ?? 0) + scoreYear(e, state.guesses[pid]?.[e.id] ?? null);
-          }
-          this.finishGame(game, scores);
-        }
+        if (this.yearAllDone(game, state)) this.finishGame(game, this.scoreYearGame(game, state));
       } else if (game.gameId === "word-connections") {
         const state = game.extra as { playerStates: Record<string, ConnectionsPlayerState> };
         if (intent.action !== "connections-guess") return { accepted: false, reason: "UNKNOWN_ACTION" };
@@ -420,7 +411,7 @@ export class RoomEngine {
         guessConnections(CONNECTIONS_BOARD, ps, tileIds as string[]);
         const allDone = this.activePlayers(game).every((pid) => {
           const s = state.playerStates[pid]!;
-          return s.solved.length >= 4 || s.mistakes >= 4;
+          return s.solved.length >= 4 || s.mistakes >= 4 || (game.abstained ?? []).includes(pid);
         });
         if (allDone) {
           const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, connectionsScore(state.playerStates[p]!)]));
@@ -434,20 +425,8 @@ export class RoomEngine {
         const roundSubs = (state.submissions[state.roundIndex] ??= {});
         if (roundSubs[actorId] !== undefined) return { accepted: false, reason: "ALREADY_SUBMITTED" };
         roundSubs[actorId] = answers as string[];
-        const allDoneRound = this.activePlayers(game).every((pid) => roundSubs[pid] !== undefined);
-        if (allDoneRound) {
-          if (state.roundIndex + 1 >= 3) {
-            const total: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
-            for (let r = 0; r < 3; r++) {
-              const cat = SPRINT_CATEGORIES[r % SPRINT_CATEGORIES.length]!;
-              const roundScores = scoreSprintRound(cat, state.submissions[r] ?? {});
-              for (const pid of game.players) total[pid] = (total[pid] ?? 0) + (roundScores[pid] ?? 0);
-            }
-            this.finishGame(game, total);
-          } else {
-            state.roundIndex += 1;
-          }
-        }
+        const allDoneRound = this.activePlayers(game).every((pid) => roundSubs[pid] !== undefined || (game.abstained ?? []).includes(pid));
+        if (allDoneRound) this.advanceSprintRound(game, state);
       } else if (game.gameId === "charades") {
         const state = game.extra as CharadesState;
         if (intent.action !== "charades-turn") return { accepted: false, reason: "UNKNOWN_ACTION" };
@@ -464,8 +443,203 @@ export class RoomEngine {
     return { accepted: true, result: { gameStatus: game.status } };
   }
 
+  /** Caption vote threshold reached: last round finishes, otherwise next round. Shared by votes and vote abstentions. */
+  private advanceCaptionRound(game: GameInstance, state: CaptionState): void {
+    if (state.roundIndex + 1 >= state.rounds.length) {
+      state.phase = "finished";
+      this.finishGame(game, captionTotalScores(state));
+    } else {
+      state.roundIndex += 1;
+      state.phase = "caption";
+    }
+  }
+
+  /** Sprint round threshold reached: last round finishes with totals, otherwise next round. Shared by submissions and abstentions. */
+  private advanceSprintRound(game: GameInstance, state: { roundIndex: number; submissions: Record<number, Record<string, string[]>> }): void {
+    if (state.roundIndex + 1 >= 3) {
+      const total: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
+      for (let r = 0; r < 3; r++) {
+        const cat = SPRINT_CATEGORIES[r % SPRINT_CATEGORIES.length]!;
+        const roundScores = scoreSprintRound(cat, state.submissions[r] ?? {});
+        for (const pid of game.players) total[pid] = (total[pid] ?? 0) + (roundScores[pid] ?? 0);
+      }
+      this.finishGame(game, total);
+    } else {
+      state.roundIndex += 1;
+    }
+  }
+
+  private quizAllDone(
+    game: GameInstance,
+    state: { questions: (TriviaQuestion | WhoSaidQuestion | GeographyQuestion)[]; answers: Record<string, Record<string, number>> },
+  ): boolean {
+    return this.activePlayers(game).every(
+      (pid) => (game.abstained ?? []).includes(pid) || Object.keys(state.answers[pid] ?? {}).length >= state.questions.length,
+    );
+  }
+
+  private scoreQuizGame(
+    game: GameInstance,
+    state: { questions: (TriviaQuestion | WhoSaidQuestion | GeographyQuestion)[]; answers: Record<string, Record<string, number>> },
+  ): Record<string, number> {
+    const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
+    for (const pid of game.players) {
+      for (const q of state.questions) {
+        const chosenIdx = state.answers[pid]?.[q.id] ?? null;
+        if (game.gameId === "trivia") scores[pid] = (scores[pid] ?? 0) + scoreTrivia(q as TriviaQuestion, chosenIdx, 3000);
+        else if (game.gameId === "who-said-that") scores[pid] = (scores[pid] ?? 0) + scoreWhoSaid(q as WhoSaidQuestion, chosenIdx);
+        else scores[pid] = (scores[pid] ?? 0) + scoreGeography(q as GeographyQuestion, chosenIdx);
+      }
+    }
+    return scores;
+  }
+
+  private yearAllDone(game: GameInstance, state: { events: YearEvent[]; guesses: Record<string, Record<string, number>> }): boolean {
+    return this.activePlayers(game).every(
+      (pid) => (game.abstained ?? []).includes(pid) || Object.keys(state.guesses[pid] ?? {}).length >= state.events.length,
+    );
+  }
+
+  private scoreYearGame(game: GameInstance, state: { events: YearEvent[]; guesses: Record<string, Record<string, number>> }): Record<string, number> {
+    const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
+    for (const pid of game.players) {
+      for (const e of state.events) scores[pid] = (scores[pid] ?? 0) + scoreYear(e, state.guesses[pid]?.[e.id] ?? null);
+    }
+    return scores;
+  }
+
+  /**
+   * Explicit abstention (decision L33). Silence is NOT abstention: a silent
+   * connected player still blocks advancement until deadline/host-skip. An
+   * explicit abstain counts toward the current threshold and scores 0 for
+   * what was skipped — it never invents scores and never reveals who
+   * abstained to other players (projections expose only the abstainer's own
+   * status). Whole-game games record the player in game.abstained; phase
+   * games record per-phase lists so a player can skip one phase and still
+   * play later ones. Charades has no abstention: turns are actor-driven
+   * and Pass already exists.
+   */
+  private submitAbstain(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now = Date.now()) {
+    const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
+    if (!game || game.status !== "playing") return { accepted: false, reason: "PHASE_CLOSED" };
+    if (game.deadlineAt && now > game.deadlineAt) return { accepted: false, reason: "PHASE_CLOSED" };
+    if (!game.players.includes(actorId)) return { accepted: false, reason: "NOT_IN_GAME" };
+    try {
+      if (game.gameId === "impostor") {
+        const state = game.extra as ImpostorState;
+        // Branch on a snapshot: resolveVote mutates state.phase, and a
+        // direct state.phase check here would be narrowed by TS to "vote".
+        const phase = state.phase;
+        if (phase === "clue") {
+          abstainClue(state, actorId);
+          if (allCluesIn(state, this.activePlayers(game))) state.phase = "vote";
+        } else if (phase === "vote") {
+          abstainVote(state, actorId);
+          if (allVotesIn(state, this.activePlayers(game))) {
+            resolveVote(state);
+            if (state.phase === "finished") this.finishGame(game, impostorScores(state, game.players));
+          }
+        } else if (phase === "guess") {
+          // Only the convicted impostor has anything to abstain from here;
+          // abstaining forfeits the guess, so the honest side wins.
+          if (actorId !== state.impostorId) throw new Error("NOT_IMPOSTOR");
+          state.guessCorrect = false;
+          state.phase = "finished";
+          state.winner = "honest";
+          this.finishGame(game, impostorScores(state, game.players));
+        } else {
+          throw new Error("PHASE_CLOSED");
+        }
+      } else if (game.gameId === "caption-clash") {
+        const state = game.extra as CaptionState;
+        if (state.phase === "caption") {
+          abstainCaption(state, actorId);
+          if (allCaptionsIn(state, this.activePlayers(game))) state.phase = "vote";
+        } else if (state.phase === "vote") {
+          abstainCaptionVote(state, actorId);
+          if (allCaptionVotesIn(state, this.activePlayers(game))) this.advanceCaptionRound(game, state);
+        } else {
+          throw new Error("PHASE_CLOSED");
+        }
+      } else if (game.gameId === "closest-wins") {
+        const state = game.extra as ClosestState;
+        abstainClosest(state, actorId);
+        if (allGuessed(state, this.activePlayers(game))) {
+          advanceClosest(state);
+          if (state.phase === "finished") this.finishGame(game, closestTotalScores(state));
+        }
+      } else if (game.gameId === "charades") {
+        throw new Error("NOT_APPLICABLE");
+      } else if (
+        game.gameId === "trivia" ||
+        game.gameId === "who-said-that" ||
+        game.gameId === "geography" ||
+        game.gameId === "guess-the-year" ||
+        game.gameId === "word-connections" ||
+        game.gameId === "category-sprint" ||
+        game.gameId === "math-mayhem"
+      ) {
+        game.abstained ??= [];
+        if (game.abstained.includes(actorId)) throw new Error("ALREADY_ABSTAINED");
+        game.abstained.push(actorId);
+        this.settleAfterAbstain(game);
+      } else {
+        return { accepted: false, reason: "UNKNOWN_ACTION" };
+      }
+    } catch (err) {
+      return { accepted: false, reason: err instanceof Error ? err.message : "INVALID_ACTION" };
+    }
+    this.log("player-abstained", { playerId: actorId, gameInstanceId: game.id });
+    return { accepted: true, result: { gameStatus: game.status } };
+  }
+
+  /**
+   * After a whole-game abstention, a game whose other players already did
+   * everything must settle immediately instead of waiting for another
+   * submission that will never come (e.g. the last answerer finished before
+   * the abstainer sat out). Scores are computed from existing answers only;
+   * unanswered items score 0 by the existing null defaults.
+   */
+  private settleAfterAbstain(game: GameInstance): void {
+    if (game.gameId === "trivia" || game.gameId === "who-said-that" || game.gameId === "geography") {
+      const state = game.extra as { questions: (TriviaQuestion | WhoSaidQuestion | GeographyQuestion)[]; answers: Record<string, Record<string, number>> };
+      if (this.quizAllDone(game, state)) this.finishGame(game, this.scoreQuizGame(game, state));
+    } else if (game.gameId === "guess-the-year") {
+      const state = game.extra as { events: YearEvent[]; guesses: Record<string, Record<string, number>> };
+      if (this.yearAllDone(game, state)) this.finishGame(game, this.scoreYearGame(game, state));
+    } else if (game.gameId === "word-connections") {
+      const state = game.extra as { playerStates: Record<string, ConnectionsPlayerState> };
+      const allDone = this.activePlayers(game).every((pid) => {
+        const s = state.playerStates[pid]!;
+        return s.solved.length >= 4 || s.mistakes >= 4 || (game.abstained ?? []).includes(pid);
+      });
+      if (allDone) {
+        const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, connectionsScore(state.playerStates[p]!)]));
+        this.finishGame(game, scores);
+      }
+    } else if (game.gameId === "category-sprint") {
+      const state = game.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
+      const roundSubs = state.submissions[state.roundIndex] ?? {};
+      const allDoneRound = this.activePlayers(game).every((pid) => roundSubs[pid] !== undefined || (game.abstained ?? []).includes(pid));
+      if (allDoneRound) this.advanceSprintRound(game, state);
+    } else if (game.gameId === "math-mayhem") {
+      const allDone = this.activePlayers(game).every(
+        (pid) => (game.abstained ?? []).includes(pid) || Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0),
+      );
+      if (allDone) {
+        // Math scores accrue live per answer; abstainers simply add nothing more.
+        game.status = "finished";
+        this.log("game-finished", { gameInstanceId: game.id, official: game.official });
+      }
+    }
+  }
+
   private finishGame(game: GameInstance, scores: Record<string, number>): void {
-    game.rawScores = scores;
+    // Normalise: every player in the game gets an entry, defaulting to 0.
+    // Scoring helpers only list players who earned points, so a player who
+    // abstained from everything (or never scored) would otherwise vanish
+    // from rawScores instead of standing at 0.
+    game.rawScores = { ...Object.fromEntries(game.players.map((p) => [p, 0])), ...scores };
     game.status = "finished";
     for (const [pid, pts] of Object.entries(scores)) {
       this.log("score-awarded", { playerId: pid, gameInstanceId: game.id, points: pts, reason: `game:${game.gameId}` });
@@ -609,6 +783,7 @@ export class RoomEngine {
     const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
     if (!game || game.status !== "playing") return { accepted: false, reason: "PHASE_CLOSED" };
     if (!game.players.includes(actorId)) return { accepted: false, reason: "NOT_IN_GAME" };
+    if ((game.abstained ?? []).includes(actorId)) return { accepted: false, reason: "ALREADY_ABSTAINED" };
     const questionId = intent.payload["questionId"];
     const chosenIndex = intent.payload["chosenIndex"];
     if (typeof questionId !== "string" || typeof chosenIndex !== "number") return { accepted: false, reason: "INVALID_PAYLOAD" };
@@ -626,8 +801,8 @@ export class RoomEngine {
     const points = scoreMathAnswer(question, chosenIndex, elapsedMs);
     game.rawScores[actorId] = (game.rawScores[actorId] ?? 0) + points;
     this.log("score-awarded", { playerId: actorId, gameInstanceId: game.id, points, reason: `math:${questionId}` });
-    // Finish when every player answered every question
-    const allDone = this.activePlayers(game).every((pid) => Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0));
+    // Finish when every player answered every question (or sat out the rest)
+    const allDone = this.activePlayers(game).every((pid) => (game.abstained ?? []).includes(pid) || Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0));
     if (allDone) {
       game.status = "finished";
       this.log("game-finished", { gameInstanceId: game.id });
@@ -711,6 +886,8 @@ export class RoomEngine {
         status: g.status,
         myAnswers: g.answers[actorId] ?? {},
         myScore: g.rawScores[actorId] ?? 0,
+        // Own whole-game abstention only; phase abstentions ride in state.myAbstained.
+        abstained: (g.abstained ?? []).includes(actorId),
         state:
           g.gameId === "impostor"
             ? projectImpostor(g.extra as ImpostorState, actorId, false)
@@ -741,6 +918,9 @@ export class RoomEngine {
           g.status === "playing"
             ? g.questions?.map((q) => ({ id: q.id, prompt: q.prompt, options: q.options }))
             : undefined,
+        // Finished scores are public (same policy as the public games list);
+        // without this, ShowResults and the finished panel rendered empty.
+        rawScores: g.status === "finished" || g.status === "revealed" ? g.rawScores : undefined,
       }));
       return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost }, myGames };
     }
