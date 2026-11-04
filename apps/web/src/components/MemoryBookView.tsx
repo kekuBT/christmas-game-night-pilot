@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import { selectShareEntries, paginateBlocks } from "./exportLayout.js";
 import type { LedgerEvent, MemoryEntry } from "../types.js";
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
@@ -25,18 +26,29 @@ export function MemoryBookView(props: {
     doc.setFontSize(20);
     doc.text("Christmas Memory Book", 14, 20);
     doc.setFontSize(12);
-    let y = 32;
-    for (const e of approved) {
+    // Build blocks first, then paginate with the tested helper: a block
+    // starts on a new page if it does not fit in the remaining space, so
+    // long content can never overflow a page (review 5769121221 #5).
+    const blocks = approved.map((e) => {
       const lines = doc.splitTextToSize(`${e.text} (Day ${e.day})`, 180);
-      doc.text(lines, 14, y);
-      y += lines.length * 7 + 4;
-      for (const f of e.derivedFacts) {
-        const fl = doc.splitTextToSize(`From the ledger: ${f}`, 180);
-        doc.text(fl, 14, y);
-        y += fl.length * 7 + 2;
+      const facts = e.derivedFacts.map((f) => doc.splitTextToSize(`From the ledger: ${f}`, 180));
+      return { lines, facts, height: lines.length * 7 + 4 + facts.reduce((s, fl) => s + fl.length * 7 + 2, 0) + 4 };
+    });
+    const pages = paginateBlocks(blocks.map((b) => b.height), 280, 32);
+    for (const page of pages) {
+      let y = 32;
+      for (const idx of page) {
+        const b = blocks[idx]!;
+        doc.text(b.lines, 14, y);
+        y += b.lines.length * 7 + 4;
+        for (const fl of b.facts) {
+          doc.text(fl, 14, y);
+          y += fl.length * 7 + 2;
+        }
+        y += 4;
       }
-      y += 4;
-      if (y > 260) { doc.addPage(); y = 20; }
+      // addPage between pages, not after the last one.
+      if (page !== pages[pages.length - 1]) doc.addPage();
     }
     if (approved.length === 0) doc.text("No approved entries yet.", 14, 32);
     doc.save("christmas-memory-book.pdf");
@@ -51,7 +63,11 @@ export function MemoryBookView(props: {
     ctx.fillStyle = "#E5BC70"; ctx.font = "bold 64px system-ui"; ctx.fillText("🎄 Christmas Memory Book", 60, 120);
     ctx.fillStyle = "#F7F2E8"; ctx.font = "36px system-ui";
     let y = 200;
-    for (const e of approved.slice(0, 8)) {
+    // The image holds at most 8 entries and says so, instead of silently
+    // clipping the rest (review 5769121221 #5). The full set is always in
+    // the markdown and PDF exports.
+    const { shown, overflow } = selectShareEntries(approved);
+    for (const e of shown) {
       const words = e.text.split(" ");
       let line = "";
       for (const w of words) {
@@ -62,6 +78,7 @@ export function MemoryBookView(props: {
       y += 24;
       if (y > 980) break;
     }
+    if (overflow > 0) { ctx.fillText(`…and ${overflow} more in the PDF export.`, 60, y + 24); }
     if (approved.length === 0) ctx.fillText("No approved entries yet.", 60, 200);
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/png");
@@ -74,7 +91,7 @@ export function MemoryBookView(props: {
     <div className="row"><button disabled={!bookText || ledger.filter((e) => e.type === "game-finished").length === 0} onClick={async () => { const src = ledger.filter((e) => e.type === "game-finished").slice(-1).map((e) => e.eventId); await post<MemoryEntry>(`/rooms/${roomId}/memory`, { day: 1, text: bookText, sourceEventIds: src }); setBookText(""); await loadMemory(); }}>Add from last finished game</button>
     <button className="secondary" onClick={async () => { const r = await get<{ markdown: string }>(`/rooms/${roomId}/memory/export`); setExportText(r.markdown); }}>Export approved</button>
     <button className="secondary" onClick={downloadPdf}>Download PDF</button>
-    <button className="secondary" onClick={downloadShareImage}>Download share image</button></div>
+    <button className="secondary" onClick={downloadShareImage}>Download share image</button><p className="muted">Share image shows the first 8 approved entries; the PDF and markdown exports contain all of them.</p></div>
     {ledger.filter((e) => e.type === "game-finished").length === 0 && <p className="muted">Finish a game first — then you can add a Memory Book entry.</p>}
     {book.map((e) => <div key={e.id} className="card"><p>{e.text} <span className="muted">(Day {e.day} · {e.approved ? "approved" : "pending"})</span></p>{e.derivedFacts.map((f, i) => <p key={i} className="muted">From the ledger: {f}</p>)}<div className="row"><button className="secondary" disabled={!canApprove} onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/memory/${e.id}/approve`, {}); await loadMemory(); }}>Approve</button><button className="secondary" disabled={!canApprove} onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/memory/${e.id}/revoke`, {}); await loadMemory(); }}>Revoke</button></div></div>)}
     {exportText && <pre style={{ whiteSpace: "pre-wrap" }}>{exportText}</pre>}

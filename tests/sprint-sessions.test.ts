@@ -90,12 +90,19 @@ describe("projection secrecy", () => {
     const game = engine.startGame(host, "impostor", { official: false, seed: 2 });
     const mine = JSON.stringify(engine.project("player", ids[0]!));
     expect(mine).not.toContain("recoveryToken");
-    const other = engine.project("player", ids[1]!) as { myGames: { state: { word?: string; role?: string } }[] };
-    const myState = (engine.project("player", ids[0]!) as { myGames: { state: { word?: string; role?: string } }[] }).myGames[0]!.state;
-    const otherState = other.myGames[0]!.state;
-    // Impostor or honest: exactly one of the two sees the word (the honest one).
-    const seen = [myState.word, otherState.word].filter(Boolean).length;
-    expect(seen).toBeLessThanOrEqual(2);
+    const states = ids.map((id) => (engine.project("player", id) as { myGames: { state: { word?: string; role?: string } }[] }).myGames[0]!.state);
+    // Role-aware assertion (replaces the old seen <= 2 count, which was
+    // true even if both clients received the secret): with a fixed seed,
+    // exactly one player is the impostor and gets NO word, and every
+    // honest player gets the SAME word. See also the HTTP/WS version in
+    // tests/review2-fixes.test.ts.
+    const impostors = states.filter((s) => s.role === "impostor");
+    const honest = states.filter((s) => s.role === "honest");
+    expect(impostors.length).toBe(1);
+    expect(impostors[0]!.word).toBeUndefined();
+    expect(honest.length).toBe(3);
+    expect(new Set(honest.map((s) => s.word)).size).toBe(1);
+    expect(honest[0]!.word).toBeTruthy();
     expect(game.id).toBeTruthy();
   });
 

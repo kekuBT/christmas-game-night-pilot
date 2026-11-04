@@ -187,7 +187,7 @@ async function playGame(roomId, players, gameId) {
 const room = await post("/rooms", { name: "Christmas Game Night" });
 const players = [];
 for (let i = 0; i < NAMES.length; i++) {
-  const j = await post(`/rooms/${room.roomId}/join`, { displayName: NAMES[i], asHost: i === 0 });
+  const j = await post(`/rooms/${room.roomId}/join`, { displayName: NAMES[i], asHost: i === 0, hostClaimToken: room.hostClaimToken });
   players.push({ id: j.playerId, displayName: NAMES[i], token: j.recoveryToken });
 }
 console.log(`room ${room.roomId} code ${room.joinCode} players ${players.map((p) => p.displayName).join(",")}`);
@@ -208,7 +208,7 @@ console.log(`TV projection: games=${tv.games.length} finished=${tv.games.filter(
 for (const g of tv.games) console.log(`  score ${g.gameId}: ${JSON.stringify(g.rawScores)}`);
 // Category-leak check on a fresh, still-playing Connections game
 const room2 = await post("/rooms", { name: "Leak check" });
-const p2 = await post(`/rooms/${room2.roomId}/join`, { displayName: "LeakHost", asHost: true });
+const p2 = await post(`/rooms/${room2.roomId}/join`, { displayName: "LeakHost", asHost: true, hostClaimToken: room2.hostClaimToken });
 await post(`/rooms/${room2.roomId}/games`, { gameId: "word-connections", official: false }, p2.recoveryToken);
 const tv2 = await get(`/rooms/${room2.roomId}`);
 const tiles = tv2.games[0].state.tiles;

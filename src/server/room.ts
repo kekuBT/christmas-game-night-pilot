@@ -480,9 +480,18 @@ export class RoomEngine {
     return out;
   }
 
-  /** Advance the championship day (host/cohost only). Games started after this count toward the new day. */
+  /**
+   * Advance the championship day (host/cohost only).
+   * Day-close semantics: a day is closed by advancing, not by the clock.
+   * Games started after the advance count toward the new day; finished
+   * games keep the day they were started on. Advancing is refused while a
+   * game is playing (finish it or host-skip it first) and refused past the
+   * seventh scheduled day — the championship has exactly seven days.
+   */
   advanceDay(actorId: string): number {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can advance the day");
+    if ([...this.games.values()].some((g) => g.status === "playing")) throw new Error("Cannot advance the day while a game is in progress");
+    if (this.championshipDay >= 7) throw new Error("Championship is already on its final day");
     this.championshipDay += 1;
     this.log("day-advanced", { actor: actorId });
     return this.championshipDay;
@@ -509,9 +518,10 @@ export class RoomEngine {
 
   /**
    * Full 7-day championship from finished official games only, using the
-   * provisional rules in src/scoring/championship.ts: per-game midrank,
-   * solo/team split, daily 75/25, best five days, at least three valid days.
-   * Practice and timed-out games never enter this calculation.
+   * Family Cup rules in src/scoring/championship.ts (owner-approved
+   * 2026-11-04): per-game midrank, solo/team split, daily 75/25, best
+   * three days, at least three qualifying days, participation bonus,
+   * finale bonus. Practice and timed-out games never enter this calculation.
    */
   championshipResults() {
     const days = new Map<string, PlayerDay>();

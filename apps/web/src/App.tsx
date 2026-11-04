@@ -92,7 +92,7 @@ export function App() {
   async function createRoom() {
     setErr(""); try {
       const r = await post<JoinResponse>("/rooms", { name: "Christmas Game Night" });
-      const j = await post<JoinResponse>(`/rooms/${r.roomId}/join`, { displayName: name || "Player 1", asHost: true });
+      const j = await post<JoinResponse>(`/rooms/${r.roomId}/join`, { displayName: name || "Player 1", asHost: true, hostClaimToken: r.hostClaimToken });
       await saveSession({ ...j, roomId: r.roomId }); setMsg(`Room created. Code: ${r.joinCode}`);
     } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
@@ -169,6 +169,7 @@ export function App() {
 
     {view === "lobby" && <>
       <div className="card"><h2>Invite by QR</h2><p className="muted">Scan to join this room. The 6-character code below works too — that is the manual-code fallback.</p>
+        {(location.hostname === "localhost" || location.hostname === "127.0.0.1") && <p>⚠️ This QR points to {location.origin}, which only works on this device. A phone scanning it will be sent to its own localhost and cannot join. Open the app from a LAN-reachable address (or the approved deployed domain) so the QR works, or share the 6-character code instead.</p>}
         {qrUrl && <img src={qrUrl} alt={`QR code to join room ${proj?.joinCode ?? ""}`} width={220} height={220} />}
         <p>Room code: <b>{proj?.joinCode ?? "…"}</b></p>
       </div>

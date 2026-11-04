@@ -17,7 +17,7 @@ snapshot route (UTF-8 text only).
   scores only. Impostor, Caption Clash, Trivia, and Geography are shown
   playing in the screenshots; all 11 finish in the browser E2E sweep.
 - **Championship:** server-computed, clearly labelled provisional rules
-  (midrank per game, 75% solo + 25% team per day, best five days, at least
+  (midrank per game, 75% solo + 25% team per day, best three days, at least
   three valid days to qualify). Practice and timed-out games never count.
 - **Ceremony and achievements:** end-of-day winner card and ledger-derived
   achievements (e.g. First Game Finished, Perfect Math Mayhem).
@@ -58,6 +58,25 @@ snapshot route (UTF-8 text only).
   breadth, not a known defect: more per-game edge cases and HTTP matrix
   cases are the next test batch, not filler assertions.
 
+## Update 2026-11-04 (after the GitHub push)
+
+This document was written while the sprint was local-only. It is now
+superseded in two respects, and this note reconciles it with the branch:
+
+- The sprint **was** pushed to GitHub on Keku's explicit approval at
+  ~08:20 EST, as commit `2e818f264c46e618127dbaf7f9c2e0ffa81c32c3` on
+  `development/first-playable-checkpoint` (PR #3, draft, unmerged).
+  The "local-only" and "branch still holds 853704b" statements below
+  were true at write time and are no longer true.
+- The championship rules below were provisional at write time. They were
+  then **owner-approved on 2026-11-04** as the Family Cup rules (best
+  three days, participation bonus, finale bonus) — see
+  `docs/CHAMPIONSHIP_RULES.md`. Three details remain configurable, not
+  approved: the qualifying-day threshold, teamless-day handling, and the
+  finale ladder.
+- Every future GitHub push still requires Keku's explicit per-checkpoint
+  approval; no push is implied by this document or by the sprint itself.
+
 ## Remaining gaps (not hidden)
 
 - Real iPhone Safari, Android, desktop Safari, and a real TV: NOT RUN (needs
@@ -72,9 +91,9 @@ snapshot route (UTF-8 text only).
 
 ## What Keku needs to approve
 
-1. **Nothing in this sprint is published, merged, deployed, or spent.**
-   The GitHub branch still holds the earlier snapshot (853704b); this sprint
-   is local-only until Keku approves a new push.
+1. **Nothing in this sprint is merged, deployed, or spent.** It was
+   published to the PR branch only after Keku's explicit approval at
+   ~08:20 EST (commit 2e818f2); see the update note above.
 2. Approve (or not) pushing this sprint as a new snapshot to PR #3 for
    ChatGPT re-review.
 3. Decide the provisional championship rules, or keep them provisional.

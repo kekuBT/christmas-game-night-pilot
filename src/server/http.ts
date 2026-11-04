@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync } from 
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
+import { randomUUID } from "node:crypto";
 import { RoomEngine, type RoomPlayer } from "./room.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { MemoryBook } from "./memorybook.js";
@@ -28,6 +29,18 @@ interface SocketMeta {
 export class LocalServer {
   rooms = new Map<string, RoomEngine>();
   private books = new Map<string, MemoryBook>();
+  /**
+   * Host-claim tokens (review #4): creating a room returns a one-time
+   * capability that binds the initial host privilege to the creator.
+   * Claiming host without it is rejected at the HTTP boundary, so a
+   * stranger who only knows the room id or code cannot grab host while
+   * the creator's room is still hostless. The token is persisted beside
+   * the room snapshot so a restart does not orphan a hostless room.
+   * Once a host exists, the token no longer grants host (engine join
+   * only makes the first host when hostId is null), so a reused token
+   * just joins as a regular player.
+   */
+  private hostClaims = new Map<string, string>();
   private dataDir: string;
   private http = createServer((req, res) => void this.handleHttp(req, res));
   private wss = new WebSocketServer({ server: this.http });
@@ -46,6 +59,15 @@ export class LocalServer {
 
   private bookPath(roomId: string): string {
     return join(this.dataDir, `${roomId}.book.json`);
+  }
+
+  private claimPath(roomId: string): string {
+    return join(this.dataDir, `${roomId}.claim.json`);
+  }
+
+  private persistClaim(roomId: string): void {
+    const token = this.hostClaims.get(roomId);
+    if (token) writeFileSync(this.claimPath(roomId), JSON.stringify({ hostClaimToken: token }));
   }
 
   private persist(room: RoomEngine): void {
@@ -90,6 +112,16 @@ export class LocalServer {
         if (typeof data["id"] === "string" && Array.isArray(data["players"])) {
           const room = RoomEngine.fromJSON(data);
           this.rooms.set(room.id, room);
+          // Restore the host-claim token for this room, if one was persisted.
+          try {
+            const claimFile = this.claimPath(room.id);
+            if (existsSync(claimFile)) {
+              const claimData = JSON.parse(readFileSync(claimFile, "utf-8")) as Record<string, unknown>;
+              if (typeof claimData["hostClaimToken"] === "string") this.hostClaims.set(room.id, claimData["hostClaimToken"]);
+            }
+          } catch {
+            // A corrupt claim file must not lose the room itself.
+          }
           // Restore the Memory Book for this room, if one was persisted.
           try {
             const bookFile = this.bookPath(room.id);
@@ -190,6 +222,10 @@ export class LocalServer {
           this.send(res, 429, { error: "Too many join attempts" });
           return;
         }
+        if (body["asHost"] === true && body["hostClaimToken"] !== this.hostClaims.get(room.id)) {
+          this.send(res, 400, { error: "Host claim requires the room creation token" });
+          return;
+        }
         const { player, recoveryToken } = room.join(String(body["displayName"] ?? ""), { asHost: body["asHost"] === true });
         this.persist(room);
         this.broadcast(room.id);
@@ -203,9 +239,12 @@ export class LocalServer {
       if (req.method === "POST" && parts.length === 1 && parts[0] === "rooms") {
         const body = await this.readBody(req);
         const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night");
+        const hostClaimToken = randomUUID();
         this.rooms.set(room.id, room);
+        this.hostClaims.set(room.id, hostClaimToken);
         this.persist(room);
-        this.send(res, 201, { roomId: room.id, joinCode: room.joinCode, name: room.name });
+        this.persistClaim(room.id);
+        this.send(res, 201, { roomId: room.id, joinCode: room.joinCode, name: room.name, hostClaimToken });
         return;
       }
       if (parts[0] === "rooms" && parts[1]) {
@@ -300,6 +339,10 @@ export class LocalServer {
             return;
           }
           const body = await this.readBody(req);
+          if (body["asHost"] === true && body["hostClaimToken"] !== this.hostClaims.get(room.id)) {
+            this.send(res, 400, { error: "Host claim requires the room creation token" });
+            return;
+          }
           const { player, recoveryToken } = room.join(String(body["displayName"] ?? ""), { asHost: body["asHost"] === true });
           this.persist(room);
           this.broadcast(room.id);
