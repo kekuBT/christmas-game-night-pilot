@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 ~06:15 EST (re-verification only: typecheck/tests/lint/build + E2E smoke all pass; no new local-only board task remains — real-device checklist + family-member acceptance still NOT RUN)
+Updated: 2026-11-04 ~07:40 EST (PR #3 review fixes, local only, no GitHub — see section at end; real-device checklist + family-member acceptance still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -192,3 +192,18 @@ Open this file, confirm local git status in `~/workspace/christmas-game-night-pi
 - Test server data/ removed, port 3457 confirmed closed. Working tree clean after the run except this PROGRESS.md entry.
 - Remaining (unchanged, need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room). npm audit stays BLOCKED by registry proxy 403; no bypass attempted, not re-tried this run.
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
+
+## PR #3 review fixes — 2026-11-04 ~07:20–07:40 EST (Keku instruction: start working on all review items now, no GitHub)
+- Source: ChatGPT review 5768033701 (COMMENTED, 2026-11-04 07:13:22 EST) on draft PR #3 commit 4218cec, 4 unresolved threads. No GitHub reply was posted and no snapshot was pushed in this work, per Keku's instruction.
+- Regression-first: new `tests/review-fixes.test.ts` (8 tests) failed 8/8 before fixes, passes 8/8 after.
+- #1 Auth: session token = join-issued recovery token, sent as `x-session-token` (HTTP) / `sessionToken` (WS); server hashes it and derives actor/role, ignoring client actorId/hostId/approverId. TV projection stays public; ledger/memory require a member token; Memory Book approve/revoke require host/cohost. UI and `scripts/clickthrough-api.mjs` updated to send tokens; integration tests updated.
+- #2 Official standings: `RoomEngine.officialStandings()` (finished + official + non-timed-out, midrank) is now in every projection; browser uses the server value. Ledger game-finished events record `official`.
+- #3 Memory Book: persists to `<roomId>.book.json` and restores on restart; `addFromLedger` requires a nonempty game-finished source, derives `derivedFacts` from score events, exports human text as "Note:" and facts under "From the ledger:". `tests/m4.test.ts` updated to cite a real finished game.
+- #4 Deadlines: social intents after `deadlineAt` rejected (PHASE_CLOSED); host/cohost can skip a timed-out game via `skipTimedOutGame` / POST `/rooms/:id/games/:gid/skip` — game marked `timedOut`, no scores invented, excluded from official standings; browser shows a host-only skip button for past-deadline playing games.
+- #5 Seed: `startGame` defaults to `crypto.randomInt`, not 42; explicit seeds still deterministic in tests.
+- #6 Charades: passes advance `promptIndex` within the same turn (max 3, then PASS_LIMIT); Correct ends the turn; game lasts one turn per player (roster-sized, not fixed 4). Decision L15 in `docs/DECISIONS.md`.
+- #7 Frontend typecheck: `apps/web/tsconfig.json` (strict) + `apps/web/src/types.ts` (Projection/GameState/RegistryGame/MemoryEntry/LedgerEvent/JoinResponse); `npm run typecheck` now runs server + web checks. Game-specific state is typed as GameState (optional fields) — documented limitation in L16.
+- Decisions L10–L17 appended to `docs/DECISIONS.md`.
+- Evidence: `npm run typecheck` exit 0 (server + web), `npm run lint` exit 0, `npm test` 9 files / 56 passed (was 48, +8 review tests), `npm run build:web` exit 0, API playthrough 11/11, E2E Chromium 12/12, Firefox 12/12, check-multiplayer 12/12, check-f4 11/11, check-f5 30/30 (one driver fix: ledger fetch now goes through the host page with its session token, after the auth change made the unauthenticated ledger fetch return 401), check-mobile 32/32, check-contrast 57/57. Test server stopped and `data/` removed after runs.
+- Next: no GitHub reply/publish until Keku explicitly asks; remaining NOT RUN items unchanged (real devices, family-member acceptance, WebKit host libs, Cloudflare, npm audit 403).

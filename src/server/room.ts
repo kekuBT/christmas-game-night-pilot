@@ -1,5 +1,6 @@
-import { createHash } from "node:crypto";
+import { createHash, randomInt } from "node:crypto";
 import { getGame } from "../games/registry.js";
+import { midrankScore } from "../scoring/championship.js";
 import { generateMathQuestions, scoreMathAnswer, type MathQuestion } from "../games/math.js";
 import {
   allCluesIn,
@@ -79,6 +80,7 @@ export interface LedgerEvent {
   points?: number;
   reason?: string;
   actor?: string;
+  official?: boolean;
   createdAt: number;
 }
 
@@ -88,6 +90,7 @@ export interface GameInstance {
   official: boolean;
   status: "lobby" | "playing" | "revealed" | "finished";
   players: string[]; // player ids
+  timedOut?: boolean; // host-skipped after deadline; never counts toward official standings
   questions?: MathQuestion[]; // Math only, server-side. Never projected pre-reveal.
   answers: Record<string, Record<string, number | null>>; // playerId -> questionId -> chosenIndex
   answerTimes: Record<string, Record<string, number>>; // playerId -> questionId -> elapsedMs
@@ -193,7 +196,9 @@ export class RoomEngine {
     if (playerIds.length < game.minPlayers) throw new Error(`Need at least ${game.minPlayers} connected players`);
     if (playerIds.length > game.maxPlayers) throw new Error(`Too many players for ${gameId}`);
     const id = `game-${this.nextGame++}`;
-    const seed = opts.seed ?? 42;
+    // Secure per-session seed by default. Explicit seeds are for controlled
+    // tests only; the old default of 42 made hidden-role assignment predictable.
+    const seed = opts.seed ?? randomInt(0, 2147483647);
     const instance: GameInstance = {
       id,
       gameId,
@@ -263,7 +268,7 @@ export class RoomEngine {
       intent.action === "sprint-answers" ||
       intent.action === "charades-turn"
     ) {
-      result = this.submitSocialIntent(intent, actorId);
+      result = this.submitSocialIntent(intent, actorId, now);
     } else {
       result = { accepted: false, reason: "UNKNOWN_ACTION" };
     }
@@ -271,9 +276,12 @@ export class RoomEngine {
     return result;
   }
 
-  private submitSocialIntent(intent: ReturnType<typeof IntentSchema.parse>, actorId: string) {
+  private submitSocialIntent(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now = Date.now()) {
     const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
     if (!game || game.status !== "playing") return { accepted: false, reason: "PHASE_CLOSED" };
+    // Late submissions after the game deadline are rejected, not silently
+    // accepted into a game that should already have closed or been skipped.
+    if (game.deadlineAt && now > game.deadlineAt) return { accepted: false, reason: "PHASE_CLOSED" };
     if (!game.players.includes(actorId)) return { accepted: false, reason: "NOT_IN_GAME" };
     try {
       if (game.gameId === "impostor") {
@@ -433,7 +441,41 @@ export class RoomEngine {
     for (const [pid, pts] of Object.entries(scores)) {
       this.log("score-awarded", { playerId: pid, gameInstanceId: game.id, points: pts, reason: `game:${game.gameId}` });
     }
-    this.log("game-finished", { gameInstanceId: game.id });
+    this.log("game-finished", { gameInstanceId: game.id, official: game.official });
+  }
+
+  /**
+   * Authoritative championship standings: finished, OFFICIAL, non-timed-out
+   * games only, midrank-normalised per game and summed. Practice games and
+   * host-skipped timed-out games can never change this, whatever the UI sums.
+   */
+  officialStandings(): Record<string, number> {
+    const out: Record<string, number> = {};
+    for (const g of this.games.values()) {
+      if (g.status !== "finished" || !g.official || g.timedOut) continue;
+      const all = Object.values(g.rawScores);
+      if (all.length < 2) continue;
+      for (const [pid, pts] of Object.entries(g.rawScores)) {
+        out[pid] = Math.round(((out[pid] ?? 0) + midrankScore(pts, all)) * 100) / 100;
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Host/cohost-only escape hatch for a stalled game: after its deadline a
+   * host may close it without inventing scores. Players who never submitted
+   * simply keep their current (zero or partial) raw scores, the game is
+   * marked timedOut, and officialStandings() excludes it.
+   */
+  skipTimedOutGame(actorId: string, gameInstanceId: string, now = Date.now()): void {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can skip a timed-out game");
+    const game = this.games.get(gameInstanceId);
+    if (!game || game.status !== "playing") throw new Error("Game is not playing");
+    if (!game.deadlineAt || now < game.deadlineAt) throw new Error("Game has not timed out yet");
+    game.status = "finished";
+    game.timedOut = true;
+    this.log("game-timed-out", { gameInstanceId: game.id, actor: actorId });
   }
 
   private submitMathAnswer(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now: number) {
@@ -481,6 +523,8 @@ export class RoomEngine {
       gameId: g.gameId,
       official: g.official,
       status: g.status,
+      timedOut: g.timedOut ?? false,
+      deadlineAt: g.deadlineAt,
       players: g.players,
       state:
         g.gameId === "impostor"
@@ -517,6 +561,7 @@ export class RoomEngine {
       name: this.name,
       players: publicPlayers,
       games: publicGames,
+      officialStandings: this.officialStandings(),
       seq: this.seq,
     };
     if (audience === "tv") {

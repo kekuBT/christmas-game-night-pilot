@@ -7,22 +7,26 @@
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
 
-async function post(path, body) {
-  const r = await fetch(`${BASE}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+async function post(path, body, token) {
+  const headers = { "content-type": "application/json" };
+  if (token) headers["x-session-token"] = token;
+  const r = await fetch(`${BASE}${path}`, { method: "POST", headers, body: JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(`POST ${path} -> ${r.status} ${j.error ?? ""}`);
   return j;
 }
-async function get(path) {
-  const r = await fetch(`${BASE}${path}`);
+async function get(path, token) {
+  const headers = {};
+  if (token) headers["x-session-token"] = token;
+  const r = await fetch(`${BASE}${path}`, { headers });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(`GET ${path} -> ${r.status} ${j.error ?? ""}`);
   return j;
 }
-const intent = (roomId, actorId, gameInstanceId, action, payload) =>
-  post(`/rooms/${roomId}/intents`, { actorId, intent: { kind: "intent", schemaVersion: 1, clientEventId: crypto.randomUUID(), roomId, gameInstanceId, action, payload } });
-const proj = (roomId, actorId) => get(`/rooms/${roomId}/projection?audience=player&actorId=${actorId}`);
-const myGame = async (roomId, actorId, gid) => (await proj(roomId, actorId)).myGames.find((g) => g.id === gid);
+const intent = (roomId, player, gameInstanceId, action, payload) =>
+  post(`/rooms/${roomId}/intents`, { intent: { kind: "intent", schemaVersion: 1, clientEventId: crypto.randomUUID(), roomId, gameInstanceId, action, payload } }, player.token);
+const proj = (roomId, player) => get(`/rooms/${roomId}/projection?audience=player`, player.token);
+const myGame = async (roomId, player, gid) => (await proj(roomId, player)).myGames.find((g) => g.id === gid);
 const tid = (text) => `tile-${text.toLowerCase().replace(/[^a-z]/g, "-")}`;
 const CONNECTIONS_GROUPS = [
   ["Gingerbread", "Candy cane", "Mince pie", "Roast turkey"],
@@ -47,13 +51,13 @@ function solveMath(prompt, options) {
 const results = [];
 async function playGame(roomId, players, gameId) {
   const host = players[0];
-  const started = await post(`/rooms/${roomId}/games`, { hostId: host.id, gameId, official: true });
+  const started = await post(`/rooms/${roomId}/games`, { gameId, official: true }, host.token);
   const gid = started.gameId;
   let steps = 0;
   const guard = 500;
   const note = [];
   while (steps++ < guard) {
-    const g = await myGame(roomId, host.id, gid);
+    const g = await myGame(roomId, host, gid);
     if (!g) throw new Error(`game ${gid} missing from projection`);
     if (g.status === "finished") {
       results.push({ gameId, status: "finished", scores: g.rawScores ?? null, steps, note: note.join("; ") });
@@ -62,12 +66,12 @@ async function playGame(roomId, players, gameId) {
     const st = g.state ?? {};
     if (gameId === "math-mayhem") {
       for (const p of players) {
-        const pg = await myGame(roomId, p.id, gid);
+        const pg = await myGame(roomId, p, gid);
         for (const q of pg.questions ?? []) {
           if (pg.myAnswers?.[q.id] === undefined) {
             let idx = solveMath(q.prompt, q.options);
             if (idx < 0) { idx = 0; note.push(`math parse fallback on "${q.prompt}"`); }
-            const r = await intent(roomId, p.id, gid, "submit-math-answer", { questionId: q.id, chosenIndex: idx });
+            const r = await intent(roomId, p, gid, "submit-math-answer", { questionId: q.id, chosenIndex: idx });
             if (!r.accepted) throw new Error(`math answer rejected: ${r.reason}`);
           }
         }
@@ -75,56 +79,56 @@ async function playGame(roomId, players, gameId) {
     } else if (["trivia", "who-said-that", "geography"].includes(gameId)) {
       const action = gameId === "trivia" ? "trivia-answer" : gameId === "who-said-that" ? "whosaid-answer" : "geography-answer";
       for (const p of players) {
-        const pg = await myGame(roomId, p.id, gid);
+        const pg = await myGame(roomId, p, gid);
         for (const q of pg.state?.questions ?? []) {
           if (pg.state.myAnswers?.[q.id] === undefined) {
-            const r = await intent(roomId, p.id, gid, action, { questionId: q.id, chosenIndex: 0 });
+            const r = await intent(roomId, p, gid, action, { questionId: q.id, chosenIndex: 0 });
             if (!r.accepted) throw new Error(`${action} rejected: ${r.reason}`);
           }
         }
       }
     } else if (gameId === "guess-the-year") {
       for (const p of players) {
-        const pg = await myGame(roomId, p.id, gid);
+        const pg = await myGame(roomId, p, gid);
         for (const e of pg.state?.events ?? []) {
           if (pg.state.myGuesses?.[e.id] === undefined) {
-            const r = await intent(roomId, p.id, gid, "year-guess", { eventId: e.id, value: 2000 });
+            const r = await intent(roomId, p, gid, "year-guess", { eventId: e.id, value: 2000 });
             if (!r.accepted) throw new Error(`year-guess rejected: ${r.reason}`);
           }
         }
       }
     } else if (gameId === "closest-wins") {
       for (const p of players) {
-          const pg = await myGame(roomId, p.id, gid);
+          const pg = await myGame(roomId, p, gid);
           if (pg.state?.myGuess === undefined) {
-            const r = await intent(roomId, p.id, gid, "closest-guess", { value: 100 });
+            const r = await intent(roomId, p, gid, "closest-guess", { value: 100 });
             if (!r.accepted) throw new Error(`closest-guess rejected: ${r.reason}`);
           }
         }
     } else if (gameId === "impostor") {
       if (st.phase === "clue") {
         for (const p of players) {
-          const pg = await myGame(roomId, p.id, gid);
+          const pg = await myGame(roomId, p, gid);
           if (!(pg.state.clues ?? {})[p.id]) {
-            const r = await intent(roomId, p.id, gid, "impostor-clue", { clue: `clue from ${p.displayName}` });
+            const r = await intent(roomId, p, gid, "impostor-clue", { clue: `clue from ${p.displayName}` });
             if (!r.accepted) throw new Error(`impostor-clue rejected: ${r.reason}`);
           }
         }
       } else if (st.phase === "vote") {
         for (const p of players) {
-          const pg = await myGame(roomId, p.id, gid);
+          const pg = await myGame(roomId, p, gid);
           if (!pg.state.myVote) {
             const suspect = players.find((x) => x.id !== p.id);
-            const r = await intent(roomId, p.id, gid, "impostor-vote", { suspectId: suspect.id });
+            const r = await intent(roomId, p, gid, "impostor-vote", { suspectId: suspect.id });
             if (!r.accepted) throw new Error(`impostor-vote rejected: ${r.reason}`);
           }
         }
       } else if (st.phase === "guess") {
         // find impostor by role in its own projection
         let imp = null;
-        for (const p of players) { const pg = await myGame(roomId, p.id, gid); if (pg.state?.role === "impostor") imp = p; }
+        for (const p of players) { const pg = await myGame(roomId, p, gid); if (pg.state?.role === "impostor") imp = p; }
         if (!imp) throw new Error("impostor not found in guess phase");
-        const r = await intent(roomId, imp.id, gid, "impostor-guess", { guess: "snowman" });
+        const r = await intent(roomId, imp, gid, "impostor-guess", { guess: "snowman" });
         if (!r.accepted) throw new Error(`impostor-guess rejected: ${r.reason}`);
       } else if (st.phase === "finished") {
         break;
@@ -134,19 +138,19 @@ async function playGame(roomId, players, gameId) {
     } else if (gameId === "caption-clash") {
       if (st.phase === "caption") {
         for (const p of players) {
-          const pg = await myGame(roomId, p.id, gid);
+          const pg = await myGame(roomId, p, gid);
           if (!pg.state.myCaption) {
-            const r = await intent(roomId, p.id, gid, "caption-submit", { caption: `caption by ${p.displayName} round ${st.roundIndex}` });
+            const r = await intent(roomId, p, gid, "caption-submit", { caption: `caption by ${p.displayName} round ${st.roundIndex}` });
             if (!r.accepted) throw new Error(`caption-submit rejected: ${r.reason}`);
           }
         }
       } else if (st.phase === "vote") {
         for (const p of players) {
-          const pg = await myGame(roomId, p.id, gid);
+          const pg = await myGame(roomId, p, gid);
           if (!pg.state.myVote) {
             const target = (pg.state.captions ?? []).find((c) => c.id !== p.id);
             if (!target) throw new Error("no votable caption");
-            const r = await intent(roomId, p.id, gid, "caption-vote", { captionId: target.id });
+            const r = await intent(roomId, p, gid, "caption-vote", { captionId: target.id });
             if (!r.accepted) throw new Error(`caption-vote rejected: ${r.reason}`);
           }
         }
@@ -155,23 +159,23 @@ async function playGame(roomId, players, gameId) {
     } else if (gameId === "word-connections") {
       for (const p of players) {
         for (const group of CONNECTIONS_GROUPS) {
-          const pg = await myGame(roomId, p.id, gid);
+          const pg = await myGame(roomId, p, gid);
           if ((pg.state.myState?.solved ?? []).length >= 4) break;
-          const r = await intent(roomId, p.id, gid, "connections-guess", { tileIds: group.map(tid) });
+          const r = await intent(roomId, p, gid, "connections-guess", { tileIds: group.map(tid) });
           if (!r.accepted) throw new Error(`connections-guess rejected: ${r.reason}`);
         }
       }
     } else if (gameId === "category-sprint") {
       for (const p of players) {
         const answers = [`${p.displayName}Alpha`, `${p.displayName}Bravo`, `${p.displayName}Charlie`];
-        const r = await intent(roomId, p.id, gid, "sprint-answers", { answers });
+        const r = await intent(roomId, p, gid, "sprint-answers", { answers });
         if (!r.accepted) throw new Error(`sprint-answers rejected: ${r.reason}`);
       }
     } else if (gameId === "charades") {
       let actor = null;
-      for (const p of players) { const pg = await myGame(roomId, p.id, gid); if (pg.state?.prompt) actor = p; }
+      for (const p of players) { const pg = await myGame(roomId, p, gid); if (pg.state?.prompt) actor = p; }
       if (!actor) throw new Error("no actor with prompt in charades turn");
-      const r = await intent(roomId, actor.id, gid, "charades-turn", { outcome: "correct" });
+      const r = await intent(roomId, actor, gid, "charades-turn", { outcome: "correct" });
       if (!r.accepted) throw new Error(`charades-turn rejected: ${r.reason}`);
     } else {
       throw new Error(`no driver for ${gameId}`);
@@ -205,15 +209,15 @@ for (const g of tv.games) console.log(`  score ${g.gameId}: ${JSON.stringify(g.r
 // Category-leak check on a fresh, still-playing Connections game
 const room2 = await post("/rooms", { name: "Leak check" });
 const p2 = await post(`/rooms/${room2.roomId}/join`, { displayName: "LeakHost", asHost: true });
-await post(`/rooms/${room2.roomId}/games`, { hostId: p2.playerId, gameId: "word-connections", official: false });
+await post(`/rooms/${room2.roomId}/games`, { gameId: "word-connections", official: false }, p2.recoveryToken);
 const tv2 = await get(`/rooms/${room2.roomId}`);
 const tiles = tv2.games[0].state.tiles;
 console.log(`playing-connections tiles leak category: ${tiles.some((t) => t.category !== undefined)}; sample: ${JSON.stringify(tiles[0])}`);
-const ledger = await get(`/rooms/${room.roomId}/ledger`);
+const ledger = await get(`/rooms/${room.roomId}/ledger`, players[0].token);
 console.log(`ledger: game-finished events=${ledger.filter((e) => e.type === "game-finished").length} total=${ledger.length}`);
-const mem = await post(`/rooms/${room.roomId}/memory`, { day: 1, text: "Test highlight from playthrough", sourceEventIds: ledger.filter((e) => e.type === "game-finished").slice(-1).map((e) => e.eventId) });
-await post(`/rooms/${room.roomId}/memory/${mem.id}/approve`, { approverId: players[0].id });
-const exp = await get(`/rooms/${room.roomId}/memory/export`);
+const mem = await post(`/rooms/${room.roomId}/memory`, { day: 1, text: "Test highlight from playthrough", sourceEventIds: ledger.filter((e) => e.type === "game-finished").slice(-1).map((e) => e.eventId) }, players[0].token);
+await post(`/rooms/${room.roomId}/memory/${mem.id}/approve`, {}, players[0].token);
+const exp = await get(`/rooms/${room.roomId}/memory/export`, players[0].token);
 console.log(`memory export includes test entry: ${exp.markdown.includes("Test highlight from playthrough")}`);
 // reconnect check
 const rc = await post(`/rooms/${room.roomId}/reconnect`, { playerId: players[1].id, recoveryToken: players[1].token });

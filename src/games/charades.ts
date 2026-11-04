@@ -2,6 +2,7 @@ export interface CharadesState {
   teams: string[][]; // player ids per team
   prompts: string[];
   turnIndex: number;
+  promptIndex: number; // prompt within the current turn; passes advance this, not the turn
   passesThisTurn: number;
   teamScores: number[];
   phase: "playing" | "finished";
@@ -20,7 +21,7 @@ export function initCharades(playerIds: string[]): CharadesState {
   // Split as evenly as possible into 2 teams, alternating assignment
   const teams: string[][] = [[], []];
   playerIds.forEach((pid, i) => teams[i % 2]!.push(pid));
-  return { teams, prompts: CHARADES_PROMPTS, turnIndex: 0, passesThisTurn: 0, teamScores: [0, 0], phase: "playing" };
+  return { teams, prompts: CHARADES_PROMPTS, turnIndex: 0, promptIndex: 0, passesThisTurn: 0, teamScores: [0, 0], phase: "playing" };
 }
 
 export function currentActor(state: CharadesState): string {
@@ -33,24 +34,26 @@ export function actorTeam(state: CharadesState, actorId: string): number {
   return state.teams[0]!.includes(actorId) ? 0 : 1;
 }
 
-/** Actor presses Correct (team +100) or Pass (0, max 3 passes per turn). After each turn, advance. */
+/** Actor presses Correct (team +100, turn ends) or Pass (0, max 3 passes per turn, turn continues with the next prompt). The game lasts one acting turn per player, so total turns scale with the roster instead of stopping at 4. */
 export function charadesTurn(state: CharadesState, actorId: string, outcome: "correct" | "pass"): void {
   if (state.phase !== "playing") throw new Error("PHASE_CLOSED");
   if (currentActor(state) !== actorId) throw new Error("NOT_ACTOR");
+  // Backwards compatibility for states created before promptIndex existed.
+  state.promptIndex ??= state.turnIndex;
   if (outcome === "correct") {
     const team = actorTeam(state, actorId);
     state.teamScores[team] = (state.teamScores[team] ?? 0) + 100;
     state.turnIndex += 1;
     state.passesThisTurn = 0;
+    state.promptIndex += 1;
   } else {
     if (state.passesThisTurn >= 3) throw new Error("PASS_LIMIT");
     state.passesThisTurn += 1;
-    // A pass does not end the turn in this simplified model; the actor can try the next prompt
-    // by advancing the prompt index via turn advancement in the engine (see below).
-    state.turnIndex += 1;
-    state.passesThisTurn = 0;
+    // A pass stays in the same turn: same actor, next prompt, pass count kept.
+    state.promptIndex += 1;
   }
-  if (state.turnIndex >= 4) state.phase = "finished";
+  const totalPlayers = state.teams[0]!.length + state.teams[1]!.length;
+  if (state.turnIndex >= totalPlayers) state.phase = "finished";
 }
 
 export function charadesPlayerScores(state: CharadesState): Record<string, number> {
@@ -63,10 +66,11 @@ export function charadesPlayerScores(state: CharadesState): Record<string, numbe
 
 export function projectCharades(state: CharadesState, actorId: string, isTv: boolean): Record<string, unknown> {
   const actor = currentActor(state);
-  const prompt = state.prompts[state.turnIndex % state.prompts.length]!;
+  const prompt = state.prompts[(state.promptIndex ?? state.turnIndex) % state.prompts.length]!;
   return {
     phase: state.phase,
     turnIndex: state.turnIndex,
+    passesThisTurn: state.passesThisTurn,
     actor,
     // Prompt is private to the actor only, never to TV or other players
     prompt: !isTv && actorId === actor ? prompt : undefined,

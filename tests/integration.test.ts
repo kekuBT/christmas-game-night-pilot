@@ -20,17 +20,21 @@ afterAll(async () => {
   await server.close();
 });
 
-async function post(path: string, body: Record<string, unknown>): Promise<{ status: number; json: Record<string, unknown> }> {
+async function post(path: string, body: Record<string, unknown>, token?: string): Promise<{ status: number; json: Record<string, unknown> }> {
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (token) headers["x-session-token"] = token;
   const res = await fetch(`http://127.0.0.1:${port}${path}`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
   return { status: res.status, json: (await res.json()) as Record<string, unknown> };
 }
 
-async function get(path: string): Promise<Record<string, unknown>> {
-  const res = await fetch(`http://127.0.0.1:${port}${path}`);
+async function get(path: string, token?: string): Promise<Record<string, unknown>> {
+  const headers: Record<string, string> = {};
+  if (token) headers["x-session-token"] = token;
+  const res = await fetch(`http://127.0.0.1:${port}${path}`, { headers });
   return (await res.json()) as Record<string, unknown>;
 }
 
@@ -40,19 +44,17 @@ describe("M1 HTTP + WebSocket adapter", () => {
     expect(created.status).toBe(201);
     const roomId = created.json["roomId"] as string;
     const players: { id: string; token: string }[] = [];
-    let host = "";
     for (let i = 0; i < 10; i++) {
       const joined = await post(`/rooms/${roomId}/join`, { displayName: `Player${i + 1}`, asHost: i === 0 });
       expect(joined.status).toBe(201);
       players.push({ id: joined.json["playerId"] as string, token: joined.json["recoveryToken"] as string });
-      if (joined.json["isHost"]) host = joined.json["playerId"] as string;
     }
-    const started = await post(`/rooms/${roomId}/games`, { hostId: host, gameId: "math-mayhem", seed: 11 });
+    const started = await post(`/rooms/${roomId}/games`, { gameId: "math-mayhem", seed: 11 }, players[0]!.token);
     expect(started.status).toBe(201);
     const gameId = started.json["gameId"] as string;
 
     // Get player projection to learn question ids (prompts/options only, no answers)
-    const proj = await get(`/rooms/${roomId}/projection?audience=player&actorId=${players[0]!.id}`);
+    const proj = await get(`/rooms/${roomId}/projection?audience=player`, players[0]!.token);
     const myGames = proj["myGames"] as { id: string; questions: { id: string }[] }[];
     const questions = myGames.find((g) => g.id === gameId)?.questions ?? [];
     expect(questions.length).toBe(10);
@@ -62,7 +64,6 @@ describe("M1 HTTP + WebSocket adapter", () => {
     for (const p of players) {
       for (const q of questions) {
         const r = await post(`/rooms/${roomId}/intents`, {
-          actorId: p.id,
           intent: {
             kind: "intent",
             schemaVersion: 1,
@@ -72,7 +73,7 @@ describe("M1 HTTP + WebSocket adapter", () => {
             action: "submit-math-answer",
             payload: { questionId: q.id, chosenIndex: 0 },
           },
-        });
+        }, p.token);
         expect(r.status).toBe(200);
       }
     }
@@ -85,11 +86,11 @@ describe("M1 HTTP + WebSocket adapter", () => {
     const created = await post("/rooms", { name: "WS Room" });
     const roomId = created.json["roomId"] as string;
     const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true });
-    const hostId = hostJoin.json["playerId"] as string;
     await post(`/rooms/${roomId}/join`, { displayName: "Guest" });
 
     const messages: string[] = [];
-    const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&actorId=${hostId}&audience=host`);
+    const hostToken = hostJoin.json["recoveryToken"] as string;
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&audience=host&sessionToken=${encodeURIComponent(hostToken)}`);
     ws.on("message", (data) => messages.push(data.toString()));
     await new Promise<void>((resolve) => ws.on("open", () => resolve()));
     // Wait a tick for the initial projection
@@ -102,17 +103,17 @@ describe("M1 HTTP + WebSocket adapter", () => {
     const created = await post("/rooms", { name: "Reload Room" });
     const roomId = created.json["roomId"] as string;
     const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true });
-    const hostId = hostJoin.json["playerId"] as string;
     const guestJoin = await post(`/rooms/${roomId}/join`, { displayName: "Guest" });
     const guestId = guestJoin.json["playerId"] as string;
+    const guestToken = guestJoin.json["recoveryToken"] as string;
 
     const connectedOf = async (id: string): Promise<boolean> => {
       const tv = await get(`/rooms/${roomId}/projection?audience=tv`);
       const players = tv["players"] as { id: string; connected: boolean }[];
       return players.find((p) => p.id === id)?.connected ?? false;
     };
-    const openWs = async (id: string): Promise<WebSocket> => {
-      const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&actorId=${id}&audience=player`);
+    const openWs = async (_id: string): Promise<WebSocket> => {
+      const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&audience=player&sessionToken=${encodeURIComponent(guestToken)}`);
       await new Promise<void>((resolve) => ws.on("open", () => resolve()));
       return ws;
     };
@@ -136,7 +137,7 @@ describe("M1 HTTP + WebSocket adapter", () => {
     expect(await connectedOf(guestId)).toBe(false);
     // And a fresh socket restores eligibility for a minPlayers game.
     const ws4 = await openWs(guestId);
-    const started = await post(`/rooms/${roomId}/games`, { hostId, gameId: "math-mayhem", seed: 5 });
+    const started = await post(`/rooms/${roomId}/games`, { gameId: "math-mayhem", seed: 5 }, hostJoin.json["recoveryToken"] as string);
     expect(started.status).toBe(201);
     await closeWs(ws4);
   });
@@ -145,9 +146,8 @@ describe("M1 HTTP + WebSocket adapter", () => {
     const created = await post("/rooms", { name: "Restart Room" });
     const roomId = created.json["roomId"] as string;
     const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true });
-    const hostId = hostJoin.json["playerId"] as string;
     await post(`/rooms/${roomId}/join`, { displayName: "Guest" });
-    const started = await post(`/rooms/${roomId}/games`, { hostId, gameId: "math-mayhem", seed: 3 });
+    const started = await post(`/rooms/${roomId}/games`, { gameId: "math-mayhem", seed: 3 }, hostJoin.json["recoveryToken"] as string);
     expect(started.status).toBe(201);
 
     // Simulate a restart: new server instance on the same dataDir
@@ -158,7 +158,7 @@ describe("M1 HTTP + WebSocket adapter", () => {
     expect((tv["players"] as unknown[]).length).toBe(2);
     expect((tv["games"] as { status: string }[])[0]?.status).toBe("playing");
     // Engine state restored, including deadline: room still exists and is playable
-    const proj = await get(`/rooms/${roomId}/projection?audience=player&actorId=${hostId}`);
+    const proj = await get(`/rooms/${roomId}/projection?audience=player`, hostJoin.json["recoveryToken"] as string);
     expect(proj["roomId"]).toBe(roomId);
   });
 });
