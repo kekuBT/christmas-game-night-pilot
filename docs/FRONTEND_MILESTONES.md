@@ -26,6 +26,7 @@
 ## F5 — Integration and end-to-end
 - Acceptance: A full 7-day seeded run through the API produces accurate standings and a factual Memory Book export; a full day playlist through the browser (host + 3 players) completes without a stuck game or secret leak.
 - Test: Championship worked-example tests (passing) + a browser E2E script when Playwright is added. Playwright E2E is NOT RUN yet.
+- Status: DONE 2026-11-04 — `scripts/check-f5.mjs` (`npm run check-f5`) 30/30 in Chromium: host + 3 players play all 11 games in registry order to finished in one room, TV projection leak-free while each game is playing, 11/11 game-finished events in the ledger, TV projection marks all 11 finished, championship standings + breakdown, TV Dashboard recent 5, Memory Book add/approve/export from the full day. The 7-day API half is covered by the passing championship/scoring unit tests. See `docs/PROGRESS.md` cron run ~03:30 EST. First run was 27/29 with two check-design flaws, not app bugs: the ledger scan looked for registry ids (ledger uses gameInstanceIds, and Math Mayhem scores per-question reasons) and the TV check expected all 11 games on a Dashboard that by design shows the recent 5.
 
 ## F6 — Mobile and accessibility
 - Acceptance: Phone layout at 320px, 375px, and 390px portrait with no horizontal scroll, touch targets >=44px, visible focus, keyboard navigation for join/lobby/game selection, reduced-motion parity, and readable contrast for the Midnight Christmas palette.

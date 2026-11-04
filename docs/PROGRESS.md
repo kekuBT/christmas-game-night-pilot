@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 ~03:05 EST (F4 DONE: championship/TV/Memory Book browser check 11/11 incl. revoke-disappears-from-export; real-device checklist still NOT RUN)
+Updated: 2026-11-04 ~03:30 EST (F5 DONE: full-day browser playlist 30/30 incl. per-game TV leak scans; real-device checklist still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -47,7 +47,7 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 2. DONE except WebKit + device checklist: Playwright E2E (`scripts/e2e-browser.mjs`, `npm run e2e`) covers Chromium/Firefox; WebKit BLOCKED on host libraries (see above); manual real-device checklist still NOT RUN.
 3. DONE 2026-11-04 ~01:20 EST: PR-ready checkpoint packet prepared LOCALLY — `docs/CHECKPOINT_PACKET.md` (summary, test evidence, screenshots, limitations, open owner decisions) + `scripts/screenshot-checkpoint.mjs` + 7 screenshots in `docs/checkpoint-screenshots/` (home, lobby, game playing, game finished, championship, TV dashboard, Memory Book; fictional players only). NOT published to GitHub until Keku explicitly asks, per local-only mode.
 4. PARTLY DONE 2026-11-04 ~01:50 EST: F6 mobile/accessibility viewport checks (Chromium emulation, NOT real devices) — see cron run below. REMAINING: manual real-device checklist (iPhone Safari, Android, desktop Safari, TV — all NOT RUN; needs real devices, cannot be done from this VM) and F5/F7 completion per `docs/FRONTEND_MILESTONES.md` (F4 closed 2026-11-04 ~03:05 EST).
-5. DONE 2026-11-04 ~03:05 EST: F4 formally closed — see cron run below. REMAINING NEXT: F5 full-day playlist (browser: host + 3 players play a full day's playlist without a stuck game or secret leak; the 7-day API worked example already passes in unit tests), then F7 clean-install, and the manual real-device checklist.
+5. DONE 2026-11-04 ~03:30 EST: F5 formally closed — see cron run below. REMAINING NEXT: F7 clean-install, and the manual real-device checklist.
 
 ## External approvals pending
 None queued. Local-only mode: do not initiate GitHub publishing or approval requests until Keku explicitly asks. GitHub coordination cron remains paused.
@@ -64,6 +64,7 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - `node scripts/check-mobile.mjs http://localhost:3457` — exit 0, 32 checks passed (see cron run 2026-11-04 ~01:46 EST)
 - `node scripts/check-multiplayer.mjs http://localhost:3457` — exit 0, 12 checks passed (see cron run 2026-11-04 ~02:45 EST)
 - `node scripts/check-f4.mjs http://localhost:3457` — exit 0, 11 checks passed (see cron run 2026-11-04 ~03:05 EST)
+- `node scripts/check-f5.mjs http://localhost:3457` — exit 0, 30/30 passed (see cron run 2026-11-04 ~03:30 EST)
 - `node scripts/e2e-browser.mjs http://localhost:3457 --browser=chromium --games=smoke` — exit 0, 3/3 passed (regression after WS connected fix)
 - Live smoke (port 3456, 2026-11-03): `/`, `/games`, join-by-code, host start Math Mayhem with 2 players — all as reported above
 - `npm audit --omit=dev` — blocked by registry proxy 403, NOT RUN (earlier session); `npm view playwright` 2026-11-04 succeeded (1.64.1)
@@ -110,5 +111,15 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - Evidence: `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run build:web` exit 0, `npm run check-f4` exit 0 (11/11), E2E smoke (`--games=smoke`, Chromium) 3/3 passed. No app code changed in this run (drivers + docs only). Test server data/ removed.
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
 
+## Cron run 2026-11-04 ~03:30 EST (local-dev-christmas-30m — COMPLETED with commit)
+- Tree was clean; worked task-board item 5 (F5 formal close-out).
+- New driver `scripts/check-f5.mjs` (`npm run check-f5`, Chromium, 4 fictional players): all 11 games in registry order played to finished in ONE room via real UI clicks, TV projection leak scan while each game is PLAYING, then ledger/TV-projection settlement checks, championship view, TV Dashboard, Memory Book add → approve → export from the full day. The 7-day API half of F5 is covered by the passing championship/scoring unit tests.
+- First run was 27/29 with TWO CHECK-DESIGN FLAWS, not app bugs:
+  1. Ledger scan looked for registry game ids in the ledger JSON, but ledger events carry gameInstanceIds (game-1…game-11) and Math Mayhem's score reasons are per-question (math:math-1…math:math-10), so "math-mayhem" never appears as a substring even though its game-finished event exists (verified in the room snapshot: 11 game-finished events, game-11 finished). Fixed: count `game-finished` events (11/11) and cross-check finished ids via the TV projection.
+  2. TV Dashboard check expected all 11 finished games listed, but "Recent games" is by design the last 5 (`src/server/hub.ts` and `apps/web/src/App.tsx` both `slice(-5)`). Fixed: assert the 5 most recent finished games are listed.
+- Server-stop quirk repeated from the checkpoint run: `pkill -f "tsx src/server/serve.ts"` matched the wrapping shell and killed it before `rm -rf data` ran; data/ was removed in a follow-up command and the server confirmed stopped (same pattern: stop via `lsof -ti:3457 | xargs kill`, then `rm -rf data`, then verify).
+- Evidence: `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run build:web` exit 0, `npm run check-f5` exit 0 (30/30: 11 leak-free scans, 11 finished-without-sticking, all-finished, 11/11 ledger finish events, TV projection all finished, championship standings + breakdown, TV recent 5, Memory Book export). No app code changed in this run (driver + docs only). Test server data/ removed.
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
 ## Next session exact resume step
-Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then work F5 (full-day playlist through the browser: host + 3 players, no stuck game, no secret leak), then F7, and the manual real-device checklist (iPhone Safari, Android, desktop, TV — all still NOT RUN; needs real devices). Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
+Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then work F7 (clean-install: fresh `npm install` + typecheck + tests + `npm run build` + `npm run build:web` all exit 0, SECURITY_AUDIT.md updated with the final test matrix, every NOT RUN item listed explicitly), and the manual real-device checklist (iPhone Safari, Android, desktop, TV — all still NOT RUN; needs real devices). Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
