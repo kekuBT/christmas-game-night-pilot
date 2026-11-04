@@ -102,6 +102,10 @@ export interface GameInstance {
   startedAt?: number;
   deadlineAt?: number;
   seed: number;
+  /** Player ids that have submitted at least one accepted intent in this game.
+   *  Used only for a privacy-safe waiting count (count, never identities or
+   *  answers, in projections). Old snapshots lack it and are treated as []. */
+  submittedPlayers?: string[];
   extra?: unknown;
 }
 
@@ -289,6 +293,13 @@ export class RoomEngine {
       result = this.submitSocialIntent(intent, actorId, now);
     } else {
       result = { accepted: false, reason: "UNKNOWN_ACTION" };
+    }
+    if (result.accepted) {
+      const game = [...this.games.values()].find((g) => g.id === intent.gameInstanceId);
+      if (game) {
+        game.submittedPlayers ??= [];
+        if (!game.submittedPlayers.includes(actorId)) game.submittedPlayers.push(actorId);
+      }
     }
     this.seenIntents.set(key, { accepted: result.accepted, result });
     return result;
@@ -643,6 +654,8 @@ export class RoomEngine {
       day: g.day ?? 1,
       deadlineAt: g.deadlineAt,
       players: g.players,
+      submittedCount: (g.submittedPlayers ?? []).length,
+      totalPlayers: g.players.length,
       state:
         g.gameId === "impostor"
           ? projectImpostor(g.extra as ImpostorState, "", true)

@@ -3,6 +3,11 @@ import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, Pu
 import { GamePanel } from "./components/GamePanel.js";
 import { ChampionshipView } from "./components/ChampionshipView.js";
 import { MemoryBookView } from "./components/MemoryBookView.js";
+import { LivingLobby } from "./components/LivingLobby.js";
+import { Reactions } from "./components/Reactions.js";
+import { ShowIntro, ShowResults, ShowWaiting } from "./components/ShowMode.js";
+import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js";
+import { deriveShowPhase } from "./components/showPhase.js";
 import QRCode from "qrcode";
 
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
@@ -55,6 +60,9 @@ export function App() {
   const [bookText, setBookText] = useState("");
   const [exportText, setExportText] = useState("");
   const [textInput, setTextInput] = useState("");
+  const [introDismissed, setIntroDismissed] = useState<string | null>(sessionStorage.getItem("cgn_intro_dismissed"));
+  const [resultsDismissed, setResultsDismissed] = useState<string | null>(sessionStorage.getItem("cgn_results_dismissed"));
+  const settings = useExperienceSettings();
   const [numInput, setNumInput] = useState("");
   const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
@@ -131,9 +139,12 @@ export function App() {
   if (!roomId || !playerId) {
     return <div className="wrap"><header><h1>🎄 Christmas Game Night</h1></header>
       <div className="card"><h2>Join the family game night</h2>
-        <p className="muted">No account needed. Each browser tab can be a different player — open a second tab to test multiplayer.</p>
+        <p className="muted">No account needed. Three steps and you are playing.</p>
+        <p><b>Step 1 — Your name.</b> This is how everyone sees you.</p>
         <label>Your name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ada" /></label>
-        <label>Room code<input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="e.g. K7M2Q9" /></label>
+        <p><b>Step 2 — Join a room, or create one.</b> Joining needs the 6-letter code from the host. Creating makes you the host.</p>
+        <label>Room code (only if joining)<input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="e.g. K7M2Q9" /></label>
+        {!name && <p className="muted">Enter your name first — then both buttons work.</p>}
         <div className="row"><button onClick={joinRoom} disabled={!code || !name}>Join room</button><button className="secondary" onClick={createRoom} disabled={!name}>Create a room (host)</button></div>
         {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
       </div>
@@ -143,7 +154,6 @@ export function App() {
 
   const players: PublicPlayer[] = proj?.players ?? [];
   const myGames: PlayerGame[] = proj?.myGames ?? [];
-  const active = myGames.find((g) => g.status === "playing") ?? myGames.slice(-1)[0];
   const me = players.find((p) => p.id === playerId);
   const finished = (proj?.games ?? []).filter((g) => g.status === "finished");
   const officialFinished = finished.filter((g) => g.official && !g.timedOut);
@@ -154,8 +164,19 @@ export function App() {
     return out;
   })();
   const nameOf = (id: string): string => players.find((p) => p.id === id)?.displayName ?? id;
+  const playingGame = myGames.find((g) => g.status === "playing");
+  const latestFinished = myGames.filter((g) => g.status === "finished").slice(-1)[0];
+  const publicPlaying = (proj?.games ?? []).find((g) => g.id === playingGame?.id);
+  const publicFinished = (proj?.games ?? []).find((g) => g.id === latestFinished?.id);
+  const showPhase = view === "lobby" ? deriveShowPhase(playingGame, latestFinished, introDismissed, resultsDismissed, playerId ?? undefined) : "lobby";
+  // Precomputed outside the lobby fragment so TS aliased-condition narrowing
+  // on the lobby branch cannot narrow showPhase itself inside that fragment.
+  const isLobbyPhase = showPhase === "lobby";
+  const showGamePanel = (showPhase === "gameplay" || showPhase === "waiting") && !!playingGame;
+  function dismissIntro(id: string) { sessionStorage.setItem("cgn_intro_dismissed", id); setIntroDismissed(id); }
+  function dismissResults(id: string) { sessionStorage.setItem("cgn_results_dismissed", id); setResultsDismissed(id); }
 
-  return <div className="wrap">
+  return <div className={`wrap anim-${settings.anim}`}>
     <header><h1>🎄 Christmas Game Night</h1><span className="pill">Code: {proj?.joinCode ?? "…"}</span></header>
     <p className="muted">Playing as <b>{me?.displayName ?? "…"}</b>{me?.isHost ? " (host)" : ""} · Room: {proj?.name ?? ""}</p>
     <div className="row">
@@ -167,7 +188,15 @@ export function App() {
     </div>
     {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
 
-    {view === "lobby" && <>
+    {view === "lobby" && showPhase === "intro" && playingGame && <ShowIntro game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} tutorial={games.find((x) => x.id === playingGame.gameId)?.tutorial ?? ""} onStart={() => dismissIntro(playingGame.id)} />}
+    {view === "lobby" && showPhase === "waiting" && playingGame && publicPlaying && <>
+      <ShowWaiting game={publicPlaying} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} isHostOrCohost={!!(me?.isHost || me?.isCohost)} onSkip={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/games/${playingGame.id}/skip`, {}); await refresh(); }} />
+      <p className="muted">The game stays visible below — when the next phase starts, this banner goes away on its own.</p>
+    </>}
+    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} onBack={() => dismissResults(latestFinished.id)} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
+      {showGamePanel && playingGame && <GamePanel game={playingGame} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
+    {view === "lobby" && isLobbyPhase && <>
+      <LivingLobby players={players} myId={playerId} />
       <div className="card"><h2>Invite by QR</h2><p className="muted">Scan to join this room. The 6-character code below works too — that is the manual-code fallback.</p>
         {(location.hostname === "localhost" || location.hostname === "127.0.0.1") && <p>⚠️ This QR points to {location.origin}, which only works on this device. A phone scanning it will be sent to its own localhost and cannot join. Open the app from a LAN-reachable address (or the approved deployed domain) so the QR works, or share the 6-character code instead.</p>}
         {qrUrl && <img src={qrUrl} alt={`QR code to join room ${proj?.joinCode ?? ""}`} width={220} height={220} />}
@@ -181,8 +210,9 @@ export function App() {
           <p>{g.tutorial}</p><div className="row"><button data-testid={`start-official-${g.id}`} onClick={() => startGame(g.id, true)} disabled={!(me?.isHost || me?.isCohost)}>Start (official)</button><button data-testid={`start-practice-${g.id}`} className="secondary" onClick={() => startGame(g.id, false)} disabled={!(me?.isHost || me?.isCohost)}>Start (practice)</button></div></div>)}
       </div>
       {(proj?.games ?? []).filter((g) => g.status === "playing" && g.deadlineAt !== undefined && Date.now() > g.deadlineAt).map((g) => (me?.isHost || me?.isCohost) ? <div key={g.id} className="card"><p>Game {g.gameId} has passed its deadline and may be stalled.</p><button onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/games/${g.id}/skip`, {}); await refresh(); }}>Skip timed-out game (no scores invented)</button></div> : null)}
-      {active && <GamePanel game={active} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
       {finished.length > 0 && <div className="card" data-testid="finished-games"><h2>Finished games</h2>{finished.map((g) => <p key={g.id}><b>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId}</b> — {Object.entries(g.rawScores ?? {}).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>)}</div>}
+      <SettingsBar sound={settings.sound} anim={settings.anim} onToggleSound={settings.toggleSound} onSetAnim={settings.setAnimSetting} />
+      <Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} />
     </>}
 
     {view === "championship" && <ChampionshipView proj={proj} games={games} players={players} nameOf={nameOf} midrank={midrank} post={post} refresh={refresh} meIsHostOrCohost={!!(me?.isHost || me?.isCohost)} />}
@@ -195,6 +225,7 @@ export function App() {
       {(proj?.games ?? []).filter((g) => g.status === "playing").length === 0 && <p className="muted">No game in progress — the lobby is choosing the next game.</p>}
       {proj?.ceremony?.winner && <p>🏆 Day {proj.ceremony.day} winner: <b>{proj.ceremony.winner}</b></p>}
       <h3>Recent games</h3>{(proj?.games ?? []).slice(-5).map((g) => <p key={g.id}>{g.gameId} — {g.status}{g.rawScores ? ` — ${Object.entries(g.rawScores).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}` : ""}</p>)}
+      <Reactions proj={proj} post={post} canMute={false} />
     </div>}
 
     {view === "memory" && <MemoryBookView roomId={roomId} book={book} ledger={ledger} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} />}

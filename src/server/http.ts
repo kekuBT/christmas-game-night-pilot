@@ -41,6 +41,21 @@ export class LocalServer {
    * just joins as a regular player.
    */
   private hostClaims = new Map<string, string>();
+  /**
+   * Live reactions (M6.5): ephemeral, scoring-free, never persisted and never
+   * in the ledger. Per room: recent reactions, per-player rate-limit stamps,
+   * and a host mute flag. Projections only carry reactions younger than
+   * 15 seconds, so a reaction is a brief moment, not a permanent record.
+   */
+  private reactions = new Map<string, { emoji: string; sender: string; ts: number }[]>();
+  private reactionStamps = new Map<string, number[]>();
+  private reactionsMuted = new Map<string, boolean>();
+  static readonly REACTION_SET = ["🎄", "❄️", "🎉", "👏", "😂", "🔥"];
+  private projectFor(room: RoomEngine, audience: "player" | "tv" | "host" | "cohost", actorId?: string): Record<string, unknown> {
+    const now = Date.now();
+    const recent = (this.reactions.get(room.id) ?? []).filter((r) => now - r.ts < 15000);
+    return { ...room.project(audience, actorId), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false };
+  }
   private dataDir: string;
   private http = createServer((req, res) => void this.handleHttp(req, res));
   private wss = new WebSocketServer({ server: this.http });
@@ -254,14 +269,14 @@ export class LocalServer {
           return;
         }
         if (req.method === "GET" && parts.length === 2) {
-          this.send(res, 200, room.project("tv"));
+          this.send(res, 200, this.projectFor(room, "tv"));
           return;
         }
         if (req.method === "GET" && parts.length === 3 && parts[2] === "projection") {
           const requested = (url.searchParams.get("audience") ?? "tv") as "player" | "tv" | "host" | "cohost";
           if (requested === "tv") {
             // TV is the only public projection; client-supplied actorId is ignored.
-            this.send(res, 200, room.project("tv"));
+            this.send(res, 200, this.projectFor(room, "tv"));
             return;
           }
           const player = this.requireSession(room, req, res);
@@ -274,7 +289,7 @@ export class LocalServer {
             this.send(res, 403, { error: "Cohost projection requires cohost role" });
             return;
           }
-          this.send(res, 200, room.project(requested, player.id));
+          this.send(res, 200, this.projectFor(room, requested, player.id));
           return;
         }
         if (req.method === "GET" && parts.length === 3 && parts[2] === "ledger") {
@@ -408,6 +423,38 @@ export class LocalServer {
           this.send(res, 200, { ok: true, day });
           return;
         }
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "reactions") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const body = await this.readBody(req);
+          const emoji = String(body["emoji"] ?? "");
+          if (!LocalServer.REACTION_SET.includes(emoji)) { this.send(res, 400, { error: "Reaction not in the allowed set" }); return; }
+          if (this.reactionsMuted.get(room.id)) { this.send(res, 403, { error: "Reactions are muted by the host" }); return; }
+          const now = Date.now();
+          const key = `${room.id}:${player.id}`;
+          const stamps = (this.reactionStamps.get(key) ?? []).filter((t) => now - t < 3600000);
+          if (stamps.length >= 30 || (stamps.length > 0 && now - stamps[stamps.length - 1]! < 3000)) {
+            this.send(res, 429, { error: "Reaction rate limit: wait a moment" }); return;
+          }
+          stamps.push(now);
+          this.reactionStamps.set(key, stamps);
+          const list = this.reactions.get(room.id) ?? [];
+          list.push({ emoji, sender: player.displayName, ts: now });
+          this.reactions.set(room.id, list.slice(-12));
+          this.broadcast(room.id);
+          this.send(res, 201, { ok: true });
+          return;
+        }
+        if (req.method === "POST" && parts.length === 4 && parts[2] === "reactions" && parts[3] === "mute") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          if (!player.isHost && !player.isCohost) { this.send(res, 403, { error: "Only host/cohost can mute reactions" }); return; }
+          const body = await this.readBody(req);
+          this.reactionsMuted.set(room.id, body["muted"] === true);
+          this.broadcast(room.id);
+          this.send(res, 200, { ok: true, muted: this.reactionsMuted.get(room.id) });
+          return;
+        }
         if (req.method === "POST" && parts.length === 3 && parts[2] === "intents") {
           const player = this.requireSession(room, req, res);
           if (!player) return;
@@ -478,7 +525,7 @@ export class LocalServer {
       const player = room.players.get(actorId);
       if (player) player.connected = true;
     }
-    ws.send(JSON.stringify({ kind: "projection", state: room.project(audience, actorId || undefined) }));
+    ws.send(JSON.stringify({ kind: "projection", state: this.projectFor(room, audience, actorId || undefined) }));
     ws.on("message", (data) => {
       try {
         const msg = JSON.parse(data.toString()) as { intent?: unknown };
@@ -518,7 +565,7 @@ export class LocalServer {
     for (const { ws, meta } of this.sockets) {
       if (meta.roomId !== roomId) continue;
       if (ws.readyState === 1) {
-        ws.send(JSON.stringify({ kind: "projection", state: room.project(meta.audience, meta.actorId || undefined) }));
+        ws.send(JSON.stringify({ kind: "projection", state: this.projectFor(room, meta.audience, meta.actorId || undefined) }));
       }
     }
   }

@@ -24,6 +24,8 @@ export interface PublicGame {
   day?: number;
   deadlineAt?: number;
   players: string[];
+  submittedCount?: number;
+  totalPlayers?: number;
   state?: unknown;
   questions?: { id: string; prompt: string; options: string[]; correctAnswer?: number }[];
   rawScores?: Record<string, number>;
@@ -80,6 +82,8 @@ export interface Projection {
   achievements?: Achievement[];
   ceremony?: Ceremony;
   seq: number;
+  reactions?: { emoji: string; sender: string; ts: number }[];
+  reactionsMuted?: boolean;
   me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean };
   myGames?: PlayerGame[];
   hostView?: boolean;

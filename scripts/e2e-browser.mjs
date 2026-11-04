@@ -49,7 +49,11 @@ async function panelFinished(page, gameId) {
   // Heading must match the game: right after a previous game finishes, the
   // panel still shows that finished game until the new game's projection
   // arrives, and a bare "Status: finished" check would false-positive.
-  return t.includes(`Now playing: ${gameId}`) && t.includes("Status: finished");
+  if (t.includes(`Now playing: ${gameId}`) && t.includes("Status: finished")) return true;
+  // M6 Show Mode: a finished game shows the results screen instead of the
+  // finished panel. The results screen only ever shows the latest finished
+  // game, so its presence means the game just played is finished.
+  return await isVisible(page.getByTestId("show-results"), 500);
 }
 
 // One action pass for a single player page, for the game currently playing.
@@ -203,10 +207,13 @@ async function runBrowser(browserName, games) {
       const label = `${gameId}`;
       try {
         await host.locator(`[data-testid="start-official-${gameId}"]`).click();
-        // Wait for the NEW game's panel on every page, not just any panel:
-        // the previous finished game's panel is still rendered until the
-        // new projection arrives.
+        // M6 Show Mode: every player sees an intro screen first. Dismiss it
+        // on every page (or wait for its auto-advance) before waiting for
+        // the gameplay panel; otherwise the heading wait below times out.
         for (const { page } of pages) {
+          const intro = page.getByTestId("show-start-playing");
+          try { await intro.waitFor({ state: "visible", timeout: 15000 }); await intro.click(); }
+          catch { /* intro already auto-advanced; panel wait below covers it */ }
           await page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 });
         }
         const deadline = Date.now() + 180_000;
@@ -220,6 +227,9 @@ async function runBrowser(browserName, games) {
           await sleep(700);
         }
         if (!finished && !(await panelFinished(host, gameId))) throw new Error("did not reach Status: finished in 180s");
+        // M6: dismiss the results screen so the lobby (and the next game's
+        // start button) is visible again.
+        try { await host.getByTestId("show-back-to-lobby").click({ timeout: 3000 }); } catch { /* already in lobby */ }
         console.log(`[${browserName}] OK ${label}: finished`);
         results.push({ gameId, status: "finished" });
       } catch (e) {

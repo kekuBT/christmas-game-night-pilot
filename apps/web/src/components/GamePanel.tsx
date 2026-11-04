@@ -1,9 +1,15 @@
+import { useEffect, useState } from "react";
 import type { GameState, PlayerGame, PublicPlayer } from "../types.js";
 
 export type IntentFn = (gid: string, a: string, p: Record<string, unknown>) => void;
 
 export function GamePanel(props: { game: PlayerGame; players: PublicPlayer[]; nameOf: (id: string) => string; intent: (gid: string, a: string, p: Record<string, unknown>) => void; textInput: string; setTextInput: (s: string) => void; numInput: string; setNumInput: (s: string) => void; selectedTiles: string[]; setSelectedTiles: (s: string[]) => void }) {
   const { game, players, nameOf, intent, textInput, setTextInput, numInput, setNumInput, selectedTiles, setSelectedTiles } = props;
+  // Impostor role card: flipped state is per game instance, never shared.
+  const [roleFlipped, setRoleFlipped] = useState(false);
+  useEffect(() => { setRoleFlipped(false); }, [game.id]);
+  const [yearSlider, setYearSlider] = useState(2000);
+  const [dialValue, setDialValue] = useState(50);
   const st: GameState = (game.state ?? {}) as GameState;
   const gid = game.id;
   const quiz = ["math-mayhem", "trivia", "who-said-that", "geography"].includes(game.gameId);
@@ -13,14 +19,19 @@ export function GamePanel(props: { game: PlayerGame; players: PublicPlayer[]; na
     {game.status === "playing" && <>
       {quiz && questions.map((q) => {
         const answered = game.myAnswers?.[q.id] !== undefined || st.myAnswers?.[q.id] !== undefined;
-        return <div key={q.id} className="card"><p><b>{q.prompt}</b></p>{answered ? <p className="ok">Answered.</p> : <div className="grid">{(q.options ?? []).map((opt, i: number) => <button key={i} onClick={() => intent(gid, game.gameId === "math-mayhem" ? "submit-math-answer" : game.gameId === "trivia" ? "trivia-answer" : game.gameId === "who-said-that" ? "whosaid-answer" : "geography-answer", { questionId: q.id, chosenIndex: i })}>{opt}</button>)}</div>}</div>;
+        return <div key={q.id} className="card"><p><b>{q.prompt}</b></p>{answered ? <p className="ok">Answered.</p> : <div className="grid">{(q.options ?? []).map((opt, i: number) => <button key={i} className="answer-tile" onClick={() => intent(gid, game.gameId === "math-mayhem" ? "submit-math-answer" : game.gameId === "trivia" ? "trivia-answer" : game.gameId === "who-said-that" ? "whosaid-answer" : "geography-answer", { questionId: q.id, chosenIndex: i })}>{opt}</button>)}</div>}</div>;
       })}
       {game.gameId === "guess-the-year" && (st.events ?? []).map((e) => {
         const done = st.myGuesses?.[e.id] !== undefined;
-        return <div key={e.id} className="card"><p><b>{e.event}</b></p>{done ? <p className="ok">Guessed: {st.myGuesses?.[e.id]}</p> : <div className="row"><input type="number" value={numInput} onChange={(ev) => setNumInput(ev.target.value)} placeholder="Year" /><button onClick={() => intent(gid, "year-guess", { eventId: e.id, value: Number(numInput) })}>Submit year</button></div>}</div>;
+        return <div key={e.id} className="card"><p><b>{e.event}</b></p><p className="muted">Drag the timeline, or type a year — both work.</p>{done ? <p className="ok">Guessed: {st.myGuesses?.[e.id]}</p> : <><div className="row"><input type="range" min={1900} max={2025} value={yearSlider} aria-label="Year timeline" onChange={(ev) => setYearSlider(Number(ev.target.value))} /><b>{yearSlider}</b></div><div className="row"><input type="number" value={numInput} onChange={(ev) => setNumInput(ev.target.value)} placeholder="Year" /><button onClick={() => intent(gid, "year-guess", { eventId: e.id, value: Number(numInput) })}>Submit year</button><button onClick={() => intent(gid, "year-guess", { eventId: e.id, value: yearSlider })}>Submit timeline year {yearSlider}</button></div></>}</div>;
       })}
-      {game.gameId === "closest-wins" && <div className="card"><p><b>{st.prompt}</b> {st.unit ? `(${st.unit})` : ""}</p>{st.myGuess !== undefined ? <p className="ok">Your guess: {st.myGuess}</p> : <div className="row"><input type="number" value={numInput} onChange={(e) => setNumInput(e.target.value)} placeholder="Your guess" /><button onClick={() => intent(gid, "closest-guess", { value: Number(numInput) })}>Submit guess</button></div>}</div>}
-      {game.gameId === "impostor" && <div className="card"><p>Category: <b>{st.category}</b> · Role: <b>{st.role}</b>{st.word ? ` · Word: ${st.word}` : " · You are the impostor — no word given."}</p><p>Phase: {st.phase}</p>
+      {game.gameId === "closest-wins" && <div className="card"><p><b>{st.prompt}</b> {st.unit ? `(${st.unit})` : ""}</p><p className="muted">Turn the dial, or type a number — both work.</p>{st.myGuess !== undefined ? <p className="ok">Your guess: {st.myGuess}</p> : <><div className="row"><input type="range" min={0} max={1000} value={dialValue} aria-label="Guess dial" onChange={(e) => setDialValue(Number(e.target.value))} /><b>{dialValue}</b></div><div className="row"><input type="number" value={numInput} onChange={(e) => setNumInput(e.target.value)} placeholder="Your guess" /><button onClick={() => intent(gid, "closest-guess", { value: Number(numInput) })}>Submit guess</button><button onClick={() => intent(gid, "closest-guess", { value: dialValue })}>Submit dial guess {dialValue}</button></div></>}</div>}
+      {game.gameId === "impostor" && <div className="card"><p>Category: <b>{st.category}</b></p>
+        <div className="role-card-wrap"><button type="button" className={roleFlipped ? "role-card flipped" : "role-card"} data-testid="role-card" aria-label={roleFlipped ? "Your role card, revealed" : "Tap to reveal your role card"} onClick={() => setRoleFlipped(!roleFlipped)}>
+          <span className="role-front">🎭 Tap to reveal your role</span>
+          <span className="role-back">{st.role === "impostor" ? "You are the IMPOSTOR — no word given. Blend in." : `You are HONEST — the word is: ${st.word ?? "…"}`}</span>
+        </button></div>
+        <p className="muted">Only you can see this card. Flip it back any time.</p><p>Phase: {st.phase}</p>
         <p>Clues: {Object.entries(st.clues ?? {}).map(([pid, c]) => `${nameOf(pid)}: ${c}`).join(" · ") || "none yet"}</p>
         {st.phase === "clue" && <div className="row"><input value={textInput} onChange={(e) => setTextInput(e.target.value)} placeholder="Your clue (max 140 chars)" maxLength={140} /><button onClick={() => intent(gid, "impostor-clue", { clue: textInput })}>Submit clue</button></div>}
         {st.phase === "vote" && !st.myVote && <div className="grid">{players.filter((p) => p.id !== props.players.find((x) => x.id === p.id)?.id || true).filter((p) => p.id !== (sessionStorage.getItem("cgn_playerId"))).map((p) => <button key={p.id} onClick={() => intent(gid, "impostor-vote", { suspectId: p.id })}>Vote: {p.displayName}</button>)}</div>}
