@@ -1,6 +1,8 @@
 import { createHash, randomInt } from "node:crypto";
 import { getGame } from "../games/registry.js";
 import { midrankScore } from "../scoring/championship.js";
+import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
+import { evaluateAchievements, dayCeremony } from "./achievements.js";
 import { generateMathQuestions, scoreMathAnswer, type MathQuestion } from "../games/math.js";
 import {
   allCluesIn,
@@ -81,6 +83,7 @@ export interface LedgerEvent {
   reason?: string;
   actor?: string;
   official?: boolean;
+  previousPoints?: number;
   createdAt: number;
 }
 
@@ -91,6 +94,7 @@ export interface GameInstance {
   status: "lobby" | "playing" | "revealed" | "finished";
   players: string[]; // player ids
   timedOut?: boolean; // host-skipped after deadline; never counts toward official standings
+  day?: number; // championship day the game was started on (default 1)
   questions?: MathQuestion[]; // Math only, server-side. Never projected pre-reveal.
   answers: Record<string, Record<string, number | null>>; // playerId -> questionId -> chosenIndex
   answerTimes: Record<string, Record<string, number>>; // playerId -> questionId -> elapsedMs
@@ -114,6 +118,7 @@ export class RoomEngine {
   players = new Map<string, RoomPlayer>();
   hostId: string | null = null;
   cohosts = new Set<string>();
+  championshipDay = 1;
   games = new Map<string, GameInstance>();
   ledger: LedgerEvent[] = [];
   seq = 0;
@@ -211,6 +216,7 @@ export class RoomEngine {
       rawScores: Object.fromEntries(playerIds.map((p) => [p, 0])),
       startedAt: Date.now(),
       deadlineAt: Date.now() + 5 * 60 * 1000,
+      day: this.championshipDay,
       seed,
       extra:
         gameId === "impostor"
@@ -238,6 +244,18 @@ export class RoomEngine {
     this.games.set(id, instance);
     this.log("game-started", { gameInstanceId: id, actor: hostId });
     return instance;
+  }
+
+  /**
+   * Players who can still advance a game: connected players, falling back to
+   * all players if nobody is connected (so a game never finishes instantly
+   * just because everyone dropped at once — the host skip covers that case).
+   * A disconnected player's partial answers still count; they simply no
+   * longer block the rest of the room from finishing.
+   */
+  private activePlayers(game: GameInstance): string[] {
+    const connected = game.players.filter((pid) => this.players.get(pid)?.connected);
+    return connected.length > 0 ? connected : game.players;
   }
 
   /** Submit a validated intent. Returns the ack; duplicates return the original result. */
@@ -290,10 +308,10 @@ export class RoomEngine {
           const clue = sanitizeText(intent.payload["clue"], 140);
           if (!clue) return { accepted: false, reason: "INVALID_PAYLOAD" };
           submitClue(state, actorId, clue);
-          if (allCluesIn(state, game.players)) state.phase = "vote";
+          if (allCluesIn(state, this.activePlayers(game))) state.phase = "vote";
         } else if (intent.action === "impostor-vote") {
           submitVote(state, actorId, String(intent.payload["suspectId"] ?? ""), game.players);
-          if (Object.keys(state.votes).length >= game.players.length) {
+          if (Object.keys(state.votes).length >= this.activePlayers(game).length) {
             resolveVote(state);
             if (state.phase === "finished") this.finishGame(game, impostorScores(state, game.players));
           }
@@ -307,10 +325,10 @@ export class RoomEngine {
           const caption = sanitizeText(intent.payload["caption"], 140);
           if (!caption) return { accepted: false, reason: "INVALID_PAYLOAD" };
           submitCaption(state, actorId, caption);
-          if (Object.keys(currentRound(state).captions).length >= game.players.length) state.phase = "vote";
+          if (Object.keys(currentRound(state).captions).length >= this.activePlayers(game).length) state.phase = "vote";
         } else if (intent.action === "caption-vote") {
           submitCaptionVote(state, actorId, String(intent.payload["captionId"] ?? ""), game.players);
-          if (Object.keys(currentRound(state).votes).length >= game.players.length) {
+          if (Object.keys(currentRound(state).votes).length >= this.activePlayers(game).length) {
             if (state.roundIndex + 1 >= state.rounds.length) {
               state.phase = "finished";
               this.finishGame(game, captionTotalScores(state));
@@ -326,7 +344,7 @@ export class RoomEngine {
           const value = intent.payload["value"];
           if (typeof value !== "number") return { accepted: false, reason: "INVALID_PAYLOAD" };
           submitClosestGuess(state, actorId, value);
-          if (allGuessed(state, game.players)) {
+          if (allGuessed(state, this.activePlayers(game))) {
             advanceClosest(state);
             if (state.phase === "finished") this.finishGame(game, closestTotalScores(state));
           }
@@ -350,7 +368,7 @@ export class RoomEngine {
         const perPlayer = (state.answers[actorId] ??= {});
         if (perPlayer[qid] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
         perPlayer[qid] = chosen;
-        const allDone = game.players.every((pid) => Object.keys(state.answers[pid] ?? {}).length >= state.questions.length);
+        const allDone = this.activePlayers(game).every((pid) => Object.keys(state.answers[pid] ?? {}).length >= state.questions.length);
         if (allDone) {
           const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
           for (const pid of game.players) {
@@ -374,7 +392,7 @@ export class RoomEngine {
         const perPlayer = (state.guesses[actorId] ??= {});
         if (perPlayer[eid] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
         perPlayer[eid] = value;
-        const allDone = game.players.every((pid) => Object.keys(state.guesses[pid] ?? {}).length >= state.events.length);
+        const allDone = this.activePlayers(game).every((pid) => Object.keys(state.guesses[pid] ?? {}).length >= state.events.length);
         if (allDone) {
           const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
           for (const pid of game.players) {
@@ -389,7 +407,7 @@ export class RoomEngine {
         if (!Array.isArray(tileIds) || !tileIds.every((t) => typeof t === "string")) return { accepted: false, reason: "INVALID_PAYLOAD" };
         const ps = state.playerStates[actorId]!;
         guessConnections(CONNECTIONS_BOARD, ps, tileIds as string[]);
-        const allDone = game.players.every((pid) => {
+        const allDone = this.activePlayers(game).every((pid) => {
           const s = state.playerStates[pid]!;
           return s.solved.length >= 4 || s.mistakes >= 4;
         });
@@ -405,7 +423,7 @@ export class RoomEngine {
         const roundSubs = (state.submissions[state.roundIndex] ??= {});
         if (roundSubs[actorId] !== undefined) return { accepted: false, reason: "ALREADY_SUBMITTED" };
         roundSubs[actorId] = answers as string[];
-        const allDoneRound = game.players.every((pid) => roundSubs[pid] !== undefined);
+        const allDoneRound = this.activePlayers(game).every((pid) => roundSubs[pid] !== undefined);
         if (allDoneRound) {
           if (state.roundIndex + 1 >= 3) {
             const total: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
@@ -462,6 +480,69 @@ export class RoomEngine {
     return out;
   }
 
+  /** Advance the championship day (host/cohost only). Games started after this count toward the new day. */
+  advanceDay(actorId: string): number {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can advance the day");
+    this.championshipDay += 1;
+    this.log("day-advanced", { actor: actorId });
+    return this.championshipDay;
+  }
+
+  /**
+   * Host/cohost score override, fully audited: the old value is kept in the
+   * ledger event, the reason is required, and standings are derived from
+   * rawScores, so the override flows into standings automatically. The UI
+   * shows the audit trail from the ledger; nothing is silently rewritten.
+   */
+  overrideScore(actorId: string, gameInstanceId: string, playerId: string, points: number, reason: string): void {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can override a score");
+    const game = this.games.get(gameInstanceId);
+    if (!game || game.status !== "finished" || game.timedOut) throw new Error("Only a finished, non-timed-out game can be overridden");
+    if (!game.players.includes(playerId)) throw new Error("Player is not in this game");
+    if (!Number.isFinite(points) || points < 0 || points > 10000) throw new Error("Override points out of range");
+    const cleanReason = reason.trim();
+    if (!cleanReason) throw new Error("Override reason is required");
+    const previous = game.rawScores[playerId] ?? 0;
+    game.rawScores[playerId] = points;
+    this.log("score-override", { playerId, gameInstanceId: game.id, points, previousPoints: previous, reason: cleanReason, actor: actorId });
+  }
+
+  /**
+   * Full 7-day championship from finished official games only, using the
+   * provisional rules in src/scoring/championship.ts: per-game midrank,
+   * solo/team split, daily 75/25, best five days, at least three valid days.
+   * Practice and timed-out games never enter this calculation.
+   */
+  championshipResults() {
+    const days = new Map<string, PlayerDay>();
+    for (const g of this.games.values()) {
+      if (g.status !== "finished" || !g.official || g.timedOut) continue;
+      const all = Object.values(g.rawScores);
+      if (all.length < 2) continue;
+      const isTeam = getGame(g.gameId).modes.includes("team");
+      for (const [pid, pts] of Object.entries(g.rawScores)) {
+        const key = `${pid}:${g.day ?? 1}`;
+        const entry = days.get(key) ?? { playerId: pid, day: g.day ?? 1, soloScores: [], teamScores: [] };
+        const score = midrankScore(pts, all);
+        if (isTeam) entry.teamScores.push(score); else entry.soloScores.push(score);
+        days.set(key, entry);
+      }
+    }
+    return computeChampionship([...days.values()]);
+  }
+
+  achievements() {
+    const rawScoresByGame: Record<string, Record<string, number>> = {};
+    for (const g of this.games.values()) if (g.status === "finished") rawScoresByGame[g.id] = g.rawScores;
+    return evaluateAchievements(this.ledger, rawScoresByGame);
+  }
+
+  ceremony() {
+    const results = this.championshipResults();
+    const standings = results.map((r) => ({ playerId: r.playerId, displayName: this.players.get(r.playerId)?.displayName ?? r.playerId, base: r.total }));
+    return dayCeremony(this.championshipDay, standings);
+  }
+
   /**
    * Host/cohost-only escape hatch for a stalled game: after its deadline a
    * host may close it without inventing scores. Players who never submitted
@@ -500,7 +581,7 @@ export class RoomEngine {
     game.rawScores[actorId] = (game.rawScores[actorId] ?? 0) + points;
     this.log("score-awarded", { playerId: actorId, gameInstanceId: game.id, points, reason: `math:${questionId}` });
     // Finish when every player answered every question
-    const allDone = game.players.every((pid) => Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0));
+    const allDone = this.activePlayers(game).every((pid) => Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0));
     if (allDone) {
       game.status = "finished";
       this.log("game-finished", { gameInstanceId: game.id });
@@ -524,6 +605,7 @@ export class RoomEngine {
       official: g.official,
       status: g.status,
       timedOut: g.timedOut ?? false,
+      day: g.day ?? 1,
       deadlineAt: g.deadlineAt,
       players: g.players,
       state:
@@ -562,6 +644,10 @@ export class RoomEngine {
       players: publicPlayers,
       games: publicGames,
       officialStandings: this.officialStandings(),
+      championshipDay: this.championshipDay,
+      championship: this.championshipResults(),
+      achievements: this.achievements(),
+      ceremony: this.ceremony(),
       seq: this.seq,
     };
     if (audience === "tv") {

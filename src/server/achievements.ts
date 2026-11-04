@@ -27,6 +27,8 @@ export function evaluateAchievements(ledger: LedgerEvent[], rawScoresByGame: Rec
   return achievements;
 }
 
+// `base` in ceremony standings is the championship TOTAL (best-three sum +
+// participation + finale), because the ceremony winner is ranked by total.
 export function dayCeremony(
   day: number,
   standings: { playerId: string; displayName: string; base: number }[],

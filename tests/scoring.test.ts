@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { championshipBase, dayScore, finalePoints, median, midrankScore, rankStandings } from "../src/scoring/championship.js";
+import { championshipTotal, dayScore, finalePoints, median, midrankScore, rankStandings } from "../src/scoring/championship.js";
 
 describe("midrankScore", () => {
   it("distinct 4-player ranks give 100, 66.67, 33.33, 0", () => {
@@ -31,16 +31,19 @@ describe("dayScore", () => {
   });
 });
 
-describe("championshipBase", () => {
-  it("Ada example: best five mean 80, base 400", () => {
-    const r = championshipBase([75, 80, 90, 65, 70, 85]);
-    expect(r.counted).toEqual([90, 85, 80, 75, 70]);
-    expect(r.base).toBeCloseTo(400);
+describe("championshipTotal (Family Cup, approved 2026-11-04)", () => {
+  it("best three sum, plus participation beyond three days", () => {
+    const r = championshipTotal([75, 80, 90, 65, 70, 85]);
+    expect(r.counted).toEqual([90, 85, 80]);
+    expect(r.base).toBeCloseTo(255);
+    expect(r.participationBonus).toBe(15); // 6 days: (6-3)*5
+    expect(r.total).toBeCloseTo(270);
     expect(r.eligible).toBe(true);
   });
   it("3-day player is eligible; 2-day player is not", () => {
-    expect(championshipBase([93, 89, 88]).eligible).toBe(true);
-    expect(championshipBase([100, 100]).eligible).toBe(false);
+    expect(championshipTotal([93, 89, 88]).eligible).toBe(true);
+    expect(championshipTotal([93, 89, 88]).total).toBe(270);
+    expect(championshipTotal([100, 100]).eligible).toBe(false);
   });
 });
 
@@ -51,8 +54,8 @@ describe("finale and ranking", () => {
   });
   it("tie-break uses daily wins then median", () => {
     const ranked = rankStandings([
-      { playerId: "a", base: 400, countedDailyWins: 1, countedMedian: 80 },
-      { playerId: "b", base: 400, countedDailyWins: 2, countedMedian: 70 },
+      { playerId: "a", total: 400, countedDailyWins: 1, countedMedian: 80 },
+      { playerId: "b", total: 400, countedDailyWins: 2, countedMedian: 70 },
     ]);
     expect(ranked[0]?.playerId).toBe("b");
   });

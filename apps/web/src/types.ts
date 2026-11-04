@@ -21,6 +21,7 @@ export interface PublicGame {
   official: boolean;
   status: GameStatus;
   timedOut: boolean;
+  day?: number;
   deadlineAt?: number;
   players: string[];
   state?: unknown;
@@ -39,6 +40,33 @@ export interface PlayerGame {
   rawScores?: Record<string, number>;
 }
 
+export interface ChampionshipResult {
+  playerId: string;
+  dayScores: number[];
+  counted: number[];
+  qualifyingDays: number;
+  base: number;
+  participationBonus: number;
+  finaleBonus: number;
+  total: number;
+  eligible: boolean;
+  countedDailyWins: number;
+  countedMedian: number;
+}
+
+export interface Achievement {
+  ruleId: string;
+  title: string;
+  playerId: string;
+  sourceEventIds: string[];
+}
+
+export interface Ceremony {
+  day: number;
+  winner: string | null;
+  standings: { playerId: string; displayName: string; base: number }[];
+}
+
 export interface Projection {
   roomId: string;
   joinCode: string;
@@ -46,6 +74,10 @@ export interface Projection {
   players: PublicPlayer[];
   games: PublicGame[];
   officialStandings: Record<string, number>;
+  championshipDay?: number;
+  championship?: ChampionshipResult[];
+  achievements?: Achievement[];
+  ceremony?: Ceremony;
   seq: number;
   me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean };
   myGames?: PlayerGame[];
@@ -78,7 +110,9 @@ export interface LedgerEvent {
   playerId?: string;
   gameInstanceId?: string;
   points?: number;
+  previousPoints?: number;
   reason?: string;
+  actor?: string;
   official?: boolean;
   createdAt: number;
 }

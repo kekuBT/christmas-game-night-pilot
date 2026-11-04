@@ -1,59 +1,104 @@
-# Seven-Day Championship — Deterministic Proposed Rules
-Status: **PROVISIONAL FORMULA FOR LOCAL IMPLEMENTATION**, not yet owner-approved for an official family championship.
+# Seven-Day Championship — Family Cup Rules
+Status: **OWNER-APPROVED 2026-11-04** (Keku). This replaces the earlier provisional best-five / 5×mean formula.
 
-## Invariants
-- Seven calendar **session slots** are explicitly scheduled by the host; dates/time zone stored per room; default room time zone chosen by host; late-night play cannot automatically spill scores into a different day.
-- At most one official playlist per day slot. Finalized official results cannot be edited silently or counted twice. Casual games never change championship points.
-- Each official playlist is a set of announced game instances. Attendance, eligibility, rosters, game mode (solo/team), raw results, cancellations and justified exclusions are captured before locking the day.
-- Only actual eligible human players score. Solo/team weight targets 75/25; team outcomes must not scale with team size. No raw-point aggregation across games with incompatible scales.
-- Host override is a signed append-only correction event: actor, time, target, previous calculated value, new corrected value, reason; audit always visible to room participants (private notes, if any, excluded).
+## Approved structure
 
-## Recommended normalized game score, 0–100
-For a completed official game among N eligible competitors (individuals in solo games; TEAMS in team games), use **midrank percentile**: rank each by official raw points descending; ties receive average occupied rank; if N>=2, `gameScore = 100 * (N - averageRank)/(N - 1)`; if N=1, the event is invalid for championship. Clamp and round only for display, not internal calculations. Example N=4 and distinct rankings: 100, 66.666..., 33.333..., 0. Tie for 1st occupying ranks 1 and 2: each score 83.333...; ranks 3,4 score 33.333...,0. A team-result score is awarded equally to all eligible team members; do not multiply contribution by team size. Preserve exact precision in ledger.
+- Seven scheduled championship days.
+- Minimum **three qualifying days** to become championship-eligible.
+- A qualifying day is a day on which the player took part in at least one
+  successfully completed official game. Practice games never count toward
+  scores or attendance.
+- Each player's main championship score is the **sum of their best three
+  daily scores**.
+- **Daily score = 75% individual (solo) + 25% team performance**, where
+  each game's contribution is a normalized placement score (see below).
+- **Participation bonus: +5 for each qualifying day beyond the first
+  three, capped at +20.** So 3 days = +0, 4 = +5, 5 = +10, 6 = +15, 7 = +20.
+- **Grand Finale: up to 50 additional points** (ladder below, disabled by
+  default in the engine until a finale is actually run).
+- **Missing days get no negative points and do not reduce the best-three
+  total.** The best three are taken from the days actually attended.
 
-**Important tradeoff:** In a 2-team game only 100/0 outcomes occur; creative games need subjective tie adjudication. Disclose exact behavior to Keku, run simulations and compare alternate score transforms before finalizing.
+## Formula
 
-## Provisional official day score
-- Recommended official playlist has a mixture of three solo games and one team game. Do not enforce exactly 3:1, but warn if a playlist cannot support ~75/25 experience.
-- For any participating player, `SoloAvg = mean(gameScore for all scheduled eligible solo games)`, `TeamAvg = mean(gameScore for all scheduled eligible team games)`.
-- If a player joins an official game and receives no valid result because they voluntarily abandon it, default 0 with host appeal; if the host cancels the whole game or marks a participant ineligible before start, exclude that item from relevant denominator. Do not compute an average only over the games someone chose to finish: prevents cherry-picking.
-- If a playlist contains both categories, `DayScore = 0.75*SoloAvg + 0.25*TeamAvg`. If **only solo** or **only team** games were scheduled, normalize the available category to 100% rather than treating a missing category as zero; flag the playlist as off-balance and ask host to confirm. If the player skipped every game in one scheduled category, its average is 0.
-- **Valid player-day (proposed):** player took part in >=1 successfully completed scheduled official game. This is flexible but permits one-game days; log a fairness warning where total participation was <50% of eligible official games. A more stringent 2-game/50% threshold remains an owner option. A fully absent player has no valid day and no 0 score.
+```
+Championship Total = Sum(Best 3 Daily Scores) + Participation Bonus + Finale Bonus
+```
 
-## Best-five-of-seven and minimum-three eligibility
-For player P, take valid day scores sorted high-to-low, keep up to five (i.e., the best five of seven). To be championship eligible, P must have >=3 valid days.
+## Normalized game score, 0–100
 
-**Attendance-neutral provisional championship base score:** `Base = 5 * mean(best min(5, validDayCount) day scores)`. The base range is 0–500 and gives a 3-day player a fair numerical chance while attendees at 5–7 days have more opportunities to replace a weak day. This interprets 'best five' as best *up to* five, rather than a sum in which fewer than five days automatically lose points. Present both interpretations with example before the owner signs off.
+For a completed official game among N eligible competitors (individuals in
+solo games; teams in team games), use **midrank percentile**: rank by
+official raw points descending; ties receive the average occupied rank;
+if N ≥ 2, `gameScore = 100 * (N - averageRank) / (N - 1)`; if N = 1, the
+event is invalid for championship. Example N = 4, distinct rankings:
+100, 66.67, 33.33, 0. Tie for 1st occupying ranks 1 and 2: each 83.33.
+A team-result score is awarded equally to all eligible team members; do
+not multiply contribution by team size.
 
-Example: Ada valid days [75,80,90,65,70,85], keeps [90,85,80,75,70], mean 80, base 400. Bea valid days [93,89,88] keeps all three, mean 90, base 450, eligible because >=3. Cal only two days [100,100] is ineligible, shown as provisional/unranked. This is deliberate: attending five days increases chance of a good average, but does not grant free points simply for showing up.
+## Daily score
 
-**Grand Finale:** Optional 0–50 extra championship points from a separately declared Finale session. Provisional mapping: 50 to 1st, 35 to 2nd, 25 to 3rd, 15 to 4th, 5 to any other eligible finisher, 0 nonparticipant. *Needs owner approval*; must not silently alter eligibility or erase best-five. Configurable disabled by default until sign-off. Grand Finale may change winner by design; disclose in advance.
+- `SoloAvg = mean(gameScore for all eligible solo games that day)`,
+  `TeamAvg = mean(gameScore for all eligible team games that day)`.
+- If both categories are present: `DayScore = 0.75*SoloAvg + 0.25*TeamAvg`.
+- If only one category was scheduled: see "Still configurable" below.
+  Current engine default: the available category's mean at 100%, flagged
+  off-balance.
+- If a player skipped every game in one scheduled category, its average
+  is 0 (a skipped category is not the same as an unscheduled one).
 
-**Provisional tie-breaks:** higher count of winning valid daily placements among counted days; then higher median of counted day scores; then head-to-head finale placement if both entered; then joint champion. Avoid attendance as an arbitrary unannounced tie-breaker. Ranks and any subsequent adjusted points are reproducible from event log.
+## Worked example (approved formula)
 
-## Team assignment and fairness
-Rotate teams automatically across team events, aiming to minimize repeated partner pairings and imbalance in team sizes. For odd player counts use uneven teams with a transparent compensation policy: prefer a 3-person team vs 2-person team with neutral difficulty or extra turn normalization; never assume raw points are comparable without per-capita/turn normalization. Provide host manual shuffle with audit and avoid hard-coded gender/age/skill grouping. No player should systematically sit out team games without fair substitute credit; explicit opt-in sit-out can be an excused exclusion before game start.
+- Ada, 6 days [75, 80, 90, 65, 70, 85]: best three 90+85+80 = 255,
+  participation (6−3)×5 = 15, total 270.
+- Bea, 3 days [93, 89, 88]: best three 270, participation 0, total 270.
+- Cal, 2 days [100, 100]: ineligible, provisional total 200, ranked last.
+- Ada and Bea tie on total 270; the tie-break (below) puts Ada first on
+  daily wins.
 
-## Edge cases to test
-- Player reconnects and retries same score submission; counted once.
-- Host cancels game after one result; voiding event does not alter already finalized other days.
-- Tie raw score among two of four; midrank arithmetic verified.
-- Solo game 3 players and team game 2 teams; different N handled.
-- Score overflow, negative game score, impossible rank and invalid actor rejected.
-- Attendance 0/1/2/3/5/7 days, late join, withdrawn player, walkover and cancellation.
-- 3- and 5-day players compare correctly, no raw score advantage from playing more games per category.
-- Duplicate day close, timezone midnight edge, host override undo via compensating event.
-- Championship recomputes identically from ledger after DB migration and restore.
+## Tie-breaks
 
-## Owner decisions, not silently final
-1. Is mean(best up to five)*5 the preferred fairness model vs sum(best five)?
-2. Is at least one game enough for valid day or require majority / minimum 2?
-3. Is 75/25 appropriate at day level, and what happens with absent category?
-4. Finale 0–50 ladder and its possibility to change champion?
-5. Tie-break sequence, team-rotation and odd-size compensation?
+Higher total; then higher count of first-place daily finishes; then higher
+median of the counted (best-three) day scores; then head-to-head finale
+placement if both entered; then joint champion. Ineligible players rank
+after all eligible players, regardless of total.
 
-All figures here are implementation defaults and test data for LOCAL development. The owner must approve before using them to award real family trophies.
+## Grand Finale ladder (configurable, see below)
 
+50 to 1st, 35 to 2nd, 25 to 3rd, 15 to 4th, 5 to any other eligible
+finisher, 0 to nonparticipants and to ineligible players. The finale may
+change the winner by design; disclose it in advance.
 
+## Host overrides
 
----
+A host override is a signed append-only correction event: actor, time,
+target, previous calculated value, new corrected value, reason; the audit
+is always visible to room participants.
+
+## Still configurable (not yet approved in detail)
+
+Per Keku 2026-11-04, these three details stay configurable in
+`src/scoring/championship.ts` (`CHAMPIONSHIP_CONFIG`) until approved:
+
+1. The precise qualifying-day threshold (currently: at least one completed
+   official game that day; a stricter 2-game / 50%-of-playlist threshold
+   remains an owner option).
+2. The handling of days without team games (currently: available category
+   at 100%, flagged off-balance; the alternative "scaled" mode — solo-only
+   days count at 75% of the solo mean — is implemented as a config switch
+   but not selected).
+3. The Grand Finale placement ladder (currently 50/35/25/15/5, disabled by
+   default until a finale is run).
+
+## Edge cases to test (covered in tests/family-cup.test.ts)
+
+- Attendance 3, 4, 5, 6, 7 days and the participation cap.
+- Missing days, gapped days (days 1, 4, 7 vs 1, 2, 3 with equal scores).
+- 2-day ineligibility and provisional ranking last.
+- Tied day scores, tied totals, tied games (midrank).
+- Finale outcomes, including finale changing the winner and finale
+  giving nothing to an ineligible player.
+- Practice games contributing nothing (engine filters them before the
+  championship module ever sees them).
+- Score overflow, negative game score, impossible rank, invalid actor
+  rejected (see tests/security.test.ts and tests/sprint-rules.test.ts).
