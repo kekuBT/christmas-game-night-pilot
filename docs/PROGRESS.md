@@ -207,3 +207,10 @@ Open this file, confirm local git status in `~/workspace/christmas-game-night-pi
 - Decisions L10–L17 appended to `docs/DECISIONS.md`.
 - Evidence: `npm run typecheck` exit 0 (server + web), `npm run lint` exit 0, `npm test` 9 files / 56 passed (was 48, +8 review tests), `npm run build:web` exit 0, API playthrough 11/11, E2E Chromium 12/12, Firefox 12/12, check-multiplayer 12/12, check-f4 11/11, check-f5 30/30 (one driver fix: ledger fetch now goes through the host page with its session token, after the auth change made the unauthenticated ledger fetch return 401), check-mobile 32/32, check-contrast 57/57. Test server stopped and `data/` removed after runs.
 - Next: no GitHub reply/publish until Keku explicitly asks; remaining NOT RUN items unchanged (real devices, family-member acceptance, WebKit host libs, Cloudflare, npm audit 403).
+
+## Cron run 2026-11-04 ~07:45 EST (local-dev-christmas-30m — RE-VERIFICATION ONLY, no milestone)
+- Tree was clean; per the task board, no local-only board task remains (all F1–F7 local parts DONE; see task board item 7). No new work invented, no app code changed.
+- Re-verification evidence: `npm run typecheck` exit 0 (server + web), `npm test` 9 files / 56 passed, `npm run lint` exit 0, `npm run build:web` exit 0 (34 modules), E2E smoke (`node scripts/e2e-browser.mjs http://localhost:3457 --browser=chromium --games=smoke`) exit 0, 3/3 passed (closest-wins, math-mayhem, views: championship/TV/Memory Book/reconnect, 4 fictional players, room LTG2NM).
+- Test server data/ removed, port 3457 confirmed closed. Working tree clean after the run except this PROGRESS.md entry.
+- Remaining (unchanged, need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room). npm audit stays BLOCKED by registry proxy 403; no bypass attempted, not re-tried this run.
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
