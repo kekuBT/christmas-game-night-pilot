@@ -163,3 +163,11 @@ Open this file, confirm local git status in `~/workspace/christmas-game-night-pi
 - Test server data/ removed, port 3457 confirmed closed. Working tree clean after the run except this PROGRESS.md entry.
 - Remaining (unchanged, need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room). npm audit stays BLOCKED by registry proxy 403; no bypass attempted.
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
+## Cron run 2026-11-04 ~05:45 EST (local-dev-christmas-30m — RE-VERIFICATION ONLY, no milestone)
+- Tree was clean; per the task board, no local-only board task remains (all F1–F7 local parts DONE; see task board item 7). No new work invented, no app code changed.
+- Re-verification evidence: `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run lint` exit 0, `npm run build:web` exit 0 (34 modules), E2E smoke (`node scripts/e2e-browser.mjs http://localhost:3457 --browser=chromium --games=smoke`) exit 0, 3/3 passed (closest-wins, math-mayhem, views: championship/TV/Memory Book/reconnect, 4 fictional players, room BX2HF7).
+- Harness note, NOT an app bug: the first E2E invocation in this run failed with MODULE_NOT_FOUND because the server was backgrounded with `&` across the whole `cd && ...` chain, so the driver ran from the home directory instead of the project directory. Re-ran from the project directory and it passed 3/3. Server stopped via port kill (not the pkill pattern that previously matched the wrapping shell).
+- Test server data/ removed, port 3457 confirmed closed. Working tree clean after the run except this PROGRESS.md entry.
+- Remaining (unchanged, need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room). npm audit stays BLOCKED by registry proxy 403; no bypass attempted, not re-tried this run.
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
