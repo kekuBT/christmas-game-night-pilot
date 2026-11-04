@@ -102,6 +102,22 @@ describe("room engine", () => {
     expect(() => engine.startGame(host, "not-a-game")).toThrow(/Unknown game/);
   });
 
+  it("who-said-that projection exposes speakers as answer options", () => {
+    const { engine, players, host } = setup(4);
+    engine.startGame(host, "who-said-that", { seed: 7 });
+    const proj = engine.project("player", players[0]!.id) as { myGames: { state: { questions: { id: string; prompt: string; options: string[] }[] } }[] };
+    const qs = proj.myGames[0]!.state.questions;
+    expect(qs.length).toBeGreaterThan(0);
+    expect(qs[0]!.prompt).toContain("snow");
+    expect(qs[0]!.options).toEqual(["Mira the Baker", "Tom the Gardener", "Lena the Sailor", "Omar the Teacher"]);
+  });
+
+  it("cannot start a second game while one is playing", () => {
+    const { engine, host } = setup(4);
+    engine.startGame(host, "math-mayhem", { seed: 7 });
+    expect(() => engine.startGame(host, "trivia", { seed: 7 })).toThrow(/already in progress/);
+  });
+
   it("TV and other-player projections do not leak answer keys or tokens", () => {
     const { engine, players, host } = setup(4);
     const game = engine.startGame(host, "math-mayhem", { seed: 7 });

@@ -185,6 +185,10 @@ export class RoomEngine {
     if (this.hostId !== hostId && !this.cohosts.has(hostId)) throw new Error("Only host/cohost can start a game");
     const game = getGame(gameId);
     if (game.status === "not-implemented") throw new Error(`Game not implemented yet: ${gameId}`);
+    // The browser UI has a single active-game panel (first playing game), so
+    // a second concurrent game would orphan the first: it could never become
+    // active again. Reject instead of silently stacking games.
+    if ([...this.games.values()].some((g) => g.status === "playing")) throw new Error("A game is already in progress");
     const playerIds = [...this.players.values()].filter((p) => p.connected).map((p) => p.id);
     if (playerIds.length < game.minPlayers) throw new Error(`Need at least ${game.minPlayers} connected players`);
     if (playerIds.length > game.maxPlayers) throw new Error(`Too many players for ${gameId}`);
@@ -541,7 +545,7 @@ export class RoomEngine {
                     ? {
                         questions: (
                           (g.extra as { questions: Record<string, unknown>[] }).questions ?? []
-                        ).map((q) => ({ id: q["id"], prompt: q["prompt"] ?? q["quote"], options: q["options"] })),
+                        ).map((q) => ({ id: q["id"], prompt: q["prompt"] ?? q["quote"], options: q["options"] ?? q["speakers"] })),
                         myAnswers: (g.extra as { answers: Record<string, Record<string, number>> }).answers[actorId] ?? {},
                       }
                     : g.gameId === "guess-the-year"

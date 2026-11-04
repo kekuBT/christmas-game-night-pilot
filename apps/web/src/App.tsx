@@ -144,11 +144,11 @@ export function App() {
         {me?.isHost && players.filter((p) => p.id !== playerId).map((p) => <div key={p.id} className="row"><span>{p.displayName}</span><button className="secondary" onClick={async () => { await post(`/rooms/${roomId}/cohost`, { hostId: playerId, targetId: p.id }); await refresh(); }}>Make cohost</button></div>)}
       </div>
       <div className="card"><h2>Start a game</h2><p className="muted">Only the host starts games. Tutorials are shown below each game.</p>
-        {games.map((g) => <div key={g.id} className="card"><b>{g.title}</b> <span className="muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min</span>
-          <p>{g.tutorial}</p><div className="row"><button onClick={() => startGame(g.id, true)} disabled={!me?.isHost}>Start (official)</button><button className="secondary" onClick={() => startGame(g.id, false)} disabled={!me?.isHost}>Start (practice)</button></div></div>)}
+        {games.map((g) => <div key={g.id} className="card" data-testid={`game-card-${g.id}`}><b>{g.title}</b> <span className="muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min</span>
+          <p>{g.tutorial}</p><div className="row"><button data-testid={`start-official-${g.id}`} onClick={() => startGame(g.id, true)} disabled={!me?.isHost}>Start (official)</button><button data-testid={`start-practice-${g.id}`} className="secondary" onClick={() => startGame(g.id, false)} disabled={!me?.isHost}>Start (practice)</button></div></div>)}
       </div>
       {active && <GamePanel game={active} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
-      {finished.length > 0 && <div className="card"><h2>Finished games</h2>{finished.map((g: Any) => <p key={g.id}><b>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId}</b> — {Object.entries(g.rawScores ?? {}).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>)}</div>}
+      {finished.length > 0 && <div className="card" data-testid="finished-games"><h2>Finished games</h2>{finished.map((g: Any) => <p key={g.id}><b>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId}</b> — {Object.entries(g.rawScores ?? {}).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>)}</div>}
     </>}
 
     {view === "championship" && <div className="card"><h2>Championship standings</h2><p className="muted">Provisional midrank scoring: each finished game is normalised 0–100, then summed. The full 7-day formula (best five days, 75/25 solo/team) is in docs/CHAMPIONSHIP_RULES.md and is still provisional — not owner-approved.</p>
@@ -180,7 +180,7 @@ function GamePanel(props: { game: Any; players: Any[]; nameOf: (id: string) => s
   const gid = game.id;
   const quiz = ["math-mayhem", "trivia", "who-said-that", "geography"].includes(game.gameId);
   const questions: Any[] = game.questions ?? st.questions ?? [];
-  return <div className="card"><h2>Now playing: {game.gameId}</h2><p className="muted">Status: {game.status}{game.status === "finished" ? ` · Your score: ${game.myScore ?? ""}` : ""}</p>
+  return <div className="card" data-testid="game-panel"><h2>Now playing: {game.gameId}</h2><p className="muted">Status: {game.status}{game.status === "finished" ? ` · Your score: ${game.myScore ?? ""}` : ""}</p>
     {game.status === "finished" && game.rawScores && <p>{Object.entries(game.rawScores).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>}
     {game.status === "playing" && <>
       {quiz && questions.map((q: Any) => {
