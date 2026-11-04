@@ -1,0 +1,169 @@
+// F3 browser check: multiplayer, reconnect, and TV projections, via Playwright.
+//
+// Usage:
+//   npm run build:web
+//   PORT=3457 npm run serve &        # in one shell; stop it and `rm -rf data` after
+//   node scripts/check-multiplayer.mjs [baseUrl]
+//
+// Defaults: base http://localhost:3457, Chromium only (multi-browser coverage
+// lives in scripts/e2e-browser.mjs; this script proves F3 behaviours, not a
+// second full game sweep). Fictional test players only; local server only.
+//
+// What it proves, through the real UI plus the public TV projection endpoint:
+//   1. Simultaneous play: host + 3 joiners all see the same game panel at
+//      the same time, and every player's own answers drive the same game.
+//   2. Reload reconnect: a player who reloads mid-game (sessionStorage
+//      recovery token) returns to the same slot — same name, same game,
+//      roster still exactly 4 players, no duplicate slot.
+//   3. TV leak check: while a game is playing (never finished), the TV
+//      projection contains no answer keys, secret words, recovery tokens,
+//      or per-player private state — for Math Mayhem and for Impostor.
+//   4. Completion: the game all four played finishes on every page.
+// A failed check is recorded and the process exits non-zero.
+
+import { chromium } from "playwright";
+
+const BASE = process.argv[2] ?? "http://localhost:3457";
+const NAMES = ["Alex", "Sam", "Jo", "Kim"];
+// Answer keys are forbidden only for games still PLAYING: a finished game
+// legitimately reveals correctAnswer in its questions (by design). Secrets
+// that must never appear anywhere in a TV projection:
+const FORBIDDEN_TV_GLOBAL_KEYS = ["recoveryToken", "secretWord", "impostorWord", "myAnswers", "myScore"];
+const FORBIDDEN_PLAYING_KEYS = ["correctAnswer", "correctIndex", "answerKey", "correctYear"];
+const results = [];
+const check = (label, ok, detail = "") => {
+  console.log(`${ok ? "PASS" : "FAIL"} ${label}${detail ? ` — ${detail}` : ""}`);
+  results.push({ label, ok });
+};
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function panelText(page) {
+  try { return await page.locator('[data-testid="game-panel"]').textContent({ timeout: 2000 }); }
+  catch { return ""; }
+}
+async function answerQuiz(page) {
+  // Click option buttons until no options remain (all questions answered).
+  const panel = page.locator('[data-testid="game-panel"]');
+  let guard = 40;
+  while (guard-- > 0) {
+    const opts = panel.locator(".grid button");
+    if ((await opts.count()) === 0) break;
+    await opts.first().click();
+    await sleep(300);
+  }
+}
+async function tvLeakCheck(label, roomId) {
+  const proj = await (await fetch(`${BASE}/rooms/${roomId}/projection?audience=tv`)).json();
+  const raw = JSON.stringify(proj);
+  const leakedGlobal = FORBIDDEN_TV_GLOBAL_KEYS.filter((k) => raw.includes(`"${k}"`));
+  const playingRaw = JSON.stringify((proj.games ?? []).filter((g) => g.status === "playing"));
+  const leakedPlaying = FORBIDDEN_PLAYING_KEYS.filter((k) => playingRaw.includes(`"${k}"`));
+  const leaked = [...leakedGlobal, ...leakedPlaying.map((k) => `${k} (playing game)`)];
+  check(`TV projection leak-free during ${label}`, leaked.length === 0,
+    leaked.length ? `leaked keys: ${leaked.join(", ")}` : "no forbidden keys");
+  const players = proj.players ?? [];
+  check(`TV projection roster is exactly 4 during ${label}`, players.length === 4,
+    `players=${players.length}`);
+}
+
+const browser = await chromium.launch({ headless: true });
+try {
+  const pages = [];
+  const hostCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const host = await hostCtx.newPage();
+  pages.push({ page: host, name: NAMES[0] });
+  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.getByPlaceholder("e.g. Ada").fill(NAMES[0]);
+  await host.getByRole("button", { name: "Create a room (host)" }).click();
+  await host.locator("header .pill").waitFor({ timeout: 15000 });
+  const code = (await host.locator("header .pill").textContent()).replace("Code:", "").trim();
+  if (!/^[A-Z0-9]{6}$/.test(code)) throw new Error(`unexpected room code: ${code}`);
+  const roomId = await host.evaluate(() => sessionStorage.getItem("cgn_roomId"));
+  if (!roomId) throw new Error("host sessionStorage has no cgn_roomId");
+  console.log(`room code ${code}, roomId ${roomId}`);
+
+  for (let i = 1; i < NAMES.length; i++) {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const p = await ctx.newPage();
+    pages.push({ page: p, name: NAMES[i] });
+    await p.goto(BASE, { waitUntil: "domcontentloaded" });
+    await p.getByPlaceholder("e.g. Ada").fill(NAMES[i]);
+    await p.getByPlaceholder("e.g. K7M2Q9").fill(code);
+    await p.getByRole("button", { name: "Join room" }).click();
+    await p.getByText(`Playing as ${NAMES[i]}`).waitFor({ timeout: 15000 });
+  }
+  for (const n of NAMES) await host.getByText(n, { exact: true }).first().waitFor({ timeout: 15000 });
+  check("lobby roster: 4 players joined", true);
+
+  // --- Simultaneous play: Math Mayhem on all four pages at once. ---
+  await host.locator('[data-testid="start-official-math-mayhem"]').click();
+  let allSeeGame = true;
+  for (const { page, name } of pages) {
+    try {
+      await page.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });
+    } catch { allSeeGame = false; console.log(`  ${name} did not show the game heading`); }
+  }
+  check("all 4 pages show the same game panel simultaneously", allSeeGame);
+
+  // TV leak check while Math Mayhem is playing (before anyone finishes it).
+  await tvLeakCheck("math-mayhem (playing)", roomId);
+
+  // --- Reload reconnect: Sam reloads mid-game and must come back as Sam. ---
+  const sam = pages[1].page;
+  await sam.reload({ waitUntil: "domcontentloaded" });
+  let reloadOk = true;
+  try {
+    await sam.getByText("Playing as Sam").waitFor({ timeout: 15000 });
+    await sam.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });
+  } catch { reloadOk = false; }
+  check("reloaded player returns to same slot and same game", reloadOk);
+  const projAfterReload = await (await fetch(`${BASE}/rooms/${roomId}/projection?audience=tv`)).json();
+  const samCount = (projAfterReload.players ?? []).filter((p) => p.displayName === "Sam").length;
+  check("reload creates no duplicate player slot", samCount === 1, `Sam entries=${samCount}`);
+  check("roster still exactly 4 after reload", (projAfterReload.players ?? []).length === 4,
+    `players=${(projAfterReload.players ?? []).length}`);
+
+  // --- Every player answers; the game must finish on every page. ---
+  for (const { page } of pages) await answerQuiz(page);
+  let finishedEverywhere = false;
+  const deadline = Date.now() + 120_000;
+  while (Date.now() < deadline) {
+    const texts = [];
+    for (const { page } of pages) texts.push(await panelText(page));
+    if (texts.every((t) => t.includes("Now playing: math-mayhem") && t.includes("Status: finished"))) {
+      finishedEverywhere = true;
+      break;
+    }
+    // Keep answering in case a page still has open questions.
+    for (const { page } of pages) await answerQuiz(page);
+    await sleep(700);
+  }
+  check("math-mayhem finished on all 4 pages after simultaneous play", finishedEverywhere);
+
+  // --- TV leak check for a secret-role game: start Impostor, do not finish it. ---
+  // Retry the start click once: a click landing during a 2s poll re-render
+  // was once lost (heading never arrived) even though the button exists.
+  let impostorStarted = false;
+  for (let attempt = 0; attempt < 2 && !impostorStarted; attempt++) {
+    await host.locator('[data-testid="start-official-impostor"]').click();
+    try {
+      await host.getByRole("heading", { name: "Now playing: impostor" }).waitFor({ timeout: 20000 });
+      impostorStarted = true;
+    } catch { /* retry once, then let the leak check's own failure surface */ }
+  }
+  check("impostor started after a finished game", impostorStarted);
+  await tvLeakCheck("impostor (playing)", roomId);
+  // TV Dashboard view itself renders in the browser while a secret game plays.
+  await host.getByRole("button", { name: "TV Dashboard" }).click();
+  await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
+  check("TV Dashboard view renders during a secret-role game", true);
+} catch (e) {
+  console.log(`FATAL: ${e.message}`);
+  results.push({ label: "script completed without fatal error", ok: false });
+} finally {
+  await browser.close();
+}
+const failed = results.filter((r) => !r.ok).length;
+console.log(failed === 0
+  ? `MULTIPLAYER ALL PASSED (${results.length}/${results.length})`
+  : `MULTIPLAYER FAILED: ${failed}/${results.length} failed`);
+process.exit(failed === 0 ? 0 : 1);

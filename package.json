@@ -1,0 +1,48 @@
+{
+  "dependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/ws": "^8.18.2",
+    "@vitejs/plugin-react": "^4.7.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "vite": "^5.4.21",
+    "ws": "^8.22.1",
+    "zod": "^3.23.8"
+  },
+  "description": "Christmas Game Night / The Family Cup — local multiplayer implementation (M0 foundation). Local-only; no deployment, no paid services.",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.0.0",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "playwright": "^1.64.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "name": "christmas-game-night",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev:demo": "tsx src/server/demo.ts",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "build:web": "vite build --config apps/web/vite.config.ts",
+    "e2e": "node scripts/e2e-browser.mjs",
+    "check-mobile": "node scripts/check-mobile.mjs",
+    "check-multiplayer": "node scripts/check-multiplayer.mjs",
+    "check-f4": "node scripts/check-f4.mjs",
+    "check-f5": "node scripts/check-f5.mjs",
+    "check-contrast": "node scripts/check-contrast.mjs",
+    "dev:web": "vite --config apps/web/vite.config.ts",
+    "serve": "tsx src/server/serve.ts"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}
