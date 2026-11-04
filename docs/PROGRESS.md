@@ -1,9 +1,9 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 01:14 EST (F1/F2 real-browser E2E passed in Chromium + Firefox; WebKit blocked on host libs)
+Updated: 2026-11-04 ~01:20 EST (task 3 DONE: PR-ready checkpoint packet, local only, not published)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
-F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of all 11 games PASSED, and REAL-BROWSER click-through of all 11 games PASSED 2026-11-04 in Chromium and Firefox (see cron run 2026-11-04 ~01:14 EST below). F2 (Playwright E2E): DONE for Chromium/Firefox; WebKit BLOCKED on missing host libraries, real-device checklist still NOT RUN. F3–F7: NOT DONE.
+F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of all 11 games PASSED, and REAL-BROWSER click-through of all 11 games PASSED 2026-11-04 in Chromium and Firefox (see cron run 2026-11-04 ~01:14 EST below). F2 (Playwright E2E): DONE for Chromium/Firefox; WebKit BLOCKED on missing host libraries, real-device checklist still NOT RUN. F3–F7: NOT DONE. Task 3 (PR-ready checkpoint packet): DONE 2026-11-04 ~01:20 EST, LOCAL ONLY — `docs/CHECKPOINT_PACKET.md` + 7 screenshots in `docs/checkpoint-screenshots/`; NOT published to GitHub, per local-only mode.
 
 ## Completed with evidence
 - M0 (commit 905643a): TypeScript+Zod+Vitest foundation, 23 tests, typecheck/build exit 0, static shell.
@@ -44,7 +44,8 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 ## Task board (next three)
 1. DONE 2026-11-04 (real browser): Playwright click-through of all 11 games to finished in Chromium and Firefox, 4-player room — see cron run below. API playthrough (`scripts/clickthrough-api.mjs`) stays as the regression check.
 2. DONE except WebKit + device checklist: Playwright E2E (`scripts/e2e-browser.mjs`, `npm run e2e`) covers Chromium/Firefox; WebKit BLOCKED on host libraries (see above); manual real-device checklist still NOT RUN.
-3. Prepare a PR-ready checkpoint packet (summary, test evidence, screenshots, limitations, open owner decisions) — but do NOT publish to GitHub until Keku explicitly asks, per local-only mode.
+3. DONE 2026-11-04 ~01:20 EST: PR-ready checkpoint packet prepared LOCALLY — `docs/CHECKPOINT_PACKET.md` (summary, test evidence, screenshots, limitations, open owner decisions) + `scripts/screenshot-checkpoint.mjs` + 7 screenshots in `docs/checkpoint-screenshots/` (home, lobby, game playing, game finished, championship, TV dashboard, Memory Book; fictional players only). NOT published to GitHub until Keku explicitly asks, per local-only mode.
+4. NEXT: Manual real-device checklist (iPhone Safari, Android, desktop Safari, TV — all NOT RUN; needs real devices, cannot be done from this VM) and F3–F7 per `docs/FRONTEND_MILESTONES.md`.
 
 ## External approvals pending
 None queued. Local-only mode: do not initiate GitHub publishing or approval requests until Keku explicitly asks. GitHub coordination cron remains paused.
@@ -54,8 +55,9 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 
 ## Last commands actually run
 - `npm run typecheck` — exit 0
-- `npm test` — 8 files, 45 tests passed
-- `npm run build:web` — exit 0, 34 modules
+- `npm test` — 8 files, 47 tests passed
+- `npm run build:web` — exit 0
+- `node scripts/screenshot-checkpoint.mjs http://localhost:3457` — exit 0, 7 screenshots
 - `node scripts/clickthrough-api.mjs http://localhost:3457` — exit 0, ALL GAMES FINISHED (twice: before and after the 2026-11-04 fixes)
 - Live smoke (port 3456, 2026-11-03): `/`, `/games`, join-by-code, host start Math Mayhem with 2 players — all as reported above
 - `npm audit --omit=dev` — blocked by registry proxy 403, NOT RUN (earlier session); `npm view playwright` 2026-11-04 succeeded (1.64.1)
@@ -71,5 +73,12 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - Evidence: `npm run typecheck` exit 0, `npm test` 8 files / 47 passed (was 45; +2 new tests), `npm run build:web` exit 0, API playthrough re-run exit 0 (`ALL GAMES FINISHED`, 11 game-finished events, no Connections category leak), E2E Chromium 12/12 passed, E2E Firefox 12/12 passed (11 games + views each). Test server data/ removed after the runs.
 - No dealer contact, no GitHub publish, no merge/deploy/spend. GitHub coordination cron left disabled and untouched.
 
+## Cron run 2026-11-04 ~01:20 EST (local-dev-christmas-30m — COMPLETED with commit)
+- Tree was clean; worked task-board item 3 (PR-ready checkpoint packet, local only).
+- New driver `scripts/screenshot-checkpoint.mjs`: Chromium, 4 fictional players (Alex/Sam/Jo/Kim), room create + join by code, Math Mayhem played to finished via real UI clicks, then championship, TV Dashboard, Memory Book add/approve/export — 7 screenshots captured in `docs/checkpoint-screenshots/` (lobby screenshot visually verified: 4-player roster, all 11 game cards). One harness quirk: `pkill -f "tsx src/server/serve.ts"` matched the wrapping shell and killed it before `rm -rf data` ran; data/ was removed in a follow-up command and the server confirmed stopped. No app bug found.
+- New doc `docs/CHECKPOINT_PACKET.md`: summary, exact test evidence, screenshot list, limitations (WebKit blocked, real devices not run, Cloud untested, provisional rules, npm audit not run, ESLint not configured), open owner decisions, manual real-device checklist, reproduce steps. Explicitly marked DO NOT PUBLISH.
+- Evidence: `npm run typecheck` exit 0, `npm test` 8 files / 47 passed, `npm run build:web` exit 0, screenshot script exit 0 (7 files). Test server data/ removed.
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
 ## Next session exact resume step
-Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then start task 3 above (PR-ready checkpoint packet, local only — do NOT publish) and the manual real-device checklist (iPhone Safari, Android, desktop, TV — all still NOT RUN). Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
+Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then start the manual real-device checklist (iPhone Safari, Android, desktop, TV — all still NOT RUN; needs real devices) and F3–F7 per `docs/FRONTEND_MILESTONES.md`. Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
