@@ -30,6 +30,24 @@ import {
   submitClosestGuess,
   type ClosestState,
 } from "../games/closest.js";
+import { generateTrivia, scoreTrivia, type TriviaQuestion } from "../games/trivia.js";
+import { scoreYear, YEAR_EVENTS, type YearEvent } from "../games/year.js";
+import { scoreWhoSaid, WHO_SAID_PACK, type WhoSaidQuestion } from "../games/whosaid.js";
+import { GEOGRAPHY_PACK, scoreGeography, type GeographyQuestion } from "../games/geography.js";
+import {
+  CONNECTIONS_BOARD,
+  connectionsScore,
+  guessConnections,
+  type ConnectionsPlayerState,
+} from "../games/connections.js";
+import { scoreSprintRound, SPRINT_CATEGORIES } from "../games/sprint.js";
+import {
+  charadesPlayerScores,
+  charadesTurn,
+  initCharades,
+  projectCharades,
+  type CharadesState,
+} from "../games/charades.js";
 import {
   createJoinCode,
   createRecoveryToken,
@@ -192,7 +210,21 @@ export class RoomEngine {
             ? initCaption(seed)
             : gameId === "closest-wins"
               ? initClosest()
-              : undefined,
+              : gameId === "trivia"
+                ? { questions: generateTrivia(seed), answers: {}, times: {} }
+                : gameId === "who-said-that"
+                  ? { questions: WHO_SAID_PACK, answers: {} }
+                  : gameId === "geography"
+                    ? { questions: GEOGRAPHY_PACK, answers: {} }
+                    : gameId === "guess-the-year"
+                      ? { events: YEAR_EVENTS, guesses: {} }
+                      : gameId === "word-connections"
+                        ? { playerStates: Object.fromEntries(playerIds.map((p) => [p, { solved: [], mistakes: 0, guessed: [] }])) }
+                        : gameId === "category-sprint"
+                          ? { roundIndex: 0, submissions: {} }
+                          : gameId === "charades"
+                            ? initCharades(playerIds)
+                            : undefined,
     };
     this.games.set(id, instance);
     this.log("game-started", { gameInstanceId: id, actor: hostId });
@@ -218,7 +250,14 @@ export class RoomEngine {
       intent.action === "impostor-guess" ||
       intent.action === "caption-submit" ||
       intent.action === "caption-vote" ||
-      intent.action === "closest-guess"
+      intent.action === "closest-guess" ||
+      intent.action === "trivia-answer" ||
+      intent.action === "whosaid-answer" ||
+      intent.action === "geography-answer" ||
+      intent.action === "year-guess" ||
+      intent.action === "connections-guess" ||
+      intent.action === "sprint-answers" ||
+      intent.action === "charades-turn"
     ) {
       result = this.submitSocialIntent(intent, actorId);
     } else {
@@ -280,6 +319,101 @@ export class RoomEngine {
             if (state.phase === "finished") this.finishGame(game, closestTotalScores(state));
           }
         }
+      } else if (game.gameId === "trivia" || game.gameId === "who-said-that" || game.gameId === "geography") {
+        const state = game.extra as {
+          questions: (TriviaQuestion | WhoSaidQuestion | GeographyQuestion)[];
+          answers: Record<string, Record<string, number>>;
+        };
+        const actionMap: Record<string, string> = {
+          "trivia-answer": "trivia",
+          "whosaid-answer": "who-said-that",
+          "geography-answer": "geography",
+        };
+        if (actionMap[intent.action] !== game.gameId) return { accepted: false, reason: "UNKNOWN_ACTION" };
+        const qid = String(intent.payload["questionId"] ?? "");
+        const chosen = intent.payload["chosenIndex"];
+        if (typeof chosen !== "number") return { accepted: false, reason: "INVALID_PAYLOAD" };
+        const question = state.questions.find((q) => q.id === qid);
+        if (!question) return { accepted: false, reason: "UNKNOWN_QUESTION" };
+        const perPlayer = (state.answers[actorId] ??= {});
+        if (perPlayer[qid] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
+        perPlayer[qid] = chosen;
+        const allDone = game.players.every((pid) => Object.keys(state.answers[pid] ?? {}).length >= state.questions.length);
+        if (allDone) {
+          const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
+          for (const pid of game.players) {
+            for (const q of state.questions) {
+              const chosenIdx = state.answers[pid]?.[q.id] ?? null;
+              if (game.gameId === "trivia") scores[pid] = (scores[pid] ?? 0) + scoreTrivia(q as TriviaQuestion, chosenIdx, 3000);
+              else if (game.gameId === "who-said-that") scores[pid] = (scores[pid] ?? 0) + scoreWhoSaid(q as WhoSaidQuestion, chosenIdx);
+              else scores[pid] = (scores[pid] ?? 0) + scoreGeography(q as GeographyQuestion, chosenIdx);
+            }
+          }
+          this.finishGame(game, scores);
+        }
+      } else if (game.gameId === "guess-the-year") {
+        const state = game.extra as { events: YearEvent[]; guesses: Record<string, Record<string, number>> };
+        if (intent.action !== "year-guess") return { accepted: false, reason: "UNKNOWN_ACTION" };
+        const eid = String(intent.payload["eventId"] ?? "");
+        const value = intent.payload["value"];
+        if (typeof value !== "number") return { accepted: false, reason: "INVALID_PAYLOAD" };
+        const event = state.events.find((e) => e.id === eid);
+        if (!event) return { accepted: false, reason: "UNKNOWN_EVENT" };
+        const perPlayer = (state.guesses[actorId] ??= {});
+        if (perPlayer[eid] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
+        perPlayer[eid] = value;
+        const allDone = game.players.every((pid) => Object.keys(state.guesses[pid] ?? {}).length >= state.events.length);
+        if (allDone) {
+          const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
+          for (const pid of game.players) {
+            for (const e of state.events) scores[pid] = (scores[pid] ?? 0) + scoreYear(e, state.guesses[pid]?.[e.id] ?? null);
+          }
+          this.finishGame(game, scores);
+        }
+      } else if (game.gameId === "word-connections") {
+        const state = game.extra as { playerStates: Record<string, ConnectionsPlayerState> };
+        if (intent.action !== "connections-guess") return { accepted: false, reason: "UNKNOWN_ACTION" };
+        const tileIds = intent.payload["tileIds"];
+        if (!Array.isArray(tileIds) || !tileIds.every((t) => typeof t === "string")) return { accepted: false, reason: "INVALID_PAYLOAD" };
+        const ps = state.playerStates[actorId]!;
+        guessConnections(CONNECTIONS_BOARD, ps, tileIds as string[]);
+        const allDone = game.players.every((pid) => {
+          const s = state.playerStates[pid]!;
+          return s.solved.length >= 4 || s.mistakes >= 4;
+        });
+        if (allDone) {
+          const scores: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, connectionsScore(state.playerStates[p]!)]));
+          this.finishGame(game, scores);
+        }
+      } else if (game.gameId === "category-sprint") {
+        const state = game.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
+        if (intent.action !== "sprint-answers") return { accepted: false, reason: "UNKNOWN_ACTION" };
+        const answers = intent.payload["answers"];
+        if (!Array.isArray(answers) || !answers.every((a) => typeof a === "string")) return { accepted: false, reason: "INVALID_PAYLOAD" };
+        const roundSubs = (state.submissions[state.roundIndex] ??= {});
+        if (roundSubs[actorId] !== undefined) return { accepted: false, reason: "ALREADY_SUBMITTED" };
+        roundSubs[actorId] = answers as string[];
+        const allDoneRound = game.players.every((pid) => roundSubs[pid] !== undefined);
+        if (allDoneRound) {
+          if (state.roundIndex + 1 >= 3) {
+            const total: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
+            for (let r = 0; r < 3; r++) {
+              const cat = SPRINT_CATEGORIES[r % SPRINT_CATEGORIES.length]!;
+              const roundScores = scoreSprintRound(cat, state.submissions[r] ?? {});
+              for (const pid of game.players) total[pid] = (total[pid] ?? 0) + (roundScores[pid] ?? 0);
+            }
+            this.finishGame(game, total);
+          } else {
+            state.roundIndex += 1;
+          }
+        }
+      } else if (game.gameId === "charades") {
+        const state = game.extra as CharadesState;
+        if (intent.action !== "charades-turn") return { accepted: false, reason: "UNKNOWN_ACTION" };
+        const outcome = intent.payload["outcome"];
+        if (outcome !== "correct" && outcome !== "pass") return { accepted: false, reason: "INVALID_PAYLOAD" };
+        charadesTurn(state, actorId, outcome);
+        if (state.phase === "finished") this.finishGame(game, charadesPlayerScores(state));
       } else {
         return { accepted: false, reason: "UNKNOWN_ACTION" };
       }
@@ -351,7 +485,21 @@ export class RoomEngine {
             ? projectCaption(g.extra as CaptionState, "", true)
             : g.gameId === "closest-wins"
               ? projectClosest(g.extra as ClosestState, "", true)
-              : undefined,
+              : g.gameId === "charades"
+                ? projectCharades(g.extra as CharadesState, "", true)
+                : g.gameId === "trivia" || g.gameId === "who-said-that" || g.gameId === "geography"
+                  ? {
+                      questions: (
+                        (g.extra as { questions: Record<string, unknown>[] }).questions ?? []
+                      ).map((q) => ({ id: q["id"], prompt: q["prompt"] ?? q["quote"], options: q["options"] })),
+                    }
+                  : g.gameId === "guess-the-year"
+                    ? { events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })) }
+                    : g.gameId === "word-connections"
+                      ? { tiles: CONNECTIONS_BOARD.tiles }
+                      : g.gameId === "category-sprint"
+                        ? { roundIndex: (g.extra as { roundIndex: number }).roundIndex, category: SPRINT_CATEGORIES[(g.extra as { roundIndex: number }).roundIndex % SPRINT_CATEGORIES.length]?.name }
+                        : undefined,
       // Public questions: prompt + options only, no correctIndex/correctAnswer, and only after finish for Math.
       questions:
         g.status === "finished"
@@ -387,7 +535,25 @@ export class RoomEngine {
               ? projectCaption(g.extra as CaptionState, actorId, false)
               : g.gameId === "closest-wins"
                 ? projectClosest(g.extra as ClosestState, actorId, false)
-                : undefined,
+                : g.gameId === "charades"
+                  ? projectCharades(g.extra as CharadesState, actorId, false)
+                  : g.gameId === "trivia" || g.gameId === "who-said-that" || g.gameId === "geography"
+                    ? {
+                        questions: (
+                          (g.extra as { questions: Record<string, unknown>[] }).questions ?? []
+                        ).map((q) => ({ id: q["id"], prompt: q["prompt"] ?? q["quote"], options: q["options"] })),
+                        myAnswers: (g.extra as { answers: Record<string, Record<string, number>> }).answers[actorId] ?? {},
+                      }
+                    : g.gameId === "guess-the-year"
+                      ? {
+                          events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })),
+                          myGuesses: (g.extra as { guesses: Record<string, Record<string, number>> }).guesses[actorId] ?? {},
+                        }
+                      : g.gameId === "word-connections"
+                        ? { tiles: CONNECTIONS_BOARD.tiles, myState: (g.extra as { playerStates: Record<string, ConnectionsPlayerState> }).playerStates[actorId] }
+                        : g.gameId === "category-sprint"
+                          ? { roundIndex: (g.extra as { roundIndex: number }).roundIndex, category: SPRINT_CATEGORIES[(g.extra as { roundIndex: number }).roundIndex % SPRINT_CATEGORIES.length]?.name }
+                          : undefined,
         questions:
           g.status === "playing"
             ? g.questions?.map((q) => ({ id: q.id, prompt: q.prompt, options: q.options }))

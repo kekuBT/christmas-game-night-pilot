@@ -96,10 +96,10 @@ describe("room engine", () => {
     expect(engine.reconnect(p.id, p.token).connected).toBe(true);
   });
 
-  it("non-host cannot start, unimplemented game cannot start", () => {
+  it("non-host cannot start, unknown game cannot start", () => {
     const { engine, players, host } = setup(4);
     expect(() => engine.startGame(players[1]!.id, "math-mayhem")).toThrow();
-    expect(() => engine.startGame(host, "trivia")).toThrow(/not implemented/);
+    expect(() => engine.startGame(host, "not-a-game")).toThrow(/Unknown game/);
   });
 
   it("TV and other-player projections do not leak answer keys or tokens", () => {
