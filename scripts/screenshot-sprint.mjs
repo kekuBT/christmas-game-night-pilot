@@ -23,7 +23,7 @@ async function setupRoom(browser) {
   const room = await api("/rooms", { name: "Sprint Review" });
   const players = [];
   for (let i = 0; i < 4; i++) {
-    const j = await api(`/rooms/${room.roomId}/join`, { displayName: NAMES[i], asHost: i === 0 });
+    const j = await api(`/rooms/${room.roomId}/join`, { displayName: NAMES[i], asHost: i === 0, hostClaimToken: room.hostClaimToken });
     players.push(j);
   }
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });

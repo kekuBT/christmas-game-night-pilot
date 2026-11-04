@@ -43,9 +43,10 @@ describe("M1 HTTP + WebSocket adapter", () => {
     const created = await post("/rooms", { name: "M1 Room" });
     expect(created.status).toBe(201);
     const roomId = created.json["roomId"] as string;
+    const claim = created.json["hostClaimToken"] as string;
     const players: { id: string; token: string }[] = [];
     for (let i = 0; i < 10; i++) {
-      const joined = await post(`/rooms/${roomId}/join`, { displayName: `Player${i + 1}`, asHost: i === 0 });
+      const joined = await post(`/rooms/${roomId}/join`, { displayName: `Player${i + 1}`, asHost: i === 0, hostClaimToken: claim });
       expect(joined.status).toBe(201);
       players.push({ id: joined.json["playerId"] as string, token: joined.json["recoveryToken"] as string });
     }
@@ -85,7 +86,8 @@ describe("M1 HTTP + WebSocket adapter", () => {
   it("WebSocket clients receive projections and acks", async () => {
     const created = await post("/rooms", { name: "WS Room" });
     const roomId = created.json["roomId"] as string;
-    const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true });
+    const claim = created.json["hostClaimToken"] as string;
+    const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true, hostClaimToken: claim });
     await post(`/rooms/${roomId}/join`, { displayName: "Guest" });
 
     const messages: string[] = [];
@@ -102,7 +104,8 @@ describe("M1 HTTP + WebSocket adapter", () => {
   it("WebSocket open/close tracks connected: reload (close + reopen) restores startGame eligibility", async () => {
     const created = await post("/rooms", { name: "Reload Room" });
     const roomId = created.json["roomId"] as string;
-    const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true });
+    const claim = created.json["hostClaimToken"] as string;
+    const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true, hostClaimToken: claim });
     const guestJoin = await post(`/rooms/${roomId}/join`, { displayName: "Guest" });
     const guestId = guestJoin.json["playerId"] as string;
     const guestToken = guestJoin.json["recoveryToken"] as string;
@@ -145,7 +148,8 @@ describe("M1 HTTP + WebSocket adapter", () => {
   it("snapshot persistence restores a room after restart, with deadlines intact", async () => {
     const created = await post("/rooms", { name: "Restart Room" });
     const roomId = created.json["roomId"] as string;
-    const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true });
+    const claim = created.json["hostClaimToken"] as string;
+    const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true, hostClaimToken: claim });
     await post(`/rooms/${roomId}/join`, { displayName: "Guest" });
     const started = await post(`/rooms/${roomId}/games`, { gameId: "math-mayhem", seed: 3 }, hostJoin.json["recoveryToken"] as string);
     expect(started.status).toBe(201);

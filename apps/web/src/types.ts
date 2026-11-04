@@ -126,6 +126,7 @@ export interface JoinResponse {
   recoveryToken: string;
   sessionToken?: string;
   name?: string;
+  hostClaimToken?: string;
 }
 
 export interface QuizQuestion {

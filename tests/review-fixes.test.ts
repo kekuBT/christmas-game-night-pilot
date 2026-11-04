@@ -43,10 +43,11 @@ async function get(path: string, token?: string): Promise<{ status: number; json
 async function makeRoom(n: number): Promise<{ roomId: string; players: { id: string; token: string }[]; host: string }> {
   const created = await post("/rooms", { name: "Review Room" });
   const roomId = created.json["roomId"] as string;
+    const claim = created.json["hostClaimToken"] as string;
   const players: { id: string; token: string }[] = [];
   let host = "";
   for (let i = 0; i < n; i++) {
-    const j = await post(`/rooms/${roomId}/join`, { displayName: `P${i + 1}-${randomUUID().slice(0, 4)}`, asHost: i === 0 });
+    const j = await post(`/rooms/${roomId}/join`, { displayName: `P${i + 1}-${randomUUID().slice(0, 4)}`, asHost: i === 0, hostClaimToken: claim });
     players.push({ id: j.json["playerId"] as string, token: j.json["recoveryToken"] as string });
     if (j.json["isHost"]) host = j.json["playerId"] as string;
   }
