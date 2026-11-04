@@ -8,6 +8,7 @@ import { Reactions } from "./components/Reactions.js";
 import { ShowIntro, ShowResults, ShowWaiting } from "./components/ShowMode.js";
 import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js";
 import { deriveShowPhase } from "./components/showPhase.js";
+import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 import QRCode from "qrcode";
 
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
@@ -82,15 +83,54 @@ export function App() {
     if (!roomId || !playerId) return;
     refresh();
     const t = setInterval(refresh, 2000);
-    try {
-      const proto = location.protocol === "https:" ? "wss" : "ws";
-      const wsUrl = `${proto}://${location.host}/?roomId=${roomId}&audience=player`;
-      // Session token travels in the WebSocket subprotocol header, never in the URL.
-      const ws = token ? new WebSocket(wsUrl, [`cgn-session-${token}`]) : new WebSocket(wsUrl);
-      wsRef.current = ws;
-      ws.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection") setProj(m.state); } catch { /* ignore malformed WS frame; polling continues */ } };
-    } catch { /* ignore WS setup failure; polling continues */ }
-    return () => { clearInterval(t); wsRef.current?.close(); };
+    // WS auto-reconnect: a dropped socket used to stay dead — polling kept
+    // the UI fresh, but the server had marked the player "(away)" and
+    // excluded them from startGame's connected-player count until the
+    // manual Reconnect button was hit. Reopen on close with capped
+    // exponential backoff (see wsBackoff.ts). A 1008 close means the
+    // server rejected the session/room, so do NOT retry it; polling and
+    // manual reconnect remain available. Cleanup stops all retries.
+    let stopped = false;
+    let attempt = 0;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    let ws: WebSocket | null = null;
+    const connect = () => {
+      if (stopped) return;
+      try {
+        const proto = location.protocol === "https:" ? "wss" : "ws";
+        const wsUrl = `${proto}://${location.host}/?roomId=${roomId}&audience=player`;
+        // Session token travels in the WebSocket subprotocol header, never
+        // in the URL. Read it fresh each attempt, not from the effect
+        // closure, so a retry after a session change uses the live token.
+        const liveToken = sessionStorage.getItem("cgn_token");
+        const next = liveToken ? new WebSocket(wsUrl, [`cgn-session-${liveToken}`]) : new WebSocket(wsUrl);
+        ws = next;
+        wsRef.current = next;
+        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection") setProj(m.state); } catch { /* ignore malformed WS frame; polling continues */ } };
+        next.onclose = (e) => {
+          if (stopped || e.code === 1008) return;
+          attempt += 1;
+          retryTimer = setTimeout(connect, wsReconnectDelayMs(attempt));
+        };
+        // onerror needs no handler of its own: browsers fire close after
+        // error, and scheduling on both would double-book retries.
+      } catch {
+        // WS setup failure (e.g. server briefly down): retry on backoff,
+        // with polling as the fallback in the meantime.
+        if (!stopped) {
+          attempt += 1;
+          retryTimer = setTimeout(connect, wsReconnectDelayMs(attempt));
+        }
+      }
+    };
+    connect();
+    return () => {
+      stopped = true;
+      clearInterval(t);
+      if (retryTimer !== undefined) clearTimeout(retryTimer);
+      ws?.close();
+      if (wsRef.current === ws) wsRef.current = null;
+    };
   }, [roomId, playerId, refresh]);
 
   async function saveSession(r: JoinResponse) {
