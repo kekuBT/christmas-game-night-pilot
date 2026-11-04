@@ -21,6 +21,7 @@
 ## F4 — Championship, TV Dashboard, and Memory Book in browser
 - Acceptance: Championship standings computed from finished games are visible with day/game breakdown; TV Dashboard shows standings, roster, recent games, and join code; Memory Book shows approved entries only and revoked entries disappear from export.
 - Test: Browser checklist + existing ledger/Memory Book unit tests.
+- Status: DONE 2026-11-04 — `scripts/check-f4.mjs` (`npm run check-f4`) 11/11 in Chromium: 4-player room, Math Mayhem to finished, championship standings + per-game breakdown, TV Dashboard (code/roster/standings/recent games), Memory Book add → approve → export contains entry → revoke → fresh export no longer contains it (entry stays listed as pending). See `docs/PROGRESS.md` cron run ~03:00 EST. Note: the first two F4 runs exposed a driver pitfall, not an app bug (see PROGRESS); the E2E views check had the same pitfall and was fixed in the same run, so its approve→export assertion now genuinely proves approval.
 
 ## F5 — Integration and end-to-end
 - Acceptance: A full 7-day seeded run through the API produces accurate standings and a factual Memory Book export; a full day playlist through the browser (host + 3 players) completes without a stuck game or secret leak.

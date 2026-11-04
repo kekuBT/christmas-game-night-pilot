@@ -235,7 +235,12 @@ async function runBrowser(browserName, games) {
       await host.getByPlaceholder("e.g. Ada won Math Mayhem in a tie-break").fill("E2E highlight: Alex won Math Mayhem");
       await host.getByRole("button", { name: "Add from last finished game" }).click();
       await host.getByText("E2E highlight: Alex won Math Mayhem").waitFor({ timeout: 15000 });
-      await host.getByRole("button", { name: "Approve" }).first().click();
+      // Scoped + exact: unscoped substring "Approve" also matches the
+      // "Export approved" button, which comes first in DOM order, so the
+      // old .first() click never actually approved (see F4 check notes).
+      await host.locator(".card", { hasText: "E2E highlight: Alex won Math Mayhem" }).last()
+        .getByRole("button", { name: "Approve", exact: true }).click();
+      await host.getByText(/Day 1 · approved/).waitFor({ timeout: 15000 });
       await host.getByRole("button", { name: "Export approved" }).click();
       await host.getByText(/E2E highlight: Alex won Math Mayhem/).last().waitFor({ timeout: 15000 });
       await host.getByRole("button", { name: "Reconnect" }).click();
