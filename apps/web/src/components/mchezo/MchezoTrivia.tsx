@@ -27,6 +27,7 @@ export interface MchezoTriviaDeps {
   post: <T>(path: string, body: Record<string, unknown>) => Promise<T>;
   onBackToLobby: () => void;
   roomId: string;
+  isHostOrCohost?: boolean;
 }
 
 function stateOf(game: PlayerGame): GameState {
@@ -55,7 +56,14 @@ export function MchezoTriviaIntro({ title, onStart }: { title: string; onStart: 
 }
 
 export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
-  const { game, publicGame, players, playerId, gamesTitle, intent } = deps;
+  const { game, publicGame, players, playerId, gamesTitle, intent, post, roomId, isHostOrCohost } = deps;
+  // Host escape hatch for a stalled game, mirroring ShowWaiting: the old
+  // waiting banner had a skip button, but the Mchezo Trivia waiting view
+  // had none — so a timed-out Trivia game could not be skipped from the
+  // very UI that plays it. Polling/WS refresh re-renders after the
+  // deadline passes, so this appears without a page reload.
+  const stalled = publicGame?.deadlineAt !== undefined && Date.now() > publicGame.deadlineAt;
+  const onSkip = stalled && isHostOrCohost ? () => { void post(`/rooms/${roomId}/games/${game.id}/skip`, {}); } : undefined;
   const st = stateOf(game);
   const questions = st.questions ?? [];
   const myAnswers: Record<string, number> = st.myAnswers ?? {};
@@ -65,7 +73,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
 
   // Sat out: the server records whole-game abstention; show the wait, not Q1.
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} />;
+    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />;
   }
   // Just answered: locked view until the player moves on. If the poll has
   // not landed yet (answer not in myAnswers), fall through to the question
@@ -80,7 +88,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
           <span className="mz-lockcard__answer">{lockedQ.options[lockedChoice]}</span>
           <Stamp className="mz-lockcard__stamp">LOCKED IN</Stamp>
         </section>
-        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} />
+        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />
         <div style={{ padding: "0 16px 16px" }}>
           <Keycap block variant="neutral" onClick={() => setLastAnswered(null)}>
             {firstUnanswered ? "Next question" : "Waiting for the game to finish"}
@@ -91,7 +99,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
   }
   // All answered: wait for the rest of the room (or the deadline/host skip).
   if (!firstUnanswered) {
-    return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} />;
+    return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />;
   }
   const idx = questions.indexOf(firstUnanswered);
   const selected = myAnswers[firstUnanswered.id] ?? null;
@@ -125,11 +133,14 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
 /** Waiting view: honest counts only. Centre = players who have played so
     far (server submittedCount) out of the room; tokens carry offline badges
     only, never check marks for answers we cannot see. */
-function MchezoWaiting({ label, players, playerId, publicGame }: {
+function MchezoWaiting({ label, players, playerId, publicGame, stalled, isHostOrCohost, onSkip }: {
   label: string;
   players: PublicPlayer[];
   playerId: string;
   publicGame?: PublicGame;
+  stalled?: boolean;
+  isHostOrCohost?: boolean;
+  onSkip?: () => void;
 }) {
   const done = publicGame?.submittedCount ?? 0;
   const total = publicGame?.totalPlayers ?? players.length;
@@ -159,6 +170,8 @@ function MchezoWaiting({ label, players, playerId, publicGame }: {
         </div>
       </div>
       <p className="mz-foot">The reveal plays right here when the game finishes.</p>
+      {stalled && isHostOrCohost && onSkip && <><p className="mz-foot">This game has passed its deadline and may be stalled.</p><div style={{ padding: "0 16px 16px" }}><Keycap block variant="neutral" onClick={onSkip}>Skip timed-out game (no scores invented)</Keycap></div></>}
+      {stalled && !isHostOrCohost && <p className="mz-foot">The host can skip this game if it stays stalled.</p>}
     </div>
   );
 }

@@ -796,8 +796,12 @@ export class RoomEngine {
     if (!question) return { accepted: false, reason: "UNKNOWN_QUESTION" };
     const startedAt = game.startedAt ?? now;
     const elapsedMs = Math.max(0, now - startedAt);
-    // Late answers after a generous 5-minute game window are rejected, not silently dropped.
-    if (elapsedMs > 5 * 60 * 1000) return { accepted: false, reason: "PHASE_CLOSED" };
+    // One deadline governs every game: deadlineAt when present (the same
+    // check social intents use), falling back to the 5-minute window from
+    // startedAt only for legacy games that predate deadlineAt. Previously
+    // Math checked only the elapsed window, so a past deadlineAt with a
+    // recent startedAt did not stop Math answers.
+    if (game.deadlineAt ? now > game.deadlineAt : elapsedMs > 5 * 60 * 1000) return { accepted: false, reason: "PHASE_CLOSED" };
     const playerAnswers = (game.answers[actorId] ??= {});
     if (playerAnswers[questionId] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
     playerAnswers[questionId] = chosenIndex;

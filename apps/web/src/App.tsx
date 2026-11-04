@@ -339,6 +339,7 @@ export function App() {
           post={post}
           onBackToLobby={() => dismissResults(playingGame.id)}
           roomId={roomId ?? ""}
+          isHostOrCohost={!!(me?.isHost || me?.isCohost)}
         />
       </MchezoProvider>
     );
