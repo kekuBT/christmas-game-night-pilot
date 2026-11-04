@@ -153,6 +153,7 @@ export class RoomEngine {
       answerTimes: {},
       rawScores: Object.fromEntries(playerIds.map((p) => [p, 0])),
       startedAt: Date.now(),
+      deadlineAt: Date.now() + 5 * 60 * 1000,
       seed,
     };
     this.games.set(id, instance);
@@ -266,6 +267,40 @@ export class RoomEngine {
       return { ...base, hostView: true };
     }
     return base;
+  }
+
+  /** Serialise the full room for snapshot persistence. Recovery token hashes are included (hashes only, never raw tokens). */
+  toJSON(): Record<string, unknown> {
+    return {
+      id: this.id,
+      joinCode: this.joinCode,
+      name: this.name,
+      hostId: this.hostId,
+      cohosts: [...this.cohosts],
+      players: [...this.players.values()],
+      games: [...this.games.values()],
+      ledger: this.ledger,
+      seq: this.seq,
+      seenIntents: [...this.seenIntents.entries()],
+      nextPlayer: this.nextPlayer,
+      nextGame: this.nextGame,
+    };
+  }
+
+  static fromJSON(data: Record<string, unknown>): RoomEngine {
+    const engine = new RoomEngine(data["name"] as string);
+    engine.id = data["id"] as string;
+    engine.joinCode = data["joinCode"] as string;
+    engine.hostId = data["hostId"] as string | null;
+    engine.cohosts = new Set(data["cohosts"] as string[]);
+    engine.players = new Map((data["players"] as RoomPlayer[]).map((p) => [p.id, p]));
+    engine.games = new Map((data["games"] as GameInstance[]).map((g) => [g.id, g]));
+    engine.ledger = data["ledger"] as LedgerEvent[];
+    engine.seq = data["seq"] as number;
+    engine.seenIntents = new Map(data["seenIntents"] as [string, { accepted: boolean; result: unknown }][]);
+    engine.nextPlayer = data["nextPlayer"] as number;
+    engine.nextGame = data["nextGame"] as number;
+    return engine;
   }
 
   /** Export a hash of the ledger for audit, without exposing tokens. */

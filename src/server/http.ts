@@ -1,0 +1,221 @@
+import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { WebSocketServer, type WebSocket } from "ws";
+import { RoomEngine } from "./room.js";
+
+export interface ServerOptions {
+  port?: number;
+  dataDir?: string;
+}
+
+interface SocketMeta {
+  roomId: string;
+  actorId: string;
+  audience: "player" | "tv" | "host" | "cohost";
+}
+
+/**
+ * Local HTTP + WebSocket adapter around RoomEngine.
+ * LOCAL only — not a Cloudflare Durable Object. Snapshot persistence is a
+ * JSON file in dataDir, written after every mutation, so a restart restores
+ * players, games, deadlines, ledger, and deduplication state.
+ */
+export class LocalServer {
+  rooms = new Map<string, RoomEngine>();
+  private dataDir: string;
+  private http = createServer((req, res) => void this.handleHttp(req, res));
+  private wss = new WebSocketServer({ server: this.http });
+  private sockets = new Set<{ ws: WebSocket; meta: SocketMeta }>();
+
+  constructor(opts: ServerOptions = {}) {
+    this.dataDir = opts.dataDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data");
+    mkdirSync(this.dataDir, { recursive: true });
+    this.loadSnapshots();
+    this.wss.on("connection", (ws, req) => this.handleWs(ws, req));
+  }
+
+  private snapshotPath(roomId: string): string {
+    return join(this.dataDir, `${roomId}.json`);
+  }
+
+  private persist(room: RoomEngine): void {
+    writeFileSync(this.snapshotPath(room.id), JSON.stringify(room.toJSON(), null, 2));
+  }
+
+  private loadSnapshots(): void {
+    // Only load files that look like room snapshots; ignore other files.
+    try {
+      for (const file of readdirSync(this.dataDir)) {
+        if (!file.endsWith(".json")) continue;
+        const data = JSON.parse(readFileSync(join(this.dataDir, file), "utf-8")) as Record<string, unknown>;
+        if (typeof data["id"] === "string" && Array.isArray(data["players"])) {
+          const room = RoomEngine.fromJSON(data);
+          this.rooms.set(room.id, room);
+        }
+      }
+    } catch {
+      // No snapshots yet — start empty.
+    }
+  }
+
+  async listen(port = 0): Promise<number> {
+    return new Promise((resolve) => {
+      this.http.listen(port, () => {
+        const addr = this.http.address();
+        resolve(typeof addr === "object" && addr ? addr.port : port);
+      });
+    });
+  }
+
+  async close(): Promise<void> {
+    for (const s of this.sockets) s.ws.close();
+    this.sockets.clear();
+    await new Promise<void>((resolve) => this.wss.close(() => resolve()));
+    await new Promise<void>((resolve) => this.http.close(() => resolve()));
+  }
+
+  private async readBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) chunks.push(chunk as Buffer);
+    const text = Buffer.concat(chunks).toString("utf-8");
+    if (!text) return {};
+    try {
+      return JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+
+  private send(res: ServerResponse, status: number, body: unknown): void {
+    res.writeHead(status, { "content-type": "application/json" });
+    res.end(JSON.stringify(body));
+  }
+
+  private async handleHttp(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    const url = new URL(req.url ?? "/", "http://localhost");
+    const parts = url.pathname.split("/").filter(Boolean);
+    try {
+      if (req.method === "POST" && parts.length === 1 && parts[0] === "rooms") {
+        const body = await this.readBody(req);
+        const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night");
+        this.rooms.set(room.id, room);
+        this.persist(room);
+        this.send(res, 201, { roomId: room.id, joinCode: room.joinCode, name: room.name });
+        return;
+      }
+      if (parts[0] === "rooms" && parts[1]) {
+        const room = this.rooms.get(parts[1]);
+        if (!room) {
+          this.send(res, 404, { error: "Room not found" });
+          return;
+        }
+        if (req.method === "GET" && parts.length === 2) {
+          this.send(res, 200, room.project("tv"));
+          return;
+        }
+        if (req.method === "GET" && parts.length === 3 && parts[2] === "projection") {
+          const audience = (url.searchParams.get("audience") ?? "tv") as "player" | "tv" | "host" | "cohost";
+          const actorId = url.searchParams.get("actorId") ?? undefined;
+          this.send(res, 200, room.project(audience, actorId));
+          return;
+        }
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "join") {
+          const body = await this.readBody(req);
+          const { player, recoveryToken } = room.join(String(body["displayName"] ?? ""), { asHost: body["asHost"] === true });
+          this.persist(room);
+          this.broadcast(room.id);
+          this.send(res, 201, { playerId: player.id, displayName: player.displayName, isHost: player.isHost, recoveryToken });
+          return;
+        }
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "reconnect") {
+          const body = await this.readBody(req);
+          const player = room.reconnect(String(body["playerId"] ?? ""), String(body["recoveryToken"] ?? ""));
+          this.persist(room);
+          this.broadcast(room.id);
+          this.send(res, 200, { playerId: player.id, connected: player.connected });
+          return;
+        }
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "cohost") {
+          const body = await this.readBody(req);
+          room.grantCohost(String(body["hostId"] ?? ""), String(body["targetId"] ?? ""));
+          this.persist(room);
+          this.broadcast(room.id);
+          this.send(res, 200, { ok: true });
+          return;
+        }
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "games") {
+          const body = await this.readBody(req);
+          const game = room.startGame(String(body["hostId"] ?? ""), String(body["gameId"] ?? ""), {
+            official: body["official"] === true,
+            seed: typeof body["seed"] === "number" ? body["seed"] : undefined,
+          });
+          this.persist(room);
+          this.broadcast(room.id);
+          this.send(res, 201, { gameId: game.id, gameType: game.gameId, status: game.status, players: game.players });
+          return;
+        }
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "intents") {
+          const body = await this.readBody(req);
+          const result = room.submitIntent(body["intent"], String(body["actorId"] ?? ""));
+          this.persist(room);
+          this.broadcast(room.id);
+          this.send(res, 200, result);
+          return;
+        }
+      }
+      this.send(res, 404, { error: "Not found" });
+    } catch (err) {
+      this.send(res, 400, { error: err instanceof Error ? err.message : "Bad request" });
+    }
+  }
+
+  private handleWs(ws: WebSocket, req: IncomingMessage): void {
+    const url = new URL(req.url ?? "/", "http://localhost");
+    const roomId = url.searchParams.get("roomId") ?? "";
+    const actorId = url.searchParams.get("actorId") ?? "";
+    const audience = (url.searchParams.get("audience") ?? "player") as SocketMeta["audience"];
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      ws.close(1008, "Room not found");
+      return;
+    }
+    const meta: SocketMeta = { roomId, actorId, audience };
+    const entry = { ws, meta };
+    this.sockets.add(entry);
+    ws.send(JSON.stringify({ kind: "projection", state: room.project(audience, actorId || undefined) }));
+    ws.on("message", (data) => {
+      try {
+        const msg = JSON.parse(data.toString()) as { intent?: unknown; actorId?: string };
+        if (!msg.intent) return;
+        const result = room.submitIntent(msg.intent, msg.actorId ?? actorId);
+        this.persist(room);
+        ws.send(JSON.stringify({ kind: "ack", result }));
+        this.broadcast(roomId);
+      } catch {
+        ws.send(JSON.stringify({ kind: "error", code: "INVALID_MESSAGE" }));
+      }
+    });
+    ws.on("close", () => {
+      this.sockets.delete(entry);
+      const player = room.players.get(actorId);
+      if (player) player.connected = false;
+    });
+  }
+
+  private broadcast(roomId: string): void {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+    for (const { ws, meta } of this.sockets) {
+      if (meta.roomId !== roomId) continue;
+      if (ws.readyState === 1) {
+        ws.send(JSON.stringify({ kind: "projection", state: room.project(meta.audience, meta.actorId || undefined) }));
+      }
+    }
+  }
+}
+
+export function exists(path: string): boolean {
+  return existsSync(path);
+}
