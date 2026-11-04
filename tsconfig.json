@@ -1,0 +1,1 @@
+{"compilerOptions":{"allowImportingTsExtensions":false,"declaration":false,"esModuleInterop":true,"forceConsistentCasingInFileNames":true,"module":"NodeNext","moduleResolution":"NodeNext","noEmit":false,"noUncheckedIndexedAccess":true,"outDir":"dist","rootDir":".","skipLibCheck":true,"strict":true,"target":"ES2022"},"exclude":["dist","node_modules"],"include":["src","tests"]}
