@@ -39,6 +39,7 @@
     "check-multiplayer": "node scripts/check-multiplayer.mjs",
     "check-f4": "node scripts/check-f4.mjs",
     "check-f5": "node scripts/check-f5.mjs",
+    "check-contrast": "node scripts/check-contrast.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",
     "serve": "tsx src/server/serve.ts"
   },

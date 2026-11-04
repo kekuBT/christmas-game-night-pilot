@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 ~04:15 EST (ESLint DONE: `npm run lint` exit 0; npm audit re-confirmed BLOCKED by registry proxy 403; real-device checklist + family-member acceptance still NOT RUN)
+Updated: 2026-11-04 ~04:45 EST (F6 contrast audit DONE via Chromium computed styles: 57/57 pairs pass WCAG AA; real-device checklist + family-member acceptance still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -35,7 +35,7 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 - Browser click-through for all 11 games: DONE in real browsers 2026-11-04 — Chromium and Firefox, 4-player room, all 11 games to finished, plus championship/TV/Memory Book/reconnect views (see cron run below). The earlier browser-tab-service failure is superseded by the Playwright run.
 - Playwright multi-browser E2E: DONE for Chromium and Firefox. WebKit BLOCKED (binaries downloaded, but launch fails: host missing libgstreamer-1.0, libgtk-4, libgraphene, libevent, libgstreamer plugins — system package install is outside local-only scope, so not attempted).
 - Real browsers/devices: iPhone Safari, Android, desktop Safari, TV — NOT RUN (real-device checklist still open).
-- F6 viewport checks: DONE 2026-11-04 via Chromium emulation (see cron run below); contrast audit and real-device confirmation still open.
+- F6 viewport checks: DONE 2026-11-04 via Chromium emulation (see cron run below); contrast audit DONE 2026-11-04 ~04:45 EST via Chromium computed styles (57/57 pairs pass WCAG AA); real-device confirmation still open.
 - Manual real-device checklist (part of task 2): NOT RUN.
 - Cloudflare: UNTESTED-CLOUD, no provisioning per owner instruction.
 - npm audit: NOT RUN — registry proxy returned 403 policy_denied; re-tried 2026-11-04 ~04:15 EST, still blocked; no bypass attempted.
@@ -49,7 +49,7 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 4. PARTLY DONE 2026-11-04 ~01:50 EST: F6 mobile/accessibility viewport checks (Chromium emulation, NOT real devices) — see cron run below. REMAINING: manual real-device checklist (iPhone Safari, Android, desktop Safari, TV — all NOT RUN; needs real devices, cannot be done from this VM) and F5/F7 completion per `docs/FRONTEND_MILESTONES.md` (F4 closed 2026-11-04 ~03:05 EST).
 5. DONE 2026-11-04 ~03:30 EST: F5 formally closed — see cron run below. REMAINING NEXT: F7 clean-install, and the manual real-device checklist.
 6. DONE 2026-11-04 ~03:50 EST: F7 formally closed — see cron run below. REMAINING NEXT (all need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room), plus contrast audit (F6 remainder). Local-only follow-ups that WERE doable: ESLint setup — DONE 2026-11-04 ~04:15 EST (see cron run below); npm audit retry — RE-TRIED 2026-11-04 ~04:15 EST, still BLOCKED by registry proxy 403 (installs work, audit POST denied by policy, no bypass attempted); WebKit host-library question (system install outside local-only scope — owner decision, not attempted).
-7. NEXT LOCAL-ONLY CANDIDATE (not yet done): F6 contrast audit (automated, via computed styles in Chromium emulation — real-device confirmation still separate and open), or a docs-only release-readiness packet. Everything else remaining needs real devices / a family member.
+7. DONE 2026-11-04 ~04:45 EST: F6 contrast audit (automated, via computed styles in Chromium emulation — see cron run below). REMAINING (all need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room). No further local-only candidate tasks remain on the board; future runs should re-verify (typecheck/tests/lint + a driver smoke run) or wait for owner input.
 
 ## External approvals pending
 None queued. Local-only mode: do not initiate GitHub publishing or approval requests until Keku explicitly asks. GitHub coordination cron remains paused.
@@ -69,6 +69,7 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - `node scripts/check-multiplayer.mjs http://localhost:3457` — exit 0, 12 checks passed (see cron run 2026-11-04 ~02:45 EST)
 - `node scripts/check-f4.mjs http://localhost:3457` — exit 0, 11 checks passed (see cron run 2026-11-04 ~03:05 EST)
 - `node scripts/check-f5.mjs http://localhost:3457` — exit 0, 30/30 passed (see cron run 2026-11-04 ~03:30 EST)
+- `node scripts/check-contrast.mjs http://localhost:3457` — exit 0, CONTRAST CHECK OK (57 unique pairs passed, 0 failed, see cron run 2026-11-04 ~04:45 EST)
 - F7 clean-install (fresh clone to /tmp, 2026-11-04 ~03:50 EST): `npm install` exit 0 (107 packages), `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run build` exit 0, `npm run build:web` exit 0 (34 modules); /tmp clone deleted after
 - `node scripts/e2e-browser.mjs http://localhost:3457 --browser=chromium --games=smoke` — exit 0, 3/3 passed (regression after WS connected fix)
 - Live smoke (port 3456, 2026-11-03): `/`, `/games`, join-by-code, host start Math Mayhem with 2 players — all as reported above
@@ -143,5 +144,15 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - npm audit RETRIED in this run and still BLOCKED: `npm audit` (with and without `--omit=dev`) returns 403 policy_denied from the registry proxy (`POST /-/npm/v1/security/audits/quick not permitted by policy`); installs succeed, so this is a proxy-policy block on the audit endpoint only. No bypass attempted. `docs/SECURITY_AUDIT.md` updated (ESLint row now PASS, NOT RUN list updated).
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
 
+## Cron run 2026-11-04 ~04:45 EST (local-dev-christmas-30m — COMPLETED with commit)
+- Tree was clean; worked task-board item 7 (F6 contrast audit, the last local-only board task).
+- New driver `scripts/check-contrast.mjs` (`npm run check-contrast`, usage: build web, `PORT=3457 npm run serve`, then `node scripts/check-contrast.mjs http://localhost:3457`). Chromium, 2 fictional players (Alex host, Sam joiner), Math Mayhem played to finished via real UI clicks, then championship, TV Dashboard, and Memory Book (add from last finished game) views. Each view samples every visible text element's computed foreground colour against its effective background (first non-transparent ancestor) and checks the WCAG 2.1 ratio (>= 4.5:1 normal, >= 3:1 large >= 24px or >= 18.66px bold). Disabled controls are reported as informational only (WCAG exempts inactive UI).
+- Two driver pitfalls found and FIXED in this run — NOT app bugs:
+  1. First run timed out waiting for "Status: finished" because only the host answered questions; Math Mayhem advances only when every player answers (same pattern as check-f4.mjs). Fixed: loop both players' answer clicks until the panel reports finished.
+  2. Second run timed out on the Memory Book "Add from last finished game" button because it is disabled until highlight text is entered (App.tsx line 171). Fixed: fill the highlight textarea before clicking.
+- Evidence: `npm run lint` exit 0, `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run build:web` exit 0, `npm run check-contrast` exit 0 — 57 unique colour pairs passed, 0 failed, 1 disabled-info (home "Join room" button, which passes at 9.44:1 anyway). Lowest passing normal-text ratio: 7.18:1 (muted #a8bfc9 on panel #162f45); all other pairs >= 9.44:1. No app code changed in this run (driver + docs only). `docs/FRONTEND_MILESTONES.md` F6 updated (contrast DONE, real-device confirmation still open). Test server data/ removed, port 3457 confirmed closed.
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+- Remaining: only real-device checklist + family-member acceptance test (need real devices / a family member, not doable from this VM). No further local-only board tasks remain.
+
 ## Next session exact resume step
-Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then: the remaining product gates need real devices / a family member and CANNOT run from this VM — manual real-device checklist (iPhone Safari, Android, desktop Safari, TV) and the family-member acceptance test (no dev tools, no developer in the room), plus the F6 contrast audit (an automated Chromium-emulation contrast check is the next local-only candidate). npm audit stays BLOCKED by registry proxy policy; do not bypass it. Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
+Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then: the remaining product gates need real devices / a family member and CANNOT run from this VM — manual real-device checklist (iPhone Safari, Android, desktop Safari, TV) and the family-member acceptance test (no dev tools, no developer in the room). The F6 contrast audit is DONE (2026-11-04 ~04:45 EST); no further local-only board tasks remain, so a run with nothing new should re-verify gates (typecheck/tests/lint + one driver smoke run) and stop at a clean checkpoint rather than inventing work. npm audit stays BLOCKED by registry proxy policy; do not bypass it. Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.

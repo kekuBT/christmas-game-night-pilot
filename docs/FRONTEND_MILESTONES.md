@@ -31,7 +31,7 @@
 ## F6 — Mobile and accessibility
 - Acceptance: Phone layout at 320px, 375px, and 390px portrait with no horizontal scroll, touch targets >=44px, visible focus, keyboard navigation for join/lobby/game selection, reduced-motion parity, and readable contrast for the Midnight Christmas palette.
 - Test: Viewport checklist with screenshots. Real iPhone Safari is NOT RUN until a real device is available; WebKit is not a substitute.
-- Status: PARTLY DONE 2026-11-04 — `scripts/check-mobile.mjs` 32/32 via Chromium emulation (no overflow, >=44px targets, visible focus, reduced motion). Contrast audit and real-device confirmation still OPEN; F6 is NOT formally closed until a real device runs.
+- Status: PARTLY DONE 2026-11-04 — `scripts/check-mobile.mjs` 32/32 via Chromium emulation (no overflow, >=44px targets, visible focus, reduced motion); `scripts/check-contrast.mjs` 57/57 unique colour pairs pass WCAG AA (see cron run 2026-11-04 ~04:45 EST). Real-device confirmation still OPEN; F6 is NOT formally closed until a real device runs.
 
 ## F7 — Release readiness
 - Acceptance: Clean install + typecheck + tests + web build all pass from a clean checkout; `docs/SECURITY_AUDIT.md` is updated with the final test matrix; every NOT RUN item is listed explicitly; no merge, deploy, spend, or publish has happened without owner approval.
