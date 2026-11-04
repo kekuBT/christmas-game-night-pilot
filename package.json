@@ -31,6 +31,7 @@
     "build:web": "vite build --config apps/web/vite.config.ts",
     "e2e": "node scripts/e2e-browser.mjs",
     "check-mobile": "node scripts/check-mobile.mjs",
+    "check-multiplayer": "node scripts/check-multiplayer.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",
     "serve": "tsx src/server/serve.ts"
   },

@@ -98,6 +98,49 @@ describe("M1 HTTP + WebSocket adapter", () => {
     ws.close();
   });
 
+  it("WebSocket open/close tracks connected: reload (close + reopen) restores startGame eligibility", async () => {
+    const created = await post("/rooms", { name: "Reload Room" });
+    const roomId = created.json["roomId"] as string;
+    const hostJoin = await post(`/rooms/${roomId}/join`, { displayName: "Host", asHost: true });
+    const hostId = hostJoin.json["playerId"] as string;
+    const guestJoin = await post(`/rooms/${roomId}/join`, { displayName: "Guest" });
+    const guestId = guestJoin.json["playerId"] as string;
+
+    const connectedOf = async (id: string): Promise<boolean> => {
+      const tv = await get(`/rooms/${roomId}/projection?audience=tv`);
+      const players = tv["players"] as { id: string; connected: boolean }[];
+      return players.find((p) => p.id === id)?.connected ?? false;
+    };
+    const openWs = async (id: string): Promise<WebSocket> => {
+      const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&actorId=${id}&audience=player`);
+      await new Promise<void>((resolve) => ws.on("open", () => resolve()));
+      return ws;
+    };
+    const closeWs = async (ws: WebSocket): Promise<void> => {
+      await new Promise<void>((resolve) => { ws.on("close", () => resolve()); ws.close(); });
+      await new Promise((r) => setTimeout(r, 100));
+    };
+
+    // Guest connects, then "reloads": socket closes, new socket opens.
+    const ws1 = await openWs(guestId);
+    expect(await connectedOf(guestId)).toBe(true);
+    await closeWs(ws1);
+    expect(await connectedOf(guestId)).toBe(false);
+    const ws2 = await openWs(guestId);
+    expect(await connectedOf(guestId)).toBe(true);
+    // Overlapping sockets (new opens before old closes) must not disconnect.
+    const ws3 = await openWs(guestId);
+    await closeWs(ws2);
+    expect(await connectedOf(guestId)).toBe(true);
+    await closeWs(ws3);
+    expect(await connectedOf(guestId)).toBe(false);
+    // And a fresh socket restores eligibility for a minPlayers game.
+    const ws4 = await openWs(guestId);
+    const started = await post(`/rooms/${roomId}/games`, { hostId, gameId: "math-mayhem", seed: 5 });
+    expect(started.status).toBe(201);
+    await closeWs(ws4);
+  });
+
   it("snapshot persistence restores a room after restart, with deadlines intact", async () => {
     const created = await post("/rooms", { name: "Restart Room" });
     const roomId = created.json["roomId"] as string;

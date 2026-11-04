@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 ~01:50 EST (F6 viewport checks DONE via Chromium emulation; real-device checklist still NOT RUN)
+Updated: 2026-11-04 ~02:45 EST (F3 DONE: multiplayer/reconnect/TV browser check 12/12 + reload-connected bug FIXED; real-device checklist still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -46,7 +46,8 @@ F1 (browser app shell + all 11 game screens): BUILT; API-level playthrough of al
 1. DONE 2026-11-04 (real browser): Playwright click-through of all 11 games to finished in Chromium and Firefox, 4-player room — see cron run below. API playthrough (`scripts/clickthrough-api.mjs`) stays as the regression check.
 2. DONE except WebKit + device checklist: Playwright E2E (`scripts/e2e-browser.mjs`, `npm run e2e`) covers Chromium/Firefox; WebKit BLOCKED on host libraries (see above); manual real-device checklist still NOT RUN.
 3. DONE 2026-11-04 ~01:20 EST: PR-ready checkpoint packet prepared LOCALLY — `docs/CHECKPOINT_PACKET.md` (summary, test evidence, screenshots, limitations, open owner decisions) + `scripts/screenshot-checkpoint.mjs` + 7 screenshots in `docs/checkpoint-screenshots/` (home, lobby, game playing, game finished, championship, TV dashboard, Memory Book; fictional players only). NOT published to GitHub until Keku explicitly asks, per local-only mode.
-4. PARTLY DONE 2026-11-04 ~01:50 EST: F6 mobile/accessibility viewport checks (Chromium emulation, NOT real devices) — see cron run below. REMAINING: manual real-device checklist (iPhone Safari, Android, desktop Safari, TV — all NOT RUN; needs real devices, cannot be done from this VM) and F3–F7 completion per `docs/FRONTEND_MILESTONES.md` (F3/F4 largely evidenced by the E2E run, but their milestone statuses were not formally closed).
+4. PARTLY DONE 2026-11-04 ~01:50 EST: F6 mobile/accessibility viewport checks (Chromium emulation, NOT real devices) — see cron run below. REMAINING: manual real-device checklist (iPhone Safari, Android, desktop Safari, TV — all NOT RUN; needs real devices, cannot be done from this VM) and F4–F7 completion per `docs/FRONTEND_MILESTONES.md`.
+5. DONE 2026-11-04 ~02:45 EST: F3 formally closed — see cron run below. REMAINING NEXT: F4 browser close-out (championship day/game breakdown is rendered, but Memory Book revoke-disappears-from-export is NOT yet browser-tested; the E2E views check covers add/approve/export only), then F5 full-day playlist, F7 clean-install, and the manual real-device checklist.
 
 ## External approvals pending
 None queued. Local-only mode: do not initiate GitHub publishing or approval requests until Keku explicitly asks. GitHub coordination cron remains paused.
@@ -56,11 +57,13 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 
 ## Last commands actually run
 - `npm run typecheck` — exit 0
-- `npm test` — 8 files, 47 tests passed
+- `npm test` — 8 files, 48 tests passed (was 47; +1 WS connected test, 2026-11-04 ~02:45 EST)
 - `npm run build:web` — exit 0
 - `node scripts/screenshot-checkpoint.mjs http://localhost:3457` — exit 0, 7 screenshots
 - `node scripts/clickthrough-api.mjs http://localhost:3457` — exit 0, ALL GAMES FINISHED (twice: before and after the 2026-11-04 fixes)
 - `node scripts/check-mobile.mjs http://localhost:3457` — exit 0, 32 checks passed (see cron run 2026-11-04 ~01:46 EST)
+- `node scripts/check-multiplayer.mjs http://localhost:3457` — exit 0, 12 checks passed (see cron run 2026-11-04 ~02:45 EST)
+- `node scripts/e2e-browser.mjs http://localhost:3457 --browser=chromium --games=smoke` — exit 0, 3/3 passed (regression after WS connected fix)
 - Live smoke (port 3456, 2026-11-03): `/`, `/games`, join-by-code, host start Math Mayhem with 2 players — all as reported above
 - `npm audit --omit=dev` — blocked by registry proxy 403, NOT RUN (earlier session); `npm view playwright` 2026-11-04 succeeded (1.64.1)
 
@@ -89,5 +92,13 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - Evidence: `npm run typecheck` exit 0, `npm test` 8 files / 47 passed, `npm run build:web` exit 0, `npm run check-mobile` exit 0 (32 passed, 0 failed; overflow 0px at all widths, all visible targets >= 44px, all focused controls outlined 3px gold, reduced-motion transitions/animations off). Test server data/ removed.
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
 
+## Cron run 2026-11-04 ~02:15 EST (local-dev-christmas-30m — COMPLETED with commit)
+- Tree was clean; worked task-board item 5 (F3 formal close-out).
+- New driver `scripts/check-multiplayer.mjs` (`npm run check-multiplayer`, Chromium, 4 fictional players): simultaneous same-panel visibility for all 4 pages during Math Mayhem; TV projection leak scan while games are playing; mid-game reload of one player (sessionStorage token) returning to the same slot with no duplicate and roster still 4; Math finished on all 4 pages; Impostor started after a finished game; TV Dashboard view during a secret-role game.
+- One REAL APP BUG found and FIXED in this run (decision L09 in `docs/DECISIONS.md`): WebSocket close set `connected = false` but nothing on open restored it — only the manual Reconnect button did — so after a plain reload, `startGame` counted only 3 connected players and a 4-player game failed with "Need at least 4 connected players" even though the reloaded tab was live. Fix in `src/server/http.ts`: WS open (player/host/cohost) sets `connected = true`; WS close sets false only when no other socket for that player remains (reload race: new socket may open before the old one closes). New integration test "WebSocket open/close tracks connected" covers close→false, reopen→true, overlapping sockets→still true, and startGame eligibility after reopen.
+- One check-design fix, NOT an app bug: the first leak scan flagged `correctAnswer` during Impostor — but that key came from the already-FINISHED Math game, where revealing answers is by design. The scan now checks answer-key fields only inside `playing` games, and secret/token keys globally.
+- Evidence: `npm run typecheck` exit 0, `npm test` 8 files / 48 passed (was 47; +1 new test), `npm run build:web` exit 0, `npm run check-multiplayer` exit 0 (12/12), E2E smoke re-run (`--games=smoke`, Chromium) 3/3 passed. Test server data/ removed.
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
 ## Next session exact resume step
-Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then start the manual real-device checklist (iPhone Safari, Android, desktop, TV — all still NOT RUN; needs real devices) and F3–F7 per `docs/FRONTEND_MILESTONES.md`. Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
+Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then close out F4 in the browser (Memory Book revoke-disappears-from-export is the untested part; add/approve/export already covered by E2E views), then F5, F7, and the manual real-device checklist (iPhone Safari, Android, desktop, TV — all still NOT RUN; needs real devices). Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.

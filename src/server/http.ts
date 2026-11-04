@@ -285,6 +285,15 @@ export class LocalServer {
     const meta: SocketMeta = { roomId, actorId, audience };
     const entry = { ws, meta };
     this.sockets.add(entry);
+    // An open socket means the player is connected again. Before this fix,
+    // only the explicit /reconnect endpoint restored connected=true, so a
+    // plain page reload left the player permanently "disconnected" for
+    // startGame's connected-player count ("Need at least N connected
+    // players") even though the reloaded tab was live.
+    if (actorId && audience !== "tv") {
+      const player = room.players.get(actorId);
+      if (player) player.connected = true;
+    }
     ws.send(JSON.stringify({ kind: "projection", state: room.project(audience, actorId || undefined) }));
     ws.on("message", (data) => {
       try {
@@ -300,8 +309,16 @@ export class LocalServer {
     });
     ws.on("close", () => {
       this.sockets.delete(entry);
-      const player = room.players.get(actorId);
-      if (player) player.connected = false;
+      // Only mark disconnected when no socket for this player remains: on a
+      // reload the new socket may open before the old one closes, and the
+      // old close must not undo the new connection.
+      const stillOpen = [...this.sockets].some(
+        (s) => s.meta.roomId === roomId && s.meta.actorId === actorId,
+      );
+      if (!stillOpen) {
+        const player = room.players.get(actorId);
+        if (player) player.connected = false;
+      }
     });
   }
 

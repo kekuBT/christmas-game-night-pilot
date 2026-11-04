@@ -5,16 +5,18 @@
 ## F1 — Browser app shell (React)
 - Acceptance: A browser at `/` shows landing, create-room, join-by-code, lobby with roster, and host controls, without developer tools.
 - Test: `npm run build:web` exit 0; manual browser smoke: create room, join as second player in a second tab, see both names in lobby.
-- Status: IN PROGRESS in this session.
+- Status: DONE 2026-11-04 — Playwright E2E (`scripts/e2e-browser.mjs`) creates rooms, joins 3 players by code, and verifies the 4-player lobby roster in Chromium and Firefox, 12/12 each (see `docs/PROGRESS.md` cron run ~01:14 EST).
 
 ## F2 — All 11 games playable in browser
 - Acceptance: For each of the 11 games, a player can start it from the lobby, complete a full round/match through the browser UI, and see correct raw scores at finish, via the real LocalServer API/WebSocket (no mock scores).
 - Games: Impostor, Caption Clash, Trivia, Word Connections, Who Said That, Guess the Year, Closest Wins, Category Sprint, Charades, Geography, Math Mayhem.
 - Test: Per-game browser flows in `apps/web` manual checklist + engine tests (already passing for all 11 at API level). Browser-level per-game test is NOT yet automated — record as such until Playwright covers it.
+- Status: DONE 2026-11-04 — Playwright E2E plays all 11 games to "Status: finished" via real UI clicks in Chromium and Firefox, 12/12 each (see `docs/PROGRESS.md` cron run ~01:14 EST). WebKit remains BLOCKED on host libraries; real devices NOT RUN.
 
 ## F3 — Multiplayer, reconnect, and projections in browser
 - Acceptance: 2+ browser tabs as different players can play the same game simultaneously; a tab reload with its recovery token restores the same player slot; TV view (audience=tv) shows only public state, never answer keys, roles, or prompts for other players.
 - Test: Multi-tab manual test + existing HTTP/WebSocket integration tests (10 players, dedupe, restart).
+- Status: DONE 2026-11-04 — `scripts/check-multiplayer.mjs` (`npm run check-multiplayer`) 12/12 in Chromium: simultaneous same-panel play on 4 pages, mid-game reload returns to the same slot with no duplicate and roster still 4, TV projection leak-free while games are playing (Math Mayhem + Impostor), plus a WS connected-tracking fix (decision L09) and a new integration test. See `docs/PROGRESS.md` cron run ~02:45 EST.
 
 ## F4 — Championship, TV Dashboard, and Memory Book in browser
 - Acceptance: Championship standings computed from finished games are visible with day/game breakdown; TV Dashboard shows standings, roster, recent games, and join code; Memory Book shows approved entries only and revoked entries disappear from export.
