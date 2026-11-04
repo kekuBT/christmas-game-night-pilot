@@ -28,6 +28,10 @@ export interface MchezoTriviaDeps {
   onBackToLobby: () => void;
   roomId: string;
   isHostOrCohost?: boolean;
+  /** Open the TV stage without leaving the game (view switch only). */
+  onTv?: () => void;
+  /** Previous finished same-type game's scores, for honest gains. */
+  previousScores?: Record<string, number>;
 }
 
 function stateOf(game: PlayerGame): GameState {
@@ -56,7 +60,7 @@ export function MchezoTriviaIntro({ title, onStart }: { title: string; onStart: 
 }
 
 export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
-  const { game, publicGame, players, playerId, gamesTitle, intent, post, roomId, isHostOrCohost } = deps;
+  const { game, publicGame, players, playerId, gamesTitle, intent, post, roomId, isHostOrCohost, onTv } = deps;
   // Host escape hatch for a stalled game, mirroring ShowWaiting: the old
   // waiting banner had a skip button, but the Mchezo Trivia waiting view
   // had none — so a timed-out Trivia game could not be skipped from the
@@ -73,7 +77,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
 
   // Sat out: the server records whole-game abstention; show the wait, not Q1.
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />;
+    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} onTv={onTv} />;
   }
   // Just answered: locked view until the player moves on. If the poll has
   // not landed yet (answer not in myAnswers), fall through to the question
@@ -88,7 +92,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
           <span className="mz-lockcard__answer">{lockedQ.options[lockedChoice]}</span>
           <Stamp className="mz-lockcard__stamp">LOCKED IN</Stamp>
         </section>
-        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />
+        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} onTv={onTv} />
         <div style={{ padding: "0 16px 16px" }}>
           <Keycap block variant="neutral" onClick={() => setLastAnswered(null)}>
             {firstUnanswered ? "Next question" : "Waiting for the game to finish"}
@@ -99,7 +103,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
   }
   // All answered: wait for the rest of the room (or the deadline/host skip).
   if (!firstUnanswered) {
-    return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />;
+    return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} onTv={onTv} />;
   }
   const idx = questions.indexOf(firstUnanswered);
   const selected = myAnswers[firstUnanswered.id] ?? null;
@@ -118,13 +122,20 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
       secondsLeft={secondsLeft}
       totalSeconds={300}
       extra={
-        <button
-          type="button"
-          className="mz-chip-btn"
-          onClick={() => { void intent(game.id, "abstain", {}); }}
-        >
-          Sit this game out
-        </button>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          <button
+            type="button"
+            className="mz-chip-btn"
+            onClick={() => { void intent(game.id, "abstain", {}); }}
+          >
+            Sit this game out
+          </button>
+          {onTv && (
+            <button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>
+              TV stage
+            </button>
+          )}
+        </div>
       }
     />
   );
@@ -133,7 +144,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
 /** Waiting view: honest counts only. Centre = players who have played so
     far (server submittedCount) out of the room; tokens carry offline badges
     only, never check marks for answers we cannot see. */
-function MchezoWaiting({ label, players, playerId, publicGame, stalled, isHostOrCohost, onSkip }: {
+function MchezoWaiting({ label, players, playerId, publicGame, stalled, isHostOrCohost, onSkip, onTv }: {
   label: string;
   players: PublicPlayer[];
   playerId: string;
@@ -141,6 +152,7 @@ function MchezoWaiting({ label, players, playerId, publicGame, stalled, isHostOr
   stalled?: boolean;
   isHostOrCohost?: boolean;
   onSkip?: () => void;
+  onTv?: () => void;
 }) {
   const done = publicGame?.submittedCount ?? 0;
   const total = publicGame?.totalPlayers ?? players.length;
@@ -170,6 +182,7 @@ function MchezoWaiting({ label, players, playerId, publicGame, stalled, isHostOr
         </div>
       </div>
       <p className="mz-foot">The reveal plays right here when the game finishes.</p>
+      {onTv && <div style={{ padding: "0 16px 16px" }}><button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>TV stage</button></div>}
       {stalled && isHostOrCohost && onSkip && <><p className="mz-foot">This game has passed its deadline and may be stalled.</p><div style={{ padding: "0 16px 16px" }}><Keycap block variant="neutral" onClick={onSkip}>Skip timed-out game (no scores invented)</Keycap></div></>}
       {stalled && !isHostOrCohost && <p className="mz-foot">The host can skip this game if it stays stalled.</p>}
     </div>
@@ -177,14 +190,19 @@ function MchezoWaiting({ label, players, playerId, publicGame, stalled, isHostOr
 }
 
 export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
-  const { game, publicGame, players, playerId, onBackToLobby } = deps;
+  const { game, publicGame, players, playerId, onBackToLobby, onTv, previousScores } = deps;
   const st = stateOf(game);
   const questions = st.questions ?? [];
   const myAnswers: Record<string, number> = st.myAnswers ?? {};
   const [picked, setPicked] = useState(0);
   const mzPlayers = toMzPlayers(players);
   const raw = publicGame?.rawScores ?? game.rawScores ?? {};
-  const ranked = rankStandings(Object.entries(raw).map(([pid, score]) => ({ playerId: pid, score, delta: score })), mzPlayers);
+  const ranked = rankStandings(Object.entries(raw).map(([pid, score]) => ({
+    playerId: pid,
+    score,
+    // Gain vs the previous same-type game only; otherwise no gain chip.
+    delta: previousScores && pid in previousScores ? score - previousScores[pid]! : undefined,
+  })), mzPlayers);
   const meRank = ranked.find((r) => r.playerId === playerId);
   const q = questions[Math.min(picked, Math.max(0, questions.length - 1))];
   const counts = publicGame?.answerCounts?.[q?.id ?? ""] ?? [];
@@ -231,7 +249,11 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
               );
             })}
           </div>
-          <p className="mz-foot">Standings below are whole-game totals, ranked with shared ranks for ties — not this question&apos;s points. Family Cup totals live in Championship. Pick a question above to see how the room answered it.</p>
+          {onTv && <div style={{ marginTop: 8 }}><button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>TV stage</button></div>}
+          <details style={{ marginTop: 8 }}>
+            <summary className="mz-foot" style={{ cursor: "pointer" }}>About these standings</summary>
+            <p className="mz-foot">Standings below are whole-game totals, ranked with shared ranks for ties — not this question&apos;s points. Family Cup totals live in Championship. Pick a question above to see how the room answered it.</p>
+          </details>
         </div>
       }
     />

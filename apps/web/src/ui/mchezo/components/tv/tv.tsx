@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useMchezo } from '../../MchezoProvider.js';
 import { ANSWER_SHAPES } from '../../tokens/tokens.js';
-import { formatScore, previousScores, rankMovement, rankStandings } from '../../lib/standings.js';
+import { formatScore, rankMovement, rankStandings } from '../../lib/standings.js';
 import type { AnswerOption, ChampionshipConfig, GameInfo, Player, ScoreEntry } from '../../types.js';
 import { EventBadge, ICON, Icon, PlayerToken, Stamp, Wordmark } from '../primitives.js';
 
@@ -164,10 +164,28 @@ export function TVReveal({ question, options, counts, correctId, phase }: { ques
  */
 export type LeaderboardPhase = 'before' | 'delta' | 'after';
 
-export function TVLeaderboard({ players, scores, phase, kicker, title }: { players: readonly Player[]; scores: readonly ScoreEntry[]; phase: LeaderboardPhase; kicker: string; title: string }) {
+export function TVLeaderboard({ players, scores, phase, kicker, title, previous, movementNote }: {
+  players: readonly Player[];
+  scores: readonly ScoreEntry[];
+  phase: LeaderboardPhase;
+  kicker: string;
+  title: string;
+  /**
+   * Scores from the previous finished game of the same type, when one
+   * exists. Rank movement and gains are computed against THESE scores.
+   * When absent there is nothing honest to compare against, so the
+   * before-state equals the after-state: no arrows, no gains, "No
+   * movers" — never an invented baseline (the old wiring passed
+   * delta = score, which faked a zero baseline and could only ever
+   * show down-moves).
+   */
+  previous?: readonly ScoreEntry[];
+  /** Short caption explaining what movement is measured against. */
+  movementNote?: string;
+}) {
   const { reducedMotion } = useMchezo();
-  const before = useMemo(() => rankStandings(previousScores(scores), players), [scores, players]);
   const after = useMemo(() => rankStandings(scores, players), [scores, players]);
+  const before = useMemo(() => previous ? rankStandings(previous, players) : after, [previous, players, after]);
   const move = useMemo(() => rankMovement(before, after), [before, after]);
   const showAfter = phase === 'after';
   const list = showAfter ? after : before;
@@ -189,6 +207,7 @@ export function TVLeaderboard({ players, scores, phase, kicker, title }: { playe
           <div><span className="mz-tv-climb__k">{climbers.length > 1 ? 'On the move' : 'Biggest climb'}</span><span className="mz-tv-climb__v">{c ? c.label : 'No movers'}</span></div>
         </div>
       </div>
+      {movementNote && <p style={{ fontSize: 13, color: 'var(--mz-text-muted)', margin: '0 0 8px' }}>{movementNote}</p>}
       <ol className={['mz-tv-rows', reducedMotion ? 'mz-tv-rows--rm' : ''].join(' ')} key={reducedMotion ? phase : 'stable'} style={{ height: list.length * rowH }}>
         {(reducedMotion ? list : after).map((r) => {
           const pos = list.findIndex((x) => x.playerId === r.playerId);
@@ -205,7 +224,9 @@ export function TVLeaderboard({ players, scores, phase, kicker, title }: { playe
                 <span className="mz-tv-row__label">
                   <span className="mz-tv-row__name">{r.player.name}</span>
                   {away && <span className="mz-tv-row__away">Away</span>}
-                  {phase !== 'before' && !!r.delta && <span className="mz-tv-row__gain">+{formatScore(r.delta)}</span>}
+                  {phase !== 'before' && r.delta !== undefined && r.delta !== 0 && (
+                    <span className="mz-tv-row__gain">{r.delta > 0 ? `+${formatScore(r.delta)}` : `−${formatScore(-r.delta)}`}</span>
+                  )}
                   {showAfter && m !== 0 && <span className={['mz-tv-row__move', m > 0 ? 'mz-tv-row__move--up' : ''].join(' ')} aria-label={m > 0 ? `up ${m}` : `down ${-m}`}>{m > 0 ? `▲ ${m}` : `▼ ${-m}`}</span>}
                 </span>
               </div>

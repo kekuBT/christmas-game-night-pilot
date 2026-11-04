@@ -76,7 +76,8 @@ async function phoneRows(page, hostName) {
     let name = (await li.locator(".mz-standings__name").textContent()) ?? "";
     if (name === "You") name = hostName;
     const score = parseInt(((await li.locator(".mz-standings__score").textContent()) ?? "0").replace(/,/g, ""), 10);
-    rows.push({ rank, name, score });
+    const gain = ((await li.locator(".mz-standings__gain").textContent().catch(() => "")) ?? "").trim();
+    rows.push({ rank, name, score, gain });
   }
   return rows;
 }
@@ -157,17 +158,23 @@ try {
     await tv.getByRole("button", { name: "TV stage" }).click();
     await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
     const tvs = await tvRows(tv);
+    const moves = {};
+    for (const li of await tv.locator(".mz-tv-row").all()) {
+      const name = (await li.locator(".mz-tv-row__name").textContent()) ?? "";
+      moves[name] = ((await li.locator(".mz-tv-row__move").textContent().catch(() => "")) ?? "").trim();
+    }
+    const note = await tv.locator("p", { hasText: "Rank movement vs the previous Trivia game" }).count();
     const phones = await phoneRows(host, "Ada");
     await tv.getByRole("button", { name: "Back to phone view" }).click();
     await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
     await host.getByRole("button", { name: "Back to lobby" }).click();
     await host.getByRole("heading", { name: "You’re in, Ada." }).waitFor({ timeout: 15000 });
-    return { expected, tvs, phones, proj };
+    return { expected, tvs, phones, proj, moves, note };
   }
 
   // Game 1: everyone answers identically -> all tied.
   {
-    const { expected, tvs, phones } = await playGame([
+    const { expected, tvs, phones, note } = await playGame([
       { page: host, kind: "option", option: 0 },
       { page: P.Bea, kind: "option", option: 0 },
       { page: P.Cal, kind: "option", option: 0 },
@@ -177,6 +184,7 @@ try {
     check("all tied: every player shares rank 1", expected.filter((r) => r.name !== "TV").every((r) => r.rank === 1));
     checkTvMatches("all tied: TV leaderboard matches server", tvs, expected);
     checkPhoneMatches("all tied: phone rows match server", phones, expected);
+    check("first game: no movement note without a previous game", note === 0, `note=${note}`);
   }
   // Game 2: two pairs answer identically -> two shared ranks.
   // Seeded (see playGame): the pair-ties shape needs an uneven split.
@@ -194,6 +202,52 @@ try {
       [...ranks.entries()].map(([n, r]) => `${n}:${r}`).join(" "));
     checkTvMatches("pair ties: TV leaderboard matches server", tvs, expected);
     checkPhoneMatches("pair ties: phone rows match server", phones, expected);
+  }
+  // Distinct scores (Milestone C.1, seed 1): correct-answer counts by
+  // option are [5,3,0,2], so options 0/1/2/3 score 600/360/0/240 — four
+  // distinct ranks plus a zero-point player, no ties among the four.
+  {
+    const { expected, tvs, phones } = await playGame([
+      { page: host, kind: "option", option: 0 },
+      { page: P.Bea, kind: "option", option: 1 },
+      { page: P.Cal, kind: "option", option: 2 },
+      { page: P.Dee, kind: "option", option: 3 },
+      { page: tv, kind: "abstain" },
+    ], 1);
+    const ranks = new Map(expected.map((r) => [r.name, r.rank]));
+    const scores = new Map(expected.map((r) => [r.name, r.score]));
+    check("distinct scores: Ada 600 / Bea 360 / Dee 240 / Cal 0, ranks 1/2/3/4",
+      ranks.get("Ada") === 1 && scores.get("Ada") === 600 &&
+      ranks.get("Bea") === 2 && scores.get("Bea") === 360 &&
+      ranks.get("Dee") === 3 && scores.get("Dee") === 240 &&
+      ranks.get("Cal") === 4 && scores.get("Cal") === 0,
+      [...ranks.entries()].map(([n, r]) => `${n}:${r}:${scores.get(n)}`).join(" "));
+    checkTvMatches("distinct scores: TV leaderboard matches server", tvs, expected);
+    checkPhoneMatches("distinct scores: phone rows match server", phones, expected);
+  }
+  // Rank movement (Milestone C.2): same seed, Ada/Bea swap options, so
+  // Bea climbs 2 -> 1 (+240) and Ada drops 1 -> 2 (-240) vs the previous
+  // Trivia game. Cal/Dee keep their options and do not move.
+  {
+    const { expected, tvs, phones, moves, note } = await playGame([
+      { page: host, kind: "option", option: 1 },
+      { page: P.Bea, kind: "option", option: 0 },
+      { page: P.Cal, kind: "option", option: 2 },
+      { page: P.Dee, kind: "option", option: 3 },
+      { page: tv, kind: "abstain" },
+    ], 1);
+    const ranks = new Map(expected.map((r) => [r.name, r.rank]));
+    check("movement: Bea takes rank 1, Ada drops to rank 2", ranks.get("Bea") === 1 && ranks.get("Ada") === 2,
+      [...ranks.entries()].map(([n, r]) => `${n}:${r}`).join(" "));
+    check("movement: TV shows the movement note vs the previous Trivia game", note === 1, `note=${note}`);
+    check("movement: TV arrows show Bea up 1, Ada down 1", moves["Bea"] === "▲ 1" && moves["Ada"] === "▼ 1",
+      `Bea=${moves["Bea"]} Ada=${moves["Ada"]} Cal=${moves["Cal"]} Dee=${moves["Dee"]}`);
+    const beaPhone = phones.find((r) => r.name === "Bea");
+    const adaPhone = phones.find((r) => r.name === "Ada");
+    check("movement: phone gain chips show Bea +240, Ada −240",
+      beaPhone?.gain === "+240" && adaPhone?.gain === "−240",
+      `Bea=${beaPhone?.gain} Ada=${adaPhone?.gain}`);
+    checkTvMatches("movement: TV leaderboard matches server", tvs, expected);
   }
   // Rank changes: alternate Ada/Bea options across games until the order flips.
   let orderA = null, orderB = null, attempts = 0;

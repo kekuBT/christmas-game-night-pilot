@@ -50,6 +50,7 @@
     "check-tv-spectator": "node scripts/check-tv-spectator.mjs",
     "check-spectator": "node scripts/check-spectator.mjs",
     "check-leaderboard": "node scripts/check-leaderboard.mjs",
+    "check-tv-entry": "node scripts/check-tv-entry.mjs",
     "check-tv-lifecycle": "node scripts/check-tv-lifecycle.mjs",
     "screenshot-mchezo": "node scripts/screenshot-mchezo.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",

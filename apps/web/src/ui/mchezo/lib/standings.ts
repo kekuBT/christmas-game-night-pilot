@@ -38,3 +38,25 @@ export function ordinal(n: number): string {
 }
 
 export const formatScore = (n: number) => n.toLocaleString('en-US');
+
+/**
+ * Scores of the most recent finished game of the same type played BEFORE
+ * the given game, for honest rank/score movement ("vs the previous Trivia
+ * game"). Returns undefined when there is no such game — callers must
+ * then show no movement at all, never an invented baseline.
+ * Same-type only: a Trivia score and a Math score are not comparable, so
+ * a cross-type "gain" would be meaningless even though ranks are ordinal.
+ */
+export function previousGameScores(
+  games: readonly { id: string; gameId: string; status: string; rawScores?: Record<string, number> }[],
+  currentId: string,
+): Record<string, number> | undefined {
+  const idx = games.findIndex((g) => g.id === currentId);
+  if (idx < 0) return undefined;
+  const current = games[idx]!;
+  for (let i = idx - 1; i >= 0; i--) {
+    const g = games[i]!;
+    if (g.gameId === current.gameId && g.status === "finished" && g.rawScores) return g.rawScores;
+  }
+  return undefined;
+}

@@ -12,7 +12,7 @@ import type { GameState, PublicGame, PublicPlayer } from "../../types.js";
 import { asRecord } from "../../types.js";
 import { toMzPlayers } from "./adapters.js";
 
-export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectatorCount, backLabel }: {
+export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectatorCount, backLabel, previousScores }: {
   publicGame: PublicGame;
   players: PublicPlayer[];
   joinCode: string;
@@ -21,6 +21,12 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectator
   spectatorCount?: number;
   /** Spectators have no phone view to return to — they stop watching. */
   backLabel?: string;
+  /**
+   * Scores of the previous finished game of the same type, when one
+   * exists. Drives honest rank movement and gains; when absent the
+   * leaderboard shows no movement rather than a faked baseline.
+   */
+  previousScores?: Record<string, number>;
 }) {
   const mzPlayers = toMzPlayers(players);
   const st = asRecord(publicGame.state) as GameState;
@@ -52,7 +58,16 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectator
   const counts: Record<string, number> = {};
   (q?.options ?? []).forEach((_, i) => { counts[String(i)] = countsArr[i] ?? 0; });
   const raw = publicGame.rawScores ?? {};
-  const scores = Object.entries(raw).map(([playerId, score]) => ({ playerId, score, delta: score }));
+  const previous = previousScores
+    ? Object.entries(previousScores).map(([playerId, score]) => ({ playerId, score }))
+    : undefined;
+  const scores = Object.entries(raw).map(([playerId, score]) => ({
+    playerId,
+    score,
+    // Gain vs the previous same-type game only; a player who did not play
+    // it has no gain to show (undefined, not an invented zero baseline).
+    delta: previousScores && playerId in previousScores ? score - previousScores[playerId]! : undefined,
+  }));
 
   return (
     <div>
@@ -84,7 +99,7 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectator
           <TVQuestion question="The reveal plays here when the game finishes." options={[]} />
         )}
         {stage === "leaderboard" && (
-          <TVLeaderboard players={mzPlayers} scores={scores} phase={lbPhase} kicker="Trivia Showdown" title="This game's standings" />
+          <TVLeaderboard players={mzPlayers} scores={scores} phase={lbPhase} kicker="Trivia Showdown" title="This game's standings" previous={previous} movementNote={previous ? "Rank movement vs the previous Trivia game" : undefined} />
         )}
       </TVStage>
       {finished && questions.length > 0 && (stage === "question" || stage === "reveal") && (

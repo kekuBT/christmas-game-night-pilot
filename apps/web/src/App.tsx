@@ -14,6 +14,7 @@ import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mchezo/adapters.js";
+import { previousGameScores } from "./ui/mchezo/lib/standings.js";
 import QRCode from "qrcode";
 
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
@@ -297,7 +298,7 @@ export function App() {
     if (specTvGame) {
       return (
         <MchezoProvider theme={themes.everyday} as="bare">
-          <MchezoTvStage key={specTvGame.id} publicGame={specTvGame} players={specPlayers} joinCode={proj.joinCode ?? "…"} onBack={stopWatching} spectatorCount={proj.spectatorCount} backLabel="Stop watching" />
+          <MchezoTvStage key={specTvGame.id} publicGame={specTvGame} players={specPlayers} joinCode={proj.joinCode ?? "…"} onBack={stopWatching} spectatorCount={proj.spectatorCount} backLabel="Stop watching" previousScores={previousGameScores(proj?.games ?? [], specTvGame.id)} />
         </MchezoProvider>
       );
     }
@@ -460,6 +461,7 @@ export function App() {
           onBackToLobby={() => dismissResults(playingGame.id)}
           roomId={roomId ?? ""}
           isHostOrCohost={!!(me?.isHost || me?.isCohost)}
+          onTv={() => setView("tv")}
         />
       </MchezoProvider>
     );
@@ -477,6 +479,8 @@ export function App() {
           post={post}
           onBackToLobby={() => dismissResults(latestFinished.id)}
           roomId={roomId ?? ""}
+          onTv={() => setView("tv")}
+          previousScores={previousGameScores(proj?.games ?? [], latestFinished.id)}
         />
       </MchezoProvider>
     );
@@ -495,7 +499,7 @@ export function App() {
     if (tvGame) {
       return (
         <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion} as="bare">
-          <MchezoTvStage key={tvGame.id} publicGame={tvGame} players={players} joinCode={proj?.joinCode ?? "…"} onBack={() => setView("lobby")} />
+          <MchezoTvStage key={tvGame.id} publicGame={tvGame} players={players} joinCode={proj?.joinCode ?? "…"} onBack={() => setView("lobby")} previousScores={previousGameScores(proj?.games ?? [], tvGame.id)} />
         </MchezoProvider>
       );
     }

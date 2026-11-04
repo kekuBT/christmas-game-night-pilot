@@ -3,7 +3,7 @@
 // leaderboard render. Server totals stay authoritative; these tests pin the
 // display math only.
 import { describe, expect, it } from "vitest";
-import { rankMovement, rankStandings } from "../apps/web/src/ui/mchezo/lib/standings.js";
+import { previousGameScores, rankMovement, rankStandings } from "../apps/web/src/ui/mchezo/lib/standings.js";
 
 const players = [
   { id: "a", name: "Ada" },
@@ -71,5 +71,31 @@ describe("standings", () => {
     expect(move.get("a")).toBe(-1);
     expect(move.get("b")).toBe(1);
     expect(move.get("c")).toBe(0);
+  });
+});
+
+describe("previousGameScores (Milestone C: honest movement baseline)", () => {
+  const games: { id: string; gameId: string; status: string; rawScores?: Record<string, number> }[] = [
+    { id: "g1", gameId: "trivia", status: "finished", rawScores: { a: 120, b: 240 } },
+    { id: "g2", gameId: "math-mayhem", status: "finished", rawScores: { a: 999 } },
+    { id: "g3", gameId: "trivia", status: "playing" },
+    { id: "g4", gameId: "trivia", status: "finished", rawScores: { a: 360, b: 120 } },
+  ];
+  it("finds the latest earlier finished game of the same type, skipping other types and unfinished games", () => {
+    expect(previousGameScores(games, "g4")).toEqual({ a: 120, b: 240 });
+  });
+  it("returns undefined when no earlier finished same-type game exists", () => {
+    expect(previousGameScores(games, "g1")).toBeUndefined();
+  });
+  it("returns undefined when the current game is not in the list", () => {
+    expect(previousGameScores(games, "nope")).toBeUndefined();
+  });
+  it("skips an earlier same-type game with no rawScores", () => {
+    const noScores: { id: string; gameId: string; status: string; rawScores?: Record<string, number> }[] = [
+      { id: "g0", gameId: "trivia", status: "finished", rawScores: { a: 60 } },
+      { id: "g1", gameId: "trivia", status: "finished" },
+      { id: "g2", gameId: "trivia", status: "finished", rawScores: { a: 300 } },
+    ];
+    expect(previousGameScores(noScores, "g2")).toEqual({ a: 60 });
   });
 });

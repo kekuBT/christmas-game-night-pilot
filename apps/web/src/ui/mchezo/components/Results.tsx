@@ -107,7 +107,9 @@ export function StandingsList({ ranked, youId, limit = 3, players }: { ranked: r
             <PlayerToken player={r.player} index={players.indexOf(r.player)} size={32} badge={away ? 'offline' : null} />
             <span className="mz-standings__name">{you ? 'You' : r.player.name}</span>
             {away && <span className="mz-standings__away">Away</span>}
-            {!!r.delta && <span className="mz-standings__gain">+{formatScore(r.delta)}</span>}
+            {r.delta !== undefined && r.delta !== 0 && (
+              <span className="mz-standings__gain">{r.delta > 0 ? `+${formatScore(r.delta)}` : `−${formatScore(-r.delta)}`}</span>
+            )}
             <span className="mz-standings__score">{formatScore(r.score)}</span>
           </li>
         );
