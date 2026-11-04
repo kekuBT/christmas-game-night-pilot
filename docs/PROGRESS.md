@@ -154,6 +154,13 @@ See `docs/DECISIONS.md` and `docs/FRONTEND_MILESTONES.md`. Championship formula,
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
 - Remaining: only real-device checklist + family-member acceptance test (need real devices / a family member, not doable from this VM). No further local-only board tasks remain.
 
+## Cron run 2026-11-04 ~06:45 EST (local-dev-christmas-30m — RE-VERIFICATION ONLY, no milestone)
+- Tree was clean; per the task board, no local-only board task remains (all F1–F7 local parts DONE; see task board item 7). No new work invented, no app code changed.
+- Re-verification evidence: `npm run typecheck` exit 0, `npm test` 8 files / 48 passed, `npm run lint` exit 0, `npm run build:web` exit 0 (34 modules), E2E smoke (`node scripts/e2e-browser.mjs http://localhost:3457 --browser=chromium --games=smoke`) exit 0, 3/3 passed (closest-wins, math-mayhem, views: championship/TV/Memory Book/reconnect, 4 fictional players, room JDMWFE).
+- Test server data/ removed, port 3457 confirmed closed. Working tree clean after the run except this PROGRESS.md entry.
+- Remaining (unchanged, need real devices / a family member, NOT doable from this VM): manual real-device checklist (iPhone Safari, Android, desktop Safari, TV), family-member acceptance test (no dev tools, no developer in the room). npm audit stays BLOCKED by registry proxy 403; no bypass attempted, not re-tried this run.
+- No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
 ## Next session exact resume step
 Open this file, confirm local git status in `~/workspace/christmas-game-night-pilot-local`, then: the remaining product gates need real devices / a family member and CANNOT run from this VM — manual real-device checklist (iPhone Safari, Android, desktop Safari, TV) and the family-member acceptance test (no dev tools, no developer in the room). The F6 contrast audit is DONE (2026-11-04 ~04:45 EST); no further local-only board tasks remain, so a run with nothing new should re-verify gates (typecheck/tests/lint + one driver smoke run) and stop at a clean checkpoint rather than inventing work. npm audit stays BLOCKED by registry proxy policy; do not bypass it. Do NOT re-request GitHub publishing. If the autonomous cron runs first, it must follow the same task board and the dirty-tree rule in its instructions.
 
