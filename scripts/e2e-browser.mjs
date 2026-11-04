@@ -279,15 +279,25 @@ async function runBrowser(browserName, games) {
 
     // Championship + TV + Memory Book + reconnect, on the host page.
     // Note: after the games we are in the Mchezo lobby, so navigation uses
-    // the lobby-extra buttons; TV shows the Mchezo stage (a Trivia game is
-    // the latest subject), not the old dashboard.
+    // the lobby-extra buttons; TV shows the Mchezo stage when a Trivia
+    // game is the latest subject, and the old dashboard otherwise (smoke).
     try {
       await host.getByRole("button", { name: "Championship" }).click();
       await host.getByText("Championship standings").waitFor({ timeout: 15000 });
       await host.getByRole("button", { name: "Lobby & Games" }).click();
       await host.getByRole("button", { name: "TV stage" }).click();
-      await host.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
-      await host.getByRole("button", { name: "Back to phone view" }).click();
+      // Full runs played Trivia, so the TV view is the Mchezo stage; smoke
+      // runs (math + closest only) have no Trivia subject, so the app
+      // falls through to the old TV Dashboard instead. Accept either —
+      // the smoke views check previously assumed Trivia had been played
+      // and timed out on the stage region when it had not.
+      try {
+        await host.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+        await host.getByRole("button", { name: "Back to phone view" }).click();
+      } catch {
+        await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
+        await host.getByRole("button", { name: "Lobby & Games" }).click();
+      }
       await host.getByRole("button", { name: "Memory Book" }).click();
       await host.getByPlaceholder("e.g. Ada won Math Mayhem in a tie-break").fill("E2E highlight: Alex won Math Mayhem");
       await host.getByRole("button", { name: "Add from last finished game" }).click();
