@@ -78,7 +78,12 @@ export class LocalServer {
 
   private async readBody(req: IncomingMessage): Promise<Record<string, unknown>> {
     const chunks: Buffer[] = [];
-    for await (const chunk of req) chunks.push(chunk as Buffer);
+    let total = 0;
+    for await (const chunk of req) {
+      total += (chunk as Buffer).length;
+      if (total > 64 * 1024) throw new Error("PAYLOAD_TOO_LARGE");
+      chunks.push(chunk as Buffer);
+    }
     const text = Buffer.concat(chunks).toString("utf-8");
     if (!text) return {};
     try {
@@ -86,6 +91,16 @@ export class LocalServer {
     } catch {
       return {};
     }
+  }
+
+  private joinAttempts = new Map<string, number[]>();
+  /** Simple local rate limit: max 20 join attempts per room per 60 seconds. */
+  private checkJoinRate(roomId: string): boolean {
+    const now = Date.now();
+    const attempts = (this.joinAttempts.get(roomId) ?? []).filter((t) => now - t < 60_000);
+    attempts.push(now);
+    this.joinAttempts.set(roomId, attempts);
+    return attempts.length <= 20;
   }
 
   private send(res: ServerResponse, status: number, body: unknown): void {
@@ -122,6 +137,10 @@ export class LocalServer {
           return;
         }
         if (req.method === "POST" && parts.length === 3 && parts[2] === "join") {
+          if (!this.checkJoinRate(room.id)) {
+            this.send(res, 429, { error: "Too many join attempts" });
+            return;
+          }
           const body = await this.readBody(req);
           const { player, recoveryToken } = room.join(String(body["displayName"] ?? ""), { asHost: body["asHost"] === true });
           this.persist(room);
