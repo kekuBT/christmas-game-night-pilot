@@ -4,6 +4,8 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { RoomEngine } from "./room.js";
+import { GAME_REGISTRY } from "../games/registry.js";
+import { MemoryBook } from "./memorybook.js";
 
 export interface ServerOptions {
   port?: number;
@@ -24,6 +26,7 @@ interface SocketMeta {
  */
 export class LocalServer {
   rooms = new Map<string, RoomEngine>();
+  private books = new Map<string, MemoryBook>();
   private dataDir: string;
   private http = createServer((req, res) => void this.handleHttp(req, res));
   private wss = new WebSocketServer({ server: this.http });
@@ -108,10 +111,51 @@ export class LocalServer {
     res.end(JSON.stringify(body));
   }
 
+  private serveStatic(pathname: string, res: ServerResponse): void {
+    const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "apps", "web", "dist");
+    const file = pathname === "/" || pathname === "/index.html" ? join(root, "index.html") : join(root, pathname.replace(/^\//, ""));
+    const safe = file.startsWith(root) ? file : join(root, "index.html");
+    try {
+      const data = readFileSync(safe);
+      const type = safe.endsWith(".js") ? "text/javascript" : safe.endsWith(".css") ? "text/css" : safe.endsWith(".html") ? "text/html" : "application/octet-stream";
+      res.writeHead(200, { "content-type": type });
+      res.end(data);
+    } catch {
+      res.writeHead(200, { "content-type": "text/html" });
+      res.end("<h1>Christmas Game Night</h1><p>Web app not built yet. Run: npm run build:web, then restart the server.</p>");
+    }
+  }
+
   private async handleHttp(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const url = new URL(req.url ?? "/", "http://localhost");
     const parts = url.pathname.split("/").filter(Boolean);
     try {
+      if (req.method === "GET" && parts.length === 1 && parts[0] === "games") {
+        this.send(res, 200, GAME_REGISTRY);
+        return;
+      }
+      if (req.method === "POST" && parts.length === 2 && parts[0] === "rooms" && parts[1] === "join-by-code") {
+        const body = await this.readBody(req);
+        const code = String(body["joinCode"] ?? "").trim().toUpperCase();
+        const room = [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === code);
+        if (!room) {
+          this.send(res, 404, { error: "Room not found for that code" });
+          return;
+        }
+        if (!this.checkJoinRate(room.id)) {
+          this.send(res, 429, { error: "Too many join attempts" });
+          return;
+        }
+        const { player, recoveryToken } = room.join(String(body["displayName"] ?? ""), { asHost: body["asHost"] === true });
+        this.persist(room);
+        this.broadcast(room.id);
+        this.send(res, 201, { roomId: room.id, joinCode: room.joinCode, playerId: player.id, displayName: player.displayName, isHost: player.isHost, recoveryToken });
+        return;
+      }
+      if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html" || url.pathname.startsWith("/assets/"))) {
+        this.serveStatic(url.pathname, res);
+        return;
+      }
       if (req.method === "POST" && parts.length === 1 && parts[0] === "rooms") {
         const body = await this.readBody(req);
         const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night");
@@ -135,6 +179,44 @@ export class LocalServer {
           const actorId = url.searchParams.get("actorId") ?? undefined;
           this.send(res, 200, room.project(audience, actorId));
           return;
+        }
+        if (req.method === "GET" && parts.length === 3 && parts[2] === "ledger") {
+          this.send(res, 200, room.toJSON().ledger ?? []);
+          return;
+        }
+        if (parts.length >= 3 && parts[2] === "memory") {
+          const book = this.books.get(room.id) ?? new MemoryBook();
+          this.books.set(room.id, book);
+          if (req.method === "GET" && parts.length === 3) {
+            this.send(res, 200, book.entries);
+            return;
+          }
+          if (req.method === "GET" && parts.length === 4 && parts[3] === "export") {
+            this.send(res, 200, { markdown: book.exportMarkdown(room.name) });
+            return;
+          }
+          if (req.method === "POST" && parts.length === 3) {
+            const body = await this.readBody(req);
+            const entry = book.addFromLedger(
+              Number(body["day"] ?? 1),
+              String(body["text"] ?? ""),
+              Array.isArray(body["sourceEventIds"]) ? body["sourceEventIds"].map(String) : [],
+              (room.toJSON().ledger ?? []) as never,
+            );
+            this.send(res, 201, entry);
+            return;
+          }
+          if (req.method === "POST" && parts.length === 5 && parts[4] === "approve") {
+            const body = await this.readBody(req);
+            book.approve(String(parts[3]), String(body["approverId"] ?? ""));
+            this.send(res, 200, { ok: true });
+            return;
+          }
+          if (req.method === "POST" && parts.length === 5 && parts[4] === "revoke") {
+            book.revoke(String(parts[3]));
+            this.send(res, 200, { ok: true });
+            return;
+          }
         }
         if (req.method === "POST" && parts.length === 3 && parts[2] === "join") {
           if (!this.checkJoinRate(room.id)) {

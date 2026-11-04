@@ -1,31 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Christmas Game Night — M0 Shell</title>
-<style>
-  :root{--bg:#102C25;--surface:#245344;--accent:#A73545;--gold:#E5BC70;--snow:#F7F2E8}
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--snow);font-family:system-ui,-apple-system,sans-serif;padding:16px;padding-bottom:env(safe-area-inset-bottom)}
-  .card{background:var(--surface);border-radius:16px;padding:20px;max-width:520px;margin:0 auto}
-  h1{font-size:28px;margin:0 0 8px} p{line-height:1.5}
-  button{min-height:44px;padding:12px 18px;border:0;border-radius:12px;background:var(--gold);color:#102C25;font-weight:700;font-size:16px;width:100%;margin-top:10px}
-  button.secondary{background:transparent;color:var(--snow);border:2px solid var(--gold)}
-  input{width:100%;min-height:44px;border-radius:12px;border:0;padding:12px;font-size:16px;margin-top:8px}
-  .note{font-size:14px;opacity:.85}
-  @media (min-width:1200px){.card{max-width:900px}.card h1{font-size:48px}}
-</style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Christmas Game Night</title>
 </head>
 <body>
-<main class="card">
-  <h1>🎄 Christmas Game Night</h1>
-  <p>A private family game night for 4–10 players. This is the M0 design shell only — it is not gameplay yet.</p>
-  <label>Room code
-    <input type="text" placeholder="e.g. K7M2Q9" aria-label="Room code">
-  </label>
-  <button>Join room</button>
-  <button class="secondary">Create a room</button>
-  <p class="note">No account required. TV view shows public state only. Local build only — no deployment.</p>
-</main>
+<div id="root"></div>
+<script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
