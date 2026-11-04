@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { championshipBase, dayScore, finalePoints, median, midrankScore, rankStandings } from "../src/scoring/championship.js";
+import { championshipTotal, dayScore, finalePoints, median, midrankScore, rankStandings } from "../src/scoring/championship.js";
 import { generateMathQuestions, mathSpeedBonus, scoreMathAnswer } from "../src/games/math.js";
 import { scoreTrivia, triviaSpeedBonus } from "../src/games/trivia.js";
 import { scoreYear, YEAR_EVENTS } from "../src/games/year.js";
@@ -29,7 +29,7 @@ describe("midrankScore", () => {
   });
 });
 
-describe("dayScore and championshipBase", () => {
+describe("dayScore and championshipTotal", () => {
   it.each([
     [{ soloScores: [100], teamScores: [] }, 100],
     [{ soloScores: [], teamScores: [100] }, 100],
@@ -43,21 +43,24 @@ describe("dayScore and championshipBase", () => {
     expect(dayScore({ soloScores: [100], teamScores: [100] }).offBalance).toBe(false);
   });
   it.each([
-    [[90, 85, 80, 75, 70], true, 400],
-    [[93, 89, 88], true, 450],
-    [[100, 100], false, 500],
-    [[100], false, 500],
-    [[], false, 0],
-    [[10, 20, 30, 40, 50, 60, 70], true, 250],
-  ])("base %j eligible=%s base=%d", (days, eligible, base) => {
-    const r = championshipBase(days as number[]);
+    [[90, 85, 80, 75, 70], true, 255, 10],
+    [[93, 89, 88], true, 270, 0],
+    [[100, 100], false, 200, 0],
+    [[100], false, 100, 0],
+    [[], false, 0, 0],
+    [[10, 20, 30, 40, 50, 60, 70], true, 180, 20],
+  ])("total %j eligible=%s base=%d participation=%d", (days, eligible, base, participation) => {
+    const r = championshipTotal(days as number[]);
     expect(r.eligible).toBe(eligible);
     expect(r.base).toBe(base);
-    expect(r.counted.length).toBeLessThanOrEqual(5);
+    expect(r.participationBonus).toBe(participation);
+    expect(r.counted.length).toBeLessThanOrEqual(3);
   });
-  it("best five drops the two lowest days", () => {
-    const r = championshipBase([10, 20, 30, 40, 50, 60, 70]);
-    expect(r.counted).toEqual([70, 60, 50, 40, 30]);
+  it("best three drops the lower days, without penalising missing days", () => {
+    const r = championshipTotal([10, 20, 30, 40, 50, 60, 70]);
+    expect(r.counted).toEqual([70, 60, 50]);
+    expect(r.base).toBe(180);
+    expect(r.total).toBe(200); // 180 + 20 participation (7 days)
   });
   it("finale is disabled by default and laddered when enabled", () => {
     expect(finalePoints(1)).toBe(0);
@@ -70,9 +73,9 @@ describe("dayScore and championshipBase", () => {
     expect(median([1, 2, 3])).toBe(2);
     expect(median([1, 2, 3, 4])).toBe(2.5);
     const ranked = rankStandings([
-      { playerId: "a", base: 100, countedDailyWins: 1, countedMedian: 50 },
-      { playerId: "b", base: 100, countedDailyWins: 2, countedMedian: 40 },
-      { playerId: "c", base: 90, countedDailyWins: 9, countedMedian: 90 },
+      { playerId: "a", total: 100, countedDailyWins: 1, countedMedian: 50 },
+      { playerId: "b", total: 100, countedDailyWins: 2, countedMedian: 40 },
+      { playerId: "c", total: 90, countedDailyWins: 9, countedMedian: 90 },
     ]);
     expect(ranked.map((r) => r.playerId)).toEqual(["b", "a", "c"]);
   });

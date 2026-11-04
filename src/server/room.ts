@@ -539,7 +539,7 @@ export class RoomEngine {
 
   ceremony() {
     const results = this.championshipResults();
-    const standings = results.map((r) => ({ playerId: r.playerId, displayName: this.players.get(r.playerId)?.displayName ?? r.playerId, base: r.base }));
+    const standings = results.map((r) => ({ playerId: r.playerId, displayName: this.players.get(r.playerId)?.displayName ?? r.playerId, base: r.total }));
     return dayCeremony(this.championshipDay, standings);
   }
 

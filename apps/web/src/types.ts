@@ -44,7 +44,11 @@ export interface ChampionshipResult {
   playerId: string;
   dayScores: number[];
   counted: number[];
+  qualifyingDays: number;
   base: number;
+  participationBonus: number;
+  finaleBonus: number;
+  total: number;
   eligible: boolean;
   countedDailyWins: number;
   countedMedian: number;
