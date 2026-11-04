@@ -243,9 +243,10 @@ export function App() {
         <p>Room code: <b>{proj?.joinCode ?? "…"}</b></p>
       </div>
       <div className="card"><h2>Players</h2>{players.map((p) => <span key={p.id} className="pill">{p.displayName}{p.isHost ? " 👑" : ""}{p.isCohost ? " ⭐" : ""}{p.connected ? "" : " (away)"}</span>)}
-        {me?.isHost && players.filter((p) => p.id !== playerId).map((p) => <div key={p.id} className="row"><span>{p.displayName}</span><button className="secondary" onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/cohost`, { targetId: p.id }); await refresh(); }}>Make cohost</button></div>)}
+        {(me?.isHost || me?.isCohost) && players.filter((p) => p.id !== playerId).map((p) => <div key={p.id} className="row"><span>{p.displayName}</span><button className="secondary" onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/cohost`, { targetId: p.id }); await refresh(); }}>Make cohost</button></div>)}
       </div>
       <div className="card"><h2>Start a game</h2><p className="muted">The host or cohost starts games. Tutorials are shown below each game.</p>
+        {!(me?.isHost || me?.isCohost) && players.some((p) => p.isHost && !p.connected) && <p className="muted">The host is away — only a connected host or cohost can start a game. The host returns by reopening the room with their session.</p>}
         {games.map((g) => <div key={g.id} className="card" data-testid={`game-card-${g.id}`}><b>{g.title}</b> <span className="muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min</span>
           <p>{g.tutorial}</p><div className="row"><button data-testid={`start-official-${g.id}`} onClick={() => startGame(g.id, true)} disabled={!(me?.isHost || me?.isCohost)}>Start (official)</button><button data-testid={`start-practice-${g.id}`} className="secondary" onClick={() => startGame(g.id, false)} disabled={!(me?.isHost || me?.isCohost)}>Start (practice)</button></div></div>)}
       </div>

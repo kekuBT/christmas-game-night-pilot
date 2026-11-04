@@ -196,13 +196,18 @@ export class RoomEngine {
     if (p) p.connected = false;
   }
 
-  grantCohost(hostId: string, targetId: string): void {
-    if (this.hostId !== hostId) throw new Error("Only the host can grant cohost");
+  grantCohost(actorId: string, targetId: string): void {
+    // Host recovery: a cohost may delegate to another cohost, so a room
+    // whose host has disconnected does not lose its only operator when
+    // the cohost also needs to hand over. Regular players still cannot
+    // grant, and granting never transfers host ownership (hostId is
+    // unchanged); the original host regains authority on reconnect.
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can grant cohost");
     const target = this.players.get(targetId);
     if (!target) throw new Error("Unknown player");
     target.isCohost = true;
     this.cohosts.add(targetId);
-    this.log("cohost-granted", { playerId: targetId, actor: hostId });
+    this.log("cohost-granted", { playerId: targetId, actor: actorId });
   }
 
   startGame(hostId: string, gameId: string, opts: { official?: boolean; seed?: number } = {}): GameInstance {

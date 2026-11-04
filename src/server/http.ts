@@ -126,6 +126,13 @@ export class LocalServer {
         const data = JSON.parse(readFileSync(join(this.dataDir, file), "utf-8")) as Record<string, unknown>;
         if (typeof data["id"] === "string" && Array.isArray(data["players"])) {
           const room = RoomEngine.fromJSON(data);
+          // Host recovery: no WebSocket exists after a restart, so a
+          // snapshot's connected=true flags are stale. Mark every
+          // restored player disconnected; each recovers explicitly via
+          // /reconnect or a fresh WebSocket open. Without this, phantom
+          // players counted toward startGame and blocked games from
+          // advancing until a deadline/host-skip.
+          for (const p of room.players.values()) p.connected = false;
           this.rooms.set(room.id, room);
           // Restore the host-claim token for this room, if one was persisted.
           try {
