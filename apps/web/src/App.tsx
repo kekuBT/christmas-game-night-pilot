@@ -14,6 +14,7 @@ import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { MchezoGeography } from "./components/mchezo/MchezoGeography.js";
+import { MchezoMath } from "./components/mchezo/MchezoMath.js";
 import { MchezoYear } from "./components/mchezo/MchezoYear.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
@@ -407,6 +408,7 @@ export function App() {
   const closestPlaying = playingGame?.gameId === "closest-wins";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
+  const mathPlaying = playingGame?.gameId === "math-mayhem";
   const triviaFinished = latestFinished?.gameId === "trivia";
   const lobbyExtra = (
     <div>
@@ -571,6 +573,29 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
         <MchezoGeography
+          game={playingGame}
+          publicGame={publicPlaying}
+          players={players}
+          playerId={playerId ?? ""}
+          gamesTitle={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          intent={intent}
+          post={post}
+          roomId={roomId ?? ""}
+          isHostOrCohost={!!(me?.isHost || me?.isCohost)}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && mathPlaying && playingGame) {
+    // Math Mayhem (§11 optional modernization): kit panel instead of the
+    // old shell + GamePanel, mirroring the Geography play branch. No TV
+    // stage and no staged reveal (the finished projection carries no
+    // correctIndex for Math), so intro and finished results still use
+    // the shared old views (ShowIntro, ShowResults). The locked view
+    // shows the player's own elapsed time, because speed is scored.
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoMath
           game={playingGame}
           publicGame={publicPlaying}
           players={players}

@@ -2,9 +2,9 @@
 // through the Mchezo UI. Usage: build:web, serve on a port, then:
 //   node scripts/check-m6.mjs <baseUrl>
 // Checks: Mchezo landing -> host creates -> second player joins -> Circle
-// lobby -> host starts Math Mayhem (old Show Mode flow, untouched by the
-// Mchezo integration) -> intro -> start playing -> answer all -> waiting
-// state with counts -> results screen -> back to lobby -> reaction.
+// lobby -> host starts Math Mayhem (kit panel since §11) -> intro ->
+// start playing -> answer all -> waiting state with counts -> results
+// screen -> back to lobby -> reaction.
 // (The Trivia version of this journey is covered by scripts/check-mchezo.mjs.)
 import { chromium } from "playwright";
 
@@ -50,27 +50,36 @@ try {
   await host.getByTestId("show-intro").waitFor({ timeout: 15000 });
   pass("show intro appears on game start");
   await host.getByTestId("show-start-playing").click();
-  await host.getByTestId("game-panel").waitFor({ timeout: 15000 });
+  // Math Mayhem renders in the Mchezo kit since §11 (no game-panel):
+  // the QuestionScreen's .mz-question is the gameplay signal.
+  await host.locator(".mz-question").waitFor({ timeout: 20000 });
   pass("start playing reaches gameplay");
 
   // Guest must dismiss its own intro too (each player's intro is per-player).
   await guest.getByTestId("show-intro").waitFor({ timeout: 15000 });
   await guest.getByTestId("show-start-playing").click();
-  await guest.getByTestId("game-panel").waitFor({ timeout: 15000 });
+  await guest.locator(".mz-question").waitFor({ timeout: 20000 });
   // Answer every Math Mayhem question on the host first, and check the
   // waiting state BEFORE the guest finishes — once the guest finishes,
   // the game ends and the host moves to results, so waiting is transient.
+  // Kit loop (same as e2e's actTrivia): slabs + Next question, then the
+  // "Waiting for the game to finish" keycap clears the last lock into
+  // the counts-only waiting ring.
   async function answerAll(page) {
-    for (let i = 0; i < 40; i++) {
-      const tiles = page.locator(".grid button");
-      if (await tiles.count() === 0) break;
-      await tiles.first().click();
-      await page.waitForTimeout(300);
+    for (let i = 0; i < 60; i++) {
+      if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }).catch(() => false)) return;
+      const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
+      if (await doneBtn.isVisible({ timeout: 500 }).catch(() => false)) { await doneBtn.click(); await page.waitForTimeout(400); return; }
+      const next = page.getByRole("button", { name: "Next question" });
+      if (await next.isVisible({ timeout: 500 }).catch(() => false)) { await next.click(); await page.waitForTimeout(400); continue; }
+      const slabs = page.locator(".mz-slab:not([disabled])");
+      if ((await slabs.count()) > 0) { await slabs.first().click(); await page.waitForTimeout(500); continue; }
+      await page.waitForTimeout(500);
     }
   }
   await answerAll(host);
-  await host.getByTestId("show-waiting").waitFor({ timeout: 15000 });
-  const waitingText = await host.getByTestId("show-waiting").textContent();
+  await host.locator(".mz-wait").waitFor({ timeout: 15000 });
+  const waitingText = await host.locator(".mz-wait").textContent();
   if (waitingText.includes("have played so far")) pass("waiting state with counts");
   else fail("waiting state with counts", waitingText);
   // Guest finishes — then results.

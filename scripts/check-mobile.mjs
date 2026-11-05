@@ -57,6 +57,35 @@ async function smallTargets(page) {
     return bad;
   });
 }
+// Sample touch targets repeatedly through an entry animation and
+// keep the worst (smallest) height seen per element, so a target
+// that dips below the floor mid-animation is caught even if it
+// measures fine at rest. (The 2026-11-05 chip: a 44px floor renders
+// at 43.6px while mz-enter is at scale(.99); a single measurement
+// after the animation settles would never see it.)
+async function smallTargetsSampled(page, samples = 9, intervalMs = 150) {
+  const worst = new Map(); // element key -> { label, height, atMs }
+  for (let i = 0; i < samples; i++) {
+    const atMs = i * intervalMs;
+    const bad = await page.evaluate(() => {
+      const out = [];
+      const els = document.querySelectorAll("button, input, textarea, select");
+      for (let j = 0; j < els.length; j++) {
+        const el = els[j];
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) continue; // hidden
+        if (r.height < 44) out.push({ key: `${j}:${el.tagName.toLowerCase()}`, label: `${el.tagName.toLowerCase()}${el.textContent ? ` "${el.textContent.trim().slice(0, 24)}"` : ""}`, height: r.height });
+      }
+      return out;
+    });
+    for (const { key, label, height } of bad) {
+      const prev = worst.get(key);
+      if (!prev || height < prev.height) worst.set(key, { label, height, atMs });
+    }
+    if (i < samples - 1) await page.waitForTimeout(intervalMs);
+  }
+  return [...worst.values()].map(({ label, height, atMs }) => `${label} ${height.toFixed(1)}px @${atMs}ms`);
+}
 async function tabFocus(page, label) {
   // Tab through the page; every stop on a real control must be interactive
   // with a visible :focus-visible outline. BODY stops are Chromium's
@@ -136,12 +165,16 @@ try {
         await host.getByTestId("choose-game").click();
     await host.getByTestId("select-game-math-mayhem").click();
     await host.locator('[data-testid="start-official-math-mayhem"]').click();
-    await host.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });
+    // Kit panel since §11: the QuestionScreen's .mz-question is the
+    // gameplay signal (the 8s intro auto-advances first).
+    await host.locator(".mz-question").waitFor({ timeout: 20000 });
     await host.screenshot({ path: join(OUT, `${vp.width}-game.png`) });
     o = await overflow(host);
     check(`${vp.width}px game panel: no horizontal overflow`, o.scrollWidth <= o.innerWidth, `scrollWidth=${o.scrollWidth} innerWidth=${o.innerWidth}`);
-    bad = await smallTargets(host);
-    check(`${vp.width}px game panel: all targets >= 44px`, bad.length === 0, bad.slice(0, 5).join("; "));
+    // Sample through the entry animation (mz-enter scales from .99),
+    // not just at rest: a 44px floor renders at 43.6px mid-animation.
+    bad = await smallTargetsSampled(host);
+    check(`${vp.width}px game panel: all targets >= 44px at every point of the entry animation`, bad.length === 0, bad.slice(0, 5).join("; "));
     await tabFocus(host, `${vp.width}px game panel`);
     await ctx.close();
     await ctx2.close();

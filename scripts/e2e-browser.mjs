@@ -45,6 +45,15 @@ async function panelText(page) {
   catch { return ""; }
 }
 async function panelFinished(page, gameId) {
+  // Kit games (Trivia, Geography, Math Mayhem) render no game-panel, so
+  // the panelText lookup below would burn its full 2s timeout on every
+  // check — and Math needs ~20 loop iterations (10 questions x 2
+  // actions), which cannot fit the 180s budget at ~2.5s per check.
+  // The "Back to lobby" button appears only on the results screen,
+  // never in play, so check it first (same fast path as check-f5).
+  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") {
+    return await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500);
+  }
   const t = await panelText(page);
   // Heading must match the game: right after a previous game finishes, the
   // panel still shows that finished game until the new game's projection
@@ -54,9 +63,6 @@ async function panelFinished(page, gameId) {
   // finished panel. The results screen only ever shows the latest finished
   // game, so its presence means the game just played is finished.
   if (await isVisible(page.getByTestId("show-results"), 500)) return true;
-  // Mchezo Trivia results: PhoneRevealScreen's "Back to lobby" button only
-  // appears on the results screen, never during play.
-  if (gameId === "trivia") return await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500);
   return false;
 }
 
@@ -131,8 +137,9 @@ async function actYear(page) {
 // Returns true if it did anything (or the panel is already finished).
 async function act(page, gameId, name) {
   // Geography is a kit panel too (Work Package E) — same play shape as
-  // Trivia, so the shared kit-question helper covers it.
-  if (gameId === "trivia" || gameId === "geography") return await actTrivia(page);
+  // Trivia, so the shared kit-question helper covers it. Math Mayhem
+  // (§11) is the same shape again.
+  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") return await actTrivia(page);
   if (gameId === "closest-wins") return await actClosest(page);
   if (gameId === "guess-the-year") return await actYear(page);
   const panel = page.locator('[data-testid="game-panel"]');
@@ -278,7 +285,7 @@ async function runBrowser(browserName, games) {
         // first. Dismiss it on every page (or wait for its auto-advance)
         // before waiting for gameplay; otherwise the wait below times out.
         for (const { page } of pages) {
-          if (gameId === "trivia" || gameId === "geography") {
+          if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") {
             // Mchezo Trivia intro is an 8s countdown with no dismiss button;
             // Geography is a kit panel too (Work Package E) — the same
             // QuestionScreen renders .mz-question, so this wait covers it.

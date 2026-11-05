@@ -71,7 +71,9 @@ async function panelFinished(page, gameId) {
   // geography game cannot finish inside the 180s budget (it needs ~16
   // iterations); with it each check costs 0.5s and the game finishes in
   // ~90s. The button appears only on the results screen, never in play.
-  if (gameId === "trivia" || gameId === "geography") {
+  // Math Mayhem (§11) is the same shape — kit panel, old ShowResults,
+  // no game-panel — and needs it even more (10 questions × 2 actions).
+  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") {
     try { return await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }); } catch { return false; }
   }
   // M6 Show Mode: a finished game shows the results screen instead of the
@@ -138,7 +140,8 @@ async function actYear(page) {
 async function act(page, gameId, name) {
   // Geography renders in the Mchezo kit too (Work Package E) — same play
   // shape as Trivia (QuestionScreen slabs + locked view + Next question).
-  if (gameId === "trivia" || gameId === "geography") {
+  // Math Mayhem (§11) is the same shape again.
+  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") {
     if (await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500)) return true;
     const slab = page.locator(".mz-slab:not([disabled])").first();
     if (await isVisible(slab, 1000)) { await slab.click(); await sleep(300); return true; }
@@ -297,7 +300,8 @@ try {
       for (const { page } of pages) {
         // Geography is a kit panel too (Work Package E) — the same
         // QuestionScreen renders .mz-question, so the trivia wait covers it.
-        if (gameId === "trivia" || gameId === "geography") await page.locator(".mz-question").waitFor({ timeout: 30000 });
+        // Math Mayhem (§11) is the same shape again.
+        if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") await page.locator(".mz-question").waitFor({ timeout: 30000 });
         // J.3: Closest renders in the Mchezo kit, not the old GamePanel, so
         // there is no "Now playing:" heading — the guess dial is the signal
         // (the 8s intro auto-advances inside the 20s wait).

@@ -18,6 +18,9 @@ Strict TS, Zod validation, per-player secret projection, idempotency and score l
 ## Safety response
 If a secret leak, data-loss bug or score integrity failure is found, stop that unsafe feature, write a reproducible failing test and fix before demoing it. Other independent development may proceed. If a provider needs paid setup, write a feasibility comparison, use local adapter, and request permission only for the actual external step.
 
+## Regression gates
+Run gates only through `scripts/run-gate.sh` (see `docs/GATE_RUNNER.md`). It takes an exclusive `flock` on `~/workspace/.mchezo-gate.lock` and writes a timestamped log per run. Never start a second gate while one holds the lock, never run a raw `node scripts/check-*.mjs` loop as a gate, and never write to another run's log. A 28-driver gate takes ~60–70 minutes and does not fit in a 30-minute scheduled slot — do not let a timeout kill a gate mid-run and call the partial log a result. Record the run's log path in `docs/PROGRESS.md` before starting, so any other worker reading the task board sees the gate is claimed. **Never edit `scripts/run-gate.sh` (or any script a running process is executing) while a gate holds the lock — bash reads scripts lazily, so overwriting a running script corrupts the running instance (on 2026-11-05 a mid-run rewrite killed the resume gate with a syntax error at its final line). Treat the runner as frozen for the duration of a run; edit it only when no gate holds the lock.**
+
 
 
 ---

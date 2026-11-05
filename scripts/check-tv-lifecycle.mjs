@@ -46,12 +46,19 @@ async function answerAllTrivia(page) {
     if (await doneBtn.isVisible({ timeout: 1000 }).catch(() => false)) { await doneBtn.click(); await sleep(200); }
   }
 }
+// Math Mayhem renders in the Mchezo kit since §11 — the same
+// QuestionScreen shape as Trivia (slabs + Next question + the
+// "Waiting for the game to finish" keycap) — so it uses the same
+// single-pass loop as answerAllTrivia above.
 async function answerAllMath(page) {
   for (let i = 0; i < 40; i++) {
-    const tiles = page.locator(".grid button");
-    if (await tiles.count() === 0) break;
-    await tiles.first().click();
-    await page.waitForTimeout(200);
+    if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }).catch(() => false)) return;
+    const slab = page.locator(".mz-slab:not([disabled])").first();
+    if (await slab.isVisible({ timeout: 1500 }).catch(() => false)) { await slab.click(); await sleep(200); }
+    const next = page.getByRole("button", { name: "Next question" });
+    if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click(); await sleep(200); }
+    const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
+    if (await doneBtn.isVisible({ timeout: 1000 }).catch(() => false)) { await doneBtn.click(); await sleep(200); }
   }
 }
 async function tvIsStage(tv) {

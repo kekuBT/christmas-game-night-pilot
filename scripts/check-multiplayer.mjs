@@ -36,19 +36,19 @@ const check = (label, ok, detail = "") => {
   results.push({ label, ok });
 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-async function panelText(page) {
-  try { return await page.locator('[data-testid="game-panel"]').textContent({ timeout: 2000 }); }
-  catch { return ""; }
-}
+// Kit answer loop (same as e2e's actTrivia): slabs + Next question,
+// then the "Waiting for the game to finish" keycap clears the last
+// lock into the counts-only waiting ring. Answers every question.
 async function answerQuiz(page) {
-  // Click option buttons until no options remain (all questions answered).
-  const panel = page.locator('[data-testid="game-panel"]');
-  let guard = 40;
-  while (guard-- > 0) {
-    const opts = panel.locator(".grid button");
-    if ((await opts.count()) === 0) break;
-    await opts.first().click();
-    await sleep(300);
+  for (let i = 0; i < 60; i++) {
+    if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }).catch(() => false)) return;
+    const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
+    if (await doneBtn.isVisible({ timeout: 500 }).catch(() => false)) { await doneBtn.click(); await sleep(400); return; }
+    const next = page.getByRole("button", { name: "Next question" });
+    if (await next.isVisible({ timeout: 500 }).catch(() => false)) { await next.click(); await sleep(400); continue; }
+    const slabs = page.locator(".mz-slab:not([disabled])");
+    if ((await slabs.count()) > 0) { await slabs.first().click(); await sleep(500); continue; }
+    await sleep(500);
   }
 }
 async function tvLeakCheck(label, roomId) {
@@ -107,8 +107,10 @@ try {
   let allSeeGame = true;
   for (const { page, name } of pages) {
     try {
-      await page.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });
-    } catch { allSeeGame = false; console.log(`  ${name} did not show the game heading`); }
+      // Kit panel since §11: the QuestionScreen's .mz-question is the
+      // gameplay signal (the 8s intro auto-advances first).
+      await page.locator(".mz-question").waitFor({ timeout: 20000 });
+    } catch { allSeeGame = false; console.log(`  ${name} did not show the game panel`); }
   }
   check("all 4 pages show the same game panel simultaneously", allSeeGame);
 
@@ -120,7 +122,7 @@ try {
   await sam.reload({ waitUntil: "domcontentloaded" });
   let reloadOk = true;
   try {
-    await sam.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });
+    await sam.locator(".mz-question").waitFor({ timeout: 20000 });
   } catch { reloadOk = false; }
   check("reloaded player returns to same slot and same game", reloadOk);
   const projAfterReload = await (await fetch(`${BASE}/rooms/${roomId}/projection?audience=tv`)).json();
@@ -133,9 +135,8 @@ try {
   // A finished page shows ShowResults instead of the panel, so accept
   // either as finished.
   const pageFinished = async (page) => {
-    const t = await panelText(page);
-    if (t.includes("Now playing: math-mayhem") && t.includes("Status: finished")) return true;
     try { if (await page.getByTestId("show-results").isVisible({ timeout: 500 })) return true; } catch { /* not on results */ }
+    try { if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 })) return true; } catch { /* not on results */ }
     return false;
   };
   for (const { page } of pages) await answerQuiz(page);

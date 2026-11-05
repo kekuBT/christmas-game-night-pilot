@@ -530,3 +530,195 @@ The dev log was not updated during J; this entry consolidates it from
   ALL PASSED. Typecheck clean, vitest 376/376, build clean, lint
   clean. Mobile + game-night screenshots restored before staging.
 - Next: commit F, then the optional §11 Math Mayhem modernization.
+
+## §11 Math Mayhem modernization (IN PROGRESS, 2026-11-05, local only)
+
+- `MchezoMath.tsx` + App `mathPlaying` branch (after the geography
+  branch). Mirrors `MchezoGeography`: QuestionScreen (accentIndex 2),
+  locked view, `MchezoWaiting` for abstained / all-answered, "Sit
+  this game out" chip (intent `abstain`). No server change: answers
+  still submit `submit-math-answer`; the server computes the speed
+  bonus from its own clock. The locked view shows the player's own
+  elapsed time from the game start (deadlineAt minus the 5-minute
+  window, captured at tap) with the bonus rule next to it. No TV
+  stage, no reveal; intro and results stay old. GamePanel's quiz
+  branch now serves only Who Said That; only Math's path is dead.
+  Before/after screenshots 22/23 (test-fixture data).
+- `check-math`: **MATH ALL PASSED (25 checks)**, exit 0 (log
+  `~/workspace/gates-math-check1.log`). Exact scores verified on a
+  seeded game (seed 1, correct indices [0,2,2,1,1,1,2,3,0,1]):
+  host 1000 (all ten correct, every answer past the 10s bonus
+  bracket), Bea 0, abstained player 0. The speed-bonus brackets
+  themselves are unit-tested (tests/room.test.ts), not re-proven by
+  the driver. Elapsed display verified live ("Answered in 12s").
+- Driver fallout fixed ahead of the Math gate: F5 and e2e now route
+  math through the shared `actTrivia` kit helper, wait for
+  `.mz-question`, and use the "Back to lobby" fast path in
+  `panelFinished` (math needs ~20 loop iterations — the 2s panelText
+  timeout per check would have blown the 180s budget, as geography
+  did before its fast path).
+- Full regression batch (the Math gate) running: 28 drivers + E2E.
+- Next: commit Math when the batch lands green, then the final
+  §13 handoff.
+
+## Duplicate-batch incident + lock correction (2026-11-05 ~10:47–11:30 EST)
+
+- Two batches ran concurrently against the same server and the same
+  fixed log (`~/workspace/gates-math-batch.log`): the interactive
+  session's batch (from ~10:09 EST) and the 10:45 scheduled run's
+  batch (from 10:47 EST). The shared log ended with 157 null-byte
+  lines; check-mchezo's verdict line was destroyed; check-multiplayer
+  (4/9 failed, first batch) and check-tv-lifecycle (exit 1, second
+  batch) both ran under doubled load and could not be trusted.
+- The second batch was killed mid-F5 (~11:13–11:16 EST) by the
+  scheduled run's 1800-second timeout — a 28-driver gate takes
+  60–70 minutes and never fit the 30-minute slot. Its completed
+  drivers with clean verdicts: math, spectator, tv-spectator,
+  leaderboard, tv-entry, m6, ws-reconnect, abstain, f4 (all exit 0,
+  ALL PASSED). F5 was partial (killed on trivia).
+- Keku chose to keep the newer batch as authoritative; the older
+  batch was stopped (its E2E was in flight; the newer batch re-runs
+  E2E). A resume gate was then launched under a new single-run lock.
+- The scheduled run then started a THIRD batch (`/tmp/math-batch.sh`,
+  11:18:54 EST, full 28 drivers + E2E, same shared log) two seconds
+  before the locked resume. Keku authorized stopping it: its session
+  bash, script bash, driver, and Chromium were terminated by exact
+  PID (server and resume untouched); one orphaned check-leaderboard
+  survived the kill (its parent loop died after spawning it) and was
+  terminated separately. The locked resume's re-runs of check-mchezo
+  and check-tv-lifecycle both passed clean (exit 0, ALL PASSED).
+- Lock: `scripts/run-gate.sh` (flock `~/workspace/.mchezo-gate.lock`,
+  per-run timestamped logs, server-up check). Contention verified
+  live: a second invocation while the resume held the lock exited 3.
+- Scheduled-workflow correction (owner-approved 2026-11-05, applied
+  ~11:30 EST): `local-dev-christmas-30m` body updated (schedule,
+  title, delivery, timeout unchanged; next run 11:45:46 EST) — all
+  driver runs must go through the runner; no full gate inside the
+  30-minute run (bounded verification only); check for a running gate
+  first; record the source revision with every verification run;
+  clean up stray test processes after interruption without touching
+  the server or another run's processes; every scheduling change
+  documented in `docs/GATE_RUNNER.md`. The runner also gained a run
+  ID, the exact git revision in each log header, and a TERM/INT/HUP
+  trap that kills the in-flight driver + Chromium children.
+  Remaining runner verification (after the resume gate): live trap
+  test + simultaneous-launch test on the new script.
+- Resume gate (locked, log `~/workspace/gates-batch-2026-11-05-1118.log`):
+  19 drivers + E2E — check-mchezo + check-tv-lifecycle re-runs,
+  then f5 → errors, then E2E. A monitor watches the runner PID and
+  reports verdicts on completion.
+
+## Math gate outcome (2026-11-05 ~11:38–11:45 EST) — gate HELD, commit not made
+
+- Resume gate (locked, log `~/workspace/gates-batch-2026-11-05-1118.log`):
+  trustworthy passes: check-mchezo, check-tv-lifecycle, check-f5
+  (30/30), check-contrast. The scheduled batch's clean section adds
+  check-spectator and check-tv-spectator (both ALL PASSED).
+- check-mobile FAILED on a real finding: the "Sit this game out"
+  chip renders at ~43.6px tall at 320px and 375px viewports (the
+  `mz-enter` animation starts at `scale(.99)`, so the 44px floor
+  renders at 43.6px mid-animation). Fixed in source
+  (`mchezo.css`: `.mz-chip-btn` min-height 44px → 46px, commented);
+  NOT yet built into `dist/` (vite blocked by the EPERM below) and
+  NOT yet re-verified by a clean check-mobile run.
+- Everything else in the resume gate failed on environment, not the
+  app: check-multiplayer (could not create/join rooms), check-reveal,
+  check-library, check-shuffle, check-studio, check-reduced-motion,
+  check-closest, check-restart, check-viewports, check-double-start,
+  check-game-night, check-year, check-geography, check-errors (all
+  exit 1 in ~1s) and E2E (1 item) all died on Chromium SIGTRAP at
+  launch. Minimal launch still failing at ~11:44 EST (Incident 4).
+- My error: I overwrote `scripts/run-gate.sh` while the resume gate
+  was running it. Bash reads scripts lazily, so the running instance
+  died at 11:38:51 on a syntax error (exit 2) after printing "gate
+  done". The drivers had all run by then, so their verdicts survive
+  in the log, but the runner's final summary line never printed.
+  Rule recorded (AGENTS.md + GATE_RUNNER.md): the runner is frozen
+  while a gate holds the lock; edit it only when no gate is running.
+- Filesystem EPERM flapping in the same window (Incident 3 pattern):
+  git index-lock writes, npm's log writer, and vite's config-bundle
+  write all hit `EPERM: operation not permitted`. Typecheck is clean
+  (both tsc configs exit 0 when run directly); the vite build and
+  git operations fail intermittently for environmental reasons, not
+  code reasons. Do not commit until the writes stop flapping.
+- The scheduled run's cleanup stopped the dev server and removed
+  `data/` (test-room snapshots only, regenerable). Server restarted
+  by the interactive session ~11:44 EST (HTTP 200, `data/`
+  recreated empty). No duplicate batch or driver process is running.
+- Cron-worker driver fixes in the tree (uncommitted, Math-routing,
+  same pattern as the F5/e2e fixes): check-contrast, check-f4,
+  check-game-night, check-m6, check-mobile, check-multiplayer,
+  check-tv-lifecycle. They belong in the Math commit once the gate
+  is green. Regenerated screenshots (mobile + game-night 14–17)
+  must be restored before staging.
+- NEXT (when Chromium recovers): verify minimal launch, rebuild
+  (chip fix), re-run the failed drivers + E2E through the new
+  run-gate.sh in one locked gate, reconcile against HEAD d42fd96 +
+  the Math tree, restore screenshots, then commit Math. Then the
+  trap + simultaneous-launch runner tests, then the final handoff.
+- Monitor note: the resume-gate monitor (proc_e783fdd1bacc) completed
+  ~11:39 EST but its report file
+  (`~/workspace/gates-resume-monitor.log`) is empty — its writes
+  landed in the same EPERM window. No verdicts were lost: every
+  verdict was already read directly from the resume log
+  (`gates-batch-2026-11-05-1118.log`) and reported above.
+
+## Owner-directed priority change — pause gates, preserve, harden, diagnose (2026-11-05 ~11:48–12:00 EST)
+
+- Owner: too much engineering time is going to recovering the
+  testing infrastructure. Temporary priority change: (1) pause new
+  full regression runs until the environment is demonstrably
+  healthy; (2) preserve all uncommitted work immediately; (3)
+  harden the runner before another full batch; (4) diagnose the
+  environment separately; (5) once stable, verify Math; (6) report
+  back. No feature expansion until the reliability problem is
+  resolved. All work remains local.
+- Hold applied: `local-dev-christmas-30m` body updated (verified by
+  read-back; schedule/title/delivery/timeout unchanged, next run
+  12:15:46 EST) — no browser drivers at all, at most one minimal
+  Chromium launch probe per run to test recovery. Pre-hold body
+  preserved at
+  `workspace/goals/christmas-game-night-github-coordination/hidden_files/cron-local-dev-pre-hold-body-2026-11-05.md`.
+  The 11:45 run (61890bae) already behaved per the corrected body:
+  dirty tree, Chromium still failing ~11:47, git EPERM persisting,
+  nothing edited, nothing committed.
+- Preservation: the working tree is the primary checkpoint (home
+  dir persists; nothing reset/cleaned/overwritten/deleted). A
+  MANIFEST (`~/workspace/backups/mchezo-math-wip-2026-11-05-MANIFEST.txt`)
+  records every changed/new file + the verification status, and
+  the four irreplaceable new files (MchezoMath.tsx, check-math.mjs,
+  run-gate.sh v2, GATE_RUNNER.md) were copied via the file tools to
+  `~/workspace/backups/mchezo-math-wip-2026-11-05-tree/`. The
+  tarball and the WIP recovery commit were both attempted and both
+  failed on EPERM (shell content writes blocked); retry when the
+  filesystem recovers. The WIP commit, when made, must be labeled
+  UNVERIFIED and never presented as a completed milestone.
+- Runner v3 (`scripts/run-gate.sh`, 215 lines, syntax-checked,
+  deps setsid/flock/sha256sum present): immutable per-run copy
+  (read-only, outside the repo; exit 4 if the copy cannot be made),
+  exclusive flock, process-group orphan cleanup (setsid + group
+  kill; never the server, never another run's browsers, no global
+  pkill), header with run ID + git HEAD + full dirty list + driver
+  sha256s + built bundle identity, --timeout-minutes (exit 124),
+  fail-safe if the run log cannot be written (exit 5). Controlled
+  tests in `scripts/test-run-gate.sh` (stub driver, no Chromium)
+  with PASS/FAIL/INCONCLUSIVE verdicts. Status ~11:56 EST:
+  INCONCLUSIVE — the copy step failed on EPERM (five 0-byte run
+  copies), so no contention/trap/lock test could execute; the
+  fail-safe itself worked. Re-run once shell content writes recover.
+- Diagnostics (see Incident 4 "Diagnostics" section): memory
+  critically low (398 MB available, not attributable to our
+  processes); browser install intact (both binaries run --version
+  standalone, Chrome 156.0.8078.4); no orphans; /dev/shm and disk
+  fine; overlayfs on / and /home; root uid yet EPERM on shell
+  content writes (metadata ops + file tools succeed). Hypotheses
+  only: SIGTRAP from memory pressure at browser startup; EPERM
+  from overlay/sandbox enforcement on exec'd-process writes.
+- Math verification prep: check-mobile's game-panel check now
+  samples touch targets 9 times over ~1.2s through the entry
+  animation (smallTargetsSampled, worst height per element with its
+  timestamp) instead of one measurement at an arbitrary instant.
+  Verification plan once stable: rebuild with the chip fix,
+  targeted tests first (check-math, check-mobile, check-f5,
+  check-contrast), then ONE locked full gate against the exact
+  final source state; never combine results across revisions.

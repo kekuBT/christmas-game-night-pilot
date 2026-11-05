@@ -115,14 +115,19 @@ function report(view, samples) {
 }
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// Kit answer loop (same as e2e's actTrivia): slabs + Next question,
+// then the "Waiting for the game to finish" keycap clears the last
+// lock into the counts-only waiting ring. Answers every question.
 async function answerQuiz(page) {
-  const panel = page.locator('[data-testid="game-panel"]');
-  let guard = 40;
-  while (guard-- > 0) {
-    const opts = panel.locator(".grid button");
-    if ((await opts.count()) === 0) break;
-    await opts.first().click();
-    await sleep(300);
+  for (let i = 0; i < 60; i++) {
+    if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }).catch(() => false)) return;
+    const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
+    if (await doneBtn.isVisible({ timeout: 500 }).catch(() => false)) { await doneBtn.click(); await sleep(400); return; }
+    const next = page.getByRole("button", { name: "Next question" });
+    if (await next.isVisible({ timeout: 500 }).catch(() => false)) { await next.click(); await sleep(400); continue; }
+    const slabs = page.locator(".mz-slab:not([disabled])");
+    if ((await slabs.count()) > 0) { await slabs.first().click(); await sleep(500); continue; }
+    await sleep(500);
   }
 }
 
@@ -157,20 +162,19 @@ try {
     await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-math-mayhem").click();
   await host.locator('[data-testid="start-official-math-mayhem"]').click();
-  await host.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });
+  // Kit panel since §11: the QuestionScreen's .mz-question is the
+  // gameplay signal (the 8s intro auto-advances first).
+  await host.locator(".mz-question").waitFor({ timeout: 20000 });
   console.log("\n== game playing ==");
   report("game-playing", await sampleView(host, "game-playing"));
 
   // Every player must answer each question before the game advances, so
-  // drive both pages until the panel reports finished (same pattern as
+  // drive both pages until the results screen appears (same pattern as
   // check-f4.mjs, which loops all players).
-  // A finished page shows ShowResults instead of the panel, so accept
-  // either as finished (same pattern as check-f4.mjs).
-  const panel = host.locator('[data-testid="game-panel"]');
+  // Math renders in the kit since §11, so there is no game-panel to
+  // read "Status: finished" from — show-results is the finish signal.
   const deadline = Date.now() + 120_000;
   while (Date.now() < deadline) {
-    const t = await panel.textContent().catch(() => "");
-    if (t.includes("Status: finished")) break;
     if (await host.getByTestId("show-results").isVisible({ timeout: 500 }).catch(() => false)) break;
     await answerQuiz(host);
     await answerQuiz(joiner);

@@ -44,7 +44,11 @@
 .mz-card { border-radius: 22px; background: var(--mz-surface-1); padding: 14px 16px; }
 
 /* chips */
-.mz-chip-btn { min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1.5px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); font: 700 14px var(--mz-font-body); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.mz-chip-btn { min-height: 46px; padding: 0 16px; border-radius: 22px; border: 1.5px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); font: 700 14px var(--mz-font-body); display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+/* 46px, not 44px: the entry animation (mz-enter) starts at scale(.99),
+   so a 44px floor renders at 43.6px mid-animation and fails the 44px
+   touch-target check (check-mobile, 2026-11-05). 46 x .99 = 45.5px,
+   which clears the floor even mid-animation. */
 .mz-chip-btn--code { font-family: var(--mz-font-display); letter-spacing: .1em; }
 .mz-event-badge { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 14px; border-radius: 18px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); color: var(--mz-highlight); font-weight: 800; font-size: 15px; }
 .mz-event-badge--compact { font-size: 13px; padding: 4px 10px; min-height: 32px; gap: 6px; }

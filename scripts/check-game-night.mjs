@@ -135,19 +135,11 @@ async function answerAllTrivia(page, slabIndex) {
     }
   }
 }
-// Answer all 10 Math questions (old quiz branch: one .answer-tile per
-// option, all questions visible at once; answered cards show "Answered.").
+// Answer all 10 Math questions. Math renders in the Mchezo kit since
+// §11 — the same QuestionScreen shape as Trivia — so it uses the same
+// slab + Next-question loop as answerAllTrivia above.
 async function answerAllMath(page) {
-  await page.locator('[data-testid="game-panel"]').waitFor({ timeout: 15000 });
-  const cards = page.locator('[data-testid="game-panel"] .card');
-  const n = await cards.count();
-  for (let i = 0; i < n; i++) {
-    const tiles = cards.nth(i).locator(".answer-tile");
-    if ((await tiles.count()) > 0) {
-      await tiles.first().click();
-      await sleep(150);
-    }
-  }
+  await answerAllTrivia(page, 0);
 }
 // One Closest question for every connected player (number-field path —
 // the path that survives the planned single-Submit unification).
@@ -324,7 +316,7 @@ try {
   // --- Game 3: Math Mayhem, started by the cohost (not the host). ---
   check("guest sees no start button", (await guests["Cal"].getByTestId("start-official-math-mayhem").count()) === 0);
   await startGame(guests["Bea"], "math-mayhem");
-  await guests["Bea"].locator('[data-testid="game-panel"]').waitFor({ timeout: 15000 });
+  await guests["Bea"].locator(".mz-question").waitFor({ timeout: 15000 });
   check("cohost can start a game", true);
   // A guest's skip attempt is rejected for permission, not timing.
   proj = await getProjection(host);
@@ -345,11 +337,13 @@ try {
   await answerAllMath(guests["Cal"]);
   await answerAllMath(guests["Dee"]);
   await answerAllMath(guests["Fay"]);
-  const eliCards = guests["Eli"].locator('[data-testid="game-panel"] .card');
-  await eliCards.nth(0).locator(".answer-tile").first().click();
+  // Eli answers one question, then reloads mid-game: disconnects,
+  // reconnects, keeps his answer. (Kit panel since §11: the first
+  // enabled slab is the current question's first option.)
+  await guests["Eli"].locator(".mz-slab:not([disabled])").first().click();
   await sleep(300);
   await guests["Eli"].reload({ waitUntil: "domcontentloaded" });
-  await guests["Eli"].locator('[data-testid="game-panel"]').waitFor({ timeout: 15000 });
+  await guests["Eli"].locator(".mz-question").waitFor({ timeout: 15000 });
   check("reloaded player lands back in the game (not the landing)", true);
   await answerAllMath(guests["Eli"]);
   await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });
