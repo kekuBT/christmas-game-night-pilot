@@ -357,3 +357,16 @@ The dev log was not updated during J; this entry consolidates it from
   decision-E protocol restated. The K batch is healthy so far.
 - Next: the K batch's remaining drivers, then the K commit, the
   two-button fix, and the C simulation run.
+
+## Milestone K — reliability, accessibility, security hardening (2026-11-05 night, local only)
+
+- Audit doc `docs/K_HARDENING_AUDIT.md` + three fixes (replay
+  returns the stored result byte-for-byte; `host-claimed` ledger
+  event; `App.startGame` in-flight guard) + 3 new tests (suite
+  369/369, 33 files) + 3 new drivers (restart 15/15, double-start
+  3/3, viewports 16/16, all green standalone).
+- Full regression batch as the K gate: **23 drivers + E2E, ALL
+  GREEN, 0 FAIL lines** (log `~/workspace/gates-k-batch.log`,
+  ~43 min, exit 0). No SIGTRAP in this batch.
+- Next: Work Package B fix (NumericGuess unification), then the
+  Package C simulation run, then Work Package D (Guess the Year).

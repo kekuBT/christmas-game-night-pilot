@@ -196,6 +196,11 @@ export class RoomEngine {
     this.players.set(id, player);
     if (isHost) this.hostId = id;
     this.log("player-joined", { playerId: id });
+    // Event attribution (Milestone K): becoming the host is a privileged
+    // role acquisition, so it gets its own audit event — the player-joined
+    // event alone cannot answer "who claimed the host role, and when?"
+    // (The first host join and a later claim-token join both log it.)
+    if (isHost) this.log("host-claimed", { playerId: id });
     return { player, recoveryToken: token };
   }
 
@@ -343,7 +348,15 @@ export class RoomEngine {
     if (intent.roomId !== this.id) return { accepted: false, reason: "WRONG_ROOM" };
     const key = dedupeKey(intent.roomId, actorId, intent.clientEventId);
     const seen = this.seenIntents.get(key);
-    if (seen) return { accepted: seen.accepted, result: seen.result };
+    // A replay must return the ORIGINAL response, byte for byte — not a
+    // re-wrapped copy. (Milestone K: the old code returned
+    // { accepted: seen.accepted, result: seen.result }, which nested the
+    // original inside `result`, so a replayed rejection carried no
+    // top-level `reason` and the client showed "unknown".) The stored
+    // `result` IS the original return value, so return it directly.
+    // The cast is safe: this function is the only writer of
+    // seenIntents, and it always stores the typed `result` below.
+    if (seen) return seen.result as { accepted: boolean; reason?: string; result?: unknown };
 
     let result: { accepted: boolean; reason?: string; result?: unknown };
     if (intent.action === "submit-math-answer") {

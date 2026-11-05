@@ -138,3 +138,17 @@ describe("room engine", () => {
     expect(() => engine.startGame(players[1]!.id, "math-mayhem", { seed: 1 })).not.toThrow();
   });
 });
+
+describe("Milestone K: host-claim attribution", () => {
+  it("claiming the host role logs a host-claimed event; guest joins do not", () => {
+    const engine = new RoomEngine("Claim Room");
+    const host = engine.join("Host", { asHost: true }).player.id;
+    const ledger = engine.toJSON().ledger as { type: string; playerId?: string }[];
+    const claims = ledger.filter((e) => e.type === "host-claimed");
+    expect(claims).toHaveLength(1);
+    expect(claims[0]!.playerId).toBe(host);
+    engine.join("Guest");
+    const ledgerAfter = engine.toJSON().ledger as { type: string; playerId?: string }[];
+    expect(ledgerAfter.filter((e) => e.type === "host-claimed")).toHaveLength(1);
+  });
+});

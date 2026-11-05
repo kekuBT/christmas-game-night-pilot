@@ -236,8 +236,16 @@ export function App() {
       await post<Record<string, unknown>>(`/rooms/${roomId}/reconnect`, { playerId, recoveryToken: token }); await refresh(); setMsg("Reconnected to your player slot.");
     } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
+  const startingRef = useRef(false);
   async function startGame(gameId: string, official: boolean) {
-    setErr(""); try { await post<Record<string, unknown>>(`/rooms/${roomId}/games`, { gameId, official }); await refresh(); setShuffleResult(null); setView("lobby"); } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
+    // Host-action race (Milestone K): a double-tap on Start posts twice;
+    // the server correctly rejects the second (a game is already playing),
+    // but the rejection surfaced as a spurious error to the host. Ignore
+    // a second call while a start is in flight — the server stays the
+    // authority, this only stops the redundant request.
+    if (startingRef.current) return;
+    startingRef.current = true;
+    setErr(""); try { await post<Record<string, unknown>>(`/rooms/${roomId}/games`, { gameId, official }); await refresh(); setShuffleResult(null); setView("lobby"); } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); } finally { startingRef.current = false; }
   }
   async function intent(gameInstanceId: string, action: string, payload: Record<string, unknown>) {
     setErr(""); try {
