@@ -42,7 +42,7 @@ means adding a preset entry plus tests, not changing the scheduler.
 | Points League | 5 | yes | solo games | League variety; scoring not implemented. |
 | Team Clash | 3 | no | team games | Only Charades supports teams today, so all three rounds are Charades. The gap is shown, not hidden. |
 | The Gauntlet | 6 | yes | all games | Six different games, shuffled order. |
-| Chaos Night | 6 | no | all games | Repeats welcome; the schedule always fills. |
+| Chaos Night | 6 | no | all games | Repeats welcome; the schedule always fills. Picks are uniform random (approved distinction from Gauntlet) — no variety preference, so repeats cluster naturally. |
 | The Think Tank | 5 | yes | knowledge, quiz, word, puzzle, math, estimation | The category set is a preset choice (brain games), not a rule. Pool is 8 games. |
 | The Long Game | 10 | no | all games | A marathon; repeats allowed. |
 
@@ -58,7 +58,10 @@ preset label), `rounds` (int 1–20), `gamesPerRound` (int 1–5),
 `playerCount` (int ≥ 1), `distinctOnly` (default true),
 `playStyle?`, `categories?` (OR match, like the Library),
 `excludeIds?`, `seed` (int), `recentIds?` (most-recent-first),
-`manifests?` (default the validated catalog).
+`manifests?` (default the validated catalog), `repeatSelection?`
+(`"variety-weighted"` default, or `"uniform-random"` for
+repeat-allowed schedules only; uniform with distinctOnly throws
+rather than being silently ignored).
 
 Validation is by hand, not Zod — the same reason as H: the engine is
 imported into the web bundle, and Zod would add a dependency there
@@ -80,10 +83,18 @@ data (player count, seed, recent history) and caller overrides.
 4. **Distinct**: one H tournament-mode shuffle call with
    `count = slots` (distinct by construction, category variety across
    the set, recency-weighted), then chunked into rounds.
-5. **Repeat-allowed**: one H smart-mode pick per slot, each seeded
-   deterministically from `seed + slot index`, with already-scheduled
-   games prepended to the recency history so repeats spread out
-   instead of clustering.
+5. **Repeat-allowed**: one H pick per slot, each seeded
+   deterministically from `seed + slot index`. The strategy is the
+   preset's `repeatSelection`: `"variety-weighted"` (default) uses
+   smart-mode picks with already-scheduled games prepended to the
+   recency history so repeats spread out instead of clustering;
+   `"uniform-random"` (Chaos Night, approved 2026-11-04 night) uses
+   random-mode picks that deliberately ignore history — no recency,
+   no variety weights — so repeats cluster naturally. This is the
+   scheduling-behavior distinction from Gauntlet (distinct +
+   variety-weighted); it changes what the preview shows, and it does
+   not activate executable tournaments. Hard eligibility is identical
+   in both strategies: picks come only from the filtered pool.
 6. Picks carry H's reason codes and explanations, so the preview can
    show *why* each game was chosen.
 

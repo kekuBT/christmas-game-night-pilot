@@ -201,3 +201,70 @@ describe("scheduleTournament determinism and purity", () => {
     expect(r.ok).toBe(true);
   });
 });
+
+describe("chaos-night uniform-random selection (J: approved distinction)", () => {
+  it("chaos preset carries repeatSelection uniform-random; others default to variety-weighted", () => {
+    expect(presetFor("chaos-night").repeatSelection).toBe("uniform-random");
+    for (const p of TOURNAMENT_PRESETS.filter((x) => x.format !== "chaos-night")) {
+      expect(p.repeatSelection).toBeUndefined();
+    }
+    expect(configFromPreset("chaos-night", { playerCount: 4, seed: 1 }).repeatSelection).toBe("uniform-random");
+    expect(configFromPreset("long-game", { playerCount: 4, seed: 1 }).repeatSelection).toBeUndefined();
+  });
+
+  it("chaos picks carry only random-pick reasons (uniform strategy, no weights)", () => {
+    for (let seed = 0; seed < 10; seed++) {
+      const r = scheduleTournament(configFromPreset("chaos-night", { playerCount: 4, seed }));
+      expect(r.ok).toBe(true);
+      if (!r.ok) continue;
+      for (const round of r.rounds) {
+        for (const g of round.games) {
+          expect(g.reasons).toEqual(["random-pick"]);
+          expect(g.explanation).toBe("Picked at random.");
+        }
+      }
+    }
+  });
+
+  it("gauntlet picks never carry random-pick reasons (variety-weighted contrast)", () => {
+    const r = scheduleTournament(configFromPreset("gauntlet", { playerCount: 4, seed: 1 }));
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      for (const round of r.rounds) {
+        for (const g of round.games) {
+          expect(g.reasons).not.toContain("random-pick");
+        }
+      }
+    }
+  });
+
+  it("uniform-random keeps hard eligibility: 2-player pool only, exclusions honored", () => {
+    const r = scheduleTournament(configFromPreset("chaos-night", { playerCount: 2, seed: 3 }));
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const twoPlayer = new Set(["trivia", "word-connections", "guess-the-year", "closest-wins", "geography", "math-mayhem"]);
+      for (const round of r.rounds) {
+        for (const g of round.games) expect(twoPlayer.has(g.gameId)).toBe(true);
+      }
+    }
+    const excluded = scheduleTournament({ ...configFromPreset("chaos-night", { playerCount: 4, seed: 3 }), excludeIds: ["trivia", "charades"] });
+    expect(excluded.ok).toBe(true);
+    if (excluded.ok) {
+      for (const round of excluded.rounds) {
+        for (const g of round.games) expect(["trivia", "charades"]).not.toContain(g.gameId);
+      }
+    }
+  });
+
+  it("uniform-random with distinctOnly throws instead of silently ignoring the strategy", () => {
+    expect(() => scheduleTournament({ ...configFromPreset("chaos-night", { playerCount: 4, seed: 1 }), distinctOnly: true })).toThrow(
+      "uniform-random",
+    );
+    expect(() => scheduleTournament({ ...base4("long-game"), repeatSelection: "bogus" as never })).toThrow("repeatSelection");
+  });
+
+  it("chaos schedules are deterministic across repeated runs", () => {
+    const c = configFromPreset("chaos-night", { playerCount: 4, seed: 7 });
+    expect(scheduleTournament(c)).toEqual(scheduleTournament(c));
+  });
+});

@@ -84,6 +84,29 @@ try {
   check("returning to a feasible format restores the preview",
     await waitForRounds(host, 5));
 
+  // Chaos Night (approved uniform-random distinction): 6 rounds, every
+  // pick explained as a uniform random draw — never a variety-weighted
+  // reason. At 2 players the pool is 6 games, so the preview fills.
+  await host.getByTestId("studio-format-chaos-night").click();
+  await host.getByTestId("studio-preview").waitFor({ timeout: 15000 });
+  check("chaos preview shows its 6 rounds",
+    await waitForRounds(host, 6));
+  check("chaos description names the uniform-random distinction",
+    await host.getByText(/uniform random/).isVisible());
+  {
+    const cards = host.locator('[data-testid^="studio-round-"]');
+    const n = await cards.count();
+    let allRandom = n === 6;
+    let noWeighted = true;
+    for (let i = 0; i < n; i++) {
+      const text = (await cards.nth(i).textContent()) ?? "";
+      if (!text.includes("Picked at random.")) allRandom = false;
+      if (/Not played recently|Adds a different kind|Adds a new category|Won the weighted draw/.test(text)) noWeighted = false;
+    }
+    check("chaos picks are all uniform random draws", allRandom);
+    check("chaos picks carry no variety-weighted reasons", noWeighted);
+  }
+
   // The Studio never starts a game: no start button exists in this view.
   check("studio has no start button (preview never starts)",
     (await host.locator('[data-testid^="start-"]').count()) === 0);

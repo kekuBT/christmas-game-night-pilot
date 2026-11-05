@@ -9,8 +9,13 @@
 // The engine reuses the Milestone H shuffle engine instead of inventing
 // a second picker: distinct schedules come from one tournament-mode
 // shuffle call (distinct by construction), repeat-allowed schedules
-// from one smart-mode pick per slot (each seeded deterministically from
-// seed + slot index, with already-scheduled games as recency history).
+// from one pick per slot (each seeded deterministically from
+// seed + slot index). The per-slot strategy is the preset's
+// repeatSelection: "variety-weighted" (smart-mode, recency + variety
+// weights, repeats spread out) or "uniform-random" (random-mode,
+// history ignored by design, repeats cluster naturally). Chaos Night
+// is the approved uniform-random format; it differs from Gauntlet
+// (distinct + variety-weighted) by scheduling behavior, not by label.
 // Like H, this module is free of node imports and Zod so the preview UI
 // can import it into the web bundle; validation is by hand and tested.
 //
@@ -46,6 +51,10 @@ export interface TournamentPreset {
   distinctOnly: boolean;
   playStyle?: "solo" | "team";
   categories?: string[];
+  // Repeat-path pick strategy. Only meaningful when distinctOnly is
+  // false; distinct schedules always use tournament-mode. Default
+  // (absent) is "variety-weighted".
+  repeatSelection?: "variety-weighted" | "uniform-random";
 }
 
 export const TOURNAMENT_PRESETS: TournamentPreset[] = [
@@ -78,10 +87,11 @@ export const TOURNAMENT_PRESETS: TournamentPreset[] = [
   {
     format: "chaos-night",
     label: "Chaos Night",
-    description: "Six rounds, anything goes, repeats welcome.",
+    description: "Six rounds, anything goes, repeats welcome. Picks are uniform random — no variety preference, so repeats cluster naturally. This is the approved scheduling distinction from Gauntlet.",
     rounds: 6,
     gamesPerRound: 1,
     distinctOnly: false,
+    repeatSelection: "uniform-random",
   },
   {
     format: "think-tank",
@@ -121,6 +131,8 @@ export interface TournamentConfig {
   seed: number;
   recentIds?: readonly string[];
   manifests?: readonly GameManifest[];
+  // Repeat-path pick strategy (see TournamentPreset.repeatSelection).
+  repeatSelection?: "variety-weighted" | "uniform-random";
 }
 
 /** Build a full config from a preset plus room data. Overrides win over preset defaults. */
@@ -140,6 +152,7 @@ export function configFromPreset(
     categories: p.categories,
     seed: opts.seed,
     recentIds: opts.recentIds ?? [],
+    repeatSelection: p.repeatSelection,
   };
 }
 
@@ -191,6 +204,12 @@ function validateConfig(c: TournamentConfig): void {
   if (c.playStyle !== undefined && c.playStyle !== "solo" && c.playStyle !== "team") {
     throw new Error(`tournament: playStyle must be "solo" or "team", got ${JSON.stringify(c.playStyle)}`);
   }
+  if (c.repeatSelection !== undefined && c.repeatSelection !== "variety-weighted" && c.repeatSelection !== "uniform-random") {
+    throw new Error(`tournament: repeatSelection must be "variety-weighted" or "uniform-random", got ${JSON.stringify(c.repeatSelection)}`);
+  }
+  if (c.repeatSelection === "uniform-random" && (c.distinctOnly ?? true)) {
+    throw new Error(`tournament: uniform-random repeatSelection only applies to repeat-allowed schedules (distinctOnly must be false)`);
+  }
   for (const [name, value] of [["categories", c.categories], ["excludeIds", c.excludeIds], ["recentIds", c.recentIds]] as const) {
     if (value !== undefined && (!Array.isArray(value) || value.some((x) => typeof x !== "string"))) {
       throw new Error(`tournament: ${name} must be an array of strings`);
@@ -237,17 +256,25 @@ export function scheduleTournament(config: TournamentConfig): ScheduleResult {
     if (!r.ok) return { ok: false, reason: "no-eligible-games", eligible: 0, requested: slots };
     flat = r.picks.map((p) => ({ gameId: p.gameId, title: p.title, reasons: p.reasons, explanation: p.explanation }));
   } else {
-    // One smart-mode pick per slot, each deterministically seeded from
-    // seed + slot index, with already-scheduled games as recency so
-    // repeats spread out instead of clustering.
+    // Repeat path: one pick per slot, each deterministically seeded
+    // from seed + slot index. The strategy is the preset's
+    // repeatSelection. "variety-weighted" uses smart-mode picks with
+    // already-scheduled games as recency, so repeats spread out.
+    // "uniform-random" (Chaos Night, approved) uses random-mode picks
+    // that deliberately ignore history — no recency, no variety
+    // weights — so repeats cluster naturally. Hard eligibility is
+    // identical in both: picks come only from the filtered pool.
+    const uniform = config.repeatSelection === "uniform-random";
     flat = [];
     const scheduledSoFar: string[] = [];
     for (let i = 0; i < slots; i++) {
       const r = shuffle({
-        mode: "smart",
+        mode: uniform ? "random" : "smart",
         playerCount: config.playerCount,
         seed: config.seed + i,
-        recentIds: [...scheduledSoFar, ...recent],
+        // Random mode ignores recentIds by construction (uniform draw),
+        // so history is passed only to the weighted path.
+        recentIds: uniform ? [] : [...scheduledSoFar, ...recent],
         manifests: eligible,
       });
       if (!r.ok || r.picks.length === 0) return { ok: false, reason: "no-eligible-games", eligible: 0, requested: slots };
