@@ -248,3 +248,71 @@ spend, or any GitHub action. Budget: $0 new spending. No runtime AI.
 - Pure engine + 6 presets reusing the H shuffle engine; host-only preview UI (no start/score/save); architecture doc + decision L46.
 - Tests: 19 tournament tests (incl. 4 review-driven differentiation tests); driver check-studio 9 checks. Full suite 32 files / 356 tests; batch 18 + E2E green; viewports 320/360/390 pass.
 - Approved for local commit 2026-11-04 night with both review docs, tests, and the player-count correction. Next: Milestone J under decisions A–F.
+
+## Milestone J — catch-up (2026-11-04 night – 2026-11-05 night, local only)
+
+The dev log was not updated during J; this entry consolidates it from
+`docs/PROGRESS.md` and the commit chain.
+- J.1 (`7864779`): shared-infrastructure inspection
+  (`docs/J_INFRASTRUCTURE_INSPECTION.md`, 10 areas) + narrow fixes:
+  OS reduced-motion floor for the kit (`lib/motion.ts`, driver
+  check-reduced-motion), redundant `index.css` block deleted, dead
+  statuses `"lobby"`/`"revealed"` removed. Full batch 19 + E2E green.
+- Chaos slice (`4360775`): Chaos Night uniform-random scheduling
+  distinction (approved; Gauntlet stays variety-weighted); preview
+  only, no executable tournaments. Studio driver 13/13.
+- J.2 (`a8b1fa0`): recovery + persistence contracts (docs only).
+- J.3 (`44ddef3`): Closest Wins modernization — kit extraction +
+  NumericGuess / AbstainControl / MchezoWaiting primitives +
+  check-closest 16/16 + before/after screenshots. Batch2 11/12 with
+  F4 solo re-run 11/11 (transient parallel-run failure). Chromium
+  SIGTRAP recurred ~00:50 EST (environment, not the app); the batch
+  was held per decision E until the runtime recovered.
+- J.4 (`8f2e696`): deadline-vs-duration investigation (docs only) —
+  the 5-minute hard submission cutoff vs 8–15-minute design durations;
+  recommendation: measure first from the next real session's ledger,
+  then decide between per-game measured deadlines and a universal
+  extension.
+
+## Milestone K — reliability, accessibility, security hardening (2026-11-05 night, local only, in progress)
+
+- Audit doc `docs/K_HARDENING_AUDIT.md` (reliability, accessibility,
+  security; known limitations incl. no room expiry, no supersede,
+  no real-device verification, non-atomic snapshots).
+- Fixes (uncommitted, awaiting the full-batch gate): replay returns
+  the stored result byte-for-byte (the re-wrap dropped the rejection
+  reason — found by the new test); `App.startGame` in-flight guard
+  against double-tap; `host-claimed` ledger event for attribution.
+- Tests: 2 replay tests + 1 host-claimed test (suite 369/369, 33 files).
+- New drivers, all green standalone: check-restart 15/15,
+  check-double-start 3/3, check-viewports 16/16.
+- Full batch (23 drivers + E2E) running as the K gate; the K commit
+  lands when it returns green. Do not rebuild the web bundle or edit
+  web code while the batch is in flight.
+
+## Overnight assignment — Work Package A: game duration and deadline review (2026-11-05, local only, docs only)
+
+- `docs/GAME_DURATION_AND_DEADLINE_REVIEW.md`: the ten questions
+  answered from code for all eleven games + a per-game table
+  (deadline behavior, design duration, rounds/questions, completion,
+  contradiction, recommended solution, rule-change needed).
+- Question counts verified: trivia 10, math 10, closest 8, whosaid 8,
+  geography 8, year 8, caption 3 rounds, sprint 3 rounds, charades 1
+  rotation, connections 1 grid (4 groups), impostor 3 phases.
+- Tournament warning: budget the 5-minute deadline per round, never
+  the design duration. No timing change.
+
+## Overnight assignment — Work Package B: Closest Wins UX audit + component inventory (2026-11-05, local only, docs only)
+
+- `docs/GAMEPLAY_COMPONENT_INVENTORY.md`: two-button finding (the
+  dial and the field hold independent values; unification into one
+  value + one Submit labelled with the value is possible and planned),
+  page cohesion (kit play + old intro/results; no Cup indicator in
+  game views — ShowIntro/ShowResults migration is a separate visual
+  review), and the reusable-vs-game-specific inventory.
+- The two-button unification is a planned code fix: it waits for the
+  K batch to land and the K commit to complete before the bundle is
+  rebuilt (it changes `NumericGuess`, the check-closest driver, and
+  the F5/e2e `actClosest` helper).
+- Next: Work Package C (realistic game-night simulation), then the
+  two-button fix, then Work Package D (Guess the Year modernization).
