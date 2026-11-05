@@ -89,7 +89,6 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
           dialAriaLabel="Guess dial"
           numberPlaceholder="Your guess"
           submitLabel="Submit guess"
-          dialSubmitLabel={(v) => `Submit dial guess ${v}`}
           hint="Turn the dial, or type a number — both work."
           onSubmit={(v) => intent(game.id, "closest-guess", { value: v })}
         />

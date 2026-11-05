@@ -1,10 +1,11 @@
-// Closest Wins kit extraction (Milestone J.3): the new MchezoClosest
-// panel must preserve every rule — same intents, same abstention,
-// same host skip path, same reconnect — while rendering in the kit.
-// Covers: authorization (guests see no start/setup controls),
-// submission (number + dial guesses), abstention (per-question),
-// reconnection (reload keeps the guessed state), mobile widths
-// (no horizontal overflow at 320/360/390).
+// Closest Wins kit extraction (Milestone J.3) + the Work Package B
+// single-Submit unification: the new MchezoClosest panel must
+// preserve every rule — same intents, same abstention, same host
+// skip path, same reconnect — while rendering in the kit. Covers:
+// authorization (guests see no start/setup controls), submission
+// (one unified value + one Submit button, labelled with the value),
+// abstention (per-question), reconnection (reload keeps the guessed
+// state), mobile widths (no horizontal overflow at 320/360/390).
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-closest.mjs <baseUrl>
 import { chromium } from "playwright";
@@ -99,15 +100,32 @@ try {
   check("abstained player loses the guess controls",
     (await cal.getByTestId("mz-num-dial").count()) === 0);
 
-  // Submission via the dial. Bea guessed and Cal abstained, so the
-  // host's guess completes Q1: the game advances (next question's
-  // prompt, or results if Q1 was last). A rejected guess would leave
-  // Q1's prompt and controls unchanged, so advancement proves acceptance.
+  // The unified value: the field and the dial share one value, and
+  // there is one primary Submit button labelled with it. Bea guessed
+  // and Cal abstained, so the host's guess completes Q1: the game
+  // advances (next question's prompt, or results if Q1 was last). A
+  // rejected guess would leave Q1's prompt and controls unchanged,
+  // so advancement proves acceptance.
   const q1Prompt = await host.locator(".mz-card p b").first().textContent();
+  // Typing in the field moves the dial (the readout and the button follow).
+  await host.getByTestId("mz-num-input").fill("250");
+  check("field value moves the dial",
+    (await host.getByTestId("mz-num-value").textContent()) === "250");
+  check("Submit button is labelled with the value",
+    (await host.getByTestId("mz-num-submit").textContent())?.trim() === "Submit guess 250");
+  // Clearing the field does not lose the value (no invisible 0).
+  await host.getByTestId("mz-num-input").fill("");
+  check("clearing the field keeps the value (no invisible 0)",
+    (await host.getByTestId("mz-num-submit").textContent())?.trim() === "Submit guess 250");
+  check("there is exactly one submit button",
+    (await host.getByTestId("mz-num-dial-submit").count()) === 0);
+  // Moving the dial moves the field (the button follows).
   await host.getByTestId("mz-num-dial").fill("123");
   const dialShown = (await host.getByTestId("mz-num-value").textContent()) === "123";
   check("dial value follows the slider", dialShown);
-  await host.getByTestId("mz-num-dial-submit").click();
+  check("Submit button follows the dial",
+    (await host.getByTestId("mz-num-submit").textContent())?.trim() === "Submit guess 123");
+  await host.getByTestId("mz-num-submit").click();
   let advanced = false;
   for (let i = 0; i < 60 && !advanced; i++) {
     const now = await host.locator(".mz-card p b").first().textContent().catch(() => null);

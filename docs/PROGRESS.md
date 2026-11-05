@@ -590,3 +590,30 @@ Owner direction 2026-11-04 11:57 EST: the application is officially named **Mche
 - New drivers (all green standalone): `scripts/check-restart.mjs` 15/15 (create room → start practice closest → guess → kill the server (SIGTERM) → respawn → projection 200, game still playing, both players disconnected, the guess survived → reconnect 200 → bad token 400; deletes only its own room files), `scripts/check-double-start.mjs` 3/3 (exactly 1 start POST, exactly 1 game in projection — the double-click is one `evaluate` dispatching two bubbling clicks in the same JS task, because sequential locator clicks cannot work once the first click unmounts the button), `scripts/check-viewports.mjs` 16/16 (no horizontal overflow at 320/360/390/768/1024 for the lobby, Trivia play, and Closest play; TV stage at 1280×720 + 1920×1080; TV dashboard at 1920×1080).
 - **Full regression batch (the K gate): 23 drivers + E2E, ALL GREEN, 0 FAIL lines** (log `~/workspace/gates-k-batch.log`, ~43 min, exit 0): mchezo, spectator, tv-spectator, tv-lifecycle, leaderboard, tv-entry, m6, ws-reconnect, abstain, f4 11/11, f5 30/30, mobile OK, contrast OK, multiplayer 12/12, reveal, library, shuffle, studio, reduced-motion, closest, restart, viewports, double-start, e2e. No SIGTRAP in this batch; the runtime stayed healthy throughout.
 - EXACT NEXT TASK: Work Package B fix (unify NumericGuess to one value + one Submit; update check-closest + F5/e2e actClosest; re-run the affected drivers), then the Package C simulation run.
+
+## Work Package F — error-message mapping (design, 2026-11-05; implementation queued after the C run)
+
+- Today the client surfaces server rejections verbatim as `Not accepted: <reason>` (App.setErr) and the kit lobby does not render `err` at all (a start error in the lobby is swallowed — which is why the K double-start guard matters: it prevents the error from being set in the first place). The old shell renders them as `<p className="err">`. Raw codes (`PHASE_CLOSED`, `ALREADY_ANSWERED`) reach the player untranslated.
+- Mapping (reason → what the player should see; grounded in the actual strings in `src/server/room.ts`):
+  - `PHASE_CLOSED` → "That game has closed — the five-minute limit passed. The host can skip it once it is stalled."
+  - `ALREADY_ANSWERED` / `ALREADY_SUBMITTED` / `ALREADY_GUESSED` → "Your answer is already in — it counted once." (never "unknown")
+  - `ALREADY_ABSTAINED` → "You already sat this one out."
+  - `NOT_IN_GAME` → "You are not in this game."
+  - `INVALID_PAYLOAD` / `INVALID_INTENT` → "That did not send properly — try again."
+  - `UNKNOWN_QUESTION` / `UNKNOWN_EVENT` / `UNKNOWN_ACTION` → "That question is no longer open."
+  - `WRONG_ROOM` → "That was for a different room."
+  - "A game is already in progress" → "A game is already running — finish it or wait for the host."
+  - "Game has not timed out yet" → "The game is still open — the host can skip it only after the five-minute limit."
+  - "Only host/cohost can …" (skip / advance / grant / override) → "Only the host or a cohost can do that."
+  - "Display name already taken" → "That name is taken in this room — pick another."
+  - "Need at least 2 connected players" → "Waiting for at least one more player to join."
+  - Reconnect failures ("Unknown player slot" / "Recovery token does not match") → "We could not bring you back into your seat — rejoin with the room code."
+- Implementation plan (not yet done): a small pure map in the kit (`lib/errors.ts`, tested), used by App.setErr; render `err` in the kit lobby (not only the old shell); keep the raw reason in the console/log for debugging, never on screen. No server change (the reasons are already structured).
+- EXACT NEXT TASK (implementation): after the C run — add the map + the lobby render + tests + a driver check (a rejected submission shows the human sentence), commit.
+
+## Work Package B fix — HELD at the e2e gate by a runtime outage (2026-11-05, local only, uncommitted)
+
+- The fix is implemented and verified except for the e2e: `NumericGuess` now holds one shared value with one primary Submit button labelled with that value (the dial sets it, the field edits it, out-of-range input is clamped visibly, the field's text is a draft while typing and resets on blur, the empty-field-submits-0 quirk is gone). `MchezoClosest` drops the `dialSubmitLabel` prop. `check-closest.mjs` is extended to 21 checks (field moves the dial, the button is labelled with the value, clearing the field keeps the value, exactly one submit button, the dial moves the field, the button follows the dial, plus the original 16). Typecheck clean, vitest 33 files / 369 tests, build clean.
+- Verification so far: `check-closest` **21/21 PASSED**, `check-f5` **30/30 PASSED** (both while the runtime was healthy). The e2e reported `E2E FAILED: 4 item(s)`, but its detail was lost to a transient `tee` EPERM on the batch log — and the runtime's Chromium then died at launch with SIGTRAP (see `docs/BROWSER_RUNTIME_INCIDENTS.md` Incident 3, first observed ~03:44 EST, confirmed by a minimal launch test). The 4-item failure is therefore **inconclusive**, not evidence of a regression: the outage may have begun mid-run.
+- Per decision E, the commit is HELD and no further browser runs are attempted while the runtime is unhealthy. The tree is preserved (the fix is uncommitted in the working tree). A companion filesystem degradation in the same window blocks git object writes to this repo intermittently (`unable to write loose object file`, flapping — plain file writes work, a throwaway /tmp repo commits fine, disk 148G free); the docs commit recording Incident 3 has failed five times and retries when the writes stop flapping. Do not run git maintenance while the repo is degraded.
+- EXACT NEXT TASK: when a minimal Chromium launch returns LAUNCH OK, re-run the e2e once with `>` (not `tee`, to avoid the EPERM) and commit the B fix if it is green; if the same items fail on a healthy runtime, investigate them as a real regression before committing.

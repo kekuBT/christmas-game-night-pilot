@@ -61,6 +61,48 @@ for a broken test runtime on the basis of this file.
   server and the same tracked screenshot directory are not isolated
   from each other. See the isolation analysis below.
 
+## Incident 3 — 2026-11-05 ~03:44 EST (Work Package B e2e gate)
+
+- **Symptom:** Chromium died at launch with SIGTRAP (the same
+  signature as Incidents 1 and 2). A minimal launch test
+  (`chromium.launch()` then close) failed with
+  `browserType.launch: Target page, context or browser has been
+  closed`; a foreground `e2e-browser.mjs` run failed at launch the
+  same way (pid 31834, `signal=SIGTRAP`). The dbus errors in the
+  launch log (`Failed to connect to the bus`) are also present on
+  healthy launches and are not the cause.
+- **What it interrupted:** the Work Package B verification batch
+  (`check-closest` 21/21 and `check-f5` 30/30 had already passed
+  while the runtime was healthy — those verdicts stand). Its `e2e`
+  reported `E2E FAILED: 4 item(s)`, but the detailed output was lost
+  to a transient `tee` EPERM on the batch log, and the outage may
+  have begun mid-run — so the 4-item failure is **inconclusive**,
+  not evidence of a regression. The B-fix commit is HELD at the e2e
+  gate (per decision E) until the runtime recovers and the e2e can
+  be re-run cleanly.
+- **Response:** no repeated runs against the broken runtime. The
+  tree is preserved (the B-fix code is uncommitted in the working
+  tree). Non-browser work continues. When a minimal launch returns
+  LAUNCH OK, re-run the e2e once with `>` (not `tee`) and commit
+  the B fix if it is green.
+- **Accompanying filesystem degradation (same window, ~03:44–03:47
+  EST):** git object writes to this repo intermittently fail with
+  `fatal: unable to write loose object file: Operation not
+  permitted`, while plain file writes to the same directory succeed.
+  Diagnostics: `touch` and `mkdir` in `.git/objects/` succeed;
+  `git hash-object -w` of a 5-byte test blob succeeded once, then
+  the same command on the docs failed; `git add` and `git commit`
+  have failed five times (the docs commit is uncommitted, the files
+  are safe on disk). A throwaway repo in `/tmp` commits fine (per
+  the 03:45 cron run), so the failure is specific to this repo's
+  object store, not to git generally, and the disk has 148G free.
+  The EPERM flaps (successes and failures interleave in time), so
+  no single cause is asserted. Do not run `git gc` or other
+  maintenance on the repo while it is degraded. The docs commit
+  retries when the writes stop flapping.
+- **Evidence not collected:** as in Incidents 1 and 2, no resource
+  measurements at the time of the crash.
+
 ## What the runtime looks like when healthy
 
 - Chromium launches from the Playwright cache

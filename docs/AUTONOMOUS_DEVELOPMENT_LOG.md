@@ -370,3 +370,17 @@ The dev log was not updated during J; this entry consolidates it from
   ~43 min, exit 0). No SIGTRAP in this batch.
 - Next: Work Package B fix (NumericGuess unification), then the
   Package C simulation run, then Work Package D (Guess the Year).
+
+## Work Package B fix — held at the e2e gate by a runtime outage (2026-11-05, local only, uncommitted)
+
+- The unification is implemented (one value + one Submit) and
+  verified except for the e2e: check-closest 21/21, check-f5 30/30,
+  typecheck/tests/build clean. The e2e reported 4 failed items, but
+  its detail was lost to a tee EPERM and the runtime's Chromium
+  then died at launch with SIGTRAP (Incident 3 in
+  `docs/BROWSER_RUNTIME_INCIDENTS.md`, confirmed by a minimal
+  launch test). The 4-item failure is inconclusive, not evidence of
+  a regression. The commit is HELD per decision E; no further
+  browser runs while the runtime is unhealthy. Next: when a minimal
+  launch returns LAUNCH OK, re-run the e2e once with `>` (not tee)
+  and commit if green.
