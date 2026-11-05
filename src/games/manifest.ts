@@ -32,7 +32,7 @@ export const GameManifestSchema = z.object({
   id: z.string(),
   title: z.string().min(1),
   description: z.string().min(1),
-  categories: z.array(z.string().min(1)).min(1),
+  categories: z.array(z.string().min(1)).min(1).readonly(),
   minPlayers: z.number().int().min(1),
   maxPlayers: z.number().int().min(1),
   playStyle: PlayStyleSchema,

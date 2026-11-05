@@ -238,3 +238,13 @@ spend, or any GitHub action. Budget: $0 new spending. No runtime AI.
 - Host-only UI: Surprise me + Smart shuffle buttons + result line in the Game setup card; connected-player count; room history as recency; Date.now() seed per click; result cleared on manual select/start. No new server endpoint.
 - Tests: `tests/shuffle.test.ts` (19 tests incl. goldens). Driver `scripts/check-shuffle.mjs` (7 checks). Full suite 31 files / 337 tests; typecheck/lint/build clean. Batch 17 + E2E: all green except leaderboard's 1 transient fail on first run, clean on two consecutive re-runs (23/23) with no code change.
 - Next: Milestone I (Tournament Studio prototype + architecture doc).
+
+## ChatGPT Milestone I architecture review — checkpoint (2026-11-04 night, local only, uncommitted)
+- Hold honored: I uncommitted, J not started. Deliverables: identity review doc (§1), format + lifecycle review doc (§2–§5), 4 differentiation tests (suite 356), one narrow preview correction (player-count line, studio 9/9).
+- Verification: browser recovered after the 22:18 runtime restart (had SIGTRAP'd at 22:13); full batch 18 + E2E green, 0 FAIL; viewports 320/360/390 pass.
+- Next: owner review of the 9-item checkpoint report; no commit, no J until approved.
+
+## Milestone I — Tournament Studio scheduling prototype (2026-11-04 evening, local only)
+- Pure engine + 6 presets reusing the H shuffle engine; host-only preview UI (no start/score/save); architecture doc + decision L46.
+- Tests: 19 tournament tests (incl. 4 review-driven differentiation tests); driver check-studio 9 checks. Full suite 32 files / 356 tests; batch 18 + E2E green; viewports 320/360/390 pass.
+- Approved for local commit 2026-11-04 night with both review docs, tests, and the player-count correction. Next: Milestone J under decisions A–F.

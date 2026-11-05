@@ -40,10 +40,10 @@ export interface ShuffleRequest {
   playerCount: number;
   seed: number;
   count?: number;
-  excludeIds?: string[];
-  incompatibleIds?: string[];
+  excludeIds?: readonly string[];
+  incompatibleIds?: readonly string[];
   playStyle?: "solo" | "team";
-  recentIds?: string[];
+  recentIds?: readonly string[];
   manifests?: readonly GameManifest[];
 }
 
@@ -75,7 +75,7 @@ function isInt(n: unknown): n is number {
   return typeof n === "number" && Number.isInteger(n);
 }
 
-function validateRequest(r: ShuffleRequest): { count: number; exclude: Set<string>; incompatible: Set<string>; recent: string[] } {
+function validateRequest(r: ShuffleRequest): { count: number; exclude: Set<string>; incompatible: Set<string>; recent: readonly string[] } {
   if (r.mode !== "random" && r.mode !== "smart" && r.mode !== "tournament") {
     throw new Error(`shuffle: unknown mode ${JSON.stringify(r.mode)}`);
   }

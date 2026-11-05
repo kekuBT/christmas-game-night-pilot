@@ -14,6 +14,7 @@ import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
+import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
 import { GAME_MANIFESTS } from "../../../src/games/manifest.js";
 import { shuffle } from "../../../src/games/shuffle.js";
 import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mchezo/adapters.js";
@@ -66,7 +67,7 @@ export function App() {
   const [specToken, setSpecToken] = useState<string | null>(sessionStorage.getItem("cgn_spec_token"));
   const [proj, setProj] = useState<Projection | null>(null);
   const [games, setGames] = useState<RegistryGame[]>([]);
-  const [view, setView] = useState<"lobby" | "championship" | "tv" | "memory" | "library">("lobby");
+  const [view, setView] = useState<"lobby" | "championship" | "tv" | "memory" | "library" | "studio">("lobby");
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [book, setBook] = useState<MemoryEntry[]>([]);
@@ -429,6 +430,7 @@ export function App() {
         <button type="button" className="mz-chip-btn" onClick={() => setView("tv")}>TV stage</button>
         <button type="button" className="mz-chip-btn" onClick={() => setView("memory")}>Memory Book</button>
         <button type="button" className="mz-chip-btn" data-testid="browse-games" onClick={() => setView("library")}>Browse games</button>
+        {(me?.isHost || me?.isCohost) && <button type="button" className="mz-chip-btn" data-testid="studio-button" onClick={() => setView("studio")}>Studio (preview)</button>}
         <button type="button" className="mz-chip-btn" onClick={reconnect}>Reconnect</button>
       </div>
       <SettingsBar sound={settings.sound} anim={settings.anim} onToggleSound={settings.toggleSound} onSetAnim={settings.setAnimSetting} />
@@ -525,6 +527,18 @@ export function App() {
           onSelect={(id) => { setUpNextId(id); setView("lobby"); }}
           onBack={() => setView("lobby")}
         />
+      </MchezoProvider>
+    );
+  }
+  if (view === "studio") {
+    // Tournament Studio preview (Milestone I): host-only, schedule-only.
+    // No game is started, scored, or saved from this view.
+    const connectedCount = players.filter((p) => p.connected).length;
+    const studioPlayerCount = connectedCount > 0 ? connectedCount : players.length;
+    const studioRecent = (proj?.games ?? []).map((g) => g.gameId).reverse();
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoStudio playerCount={studioPlayerCount} recentIds={studioRecent} onBack={() => setView("lobby")} />
       </MchezoProvider>
     );
   }
