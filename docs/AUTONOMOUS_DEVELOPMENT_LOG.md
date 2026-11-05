@@ -316,3 +316,32 @@ The dev log was not updated during J; this entry consolidates it from
   the F5/e2e `actClosest` helper).
 - Next: Work Package C (realistic game-night simulation), then the
   two-button fix, then Work Package D (Guess the Year modernization).
+
+## Overnight assignment — Work Package H: next architecture decisions (2026-11-05, local only, docs only)
+
+- `docs/NEXT_ARCHITECTURE_DECISIONS.md`: decision-ready synthesis of
+  the recovery/persistence contracts, the identity and tournament
+  reviews, and the K audit. Covers what persists and what does not,
+  slot recovery without accounts, why person identity is separate,
+  what atomic storage requires, how Cup results are preserved,
+  what persistent tournament membership needs, the seven decisions
+  requiring explicit approval, the independently implementable
+  prerequisites, the staged sequence (atomic snapshots → slot
+  recovery → display-only linking → events/tournaments → accounts,
+  deferred), the risks, and the six future modes. Nothing in it is
+  authorized for implementation.
+
+## Overnight assignment — Work Package C: simulation driver written, not yet run (2026-11-05)
+
+- `scripts/check-game-night.mjs`: a full evening — 6-player room
+  (host + cohost + 4 players + spectator + a 7th who disconnects) x
+  Trivia / Closest / Math, plus a 10-player max room x Trivia.
+  ~25 checks (permissions, leakage, ties, reconnect, score agreement
+  phone/TV/server, championship standings, max capacity) + 4
+  screenshots. Written and syntax-checked, but NOT run and NOT
+  committed: the K batch owns the browser and the server, and a
+  second driver would contend for both. It runs after the batch lands
+  and the K commit completes.
+- Next: run it, fix low-risk defects within the approved rules, write
+  `docs/GAME_NIGHT_END_TO_END_REVIEW.md`, commit; then the
+  two-button fix, then Work Package D (Guess the Year).
