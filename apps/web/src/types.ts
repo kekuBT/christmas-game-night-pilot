@@ -4,7 +4,7 @@
 // per game in App.tsx; the top-level contract — players, games, standings,
 // me/myGames — is fully typed and checked by apps/web/tsconfig.json.
 
-export type GameStatus = "lobby" | "playing" | "revealed" | "finished";
+export type GameStatus = "playing" | "finished";
 
 export interface PublicPlayer {
   id: string;

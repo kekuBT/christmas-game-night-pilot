@@ -15,6 +15,7 @@ import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./comp
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
 import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
+import { resolveReducedMotion } from "./ui/mchezo/lib/motion.js";
 import { GAME_MANIFESTS } from "../../../src/games/manifest.js";
 import { shuffle } from "../../../src/games/shuffle.js";
 import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mchezo/adapters.js";
@@ -352,7 +353,7 @@ export function App() {
   // ---- Mchezo integrated views (Phase 2) ----
   // Everyday theme throughout: Mchezo is year-round; the Christmas Family
   // Cup is a seasonal event shown as data (below), not as the platform skin.
-  const mzReducedMotion = settings.anim === "full" ? undefined : true;
+  const mzReducedMotion = resolveReducedMotion(settings.anim, typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? true : undefined;
   const mzPlayers = toMzPlayers(players);
   const mzReactions = toMzReactions(proj?.reactions, players);
   const mzReact = async (r: ReactionId) => {

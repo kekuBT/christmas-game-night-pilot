@@ -57,6 +57,3 @@ input, select, textarea { background: #0E2620; color: var(--cream); width: 100%;
 /* Animation intensity + reduced motion: nothing important depends on animation. */
 .anim-reduced * { animation-duration: 150ms !important; transition-duration: 150ms !important; }
 .anim-off * { animation: none !important; transition: none !important; }
-@media (prefers-reduced-motion: reduce) {
-  * { animation-duration: 150ms !important; transition-duration: 150ms !important; }
-}

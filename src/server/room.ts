@@ -112,7 +112,7 @@ export interface GameInstance {
   id: string;
   gameId: string;
   official: boolean;
-  status: "lobby" | "playing" | "revealed" | "finished";
+  status: "playing" | "finished";
   players: string[]; // player ids
   timedOut?: boolean; // host-skipped after deadline; never counts toward official standings
   day?: number; // championship day the game was started on (default 1)
@@ -973,7 +973,7 @@ export class RoomEngine {
       // the room can see HOW it answered, never WHO answered what.
       answerCounts: g.status === "finished" && g.gameId === "trivia" ? this.quizAnswerCounts(g) : undefined,
       questionPoints: g.status === "finished" && g.gameId === "trivia" ? this.quizQuestionPoints(g) : undefined,
-      rawScores: g.status === "finished" || g.status === "revealed" ? g.rawScores : undefined,
+      rawScores: g.status === "finished" ? g.rawScores : undefined,
     }));
     const base: Record<string, unknown> = {
       roomId: this.id,
@@ -1044,7 +1044,7 @@ export class RoomEngine {
             : undefined,
         // Finished scores are public (same policy as the public games list);
         // without this, ShowResults and the finished panel rendered empty.
-        rawScores: g.status === "finished" || g.status === "revealed" ? g.rawScores : undefined,
+        rawScores: g.status === "finished" ? g.rawScores : undefined,
       }));
       return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost }, myGames };
     }
