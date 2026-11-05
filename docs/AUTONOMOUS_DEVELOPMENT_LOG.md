@@ -384,3 +384,27 @@ The dev log was not updated during J; this entry consolidates it from
   browser runs while the runtime is unhealthy. Next: when a minimal
   launch returns LAUNCH OK, re-run the e2e once with `>` (not tee)
   and commit if green.
+
+## Work Package C — game-night simulation (COMPLETE, 2026-11-05, local only)
+
+- `scripts/check-game-night.mjs` (+ npm script `check-game-night`):
+  a six-player evening (host + cohost via the UI + four players +
+  a spectator TV + a late joiner who disconnects mid-Closest)
+  through Trivia, Closest Wins, and Math Mayhem, plus a full
+  ten-player room. Review doc
+  `docs/GAME_NIGHT_END_TO_END_REVIEW.md`; screenshots 14–17
+  (test-fixture data).
+- Four runs to green. Runs 1–2 stopped at the late joiner's join
+  (the driver waited only for the lobby heading; a joiner arriving
+  after a finished game lands on the Trivia reveal walk). Run 3
+  reached 16 of 17 checks: the old TV dashboard has no Away marker
+  (the check was corrected to assert the player is listed; the gap
+  is recorded), and only the host returned to the lobby, so the
+  cohost had no chooser (now every connected player returns
+  between games). Run 4: **GAME NIGHT ALL PASSED (28 checks)**,
+  exit 0, ~4 min (log `~/workspace/gates-c-game-night4.log`).
+- Correctness defects: none. UX gaps recorded: a late joiner lands
+  on a finished game's results with no context; the old TV
+  dashboard has no Away marker; a failed join shows no error on the
+  landing. All three are Package F / visual-review items.
+- Next: Work Package D (Guess the Year modernization).
