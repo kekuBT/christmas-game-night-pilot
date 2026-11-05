@@ -46,7 +46,6 @@ try {
   // without the guard both fire startGame; with it the second is ignored.
   // (Two sequential locator clicks cannot do this: the first click starts
   // the game and unmounts the button, so the second waits on a gone element.)
-  const startBtn = host.getByTestId("start-official-trivia");
   await host.getByRole("button", { name: /^Start Trivia Showdown/ }).waitFor({ timeout: 15000 });
   await host.evaluate(() => {
     const b = document.querySelector('[data-testid="start-official-trivia"]');
