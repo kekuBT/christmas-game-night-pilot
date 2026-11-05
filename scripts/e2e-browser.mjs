@@ -130,7 +130,9 @@ async function actYear(page) {
 // One action pass for a single player page, for the game currently playing.
 // Returns true if it did anything (or the panel is already finished).
 async function act(page, gameId, name) {
-  if (gameId === "trivia") return await actTrivia(page);
+  // Geography is a kit panel too (Work Package E) — same play shape as
+  // Trivia, so the shared kit-question helper covers it.
+  if (gameId === "trivia" || gameId === "geography") return await actTrivia(page);
   if (gameId === "closest-wins") return await actClosest(page);
   if (gameId === "guess-the-year") return await actYear(page);
   const panel = page.locator('[data-testid="game-panel"]');
@@ -276,8 +278,10 @@ async function runBrowser(browserName, games) {
         // first. Dismiss it on every page (or wait for its auto-advance)
         // before waiting for gameplay; otherwise the wait below times out.
         for (const { page } of pages) {
-          if (gameId === "trivia") {
+          if (gameId === "trivia" || gameId === "geography") {
             // Mchezo Trivia intro is an 8s countdown with no dismiss button;
+            // Geography is a kit panel too (Work Package E) — the same
+            // QuestionScreen renders .mz-question, so this wait covers it.
             // the question screen appears when it ends.
             await page.locator(".mz-question").first().waitFor({ timeout: 30000 });
             continue;

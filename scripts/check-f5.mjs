@@ -63,7 +63,15 @@ async function panelText(page) {
   catch { return ""; }
 }
 async function panelFinished(page, gameId) {
-  if (gameId === "trivia") {
+  // Geography's results are the old ShowResults screen (Work Package E),
+  // which carries the same "Back to lobby" button as Trivia's results —
+  // and Geography has no game-panel, so the panelText lookup below would
+  // burn its full 2s timeout on every check. Without this fast path the
+  // loop costs ~2.5s per page per iteration and the 8-question × 2-action
+  // geography game cannot finish inside the 180s budget (it needs ~16
+  // iterations); with it each check costs 0.5s and the game finishes in
+  // ~90s. The button appears only on the results screen, never in play.
+  if (gameId === "trivia" || gameId === "geography") {
     try { return await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }); } catch { return false; }
   }
   // M6 Show Mode: a finished game shows the results screen instead of the
@@ -128,7 +136,9 @@ async function actYear(page) {
 // Mirrors the driver in scripts/e2e-browser.mjs; returns true if it did
 // anything (or the panel is already finished).
 async function act(page, gameId, name) {
-  if (gameId === "trivia") {
+  // Geography renders in the Mchezo kit too (Work Package E) — same play
+  // shape as Trivia (QuestionScreen slabs + locked view + Next question).
+  if (gameId === "trivia" || gameId === "geography") {
     if (await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500)) return true;
     const slab = page.locator(".mz-slab:not([disabled])").first();
     if (await isVisible(slab, 1000)) { await slab.click(); await sleep(300); return true; }
@@ -285,7 +295,9 @@ try {
       await host.getByTestId(`select-game-${gameId}`).click();
       await host.locator(`[data-testid="start-official-${gameId}"]`).click();
       for (const { page } of pages) {
-        if (gameId === "trivia") await page.locator(".mz-question").waitFor({ timeout: 30000 });
+        // Geography is a kit panel too (Work Package E) — the same
+        // QuestionScreen renders .mz-question, so the trivia wait covers it.
+        if (gameId === "trivia" || gameId === "geography") await page.locator(".mz-question").waitFor({ timeout: 30000 });
         // J.3: Closest renders in the Mchezo kit, not the old GamePanel, so
         // there is no "Now playing:" heading — the guess dial is the signal
         // (the 8s intro auto-advances inside the 20s wait).

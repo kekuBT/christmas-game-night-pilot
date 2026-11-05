@@ -13,6 +13,7 @@ import { LandingScreen, LobbyScreen, MchezoProvider, themes } from "./ui/mchezo/
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
+import { MchezoGeography } from "./components/mchezo/MchezoGeography.js";
 import { MchezoYear } from "./components/mchezo/MchezoYear.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
@@ -394,6 +395,7 @@ export function App() {
   const triviaPlaying = playingGame?.gameId === "trivia";
   const closestPlaying = playingGame?.gameId === "closest-wins";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
+  const geographyPlaying = playingGame?.gameId === "geography";
   const triviaFinished = latestFinished?.gameId === "trivia";
   const lobbyExtra = (
     <div>
@@ -544,6 +546,28 @@ export function App() {
           roomId={roomId ?? ""}
           isHostOrCohost={!!(me?.isHost || me?.isCohost)}
           title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && geographyPlaying && playingGame) {
+    // Geography Challenge (Work Package E): kit panel instead of the
+    // old shell + GamePanel, mirroring the Trivia play branch. No TV
+    // stage and no staged reveal (the finished projection carries no
+    // correctIndex for Geography), so intro and finished results still
+    // use the shared old views (ShowIntro, ShowResults).
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoGeography
+          game={playingGame}
+          publicGame={publicPlaying}
+          players={players}
+          playerId={playerId ?? ""}
+          gamesTitle={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          intent={intent}
+          post={post}
+          roomId={roomId ?? ""}
+          isHostOrCohost={!!(me?.isHost || me?.isCohost)}
         />
       </MchezoProvider>
     );
