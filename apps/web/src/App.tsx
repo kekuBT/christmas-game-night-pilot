@@ -23,6 +23,7 @@ import { GAME_MANIFESTS } from "../../../src/games/manifest.js";
 import { shuffle } from "../../../src/games/shuffle.js";
 import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mchezo/adapters.js";
 import { previousGameScores } from "./ui/mchezo/lib/standings.js";
+import { humanError } from "./ui/mchezo/lib/errors.js";
 import QRCode from "qrcode";
 
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
@@ -74,6 +75,16 @@ export function App() {
   const [view, setView] = useState<"lobby" | "championship" | "tv" | "memory" | "library" | "studio">("lobby");
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
+  // Work Package F: server rejections arrive as terse codes or terse
+  // server sentences. Show the human mapping on screen and keep the raw
+  // text in the console for debugging — it never reaches the player.
+  function reportError(raw: string) {
+    console.warn("[mchezo] error:", raw);
+    setErr(humanError(raw));
+  }
+  function fail(e: unknown) {
+    reportError(e instanceof Error ? e.message : "Request failed");
+  }
   const [book, setBook] = useState<MemoryEntry[]>([]);
   const [ledger, setLedger] = useState<LedgerEvent[]>([]);
   const [qrUrl, setQrUrl] = useState("");
@@ -169,20 +180,20 @@ export function App() {
       const r = await post<JoinResponse>("/rooms", { name: "Christmas Game Night" });
       const j = await post<JoinResponse>(`/rooms/${r.roomId}/join`, { displayName: name || "Player 1", asHost: true, hostClaimToken: r.hostClaimToken });
       await saveSession({ ...j, roomId: r.roomId }); setMsg(`Room created. Code: ${r.joinCode}`);
-    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
+    } catch (e) { fail(e); }
   }
   async function joinRoom() {
     setErr(""); try {
       const j = await post<JoinResponse>("/rooms/join-by-code", { joinCode: code, displayName: name || "Player" });
       await saveSession(j); setMsg("Joined room.");
-    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
+    } catch (e) { fail(e); }
   }
   async function spectate() {
     setErr(""); try {
       const s = await post<SpectateResponse>("/rooms/spectate-by-code", { joinCode: code });
       sessionStorage.setItem("cgn_spec_roomId", s.roomId); sessionStorage.setItem("cgn_spec_token", s.spectatorToken);
       setSpecRoomId(s.roomId); setSpecToken(s.spectatorToken); setMsg("Watching — no seat taken.");
-    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
+    } catch (e) { fail(e); }
   }
   function stopWatching() {
     sessionStorage.removeItem("cgn_spec_roomId"); sessionStorage.removeItem("cgn_spec_token");
@@ -236,7 +247,7 @@ export function App() {
     setErr(""); try {
       if (!roomId || !playerId || !token) return;
       await post<Record<string, unknown>>(`/rooms/${roomId}/reconnect`, { playerId, recoveryToken: token }); await refresh(); setMsg("Reconnected to your player slot.");
-    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
+    } catch (e) { fail(e); }
   }
   const startingRef = useRef(false);
   async function startGame(gameId: string, official: boolean) {
@@ -247,17 +258,17 @@ export function App() {
     // authority, this only stops the redundant request.
     if (startingRef.current) return;
     startingRef.current = true;
-    setErr(""); try { await post<Record<string, unknown>>(`/rooms/${roomId}/games`, { gameId, official }); await refresh(); setShuffleResult(null); setView("lobby"); } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); } finally { startingRef.current = false; }
+    setErr(""); try { await post<Record<string, unknown>>(`/rooms/${roomId}/games`, { gameId, official }); await refresh(); setShuffleResult(null); setView("lobby"); } catch (e) { fail(e); } finally { startingRef.current = false; }
   }
   async function intent(gameInstanceId: string, action: string, payload: Record<string, unknown>) {
     setErr(""); try {
       const r = await post<{ accepted: boolean; reason?: string }>(`/rooms/${roomId}/intents`, { intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId, gameInstanceId, action, payload } });
-      if (!r.accepted) setErr(`Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
+      if (!r.accepted) reportError(`Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
       await refresh();
-    } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
+    } catch (e) { fail(e); }
   }
   async function loadMemory() {
-    try { setBook(await get<MemoryEntry[]>(`/rooms/${roomId}/memory`)); setLedger(await get<LedgerEvent[]>(`/rooms/${roomId}/ledger`)); } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
+    try { setBook(await get<MemoryEntry[]>(`/rooms/${roomId}/memory`)); setLedger(await get<LedgerEvent[]>(`/rooms/${roomId}/ledger`)); } catch (e) { fail(e); }
   }
   useEffect(() => { if (view === "memory" && roomId) loadMemory(); }, [view, roomId]);
   useEffect(() => {
@@ -281,7 +292,7 @@ export function App() {
           onSpectate={spectate}
           extra={
             <div style={{ padding: "0 16px 16px" }}>
-              {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
+              {err && <p className="err" data-testid="mz-error" role="alert">{err}</p>}{msg && <p className="ok">{msg}</p>}
               <p className="mz-foot">No account needed — just the 6-character code from the host.</p>
             </div>
           }
@@ -449,7 +460,7 @@ export function App() {
         <button type="button" className="mz-chip-btn" onClick={reconnect}>Reconnect</button>
       </div>
       <SettingsBar sound={settings.sound} anim={settings.anim} onToggleSound={settings.toggleSound} onSetAnim={settings.setAnimSetting} />
-      {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
+      {msg && <p className="ok">{msg}</p>}
     </div>
   );
 
@@ -478,6 +489,7 @@ export function App() {
           startTestId={upNext ? `start-${gameMode}-${upNext.id}` : undefined}
           minPlayers={upNext?.minPlayers ?? 2}
           capacity={10}
+          error={err || undefined}
           extra={lobbyExtra}
         />
       </MchezoProvider>

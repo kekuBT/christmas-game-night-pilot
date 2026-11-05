@@ -256,6 +256,14 @@ try {
     checkTvMatches("movement: TV leaderboard matches server", tvs, expected);
   }
   // Rank changes: alternate Ada/Bea options across games until the order flips.
+  // Seeded (seed 1, like games 2–4 above): with random seeds the first
+  // game ties ~1-in-5 — option 0 and option 1 happen to score equally —
+  // and a tied first game poisoned this loop: orderA locked to "tied"
+  // and the orderB condition (which requires orderA !== "tied") could
+  // never be satisfied, so the check failed through no app fault. Seed 1
+  // splits option 0/1 as 600/360, so attempt 1 is Ada>Bea and attempt 2
+  // is Bea>Ada — a deterministic flip. The loop also no longer locks
+  // orderA on a tie, so a tied game is skipped rather than poisoning it.
   let orderA = null, orderB = null, attempts = 0;
   while (attempts < 6 && !(orderA && orderB && orderA !== orderB)) {
     attempts++;
@@ -266,7 +274,7 @@ try {
       { page: P.Cal, kind: "abstain" },
       { page: P.Dee, kind: "abstain" },
       { page: tv, kind: "abstain" },
-    ]);
+    ], 1);
     const order = (() => {
       const a = expected.find((r) => r.name === "Ada");
       const b = expected.find((r) => r.name === "Bea");
@@ -275,8 +283,8 @@ try {
       if (b.rank < a.rank) return "Bea>Ada";
       return "tied";
     })();
-    if (!orderA) orderA = order;
-    else if (order !== orderA && order !== "tied" && orderA !== "tied" && !orderB) orderB = order;
+    if (!orderA && order !== "tied") orderA = order;
+    else if (orderA && order !== orderA && order !== "tied" && !orderB) orderB = order;
     if (orderA && orderB) break;
   }
   check("rank changes: Ada/Bea order flips across games", !!orderA && !!orderB && orderA !== orderB, `${orderA} -> ${orderB} (${attempts} games)`);

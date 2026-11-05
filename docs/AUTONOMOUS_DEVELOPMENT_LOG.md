@@ -489,3 +489,44 @@ The dev log was not updated during J; this entry consolidates it from
   369/369, build clean. Mobile + game-night screenshots restored
   before staging.
 - Next: commit E, then Work Package F (error mapping).
+
+## Work Package F — error-message mapping (COMPLETE, 2026-11-05, local only)
+
+- `lib/errors.ts` (pure, web-safe) + `tests/errors.test.ts` (7 tests;
+  376 total). Every entry grounded in an actual server string
+  (room.ts / http.ts / games/*.ts). `humanError` strips "Not accepted: ",
+  maps the intent codes and server sentences, covers the
+  "Only host/cohost can …" family and the "Need at least N connected
+  players" template by prefix/shape, sends unmapped codes to a generic
+  sentence, and passes already-human sentences through unchanged.
+- App.tsx: `reportError` (console.warn the raw reason, set the mapped
+  sentence) + `fail(e)`; all seven raw-message catch sites now use
+  `fail(e)`; the intent rejection uses `reportError`. No server change.
+- Lobby render: `err` used to sit at the very bottom of `lobbyExtra`,
+  below the fold on a phone — it is now a dedicated `error` prop on
+  LobbyScreen, rendered at the top under "You're in" (testid
+  `mz-error`, role="alert"); the duplicate in `lobbyExtra` removed.
+  The landing's error paragraph gained the same testid/role.
+- `check-errors`: **ERRORS ALL PASSED (5 checks)**, exit 0 (log
+  `~/workspace/gates-f-check-errors.log`). Live: duplicate name shows
+  the human sentence on the landing; bad-token reconnect shows the
+  human seat sentence at the top of the lobby; restoring the token
+  clears it. Driver lesson: reconnect() sends the token from React
+  state (read at mount), so the driver reloads after corrupting /
+  restoring sessionStorage.
+- Full regression batch (the F gate) running: 27 drivers + E2E.
+- Next: commit F when the batch lands green, then Package G remaining
+  work.
+- Full regression batch (the F gate): batch 1 was killed by a runtime
+  restart after 5 drivers (server restarted, Chromium verified OK);
+  batch 2 landed 26/27 + E2E 12/12. The one failure was
+  check-leaderboard's rank-changes check — a driver bug, not an app
+  regression: a tied first game (~1-in-5 with random seeds) poisoned
+  the loop, so orderB could never be set. Fixed driver-only in the
+  pairs game's pattern: the rank-changes games now use seed 1 and
+  orderA no longer locks on a tie. Leaderboard re-run: ALL PASSED.
+  check-tv-spectator also needed its assertion updated to the human
+  name-taken sentence (the F behavior working as intended); re-run
+  ALL PASSED. Typecheck clean, vitest 376/376, build clean, lint
+  clean. Mobile + game-night screenshots restored before staging.
+- Next: commit F, then the optional §11 Math Mayhem modernization.

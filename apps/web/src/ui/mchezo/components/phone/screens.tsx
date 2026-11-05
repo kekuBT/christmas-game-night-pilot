@@ -114,6 +114,11 @@ export interface LobbyScreenProps {
       navigation live here — our lobby has more than the handoff's single
       up-next game, and those controls must stay reachable. */
   extra?: ReactNode;
+  /** Work Package F: a server rejection mapped to a human sentence
+      (App passes the already-mapped `err`). Rendered at the top of the
+      lobby — it used to sit at the very bottom of `extra`, below the
+      fold on a phone, so a start error was effectively swallowed. */
+  error?: string;
 }
 
 export function LobbyScreen(p: LobbyScreenProps) {
@@ -132,6 +137,7 @@ export function LobbyScreen(p: LobbyScreenProps) {
         {p.session.championship ? <EventBadge championship={p.session.championship} compact /> : <span className="mz-muted mz-small">{p.session.sessionLabel}</span>}
       </header>
       <h1 className="mz-h1">You’re in, {you?.name ?? 'friend'}.</h1>
+      {p.error ? <p className="err" data-testid="mz-error" role="alert">{p.error}</p> : null}
       <p className="mz-sub" role="status" aria-live="polite">
         {arrival ? <span className="mz-sub__new">{arrival} joined</span> : null}
         {arrival ? ' · ' : ''}{connected} here{away ? ` · ${away} reconnecting` : ''}{arrival ? '' : p.players.length < (p.capacity ?? 10) ? ' · room for more' : ' · room is full'}

@@ -153,7 +153,9 @@ try {
   await sleep(1500);
   const bodyText = await tv2.locator("body").textContent();
   check("rejoining as TV is refused while the old slot exists",
-    /already taken/i.test(bodyText ?? ""), (bodyText ?? "").slice(0, 80));
+    // Work Package F: the refusal now reads as the human sentence, not
+    // the raw server text ("Display name already taken").
+    /That name is taken in this room/i.test(bodyText ?? ""), (bodyText ?? "").slice(0, 80));
   proj = await tvProj(roomId);
   check("failed rejoin added no participant", proj.players.length === 4);
   await tv2.getByPlaceholder("e.g. Auntie June").fill("TV2");
