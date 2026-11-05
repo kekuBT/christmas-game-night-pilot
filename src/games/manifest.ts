@@ -206,7 +206,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     intensity: "unknown",
     intensityNote: UNKNOWN_INTENSITY,
     scoring: { type: "per-player-points", teamDerived: false },
-    features: { practice: true, official: true, abstention: "whole-game" },
+    features: { practice: true, official: true, abstention: "per-question" },
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
     details: "Numeric estimates scored per question; abstention is per-question (0 for that question, later questions still playable).",
   },

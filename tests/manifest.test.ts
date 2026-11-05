@@ -42,6 +42,29 @@ describe("the shipped manifests", () => {
       expect(m.features.official).toBe(true);
     }
   });
+
+  it("abstention matches the engine per game (decision L33)", () => {
+    // Regression: closest-wins shipped as "whole-game" while its details,
+    // the engine (abstainClosest, per-question state), and L33 all say
+    // per-question — a player who sits out one question can still play
+    // the later ones. Pin every game's value so a typo cannot hide again.
+    const expected: Record<string, string> = {
+      impostor: "per-phase",
+      "caption-clash": "per-round",
+      trivia: "whole-game",
+      "word-connections": "whole-game",
+      "who-said-that": "whole-game",
+      "guess-the-year": "whole-game",
+      "closest-wins": "per-question",
+      "category-sprint": "whole-game",
+      charades: "none",
+      geography: "whole-game",
+      "math-mayhem": "whole-game",
+    };
+    for (const m of GAME_MANIFESTS) {
+      expect(m.features.abstention).toBe(expected[m.id]);
+    }
+  });
 });
 
 describe("validateManifest shape errors", () => {

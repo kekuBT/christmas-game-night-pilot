@@ -41,7 +41,7 @@ validation). Tests: `tests/manifest.test.ts` (22 tests).
 | Word Connections | 1–10 | 8 | solo | tile-selection | dashboard | whole-game |
 | Who Said That? | 4–10 | 10 | solo | choice | dashboard | whole-game |
 | Guess the Year | 2–10 | 8 | solo | numeric | dashboard | whole-game |
-| Closest Wins | 2–10 | 8 | solo | numeric | dashboard | whole-game |
+| Closest Wins | 2–10 | 8 | solo | numeric | dashboard | per-question |
 | Category Sprint | 4–10 | 10 | solo | text | dashboard | whole-game |
 | Charades | 4–10 | 15 | **team** | performance, choice | dashboard | **none** |
 | Geography Challenge | 2–10 | 12 | solo | choice | dashboard | whole-game |
