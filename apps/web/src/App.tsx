@@ -15,6 +15,7 @@ import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./comp
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
 import { GAME_MANIFESTS } from "../../../src/games/manifest.js";
+import { shuffle } from "../../../src/games/shuffle.js";
 import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mchezo/adapters.js";
 import { previousGameScores } from "./ui/mchezo/lib/standings.js";
 import QRCode from "qrcode";
@@ -84,6 +85,7 @@ export function App() {
   // and one compact chooser instead of per-game official/practice buttons.
   const [gameMode, setGameMode] = useState<"official" | "practice">("official");
   const [chooserOpen, setChooserOpen] = useState(false);
+  const [shuffleResult, setShuffleResult] = useState<string | null>(null);
   const [numInput, setNumInput] = useState("");
   const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
@@ -232,7 +234,7 @@ export function App() {
     } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
   async function startGame(gameId: string, official: boolean) {
-    setErr(""); try { await post<Record<string, unknown>>(`/rooms/${roomId}/games`, { gameId, official }); await refresh(); setView("lobby"); } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
+    setErr(""); try { await post<Record<string, unknown>>(`/rooms/${roomId}/games`, { gameId, official }); await refresh(); setShuffleResult(null); setView("lobby"); } catch (e) { setErr(e instanceof Error ? e.message : "Request failed"); }
   }
   async function intent(gameInstanceId: string, action: string, payload: Record<string, unknown>) {
     setErr(""); try {
@@ -359,6 +361,24 @@ export function App() {
     try { await post(`/rooms/${roomId}/nudge`, { targetId }); await refresh(); } catch { /* non-fatal */ }
   };
   const upNext = games.find((g) => g.id === upNextId) ?? games[0];
+  // Smart Shuffle UI (Milestone H): pure engine call, client-side. The
+  // up-next game is client state, so no server round-trip is needed: the
+  // engine reads manifests, the connected-player count, and the room's
+  // game history from the projection. Seeded from Date.now() for a fresh
+  // draw per click; the engine itself is deterministic per seed.
+  const runShuffle = (mode: "random" | "smart") => {
+    const connectedCount = players.filter((p) => p.connected).length;
+    const playerCount = connectedCount > 0 ? connectedCount : players.length;
+    const recentIds = (proj?.games ?? []).map((g) => g.gameId).reverse();
+    const r = shuffle({ mode, playerCount, seed: Date.now(), recentIds, manifests: GAME_MANIFESTS });
+    if (!r.ok) {
+      setShuffleResult(`No games fit ${playerCount} players.`);
+      return;
+    }
+    const pick = r.picks[0]!;
+    setUpNextId(pick.gameId);
+    setShuffleResult(`${pick.title}: ${pick.explanation}`);
+  };
   const triviaPlaying = playingGame?.gameId === "trivia";
   const triviaFinished = latestFinished?.gameId === "trivia";
   const lobbyExtra = (
@@ -371,11 +391,14 @@ export function App() {
             <button type="button" className="mz-chip-btn" data-testid="mode-official" aria-pressed={gameMode === "official"} onClick={() => setGameMode("official")}>Official</button>
             <button type="button" className="mz-chip-btn" data-testid="mode-practice" aria-pressed={gameMode === "practice"} onClick={() => setGameMode("practice")}>Practice</button>
             <button type="button" className="mz-chip-btn" data-testid="choose-game" aria-expanded={chooserOpen} onClick={() => setChooserOpen((o) => !o)}>{chooserOpen ? "Close game list" : "Choose a different game"}</button>
+            <button type="button" className="mz-chip-btn" data-testid="surprise-me" onClick={() => runShuffle("random")}>Surprise me</button>
+            <button type="button" className="mz-chip-btn" data-testid="smart-shuffle" onClick={() => runShuffle("smart")}>Smart shuffle</button>
           </div>
+          {shuffleResult && <p className="mz-foot" style={{ margin: "8px 0 0" }} data-testid="shuffle-result">{shuffleResult}</p>}
           {chooserOpen && (
             <div style={{ marginTop: 8 }}>
               {games.map((g) => (
-                <button key={g.id} type="button" className="mz-chip-btn" data-testid={`select-game-${g.id}`} aria-current={g.id === upNext?.id ? "true" : undefined} onClick={() => { setUpNextId(g.id); setChooserOpen(false); }} style={{ display: "block", width: "100%", textAlign: "left", marginBottom: 6 }}>
+                <button key={g.id} type="button" className="mz-chip-btn" data-testid={`select-game-${g.id}`} aria-current={g.id === upNext?.id ? "true" : undefined} onClick={() => { setUpNextId(g.id); setChooserOpen(false); setShuffleResult(null); }} style={{ display: "block", width: "100%", textAlign: "left", marginBottom: 6 }}>
                   {g.title} <span className="mz-muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min</span>{g.id === upNext?.id ? " · Up next" : ""}
                 </button>
               ))}

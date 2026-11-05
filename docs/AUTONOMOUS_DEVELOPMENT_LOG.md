@@ -232,3 +232,9 @@ spend, or any GitHub action. Budget: $0 new spending. No runtime AI.
 - Tests: `tests/library.test.ts` (14 tests). Driver `scripts/check-library.mjs` (17 checks). Full suite 30 files / 318 tests; typecheck/lint/build clean. Full batch 16 drivers + E2E green (mobile 32/32, contrast 64/64, E2E 12/12; log `~/workspace/gates-g-batch.log`).
 - Recovery: runtime restart killed the 3461 server + first batch mid-run; server restarted + verified, batch re-run in full and tee'd to the log. Mobile screenshots restored before staging. GAME_MANIFEST.md header test count corrected 22 → 23.
 - Next: Milestone H (Smart Shuffle / Smart Director engine).
+
+## Milestone H — Smart Shuffle / Smart Director engine + restrained UI (2026-11-04 evening, local only)
+- Pure engine (`src/games/shuffle.ts`): random/smart/tournament modes; hard filters (player count, exclusions, format incompatibility, play style) never overridden by scores; explicit no-eligible-games value; partial results; reason codes + deterministic explanations; seeded determinism via extracted `src/shared/rng.ts` (protocol re-exports it).
+- Host-only UI: Surprise me + Smart shuffle buttons + result line in the Game setup card; connected-player count; room history as recency; Date.now() seed per click; result cleared on manual select/start. No new server endpoint.
+- Tests: `tests/shuffle.test.ts` (19 tests incl. goldens). Driver `scripts/check-shuffle.mjs` (7 checks). Full suite 31 files / 337 tests; typecheck/lint/build clean. Batch 17 + E2E: all green except leaderboard's 1 transient fail on first run, clean on two consecutive re-runs (23/23) with no code change.
+- Next: Milestone I (Tournament Studio prototype + architecture doc).
