@@ -76,6 +76,23 @@ async function panelFinished(page, gameId) {
   return t.includes(`Now playing: ${gameId}`) && t.includes("Status: finished");
 }
 
+// Mchezo Closest play (J.3): kit panel with NumericGuess — no game-panel.
+// Fill the number field and submit; if this player already guessed this
+// question, the waiting view ("Your guess: N") is showing instead.
+// (Same helper as scripts/e2e-browser.mjs; the two drivers are separate
+// scripts with no shared module.)
+async function actClosest(page) {
+  const input = page.getByTestId("mz-num-input");
+  if (await isVisible(input, 1000)) {
+    await input.fill("100");
+    await page.getByTestId("mz-num-submit").click();
+    await sleep(400);
+    return true;
+  }
+  if (await isVisible(page.getByText(/^Your guess: /), 500)) return true;
+  return false;
+}
+
 // One action pass for a single player page, for the game currently playing.
 // Mirrors the driver in scripts/e2e-browser.mjs; returns true if it did
 // anything (or the panel is already finished).
@@ -88,6 +105,7 @@ async function act(page, gameId, name) {
     if (await isVisible(next, 1000)) { await next.click(); await sleep(300); return true; }
     return false;
   }
+  if (gameId === "closest-wins") return await actClosest(page);
   const panel = page.locator('[data-testid="game-panel"]');
   if (!(await isVisible(panel, 3000))) return false;
   if ((await panelText(page)).includes("Status: finished")) return true;
@@ -107,14 +125,6 @@ async function act(page, gameId, name) {
     if ((await inputs.count()) === 0) return false;
     await inputs.first().fill("2000");
     await panel.getByRole("button", { name: "Submit year" }).first().click();
-    await sleep(400);
-    return true;
-  }
-  if (gameId === "closest-wins") {
-    const input = panel.locator('input[placeholder="Your guess"]');
-    if (!(await isVisible(input, 1000))) return false;
-    await input.fill("100");
-    await panel.getByRole("button", { name: "Submit guess" }).click();
     await sleep(400);
     return true;
   }
@@ -252,6 +262,10 @@ try {
       await host.locator(`[data-testid="start-official-${gameId}"]`).click();
       for (const { page } of pages) {
         if (gameId === "trivia") await page.locator(".mz-question").waitFor({ timeout: 30000 });
+        // J.3: Closest renders in the Mchezo kit, not the old GamePanel, so
+        // there is no "Now playing:" heading — the guess dial is the signal
+        // (the 8s intro auto-advances inside the 20s wait).
+        else if (gameId === "closest-wins") await page.getByTestId("mz-num-dial").waitFor({ timeout: 20000 });
         else await page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 });
       }
       // Leak scan BEFORE driving any answers, while the game is playing.

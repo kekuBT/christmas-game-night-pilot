@@ -81,10 +81,26 @@ async function actTrivia(page) {
   return false;
 }
 
+// Mchezo Closest play (J.3): kit panel with NumericGuess — no game-panel.
+// Fill the number field and submit; if this player already guessed this
+// question, the waiting view ("Your guess: N") is showing instead.
+async function actClosest(page) {
+  const input = page.getByTestId("mz-num-input");
+  if (await isVisible(input, 1000)) {
+    await input.fill("100");
+    await page.getByTestId("mz-num-submit").click();
+    await sleep(400);
+    return true;
+  }
+  if (await isVisible(page.getByText(/^Your guess: /), 500)) return true;
+  return false;
+}
+
 // One action pass for a single player page, for the game currently playing.
 // Returns true if it did anything (or the panel is already finished).
 async function act(page, gameId, name) {
   if (gameId === "trivia") return await actTrivia(page);
+  if (gameId === "closest-wins") return await actClosest(page);
   const panel = page.locator('[data-testid="game-panel"]');
   if (!(await isVisible(panel, 3000))) return false;
   if ((await panelText(page)).includes("Status: finished")) return true;
@@ -105,14 +121,6 @@ async function act(page, gameId, name) {
     if ((await inputs.count()) === 0) return false;
     await inputs.first().fill("2000");
     await panel.getByRole("button", { name: "Submit year" }).first().click();
-    await sleep(400);
-    return true;
-  }
-  if (gameId === "closest-wins") {
-    const input = panel.locator('input[placeholder="Your guess"]');
-    if (!(await isVisible(input, 1000))) return false;
-    await input.fill("100");
-    await panel.getByRole("button", { name: "Submit guess" }).click();
     await sleep(400);
     return true;
   }
@@ -253,7 +261,14 @@ async function runBrowser(browserName, games) {
           const intro = page.getByTestId("show-start-playing");
           try { await intro.waitFor({ state: "visible", timeout: 15000 }); await intro.click(); }
           catch { /* intro already auto-advanced; panel wait below covers it */ }
-          await page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 });
+          if (gameId === "closest-wins") {
+            // J.3: Closest renders in the Mchezo kit, not the old GamePanel,
+            // so there is no "Now playing:" heading — the guess dial is the
+            // gameplay signal.
+            await page.getByTestId("mz-num-dial").waitFor({ timeout: 20000 });
+          } else {
+            await page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 });
+          }
         }
         const deadline = Date.now() + 180_000;
         let finished = false;

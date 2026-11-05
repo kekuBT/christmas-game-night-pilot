@@ -56,6 +56,7 @@
     "check-library": "node scripts/check-library.mjs",
     "check-shuffle": "node scripts/check-shuffle.mjs",
     "check-studio": "node scripts/check-studio.mjs",
+    "check-closest": "node scripts/check-closest.mjs",
     "check-reduced-motion": "node scripts/check-reduced-motion.mjs",
     "screenshot-mchezo": "node scripts/screenshot-mchezo.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",

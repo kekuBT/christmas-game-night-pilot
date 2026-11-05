@@ -12,6 +12,7 @@ import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 import { LandingScreen, LobbyScreen, MchezoProvider, themes } from "./ui/mchezo/index.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
+import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
 import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
@@ -382,6 +383,7 @@ export function App() {
     setShuffleResult(`${pick.title}: ${pick.explanation}`);
   };
   const triviaPlaying = playingGame?.gameId === "trivia";
+  const closestPlaying = playingGame?.gameId === "closest-wins";
   const triviaFinished = latestFinished?.gameId === "trivia";
   const lobbyExtra = (
     <div>
@@ -491,6 +493,26 @@ export function App() {
           roomId={roomId ?? ""}
           isHostOrCohost={!!(me?.isHost || me?.isCohost)}
           onTv={() => setView("tv")}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && closestPlaying && playingGame) {
+    // Closest Wins (Milestone J.3): kit panel instead of the old shell
+    // + GamePanel, mirroring the Trivia play branch. Intro and finished
+    // results still use the shared old views (ShowIntro, ShowResults).
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoClosest
+          game={playingGame}
+          publicGame={publicPlaying}
+          players={players}
+          playerId={playerId ?? ""}
+          intent={intent}
+          post={post}
+          roomId={roomId ?? ""}
+          isHostOrCohost={!!(me?.isHost || me?.isCohost)}
+          title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
         />
       </MchezoProvider>
     );

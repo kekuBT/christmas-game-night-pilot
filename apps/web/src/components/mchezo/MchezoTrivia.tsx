@@ -10,7 +10,7 @@
 // approved mz-wait styles with an honest count in the centre and
 // PlayerTokens that carry only offline badges.
 import { useEffect, useMemo, useState } from "react";
-import { AnswerDistribution, AnswerGrid, Keycap, PhoneScreen, PlayerToken, ResultCard, Stamp, StandingsList } from "../../ui/mchezo/index.js";
+import { AnswerDistribution, AnswerGrid, Keycap, MchezoWaiting, PhoneScreen, ResultCard, Stamp, StandingsList } from "../../ui/mchezo/index.js";
 import { GameIntroScreen, QuestionScreen } from "../../ui/mchezo/index.js";
 import { clampStep, rankStandings, revealSteps, stepLabel } from "../../ui/mchezo/index.js";
 import type { GameState, PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
@@ -138,54 +138,6 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
         </div>
       }
     />
-  );
-}
-
-/** Waiting view: honest counts only. Centre = players who have played so
-    far (server submittedCount) out of the room; tokens carry offline badges
-    only, never check marks for answers we cannot see. */
-function MchezoWaiting({ label, players, playerId, publicGame, stalled, isHostOrCohost, onSkip, onTv }: {
-  label: string;
-  players: PublicPlayer[];
-  playerId: string;
-  publicGame?: PublicGame;
-  stalled?: boolean;
-  isHostOrCohost?: boolean;
-  onSkip?: () => void;
-  onTv?: () => void;
-}) {
-  const done = publicGame?.submittedCount ?? 0;
-  const total = publicGame?.totalPlayers ?? players.length;
-  const mzPlayers = toMzPlayers(players);
-  const r = 44;
-  const c = 2 * Math.PI * r;
-  return (
-    <div>
-      <p className="mz-kicker">{label}</p>
-      <div className="mz-wait">
-        <svg className="mz-wait__ring" viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r={r} className="mz-wait__track" />
-          <circle cx="50" cy="50" r={r} className="mz-wait__fill" strokeDasharray={c} strokeDashoffset={c * (1 - done / Math.max(1, total))} transform="rotate(-90 50 50)" />
-        </svg>
-        {mzPlayers.map((p, k) => {
-          const a = -Math.PI / 2 + (k * Math.PI * 2) / Math.max(1, mzPlayers.length);
-          return (
-            <span key={p.id} className="mz-wait__seat" style={{ left: `${50 + Math.cos(a) * r}%`, top: `${50 + Math.sin(a) * r}%` }}>
-              <PlayerToken player={p} index={k} size={40} you={p.id === playerId} badge={p.connection === "disconnected" ? "offline" : null} />
-              <span className="mz-seat__name">{p.id === playerId ? "You" : p.connection === "disconnected" ? "Away" : p.name}</span>
-            </span>
-          );
-        })}
-        <div className="mz-wait__center" role="status" aria-live="polite">
-          <span className="mz-wait__count">{done}<small>/{total}</small></span>
-          <span className="mz-wait__label">{done < total ? "have played so far" : "everyone’s in"}</span>
-        </div>
-      </div>
-      <p className="mz-foot">The reveal plays right here when the game finishes.</p>
-      {onTv && <div style={{ padding: "0 16px 16px" }}><button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>TV stage</button></div>}
-      {stalled && isHostOrCohost && onSkip && <><p className="mz-foot">This game has passed its deadline and may be stalled.</p><div style={{ padding: "0 16px 16px" }}><Keycap block variant="neutral" onClick={onSkip}>Skip timed-out game (no scores invented)</Keycap></div></>}
-      {stalled && !isHostOrCohost && <p className="mz-foot">The host can skip this game if it stays stalled.</p>}
-    </div>
   );
 }
 
