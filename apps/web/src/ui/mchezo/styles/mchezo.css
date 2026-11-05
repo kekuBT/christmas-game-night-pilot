@@ -345,3 +345,6 @@
   .mz-switch-row { min-height: 50px; margin-bottom: 10px; }
   .mz-h1 { margin-top: 10px; }
 }
+
+/* Game Library tags (Milestone G): small pills for categories, team/TV badges. */
+.mz-lib-tag { display: inline-flex; align-items: center; border: 1px solid var(--mz-line); background: var(--mz-surface-2); color: var(--mz-text); border-radius: 999px; padding: 2px 8px; font: 600 12px var(--mz-font-body); }

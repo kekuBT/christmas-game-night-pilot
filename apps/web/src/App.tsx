@@ -13,6 +13,8 @@ import { LandingScreen, LobbyScreen, MchezoProvider, themes } from "./ui/mchezo/
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
+import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
+import { GAME_MANIFESTS } from "../../../src/games/manifest.js";
 import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mchezo/adapters.js";
 import { previousGameScores } from "./ui/mchezo/lib/standings.js";
 import QRCode from "qrcode";
@@ -63,7 +65,7 @@ export function App() {
   const [specToken, setSpecToken] = useState<string | null>(sessionStorage.getItem("cgn_spec_token"));
   const [proj, setProj] = useState<Projection | null>(null);
   const [games, setGames] = useState<RegistryGame[]>([]);
-  const [view, setView] = useState<"lobby" | "championship" | "tv" | "memory">("lobby");
+  const [view, setView] = useState<"lobby" | "championship" | "tv" | "memory" | "library">("lobby");
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [book, setBook] = useState<MemoryEntry[]>([]);
@@ -403,6 +405,7 @@ export function App() {
         <button type="button" className="mz-chip-btn" onClick={() => setView("championship")}>Championship</button>
         <button type="button" className="mz-chip-btn" onClick={() => setView("tv")}>TV stage</button>
         <button type="button" className="mz-chip-btn" onClick={() => setView("memory")}>Memory Book</button>
+        <button type="button" className="mz-chip-btn" data-testid="browse-games" onClick={() => setView("library")}>Browse games</button>
         <button type="button" className="mz-chip-btn" onClick={reconnect}>Reconnect</button>
       </div>
       <SettingsBar sound={settings.sound} anim={settings.anim} onToggleSound={settings.toggleSound} onSetAnim={settings.setAnimSetting} />
@@ -481,6 +484,23 @@ export function App() {
           roomId={roomId ?? ""}
           onTv={() => setView("tv")}
           previousScores={previousGameScores(proj?.games ?? [], latestFinished.id)}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "library") {
+    // Game Library (Milestone G): browse only. Selecting sets the up-next
+    // game and returns to the lobby, where the existing Start button starts
+    // it — the library itself never starts a game. Guests browse read-only;
+    // only host/cohost get the select button.
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoLibrary
+          manifests={GAME_MANIFESTS}
+          upNextId={upNextId}
+          canSelect={!!(me?.isHost || me?.isCohost)}
+          onSelect={(id) => { setUpNextId(id); setView("lobby"); }}
+          onBack={() => setView("lobby")}
         />
       </MchezoProvider>
     );

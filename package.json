@@ -53,6 +53,7 @@
     "check-tv-entry": "node scripts/check-tv-entry.mjs",
     "check-tv-lifecycle": "node scripts/check-tv-lifecycle.mjs",
     "check-reveal": "node scripts/check-reveal.mjs",
+    "check-library": "node scripts/check-library.mjs",
     "screenshot-mchezo": "node scripts/screenshot-mchezo.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",
     "serve": "tsx src/server/serve.ts",

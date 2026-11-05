@@ -226,3 +226,9 @@ spend, or any GitHub action. Budget: $0 new spending. No runtime AI.
 - Tests: `tests/manifest.test.ts` (22 tests). Full suite 29 files / 303 tests; typecheck/lint/build clean. Additive only — no registry, server, or UI change; no driver changes needed.
 - Deliverable: `docs/GAME_MANIFEST.md` (field dictionary, at-a-glance table, honesty notes, validation rules, catalog-change procedure).
 - Next: Milestone G (Game Library + discovery UI).
+
+## Milestone G — Game Library + discovery UI (2026-11-04 evening, local only)
+- Pure filter/sort module (`ui/mchezo/lib/library.ts`) + Circle-styled Library screen (`components/mchezo/MchezoLibrary.tsx`) + `library` view in App with a "Browse games" lobby button. Browse open to all; select host/cohost-only; start only from the lobby (no start button in the library); compact chooser untouched.
+- Tests: `tests/library.test.ts` (14 tests). Driver `scripts/check-library.mjs` (17 checks). Full suite 30 files / 318 tests; typecheck/lint/build clean. Full batch 16 drivers + E2E green (mobile 32/32, contrast 64/64, E2E 12/12; log `~/workspace/gates-g-batch.log`).
+- Recovery: runtime restart killed the 3461 server + first batch mid-run; server restarted + verified, batch re-run in full and tee'd to the log. Mobile screenshots restored before staging. GAME_MANIFEST.md header test count corrected 22 → 23.
+- Next: Milestone H (Smart Shuffle / Smart Director engine).

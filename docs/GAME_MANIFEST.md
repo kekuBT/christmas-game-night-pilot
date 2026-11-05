@@ -7,7 +7,7 @@ games; it does not run them. Gameplay, scoring, and the registry are
 unchanged by this module.
 
 Source: `src/games/manifest.ts` (Zod schema + the 11 manifests +
-validation). Tests: `tests/manifest.test.ts` (22 tests).
+validation). Tests: `tests/manifest.test.ts` (23 tests).
 
 ## What a manifest contains
 
