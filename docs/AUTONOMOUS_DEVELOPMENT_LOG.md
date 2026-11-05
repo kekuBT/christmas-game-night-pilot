@@ -219,3 +219,10 @@ spend, or any GitHub action. Budget: $0 new spending. No runtime AI.
 - Drivers: new check-reveal (all passed); leaderboard/abstain/mchezo/tv-lifecycle updated for the new results/TV defaults (same assertions, added tab/jump navigation). Full batch 16 drivers + E2E all green; typecheck/lint clean; 28 files / 281 tests.
 - Limitation: reload-to-results round-trip not driver-verified; sequence rebuilds from the finished projection by construction.
 - Next: Milestone F (Game Manifest system).
+
+## Milestone F — Game Manifest system (2026-11-04 evening, local only)
+- Added `src/games/manifest.ts`: Zod schema, 11 manifests, validation (shape + registry agreement + room rules + architecture facts + consistency). `getManifest` throws on unknown/invalid; `validateAllManifests` checks the whole set.
+- Honesty core (L43): registry wins; durations are design defaults (measured: false); intensity unknown everywhere; TV dedicated only for Trivia; tournament verdicts deferred to I (structural facts only); deadline-vs-duration tension flagged for J/K, not hidden.
+- Tests: `tests/manifest.test.ts` (22 tests). Full suite 29 files / 303 tests; typecheck/lint/build clean. Additive only — no registry, server, or UI change; no driver changes needed.
+- Deliverable: `docs/GAME_MANIFEST.md` (field dictionary, at-a-glance table, honesty notes, validation rules, catalog-change procedure).
+- Next: Milestone G (Game Library + discovery UI).
