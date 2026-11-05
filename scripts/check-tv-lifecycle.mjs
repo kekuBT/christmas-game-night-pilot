@@ -100,6 +100,8 @@ try {
   await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
   await tv.getByRole("button", { name: "TV stage" }).click();
   await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+  // D: finished TV auto-walks the reveal; jump straight to the board.
+  await tv.getByRole("tab", { name: "Leaderboard" }).click();
   await sleep(3000);
   check("trivia finished: TV shows the leaderboard stage",
     (await tv.locator("body").textContent()).includes("This game's standings"));

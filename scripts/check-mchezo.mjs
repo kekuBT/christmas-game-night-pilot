@@ -155,11 +155,14 @@ try {
   for (const g of guestsB) await answerAllTrivia(g);
   await hostB.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });
   check("results screen after all players finish", true);
-  check("results show standings list", (await hostB.locator(".mz-standings").count()) === 1);
-  check("results show question picker", (await hostB.getByRole("button", { name: /^Q10 / }).count()) === 1);
   const resultsText = await hostB.locator("body").textContent();
   check("results separate this question from the game total and rank",
     resultsText.includes("This question:") && resultsText.includes("Your game total:") && resultsText.includes("Game rank:"));
+  // D: phone results open on the reveal sequence; jump to standings.
+  await hostB.getByTestId("mz-reveal-standings").click();
+  await hostB.locator(".mz-standings").waitFor({ timeout: 15000 });
+  check("results show standings list", (await hostB.locator(".mz-standings").count()) === 1);
+  check("results show question picker", (await hostB.getByRole("button", { name: /^Q10 / }).count()) === 1);
   await hostB.getByRole("button", { name: /^Q2 / }).click();
   await sleep(500);
   check("question picker switches the inspected question", true);

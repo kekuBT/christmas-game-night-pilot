@@ -3,8 +3,10 @@
 // no per-player position, so it never claims to show "your" question).
 // Finished: director stages — question, reveal (real aggregate counts +
 // correct answer, post-finish only), leaderboard (this game's raw scores
-// with the handoff's phase-consistent animation). The director controls
-// only change what THIS screen shows; auto mode follows game status.
+// with the handoff's phase-consistent animation). Auto mode walks the
+// staged reveal (Milestone D): question, reveal per question in order,
+// then the leaderboard. The director controls only change what THIS
+// screen shows; manual jumps switch auto off.
 import { useEffect, useState } from "react";
 import { DirectorBar, TVLeaderboard, TVQuestion, TVReveal, TVStage, TVTopBar, useLeaderboardPhases } from "../../ui/mchezo/index.js";
 import type { TVStageId } from "../../ui/mchezo/index.js";
@@ -38,12 +40,35 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectator
   const finished = publicGame.status === "finished";
   const lbPhase = useLeaderboardPhases(publicGame.id, "before");
 
-  // Auto-director: the stage follows the game. Manual jumps stick until
-  // the game status changes.
+  // Auto-director: while playing, the featured question. Once finished,
+  // the walk starts at the first question (the walk effect below steps
+  // through each reveal to the leaderboard). Manual jumps switch auto
+  // off, so they stick until auto is re-enabled.
   useEffect(() => {
     if (!auto) return;
-    setStage(finished ? "leaderboard" : "question");
+    setStage("question");
+    if (finished) setPicked(0);
   }, [auto, finished]);
+  // Auto walk (finished games only): question holds 4s, reveal plays
+  // its animation then holds to 5s total, then the next question — or
+  // the leaderboard after the last reveal.
+  useEffect(() => {
+    if (!auto || !finished) return;
+    if (stage === "leaderboard") return;
+    if (questions.length === 0) { setStage("leaderboard"); return; }
+    const delay = stage === "question" ? 4000 : 5000;
+    const t = setTimeout(() => {
+      if (stage === "question") {
+        setStage("reveal");
+      } else if (picked + 1 < questions.length) {
+        setPicked(picked + 1);
+        setStage("question");
+      } else {
+        setStage("leaderboard");
+      }
+    }, delay);
+    return () => clearTimeout(t);
+  }, [auto, finished, stage, picked, questions.length]);
   // Reveal animation: counting -> bars -> answer, resetting per question.
   useEffect(() => {
     if (stage !== "reveal") return;
@@ -105,7 +130,7 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectator
       {finished && questions.length > 0 && (stage === "question" || stage === "reveal") && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: 12 }}>
           {questions.map((qq, i) => (
-            <button key={qq.id} type="button" className="mz-chip-btn" aria-pressed={i === picked} onClick={() => setPicked(i)}>
+            <button key={qq.id} type="button" className="mz-chip-btn" aria-pressed={i === picked} onClick={() => { setAuto(false); setPicked(i); }}>
               Q{i + 1}
             </button>
           ))}

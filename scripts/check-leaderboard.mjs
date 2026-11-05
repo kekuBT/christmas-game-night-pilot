@@ -157,6 +157,9 @@ try {
     await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
     await tv.getByRole("button", { name: "TV stage" }).click();
     await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+    // D: finished TV auto-walks the reveal; jump straight to the board.
+    await tv.getByRole("tab", { name: "Leaderboard" }).click();
+    await tv.locator(".mz-tv-row").first().waitFor({ timeout: 15000 });
     const tvs = await tvRows(tv);
     const moves = {};
     for (const li of await tv.locator(".mz-tv-row").all()) {
@@ -164,6 +167,9 @@ try {
       moves[name] = ((await li.locator(".mz-tv-row__move").textContent().catch(() => "")) ?? "").trim();
     }
     const note = await tv.locator("p", { hasText: "Rank movement vs the previous Trivia game" }).count();
+    // D: phone results open on the reveal sequence; jump to standings.
+    await host.getByTestId("mz-reveal-standings").click();
+    await host.locator(".mz-standings").waitFor({ timeout: 15000 });
     const phones = await phoneRows(host, "Ada");
     await tv.getByRole("button", { name: "Back to phone view" }).click();
     await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
@@ -296,6 +302,9 @@ try {
     await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
     await tv.getByRole("button", { name: "TV stage" }).click();
     await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+    // D: finished TV auto-walks the reveal; jump straight to the board.
+    await tv.getByRole("tab", { name: "Leaderboard" }).click();
+    await tv.locator(".mz-tv-row").first().waitFor({ timeout: 15000 });
     const tvs = await tvRows(tv);
     checkTvMatches("disconnected player: TV leaderboard includes Dee with server score", tvs, expected);
   }
@@ -324,6 +333,9 @@ try {
     check("away marker: Cal disconnected with a positive score", cal.connected === false && game.rawScores[cal.id] > 0, `Cal=${game.rawScores[cal.id]}`);
     check("away marker: Cal ranks 1st as the only scorer", expected.find((r) => r.name === "Cal")?.rank === 1,
       expected.map((r) => `${r.name}:${r.rank}:${r.score}`).join(" "));
+    // D: phone results open on the reveal sequence; jump to standings.
+    await host.getByTestId("mz-reveal-standings").click();
+    await host.locator(".mz-standings").waitFor({ timeout: 15000 });
     let phoneAway = false;
     for (const li of await host.locator(".mz-standings li").all()) {
       const name = (await li.locator(".mz-standings__name").textContent()) ?? "";
@@ -334,6 +346,9 @@ try {
     await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
     await tv.getByRole("button", { name: "TV stage" }).click();
     await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
+    // D: finished TV auto-walks the reveal; jump straight to the board.
+    await tv.getByRole("tab", { name: "Leaderboard" }).click();
+    await tv.locator(".mz-tv-row").first().waitFor({ timeout: 15000 });
     await tv.waitForTimeout(3000);
     let tvAway = false;
     for (const li of await tv.locator(".mz-tv-row").all()) {

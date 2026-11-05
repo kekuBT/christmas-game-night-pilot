@@ -3,6 +3,7 @@ import './styles/mchezo.css';
 export * from './tokens/tokens.js';
 export * from './types.js';
 export * from './lib/standings.js';
+export * from './lib/reveal.js';
 export { MchezoProvider, useMchezo, useHaptics } from './MchezoProvider.js';
 export * from './components/primitives.js';
 export { CodeInput } from './components/CodeInput.js';

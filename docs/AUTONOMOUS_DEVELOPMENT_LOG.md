@@ -212,3 +212,10 @@ spend, or any GitHub action. Budget: $0 new spending. No runtime AI.
   every factual claim cites the establishing file. NOT committed:
   git object writes are still blocked by the environment (EPERM), so
   these docs sit uncommitted in the working tree alongside Milestone C.
+
+## Milestone D — safe staged Trivia reveal (2026-11-04 evening, local only)
+- Ruling first: live per-question reveals ruled OUT (decision L42). The gap note's "all connected answered" rule plus host manual reveal would leak keys to a disconnected player who reconnects while answers are still accepted; host controls must not override the safety condition. No server change was made.
+- Built: pure reveal-steps module (question/reveal pairs + standings finale; empty when unfinished; kind + index only, no answer data); phone sequence with question phases (no correct marking possible — AnswerGrid has no correctness display), reveal phases, standings finale, Next/Prev, 6s auto-play (memoised against poll re-renders), jumps, persistent Back to lobby; TV auto-director walk (4s question / 5s reveal per question, then leaderboard; manual jumps disable auto).
+- Drivers: new check-reveal (all passed); leaderboard/abstain/mchezo/tv-lifecycle updated for the new results/TV defaults (same assertions, added tab/jump navigation). Full batch 16 drivers + E2E all green; typecheck/lint clean; 28 files / 281 tests.
+- Limitation: reload-to-results round-trip not driver-verified; sequence rebuilds from the finished projection by construction.
+- Next: Milestone F (Game Manifest system).

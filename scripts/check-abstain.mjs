@@ -91,6 +91,9 @@ try {
 
   // 4. The finished results screen scores the abstainer at 0: Bea's
   // standings row (host view) shows score 0.
+  // D: phone results open on the reveal sequence; jump to standings.
+  await host.getByTestId("mz-reveal-standings").click();
+  await host.locator(".mz-standings").waitFor({ timeout: 15000 });
   let beaRow = "";
   try { beaRow = (await host.locator(".mz-standings li", { hasText: "Bea" }).first().textContent({ timeout: 3000 })) ?? ""; } catch { /* no row */ }
   if (beaRow && /0/.test(beaRow)) pass("abstainer scores 0 in the finished view");

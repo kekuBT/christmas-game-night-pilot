@@ -9,10 +9,10 @@
 // WaitingCircle is therefore not used here; the ring below reuses the
 // approved mz-wait styles with an honest count in the centre and
 // PlayerTokens that carry only offline badges.
-import { useEffect, useState } from "react";
-import { Keycap, PlayerToken, Stamp } from "../../ui/mchezo/index.js";
-import { GameIntroScreen, PhoneRevealScreen, QuestionScreen } from "../../ui/mchezo/index.js";
-import { rankStandings } from "../../ui/mchezo/index.js";
+import { useEffect, useMemo, useState } from "react";
+import { AnswerDistribution, AnswerGrid, Keycap, PhoneScreen, PlayerToken, ResultCard, Stamp, StandingsList } from "../../ui/mchezo/index.js";
+import { GameIntroScreen, QuestionScreen } from "../../ui/mchezo/index.js";
+import { clampStep, rankStandings, revealSteps, stepLabel } from "../../ui/mchezo/index.js";
 import type { GameState, PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 import { asRecord } from "../../types.js";
 import { toMzPlayers } from "./adapters.js";
@@ -189,12 +189,25 @@ function MchezoWaiting({ label, players, playerId, publicGame, stalled, isHostOr
   );
 }
 
+/** Post-completion staged reveal (Milestone D, decision L42). The sequence
+    walks question → reveal per question, then a standings finale. It
+    renders ONLY for finished games: steps are empty otherwise, so no
+    correct answer or distribution can ever appear while play is live.
+    No server change — every value below comes from the finished
+    projection (correctIndex, answerCounts, questionPoints, rawScores). */
 export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
   const { game, publicGame, players, playerId, onBackToLobby, onTv, previousScores } = deps;
   const st = stateOf(game);
   const questions = st.questions ?? [];
   const myAnswers: Record<string, number> = st.myAnswers ?? {};
-  const [picked, setPicked] = useState(0);
+  const finished = publicGame?.status === "finished";
+  // Memoised on primitives so the 2s projection polls don't hand the
+  // auto-play effect a new steps array each render and reset its timer.
+  const steps = useMemo(() => revealSteps(questions.length, finished), [questions.length, finished]);
+  const [stepIdx, setStepIdx] = useState(0);
+  const [auto, setAuto] = useState(false);
+  const idx = clampStep(steps, stepIdx);
+  const step = steps[idx];
   const mzPlayers = toMzPlayers(players);
   const raw = publicGame?.rawScores ?? game.rawScores ?? {};
   const ranked = rankStandings(Object.entries(raw).map(([pid, score]) => ({
@@ -204,10 +217,33 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
     delta: previousScores && pid in previousScores ? score - previousScores[pid]! : undefined,
   })), mzPlayers);
   const meRank = ranked.find((r) => r.playerId === playerId);
-  const q = questions[Math.min(picked, Math.max(0, questions.length - 1))];
+  const tiedWith = meRank ? ranked.filter((r) => r.rank === meRank.rank).length - 1 : 0;
+  const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
+  const go = (i: number) => setStepIdx(clampStep(steps, i));
+
+  // Auto-play: one step every 6s; stops (and switches off) at the finale.
+  useEffect(() => {
+    if (!auto) return;
+    if (!step || step.kind === "standings") { setAuto(false); return; }
+    const t = setTimeout(() => setStepIdx(clampStep(steps, idx + 1)), 6000);
+    return () => clearTimeout(t);
+  }, [auto, idx, step, steps]);
+
+  // Never reveal early: without finished steps there is nothing to show.
+  if (!step) {
+    return (
+      <main className="mz-screen" aria-label="Results">
+        <p className="mz-foot">Results appear here when the game finishes.</p>
+      </main>
+    );
+  }
+
+  const qIndex = step.kind === "standings" ? -1 : step.index;
+  const q = qIndex >= 0 ? questions[qIndex] : undefined;
   const counts = publicGame?.answerCounts?.[q?.id ?? ""] ?? [];
   const countsRecord: Record<string, number> = {};
   (q?.options ?? []).forEach((_, i) => { countsRecord[String(i)] = counts[i] ?? 0; });
+  const countsTotal = Object.values(countsRecord).reduce((a, b) => a + b, 0);
   const myChoice = q ? myAnswers[q.id] : undefined;
   const correctIdx = q?.correctIndex;
   const correct = myChoice === undefined || correctIdx === undefined ? null : myChoice === correctIdx;
@@ -217,45 +253,86 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
   // answer on one question never reads as a bad game result.
   const qValue = q ? publicGame?.questionPoints?.[q.id] : undefined;
   const earned = qValue === undefined ? undefined : correct ? qValue : 0;
-  const tiedWith = meRank ? ranked.filter((r) => r.rank === meRank.rank).length - 1 : 0;
-  const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
-  return (
-    <PhoneRevealScreen
-      correct={correct}
-      correctLabel={correctIdx !== undefined && q ? q.options[correctIdx] ?? "" : "—"}
-      points={earned}
-      rank={meRank?.rank}
-      tvConnected={false}
-      options={(q?.options ?? []).map((label, i) => ({ id: String(i), label }))}
-      counts={countsRecord}
-      correctId={correctIdx === undefined ? "" : String(correctIdx)}
-      ranked={ranked}
-      players={mzPlayers}
-      youId={playerId}
-      nextLabel="Back to lobby"
-      onNext={onBackToLobby}
-      extra={
-        <div>
-          <p className="mz-foot">This question: {myChoice === undefined ? "you didn't answer" : `you answered ${q?.options[myChoice] ?? "—"}`} — {correct === null ? "no result" : correct ? `correct, +${earned ?? 0} points` : "not correct, +0 points"}.</p>
-          <p className="mz-foot">Your game total: <b>{game.myScore}</b> points · Game rank: <b>{meRank ? ordinal(meRank.rank) : "—"}</b>{tiedWith > 0 ? `, tied with ${tiedWith} other${tiedWith === 1 ? "" : "s"}` : ""}. The rank is for the whole game, not this question.</p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {questions.map((qq, i) => {
-              const mine = myAnswers[qq.id];
-              const ok = qq.correctIndex !== undefined && mine !== undefined && mine === qq.correctIndex;
-              return (
-                <button key={qq.id} type="button" className="mz-chip-btn" aria-pressed={i === picked} onClick={() => setPicked(i)}>
-                  Q{i + 1} {mine === undefined ? "· no answer" : ok ? "· ✓" : "· ✗"}
-                </button>
-              );
-            })}
+  const totalLine = (
+    <p className="mz-foot">Your game total: <b>{game.myScore}</b> points · Game rank: <b>{meRank ? ordinal(meRank.rank) : "—"}</b>{tiedWith > 0 ? `, tied with ${tiedWith} other${tiedWith === 1 ? "" : "s"}` : ""}. The rank is for the whole game, not this question.</p>
+  );
+  const nextLabel = step.kind === "question" ? "Reveal answer" : step.kind === "reveal" ? (qIndex === questions.length - 1 ? "See standings" : "Next question") : "Back to lobby";
+  const onNext = step.kind === "standings" ? onBackToLobby : () => go(idx + 1);
+  const nav = (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      <button type="button" className="mz-chip-btn" data-testid="mz-reveal-prev" disabled={idx === 0} onClick={() => go(idx - 1)}>Previous</button>
+      <button type="button" className="mz-chip-btn" data-testid="mz-reveal-next" onClick={onNext}>{nextLabel}</button>
+      <button type="button" className="mz-chip-btn" data-testid="mz-reveal-play" aria-pressed={auto} disabled={step.kind === "standings"} onClick={() => setAuto((a) => !a)}>{auto ? "Pause reveal" : "Play reveal"}</button>
+      {step.kind !== "standings" && <button type="button" className="mz-chip-btn" onClick={onBackToLobby}>Back to lobby</button>}
+    </div>
+  );
+  const jumps = (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {questions.map((qq, i) => {
+        const mine = myAnswers[qq.id];
+        const ok = qq.correctIndex !== undefined && mine !== undefined && mine === qq.correctIndex;
+        return (
+          <button key={qq.id} type="button" className="mz-chip-btn" data-testid={`mz-reveal-q${i}`} aria-pressed={step.kind !== "standings" && step.index === i} onClick={() => go(i * 2)}>
+            Q{i + 1} {mine === undefined ? "· no answer" : ok ? "· ✓" : "· ✗"}
+          </button>
+        );
+      })}
+      <button type="button" className="mz-chip-btn" data-testid="mz-reveal-standings" aria-pressed={step.kind === "standings"} onClick={() => go(steps.length - 1)}>Standings</button>
+    </div>
+  );
+  const tvBtn = onTv ? <div style={{ marginTop: 8 }}><button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>TV stage</button></div> : null;
+
+  if (step.kind === "question" && q) {
+    return (
+      <div data-testid="mz-reveal-step" data-step-kind="question" data-step-index={idx}>
+        <PhoneScreen label={stepLabel(step, questions.length)}>
+          <span className="mz-kicker">Trivia Showdown</span>
+          <span className="mz-muted">{stepLabel(step, questions.length)}</span>
+          <h1 className="mz-question">{q.prompt}</h1>
+          <div className="mz-grow mz-grow--min" />
+          <AnswerGrid options={q.options.map((label, i) => ({ id: String(i), label }))} selectedId={myChoice === undefined ? null : String(myChoice)} locked={myChoice !== undefined} onSelect={() => {}} disabled />
+          <p className="mz-foot" role="status">{myChoice === undefined ? "This question: you didn't answer." : `This question: you answered ${q.options[myChoice] ?? "—"} — locked in.`}</p>
+          {totalLine}
+          {nav}
+          {jumps}
+          {tvBtn}
+        </PhoneScreen>
+      </div>
+    );
+  }
+
+  if (step.kind === "reveal" && q) {
+    return (
+      <div data-testid="mz-reveal-step" data-step-kind="reveal" data-step-index={idx}>
+        <PhoneScreen label={stepLabel(step, questions.length)}>
+          <div data-testid="mz-reveal-answer">
+            <ResultCard correct={correct} correctLabel={correctIdx !== undefined ? q.options[correctIdx] ?? "" : "—"} points={earned} rank={meRank?.rank} />
           </div>
-          {onTv && <div style={{ marginTop: 8 }}><button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>TV stage</button></div>}
-          <details style={{ marginTop: 8 }}>
-            <summary className="mz-foot" style={{ cursor: "pointer" }}>About these standings</summary>
-            <p className="mz-foot">Standings below are whole-game totals, ranked with shared ranks for ties — not this question&apos;s points. Family Cup totals live in Championship. Pick a question above to see how the room answered it.</p>
-          </details>
-        </div>
-      }
-    />
+          <AnswerDistribution options={q.options.map((label, i) => ({ id: String(i), label }))} counts={countsRecord} correctId={correctIdx === undefined ? "" : String(correctIdx)} total={countsTotal} />
+          <p className="mz-foot">This question: {myChoice === undefined ? "you didn't answer" : `you answered ${q.options[myChoice] ?? "—"}`} — {correct === null ? "no result" : correct ? `correct, +${earned ?? 0} points` : "not correct, +0 points"}.</p>
+          {totalLine}
+          {nav}
+          {jumps}
+          {tvBtn}
+        </PhoneScreen>
+      </div>
+    );
+  }
+
+  // Standings finale: same limit-2 phone contract as before.
+  return (
+    <div data-testid="mz-reveal-step" data-step-kind="standings" data-step-index={idx}>
+      <PhoneScreen label="Standings">
+        {totalLine}
+        <StandingsList ranked={ranked} youId={playerId} players={mzPlayers} limit={2} />
+        <details style={{ marginTop: 8 }}>
+          <summary className="mz-foot" style={{ cursor: "pointer" }}>About these standings</summary>
+          <p className="mz-foot">Standings here are whole-game totals, ranked with shared ranks for ties. Family Cup totals live in Championship.</p>
+        </details>
+        {nav}
+        {jumps}
+        {tvBtn}
+      </PhoneScreen>
+    </div>
   );
 }

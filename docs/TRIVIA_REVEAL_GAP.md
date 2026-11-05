@@ -102,3 +102,32 @@ above, without gated progression and without per-question timers. It
 delivers the coordinated suspense Show Mode intends while keeping every
 authoritative rule — scoring, deadline, any-order answering, abstention,
 ties — exactly as it is.
+
+## Milestone D outcome (2026-11-04, local only)
+
+The "Implementation required (proposed Phase 2.2)" section above is
+SUPERSEDED in one respect: its live-reveal rule (reveal once every
+connected player answered that question, plus host manual reveal) was
+ruled OUT under the assignment's integrity rule before implementation.
+A disconnected player may reconnect while answers are still accepted,
+so any in-play correct-answer or distribution display creates a relay
+channel to a still-eligible player; "all connected answered" is
+insufficient, and host controls must not override the safety
+condition. No server `revealed` set, no `reveal-question` intent, and
+no live TV reveal stage were built.
+
+What was built instead (decision L42): a post-completion staged
+reveal, display-only, over the finished projection's existing fields
+(correctIndex, answerCounts, questionPoints, rawScores). Phone:
+question → reveal per question, then a standings finale, with
+Next/Previous, auto-play (6s/step, stops at the finale), question
+jumps, and a persistent Back to lobby. TV: the auto-director walks
+question (4s) → reveal (5s) per question, then the leaderboard;
+manual jumps switch auto off. No scoring, deadline, ordering, or
+tie rule changed; gated progression and per-question timers remain
+deferred pending owner decision, as before.
+
+Refresh/reconnect recovery: the sequence is rebuilt from the finished
+projection on mount and restarts at the first question, so nothing is
+lost — but a full reload-to-results round-trip was not driver-verified
+and is recorded as a limitation, not a claim.
