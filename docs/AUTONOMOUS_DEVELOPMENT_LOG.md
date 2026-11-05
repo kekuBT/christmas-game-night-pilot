@@ -345,3 +345,15 @@ The dev log was not updated during J; this entry consolidates it from
 - Next: run it, fix low-risk defects within the approved rules, write
   `docs/GAME_NIGHT_END_TO_END_REVIEW.md`, commit; then the
   two-button fix, then Work Package D (Guess the Year).
+
+## Overnight assignment — Work Package G (part): browser runtime incidents + isolation analysis (2026-11-05, local only, docs only)
+
+- `docs/BROWSER_RUNTIME_INCIDENTS.md`: evidence log for the two
+  SIGTRAP outages (2026-11-04 night, 2026-11-05 ~00:50 EST) and the
+  parallel-run interference incident (01:45 EST). No root cause is
+  asserted — no resource measurements exist from either outage.
+  Also the isolation analysis (per-driver rooms, fresh profiles,
+  the shared 3461 server, the tracked mobile screenshots) and the
+  decision-E protocol restated. The K batch is healthy so far.
+- Next: the K batch's remaining drivers, then the K commit, the
+  two-button fix, and the C simulation run.
