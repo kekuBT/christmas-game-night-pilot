@@ -95,12 +95,44 @@ async function actClosest(page) {
   if (await isVisible(page.getByText(/^Your guess: /), 500)) return true;
   return false;
 }
+// Guess the Year in the kit (Work Package D): one event at a time.
+// Each act() pass guesses the current event (or navigates to the
+// next unguessed one). The old panel's "Submit year" button no longer
+// exists — the App routes Year to MchezoYear first, so the old
+// GamePanel year branch is dead. (Same helper in both drivers; the
+// two scripts share no module.)
+async function actYear(page) {
+  const input = page.getByTestId("mz-num-input");
+  if (await isVisible(input, 1000)) {
+    await input.fill("2000");
+    await page.getByTestId("mz-num-submit").click();
+    await sleep(400);
+  } else if (!(await isVisible(page.getByTestId("mz-year-guessed"), 500))) {
+    return false;
+  }
+  // After a guess the kit shows that event's confirmation until the
+  // player navigates — move to the next unguessed event, if one
+  // remains; if all chips carry a check mark the player is done
+  // (the waiting ring is showing).
+  const chips = page.locator("[data-testid^='mz-year-q']");
+  const n = await chips.count();
+  for (let i = 0; i < n; i++) {
+    if ((await chips.nth(i).innerText()) !== "\u2713") {
+      await chips.nth(i).click();
+      await sleep(200);
+      break;
+    }
+  }
+  return true;
+}
+
 
 // One action pass for a single player page, for the game currently playing.
 // Returns true if it did anything (or the panel is already finished).
 async function act(page, gameId, name) {
   if (gameId === "trivia") return await actTrivia(page);
   if (gameId === "closest-wins") return await actClosest(page);
+  if (gameId === "guess-the-year") return await actYear(page);
   const panel = page.locator('[data-testid="game-panel"]');
   if (!(await isVisible(panel, 3000))) return false;
   if ((await panelText(page)).includes("Status: finished")) return true;
@@ -114,14 +146,6 @@ async function act(page, gameId, name) {
       await opts.first().click();
       await sleep(300);
     }
-    return true;
-  }
-  if (gameId === "guess-the-year") {
-    const inputs = panel.locator('input[placeholder="Year"]');
-    if ((await inputs.count()) === 0) return false;
-    await inputs.first().fill("2000");
-    await panel.getByRole("button", { name: "Submit year" }).first().click();
-    await sleep(400);
     return true;
   }
   if (gameId === "impostor") {
@@ -266,6 +290,11 @@ async function runBrowser(browserName, games) {
             // so there is no "Now playing:" heading — the guess dial is the
             // gameplay signal.
             await page.getByTestId("mz-num-dial").waitFor({ timeout: 20000 });
+          } else if (gameId === "guess-the-year") {
+            // Work Package D: Year renders in the Mchezo kit too, so
+            // there is no "Now playing:" heading — the progress line
+            // is the gameplay signal.
+            await page.getByTestId("mz-year-progress").waitFor({ timeout: 20000 });
           } else {
             await page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 });
           }

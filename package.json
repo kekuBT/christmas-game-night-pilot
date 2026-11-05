@@ -62,6 +62,7 @@
     "check-viewports": "node scripts/check-viewports.mjs",
     "check-double-start": "node scripts/check-double-start.mjs",
     "check-game-night": "node scripts/check-game-night.mjs",
+    "check-year": "node scripts/check-year.mjs",
     "screenshot-mchezo": "node scripts/screenshot-mchezo.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",
     "serve": "tsx src/server/serve.ts",

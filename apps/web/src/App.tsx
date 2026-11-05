@@ -13,6 +13,7 @@ import { LandingScreen, LobbyScreen, MchezoProvider, themes } from "./ui/mchezo/
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
+import { MchezoYear } from "./components/mchezo/MchezoYear.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
 import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
@@ -392,6 +393,7 @@ export function App() {
   };
   const triviaPlaying = playingGame?.gameId === "trivia";
   const closestPlaying = playingGame?.gameId === "closest-wins";
+  const yearPlaying = playingGame?.gameId === "guess-the-year";
   const triviaFinished = latestFinished?.gameId === "trivia";
   const lobbyExtra = (
     <div>
@@ -512,6 +514,27 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
         <MchezoClosest
+          game={playingGame}
+          publicGame={publicPlaying}
+          players={players}
+          playerId={playerId ?? ""}
+          intent={intent}
+          post={post}
+          roomId={roomId ?? ""}
+          isHostOrCohost={!!(me?.isHost || me?.isCohost)}
+          title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && yearPlaying && playingGame) {
+    // Guess the Year (Work Package D): kit panel instead of the old
+    // shell + GamePanel, mirroring the Trivia and Closest play
+    // branches. Intro and finished results still use the shared old
+    // views (ShowIntro, ShowResults).
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoYear
           game={playingGame}
           publicGame={publicPlaying}
           players={players}

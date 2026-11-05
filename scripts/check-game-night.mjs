@@ -252,14 +252,18 @@ try {
     triviaScores[Object.keys(triviaScores).find((id) => nameOf(id) === "Cal")]);
   await tv.screenshot({ path: "docs/mchezo-screenshots/15-game-night-tv-results.png" });
   // The phone's standings show the same leader as the TV (and the server).
+  // The host's own row shows "You", not her name — so when the leader
+  // is the host (Ada, whose page this is), "You" is the leader's row.
   await host.getByTestId("mz-reveal-standings").click();
   await sleep(500);
   const phoneTop = await host.locator(".mz-standings").first().textContent().catch(() => "");
   const tvTop = tvRows.find((r) => r.rank === "1");
   const leaderId = Object.entries(triviaScores).sort((a, b) => b[1] - a[1])[0]?.[0];
   const leaderName = leaderId ? nameOf(leaderId) : "";
+  const phoneShowsLeader = (phoneTop ?? "").includes(leaderName) ||
+    (leaderName === "Ada" && (phoneTop ?? "").includes("You"));
   check("phone standings show the same leader as the TV and the server",
-    leaderName !== "" && (phoneTop ?? "").includes(leaderName) && (tvTop?.name ?? "").includes(leaderName),
+    leaderName !== "" && phoneShowsLeader && (tvTop?.name ?? "").includes(leaderName),
     `leader: ${leaderName}; phone top: ${(phoneTop ?? "").slice(0, 60)}`);
   await backToLobbyAll([host, guests["Bea"], guests["Cal"], guests["Dee"], guests["Eli"], guests["Fay"]]);
   check("host returns to the lobby after trivia", true);
