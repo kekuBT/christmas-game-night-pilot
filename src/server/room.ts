@@ -659,7 +659,9 @@ export class RoomEngine {
       const game = [...this.games.values()].find((g) => g.id === intent.gameInstanceId);
       if (game) {
         game.submittedPlayers ??= [];
-        if (!game.submittedPlayers.includes(actorId)) game.submittedPlayers.push(actorId);
+        // Opening a Math question reveals it; it is not playing. Only real
+        // actions count toward "have played so far".
+        if (intent.action !== "math-open" && !game.submittedPlayers.includes(actorId)) game.submittedPlayers.push(actorId);
         // A phase that ended early (everyone acted) starts the next phase's clock now.
         if (game.status === "playing") this.syncPhase(game, now);
       }

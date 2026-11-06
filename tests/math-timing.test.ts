@@ -63,6 +63,16 @@ describe("Math: per-question server timing", () => {
     }
   });
 
+  it("opening a question is not 'playing': the waiting count only moves on a real answer", async () => {
+    const { ada, bea, gid } = await setup();
+    await h.intent(bea, gid, "math-open", { questionId: qs(gid)[0]!.id });
+    await h.intent(ada, gid, "math-open", { questionId: qs(gid)[0]!.id });
+    const pub = () => ((h.tv() as Promise<Json>).then((tv) => (tv["games"] as Json[]).find((g) => g["id"] === gid)!));
+    expect((await pub())["submittedCount"]).toBe(0);
+    await h.intent(ada, gid, "submit-math-answer", { questionId: qs(gid)[0]!.id, chosenIndex: 0 });
+    expect((await pub())["submittedCount"]).toBe(1);
+  });
+
   it("re-opening never restarts the clock (no bonus farming by reopening)", async () => {
     const { bea, gid } = await setup();
     const q = qs(gid)[0]!;
