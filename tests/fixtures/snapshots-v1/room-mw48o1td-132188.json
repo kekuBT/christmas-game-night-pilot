@@ -1,0 +1,523 @@
+{
+  "id": "room-mw48o1td-132188",
+  "joinCode": "VUMVLV",
+  "name": "Legacy Family Night",
+  "hostId": "player-1",
+  "cohosts": [],
+  "championshipDay": 1,
+  "players": [
+    {
+      "id": "player-1",
+      "displayName": "Ada",
+      "avatar": "🎄",
+      "isHost": true,
+      "isCohost": false,
+      "connected": true,
+      "recoveryTokenHash": "286626263139921ce2119ca05a60851f20607f538e2cd59d06be46efa6619641",
+      "joinedAt": 1793925068605
+    },
+    {
+      "id": "player-2",
+      "displayName": "Bea",
+      "avatar": "🎄",
+      "isHost": false,
+      "isCohost": false,
+      "connected": true,
+      "recoveryTokenHash": "b771b6cc009f98413758cb39d7b561cd3f4389a7d43c81f445d18bc65a541e97",
+      "joinedAt": 1793925068609
+    }
+  ],
+  "spectators": [],
+  "games": [
+    {
+      "id": "game-1",
+      "gameId": "trivia",
+      "official": true,
+      "status": "finished",
+      "players": [
+        "player-1",
+        "player-2"
+      ],
+      "answers": {},
+      "answerTimes": {},
+      "rawScores": {
+        "player-1": 360,
+        "player-2": 0
+      },
+      "startedAt": 1793925068613,
+      "deadlineAt": 1793925368613,
+      "day": 1,
+      "seed": 5,
+      "extra": {
+        "questions": [
+          {
+            "prompt": "Which month comes after November?",
+            "options": [
+              "September",
+              "October",
+              "December",
+              "January"
+            ],
+            "correctIndex": 2,
+            "explanation": "December follows November.",
+            "source": "Calendar",
+            "id": "trivia-1"
+          },
+          {
+            "prompt": "How many sides does a hexagon have?",
+            "options": [
+              "7",
+              "8",
+              "5",
+              "6"
+            ],
+            "correctIndex": 3,
+            "explanation": "Hexa- means six.",
+            "source": "Geometry",
+            "id": "trivia-2"
+          },
+          {
+            "prompt": "How many minutes are in 2 hours?",
+            "options": [
+              "60",
+              "180",
+              "120",
+              "90"
+            ],
+            "correctIndex": 2,
+            "explanation": "2 × 60 = 120.",
+            "source": "Arithmetic",
+            "id": "trivia-3"
+          },
+          {
+            "prompt": "Which gas do plants absorb from the air?",
+            "options": [
+              "Carbon dioxide",
+              "Hydrogen",
+              "Oxygen",
+              "Nitrogen"
+            ],
+            "correctIndex": 0,
+            "explanation": "Plants use carbon dioxide in photosynthesis.",
+            "source": "Biology",
+            "id": "trivia-4"
+          },
+          {
+            "prompt": "What colour do you get by mixing blue and yellow paint?",
+            "options": [
+              "Green",
+              "Orange",
+              "Brown",
+              "Purple"
+            ],
+            "correctIndex": 0,
+            "explanation": "Blue + yellow = green.",
+            "source": "Colour theory",
+            "id": "trivia-5"
+          },
+          {
+            "prompt": "What is the largest ocean on Earth?",
+            "options": [
+              "Pacific",
+              "Atlantic",
+              "Arctic",
+              "Indian"
+            ],
+            "correctIndex": 0,
+            "explanation": "The Pacific is the largest ocean.",
+            "source": "Geography",
+            "id": "trivia-6"
+          },
+          {
+            "prompt": "What is 15 × 4?",
+            "options": [
+              "50",
+              "75",
+              "60",
+              "45"
+            ],
+            "correctIndex": 2,
+            "explanation": "15 × 4 = 60.",
+            "source": "Arithmetic",
+            "id": "trivia-7"
+          },
+          {
+            "prompt": "Which planet is known as the Red Planet?",
+            "options": [
+              "Saturn",
+              "Venus",
+              "Jupiter",
+              "Mars"
+            ],
+            "correctIndex": 3,
+            "explanation": "Mars appears red due to iron oxide on its surface.",
+            "source": "General astronomy",
+            "id": "trivia-8"
+          },
+          {
+            "prompt": "Who wrote Romeo and Juliet?",
+            "options": [
+              "Jane Austen",
+              "Mark Twain",
+              "Charles Dickens",
+              "William Shakespeare"
+            ],
+            "correctIndex": 3,
+            "explanation": "Shakespeare wrote Romeo and Juliet.",
+            "source": "Literature",
+            "id": "trivia-9"
+          },
+          {
+            "prompt": "What is the capital of Japan?",
+            "options": [
+              "Seoul",
+              "Beijing",
+              "Bangkok",
+              "Tokyo"
+            ],
+            "correctIndex": 3,
+            "explanation": "Tokyo has been Japan's capital since 1868.",
+            "source": "Geography",
+            "id": "trivia-10"
+          }
+        ],
+        "answers": {
+          "player-1": {
+            "trivia-1": 0,
+            "trivia-2": 0,
+            "trivia-3": 0,
+            "trivia-4": 0,
+            "trivia-5": 0,
+            "trivia-6": 0,
+            "trivia-7": 0,
+            "trivia-8": 0,
+            "trivia-9": 0,
+            "trivia-10": 0
+          },
+          "player-2": {
+            "trivia-1": 1,
+            "trivia-2": 1,
+            "trivia-3": 1,
+            "trivia-4": 1,
+            "trivia-5": 1,
+            "trivia-6": 1,
+            "trivia-7": 1,
+            "trivia-8": 1,
+            "trivia-9": 1,
+            "trivia-10": 1
+          }
+        },
+        "times": {}
+      },
+      "submittedPlayers": [
+        "player-1",
+        "player-2"
+      ]
+    }
+  ],
+  "ledger": [
+    {
+      "eventId": "evt-1",
+      "seq": 1,
+      "type": "player-joined",
+      "createdAt": 1793925068605,
+      "playerId": "player-1"
+    },
+    {
+      "eventId": "evt-2",
+      "seq": 2,
+      "type": "host-claimed",
+      "createdAt": 1793925068605,
+      "playerId": "player-1"
+    },
+    {
+      "eventId": "evt-3",
+      "seq": 3,
+      "type": "player-joined",
+      "createdAt": 1793925068609,
+      "playerId": "player-2"
+    },
+    {
+      "eventId": "evt-4",
+      "seq": 4,
+      "type": "game-started",
+      "createdAt": 1793925068614,
+      "gameInstanceId": "game-1",
+      "actor": "player-1"
+    },
+    {
+      "eventId": "evt-5",
+      "seq": 5,
+      "type": "score-awarded",
+      "createdAt": 1793925068665,
+      "playerId": "player-1",
+      "gameInstanceId": "game-1",
+      "points": 360,
+      "reason": "game:trivia"
+    },
+    {
+      "eventId": "evt-6",
+      "seq": 6,
+      "type": "score-awarded",
+      "createdAt": 1793925068666,
+      "playerId": "player-2",
+      "gameInstanceId": "game-1",
+      "points": 0,
+      "reason": "game:trivia"
+    },
+    {
+      "eventId": "evt-7",
+      "seq": 7,
+      "type": "game-finished",
+      "createdAt": 1793925068666,
+      "gameInstanceId": "game-1",
+      "official": true
+    }
+  ],
+  "seq": 7,
+  "seenIntents": [
+    [
+      "room-mw48o1td-132188:player-1:c782742d-4012-4ec8-a2bf-f0983fdd66b0",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-1:b138e9b3-caca-4e46-bdeb-442870cf2364",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-1:be2762ce-f567-4e9f-a1b0-3477f1568083",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-1:b49607ee-3158-4d21-9959-4f1b5548409e",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-1:a933c1da-d8b4-47f2-9631-6b7bfcd4d111",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-1:7242be9a-4298-4791-8c96-cb4d4a936279",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-1:276e4316-6b81-42ed-9817-a5f86e1f3675",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-1:1f73dc0e-a65d-427b-b02b-e9a36a516e27",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-1:be29e0e7-b39a-42f8-9bbc-657d5487195f",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-1:32d39c12-bae4-4cfd-9329-5f1a5301e063",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:9c4101c7-19b2-4a97-be69-6d09b9e35f1f",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:ca400d4b-ea00-4d21-aa78-7bfa3a999e1c",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:c2d6f768-725f-4b52-a83e-a73a9f9ed70c",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:99e8ff69-f1d5-4911-9efe-fdfbdc016ebb",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:415e56df-23b0-43b7-9879-aaad2f84428c",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:87f5036b-de5c-4b58-975d-ff52bcb6c676",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:60f726a2-c9ca-41b6-abd8-34c704ffd9cd",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:6840396e-5b52-48f6-9cb1-ad33164f2b44",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:8435161b-bbe5-4fd4-aab7-1cff552bc0aa",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "playing"
+          }
+        }
+      }
+    ],
+    [
+      "room-mw48o1td-132188:player-2:6d9b5b3e-ec30-481c-bbd8-9c16fbebd67d",
+      {
+        "accepted": true,
+        "result": {
+          "accepted": true,
+          "result": {
+            "gameStatus": "finished"
+          }
+        }
+      }
+    ]
+  ],
+  "nextPlayer": 3,
+  "nextSpectator": 1,
+  "nextGame": 2
+}

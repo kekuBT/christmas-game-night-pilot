@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
@@ -8,6 +8,14 @@ import { RoomEngine, type RoomPlayer } from "./room.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { MemoryBook } from "./memorybook.js";
 import { hashToken } from "../shared/protocol.js";
+import { RoomStore, type RestoreReport } from "./persistence.js";
+
+/** A change was applied in memory but could not be written to disk. */
+class PersistError extends Error {
+  constructor() {
+    super("The room could not be saved to disk, so this change may not survive a server restart. Tell the host.");
+  }
+}
 
 export interface ServerOptions {
   port?: number;
@@ -26,9 +34,10 @@ interface SocketMeta {
 
 /**
  * Local HTTP + WebSocket adapter around RoomEngine.
- * LOCAL only — not a Cloudflare Durable Object. Snapshot persistence is a
- * JSON file in dataDir, written after every mutation, so a restart restores
- * players, games, deadlines, ledger, and deduplication state.
+ * LOCAL only — not a Cloudflare Durable Object. After every mutation the
+ * room is saved atomically (src/server/persistence.ts), so a restart restores
+ * players, games, deadlines, ledger, and deduplication state, and each room
+ * restores independently of any damaged file.
  */
 export class LocalServer {
   rooms = new Map<string, RoomEngine>();
@@ -38,13 +47,18 @@ export class LocalServer {
    * capability that binds the initial host privilege to the creator.
    * Claiming host without it is rejected at the HTTP boundary, so a
    * stranger who only knows the room id or code cannot grab host while
-   * the creator's room is still hostless. The token is persisted beside
-   * the room snapshot so a restart does not orphan a hostless room.
+   * the creator's room is still hostless. Only the token's SHA-256 hash
+   * is kept, inside the room's own snapshot (persistence.ts, format v2),
+   * so a restart does not orphan a hostless room and no plaintext
+   * capability sits on disk. A host claim for a room with no claim on
+   * record is refused (it used to be accepted when the token was absent).
    * Once a host exists, the token no longer grants host (engine join
    * only makes the first host when hostId is null), so a reused token
    * just joins as a regular player.
    */
-  private hostClaims = new Map<string, string>();
+  private hostClaimHashes = new Map<string, string>();
+  /** What the last startup restore did: rooms loaded, files that failed, files quarantined. */
+  restoreReport: RestoreReport;
   /**
    * Live reactions (M6.5): ephemeral, scoring-free, never persisted and never
    * in the ledger. Per room: recent reactions, per-player rate-limit stamps,
@@ -69,7 +83,7 @@ export class LocalServer {
     const engineAudience = audience === "spectator" ? "tv" : audience;
     return { ...room.project(engineAudience, actorId), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy };
   }
-  private dataDir: string;
+  private store: RoomStore;
   private http = createServer((req, res) => void this.handleHttp(req, res));
   private wss = new WebSocketServer({ server: this.http });
   private sockets = new Set<{ ws: WebSocket; meta: SocketMeta }>();
@@ -77,37 +91,35 @@ export class LocalServer {
   private webDistDir: string;
 
   constructor(opts: ServerOptions = {}) {
-    this.dataDir = opts.dataDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data");
+    this.store = new RoomStore(opts.dataDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data"));
     this.webDistDir = resolve(opts.webDistDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "apps", "web", "dist"));
-    mkdirSync(this.dataDir, { recursive: true });
-    this.loadSnapshots();
+    this.restoreReport = this.loadSnapshots();
     this.wss.on("connection", (ws, req) => this.handleWs(ws, req));
   }
 
-  private snapshotPath(roomId: string): string {
-    return join(this.dataDir, `${roomId}.json`);
-  }
-
-  private bookPath(roomId: string): string {
-    return join(this.dataDir, `${roomId}.book.json`);
-  }
-
-  private claimPath(roomId: string): string {
-    return join(this.dataDir, `${roomId}.claim.json`);
-  }
-
-  private persistClaim(roomId: string): void {
-    const token = this.hostClaims.get(roomId);
-    if (token) writeFileSync(this.claimPath(roomId), JSON.stringify({ hostClaimToken: token }));
-  }
-
+  /**
+   * Save the room. Throws PersistError so callers answer 500 instead of
+   * pretending the change is durable. (The in-memory change has already
+   * happened; the next successful save writes the full snapshot again.)
+   */
   private persist(room: RoomEngine): void {
-    writeFileSync(this.snapshotPath(room.id), JSON.stringify(room.toJSON(), null, 2));
+    try {
+      this.store.saveRoom(room.id, room.toJSON(), this.hostClaimHashes.get(room.id) ?? null);
+    } catch (err) {
+      console.error(`[persist] could not save room ${room.id}: ${(err as Error).message}`);
+      throw new PersistError();
+    }
   }
 
   private persistBook(roomId: string): void {
     const book = this.books.get(roomId);
-    if (book) writeFileSync(this.bookPath(roomId), JSON.stringify(book.toJSON(), null, 2));
+    if (!book) return;
+    try {
+      this.store.saveBook(roomId, book.toJSON());
+    } catch (err) {
+      console.error(`[persist] could not save Memory Book for ${roomId}: ${(err as Error).message}`);
+      throw new PersistError();
+    }
   }
 
   /**
@@ -134,50 +146,53 @@ export class LocalServer {
     return player;
   }
 
-  private loadSnapshots(): void {
-    // Only load files that look like room snapshots; ignore other files.
-    try {
-      for (const file of readdirSync(this.dataDir)) {
-        if (!file.endsWith(".json") || file.endsWith(".book.json")) continue;
-        const data = JSON.parse(readFileSync(join(this.dataDir, file), "utf-8")) as Record<string, unknown>;
-        if (typeof data["id"] === "string" && Array.isArray(data["players"])) {
-          const room = RoomEngine.fromJSON(data);
-          // Host recovery: no WebSocket exists after a restart, so a
-          // snapshot's connected=true flags are stale. Mark every
-          // restored player disconnected; each recovers explicitly via
-          // /reconnect or a fresh WebSocket open. Without this, phantom
-          // players counted toward startGame and blocked games from
-          // advancing until a deadline/host-skip.
-          for (const p of room.players.values()) p.connected = false;
-          // Same for spectators: no socket exists after a restart, so a
-          // restored connected=true would inflate the watching count.
-          for (const s of room.spectators.values()) s.connected = false;
-          this.rooms.set(room.id, room);
-          // Restore the host-claim token for this room, if one was persisted.
-          try {
-            const claimFile = this.claimPath(room.id);
-            if (existsSync(claimFile)) {
-              const claimData = JSON.parse(readFileSync(claimFile, "utf-8")) as Record<string, unknown>;
-              if (typeof claimData["hostClaimToken"] === "string") this.hostClaims.set(room.id, claimData["hostClaimToken"]);
-            }
-          } catch {
-            // A corrupt claim file must not lose the room itself.
-          }
-          // Restore the Memory Book for this room, if one was persisted.
-          try {
-            const bookFile = this.bookPath(room.id);
-            if (existsSync(bookFile)) {
-              const bookData = JSON.parse(readFileSync(bookFile, "utf-8")) as Record<string, unknown>;
-              if (Array.isArray(bookData["entries"])) this.books.set(room.id, MemoryBook.fromJSON(bookData));
-            }
-          } catch {
-            // A corrupt book file must not lose the room itself.
-          }
+  /**
+   * Restore every valid room independently (persistence.ts). A damaged or
+   * unreadable file is reported and left in place; it never stops other
+   * rooms loading and is never overwritten or deleted.
+   */
+  private loadSnapshots(): RestoreReport {
+    const { rooms, report } = this.store.restoreAll();
+    for (const restored of rooms) {
+      let room: RoomEngine;
+      try {
+        room = RoomEngine.fromJSON(restored.room);
+      } catch (err) {
+        report.failed.push({ file: restored.file, reason: `could not rebuild room: ${(err as Error).message}` });
+        report.loaded = report.loaded.filter((l) => l.file !== restored.file);
+        continue;
+      }
+      // Host recovery: no WebSocket exists after a restart, so a
+      // snapshot's connected=true flags are stale. Mark every
+      // restored player disconnected; each recovers explicitly via
+      // /reconnect or a fresh WebSocket open. Without this, phantom
+      // players counted toward startGame and blocked games from
+      // advancing until a deadline/host-skip.
+      for (const p of room.players.values()) p.connected = false;
+      // Same for spectators: no socket exists after a restart, so a
+      // restored connected=true would inflate the watching count.
+      for (const s of room.spectators.values()) s.connected = false;
+      this.rooms.set(room.id, room);
+      if (restored.hostClaimHash) this.hostClaimHashes.set(room.id, restored.hostClaimHash);
+      if (restored.book) {
+        try {
+          this.books.set(room.id, MemoryBook.fromJSON(restored.book));
+        } catch (err) {
+          report.warnings.push({ file: `${room.id}.book.json`, message: `Memory Book not restored: ${(err as Error).message}` });
         }
       }
-    } catch {
-      // No snapshots yet — start empty.
     }
+    for (const f of report.failed) console.error(`[restore] NOT LOADED ${f.file}: ${f.reason}`);
+    for (const w of report.warnings) console.warn(`[restore] warning ${w.file}: ${w.message}`);
+    for (const q of report.quarantined) console.warn(`[restore] moved ${q.file} to ${q.movedTo}: ${q.reason}`);
+    if (report.loaded.length || report.failed.length) console.log(`[restore] ${report.loaded.length} room(s) restored, ${report.failed.length} not loaded (data: ${report.dataDir})`);
+    return report;
+  }
+
+  /** Host claim check: requires a claim on record and a matching token. */
+  private hostClaimValid(roomId: string, token: unknown): boolean {
+    const expected = this.hostClaimHashes.get(roomId);
+    return typeof expected === "string" && typeof token === "string" && token.length > 0 && hashToken(token) === expected;
   }
 
   async listen(port = 0): Promise<number> {
@@ -263,7 +278,7 @@ export class LocalServer {
           this.send(res, 429, { error: "Too many join attempts" });
           return;
         }
-        if (body["asHost"] === true && body["hostClaimToken"] !== this.hostClaims.get(room.id)) {
+        if (body["asHost"] === true && !this.hostClaimValid(room.id, body["hostClaimToken"])) {
           this.send(res, 400, { error: "Host claim requires the room creation token" });
           return;
         }
@@ -302,9 +317,8 @@ export class LocalServer {
         const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night");
         const hostClaimToken = randomUUID();
         this.rooms.set(room.id, room);
-        this.hostClaims.set(room.id, hostClaimToken);
+        this.hostClaimHashes.set(room.id, hashToken(hostClaimToken));
         this.persist(room);
-        this.persistClaim(room.id);
         this.send(res, 201, { roomId: room.id, joinCode: room.joinCode, name: room.name, hostClaimToken });
         return;
       }
@@ -414,7 +428,7 @@ export class LocalServer {
             return;
           }
           const body = await this.readBody(req);
-          if (body["asHost"] === true && body["hostClaimToken"] !== this.hostClaims.get(room.id)) {
+          if (body["asHost"] === true && !this.hostClaimValid(room.id, body["hostClaimToken"])) {
             this.send(res, 400, { error: "Host claim requires the room creation token" });
             return;
           }
@@ -553,6 +567,10 @@ export class LocalServer {
       }
       this.send(res, 404, { error: "Not found" });
     } catch (err) {
+      if (err instanceof PersistError) {
+        this.send(res, 500, { error: err.message });
+        return;
+      }
       this.send(res, 400, { error: err instanceof Error ? err.message : "Bad request" });
     }
   }
@@ -648,8 +666,8 @@ export class LocalServer {
         this.persist(room);
         ws.send(JSON.stringify({ kind: "ack", result }));
         this.broadcast(roomId);
-      } catch {
-        ws.send(JSON.stringify({ kind: "error", code: "INVALID_MESSAGE" }));
+      } catch (err) {
+        ws.send(JSON.stringify({ kind: "error", code: err instanceof PersistError ? "PERSIST_FAILED" : "INVALID_MESSAGE" }));
       }
     });
     ws.on("close", () => {
