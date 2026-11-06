@@ -4,6 +4,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-leaderboard.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { answerKitQuestions } from "./lib/answer.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -37,25 +38,17 @@ async function roomIdOf(page) {
   return page.evaluate(() => sessionStorage.getItem("cgn_roomId"));
 }
 // Answer every question with the same option index (0-3).
+// Sprint 2 (Workstream I): observable-state answering that fails at the
+// missing interaction instead of returning silently (scripts/lib/answer.mjs).
 async function answerOption(page, optionIndex) {
-  for (let i = 0; i < 12; i++) {
-    if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }).catch(() => false)) return;
-    const slab = page.locator(".mz-slab:not([disabled])").nth(optionIndex);
-    if (await slab.isVisible({ timeout: 1500 }).catch(() => false)) { await slab.click(); await sleep(200); }
-    const next = page.getByRole("button", { name: "Next question" });
-    if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click(); await sleep(200); }
-    const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
-    if (await doneBtn.isVisible({ timeout: 1000 }).catch(() => false)) { await doneBtn.click(); await sleep(200); }
-  }
+  const player = (await page.evaluate(() => sessionStorage.getItem("cgn_name"))) || "player";
+  await answerKitQuestions(page, { player, choose: () => optionIndex });
 }
 // Answer only the first n questions, then stop (used before disconnecting).
 async function answerFirstN(page, n, optionIndex = 0) {
-  for (let i = 0; i < n; i++) {
-    const slab = page.locator(".mz-slab:not([disabled])").nth(optionIndex);
-    if (await slab.isVisible({ timeout: 15000 }).catch(() => false)) { await slab.click(); await sleep(200); }
-    const next = page.getByRole("button", { name: "Next question" });
-    if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click(); await sleep(200); }
-  }
+  const player = (await page.evaluate(() => sessionStorage.getItem("cgn_name"))) || "player";
+  const answered = await answerKitQuestions(page, { player, choose: () => optionIndex, limit: n });
+  if (answered !== n) throw new Error(`${player}: expected to answer ${n} questions before disconnecting, answered ${answered}`);
 }
 // Sprint 2: an official start asks before leaving out a player who is
 // still reconnecting. These scenarios continue without the player who

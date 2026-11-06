@@ -8,6 +8,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-game-night.mjs <baseUrl>
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { answerKitQuestions } from "./lib/answer.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -127,23 +128,12 @@ async function getTvProjection(page) {
 }
 // Answer all 10 Trivia questions with the same slab index every time
 // (identical answers across players => identical scores => a tie).
+// Sprint 2 (Workstream I): answers through observable app states and
+// fails AT the missing interaction (player, question, state) instead of
+// returning silently when the UI is slower than a fixed sleep.
 async function answerAllTrivia(page, slabIndex) {
-  await page.locator(".mz-question").waitFor({ timeout: 15000 });
-  for (let i = 0; i < 12; i++) {
-    if (await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }).catch(() => false)) return;
-    const slab = page.locator(".mz-slab:not([disabled])").nth(slabIndex);
-    if (await slab.isVisible({ timeout: 1500 }).catch(() => false)) {
-      await slab.click();
-      await sleep(250);
-    }
-    const next = page.getByRole("button", { name: "Next question" });
-    if (await next.isVisible({ timeout: 500 }).catch(() => false)) {
-      await next.click();
-      await sleep(250);
-    } else {
-      return;
-    }
-  }
+  const player = (await page.evaluate(() => sessionStorage.getItem("cgn_name"))) || "player";
+  await answerKitQuestions(page, { player, choose: () => slabIndex });
 }
 // Answer all 10 Math questions. Math renders in the Mchezo kit since
 // §11 — the same QuestionScreen shape as Trivia — so it uses the same
