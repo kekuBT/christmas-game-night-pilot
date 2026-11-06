@@ -21,13 +21,24 @@ export type QualificationPolicy =
   /** Took part (answered/guessed/submitted at least once) in at least `min` Cup games that day. */
   | { kind: "played-games"; min: number }
   /** Took part in at least `share` (0-1) of that day's Cup games, and in at least one. */
-  | { kind: "share-of-day"; share: number };
+  | { kind: "share-of-day"; share: number }
+  /**
+   * Meaningful scoring participation: in at least `minGames` Cup games that
+   * day, the player completed at least `share` of the game's scoring items
+   * (answers, guesses, rounds, groups) or played it to its end.
+   */
+  | { kind: "meaningful-games"; minGames: number; share: number };
 
 export interface DayAttendance {
   /** Cup games that day with this player on the roster. */
   gamesOnRoster: number;
   /** Of those, games in which the player did at least one thing. */
   gamesPlayed: number;
+  /**
+   * Per Cup game that day: the player's participation record, or null for a
+   * game from before Sprint 3 (no record; treated as meaningful, as before).
+   */
+  participations?: ({ done: number; of: number; finished?: boolean } | null)[];
   /** Cup games played in the room that day. */
   gamesThatDay: number;
 }
@@ -40,7 +51,18 @@ export const PROPOSED_QUALIFICATION_POLICIES: readonly { id: string; policy: Qua
   { id: "B", policy: { kind: "played-games", min: 1 }, summary: "Took part in at least one Cup game that day (at least one answer, guess or submission)." },
   { id: "C", policy: { kind: "played-games", min: 2 }, summary: "Took part in at least two Cup games that day." },
   { id: "D", policy: { kind: "share-of-day", share: 0.5 }, summary: "Took part in at least half of that day's Cup games." },
+  { id: "E", policy: { kind: "meaningful-games", minGames: 1, share: 0.5 }, summary: "Played at least half of one Cup game that day (e.g. 5 of 10 answers, 2 of 3 rounds, a Connections puzzle to its end)." },
 ]);
+
+/** The share of a game a player must complete for it to count as meaningful participation (option E). */
+export const MEANINGFUL_SHARE = 0.5;
+
+/** Did this participation record show meaningful scoring participation? */
+export function meaningful(p: { done: number; of: number; finished?: boolean } | undefined, share = MEANINGFUL_SHARE): boolean {
+  if (!p) return false;
+  if (p.finished) return true;
+  return p.of > 0 && p.done / p.of >= share;
+}
 
 export function qualifies(policy: QualificationPolicy, a: DayAttendance): boolean {
   switch (policy.kind) {
@@ -50,5 +72,7 @@ export function qualifies(policy: QualificationPolicy, a: DayAttendance): boolea
       return a.gamesPlayed >= Math.max(1, policy.min);
     case "share-of-day":
       return a.gamesPlayed >= 1 && a.gamesThatDay > 0 && a.gamesPlayed / a.gamesThatDay >= policy.share;
+    case "meaningful-games":
+      return (a.participations ?? []).filter((p) => p === null || meaningful(p, policy.share)).length >= Math.max(1, policy.minGames);
   }
 }

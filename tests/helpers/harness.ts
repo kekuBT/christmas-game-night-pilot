@@ -11,6 +11,7 @@ import { join } from "node:path";
 import WebSocket from "ws";
 import { LocalServer } from "../../src/server/http.js";
 import { policyFor } from "../../src/server/lifecycle.js";
+import { CLIENT_PROTOCOL, PROTOCOL_HEADER } from "../../src/shared/clientProtocol.js";
 
 export type Json = Record<string, unknown>;
 
@@ -77,17 +78,26 @@ export class Harness {
     rmSync(this.dataDir, { recursive: true, force: true });
   }
 
+  /**
+   * Requests speak the current client protocol, like the shipped web app.
+   * Set true to act as a tab loaded before Sprint 3 (no version sent).
+   */
+  legacyClient = false;
+  private protocolHeaders(): Record<string, string> {
+    return this.legacyClient ? {} : { [PROTOCOL_HEADER]: String(CLIENT_PROTOCOL) };
+  }
+
   async post(path: string, body: unknown, token?: string): Promise<{ status: number; body: Json }> {
     const r = await fetch(this.base + path, {
       method: "POST",
-      headers: { "content-type": "application/json", ...(token ? { "x-session-token": token } : {}) },
+      headers: { "content-type": "application/json", ...this.protocolHeaders(), ...(token ? { "x-session-token": token } : {}) },
       body: JSON.stringify(body),
     });
     return { status: r.status, body: (await r.json().catch(() => ({}))) as Json };
   }
 
   async get(path: string, headers: Record<string, string> = {}): Promise<{ status: number; body: Json }> {
-    const r = await fetch(this.base + path, { headers });
+    const r = await fetch(this.base + path, { headers: { ...this.protocolHeaders(), ...headers } });
     return { status: r.status, body: (await r.json().catch(() => ({}))) as Json };
   }
 
@@ -118,7 +128,7 @@ export class Harness {
    */
   openSocket(p: Player, opts: { autoPong?: boolean; onMessage?: (m: Json) => void } = {}): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
-      const ws = new WebSocket(`ws://localhost:${this.port}/?roomId=${this.roomId}&audience=player`, [`cgn-session-${p.token}`], { autoPong: opts.autoPong ?? true });
+      const ws = new WebSocket(`ws://localhost:${this.port}/?roomId=${this.roomId}&audience=player${this.legacyClient ? "" : `&protocol=${CLIENT_PROTOCOL}`}`, [`cgn-session-${p.token}`], { autoPong: opts.autoPong ?? true });
       this.sockets.add(ws);
       let accepted = false;
       ws.on("message", (d) => {

@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { randomUUID } from "node:crypto";
 import { FakeClock, Harness, myGame, type Json, type Player } from "./helpers/harness.js";
 import { RoomEngine } from "../src/server/room.js";
+import { CLIENT_PROTOCOL, clientNeedsRefresh, MIN_CLIENT_PROTOCOL } from "../src/shared/clientProtocol.js";
 
 let h: Harness;
 let clock: FakeClock;
@@ -132,5 +133,61 @@ describe("Math games from before Sprint 3 keep their rules", () => {
     const q = g.questions![0]!;
     const r = restored.submitIntent({ kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: restored.id, gameInstanceId: g.id, action: "submit-math-answer", payload: { questionId: q.id, chosenIndex: q.correctIndex } }, host);
     expect((r.result as Json)["points"]).toBe(120);
+  });
+});
+
+describe("outdated clients (owner decision: no recorded opening, no bonus — and tell them to refresh)", () => {
+  it("every projection publishes the protocol; an up-to-date app is never asked to refresh", async () => {
+    const { bea, gid } = await setup();
+    const p = await h.projection(bea);
+    expect(p["protocol"]).toEqual({ current: CLIENT_PROTOCOL, min: MIN_CLIENT_PROTOCOL });
+    expect(myGame(p, gid)["refreshNeeded"]).toBeUndefined();
+    expect(clientNeedsRefresh(MIN_CLIENT_PROTOCOL)).toBe(false);
+    expect(clientNeedsRefresh(MIN_CLIENT_PROTOCOL + 1)).toBe(true);
+  });
+
+  it("a tab from before Sprint 3 can still play, is told to refresh, and scores correctness only for that game", async () => {
+    const { bea, gid } = await setup();
+    h.legacyClient = true; // Bea's old tab sends no protocol version
+    const view = myGame(await h.projection(bea), gid);
+    expect(view["refreshNeeded"]).toBe(true);
+    expect((view["questions"] as Json[]).every((q) => typeof q["prompt"] === "string")).toBe(true); // playable, not blank
+    expect(h.game(gid).promptsExposed).toEqual([bea.playerId]);
+    h.legacyClient = false;
+    // Even if she now refreshes and opens properly, she already saw every prompt: no bonus this game.
+    const q = qs(gid)[0]!;
+    await h.intent(bea, gid, "math-open", { questionId: q.id });
+    clock.advance(1_000);
+    const r = await h.intent(bea, gid, "submit-math-answer", { questionId: q.id, chosenIndex: q.correctIndex });
+    expect(r["result"]).toMatchObject({ points: 100, speedBonus: "not-timed" });
+    expect(String((r["result"] as Json)["refreshAdvice"])).toMatch(/Refresh the page/);
+    // Audited once, saved before anyone acts on it, and survives a restart.
+    expect(h.engine().ledger.filter((e) => e.type === "math-untimed-client" && e.playerId === bea.playerId)).toHaveLength(1);
+    await h.restart();
+    expect(h.game(gid).promptsExposed).toEqual([bea.playerId]);
+  });
+
+  it("hiding the version can't be used to read prompts early for a bonus", async () => {
+    const { ada, gid } = await setup();
+    h.legacyClient = true;
+    await h.projection(ada); // read every prompt in advance
+    h.legacyClient = false;
+    for (const q of qs(gid).slice(0, 3)) {
+      await h.intent(ada, gid, "math-open", { questionId: q.id });
+      const r = await h.intent(ada, gid, "submit-math-answer", { questionId: q.id, chosenIndex: q.correctIndex });
+      expect((r["result"] as Json)["points"]).toBe(100);
+    }
+  });
+
+  it("other players are unaffected by one player's old tab", async () => {
+    const { ada, bea, gid } = await setup();
+    h.legacyClient = true;
+    await h.projection(bea);
+    h.legacyClient = false;
+    const q = qs(gid)[0]!;
+    await h.intent(ada, gid, "math-open", { questionId: q.id });
+    clock.advance(2_000);
+    expect(((await h.intent(ada, gid, "submit-math-answer", { questionId: q.id, chosenIndex: q.correctIndex }))["result"] as Json)["points"]).toBe(120);
+    expect(myGame(await h.projection(ada), gid)["refreshNeeded"]).toBeUndefined();
   });
 });

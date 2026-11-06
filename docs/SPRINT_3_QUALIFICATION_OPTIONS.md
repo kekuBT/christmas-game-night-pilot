@@ -10,19 +10,38 @@ Today a day qualifies if the player was **on the roster of any official game tha
 
 ## Options
 
-| | Rule | Example: Cal was on the roster of 3 games and answered in 1 |
-|---|---|---|
-| **A** (current, active) | On the roster of at least 1 official game that day | qualifies |
-| **B** | Took part (at least one answer, guess or submission) in at least 1 official game that day | qualifies |
-| **C** | Took part in at least 2 official games that day | does not qualify |
-| **D** | Took part in at least half of that day's official games | does not qualify (1 of 3) |
+| | Rule | Cal was on 3 games' rosters, answered once | Short night: one game, 6 of 10 answered |
+|---|---|---|---|
+| **A** (current, **active**) | On the roster of ≥ 1 official game that day | qualifies | qualifies |
+| B | Took part (≥ 1 answer, guess or submission) in ≥ 1 official game | qualifies | qualifies |
+| C | Took part in ≥ 2 official games | does not | does not |
+| D | Took part in ≥ half of that day's official games | does not | qualifies |
+| **E** (proposed) | **Meaningful scoring participation:** completed ≥ half of the scoring items of ≥ 1 official game, or played it to its end | **does not** | **qualifies** |
 
-"Took part" is read from the server's own participation record for each game, so it can't be faked by the client. Choosing to sit out (abstain) does not count as taking part.
+"Took part" and "completed" come from the server's own record of each game (`outcome.participation`), so the client can't fake them. Choosing to sit out is never counted as taking part.
 
-## Recommendation
+## Owner decision (2026-11-06)
 
-1. **B: took part in at least one official game.** This is the smallest change that closes the gap. You have to actually play to attend, and a family member who joins for only one game still gets the day. **Recommended.**
-2. **C: at least two games.** Use this if one-game drop-ins shouldn't earn attendance. It can be unfair on days when only one or two games run.
-3. **D: half the day's games.** This adjusts to the length of the night. It is harder to explain, and on short days it behaves like B.
+**B is not approved:** one answer is not enough evidence of meaningful participation. The current rule (A) stays active until a threshold is approved.
 
-Whatever you choose, it applies from the next Cup onward. Cups in progress and Cups already played keep the rule they started with.
+## Proposal: option E, meaningful scoring participation
+
+A day qualifies when, in **at least one** official game that day, the player completed **at least half** of what that game scores:
+
+| Game | "Half" means |
+|---|---|
+| Trivia, Who Said That?, Geography, Math | ≥ 5 of 10 answers |
+| Guess the Year, Closest Wins | ≥ 4 of 8 guesses |
+| Caption Clash, Category Sprint | ≥ 2 of 3 rounds submitted |
+| Word Connections | ≥ 2 of 4 groups solved, **or** the puzzle played to its end (4 groups or 4 mistakes) |
+
+Why this fits:
+- **Meaningful:** one tap is never enough; the player has to genuinely play most of a game.
+- **Short family nights:** a single game played properly is enough, so a night with one or two games still counts for everyone who played them.
+- **Fair to time limits:** a player who runs out of time at 5 of 10 still qualifies. Someone who joins, answers once and leaves doesn't.
+- **Hard to game:** the record is server-side, sitting out doesn't count, and practice games never count.
+- **Configurable:** the share (0.5) and minimum games (1) are parameters of the policy, so for example `minGames: 2` for longer nights is a one-line change.
+
+Implemented and tested (`src/scoring/qualification.ts` option E, `tests/cup-integrity.test.ts`), **not active.** Games recorded before Sprint 3 have no participation record and keep counting as before.
+
+Whatever you choose applies from the next Cup onward. Cups in progress and Cups already played keep the rule they started with.

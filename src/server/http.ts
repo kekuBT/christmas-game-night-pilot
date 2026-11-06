@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import { RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
+import { parseClientProtocol, PROTOCOL_HEADER, PROTOCOL_PARAM } from "../shared/clientProtocol.js";
 import { MemoryBook } from "./memorybook.js";
 import { hashToken } from "../shared/protocol.js";
 import { RoomStore, type RestoreReport } from "./persistence.js";
@@ -53,6 +54,8 @@ interface SocketMeta {
   roomId: string;
   actorId: string;
   audience: "player" | "tv" | "host" | "cohost" | "spectator";
+  /** Protocol version the client announced (undefined: a tab from before Sprint 3). */
+  clientProtocol?: number;
   /** Set only for spectator sockets: the viewer whose presence this socket holds. */
   spectatorId?: string;
   /** The slot's credentialVersion when this socket authenticated. A socket from a replaced credential is stale. */
@@ -104,7 +107,7 @@ export class LocalServer {
   private nudges = new Map<string, { fromId: string; targetId: string; ts: number }[]>();
   private nudgeStamps = new Map<string, number[]>();
   static readonly REACTION_SET = ["🎄", "❄️", "🎉", "👏", "😂", "🔥"];
-  private projectFor(room: RoomEngine, audience: "player" | "tv" | "host" | "cohost" | "spectator", actorId?: string): Record<string, unknown> {
+  private projectFor(room: RoomEngine, audience: "player" | "tv" | "host" | "cohost" | "spectator", actorId?: string, clientProtocol?: number): Record<string, unknown> {
     const now = Date.now();
     const recent = (this.reactions.get(room.id) ?? []).filter((r) => now - r.ts < 15000);
     const nudgedBy = actorId
@@ -113,7 +116,7 @@ export class LocalServer {
     // Spectators receive exactly the public TV projection — never a player
     // view, never private state. The engine's "tv" audience is that projection.
     const engineAudience = audience === "spectator" ? "tv" : audience;
-    const base = { ...room.project(engineAudience, actorId), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy };
+    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy };
     // Host-assisted recovery requests: host/cohost only. Shows the seat and
     // the match code to compare; never the requester's secret.
     const me = actorId ? room.players.get(actorId) : undefined;
@@ -634,7 +637,10 @@ export class LocalServer {
             this.send(res, 403, { error: "Cohost projection requires cohost role" });
             return;
           }
-          this.send(res, 200, this.projectFor(room, requested, player.id));
+          this.send(res, 200, this.projectFor(room, requested, player.id, parseClientProtocol(req.headers[PROTOCOL_HEADER])));
+          // A pre-Sprint 3 tab was just shown Math prompts in advance: save the
+          // resulting "no speed bonus for this player" mark before anything else.
+          if (room.takeDirty()) this.persist(room);
           return;
         }
         // Issue a recovery code for MY seat (shown once, to me only).
@@ -972,7 +978,7 @@ export class LocalServer {
       actorId = player.id;
       audience = requestedAudience;
     }
-    const meta: SocketMeta = { roomId, actorId, audience, spectatorId, alive: true, credentialVersion: actorId ? room.players.get(actorId)?.credentialVersion ?? 0 : undefined };
+    const meta: SocketMeta = { roomId, actorId, audience, spectatorId, alive: true, clientProtocol: parseClientProtocol(url.searchParams.get(PROTOCOL_PARAM)), credentialVersion: actorId ? room.players.get(actorId)?.credentialVersion ?? 0 : undefined };
     const entry = { ws, meta };
     this.sockets.add(entry);
     ws.on("pong", () => { meta.alive = true; });
@@ -994,7 +1000,8 @@ export class LocalServer {
       room.setSpectatorConnected(spectatorId, true);
       this.broadcast(roomId);
     }
-    ws.send(JSON.stringify({ kind: "projection", state: this.projectFor(room, audience, actorId || undefined) }));
+    ws.send(JSON.stringify({ kind: "projection", state: this.projectFor(room, audience, actorId || undefined, meta.clientProtocol) }));
+    if (room.takeDirty()) { try { this.persist(room); } catch { /* logged by persist */ } }
     ws.on("message", (data) => {
       try {
         const msg = JSON.parse(data.toString()) as { intent?: unknown };
@@ -1056,9 +1063,10 @@ export class LocalServer {
     for (const { ws, meta } of this.sockets) {
       if (meta.roomId !== roomId) continue;
       if (ws.readyState === 1) {
-        ws.send(JSON.stringify({ kind: "projection", state: this.projectFor(room, meta.audience, meta.actorId || undefined) }));
+        ws.send(JSON.stringify({ kind: "projection", state: this.projectFor(room, meta.audience, meta.actorId || undefined, meta.clientProtocol) }));
       }
     }
+    if (room.takeDirty()) { try { this.persist(room); } catch { /* logged by persist */ } }
   }
 }
 

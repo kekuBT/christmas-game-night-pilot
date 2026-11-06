@@ -17,6 +17,8 @@
 //     without waiting for silent players.
 //  C. Lobby: Impostor is labelled practice-only, the Official mode is
 //     disabled, and Start starts practice. The Cup is the Individual Family Cup.
+//  D. A tab that sends no protocol version (as one loaded before Sprint 3)
+//     shows "refresh", can still play Math, and is marked untimed.
 // Usage: node scripts/check-lifecycle.mjs
 import { spawn } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -205,6 +207,55 @@ try {
   }, 15000);
   await expectSoon("B. Cal's screen shows the next question", async () => (await cal.getByTestId("mz-num-input").count()) === 1, 10000);
   check("no horizontal overflow on results/countdown screens", await ada.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+
+  // ---- D. An outdated tab is detected and told to refresh (owner decision) ----
+  // Dee's tab behaves like one loaded before Sprint 3: it sends no protocol
+  // version (stripped under the app), so the server can't time her Math.
+  for (const p of [ada, bea, cal]) { const back = p.getByRole("button", { name: "Back to lobby" }); if (await back.count()) await back.first().click().catch(() => {}); }
+  await expectSoon("D. Closest has ended (its questions time out)", async () => (await serverGame(cal, cgid)).game?.status === "finished", 60000);
+  const deeCtx = await browser.newContext(vp);
+  await deeCtx.addInitScript(() => {
+    const nf = window.fetch.bind(window);
+    window.fetch = (input, init) => { const h = new Headers(init?.headers ?? {}); h.delete("x-mchezo-protocol"); return nf(input, { ...init, headers: h }); };
+    const NativeWS = window.WebSocket;
+    window.WebSocket = function (url, protocols) { return new NativeWS(String(url).replace(/&protocol=\d+/, ""), protocols); };
+    window.WebSocket.prototype = NativeWS.prototype;
+    Object.assign(window.WebSocket, { CONNECTING: 0, OPEN: 1, CLOSING: 2, CLOSED: 3 });
+  });
+  const dee = await deeCtx.newPage();
+  const deeErrors = [];
+  dee.on("pageerror", (e) => deeErrors.push(String(e.message)));
+  try {
+    await dee.goto(BASE, { waitUntil: "domcontentloaded" });
+    await dee.getByPlaceholder("e.g. Auntie June").fill("Dee");
+    await dee.locator(".mz-code__input").fill(code);
+    await dee.getByRole("button", { name: "Join the game" }).click();
+    // Joining right after a game ended shows that game's results first (existing behaviour).
+    const back = dee.getByTestId("show-back-to-lobby");
+    if (await back.waitFor({ timeout: 5000 }).then(() => true, () => false)) await back.click();
+    await dee.getByRole("heading", { name: "You’re in, Dee." }).waitFor({ timeout: 15000 });
+  } catch (e) {
+    throw new Error(`Dee could not join: ${e.message.split("\n")[0]} | errors: ${deeErrors.join(" ; ")} | screen: ${(await dee.evaluate(() => document.body.innerText)).replace(/\s+/g, " ").slice(0, 200)}`, { cause: e });
+  }
+  for (const p of [ada, bea, cal]) await p.getByRole("heading", { name: /You’re in/ }).waitFor({ timeout: 15000 }).catch(() => {});
+  const mgid = await startViaApi(ada, "math-mayhem", false, 2);
+  await dee.locator(".mz-question").waitFor({ timeout: 30000 });
+  await expectSoon("D. the outdated tab shows the refresh banner", async () => (await dee.getByTestId("mz-refresh-banner").count()) === 1, 10000);
+  check("D. the outdated tab can still play (the question is shown, not blank)", /= \?/.test(await text(dee.locator(".mz-question"))));
+  await ada.locator(".mz-question").waitFor({ timeout: 30000 });
+  check("D. an up-to-date phone shows no refresh banner", (await ada.getByTestId("mz-refresh-banner").count()) === 0);
+  const ids2 = await cal.evaluate(async () => Object.fromEntries(((await (await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/projection?audience=tv`)).json()).players ?? []).map((p) => [p.displayName, p.id])));
+  const marked = await ada.evaluate(async (gid) => {
+    const r = await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/ledger`, { headers: { "x-session-token": sessionStorage.getItem("cgn_token") ?? "" } });
+    return (await r.json()).filter((e) => e.type === "math-untimed-client" && e.gameInstanceId === gid).map((e) => e.playerId);
+  }, mgid);
+  check("D. the server marked only Dee as untimed for this game", JSON.stringify(marked) === JSON.stringify([ids2.Dee]), JSON.stringify(marked));
+  await dee.screenshot({ path: screenshotPath("docs/sprint-3-screenshots/04-outdated-tab-refresh.png") });
+  await dee.getByTestId("mz-refresh-later").click();
+  check("D. 'Later' hides the banner so it never blocks answering", (await dee.getByTestId("mz-refresh-banner").count()) === 0);
+  await dee.locator(".mz-slab:not([disabled])").nth(3).click({ timeout: 5000 });
+  await expectSoon("D. the outdated tab can answer (even the bottom option)", async () => (await dee.locator('main[aria-label="Answer locked in"]').count()) === 1, 10000);
+  await deeCtx.close();
 } finally {
   await browser.close();
   await stopServer(server);

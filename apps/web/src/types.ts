@@ -78,6 +78,8 @@ export interface PlayerGame extends LifecycleFields {
   /** Math (Sprint 3): prompt/options arrive only once the question is opened. */
   questions?: { id: string; prompt?: string; options?: string[] }[];
   rawScores?: Record<string, number>;
+  /** Math: this tab is treated as outdated (it was sent every prompt); refresh to get timed questions. */
+  refreshNeeded?: boolean;
   /** Math: own server-measured answer times (ms from reveal to answer). */
   myAnswerTimes?: Record<string, number>;
 }
@@ -113,6 +115,8 @@ export interface Ceremony {
 export interface Projection {
   /** The server's clock when this projection was made; countdowns use deadline − serverNow. */
   serverNow?: number;
+  /** Protocol versions (Sprint 3): below `min`, this app must be refreshed. */
+  protocol?: { current: number; min: number };
   /** The Cup's fixed format (Sprint 3): label and one plain sentence. */
   competition?: { format: "individual-only" | "combined-75-25"; label: string; description: string; teamGamesCount: boolean };
   roomId: string;

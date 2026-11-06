@@ -630,3 +630,24 @@ Owner direction 2026-11-04 11:57 EST: the application is officially named **Mche
 - Test server stopped (port 3457 confirmed closed). `data/` left untouched (git-ignored test-room files).
 - EXACT NEXT TASK: Work Package C — run the game-night simulation driver (`scripts/check-game-night.mjs`, untracked, not yet run) once, fix what it finds (only low-risk defects within the approved rules), write the review doc, commit. Then Work Package D (Guess the Year modernization, range 1896–2025).
 - No GitHub publish, no merge/deploy/spend, no dealer contact. GitHub coordination cron left disabled and untouched.
+
+## Sprint 3 — game lifecycle, competitive fairness, championship integrity (2026-11-06, branch `claude/sprint-3-game-lifecycle`, from 3119f17)
+Milestone: Sprint 3 CP1–CP6 implemented; owner decisions of 2026-11-06 applied (D-S3-02, D-S3-09, D-S3-12 approved; qualification option B NOT approved → option E proposed, rule A stays active). Verdict of the full regression on the final commit is recorded in the Sprint 3 report, not here (a result belongs to one run on one revision).
+
+Completed features (files):
+- Lifecycle engine: `src/server/lifecycle.ts` (policy table P1/P2/P8/P9), `RoomEngine.tick/syncPhase/expirePhase/finalize/voidGame` in `src/server/room.ts`, server-wide sweep + tick-before-request in `src/server/http.ts`.
+- Six independent games end at their deadline with partial results (P3) and participation (P5); lock-step phase deadlines + backstop (Closest, Caption, Sprint); Impostor/Charades practice-only, Charades turn limit.
+- Stale-phase guard (`phaseKey`); no routine host Skip (endpoint idempotent, never voids).
+- Individual Family Cup (`src/scoring/format.ts`, immutable per room; legacy rooms combined 75/25); qualification options A–E (`src/scoring/qualification.ts`, A active).
+- Math per-question server timing (`math-open`), outdated-client detection and refresh banner (`src/shared/clientProtocol.ts`, `apps/web/src/components/RefreshBanner.tsx`).
+- UI: server-time countdowns, outcome/participation lines, practice-only lobby labels, Cup label (`apps/web/src/ui/mchezo/components/Lifecycle.tsx`, `lib/lifecycle.ts`).
+- Test-only time scale `MCHEZO_LIFECYCLE_SCALE` (refused in production); own-server browser driver `scripts/check-lifecycle.mjs`; failure diagnosis `scripts/lib/diagnose.mjs`.
+- Docs: DECISIONS D-S3-01..13, `SPRINT_3_QUALIFICATION_OPTIONS.md`, `SPRINT_3_GAME_DESIGN_REVIEW.md`, `SPRINT_3_RECLASSIFICATION_DESIGN.md`, TESTING.md.
+
+Tests added: lifecycle (27), phased (14), cup-integrity (20, incl. a 4-day Cup generated on 3119f17), math-timing (13), lifecycle-display (7), lifecycle-scale (4), privacy-sprint3 (3), diagnose (1). Sprint 1/2 tests that encoded superseded behaviour were rewritten to the approved rules, not deleted.
+
+Failures found and fixed during the sprint: Math next-question clock started under the locked view (caught by check-answer-race on the full gate); refresh banner covered answer buttons (caught by check-lifecycle); drivers assuming the old disconnect/skip/official-Impostor rules (check-f5, check-game-night, check-leaderboard, check-math).
+
+External blockers: none. Not done (needs people/devices): real-device acceptance, real-family timing playtest.
+Next task: owner decisions on qualification option E and measured durations; Sprint 4 only when authorised (recommendation in `docs/SPRINT_3_GAME_DESIGN_REVIEW.md`).
+Risk: content is thin for a 7-day Cup (repeats); P2 durations are unmeasured; network delay counts against Math speed.

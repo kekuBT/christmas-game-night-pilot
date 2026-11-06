@@ -29,6 +29,8 @@ import { midrank } from "./components/midrank.js";
 import { sendIntent } from "./components/intentRetry.js";
 import { connection, roomNotices } from "./connectionStore.js";
 import { seats } from "./session.js";
+import { setRefreshNeeded } from "./components/RefreshBanner.js";
+import { CLIENT_PROTOCOL, clientNeedsRefresh, PROTOCOL_PARAM } from "../../../src/shared/clientProtocol.js";
 import { RememberChoice, ThisDeviceCard, WelcomeBack, useRememberedSeats } from "./components/mchezo/DeviceSeat.js";
 import { RecoverScreen, RecoveryCodeSection, RecoveryRequestsCard } from "./components/mchezo/Recovery.js";
 import { ReadinessCard, type StartDecision } from "./components/mchezo/ReadinessCard.js";
@@ -188,7 +190,7 @@ export function App() {
       if (stopped) return;
       try {
         const proto = location.protocol === "https:" ? "wss" : "ws";
-        const wsUrl = `${proto}://${location.host}/?roomId=${roomId}&audience=player`;
+        const wsUrl = `${proto}://${location.host}/?roomId=${roomId}&audience=player&${PROTOCOL_PARAM}=${CLIENT_PROTOCOL}`;
         // Session token travels in the WebSocket subprotocol header, never
         // in the URL. Read it fresh each attempt, not from the effect
         // closure, so a retry after a session change uses the live token.
@@ -551,6 +553,9 @@ export function App() {
   const playingGame = myGames.find((g) => g.status === "playing");
   // Countdowns use the server's clock, never this phone's own clock alone.
   noteServerTime(proj?.serverNow);
+  // Deferred: the banner is another component and must not update during this render.
+  const refreshNeeded = clientNeedsRefresh(proj?.protocol?.min) || myGames.some((g) => g.refreshNeeded === true);
+  queueMicrotask(() => setRefreshNeeded(refreshNeeded));
   const latestFinished = myGames.filter((g) => g.status === "finished").slice(-1)[0];
   const publicPlaying = (proj?.games ?? []).find((g) => g.id === playingGame?.id);
   const publicFinished = (proj?.games ?? []).find((g) => g.id === latestFinished?.id);

@@ -1,5 +1,6 @@
 import { createHash, randomInt } from "node:crypto";
 import { getGame } from "../games/registry.js";
+import { CLIENT_PROTOCOL, MIN_CLIENT_PROTOCOL } from "../shared/clientProtocol.js";
 import { COUNT_GAMES_WITH_NO_PARTICIPATION, policyFor, type EndReason, type GameOutcome, type Participation } from "./lifecycle.js";
 import { dayScore, midrankScore } from "../scoring/championship.js";
 import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
@@ -191,6 +192,13 @@ export interface GameInstance {
    * moment, on the server's clock. Absent on games started before Sprint 3.
    */
   openedAt?: Record<string, Record<string, number>>;
+  /**
+   * Math: players whose device was shown every prompt in advance because it
+   * is a pre-Sprint 3 tab that cannot open questions one by one. Their
+   * answers in this game score correctness only (no speed bonus), so hiding
+   * the client version can never be used to read prompts early.
+   */
+  promptsExposed?: string[];
   rawScores: Record<string, number>;
   startedAt?: number;
   deadlineAt?: number;
@@ -250,6 +258,13 @@ export class RoomEngine {
    * which serve.ts refuses in production. Not persisted.
    */
   lifecycleScale = 1;
+  /** A projection changed persisted state (promptsExposed); the caller saves. */
+  private dirty = false;
+  takeDirty(): boolean {
+    const d = this.dirty;
+    this.dirty = false;
+    return d;
+  }
   /** Which attendance rule makes a day "qualifying" (inactive alternatives exist; P7). */
   qualificationPolicy: QualificationPolicy = ACTIVE_QUALIFICATION_POLICY;
   seq = 0;
@@ -1000,6 +1015,17 @@ export class RoomEngine {
     }
   }
 
+  /** Record (once) that a legacy client saw every Math prompt; tell it to refresh. */
+  private markPromptsExposed(g: GameInstance, actorId: string): { refreshNeeded: true } {
+    g.promptsExposed ??= [];
+    if (!g.promptsExposed.includes(actorId)) {
+      g.promptsExposed.push(actorId);
+      this.dirty = true;
+      this.log("math-untimed-client", { gameInstanceId: g.id, playerId: actorId });
+    }
+    return { refreshNeeded: true };
+  }
+
   private stalePhase(intent: ReturnType<typeof IntentSchema.parse>): boolean {
     const sent = intent.payload["phaseKey"];
     if (typeof sent !== "string") return false;
@@ -1389,7 +1415,7 @@ export class RoomEngine {
    * qualification policy. Shared by the championship and the ceremony.
    */
   private playerDays(onlyDay?: number): PlayerDay[] {
-    const days = new Map<string, PlayerDay & { games: number; gamesPlayed: number }>();
+    const days = new Map<string, PlayerDay & { games: number; gamesPlayed: number; participations: ({ done: number; of: number; finished?: boolean } | null)[] }>();
     const gamesPerDay = new Map<number, number>();
     for (const g of this.cupGames()) {
       const day = g.day ?? 1;
@@ -1400,18 +1426,19 @@ export class RoomEngine {
       const isTeam = getGame(g.gameId).modes.includes("team");
       for (const [pid, pts] of Object.entries(g.rawScores)) {
         const key = `${pid}:${day}`;
-        const entry = days.get(key) ?? { playerId: pid, day, soloScores: [], teamScores: [], games: 0, gamesPlayed: 0 };
+        const entry = days.get(key) ?? { playerId: pid, day, soloScores: [], teamScores: [], games: 0, gamesPlayed: 0, participations: [] };
         const score = midrankScore(pts, all);
         if (isTeam) entry.teamScores.push(score); else entry.soloScores.push(score);
         entry.games += 1;
         // Took part = did at least one thing; legacy games without an outcome count as taken part.
         const part = g.outcome?.participation[pid];
         if (!part || part.done > 0 || part.finished) entry.gamesPlayed += 1;
+        entry.participations.push(part ?? null);
         days.set(key, entry);
       }
     }
     return [...days.values()]
-      .filter((d) => qualifies(this.qualificationPolicy, { gamesOnRoster: d.games, gamesPlayed: d.gamesPlayed, gamesThatDay: gamesPerDay.get(d.day) ?? 0 }))
+      .filter((d) => qualifies(this.qualificationPolicy, { gamesOnRoster: d.games, gamesPlayed: d.gamesPlayed, participations: d.participations, gamesThatDay: gamesPerDay.get(d.day) ?? 0 }))
       .map(({ playerId, day, soloScores, teamScores }) => ({ playerId, day, soloScores, teamScores }));
   }
 
@@ -1478,7 +1505,8 @@ export class RoomEngine {
     // question (an old client) scores correctness only: no proof of speed,
     // no speed bonus. Games from before Sprint 3 keep game-start timing.
     const opened = game.openedAt?.[actorId]?.[questionId];
-    const speedMs = game.openedAt === undefined ? elapsedMs : opened === undefined ? Number.POSITIVE_INFINITY : Math.max(0, now - opened);
+    const exposed = (game.promptsExposed ?? []).includes(actorId);
+    const speedMs = game.openedAt === undefined ? elapsedMs : opened === undefined || exposed ? Number.POSITIVE_INFINITY : Math.max(0, now - opened);
     // One deadline governs every game: deadlineAt when present (the same
     // check social intents use), falling back to the 5-minute window from
     // startedAt only for legacy games that predate deadlineAt. Previously
@@ -1497,7 +1525,16 @@ export class RoomEngine {
     const allDone = this.activePlayers(game).every((pid) => (game.abstained ?? []).includes(pid) || Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0));
     // Math scores accrue live per answer, so finalizing adds no score events.
     if (allDone) this.finalize(game, "completed");
-    return { accepted: true, result: { points, total: game.rawScores[actorId], ...(Number.isFinite(speedMs) && game.openedAt ? { answeredInMs: speedMs } : {}) } };
+    return {
+      accepted: true,
+      result: {
+        points,
+        total: game.rawScores[actorId],
+        ...(Number.isFinite(speedMs) && game.openedAt ? { answeredInMs: speedMs } : {}),
+        // Approved rule: no recorded opening, no speed bonus — and say why, so an outdated app is told to refresh.
+        ...(game.openedAt && !Number.isFinite(speedMs) ? { speedBonus: "not-timed", refreshAdvice: "This question wasn’t timed, so no speed bonus. Refresh the page to get the latest version of the game." } : {}),
+      },
+    };
   }
 
   /**
@@ -1635,7 +1672,8 @@ export class RoomEngine {
   }
 
   /** The ONLY pathway to outbound state. Never include secrets for the wrong audience. */
-  project(audience: Audience, actorId?: string): Record<string, unknown> {
+  project(audience: Audience, actorId?: string, opts: { clientProtocol?: number } = {}): Record<string, unknown> {
+    const legacyClient = opts.clientProtocol === undefined || opts.clientProtocol < CLIENT_PROTOCOL;
     const now = this.clock();
     const publicPlayers = [...this.players.values()].map((p) => ({
       id: p.id,
@@ -1681,6 +1719,8 @@ export class RoomEngine {
     const base: Record<string, unknown> = {
       /** The server's clock when this projection was made (deadline countdowns). */
       serverNow: now,
+      /** Clients older than `min` show "refresh" (src/shared/clientProtocol.ts). */
+      protocol: { current: CLIENT_PROTOCOL, min: MIN_CLIENT_PROTOCOL },
       roomId: this.id,
       joinCode: this.joinCode,
       name: this.name,
@@ -1732,12 +1772,16 @@ export class RoomEngine {
           // Math (Sprint 3): a question's prompt is revealed only once the
           // player has opened it (its speed clock starts then). Legacy games
           // without openedAt keep showing every prompt.
+          // A pre-Sprint 3 tab can't open questions one at a time, so it gets
+          // every prompt (or it could not play at all), and that player is
+          // marked: their answers in this game score correctness only.
           questions:
             participant && g.status === "playing"
-              ? g.questions?.map((q) => (g.openedAt === undefined || g.openedAt[actorId]?.[q.id] !== undefined || g.answers[actorId]?.[q.id] !== undefined
+              ? g.questions?.map((q) => (g.openedAt === undefined || legacyClient || g.openedAt[actorId]?.[q.id] !== undefined || g.answers[actorId]?.[q.id] !== undefined
                 ? { id: q.id, prompt: q.prompt, options: q.options }
                 : { id: q.id }))
               : undefined,
+          ...(participant && g.status === "playing" && g.openedAt !== undefined && legacyClient ? this.markPromptsExposed(g, actorId) : {}),
           // Own answer times only (server-measured), for "answered in 3.2 s".
           myAnswerTimes: participant && g.gameId === "math-mayhem" && g.openedAt !== undefined ? g.answerTimes[actorId] ?? {} : undefined,
           // Finished scores are public (same policy as the public games list);
