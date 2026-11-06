@@ -925,6 +925,80 @@ export class RoomEngine {
     return out;
   }
 
+  /**
+   * A game's state as anyone may see it: the TV, spectators, and players
+   * who are not in that game (late joiners). Never contains a hidden role,
+   * secret word, actor prompt, answer key before finish, or anyone's own
+   * private answers.
+   */
+  private publicGameState(g: GameInstance): unknown {
+    switch (g.gameId) {
+      case "impostor": return projectImpostor(g.extra as ImpostorState, "", true);
+      case "caption-clash": return projectCaption(g.extra as CaptionState, "", true);
+      case "closest-wins": return projectClosest(g.extra as ClosestState, "", true);
+      case "charades": return projectCharades(g.extra as CharadesState, "", true);
+      case "trivia":
+      case "who-said-that":
+      case "geography":
+        return { questions: this.quizQuestionsView(g) };
+      case "guess-the-year":
+        return { events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })) };
+      case "word-connections":
+        return { tiles: CONNECTIONS_BOARD.tiles.map((t) => ({ id: t.id, text: t.text })) };
+      case "category-sprint":
+        return this.sprintView(g);
+      default:
+        return undefined;
+    }
+  }
+
+  /**
+   * A game's state for one of its own players: the public state plus that
+   * player's private view (their role/word, their own answers). Only ever
+   * called for a player listed in g.players.
+   */
+  private participantGameState(g: GameInstance, actorId: string): unknown {
+    switch (g.gameId) {
+      case "impostor": return projectImpostor(g.extra as ImpostorState, actorId, false);
+      case "caption-clash": return projectCaption(g.extra as CaptionState, actorId, false);
+      case "closest-wins": return projectClosest(g.extra as ClosestState, actorId, false);
+      case "charades": return projectCharades(g.extra as CharadesState, actorId, false);
+      case "trivia":
+      case "who-said-that":
+      case "geography":
+        return { questions: this.quizQuestionsView(g), myAnswers: (g.extra as { answers: Record<string, Record<string, number>> }).answers[actorId] ?? {} };
+      case "guess-the-year":
+        return {
+          events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })),
+          myGuesses: (g.extra as { guesses: Record<string, Record<string, number>> }).guesses[actorId] ?? {},
+        };
+      case "word-connections":
+        return { tiles: CONNECTIONS_BOARD.tiles.map((t) => ({ id: t.id, text: t.text })), myState: (g.extra as { playerStates: Record<string, ConnectionsPlayerState> }).playerStates[actorId] };
+      case "category-sprint":
+        return this.sprintView(g);
+      default:
+        return undefined;
+    }
+  }
+
+  /** Quiz questions: prompt + options; the correct index only after a Trivia game finishes. */
+  private quizQuestionsView(g: GameInstance): Record<string, unknown>[] {
+    return ((g.extra as { questions: Record<string, unknown>[] }).questions ?? []).map((q) => ({
+      id: q["id"],
+      prompt: q["prompt"] ?? q["quote"],
+      // Who Said That stores its options as `speakers` (the option list, not a secret).
+      options: q["options"] ?? q["speakers"],
+      // Post-finish only, trivia only: the correct answer is public once
+      // the game is finished (scores already are). Never while playing.
+      ...(g.status === "finished" && g.gameId === "trivia" ? { correctIndex: q["correctIndex"] } : {}),
+    }));
+  }
+
+  private sprintView(g: GameInstance): Record<string, unknown> {
+    const roundIndex = (g.extra as { roundIndex: number }).roundIndex;
+    return { roundIndex, category: SPRINT_CATEGORIES[roundIndex % SPRINT_CATEGORIES.length]?.name };
+  }
+
   /** The ONLY pathway to outbound state. Never include secrets for the wrong audience. */
   project(audience: Audience, actorId?: string): Record<string, unknown> {
     const publicPlayers = [...this.players.values()].map((p) => ({
@@ -946,36 +1020,7 @@ export class RoomEngine {
       players: g.players,
       submittedCount: (g.submittedPlayers ?? []).length,
       totalPlayers: g.players.length,
-      state:
-        g.gameId === "impostor"
-          ? projectImpostor(g.extra as ImpostorState, "", true)
-          : g.gameId === "caption-clash"
-            ? projectCaption(g.extra as CaptionState, "", true)
-            : g.gameId === "closest-wins"
-              ? projectClosest(g.extra as ClosestState, "", true)
-              : g.gameId === "charades"
-                ? projectCharades(g.extra as CharadesState, "", true)
-                : g.gameId === "trivia" || g.gameId === "who-said-that" || g.gameId === "geography"
-                  ? {
-                      questions: (
-                        (g.extra as { questions: Record<string, unknown>[] }).questions ?? []
-                      ).map((q) => ({
-                        id: q["id"],
-                        prompt: q["prompt"] ?? q["quote"],
-                        options: q["options"],
-                        // Post-finish only, trivia only: the correct answer is
-                        // public once the game is finished (scores already are).
-                        // Never exposed while playing — that would leak the key.
-                        ...(g.status === "finished" && g.gameId === "trivia" ? { correctIndex: q["correctIndex"] } : {}),
-                      })),
-                    }
-                  : g.gameId === "guess-the-year"
-                    ? { events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })) }
-                    : g.gameId === "word-connections"
-                      ? { tiles: CONNECTIONS_BOARD.tiles.map((t) => ({ id: t.id, text: t.text })) }
-                      : g.gameId === "category-sprint"
-                        ? { roundIndex: (g.extra as { roundIndex: number }).roundIndex, category: SPRINT_CATEGORIES[(g.extra as { roundIndex: number }).roundIndex % SPRINT_CATEGORIES.length]?.name }
-                        : undefined,
+      state: this.publicGameState(g),
       // Public questions: prompt + options only, no correctIndex/correctAnswer, and only after finish for Math.
       questions:
         g.status === "finished"
@@ -1010,55 +1055,32 @@ export class RoomEngine {
     if (audience === "player" && actorId) {
       const me = this.players.get(actorId);
       if (!me) return base;
-      // Player sees their own answers only, never other players' answers or answer keys pre-reveal.
-      const myGames = [...this.games.values()].map((g) => ({
-        id: g.id,
-        gameId: g.gameId,
-        status: g.status,
-        myAnswers: g.answers[actorId] ?? {},
-        myScore: g.rawScores[actorId] ?? 0,
-        // Own whole-game abstention only; phase abstentions ride in state.myAbstained.
-        abstained: (g.abstained ?? []).includes(actorId),
-        state:
-          g.gameId === "impostor"
-            ? projectImpostor(g.extra as ImpostorState, actorId, false)
-            : g.gameId === "caption-clash"
-              ? projectCaption(g.extra as CaptionState, actorId, false)
-              : g.gameId === "closest-wins"
-                ? projectClosest(g.extra as ClosestState, actorId, false)
-                : g.gameId === "charades"
-                  ? projectCharades(g.extra as CharadesState, actorId, false)
-                  : g.gameId === "trivia" || g.gameId === "who-said-that" || g.gameId === "geography"
-                    ? {
-                        questions: (
-                          (g.extra as { questions: Record<string, unknown>[] }).questions ?? []
-                        ).map((q) => ({
-                          id: q["id"],
-                          prompt: q["prompt"] ?? q["quote"],
-                          options: q["options"] ?? q["speakers"],
-                          // Same post-finish-only rule as the public branch.
-                          ...(g.status === "finished" && g.gameId === "trivia" ? { correctIndex: q["correctIndex"] } : {}),
-                        })),
-                        myAnswers: (g.extra as { answers: Record<string, Record<string, number>> }).answers[actorId] ?? {},
-                      }
-                    : g.gameId === "guess-the-year"
-                      ? {
-                          events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })),
-                          myGuesses: (g.extra as { guesses: Record<string, Record<string, number>> }).guesses[actorId] ?? {},
-                        }
-                      : g.gameId === "word-connections"
-                        ? { tiles: CONNECTIONS_BOARD.tiles.map((t) => ({ id: t.id, text: t.text })), myState: (g.extra as { playerStates: Record<string, ConnectionsPlayerState> }).playerStates[actorId] }
-                        : g.gameId === "category-sprint"
-                          ? { roundIndex: (g.extra as { roundIndex: number }).roundIndex, category: SPRINT_CATEGORIES[(g.extra as { roundIndex: number }).roundIndex % SPRINT_CATEGORIES.length]?.name }
-                          : undefined,
-        questions:
-          g.status === "playing"
-            ? g.questions?.map((q) => ({ id: q.id, prompt: q.prompt, options: q.options }))
-            : undefined,
-        // Finished scores are public (same policy as the public games list);
-        // without this, ShowResults and the finished panel rendered empty.
-        rawScores: g.status === "finished" ? g.rawScores : undefined,
-      }));
+      // Player sees their own answers only, never other players' answers or
+      // answer keys pre-reveal. Private game state (hidden roles, secret
+      // words, the actor's prompt, own answers) goes ONLY to players listed
+      // in that game: joining the room after a game started does not make
+      // someone a participant, so a late joiner gets the public state.
+      const myGames = [...this.games.values()].map((g) => {
+        const participant = g.players.includes(actorId);
+        return {
+          id: g.id,
+          gameId: g.gameId,
+          status: g.status,
+          participant,
+          myAnswers: participant ? g.answers[actorId] ?? {} : {},
+          myScore: participant ? g.rawScores[actorId] ?? 0 : 0,
+          // Own whole-game abstention only; phase abstentions ride in state.myAbstained.
+          abstained: participant && (g.abstained ?? []).includes(actorId),
+          state: participant ? this.participantGameState(g, actorId) : this.publicGameState(g),
+          questions:
+            participant && g.status === "playing"
+              ? g.questions?.map((q) => ({ id: q.id, prompt: q.prompt, options: q.options }))
+              : undefined,
+          // Finished scores are public (same policy as the public games list);
+          // without this, ShowResults and the finished panel rendered empty.
+          rawScores: g.status === "finished" ? g.rawScores : undefined,
+        };
+      });
       return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost }, myGames };
     }
     if (audience === "host" || audience === "cohost") {
@@ -1110,6 +1132,25 @@ export class RoomEngine {
     engine.nextSpectator = typeof data["nextSpectator"] === "number" ? data["nextSpectator"] : 1;
     engine.nextGame = data["nextGame"] as number;
     return engine;
+  }
+
+  /**
+   * The audit ledger as one player may see it. The full ledger stays
+   * server-side (snapshots, scoring, Memory Book derivation). Two event
+   * kinds are private to their subject:
+   * - another player's `player-abstained` event (decision L33: who sat out
+   *   is never revealed to other players), and
+   * - any `score-awarded` event of a game still being played (Math awards
+   *   points per answer, so live per-question points reveal who is
+   *   answering correctly before the reveal).
+   */
+  ledgerFor(actorId: string): LedgerEvent[] {
+    const playing = new Set([...this.games.values()].filter((g) => g.status === "playing").map((g) => g.id));
+    return this.ledger.filter((e) => {
+      if (e.type === "player-abstained" && e.playerId !== actorId) return false;
+      if (e.type === "score-awarded" && e.gameInstanceId && playing.has(e.gameInstanceId)) return false;
+      return true;
+    });
   }
 
   /** Export a hash of the ledger for audit, without exposing tokens. */

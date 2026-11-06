@@ -367,8 +367,11 @@ export class LocalServer {
           return;
         }
         if (req.method === "GET" && parts.length === 3 && parts[2] === "ledger") {
-          if (!this.requireSession(room, req, res)) return;
-          this.send(res, 200, room.toJSON().ledger ?? []);
+          const viewer = this.requireSession(room, req, res);
+          if (!viewer) return;
+          // Redacted per viewer: other players' abstentions and live
+          // in-game scores are private (RoomEngine.ledgerFor).
+          this.send(res, 200, room.ledgerFor(viewer.id));
           return;
         }
         if (parts.length >= 3 && parts[2] === "memory") {
