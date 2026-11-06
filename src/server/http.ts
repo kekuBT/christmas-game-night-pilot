@@ -648,7 +648,12 @@ export class LocalServer {
     // players") even though the reloaded tab was live.
     if (actorId && audience !== "tv") {
       const player = room.players.get(actorId);
-      if (player) player.connected = true;
+      if (player && !player.connected) {
+        player.connected = true;
+        // Presence is visible to everyone (lobby "away" markers), so tell them.
+        // Completion rules are unchanged by this broadcast.
+        this.broadcast(roomId);
+      }
     }
     if (spectatorId) {
       room.setSpectatorConnected(spectatorId, true);
@@ -695,7 +700,13 @@ export class LocalServer {
       );
       if (!stillOpen) {
         const player = room.players.get(actorId);
-        if (player) player.connected = false;
+        if (player) {
+          player.connected = false;
+          // Previously silent: other screens only learned of the drop on
+          // their next poll. NOTE: whether a disconnect should also re-check
+          // game completion is an open owner decision (D1); not done here.
+          this.broadcast(roomId);
+        }
       }
     });
   }

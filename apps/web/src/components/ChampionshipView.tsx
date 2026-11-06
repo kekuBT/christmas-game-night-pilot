@@ -44,7 +44,7 @@ export function ChampionshipView(props: {
     {championship.map((r) => <p key={r.playerId}><b>{nameOf(r.playerId)}</b>: {r.total} points total = best three {r.counted.join(" + ")} = {r.base}, plus participation +{r.participationBonus} and finale +{r.finaleBonus}{r.eligible ? "" : " (not yet qualified — needs 3 qualifying days)"} · {r.qualifyingDays} qualifying day{r.qualifyingDays === 1 ? "" : "s"} · Day scores: {r.dayScores.join(", ")} · Daily wins: {r.countedDailyWins}</p>)}
     <h3>Session standings (all official games, midrank sum)</h3>
     {Object.entries(serverStandings).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([pid, v]) => <p key={pid}>{nameOf(pid)}: {v} points</p>)}
-    <h3>Per-game breakdown (official games only)</h3>{officialFinished.map((g) => <p key={g.id}><b>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId}</b> ({g.gameId}, Day {g.day ?? 1}) — {Object.entries(midrank(g.rawScores ?? {})).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>)}
+    <h3>Per-game breakdown (official games only)</h3>{officialFinished.map((g) => <p key={g.id}><b>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId}</b> ({g.gameId}, Day {g.day ?? 1}) — {Object.entries(midrank(g.rawScores ?? {})).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ") || "not counted (fewer than 2 players)"}</p>)}
     <h3>🏆 End-of-day ceremony</h3>
     {ceremony && ceremony.winner ? <p>Day {ceremony.day} winner: <b>{(ceremony.winners ?? [ceremony.winner]).join(" & ")}</b> — congratulations! Add the moment to the Memory Book from the Memory Book view.</p> : <p>No ceremony yet — finish a game first.</p>}
     <h3>Achievements (from real game events only)</h3>

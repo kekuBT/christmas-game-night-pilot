@@ -883,7 +883,8 @@ export class RoomEngine {
     const allDone = this.activePlayers(game).every((pid) => (game.abstained ?? []).includes(pid) || Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0));
     if (allDone) {
       game.status = "finished";
-      this.log("game-finished", { gameInstanceId: game.id });
+      // Same metadata as every other finish path (finishGame, settleAfterAbstain).
+      this.log("game-finished", { gameInstanceId: game.id, official: game.official });
     }
     return { accepted: true, result: { points, total: game.rawScores[actorId] } };
   }

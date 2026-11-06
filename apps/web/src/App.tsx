@@ -25,6 +25,8 @@ import { shuffle } from "../../../src/games/shuffle.js";
 import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mchezo/adapters.js";
 import { previousGameScores } from "./ui/mchezo/lib/standings.js";
 import { humanError } from "./ui/mchezo/lib/errors.js";
+import { midrank } from "./components/midrank.js";
+import { sendIntent } from "./components/intentRetry.js";
 import QRCode from "qrcode";
 
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
@@ -45,19 +47,6 @@ async function get<T>(path: string): Promise<T> {
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error((j as { error?: string }).error || `Request failed (${r.status})`);
   return j as T;
-}
-function midrank(scores: Record<string, number>): Record<string, number> {
-  const entries = Object.entries(scores).sort((a, b) => a[1] - b[1]);
-  const out: Record<string, number> = {};
-  let i = 0;
-  while (i < entries.length) {
-    let j = i;
-    while (j + 1 < entries.length && entries[j + 1][1] === entries[i][1]) j++;
-    const pct = entries.length === 1 ? 100 : ((i + j) / 2 / (entries.length - 1)) * 100;
-    for (let k = i; k <= j; k++) out[entries[k][0]] = Math.round(pct * 100) / 100;
-    i = j + 1;
-  }
-  return out;
 }
 
 export function App() {
@@ -107,9 +96,32 @@ export function App() {
   const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
 
+  // Poll failures used to be swallowed forever: a player whose room was
+  // gone (or whose server was down) saw a frozen screen with no message.
+  // After three consecutive failures (~6s) say so; clear it on recovery.
+  const pollFailures = useRef(0);
+  const pollNotice = useRef("");
   const refresh = useCallback(async () => {
     if (!roomId || !playerId) return;
-    try { setProj(await get<Projection>(`/rooms/${roomId}/projection?audience=player`)); } catch { /* poll retry */ }
+    try {
+      setProj(await get<Projection>(`/rooms/${roomId}/projection?audience=player`));
+      pollFailures.current = 0;
+      if (pollNotice.current) {
+        const shown = pollNotice.current;
+        pollNotice.current = "";
+        setErr((cur) => (cur === shown ? "" : cur));
+      }
+    } catch (e) {
+      pollFailures.current += 1;
+      if (pollFailures.current >= 3) {
+        const text = e instanceof Error && /Session token required|Room not found/.test(e.message)
+          ? "This game is no longer available on the server. Ask the host for the room code to join again."
+          : "Can't reach the game server. Retrying automatically…";
+        if (pollNotice.current !== text) console.warn("[mchezo] polling failing:", e instanceof Error ? e.message : e);
+        pollNotice.current = text;
+        setErr(text);
+      }
+    }
   }, [roomId, playerId]);
 
   useEffect(() => { get<RegistryGame[]>("/games").then(setGames).catch(() => {}); }, []);
@@ -263,7 +275,18 @@ export function App() {
   }
   async function intent(gameInstanceId: string, action: string, payload: Record<string, unknown>) {
     setErr(""); try {
-      const r = await post<{ accepted: boolean; reason?: string }>(`/rooms/${roomId}/intents`, { intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId, gameInstanceId, action, payload } });
+      // One clientEventId per user action, reused by every retry, so the
+      // server's dedupe returns the original result if a response was lost.
+      const body = JSON.stringify({ intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId, gameInstanceId, action, payload } });
+      const res = await sendIntent(async () => {
+        const headers: Record<string, string> = { "content-type": "application/json" };
+        const t = sessionStorage.getItem("cgn_token");
+        if (t) headers["x-session-token"] = t;
+        const resp = await fetch(`/rooms/${roomId}/intents`, { method: "POST", headers, body });
+        return { status: resp.status, body: await resp.json().catch(() => ({})) };
+      });
+      const r = res.body as { accepted?: boolean; reason?: string; error?: string };
+      if (res.status >= 400) throw new Error(r.error || `Request failed (${res.status})`);
       if (!r.accepted) reportError(`Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
       await refresh();
     } catch (e) { fail(e); }
@@ -352,14 +375,11 @@ export function App() {
   const players: PublicPlayer[] = proj?.players ?? [];
   const myGames: PlayerGame[] = proj?.myGames ?? [];
   const me = players.find((p) => p.id === playerId);
-  const finished = (proj?.games ?? []).filter((g) => g.status === "finished");
-  const officialFinished = finished.filter((g) => g.official && !g.timedOut);
   const serverStandings = proj?.officialStandings;
-  const standings: Record<string, number> = serverStandings ?? (() => {
-    const out: Record<string, number> = {};
-    for (const g of officialFinished) { const m = midrank(g.rawScores ?? {}); for (const [pid, v] of Object.entries(m)) out[pid] = (out[pid] ?? 0) + (v as number); }
-    return out;
-  })();
+  // Standings come from the server only (RoomEngine.officialStandings). The
+  // client used to recompute them as a fallback, with different rules for
+  // single-player games: a second scoring engine that could disagree.
+  const standings: Record<string, number> = serverStandings ?? {};
   const nameOf = (id: string): string => players.find((p) => p.id === id)?.displayName ?? id;
   const playingGame = myGames.find((g) => g.status === "playing");
   const latestFinished = myGames.filter((g) => g.status === "finished").slice(-1)[0];
