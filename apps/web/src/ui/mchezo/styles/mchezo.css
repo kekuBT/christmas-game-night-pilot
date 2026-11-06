@@ -352,3 +352,21 @@
 
 /* Game Library tags (Milestone G): small pills for categories, team/TV badges. */
 .mz-lib-tag { display: inline-flex; align-items: center; border: 1px solid var(--mz-line); background: var(--mz-surface-2); color: var(--mz-text); border-radius: 999px; padding: 2px 8px; font: 600 12px var(--mz-font-body); }
+
+/* ---------- Sprint 2: connection feedback, readiness, seat recovery ---------- */
+/* Connection banner: pinned under the safe area, never covers content taps for long. */
+.mz-conn { position: fixed; z-index: 50; left: 12px; right: 12px; top: calc(env(safe-area-inset-top, 0px) + 8px); max-width: 456px; margin: 0 auto; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 16px; background: var(--mz-surface-1); color: var(--mz-text); border: 1.5px solid var(--mz-line); box-shadow: 0 8px 24px rgba(0,0,0,.35); font: 600 14px/1.35 var(--mz-font-body); animation: mz-conn-in .22s var(--mz-ease-out) both; }
+.mz-conn__dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--mz-highlight); animation: mz-conn-pulse 1.4s ease-in-out infinite; }
+.mz-conn--restored .mz-conn__dot { background: #5ED39B; animation: none; }
+.mz-conn__text { flex: 1; }
+.mz-conn__sub { color: var(--mz-text-muted); font-weight: 500; }
+.mz-conn__retry { flex: none; min-height: 44px; min-width: 44px; padding: 0 12px; border-radius: 14px; border: 1.5px solid var(--mz-line); background: transparent; color: var(--mz-text); font: 700 13px var(--mz-font-body); cursor: pointer; }
+.mz-conn--replaced { flex-direction: column; align-items: stretch; gap: 6px; padding: 16px; }
+.mz-conn__title { margin: 0; font: 700 16px var(--mz-font-display); }
+.mz-conn__desc { margin: 0; color: var(--mz-text-muted); font-weight: 500; }
+.mz-conn__btn { align-self: flex-end; }
+@keyframes mz-conn-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes mz-conn-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+[data-mz-motion="reduced"] .mz-conn, [data-mz-motion="reduced"] .mz-conn__dot { animation: none; }
+@media (prefers-reduced-motion: reduce) { .mz-conn, .mz-conn__dot { animation: none; } }
+.mz-presence-note { padding: 0 16px; }

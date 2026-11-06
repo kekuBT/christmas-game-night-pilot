@@ -27,6 +27,7 @@ import { previousGameScores } from "./ui/mchezo/lib/standings.js";
 import { humanError } from "./ui/mchezo/lib/errors.js";
 import { midrank } from "./components/midrank.js";
 import { sendIntent } from "./components/intentRetry.js";
+import { connection } from "./connectionStore.js";
 import QRCode from "qrcode";
 
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
@@ -157,9 +158,23 @@ export function App() {
         const next = liveToken ? new WebSocket(wsUrl, [`cgn-session-${liveToken}`]) : new WebSocket(wsUrl);
         ws = next;
         wsRef.current = next;
-        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection") setProj(m.state); } catch { /* ignore malformed WS frame; polling continues */ } };
+        next.onmessage = (e) => {
+          try {
+            const m = JSON.parse(e.data);
+            if (m.kind === "projection") {
+              setProj(m.state);
+              // The server sends a projection only after accepting the
+              // session: that, not the socket opening, is "reconnected".
+              attempt = 0;
+              connection.confirmed();
+            }
+          } catch { /* ignore malformed WS frame; polling continues */ }
+        };
         next.onclose = (e) => {
-          if (stopped || e.code === 1008) return;
+          if (stopped || ws !== next) return;
+          if (e.code === 4001) { connection.replaced(); return; } // seat recovered on another device
+          if (e.code === 1008) { connection.signedOut(); return; } // credential no longer accepted
+          connection.dropped();
           attempt += 1;
           retryTimer = setTimeout(connect, wsReconnectDelayMs(attempt));
         };
@@ -174,11 +189,32 @@ export function App() {
         }
       }
     };
+    // A phone that was locked or backgrounded may come back with a dead
+    // socket and a long backoff pending: reconnect at once instead.
+    const reconnectNow = () => {
+      if (stopped) return;
+      const state = connection.get().state;
+      if (state === "replaced" || state === "signed-out") return;
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) { void refresh(); return; }
+      if (retryTimer !== undefined) clearTimeout(retryTimer);
+      attempt = 0;
+      connect();
+      void refresh();
+    };
+    const onVisible = () => { if (document.visibilityState === "visible") reconnectNow(); };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", reconnectNow);
+    window.addEventListener("pageshow", reconnectNow);
+    connection.setHandlers({ retryNow: reconnectNow });
     connect();
     return () => {
       stopped = true;
       clearInterval(t);
       if (retryTimer !== undefined) clearTimeout(retryTimer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", reconnectNow);
+      window.removeEventListener("pageshow", reconnectNow);
+      connection.setHandlers({ retryNow: () => {} });
       ws?.close();
       if (wsRef.current === ws) wsRef.current = null;
     };

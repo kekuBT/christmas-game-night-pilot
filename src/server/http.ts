@@ -22,6 +22,15 @@ export interface ServerOptions {
   dataDir?: string;
   /** Directory holding the built web app (index.html + assets/). Defaults to apps/web/dist. */
   webDistDir?: string;
+  /** Server clock (tests inject a fake one). Presence and grace periods use only this. */
+  clock?: () => number;
+  /**
+   * WebSocket heartbeat interval. A locked phone often leaves a half-open
+   * TCP connection that never closes on its own; a socket that misses one
+   * ping/pong round is terminated so its player shows as reconnecting.
+   * null disables it (tests drive disconnects explicitly). Default 15s.
+   */
+  heartbeatMs?: number | null;
 }
 
 interface SocketMeta {
@@ -30,7 +39,14 @@ interface SocketMeta {
   audience: "player" | "tv" | "host" | "cohost" | "spectator";
   /** Set only for spectator sockets: the viewer whose presence this socket holds. */
   spectatorId?: string;
+  /** The slot's credentialVersion when this socket authenticated. A socket from a replaced credential is stale. */
+  credentialVersion?: number;
+  /** Heartbeat: false after a ping until the pong arrives. */
+  alive?: boolean;
 }
+
+/** Close code for a socket whose session credential was replaced (seat recovered elsewhere). */
+export const WS_SESSION_REPLACED = 4001;
 
 /**
  * Local HTTP + WebSocket adapter around RoomEngine.
@@ -90,11 +106,42 @@ export class LocalServer {
 
   private webDistDir: string;
 
+  readonly clock: () => number;
+  private heartbeat: ReturnType<typeof setInterval> | null = null;
+
   constructor(opts: ServerOptions = {}) {
+    this.clock = opts.clock ?? Date.now;
     this.store = new RoomStore(opts.dataDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data"));
     this.webDistDir = resolve(opts.webDistDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "apps", "web", "dist"));
     this.restoreReport = this.loadSnapshots();
     this.wss.on("connection", (ws, req) => this.handleWs(ws, req));
+    const beat = opts.heartbeatMs === undefined ? 15_000 : opts.heartbeatMs;
+    if (beat !== null) {
+      // One timer for the whole server (not per player), unref'd so it never keeps the process alive.
+      this.heartbeat = setInterval(() => this.heartbeatTick(), beat);
+      this.heartbeat.unref();
+    }
+  }
+
+  /** Terminate sockets that did not answer the previous ping; ping the rest. */
+  heartbeatTick(): void {
+    for (const s of this.sockets) {
+      if (s.meta.alive === false) { s.ws.terminate(); continue; }
+      s.meta.alive = false;
+      try { s.ws.ping(); } catch { /* closing */ }
+    }
+  }
+
+  /** Is this socket still authenticated with the slot's current credential? */
+  private socketCurrent(room: RoomEngine, meta: SocketMeta): boolean {
+    if (!meta.actorId) return true;
+    const p = room.players.get(meta.actorId);
+    return !!p && (p.credentialVersion ?? 0) === (meta.credentialVersion ?? 0);
+  }
+
+  /** A live, current-credential socket exists for this slot (other than `except`). */
+  private hasLiveSocket(room: RoomEngine, actorId: string, except?: WebSocket): boolean {
+    return [...this.sockets].some((s) => s.ws !== except && s.meta.roomId === room.id && s.meta.actorId === actorId && this.socketCurrent(room, s.meta));
   }
 
   /**
@@ -168,7 +215,11 @@ export class LocalServer {
       // /reconnect or a fresh WebSocket open. Without this, phantom
       // players counted toward startGame and blocked games from
       // advancing until a deadline/host-skip.
-      for (const p of room.players.values()) p.connected = false;
+      // Sprint 2: every restored player starts a reconnect grace window at
+      // restart time, so a restart reads as "reconnecting", not "away".
+      room.clock = this.clock;
+      const restartedAt = this.clock();
+      for (const p of room.players.values()) { p.connected = false; p.disconnectedAt = restartedAt; }
       // Same for spectators: no socket exists after a restart, so a
       // restored connected=true would inflate the watching count.
       for (const s of room.spectators.values()) s.connected = false;
@@ -205,6 +256,7 @@ export class LocalServer {
   }
 
   async close(): Promise<void> {
+    if (this.heartbeat) clearInterval(this.heartbeat);
     for (const s of this.sockets) s.ws.close();
     this.sockets.clear();
     await new Promise<void>((resolve) => this.wss.close(() => resolve()));
@@ -315,6 +367,7 @@ export class LocalServer {
       if (req.method === "POST" && parts.length === 1 && parts[0] === "rooms") {
         const body = await this.readBody(req);
         const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night");
+        room.clock = this.clock;
         const hostClaimToken = randomUUID();
         this.rooms.set(room.id, room);
         this.hostClaimHashes.set(room.id, hashToken(hostClaimToken));
@@ -638,9 +691,10 @@ export class LocalServer {
       actorId = player.id;
       audience = requestedAudience;
     }
-    const meta: SocketMeta = { roomId, actorId, audience, spectatorId };
+    const meta: SocketMeta = { roomId, actorId, audience, spectatorId, alive: true, credentialVersion: actorId ? room.players.get(actorId)?.credentialVersion ?? 0 : undefined };
     const entry = { ws, meta };
     this.sockets.add(entry);
+    ws.on("pong", () => { meta.alive = true; });
     // An open socket means the player is connected again. Before this fix,
     // only the explicit /reconnect endpoint restored connected=true, so a
     // plain page reload left the player permanently "disconnected" for
@@ -649,7 +703,7 @@ export class LocalServer {
     if (actorId && audience !== "tv") {
       const player = room.players.get(actorId);
       if (player && !player.connected) {
-        player.connected = true;
+        room.markConnected(actorId);
         // Presence is visible to everyone (lobby "away" markers), so tell them.
         // Completion rules are unchanged by this broadcast.
         this.broadcast(roomId);
@@ -668,6 +722,13 @@ export class LocalServer {
         // message frame is ignored, so a sender cannot impersonate another player.
         if (!actorId) {
           ws.send(JSON.stringify({ kind: "error", code: "SESSION_REQUIRED" }));
+          return;
+        }
+        // A socket opened with a credential that has since been replaced
+        // (seat recovered on another device) may not act for the slot.
+        if (!this.socketCurrent(room, meta)) {
+          ws.send(JSON.stringify({ kind: "error", code: "SESSION_REPLACED" }));
+          ws.close(WS_SESSION_REPLACED, "Session replaced");
           return;
         }
         const result = room.submitIntent(msg.intent, actorId);
@@ -692,19 +753,15 @@ export class LocalServer {
         }
         return;
       }
-      // Only mark disconnected when no socket for this player remains: on a
-      // reload the new socket may open before the old one closes, and the
-      // old close must not undo the new connection.
-      const stillOpen = [...this.sockets].some(
-        (s) => s.meta.roomId === roomId && s.meta.actorId === actorId,
-      );
-      if (!stillOpen) {
-        const player = room.players.get(actorId);
-        if (player) {
-          player.connected = false;
-          // Previously silent: other screens only learned of the drop on
-          // their next poll. NOTE: whether a disconnect should also re-check
-          // game completion is an open owner decision (D1); not done here.
+      // Only mark disconnected when no live, current-credential socket for
+      // this player remains: on a reload the new socket may open before the
+      // old one closes, and the old close must not undo the new connection.
+      // A stale (replaced-credential) socket never counts as presence.
+      if (!actorId || !room.players.has(actorId)) return;
+      if (!this.hasLiveSocket(room, actorId)) {
+        if (room.players.get(actorId)!.connected) {
+          room.disconnect(actorId); // starts the reconnect grace window
+          // Completion is NOT re-checked on disconnect (owner decision D1).
           this.broadcast(roomId);
         }
       }

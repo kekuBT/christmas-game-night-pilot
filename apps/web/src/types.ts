@@ -13,6 +13,10 @@ export interface PublicPlayer {
   isHost: boolean;
   isCohost: boolean;
   connected: boolean;
+  /** Server-derived network presence (Sprint 2). Absent from older servers. */
+  presence?: "connected" | "reconnecting" | "away";
+  /** Server-measured time since the device dropped (0 while connected). */
+  awayForMs?: number;
 }
 
 export interface PublicGame {

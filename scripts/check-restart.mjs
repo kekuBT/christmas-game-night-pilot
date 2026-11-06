@@ -117,12 +117,20 @@ try {
   const myGame = (guestProj.data.myGames ?? []).find((g) => g.id === gameId);
   check("guest guess survived the restart", myGame?.state?.myGuess === 42);
 
-  // Reconnect with the original token restores the session.
+  // Reconnect with the original token restores the session. Sprint 2:
+  // the credential check alone is not presence (no phantom "connected"
+  // player without a device); the app's live socket is.
   const recon = await post(port, `/rooms/${roomId}/reconnect`, { playerId: guest.data.playerId, recoveryToken: guest.data.recoveryToken });
-  check("guest reconnects with the original token", recon.status === 200 && recon.data.connected === true);
+  check("guest reconnects with the original token", recon.status === 200 && recon.data.playerId === guest.data.playerId);
+  const projNoSocket = await getProj(port, roomId, guest.data.sessionToken);
+  check("credential check alone does not fake presence",
+    (projNoSocket.data.players ?? []).find((p) => p.id === guest.data.playerId)?.connected === false);
+  const ws = new WebSocket(`ws://localhost:${port}/?roomId=${roomId}&audience=player`, [`cgn-session-${guest.data.sessionToken}`]);
+  await new Promise((resolve, reject) => { ws.onmessage = resolve; ws.onclose = (e) => reject(new Error(`socket closed ${e.code}`)); });
   const proj2 = await getProj(port, roomId, guest.data.sessionToken);
-  check("guest shows connected after reconnect",
+  check("guest shows connected once their device reconnects",
     (proj2.data.players ?? []).find((p) => p.id === guest.data.playerId)?.connected === true);
+  ws.close();
 
   // A bad token must not take over the slot.
   const bad = await post(port, `/rooms/${roomId}/reconnect`, { playerId: guest.data.playerId, recoveryToken: "00".repeat(32) });

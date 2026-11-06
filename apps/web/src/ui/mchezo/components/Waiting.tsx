@@ -41,7 +41,7 @@ export function MchezoWaiting({ label, players, playerId, publicGame, stalled, i
           return (
             <span key={p.id} className="mz-wait__seat" style={{ left: `${50 + Math.cos(a) * r}%`, top: `${50 + Math.sin(a) * r}%` }}>
               <PlayerToken player={p} index={k} size={40} you={p.id === playerId} badge={p.connection === "disconnected" ? "offline" : null} />
-              <span className="mz-seat__name">{p.id === playerId ? "You" : p.connection === "disconnected" ? "Away" : p.name}</span>
+              <span className="mz-seat__name">{p.id === playerId ? "You" : p.presence === "reconnecting" ? "Reconnecting" : p.connection === "disconnected" ? "Away" : p.name}</span>
             </span>
           );
         })}
@@ -51,9 +51,30 @@ export function MchezoWaiting({ label, players, playerId, publicGame, stalled, i
         </div>
       </div>
       <p className="mz-foot">{footNote ?? "The reveal plays right here when the game finishes."}</p>
+      <PresenceNote players={players} participants={publicGame?.players} youId={playerId} />
       {onTv && <div style={{ padding: "0 16px 16px" }}><button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>TV stage</button></div>}
       {stalled && isHostOrCohost && onSkip && <><p className="mz-foot">This game has passed its deadline and may be stalled.</p><div style={{ padding: "0 16px 16px" }}><Keycap block variant="neutral" onClick={onSkip}>Skip timed-out game (no scores invented)</Keycap></div></>}
       {stalled && !isHostOrCohost && <p className="mz-foot">The host can skip this game if it stays stalled.</p>}
     </div>
+  );
+}
+
+/**
+ * Who the game is waiting on, in plain words. Only players IN this game
+ * (its fixed roster) are mentioned: a room member who never joined the
+ * game is not something anyone is waiting for. Presence comes from the
+ * server; nothing here decides completion.
+ */
+function PresenceNote({ players, participants, youId }: { players: PublicPlayer[]; participants?: string[]; youId: string }) {
+  const inGame = players.filter((p) => p.id !== youId && (!participants || participants.includes(p.id)));
+  const reconnecting = inGame.filter((p) => p.presence === "reconnecting");
+  const away = inGame.filter((p) => p.presence === "away" || (!p.presence && !p.connected));
+  if (reconnecting.length === 0 && away.length === 0) return null;
+  const names = (list: PublicPlayer[]) => list.map((p) => p.displayName).join(", ");
+  return (
+    <p className="mz-foot mz-presence-note" role="status" aria-live="polite" data-testid="mz-presence-note">
+      {reconnecting.length > 0 && <>Waiting for {reconnecting.length === 1 ? "1 player" : `${reconnecting.length} players`} to reconnect ({names(reconnecting)}). </>}
+      {away.length > 0 && <>{names(away)} {away.length === 1 ? "is" : "are"} away.</>}
+    </p>
   );
 }

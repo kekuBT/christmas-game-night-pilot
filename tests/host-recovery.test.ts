@@ -15,6 +15,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { LocalServer } from "../src/server/http.js";
 import { RoomEngine } from "../src/server/room.js";
+import { openPlayerSocket } from "./helpers/socket.js";
 
 function setup(n: number) {
   const engine = new RoomEngine("Recovery Room");
@@ -118,6 +119,13 @@ describe("host recovery (HTTP restart)", () => {
       recoveryToken: guestJoin.json["recoveryToken"],
     });
     expect(guestBack.status).toBe(200);
+    // Sprint 2: a credential check alone is not presence. Nobody is
+    // present until their device holds a live socket, as the app does.
+    expect(((await get(`/rooms/${roomId}/projection?audience=tv`))["players"] as { connected: boolean }[]).every((p) => !p.connected)).toBe(true);
+    const sockets = [
+      await openPlayerSocket(port, roomId, hostJoin.json["recoveryToken"] as string),
+      await openPlayerSocket(port, roomId, guestJoin.json["recoveryToken"] as string),
+    ];
 
     const started = await post(
       `/rooms/${roomId}/games`,
@@ -125,5 +133,6 @@ describe("host recovery (HTTP restart)", () => {
       hostJoin.json["recoveryToken"] as string,
     );
     expect(started.status).toBe(201);
+    for (const ws of sockets) ws.terminate();
   });
 });

@@ -7,6 +7,8 @@ export interface Player {
   /** Optional override; otherwise assigned from `playerPalette` by join order. */
   color?: string;
   connection?: 'connected' | 'disconnected';
+  /** Finer server presence: a dropped phone is 'reconnecting' for a grace period before 'away'. */
+  presence?: 'connected' | 'reconnecting' | 'away';
   isHost?: boolean;
 }
 

@@ -12,6 +12,7 @@ export function toMzPlayers(players: PublicPlayer[]): MzPlayer[] {
     id: p.id,
     name: p.displayName,
     connection: p.connected ? "connected" : "disconnected",
+    presence: p.presence ?? (p.connected ? "connected" : "away"),
     isHost: p.isHost,
   }));
 }

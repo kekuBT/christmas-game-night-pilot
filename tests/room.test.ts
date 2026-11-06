@@ -93,7 +93,12 @@ describe("room engine", () => {
     const p = players[0]!;
     engine.disconnect(p.id);
     expect(() => engine.reconnect(p.id, "wrong-token")).toThrow();
-    expect(engine.reconnect(p.id, p.token).connected).toBe(true);
+    // Sprint 2: verifying the credential does not by itself make the player
+    // present; presence follows a live socket (markConnected).
+    expect(engine.reconnect(p.id, p.token).id).toBe(p.id);
+    expect(engine.players.get(p.id)!.connected).toBe(false);
+    engine.markConnected(p.id);
+    expect(engine.players.get(p.id)!.connected).toBe(true);
   });
 
   it("non-host cannot start, unknown game cannot start", () => {

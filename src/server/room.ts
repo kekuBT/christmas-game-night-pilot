@@ -69,15 +69,45 @@ import {
 
 export type Audience = "player" | "tv" | "host" | "cohost";
 
+/**
+ * How long a player whose device dropped is shown as "reconnecting" (and
+ * protected from being silently left out of an official game start)
+ * before they are shown as "away". Presence only: it never changes a
+ * game roster, an answer, a score, or completion.
+ */
+export const RECONNECT_GRACE_MS = 45_000;
+
+/**
+ * Network presence, derived on read (never stored):
+ * - connected: at least one live, current-credential socket;
+ * - reconnecting: no socket, dropped less than RECONNECT_GRACE_MS ago;
+ * - away: no socket for longer (or never connected since a restart grace).
+ * Presence is separate from room membership (the slot always exists) and
+ * from game participation (GameInstance.players, fixed at start).
+ */
+export type Presence = "connected" | "reconnecting" | "away";
+
 export interface RoomPlayer {
   id: string;
   displayName: string;
   avatar: string;
   isHost: boolean;
   isCohost: boolean;
+  /** A live socket is open for this slot right now. Completion rules read this (unchanged). */
   connected: boolean;
+  /**
+   * SHA-256 of the slot's current SESSION credential. (Legacy field name:
+   * this is the session token, not a recovery code; renaming it would
+   * break every saved room.)
+   */
   recoveryTokenHash: string;
   joinedAt: number;
+  /** Server time the last live socket closed; null/absent while connected. */
+  disconnectedAt?: number | null;
+  /** Incremented whenever the session credential is replaced (recovery). Absent = 0. */
+  credentialVersion?: number;
+  /** SHA-256 of the slot's current one-time recovery code, if one was issued. */
+  recoveryCodeHash?: string | null;
 }
 
 /**
@@ -159,6 +189,8 @@ export class RoomEngine {
   private nextPlayer = 1;
   private nextGame = 1;
   private nextSpectator = 1;
+  /** Server clock. Injectable so tests control time; never the client's clock. */
+  clock: () => number = Date.now;
 
   constructor(name: string) {
     this.id = `room-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6)}`;
@@ -168,7 +200,7 @@ export class RoomEngine {
 
   private log(type: string, extra: Partial<LedgerEvent> = {}): LedgerEvent {
     this.seq += 1;
-    const ev: LedgerEvent = { eventId: `evt-${this.seq}`, seq: this.seq, type, createdAt: Date.now(), ...extra };
+    const ev: LedgerEvent = { eventId: `evt-${this.seq}`, seq: this.seq, type, createdAt: this.clock(), ...extra };
     this.ledger.push(ev);
     return ev;
   }
@@ -191,7 +223,10 @@ export class RoomEngine {
       isCohost: false,
       connected: true,
       recoveryTokenHash: hashToken(token),
-      joinedAt: Date.now(),
+      joinedAt: this.clock(),
+      disconnectedAt: null,
+      credentialVersion: 0,
+      recoveryCodeHash: null,
     };
     this.players.set(id, player);
     if (isHost) this.hostId = id;
@@ -204,19 +239,43 @@ export class RoomEngine {
     return { player, recoveryToken: token };
   }
 
-  /** Reconnect to the same slot with the recovery token. No token = no takeover. */
+  /**
+   * Verify a slot's session credential (the "Reconnect" button). No token =
+   * no takeover. This no longer marks the player connected: presence
+   * follows live sockets only (Sprint 2). The old behaviour created a
+   * "connected" player with no device behind it, who then counted for
+   * game starts and blocked completion indefinitely.
+   */
   reconnect(playerId: string, recoveryToken: string): RoomPlayer {
     const player = this.players.get(playerId);
     if (!player) throw new Error("Unknown player slot");
     if (hashToken(recoveryToken) !== player.recoveryTokenHash) throw new Error("Recovery token does not match");
-    player.connected = true;
     this.log("player-reconnected", { playerId });
     return player;
   }
 
+  /** The slot's last live socket closed. Starts the reconnect grace window. */
   disconnect(playerId: string): void {
     const p = this.players.get(playerId);
-    if (p) p.connected = false;
+    if (!p) return;
+    if (p.connected || p.disconnectedAt == null) p.disconnectedAt = this.clock();
+    p.connected = false;
+  }
+
+  /** A live, current-credential socket is open for the slot. */
+  markConnected(playerId: string): void {
+    const p = this.players.get(playerId);
+    if (!p) return;
+    p.connected = true;
+    p.disconnectedAt = null;
+  }
+
+  presenceOf(playerId: string, now = this.clock()): Presence {
+    const p = this.players.get(playerId);
+    if (!p) return "away";
+    if (p.connected) return "connected";
+    if (p.disconnectedAt != null && now - p.disconnectedAt < RECONNECT_GRACE_MS) return "reconnecting";
+    return "away";
   }
 
   /** Register a spectator: no player record, no seat, no name required.
@@ -229,7 +288,7 @@ export class RoomEngine {
       id: `spectator-${this.nextSpectator++}`,
       tokenHash: hashToken(token),
       connected: true,
-      joinedAt: Date.now(),
+      joinedAt: this.clock(),
     };
     this.spectators.set(spectator.id, spectator);
     this.log("spectator-joined", { actor: spectator.id });
@@ -296,8 +355,8 @@ export class RoomEngine {
       answers: {},
       answerTimes: {},
       rawScores: Object.fromEntries(playerIds.map((p) => [p, 0])),
-      startedAt: Date.now(),
-      deadlineAt: Date.now() + 5 * 60 * 1000,
+      startedAt: this.clock(),
+      deadlineAt: this.clock() + 5 * 60 * 1000,
       day: this.championshipDay,
       seed,
       extra:
@@ -341,7 +400,7 @@ export class RoomEngine {
   }
 
   /** Submit a validated intent. Returns the ack; duplicates return the original result. */
-  submitIntent(raw: unknown, actorId: string, now = Date.now()): { accepted: boolean; reason?: string; result?: unknown } {
+  submitIntent(raw: unknown, actorId: string, now = this.clock()): { accepted: boolean; reason?: string; result?: unknown } {
     const parsed = IntentSchema.safeParse(raw);
     if (!parsed.success) return { accepted: false, reason: "INVALID_INTENT" };
     const intent = parsed.data;
@@ -393,7 +452,7 @@ export class RoomEngine {
     return result;
   }
 
-  private submitSocialIntent(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now = Date.now()) {
+  private submitSocialIntent(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now = this.clock()) {
     const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
     if (!game || game.status !== "playing") return { accepted: false, reason: "PHASE_CLOSED" };
     // Late submissions after the game deadline are rejected, not silently
@@ -593,7 +652,7 @@ export class RoomEngine {
    * play later ones. Charades has no abstention: turns are actor-driven
    * and Pass already exists.
    */
-  private submitAbstain(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now = Date.now()) {
+  private submitAbstain(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now = this.clock()) {
     const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
     if (!game || game.status !== "playing") return { accepted: false, reason: "PHASE_CLOSED" };
     if (game.deadlineAt && now > game.deadlineAt) return { accepted: false, reason: "PHASE_CLOSED" };
@@ -843,7 +902,7 @@ export class RoomEngine {
    * simply keep their current (zero or partial) raw scores, the game is
    * marked timedOut, and officialStandings() excludes it.
    */
-  skipTimedOutGame(actorId: string, gameInstanceId: string, now = Date.now()): void {
+  skipTimedOutGame(actorId: string, gameInstanceId: string, now = this.clock()): void {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can skip a timed-out game");
     const game = this.games.get(gameInstanceId);
     if (!game || game.status !== "playing") throw new Error("Game is not playing");
@@ -1002,6 +1061,7 @@ export class RoomEngine {
 
   /** The ONLY pathway to outbound state. Never include secrets for the wrong audience. */
   project(audience: Audience, actorId?: string): Record<string, unknown> {
+    const now = this.clock();
     const publicPlayers = [...this.players.values()].map((p) => ({
       id: p.id,
       displayName: p.displayName,
@@ -1009,6 +1069,9 @@ export class RoomEngine {
       isHost: p.isHost,
       isCohost: p.isCohost,
       connected: p.connected,
+      presence: this.presenceOf(p.id, now),
+      // Server time the device dropped; lets clients say "away 2 min" without trusting their own clock.
+      awayForMs: p.connected || p.disconnectedAt == null ? 0 : Math.max(0, now - p.disconnectedAt),
     }));
     const publicGames = [...this.games.values()].map((g) => ({
       id: g.id,

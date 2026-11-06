@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { LocalServer } from "../src/server/http.js";
 import { RoomEngine } from "../src/server/room.js";
+import { openPlayerSocket } from "./helpers/socket.js";
 
 // Third review 5769441799 (2026-11-04) — regression tests first.
 let server: LocalServer;
@@ -66,9 +67,15 @@ describe("review3 P1: championshipDay survives restart", () => {
     const after = await get(`/rooms/${roomId}/projection?audience=player`, host.token);
     expect((after.json as Record<string, unknown>)["championshipDay"]).toBe(4);
     // Reconnect everyone (restart drops sockets), then start a game: it must be day 4.
-    for (const p of players) await post(`/rooms/${roomId}/reconnect`, { playerId: p.id, recoveryToken: p.token });
+    // Sprint 2: presence comes from a live socket, as in the app.
+    const sockets = [];
+    for (const p of players) {
+      await post(`/rooms/${roomId}/reconnect`, { playerId: p.id, recoveryToken: p.token });
+      sockets.push(await openPlayerSocket(port, roomId, p.token));
+    }
     const started = await post(`/rooms/${roomId}/games`, { gameId: "math-mayhem", official: true }, host.token);
     expect(started.status).toBe(201);
+    for (const ws of sockets) ws.terminate();
     const proj = await get(`/rooms/${roomId}/projection?audience=player`, host.token);
     const games = (proj.json as { games: { id: string; day?: number }[] }).games;
     const mine = games.find((g) => g.id === started.json["gameId"]);

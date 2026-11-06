@@ -84,6 +84,10 @@ const PlayerRecord = z.object({
   connected: z.boolean(),
   recoveryTokenHash: z.string().regex(/^[0-9a-f]{64}$/),
   joinedAt: num,
+  // Sprint 2 fields: optional, so rooms saved before them load with defaults.
+  disconnectedAt: num.nullable().optional(),
+  credentialVersion: z.number().int().nonnegative().optional(),
+  recoveryCodeHash: z.string().regex(/^[0-9a-f]{64}$/).nullable().optional(),
 }).passthrough();
 
 const SpectatorRecord = z.object({

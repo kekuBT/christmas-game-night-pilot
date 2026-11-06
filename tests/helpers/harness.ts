@@ -22,6 +22,18 @@ export interface Player {
   lastPush?: Json;
 }
 
+/** A server clock the test controls. Starts at a fixed instant; only advance() moves it. */
+export class FakeClock {
+  constructor(public t = 1_800_000_000_000) {}
+  now = (): number => this.t;
+  advance(ms: number): void { this.t += ms; }
+}
+
+export interface HarnessOptions {
+  /** Inject a fake server clock (presence/grace tests). Default: real time. */
+  clock?: FakeClock;
+}
+
 export class Harness {
   server!: LocalServer;
   base = "";
@@ -31,10 +43,16 @@ export class Harness {
   hostClaimToken = "";
   private sockets = new Set<WebSocket>();
 
-  constructor(readonly dataDir: string = mkdtempSync(join(tmpdir(), "mz-harness-"))) {}
+  constructor(readonly dataDir: string = mkdtempSync(join(tmpdir(), "mz-harness-")), readonly opts: HarnessOptions = {}) {}
+
+  get clock(): FakeClock {
+    if (!this.opts.clock) throw new Error("Harness was created without a FakeClock");
+    return this.opts.clock;
+  }
 
   async start(): Promise<this> {
-    this.server = new LocalServer({ dataDir: this.dataDir });
+    // Heartbeat off: tests drive disconnects explicitly (heartbeatTick() can be called by hand).
+    this.server = new LocalServer({ dataDir: this.dataDir, clock: this.opts.clock?.now, heartbeatMs: null });
     this.port = await this.server.listen(0);
     this.base = `http://localhost:${this.port}`;
     return this;
@@ -88,19 +106,41 @@ export class Harness {
   }
 
   /** Open the player's WebSocket (what a live browser tab holds). */
-  connect(p: Player): Promise<void> {
+  async connect(p: Player): Promise<void> {
+    p.ws = await this.openSocket(p);
+  }
+
+  /**
+   * Open an additional socket for the same session (a second tab, or a
+   * reload whose new socket opens before the old one closes). Resolves
+   * once the server has accepted it (first projection received).
+   */
+  openSocket(p: Player, opts: { autoPong?: boolean; onMessage?: (m: Json) => void } = {}): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
-      const ws = new WebSocket(`ws://localhost:${this.port}/?roomId=${this.roomId}&audience=player`, [`cgn-session-${p.token}`]);
+      const ws = new WebSocket(`ws://localhost:${this.port}/?roomId=${this.roomId}&audience=player`, [`cgn-session-${p.token}`], { autoPong: opts.autoPong ?? true });
       this.sockets.add(ws);
-      p.ws = ws;
+      let accepted = false;
       ws.on("message", (d) => {
         const m = JSON.parse(d.toString()) as Json;
         if (m["kind"] === "projection") p.lastPush = m["state"] as Json;
+        opts.onMessage?.(m);
+        if (!accepted) { accepted = true; resolve(ws); }
       });
-      ws.once("open", () => resolve());
       ws.once("error", reject);
-      ws.once("close", (code) => { if (code === 1008) reject(new Error("socket rejected (1008)")); });
+      ws.once("close", (code) => { if (!accepted) reject(new Error(`socket rejected (${code})`)); });
     });
+  }
+
+  /** Close one specific socket and wait for the server to process the close. */
+  async closeSocket(ws: WebSocket): Promise<void> {
+    if (ws.readyState === WebSocket.CLOSED) return;
+    await new Promise<void>((r) => { ws.once("close", () => r()); ws.terminate(); });
+    this.sockets.delete(ws);
+    await new Promise((r) => setTimeout(r, 20)); // let the server-side close handler run
+  }
+
+  presence(p: Player): string {
+    return this.engine().presenceOf(p.playerId);
   }
 
   /** Drop the player's socket (phone locks, tab closes, Wi-Fi blips) and wait for the server to notice. */

@@ -124,7 +124,8 @@ export interface LobbyScreenProps {
 export function LobbyScreen(p: LobbyScreenProps) {
   const you = p.players.find((x) => x.id === p.youId);
   const connected = p.players.filter((x) => x.connection !== 'disconnected').length;
-  const away = p.players.length - connected;
+  const reconnecting = p.players.filter((x) => x.connection === 'disconnected' && x.presence === 'reconnecting').length;
+  const away = p.players.length - connected - reconnecting;
   const min = p.minPlayers ?? 3;
   const canStart = connected >= min;
   const arrival = useArrivals(p.players);
@@ -140,7 +141,7 @@ export function LobbyScreen(p: LobbyScreenProps) {
       {p.error ? <p className="err" data-testid="mz-error" role="alert">{p.error}</p> : null}
       <p className="mz-sub" role="status" aria-live="polite">
         {arrival ? <span className="mz-sub__new">{arrival} joined</span> : null}
-        {arrival ? ' · ' : ''}{connected} here{away ? ` · ${away} reconnecting` : ''}{arrival ? '' : p.players.length < (p.capacity ?? 10) ? ' · room for more' : ' · room is full'}
+        {arrival ? ' · ' : ''}{connected} here{reconnecting ? ` · ${reconnecting} reconnecting` : ''}{away ? ` · ${away} away` : ''}{arrival ? '' : p.players.length < (p.capacity ?? 10) ? ' · room for more' : ' · room is full'}
       </p>
       {p.session.championship && <ChampionshipProgress championship={p.session.championship} />}
       <div className="mz-circle-wrap">
