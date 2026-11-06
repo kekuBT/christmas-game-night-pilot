@@ -5,6 +5,7 @@
 //   node scripts/check-leaderboard.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
+import { optionIndex } from "./lib/content-oracle.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -43,6 +44,20 @@ async function roomIdOf(page) {
 async function answerOption(page, optionIndex) {
   const player = (await page.evaluate(() => sessionStorage.getItem("cgn_name"))) || "player";
   await answerKitQuestions(page, { player, choose: () => optionIndex });
+}
+// Sprint 4: each game draws its own questions, so a scenario fixes how many
+// questions a player gets RIGHT (the first n), using the content oracle;
+// the rest are answered wrong. Every Trivia answer is worth 120 if right.
+async function answerCorrect(page, n) {
+  const player = (await page.evaluate(() => sessionStorage.getItem("cgn_name"))) || "player";
+  await answerKitQuestions(page, {
+    player,
+    choose: async (q, pg) => {
+      const prompt = await pg.locator(".mz-question").innerText();
+      const options = (await pg.locator(".mz-slab").allInnerTexts()).map((o) => o.split("\n").filter(Boolean).pop() ?? o);
+      return optionIndex("trivia", prompt, options, { wrong: q > n });
+    },
+  });
 }
 // Answer only the first n questions, then stop (used before disconnecting).
 async function answerFirstN(page, n, optionIndex = 0) {
@@ -131,7 +146,7 @@ try {
   await joinRoom(tv, "TV", code);
 
   async function playGame(actions, seed) {
-    // actions: { page, kind: "option"|"abstain" }[]; host starts from lobby.
+    // actions: { page, kind: "correct"(n)|"option"|"abstain" }[]; host starts from lobby.
     // A fixed seed is used only where the scenario needs a deterministic
     // correct-answer split (game 2: option-0 vs option-1 pairs must score
     // differently). Random seeds made that shape a ~1-in-5 flake: a 5/5
@@ -150,6 +165,7 @@ try {
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     for (const a of actions) {
       if (a.kind === "abstain") await a.page.getByRole("button", { name: "Sit this game out" }).click();
+      else if (a.kind === "correct") await answerCorrect(a.page, a.n);
       else await answerOption(a.page, a.option);
     }
     await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });
@@ -182,13 +198,13 @@ try {
     return { expected, tvs, phones, proj, moves, note };
   }
 
-  // Game 1: everyone answers identically -> all tied.
+  // Game 1: everyone gets the same number right -> all tied.
   {
     const { expected, tvs, phones, note } = await playGame([
-      { page: host, kind: "option", option: 0 },
-      { page: P.Bea, kind: "option", option: 0 },
-      { page: P.Cal, kind: "option", option: 0 },
-      { page: P.Dee, kind: "option", option: 0 },
+      { page: host, kind: "correct", n: 2 },
+      { page: P.Bea, kind: "correct", n: 2 },
+      { page: P.Cal, kind: "correct", n: 2 },
+      { page: P.Dee, kind: "correct", n: 2 },
       { page: tv, kind: "abstain" },
     ]);
     check("all tied: every player shares rank 1", expected.filter((r) => r.name !== "TV").every((r) => r.rank === 1));
@@ -196,16 +212,15 @@ try {
     checkPhoneMatches("all tied: phone rows match server", phones, expected);
     check("first game: no movement note without a previous game", note === 0, `note=${note}`);
   }
-  // Game 2: two pairs answer identically -> two shared ranks.
-  // Seeded (see playGame): the pair-ties shape needs an uneven split.
+  // Game 2: two pairs score the same -> two shared ranks (5 right vs 3 right).
   {
     const { expected, tvs, phones } = await playGame([
-      { page: host, kind: "option", option: 0 },
-      { page: P.Bea, kind: "option", option: 0 },
-      { page: P.Cal, kind: "option", option: 1 },
-      { page: P.Dee, kind: "option", option: 1 },
+      { page: host, kind: "correct", n: 5 },
+      { page: P.Bea, kind: "correct", n: 5 },
+      { page: P.Cal, kind: "correct", n: 3 },
+      { page: P.Dee, kind: "correct", n: 3 },
       { page: tv, kind: "abstain" },
-    ], 1);
+    ]);
     const ranks = new Map(expected.map((r) => [r.name, r.rank]));
     const pairsShare = ranks.get("Ada") === ranks.get("Bea") && ranks.get("Cal") === ranks.get("Dee") && ranks.get("Ada") !== ranks.get("Cal");
     check("pair ties: Ada=Bea and Cal=Dee share ranks, pairs differ", pairsShare,
@@ -213,17 +228,16 @@ try {
     checkTvMatches("pair ties: TV leaderboard matches server", tvs, expected);
     checkPhoneMatches("pair ties: phone rows match server", phones, expected);
   }
-  // Distinct scores (Milestone C.1, seed 1): correct-answer counts by
-  // option are [5,3,0,2], so options 0/1/2/3 score 600/360/0/240 — four
-  // distinct ranks plus a zero-point player, no ties among the four.
+  // Distinct scores (Milestone C.1): 5 / 3 / 0 / 2 right = 600 / 360 / 0 / 240,
+  // four distinct ranks plus a zero-point player, no ties among the four.
   {
     const { expected, tvs, phones } = await playGame([
-      { page: host, kind: "option", option: 0 },
-      { page: P.Bea, kind: "option", option: 1 },
-      { page: P.Cal, kind: "option", option: 2 },
-      { page: P.Dee, kind: "option", option: 3 },
+      { page: host, kind: "correct", n: 5 },
+      { page: P.Bea, kind: "correct", n: 3 },
+      { page: P.Cal, kind: "correct", n: 0 },
+      { page: P.Dee, kind: "correct", n: 2 },
       { page: tv, kind: "abstain" },
-    ], 1);
+    ]);
     const ranks = new Map(expected.map((r) => [r.name, r.rank]));
     const scores = new Map(expected.map((r) => [r.name, r.score]));
     check("distinct scores: Ada 600 / Bea 360 / Dee 240 / Cal 0, ranks 1/2/3/4",
@@ -235,17 +249,17 @@ try {
     checkTvMatches("distinct scores: TV leaderboard matches server", tvs, expected);
     checkPhoneMatches("distinct scores: phone rows match server", phones, expected);
   }
-  // Rank movement (Milestone C.2): same seed, Ada/Bea swap options, so
-  // Bea climbs 2 -> 1 (+240) and Ada drops 1 -> 2 (-240) vs the previous
-  // Trivia game. Cal/Dee keep their options and do not move.
+  // Rank movement (Milestone C.2): Ada and Bea swap results, so Bea climbs
+  // 2 -> 1 (+240) and Ada drops 1 -> 2 (-240) vs the previous Trivia game.
+  // Cal and Dee repeat theirs and do not move.
   {
     const { expected, tvs, phones, moves, note } = await playGame([
-      { page: host, kind: "option", option: 1 },
-      { page: P.Bea, kind: "option", option: 0 },
-      { page: P.Cal, kind: "option", option: 2 },
-      { page: P.Dee, kind: "option", option: 3 },
+      { page: host, kind: "correct", n: 3 },
+      { page: P.Bea, kind: "correct", n: 5 },
+      { page: P.Cal, kind: "correct", n: 0 },
+      { page: P.Dee, kind: "correct", n: 2 },
       { page: tv, kind: "abstain" },
-    ], 1);
+    ]);
     const ranks = new Map(expected.map((r) => [r.name, r.rank]));
     check("movement: Bea takes rank 1, Ada drops to rank 2", ranks.get("Bea") === 1 && ranks.get("Ada") === 2,
       [...ranks.entries()].map(([n, r]) => `${n}:${r}`).join(" "));
@@ -273,12 +287,12 @@ try {
     attempts++;
     const swap = attempts % 2 === 0;
     const { expected } = await playGame([
-      { page: host, kind: "option", option: swap ? 1 : 0 },
-      { page: P.Bea, kind: "option", option: swap ? 0 : 1 },
+      { page: host, kind: "correct", n: swap ? 3 : 5 },
+      { page: P.Bea, kind: "correct", n: swap ? 5 : 3 },
       { page: P.Cal, kind: "abstain" },
       { page: P.Dee, kind: "abstain" },
       { page: tv, kind: "abstain" },
-    ], 1);
+    ]);
     const order = (() => {
       const a = expected.find((r) => r.name === "Ada");
       const b = expected.find((r) => r.name === "Bea");

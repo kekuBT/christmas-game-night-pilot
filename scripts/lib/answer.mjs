@@ -77,7 +77,8 @@ export async function answerKitQuestions(page, { player, choose, timeout = 20000
       continue;
     }
     // A question: tap the chosen option and require the app to move on.
-    const index = choose(st.n);
+    // `choose` may read the screen (e.g. the content oracle) and be async.
+    const index = await choose(st.n, page);
     try {
       await page.locator(".mz-slab:not([disabled])").nth(index).click({ timeout });
     } catch (err) {
