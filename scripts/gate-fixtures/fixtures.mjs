@@ -6,6 +6,8 @@
 //     pass          check the gate's own server answers, then exit 0
 //     fail          print a FAIL line and exit 1 (an assertion failure)
 //     hang          start a child process, record both pids, never exit
+//     hang-detached like hang, but the child is in its own process group,
+//                   both ignore SIGTERM, and the child holds our stdout
 //     mutate        edit a source file (makes the built bundle stale), exit 0
 //     touch-tracked edit a tracked non-source file, exit 0
 import { spawn } from "node:child_process";
@@ -29,6 +31,14 @@ if (mode === "pass") {
   const child = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { stdio: "ignore" });
   writeFileSync(process.env.FIXTURE_PID_FILE, JSON.stringify({ pid: process.pid, child: child.pid }));
   console.log(`hanging (pid ${process.pid}, child ${child.pid})`);
+  setInterval(() => {}, 1000);
+} else if (mode === "hang-detached") {
+  // Worst case for cleanup, like Playwright's browser: the child is in its
+  // own process group (detached), ignores SIGTERM, and holds our stdout.
+  const child = spawn(process.execPath, ["-e", "process.on('SIGTERM', () => {}); setInterval(() => {}, 1000)"], { stdio: ["ignore", "inherit", "inherit"], detached: true });
+  process.on("SIGTERM", () => {}); // the driver itself ignores SIGTERM too
+  writeFileSync(process.env.FIXTURE_PID_FILE, JSON.stringify({ pid: process.pid, child: child.pid }));
+  console.log(`hanging detached (pid ${process.pid}, child ${child.pid})`);
   setInterval(() => {}, 1000);
 } else if (mode === "mutate") {
   appendFileSync("src/server/serve.ts", "\n// gate self-test: source edited mid-run\n");

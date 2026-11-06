@@ -34,7 +34,7 @@ The summary lists every non-passing step with its first failing assertions. Each
 - **Builds what it tests.** Every level builds the bundle from the current tree into the run directory. The tree is fingerprinted (all files under `apps/`, `src/`, `scripts/`, `tests/` and the manifests) and re-checked before each browser step and at the end. Any edit during the run makes the result `INVALID`.
 - **Owns its server.** It starts `src/server/serve.ts` on an OS-assigned port with a fresh data directory, and stops it at the end. It never touches a dev server you started.
 - **Isolated runs.** Two gates can run at once: separate builds, servers, ports, data and results.
-- **Hard timeouts.** Each step runs in its own process group: 300 s for typecheck, lint and build, 900 s for unit tests, 600 s per driver and 1800 s for E2E. `--driver-timeout=<sec>` overrides the driver limit and `--timeout=<min>` caps the whole run. A hung step is killed with its children and reported as `TIMEOUT`.
+- **Hard timeouts.** Each step runs in its own process group, and every process it starts carries a run-specific environment tag. After each step, and at the end, anything still carrying the tag is killed, which catches browsers that Playwright starts in their own process group. Limits: 300 s for typecheck, lint and build, 900 s for unit tests, 600 s per driver and 1800 s for E2E. `--driver-timeout=<sec>` overrides the driver limit and `--timeout=<min>` caps the whole run. A hung step is killed with its children and reported as `TIMEOUT`.
 - **Infrastructure vs failure.** A browser preflight runs before any driver. A missing browser is one `INFRA` line, not 28 failures.
 - **Clean tree.** A run that modifies tracked files fails.
 
@@ -44,7 +44,7 @@ The self-test proves each guarantee by making the gate fail on purpose in a thro
 npm run gate:selftest
 ```
 
-It covers: a failing unit test, a failing driver, a hanging driver, a missing browser, a source edit after the build (stale bundle), a check that edits a tracked file, two concurrent runs, and cancellation that leaves unrelated processes alone.
+It covers: a failing unit test, a failing driver, a hanging driver, a hanging driver whose detached child (like Playwright's browser) ignores SIGTERM and holds the step's output open, a missing browser, a source edit after the build (stale bundle), a check that edits a tracked file, two concurrent runs, and cancellation that leaves unrelated processes alone.
 
 ## Browsers
 

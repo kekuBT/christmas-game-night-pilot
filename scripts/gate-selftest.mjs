@@ -122,6 +122,19 @@ try {
     rmSync(pidFile, { force: true });
   }
 
+  // 3b. Worst case: a detached grandchild (like Playwright's browser) that
+  // ignores SIGTERM and holds the step's stdout open. Process-group kill
+  // cannot reach it; the gate's ownership-tag sweep must.
+  if (!IS_WINDOWS) {
+    const pidFile = join(SANDBOX, "hang-detached.pid");
+    const t0 = Date.now();
+    const r = await runGate(["targeted", fx("hang-detached"), "--driver-timeout=3"], { FIXTURE_PID_FILE: pidFile });
+    const pids = JSON.parse(readFileSync(pidFile, "utf8"));
+    check("detached SIGTERM-ignoring driver → TIMEOUT, gate does not hang", r.code === 1 && step(r.report, "fixture-hang-detached")?.status === "TIMEOUT" && Date.now() - t0 < 60_000, `exit ${r.code}`);
+    check("detached grandchild outside the process group is still cleaned up", await allGone([pids.pid, pids.child]), JSON.stringify(pids));
+    rmSync(pidFile, { force: true });
+  }
+
   // 4. A missing browser is reported as an infrastructure error, not an app failure.
   {
     const r = await runGate(["targeted", "math"], { MCHEZO_CHROMIUM_PATH: join(SANDBOX, "no-such-chrome") });

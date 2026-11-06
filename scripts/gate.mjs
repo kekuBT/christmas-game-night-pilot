@@ -18,7 +18,7 @@
 //   only ever kills process groups it started.
 // - Drivers write screenshots into the run directory; a run that modifies
 //   tracked files fails.
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -122,6 +122,48 @@ function killTree(child) {
   });
 }
 
+// Ownership tags. Every process a step starts inherits MCHEZO_GATE_STEP;
+// everything the run starts (steps and server) inherits MCHEZO_GATE_RUN.
+// Process groups are not enough: Playwright launches Chromium detached, in
+// its own group, so a driver killed with SIGKILL can orphan its browser.
+// After each step, and at the end, the gate kills any process still
+// carrying this run's tag, and nothing else.
+const RUN_TAG = `MCHEZO_GATE_RUN=${RUN_ID}`;
+const stepTag = (index) => `MCHEZO_GATE_STEP=${RUN_ID}:${index}`;
+
+/** PIDs of live processes whose environment contains `tag` (Linux /proc, macOS ps -E). */
+function taggedPids(tag) {
+  const pids = [];
+  if (process.platform === "linux") {
+    let entries;
+    try { entries = readdirSync("/proc").filter((d) => /^\d+$/.test(d)); } catch { return pids; }
+    for (const d of entries) {
+      const pid = Number(d);
+      if (pid === process.pid) continue;
+      try {
+        if (readFileSync(`/proc/${d}/environ`, "utf8").split("\0").includes(tag)) pids.push(pid);
+      } catch { /* exited or not ours to read */ }
+    }
+  } else if (process.platform === "darwin") {
+    try {
+      for (const line of execFileSync("ps", ["-E", "-ww", "-o", "pid=,command="], { encoding: "utf8" }).split("\n")) {
+        const m = /^\s*(\d+)\s/.exec(line);
+        if (m && Number(m[1]) !== process.pid && line.includes(` ${tag}`)) pids.push(Number(m[1]));
+      }
+    } catch { /* ps unavailable */ }
+  }
+  return pids; // Windows: taskkill /T on the step's pid already covers its tree
+}
+
+/** Kill every live process carrying `tag`. Returns how many were killed. */
+function sweep(tag) {
+  let killed = 0;
+  for (const pid of taggedPids(tag)) {
+    try { process.kill(pid, "SIGKILL"); killed++; } catch { /* already gone */ }
+  }
+  return killed;
+}
+
 function onSignal(sig) {
   if (cancelled) return;
   cancelled = true;
@@ -156,7 +198,7 @@ function runStep(name, command, args, { timeoutSec, env = {}, kind = "check" } =
     let output = "";
     const child = spawn(command, args, {
       cwd: REPO,
-      env: { ...process.env, ...env, FORCE_COLOR: "0" },
+      env: { ...process.env, ...env, FORCE_COLOR: "0", MCHEZO_GATE_RUN: RUN_ID, MCHEZO_GATE_STEP: `${RUN_ID}:${index}` },
       detached: !IS_WINDOWS, // own process group on POSIX, so cleanup is exact
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: true,
@@ -167,6 +209,10 @@ function runStep(name, command, args, { timeoutSec, env = {}, kind = "check" } =
     child.stderr.on("data", capture);
     let timedOut = false;
     const timer = setTimeout(() => { timedOut = true; void killTree(child); }, limit * 1000);
+    // `close` waits for stdout/stderr to close; an orphaned grandchild that
+    // inherited them would hold it open forever. Once the step's main
+    // process has exited, give its tree 2s, then sweep its tagged leftovers.
+    child.on("exit", () => { setTimeout(() => sweep(stepTag(index)), 2000).unref(); });
     child.on("error", (err) => {
       clearTimeout(timer);
       step.status = "INFRA";
@@ -175,6 +221,8 @@ function runStep(name, command, args, { timeoutSec, env = {}, kind = "check" } =
     child.on("close", (code, signal) => {
       clearTimeout(timer);
       current = null;
+      const leftovers = sweep(stepTag(index));
+      if (leftovers) log.write(`\n# killed ${leftovers} leftover process(es) started by this step\n`);
       step.exitCode = code;
       step.durationSec = Math.round((Date.now() - t0) / 100) / 10;
       if (step.status === "INFRA") { /* spawn error already recorded */ }
@@ -217,7 +265,7 @@ async function startServer() {
   mkdirSync(DATA_DIR, { recursive: true });
   const child = spawn(NODE, ["--import", "tsx", "src/server/serve.ts"], {
     cwd: REPO,
-    env: { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR, MCHEZO_WEB_DIST: DIST_DIR },
+    env: { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR, MCHEZO_WEB_DIST: DIST_DIR, MCHEZO_GATE_RUN: RUN_ID },
     detached: !IS_WINDOWS,
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,
@@ -312,6 +360,8 @@ async function main() {
 async function finish() {
   await killTree(current?.child);
   await killTree(server?.child);
+  const stray = sweep(RUN_TAG);
+  if (stray) report.notes.push(`killed ${stray} leftover process(es) started by this run`);
   if (!cancelled) verifyUnchanged("end of run");
   const after = gitInfo(REPO);
   const before = new Set(git.dirty ?? []);
