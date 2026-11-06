@@ -1,78 +1,92 @@
 /**
- * What makes a championship day "qualifying" for a player (Sprint 3, P7).
+ * What makes a championship day "qualifying" for a player.
  *
- * P7: the threshold is NOT approved. This module is the mechanism only.
- * The ACTIVE policy is the existing rule, unchanged: a player qualifies for
- * a day if they were on the roster of at least one of that day's Cup games
- * (the pre-Sprint 3 calculation, proven identical by
- * tests/cup-integrity.test.ts). The alternatives below are implemented and
- * tested but NOT active; switching needs the owner's decision, and must
- * happen before a Cup starts, never during one.
+ * The rule belongs to the Cup, not to the application: every Cup stores its
+ * own validated policy (src/server/cup.ts) when it is created, and keeps it
+ * for life. Changing the default here changes only Cups created afterwards.
  *
- * Why it matters now: since Sprint 3 a player who starts a game and then
- * does nothing still ends up on its roster with 0 points (P6, P3). Under
- * the active rule that day still counts toward their attendance bonus.
- * See docs/SPRINT_3_QUALIFICATION_OPTIONS.md for the recommendation.
+ * Policies:
+ * - "any-official-game" (legacy): on the roster of at least one Cup game
+ *   that day. Every Cup created before Sprint 4 used this rule and keeps it.
+ * - "meaningful-participation" v1 (owner-approved 2026-11-06, Sprint 4):
+ *   the player meaningfully took part in at least `minGames` completed,
+ *   officially counted games that day. Meaningful means BOTH:
+ *     - at least `minActions` genuine scoring actions (answers and guesses,
+ *       wrong ones included; captions; non-empty Sprint submissions;
+ *       Connections group guesses). Opening a question, being on the
+ *       roster, staying connected and choosing to sit out are not actions;
+ *     - at least `minShare` of the game's scoring opportunities completed,
+ *       except Word Connections, where the opportunity is the puzzle: it
+ *       counts when the PLAYER ended it (all four groups solved, or the
+ *       allowed mistakes used up) or solved at least `minShare` of the
+ *       groups. Reaching the game's deadline is not the player finishing.
+ *   Void, practice and otherwise excluded games never reach this check
+ *   (only games that count officially are considered).
  */
+import { z } from "zod";
 
-export type QualificationPolicy =
-  /** Active (existing) rule: on the roster of at least one Cup game that day. */
-  | { kind: "any-official-game" }
-  /** Took part (answered/guessed/submitted at least once) in at least `min` Cup games that day. */
-  | { kind: "played-games"; min: number }
-  /** Took part in at least `share` (0-1) of that day's Cup games, and in at least one. */
-  | { kind: "share-of-day"; share: number }
-  /**
-   * Meaningful scoring participation: in at least `minGames` Cup games that
-   * day, the player completed at least `share` of the game's scoring items
-   * (answers, guesses, rounds, groups) or played it to its end.
-   */
-  | { kind: "meaningful-games"; minGames: number; share: number };
+export const LegacyQualificationPolicySchema = z.object({ kind: z.literal("any-official-game") }).strict();
+export const MeaningfulQualificationPolicySchema = z.object({
+  kind: z.literal("meaningful-participation"),
+  version: z.literal(1),
+  /** Share of a game's scoring opportunities that must be completed (0-1]. */
+  minShare: z.number().gt(0).lte(1),
+  /** Genuine scoring actions required in that game. */
+  minActions: z.number().int().min(1).max(100),
+  /** Meaningfully played, officially counted games needed that day. */
+  minGames: z.number().int().min(1).max(20),
+}).strict();
+export const QualificationPolicySchema = z.discriminatedUnion("kind", [LegacyQualificationPolicySchema, MeaningfulQualificationPolicySchema]);
+export type QualificationPolicy = z.infer<typeof QualificationPolicySchema>;
 
-export interface DayAttendance {
-  /** Cup games that day with this player on the roster. */
-  gamesOnRoster: number;
-  /** Of those, games in which the player did at least one thing. */
-  gamesPlayed: number;
-  /**
-   * Per Cup game that day: the player's participation record, or null for a
-   * game from before Sprint 3 (no record; treated as meaningful, as before).
-   */
-  participations?: ({ done: number; of: number; finished?: boolean } | null)[];
-  /** Cup games played in the room that day. */
-  gamesThatDay: number;
+/** The rule of every Cup created before Sprint 4 (and of snapshots without a Cup record). */
+export const LEGACY_QUALIFICATION_POLICY: QualificationPolicy = Object.freeze({ kind: "any-official-game" });
+
+/** The owner-approved rule for Cups created from Sprint 4 on. */
+export const NEW_CUP_QUALIFICATION_POLICY: QualificationPolicy = Object.freeze({
+  kind: "meaningful-participation",
+  version: 1,
+  minShare: 0.5,
+  minActions: 2,
+  minGames: 1,
+});
+
+/** One player's record in one officially counted game (from the game's outcome). */
+export interface GameParticipationRecord {
+  done: number;
+  of: number;
+  /** Word Connections: the player ended the puzzle themselves. */
+  finished?: boolean;
+  /** Genuine scoring actions (absent on records written before Sprint 4). */
+  actions?: number;
 }
 
-export const ACTIVE_QUALIFICATION_POLICY: QualificationPolicy = Object.freeze({ kind: "any-official-game" });
+export interface DayAttendance {
+  /** Officially counted Cup games that day with this player on the roster. */
+  gamesOnRoster: number;
+  /**
+   * Per such game: the participation record, or null for a game recorded
+   * before Sprint 3 (no record at all).
+   */
+  participations: (GameParticipationRecord | null)[];
+}
 
-/** The options proposed to the owner (not active). */
-export const PROPOSED_QUALIFICATION_POLICIES: readonly { id: string; policy: QualificationPolicy; summary: string }[] = Object.freeze([
-  { id: "A", policy: { kind: "any-official-game" }, summary: "Current rule: in at least one Cup game that day (even with no answers)." },
-  { id: "B", policy: { kind: "played-games", min: 1 }, summary: "Took part in at least one Cup game that day (at least one answer, guess or submission)." },
-  { id: "C", policy: { kind: "played-games", min: 2 }, summary: "Took part in at least two Cup games that day." },
-  { id: "D", policy: { kind: "share-of-day", share: 0.5 }, summary: "Took part in at least half of that day's Cup games." },
-  { id: "E", policy: { kind: "meaningful-games", minGames: 1, share: 0.5 }, summary: "Played at least half of one Cup game that day (e.g. 5 of 10 answers, 2 of 3 rounds, a Connections puzzle to its end)." },
-]);
-
-/** The share of a game a player must complete for it to count as meaningful participation (option E). */
-export const MEANINGFUL_SHARE = 0.5;
-
-/** Did this participation record show meaningful scoring participation? */
-export function meaningful(p: { done: number; of: number; finished?: boolean } | undefined, share = MEANINGFUL_SHARE): boolean {
-  if (!p) return false;
+/** Was this game meaningful participation under the policy? */
+export function meaningful(p: GameParticipationRecord | null, policy: Extract<QualificationPolicy, { kind: "meaningful-participation" }>): boolean {
+  // A game with no participation record predates outcomes; it can only exist
+  // in an old Cup, which never uses this policy. Fail closed if it ever does.
+  if (p === null) return false;
+  const actions = p.actions ?? p.done;
+  if (actions < policy.minActions) return false;
   if (p.finished) return true;
-  return p.of > 0 && p.done / p.of >= share;
+  return p.of > 0 && p.done / p.of >= policy.minShare;
 }
 
 export function qualifies(policy: QualificationPolicy, a: DayAttendance): boolean {
   switch (policy.kind) {
     case "any-official-game":
       return a.gamesOnRoster >= 1;
-    case "played-games":
-      return a.gamesPlayed >= Math.max(1, policy.min);
-    case "share-of-day":
-      return a.gamesPlayed >= 1 && a.gamesThatDay > 0 && a.gamesPlayed / a.gamesThatDay >= policy.share;
-    case "meaningful-games":
-      return (a.participations ?? []).filter((p) => p === null || meaningful(p, policy.share)).length >= Math.max(1, policy.minGames);
+    case "meaningful-participation":
+      return a.participations.filter((p) => meaningful(p, policy)).length >= policy.minGames;
   }
 }

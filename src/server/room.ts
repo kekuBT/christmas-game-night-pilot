@@ -4,8 +4,9 @@ import { CLIENT_PROTOCOL, MIN_CLIENT_PROTOCOL } from "../shared/clientProtocol.j
 import { COUNT_GAMES_WITH_NO_PARTICIPATION, policyFor, type EndReason, type GameOutcome, type Participation } from "./lifecycle.js";
 import { dayScore, midrankScore } from "../scoring/championship.js";
 import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
-import { formatInfo, LEGACY_ROOM_FORMAT, NEW_ROOM_FORMAT, type CompetitionFormat } from "../scoring/format.js";
-import { ACTIVE_QUALIFICATION_POLICY, qualifies, type QualificationPolicy } from "../scoring/qualification.js";
+import { formatInfo, type CompetitionFormat } from "../scoring/format.js";
+import { qualifies, QualificationPolicySchema, type GameParticipationRecord, type QualificationPolicy } from "../scoring/qualification.js";
+import { CupRecordSchema, describePolicy, newCupRecord, restoreCupRecord, type CupRecord } from "./cup.js";
 import { evaluateAchievements, dayCeremony } from "./achievements.js";
 import { generateMathQuestions, scoreMathAnswer, type MathQuestion } from "../games/math.js";
 import {
@@ -242,14 +243,43 @@ export class RoomEngine {
   games = new Map<string, GameInstance>();
   ledger: LedgerEvent[] = [];
   /**
-   * The Cup's rules, fixed when the room is created and never changed
-   * (src/scoring/format.ts). New rooms: the Individual Family Cup. Rooms
-   * restored from snapshots written before formats existed keep the
-   * combined 75/25 rules they were played under.
+   * The Cup this room is running (src/server/cup.ts): its format and
+   * qualifying rule, saved with the room and fixed for the Cup's life.
+   * New rooms: the Individual Family Cup with the meaningful-participation
+   * rule. Snapshots from before Sprint 4 keep the rules they were played
+   * under. An invalid saved record is kept as-is (cupRaw) and pauses the
+   * standings instead of being replaced by a guess.
    */
-  private _competitionFormat: CompetitionFormat = NEW_ROOM_FORMAT;
+  private _cup: CupRecord;
+  private cupError: string | null = null;
+  private cupRaw: unknown = undefined;
+  get cup(): CupRecord {
+    return this._cup;
+  }
   get competitionFormat(): CompetitionFormat {
-    return this._competitionFormat;
+    return this._cup.format;
+  }
+  get qualificationPolicy(): QualificationPolicy {
+    return this._cup.qualificationPolicy;
+  }
+  /** Why standings are paused (an unreadable Cup record), or null. */
+  get cupProblem(): string | null {
+    return this.cupError;
+  }
+  /**
+   * Choose this Cup's rules. Only before its first game: a Cup's rules are
+   * fixed before it begins and never change during it. Validated.
+   */
+  configureCup(opts: { qualificationPolicy?: unknown; format?: CompetitionFormat }): void {
+    if (this.cupError) throw new Error("This Cup's saved rules could not be read; they must be repaired, not replaced");
+    if (this.games.size > 0) throw new Error("A Cup's rules are fixed once its first game has started");
+    const next = CupRecordSchema.parse({
+      ...this._cup,
+      ...(opts.format ? { format: opts.format } : {}),
+      ...(opts.qualificationPolicy !== undefined ? { qualificationPolicy: QualificationPolicySchema.parse(opts.qualificationPolicy) } : {}),
+    });
+    this._cup = Object.freeze({ ...next, qualificationPolicy: Object.freeze({ ...next.qualificationPolicy }) }) as CupRecord;
+    this.log("cup-configured", { detail: { format: next.format, qualificationPolicy: next.qualificationPolicy } });
   }
   /**
    * TESTING ONLY: multiplies every lifecycle duration (game windows and
@@ -265,8 +295,6 @@ export class RoomEngine {
     this.dirty = false;
     return d;
   }
-  /** Which attendance rule makes a day "qualifying" (inactive alternatives exist; P7). */
-  qualificationPolicy: QualificationPolicy = ACTIVE_QUALIFICATION_POLICY;
   seq = 0;
   private seenIntents = new Map<string, { accepted: boolean; result: unknown }>();
   private nextPlayer = 1;
@@ -279,6 +307,7 @@ export class RoomEngine {
     this.id = `room-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6)}`;
     this.joinCode = createJoinCode();
     this.name = name;
+    this._cup = newCupRecord(`cup-${Date.now().toString(36)}-${randomInt(0, 2 ** 31).toString(36)}`, Date.now());
   }
 
   private log(type: string, extra: Partial<LedgerEvent> = {}): LedgerEvent {
@@ -1183,32 +1212,41 @@ export class RoomEngine {
       case "who-said-that":
       case "geography": {
         const st = game.extra as { questions: unknown[]; answers: Record<string, Record<string, number>> };
-        each((pid) => ({ done: Object.keys(st.answers[pid] ?? {}).length, of: st.questions.length }));
+        // Every answer is an action, right or wrong.
+        each((pid) => { const n = Object.keys(st.answers[pid] ?? {}).length; return { done: n, of: st.questions.length, actions: n }; });
         break;
       }
       case "guess-the-year": {
         const st = game.extra as { events: unknown[]; guesses: Record<string, Record<string, number>> };
-        each((pid) => ({ done: Object.keys(st.guesses[pid] ?? {}).length, of: st.events.length }));
+        each((pid) => { const n = Object.keys(st.guesses[pid] ?? {}).length; return { done: n, of: st.events.length, actions: n }; });
         break;
       }
       case "math-mayhem":
-        each((pid) => ({ done: Object.keys(game.answers[pid] ?? {}).length, of: game.questions?.length ?? 0 }));
+        // Answers only: opening a question is not an action.
+        each((pid) => { const n = Object.keys(game.answers[pid] ?? {}).length; return { done: n, of: game.questions?.length ?? 0, actions: n }; });
         break;
       case "word-connections": {
+        // The opportunity is the puzzle: `finished` only when the PLAYER ended
+        // it (four groups, or the allowed mistakes used up) — never because the
+        // game's deadline arrived. Every group guess, right or wrong, is an action.
         const st = game.extra as { playerStates: Record<string, ConnectionsPlayerState> };
-        each((pid) => { const ps = st.playerStates[pid]; return { done: ps?.solved.length ?? 0, of: 4, finished: !!ps && (ps.solved.length >= 4 || ps.mistakes >= 4) }; });
+        each((pid) => {
+          const ps = st.playerStates[pid];
+          return { done: ps?.solved.length ?? 0, of: 4, finished: !!ps && (ps.solved.length >= 4 || ps.mistakes >= 4), actions: ps?.guessed.length ?? 0 };
+        });
         break;
       }
       case "closest-wins": {
         const st = game.extra as ClosestState;
         const reached = st.phase === "finished" ? st.questions.length : st.questionIndex;
-        each((pid) => ({ done: st.questions.slice(0, reached).filter((q) => (st.guesses[q.id] ?? {})[pid] !== undefined).length, of: st.questions.length }));
+        each((pid) => { const n = st.questions.slice(0, reached).filter((q) => (st.guesses[q.id] ?? {})[pid] !== undefined).length; return { done: n, of: st.questions.length, actions: n }; });
         return { participation: out, completedUnits: reached, totalUnits: st.questions.length };
       }
       case "caption-clash": {
         const st = game.extra as CaptionState;
         const reached = st.phase === "finished" ? st.rounds.length : st.roundIndex;
-        each((pid) => ({ done: st.rounds.slice(0, reached).filter((r) => r.captions[pid] !== undefined).length, of: st.rounds.length }));
+        // Writing a caption is the player's scoring action (votes score others).
+        each((pid) => { const n = st.rounds.slice(0, reached).filter((r) => r.captions[pid] !== undefined).length; return { done: n, of: st.rounds.length, actions: n }; });
         return { participation: out, completedUnits: reached, totalUnits: st.rounds.length };
       }
       case "category-sprint": {
@@ -1216,7 +1254,9 @@ export class RoomEngine {
         const total = 3;
         // A completed sprint ends inside its last round without moving roundIndex on.
         const reached = reason === "completed" ? total : st.roundIndex;
-        each((pid) => ({ done: Array.from({ length: total }, (_, r) => r).filter((r) => r < reached && (st.submissions[r] ?? {})[pid] !== undefined).length, of: total }));
+        // An empty submission is not playing the round.
+        const real = (r: number, pid: string) => ((st.submissions[r] ?? {})[pid] ?? []).some((a) => a.trim().length > 0);
+        each((pid) => { const n = Array.from({ length: total }, (_, r) => r).filter((r) => r < reached && real(r, pid)).length; return { done: n, of: total, actions: n }; });
         return { participation: out, completedUnits: reached, totalUnits: total };
       }
       default:
@@ -1402,12 +1442,14 @@ export class RoomEngine {
    * finale bonus. Practice and timed-out games never enter this calculation.
    */
   championshipResults() {
-    return computeChampionship(this.playerDays(), { config: formatInfo(this._competitionFormat).config });
+    if (this.cupError) return []; // paused: never computed under a guessed rule
+    return computeChampionship(this.playerDays(), { config: formatInfo(this._cup.format).config });
   }
 
   /** Finished games that feed this room's Cup, under its format. */
   private cupGames(): GameInstance[] {
-    const teamGamesCount = formatInfo(this._competitionFormat).teamGamesCount;
+    if (this.cupError) return [];
+    const teamGamesCount = formatInfo(this._cup.format).teamGamesCount;
     return [...this.games.values()].filter((g) => this.countsOfficially(g) && (teamGamesCount || !getGame(g.gameId).modes.includes("team")));
   }
 
@@ -1417,30 +1459,27 @@ export class RoomEngine {
    * qualification policy. Shared by the championship and the ceremony.
    */
   private playerDays(onlyDay?: number): PlayerDay[] {
-    const days = new Map<string, PlayerDay & { games: number; gamesPlayed: number; participations: ({ done: number; of: number; finished?: boolean } | null)[] }>();
-    const gamesPerDay = new Map<number, number>();
+    // Only completed games that count officially reach here (cupGames):
+    // void, practice and excluded games can never qualify a day.
+    const days = new Map<string, PlayerDay & { games: number; participations: (GameParticipationRecord | null)[] }>();
     for (const g of this.cupGames()) {
       const day = g.day ?? 1;
       if (onlyDay !== undefined && day !== onlyDay) continue;
       const all = Object.values(g.rawScores);
       if (all.length < 2) continue;
-      gamesPerDay.set(day, (gamesPerDay.get(day) ?? 0) + 1);
       const isTeam = getGame(g.gameId).modes.includes("team");
       for (const [pid, pts] of Object.entries(g.rawScores)) {
         const key = `${pid}:${day}`;
-        const entry = days.get(key) ?? { playerId: pid, day, soloScores: [], teamScores: [], games: 0, gamesPlayed: 0, participations: [] };
+        const entry = days.get(key) ?? { playerId: pid, day, soloScores: [], teamScores: [], games: 0, participations: [] };
         const score = midrankScore(pts, all);
         if (isTeam) entry.teamScores.push(score); else entry.soloScores.push(score);
         entry.games += 1;
-        // Took part = did at least one thing; legacy games without an outcome count as taken part.
-        const part = g.outcome?.participation[pid];
-        if (!part || part.done > 0 || part.finished) entry.gamesPlayed += 1;
-        entry.participations.push(part ?? null);
+        entry.participations.push(g.outcome?.participation[pid] ?? null);
         days.set(key, entry);
       }
     }
     return [...days.values()]
-      .filter((d) => qualifies(this.qualificationPolicy, { gamesOnRoster: d.games, gamesPlayed: d.gamesPlayed, participations: d.participations, gamesThatDay: gamesPerDay.get(d.day) ?? 0 }))
+      .filter((d) => qualifies(this._cup.qualificationPolicy, { gamesOnRoster: d.games, participations: d.participations }))
       .map(({ playerId, day, soloScores, teamScores }) => ({ playerId, day, soloScores, teamScores }));
   }
 
@@ -1459,7 +1498,8 @@ export class RoomEngine {
    * no winner yet (winner null), never an invented one.
    */
   ceremony() {
-    const config = formatInfo(this._competitionFormat).config;
+    if (this.cupError) return dayCeremony(this.championshipDay, []);
+    const config = formatInfo(this._cup.format).config;
     const standings = this.playerDays(this.championshipDay).map((d) => ({
       playerId: d.playerId,
       displayName: this.players.get(d.playerId)?.displayName ?? d.playerId,
@@ -1732,7 +1772,12 @@ export class RoomEngine {
       notices: this.recentNotices(now),
       officialStandings: this.officialStandings(),
       championshipDay: this.championshipDay,
-      competition: (({ format, label, description, teamGamesCount }) => ({ format, label, description, teamGamesCount }))(formatInfo(this._competitionFormat)),
+      competition: {
+        ...(({ format, label, description, teamGamesCount }) => ({ format, label, description, teamGamesCount }))(formatInfo(this._cup.format)),
+        cupId: this._cup.cupId,
+        qualifying: describePolicy(this._cup.qualificationPolicy),
+        ...(this.cupError ? { standingsPaused: "This Cup’s saved rules could not be read, so standings are paused until they are repaired. No results have been lost." } : {}),
+      },
       championship: this.championshipResults(),
       achievements: this.achievements(),
       ceremony: this.ceremony(),
@@ -1809,7 +1854,10 @@ export class RoomEngine {
       hostId: this.hostId,
       cohosts: [...this.cohosts],
       championshipDay: this.championshipDay,
-      competitionFormat: this._competitionFormat,
+      // Kept for older readers; the Cup record is authoritative. An unreadable
+      // record is written back exactly as it was found, never overwritten.
+      competitionFormat: this._cup.format,
+      cup: this.cupError ? this.cupRaw : this._cup,
       players: [...this.players.values()],
       spectators: [...this.spectators.values()],
       games: [...this.games.values()],
@@ -1831,9 +1879,17 @@ export class RoomEngine {
     // Migration default: snapshots written before championshipDay was
     // serialized (review 5769441799) have no field and resume at day 1.
     engine.championshipDay = typeof data["championshipDay"] === "number" ? data["championshipDay"] : 1;
-    // A snapshot from before formats existed was played under the combined rules: keep them.
-    const fmt = data["competitionFormat"];
-    engine._competitionFormat = fmt === "individual-only" || fmt === "combined-75-25" ? fmt : LEGACY_ROOM_FORMAT;
+    // The Cup's rules come from its saved record; a snapshot from before
+    // Sprint 4 keeps the rules it was played under (src/server/cup.ts).
+    const firstEvent = (data["ledger"] as LedgerEvent[] | undefined)?.[0]?.createdAt ?? 0;
+    const restored = restoreCupRecord(data["cup"], { roomId: engine.id, legacyFormat: data["competitionFormat"], createdAt: firstEvent });
+    if (restored.ok) {
+      engine._cup = restored.cup;
+    } else {
+      engine.cupError = restored.error;
+      engine.cupRaw = restored.raw;
+      console.error(`[cup] room ${engine.id}: ${restored.error} — standings paused, record preserved`);
+    }
     engine.players = new Map((data["players"] as RoomPlayer[]).map((p) => [p.id, p]));
     // Migration default: snapshots written before spectators existed have
     // no spectators field and resume with none — never with phantom viewers.

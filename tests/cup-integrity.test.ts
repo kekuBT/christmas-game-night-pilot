@@ -19,7 +19,6 @@ import { afterEach, describe, expect, it } from "vitest";
 import { RoomEngine } from "../src/server/room.js";
 import { computeChampionship } from "../src/scoring/ledger.js";
 import { COMPETITION_FORMATS } from "../src/scoring/format.js";
-import { ACTIVE_QUALIFICATION_POLICY, PROPOSED_QUALIFICATION_POLICIES, qualifies } from "../src/scoring/qualification.js";
 import { midrankScore } from "../src/scoring/championship.js";
 import { GAME_POLICIES } from "../src/server/lifecycle.js";
 import { FakeClock, Harness, type Player } from "./helpers/harness.js";
@@ -82,7 +81,11 @@ describe("the Individual Family Cup (new rooms)", () => {
     const { engine } = room(2);
     expect(engine.competitionFormat).toBe("individual-only");
     const tv = engine.project("tv") as Json;
-    expect(tv["competition"]).toEqual({ format: "individual-only", label: "Individual Family Cup", description: COMPETITION_FORMATS["individual-only"].description, teamGamesCount: false });
+    expect(tv["competition"]).toEqual({
+      format: "individual-only", label: "Individual Family Cup", description: COMPETITION_FORMATS["individual-only"].description, teamGamesCount: false,
+      cupId: engine.cup.cupId,
+      qualifying: "A day counts if you really played at least one official game that day: at least 50% of it and at least 2 answers or moves (wrong answers count; sitting out doesn't).",
+    });
   });
 
   it("a day's score is the mean of its individual placement scores (no team share, no fake contribution)", () => {
@@ -129,74 +132,7 @@ describe("the Individual Family Cup (new rooms)", () => {
   });
 });
 
-describe("qualifying days (P7: mechanism only, existing rule active)", () => {
-  it("the active rule is the existing one", () => {
-    expect(ACTIVE_QUALIFICATION_POLICY).toEqual({ kind: "any-official-game" });
-    expect(new RoomEngine("x").qualificationPolicy).toEqual({ kind: "any-official-game" });
-  });
-
-  const g = (done: number, of = 10, finished?: boolean) => ({ done, of, ...(finished !== undefined ? { finished } : {}) });
-  it.each([
-    // A did nothing in 1 of 3 games that day
-    [{ gamesOnRoster: 1, gamesPlayed: 0, gamesThatDay: 3, participations: [g(0)] }, [true, false, false, false, false]],
-    // one answer in one game of three: B says yes, E (meaningful) says no
-    [{ gamesOnRoster: 3, gamesPlayed: 1, gamesThatDay: 3, participations: [g(1), g(0), g(0)] }, [true, true, false, false, false]],
-    // a short night: ONE game, played properly (6 of 10): E says yes
-    [{ gamesOnRoster: 1, gamesPlayed: 1, gamesThatDay: 1, participations: [g(6)] }, [true, true, false, true, true]],
-    // two games, a couple of answers each: C/D yes, E no
-    [{ gamesOnRoster: 3, gamesPlayed: 2, gamesThatDay: 3, participations: [g(2), g(1), g(0)] }, [true, true, true, true, false]],
-    // a Connections puzzle played to its end (0 groups, 4 mistakes) is meaningful
-    [{ gamesOnRoster: 1, gamesPlayed: 1, gamesThatDay: 4, participations: [g(0, 4, true)] }, [true, true, false, false, true]],
-    // exactly half counts
-    [{ gamesOnRoster: 1, gamesPlayed: 1, gamesThatDay: 2, participations: [g(5)] }, [true, true, false, true, true]],
-    // a game from before Sprint 3 (no record) keeps counting
-    [{ gamesOnRoster: 1, gamesPlayed: 1, gamesThatDay: 1, participations: [null] }, [true, true, false, true, true]],
-  ])("attendance %j -> options A-E %j", (a, expected) => {
-    expect(PROPOSED_QUALIFICATION_POLICIES.map((p) => qualifies(p.policy, a))).toEqual(expected);
-  });
-
-  it("option E's threshold is the policy's own share, not a hidden constant", () => {
-    const a = { gamesOnRoster: 1, gamesPlayed: 1, gamesThatDay: 1, participations: [{ done: 3, of: 10 }] };
-    expect(qualifies({ kind: "meaningful-games", minGames: 1, share: 0.5 }, a)).toBe(false);
-    expect(qualifies({ kind: "meaningful-games", minGames: 1, share: 0.3 }, a)).toBe(true);
-    expect(qualifies({ kind: "meaningful-games", minGames: 2, share: 0.3 }, a)).toBe(false);
-  });
-
-  it("option E (not active) in a real room: one answer is not enough, half a game is", () => {
-    let t = 1_800_000_000_000;
-    const engine = new RoomEngine("E");
-    engine.clock = () => t;
-    const host = engine.join("Ada", { asHost: true }).player.id;
-    const bea = engine.join("Bea").player.id;
-    const cal = engine.join("Cal").player.id;
-    const game = engine.startGame(host, "trivia", { official: true, seed: 2 });
-    const qs = (game.extra as { questions: { id: string; correctIndex: number }[] }).questions;
-    const answer = (pid: string, n: number) => { for (const q of qs.slice(0, n)) engine.submitIntent(intent(engine.id, game.id, "trivia-answer", { questionId: q.id, chosenIndex: q.correctIndex }), pid); };
-    answer(host, 10); answer(bea, 5); answer(cal, 1);
-    t = game.deadlineAt! + 1;
-    engine.tick();
-    expect(engine.championshipResults().map((r) => r.playerId).sort()).toEqual([bea, cal, host].sort()); // active rule A unchanged
-    engine.qualificationPolicy = PROPOSED_QUALIFICATION_POLICIES.find((p) => p.id === "E")!.policy;
-    expect(engine.championshipResults().map((r) => r.playerId).sort()).toEqual([bea, host].sort());
-  });
-
-  it("option B (not active) would stop a do-nothing roster spot from earning a qualifying day", () => {
-    let t = 1_800_000_000_000;
-    const engine = new RoomEngine("Q");
-    engine.clock = () => t;
-    const host = engine.join("Ada", { asHost: true }).player.id;
-    const bea = engine.join("Bea").player.id;
-    const cal = engine.join("Cal").player.id;
-    const g = engine.startGame(host, "trivia", { official: true, seed: 2 });
-    const qs = (g.extra as { questions: { id: string; correctIndex: number }[] }).questions;
-    for (const pid of [host, bea]) for (const q of qs) engine.submitIntent(intent(engine.id, g.id, "trivia-answer", { questionId: q.id, chosenIndex: q.correctIndex }), pid);
-    t = g.deadlineAt! + 1;
-    engine.tick();
-    expect(engine.championshipResults().map((r) => r.playerId).sort()).toEqual([bea, cal, host].sort()); // active rule: Cal's day counts
-    engine.qualificationPolicy = PROPOSED_QUALIFICATION_POLICIES.find((p) => p.id === "B")!.policy;
-    expect(engine.championshipResults().map((r) => r.playerId).sort()).toEqual([bea, host].sort());
-  });
-});
+// Qualifying-day rules: see tests/qualification.test.ts (Sprint 4).
 
 describe("a seven-day Individual Cup with deadlines and restarts", () => {
   let h: Harness;

@@ -84,7 +84,7 @@ describe("Closest Wins: 40 s per question", () => {
     for (let i = 0; i < 8 && h.game(gid).status === "playing"; i++) expire(gid);
     const g = h.game(gid);
     expect(g.outcome).toMatchObject({ reason: "completed", completedUnits: 8, totalUnits: 8 });
-    expect(g.outcome!.participation[ps[1]!.playerId]).toEqual({ done: 1, of: 8 });
+    expect(g.outcome!.participation[ps[1]!.playerId]).toEqual({ done: 1, of: 8, actions: 1 });
     expect(g.rawScores[ps[1]!.playerId]).toBe(100); // closest (only) guess on question 1
     expect(g.rawScores[ps[2]!.playerId]).toBe(0);
     expect(g.outcome!.countsOfficially).toBe(true);
@@ -165,7 +165,7 @@ describe("Caption Clash: 90 s write, 45 s vote", () => {
     expect(g.rawScores[bea!.playerId]).toBe(125); // 25 for writing + 100 for one vote
     expect(g.rawScores[ada!.playerId]).toBe(25);
     expect(g.rawScores[cal!.playerId]).toBe(0);
-    expect(g.outcome!.participation[ada!.playerId]).toEqual({ done: 1, of: 3 });
+    expect(g.outcome!.participation[ada!.playerId]).toEqual({ done: 1, of: 3, actions: 1 });
     expect(finishedEvents(gid)).toHaveLength(1);
   });
 });
@@ -182,8 +182,8 @@ describe("Category Sprint: 60 s per round", () => {
     expire(gid);
     const g = h.game(gid);
     expect(g.outcome).toMatchObject({ reason: "completed", completedUnits: 3, totalUnits: 3 });
-    expect(g.outcome!.participation[bea!.playerId]).toEqual({ done: 1, of: 3 });
-    expect(g.outcome!.participation[ada!.playerId]).toEqual({ done: 0, of: 3 });
+    expect(g.outcome!.participation[bea!.playerId]).toEqual({ done: 1, of: 3, actions: 1 });
+    expect(g.outcome!.participation[ada!.playerId]).toEqual({ done: 0, of: 3, actions: 0 });
   });
 });
 

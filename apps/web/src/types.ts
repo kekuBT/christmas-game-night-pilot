@@ -118,7 +118,7 @@ export interface Projection {
   /** Protocol versions (Sprint 3): below `min`, this app must be refreshed. */
   protocol?: { current: number; min: number };
   /** The Cup's fixed format (Sprint 3): label and one plain sentence. */
-  competition?: { format: "individual-only" | "combined-75-25"; label: string; description: string; teamGamesCount: boolean };
+  competition?: { format: "individual-only" | "combined-75-25"; label: string; description: string; teamGamesCount: boolean; cupId?: string; qualifying?: string; standingsPaused?: string };
   roomId: string;
   joinCode: string;
   name: string;

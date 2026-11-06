@@ -72,7 +72,7 @@ describe("disconnections during a game", () => {
     const g = h.game(gid);
     expect(g.status).toBe("finished");
     expect(g.outcome).toMatchObject({ reason: "deadline", countsOfficially: true });
-    expect(g.outcome!.participation[cal.playerId]).toEqual({ done: 0, of: g.questions!.length });
+    expect(g.outcome!.participation[cal.playerId]).toEqual({ done: 0, of: g.questions!.length, actions: 0 });
     expect(g.rawScores[cal.playerId]).toBe(0);
     expect(Object.keys(standings()).sort()).toEqual([ada.playerId, bea.playerId, cal.playerId].sort());
     expect(standings()[ada.playerId]).toBeGreaterThan(standings()[cal.playerId]!);

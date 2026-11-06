@@ -75,7 +75,7 @@ describe("independent games: how they end", () => {
     for (const p of [ada, bea, cal]) await answerTrivia(p, gid, n);
     const g = h.game(gid);
     expect(g.outcome).toMatchObject({ reason: "completed", countsOfficially: true });
-    for (const p of [ada, bea, cal]) expect(g.outcome!.participation[p.playerId]).toEqual({ done: n, of: n });
+    for (const p of [ada, bea, cal]) expect(g.outcome!.participation[p.playerId]).toEqual({ done: n, of: n, actions: n });
     expect(finishedEvents(gid)).toHaveLength(1);
   });
 
@@ -89,8 +89,8 @@ describe("independent games: how they end", () => {
     expect(h.lifecycleTick()).toBe(1);
     const g = h.game(gid);
     expect(g.outcome).toMatchObject({ reason: "deadline", countsOfficially: true });
-    expect(g.outcome!.participation[bea.playerId]).toEqual({ done: 3, of: n });
-    expect(g.outcome!.participation[cal.playerId]).toEqual({ done: 0, of: n });
+    expect(g.outcome!.participation[bea.playerId]).toEqual({ done: 3, of: n, actions: 3 });
+    expect(g.outcome!.participation[cal.playerId]).toEqual({ done: 0, of: n, actions: 0 });
     expect(g.rawScores[ada.playerId]).toBe(n * 120);
     expect(g.rawScores[bea.playerId]).toBe(3 * 120); // exactly her three valid answers, nothing invented
     expect(g.rawScores[cal.playerId]).toBe(0);
@@ -255,7 +255,7 @@ describe("exactly-once finalization", () => {
     expect(g.rawScores[bea.playerId]).toBe(live);
     const ledgerSum = scoreEvents(gid).filter((e) => e.playerId === bea.playerId).reduce((s, e) => s + (e.points ?? 0), 0);
     expect(ledgerSum).toBe(live);
-    expect(g.outcome!.participation[bea.playerId]).toEqual({ done: 5, of: qs.length });
+    expect(g.outcome!.participation[bea.playerId]).toEqual({ done: 5, of: qs.length, actions: 5 });
     void ada;
   });
 });
@@ -272,7 +272,7 @@ describe("Word Connections at the deadline", () => {
     h.lifecycleTick();
     const g = h.game(gid);
     expect(g.outcome).toMatchObject({ reason: "deadline", countsOfficially: true });
-    expect(g.outcome!.participation[bea.playerId]).toEqual({ done: 2, of: 4, finished: false });
+    expect(g.outcome!.participation[bea.playerId]).toEqual({ done: 2, of: 4, finished: false, actions: 2 });
     expect(g.rawScores[bea.playerId]).toBeGreaterThan(0);
     expect(g.rawScores[ada.playerId]).toBe(0);
   });
@@ -342,7 +342,7 @@ describe("public projections stay public", () => {
     const outcome = g["outcome"] as Json;
     expect(outcome["reason"]).toBe("deadline");
     expect(JSON.stringify(outcome)).not.toMatch(/abstain/i);
-    expect((outcome["participation"] as Json)[cal.playerId]).toEqual({ done: 0, of: n });
+    expect((outcome["participation"] as Json)[cal.playerId]).toEqual({ done: 0, of: n, actions: 0 });
   });
 });
 

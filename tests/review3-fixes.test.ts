@@ -86,6 +86,8 @@ describe("review3 P1: championshipDay survives restart", () => {
 describe("review3 P1: ceremony crowns the current day's winner", () => {
   it("Day 2 winner is named even when the overall leader is someone else", () => {
     const engine = new RoomEngine("Ceremony Day");
+    // Hand-built results (no participation records): judged under the legacy rule.
+    engine.configureCup({ qualificationPolicy: { kind: "any-official-game" } });
     const a = engine.join("Ada", { asHost: true }).player.id;
     const b = engine.join("Bea").player.id;
     // Day 1: Ada wins.
@@ -105,6 +107,7 @@ describe("review3 P1: ceremony crowns the current day's winner", () => {
   });
   it("a tied day names both winners", () => {
     const engine = new RoomEngine("Ceremony Tie");
+    engine.configureCup({ qualificationPolicy: { kind: "any-official-game" } });
     const a = engine.join("Ada", { asHost: true }).player.id;
     const b = engine.join("Bea").player.id;
     const g1 = engine.startGame(a, "math-mayhem", { official: true });

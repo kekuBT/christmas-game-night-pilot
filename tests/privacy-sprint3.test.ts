@@ -40,7 +40,7 @@ describe("Sprint 3 projections stay private", () => {
     const outcome = pub["outcome"] as Json;
     expect(Object.keys(outcome).sort()).toEqual(["completedUnits", "countsOfficially", "endedAt", "participation", "reason", "totalUnits"].filter((k) => k in outcome).sort());
     for (const p of Object.values(outcome["participation"] as Record<string, Json>)) {
-      for (const k of Object.keys(p)) expect(["done", "of", "finished"]).toContain(k);
+      for (const k of Object.keys(p)) expect(["done", "of", "finished", "actions"]).toContain(k);
     }
     // Cal sat out and Ada did nothing look the same to others: 0 of N.
     expect((outcome["participation"] as Json)[cal!.playerId]).toEqual((outcome["participation"] as Json)[ada!.playerId]);

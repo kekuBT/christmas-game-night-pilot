@@ -437,7 +437,7 @@ describe("Engine timeout, abstention and start guards", () => {
     expect(game.rawScores).toEqual({ [ids[0]!]: 0, [ids[1]!]: 0 });
     expect(game.outcome?.reason).toBe("deadline");
     expect(game.outcome?.countsOfficially).toBe(false); // D-S3-02: no participation, no result
-    expect(game.outcome?.participation[ids[0]!]).toEqual({ done: 0, of: game.questions!.length });
+    expect(game.outcome?.participation[ids[0]!]).toEqual({ done: 0, of: game.questions!.length, actions: 0 });
   });
   it("skipping before the deadline is rejected, and a cohost may skip after it", () => {
     const { engine, host, ids } = room(2);
@@ -464,7 +464,7 @@ describe("Engine timeout, abstention and start guards", () => {
     engine.tick();
     expect(game.status).toBe("finished");
     expect(game.outcome?.reason).toBe("deadline");
-    expect(game.outcome?.participation[ids[1]!]).toEqual({ done: 0, of: questions.length });
+    expect(game.outcome?.participation[ids[1]!]).toEqual({ done: 0, of: questions.length, actions: 0 });
     expect(game.rawScores[ids[0]!]).toBe(questions.length * 120);
     expect(game.rawScores[ids[1]!]).toBe(0);
   });

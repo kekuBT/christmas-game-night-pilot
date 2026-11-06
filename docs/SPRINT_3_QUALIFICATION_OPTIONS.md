@@ -1,5 +1,7 @@
 # Qualifying days — options for the owner (Sprint 3, P7)
 
+> **Superseded (Sprint 4):** the owner approved meaningful participation with a two-action minimum. It is now the saved rule of every new Cup; Cups created before Sprint 4 keep their rule. See `docs/DECISIONS.md` D-S4-01/02. Options B–E below were never active and have been removed from the code.
+
 **Status: decision needed. Nothing here is active.** The Cup still uses the existing rule (option A). The mechanism for the other options is built and tested (`src/scoring/qualification.ts`, `tests/cup-integrity.test.ts`) and can be switched in one line. Switch it before a Cup starts, never during one.
 
 ## Why this comes up now

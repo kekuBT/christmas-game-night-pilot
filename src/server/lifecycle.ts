@@ -91,6 +91,8 @@ export interface Participation {
   of: number;
   /** For Word Connections: the puzzle ended for them (4 groups or 4 mistakes). */
   finished?: boolean;
+  /** Genuine scoring actions: answers/guesses (wrong ones too), captions, non-empty submissions. Never opens or abstentions. */
+  actions?: number;
 }
 
 export interface GameOutcome {
