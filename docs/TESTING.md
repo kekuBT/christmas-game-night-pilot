@@ -50,7 +50,19 @@ It covers: a failing unit test, a failing driver, a hanging driver, a hanging dr
 
 Drivers launch Chromium through `scripts/lib/driver-env.mjs`, which uses the build matching the pinned Playwright (`npx playwright install chromium`); headless runs use `chrome-headless-shell`. On hosts that ship their own Chromium, set `MCHEZO_CHROMIUM_PATH`, preferably to a headless-shell build. The report records the browser version, the build kind and its source, and warns about a full Chrome build. Driver timing assumptions are calibrated on the headless shell (see DEVELOPMENT.md).
 
-**Answering helpers (Sprint 2).** `scripts/lib/answer.mjs` answers kit question screens (Trivia, Geography, Math) by waiting on the app's observable states (`Question N of M`, `Answer locked in`, the waiting ring, results), with bounded timeouts. It never returns early silently: when an answer is not confirmed, it throws `AnswerStuckError` naming the player, the question and the state it was stuck in. `check-game-night` and `check-leaderboard` use it. `check-answer-helper` proves the behaviour on fake screens: the old fixed-sleep helper answered 0 of 3 questions on a slow app without any error. The E2E and `check-f5` round-robin loops still fail only with "did not reach finished", without naming the stuck player; that is the remaining item.
+**Answering helpers (Sprint 2).** `scripts/lib/answer.mjs` answers kit question screens (Trivia, Geography, Math) by waiting on the app's observable states (`Question N of M`, `Answer locked in`, the waiting ring, results), with bounded timeouts. It never returns early silently: when an answer is not confirmed, it throws `AnswerStuckError` naming the player, the question and the state it was stuck in. `check-game-night` and `check-leaderboard` use it. `check-answer-helper` proves the behaviour on fake screens: the old fixed-sleep helper answered 0 of 3 questions on a slow app without any error.
+
+**Failure diagnosis (Sprint 3).** `scripts/lib/diagnose.mjs` prints one `DIAG` line per player that puts what the server says next to what the screen shows. The server side covers game, status, phase, seconds to the phase and game deadlines, submitted counts, the outcome and the player's own participation. The screen side covers its label and the countdown text. Each line ends with a failure type: `server-ended-client-behind`, `deadline-overdue`, `waiting-on-players`, `client-not-on-game`, `no-game`, `server-unreachable`, or `finished-and-shown`. Every `AnswerStuckError` now carries this line. The E2E and `check-f5` loops print it for every player when a game fails, so they no longer fail with only "did not reach finished". The classifier has unit tests (`tests/diagnose.test.ts`), and its real output is checked in a browser by `check-lifecycle`.
+
+**Deadlines in real browsers (Sprint 3).** Game time limits are minutes long, so the shared gate server runs the real durations and the drivers that run on it finish their games by playing. `scripts/check-lifecycle.mjs` starts **its own** server (free port, temporary data directory, the gate's build through `MCHEZO_WEB_DIST`) with `MCHEZO_LIFECYCLE_SCALE=0.1`. This test-only setting makes every time limit ten times shorter, and `serve.ts` refuses it when `NODE_ENV=production`. On that server the driver watches real deadlines pass and checks:
+- a Trivia game ends with no host action;
+- the wording for partial play and for no play;
+- a player who goes offline and comes back;
+- a phone clock that is 10 minutes wrong still shows the right countdown;
+- a Closest question times out;
+- the practice-only lobby.
+
+Server-side deadline behaviour is covered with a fake clock in `tests/lifecycle.test.ts`, `tests/phased.test.ts`, `tests/math-timing.test.ts` and `tests/cup-integrity.test.ts`.
 
 ## Running one driver by hand
 

@@ -142,6 +142,8 @@ try {
     await page.locator(".mz-question").waitFor({ timeout: 15000 });
     check(`${name} sees the kit math panel`, true);
   }
+  // Speed is timed from when a question is shown (after the intro), not the game start.
+  const q1ShownAt = Date.now();
   check("first question is 16 ÷ 2",
     (await host.locator(".mz-question").innerText()).includes("16 ÷ 2 = ?"));
   check("question counter reads 1 of 10",
@@ -160,8 +162,9 @@ try {
   }
   await host.setViewportSize({ width: 390, height: 844 });
 
-  // Question 1 is answered slowly (about 13 s after it appeared): no speed bonus.
-  await sleep(Math.max(0, 13000 - (Date.now() - startedAt)));
+  // Question 1 is answered slowly (about 12.5 s after it appeared): no speed bonus.
+  void startedAt;
+  await sleep(Math.max(0, 12500 - (Date.now() - q1ShownAt)));
 
   // The locked view after answering, with the elapsed-time display,
   // then the next question.
@@ -176,10 +179,14 @@ try {
   const elapsedSecs = Number((elapsedText.match(/Answered in (\d+(?:\.\d)?) s/) ?? [])[1]);
   check("locked view shows the server-measured time for this question (>= 10 s, past the bonus)",
     /Answered in \d+(\.\d)? s/.test(elapsedText) && elapsedSecs >= 10 && /from when this question appeared/.test(elapsedText), elapsedText);
+  // Linger 3 s on the locked view: question 2's clock must NOT be running yet.
+  await sleep(3000);
   await host.getByRole("button", { name: "Next question" }).click();
   await sleep(500);
   check("next question is 7 × 4",
     (await host.locator(".mz-question").innerText()).includes("7 × 4 = ?"));
+  // Answer question 2 straight away: its server time must be short.
+  await answerAll(host, [CORRECT[1]]);
 
   // Bea answers everything wrong; the host answers the remaining nine
   // correctly. Exact scores: host 1000, Bea 0. (The host already
@@ -192,7 +199,7 @@ try {
   // compare case-insensitively.
   check("Bea's done state says all answers are in",
     (await bea.evaluate(() => document.body.innerText)).toLowerCase().includes("all your answers are in"));
-  await answerAll(host, CORRECT.slice(1));
+  await answerAll(host, CORRECT.slice(2));
   await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 15000 });
   check("game finishes and shows results", true);
   const hostText = await host.evaluate(() => document.body.innerText);
@@ -200,6 +207,7 @@ try {
   const expected = Object.values(times).reduce((sum, ms) => sum + 100 + bonusFor(ms), 0);
   check("server measured a time for each of the host's 10 answers", Object.keys(times).length === 10, JSON.stringify(times));
   check("question 1 (answered after 12 s) earned no speed bonus", (Object.values(times)[0] ?? 0) > 10000, JSON.stringify(times));
+  check("question 2's clock started when it was shown, not while the locked view of question 1 was up (< 3 s)", (Object.values(times)[1] ?? Infinity) < 3000, JSON.stringify(times));
   check(`host scores ${expected} (all ten correct + per-question speed bonuses from server times)`, hostText.includes(`Ada: ${expected} points`), hostText.slice(0, 300));
   check("Bea scores 0 (all ten wrong)", hostText.includes("Bea: 0 points"));
   check("host wins the game", hostText.includes("Ada wins this game!"));

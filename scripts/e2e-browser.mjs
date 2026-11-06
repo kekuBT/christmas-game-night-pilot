@@ -18,6 +18,7 @@
 //   reconnect. A failed game is recorded and the run continues to the next
 //   game; the process exits non-zero if anything failed.
 
+import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchBrowser } from "./lib/driver-env.mjs";
 
 const args = process.argv.slice(2);
@@ -329,6 +330,7 @@ async function runBrowser(browserName, games) {
         results.push({ gameId, status: "finished" });
       } catch (e) {
         console.log(`[${browserName}] FAIL ${label}: ${e.message}`);
+        for (const line of await diagnoseAll(pages)) console.log(`[${browserName}]   ${line}`);
         results.push({ gameId, status: "failed", error: e.message });
       }
     }

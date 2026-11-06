@@ -15,7 +15,16 @@
 //             "Waiting for the game to finish")
 //   waiting   "All your answers are in" / "You sat this one out" ring
 //   finished  results ("Back to lobby") or the staged reveal
+import { lifecycleDiagnosis } from "./diagnose.mjs";
+
 export class AnswerStuckError extends Error {}
+
+// Sprint 3: every stuck error also says what the SERVER thinks (game status,
+// phase, time to deadline, outcome) next to what the screen shows.
+async function stuck(page, player, message) {
+  const diag = await lifecycleDiagnosis(page, player).catch(() => "DIAG unavailable");
+  return new AnswerStuckError(`${message}\n  ${diag}`);
+}
 
 async function stateOf(page) {
   return await page.evaluate(() => {
@@ -42,7 +51,7 @@ async function waitForState(page, accept, { timeout, player, context }) {
     if (accept(last)) return last;
     await page.waitForTimeout(150);
   }
-  throw new AnswerStuckError(`${player}: ${context} — still ${JSON.stringify(last)} after ${timeout}ms`);
+  throw await stuck(page, player, `${player}: ${context} — still ${JSON.stringify(last)} after ${timeout}ms`);
 }
 
 /**
@@ -73,12 +82,12 @@ export async function answerKitQuestions(page, { player, choose, timeout = 20000
       await page.locator(".mz-slab:not([disabled])").nth(index).click({ timeout });
     } catch (err) {
       const now = await stateOf(page).catch(() => ({ kind: "unknown" }));
-      throw new AnswerStuckError(`${player}: could not tap option ${index} on question ${st.n} of ${st.of} — page now ${JSON.stringify(now)} (${String(err?.message ?? err).split("\n").slice(0, 3).join(" | ")})`);
+      throw await stuck(page, player, `${player}: could not tap option ${index} on question ${st.n} of ${st.of} — page now ${JSON.stringify(now)} (${String(err?.message ?? err).split("\n").slice(0, 3).join(" | ")})`);
     }
     await waitForState(page, (s) => !(s.kind === "question" && s.n === st.n), { timeout, player, context: `after answering question ${st.n} of ${st.of} (option ${index}); the answer was not confirmed` });
     answered++;
     if (answered >= limit) return answered;
-    if (answered > maxQuestions) throw new AnswerStuckError(`${player}: answered more than ${maxQuestions} questions; the game never finished`);
+    if (answered > maxQuestions) throw await stuck(page, player, `${player}: answered more than ${maxQuestions} questions; the game never finished`);
   }
-  throw new AnswerStuckError(`${player}: no progress after ${maxQuestions * 3} steps`);
+  throw await stuck(page, player, `${player}: no progress after ${maxQuestions * 3} steps`);
 }

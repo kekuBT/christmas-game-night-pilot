@@ -33,6 +33,7 @@
 // the browser half that was still open. A failed check is recorded and the
 // process exits non-zero.
 
+import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
@@ -331,6 +332,8 @@ try {
       check(`day playlist: ${gameId} finished without sticking`, true);
     } catch (e) {
       console.log(`FAIL ${gameId}: ${e.message}`);
+      // Sprint 3: where was every player, on the server and on screen?
+      for (const line of await diagnoseAll(pages)) console.log(`  ${line}`);
       check(`day playlist: ${gameId} finished without sticking`, false, e.message);
       // A stuck game must not end the day: the concurrent-game guard
       // (decision L08) blocks starting the next game while one is playing,

@@ -24,6 +24,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
+import { lifecycleDiagnosis } from "./lib/diagnose.mjs";
 
 const SCALE = 0.1;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -149,6 +150,11 @@ try {
   const truth = Math.round((game.deadlineAt - serverNow) / 1000);
   check("A. the countdown uses server time, not the phone's wrong clock", shown !== null && Math.abs(shown - truth) <= 3, `shown ${shown}s, server says ${truth}s`);
   check("A. no Skip button for the host", (await ada.getByRole("button", { name: /skip/i }).count()) === 0);
+  // Workstream H: the failure diagnosis reads both sides correctly.
+  const diagAda = await lifecycleDiagnosis(ada, "Ada");
+  check("H. diagnosis while waiting: server playing, deadline ahead, type waiting-on-players", /game=trivia\(.*\) server=playing .*deadlineIn=\d+s .*submitted=2\/3 .*type=waiting-on-players/.test(diagAda), diagAda);
+  const diagBea = await lifecycleDiagnosis(bea, "Bea");
+  check("H. diagnosis for an offline phone says the server is unreachable", /type=server-unreachable/.test(diagBea), diagBea);
   check("A. the waiting screen says the game ends by itself", (await ada.getByTestId("mz-ends-by-itself").count()) === 1);
   await ada.screenshot({ path: screenshotPath("docs/sprint-3-screenshots/02-waiting-countdown.png") });
 
@@ -164,6 +170,8 @@ try {
   check("A. Ada sees Bea: Answered 3 of 10", /Bea: Answered 3 of 10 questions/.test(everyone), everyone);
   check("A. Ada sees Cal: Did not answer (never 'abstained')", /Cal: Did not answer/.test(everyone) && !/abstain|sat out/i.test(everyone), everyone);
   check("A. Cal's own line: Did not answer", /You: Did not answer/.test(await text(cal.getByTestId("mz-outcome-mine"))));
+  const diagEnd = await lifecycleDiagnosis(cal, "Cal");
+  check("H. diagnosis after the end: server finished with outcome deadline, Cal 0/10", /server=finished .*outcome=deadline mine=0\/10 .*shownOutcome=deadline \| type=finished-and-shown/.test(diagEnd), diagEnd);
   await ada.getByTestId("mz-outcome").scrollIntoViewIfNeeded();
   await ada.screenshot({ path: screenshotPath("docs/sprint-3-screenshots/03-results-deadline.png") });
   // Bea's connection comes back: she sees the same results with her partial count.

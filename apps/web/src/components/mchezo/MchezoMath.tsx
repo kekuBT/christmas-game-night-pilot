@@ -83,7 +83,13 @@ export function MchezoMath(deps: MchezoMathDeps) {
   // its speed bonus is timed by the server from that moment. Open the
   // question on screen once; the projection refresh then brings its prompt.
   const opening = useRef<string | null>(null);
-  const needsOpen = !game.abstained && firstUnanswered !== undefined && firstUnanswered.prompt === undefined;
+  // Open ONLY when the question screen itself is about to show: never while
+  // the "locked in" view of the previous answer is still up, or the next
+  // question's clock would start before the player can see it.
+  const lockedQ = lastAnswered ? questions.find((x) => x.id === lastAnswered) : undefined;
+  const lockedChoice = lockedQ ? myAnswers[lockedQ.id] : undefined;
+  const lockedShowing = lockedQ !== undefined && lockedChoice !== undefined && lockedChoice !== null;
+  const needsOpen = !game.abstained && !lockedShowing && pending === null && firstUnanswered !== undefined && firstUnanswered.prompt === undefined;
   useEffect(() => {
     if (!needsOpen || !firstUnanswered || opening.current === firstUnanswered.id) return;
     opening.current = firstUnanswered.id;
@@ -100,9 +106,7 @@ export function MchezoMath(deps: MchezoMathDeps) {
   // Just answered: locked view until the player moves on. If the poll has
   // not landed yet (answer not in myAnswers), fall through to the question
   // view — the next poll shows the locked view.
-  const lockedQ = lastAnswered ? questions.find((x) => x.id === lastAnswered) : undefined;
-  const lockedChoice = lockedQ ? myAnswers[lockedQ.id] : undefined;
-  if (lockedQ && lockedChoice !== undefined && lockedChoice !== null) {
+  if (lockedQ && lockedShowing) {
     return (
       <main className="mz-screen" aria-label="Answer locked in">
         <section className="mz-lockcard" style={{ background: `var(--mz-answer-${lockedChoice % 4})`, color: "var(--mz-on-accent)" }}>

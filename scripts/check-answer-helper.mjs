@@ -63,6 +63,8 @@ try {
   try { await answerKitQuestions(page, { player: "Cal", choose: () => 0, timeout: 1500 }); } catch (e) { err = e; }
   check("an answer that is never confirmed fails loudly", err instanceof AnswerStuckError, String(err?.message ?? "no error"));
   check("the failure names the player, the question and the stuck state", /Cal: after answering question 1 of 3/.test(err?.message ?? "") && /"kind":"question"/.test(err?.message ?? ""));
+  // Sprint 3: it also carries the server/screen diagnosis (no server here, so it says so).
+  check("the failure carries a lifecycle diagnosis line", /DIAG player=Cal server=unavailable\(.+\) \| screen="Question 1 of 3".* type=server-unreachable/.test(err?.message ?? ""), String(err?.message ?? "").split("\n").at(-1));
 
   await fresh(fakeApp(50));
   const m = await answerKitQuestions(page, { player: "Dee", choose: (q) => q % 4 });
