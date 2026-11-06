@@ -3,6 +3,8 @@ import { getGame } from "../games/registry.js";
 import { COUNT_GAMES_WITH_NO_PARTICIPATION, policyFor, type EndReason, type GameOutcome, type Participation } from "./lifecycle.js";
 import { dayScore, midrankScore } from "../scoring/championship.js";
 import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
+import { formatInfo, LEGACY_ROOM_FORMAT, NEW_ROOM_FORMAT, type CompetitionFormat } from "../scoring/format.js";
+import { ACTIVE_QUALIFICATION_POLICY, qualifies, type QualificationPolicy } from "../scoring/qualification.js";
 import { evaluateAchievements, dayCeremony } from "./achievements.js";
 import { generateMathQuestions, scoreMathAnswer, type MathQuestion } from "../games/math.js";
 import {
@@ -224,6 +226,18 @@ export class RoomEngine {
   championshipDay = 1;
   games = new Map<string, GameInstance>();
   ledger: LedgerEvent[] = [];
+  /**
+   * The Cup's rules, fixed when the room is created and never changed
+   * (src/scoring/format.ts). New rooms: the Individual Family Cup. Rooms
+   * restored from snapshots written before formats existed keep the
+   * combined 75/25 rules they were played under.
+   */
+  private _competitionFormat: CompetitionFormat = NEW_ROOM_FORMAT;
+  get competitionFormat(): CompetitionFormat {
+    return this._competitionFormat;
+  }
+  /** Which attendance rule makes a day "qualifying" (inactive alternatives exist; P7). */
+  qualificationPolicy: QualificationPolicy = ACTIVE_QUALIFICATION_POLICY;
   seq = 0;
   private seenIntents = new Map<string, { accepted: boolean; result: unknown }>();
   private nextPlayer = 1;
@@ -1288,8 +1302,7 @@ export class RoomEngine {
    */
   officialStandings(): Record<string, number> {
     const out: Record<string, number> = {};
-    for (const g of this.games.values()) {
-      if (!this.countsOfficially(g)) continue;
+    for (const g of this.cupGames()) {
       const all = Object.values(g.rawScores);
       if (all.length < 2) continue;
       for (const [pid, pts] of Object.entries(g.rawScores)) {
@@ -1343,21 +1356,45 @@ export class RoomEngine {
    * finale bonus. Practice and timed-out games never enter this calculation.
    */
   championshipResults() {
-    const days = new Map<string, PlayerDay>();
-    for (const g of this.games.values()) {
-      if (!this.countsOfficially(g)) continue;
+    return computeChampionship(this.playerDays(), { config: formatInfo(this._competitionFormat).config });
+  }
+
+  /** Finished games that feed this room's Cup, under its format. */
+  private cupGames(): GameInstance[] {
+    const teamGamesCount = formatInfo(this._competitionFormat).teamGamesCount;
+    return [...this.games.values()].filter((g) => this.countsOfficially(g) && (teamGamesCount || !getGame(g.gameId).modes.includes("team")));
+  }
+
+  /**
+   * Per player per day: normalised placement scores (0-100 midrank) of the
+   * Cup's games, split solo/team, for days that qualify under the active
+   * qualification policy. Shared by the championship and the ceremony.
+   */
+  private playerDays(onlyDay?: number): PlayerDay[] {
+    const days = new Map<string, PlayerDay & { games: number; gamesPlayed: number }>();
+    const gamesPerDay = new Map<number, number>();
+    for (const g of this.cupGames()) {
+      const day = g.day ?? 1;
+      if (onlyDay !== undefined && day !== onlyDay) continue;
       const all = Object.values(g.rawScores);
       if (all.length < 2) continue;
+      gamesPerDay.set(day, (gamesPerDay.get(day) ?? 0) + 1);
       const isTeam = getGame(g.gameId).modes.includes("team");
       for (const [pid, pts] of Object.entries(g.rawScores)) {
-        const key = `${pid}:${g.day ?? 1}`;
-        const entry = days.get(key) ?? { playerId: pid, day: g.day ?? 1, soloScores: [], teamScores: [] };
+        const key = `${pid}:${day}`;
+        const entry = days.get(key) ?? { playerId: pid, day, soloScores: [], teamScores: [], games: 0, gamesPlayed: 0 };
         const score = midrankScore(pts, all);
         if (isTeam) entry.teamScores.push(score); else entry.soloScores.push(score);
+        entry.games += 1;
+        // Took part = did at least one thing; legacy games without an outcome count as taken part.
+        const part = g.outcome?.participation[pid];
+        if (!part || part.done > 0 || part.finished) entry.gamesPlayed += 1;
         days.set(key, entry);
       }
     }
-    return computeChampionship([...days.values()]);
+    return [...days.values()]
+      .filter((d) => qualifies(this.qualificationPolicy, { gamesOnRoster: d.games, gamesPlayed: d.gamesPlayed, gamesThatDay: gamesPerDay.get(d.day) ?? 0 }))
+      .map(({ playerId, day, soloScores, teamScores }) => ({ playerId, day, soloScores, teamScores }));
   }
 
   achievements() {
@@ -1375,24 +1412,11 @@ export class RoomEngine {
    * no winner yet (winner null), never an invented one.
    */
   ceremony() {
-    const days = new Map<string, PlayerDay>();
-    for (const g of this.games.values()) {
-      if (!this.countsOfficially(g)) continue;
-      if ((g.day ?? 1) !== this.championshipDay) continue;
-      const all = Object.values(g.rawScores);
-      if (all.length < 2) continue;
-      const isTeam = getGame(g.gameId).modes.includes("team");
-      for (const [pid, pts] of Object.entries(g.rawScores)) {
-        const entry = days.get(pid) ?? { playerId: pid, day: this.championshipDay, soloScores: [], teamScores: [] };
-        const score = midrankScore(pts, all);
-        if (isTeam) entry.teamScores.push(score); else entry.soloScores.push(score);
-        days.set(pid, entry);
-      }
-    }
-    const standings = [...days.values()].map((d) => ({
+    const config = formatInfo(this._competitionFormat).config;
+    const standings = this.playerDays(this.championshipDay).map((d) => ({
       playerId: d.playerId,
       displayName: this.players.get(d.playerId)?.displayName ?? d.playerId,
-      base: dayScore({ soloScores: d.soloScores, teamScores: d.teamScores }).score,
+      base: dayScore({ soloScores: d.soloScores, teamScores: d.teamScores }, config).score,
     }));
     return dayCeremony(this.championshipDay, standings);
   }
@@ -1619,6 +1643,7 @@ export class RoomEngine {
       notices: this.recentNotices(now),
       officialStandings: this.officialStandings(),
       championshipDay: this.championshipDay,
+      competition: (({ format, label, description, teamGamesCount }) => ({ format, label, description, teamGamesCount }))(formatInfo(this._competitionFormat)),
       championship: this.championshipResults(),
       achievements: this.achievements(),
       ceremony: this.ceremony(),
@@ -1684,6 +1709,7 @@ export class RoomEngine {
       hostId: this.hostId,
       cohosts: [...this.cohosts],
       championshipDay: this.championshipDay,
+      competitionFormat: this._competitionFormat,
       players: [...this.players.values()],
       spectators: [...this.spectators.values()],
       games: [...this.games.values()],
@@ -1705,6 +1731,9 @@ export class RoomEngine {
     // Migration default: snapshots written before championshipDay was
     // serialized (review 5769441799) have no field and resume at day 1.
     engine.championshipDay = typeof data["championshipDay"] === "number" ? data["championshipDay"] : 1;
+    // A snapshot from before formats existed was played under the combined rules: keep them.
+    const fmt = data["competitionFormat"];
+    engine._competitionFormat = fmt === "individual-only" || fmt === "combined-75-25" ? fmt : LEGACY_ROOM_FORMAT;
     engine.players = new Map((data["players"] as RoomPlayer[]).map((p) => [p.id, p]));
     // Migration default: snapshots written before spectators existed have
     // no spectators field and resume with none — never with phantom viewers.
