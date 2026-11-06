@@ -72,6 +72,13 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
   const questions = st.questions ?? [];
   const myAnswers: Record<string, number> = st.myAnswers ?? {};
   const [lastAnswered, setLastAnswered] = useState<string | null>(null);
+  // Sprint 2: the answered question is recorded at TAP time, and the grid
+  // stays locked on the tapped option until the server answers. Recording
+  // it only after the request + refresh resolved let the server's push
+  // advance the screen to the next question first, which then flipped back
+  // to the previous question's locked view (a visible flash, and a tap on
+  // the vanishing question could be lost).
+  const [pending, setPending] = useState<{ qid: string; choice: number } | null>(null);
   const firstUnanswered = questions.find((q) => myAnswers[q.id] === undefined);
   const secondsLeft = publicGame?.deadlineAt ? Math.max(0, Math.round((publicGame.deadlineAt - Date.now()) / 1000)) : 0;
 
@@ -106,7 +113,8 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
     return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} onTv={onTv} />;
   }
   const idx = questions.indexOf(firstUnanswered);
-  const selected = myAnswers[firstUnanswered.id] ?? null;
+  const pendingHere = pending && pending.qid === firstUnanswered.id ? pending.choice : null;
+  const selected = myAnswers[firstUnanswered.id] ?? pendingHere;
   return (
     <QuestionScreen
       game={{ name: gamesTitle, kind: "Trivia", accentIndex: 3 }}
@@ -117,7 +125,10 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
       selectedId={selected === null ? null : String(selected)}
       locked={selected !== null}
       onSelect={(id) => {
-        void intent(game.id, "trivia-answer", { questionId: firstUnanswered.id, chosenIndex: Number(id) }).then(() => setLastAnswered(firstUnanswered.id));
+        if (pending) return;
+        setPending({ qid: firstUnanswered.id, choice: Number(id) });
+        setLastAnswered(firstUnanswered.id);
+        void intent(game.id, "trivia-answer", { questionId: firstUnanswered.id, chosenIndex: Number(id) }).finally(() => setPending(null));
       }}
       secondsLeft={secondsLeft}
       totalSeconds={300}

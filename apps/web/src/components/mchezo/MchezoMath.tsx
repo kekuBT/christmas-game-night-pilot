@@ -69,6 +69,13 @@ export function MchezoMath(deps: MchezoMathDeps) {
   const questions = game.questions ?? [];
   const myAnswers: Record<string, number | null> = game.myAnswers ?? {};
   const [lastAnswered, setLastAnswered] = useState<string | null>(null);
+  // Sprint 2: the answered question is recorded at TAP time, and the grid
+  // stays locked on the tapped option until the server answers. Recording
+  // it only after the request + refresh resolved let the server's push
+  // advance the screen to the next question first, which then flipped back
+  // to the previous question's locked view (a visible flash, and a tap on
+  // the vanishing question could be lost).
+  const [pending, setPending] = useState<{ qid: string; choice: number } | null>(null);
   // Elapsed seconds from the game start at the moment the player tapped
   // (deadlineAt is startedAt + 300s, so 300 - secondsLeft is the elapsed).
   // Captured at tap time, not at render — the locked view renders after
@@ -117,7 +124,8 @@ export function MchezoMath(deps: MchezoMathDeps) {
     return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />;
   }
   const idx = questions.indexOf(firstUnanswered);
-  const selected = myAnswers[firstUnanswered.id] ?? null;
+  const pendingHere = pending && pending.qid === firstUnanswered.id ? pending.choice : null;
+  const selected = myAnswers[firstUnanswered.id] ?? pendingHere;
   return (
     <QuestionScreen
       game={{ name: gamesTitle, kind: "Math", accentIndex: 2 }}
@@ -128,11 +136,12 @@ export function MchezoMath(deps: MchezoMathDeps) {
       selectedId={selected === null ? null : String(selected)}
       locked={selected !== null}
       onSelect={(id) => {
+        if (pending) return;
         const tappedElapsed = elapsedSeconds();
-        void intent(game.id, "submit-math-answer", { questionId: firstUnanswered.id, chosenIndex: Number(id) }).then(() => {
-          setLastAnswered(firstUnanswered.id);
-          setElapsedAtAnswer(tappedElapsed);
-        });
+        setPending({ qid: firstUnanswered.id, choice: Number(id) });
+        setLastAnswered(firstUnanswered.id);
+        setElapsedAtAnswer(tappedElapsed);
+        void intent(game.id, "submit-math-answer", { questionId: firstUnanswered.id, chosenIndex: Number(id) }).finally(() => setPending(null));
       }}
       secondsLeft={secondsLeft}
       totalSeconds={300}
