@@ -90,10 +90,20 @@ async function spectate(page, code) {
   await page.getByTestId("watch-spectator").click();
   await page.getByRole("button", { name: "Stop watching" }).waitFor({ timeout: 15000 });
 }
-async function startGame(page, gameId) {
+// Sprint 2: an official start asks before leaving out a player who is
+// still reconnecting ("Start without Gus?"). This scenario deliberately
+// continues without them, so answer explicitly and report who was named.
+async function startGame(page, gameId, { expectLeftOut } = {}) {
   await page.getByTestId("choose-game").click();
   await page.getByTestId(`select-game-${gameId}`).click();
   await page.getByTestId(`start-official-${gameId}`).click();
+  const decision = page.getByTestId("mz-start-decision");
+  const asked = await decision.waitFor({ timeout: 2500 }).then(() => true, () => false);
+  if (asked) {
+    const q = ((await decision.textContent()) ?? "").replace(/\s+/g, " ");
+    check(`start asks before leaving out a reconnecting player${expectLeftOut ? ` (${expectLeftOut})` : ""}`, !expectLeftOut || q.includes(expectLeftOut), q);
+    await page.getByTestId("mz-start-without").click();
+  }
   try {
     await page.getByTestId("show-start-playing").click({ timeout: 3000 });
   } catch {
@@ -315,7 +325,7 @@ try {
 
   // --- Game 3: Math Mayhem, started by the cohost (not the host). ---
   check("guest sees no start button", (await guests["Cal"].getByTestId("start-official-math-mayhem").count()) === 0);
-  await startGame(guests["Bea"], "math-mayhem");
+  await startGame(guests["Bea"], "math-mayhem", { expectLeftOut: "Gus" });
   await guests["Bea"].locator(".mz-question").waitFor({ timeout: 15000 });
   check("cohost can start a game", true);
   // A guest's skip attempt is rejected for permission, not timing.

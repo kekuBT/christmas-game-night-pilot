@@ -57,6 +57,17 @@ async function answerFirstN(page, n, optionIndex = 0) {
     if (await next.isVisible({ timeout: 1000 }).catch(() => false)) { await next.click(); await sleep(200); }
   }
 }
+// Sprint 2: an official start asks before leaving out a player who is
+// still reconnecting. These scenarios continue without the player who
+// closed their page, so answer the question explicitly when it appears.
+async function startOfficialTrivia(page) {
+  await page.getByTestId("start-official-trivia").click();
+  const decision = page.getByTestId("mz-start-decision");
+  if (await decision.waitFor({ timeout: 2500 }).then(() => true, () => false)) {
+    console.log(`note: start asked first — ${((await decision.textContent()) ?? "").replace(/\s+/g, " ").slice(0, 80)}`);
+    await page.getByTestId("mz-start-without").click();
+  }
+}
 async function tvProj(roomId) {
   return (await fetch(`${BASE}/rooms/${roomId}/projection?audience=tv`)).json();
 }
@@ -141,7 +152,7 @@ try {
         if (!r.ok) throw new Error(`seeded start failed: ${r.status}`);
       }, { roomId, seed });
     } else {
-      await host.getByTestId("start-official-trivia").click();
+      await startOfficialTrivia(host);
     }
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     for (const a of actions) {
@@ -290,7 +301,7 @@ try {
   check("rank changes: Ada/Bea order flips across games", !!orderA && !!orderB && orderA !== orderB, `${orderA} -> ${orderB} (${attempts} games)`);
   // Disconnected player: Dee answers 3, closes the page; game still finishes.
   {
-    await host.getByTestId("start-official-trivia").click();
+    await startOfficialTrivia(host);
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     await answerFirstN(P.Dee, 3, 0);
     await P.Dee.close();
@@ -326,7 +337,7 @@ try {
     await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
     await host.getByRole("button", { name: "Back to lobby" }).click();
     await host.getByRole("heading", { name: "You’re in, Ada." }).waitFor({ timeout: 15000 });
-    await host.getByTestId("start-official-trivia").click();
+    await startOfficialTrivia(host);
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     await answerOption(P.Cal, 0);
     await P.Cal.close();
