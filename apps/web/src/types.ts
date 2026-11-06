@@ -87,6 +87,8 @@ export interface Projection {
   players: PublicPlayer[];
   games: PublicGame[];
   officialStandings: Record<string, number>;
+  /** Who is here and who a game started now would include or leave out (Sprint 2). */
+  readiness?: Readiness;
   championshipDay?: number;
   championship?: ChampionshipResult[];
   achievements?: Achievement[];
@@ -208,4 +210,13 @@ export function asNumber(v: unknown, fallback = 0): number {
 
 export function asStringArray(v: unknown): string[] {
   return Array.isArray(v) && v.every((x) => typeof x === "string") ? (v as string[]) : [];
+}
+
+export interface Readiness {
+  registered: number;
+  connected: number;
+  reconnecting: number;
+  away: number;
+  wouldPlay: string[];
+  wouldMiss: { id: string; presence: "connected" | "reconnecting" | "away"; awayForMs: number }[];
 }

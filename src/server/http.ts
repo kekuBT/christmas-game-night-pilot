@@ -4,7 +4,7 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { RoomEngine, type RoomPlayer } from "./room.js";
+import { RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { MemoryBook } from "./memorybook.js";
 import { hashToken } from "../shared/protocol.js";
@@ -516,10 +516,22 @@ export class LocalServer {
           const player = this.requireSession(room, req, res);
           if (!player) return;
           const body = await this.readBody(req);
-          const game = room.startGame(player.id, String(body["gameId"] ?? ""), {
-            official: body["official"] === true,
-            seed: typeof body["seed"] === "number" ? body["seed"] : undefined,
-          });
+          const ids = (v: unknown) => (Array.isArray(v) ? v.map(String) : undefined);
+          let game;
+          try {
+            game = room.startGame(player.id, String(body["gameId"] ?? ""), {
+              official: body["official"] === true,
+              seed: typeof body["seed"] === "number" ? body["seed"] : undefined,
+              roster: ids(body["roster"]),
+              proceedWithout: ids(body["proceedWithout"]),
+            });
+          } catch (err) {
+            if (err instanceof StartRefused) {
+              this.send(res, 409, { error: err.message, code: err.code, readiness: err.readiness });
+              return;
+            }
+            throw err;
+          }
           this.persist(room);
           this.broadcast(room.id);
           this.send(res, 201, { gameId: game.id, gameType: game.gameId, status: game.status, players: game.players });

@@ -153,8 +153,14 @@ export class Harness {
     await waitFor(() => this.server.rooms.get(this.roomId)!.players.get(p.playerId)!.connected === false);
   }
 
-  async startGame(host: Player, gameId: string, opts: { official?: boolean; seed?: number } = {}): Promise<{ status: number; body: Json }> {
-    return this.post(`/rooms/${this.roomId}/games`, { gameId, official: opts.official ?? true, ...(opts.seed !== undefined ? { seed: opts.seed } : {}) }, host.token);
+  async startGame(host: Player, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[] } = {}): Promise<{ status: number; body: Json }> {
+    return this.post(`/rooms/${this.roomId}/games`, {
+      gameId,
+      official: opts.official ?? true,
+      ...(opts.seed !== undefined ? { seed: opts.seed } : {}),
+      ...(opts.roster ? { roster: opts.roster } : {}),
+      ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}),
+    }, host.token);
   }
 
   intentBody(gameInstanceId: string, action: string, payload: Json, clientEventId: string = randomUUID()) {

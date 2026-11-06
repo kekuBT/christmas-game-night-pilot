@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicPlayer, RegistryGame, SpectateResponse } from "./types.js";
+import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicPlayer, Readiness, RegistryGame, SpectateResponse } from "./types.js";
 import { GamePanel } from "./components/GamePanel.js";
 import { ChampionshipView } from "./components/ChampionshipView.js";
 import { MemoryBookView } from "./components/MemoryBookView.js";
@@ -28,6 +28,7 @@ import { humanError } from "./ui/mchezo/lib/errors.js";
 import { midrank } from "./components/midrank.js";
 import { sendIntent } from "./components/intentRetry.js";
 import { connection } from "./connectionStore.js";
+import { ReadinessCard, type StartDecision } from "./components/mchezo/ReadinessCard.js";
 import QRCode from "qrcode";
 
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
@@ -202,7 +203,18 @@ export function App() {
       void refresh();
     };
     const onVisible = () => { if (document.visibilityState === "visible") reconnectNow(); };
+    // The browser knows it lost the network (Wi-Fi off, airplane mode,
+    // tunnel): say so now and drop the socket ourselves, instead of
+    // waiting minutes for TCP to notice. "online" reconnects at once.
+    const onOffline = () => {
+      if (stopped) return;
+      const state = connection.get().state;
+      if (state === "replaced" || state === "signed-out") return;
+      connection.dropped();
+      ws?.close();
+    };
     document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("offline", onOffline);
     window.addEventListener("online", reconnectNow);
     window.addEventListener("pageshow", reconnectNow);
     connection.setHandlers({ retryNow: reconnectNow });
@@ -212,6 +224,7 @@ export function App() {
       clearInterval(t);
       if (retryTimer !== undefined) clearTimeout(retryTimer);
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("offline", onOffline);
       window.removeEventListener("online", reconnectNow);
       window.removeEventListener("pageshow", reconnectNow);
       connection.setHandlers({ retryNow: () => {} });
@@ -299,15 +312,53 @@ export function App() {
     } catch (e) { fail(e); }
   }
   const startingRef = useRef(false);
-  async function startGame(gameId: string, official: boolean) {
+  const [startDecision, setStartDecision] = useState<(StartDecision & { gameId: string; official: boolean }) | null>(null);
+  // A pending "start without them?" question goes away by itself once
+  // nobody it names is still reconnecting (they came back, or the grace
+  // period ended): the host then just presses Start normally.
+  useEffect(() => {
+    if (!startDecision) return;
+    const still = new Set((proj?.readiness?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id));
+    if (!startDecision.reconnecting.some((id) => still.has(id))) setStartDecision(null);
+  }, [proj?.readiness, startDecision]);
+  async function startGame(gameId: string, official: boolean, proceedWithout?: string[]) {
     // Host-action race (Milestone K): a double-tap on Start posts twice;
     // the server correctly rejects the second (a game is already playing),
     // but the rejection surfaced as a spurious error to the host. Ignore
     // a second call while a start is in flight — the server stays the
     // authority, this only stops the redundant request.
     if (startingRef.current) return;
+    // Sprint 2: send the roster the host is looking at, so the game's
+    // roster is exactly what was shown. If an official game would leave
+    // out someone still reconnecting, ask first (inline, not a modal):
+    // the ordinary all-here case starts immediately with no extra step.
+    const r = proj?.readiness;
+    const reconnecting = (r?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id);
+    if (official && reconnecting.length > 0 && !proceedWithout) {
+      setStartDecision({ gameId, official, gameTitle: games.find((g) => g.id === gameId)?.title ?? gameId, reconnecting });
+      return;
+    }
     startingRef.current = true;
-    setErr(""); try { await post<Record<string, unknown>>(`/rooms/${roomId}/games`, { gameId, official }); await refresh(); setShuffleResult(null); setView("lobby"); } catch (e) { fail(e); } finally { startingRef.current = false; }
+    setErr("");
+    try {
+      const headers: Record<string, string> = { "content-type": "application/json" };
+      const t = sessionStorage.getItem("cgn_token");
+      if (t) headers["x-session-token"] = t;
+      const resp = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers, body: JSON.stringify({ gameId, official, roster: r?.wouldPlay, proceedWithout }) });
+      const body = (await resp.json().catch(() => ({}))) as { error?: string; code?: string; readiness?: Readiness };
+      if (resp.status === 409) {
+        // The room changed between looking and pressing Start: show the
+        // fresh picture and let the host decide again. Nothing started.
+        await refresh();
+        const again = (body.readiness?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id);
+        if (body.code === "PLAYERS_RECONNECTING" && again.length) setStartDecision({ gameId, official, gameTitle: games.find((g) => g.id === gameId)?.title ?? gameId, reconnecting: again });
+        else setErr(body.error ?? "Who is playing changed. Check the list, then start again.");
+        return;
+      }
+      if (!resp.ok) throw new Error(body.error || `Request failed (${resp.status})`);
+      setStartDecision(null);
+      await refresh(); setShuffleResult(null); setView("lobby");
+    } catch (e) { fail(e); } finally { startingRef.current = false; }
   }
   async function intent(gameInstanceId: string, action: string, payload: Record<string, unknown>) {
     setErr(""); try {
@@ -549,6 +600,18 @@ export function App() {
           capacity={10}
           error={err || undefined}
           extra={lobbyExtra}
+          beforeStart={(me?.isHost || me?.isCohost) && upNext && (
+          <ReadinessCard
+            readiness={proj?.readiness}
+            players={players}
+            gameTitle={upNext.title}
+            minPlayers={upNext.minPlayers}
+            maxPlayers={upNext.maxPlayers}
+            decision={startDecision && startDecision.gameId === upNext.id ? startDecision : null}
+            onWait={() => setStartDecision(null)}
+            onStartWithout={() => { const d = startDecision; if (d) void startGame(d.gameId, d.official, d.reconnecting); }}
+          />
+        )}
         />
       </MchezoProvider>
     );

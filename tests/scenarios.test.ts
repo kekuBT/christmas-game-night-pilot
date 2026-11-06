@@ -89,7 +89,10 @@ describe("disconnections during a game", () => {
     const [ada, bea, cal] = [await h.join("Ada", { host: true }), await h.join("Bea"), await h.join("Cal")];
     expect((await h.post(`/rooms/${h.roomId}/cohost`, { targetId: bea.playerId }, ada.token)).status).toBe(200);
     await h.disconnect(ada);
-    const started = await h.startGame(bea, "trivia", { seed: 1 });
+    // Sprint 2: the host is still inside the reconnect window, so an official
+    // start asks first (409); the cohost then deliberately proceeds.
+    expect((await h.startGame(bea, "trivia", { seed: 1 })).status).toBe(409);
+    const started = await h.startGame(bea, "trivia", { seed: 1, proceedWithout: [ada.playerId] });
     expect(started.status).toBe(201);
     const gid = started.body["gameId"] as string;
     h.game(gid).deadlineAt = Date.now() - 1;
@@ -104,10 +107,13 @@ describe("disconnections during a game", () => {
 });
 
 describe("before the game starts", () => {
-  it("CURRENT BEHAVIOUR (decision D1 pending): a player whose phone is asleep when the host taps Start is left out of the whole game", async () => {
+  it("REQUIREMENT (Sprint 2): a player whose phone just went to sleep is not left out silently; once the host chooses to start without them, they stay out of that game", async () => {
     const [ada, bea, cal] = [await h.join("Ada", { host: true }), await h.join("Bea"), await h.join("Cal")];
     await h.disconnect(cal);
-    const gid = (await h.startGame(ada, "trivia", { seed: 2 })).body["gameId"] as string;
+    const refused = await h.startGame(ada, "trivia", { seed: 2 });
+    expect(refused.status).toBe(409);
+    expect(refused.body["code"]).toBe("PLAYERS_RECONNECTING");
+    const gid = (await h.startGame(ada, "trivia", { seed: 2, proceedWithout: [cal.playerId] })).body["gameId"] as string;
     expect(h.game(gid).players).toEqual([ada.playerId, bea.playerId]);
     await h.connect(cal); // wakes up seconds later
     const q = (myGame(await h.projection(cal), gid)["state"] as { questions: Json[] }).questions[0]!;

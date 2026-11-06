@@ -135,7 +135,33 @@ export interface LedgerEvent {
   actor?: string;
   official?: boolean;
   previousPoints?: number;
+  /** Structured detail for audit events (e.g. who was left out of a game start). Never secrets. */
+  detail?: Record<string, unknown>;
   createdAt: number;
+}
+
+/** Who is here, and what pressing Start would do. Derived from presence; no secrets. */
+export interface Readiness {
+  registered: number;
+  connected: number;
+  reconnecting: number;
+  away: number;
+  /** Players a game started now would include (live connection), in join order. */
+  wouldPlay: string[];
+  /** Players a game started now would leave out, with why. */
+  wouldMiss: { id: string; presence: Presence; awayForMs: number }[];
+}
+
+/**
+ * A game start the server refused so the host can decide (HTTP 409):
+ * - ROSTER_CHANGED: the roster the host saw is not the roster it would get.
+ * - PLAYERS_RECONNECTING: an official game would silently leave out a
+ *   player still inside the reconnect grace window.
+ */
+export class StartRefused extends Error {
+  constructor(readonly code: "ROSTER_CHANGED" | "PLAYERS_RECONNECTING", message: string, readonly readiness: Readiness) {
+    super(message);
+  }
 }
 
 export interface GameInstance {
@@ -330,7 +356,33 @@ export class RoomEngine {
     this.log("cohost-granted", { playerId: targetId, actor: actorId });
   }
 
-  startGame(hostId: string, gameId: string, opts: { official?: boolean; seed?: number } = {}): GameInstance {
+  /** Who is here right now, and who a game started now would include or leave out. */
+  readiness(now = this.clock()): Readiness {
+    const all = [...this.players.values()];
+    const presence = all.map((p) => ({ id: p.id, presence: this.presenceOf(p.id, now), awayForMs: p.connected || p.disconnectedAt == null ? 0 : Math.max(0, now - p.disconnectedAt) }));
+    return {
+      registered: all.length,
+      connected: presence.filter((p) => p.presence === "connected").length,
+      reconnecting: presence.filter((p) => p.presence === "reconnecting").length,
+      away: presence.filter((p) => p.presence === "away").length,
+      wouldPlay: all.filter((p) => p.connected).map((p) => p.id),
+      wouldMiss: presence.filter((p) => p.presence !== "connected"),
+    };
+  }
+
+  /**
+   * Start a game. Eligibility is unchanged: the roster is the players with a
+   * live connection at this moment, fixed for the whole game. Sprint 2 adds
+   * two refusals so nobody is left out without the host knowing:
+   * - `roster` (optional): the roster the host was shown. If the room
+   *   changed since, refuse (ROSTER_CHANGED) instead of starting a game
+   *   whose players differ from what was on screen.
+   * - Official games refuse while a player is inside the reconnect grace
+   *   window (PLAYERS_RECONNECTING), unless the host explicitly lists them
+   *   in `proceedWithout`. Practice games do not ask.
+   * Nobody is ever added to a game after it starts.
+   */
+  startGame(hostId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[] } = {}): GameInstance {
     if (this.hostId !== hostId && !this.cohosts.has(hostId)) throw new Error("Only host/cohost can start a game");
     const game = getGame(gameId);
     if (game.status === "not-implemented") throw new Error(`Game not implemented yet: ${gameId}`);
@@ -338,7 +390,20 @@ export class RoomEngine {
     // a second concurrent game would orphan the first: it could never become
     // active again. Reject instead of silently stacking games.
     if ([...this.games.values()].some((g) => g.status === "playing")) throw new Error("A game is already in progress");
-    const playerIds = [...this.players.values()].filter((p) => p.connected).map((p) => p.id);
+    const readiness = this.readiness();
+    const playerIds = readiness.wouldPlay;
+    if (opts.roster !== undefined) {
+      const shown = new Set(opts.roster);
+      if (shown.size !== playerIds.length || playerIds.some((id) => !shown.has(id))) {
+        throw new StartRefused("ROSTER_CHANGED", "Who is playing changed since you looked. Check the list, then start again.", readiness);
+      }
+    }
+    const reconnecting = readiness.wouldMiss.filter((m) => m.presence === "reconnecting").map((m) => m.id);
+    const leftOutOnPurpose = new Set(opts.proceedWithout ?? []);
+    if ((opts.official ?? false) && reconnecting.some((id) => !leftOutOnPurpose.has(id))) {
+      const names = reconnecting.filter((id) => !leftOutOnPurpose.has(id)).map((id) => this.players.get(id)?.displayName ?? id);
+      throw new StartRefused("PLAYERS_RECONNECTING", `${names.join(", ")} ${names.length === 1 ? "is" : "are"} reconnecting. Wait for them, or start without them.`, readiness);
+    }
     if (playerIds.length < game.minPlayers) throw new Error(`Need at least ${game.minPlayers} connected players`);
     if (playerIds.length > game.maxPlayers) throw new Error(`Too many players for ${gameId}`);
     const id = `game-${this.nextGame++}`;
@@ -383,7 +448,9 @@ export class RoomEngine {
                             : undefined,
     };
     this.games.set(id, instance);
-    this.log("game-started", { gameInstanceId: id, actor: hostId });
+    // Audit who was left out and whether the host chose that explicitly.
+    const leftOut = readiness.wouldMiss.map((m) => ({ id: m.id, presence: m.presence }));
+    this.log("game-started", { gameInstanceId: id, actor: hostId, ...(leftOut.length ? { detail: { leftOut, startedWithoutOnPurpose: [...leftOutOnPurpose].filter((x) => leftOut.some((l) => l.id === x)) } } : {}) });
     return instance;
   }
 
@@ -1103,6 +1170,7 @@ export class RoomEngine {
       name: this.name,
       players: publicPlayers,
       games: publicGames,
+      readiness: this.readiness(now),
       officialStandings: this.officialStandings(),
       championshipDay: this.championshipDay,
       championship: this.championshipResults(),

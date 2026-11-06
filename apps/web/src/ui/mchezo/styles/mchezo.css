@@ -370,3 +370,15 @@
 [data-mz-motion="reduced"] .mz-conn, [data-mz-motion="reduced"] .mz-conn__dot { animation: none; }
 @media (prefers-reduced-motion: reduce) { .mz-conn, .mz-conn__dot { animation: none; } }
 .mz-presence-note { padding: 0 16px; }
+/* Readiness card */
+.mz-ready__summary { margin: 4px 0 0; font: 700 16px/1.35 var(--mz-font-body); }
+.mz-ready__list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.mz-ready__item { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; padding: 8px 12px; border-radius: 12px; background: var(--mz-ground); border: 1.5px solid var(--mz-line); }
+.mz-ready__item--reconnecting { border-color: var(--mz-highlight); }
+.mz-ready__name { font-weight: 700; }
+.mz-ready__status { color: var(--mz-text-muted); font-size: 14px; }
+.mz-ready__warn { color: var(--mz-highlight); }
+.mz-ready__decision { margin-top: 10px; padding: 12px; border-radius: 14px; border: 1.5px solid var(--mz-highlight); }
+.mz-ready__q { margin: 0 0 4px; font: 700 15px/1.35 var(--mz-font-body); }
+.mz-ready__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.mz-chip-btn--danger { border-color: var(--mz-brand); }

@@ -114,6 +114,9 @@ export interface LobbyScreenProps {
       navigation live here — our lobby has more than the handoff's single
       up-next game, and those controls must stay reachable. */
   extra?: ReactNode;
+  /** Sprint 2: host readiness ("who's playing, what Start will do") rendered
+      directly above the Start button, so the answer is next to the action. */
+  beforeStart?: ReactNode;
   /** Work Package F: a server rejection mapped to a human sentence
       (App passes the already-mapped `err`). Rendered at the top of the
       lobby — it used to sit at the very bottom of `extra`, below the
@@ -165,6 +168,7 @@ export function LobbyScreen(p: LobbyScreenProps) {
       <div className="mz-gap" />
       {p.extra}
       {p.isHost && p.onTvChange && <BigScreenToggle on={p.tvConnected} onChange={p.onTvChange} />}
+      {p.isHost && p.beforeStart}
       {p.isHost ? (
         <>
           <Keycap block disabled={!canStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? `Start ${p.nextGame.name}` : `Waiting for players (${connected}/${min})`}</Keycap>
