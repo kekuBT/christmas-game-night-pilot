@@ -3,7 +3,7 @@
 // TV leaderboard vs the server's raw scores, which are authoritative.
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-leaderboard.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -110,7 +110,7 @@ function checkTvMatches(name, visible, expected) {
   check(name, ok, `tv=${visible.map((v) => `${v.name}:${v.rank}:${v.score}`).join(" ")} | server=${expected.map((v) => `${v.name}:${v.rank}:${v.score}`).join(" ")}`);
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await ctx.newPage();

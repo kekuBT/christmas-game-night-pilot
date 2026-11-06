@@ -8,7 +8,7 @@
 // state), mobile widths (no horizontal overflow at 320/360/390).
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-closest.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -39,7 +39,7 @@ async function joinRoom(page, name, code) {
   await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await ctx.newPage();

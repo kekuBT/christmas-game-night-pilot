@@ -10,7 +10,7 @@
 // final results, mobile widths (no horizontal overflow at
 // 320/360/390). Usage: build:web, serve on a port, then:
 //   node scripts/check-year.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -75,7 +75,7 @@ async function guessEvent(page, i, value, via = "field") {
   return won;
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await ctx.newPage();
@@ -99,7 +99,7 @@ try {
   check("first event is the Moon landing",
     (await host.getByTestId("mz-year-event").innerText()).includes("first Moon landing"));
   check("eight jump chips", (await host.locator("[data-testid^='mz-year-q']").count()) === 8);
-  await host.screenshot({ path: "docs/mchezo-screenshots/19-year-after.png" });
+  await host.screenshot({ path: screenshotPath("docs/mchezo-screenshots/19-year-after.png") });
 
   // Mobile widths: the new controls must not overflow horizontally.
   for (const w of [320, 360, 390]) {

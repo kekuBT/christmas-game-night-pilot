@@ -12,7 +12,7 @@
 //     of the kit lobby, never "Unknown player slot" / "Recovery token
 //     does not match".
 //  3. A successful reconnect afterwards clears the error and confirms.
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -22,7 +22,7 @@ function check(name, cond) {
   if (!cond) failures++;
 }
 
-const browser = await chromium.launch({ headless: true });
+const browser = await launchChromium({ headless: true });
 try {
   const hostCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const host = await hostCtx.newPage();

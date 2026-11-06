@@ -10,7 +10,7 @@
 // horizontal overflow at 320/360/390). Usage: build:web, serve on
 // a port, then:
 //   node scripts/check-geography.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -100,7 +100,7 @@ async function answerAll(page, picks) {
   }
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await ctx.newPage();
@@ -126,7 +126,7 @@ try {
   check("four answer options", (await host.locator(".mz-slab").count()) === 4);
   check("no TV stage chip (Geography has no TV stage)",
     (await host.getByTestId("mz-tv-stage").count()) === 0);
-  await host.screenshot({ path: "docs/mchezo-screenshots/21-geography-after.png" });
+  await host.screenshot({ path: screenshotPath("docs/mchezo-screenshots/21-geography-after.png") });
 
   // Mobile widths: the new question screen must not overflow.
   for (const w of [320, 360, 390]) {

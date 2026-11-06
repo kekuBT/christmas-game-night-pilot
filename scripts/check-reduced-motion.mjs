@@ -6,7 +6,7 @@
 // 900ms arrival window. Both arms use the lobby only (no game flow).
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-reduced-motion.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -47,7 +47,7 @@ async function seatHasArrive(page, name) {
   return cls.split(/\s+/).includes("mz-seat--arrive");
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   // Control arm: default emulation → the arriving seat animates.
   {

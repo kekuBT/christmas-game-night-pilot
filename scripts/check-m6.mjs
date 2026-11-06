@@ -6,14 +6,14 @@
 // start playing -> answer all -> waiting state with counts -> results
 // screen -> back to lobby -> reaction.
 // (The Trivia version of this journey is covered by scripts/check-mchezo.mjs.)
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const results = [];
 function pass(name) { results.push([name, true]); console.log("PASS", name); }
 function fail(name, detail) { results.push([name, false]); console.log("FAIL", name, detail ?? ""); }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
 try {
   const host = await ctx.newPage();

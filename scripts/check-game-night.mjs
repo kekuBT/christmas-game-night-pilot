@@ -7,7 +7,7 @@
 // maximum-capacity room (10 players) playing Trivia.
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-game-night.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -172,7 +172,7 @@ async function backToLobbyAll(pages) {
   for (const page of pages) await backToLobby(page);
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   // ---------- Scenario 1: the main room (6 players + spectator + Gus) ----------
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -190,7 +190,7 @@ try {
   await sleep(1500);
   let proj = await getProjection(host);
   check("cohost granted via the lobby UI", (proj.players ?? []).find((p) => p.displayName === "Bea")?.isCohost === true);
-  await host.screenshot({ path: "docs/mchezo-screenshots/14-game-night-lobby.png" });
+  await host.screenshot({ path: screenshotPath("docs/mchezo-screenshots/14-game-night-lobby.png") });
 
   // Spectator opens the TV (must not consume a player slot).
   const tv = await ctx.newPage();
@@ -242,7 +242,7 @@ try {
     triviaScores && Object.keys(triviaScores).length > 0 &&
     triviaScores[Object.keys(triviaScores).find((id) => nameOf(id) === "Ada")] ===
     triviaScores[Object.keys(triviaScores).find((id) => nameOf(id) === "Cal")]);
-  await tv.screenshot({ path: "docs/mchezo-screenshots/15-game-night-tv-results.png" });
+  await tv.screenshot({ path: screenshotPath("docs/mchezo-screenshots/15-game-night-tv-results.png") });
   // The phone's standings show the same leader as the TV (and the server).
   // The host's own row shows "You", not her name — so when the leader
   // is the host (Ada, whose page this is), "You" is the leader's row.
@@ -310,7 +310,7 @@ try {
   // (Gus listed) and the projection already proved him marked away.
   check("TV lists the disconnected player (Gus)", /Gus/.test(tvText));
   check("TV follows the active game (closest)", /closest-wins/i.test(tvText));
-  await host.screenshot({ path: "docs/mchezo-screenshots/16-game-night-closest.png" });
+  await host.screenshot({ path: screenshotPath("docs/mchezo-screenshots/16-game-night-closest.png") });
   await backToLobbyAll([host, guests["Bea"], guests["Cal"], guests["Dee"], guests["Eli"], guests["Fay"]]);
 
   // --- Game 3: Math Mayhem, started by the cohost (not the host). ---
@@ -376,7 +376,7 @@ try {
     await joinRoom(p, `P${i}`, code2);
     maxGuests[`P${i}`] = p;
   }
-  await host2.screenshot({ path: "docs/mchezo-screenshots/17-game-night-max-room.png" });
+  await host2.screenshot({ path: screenshotPath("docs/mchezo-screenshots/17-game-night-max-room.png") });
   const tv2 = await ctx2.newPage();
   await spectate(tv2, code2);
   let proj2 = await getProjection(host2);

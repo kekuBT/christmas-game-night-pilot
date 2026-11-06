@@ -3,7 +3,7 @@
 // from the library. Browsing is open to guests; selection stays host-only.
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-library.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -45,7 +45,7 @@ async function cardCount(page) {
   return page.locator('[data-testid^="mz-lib-card-"]').count();
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await ctx.newPage();

@@ -6,7 +6,7 @@
 //   standings and tie handling via the results screen, TV stage while
 //   playing and after finish, mobile widths 320/360/390, reduced motion.
 // Fictional test players only; run against a local server only.
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const results = [];
@@ -56,7 +56,7 @@ async function answerAllTrivia(page) {
   }
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   // ---- Room A: landing, lobby sizes, presence -------------------------
   const ctxA = await browser.newContext({ viewport: { width: 390, height: 844 } });

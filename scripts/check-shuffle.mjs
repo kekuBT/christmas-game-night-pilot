@@ -3,7 +3,7 @@
 // Guests see no shuffle buttons. Manual selection clears the result line.
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-shuffle.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -41,7 +41,7 @@ async function upNextTitle(page) {
   return m ? m[1] : "";
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await ctx.newPage();

@@ -6,7 +6,7 @@
 //  - A competing player opening TV on a second tab keeps the same slot.
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-spectator.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -77,7 +77,7 @@ async function specSessionOf(page) {
   return page.evaluate(() => ({ roomId: sessionStorage.getItem("cgn_spec_roomId"), token: sessionStorage.getItem("cgn_spec_token") }));
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await ctx.newPage();

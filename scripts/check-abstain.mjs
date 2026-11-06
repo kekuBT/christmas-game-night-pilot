@@ -6,7 +6,7 @@
 //   3. The other player can still finish the game alone (no stall).
 //   4. The finished results screen scores the abstainer at 0.
 // Checks: 5. Fictional test players only; run against a local server only.
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const results = [];
@@ -25,7 +25,7 @@ async function waitFor(fn, timeoutMs) {
   return last;
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
 try {
   const host = await ctx.newPage();

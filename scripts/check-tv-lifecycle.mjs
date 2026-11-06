@@ -6,7 +6,7 @@
 // no TV-device click is needed for the switches themselves.
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-tv-lifecycle.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -68,7 +68,7 @@ async function tvIsDashboard(tv) {
   return ((await tv.locator("body").textContent()) ?? "").includes("TV Dashboard — public only");
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await ctx.newPage();

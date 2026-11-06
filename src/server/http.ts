@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
@@ -12,6 +12,8 @@ import { hashToken } from "../shared/protocol.js";
 export interface ServerOptions {
   port?: number;
   dataDir?: string;
+  /** Directory holding the built web app (index.html + assets/). Defaults to apps/web/dist. */
+  webDistDir?: string;
 }
 
 interface SocketMeta {
@@ -72,8 +74,11 @@ export class LocalServer {
   private wss = new WebSocketServer({ server: this.http });
   private sockets = new Set<{ ws: WebSocket; meta: SocketMeta }>();
 
+  private webDistDir: string;
+
   constructor(opts: ServerOptions = {}) {
     this.dataDir = opts.dataDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data");
+    this.webDistDir = resolve(opts.webDistDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "apps", "web", "dist"));
     mkdirSync(this.dataDir, { recursive: true });
     this.loadSnapshots();
     this.wss.on("connection", (ws, req) => this.handleWs(ws, req));
@@ -224,9 +229,9 @@ export class LocalServer {
   }
 
   private serveStatic(pathname: string, res: ServerResponse): void {
-    const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "apps", "web", "dist");
+    const root = this.webDistDir;
     const file = pathname === "/" || pathname === "/index.html" ? join(root, "index.html") : join(root, pathname.replace(/^\//, ""));
-    const safe = file.startsWith(root) ? file : join(root, "index.html");
+    const safe = file.startsWith(root + sep) ? file : join(root, "index.html");
     try {
       const data = readFileSync(safe);
       const type = safe.endsWith(".js") ? "text/javascript" : safe.endsWith(".css") ? "text/css" : safe.endsWith(".html") ? "text/html" : "application/octet-stream";

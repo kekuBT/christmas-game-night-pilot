@@ -19,7 +19,7 @@
 // NOTE: this is Chromium computed-style emulation, NOT real-device
 // confirmation — the manual real-device checklist stays open.
 
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 
@@ -131,7 +131,7 @@ async function answerQuiz(page) {
   }
 }
 
-const browser = await chromium.launch({ headless: true });
+const browser = await launchChromium({ headless: true });
 try {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const host = await ctx.newPage();

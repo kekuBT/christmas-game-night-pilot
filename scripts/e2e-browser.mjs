@@ -18,13 +18,12 @@
 //   reconnect. A failed game is recorded and the run continues to the next
 //   game; the process exits non-zero if anything failed.
 
-import { chromium, firefox, webkit } from "playwright";
+import { launchBrowser } from "./lib/driver-env.mjs";
 
 const args = process.argv.slice(2);
 const BASE = args.find((a) => !a.startsWith("--")) ?? "http://localhost:3457";
 const browserArg = (args.find((a) => a.startsWith("--browser=")) ?? "--browser=chromium").split("=")[1];
 const gamesArg = (args.find((a) => a.startsWith("--games=")) ?? "--games=all").split("=")[1];
-const BROWSERS = { chromium, firefox, webkit };
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
 const CONNECTIONS_GROUPS = [
   ["Gingerbread", "Candy cane", "Mince pie", "Roast turkey"],
@@ -238,7 +237,7 @@ async function act(page, gameId, name) {
 
 async function runBrowser(browserName, games) {
   const results = [];
-  const browser = await BROWSERS[browserName].launch({ headless: true });
+  const browser = await launchBrowser(browserName, { headless: true });
   try {
     const pages = [];
     // Host creates a room.

@@ -4,12 +4,14 @@
 // restart path is server-side (snapshot persistence + restore), so no
 // browser is needed here — the browser reconnect path is already
 // covered by check-ws-reconnect (reload) and check-closest.
-// Spawns its own server on a free port (3462–3464) with the shared
-// data dir, so the test room is a real snapshot file; the driver
-// deletes only its own room files afterwards.
+// Spawns its own server (OS-assigned free port) on its own temporary
+// data dir, so the test room is a real snapshot file that no other run
+// or developer room can collide with; the temp dir is removed afterwards.
 // Usage: node scripts/check-restart.mjs
 import { spawn } from "node:child_process";
-import { existsSync, unlinkSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -29,25 +31,25 @@ async function waitUp(port, timeoutMs = 30000) {
   }
   return false;
 }
-async function pickPort() {
-  for (const port of [3462, 3463, 3464]) {
-    try {
-      const r = await fetch(`http://localhost:${port}/`, { signal: AbortSignal.timeout(1000) });
-      if (r.ok) continue; // something already answers here
-    } catch { return port; } // connection refused = free
-  }
-  return null;
-}
-function startServer(port) {
-  const child = spawn("./node_modules/.bin/tsx", ["src/server/serve.ts"], {
+const DATA_DIR = mkdtempSync(join(tmpdir(), "mchezo-restart-"));
+// Start the real server on PORT=0 and read the port it actually bound
+// from its startup line. `node --import tsx` works on every platform
+// (the old ./node_modules/.bin/tsx path did not exist on Windows).
+async function startServer() {
+  const child = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], {
     cwd: process.cwd(),
-    env: { ...process.env, PORT: String(port) },
+    env: { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR },
     stdio: ["ignore", "pipe", "pipe"],
   });
   let out = "";
   child.stdout.on("data", (d) => { out += d.toString(); });
   child.stderr.on("data", (d) => { out += d.toString(); });
-  return { child, getOutput: () => out };
+  let port = null;
+  for (let i = 0; i < 120 && port === null && child.exitCode === null; i++) {
+    const m = /on http:\/\/localhost:(\d+)/.exec(out);
+    if (m) port = Number(m[1]); else await sleep(250);
+  }
+  return { child, port, getOutput: () => out };
 }
 async function stopServer(proc) {
   proc.child.kill("SIGTERM");
@@ -74,20 +76,14 @@ async function getProj(port, roomId, token) {
   return { status: r.status, data: await r.json().catch(() => ({})) };
 }
 
-const port = await pickPort();
-if (!port) {
-  console.log("FAIL no free port in 3462-3464 for the restart test server");
-  process.exitCode = 1;
-  process.exit(1);
-}
-let roomId = "";
-let server = startServer(port);
+let server = await startServer();
+let port = server.port;
 try {
-  check("test server starts", await waitUp(port));
+  check("test server starts", port !== null && await waitUp(port), port === null ? server.getOutput().slice(0, 300) : "");
   // Create a room and join two players.
   const created = await post(port, "/rooms", { name: "Restart Test" });
   check("room created", created.status === 201 && !!created.data.roomId && !!created.data.joinCode);
-  roomId = created.data.roomId;
+  const roomId = created.data.roomId;
   const joinCode = created.data.joinCode;
   const host = await post(port, "/rooms/join-by-code", { joinCode, displayName: "Ada", asHost: true, hostClaimToken: created.data.hostClaimToken });
   check("host joined", host.status === 201 && host.data.isHost === true);
@@ -104,8 +100,9 @@ try {
 
   // Kill and respawn the server (the restart under test).
   check("server stopped", await stopServer(server));
-  server = startServer(port);
-  check("server restarted", await waitUp(port));
+  server = await startServer();
+  port = server.port;
+  check("server restarted", port !== null && await waitUp(port));
 
   // The room, the game, and the guess must all survive; everyone is
   // disconnected after a restart (snapshot restore marks them so).
@@ -132,11 +129,7 @@ try {
   check("bad recovery token is rejected", bad.status === 400);
 } finally {
   await stopServer(server);
-  // Test hygiene: delete only this room's snapshot files.
-  for (const suffix of ["", ".book.json", ".claim.json"]) {
-    const f = suffix === "" ? `data/${roomId}.json` : `data/${roomId}${suffix}`;
-    if (roomId && existsSync(f)) unlinkSync(f);
-  }
+  rmSync(DATA_DIR, { recursive: true, force: true });
 }
 console.log(failures === 0 ? "RESTART ALL PASSED" : `RESTART FAILURES: ${failures}`);
 process.exitCode = failures ? 1 : 0;

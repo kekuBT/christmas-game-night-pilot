@@ -3,7 +3,7 @@
 // no game state touched, no restart, progress intact on return.
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-tv-entry.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -51,7 +51,7 @@ async function tvProj(roomId) {
   return (await fetch(`${BASE}/rooms/${roomId}/projection?audience=tv`)).json();
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await ctx.newPage();

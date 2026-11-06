@@ -5,7 +5,7 @@
 // TV sizes check that the big-screen stage and dashboard fit.
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-viewports.mjs <baseUrl>
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -50,7 +50,7 @@ async function startGame(host, gameId) {
   }
 }
 
-const browser = await chromium.launch();
+const browser = await launchChromium();
 try {
   // Room 1: lobby + Trivia play + TV stage.
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });

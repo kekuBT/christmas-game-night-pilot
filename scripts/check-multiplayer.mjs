@@ -21,7 +21,7 @@
 //   4. Completion: the game all four played finishes on every page.
 // A failed check is recorded and the process exits non-zero.
 
-import { chromium } from "playwright";
+import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
@@ -65,7 +65,7 @@ async function tvLeakCheck(label, roomId) {
     `players=${players.length}`);
 }
 
-const browser = await chromium.launch({ headless: true });
+const browser = await launchChromium({ headless: true });
 try {
   const pages = [];
   const hostCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });

@@ -18,13 +18,13 @@
 // NOTE: this is Chromium viewport emulation, NOT real iPhone Safari —
 // the real-device checklist stays open (see docs/PROGRESS.md).
 
-import { chromium } from "playwright";
+import { launchChromium, screenshotDir } from "./lib/driver-env.mjs";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 const args = process.argv.slice(2);
 const BASE = args.find((a) => !a.startsWith("--")) ?? "http://localhost:3457";
-const OUT = (args.find((a) => a.startsWith("--out=")) ?? "--out=docs/mobile-screenshots").split("=")[1];
+const OUT = (args.find((a) => a.startsWith("--out=")) ?? `--out=${screenshotDir("docs/mobile-screenshots")}`).split("=")[1];
 mkdirSync(OUT, { recursive: true });
 
 const VIEWPORTS = [
@@ -115,7 +115,7 @@ async function tabFocus(page, label) {
   check(`${label}: focused controls show a visible outline`, controls.length > 0 && outlined.length === controls.length, `${outlined.length}/${controls.length} outlined`);
 }
 
-const browser = await chromium.launch({ headless: true });
+const browser = await launchChromium({ headless: true });
 try {
   for (const vp of VIEWPORTS) {
     console.log(`\n== viewport ${vp.width}x${vp.height} ==`);
