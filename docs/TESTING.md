@@ -34,7 +34,7 @@ The summary lists every non-passing step with its first failing assertions. Each
 - **Builds what it tests.** Every level builds the bundle from the current tree into the run directory. The tree is fingerprinted (all files under `apps/`, `src/`, `scripts/`, `tests/` and the manifests) and re-checked before each browser step and at the end. Any edit during the run makes the result `INVALID`.
 - **Owns its server.** It starts `src/server/serve.ts` on an OS-assigned port with a fresh data directory, and stops it at the end. It never touches a dev server you started.
 - **Isolated runs.** Two gates can run at once: separate builds, servers, ports, data and results.
-- **Hard timeouts.** Each step runs in its own process group, and every process it starts carries a run-specific environment tag. After each step, and at the end, anything still carrying the tag is killed, which catches browsers that Playwright starts in their own process group. Limits: 300 s for typecheck, lint and build, 900 s for unit tests, 600 s per driver and 1800 s for E2E. `--driver-timeout=<sec>` overrides the driver limit and `--timeout=<min>` caps the whole run. A hung step is killed with its children and reported as `TIMEOUT`.
+- **Hard timeouts.** Each step runs in its own process group, and every process it starts carries a run-specific environment tag. After each step, and at the end, anything still carrying the tag is killed, which catches browsers that Playwright starts in their own process group. Limits: 300 s for typecheck, lint and build, 900 s for unit tests, and per-driver budgets of about twice the measured duration (600 s default; 1800 s for `leaderboard` and E2E, 1500 s for `f5`, 900 s for `mchezo`, `tv-lifecycle` and `game-night`). `--driver-timeout=<sec>` overrides the driver limit and `--timeout=<min>` caps the whole run. A hung step is killed with its children and reported as `TIMEOUT`.
 - **Infrastructure vs failure.** A browser preflight runs before any driver. A missing browser is one `INFRA` line, not 28 failures.
 - **Clean tree.** A run that modifies tracked files fails.
 
@@ -48,7 +48,9 @@ It covers: a failing unit test, a failing driver, a hanging driver, a hanging dr
 
 ## Browsers
 
-Drivers launch Chromium through `scripts/lib/driver-env.mjs`, which uses the build matching the pinned Playwright (`npx playwright install chromium`). On hosts that ship their own Chromium, set `MCHEZO_CHROMIUM_PATH`. The report records the browser version and whether it came from Playwright or the override.
+Drivers launch Chromium through `scripts/lib/driver-env.mjs`, which uses the build matching the pinned Playwright (`npx playwright install chromium`); headless runs use `chrome-headless-shell`. On hosts that ship their own Chromium, set `MCHEZO_CHROMIUM_PATH`, preferably to a headless-shell build. The report records the browser version, the build kind and its source, and warns about a full Chrome build. Driver timing assumptions are calibrated on the headless shell (see DEVELOPMENT.md).
+
+**Known driver weakness (not fixed in Sprint 1).** Several drivers' answering helpers (e.g. `answerAllTrivia` in `check-game-night.mjs`) return silently when the UI is slower than expected, leaving questions unanswered. The run then fails later on an unrelated-looking wait. The failure is real, but the report points at the wrong place. Making those helpers fail where answers are lost is a Sprint 2 test-quality item.
 
 ## Running one driver by hand
 

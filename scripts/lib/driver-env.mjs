@@ -28,11 +28,16 @@ export function infraError(message) {
   process.exit(INFRA_EXIT_CODE);
 }
 
-/** The Chromium executable the drivers will use, and where that choice came from. */
+/**
+ * The Chromium the drivers will use, and where that choice came from.
+ * Playwright-managed headless runs use chrome-headless-shell (Playwright's
+ * default since 1.49), whatever chromium.executablePath() says, which is
+ * the full build used for headed runs.
+ */
 export function chromiumExecutable() {
   const override = process.env.MCHEZO_CHROMIUM_PATH;
   if (override) return { path: override, source: "MCHEZO_CHROMIUM_PATH" };
-  return { path: chromium.executablePath(), source: "playwright-managed" };
+  return { path: "chrome-headless-shell (playwright-managed)", source: "playwright-managed" };
 }
 
 const BROWSERS = { chromium, firefox, webkit };
@@ -44,19 +49,19 @@ export async function launchBrowser(name = "chromium", options = {}) {
   const opts = { ...options };
   if (name === "chromium") {
     const exe = chromiumExecutable();
-    if (!existsSync(exe.path)) {
-      infraError(
-        exe.source === "MCHEZO_CHROMIUM_PATH"
-          ? `MCHEZO_CHROMIUM_PATH points at ${exe.path}, which does not exist`
-          : `Chromium for the pinned Playwright is not installed (expected ${exe.path}). Run "npx playwright install chromium", or set MCHEZO_CHROMIUM_PATH to an existing Chromium build.`,
-      );
+    if (exe.source === "MCHEZO_CHROMIUM_PATH") {
+      if (!existsSync(exe.path)) infraError(`MCHEZO_CHROMIUM_PATH points at ${exe.path}, which does not exist`);
+      opts.executablePath = exe.path;
     }
-    if (exe.source === "MCHEZO_CHROMIUM_PATH") opts.executablePath = exe.path;
   }
   try {
     return await type.launch(opts);
   } catch (err) {
-    infraError(`${name} failed to launch: ${String(err?.message ?? err).split("\n")[0]}`);
+    const first = String(err?.message ?? err).split("\n")[0];
+    if (/Executable doesn't exist/.test(first)) {
+      infraError(`the browser for the pinned Playwright is not installed (${first.replace(/^.*Executable doesn't exist at /, "expected ")}). Run "npx playwright install chromium", or set MCHEZO_CHROMIUM_PATH to an existing chrome-headless-shell build.`);
+    }
+    infraError(`${name} failed to launch: ${first}`);
   }
 }
 

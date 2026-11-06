@@ -283,6 +283,13 @@ async function startServer() {
 }
 
 // ---------- plan ----------
+// Per-driver time budgets, about 2x the duration measured on
+// chrome-headless-shell in a cloud container (2026-11-06, commit 08348bf):
+// leaderboard 928s, e2e 830s, f5 732s, mchezo 376s, tv-lifecycle 350s,
+// game-night 270s; every other driver finished in under 160s. A budget is
+// a hang detector, not a performance assertion.
+const DEFAULT_DRIVER_TIMEOUT_SEC = 600;
+const DRIVER_TIMEOUT_SEC = { "check-leaderboard": 1800, "e2e-chromium": 1800, "check-f5": 1500, "check-mchezo": 900, "check-tv-lifecycle": 900, "check-game-night": 900 };
 const fastSteps = [
   ["typecheck-server", NODE, [BIN.tsc, "--noEmit"], 300],
   ["typecheck-web", NODE, [BIN.tsc, "-p", "apps/web/tsconfig.json", "--noEmit"], 300],
@@ -322,6 +329,15 @@ async function main() {
     ], { timeoutSec: 120, kind: "infra" });
     if (pre.status === "PASS") {
       try { report.browser = JSON.parse(readFileSync(join(RUN_DIR, pre.log), "utf8").split("\n").find((l) => l.startsWith("{"))); } catch { /* informational only */ }
+      if (report.browser) {
+        report.browser.build = /headless[-_]shell/.test(report.browser.executable) ? "chrome-headless-shell" : "full-chrome"; // managed runs report "chrome-headless-shell (playwright-managed)"
+        console.log(`  browser  ${report.browser.build} ${report.browser.version} (${report.browser.source})`);
+        if (report.browser.build === "full-chrome") {
+          const note = "browser is a full Chrome build, not chrome-headless-shell: it renders more slowly, and several drivers have timing assumptions calibrated on the headless shell (see docs/TESTING.md)";
+          report.notes.push(note);
+          console.log(`  WARNING  ${note}`);
+        }
+      }
     } else {
       if (pre.status === "FAIL" || pre.status === "TIMEOUT") pre.status = "INFRA";
       report.notes.push("browser checks not run: browser preflight failed");
@@ -346,7 +362,7 @@ async function main() {
     for (const [name, args] of list) {
       if (cancelled) break;
       if (!verifyUnchanged(`before ${name}`)) return;
-      await runStep(name, NODE, args, { timeoutSec: opts.driverTimeoutSec ?? (name === "e2e-chromium" ? 1800 : 600), env: driverEnv, kind: "browser" });
+      await runStep(name, NODE, args, { timeoutSec: opts.driverTimeoutSec ?? DRIVER_TIMEOUT_SEC[name] ?? DEFAULT_DRIVER_TIMEOUT_SEC, env: driverEnv, kind: "browser" });
       if (cancelled) break; // the run stopped its own server; not a server failure
       if (server.child.exitCode !== null) {
         report.steps.push({ name: "server-alive", kind: "infra", status: "INFRA", detail: `gate server exited (code ${server.child.exitCode}) during ${name}` });

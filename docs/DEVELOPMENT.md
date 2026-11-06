@@ -19,12 +19,14 @@ npx playwright install chromium     # browser matching the pinned Playwright (br
 
 Use `npm ci`, not `npm install`: it fails loudly if `package.json` and `package-lock.json` disagree, instead of quietly rewriting the lockfile.
 
-**Pre-provisioned Chromium.** If your machine already has a Chromium build and cannot download one (a managed cloud container, or a network that blocks the Playwright CDN), skip `playwright install` and point the drivers at it explicitly:
+**Pre-provisioned Chromium.** If your machine already has a Chromium build and cannot download one (a managed cloud container, or a network that blocks the Playwright CDN), skip `playwright install` and point the drivers at it explicitly. Prefer a **`chrome-headless-shell`** build, which is what Playwright itself uses for headless runs:
 
 ```sh
-export MCHEZO_CHROMIUM_PATH=/path/to/chrome        # macOS/Linux
-$env:MCHEZO_CHROMIUM_PATH = "C:\path\to\chrome.exe" # Windows PowerShell
+export MCHEZO_CHROMIUM_PATH=/path/to/chrome-headless-shell        # macOS/Linux
+$env:MCHEZO_CHROMIUM_PATH = "C:\path\to\chrome-headless-shell.exe" # Windows PowerShell
 ```
+
+A full Chrome binary also works but renders more slowly. Some drivers then fail on their own timing assumptions: measured on 2026-11-06, `check-game-night` failed and `check-leaderboard`/`check-f5` ran past their budgets under full Chrome, on both the handoff code and Sprint 1, and all three passed under the headless shell. The gate warns when it detects a full Chrome build.
 
 The gate report records which browser was used, so results from an overridden browser are never mistaken for results from the pinned one. Without either, browser checks stop with a `MCHEZO_INFRA_ERROR` explaining what is missing. They never quietly fall back to another browser.
 
