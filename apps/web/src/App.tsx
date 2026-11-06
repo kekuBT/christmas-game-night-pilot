@@ -27,9 +27,10 @@ import { previousGameScores } from "./ui/mchezo/lib/standings.js";
 import { humanError } from "./ui/mchezo/lib/errors.js";
 import { midrank } from "./components/midrank.js";
 import { sendIntent } from "./components/intentRetry.js";
-import { connection } from "./connectionStore.js";
+import { connection, roomNotices } from "./connectionStore.js";
 import { seats } from "./session.js";
 import { RememberChoice, ThisDeviceCard, WelcomeBack, useRememberedSeats } from "./components/mchezo/DeviceSeat.js";
+import { RecoverScreen, RecoveryCodeSection, RecoveryRequestsCard } from "./components/mchezo/Recovery.js";
 import { ReadinessCard, type StartDecision } from "./components/mchezo/ReadinessCard.js";
 import QRCode from "qrcode";
 
@@ -108,6 +109,7 @@ export function App() {
   const [rememberOnJoin, setRememberOnJoin] = useState(false);
   const [seatRemembered, setSeatRemembered] = useState(() => seats.current()?.remembered ?? false);
   const rememberedSeats = useRememberedSeats();
+  const [recoverMode, setRecoverMode] = useState(false);
   const [chooserOpen, setChooserOpen] = useState(false);
   const [shuffleResult, setShuffleResult] = useState<string | null>(null);
   const [numInput, setNumInput] = useState("");
@@ -120,6 +122,16 @@ export function App() {
   useEffect(() => {
     connection.setHandlers({ acknowledge: () => leaveSeatOnThisDevice("This device is signed out. Your seat and scores are safe in the game.") });
   });
+  // Seat recoveries are announced to everyone (except on the recovered seat's own device).
+  useEffect(() => {
+    const list = proj?.notices ?? [];
+    roomNotices.offer(list.filter((n) => n.playerId !== playerId).map((n) => ({
+      id: n.eventId,
+      text: n.method === "host" && n.byName
+        ? `${n.byName} restored ${n.displayName}’s seat on a new device.`
+        : `${n.displayName}’s seat was recovered on a new device with a recovery code.`,
+    })));
+  }, [proj?.notices, playerId]);
   // Poll failures used to be swallowed forever: a player whose room was
   // gone (or whose server was down) saw a frozen screen with no message.
   // After three consecutive failures (~6s) say so; clear it on recovery.
@@ -424,6 +436,24 @@ export function App() {
 
   // Landing shows unless a player session exists — or a spectator session
   // does (spectator tabs skip landing and render the TV-only branch below).
+  if ((!roomId || !playerId) && !(specRoomId && specToken) && recoverMode) {
+    return (
+      <MchezoProvider theme={themes.everyday}>
+        <RecoverScreen
+          initialCode={code}
+          onBack={() => setRecoverMode(false)}
+          onSecured={(seat, remember) => {
+            seats.begin({ roomId: seat.roomId, playerId: seat.playerId, token: seat.sessionToken, displayName: seat.displayName }, { remember });
+          }}
+          onRecovered={(seat, remember) => {
+            setRecoverMode(false);
+            void saveSession({ roomId: seat.roomId, playerId: seat.playerId, recoveryToken: seat.sessionToken, displayName: seat.displayName } as JoinResponse, { remember });
+            setMsg(`Welcome back, ${seat.displayName}. Your seat is restored.`);
+          }}
+        />
+      </MchezoProvider>
+    );
+  }
   if ((!roomId || !playerId) && !(specRoomId && specToken)) {
     return (
       <MchezoProvider theme={themes.everyday}>
@@ -443,7 +473,10 @@ export function App() {
               onForget={(v) => rememberedSeats.forget(v.seat)}
             />
           )}
-          formExtra={<RememberChoice checked={rememberOnJoin} onChange={setRememberOnJoin} />}
+          formExtra={<>
+            <RememberChoice checked={rememberOnJoin} onChange={setRememberOnJoin} />
+            <button type="button" className="mz-linkbtn" data-testid="mz-lost-place" onClick={() => { setErr(""); setRecoverMode(true); }}>Lost your place? Recover your seat</button>
+          </>}
           extra={
             <div style={{ padding: "0 16px 16px" }}>
               {err && <p className="err" data-testid="mz-error" role="alert">{err}</p>}{msg && <p className="ok">{msg}</p>}
@@ -563,6 +596,15 @@ export function App() {
   const lobbyExtra = (
     <div>
       {(me?.isHost || me?.isCohost) && (
+        <RecoveryRequestsCard
+          requests={proj?.recoveryRequests ?? []}
+          onDecide={async (r, approve) => {
+            try { await post(`/rooms/${roomId}/recovery-requests/${r.requestId}/${approve ? "approve" : "deny"}`, approve ? { playerId: r.playerId } : {}); } catch (e) { fail(e); }
+            await refresh();
+          }}
+        />
+      )}
+      {(me?.isHost || me?.isCohost) && (
         <div className="mz-card" style={{ marginTop: 12 }}>
           <span className="mz-kicker">Game setup</span>
           <p className="mz-foot" style={{ margin: "4px 0" }}>Up next is {upNext?.title ?? "—"}. Official games count toward the Family Cup; practice games do not.</p>
@@ -589,7 +631,12 @@ export function App() {
         remembered={seatRemembered}
         onRemember={(on) => setSeatRemembered(seats.setRemember(on))}
         onForgetDevice={() => leaveSeatOnThisDevice("Signed out on this device. Your seat and scores stay in the game.")}
-      />
+      >
+        <RecoveryCodeSection
+          hasCode={!!proj?.me?.hasRecoveryCode}
+          onIssue={async () => { const r = await post<{ recoveryCode: string }>(`/rooms/${roomId}/recovery-code`, {}); void refresh(); return r.recoveryCode; }}
+        />
+      </ThisDeviceCard>
       <div className="mz-card" style={{ marginTop: 12 }}>
         <span className="mz-kicker">Invite by QR</span>
         <p className="mz-foot">Scan to join this room. The 6-character code below works too — that is the manual-code fallback.</p>

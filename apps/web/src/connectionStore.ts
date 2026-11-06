@@ -62,3 +62,29 @@ export const connection = {
 export function useConnection(): ConnSnapshot {
   return useSyncExternalStore(connection.subscribe, connection.get, connection.get);
 }
+
+// ---------------------------------------------------------------- room notices
+// Seat recoveries are always announced to the room (recovery contract §2.1
+// step 6). App feeds the server's notices in; each new one is shown once.
+export interface NoticeItem { id: string; text: string }
+let noticeQueue: NoticeItem[] = [];
+const seenNotices = new Set<string>();
+const noticeListeners = new Set<() => void>();
+const emitNotices = () => { for (const l of noticeListeners) l(); };
+
+export const roomNotices = {
+  get: (): NoticeItem[] => noticeQueue,
+  subscribe(l: () => void): () => void { noticeListeners.add(l); return () => noticeListeners.delete(l); },
+  offer(items: NoticeItem[]): void {
+    const fresh = items.filter((i) => !seenNotices.has(i.id));
+    if (!fresh.length) return;
+    for (const i of fresh) seenNotices.add(i.id);
+    noticeQueue = [...noticeQueue, ...fresh];
+    emitNotices();
+  },
+  dismiss(id: string): void { noticeQueue = noticeQueue.filter((n) => n.id !== id); emitNotices(); },
+};
+
+export function useRoomNotices(): NoticeItem[] {
+  return useSyncExternalStore(roomNotices.subscribe, roomNotices.get, roomNotices.get);
+}

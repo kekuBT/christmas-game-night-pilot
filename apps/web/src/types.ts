@@ -100,7 +100,11 @@ export interface Projection {
   spectatorCount?: number;
   /** Player ids that nudged me in the last 10s (ephemeral, target-only). */
   nudgedBy?: string[];
-  me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean };
+  me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean; hasRecoveryCode?: boolean };
+  /** Seat recoveries in the last few minutes, visible to everyone (accountability). */
+  notices?: RoomNotice[];
+  /** Host/cohost only: devices asking to recover a seat. */
+  recoveryRequests?: RecoveryRequestView[];
   myGames?: PlayerGame[];
   hostView?: boolean;
 }
@@ -219,4 +223,23 @@ export interface Readiness {
   away: number;
   wouldPlay: string[];
   wouldMiss: { id: string; presence: "connected" | "reconnecting" | "away"; awayForMs: number }[];
+}
+
+export interface RoomNotice {
+  eventId: string;
+  type: string;
+  playerId: string;
+  displayName: string;
+  method: string;
+  byName: string | null;
+  at: number;
+}
+
+export interface RecoveryRequestView {
+  requestId: string;
+  playerId: string;
+  displayName: string;
+  matchCode: string;
+  ageMs: number;
+  expiresInMs: number;
 }

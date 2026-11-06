@@ -397,3 +397,28 @@
 .mz-device__state { flex: 1; color: var(--mz-text-muted); font: 600 14px var(--mz-font-body); }
 .mz-device__chev { font-size: 14px; }
 .mz-device__panel { margin-top: 6px; display: grid; gap: 6px; }
+/* Seat recovery */
+.mz-recover { padding: 0 16px 24px; display: grid; gap: 12px; }
+.mz-recover .mz-h1 { margin: 8px 0 0; }
+.mz-recover__options, .mz-recover__seats { display: grid; gap: 10px; }
+.mz-option { display: grid; gap: 4px; min-height: 64px; padding: 14px 16px; text-align: left; border-radius: 16px; border: 1.5px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); cursor: pointer; }
+.mz-option--seat { min-height: 52px; }
+.mz-option__title { font: 700 17px var(--mz-font-body); }
+.mz-option__desc { color: var(--mz-text-muted); font: 500 14px var(--mz-font-body); }
+.mz-input--code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: .06em; text-transform: uppercase; }
+.mz-codecard { display: grid; gap: 10px; }
+.mz-codecard__title { margin: 4px 0 0; font: 700 20px/1.25 var(--mz-font-display); outline: none; }
+.mz-codecard__code { margin: 0; padding: 14px 12px; border-radius: 14px; background: var(--mz-ground); border: 1.5px dashed var(--mz-highlight); font: 700 clamp(17px, 5.4vw, 22px)/1.3 ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: .04em; text-align: center; user-select: all; }
+.mz-codecard__group { display: inline-block; white-space: nowrap; }
+.mz-codecard__notes { margin: 0; padding-left: 18px; color: var(--mz-text-muted); font: 500 14px/1.45 var(--mz-font-body); }
+.mz-matchcode { margin: 4px 0; font: 800 clamp(44px, 16vw, 64px)/1 var(--mz-font-display); letter-spacing: .12em; text-align: center; }
+.mz-matchcode--small { font-size: 34px; text-align: left; }
+.mz-recreq__item + .mz-recreq__item { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--mz-line); }
+.mz-recreq__q { margin: 4px 0; font: 600 15px/1.35 var(--mz-font-body); }
+.mz-device__section { padding-top: 6px; border-top: 1px solid var(--mz-line); }
+/* Room notices (seat recoveries are always shown to the room) */
+.mz-notice { position: fixed; z-index: 49; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); max-width: 456px; margin: 0 auto; display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 16px; background: var(--mz-surface-1); color: var(--mz-text); border: 1.5px solid var(--mz-highlight); box-shadow: 0 8px 24px rgba(0,0,0,.35); font: 600 14px/1.35 var(--mz-font-body); animation: mz-conn-in .22s var(--mz-ease-out) both; }
+.mz-notice__text { flex: 1; }
+.mz-notice__close { flex: none; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--mz-text-muted); font: 700 18px var(--mz-font-body); cursor: pointer; }
+[data-mz-motion="reduced"] .mz-notice { animation: none; }
+@media (prefers-reduced-motion: reduce) { .mz-notice { animation: none; } }

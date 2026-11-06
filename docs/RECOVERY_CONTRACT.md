@@ -1,5 +1,19 @@
 # Recovery Contract — room-session recovery, host-assisted recovery, supersede
 
+> **Implementation status (Sprint 2, branch `claude/sprint-2-player-resilience`).** §1 recovery codes, §2 host-assisted recovery and §3 supersede are implemented as specified. The code is in `src/server/room.ts` (`issueRecoveryCode`, `slotForRecoveryCode`, `rotateCredentials`), `src/server/recovery.ts` (rate limits, pending requests) and `src/server/http.ts` (routes, `recoverSeat`), and the UI in `apps/web/src/components/mchezo/Recovery.tsx`. Tests: `tests/recovery.test.ts`, `scripts/check-recovery.mjs`.
+>
+> **Implementation choices (within this contract):**
+> - Rate limits key failed attempts by client address, because a wrong code identifies no slot: 5 per device per room, 30 per room and 20 per device in total, each per 15 minutes. Failures are audited without the guessed values.
+> - Rotation and its save are one atomic snapshot write; if the save fails, the in-memory change is rolled back and the client gets a 500.
+> - Host-assisted recovery binds approval to the requesting device. The device holds a secret plus a 4-digit match code shown on both screens. The operator approves the exact slot id, and the credential is minted only when that device collects it.
+> - An operator cannot approve their own seat.
+>
+> **Social-trust limitation (§2.2), restated:** a mistaken or malicious host or cohost can approve the wrong person. The match code only makes an honest mistake less likely. The room notice and ledger event make every recovery visible, so it can be questioned. A cohost can restore the host's seat; the notice names who did it.
+>
+> **Contract inconsistency resolved:** §1.3 says "no L", but its listed 32-character alphabet includes L. The listed alphabet is used, because 31 symbols would bias `byte % 32`.
+>
+> **Still unresolved, by design:** if every host and cohost loses their credential and has no code, nobody can approve a host-assisted recovery. §4 (room-owner credential) was not authorized and is not implemented.
+
 **Status: contract for review (Milestone J.2). No implementation is
 authorized by this document.** It defines the threat model, storage
 requirements, and safeguard contracts required by decisions A2–A6

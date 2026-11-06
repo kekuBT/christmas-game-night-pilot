@@ -9,6 +9,7 @@ import { GAME_REGISTRY } from "../games/registry.js";
 import { MemoryBook } from "./memorybook.js";
 import { hashToken } from "../shared/protocol.js";
 import { RoomStore, type RestoreReport } from "./persistence.js";
+import { FailureLimiter, PendingRecoveries } from "./recovery.js";
 
 /** A change was applied in memory but could not be written to disk. */
 class PersistError extends Error {
@@ -97,7 +98,25 @@ export class LocalServer {
     // Spectators receive exactly the public TV projection — never a player
     // view, never private state. The engine's "tv" audience is that projection.
     const engineAudience = audience === "spectator" ? "tv" : audience;
-    return { ...room.project(engineAudience, actorId), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy };
+    const base = { ...room.project(engineAudience, actorId), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy };
+    // Host-assisted recovery requests: host/cohost only. Shows the seat and
+    // the match code to compare; never the requester's secret.
+    const me = actorId ? room.players.get(actorId) : undefined;
+    if (audience !== "tv" && audience !== "spectator" && me && (me.isHost || me.isCohost)) {
+      const t = this.clock();
+      return {
+        ...base,
+        recoveryRequests: this.recoveries.pending(room.id).map((r) => ({
+          requestId: r.id,
+          playerId: r.playerId,
+          displayName: room.players.get(r.playerId)?.displayName ?? "A player",
+          matchCode: r.matchCode,
+          ageMs: t - r.createdAt,
+          expiresInMs: r.expiresAt - t,
+        })),
+      };
+    }
+    return base;
   }
   private store: RoomStore;
   private http = createServer((req, res) => void this.handleHttp(req, res));
@@ -108,9 +127,24 @@ export class LocalServer {
 
   readonly clock: () => number;
   private heartbeat: ReturnType<typeof setInterval> | null = null;
+  /** Seat recovery: brute-force limits (contract §1.5) and pending host-assisted requests. */
+  private recoveries: PendingRecoveries;
+  private codeFailuresPerAddressPerRoom: FailureLimiter;
+  private codeFailuresPerRoom: FailureLimiter;
+  private codeFailuresPerAddress: FailureLimiter;
+  private requestLimiter: FailureLimiter;
 
   constructor(opts: ServerOptions = {}) {
     this.clock = opts.clock ?? Date.now;
+    this.recoveries = new PendingRecoveries(this.clock);
+    // Failed recovery-code attempts, 15-minute windows: 5 per device per
+    // room (the contract's per-slot limit, keyed by device because a wrong
+    // code identifies no slot), 30 per room, 20 per device across rooms.
+    this.codeFailuresPerAddressPerRoom = new FailureLimiter(5, 15 * 60_000, this.clock);
+    this.codeFailuresPerRoom = new FailureLimiter(30, 15 * 60_000, this.clock);
+    this.codeFailuresPerAddress = new FailureLimiter(20, 15 * 60_000, this.clock);
+    // Host-assisted requests created (successful or not), per device: 5 per 15 minutes.
+    this.requestLimiter = new FailureLimiter(5, 15 * 60_000, this.clock);
     this.store = new RoomStore(opts.dataDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data"));
     this.webDistDir = resolve(opts.webDistDir ?? join(dirname(fileURLToPath(import.meta.url)), "..", "..", "apps", "web", "dist"));
     this.restoreReport = this.loadSnapshots();
@@ -310,6 +344,126 @@ export class LocalServer {
     }
   }
 
+  private roomByJoinCode(code: unknown): RoomEngine | undefined {
+    const c = String(code ?? "").trim().toUpperCase();
+    return c ? [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === c) : undefined;
+  }
+
+  private static clientAddress(req: IncomingMessage): string {
+    return req.socket.remoteAddress ?? "unknown";
+  }
+
+  /**
+   * Recover a seat (code or host-approved): rotate its credentials, save
+   * atomically, and only then supersede the old device. If the save fails,
+   * every in-memory change is undone and the caller answers 500: a
+   * recovery that only existed in memory is never reported as successful,
+   * and the old code/credential keep working.
+   */
+  private recoverSeat(room: RoomEngine, playerId: string, method: "code" | "host", actorId?: string): { sessionToken: string; recoveryCode: string } {
+    const p = room.players.get(playerId)!;
+    const before = { recoveryTokenHash: p.recoveryTokenHash, credentialVersion: p.credentialVersion, recoveryCodeHash: p.recoveryCodeHash };
+    const ledgerLength = room.ledger.length;
+    const seq = room.seq;
+    const creds = room.rotateCredentials(playerId, method, actorId);
+    try {
+      this.persist(room);
+    } catch (err) {
+      p.recoveryTokenHash = before.recoveryTokenHash;
+      p.credentialVersion = before.credentialVersion;
+      p.recoveryCodeHash = before.recoveryCodeHash;
+      room.ledger.length = ledgerLength;
+      room.seq = seq;
+      throw err;
+    }
+    // Supersede (contract §3): the old device's sockets stop acting at once.
+    for (const s of [...this.sockets]) {
+      if (s.meta.roomId === room.id && s.meta.actorId === playerId && !this.socketCurrent(room, s.meta)) {
+        try { s.ws.send(JSON.stringify({ kind: "error", code: "SESSION_REPLACED" })); } catch { /* closing */ }
+        s.ws.close(WS_SESSION_REPLACED, "Session replaced");
+      }
+    }
+    if (!this.hasLiveSocket(room, playerId) && p.connected) room.disconnect(playerId);
+    this.broadcast(room.id);
+    return creds;
+  }
+
+  /** Recovery routes that work WITHOUT a seat credential (the device lost it). Returns true if handled. */
+  private async handleRecoveryWithoutSession(req: IncomingMessage, res: ServerResponse, parts: string[]): Promise<boolean> {
+    if (req.method !== "POST" || parts[0] !== "rooms") return false;
+    const addr = LocalServer.clientAddress(req);
+
+    // Recover with a one-time code: POST /rooms/recover-by-code { joinCode, recoveryCode }
+    if (parts.length === 2 && parts[1] === "recover-by-code") {
+      const body = await this.readBody(req);
+      const room = this.roomByJoinCode(body["joinCode"]);
+      const keys = [this.codeFailuresPerAddress.retryAfterMs(`addr:${addr}`), room ? this.codeFailuresPerAddressPerRoom.retryAfterMs(`${room.id}:${addr}`) : 0, room ? this.codeFailuresPerRoom.retryAfterMs(room.id) : 0];
+      const wait = Math.max(...keys);
+      if (wait > 0) {
+        this.send(res, 429, { error: `Too many attempts. Try again in ${Math.ceil(wait / 60_000)} minute${wait > 60_000 ? "s" : ""}, or ask the host for help.`, retryAfterMs: wait });
+        return true;
+      }
+      const slot = room?.slotForRecoveryCode(body["recoveryCode"]);
+      if (!room || !slot) {
+        this.codeFailuresPerAddress.fail(`addr:${addr}`);
+        if (room) {
+          this.codeFailuresPerAddressPerRoom.fail(`${room.id}:${addr}`);
+          this.codeFailuresPerRoom.fail(room.id);
+          // Audited (contract §1.5), never with the code value. Rate limits bound the writes.
+          room.auditRecoveryFailure("code");
+          try { this.persist(room); } catch { /* the audit event is retried with the next save */ }
+        }
+        this.send(res, 400, { error: "That room code and recovery code don’t match a seat. Check both, or ask the host for help." });
+        return true;
+      }
+      const creds = this.recoverSeat(room, slot.id, "code");
+      this.codeFailuresPerAddressPerRoom.reset(`${room.id}:${addr}`);
+      this.send(res, 200, { roomId: room.id, joinCode: room.joinCode, playerId: slot.id, displayName: slot.displayName, sessionToken: creds.sessionToken, recoveryToken: creds.sessionToken, recoveryCode: creds.recoveryCode });
+      return true;
+    }
+
+    // Host-assisted, step 0: which seats exist? POST /rooms/recovery-requests/seats { joinCode }
+    if (parts.length === 3 && parts[1] === "recovery-requests" && parts[2] === "seats") {
+      const body = await this.readBody(req);
+      const room = this.roomByJoinCode(body["joinCode"]);
+      if (!room) { this.send(res, 404, { error: "No game with that room code." }); return true; }
+      // Public roster facts only (names are already visible to anyone with the code).
+      this.send(res, 200, { roomId: room.id, roomName: room.name, seats: [...room.players.values()].map((p) => ({ playerId: p.id, displayName: p.displayName, presence: room.presenceOf(p.id) })) });
+      return true;
+    }
+
+    // Host-assisted, step 1: ask for an exact seat. POST /rooms/recovery-requests { joinCode, playerId }
+    if (parts.length === 2 && parts[1] === "recovery-requests") {
+      const wait = this.requestLimiter.retryAfterMs(`addr:${addr}`);
+      if (wait > 0) { this.send(res, 429, { error: "Too many requests from this device. Wait a few minutes, then try again.", retryAfterMs: wait }); return true; }
+      this.requestLimiter.fail(`addr:${addr}`); // every request counts toward the device's budget
+      const body = await this.readBody(req);
+      const room = this.roomByJoinCode(body["joinCode"]);
+      const playerId = String(body["playerId"] ?? "");
+      if (!room || !room.players.has(playerId)) { this.send(res, 404, { error: "Pick your seat from the list." }); return true; }
+      const { request, secret } = this.recoveries.create(room.id, playerId);
+      this.broadcast(room.id); // hosts see it right away
+      this.send(res, 201, { requestId: request.id, requestSecret: secret, matchCode: request.matchCode, expiresInMs: request.expiresAt - this.clock(), displayName: room.players.get(playerId)!.displayName, roomName: room.name });
+      return true;
+    }
+
+    // Host-assisted, step 3: the requester collects. POST /rooms/recovery-requests/:id/status (secret in header)
+    if (parts.length === 4 && parts[1] === "recovery-requests" && parts[3] === "status") {
+      const r = this.recoveries.forRequester(parts[2]!, req.headers["x-recovery-request-secret"]);
+      if (!r) { this.send(res, 404, { status: "expired", error: "This request has expired or was already used. Ask again if you still need help." }); return true; }
+      if (r.status === "pending") { this.send(res, 200, { status: "pending", matchCode: r.matchCode, expiresInMs: r.expiresAt - this.clock() }); return true; }
+      if (r.status === "denied") { this.recoveries.consume(r.id); this.send(res, 200, { status: "denied" }); return true; }
+      const room = this.rooms.get(r.roomId);
+      if (!room || !room.players.has(r.playerId)) { this.recoveries.consume(r.id); this.send(res, 404, { status: "expired", error: "That game is no longer available." }); return true; }
+      const creds = this.recoverSeat(room, r.playerId, "host", r.decidedBy); // throws PersistError -> 500, request stays approved for a retry
+      this.recoveries.consume(r.id);
+      const slot = room.players.get(r.playerId)!;
+      this.send(res, 200, { status: "recovered", roomId: room.id, joinCode: room.joinCode, playerId: slot.id, displayName: slot.displayName, sessionToken: creds.sessionToken, recoveryToken: creds.sessionToken, recoveryCode: creds.recoveryCode });
+      return true;
+    }
+    return false;
+  }
+
   private async handleHttp(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const url = new URL(req.url ?? "/", "http://localhost");
     const parts = url.pathname.split("/").filter(Boolean);
@@ -340,6 +494,7 @@ export class LocalServer {
         this.send(res, 201, { roomId: room.id, joinCode: room.joinCode, playerId: player.id, displayName: player.displayName, isHost: player.isHost, recoveryToken, sessionToken: recoveryToken });
         return;
       }
+      if (await this.handleRecoveryWithoutSession(req, res, parts)) return;
       if (req.method === "POST" && parts.length === 2 && parts[0] === "rooms" && parts[1] === "spectate-by-code") {
         const body = await this.readBody(req);
         const code = String(body["joinCode"] ?? "").trim().toUpperCase();
@@ -417,6 +572,39 @@ export class LocalServer {
             return;
           }
           this.send(res, 200, this.projectFor(room, requested, player.id));
+          return;
+        }
+        // Issue a recovery code for MY seat (shown once, to me only).
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "recovery-code") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const before = player.recoveryCodeHash;
+          const ledgerLength = room.ledger.length;
+          const seq = room.seq;
+          const code = room.issueRecoveryCode(player.id);
+          try { this.persist(room); } catch (err) { player.recoveryCodeHash = before; room.ledger.length = ledgerLength; room.seq = seq; throw err; }
+          this.send(res, 201, { recoveryCode: code });
+          return;
+        }
+        // Host-assisted, step 2: an operator approves or declines an EXACT seat.
+        if (req.method === "POST" && parts.length === 5 && parts[2] === "recovery-requests" && (parts[4] === "approve" || parts[4] === "deny")) {
+          const operator = this.requireSession(room, req, res);
+          if (!operator) return;
+          if (!operator.isHost && !operator.isCohost) { this.send(res, 403, { error: "Only the host or a cohost can approve a seat recovery." }); return; }
+          const r = this.recoveries.forOperator(room.id, parts[3]!);
+          if (!r || r.status !== "pending") { this.send(res, 404, { error: "That request has expired or was already handled." }); return; }
+          const body = await this.readBody(req);
+          if (parts[4] === "approve") {
+            // The operator must name the exact seat they are approving.
+            if (String(body["playerId"] ?? "") !== r.playerId) { this.send(res, 400, { error: "Confirm the exact seat you are restoring." }); return; }
+            if (r.playerId === operator.id) { this.send(res, 400, { error: "You can’t approve a recovery of your own seat. Ask another host or cohost." }); return; }
+            r.status = "approved";
+          } else {
+            r.status = "denied";
+          }
+          r.decidedBy = operator.id;
+          this.broadcast(room.id);
+          this.send(res, 200, { ok: true, status: r.status });
           return;
         }
         // Sprint 2: "Welcome back. Continue as Ada?" A saved credential is

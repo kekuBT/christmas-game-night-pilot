@@ -53,6 +53,33 @@ export function createJoinCode(): string {
   return [...bytes].map((b) => alphabet[b % alphabet.length]).join("");
 }
 
+/**
+ * One-time seat recovery code (docs/RECOVERY_CONTRACT.md §1.3): 20
+ * characters from the contract's 32-character alphabet (no 0/O, no 1/I),
+ * i.e. 100 bits from the CSPRNG, shown as XXXXX-XXXXX-XXXXX-XXXXX.
+ * 256 is a multiple of 32, so `byte % 32` is unbiased. (The contract's
+ * prose also says "no L", but its listed 32-character alphabet includes
+ * L; the listed alphabet is used, since dropping L would leave 31 symbols
+ * and a biased mapping.)
+ */
+export const RECOVERY_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+export const RECOVERY_CODE_LENGTH = 20;
+export function createRecoveryCode(): string {
+  const raw = [...randomBytes(RECOVERY_CODE_LENGTH)].map((b) => RECOVERY_ALPHABET[b % 32]).join("");
+  return raw.match(/.{5}/g)!.join("-");
+}
+/** Case-insensitive; spaces and dashes ignored. Returns null if it cannot be a code. */
+export function normalizeRecoveryCode(input: unknown): string | null {
+  if (typeof input !== "string") return null;
+  const n = input.toUpperCase().replace(/[\s-]/g, "");
+  if (n.length !== RECOVERY_CODE_LENGTH) return null;
+  for (const ch of n) if (!RECOVERY_ALPHABET.includes(ch)) return null;
+  return n;
+}
+export function hashRecoveryCode(normalized: string): string {
+  return createHash("sha256").update(`mchezo-recovery:${normalized}`).digest("hex");
+}
+
 /** Opaque recovery token. Only the hash is stored server-side. */
 export function createRecoveryToken(): string {
   return randomBytes(32).toString("hex");

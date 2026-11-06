@@ -60,10 +60,13 @@ import {
 } from "../games/charades.js";
 import {
   createJoinCode,
+  createRecoveryCode,
   createRecoveryToken,
   dedupeKey,
+  hashRecoveryCode,
   hashToken,
   IntentSchema,
+  normalizeRecoveryCode,
   sanitizeText,
 } from "../shared/protocol.js";
 
@@ -278,6 +281,72 @@ export class RoomEngine {
     if (hashToken(recoveryToken) !== player.recoveryTokenHash) throw new Error("Recovery token does not match");
     this.log("player-reconnected", { playerId });
     return player;
+  }
+
+  // ---------------------------------------------------------------- recovery
+  // docs/RECOVERY_CONTRACT.md. A recovery restores an EXISTING slot (its id,
+  // role, answers, scores, Family Cup history): it never creates a slot,
+  // merges slots, frees a name, or changes privileges.
+
+  /**
+   * Issue (or re-issue) the slot's one-time recovery code. Only the hash is
+   * kept; the plaintext is returned once, to the slot's own session. A new
+   * code revokes the previous one.
+   */
+  issueRecoveryCode(playerId: string): string {
+    const p = this.players.get(playerId);
+    if (!p) throw new Error("Unknown player slot");
+    const code = createRecoveryCode();
+    p.recoveryCodeHash = hashRecoveryCode(normalizeRecoveryCode(code)!);
+    this.log("recovery-code-issued", { playerId });
+    return code;
+  }
+
+  /** The slot a recovery code belongs to, or null. Never matches by name. */
+  slotForRecoveryCode(input: unknown): RoomPlayer | null {
+    const n = normalizeRecoveryCode(input);
+    if (!n) return null;
+    const h = hashRecoveryCode(n);
+    for (const p of this.players.values()) if (p.recoveryCodeHash && p.recoveryCodeHash === h) return p;
+    return null;
+  }
+
+  /**
+   * Supersede the slot's session (contract §3): new session credential,
+   * credentialVersion + 1 (old sockets become stale), old recovery code
+   * consumed and replaced by a fresh one, audit event. Roles, answers,
+   * scores and game rosters are untouched.
+   */
+  rotateCredentials(playerId: string, method: "code" | "host", actorId?: string): { sessionToken: string; recoveryCode: string } {
+    const p = this.players.get(playerId);
+    if (!p) throw new Error("Unknown player slot");
+    const sessionToken = createRecoveryToken();
+    p.recoveryTokenHash = hashToken(sessionToken);
+    p.credentialVersion = (p.credentialVersion ?? 0) + 1;
+    const recoveryCode = createRecoveryCode();
+    p.recoveryCodeHash = hashRecoveryCode(normalizeRecoveryCode(recoveryCode)!);
+    this.log("seat-recovered", { playerId, actor: actorId, detail: { method, credentialVersion: p.credentialVersion } });
+    return { sessionToken, recoveryCode };
+  }
+
+  /** Audit a failed recovery-code attempt (never the code itself). */
+  auditRecoveryFailure(via: "code"): void {
+    this.log("recovery-attempt-failed", { detail: { via } });
+  }
+
+  /** Recent seat recoveries, as plain room notices (contract §2.1 step 6: mandatory and visible). */
+  recentNotices(now = this.clock(), windowMs = 5 * 60_000): { eventId: string; type: string; playerId: string; displayName: string; method: string; byName: string | null; at: number }[] {
+    return this.ledger
+      .filter((e) => e.type === "seat-recovered" && now - e.createdAt < windowMs && e.playerId)
+      .map((e) => ({
+        eventId: e.eventId,
+        type: e.type,
+        playerId: e.playerId!,
+        displayName: this.players.get(e.playerId!)?.displayName ?? "A player",
+        method: String((e.detail as { method?: string } | undefined)?.method ?? "code"),
+        byName: e.actor ? this.players.get(e.actor)?.displayName ?? null : null,
+        at: e.createdAt,
+      }));
   }
 
   /** The slot's last live socket closed. Starts the reconnect grace window. */
@@ -1171,6 +1240,7 @@ export class RoomEngine {
       players: publicPlayers,
       games: publicGames,
       readiness: this.readiness(now),
+      notices: this.recentNotices(now),
       officialStandings: this.officialStandings(),
       championshipDay: this.championshipDay,
       championship: this.championshipResults(),
@@ -1213,7 +1283,7 @@ export class RoomEngine {
           rawScores: g.status === "finished" ? g.rawScores : undefined,
         };
       });
-      return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost }, myGames };
+      return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash }, myGames };
     }
     if (audience === "host" || audience === "cohost") {
       // Host/cohost do NOT get answer keys or recovery tokens pre-reveal in this engine.
@@ -1280,6 +1350,8 @@ export class RoomEngine {
     const playing = new Set([...this.games.values()].filter((g) => g.status === "playing").map((g) => g.id));
     return this.ledger.filter((e) => {
       if (e.type === "player-abstained" && e.playerId !== actorId) return false;
+      // Whether someone else saved a recovery code is their business.
+      if (e.type === "recovery-code-issued" && e.playerId !== actorId) return false;
       if (e.type === "score-awarded" && e.gameInstanceId && playing.has(e.gameInstanceId)) return false;
       return true;
     });
