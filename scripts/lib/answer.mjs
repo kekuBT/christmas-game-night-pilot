@@ -25,9 +25,11 @@ async function stateOf(page) {
     const q = /^Question (\d+) of (\d+)$/.exec(label);
     const enabledSlabs = document.querySelectorAll(".mz-slab:not([disabled])").length;
     if (q && enabledSlabs > 0) return { kind: "question", n: Number(q[1]), of: Number(q[2]) };
-    if (label === "Answer locked in") return { kind: "locked", next: /Next question/.test(text) };
-    if (document.querySelector('[data-testid="mz-reveal-step"], [data-testid="mz-reveal-standings"]') || /Back to lobby/.test(text)) return { kind: "finished" };
-    if (/All your answers are in|You sat this one out/.test(text)) return { kind: "waiting" };
+    // Case-insensitive: kit kickers are uppercased by CSS, and innerText
+    // returns the transformed text ("ALL YOUR ANSWERS ARE IN").
+    if (label === "Answer locked in") return { kind: "locked", next: /Next question/i.test(text) };
+    if (document.querySelector('[data-testid="mz-reveal-step"], [data-testid="mz-reveal-standings"]') || /Back to lobby/i.test(text)) return { kind: "finished" };
+    if (/All your answers are in|You sat this one out/i.test(text)) return { kind: "waiting" };
     return { kind: "other", label, snippet: text.replace(/\s+/g, " ").slice(0, 120) };
   });
 }
@@ -67,7 +69,12 @@ export async function answerKitQuestions(page, { player, choose, timeout = 20000
     }
     // A question: tap the chosen option and require the app to move on.
     const index = choose(st.n);
-    await page.locator(".mz-slab:not([disabled])").nth(index).click();
+    try {
+      await page.locator(".mz-slab:not([disabled])").nth(index).click({ timeout });
+    } catch (err) {
+      const now = await stateOf(page).catch(() => ({ kind: "unknown" }));
+      throw new AnswerStuckError(`${player}: could not tap option ${index} on question ${st.n} of ${st.of} — page now ${JSON.stringify(now)} (${String(err?.message ?? err).split("\n").slice(0, 3).join(" | ")})`);
+    }
     await waitForState(page, (s) => !(s.kind === "question" && s.n === st.n), { timeout, player, context: `after answering question ${st.n} of ${st.of} (option ${index}); the answer was not confirmed` });
     answered++;
     if (answered >= limit) return answered;

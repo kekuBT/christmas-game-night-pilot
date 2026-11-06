@@ -22,7 +22,8 @@ const fakeApp = (confirmMs, count = 3) => `<!doctype html><body><div id="app"></
   const question = () => render('<main class="mz-screen" aria-label="Question ' + q + ' of ${count}">' +
     [0,1,2,3].map(i => '<button class="mz-slab" onclick="tap(' + i + ')">Option ' + i + '</button>').join("") + '</main>');
   const locked = () => render('<main class="mz-screen" aria-label="Answer locked in"><button onclick="next()">' + (answers.length < ${count} ? 'Next question' : 'Waiting for the game to finish') + '</button></main>');
-  const waiting = () => render('<main class="mz-screen" aria-label="Waiting"><p>All your answers are in</p></main>');
+  // Uppercased by CSS like the real kit kicker (innerText returns "ALL YOUR ANSWERS ARE IN").
+  const waiting = () => render('<main class="mz-screen" aria-label="Waiting"><p style="text-transform:uppercase">All your answers are in</p></main>');
   window.tap = (i) => { if (${confirmMs} < 0) return; setTimeout(() => { answers.push(i); locked(); }, ${confirmMs}); };
   window.next = () => { if (answers.length >= ${count}) return waiting(); q++; question(); };
   window.answered = () => answers.length;
@@ -65,7 +66,7 @@ try {
 
   await fresh(fakeApp(50));
   const m = await answerKitQuestions(page, { player: "Dee", choose: (q) => q % 4 });
-  const ended = await page.evaluate(() => document.body.innerText.includes("All your answers are in"));
+  const ended = await page.evaluate(() => /all your answers are in/i.test(document.body.innerText));
   check("a normal flow answers all questions and ends on the waiting ring", m === 3 && ended);
 
   await fresh(fakeApp(50, 5));
