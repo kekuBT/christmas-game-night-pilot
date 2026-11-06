@@ -1,0 +1,57 @@
+# Mchezo CI: the same gate developers run locally (docs/TESTING.md).
+#
+# Manual trigger only. The owner's GitHub plan and Actions spending limit
+# have not been confirmed, and private-repository minutes count against
+# the account's allowance, so nothing runs automatically. Once the plan is
+# confirmed, add `pull_request:` under `on:` to run it on every PR.
+name: ci
+
+on:
+  workflow_dispatch:
+    inputs:
+      level:
+        description: "Gate level"
+        type: choice
+        options: [smoke, full]
+        default: smoke
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.level == 'full' && 100 || 25 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install the Chromium matching the pinned Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Fast gate (typecheck, lint, unit tests, build)
+        if: inputs.level != 'full'
+        run: node scripts/gate.mjs fast
+      - name: Browser smoke (server restart + error rendering)
+        if: inputs.level != 'full'
+        run: node scripts/gate.mjs targeted restart errors
+      - name: Full gate
+        if: inputs.level == 'full'
+        run: node scripts/gate.mjs full
+      - name: Upload reports and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-results
+          path: |
+            test-results/*/report.json
+            test-results/*/summary.txt
+            test-results/*/logs/
+            test-results/*/screenshots/
+          retention-days: 14

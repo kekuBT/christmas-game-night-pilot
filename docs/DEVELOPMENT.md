@@ -31,8 +31,11 @@ The gate report records which browser was used, so results from an overridden br
 ## 3. Verify
 
 ```sh
-npm run typecheck && npm run lint && npm test && npm run build:web
+npm run gate            # fast level: typecheck, lint, unit tests, production build
+npm run gate:selftest   # optional: proves the gate fails when it should
 ```
+
+See [TESTING.md](TESTING.md) for targeted and full browser runs and what each verdict means.
 
 ## 4. Run the app
 

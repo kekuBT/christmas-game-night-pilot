@@ -71,7 +71,11 @@
     "screenshot-mchezo": "node scripts/screenshot-mchezo.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",
     "serve": "tsx src/server/serve.ts",
-    "typecheck:web": "tsc -p apps/web/tsconfig.json --noEmit"
+    "typecheck:web": "tsc -p apps/web/tsconfig.json --noEmit",
+    "gate": "node scripts/gate.mjs fast",
+    "gate:targeted": "node scripts/gate.mjs targeted",
+    "gate:full": "node scripts/gate.mjs full",
+    "gate:selftest": "node scripts/gate-selftest.mjs"
   },
   "type": "module",
   "version": "0.1.0"
