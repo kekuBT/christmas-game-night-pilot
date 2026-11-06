@@ -100,6 +100,20 @@ describe("several sockets for one session", () => {
     await h.closeSocket(newWs);
   });
 
+  it("1. a page refresh DURING a game (new socket first, old closes after) keeps the player present and their game", async () => {
+    const ada = await h.join("Ada", { host: true });
+    const bea = await h.join("Bea");
+    const gid = (await h.startGame(ada, "math-mayhem", { seed: 2 })).body["gameId"] as string;
+    const q = h.game(gid).questions![0]!;
+    await h.intent(bea, gid, "submit-math-answer", { questionId: q.id, chosenIndex: q.correctIndex });
+    const oldWs = bea.ws!;
+    const reloaded = await h.openSocket(bea);
+    await h.closeSocket(oldWs);
+    expect(h.presence(bea)).toBe("connected");
+    expect(myGame(bea.lastPush!, gid)["myAnswers"]).toEqual({ [q.id]: q.correctIndex });
+    await h.closeSocket(reloaded);
+  });
+
   it("rapid disconnect/reconnect cycles end in a consistent state", async () => {
     await h.join("Ada", { host: true });
     const bea = await h.join("Bea");

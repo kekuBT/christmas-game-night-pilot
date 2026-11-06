@@ -168,6 +168,22 @@ describe("recovery codes", () => {
     await expect(h.openSocket(bea)).rejects.toThrow(/1008/);
   });
 
+  it("30b. a stale socket that tries to act after rotation (before it is closed) is refused by the server", async () => {
+    const ada = await h.join("Ada", { host: true });
+    const bea = await h.join("Bea");
+    const gid = (await h.startGame(ada, "math-mayhem", { seed: 4 })).body["gameId"] as string;
+    const q = h.game(gid).questions![0]!;
+    const replies: Json[] = [];
+    const stale = await h.openSocket(bea, { onMessage: (m) => replies.push(m) });
+    // Rotate directly in the engine, so the socket has not been closed yet.
+    h.engine().rotateCredentials(bea.playerId, "code");
+    const closed = new Promise<number>((r) => stale.once("close", (c) => r(c)));
+    stale.send(JSON.stringify(h.intentBody(gid, "submit-math-answer", { questionId: q.id, chosenIndex: q.correctIndex })));
+    expect(await closed).toBe(4001);
+    expect(replies.some((m) => m["kind"] === "error" && m["code"] === "SESSION_REPLACED")).toBe(true);
+    expect(h.game(gid).answers[bea.playerId]).toBeUndefined(); // the answer was NOT recorded
+  });
+
   it("31/32. a host and a cohost who recover their own seats keep exactly their roles", async () => {
     const ada = await h.join("Ada", { host: true });
     const bea = await h.join("Bea");
