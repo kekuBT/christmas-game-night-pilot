@@ -76,3 +76,9 @@ Run by hand like this, drivers still write their reference screenshots into `doc
 ## CI
 
 `.github/workflows/ci.yml` runs the same gate on GitHub (a fast run plus a `restart` + `errors` browser smoke test, or the full gate). It is manual-dispatch only until the account's Actions allowance is confirmed; pushing a branch never triggers it.
+
+## Content in tests (Sprint 4)
+
+- **Test content mode.** `MCHEZO_CONTENT_TEST_MODE=approve-provisional` treats provisional content as approved, so a test can play many official games in one Cup. `vitest.config.ts`, the gate server and the own-server drivers set it; production refuses it. The real approval state is tested without it (`tests/content.test.ts`).
+- **Content oracle.** Games now draw their questions from content packs, so drivers can't hard-code answers. `scripts/lib/content-oracle.mjs` reads the pack files on disk and finds the right answer for whatever is on screen: trivia, geography, who-said-that options, Guess the Year years, Connections groups by their words. The server never sends answers to the browser; the oracle is test-side knowledge only.
+- **Own-server drivers.** `check-lifecycle`, `check-connections` and `check-caption` each start their own server with the test time scale, so deadlines pass in seconds. They also run inside the full gate.

@@ -651,3 +651,19 @@ Failures found and fixed during the sprint: Math next-question clock started und
 External blockers: none. Not done (needs people/devices): real-device acceptance, real-family timing playtest.
 Next task: owner decisions on qualification option E and measured durations; Sprint 4 only when authorised (recommendation in `docs/SPRINT_3_GAME_DESIGN_REVIEW.md`).
 Risk: content is thin for a 7-day Cup (repeats); P2 durations are unmeasured; network delay counts against Math speed.
+
+## Sprint 4 — content depth, competitive fairness, game experience (2026-11-06, branch `claude/sprint-4-game-experience`, from 5e05a8a)
+The verdict of the full regression on the final commit is in the Sprint 4 report, not here.
+
+Completed (files):
+- CP1 qualification: a saved, validated, immutable Cup record (`src/server/cup.ts`). New Cups use meaningful participation (≥50% of opportunities and ≥2 genuine actions in a counted game); older Cups keep their rule. Invalid records pause standings. `tests/qualification.test.ts` (30).
+- CP2 content system: `src/content/{schema,registry,lint,cli}.ts`, `content/packs/*.json`, `content/approvals.json` (bound to item hashes), `npm run content:check|review|approve`. `tests/content.test.ts` (14).
+- CP3 selection: `src/content/{select,materialize}.ts`, per-Cup usage history in the room snapshot, practice retirement, 409 CONTENT_EXHAUSTED. About 690 items authored; all provisional (practice-only) except 21 computed Closest items. Fixed: Connections tiles were sent in answer order. `tests/content-selection.test.ts` (13).
+- CP4 Word Connections UI (`MchezoConnections.tsx`, `games.css`, `GameKit.tsx`), per-player server view, engine guess-validation fixes. `scripts/check-connections.mjs`, `tests/connections-view.test.ts` (4).
+- CP5 Caption Clash UI (`MchezoCaption.tsx`). Fixed: voting wasn't anonymous (caption id = author id). `scripts/check-caption.mjs`, `tests/caption-view.test.ts` (5).
+- Docs: DECISIONS D-S4-01..09, `docs/SPRINT_4_DESIGN_SYSTEM_NOTES.md` (incl. Charades investigation), TESTING.md (content oracle, test content mode).
+- Test infrastructure: `MCHEZO_CONTENT_TEST_MODE` (test-only), `scripts/lib/content-oracle.mjs`, injectable content library.
+
+Unit tests: 57 files / 648 tests. External blockers: none. Not done: Charades prototype (design only), real-device and Safari checks (no WebKit here), human review of the new content.
+Next: owner editorial approval of content (`npm run content:review`); Sprint 5 only when authorised.
+Risk: official games stay content-starved until content is approved (Trivia: one official game per Cup; Category Sprint: none).
