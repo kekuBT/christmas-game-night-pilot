@@ -140,7 +140,7 @@ try {
   const q1Text = await hostB.locator(".mz-question").textContent();
   // Host answers Q1 -> locked view with LOCKED IN stamp.
   await hostB.locator(".mz-slab:not([disabled])").first().click();
-  await hostB.getByText("LOCKED IN").waitFor({ timeout: 15000 });
+  await hostB.locator('main[aria-label="Answer locked in"]').waitFor({ timeout: 15000 });
   check("answer selection locks (LOCKED IN stamp)", true);
   await hostB.getByRole("button", { name: "Next question" }).click();
   await hostB.locator(".mz-question").waitFor({ timeout: 15000 });

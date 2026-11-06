@@ -74,7 +74,7 @@ async function answerAll(page, picks) {
         continue;
       }
       landed = await Promise.race([
-        page.getByText("LOCKED IN").waitFor({ timeout: 10000 }).then(() => "locked"),
+        page.locator('main[aria-label="Answer locked in"]').waitFor({ timeout: 10000 }).then(() => "locked"),
         page.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 10000 }).then(() => "finished"),
       ]).catch(() => null);
     }
@@ -139,7 +139,7 @@ try {
 
   // The locked view after answering, then the next question.
   await host.locator(".mz-slab").nth(0).click();
-  await host.getByText("LOCKED IN").waitFor({ timeout: 15000 });
+  await host.locator('main[aria-label="Answer locked in"]').waitFor({ timeout: 15000 });
   check("locked view shows the chosen answer (France)",
     (await host.evaluate(() => document.body.innerText)).includes("France"));
   await host.getByRole("button", { name: "Next question" }).click();

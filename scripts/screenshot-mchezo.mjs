@@ -79,7 +79,7 @@ try {
   await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
   await tv.screenshot({ path: join(OUT, "07-tv-question.png") });
   await host.locator(".mz-slab:not([disabled])").first().click();
-  await host.getByText("LOCKED IN").waitFor({ timeout: 15000 });
+  await host.locator('main[aria-label="Answer locked in"]').waitFor({ timeout: 15000 });
   await host.screenshot({ path: join(OUT, "04-trivia-locked.png") });
   await host.getByRole("button", { name: "Next question" }).click();
   await host.locator(".mz-question").waitFor({ timeout: 15000 });

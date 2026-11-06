@@ -84,7 +84,7 @@ async function answerAll(page, picks) {
         continue;
       }
       landed = await Promise.race([
-        page.getByText("LOCKED IN").waitFor({ timeout: 10000 }).then(() => "locked"),
+        page.locator('main[aria-label="Answer locked in"]').waitFor({ timeout: 10000 }).then(() => "locked"),
         page.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 10000 }).then(() => "finished"),
       ]).catch(() => null);
     }
@@ -155,7 +155,7 @@ try {
   // The locked view after answering, with the elapsed-time display,
   // then the next question.
   await host.locator(".mz-slab").nth(CORRECT[0]).click();
-  await host.getByText("LOCKED IN").waitFor({ timeout: 15000 });
+  await host.locator('main[aria-label="Answer locked in"]').waitFor({ timeout: 15000 });
   const lockText = await host.evaluate(() => document.body.innerText);
   check("locked view shows the chosen answer (8)",
     lockText.includes("8"));
