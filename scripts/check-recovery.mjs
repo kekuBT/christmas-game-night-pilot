@@ -78,6 +78,8 @@ try {
   const newBea = await newCtx.newPage();
   await newBea.goto(BASE, { waitUntil: "domcontentloaded" });
   await newBea.getByTestId("mz-lost-place").click();
+  await newBea.getByTestId("mz-recover-with-code").waitFor();
+  await newBea.waitForTimeout(500); // let the screen's entry fade finish before capturing
   await newBea.screenshot({ path: screenshotPath("docs/mchezo-screenshots/36-recover-choose.png") });
   await newBea.getByTestId("mz-recover-with-code").click();
   await newBea.getByTestId("mz-recover-room").fill(code);
