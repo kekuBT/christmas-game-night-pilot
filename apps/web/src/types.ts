@@ -19,14 +19,40 @@ export interface PublicPlayer {
   awayForMs?: number;
 }
 
-export interface PublicGame {
+/** Sprint 3 lifecycle facts, in server time (src/server/lifecycle.ts). */
+export interface GameLifecycleInfo {
+  model: "game-deadline" | "phased" | "turns";
+  officialEligible: boolean;
+  practiceOnlyReason?: string;
+  unit: "questions" | "events" | "groups" | "rounds" | "phases" | "turns";
+  /** The phase now running (phased games); sent back with actions so a late one is refused. */
+  phaseKey?: string;
+}
+export interface GameParticipation { done: number; of: number; finished?: boolean }
+export interface GameOutcome {
+  reason: "completed" | "deadline" | "backstop-partial" | "void";
+  endedAt: number;
+  countsOfficially: boolean;
+  note?: string;
+  participation: Record<string, GameParticipation>;
+  completedUnits?: number;
+  totalUnits?: number;
+}
+interface LifecycleFields {
+  deadlineAt?: number;
+  phaseDeadlineAt?: number;
+  lifecycle?: GameLifecycleInfo;
+  outcome?: GameOutcome;
+  countsOfficially?: boolean;
+}
+
+export interface PublicGame extends LifecycleFields {
   id: string;
   gameId: string;
   official: boolean;
   status: GameStatus;
   timedOut: boolean;
   day?: number;
-  deadlineAt?: number;
   players: string[];
   submittedCount?: number;
   totalPlayers?: number;
@@ -39,8 +65,9 @@ export interface PublicGame {
   questionPoints?: Record<string, number>;
 }
 
-export interface PlayerGame {
+export interface PlayerGame extends LifecycleFields {
   id: string;
+  official?: boolean;
   gameId: string;
   status: GameStatus;
   myAnswers: Record<string, number | null>;
@@ -81,6 +108,8 @@ export interface Ceremony {
 }
 
 export interface Projection {
+  /** The server's clock when this projection was made; countdowns use deadline − serverNow. */
+  serverNow?: number;
   roomId: string;
   joinCode: string;
   name: string;

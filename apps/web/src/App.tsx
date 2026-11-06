@@ -410,7 +410,11 @@ export function App() {
     setErr(""); try {
       // One clientEventId per user action, reused by every retry, so the
       // server's dedupe returns the original result if a response was lost.
-      const body = JSON.stringify({ intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId, gameInstanceId, action, payload } });
+      // Lock-step games: say which phase this action was made in, so a tap
+      // that lands after that phase closed is refused, never misfiled.
+      const phaseKey = proj?.myGames?.find((g) => g.id === gameInstanceId)?.lifecycle?.phaseKey;
+      const sent = phaseKey !== undefined && payload["phaseKey"] === undefined ? { ...payload, phaseKey } : payload;
+      const body = JSON.stringify({ intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId, gameInstanceId, action, payload: sent } });
       const res = await sendIntent(async () => {
         const headers: Record<string, string> = { "content-type": "application/json" };
         const t = seats.token();
@@ -420,7 +424,7 @@ export function App() {
       });
       const r = res.body as { accepted?: boolean; reason?: string; error?: string };
       if (res.status >= 400) throw new Error(r.error || `Request failed (${res.status})`);
-      if (!r.accepted) reportError(`Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
+      if (!r.accepted) reportError(r.reason === "PHASE_CLOSED" ? "Time was up for that one — it wasn’t counted." : `Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
       await refresh();
     } catch (e) { fail(e); }
   }

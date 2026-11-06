@@ -578,7 +578,15 @@ export class RoomEngine {
     if (seen) return seen.result as { accepted: boolean; reason?: string; result?: unknown };
 
     let result: { accepted: boolean; reason?: string; result?: unknown };
-    if (intent.action === "submit-math-answer") {
+    // Phased games: an action says which phase it was made in. If that phase
+    // has already closed (its deadline passed while the action was in
+    // flight), the action is refused instead of landing in the NEXT
+    // question/round, where it was never meant to go. Older clients that send
+    // no phaseKey keep the previous behaviour.
+    const stalePhase = this.stalePhase(intent);
+    if (stalePhase) {
+      result = { accepted: false, reason: "PHASE_CLOSED" };
+    } else if (intent.action === "submit-math-answer") {
       result = this.submitMathAnswer(intent, actorId, now);
     } else if (intent.action === "abstain") {
       result = this.submitAbstain(intent, actorId, now);
@@ -959,6 +967,14 @@ export class RoomEngine {
       case "charades": return { key: `turn:${(game.extra as CharadesState).turnIndex}`, kind: "turn" };
       default: return null;
     }
+  }
+
+  private stalePhase(intent: ReturnType<typeof IntentSchema.parse>): boolean {
+    const sent = intent.payload["phaseKey"];
+    if (typeof sent !== "string") return false;
+    const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
+    if (!game || game.status !== "playing" || game.phaseKey === undefined) return false;
+    return sent !== game.phaseKey;
   }
 
   /** If the game moved to a new phase, start that phase's clock at `at`. */
