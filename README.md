@@ -1,5 +1,7 @@
 # Christmas Game Night — local development
 
+> **Start here:** [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) (clean install and run, Windows/macOS/Linux) and [docs/TESTING.md](docs/TESTING.md) (the verification gate). The milestone notes below are historical (M0) and partly out of date.
+
 Local-only build. No deployment, no paid services, no GitHub publishing in this mode.
 
 ## Run
