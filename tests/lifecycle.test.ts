@@ -264,8 +264,9 @@ describe("Word Connections at the deadline", () => {
   it("solved groups count, an unfinished puzzle is shown as such, nothing is invented", async () => {
     const [ada, bea] = await three();
     const gid = await start(ada, "word-connections");
-    const tilesOf = (name: string) => CONNECTIONS_BOARD.tiles.filter((t) => t.category === name).map((t) => t.id);
-    for (const cat of CONNECTIONS_BOARD.categories.slice(0, 2)) {
+    const BOARD = (h.game(gid).extra as { board?: typeof CONNECTIONS_BOARD }).board ?? CONNECTIONS_BOARD;
+    const tilesOf = (name: string) => BOARD.tiles.filter((t) => t.category === name).map((t) => t.id);
+    for (const cat of BOARD.categories.slice(0, 2)) {
       expect(await h.intent(bea, gid, "connections-guess", { tileIds: tilesOf(cat.name) })).toMatchObject({ accepted: true });
     }
     clock.advance(GAME_POLICIES["word-connections"]!.gameWindowMs + 1);

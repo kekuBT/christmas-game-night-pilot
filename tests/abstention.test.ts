@@ -233,13 +233,15 @@ describe("abstention semantics (L33)", () => {
     const { engine, players, host } = makeEngine(2);
     const game = engine.startGame(host, "word-connections", { official: true, seed: 7 });
     const [p1, p2] = players as [string, string];
-    const foods = CONNECTIONS_BOARD.categories[0]!.tiles.map(
-      (text) => CONNECTIONS_BOARD.tiles.find((t) => t.text === text)!.id,
+    // Each game carries its own board (Sprint 4 content selection).
+    const BOARD = (game.extra as { board?: typeof CONNECTIONS_BOARD }).board ?? CONNECTIONS_BOARD;
+    const foods = BOARD.categories[0]!.tiles.map(
+      (text) => BOARD.tiles.find((t) => t.text === text)!.id,
     );
     submit(engine, game.id, "connections-guess", p1, { tileIds: foods });
     expect(submit(engine, game.id, "abstain", p1).accepted).toBe(true);
-    for (const cat of CONNECTIONS_BOARD.categories) {
-      const ids = cat.tiles.map((text) => CONNECTIONS_BOARD.tiles.find((t) => t.text === text)!.id);
+    for (const cat of BOARD.categories) {
+      const ids = cat.tiles.map((text) => BOARD.tiles.find((t) => t.text === text)!.id);
       submit(engine, game.id, "connections-guess", p2, { tileIds: ids });
     }
     expect(game.status).toBe("finished");

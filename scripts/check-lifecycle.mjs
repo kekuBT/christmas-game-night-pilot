@@ -49,7 +49,7 @@ const text = async (loc) => ((await loc.textContent({ timeout: 2000 })) ?? "").r
 
 const DATA_DIR = mkdtempSync(join(tmpdir(), "mchezo-lifecycle-"));
 async function startServer() {
-  const env = { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR, MCHEZO_LIFECYCLE_SCALE: String(SCALE) };
+  const env = { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR, MCHEZO_LIFECYCLE_SCALE: String(SCALE), MCHEZO_CONTENT_TEST_MODE: "approve-provisional" };
   delete env.NODE_ENV;
   const child = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { cwd: process.cwd(), env, stdio: ["ignore", "pipe", "pipe"] });
   let out = "";

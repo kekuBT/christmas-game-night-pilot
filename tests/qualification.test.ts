@@ -100,7 +100,8 @@ describe("new Cups: who qualifies, game by game", () => {
     const r = room(3);
     const [ada, bea, cal] = r.ids as [string, string, string];
     const g = r.engine.startGame(r.host, "word-connections", { official: true, seed: 1 });
-    const cats = CONNECTIONS_BOARD.categories.map((c) => CONNECTIONS_BOARD.tiles.filter((t) => t.category === c.name).map((t) => t.id));
+    const BOARD = (g.extra as { board?: typeof CONNECTIONS_BOARD }).board ?? CONNECTIONS_BOARD;
+    const cats = BOARD.categories.map((c) => BOARD.tiles.filter((t) => t.category === c.name).map((t) => t.id));
     const guess = (pid: string, tiles: string[]) => r.engine.submitIntent(intent(r.engine.id, g.id, "connections-guess", { tileIds: tiles }), pid);
     // Ada solves everything.
     for (const c of cats) guess(ada, c);

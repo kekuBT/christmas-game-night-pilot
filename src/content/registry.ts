@@ -61,7 +61,19 @@ export function practiceUsable(li: LoadedItem): boolean {
   return li.status !== "rejected";
 }
 
-export function loadContent(dir: string = DEFAULT_CONTENT_DIR): ContentLibrary {
+/**
+ * TESTING ONLY: MCHEZO_CONTENT_TEST_MODE=approve-provisional treats
+ * provisional items as approved (reviewer "TEST MODE"), so test suites and
+ * the regression gate can play many official games in one Cup. Refused in
+ * production (serve.ts and here). Never set by any request.
+ */
+export function contentTestMode(env: NodeJS.ProcessEnv = process.env): boolean {
+  if (env["MCHEZO_CONTENT_TEST_MODE"] !== "approve-provisional") return false;
+  if (env["NODE_ENV"] === "production") throw new Error("MCHEZO_CONTENT_TEST_MODE is for tests only and is not allowed in production.");
+  return true;
+}
+
+export function loadContent(dir: string = DEFAULT_CONTENT_DIR, opts: { testApproveProvisional?: boolean } = {}): ContentLibrary {
   const lib: ContentLibrary = { items: new Map(), byGame: new Map(), packs: [], problems: [] };
   const packDir = join(dir, "packs");
   const approvals = new Map<string, { hash: string; reviewer: string; date: string }>();
@@ -87,7 +99,7 @@ export function loadContent(dir: string = DEFAULT_CONTENT_DIR): ContentLibrary {
       const item = parsed.data as AnyItem;
       if (lib.items.has(item.id)) { lib.problems.push({ file, itemId: item.id, message: `duplicate id (also in ${lib.items.get(item.id)!.packId})` }); continue; }
       const hash = itemHash(gameId, item);
-      const appr = approvals.get(item.id);
+      const appr = approvals.get(item.id) ?? (opts.testApproveProvisional && item.review.status === "provisional" ? { hash, reviewer: "TEST MODE (not a human review)", date: "1970-01-01" } : undefined);
       let status: ReviewStatus = item.review.status;
       let approval: LoadedItem["approval"];
       if (appr) {
@@ -111,7 +123,7 @@ let cached: ContentLibrary | null = null;
 /** The shipped content, loaded once per process. */
 export function contentLibrary(): ContentLibrary {
   if (!cached) {
-    cached = loadContent();
+    cached = loadContent(DEFAULT_CONTENT_DIR, { testApproveProvisional: contentTestMode() });
     for (const p of cached.problems) console.error(`[content] ${p.file}${p.itemId ? ` ${p.itemId}` : ""}: ${p.message}`);
   }
   return cached;

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { contentLibrary } from "../src/content/registry.js";
 import { describe, expect, it } from "vitest";
 import { GAME_REGISTRY } from "../src/games/registry.js";
 import { RoomEngine } from "../src/server/room.js";
@@ -75,11 +76,12 @@ describe("Trivia / Who Said / Geography / Year", () => {
     expect(game.rawScores[players[1]!]).toBe(400);
   });
 
-  it("geography: all six modes present in pack", () => {
+  it("geography: the content covers all six modes, and a game's questions use valid modes", () => {
     const { engine, players, game } = setup(2, "geography", 1);
     const state = game.extra as { questions: { id: string; correctIndex: number; mode: string }[] };
-    const modes = new Set(state.questions.map((q) => q.mode));
-    expect(modes.size).toBeGreaterThanOrEqual(5);
+    const packModes = new Set((contentLibrary().byGame.get("geography") ?? []).map((li) => (li.item as { mode: string }).mode));
+    for (const m of ["flag", "outline", "capital", "region", "higher-lower", "distance"]) expect(packModes.has(m)).toBe(true);
+    for (const q of state.questions) expect(["flag", "outline", "capital", "region", "higher-lower", "distance"]).toContain(q.mode);
     for (const pid of players) {
       for (const q of state.questions) {
         engine.submitIntent(intent(engine, game.id, "geography-answer", { questionId: q.id, chosenIndex: q.correctIndex }), pid);
@@ -92,12 +94,9 @@ describe("Trivia / Who Said / Geography / Year", () => {
 describe("Connections / Sprint / Charades", () => {
   it("connections: correct groups solve, mistakes capped, score with bonus", () => {
     const { engine, players, game } = setup(2, "word-connections", 1);
-    const groups = [
-      ["tile-gingerbread", "tile-candy-cane", "tile-mince-pie", "tile-roast-turkey"],
-      ["tile-snowfall", "tile-frost", "tile-blizzard", "tile-icicle"],
-      ["tile-tinsel", "tile-bauble", "tile-wreath", "tile-stocking"],
-      ["tile-dasher", "tile-dancer", "tile-prancer", "tile-vixen"],
-    ];
+    // The game's own board (Sprint 4): its four groups, by tile id.
+    const board = (game.extra as { board: { categories: { name: string }[]; tiles: { id: string; category: string }[] } }).board;
+    const groups = board.categories.map((c) => board.tiles.filter((t) => t.category === c.name).map((t) => t.id));
     for (const pid of players) {
       for (const group of groups) {
         expect(engine.submitIntent(intent(engine, game.id, "connections-guess", { tileIds: group }), pid).accepted).toBe(true);
@@ -109,20 +108,23 @@ describe("Connections / Sprint / Charades", () => {
 
   it("sprint: valid unique answers score more than shared answers", () => {
     const { engine, players, game } = setup(4, "category-sprint", 1);
-    // Round 0 = Fruits, Round 1 = Animals, Round 2 = Christmas things
-    const rounds: Record<string, string[]>[] = [
-      { [players[0]!]: ["apple", "banana"], [players[1]!]: ["apple", "orange"], [players[2]!]: ["grape"], [players[3]!]: ["mango"] },
-      { [players[0]!]: ["dog"], [players[1]!]: ["dog"], [players[2]!]: ["cat"], [players[3]!]: ["horse"] },
-      { [players[0]!]: ["tree"], [players[1]!]: ["tree"], [players[2]!]: ["stocking"], [players[3]!]: ["wreath"] },
-    ];
+    // The game's own categories (Sprint 4 content selection): use real accepted answers.
+    const cats = (game.extra as { categories: { answers: string[] }[] }).categories;
+    const rounds: Record<string, string[]>[] = cats.map((c) => {
+      const [a, b, x, y, z] = c.answers as [string, string, string, string, string];
+      return { [players[0]!]: [a, b], [players[1]!]: [a, x], [players[2]!]: [y], [players[3]!]: [z] };
+    });
+    // Round 2 and 3 reuse the round-1 pattern; player 0 shares one answer per round.
     for (const round of rounds) {
       for (const [pid, answers] of Object.entries(round)) {
         expect(engine.submitIntent(intent(engine, game.id, "sprint-answers", { answers }), pid).accepted).toBe(true);
       }
     }
     expect(game.status).toBe("finished");
-    // Player0: round0 2 valid, 1 unique (banana) => 40+20=60; round1 dog shared =>20; round2 tree shared=>20; total 100
-    expect(game.rawScores[players[0]!]).toBe(100);
+    // Player 0 each round: 2 valid answers, 1 unique (b) => 40 + 20 = 60; three rounds => 180.
+    // Player 2 each round: 1 valid unique answer => 40; three rounds => 120.
+    expect(game.rawScores[players[0]!]).toBe(180);
+    expect(game.rawScores[players[2]!]).toBe(120);
   });
 
   it("charades: actor prompt private, team scores assigned, game finishes after 4 turns", () => {

@@ -1,0 +1,778 @@
+{
+ "schemaVersion": 1,
+ "packId": "who-said-that-s4",
+ "gameId": "who-said-that",
+ "version": "1.0.0",
+ "title": "Who Said That? — the Mchezo cast",
+ "language": "en",
+ "items": [
+  {
+   "id": "who-s4-001",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Professor Quill (absent-minded scientist); Chef Paprika (dramatic chef obsessed with flavour); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "In forty years at sea I never once saw a calm Tuesday.",
+   "speakers": [
+    "Professor Quill",
+    "Captain Bramble",
+    "Chef Paprika",
+    "Pip the Inventor"
+   ],
+   "answer": "Captain Bramble"
+  },
+  {
+   "id": "who-s4-002",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Professor Quill (absent-minded scientist); Granny Juniper (baker who feeds everyone); Chef Paprika (dramatic chef obsessed with flavour)"
+   },
+   "tags": [],
+   "quote": "Batten down the biscuits, the grandchildren are coming aboard.",
+   "speakers": [
+    "Captain Bramble",
+    "Chef Paprika",
+    "Professor Quill",
+    "Granny Juniper"
+   ],
+   "answer": "Captain Bramble"
+  },
+  {
+   "id": "who-s4-003",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Professor Quill (absent-minded scientist); Chef Paprika (dramatic chef obsessed with flavour); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "A good knot holds a ship; a good story holds a dinner table.",
+   "speakers": [
+    "Captain Bramble",
+    "Chef Paprika",
+    "Professor Quill",
+    "Pip the Inventor"
+   ],
+   "answer": "Captain Bramble"
+  },
+  {
+   "id": "who-s4-004",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Granny Juniper (baker who feeds everyone); Luna the Stargazer (dreamy astronomer); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "I measure every journey in waves, not miles.",
+   "speakers": [
+    "Pip the Inventor",
+    "Granny Juniper",
+    "Luna the Stargazer",
+    "Captain Bramble"
+   ],
+   "answer": "Captain Bramble"
+  },
+  {
+   "id": "who-s4-005",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Professor Quill (absent-minded scientist); Detective Sloane (suspicious about everything); Luna the Stargazer (dreamy astronomer)"
+   },
+   "tags": [],
+   "quote": "I have misplaced my glasses, my notes and, apparently, Thursday.",
+   "speakers": [
+    "Luna the Stargazer",
+    "Professor Quill",
+    "Captain Bramble",
+    "Detective Sloane"
+   ],
+   "answer": "Professor Quill"
+  },
+  {
+   "id": "who-s4-006",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Professor Quill (absent-minded scientist); Granny Juniper (baker who feeds everyone); Detective Sloane (suspicious about everything); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "According to my calculations, the snowman is melting at 2.3 centimetres per hour.",
+   "speakers": [
+    "Granny Juniper",
+    "Detective Sloane",
+    "Professor Quill",
+    "Pip the Inventor"
+   ],
+   "answer": "Professor Quill"
+  },
+  {
+   "id": "who-s4-007",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Professor Quill (absent-minded scientist); Coach Rocket (sports coach, loud and motivational); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "The experiment failed beautifully, which means we learned something.",
+   "speakers": [
+    "Captain Bramble",
+    "Professor Quill",
+    "Coach Rocket",
+    "Pip the Inventor"
+   ],
+   "answer": "Professor Quill"
+  },
+  {
+   "id": "who-s4-008",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Professor Quill (absent-minded scientist); Coach Rocket (sports coach, loud and motivational); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "I labelled the jars, but I labelled them in Latin.",
+   "speakers": [
+    "Coach Rocket",
+    "Professor Quill",
+    "Captain Bramble",
+    "Pip the Inventor"
+   ],
+   "answer": "Professor Quill"
+  },
+  {
+   "id": "who-s4-009",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Granny Juniper (baker who feeds everyone); Detective Sloane (suspicious about everything); Luna the Stargazer (dreamy astronomer); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "Nobody leaves my kitchen without a second slice.",
+   "speakers": [
+    "Detective Sloane",
+    "Luna the Stargazer",
+    "Granny Juniper",
+    "Pip the Inventor"
+   ],
+   "answer": "Granny Juniper"
+  },
+  {
+   "id": "who-s4-010",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Granny Juniper (baker who feeds everyone); Chef Paprika (dramatic chef obsessed with flavour); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "The secret ingredient is always more butter.",
+   "speakers": [
+    "Pip the Inventor",
+    "Chef Paprika",
+    "Granny Juniper",
+    "Captain Bramble"
+   ],
+   "answer": "Granny Juniper"
+  },
+  {
+   "id": "who-s4-011",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Professor Quill (absent-minded scientist); Granny Juniper (baker who feeds everyone); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "I baked a few extra pies, just in case the neighbours are hungry. All of them.",
+   "speakers": [
+    "Pip the Inventor",
+    "Captain Bramble",
+    "Professor Quill",
+    "Granny Juniper"
+   ],
+   "answer": "Granny Juniper"
+  },
+  {
+   "id": "who-s4-012",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Professor Quill (absent-minded scientist); Granny Juniper (baker who feeds everyone); Detective Sloane (suspicious about everything); Chef Paprika (dramatic chef obsessed with flavour)"
+   },
+   "tags": [],
+   "quote": "If the oven is warm, the house is happy.",
+   "speakers": [
+    "Granny Juniper",
+    "Chef Paprika",
+    "Detective Sloane",
+    "Professor Quill"
+   ],
+   "answer": "Granny Juniper"
+  },
+  {
+   "id": "who-s4-013",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Granny Juniper (baker who feeds everyone); Detective Sloane (suspicious about everything); Chef Paprika (dramatic chef obsessed with flavour)"
+   },
+   "tags": [],
+   "quote": "The cookie jar is empty, and somebody here has crumbs on their sleeve.",
+   "speakers": [
+    "Detective Sloane",
+    "Chef Paprika",
+    "Captain Bramble",
+    "Granny Juniper"
+   ],
+   "answer": "Detective Sloane"
+  },
+  {
+   "id": "who-s4-014",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Professor Quill (absent-minded scientist); Detective Sloane (suspicious about everything); Coach Rocket (sports coach, loud and motivational); Chef Paprika (dramatic chef obsessed with flavour)"
+   },
+   "tags": [],
+   "quote": "Interesting. Very interesting. Nobody move.",
+   "speakers": [
+    "Coach Rocket",
+    "Professor Quill",
+    "Detective Sloane",
+    "Chef Paprika"
+   ],
+   "answer": "Detective Sloane"
+  },
+  {
+   "id": "who-s4-015",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Granny Juniper (baker who feeds everyone); Detective Sloane (suspicious about everything); Chef Paprika (dramatic chef obsessed with flavour)"
+   },
+   "tags": [],
+   "quote": "Every footprint in the snow tells a story, and this one is lying.",
+   "speakers": [
+    "Captain Bramble",
+    "Detective Sloane",
+    "Chef Paprika",
+    "Granny Juniper"
+   ],
+   "answer": "Detective Sloane"
+  },
+  {
+   "id": "who-s4-016",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Granny Juniper (baker who feeds everyone); Detective Sloane (suspicious about everything); Coach Rocket (sports coach, loud and motivational)"
+   },
+   "tags": [],
+   "quote": "I never trust a present that rattles.",
+   "speakers": [
+    "Coach Rocket",
+    "Detective Sloane",
+    "Captain Bramble",
+    "Granny Juniper"
+   ],
+   "answer": "Detective Sloane"
+  },
+  {
+   "id": "who-s4-017",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Professor Quill (absent-minded scientist); Detective Sloane (suspicious about everything); Coach Rocket (sports coach, loud and motivational); Chef Paprika (dramatic chef obsessed with flavour)"
+   },
+   "tags": [],
+   "quote": "Sledging is a sport and I expect one hundred and ten per cent!",
+   "speakers": [
+    "Professor Quill",
+    "Chef Paprika",
+    "Detective Sloane",
+    "Coach Rocket"
+   ],
+   "answer": "Coach Rocket"
+  },
+  {
+   "id": "who-s4-018",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Professor Quill (absent-minded scientist); Granny Juniper (baker who feeds everyone); Coach Rocket (sports coach, loud and motivational); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "Warm up those thumbs, people, it's game night!",
+   "speakers": [
+    "Professor Quill",
+    "Coach Rocket",
+    "Pip the Inventor",
+    "Granny Juniper"
+   ],
+   "answer": "Coach Rocket"
+  },
+  {
+   "id": "who-s4-019",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Detective Sloane (suspicious about everything); Coach Rocket (sports coach, loud and motivational); Luna the Stargazer (dreamy astronomer); Chef Paprika (dramatic chef obsessed with flavour)"
+   },
+   "tags": [],
+   "quote": "Second place is just the first loser of the snowball fight!",
+   "speakers": [
+    "Detective Sloane",
+    "Chef Paprika",
+    "Luna the Stargazer",
+    "Coach Rocket"
+   ],
+   "answer": "Coach Rocket"
+  },
+  {
+   "id": "who-s4-020",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Professor Quill (absent-minded scientist); Detective Sloane (suspicious about everything); Coach Rocket (sports coach, loud and motivational); Luna the Stargazer (dreamy astronomer)"
+   },
+   "tags": [],
+   "quote": "Hydrate! Even hot chocolate counts!",
+   "speakers": [
+    "Luna the Stargazer",
+    "Detective Sloane",
+    "Coach Rocket",
+    "Professor Quill"
+   ],
+   "answer": "Coach Rocket"
+  },
+  {
+   "id": "who-s4-021",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Professor Quill (absent-minded scientist); Luna the Stargazer (dreamy astronomer); Chef Paprika (dramatic chef obsessed with flavour); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "Tonight the sky is so clear I can almost hear the stars.",
+   "speakers": [
+    "Chef Paprika",
+    "Professor Quill",
+    "Pip the Inventor",
+    "Luna the Stargazer"
+   ],
+   "answer": "Luna the Stargazer"
+  },
+  {
+   "id": "who-s4-022",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Detective Sloane (suspicious about everything); Coach Rocket (sports coach, loud and motivational); Luna the Stargazer (dreamy astronomer); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "I made a wish on a comet, so technically it is still travelling.",
+   "speakers": [
+    "Detective Sloane",
+    "Pip the Inventor",
+    "Coach Rocket",
+    "Luna the Stargazer"
+   ],
+   "answer": "Luna the Stargazer"
+  },
+  {
+   "id": "who-s4-023",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Coach Rocket (sports coach, loud and motivational); Luna the Stargazer (dreamy astronomer); Chef Paprika (dramatic chef obsessed with flavour)"
+   },
+   "tags": [],
+   "quote": "Every snowflake is a tiny galaxy if you look slowly enough.",
+   "speakers": [
+    "Coach Rocket",
+    "Captain Bramble",
+    "Luna the Stargazer",
+    "Chef Paprika"
+   ],
+   "answer": "Luna the Stargazer"
+  },
+  {
+   "id": "who-s4-024",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Granny Juniper (baker who feeds everyone); Detective Sloane (suspicious about everything); Luna the Stargazer (dreamy astronomer)"
+   },
+   "tags": [],
+   "quote": "I would rather count constellations than sheep.",
+   "speakers": [
+    "Detective Sloane",
+    "Captain Bramble",
+    "Luna the Stargazer",
+    "Granny Juniper"
+   ],
+   "answer": "Luna the Stargazer"
+  },
+  {
+   "id": "who-s4-025",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Granny Juniper (baker who feeds everyone); Luna the Stargazer (dreamy astronomer); Chef Paprika (dramatic chef obsessed with flavour); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "This soup needs drama! It needs passion! It needs salt!",
+   "speakers": [
+    "Chef Paprika",
+    "Luna the Stargazer",
+    "Granny Juniper",
+    "Pip the Inventor"
+   ],
+   "answer": "Chef Paprika"
+  },
+  {
+   "id": "who-s4-026",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Granny Juniper (baker who feeds everyone); Luna the Stargazer (dreamy astronomer); Chef Paprika (dramatic chef obsessed with flavour); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "A roast without gravy is just a sad, dry rumour.",
+   "speakers": [
+    "Granny Juniper",
+    "Chef Paprika",
+    "Pip the Inventor",
+    "Luna the Stargazer"
+   ],
+   "answer": "Chef Paprika"
+  },
+  {
+   "id": "who-s4-027",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Professor Quill (absent-minded scientist); Coach Rocket (sports coach, loud and motivational); Chef Paprika (dramatic chef obsessed with flavour); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "I do not burn toast. I caramelise it with confidence.",
+   "speakers": [
+    "Chef Paprika",
+    "Professor Quill",
+    "Coach Rocket",
+    "Pip the Inventor"
+   ],
+   "answer": "Chef Paprika"
+  },
+  {
+   "id": "who-s4-028",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Detective Sloane (suspicious about everything); Luna the Stargazer (dreamy astronomer); Chef Paprika (dramatic chef obsessed with flavour)"
+   },
+   "tags": [],
+   "quote": "Taste it. Now tell me it doesn't make you want to sing.",
+   "speakers": [
+    "Chef Paprika",
+    "Detective Sloane",
+    "Captain Bramble",
+    "Luna the Stargazer"
+   ],
+   "answer": "Chef Paprika"
+  },
+  {
+   "id": "who-s4-029",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Professor Quill (absent-minded scientist); Coach Rocket (sports coach, loud and motivational); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "I built a robot that wraps presents, but it wrapped the cat.",
+   "speakers": [
+    "Coach Rocket",
+    "Professor Quill",
+    "Pip the Inventor",
+    "Captain Bramble"
+   ],
+   "answer": "Pip the Inventor"
+  },
+  {
+   "id": "who-s4-030",
+   "difficulty": 1,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Captain Bramble (retired sea captain, everything is about the sea); Coach Rocket (sports coach, loud and motivational); Chef Paprika (dramatic chef obsessed with flavour); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "My self-stirring mug only spills a little bit.",
+   "speakers": [
+    "Coach Rocket",
+    "Pip the Inventor",
+    "Chef Paprika",
+    "Captain Bramble"
+   ],
+   "answer": "Pip the Inventor"
+  },
+  {
+   "id": "who-s4-031",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Professor Quill (absent-minded scientist); Granny Juniper (baker who feeds everyone); Coach Rocket (sports coach, loud and motivational); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "Step one: add batteries. Step two: stand well back.",
+   "speakers": [
+    "Professor Quill",
+    "Granny Juniper",
+    "Coach Rocket",
+    "Pip the Inventor"
+   ],
+   "answer": "Pip the Inventor"
+  },
+  {
+   "id": "who-s4-032",
+   "difficulty": 2,
+   "category": "Fictional cast",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-fiction",
+    "ref": "Original characters written for Mchezo: Granny Juniper (baker who feeds everyone); Detective Sloane (suspicious about everything); Luna the Stargazer (dreamy astronomer); Pip the Inventor (young inventor of silly gadgets)"
+   },
+   "tags": [],
+   "quote": "It's not broken, it's in an unexpected mode.",
+   "speakers": [
+    "Luna the Stargazer",
+    "Pip the Inventor",
+    "Granny Juniper",
+    "Detective Sloane"
+   ],
+   "answer": "Pip the Inventor"
+  }
+ ]
+}

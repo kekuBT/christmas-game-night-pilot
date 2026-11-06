@@ -1,0 +1,1064 @@
+{
+ "schemaVersion": 1,
+ "packId": "impostor-s4",
+ "gameId": "impostor",
+ "version": "1.0.0",
+ "title": "Impostor — Sprint 4 words (practice)",
+ "language": "en",
+ "items": [
+  {
+   "id": "imp-s4-001",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Pizza",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-002",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Sandwich",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-003",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Pancake",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-004",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Spaghetti",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-005",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Burger",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-006",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Soup",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-007",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Popcorn",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-008",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Doughnut",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-009",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Sushi",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-010",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Omelette",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-011",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Curry",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-012",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Waffle",
+   "hintCategory": "Food"
+  },
+  {
+   "id": "imp-s4-013",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Penguin",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-014",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Giraffe",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-015",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Octopus",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-016",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Kangaroo",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-017",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Hedgehog",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-018",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Flamingo",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-019",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Squirrel",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-020",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Crocodile",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-021",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Owl",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-022",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Tortoise",
+   "hintCategory": "Animals"
+  },
+  {
+   "id": "imp-s4-023",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Beach",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-024",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Library",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-025",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Airport",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-026",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Hospital",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-027",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Castle",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-028",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Museum",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-029",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Cinema",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-030",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Supermarket",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-031",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Zoo",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-032",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Farm",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-033",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Lighthouse",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-034",
+   "difficulty": 1,
+   "category": "Places",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Igloo",
+   "hintCategory": "Places"
+  },
+  {
+   "id": "imp-s4-035",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Umbrella",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-036",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Toothbrush",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-037",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Telescope",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-038",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Ladder",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-039",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Pillow",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-040",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Candle",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-041",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Backpack",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-042",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Compass",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-043",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Mirror",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-044",
+   "difficulty": 1,
+   "category": "Objects",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Scissors",
+   "hintCategory": "Objects"
+  },
+  {
+   "id": "imp-s4-045",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Snowman",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-046",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Mittens",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-047",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Sledge",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-048",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Icicle",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-049",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Fireplace",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-050",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Scarf",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-051",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Snowball",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-052",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Blizzard",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-053",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Hot chocolate",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-054",
+   "difficulty": 1,
+   "category": "Winter",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Skates",
+   "hintCategory": "Winter"
+  },
+  {
+   "id": "imp-s4-055",
+   "difficulty": 1,
+   "category": "Jobs",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Astronaut",
+   "hintCategory": "Jobs"
+  },
+  {
+   "id": "imp-s4-056",
+   "difficulty": 1,
+   "category": "Jobs",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Firefighter",
+   "hintCategory": "Jobs"
+  },
+  {
+   "id": "imp-s4-057",
+   "difficulty": 1,
+   "category": "Jobs",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Chef",
+   "hintCategory": "Jobs"
+  },
+  {
+   "id": "imp-s4-058",
+   "difficulty": 1,
+   "category": "Jobs",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Pilot",
+   "hintCategory": "Jobs"
+  },
+  {
+   "id": "imp-s4-059",
+   "difficulty": 1,
+   "category": "Jobs",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Dentist",
+   "hintCategory": "Jobs"
+  },
+  {
+   "id": "imp-s4-060",
+   "difficulty": 1,
+   "category": "Jobs",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Farmer",
+   "hintCategory": "Jobs"
+  },
+  {
+   "id": "imp-s4-061",
+   "difficulty": 1,
+   "category": "Jobs",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Magician",
+   "hintCategory": "Jobs"
+  },
+  {
+   "id": "imp-s4-062",
+   "difficulty": 1,
+   "category": "Jobs",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "word": "Librarian",
+   "hintCategory": "Jobs"
+  }
+ ]
+}

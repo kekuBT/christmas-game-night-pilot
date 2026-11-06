@@ -1,0 +1,3286 @@
+{
+ "schemaVersion": 1,
+ "packId": "trivia-s4-general",
+ "gameId": "trivia",
+ "version": "1.0.0",
+ "title": "Trivia — Sprint 4 general knowledge",
+ "language": "en",
+ "items": [
+  {
+   "id": "trv-scie-001",
+   "difficulty": 1,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Basic chemistry"
+   },
+   "tags": [],
+   "prompt": "What is the chemical symbol for water?",
+   "options": [
+    "H2O",
+    "CO2",
+    "O2",
+    "NaCl"
+   ],
+   "answer": "H2O",
+   "explanation": "Two hydrogen atoms and one oxygen atom."
+  },
+  {
+   "id": "trv-scie-002",
+   "difficulty": 1,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Human biology"
+   },
+   "tags": [],
+   "prompt": "Which organ pumps blood around the human body?",
+   "options": [
+    "Lungs",
+    "Heart",
+    "Liver",
+    "Kidneys"
+   ],
+   "answer": "Heart",
+   "explanation": "The heart pumps blood through the circulatory system."
+  },
+  {
+   "id": "trv-scie-003",
+   "difficulty": 1,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Biology"
+   },
+   "tags": [],
+   "prompt": "What do bees collect from flowers to make honey?",
+   "options": [
+    "Pollen",
+    "Nectar",
+    "Sap",
+    "Dew"
+   ],
+   "answer": "Nectar",
+   "explanation": "Bees turn flower nectar into honey."
+  },
+  {
+   "id": "trv-scie-004",
+   "difficulty": 1,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Mohs scale of mineral hardness"
+   },
+   "tags": [],
+   "prompt": "What is the hardest natural substance?",
+   "options": [
+    "Gold",
+    "Iron",
+    "Diamond",
+    "Quartz"
+   ],
+   "answer": "Diamond",
+   "explanation": "Diamond scores 10 on the Mohs hardness scale."
+  },
+  {
+   "id": "trv-scie-005",
+   "difficulty": 1,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Entomology"
+   },
+   "tags": [],
+   "prompt": "How many legs does an insect have?",
+   "options": [
+    "4",
+    "6",
+    "8",
+    "10"
+   ],
+   "answer": "6",
+   "explanation": "Insects have three pairs of legs."
+  },
+  {
+   "id": "trv-scie-006",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Periodic table"
+   },
+   "tags": [],
+   "prompt": "What is the chemical symbol for gold?",
+   "options": [
+    "Go",
+    "Gd",
+    "Au",
+    "Ag"
+   ],
+   "answer": "Au",
+   "explanation": "From the Latin 'aurum'."
+  },
+  {
+   "id": "trv-scie-007",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Solar System"
+   },
+   "tags": [],
+   "prompt": "Which planet is closest to the Sun?",
+   "options": [
+    "Venus",
+    "Mercury",
+    "Mars",
+    "Earth"
+   ],
+   "answer": "Mercury",
+   "explanation": "Mercury orbits closest to the Sun."
+  },
+  {
+   "id": "trv-scie-008",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Atmospheric composition"
+   },
+   "tags": [],
+   "prompt": "What gas makes up most of Earth's atmosphere?",
+   "options": [
+    "Oxygen",
+    "Carbon dioxide",
+    "Nitrogen",
+    "Argon"
+   ],
+   "answer": "Nitrogen",
+   "explanation": "About 78% of the air is nitrogen."
+  },
+  {
+   "id": "trv-scie-009",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Plant biology"
+   },
+   "tags": [],
+   "prompt": "What part of a plant mainly carries out photosynthesis?",
+   "options": [
+    "Roots",
+    "Leaves",
+    "Bark",
+    "Seeds"
+   ],
+   "answer": "Leaves",
+   "explanation": "Leaves contain most of the chlorophyll."
+  },
+  {
+   "id": "trv-scie-010",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Temperature scales"
+   },
+   "tags": [],
+   "prompt": "What is the freezing point of water in Fahrenheit?",
+   "options": [
+    "0°F",
+    "32°F",
+    "100°F",
+    "212°F"
+   ],
+   "answer": "32°F",
+   "explanation": "Water freezes at 32°F (0°C) at sea level."
+  },
+  {
+   "id": "trv-scie-011",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Human biology"
+   },
+   "tags": [],
+   "prompt": "Which blood cells help fight infection?",
+   "options": [
+    "Red blood cells",
+    "White blood cells",
+    "Platelets",
+    "Plasma"
+   ],
+   "answer": "White blood cells",
+   "explanation": "White blood cells are part of the immune system."
+  },
+  {
+   "id": "trv-scie-012",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Physics"
+   },
+   "tags": [],
+   "prompt": "What force keeps the planets in orbit around the Sun?",
+   "options": [
+    "Magnetism",
+    "Friction",
+    "Gravity",
+    "Electricity"
+   ],
+   "answer": "Gravity",
+   "explanation": "The Sun's gravity holds the planets in orbit."
+  },
+  {
+   "id": "trv-scie-013",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Human anatomy"
+   },
+   "tags": [],
+   "prompt": "How many bones are in an adult human body?",
+   "options": [
+    "106",
+    "206",
+    "306",
+    "406"
+   ],
+   "answer": "206",
+   "explanation": "An adult skeleton usually has 206 bones."
+  },
+  {
+   "id": "trv-scie-014",
+   "difficulty": 3,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Astrophysics"
+   },
+   "tags": [],
+   "prompt": "What is the most abundant element in the universe?",
+   "options": [
+    "Oxygen",
+    "Helium",
+    "Hydrogen",
+    "Carbon"
+   ],
+   "answer": "Hydrogen",
+   "explanation": "Hydrogen makes up roughly three quarters of ordinary matter by mass."
+  },
+  {
+   "id": "trv-scie-015",
+   "difficulty": 3,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Chemistry"
+   },
+   "tags": [],
+   "prompt": "What is the pH of pure water at 25°C?",
+   "options": [
+    "5",
+    "7",
+    "9",
+    "14"
+   ],
+   "answer": "7",
+   "explanation": "Pure water is neutral, pH 7."
+  },
+  {
+   "id": "trv-scie-016",
+   "difficulty": 3,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "History of physics"
+   },
+   "tags": [],
+   "prompt": "Which scientist proposed the three laws of motion?",
+   "options": [
+    "Galileo Galilei",
+    "Isaac Newton",
+    "Albert Einstein",
+    "Johannes Kepler"
+   ],
+   "answer": "Isaac Newton",
+   "explanation": "Newton published them in the Principia (1687)."
+  },
+  {
+   "id": "trv-spac-017",
+   "difficulty": 1,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Astronomy"
+   },
+   "tags": [],
+   "prompt": "What is the name of Earth's natural satellite?",
+   "options": [
+    "The Sun",
+    "The Moon",
+    "Mars",
+    "Polaris"
+   ],
+   "answer": "The Moon",
+   "explanation": "Earth has one natural satellite, the Moon."
+  },
+  {
+   "id": "trv-spac-018",
+   "difficulty": 1,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Astronomy"
+   },
+   "tags": [],
+   "prompt": "Which planet is famous for its large rings?",
+   "options": [
+    "Mars",
+    "Venus",
+    "Saturn",
+    "Mercury"
+   ],
+   "answer": "Saturn",
+   "explanation": "Saturn's rings are the most prominent in the Solar System."
+  },
+  {
+   "id": "trv-spac-019",
+   "difficulty": 2,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Solar System"
+   },
+   "tags": [],
+   "prompt": "What is the largest planet in our Solar System?",
+   "options": [
+    "Saturn",
+    "Jupiter",
+    "Neptune",
+    "Earth"
+   ],
+   "answer": "Jupiter",
+   "explanation": "Jupiter is the largest planet."
+  },
+  {
+   "id": "trv-spac-020",
+   "difficulty": 2,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Astronomy"
+   },
+   "tags": [],
+   "prompt": "What is the name of the galaxy that contains our Solar System?",
+   "options": [
+    "Andromeda",
+    "The Milky Way",
+    "Triangulum",
+    "Whirlpool"
+   ],
+   "answer": "The Milky Way",
+   "explanation": "The Solar System is in the Milky Way."
+  },
+  {
+   "id": "trv-spac-021",
+   "difficulty": 2,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "NASA Apollo 11"
+   },
+   "tags": [],
+   "prompt": "Who was the first person to walk on the Moon?",
+   "options": [
+    "Buzz Aldrin",
+    "Yuri Gagarin",
+    "Neil Armstrong",
+    "Michael Collins"
+   ],
+   "answer": "Neil Armstrong",
+   "explanation": "Armstrong stepped onto the Moon in July 1969."
+  },
+  {
+   "id": "trv-spac-022",
+   "difficulty": 3,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "History of spaceflight"
+   },
+   "tags": [],
+   "prompt": "Who was the first human to travel into space?",
+   "options": [
+    "Neil Armstrong",
+    "Yuri Gagarin",
+    "John Glenn",
+    "Alan Shepard"
+   ],
+   "answer": "Yuri Gagarin",
+   "explanation": "Gagarin orbited Earth on 12 April 1961."
+  },
+  {
+   "id": "trv-spac-023",
+   "difficulty": 3,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Planetary science"
+   },
+   "tags": [],
+   "prompt": "Which planet has the shortest day (fastest rotation)?",
+   "options": [
+    "Earth",
+    "Jupiter",
+    "Mercury",
+    "Venus"
+   ],
+   "answer": "Jupiter",
+   "explanation": "Jupiter rotates in under 10 hours."
+  },
+  {
+   "id": "trv-geog-024",
+   "difficulty": 1,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World capitals"
+   },
+   "tags": [],
+   "prompt": "What is the capital of France?",
+   "options": [
+    "Lyon",
+    "Paris",
+    "Marseille",
+    "Nice"
+   ],
+   "answer": "Paris",
+   "explanation": "Paris is the capital of France."
+  },
+  {
+   "id": "trv-geog-025",
+   "difficulty": 1,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Geography"
+   },
+   "tags": [],
+   "prompt": "Which continent is Egypt in?",
+   "options": [
+    "Asia",
+    "Africa",
+    "Europe",
+    "South America"
+   ],
+   "answer": "Africa",
+   "explanation": "Egypt is in north-east Africa."
+  },
+  {
+   "id": "trv-geog-026",
+   "difficulty": 1,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Rivers"
+   },
+   "tags": [],
+   "prompt": "What is the longest river in South America?",
+   "options": [
+    "Orinoco",
+    "Paraná",
+    "Amazon",
+    "Magdalena"
+   ],
+   "answer": "Amazon",
+   "explanation": "The Amazon is South America's longest river."
+  },
+  {
+   "id": "trv-geog-027",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World capitals"
+   },
+   "tags": [],
+   "prompt": "What is the capital of Italy?",
+   "options": [
+    "Milan",
+    "Venice",
+    "Rome",
+    "Naples"
+   ],
+   "answer": "Rome",
+   "explanation": "Rome is Italy's capital."
+  },
+  {
+   "id": "trv-geog-028",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Geography"
+   },
+   "tags": [],
+   "prompt": "Which country has the shape often described as a boot?",
+   "options": [
+    "Greece",
+    "Italy",
+    "Portugal",
+    "Chile"
+   ],
+   "answer": "Italy",
+   "explanation": "The Italian peninsula is boot-shaped."
+  },
+  {
+   "id": "trv-geog-029",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Physical geography"
+   },
+   "tags": [],
+   "prompt": "Which desert is the largest hot desert in the world?",
+   "options": [
+    "Gobi",
+    "Kalahari",
+    "Sahara",
+    "Atacama"
+   ],
+   "answer": "Sahara",
+   "explanation": "The Sahara is the largest hot desert."
+  },
+  {
+   "id": "trv-geog-030",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Landmarks"
+   },
+   "tags": [],
+   "prompt": "In which country are the pyramids of Giza?",
+   "options": [
+    "Mexico",
+    "Egypt",
+    "Peru",
+    "Sudan"
+   ],
+   "answer": "Egypt",
+   "explanation": "The Giza pyramids are near Cairo."
+  },
+  {
+   "id": "trv-geog-031",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Oceans"
+   },
+   "tags": [],
+   "prompt": "Which ocean lies between Africa and Australia?",
+   "options": [
+    "Atlantic",
+    "Indian",
+    "Pacific",
+    "Southern"
+   ],
+   "answer": "Indian",
+   "explanation": "The Indian Ocean lies between them."
+  },
+  {
+   "id": "trv-geog-032",
+   "difficulty": 3,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World capitals"
+   },
+   "tags": [],
+   "prompt": "What is the capital of New Zealand?",
+   "options": [
+    "Auckland",
+    "Wellington",
+    "Christchurch",
+    "Dunedin"
+   ],
+   "answer": "Wellington",
+   "explanation": "Wellington is the capital; Auckland is the largest city."
+  },
+  {
+   "id": "trv-geog-033",
+   "difficulty": 3,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Countries"
+   },
+   "tags": [],
+   "prompt": "Which is the smallest country in the world by area?",
+   "options": [
+    "Monaco",
+    "Vatican City",
+    "San Marino",
+    "Liechtenstein"
+   ],
+   "answer": "Vatican City",
+   "explanation": "Vatican City is about 0.44 km²."
+  },
+  {
+   "id": "trv-geog-034",
+   "difficulty": 3,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Mountains"
+   },
+   "tags": [],
+   "prompt": "Mount Kilimanjaro is in which country?",
+   "options": [
+    "Kenya",
+    "Tanzania",
+    "Uganda",
+    "Ethiopia"
+   ],
+   "answer": "Tanzania",
+   "explanation": "Kilimanjaro is in north-east Tanzania."
+  },
+  {
+   "id": "trv-hist-035",
+   "difficulty": 1,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Maritime history"
+   },
+   "tags": [],
+   "prompt": "Which ship famously sank on its first voyage in 1912?",
+   "options": [
+    "Lusitania",
+    "Titanic",
+    "Mayflower",
+    "Bismarck"
+   ],
+   "answer": "Titanic",
+   "explanation": "RMS Titanic sank in April 1912."
+  },
+  {
+   "id": "trv-hist-036",
+   "difficulty": 1,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Ancient history"
+   },
+   "tags": [],
+   "prompt": "Which ancient people built the pyramids of Giza?",
+   "options": [
+    "Romans",
+    "Egyptians",
+    "Greeks",
+    "Vikings"
+   ],
+   "answer": "Egyptians",
+   "explanation": "Ancient Egyptians built them as royal tombs."
+  },
+  {
+   "id": "trv-hist-037",
+   "difficulty": 2,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "US history"
+   },
+   "tags": [],
+   "prompt": "Who was the first President of the United States?",
+   "options": [
+    "Abraham Lincoln",
+    "Thomas Jefferson",
+    "George Washington",
+    "John Adams"
+   ],
+   "answer": "George Washington",
+   "explanation": "Washington served from 1789 to 1797."
+  },
+  {
+   "id": "trv-hist-038",
+   "difficulty": 2,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Modern history"
+   },
+   "tags": [],
+   "prompt": "In which city was the Berlin Wall?",
+   "options": [
+    "Bonn",
+    "Berlin",
+    "Munich",
+    "Vienna"
+   ],
+   "answer": "Berlin",
+   "explanation": "The wall divided Berlin from 1961 to 1989."
+  },
+  {
+   "id": "trv-hist-039",
+   "difficulty": 2,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Ancient Rome"
+   },
+   "tags": [],
+   "prompt": "Which empire built the Colosseum?",
+   "options": [
+    "Greek",
+    "Roman",
+    "Ottoman",
+    "Persian"
+   ],
+   "answer": "Roman",
+   "explanation": "The Colosseum was completed under Emperor Titus in AD 80."
+  },
+  {
+   "id": "trv-hist-040",
+   "difficulty": 2,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "British history"
+   },
+   "tags": [],
+   "prompt": "Who was the British Prime Minister for most of the Second World War?",
+   "options": [
+    "Neville Chamberlain",
+    "Winston Churchill",
+    "Clement Attlee",
+    "Anthony Eden"
+   ],
+   "answer": "Winston Churchill",
+   "explanation": "Churchill led Britain from 1940 to 1945."
+  },
+  {
+   "id": "trv-hist-041",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "South American history"
+   },
+   "tags": [],
+   "prompt": "Which civilisation built Machu Picchu?",
+   "options": [
+    "Aztec",
+    "Maya",
+    "Inca",
+    "Olmec"
+   ],
+   "answer": "Inca",
+   "explanation": "The Inca built it in the 15th century."
+  },
+  {
+   "id": "trv-hist-042",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Art history"
+   },
+   "tags": [],
+   "prompt": "Who painted the ceiling of the Sistine Chapel?",
+   "options": [
+    "Leonardo da Vinci",
+    "Raphael",
+    "Michelangelo",
+    "Donatello"
+   ],
+   "answer": "Michelangelo",
+   "explanation": "Michelangelo painted it between 1508 and 1512."
+  },
+  {
+   "id": "trv-hist-043",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "English history"
+   },
+   "tags": [],
+   "prompt": "Which queen ruled England during the defeat of the Spanish Armada in 1588?",
+   "options": [
+    "Mary I",
+    "Elizabeth I",
+    "Victoria",
+    "Anne"
+   ],
+   "answer": "Elizabeth I",
+   "explanation": "The Armada was defeated during Elizabeth I's reign."
+  },
+  {
+   "id": "trv-lite-044",
+   "difficulty": 1,
+   "category": "Literature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Children's literature"
+   },
+   "tags": [],
+   "prompt": "Who wrote 'Harry Potter and the Philosopher's Stone'?",
+   "options": [
+    "Roald Dahl",
+    "J. K. Rowling",
+    "C. S. Lewis",
+    "Enid Blyton"
+   ],
+   "answer": "J. K. Rowling",
+   "explanation": "Published in 1997."
+  },
+  {
+   "id": "trv-lite-045",
+   "difficulty": 1,
+   "category": "Literature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Fairy tales"
+   },
+   "tags": [],
+   "prompt": "In the fairy tale, who climbs a beanstalk?",
+   "options": [
+    "Jack",
+    "Hansel",
+    "Peter",
+    "Tom"
+   ],
+   "answer": "Jack",
+   "explanation": "'Jack and the Beanstalk' is an English fairy tale."
+  },
+  {
+   "id": "trv-lite-046",
+   "difficulty": 2,
+   "category": "Literature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "English literature"
+   },
+   "tags": [],
+   "prompt": "Who wrote 'A Christmas Carol'?",
+   "options": [
+    "Charles Dickens",
+    "Jane Austen",
+    "Thomas Hardy",
+    "Lewis Carroll"
+   ],
+   "answer": "Charles Dickens",
+   "explanation": "Dickens published it in 1843."
+  },
+  {
+   "id": "trv-lite-047",
+   "difficulty": 2,
+   "category": "Literature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Tolkien"
+   },
+   "tags": [],
+   "prompt": "What is the name of the wizard in 'The Lord of the Rings' who carries a staff and wears grey (later white)?",
+   "options": [
+    "Merlin",
+    "Gandalf",
+    "Dumbledore",
+    "Saruman"
+   ],
+   "answer": "Gandalf",
+   "explanation": "Gandalf the Grey becomes Gandalf the White."
+  },
+  {
+   "id": "trv-lite-048",
+   "difficulty": 2,
+   "category": "Literature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Detective fiction"
+   },
+   "tags": [],
+   "prompt": "Which author created Sherlock Holmes?",
+   "options": [
+    "Agatha Christie",
+    "Arthur Conan Doyle",
+    "Edgar Allan Poe",
+    "Dorothy L. Sayers"
+   ],
+   "answer": "Arthur Conan Doyle",
+   "explanation": "Holmes first appeared in 1887."
+  },
+  {
+   "id": "trv-lite-049",
+   "difficulty": 2,
+   "category": "Literature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Lewis Carroll"
+   },
+   "tags": [],
+   "prompt": "In 'Alice's Adventures in Wonderland', what does Alice follow down the hole?",
+   "options": [
+    "A cat",
+    "A white rabbit",
+    "A caterpillar",
+    "A mouse"
+   ],
+   "answer": "A white rabbit",
+   "explanation": "She follows the White Rabbit."
+  },
+  {
+   "id": "trv-lite-050",
+   "difficulty": 3,
+   "category": "Literature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "English literature"
+   },
+   "tags": [],
+   "prompt": "Who wrote 'Pride and Prejudice'?",
+   "options": [
+    "Charlotte Brontë",
+    "Jane Austen",
+    "Mary Shelley",
+    "George Eliot"
+   ],
+   "answer": "Jane Austen",
+   "explanation": "Published in 1813."
+  },
+  {
+   "id": "trv-lite-051",
+   "difficulty": 3,
+   "category": "Literature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Gothic literature"
+   },
+   "tags": [],
+   "prompt": "Who wrote the novel 'Frankenstein'?",
+   "options": [
+    "Bram Stoker",
+    "Mary Shelley",
+    "Robert Louis Stevenson",
+    "H. G. Wells"
+   ],
+   "answer": "Mary Shelley",
+   "explanation": "Published in 1818."
+  },
+  {
+   "id": "trv-lang-052",
+   "difficulty": 1,
+   "category": "Language",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Vocabulary"
+   },
+   "tags": [],
+   "prompt": "What is the opposite of 'ancient'?",
+   "options": [
+    "Old",
+    "Modern",
+    "Historic",
+    "Antique"
+   ],
+   "answer": "Modern",
+   "explanation": "'Modern' is the usual antonym."
+  },
+  {
+   "id": "trv-lang-053",
+   "difficulty": 2,
+   "category": "Language",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "English alphabet"
+   },
+   "tags": [],
+   "prompt": "How many letters are in the English alphabet?",
+   "options": [
+    "24",
+    "25",
+    "26",
+    "27"
+   ],
+   "answer": "26",
+   "explanation": "A to Z: 26 letters."
+  },
+  {
+   "id": "trv-lang-054",
+   "difficulty": 2,
+   "category": "Language",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Vocabulary"
+   },
+   "tags": [],
+   "prompt": "Which word is a synonym of 'happy'?",
+   "options": [
+    "Gloomy",
+    "Cheerful",
+    "Tired",
+    "Angry"
+   ],
+   "answer": "Cheerful",
+   "explanation": "'Cheerful' means happy."
+  },
+  {
+   "id": "trv-lang-055",
+   "difficulty": 3,
+   "category": "Language",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Wordplay"
+   },
+   "tags": [],
+   "prompt": "What is a word that reads the same backwards called?",
+   "options": [
+    "Anagram",
+    "Palindrome",
+    "Homophone",
+    "Acronym"
+   ],
+   "answer": "Palindrome",
+   "explanation": "For example 'level' or 'radar'."
+  },
+  {
+   "id": "trv-lang-056",
+   "difficulty": 3,
+   "category": "Language",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Word roots"
+   },
+   "tags": [],
+   "prompt": "What does the prefix 'tri-' mean?",
+   "options": [
+    "Two",
+    "Three",
+    "Four",
+    "Many"
+   ],
+   "answer": "Three",
+   "explanation": "As in tricycle and triangle."
+  },
+  {
+   "id": "trv-arts-057",
+   "difficulty": 1,
+   "category": "Arts",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Music"
+   },
+   "tags": [],
+   "prompt": "How many strings does a standard guitar have?",
+   "options": [
+    "4",
+    "5",
+    "6",
+    "8"
+   ],
+   "answer": "6",
+   "explanation": "A standard guitar has six strings."
+  },
+  {
+   "id": "trv-arts-058",
+   "difficulty": 1,
+   "category": "Arts",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Colour theory"
+   },
+   "tags": [],
+   "prompt": "What are the three primary colours of paint in traditional art?",
+   "options": [
+    "Red, yellow, blue",
+    "Red, green, blue",
+    "Orange, green, purple",
+    "Black, white, grey"
+   ],
+   "answer": "Red, yellow, blue",
+   "explanation": "The traditional painter's primaries."
+  },
+  {
+   "id": "trv-arts-059",
+   "difficulty": 2,
+   "category": "Arts",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Art history"
+   },
+   "tags": [],
+   "prompt": "Who painted the 'Mona Lisa'?",
+   "options": [
+    "Vincent van Gogh",
+    "Leonardo da Vinci",
+    "Pablo Picasso",
+    "Claude Monet"
+   ],
+   "answer": "Leonardo da Vinci",
+   "explanation": "Painted in the early 1500s."
+  },
+  {
+   "id": "trv-arts-060",
+   "difficulty": 2,
+   "category": "Arts",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Musical instruments"
+   },
+   "tags": [],
+   "prompt": "How many keys does a standard piano have?",
+   "options": [
+    "66",
+    "76",
+    "88",
+    "96"
+   ],
+   "answer": "88",
+   "explanation": "52 white and 36 black keys."
+  },
+  {
+   "id": "trv-arts-061",
+   "difficulty": 2,
+   "category": "Arts",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Classical music"
+   },
+   "tags": [],
+   "prompt": "Which composer wrote 'The Nutcracker' ballet?",
+   "options": [
+    "Mozart",
+    "Tchaikovsky",
+    "Beethoven",
+    "Bach"
+   ],
+   "answer": "Tchaikovsky",
+   "explanation": "Premiered in 1892."
+  },
+  {
+   "id": "trv-arts-062",
+   "difficulty": 3,
+   "category": "Arts",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Art history"
+   },
+   "tags": [],
+   "prompt": "Which artist cut off part of his own ear?",
+   "options": [
+    "Claude Monet",
+    "Vincent van Gogh",
+    "Salvador Dalí",
+    "Paul Cézanne"
+   ],
+   "answer": "Vincent van Gogh",
+   "explanation": "This happened in 1888 in Arles."
+  },
+  {
+   "id": "trv-arts-063",
+   "difficulty": 3,
+   "category": "Arts",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Music theory"
+   },
+   "tags": [],
+   "prompt": "In music, how many beats does a whole note last in 4/4 time?",
+   "options": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "answer": "4",
+   "explanation": "A whole note fills a 4/4 bar."
+  },
+  {
+   "id": "trv-natu-064",
+   "difficulty": 1,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "What is the largest animal on Earth?",
+   "options": [
+    "African elephant",
+    "Blue whale",
+    "Giraffe",
+    "Great white shark"
+   ],
+   "answer": "Blue whale",
+   "explanation": "The blue whale is the largest known animal."
+  },
+  {
+   "id": "trv-natu-065",
+   "difficulty": 1,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Entomology"
+   },
+   "tags": [],
+   "prompt": "What do caterpillars turn into?",
+   "options": [
+    "Beetles",
+    "Butterflies or moths",
+    "Spiders",
+    "Bees"
+   ],
+   "answer": "Butterflies or moths",
+   "explanation": "Through metamorphosis."
+  },
+  {
+   "id": "trv-natu-066",
+   "difficulty": 1,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Symbols"
+   },
+   "tags": [],
+   "prompt": "Which bird is a symbol of peace?",
+   "options": [
+    "Eagle",
+    "Dove",
+    "Crow",
+    "Parrot"
+   ],
+   "answer": "Dove",
+   "explanation": "The dove with an olive branch."
+  },
+  {
+   "id": "trv-natu-067",
+   "difficulty": 2,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "What is a baby kangaroo called?",
+   "options": [
+    "Cub",
+    "Joey",
+    "Kid",
+    "Calf"
+   ],
+   "answer": "Joey",
+   "explanation": "Young kangaroos are joeys."
+  },
+  {
+   "id": "trv-natu-068",
+   "difficulty": 2,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Marine biology"
+   },
+   "tags": [],
+   "prompt": "How many hearts does an octopus have?",
+   "options": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "answer": "3",
+   "explanation": "Two pump blood through the gills, one through the body."
+  },
+  {
+   "id": "trv-natu-069",
+   "difficulty": 2,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "Which animal is known for changing colour to blend in?",
+   "options": [
+    "Chameleon",
+    "Hedgehog",
+    "Otter",
+    "Koala"
+   ],
+   "answer": "Chameleon",
+   "explanation": "Chameleons change colour."
+  },
+  {
+   "id": "trv-natu-070",
+   "difficulty": 2,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "What do pandas mainly eat?",
+   "options": [
+    "Fish",
+    "Bamboo",
+    "Berries",
+    "Insects"
+   ],
+   "answer": "Bamboo",
+   "explanation": "Bamboo makes up most of a giant panda's diet."
+  },
+  {
+   "id": "trv-natu-071",
+   "difficulty": 3,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Collective nouns"
+   },
+   "tags": [],
+   "prompt": "What is a group of crows called?",
+   "options": [
+    "A pride",
+    "A murder",
+    "A pack",
+    "A school"
+   ],
+   "answer": "A murder",
+   "explanation": "'A murder of crows' is the traditional collective noun."
+  },
+  {
+   "id": "trv-natu-072",
+   "difficulty": 3,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "Which is the only mammal capable of true flight?",
+   "options": [
+    "Flying squirrel",
+    "Bat",
+    "Sugar glider",
+    "Colugo"
+   ],
+   "answer": "Bat",
+   "explanation": "Other 'flying' mammals glide."
+  },
+  {
+   "id": "trv-natu-073",
+   "difficulty": 3,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Botany"
+   },
+   "tags": [],
+   "prompt": "Which tree produces acorns?",
+   "options": [
+    "Maple",
+    "Oak",
+    "Birch",
+    "Pine"
+   ],
+   "answer": "Oak",
+   "explanation": "Acorns are oak nuts."
+  },
+  {
+   "id": "trv-food-074",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Cookery"
+   },
+   "tags": [],
+   "prompt": "Which fruit is used to make guacamole?",
+   "options": [
+    "Banana",
+    "Avocado",
+    "Mango",
+    "Lime"
+   ],
+   "answer": "Avocado",
+   "explanation": "Guacamole is mashed avocado."
+  },
+  {
+   "id": "trv-food-075",
+   "difficulty": 1,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Cookery"
+   },
+   "tags": [],
+   "prompt": "What is the main ingredient of an omelette?",
+   "options": [
+    "Flour",
+    "Eggs",
+    "Rice",
+    "Cheese"
+   ],
+   "answer": "Eggs",
+   "explanation": "An omelette is beaten eggs cooked in a pan."
+  },
+  {
+   "id": "trv-food-076",
+   "difficulty": 2,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World cuisine"
+   },
+   "tags": [],
+   "prompt": "Which country is the origin of sushi?",
+   "options": [
+    "China",
+    "Japan",
+    "Korea",
+    "Thailand"
+   ],
+   "answer": "Japan",
+   "explanation": "Sushi is a Japanese dish."
+  },
+  {
+   "id": "trv-food-077",
+   "difficulty": 2,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Food science"
+   },
+   "tags": [],
+   "prompt": "What is tofu made from?",
+   "options": [
+    "Rice",
+    "Soybeans",
+    "Wheat",
+    "Corn"
+   ],
+   "answer": "Soybeans",
+   "explanation": "Tofu is pressed soybean curd."
+  },
+  {
+   "id": "trv-food-078",
+   "difficulty": 2,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Spanish cuisine"
+   },
+   "tags": [],
+   "prompt": "Which spice is traditionally used to make paella yellow?",
+   "options": [
+    "Turmeric",
+    "Saffron",
+    "Paprika",
+    "Cumin"
+   ],
+   "answer": "Saffron",
+   "explanation": "Saffron gives traditional paella its colour."
+  },
+  {
+   "id": "trv-food-079",
+   "difficulty": 3,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Baking"
+   },
+   "tags": [],
+   "prompt": "What type of pastry is used for profiteroles?",
+   "options": [
+    "Puff",
+    "Shortcrust",
+    "Choux",
+    "Filo"
+   ],
+   "answer": "Choux",
+   "explanation": "Profiteroles are choux buns."
+  },
+  {
+   "id": "trv-food-080",
+   "difficulty": 3,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Confectionery"
+   },
+   "tags": [],
+   "prompt": "Which nut is used to make marzipan?",
+   "options": [
+    "Walnut",
+    "Almond",
+    "Hazelnut",
+    "Cashew"
+   ],
+   "answer": "Almond",
+   "explanation": "Marzipan is ground almonds and sugar."
+  },
+  {
+   "id": "trv-spor-081",
+   "difficulty": 1,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Laws of the Game"
+   },
+   "tags": [],
+   "prompt": "How many players does a football (soccer) team have on the pitch?",
+   "options": [
+    "9",
+    "10",
+    "11",
+    "12"
+   ],
+   "answer": "11",
+   "explanation": "Each side fields eleven players."
+  },
+  {
+   "id": "trv-spor-082",
+   "difficulty": 1,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Sport"
+   },
+   "tags": [],
+   "prompt": "In which sport do you use a shuttlecock?",
+   "options": [
+    "Tennis",
+    "Badminton",
+    "Squash",
+    "Table tennis"
+   ],
+   "answer": "Badminton",
+   "explanation": "Badminton uses a shuttlecock."
+  },
+  {
+   "id": "trv-spor-083",
+   "difficulty": 2,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Olympic symbols"
+   },
+   "tags": [],
+   "prompt": "How many rings are on the Olympic flag?",
+   "options": [
+    "4",
+    "5",
+    "6",
+    "7"
+   ],
+   "answer": "5",
+   "explanation": "Five interlocking rings."
+  },
+  {
+   "id": "trv-spor-084",
+   "difficulty": 2,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Tennis scoring"
+   },
+   "tags": [],
+   "prompt": "In tennis, what is a score of zero called?",
+   "options": [
+    "Nil",
+    "Love",
+    "Duck",
+    "Zero"
+   ],
+   "answer": "Love",
+   "explanation": "Zero in tennis is 'love'."
+  },
+  {
+   "id": "trv-spor-085",
+   "difficulty": 2,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "American football rules"
+   },
+   "tags": [],
+   "prompt": "How many points is a touchdown worth in American football?",
+   "options": [
+    "3",
+    "6",
+    "7",
+    "2"
+   ],
+   "answer": "6",
+   "explanation": "A touchdown scores six points."
+  },
+  {
+   "id": "trv-spor-086",
+   "difficulty": 3,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Athletics"
+   },
+   "tags": [],
+   "prompt": "How long is a marathon, to the nearest kilometre?",
+   "options": [
+    "26 km",
+    "42 km",
+    "50 km",
+    "100 km"
+   ],
+   "answer": "42 km",
+   "explanation": "A marathon is 42.195 km."
+  },
+  {
+   "id": "trv-spor-087",
+   "difficulty": 3,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Rules of chess"
+   },
+   "tags": [],
+   "prompt": "In chess, which piece can only move diagonally?",
+   "options": [
+    "Rook",
+    "Bishop",
+    "Knight",
+    "King"
+   ],
+   "answer": "Bishop",
+   "explanation": "Bishops stay on one colour."
+  },
+  {
+   "id": "trv-math-088",
+   "difficulty": 1,
+   "category": "Maths",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Arithmetic"
+   },
+   "tags": [],
+   "prompt": "What is 7 × 8?",
+   "options": [
+    "54",
+    "56",
+    "58",
+    "64"
+   ],
+   "answer": "56",
+   "explanation": "7 × 8 = 56."
+  },
+  {
+   "id": "trv-math-089",
+   "difficulty": 1,
+   "category": "Maths",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Geometry"
+   },
+   "tags": [],
+   "prompt": "How many sides does a triangle have?",
+   "options": [
+    "2",
+    "3",
+    "4",
+    "5"
+   ],
+   "answer": "3",
+   "explanation": "Tri- means three."
+  },
+  {
+   "id": "trv-math-090",
+   "difficulty": 2,
+   "category": "Maths",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Arithmetic"
+   },
+   "tags": [],
+   "prompt": "What is the square root of 81?",
+   "options": [
+    "7",
+    "8",
+    "9",
+    "11"
+   ],
+   "answer": "9",
+   "explanation": "9 × 9 = 81."
+  },
+  {
+   "id": "trv-math-091",
+   "difficulty": 2,
+   "category": "Maths",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Geometry"
+   },
+   "tags": [],
+   "prompt": "How many degrees are in a right angle?",
+   "options": [
+    "45",
+    "90",
+    "180",
+    "360"
+   ],
+   "answer": "90",
+   "explanation": "A right angle is 90°."
+  },
+  {
+   "id": "trv-math-092",
+   "difficulty": 2,
+   "category": "Maths",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Percentages"
+   },
+   "tags": [],
+   "prompt": "What is 25% of 200?",
+   "options": [
+    "25",
+    "40",
+    "50",
+    "75"
+   ],
+   "answer": "50",
+   "explanation": "A quarter of 200 is 50."
+  },
+  {
+   "id": "trv-math-093",
+   "difficulty": 3,
+   "category": "Maths",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Number theory"
+   },
+   "tags": [],
+   "prompt": "What is the next prime number after 7?",
+   "options": [
+    "9",
+    "10",
+    "11",
+    "13"
+   ],
+   "answer": "11",
+   "explanation": "8, 9 and 10 are not prime."
+  },
+  {
+   "id": "trv-math-094",
+   "difficulty": 3,
+   "category": "Maths",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Geometry"
+   },
+   "tags": [],
+   "prompt": "How many sides does a dodecagon have?",
+   "options": [
+    "10",
+    "11",
+    "12",
+    "20"
+   ],
+   "answer": "12",
+   "explanation": "Dodeca- means twelve."
+  },
+  {
+   "id": "trv-ever-095",
+   "difficulty": 1,
+   "category": "Everyday",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Calendar"
+   },
+   "tags": [],
+   "prompt": "How many days are in a week?",
+   "options": [
+    "5",
+    "6",
+    "7",
+    "8"
+   ],
+   "answer": "7",
+   "explanation": "Seven days a week."
+  },
+  {
+   "id": "trv-ever-096",
+   "difficulty": 1,
+   "category": "Everyday",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Colour"
+   },
+   "tags": [],
+   "prompt": "Which colour do you get by mixing red and white paint?",
+   "options": [
+    "Purple",
+    "Pink",
+    "Orange",
+    "Brown"
+   ],
+   "answer": "Pink",
+   "explanation": "Red plus white makes pink."
+  },
+  {
+   "id": "trv-ever-097",
+   "difficulty": 2,
+   "category": "Everyday",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Time"
+   },
+   "tags": [],
+   "prompt": "How many hours are in a day?",
+   "options": [
+    "12",
+    "20",
+    "24",
+    "48"
+   ],
+   "answer": "24",
+   "explanation": "A day has 24 hours."
+  },
+  {
+   "id": "trv-ever-098",
+   "difficulty": 2,
+   "category": "Everyday",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Vocabulary"
+   },
+   "tags": [],
+   "prompt": "What is the name for a baby cat?",
+   "options": [
+    "Pup",
+    "Kitten",
+    "Cub",
+    "Foal"
+   ],
+   "answer": "Kitten",
+   "explanation": "A young cat is a kitten."
+  },
+  {
+   "id": "trv-ever-099",
+   "difficulty": 2,
+   "category": "Everyday",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Calendar"
+   },
+   "tags": [],
+   "prompt": "How many months have 31 days?",
+   "options": [
+    "5",
+    "6",
+    "7",
+    "8"
+   ],
+   "answer": "7",
+   "explanation": "January, March, May, July, August, October, December."
+  },
+  {
+   "id": "trv-ever-100",
+   "difficulty": 3,
+   "category": "Everyday",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Astronomy"
+   },
+   "tags": [],
+   "prompt": "In which month is the summer solstice in the Northern Hemisphere?",
+   "options": [
+    "May",
+    "June",
+    "July",
+    "August"
+   ],
+   "answer": "June",
+   "explanation": "Around 20–21 June."
+  },
+  {
+   "id": "trv-fest-101",
+   "difficulty": 1,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Tradition"
+   },
+   "tags": [],
+   "prompt": "What colour is Santa Claus's suit traditionally?",
+   "options": [
+    "Green",
+    "Red",
+    "Blue",
+    "Gold"
+   ],
+   "answer": "Red",
+   "explanation": "Red with white trim."
+  },
+  {
+   "id": "trv-fest-102",
+   "difficulty": 1,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Tradition"
+   },
+   "tags": [],
+   "prompt": "What do people traditionally hang by the fireplace for Santa to fill?",
+   "options": [
+    "Hats",
+    "Stockings",
+    "Bells",
+    "Wreaths"
+   ],
+   "answer": "Stockings",
+   "explanation": "Christmas stockings."
+  },
+  {
+   "id": "trv-fest-103",
+   "difficulty": 1,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "What is a baby reindeer called?",
+   "options": [
+    "Foal",
+    "Calf",
+    "Kid",
+    "Lamb"
+   ],
+   "answer": "Calf",
+   "explanation": "Reindeer young are calves."
+  },
+  {
+   "id": "trv-fest-104",
+   "difficulty": 2,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Traditional song"
+   },
+   "tags": [],
+   "prompt": "In the song 'The Twelve Days of Christmas', what is given on the first day?",
+   "options": [
+    "Two turtle doves",
+    "A partridge in a pear tree",
+    "Five gold rings",
+    "Three French hens"
+   ],
+   "answer": "A partridge in a pear tree",
+   "explanation": "The first gift is a partridge in a pear tree."
+  },
+  {
+   "id": "trv-fest-105",
+   "difficulty": 2,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Tradition"
+   },
+   "tags": [],
+   "prompt": "Which plant with white berries do people traditionally kiss under?",
+   "options": [
+    "Holly",
+    "Ivy",
+    "Mistletoe",
+    "Poinsettia"
+   ],
+   "answer": "Mistletoe",
+   "explanation": "Kissing under the mistletoe."
+  },
+  {
+   "id": "trv-fest-106",
+   "difficulty": 2,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Tradition"
+   },
+   "tags": [],
+   "prompt": "Which country gives London a Christmas tree every year for Trafalgar Square?",
+   "options": [
+    "Sweden",
+    "Norway",
+    "Denmark",
+    "Finland"
+   ],
+   "answer": "Norway",
+   "explanation": "A thank-you from Oslo since 1947."
+  },
+  {
+   "id": "trv-fest-107",
+   "difficulty": 3,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "History of Christmas"
+   },
+   "tags": [],
+   "prompt": "In which country did the tradition of the Christmas tree become popular in the 16th century?",
+   "options": [
+    "England",
+    "Germany",
+    "France",
+    "Italy"
+   ],
+   "answer": "Germany",
+   "explanation": "Decorated trees spread from Germany."
+  },
+  {
+   "id": "trv-fest-108",
+   "difficulty": 3,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Popular culture"
+   },
+   "tags": [],
+   "prompt": "What is the name of the reindeer with a red nose?",
+   "options": [
+    "Dasher",
+    "Comet",
+    "Rudolph",
+    "Blitzen"
+   ],
+   "answer": "Rudolph",
+   "explanation": "Rudolph first appeared in a 1939 booklet."
+  },
+  {
+   "id": "trv-fest-109",
+   "difficulty": 2,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Confectionery"
+   },
+   "tags": [],
+   "prompt": "What is the traditional shape of a candy cane?",
+   "options": [
+    "A circle",
+    "A J or shepherd's crook",
+    "A star",
+    "A square"
+   ],
+   "answer": "A J or shepherd's crook",
+   "explanation": "It is shaped like a hook."
+  },
+  {
+   "id": "trv-fest-110",
+   "difficulty": 3,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Language"
+   },
+   "tags": [],
+   "prompt": "What does 'Noël' mean in English, as used at Christmas?",
+   "options": [
+    "Snow",
+    "Christmas",
+    "Star",
+    "Bell"
+   ],
+   "answer": "Christmas",
+   "explanation": "'Noël' is French for Christmas."
+  },
+  {
+   "id": "trv-tech-111",
+   "difficulty": 1,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Everyday technology"
+   },
+   "tags": [],
+   "prompt": "What device do you use to take a photograph?",
+   "options": [
+    "Microscope",
+    "Camera",
+    "Telescope",
+    "Radio"
+   ],
+   "answer": "Camera",
+   "explanation": "Cameras capture images."
+  },
+  {
+   "id": "trv-tech-112",
+   "difficulty": 2,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "History of technology"
+   },
+   "tags": [],
+   "prompt": "Who is credited with inventing the telephone in 1876?",
+   "options": [
+    "Thomas Edison",
+    "Alexander Graham Bell",
+    "Nikola Tesla",
+    "Guglielmo Marconi"
+   ],
+   "answer": "Alexander Graham Bell",
+   "explanation": "Bell received the patent in 1876."
+  },
+  {
+   "id": "trv-tech-113",
+   "difficulty": 2,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Computing"
+   },
+   "tags": [],
+   "prompt": "What does 'www' stand for in a web address?",
+   "options": [
+    "World Wide Web",
+    "Wide World Web",
+    "Web World Wide",
+    "World Web Wire"
+   ],
+   "answer": "World Wide Web",
+   "explanation": "The Web, invented by Tim Berners-Lee."
+  },
+  {
+   "id": "trv-tech-114",
+   "difficulty": 3,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "History of printing"
+   },
+   "tags": [],
+   "prompt": "Which invention is Johannes Gutenberg famous for?",
+   "options": [
+    "The telescope",
+    "The printing press with movable type",
+    "The steam engine",
+    "The compass"
+   ],
+   "answer": "The printing press with movable type",
+   "explanation": "Around 1440 in Mainz."
+  },
+  {
+   "id": "trv-tech-115",
+   "difficulty": 3,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Computing"
+   },
+   "tags": [],
+   "prompt": "What does 'CPU' stand for?",
+   "options": [
+    "Central Processing Unit",
+    "Computer Power Unit",
+    "Core Program Utility",
+    "Central Power Unit"
+   ],
+   "answer": "Central Processing Unit",
+   "explanation": "The CPU executes instructions."
+  },
+  {
+   "id": "trv-geog-116",
+   "difficulty": 1,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World capitals"
+   },
+   "tags": [],
+   "prompt": "What is the capital of Spain?",
+   "options": [
+    "Barcelona",
+    "Madrid",
+    "Seville",
+    "Valencia"
+   ],
+   "answer": "Madrid",
+   "explanation": "Madrid is Spain's capital."
+  },
+  {
+   "id": "trv-geog-117",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World capitals"
+   },
+   "tags": [],
+   "prompt": "What is the capital of Egypt?",
+   "options": [
+    "Alexandria",
+    "Cairo",
+    "Luxor",
+    "Giza"
+   ],
+   "answer": "Cairo",
+   "explanation": "Cairo is Egypt's capital."
+  },
+  {
+   "id": "trv-geog-118",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Mountains"
+   },
+   "tags": [],
+   "prompt": "What is the tallest mountain in the world above sea level?",
+   "options": [
+    "K2",
+    "Kangchenjunga",
+    "Mount Everest",
+    "Mont Blanc"
+   ],
+   "answer": "Mount Everest",
+   "explanation": "About 8,849 m."
+  },
+  {
+   "id": "trv-geog-119",
+   "difficulty": 3,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World capitals"
+   },
+   "tags": [],
+   "prompt": "What is the capital of Canada?",
+   "options": [
+    "Toronto",
+    "Ottawa",
+    "Montreal",
+    "Vancouver"
+   ],
+   "answer": "Ottawa",
+   "explanation": "Ottawa is the capital of Canada."
+  },
+  {
+   "id": "trv-geog-120",
+   "difficulty": 3,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Rivers"
+   },
+   "tags": [],
+   "prompt": "Which river flows through Paris?",
+   "options": [
+    "Thames",
+    "Seine",
+    "Rhine",
+    "Loire"
+   ],
+   "answer": "Seine",
+   "explanation": "The Seine runs through Paris."
+  },
+  {
+   "id": "trv-geog-121",
+   "difficulty": 3,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Physical geography"
+   },
+   "tags": [],
+   "prompt": "Which country has the most islands, by most counts?",
+   "options": [
+    "Indonesia",
+    "Sweden",
+    "Philippines",
+    "Japan"
+   ],
+   "answer": "Sweden",
+   "explanation": "Sweden is often cited with over 200,000 islands; counting methods vary.",
+   "ambiguity": "Island counts depend on the minimum size counted; Sweden is often cited but sources differ."
+  },
+  {
+   "id": "trv-scie-122",
+   "difficulty": 1,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Physics"
+   },
+   "tags": [],
+   "prompt": "What do we call frozen water?",
+   "options": [
+    "Steam",
+    "Ice",
+    "Mist",
+    "Dew"
+   ],
+   "answer": "Ice",
+   "explanation": "Water freezes into ice."
+  },
+  {
+   "id": "trv-scie-123",
+   "difficulty": 1,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Biology"
+   },
+   "tags": [],
+   "prompt": "Which sense do we use our ears for?",
+   "options": [
+    "Sight",
+    "Hearing",
+    "Smell",
+    "Taste"
+   ],
+   "answer": "Hearing",
+   "explanation": "Ears are for hearing."
+  },
+  {
+   "id": "trv-scie-124",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "What type of animal is a frog?",
+   "options": [
+    "Reptile",
+    "Amphibian",
+    "Mammal",
+    "Fish"
+   ],
+   "answer": "Amphibian",
+   "explanation": "Frogs live both in water and on land."
+  },
+  {
+   "id": "trv-scie-125",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Physics"
+   },
+   "tags": [],
+   "prompt": "What is the centre of an atom called?",
+   "options": [
+    "Electron",
+    "Nucleus",
+    "Proton cloud",
+    "Shell"
+   ],
+   "answer": "Nucleus",
+   "explanation": "Protons and neutrons form the nucleus."
+  },
+  {
+   "id": "trv-scie-126",
+   "difficulty": 3,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Human biology"
+   },
+   "tags": [],
+   "prompt": "Which vitamin does the skin make in sunlight?",
+   "options": [
+    "Vitamin A",
+    "Vitamin C",
+    "Vitamin D",
+    "Vitamin K"
+   ],
+   "answer": "Vitamin D",
+   "explanation": "UVB light triggers vitamin D production."
+  },
+  {
+   "id": "trv-scie-127",
+   "difficulty": 3,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Physics"
+   },
+   "tags": [],
+   "prompt": "What is the speed of light, approximately?",
+   "options": [
+    "300 km per second",
+    "300,000 km per second",
+    "3,000 km per second",
+    "30 million km per second"
+   ],
+   "answer": "300,000 km per second",
+   "explanation": "About 299,792 km/s in a vacuum."
+  },
+  {
+   "id": "trv-hist-128",
+   "difficulty": 2,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "European history"
+   },
+   "tags": [],
+   "prompt": "Which famous ruler of France was defeated at Waterloo in 1815?",
+   "options": [
+    "Louis XIV",
+    "Napoleon Bonaparte",
+    "Charlemagne",
+    "Louis XVI"
+   ],
+   "answer": "Napoleon Bonaparte",
+   "explanation": "Waterloo ended his rule."
+  },
+  {
+   "id": "trv-hist-129",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Chinese history"
+   },
+   "tags": [],
+   "prompt": "The Great Wall was built mainly to protect which country?",
+   "options": [
+    "Japan",
+    "China",
+    "Mongolia",
+    "Korea"
+   ],
+   "answer": "China",
+   "explanation": "Built along China's northern borders."
+  },
+  {
+   "id": "trv-hist-130",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Age of exploration"
+   },
+   "tags": [],
+   "prompt": "Which explorer led the first expedition to sail around the world (1519–1522)?",
+   "options": [
+    "Christopher Columbus",
+    "Ferdinand Magellan",
+    "Vasco da Gama",
+    "James Cook"
+   ],
+   "answer": "Ferdinand Magellan",
+   "explanation": "Magellan died on the way; Elcano completed it."
+  },
+  {
+   "id": "trv-hist-131",
+   "difficulty": 1,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Medieval history"
+   },
+   "tags": [],
+   "prompt": "What were the castles of medieval knights usually surrounded by, filled with water?",
+   "options": [
+    "A fence",
+    "A moat",
+    "A hedge",
+    "A wall of ice"
+   ],
+   "answer": "A moat",
+   "explanation": "Moats made castles harder to attack."
+  }
+ ]
+}

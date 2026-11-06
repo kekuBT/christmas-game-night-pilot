@@ -34,6 +34,8 @@ export class FakeClock {
 export interface HarnessOptions {
   /** Inject a fake server clock (presence/grace tests). Default: real time. */
   clock?: FakeClock;
+  /** Inject a content library (fixture packs) instead of the shipped one. */
+  content?: import("../../src/content/registry.js").ContentLibrary;
 }
 
 export class Harness {
@@ -54,7 +56,7 @@ export class Harness {
 
   async start(): Promise<this> {
     // Heartbeat off: tests drive disconnects explicitly (heartbeatTick() can be called by hand).
-    this.server = new LocalServer({ dataDir: this.dataDir, clock: this.opts.clock?.now, heartbeatMs: null, lifecycleSweepMs: null });
+    this.server = new LocalServer({ dataDir: this.dataDir, clock: this.opts.clock?.now, heartbeatMs: null, lifecycleSweepMs: null, content: this.opts.content });
     this.port = await this.server.listen(0);
     this.base = `http://localhost:${this.port}`;
     return this;

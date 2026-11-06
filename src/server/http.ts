@@ -4,9 +4,10 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
+import { ContentShortage, RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
+import type { ContentLibrary } from "../content/registry.js";
 import { parseClientProtocol, PROTOCOL_HEADER, PROTOCOL_PARAM } from "../shared/clientProtocol.js";
 import { MemoryBook } from "./memorybook.js";
 import { hashToken } from "../shared/protocol.js";
@@ -48,6 +49,8 @@ export interface ServerOptions {
    * time. Default 1. serve.ts refuses it when NODE_ENV=production.
    */
   lifecycleScale?: number;
+  /** Content library for every room (tests inject fixtures). Default: the shipped packs. */
+  content?: ContentLibrary;
 }
 
 interface SocketMeta {
@@ -147,6 +150,7 @@ export class LocalServer {
   private heartbeat: ReturnType<typeof setInterval> | null = null;
   private lifecycleTimer: ReturnType<typeof setInterval> | null = null;
   private readonly lifecycleScale: number;
+  private readonly contentLib?: ContentLibrary;
   /** Seat recovery: brute-force limits (contract §1.5) and pending host-assisted requests. */
   private recoveries: PendingRecoveries;
   private codeFailuresPerAddressPerRoom: FailureLimiter;
@@ -156,6 +160,7 @@ export class LocalServer {
 
   constructor(opts: ServerOptions = {}) {
     this.clock = opts.clock ?? Date.now;
+    this.contentLib = opts.content;
     this.lifecycleScale = opts.lifecycleScale !== undefined && Number.isFinite(opts.lifecycleScale) && opts.lifecycleScale > 0 ? opts.lifecycleScale : 1;
     this.recoveries = new PendingRecoveries(this.clock);
     // Failed recovery-code attempts, 15-minute windows: 5 per device per
@@ -307,6 +312,7 @@ export class LocalServer {
       // restart time, so a restart reads as "reconnecting", not "away".
       room.clock = this.clock;
       room.lifecycleScale = this.lifecycleScale;
+      if (this.contentLib) room.content = this.contentLib;
       const restartedAt = this.clock();
       for (const p of room.players.values()) { p.connected = false; p.disconnectedAt = restartedAt; }
       // Same for spectators: no socket exists after a restart, so a
@@ -587,6 +593,7 @@ export class LocalServer {
         const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night");
         room.clock = this.clock;
         room.lifecycleScale = this.lifecycleScale;
+      if (this.contentLib) room.content = this.contentLib;
         const hostClaimToken = randomUUID();
         this.rooms.set(room.id, room);
         this.hostClaimHashes.set(room.id, hashToken(hostClaimToken));
@@ -803,6 +810,10 @@ export class LocalServer {
           } catch (err) {
             if (err instanceof StartRefused) {
               this.send(res, 409, { error: err.message, code: err.code, readiness: err.readiness });
+              return;
+            }
+            if (err instanceof ContentShortage) {
+              this.send(res, 409, { error: err.message, code: err.code, available: err.available, needed: err.needed });
               return;
             }
             throw err;

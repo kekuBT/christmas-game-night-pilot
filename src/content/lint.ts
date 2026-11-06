@@ -43,6 +43,7 @@ export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
     for (const li of items) {
       const it = li.item as Record<string, unknown>;
       if (li.item.review.status === "approved") add(li, "error", "approved-in-file", "status 'approved' can only come from content/approvals.json (a human sign-off), not from the pack file");
+      if (li.status === "rejected") continue; // never used: no editorial warnings needed
       // Multiple-choice integrity.
       const opts = (it["options"] ?? it["speakers"]) as string[] | undefined;
       if (opts) {
@@ -86,7 +87,7 @@ export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
       if (gameId === "geography" && it["mode"] === "flag" && !li.item.accessibility) add(li, "warn", "accessibility", "flag questions rely on colour/emoji: describe a text alternative");
     }
     // Near-duplicates within a game.
-    const toks = items.map((li) => ({ li, t: tokens(promptOf(li)), answer: norm(String((li.item as Record<string, unknown>)["answer"] ?? "")) }));
+    const toks = items.filter((li) => li.status !== "rejected").map((li) => ({ li, t: tokens(promptOf(li)), answer: norm(String((li.item as Record<string, unknown>)["answer"] ?? "")) }));
     for (let i = 0; i < toks.length; i++) {
       for (let j = i + 1; j < toks.length; j++) {
         const a = toks[i]!, b = toks[j]!;

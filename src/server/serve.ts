@@ -4,10 +4,17 @@ import { LocalServer } from "./http.js";
 //   PORT                 listen port (default 3000; 0 picks a free port)
 //   MCHEZO_DATA_DIR      room snapshot directory (default ./data)
 //   MCHEZO_WEB_DIST      built web app directory (default apps/web/dist)
+//   MCHEZO_CONTENT_TEST_MODE=approve-provisional  TESTING ONLY: treat
+//                        provisional content as approved. Refused in production.
 //   MCHEZO_LIFECYCLE_SCALE  TESTING ONLY: multiply game/phase time limits
 //                        (e.g. 0.1). Refused when NODE_ENV=production.
 const port = Number(process.env.PORT ?? 3000);
 const scaleRaw = process.env.MCHEZO_LIFECYCLE_SCALE;
+if (process.env.MCHEZO_CONTENT_TEST_MODE && process.env.NODE_ENV === "production") {
+  console.error("MCHEZO_CONTENT_TEST_MODE is for tests only and is not allowed in production.");
+  process.exit(2);
+}
+if (process.env.MCHEZO_CONTENT_TEST_MODE) console.log("TEST MODE: provisional content treated as approved (not a human review)");
 if (scaleRaw && process.env.NODE_ENV === "production") {
   console.error("MCHEZO_LIFECYCLE_SCALE is for tests only and is not allowed in production.");
   process.exit(2);

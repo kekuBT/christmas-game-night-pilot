@@ -1,0 +1,1158 @@
+{
+ "schemaVersion": 1,
+ "packId": "geography-s4",
+ "gameId": "geography",
+ "version": "1.0.0",
+ "title": "Geography — Sprint 4",
+ "language": "en",
+ "items": [
+  {
+   "id": "geo-s4-001",
+   "difficulty": 1,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Germany?",
+   "options": [
+    "Munich",
+    "Berlin",
+    "Hamburg",
+    "Frankfurt"
+   ],
+   "answer": "Berlin",
+   "explanation": "Berlin is Germany's capital."
+  },
+  {
+   "id": "geo-s4-002",
+   "difficulty": 1,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of the United Kingdom?",
+   "options": [
+    "Manchester",
+    "Edinburgh",
+    "London",
+    "Cardiff"
+   ],
+   "answer": "London",
+   "explanation": "London is the UK capital."
+  },
+  {
+   "id": "geo-s4-003",
+   "difficulty": 1,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Ireland?",
+   "options": [
+    "Cork",
+    "Dublin",
+    "Galway",
+    "Belfast"
+   ],
+   "answer": "Dublin",
+   "explanation": "Dublin is Ireland's capital."
+  },
+  {
+   "id": "geo-s4-004",
+   "difficulty": 2,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Portugal?",
+   "options": [
+    "Porto",
+    "Lisbon",
+    "Faro",
+    "Braga"
+   ],
+   "answer": "Lisbon",
+   "explanation": "Lisbon is Portugal's capital."
+  },
+  {
+   "id": "geo-s4-005",
+   "difficulty": 2,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Greece?",
+   "options": [
+    "Athens",
+    "Thessaloniki",
+    "Sparta",
+    "Patras"
+   ],
+   "answer": "Athens",
+   "explanation": "Athens is Greece's capital."
+  },
+  {
+   "id": "geo-s4-006",
+   "difficulty": 2,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Norway?",
+   "options": [
+    "Bergen",
+    "Oslo",
+    "Trondheim",
+    "Stavanger"
+   ],
+   "answer": "Oslo",
+   "explanation": "Oslo is Norway's capital."
+  },
+  {
+   "id": "geo-s4-007",
+   "difficulty": 2,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Kenya?",
+   "options": [
+    "Mombasa",
+    "Nairobi",
+    "Kisumu",
+    "Nakuru"
+   ],
+   "answer": "Nairobi",
+   "explanation": "Nairobi is Kenya's capital."
+  },
+  {
+   "id": "geo-s4-008",
+   "difficulty": 2,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Argentina?",
+   "options": [
+    "Córdoba",
+    "Buenos Aires",
+    "Rosario",
+    "Mendoza"
+   ],
+   "answer": "Buenos Aires",
+   "explanation": "Buenos Aires is Argentina's capital."
+  },
+  {
+   "id": "geo-s4-009",
+   "difficulty": 2,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of South Korea?",
+   "options": [
+    "Busan",
+    "Seoul",
+    "Incheon",
+    "Daegu"
+   ],
+   "answer": "Seoul",
+   "explanation": "Seoul is South Korea's capital."
+  },
+  {
+   "id": "geo-s4-010",
+   "difficulty": 3,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Turkey?",
+   "options": [
+    "Istanbul",
+    "Ankara",
+    "Izmir",
+    "Antalya"
+   ],
+   "answer": "Ankara",
+   "explanation": "Ankara, not Istanbul, is the capital."
+  },
+  {
+   "id": "geo-s4-011",
+   "difficulty": 3,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Brazil?",
+   "options": [
+    "Rio de Janeiro",
+    "São Paulo",
+    "Brasília",
+    "Salvador"
+   ],
+   "answer": "Brasília",
+   "explanation": "Brasília became the capital in 1960."
+  },
+  {
+   "id": "geo-s4-012",
+   "difficulty": 3,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Switzerland (its federal city)?",
+   "options": [
+    "Zurich",
+    "Geneva",
+    "Bern",
+    "Basel"
+   ],
+   "answer": "Bern",
+   "explanation": "Bern is the federal city."
+  },
+  {
+   "id": "geo-s4-013",
+   "difficulty": 3,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Morocco?",
+   "options": [
+    "Casablanca",
+    "Marrakesh",
+    "Rabat",
+    "Fez"
+   ],
+   "answer": "Rabat",
+   "explanation": "Rabat is Morocco's capital."
+  },
+  {
+   "id": "geo-s4-014",
+   "difficulty": 3,
+   "category": "Capitals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "capital",
+   "prompt": "What is the capital of Vietnam?",
+   "options": [
+    "Ho Chi Minh City",
+    "Hanoi",
+    "Da Nang",
+    "Hue"
+   ],
+   "answer": "Hanoi",
+   "explanation": "Hanoi is Vietnam's capital."
+  },
+  {
+   "id": "geo-s4-015",
+   "difficulty": 1,
+   "category": "World regions",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "region",
+   "prompt": "On which continent is Brazil?",
+   "options": [
+    "Africa",
+    "South America",
+    "Asia",
+    "Europe"
+   ],
+   "answer": "South America",
+   "explanation": "Brazil is in South America."
+  },
+  {
+   "id": "geo-s4-016",
+   "difficulty": 1,
+   "category": "World regions",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "region",
+   "prompt": "On which continent is India?",
+   "options": [
+    "Asia",
+    "Africa",
+    "Oceania",
+    "Europe"
+   ],
+   "answer": "Asia",
+   "explanation": "India is in South Asia."
+  },
+  {
+   "id": "geo-s4-017",
+   "difficulty": 2,
+   "category": "World regions",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "region",
+   "prompt": "Which of these countries is in Scandinavia?",
+   "options": [
+    "Poland",
+    "Sweden",
+    "Austria",
+    "Hungary"
+   ],
+   "answer": "Sweden",
+   "explanation": "Sweden is Scandinavian."
+  },
+  {
+   "id": "geo-s4-018",
+   "difficulty": 2,
+   "category": "World regions",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "region",
+   "prompt": "Which ocean is off the west coast of the United States?",
+   "options": [
+    "Atlantic",
+    "Pacific",
+    "Indian",
+    "Arctic"
+   ],
+   "answer": "Pacific",
+   "explanation": "The Pacific borders California."
+  },
+  {
+   "id": "geo-s4-019",
+   "difficulty": 2,
+   "category": "World regions",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "region",
+   "prompt": "Which sea separates Europe from Africa?",
+   "options": [
+    "Red Sea",
+    "Mediterranean Sea",
+    "Black Sea",
+    "Baltic Sea"
+   ],
+   "answer": "Mediterranean Sea",
+   "explanation": "The Mediterranean lies between them."
+  },
+  {
+   "id": "geo-s4-020",
+   "difficulty": 2,
+   "category": "World regions",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "region",
+   "prompt": "Which country is directly north of the United States?",
+   "options": [
+    "Mexico",
+    "Canada",
+    "Greenland",
+    "Russia"
+   ],
+   "answer": "Canada",
+   "explanation": "Canada shares the northern border."
+  },
+  {
+   "id": "geo-s4-021",
+   "difficulty": 3,
+   "category": "World regions",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "region",
+   "prompt": "Which of these countries is landlocked?",
+   "options": [
+    "Portugal",
+    "Switzerland",
+    "Norway",
+    "Croatia"
+   ],
+   "answer": "Switzerland",
+   "explanation": "Switzerland has no coastline."
+  },
+  {
+   "id": "geo-s4-022",
+   "difficulty": 3,
+   "category": "World regions",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "region",
+   "prompt": "Which country shares the longest land border with China?",
+   "options": [
+    "India",
+    "Russia",
+    "Mongolia",
+    "Kazakhstan"
+   ],
+   "answer": "Mongolia",
+   "explanation": "The China–Mongolia border is about 4,600 km."
+  },
+  {
+   "id": "geo-s4-023",
+   "difficulty": 3,
+   "category": "World regions",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "region",
+   "prompt": "The island of Madagascar lies off the coast of which continent?",
+   "options": [
+    "Asia",
+    "Africa",
+    "Australia",
+    "South America"
+   ],
+   "answer": "Africa",
+   "explanation": "It lies off south-east Africa."
+  },
+  {
+   "id": "geo-s4-024",
+   "difficulty": 1,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "landmark",
+   "prompt": "In which city is the Eiffel Tower?",
+   "options": [
+    "London",
+    "Paris",
+    "Rome",
+    "Berlin"
+   ],
+   "answer": "Paris",
+   "explanation": "The Eiffel Tower is in Paris."
+  },
+  {
+   "id": "geo-s4-025",
+   "difficulty": 1,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "landmark",
+   "prompt": "In which country is the Taj Mahal?",
+   "options": [
+    "Pakistan",
+    "India",
+    "Nepal",
+    "Bangladesh"
+   ],
+   "answer": "India",
+   "explanation": "In Agra, India."
+  },
+  {
+   "id": "geo-s4-026",
+   "difficulty": 2,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "landmark",
+   "prompt": "In which city is the Sydney Opera House?",
+   "options": [
+    "Melbourne",
+    "Sydney",
+    "Brisbane",
+    "Perth"
+   ],
+   "answer": "Sydney",
+   "explanation": "It stands on Sydney Harbour."
+  },
+  {
+   "id": "geo-s4-027",
+   "difficulty": 2,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "landmark",
+   "prompt": "In which country is the ancient city of Petra?",
+   "options": [
+    "Egypt",
+    "Jordan",
+    "Syria",
+    "Israel"
+   ],
+   "answer": "Jordan",
+   "explanation": "Petra is in southern Jordan."
+  },
+  {
+   "id": "geo-s4-028",
+   "difficulty": 2,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "landmark",
+   "prompt": "In which city is the Colosseum?",
+   "options": [
+    "Athens",
+    "Rome",
+    "Naples",
+    "Istanbul"
+   ],
+   "answer": "Rome",
+   "explanation": "The Colosseum is in Rome."
+  },
+  {
+   "id": "geo-s4-029",
+   "difficulty": 2,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "landmark",
+   "prompt": "Which country is home to Stonehenge?",
+   "options": [
+    "Ireland",
+    "England",
+    "Scotland",
+    "France"
+   ],
+   "answer": "England",
+   "explanation": "In Wiltshire, England."
+  },
+  {
+   "id": "geo-s4-030",
+   "difficulty": 3,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "landmark",
+   "prompt": "In which country is Angkor Wat?",
+   "options": [
+    "Thailand",
+    "Cambodia",
+    "Laos",
+    "Vietnam"
+   ],
+   "answer": "Cambodia",
+   "explanation": "Angkor Wat is in Cambodia."
+  },
+  {
+   "id": "geo-s4-031",
+   "difficulty": 3,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "landmark",
+   "prompt": "Which city is home to the Sagrada Família?",
+   "options": [
+    "Madrid",
+    "Barcelona",
+    "Seville",
+    "Valencia"
+   ],
+   "answer": "Barcelona",
+   "explanation": "Gaudí's basilica in Barcelona."
+  },
+  {
+   "id": "geo-s4-032",
+   "difficulty": 3,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "landmark",
+   "prompt": "In which country is Table Mountain?",
+   "options": [
+    "Namibia",
+    "South Africa",
+    "Kenya",
+    "Australia"
+   ],
+   "answer": "South Africa",
+   "explanation": "It overlooks Cape Town."
+  },
+  {
+   "id": "geo-s4-033",
+   "difficulty": 1,
+   "category": "Bigger or smaller",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "higher-lower",
+   "prompt": "Which is larger by area: Russia or France?",
+   "options": [
+    "Russia",
+    "France",
+    "They are equal",
+    "It depends on the season"
+   ],
+   "answer": "Russia",
+   "explanation": "Russia is the largest country."
+  },
+  {
+   "id": "geo-s4-034",
+   "difficulty": 2,
+   "category": "Bigger or smaller",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "higher-lower",
+   "prompt": "Which river is longer: the Nile or the Thames?",
+   "options": [
+    "Nile",
+    "Thames",
+    "They are equal",
+    "Neither is a river"
+   ],
+   "answer": "Nile",
+   "explanation": "The Nile is about 6,650 km; the Thames about 346 km."
+  },
+  {
+   "id": "geo-s4-035",
+   "difficulty": 2,
+   "category": "Bigger or smaller",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "higher-lower",
+   "prompt": "Which is bigger by area: Australia or Greenland?",
+   "options": [
+    "Australia",
+    "Greenland",
+    "They are equal",
+    "Neither is land"
+   ],
+   "answer": "Australia",
+   "explanation": "Australia is about 7.7 million km²; Greenland about 2.2 million km²."
+  },
+  {
+   "id": "geo-s4-036",
+   "difficulty": 3,
+   "category": "Bigger or smaller",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "higher-lower",
+   "prompt": "Which is higher: Mont Blanc or Mount Kilimanjaro?",
+   "options": [
+    "Mont Blanc",
+    "Mount Kilimanjaro",
+    "They are equal",
+    "Neither is a mountain"
+   ],
+   "answer": "Mount Kilimanjaro",
+   "explanation": "Kilimanjaro is about 5,895 m; Mont Blanc about 4,806 m."
+  },
+  {
+   "id": "geo-s4-037",
+   "difficulty": 3,
+   "category": "Bigger or smaller",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "higher-lower",
+   "prompt": "Which lake is larger by area: Lake Superior or Lake Victoria?",
+   "options": [
+    "Lake Superior",
+    "Lake Victoria",
+    "They are equal",
+    "Neither is a lake"
+   ],
+   "answer": "Lake Superior",
+   "explanation": "Superior is about 82,000 km²; Victoria about 69,000 km²."
+  },
+  {
+   "id": "geo-s4-038",
+   "difficulty": 1,
+   "category": "Flags",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "flag",
+   "prompt": "Which country does this flag belong to? 🇮🇹",
+   "options": [
+    "Italy",
+    "Ireland",
+    "Mexico",
+    "Hungary"
+   ],
+   "answer": "Italy",
+   "explanation": "Green, white and red vertical stripes.",
+   "accessibility": "Three vertical stripes: green, white, red."
+  },
+  {
+   "id": "geo-s4-039",
+   "difficulty": 2,
+   "category": "Flags",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "flag",
+   "prompt": "Which country does this flag belong to? 🇨🇦",
+   "options": [
+    "Canada",
+    "Peru",
+    "Austria",
+    "Switzerland"
+   ],
+   "answer": "Canada",
+   "explanation": "Red and white with a maple leaf.",
+   "accessibility": "Red bands at each side, white centre with a red maple leaf."
+  },
+  {
+   "id": "geo-s4-040",
+   "difficulty": 2,
+   "category": "Flags",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "flag",
+   "prompt": "Which country does this flag belong to? 🇧🇷",
+   "options": [
+    "Portugal",
+    "Brazil",
+    "Argentina",
+    "Colombia"
+   ],
+   "answer": "Brazil",
+   "explanation": "Green with a yellow diamond and a blue globe.",
+   "accessibility": "Green field, yellow diamond, blue globe with stars."
+  },
+  {
+   "id": "geo-s4-041",
+   "difficulty": 3,
+   "category": "Flags",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "flag",
+   "prompt": "Which country does this flag belong to? 🇰🇷",
+   "options": [
+    "Japan",
+    "South Korea",
+    "China",
+    "Taiwan"
+   ],
+   "answer": "South Korea",
+   "explanation": "White with a red and blue circle and four black trigrams.",
+   "accessibility": "White field, red-and-blue circle, four black bar symbols."
+  },
+  {
+   "id": "geo-s4-042",
+   "difficulty": 2,
+   "category": "Distances",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "distance",
+   "prompt": "Which city is closest to London?",
+   "options": [
+    "Paris",
+    "Madrid",
+    "Rome",
+    "Vienna"
+   ],
+   "answer": "Paris",
+   "explanation": "About 340 km."
+  },
+  {
+   "id": "geo-s4-043",
+   "difficulty": 3,
+   "category": "Distances",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "distance",
+   "prompt": "Which of these cities is closest to New York?",
+   "options": [
+    "Chicago",
+    "Boston",
+    "Miami",
+    "Los Angeles"
+   ],
+   "answer": "Boston",
+   "explanation": "About 300 km."
+  },
+  {
+   "id": "geo-s4-044",
+   "difficulty": 3,
+   "category": "Distances",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World atlas / encyclopaedia"
+   },
+   "tags": [],
+   "mode": "distance",
+   "prompt": "Which capital is closest to Tokyo?",
+   "options": [
+    "Seoul",
+    "Beijing",
+    "Manila",
+    "Bangkok"
+   ],
+   "answer": "Seoul",
+   "explanation": "About 1,150 km."
+  }
+ ]
+}

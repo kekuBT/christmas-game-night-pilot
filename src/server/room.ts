@@ -7,6 +7,13 @@ import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
 import { formatInfo, type CompetitionFormat } from "../scoring/format.js";
 import { qualifies, QualificationPolicySchema, type GameParticipationRecord, type QualificationPolicy } from "../scoring/qualification.js";
 import { CupRecordSchema, describePolicy, newCupRecord, restoreCupRecord, type CupRecord } from "./cup.js";
+import { contentLibrary, type ContentLibrary } from "../content/registry.js";
+import { recordUsage, selectContent, type UsageHistory } from "../content/select.js";
+import { ITEMS_PER_GAME, materialize } from "../content/materialize.js";
+import { CONTENT_GAMES, type ContentGameId } from "../content/schema.js";
+import { seededRng } from "../shared/rng.js";
+import type { ConnectionsBoard } from "../games/connections.js";
+import type { SprintCategory } from "../games/sprint.js";
 import { evaluateAchievements, dayCeremony } from "./achievements.js";
 import { generateMathQuestions, scoreMathAnswer, type MathQuestion } from "../games/math.js";
 import {
@@ -175,6 +182,14 @@ export class StartRefused extends Error {
   }
 }
 
+/** The host can't start an official game: this Cup has run out of unused approved content for it. */
+export class ContentShortage extends Error {
+  readonly code = "CONTENT_EXHAUSTED";
+  constructor(message: string, readonly available: number, readonly needed: number) {
+    super(message);
+  }
+}
+
 export interface GameInstance {
   id: string;
   gameId: string;
@@ -288,6 +303,17 @@ export class RoomEngine {
    * which serve.ts refuses in production. Not persisted.
    */
   lifecycleScale = 1;
+  /**
+   * Content (Sprint 4): which items this Cup has used, and a counter that
+   * makes successive selections differ reproducibly. Saved with the room,
+   * scoped to the Cup. Cups from before Sprint 4 keep their old fixed packs.
+   */
+  contentUsage: UsageHistory = {};
+  contentSeq = 0;
+  /** The content library (the shipped packs; tests may inject their own). */
+  private _content: ContentLibrary | null = null;
+  get content(): ContentLibrary { return (this._content ??= contentLibrary()); }
+  set content(lib: ContentLibrary) { this._content = lib; }
   /** A projection changed persisted state (promptsExposed); the caller saves. */
   private dirty = false;
   takeDirty(): boolean {
@@ -567,6 +593,25 @@ export class RoomEngine {
     // tests only; the old default of 42 made hidden-role assignment predictable.
     const seed = opts.seed ?? randomInt(0, 2147483647);
     const startedAt = this.clock(); // one instant: start, game deadline and first phase all derive from it
+    // Content for Cups created from Sprint 4 on: chosen by the selection
+    // service and recorded in the Cup's history in this same synchronous
+    // step, so it is atomic with game creation.
+    let selected: { extra: unknown; record: () => void } | null = null;
+    if (this._cup.origin === "created" && (CONTENT_GAMES as string[]).includes(gameId)) {
+      const cg = gameId as ContentGameId;
+      const mode = (opts.official ?? false) ? "official" : "practice";
+      const need = cg === "charades" ? Math.max(ITEMS_PER_GAME.charades, playerIds.length * 4) : ITEMS_PER_GAME[cg];
+      const pick = selectContent({ lib: this.content, gameId: cg, count: need, mode, cupId: this._cup.cupId, usage: this.contentUsage, seq: this.contentSeq, today: new Date(startedAt).toISOString().slice(0, 10) });
+      if (!pick.ok) throw new ContentShortage(pick.message, pick.available, pick.needed);
+      selected = {
+        extra: materialize(cg, pick.items, { seed, playerIds }),
+        record: () => {
+          recordUsage(this.contentUsage, pick.items, { gameInstanceId: id, day: this.championshipDay, mode, seq: this.contentSeq });
+          this.contentSeq += 1;
+          this.log("content-selected", { gameInstanceId: id, detail: { items: pick.items.map((li) => li.item.id), packs: [...new Set(pick.items.map((li) => `${li.packId}@${li.packVersion}`))], reasons: pick.reasons } });
+        },
+      };
+    }
     const instance: GameInstance = {
       id,
       gameId,
@@ -584,8 +629,8 @@ export class RoomEngine {
       lifecycleVersion: 1,
       day: this.championshipDay,
       seed,
-      extra:
-        gameId === "impostor"
+      extra: selected ? selected.extra
+        : gameId === "impostor"
           ? initImpostor(playerIds, seed)
           : gameId === "caption-clash"
             ? initCaption(seed)
@@ -608,6 +653,7 @@ export class RoomEngine {
                             : undefined,
     };
     this.games.set(id, instance);
+    selected?.record();
     this.syncPhase(instance, startedAt); // phased games: start the first phase's clock
     // Audit who was left out and whether the host chose that explicitly.
     const leftOut = readiness.wouldMiss.map((m) => ({ id: m.id, presence: m.presence }));
@@ -788,7 +834,7 @@ export class RoomEngine {
         const tileIds = intent.payload["tileIds"];
         if (!Array.isArray(tileIds) || !tileIds.every((t) => typeof t === "string")) return { accepted: false, reason: "INVALID_PAYLOAD" };
         const ps = state.playerStates[actorId]!;
-        guessConnections(CONNECTIONS_BOARD, ps, tileIds as string[]);
+        guessConnections(this.boardOf(game), ps, tileIds as string[]);
         const allDone = this.activePlayers(game).every((pid) => {
           const s = state.playerStates[pid]!;
           return s.solved.length >= 4 || s.mistakes >= 4 || (game.abstained ?? []).includes(pid);
@@ -839,7 +885,7 @@ export class RoomEngine {
     if (state.roundIndex + 1 >= 3) {
       const total: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
       for (let r = 0; r < 3; r++) {
-        const cat = SPRINT_CATEGORIES[r % SPRINT_CATEGORIES.length]!;
+        const cat = this.sprintCategory(game, r);
         const roundScores = scoreSprintRound(cat, state.submissions[r] ?? {});
         for (const pid of game.players) total[pid] = (total[pid] ?? 0) + (roundScores[pid] ?? 0);
       }
@@ -1197,7 +1243,7 @@ export class RoomEngine {
       for (const r of st.rounds.slice(0, st.roundIndex)) add(captionRoundScores(r));
     } else if (game.gameId === "category-sprint") {
       const st = game.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
-      for (let r = 0; r < st.roundIndex; r++) add(scoreSprintRound(SPRINT_CATEGORIES[r % SPRINT_CATEGORIES.length]!, st.submissions[r] ?? {}));
+      for (let r = 0; r < st.roundIndex; r++) add(scoreSprintRound(this.sprintCategory(game, r), st.submissions[r] ?? {}));
     }
     // Impostor/Charades: no partial result exists (and they are practice-only).
     return totals;
@@ -1658,7 +1704,7 @@ export class RoomEngine {
       case "guess-the-year":
         return { events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })) };
       case "word-connections":
-        return { tiles: CONNECTIONS_BOARD.tiles.map((t) => ({ id: t.id, text: t.text })) };
+        return { tiles: this.connectionsTiles(g) };
       case "category-sprint":
         return this.sprintView(g);
       default:
@@ -1687,7 +1733,7 @@ export class RoomEngine {
           myGuesses: (g.extra as { guesses: Record<string, Record<string, number>> }).guesses[actorId] ?? {},
         };
       case "word-connections":
-        return { tiles: CONNECTIONS_BOARD.tiles.map((t) => ({ id: t.id, text: t.text })), myState: (g.extra as { playerStates: Record<string, ConnectionsPlayerState> }).playerStates[actorId] };
+        return { tiles: this.connectionsTiles(g), myState: (g.extra as { playerStates: Record<string, ConnectionsPlayerState> }).playerStates[actorId] };
       case "category-sprint":
         return this.sprintView(g);
       default:
@@ -1710,7 +1756,35 @@ export class RoomEngine {
 
   private sprintView(g: GameInstance): Record<string, unknown> {
     const roundIndex = (g.extra as { roundIndex: number }).roundIndex;
-    return { roundIndex, category: SPRINT_CATEGORIES[roundIndex % SPRINT_CATEGORIES.length]?.name };
+    return { roundIndex, category: this.sprintCategory(g, roundIndex)?.name };
+  }
+
+  /** A Sprint round's category: the game's own snapshot, or the original fixed list for older games. */
+  private sprintCategory(g: GameInstance, round: number): SprintCategory {
+    const own = (g.extra as { categories?: SprintCategory[] }).categories;
+    return own?.[round] ?? SPRINT_CATEGORIES[round % SPRINT_CATEGORIES.length]!;
+  }
+
+  /** The game's own Connections board, or the original board for older games. */
+  private boardOf(g: GameInstance): ConnectionsBoard {
+    return (g.extra as { board?: ConnectionsBoard }).board ?? CONNECTIONS_BOARD;
+  }
+
+  /**
+   * Tiles in display order. Never in answer order: before Sprint 4 the board
+   * was sent group by group (the first four tiles were always one group).
+   * New games carry a seeded order; older games get one derived from their seed.
+   */
+  private connectionsTiles(g: GameInstance): { id: string; text: string }[] {
+    const board = this.boardOf(g);
+    let order = (g.extra as { tileOrder?: string[] }).tileOrder;
+    if (!order) {
+      const rng = seededRng((g.seed ?? 1) ^ 0x5bd1e995);
+      order = board.tiles.map((t) => t.id);
+      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [order[i], order[j]] = [order[j]!, order[i]!]; }
+    }
+    const byId = new Map(board.tiles.map((t) => [t.id, t]));
+    return order.map((id) => ({ id, text: byId.get(id)!.text }));
   }
 
   /** The ONLY pathway to outbound state. Never include secrets for the wrong audience. */
@@ -1858,6 +1932,8 @@ export class RoomEngine {
       // record is written back exactly as it was found, never overwritten.
       competitionFormat: this._cup.format,
       cup: this.cupError ? this.cupRaw : this._cup,
+      contentUsage: this.contentUsage,
+      contentSeq: this.contentSeq,
       players: [...this.players.values()],
       spectators: [...this.spectators.values()],
       games: [...this.games.values()],
@@ -1879,6 +1955,8 @@ export class RoomEngine {
     // Migration default: snapshots written before championshipDay was
     // serialized (review 5769441799) have no field and resume at day 1.
     engine.championshipDay = typeof data["championshipDay"] === "number" ? data["championshipDay"] : 1;
+    engine.contentUsage = (data["contentUsage"] as UsageHistory | undefined) ?? {};
+    engine.contentSeq = typeof data["contentSeq"] === "number" ? data["contentSeq"] : 0;
     // The Cup's rules come from its saved record; a snapshot from before
     // Sprint 4 keeps the rules it was played under (src/server/cup.ts).
     const firstEvent = (data["ledger"] as LedgerEvent[] | undefined)?.[0]?.createdAt ?? 0;

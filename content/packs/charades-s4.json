@@ -1,0 +1,1258 @@
+{
+ "schemaVersion": 1,
+ "packId": "charades-s4",
+ "gameId": "charades",
+ "version": "1.0.0",
+ "title": "Charades — Sprint 4 prompts (practice)",
+ "language": "en",
+ "items": [
+  {
+   "id": "chr-s4-001",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Brushing your teeth"
+  },
+  {
+   "id": "chr-s4-002",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Riding a bicycle"
+  },
+  {
+   "id": "chr-s4-003",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Making a snowman"
+  },
+  {
+   "id": "chr-s4-004",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Flying a kite"
+  },
+  {
+   "id": "chr-s4-005",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Baking a cake"
+  },
+  {
+   "id": "chr-s4-006",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Washing a dog"
+  },
+  {
+   "id": "chr-s4-007",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Climbing a ladder"
+  },
+  {
+   "id": "chr-s4-008",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Playing the piano"
+  },
+  {
+   "id": "chr-s4-009",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Walking on ice"
+  },
+  {
+   "id": "chr-s4-010",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Catching a fish"
+  },
+  {
+   "id": "chr-s4-011",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Building a sandcastle"
+  },
+  {
+   "id": "chr-s4-012",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Wrapping a present"
+  },
+  {
+   "id": "chr-s4-013",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Blowing out candles"
+  },
+  {
+   "id": "chr-s4-014",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Juggling"
+  },
+  {
+   "id": "chr-s4-015",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Taking a selfie"
+  },
+  {
+   "id": "chr-s4-016",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Ice skating"
+  },
+  {
+   "id": "chr-s4-017",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Changing a light bulb"
+  },
+  {
+   "id": "chr-s4-018",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being stuck in a lift"
+  },
+  {
+   "id": "chr-s4-019",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Waiting for a bus in the rain"
+  },
+  {
+   "id": "chr-s4-020",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Eating spaghetti"
+  },
+  {
+   "id": "chr-s4-021",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Making a pizza"
+  },
+  {
+   "id": "chr-s4-022",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Opening a stuck jar"
+  },
+  {
+   "id": "chr-s4-023",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Doing yoga"
+  },
+  {
+   "id": "chr-s4-024",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Riding a horse"
+  },
+  {
+   "id": "chr-s4-025",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Rowing a boat"
+  },
+  {
+   "id": "chr-s4-026",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Skiing downhill"
+  },
+  {
+   "id": "chr-s4-027",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Playing tennis"
+  },
+  {
+   "id": "chr-s4-028",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Painting a wall"
+  },
+  {
+   "id": "chr-s4-029",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Planting a tree"
+  },
+  {
+   "id": "chr-s4-030",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Sledging"
+  },
+  {
+   "id": "chr-s4-031",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Throwing a snowball"
+  },
+  {
+   "id": "chr-s4-032",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Decorating a tree"
+  },
+  {
+   "id": "chr-s4-033",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Hanging up washing"
+  },
+  {
+   "id": "chr-s4-034",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Ironing a shirt"
+  },
+  {
+   "id": "chr-s4-035",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Walking a very big dog"
+  },
+  {
+   "id": "chr-s4-036",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Hiding from someone"
+  },
+  {
+   "id": "chr-s4-037",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Sneaking past a sleeping cat"
+  },
+  {
+   "id": "chr-s4-038",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Searching for lost keys"
+  },
+  {
+   "id": "chr-s4-039",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Dancing at a wedding"
+  },
+  {
+   "id": "chr-s4-040",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Conducting an orchestra"
+  },
+  {
+   "id": "chr-s4-041",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being a robot"
+  },
+  {
+   "id": "chr-s4-042",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being a penguin"
+  },
+  {
+   "id": "chr-s4-043",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being a cat waking up"
+  },
+  {
+   "id": "chr-s4-044",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being an astronaut on the Moon"
+  },
+  {
+   "id": "chr-s4-045",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being a magician"
+  },
+  {
+   "id": "chr-s4-046",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being a statue"
+  },
+  {
+   "id": "chr-s4-047",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being a scarecrow"
+  },
+  {
+   "id": "chr-s4-048",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being a lion tamer"
+  },
+  {
+   "id": "chr-s4-049",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Swimming against the current"
+  },
+  {
+   "id": "chr-s4-050",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Climbing a mountain"
+  },
+  {
+   "id": "chr-s4-051",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Surfing a big wave"
+  },
+  {
+   "id": "chr-s4-052",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Popping a balloon"
+  },
+  {
+   "id": "chr-s4-053",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Chopping onions"
+  },
+  {
+   "id": "chr-s4-054",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Reading a scary book"
+  },
+  {
+   "id": "chr-s4-055",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Watching a sad film"
+  },
+  {
+   "id": "chr-s4-056",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Winning a race"
+  },
+  {
+   "id": "chr-s4-057",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Losing your umbrella in the wind"
+  },
+  {
+   "id": "chr-s4-058",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Opening a present you don't like"
+  },
+  {
+   "id": "chr-s4-059",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Trying to stay awake"
+  },
+  {
+   "id": "chr-s4-060",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Sneezing"
+  },
+  {
+   "id": "chr-s4-061",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Playing hide and seek"
+  },
+  {
+   "id": "chr-s4-062",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Pulling a cracker"
+  },
+  {
+   "id": "chr-s4-063",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Carrying a heavy suitcase upstairs"
+  },
+  {
+   "id": "chr-s4-064",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Feeding the ducks"
+  },
+  {
+   "id": "chr-s4-065",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Drinking very hot soup"
+  },
+  {
+   "id": "chr-s4-066",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Chasing a runaway hat"
+  },
+  {
+   "id": "chr-s4-067",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Using a hula hoop"
+  },
+  {
+   "id": "chr-s4-068",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Bowling"
+  },
+  {
+   "id": "chr-s4-069",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Playing golf"
+  },
+  {
+   "id": "chr-s4-070",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Taking a penalty kick"
+  },
+  {
+   "id": "chr-s4-071",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Brushing a horse"
+  },
+  {
+   "id": "chr-s4-072",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Putting up a tent"
+  },
+  {
+   "id": "chr-s4-073",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Toasting marshmallows"
+  },
+  {
+   "id": "chr-s4-074",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Knitting a scarf"
+  },
+  {
+   "id": "chr-s4-075",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Shovelling snow"
+  },
+  {
+   "id": "chr-s4-076",
+   "difficulty": 2,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Being a reindeer pulling a sleigh"
+  },
+  {
+   "id": "chr-s4-077",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Making a cup of tea"
+  },
+  {
+   "id": "chr-s4-078",
+   "difficulty": 1,
+   "category": "Actions",
+   "language": "en",
+   "eligibility": "practice",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Doing a magic trick"
+  }
+ ]
+}

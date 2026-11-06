@@ -1,0 +1,706 @@
+{
+ "schemaVersion": 1,
+ "packId": "word-connections-s4",
+ "gameId": "word-connections",
+ "version": "1.0.0",
+ "title": "Word Connections — Sprint 4 boards",
+ "language": "en",
+ "items": [
+  {
+   "id": "con-s4-01",
+   "difficulty": 2,
+   "category": "Mixed",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Snow' looks like weather, but the weather group is already complete (Hail, Sleet, Drizzle, Fog); Snow belongs to ___ball.",
+   "groups": [
+    {
+     "name": "Kitchen utensils",
+     "words": [
+      "Spoon",
+      "Whisk",
+      "Ladle",
+      "Spatula"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Weather",
+     "words": [
+      "Hail",
+      "Sleet",
+      "Drizzle",
+      "Fog"
+     ],
+     "level": 2
+    },
+    {
+     "name": "___ball",
+     "words": [
+      "Snow",
+      "Foot",
+      "Basket",
+      "Meat"
+     ],
+     "level": 3
+    },
+    {
+     "name": "Things with keys",
+     "words": [
+      "Piano",
+      "Map",
+      "Lock",
+      "Typewriter"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-02",
+   "difficulty": 2,
+   "category": "Mixed",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Sage' is a herb, but the herb group is already complete (Basil, Thyme, Parsley, Rosemary); here it is a shade of green. 'Lime' is a fruit, not a green, on this board.",
+   "groups": [
+    {
+     "name": "Citrus and stone fruits",
+     "words": [
+      "Cherry",
+      "Plum",
+      "Lemon",
+      "Lime"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Card games",
+     "words": [
+      "Snap",
+      "Bridge",
+      "Poker",
+      "Rummy"
+     ],
+     "level": 2
+    },
+    {
+     "name": "Herbs",
+     "words": [
+      "Basil",
+      "Thyme",
+      "Parsley",
+      "Rosemary"
+     ],
+     "level": 3
+    },
+    {
+     "name": "Shades of green",
+     "words": [
+      "Emerald",
+      "Jade",
+      "Moss",
+      "Sage"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-03",
+   "difficulty": 2,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Comet' is a reindeer and a space object, and 'Star' is a tree topper and a space object. Only Comet completes the reindeer (Cupid, Donner, Blitzen) and only Star completes space (Planet, Meteor, Galaxy).",
+   "groups": [
+    {
+     "name": "On a Christmas tree",
+     "words": [
+      "Angel",
+      "Tinsel",
+      "Bauble",
+      "Garland"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Santa's reindeer",
+     "words": [
+      "Comet",
+      "Cupid",
+      "Donner",
+      "Blitzen"
+     ],
+     "level": 2
+    },
+    {
+     "name": "In space",
+     "words": [
+      "Star",
+      "Planet",
+      "Meteor",
+      "Galaxy"
+     ],
+     "level": 3
+    },
+    {
+     "name": "___bread",
+     "words": [
+      "Ginger",
+      "Short",
+      "Corn",
+      "Flat"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-04",
+   "difficulty": 2,
+   "category": "Mixed",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Organ' is a body part and an instrument; the body group (Elbow, Knee, Ankle, Wrist) is complete without it.",
+   "groups": [
+    {
+     "name": "Joints of the body",
+     "words": [
+      "Elbow",
+      "Knee",
+      "Ankle",
+      "Wrist"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Musical instruments",
+     "words": [
+      "Drum",
+      "Harp",
+      "Flute",
+      "Organ"
+     ],
+     "level": 2
+    },
+    {
+     "name": "___fly",
+     "words": [
+      "Butter",
+      "Dragon",
+      "House",
+      "Fire"
+     ],
+     "level": 3
+    },
+    {
+     "name": "Sun___",
+     "words": [
+      "Flower",
+      "Dial",
+      "Shine",
+      "Rise"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-05",
+   "difficulty": 1,
+   "category": "Animals",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Turtle' is an animal but not a farm animal; it belongs with things that have shells.",
+   "groups": [
+    {
+     "name": "Farm animals",
+     "words": [
+      "Cow",
+      "Pig",
+      "Goat",
+      "Sheep"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Garden birds",
+     "words": [
+      "Robin",
+      "Wren",
+      "Owl",
+      "Swan"
+     ],
+     "level": 2
+    },
+    {
+     "name": "Boats",
+     "words": [
+      "Canoe",
+      "Yacht",
+      "Ferry",
+      "Barge"
+     ],
+     "level": 3
+    },
+    {
+     "name": "Things with shells",
+     "words": [
+      "Egg",
+      "Snail",
+      "Turtle",
+      "Nut"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-06",
+   "difficulty": 2,
+   "category": "Mixed",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Hands' and 'Face' sound like body parts but belong to a watch; 'Hearts' is a card suit.",
+   "groups": [
+    {
+     "name": "Breakfast foods",
+     "words": [
+      "Toast",
+      "Cereal",
+      "Porridge",
+      "Pancakes"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Parts of a watch",
+     "words": [
+      "Face",
+      "Hands",
+      "Strap",
+      "Dial"
+     ],
+     "level": 2
+    },
+    {
+     "name": "Card suits",
+     "words": [
+      "Hearts",
+      "Clubs",
+      "Spades",
+      "Diamonds"
+     ],
+     "level": 3
+    },
+    {
+     "name": "___cake",
+     "words": [
+      "Cup",
+      "Cheese",
+      "Fish",
+      "Sponge"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-07",
+   "difficulty": 2,
+   "category": "Mixed",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Squash' is also a vegetable, but the vegetables (Carrot, Leek, Pea, Turnip) are already complete, so it is a racket sport here. 'Square' is a shape.",
+   "groups": [
+    {
+     "name": "Racket sports",
+     "words": [
+      "Tennis",
+      "Squash",
+      "Badminton",
+      "Padel"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Vegetables",
+     "words": [
+      "Carrot",
+      "Leek",
+      "Pea",
+      "Turnip"
+     ],
+     "level": 2
+    },
+    {
+     "name": "Shapes",
+     "words": [
+      "Circle",
+      "Square",
+      "Triangle",
+      "Oval"
+     ],
+     "level": 3
+    },
+    {
+     "name": "Things you can break",
+     "words": [
+      "Record",
+      "Promise",
+      "Code",
+      "Silence"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-08",
+   "difficulty": 3,
+   "category": "Mixed",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'King' could also make 'kingfish', but the chess group (King, Queen, Bishop, Knight) needs it; 'Star', 'Cat', 'Sword' and 'Jelly' complete ___fish. 'Piano' is a musical term (softly) here.",
+   "groups": [
+    {
+     "name": "Sea creatures",
+     "words": [
+      "Shark",
+      "Whale",
+      "Dolphin",
+      "Octopus"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Chess pieces",
+     "words": [
+      "King",
+      "Queen",
+      "Bishop",
+      "Knight"
+     ],
+     "level": 2
+    },
+    {
+     "name": "Musical terms",
+     "words": [
+      "Forte",
+      "Piano",
+      "Tempo",
+      "Chord"
+     ],
+     "level": 3
+    },
+    {
+     "name": "___fish",
+     "words": [
+      "Star",
+      "Cat",
+      "Sword",
+      "Jelly"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-09",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Lima' is the capital of Peru, which is on the board as a country; capitals and countries are separate groups.",
+   "groups": [
+    {
+     "name": "Countries",
+     "words": [
+      "Chile",
+      "Peru",
+      "Cuba",
+      "Kenya"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Capital cities",
+     "words": [
+      "Paris",
+      "Rome",
+      "Lima",
+      "Oslo"
+     ],
+     "level": 2
+    },
+    {
+     "name": "Rivers",
+     "words": [
+      "Nile",
+      "Thames",
+      "Amazon",
+      "Danube"
+     ],
+     "level": 3
+    },
+    {
+     "name": "Mountain ranges",
+     "words": [
+      "Andes",
+      "Alps",
+      "Rockies",
+      "Himalayas"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-10",
+   "difficulty": 2,
+   "category": "Mixed",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Fry' and 'Boil' are cooking verbs; 'Ear', 'Key', 'Boxing' and 'Wedding' come before 'ring'.",
+   "groups": [
+    {
+     "name": "Stringed instruments",
+     "words": [
+      "Violin",
+      "Cello",
+      "Guitar",
+      "Banjo"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Ways to cook",
+     "words": [
+      "Bake",
+      "Roast",
+      "Boil",
+      "Fry"
+     ],
+     "level": 2
+    },
+    {
+     "name": "Pasta shapes",
+     "words": [
+      "Penne",
+      "Fusilli",
+      "Ravioli",
+      "Farfalle"
+     ],
+     "level": 3
+    },
+    {
+     "name": "___ring",
+     "words": [
+      "Ear",
+      "Key",
+      "Boxing",
+      "Wedding"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-11",
+   "difficulty": 2,
+   "category": "Mixed",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Ruler' sounds royal but is in the pencil case; the titles are Prince, Duke, Earl, Baron. 'Key' and 'Card' come before 'board'.",
+   "groups": [
+    {
+     "name": "Furniture",
+     "words": [
+      "Sofa",
+      "Table",
+      "Chair",
+      "Wardrobe"
+     ],
+     "level": 1
+    },
+    {
+     "name": "In a pencil case",
+     "words": [
+      "Ruler",
+      "Eraser",
+      "Pencil",
+      "Sharpener"
+     ],
+     "level": 2
+    },
+    {
+     "name": "Titles of nobility",
+     "words": [
+      "Prince",
+      "Duke",
+      "Earl",
+      "Baron"
+     ],
+     "level": 3
+    },
+    {
+     "name": "___board",
+     "words": [
+      "Card",
+      "Key",
+      "Skate",
+      "Surf"
+     ],
+     "level": 4
+    }
+   ]
+  },
+  {
+   "id": "con-s4-12",
+   "difficulty": 2,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "redHerrings": "'Amber' and 'Pearl' are gems, not flowers or trees; 'Straw', 'Blue', 'Rasp' and 'Goose' come before 'berry'.",
+   "groups": [
+    {
+     "name": "Trees",
+     "words": [
+      "Oak",
+      "Ash",
+      "Elm",
+      "Birch"
+     ],
+     "level": 1
+    },
+    {
+     "name": "Flowers",
+     "words": [
+      "Rose",
+      "Daisy",
+      "Tulip",
+      "Lily"
+     ],
+     "level": 2
+    },
+    {
+     "name": "Gemstones",
+     "words": [
+      "Ruby",
+      "Pearl",
+      "Amber",
+      "Opal"
+     ],
+     "level": 3
+    },
+    {
+     "name": "___berry",
+     "words": [
+      "Straw",
+      "Blue",
+      "Rasp",
+      "Goose"
+     ],
+     "level": 4
+    }
+   ]
+  }
+ ]
+}

@@ -115,8 +115,12 @@ describe("room engine", () => {
     const proj = engine.project("player", players[0]!.id) as { myGames: { state: { questions: { id: string; prompt: string; options: string[] }[] } }[] };
     const qs = proj.myGames[0]!.state.questions;
     expect(qs.length).toBeGreaterThan(0);
-    expect(qs[0]!.prompt).toContain("snow");
-    expect(qs[0]!.options).toEqual(["Mira the Baker", "Tom the Gardener", "Lena the Sailor", "Omar the Teacher"]);
+    // Each question shows its own four speakers (shuffled per game) as the answer options.
+    const game = [...engine.games.values()][0]!;
+    const own = (game.extra as { questions: { id: string; quote: string; speakers: string[] }[] }).questions;
+    expect(qs[0]!.prompt).toBe(own[0]!.quote);
+    expect(qs[0]!.options).toEqual(own[0]!.speakers);
+    expect(new Set(qs[0]!.options).size).toBe(4);
   });
 
   it("cannot start a second game while one is playing", () => {

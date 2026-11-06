@@ -17,11 +17,11 @@ export const CHARADES_PROMPTS = [
   "Sledging down a hill",
 ];
 
-export function initCharades(playerIds: string[]): CharadesState {
+export function initCharades(playerIds: string[], prompts: string[] = CHARADES_PROMPTS): CharadesState {
   // Split as evenly as possible into 2 teams, alternating assignment
   const teams: string[][] = [[], []];
   playerIds.forEach((pid, i) => teams[i % 2]!.push(pid));
-  return { teams, prompts: CHARADES_PROMPTS, turnIndex: 0, promptIndex: 0, passesThisTurn: 0, teamScores: [0, 0], phase: "playing" };
+  return { teams, prompts: prompts.length > 0 ? prompts : CHARADES_PROMPTS, turnIndex: 0, promptIndex: 0, passesThisTurn: 0, teamScores: [0, 0], phase: "playing" };
 }
 
 export function currentActor(state: CharadesState): string {

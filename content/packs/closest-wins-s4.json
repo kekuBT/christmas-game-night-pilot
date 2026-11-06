@@ -1,0 +1,1063 @@
+{
+ "schemaVersion": 1,
+ "packId": "closest-wins-s4",
+ "gameId": "closest-wins",
+ "version": "1.0.0",
+ "title": "Closest Wins — Sprint 4",
+ "language": "en",
+ "items": [
+  {
+   "id": "cls-c-01",
+   "difficulty": 1,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "24 * 60 * 60"
+   },
+   "tags": [],
+   "prompt": "How many seconds are in one day?",
+   "unit": "seconds",
+   "answer": 86400,
+   "formula": "24 * 60 * 60",
+   "explanation": "24 hours × 60 minutes × 60 seconds."
+  },
+  {
+   "id": "cls-c-02",
+   "difficulty": 1,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "7 * 24 * 60"
+   },
+   "tags": [],
+   "prompt": "How many minutes are in one week?",
+   "unit": "minutes",
+   "answer": 10080,
+   "formula": "7 * 24 * 60",
+   "explanation": "7 days × 24 hours × 60 minutes."
+  },
+  {
+   "id": "cls-c-03",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "7 * 24 * 60 * 60"
+   },
+   "tags": [],
+   "prompt": "How many seconds are in one week?",
+   "unit": "seconds",
+   "answer": 604800,
+   "formula": "7 * 24 * 60 * 60",
+   "explanation": "7 × 24 × 60 × 60."
+  },
+  {
+   "id": "cls-c-04",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "365 * 24"
+   },
+   "tags": [],
+   "prompt": "How many hours are in a (non-leap) year?",
+   "unit": "hours",
+   "answer": 8760,
+   "formula": "365 * 24",
+   "explanation": "365 days × 24 hours."
+  },
+  {
+   "id": "cls-c-05",
+   "difficulty": 3,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "365 * 24 * 60"
+   },
+   "tags": [],
+   "prompt": "How many minutes are in a (non-leap) year?",
+   "unit": "minutes",
+   "answer": 525600,
+   "formula": "365 * 24 * 60",
+   "explanation": "365 × 24 × 60."
+  },
+  {
+   "id": "cls-c-06",
+   "difficulty": 1,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "8 * 8"
+   },
+   "tags": [],
+   "prompt": "How many squares are on a chessboard?",
+   "unit": "squares",
+   "answer": 64,
+   "formula": "8 * 8",
+   "explanation": "An 8 × 8 board."
+  },
+  {
+   "id": "cls-c-07",
+   "difficulty": 1,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "4 * 13"
+   },
+   "tags": [],
+   "prompt": "How many cards are in a standard deck, without jokers?",
+   "unit": "cards",
+   "answer": 52,
+   "formula": "4 * 13",
+   "explanation": "4 suits × 13 ranks."
+  },
+  {
+   "id": "cls-c-08",
+   "difficulty": 1,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "1 + 2 + 3 + 4 + 5 + 6"
+   },
+   "tags": [],
+   "prompt": "What is the total of all the dots on a standard six-sided die?",
+   "unit": "dots",
+   "answer": 21,
+   "formula": "1 + 2 + 3 + 4 + 5 + 6",
+   "explanation": "1 + 2 + … + 6."
+  },
+  {
+   "id": "cls-c-09",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "31 * 24"
+   },
+   "tags": [],
+   "prompt": "How many hours are in the month of December?",
+   "unit": "hours",
+   "answer": 744,
+   "formula": "31 * 24",
+   "explanation": "31 days × 24 hours."
+  },
+  {
+   "id": "cls-c-10",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "365 * 3 + 366"
+   },
+   "tags": [],
+   "prompt": "How many days are in four years, including one leap year?",
+   "unit": "days",
+   "answer": 1461,
+   "formula": "365 * 3 + 366",
+   "explanation": "Three ordinary years and one leap year."
+  },
+  {
+   "id": "cls-c-11",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "90 + 15"
+   },
+   "tags": [],
+   "prompt": "How many minutes are there in a full 90-minute football match plus 15 minutes of half-time?",
+   "unit": "minutes",
+   "answer": 105,
+   "formula": "90 + 15",
+   "explanation": "90 minutes of play plus a 15-minute break."
+  },
+  {
+   "id": "cls-c-12",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "90 * 60"
+   },
+   "tags": [],
+   "prompt": "How many seconds are in an hour and a half?",
+   "unit": "seconds",
+   "answer": 5400,
+   "formula": "90 * 60",
+   "explanation": "90 minutes × 60 seconds."
+  },
+  {
+   "id": "cls-c-13",
+   "difficulty": 3,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "365 * 10"
+   },
+   "tags": [],
+   "prompt": "How many days old is someone on their 10th birthday, ignoring leap days?",
+   "unit": "days",
+   "answer": 3650,
+   "formula": "365 * 10",
+   "explanation": "10 × 365."
+  },
+  {
+   "id": "cls-c-14",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "25 * 8"
+   },
+   "tags": [],
+   "prompt": "How many legs do 25 spiders have in total?",
+   "unit": "legs",
+   "answer": 200,
+   "formula": "25 * 8",
+   "explanation": "Spiders have 8 legs."
+  },
+  {
+   "id": "cls-c-15",
+   "difficulty": 1,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "5 * 12"
+   },
+   "tags": [],
+   "prompt": "How many eggs are in 5 dozen?",
+   "unit": "eggs",
+   "answer": 60,
+   "formula": "5 * 12",
+   "explanation": "A dozen is 12."
+  },
+  {
+   "id": "cls-c-17",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "12 * 60"
+   },
+   "tags": [],
+   "prompt": "How many minutes are on the clock between noon and midnight?",
+   "unit": "minutes",
+   "answer": 720,
+   "formula": "12 * 60",
+   "explanation": "12 hours × 60."
+  },
+  {
+   "id": "cls-c-18",
+   "difficulty": 3,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "28 * 24 * 60 * 60"
+   },
+   "tags": [],
+   "prompt": "How many seconds are in the month of February in a non-leap year?",
+   "unit": "seconds",
+   "answer": 2419200,
+   "formula": "28 * 24 * 60 * 60",
+   "explanation": "28 × 24 × 60 × 60."
+  },
+  {
+   "id": "cls-c-19",
+   "difficulty": 1,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "12 * 100"
+   },
+   "tags": [],
+   "prompt": "How many pennies are in £12 (or cents in $12)?",
+   "unit": "pennies or cents",
+   "answer": 1200,
+   "formula": "12 * 100",
+   "explanation": "100 per pound or dollar."
+  },
+  {
+   "id": "cls-c-20",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "2.5 * 1000"
+   },
+   "tags": [],
+   "prompt": "How many grams are in 2.5 kilograms?",
+   "unit": "grams",
+   "answer": 2500.0,
+   "formula": "2.5 * 1000",
+   "explanation": "1 kg = 1000 g."
+  },
+  {
+   "id": "cls-c-21",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "3 * 1000"
+   },
+   "tags": [],
+   "prompt": "How many millimetres are in 3 metres?",
+   "unit": "millimetres",
+   "answer": 3000,
+   "formula": "3 * 1000",
+   "explanation": "1 m = 1000 mm."
+  },
+  {
+   "id": "cls-c-22",
+   "difficulty": 2,
+   "category": "Numbers",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "verified-computed",
+    "notes": "Answer is pure arithmetic/definition; the formula is re-evaluated by the content lint. Prompt-to-formula match checked by the author."
+   },
+   "source": {
+    "kind": "computed",
+    "ref": "31 + 28 + 31"
+   },
+   "tags": [],
+   "prompt": "How many days are in the first three months of a non-leap year?",
+   "unit": "days",
+   "answer": 90,
+   "formula": "31 + 28 + 31",
+   "explanation": "January 31, February 28, March 31."
+  },
+  {
+   "id": "cls-k-01",
+   "difficulty": 1,
+   "category": "Human body",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Gray's Anatomy"
+   },
+   "tags": [],
+   "prompt": "How many bones are in the adult human body?",
+   "unit": "bones",
+   "answer": 206,
+   "explanation": "Adults usually have 206 bones."
+  },
+  {
+   "id": "cls-k-02",
+   "difficulty": 1,
+   "category": "Music",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Standard piano keyboard"
+   },
+   "tags": [],
+   "prompt": "How many keys does a standard piano have?",
+   "unit": "keys",
+   "answer": 88,
+   "explanation": "52 white and 36 black."
+  },
+  {
+   "id": "cls-k-03",
+   "difficulty": 2,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World Athletics"
+   },
+   "tags": [],
+   "prompt": "How long is a marathon, in kilometres? (decimals allowed)",
+   "unit": "km",
+   "answer": 42.195,
+   "explanation": "42.195 km (26.2 miles)."
+  },
+  {
+   "id": "cls-k-04",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Temperature scales"
+   },
+   "tags": [],
+   "prompt": "At what temperature does water boil at sea level, in degrees Fahrenheit?",
+   "unit": "°F",
+   "answer": 212,
+   "explanation": "212°F = 100°C."
+  },
+  {
+   "id": "cls-k-05",
+   "difficulty": 3,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "2020 survey"
+   },
+   "tags": [],
+   "prompt": "How tall is Mount Everest, in metres?",
+   "unit": "m",
+   "answer": 8849,
+   "explanation": "8,848.86 m (2020 China–Nepal survey).",
+   "timeSensitive": {
+    "asOf": "2020-12-08",
+    "reviewBy": "2030-12-31"
+   }
+  },
+  {
+   "id": "cls-k-06",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "US government"
+   },
+   "tags": [],
+   "prompt": "How many US states are there?",
+   "unit": "states",
+   "answer": 50,
+   "explanation": "Hawaii became the 50th in 1959."
+  },
+  {
+   "id": "cls-k-07",
+   "difficulty": 3,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Physics reference"
+   },
+   "tags": [],
+   "prompt": "How fast does sound travel in air at 20°C, in metres per second?",
+   "unit": "m/s",
+   "answer": 343,
+   "explanation": "About 343 m/s."
+  },
+  {
+   "id": "cls-k-08",
+   "difficulty": 2,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "IAU definition"
+   },
+   "tags": [],
+   "prompt": "How many planets are in our Solar System?",
+   "unit": "planets",
+   "answer": 8,
+   "explanation": "Since 2006, eight planets."
+  },
+  {
+   "id": "cls-k-09",
+   "difficulty": 3,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "NASA planetary fact sheet"
+   },
+   "tags": [],
+   "prompt": "How many days does Mars take to orbit the Sun (Earth days)?",
+   "unit": "days",
+   "answer": 687,
+   "explanation": "About 687 Earth days."
+  },
+  {
+   "id": "cls-k-10",
+   "difficulty": 3,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "NASA"
+   },
+   "tags": [],
+   "prompt": "About how far is the Moon from Earth on average, in kilometres?",
+   "unit": "km",
+   "answer": 384400,
+   "explanation": "About 384,400 km."
+  },
+  {
+   "id": "cls-k-11",
+   "difficulty": 2,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "How many legs does a lobster have, including its claws?",
+   "unit": "legs",
+   "answer": 10,
+   "explanation": "Lobsters are decapods: ten legs."
+  },
+  {
+   "id": "cls-k-12",
+   "difficulty": 3,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "How long is the gestation of an African elephant, in months?",
+   "unit": "months",
+   "answer": 22,
+   "explanation": "About 22 months."
+  },
+  {
+   "id": "cls-k-13",
+   "difficulty": 2,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Zoology"
+   },
+   "tags": [],
+   "prompt": "About how tall is an adult giraffe, in metres?",
+   "unit": "m",
+   "answer": 5.5,
+   "explanation": "Typically 4.5–6 m; about 5.5 m is common for males."
+  },
+  {
+   "id": "cls-k-14",
+   "difficulty": 3,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Environment Agency"
+   },
+   "tags": [],
+   "prompt": "How long is the River Thames, in kilometres?",
+   "unit": "km",
+   "answer": 346,
+   "explanation": "About 346 km."
+  },
+  {
+   "id": "cls-k-15",
+   "difficulty": 2,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "US National Park Service"
+   },
+   "tags": [],
+   "prompt": "How tall is the Statue of Liberty from base to torch tip (statue only), in metres?",
+   "unit": "m",
+   "answer": 46,
+   "explanation": "About 46 m (93 m including the pedestal)."
+  },
+  {
+   "id": "cls-k-16",
+   "difficulty": 3,
+   "category": "Landmarks",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Golden Gate Bridge District"
+   },
+   "tags": [],
+   "prompt": "How long is the Golden Gate Bridge's main span, in metres?",
+   "unit": "m",
+   "answer": 1280,
+   "explanation": "1,280 m."
+  },
+  {
+   "id": "cls-k-17",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Ancient history"
+   },
+   "tags": [],
+   "prompt": "In what year AD was the Colosseum in Rome completed?",
+   "unit": "year",
+   "answer": 80,
+   "explanation": "AD 80, under Emperor Titus."
+  },
+  {
+   "id": "cls-k-18",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "IUPAC"
+   },
+   "tags": [],
+   "prompt": "How many elements are on the periodic table today?",
+   "unit": "elements",
+   "answer": 118,
+   "explanation": "118 confirmed elements.",
+   "timeSensitive": {
+    "asOf": "2016-11-28",
+    "reviewBy": "2030-12-31"
+   }
+  },
+  {
+   "id": "cls-k-19",
+   "difficulty": 2,
+   "category": "Human body",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Dentistry"
+   },
+   "tags": [],
+   "prompt": "How many teeth does an adult usually have, including wisdom teeth?",
+   "unit": "teeth",
+   "answer": 32,
+   "explanation": "32 permanent teeth."
+  },
+  {
+   "id": "cls-k-20",
+   "difficulty": 2,
+   "category": "Literature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Poetry"
+   },
+   "tags": [],
+   "prompt": "How many lines are in a sonnet?",
+   "unit": "lines",
+   "answer": 14,
+   "explanation": "A sonnet has 14 lines."
+  },
+  {
+   "id": "cls-k-21",
+   "difficulty": 2,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "World Aquatics"
+   },
+   "tags": [],
+   "prompt": "How long is an Olympic swimming pool, in metres?",
+   "unit": "m",
+   "answer": 50,
+   "explanation": "Olympic pools are 50 m long."
+  },
+  {
+   "id": "cls-k-22",
+   "difficulty": 3,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Snooker rules"
+   },
+   "tags": [],
+   "prompt": "What is the maximum break in snooker (standard rules)?",
+   "unit": "points",
+   "answer": 147,
+   "explanation": "15 reds with blacks, then the colours."
+  },
+  {
+   "id": "cls-k-23",
+   "difficulty": 3,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Physics"
+   },
+   "tags": [],
+   "prompt": "What is the temperature of absolute zero, in degrees Celsius? (enter the number without the minus sign)",
+   "unit": "°C below zero",
+   "answer": 273.15,
+   "explanation": "−273.15 °C."
+  },
+  {
+   "id": "cls-k-24",
+   "difficulty": 2,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "United Nations"
+   },
+   "tags": [],
+   "prompt": "How many countries are there in Africa (UN members)?",
+   "unit": "countries",
+   "answer": 54,
+   "explanation": "54 UN member states.",
+   "timeSensitive": {
+    "asOf": "2024-01-01",
+    "reviewBy": "2028-12-31"
+   }
+  },
+  {
+   "id": "cls-k-25",
+   "difficulty": 1,
+   "category": "Nature",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Marine biology"
+   },
+   "tags": [],
+   "prompt": "How many arms does a starfish usually have?",
+   "unit": "arms",
+   "answer": 5,
+   "explanation": "Most species have five."
+  },
+  {
+   "id": "cls-k-26",
+   "difficulty": 2,
+   "category": "Food",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Confectionery reference"
+   },
+   "tags": [],
+   "prompt": "At what temperature does sugar reach the 'hard crack' stage, in degrees Celsius (roughly)?",
+   "unit": "°C",
+   "answer": 150,
+   "explanation": "About 146–154 °C."
+  },
+  {
+   "id": "cls-k-27",
+   "difficulty": 2,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Traditional song (sum of 1+3+6+…+78)"
+   },
+   "tags": [],
+   "prompt": "How many gifts in total are given in 'The Twelve Days of Christmas' (counting every repeat)?",
+   "unit": "gifts",
+   "answer": 364,
+   "explanation": "The cumulative total is 364."
+  },
+  {
+   "id": "cls-k-28",
+   "difficulty": 3,
+   "category": "Geography",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "2012 Chinese survey"
+   },
+   "tags": [],
+   "prompt": "How long is the Great Wall of China including all its branches, in kilometres (2012 survey)?",
+   "unit": "km",
+   "answer": 21196,
+   "explanation": "21,196 km (State Administration of Cultural Heritage, 2012)."
+  },
+  {
+   "id": "cls-k-29",
+   "difficulty": 2,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Astronomy"
+   },
+   "tags": [],
+   "prompt": "How many minutes does sunlight take to reach Earth, roughly?",
+   "unit": "minutes",
+   "answer": 8.3,
+   "explanation": "About 8 minutes 20 seconds."
+  },
+  {
+   "id": "cls-k-30",
+   "difficulty": 3,
+   "category": "Human body",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Physiology"
+   },
+   "tags": [],
+   "prompt": "About how many litres of blood are in an adult human body?",
+   "unit": "litres",
+   "answer": 5,
+   "explanation": "About 5 litres."
+  }
+ ]
+}

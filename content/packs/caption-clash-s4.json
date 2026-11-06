@@ -1,0 +1,570 @@
+{
+ "schemaVersion": 1,
+ "packId": "caption-clash-s4",
+ "gameId": "caption-clash",
+ "version": "1.0.0",
+ "title": "Caption Clash — Sprint 4 prompts",
+ "language": "en",
+ "items": [
+  {
+   "id": "cap-s4-001",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A penguin tries out for the school football team"
+  },
+  {
+   "id": "cap-s4-002",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Grandpa discovers video calls"
+  },
+  {
+   "id": "cap-s4-003",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A snowman visits the beach"
+  },
+  {
+   "id": "cap-s4-004",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The dog has been left in charge of the turkey"
+  },
+  {
+   "id": "cap-s4-005",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A reindeer's first day at flying school"
+  },
+  {
+   "id": "cap-s4-006",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The Christmas tree decides to redecorate itself"
+  },
+  {
+   "id": "cap-s4-007",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Two cats negotiate over the last sunny spot"
+  },
+  {
+   "id": "cap-s4-008",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A robot tries to tell a joke"
+  },
+  {
+   "id": "cap-s4-009",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A goldfish plans a great escape"
+  },
+  {
+   "id": "cap-s4-010",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The family car refuses to start on holiday morning"
+  },
+  {
+   "id": "cap-s4-011",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A squirrel finds the nut of its dreams"
+  },
+  {
+   "id": "cap-s4-012",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The kitchen timer has had enough"
+  },
+  {
+   "id": "cap-s4-013",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A llama walks into a fancy restaurant"
+  },
+  {
+   "id": "cap-s4-014",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Aliens land at a village fete"
+  },
+  {
+   "id": "cap-s4-015",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A ghost who is afraid of the dark"
+  },
+  {
+   "id": "cap-s4-016",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The garden gnome goes on holiday"
+  },
+  {
+   "id": "cap-s4-017",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A pigeon wins a talent show"
+  },
+  {
+   "id": "cap-s4-018",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The toaster's secret ambition"
+  },
+  {
+   "id": "cap-s4-019",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A dragon tries to light birthday candles gently"
+  },
+  {
+   "id": "cap-s4-020",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A giraffe tries on a scarf"
+  },
+  {
+   "id": "cap-s4-021",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The moon takes a day off"
+  },
+  {
+   "id": "cap-s4-022",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A hedgehog's first hug"
+  },
+  {
+   "id": "cap-s4-023",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "An owl who just can't stay awake at night"
+  },
+  {
+   "id": "cap-s4-024",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The sofa reveals what it has found down the back"
+  },
+  {
+   "id": "cap-s4-025",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A tortoise enters a race against a cheetah"
+  },
+  {
+   "id": "cap-s4-026",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The snowplough falls in love"
+  },
+  {
+   "id": "cap-s4-027",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A teapot that only pours gossip"
+  },
+  {
+   "id": "cap-s4-028",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "Santa's sleigh gets a parking ticket"
+  },
+  {
+   "id": "cap-s4-029",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A grandma beats everyone at a video game"
+  },
+  {
+   "id": "cap-s4-030",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A baby elephant discovers bubbles"
+  },
+  {
+   "id": "cap-s4-031",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The weather forecaster looks out of the window"
+  },
+  {
+   "id": "cap-s4-032",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A fridge that knows when you are snacking"
+  },
+  {
+   "id": "cap-s4-033",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A sheep counts people to fall asleep"
+  },
+  {
+   "id": "cap-s4-034",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "A crab tries to walk forwards"
+  },
+  {
+   "id": "cap-s4-035",
+   "difficulty": 1,
+   "category": "Funny scene",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "original-creative"
+   },
+   "tags": [],
+   "prompt": "The lost sock finally comes home"
+  }
+ ]
+}

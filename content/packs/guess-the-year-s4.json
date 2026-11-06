@@ -1,0 +1,865 @@
+{
+ "schemaVersion": 1,
+ "packId": "guess-the-year-s4",
+ "gameId": "guess-the-year",
+ "version": "1.0.0",
+ "title": "Guess the Year — Sprint 4",
+ "language": "en",
+ "items": [
+  {
+   "id": "year-s4-001",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Charles Darwin published 'On the Origin of Species'",
+   "year": 1859,
+   "context": "Published in November 1859."
+  },
+  {
+   "id": "year-s4-002",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Alexander Fleming discovered penicillin",
+   "year": 1928,
+   "context": "Fleming noticed the mould in 1928."
+  },
+  {
+   "id": "year-s4-003",
+   "difficulty": 3,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first successful human heart transplant",
+   "year": 1967,
+   "context": "By Christiaan Barnard in Cape Town."
+  },
+  {
+   "id": "year-s4-004",
+   "difficulty": 3,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Dolly the sheep, the first cloned mammal, was born",
+   "year": 1996,
+   "context": "Born at the Roslin Institute."
+  },
+  {
+   "id": "year-s4-005",
+   "difficulty": 2,
+   "category": "Science",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The structure of DNA was described by Watson and Crick",
+   "year": 1953,
+   "context": "Published in Nature in 1953."
+  },
+  {
+   "id": "year-s4-006",
+   "difficulty": 1,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Apollo 11 landed on the Moon",
+   "year": 1969,
+   "context": "July 1969."
+  },
+  {
+   "id": "year-s4-007",
+   "difficulty": 2,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Sputnik 1, the first artificial satellite, was launched",
+   "year": 1957,
+   "context": "October 1957."
+  },
+  {
+   "id": "year-s4-008",
+   "difficulty": 2,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Yuri Gagarin became the first person in space",
+   "year": 1961,
+   "context": "12 April 1961."
+  },
+  {
+   "id": "year-s4-009",
+   "difficulty": 3,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Hubble Space Telescope was launched",
+   "year": 1990,
+   "context": "April 1990."
+  },
+  {
+   "id": "year-s4-010",
+   "difficulty": 3,
+   "category": "Space",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Pluto was reclassified as a dwarf planet",
+   "year": 2006,
+   "context": "By the IAU in August 2006."
+  },
+  {
+   "id": "year-s4-011",
+   "difficulty": 2,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Alexander Graham Bell patented the telephone",
+   "year": 1876,
+   "context": "Patent granted March 1876."
+  },
+  {
+   "id": "year-s4-012",
+   "difficulty": 2,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first email was sent by Ray Tomlinson",
+   "year": 1971,
+   "context": "On ARPANET in 1971."
+  },
+  {
+   "id": "year-s4-013",
+   "difficulty": 3,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Thomas Edison's practical light bulb was demonstrated",
+   "year": 1879,
+   "context": "Edison's carbon-filament lamp, late 1879."
+  },
+  {
+   "id": "year-s4-014",
+   "difficulty": 2,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first iPhone went on sale",
+   "year": 2007,
+   "context": "June 2007."
+  },
+  {
+   "id": "year-s4-015",
+   "difficulty": 3,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first text message (SMS) was sent",
+   "year": 1992,
+   "context": "'Merry Christmas', sent in December 1992."
+  },
+  {
+   "id": "year-s4-016",
+   "difficulty": 1,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Titanic sank",
+   "year": 1912,
+   "context": "April 1912."
+  },
+  {
+   "id": "year-s4-017",
+   "difficulty": 1,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Second World War ended",
+   "year": 1945,
+   "context": "In Europe in May and in Asia in September 1945."
+  },
+  {
+   "id": "year-s4-018",
+   "difficulty": 2,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The First World War began",
+   "year": 1914,
+   "context": "July–August 1914."
+  },
+  {
+   "id": "year-s4-019",
+   "difficulty": 2,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Christopher Columbus first reached the Americas",
+   "year": 1492,
+   "context": "October 1492."
+  },
+  {
+   "id": "year-s4-020",
+   "difficulty": 2,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Berlin Wall fell",
+   "year": 1989,
+   "context": "9 November 1989."
+  },
+  {
+   "id": "year-s4-021",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Magna Carta was sealed",
+   "year": 1215,
+   "context": "At Runnymede, June 1215."
+  },
+  {
+   "id": "year-s4-022",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Battle of Hastings",
+   "year": 1066,
+   "context": "October 1066."
+  },
+  {
+   "id": "year-s4-023",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The French Revolution began with the storming of the Bastille",
+   "year": 1789,
+   "context": "14 July 1789."
+  },
+  {
+   "id": "year-s4-024",
+   "difficulty": 2,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Nelson Mandela became President of South Africa",
+   "year": 1994,
+   "context": "May 1994."
+  },
+  {
+   "id": "year-s4-025",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The US Declaration of Independence was adopted",
+   "year": 1776,
+   "context": "4 July 1776."
+  },
+  {
+   "id": "year-s4-026",
+   "difficulty": 3,
+   "category": "History",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Great Fire of London",
+   "year": 1666,
+   "context": "September 1666."
+  },
+  {
+   "id": "year-s4-027",
+   "difficulty": 2,
+   "category": "Culture",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Beatles released their first album, 'Please Please Me'",
+   "year": 1963,
+   "context": "March 1963."
+  },
+  {
+   "id": "year-s4-028",
+   "difficulty": 3,
+   "category": "Culture",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Shakespeare's 'Romeo and Juliet' was first published",
+   "year": 1597,
+   "context": "First quarto, 1597."
+  },
+  {
+   "id": "year-s4-029",
+   "difficulty": 2,
+   "category": "Culture",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first Harry Potter book was published",
+   "year": 1997,
+   "context": "June 1997."
+  },
+  {
+   "id": "year-s4-030",
+   "difficulty": 3,
+   "category": "Culture",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Leonardo da Vinci was born",
+   "year": 1452,
+   "context": "April 1452, in Vinci."
+  },
+  {
+   "id": "year-s4-031",
+   "difficulty": 2,
+   "category": "Culture",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Disney's 'Snow White and the Seven Dwarfs' was released",
+   "year": 1937,
+   "context": "December 1937."
+  },
+  {
+   "id": "year-s4-032",
+   "difficulty": 3,
+   "category": "Culture",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first Nobel Prizes were awarded",
+   "year": 1901,
+   "context": "December 1901."
+  },
+  {
+   "id": "year-s4-033",
+   "difficulty": 2,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first FIFA World Cup was held, in Uruguay",
+   "year": 1930,
+   "context": "July 1930."
+  },
+  {
+   "id": "year-s4-034",
+   "difficulty": 2,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Roger Bannister ran the first sub-four-minute mile",
+   "year": 1954,
+   "context": "6 May 1954."
+  },
+  {
+   "id": "year-s4-035",
+   "difficulty": 3,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first Wimbledon Championships were held",
+   "year": 1877,
+   "context": "July 1877."
+  },
+  {
+   "id": "year-s4-036",
+   "difficulty": 1,
+   "category": "Sport",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "London hosted the Summer Olympics for the third time",
+   "year": 2012,
+   "context": "July–August 2012."
+  },
+  {
+   "id": "year-s4-037",
+   "difficulty": 3,
+   "category": "Exploration",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Roald Amundsen's team reached the South Pole",
+   "year": 1911,
+   "context": "14 December 1911."
+  },
+  {
+   "id": "year-s4-038",
+   "difficulty": 3,
+   "category": "Exploration",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Edmund Hillary and Tenzing Norgay first climbed Everest",
+   "year": 1953,
+   "context": "29 May 1953."
+  },
+  {
+   "id": "year-s4-039",
+   "difficulty": 3,
+   "category": "Exploration",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "Charles Lindbergh flew solo non-stop across the Atlantic",
+   "year": 1927,
+   "context": "May 1927."
+  },
+  {
+   "id": "year-s4-040",
+   "difficulty": 2,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Channel Tunnel opened between England and France",
+   "year": 1994,
+   "context": "May 1994."
+  },
+  {
+   "id": "year-s4-041",
+   "difficulty": 2,
+   "category": "Culture",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first 'Toy Story' film was released",
+   "year": 1995,
+   "context": "November 1995."
+  },
+  {
+   "id": "year-s4-042",
+   "difficulty": 3,
+   "category": "Technology",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The Wright brothers' first powered flight",
+   "year": 1903,
+   "context": "17 December 1903."
+  },
+  {
+   "id": "year-s4-043",
+   "difficulty": 3,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "The first commercial Christmas card was produced, by Henry Cole",
+   "year": 1843,
+   "context": "London, 1843."
+  },
+  {
+   "id": "year-s4-044",
+   "difficulty": 3,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "'A Christmas Carol' by Charles Dickens was published",
+   "year": 1843,
+   "context": "19 December 1843."
+  },
+  {
+   "id": "year-s4-045",
+   "difficulty": 3,
+   "category": "Festive",
+   "language": "en",
+   "eligibility": "official",
+   "review": {
+    "status": "provisional",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+   },
+   "source": {
+    "kind": "common-knowledge",
+    "ref": "Encyclopaedia (standard date)"
+   },
+   "tags": [],
+   "event": "'Silent Night' was first performed",
+   "year": 1818,
+   "context": "Christmas Eve 1818 in Oberndorf, Austria."
+  }
+ ]
+}

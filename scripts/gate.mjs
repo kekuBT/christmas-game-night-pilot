@@ -265,7 +265,10 @@ async function startServer() {
   mkdirSync(DATA_DIR, { recursive: true });
   const child = spawn(NODE, ["--import", "tsx", "src/server/serve.ts"], {
     cwd: REPO,
-    env: { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR, MCHEZO_WEB_DIST: DIST_DIR, MCHEZO_GATE_RUN: RUN_ID },
+    // Test content mode: provisional content counts as approved, so drivers can
+    // play many official games in one Cup (the real approval state is checked
+    // by tests/content.test.ts without this mode).
+    env: { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR, MCHEZO_WEB_DIST: DIST_DIR, MCHEZO_GATE_RUN: RUN_ID, MCHEZO_CONTENT_TEST_MODE: "approve-provisional" },
     detached: !IS_WINDOWS,
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,

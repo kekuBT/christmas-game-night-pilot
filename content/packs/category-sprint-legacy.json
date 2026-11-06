@@ -3,7 +3,7 @@
   "packId": "category-sprint-legacy",
   "gameId": "category-sprint",
   "version": "1.0.0",
-  "title": "Category Sprint — original set",
+  "title": "Category Sprint \u2014 original set",
   "language": "en",
   "items": [
     {
@@ -13,8 +13,8 @@
       "language": "en",
       "eligibility": "official",
       "review": {
-        "status": "legacy",
-        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+        "status": "rejected",
+        "notes": "Superseded in Sprint 4 by spr-s4-001: only 10 accepted answers, so common valid answers (e.g. 'cow' for Animals) scored nothing. Older Cups keep using their built-in lists unchanged."
       },
       "source": {
         "kind": "common-knowledge"
@@ -43,8 +43,8 @@
       "language": "en",
       "eligibility": "official",
       "review": {
-        "status": "legacy",
-        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+        "status": "rejected",
+        "notes": "Superseded in Sprint 4 by spr-s4-002: only 10 accepted answers, so common valid answers (e.g. 'cow' for Animals) scored nothing. Older Cups keep using their built-in lists unchanged."
       },
       "source": {
         "kind": "common-knowledge"
@@ -73,8 +73,8 @@
       "language": "en",
       "eligibility": "official",
       "review": {
-        "status": "legacy",
-        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+        "status": "rejected",
+        "notes": "Superseded in Sprint 4 by spr-s4-015: only 10 accepted answers, so common valid answers (e.g. 'cow' for Animals) scored nothing. Older Cups keep using their built-in lists unchanged."
       },
       "source": {
         "kind": "common-knowledge"

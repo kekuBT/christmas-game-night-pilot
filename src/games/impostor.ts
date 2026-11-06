@@ -26,9 +26,11 @@ const PACK: { word: string; category: string }[] = [
   { word: "Snowflake", category: "Christmas" },
 ];
 
-export function initImpostor(playerIds: string[], seed: number): ImpostorState {
+export function initImpostor(playerIds: string[], seed: number, chosen?: { word: string; category: string }): ImpostorState {
   const rng = seededRng(seed);
-  const pack = PACK[Math.floor(rng() * PACK.length)]!;
+  // Content from the selection service (Sprint 4) or, for older Cups, the original word list.
+  const legacyPick = PACK[Math.floor(rng() * PACK.length)]!;
+  const pack = chosen ?? legacyPick;
   const impostorId = playerIds[Math.floor(rng() * playerIds.length)]!;
   return { word: pack.word, category: pack.category, impostorId, phase: "clue", clues: {}, votes: {}, abstainedClues: [], abstainedVotes: [] };
 }
