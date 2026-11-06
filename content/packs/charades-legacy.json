@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "packId": "charades-legacy",
+  "gameId": "charades",
+  "version": "1.0.0",
+  "title": "Charades — original set",
+  "language": "en",
+  "items": [
+    {
+      "id": "chr-legacy-1",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Building a snowman"
+    },
+    {
+      "id": "chr-legacy-2",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Wrapping a present"
+    },
+    {
+      "id": "chr-legacy-3",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Ice skating"
+    },
+    {
+      "id": "chr-legacy-4",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Drinking hot chocolate"
+    },
+    {
+      "id": "chr-legacy-5",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Decorating a tree"
+    },
+    {
+      "id": "chr-legacy-6",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Sledging down a hill"
+    }
+  ]
+}

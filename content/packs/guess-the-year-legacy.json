@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "packId": "guess-the-year-legacy",
+  "gameId": "guess-the-year",
+  "version": "1.0.0",
+  "title": "Guess the Year — original set",
+  "language": "en",
+  "items": [
+    {
+      "id": "year-legacy-1",
+      "difficulty": 2,
+      "category": "History",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "NASA history"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "event": "The first Moon landing",
+      "year": 1969,
+      "context": "Apollo 11 landed on the Moon."
+    },
+    {
+      "id": "year-legacy-2",
+      "difficulty": 2,
+      "category": "History",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Apple history"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "event": "The first iPhone was released",
+      "year": 2007,
+      "context": "Apple released the first iPhone in June 2007."
+    },
+    {
+      "id": "year-legacy-3",
+      "difficulty": 2,
+      "category": "History",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Modern history"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "event": "The Berlin Wall fell",
+      "year": 1989,
+      "context": "The Berlin Wall fell in November 1989."
+    },
+    {
+      "id": "year-legacy-4",
+      "difficulty": 2,
+      "category": "History",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Olympic history"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "event": "The first modern Olympic Games",
+      "year": 1896,
+      "context": "Athens hosted the first modern Olympics."
+    },
+    {
+      "id": "year-legacy-5",
+      "difficulty": 2,
+      "category": "History",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Aviation history"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "event": "Humans first flew a powered airplane (Wright brothers)",
+      "year": 1903,
+      "context": "The Wright Flyer flew at Kitty Hawk."
+    },
+    {
+      "id": "year-legacy-6",
+      "difficulty": 2,
+      "category": "History",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Web history"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "event": "The World Wide Web became publicly available",
+      "year": 1991,
+      "context": "The Web opened to the public in 1991."
+    },
+    {
+      "id": "year-legacy-7",
+      "difficulty": 2,
+      "category": "History",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Maritime history"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "event": "The Titanic sank",
+      "year": 1912,
+      "context": "Titanic sank in April 1912."
+    },
+    {
+      "id": "year-legacy-8",
+      "difficulty": 2,
+      "category": "History",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Film history"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "event": "The first Star Wars film was released",
+      "year": 1977,
+      "context": "Star Wars premiered in 1977."
+    }
+  ]
+}

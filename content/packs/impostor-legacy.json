@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "packId": "impostor-legacy",
+  "gameId": "impostor",
+  "version": "1.0.0",
+  "title": "Impostor — original words",
+  "language": "en",
+  "items": [
+    {
+      "id": "imp-legacy-1",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "word": "Snowman",
+      "hintCategory": "Christmas"
+    },
+    {
+      "id": "imp-legacy-2",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "word": "Reindeer",
+      "hintCategory": "Christmas"
+    },
+    {
+      "id": "imp-legacy-3",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "word": "Mistletoe",
+      "hintCategory": "Christmas"
+    },
+    {
+      "id": "imp-legacy-4",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "word": "Gingerbread",
+      "hintCategory": "Christmas"
+    },
+    {
+      "id": "imp-legacy-5",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "word": "Fireplace",
+      "hintCategory": "Christmas"
+    },
+    {
+      "id": "imp-legacy-6",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "word": "Snowflake",
+      "hintCategory": "Christmas"
+    }
+  ]
+}

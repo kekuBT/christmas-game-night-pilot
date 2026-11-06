@@ -1,0 +1,334 @@
+{
+  "schemaVersion": 1,
+  "packId": "trivia-legacy",
+  "gameId": "trivia",
+  "version": "1.0.0",
+  "title": "Trivia — original set",
+  "language": "en",
+  "items": [
+    {
+      "id": "trv-legacy-01",
+      "difficulty": 1,
+      "category": "Maths",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Arithmetic"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "What is 15 × 4?",
+      "options": [
+        "75",
+        "60",
+        "45",
+        "50"
+      ],
+      "answer": "60",
+      "explanation": "15 × 4 = 60."
+    },
+    {
+      "id": "trv-legacy-02",
+      "difficulty": 1,
+      "category": "Everyday",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Calendar"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Which month comes after November?",
+      "options": [
+        "December",
+        "January",
+        "September",
+        "October"
+      ],
+      "answer": "December",
+      "explanation": "December follows November."
+    },
+    {
+      "id": "trv-legacy-03",
+      "difficulty": 1,
+      "category": "Geography",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Geography"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "What is the capital of Japan?",
+      "options": [
+        "Bangkok",
+        "Tokyo",
+        "Beijing",
+        "Seoul"
+      ],
+      "answer": "Tokyo",
+      "explanation": "Tokyo has been Japan's capital since 1868."
+    },
+    {
+      "id": "trv-legacy-04",
+      "difficulty": 1,
+      "category": "Geography",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Geography"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "What is the largest ocean on Earth?",
+      "options": [
+        "Pacific",
+        "Arctic",
+        "Atlantic",
+        "Indian"
+      ],
+      "answer": "Pacific",
+      "explanation": "The Pacific is the largest ocean."
+    },
+    {
+      "id": "trv-legacy-05",
+      "difficulty": 1,
+      "category": "Everyday",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Colour theory"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "What colour do you get by mixing blue and yellow paint?",
+      "options": [
+        "Purple",
+        "Orange",
+        "Brown",
+        "Green"
+      ],
+      "answer": "Green",
+      "explanation": "Blue + yellow = green."
+    },
+    {
+      "id": "trv-legacy-06",
+      "difficulty": 1,
+      "category": "Science",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Biology"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Which gas do plants absorb from the air?",
+      "options": [
+        "Carbon dioxide",
+        "Hydrogen",
+        "Oxygen",
+        "Nitrogen"
+      ],
+      "answer": "Carbon dioxide",
+      "explanation": "Plants use carbon dioxide in photosynthesis."
+    },
+    {
+      "id": "trv-legacy-07",
+      "difficulty": 1,
+      "category": "Maths",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Geometry"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How many sides does a hexagon have?",
+      "options": [
+        "6",
+        "5",
+        "8",
+        "7"
+      ],
+      "answer": "6",
+      "explanation": "Hexa- means six."
+    },
+    {
+      "id": "trv-legacy-08",
+      "difficulty": 1,
+      "category": "Science",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Physics"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "What is the boiling point of water at sea level, in Celsius?",
+      "options": [
+        "90",
+        "110",
+        "95",
+        "100"
+      ],
+      "answer": "100",
+      "explanation": "Water boils at 100°C at sea level."
+    },
+    {
+      "id": "trv-legacy-09",
+      "difficulty": 1,
+      "category": "Everyday",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "General knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Which animal is known as man's best friend?",
+      "options": [
+        "Horse",
+        "Dog",
+        "Cat",
+        "Parrot"
+      ],
+      "answer": "Dog",
+      "explanation": "Dogs are commonly called man's best friend."
+    },
+    {
+      "id": "trv-legacy-10",
+      "difficulty": 1,
+      "category": "Literature",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Literature"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Who wrote Romeo and Juliet?",
+      "options": [
+        "William Shakespeare",
+        "Jane Austen",
+        "Mark Twain",
+        "Charles Dickens"
+      ],
+      "answer": "William Shakespeare",
+      "explanation": "Shakespeare wrote Romeo and Juliet."
+    },
+    {
+      "id": "trv-legacy-11",
+      "difficulty": 1,
+      "category": "Science",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "General astronomy"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "Which planet is known as the Red Planet?",
+      "options": [
+        "Jupiter",
+        "Mars",
+        "Saturn",
+        "Venus"
+      ],
+      "answer": "Mars",
+      "explanation": "Mars appears red due to iron oxide on its surface."
+    },
+    {
+      "id": "trv-legacy-12",
+      "difficulty": 1,
+      "category": "Maths",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Arithmetic"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How many minutes are in 2 hours?",
+      "options": [
+        "90",
+        "180",
+        "60",
+        "120"
+      ],
+      "answer": "120",
+      "explanation": "2 × 60 = 120."
+    }
+  ]
+}

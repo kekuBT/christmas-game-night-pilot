@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "packId": "word-connections-legacy",
+  "gameId": "word-connections",
+  "version": "1.0.0",
+  "title": "Word Connections — original board",
+  "language": "en",
+  "items": [
+    {
+      "id": "con-legacy-1",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "groups": [
+        {
+          "name": "Christmas foods",
+          "words": [
+            "Gingerbread",
+            "Candy cane",
+            "Mince pie",
+            "Roast turkey"
+          ],
+          "level": 1
+        },
+        {
+          "name": "Winter weather",
+          "words": [
+            "Snowfall",
+            "Frost",
+            "Blizzard",
+            "Icicle"
+          ],
+          "level": 2
+        },
+        {
+          "name": "Christmas decorations",
+          "words": [
+            "Tinsel",
+            "Bauble",
+            "Wreath",
+            "Stocking"
+          ],
+          "level": 3
+        },
+        {
+          "name": "Reindeer names",
+          "words": [
+            "Dasher",
+            "Dancer",
+            "Prancer",
+            "Vixen"
+          ],
+          "level": 4
+        }
+      ]
+    }
+  ]
+}

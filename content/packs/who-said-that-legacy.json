@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "packId": "who-said-that-legacy",
+  "gameId": "who-said-that",
+  "version": "1.0.0",
+  "title": "Who Said That? — fictional townsfolk",
+  "language": "en",
+  "items": [
+    {
+      "id": "who-legacy-1",
+      "difficulty": 2,
+      "category": "Fictional townsfolk",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-fiction"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "quote": "The snow is best when shared with friends.",
+      "speakers": [
+        "Mira the Baker",
+        "Tom the Gardener",
+        "Lena the Sailor",
+        "Omar the Teacher"
+      ],
+      "answer": "Mira the Baker"
+    },
+    {
+      "id": "who-legacy-2",
+      "difficulty": 2,
+      "category": "Fictional townsfolk",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-fiction"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "quote": "I always hide the last cookie for myself.",
+      "speakers": [
+        "Mira the Baker",
+        "Tom the Gardener",
+        "Lena the Sailor",
+        "Omar the Teacher"
+      ],
+      "answer": "Tom the Gardener"
+    },
+    {
+      "id": "who-legacy-3",
+      "difficulty": 2,
+      "category": "Fictional townsfolk",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-fiction"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "quote": "A story is warmer by the fire.",
+      "speakers": [
+        "Mira the Baker",
+        "Tom the Gardener",
+        "Lena the Sailor",
+        "Omar the Teacher"
+      ],
+      "answer": "Omar the Teacher"
+    },
+    {
+      "id": "who-legacy-4",
+      "difficulty": 2,
+      "category": "Fictional townsfolk",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-fiction"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "quote": "The sea sings best in winter.",
+      "speakers": [
+        "Mira the Baker",
+        "Tom the Gardener",
+        "Lena the Sailor",
+        "Omar the Teacher"
+      ],
+      "answer": "Lena the Sailor"
+    },
+    {
+      "id": "who-legacy-5",
+      "difficulty": 2,
+      "category": "Fictional townsfolk",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-fiction"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "quote": "Every garden needs a little snow.",
+      "speakers": [
+        "Mira the Baker",
+        "Tom the Gardener",
+        "Lena the Sailor",
+        "Omar the Teacher"
+      ],
+      "answer": "Tom the Gardener"
+    },
+    {
+      "id": "who-legacy-6",
+      "difficulty": 2,
+      "category": "Fictional townsfolk",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-fiction"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "quote": "Baking is just chemistry with cinnamon.",
+      "speakers": [
+        "Mira the Baker",
+        "Tom the Gardener",
+        "Lena the Sailor",
+        "Omar the Teacher"
+      ],
+      "answer": "Mira the Baker"
+    },
+    {
+      "id": "who-legacy-7",
+      "difficulty": 2,
+      "category": "Fictional townsfolk",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-fiction"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "quote": "Teach me one song, and I will sing it all year.",
+      "speakers": [
+        "Mira the Baker",
+        "Tom the Gardener",
+        "Lena the Sailor",
+        "Omar the Teacher"
+      ],
+      "answer": "Omar the Teacher"
+    },
+    {
+      "id": "who-legacy-8",
+      "difficulty": 2,
+      "category": "Fictional townsfolk",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-fiction"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "quote": "Sailors count stars, not sheep.",
+      "speakers": [
+        "Mira the Baker",
+        "Tom the Gardener",
+        "Lena the Sailor",
+        "Omar the Teacher"
+      ],
+      "answer": "Lena the Sailor"
+    }
+  ]
+}

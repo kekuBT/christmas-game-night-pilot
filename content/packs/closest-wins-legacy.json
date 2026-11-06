@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "packId": "closest-wins-legacy",
+  "gameId": "closest-wins",
+  "version": "1.0.0",
+  "title": "Closest Wins — original set",
+  "language": "en",
+  "items": [
+    {
+      "id": "cls-legacy-1",
+      "difficulty": 1,
+      "category": "Numbers",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Eiffel Tower official height, 330 m with antenna"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How tall is the Eiffel Tower, in metres?",
+      "unit": "m",
+      "answer": 330,
+      "explanation": "Eiffel Tower official height, 330 m with antenna"
+    },
+    {
+      "id": "cls-legacy-2",
+      "difficulty": 1,
+      "category": "Numbers",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "24 × 60"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How many minutes are in one day?",
+      "unit": "minutes",
+      "answer": 1440,
+      "explanation": "24 × 60"
+    },
+    {
+      "id": "cls-legacy-3",
+      "difficulty": 1,
+      "category": "Numbers",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "Leap year calendar"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How many days are in a leap year?",
+      "unit": "days",
+      "answer": 366,
+      "explanation": "Leap year calendar"
+    },
+    {
+      "id": "cls-legacy-4",
+      "difficulty": 1,
+      "category": "Numbers",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "60 × 60"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How many seconds are in one hour?",
+      "unit": "seconds",
+      "answer": 3600,
+      "explanation": "60 × 60"
+    },
+    {
+      "id": "cls-legacy-5",
+      "difficulty": 1,
+      "category": "Numbers",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "365 / 7 ≈ 52"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How many weeks are in a year (rounded to the nearest whole week)?",
+      "unit": "weeks",
+      "answer": 52,
+      "explanation": "365 / 7 ≈ 52"
+    },
+    {
+      "id": "cls-legacy-6",
+      "difficulty": 1,
+      "category": "Numbers",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "English alphabet"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How many letters are in the English alphabet?",
+      "unit": "letters",
+      "answer": 26,
+      "explanation": "English alphabet"
+    },
+    {
+      "id": "cls-legacy-7",
+      "difficulty": 1,
+      "category": "Numbers",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "7 × 24"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How many hours are in one week?",
+      "unit": "hours",
+      "answer": 168,
+      "explanation": "7 × 24"
+    },
+    {
+      "id": "cls-legacy-8",
+      "difficulty": 1,
+      "category": "Numbers",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge",
+        "ref": "December calendar"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "How many days are in December?",
+      "unit": "days",
+      "answer": 31,
+      "explanation": "December calendar"
+    }
+  ]
+}

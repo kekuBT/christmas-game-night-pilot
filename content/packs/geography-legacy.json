@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "packId": "geography-legacy",
+  "gameId": "geography",
+  "version": "1.0.0",
+  "title": "Geography — original set",
+  "language": "en",
+  "items": [
+    {
+      "id": "geo-legacy-1",
+      "difficulty": 1,
+      "category": "Flags",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "mode": "flag",
+      "prompt": "Which country does this flag belong to? 🇫🇷",
+      "options": [
+        "France",
+        "Italy",
+        "Spain",
+        "Germany"
+      ],
+      "answer": "France",
+      "explanation": "Blue, white, and red vertical stripes: France.",
+      "accessibility": "Flag shown as an emoji; the explanation names its colours."
+    },
+    {
+      "id": "geo-legacy-2",
+      "difficulty": 1,
+      "category": "Flags",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "mode": "flag",
+      "prompt": "Which country does this flag belong to? 🇯🇵",
+      "options": [
+        "China",
+        "South Korea",
+        "Japan",
+        "Thailand"
+      ],
+      "answer": "Japan",
+      "explanation": "Red circle on white: Japan.",
+      "accessibility": "Flag shown as an emoji; the explanation names its colours."
+    },
+    {
+      "id": "geo-legacy-3",
+      "difficulty": 1,
+      "category": "Capitals",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "mode": "capital",
+      "prompt": "What is the capital of Canada?",
+      "options": [
+        "Toronto",
+        "Vancouver",
+        "Ottawa",
+        "Montreal"
+      ],
+      "answer": "Ottawa",
+      "explanation": "Ottawa is Canada's capital."
+    },
+    {
+      "id": "geo-legacy-4",
+      "difficulty": 1,
+      "category": "Capitals",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "mode": "capital",
+      "prompt": "What is the capital of Australia?",
+      "options": [
+        "Sydney",
+        "Melbourne",
+        "Canberra",
+        "Perth"
+      ],
+      "answer": "Canberra",
+      "explanation": "Canberra is Australia's capital."
+    },
+    {
+      "id": "geo-legacy-5",
+      "difficulty": 1,
+      "category": "World",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "mode": "outline",
+      "prompt": "Which boot-shaped country is this outline hint describing?",
+      "options": [
+        "Greece",
+        "Italy",
+        "Spain",
+        "Portugal"
+      ],
+      "answer": "Italy",
+      "explanation": "Italy is famously boot-shaped. Text hint fallback, not SVG geometry."
+    },
+    {
+      "id": "geo-legacy-6",
+      "difficulty": 1,
+      "category": "World",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "mode": "region",
+      "prompt": "In which region is Egypt located?",
+      "options": [
+        "South America",
+        "North Africa",
+        "Southeast Asia",
+        "Northern Europe"
+      ],
+      "answer": "North Africa",
+      "explanation": "Egypt is in North Africa. Accessible region fallback, not map tap."
+    },
+    {
+      "id": "geo-legacy-7",
+      "difficulty": 1,
+      "category": "World",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "mode": "higher-lower",
+      "prompt": "Which mountain is taller: Mount Everest or Mount Kilimanjaro?",
+      "options": [
+        "Mount Everest",
+        "Mount Kilimanjaro",
+        "They are equal",
+        "Neither is a mountain"
+      ],
+      "answer": "Mount Everest",
+      "explanation": "Everest (~8,849 m) is taller than Kilimanjaro (~5,895 m)."
+    },
+    {
+      "id": "geo-legacy-8",
+      "difficulty": 2,
+      "category": "World",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "mode": "distance",
+      "prompt": "Which city is closest to Paris: London, Berlin, Madrid, or Rome?",
+      "options": [
+        "London",
+        "Berlin",
+        "Madrid",
+        "Rome"
+      ],
+      "answer": "London",
+      "explanation": "Paris–London is the shortest of these great-circle distances."
+    }
+  ]
+}

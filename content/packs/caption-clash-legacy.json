@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "packId": "caption-clash-legacy",
+  "gameId": "caption-clash",
+  "version": "1.0.0",
+  "title": "Caption Clash — original prompts",
+  "language": "en",
+  "items": [
+    {
+      "id": "cap-legacy-1",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "A snowman learns to dance"
+    },
+    {
+      "id": "cap-legacy-2",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "A reindeer tries to bake cookies"
+    },
+    {
+      "id": "cap-legacy-3",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "A cat opens a Christmas present"
+    },
+    {
+      "id": "cap-legacy-4",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "A snowflake gets lost in July"
+    },
+    {
+      "id": "cap-legacy-5",
+      "difficulty": 1,
+      "category": "Christmas",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "prompt": "A fireplace tells a secret"
+    }
+  ]
+}

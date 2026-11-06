@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "packId": "category-sprint-legacy",
+  "gameId": "category-sprint",
+  "version": "1.0.0",
+  "title": "Category Sprint — original set",
+  "language": "en",
+  "items": [
+    {
+      "id": "spr-legacy-1",
+      "difficulty": 1,
+      "category": "Everyday",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "name": "Fruits",
+      "answers": [
+        "apple",
+        "banana",
+        "orange",
+        "grape",
+        "mango",
+        "pear",
+        "peach",
+        "lemon",
+        "strawberry",
+        "cherry"
+      ]
+    },
+    {
+      "id": "spr-legacy-2",
+      "difficulty": 1,
+      "category": "Everyday",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "name": "Animals",
+      "answers": [
+        "dog",
+        "cat",
+        "horse",
+        "elephant",
+        "lion",
+        "tiger",
+        "bear",
+        "rabbit",
+        "mouse",
+        "fox"
+      ]
+    },
+    {
+      "id": "spr-legacy-3",
+      "difficulty": 1,
+      "category": "Everyday",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "legacy",
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+      },
+      "source": {
+        "kind": "common-knowledge"
+      },
+      "tags": [
+        "legacy"
+      ],
+      "name": "Christmas things",
+      "answers": [
+        "tree",
+        "stocking",
+        "wreath",
+        "tinsel",
+        "bauble",
+        "snowman",
+        "reindeer",
+        "sleigh",
+        "mistletoe",
+        "gingerbread"
+      ]
+    }
+  ]
+}
