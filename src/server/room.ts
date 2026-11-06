@@ -39,7 +39,6 @@ import {
   captionTotalScores,
   currentRound,
   initCaption,
-  projectCaption,
   submitCaption,
   submitCaptionVote,
   type CaptionState,
@@ -782,7 +781,10 @@ export class RoomEngine {
           submitCaption(state, actorId, caption);
           if (allCaptionsIn(state, this.activePlayers(game))) state.phase = "vote";
         } else if (intent.action === "caption-vote") {
-          submitCaptionVote(state, actorId, String(intent.payload["captionId"] ?? ""), game.players);
+          // Votes name a caption by its anonymous id (Sprint 4); an older
+          // client may still send the author id directly.
+          const sent = String(intent.payload["captionId"] ?? "");
+          submitCaptionVote(state, actorId, this.captionAuthorOf(game, state.roundIndex, sent) ?? sent, game.players);
           if (allCaptionVotesIn(state, this.activePlayers(game))) this.advanceCaptionRound(game, state);
         }
       } else if (game.gameId === "closest-wins") {
@@ -1694,7 +1696,7 @@ export class RoomEngine {
   private publicGameState(g: GameInstance): unknown {
     switch (g.gameId) {
       case "impostor": return projectImpostor(g.extra as ImpostorState, "", true);
-      case "caption-clash": return projectCaption(g.extra as CaptionState, "", true);
+      case "caption-clash": return this.captionView(g, undefined, true);
       case "closest-wins": return projectClosest(g.extra as ClosestState, "", true);
       case "charades": return projectCharades(g.extra as CharadesState, "", true);
       case "trivia":
@@ -1720,7 +1722,7 @@ export class RoomEngine {
   private participantGameState(g: GameInstance, actorId: string): unknown {
     switch (g.gameId) {
       case "impostor": return projectImpostor(g.extra as ImpostorState, actorId, false);
-      case "caption-clash": return projectCaption(g.extra as CaptionState, actorId, false);
+      case "caption-clash": return this.captionView(g, actorId, false);
       case "closest-wins": return projectClosest(g.extra as ClosestState, actorId, false);
       case "charades": return projectCharades(g.extra as CharadesState, actorId, false);
       case "trivia":
@@ -1792,6 +1794,74 @@ export class RoomEngine {
       myGuessCount: ps.guessed.length,
       ...(lastGuess ? { lastGuess } : {}),
     };
+  }
+
+  /** A caption's anonymous id in one round: stable, unguessable from the author's player id. */
+  private captionAnonId(g: GameInstance, round: number, author: string): string {
+    return `c-${createHash("sha256").update(`${g.id}|${g.seed ?? 0}|${round}|${author}`).digest("hex").slice(0, 10)}`;
+  }
+  private captionAuthorOf(g: GameInstance, round: number, anonId: string): string | undefined {
+    const r = (g.extra as CaptionState).rounds[round];
+    return r ? Object.keys(r.captions).find((a) => this.captionAnonId(g, round, a) === anonId) : undefined;
+  }
+
+  /**
+   * Caption Clash view (Sprint 4). Voting is anonymous: captions carry a
+   * per-round anonymous id (never the author's player id), appear in a
+   * seeded shuffled order (never submission order), and only the viewer's
+   * own caption is flagged, for the viewer alone. Earlier rounds show their
+   * captions and vote counts without authors; authors are revealed to
+   * players only when the game has ended (the TV never shows authors).
+   */
+  private captionView(g: GameInstance, actorId: string | undefined, isTv: boolean): Record<string, unknown> {
+    const st = g.extra as CaptionState;
+    const finished = g.status === "finished" || st.phase === "finished";
+    const round = st.rounds[Math.min(st.roundIndex, st.rounds.length - 1)]!;
+    const roundIdx = Math.min(st.roundIndex, st.rounds.length - 1);
+    const order = (r: number, authors: string[]) => {
+      const rng = seededRng(((g.seed ?? 0) ^ (r * 0x9e3779b1)) >>> 0);
+      const a = [...authors].sort();
+      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j]!, a[i]!]; }
+      return a;
+    };
+    const showAuthors = finished && !isTv;
+    const roundResult = (r: number) => {
+      const rd = st.rounds[r]!;
+      const votes = (author: string) => Object.values(rd.votes).filter((v) => v === author).length;
+      return {
+        prompt: rd.prompt,
+        captions: order(r, Object.keys(rd.captions))
+          .map((a) => ({ id: this.captionAnonId(g, r, a), text: rd.captions[a]!, votes: votes(a), ...(showAuthors ? { author: a } : {}), ...(actorId === a ? { mine: true } : {}) }))
+          .sort((x, y) => y.votes - x.votes),
+      };
+    };
+    const inThisRound = (author: string) => round.captions[author] !== undefined || (round.abstainedSubmissions ?? []).includes(author);
+    const base: Record<string, unknown> = {
+      phase: finished ? "finished" : st.phase,
+      roundIndex: roundIdx,
+      roundCount: st.rounds.length,
+      prompt: round.prompt,
+      // Counts only, for this round's current phase.
+      submitted: st.phase === "vote" ? g.players.filter((p) => round.votes[p] !== undefined || (round.abstainedVotes ?? []).includes(p)).length : g.players.filter(inThisRound).length,
+      totalPlayers: g.players.length,
+    };
+    if (finished) return { ...base, rounds: st.rounds.map((_, r) => roundResult(r)) };
+    if (roundIdx > 0) base["lastRound"] = roundResult(roundIdx - 1);
+    if (st.phase === "vote") {
+      base["captions"] = order(roundIdx, Object.keys(round.captions)).map((a) => ({ id: this.captionAnonId(g, roundIdx, a), text: round.captions[a]!, ...(actorId === a ? { mine: true } : {}) }));
+      if (actorId) {
+        const v = round.votes[actorId];
+        base["myVote"] = v ? this.captionAnonId(g, roundIdx, v) : undefined;
+        base["myAbstained"] = (round.abstainedVotes ?? []).includes(actorId);
+        base["myCaption"] = round.captions[actorId];
+      }
+      return base;
+    }
+    if (actorId) {
+      base["myCaption"] = round.captions[actorId];
+      base["myAbstained"] = (round.abstainedSubmissions ?? []).includes(actorId);
+    }
+    return base;
   }
 
   /** A Sprint round's category: the game's own snapshot, or the original fixed list for older games. */

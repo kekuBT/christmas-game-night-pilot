@@ -14,6 +14,7 @@ import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./components/mchezo/MchezoConnections.js";
+import { CaptionTv, MchezoCaption, MchezoCaptionResults } from "./components/mchezo/MchezoCaption.js";
 import { MchezoGeography } from "./components/mchezo/MchezoGeography.js";
 import { MchezoMath } from "./components/mchezo/MchezoMath.js";
 import { MchezoYear } from "./components/mchezo/MchezoYear.js";
@@ -431,15 +432,16 @@ export function App() {
       await refresh();
     } catch (e) { fail(e); }
   }
-  /** The shared Word Connections board for a TV or spectator screen (never the answers while playing). */
+  /** TV / spectator screen for the Sprint 4 games (never answers or authors while playing). */
   function connectionsTvScreen(game: PublicGame, onBack: () => void, backLabel: string) {
-    const t = games.find((x) => x.id === game.gameId)?.title ?? "Word Connections";
+    const t = games.find((x) => x.id === game.gameId)?.title ?? game.gameId;
+    const isCaption = game.gameId === "caption-clash";
     return (
       <MchezoProvider theme={themes.everyday}>
-        <main className="mz-screen" style={{ maxWidth: 1200 }} aria-label={`${t} on the TV`} data-testid="mz-cx-tv">
+        <main className="mz-screen" style={{ maxWidth: 1200 }} aria-label={`${t} on the TV`} data-testid={isCaption ? "mz-cap-tv" : "mz-cx-tv"}>
           <div className="mz-topbar"><span className="mz-kicker" style={{ color: "var(--mz-answer-2)" }}>{t} · {proj?.joinCode}</span><button type="button" className="mz-chip-btn" onClick={onBack}>{backLabel}</button></div>
           <GameClock game={game} tv />
-          <ConnectionsTv game={game} title={t} />
+          {isCaption ? <CaptionTv game={game} /> : <ConnectionsTv game={game} title={t} />}
         </main>
       </MchezoProvider>
     );
@@ -531,7 +533,7 @@ export function App() {
         </MchezoProvider>
       );
     }
-    if (specLatest?.gameId === "word-connections") return connectionsTvScreen(specLatest, stopWatching, "Stop watching");
+    if (specLatest?.gameId === "word-connections" || specLatest?.gameId === "caption-clash") return connectionsTvScreen(specLatest, stopWatching, "Stop watching");
     if (specTvGame) {
       return (
         <MchezoProvider theme={themes.everyday} as="bare">
@@ -623,6 +625,8 @@ export function App() {
   const closestPlaying = playingGame?.gameId === "closest-wins";
   const connectionsPlaying = playingGame?.gameId === "word-connections";
   const connectionsFinished = latestFinished?.gameId === "word-connections";
+  const captionPlaying = playingGame?.gameId === "caption-clash";
+  const captionFinished = latestFinished?.gameId === "caption-clash";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -772,6 +776,35 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
         <MchezoConnectionsResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Word Connections"} onBackToLobby={() => dismissResults(latestFinished.id)} />
+      </MchezoProvider>
+    );
+  }
+  // Caption Clash (Sprint 4): its own intro, write/vote screens and results.
+  if (view === "lobby" && showPhase === "intro" && captionPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <GameIntro
+          title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"}
+          objective="Write the funniest caption."
+          accent={1}
+          steps={["Everyone gets the same silly scene.", "Write a caption, then vote for your favourite (not your own).", "Captions are anonymous until the end: 100 points per vote."]}
+          onStart={() => dismissIntro(playingGame.id)}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && captionPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <GameClock game={playingGame} />
+        <MchezoCaption game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"} intent={intent} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && captionFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoCaptionResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Caption Clash"} onBackToLobby={() => dismissResults(latestFinished.id)} />
       </MchezoProvider>
     );
   }
@@ -951,7 +984,7 @@ export function App() {
     // actions (start/finish) therefore drive every TV viewer's screen
     // through server state alone — no per-device phase is consulted.
     const latestGame = (proj?.games ?? []).at(-1);
-    if (latestGame?.gameId === "word-connections") return connectionsTvScreen(latestGame, () => setView("lobby"), "Back to phone view");
+    if (latestGame?.gameId === "word-connections" || latestGame?.gameId === "caption-clash") return connectionsTvScreen(latestGame, () => setView("lobby"), "Back to phone view");
     const tvGame = latestGame?.gameId === "trivia" && (latestGame.status === "playing" || latestGame.status === "finished") ? latestGame : undefined;
     if (tvGame) {
       return (

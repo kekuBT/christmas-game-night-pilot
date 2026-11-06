@@ -69,7 +69,7 @@ async function panelFinished(page, gameId) {
   // ~90s. The button appears only on the results screen, never in play.
   // Math Mayhem (§11) is the same shape — kit panel, old ShowResults,
   // no game-panel — and needs it even more (10 questions × 2 actions).
-  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem" || gameId === "word-connections") {
+  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem" || gameId === "word-connections" || gameId === "caption-clash") {
     try { return await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }); } catch { return false; }
   }
   // M6 Show Mode: a finished game shows the results screen instead of the
@@ -149,8 +149,24 @@ async function actConnections(page) {
   return true;
 }
 
+// Sprint 4: Caption Clash has its own screens (write / vote / results).
+async function actCaption(page, name) {
+  if (await isVisible(page.getByRole("button", { name: "Back to lobby" }), 300)) return true;
+  const input = page.getByTestId("mz-cap-input");
+  if (await isVisible(input, 500)) {
+    await input.fill(`caption by ${name}`);
+    await page.getByTestId("mz-cap-submit").click();
+    await sleep(400);
+    return true;
+  }
+  const option = page.locator('[data-testid="mz-cap-option"]:not([disabled])').first();
+  if (await isVisible(option, 500)) { await option.click(); await sleep(500); return true; }
+  return (await page.getByTestId("mz-cap-wait").count()) > 0 || (await page.getByTestId("mz-cap-vote").count()) > 0;
+}
+
 async function act(page, gameId, name) {
   if (gameId === "word-connections") return await actConnections(page);
+  if (gameId === "caption-clash") return await actCaption(page, name);
   // Geography renders in the Mchezo kit too (Work Package E) — same play
   // shape as Trivia (QuestionScreen slabs + locked view + Next question).
   // Math Mayhem (§11) is the same shape again.
@@ -324,7 +340,7 @@ try {
         // Guess the Year is a kit panel too (Work Package D) — there is
         // no "Now playing:" heading; the progress line is the signal.
         else if (gameId === "guess-the-year") await page.getByTestId("mz-year-progress").waitFor({ timeout: 20000 });
-        else await (gameId === "word-connections" ? page.getByTestId("mz-cx").waitFor({ timeout: 25000 }) : page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 }));
+        else await (gameId === "word-connections" ? page.getByTestId("mz-cx").waitFor({ timeout: 25000 }) : gameId === "caption-clash" ? page.getByTestId("mz-cap-write").waitFor({ timeout: 25000 }) : page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 }));
       }
       // Leak scan BEFORE driving any answers, while the game is playing.
       await tvLeakCheck(gameId, roomId);
