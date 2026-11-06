@@ -174,6 +174,7 @@ try {
     check("cancelled run killed its driver and the driver's child", await allGone([pids.pid, pids.child]), JSON.stringify(pids));
     check("cancelled run stopped its own server", await allGone([report.server.pid]));
     check("unrelated process left untouched", alive(sentinel.pid));
+    check("cancellation is not misreported as an infrastructure failure", !report.steps.some((s) => s.status === "INFRA"));
     process.kill(sentinel.pid, "SIGKILL");
   }
 } finally {

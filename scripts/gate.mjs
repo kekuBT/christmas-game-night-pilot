@@ -299,6 +299,7 @@ async function main() {
       if (cancelled) break;
       if (!verifyUnchanged(`before ${name}`)) return;
       await runStep(name, NODE, args, { timeoutSec: opts.driverTimeoutSec ?? (name === "e2e-chromium" ? 1800 : 600), env: driverEnv, kind: "browser" });
+      if (cancelled) break; // the run stopped its own server; not a server failure
       if (server.child.exitCode !== null) {
         report.steps.push({ name: "server-alive", kind: "infra", status: "INFRA", detail: `gate server exited (code ${server.child.exitCode}) during ${name}` });
         report.notes.push("remaining browser checks not run: server died");
