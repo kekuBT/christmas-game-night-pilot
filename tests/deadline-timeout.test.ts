@@ -50,22 +50,36 @@ describe("deadline/timeout", () => {
     expect(late).toMatchObject({ accepted: false, reason: "PHASE_CLOSED" });
   });
 
-  it("a host-skipped timed-out game unblocks starting the next game", () => {
+  // Sprint 3 (P3/P4): the server closes a game at its deadline by itself,
+  // keeping valid answers; the host "skip" no longer voids anything.
+  it("the host skip after a deadline closes the game with the deadline rules (not voided) and unblocks the next game", () => {
     const { engine, host } = makeRoom();
     const game = engine.startGame(host, "trivia", { seed: 1 });
     game.deadlineAt = Date.now() - 1000;
-    engine.skipTimedOutGame(host, game.id);
+    expect(engine.skipTimedOutGame(host, game.id)).toBe("deadline");
     expect(game.status).toBe("finished");
-    expect(game.timedOut).toBe(true);
+    expect(game.timedOut).toBeUndefined();
+    expect(game.outcome?.reason).toBe("deadline");
+    // A second skip is a no-op, not a second ending.
+    expect(engine.skipTimedOutGame(host, game.id)).toBe("deadline");
     const next = engine.startGame(host, "math-mayhem", { seed: 7 });
     expect(next.status).toBe("playing");
     expect(next.gameId).toBe("math-mayhem");
   });
 
-  it("a playing game past its deadline still blocks a new game until it is skipped", () => {
+  it("a playing game past its deadline no longer blocks a new game: the deadline closes it first", () => {
     const { engine, host } = makeRoom();
     const game = engine.startGame(host, "trivia", { seed: 1 });
     game.deadlineAt = Date.now() - 1000;
+    const next = engine.startGame(host, "math-mayhem", { seed: 7 });
+    expect(game.status).toBe("finished");
+    expect(game.outcome?.reason).toBe("deadline");
+    expect(next.status).toBe("playing");
+  });
+
+  it("before its deadline a game blocks a new game", () => {
+    const { engine, host } = makeRoom();
+    engine.startGame(host, "trivia", { seed: 1 });
     expect(() => engine.startGame(host, "math-mayhem", { seed: 7 })).toThrow("A game is already in progress");
   });
 });

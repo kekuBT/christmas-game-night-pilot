@@ -419,26 +419,38 @@ describe("Charades edges", () => {
 });
 
 describe("Engine timeout, abstention and start guards", () => {
-  it("a timed-out game is finished without scores and excluded from standings and championship", () => {
+  it("a legacy timed-out game (pre-Sprint 3 skip) stays excluded from standings and championship", () => {
     const { engine, host } = room(2);
     const game = engine.startGame(host, "math-mayhem", { official: true });
-    game.deadlineAt = Date.now() - 1;
-    engine.skipTimedOutGame(host, game.id);
-    expect(game.status).toBe("finished");
-    expect(game.timedOut).toBe(true);
+    // As a Sprint 2 snapshot records it: finished by the old skip, no outcome.
+    game.status = "finished";
+    game.timedOut = true;
     expect(engine.officialStandings()).toEqual({});
     expect(engine.championshipResults()).toEqual([]);
+    expect(engine.skipTimedOutGame(host, game.id)).toBe("legacy-timed-out");
+  });
+  it("a game that reaches its deadline with nobody answering ends at 0 for everyone, is not voided, and has nothing to count", () => {
+    const { engine, host, ids } = room(2);
+    const game = engine.startGame(host, "math-mayhem", { official: true });
+    game.deadlineAt = Date.now() - 1;
+    expect(engine.skipTimedOutGame(host, game.id)).toBe("deadline");
+    expect(game.rawScores).toEqual({ [ids[0]!]: 0, [ids[1]!]: 0 });
+    expect(game.outcome?.reason).toBe("deadline");
+    expect(game.outcome?.countsOfficially).toBe(false); // D-S3-02: no participation, no result
+    expect(game.outcome?.participation[ids[0]!]).toEqual({ done: 0, of: game.questions!.length });
   });
   it("skipping before the deadline is rejected, and a cohost may skip after it", () => {
     const { engine, host, ids } = room(2);
     engine.grantCohost(host, ids[1]!);
     const game = engine.startGame(host, "math-mayhem", { official: true });
     expect(() => engine.skipTimedOutGame(ids[1]!, game.id)).toThrow("Game has not timed out yet");
+    expect(game.status).toBe("playing");
     game.deadlineAt = Date.now() - 1;
-    engine.skipTimedOutGame(ids[1]!, game.id);
-    expect(game.timedOut).toBe(true);
+    expect(engine.skipTimedOutGame(ids[1]!, game.id)).toBe("deadline");
+    expect(game.status).toBe("finished");
   });
-  it("a disconnected player does not block a trivia game, and scores 0 for unanswered questions", () => {
+  // Sprint 3 (P6): a disconnect alone never ends a game; the deadline does.
+  it("a disconnected player does not finish a trivia game early; at the deadline they score 0 for unanswered questions", () => {
     const { engine, host, ids } = room(2);
     const game = engine.startGame(host, "trivia", { official: true, seed: 7 });
     const questions = (game.extra as { questions: { id: string; correctIndex: number }[] }).questions;
@@ -447,7 +459,12 @@ describe("Engine timeout, abstention and start guards", () => {
       const r = engine.submitIntent(intent(game.id, "trivia-answer", { questionId: q.id, chosenIndex: q.correctIndex }, engine.id), ids[0]!);
       expect(r.accepted).toBe(true);
     }
+    expect(game.status).toBe("playing"); // the disconnected player may still come back
+    game.deadlineAt = Date.now() - 1;
+    engine.tick();
     expect(game.status).toBe("finished");
+    expect(game.outcome?.reason).toBe("deadline");
+    expect(game.outcome?.participation[ids[1]!]).toEqual({ done: 0, of: questions.length });
     expect(game.rawScores[ids[0]!]).toBe(questions.length * 120);
     expect(game.rawScores[ids[1]!]).toBe(0);
   });
@@ -464,8 +481,8 @@ describe("Engine timeout, abstention and start guards", () => {
   it("an override on a timed-out game is rejected, and a finished game's override flows into standings", () => {
     const { engine, host, ids } = room(2);
     const timed = engine.startGame(host, "math-mayhem", { official: true });
-    timed.deadlineAt = Date.now() - 1;
-    engine.skipTimedOutGame(host, timed.id);
+    timed.status = "finished"; // a legacy (pre-Sprint 3) host-skipped game
+    timed.timedOut = true;
     expect(() => engine.overrideScore(host, timed.id, ids[0]!, 500, "late")).toThrow();
     const game = engine.startGame(host, "math-mayhem", { official: true });
     const questions = game.questions!;

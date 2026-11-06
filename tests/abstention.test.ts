@@ -50,7 +50,7 @@ function answerAllMath(engine: RoomEngine, gameId: string, pid: string) {
 describe("abstention semantics (L33)", () => {
   it("impostor: a clue abstention advances to the vote phase", () => {
     const { engine, players, host } = makeEngine(4);
-    const game = engine.startGame(host, "impostor", { official: true, seed: 7 });
+    const game = engine.startGame(host, "impostor", { official: false, seed: 7 });
     const state = game.extra as ImpostorState;
     const abstainer = players[0]!;
     for (const pid of players) {
@@ -65,7 +65,7 @@ describe("abstention semantics (L33)", () => {
 
   it("impostor: a vote abstention resolves the vote; the abstainer gets side points but no voter bonus", () => {
     const { engine, players, host } = makeEngine(4);
-    const game = engine.startGame(host, "impostor", { official: true, seed: 7 });
+    const game = engine.startGame(host, "impostor", { official: false, seed: 7 });
     const state = game.extra as ImpostorState;
     for (const pid of players) submit(engine, game.id, "impostor-clue", pid, { clue: "cold" });
     expect(state.phase).toBe("vote");
@@ -93,7 +93,7 @@ describe("abstention semantics (L33)", () => {
 
   it("impostor: an all-abstain vote convicts nobody, so the impostor wins", () => {
     const { engine, players, host } = makeEngine(4);
-    const game = engine.startGame(host, "impostor", { official: true, seed: 7 });
+    const game = engine.startGame(host, "impostor", { official: false, seed: 7 });
     const state = game.extra as ImpostorState;
     for (const pid of players) submit(engine, game.id, "impostor-clue", pid, { clue: "cold" });
     for (const pid of players) expect(submit(engine, game.id, "abstain", pid).accepted).toBe(true);
@@ -105,7 +105,7 @@ describe("abstention semantics (L33)", () => {
 
   it("impostor: a convicted impostor who abstains from the guess forfeits it (honest wins)", () => {
     const { engine, players, host } = makeEngine(4);
-    const game = engine.startGame(host, "impostor", { official: true, seed: 7 });
+    const game = engine.startGame(host, "impostor", { official: false, seed: 7 });
     const state = game.extra as ImpostorState;
     for (const pid of players) submit(engine, game.id, "impostor-clue", pid, { clue: "cold" });
     const impostor = state.impostorId;
@@ -271,7 +271,7 @@ describe("abstention semantics (L33)", () => {
 
   it("charades: abstention does not apply (Pass already exists) and is rejected", () => {
     const { engine, players, host } = makeEngine(4);
-    const game = engine.startGame(host, "charades", { official: true, seed: 7 });
+    const game = engine.startGame(host, "charades", { official: false, seed: 7 });
     const res = submit(engine, game.id, "abstain", players[0]!);
     expect(res.accepted).toBe(false);
     expect(res.reason).toBe("NOT_APPLICABLE");
@@ -286,7 +286,7 @@ describe("abstention semantics (L33)", () => {
     expect(submit(engine, game.id, "abstain", "player-999")).toMatchObject({ accepted: false, reason: "NOT_IN_GAME" });
 
     const { engine: engine2, players: players2, host: host2 } = makeEngine(4);
-    const game2 = engine2.startGame(host2, "impostor", { official: true, seed: 7 });
+    const game2 = engine2.startGame(host2, "impostor", { official: false, seed: 7 });
     submit(engine2, game2.id, "impostor-clue", players2[0]!, { clue: "cold" });
     expect(submit(engine2, game2.id, "abstain", players2[0]!)).toMatchObject({ accepted: false, reason: "ALREADY_SUBMITTED" });
 

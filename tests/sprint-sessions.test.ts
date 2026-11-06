@@ -156,9 +156,13 @@ describe("championship mathematics end to end", () => {
     expect(results[0]!.playerId).toBe(ids[0]);
   });
 
-  it("team games contribute through the team channel, not the solo channel", () => {
+  // Sprint 3 (P9): Charades, the only team game, is practice-only, so no
+  // real game can feed the team channel now. The channel itself is unchanged
+  // and still covered by tests/scoring.test.ts and tests/championship.test.ts.
+  it("the team game (Charades) cannot be official, and a practice Charades never enters the championship", () => {
     const { engine, host } = room(4);
-    const game = engine.startGame(host, "charades", { official: true });
+    expect(() => engine.startGame(host, "charades", { official: true })).toThrow(/practice-only/);
+    const game = engine.startGame(host, "charades", { official: false });
     const st = game.extra as { teams: string[][] };
     // Actor correct on every turn: both teams score equally.
     for (let i = 0; i < 4; i++) {
@@ -166,7 +170,7 @@ describe("championship mathematics end to end", () => {
       engine.submitIntent(intent(game.id, "charades-turn", { outcome: "correct" }, engine.id), actor);
     }
     expect(game.status).toBe("finished");
-    const results = engine.championshipResults();
-    expect(results.length).toBe(4);
+    expect(engine.championshipResults().length).toBe(0);
+    expect(engine.officialStandings()).toEqual({});
   });
 });

@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import WebSocket from "ws";
 import { LocalServer } from "../../src/server/http.js";
+import { policyFor } from "../../src/server/lifecycle.js";
 
 export type Json = Record<string, unknown>;
 
@@ -52,7 +53,7 @@ export class Harness {
 
   async start(): Promise<this> {
     // Heartbeat off: tests drive disconnects explicitly (heartbeatTick() can be called by hand).
-    this.server = new LocalServer({ dataDir: this.dataDir, clock: this.opts.clock?.now, heartbeatMs: null });
+    this.server = new LocalServer({ dataDir: this.dataDir, clock: this.opts.clock?.now, heartbeatMs: null, lifecycleSweepMs: null });
     this.port = await this.server.listen(0);
     this.base = `http://localhost:${this.port}`;
     return this;
@@ -156,11 +157,17 @@ export class Harness {
   async startGame(host: Player, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[] } = {}): Promise<{ status: number; body: Json }> {
     return this.post(`/rooms/${this.roomId}/games`, {
       gameId,
-      official: opts.official ?? true,
+      // Default: official where the game may count (practice-only games default to practice).
+      official: opts.official ?? policyFor(gameId).officialEligible,
       ...(opts.seed !== undefined ? { seed: opts.seed } : {}),
       ...(opts.roster ? { roster: opts.roster } : {}),
       ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}),
     }, host.token);
+  }
+
+  /** Run the server's deadline sweep now (tests disable the timer and drive the fake clock). */
+  lifecycleTick(): number {
+    return this.server.lifecycleSweep();
   }
 
   intentBody(gameInstanceId: string, action: string, payload: Json, clientEventId: string = randomUUID()) {

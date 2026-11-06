@@ -1,5 +1,6 @@
 import { createHash, randomInt } from "node:crypto";
 import { getGame } from "../games/registry.js";
+import { COUNT_GAMES_WITH_NO_PARTICIPATION, policyFor, type EndReason, type GameOutcome, type Participation } from "./lifecycle.js";
 import { dayScore, midrankScore } from "../scoring/championship.js";
 import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
 import { evaluateAchievements, dayCeremony } from "./achievements.js";
@@ -23,7 +24,9 @@ import {
   abstainCaptionVote,
   allCaptionVotesIn,
   allCaptionsIn,
+  captionRoundScores,
   captionTotalScores,
+  currentRound,
   initCaption,
   projectCaption,
   submitCaption,
@@ -34,6 +37,7 @@ import {
   abstainClosest,
   advanceClosest,
   allGuessed,
+  closestQuestionScores,
   closestTotalScores,
   initClosest,
   projectClosest,
@@ -192,6 +196,13 @@ export interface GameInstance {
    *  per phase in their own state instead. */
   abstained?: string[];
   extra?: unknown;
+  /** Sprint 3 lifecycle. Absent on games started before it (legacy). */
+  lifecycleVersion?: number;
+  /** Phased games: which phase is running ("q:3", "1:vote"...) and when it closes (server time). */
+  phaseKey?: string;
+  phaseDeadlineAt?: number;
+  /** How the game ended and whether it counts. Written once, at finalization; never recomputed. */
+  outcome?: GameOutcome;
 }
 
 /**
@@ -455,6 +466,10 @@ export class RoomEngine {
     if (this.hostId !== hostId && !this.cohosts.has(hostId)) throw new Error("Only host/cohost can start a game");
     const game = getGame(gameId);
     if (game.status === "not-implemented") throw new Error(`Game not implemented yet: ${gameId}`);
+    const policy = policyFor(gameId);
+    // P8/P9: practice-only games can never start as official (server-enforced).
+    if ((opts.official ?? false) && !policy.officialEligible) throw new Error(policy.practiceOnlyReason ?? `${game.title} is practice-only`);
+    this.tick(); // a game whose deadline just passed is finalized before anything new starts
     // The browser UI has a single active-game panel (first playing game), so
     // a second concurrent game would orphan the first: it could never become
     // active again. Reject instead of silently stacking games.
@@ -479,6 +494,7 @@ export class RoomEngine {
     // Secure per-session seed by default. Explicit seeds are for controlled
     // tests only; the old default of 42 made hidden-role assignment predictable.
     const seed = opts.seed ?? randomInt(0, 2147483647);
+    const startedAt = this.clock(); // one instant: start, game deadline and first phase all derive from it
     const instance: GameInstance = {
       id,
       gameId,
@@ -489,8 +505,10 @@ export class RoomEngine {
       answers: {},
       answerTimes: {},
       rawScores: Object.fromEntries(playerIds.map((p) => [p, 0])),
-      startedAt: this.clock(),
-      deadlineAt: this.clock() + 5 * 60 * 1000,
+      startedAt,
+      // Overall deadline (independent games) or backstop (phased), from the policy table.
+      deadlineAt: startedAt + policy.gameWindowMs,
+      lifecycleVersion: 1,
       day: this.championshipDay,
       seed,
       extra:
@@ -517,6 +535,7 @@ export class RoomEngine {
                             : undefined,
     };
     this.games.set(id, instance);
+    this.syncPhase(instance, startedAt); // phased games: start the first phase's clock
     // Audit who was left out and whether the host chose that explicitly.
     const leftOut = readiness.wouldMiss.map((m) => ({ id: m.id, presence: m.presence }));
     this.log("game-started", { gameInstanceId: id, actor: hostId, ...(leftOut.length ? { detail: { leftOut, startedWithoutOnPurpose: [...leftOutOnPurpose].filter((x) => leftOut.some((l) => l.id === x)) } } : {}) });
@@ -524,15 +543,15 @@ export class RoomEngine {
   }
 
   /**
-   * Players who can still advance a game: connected players, falling back to
-   * all players if nobody is connected (so a game never finishes instantly
-   * just because everyone dropped at once — the host skip covers that case).
-   * A disconnected player's partial answers still count; they simply no
-   * longer block the rest of the room from finishing.
+   * Players a game waits for before ending early: its whole roster (P6).
+   * Until Sprint 3 this was "connected players", so a socket dropping could
+   * decide when a game finished. Now completion follows the rules: early
+   * when every roster player has finished or chosen to sit out, otherwise
+   * at the deadline. A disconnected player can come back and keep playing
+   * until then; a silent player can delay others only until the deadline.
    */
   private activePlayers(game: GameInstance): string[] {
-    const connected = game.players.filter((pid) => this.players.get(pid)?.connected);
-    return connected.length > 0 ? connected : game.players;
+    return game.players;
   }
 
   /** Submit a validated intent. Returns the ack; duplicates return the original result. */
@@ -541,6 +560,11 @@ export class RoomEngine {
     if (!parsed.success) return { accepted: false, reason: "INVALID_INTENT" };
     const intent = parsed.data;
     if (intent.roomId !== this.id) return { accepted: false, reason: "WRONG_ROOM" };
+    // Deadlines first: anything due at or before `now` is processed (as of
+    // its own deadline instant) before this action is considered, so an
+    // action that arrives after a deadline can never slip into that phase.
+    // A replayed intent still returns its original result below.
+    this.tick(now);
     const key = dedupeKey(intent.roomId, actorId, intent.clientEventId);
     const seen = this.seenIntents.get(key);
     // A replay must return the ORIGINAL response, byte for byte — not a
@@ -582,6 +606,8 @@ export class RoomEngine {
       if (game) {
         game.submittedPlayers ??= [];
         if (!game.submittedPlayers.includes(actorId)) game.submittedPlayers.push(actorId);
+        // A phase that ended early (everyone acted) starts the next phase's clock now.
+        if (game.status === "playing") this.syncPhase(game, now);
       }
     }
     this.seenIntents.set(key, { accepted: result.accepted, result });
@@ -895,25 +921,348 @@ export class RoomEngine {
       const allDone = this.activePlayers(game).every(
         (pid) => (game.abstained ?? []).includes(pid) || Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0),
       );
-      if (allDone) {
-        // Math scores accrue live per answer; abstainers simply add nothing more.
-        game.status = "finished";
-        this.log("game-finished", { gameInstanceId: game.id, official: game.official });
-      }
+      // Math scores accrue live per answer; abstainers simply add nothing more.
+      if (allDone) this.finalize(game, "completed");
     }
   }
 
+  /** A game reached its natural end through play (every phase ran, or everyone finished). */
   private finishGame(game: GameInstance, scores: Record<string, number>): void {
-    // Normalise: every player in the game gets an entry, defaulting to 0.
-    // Scoring helpers only list players who earned points, so a player who
-    // abstained from everything (or never scored) would otherwise vanish
-    // from rawScores instead of standing at 0.
-    game.rawScores = { ...Object.fromEntries(game.players.map((p) => [p, 0])), ...scores };
-    game.status = "finished";
-    for (const [pid, pts] of Object.entries(scores)) {
-      this.log("score-awarded", { playerId: pid, gameInstanceId: game.id, points: pts, reason: `game:${game.gameId}` });
+    this.finalize(game, "completed", scores);
+  }
+
+  // ------------------------------------------------------------ lifecycle
+  // Sprint 3 (src/server/lifecycle.ts). Server time only; persisted in the
+  // game record; processed lazily by tick(), which LocalServer calls before
+  // every action and read and from one server-wide sweep, so a deadline is
+  // handled even when nobody acts, and identically after a restart.
+
+  /** While tick() processes a deadline, "now" is that deadline instant. */
+  private eventTime: number | null = null;
+  private at(): number {
+    return this.eventTime ?? this.clock();
+  }
+
+  /** The phase a phased game is in, derived from its own state (e.g. "q:3", "1:vote"). */
+  private phaseOf(game: GameInstance): { key: string; kind: "question" | "write" | "vote" | "round" | "clue" | "guess" | "turn" } | null {
+    switch (game.gameId) {
+      case "closest-wins": return { key: `q:${(game.extra as ClosestState).questionIndex}`, kind: "question" };
+      case "caption-clash": {
+        const st = game.extra as CaptionState;
+        return { key: `${st.roundIndex}:${st.phase}`, kind: st.phase === "vote" ? "vote" : "write" };
+      }
+      case "category-sprint": return { key: `r:${(game.extra as { roundIndex: number }).roundIndex}`, kind: "round" };
+      case "impostor": {
+        const ph = (game.extra as ImpostorState).phase;
+        return { key: ph, kind: ph === "vote" ? "vote" : ph === "guess" ? "guess" : "clue" };
+      }
+      case "charades": return { key: `turn:${(game.extra as CharadesState).turnIndex}`, kind: "turn" };
+      default: return null;
     }
-    this.log("game-finished", { gameInstanceId: game.id, official: game.official });
+  }
+
+  /** If the game moved to a new phase, start that phase's clock at `at`. */
+  private syncPhase(game: GameInstance, at: number): void {
+    if (game.status !== "playing" || game.lifecycleVersion === undefined) return;
+    const ph = this.phaseOf(game);
+    if (!ph || ph.key === game.phaseKey) return;
+    const ms = policyFor(game.gameId).phaseMs?.[ph.kind];
+    if (ms === undefined) return;
+    game.phaseKey = ph.key;
+    game.phaseDeadlineAt = at + ms;
+  }
+
+  /**
+   * Process every deadline that has passed by `now`, in time order, each as
+   * of its own deadline instant. Returns true if anything changed (the
+   * caller saves and broadcasts). Idempotent: running it twice, or from two
+   * requests, does nothing the second time.
+   */
+  tick(now = this.clock()): boolean {
+    let changed = false;
+    for (const game of this.games.values()) {
+      for (let guard = 0; guard < 100 && game.status === "playing"; guard++) {
+        const phaseDue = game.phaseDeadlineAt !== undefined && now > game.phaseDeadlineAt ? game.phaseDeadlineAt : Infinity;
+        const gameDue = game.deadlineAt !== undefined && now > game.deadlineAt ? game.deadlineAt : Infinity;
+        const next = Math.min(phaseDue, gameDue);
+        if (next === Infinity) break;
+        this.eventTime = next;
+        try {
+          if (next === phaseDue && phaseDue <= gameDue) this.expirePhase(game, next);
+          else this.expireGame(game);
+        } finally {
+          this.eventTime = null;
+        }
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  /** A phase's time ran out: close it with the input received, never inventing any. */
+  private expirePhase(game: GameInstance, at: number): void {
+    const before = game.phaseKey;
+    try {
+      switch (game.gameId) {
+        case "closest-wins": {
+          const st = game.extra as ClosestState;
+          advanceClosest(st); // missing guesses simply score nothing for this question
+          if (st.phase === "finished") this.finishGame(game, closestTotalScores(st));
+          break;
+        }
+        case "caption-clash": {
+          const st = game.extra as CaptionState;
+          if (st.phase === "caption") {
+            // Nobody wrote a caption: there is nothing to vote on; the round ends empty.
+            if (Object.keys(currentRound(st).captions).length === 0) this.advanceCaptionRound(game, st);
+            else st.phase = "vote";
+          } else if (st.phase === "vote") {
+            this.advanceCaptionRound(game, st); // votes received count; late votes cannot arrive
+          }
+          break;
+        }
+        case "category-sprint":
+          this.advanceSprintRound(game, game.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> });
+          break;
+        case "impostor": {
+          const st = game.extra as ImpostorState;
+          if (st.phase === "clue") st.phase = "vote";
+          else if (st.phase === "vote") {
+            resolveVote(st); // existing rule: no votes convicts nobody, so the impostor wins
+            if ((st.phase as ImpostorState["phase"]) === "finished") this.finishGame(game, impostorScores(st, game.players));
+          } else if (st.phase === "guess") {
+            // The convicted impostor didn't guess in time: same as forfeiting (L33).
+            st.guessCorrect = false;
+            st.phase = "finished";
+            st.winner = "honest";
+            this.finishGame(game, impostorScores(st, game.players));
+          }
+          break;
+        }
+        case "charades": {
+          // The actor's time is up (or the actor is absent): the turn ends with
+          // no point and play moves on, so an absent actor can't stall the game.
+          const st = game.extra as CharadesState;
+          st.promptIndex = (st.promptIndex ?? st.turnIndex) + 1;
+          st.turnIndex += 1;
+          st.passesThisTurn = 0;
+          if (st.turnIndex >= st.teams[0]!.length + st.teams[1]!.length) {
+            st.phase = "finished";
+            this.finishGame(game, charadesPlayerScores(st));
+          }
+          break;
+        }
+        default:
+          game.phaseDeadlineAt = undefined;
+          return;
+      }
+    } catch (err) {
+      this.voidGame(game, at, `phase deadline could not be processed: ${(err as Error).message}`);
+      return;
+    }
+    if (game.status === "playing") {
+      this.syncPhase(game, at);
+      // Defensive: a phase that did not change would otherwise expire forever.
+      if (game.phaseKey === before) game.phaseDeadlineAt = undefined;
+    }
+    this.log("phase-closed", { gameInstanceId: game.id, detail: { phase: before, at } });
+  }
+
+  /** The game deadline (independent games) or backstop (phased) arrived. */
+  private expireGame(game: GameInstance): void {
+    const policy = policyFor(game.gameId);
+    if (policy.model === "game-deadline") {
+      this.finalize(game, "deadline");
+      return;
+    }
+    // Phased game at its backstop: only fully completed rounds/questions are
+    // scored; an unfinished round gets no fabricated score; it counts as practice.
+    this.finalize(game, "backstop-partial", this.completedUnitScores(game));
+  }
+
+  /** Phased games at the backstop: totals from completed questions/rounds only. */
+  private completedUnitScores(game: GameInstance): Record<string, number> {
+    const totals: Record<string, number> = {};
+    const add = (s: Record<string, number>) => { for (const [k, v] of Object.entries(s)) totals[k] = (totals[k] ?? 0) + v; };
+    if (game.gameId === "closest-wins") {
+      const st = game.extra as ClosestState;
+      for (const q of st.questions.slice(0, st.questionIndex)) add(closestQuestionScores(q, st.guesses[q.id] ?? {}));
+    } else if (game.gameId === "caption-clash") {
+      const st = game.extra as CaptionState;
+      for (const r of st.rounds.slice(0, st.roundIndex)) add(captionRoundScores(r));
+    } else if (game.gameId === "category-sprint") {
+      const st = game.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
+      for (let r = 0; r < st.roundIndex; r++) add(scoreSprintRound(SPRINT_CATEGORIES[r % SPRINT_CATEGORIES.length]!, st.submissions[r] ?? {}));
+    }
+    // Impostor/Charades: no partial result exists (and they are practice-only).
+    return totals;
+  }
+
+  /** Per-player participation, as public counts (never who chose to abstain). */
+  private participationOf(game: GameInstance, reason: EndReason): { participation: Record<string, Participation>; completedUnits?: number; totalUnits?: number } {
+    const out: Record<string, Participation> = {};
+    const each = (fn: (pid: string) => Participation) => { for (const pid of game.players) out[pid] = fn(pid); };
+    switch (game.gameId) {
+      case "trivia":
+      case "who-said-that":
+      case "geography": {
+        const st = game.extra as { questions: unknown[]; answers: Record<string, Record<string, number>> };
+        each((pid) => ({ done: Object.keys(st.answers[pid] ?? {}).length, of: st.questions.length }));
+        break;
+      }
+      case "guess-the-year": {
+        const st = game.extra as { events: unknown[]; guesses: Record<string, Record<string, number>> };
+        each((pid) => ({ done: Object.keys(st.guesses[pid] ?? {}).length, of: st.events.length }));
+        break;
+      }
+      case "math-mayhem":
+        each((pid) => ({ done: Object.keys(game.answers[pid] ?? {}).length, of: game.questions?.length ?? 0 }));
+        break;
+      case "word-connections": {
+        const st = game.extra as { playerStates: Record<string, ConnectionsPlayerState> };
+        each((pid) => { const ps = st.playerStates[pid]; return { done: ps?.solved.length ?? 0, of: 4, finished: !!ps && (ps.solved.length >= 4 || ps.mistakes >= 4) }; });
+        break;
+      }
+      case "closest-wins": {
+        const st = game.extra as ClosestState;
+        const reached = st.phase === "finished" ? st.questions.length : st.questionIndex;
+        each((pid) => ({ done: st.questions.slice(0, reached).filter((q) => (st.guesses[q.id] ?? {})[pid] !== undefined).length, of: st.questions.length }));
+        return { participation: out, completedUnits: reached, totalUnits: st.questions.length };
+      }
+      case "caption-clash": {
+        const st = game.extra as CaptionState;
+        const reached = st.phase === "finished" ? st.rounds.length : st.roundIndex;
+        each((pid) => ({ done: st.rounds.slice(0, reached).filter((r) => r.captions[pid] !== undefined).length, of: st.rounds.length }));
+        return { participation: out, completedUnits: reached, totalUnits: st.rounds.length };
+      }
+      case "category-sprint": {
+        const st = game.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
+        const total = 3;
+        // A completed sprint ends inside its last round without moving roundIndex on.
+        const reached = reason === "completed" ? total : st.roundIndex;
+        each((pid) => ({ done: Array.from({ length: total }, (_, r) => r).filter((r) => r < reached && (st.submissions[r] ?? {})[pid] !== undefined).length, of: total }));
+        return { participation: out, completedUnits: reached, totalUnits: total };
+      }
+      default:
+        each(() => ({ done: 0, of: 0 }));
+    }
+    return { participation: out };
+  }
+
+  /**
+   * The ONE way a game ends. Exactly once: the status guard means a second
+   * caller (a racing deadline, a host action, a final answer) does nothing.
+   * Writes scores, the outcome (reason, counts-or-not, participation) and
+   * the ledger events in one step; the caller saves the room atomically.
+   */
+  private finalize(game: GameInstance, reason: EndReason, scores?: Record<string, number>): void {
+    if (game.status !== "playing") return;
+    const at = this.at();
+    const policy = policyFor(game.gameId);
+    let finalScores: Record<string, number>;
+    let part: ReturnType<RoomEngine["participationOf"]>;
+    let nobodyPlayed: boolean;
+    try {
+      if (scores !== undefined) finalScores = scores;
+      else if (game.gameId === "math-mayhem") finalScores = { ...game.rawScores }; // already scored live, per answer
+      else finalScores = this.scoresAtEnd(game);
+      if (Object.values(finalScores).some((v) => typeof v !== "number" || !Number.isFinite(v))) throw new Error("non-numeric score");
+      part = this.participationOf(game, reason);
+      nobodyPlayed = !this.anyoneParticipated(game, part.participation);
+    } catch (err) {
+      // Nothing has been written yet: the game is voided, never half-finished.
+      this.voidGame(game, at, `scores could not be calculated: ${(err as Error).message}`);
+      return;
+    }
+    // Every roster player has an entry (0 if they never scored).
+    game.rawScores = { ...Object.fromEntries(game.players.map((p) => [p, 0])), ...finalScores };
+    game.status = "finished";
+    game.phaseDeadlineAt = undefined;
+    const countsOfficially = game.official && policy.officialEligible && reason !== "backstop-partial"
+      && !(nobodyPlayed && !COUNT_GAMES_WITH_NO_PARTICIPATION);
+    game.outcome = {
+      reason,
+      endedAt: at,
+      countsOfficially,
+      ...(reason === "backstop-partial" ? { note: "The game hit its time limit in the middle of a round. Completed rounds are shown; it counts as practice." } : {}),
+      ...(game.official && !policy.officialEligible ? { note: policy.practiceOnlyReason } : {}),
+      ...(game.official && policy.officialEligible && nobodyPlayed && !COUNT_GAMES_WITH_NO_PARTICIPATION
+        ? { note: "Nobody answered before time ran out, so there is no result to count." } : {}),
+      ...part,
+    };
+    if (game.gameId !== "math-mayhem") {
+      for (const [pid, pts] of Object.entries(finalScores)) {
+        this.log("score-awarded", { playerId: pid, gameInstanceId: game.id, points: pts, reason: `game:${game.gameId}` });
+      }
+    }
+    this.log("game-finished", { gameInstanceId: game.id, official: game.official, detail: { reason, countsOfficially } });
+  }
+
+  /** Did any roster player take any scoring action (an answer, a guess, a caption, a vote)? */
+  private anyoneParticipated(game: GameInstance, participation: Record<string, Participation>): boolean {
+    if (Object.values(participation).some((p) => p.done > 0 || p.finished)) return true;
+    if (game.gameId === "word-connections") {
+      const st = game.extra as { playerStates: Record<string, ConnectionsPlayerState> };
+      return game.players.some((p) => (st.playerStates[p]?.mistakes ?? 0) > 0);
+    }
+    if (game.gameId === "caption-clash") {
+      const st = game.extra as CaptionState;
+      return st.rounds.some((r) => Object.keys(r.votes ?? {}).length > 0);
+    }
+    // Impostor/Charades are practice-only; their completion is played, not answered.
+    return game.gameId === "impostor" || game.gameId === "charades";
+  }
+
+  /** Scores at a deadline for independent games: valid answers only, unanswered = 0. */
+  private scoresAtEnd(game: GameInstance): Record<string, number> {
+    switch (game.gameId) {
+      case "trivia":
+      case "who-said-that":
+      case "geography":
+        return this.scoreQuizGame(game, game.extra as { questions: (TriviaQuestion | WhoSaidQuestion | GeographyQuestion)[]; answers: Record<string, Record<string, number>> });
+      case "guess-the-year":
+        return this.scoreYearGame(game, game.extra as { events: YearEvent[]; guesses: Record<string, Record<string, number>> });
+      case "word-connections": {
+        const st = game.extra as { playerStates: Record<string, ConnectionsPlayerState> };
+        return Object.fromEntries(game.players.map((p) => [p, connectionsScore(st.playerStates[p]!)]));
+      }
+      default:
+        // Phased games end through their phases; a legacy in-flight game of
+        // one of these kinds ends with its completed units only.
+        return this.completedUnitScores(game);
+    }
+  }
+
+  /**
+   * A technical integrity failure (P4): no result, clearly marked, audited.
+   * Never used for a normal deadline and never available to players.
+   */
+  private voidGame(game: GameInstance, at: number, why: string): void {
+    if (game.status !== "playing") return;
+    game.status = "finished";
+    game.phaseDeadlineAt = undefined;
+    game.outcome = { reason: "void", endedAt: at, countsOfficially: false, note: "This game was voided because of a technical problem. It does not count.", participation: {} };
+    this.log("game-voided", { gameInstanceId: game.id, reason: why.slice(0, 200) });
+  }
+
+  /** Public timing/eligibility facts for a game (never answers or who abstained). */
+  private lifecycleInfo(g: GameInstance): Record<string, unknown> | undefined {
+    if (g.lifecycleVersion === undefined) return undefined;
+    let policy;
+    try { policy = policyFor(g.gameId); } catch { return undefined; }
+    return {
+      model: policy.model,
+      officialEligible: policy.officialEligible,
+      practiceOnlyReason: policy.officialEligible ? undefined : policy.practiceOnlyReason,
+      unit: policy.unit,
+      phaseKey: g.status === "playing" ? g.phaseKey : undefined,
+    };
+  }
+
+  /** Does a finished game feed official standings? Legacy games keep their old rule. */
+  countsOfficially(g: GameInstance): boolean {
+    if (g.status !== "finished" || !g.official || g.timedOut) return false;
+    return g.outcome ? g.outcome.countsOfficially : true;
   }
 
   /**
@@ -924,7 +1273,7 @@ export class RoomEngine {
   officialStandings(): Record<string, number> {
     const out: Record<string, number> = {};
     for (const g of this.games.values()) {
-      if (g.status !== "finished" || !g.official || g.timedOut) continue;
+      if (!this.countsOfficially(g)) continue;
       const all = Object.values(g.rawScores);
       if (all.length < 2) continue;
       for (const [pid, pts] of Object.entries(g.rawScores)) {
@@ -980,7 +1329,7 @@ export class RoomEngine {
   championshipResults() {
     const days = new Map<string, PlayerDay>();
     for (const g of this.games.values()) {
-      if (g.status !== "finished" || !g.official || g.timedOut) continue;
+      if (!this.countsOfficially(g)) continue;
       const all = Object.values(g.rawScores);
       if (all.length < 2) continue;
       const isTeam = getGame(g.gameId).modes.includes("team");
@@ -1012,7 +1361,7 @@ export class RoomEngine {
   ceremony() {
     const days = new Map<string, PlayerDay>();
     for (const g of this.games.values()) {
-      if (g.status !== "finished" || !g.official || g.timedOut) continue;
+      if (!this.countsOfficially(g)) continue;
       if ((g.day ?? 1) !== this.championshipDay) continue;
       const all = Object.values(g.rawScores);
       if (all.length < 2) continue;
@@ -1033,19 +1382,25 @@ export class RoomEngine {
   }
 
   /**
-   * Host/cohost-only escape hatch for a stalled game: after its deadline a
-   * host may close it without inventing scores. Players who never submitted
-   * simply keep their current (zero or partial) raw scores, the game is
-   * marked timedOut, and officialStandings() excludes it.
+   * Host/cohost "close a game that is past its deadline". Since Sprint 3 the
+   * server closes every game at its deadline by itself (tick), with the
+   * deadline rules (P3/P4): valid answers kept, unanswered = 0, the result
+   * counts. So this no longer voids anything: it processes any due deadline
+   * and is a no-op for a game that has already ended. Before the deadline it
+   * is refused, so a host cannot cut a game short or void it (P4).
+   * Returns the game's outcome reason.
    */
-  skipTimedOutGame(actorId: string, gameInstanceId: string, now = this.clock()): void {
+  skipTimedOutGame(actorId: string, gameInstanceId: string, now = this.clock()): EndReason | "legacy-timed-out" {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can skip a timed-out game");
+    this.tick(now);
     const game = this.games.get(gameInstanceId);
-    if (!game || game.status !== "playing") throw new Error("Game is not playing");
-    if (!game.deadlineAt || now < game.deadlineAt) throw new Error("Game has not timed out yet");
-    game.status = "finished";
-    game.timedOut = true;
-    this.log("game-timed-out", { gameInstanceId: game.id, actor: actorId });
+    if (!game) throw new Error("Game is not playing");
+    if (game.status === "finished") {
+      if (game.outcome) return game.outcome.reason;
+      if (game.timedOut) return "legacy-timed-out";
+      throw new Error("Game is not playing");
+    }
+    throw new Error("Game has not timed out yet");
   }
 
   private submitMathAnswer(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now: number) {
@@ -1076,11 +1431,8 @@ export class RoomEngine {
     this.log("score-awarded", { playerId: actorId, gameInstanceId: game.id, points, reason: `math:${questionId}` });
     // Finish when every player answered every question (or sat out the rest)
     const allDone = this.activePlayers(game).every((pid) => (game.abstained ?? []).includes(pid) || Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0));
-    if (allDone) {
-      game.status = "finished";
-      // Same metadata as every other finish path (finishGame, settleAfterAbstain).
-      this.log("game-finished", { gameInstanceId: game.id, official: game.official });
-    }
+    // Math scores accrue live per answer, so finalizing adds no score events.
+    if (allDone) this.finalize(game, "completed");
     return { accepted: true, result: { points, total: game.rawScores[actorId] } };
   }
 
@@ -1217,6 +1569,12 @@ export class RoomEngine {
       timedOut: g.timedOut ?? false,
       day: g.day ?? 1,
       deadlineAt: g.deadlineAt,
+      // Sprint 3 lifecycle (server time; clients show countdowns as
+      // deadline - serverNow, never their own clock alone).
+      phaseDeadlineAt: g.status === "playing" ? g.phaseDeadlineAt : undefined,
+      lifecycle: this.lifecycleInfo(g),
+      outcome: g.status === "finished" ? g.outcome : undefined,
+      countsOfficially: g.status === "finished" ? this.countsOfficially(g) : undefined,
       players: g.players,
       submittedCount: (g.submittedPlayers ?? []).length,
       totalPlayers: g.players.length,
@@ -1234,6 +1592,8 @@ export class RoomEngine {
       rawScores: g.status === "finished" ? g.rawScores : undefined,
     }));
     const base: Record<string, unknown> = {
+      /** The server's clock when this projection was made (deadline countdowns). */
+      serverNow: now,
       roomId: this.id,
       joinCode: this.joinCode,
       name: this.name,
@@ -1268,6 +1628,13 @@ export class RoomEngine {
           id: g.id,
           gameId: g.gameId,
           status: g.status,
+          official: g.official,
+          // Same public timing/outcome facts as the games list (server time).
+          deadlineAt: g.deadlineAt,
+          phaseDeadlineAt: g.status === "playing" ? g.phaseDeadlineAt : undefined,
+          lifecycle: this.lifecycleInfo(g),
+          outcome: g.status === "finished" ? g.outcome : undefined,
+          countsOfficially: g.status === "finished" ? this.countsOfficially(g) : undefined,
           participant,
           myAnswers: participant ? g.answers[actorId] ?? {} : {},
           myScore: participant ? g.rawScores[actorId] ?? 0 : 0,

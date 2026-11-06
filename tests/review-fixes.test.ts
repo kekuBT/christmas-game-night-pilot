@@ -193,7 +193,7 @@ describe("PR #3 review fixes", () => {
     expect(entries.some((e) => e.text === "Restart-proof highlight" && e.approved)).toBe(true);
   });
 
-  it("#4: late social submissions are rejected and the host can skip a timed-out game without inventing scores", async () => {
+  it("#4: late submissions are rejected; the deadline closes the game without inventing scores (Sprint 3: the server, not the host skip)", async () => {
     const engine = new RoomEngine("Deadline Room");
     const host = engine.join("Host", { asHost: true }).player.id;
     const ids = [host];
@@ -205,9 +205,10 @@ describe("PR #3 review fixes", () => {
     expect(late.accepted).toBe(false);
     expect(late.reason).toBe("PHASE_CLOSED");
     expect(() => engine.skipTimedOutGame(ids[1]!, game.id)).toThrow();
-    engine.skipTimedOutGame(host, game.id);
+    expect(engine.skipTimedOutGame(host, game.id)).toBe("deadline");
     expect(game.status).toBe("finished");
-    expect(game.timedOut).toBe(true);
+    expect(game.outcome?.reason).toBe("deadline");
+    expect(Object.values(game.rawScores).every((v) => v === 0)).toBe(true); // nobody answered in time
     expect(engine.officialStandings()).toEqual({});
   });
 

@@ -32,6 +32,14 @@ export interface ServerOptions {
    * null disables it (tests drive disconnects explicitly). Default 15s.
    */
   heartbeatMs?: number | null;
+  /**
+   * Game deadlines (Sprint 3): one server-wide sweep, not a timer per room
+   * or per game. It only catches deadlines nobody triggers: every request
+   * and socket action already processes due deadlines first, so the sweep
+   * interval bounds how late a "Time's up" can appear, never correctness.
+   * null disables it (tests call lifecycleSweep() with a fake clock). Default 1s.
+   */
+  lifecycleSweepMs?: number | null;
 }
 
 interface SocketMeta {
@@ -127,6 +135,7 @@ export class LocalServer {
 
   readonly clock: () => number;
   private heartbeat: ReturnType<typeof setInterval> | null = null;
+  private lifecycleTimer: ReturnType<typeof setInterval> | null = null;
   /** Seat recovery: brute-force limits (contract §1.5) and pending host-assisted requests. */
   private recoveries: PendingRecoveries;
   private codeFailuresPerAddressPerRoom: FailureLimiter;
@@ -155,6 +164,39 @@ export class LocalServer {
       this.heartbeat = setInterval(() => this.heartbeatTick(), beat);
       this.heartbeat.unref();
     }
+    const sweep = opts.lifecycleSweepMs === undefined ? 1_000 : opts.lifecycleSweepMs;
+    if (sweep !== null) {
+      this.lifecycleTimer = setInterval(() => this.lifecycleSweep(), sweep);
+      this.lifecycleTimer.unref();
+    }
+    // A restart processes everything that fell due while the server was down.
+    this.lifecycleSweep();
+  }
+
+  /** Process due game deadlines in every room; save and broadcast rooms that changed. */
+  lifecycleSweep(): number {
+    let changed = 0;
+    for (const room of this.rooms.values()) if (this.tickRoom(room)) changed++;
+    return changed;
+  }
+
+  /** Process due deadlines for one room; on change, save before anyone sees it. */
+  private tickRoom(room: RoomEngine): boolean {
+    let did: boolean;
+    try {
+      did = room.tick();
+    } catch (err) {
+      console.error(`[lifecycle] room ${room.id}: ${(err as Error).message}`);
+      return false;
+    }
+    if (!did) return false;
+    try {
+      this.persist(room);
+    } catch {
+      // Logged by persist(); state stays in memory and is saved on the next write.
+    }
+    this.broadcast(room.id);
+    return true;
   }
 
   /** Terminate sockets that did not answer the previous ping; ping the rest. */
@@ -291,6 +333,7 @@ export class LocalServer {
 
   async close(): Promise<void> {
     if (this.heartbeat) clearInterval(this.heartbeat);
+    if (this.lifecycleTimer) clearInterval(this.lifecycleTimer);
     for (const s of this.sockets) s.ws.close();
     this.sockets.clear();
     await new Promise<void>((resolve) => this.wss.close(() => resolve()));
@@ -536,6 +579,8 @@ export class LocalServer {
           this.send(res, 404, { error: "Room not found" });
           return;
         }
+        // Deadlines that are due are processed (and saved) before this request is served.
+        this.tickRoom(room);
         if (req.method === "GET" && parts.length === 2) {
           this.send(res, 200, this.projectFor(room, "tv"));
           return;
@@ -746,10 +791,10 @@ export class LocalServer {
         if (req.method === "POST" && parts.length === 5 && parts[2] === "games" && parts[4] === "skip") {
           const player = this.requireSession(room, req, res);
           if (!player) return;
-          room.skipTimedOutGame(player.id, String(parts[3]));
+          const reason = room.skipTimedOutGame(player.id, String(parts[3]));
           this.persist(room);
           this.broadcast(room.id);
-          this.send(res, 200, { ok: true, timedOut: true });
+          this.send(res, 200, { ok: true, reason });
           return;
         }
         if (req.method === "POST" && parts.length === 5 && parts[2] === "games" && parts[4] === "override") {
@@ -936,6 +981,7 @@ export class LocalServer {
       try {
         const msg = JSON.parse(data.toString()) as { intent?: unknown };
         if (!msg.intent) return;
+        this.tickRoom(room);
         // The socket session actor is authoritative; any actorId inside the
         // message frame is ignored, so a sender cannot impersonate another player.
         if (!actorId) {

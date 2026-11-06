@@ -114,14 +114,15 @@ describe("Sprint P1 — session security and standings verification", () => {
     expect(Object.values(s2).every((v) => v === 100)).toBe(true);
   });
 
-  it("a timed-out official game is excluded from standings, and a practice finish is too", async () => {
+  it("an official game where nobody answered before the deadline has no result to count (D-S3-02)", async () => {
     const engine = new RoomEngine("Timeout Standings");
     const host = engine.join("Host", { asHost: true }).player.id;
     for (let i = 0; i < 3; i++) engine.join(`G${i}`);
     const game = engine.startGame(host, "trivia", { official: true, seed: 1 });
     game.deadlineAt = Date.now() - 1;
-    engine.skipTimedOutGame(host, game.id);
-    expect(game.timedOut).toBe(true);
+    engine.tick();
+    expect(game.outcome).toMatchObject({ reason: "deadline", countsOfficially: false });
+    expect(game.outcome?.note).toMatch(/Nobody answered/);
     expect(engine.officialStandings()).toEqual({});
   });
 });

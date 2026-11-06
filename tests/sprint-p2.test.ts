@@ -60,7 +60,8 @@ describe("Sprint P2 — championship, overrides, achievements, disconnections", 
     expect(engine.officialStandings()).not.toEqual(before);
   });
 
-  it("a disconnected player no longer blocks a quiz game from finishing", () => {
+  // Sprint 3 (P6): the disconnected player can come back until the deadline; then the game ends.
+  it("a disconnected player cannot stall a quiz game: the deadline finishes it with their unanswered questions at 0", () => {
     const { engine, host, ids } = roomWithPlayers(3);
     const game = engine.startGame(host, "trivia", { official: true, seed: 1 });
     engine.disconnect(ids[2]!);
@@ -70,7 +71,11 @@ describe("Sprint P2 — championship, overrides, achievements, disconnections", 
         engine.submitIntent({ kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: engine.id, gameInstanceId: game.id, action: "trivia-answer", payload: { questionId: q.id, chosenIndex: 0 } }, pid);
       }
     }
+    expect(game.status).toBe("playing");
+    game.deadlineAt = Date.now() - 1;
+    engine.tick();
     expect(game.status).toBe("finished");
+    expect(game.outcome?.countsOfficially).toBe(true);
     expect(game.rawScores[ids[2]!]).toBe(0);
   });
 

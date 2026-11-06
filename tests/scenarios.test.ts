@@ -18,6 +18,7 @@ import { join } from "node:path";
 import WebSocket from "ws";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Harness, myGame, waitFor, type Json, type Player } from "./helpers/harness.js";
+import { GAME_POLICIES } from "../src/server/lifecycle.js";
 
 let h: Harness;
 beforeEach(async () => { h = await new Harness().start(); await h.createRoom(); });
@@ -44,10 +45,9 @@ describe("disconnections during a game", () => {
     expect(standings()[bea.playerId]).toBe(100); // she won, and it counts
   });
 
-  it("CURRENT BEHAVIOUR (decision D1 pending): when the last unfinished player disconnects, the game does not finish on its own", async () => {
-    // Everyone else is done and the only blocker has left, yet nothing
-    // re-checks completion on disconnect: the game waits for a further
-    // action or the host's post-deadline skip.
+  it("REQUIREMENT (P6, Sprint 3): when the last unfinished player disconnects, the game waits for them until the deadline", async () => {
+    // A disconnect alone never finishes a game: Cal may come back and
+    // finish. The deadline (next test) is what ends it if he does not.
     const [ada, bea, cal] = [await h.join("Ada", { host: true }), await h.join("Bea"), await h.join("Cal")];
     const gid = (await h.startGame(ada, "math-mayhem", { seed: 5 })).body["gameId"] as string;
     await answerAllMath(ada, gid);
@@ -56,18 +56,28 @@ describe("disconnections during a game", () => {
     expect(h.game(gid).status).toBe("playing");
   });
 
-  it("CURRENT BEHAVIOUR (decisions D1 + D2 pending): resolving that stall with the host skip discards everyone's results", async () => {
+  it("REQUIREMENT (P3/P4, Sprint 3): at the deadline the server finishes that game by itself and keeps everyone's valid results", async () => {
+    // Sprint 1 recorded the old behaviour here: the host skip discarded two
+    // complete results. Now the deadline closes the game with no host action,
+    // Cal's unanswered questions score 0, and the result counts.
     const [ada, bea, cal] = [await h.join("Ada", { host: true }), await h.join("Bea"), await h.join("Cal")];
     const gid = (await h.startGame(ada, "math-mayhem", { seed: 5 })).body["gameId"] as string;
     await answerAllMath(ada, gid);
     await answerAllMath(bea, gid);
     await h.disconnect(cal);
     const early = await h.post(`/rooms/${h.roomId}/games/${gid}/skip`, {}, ada.token);
-    expect(early.status).toBe(400); // only after the deadline
-    h.game(gid).deadlineAt = Date.now() - 1; // the 5-minute deadline passes
-    expect((await h.post(`/rooms/${h.roomId}/games/${gid}/skip`, {}, ada.token)).status).toBe(200);
-    expect(h.game(gid).timedOut).toBe(true);
-    expect(standings()).toEqual({}); // two complete results, zero Family Cup points
+    expect(early.status).toBe(400); // a host cannot cut a game short
+    h.game(gid).deadlineAt = Date.now() - 1; // the deadline passes
+    expect(h.lifecycleTick()).toBe(1); // the server's own sweep, no request needed
+    const g = h.game(gid);
+    expect(g.status).toBe("finished");
+    expect(g.outcome).toMatchObject({ reason: "deadline", countsOfficially: true });
+    expect(g.outcome!.participation[cal.playerId]).toEqual({ done: 0, of: g.questions!.length });
+    expect(g.rawScores[cal.playerId]).toBe(0);
+    expect(Object.keys(standings()).sort()).toEqual([ada.playerId, bea.playerId, cal.playerId].sort());
+    expect(standings()[ada.playerId]).toBeGreaterThan(standings()[cal.playerId]!);
+    // A host "skip" afterwards is harmless: it voids nothing.
+    expect((await h.post(`/rooms/${h.roomId}/games/${gid}/skip`, {}, ada.token)).body).toMatchObject({ ok: true, reason: "deadline" });
   });
 
   it("REQUIREMENT: a player who reconnects mid-game gets the same seat, their answers intact, and can finish", async () => {
@@ -177,11 +187,12 @@ describe("server restarts", () => {
 });
 
 describe("deadlines", () => {
-  it("CURRENT BEHAVIOUR (decision D2 pending): every game closes at 5 minutes, including games designed to run longer", async () => {
+  it("REQUIREMENT (P1/P2, Sprint 3): each game gets its own window from the central policy table", async () => {
     const players = [await h.join("Ada", { host: true }), await h.join("Bea"), await h.join("Cal"), await h.join("Dee")];
     const gid = (await h.startGame(players[0]!, "caption-clash", { seed: 1 })).body["gameId"] as string;
     const g = h.game(gid);
-    expect(g.deadlineAt! - g.startedAt!).toBe(5 * 60 * 1000); // Caption Clash is designed for ~10 minutes
+    expect(g.deadlineAt! - g.startedAt!).toBe(GAME_POLICIES["caption-clash"]!.gameWindowMs); // 10-minute backstop, not 5
+    expect(g.phaseDeadlineAt! - g.startedAt!).toBe(GAME_POLICIES["caption-clash"]!.phaseMs!.write!);
     g.deadlineAt = Date.now() - 1;
     expect(await h.intent(players[1]!, gid, "caption-submit", { caption: "a little late" })).toMatchObject({ accepted: false, reason: "PHASE_CLOSED" });
   });

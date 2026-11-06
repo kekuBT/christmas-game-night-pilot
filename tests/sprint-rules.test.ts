@@ -156,8 +156,8 @@ describe("Engine security and session boundaries", () => {
     const game = engine.startGame(host, "trivia", { official: true, seed: 1 });
     expect(() => engine.skipTimedOutGame("player-999", game.id)).toThrow();
     game.deadlineAt = Date.now() - 1;
-    engine.skipTimedOutGame(host, game.id);
-    expect(game.timedOut).toBe(true);
+    expect(engine.skipTimedOutGame(host, game.id)).toBe("deadline");
+    expect(game.status).toBe("finished");
   });
   it("join tokens are hashed, names are sanitised, and codes are 6 characters", () => {
     const token = "a".repeat(64);

@@ -95,7 +95,7 @@ describe("review #6: role-aware Impostor projections over HTTP", () => {
   it("with a fixed seed, exactly one player is the impostor (no word) and every honest player gets the same word", async () => {
     const { roomId, players } = await makeRoom(4);
     const host = players[0]!;
-    const started = await post(`/rooms/${roomId}/games`, { gameId: "impostor", official: true, seed: 7 }, host.token);
+    const started = await post(`/rooms/${roomId}/games`, { gameId: "impostor", official: false, seed: 7 }, host.token);
     expect(started.status).toBe(201);
     const states: { role?: string; word?: string }[] = [];
     for (const p of players) {
