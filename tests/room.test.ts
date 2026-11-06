@@ -80,6 +80,8 @@ describe("room engine", () => {
       action: "submit-math-answer",
       payload: { questionId: q.id, chosenIndex: q.correctIndex },
     };
+    // Sprint 3 (P10): the question is opened (revealed) first; speed counts from then.
+    engine.submitIntent({ ...intent, clientEventId: randomUUID(), action: "math-open", payload: { questionId: q.id } }, pid, (game.startedAt ?? 0) + 1000);
     const first = engine.submitIntent(intent, pid, (game.startedAt ?? 0) + 3000);
     const second = engine.submitIntent(intent, pid, (game.startedAt ?? 0) + 3000);
     expect(first.accepted).toBe(true);

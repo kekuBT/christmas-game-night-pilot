@@ -41,6 +41,18 @@ async function joinRoom(page, name, code) {
   await page.getByRole("button", { name: "Join the game" }).click();
   await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
 }
+// Sprint 3 (P10): the speed bonus is timed by the server per question,
+// from when that question was revealed to the player. The expected score
+// is computed from the server's own measured times for this player.
+const bonusFor = (ms) => (ms <= 5000 ? 20 : ms <= 10000 ? 10 : 0);
+async function myMathTimes(page) {
+  return await page.evaluate(async () => {
+    const roomId = sessionStorage.getItem("cgn_roomId");
+    const p = await (await fetch(`/rooms/${roomId}/projection?audience=player`, { headers: { "x-session-token": sessionStorage.getItem("cgn_token") ?? "" } })).json();
+    const g = (p.myGames ?? []).filter((x) => x.gameId === "math-mayhem").at(-1);
+    return g?.myAnswerTimes ?? {};
+  });
+}
 async function roomIdOf(page) {
   return await page.evaluate(() => sessionStorage.getItem("cgn_roomId"));
 }
@@ -148,9 +160,8 @@ try {
   }
   await host.setViewportSize({ width: 390, height: 844 });
 
-  // Slow answers only: wait until 12s after the game started, so every
-  // answer lands past the 10s speed-bonus bracket (bonus +0, exact 1000).
-  await sleep(Math.max(0, 12000 - (Date.now() - startedAt)));
+  // Question 1 is answered slowly (about 13 s after it appeared): no speed bonus.
+  await sleep(Math.max(0, 13000 - (Date.now() - startedAt)));
 
   // The locked view after answering, with the elapsed-time display,
   // then the next question.
@@ -162,9 +173,9 @@ try {
   const elapsedEl = host.getByTestId("mz-math-elapsed");
   await elapsedEl.waitFor({ timeout: 5000 });
   const elapsedText = await elapsedEl.innerText();
-  const elapsedSecs = Number((elapsedText.match(/Answered in (\d+)s/) ?? [])[1]);
-  check("locked view shows the elapsed time (>= 10s, past the bonus)",
-    /Answered in \d+s/.test(elapsedText) && elapsedSecs >= 10, elapsedText);
+  const elapsedSecs = Number((elapsedText.match(/Answered in (\d+(?:\.\d)?) s/) ?? [])[1]);
+  check("locked view shows the server-measured time for this question (>= 10 s, past the bonus)",
+    /Answered in \d+(\.\d)? s/.test(elapsedText) && elapsedSecs >= 10 && /from when this question appeared/.test(elapsedText), elapsedText);
   await host.getByRole("button", { name: "Next question" }).click();
   await sleep(500);
   check("next question is 7 × 4",
@@ -185,7 +196,11 @@ try {
   await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 15000 });
   check("game finishes and shows results", true);
   const hostText = await host.evaluate(() => document.body.innerText);
-  check("host scores 1000 (all ten correct, no speed bonus)", hostText.includes("Ada: 1000 points"));
+  const times = await myMathTimes(host);
+  const expected = Object.values(times).reduce((sum, ms) => sum + 100 + bonusFor(ms), 0);
+  check("server measured a time for each of the host's 10 answers", Object.keys(times).length === 10, JSON.stringify(times));
+  check("question 1 (answered after 12 s) earned no speed bonus", (Object.values(times)[0] ?? 0) > 10000, JSON.stringify(times));
+  check(`host scores ${expected} (all ten correct + per-question speed bonuses from server times)`, hostText.includes(`Ada: ${expected} points`), hostText.slice(0, 300));
   check("Bea scores 0 (all ten wrong)", hostText.includes("Bea: 0 points"));
   check("host wins the game", hostText.includes("Ada wins this game!"));
 
@@ -210,7 +225,7 @@ try {
   await bea2.locator(".mz-wait").waitFor({ timeout: 15000 });
   check("reloaded player is still sat out (abstention survived)",
     (await bea2.evaluate(() => document.body.innerText)).toLowerCase().includes("you sat this one out"));
-  await sleep(Math.max(0, 12000 - (Date.now() - startedAt2)));
+  void startedAt2;
   await answerAll(host2, CORRECT);
   await host2.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 15000 });
   check("game finishes without the abstained player", true);

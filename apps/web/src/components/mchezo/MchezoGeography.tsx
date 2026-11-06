@@ -37,6 +37,7 @@
 //   only Geography's branch is now dead (App routes geography here
 //   first), left in place like Trivia's dead quiz branch — a future
 //   cleanup removes dead branches as more games migrate.
+import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { useState } from "react";
 import { Keycap, MchezoWaiting, Stamp } from "../../ui/mchezo/index.js";
 import { QuestionScreen } from "../../ui/mchezo/index.js";
@@ -53,6 +54,8 @@ export interface MchezoGeographyDeps {
   post: <T>(path: string, body: Record<string, unknown>) => Promise<T>;
   roomId: string;
   isHostOrCohost?: boolean;
+  /** The game window from the server policy (for the timer ring). */
+  windowMs?: number;
 }
 
 function stateOf(game: PlayerGame): GameState {
@@ -60,10 +63,9 @@ function stateOf(game: PlayerGame): GameState {
 }
 
 export function MchezoGeography(deps: MchezoGeographyDeps) {
-  const { game, publicGame, players, playerId, gamesTitle, intent, post, roomId, isHostOrCohost } = deps;
-  // Host escape hatch for a stalled game, mirroring Trivia play.
-  const stalled = publicGame?.deadlineAt !== undefined && Date.now() > publicGame.deadlineAt;
-  const onSkip = stalled && isHostOrCohost ? () => { void post(`/rooms/${roomId}/games/${game.id}/skip`, {}); } : undefined;
+  const { game, publicGame, players, playerId, gamesTitle, intent } = deps;
+  // Sprint 3: no host skip here. The server ends the game at its deadline
+  // by itself; the waiting view shows the countdown (GameClock).
   const st = stateOf(game);
   const questions = st.questions ?? [];
   const myAnswers: Record<string, number> = st.myAnswers ?? {};
@@ -76,11 +78,13 @@ export function MchezoGeography(deps: MchezoGeographyDeps) {
   // the vanishing question could be lost).
   const [pending, setPending] = useState<{ qid: string; choice: number } | null>(null);
   const firstUnanswered = questions.find((q) => myAnswers[q.id] === undefined);
-  const secondsLeft = publicGame?.deadlineAt ? Math.max(0, Math.round((publicGame.deadlineAt - Date.now()) / 1000)) : 0;
+  // Server time (offset-corrected), and the game's real window from the policy table.
+  const secondsLeft = publicGame?.deadlineAt ? Math.max(0, Math.round((publicGame.deadlineAt - serverNowEstimate()) / 1000)) : 0;
+  const totalSeconds = Math.round((deps.windowMs ?? 300_000) / 1000);
 
   // Sat out: the server records whole-game abstention; show the wait, not Q1.
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />;
+    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} showClock />;
   }
   // Just answered: locked view until the player moves on. If the poll has
   // not landed yet (answer not in myAnswers), fall through to the question
@@ -95,7 +99,7 @@ export function MchezoGeography(deps: MchezoGeographyDeps) {
           <span className="mz-lockcard__answer">{lockedQ.options[lockedChoice]}</span>
           <Stamp className="mz-lockcard__stamp">LOCKED IN</Stamp>
         </section>
-        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />
+        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} showClock />
         <div style={{ padding: "0 16px 16px" }}>
           <Keycap block variant="neutral" onClick={() => setLastAnswered(null)}>
             {firstUnanswered ? "Next question" : "Waiting for the game to finish"}
@@ -106,7 +110,7 @@ export function MchezoGeography(deps: MchezoGeographyDeps) {
   }
   // All answered: wait for the rest of the room (or the deadline/host skip).
   if (!firstUnanswered) {
-    return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} />;
+    return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} showClock />;
   }
   const idx = questions.indexOf(firstUnanswered);
   const pendingHere = pending && pending.qid === firstUnanswered.id ? pending.choice : null;
@@ -127,7 +131,7 @@ export function MchezoGeography(deps: MchezoGeographyDeps) {
         void intent(game.id, "geography-answer", { questionId: firstUnanswered.id, chosenIndex: Number(id) }).finally(() => setPending(null));
       }}
       secondsLeft={secondsLeft}
-      totalSeconds={300}
+      totalSeconds={totalSeconds}
       extra={
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <button

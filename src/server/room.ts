@@ -184,6 +184,13 @@ export interface GameInstance {
   questions?: MathQuestion[]; // Math only, server-side. Never projected pre-reveal.
   answers: Record<string, Record<string, number | null>>; // playerId -> questionId -> chosenIndex
   answerTimes: Record<string, Record<string, number>>; // playerId -> questionId -> elapsedMs
+  /**
+   * Math (Sprint 3, P10): server time each question was revealed to each
+   * player (playerId -> questionId -> ms). A question's prompt is sent only
+   * when the player opens it, so its speed bonus is measured from that
+   * moment, on the server's clock. Absent on games started before Sprint 3.
+   */
+  openedAt?: Record<string, Record<string, number>>;
   rawScores: Record<string, number>;
   startedAt?: number;
   deadlineAt?: number;
@@ -236,6 +243,13 @@ export class RoomEngine {
   get competitionFormat(): CompetitionFormat {
     return this._competitionFormat;
   }
+  /**
+   * TESTING ONLY: multiplies every lifecycle duration (game windows and
+   * phases) so browser drivers can watch deadlines pass in seconds. Always
+   * 1 in real use; set only by LocalServer from MCHEZO_LIFECYCLE_SCALE,
+   * which serve.ts refuses in production. Not persisted.
+   */
+  lifecycleScale = 1;
   /** Which attendance rule makes a day "qualifying" (inactive alternatives exist; P7). */
   qualificationPolicy: QualificationPolicy = ACTIVE_QUALIFICATION_POLICY;
   seq = 0;
@@ -518,10 +532,11 @@ export class RoomEngine {
       questions: gameId === "math-mayhem" ? generateMathQuestions(seed) : undefined,
       answers: {},
       answerTimes: {},
+      ...(gameId === "math-mayhem" ? { openedAt: {} } : {}),
       rawScores: Object.fromEntries(playerIds.map((p) => [p, 0])),
       startedAt,
       // Overall deadline (independent games) or backstop (phased), from the policy table.
-      deadlineAt: startedAt + policy.gameWindowMs,
+      deadlineAt: startedAt + Math.round(policy.gameWindowMs * this.lifecycleScale),
       lifecycleVersion: 1,
       day: this.championshipDay,
       seed,
@@ -600,6 +615,8 @@ export class RoomEngine {
     const stalePhase = this.stalePhase(intent);
     if (stalePhase) {
       result = { accepted: false, reason: "PHASE_CLOSED" };
+    } else if (intent.action === "math-open") {
+      result = this.openMathQuestion(intent, actorId, now);
     } else if (intent.action === "submit-math-answer") {
       result = this.submitMathAnswer(intent, actorId, now);
     } else if (intent.action === "abstain") {
@@ -996,8 +1013,9 @@ export class RoomEngine {
     if (game.status !== "playing" || game.lifecycleVersion === undefined) return;
     const ph = this.phaseOf(game);
     if (!ph || ph.key === game.phaseKey) return;
-    const ms = policyFor(game.gameId).phaseMs?.[ph.kind];
-    if (ms === undefined) return;
+    const base = policyFor(game.gameId).phaseMs?.[ph.kind];
+    if (base === undefined) return;
+    const ms = Math.round(base * this.lifecycleScale);
     game.phaseKey = ph.key;
     game.phaseDeadlineAt = at + ms;
   }
@@ -1455,6 +1473,12 @@ export class RoomEngine {
     if (!question) return { accepted: false, reason: "UNKNOWN_QUESTION" };
     const startedAt = game.startedAt ?? now;
     const elapsedMs = Math.max(0, now - startedAt);
+    // Speed is measured per question from when the server revealed it to
+    // this player (P10). A Sprint 3 game answered without opening the
+    // question (an old client) scores correctness only: no proof of speed,
+    // no speed bonus. Games from before Sprint 3 keep game-start timing.
+    const opened = game.openedAt?.[actorId]?.[questionId];
+    const speedMs = game.openedAt === undefined ? elapsedMs : opened === undefined ? Number.POSITIVE_INFINITY : Math.max(0, now - opened);
     // One deadline governs every game: deadlineAt when present (the same
     // check social intents use), falling back to the 5-minute window from
     // startedAt only for legacy games that predate deadlineAt. Previously
@@ -1465,15 +1489,38 @@ export class RoomEngine {
     if (playerAnswers[questionId] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
     playerAnswers[questionId] = chosenIndex;
     const playerTimes = (game.answerTimes[actorId] ??= {});
-    playerTimes[questionId] = elapsedMs;
-    const points = scoreMathAnswer(question, chosenIndex, elapsedMs);
+    playerTimes[questionId] = Number.isFinite(speedMs) ? speedMs : elapsedMs;
+    const points = scoreMathAnswer(question, chosenIndex, speedMs);
     game.rawScores[actorId] = (game.rawScores[actorId] ?? 0) + points;
     this.log("score-awarded", { playerId: actorId, gameInstanceId: game.id, points, reason: `math:${questionId}` });
     // Finish when every player answered every question (or sat out the rest)
     const allDone = this.activePlayers(game).every((pid) => (game.abstained ?? []).includes(pid) || Object.keys(game.answers[pid] ?? {}).length >= (game.questions?.length ?? 0));
     // Math scores accrue live per answer, so finalizing adds no score events.
     if (allDone) this.finalize(game, "completed");
-    return { accepted: true, result: { points, total: game.rawScores[actorId] } };
+    return { accepted: true, result: { points, total: game.rawScores[actorId], ...(Number.isFinite(speedMs) && game.openedAt ? { answeredInMs: speedMs } : {}) } };
+  }
+
+  /**
+   * Reveal a Math question to one player and start its speed clock (P10).
+   * Idempotent: opening again keeps the first reveal time. Server time
+   * only; what is measured is "revealed by the server" to "answer received
+   * by the server", so network delay in both directions counts against the
+   * player (documented in docs/DECISIONS.md D-S3-09).
+   */
+  private openMathQuestion(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now: number) {
+    const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
+    if (!game || game.status !== "playing" || game.gameId !== "math-mayhem") return { accepted: false, reason: "PHASE_CLOSED" };
+    if (!game.players.includes(actorId)) return { accepted: false, reason: "NOT_IN_GAME" };
+    if ((game.abstained ?? []).includes(actorId)) return { accepted: false, reason: "ALREADY_ABSTAINED" };
+    if (game.deadlineAt && now > game.deadlineAt) return { accepted: false, reason: "PHASE_CLOSED" };
+    const questionId = intent.payload["questionId"];
+    const question = typeof questionId === "string" ? game.questions?.find((q) => q.id === questionId) : undefined;
+    if (!question) return { accepted: false, reason: "UNKNOWN_QUESTION" };
+    if (game.answers[actorId]?.[question.id] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
+    game.openedAt ??= {};
+    const mine = (game.openedAt[actorId] ??= {});
+    mine[question.id] ??= now;
+    return { accepted: true, result: { questionId: question.id, prompt: question.prompt, options: question.options, openedAt: mine[question.id] } };
   }
 
   /**
@@ -1682,10 +1729,17 @@ export class RoomEngine {
           // Own whole-game abstention only; phase abstentions ride in state.myAbstained.
           abstained: participant && (g.abstained ?? []).includes(actorId),
           state: participant ? this.participantGameState(g, actorId) : this.publicGameState(g),
+          // Math (Sprint 3): a question's prompt is revealed only once the
+          // player has opened it (its speed clock starts then). Legacy games
+          // without openedAt keep showing every prompt.
           questions:
             participant && g.status === "playing"
-              ? g.questions?.map((q) => ({ id: q.id, prompt: q.prompt, options: q.options }))
+              ? g.questions?.map((q) => (g.openedAt === undefined || g.openedAt[actorId]?.[q.id] !== undefined || g.answers[actorId]?.[q.id] !== undefined
+                ? { id: q.id, prompt: q.prompt, options: q.options }
+                : { id: q.id }))
               : undefined,
+          // Own answer times only (server-measured), for "answered in 3.2 s".
+          myAnswerTimes: participant && g.gameId === "math-mayhem" && g.openedAt !== undefined ? g.answerTimes[actorId] ?? {} : undefined,
           // Finished scores are public (same policy as the public games list);
           // without this, ShowResults and the finished panel rendered empty.
           rawScores: g.status === "finished" ? g.rawScores : undefined,

@@ -1,6 +1,6 @@
 // Shared waiting view (moved from MchezoTrivia.tsx in Milestone J.3 so
 // other games can reuse it — it was already game-agnostic: label-driven,
-// counts-only ring, host skip when stalled). The footNote defaults to
+// counts-only ring; Sprint 3: a deadline countdown replaced the host skip). The footNote defaults to
 // the Trivia reveal line so Trivia is byte-identical in behavior;
 // other games pass their own (Closest Wins uses the shared waiting
 // sentence from the old ShowWaiting banner).
@@ -8,20 +8,20 @@
 // Waiting view: honest counts only. Centre = players who have played so
 // far (server submittedCount) out of the room; tokens carry offline badges
 // only, never check marks for answers we cannot see.
-import { Keycap, PlayerToken } from "./primitives.js";
+import { PlayerToken } from "./primitives.js";
+import { GameClock } from "./Lifecycle.js";
 import { toMzPlayers } from "../../../components/mchezo/adapters.js";
 import type { PublicGame, PublicPlayer } from "../../../types.js";
 
-export function MchezoWaiting({ label, players, playerId, publicGame, stalled, isHostOrCohost, onSkip, onTv, footNote }: {
+export function MchezoWaiting({ label, players, playerId, publicGame, onTv, footNote, showClock }: {
   label: string;
   players: PublicPlayer[];
   playerId: string;
   publicGame?: PublicGame;
-  stalled?: boolean;
-  isHostOrCohost?: boolean;
-  onSkip?: () => void;
   onTv?: () => void;
   footNote?: string;
+  /** Show the deadline countdown here (screens that have no other clock on show). */
+  showClock?: boolean;
 }) {
   const done = publicGame?.submittedCount ?? 0;
   const total = publicGame?.totalPlayers ?? players.length;
@@ -53,8 +53,11 @@ export function MchezoWaiting({ label, players, playerId, publicGame, stalled, i
       <p className="mz-foot">{footNote ?? "The reveal plays right here when the game finishes."}</p>
       <PresenceNote players={players} participants={publicGame?.players} youId={playerId} />
       {onTv && <div style={{ padding: "0 16px 16px" }}><button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>TV stage</button></div>}
-      {stalled && isHostOrCohost && onSkip && <><p className="mz-foot">This game has passed its deadline and may be stalled.</p><div style={{ padding: "0 16px 16px" }}><Keycap block variant="neutral" onClick={onSkip}>Skip timed-out game (no scores invented)</Keycap></div></>}
-      {stalled && !isHostOrCohost && <p className="mz-foot">The host can skip this game if it stays stalled.</p>}
+      {/* Sprint 3: no routine host Skip. The server ends the game at its
+          time limit by itself (answers given in time count); the countdown
+          above the game shows how long is left. */}
+      {showClock && publicGame && <GameClock game={publicGame} label="Ends automatically in" />}
+      <p className="mz-foot" data-testid="mz-ends-by-itself">If someone doesn’t finish, the game ends by itself when time runs out.</p>
     </div>
   );
 }

@@ -75,8 +75,11 @@ export interface PlayerGame extends LifecycleFields {
   /** True when this player sat out the rest of this whole-game game. */
   abstained?: boolean;
   state?: unknown;
-  questions?: { id: string; prompt: string; options: string[] }[];
+  /** Math (Sprint 3): prompt/options arrive only once the question is opened. */
+  questions?: { id: string; prompt?: string; options?: string[] }[];
   rawScores?: Record<string, number>;
+  /** Math: own server-measured answer times (ms from reveal to answer). */
+  myAnswerTimes?: Record<string, number>;
 }
 
 export interface ChampionshipResult {
@@ -110,6 +113,8 @@ export interface Ceremony {
 export interface Projection {
   /** The server's clock when this projection was made; countdowns use deadline − serverNow. */
   serverNow?: number;
+  /** The Cup's fixed format (Sprint 3): label and one plain sentence. */
+  competition?: { format: "individual-only" | "combined-75-25"; label: string; description: string; teamGamesCount: boolean };
   roomId: string;
   joinCode: string;
   name: string;
@@ -145,6 +150,14 @@ export interface RegistryGame {
   maxPlayers: number;
   defaultDurationMinutes: number;
   tutorial: string;
+  /** Server lifecycle policy (Sprint 3): time limits and whether it can count officially. */
+  lifecycle?: {
+    model: "game-deadline" | "phased" | "turns";
+    gameWindowMs: number;
+    phaseMs?: Partial<Record<string, number>>;
+    officialEligible: boolean;
+    practiceOnlyReason?: string;
+  };
 }
 
 export interface MemoryEntry {

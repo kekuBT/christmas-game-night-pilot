@@ -48,17 +48,16 @@ export interface MchezoClosestDeps {
 }
 
 export function MchezoClosest(deps: MchezoClosestDeps) {
-  const { game, publicGame, players, playerId, intent, post, roomId, isHostOrCohost, title } = deps;
+  const { game, publicGame, players, playerId, intent, title } = deps;
   const st = (game.state ?? {}) as { prompt?: string; unit?: string; myGuess?: number; myAbstained?: boolean };
-  // Host escape hatch, mirroring Trivia play and the old waiting banner.
-  const stalled = publicGame?.deadlineAt !== undefined && Date.now() > publicGame.deadlineAt;
-  const onSkip = stalled && isHostOrCohost ? () => { void post(`/rooms/${roomId}/games/${game.id}/skip`, {}); } : undefined;
+  // Sprint 3: no host skip here. The server ends the game at its deadline
+  // by itself; the waiting view shows the countdown (GameClock).
   const done = st.myGuess !== undefined || st.myAbstained === true;
   const abstainedNow = game.abstained === true || st.myAbstained === true;
 
   if (done) {
     // Guessed or abstained on the current question: confirmation plus
-    // the shared waiting ring (counts only, host skip when stalled).
+    // the shared waiting ring (counts only, deadline countdown).
     // A guessed player gets no abstain button here — post-guess
     // abstention is server-rejected (ALREADY_GUESSED), so the old
     // button could only error.
@@ -70,7 +69,7 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
           <p>{st.myAbstained ? "Abstained on this question." : `Your guess: ${st.myGuess}`}</p>
         </div>
         {abstainedNow && <div style={{ padding: "0 16px 16px" }}><AbstainControl abstained={true} onAbstain={() => {}} /></div>}
-        <MchezoWaiting label={abstainedNow ? "You sat this one out" : "Your guess is in"} players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} footNote="When everyone is done, results appear automatically." />
+        <MchezoWaiting label={abstainedNow ? "You sat this one out" : "Your guess is in"} players={players} playerId={playerId} publicGame={publicGame} footNote="When everyone is done, results appear automatically." />
       </PhoneScreen>
     );
   }

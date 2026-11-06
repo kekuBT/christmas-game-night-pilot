@@ -353,7 +353,9 @@ async function main() {
     const base = `http://localhost:${server.port}`;
     report.server = { port: server.port, pid: server.child.pid, dataDir: DATA_DIR, webDist: DIST_DIR };
     console.log(`  server   ${base} (pid ${server.child.pid}, data ${DATA_DIR})`);
-    const driverEnv = { MCHEZO_SCREENSHOT_DIR: SHOT_DIR };
+    // MCHEZO_WEB_DIST: drivers that start their own server (check-lifecycle)
+    // serve the exact build under test, not whatever apps/web/dist holds.
+    const driverEnv = { MCHEZO_SCREENSHOT_DIR: SHOT_DIR, MCHEZO_WEB_DIST: DIST_DIR };
     const list = [
       ...drivers.map((d) => [`check-${d}`, [join("scripts", `check-${d}.mjs`), base]]),
       ...opts.driverFiles.map((f) => [`fixture-${basename(f, ".mjs")}`, [f, base]]),

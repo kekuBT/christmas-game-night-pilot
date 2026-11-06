@@ -110,7 +110,7 @@ try {
   await host.getByRole("heading", { name: "You’re in, Ada." }).waitFor({ timeout: 15000 });
   check("host selection returns to the lobby with the game up next",
     await host.getByText(/Up next is Charades/).isVisible()
-    && await host.getByTestId("start-official-charades").isVisible());
+    && await host.getByTestId("start-practice-charades").isVisible());
   check("selection started no game",
     (await host.locator(".mz-question").count()) === 0);
 

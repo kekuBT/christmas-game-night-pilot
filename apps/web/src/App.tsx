@@ -9,7 +9,7 @@ import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js"
 import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
-import { LandingScreen, LobbyScreen, MchezoProvider, themes } from "./ui/mchezo/index.js";
+import { GameClock, LandingScreen, LobbyScreen, MchezoProvider, noteServerTime, OutcomeSummary, themes } from "./ui/mchezo/index.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
@@ -549,6 +549,8 @@ export function App() {
   const standings: Record<string, number> = serverStandings ?? {};
   const nameOf = (id: string): string => players.find((p) => p.id === id)?.displayName ?? id;
   const playingGame = myGames.find((g) => g.status === "playing");
+  // Countdowns use the server's clock, never this phone's own clock alone.
+  noteServerTime(proj?.serverNow);
   const latestFinished = myGames.filter((g) => g.status === "finished").slice(-1)[0];
   const publicPlaying = (proj?.games ?? []).find((g) => g.id === playingGame?.id);
   const publicFinished = (proj?.games ?? []).find((g) => g.id === latestFinished?.id);
@@ -573,6 +575,11 @@ export function App() {
     try { await post(`/rooms/${roomId}/nudge`, { targetId }); await refresh(); } catch { /* non-fatal */ }
   };
   const upNext = games.find((g) => g.id === upNextId) ?? games[0];
+  // Practice-only games (Impostor, Charades) can't count: the server refuses
+  // them as official, so the lobby starts them as practice and says why.
+  const upNextPracticeOnly = upNext?.lifecycle?.officialEligible === false;
+  const startMode: "official" | "practice" = upNextPracticeOnly ? "practice" : gameMode;
+  const minutes = (ms?: number) => (ms === undefined ? undefined : Math.round(ms / 60_000));
   // Smart Shuffle UI (Milestone H): pure engine call, client-side. The
   // up-next game is client state, so no server round-trip is needed: the
   // engine reads manifests, the connected-player count, and the room's
@@ -611,10 +618,11 @@ export function App() {
       {(me?.isHost || me?.isCohost) && (
         <div className="mz-card" style={{ marginTop: 12 }}>
           <span className="mz-kicker">Game setup</span>
-          <p className="mz-foot" style={{ margin: "4px 0" }}>Up next is {upNext?.title ?? "—"}. Official games count toward the Family Cup; practice games do not.</p>
+          <p className="mz-foot" style={{ margin: "4px 0" }}>Up next is {upNext?.title ?? "—"}. Official games count toward the {proj?.competition?.label ?? "Family Cup"}; practice games do not.{upNext?.lifecycle ? ` Time limit: about ${minutes(upNext.lifecycle.gameWindowMs)} min — the game ends by itself.` : ""}</p>
+          {upNextPracticeOnly && <p className="mz-foot" style={{ margin: "4px 0", fontWeight: 600 }} data-testid="practice-only-note">Practice only: {upNext?.lifecycle?.practiceOnlyReason}</p>}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }} role="group" aria-label="Game mode">
-            <button type="button" className="mz-chip-btn" data-testid="mode-official" aria-pressed={gameMode === "official"} onClick={() => setGameMode("official")}>Official</button>
-            <button type="button" className="mz-chip-btn" data-testid="mode-practice" aria-pressed={gameMode === "practice"} onClick={() => setGameMode("practice")}>Practice</button>
+            <button type="button" className="mz-chip-btn" data-testid="mode-official" aria-pressed={startMode === "official"} disabled={upNextPracticeOnly} onClick={() => setGameMode("official")}>Official</button>
+            <button type="button" className="mz-chip-btn" data-testid="mode-practice" aria-pressed={startMode === "practice"} onClick={() => setGameMode("practice")}>Practice</button>
             <button type="button" className="mz-chip-btn" data-testid="choose-game" aria-expanded={chooserOpen} onClick={() => setChooserOpen((o) => !o)}>{chooserOpen ? "Close game list" : "Choose a different game"}</button>
             <button type="button" className="mz-chip-btn" data-testid="surprise-me" onClick={() => runShuffle("random")}>Surprise me</button>
             <button type="button" className="mz-chip-btn" data-testid="smart-shuffle" onClick={() => runShuffle("smart")}>Smart shuffle</button>
@@ -624,7 +632,7 @@ export function App() {
             <div style={{ marginTop: 8 }}>
               {games.map((g) => (
                 <button key={g.id} type="button" className="mz-chip-btn" data-testid={`select-game-${g.id}`} aria-current={g.id === upNext?.id ? "true" : undefined} onClick={() => { setUpNextId(g.id); setChooserOpen(false); setShuffleResult(null); }} style={{ display: "block", width: "100%", textAlign: "left", marginBottom: 6 }}>
-                  {g.title} <span className="mz-muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min</span>{g.id === upNext?.id ? " · Up next" : ""}
+                  {g.title} <span className="mz-muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min{g.lifecycle?.officialEligible === false ? " · Practice only" : ""}</span>{g.id === upNext?.id ? " · Up next" : ""}
                 </button>
               ))}
             </div>
@@ -681,7 +689,7 @@ export function App() {
             sessionLabel: proj?.name ?? "Mchezo",
             // Family Cup event data: 7 days is the approved championship
             // length; the current day comes from the server projection.
-            championship: { name: "Family Cup", unitLabel: "Day", current: proj?.championshipDay ?? 1, total: 7 },
+            championship: { name: proj?.competition?.label ?? "Family Cup", unitLabel: "Day", current: proj?.championshipDay ?? 1, total: 7 },
           }}
           players={mzPlayers}
           youId={playerId ?? ""}
@@ -693,8 +701,8 @@ export function App() {
           onReact={mzReact}
           onNudge={mzNudge}
           nudgedBy={proj?.nudgedBy}
-          onStart={upNext ? () => startGame(upNext.id, gameMode === "official") : undefined}
-          startTestId={upNext ? `start-${gameMode}-${upNext.id}` : undefined}
+          onStart={upNext ? () => startGame(upNext.id, startMode === "official") : undefined}
+          startTestId={upNext ? `start-${startMode}-${upNext.id}` : undefined}
           minPlayers={upNext?.minPlayers ?? 2}
           capacity={10}
           error={err || undefined}
@@ -726,6 +734,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
         <MchezoTriviaPlay
+          windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
           game={playingGame}
           publicGame={publicPlaying}
           players={players}
@@ -747,6 +756,7 @@ export function App() {
     // results still use the shared old views (ShowIntro, ShowResults).
     return (
       <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <GameClock game={playingGame} />
         <MchezoClosest
           game={playingGame}
           publicGame={publicPlaying}
@@ -768,6 +778,7 @@ export function App() {
     // views (ShowIntro, ShowResults).
     return (
       <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <GameClock game={playingGame} />
         <MchezoYear
           game={playingGame}
           publicGame={publicPlaying}
@@ -791,6 +802,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
         <MchezoGeography
+          windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
           game={playingGame}
           publicGame={publicPlaying}
           players={players}
@@ -814,6 +826,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
         <MchezoMath
+          windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
           game={playingGame}
           publicGame={publicPlaying}
           players={players}
@@ -830,6 +843,7 @@ export function App() {
   if (view === "lobby" && showPhase === "results" && triviaFinished && latestFinished) {
     return (
       <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <OutcomeSummary gameId={latestFinished.gameId} outcome={latestFinished.outcome} official={publicFinished?.official} youId={playerId ?? undefined} youChoseSatOut={latestFinished.abstained === true} nameOf={nameOf} showEveryone />
         <MchezoTriviaResults
           game={latestFinished}
           publicGame={publicFinished}
@@ -909,10 +923,11 @@ export function App() {
 
     {view === "lobby" && showPhase === "intro" && playingGame && <ShowIntro game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} tutorial={games.find((x) => x.id === playingGame.gameId)?.tutorial ?? ""} onStart={() => dismissIntro(playingGame.id)} />}
     {view === "lobby" && showPhase === "waiting" && playingGame && publicPlaying && <>
-      <ShowWaiting game={publicPlaying} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} isHostOrCohost={!!(me?.isHost || me?.isCohost)} onSkip={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/games/${playingGame.id}/skip`, {}); await refresh(); }} />
+      <ShowWaiting game={publicPlaying} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} />
       <p className="muted">The game stays visible below — when the next phase starts, this banner goes away on its own.</p>
     </>}
-    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} onBack={() => dismissResults(latestFinished.id)} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
+    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
+      {showGamePanel && playingGame && <GameClock game={playingGame} />}
       {showGamePanel && playingGame && <GamePanel game={playingGame} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
     {view === "championship" && <ChampionshipView proj={proj} games={games} players={players} nameOf={nameOf} midrank={midrank} post={post} refresh={refresh} meIsHostOrCohost={!!(me?.isHost || me?.isCohost)} />}
 
@@ -920,7 +935,7 @@ export function App() {
       <p>Room code: <b>{proj?.joinCode}</b></p><p>Players: {players.map((p) => p.displayName).join(", ")}</p>
       <h3>Standings (Family Cup totals)</h3>{(proj?.championship ?? []).map((r) => <p key={r.playerId}>{nameOf(r.playerId)}: {r.total} points{r.eligible ? "" : " (not yet qualified)"}</p>)}
       {(proj?.championship ?? []).length === 0 && Object.entries(standings).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([pid, v]) => <p key={pid}>{nameOf(pid)}: {v}</p>)}
-      <h3>Now playing</h3>{(proj?.games ?? []).filter((g) => g.status === "playing").map((g) => <p key={g.id}>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId} — players: {g.players.map(nameOf).join(", ")}</p>)}
+      <h3>Now playing</h3>{(proj?.games ?? []).filter((g) => g.status === "playing").map((g) => <div key={g.id}><p>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId} — players: {g.players.map(nameOf).join(", ")}{g.official ? "" : " (practice)"}</p><GameClock game={g} tv /></div>)}
       {(proj?.games ?? []).filter((g) => g.status === "playing").length === 0 && <p className="muted">No game in progress — the lobby is choosing the next game.</p>}
       {proj?.ceremony?.winner && <p>🏆 Day {proj.ceremony.day} winner: <b>{proj.ceremony.winner}</b></p>}
       <h3>Recent games</h3>{(proj?.games ?? []).slice(-5).map((g) => <p key={g.id}>{g.gameId} — {g.status}{g.rawScores ? ` — ${Object.entries(g.rawScores).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}` : ""}</p>)}

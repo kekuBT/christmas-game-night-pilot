@@ -164,7 +164,7 @@ try {
   for (let attempt = 0; attempt < 2 && !impostorStarted; attempt++) {
         await host.getByTestId("choose-game").click();
     await host.getByTestId("select-game-impostor").click();
-    await host.locator('[data-testid="start-official-impostor"]').click();
+    await host.locator('[data-testid="start-practice-impostor"]').click();
     try {
       await host.getByRole("heading", { name: "Now playing: impostor" }).waitFor({ timeout: 20000 });
       impostorStarted = true;

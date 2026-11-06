@@ -6,6 +6,7 @@ import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import { RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
 import { GAME_REGISTRY } from "../games/registry.js";
+import { GAME_POLICIES } from "./lifecycle.js";
 import { MemoryBook } from "./memorybook.js";
 import { hashToken } from "../shared/protocol.js";
 import { RoomStore, type RestoreReport } from "./persistence.js";
@@ -40,6 +41,12 @@ export interface ServerOptions {
    * null disables it (tests call lifecycleSweep() with a fake clock). Default 1s.
    */
   lifecycleSweepMs?: number | null;
+  /**
+   * TESTING ONLY: multiply every game/phase duration (e.g. 0.1 makes a
+   * 6-minute game last 36 s) so browser drivers can test deadlines in real
+   * time. Default 1. serve.ts refuses it when NODE_ENV=production.
+   */
+  lifecycleScale?: number;
 }
 
 interface SocketMeta {
@@ -136,6 +143,7 @@ export class LocalServer {
   readonly clock: () => number;
   private heartbeat: ReturnType<typeof setInterval> | null = null;
   private lifecycleTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly lifecycleScale: number;
   /** Seat recovery: brute-force limits (contract §1.5) and pending host-assisted requests. */
   private recoveries: PendingRecoveries;
   private codeFailuresPerAddressPerRoom: FailureLimiter;
@@ -145,6 +153,7 @@ export class LocalServer {
 
   constructor(opts: ServerOptions = {}) {
     this.clock = opts.clock ?? Date.now;
+    this.lifecycleScale = opts.lifecycleScale !== undefined && Number.isFinite(opts.lifecycleScale) && opts.lifecycleScale > 0 ? opts.lifecycleScale : 1;
     this.recoveries = new PendingRecoveries(this.clock);
     // Failed recovery-code attempts, 15-minute windows: 5 per device per
     // room (the contract's per-slot limit, keyed by device because a wrong
@@ -294,6 +303,7 @@ export class LocalServer {
       // Sprint 2: every restored player starts a reconnect grace window at
       // restart time, so a restart reads as "reconnecting", not "away".
       room.clock = this.clock;
+      room.lifecycleScale = this.lifecycleScale;
       const restartedAt = this.clock();
       for (const p of room.players.values()) { p.connected = false; p.disconnectedAt = restartedAt; }
       // Same for spectators: no socket exists after a restart, so a
@@ -512,7 +522,14 @@ export class LocalServer {
     const parts = url.pathname.split("/").filter(Boolean);
     try {
       if (req.method === "GET" && parts.length === 1 && parts[0] === "games") {
-        this.send(res, 200, GAME_REGISTRY);
+        // Each game with its lifecycle policy (time limits, practice-only), so
+        // the lobby shows the same rules the server enforces.
+        this.send(res, 200, GAME_REGISTRY.map((g) => {
+          const p = GAME_POLICIES[g.id];
+          const k = this.lifecycleScale;
+          const phaseMs = p?.phaseMs ? Object.fromEntries(Object.entries(p.phaseMs).map(([key, v]) => [key, Math.round((v ?? 0) * k)])) : undefined;
+          return p ? { ...g, lifecycle: { model: p.model, gameWindowMs: Math.round(p.gameWindowMs * k), phaseMs, officialEligible: p.officialEligible, practiceOnlyReason: p.practiceOnlyReason } } : g;
+        }));
         return;
       }
       if (req.method === "POST" && parts.length === 2 && parts[0] === "rooms" && parts[1] === "join-by-code") {
@@ -566,6 +583,7 @@ export class LocalServer {
         const body = await this.readBody(req);
         const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night");
         room.clock = this.clock;
+        room.lifecycleScale = this.lifecycleScale;
         const hostClaimToken = randomUUID();
         this.rooms.set(room.id, room);
         this.hostClaimHashes.set(room.id, hashToken(hostClaimToken));

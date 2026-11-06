@@ -9,6 +9,7 @@
 // WaitingCircle is therefore not used here; the ring below reuses the
 // approved mz-wait styles with an honest count in the centre and
 // PlayerTokens that carry only offline badges.
+import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { useEffect, useMemo, useState } from "react";
 import { AnswerDistribution, AnswerGrid, Keycap, MchezoWaiting, PhoneScreen, ResultCard, Stamp, StandingsList } from "../../ui/mchezo/index.js";
 import { GameIntroScreen, QuestionScreen } from "../../ui/mchezo/index.js";
@@ -28,6 +29,8 @@ export interface MchezoTriviaDeps {
   onBackToLobby: () => void;
   roomId: string;
   isHostOrCohost?: boolean;
+  /** The game window from the server policy (for the timer ring). */
+  windowMs?: number;
   /** Open the TV stage without leaving the game (view switch only). */
   onTv?: () => void;
   /** Previous finished same-type game's scores, for honest gains. */
@@ -60,14 +63,9 @@ export function MchezoTriviaIntro({ title, onStart }: { title: string; onStart: 
 }
 
 export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
-  const { game, publicGame, players, playerId, gamesTitle, intent, post, roomId, isHostOrCohost, onTv } = deps;
-  // Host escape hatch for a stalled game, mirroring ShowWaiting: the old
-  // waiting banner had a skip button, but the Mchezo Trivia waiting view
-  // had none — so a timed-out Trivia game could not be skipped from the
-  // very UI that plays it. Polling/WS refresh re-renders after the
-  // deadline passes, so this appears without a page reload.
-  const stalled = publicGame?.deadlineAt !== undefined && Date.now() > publicGame.deadlineAt;
-  const onSkip = stalled && isHostOrCohost ? () => { void post(`/rooms/${roomId}/games/${game.id}/skip`, {}); } : undefined;
+  const { game, publicGame, players, playerId, gamesTitle, intent, onTv } = deps;
+  // Sprint 3: no host skip here. The server ends the game at its deadline
+  // by itself; the waiting view shows the countdown (GameClock).
   const st = stateOf(game);
   const questions = st.questions ?? [];
   const myAnswers: Record<string, number> = st.myAnswers ?? {};
@@ -80,11 +78,13 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
   // the vanishing question could be lost).
   const [pending, setPending] = useState<{ qid: string; choice: number } | null>(null);
   const firstUnanswered = questions.find((q) => myAnswers[q.id] === undefined);
-  const secondsLeft = publicGame?.deadlineAt ? Math.max(0, Math.round((publicGame.deadlineAt - Date.now()) / 1000)) : 0;
+  // Server time (offset-corrected), and the game's real window from the policy table.
+  const secondsLeft = publicGame?.deadlineAt ? Math.max(0, Math.round((publicGame.deadlineAt - serverNowEstimate()) / 1000)) : 0;
+  const totalSeconds = Math.round((deps.windowMs ?? 300_000) / 1000);
 
   // Sat out: the server records whole-game abstention; show the wait, not Q1.
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} onTv={onTv} />;
+    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} onTv={onTv} showClock />;
   }
   // Just answered: locked view until the player moves on. If the poll has
   // not landed yet (answer not in myAnswers), fall through to the question
@@ -99,7 +99,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
           <span className="mz-lockcard__answer">{lockedQ.options[lockedChoice]}</span>
           <Stamp className="mz-lockcard__stamp">LOCKED IN</Stamp>
         </section>
-        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} onTv={onTv} />
+        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} onTv={onTv} showClock />
         <div style={{ padding: "0 16px 16px" }}>
           <Keycap block variant="neutral" onClick={() => setLastAnswered(null)}>
             {firstUnanswered ? "Next question" : "Waiting for the game to finish"}
@@ -110,7 +110,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
   }
   // All answered: wait for the rest of the room (or the deadline/host skip).
   if (!firstUnanswered) {
-    return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} onTv={onTv} />;
+    return <MchezoWaiting label="All your answers are in" players={players} playerId={playerId} publicGame={publicGame} onTv={onTv} showClock />;
   }
   const idx = questions.indexOf(firstUnanswered);
   const pendingHere = pending && pending.qid === firstUnanswered.id ? pending.choice : null;
@@ -131,7 +131,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
         void intent(game.id, "trivia-answer", { questionId: firstUnanswered.id, chosenIndex: Number(id) }).finally(() => setPending(null));
       }}
       secondsLeft={secondsLeft}
-      totalSeconds={300}
+      totalSeconds={totalSeconds}
       extra={
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <button

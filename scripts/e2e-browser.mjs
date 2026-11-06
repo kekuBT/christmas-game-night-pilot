@@ -279,7 +279,7 @@ async function runBrowser(browserName, games) {
       try {
                 await host.getByTestId("choose-game").click();
         await host.getByTestId(`select-game-${gameId}`).click();
-        await host.locator(`[data-testid="start-official-${gameId}"]`).click();
+        await host.locator(`[data-testid="start-${["impostor", "charades"].includes(gameId) ? "practice" : "official"}-${gameId}"]`).click();
         // Show Mode / Mchezo intro: every player sees an intro screen
         // first. Dismiss it on every page (or wait for its auto-advance)
         // before waiting for gameplay; otherwise the wait below times out.

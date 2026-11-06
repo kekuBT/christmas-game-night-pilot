@@ -22,7 +22,8 @@ export function ChampionshipView(props: {
   const [audit, setAudit] = useState<LedgerEvent[]>([]);
   const [auditLoaded, setAuditLoaded] = useState(false);
   const finished: PublicGame[] = (proj?.games ?? []).filter((g) => g.status === "finished");
-  const officialFinished = finished.filter((g) => g.official && !g.timedOut);
+  // The server says which games count (outcome-aware since Sprint 3); legacy games keep the old rule.
+  const officialFinished = finished.filter((g) => g.countsOfficially ?? (g.official && !g.timedOut));
   const championship: ChampionshipResult[] = proj?.championship ?? [];
   const achievements: Achievement[] = proj?.achievements ?? [];
   const ceremony: Ceremony | undefined = proj?.ceremony;
@@ -38,8 +39,10 @@ export function ChampionshipView(props: {
   }
   useEffect(() => { if (!auditLoaded && roomId) { void loadAudit(); } }, [auditLoaded, roomId]);
 
-  return <div className="card"><h2>Championship standings</h2>
-    <p className="muted">Family Cup rules, owner-approved 2026-11-04: seven scheduled days, at least three qualifying days to be eligible, and the total is <b>best three daily scores + participation bonus + finale bonus</b>. Each day is 75% individual + 25% team, with individual games normalised 0–100 by placement (ties share the average rank). Participation is +5 for each qualifying day beyond the first three, capped at +20. The Grand Finale can add up to 50 points. Practice games never count toward scores or attendance, and missing days add nothing — they do not reduce the best-three total. Three details are still configurable and not yet approved in detail: the precise qualifying-day threshold, how days without team games are handled, and the Grand Finale placement ladder.</p>
+  const individual = proj?.competition?.format === "individual-only";
+  return <div className="card"><h2>Championship standings{proj?.competition ? ` — ${proj.competition.label}` : ""}</h2>
+    {proj?.competition && <p data-testid="competition-format"><b>{proj.competition.label}:</b> {proj.competition.description} The rules of a Cup never change once it has started.</p>}
+    <p className="muted">Family Cup rules, owner-approved 2026-11-04: seven scheduled days, at least three qualifying days to be eligible, and the total is <b>best three daily scores + participation bonus + finale bonus</b>. {individual ? "In this Individual Family Cup each day is the average of your individual game placements (team games don’t count)" : "Each day is 75% individual + 25% team"}, with individual games normalised 0–100 by placement (ties share the average rank). Participation is +5 for each qualifying day beyond the first three, capped at +20. The Grand Finale can add up to 50 points. Practice games never count toward scores or attendance, and missing days add nothing — they do not reduce the best-three total. Three details are still configurable and not yet approved in detail: the precise qualifying-day threshold, how days without team games are handled, and the Grand Finale placement ladder.</p>
     <p>Championship day: <b>{proj?.championshipDay ?? 1}</b> {meIsHostOrCohost && <button className="secondary" onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/day`, {}); await refresh(); }}>Advance to next day</button>}</p>
     {championship.length === 0 && <p>No finished official games yet.</p>}
     {championship.map((r) => <p key={r.playerId}><b>{nameOf(r.playerId)}</b>: {r.total} points total = best three {r.counted.join(" + ")} = {r.base}, plus participation +{r.participationBonus} and finale +{r.finaleBonus}{r.eligible ? "" : " (not yet qualified — needs 3 qualifying days)"} · {r.qualifyingDays} qualifying day{r.qualifyingDays === 1 ? "" : "s"} · Day scores: {r.dayScores.join(", ")} · Daily wins: {r.countedDailyWins}</p>)}

@@ -63,15 +63,14 @@ interface YearEvent {
 }
 
 export function MchezoYear(deps: MchezoYearDeps) {
-  const { game, publicGame, players, playerId, intent, post, roomId, isHostOrCohost, title } = deps;
+  const { game, publicGame, players, playerId, intent, title } = deps;
   const st = (game.state ?? {}) as { events?: YearEvent[]; myGuesses?: Record<string, number>; myAbstained?: boolean };
   const events = st.events ?? [];
   const myGuesses = st.myGuesses ?? {};
   const [idx, setIdx] = useState(0);
   const current = events[Math.min(idx, Math.max(0, events.length - 1))];
-  // Host escape hatch, mirroring Trivia play and Closest.
-  const stalled = publicGame?.deadlineAt !== undefined && Date.now() > publicGame.deadlineAt;
-  const onSkip = stalled && isHostOrCohost ? () => { void post(`/rooms/${roomId}/games/${game.id}/skip`, {}); } : undefined;
+  // Sprint 3: no host skip here. The server ends the game at its deadline
+  // by itself; the waiting view shows the countdown (GameClock).
   const abstainedNow = game.abstained === true || st.myAbstained === true;
   const allDone = events.length > 0 && events.every((e) => myGuesses[e.id] !== undefined);
   const done = abstainedNow || allDone;
@@ -87,7 +86,7 @@ export function MchezoYear(deps: MchezoYearDeps) {
 
   if (done) {
     // All eight guessed, or sat the whole game out: confirmation plus
-    // the shared waiting ring (counts only, host skip when stalled).
+    // the shared waiting ring (counts only, deadline countdown).
     return (
       <PhoneScreen label={title}>
         <p className="mz-kicker">{title}</p>
@@ -95,7 +94,7 @@ export function MchezoYear(deps: MchezoYearDeps) {
           <p data-testid="mz-year-guessed">{abstainedNow ? "You sat this game out — 0 points for what you skipped." : `All 8 events guessed. Your last guess: ${myGuesses[current.id]}`}</p>
         </div>
         {abstainedNow && <div style={{ padding: "0 16px 16px" }}><AbstainControl abstained={true} onAbstain={() => {}} /></div>}
-        <MchezoWaiting label={abstainedNow ? "You sat this one out" : "All your guesses are in"} players={players} playerId={playerId} publicGame={publicGame} stalled={stalled} isHostOrCohost={isHostOrCohost} onSkip={onSkip} footNote="When everyone is done, results appear automatically." />
+        <MchezoWaiting label={abstainedNow ? "You sat this one out" : "All your guesses are in"} players={players} playerId={playerId} publicGame={publicGame} footNote="When everyone is done, results appear automatically." />
       </PhoneScreen>
     );
   }

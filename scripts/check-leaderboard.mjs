@@ -292,11 +292,18 @@ try {
     if (orderA && orderB) break;
   }
   check("rank changes: Ada/Bea order flips across games", !!orderA && !!orderB && orderA !== orderB, `${orderA} -> ${orderB} (${attempts} games)`);
-  // Disconnected player: Dee answers 3, closes the page; game still finishes.
+  // Disconnected player: Dee answers 3, sits out the rest, closes the page.
+  // Sprint 3 (P6): a disconnect alone never finishes a game — it would wait
+  // for Dee until the time limit (covered by check-game-night and
+  // check-lifecycle). Here Dee chose to stop, so the game finishes when the
+  // others are done, and her three answers still count.
   {
     await startOfficialTrivia(host);
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     await answerFirstN(P.Dee, 3, 0);
+    await P.Dee.getByRole("button", { name: "Next question" }).click();
+    await P.Dee.getByRole("button", { name: "Sit this game out" }).click();
+    await P.Dee.locator(".mz-wait").waitFor({ timeout: 15000 });
     await P.Dee.close();
     await answerOption(host, 0);
     await answerOption(P.Bea, 0);
@@ -307,7 +314,7 @@ try {
     const game = (proj.games ?? []).filter((g) => g.gameId === "trivia" && g.status === "finished").at(-1);
     const expected = expectedRanking(game.rawScores, proj.players);
     const dee = proj.players.find((p) => p.displayName === "Dee");
-    check("disconnected player: game finishes without Dee", game.status === "finished" && dee.connected === false);
+    check("disconnected player: game finishes after Dee sat out and left", game.status === "finished" && dee.connected === false);
     check("disconnected player: Dee keeps a partial score in standings",
       expected.some((r) => r.name === "Dee"), `Dee=${game.rawScores[dee.id]}`);
     await tv.getByRole("button", { name: "Back to lobby" }).click();

@@ -260,15 +260,17 @@ try {
   await backToLobbyAll([host, guests["Bea"], guests["Cal"], guests["Dee"], guests["Eli"], guests["Fay"]]);
   check("host returns to the lobby after trivia", true);
 
-  // Gus joins between games (7th player), then disconnects mid-Closest.
-  const gus = await ctx.newPage();
+  // Gus joins between games (7th player), then drops off mid-Closest and
+  // comes back (his own browser context, so only his network goes down).
+  const gusCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const gus = await gusCtx.newPage();
   await joinRoom(gus, "Gus", code);
 
   // --- Game 2: Closest Wins. ---
   await startGame(host, "closest-wins");
   await host.getByTestId("mz-num-dial").waitFor({ timeout: 15000 });
   // Q1: Ada 100, Bea 200 (then the waiting ring shows 2/7), Cal 300,
-  // Dee 300, Fay 400, Eli abstains (per-question), Gus 100 then leaves.
+  // Dee 300, Fay 400, Eli abstains (per-question), Gus 100.
   await guessClosest([[host, 100], [guests["Bea"], 200]]);
   // The ring counts come from the 2s projection poll — wait for 2/7.
   let ring = "";
@@ -283,16 +285,33 @@ try {
   await sleep(500);
   await gus.getByTestId("mz-num-dial").waitFor({ timeout: 15000 });
   await guessClosest([[gus, 100]]);
-  await gus.close();
-  await sleep(1000);
+  // Q2: Gus's phone loses its connection before he guesses.
+  await host.getByTestId("mz-num-dial").waitFor({ timeout: 15000 });
+  await gusCtx.setOffline(true);
+  let gusAway = false;
+  for (let i = 0; i < 30 && !gusAway; i++) {
+    proj = await getProjection(host);
+    gusAway = (proj.players ?? []).find((p) => p.displayName === "Gus")?.connected === false;
+    if (!gusAway) await sleep(500);
+  }
+  check("disconnected player is marked away", gusAway);
+  await guessClosest([[host, 100], [guests["Bea"], 200], [guests["Cal"], 300], [guests["Dee"], 300], [guests["Fay"], 400], [guests["Eli"], 150]]);
+  await sleep(1500);
   proj = await getProjection(host);
-  check("disconnected player is marked away", (proj.players ?? []).find((p) => p.displayName === "Gus")?.connected === false);
-  // Q2–Q8: everyone still connected guesses; Eli is back in after his Q1 abstain.
-  for (let q = 2; q <= 8; q++) {
+  const closestNow = (proj.games ?? []).find((g) => g.status === "playing" && g.gameId === "closest-wins");
+  // Sprint 3 (P6): a disconnect alone never ends a question or a game.
+  check("the question waits for the disconnected player (no early finish)", closestNow?.lifecycle?.phaseKey === "q:1", `phase ${closestNow?.lifecycle?.phaseKey}`);
+  // Gus's connection comes back within the question's time: he guesses and play moves on.
+  await gusCtx.setOffline(false);
+  await gus.getByTestId("mz-num-dial").waitFor({ timeout: 20000 });
+  await guessClosest([[gus, 100]]);
+  check("the returning player catches up in the same question", true);
+  // Q3–Q8: everyone guesses; Eli is back in after his Q1 abstain.
+  for (let q = 3; q <= 8; q++) {
     await host.getByTestId("mz-num-dial").waitFor({ timeout: 15000 });
-    await guessClosest([[host, 100], [guests["Bea"], 200], [guests["Cal"], 300], [guests["Dee"], 300], [guests["Fay"], 400], [guests["Eli"], 150]]);
+    await guessClosest([[host, 100], [guests["Bea"], 200], [guests["Cal"], 300], [guests["Dee"], 300], [guests["Fay"], 400], [guests["Eli"], 150], [gus, 100]]);
     await sleep(600);
-    if (q === 2) {
+    if (q === 3) {
       // Eli's Q3 controls appearing proves he is back in after the
       // per-question abstain (his Q2 panel showed the waiting ring).
       await guests["Eli"].getByTestId("mz-num-dial").waitFor({ timeout: 15000 });
@@ -300,7 +319,7 @@ try {
     }
   }
   await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });
-  check("closest finishes without the disconnected player", true);
+  check("closest finishes with everyone, including the player who dropped and came back", true);
   // The TV shows Gus as Away and follows the game (dashboard, closest).
   const tvText = await tv.evaluate(() => document.body.innerText);
   // The old TV dashboard lists the disconnected player but has NO
@@ -312,6 +331,13 @@ try {
   check("TV follows the active game (closest)", /closest-wins/i.test(tvText));
   await host.screenshot({ path: screenshotPath("docs/mchezo-screenshots/16-game-night-closest.png") });
   await backToLobbyAll([host, guests["Bea"], guests["Cal"], guests["Dee"], guests["Eli"], guests["Fay"]]);
+  // Gus leaves the night for good before Math (the next game starts without him).
+  await gusCtx.close();
+  for (let i = 0; i < 30; i++) {
+    proj = await getProjection(host);
+    if ((proj.players ?? []).find((p) => p.displayName === "Gus")?.connected === false) break;
+    await sleep(500);
+  }
 
   // --- Game 3: Math Mayhem, started by the cohost (not the host). ---
   check("guest sees no start button", (await guests["Cal"].getByTestId("start-official-math-mayhem").count()) === 0);

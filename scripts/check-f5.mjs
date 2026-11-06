@@ -296,7 +296,7 @@ try {
     try {
             await host.getByTestId("choose-game").click();
       await host.getByTestId(`select-game-${gameId}`).click();
-      await host.locator(`[data-testid="start-official-${gameId}"]`).click();
+      await host.locator(`[data-testid="start-${["impostor", "charades"].includes(gameId) ? "practice" : "official"}-${gameId}"]`).click();
       for (const { page } of pages) {
         // Geography is a kit panel too (Work Package E) — the same
         // QuestionScreen renders .mz-question, so the trivia wait covers it.
