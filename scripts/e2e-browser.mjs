@@ -18,6 +18,7 @@
 //   reconnect. A failed game is recorded and the run continues to the next
 //   game; the process exits non-zero if anything failed.
 
+import { connectionsGroups } from "./lib/content-oracle.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchBrowser } from "./lib/driver-env.mjs";
 
@@ -26,12 +27,6 @@ const BASE = args.find((a) => !a.startsWith("--")) ?? "http://localhost:3457";
 const browserArg = (args.find((a) => a.startsWith("--browser=")) ?? "--browser=chromium").split("=")[1];
 const gamesArg = (args.find((a) => a.startsWith("--games=")) ?? "--games=all").split("=")[1];
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
-const CONNECTIONS_GROUPS = [
-  ["Gingerbread", "Candy cane", "Mince pie", "Roast turkey"],
-  ["Snowfall", "Frost", "Blizzard", "Icicle"],
-  ["Tinsel", "Bauble", "Wreath", "Stocking"],
-  ["Dasher", "Dancer", "Prancer", "Vixen"],
-];
 const QUIZ_GAMES = ["math-mayhem", "trivia", "who-said-that", "geography"];
 const SMOKE_GAMES = ["math-mayhem", "closest-wins"];
 
@@ -51,7 +46,7 @@ async function panelFinished(page, gameId) {
   // actions), which cannot fit the 180s budget at ~2.5s per check.
   // The "Back to lobby" button appears only on the results screen,
   // never in play, so check it first (same fast path as check-f5).
-  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") {
+  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem" || gameId === "word-connections") {
     return await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500);
   }
   const t = await panelText(page);
@@ -135,7 +130,24 @@ async function actYear(page) {
 
 // One action pass for a single player page, for the game currently playing.
 // Returns true if it did anything (or the panel is already finished).
+// Sprint 4: Word Connections has its own screen (mz-cx); the test oracle
+// knows the board's groups from the words on screen.
+async function actConnections(page) {
+  if (await isVisible(page.getByRole("button", { name: "Back to lobby" }), 300)) return true;
+  if (!(await isVisible(page.getByTestId("mz-cx"), 1000))) return false;
+  const tiles = page.getByTestId("mz-cx-tile");
+  const shown = (await tiles.allInnerTexts()).map((t) => t.trim()).filter(Boolean);
+  if (shown.length === 0) return true; // puzzle over for this player
+  const group = connectionsGroups(shown).find((g) => g.every((w) => shown.some((s) => s.toLowerCase() === w.toLowerCase())));
+  if (!group) return false;
+  for (const w of group) await tiles.filter({ hasText: new RegExp(`^${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") }).first().click();
+  await page.getByTestId("mz-cx-submit").click();
+  await sleep(600);
+  return true;
+}
+
 async function act(page, gameId, name) {
+  if (gameId === "word-connections") return await actConnections(page);
   // Geography is a kit panel too (Work Package E) — same play shape as
   // Trivia, so the shared kit-question helper covers it. Math Mayhem
   // (§11) is the same shape again.
@@ -203,7 +215,9 @@ async function act(page, gameId, name) {
   if (gameId === "word-connections") {
     const tiles = panel.locator(".tile");
     if ((await tiles.count()) === 0) return false;
-    for (const group of CONNECTIONS_GROUPS) {
+    // Sprint 4: each game has its own board; the oracle finds its groups.
+    const shownWords = (await tiles.allInnerTexts()).map((t) => t.trim()).filter(Boolean);
+    for (const group of connectionsGroups(shownWords)) {
       // Skip groups already solved (their tiles are gone from the board).
       let missing = false;
       for (const word of group) {
@@ -307,7 +321,7 @@ async function runBrowser(browserName, games) {
             // is the gameplay signal.
             await page.getByTestId("mz-year-progress").waitFor({ timeout: 20000 });
           } else {
-            await page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 });
+            await (gameId === "word-connections" ? page.getByTestId("mz-cx").waitFor({ timeout: 25000 }) : page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 }));
           }
         }
         const deadline = Date.now() + 180_000;

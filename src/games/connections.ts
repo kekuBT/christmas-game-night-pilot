@@ -35,11 +35,14 @@ export function guessConnections(
 ): { correct: boolean; category?: string; finished: boolean } {
   if (tileIds.length !== 4) throw new Error("INVALID_GROUP");
   if (new Set(tileIds).size !== 4) throw new Error("DUPLICATE_TILE");
+  if (playerState.solved.length >= 4 || playerState.mistakes >= 4) throw new Error("PUZZLE_OVER");
   const key = [...tileIds].sort().join(",");
   if (playerState.guessed.some((g) => [...g].sort().join(",") === key)) throw new Error("ALREADY_GUESSED");
-  playerState.guessed.push([...tileIds]);
+  // Validate before recording: a rejected guess is not an attempt.
   const tiles = tileIds.map((id) => board.tiles.find((t) => t.id === id));
   if (tiles.some((t) => !t)) throw new Error("UNKNOWN_TILE");
+  if (tiles.some((t) => playerState.solved.includes(t!.category))) throw new Error("TILE_ALREADY_SOLVED");
+  playerState.guessed.push([...tileIds]);
   const categories = new Set(tiles.map((t) => t!.category));
   if (categories.size === 1) {
     const category = [...categories][0]!;

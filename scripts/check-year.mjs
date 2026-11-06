@@ -10,6 +10,7 @@
 // final results, mobile widths (no horizontal overflow at
 // 320/360/390). Usage: build:web, serve on a port, then:
 //   node scripts/check-year.mjs <baseUrl>
+import { yearFor } from "./lib/content-oracle.mjs";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -96,8 +97,16 @@ try {
   }
   check("progress line reads Event 1 of 8",
     (await host.getByTestId("mz-year-progress").innerText()) === "Event 1 of 8");
-  check("first event is the Moon landing",
-    (await host.getByTestId("mz-year-event").innerText()).includes("first Moon landing"));
+  // Sprint 4: events are drawn from the content packs; the test oracle
+  // knows each event's year, so expected scores are computed, not fixed.
+  const years = [];
+  for (let i = 0; i < 8; i++) {
+    await host.getByTestId(`mz-year-q${i}`).click();
+    years.push(yearFor(await host.getByTestId("mz-year-event").innerText()));
+  }
+  await host.getByTestId("mz-year-q0").click();
+  check("every event comes from the content (oracle knows all 8 years)", years.length === 8 && years.every((y) => Number.isInteger(y)), years.join(","));
+  const pts = (guess, year) => Math.max(0, 100 - 10 * Math.abs(guess - year));
   check("eight jump chips", (await host.locator("[data-testid^='mz-year-q']").count()) === 8);
   await host.screenshot({ path: screenshotPath("docs/mchezo-screenshots/19-year-after.png") });
 
@@ -113,8 +122,6 @@ try {
   // The 1896 boundary (the first modern Olympics): the old dial's
   // 1900 floor could never reach it. Via the dial this time.
   await host.getByTestId("mz-year-q3").click();
-  check("fourth event is the first modern Olympics",
-    (await host.getByTestId("mz-year-event").innerText()).includes("first modern Olympic Games"));
   await host.getByTestId("mz-num-dial").fill("1896");
   check("dial reaches 1896", (await host.getByTestId("mz-num-value").innerText()) === "1896");
   check("Submit is labelled with 1896",
@@ -158,10 +165,12 @@ try {
   }
   await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 15000 });
   check("game finishes and shows results", true);
-  check("host's results show his exact score (110: Olympics exact 100 + Web 10)",
-    (await host.evaluate(() => document.body.innerText)).includes("Ada: 110 points"));
-  check("host wins the game (110 vs Bea's 40)",
-    (await host.evaluate(() => document.body.innerText)).includes("Ada wins this game!"));
+  const hostGuesses = years.map((_, i) => (i === 3 || i === 2 ? 1896 : i === 1 ? 2025 : 2000));
+  const hostExpected = years.reduce((s, y, i) => s + pts(hostGuesses[i], y), 0);
+  const beaExpected = years.reduce((s, y) => s + pts(2000, y), 0);
+  const resultsText = await host.evaluate(() => document.body.innerText);
+  check(`host's results show his exact score (${hostExpected}, from the oracle's years)`, resultsText.includes(`Ada: ${hostExpected} points`), resultsText.slice(0, 200));
+  check(`Bea's exact score (${beaExpected})`, resultsText.includes(`Bea: ${beaExpected} points`));
 
   // Room 2: whole-game abstention + reconnect. The guest sits out,
   // reloads, and is still sat out; the host's eight guesses finish

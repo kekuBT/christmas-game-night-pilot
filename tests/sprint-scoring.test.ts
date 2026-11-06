@@ -136,10 +136,16 @@ describe("per-game scoring rules", () => {
     const res = guessConnections(board, ps, firstCategory);
     expect(res.correct).toBe(true);
     expect(connectionsScore(ps)).toBe(100);
-    const mixed = [board.tiles[0]!.id, board.tiles[1]!.id, board.tiles[4]!.id, board.tiles[5]!.id];
+    // Sprint 4: tiles from a group already solved can't be guessed again (no free "attempts").
+    expect(() => guessConnections(board, ps, [board.tiles[0]!.id, board.tiles[1]!.id, board.tiles[4]!.id, board.tiles[5]!.id])).toThrow("TILE_ALREADY_SOLVED");
+    const mixed = [board.tiles[4]!.id, board.tiles[5]!.id, board.tiles[8]!.id, board.tiles[9]!.id];
     const wrong = guessConnections(board, ps, mixed);
     expect(wrong.correct).toBe(false);
     expect(ps.mistakes).toBe(1);
+    // A rejected guess (unknown tile) is not recorded as an attempt.
+    const before = ps.guessed.length;
+    expect(() => guessConnections(board, ps, [board.tiles[4]!.id, board.tiles[5]!.id, board.tiles[8]!.id, "tile-nope"])).toThrow("UNKNOWN_TILE");
+    expect(ps.guessed.length).toBe(before);
   });
   it("sprint: normalisation and uniqueness", () => {
     expect(normalizeSprintAnswer("  New York ")).toBe("new york");

@@ -10,6 +10,7 @@
 // horizontal overflow at 320/360/390). Usage: build:web, serve on
 // a port, then:
 //   node scripts/check-geography.mjs <baseUrl>
+import { answerFor, optionIndex } from "./lib/content-oracle.mjs";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -50,11 +51,16 @@ async function startGeography(host) {
     await sleep(8500);
   }
 }
-// Correct indices for the fixed GEOGRAPHY_PACK (8 questions):
-// France 0, Japan 2, Ottawa 2, Canberra 2, Italy 1, North Africa 1,
-// Everest 0, London 0. Answering them all scores 800 (8 x 100);
-// always picking the last option scores 0.
-const CORRECT = [0, 2, 2, 2, 1, 1, 0, 0];
+// Sprint 4: each game draws its own 8 questions from the content packs.
+// The test oracle (scripts/lib/content-oracle.mjs) finds the right option
+// for the question on screen. All right = 800 (8 x 100); all wrong = 0.
+const CORRECT = Array(8).fill("right");
+const WRONG = Array(8).fill("wrong");
+async function pickIndex(page, how) {
+  const prompt = await page.locator(".mz-question").innerText();
+  const options = await page.locator(".mz-slab").allInnerTexts();
+  return optionIndex("geography", prompt, options.map((o) => o.split("\n").filter(Boolean).pop() ?? o), { wrong: how === "wrong" });
+}
 async function answerAll(page, picks) {
   for (let i = 0; i < picks.length; i++) {
     // Click the slab; retry if the click was lost to a poll re-render
@@ -68,7 +74,7 @@ async function answerAll(page, picks) {
     let landed = null;
     for (let attempt = 0; attempt < 3 && !landed; attempt++) {
       try {
-        await page.locator(".mz-slab").nth(picks[i]).click();
+        await page.locator(".mz-slab").nth(await pickIndex(page, picks[i])).click();
       } catch {
         await sleep(500);
         continue;
@@ -119,8 +125,8 @@ try {
     await page.locator(".mz-question").waitFor({ timeout: 15000 });
     check(`${name} sees the kit geography panel`, true);
   }
-  check("first question is the French flag",
-    (await host.locator(".mz-question").innerText()).includes("🇫🇷"));
+  check("the first question comes from the geography content (oracle knows its answer)",
+    typeof answerFor("geography", await host.locator(".mz-question").innerText()) === "string");
   check("question counter reads 1 of 8",
     (await host.evaluate(() => document.body.innerText)).includes("Question 1 of 8"));
   check("four answer options", (await host.locator(".mz-slab").count()) === 4);
@@ -138,19 +144,21 @@ try {
   await host.setViewportSize({ width: 390, height: 844 });
 
   // The locked view after answering, then the next question.
-  await host.locator(".mz-slab").nth(0).click();
+  const q1 = await host.locator(".mz-question").innerText();
+  const q1Answer = answerFor("geography", q1);
+  await host.locator(".mz-slab").nth(await pickIndex(host, "right")).click();
   await host.locator('main[aria-label="Answer locked in"]').waitFor({ timeout: 15000 });
-  check("locked view shows the chosen answer (France)",
-    (await host.evaluate(() => document.body.innerText)).includes("France"));
+  check(`locked view shows the chosen answer (${q1Answer})`,
+    (await host.evaluate(() => document.body.innerText)).includes(q1Answer));
   await host.getByRole("button", { name: "Next question" }).click();
   await sleep(500);
-  check("next question is the Japanese flag",
-    (await host.locator(".mz-question").innerText()).includes("🇯🇵"));
+  check("the next question is a different one",
+    (await host.locator(".mz-question").innerText()) !== q1);
 
   // Bea answers everything wrong (always the last option); the host
   // answers the remaining seven correctly. Exact scores: host 800,
   // Bea 0. (The host already answered Q1 correctly above.)
-  await answerAll(bea, [3, 3, 3, 3, 3, 3, 3, 3]);
+  await answerAll(bea, WRONG);
   await bea.locator(".mz-wait").waitFor({ timeout: 15000 });
   check("Bea sees the waiting ring after all 8 answers", true);
   // The waiting ring's label is a kicker, and kickers render in

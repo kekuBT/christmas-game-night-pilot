@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicPlayer, Readiness, RegistryGame, SpectateResponse } from "./types.js";
+import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicGame, PublicPlayer, Readiness, RegistryGame, SpectateResponse } from "./types.js";
 import { GamePanel } from "./components/GamePanel.js";
 import { ChampionshipView } from "./components/ChampionshipView.js";
 import { MemoryBookView } from "./components/MemoryBookView.js";
@@ -9,10 +9,11 @@ import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js"
 import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
-import { GameClock, LandingScreen, LobbyScreen, MchezoProvider, noteServerTime, OutcomeSummary, themes } from "./ui/mchezo/index.js";
+import { GameClock, GameIntro, LandingScreen, LobbyScreen, MchezoProvider, noteServerTime, OutcomeSummary, themes } from "./ui/mchezo/index.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
+import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./components/mchezo/MchezoConnections.js";
 import { MchezoGeography } from "./components/mchezo/MchezoGeography.js";
 import { MchezoMath } from "./components/mchezo/MchezoMath.js";
 import { MchezoYear } from "./components/mchezo/MchezoYear.js";
@@ -430,6 +431,19 @@ export function App() {
       await refresh();
     } catch (e) { fail(e); }
   }
+  /** The shared Word Connections board for a TV or spectator screen (never the answers while playing). */
+  function connectionsTvScreen(game: PublicGame, onBack: () => void, backLabel: string) {
+    const t = games.find((x) => x.id === game.gameId)?.title ?? "Word Connections";
+    return (
+      <MchezoProvider theme={themes.everyday}>
+        <main className="mz-screen" style={{ maxWidth: 1200 }} aria-label={`${t} on the TV`} data-testid="mz-cx-tv">
+          <div className="mz-topbar"><span className="mz-kicker" style={{ color: "var(--mz-answer-2)" }}>{t} · {proj?.joinCode}</span><button type="button" className="mz-chip-btn" onClick={onBack}>{backLabel}</button></div>
+          <GameClock game={game} tv />
+          <ConnectionsTv game={game} title={t} />
+        </main>
+      </MchezoProvider>
+    );
+  }
   async function loadMemory() {
     try { setBook(await get<MemoryEntry[]>(`/rooms/${roomId}/memory`)); setLedger(await get<LedgerEvent[]>(`/rooms/${roomId}/ledger`)); } catch (e) { fail(e); }
   }
@@ -504,6 +518,7 @@ export function App() {
     const specPlayers: PublicPlayer[] = proj?.players ?? [];
     const specNameOf = (id: string): string => specPlayers.find((p) => p.id === id)?.displayName ?? id;
     const specLatest = (proj?.games ?? []).at(-1);
+    noteServerTime(proj?.serverNow);
     const specTvGame = specLatest?.gameId === "trivia" && (specLatest.status === "playing" || specLatest.status === "finished") ? specLatest : undefined;
     if (!proj) {
       return (
@@ -516,6 +531,7 @@ export function App() {
         </MchezoProvider>
       );
     }
+    if (specLatest?.gameId === "word-connections") return connectionsTvScreen(specLatest, stopWatching, "Stop watching");
     if (specTvGame) {
       return (
         <MchezoProvider theme={themes.everyday} as="bare">
@@ -605,6 +621,8 @@ export function App() {
   };
   const triviaPlaying = playingGame?.gameId === "trivia";
   const closestPlaying = playingGame?.gameId === "closest-wins";
+  const connectionsPlaying = playingGame?.gameId === "word-connections";
+  const connectionsFinished = latestFinished?.gameId === "word-connections";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -725,6 +743,35 @@ export function App() {
           />
         )}
         />
+      </MchezoProvider>
+    );
+  }
+  // Word Connections (Sprint 4): its own intro, puzzle and results screens.
+  if (view === "lobby" && showPhase === "intro" && connectionsPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <GameIntro
+          title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Word Connections"}
+          objective="Find four groups of four."
+          accent={2}
+          steps={["Sixteen words hide four secret groups.", "Tap four words that belong together, then Submit.", "Four mistakes and your puzzle ends — the groups you found still count."]}
+          onStart={() => dismissIntro(playingGame.id)}
+        />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && connectionsPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <GameClock game={playingGame} />
+        <MchezoConnections game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Word Connections"} intent={intent} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && connectionsFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+        <MchezoConnectionsResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Word Connections"} onBackToLobby={() => dismissResults(latestFinished.id)} />
       </MchezoProvider>
     );
   }
@@ -904,6 +951,7 @@ export function App() {
     // actions (start/finish) therefore drive every TV viewer's screen
     // through server state alone — no per-device phase is consulted.
     const latestGame = (proj?.games ?? []).at(-1);
+    if (latestGame?.gameId === "word-connections") return connectionsTvScreen(latestGame, () => setView("lobby"), "Back to phone view");
     const tvGame = latestGame?.gameId === "trivia" && (latestGame.status === "playing" || latestGame.status === "finished") ? latestGame : undefined;
     if (tvGame) {
       return (

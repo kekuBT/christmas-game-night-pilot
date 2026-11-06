@@ -33,17 +33,12 @@
 // the browser half that was still open. A failed check is recorded and the
 // process exits non-zero.
 
+import { connectionsGroups } from "./lib/content-oracle.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchChromium } from "./lib/driver-env.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
-const CONNECTIONS_GROUPS = [
-  ["Gingerbread", "Candy cane", "Mince pie", "Roast turkey"],
-  ["Snowfall", "Frost", "Blizzard", "Icicle"],
-  ["Tinsel", "Bauble", "Wreath", "Stocking"],
-  ["Dasher", "Dancer", "Prancer", "Vixen"],
-];
 const QUIZ_GAMES = ["math-mayhem", "trivia", "who-said-that", "geography"];
 // Secrets that must never appear anywhere in a TV projection; answer keys
 // are forbidden only while a game is still PLAYING (see check-multiplayer).
@@ -74,7 +69,7 @@ async function panelFinished(page, gameId) {
   // ~90s. The button appears only on the results screen, never in play.
   // Math Mayhem (§11) is the same shape — kit panel, old ShowResults,
   // no game-panel — and needs it even more (10 questions × 2 actions).
-  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") {
+  if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem" || gameId === "word-connections") {
     try { return await page.getByRole("button", { name: "Back to lobby" }).isVisible({ timeout: 500 }); } catch { return false; }
   }
   // M6 Show Mode: a finished game shows the results screen instead of the
@@ -138,7 +133,24 @@ async function actYear(page) {
 // One action pass for a single player page, for the game currently playing.
 // Mirrors the driver in scripts/e2e-browser.mjs; returns true if it did
 // anything (or the panel is already finished).
+// Sprint 4: Word Connections has its own screen (mz-cx); the test oracle
+// knows the board's groups from the words on screen.
+async function actConnections(page) {
+  if (await isVisible(page.getByRole("button", { name: "Back to lobby" }), 300)) return true;
+  if (!(await isVisible(page.getByTestId("mz-cx"), 1000))) return false;
+  const tiles = page.getByTestId("mz-cx-tile");
+  const shown = (await tiles.allInnerTexts()).map((t) => t.trim()).filter(Boolean);
+  if (shown.length === 0) return true; // puzzle over for this player
+  const group = connectionsGroups(shown).find((g) => g.every((w) => shown.some((s) => s.toLowerCase() === w.toLowerCase())));
+  if (!group) return false;
+  for (const w of group) await tiles.filter({ hasText: new RegExp(`^${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") }).first().click();
+  await page.getByTestId("mz-cx-submit").click();
+  await sleep(600);
+  return true;
+}
+
 async function act(page, gameId, name) {
+  if (gameId === "word-connections") return await actConnections(page);
   // Geography renders in the Mchezo kit too (Work Package E) — same play
   // shape as Trivia (QuestionScreen slabs + locked view + Next question).
   // Math Mayhem (§11) is the same shape again.
@@ -210,7 +222,9 @@ async function act(page, gameId, name) {
   if (gameId === "word-connections") {
     const tiles = panel.locator(".tile");
     if ((await tiles.count()) === 0) return false;
-    for (const group of CONNECTIONS_GROUPS) {
+    // Sprint 4: each game has its own board; the oracle finds its groups.
+    const shownWords = (await tiles.allInnerTexts()).map((t) => t.trim()).filter(Boolean);
+    for (const group of connectionsGroups(shownWords)) {
       let missing = false;
       for (const word of group) {
         if (!(await isVisible(panel.getByRole("button", { name: word, exact: true }), 500))) { missing = true; break; }
@@ -310,7 +324,7 @@ try {
         // Guess the Year is a kit panel too (Work Package D) — there is
         // no "Now playing:" heading; the progress line is the signal.
         else if (gameId === "guess-the-year") await page.getByTestId("mz-year-progress").waitFor({ timeout: 20000 });
-        else await page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 });
+        else await (gameId === "word-connections" ? page.getByTestId("mz-cx").waitFor({ timeout: 25000 }) : page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 }));
       }
       // Leak scan BEFORE driving any answers, while the game is playing.
       await tvLeakCheck(gameId, roomId);

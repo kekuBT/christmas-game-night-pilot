@@ -1704,7 +1704,7 @@ export class RoomEngine {
       case "guess-the-year":
         return { events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })) };
       case "word-connections":
-        return { tiles: this.connectionsTiles(g) };
+        return this.connectionsView(g);
       case "category-sprint":
         return this.sprintView(g);
       default:
@@ -1733,7 +1733,7 @@ export class RoomEngine {
           myGuesses: (g.extra as { guesses: Record<string, Record<string, number>> }).guesses[actorId] ?? {},
         };
       case "word-connections":
-        return { tiles: this.connectionsTiles(g), myState: (g.extra as { playerStates: Record<string, ConnectionsPlayerState> }).playerStates[actorId] };
+        return this.connectionsView(g, actorId);
       case "category-sprint":
         return this.sprintView(g);
       default:
@@ -1757,6 +1757,41 @@ export class RoomEngine {
   private sprintView(g: GameInstance): Record<string, unknown> {
     const roundIndex = (g.extra as { roundIndex: number }).roundIndex;
     return { roundIndex, category: this.sprintCategory(g, roundIndex)?.name };
+  }
+
+  /**
+   * Word Connections view (Sprint 4). A player sees their OWN solved groups
+   * (name, colour level, tiles) and feedback on their own last guess. The
+   * full board (every group) is revealed only when the whole game has
+   * ended, so a player who finishes early can't relay answers. Public
+   * views add only how many players have finished.
+   */
+  private connectionsView(g: GameInstance, actorId?: string): Record<string, unknown> {
+    const board = this.boardOf(g);
+    const st = g.extra as { playerStates: Record<string, ConnectionsPlayerState>; levels?: Record<string, number> };
+    const levelOf = (name: string) => st.levels?.[name] ?? board.categories.findIndex((c) => c.name === name) + 1;
+    const tilesOf = (name: string) => board.tiles.filter((t) => t.category === name).map((t) => t.id);
+    const finishedPlayers = g.players.filter((p) => { const ps = st.playerStates[p]; return !!ps && (ps.solved.length >= 4 || ps.mistakes >= 4); }).length;
+    const base: Record<string, unknown> = { tiles: this.connectionsTiles(g), maxMistakes: 4, finishedPlayers, totalPlayers: g.players.length };
+    if (g.status === "finished") base["groups"] = board.categories.map((c) => ({ name: c.name, level: levelOf(c.name), tileIds: tilesOf(c.name) }));
+    if (!actorId) return base;
+    const ps = st.playerStates[actorId];
+    if (!ps) return base;
+    const last = ps.guessed.at(-1);
+    let lastGuess: { correct: boolean; oneAway: boolean; group?: string } | undefined;
+    if (last) {
+      const counts = new Map<string, number>();
+      for (const id of last) { const c = board.tiles.find((t) => t.id === id)?.category; if (c) counts.set(c, (counts.get(c) ?? 0) + 1); }
+      const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
+      lastGuess = top && top[1] === 4 ? { correct: true, oneAway: false, group: top[0] } : { correct: false, oneAway: !!top && top[1] === 3 };
+    }
+    return {
+      ...base,
+      myState: ps,
+      mySolved: ps.solved.map((name) => ({ name, level: levelOf(name), tileIds: tilesOf(name) })),
+      myGuessCount: ps.guessed.length,
+      ...(lastGuess ? { lastGuess } : {}),
+    };
   }
 
   /** A Sprint round's category: the game's own snapshot, or the original fixed list for older games. */

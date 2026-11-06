@@ -1,4 +1,5 @@
 import './styles/mchezo.css';
+import './styles/games.css';
 
 export * from './tokens/tokens.js';
 export * from './types.js';
@@ -15,6 +16,7 @@ export { NumericGuess } from './components/NumericGuess.js';
 export { AbstainControl } from './components/AbstainControl.js';
 export { MchezoWaiting } from './components/Waiting.js';
 export { GameClock, OutcomeSummary } from './components/Lifecycle.js';
+export { GameHeader, FeedbackLine, GameIntro, ScoreList } from './components/GameKit.js';
 export { ReactionBar, ReactionGlyph, REACTION_ICONS } from './components/Reactions.js';
 export * from './components/Results.js';
 export * from './components/phone/screens.js';
