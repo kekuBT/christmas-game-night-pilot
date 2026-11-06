@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Achievement, Ceremony, ChampionshipResult, LedgerEvent, Projection, PublicGame, PublicPlayer, RegistryGame } from "../types.js";
+import { seats } from "../session.js";
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
 
@@ -30,7 +31,7 @@ export function ChampionshipView(props: {
 
   async function loadAudit() {
     try {
-      const ledger = await fetch(`/rooms/${roomId}/ledger`, { headers: { "x-session-token": sessionStorage.getItem("cgn_token") ?? "" } }).then((r) => r.json());
+      const ledger = await fetch(`/rooms/${roomId}/ledger`, { headers: { "x-session-token": seats.token() ?? "" } }).then((r) => r.json());
       setAudit((ledger as LedgerEvent[]).filter((e) => e.type === "score-override"));
       setAuditLoaded(true);
     } catch { /* audit is best-effort; standings remain authoritative */ }

@@ -419,6 +419,24 @@ export class LocalServer {
           this.send(res, 200, this.projectFor(room, requested, player.id));
           return;
         }
+        // Sprint 2: "Welcome back. Continue as Ada?" A saved credential is
+        // only offered after the server confirms it still controls a seat.
+        // Returns no token, no secrets: just who the seat is.
+        if (req.method === "GET" && parts.length === 3 && parts[2] === "session") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          this.send(res, 200, {
+            roomId: room.id,
+            roomName: room.name,
+            joinCode: room.joinCode,
+            playerId: player.id,
+            displayName: player.displayName,
+            isHost: player.isHost,
+            isCohost: player.isCohost,
+            hasRecoveryCode: !!player.recoveryCodeHash,
+          });
+          return;
+        }
         if (req.method === "GET" && parts.length === 3 && parts[2] === "ledger") {
           const viewer = this.requireSession(room, req, res);
           if (!viewer) return;

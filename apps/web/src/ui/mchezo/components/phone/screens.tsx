@@ -45,9 +45,13 @@ export interface LandingScreenProps {
   /** Present only during a seasonal event — no event branding by default. */
   session?: Pick<SessionInfo, 'championship' | 'eventName'>;
   extra?: ReactNode;
+  /** Sprint 2: "Welcome back" for a seat remembered on this device, shown before the join form. */
+  top?: ReactNode;
+  /** Sprint 2: shown under the Join button (e.g. "Remember this device"). */
+  formExtra?: ReactNode;
 }
 
-export function LandingScreen({ code, onCodeChange, name, onNameChange, onJoin, onHost, onSpectate, codeLength = 6, codePattern = /[^A-Z0-9]/g, session, extra }: LandingScreenProps) {
+export function LandingScreen({ code, onCodeChange, name, onNameChange, onJoin, onHost, onSpectate, codeLength = 6, codePattern = /[^A-Z0-9]/g, session, extra, top, formExtra }: LandingScreenProps) {
   const nameId = useId();
   const ok = code.length === codeLength && name.trim().length > 0;
   const canSpectate = code.length === codeLength;
@@ -57,6 +61,7 @@ export function LandingScreen({ code, onCodeChange, name, onNameChange, onJoin, 
         <Wordmark size={20} />
         {onHost && <button type="button" className="mz-chip-btn" onClick={onHost}>Host a game</button>}
       </header>
+      {top}
       {session?.championship && (
         <div className="mz-event-card">
           <Icon d={ICON.trophy} size={30} stroke={1.8} />
@@ -79,6 +84,7 @@ export function LandingScreen({ code, onCodeChange, name, onNameChange, onJoin, 
           <input id={nameId} className="mz-input" value={name} maxLength={24} autoComplete="nickname" placeholder="e.g. Auntie June" onChange={(e) => onNameChange(e.target.value)} />
         </div>
         <Keycap type="submit" block disabled={!ok}>Join the game</Keycap>
+        {formExtra}
       </form>
       {onSpectate && (
         <button type="button" className="mz-chip-btn" data-testid="watch-spectator" disabled={!canSpectate} onClick={onSpectate} style={{ alignSelf: "center", marginTop: 4 }}>

@@ -4,16 +4,16 @@ export type AnimSetting = "full" | "reduced" | "off";
 
 /** Per-player experience settings (M6.2): sound off by default, animation intensity. Local only. */
 export function useExperienceSettings() {
-  const [sound, setSound] = useState(() => localStorage.getItem("cgn_sound") === "on");
-  const [anim, setAnim] = useState<AnimSetting>(() => (localStorage.getItem("cgn_anim") as AnimSetting) || "full");
+  const [sound, setSound] = useState(() => { try { return localStorage.getItem("cgn_sound") === "on"; } catch { return false; } });
+  const [anim, setAnim] = useState<AnimSetting>(() => { try { return (localStorage.getItem("cgn_anim") as AnimSetting) || "full"; } catch { return "full"; } });
   function toggleSound() {
     const next = !sound;
     setSound(next);
-    localStorage.setItem("cgn_sound", next ? "on" : "off");
+    try { localStorage.setItem("cgn_sound", next ? "on" : "off"); } catch { /* storage unavailable */ }
   }
   function setAnimSetting(v: AnimSetting) {
     setAnim(v);
-    localStorage.setItem("cgn_anim", v);
+    try { localStorage.setItem("cgn_anim", v); } catch { /* storage unavailable */ }
   }
   return { sound, anim, toggleSound, setAnimSetting };
 }

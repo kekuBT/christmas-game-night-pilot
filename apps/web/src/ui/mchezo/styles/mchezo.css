@@ -382,3 +382,18 @@
 .mz-ready__q { margin: 0 0 4px; font: 700 15px/1.35 var(--mz-font-body); }
 .mz-ready__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .mz-chip-btn--danger { border-color: var(--mz-brand); }
+/* Welcome back / remember / this device */
+.mz-welcome { margin: 12px 16px 0; }
+.mz-welcome__title { margin: 0 0 10px; font: 700 20px var(--mz-font-display); }
+.mz-welcome__seat + .mz-welcome__seat { margin-top: 14px; }
+.mz-welcome__room { margin: 6px 0 2px; }
+.mz-welcome__note { margin: 8px 0 0; }
+.mz-linkbtn { min-height: 44px; padding: 0 2px; border: 0; background: transparent; color: var(--mz-text-muted); font: 600 14px var(--mz-font-body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.mz-remember { margin-top: 8px; }
+.mz-remember__label { display: flex; align-items: center; gap: 12px; min-height: 44px; font: 700 15px var(--mz-font-body); cursor: pointer; }
+.mz-remember__box { width: 24px; height: 24px; flex: none; accent-color: var(--mz-brand); }
+.mz-remember__help { margin: 0; }
+.mz-device__toggle { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: transparent; color: var(--mz-text); cursor: pointer; text-align: left; }
+.mz-device__state { flex: 1; color: var(--mz-text-muted); font: 600 14px var(--mz-font-body); }
+.mz-device__chev { font-size: 14px; }
+.mz-device__panel { margin-top: 6px; display: grid; gap: 6px; }

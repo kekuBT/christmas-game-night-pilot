@@ -28,13 +28,23 @@ import { humanError } from "./ui/mchezo/lib/errors.js";
 import { midrank } from "./components/midrank.js";
 import { sendIntent } from "./components/intentRetry.js";
 import { connection } from "./connectionStore.js";
+import { seats } from "./session.js";
+import { RememberChoice, ThisDeviceCard, WelcomeBack, useRememberedSeats } from "./components/mchezo/DeviceSeat.js";
 import { ReadinessCard, type StartDecision } from "./components/mchezo/ReadinessCard.js";
 import QRCode from "qrcode";
 
+/** Per-tab UI state (spectator seat, dismissed screens). Never throws: a
+    browser that blocks site data must still be able to play. */
+function tabGet(key: string): string | null {
+  try { return sessionStorage.getItem(key); } catch { return null; }
+}
+function tabSet(key: string, value: string | null): void {
+  try { if (value === null) sessionStorage.removeItem(key); else sessionStorage.setItem(key, value); } catch { /* storage unavailable */ }
+}
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 async function post<T>(path: string, body: Record<string, unknown>): Promise<T> {
   const headers: Record<string, string> = { "content-type": "application/json" };
-  const token = sessionStorage.getItem("cgn_token");
+  const token = seats.token();
   if (token) headers["x-session-token"] = token;
   const r = await fetch(path, { method: "POST", headers, body: JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));
@@ -43,7 +53,7 @@ async function post<T>(path: string, body: Record<string, unknown>): Promise<T> 
 }
 async function get<T>(path: string): Promise<T> {
   const headers: Record<string, string> = {};
-  const token = sessionStorage.getItem("cgn_token");
+  const token = seats.token();
   if (token) headers["x-session-token"] = token;
   const r = await fetch(path, { headers });
   const j = await r.json().catch(() => ({}));
@@ -54,14 +64,16 @@ async function get<T>(path: string): Promise<T> {
 export function App() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
-  const [roomId, setRoomId] = useState<string | null>(sessionStorage.getItem("cgn_roomId"));
-  const [playerId, setPlayerId] = useState<string | null>(sessionStorage.getItem("cgn_playerId"));
-  const [token, setToken] = useState<string | null>(sessionStorage.getItem("cgn_token"));
+  // Seat credentials are owned by the session store (sessionStorage by
+  // default; localStorage only after "Remember this device").
+  const [roomId, setRoomId] = useState<string | null>(() => seats.current()?.roomId ?? null);
+  const [playerId, setPlayerId] = useState<string | null>(() => seats.current()?.playerId ?? null);
+  const [token, setToken] = useState<string | null>(() => seats.token());
   // Spectator session (Milestone B): seat-free viewing, stored separately
   // from any player session. A tab holding both shows the player view;
   // spectating never creates or disturbs a player seat.
-  const [specRoomId, setSpecRoomId] = useState<string | null>(sessionStorage.getItem("cgn_spec_roomId"));
-  const [specToken, setSpecToken] = useState<string | null>(sessionStorage.getItem("cgn_spec_token"));
+  const [specRoomId, setSpecRoomId] = useState<string | null>(tabGet("cgn_spec_roomId"));
+  const [specToken, setSpecToken] = useState<string | null>(tabGet("cgn_spec_token"));
   const [proj, setProj] = useState<Projection | null>(null);
   const [games, setGames] = useState<RegistryGame[]>([]);
   const [view, setView] = useState<"lobby" | "championship" | "tv" | "memory" | "library" | "studio">("lobby");
@@ -83,8 +95,8 @@ export function App() {
   const [bookText, setBookText] = useState("");
   const [exportText, setExportText] = useState("");
   const [textInput, setTextInput] = useState("");
-  const [introDismissed, setIntroDismissed] = useState<string | null>(sessionStorage.getItem("cgn_intro_dismissed"));
-  const [resultsDismissed, setResultsDismissed] = useState<string | null>(sessionStorage.getItem("cgn_results_dismissed"));
+  const [introDismissed, setIntroDismissed] = useState<string | null>(tabGet("cgn_intro_dismissed"));
+  const [resultsDismissed, setResultsDismissed] = useState<string | null>(tabGet("cgn_results_dismissed"));
   const settings = useExperienceSettings();
   // Mchezo lobby: the host-chosen "up next" game (default: Trivia, the
   // Phase 2 featured game). The lobby Start button starts this game.
@@ -92,12 +104,22 @@ export function App() {
   // Phase 2.1 lobby simplification: one mode for the single Start action,
   // and one compact chooser instead of per-game official/practice buttons.
   const [gameMode, setGameMode] = useState<"official" | "practice">("official");
+  // "Remember this device": default OFF, explicit per join (Sprint 2).
+  const [rememberOnJoin, setRememberOnJoin] = useState(false);
+  const [seatRemembered, setSeatRemembered] = useState(() => seats.current()?.remembered ?? false);
+  const rememberedSeats = useRememberedSeats();
   const [chooserOpen, setChooserOpen] = useState(false);
   const [shuffleResult, setShuffleResult] = useState<string | null>(null);
   const [numInput, setNumInput] = useState("");
   const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
 
+  // Replaced (seat recovered elsewhere) or signed out: after the player
+  // acknowledges, this device forgets the dead credential and goes back to
+  // the start screen. The seat and its scores stay in the game.
+  useEffect(() => {
+    connection.setHandlers({ acknowledge: () => leaveSeatOnThisDevice("This device is signed out. Your seat and scores are safe in the game.") });
+  });
   // Poll failures used to be swallowed forever: a player whose room was
   // gone (or whose server was down) saw a frozen screen with no message.
   // After three consecutive failures (~6s) say so; clear it on recovery.
@@ -115,6 +137,9 @@ export function App() {
       }
     } catch (e) {
       pollFailures.current += 1;
+      // 401 = the server no longer accepts this credential (replaced or
+      // invalid): that is not a network blip, so say so at once.
+      if (e instanceof Error && /Session token required/.test(e.message)) { connection.signedOut(); return; }
       if (pollFailures.current >= 3) {
         const text = e instanceof Error && /Session token required|Room not found/.test(e.message)
           ? "This game is no longer available on the server. Ask the host for the room code to join again."
@@ -155,7 +180,7 @@ export function App() {
         // Session token travels in the WebSocket subprotocol header, never
         // in the URL. Read it fresh each attempt, not from the effect
         // closure, so a retry after a session change uses the live token.
-        const liveToken = sessionStorage.getItem("cgn_token");
+        const liveToken = seats.token();
         const next = liveToken ? new WebSocket(wsUrl, [`cgn-session-${liveToken}`]) : new WebSocket(wsUrl);
         ws = next;
         wsRef.current = next;
@@ -233,9 +258,18 @@ export function App() {
     };
   }, [roomId, playerId, refresh]);
 
-  async function saveSession(r: JoinResponse) {
-    sessionStorage.setItem("cgn_roomId", r.roomId); sessionStorage.setItem("cgn_playerId", r.playerId); sessionStorage.setItem("cgn_token", r.recoveryToken);
+  async function saveSession(r: JoinResponse, opts: { remember?: boolean } = {}) {
+    seats.begin({ roomId: r.roomId, playerId: r.playerId, token: r.recoveryToken, displayName: r.displayName }, { remember: opts.remember ?? rememberOnJoin });
+    setSeatRemembered(seats.current()?.remembered ?? false);
+    connection.reset();
     setRoomId(r.roomId); setPlayerId(r.playerId); setToken(r.recoveryToken); setView("lobby");
+  }
+  /** This device stops using the seat (sign out / session replaced). The seat stays in the game. */
+  function leaveSeatOnThisDevice(note?: string) {
+    seats.signOut();
+    connection.reset();
+    setRoomId(null); setPlayerId(null); setToken(null); setProj(null); setView("lobby");
+    if (note) setMsg(note);
   }
   async function createRoom() {
     setErr(""); try {
@@ -253,12 +287,12 @@ export function App() {
   async function spectate() {
     setErr(""); try {
       const s = await post<SpectateResponse>("/rooms/spectate-by-code", { joinCode: code });
-      sessionStorage.setItem("cgn_spec_roomId", s.roomId); sessionStorage.setItem("cgn_spec_token", s.spectatorToken);
+      tabSet("cgn_spec_roomId", s.roomId); tabSet("cgn_spec_token", s.spectatorToken);
       setSpecRoomId(s.roomId); setSpecToken(s.spectatorToken); setMsg("Watching — no seat taken.");
     } catch (e) { fail(e); }
   }
   function stopWatching() {
-    sessionStorage.removeItem("cgn_spec_roomId"); sessionStorage.removeItem("cgn_spec_token");
+    tabSet("cgn_spec_roomId", null); tabSet("cgn_spec_token", null);
     setSpecRoomId(null); setSpecToken(null); setProj(null); setMsg("Stopped watching.");
   }
   // Spectator live updates: poll + WebSocket on the spectator credential.
@@ -342,7 +376,7 @@ export function App() {
     setErr("");
     try {
       const headers: Record<string, string> = { "content-type": "application/json" };
-      const t = sessionStorage.getItem("cgn_token");
+      const t = seats.token();
       if (t) headers["x-session-token"] = t;
       const resp = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers, body: JSON.stringify({ gameId, official, roster: r?.wouldPlay, proceedWithout }) });
       const body = (await resp.json().catch(() => ({}))) as { error?: string; code?: string; readiness?: Readiness };
@@ -367,7 +401,7 @@ export function App() {
       const body = JSON.stringify({ intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId, gameInstanceId, action, payload } });
       const res = await sendIntent(async () => {
         const headers: Record<string, string> = { "content-type": "application/json" };
-        const t = sessionStorage.getItem("cgn_token");
+        const t = seats.token();
         if (t) headers["x-session-token"] = t;
         const resp = await fetch(`/rooms/${roomId}/intents`, { method: "POST", headers, body });
         return { status: resp.status, body: await resp.json().catch(() => ({})) };
@@ -401,6 +435,15 @@ export function App() {
           onJoin={joinRoom}
           onHost={createRoom}
           onSpectate={spectate}
+          top={!roomId && (
+            <WelcomeBack
+              verified={rememberedSeats.verified}
+              notes={rememberedSeats.notes}
+              onContinue={(v) => { void saveSession({ roomId: v.seat.roomId, playerId: v.seat.playerId, recoveryToken: v.seat.token, displayName: v.displayName } as JoinResponse, { remember: true }); setMsg(`Welcome back, ${v.displayName}.`); }}
+              onForget={(v) => rememberedSeats.forget(v.seat)}
+            />
+          )}
+          formExtra={<RememberChoice checked={rememberOnJoin} onChange={setRememberOnJoin} />}
           extra={
             <div style={{ padding: "0 16px 16px" }}>
               {err && <p className="err" data-testid="mz-error" role="alert">{err}</p>}{msg && <p className="ok">{msg}</p>}
@@ -477,8 +520,8 @@ export function App() {
   // on the lobby branch cannot narrow showPhase itself inside that fragment.
   const isLobbyPhase = showPhase === "lobby";
   const showGamePanel = (showPhase === "gameplay" || showPhase === "waiting") && !!playingGame;
-  function dismissIntro(id: string) { sessionStorage.setItem("cgn_intro_dismissed", id); setIntroDismissed(id); }
-  function dismissResults(id: string) { sessionStorage.setItem("cgn_results_dismissed", id); setResultsDismissed(id); }
+  function dismissIntro(id: string) { tabSet("cgn_intro_dismissed", id); setIntroDismissed(id); }
+  function dismissResults(id: string) { tabSet("cgn_results_dismissed", id); setResultsDismissed(id); }
 
   // ---- Mchezo integrated views (Phase 2) ----
   // Everyday theme throughout: Mchezo is year-round; the Christmas Family
@@ -542,6 +585,11 @@ export function App() {
           )}
         </div>
       )}
+      <ThisDeviceCard
+        remembered={seatRemembered}
+        onRemember={(on) => setSeatRemembered(seats.setRemember(on))}
+        onForgetDevice={() => leaveSeatOnThisDevice("Signed out on this device. Your seat and scores stay in the game.")}
+      />
       <div className="mz-card" style={{ marginTop: 12 }}>
         <span className="mz-kicker">Invite by QR</span>
         <p className="mz-foot">Scan to join this room. The 6-character code below works too — that is the manual-code fallback.</p>

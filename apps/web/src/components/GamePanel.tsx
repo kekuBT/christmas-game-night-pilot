@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { GameState, PlayerGame, PublicPlayer } from "../types.js";
+import { seats } from "../session.js";
 
 export type IntentFn = (gid: string, a: string, p: Record<string, unknown>) => void;
 
@@ -37,7 +38,7 @@ export function GamePanel(props: { game: PlayerGame; players: PublicPlayer[]; na
         <p className="muted">Only you can see this card. Flip it back any time.</p><p>Phase: {st.phase}</p>
         <p>Clues: {Object.entries(st.clues ?? {}).map(([pid, c]) => `${nameOf(pid)}: ${c}`).join(" · ") || "none yet"}</p>
         {st.phase === "clue" && !st.myAbstained && <div className="row"><input value={textInput} onChange={(e) => setTextInput(e.target.value)} placeholder="Your clue (max 140 chars)" maxLength={140} /><button onClick={() => intent(gid, "impostor-clue", { clue: textInput })}>Submit clue</button></div>}
-        {st.phase === "vote" && !st.myVote && !st.myAbstained && <div className="grid">{players.filter((p) => p.id !== props.players.find((x) => x.id === p.id)?.id || true).filter((p) => p.id !== (sessionStorage.getItem("cgn_playerId"))).map((p) => <button key={p.id} onClick={() => intent(gid, "impostor-vote", { suspectId: p.id })}>Vote: {p.displayName}</button>)}</div>}
+        {st.phase === "vote" && !st.myVote && !st.myAbstained && <div className="grid">{players.filter((p) => p.id !== props.players.find((x) => x.id === p.id)?.id || true).filter((p) => p.id !== (seats.current()?.playerId ?? null)).map((p) => <button key={p.id} onClick={() => intent(gid, "impostor-vote", { suspectId: p.id })}>Vote: {p.displayName}</button>)}</div>}
         {st.phase === "guess" && st.role === "impostor" && <div className="row"><input value={textInput} onChange={(e) => setTextInput(e.target.value)} placeholder="Guess the word" /><button onClick={() => intent(gid, "impostor-guess", { guess: textInput })}>Guess word</button></div>}
         {st.winner && <p>Winner: {st.winner}{st.revealedWord ? ` · Word was: ${st.revealedWord}` : ""}</p>}
       </div>}
