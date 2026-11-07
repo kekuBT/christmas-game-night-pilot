@@ -28,6 +28,7 @@ import { createHash } from "node:crypto";
 import { seededRng } from "../shared/rng.js";
 import { officialEligible, practiceUsable, type ContentLibrary, type LoadedItem } from "./registry.js";
 import type { ContentGameId } from "./schema.js";
+import { isNumericGame, withinNumericInput } from "../shared/numericInput.js";
 
 export interface UsageRecord { gameInstanceId: string; day: number; mode: "official" | "practice"; seq: number }
 /** Per Cup: item id -> every time it was used. Saved with the room. */
@@ -56,6 +57,17 @@ export function selectionSeed(cupId: string, gameId: string, seq: number): numbe
 /** Used in this Cup in any game (official, or practice that retired it). */
 const usedInCup = (usage: UsageHistory, id: string) => (usage[id] ?? []).length > 0;
 const lastUsedSeq = (usage: UsageHistory, id: string) => Math.max(-1, ...(usage[id] ?? []).map((u) => u.seq));
+
+/**
+ * E1 (owner-approved): an item whose correct answer the game's input can't
+ * accept is never selected, in any mode. Past selections and results are
+ * untouched; this only filters the pool for new games.
+ */
+export function answerEnterable(li: LoadedItem): boolean {
+  if (!isNumericGame(li.gameId)) return true;
+  const it = li.item as unknown as Record<string, unknown>;
+  return withinNumericInput(li.gameId, Number(li.gameId === "guess-the-year" ? it["year"] : it["answer"]));
+}
 
 function shuffled<T>(xs: T[], rng: () => number): T[] {
   const a = [...xs];
@@ -103,7 +115,10 @@ function stratified(pool: LoadedItem[], count: number, rng: () => number): Loade
 }
 
 export function selectContent(req: SelectionRequest): SelectionResult {
-  const all = (req.lib.byGame.get(req.gameId) ?? []).slice().sort((a, b) => a.item.id.localeCompare(b.item.id));
+  const listed = (req.lib.byGame.get(req.gameId) ?? []).slice().sort((a, b) => a.item.id.localeCompare(b.item.id));
+  const all = listed.filter(answerEnterable);
+  const unenterable = listed.length - all.length;
+  const excludedNote = unenterable ? [`${unenterable} item(s) skipped: answer can't be entered with this game's input`] : [];
   const seed = selectionSeed(req.cupId, req.gameId, req.seq);
   const rng = seededRng(seed);
   if (req.mode === "official") {
@@ -116,7 +131,7 @@ export function selectContent(req: SelectionRequest): SelectionResult {
       };
     }
     const items = stratified(fresh, req.count, rng);
-    return { ok: true, items, seed, reasons: [`official pool: ${fresh.length} unused of ${eligible.length} eligible`, `difficulty mix: ${[1, 2, 3].map((d) => items.filter((i) => i.item.difficulty === d).length).join("/")}`] };
+    return { ok: true, items, seed, reasons: [`official pool: ${fresh.length} unused of ${eligible.length} eligible`, `difficulty mix: ${[1, 2, 3].map((d) => items.filter((i) => i.item.difficulty === d).length).join("/")}`, ...excludedNote] };
   }
   // Practice: practice-only or already-used items first (least recently used),
   // then fresh official items, which this use retires from official play.
@@ -133,7 +148,7 @@ export function selectContent(req: SelectionRequest): SelectionResult {
   const items: LoadedItem[] = [];
   for (let i = 0; items.length < req.count; i++) items.push(ranked[i % ranked.length]!);
   const retired = items.filter((li) => freshOfficial.includes(li)).length;
-  return { ok: true, items, seed, reasons: [`practice pool: ${safe.length} practice-only/already used${retired ? `, ${retired} fresh official item(s) retired from official play` : ""}${req.count > usable.length ? " (small pool: items repeat)" : ""}`] };
+  return { ok: true, items, seed, reasons: [`practice pool: ${safe.length} practice-only/already used${retired ? `, ${retired} fresh official item(s) retired from official play` : ""}${req.count > usable.length ? " (small pool: items repeat)" : ""}`, ...excludedNote] };
 }
 
 /** Record the selection in the Cup's usage history (same synchronous step as game creation). */

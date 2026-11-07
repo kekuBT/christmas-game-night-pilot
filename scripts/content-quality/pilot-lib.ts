@@ -8,12 +8,10 @@
 import { readFileSync } from "node:fs";
 import { ITEM_SCHEMAS, type ContentGameId } from "../../src/content/schema.js";
 import { evalFormula } from "../../src/content/lint.js";
+import { NUMERIC_INPUT, withinNumericInput } from "../../src/shared/numericInput.js";
 
-/** Numeric input bounds the current client enforces (MchezoYear.tsx, MchezoClosest.tsx + NumericGuess integer clamp). */
-export const UI_INPUT_BOUNDS = {
-  "guess-the-year": { min: 1896, max: 2025, integer: true },
-  "closest-wins": { min: 0, max: 1000, integer: true },
-} as const;
+/** The numeric input bounds the game enforces (src/shared/numericInput.ts). */
+export const UI_INPUT_BOUNDS = NUMERIC_INPUT;
 
 export interface Rubric { entertainment: number; creativity: number; clarity: number; distractors: number; social: number }
 export interface PilotEntry {
@@ -32,8 +30,7 @@ export interface Finding { id: string; level: "error" | "warn"; message: string 
 
 /** Is a numeric answer enterable with today's client input? */
 export function enterable(game: keyof typeof UI_INPUT_BOUNDS, answer: number): boolean {
-  const b = UI_INPUT_BOUNDS[game];
-  return answer >= b.min && answer <= b.max && (!b.integer || Number.isInteger(answer));
+  return withinNumericInput(game, answer);
 }
 
 /**
