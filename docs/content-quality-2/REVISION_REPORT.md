@@ -58,14 +58,15 @@ Results:
 - `npm run content:check`: CONTENT OK.
 - `npm run content:audit`: 0 unenterable official items, 0 Connections boards with an alternative solution.
 - `npm run content:pilot`: OK, 69 items.
-- Unit tests: 690 passed (62 files).
+- Unit tests: 691 passed (62 files), in the gate run below.
+- Full gate on `e06fe92`: **PASSED (exit 0)**, run `20261107-114948-e06fe92c-3602`, 44 of 44 steps.
 
 New tests:
 - `tests/sprint-sim.test.ts` (5);
-- `tests/audit-batch-a.test.ts` (8);
+- `tests/audit-batch-a.test.ts` (9);
 - 6 more in `tests/content-pilot.test.ts`.
 
-The gate verdict and the commit hash are recorded in `docs/PROGRESS.md`.
+The gate verdict is also recorded in `docs/PROGRESS.md`.
 
 **Fixed in passing:** `npm run content:pilot` crashed on the batch-01 review file, which sits in the same folder (introduced in `c70f16b`; the gate doesn't run that command). It now skips files that aren't pilot item files.
 

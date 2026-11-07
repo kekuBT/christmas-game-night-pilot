@@ -6,7 +6,7 @@
 
 **Script:** `scripts/content-quality/revisions/batch_a_apply.py`. It is a one-shot, readable list of every edit.
 
-**Tests:** `tests/audit-batch-a.test.ts` (8 tests).
+**Tests:** `tests/audit-batch-a.test.ts` (9 tests).
 
 ## Scope and rules
 

@@ -735,7 +735,7 @@ Completed (files):
   - `scripts/content-quality/revisions/batch_a_apply.py`;
   - `docs/content-quality-2/audit-batches/BATCH_A_APPLIED.md`.
 - Standard §5a (audience and personality). Report: `docs/content-quality-2/REVISION_REPORT.md`. Decisions D-CQ2-12..16.
-- Tests: `tests/sprint-sim.test.ts` (5), `tests/audit-batch-a.test.ts` (8), and 6 more in `tests/content-pilot.test.ts`.
+- Tests: `tests/sprint-sim.test.ts` (5), `tests/audit-batch-a.test.ts` (9), and 6 more in `tests/content-pilot.test.ts`.
 
 Failures found and fixed:
 - `npm run content:pilot` crashed on `review-batch-01.json` (since c70f16b). It now skips non-pilot files.
@@ -753,3 +753,5 @@ Next: stop for owner review. No library expansion and no further content batches
 Risk:
 - A1 edits the only official Connections board; it needs owner sign-off at merge.
 - Batch A retires 14 provisional items, which shrinks the practice pools slightly.
+
+Gate verdict (one run, one revision): `node scripts/gate.mjs full` on `e06fe92`, in a fresh clean clone: **PASSED (exit 0)**, run `20261107-114948-e06fe92c-3602`. 44 passed, 0 failed, 0 timed out. Unit tests: 691 passed (62 files). This verdict covers `e06fe92` only. The commit that records it changes docs only.
