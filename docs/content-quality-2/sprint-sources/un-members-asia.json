@@ -1,0 +1,83 @@
+{
+  "id": "un-members-asia",
+  "authority": "UN Statistics Division M49 (Asia), joined with the UN member-state list",
+  "fetchedAt": "2026-11-07",
+  "extraction": "M49 overview, English table: 'Country or Area' where 'Region Name' is Asia; kept only if it is a UN member state (as for South America).",
+  "pages": [
+    {
+      "url": "https://www.un.org/en/about-us/member-states",
+      "sha256": "a7092e9cd9b42f921137710cb931a706d4d46ecfe314da4574dbfe13640cb7d0",
+      "bytes": 200748,
+      "via": "http"
+    },
+    {
+      "url": "https://unstats.un.org/unsd/methodology/m49/overview/",
+      "sha256": "b9048114f6e7f2abda83bf03d4263c9d7cd1bd7230e3d0461025ee7839a7a1fb",
+      "bytes": 1721575,
+      "via": "http"
+    }
+  ],
+  "published": [
+    "Kazakhstan",
+    "Kyrgyzstan",
+    "Tajikistan",
+    "Turkmenistan",
+    "Uzbekistan",
+    "China",
+    "Democratic People's Republic of Korea",
+    "Japan",
+    "Mongolia",
+    "Republic of Korea",
+    "Brunei Darussalam",
+    "Cambodia",
+    "Indonesia",
+    "Lao People's Democratic Republic",
+    "Malaysia",
+    "Myanmar",
+    "Philippines",
+    "Singapore",
+    "Thailand",
+    "Timor-Leste",
+    "Viet Nam",
+    "Afghanistan",
+    "Bangladesh",
+    "Bhutan",
+    "India",
+    "Iran (Islamic Republic of)",
+    "Maldives",
+    "Nepal",
+    "Pakistan",
+    "Sri Lanka",
+    "Armenia",
+    "Azerbaijan",
+    "Bahrain",
+    "Cyprus",
+    "Georgia",
+    "Iraq",
+    "Israel",
+    "Jordan",
+    "Kuwait",
+    "Lebanon",
+    "Oman",
+    "Qatar",
+    "Saudi Arabia",
+    "Syrian Arab Republic",
+    "Türkiye",
+    "United Arab Emirates",
+    "Yemen"
+  ],
+  "excluded": [
+    {
+      "name": "China, Hong Kong Special Administrative Region",
+      "why": "special administrative region of China, not a member state"
+    },
+    {
+      "name": "China, Macao Special Administrative Region",
+      "why": "special administrative region of China, not a member state"
+    },
+    {
+      "name": "State of Palestine",
+      "why": "UN non-member observer state, not a member state"
+    }
+  ]
+}

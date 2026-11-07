@@ -1,0 +1,96 @@
+{
+  "id": "us-states",
+  "authority": "U.S. Census Bureau, 2020 state codes file (national_state2020.txt), linked from the ANSI codes page",
+  "fetchedAt": "2026-11-07",
+  "extraction": "STATE_NAME column of every row with STATEFP 01-56, except 11 (District of Columbia); rows above 56 are territories.",
+  "pages": [
+    {
+      "url": "https://www2.census.gov/geo/docs/reference/codes2020/national_state2020.txt",
+      "sha256": "167942161ec455bf7b0ee81b6ad76c109eb65e63136125d3683f8a44f51bbc66",
+      "bytes": 1515,
+      "via": "http"
+    }
+  ],
+  "published": [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming"
+  ],
+  "excluded": [
+    {
+      "name": "District of Columbia",
+      "why": "federal district, not a state"
+    },
+    {
+      "name": "American Samoa",
+      "why": "territory, not a state"
+    },
+    {
+      "name": "Guam",
+      "why": "territory, not a state"
+    },
+    {
+      "name": "Commonwealth of the Northern Mariana Islands",
+      "why": "territory, not a state"
+    },
+    {
+      "name": "Puerto Rico",
+      "why": "territory, not a state"
+    },
+    {
+      "name": "U.S. Minor Outlying Islands",
+      "why": "territory, not a state"
+    },
+    {
+      "name": "United States Virgin Islands",
+      "why": "territory, not a state"
+    }
+  ]
+}

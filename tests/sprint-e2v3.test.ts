@@ -133,7 +133,7 @@ describe("closed-set membership is verified against its published list, not coun
   const closed = () => sprintItems().filter((li) => (li.item as SprintItem).closedSet);
   it("the shipped library loads with no problems and every closed set matches its reference exactly", () => {
     expect(lib.problems).toEqual([]);
-    expect(closed().map((li) => li.item.id).sort()).toEqual(["spr-cs-africa", "spr-cs-chinese-zodiac", "spr-cs-elements", "spr-cs-eu-members", "spr-cs-planets", "spr-cs-south-america", "spr-cs-us-states"]);
+    expect(closed().map((li) => li.item.id).sort()).toEqual(["spr-cs-africa", "spr-cs-asia", "spr-cs-chinese-zodiac", "spr-cs-elements", "spr-cs-eu-members", "spr-cs-nfl", "spr-cs-planets", "spr-cs-south-america", "spr-cs-us-states", "spr-cs-wc2026"]);
     for (const li of closed()) {
       const it = li.item as SprintItem;
       const ref = lib.sprintReferences.get(it.membership!.reference)!;

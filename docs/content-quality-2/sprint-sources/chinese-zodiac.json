@@ -1,0 +1,9 @@
+{
+  "id": "chinese-zodiac",
+  "authority": "Encyclopaedia Britannica, 'Chinese zodiac'",
+  "fetchedAt": "2026-11-07",
+  "blocked": "www.britannica.com answers automated requests with a Cloudflare bot challenge (HTTP 403 to curl; the challenge page in a real headless browser). Not worked around. A person needs to compare the list by hand, or name another credible source.",
+  "extraction": "Not extracted.",
+  "pages": [],
+  "published": []
+}

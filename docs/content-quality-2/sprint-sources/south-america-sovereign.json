@@ -1,0 +1,52 @@
+{
+  "id": "south-america-sovereign",
+  "authority": "UN Statistics Division M49 (South America), joined with the UN member-state list for the sovereign-state criterion",
+  "fetchedAt": "2026-11-07",
+  "extraction": "M49 overview, English table: 'Country or Area' where 'Intermediate Region Name' is South America; kept only if it is a UN member state (un.org member-states page, with seven UN spellings mapped to M49's).",
+  "pages": [
+    {
+      "url": "https://www.un.org/en/about-us/member-states",
+      "sha256": "a7092e9cd9b42f921137710cb931a706d4d46ecfe314da4574dbfe13640cb7d0",
+      "bytes": 200748,
+      "via": "http"
+    },
+    {
+      "url": "https://unstats.un.org/unsd/methodology/m49/overview/",
+      "sha256": "b9048114f6e7f2abda83bf03d4263c9d7cd1bd7230e3d0461025ee7839a7a1fb",
+      "bytes": 1721575,
+      "via": "http"
+    }
+  ],
+  "published": [
+    "Argentina",
+    "Bolivia (Plurinational State of)",
+    "Brazil",
+    "Chile",
+    "Colombia",
+    "Ecuador",
+    "Guyana",
+    "Paraguay",
+    "Peru",
+    "Suriname",
+    "Uruguay",
+    "Venezuela (Bolivarian Republic of)"
+  ],
+  "excluded": [
+    {
+      "name": "Bouvet Island",
+      "why": "not a UN member state (a territory)"
+    },
+    {
+      "name": "Falkland Islands (Malvinas)",
+      "why": "not a UN member state (a territory)"
+    },
+    {
+      "name": "French Guiana",
+      "why": "not a UN member state (a territory)"
+    },
+    {
+      "name": "South Georgia and the South Sandwich Islands",
+      "why": "not a UN member state (a territory)"
+    }
+  ]
+}

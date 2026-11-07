@@ -81,6 +81,7 @@ Only the gate's verdict is evidence. The gate runs every `scripts/check-*.mjs` d
 |---|---|---|
 | `gate.mjs`, `gate-selftest.mjs` | The gate itself, and its self-test (which makes the gate fail on purpose). | — |
 | `screenshot-*.mjs` | Tools that write reference screenshots for visual review. | No verdict: they produce images, not a pass. |
+| `content-quality/sprint-sources.ts` (`npm run content:sprint-sources`) | A report tool. It fetches the Category Sprint membership sources over the network, saves snapshots, and writes `docs/content-quality-2/SPRINT_SOURCE_CHECK.md`. Its output is evidence for a person's source check, never an approval. `tests/sprint-sources.test.ts` checks the committed snapshots offline. | No verdict: it writes a report. A fetch failure exits 1. |
 | `clickthrough-api.mjs` | **Retired 2026-11-07.** A tombstone that always exits 2. It was a manual API playthrough from 2026-11-04 that was never in the gate and went stale as the rules changed. Its coverage map is in the file header. | **Never.** |
 
 ## CI

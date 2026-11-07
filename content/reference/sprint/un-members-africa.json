@@ -3,8 +3,8 @@
   "id": "un-members-africa",
   "title": "UN member states in Africa",
   "source": {
-    "authority": "United Nations (member states), African region",
-    "url": "https://www.un.org/en/about-us/member-states",
+    "authority": "United Nations, regional groups of Member States: African States",
+    "url": "https://www.un.org/dgacm/en/content/regional-groups",
     "publishedCount": 54
   },
   "members": [
@@ -63,7 +63,7 @@
     "Zambia",
     "Zimbabwe"
   ],
-  "provenance": "Transcribed by the author (Claude, 2026-11-07) from the authority's list; NOT yet compared with the source page (network blocked). Count cross-checked by web search.",
+  "provenance": "Transcribed by the author (Claude, 2026-11-07); machine-compared with the source page on 2026-11-07: all 54 match (Tanzania via its alias) (docs/content-quality-2/SPRINT_SOURCE_CHECK.md). No human source check yet.",
   "timeSensitive": {
     "asOf": "2026-11-07",
     "reviewBy": "2027-11-07"

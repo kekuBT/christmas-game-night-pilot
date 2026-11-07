@@ -1,0 +1,29 @@
+{
+  "id": "iau-planets-dwarf-planets",
+  "authority": "NASA Science, 'Planets' overview (the IAU page named in the old reference now returns 404)",
+  "fetchedAt": "2026-11-07",
+  "extraction": "Names in the page's 'Explore <body>' links, in page order; the page states 'eight planets, and five officially recognized dwarf planets' and lists the dwarf planets as 'Ceres, Pluto, Haumea, Makemake, and Eris'.",
+  "pages": [
+    {
+      "url": "https://science.nasa.gov/solar-system/planets/",
+      "sha256": "e38d9c65d82492a953cbef4c59b3e49370f5bbb2762d868cbefb395c014ae286",
+      "bytes": 330575,
+      "via": "http"
+    }
+  ],
+  "published": [
+    "Earth",
+    "Mercury",
+    "Venus",
+    "Mars",
+    "Jupiter",
+    "Saturn",
+    "Uranus",
+    "Neptune",
+    "Ceres",
+    "Pluto",
+    "Haumea",
+    "Makemake",
+    "Eris"
+  ]
+}

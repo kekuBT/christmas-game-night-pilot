@@ -1,0 +1,9 @@
+{
+  "id": "pokemon-generation-1",
+  "authority": "The Pokémon Company, official Pokédex (pokemon.com)",
+  "fetchedAt": "2026-11-07",
+  "blocked": "www.pokemon.com returns HTTP 403 to automated requests and an empty page in a headless browser. Not worked around. See the report for the separate matching problem (Nidoran).",
+  "extraction": "Not extracted.",
+  "pages": [],
+  "published": []
+}

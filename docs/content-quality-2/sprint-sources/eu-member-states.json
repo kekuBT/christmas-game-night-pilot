@@ -1,0 +1,49 @@
+{
+  "id": "eu-member-states",
+  "authority": "European Union, 'EU countries' (european-union.europa.eu), both result pages",
+  "fetchedAt": "2026-11-07",
+  "extraction": "Link text of every /principles-countries-history/eu-countries/<name>_en link on result pages 1 and 2.",
+  "pages": [
+    {
+      "url": "https://european-union.europa.eu/principles-countries-history/eu-countries_en",
+      "sha256": "845638cbe7db118d9e7bea7002fad54e0bb741d6df6ac5da4245f1ea20be0980",
+      "bytes": 117465,
+      "via": "http"
+    },
+    {
+      "url": "https://european-union.europa.eu/principles-countries-history/eu-countries_en?page=1",
+      "sha256": "19190c71b49310e8dff124fa0c68a272bc6a4b3d7ef2a025941497e36595e6ae",
+      "bytes": 103318,
+      "via": "http"
+    }
+  ],
+  "published": [
+    "Austria",
+    "Belgium",
+    "Bulgaria",
+    "Croatia",
+    "Cyprus",
+    "Czechia",
+    "Denmark",
+    "Estonia",
+    "Finland",
+    "France",
+    "Germany",
+    "Greece",
+    "Hungary",
+    "Ireland",
+    "Italy",
+    "Latvia",
+    "Lithuania",
+    "Luxembourg",
+    "Malta",
+    "Netherlands",
+    "Poland",
+    "Portugal",
+    "Romania",
+    "Slovakia",
+    "Slovenia",
+    "Spain",
+    "Sweden"
+  ]
+}

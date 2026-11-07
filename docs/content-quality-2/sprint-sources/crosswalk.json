@@ -1,0 +1,21 @@
+{
+  "_comment": "Where a source names a member differently from our display name in more than spelling. Read by scripts/content-quality/sprint-sources.ts (comparison) and scripts/content-quality/revisions/rev04_sprint_sources.py (reference lists). Each mapping needs a person to confirm at the source check.",
+  "south-america-sovereign": [
+    { "source": "Bolivia (Plurinational State of)", "member": "Bolivia", "reason": "M49 official form; the common English short name is shown to players" },
+    { "source": "Venezuela (Bolivarian Republic of)", "member": "Venezuela", "reason": "M49 official form; the common English short name is shown to players" }
+  ],
+  "un-members-asia": [
+    { "source": "Democratic People's Republic of Korea", "member": "North Korea", "reason": "M49 official form; common English name" },
+    { "source": "Republic of Korea", "member": "South Korea", "reason": "M49 official form; common English name" },
+    { "source": "Brunei Darussalam", "member": "Brunei", "reason": "M49 official form; common English name" },
+    { "source": "Lao People's Democratic Republic", "member": "Laos", "reason": "M49 official form; common English name" },
+    { "source": "Viet Nam", "member": "Vietnam", "reason": "M49 spelling; common English spelling" },
+    { "source": "Iran (Islamic Republic of)", "member": "Iran", "reason": "M49 official form; common English name" },
+    { "source": "Syrian Arab Republic", "member": "Syria", "reason": "M49 official form; common English name" }
+  ],
+  "fifa-world-cup-2026-teams": [
+    { "source": "Congo DR", "member": "DR Congo", "reason": "FIFA's word order; the usual English short form" },
+    { "source": "IR Iran", "member": "Iran", "reason": "FIFA's form; common English name" },
+    { "source": "Korea Republic", "member": "South Korea", "reason": "FIFA's form; common English name" }
+  ]
+}

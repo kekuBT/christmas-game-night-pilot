@@ -195,7 +195,7 @@
       },
       "source": {
         "kind": "reference",
-        "ref": "United Nations (member states), African region: https://www.un.org/en/about-us/member-states"
+        "ref": "United Nations, regional groups of Member States: African States: https://www.un.org/dgacm/en/content/regional-groups"
       },
       "tags": [
         "e2-v3",
@@ -507,7 +507,7 @@
       },
       "source": {
         "kind": "reference",
-        "ref": "United Nations M49 (South America), sovereign states only: https://unstats.un.org/unsd/methodology/m49/"
+        "ref": "UN Statistics Division M49 (South America), UN member states only: https://unstats.un.org/unsd/methodology/m49/overview/"
       },
       "tags": [
         "e2-v3",
@@ -627,7 +627,7 @@
       },
       "source": {
         "kind": "reference",
-        "ref": "International Astronomical Union (2006 definition; recognised dwarf planets): https://www.iau.org/public/themes/pluto/"
+        "ref": "IAU definition and recognised dwarf planets, as published by NASA Science: https://science.nasa.gov/solar-system/planets/"
       },
       "tags": [
         "e2-v3",

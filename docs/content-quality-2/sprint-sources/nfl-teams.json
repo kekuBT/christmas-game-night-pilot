@@ -1,0 +1,48 @@
+{
+  "id": "nfl-teams",
+  "authority": "NFL, 'NFL Football Teams' (nfl.com/teams)",
+  "fetchedAt": "2026-11-07",
+  "extraction": "Rendered in a browser; every line directly above a 'VIEW PROFILE VIEW FULL SITE' line is a team name.",
+  "pages": [
+    {
+      "url": "https://www.nfl.com/teams/",
+      "sha256": "77db70cd97eff39f4cc06eda2089edc1a3897c6eaf3034bd0c87a67c01a939d6",
+      "bytes": 1631,
+      "via": "browser"
+    }
+  ],
+  "published": [
+    "Arizona Cardinals",
+    "Atlanta Falcons",
+    "Carolina Panthers",
+    "Chicago Bears",
+    "Dallas Cowboys",
+    "Detroit Lions",
+    "Green Bay Packers",
+    "Los Angeles Rams",
+    "Minnesota Vikings",
+    "New Orleans Saints",
+    "New York Giants",
+    "Philadelphia Eagles",
+    "San Francisco 49ers",
+    "Seattle Seahawks",
+    "Tampa Bay Buccaneers",
+    "Washington Commanders",
+    "Baltimore Ravens",
+    "Buffalo Bills",
+    "Cincinnati Bengals",
+    "Cleveland Browns",
+    "Denver Broncos",
+    "Houston Texans",
+    "Indianapolis Colts",
+    "Jacksonville Jaguars",
+    "Kansas City Chiefs",
+    "Las Vegas Raiders",
+    "Los Angeles Chargers",
+    "Miami Dolphins",
+    "New England Patriots",
+    "New York Jets",
+    "Pittsburgh Steelers",
+    "Tennessee Titans"
+  ]
+}

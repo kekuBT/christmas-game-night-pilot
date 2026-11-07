@@ -1,0 +1,624 @@
+{
+  "schemaVersion": 1,
+  "packId": "category-sprint-closed-drafts",
+  "gameId": "category-sprint",
+  "version": "0.1.0",
+  "title": "Category Sprint: closed-set drafts (batch 1, practice until approved)",
+  "language": "en",
+  "items": [
+    {
+      "id": "spr-cs-asia",
+      "difficulty": 3,
+      "category": "Geography",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "provisional",
+        "notes": "Draft closed set by Claude (2026-11-07), built from the fetched source list. Practice-only and provisional: outside official selection until a person source-checks the list and approves it."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "UN Statistics Division M49 (Asia), UN member states only: https://unstats.un.org/unsd/methodology/m49/overview/"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set",
+        "draft-batch-1",
+        "official-candidate",
+        "geography"
+      ],
+      "name": "Countries in Asia",
+      "answers": [
+        "afghanistan",
+        "armenia",
+        "azerbaijan",
+        "bahrain",
+        "bangladesh",
+        "bhutan",
+        "brunei",
+        "cambodia",
+        "china",
+        "cyprus",
+        "georgia",
+        "india",
+        "indonesia",
+        "iran",
+        "iraq",
+        "israel",
+        "japan",
+        "jordan",
+        "kazakhstan",
+        "kuwait",
+        "kyrgyzstan",
+        "laos",
+        "lebanon",
+        "malaysia",
+        "maldives",
+        "mongolia",
+        "myanmar",
+        "nepal",
+        "north korea",
+        "oman",
+        "pakistan",
+        "philippines",
+        "qatar",
+        "saudi arabia",
+        "singapore",
+        "south korea",
+        "sri lanka",
+        "syria",
+        "tajikistan",
+        "thailand",
+        "timor leste",
+        "turkiye",
+        "turkmenistan",
+        "united arab emirates",
+        "uzbekistan",
+        "vietnam",
+        "yemen"
+      ],
+      "closedSet": true,
+      "definition": "UN member states in Asia, as the UN's M49 regions define it (47)",
+      "recallProfile": "obscure-tail",
+      "membership": {
+        "reference": "un-members-asia"
+      },
+      "typicalRecall": 15,
+      "timeSensitive": {
+        "asOf": "2026-11-07",
+        "reviewBy": "2027-11-07"
+      },
+      "aliases": {
+        "brunei darussalam": {
+          "to": "brunei",
+          "reason": "Official name"
+        },
+        "burma": {
+          "to": "myanmar",
+          "reason": "Former English name"
+        },
+        "democratic peoples republic of korea": {
+          "to": "north korea",
+          "reason": "Official name"
+        },
+        "dprk": {
+          "to": "north korea",
+          "reason": "Standard abbreviation"
+        },
+        "east timor": {
+          "to": "timor leste",
+          "reason": "English name"
+        },
+        "kyrgyz republic": {
+          "to": "kyrgyzstan",
+          "reason": "Official alternative name"
+        },
+        "lao pdr": {
+          "to": "laos",
+          "reason": "Common UN short form"
+        },
+        "republic of korea": {
+          "to": "south korea",
+          "reason": "Official name"
+        },
+        "syrian arab republic": {
+          "to": "syria",
+          "reason": "Official name"
+        },
+        "turkey": {
+          "to": "turkiye",
+          "reason": "English name until 2022; the UN now uses Türkiye"
+        },
+        "uae": {
+          "to": "united arab emirates",
+          "reason": "Standard abbreviation"
+        },
+        "viet nam": {
+          "to": "vietnam",
+          "reason": "M49 spelling"
+        }
+      },
+      "knownNotAccepted": {
+        "egypt": "M49 places Egypt in Africa",
+        "hong kong": "A special administrative region of China, not a UN member state",
+        "korea": "There are two Koreas in Asia: say North Korea or South Korea",
+        "macao": "A special administrative region of China, not a UN member state",
+        "macau": "A special administrative region of China, not a UN member state",
+        "palestine": "A UN non-member observer state, not a member state",
+        "russia": "M49 places Russia in Europe",
+        "taiwan": "Not a UN member state",
+        "tibet": "Part of China"
+      }
+    },
+    {
+      "id": "spr-cs-wc2026",
+      "difficulty": 2,
+      "category": "Sport",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "provisional",
+        "notes": "Draft closed set by Claude (2026-11-07), built from the fetched source list. Practice-only and provisional: outside official selection until a person source-checks the list and approves it."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "FIFA, FIFA World Cup 2026 teams page (tournament completed): https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set",
+        "draft-batch-1",
+        "official-candidate",
+        "sport"
+      ],
+      "name": "2026 World Cup teams",
+      "answers": [
+        "algeria",
+        "argentina",
+        "australia",
+        "austria",
+        "belgium",
+        "bosnia and herzegovina",
+        "brazil",
+        "cabo verde",
+        "canada",
+        "colombia",
+        "cote d ivoire",
+        "croatia",
+        "curacao",
+        "czechia",
+        "dr congo",
+        "ecuador",
+        "egypt",
+        "england",
+        "france",
+        "germany",
+        "ghana",
+        "haiti",
+        "iran",
+        "iraq",
+        "japan",
+        "jordan",
+        "mexico",
+        "morocco",
+        "netherlands",
+        "new zealand",
+        "norway",
+        "panama",
+        "paraguay",
+        "portugal",
+        "qatar",
+        "saudi arabia",
+        "scotland",
+        "senegal",
+        "south africa",
+        "south korea",
+        "spain",
+        "sweden",
+        "switzerland",
+        "tunisia",
+        "turkiye",
+        "uruguay",
+        "usa",
+        "uzbekistan"
+      ],
+      "closedSet": true,
+      "definition": "The 48 teams at the 2026 FIFA World Cup (FIFA's team list)",
+      "recallProfile": "famous-first",
+      "membership": {
+        "reference": "fifa-world-cup-2026-teams"
+      },
+      "aliases": {
+        "bosnia": {
+          "to": "bosnia and herzegovina",
+          "reason": "Common short form"
+        },
+        "cape verde": {
+          "to": "cabo verde",
+          "reason": "English name used until 2013"
+        },
+        "congo dr": {
+          "to": "dr congo",
+          "reason": "FIFA's form"
+        },
+        "cote divoire": {
+          "to": "cote d ivoire",
+          "reason": "Typed without the apostrophe"
+        },
+        "czech republic": {
+          "to": "czechia",
+          "reason": "Former English short name"
+        },
+        "democratic republic of the congo": {
+          "to": "dr congo",
+          "reason": "Full name"
+        },
+        "drc": {
+          "to": "dr congo",
+          "reason": "Standard abbreviation"
+        },
+        "holland": {
+          "to": "netherlands",
+          "reason": "Common English name"
+        },
+        "ir iran": {
+          "to": "iran",
+          "reason": "FIFA's form"
+        },
+        "ivory coast": {
+          "to": "cote d ivoire",
+          "reason": "English translation"
+        },
+        "korea": {
+          "to": "south korea",
+          "reason": "Only one Korea is on the list"
+        },
+        "korea republic": {
+          "to": "south korea",
+          "reason": "FIFA's form"
+        },
+        "turkey": {
+          "to": "turkiye",
+          "reason": "English name until 2022"
+        },
+        "united states": {
+          "to": "usa",
+          "reason": "Full English name of the team FIFA lists as USA"
+        },
+        "us": {
+          "to": "usa",
+          "reason": "Common abbreviation"
+        }
+      },
+      "knownNotAccepted": {
+        "cameroon": "Not among the 48 teams on FIFA's list",
+        "chile": "Not among the 48 teams on FIFA's list",
+        "denmark": "Not among the 48 teams on FIFA's list",
+        "great britain": "There is no British team: England and Scotland are separate FIFA members",
+        "italy": "Not among the 48 teams on FIFA's list",
+        "nigeria": "Not among the 48 teams on FIFA's list",
+        "poland": "Not among the 48 teams on FIFA's list",
+        "serbia": "Not among the 48 teams on FIFA's list",
+        "united kingdom": "There is no UK team: England and Scotland are separate FIFA members",
+        "wales": "Not among the 48 teams on FIFA's list"
+      }
+    },
+    {
+      "id": "spr-cs-nfl",
+      "difficulty": 2,
+      "category": "Sport",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "provisional",
+        "notes": "Draft closed set by Claude (2026-11-07), built from the fetched source list. Practice-only and provisional: outside official selection until a person source-checks the list and approves it."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "National Football League, team list (nfl.com/teams): https://www.nfl.com/teams/"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set",
+        "draft-batch-1",
+        "official-candidate",
+        "sport"
+      ],
+      "name": "NFL teams",
+      "answers": [
+        "arizona cardinals",
+        "atlanta falcons",
+        "baltimore ravens",
+        "buffalo bills",
+        "carolina panthers",
+        "chicago bears",
+        "cincinnati bengals",
+        "cleveland browns",
+        "dallas cowboys",
+        "denver broncos",
+        "detroit lions",
+        "green bay packers",
+        "houston texans",
+        "indianapolis colts",
+        "jacksonville jaguars",
+        "kansas city chiefs",
+        "las vegas raiders",
+        "los angeles chargers",
+        "los angeles rams",
+        "miami dolphins",
+        "minnesota vikings",
+        "new england patriots",
+        "new orleans saints",
+        "new york giants",
+        "new york jets",
+        "philadelphia eagles",
+        "pittsburgh steelers",
+        "san francisco ers",
+        "seattle seahawks",
+        "tampa bay buccaneers",
+        "tennessee titans",
+        "washington commanders"
+      ],
+      "closedSet": true,
+      "definition": "The 32 NFL teams, by full name, nickname or unique city (nfl.com)",
+      "recallProfile": "even",
+      "membership": {
+        "reference": "nfl-teams"
+      },
+      "timeSensitive": {
+        "asOf": "2026-11-07",
+        "reviewBy": "2027-11-07"
+      },
+      "aliases": {
+        "arizona": {
+          "to": "arizona cardinals",
+          "reason": "The only NFL team from Arizona"
+        },
+        "atlanta": {
+          "to": "atlanta falcons",
+          "reason": "The only NFL team from Atlanta"
+        },
+        "baltimore": {
+          "to": "baltimore ravens",
+          "reason": "The only NFL team from Baltimore"
+        },
+        "bears": {
+          "to": "chicago bears",
+          "reason": "Team nickname (Bears)"
+        },
+        "bengals": {
+          "to": "cincinnati bengals",
+          "reason": "Team nickname (Bengals)"
+        },
+        "bills": {
+          "to": "buffalo bills",
+          "reason": "Team nickname (Bills)"
+        },
+        "broncos": {
+          "to": "denver broncos",
+          "reason": "Team nickname (Broncos)"
+        },
+        "browns": {
+          "to": "cleveland browns",
+          "reason": "Team nickname (Browns)"
+        },
+        "buccaneers": {
+          "to": "tampa bay buccaneers",
+          "reason": "Team nickname (Buccaneers)"
+        },
+        "buffalo": {
+          "to": "buffalo bills",
+          "reason": "The only NFL team from Buffalo"
+        },
+        "cardinals": {
+          "to": "arizona cardinals",
+          "reason": "Team nickname (Cardinals)"
+        },
+        "carolina": {
+          "to": "carolina panthers",
+          "reason": "The only NFL team from Carolina"
+        },
+        "chargers": {
+          "to": "los angeles chargers",
+          "reason": "Team nickname (Chargers)"
+        },
+        "chicago": {
+          "to": "chicago bears",
+          "reason": "The only NFL team from Chicago"
+        },
+        "chiefs": {
+          "to": "kansas city chiefs",
+          "reason": "Team nickname (Chiefs)"
+        },
+        "cincinnati": {
+          "to": "cincinnati bengals",
+          "reason": "The only NFL team from Cincinnati"
+        },
+        "cleveland": {
+          "to": "cleveland browns",
+          "reason": "The only NFL team from Cleveland"
+        },
+        "colts": {
+          "to": "indianapolis colts",
+          "reason": "Team nickname (Colts)"
+        },
+        "commanders": {
+          "to": "washington commanders",
+          "reason": "Team nickname (Commanders)"
+        },
+        "cowboys": {
+          "to": "dallas cowboys",
+          "reason": "Team nickname (Cowboys)"
+        },
+        "dallas": {
+          "to": "dallas cowboys",
+          "reason": "The only NFL team from Dallas"
+        },
+        "denver": {
+          "to": "denver broncos",
+          "reason": "The only NFL team from Denver"
+        },
+        "detroit": {
+          "to": "detroit lions",
+          "reason": "The only NFL team from Detroit"
+        },
+        "dolphins": {
+          "to": "miami dolphins",
+          "reason": "Team nickname (Dolphins)"
+        },
+        "eagles": {
+          "to": "philadelphia eagles",
+          "reason": "Team nickname (Eagles)"
+        },
+        "ers": {
+          "to": "san francisco ers",
+          "reason": "'49ers' as the matcher reads it (it keeps letters only)"
+        },
+        "falcons": {
+          "to": "atlanta falcons",
+          "reason": "Team nickname (Falcons)"
+        },
+        "giants": {
+          "to": "new york giants",
+          "reason": "Team nickname (Giants)"
+        },
+        "green bay": {
+          "to": "green bay packers",
+          "reason": "The only NFL team from Green Bay"
+        },
+        "houston": {
+          "to": "houston texans",
+          "reason": "The only NFL team from Houston"
+        },
+        "indianapolis": {
+          "to": "indianapolis colts",
+          "reason": "The only NFL team from Indianapolis"
+        },
+        "jacksonville": {
+          "to": "jacksonville jaguars",
+          "reason": "The only NFL team from Jacksonville"
+        },
+        "jaguars": {
+          "to": "jacksonville jaguars",
+          "reason": "Team nickname (Jaguars)"
+        },
+        "jets": {
+          "to": "new york jets",
+          "reason": "Team nickname (Jets)"
+        },
+        "kansas city": {
+          "to": "kansas city chiefs",
+          "reason": "The only NFL team from Kansas City"
+        },
+        "las vegas": {
+          "to": "las vegas raiders",
+          "reason": "The only NFL team from Las Vegas"
+        },
+        "lions": {
+          "to": "detroit lions",
+          "reason": "Team nickname (Lions)"
+        },
+        "miami": {
+          "to": "miami dolphins",
+          "reason": "The only NFL team from Miami"
+        },
+        "minnesota": {
+          "to": "minnesota vikings",
+          "reason": "The only NFL team from Minnesota"
+        },
+        "new england": {
+          "to": "new england patriots",
+          "reason": "The only NFL team from New England"
+        },
+        "new orleans": {
+          "to": "new orleans saints",
+          "reason": "The only NFL team from New Orleans"
+        },
+        "niners": {
+          "to": "san francisco ers",
+          "reason": "Common nickname for the 49ers"
+        },
+        "packers": {
+          "to": "green bay packers",
+          "reason": "Team nickname (Packers)"
+        },
+        "panthers": {
+          "to": "carolina panthers",
+          "reason": "Team nickname (Panthers)"
+        },
+        "patriots": {
+          "to": "new england patriots",
+          "reason": "Team nickname (Patriots)"
+        },
+        "philadelphia": {
+          "to": "philadelphia eagles",
+          "reason": "The only NFL team from Philadelphia"
+        },
+        "pittsburgh": {
+          "to": "pittsburgh steelers",
+          "reason": "The only NFL team from Pittsburgh"
+        },
+        "raiders": {
+          "to": "las vegas raiders",
+          "reason": "Team nickname (Raiders)"
+        },
+        "rams": {
+          "to": "los angeles rams",
+          "reason": "Team nickname (Rams)"
+        },
+        "ravens": {
+          "to": "baltimore ravens",
+          "reason": "Team nickname (Ravens)"
+        },
+        "saints": {
+          "to": "new orleans saints",
+          "reason": "Team nickname (Saints)"
+        },
+        "san francisco": {
+          "to": "san francisco ers",
+          "reason": "The only NFL team from San Francisco"
+        },
+        "seahawks": {
+          "to": "seattle seahawks",
+          "reason": "Team nickname (Seahawks)"
+        },
+        "seattle": {
+          "to": "seattle seahawks",
+          "reason": "The only NFL team from Seattle"
+        },
+        "steelers": {
+          "to": "pittsburgh steelers",
+          "reason": "Team nickname (Steelers)"
+        },
+        "tampa bay": {
+          "to": "tampa bay buccaneers",
+          "reason": "The only NFL team from Tampa Bay"
+        },
+        "tennessee": {
+          "to": "tennessee titans",
+          "reason": "The only NFL team from Tennessee"
+        },
+        "texans": {
+          "to": "houston texans",
+          "reason": "Team nickname (Texans)"
+        },
+        "titans": {
+          "to": "tennessee titans",
+          "reason": "Team nickname (Titans)"
+        },
+        "vikings": {
+          "to": "minnesota vikings",
+          "reason": "Team nickname (Vikings)"
+        },
+        "washington": {
+          "to": "washington commanders",
+          "reason": "The only NFL team from Washington"
+        }
+      },
+      "knownNotAccepted": {
+        "los angeles": "Los Angeles has 2 NFL teams: give the team's name",
+        "new york": "New York has 2 NFL teams: give the team's name"
+      }
+    }
+  ]
+}

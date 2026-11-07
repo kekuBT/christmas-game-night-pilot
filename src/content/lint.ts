@@ -100,7 +100,7 @@ export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
         }
         if (sp.closedSet) {
           const ref = lib.sprintReferences.get(sp.membership!.reference);
-          if (ref && !ref.sourceCheck) add(li, "warn", "membership-unchecked", `membership list "${ref.id}" has not been compared with its source page (${ref.source.url}); approval is refused until a person records that check`);
+          if (ref && !ref.sourceCheck) add(li, "warn", "membership-unchecked", `membership list "${ref.id}" has no human source check against ${ref.source.url} (machine comparison: docs/content-quality-2/SPRINT_SOURCE_CHECK.md); approval is refused until a person records that check`);
         }
       }
       if (gameId === "impostor" && norm(String(it["word"])) === norm(String(it["hintCategory"]))) add(li, "error", "word-is-category", "the secret word must differ from its category hint");
