@@ -667,3 +667,22 @@ Completed (files):
 Unit tests: 57 files / 648 tests. External blockers: none. Not done: Charades prototype (design only), real-device and Safari checks (no WebKit here), human review of the new content.
 Next: owner editorial approval of content (`npm run content:review`); Sprint 5 only when authorised.
 Risk: official games stay content-starved until content is approved (Trivia: one official game per Cup; Category Sprint: none).
+
+## Content Quality 2.0 — editorial standard, audit, pilot (2026-11-07, branch `claude/content-quality-2`, from 212376f)
+Milestone: all seven deliverables drafted for owner review (`docs/content-quality-2/README.md`). No status changes, approvals, engine, scoring or selection changes.
+
+Completed (files):
+- Standard: `docs/content-quality-2/EDITORIAL_STANDARD.md` (7 gates, 5-dimension rubric with an 18/25 bar, difficulty bands, per-game guidance for all 11 games, variety rules, verification levels).
+- Audit: `LIBRARY_AUDIT.md`, plus `audit-verdicts.json` (a verdict for every one of the 571 items) and the generated `LIBRARY_AUDIT_TABLE.md`. Result: 305 KEEP / 126 REVISE / 40 REPLACE / 100 REJECT.
+- Pilot: `content/pilot/pilot-cq2.json` (60 items, 10 games; rendered as `PILOT_ITEMS.md`); `TRANSFORMATIONS.md`, `DISTRIBUTION.md`, `WORKFLOW.md`, `ENGINE_CHANGES.md`.
+- Tools: `scripts/content-quality/{pilot-lib,check-pilot,render-pilot,audit}.ts`; npm `content:pilot`, `content:pilot:render`, `content:audit`; `tests/content-pilot.test.ts` (5).
+
+Findings needing the owner:
+- E1: client input clamps make 14 official-eligible Closest items unanswerable (everyone ties).
+- E3: item explanations are never shown on any screen.
+- E2: Category Sprint lists reject valid answers (peer-challenge proposal; a scoring change).
+
+Failures: none outstanding. External blockers: none.
+Not done (needs people): human fact-check and editor re-score of the pilot.
+Next task: owner review of the pilot and decisions 1–5 in the README; then the first reviewed batch (at most 30 items).
+Risk: the pilot's facts are self-checked by Claude only, and every item lists its required human check. Rubric scores are self-assessed.

@@ -1,0 +1,2962 @@
+{
+ "generatedBy": "Content Quality 2.0 editorial pass (Claude). Triage verdicts, not human review; nothing here changes an item's status.",
+ "codes": {
+  "OBVIOUS": "Expected correct above about 95% for adults; nothing learned.",
+  "MISCALIBRATED": "The difficulty label disagrees with the expected correct rate (see suggestedDifficulty).",
+  "WEAK-DISTRACTORS": "Wrong options that tempt nobody (jokes, made-up terms).",
+  "PATTERNED-OPTIONS": "Option values follow a pattern that reveals the answer.",
+  "LENGTH-TELL": "The answer stands out by its length.",
+  "DUPLICATE": "Same fact or prompt as another item (named in the note).",
+  "DUPLICATE-ANSWER": "Shares an answer with another item; never schedule both in one night.",
+  "DISPUTED": "The answer is contested or is a range.",
+  "NEEDS-QUALIFIER": "Needs a date, convention or source in the wording.",
+  "AMBIGUOUS-WORDING": "Can be read more than one way, or is too long to read in time.",
+  "ANSWER-IN-QUESTION": "The prompt contains the answer.",
+  "WRONG-GAME": "Belongs to another game (usually Math Mayhem).",
+  "COMPUTABLE": "Has an exact arithmetic answer, so Closest Wins becomes a tie.",
+  "INPUT-RANGE": "The correct answer can't be entered with today's input.",
+  "OBSCURE-UNINTERESTING": "Hard only because it is niche, with no payoff.",
+  "FLAT-REVEAL": "Correct but the reveal teaches nothing; add one.",
+  "CULTURAL-CONCENTRATION": "Assumes one country's knowledge or vocabulary.",
+  "ARBITRARY-ANSWER": "Nothing in the item determines the answer.",
+  "WRONG-GROUPING": "A Connections group label or membership is loose.",
+  "FACTUAL": "A factual error.",
+  "FLAT": "No wordplay or surprise.",
+  "LIST-GAPS": "The Category Sprint list rejects common valid answers.",
+  "UNBOUNDED": "The Category Sprint category has no complete answer list.",
+  "SUBJECTIVE": "Membership is a matter of opinion.",
+  "SAMENESS": "Quantity hiding a lack of variety.",
+  "CLICHE": "The prompt already contains the joke.",
+  "HARD-TO-WRITE": "Hard to write a good caption for.",
+  "MISLABELLED-MODE": "The geography mode doesn't match the item.",
+  "ALTERNATIVE-SOLUTION": "A Connections board with more than one valid partition (added automatically by the solver)."
+ },
+ "defaults": {
+  "caption-clash": {
+   "verdict": "KEEP",
+   "codes": [
+    "SAMENESS"
+   ],
+   "note": "Usable, but 40 prompts share one 'A [creature] does [thing]' template and one category. Mix in format prompts (a review, a note, a speech) — see pilot."
+  },
+  "impostor": {
+   "verdict": "KEEP",
+   "codes": [],
+   "note": "A reasonable word with its category hint (practice-only game)."
+  },
+  "charades": {
+   "verdict": "KEEP",
+   "codes": [],
+   "note": "Actable (practice-only game). Needs accepted answers before it could ever count."
+  }
+ },
+ "items": {
+  "trv-legacy-01": {
+   "verdict": "REPLACE",
+   "codes": [
+    "WRONG-GAME",
+    "OBVIOUS"
+   ],
+   "note": "Arithmetic or a definition: belongs to Math Mayhem, not Trivia."
+  },
+  "trv-legacy-07": {
+   "verdict": "REPLACE",
+   "codes": [
+    "WRONG-GAME",
+    "OBVIOUS"
+   ],
+   "note": "Arithmetic or a definition: belongs to Math Mayhem, not Trivia."
+  },
+  "trv-legacy-12": {
+   "verdict": "REPLACE",
+   "codes": [
+    "WRONG-GAME",
+    "OBVIOUS"
+   ],
+   "note": "Arithmetic or a definition: belongs to Math Mayhem, not Trivia."
+  },
+  "trv-legacy-02": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "No knowledge tested; close to 100% correct for adults."
+  },
+  "trv-legacy-09": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "No knowledge tested; close to 100% correct for adults."
+  },
+  "trv-legacy-03": {
+   "verdict": "REPLACE",
+   "codes": [
+    "DUPLICATE",
+    "OBVIOUS"
+   ],
+   "note": "Capital cities belong to Geography (which already has a capital mode)."
+  },
+  "trv-legacy-04": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Above 95% expected correct; nothing to learn in the reveal."
+  },
+  "trv-legacy-05": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Children's colour-mixing fact; near 100%."
+  },
+  "trv-legacy-06": {
+   "verdict": "REVISE",
+   "codes": [
+    "FLAT-REVEAL"
+   ],
+   "note": "True and easy, but the interesting fact is that most of a tree's mass comes from the air. See pilot trv-cq2-10."
+  },
+  "trv-legacy-08": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "DUPLICATE"
+   ],
+   "note": "Near 100%, and it overlaps trv-scie-010."
+  },
+  "trv-legacy-10": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-legacy-11": {
+   "verdict": "REVISE",
+   "codes": [
+    "FLAT-REVEAL"
+   ],
+   "note": "Easy; keep only with a reveal (iron oxide dust) or replace."
+  },
+  "trv-scie-001": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100% for adults."
+  },
+  "trv-spac-017": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100% for adults."
+  },
+  "trv-scie-002": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Primary-school fact with no surprise; weak or joke distractors."
+  },
+  "trv-scie-012": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Primary-school fact with no surprise; weak or joke distractors."
+  },
+  "trv-scie-122": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Primary-school fact with no surprise; weak or joke distractors."
+  },
+  "trv-scie-123": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Primary-school fact with no surprise; weak or joke distractors."
+  },
+  "trv-scie-009": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Primary-school fact with no surprise; weak or joke distractors."
+  },
+  "trv-scie-003": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Pollen is a genuinely tempting distractor; a good easy item."
+  },
+  "trv-scie-004": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair easy item."
+  },
+  "trv-scie-005": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair easy item."
+  },
+  "trv-scie-006": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Ag (silver) is a strong distractor."
+  },
+  "trv-scie-007": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easier than labelled.",
+   "suggestedDifficulty": 1
+  },
+  "trv-scie-011": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easier than labelled.",
+   "suggestedDifficulty": 1
+  },
+  "trv-spac-020": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easier than labelled.",
+   "suggestedDifficulty": 1
+  },
+  "trv-scie-008": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Most people say oxygen: a good medium question."
+  },
+  "trv-scie-010": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair medium question."
+  },
+  "trv-scie-013": {
+   "verdict": "REPLACE",
+   "codes": [
+    "DUPLICATE",
+    "PATTERNED-OPTIONS"
+   ],
+   "note": "Same fact as cls-k-01 (keep it in Closest Wins, where it estimates well). The options 106/206/306/406 give the pattern away."
+  },
+  "trv-scie-014": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Good, but medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-scie-015": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Widely known from school.",
+   "suggestedDifficulty": 2
+  },
+  "trv-scie-016": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Common knowledge, labelled hard.",
+   "suggestedDifficulty": 1
+  },
+  "trv-spac-018": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Turn it into 'how many planets have rings?' (pilot trv-cq2-06)."
+  },
+  "trv-spac-019": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "trv-spac-021": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "trv-spac-022": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-spac-023": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A good trap: many say Mercury. Jupiter rotates in about 10 hours."
+  },
+  "trv-geog-024": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "DUPLICATE"
+   ],
+   "note": "Famous capitals are near 100% and duplicate Geography's capital mode."
+  },
+  "trv-geog-027": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "DUPLICATE"
+   ],
+   "note": "Famous capitals are near 100% and duplicate Geography's capital mode."
+  },
+  "trv-geog-116": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "DUPLICATE"
+   ],
+   "note": "Famous capitals are near 100% and duplicate Geography's capital mode."
+  },
+  "trv-geog-025": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "DUPLICATE"
+   ],
+   "note": "Same as geo-legacy-6."
+  },
+  "trv-geog-026": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair easy item."
+  },
+  "trv-geog-028": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same as geo-legacy-5 (Italy boot)."
+  },
+  "trv-geog-029": {
+   "verdict": "REVISE",
+   "codes": [
+    "FLAT-REVEAL"
+   ],
+   "note": "Keep the 'hot' qualifier; add the reveal that Antarctica is the largest desert overall."
+  },
+  "trv-geog-030": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "DUPLICATE"
+   ],
+   "note": "Overlaps trv-hist-036; near 100%."
+  },
+  "trv-geog-031": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair medium question."
+  },
+  "trv-geog-032": {
+   "verdict": "REVISE",
+   "codes": [
+    "DUPLICATE",
+    "MISCALIBRATED"
+   ],
+   "note": "Move to Geography; medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-geog-033": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-geog-034": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Excellent Kenya distractor; medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-hist-035": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS",
+    "DUPLICATE"
+   ],
+   "note": "The year in the prompt gives it away, and Guess the Year has the Titanic twice already."
+  },
+  "trv-hist-036": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-hist-039": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-hist-037": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED",
+    "CULTURAL-CONCENTRATION"
+   ],
+   "note": "Easy; US-centric.",
+   "suggestedDifficulty": 1
+  },
+  "trv-hist-038": {
+   "verdict": "REJECT",
+   "codes": [
+    "ANSWER-IN-QUESTION"
+   ],
+   "note": "The prompt names Berlin."
+  },
+  "trv-hist-040": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED",
+    "CULTURAL-CONCENTRATION"
+   ],
+   "note": "Easy for UK players, harder elsewhere: say so in the difficulty notes.",
+   "suggestedDifficulty": 1
+  },
+  "trv-hist-041": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Good distractors; medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-hist-042": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Good distractors; medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-hist-043": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED",
+    "CULTURAL-CONCENTRATION"
+   ],
+   "note": "UK-centric; medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-lite-044": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-lite-045": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-lite-046": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "trv-lite-049": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "trv-lite-047": {
+   "verdict": "REVISE",
+   "codes": [
+    "AMBIGUOUS-WORDING"
+   ],
+   "note": "Too long to read in time, and 'later white' also describes Saruman. Shorten."
+  },
+  "trv-lite-048": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Agatha Christie is a strong distractor."
+  },
+  "trv-lite-050": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-lite-051": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-lang-052": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "AMBIGUOUS-WORDING"
+   ],
+   "note": "Near 100%, and 'Antique' or 'Old' cause arguments."
+  },
+  "trv-lang-053": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE",
+    "OBVIOUS"
+   ],
+   "note": "Same as cls-legacy-6."
+  },
+  "trv-lang-054": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-lang-056": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-lang-055": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-arts-057": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair easy item."
+  },
+  "trv-arts-058": {
+   "verdict": "REVISE",
+   "codes": [
+    "DISPUTED"
+   ],
+   "note": "RYB versus CMY. Add an ambiguity note, or reword as 'taught in traditional art classes'."
+  },
+  "trv-arts-059": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-arts-060": {
+   "verdict": "REPLACE",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same as cls-k-02 (better as an estimate)."
+  },
+  "trv-arts-061": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Festive and fair."
+  },
+  "trv-arts-062": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "trv-arts-063": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair for musicians; a medium-hard item."
+  },
+  "trv-natu-064": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair easy item."
+  },
+  "trv-natu-067": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair easy item."
+  },
+  "trv-natu-065": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Near 100%; the distractors don't tempt anyone."
+  },
+  "trv-natu-066": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Near 100%; the distractors don't tempt anyone."
+  },
+  "trv-natu-069": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Near 100%; the distractors don't tempt anyone."
+  },
+  "trv-natu-070": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Near 100%; the distractors don't tempt anyone."
+  },
+  "trv-natu-073": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Near 100%; the distractors don't tempt anyone."
+  },
+  "trv-natu-068": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A surprising fact; good."
+  },
+  "trv-natu-071": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Fun, but widely known: medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-natu-072": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Good distractors; medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-food-074": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair; saffron versus turmeric is a good trap."
+  },
+  "trv-food-077": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair; saffron versus turmeric is a good trap."
+  },
+  "trv-food-078": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair; saffron versus turmeric is a good trap."
+  },
+  "trv-food-075": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-food-076": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-food-079": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-food-080": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "trv-spor-081": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair easy item."
+  },
+  "trv-spor-083": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair easy item."
+  },
+  "trv-spor-082": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Weak; see pilot trv-cq2-09."
+  },
+  "trv-spor-084": {
+   "verdict": "REVISE",
+   "codes": [
+    "FLAT-REVEAL"
+   ],
+   "note": "Add the reveal: the origin of 'love' is disputed, so say that rather than pick one story."
+  },
+  "trv-spor-085": {
+   "verdict": "KEEP",
+   "codes": [
+    "CULTURAL-CONCENTRATION"
+   ],
+   "note": "Good trap (7 with the extra point); US-centric."
+  },
+  "trv-spor-086": {
+   "verdict": "REPLACE",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same fact as cls-k-03."
+  },
+  "trv-spor-087": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-math-088": {
+   "verdict": "REJECT",
+   "codes": [
+    "WRONG-GAME"
+   ],
+   "note": "Arithmetic belongs to Math Mayhem, which generates and times it properly."
+  },
+  "trv-math-089": {
+   "verdict": "REJECT",
+   "codes": [
+    "WRONG-GAME"
+   ],
+   "note": "Arithmetic belongs to Math Mayhem, which generates and times it properly."
+  },
+  "trv-math-090": {
+   "verdict": "REJECT",
+   "codes": [
+    "WRONG-GAME"
+   ],
+   "note": "Arithmetic belongs to Math Mayhem, which generates and times it properly."
+  },
+  "trv-math-091": {
+   "verdict": "REJECT",
+   "codes": [
+    "WRONG-GAME"
+   ],
+   "note": "Arithmetic belongs to Math Mayhem, which generates and times it properly."
+  },
+  "trv-math-092": {
+   "verdict": "REJECT",
+   "codes": [
+    "WRONG-GAME"
+   ],
+   "note": "Arithmetic belongs to Math Mayhem, which generates and times it properly."
+  },
+  "trv-math-093": {
+   "verdict": "REJECT",
+   "codes": [
+    "WRONG-GAME"
+   ],
+   "note": "Arithmetic belongs to Math Mayhem, which generates and times it properly."
+  },
+  "trv-math-094": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A vocabulary question rather than arithmetic; fine as medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-ever-095": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-ever-096": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-ever-097": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-ever-098": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-ever-099": {
+   "verdict": "REVISE",
+   "codes": [
+    "FLAT-REVEAL"
+   ],
+   "note": "Add the reveal (the knuckle trick)."
+  },
+  "trv-ever-100": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-fest-101": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100% (trv-fest-108 is labelled hard)."
+  },
+  "trv-fest-102": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100% (trv-fest-108 is labelled hard)."
+  },
+  "trv-fest-108": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100% (trv-fest-108 is labelled hard)."
+  },
+  "trv-fest-109": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100% (trv-fest-108 is labelled hard)."
+  },
+  "trv-fest-103": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Harder than labelled: medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-fest-104": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Replaced by the day-five version (pilot trv-cq2-01), where every option is a real line from the song."
+  },
+  "trv-fest-105": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "trv-fest-106": {
+   "verdict": "KEEP",
+   "codes": [
+    "CULTURAL-CONCENTRATION"
+   ],
+   "note": "Good and festive; UK-centric."
+  },
+  "trv-fest-107": {
+   "verdict": "REVISE",
+   "codes": [
+    "DISPUTED",
+    "MISCALIBRATED"
+   ],
+   "note": "Say 'is generally credited with'; medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-fest-110": {
+   "verdict": "REVISE",
+   "codes": [
+    "FLAT-REVEAL",
+    "MISCALIBRATED"
+   ],
+   "note": "Easy; add the etymology reveal (Latin natalis).",
+   "suggestedDifficulty": 1
+  },
+  "trv-tech-111": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Near 100%; joke distractors."
+  },
+  "trv-tech-113": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Near 100%; joke distractors."
+  },
+  "trv-tech-112": {
+   "verdict": "REVISE",
+   "codes": [
+    "DISPUTED"
+   ],
+   "note": "Reword as 'was granted the first US patent for the telephone, in 1876' (Meucci and Gray are known rival claims)."
+  },
+  "trv-tech-114": {
+   "verdict": "REVISE",
+   "codes": [
+    "LENGTH-TELL"
+   ],
+   "note": "The answer is much longer than the other options. Rebalance the option lengths."
+  },
+  "trv-tech-115": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair.",
+   "suggestedDifficulty": 2
+  },
+  "trv-geog-117": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Capitals belong to Geography."
+  },
+  "trv-geog-118": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "trv-geog-119": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE",
+    "MISCALIBRATED"
+   ],
+   "note": "Same as geo-legacy-3; labelled hard."
+  },
+  "trv-geog-120": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-geog-121": {
+   "verdict": "REJECT",
+   "codes": [
+    "DISPUTED"
+   ],
+   "note": "No defensible single answer (it depends how islands are counted). Already practice-only."
+  },
+  "trv-scie-124": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "trv-scie-125": {
+   "verdict": "REVISE",
+   "codes": [
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "'Proton cloud' is made up. Use real terms (electron shell, orbital, neutron)."
+  },
+  "trv-scie-126": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Medium.",
+   "suggestedDifficulty": 2
+  },
+  "trv-scie-127": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair medium question."
+  },
+  "trv-hist-128": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "trv-hist-129": {
+   "verdict": "REJECT",
+   "codes": [
+    "ANSWER-IN-QUESTION"
+   ],
+   "note": "'The Great Wall … which country?' The answer is in the name everyone knows."
+  },
+  "trv-hist-130": {
+   "verdict": "REVISE",
+   "codes": [
+    "NEEDS-QUALIFIER"
+   ],
+   "note": "True as worded (he led it), but the reveal must say Magellan died on the way and Elcano finished."
+  },
+  "trv-hist-131": {
+   "verdict": "REVISE",
+   "codes": [
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "'A wall of ice' is a joke option. Use fair alternatives or drop the item."
+  },
+  "cls-legacy-1": {
+   "verdict": "REVISE",
+   "codes": [
+    "NEEDS-QUALIFIER"
+   ],
+   "note": "The height has changed with antennas (324 m, then 330 m from 2022). Add timeSensitive and say 'including antennas'."
+  },
+  "cls-legacy-2": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Exact arithmetic: careful players tie at the exact value, so it isn't an estimate. Move to the Math Mayhem pool."
+  },
+  "cls-legacy-4": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Exact arithmetic: careful players tie at the exact value, so it isn't an estimate. Move to the Math Mayhem pool."
+  },
+  "cls-legacy-7": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Exact arithmetic: careful players tie at the exact value, so it isn't an estimate. Move to the Math Mayhem pool."
+  },
+  "cls-legacy-3": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "COMPUTABLE"
+   ],
+   "note": "Everyone knows it exactly, so all players tie."
+  },
+  "cls-legacy-6": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "COMPUTABLE"
+   ],
+   "note": "Everyone knows it exactly, so all players tie."
+  },
+  "cls-legacy-8": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "COMPUTABLE"
+   ],
+   "note": "Everyone knows it exactly, so all players tie."
+  },
+  "cls-legacy-5": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "52: everyone ties."
+  },
+  "cls-c-01": {
+   "verdict": "REVISE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Large time arithmetic: fine as an occasional 'estimate under the clock' item (at most 1 in 5 of a set), but only after the input-range fix."
+  },
+  "cls-c-02": {
+   "verdict": "REVISE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Large time arithmetic: fine as an occasional 'estimate under the clock' item (at most 1 in 5 of a set), but only after the input-range fix."
+  },
+  "cls-c-03": {
+   "verdict": "REVISE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Large time arithmetic: fine as an occasional 'estimate under the clock' item (at most 1 in 5 of a set), but only after the input-range fix."
+  },
+  "cls-c-04": {
+   "verdict": "REVISE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Large time arithmetic: fine as an occasional 'estimate under the clock' item (at most 1 in 5 of a set), but only after the input-range fix."
+  },
+  "cls-c-05": {
+   "verdict": "REVISE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Large time arithmetic: fine as an occasional 'estimate under the clock' item (at most 1 in 5 of a set), but only after the input-range fix."
+  },
+  "cls-c-10": {
+   "verdict": "REVISE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Large time arithmetic: fine as an occasional 'estimate under the clock' item (at most 1 in 5 of a set), but only after the input-range fix."
+  },
+  "cls-c-12": {
+   "verdict": "REVISE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Large time arithmetic: fine as an occasional 'estimate under the clock' item (at most 1 in 5 of a set), but only after the input-range fix."
+  },
+  "cls-c-18": {
+   "verdict": "REVISE",
+   "codes": [
+    "COMPUTABLE"
+   ],
+   "note": "Large time arithmetic: fine as an occasional 'estimate under the clock' item (at most 1 in 5 of a set), but only after the input-range fix."
+  },
+  "cls-c-06": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "64: everyone ties. Replaced by the 204-squares version (pilot cls-cq2-02)."
+  },
+  "cls-c-07": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-08": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-09": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-11": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-13": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-14": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-15": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-17": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-19": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-20": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-21": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-c-22": {
+   "verdict": "REPLACE",
+   "codes": [
+    "COMPUTABLE",
+    "WRONG-GAME"
+   ],
+   "note": "Mental arithmetic with an exact answer: Math Mayhem material."
+  },
+  "cls-k-01": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-02": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-04": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-07": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-09": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-12": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-14": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-15": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-18": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-19": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-22": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-24": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A real estimation question with a precise, checkable answer."
+  },
+  "cls-k-27": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Excellent: festive, and nobody knows it exactly."
+  },
+  "cls-k-05": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good estimation item, but blocked until the input range is fixed."
+  },
+  "cls-k-10": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good estimation item, but blocked until the input range is fixed."
+  },
+  "cls-k-16": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good estimation item, but blocked until the input range is fixed."
+  },
+  "cls-k-28": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good estimation item, but blocked until the input range is fixed."
+  },
+  "cls-k-03": {
+   "verdict": "REVISE",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "The prompt says 'decimals allowed', but the input truncates to whole numbers. Fix the wording (or the engine)."
+  },
+  "cls-k-06": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Widely known exactly, so most players tie."
+  },
+  "cls-k-08": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Widely known exactly, so most players tie."
+  },
+  "cls-k-21": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Widely known exactly, so most players tie."
+  },
+  "cls-k-25": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Widely known exactly, so most players tie."
+  },
+  "cls-k-11": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Small range, but guesses still spread."
+  },
+  "cls-k-20": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Small range, but guesses still spread."
+  },
+  "cls-k-13": {
+   "verdict": "REJECT",
+   "codes": [
+    "DISPUTED"
+   ],
+   "note": "The answer is a range (4.5–6 m), not a value, so close guesses rank arbitrarily."
+  },
+  "cls-k-17": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Good; a year below 1000 can't go in Guess the Year."
+  },
+  "cls-k-23": {
+   "verdict": "REVISE",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "'Enter without the minus sign' is clumsy and the decimal is truncated. Needs signed decimal input."
+  },
+  "cls-k-26": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBSCURE-UNINTERESTING",
+    "DISPUTED"
+   ],
+   "note": "A range (146–154 °C), and niche."
+  },
+  "cls-k-29": {
+   "verdict": "REVISE",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "8.3 can't be entered. Ask in seconds (about 499)."
+  },
+  "cls-k-30": {
+   "verdict": "REVISE",
+   "codes": [
+    "DISPUTED"
+   ],
+   "note": "'About 5' is a rounded range. Keep only with a stated convention, e.g. 'about 7% of body weight'."
+  },
+  "geo-legacy-1": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-legacy-2": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-legacy-3": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-legacy-4": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-legacy-5": {
+   "verdict": "REPLACE",
+   "codes": [
+    "DUPLICATE",
+    "MISLABELLED-MODE"
+   ],
+   "note": "Not an outline (it's text), and the same as trv-geog-028."
+  },
+  "geo-legacy-6": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Joke distractors ('Neither is a mountain')."
+  },
+  "geo-legacy-7": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Joke distractors ('Neither is a mountain')."
+  },
+  "geo-legacy-8": {
+   "verdict": "REVISE",
+   "codes": [
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Use closer options (e.g. Brussels versus London from Paris) so it becomes a real distance question."
+  },
+  "geo-s4-001": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-s4-002": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-s4-005": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-s4-003": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-006": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-007": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-008": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-009": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-010": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-011": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-012": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-013": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-014": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair capital question with strong 'largest city' distractors. Capitals should be at most a quarter of a set."
+  },
+  "geo-s4-004": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "geo-s4-015": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-s4-016": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-s4-018": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-s4-020": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-s4-017": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-019": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-021": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-025": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-027": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-029": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-030": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-031": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-032": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-038": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-040": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-041": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-044": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair."
+  },
+  "geo-s4-022": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "A surprising answer (Mongolia beats Russia); good."
+  },
+  "geo-s4-023": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "geo-s4-024": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-s4-026": {
+   "verdict": "REJECT",
+   "codes": [
+    "ANSWER-IN-QUESTION"
+   ],
+   "note": "'Sydney Opera House — in which city?'"
+  },
+  "geo-s4-028": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE",
+    "OBVIOUS"
+   ],
+   "note": "Same as trv-hist-039."
+  },
+  "geo-s4-033": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Joke third and fourth options; obvious answer."
+  },
+  "geo-s4-034": {
+   "verdict": "REJECT",
+   "codes": [
+    "OBVIOUS",
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Joke third and fourth options; obvious answer."
+  },
+  "geo-s4-035": {
+   "verdict": "REVISE",
+   "codes": [
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Good comparisons, but the third and fourth options are filler ('Neither is land'). Higher-or-lower needs two options (engine change E4)."
+  },
+  "geo-s4-036": {
+   "verdict": "REVISE",
+   "codes": [
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Good comparisons, but the third and fourth options are filler ('Neither is land'). Higher-or-lower needs two options (engine change E4)."
+  },
+  "geo-s4-037": {
+   "verdict": "REVISE",
+   "codes": [
+    "WEAK-DISTRACTORS"
+   ],
+   "note": "Good comparisons, but the third and fourth options are filler ('Neither is land'). Higher-or-lower needs two options (engine change E4)."
+  },
+  "geo-s4-039": {
+   "verdict": "REPLACE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Near 100%."
+  },
+  "geo-s4-042": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same pair as geo-legacy-8."
+  },
+  "geo-s4-043": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Easy.",
+   "suggestedDifficulty": 1
+  },
+  "year-legacy-1": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Famous anchor events; fine as easy or medium."
+  },
+  "year-legacy-2": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Famous anchor events; fine as easy or medium."
+  },
+  "year-legacy-3": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Famous anchor events; fine as easy or medium."
+  },
+  "year-legacy-6": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Famous anchor events; fine as easy or medium."
+  },
+  "year-legacy-7": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Famous anchor events; fine as easy or medium."
+  },
+  "year-legacy-8": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Famous anchor events; fine as easy or medium."
+  },
+  "year-legacy-4": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fine. The answer equals the input minimum (1896), which hints at it."
+  },
+  "year-legacy-5": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fine."
+  },
+  "year-s4-006": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers)."
+  },
+  "year-s4-014": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers)."
+  },
+  "year-s4-016": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers)."
+  },
+  "year-s4-020": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers)."
+  },
+  "year-s4-042": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers)."
+  },
+  "year-s4-002": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-003": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-004": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-005": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-007": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-008": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-009": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-010": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-012": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-015": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-017": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-018": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-024": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-027": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-029": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-031": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-032": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-033": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-034": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-036": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-037": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-038": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-039": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-040": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-041": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "Fair and checkable."
+  },
+  "year-s4-001": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-011": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-013": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-019": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-021": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-022": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-023": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-025": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-026": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-028": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-030": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-035": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-045": {
+   "verdict": "KEEP",
+   "codes": [
+    "INPUT-RANGE"
+   ],
+   "note": "Good event, but the year can't be entered (input starts at 1896)."
+  },
+  "year-s4-043": {
+   "verdict": "REVISE",
+   "codes": [
+    "INPUT-RANGE",
+    "DUPLICATE-ANSWER"
+   ],
+   "note": "Both 1843; never use them in the same night. Blocked by the input range."
+  },
+  "year-s4-044": {
+   "verdict": "REVISE",
+   "codes": [
+    "INPUT-RANGE",
+    "DUPLICATE-ANSWER"
+   ],
+   "note": "Both 1843; never use them in the same night. Blocked by the input range."
+  },
+  "who-legacy-1": {
+   "verdict": "REJECT",
+   "codes": [
+    "ARBITRARY-ANSWER"
+   ],
+   "note": "Nothing in the quote points to the listed speaker: unguessable, so unfair."
+  },
+  "who-legacy-2": {
+   "verdict": "REJECT",
+   "codes": [
+    "ARBITRARY-ANSWER"
+   ],
+   "note": "Nothing in the quote points to the listed speaker: unguessable, so unfair."
+  },
+  "who-legacy-3": {
+   "verdict": "REVISE",
+   "codes": [
+    "ARBITRARY-ANSWER"
+   ],
+   "note": "Storytelling fits several of the cast."
+  },
+  "who-legacy-4": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "A keyword match (sea → sailor), so it tests nothing. The game needs real, surprising quotes (see pilot)."
+  },
+  "who-legacy-5": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "A keyword match (sea → sailor), so it tests nothing. The game needs real, surprising quotes (see pilot)."
+  },
+  "who-legacy-6": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "A keyword match (sea → sailor), so it tests nothing. The game needs real, surprising quotes (see pilot)."
+  },
+  "who-legacy-7": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "A keyword match (sea → sailor), so it tests nothing. The game needs real, surprising quotes (see pilot)."
+  },
+  "who-legacy-8": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "A keyword match (sea → sailor), so it tests nothing. The game needs real, surprising quotes (see pilot)."
+  },
+  "who-s4-001": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-002": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-003": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-004": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-005": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-008": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-009": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-011": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-013": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-014": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-015": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-016": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-017": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-018": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-019": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-020": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-021": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-022": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-023": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-024": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-025": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-027": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-028": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-029": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-030": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-032": {
+   "verdict": "REVISE",
+   "codes": [
+    "OBVIOUS"
+   ],
+   "note": "Charming writing, but answerable by keyword. Keep the cast as a practice or 'family edition' mode; official play should use verified real quotes."
+  },
+  "who-s4-006": {
+   "verdict": "REJECT",
+   "codes": [
+    "ARBITRARY-ANSWER"
+   ],
+   "note": "Professor Quill and Pip the Inventor are both options and both fit the quote."
+  },
+  "who-s4-007": {
+   "verdict": "REJECT",
+   "codes": [
+    "ARBITRARY-ANSWER"
+   ],
+   "note": "Professor Quill and Pip the Inventor are both options and both fit the quote."
+  },
+  "who-s4-031": {
+   "verdict": "REJECT",
+   "codes": [
+    "ARBITRARY-ANSWER"
+   ],
+   "note": "Professor Quill and Pip the Inventor are both options and both fit the quote."
+  },
+  "who-s4-010": {
+   "verdict": "REJECT",
+   "codes": [
+    "ARBITRARY-ANSWER"
+   ],
+   "note": "Granny Juniper and Chef Paprika are both options and both fit the quote."
+  },
+  "who-s4-012": {
+   "verdict": "REJECT",
+   "codes": [
+    "ARBITRARY-ANSWER"
+   ],
+   "note": "Granny Juniper and Chef Paprika are both options and both fit the quote."
+  },
+  "who-s4-026": {
+   "verdict": "REJECT",
+   "codes": [
+    "ARBITRARY-ANSWER"
+   ],
+   "note": "Granny Juniper and Chef Paprika are both options and both fit the quote."
+  },
+  "con-legacy-1": {
+   "verdict": "REVISE",
+   "codes": [
+    "WRONG-GROUPING"
+   ],
+   "note": "'Icicle' isn't weather. Candy canes and gingerbread are also tree decorations (unique only by counting)."
+  },
+  "con-s4-01": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "One solution with the noted overlaps; fair misdirection."
+  },
+  "con-s4-03": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "One solution with the noted overlaps; fair misdirection."
+  },
+  "con-s4-04": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "One solution with the noted overlaps; fair misdirection."
+  },
+  "con-s4-06": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "One solution with the noted overlaps; fair misdirection."
+  },
+  "con-s4-07": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "One solution with the noted overlaps; fair misdirection."
+  },
+  "con-s4-10": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "One solution with the noted overlaps; fair misdirection."
+  },
+  "con-s4-11": {
+   "verdict": "KEEP",
+   "codes": [
+    ""
+   ],
+   "note": "One solution with the noted overlaps; fair misdirection."
+  },
+  "con-s4-02": {
+   "verdict": "REVISE",
+   "codes": [
+    "WRONG-GROUPING"
+   ],
+   "note": "'Citrus and stone fruits' is two categories in one name. The red-herring note says lime is 'not a green', which is wrong: it's unique only by counting."
+  },
+  "con-s4-05": {
+   "verdict": "REVISE",
+   "codes": [
+    "FACTUAL"
+   ],
+   "note": "Swans and owls aren't garden birds. Use Robin, Wren, Sparrow, Blackbird (or rename the group)."
+  },
+  "con-s4-08": {
+   "verdict": "REVISE",
+   "codes": [
+    "MISCALIBRATED"
+   ],
+   "note": "Fair, but medium rather than hard.",
+   "suggestedDifficulty": 2
+  },
+  "con-s4-09": {
+   "verdict": "REPLACE",
+   "codes": [
+    "FLAT"
+   ],
+   "note": "Four literal categories and no wordplay, so there is no 'aha'."
+  },
+  "con-s4-12": {
+   "verdict": "REVISE",
+   "codes": [
+    "FACTUAL"
+   ],
+   "note": "Pearl and amber are gems but not gemstones in the mineral sense. Rename to 'Gems'."
+  },
+  "spr-legacy-1": {
+   "verdict": "REJECT",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Already rejected and superseded in Sprint 4 (10-answer lists)."
+  },
+  "spr-legacy-2": {
+   "verdict": "REJECT",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Already rejected and superseded in Sprint 4 (10-answer lists)."
+  },
+  "spr-legacy-3": {
+   "verdict": "REJECT",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Already rejected and superseded in Sprint 4 (10-answer lists)."
+  },
+  "spr-s4-001": {
+   "verdict": "REVISE",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Missing avocado, mandarin, plantain, rhubarb (botanically a vegetable — needs a rule), persimmon, durian, jackfruit, quince, kumquat, blackcurrant, elderberry, olive, tomato…"
+  },
+  "spr-s4-002": {
+   "verdict": "REVISE",
+   "codes": [
+    "LIST-GAPS",
+    "UNBOUNDED"
+   ],
+   "note": "'Animals' is unbounded: snake, frog, shark, spider, owl and ant are all missing. Narrow it ('Mammals', 'Animals in a zoo') or move it to peer review."
+  },
+  "spr-s4-003": {
+   "verdict": "REVISE",
+   "codes": [
+    "UNBOUNDED"
+   ],
+   "note": "An open category with thousands of valid answers: only fair with peer review of unlisted answers."
+  },
+  "spr-s4-009": {
+   "verdict": "REVISE",
+   "codes": [
+    "UNBOUNDED"
+   ],
+   "note": "An open category with thousands of valid answers: only fair with peer review of unlisted answers."
+  },
+  "spr-s4-014": {
+   "verdict": "REVISE",
+   "codes": [
+    "UNBOUNDED"
+   ],
+   "note": "An open category with thousands of valid answers: only fair with peer review of unlisted answers."
+  },
+  "spr-s4-015": {
+   "verdict": "REVISE",
+   "codes": [
+    "UNBOUNDED"
+   ],
+   "note": "An open category with thousands of valid answers: only fair with peer review of unlisted answers."
+  },
+  "spr-s4-004": {
+   "verdict": "REVISE",
+   "codes": [
+    "LIST-GAPS",
+    "CULTURAL-CONCENTRATION"
+   ],
+   "note": "UK names only: aubergine and courgette are accepted but eggplant, zucchini and rutabaga are not. Also missing sweet potato, yam, okra, chilli, artichoke."
+  },
+  "spr-s4-005": {
+   "verdict": "REVISE",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Missing table tennis, athletics, rugby league or union variants, ice hockey, wrestling, handball, cricket variants, motor racing, sumo, taekwondo, triathlon, curling, lacrosse…"
+  },
+  "spr-s4-006": {
+   "verdict": "REPLACE",
+   "codes": [
+    "DISPUTED",
+    "LIST-GAPS"
+   ],
+   "note": "Accepts England, Scotland and Wales (not sovereign states) but rejects Russia, Turkey, Albania, Andorra, Belarus, Bosnia, Liechtenstein, Moldova, Monaco, Montenegro, North Macedonia, San Marino and Vatican City. Use a closed set instead (pilot spr-cq2-01)."
+  },
+  "spr-s4-007": {
+   "verdict": "REVISE",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Good category; the list misses common answers (e.g. Birds is missing chicken, vulture, stork, pelican, toucan, kiwi, canary)."
+  },
+  "spr-s4-010": {
+   "verdict": "REVISE",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Good category; the list misses common answers (e.g. Birds is missing chicken, vulture, stork, pelican, toucan, kiwi, canary)."
+  },
+  "spr-s4-011": {
+   "verdict": "REVISE",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Good category; the list misses common answers (e.g. Birds is missing chicken, vulture, stork, pelican, toucan, kiwi, canary)."
+  },
+  "spr-s4-013": {
+   "verdict": "REVISE",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Good category; the list misses common answers (e.g. Birds is missing chicken, vulture, stork, pelican, toucan, kiwi, canary)."
+  },
+  "spr-s4-016": {
+   "verdict": "REVISE",
+   "codes": [
+    "LIST-GAPS"
+   ],
+   "note": "Good category; the list misses common answers (e.g. Birds is missing chicken, vulture, stork, pelican, toucan, kiwi, canary)."
+  },
+  "spr-s4-008": {
+   "verdict": "REJECT",
+   "codes": [
+    "UNBOUNDED",
+    "SUBJECTIVE"
+   ],
+   "note": "'Things that are cold' and 'Things in a school' have no defensible boundary, so a list can never be fair."
+  },
+  "spr-s4-012": {
+   "verdict": "REJECT",
+   "codes": [
+    "UNBOUNDED",
+    "SUBJECTIVE"
+   ],
+   "note": "'Things that are cold' and 'Things in a school' have no defensible boundary, so a list can never be fair."
+  },
+  "imp-s4-045": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same word as an impostor legacy item."
+  },
+  "imp-s4-049": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same word as an impostor legacy item."
+  },
+  "chr-s4-003": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same prompt as a charades legacy item."
+  },
+  "chr-s4-012": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same prompt as a charades legacy item."
+  },
+  "chr-s4-016": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same prompt as a charades legacy item."
+  },
+  "chr-s4-030": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same prompt as a charades legacy item."
+  },
+  "chr-s4-032": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same prompt as a charades legacy item."
+  },
+  "chr-s4-045": {
+   "verdict": "REJECT",
+   "codes": [
+    "DUPLICATE"
+   ],
+   "note": "Same as chr-s4-078 (magic trick)."
+  },
+  "chr-s4-062": {
+   "verdict": "KEEP",
+   "codes": [
+    "CULTURAL-CONCENTRATION"
+   ],
+   "note": "Christmas crackers are mainly a UK and Commonwealth tradition."
+  },
+  "cap-s4-015": {
+   "verdict": "REVISE",
+   "codes": [
+    "CLICHE"
+   ],
+   "note": "The joke is already in the prompt (an owl that can't stay awake, a crab walking forwards), which leaves little to write. Add a format or a twist."
+  },
+  "cap-s4-023": {
+   "verdict": "REVISE",
+   "codes": [
+    "CLICHE"
+   ],
+   "note": "The joke is already in the prompt (an owl that can't stay awake, a crab walking forwards), which leaves little to write. Add a format or a twist."
+  },
+  "cap-s4-025": {
+   "verdict": "REVISE",
+   "codes": [
+    "CLICHE"
+   ],
+   "note": "The joke is already in the prompt (an owl that can't stay awake, a crab walking forwards), which leaves little to write. Add a format or a twist."
+  },
+  "cap-s4-034": {
+   "verdict": "REVISE",
+   "codes": [
+    "CLICHE"
+   ],
+   "note": "The joke is already in the prompt (an owl that can't stay awake, a crab walking forwards), which leaves little to write. Add a format or a twist."
+  },
+  "cap-s4-008": {
+   "verdict": "REVISE",
+   "codes": [
+    "HARD-TO-WRITE"
+   ],
+   "note": "'A robot tries to tell a joke' asks players to write a joke about a joke. Give it a format ('the robot's first joke')."
+  }
+ },
+ "connectionsOverlaps": {
+  "con-legacy-1": {
+   "Candy cane": [
+    "Christmas decorations"
+   ],
+   "Gingerbread": [
+    "Christmas decorations"
+   ]
+  },
+  "con-s4-01": {
+   "Snow": [
+    "Weather"
+   ]
+  },
+  "con-s4-02": {
+   "Sage": [
+    "Herbs"
+   ],
+   "Lime": [
+    "Shades of green"
+   ]
+  },
+  "con-s4-03": {
+   "Comet": [
+    "In space"
+   ],
+   "Star": [
+    "On a Christmas tree"
+   ]
+  },
+  "con-s4-04": {
+   "Organ": [
+    "Joints of the body"
+   ]
+  },
+  "con-s4-05": {
+   "Turtle": [
+    "Farm animals"
+   ]
+  },
+  "con-s4-07": {
+   "Squash": [
+    "Vegetables"
+   ]
+  },
+  "con-s4-08": {
+   "King": [
+    "___fish"
+   ]
+  },
+  "con-s4-11": {
+   "Ruler": [
+    "Titles of nobility"
+   ]
+  }
+ }
+}
