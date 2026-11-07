@@ -931,3 +931,42 @@ F1 is a score-integrity issue under the AGENTS.md safety rule. Its fix changes a
 **Risks:**
 - A copy change without stage 0 breaks 41 drivers.
 - A real-WebKit-only issue (V6) is unconfirmed.
+
+## 2026-11-07: stage 1, approved fixes (branch `claude/ux-stage1-fixes`, from `f2127c5`)
+
+The owner accepted the audit, approved Night Circle, Home B, Lobby A and the procedural covers, and authorised a narrow first implementation. This is not the five-stage rewrite.
+
+**Commits:**
+- `8a1b699`: D1 failing test (3 of 5 fail).
+- `b66b2fc`: D1 server fix.
+- `517304c`: UI fixes.
+- A later docs commit (this entry): mockup and proposal corrections, and the D3 timing contract.
+
+**Done:**
+- **D1:** official games with fewer than 2 competitors are refused before content selection (409 `OFFICIAL_NEEDS_TWO`). The lobby gives an explicit practice choice. Historical one-player games keep their stored record but report "not counting".
+- **F2** invite sheet (native Share, Copy, fallback, honest private-preview note).
+- **F3** visible and accessible Official/Practice state.
+- **F5** day-advance confirmation.
+- **V1/V6** lobby overlaps.
+- **V2** Mchezo background, theme-color and title; legacy palette recoloured.
+- **F7** no dead Sound switch.
+- **F8** motion setting on every screen.
+
+**Docs:**
+- `docs/ux-redesign/stage1/README.md`: before/after and iPhone test steps.
+- `docs/ux-redesign/D3_TIMING_CONTRACT.md`: decisions T1–T5.
+- PROPOSAL §6.8 and §10 corrections (Results arithmetic: Trivia scores a flat 120 per correct answer, so there's no variable speed bonus; no invented statistics; dock caveats).
+- `mockups/results.png` corrected.
+- Decisions D-UX-01..06.
+
+**Tests:**
+- Unit: 840 passed (73 files). Typecheck and lint OK.
+- Targeted gate `20261107-210923-517304c4-5008` on `517304c`: PASSED (12/12: lobby-fixes, mchezo, lifecycle, mobile, contrast, readiness, viewports, connections, double-start, tv-entry). Not a release verdict.
+
+**Not changed:**
+- Home/Lobby migration, Championship/TV rebuild, games, D2 solo practice, D3 timing.
+- No scoring formula changed. No merge or deployment.
+
+**Next:**
+1. The owner tests on an iPhone via a separate codespace on this branch.
+2. Then approval of the Lobby A migration, D2, and D3 (T1–T5).

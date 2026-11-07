@@ -341,15 +341,20 @@ Each spec covers: the goal · what must be visible without scrolling · actions 
      - solved groups stack as accent bands.
    - Existing mechanics and `data-testid`s are unchanged.
 
-8. **Results** ([mock](mockups/results.png))
+8. **Results** ([mock](mockups/results.png), corrected 2026-11-07)
    - **Goal:** a moment of drama, then the next game.
    - **Order:**
-     1. a headline with personality (§8);
-     2. your card: placing, score, **breakdown** (per correct answer, bonuses, misses) and one superlative;
-     3. Cup movement (▲1 / ▼1);
-     4. the dock: Full results / Back to lobby (host: **Next game**).
-   - **Celebration:** at most 1.2 s of shape confetti for the winner's phone and the TV; skipped under reduced motion.
-   - **Details on demand:** the per-question review (today's reveal) sits under "Full results".
+     1. a headline;
+     2. your card: placing, score, and a **breakdown taken from the server's recorded scoring details**;
+     3. Cup movement;
+     4. the dock (Full results / Back to lobby; host: **Next game**).
+   - **Hard rule:** the client never computes or invents a number.
+     - The breakdown shows what the server recorded: per-item points, bonuses and misses.
+     - A speed bonus appears only where the game really scores one. Math Mayhem times each question. **Trivia does not**: the server uses a fixed reference time, so every correct answer is worth 120.
+     - Movement arrows compare the server's standings before and after the game, and are hidden when there is nothing to compare.
+     - Superlatives, streaks and comebacks appear only when they are computed from recorded answers and scores.
+   - **Celebration:** at most 1.2 s of shape confetti, results only; none under reduced motion; never blocks the buttons.
+   - **Details on demand:** the per-question review sits under "Full results".
 
 9. **Championship** ([mock](mockups/cup.png))
    - **Order:**
@@ -409,8 +414,8 @@ The prototype in `mockups.html` is about 60 lines of code. In the app it becomes
 
 ## 8. Personality: wit without slowing the game
 
-**A small, curated copy bank** (`ui/mchezo/lib/quips.ts`):
-- About 120 original lines, tagged by situation: clear win, narrow win (≤5%), comeback (rank gain ≥2), perfect score, zero, tie, last place, a streak, a fast finisher, a sat-out player.
+**A small, curated copy bank** (`ui/mchezo/lib/quips.ts`). Approved scope (D6): start with **20–30 Mild lines**, reviewed like content; no Spicy mode and no large library until real players have tried them.
+- Original lines, tagged by situation: clear win, narrow win (≤5%), comeback (rank gain ≥2), perfect score, zero, tie, last place, a streak, a fast finisher, a sat-out player.
 - **Choosing a line:** deterministic per game id, so every phone and the TV show the same line. No repeat within a session.
 
 **Superlatives:** computed from data the results already have, for example:
@@ -456,3 +461,17 @@ The prototype in `mockups.html` is about 60 lines of code. In the app it becomes
 - Existing finished games keep their recorded outcome.
 
 **Presentation-only interim (safe now):** the lobby disables Official, with a reason line, when only one player is connected. The server is unchanged, so this is a guard, not a rule.
+
+## 10. Corrections after the owner's review (2026-11-07)
+
+1. **Results arithmetic.** The original mock showed 7 × 100 + 80 = "680", which is wrong; the sum is 780. That example was also built on a Trivia speed bonus that the server doesn't award: Trivia uses a fixed reference time, so each correct answer scores exactly 120. The mock now shows 7 × 120 = 840. Real results will always render the server's recorded scoring details (§6.8).
+2. **No invented statistics.** Speed bonuses, streaks, rank movement, comebacks and superlatives are shown only when computed from recorded game data. If the data doesn't support a line, the line isn't shown.
+3. **The dock isn't proven by static mockups.**
+   - Before the dock ships, it must pass on a real iPhone and Android: Safari toolbars expanded and collapsed, the keyboard open (`visualViewport`), home-indicator insets, the largest text size, and an SE-class screen.
+   - Stage 1 deliberately did **not** introduce the dock. Start keeps its in-flow position until that work is approved and tested.
+4. **Mode state.** Shipped in stage 1:
+   - the selected mode fills with its colour and shows ✓, with `aria-pressed`;
+   - practice-only games and the two-player minimum for official play explain themselves, with an explicit switch.
+5. **The lobby isn't dominated by secondary tools.** In the approved Lobby A, game selection, QR and sharing, player administration and advanced Cup controls live in sheets or Host tools. The lobby must not be forced onto one screen where that causes collisions or accessibility problems on small phones; scrolling is fine as long as Start stays easy to reach and respects safe areas.
+6. **Championship and TV** move to the Mchezo system while keeping server-authoritative scoring, the audit history and the secrecy boundaries. They are only recoloured until the rebuild is approved.
+7. **Compatibility.** Seat recovery, reconnection, active-game state, the roster and reconnection protection, and historical Cup records are preserved. An away player is never silently dropped from an official game: the readiness card names everyone who would miss it.

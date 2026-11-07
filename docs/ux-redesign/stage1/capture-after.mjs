@@ -1,0 +1,34 @@
+// Stage 1 "after" screenshots (docs/ux-redesign/stage1). Environment-specific helper.
+// Usage: serve:device-test on a port, then node docs/ux-redesign/stage1/capture-after.mjs http://localhost:PORT
+import { launchChromium } from "../../../scripts/lib/driver-env.mjs";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+const BASE = process.argv[2]; const OUT = dirname(fileURLToPath(import.meta.url));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const b = await launchChromium();
+const phone = { viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 };
+const shot = (p, n, o = {}) => p.screenshot({ path: `${OUT}/${n}.jpg`, type: "jpeg", quality: 74, ...o });
+const ctx = await b.newContext(phone); const host = await ctx.newPage();
+await host.goto(BASE); await host.getByPlaceholder("e.g. Auntie June").fill("Keku"); await host.getByRole("button", { name: "Host a game" }).click();
+const chip = host.getByRole("button", { name: /^Share room code / }); await chip.waitFor(); await sleep(1200);
+const code = (await chip.getAttribute("aria-label")).match(/[A-Z0-9]{6}/)[0];
+await shot(host, "01-lobby-top-alone");
+await host.getByTestId("choose-game").click(); await host.getByTestId("select-game-word-connections").click();
+await host.getByTestId("mode-official").click(); await sleep(300);
+await host.getByTestId("start-official-word-connections").scrollIntoViewIfNeeded(); await sleep(300);
+await shot(host, "02-official-needs-two");
+await host.getByTestId("switch-to-practice").click(); await sleep(300);
+await host.getByTestId("start-practice-word-connections").scrollIntoViewIfNeeded(); await shot(host, "03-practice-selected");
+for (const n of ["Amina", "Baraka", "Juma", "Mzee Otieno"]) await fetch(`${BASE}/rooms/join-by-code`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ joinCode: code, displayName: n }) });
+await host.getByTestId("choose-game").click(); await host.getByTestId("select-game-trivia").click(); await host.getByTestId("mode-official").click(); await sleep(1500);
+await host.evaluate(() => document.querySelector(".mz-screen").scrollTo(0, 0)); await sleep(300);
+await shot(host, "04-lobby-top-5-players");
+await host.getByTestId("start-official-trivia").scrollIntoViewIfNeeded(); await sleep(300); await shot(host, "05-official-selected-start");
+await ctx.grantPermissions(["clipboard-read", "clipboard-write"], { origin: new URL(BASE).origin });
+await host.getByTestId("share-room").click(); await sleep(500); await host.getByTestId("invite-copy").click(); await sleep(400); await shot(host, "06-invite-sheet-copied");
+await host.getByTestId("invite-close").click();
+await host.getByTestId("settings-bar").scrollIntoViewIfNeeded(); await sleep(300); await shot(host, "07-settings");
+await host.getByRole("button", { name: "Championship", exact: true }).click(); await sleep(600);
+await host.getByTestId("advance-day").click(); await sleep(400); await host.getByTestId("advance-day-confirm").scrollIntoViewIfNeeded(); await shot(host, "08-advance-day-confirm");
+await host.getByTestId("advance-day-cancel").click(); await host.evaluate(() => scrollTo(0, 0)); await sleep(300); await shot(host, "09-championship-recoloured");
+await b.close();
