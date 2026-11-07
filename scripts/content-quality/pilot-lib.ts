@@ -6,6 +6,7 @@
  * approved.
  */
 import { readFileSync } from "node:fs";
+import { roundProblems } from "./variety.js";
 import { ITEM_SCHEMAS, type ContentGameId } from "../../src/content/schema.js";
 import { evalFormula } from "../../src/content/lint.js";
 import { NUMERIC_INPUT, withinNumericInput } from "../../src/shared/numericInput.js";
@@ -38,29 +39,18 @@ export type Tone = (typeof TONES)[number];
 export const PLAYLISTS = ["Mixed Party Night", "Modern Culture", "Internet & Memes", "Gaming", "Music & Entertainment", "2000s Nostalgia", "Weird but True", "Brainy & Challenging", "World Knowledge"] as const;
 export const MECHANICS = ["recall", "recognition", "deduction", "comparison", "myth-buster", "never-said", "misquote", "misattribution", "definition-twist", "origin-story", "weird-but-true"] as const;
 const QUIZ_GAMES = new Set(["trivia", "geography", "who-said-that"]);
-/** Quote-twist mechanics share one family: at most one per round. */
-const QUOTE_TWIST = new Set(["never-said", "misquote", "misattribution"]);
-
 /**
- * Round-variety rule (proposal E10, not wired into selection): within one
- * quiz round, no mechanic more than twice, never the same mechanic back to
- * back, at most one quote-twist question, and at most one negative stem.
+ * Round-variety rule (E10 v2, proposal; not wired into selection). One
+ * definition, shared with the selection simulation: see
+ * scripts/content-quality/variety.ts roundProblems().
  */
 export function roundVarietyProblems(round: PilotEntry[]): string[] {
-  const out: string[] = [];
-  const count = new Map<string, number>();
-  let quote = 0, neg = 0;
-  round.forEach((e, idx) => {
-    const m = e.editorial.mechanic ?? "untagged";
-    count.set(m, (count.get(m) ?? 0) + 1);
-    if (QUOTE_TWIST.has(m)) quote++;
-    if (e.editorial.negativeStem) neg++;
-    if (idx > 0 && round[idx - 1]!.editorial.mechanic === m) out.push(`'${m}' twice in a row (${round[idx - 1]!.item.id}, ${e.item.id})`);
-  });
-  for (const [m, n] of count) if (n > 2) out.push(`'${m}' appears ${n} times (max 2)`);
-  if (quote > 1) out.push(`${quote} quote-twist questions (max 1)`);
-  if (neg > 1) out.push(`${neg} negative stems (max 1)`);
-  return out;
+  return roundProblems(round.map((e) => ({
+    id: e.item.id as string,
+    difficulty: e.item.difficulty as 1 | 2 | 3,
+    category: String(e.item.category),
+    tags: { ...(e.editorial.mechanic ? { mechanic: e.editorial.mechanic } : {}), ...(e.editorial.negativeStem ? { negative: true } : {}) },
+  })));
 }
 
 export interface PilotFile { schemaVersion: 1; pilotId: string; status: string; entries: PilotEntry[] }

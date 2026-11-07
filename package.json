@@ -84,7 +84,8 @@
     "content:pilot:render": "tsx scripts/content-quality/render-pilot.ts",
     "content:review-batch": "tsx scripts/content-quality/review-batch.ts",
     "content:sprint-sim": "tsx scripts/content-quality/sprint-sim-report.ts",
-    "content:pilot-diff": "tsx scripts/content-quality/pilot-diff.ts"
+    "content:pilot-diff": "tsx scripts/content-quality/pilot-diff.ts",
+    "content:variety-sim": "tsx scripts/content-quality/variety-report.ts"
   },
   "type": "module",
   "version": "0.1.0"
