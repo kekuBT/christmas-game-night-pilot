@@ -1,5 +1,7 @@
 # Real-Device Acceptance Checklist (Sprint 2 features)
 
+> **Superseded for the next device run by [REAL_DEVICE_TESTING.md](REAL_DEVICE_TESTING.md)** (2026-11-07), which folds these rows into its Parts C and H. Kept unchanged below as the Sprint 2 record.
+
 Automated tests run in desktop Chromium (headless shell) with emulated phone sizes. **None of this has been tried on a physical phone or TV yet.** Run this once on the actual family devices before the first official night. It takes about 30 minutes with 3 people.
 
 Setup: the host laptop serves the app on the home Wi-Fi (`npm run serve`, open `http://<laptop-LAN-IP>:3000`). Devices: at least one iPhone (Safari), one Android (Chrome), and the TV browser if used. Write down device, OS and browser version for each row.

@@ -54,7 +54,9 @@ Server configuration (environment variables, all optional):
 | `MCHEZO_DATA_DIR` | `./data` | Room snapshots (git-ignored) |
 | `MCHEZO_WEB_DIST` | `apps/web/dist` | Built web app to serve |
 
-Phones on the same Wi-Fi can join at `http://<your-computer's-LAN-IP>:3000`.
+Phones on the same Wi-Fi can join at `http://<your-computer's-LAN-IP>:3000`; the server prints that address when it starts.
+
+For real-device testing use `npm run serve:device-test` (test-mode content, separate `./data-device-test` data) and follow [REAL_DEVICE_TESTING.md](REAL_DEVICE_TESTING.md).
 
 ## 5. Day-to-day
 

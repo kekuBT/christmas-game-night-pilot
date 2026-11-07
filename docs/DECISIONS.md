@@ -261,3 +261,13 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
   - *Alternative:* a new id. Rejected: Batch A edits kept ids, and history is already protected by the board stored with each game.
 - **D-CQ2-26 E10 metadata is an optional schema field (`mechanic`, `negativeStem`) on quiz items.** It uses one shared vocabulary. Lint reads it; selection does not.
   - *Alternative:* encode it in `tags`. Rejected: tags are free text and could not be validated.
+- **D-CQ2-27 Congo ruling (owner, 2026-11-07) via per-Cup answer rules.**
+  - New Cups record `categorySprint.answerRules: 2`. Under rules 2, a bare "Congo" is a known non-answer: it scores nothing, and results explain the two Congos.
+  - Cups without the field (every earlier Cup) keep rules 1: the item carries a frozen `answerRules1` copy that is used only for them. Games already started are unaffected either way, because each game holds its own copy of its categories.
+  - *Alternative:* edit the item in place. Rejected: unstarted games in existing Cups would be re-ruled.
+  - *Alternative:* a matcher v3. Rejected: the owner asked for no matcher rewrite without review. Rules 2 is data only, through the existing near-miss mechanism.
+- **D-CQ2-28 The Chinese zodiac is compared with the UN publication the owner named** ("The Chinese Zodiac: In Praise of the Jade Rabbit"). All 12 names match. This is machine evidence, not a `sourceCheck`.
+- **D-DEV-01 Real-device testing runs on the owner's computer over home Wi-Fi, at $0** (`npm run serve:device-test`, docs/REAL_DEVICE_TESTING.md).
+  - The test server defaults to content test mode, which official quiz games need while nothing is approved, and to a separate `./data-device-test`. It is refused in production.
+  - The server prints the computer's Wi-Fi addresses, so the host opens a non-localhost address and the QR code works.
+  - *Alternative:* a tunnel or temporary hosting. Not used: these are external services that need the owner's approval, and they are offered only if home Wi-Fi fails.

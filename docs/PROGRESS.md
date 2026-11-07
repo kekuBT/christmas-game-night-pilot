@@ -833,3 +833,34 @@ Gate verdict (one run, one revision): `node scripts/gate.mjs full` on `5bae6de`,
 - Machine-matched lists still need a human source check.
 - Rooms of 9–10 players still get one official Sprint game.
 - Canonical answers display in normalised form.
+
+## 2026-11-07: final content checkpoint + real-device testing handoff (branch `claude/real-device-acceptance`, from `65d5aca`)
+
+The owner accepted `5bae6de`. This session handled the owner's final content rulings and prepared real-device acceptance. It was not a content sprint.
+
+**Done:**
+- **Chinese zodiac:** compared with the owner-named UN publication ("The Chinese Zodiac: In Praise of the Jade Rabbit"). All 12 match. `npm run content:sprint-sources -- --only <id>` refetches one source. No `sourceCheck` or approval was recorded.
+- **Congo ruling:** in new Cups (`categorySprint.answerRules: 2`), a bare "Congo" is a near-miss: it scores 0 and results explain the two Congos. Every unambiguous Republic or DRC form scores.
+  - Earlier Cups keep scoring a bare "Congo" as the Republic, from a frozen `answerRules1` copy on `spr-cs-africa`. Started games keep their own copy.
+  - The World Cup draft also explains a bare "Congo"; it still scores 0 there.
+  - Files: `src/server/cup.ts`, `src/content/{schema,materialize,closedSet}.ts`, `src/server/room.ts`, `scripts/content-quality/revisions/rev07_congo_zodiac.py`. Tests: `tests/congo-ruling.test.ts` (29).
+- **Stable answer IDs and display names:** a proposal only, in `docs/content-quality-2/E2_ANSWER_IDENTITY_PROPOSAL.md`. Nothing is implemented, and the NFL draft stays practice-only.
+- **Real-device testing:** `docs/REAL_DEVICE_TESTING.md` (setup, checklist A–H, a feel survey) and `docs/device-testing/RESULTS_TEMPLATE.md` (device table, checklist, issue log).
+  - `npm run serve:device-test` uses test-mode content and `./data-device-test`, and is refused in production. `serve` now prints the Wi-Fi addresses phones should use. Test: `tests/serve-device-test.test.ts`.
+- **Decisions:** D-CQ2-27, D-CQ2-28 and D-DEV-01.
+
+**Unchanged:**
+- E10 window-three selection stays off.
+- No scoring formula changed.
+- Nothing merged, deployed or approved, and no spending.
+
+**Found while preparing:**
+- Inside this cloud sandbox, browser WebSockets to non-localhost addresses get a 403 from the sandbox's egress proxy (through the proxy environment variables), so a LAN-style origin shows "Reconnecting…" forever.
+- The server itself answers the upgrade on the same address (101 via curl). With the proxy variables removed, a non-localhost hostname connects and stays connected.
+- This is not an app defect, and a home network is not affected.
+
+**Next:** the owner runs the real-device session, then sends the results file, the server log and a zip of `data-device-test`. Blockers get a failing test first, then a fix.
+
+**Risks:**
+- Real WebKit (iOS) has never run this app.
+- Router or client isolation on some home networks. The guide has the free hotspot fallback; anything else needs owner approval.

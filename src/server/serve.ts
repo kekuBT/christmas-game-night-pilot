@@ -1,3 +1,4 @@
+import { networkInterfaces } from "node:os";
 import { LocalServer } from "./http.js";
 
 // Configuration (all optional):
@@ -33,6 +34,14 @@ const server = new LocalServer({
 const actual = await server.listen(port);
 // The test gate and drivers parse this exact line to learn the real port.
 console.log(`Christmas Game Night server on http://localhost:${actual} (web app at / after npm run build:web)`);
+// Phones can't use "localhost". Print this computer's home-network addresses
+// so the host opens one of them, and the lobby QR code then points phones there.
+const lan = Object.values(networkInterfaces()).flat()
+  .filter((a): a is NonNullable<typeof a> => !!a && a.family === "IPv4" && !a.internal)
+  .map((a) => `http://${a.address}:${actual}`);
+console.log(lan.length
+  ? `Phones on the same Wi-Fi: open ${lan.join(" or ")} on the host device (not localhost), so the QR code works.`
+  : "No network address found: phones can't reach this computer. Check that it is on Wi-Fi.");
 
 let closing = false;
 async function shutdown(signal: string): Promise<void> {

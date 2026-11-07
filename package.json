@@ -71,6 +71,7 @@
     "screenshot-mchezo": "node scripts/screenshot-mchezo.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",
     "serve": "tsx src/server/serve.ts",
+    "serve:device-test": "tsx src/server/serve-device-test.ts",
     "typecheck:web": "tsc -p apps/web/tsconfig.json --noEmit",
     "gate": "node scripts/gate.mjs fast",
     "gate:targeted": "node scripts/gate.mjs targeted",
