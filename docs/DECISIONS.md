@@ -282,3 +282,26 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
 - **D-UX-04 The legacy screens are recoloured to the Night Circle palette, not rebuilt.** Their CSS variables now carry Mchezo colours and the document background is the Mchezo ground. Championship, TV Dashboard and Memory Book keep their layout until their rebuild is approved.
 - **D-UX-05 Lobby overlap fixed by stopping screen children from shrinking,** not by switching to document scrolling. Document scrolling (better for Safari's toolbars) needs scroll-position handling between screens, and belongs with the shell/dock work that must be proven on real devices.
 - **D-UX-06 No Sound control until Mchezo has audio.** A switch that changes nothing misleads. The stored preference is left untouched.
+- **D-UX-07 D3 timing contract v2** (`docs/ux-redesign/D3_TIMING_CONTRACT.md`). **Owner rulings, 2026-11-07:**
+  - T1: Start now after 20 s; if every roster player is ready, start at once.
+  - T2: cancel after 5 min, with a visible warning first; nothing scored or used up.
+  - T3: everyone sees readiness.
+  - T4: Ready can be withdrawn until play starts, then it's locked.
+  - T5: new Cups only; existing Cups and stored games are never migrated.
+
+  The owner also required six safeguards: the minimum recheck at T_play; one active game, briefing included; content reserved, not consumed; explicit consent to start with unready players; secrecy until play; server-authoritative timers across restarts.
+
+  **Technical choices** (not yet implemented; approval of the contract pending):
+  - "Every eligible participant" means every roster player. An away player who isn't ready therefore needs the host's explicit Start now confirmation.
+  - The confirmation is checked on the server (current needs-confirmation set ⊆ `confirmed`).
+  - Content is frozen at T_create and recorded at T_play.
+  - A cancelled briefing is removed from the games list and logged without item IDs.
+  - Timing parameters are frozen per Cup, like `categorySprint`.
+  - A restart never cancels a briefing without 60 s of visible warning.
+
+  **Provisional defaults, not owner rulings:**
+  - P1: the warning shows 60 s before cancellation.
+  - P2: Start now marks the host ready.
+  - P3: spectators see readiness like the TV.
+
+  *Alternative:* select content at T_play. Rejected: a shortage would surface only after everyone had read the rules, and Category Sprint eligibility and Impostor roles must be fixed with the roster.
