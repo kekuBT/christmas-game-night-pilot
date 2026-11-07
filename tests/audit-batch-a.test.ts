@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_CONTENT_DIR, loadContent, officialEligible } from "../src/content/registry.js";
 import { recordUsage, selectContent, type UsageHistory } from "../src/content/select.js";
 import { connectionsSolutions } from "../scripts/content-quality/pilot-lib.js";
+import { CONNECTIONS_BOARD } from "../src/games/connections.js";
 
 const lib = loadContent();
 const TODAY = "2026-11-07";
@@ -81,6 +82,11 @@ describe("Audit Batch A corrections", () => {
     expect(li.status).toBe("legacy");
     expect(officialEligible(li, TODAY)).toBe(true);
     expect((li.item as unknown as { groups: { words: string[] }[] }).groups.flatMap((g) => g.words)).not.toContain("Icicle");
+  });
+
+  it("games saved before Sprint 4 (no stored board) still replay the original board, Icicle included", () => {
+    // room.ts boardOf() falls back to CONNECTIONS_BOARD for old games; editing the pack must not change history.
+    expect(CONNECTIONS_BOARD.categories.find((c) => c.name === "Winter weather")!.tiles).toContain("Icicle");
   });
 
   it("A8 and A17 corrections are present", () => {

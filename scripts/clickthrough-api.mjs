@@ -5,6 +5,7 @@
 // to completion through the same HTTP endpoints and intent actions App.tsx uses.
 // Fictional test players only; run against a local server only.
 import { PROTOCOL_HEADERS } from "./lib/protocol.mjs";
+import { connectionsGroups } from "./lib/content-oracle.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
 
@@ -29,12 +30,6 @@ const intent = (roomId, player, gameInstanceId, action, payload) =>
 const proj = (roomId, player) => get(`/rooms/${roomId}/projection?audience=player`, player.token);
 const myGame = async (roomId, player, gid) => (await proj(roomId, player)).myGames.find((g) => g.id === gid);
 const tid = (text) => `tile-${text.toLowerCase().replace(/[^a-z]/g, "-")}`;
-const CONNECTIONS_GROUPS = [
-  ["Gingerbread", "Candy cane", "Mince pie", "Roast turkey"],
-  ["Snowfall", "Frost", "Blizzard", "Icicle"],
-  ["Tinsel", "Bauble", "Wreath", "Stocking"],
-  ["Dasher", "Dancer", "Prancer", "Vixen"],
-];
 function solveMath(prompt, options) {
   let m = prompt.match(/^(\d+) \+ (\d+) = \?$/);
   if (m) return options.indexOf(Number(m[1]) + Number(m[2]));
@@ -159,7 +154,9 @@ async function playGame(roomId, players, gameId) {
       else throw new Error(`unexpected caption phase ${st.phase}`);
     } else if (gameId === "word-connections") {
       for (const p of players) {
-        for (const group of CONNECTIONS_GROUPS) {
+        // The board is whatever content selection chose: read its groups from the packs (test oracle).
+        const shown = (await myGame(roomId, p, gid)).state.tiles.map((t) => t.text);
+        for (const group of connectionsGroups(shown)) {
           const pg = await myGame(roomId, p, gid);
           if ((pg.state.myState?.solved ?? []).length >= 4) break;
           const r = await intent(roomId, p, gid, "connections-guess", { tileIds: group.map(tid) });
