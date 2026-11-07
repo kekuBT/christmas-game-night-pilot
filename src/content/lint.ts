@@ -7,6 +7,7 @@
 import type { ContentLibrary, LoadedItem } from "./registry.js";
 import { officialEligible } from "./registry.js";
 import type { ContentGameId } from "./schema.js";
+import { isNumericGame, NUMERIC_INPUT, withinNumericInput } from "../shared/numericInput.js";
 
 export interface LintIssue { level: "error" | "warn"; gameId: ContentGameId; itemId: string; code: string; message: string }
 
@@ -67,6 +68,12 @@ export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
           const v = evalFormula(String(it["formula"]));
           if (Math.abs(v - Number(it["answer"])) > 1e-9) add(li, "error", "formula-mismatch", `formula gives ${v}, answer says ${it["answer"]}`);
         }
+      }
+      // E1: a numeric answer the game's input can't accept is never selected.
+      if (isNumericGame(gameId)) {
+        const v = Number(gameId === "guess-the-year" ? it["year"] : it["answer"]);
+        const spec = NUMERIC_INPUT[gameId];
+        if (!withinNumericInput(gameId, v)) add(li, "error", "unenterable-answer", `answer ${v} can't be entered (input: ${spec.min}–${spec.max}, ${spec.decimals} decimal places); the item is never selected`);
       }
       // Game-specific structure.
       if (gameId === "word-connections") {

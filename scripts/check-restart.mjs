@@ -8,6 +8,7 @@
 // data dir, so the test room is a real snapshot file that no other run
 // or developer room can collide with; the temp dir is removed afterwards.
 // Usage: node scripts/check-restart.mjs
+import { PROTOCOL_HEADERS } from "./lib/protocol.mjs";
 import { spawn } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -61,7 +62,7 @@ async function stopServer(proc) {
   return false;
 }
 async function post(port, path, body, token) {
-  const headers = { "Content-Type": "application/json" };
+  const headers = { "Content-Type": "application/json", ...PROTOCOL_HEADERS };
   if (token) headers["x-session-token"] = token;
   const r = await fetch(`http://localhost:${port}${path}`, {
     method: "POST", headers, body: JSON.stringify(body),

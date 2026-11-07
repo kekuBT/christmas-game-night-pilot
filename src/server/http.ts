@@ -912,7 +912,7 @@ export class LocalServer {
           const player = this.requireSession(room, req, res);
           if (!player) return;
           const body = await this.readBody(req);
-          const result = room.submitIntent(body["intent"], player.id);
+          const result = room.submitIntent(body["intent"], player.id, undefined, { clientProtocol: parseClientProtocol(req.headers[PROTOCOL_HEADER]) ?? 0 });
           this.persist(room);
           this.broadcast(room.id);
           this.send(res, 200, result);
@@ -1031,7 +1031,7 @@ export class LocalServer {
           ws.close(WS_SESSION_REPLACED, "Session replaced");
           return;
         }
-        const result = room.submitIntent(msg.intent, actorId);
+        const result = room.submitIntent(msg.intent, actorId, undefined, { clientProtocol: meta.clientProtocol ?? 0 });
         this.persist(room);
         ws.send(JSON.stringify({ kind: "ack", result }));
         this.broadcast(roomId);

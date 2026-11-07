@@ -2,9 +2,10 @@
 // MchezoYear panel must preserve every rule — same intents, same
 // whole-game abstention, same host skip path, same reconnect — while
 // rendering one event at a time in the kit. Covers: authorization
-// (guests see no start/setup controls), the 1896–2025 range (the
-// old slider's 1900 floor could never reach the 1896 Olympics
-// answer), visible clamping of out-of-range input, locked guessed
+// (guests see no start/setup controls), the E1 range 1000–2100 (the
+// old 1896–2025 clamp made earlier events unanswerable), no clamping
+// (out-of-range input shows a message and disables Submit), the ±1/±10
+// nudge buttons, the numeric phone keypad, locked guessed
 // events, any-order answering, whole-game abstention, reconnection
 // (reload keeps guesses and the abstained state), the waiting ring,
 // final results, mobile widths (no horizontal overflow at
@@ -78,7 +79,8 @@ async function guessEvent(page, i, value, via = "field") {
 
 const browser = await launchChromium();
 try {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  // E1: an emulated phone (touch, mobile viewport) for the first room.
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const host = await ctx.newPage();
   const code = await createRoom(host, "Ada");
   const bea = await ctx.newPage();
@@ -119,30 +121,47 @@ try {
   }
   await host.setViewportSize({ width: 390, height: 844 });
 
-  // The 1896 boundary (the first modern Olympics): the old dial's
-  // 1900 floor could never reach it. Via the dial this time.
+  // E1: the phone gets a numeric keypad, and a year before the old 1896
+  // floor can be typed exactly (no clamp).
   await host.getByTestId("mz-year-q3").click();
-  await host.getByTestId("mz-num-dial").fill("1896");
-  check("dial reaches 1896", (await host.getByTestId("mz-num-value").innerText()) === "1896");
+  const yf = host.getByTestId("mz-num-input");
+  check("phone gets a numeric keypad (inputmode=numeric)", (await yf.getAttribute("inputmode")) === "numeric");
+  await yf.fill(""); await yf.pressSequentially("1066", { delay: 15 });
+  check("1066 is accepted as typed (old input clamped it to 1896)",
+    (await host.getByTestId("mz-num-submit").innerText()).trim().endsWith("1066") && !(await host.getByTestId("mz-num-submit").isDisabled()));
+  await yf.fill(""); await yf.pressSequentially("999", { delay: 15 });
+  check("999 shows a message and disables Submit (no silent clamp)",
+    (await host.getByTestId("mz-num-error").innerText()).includes("1000 to 2100") && await host.getByTestId("mz-num-submit").isDisabled());
+  // Nudge buttons fine-tune the year by touch: 1890 +10 −1 −1 −1 −1 = 1896.
+  await yf.fill("1890");
+  await host.getByTestId("mz-num-nudge-10").tap();
+  for (let i = 0; i < 4; i++) await host.getByTestId("mz-num-nudge--1").tap();
+  check("nudges reach 1896", (await host.getByTestId("mz-num-value").innerText()) === "1896");
   check("Submit is labelled with 1896",
     (await host.getByTestId("mz-num-submit").innerText()).includes("1896"));
-  await host.getByTestId("mz-num-submit").click();
+  await host.getByTestId("mz-num-submit").tap();
   await host.getByTestId("mz-year-guessed").waitFor({ timeout: 15000 });
   check("1896 guess confirmed", (await host.getByTestId("mz-year-guessed").innerText()).includes("1896"));
 
-  // The 2025 boundary, via the field.
+  // The dial covers the whole range: its ends are 1000 and 2100.
+  await host.getByTestId("mz-year-q1").click();
+  await host.getByTestId("mz-num-dial").fill("0");
+  check("dial start is 1000", (await host.getByTestId("mz-num-value").innerText()) === "1000");
+  await host.getByTestId("mz-num-dial").fill("1000");
+  check("dial end is 2100", (await host.getByTestId("mz-num-value").innerText()) === "2100");
+  // 2025 via the field.
   await guessEvent(host, 1, 2025);
   check("2025 guess confirmed", (await host.getByTestId("mz-year-guessed").innerText()).includes("2025"));
 
-  // Out-of-range input is clamped visibly, never silently: 1800
-  // snaps to the 1896 floor in the field and on the Submit button.
+  // 1800 (below the old floor) is submitted exactly as typed.
   await host.getByTestId("mz-year-q2").click();
   await host.getByTestId("mz-num-input").fill("1800");
-  check("field snaps 1800 to 1896", (await host.getByTestId("mz-num-input").inputValue()) === "1896");
-  check("Submit shows the clamped 1896",
-    (await host.getByTestId("mz-num-submit").innerText()).includes("1896"));
+  check("1800 is kept as typed", (await host.getByTestId("mz-num-input").inputValue()) === "1800");
+  check("Submit shows 1800",
+    (await host.getByTestId("mz-num-submit").innerText()).includes("1800"));
   await host.getByTestId("mz-num-submit").click();
   await host.getByTestId("mz-year-guessed").waitFor({ timeout: 15000 });
+  check("1800 guess confirmed", (await host.getByTestId("mz-year-guessed").innerText()).includes("1800"));
 
   // A guessed event is locked: no number controls, the confirmation
   // shows instead, and the chip carries a check mark.
@@ -165,7 +184,7 @@ try {
   }
   await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 15000 });
   check("game finishes and shows results", true);
-  const hostGuesses = years.map((_, i) => (i === 3 || i === 2 ? 1896 : i === 1 ? 2025 : 2000));
+  const hostGuesses = years.map((_, i) => (i === 3 ? 1896 : i === 2 ? 1800 : i === 1 ? 2025 : 2000));
   const hostExpected = years.reduce((s, y, i) => s + pts(hostGuesses[i], y), 0);
   const beaExpected = years.reduce((s, y) => s + pts(2000, y), 0);
   const resultsText = await host.evaluate(() => document.body.innerText);

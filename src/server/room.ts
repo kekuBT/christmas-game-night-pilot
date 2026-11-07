@@ -1,6 +1,7 @@
 import { createHash, randomInt } from "node:crypto";
 import { getGame } from "../games/registry.js";
-import { CLIENT_PROTOCOL, MIN_CLIENT_PROTOCOL } from "../shared/clientProtocol.js";
+import { CLIENT_PROTOCOL, MATH_OPEN_PROTOCOL, MIN_CLIENT_PROTOCOL, NUMERIC_INPUT_PROTOCOL } from "../shared/clientProtocol.js";
+import { withinNumericInput } from "../shared/numericInput.js";
 import { COUNT_GAMES_WITH_NO_PARTICIPATION, policyFor, type EndReason, type GameOutcome, type Participation } from "./lifecycle.js";
 import { dayScore, midrankScore } from "../scoring/championship.js";
 import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
@@ -673,7 +674,11 @@ export class RoomEngine {
   }
 
   /** Submit a validated intent. Returns the ack; duplicates return the original result. */
-  submitIntent(raw: unknown, actorId: string, now = this.clock()): { accepted: boolean; reason?: string; result?: unknown } {
+  /**
+   * `opts.clientProtocol`: the version the transport saw (http.ts passes 0
+   * for a request without one). Left undefined by in-process callers.
+   */
+  submitIntent(raw: unknown, actorId: string, now = this.clock(), opts: { clientProtocol?: number } = {}): { accepted: boolean; reason?: string; result?: unknown } {
     const parsed = IntentSchema.safeParse(raw);
     if (!parsed.success) return { accepted: false, reason: "INVALID_INTENT" };
     const intent = parsed.data;
@@ -704,6 +709,10 @@ export class RoomEngine {
     const stalePhase = this.stalePhase(intent);
     if (stalePhase) {
       result = { accepted: false, reason: "PHASE_CLOSED" };
+    } else if ((intent.action === "closest-guess" || intent.action === "year-guess") && opts.clientProtocol !== undefined && opts.clientProtocol < NUMERIC_INPUT_PROTOCOL) {
+      // E1: an older tab clamps numeric input (Closest at 1000, the Year to
+      // 1896–2025), so its number may not be what the player meant.
+      result = { accepted: false, reason: "CLIENT_OUTDATED" };
     } else if (intent.action === "math-open") {
       result = this.openMathQuestion(intent, actorId, now);
     } else if (intent.action === "submit-math-answer") {
@@ -792,6 +801,7 @@ export class RoomEngine {
         if (intent.action === "closest-guess") {
           const value = intent.payload["value"];
           if (typeof value !== "number") return { accepted: false, reason: "INVALID_PAYLOAD" };
+          if (!withinNumericInput("closest-wins", value)) return { accepted: false, reason: "INVALID_GUESS" };
           submitClosestGuess(state, actorId, value);
           if (allGuessed(state, this.activePlayers(game))) {
             advanceClosest(state);
@@ -824,6 +834,7 @@ export class RoomEngine {
         const eid = String(intent.payload["eventId"] ?? "");
         const value = intent.payload["value"];
         if (typeof value !== "number") return { accepted: false, reason: "INVALID_PAYLOAD" };
+        if (!withinNumericInput("guess-the-year", value)) return { accepted: false, reason: "INVALID_GUESS" };
         const event = state.events.find((e) => e.id === eid);
         if (!event) return { accepted: false, reason: "UNKNOWN_EVENT" };
         const perPlayer = (state.guesses[actorId] ??= {});
@@ -1894,7 +1905,8 @@ export class RoomEngine {
 
   /** The ONLY pathway to outbound state. Never include secrets for the wrong audience. */
   project(audience: Audience, actorId?: string, opts: { clientProtocol?: number } = {}): Record<string, unknown> {
-    const legacyClient = opts.clientProtocol === undefined || opts.clientProtocol < CLIENT_PROTOCOL;
+    // "Legacy" here means the tab can't open Math questions one by one.
+    const legacyClient = opts.clientProtocol === undefined || opts.clientProtocol < MATH_OPEN_PROTOCOL;
     const now = this.clock();
     const publicPlayers = [...this.players.values()].map((p) => ({
       id: p.id,

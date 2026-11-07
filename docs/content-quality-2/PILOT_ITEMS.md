@@ -256,7 +256,6 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Verification required: Computed with the haversine formula (5,570.2 km). Editors should agree the 'city centre' convention.
 - Why include it: A classic estimation question with a wide, fun spread of guesses.
 - Rubric: 4/3/4/4/4 = 19
-- **Blocked:** Closest Wins number input only accepts 0–1000 (MchezoClosest.tsx). Needs the per-item input range (engine change E1) before use.
 
 ### cls-cq2-06 · Medium · Music
 
@@ -403,7 +402,6 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Verification required: Check against Nintendo's corporate history; check the Eiffel Tower opening (1889) before using that line.
 - Why include it: One of the best surprises in the set — but it cannot be entered yet.
 - Rubric: 5/4/5/4/5 = 23
-- **Blocked:** Guess the Year input only accepts 1896–2025 (MchezoYear.tsx). Needs the per-item input range (engine change E1).
 
 
 ## geography

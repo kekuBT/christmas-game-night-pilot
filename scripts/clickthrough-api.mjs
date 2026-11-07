@@ -4,11 +4,12 @@
 // (browser tab service failure, 2026-11-04 cron run). It exercises every game
 // to completion through the same HTTP endpoints and intent actions App.tsx uses.
 // Fictional test players only; run against a local server only.
+import { PROTOCOL_HEADERS } from "./lib/protocol.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
 
 async function post(path, body, token) {
-  const headers = { "content-type": "application/json" };
+  const headers = { "content-type": "application/json", ...PROTOCOL_HEADERS };
   if (token) headers["x-session-token"] = token;
   const r = await fetch(`${BASE}${path}`, { method: "POST", headers, body: JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));

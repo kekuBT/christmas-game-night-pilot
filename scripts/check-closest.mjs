@@ -42,11 +42,14 @@ async function joinRoom(page, name, code) {
 const browser = await launchChromium();
 try {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  // E1: Bea and Cal play on an emulated phone (touch, mobile viewport), so
+  // the typed-entry checks below exercise the phone input path.
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const host = await ctx.newPage();
   const code = await createRoom(host, "Ada");
-  const bea = await ctx.newPage();
+  const bea = await phone.newPage();
   await joinRoom(bea, "Bea", code);
-  const cal = await ctx.newPage();
+  const cal = await phone.newPage();
   await joinRoom(cal, "Cal", code);
 
   // Authorization: guests see no setup card and no closest start control.
@@ -78,17 +81,33 @@ try {
   }
   await host.setViewportSize({ width: 390, height: 844 });
 
-  // Submission via the number field.
-  await bea.getByTestId("mz-num-input").fill("42");
-  await bea.getByTestId("mz-num-submit").click();
-  await bea.getByText("Your guess: 42").waitFor({ timeout: 15000 });
-  check("number guess submits and confirms", true);
+  // E1: the phone keyboard is a decimal pad, and typed values are never
+  // clamped or rounded. Typed key by key, as a phone keyboard would.
+  const field = bea.getByTestId("mz-num-input");
+  check("phone gets a decimal keypad (inputmode=decimal)", (await field.getAttribute("inputmode")) === "decimal");
+  check("field is a text field (no browser number clamping)", (await field.getAttribute("type")) === "text");
+  const typeInto = async (t) => { await field.fill(""); await field.pressSequentially(t, { delay: 15 }); };
+  await typeInto("5,570");
+  check("'5,570' reads as 5,570 (no clamp to 1000)", (await bea.getByTestId("mz-num-submit").textContent())?.trim() === "Submit guess 5,570");
+  await typeInto("2419200");
+  check("a seven-digit answer is accepted as typed", (await bea.getByTestId("mz-num-submit").textContent())?.trim() === "Submit guess 2,419,200");
+  await typeInto("-3");
+  check("a negative number shows a message and disables Submit",
+    (await bea.getByTestId("mz-num-error").textContent())?.includes("Negative") === true && await bea.getByTestId("mz-num-submit").isDisabled());
+  await typeInto("1.2345");
+  check("too many decimals shows a message (no silent rounding)",
+    (await bea.getByTestId("mz-num-error").textContent())?.includes("3 decimal places") === true && await bea.getByTestId("mz-num-submit").isDisabled());
+  // Submission via the number field, with decimals, by tapping.
+  await typeInto("42.195");
+  await bea.getByTestId("mz-num-submit").tap();
+  await bea.getByText("Your guess: 42.195").waitFor({ timeout: 15000 });
+  check("decimal guess 42.195 submits and confirms (server stored it exactly)", true);
   check("guessed player sees the waiting ring",
     await bea.locator(".mz-wait").isVisible());
 
   // Reconnection: reload while Q1 is still open keeps the guessed state.
   await bea.reload({ waitUntil: "domcontentloaded" });
-  await bea.getByText("Your guess: 42").waitFor({ timeout: 15000 });
+  await bea.getByText("Your guess: 42.195").waitFor({ timeout: 15000 });
   check("reload restores the guessed state", true);
 
   // Per-question abstention.
@@ -113,30 +132,34 @@ try {
     (await host.getByTestId("mz-num-value").textContent()) === "250");
   check("Submit button is labelled with the value",
     (await host.getByTestId("mz-num-submit").textContent())?.trim() === "Submit guess 250");
-  // Clearing the field does not lose the value (no invisible 0).
+  // Clearing the field never submits an invisible value: Submit is disabled.
   await host.getByTestId("mz-num-input").fill("");
-  check("clearing the field keeps the value (no invisible 0)",
-    (await host.getByTestId("mz-num-submit").textContent())?.trim() === "Submit guess 250");
+  check("clearing the field disables Submit (no invisible 0)",
+    await host.getByTestId("mz-num-submit").isDisabled());
   check("there is exactly one submit button",
     (await host.getByTestId("mz-num-dial-submit").count()) === 0);
-  // Moving the dial moves the field (the button follows).
+  // Moving the (logarithmic) dial moves the field and the button.
+  await host.getByTestId("mz-num-dial").fill("500");
+  const dialValue = (await host.getByTestId("mz-num-value").textContent())?.trim();
+  check("dial at mid-track gives a mid-magnitude value (log scale)", dialValue === "1,000,000", dialValue);
+  check("field follows the dial", (await host.getByTestId("mz-num-input").inputValue()) === "1000000");
   await host.getByTestId("mz-num-dial").fill("123");
-  const dialShown = (await host.getByTestId("mz-num-value").textContent()) === "123";
-  check("dial value follows the slider", dialShown);
+  const dialShown = (await host.getByTestId("mz-num-value").textContent())?.trim();
   check("Submit button follows the dial",
-    (await host.getByTestId("mz-num-submit").textContent())?.trim() === "Submit guess 123");
+    (await host.getByTestId("mz-num-submit").textContent())?.trim() === `Submit guess ${dialShown}`);
   await host.getByTestId("mz-num-submit").click();
   let advanced = false;
   for (let i = 0; i < 60 && !advanced; i++) {
     const now = await host.locator(".mz-card p b").first().textContent().catch(() => null);
     const results = await host.getByText(/wins this game|It's a tie/).count();
-    const guessText = await host.getByText("Your guess: 123").count();
+    const guessText = await host.getByText(`Your guess: ${dialShown}`).count();
     advanced = (now !== null && now !== q1Prompt) || results > 0 || guessText > 0;
     if (!advanced) await sleep(250);
   }
   check("dial guess accepted (game advances or confirms)", advanced);
 
   await ctx.close();
+  await phone.close();
 } finally {
   await browser.close();
 }

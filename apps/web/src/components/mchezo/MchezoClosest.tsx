@@ -11,8 +11,8 @@
 //   green shell, mirroring how Trivia play bypasses the old shell.
 //   Intro (ShowIntro) and finished results (ShowResults) are
 //   untouched — this component covers gameplay + waiting only.
-// - Inputs come from the shared NumericGuess primitive (dial 0–1000,
-//   initial 50, same labels) and the shared AbstainControl primitive
+// - Inputs come from the shared NumericGuess primitive (E1: the fixed
+//   game-wide range 0 to a trillion, 3 decimals, log dial, initial 50) and the shared AbstainControl primitive
 //   (same button text, same abstained note). The number field is now
 //   component-local instead of App-shared across games (input hygiene;
 //   it starts empty per mount). An empty number field still submits 0,
@@ -34,6 +34,7 @@
 //   cleanup removes dead branches as more games migrate.
 import { AbstainControl, MchezoWaiting, NumericGuess, PhoneScreen } from "../../ui/mchezo/index.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
+import { formatNumeric } from "../../../../../src/shared/numericInput.js";
 
 export interface MchezoClosestDeps {
   game: PlayerGame;
@@ -66,7 +67,7 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
         <p className="mz-kicker">{title}</p>
         <div className="mz-card">
           <p><b>{st.prompt}</b>{st.unit ? ` (${st.unit})` : ""}</p>
-          <p>{st.myAbstained ? "Abstained on this question." : `Your guess: ${st.myGuess}`}</p>
+          <p>{st.myAbstained ? "Abstained on this question." : `Your guess: ${formatNumeric(st.myGuess ?? 0)}`}</p>
         </div>
         {abstainedNow && <div style={{ padding: "0 16px 16px" }}><AbstainControl abstained={true} onAbstain={() => {}} /></div>}
         <MchezoWaiting label={abstainedNow ? "You sat this one out" : "Your guess is in"} players={players} playerId={playerId} publicGame={publicGame} footNote="When everyone is done, results appear automatically." />
@@ -82,13 +83,12 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
       <div className="mz-card">
         <p><b>{st.prompt}</b>{st.unit ? ` (${st.unit})` : ""}</p>
         <NumericGuess
-          min={0}
-          max={1000}
+          game="closest-wins"
           initial={50}
           dialAriaLabel="Guess dial"
-          numberPlaceholder="Your guess"
+          fieldLabel="Your guess"
           submitLabel="Submit guess"
-          hint="Turn the dial, or type a number — both work."
+          hint="Type your number (decimals are fine), or turn the dial."
           onSubmit={(v) => intent(game.id, "closest-guess", { value: v })}
         />
       </div>

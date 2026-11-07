@@ -1,62 +1,101 @@
-// Numeric-guess control (Milestone J.3 primitive, unified in Work
-// Package B) — a dial plus a number field that share ONE value, with
-// ONE primary Submit button labelled with that value. The two-button
-// version held two independent values (the dial and the field), so
-// "Submit guess" and "Submit dial guess {v}" sent different numbers
-// and the player could not tell at a glance which value each button
-// sent. Unifying the state removes the ambiguity: the dial sets the
-// value, the field edits it, and the displayed value is always the
-// value that will be submitted. The old "empty field submits 0"
-// quirk is gone with the unification — the value is never invisible
-// (the button, the dial readout, and the field after blur all show
-// it). The field's text is a draft while typing; on blur it resets
-// to the value. Out-of-range input is clamped visibly (the field
-// snaps to the clamped value), so no value is silently changed.
-// Shared by Closest Wins today (dial 0–1000) and Guess the Year
-// next (timeline 1896–2025): the two games have the same input
-// shape, so one component serves both instead of a copied branch
-// per game. Games that answer differently (text, tiles, choices,
-// performance) do not use this component and are never forced into it.
+// Numeric-guess control: a dial plus a typed field that share ONE value,
+// with ONE Submit button labelled with exactly the value it will send.
+//
+// E1 (Content Quality 2.0) rebuilt the input so every correct answer can
+// be entered:
+// - The range is the game's fixed, game-wide range (src/shared/
+//   numericInput.ts), never derived from the question's answer.
+// - Typing never clamps or rounds. An out-of-range or over-precise entry
+//   shows a plain message and disables Submit until it is fixed, so no
+//   value is ever silently changed (the old field snapped 5,570 to 1,000).
+// - The field is type="text" with inputMode "decimal"/"numeric": phones
+//   show a number pad with a decimal key, and "5 570", "5,570", "42.195"
+//   and "42,195"-style entries are read by parseNumericEntry. The Submit
+//   label shows the value as read, so a misreading is visible.
+// - Closest Wins' dial is logarithmic (0 … a trillion): every order of
+//   magnitude gets the same share of the track. Guess the Year's dial is
+//   linear, with ±1 / ±10 nudge buttons for exact years on a phone.
 import { useState } from "react";
 import { Keycap } from "./primitives.js";
+import { formatNumeric, NUMERIC_INPUT, parseNumericEntry, type NumericGameId } from "../../../../../../src/shared/numericInput.js";
 
 export interface NumericGuessProps {
-  min: number;
-  max: number;
+  game: NumericGameId;
   initial: number;
   dialAriaLabel: string;
-  numberPlaceholder: string;
+  fieldLabel: string;
   submitLabel: string;
   hint: string;
   onSubmit: (value: number) => void;
 }
 
+const STEPS = 1000;
+
+function sig2(n: number): number {
+  if (n < 10) return Math.round(n);
+  const p = 10 ** (Math.floor(Math.log10(n)) - 1);
+  return Math.round(n / p) * p;
+}
+
 export function NumericGuess(props: NumericGuessProps) {
-  const [value, setValue] = useState(props.initial);
+  const spec = NUMERIC_INPUT[props.game];
+  const year = props.game === "guess-the-year";
+  const show = (v: number) => formatNumeric(v, { year });
+  const logMax = Math.log10(spec.max + 1);
+  const toDial = (v: number) => Math.round(year ? ((v - spec.min) / (spec.max - spec.min)) * STEPS : (Math.log10(v + 1) / logMax) * STEPS);
+  const fromDial = (p: number) => (year ? Math.round(spec.min + (p / STEPS) * (spec.max - spec.min)) : sig2(10 ** ((p / STEPS) * logMax) - 1));
+
   const [text, setText] = useState(String(props.initial));
-  const clamp = (n: number) => Math.min(props.max, Math.max(props.min, n));
-  const setFromDial = (v: number) => { setValue(v); setText(String(v)); };
-  const onFieldChange = (t: string) => {
-    setText(t);
-    const n = Number(t);
-    if (t !== "" && Number.isFinite(n)) {
-      const c = clamp(Math.trunc(n));
-      setValue(c);
-      if (c !== n) setText(String(c));
-    }
-  };
+  const parsed = parseNumericEntry(props.game, text);
+  const value = parsed.ok ? parsed.value : undefined;
+  const set = (v: number) => setText(String(v));
+  const nudge = (d: number) => value !== undefined && set(value + d);
+  const canNudge = (d: number) => value !== undefined && value + d >= spec.min && value + d <= spec.max;
+
   return (
-    <div>
+    <div className="mz-num">
       <p className="mz-muted">{props.hint}</p>
-      <div>
-        <input type="range" min={props.min} max={props.max} value={value} aria-label={props.dialAriaLabel} data-testid="mz-num-dial" onChange={(e) => setFromDial(Number(e.target.value))} />
-        <b data-testid="mz-num-value">{value}</b>
+      <div className="mz-num__dial">
+        <input
+          type="range" min={0} max={STEPS} step={1}
+          value={value === undefined ? 0 : toDial(value)}
+          aria-label={props.dialAriaLabel}
+          aria-valuetext={value === undefined ? "No value" : show(value)}
+          data-testid="mz-num-dial"
+          onChange={(e) => set(fromDial(Number(e.target.value)))}
+        />
+        <b data-testid="mz-num-value">{value === undefined ? "–" : show(value)}</b>
       </div>
-      <div>
-        <input type="number" className="mz-input" value={text} data-testid="mz-num-input" onChange={(e) => onFieldChange(e.target.value)} onBlur={() => setText(String(value))} placeholder={props.numberPlaceholder} />
-      </div>
+      {year && (
+        <div className="mz-num__nudges" role="group" aria-label="Adjust the year">
+          {[-10, -1, 1, 10].map((d) => (
+            <button key={d} type="button" className="mz-chip-btn" data-testid={`mz-num-nudge-${d}`} disabled={!canNudge(d)} onClick={() => nudge(d)} aria-label={`${Math.abs(d)} ${Math.abs(d) === 1 ? "year" : "years"} ${d < 0 ? "earlier" : "later"}`}>
+              {d > 0 ? `+${d}` : `−${-d}`}
+            </button>
+          ))}
+        </div>
+      )}
+      <label className="mz-num__field">
+        <span className="mz-sr">{props.fieldLabel}</span>
+        <input
+          type="text"
+          inputMode={spec.decimals > 0 ? "decimal" : "numeric"}
+          enterKeyHint="done"
+          autoComplete="off"
+          className="mz-input"
+          value={text}
+          aria-invalid={!parsed.ok}
+          aria-describedby="mz-num-error"
+          data-testid="mz-num-input"
+          onChange={(e) => setText(e.target.value)}
+          placeholder={props.fieldLabel}
+        />
+      </label>
+      <p id="mz-num-error" className="mz-num__error" role="status" aria-live="polite" data-testid="mz-num-error">{parsed.ok ? "" : parsed.message}</p>
       <div style={{ display: "grid", gap: 8 }}>
-        <Keycap block data-testid="mz-num-submit" onClick={() => props.onSubmit(value)}>{props.submitLabel} {value}</Keycap>
+        <Keycap block data-testid="mz-num-submit" disabled={value === undefined} onClick={() => value !== undefined && props.onSubmit(value)}>
+          {props.submitLabel}{value === undefined ? "" : ` ${show(value)}`}
+        </Keycap>
       </div>
     </div>
   );

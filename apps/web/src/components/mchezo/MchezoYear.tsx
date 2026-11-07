@@ -21,12 +21,10 @@
 //   has no current-event pointer, guesses are per event id in
 //   myGuesses, and nothing forces the player to answer in order.
 // - Inputs come from the shared NumericGuess primitive (unified in
-//   Work Package B: one value, one Submit). The range is 1896–2025,
-//   not the old slider's 1900–2025: one event's answer is 1896 (the
-//   first modern Olympics), which the old dial alone could never
-//   reach (best 60 on that event). The engine accepts any integer,
-//   so the range is a UI correction, not a rule change — the
-//   submitted values are the same ones the field already allowed.
+//   Work Package B: one value, one Submit). E1 (Content Quality 2.0)
+//   replaced the 1896–2025 clamp with the fixed game-wide range
+//   1000–2100 (src/shared/numericInput.ts), never derived from the
+//   answer; typing never clamps, and ±1/±10 buttons fine-tune the year.
 //   The control is keyed by event id, so each event starts at 2000
 //   (the old slider's initial) instead of carrying the previous
 //   event's value.
@@ -126,13 +124,12 @@ export function MchezoYear(deps: MchezoYearDeps) {
         ) : (
           <NumericGuess
             key={current.id}
-            min={1896}
-            max={2025}
+            game="guess-the-year"
             initial={2000}
             dialAriaLabel="Year timeline"
-            numberPlaceholder="Year"
+            fieldLabel="Year"
             submitLabel="Submit year"
-            hint="Drag the timeline, or type a year — both work."
+            hint="Type the year, or drag the timeline and fine-tune with the buttons."
             onSubmit={(v) => intent(game.id, "year-guess", { eventId: current.id, value: v })}
           />
         )}

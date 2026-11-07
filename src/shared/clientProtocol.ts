@@ -9,10 +9,19 @@
  *
  * 3 = Sprint 3: Math prompts are revealed per question (`math-open`),
  *     phased actions carry `phaseKey`, countdowns use `serverNow`.
+ * 4 = E1 (Content Quality 2.0): numeric guesses use the fixed game-wide
+ *     ranges in src/shared/numericInput.ts (decimals for Closest Wins).
+ *     Older tabs clamp Closest at 1000 and the Year at 1896–2025, so the
+ *     server refuses their numeric guesses (CLIENT_OUTDATED) and they are
+ *     told to refresh.
  * A request with no version comes from a tab loaded before Sprint 3.
  */
-export const CLIENT_PROTOCOL = 3;
-export const MIN_CLIENT_PROTOCOL = 3;
+export const CLIENT_PROTOCOL = 4;
+export const MIN_CLIENT_PROTOCOL = 4;
+/** Math per-question prompts (`math-open`) arrived in protocol 3. */
+export const MATH_OPEN_PROTOCOL = 3;
+/** The first protocol whose numeric input matches src/shared/numericInput.ts. */
+export const NUMERIC_INPUT_PROTOCOL = 4;
 export const PROTOCOL_HEADER = "x-mchezo-protocol";
 export const PROTOCOL_PARAM = "protocol";
 

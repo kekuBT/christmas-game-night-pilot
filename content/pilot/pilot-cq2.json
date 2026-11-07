@@ -781,8 +781,7 @@
      "distractors": 4,
      "social": 4
     },
-    "scoring": "Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change.",
-    "blockedBy": "Closest Wins number input only accepts 0–1000 (MchezoClosest.tsx). Needs the per-item input range (engine change E1) before use."
+    "scoring": "Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change."
    }
   },
   {
@@ -1173,8 +1172,7 @@
      "distractors": 4,
      "social": 5
     },
-    "scoring": "Guess the Year scoring unchanged: max(0, 100 − 10 × |guess − year|).",
-    "blockedBy": "Guess the Year input only accepts 1896–2025 (MchezoYear.tsx). Needs the per-item input range (engine change E1)."
+    "scoring": "Guess the Year scoring unchanged: max(0, 100 − 10 × |guess − year|)."
    }
   },
   {

@@ -22,11 +22,13 @@ describe("content quality 2.0 pilot", () => {
       expect((e.item["review"] as { status: string }).status).toBe("provisional");
     }
   });
-  it("flags numeric answers the current client cannot accept", () => {
+  it("flags numeric answers the game's input cannot accept (E1 ranges)", () => {
     expect(enterable("closest-wins", 828)).toBe(true);
-    expect(enterable("closest-wins", 5570)).toBe(false);
-    expect(enterable("closest-wins", 42.195)).toBe(false);
-    expect(enterable("guess-the-year", 1889)).toBe(false);
+    expect(enterable("closest-wins", 5570)).toBe(true);
+    expect(enterable("closest-wins", 42.195)).toBe(true);
+    expect(enterable("closest-wins", 2e12)).toBe(false);
+    expect(enterable("guess-the-year", 1889)).toBe(true);
+    expect(enterable("guess-the-year", 999)).toBe(false);
   });
 });
 
