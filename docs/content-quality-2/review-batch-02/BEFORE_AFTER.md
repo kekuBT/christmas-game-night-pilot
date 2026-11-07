@@ -21,7 +21,7 @@ Every item remains `provisional`. Nothing here is an approval.
 |---|---|---|
 | source | {"kind":"reference","ref":"Plant physiology: carbon fixation in photosynthesis; van Helmont's willow experiment (1640s)"} | {"kind":"reference","ref":"Plant physiology textbook treatment of photosynthetic carbon fixation and plant dry-mass composition (e.g. Taiz & Zeiger, Plant Physiology); van Helmont's willow experiment (1640s)"} |
 | explanation | The air: carbon dioxide, turned into sugars and wood by photosynthesis. In the 1640s van Helmont grew a willow for five years and the soil barely lost any weight. | The air. Wood is mostly cellulose and lignin; their carbon and most of their oxygen come from CO2 taken in by the leaves. Water supplies the hydrogen, and soil minerals are only a few per cent. |
-| editorial.reveal | From thin air — literally. A tree is mostly solidified carbon dioxide. | Mostly from thin air: a tree's dry mass is mainly carbon and oxygen captured from CO2. Van Helmont's 1640s willow gained far more weight than its soil lost; he wrongly credited the water. |
+| editorial.reveal | From thin air — literally. A tree is mostly solidified carbon dioxide. | Mostly thin air: a tree is built mainly from carbon and oxygen pulled out of CO2. |
 | editorial.verification | Check against a plant physiology textbook (dry mass is mostly carbon, hydrogen and oxygen fixed from CO2 and water; carbon comes from the air). Check van Helmont's figures before adding them. | Check against a plant physiology text: dry mass is mostly C, O and H; C and the O in carbohydrates come from CO2, H from water; minerals (ash) are a few per cent. Confirm the van Helmont summary (no figures are quoted). |
 
 ### `cls-cq2-01` (closest-wins)
@@ -36,12 +36,13 @@ Every item remains `provisional`. Nothing here is an approval.
 
 | Field | Before | After |
 |---|---|---|
-| source | {"kind":"computed","ref":"Great-circle (haversine) distance between central London (51.5074, -0.1278) and New York City (40.7128, -74.0060), Earth mean radius 6371 km"} | {"kind":"computed","ref":"Geodesic (Vincenty, WGS 84) distance between airport reference points LHR 51.4700 N 0.4543 W and JFK 40.6413 N 73.7781 W = 5,554.9 km (spherical haversine gives 5,540 km)"} |
-| prompt | How far is it in a straight line from London to New York, in kilometres? | What is the great-circle (shortest flight path) distance from London Heathrow to New York JFK airport, in km? |
+| source | {"kind":"computed","ref":"Great-circle (haversine) distance between central London (51.5074, -0.1278) and New York City (40.7128, -74.0060), Earth mean radius 6371 km"} | {"kind":"computed","ref":"Scoring convention: the answer is the shortest surface distance on the WGS 84 ellipsoid (Vincenty) between airport reference points LHR 51.4700 N 0.4543 W and JFK 40.6413 N 73.7781 W = 5,554.9 km, rounded to 5,555. A sphere (R 6,371 km) gives 5,540.0 km."} |
+| prompt | How far is it in a straight line from London to New York, in kilometres? | How far is it from London Heathrow to New York JFK by the shortest route over the Earth's surface, in km? |
 | answer | 5570 | 5555 |
-| explanation | About 5,570 km as the crow flies (city centre to city centre). | About 5,555 km between the two airports on the standard WGS 84 Earth model. Real flights are usually longer because of winds and air routes. |
-| editorial.reveal | About 5,570 km. | About 5,555 km airport to airport. |
-| editorial.verification | Computed with the haversine formula (5,570.2 km). Editors should agree the 'city centre' convention. | Computed: Vincenty geodesic on WGS 84 = 5,554.9 km. Convention fixed: airport reference points, ellipsoidal Earth. A human should confirm against a published great-circle calculator (e.g. Great Circle Mapper). |
+| explanation | About 5,570 km as the crow flies (city centre to city centre). | About 5,555 km, measured on the standard WGS 84 model of the Earth's shape. A perfect-sphere calculation gives about 5,540 km. Real flights go further, following winds and air routes. |
+| editorial.reveal | About 5,570 km. | About 5,555 km over the Earth's surface. Flights cover more. |
+| editorial.verification | Computed with the haversine formula (5,570.2 km). Editors should agree the 'city centre' convention. | Computed and recomputed 2026-11-07: WGS 84 geodesic 5,554.9 km; sphere 5,540.0 km. The prompt no longer says 'great-circle' (a sphere term). A human should confirm with a published WGS 84 geodesic calculator, such as Great Circle Mapper. |
+| editorial.scoring | Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change. | Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change. The answer is the WGS 84 value, 5,555; a guess of 5,540 (the sphere value) is simply 15 km away, like any other guess. |
 
 ### `cls-cq2-06` (closest-wins)
 
@@ -71,6 +72,7 @@ Every item remains `provisional`. Nothing here is an approval.
 | prompt | Counting its overseas territories, which country uses the most time zones? | Counting overseas territories, which country spans the most standard time zones? |
 | explanation | France: 12 (13 counting its Antarctic claim), thanks to territories from the Pacific to the Indian Ocean. Russia has 11. | France: 12 standard offsets across its overseas territories (13 with its Antarctic claim). Russia and the US have 11 each; the US count includes uninhabited Pacific islands. |
 | ambiguity | Depends on counting overseas territories, which the prompt states. The US also has 11 counting territories. | Counts standard time (not summer time) and includes overseas territories, as the prompt says. Russia's 11 are all on its own territory. |
+| editorial.reveal | France! | France, thanks to overseas territories scattered across the world's oceans. |
 | editorial.verification | Check current counts for all four countries against a time-zone reference (e.g. the IANA database, or a summary that cites it). | AI web check 2026-11-07 (not a human fact-check): timeanddate.com and Guinness World Records agree: France 12 (13 with Adélie Land), Russia 11, US 11 with territories. A human should confirm all four counts, including the UK's. |
 
 ### `spr-cq2-01` (category-sprint)
@@ -115,7 +117,7 @@ Every item remains `provisional`. Nothing here is an approval.
 
 - `trv-cq2-14` (trivia): 'Let them eat cake' (in French, really 'brioche') was first written down by which author, about an unnamed princess? → **Jean-Jacques Rousseau** (replaces who-cq2-02)
 - `spr-cq2-05` (category-sprint): US states → **50 answers**
-- `trv-cq2-21` (trivia): Minecraft's Creeper was a happy accident. What was Notch trying to make when he mixed up the model's length and height? → **A pig**
+- `trv-cq2-21` (trivia): Minecraft's Creeper was a happy accident. What was the game's creator trying to make when he mixed up the model's height and length? → **A pig**
 - `trv-cq2-22` (trivia): The first video ever uploaded to YouTube (2005) shows co-founder Jawed Karim at a zoo. What does he talk about? → **Elephants' long trunks**
 - `trv-cq2-23` (trivia): In which Studio Ghibli film do a girl's parents turn into pigs after eating food meant for spirits? → **Spirited Away**
 - `cls-cq2-21` (closest-wins): In 2019, 'Old Town Road' by Lil Nas X set a record for consecutive weeks at No. 1 on the US Billboard Hot 100. How many weeks? → **19**

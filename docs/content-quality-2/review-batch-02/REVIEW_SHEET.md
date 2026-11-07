@@ -34,7 +34,7 @@ The full standard is in `docs/content-quality-2/EDITORIAL_STANDARD.md`.
 
 ## 1. Trivia · `trv-cq2-21` · labelled Medium
 
-**Prompt:** Minecraft's Creeper was a happy accident. What was Notch trying to make when he mixed up the model's length and height?
+**Prompt:** Minecraft's Creeper was a happy accident. What was the game's creator trying to make when he mixed up the model's height and length?
 
 - Options: A pig · A zombie · A tree · A sheep
 - Answer: **A pig**
@@ -59,7 +59,7 @@ Notes:
 - Options: France · Russia · United States · United Kingdom
 - Answer: **France**
 - Explanation shown to players: France: 12 standard offsets across its overseas territories (13 with its Antarctic claim). Russia and the US have 11 each; the US count includes uninhabited Pacific islands.
-- Reveal moment: France!
+- Reveal moment: France, thanks to overseas territories scattered across the world's oceans.
 - Tone: classic, weird · Playlists: Mixed Party Night, Brainy & Challenging, Weird but True, World Knowledge · Mechanic: myth-buster
 - Known ambiguity: Counts standard time (not summer time) and includes overseas territories, as the prompt says. Russia's 11 are all on its own territory.
 - Source basis (as written by the author, **not yet checked by a person**): timeanddate.com 'Which country has the most time zones?'; Guinness World Records 'Country with the most time zones' (France 12, 13 with Adélie Land)
@@ -118,7 +118,7 @@ Notes:
 
 - Answer: **2006**
 - Explanation shown to players: November 2006 in North America, December 2006 in Japan and Europe. Wii Sports bowling turned living rooms (and grandparents) into gamers.
-- Reveal moment: 2006.
+- Reveal moment: 2006: the year Wii Sports bowling took over living rooms.
 - Tone: nostalgia, modern · Playlists: Mixed Party Night, 2000s Nostalgia, Modern Culture, Gaming
 - Source basis (as written by the author, **not yet checked by a person**): Nintendo Wii launch: 19 Nov 2006 (North America), 2 Dec 2006 (Japan), 8 Dec 2006 (Europe)
 - **Fact check to do:** AI web check 2026-11-07 (not a human fact-check): Mario Wiki and Wikipedia's Wii launch article agree on 19 Nov 2006 (NA) and 2 Dec 2006 (JP). A human should confirm the Europe date against Nintendo.
@@ -192,14 +192,14 @@ Notes:
 
 ## 9. Closest Wins · `cls-cq2-05` · labelled Hard
 
-**Prompt:** What is the great-circle (shortest flight path) distance from London Heathrow to New York JFK airport, in km?
+**Prompt:** How far is it from London Heathrow to New York JFK by the shortest route over the Earth's surface, in km?
 
 - Answer: **5555 km**
-- Explanation shown to players: About 5,555 km between the two airports on the standard WGS 84 Earth model. Real flights are usually longer because of winds and air routes.
-- Reveal moment: About 5,555 km airport to airport.
+- Explanation shown to players: About 5,555 km, measured on the standard WGS 84 model of the Earth's shape. A perfect-sphere calculation gives about 5,540 km. Real flights go further, following winds and air routes.
+- Reveal moment: About 5,555 km over the Earth's surface. Flights cover more.
 - Tone: classic · Playlists: Mixed Party Night, Brainy & Challenging
-- Source basis (as written by the author, **not yet checked by a person**): Geodesic (Vincenty, WGS 84) distance between airport reference points LHR 51.4700 N 0.4543 W and JFK 40.6413 N 73.7781 W = 5,554.9 km (spherical haversine gives 5,540 km)
-- **Fact check to do:** Computed: Vincenty geodesic on WGS 84 = 5,554.9 km. Convention fixed: airport reference points, ellipsoidal Earth. A human should confirm against a published great-circle calculator (e.g. Great Circle Mapper).
+- Source basis (as written by the author, **not yet checked by a person**): Scoring convention: the answer is the shortest surface distance on the WGS 84 ellipsoid (Vincenty) between airport reference points LHR 51.4700 N 0.4543 W and JFK 40.6413 N 73.7781 W = 5,554.9 km, rounded to 5,555. A sphere (R 6,371 km) gives 5,540.0 km.
+- **Fact check to do:** Computed and recomputed 2026-11-07: WGS 84 geodesic 5,554.9 km; sphere 5,540.0 km. The prompt no longer says 'great-circle' (a sphere term). A human should confirm with a published WGS 84 geodesic calculator, such as Great Circle Mapper.
 
 | G1 | G2 | G3 | G4 | G5 | G6 | G7 | R1 | R2 | R3 | R4 | R5 | Decision | Your difficulty |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -217,7 +217,7 @@ Notes:
 - Answer: **Elephants' long trunks**
 - Explanation shown to players: 'Me at the zoo': 19 seconds at San Diego Zoo, where Karim notes the elephants have 'really, really, really long trunks'. That's the whole video.
 - Reveal moment: Elephants. Internet history began with 19 seconds of trunk appreciation.
-- Tone: modern, nostalgia, weird · Playlists: Mixed Party Night, Modern Culture, 2000s Nostalgia, Weird but True, Internet & Memes · Mechanic: recall
+- Tone: modern, nostalgia, weird · Playlists: Mixed Party Night, Modern Culture, 2000s Nostalgia, Weird but True, Internet & Memes · Mechanic: origin-story
 - Source basis (as written by the author, **not yet checked by a person**): 'Me at the zoo', uploaded 23 April 2005 by Jawed Karim (Wikipedia; NBC News 20th-anniversary report)
 - **Fact check to do:** AI web check 2026-11-07 (not a human fact-check): Wikipedia and NBC confirm the date, uploader, San Diego Zoo and elephants; length is reported as 18 or 19 seconds. A human should watch the video to confirm the quoted line.
 
@@ -370,7 +370,7 @@ Notes:
 - Options: The air · The soil · Rainwater · Sunlight
 - Answer: **The air**
 - Explanation shown to players: The air. Wood is mostly cellulose and lignin; their carbon and most of their oxygen come from CO2 taken in by the leaves. Water supplies the hydrogen, and soil minerals are only a few per cent.
-- Reveal moment: Mostly from thin air: a tree's dry mass is mainly carbon and oxygen captured from CO2. Van Helmont's 1640s willow gained far more weight than its soil lost; he wrongly credited the water.
+- Reveal moment: Mostly thin air: a tree is built mainly from carbon and oxygen pulled out of CO2.
 - Tone: classic · Playlists: Mixed Party Night, Brainy & Challenging · Mechanic: myth-buster
 - Source basis (as written by the author, **not yet checked by a person**): Plant physiology textbook treatment of photosynthetic carbon fixation and plant dry-mass composition (e.g. Taiz & Zeiger, Plant Physiology); van Helmont's willow experiment (1640s)
 - **Fact check to do:** Check against a plant physiology text: dry mass is mostly C, O and H; C and the O in carbohydrates come from CO2, H from water; minerals (ash) are a few per cent. Confirm the van Helmont summary (no figures are quoted).
@@ -389,7 +389,7 @@ Notes:
 
 - Answer: **2014**
 - Explanation shown to players: Summer 2014. Millions filmed themselves under ice water; ALS charities raised more than $100 million in a few weeks.
-- Reveal moment: 2014.
+- Reveal moment: 2014: the summer feeds filled with buckets of ice water.
 - Tone: nostalgia, modern · Playlists: Mixed Party Night, 2000s Nostalgia, Modern Culture, Internet & Memes
 - Source basis (as written by the author, **not yet checked by a person**): Ice Bucket Challenge, viral July–August 2014 (Wikipedia; Nature, 2017, 'Was it worth it?')
 - **Fact check to do:** AI web check 2026-11-07 (not a human fact-check): Wikipedia and a Nature feature date it to July–August 2014; reported totals vary ($100M–$220M) so the context says 'more than $100 million'. A human should confirm against the ALS Association.

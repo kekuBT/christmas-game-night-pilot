@@ -1,0 +1,81 @@
+{
+  "about": "Semantic overlap review of the four Connections boards Audit Batch A changed (owner direction 2026-11-07: keep the uniqueness solver, and also review overlaps its declared relationships may not capture). Every tile is listed. 'alsoFits' names any OTHER group on the same board a reasonable player might put the tile in, including weak associations; 'note' says why. tests/batch-a-compat.test.ts re-runs the solver with every listed fit plus the declared overlaps in audit-verdicts.json and requires exactly one solution. Reviewer: Claude (AI editorial pass), not a human review.",
+  "boards": {
+    "con-legacy-1": {
+      "Gingerbread": { "alsoFits": ["Christmas decorations"], "note": "Gingerbread ornaments hang on trees (declared)." },
+      "Candy cane": { "alsoFits": ["Christmas decorations"], "note": "Hung on trees (declared)." },
+      "Mince pie": { "alsoFits": [], "note": "" },
+      "Roast turkey": { "alsoFits": [], "note": "" },
+      "Snowfall": { "alsoFits": [], "note": "" },
+      "Frost": { "alsoFits": [], "note": "'Jack Frost' is a character; there is no characters group." },
+      "Blizzard": { "alsoFits": ["Christmas foods"], "note": "Weak: a branded ice-cream dessert. Not Christmas food, but listed to stress the board." },
+      "Sleet": { "alsoFits": [], "note": "The A1 replacement: a weather condition with no other reading on this board." },
+      "Tinsel": { "alsoFits": [], "note": "" },
+      "Bauble": { "alsoFits": [], "note": "" },
+      "Wreath": { "alsoFits": [], "note": "" },
+      "Stocking": { "alsoFits": [], "note": "" },
+      "Dasher": { "alsoFits": [], "note": "Donner and Blitzen (German for thunder and lightning) would overlap with weather; they are deliberately not on the board." },
+      "Dancer": { "alsoFits": [], "note": "" },
+      "Prancer": { "alsoFits": [], "note": "" },
+      "Vixen": { "alsoFits": [], "note": "A female fox; no animals group." }
+    },
+    "con-s4-05": {
+      "Cow": { "alsoFits": [], "note": "" },
+      "Pig": { "alsoFits": [], "note": "" },
+      "Goat": { "alsoFits": [], "note": "" },
+      "Sheep": { "alsoFits": [], "note": "" },
+      "Robin": { "alsoFits": [], "note": "" },
+      "Wren": { "alsoFits": [], "note": "" },
+      "Sparrow": { "alsoFits": [], "note": "A2 replacement for Owl (not a typical garden bird)." },
+      "Blackbird": { "alsoFits": [], "note": "A2 replacement for Swan (not a garden bird)." },
+      "Canoe": { "alsoFits": [], "note": "" },
+      "Yacht": { "alsoFits": [], "note": "" },
+      "Ferry": { "alsoFits": [], "note": "" },
+      "Barge": { "alsoFits": [], "note": "" },
+      "Egg": { "alsoFits": [], "note": "Laid by farm birds, but an egg is not an animal or a bird." },
+      "Snail": { "alsoFits": [], "note": "A garden creature, but the group is garden BIRDS." },
+      "Turtle": { "alsoFits": ["Farm animals", "Garden birds"], "note": "An animal, not a farm one (declared); weak bird pull from 'turtle dove'." },
+      "Nut": { "alsoFits": [], "note": "" }
+    },
+    "con-s4-12": {
+      "Oak": { "alsoFits": [], "note": "" },
+      "Ash": { "alsoFits": [], "note": "" },
+      "Elm": { "alsoFits": [], "note": "" },
+      "Birch": { "alsoFits": [], "note": "" },
+      "Rose": { "alsoFits": ["Gems"], "note": "Weak: rose quartz." },
+      "Daisy": { "alsoFits": [], "note": "" },
+      "Tulip": { "alsoFits": ["Trees"], "note": "Weak: the tulip tree." },
+      "Lily": { "alsoFits": [], "note": "" },
+      "Ruby": { "alsoFits": [], "note": "" },
+      "Pearl": { "alsoFits": [], "note": "An organic gem (the A3 label 'Gems' covers it)." },
+      "Amber": { "alsoFits": ["Trees"], "note": "Weak: fossilised tree resin. An organic gem." },
+      "Opal": { "alsoFits": [], "note": "" },
+      "Straw": { "alsoFits": [], "note": "" },
+      "Blue": { "alsoFits": [], "note": "" },
+      "Rasp": { "alsoFits": [], "note": "" },
+      "Goose": { "alsoFits": [], "note": "" }
+    },
+    "con-s4-02": {
+      "Cherry": { "alsoFits": [], "note": "A shade of red, not green." },
+      "Plum": { "alsoFits": [], "note": "A shade of purple, not green." },
+      "Lemon": { "alsoFits": [], "note": "A shade of yellow, not green." },
+      "Lime": { "alsoFits": ["Shades of green"], "note": "Declared. Counting forces it to the fruits." },
+      "Snap": { "alsoFits": [], "note": "" },
+      "Bridge": { "alsoFits": [], "note": "" },
+      "Poker": { "alsoFits": [], "note": "" },
+      "Rummy": { "alsoFits": [], "note": "" },
+      "Basil": { "alsoFits": [], "note": "Judged NOT a shade of green: 'basil green' exists only as a paint or fashion name. If an editor disagrees, the board has two solutions (Basil and Sage could swap between herbs and greens), so the editor should confirm this call (tests/batch-a-compat.test.ts)." },
+      "Thyme": { "alsoFits": [], "note": "" },
+      "Parsley": { "alsoFits": [], "note": "" },
+      "Rosemary": { "alsoFits": [], "note": "" },
+      "Emerald": { "alsoFits": [], "note": "" },
+      "Jade": { "alsoFits": [], "note": "Also a houseplant, but not a herb." },
+      "Moss": { "alsoFits": [], "note": "A plant, not a herb." },
+      "Sage": { "alsoFits": ["Herbs"], "note": "Declared. Counting forces it to the greens, because the herbs are full without it." }
+    }
+  },
+  "acrossBoards": {
+    "con-s4-12": "Seven tiles are also girls' names (Ruby, Pearl, Amber, Opal, Rose, Daisy, Lily). There is no names group, and seven is more than four, so it is misdirection, not a second solution.",
+    "con-s4-02": "Basil and Rosemary are also names; no names group."
+  }
+}

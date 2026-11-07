@@ -90,6 +90,9 @@ describe("content quality 2.0 revision (owner feedback 2026-11-07)", () => {
     expect(String(byId.get("trv-cq2-14")!.item["prompt"])).toMatch(/first written down/);
     expect(byId.get("cls-cq2-05")!.item["answer"]).toBe(5555);
     expect(String(byId.get("cls-cq2-05")!.item["prompt"])).toMatch(/Heathrow.*JFK/);
+    // Second owner review: no sphere term for an ellipsoid answer; the convention matches 5,555.
+    expect(JSON.stringify(byId.get("cls-cq2-05")!.item)).not.toMatch(/great[- ]circle/i);
+    expect(String((byId.get("cls-cq2-05")!.item["source"] as { ref: string }).ref)).toMatch(/WGS 84.*5,554\.9 km.*5,555.*5,540/);
     expect(String(byId.get("geo-cq2-04")!.item["prompt"])).toMatch(/standard time zones/);
     expect(String(byId.get("trv-cq2-10")!.item["explanation"])).toMatch(/CO2/);
   });

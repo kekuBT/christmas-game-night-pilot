@@ -521,7 +521,7 @@
    },
    "editorial": {
     "expectedCorrect": "15–35%",
-    "reveal": "Mostly from thin air: a tree's dry mass is mainly carbon and oxygen captured from CO2. Van Helmont's 1640s willow gained far more weight than its soil lost; he wrongly credited the water.",
+    "reveal": "Mostly thin air: a tree is built mainly from carbon and oxygen pulled out of CO2.",
     "verification": "Check against a plant physiology text: dry mass is mostly C, O and H; C and the O in carbohydrates come from CO2, H from water; minerals (ash) are a few per cent. Confirm the van Helmont summary (no figures are quoted).",
     "whyInclude": "A genuinely mind-changing fact. 'Dry weight' removes the water ambiguity, and 'Sunlight' is a strong, fair distractor because it supplies energy, not material.",
     "rubric": {
@@ -903,20 +903,20 @@
     },
     "source": {
      "kind": "computed",
-     "ref": "Geodesic (Vincenty, WGS 84) distance between airport reference points LHR 51.4700 N 0.4543 W and JFK 40.6413 N 73.7781 W = 5,554.9 km (spherical haversine gives 5,540 km)"
+     "ref": "Scoring convention: the answer is the shortest surface distance on the WGS 84 ellipsoid (Vincenty) between airport reference points LHR 51.4700 N 0.4543 W and JFK 40.6413 N 73.7781 W = 5,554.9 km, rounded to 5,555. A sphere (R 6,371 km) gives 5,540.0 km."
     },
     "tags": [
      "cq2-pilot"
     ],
-    "prompt": "What is the great-circle (shortest flight path) distance from London Heathrow to New York JFK airport, in km?",
+    "prompt": "How far is it from London Heathrow to New York JFK by the shortest route over the Earth's surface, in km?",
     "unit": "km",
     "answer": 5555,
-    "explanation": "About 5,555 km between the two airports on the standard WGS 84 Earth model. Real flights are usually longer because of winds and air routes."
+    "explanation": "About 5,555 km, measured on the standard WGS 84 model of the Earth's shape. A perfect-sphere calculation gives about 5,540 km. Real flights go further, following winds and air routes."
    },
    "editorial": {
     "expectedCorrect": "estimate",
-    "reveal": "About 5,555 km airport to airport.",
-    "verification": "Computed: Vincenty geodesic on WGS 84 = 5,554.9 km. Convention fixed: airport reference points, ellipsoidal Earth. A human should confirm against a published great-circle calculator (e.g. Great Circle Mapper).",
+    "reveal": "About 5,555 km over the Earth's surface. Flights cover more.",
+    "verification": "Computed and recomputed 2026-11-07: WGS 84 geodesic 5,554.9 km; sphere 5,540.0 km. The prompt no longer says 'great-circle' (a sphere term). A human should confirm with a published WGS 84 geodesic calculator, such as Great Circle Mapper.",
     "whyInclude": "A classic estimation question with a wide, fun spread of guesses.",
     "rubric": {
      "entertainment": 4,
@@ -925,7 +925,7 @@
      "distractors": 4,
      "social": 4
     },
-    "scoring": "Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change.",
+    "scoring": "Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change. The answer is the WGS 84 value, 5,555; a guess of 5,540 (the sphere value) is simply 15 km away, like any other guess.",
     "tone": [
      "classic"
     ],
@@ -1602,7 +1602,7 @@
    },
    "editorial": {
     "expectedCorrect": "10–25%",
-    "reveal": "France!",
+    "reveal": "France, thanks to overseas territories scattered across the world's oceans.",
     "verification": "AI web check 2026-11-07 (not a human fact-check): timeanddate.com and Guinness World Records agree: France 12 (13 with Adélie Land), Russia 11, US 11 with territories. A human should confirm all four counts, including the UK's.",
     "whyInclude": "Nearly everyone answers Russia, so the reveal is a big 'what?'. The qualifier makes the answer defensible.",
     "rubric": {
@@ -3371,7 +3371,7 @@
      "kind": "reference",
      "ref": "'Minecraft: The Story of Mojang' (2012 documentary); Wikipedia 'Creeper (Minecraft)'"
     },
-    "prompt": "Minecraft's Creeper was a happy accident. What was Notch trying to make when he mixed up the model's length and height?",
+    "prompt": "Minecraft's Creeper was a happy accident. What was the game's creator trying to make when he mixed up the model's height and length?",
     "options": [
      "A pig",
      "A zombie",
@@ -3459,7 +3459,7 @@
      "Weird but True",
      "Internet & Memes"
     ],
-    "mechanic": "recall"
+    "mechanic": "origin-story"
    }
   },
   {
@@ -3639,7 +3639,7 @@
    },
    "editorial": {
     "expectedCorrect": "40–60% within 2 years",
-    "reveal": "2006.",
+    "reveal": "2006: the year Wii Sports bowling took over living rooms.",
     "verification": "AI web check 2026-11-07 (not a human fact-check): Mario Wiki and Wikipedia's Wii launch article agree on 19 Nov 2006 (NA) and 2 Dec 2006 (JP). A human should confirm the Europe date against Nintendo.",
     "whyInclude": "2000s nostalgia most players have a personal memory of.",
     "rubric": {
@@ -3687,7 +3687,7 @@
    },
    "editorial": {
     "expectedCorrect": "40–60% within 2 years",
-    "reveal": "2014.",
+    "reveal": "2014: the summer feeds filled with buckets of ice water.",
     "verification": "AI web check 2026-11-07 (not a human fact-check): Wikipedia and a Nature feature date it to July–August 2014; reported totals vary ($100M–$220M) so the context says 'more than $100 million'. A human should confirm against the ALS Association.",
     "whyInclude": "A viral moment with a feel-good ending; most players remember their feed that summer.",
     "rubric": {

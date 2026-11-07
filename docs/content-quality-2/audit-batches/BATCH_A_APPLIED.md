@@ -51,3 +51,37 @@
 
 - **Official pools:** only A1 touches official play (one tile changes).
 - **Provisional (practice) pools:** 14 items are retired. `npm run content:check` and `content:audit` still pass, and official Closest Wins and Year selection succeed (tested).
+
+## Owner decision (2026-11-07, second review) and follow-up
+
+**Decision:**
+- A1–A18 are approved for continued development, and A1 (Icicle → Sleet) is accepted.
+- Subjective retirements and difficulty relabels (Batches B–D) stay unapplied until they are reviewed.
+- This approval is for development on a branch. It does not record a content approval or permit a merge.
+
+**History preserved.** `tests/batch-a-compat.test.ts` covers each case:
+
+| Case | What the test shows |
+|---|---|
+| New game | Gets the corrected board: Sleet, no Icicle. |
+| Game materialised before A1 (board stored with Icicle) | After save and restore, it accepts the Icicle group and keeps its own board. |
+| Pre-Sprint-4 game (no stored board) | Replays the original `CONNECTIONS_BOARD`, Icicle included. |
+| Finished game | Raw scores and Cup standings are identical after reloading with the edited library. |
+
+### Semantic overlap review
+
+The solver only checks the overlaps someone declared. So every tile of the four edited boards was reviewed against every other group on its board, weak associations included. The review is in [batch-a-semantic-review.json](batch-a-semantic-review.json). The test re-runs the solver with every reviewed and declared overlap, and each board still has exactly one solution.
+
+**Weak associations recorded:**
+- Blizzard (a branded ice-cream dessert);
+- Turtle (turtle dove);
+- Rose (rose quartz);
+- Tulip (tulip tree);
+- Amber (tree resin);
+- the seven tiles that are also girls' names on `con-s4-12`. There is no names group, and seven is more than four.
+
+**One editorial call to confirm:**
+- On `con-s4-02`, Basil was judged not a shade of green: "basil green" is only a paint or fashion name.
+- If an editor disagrees, Basil and Sage could swap between herbs and greens, and the board has **two** solutions. A test shows this.
+- The fix would be to replace Basil with a herb that has no colour sense, such as Dill.
+- Nothing was changed; this needs a human decision.
