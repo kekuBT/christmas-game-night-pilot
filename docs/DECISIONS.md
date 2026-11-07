@@ -249,3 +249,15 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
   - *Alternative:* wire it in now. Deferred: the library has no `mechanic` tags yet, so the step would do nothing, and it changes selection, which needs approval.
 - **D-CQ2-21 `scripts/clickthrough-api.mjs` is retired as a tombstone that always exits 2.** A test now requires every script to be either in the gate or explicitly classified as not a check.
   - *Alternative:* repair it. Rejected: its coverage is already in the gate and unit tests, and it never asserted anything beyond "every game finished".
+- **D-CQ2-22 Category Sprint source comparison is a reproducible machine report, not a source check.**
+  - `npm run content:sprint-sources` fetches each source the owner named, commits snapshots, and writes `SPRINT_SOURCE_CHECK.md`.
+  - `sourceCheck` stays a person's signature, and nothing writes it.
+  - Sources that block automated access (Britannica, pokemon.com) are documented as blockers, never worked around.
+  - *Alternative:* record a `sourceCheck` when the machine diff is clean. Rejected: the owner asked that no human approval be recorded on their behalf.
+- **D-CQ2-23 Reference members are the names shown to players.** Where a source's official form differs (M49 "Viet Nam", FIFA "Korea Republic"), a documented crosswalk (`sprint-sources/crosswalk.json`) or an item alias links the two, and the report shows every such link.
+  - *Alternative:* use the source's exact form as the canonical answer. Rejected: results would show answers like "iran islamic republic of".
+- **D-CQ2-24 New closed-set drafts are practice-only, provisional and tagged `official-candidate`.** This keeps them out of official selection, as a test checks. Promoting them is a review decision.
+- **D-CQ2-25 `con-s4-02`: Herbs replaced by Gemstones.** Herb names double as paint shades, so no single-word swap can make a herb group safe beside Shades of green. The id is kept, so stored games keep the old board.
+  - *Alternative:* a new id. Rejected: Batch A edits kept ids, and history is already protected by the board stored with each game.
+- **D-CQ2-26 E10 metadata is an optional schema field (`mechanic`, `negativeStem`) on quiz items.** It uses one shared vocabulary. Lint reads it; selection does not.
+  - *Alternative:* encode it in `tags`. Rejected: tags are free text and could not be validated.

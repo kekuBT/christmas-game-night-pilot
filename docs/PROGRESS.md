@@ -796,3 +796,38 @@ Gate verdict (one run, one revision): `node scripts/gate.mjs full` on `a95e211`,
 - Category Sprint official matching changes for new Cups; old Cups are unaffected.
 - A Cup can play only one official Sprint game until more closed sets exist.
 - Membership lists need a human source check before any approval.
+
+## E2 checkpoint follow-up (2026-11-07, branch `claude/cq2-e10-meta-sprint-sources`, from 999a3f1)
+
+**Milestone:** the owner's follow-up review of the E2 checkpoint (E10 partial approval, Sprint source checks, `con-s4-02`, a small draft batch). The `a95e211` checkpoint is kept intact. Report: `docs/content-quality-2/STATUS_2026-11-07_E2_FOLLOWUP.md`.
+
+**Done:**
+- **Sprint source comparison:** `scripts/content-quality/sprint-sources.ts`, `sprint-source-compare.ts`, `docs/content-quality-2/SPRINT_SOURCE_CHECK.md`, snapshots in `docs/content-quality-2/sprint-sources/`.
+  - Six lists match their sources; the Chinese zodiac is blocked (Britannica bot challenge).
+  - No `sourceCheck` recorded.
+- **Draft batch 1:** Asia (47), the 2026 World Cup (48) and NFL (32), all practice and provisional. File: `content/packs/category-sprint-closed-drafts.json`.
+- **`con-s4-02` redesign:** Herbs → Gemstones (`rev05_con_s4_02.py`).
+- **E10 metadata:** `mechanic` and `negativeStem` on 235 quiz items (`rev06_quiz_mechanics.py`), with `content:check` warnings `format-untagged` and `content-mix`. The selector is unchanged.
+- **Docs:** decisions D-CQ2-22..26.
+
+**Tests:**
+- `tests/sprint-sources.test.ts` (18), `tests/quiz-format.test.ts` (8), and `tests/batch-a-compat.test.ts` +2.
+- 788 unit tests passed (68 files).
+- typecheck, lint, `content:check`, `content:audit` and `content:pilot` all OK.
+
+**Failures found and fixed:**
+- The first negative-stem pass flagged words inside quotes; it now checks question stems only.
+- The semantic review file's layout was briefly reflowed by a generator; it was restored.
+
+**External blockers:**
+- www.britannica.com and www.pokemon.com refuse automated access.
+- olympics.com fails with an HTTP/2 protocol error.
+- The White House presidents list names no 46th president.
+- E1/E3 real-device verification is still outstanding.
+
+**Next:** stop for owner review. The owner's next priority is real-device testing of Mchezo.
+
+**Risks:**
+- Machine-matched lists still need a human source check.
+- Rooms of 9–10 players still get one official Sprint game.
+- Canonical answers display in normalised form.
