@@ -117,6 +117,17 @@ export const SprintItem = z.object({
   /** Answers that are NOT accepted, with the reason shown in results. */
   knownNotAccepted: z.record(sprintKey, text(200)).optional(),
   typoTolerance: z.boolean().optional(),
+  /**
+   * How this category scored under answer rules 1, i.e. in every Cup created
+   * before the owner's Congo ruling (2026-11-07; Cup field
+   * `categorySprint.answerRules`). A frozen copy used only for those Cups, so
+   * a Cup already under way is never re-ruled. Never edit it.
+   */
+  answerRules1: z.object({
+    answers: z.array(z.string().regex(/^[a-z][a-z ]*[a-z]$/)).min(10).max(400),
+    aliases: z.record(sprintKey, z.object({ to: sprintKey, reason: text(200) }).strict()).optional(),
+    knownNotAccepted: z.record(sprintKey, text(200)).optional(),
+  }).strict().optional(),
 }).strict();
 
 /** A closed set's membership as published by its authority (content/reference/sprint/*.json). */

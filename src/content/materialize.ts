@@ -55,7 +55,10 @@ export interface SprintRulesSnapshot {
   eligibility?: { sizePolicy: number; players: number };
 }
 
-export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { seed: number; playerIds: string[]; sprint?: SprintRulesSnapshot }): unknown {
+/** Closed-category answer rules; see CupRecord `categorySprint.answerRules`. */
+export type SprintAnswerRules = 1 | 2;
+
+export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { seed: number; playerIds: string[]; sprint?: SprintRulesSnapshot; sprintAnswerRules?: SprintAnswerRules }): unknown {
   const rng = seededRng(ctx.seed);
   switch (gameId) {
     case "trivia":
@@ -81,13 +84,16 @@ export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { s
     case "category-sprint": {
       const categories = items.map((li): SprintCategory => {
         const it = as<"category-sprint">(li);
+        // Cups created before answer rules 2 score with the item's frozen rules-1 copy, if it has one.
+        // Absent = current rules (2).
+        const rules = (ctx.sprintAnswerRules ?? 2) === 1 && it.answerRules1 ? it.answerRules1 : it;
         // A full copy: later pack edits (aliases, near-misses) never change this game.
         return {
           name: it.name,
-          answers: [...it.answers],
+          answers: [...rules.answers],
           ...(it.definition ? { definition: it.definition } : {}),
-          ...(it.aliases ? { aliases: structuredClone(it.aliases) } : {}),
-          ...(it.knownNotAccepted ? { knownNotAccepted: { ...it.knownNotAccepted } } : {}),
+          ...(rules.aliases ? { aliases: structuredClone(rules.aliases) } : {}),
+          ...(rules.knownNotAccepted ? { knownNotAccepted: { ...rules.knownNotAccepted } } : {}),
           ...(it.typoTolerance !== undefined ? { typoTolerance: it.typoTolerance } : {}),
         };
       });

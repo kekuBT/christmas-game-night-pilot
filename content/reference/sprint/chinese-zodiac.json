@@ -3,8 +3,8 @@
   "id": "chinese-zodiac",
   "title": "The 12 animals of the Chinese zodiac",
   "source": {
-    "authority": "Encyclopaedia Britannica (Chinese zodiac)",
-    "url": "https://www.britannica.com/topic/Chinese-zodiac",
+    "authority": "United Nations, 'The Chinese Zodiac: In Praise of the Jade Rabbit' (2023)",
+    "url": "https://www.un.org/sites/un2.un.org/files/2023/04/the_chinese_zodiac_introduction.pdf",
     "publishedCount": 12
   },
   "members": [
@@ -21,5 +21,5 @@
     "Dog",
     "Pig"
   ],
-  "provenance": "Transcribed by the author (Claude, 2026-11-07). NOT compared: www.britannica.com blocks automated requests with a bot challenge. A person must compare it by hand or name another credible source."
+  "provenance": "Transcribed by the author (Claude, 2026-11-07); machine-compared on 2026-11-07 with the UN publication the owner named (Britannica blocks automated access): all 12 names match (SPRINT_SOURCE_CHECK.md). No human source check yet."
 }

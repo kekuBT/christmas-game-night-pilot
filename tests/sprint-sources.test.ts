@@ -60,9 +60,16 @@ describe("committed source snapshots", () => {
   const items = new Map(sprintItems.map((i) => [i.membership?.reference, i]));
   const checked = refs.filter((r) => !snap(r.id).blocked);
 
-  it("every reference list has a snapshot; only the Chinese zodiac is blocked", () => {
+  it("every reference list has a snapshot, and none is blocked", () => {
     for (const r of refs) expect(() => snap(r.id), r.id).not.toThrow();
-    expect(refs.filter((r) => snap(r.id).blocked).map((r) => r.id)).toEqual(["chinese-zodiac"]);
+    expect(refs.filter((r) => snap(r.id).blocked).map((r) => r.id)).toEqual([]);
+  });
+
+  it("the zodiac is compared with the UN publication the owner named, not Britannica", () => {
+    const z = snap("chinese-zodiac");
+    expect(z.pages.map((p) => p.url)).toEqual(["https://www.un.org/sites/un2.un.org/files/2023/04/the_chinese_zodiac_introduction.pdf"]);
+    expect(z.published).toEqual(["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"]);
+    expect(refs.find((r) => r.id === "chinese-zodiac")!.source.url).toBe(z.pages[0]!.url);
   });
 
   it.each(checked.map((r) => [r.id, r] as const))("%s matches what its source published", (_id, r) => {
@@ -77,12 +84,12 @@ describe("committed source snapshots", () => {
     for (const i of sprintItems) expect(i.review.status === "approved", i.id).toBe(false);
   });
 
-  it("the Congo answers stay distinct and say which state they scored", () => {
+  it("the Congo answers stay distinct and say which state they scored (owner ruling: a bare Congo scores nothing)", () => {
     const africa = sprintItems.find((i) => i.id === "spr-cs-africa")!;
-    expect(matchSprintAnswer(africa, "Congo")).toMatchObject({ kind: "valid", canonical: "congo" });
+    expect(matchSprintAnswer(africa, "Congo")).toMatchObject({ kind: "near-miss" });
     expect(matchSprintAnswer(africa, "DRC")).toMatchObject({ kind: "valid", canonical: "democratic republic of the congo" });
     expect(matchSprintAnswer(africa, "Congo-Kinshasa")).toMatchObject({ kind: "valid", canonical: "democratic republic of the congo" });
-    expect(matchSprintAnswer(africa, "Congo-Brazzaville")).toMatchObject({ kind: "valid", canonical: "congo" });
+    expect(matchSprintAnswer(africa, "Congo-Brazzaville")).toMatchObject({ kind: "valid", canonical: "republic of the congo" });
   });
 });
 

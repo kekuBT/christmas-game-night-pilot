@@ -607,7 +607,7 @@ export class RoomEngine {
       const pick = selectContent({ lib: this.content, gameId: cg, count: need, mode, cupId: this._cup.cupId, usage: this.contentUsage, seq: this.contentSeq, today: new Date(startedAt).toISOString().slice(0, 10), ...(sprintSel ? { sprint: sprintSel } : {}) });
       if (!pick.ok) throw new ContentShortage(pick.message, pick.available, pick.needed, pick.reason === "no-suitable-category" ? "NO_SUITABLE_CATEGORY" : "CONTENT_EXHAUSTED");
       selected = {
-        extra: materialize(cg, pick.items, { seed, playerIds, ...(sprintRules ? { sprint: { matcherVersion: sprintRules.matcher, ...(sprintSel ? { eligibility: sprintSel } : {}) } } : {}) }),
+        extra: materialize(cg, pick.items, { seed, playerIds, sprintAnswerRules: this._cup.categorySprint?.answerRules ?? 1, ...(sprintRules ? { sprint: { matcherVersion: sprintRules.matcher, ...(sprintSel ? { eligibility: sprintSel } : {}) } } : {}) }),
         record: () => {
           recordUsage(this.contentUsage, pick.items, { gameInstanceId: id, day: this.championshipDay, mode, seq: this.contentSeq });
           this.contentSeq += 1;

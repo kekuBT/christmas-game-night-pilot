@@ -10,11 +10,11 @@ Match kinds: **exact** (same text); **spelling** (written differently, same cano
 |---|---|---|---|---|---|---|---|---|---|---|
 | `us-states` | 2026-11-07 | 50 | 50 | 50 | 0 | 0 | 0 | 0 | 0 | matches source |
 | `eu-member-states` | 2026-11-07 | 27 | 27 | 27 | 0 | 0 | 0 | 0 | 0 | matches source |
-| `un-members-africa` | 2026-11-07 | 54 | 54 | 53 | 0 | 1 | 0 | 0 | 0 | matches source |
+| `un-members-africa` | 2026-11-07 | 54 | 54 | 52 | 0 | 1 | 1 | 0 | 0 | matches source |
 | `chemical-elements` | 2026-11-07 | 118 | 118 | 0 | 118 | 0 | 0 | 0 | 0 | matches source |
 | `iau-planets-dwarf-planets` | 2026-11-07 | 13 | 13 | 13 | 0 | 0 | 0 | 0 | 0 | matches source |
 | `south-america-sovereign` | 2026-11-07 | 12 | 12 | 10 | 0 | 0 | 2 | 0 | 0 | matches source |
-| `chinese-zodiac` | **blocked** | | 12 | | | | | | | **not verified** |
+| `chinese-zodiac` | 2026-11-07 | 12 | 12 | 12 | 0 | 0 | 0 | 0 | 0 | matches source |
 | `un-members-asia` | 2026-11-07 | 47 | 47 | 40 | 0 | 4 | 3 | 0 | 0 | matches source |
 | `fifa-world-cup-2026-teams` | 2026-11-07 | 48 | 48 | 45 | 0 | 3 | 0 | 0 | 0 | matches source |
 | `nfl-teams` | 2026-11-07 | 32 | 32 | 32 | 0 | 0 | 0 | 0 | 0 | matches source |
@@ -70,13 +70,14 @@ Every name matches exactly.
 
 | Source writes | Our member | How it matches |
 |---|---|---|
+| Congo | Republic of the Congo | crosswalk: The UN's short name. Shown in full because a bare 'Congo' is ambiguous (owner ruling 2026-11-07) |
 | United Republic of Tanzania | Tanzania | alias (`united republic of tanzania`) |
 
-**Aliases (spr-cs-africa):** `republic of the congo` → `congo` (Full name of the state the UN lists as Congo); `congo brazzaville` → `congo` (Name by capital, used to tell the two Congos apart); `dr congo` → `democratic republic of the congo` (Standard short form); `drc` → `democratic republic of the congo` (Standard abbreviation); `democratic republic of congo` → `democratic republic of the congo` (Common form without 'the'); `congo kinshasa` → `democratic republic of the congo` (Name by capital, used to tell the two Congos apart); `ivory coast` → `cote d ivoire` (English translation of Côte d'Ivoire); `cote divoire` → `cote d ivoire` (Typed without the apostrophe); `cape verde` → `cabo verde` (English name used until 2013); `swaziland` → `eswatini` (Official name until 2018); `sao tome` → `sao tome and principe` (Common short form); `united republic of tanzania` → `tanzania` (Official long name)
+**Aliases (spr-cs-africa):** `congo brazzaville` → `republic of the congo` (Name by capital, used to tell the two Congos apart); `dr congo` → `democratic republic of the congo` (Standard short form); `drc` → `democratic republic of the congo` (Standard abbreviation); `democratic republic of congo` → `democratic republic of the congo` (Common form without 'the'); `congo kinshasa` → `democratic republic of the congo` (Name by capital, used to tell the two Congos apart); `ivory coast` → `cote d ivoire` (English translation of Côte d'Ivoire); `cote divoire` → `cote d ivoire` (Typed without the apostrophe); `cape verde` → `cabo verde` (English name used until 2013); `swaziland` → `eswatini` (Official name until 2018); `sao tome` → `sao tome and principe` (Common short form); `united republic of tanzania` → `tanzania` (Official long name); `republic of congo` → `republic of the congo` (Full name without 'the'); `congo republic` → `republic of the congo` (Common short form naming the Republic); `congo republic of` → `republic of the congo` (Index form, as in 'Congo, Republic of')
 
 **Questionable or ambiguous entries:**
 
-- **Congo.** The UN lists two members: 'Congo' (capital Brazzaville) and 'Democratic Republic of the Congo' (capital Kinshasa). The canonical answer `congo` is the UN's own short name for the Republic of the Congo, so a bare 'Congo' scores that state. A player who typed 'Congo' meaning the DRC is credited with the other state; they can still score the DRC by typing any DRC form ('DRC', 'DR Congo', 'Congo-Kinshasa'). Results show which state each answer counted as. Recommendation: keep; the editor confirms.
+- **Congo (owner ruling 2026-11-07).** The UN lists two members: 'Congo' (capital Brazzaville) and 'Democratic Republic of the Congo' (capital Kinshasa). The UN's short name 'Congo' is shown as 'Republic of the Congo' (crosswalk). In Cups created under answer rules 2, a bare 'Congo' is ambiguous and scores nothing; results tell the player to type Republic of the Congo (Congo-Brazzaville) or DR Congo (Congo-Kinshasa). Cups created earlier keep scoring a bare 'Congo' as the Republic, from the item's frozen `answerRules1` copy.
 - **Côte d'Ivoire.** The regional-groups page writes Côte d'Ivoire; the member-states page writes Côte D'Ivoire. Both normalise to the same answer. 'Ivory Coast' is accepted by alias.
 - **Tanzania.** The UN's name is 'United Republic of Tanzania'. The reference now uses the UN form; 'Tanzania' is accepted by alias.
 - **Not members:** Western Sahara, Somaliland. Both stay as known non-answers with reasons.
@@ -256,12 +257,23 @@ Every name matches exactly.
 - **French Guiana** is part of France and the **Falkland Islands** are a British Overseas Territory under M49; both are excluded by the sovereign-state criterion and are known non-answers.
 - M49 names Bolivia and Venezuela by their full official forms; the short forms are accepted by alias.
 
-## `chinese-zodiac`: blocked
+## `chinese-zodiac`: matches source
 
-**Source:** Encyclopaedia Britannica, 'Chinese zodiac'.
+**Source:** United Nations, 'The Chinese Zodiac: In Praise of the Jade Rabbit' (Chinese Language Day 2023 exhibition introduction). Fetched 2026-11-07.
+- https://www.un.org/sites/un2.un.org/files/2023/04/the_chinese_zodiac_introduction.pdf (pdf, 263154 bytes, sha256 `9463cb4c75e77dd4…`)
 
-www.britannica.com answers automated requests with a Cloudflare bot challenge (HTTP 403 to curl; the challenge page in a real headless browser). Not worked around. A person needs to compare the list by hand, or name another credible source.
+**Extraction:** PDF text; the sentence 'In order, the 12 animals of the Chinese zodiac, also known as Shengxiao ("生肖"), are: …', split on commas and the final 'and'.
 
+**Counts:** source publishes 12; our list has 12; the reference declares 12. No human source check recorded.
+
+Every name matches exactly.
+
+**Aliases (spr-cs-chinese-zodiac):** `sheep` → `goat` (The sign 羊 (yáng) is translated Goat, Sheep or Ram in standard references); `ram` → `goat` (A standard translation of the sign 羊 (yáng)); `chicken` → `rooster` (The sign 鸡 (jī) literally means chicken; Rooster is the conventional English name); `cockerel` → `rooster` (British English for rooster); `boar` → `pig` (The sign 猪 (zhū) is sometimes translated Boar); `hare` → `rabbit` (The sign 兔 (tù) is translated Rabbit or Hare); `mouse` → `rat` (The sign 鼠 (shǔ) covers both rat and mouse)
+
+**Questionable or ambiguous entries:**
+
+- **Source (owner-named, 2026-11-07):** the UN publication 'The Chinese Zodiac: In Praise of the Jade Rabbit', which lists the twelve animals in order. Britannica, named first, answers automated requests with a bot challenge and was not used.
+- The UN text names the sign 羊 'Goat' and 鸡 'Rooster'. The aliases (Sheep, Ram, Chicken, Cockerel, Boar, Hare, Mouse) are editorial choices this source does not settle; the editor confirms them.
 
 ## `un-members-asia`: matches source
 

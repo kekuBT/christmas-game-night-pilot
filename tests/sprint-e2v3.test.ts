@@ -311,7 +311,7 @@ const myState = (engine: RoomEngine, pid: string, gid: string) => {
 describe("room: rules frozen per Cup and per game", () => {
   it("a new Cup records the E2 v3 rules, and official games snapshot matcher v2 and the roster size", () => {
     const { engine, host } = room(5);
-    expect((engine.toJSON()["cup"] as Json)["categorySprint"]).toEqual({ matcher: 2, sizePolicy: 1 });
+    expect((engine.toJSON()["cup"] as Json)["categorySprint"]).toEqual({ matcher: 2, sizePolicy: 1, answerRules: 2 });
     const g = engine.startGame(host, "category-sprint", { official: true, seed: 3 });
     const ex = g.extra as Extra;
     expect(ex.matcherVersion).toBe(2);

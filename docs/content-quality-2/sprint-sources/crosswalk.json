@@ -17,5 +17,8 @@
     { "source": "Congo DR", "member": "DR Congo", "reason": "FIFA's word order; the usual English short form" },
     { "source": "IR Iran", "member": "Iran", "reason": "FIFA's form; common English name" },
     { "source": "Korea Republic", "member": "South Korea", "reason": "FIFA's form; common English name" }
+  ],
+  "un-members-africa": [
+    { "source": "Congo", "member": "Republic of the Congo", "reason": "The UN's short name. Shown in full because a bare 'Congo' is ambiguous (owner ruling 2026-11-07)" }
   ]
 }

@@ -19,7 +19,7 @@
     "Central African Republic",
     "Chad",
     "Comoros",
-    "Congo",
+    "Republic of the Congo",
     "Côte d'Ivoire",
     "Democratic Republic of the Congo",
     "Djibouti",
@@ -63,7 +63,7 @@
     "Zambia",
     "Zimbabwe"
   ],
-  "provenance": "Transcribed by the author (Claude, 2026-11-07); machine-compared with the source page on 2026-11-07: all 54 match (Tanzania via its alias) (docs/content-quality-2/SPRINT_SOURCE_CHECK.md). No human source check yet.",
+  "provenance": "Machine-compared with the UN African States group on 2026-11-07: all 54 match; the UN's 'Congo' is shown as 'Republic of the Congo' (crosswalk; owner ruling). See SPRINT_SOURCE_CHECK.md. No human source check yet.",
   "timeSensitive": {
     "asOf": "2026-11-07",
     "reviewBy": "2027-11-07"

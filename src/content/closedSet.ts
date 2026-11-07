@@ -36,6 +36,13 @@ export function sprintItemProblems(item: SprintItem, ref: SprintReference | unde
     if (normalizeSprintAnswerV2(k) !== k) out.push(`known non-answer "${k}" is not in normalised form`);
     if (answers.has(k)) out.push(`known non-answer "${k}" is an accepted answer`);
   }
+  const r1 = item.answerRules1;
+  if (r1) {
+    const a1 = new Set(r1.answers);
+    for (const a of r1.answers) if (normalizeSprintAnswerV2(a) !== a) out.push(`answer-rules-1 answer "${a}" is not in canonical (normalised) form`);
+    for (const [k, v] of Object.entries(r1.aliases ?? {})) if (!a1.has(v.to) || a1.has(k)) out.push(`answer-rules-1 alias "${k}" is invalid`);
+    for (const k of Object.keys(r1.knownNotAccepted ?? {})) if (a1.has(k) || Object.hasOwn(r1.aliases ?? {}, k)) out.push(`answer-rules-1 known non-answer "${k}" is also accepted`);
+  }
   if (!item.closedSet) {
     if (item.membership) out.push("membership reference on an open category: set closedSet");
     return out;

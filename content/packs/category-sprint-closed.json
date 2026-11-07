@@ -191,7 +191,7 @@
       "eligibility": "official",
       "review": {
         "status": "provisional",
-        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck."
+        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck. 2026-11-07 Congo ruling (owner): a bare 'Congo' is ambiguous and scores nothing in new Cups; Cups created earlier keep scoring it as the Republic (answerRules1)."
       },
       "source": {
         "kind": "reference",
@@ -214,7 +214,6 @@
         "central african republic",
         "chad",
         "comoros",
-        "congo",
         "cote d ivoire",
         "democratic republic of the congo",
         "djibouti",
@@ -242,6 +241,7 @@
         "namibia",
         "niger",
         "nigeria",
+        "republic of the congo",
         "rwanda",
         "sao tome and principe",
         "senegal",
@@ -270,12 +270,8 @@
         "reviewBy": "2027-11-07"
       },
       "aliases": {
-        "republic of the congo": {
-          "to": "congo",
-          "reason": "Full name of the state the UN lists as Congo"
-        },
         "congo brazzaville": {
-          "to": "congo",
+          "to": "republic of the congo",
           "reason": "Name by capital, used to tell the two Congos apart"
         },
         "dr congo": {
@@ -317,6 +313,18 @@
         "united republic of tanzania": {
           "to": "tanzania",
           "reason": "Official long name"
+        },
+        "republic of congo": {
+          "to": "republic of the congo",
+          "reason": "Full name without 'the'"
+        },
+        "congo republic": {
+          "to": "republic of the congo",
+          "reason": "Common short form naming the Republic"
+        },
+        "congo republic of": {
+          "to": "republic of the congo",
+          "reason": "Index form, as in 'Congo, Republic of'"
         }
       },
       "knownNotAccepted": {
@@ -325,7 +333,124 @@
         "sahrawi arab democratic republic": "An African Union member but not a UN member state",
         "canary islands": "Part of Spain",
         "madeira": "Part of Portugal",
-        "reunion": "An overseas department of France"
+        "reunion": "An overseas department of France",
+        "congo": "Two countries are called Congo. Type Republic of the Congo (Congo-Brazzaville) or DR Congo (Congo-Kinshasa)."
+      },
+      "answerRules1": {
+        "answers": [
+          "algeria",
+          "angola",
+          "benin",
+          "botswana",
+          "burkina faso",
+          "burundi",
+          "cabo verde",
+          "cameroon",
+          "central african republic",
+          "chad",
+          "comoros",
+          "congo",
+          "cote d ivoire",
+          "democratic republic of the congo",
+          "djibouti",
+          "egypt",
+          "equatorial guinea",
+          "eritrea",
+          "eswatini",
+          "ethiopia",
+          "gabon",
+          "gambia",
+          "ghana",
+          "guinea",
+          "guinea bissau",
+          "kenya",
+          "lesotho",
+          "liberia",
+          "libya",
+          "madagascar",
+          "malawi",
+          "mali",
+          "mauritania",
+          "mauritius",
+          "morocco",
+          "mozambique",
+          "namibia",
+          "niger",
+          "nigeria",
+          "rwanda",
+          "sao tome and principe",
+          "senegal",
+          "seychelles",
+          "sierra leone",
+          "somalia",
+          "south africa",
+          "south sudan",
+          "sudan",
+          "tanzania",
+          "togo",
+          "tunisia",
+          "uganda",
+          "zambia",
+          "zimbabwe"
+        ],
+        "aliases": {
+          "republic of the congo": {
+            "to": "congo",
+            "reason": "Full name of the state the UN lists as Congo"
+          },
+          "congo brazzaville": {
+            "to": "congo",
+            "reason": "Name by capital, used to tell the two Congos apart"
+          },
+          "dr congo": {
+            "to": "democratic republic of the congo",
+            "reason": "Standard short form"
+          },
+          "drc": {
+            "to": "democratic republic of the congo",
+            "reason": "Standard abbreviation"
+          },
+          "democratic republic of congo": {
+            "to": "democratic republic of the congo",
+            "reason": "Common form without 'the'"
+          },
+          "congo kinshasa": {
+            "to": "democratic republic of the congo",
+            "reason": "Name by capital, used to tell the two Congos apart"
+          },
+          "ivory coast": {
+            "to": "cote d ivoire",
+            "reason": "English translation of Côte d'Ivoire"
+          },
+          "cote divoire": {
+            "to": "cote d ivoire",
+            "reason": "Typed without the apostrophe"
+          },
+          "cape verde": {
+            "to": "cabo verde",
+            "reason": "English name used until 2013"
+          },
+          "swaziland": {
+            "to": "eswatini",
+            "reason": "Official name until 2018"
+          },
+          "sao tome": {
+            "to": "sao tome and principe",
+            "reason": "Common short form"
+          },
+          "united republic of tanzania": {
+            "to": "tanzania",
+            "reason": "Official long name"
+          }
+        },
+        "knownNotAccepted": {
+          "western sahara": "A disputed territory, not a UN member state",
+          "somaliland": "Self-declared state, not a UN member",
+          "sahrawi arab democratic republic": "An African Union member but not a UN member state",
+          "canary islands": "Part of Spain",
+          "madeira": "Part of Portugal",
+          "reunion": "An overseas department of France"
+        }
       }
     },
     {
@@ -549,11 +674,11 @@
       "eligibility": "practice",
       "review": {
         "status": "provisional",
-        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck."
+        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership machine-compared on 2026-11-07 with the UN publication the owner named: all 12 match. Not human-reviewed or approved; approval is refused until the reference has a sourceCheck."
       },
       "source": {
         "kind": "reference",
-        "ref": "Encyclopaedia Britannica (Chinese zodiac): https://www.britannica.com/topic/Chinese-zodiac"
+        "ref": "United Nations, 'The Chinese Zodiac: In Praise of the Jade Rabbit' (2023): https://www.un.org/sites/un2.un.org/files/2023/04/the_chinese_zodiac_introduction.pdf"
       },
       "tags": [
         "e2-v3",

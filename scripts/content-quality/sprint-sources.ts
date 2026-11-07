@@ -1,6 +1,7 @@
 /**
  * npm run content:sprint-sources              fetch every source, refresh snapshots, rewrite the report
  * npm run content:sprint-sources -- --offline rebuild the report from the committed snapshots only
+ * npm run content:sprint-sources -- --only <id> refetch one source, keep the other snapshots
  *
  * Category Sprint closed sets: fetch each list from the primary or
  * authoritative source the owner named (2026-11-07), extract the published
@@ -32,6 +33,8 @@ const PACK = join(DEFAULT_CONTENT_DIR, "packs", "category-sprint-closed.json");
 const DRAFT_PACK = join(DEFAULT_CONTENT_DIR, "packs", "category-sprint-closed-drafts.json");
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36";
 const offline = process.argv.includes("--offline");
+/** `-- --only <id>` refetches one source and keeps every other committed snapshot. */
+const only = process.argv.includes("--only") ? process.argv[process.argv.indexOf("--only") + 1] : undefined;
 
 // ------------------------------------------------------------------ fetching
 
@@ -159,9 +162,17 @@ const SOURCES: Source[] = [
     },
   },
   {
-    id: "chinese-zodiac", authority: "Encyclopaedia Britannica, 'Chinese zodiac'",
-    extraction: "Not extracted.",
-    blocked: "www.britannica.com answers automated requests with a Cloudflare bot challenge (HTTP 403 to curl; the challenge page in a real headless browser). Not worked around. A person needs to compare the list by hand, or name another credible source.",
+    // Britannica (the first source named) answers automated requests with a
+    // Cloudflare bot challenge; the owner named this UN publication instead (2026-11-07).
+    id: "chinese-zodiac", authority: "United Nations, 'The Chinese Zodiac: In Praise of the Jade Rabbit' (Chinese Language Day 2023 exhibition introduction)",
+    extraction: "PDF text; the sentence 'In order, the 12 animals of the Chinese zodiac, also known as Shengxiao (\"生肖\"), are: …', split on commas and the final 'and'.",
+    run: async () => {
+      const f = pdf("https://www.un.org/sites/un2.un.org/files/2023/04/the_chinese_zodiac_introduction.pdf");
+      const t = f.body.replace(/\s+/g, " ");
+      const m = /In order, the 12 animals of the Chinese zodiac,[^:]*are: ([^.]+)\./.exec(t);
+      if (!m) throw new Error("UN zodiac PDF no longer contains the 'In order, the 12 animals' sentence");
+      return { pages: [f.page], published: m[1]!.split(/, | and /).map(ws).filter(Boolean) };
+    },
   },
   // ---- candidates for the new draft batch (not official; see the draft pack)
   {
@@ -226,7 +237,7 @@ const CROSSWALK: Record<string, Crosswalk[]> = (() => {
 /** Questionable or ambiguous entries a reviewer should look at, whatever the diff says. */
 const NOTES: Record<string, string[]> = {
   "un-members-africa": [
-    "**Congo.** The UN lists two members: 'Congo' (capital Brazzaville) and 'Democratic Republic of the Congo' (capital Kinshasa). The canonical answer `congo` is the UN's own short name for the Republic of the Congo, so a bare 'Congo' scores that state. A player who typed 'Congo' meaning the DRC is credited with the other state; they can still score the DRC by typing any DRC form ('DRC', 'DR Congo', 'Congo-Kinshasa'). Results show which state each answer counted as. Recommendation: keep; the editor confirms.",
+    "**Congo (owner ruling 2026-11-07).** The UN lists two members: 'Congo' (capital Brazzaville) and 'Democratic Republic of the Congo' (capital Kinshasa). The UN's short name 'Congo' is shown as 'Republic of the Congo' (crosswalk). In Cups created under answer rules 2, a bare 'Congo' is ambiguous and scores nothing; results tell the player to type Republic of the Congo (Congo-Brazzaville) or DR Congo (Congo-Kinshasa). Cups created earlier keep scoring a bare 'Congo' as the Republic, from the item's frozen `answerRules1` copy.",
     "**Côte d'Ivoire.** The regional-groups page writes Côte d'Ivoire; the member-states page writes Côte D'Ivoire. Both normalise to the same answer. 'Ivory Coast' is accepted by alias.",
     "**Tanzania.** The UN's name is 'United Republic of Tanzania'. The reference now uses the UN form; 'Tanzania' is accepted by alias.",
     "**Not members:** Western Sahara, Somaliland. Both stay as known non-answers with reasons.",
@@ -244,6 +255,7 @@ const NOTES: Record<string, string[]> = {
     "**Matching problem, independent of the source.** The original 151 include two Pokémon named Nidoran (♀ and ♂). The matcher keeps letters only, so both normalise to `nidoran` and the closed-set check rejects the list (two members, one answer). Building this category needs a matcher or schema change (per-member answer keys), which is out of scope.",
     "**Also:** Mr. Mime and Farfetch'd normalise acceptably (`mr mime`, `farfetch d`), but 151 names with idiosyncratic spellings make typing errors likely; typo tolerance (length >= 6, one edit) covers some.",
   ],
+  "chinese-zodiac": ["**Source (owner-named, 2026-11-07):** the UN publication 'The Chinese Zodiac: In Praise of the Jade Rabbit', which lists the twelve animals in order. Britannica, named first, answers automated requests with a bot challenge and was not used.", "The UN text names the sign 羊 'Goat' and 鸡 'Rooster'. The aliases (Sheep, Ram, Chicken, Cockerel, Boar, Hare, Mouse) are editorial choices this source does not settle; the editor confirms them."],
   "iau-planets-dwarf-planets": ["The old reference URL (iau.org/public/themes/pluto/) now returns 404. NASA's page states the IAU recognises these five dwarf planets; IAU is still the authority for the definition.", "**Pluto** is a member (as a dwarf planet)."],
 };
 
@@ -256,7 +268,7 @@ function loadSnapshot(id: string): (SourceSnapshot & { blocked?: string }) | und
 
 async function refresh() {
   mkdirSync(SNAP_DIR, { recursive: true });
-  for (const s of SOURCES) {
+  for (const s of SOURCES.filter((x) => !only || x.id === only)) {
     const fetchedAt = new Date().toISOString().slice(0, 10);
     if (s.blocked || !s.run) {
       writeFileSync(join(SNAP_DIR, `${s.id}.json`), JSON.stringify({ id: s.id, authority: s.authority, fetchedAt, blocked: s.blocked, extraction: s.extraction, pages: [], published: [] }, null, 2) + "\n");

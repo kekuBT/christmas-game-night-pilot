@@ -39,6 +39,13 @@ export const CupRecordSchema = z.object({
     matcher: z.literal(2),
     /** Official categories must be closed sets that pass this size policy for the room. */
     sizePolicy: z.literal(1),
+    /**
+     * Answer rules for closed categories. 2 (owner ruling 2026-11-07): a bare
+     * "Congo" is ambiguous and scores nothing. Absent = 1, every Cup created
+     * before that ruling: those Cups keep scoring a bare "Congo" as the
+     * Republic of the Congo (items carry an `answerRules1` copy).
+     */
+    answerRules: z.literal(2).optional(),
   }).strict().optional(),
 }).strict();
 export type CupRecord = z.infer<typeof CupRecordSchema>;
@@ -51,7 +58,7 @@ export function newCupRecord(cupId: string, createdAt: number): CupRecord {
     format: NEW_ROOM_FORMAT,
     qualificationPolicy: NEW_CUP_QUALIFICATION_POLICY,
     origin: "created",
-    categorySprint: Object.freeze({ matcher: 2, sizePolicy: 1 }),
+    categorySprint: Object.freeze({ matcher: 2, sizePolicy: 1, answerRules: 2 }),
   }) as CupRecord;
 }
 

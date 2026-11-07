@@ -1,9 +1,28 @@
 {
   "id": "chinese-zodiac",
-  "authority": "Encyclopaedia Britannica, 'Chinese zodiac'",
+  "authority": "United Nations, 'The Chinese Zodiac: In Praise of the Jade Rabbit' (Chinese Language Day 2023 exhibition introduction)",
   "fetchedAt": "2026-11-07",
-  "blocked": "www.britannica.com answers automated requests with a Cloudflare bot challenge (HTTP 403 to curl; the challenge page in a real headless browser). Not worked around. A person needs to compare the list by hand, or name another credible source.",
-  "extraction": "Not extracted.",
-  "pages": [],
-  "published": []
+  "extraction": "PDF text; the sentence 'In order, the 12 animals of the Chinese zodiac, also known as Shengxiao (\"生肖\"), are: …', split on commas and the final 'and'.",
+  "pages": [
+    {
+      "url": "https://www.un.org/sites/un2.un.org/files/2023/04/the_chinese_zodiac_introduction.pdf",
+      "sha256": "9463cb4c75e77dd4416b5047c3828838dce4ad47092312237b597f45a3aa1c7b",
+      "bytes": 263154,
+      "via": "pdf"
+    }
+  ],
+  "published": [
+    "Rat",
+    "Ox",
+    "Tiger",
+    "Rabbit",
+    "Dragon",
+    "Snake",
+    "Horse",
+    "Goat",
+    "Monkey",
+    "Rooster",
+    "Dog",
+    "Pig"
+  ]
 }
