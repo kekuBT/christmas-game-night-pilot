@@ -825,6 +825,8 @@ Gate verdict (one run, one revision): `node scripts/gate.mjs full` on `a95e211`,
 - The White House presidents list names no 46th president.
 - E1/E3 real-device verification is still outstanding.
 
+Gate verdict (one run, one revision): `node scripts/gate.mjs full` on `5bae6de`, in a fresh clean clone with `MCHEZO_CHROMIUM_PATH` set to the machine's headless shell (build 1243): **PASSED (exit 0)**, run `20261107-165621-5bae6de8-15851`. 44 passed, 0 failed, 0 timed out. Unit tests: 788 passed (68 files). This verdict covers `5bae6de` only. The commit that records it changes docs only. An earlier run on the same commit (`20261107-165517-5bae6de8-14010`) stopped with INFRASTRUCTURE ERROR (exit 2): the browser preflight failed because the variable was not set. That run is not a verdict.
+
 **Next:** stop for owner review. The owner's next priority is real-device testing of Mchezo.
 
 **Risks:**
