@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "eu-member-states",
+  "title": "Member states of the European Union",
+  "source": {
+    "authority": "European Union (europa.eu, EU countries)",
+    "url": "https://european-union.europa.eu/principles-countries-history/eu-countries_en",
+    "publishedCount": 27
+  },
+  "members": [
+    "Austria",
+    "Belgium",
+    "Bulgaria",
+    "Croatia",
+    "Cyprus",
+    "Czechia",
+    "Denmark",
+    "Estonia",
+    "Finland",
+    "France",
+    "Germany",
+    "Greece",
+    "Hungary",
+    "Ireland",
+    "Italy",
+    "Latvia",
+    "Lithuania",
+    "Luxembourg",
+    "Malta",
+    "Netherlands",
+    "Poland",
+    "Portugal",
+    "Romania",
+    "Slovakia",
+    "Slovenia",
+    "Spain",
+    "Sweden"
+  ],
+  "provenance": "Transcribed by the author (Claude, 2026-11-07) from the authority's list; NOT yet compared with the source page (network blocked). Count cross-checked by web search.",
+  "timeSensitive": {
+    "asOf": "2026-11-07",
+    "reviewBy": "2027-11-07"
+  }
+}

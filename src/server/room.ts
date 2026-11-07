@@ -65,7 +65,7 @@ import {
   guessConnections,
   type ConnectionsPlayerState,
 } from "../games/connections.js";
-import { scoreSprintRound, SPRINT_CATEGORIES } from "../games/sprint.js";
+import { reviewSprintRound, scoreSprintRound, SPRINT_CATEGORIES, type SprintMatcherVersion } from "../games/sprint.js";
 import {
   charadesPlayerScores,
   charadesTurn,
@@ -184,8 +184,7 @@ export class StartRefused extends Error {
 
 /** The host can't start an official game: this Cup has run out of unused approved content for it. */
 export class ContentShortage extends Error {
-  readonly code = "CONTENT_EXHAUSTED";
-  constructor(message: string, readonly available: number, readonly needed: number) {
+  constructor(message: string, readonly available: number, readonly needed: number, readonly code: "CONTENT_EXHAUSTED" | "NO_SUITABLE_CATEGORY" = "CONTENT_EXHAUSTED") {
     super(message);
   }
 }
@@ -601,10 +600,14 @@ export class RoomEngine {
       const cg = gameId as ContentGameId;
       const mode = (opts.official ?? false) ? "official" : "practice";
       const need = cg === "charades" ? Math.max(ITEMS_PER_GAME.charades, playerIds.length * 4) : ITEMS_PER_GAME[cg];
-      const pick = selectContent({ lib: this.content, gameId: cg, count: need, mode, cupId: this._cup.cupId, usage: this.contentUsage, seq: this.contentSeq, today: new Date(startedAt).toISOString().slice(0, 10) });
-      if (!pick.ok) throw new ContentShortage(pick.message, pick.available, pick.needed);
+      // E2 v3: Category Sprint eligibility and matcher are frozen here, at
+      // game start, from the Cup's own rules (absent on older Cups = v1).
+      const sprintRules = cg === "category-sprint" ? this._cup.categorySprint : undefined;
+      const sprintSel = sprintRules && mode === "official" ? { players: playerIds.length, sizePolicy: sprintRules.sizePolicy } : undefined;
+      const pick = selectContent({ lib: this.content, gameId: cg, count: need, mode, cupId: this._cup.cupId, usage: this.contentUsage, seq: this.contentSeq, today: new Date(startedAt).toISOString().slice(0, 10), ...(sprintSel ? { sprint: sprintSel } : {}) });
+      if (!pick.ok) throw new ContentShortage(pick.message, pick.available, pick.needed, pick.reason === "no-suitable-category" ? "NO_SUITABLE_CATEGORY" : "CONTENT_EXHAUSTED");
       selected = {
-        extra: materialize(cg, pick.items, { seed, playerIds }),
+        extra: materialize(cg, pick.items, { seed, playerIds, ...(sprintRules ? { sprint: { matcherVersion: sprintRules.matcher, ...(sprintSel ? { eligibility: sprintSel } : {}) } } : {}) }),
         record: () => {
           recordUsage(this.contentUsage, pick.items, { gameInstanceId: id, day: this.championshipDay, mode, seq: this.contentSeq });
           this.contentSeq += 1;
@@ -899,7 +902,7 @@ export class RoomEngine {
       const total: Record<string, number> = Object.fromEntries(game.players.map((p) => [p, 0]));
       for (let r = 0; r < 3; r++) {
         const cat = this.sprintCategory(game, r);
-        const roundScores = scoreSprintRound(cat, state.submissions[r] ?? {});
+        const roundScores = scoreSprintRound(cat, state.submissions[r] ?? {}, this.sprintMatcher(game));
         for (const pid of game.players) total[pid] = (total[pid] ?? 0) + (roundScores[pid] ?? 0);
       }
       this.finishGame(game, total);
@@ -1256,7 +1259,7 @@ export class RoomEngine {
       for (const r of st.rounds.slice(0, st.roundIndex)) add(captionRoundScores(r));
     } else if (game.gameId === "category-sprint") {
       const st = game.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
-      for (let r = 0; r < st.roundIndex; r++) add(scoreSprintRound(this.sprintCategory(game, r), st.submissions[r] ?? {}));
+      for (let r = 0; r < st.roundIndex; r++) add(scoreSprintRound(this.sprintCategory(game, r), st.submissions[r] ?? {}, this.sprintMatcher(game)));
     }
     // Impostor/Charades: no partial result exists (and they are practice-only).
     return totals;
@@ -1748,7 +1751,7 @@ export class RoomEngine {
       case "word-connections":
         return this.connectionsView(g, actorId);
       case "category-sprint":
-        return this.sprintView(g);
+        return this.sprintView(g, actorId);
       default:
         return undefined;
     }
@@ -1780,9 +1783,27 @@ export class RoomEngine {
     return ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event, ...(reveal ? { year: e.year, context: e.context } : {}) }));
   }
 
-  private sprintView(g: GameInstance): Record<string, unknown> {
-    const roundIndex = (g.extra as { roundIndex: number }).roundIndex;
-    return { roundIndex, category: this.sprintCategory(g, roundIndex)?.name };
+  /**
+   * Category Sprint view. While playing: the round and its category (with
+   * the closed set's definition, shown before typing). Once the game has
+   * FINISHED: each round's full accepted list, and, for a player, how each of
+   * THEIR OWN answers was judged (unique, shared, repeat, near-miss with its
+   * reason, or not on the list). Never another player's answers.
+   */
+  private sprintView(g: GameInstance, actorId?: string): Record<string, unknown> {
+    const st = g.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
+    const cat = this.sprintCategory(g, st.roundIndex);
+    const base: Record<string, unknown> = { roundIndex: st.roundIndex, category: cat?.name, ...(cat?.definition ? { definition: cat.definition } : {}) };
+    if (g.status !== "finished") return base;
+    const own = (g.extra as { categories?: unknown[] }).categories;
+    const rounds = own ? own.length : 3;
+    base["results"] = Array.from({ length: rounds }, (_, r) => {
+      const c = this.sprintCategory(g, r);
+      const out: Record<string, unknown> = { category: c.name, accepted: [...c.answers].sort() };
+      if (actorId !== undefined) out["mine"] = reviewSprintRound(c, st.submissions[r] ?? {}, this.sprintMatcher(g)).reviews[actorId] ?? [];
+      return out;
+    });
+    return base;
   }
 
   /**
@@ -1886,6 +1907,11 @@ export class RoomEngine {
       base["myAbstained"] = (round.abstainedSubmissions ?? []).includes(actorId);
     }
     return base;
+  }
+
+  /** The matcher a Sprint game was started with (absent = v1, every game before E2 v3). */
+  private sprintMatcher(g: GameInstance): SprintMatcherVersion {
+    return (g.extra as { matcherVersion?: SprintMatcherVersion }).matcherVersion ?? 1;
   }
 
   /** A Sprint round's category: the game's own snapshot, or the original fixed list for older games. */

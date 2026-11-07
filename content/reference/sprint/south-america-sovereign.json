@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "south-america-sovereign",
+  "title": "Sovereign states of South America",
+  "source": {
+    "authority": "United Nations M49 (South America), sovereign states only",
+    "url": "https://unstats.un.org/unsd/methodology/m49/",
+    "publishedCount": 12
+  },
+  "members": [
+    "Argentina",
+    "Bolivia",
+    "Brazil",
+    "Chile",
+    "Colombia",
+    "Ecuador",
+    "Guyana",
+    "Paraguay",
+    "Peru",
+    "Suriname",
+    "Uruguay",
+    "Venezuela"
+  ],
+  "provenance": "Transcribed by the author (Claude, 2026-11-07) from the authority's list; NOT yet compared with the source page (network blocked). Count cross-checked by web search."
+}

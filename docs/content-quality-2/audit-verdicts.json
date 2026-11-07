@@ -2901,6 +2901,41 @@
     "HARD-TO-WRITE"
    ],
    "note": "'A robot tries to tell a joke' asks players to write a joke about a joke. Give it a format ('the robot's first joke')."
+  },
+  "spr-cs-us-states": {
+   "verdict": "KEEP",
+   "codes": [],
+   "note": "E2 v3 closed set (2026-11-07). Membership transcribed from the named authority; machine-checked against its reference list; NOT yet compared with the source page by a person."
+  },
+  "spr-cs-eu-members": {
+   "verdict": "KEEP",
+   "codes": [],
+   "note": "E2 v3 closed set (2026-11-07). Membership transcribed from the named authority; machine-checked against its reference list; NOT yet compared with the source page by a person. Time-sensitive (accessions); official for 4-6 players only."
+  },
+  "spr-cs-africa": {
+   "verdict": "KEEP",
+   "codes": [],
+   "note": "E2 v3 closed set (2026-11-07). Membership transcribed from the named authority; machine-checked against its reference list; NOT yet compared with the source page by a person. Obscure tail: the 'can name 10' estimate needs an editor."
+  },
+  "spr-cs-elements": {
+   "verdict": "KEEP",
+   "codes": [],
+   "note": "E2 v3 closed set (2026-11-07). Membership transcribed from the named authority; machine-checked against its reference list; NOT yet compared with the source page by a person. Obscure tail: the 'can name 10' estimate needs an editor."
+  },
+  "spr-cs-south-america": {
+   "verdict": "KEEP",
+   "codes": [],
+   "note": "E2 v3 closed set (2026-11-07). Membership transcribed from the named authority; machine-checked against its reference list; NOT yet compared with the source page by a person. Practice only: 12 is too small for any room."
+  },
+  "spr-cs-chinese-zodiac": {
+   "verdict": "KEEP",
+   "codes": [],
+   "note": "E2 v3 closed set (2026-11-07). Membership transcribed from the named authority; machine-checked against its reference list; NOT yet compared with the source page by a person. Practice only (recited in order). cat/buffalo are explained near-misses."
+  },
+  "spr-cs-planets": {
+   "verdict": "KEEP",
+   "codes": [],
+   "note": "E2 v3 closed set (2026-11-07). Membership transcribed from the named authority; machine-checked against its reference list; NOT yet compared with the source page by a person. Practice only (recited in order)."
   }
  },
  "connectionsOverlaps": {

@@ -1,0 +1,664 @@
+{
+  "schemaVersion": 1,
+  "packId": "category-sprint-closed",
+  "gameId": "category-sprint",
+  "version": "1.0.0",
+  "title": "Category Sprint: closed sets (E2 v3)",
+  "language": "en",
+  "items": [
+    {
+      "id": "spr-cs-us-states",
+      "difficulty": 1,
+      "category": "Closed set",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "U.S. Census Bureau (state codes list): https://www.census.gov/library/reference/code-lists/ansi/ansi-codes-for-states.html"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set"
+      ],
+      "name": "US states",
+      "answers": [
+        "alabama",
+        "alaska",
+        "arizona",
+        "arkansas",
+        "california",
+        "colorado",
+        "connecticut",
+        "delaware",
+        "florida",
+        "georgia",
+        "hawaii",
+        "idaho",
+        "illinois",
+        "indiana",
+        "iowa",
+        "kansas",
+        "kentucky",
+        "louisiana",
+        "maine",
+        "maryland",
+        "massachusetts",
+        "michigan",
+        "minnesota",
+        "mississippi",
+        "missouri",
+        "montana",
+        "nebraska",
+        "nevada",
+        "new hampshire",
+        "new jersey",
+        "new mexico",
+        "new york",
+        "north carolina",
+        "north dakota",
+        "ohio",
+        "oklahoma",
+        "oregon",
+        "pennsylvania",
+        "rhode island",
+        "south carolina",
+        "south dakota",
+        "tennessee",
+        "texas",
+        "utah",
+        "vermont",
+        "virginia",
+        "washington",
+        "west virginia",
+        "wisconsin",
+        "wyoming"
+      ],
+      "closedSet": true,
+      "definition": "The 50 US states (not DC or territories)",
+      "recallProfile": "famous-first",
+      "membership": {
+        "reference": "us-states"
+      },
+      "aliases": {
+        "hawai i": {
+          "to": "hawaii",
+          "reason": "Hawaiʻi typed with a straight apostrophe for the ʻokina"
+        },
+        "washington state": {
+          "to": "washington",
+          "reason": "Common way to say the state, not the city"
+        }
+      },
+      "knownNotAccepted": {
+        "district of columbia": "A federal district, not a state",
+        "washington dc": "Washington, D.C. is a federal district, not a state",
+        "puerto rico": "A US territory, not a state",
+        "guam": "A US territory, not a state"
+      }
+    },
+    {
+      "id": "spr-cs-eu-members",
+      "difficulty": 2,
+      "category": "Closed set",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "European Union (europa.eu, EU countries): https://european-union.europa.eu/principles-countries-history/eu-countries_en"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set"
+      ],
+      "name": "EU member states",
+      "answers": [
+        "austria",
+        "belgium",
+        "bulgaria",
+        "croatia",
+        "cyprus",
+        "czechia",
+        "denmark",
+        "estonia",
+        "finland",
+        "france",
+        "germany",
+        "greece",
+        "hungary",
+        "ireland",
+        "italy",
+        "latvia",
+        "lithuania",
+        "luxembourg",
+        "malta",
+        "netherlands",
+        "poland",
+        "portugal",
+        "romania",
+        "slovakia",
+        "slovenia",
+        "spain",
+        "sweden"
+      ],
+      "closedSet": true,
+      "definition": "Countries in the European Union (27 members)",
+      "recallProfile": "famous-first",
+      "membership": {
+        "reference": "eu-member-states"
+      },
+      "timeSensitive": {
+        "asOf": "2026-11-07",
+        "reviewBy": "2027-11-07"
+      },
+      "aliases": {
+        "czech republic": {
+          "to": "czechia",
+          "reason": "Former English short name; the EU now uses Czechia"
+        },
+        "holland": {
+          "to": "netherlands",
+          "reason": "Common English name for the Netherlands (strictly two of its provinces)"
+        },
+        "republic of ireland": {
+          "to": "ireland",
+          "reason": "Usual way to distinguish the state from the island"
+        }
+      },
+      "knownNotAccepted": {
+        "united kingdom": "Left the EU on 31 January 2020",
+        "uk": "Left the EU on 31 January 2020",
+        "great britain": "The UK left the EU on 31 January 2020",
+        "britain": "The UK left the EU on 31 January 2020",
+        "england": "The UK left the EU on 31 January 2020",
+        "switzerland": "Not an EU member (EFTA)",
+        "norway": "Not an EU member (EEA through EFTA)",
+        "iceland": "Not an EU member (EEA through EFTA)"
+      }
+    },
+    {
+      "id": "spr-cs-africa",
+      "difficulty": 3,
+      "category": "Closed set",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "United Nations (member states), African region: https://www.un.org/en/about-us/member-states"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set"
+      ],
+      "name": "Countries in Africa",
+      "answers": [
+        "algeria",
+        "angola",
+        "benin",
+        "botswana",
+        "burkina faso",
+        "burundi",
+        "cabo verde",
+        "cameroon",
+        "central african republic",
+        "chad",
+        "comoros",
+        "congo",
+        "cote d ivoire",
+        "democratic republic of the congo",
+        "djibouti",
+        "egypt",
+        "equatorial guinea",
+        "eritrea",
+        "eswatini",
+        "ethiopia",
+        "gabon",
+        "gambia",
+        "ghana",
+        "guinea",
+        "guinea bissau",
+        "kenya",
+        "lesotho",
+        "liberia",
+        "libya",
+        "madagascar",
+        "malawi",
+        "mali",
+        "mauritania",
+        "mauritius",
+        "morocco",
+        "mozambique",
+        "namibia",
+        "niger",
+        "nigeria",
+        "rwanda",
+        "sao tome and principe",
+        "senegal",
+        "seychelles",
+        "sierra leone",
+        "somalia",
+        "south africa",
+        "south sudan",
+        "sudan",
+        "tanzania",
+        "togo",
+        "tunisia",
+        "uganda",
+        "zambia",
+        "zimbabwe"
+      ],
+      "closedSet": true,
+      "definition": "UN member states in Africa (54)",
+      "recallProfile": "obscure-tail",
+      "membership": {
+        "reference": "un-members-africa"
+      },
+      "typicalRecall": 12,
+      "timeSensitive": {
+        "asOf": "2026-11-07",
+        "reviewBy": "2027-11-07"
+      },
+      "aliases": {
+        "republic of the congo": {
+          "to": "congo",
+          "reason": "Full name of the state the UN lists as Congo"
+        },
+        "congo brazzaville": {
+          "to": "congo",
+          "reason": "Name by capital, used to tell the two Congos apart"
+        },
+        "dr congo": {
+          "to": "democratic republic of the congo",
+          "reason": "Standard short form"
+        },
+        "drc": {
+          "to": "democratic republic of the congo",
+          "reason": "Standard abbreviation"
+        },
+        "democratic republic of congo": {
+          "to": "democratic republic of the congo",
+          "reason": "Common form without 'the'"
+        },
+        "congo kinshasa": {
+          "to": "democratic republic of the congo",
+          "reason": "Name by capital, used to tell the two Congos apart"
+        },
+        "ivory coast": {
+          "to": "cote d ivoire",
+          "reason": "English translation of Côte d'Ivoire"
+        },
+        "cote divoire": {
+          "to": "cote d ivoire",
+          "reason": "Typed without the apostrophe"
+        },
+        "cape verde": {
+          "to": "cabo verde",
+          "reason": "English name used until 2013"
+        },
+        "swaziland": {
+          "to": "eswatini",
+          "reason": "Official name until 2018"
+        },
+        "sao tome": {
+          "to": "sao tome and principe",
+          "reason": "Common short form"
+        },
+        "united republic of tanzania": {
+          "to": "tanzania",
+          "reason": "Official long name"
+        }
+      },
+      "knownNotAccepted": {
+        "western sahara": "A disputed territory, not a UN member state",
+        "somaliland": "Self-declared state, not a UN member",
+        "sahrawi arab democratic republic": "An African Union member but not a UN member state",
+        "canary islands": "Part of Spain",
+        "madeira": "Part of Portugal",
+        "reunion": "An overseas department of France"
+      }
+    },
+    {
+      "id": "spr-cs-elements",
+      "difficulty": 2,
+      "category": "Closed set",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "IUPAC Periodic Table of Elements: https://iupac.org/what-we-do/periodic-table-of-elements/"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set"
+      ],
+      "name": "Chemical elements",
+      "answers": [
+        "actinium",
+        "aluminium",
+        "americium",
+        "antimony",
+        "argon",
+        "arsenic",
+        "astatine",
+        "barium",
+        "berkelium",
+        "beryllium",
+        "bismuth",
+        "bohrium",
+        "boron",
+        "bromine",
+        "cadmium",
+        "caesium",
+        "calcium",
+        "californium",
+        "carbon",
+        "cerium",
+        "chlorine",
+        "chromium",
+        "cobalt",
+        "copernicium",
+        "copper",
+        "curium",
+        "darmstadtium",
+        "dubnium",
+        "dysprosium",
+        "einsteinium",
+        "erbium",
+        "europium",
+        "fermium",
+        "flerovium",
+        "fluorine",
+        "francium",
+        "gadolinium",
+        "gallium",
+        "germanium",
+        "gold",
+        "hafnium",
+        "hassium",
+        "helium",
+        "holmium",
+        "hydrogen",
+        "indium",
+        "iodine",
+        "iridium",
+        "iron",
+        "krypton",
+        "lanthanum",
+        "lawrencium",
+        "lead",
+        "lithium",
+        "livermorium",
+        "lutetium",
+        "magnesium",
+        "manganese",
+        "meitnerium",
+        "mendelevium",
+        "mercury",
+        "molybdenum",
+        "moscovium",
+        "neodymium",
+        "neon",
+        "neptunium",
+        "nickel",
+        "nihonium",
+        "niobium",
+        "nitrogen",
+        "nobelium",
+        "oganesson",
+        "osmium",
+        "oxygen",
+        "palladium",
+        "phosphorus",
+        "platinum",
+        "plutonium",
+        "polonium",
+        "potassium",
+        "praseodymium",
+        "promethium",
+        "protactinium",
+        "radium",
+        "radon",
+        "rhenium",
+        "rhodium",
+        "roentgenium",
+        "rubidium",
+        "ruthenium",
+        "rutherfordium",
+        "samarium",
+        "scandium",
+        "seaborgium",
+        "selenium",
+        "silicon",
+        "silver",
+        "sodium",
+        "strontium",
+        "sulfur",
+        "tantalum",
+        "technetium",
+        "tellurium",
+        "tennessine",
+        "terbium",
+        "thallium",
+        "thorium",
+        "thulium",
+        "tin",
+        "titanium",
+        "tungsten",
+        "uranium",
+        "vanadium",
+        "xenon",
+        "ytterbium",
+        "yttrium",
+        "zinc",
+        "zirconium"
+      ],
+      "closedSet": true,
+      "definition": "Any of the 118 chemical elements, by name (not symbol)",
+      "recallProfile": "obscure-tail",
+      "membership": {
+        "reference": "chemical-elements"
+      },
+      "typicalRecall": 15,
+      "aliases": {
+        "aluminum": {
+          "to": "aluminium",
+          "reason": "American spelling of the IUPAC name aluminium"
+        },
+        "cesium": {
+          "to": "caesium",
+          "reason": "American spelling of the IUPAC name caesium"
+        },
+        "sulphur": {
+          "to": "sulfur",
+          "reason": "British spelling; IUPAC uses sulfur"
+        }
+      },
+      "knownNotAccepted": {
+        "steel": "An alloy, not an element",
+        "brass": "An alloy, not an element",
+        "bronze": "An alloy, not an element",
+        "water": "A compound, not an element"
+      }
+    },
+    {
+      "id": "spr-cs-south-america",
+      "difficulty": 1,
+      "category": "Closed set",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "provisional",
+        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "United Nations M49 (South America), sovereign states only: https://unstats.un.org/unsd/methodology/m49/"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set"
+      ],
+      "name": "Countries in South America",
+      "answers": [
+        "argentina",
+        "bolivia",
+        "brazil",
+        "chile",
+        "colombia",
+        "ecuador",
+        "guyana",
+        "paraguay",
+        "peru",
+        "suriname",
+        "uruguay",
+        "venezuela"
+      ],
+      "closedSet": true,
+      "definition": "Sovereign countries of South America (12)",
+      "recallProfile": "famous-first",
+      "membership": {
+        "reference": "south-america-sovereign"
+      },
+      "knownNotAccepted": {
+        "french guiana": "An overseas region of France, not a country",
+        "falkland islands": "A British Overseas Territory",
+        "panama": "In Central America",
+        "mexico": "In North America"
+      }
+    },
+    {
+      "id": "spr-cs-chinese-zodiac",
+      "difficulty": 2,
+      "category": "Closed set",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "provisional",
+        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "Encyclopaedia Britannica (Chinese zodiac): https://www.britannica.com/topic/Chinese-zodiac"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set"
+      ],
+      "name": "Animals of the Chinese zodiac",
+      "answers": [
+        "dog",
+        "dragon",
+        "goat",
+        "horse",
+        "monkey",
+        "ox",
+        "pig",
+        "rabbit",
+        "rat",
+        "rooster",
+        "snake",
+        "tiger"
+      ],
+      "closedSet": true,
+      "definition": "The 12 animals of the Chinese zodiac",
+      "recallProfile": "dominant",
+      "membership": {
+        "reference": "chinese-zodiac"
+      },
+      "aliases": {
+        "sheep": {
+          "to": "goat",
+          "reason": "The sign 羊 (yáng) is translated Goat, Sheep or Ram in standard references"
+        },
+        "ram": {
+          "to": "goat",
+          "reason": "A standard translation of the sign 羊 (yáng)"
+        },
+        "chicken": {
+          "to": "rooster",
+          "reason": "The sign 鸡 (jī) literally means chicken; Rooster is the conventional English name"
+        },
+        "cockerel": {
+          "to": "rooster",
+          "reason": "British English for rooster"
+        },
+        "boar": {
+          "to": "pig",
+          "reason": "The sign 猪 (zhū) is sometimes translated Boar"
+        },
+        "hare": {
+          "to": "rabbit",
+          "reason": "The sign 兔 (tù) is translated Rabbit or Hare"
+        },
+        "mouse": {
+          "to": "rat",
+          "reason": "The sign 鼠 (shǔ) covers both rat and mouse"
+        }
+      },
+      "knownNotAccepted": {
+        "cat": "The Cat replaces the Rabbit in the Vietnamese zodiac, not the Chinese one",
+        "buffalo": "The Buffalo replaces the Ox in the Vietnamese zodiac, not the Chinese one"
+      }
+    },
+    {
+      "id": "spr-cs-planets",
+      "difficulty": 2,
+      "category": "Closed set",
+      "language": "en",
+      "eligibility": "practice",
+      "review": {
+        "status": "provisional",
+        "notes": "E2 v3 closed set by Claude (2026-11-07). Membership list transcribed, not yet compared with its source page; not human-reviewed or approved. Approval is refused until the reference has a sourceCheck."
+      },
+      "source": {
+        "kind": "reference",
+        "ref": "International Astronomical Union (2006 definition; recognised dwarf planets): https://www.iau.org/public/themes/pluto/"
+      },
+      "tags": [
+        "e2-v3",
+        "closed-set"
+      ],
+      "name": "Planets and dwarf planets",
+      "answers": [
+        "ceres",
+        "earth",
+        "eris",
+        "haumea",
+        "jupiter",
+        "makemake",
+        "mars",
+        "mercury",
+        "neptune",
+        "pluto",
+        "saturn",
+        "uranus",
+        "venus"
+      ],
+      "closedSet": true,
+      "definition": "The 8 planets and 5 IAU-recognised dwarf planets",
+      "recallProfile": "dominant",
+      "membership": {
+        "reference": "iau-planets-dwarf-planets"
+      },
+      "knownNotAccepted": {
+        "moon": "Earth's natural satellite, not a planet",
+        "sun": "A star"
+      }
+    }
+  ]
+}

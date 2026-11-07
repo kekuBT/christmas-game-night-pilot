@@ -13,7 +13,7 @@ import type { GeographyQuestion } from "../games/geography.js";
 import type { YearEvent } from "../games/year.js";
 import type { ClosestQuestion, ClosestState } from "../games/closest.js";
 import type { CaptionState } from "../games/caption.js";
-import type { SprintCategory } from "../games/sprint.js";
+import type { SprintCategory, SprintMatcherVersion } from "../games/sprint.js";
 import type { ConnectionsBoard } from "../games/connections.js";
 import { initImpostor } from "../games/impostor.js";
 import { initCharades } from "../games/charades.js";
@@ -48,7 +48,14 @@ function mc(options: string[], answer: string, rng: () => number): { options: st
   return { options: o, correctIndex: o.indexOf(answer) };
 }
 
-export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { seed: number; playerIds: string[] }): unknown {
+export interface SprintRulesSnapshot {
+  /** Matcher the game is scored with, for its whole life. */
+  matcherVersion: SprintMatcherVersion;
+  /** Official games only: the size policy and room size the categories were chosen for. */
+  eligibility?: { sizePolicy: number; players: number };
+}
+
+export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { seed: number; playerIds: string[]; sprint?: SprintRulesSnapshot }): unknown {
   const rng = seededRng(ctx.seed);
   switch (gameId) {
     case "trivia":
@@ -71,8 +78,22 @@ export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { s
       const st: CaptionState = { rounds: items.map((li) => ({ prompt: as<"caption-clash">(li).prompt, captions: {}, votes: {}, abstainedSubmissions: [], abstainedVotes: [] })), roundIndex: 0, phase: "caption" };
       return st;
     }
-    case "category-sprint":
-      return { roundIndex: 0, submissions: {}, categories: items.map((li): SprintCategory => { const it = as<"category-sprint">(li); return { name: it.name, answers: [...it.answers] }; }) };
+    case "category-sprint": {
+      const categories = items.map((li): SprintCategory => {
+        const it = as<"category-sprint">(li);
+        // A full copy: later pack edits (aliases, near-misses) never change this game.
+        return {
+          name: it.name,
+          answers: [...it.answers],
+          ...(it.definition ? { definition: it.definition } : {}),
+          ...(it.aliases ? { aliases: structuredClone(it.aliases) } : {}),
+          ...(it.knownNotAccepted ? { knownNotAccepted: { ...it.knownNotAccepted } } : {}),
+          ...(it.typoTolerance !== undefined ? { typoTolerance: it.typoTolerance } : {}),
+        };
+      });
+      // No `matcherVersion` (games from Cups before E2 v3) means v1.
+      return { roundIndex: 0, submissions: {}, categories, ...(ctx.sprint && ctx.sprint.matcherVersion !== 1 ? { matcherVersion: ctx.sprint.matcherVersion } : {}), ...(ctx.sprint?.eligibility ? { eligibility: ctx.sprint.eligibility } : {}) };
+    }
     case "word-connections": {
       const it = as<"word-connections">(items[0]!);
       const board: ConnectionsBoard = {

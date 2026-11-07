@@ -220,8 +220,14 @@ export interface QuizQuestion {
 }
 
 /** Game-specific state, as projected by the server. All fields optional: each game uses a subset. */
+export interface SprintVerdict { raw: string; verdict: "unique" | "shared" | "repeat" | "near-miss" | "not-on-list" | "empty" | "over-limit"; canonical?: string; reason?: string }
+
 export interface GameState {
   category?: string;
+  /** Category Sprint closed set: what counts, shown before typing. */
+  definition?: string;
+  /** Category Sprint, finished only: each round's accepted list and the player's own verdicts. */
+  results?: { category: string; accepted: string[]; mine?: SprintVerdict[] }[];
   role?: string;
   word?: string;
   phase?: string;

@@ -76,12 +76,51 @@ export const ClosestItem = z.object({
   explanation: text(240),
 }).strict();
 export const CaptionItem = z.object({ ...BaseItem, prompt: text(120) }).strict();
+const sprintKey = z.string().regex(/^[a-z][a-z ]*[a-z]$|^[a-z]$/).max(60);
+export const RECALL_PROFILES = ["even", "famous-first", "obscure-tail", "dominant"] as const;
+export type RecallProfile = (typeof RECALL_PROFILES)[number];
 export const SprintItem = z.object({
   ...BaseItem,
   name: text(40),
-  /** Accepted answers, normalised (lowercase letters and spaces). */
+  /** Accepted answers, normalised (lowercase letters and spaces). For a closed set: the canonical members. */
   answers: z.array(z.string().regex(/^[a-z][a-z ]*[a-z]$/)).min(10).max(400),
+  /**
+   * E2 v3 closed set: membership is decided by a named authority. The item's
+   * answers must equal the canonical members of `membership.reference`
+   * (content/reference/sprint/<reference>.json), checked when content loads.
+   */
+  closedSet: z.literal(true).optional(),
+  definition: text(100).optional(),
+  recallProfile: z.enum(RECALL_PROFILES).optional(),
+  /** Author's estimate of how many members a typical player can name (obscure-tail sets need >= 10; an editor confirms it at review). */
+  typicalRecall: z.number().int().min(0).max(400).optional(),
+  membership: z.object({ reference: z.string().regex(/^[a-z0-9-]+$/).max(48) }).strict().optional(),
+  /** Category-scoped: variant -> canonical answer, each with a reason. Never global. */
+  aliases: z.record(sprintKey, z.object({ to: sprintKey, reason: text(200) }).strict()).optional(),
+  /** Answers that are NOT accepted, with the reason shown in results. */
+  knownNotAccepted: z.record(sprintKey, text(200)).optional(),
+  typoTolerance: z.boolean().optional(),
 }).strict();
+
+/** A closed set's membership as published by its authority (content/reference/sprint/*.json). */
+export const SprintReferenceSchema = z.object({
+  schemaVersion: z.literal(1),
+  id: z.string().regex(/^[a-z0-9-]+$/).max(48),
+  title: text(100),
+  /** The authority and the page that publishes the list. */
+  source: z.object({ authority: text(120), url: z.string().url().max(300), publishedCount: z.number().int().positive() }).strict(),
+  /** Members exactly as the source names them (display form). */
+  members: z.array(text(80)).min(1).max(400),
+  /** How the list was produced. "transcribed" means typed in, not yet compared with the source page. */
+  provenance: text(300),
+  /**
+   * Comparison of `members` with the source page by a named person. Required
+   * before any item using this list can be approved for official play.
+   */
+  sourceCheck: z.object({ by: text(60), date: isoDate, url: z.string().url().max(300), note: z.string().max(300).optional() }).strict().optional(),
+  timeSensitive: z.object({ asOf: isoDate, reviewBy: isoDate }).strict().optional(),
+}).strict();
+export type SprintReference = z.infer<typeof SprintReferenceSchema>;
 export const ConnectionsItem = z.object({
   ...BaseItem,
   groups: z.array(z.object({

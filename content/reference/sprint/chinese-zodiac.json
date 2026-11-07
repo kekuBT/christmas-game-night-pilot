@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "chinese-zodiac",
+  "title": "The 12 animals of the Chinese zodiac",
+  "source": {
+    "authority": "Encyclopaedia Britannica (Chinese zodiac)",
+    "url": "https://www.britannica.com/topic/Chinese-zodiac",
+    "publishedCount": 12
+  },
+  "members": [
+    "Rat",
+    "Ox",
+    "Tiger",
+    "Rabbit",
+    "Dragon",
+    "Snake",
+    "Horse",
+    "Goat",
+    "Monkey",
+    "Rooster",
+    "Dog",
+    "Pig"
+  ],
+  "provenance": "Transcribed by the author (Claude, 2026-11-07) from the authority's list; NOT yet compared with the source page (network blocked). Count cross-checked by web search."
+}

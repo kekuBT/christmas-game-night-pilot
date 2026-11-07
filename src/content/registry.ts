@@ -10,7 +10,8 @@ import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ApprovalsSchema, ITEM_SCHEMAS, OFFICIAL_STATUSES, PackHeaderSchema, type AnyItem, type ContentGameId, type ItemOf, type ReviewStatus } from "./schema.js";
+import { ApprovalsSchema, ITEM_SCHEMAS, OFFICIAL_STATUSES, PackHeaderSchema, SprintReferenceSchema, type AnyItem, type ContentGameId, type ItemOf, type ReviewStatus, type SprintReference } from "./schema.js";
+import { sprintItemProblems } from "./closedSet.js";
 
 export const DEFAULT_CONTENT_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "content");
 
@@ -33,6 +34,8 @@ export interface ContentLibrary {
   byGame: Map<ContentGameId, LoadedItem[]>;
   packs: { packId: string; gameId: ContentGameId; version: string; title: string; file: string; count: number }[];
   problems: ContentProblem[];
+  /** Category Sprint closed-set membership lists (content/reference/sprint). */
+  sprintReferences: Map<string, SprintReference>;
 }
 
 function stable(v: unknown): string {
@@ -74,7 +77,16 @@ export function contentTestMode(env: NodeJS.ProcessEnv = process.env): boolean {
 }
 
 export function loadContent(dir: string = DEFAULT_CONTENT_DIR, opts: { testApproveProvisional?: boolean } = {}): ContentLibrary {
-  const lib: ContentLibrary = { items: new Map(), byGame: new Map(), packs: [], problems: [] };
+  const lib: ContentLibrary = { items: new Map(), byGame: new Map(), packs: [], problems: [], sprintReferences: new Map() };
+  const refDir = join(dir, "reference", "sprint");
+  for (const f of existsSync(refDir) ? readdirSync(refDir).filter((x) => x.endsWith(".json")).sort() : []) {
+    let raw: unknown;
+    try { raw = JSON.parse(readFileSync(join(refDir, f), "utf8")); } catch (e) { lib.problems.push({ file: `reference/sprint/${f}`, message: `not JSON: ${(e as Error).message}` }); continue; }
+    const ref = SprintReferenceSchema.safeParse(raw);
+    if (!ref.success) { lib.problems.push({ file: `reference/sprint/${f}`, message: ref.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ") }); continue; }
+    if (`${ref.data.id}.json` !== f) { lib.problems.push({ file: `reference/sprint/${f}`, message: `id "${ref.data.id}" does not match the file name` }); continue; }
+    lib.sprintReferences.set(ref.data.id, ref.data);
+  }
   const packDir = join(dir, "packs");
   const approvals = new Map<string, { hash: string; reviewer: string; date: string }>();
   const approvalsFile = join(dir, "approvals.json");
@@ -97,12 +109,25 @@ export function loadContent(dir: string = DEFAULT_CONTENT_DIR, opts: { testAppro
       const id = (rawItem as { id?: string })?.id ?? `#${i}`;
       if (!parsed.success) { lib.problems.push({ file, itemId: id, message: parsed.error.issues.map((x) => `${x.path.join(".")}: ${x.message}`).join("; ") }); continue; }
       const item = parsed.data as AnyItem;
+      if (gameId === "category-sprint") {
+        // E2 v3: a closed set whose answers don't exactly match its published
+        // membership (or whose aliases are malformed) never reaches a game.
+        const sp = item as ItemOf<"category-sprint">;
+        const bad = sprintItemProblems(sp, sp.membership ? lib.sprintReferences.get(sp.membership.reference) : undefined);
+        if (bad.length) { lib.problems.push({ file, itemId: item.id, message: bad.join("; ") }); continue; }
+      }
       if (lib.items.has(item.id)) { lib.problems.push({ file, itemId: item.id, message: `duplicate id (also in ${lib.items.get(item.id)!.packId})` }); continue; }
       const hash = itemHash(gameId, item);
       const appr = approvals.get(item.id) ?? (opts.testApproveProvisional && item.review.status === "provisional" ? { hash, reviewer: "TEST MODE (not a human review)", date: "1970-01-01" } : undefined);
       let status: ReviewStatus = item.review.status;
       let approval: LoadedItem["approval"];
-      if (appr) {
+      const realApproval = approvals.get(item.id);
+      const sp = gameId === "category-sprint" ? (item as ItemOf<"category-sprint">) : undefined;
+      if (realApproval && sp?.closedSet && !lib.sprintReferences.get(sp.membership!.reference)?.sourceCheck) {
+        // A closed set can be approved only after a person compared its
+        // membership list with the source page (owner correction, E2 v3).
+        lib.problems.push({ file, itemId: item.id, message: `approval refused: membership list "${sp.membership!.reference}" has no recorded source check` });
+      } else if (appr) {
         if (appr.hash !== hash) lib.problems.push({ file, itemId: item.id, message: "approval is for an earlier version of this item (edited since approval): re-review needed" });
         else if (status !== "rejected") { status = "approved"; approval = { reviewer: appr.reviewer, date: appr.date }; }
       }

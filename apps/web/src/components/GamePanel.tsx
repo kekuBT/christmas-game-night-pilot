@@ -20,6 +20,7 @@ export function GamePanel(props: { game: PlayerGame; players: PublicPlayer[]; na
   const questions = game.questions ?? st.questions ?? [];
   return <div className="card" data-testid="game-panel"><h2>Now playing: {game.gameId}</h2><p className="muted">Status: {game.status}{game.status === "finished" ? ` · Your score: ${game.myScore ?? ""}` : ""}</p>
     {game.status === "finished" && game.rawScores && <p>{Object.entries(game.rawScores).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>}
+    {game.status === "finished" && game.gameId === "category-sprint" && (st.results ?? []).length > 0 && <SprintResults results={st.results!} />}
     {game.status === "playing" && <>
       {quiz && questions.map((q) => {
         const answered = game.abstained === true || game.myAnswers?.[q.id] !== undefined || st.myAnswers?.[q.id] !== undefined;
@@ -52,7 +53,7 @@ export function GamePanel(props: { game: PlayerGame; players: PublicPlayer[]; na
         <div className="grid">{(st.tiles ?? []).map((t) => <button key={t.id} className={selectedTiles.includes(t.id) ? "tile sel" : "tile"} onClick={() => setSelectedTiles(selectedTiles.includes(t.id) ? selectedTiles.filter((x) => x !== t.id) : selectedTiles.length < 4 ? [...selectedTiles, t.id] : selectedTiles)}>{t.text ?? t.id}</button>)}</div>
         <div className="row"><button disabled={selectedTiles.length !== 4 || game.abstained === true} onClick={() => { intent(gid, "connections-guess", { tileIds: selectedTiles }); setSelectedTiles([]); }}>Submit group of 4</button></div>
       </div>}
-      {game.gameId === "category-sprint" && <div className="card"><p>Round {(st.roundIndex ?? 0) + 1} of 3 · Category: <b>{st.category}</b></p><p className="muted">Enter up to 5 examples, comma-separated. Unique answers score more.</p>
+      {game.gameId === "category-sprint" && <div className="card"><p>Round {(st.roundIndex ?? 0) + 1} of 3 · Category: <b>{st.category}</b></p>{st.definition && <p data-testid="sprint-definition">Counts: {st.definition}</p>}<p className="muted">Enter up to 5 examples, comma-separated. Unique answers score more.</p>
         <div className="row"><input value={textInput} onChange={(e) => setTextInput(e.target.value)} placeholder="e.g. Paris, Rome, Madrid" /><button disabled={game.abstained === true} onClick={() => intent(gid, "sprint-answers", { answers: textInput.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 5) })}>Submit answers</button></div>
       </div>}
       {game.gameId === "charades" && <div className="card"><p>Actor: <b>{nameOf(st.actor ?? "")}</b> · Team scores: {JSON.stringify(st.teamScores)} · Passes used: {st.passesThisTurn ?? 0} / 3</p>
@@ -62,4 +63,23 @@ export function GamePanel(props: { game: PlayerGame; players: PublicPlayer[]; na
       {abstainedNow && <p className="muted">You sat this one out — 0 points for what you skipped. The game continues for everyone else.</p>}
     </>}
   </div>;
+}
+
+const VERDICT_TEXT: Record<string, string> = {
+  "unique": "Unique (+40)",
+  "shared": "Valid, someone else had it too (+20)",
+  "repeat": "Repeat of your own answer (0)",
+  "near-miss": "Not accepted",
+  "not-on-list": "Not on our list (0)",
+  "empty": "Blank",
+  "over-limit": "Over the 5-answer limit",
+};
+
+/** Category Sprint results: your own answers judged, with near-miss reasons, then the full list. */
+function SprintResults(props: { results: NonNullable<GameState["results"]> }) {
+  return <div className="card" data-testid="sprint-results">{props.results.map((r, i) => <div key={i}>
+    <p><b>Round {i + 1}: {r.category}</b></p>
+    {(r.mine ?? []).length > 0 && <ul>{r.mine!.map((m, j) => <li key={j}>{m.raw}: {VERDICT_TEXT[m.verdict] ?? m.verdict}{m.reason ? ` (${m.reason})` : ""}</li>)}</ul>}
+    <details><summary>All {r.accepted.length} accepted answers</summary><p className="muted">{r.accepted.join(", ")}</p></details>
+  </div>)}</div>;
 }

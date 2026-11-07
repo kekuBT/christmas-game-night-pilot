@@ -6,7 +6,8 @@
  */
 import type { ContentLibrary, LoadedItem } from "./registry.js";
 import { officialEligible } from "./registry.js";
-import type { ContentGameId } from "./schema.js";
+import type { ContentGameId, ItemOf } from "./schema.js";
+import { officialSprintSuitable } from "./closedSet.js";
 import { isNumericGame, NUMERIC_INPUT, withinNumericInput } from "../shared/numericInput.js";
 
 export interface LintIssue { level: "error" | "warn"; gameId: ContentGameId; itemId: string; code: string; message: string }
@@ -86,9 +87,21 @@ export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
         if (li.item.eligibility === "official" && !(it["redHerrings"] as string | undefined)) add(li, "warn", "no-red-herring-note", "describe the intended misdirection so an editor can check no word honestly fits two groups");
       }
       if (gameId === "category-sprint") {
-        const answers = it["answers"] as string[];
+        const sp = li.item as ItemOf<"category-sprint">;
+        const answers = sp.answers;
         if (new Set(answers).size !== answers.length) add(li, "error", "duplicate-answers", "accepted answers repeat");
-        if (answers.length < 25) add(li, "warn", "thin-answers", `only ${answers.length} accepted answers: players will give valid answers that are not listed`);
+        if (!sp.closedSet && answers.length < 25) add(li, "warn", "thin-answers", `only ${answers.length} accepted answers: players will give valid answers that are not listed`);
+        // E2 v3 (owner-approved): official competition uses closed sets only.
+        if (!sp.closedSet && sp.eligibility === "official") add(li, "error", "open-set-official", "open categories are practice-only under E2 v3: mark it practice, or make it a closed set with a membership reference");
+        if (sp.closedSet && sp.eligibility === "official") {
+          const rooms = [4, 5, 6, 7, 8, 9, 10].filter((p) => officialSprintSuitable(sp, p).ok);
+          if (rooms.length === 0) add(li, "warn", "never-suitable", `no room size from 4 to 10 players passes the size policy (${answers.length} members, ${sp.recallProfile}): it will never be chosen officially`);
+          else if (rooms.length < 7) add(li, "warn", "room-limited", `official only for ${rooms[0]}-${rooms[rooms.length - 1]} players under the size policy`);
+        }
+        if (sp.closedSet) {
+          const ref = lib.sprintReferences.get(sp.membership!.reference);
+          if (ref && !ref.sourceCheck) add(li, "warn", "membership-unchecked", `membership list "${ref.id}" has not been compared with its source page (${ref.source.url}); approval is refused until a person records that check`);
+        }
       }
       if (gameId === "impostor" && norm(String(it["word"])) === norm(String(it["hintCategory"]))) add(li, "error", "word-is-category", "the secret word must differ from its category hint");
       if (gameId === "geography" && it["mode"] === "flag" && !li.item.accessibility) add(li, "warn", "accessibility", "flag questions rely on colour/emoji: describe a text alternative");

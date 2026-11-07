@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "iau-planets-dwarf-planets",
+  "title": "Planets and IAU-recognised dwarf planets",
+  "source": {
+    "authority": "International Astronomical Union (2006 definition; recognised dwarf planets)",
+    "url": "https://www.iau.org/public/themes/pluto/",
+    "publishedCount": 13
+  },
+  "members": [
+    "Mercury",
+    "Venus",
+    "Earth",
+    "Mars",
+    "Jupiter",
+    "Saturn",
+    "Uranus",
+    "Neptune",
+    "Ceres",
+    "Pluto",
+    "Haumea",
+    "Makemake",
+    "Eris"
+  ],
+  "provenance": "Transcribed by the author (Claude, 2026-11-07) from the authority's list; NOT yet compared with the source page (network blocked). Count cross-checked by web search."
+}

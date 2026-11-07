@@ -29,6 +29,17 @@ export const CupRecordSchema = z.object({
   qualificationPolicy: QualificationPolicySchema,
   /** How the Cup came to exist: created in Sprint 4+, or reconstructed from an older snapshot. */
   origin: z.enum(["created", "legacy-restored"]),
+  /**
+   * Category Sprint rules (E2 v3, owner-approved 2026-11-07). Fixed when the
+   * Cup is created. Absent = a Cup created before E2 v3: it keeps the
+   * Sprint 4 behaviour (matcher v1, no closed-set or size filter), so a Cup
+   * already under way is never re-ruled.
+   */
+  categorySprint: z.object({
+    matcher: z.literal(2),
+    /** Official categories must be closed sets that pass this size policy for the room. */
+    sizePolicy: z.literal(1),
+  }).strict().optional(),
 }).strict();
 export type CupRecord = z.infer<typeof CupRecordSchema>;
 
@@ -40,6 +51,7 @@ export function newCupRecord(cupId: string, createdAt: number): CupRecord {
     format: NEW_ROOM_FORMAT,
     qualificationPolicy: NEW_CUP_QUALIFICATION_POLICY,
     origin: "created",
+    categorySprint: Object.freeze({ matcher: 2, sizePolicy: 1 }),
   }) as CupRecord;
 }
 
@@ -69,7 +81,7 @@ export function restoreCupRecord(raw: unknown, ctx: { roomId: string; legacyForm
   if (!parsed.success) {
     return { ok: false, error: `Cup record invalid: ${parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; ").slice(0, 300)}`, raw };
   }
-  return { ok: true, cup: Object.freeze({ ...parsed.data, qualificationPolicy: Object.freeze({ ...parsed.data.qualificationPolicy }) }) as CupRecord };
+  return { ok: true, cup: Object.freeze({ ...parsed.data, qualificationPolicy: Object.freeze({ ...parsed.data.qualificationPolicy }), ...(parsed.data.categorySprint ? { categorySprint: Object.freeze({ ...parsed.data.categorySprint }) } : {}) }) as CupRecord };
 }
 
 export function describePolicy(p: QualificationPolicy): string {

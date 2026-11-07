@@ -29,6 +29,7 @@ import { seededRng } from "../shared/rng.js";
 import { officialEligible, practiceUsable, type ContentLibrary, type LoadedItem } from "./registry.js";
 import type { ContentGameId } from "./schema.js";
 import { isNumericGame, withinNumericInput } from "../shared/numericInput.js";
+import { officialSprintSuitable, SPRINT_SIZE_POLICY_VERSION } from "./closedSet.js";
 
 export interface UsageRecord { gameInstanceId: string; day: number; mode: "official" | "practice"; seq: number }
 /** Per Cup: item id -> every time it was used. Saved with the room. */
@@ -44,11 +45,18 @@ export interface SelectionRequest {
   /** Monotonic per Cup: makes successive games differ, reproducibly. */
   seq: number;
   today: string;
+  /**
+   * Category Sprint under E2 v3 (Cups created with categorySprint rules):
+   * official categories must be closed sets that suit this many players.
+   * The roster size is fixed at game start, so eligibility is decided once,
+   * here, and recorded in the game. Absent = Sprint 4 behaviour.
+   */
+  sprint?: { players: number; sizePolicy: typeof SPRINT_SIZE_POLICY_VERSION };
 }
 
 export type SelectionResult =
   | { ok: true; items: LoadedItem[]; seed: number; reasons: string[] }
-  | { ok: false; reason: "insufficient-content"; available: number; needed: number; message: string };
+  | { ok: false; reason: "insufficient-content" | "no-suitable-category"; available: number; needed: number; message: string };
 
 export function selectionSeed(cupId: string, gameId: string, seq: number): number {
   return createHash("sha256").update(`${cupId}|${gameId}|${seq}`).digest().readUInt32BE(0);
@@ -122,8 +130,18 @@ export function selectContent(req: SelectionRequest): SelectionResult {
   const seed = selectionSeed(req.cupId, req.gameId, req.seq);
   const rng = seededRng(seed);
   if (req.mode === "official") {
-    const eligible = all.filter((li) => officialEligible(li, req.today));
+    const sprint = req.gameId === "category-sprint" ? req.sprint : undefined;
+    const eligible = all.filter((li) => officialEligible(li, req.today) && (!sprint || officialSprintSuitable(li.item as never, sprint.players).ok));
     const fresh = eligible.filter((li) => !usedInCup(req.usage, li.item.id));
+    if (sprint && fresh.length < req.count) {
+      // No fallback to "the largest category we have" (owner correction):
+      // an unsuitable category would make the uniqueness bonus near-impossible
+      // or leave players without answers. Say so and offer practice.
+      return {
+        ok: false, reason: "no-suitable-category", available: fresh.length, needed: req.count,
+        message: `No suitable official Category Sprint categories are left for ${sprint.players} players in this Cup (${fresh.length} suitable, ${req.count} needed). Official categories must be closed lists large enough for the room. You can play Category Sprint as practice instead.`,
+      };
+    }
     if (fresh.length < req.count) {
       return {
         ok: false, reason: "insufficient-content", available: fresh.length, needed: req.count,
@@ -131,7 +149,7 @@ export function selectContent(req: SelectionRequest): SelectionResult {
       };
     }
     const items = stratified(fresh, req.count, rng);
-    return { ok: true, items, seed, reasons: [`official pool: ${fresh.length} unused of ${eligible.length} eligible`, `difficulty mix: ${[1, 2, 3].map((d) => items.filter((i) => i.item.difficulty === d).length).join("/")}`, ...excludedNote] };
+    return { ok: true, items, seed, reasons: [`official pool: ${fresh.length} unused of ${eligible.length} eligible`, ...(sprint ? [`category sprint: closed sets suitable for ${sprint.players} players (size policy v${sprint.sizePolicy})`] : []), `difficulty mix: ${[1, 2, 3].map((d) => items.filter((i) => i.item.difficulty === d).length).join("/")}`, ...excludedNote] };
   }
   // Practice: practice-only or already-used items first (least recently used),
   // then fresh official items, which this use retires from official play.
