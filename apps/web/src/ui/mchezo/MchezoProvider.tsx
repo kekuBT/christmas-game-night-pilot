@@ -28,6 +28,8 @@ export interface MchezoProviderProps {
   /** Force reduced motion on/off (e.g. an in-app setting). Defaults to the OS preference. */
   reducedMotion?: boolean;
   haptics?: boolean;
+  /** In-app Animations "Off": implies reduced motion, and stops every animation and transition. */
+  still?: boolean;
   /** Render as a full-height phone surface (default) or a bare wrapper. */
   as?: 'surface' | 'bare';
   className?: string;
@@ -36,9 +38,9 @@ export interface MchezoProviderProps {
 }
 
 /** Applies theme CSS variables and motion preference to everything inside. */
-export function MchezoProvider({ theme = everyday, reducedMotion, haptics = true, as = 'surface', className, style, children }: MchezoProviderProps) {
+export function MchezoProvider({ theme = everyday, reducedMotion, haptics = true, still = false, as = 'surface', className, style, children }: MchezoProviderProps) {
   const sys = useSystemReducedMotion();
-  const rm = reducedMotion ?? sys;
+  const rm = still || (reducedMotion ?? sys);
   const value = useMemo(() => ({ theme, reducedMotion: rm, haptics }), [theme, rm, haptics]);
   const vars = useMemo(() => themeToCssVars(theme) as CSSProperties, [theme]);
   return (
@@ -47,6 +49,7 @@ export function MchezoProvider({ theme = everyday, reducedMotion, haptics = true
         className={['mz-root', as === 'surface' ? 'mz-surface' : '', className].filter(Boolean).join(' ')}
         data-mz-theme={theme.id}
         data-mz-motion={rm ? 'reduced' : 'full'}
+        data-mz-still={still ? '' : undefined}
         style={{ ...vars, ...style }}
       >
         {children}

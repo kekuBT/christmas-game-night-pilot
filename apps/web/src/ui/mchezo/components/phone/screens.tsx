@@ -116,6 +116,8 @@ export interface LobbyScreenProps {
   startTestId?: string;
   minPlayers?: number;
   capacity?: number;
+  /** Opens the invite sheet (QR, native Share, Copy link). */
+  onShare?: () => void;
   /** Integration slot: host game picker, QR invite, cohost controls, and
       navigation live here — our lobby has more than the handoff's single
       up-next game, and those controls must stay reachable. */
@@ -141,7 +143,7 @@ export function LobbyScreen(p: LobbyScreenProps) {
   return (
     <PhoneScreen label="Lobby">
       <header className="mz-topbar">
-        <button type="button" className="mz-chip-btn mz-chip-btn--code" aria-label={`Share room code ${p.session.roomCode}`}>
+        <button type="button" className="mz-chip-btn mz-chip-btn--code" aria-label={`Share room code ${p.session.roomCode}`} aria-haspopup="dialog" data-testid="share-room" onClick={p.onShare} disabled={!p.onShare}>
           {p.session.roomCode}<Icon d={ICON.share} size={16} />
         </button>
         {p.session.championship ? <EventBadge championship={p.session.championship} compact /> : <span className="mz-muted mz-small">{p.session.sessionLabel}</span>}

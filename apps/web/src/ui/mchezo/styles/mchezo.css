@@ -21,11 +21,18 @@
   padding: max(14px, env(safe-area-inset-top)) clamp(14px, 4.6vw, 20px) max(18px, env(safe-area-inset-bottom));
   animation: mz-enter .38s var(--mz-ease-out) both; overflow-x: clip;
 }
+/* Stage 1 (V1): a screen is a fixed-height flex column that scrolls itself.
+   When content outgrew the viewport, children SHRANK below their content and
+   painted over each other (lobby title over the Cup badge). Children keep their
+   size now and the screen scrolls; only spacers and the landing hero flex. */
+.mz-screen > :not(.mz-grow):not(.mz-hero) { flex-shrink: 0; }
 .mz-gap { flex: none; height: 12px; }
 .mz-sub__new { color: var(--mz-highlight); font-weight: 800; }
-.mz-circle-wrap { flex: 1 1 250px; min-height: 236px; max-height: 372px; container-type: size; display: flex; align-items: center; justify-content: center; }
+.mz-circle-wrap { flex: 1 0 260px; min-height: 260px; max-height: 372px; container-type: size; display: flex; align-items: center; justify-content: center; }
 @keyframes mz-enter { from { opacity: 0; transform: translateY(14px) scale(.99); } to { opacity: 1; transform: none; } }
 @keyframes mz-fade { from { opacity: 0; } to { opacity: 1; } }
+/* In-app Animations "Off": reduced-motion visuals, and nothing moves at all. */
+[data-mz-still] *, [data-mz-still] *::before, [data-mz-still] *::after { animation: none !important; transition: none !important; }
 [data-mz-motion="reduced"] .mz-screen,
 [data-mz-motion="reduced"] .mz-enter { animation: mz-fade .16s linear both; }
 
@@ -52,6 +59,7 @@
 .mz-chip-btn--code { font-family: var(--mz-font-display); letter-spacing: .1em; }
 .mz-event-badge { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 14px; border-radius: 18px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); color: var(--mz-highlight); font-weight: 800; font-size: 15px; }
 .mz-event-badge--compact { font-size: 13px; padding: 4px 10px; min-height: 32px; gap: 6px; }
+.mz-topbar .mz-event-badge { max-width: 100%; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
 /* ---------------------------------------------------------------- keycap */
 .mz-key {
@@ -117,13 +125,17 @@
 .mz-circle__center { position: absolute; left: 50%; top: 50%; width: 46%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); display: grid; place-items: center; text-align: center; padding: 4%; }
 .mz-upnext { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .mz-upnext .mz-kicker { font-size: 13px; }
-.mz-upnext__name { font: 700 clamp(13px, 4.4cqi, 17px)/1.1 var(--mz-font-display); white-space: nowrap; }
-.mz-upnext__kind { font-size: 14px; color: var(--mz-text-muted); }
+/* Stage 1 (V6): long names ("Geography Challenge") wrap inside the disc instead
+   of spilling under the seats around it. */
+.mz-upnext { max-width: 100%; }
+.mz-upnext__name { font: 700 clamp(12px, 4.2cqi, 17px)/1.1 var(--mz-font-display); white-space: normal; overflow-wrap: anywhere; text-wrap: balance; max-width: 100%; }
+.mz-upnext__kind { font-size: clamp(12px, 3.8cqi, 14px); color: var(--mz-text-muted); }
 .mz-circle__seats { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
 .mz-seat { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; width: 24cqi; }
 .mz-seat__btn { appearance: none; border: 0; background: none; padding: 0; border-radius: 50%; cursor: pointer; display: grid; place-items: center; min-width: 44px; min-height: 44px; }
 .mz-seat__btn:disabled { cursor: default; }
-.mz-seat .mz-token { width: clamp(42px, 14.5cqi, 54px) !important; height: clamp(42px, 14.5cqi, 54px) !important; font-size: clamp(15px, 5cqi, 19px) !important; }
+/* Seat tokens stay inside the ring-to-disc gap (15% of the circle) at every size. */
+.mz-seat .mz-token { width: clamp(36px, 13cqi, 52px) !important; height: clamp(36px, 13cqi, 52px) !important; font-size: clamp(14px, 4.6cqi, 18px) !important; }
 .mz-seat__btn:active:not(:disabled) .mz-token { transform: scale(.92); }
 .mz-seat__name { position: absolute; top: calc(100% + 1px); max-width: 100%; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; padding: 0 2px; border-radius: 6px; background: color-mix(in srgb, var(--mz-ground) 78%, transparent); }
 .mz-seat__name--off { color: var(--mz-text-muted); font-style: italic; }
@@ -422,3 +434,46 @@
 .mz-notice__close { flex: none; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--mz-text-muted); font: 700 18px var(--mz-font-body); cursor: pointer; }
 [data-mz-motion="reduced"] .mz-notice { animation: none; }
 @media (prefers-reduced-motion: reduce) { .mz-notice { animation: none; } }
+
+/* ---------- Stage 1: segmented choice, notices, invite sheet, confirmation ---------- */
+.mz-choice { display: grid; gap: 6px; padding: 5px; border-radius: 20px; background: var(--mz-ground); box-shadow: inset 0 0 0 1.5px var(--mz-line); }
+.mz-choice__opt { appearance: none; border: 0; cursor: pointer; min-height: 56px; padding: 8px 12px; border-radius: 15px; background: transparent; color: var(--mz-text); text-align: left; display: flex; flex-direction: column; justify-content: center; gap: 2px; font-family: var(--mz-font-body); }
+.mz-choice--compact .mz-choice__opt { min-height: 46px; align-items: center; text-align: center; }
+.mz-choice__title { font-weight: 800; font-size: 16px; display: inline-flex; align-items: center; gap: 6px; }
+.mz-choice__detail { font-weight: 600; font-size: 13px; line-height: 1.3; color: var(--mz-text-muted); }
+.mz-choice__check { font-size: 15px; }
+.mz-choice__opt.is-on { color: var(--mz-on-accent); box-shadow: 0 3px 0 rgba(0,0,0,.35); }
+.mz-choice__opt.is-on .mz-choice__detail { color: color-mix(in srgb, var(--mz-on-accent) 78%, transparent); }
+.mz-choice__opt--sun.is-on { background: var(--mz-highlight); }
+.mz-choice__opt--mint.is-on { background: var(--mz-success); }
+.mz-choice__opt--neutral.is-on { background: var(--mz-text); }
+.mz-choice__opt:disabled { cursor: not-allowed; opacity: .5; }
+[data-mz-motion="full"] .mz-choice__opt { transition: background-color .15s ease, color .15s ease; }
+.mz-noticecard { margin: 10px 0 0; padding: 12px 14px; border-radius: 16px; background: color-mix(in srgb, var(--mz-highlight) 12%, var(--mz-surface-1)); box-shadow: inset 0 0 0 1.5px var(--mz-highlight); }
+.mz-noticecard--info { background: var(--mz-surface-1); box-shadow: inset 0 0 0 1.5px var(--mz-line); }
+.mz-noticecard__title { margin: 0; font: 800 15px/1.3 var(--mz-font-body); color: var(--mz-text); }
+.mz-noticecard__text { margin: 4px 0 0; font: 600 14px/1.4 var(--mz-font-body); color: var(--mz-text); }
+.mz-noticecard__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.mz-noticecard__actions .mz-key { margin-bottom: 4px; }
+.mz-sheet-layer { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; }
+.mz-sheet-backdrop { position: absolute; inset: 0; background: rgba(8,5,12,.66); }
+.mz-sheet { position: relative; width: 100%; max-width: 480px; max-height: 92dvh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 10px clamp(16px, 5vw, 22px) max(20px, env(safe-area-inset-bottom)); border-radius: 26px 26px 0 0; background: var(--mz-surface-1); box-shadow: 0 -12px 40px rgba(0,0,0,.5); animation: mz-sheet-in .26s var(--mz-ease-out) both; }
+@keyframes mz-sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+[data-mz-motion="reduced"] .mz-sheet { animation: mz-fade .16s linear both; }
+.mz-sheet__grab { width: 40px; height: 5px; border-radius: 3px; background: var(--mz-line); margin: 0 auto 4px; }
+.mz-sheet__title { margin: 0; text-align: center; font: 700 20px var(--mz-font-display); outline: none; }
+.mz-sheet__actions { display: flex; gap: 10px; }
+.mz-sheet__actions > .mz-key { flex: 1 1 0; }
+.mz-invite__qr { display: block; margin: 4px auto 0; border-radius: 16px; background: #fff; width: min(176px, 50vw); height: auto; aspect-ratio: 1; }
+.mz-invite__code { margin: 4px 0 0; text-align: center; font: 700 clamp(28px, 9vw, 36px) var(--mz-font-display); letter-spacing: .18em; }
+.mz-invite__link { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--mz-ground); font: 600 14px/1.35 ui-monospace, "SF Mono", Menlo, monospace; overflow-wrap: anywhere; user-select: all; -webkit-user-select: all; }
+.mz-invite__status { margin: 0; min-height: 20px; text-align: center; font: 700 14px/1.35 var(--mz-font-body); }
+.mz-invite__status--ok { color: var(--mz-success); }
+.mz-invite__status--warn { color: var(--mz-highlight); }
+.mz-confirm { margin-top: 10px; padding: 14px; border-radius: 18px; background: var(--mz-surface-1); box-shadow: inset 0 0 0 2px var(--mz-brand); color: var(--mz-text); }
+.mz-confirm__title { margin: 0; font: 700 18px/1.25 var(--mz-font-display); outline: none; }
+.mz-confirm__text { margin: 6px 0 10px; font: 500 15px/1.45 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-settings__row { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.mz-settings__label { font: 800 15px var(--mz-font-body); }
+.mz-mode { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.mz-ready { margin-bottom: 14px; }

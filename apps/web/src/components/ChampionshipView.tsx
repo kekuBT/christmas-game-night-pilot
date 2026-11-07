@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import type { Achievement, Ceremony, ChampionshipResult, LedgerEvent, Projection, PublicGame, PublicPlayer, RegistryGame } from "../types.js";
 import { seats } from "../session.js";
+import { ConfirmPanel, MchezoProvider, themes } from "../ui/mchezo/index.js";
+
+/** The Cup has exactly seven days (server: RoomEngine.advanceDay). */
+const CUP_DAYS = 7;
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
 
@@ -21,6 +25,9 @@ export function ChampionshipView(props: {
   const [overrideReason, setOverrideReason] = useState("");
   const [audit, setAudit] = useState<LedgerEvent[]>([]);
   const [auditLoaded, setAuditLoaded] = useState(false);
+  // Advancing the day is one-way on the server (no undo): confirm first (audit F5).
+  const [confirmDay, setConfirmDay] = useState(false);
+  const [dayError, setDayError] = useState("");
   const finished: PublicGame[] = (proj?.games ?? []).filter((g) => g.status === "finished");
   // The server says which games count (outcome-aware since Sprint 3); legacy games keep the old rule.
   const officialFinished = finished.filter((g) => g.countsOfficially ?? (g.official && !g.timedOut));
@@ -45,7 +52,33 @@ export function ChampionshipView(props: {
     {proj?.competition?.qualifying && <p data-testid="competition-qualifying"><b>Qualifying days:</b> {proj.competition.qualifying}</p>}
     {proj?.competition?.standingsPaused && <p className="err" role="alert" data-testid="standings-paused">{proj.competition.standingsPaused}</p>}
     <p className="muted">Family Cup rules, owner-approved 2026-11-04: seven scheduled days, at least three qualifying days to be eligible, and the total is <b>best three daily scores + participation bonus + finale bonus</b>. {individual ? "In this Individual Family Cup each day is the average of your individual game placements (team games don’t count)" : "Each day is 75% individual + 25% team"}, with individual games normalised 0–100 by placement (ties share the average rank). Participation is +5 for each qualifying day beyond the first three, capped at +20. The Grand Finale can add up to 50 points. Practice games never count toward scores or attendance, and missing days add nothing — they do not reduce the best-three total. Each Cup keeps the qualifying rule it started with (shown above). Still to be approved in detail: how days without team games are handled in combined Cups, and the Grand Finale placement ladder.</p>
-    <p>Championship day: <b>{proj?.championshipDay ?? 1}</b> {meIsHostOrCohost && <button className="secondary" onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/day`, {}); await refresh(); }}>Advance to next day</button>}</p>
+    <p>Championship day: <b>{proj?.championshipDay ?? 1}</b> {meIsHostOrCohost && (proj?.championshipDay ?? 1) < CUP_DAYS && !confirmDay && <button className="secondary" data-testid="advance-day" onClick={() => { setDayError(""); setConfirmDay(true); }}>Advance to next day</button>}</p>
+    {meIsHostOrCohost && confirmDay && (() => {
+      const day = proj?.championshipDay ?? 1;
+      return (
+        <MchezoProvider theme={themes.everyday} as="bare">
+          <ConfirmPanel
+            testId="advance-day"
+            title={`End Day ${day} and start Day ${day + 1}?`}
+            confirmLabel={`Start Day ${day + 1}`}
+            onCancel={() => setConfirmDay(false)}
+            onConfirm={async () => {
+              try {
+                await post<Record<string, unknown>>(`/rooms/${roomId}/day`, {});
+                setConfirmDay(false);
+                await refresh();
+              } catch (e) {
+                setConfirmDay(false);
+                setDayError(e instanceof Error ? e.message : "The day could not be advanced.");
+              }
+            }}
+          >
+            Day {day} closes for good: it can’t be reopened, and its scores stay as they are. Games started after this count for Day {day + 1}.
+          </ConfirmPanel>
+        </MchezoProvider>
+      );
+    })()}
+    {dayError && <p className="err" role="alert" data-testid="advance-day-error">{dayError}</p>}
     {championship.length === 0 && <p>No finished official games yet.</p>}
     {championship.map((r) => <p key={r.playerId}><b>{nameOf(r.playerId)}</b>: {r.total} points total = best three {r.counted.join(" + ")} = {r.base}, plus participation +{r.participationBonus} and finale +{r.finaleBonus}{r.eligible ? "" : " (not yet qualified — needs 3 qualifying days)"} · {r.qualifyingDays} qualifying day{r.qualifyingDays === 1 ? "" : "s"} · Day scores: {r.dayScores.join(", ")} · Daily wins: {r.countedDailyWins}</p>)}
     <h3>Session standings (all official games, midrank sum)</h3>

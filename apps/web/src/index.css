@@ -1,5 +1,11 @@
-:root { --bg:#102C25; --panel:#245344; --panel2:#1B4237; --gold:#E5BC70; --cream:#F7F2E8; --accent:#A73545; --muted:#C8D8D0; --green:#3E8E6A; --line:#3A6B5C; }
+/* Stage 1 (audit V2/V3): the legacy screens (Championship, TV Dashboard,
+   Memory Book, older game panels) keep their layout until they are migrated,
+   but no longer paint the rejected Christmas green. These legacy variables now
+   carry the Night Circle palette, and the document background is the Mchezo
+   ground, so nothing green shows behind kit screens or in Safari's toolbar. */
+:root { --bg:#16111D; --panel:#211A2B; --panel2:#2D2539; --gold:#FFC94A; --cream:#F7F1E8; --accent:#FF6B4A; --muted:#C7BED2; --green:#3CCFB4; --line:#7A6E8E; --on-accent:#16111D; }
 * { box-sizing: border-box; }
+html { background: var(--bg); color-scheme: dark; }
 body { margin:0; background:var(--bg); color:var(--cream); font-family: system-ui, -apple-system, sans-serif; line-height: 1.45; }
 a { color: var(--gold); }
 .wrap { max-width: 760px; margin: 0 auto; padding: 16px; }
@@ -9,16 +15,16 @@ h2 { font-size: 1.25rem; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 12px 0; box-shadow: 0 2px 12px rgba(0,0,0,.25); animation: card-in 250ms ease-out; }
 @keyframes card-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 button, input, select, textarea { font-size: 1rem; min-height: 44px; border-radius: 10px; border: 1px solid var(--line); padding: 8px 12px; }
-button { background: var(--gold); color: #102C25; font-weight: 700; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
+button { background: var(--gold); color: var(--on-accent); font-weight: 700; cursor: pointer; transition: transform 180ms ease, background 180ms ease; }
 button:active { transform: scale(.98); }
 button.secondary { background: transparent; color: var(--cream); }
 button:disabled { opacity: .5; cursor: default; }
-input, select, textarea { background: #0E2620; color: var(--cream); width: 100%; }
+input, select, textarea { background: var(--bg); color: var(--cream); width: 100%; }
 .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 .row > * { flex: 1 1 160px; }
 .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:8px; }
 .tile { min-height: 64px; font-weight: 700; }
-.tile.sel { background: var(--green); color: white; }
+.tile.sel { background: var(--green); color: var(--on-accent); }
 .pill { display:inline-block; background:var(--panel2); border: 1px solid var(--line); border-radius:999px; padding:4px 10px; margin:2px; font-size:.9rem; }
 .err { color:#FFB3B3; } .ok { color:#A8E6C5; } .muted { color: var(--muted); }
 :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
@@ -35,7 +41,7 @@ input, select, textarea { background: #0E2620; color: var(--cream); width: 100%;
 /* Ornaments */
 .ornament-row { display: flex; flex-wrap: wrap; gap: 12px; }
 .ornament { background: none; border: none; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 72px; min-height: 72px; position: relative; }
-.ornament-ball { width: 56px; height: 56px; border-radius: 50%; background: var(--orn, var(--gold)); color: #102C25; display: grid; place-items: center; font-size: 24px; font-weight: 700; border: 3px solid rgba(255,255,255,.35); box-shadow: 0 4px 12px rgba(0,0,0,.35); }
+.ornament-ball { width: 56px; height: 56px; border-radius: 50%; background: var(--orn, var(--gold)); color: var(--on-accent); display: grid; place-items: center; font-size: 24px; font-weight: 700; border: 3px solid rgba(255,255,255,.35); box-shadow: 0 4px 12px rgba(0,0,0,.35); }
 .ornament-name { color: var(--cream); font-size: 14px; }
 .dot { font-size: 12px; color: var(--muted); }
 .dot.on { color: #7FB069; }

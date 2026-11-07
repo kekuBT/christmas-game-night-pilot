@@ -9,7 +9,7 @@ import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js"
 import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
-import { GameClock, GameIntro, LandingScreen, LobbyScreen, MchezoProvider, noteServerTime, OutcomeSummary, themes } from "./ui/mchezo/index.js";
+import { GameClock, GameIntro, InviteSheet, LandingScreen, linkReach, LobbyScreen, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, SegmentedChoice, themes } from "./ui/mchezo/index.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
@@ -47,6 +47,8 @@ function tabGet(key: string): string | null {
 function tabSet(key: string, value: string | null): void {
   try { if (value === null) sessionStorage.removeItem(key); else sessionStorage.setItem(key, value); } catch { /* storage unavailable */ }
 }
+/** Mirrors the server's MIN_OFFICIAL_COMPETITORS (D1). */
+const MIN_OFFICIAL_PLAYERS = 2;
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 async function post<T>(path: string, body: Record<string, unknown>): Promise<T> {
   const headers: Record<string, string> = { "content-type": "application/json" };
@@ -104,6 +106,12 @@ export function App() {
   const [introDismissed, setIntroDismissed] = useState<string | null>(tabGet("cgn_intro_dismissed"));
   const [resultsDismissed, setResultsDismissed] = useState<string | null>(tabGet("cgn_results_dismissed"));
   const settings = useExperienceSettings();
+  // Animation preference applies on EVERY screen (audit F8): the OS
+  // reduced-motion setting is a floor; the in-app setting can only reduce
+  // further, and "Off" stops all motion.
+  const osReducedMotion = typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const motion = { reducedMotion: resolveReducedMotion(settings.anim, osReducedMotion) ? true : undefined, still: settings.anim === "off" };
+  const [inviteOpen, setInviteOpen] = useState(false);
   // Mchezo lobby: the host-chosen "up next" game (default: Trivia, the
   // Phase 2 featured game). The lobby Start button starts this game.
   const [upNextId, setUpNextId] = useState("trivia");
@@ -452,7 +460,7 @@ export function App() {
     const t = games.find((x) => x.id === game.gameId)?.title ?? game.gameId;
     const isCaption = game.gameId === "caption-clash";
     return (
-      <MchezoProvider theme={themes.everyday}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <main className="mz-screen" style={{ maxWidth: 1200 }} aria-label={`${t} on the TV`} data-testid={isCaption ? "mz-cap-tv" : "mz-cx-tv"}>
           <div className="mz-topbar"><span className="mz-kicker" style={{ color: "var(--mz-answer-2)" }}>{t} · {proj?.joinCode}</span><button type="button" className="mz-chip-btn" onClick={onBack}>{backLabel}</button></div>
           <GameClock game={game} tv />
@@ -475,7 +483,7 @@ export function App() {
   // does (spectator tabs skip landing and render the TV-only branch below).
   if ((!roomId || !playerId) && !(specRoomId && specToken) && recoverMode) {
     return (
-      <MchezoProvider theme={themes.everyday}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <RecoverScreen
           initialCode={code}
           onBack={() => setRecoverMode(false)}
@@ -493,7 +501,7 @@ export function App() {
   }
   if ((!roomId || !playerId) && !(specRoomId && specToken)) {
     return (
-      <MchezoProvider theme={themes.everyday}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <LandingScreen
           code={code}
           onCodeChange={(c) => setCode(c)}
@@ -539,7 +547,7 @@ export function App() {
     const specTvGame = specLatest?.gameId === "trivia" && (specLatest.status === "playing" || specLatest.status === "finished") ? specLatest : undefined;
     if (!proj) {
       return (
-        <MchezoProvider theme={themes.everyday}>
+        <MchezoProvider theme={themes.everyday} {...motion}>
           <div style={{ padding: 24 }}>
             <p className="mz-foot">Finding the game…</p>
             <button type="button" className="mz-chip-btn" onClick={stopWatching}>Stop watching</button>
@@ -551,7 +559,7 @@ export function App() {
     if (specLatest?.gameId === "word-connections" || specLatest?.gameId === "caption-clash") return connectionsTvScreen(specLatest, stopWatching, "Stop watching");
     if (specTvGame) {
       return (
-        <MchezoProvider theme={themes.everyday} as="bare">
+        <MchezoProvider theme={themes.everyday} {...motion} as="bare">
           <MchezoTvStage key={specTvGame.id} publicGame={specTvGame} players={specPlayers} joinCode={proj.joinCode ?? "…"} onBack={stopWatching} spectatorCount={proj.spectatorCount} backLabel="Stop watching" previousScores={previousGameScores(proj?.games ?? [], specTvGame.id)} />
         </MchezoProvider>
       );
@@ -604,7 +612,6 @@ export function App() {
   // ---- Mchezo integrated views (Phase 2) ----
   // Everyday theme throughout: Mchezo is year-round; the Christmas Family
   // Cup is a seasonal event shown as data (below), not as the platform skin.
-  const mzReducedMotion = resolveReducedMotion(settings.anim, typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) ? true : undefined;
   const mzPlayers = toMzPlayers(players);
   const mzReactions = toMzReactions(proj?.reactions, players);
   const mzReact = async (r: ReactionId) => {
@@ -618,6 +625,10 @@ export function App() {
   // them as official, so the lobby starts them as practice and says why.
   const upNextPracticeOnly = upNext?.lifecycle?.officialEligible === false;
   const startMode: "official" | "practice" = upNextPracticeOnly ? "practice" : gameMode;
+  // D1: the server refuses official starts with fewer than 2 competitors. Say so
+  // before Start, with an explicit switch — the mode is never changed silently.
+  const wouldPlayCount = proj?.readiness?.wouldPlay.length ?? players.filter((p) => p.connected).length;
+  const officialShort = wouldPlayCount < MIN_OFFICIAL_PLAYERS;
   const minutes = (ms?: number) => (ms === undefined ? undefined : Math.round(ms / 60_000));
   // Smart Shuffle UI (Milestone H): pure engine call, client-side. The
   // up-next game is client state, so no server round-trip is needed: the
@@ -661,11 +672,8 @@ export function App() {
       {(me?.isHost || me?.isCohost) && (
         <div className="mz-card" style={{ marginTop: 12 }}>
           <span className="mz-kicker">Game setup</span>
-          <p className="mz-foot" style={{ margin: "4px 0" }}>Up next is {upNext?.title ?? "—"}. Official games count toward the {proj?.competition?.label ?? "Family Cup"}; practice games do not.{upNext?.lifecycle ? ` Time limit: about ${minutes(upNext.lifecycle.gameWindowMs)} min — the game ends by itself.` : ""}</p>
-          {upNextPracticeOnly && <p className="mz-foot" style={{ margin: "4px 0", fontWeight: 600 }} data-testid="practice-only-note">Practice only: {upNext?.lifecycle?.practiceOnlyReason}</p>}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }} role="group" aria-label="Game mode">
-            <button type="button" className="mz-chip-btn" data-testid="mode-official" aria-pressed={startMode === "official"} disabled={upNextPracticeOnly} onClick={() => setGameMode("official")}>Official</button>
-            <button type="button" className="mz-chip-btn" data-testid="mode-practice" aria-pressed={startMode === "practice"} onClick={() => setGameMode("practice")}>Practice</button>
+          <p className="mz-foot" style={{ margin: "4px 0" }}>Up next is {upNext?.title ?? "—"}.{upNext?.lifecycle ? ` Time limit: about ${minutes(upNext.lifecycle.gameWindowMs)} min — the game ends by itself.` : ""}</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             <button type="button" className="mz-chip-btn" data-testid="choose-game" aria-expanded={chooserOpen} onClick={() => setChooserOpen((o) => !o)}>{chooserOpen ? "Close game list" : "Choose a different game"}</button>
             <button type="button" className="mz-chip-btn" data-testid="surprise-me" onClick={() => runShuffle("random")}>Surprise me</button>
             <button type="button" className="mz-chip-btn" data-testid="smart-shuffle" onClick={() => runShuffle("smart")}>Smart shuffle</button>
@@ -695,6 +703,7 @@ export function App() {
       <div className="mz-card" style={{ marginTop: 12 }}>
         <span className="mz-kicker">Invite by QR</span>
         <p className="mz-foot">Scan to join this room. The 6-character code below works too — that is the manual-code fallback.</p>
+        {linkReach(location.hostname) === "private-preview" && <p className="mz-noticecard__text" data-testid="qr-reach-note"><b>Private preview:</b> this QR code only opens for the GitHub account running this preview. Other people can’t join from it.</p>}
         {(location.hostname === "localhost" || location.hostname === "127.0.0.1") && <p>⚠️ This QR points to {location.origin}, which only works on this device. A phone scanning it will be sent to its own localhost and cannot join. Open the app from a LAN-reachable address (or the approved deployed domain) so the QR works, or share the 6-character code instead.</p>}
         {qrUrl && <img src={qrUrl} alt={`QR code to join room ${proj?.joinCode ?? ""}`} width={220} height={220} />}
         <p>Room code: <b>{proj?.joinCode ?? "…"}</b></p>
@@ -718,14 +727,14 @@ export function App() {
         {(me?.isHost || me?.isCohost) && <button type="button" className="mz-chip-btn" data-testid="studio-button" onClick={() => setView("studio")}>Studio (preview)</button>}
         <button type="button" className="mz-chip-btn" onClick={reconnect}>Reconnect</button>
       </div>
-      <SettingsBar sound={settings.sound} anim={settings.anim} onToggleSound={settings.toggleSound} onSetAnim={settings.setAnimSetting} />
+      <SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} />
       {msg && <p className="ok">{msg}</p>}
     </div>
   );
 
   if (view === "lobby" && isLobbyPhase) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <LobbyScreen
           session={{
             roomCode: proj?.joinCode ?? "…",
@@ -746,11 +755,31 @@ export function App() {
           nudgedBy={proj?.nudgedBy}
           onStart={upNext ? () => startGame(upNext.id, startMode === "official") : undefined}
           startTestId={upNext ? `start-${startMode}-${upNext.id}` : undefined}
-          minPlayers={upNext?.minPlayers ?? 2}
+          minPlayers={startMode === "official" ? Math.max(MIN_OFFICIAL_PLAYERS, upNext?.minPlayers ?? 2) : (upNext?.minPlayers ?? 2)}
+          onShare={() => setInviteOpen(true)}
           capacity={10}
           error={err || undefined}
           extra={lobbyExtra}
-          beforeStart={(me?.isHost || me?.isCohost) && upNext && (
+          beforeStart={(me?.isHost || me?.isCohost) && upNext && (<>
+          <div className="mz-mode" data-testid="mode-choice">
+            <span className="mz-kicker mz-kicker--muted">How should {upNext.title} count?</span>
+            <SegmentedChoice
+              label="Game mode"
+              value={startMode}
+              onChange={(v) => setGameMode(v as "official" | "practice")}
+              options={[
+                { value: "official", title: "Official", tone: "sun", testId: "mode-official", disabled: upNextPracticeOnly, detail: upNextPracticeOnly ? "Not available for this game" : `Counts toward the ${proj?.competition?.label ?? "Family Cup"}` },
+                { value: "practice", title: "Practice", tone: "mint", testId: "mode-practice", detail: "Just for fun · no Cup points" },
+              ]}
+            />
+            {upNextPracticeOnly && <p className="mz-foot" style={{ margin: "8px 0 0", fontWeight: 600 }} data-testid="practice-only-note">Practice only: {upNext.lifecycle?.practiceOnlyReason}</p>}
+            {startMode === "official" && officialShort && (
+              <NoticeCard testId="official-needs-two" title="Official games need at least 2 players"
+                action={<button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="switch-to-practice" onClick={() => setGameMode("practice")}>Play it as practice instead</button>}>
+                Only games with 2 or more players can count toward the {proj?.competition?.label ?? "Family Cup"}. Wait for someone to join, or play this one as practice.
+              </NoticeCard>
+            )}
+          </div>
           <ReadinessCard
             readiness={proj?.readiness}
             players={players}
@@ -761,15 +790,18 @@ export function App() {
             onWait={() => setStartDecision(null)}
             onStartWithout={() => { const d = startDecision; if (d) void startGame(d.gameId, d.official, d.reconnecting); }}
           />
-        )}
+        </>)}
         />
+        {inviteOpen && proj?.joinCode && (
+          <InviteSheet code={proj.joinCode} url={`${location.origin}/?code=${proj.joinCode}`} qrDataUrl={qrUrl || undefined} reach={linkReach(location.hostname)} onClose={() => setInviteOpen(false)} />
+        )}
       </MchezoProvider>
     );
   }
   // Word Connections (Sprint 4): its own intro, puzzle and results screens.
   if (view === "lobby" && showPhase === "intro" && connectionsPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <GameIntro
           title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Word Connections"}
           objective="Find four groups of four."
@@ -782,7 +814,7 @@ export function App() {
   }
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && connectionsPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
         <MchezoConnections game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Word Connections"} intent={intent} />
       </MchezoProvider>
@@ -790,7 +822,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && connectionsFinished && latestFinished) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <MchezoConnectionsResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Word Connections"} onBackToLobby={() => dismissResults(latestFinished.id)} />
       </MchezoProvider>
     );
@@ -798,7 +830,7 @@ export function App() {
   // Caption Clash (Sprint 4): its own intro, write/vote screens and results.
   if (view === "lobby" && showPhase === "intro" && captionPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <GameIntro
           title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"}
           objective="Write the funniest caption."
@@ -811,7 +843,7 @@ export function App() {
   }
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && captionPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
         <MchezoCaption game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"} intent={intent} />
       </MchezoProvider>
@@ -819,21 +851,21 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && captionFinished && latestFinished) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <MchezoCaptionResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Caption Clash"} onBackToLobby={() => dismissResults(latestFinished.id)} />
       </MchezoProvider>
     );
   }
   if (view === "lobby" && showPhase === "intro" && triviaPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <MchezoTriviaIntro title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} onStart={() => dismissIntro(playingGame.id)} />
       </MchezoProvider>
     );
   }
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && triviaPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <MchezoTriviaPlay
           windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
           game={playingGame}
@@ -856,7 +888,7 @@ export function App() {
     // + GamePanel, mirroring the Trivia play branch. Intro and finished
     // results still use the shared old views (ShowIntro, ShowResults).
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
         <MchezoClosest
           game={playingGame}
@@ -878,7 +910,7 @@ export function App() {
     // branches. Intro and finished results still use the shared old
     // views (ShowIntro, ShowResults).
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
         <MchezoYear
           game={playingGame}
@@ -901,7 +933,7 @@ export function App() {
     // correctIndex for Geography), so intro and finished results still
     // use the shared old views (ShowIntro, ShowResults).
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <MchezoGeography
           windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
           game={playingGame}
@@ -925,7 +957,7 @@ export function App() {
     // the shared old views (ShowIntro, ShowResults). The locked view
     // shows the player's own elapsed time, because speed is scored.
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <MchezoMath
           windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
           game={playingGame}
@@ -943,7 +975,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && triviaFinished && latestFinished) {
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <OutcomeSummary gameId={latestFinished.gameId} outcome={latestFinished.outcome} official={publicFinished?.official} youId={playerId ?? undefined} youChoseSatOut={latestFinished.abstained === true} nameOf={nameOf} showEveryone />
         <MchezoTriviaResults
           game={latestFinished}
@@ -967,7 +999,7 @@ export function App() {
     // it — the library itself never starts a game. Guests browse read-only;
     // only host/cohost get the select button.
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <MchezoLibrary
           manifests={GAME_MANIFESTS}
           upNextId={upNextId}
@@ -985,7 +1017,7 @@ export function App() {
     const studioPlayerCount = connectedCount > 0 ? connectedCount : players.length;
     const studioRecent = (proj?.games ?? []).map((g) => g.gameId).reverse();
     return (
-      <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion}>
+      <MchezoProvider theme={themes.everyday} {...motion}>
         <MchezoStudio playerCount={studioPlayerCount} recentIds={studioRecent} onBack={() => setView("lobby")} />
       </MchezoProvider>
     );
@@ -1004,7 +1036,7 @@ export function App() {
     const tvGame = latestGame?.gameId === "trivia" && (latestGame.status === "playing" || latestGame.status === "finished") ? latestGame : undefined;
     if (tvGame) {
       return (
-        <MchezoProvider theme={themes.everyday} reducedMotion={mzReducedMotion} as="bare">
+        <MchezoProvider theme={themes.everyday} {...motion} as="bare">
           <MchezoTvStage key={tvGame.id} publicGame={tvGame} players={players} joinCode={proj?.joinCode ?? "…"} onBack={() => setView("lobby")} previousScores={previousGameScores(proj?.games ?? [], tvGame.id)} />
         </MchezoProvider>
       );
