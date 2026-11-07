@@ -1,8 +1,8 @@
 # E2 v3 — Category Sprint: final design for approval
 
-**Status:** design only, submitted for owner approval.
-- Nothing is implemented.
-- Category Sprint scoring, selection and matching are unchanged in the game.
+**Status:** approved in principle by the owner on 2026-11-07, with corrections, and **implemented on branch `claude/cq2-e2-sprint-v3`** (not merged or deployed).
+- See §9 for the owner's corrections and how each one is implemented.
+- §5 Rule 4's fallback is **withdrawn**: there is no fallback.
 - This file supersedes [E2_CATEGORY_SPRINT_V2.md](E2_CATEGORY_SPRINT_V2.md), which is kept for history.
 
 ## 0. Owner rulings already applied
@@ -121,7 +121,7 @@ A test confirms this rule meets the policy for famous-first recall at every room
 **Rule 3. Dominant or recited-in-order sets** (zodiac, months, the days of the week, the planets in order): not official, unless the size meets the "dominant" row.
 - In practice that means practice-only.
 
-**Rule 4. Selection.** Official selection filters by the room's player count at the start of the round. If no category fits, it falls back to the largest eligible set. That filter is a selection change, so it needs your approval.
+**Rule 4. Selection.** Official selection filters by the room's player count when the game starts. ~~If no category fits, it falls back to the largest eligible set.~~ **Withdrawn by the owner:** if no suitable category is left, the start is refused with a plain explanation and an offer of practice (§9).
 
 ### Caveat
 
@@ -163,3 +163,33 @@ The pilot now carries one example in each state:
 1. Approve the size policy in §5: Rules 1–3, the suitability definition, and the selection filter.
 2. Approve normalisation v2, with category-scoped aliases (§3), and its test list.
 3. Confirm the example verdicts in §6, especially that South America, the zodiac and the planets become practice-only.
+
+## 9. Owner corrections (2026-11-07) and how they are implemented
+
+| Correction | Implementation | Test |
+|---|---|---|
+| **No fallback** to the largest category when none suits the room | `selectContent` returns `no-suitable-category`. The room refuses the start with code `NO_SUITABLE_CATEGORY` and the message "…You can play Category Sprint as practice instead." Practice still starts. | `tests/sprint-e2v3.test.ts`: "no suitable official category…", "when no suitable category is left…" |
+| **Verify complete canonical membership** against the source, not a count | Each closed set has a published list in `content/reference/sprint/<id>.json`, naming the authority, its URL and its published count. When content loads, the item's answers must **equal** the canonical forms of those members: no member missing, no extra answer, and the list's length must match the published count. An item that drifts is skipped and reported. **A real approval is refused until a person records a `sourceCheck`** on the reference, having compared the list with the source page. | "the right size with a wrong member fails", "an item whose list drifts…never loads", "a real approval…is refused until…source check" |
+| **Aliases scoped to one category, each with a reason** | `aliases: { variant: { to, reason } }` on the item. There is no global table. The checks: an alias points to a member, is never a member itself, and is never also a near-miss. | "sheep is the zodiac Goat, but stays sheep…", "alias rules…" |
+| **Canonical duplicate protection** | Matcher v2 de-duplicates and decides uniqueness on canonical answers. | "goat + sheep…count once", "aubergine is not unique next to eggplant" |
+| **Freeze eligibility and the matcher version at game start** | The Cup record carries `categorySprint: { matcher: 2, sizePolicy: 1 }`, fixed at creation. Each game stores `matcherVersion`, plus for official games `eligibility: { players, sizePolicy }` decided from the roster at start. Scoring always uses the game's own version. | "a new Cup records…", "a game saved with v2 is still scored with v2 after a restart…" |
+| **Preserve historical Cup behaviour** | A Cup without `categorySprint` (created before this change, or restored from older snapshots) keeps matcher v1 and Sprint 4 selection, through any number of saves. A game without `matcherVersion` is v1. The v1 normaliser is unchanged byte for byte. | "a Cup created before E2 v3 keeps v1…", "matcher v1 is preserved…" |
+| **Simulation thresholds are provisional** | Size policy v1 is versioned and recorded in every official game, so a recalibrated v2 (from E7 real-play logs) can ship for new Cups without re-ruling old ones. | "the rule is never looser than the simulation's minimum…" |
+| **Example verdicts approved** | South America, Chinese zodiac, planets: practice. US states: official candidate. | "approved example verdicts hold…" |
+
+### Content added (all provisional, nothing approved)
+
+`content/packs/category-sprint-closed.json` holds 7 closed sets: US states, EU members, UN members in Africa, chemical elements, South America, the Chinese zodiac, and planets plus dwarf planets. The script is `scripts/content-quality/revisions/e2_closed_sets.py`.
+
+**Open categories are now practice-only.** The 14 open Sprint 4 categories that were marked official are now practice (eligibility only; review status unchanged). A content-check error stops any open category being marked official again.
+
+**Membership lists: not yet compared with their sources.**
+- The lists were transcribed by the author. This session's network blocks census.gov, europa.eu, un.org, iupac.org, iau.org and wikipedia.org, so no member-by-member source check was possible.
+- Web search confirmed the published counts only: EU 27, UN Africa 54, IAU 5 dwarf planets.
+- Every reference therefore has **no `sourceCheck`**. `content:check` warns on each one, and the loader would refuse a real approval.
+
+### What players see
+
+- **While typing:** the category and its definition, for example "Counts: The 50 US states (not DC or territories)".
+- **After the game:** each player sees only their own answers, judged as unique, shared, repeat, not accepted (with the reason, e.g. "The Cat replaces the Rabbit in the Vietnamese zodiac…"), or not on our list. Everyone, including the TV, sees the full accepted list.
+- **Never:** another player's answers. No list is visible while the game is playing.

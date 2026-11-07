@@ -755,3 +755,42 @@ Risk:
 - Batch A retires 14 provisional items, which shrinks the practice pools slightly.
 
 Gate verdict (one run, one revision): `node scripts/gate.mjs full` on `e06fe92`, in a fresh clean clone: **PASSED (exit 0)**, run `20261107-114948-e06fe92c-3602`. 44 passed, 0 failed, 0 timed out. Unit tests: 691 passed (62 files). This verdict covers `e06fe92` only. The commit that records it changes docs only.
+
+## E2 implementation and owner corrections (2026-11-07, branch `claude/cq2-e2-sprint-v3`, from 9e3796d)
+
+Milestone: the owner's second Content Quality 2.0 review is carried out. Nothing is merged or deployed, no approvals are recorded, and there is no spending.
+
+**Completed:**
+- **E2 v3 Category Sprint implemented with the owner's corrections:**
+  - `src/games/sprint.ts`: matcher v2, with v1 unchanged.
+  - `src/content/closedSet.ts`: membership verification and the size policy.
+  - `src/content/select.ts`: player-count filter, with no fallback (`NO_SUITABLE_CATEGORY`).
+  - `src/content/registry.ts`: reference lists; a real approval is refused without a source check.
+  - `src/server/cup.ts`: `categorySprint` on new Cups.
+  - `src/server/room.ts`: rules frozen per game; results show each player only their own verdicts.
+  - Web: definition and results.
+  - Content: 7 provisional closed sets in `content/packs/category-sprint-closed.json` and `content/reference/sprint/`; 14 open categories moved to practice.
+- **Batch A follow-up:**
+  - semantic overlap review (`docs/content-quality-2/audit-batches/batch-a-semantic-review.json`);
+  - old- and new-board history tests.
+- **`cls-cq2-05`:** the wording is fixed and the scoring convention is stated.
+- **Review batch 02:** the five checks are written up (`review-batch-02/EDITORIAL_CHECKS.md`) and four wording fixes applied.
+- **E10:** the v2 rule and a bounded variety step, simulated (`scripts/content-quality/variety.ts`, `npm run content:variety-sim`, `docs/content-quality-2/E10_ROUND_VARIETY*.md`). Not wired in.
+- **`scripts/clickthrough-api.mjs`:** retired as a tombstone that always exits 2. `tests/script-inventory.test.ts` added and `docs/TESTING.md` updated.
+
+**Tests:** 760 unit tests passed (66 files). New: `tests/sprint-e2v3.test.ts` (48), `tests/batch-a-compat.test.ts` (7), `tests/variety.test.ts` (10), `tests/script-inventory.test.ts` (4). Typecheck, lint, `content:check`, `content:audit` and `content:pilot` are all OK.
+
+**Failures found and fixed:**
+- The first E10 rule flagged 93–100% of realistic rounds; it was recalibrated to v2.
+- The clickthrough driver was stale and was retired.
+
+**External blockers:**
+- The closed-set source pages (census.gov, europa.eu, un.org, iupac.org, iau.org, wikipedia.org) are blocked by this session's network, so the membership lists have no source check.
+- E1/E3 real-device verification is still outstanding.
+
+**Next:** stop for owner review. See `docs/content-quality-2/STATUS_2026-11-07_E2_IMPLEMENTATION.md`.
+
+**Risks:**
+- Category Sprint official matching changes for new Cups; old Cups are unaffected.
+- A Cup can play only one official Sprint game until more closed sets exist.
+- Membership lists need a human source check before any approval.

@@ -235,3 +235,17 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
   - They live in the pilot's editorial block, not in the live schema, until E9/E10 are approved.
   - *Alternative:* add schema fields now. Deferred, because it is a schema change to shipped packs.
 
+
+- **D-CQ2-17 E2 v3 Category Sprint is implemented with the owner's corrections (2026-11-07).**
+  - **Rules are frozen per Cup and per game.** The Cup record carries `categorySprint {matcher 2, sizePolicy 1}`; each game stores its `matcherVersion`, and official games also store their eligibility. Older Cups and games stay on v1 with Sprint 4 selection.
+  - *Alternative:* freeze the rules per game only. Rejected: a Cup's official games should all play under one ruleset, just as the qualification policy is per Cup.
+- **D-CQ2-18 Closed-set membership is verified against a reference list when content loads, and a real approval needs a recorded source check.**
+  - An item whose list has drifted is skipped (fail safe), not just flagged.
+  - *Alternative:* a lint error only. Rejected: content that fails the lint could still be loaded and played.
+- **D-CQ2-19 The 14 open Sprint 4 categories marked official are now practice.** Only eligibility changes; review status does not.
+  - This implements the approved closed-set-only rule in the data, and a content-check error keeps it that way.
+- **D-CQ2-20 E10 v2 caps twist formats only. The bounded variety step (window 3) is a proposal, not wired in.**
+  - Simulation showed that capping every mechanic flags 93–100% of realistic rounds.
+  - *Alternative:* wire it in now. Deferred: the library has no `mechanic` tags yet, so the step would do nothing, and it changes selection, which needs approval.
+- **D-CQ2-21 `scripts/clickthrough-api.mjs` is retired as a tombstone that always exits 2.** A test now requires every script to be either in the gate or explicitly classified as not a check.
+  - *Alternative:* repair it. Rejected: its coverage is already in the gate and unit tests, and it never asserted anything beyond "every game finished".
