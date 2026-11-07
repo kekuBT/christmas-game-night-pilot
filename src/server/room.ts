@@ -94,6 +94,8 @@ export type Audience = "player" | "tv" | "host" | "cohost";
  * game roster, an answer, a score, or completion.
  */
 export const RECONNECT_GRACE_MS = 45_000;
+/** D1: an official game needs at least this many competitors (championship scoring ranks players). */
+export const MIN_OFFICIAL_COMPETITORS = 2;
 
 /**
  * Network presence, derived on read (never stored):
@@ -177,7 +179,7 @@ export interface Readiness {
  *   player still inside the reconnect grace window.
  */
 export class StartRefused extends Error {
-  constructor(readonly code: "ROSTER_CHANGED" | "PLAYERS_RECONNECTING", message: string, readonly readiness: Readiness) {
+  constructor(readonly code: "ROSTER_CHANGED" | "PLAYERS_RECONNECTING" | "OFFICIAL_NEEDS_TWO", message: string, readonly readiness: Readiness) {
     super(message);
   }
 }
@@ -586,6 +588,14 @@ export class RoomEngine {
       throw new StartRefused("PLAYERS_RECONNECTING", `${names.join(", ")} ${names.length === 1 ? "is" : "are"} reconnecting. Wait for them, or start without them.`, readiness);
     }
     if (playerIds.length < game.minPlayers) throw new Error(`Need at least ${game.minPlayers} connected players`);
+    // D1 (owner-approved 2026-11-07): an official game needs two competitors.
+    // Championship scoring can't rank one player (championship.ts, N=1) and
+    // always skipped such games, so refuse BEFORE content is selected: nothing
+    // is retired from the Cup's official pool. The client offers practice as
+    // an explicit choice; the server never switches modes by itself.
+    if ((opts.official ?? false) && playerIds.length < MIN_OFFICIAL_COMPETITORS) {
+      throw new StartRefused("OFFICIAL_NEEDS_TWO", "Official games need at least 2 players to count toward the Cup. Play it as practice, or wait for someone to join.", readiness);
+    }
     if (playerIds.length > game.maxPlayers) throw new Error(`Too many players for ${gameId}`);
     const id = `game-${this.nextGame++}`;
     // Secure per-session seed by default. Explicit seeds are for controlled
@@ -1440,7 +1450,21 @@ export class RoomEngine {
   /** Does a finished game feed official standings? Legacy games keep their old rule. */
   countsOfficially(g: GameInstance): boolean {
     if (g.status !== "finished" || !g.official || g.timedOut) return false;
+    // D1: fewer than two competitors can never feed standings or days (both
+    // skip them below), so never report such a game as counting — including
+    // one-player official games finished before D1, whose stored record stays as it was.
+    if (Object.keys(g.rawScores ?? {}).length < MIN_OFFICIAL_COMPETITORS) return false;
     return g.outcome ? g.outcome.countsOfficially : true;
+  }
+
+  /** The outcome as clients see it: a stored "counts" never contradicts countsOfficially(). */
+  private projectedOutcome(g: GameInstance): GameInstance["outcome"] {
+    const o = g.outcome;
+    if (!o || g.status !== "finished") return undefined;
+    if (o.countsOfficially && !this.countsOfficially(g)) {
+      return { ...o, countsOfficially: false, note: "Only one player took part, so this game doesn’t count toward the Cup." };
+    }
+    return o;
   }
 
   /**
@@ -1970,7 +1994,7 @@ export class RoomEngine {
       // deadline - serverNow, never their own clock alone).
       phaseDeadlineAt: g.status === "playing" ? g.phaseDeadlineAt : undefined,
       lifecycle: this.lifecycleInfo(g),
-      outcome: g.status === "finished" ? g.outcome : undefined,
+      outcome: this.projectedOutcome(g),
       countsOfficially: g.status === "finished" ? this.countsOfficially(g) : undefined,
       players: g.players,
       submittedCount: (g.submittedPlayers ?? []).length,
@@ -2038,7 +2062,7 @@ export class RoomEngine {
           deadlineAt: g.deadlineAt,
           phaseDeadlineAt: g.status === "playing" ? g.phaseDeadlineAt : undefined,
           lifecycle: this.lifecycleInfo(g),
-          outcome: g.status === "finished" ? g.outcome : undefined,
+          outcome: this.projectedOutcome(g),
           countsOfficially: g.status === "finished" ? this.countsOfficially(g) : undefined,
           participant,
           myAnswers: participant ? g.answers[actorId] ?? {} : {},
