@@ -85,3 +85,33 @@ The solver only checks the overlaps someone declared. So every tile of the four 
 - If an editor disagrees, Basil and Sage could swap between herbs and greens, and the board has **two** solutions. A test shows this.
 - The fix would be to replace Basil with a herb that has no colour sense, such as Dill.
 - Nothing was changed; this needs a human decision.
+
+## Follow-up 2: `con-s4-02` redesigned (2026-11-07, after owner review)
+
+The owner confirmed the Basil ambiguity is real ("Basil Green" is a marketed paint shade) and ruled out both declaring Basil ineligible and swapping in Dill, which is also a colour term. The earlier note above, which suggested Dill, is superseded.
+
+**Why a word swap can't fix it.** Many herb names are also paint shades (basil, parsley, dill, sage). A Herbs group next to a Shades of green group always lets a herb swap into the greens.
+
+**The redesign** replaces the Herbs group with Gemstones:
+
+| Level | Group | Words | Deliberate misdirection |
+|---|---|---|---|
+| 1 | Fruits | Cherry, Plum, Lemon, Lime | Lime is also a green. |
+| 2 | Card games | Snap, Bridge, Poker, Rummy | |
+| 3 | Gemstones | Sapphire, Topaz, Garnet, Amethyst | |
+| 4 | Shades of green | Emerald, Jade, Moss, Sage | Emerald and Jade are also gemstones. |
+
+**Why it has one solution:**
+- No other tile is a fruit, so Lime must be the fourth fruit.
+- Moss and Sage fit only the greens, so the greens need two more words, and only Emerald and Jade are left that can be green.
+- The four remaining gemstones complete the board.
+
+**Checks:**
+- The solver, given the declared overlaps (Lime→greens, Emerald→Gemstones, Jade→Gemstones), finds exactly one solution.
+- The semantic review covers every tile ([batch-a-semantic-review.json](batch-a-semantic-review.json)). One editor call is noted: Garnet means deep red as a colour word, even though some garnet stones are green.
+- The gemstones do not repeat `con-s4-12`'s (Ruby, Pearl, Amber, Opal).
+
+**History:**
+- The id is unchanged. A game that stored the old Herbs board keeps it through save and restore (`tests/batch-a-compat.test.ts`). New games get the new board.
+- The item stays **provisional**.
+- Generator: `scripts/content-quality/revisions/rev05_con_s4_02.py`.

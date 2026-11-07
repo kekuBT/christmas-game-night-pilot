@@ -72,13 +72,13 @@
    "eligibility": "official",
    "review": {
     "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. 2026-11-07 Audit Batch A A4: corrected red-herring note; group renamed 'Fruits'."
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. 2026-11-07 Audit Batch A A4: corrected red-herring note; group renamed 'Fruits'. 2026-11-07 redesign: the Herbs group is replaced by Gemstones, because herb names double as paint shades (Basil Green, parsley green), which gave a second solution. Still provisional; awaiting human review."
    },
    "source": {
     "kind": "original-creative"
    },
    "tags": [],
-   "redHerrings": "'Sage' is a herb and a green; 'Lime' is a fruit and a green. The herb group is already full without Sage, so Sage is the green, which leaves Lime with the fruits.",
+   "redHerrings": "'Emerald' and 'Jade' are gemstones and greens; 'Lime' is a fruit and a green. There are only four fruits, so Lime is a fruit; the greens are then Emerald, Jade, Moss and Sage, which leaves four gemstones.",
    "groups": [
     {
      "name": "Fruits",
@@ -101,12 +101,12 @@
      "level": 2
     },
     {
-     "name": "Herbs",
+     "name": "Gemstones",
      "words": [
-      "Basil",
-      "Thyme",
-      "Parsley",
-      "Rosemary"
+      "Sapphire",
+      "Topaz",
+      "Garnet",
+      "Amethyst"
      ],
      "level": 3
     },

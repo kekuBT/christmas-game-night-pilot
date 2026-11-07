@@ -56,26 +56,26 @@
       "Goose": { "alsoFits": [], "note": "" }
     },
     "con-s4-02": {
-      "Cherry": { "alsoFits": [], "note": "A shade of red, not green." },
+      "Cherry": { "alsoFits": [], "note": "A shade of red, not green; not a gemstone." },
       "Plum": { "alsoFits": [], "note": "A shade of purple, not green." },
       "Lemon": { "alsoFits": [], "note": "A shade of yellow, not green." },
-      "Lime": { "alsoFits": ["Shades of green"], "note": "Declared. Counting forces it to the fruits." },
+      "Lime": { "alsoFits": ["Shades of green"], "note": "Declared. Counting forces it to the fruits: there is no other fourth fruit." },
       "Snap": { "alsoFits": [], "note": "" },
       "Bridge": { "alsoFits": [], "note": "" },
-      "Poker": { "alsoFits": [], "note": "" },
+      "Poker": { "alsoFits": [], "note": "Also a fireplace tool; no such group." },
       "Rummy": { "alsoFits": [], "note": "" },
-      "Basil": { "alsoFits": [], "note": "Judged NOT a shade of green: 'basil green' exists only as a paint or fashion name. If an editor disagrees, the board has two solutions (Basil and Sage could swap between herbs and greens), so the editor should confirm this call (tests/batch-a-compat.test.ts)." },
-      "Thyme": { "alsoFits": [], "note": "" },
-      "Parsley": { "alsoFits": [], "note": "" },
-      "Rosemary": { "alsoFits": [], "note": "" },
-      "Emerald": { "alsoFits": [], "note": "" },
-      "Jade": { "alsoFits": [], "note": "Also a houseplant, but not a herb." },
-      "Moss": { "alsoFits": [], "note": "A plant, not a herb." },
-      "Sage": { "alsoFits": ["Herbs"], "note": "Declared. Counting forces it to the greens, because the herbs are full without it." }
+      "Sapphire": { "alsoFits": [], "note": "A shade of blue as a colour word, not green." },
+      "Topaz": { "alsoFits": [], "note": "Yellow or blue as a colour word, not green." },
+      "Garnet": { "alsoFits": [], "note": "As a colour word, a deep red. Some garnet varieties are green stones, but 'garnet' is not a shade of green; the editor confirms this call." },
+      "Amethyst": { "alsoFits": [], "note": "A shade of purple, not green." },
+      "Emerald": { "alsoFits": ["Gemstones"], "note": "Declared, deliberate: a gemstone and a green." },
+      "Jade": { "alsoFits": ["Gemstones"], "note": "Declared, deliberate: an ornamental gemstone and a green." },
+      "Moss": { "alsoFits": [], "note": "Not a gemstone ('moss agate' is, but not 'moss')." },
+      "Sage": { "alsoFits": [], "note": "A herb, but the board no longer has a herb group." }
     }
   },
   "acrossBoards": {
     "con-s4-12": "Seven tiles are also girls' names (Ruby, Pearl, Amber, Opal, Rose, Daisy, Lily). There is no names group, and seven is more than four, so it is misdirection, not a second solution.",
-    "con-s4-02": "Basil and Rosemary are also names; no names group."
+    "con-s4-02": "Redesigned 2026-11-07: no herb group. Its gemstones (Sapphire, Topaz, Garnet, Amethyst) do not repeat con-s4-12's (Ruby, Pearl, Amber, Opal). Many tiles are also colour words (red, purple, yellow, blue); there is no colour group other than greens."
   }
 }

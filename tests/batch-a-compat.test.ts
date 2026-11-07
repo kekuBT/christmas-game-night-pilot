@@ -49,13 +49,31 @@ describe("semantic overlap review of the edited boards", () => {
     }
   });
 
-  it("the review matters: one contested judgement (Basil as a green) would give con-s4-02 two solutions", () => {
-    const also = { ...declared["con-s4-02"], Basil: ["Shades of green"] };
-    expect(connectionsSolutions(groupsOf("con-s4-02"), also).length).toBe(2);
-    expect(semantic["con-s4-02"]!["Basil"]!.alsoFits).toEqual([]);
-    expect(semantic["con-s4-02"]!["Basil"]!.note).toMatch(/editor should confirm/);
+  it("why con-s4-02 was redesigned: on the old board, reading Basil as a green gave two solutions", () => {
+    const also = { Sage: ["Herbs"], Lime: ["Shades of green"], Basil: ["Shades of green"] };
+    expect(connectionsSolutions(OLD_CON_S4_02.map((g) => ({ name: g.name, words: g.words })), also).length).toBe(2);
+  });
+
+  it("the redesigned con-s4-02 has no herb group and one solution; Lime is pinned by counting, Emerald and Jade by elimination", () => {
+    const groups = groupsOf("con-s4-02");
+    expect(groups.map((g) => g.name)).toEqual(["Fruits", "Card games", "Gemstones", "Shades of green"]);
+    expect(groups.flatMap((g) => g.words)).not.toEqual(expect.arrayContaining(["Basil"]));
+    expect(declared["con-s4-02"]).toEqual({ Lime: ["Shades of green"], Emerald: ["Gemstones"], Jade: ["Gemstones"] });
+    // Even the deliberate pulls together cannot move a word: every alternative leaves some group short.
+    expect(connectionsSolutions(groups, { Lime: ["Shades of green"], Emerald: ["Gemstones"], Jade: ["Gemstones"], Sage: [] }).length).toBe(1);
+    // The gems do not repeat con-s4-12's gems.
+    const otherGems = groupsOf("con-s4-12").find((g) => g.name === "Gems")!.words;
+    expect(groups.find((g) => g.name === "Gemstones")!.words.filter((w) => otherGems.includes(w))).toEqual([]);
   });
 });
+
+/** con-s4-02 as it was before the 2026-11-07 redesign, for games that stored it. */
+const OLD_CON_S4_02 = [
+  { name: "Fruits", words: ["Cherry", "Plum", "Lemon", "Lime"] },
+  { name: "Card games", words: ["Snap", "Bridge", "Poker", "Rummy"] },
+  { name: "Herbs", words: ["Basil", "Thyme", "Parsley", "Rosemary"] },
+  { name: "Shades of green", words: ["Emerald", "Jade", "Moss", "Sage"] },
+];
 
 // ---------------------------------------------------------------- history
 const intent = (roomId: string, gid: string, action: string, payload: Json) =>
@@ -105,6 +123,25 @@ describe("Batch A keeps game history intact (old and new cases)", () => {
     expect(ps[ids[0]!]!.solved).toContain("Winter weather");
     expect(JSON.stringify(saved["extra"])).toContain("Icicle");
     expect(JSON.stringify(saved["extra"])).not.toContain("Sleet");
+  });
+
+  it("a game that stored the old con-s4-02 board (Herbs) keeps it through save and restore", () => {
+    const { engine, host, ids } = room();
+    const g = engine.startGame(host, "word-connections", { official: true, seed: 1 });
+    const ex = g.extra as { boardId: string; board: ConnectionsBoard; tileOrder: string[] };
+    const categories = OLD_CON_S4_02.map((c) => ({ name: c.name, tiles: c.words }));
+    ex.boardId = "con-s4-02";
+    ex.board = { categories, tiles: categories.flatMap((c) => c.tiles.map((text) => ({ id: tileId(text), text, category: c.name }))) };
+    ex.tileOrder = ex.board.tiles.map((t) => t.id);
+    const restored = restore(engine);
+    const rg = [...(restored as unknown as { games: Map<string, GameInstance> }).games.values()].find((x) => x.id === g.id)!;
+    solveAll(restored, rg, ids[0]!, ex.board.categories);
+    const saved = gameIn(restored, g.id);
+    const ps = ((saved["extra"] as Json)["playerStates"] as Record<string, { solved: string[] }>);
+    expect(ps[ids[0]!]!.solved).toEqual(expect.arrayContaining(["Herbs"]));
+    expect(ps[ids[0]!]!.solved).toHaveLength(4);
+    expect(JSON.stringify(saved["extra"])).toContain("Basil");
+    expect(JSON.stringify(saved["extra"])).not.toContain("Sapphire");
   });
 
   it("a pre-Sprint-4 game with no stored board replays the original Icicle board", () => {
