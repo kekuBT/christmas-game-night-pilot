@@ -37,7 +37,8 @@ export interface PilotEntry {
 export const TONES = ["classic", "modern", "nostalgia", "weird"] as const;
 export type Tone = (typeof TONES)[number];
 export const PLAYLISTS = ["Mixed Party Night", "Modern Culture", "Internet & Memes", "Gaming", "Music & Entertainment", "2000s Nostalgia", "Weird but True", "Brainy & Challenging", "World Knowledge"] as const;
-export const MECHANICS = ["recall", "recognition", "deduction", "comparison", "myth-buster", "never-said", "misquote", "misattribution", "definition-twist", "origin-story", "weird-but-true"] as const;
+export { QUIZ_MECHANICS as MECHANICS } from "../../src/content/schema.js";
+import { QUIZ_MECHANICS as MECHANICS } from "../../src/content/schema.js";
 const QUIZ_GAMES = new Set(["trivia", "geography", "who-said-that"]);
 /**
  * Round-variety rule (E10 v2, proposal; not wired into selection). One

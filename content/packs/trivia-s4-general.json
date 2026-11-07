@@ -29,7 +29,8 @@
     "NaCl"
    ],
    "answer": "H2O",
-   "explanation": "Two hydrogen atoms and one oxygen atom."
+   "explanation": "Two hydrogen atoms and one oxygen atom.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-002",
@@ -54,7 +55,8 @@
     "Kidneys"
    ],
    "answer": "Heart",
-   "explanation": "The heart pumps blood through the circulatory system."
+   "explanation": "The heart pumps blood through the circulatory system.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-003",
@@ -79,7 +81,8 @@
     "Dew"
    ],
    "answer": "Nectar",
-   "explanation": "Bees turn flower nectar into honey."
+   "explanation": "Bees turn flower nectar into honey.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-004",
@@ -104,7 +107,8 @@
     "Quartz"
    ],
    "answer": "Diamond",
-   "explanation": "Diamond scores 10 on the Mohs hardness scale."
+   "explanation": "Diamond scores 10 on the Mohs hardness scale.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-005",
@@ -129,7 +133,8 @@
     "10"
    ],
    "answer": "6",
-   "explanation": "Insects have three pairs of legs."
+   "explanation": "Insects have three pairs of legs.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-006",
@@ -154,7 +159,8 @@
     "Ag"
    ],
    "answer": "Au",
-   "explanation": "From the Latin 'aurum'."
+   "explanation": "From the Latin 'aurum'.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-007",
@@ -179,7 +185,8 @@
     "Earth"
    ],
    "answer": "Mercury",
-   "explanation": "Mercury orbits closest to the Sun."
+   "explanation": "Mercury orbits closest to the Sun.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-008",
@@ -204,7 +211,8 @@
     "Argon"
    ],
    "answer": "Nitrogen",
-   "explanation": "About 78% of the air is nitrogen."
+   "explanation": "About 78% of the air is nitrogen.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-009",
@@ -229,7 +237,8 @@
     "Seeds"
    ],
    "answer": "Leaves",
-   "explanation": "Leaves contain most of the chlorophyll."
+   "explanation": "Leaves contain most of the chlorophyll.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-010",
@@ -254,7 +263,8 @@
     "212°F"
    ],
    "answer": "32°F",
-   "explanation": "Water freezes at 32°F (0°C) at sea level."
+   "explanation": "Water freezes at 32°F (0°C) at sea level.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-011",
@@ -279,7 +289,8 @@
     "Plasma"
    ],
    "answer": "White blood cells",
-   "explanation": "White blood cells are part of the immune system."
+   "explanation": "White blood cells are part of the immune system.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-012",
@@ -304,7 +315,8 @@
     "Electricity"
    ],
    "answer": "Gravity",
-   "explanation": "The Sun's gravity holds the planets in orbit."
+   "explanation": "The Sun's gravity holds the planets in orbit.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-013",
@@ -329,7 +341,8 @@
     "406"
    ],
    "answer": "206",
-   "explanation": "An adult skeleton usually has 206 bones."
+   "explanation": "An adult skeleton usually has 206 bones.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-014",
@@ -354,7 +367,8 @@
     "Carbon"
    ],
    "answer": "Hydrogen",
-   "explanation": "Hydrogen makes up roughly three quarters of ordinary matter by mass."
+   "explanation": "Hydrogen makes up roughly three quarters of ordinary matter by mass.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-015",
@@ -379,7 +393,8 @@
     "14"
    ],
    "answer": "7",
-   "explanation": "Pure water is neutral, pH 7."
+   "explanation": "Pure water is neutral, pH 7.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-016",
@@ -404,7 +419,8 @@
     "Johannes Kepler"
    ],
    "answer": "Isaac Newton",
-   "explanation": "Newton published them in the Principia (1687)."
+   "explanation": "Newton published them in the Principia (1687).",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spac-017",
@@ -429,7 +445,8 @@
     "Polaris"
    ],
    "answer": "The Moon",
-   "explanation": "Earth has one natural satellite, the Moon."
+   "explanation": "Earth has one natural satellite, the Moon.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spac-018",
@@ -454,7 +471,8 @@
     "Mercury"
    ],
    "answer": "Saturn",
-   "explanation": "Saturn's rings are the most prominent in the Solar System."
+   "explanation": "Saturn's rings are the most prominent in the Solar System.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spac-019",
@@ -479,7 +497,8 @@
     "Earth"
    ],
    "answer": "Jupiter",
-   "explanation": "Jupiter is the largest planet."
+   "explanation": "Jupiter is the largest planet.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spac-020",
@@ -504,7 +523,8 @@
     "Whirlpool"
    ],
    "answer": "The Milky Way",
-   "explanation": "The Solar System is in the Milky Way."
+   "explanation": "The Solar System is in the Milky Way.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spac-021",
@@ -529,7 +549,8 @@
     "Michael Collins"
    ],
    "answer": "Neil Armstrong",
-   "explanation": "Armstrong stepped onto the Moon in July 1969."
+   "explanation": "Armstrong stepped onto the Moon in July 1969.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spac-022",
@@ -554,7 +575,8 @@
     "Alan Shepard"
    ],
    "answer": "Yuri Gagarin",
-   "explanation": "Gagarin orbited Earth on 12 April 1961."
+   "explanation": "Gagarin orbited Earth on 12 April 1961.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spac-023",
@@ -579,7 +601,8 @@
     "Venus"
    ],
    "answer": "Jupiter",
-   "explanation": "Jupiter rotates in under 10 hours."
+   "explanation": "Jupiter rotates in under 10 hours.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-024",
@@ -604,7 +627,8 @@
     "Nice"
    ],
    "answer": "Paris",
-   "explanation": "Paris is the capital of France."
+   "explanation": "Paris is the capital of France.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-025",
@@ -629,7 +653,8 @@
     "South America"
    ],
    "answer": "Africa",
-   "explanation": "Egypt is in north-east Africa."
+   "explanation": "Egypt is in north-east Africa.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-026",
@@ -654,7 +679,8 @@
     "Magdalena"
    ],
    "answer": "Amazon",
-   "explanation": "The Amazon is South America's longest river."
+   "explanation": "The Amazon is South America's longest river.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-027",
@@ -679,7 +705,8 @@
     "Naples"
    ],
    "answer": "Rome",
-   "explanation": "Rome is Italy's capital."
+   "explanation": "Rome is Italy's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-028",
@@ -704,7 +731,8 @@
     "Chile"
    ],
    "answer": "Italy",
-   "explanation": "The Italian peninsula is boot-shaped."
+   "explanation": "The Italian peninsula is boot-shaped.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-029",
@@ -729,7 +757,8 @@
     "Atacama"
    ],
    "answer": "Sahara",
-   "explanation": "The Sahara is the largest hot desert."
+   "explanation": "The Sahara is the largest hot desert.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-030",
@@ -754,7 +783,8 @@
     "Sudan"
    ],
    "answer": "Egypt",
-   "explanation": "The Giza pyramids are near Cairo."
+   "explanation": "The Giza pyramids are near Cairo.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-031",
@@ -779,7 +809,8 @@
     "Southern"
    ],
    "answer": "Indian",
-   "explanation": "The Indian Ocean lies between them."
+   "explanation": "The Indian Ocean lies between them.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-032",
@@ -804,7 +835,8 @@
     "Dunedin"
    ],
    "answer": "Wellington",
-   "explanation": "Wellington is the capital; Auckland is the largest city."
+   "explanation": "Wellington is the capital; Auckland is the largest city.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-033",
@@ -829,7 +861,8 @@
     "Liechtenstein"
    ],
    "answer": "Vatican City",
-   "explanation": "Vatican City is about 0.44 km²."
+   "explanation": "Vatican City is about 0.44 km².",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-034",
@@ -854,7 +887,8 @@
     "Ethiopia"
    ],
    "answer": "Tanzania",
-   "explanation": "Kilimanjaro is in north-east Tanzania."
+   "explanation": "Kilimanjaro is in north-east Tanzania.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-035",
@@ -879,7 +913,8 @@
     "Bismarck"
    ],
    "answer": "Titanic",
-   "explanation": "RMS Titanic sank in April 1912."
+   "explanation": "RMS Titanic sank in April 1912.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-036",
@@ -904,7 +939,8 @@
     "Vikings"
    ],
    "answer": "Egyptians",
-   "explanation": "Ancient Egyptians built them as royal tombs."
+   "explanation": "Ancient Egyptians built them as royal tombs.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-037",
@@ -929,7 +965,8 @@
     "John Adams"
    ],
    "answer": "George Washington",
-   "explanation": "Washington served from 1789 to 1797."
+   "explanation": "Washington served from 1789 to 1797.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-038",
@@ -954,7 +991,8 @@
     "Vienna"
    ],
    "answer": "Berlin",
-   "explanation": "The wall divided Berlin from 1961 to 1989."
+   "explanation": "The wall divided Berlin from 1961 to 1989.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-039",
@@ -979,7 +1017,8 @@
     "Persian"
    ],
    "answer": "Roman",
-   "explanation": "The Colosseum was completed under Emperor Titus in AD 80."
+   "explanation": "The Colosseum was completed under Emperor Titus in AD 80.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-040",
@@ -1004,7 +1043,8 @@
     "Anthony Eden"
    ],
    "answer": "Winston Churchill",
-   "explanation": "Churchill led Britain from 1940 to 1945."
+   "explanation": "Churchill led Britain from 1940 to 1945.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-041",
@@ -1029,7 +1069,8 @@
     "Olmec"
    ],
    "answer": "Inca",
-   "explanation": "The Inca built it in the 15th century."
+   "explanation": "The Inca built it in the 15th century.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-042",
@@ -1054,7 +1095,8 @@
     "Donatello"
    ],
    "answer": "Michelangelo",
-   "explanation": "Michelangelo painted it between 1508 and 1512."
+   "explanation": "Michelangelo painted it between 1508 and 1512.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-043",
@@ -1079,7 +1121,8 @@
     "Anne"
    ],
    "answer": "Elizabeth I",
-   "explanation": "The Armada was defeated during Elizabeth I's reign."
+   "explanation": "The Armada was defeated during Elizabeth I's reign.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lite-044",
@@ -1104,7 +1147,8 @@
     "Enid Blyton"
    ],
    "answer": "J. K. Rowling",
-   "explanation": "Published in 1997."
+   "explanation": "Published in 1997.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lite-045",
@@ -1129,7 +1173,8 @@
     "Tom"
    ],
    "answer": "Jack",
-   "explanation": "'Jack and the Beanstalk' is an English fairy tale."
+   "explanation": "'Jack and the Beanstalk' is an English fairy tale.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lite-046",
@@ -1154,7 +1199,8 @@
     "Lewis Carroll"
    ],
    "answer": "Charles Dickens",
-   "explanation": "Dickens published it in 1843."
+   "explanation": "Dickens published it in 1843.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lite-047",
@@ -1179,7 +1225,8 @@
     "Saruman"
    ],
    "answer": "Gandalf",
-   "explanation": "Gandalf the Grey becomes Gandalf the White."
+   "explanation": "Gandalf the Grey becomes Gandalf the White.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lite-048",
@@ -1204,7 +1251,8 @@
     "Dorothy L. Sayers"
    ],
    "answer": "Arthur Conan Doyle",
-   "explanation": "Holmes first appeared in 1887."
+   "explanation": "Holmes first appeared in 1887.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lite-049",
@@ -1229,7 +1277,8 @@
     "A mouse"
    ],
    "answer": "A white rabbit",
-   "explanation": "She follows the White Rabbit."
+   "explanation": "She follows the White Rabbit.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lite-050",
@@ -1254,7 +1303,8 @@
     "George Eliot"
    ],
    "answer": "Jane Austen",
-   "explanation": "Published in 1813."
+   "explanation": "Published in 1813.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lite-051",
@@ -1279,7 +1329,8 @@
     "H. G. Wells"
    ],
    "answer": "Mary Shelley",
-   "explanation": "Published in 1818."
+   "explanation": "Published in 1818.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lang-052",
@@ -1304,7 +1355,8 @@
     "Antique"
    ],
    "answer": "Modern",
-   "explanation": "'Modern' is the usual antonym."
+   "explanation": "'Modern' is the usual antonym.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lang-053",
@@ -1329,7 +1381,8 @@
     "27"
    ],
    "answer": "26",
-   "explanation": "A to Z: 26 letters."
+   "explanation": "A to Z: 26 letters.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lang-054",
@@ -1354,7 +1407,8 @@
     "Angry"
    ],
    "answer": "Cheerful",
-   "explanation": "'Cheerful' means happy."
+   "explanation": "'Cheerful' means happy.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lang-055",
@@ -1379,7 +1433,8 @@
     "Acronym"
    ],
    "answer": "Palindrome",
-   "explanation": "For example 'level' or 'radar'."
+   "explanation": "For example 'level' or 'radar'.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-lang-056",
@@ -1404,7 +1459,8 @@
     "Many"
    ],
    "answer": "Three",
-   "explanation": "As in tricycle and triangle."
+   "explanation": "As in tricycle and triangle.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-arts-057",
@@ -1429,7 +1485,8 @@
     "8"
    ],
    "answer": "6",
-   "explanation": "A standard guitar has six strings."
+   "explanation": "A standard guitar has six strings.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-arts-058",
@@ -1454,7 +1511,8 @@
     "Black, white, grey"
    ],
    "answer": "Red, yellow, blue",
-   "explanation": "The traditional painter's primaries."
+   "explanation": "The traditional painter's primaries.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-arts-059",
@@ -1479,7 +1537,8 @@
     "Claude Monet"
    ],
    "answer": "Leonardo da Vinci",
-   "explanation": "Painted in the early 1500s."
+   "explanation": "Painted in the early 1500s.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-arts-060",
@@ -1504,7 +1563,8 @@
     "96"
    ],
    "answer": "88",
-   "explanation": "52 white and 36 black keys."
+   "explanation": "52 white and 36 black keys.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-arts-061",
@@ -1529,7 +1589,8 @@
     "Bach"
    ],
    "answer": "Tchaikovsky",
-   "explanation": "Premiered in 1892."
+   "explanation": "Premiered in 1892.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-arts-062",
@@ -1554,7 +1615,8 @@
     "Paul Cézanne"
    ],
    "answer": "Vincent van Gogh",
-   "explanation": "This happened in 1888 in Arles."
+   "explanation": "This happened in 1888 in Arles.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-arts-063",
@@ -1579,7 +1641,8 @@
     "4"
    ],
    "answer": "4",
-   "explanation": "A whole note fills a 4/4 bar."
+   "explanation": "A whole note fills a 4/4 bar.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-natu-064",
@@ -1604,7 +1667,8 @@
     "Great white shark"
    ],
    "answer": "Blue whale",
-   "explanation": "The blue whale is the largest known animal."
+   "explanation": "The blue whale is the largest known animal.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-natu-065",
@@ -1629,7 +1693,8 @@
     "Bees"
    ],
    "answer": "Butterflies or moths",
-   "explanation": "Through metamorphosis."
+   "explanation": "Through metamorphosis.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-natu-066",
@@ -1654,7 +1719,8 @@
     "Parrot"
    ],
    "answer": "Dove",
-   "explanation": "The dove with an olive branch."
+   "explanation": "The dove with an olive branch.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-natu-067",
@@ -1679,7 +1745,8 @@
     "Calf"
    ],
    "answer": "Joey",
-   "explanation": "Young kangaroos are joeys."
+   "explanation": "Young kangaroos are joeys.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-natu-068",
@@ -1704,7 +1771,8 @@
     "4"
    ],
    "answer": "3",
-   "explanation": "Two pump blood through the gills, one through the body."
+   "explanation": "Two pump blood through the gills, one through the body.",
+   "mechanic": "weird-but-true"
   },
   {
    "id": "trv-natu-069",
@@ -1729,7 +1797,8 @@
     "Koala"
    ],
    "answer": "Chameleon",
-   "explanation": "Chameleons change colour."
+   "explanation": "Chameleons change colour.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-natu-070",
@@ -1754,7 +1823,8 @@
     "Insects"
    ],
    "answer": "Bamboo",
-   "explanation": "Bamboo makes up most of a giant panda's diet."
+   "explanation": "Bamboo makes up most of a giant panda's diet.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-natu-071",
@@ -1779,7 +1849,8 @@
     "A school"
    ],
    "answer": "A murder",
-   "explanation": "'A murder of crows' is the traditional collective noun."
+   "explanation": "'A murder of crows' is the traditional collective noun.",
+   "mechanic": "weird-but-true"
   },
   {
    "id": "trv-natu-072",
@@ -1804,7 +1875,8 @@
     "Colugo"
    ],
    "answer": "Bat",
-   "explanation": "Other 'flying' mammals glide."
+   "explanation": "Other 'flying' mammals glide.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-natu-073",
@@ -1829,7 +1901,8 @@
     "Pine"
    ],
    "answer": "Oak",
-   "explanation": "Acorns are oak nuts."
+   "explanation": "Acorns are oak nuts.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-food-074",
@@ -1854,7 +1927,8 @@
     "Lime"
    ],
    "answer": "Avocado",
-   "explanation": "Guacamole is mashed avocado."
+   "explanation": "Guacamole is mashed avocado.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-food-075",
@@ -1879,7 +1953,8 @@
     "Cheese"
    ],
    "answer": "Eggs",
-   "explanation": "An omelette is beaten eggs cooked in a pan."
+   "explanation": "An omelette is beaten eggs cooked in a pan.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-food-076",
@@ -1904,7 +1979,8 @@
     "Thailand"
    ],
    "answer": "Japan",
-   "explanation": "Sushi is a Japanese dish."
+   "explanation": "Sushi is a Japanese dish.",
+   "mechanic": "origin-story"
   },
   {
    "id": "trv-food-077",
@@ -1929,7 +2005,8 @@
     "Corn"
    ],
    "answer": "Soybeans",
-   "explanation": "Tofu is pressed soybean curd."
+   "explanation": "Tofu is pressed soybean curd.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-food-078",
@@ -1954,7 +2031,8 @@
     "Cumin"
    ],
    "answer": "Saffron",
-   "explanation": "Saffron gives traditional paella its colour."
+   "explanation": "Saffron gives traditional paella its colour.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-food-079",
@@ -1979,7 +2057,8 @@
     "Filo"
    ],
    "answer": "Choux",
-   "explanation": "Profiteroles are choux buns."
+   "explanation": "Profiteroles are choux buns.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-food-080",
@@ -2004,7 +2083,8 @@
     "Cashew"
    ],
    "answer": "Almond",
-   "explanation": "Marzipan is ground almonds and sugar."
+   "explanation": "Marzipan is ground almonds and sugar.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spor-081",
@@ -2029,7 +2109,8 @@
     "12"
    ],
    "answer": "11",
-   "explanation": "Each side fields eleven players."
+   "explanation": "Each side fields eleven players.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spor-082",
@@ -2054,7 +2135,8 @@
     "Table tennis"
    ],
    "answer": "Badminton",
-   "explanation": "Badminton uses a shuttlecock."
+   "explanation": "Badminton uses a shuttlecock.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spor-083",
@@ -2079,7 +2161,8 @@
     "7"
    ],
    "answer": "5",
-   "explanation": "Five interlocking rings."
+   "explanation": "Five interlocking rings.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spor-084",
@@ -2104,7 +2187,8 @@
     "Zero"
    ],
    "answer": "Love",
-   "explanation": "Zero in tennis is 'love'."
+   "explanation": "Zero in tennis is 'love'.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spor-085",
@@ -2129,7 +2213,8 @@
     "2"
    ],
    "answer": "6",
-   "explanation": "A touchdown scores six points."
+   "explanation": "A touchdown scores six points.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spor-086",
@@ -2154,7 +2239,8 @@
     "100 km"
    ],
    "answer": "42 km",
-   "explanation": "A marathon is 42.195 km."
+   "explanation": "A marathon is 42.195 km.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-spor-087",
@@ -2179,7 +2265,8 @@
     "King"
    ],
    "answer": "Bishop",
-   "explanation": "Bishops stay on one colour."
+   "explanation": "Bishops stay on one colour.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-math-088",
@@ -2204,7 +2291,8 @@
     "64"
    ],
    "answer": "56",
-   "explanation": "7 × 8 = 56."
+   "explanation": "7 × 8 = 56.",
+   "mechanic": "deduction"
   },
   {
    "id": "trv-math-089",
@@ -2229,7 +2317,8 @@
     "5"
    ],
    "answer": "3",
-   "explanation": "Tri- means three."
+   "explanation": "Tri- means three.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-math-090",
@@ -2254,7 +2343,8 @@
     "11"
    ],
    "answer": "9",
-   "explanation": "9 × 9 = 81."
+   "explanation": "9 × 9 = 81.",
+   "mechanic": "deduction"
   },
   {
    "id": "trv-math-091",
@@ -2279,7 +2369,8 @@
     "360"
    ],
    "answer": "90",
-   "explanation": "A right angle is 90°."
+   "explanation": "A right angle is 90°.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-math-092",
@@ -2304,7 +2395,8 @@
     "75"
    ],
    "answer": "50",
-   "explanation": "A quarter of 200 is 50."
+   "explanation": "A quarter of 200 is 50.",
+   "mechanic": "deduction"
   },
   {
    "id": "trv-math-093",
@@ -2329,7 +2421,8 @@
     "13"
    ],
    "answer": "11",
-   "explanation": "8, 9 and 10 are not prime."
+   "explanation": "8, 9 and 10 are not prime.",
+   "mechanic": "deduction"
   },
   {
    "id": "trv-math-094",
@@ -2354,7 +2447,8 @@
     "20"
    ],
    "answer": "12",
-   "explanation": "Dodeca- means twelve."
+   "explanation": "Dodeca- means twelve.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-ever-095",
@@ -2379,7 +2473,8 @@
     "8"
    ],
    "answer": "7",
-   "explanation": "Seven days a week."
+   "explanation": "Seven days a week.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-ever-096",
@@ -2404,7 +2499,8 @@
     "Brown"
    ],
    "answer": "Pink",
-   "explanation": "Red plus white makes pink."
+   "explanation": "Red plus white makes pink.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-ever-097",
@@ -2429,7 +2525,8 @@
     "48"
    ],
    "answer": "24",
-   "explanation": "A day has 24 hours."
+   "explanation": "A day has 24 hours.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-ever-098",
@@ -2454,7 +2551,8 @@
     "Foal"
    ],
    "answer": "Kitten",
-   "explanation": "A young cat is a kitten."
+   "explanation": "A young cat is a kitten.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-ever-099",
@@ -2479,7 +2577,8 @@
     "8"
    ],
    "answer": "7",
-   "explanation": "January, March, May, July, August, October, December."
+   "explanation": "January, March, May, July, August, October, December.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-ever-100",
@@ -2504,7 +2603,8 @@
     "August"
    ],
    "answer": "June",
-   "explanation": "Around 20–21 June."
+   "explanation": "Around 20–21 June.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-fest-101",
@@ -2529,7 +2629,8 @@
     "Gold"
    ],
    "answer": "Red",
-   "explanation": "Red with white trim."
+   "explanation": "Red with white trim.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-fest-102",
@@ -2554,7 +2655,8 @@
     "Wreaths"
    ],
    "answer": "Stockings",
-   "explanation": "Christmas stockings."
+   "explanation": "Christmas stockings.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-fest-103",
@@ -2579,7 +2681,8 @@
     "Lamb"
    ],
    "answer": "Calf",
-   "explanation": "Reindeer young are calves."
+   "explanation": "Reindeer young are calves.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-fest-104",
@@ -2604,7 +2707,8 @@
     "Three French hens"
    ],
    "answer": "A partridge in a pear tree",
-   "explanation": "The first gift is a partridge in a pear tree."
+   "explanation": "The first gift is a partridge in a pear tree.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-fest-105",
@@ -2629,7 +2733,8 @@
     "Poinsettia"
    ],
    "answer": "Mistletoe",
-   "explanation": "Kissing under the mistletoe."
+   "explanation": "Kissing under the mistletoe.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-fest-106",
@@ -2654,7 +2759,8 @@
     "Finland"
    ],
    "answer": "Norway",
-   "explanation": "A thank-you from Oslo since 1947."
+   "explanation": "A thank-you from Oslo since 1947.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-fest-107",
@@ -2679,7 +2785,8 @@
     "Italy"
    ],
    "answer": "Germany",
-   "explanation": "Decorated trees spread from Germany."
+   "explanation": "Decorated trees spread from Germany.",
+   "mechanic": "origin-story"
   },
   {
    "id": "trv-fest-108",
@@ -2704,7 +2811,8 @@
     "Blitzen"
    ],
    "answer": "Rudolph",
-   "explanation": "Rudolph first appeared in a 1939 booklet."
+   "explanation": "Rudolph first appeared in a 1939 booklet.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-fest-109",
@@ -2729,7 +2837,8 @@
     "A square"
    ],
    "answer": "A J or shepherd's crook",
-   "explanation": "It is shaped like a hook."
+   "explanation": "It is shaped like a hook.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-fest-110",
@@ -2754,7 +2863,8 @@
     "Bell"
    ],
    "answer": "Christmas",
-   "explanation": "'Noël' is French for Christmas."
+   "explanation": "'Noël' is French for Christmas.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-tech-111",
@@ -2779,7 +2889,8 @@
     "Radio"
    ],
    "answer": "Camera",
-   "explanation": "Cameras capture images."
+   "explanation": "Cameras capture images.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-tech-112",
@@ -2804,7 +2915,8 @@
     "Guglielmo Marconi"
    ],
    "answer": "Alexander Graham Bell",
-   "explanation": "Bell received the patent in 1876."
+   "explanation": "Bell received the patent in 1876.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-tech-113",
@@ -2829,7 +2941,8 @@
     "World Web Wire"
    ],
    "answer": "World Wide Web",
-   "explanation": "The Web, invented by Tim Berners-Lee."
+   "explanation": "The Web, invented by Tim Berners-Lee.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-tech-114",
@@ -2854,7 +2967,8 @@
     "The compass"
    ],
    "answer": "The printing press with movable type",
-   "explanation": "Around 1440 in Mainz."
+   "explanation": "Around 1440 in Mainz.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-tech-115",
@@ -2879,7 +2993,8 @@
     "Central Power Unit"
    ],
    "answer": "Central Processing Unit",
-   "explanation": "The CPU executes instructions."
+   "explanation": "The CPU executes instructions.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-116",
@@ -2904,7 +3019,8 @@
     "Valencia"
    ],
    "answer": "Madrid",
-   "explanation": "Madrid is Spain's capital."
+   "explanation": "Madrid is Spain's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-117",
@@ -2929,7 +3045,8 @@
     "Giza"
    ],
    "answer": "Cairo",
-   "explanation": "Cairo is Egypt's capital."
+   "explanation": "Cairo is Egypt's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-118",
@@ -2954,7 +3071,8 @@
     "Mont Blanc"
    ],
    "answer": "Mount Everest",
-   "explanation": "About 8,849 m."
+   "explanation": "About 8,849 m.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-119",
@@ -2979,7 +3097,8 @@
     "Vancouver"
    ],
    "answer": "Ottawa",
-   "explanation": "Ottawa is the capital of Canada."
+   "explanation": "Ottawa is the capital of Canada.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-120",
@@ -3004,7 +3123,8 @@
     "Loire"
    ],
    "answer": "Seine",
-   "explanation": "The Seine runs through Paris."
+   "explanation": "The Seine runs through Paris.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-geog-121",
@@ -3030,7 +3150,8 @@
    ],
    "answer": "Sweden",
    "explanation": "Sweden is often cited with over 200,000 islands; counting methods vary.",
-   "ambiguity": "Island counts depend on the minimum size counted; Sweden is often cited but sources differ."
+   "ambiguity": "Island counts depend on the minimum size counted; Sweden is often cited but sources differ.",
+   "mechanic": "weird-but-true"
   },
   {
    "id": "trv-scie-122",
@@ -3055,7 +3176,8 @@
     "Dew"
    ],
    "answer": "Ice",
-   "explanation": "Water freezes into ice."
+   "explanation": "Water freezes into ice.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-123",
@@ -3080,7 +3202,8 @@
     "Taste"
    ],
    "answer": "Hearing",
-   "explanation": "Ears are for hearing."
+   "explanation": "Ears are for hearing.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-124",
@@ -3105,7 +3228,8 @@
     "Fish"
    ],
    "answer": "Amphibian",
-   "explanation": "Frogs live both in water and on land."
+   "explanation": "Frogs live both in water and on land.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-125",
@@ -3130,7 +3254,8 @@
     "Shell"
    ],
    "answer": "Nucleus",
-   "explanation": "Protons and neutrons form the nucleus."
+   "explanation": "Protons and neutrons form the nucleus.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-126",
@@ -3155,7 +3280,8 @@
     "Vitamin K"
    ],
    "answer": "Vitamin D",
-   "explanation": "UVB light triggers vitamin D production."
+   "explanation": "UVB light triggers vitamin D production.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-scie-127",
@@ -3180,7 +3306,8 @@
     "30 million km per second"
    ],
    "answer": "300,000 km per second",
-   "explanation": "About 299,792 km/s in a vacuum."
+   "explanation": "About 299,792 km/s in a vacuum.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-128",
@@ -3205,7 +3332,8 @@
     "Louis XVI"
    ],
    "answer": "Napoleon Bonaparte",
-   "explanation": "Waterloo ended his rule."
+   "explanation": "Waterloo ended his rule.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-129",
@@ -3230,7 +3358,8 @@
     "Korea"
    ],
    "answer": "China",
-   "explanation": "Built along China's northern borders."
+   "explanation": "Built along China's northern borders.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-130",
@@ -3255,7 +3384,8 @@
     "James Cook"
    ],
    "answer": "Ferdinand Magellan",
-   "explanation": "Magellan died on the way; Elcano completed it."
+   "explanation": "Magellan died on the way; Elcano completed it.",
+   "mechanic": "recall"
   },
   {
    "id": "trv-hist-131",
@@ -3280,7 +3410,8 @@
     "A wall of ice"
    ],
    "answer": "A moat",
-   "explanation": "Moats made castles harder to attack."
+   "explanation": "Moats made castles harder to attack.",
+   "mechanic": "recall"
   }
  ]
 }

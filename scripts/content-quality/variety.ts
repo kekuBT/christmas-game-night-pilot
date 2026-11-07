@@ -21,6 +21,8 @@
  * With window 0 it reproduces the current selector's behaviour (the baseline).
  */
 
+import { PLAIN_QUIZ_MECHANICS, QUOTE_TWIST_MECHANICS } from "../../src/content/schema.js";
+
 export interface VarietyTags { mechanic?: string; negative?: boolean }
 export interface VItem { id: string; difficulty: 1 | 2 | 3; category: string; tags: VarietyTags }
 
@@ -30,8 +32,8 @@ export const VARIETY_RULE = { maxPerTwist: 2, maxQuoteTwist: 1, maxNegative: 1 }
  * simulated 10-question rounds "fail" (E10_ROUND_VARIETY.md), so they are
  * never capped. Only formats that feel samey when repeated are limited.
  */
-export const PLAIN_MECHANICS = new Set(["recall", "recognition", "comparison", "deduction"]);
-export const QUOTE_TWIST = new Set(["never-said", "misquote", "misattribution"]);
+export const PLAIN_MECHANICS = new Set<string>(PLAIN_QUIZ_MECHANICS);
+export const QUOTE_TWIST = new Set<string>(QUOTE_TWIST_MECHANICS);
 const isTwist = (m: string | undefined): m is string => !!m && !PLAIN_MECHANICS.has(m);
 
 /**

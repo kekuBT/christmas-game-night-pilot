@@ -29,7 +29,8 @@
         "Lena the Sailor",
         "Omar the Teacher"
       ],
-      "answer": "Mira the Baker"
+      "answer": "Mira the Baker",
+      "mechanic": "recognition"
     },
     {
       "id": "who-legacy-2",
@@ -54,7 +55,8 @@
         "Lena the Sailor",
         "Omar the Teacher"
       ],
-      "answer": "Tom the Gardener"
+      "answer": "Tom the Gardener",
+      "mechanic": "recognition"
     },
     {
       "id": "who-legacy-3",
@@ -79,7 +81,8 @@
         "Lena the Sailor",
         "Omar the Teacher"
       ],
-      "answer": "Omar the Teacher"
+      "answer": "Omar the Teacher",
+      "mechanic": "recognition"
     },
     {
       "id": "who-legacy-4",
@@ -104,7 +107,8 @@
         "Lena the Sailor",
         "Omar the Teacher"
       ],
-      "answer": "Lena the Sailor"
+      "answer": "Lena the Sailor",
+      "mechanic": "recognition"
     },
     {
       "id": "who-legacy-5",
@@ -129,7 +133,8 @@
         "Lena the Sailor",
         "Omar the Teacher"
       ],
-      "answer": "Tom the Gardener"
+      "answer": "Tom the Gardener",
+      "mechanic": "recognition"
     },
     {
       "id": "who-legacy-6",
@@ -154,7 +159,8 @@
         "Lena the Sailor",
         "Omar the Teacher"
       ],
-      "answer": "Mira the Baker"
+      "answer": "Mira the Baker",
+      "mechanic": "recognition"
     },
     {
       "id": "who-legacy-7",
@@ -179,7 +185,8 @@
         "Lena the Sailor",
         "Omar the Teacher"
       ],
-      "answer": "Omar the Teacher"
+      "answer": "Omar the Teacher",
+      "mechanic": "recognition"
     },
     {
       "id": "who-legacy-8",
@@ -204,7 +211,8 @@
         "Lena the Sailor",
         "Omar the Teacher"
       ],
-      "answer": "Lena the Sailor"
+      "answer": "Lena the Sailor",
+      "mechanic": "recognition"
     }
   ]
 }

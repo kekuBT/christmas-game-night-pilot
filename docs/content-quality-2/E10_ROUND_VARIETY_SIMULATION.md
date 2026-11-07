@@ -82,3 +82,16 @@ Columns: **games** = official games the Cup could play (must not change); **roun
 | 0 (today) | 100% | 2.36 |
 | 3 | 45% | 0.45 |
 | 8 | 45% | 0.45 |
+
+## The real library (tagged 2026-11-07; provisional, not yet editorially reviewed)
+
+Pool: every official-eligibility item that is not rejected, i.e. what official play would draw on once approved. Whole Cups of 10-question games, 40 seeds. **Re-run after editorial review**: the approved pool may differ.
+
+| Game | Pool | Twist-format items | Window | Games | Rounds with a problem | Repeats |
+|---|---|---|---|---|---|---|
+| trivia | 138 | 4 | 0 (today) | 13 | 0% | 0 |
+| trivia | 138 | 4 | 3 | 13 | 0% | 0 |
+| geography | 50 | 0 | 0 (today) | 5 | 0% | 0 |
+| geography | 50 | 0 | 3 | 5 | 0% | 0 |
+| who-said-that | 40 | 0 | 0 (today) | 4 | 0% | 0 |
+| who-said-that | 40 | 0 | 3 | 4 | 0% | 0 |

@@ -31,7 +31,8 @@
         "50"
       ],
       "answer": "60",
-      "explanation": "15 × 4 = 60."
+      "explanation": "15 × 4 = 60.",
+      "mechanic": "deduction"
     },
     {
       "id": "trv-legacy-02",
@@ -58,7 +59,8 @@
         "October"
       ],
       "answer": "December",
-      "explanation": "December follows November."
+      "explanation": "December follows November.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-03",
@@ -85,7 +87,8 @@
         "Seoul"
       ],
       "answer": "Tokyo",
-      "explanation": "Tokyo has been Japan's capital since 1868."
+      "explanation": "Tokyo has been Japan's capital since 1868.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-04",
@@ -112,7 +115,8 @@
         "Indian"
       ],
       "answer": "Pacific",
-      "explanation": "The Pacific is the largest ocean."
+      "explanation": "The Pacific is the largest ocean.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-05",
@@ -139,7 +143,8 @@
         "Green"
       ],
       "answer": "Green",
-      "explanation": "Blue + yellow = green."
+      "explanation": "Blue + yellow = green.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-06",
@@ -166,7 +171,8 @@
         "Nitrogen"
       ],
       "answer": "Carbon dioxide",
-      "explanation": "Plants use carbon dioxide in photosynthesis."
+      "explanation": "Plants use carbon dioxide in photosynthesis.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-07",
@@ -193,7 +199,8 @@
         "7"
       ],
       "answer": "6",
-      "explanation": "Hexa- means six."
+      "explanation": "Hexa- means six.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-08",
@@ -220,7 +227,8 @@
         "100"
       ],
       "answer": "100",
-      "explanation": "Water boils at 100°C at sea level."
+      "explanation": "Water boils at 100°C at sea level.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-09",
@@ -247,7 +255,8 @@
         "Parrot"
       ],
       "answer": "Dog",
-      "explanation": "Dogs are commonly called man's best friend."
+      "explanation": "Dogs are commonly called man's best friend.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-10",
@@ -274,7 +283,8 @@
         "Charles Dickens"
       ],
       "answer": "William Shakespeare",
-      "explanation": "Shakespeare wrote Romeo and Juliet."
+      "explanation": "Shakespeare wrote Romeo and Juliet.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-11",
@@ -301,7 +311,8 @@
         "Venus"
       ],
       "answer": "Mars",
-      "explanation": "Mars appears red due to iron oxide on its surface."
+      "explanation": "Mars appears red due to iron oxide on its surface.",
+      "mechanic": "recall"
     },
     {
       "id": "trv-legacy-12",
@@ -328,7 +339,8 @@
         "120"
       ],
       "answer": "120",
-      "explanation": "2 × 60 = 120."
+      "explanation": "2 × 60 = 120.",
+      "mechanic": "deduction"
     }
   ]
 }

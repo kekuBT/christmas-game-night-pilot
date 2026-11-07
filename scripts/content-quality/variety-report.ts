@@ -6,8 +6,8 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { DEFAULT_CONTENT_DIR } from "../../src/content/registry.js";
-import { makeLibrary, PROFILES, prng, selectVaried, simulateCup, type VItem } from "./variety.js";
+import { DEFAULT_CONTENT_DIR, loadContent } from "../../src/content/registry.js";
+import { makeLibrary, PLAIN_MECHANICS, PROFILES, prng, selectVaried, simulateCup, type VItem } from "./variety.js";
 import type { PilotFile } from "./pilot-lib.js";
 
 const SEEDS = 40;
@@ -52,6 +52,27 @@ for (const w of WINDOWS) {
   const n = SEEDS * 5;
   for (let s = 1; s <= n; s++) { const r = selectVaried(real, 10, prng(s), w); bad += r.problems.length > 0 ? 1 : 0; mean += r.problems.length; }
   lines.push(`| ${w === 0 ? "0 (today)" : w} | ${pct(bad / n)} | ${(mean / n).toFixed(2)} |`);
+}
+lines.push("");
+
+// The real library, now tagged with question formats (E10 metadata). Every
+// item is still provisional or legacy: re-run after editorial review, when the
+// approved pool is known (owner direction 2026-11-07).
+const lib = loadContent(DEFAULT_CONTENT_DIR);
+lines.push("## The real library (tagged 2026-11-07; provisional, not yet editorially reviewed)", "",
+  "Pool: every official-eligibility item that is not rejected, i.e. what official play would draw on once approved. Whole Cups of 10-question games, " + SEEDS + " seeds. **Re-run after editorial review**: the approved pool may differ.", "",
+  "| Game | Pool | Twist-format items | Window | Games | Rounds with a problem | Repeats |", "|---|---|---|---|---|---|---|");
+for (const g of ["trivia", "geography", "who-said-that"] as const) {
+  const items: VItem[] = (lib.byGame.get(g) ?? []).filter((li) => li.item.eligibility === "official" && li.status !== "rejected").map((li) => {
+    const it = li.item as { id: string; difficulty: 1 | 2 | 3; category: string; mechanic?: string; negativeStem?: boolean };
+    return { id: it.id, difficulty: it.difficulty, category: it.category, tags: { ...(it.mechanic ? { mechanic: it.mechanic } : {}), ...(it.negativeStem ? { negative: true } : {}) } };
+  });
+  const twist = items.filter((x) => x.tags.mechanic && !PLAIN_MECHANICS.has(x.tags.mechanic)).length;
+  for (const w of [0, 3]) {
+    let games = 0, bad = 0, rep = 0;
+    for (let s = 1; s <= SEEDS; s++) { const r = simulateCup(items, 10, w, s); games += r.games; bad += r.gamesWithProblems; rep += r.repeats; }
+    lines.push(`| ${g} | ${items.length} | ${twist} | ${w === 0 ? "0 (today)" : w} | ${(games / SEEDS).toFixed(0)} | ${pct(bad / SEEDS)} | ${rep} |`);
+  }
 }
 lines.push("");
 writeFileSync(join(DEFAULT_CONTENT_DIR, "..", "docs", "content-quality-2", "E10_ROUND_VARIETY_SIMULATION.md"), lines.join("\n"));

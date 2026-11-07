@@ -98,3 +98,51 @@ Over a whole Cup it still cuts problems a lot. But in **small Cups the last game
 1. Approve the E10 v2 rule (twist formats only, as above), or adjust the caps.
 2. Approve the bounded step with window 3, to be implemented after the library is tagged.
 3. Approve tagging the library's quiz items with `mechanic`, and the content-mix warning.
+
+## Update 2026-11-07: owner partial approval
+
+**Approved and implemented:**
+1. **Question-format metadata.**
+   - The quiz item schemas (Trivia, Geography, Who Said That?) gain optional `mechanic` and `negativeStem` fields.
+   - The pilot, the simulation and the lint share one vocabulary: `QUIZ_MECHANICS` in `src/content/schema.ts`.
+   - All 235 library quiz items are tagged by `scripts/content-quality/revisions/rev06_quiz_mechanics.py`.
+   - Trivia: 132 recall, 6 deduction, 3 weird-but-true, 2 origin-story. Geography: 35 recall, 10 comparison, 7 recognition. Who Said That?: 40 recognition.
+   - No library item has a negative stem or a quote twist.
+2. **Editorial warnings** in `npm run content:check`:
+   - `format-untagged`: a quiz item in use has no format.
+   - `content-mix`: in a game's official pool (official eligibility, not rejected), one twist format is over 20%, quote twists together are over 10%, or negative stems are over 10%.
+   - Pools under 10 items are not judged.
+   - Today's library gives no warning.
+3. **Tests:** `tests/quiz-format.test.ts` covers the tags, the schema, each warning, and the round rule on tagged library items.
+
+**Not activated:** the window-3 variety step. A test checks that official and practice quiz selections are identical with and without the metadata.
+
+### The real library, simulated (provisional, before editorial review)
+
+See [the simulation](E10_ROUND_VARIETY_SIMULATION.md), last section.
+- Today's pool has almost no twist formats: 4 of 138 Trivia items, 0 of 50 Geography, 0 of 40 Who Said That?.
+- Both today's selector and the variety step produce **0%** problem rounds over whole Cups.
+
+**So activating the step would change nothing today.** It starts to matter only when twist-heavy content, such as the pilot's (100% → 45%), is approved. **Recommendation:** keep it off. Re-run `npm run content:variety-sim` on the approved library after editorial review, and decide then.
+
+### Proposal: keeping a running Cup's selection behaviour across an app update
+
+Use the same mechanism that already protects Category Sprint matching (D-CQ2-17..21). It is not built yet.
+
+1. **Version the selection rules and freeze the version in the Cup.**
+   - New Cups record `quizSelection: { variety: 1, window: 3 }` in the Cup record when they are created, alongside `categorySprint`.
+   - A Cup without the field is a pre-activation Cup. It uses today's selector (`variety: 0`) for its whole life, through restarts and restores, whatever the app version.
+2. **Record what each game used.** The game's selection log notes the variety version and window. A finished or running game is never re-selected: its questions are materialised at the start, as today.
+3. **What "same behaviour" means, honestly.**
+   - The frozen version fixes the algorithm, not the exact picks.
+   - Today's selector already depends on the pack contents at selection time: items added or retired mid-Cup change later games' picks.
+   - Editorial retagging works the same way. A Cup's later games see current tags, but only through the frozen algorithm, and under `variety: 0` tags are never read.
+4. **Tests to add when it is activated:**
+   - A pre-activation Cup selects exactly what today's selector would, after the update and after a restore.
+   - A new Cup records `variety: 1` and keeps it through restore.
+   - Mixing versions in one process never leaks one Cup's rules into another.
+   - Eligibility, no-repeat and game counts are unchanged, as the simulation tests already assert.
+
+**Decisions still needed:**
+- Approve this versioning design.
+- Choose when to activate: after the approved library contains enough twist formats for it to matter.

@@ -28,7 +28,8 @@
     "Chef Paprika",
     "Pip the Inventor"
    ],
-   "answer": "Captain Bramble"
+   "answer": "Captain Bramble",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-002",
@@ -52,7 +53,8 @@
     "Professor Quill",
     "Granny Juniper"
    ],
-   "answer": "Captain Bramble"
+   "answer": "Captain Bramble",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-003",
@@ -76,7 +78,8 @@
     "Professor Quill",
     "Pip the Inventor"
    ],
-   "answer": "Captain Bramble"
+   "answer": "Captain Bramble",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-004",
@@ -100,7 +103,8 @@
     "Luna the Stargazer",
     "Captain Bramble"
    ],
-   "answer": "Captain Bramble"
+   "answer": "Captain Bramble",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-005",
@@ -124,7 +128,8 @@
     "Captain Bramble",
     "Detective Sloane"
    ],
-   "answer": "Professor Quill"
+   "answer": "Professor Quill",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-006",
@@ -148,7 +153,8 @@
     "Professor Quill",
     "Pip the Inventor"
    ],
-   "answer": "Professor Quill"
+   "answer": "Professor Quill",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-007",
@@ -172,7 +178,8 @@
     "Coach Rocket",
     "Pip the Inventor"
    ],
-   "answer": "Professor Quill"
+   "answer": "Professor Quill",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-008",
@@ -196,7 +203,8 @@
     "Captain Bramble",
     "Pip the Inventor"
    ],
-   "answer": "Professor Quill"
+   "answer": "Professor Quill",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-009",
@@ -220,7 +228,8 @@
     "Granny Juniper",
     "Pip the Inventor"
    ],
-   "answer": "Granny Juniper"
+   "answer": "Granny Juniper",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-010",
@@ -244,7 +253,8 @@
     "Granny Juniper",
     "Captain Bramble"
    ],
-   "answer": "Granny Juniper"
+   "answer": "Granny Juniper",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-011",
@@ -268,7 +278,8 @@
     "Professor Quill",
     "Granny Juniper"
    ],
-   "answer": "Granny Juniper"
+   "answer": "Granny Juniper",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-012",
@@ -292,7 +303,8 @@
     "Detective Sloane",
     "Professor Quill"
    ],
-   "answer": "Granny Juniper"
+   "answer": "Granny Juniper",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-013",
@@ -316,7 +328,8 @@
     "Captain Bramble",
     "Granny Juniper"
    ],
-   "answer": "Detective Sloane"
+   "answer": "Detective Sloane",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-014",
@@ -340,7 +353,8 @@
     "Detective Sloane",
     "Chef Paprika"
    ],
-   "answer": "Detective Sloane"
+   "answer": "Detective Sloane",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-015",
@@ -364,7 +378,8 @@
     "Chef Paprika",
     "Granny Juniper"
    ],
-   "answer": "Detective Sloane"
+   "answer": "Detective Sloane",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-016",
@@ -388,7 +403,8 @@
     "Captain Bramble",
     "Granny Juniper"
    ],
-   "answer": "Detective Sloane"
+   "answer": "Detective Sloane",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-017",
@@ -412,7 +428,8 @@
     "Detective Sloane",
     "Coach Rocket"
    ],
-   "answer": "Coach Rocket"
+   "answer": "Coach Rocket",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-018",
@@ -436,7 +453,8 @@
     "Pip the Inventor",
     "Granny Juniper"
    ],
-   "answer": "Coach Rocket"
+   "answer": "Coach Rocket",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-019",
@@ -460,7 +478,8 @@
     "Luna the Stargazer",
     "Coach Rocket"
    ],
-   "answer": "Coach Rocket"
+   "answer": "Coach Rocket",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-020",
@@ -484,7 +503,8 @@
     "Coach Rocket",
     "Professor Quill"
    ],
-   "answer": "Coach Rocket"
+   "answer": "Coach Rocket",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-021",
@@ -508,7 +528,8 @@
     "Pip the Inventor",
     "Luna the Stargazer"
    ],
-   "answer": "Luna the Stargazer"
+   "answer": "Luna the Stargazer",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-022",
@@ -532,7 +553,8 @@
     "Coach Rocket",
     "Luna the Stargazer"
    ],
-   "answer": "Luna the Stargazer"
+   "answer": "Luna the Stargazer",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-023",
@@ -556,7 +578,8 @@
     "Luna the Stargazer",
     "Chef Paprika"
    ],
-   "answer": "Luna the Stargazer"
+   "answer": "Luna the Stargazer",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-024",
@@ -580,7 +603,8 @@
     "Luna the Stargazer",
     "Granny Juniper"
    ],
-   "answer": "Luna the Stargazer"
+   "answer": "Luna the Stargazer",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-025",
@@ -604,7 +628,8 @@
     "Granny Juniper",
     "Pip the Inventor"
    ],
-   "answer": "Chef Paprika"
+   "answer": "Chef Paprika",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-026",
@@ -628,7 +653,8 @@
     "Pip the Inventor",
     "Luna the Stargazer"
    ],
-   "answer": "Chef Paprika"
+   "answer": "Chef Paprika",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-027",
@@ -652,7 +678,8 @@
     "Coach Rocket",
     "Pip the Inventor"
    ],
-   "answer": "Chef Paprika"
+   "answer": "Chef Paprika",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-028",
@@ -676,7 +703,8 @@
     "Captain Bramble",
     "Luna the Stargazer"
    ],
-   "answer": "Chef Paprika"
+   "answer": "Chef Paprika",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-029",
@@ -700,7 +728,8 @@
     "Pip the Inventor",
     "Captain Bramble"
    ],
-   "answer": "Pip the Inventor"
+   "answer": "Pip the Inventor",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-030",
@@ -724,7 +753,8 @@
     "Chef Paprika",
     "Captain Bramble"
    ],
-   "answer": "Pip the Inventor"
+   "answer": "Pip the Inventor",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-031",
@@ -748,7 +778,8 @@
     "Coach Rocket",
     "Pip the Inventor"
    ],
-   "answer": "Pip the Inventor"
+   "answer": "Pip the Inventor",
+   "mechanic": "recognition"
   },
   {
    "id": "who-s4-032",
@@ -772,7 +803,8 @@
     "Granny Juniper",
     "Detective Sloane"
    ],
-   "answer": "Pip the Inventor"
+   "answer": "Pip the Inventor",
+   "mechanic": "recognition"
   }
  ]
 }

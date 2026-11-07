@@ -6,7 +6,7 @@
  */
 import type { ContentLibrary, LoadedItem } from "./registry.js";
 import { officialEligible } from "./registry.js";
-import type { ContentGameId, ItemOf } from "./schema.js";
+import { PLAIN_QUIZ_MECHANICS, QUOTE_TWIST_MECHANICS, type ContentGameId, type ItemOf, type QuizMechanic } from "./schema.js";
 import { officialSprintSuitable } from "./closedSet.js";
 import { isNumericGame, NUMERIC_INPUT, withinNumericInput } from "../shared/numericInput.js";
 
@@ -36,6 +36,33 @@ const TIME_WORDS = /\b(current(ly)?|now|today|as of|latest|record|tallest|larges
 export function evalFormula(f: string): number {
   if (!/^[0-9+\-*/(). ]+$/.test(f)) throw new Error("bad formula");
   return Function(`"use strict"; return (${f});`)() as number;
+}
+
+const QUIZ_GAMES = new Set<ContentGameId>(["trivia", "geography", "who-said-that"]);
+/**
+ * E10 content mix (owner-approved 2026-11-07). If one twist format is more
+ * than this share of a game's official pool, no selector can keep every round
+ * to two of it, so the editor hears about it here, at authoring time.
+ */
+export const CONTENT_MIX = { maxTwistShare: 0.2, maxQuoteTwistShare: 0.1, maxNegativeShare: 0.1, minPool: 10 } as const;
+
+/** Mix warnings for one game's items. The pool is every official-eligibility item that is not rejected (what official play would draw on once approved). */
+export function contentMixWarnings(items: LoadedItem[]): string[] {
+  const pool = items.filter((li) => li.item.eligibility === "official" && li.status !== "rejected");
+  if (pool.length < CONTENT_MIX.minPool) return [];
+  const mech = (li: LoadedItem) => (li.item as { mechanic?: QuizMechanic }).mechanic;
+  const counts = new Map<QuizMechanic, number>();
+  for (const li of pool) { const m = mech(li); if (m && !PLAIN_QUIZ_MECHANICS.includes(m)) counts.set(m, (counts.get(m) ?? 0) + 1); }
+  const pct = (n: number) => `${Math.round((n / pool.length) * 100)}%`;
+  const out: string[] = [];
+  for (const [m, n] of [...counts].sort(([a], [b]) => a.localeCompare(b))) {
+    if (n / pool.length > CONTENT_MIX.maxTwistShare) out.push(`'${m}' is ${n} of ${pool.length} official-pool items (${pct(n)}; max ${CONTENT_MIX.maxTwistShare * 100}%): rounds will repeat this format`);
+  }
+  const quote = pool.filter((li) => QUOTE_TWIST_MECHANICS.includes(mech(li)!)).length;
+  if (quote / pool.length > CONTENT_MIX.maxQuoteTwistShare) out.push(`quote twists are ${quote} of ${pool.length} official-pool items (${pct(quote)}; max ${CONTENT_MIX.maxQuoteTwistShare * 100}%)`);
+  const neg = pool.filter((li) => (li.item as { negativeStem?: boolean }).negativeStem).length;
+  if (neg / pool.length > CONTENT_MIX.maxNegativeShare) out.push(`negative stems are ${neg} of ${pool.length} official-pool items (${pct(neg)}; max ${CONTENT_MIX.maxNegativeShare * 100}%)`);
+  return out;
 }
 
 export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
@@ -115,6 +142,11 @@ export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
         const sameAnswer = a.answer !== "" && a.answer === b.answer;
         if (sim >= 0.8 || (sim >= 0.5 && sameAnswer)) add(b.li, "warn", "near-duplicate", `similar to ${a.li.item.id} (${Math.round(sim * 100)}% word overlap${sameAnswer ? ", same answer" : ""})`);
       }
+    }
+    // E10 (owner-approved metadata and warnings; selection unchanged): question formats.
+    if (QUIZ_GAMES.has(gameId)) {
+      for (const li of items) if (li.status !== "rejected" && !(li.item as { mechanic?: string }).mechanic) add(li, "warn", "format-untagged", "quiz item has no question format (mechanic): the content-mix check cannot count it");
+      for (const w of contentMixWarnings(items)) out.push({ level: "warn", gameId, itemId: "(pool)", code: "content-mix", message: w });
     }
     // Difficulty balance among items usable officially.
     const off = items.filter((li) => officialEligible(li, today));

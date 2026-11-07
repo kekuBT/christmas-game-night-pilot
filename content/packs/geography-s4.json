@@ -30,7 +30,8 @@
     "Frankfurt"
    ],
    "answer": "Berlin",
-   "explanation": "Berlin is Germany's capital."
+   "explanation": "Berlin is Germany's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-002",
@@ -56,7 +57,8 @@
     "Cardiff"
    ],
    "answer": "London",
-   "explanation": "London is the UK capital."
+   "explanation": "London is the UK capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-003",
@@ -82,7 +84,8 @@
     "Belfast"
    ],
    "answer": "Dublin",
-   "explanation": "Dublin is Ireland's capital."
+   "explanation": "Dublin is Ireland's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-004",
@@ -108,7 +111,8 @@
     "Braga"
    ],
    "answer": "Lisbon",
-   "explanation": "Lisbon is Portugal's capital."
+   "explanation": "Lisbon is Portugal's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-005",
@@ -134,7 +138,8 @@
     "Patras"
    ],
    "answer": "Athens",
-   "explanation": "Athens is Greece's capital."
+   "explanation": "Athens is Greece's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-006",
@@ -160,7 +165,8 @@
     "Stavanger"
    ],
    "answer": "Oslo",
-   "explanation": "Oslo is Norway's capital."
+   "explanation": "Oslo is Norway's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-007",
@@ -186,7 +192,8 @@
     "Nakuru"
    ],
    "answer": "Nairobi",
-   "explanation": "Nairobi is Kenya's capital."
+   "explanation": "Nairobi is Kenya's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-008",
@@ -212,7 +219,8 @@
     "Mendoza"
    ],
    "answer": "Buenos Aires",
-   "explanation": "Buenos Aires is Argentina's capital."
+   "explanation": "Buenos Aires is Argentina's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-009",
@@ -238,7 +246,8 @@
     "Daegu"
    ],
    "answer": "Seoul",
-   "explanation": "Seoul is South Korea's capital."
+   "explanation": "Seoul is South Korea's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-010",
@@ -264,7 +273,8 @@
     "Antalya"
    ],
    "answer": "Ankara",
-   "explanation": "Ankara, not Istanbul, is the capital."
+   "explanation": "Ankara, not Istanbul, is the capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-011",
@@ -290,7 +300,8 @@
     "Salvador"
    ],
    "answer": "Brasília",
-   "explanation": "Brasília became the capital in 1960."
+   "explanation": "Brasília became the capital in 1960.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-012",
@@ -316,7 +327,8 @@
     "Basel"
    ],
    "answer": "Bern",
-   "explanation": "Bern is the federal city."
+   "explanation": "Bern is the federal city.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-013",
@@ -342,7 +354,8 @@
     "Fez"
    ],
    "answer": "Rabat",
-   "explanation": "Rabat is Morocco's capital."
+   "explanation": "Rabat is Morocco's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-014",
@@ -368,7 +381,8 @@
     "Hue"
    ],
    "answer": "Hanoi",
-   "explanation": "Hanoi is Vietnam's capital."
+   "explanation": "Hanoi is Vietnam's capital.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-015",
@@ -394,7 +408,8 @@
     "Europe"
    ],
    "answer": "South America",
-   "explanation": "Brazil is in South America."
+   "explanation": "Brazil is in South America.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-016",
@@ -420,7 +435,8 @@
     "Europe"
    ],
    "answer": "Asia",
-   "explanation": "India is in South Asia."
+   "explanation": "India is in South Asia.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-017",
@@ -446,7 +462,8 @@
     "Hungary"
    ],
    "answer": "Sweden",
-   "explanation": "Sweden is Scandinavian."
+   "explanation": "Sweden is Scandinavian.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-018",
@@ -472,7 +489,8 @@
     "Arctic"
    ],
    "answer": "Pacific",
-   "explanation": "The Pacific borders California."
+   "explanation": "The Pacific borders California.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-019",
@@ -498,7 +516,8 @@
     "Baltic Sea"
    ],
    "answer": "Mediterranean Sea",
-   "explanation": "The Mediterranean lies between them."
+   "explanation": "The Mediterranean lies between them.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-020",
@@ -524,7 +543,8 @@
     "Russia"
    ],
    "answer": "Canada",
-   "explanation": "Canada shares the northern border."
+   "explanation": "Canada shares the northern border.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-021",
@@ -550,7 +570,8 @@
     "Croatia"
    ],
    "answer": "Switzerland",
-   "explanation": "Switzerland has no coastline."
+   "explanation": "Switzerland has no coastline.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-022",
@@ -576,7 +597,8 @@
     "Kazakhstan"
    ],
    "answer": "Mongolia",
-   "explanation": "The China–Mongolia border is about 4,600 km."
+   "explanation": "The China–Mongolia border is about 4,600 km.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-023",
@@ -602,7 +624,8 @@
     "South America"
    ],
    "answer": "Africa",
-   "explanation": "It lies off south-east Africa."
+   "explanation": "It lies off south-east Africa.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-024",
@@ -628,7 +651,8 @@
     "Berlin"
    ],
    "answer": "Paris",
-   "explanation": "The Eiffel Tower is in Paris."
+   "explanation": "The Eiffel Tower is in Paris.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-025",
@@ -654,7 +678,8 @@
     "Bangladesh"
    ],
    "answer": "India",
-   "explanation": "In Agra, India."
+   "explanation": "In Agra, India.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-026",
@@ -680,7 +705,8 @@
     "Perth"
    ],
    "answer": "Sydney",
-   "explanation": "It stands on Sydney Harbour."
+   "explanation": "It stands on Sydney Harbour.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-027",
@@ -706,7 +732,8 @@
     "Israel"
    ],
    "answer": "Jordan",
-   "explanation": "Petra is in southern Jordan."
+   "explanation": "Petra is in southern Jordan.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-028",
@@ -732,7 +759,8 @@
     "Istanbul"
    ],
    "answer": "Rome",
-   "explanation": "The Colosseum is in Rome."
+   "explanation": "The Colosseum is in Rome.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-029",
@@ -758,7 +786,8 @@
     "France"
    ],
    "answer": "England",
-   "explanation": "In Wiltshire, England."
+   "explanation": "In Wiltshire, England.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-030",
@@ -784,7 +813,8 @@
     "Vietnam"
    ],
    "answer": "Cambodia",
-   "explanation": "Angkor Wat is in Cambodia."
+   "explanation": "Angkor Wat is in Cambodia.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-031",
@@ -810,7 +840,8 @@
     "Valencia"
    ],
    "answer": "Barcelona",
-   "explanation": "Gaudí's basilica in Barcelona."
+   "explanation": "Gaudí's basilica in Barcelona.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-032",
@@ -836,7 +867,8 @@
     "Australia"
    ],
    "answer": "South Africa",
-   "explanation": "It overlooks Cape Town."
+   "explanation": "It overlooks Cape Town.",
+   "mechanic": "recall"
   },
   {
    "id": "geo-s4-033",
@@ -862,7 +894,8 @@
     "It depends on the season"
    ],
    "answer": "Russia",
-   "explanation": "Russia is the largest country."
+   "explanation": "Russia is the largest country.",
+   "mechanic": "comparison"
   },
   {
    "id": "geo-s4-034",
@@ -888,7 +921,8 @@
     "Neither is a river"
    ],
    "answer": "Nile",
-   "explanation": "The Nile is about 6,650 km; the Thames about 346 km."
+   "explanation": "The Nile is about 6,650 km; the Thames about 346 km.",
+   "mechanic": "comparison"
   },
   {
    "id": "geo-s4-035",
@@ -914,7 +948,8 @@
     "Neither is land"
    ],
    "answer": "Australia",
-   "explanation": "Australia is about 7.7 million km²; Greenland about 2.2 million km²."
+   "explanation": "Australia is about 7.7 million km²; Greenland about 2.2 million km².",
+   "mechanic": "comparison"
   },
   {
    "id": "geo-s4-036",
@@ -940,7 +975,8 @@
     "Neither is a mountain"
    ],
    "answer": "Mount Kilimanjaro",
-   "explanation": "Kilimanjaro is about 5,895 m; Mont Blanc about 4,806 m."
+   "explanation": "Kilimanjaro is about 5,895 m; Mont Blanc about 4,806 m.",
+   "mechanic": "comparison"
   },
   {
    "id": "geo-s4-037",
@@ -966,7 +1002,8 @@
     "Neither is a lake"
    ],
    "answer": "Lake Superior",
-   "explanation": "Superior is about 82,000 km²; Victoria about 69,000 km²."
+   "explanation": "Superior is about 82,000 km²; Victoria about 69,000 km².",
+   "mechanic": "comparison"
   },
   {
    "id": "geo-s4-038",
@@ -993,7 +1030,8 @@
    ],
    "answer": "Italy",
    "explanation": "Green, white and red vertical stripes.",
-   "accessibility": "Three vertical stripes: green, white, red."
+   "accessibility": "Three vertical stripes: green, white, red.",
+   "mechanic": "recognition"
   },
   {
    "id": "geo-s4-039",
@@ -1020,7 +1058,8 @@
    ],
    "answer": "Canada",
    "explanation": "Red and white with a maple leaf.",
-   "accessibility": "Red bands at each side, white centre with a red maple leaf."
+   "accessibility": "Red bands at each side, white centre with a red maple leaf.",
+   "mechanic": "recognition"
   },
   {
    "id": "geo-s4-040",
@@ -1047,7 +1086,8 @@
    ],
    "answer": "Brazil",
    "explanation": "Green with a yellow diamond and a blue globe.",
-   "accessibility": "Green field, yellow diamond, blue globe with stars."
+   "accessibility": "Green field, yellow diamond, blue globe with stars.",
+   "mechanic": "recognition"
   },
   {
    "id": "geo-s4-041",
@@ -1074,7 +1114,8 @@
    ],
    "answer": "South Korea",
    "explanation": "White with a red and blue circle and four black trigrams.",
-   "accessibility": "White field, red-and-blue circle, four black bar symbols."
+   "accessibility": "White field, red-and-blue circle, four black bar symbols.",
+   "mechanic": "recognition"
   },
   {
    "id": "geo-s4-042",
@@ -1100,7 +1141,8 @@
     "Vienna"
    ],
    "answer": "Paris",
-   "explanation": "About 340 km."
+   "explanation": "About 340 km.",
+   "mechanic": "comparison"
   },
   {
    "id": "geo-s4-043",
@@ -1126,7 +1168,8 @@
     "Los Angeles"
    ],
    "answer": "Boston",
-   "explanation": "About 300 km."
+   "explanation": "About 300 km.",
+   "mechanic": "comparison"
   },
   {
    "id": "geo-s4-044",
@@ -1152,7 +1195,8 @@
     "Bangkok"
    ],
    "answer": "Seoul",
-   "explanation": "About 1,150 km."
+   "explanation": "About 1,150 km.",
+   "mechanic": "comparison"
   }
  ]
 }

@@ -58,10 +58,27 @@ const BaseItem = {
 
 const fourOptions = z.array(text(80)).length(4);
 
-export const TriviaItem = z.object({ ...BaseItem, prompt: text(160), options: fourOptions, answer: text(80), explanation: text(240) }).strict();
-export const WhoSaidItem = z.object({ ...BaseItem, quote: text(160), speakers: fourOptions, answer: text(80), explanation: text(240).optional() }).strict();
+/**
+ * E10 question-format metadata (owner-approved 2026-11-07) for quiz games.
+ * Plain formats: recall, recognition, deduction, comparison. Twist formats feel
+ * samey when repeated; quote twists (never-said, misquote, misattribution) most
+ * of all. Editorial metadata only: selection does not read it (E10's variety
+ * step is not activated).
+ */
+export const QUIZ_MECHANICS = ["recall", "recognition", "deduction", "comparison", "myth-buster", "never-said", "misquote", "misattribution", "definition-twist", "origin-story", "weird-but-true"] as const;
+export type QuizMechanic = (typeof QUIZ_MECHANICS)[number];
+export const PLAIN_QUIZ_MECHANICS: readonly QuizMechanic[] = ["recall", "recognition", "deduction", "comparison"];
+export const QUOTE_TWIST_MECHANICS: readonly QuizMechanic[] = ["never-said", "misquote", "misattribution"];
+const QuizFormat = {
+  mechanic: z.enum(QUIZ_MECHANICS).optional(),
+  /** The question hinges on NOT / never (E10 allows one per round). */
+  negativeStem: z.literal(true).optional(),
+};
+export const TriviaItem = z.object({ ...BaseItem, ...QuizFormat, prompt: text(160), options: fourOptions, answer: text(80), explanation: text(240) }).strict();
+export const WhoSaidItem = z.object({ ...BaseItem, ...QuizFormat, quote: text(160), speakers: fourOptions, answer: text(80), explanation: text(240).optional() }).strict();
 export const GeographyItem = z.object({
   ...BaseItem,
+  ...QuizFormat,
   mode: z.enum(["flag", "outline", "capital", "region", "higher-lower", "distance", "landmark"]),
   prompt: text(160), options: fourOptions, answer: text(80), explanation: text(240),
 }).strict();

@@ -32,7 +32,8 @@
       ],
       "answer": "France",
       "explanation": "Blue, white, and red vertical stripes: France.",
-      "accessibility": "Flag shown as an emoji; the explanation names its colours."
+      "accessibility": "Flag shown as an emoji; the explanation names its colours.",
+      "mechanic": "recognition"
     },
     {
       "id": "geo-legacy-2",
@@ -60,7 +61,8 @@
       ],
       "answer": "Japan",
       "explanation": "Red circle on white: Japan.",
-      "accessibility": "Flag shown as an emoji; the explanation names its colours."
+      "accessibility": "Flag shown as an emoji; the explanation names its colours.",
+      "mechanic": "recognition"
     },
     {
       "id": "geo-legacy-3",
@@ -87,7 +89,8 @@
         "Montreal"
       ],
       "answer": "Ottawa",
-      "explanation": "Ottawa is Canada's capital."
+      "explanation": "Ottawa is Canada's capital.",
+      "mechanic": "recall"
     },
     {
       "id": "geo-legacy-4",
@@ -114,7 +117,8 @@
         "Perth"
       ],
       "answer": "Canberra",
-      "explanation": "Canberra is Australia's capital."
+      "explanation": "Canberra is Australia's capital.",
+      "mechanic": "recall"
     },
     {
       "id": "geo-legacy-5",
@@ -141,7 +145,8 @@
         "Portugal"
       ],
       "answer": "Italy",
-      "explanation": "Italy is famously boot-shaped. Text hint fallback, not SVG geometry."
+      "explanation": "Italy is famously boot-shaped. Text hint fallback, not SVG geometry.",
+      "mechanic": "recognition"
     },
     {
       "id": "geo-legacy-6",
@@ -168,7 +173,8 @@
         "Northern Europe"
       ],
       "answer": "North Africa",
-      "explanation": "Egypt is in North Africa. Accessible region fallback, not map tap."
+      "explanation": "Egypt is in North Africa. Accessible region fallback, not map tap.",
+      "mechanic": "recall"
     },
     {
       "id": "geo-legacy-7",
@@ -195,7 +201,8 @@
         "Neither is a mountain"
       ],
       "answer": "Mount Everest",
-      "explanation": "Everest (~8,849 m) is taller than Kilimanjaro (~5,895 m)."
+      "explanation": "Everest (~8,849 m) is taller than Kilimanjaro (~5,895 m).",
+      "mechanic": "comparison"
     },
     {
       "id": "geo-legacy-8",
@@ -222,7 +229,8 @@
         "Rome"
       ],
       "answer": "London",
-      "explanation": "Paris–London is the shortest of these great-circle distances."
+      "explanation": "Paris–London is the shortest of these great-circle distances.",
+      "mechanic": "comparison"
     }
   ]
 }
