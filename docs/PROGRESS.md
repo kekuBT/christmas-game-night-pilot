@@ -940,7 +940,9 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - `8a1b699`: D1 failing test (3 of 5 fail).
 - `b66b2fc`: D1 server fix.
 - `517304c`: UI fixes.
-- A later docs commit (this entry): mockup and proposal corrections, and the D3 timing contract.
+- `67c2de9`: docs (stage-1 README, D3 contract v1, mockup and proposal corrections).
+- `4ca59a3`: restores the setup-card sentence that `check-shuffle` reads (see Tests).
+- `1cc25a4`: D3 contract v2 with the owner's rulings T1–T5 and six safeguards (docs only, not implemented).
 
 **Done:**
 - **D1:** official games with fewer than 2 competitors are refused before content selection (409 `OFFICIAL_NEEDS_TWO`). The lobby gives an explicit practice choice. Historical one-player games keep their stored record but report "not counting".
@@ -962,6 +964,16 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Tests:**
 - Unit: 840 passed (73 files). Typecheck and lint OK.
 - Targeted gate `20261107-210923-517304c4-5008` on `517304c`: PASSED (12/12: lobby-fixes, mchezo, lifecycle, mobile, contrast, readiness, viewports, connections, double-start, tv-entry). Not a release verdict.
+- **Full gate on `67c2de9`: FAILED (exit 1),** run `20261107-212035-67c2de95-6617`. 44 passed, 1 failed (`check-shuffle`, 4 checks).
+  - Cause: `517304c` shortened the setup-card sentence "Up next is X. Official games count toward the Cup; practice games do not." to "Up next is X.". The driver reads the up-next title from that sentence. The targeted run hadn't included `check-shuffle`.
+  - Fix (`4ca59a3`): the sentence is restored. The driver is unchanged (no weakened assertion).
+  - Targeted run `20261107-223527-4ca59a30-13747` on `4ca59a3`: shuffle, library, lobby-fixes, mobile, viewports, mchezo: 8/8 PASSED.
+- **Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on `4ca59a3`:
+  - PASSED (exit 0), run `20261107-223915-4ca59a30-14719`.
+  - 45 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+  - Unit tests 840 passed (73 files); e2e-chromium 12/12.
+  - Fresh clone, untracked `node_modules` symlinks only; `MCHEZO_CHROMIUM_PATH` = this machine's headless shell 1243 (153.0.8010.12).
+  - This verdict covers `4ca59a3` only. `1cc25a4` and this recording commit change docs only.
 
 **Not changed:**
 - Home/Lobby migration, Championship/TV rebuild, games, D2 solo practice, D3 timing.
@@ -969,4 +981,7 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 
 **Next:**
 1. The owner tests on an iPhone via a separate codespace on this branch.
-2. Then approval of the Lobby A migration, D2, and D3 (T1–T5).
+2. D3 implementation on its own branch, once the v2 contract is approved (provisional defaults P1–P3 still open).
+3. Then approval of the Lobby A / Home migration and D2.
+
+**Risk:** the stage-1 lobby changes are verified in Chromium phone emulation only, not yet on a real iPhone.
