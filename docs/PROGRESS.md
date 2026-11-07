@@ -894,3 +894,40 @@ The owner has no laptop for about 10 hours, so this session checked whether GitH
 - Private means only the owner's signed-in GitHub account can open it.
 - The idle timeout ignores port traffic, so the guide says to raise it to 120 minutes.
 - The private-port auth cookie lasts 3 hours.
+
+## 2026-11-07: product experience audit and redesign proposal (branch `claude/ux-audit`, from `fa1514b`)
+
+The owner tested Mchezo on a real iPhone through the Codespaces preview and asked for an independent audit and a redesign proposal, **with no UI implementation in this pass**.
+
+**Added (docs only):**
+- `docs/ux-redesign/README.md`: summary and decisions D1–D7.
+- `docs/ux-redesign/AUDIT.md`: journeys and the code that owns them; findings with severity, type and code references.
+- `docs/ux-redesign/PROPOSAL.md`: IA, navigation, home and lobby alternatives, the "Night Circle" design system, procedural cover art, screen specs.
+- `docs/ux-redesign/PLAN.md`: staged plan, migration, QA matrix.
+- Mockups (`mockups/*.png` from `mockups.html` via `render.mjs`) and evidence (`evidence/`).
+
+**Confirmed defects, not fixed (awaiting decisions):**
+
+| | Defect | Where |
+|---|---|---|
+| F1 (score integrity) | A one-player official game shows "counts toward the Cup", but standings skip it and its content is retired from the official pool | `room.ts:1359,1454,1531,612` |
+| F2 | The share button has no handler | `screens.tsx:144` |
+| F3 | Official and Practice selected states are identical | no `aria-pressed` style on `.mz-chip-btn` |
+| F4 | No browser history | |
+| F5 | Advance day is irreversible with no confirmation | |
+| F6 | The 8 s client intro eats the first phase of phased games | |
+| F7 | Sound does nothing | |
+| V1 | Lobby title overlap | fixed-height flex screen |
+| V2 | Green `body` background, no `theme-color` | |
+
+F1 is a score-integrity issue under the AGENTS.md safety rule. Its fix changes an eligibility rule, so it waits for the owner's decision D1; a failing test is written first.
+
+**Verification:**
+- Evidence was captured in Chromium phone emulation, not WebKit.
+- Unit tests 826/826 and lint OK. No code changed, so no gate run was needed for this docs-only commit.
+
+**Next:** the owner's decisions D1–D7. Then stage 0 (stable test hooks) and stage 1 (safe defect fixes).
+
+**Risks:**
+- A copy change without stage 0 breaks 41 drivers.
+- A real-WebKit-only issue (V6) is unconfirmed.

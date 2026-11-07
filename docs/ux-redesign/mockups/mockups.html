@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mchezo redesign: low-fidelity mockups</title>
+<!-- Proposal artefact only (docs/ux-redesign). Not part of the app build.
+     Fonts are the app's own bundled OFL fonts; when node_modules is absent the
+     page falls back to system fonts. Rendered to PNG by render.mjs. -->
+<style>
+@font-face { font-family: "Unbounded"; src: url("../../../node_modules/@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2") format("woff2"); font-weight: 200 900; }
+@font-face { font-family: "Figtree"; src: url("../../../node_modules/@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2") format("woff2"); font-weight: 300 900; }
+:root {
+  --ground:#16111D; --s1:#211A2B; --s2:#2D2539; --s3:#3A3048; --line:#7A6E8E; --soft:rgba(199,190,210,.16);
+  --text:#F7F1E8; --muted:#C7BED2; --on:#16111D;
+  --coral:#FF6B4A; --coral-d:#B8432A; --sun:#FFC94A; --sun-d:#B88A1F; --mint:#3CCFB4; --mint-d:#1E8F7B;
+  --iris:#9AA5FF; --iris-d:#5D67C2; --pink:#FF7AC6; --pink-d:#B54489; --lime:#B6F05A; --lime-d:#6F9B2A; --err:#FF5470;
+  --disp:"Unbounded", system-ui, sans-serif; --body:"Figtree", system-ui, -apple-system, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #0B0810; color: var(--text); font-family: var(--body); }
+.board { display: flex; flex-wrap: wrap; gap: 40px; padding: 40px; }
+.frame { position: relative; flex: none; }
+.cap { font: 700 15px var(--body); color: var(--muted); margin: 0 0 10px; max-width: 390px; }
+.cap b { color: var(--text); font-family: var(--disp); font-size: 14px; letter-spacing: .02em; }
+/* phone */
+.phone { position: relative; width: 390px; height: 844px; border-radius: 44px; background: var(--ground); overflow: hidden; box-shadow: 0 0 0 10px #000, 0 0 0 11px #333; }
+.status { height: 47px; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; font: 700 15px var(--body); }
+.notch { position: absolute; left: 50%; top: 10px; width: 120px; height: 34px; border-radius: 20px; background: #000; transform: translateX(-50%); }
+.homebar { position: absolute; left: 50%; bottom: 8px; width: 134px; height: 5px; border-radius: 3px; background: var(--text); opacity: .8; transform: translateX(-50%); z-index: 9; }
+.fold { position: absolute; left: 0; right: 0; top: 664px; border-top: 2px dashed rgba(255,201,74,.55); z-index: 8; pointer-events: none; }
+.fold span { position: absolute; right: 10px; top: -20px; font: 700 11px var(--body); color: var(--sun); background: rgba(22,17,29,.85); padding: 1px 6px; border-radius: 6px; }
+.scr { position: absolute; inset: 47px 0 0; padding: 4px 18px 0; overflow: hidden; display: flex; flex-direction: column; }
+.dock { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 18px 30px; background: linear-gradient(to top, var(--ground) 72%, rgba(22,17,29,0)); z-index: 5; display: flex; flex-direction: column; gap: 10px; }
+.dim::after { content: ""; position: absolute; inset: 0; background: rgba(8,5,12,.62); z-index: 6; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 7; background: var(--s1); border-radius: 28px 28px 0 0; padding: 10px 18px 34px; box-shadow: 0 -10px 40px rgba(0,0,0,.5); }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 12px; }
+/* type */
+.wm { display: inline-flex; align-items: center; gap: 8px; font: 700 20px var(--disp); letter-spacing: -.02em; }
+.h1 { font: 700 26px/1.12 var(--disp); letter-spacing: -.03em; margin: 0; }
+.h2 { font: 700 19px/1.2 var(--disp); letter-spacing: -.02em; margin: 0; }
+.h3 { font: 800 16px/1.25 var(--body); margin: 0; }
+.kick { font: 800 12px var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.p { font: 500 15px/1.4 var(--body); color: var(--muted); margin: 0; }
+.small { font: 600 13px/1.35 var(--body); color: var(--muted); }
+.row { display: flex; align-items: center; gap: 10px; }
+.between { justify-content: space-between; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+.grow { flex: 1; }
+/* controls */
+.key { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 58px; border-radius: 20px; font: 700 17px var(--disp); background: var(--coral); color: var(--on); box-shadow: 0 6px 0 var(--coral-d); margin-bottom: 6px; }
+.key.sec { background: var(--s2); color: var(--text); box-shadow: 0 5px 0 #120E18, inset 0 0 0 1.5px var(--line); font-family: var(--body); font-weight: 800; }
+.key.sm { min-height: 48px; font-size: 15px; border-radius: 16px; box-shadow: 0 4px 0 var(--coral-d); margin-bottom: 4px; }
+.key.sec.sm { box-shadow: 0 4px 0 #120E18, inset 0 0 0 1.5px var(--line); }
+.key.off { background: var(--s2); color: var(--muted); box-shadow: none; }
+.ghost { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font: 700 15px var(--body); color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.icon { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--s1); border: 1.5px solid var(--soft); font: 700 18px var(--body); flex: none; }
+.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 11px; border-radius: 15px; background: var(--s2); font: 700 12.5px var(--body); color: var(--text); white-space: nowrap; }
+.chip.sun { background: rgba(255,201,74,.16); color: var(--sun); }
+.chip.mint { background: rgba(60,207,180,.16); color: var(--mint); }
+.chip.iris { background: rgba(154,165,255,.18); color: var(--iris); }
+.chip.pink { background: rgba(255,122,198,.16); color: var(--pink); }
+.chip.out { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); }
+.card { background: var(--s1); border-radius: 22px; padding: 14px; }
+.input { min-height: 56px; border-radius: 18px; background: var(--s1); box-shadow: inset 0 0 0 1.5px var(--line); display: flex; align-items: center; padding: 0 16px; font: 600 17px var(--body); color: var(--muted); }
+.input.focus { box-shadow: inset 0 0 0 2.5px var(--coral); color: var(--text); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 5px; border-radius: 20px; background: var(--ground); box-shadow: inset 0 0 0 1.5px var(--soft); }
+.seg > div { min-height: 58px; border-radius: 15px; display: flex; flex-direction: column; justify-content: center; padding: 6px 12px; color: var(--muted); }
+.seg > div b { font: 800 15px var(--body); color: var(--text); display: flex; align-items: center; gap: 6px; }
+.seg > div span { font: 600 12px/1.25 var(--body); }
+.seg .on-official { background: var(--sun); color: #3A2C05; } .seg .on-official b { color: var(--on); }
+.seg .on-practice { background: var(--mint); color: #0E3A32; } .seg .on-practice b { color: var(--on); }
+.tok { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 700 15px var(--disp); color: var(--on); flex: none; }
+.tok.you { box-shadow: 0 0 0 3px var(--ground), 0 0 0 5.5px var(--coral); }
+.badge { position: absolute; right: -3px; bottom: -3px; width: 17px; height: 17px; border-radius: 50%; background: var(--mint); border: 2.5px solid var(--ground); display: grid; place-items: center; font: 900 9px var(--body); color: var(--on); }
+.badge.wait { background: var(--sun); }
+.list { display: flex; flex-direction: column; gap: 6px; }
+.li { display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 0 14px; border-radius: 16px; background: var(--s1); }
+.li.you { background: var(--s2); box-shadow: inset 0 0 0 1.5px var(--coral); }
+.rank { width: 20px; font: 700 15px var(--disp); color: var(--muted); }
+.num { font: 700 16px var(--disp); font-variant-numeric: tabular-nums; }
+.up { font: 800 13px var(--body); color: var(--mint); }
+.down { font: 800 13px var(--body); color: var(--err); }
+.toast { position: absolute; left: 18px; right: 18px; top: 58px; z-index: 9; background: var(--text); color: var(--on); border-radius: 16px; padding: 12px 14px; font: 700 14px var(--body); display: flex; gap: 10px; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+/* covers */
+.cover { position: relative; border-radius: 20px; overflow: hidden; flex: none; }
+.cover svg { display: block; width: 100%; height: 100%; }
+.gcard { width: 156px; flex: none; }
+.gcard .cover { width: 156px; height: 156px; }
+.gcard .t { font: 700 14px/1.2 var(--disp); margin: 8px 0 3px; letter-spacing: -.01em; }
+.gcard .m { font: 600 12px var(--body); color: var(--muted); }
+.hscroll { display: flex; gap: 12px; overflow: hidden; margin-right: -18px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* circle */
+.ring { position: relative; width: 250px; height: 250px; margin: 0 auto; }
+.ring > svg { position: absolute; inset: 0; }
+.seat { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.seat small { font: 700 11px var(--body); background: rgba(22,17,29,.85); padding: 0 4px; border-radius: 5px; }
+.center { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 112px; height: 112px; border-radius: 26px; overflow: hidden; }
+/* tiles */
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.tile { min-height: 62px; border-radius: 14px; background: var(--s2); box-shadow: 0 4px 0 #120E18; display: grid; place-items: center; text-align: center; font: 800 12.5px/1.1 var(--body); text-transform: uppercase; padding: 4px 3px; }
+.tile.sel { background: var(--text); color: var(--on); box-shadow: 0 4px 0 var(--sun); }
+.band { border-radius: 14px; padding: 9px 12px; color: var(--on); margin-bottom: 7px; }
+.band b { font: 800 13px var(--body); text-transform: uppercase; letter-spacing: .04em; display: block; }
+.band span { font: 700 12.5px var(--body); }
+/* annotations */
+.note { position: absolute; z-index: 10; font: 700 11px/1.3 var(--body); background: var(--sun); color: var(--on); padding: 4px 7px; border-radius: 8px; max-width: 170px; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+/* TV */
+.tv { position: relative; width: 1280px; height: 720px; border-radius: 18px; background: radial-gradient(60% 70% at 55% 0%, rgba(154,165,255,.16), transparent 70%), var(--ground); overflow: hidden; box-shadow: 0 0 0 12px #000; }
+</style>
+</head>
+<body>
+<div class="board" id="board">
+
+<!-- ================================================================ HOME (recommended) -->
+<section class="frame" id="home-b">
+<p class="cap"><b>1 · Home / Discover (recommended: B)</b> Games first, with Join and Host always one tap away in a fixed dock.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="scr">
+  <div class="row between" style="min-height:48px"><span class="wm" data-mark></span><span class="icon">⚙︎</span></div>
+  <div class="card" style="margin-top:8px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:inset 0 0 0 1.5px var(--sun)">
+    <div class="tok you" style="background:var(--sun)">K</div>
+    <div class="grow"><div class="h3">Rejoin room 548BHE</div><div class="small">Family Cup · Day 3 · You’re 2nd</div></div><span class="chip sun">Rejoin</span>
+  </div>
+  <div class="kick" style="margin:16px 0 8px">Tonight’s pick</div>
+  <div class="cover" data-cover="word-connections" data-w="354" data-h="176" data-title="1" style="width:354px;height:176px"></div>
+  <div class="row between" style="margin:16px 0 8px"><span class="kick">Party games</span><span class="small">All 11 ›</span></div>
+  <div class="hscroll">
+    <div class="gcard"><div class="cover" data-cover="trivia"></div><div class="t">Trivia Showdown</div><div class="m">2–10 · 6 min · Quiz</div></div>
+    <div class="gcard"><div class="cover" data-cover="caption-clash"></div><div class="t">Caption Clash</div><div class="m">4–10 · 10 min · Funny</div></div>
+    <div class="gcard"><div class="cover" data-cover="impostor"></div><div class="t">Impostor</div><div class="m">4–10 · 5 min · Bluff</div></div>
+  </div>
+</div>
+<div class="fold"><span>Safari toolbar starts ≈ 664 px · the dock sits just above it</span></div>
+<div class="dock">
+  <div class="key">Join with a code</div>
+  <div class="key sec sm">Host a party</div>
+</div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ HOME alt A -->
+<section class="frame" id="home-a">
+<p class="cap"><b>Home alternative A · Join first</b> Fastest for invited guests, but the catalog sits below the fold.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="scr">
+  <div class="row between" style="min-height:48px"><span class="wm" data-mark></span><span class="icon">⚙︎</span></div>
+  <h1 class="h1" style="margin-top:14px">Got a code?<br>Jump in.</h1>
+  <div class="row" style="margin-top:14px;gap:8px">
+    <div class="input focus grow" style="font:700 22px var(--disp);letter-spacing:.3em;color:var(--text)">548B<span style="opacity:.35">HE</span></div>
+    <div class="key sm" style="width:80px;margin:0">Go</div>
+  </div>
+  <div class="small" style="margin-top:8px">Or scan the QR code on the host’s screen.</div>
+  <div class="key sec sm" style="margin-top:16px">Host a party</div>
+  <div class="row between" style="margin:20px 0 8px"><span class="kick">Discover games</span><span class="small">All 11 ›</span></div>
+  <div class="grid2">
+    <div class="gcard" style="width:auto"><div class="cover" data-cover="trivia" style="width:auto;height:150px"></div><div class="t">Trivia Showdown</div></div>
+    <div class="gcard" style="width:auto"><div class="cover" data-cover="word-connections" style="width:auto;height:150px"></div><div class="t">Word Connections</div></div>
+    <div class="gcard" style="width:auto"><div class="cover" data-cover="math-mayhem" style="width:auto;height:150px"></div></div>
+    <div class="gcard" style="width:auto"><div class="cover" data-cover="closest-wins" style="width:auto;height:150px"></div></div>
+  </div>
+</div>
+<div class="fold"><span>Safari toolbar starts ≈ 664 px · the dock sits just above it</span></div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ HOME alt C -->
+<section class="frame" id="home-c">
+<p class="cap"><b>Home alternative C · Play / Discover tabs</b> Tidy, but it hides one task behind a tab and adds a tap.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="scr">
+  <div class="row between" style="min-height:48px"><span class="wm" data-mark></span><span class="icon">⚙︎</span></div>
+  <div class="seg" style="margin-top:8px;grid-template-columns:1fr 1fr"><div style="min-height:44px;align-items:center;background:var(--text)"><b style="color:var(--on)">Play</b></div><div style="min-height:44px;align-items:center"><b>Discover</b></div></div>
+  <div class="col" style="margin-top:22px;gap:14px">
+    <div class="card" style="padding:18px"><div class="h2">Join a room</div><div class="p" style="margin:6px 0 14px">Enter the 6-letter code from the host.</div><div class="input">Room code</div></div>
+    <div class="card" style="padding:18px"><div class="h2">Host a party</div><div class="p" style="margin:6px 0 14px">Start a room; everyone joins with their phone.</div><div class="key sm" style="margin:0">Host</div></div>
+    <div class="card" style="padding:18px"><div class="h2">Play solo</div><div class="p" style="margin:6px 0 0">Word Connections and practice rounds.</div></div>
+  </div>
+</div>
+<div class="fold"><span>Safari toolbar starts ≈ 664 px · the dock sits just above it</span></div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ GAME DETAILS -->
+<section class="frame" id="details">
+<p class="cap"><b>2 · Game details</b> A sheet over Home: cover art, a one-line pitch, the facts, and the next action.</p>
+<div class="phone dim"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="sheet" style="top:70px">
+  <div class="grab"></div>
+  <div class="cover" data-cover="word-connections" data-w="354" data-h="200" data-title="1" style="width:354px;height:200px"></div>
+  <p class="p" style="margin:14px 0 10px;color:var(--text);font-size:16px">Sixteen words, four secret groups. Spot the link before your four mistakes run out.</p>
+  <div class="row" style="flex-wrap:wrap;gap:6px"><span class="chip">1–10 players</span><span class="chip">~8 min</span><span class="chip mint">Solo practice</span><span class="chip sun">🏆 Counts in the Cup (2+)</span></div>
+  <div class="kick" style="margin:18px 0 8px">How it plays</div>
+  <div class="col" style="gap:8px">
+    <div class="row"><span class="tok" style="width:28px;height:28px;font-size:12px;background:var(--mint)">1</span><span class="p">Tap four words that belong together.</span></div>
+    <div class="row"><span class="tok" style="width:28px;height:28px;font-size:12px;background:var(--iris)">2</span><span class="p">Submit. Wrong guesses cost a life.</span></div>
+    <div class="row"><span class="tok" style="width:28px;height:28px;font-size:12px;background:var(--sun)">3</span><span class="p">Harder groups score more.</span></div>
+  </div>
+  <div class="row" style="margin-top:22px;gap:10px"><div class="key sec sm grow" style="margin:0">Play solo</div><div class="key sm grow" style="margin:0">Host with friends</div></div>
+</div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ JOIN -->
+<section class="frame" id="join">
+<p class="cap"><b>3 · Join (from a QR code)</b> The code is already filled in and confirmed, so the guest only types a name.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="scr">
+  <div class="row between" style="min-height:48px"><span class="icon">‹</span><span class="wm" data-mark></span><span style="width:44px"></span></div>
+  <div class="card" style="margin-top:14px;display:flex;align-items:center;gap:12px">
+    <div class="cover" data-cover="ring" style="width:54px;height:54px;border-radius:16px"></div>
+    <div class="grow"><div class="kick" style="color:var(--mint)">Room found</div><div class="h3">Keku’s party · 4 here</div><div class="small">Family Cup · Day 3 of 7</div></div>
+    <span class="chip out">548BHE</span>
+  </div>
+  <h1 class="h1" style="margin-top:24px">What should we<br>call you?</h1>
+  <div class="input focus" style="margin-top:14px">Amina|</div>
+  <div class="small" style="margin-top:8px">Shown to everyone in the room. Up to 24 characters.</div>
+  <div class="card" style="margin-top:14px;padding:12px 14px;display:flex;gap:12px;align-items:center"><span style="width:24px;height:24px;border-radius:7px;box-shadow:inset 0 0 0 2px var(--line)"></span><div class="grow"><div class="h3" style="font-size:15px">Remember this phone</div><div class="small">Only on your own device.</div></div></div>
+</div>
+<div class="dock" style="padding-bottom:300px;background:none">
+  <div class="key">Join the room</div>
+  <div class="ghost" style="margin:-4px auto 0">Lost your seat? Recover it</div>
+</div>
+<div class="sheet" style="background:#CFC7D9;height:270px;border-radius:12px 12px 0 0;padding:16px"><div class="small" style="color:#333;text-align:center">iOS keyboard</div></div>
+<div class="note" style="left:200px;top:440px">Dock sits above the keyboard (visualViewport), so Join is never hidden</div>
+</div>
+</section>
+
+<!-- ================================================================ LOBBY recommended -->
+<section class="frame" id="lobby-a">
+<p class="cap"><b>4 · Host lobby (recommended: A, stage and dock)</b> Players, the chosen game, the mode and Start, with no scrolling.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="scr">
+  <div class="row between" style="min-height:48px">
+    <div class="chip out" style="min-height:40px;font:700 15px var(--disp);letter-spacing:.12em;padding:0 12px">548BHE&nbsp;<span style="font-family:var(--body);letter-spacing:0">↗︎ Invite</span></div>
+    <div class="row" style="gap:8px"><span class="chip sun">🏆 Day 3/7</span><span class="icon">☰</span></div>
+  </div>
+  <div class="row between" style="margin-top:8px"><div class="h2">Everyone’s here</div><span class="small"><b style="color:var(--mint)">4 ready</b> · 1 away</span></div>
+  <div class="ring" style="margin-top:6px" id="ringA"></div>
+  <div class="card" style="margin-top:4px;padding:10px;display:flex;gap:12px;align-items:center">
+    <div class="cover" data-cover="trivia" style="width:64px;height:64px;border-radius:16px"></div>
+    <div class="grow"><div class="kick" style="color:var(--iris)">Up next</div><div class="h3" style="font-size:17px">Trivia Showdown</div><div class="small">10 questions · ~6 min</div></div>
+    <span class="chip">Change</span>
+  </div>
+  <div class="seg" style="margin-top:10px">
+    <div class="on-official"><b>🏆 Official ✓</b><span>Counts toward the Cup</span></div>
+    <div><b>Practice</b><span>Just for fun, no points</span></div>
+  </div>
+</div>
+<div class="fold"><span>Safari toolbar starts ≈ 664 px · the dock sits just above it</span></div>
+<div class="dock" style="padding-top:22px"><div class="key">Start Trivia Showdown</div></div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ LOBBY alt B -->
+<section class="frame" id="lobby-b">
+<p class="cap"><b>Lobby alternative B · Tabs</b> Everything is one tab away, but state hides behind tabs and the Circle shrinks to a list.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="scr">
+  <div class="row between" style="min-height:48px"><div class="chip out" style="min-height:40px;font:700 15px var(--disp);letter-spacing:.12em">548BHE ↗︎</div><span class="chip sun">🏆 Day 3/7</span></div>
+  <div class="seg" style="grid-template-columns:repeat(3,1fr);margin-top:10px"><div style="min-height:40px;align-items:center;background:var(--text)"><b style="color:var(--on)">Game</b></div><div style="min-height:40px;align-items:center"><b>Players 5</b></div><div style="min-height:40px;align-items:center"><b>Invite</b></div></div>
+  <div class="cover" data-cover="trivia" data-w="354" data-h="190" data-title="1" style="width:354px;height:190px;margin-top:14px"></div>
+  <div class="seg" style="margin-top:12px"><div class="on-official"><b>🏆 Official ✓</b><span>Counts toward the Cup</span></div><div><b>Practice</b><span>No points</span></div></div>
+  <div class="key sec sm" style="margin-top:12px">Choose another game</div>
+</div>
+<div class="dock"><div class="key">Start Trivia Showdown</div></div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ LOBBY alt C -->
+<section class="frame" id="lobby-c">
+<p class="cap"><b>Lobby alternative C · Game-first poster</b> The richest look, but players shrink to a strip and the Circle is lost.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="cover" data-cover="trivia" data-w="390" data-h="430" data-title="1" style="position:absolute;left:0;top:0;width:390px;height:430px;border-radius:0"></div>
+<div class="scr" style="top:430px;padding-top:16px">
+  <div class="row" style="gap:-6px"><div class="tok you" style="background:var(--coral)">K</div><div class="tok" style="background:var(--sun)">A</div><div class="tok" style="background:var(--mint)">B</div><div class="tok" style="background:var(--iris)">J</div><div class="tok" style="background:var(--s2);color:var(--muted)">+1</div><span class="small grow" style="text-align:right">5 in room</span></div>
+  <div class="seg" style="margin-top:14px"><div class="on-official"><b>🏆 Official ✓</b><span>Counts</span></div><div><b>Practice</b><span>No points</span></div></div>
+</div>
+<div class="dock"><div class="key">Start Trivia Showdown</div></div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ CHOOSE GAME -->
+<section class="frame" id="choose">
+<p class="cap"><b>5 · Choose game (sheet)</b> Covers, a filter set to the current room, and a clear selected state.</p>
+<div class="phone dim"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="sheet" style="top:96px">
+  <div class="grab"></div>
+  <div class="row between"><div class="h2">Pick a game</div><span class="small">Fits 5 players</span></div>
+  <div class="row" style="margin:12px 0;gap:6px;overflow:hidden"><span class="chip" style="background:var(--text);color:var(--on)">All</span><span class="chip">Quiz</span><span class="chip">Funny</span><span class="chip">Bluff</span><span class="chip">Quick</span><span class="chip">🎲 Surprise me</span></div>
+  <div class="grid2" id="pickGrid"></div>
+</div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ INVITE -->
+<section class="frame" id="invite">
+<p class="cap"><b>Invite (sheet)</b> QR code, code, native Share with a Copy fallback, and an honest note on a private preview link.</p>
+<div class="phone dim"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="toast">✓ Link copied. Paste it in your group chat.</div>
+<div class="sheet" style="top:150px">
+  <div class="grab"></div>
+  <div class="h2" style="text-align:center">Invite players</div>
+  <div style="margin:16px auto 10px;width:190px;height:190px;border-radius:20px;background:#fff;display:grid;place-items:center;color:#000;font:700 13px var(--body)">[ QR ]</div>
+  <div style="text-align:center;font:700 34px var(--disp);letter-spacing:.2em">548BHE</div>
+  <div class="small" style="text-align:center">mchezo link · or open the app and type the code</div>
+  <div class="row" style="margin-top:16px;gap:10px"><div class="key sm grow" style="margin:0">Share…</div><div class="key sec sm grow" style="margin:0">Copy link</div></div>
+  <div class="card" style="margin-top:14px;background:rgba(255,201,74,.12);box-shadow:inset 0 0 0 1.5px var(--sun)"><div class="h3" style="color:var(--sun);font-size:14px">Private preview link</div><div class="small" style="color:var(--text)">This address (…app.github.dev) only opens for your GitHub account. Others can’t join it.</div></div>
+</div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ RULES / READY -->
+<section class="frame" id="rules">
+<p class="cap"><b>6 · Rules and Ready</b> Nobody’s clock runs while the rules are shown; play starts when everyone taps Ready or after 20 s.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="cover" data-cover="closest-wins" data-w="390" data-h="250" style="position:absolute;left:0;top:0;width:390px;height:250px;border-radius:0"></div>
+<div class="scr" style="top:230px;padding-top:0">
+  <div class="card" style="padding:18px">
+    <div class="kick" style="color:var(--pink)">Closest Wins · official</div>
+    <div class="h1" style="font-size:24px;margin-top:4px">Guess the number. Closest wins.</div>
+    <div class="col" style="margin-top:14px;gap:9px">
+      <div class="row"><span class="tok" style="width:26px;height:26px;font-size:12px;background:var(--pink)">1</span><span class="p">8 questions, 40 seconds each.</span></div>
+      <div class="row"><span class="tok" style="width:26px;height:26px;font-size:12px;background:var(--sun)">2</span><span class="p">Type or dial your guess.</span></div>
+      <div class="row"><span class="tok" style="width:26px;height:26px;font-size:12px;background:var(--mint)">3</span><span class="p">Closest guess gets the most points.</span></div>
+    </div>
+  </div>
+  <div class="row between" style="margin-top:14px"><span class="small">Ready: <b style="color:var(--mint)">3 of 5</b></span><div class="row" style="gap:4px"><span class="tok" style="width:26px;height:26px;font-size:11px;background:var(--coral)">K</span><span class="tok" style="width:26px;height:26px;font-size:11px;background:var(--sun)">A</span><span class="tok" style="width:26px;height:26px;font-size:11px;background:var(--mint)">B</span><span class="tok" style="width:26px;height:26px;font-size:11px;background:var(--s2);color:var(--muted)">J</span><span class="tok" style="width:26px;height:26px;font-size:11px;background:var(--s2);color:var(--muted)">M</span></div></div>
+  <div class="small" style="margin-top:6px">Starts when everyone is ready, or in 14 s. The first question’s 40 seconds begin then, the same for everyone.</div>
+</div>
+<div class="dock"><div class="key" style="background:var(--mint);box-shadow:0 6px 0 var(--mint-d)">✓ I’m ready</div></div>
+<div class="homebar"></div>
+<div class="note" style="left:200px;top:600px">Server-timed: needs your approval (decision D3)</div>
+</div>
+</section>
+
+<!-- ================================================================ GAMEPLAY SHELL -->
+<section class="frame" id="play">
+<p class="cap"><b>7 · Gameplay shell (Word Connections)</b> One header and progress pattern for every game. Long words fit, and Submit clearly leads.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="scr">
+  <div class="row between" style="min-height:48px"><div class="row" style="gap:8px"><div class="cover" data-cover="word-connections" style="width:34px;height:34px;border-radius:10px"></div><span class="h3">Word Connections</span></div><span class="chip iris">⏱ 6:42</span></div>
+  <div class="row between" style="margin:4px 0 10px"><span class="small">Groups 1/4</span><span class="small">Mistakes <b style="color:var(--text)">● ● ● ○</b></span></div>
+  <div class="band" style="background:var(--sun)"><b>Card suits</b><span>Clubs · Hearts · Spades · Diamonds</span></div>
+  <div class="tiles">
+    <div class="tile sel">Porridge</div><div class="tile">Toast</div><div class="tile">Cup</div><div class="tile sel">Pancakes</div>
+    <div class="tile">Hands</div><div class="tile">Face</div><div class="tile sel">Cereal</div><div class="tile">Dial</div>
+    <div class="tile">Strap</div><div class="tile">Cheese</div><div class="tile">Sponge</div><div class="tile sel" style="font-size:11px">Amethyst</div>
+  </div>
+  <div class="small" style="text-align:center;margin-top:10px">4 selected. One away? Shuffle can help you see it.</div>
+</div>
+<div class="dock">
+  <div class="row" style="gap:8px"><div class="key sec sm" style="width:84px;margin:0">⤮</div><div class="key sec sm" style="width:84px;margin:0">✕</div><div class="key sm grow" style="margin:0">Submit</div></div>
+  <div class="ghost small" style="margin:-2px auto 0">Sit this game out</div>
+</div>
+<div class="note" style="left:8px;top:640px">Icon buttons: Shuffle, Clear (labelled for screen readers)</div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ RESULTS -->
+<section class="frame" id="results">
+<p class="cap"><b>8 · Results</b> A headline with personality, your breakdown, how the standings moved, and the next action.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="scr">
+  <div class="kick" style="margin-top:10px;color:var(--iris)">Trivia Showdown · official</div>
+  <h1 class="h1" style="font-size:30px;margin-top:6px">Amina takes it<br>by <span style="color:var(--sun)">40 points.</span></h1>
+  <p class="p" style="margin-top:6px">“Question 7 was a coin toss and she called it.”</p>
+  <div class="card" style="margin-top:14px;background:var(--s2)">
+    <div class="row between"><span class="h3">You · 2nd</span><span class="num" style="font-size:26px">680</span></div>
+    <div class="col" style="gap:4px;margin-top:8px">
+      <div class="row between small"><span>7 correct × 100</span><span>700</span></div>
+      <div class="row between small"><span>Speed bonus</span><span>+80</span></div>
+      <div class="row between small"><span>Missed Q3, Q9</span><span>−0</span></div>
+    </div>
+    <div class="chip mint" style="margin-top:10px">🔥 3 in a row: your best streak tonight</div>
+  </div>
+  <div class="kick" style="margin:14px 0 6px">Family Cup · Day 3</div>
+  <div class="list">
+    <div class="li"><span class="rank">1</span><div class="tok" style="background:var(--sun);width:32px;height:32px">A</div><span class="h3 grow">Amina</span><span class="up">▲1</span><span class="num">212</span></div>
+    <div class="li you"><span class="rank">2</span><div class="tok" style="background:var(--coral);width:32px;height:32px">K</div><span class="h3 grow">You</span><span class="down">▼1</span><span class="num">205</span></div>
+  </div>
+</div>
+<div class="dock"><div class="row" style="gap:8px"><div class="key sec sm grow" style="margin:0">Full results</div><div class="key sm grow" style="margin:0">Back to lobby</div></div></div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ CHAMPIONSHIP -->
+<section class="frame" id="cup">
+<p class="cap"><b>9 · Championship</b> The day, the top three, where you stand and what you need. Rules and the full table open on demand.</p>
+<div class="phone"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="scr">
+  <div class="row between" style="min-height:48px"><span class="icon">‹</span><span class="h3">Family Cup</span><span class="icon">ⓘ</span></div>
+  <div class="row" style="gap:4px;margin-top:6px" id="days"></div>
+  <div class="row" style="gap:8px;margin-top:16px;align-items:flex-end">
+    <div class="card grow" style="text-align:center;padding:10px 6px;height:112px"><div class="tok" style="background:var(--iris);margin:0 auto">J</div><div class="h3" style="font-size:13px;margin-top:6px">Juma</div><div class="num" style="font-size:14px">198</div><div class="small">2nd</div></div>
+    <div class="card grow" style="text-align:center;padding:10px 6px;height:136px;box-shadow:inset 0 0 0 2px var(--sun)"><div class="tok" style="background:var(--sun);margin:0 auto">A</div><div class="h3" style="font-size:13px;margin-top:6px">Amina 👑</div><div class="num" style="font-size:14px">212</div><div class="small">1st</div></div>
+    <div class="card grow" style="text-align:center;padding:10px 6px;height:98px"><div class="tok" style="background:var(--mint);margin:0 auto">B</div><div class="h3" style="font-size:13px;margin-top:6px">Baraka</div><div class="num" style="font-size:14px">171</div></div>
+  </div>
+  <div class="card" style="margin-top:12px;background:var(--s2);box-shadow:inset 0 0 0 1.5px var(--coral)">
+    <div class="row between"><span class="h3">You’re 4th · 165</span><span class="chip mint">2 of 3 days ✓</span></div>
+    <div class="small" style="margin-top:6px">Play one official game on a new day to qualify. Your best three days count.</div>
+  </div>
+  <div class="kick" style="margin:14px 0 6px">Today</div>
+  <div class="list"><div class="li"><div class="cover" data-cover="trivia" style="width:32px;height:32px;border-radius:9px"></div><span class="h3 grow" style="font-size:14px">Trivia Showdown</span><span class="small">Amina won</span></div>
+  <div class="li"><div class="cover" data-cover="word-connections" style="width:32px;height:32px;border-radius:9px"></div><span class="h3 grow" style="font-size:14px">Word Connections</span><span class="small">You won 🎉</span></div></div>
+</div>
+<div class="dock"><div class="row" style="gap:8px"><div class="key sec sm grow" style="margin:0">Full standings</div><div class="key sec sm grow" style="margin:0">How scoring works</div></div></div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ SETTINGS / ROOM MENU -->
+<section class="frame" id="menu">
+<p class="cap"><b>11 · Room menu: settings, recovery and host tools</b> Everything secondary lives here, grouped.</p>
+<div class="phone dim"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="sheet" style="top:80px">
+  <div class="grab"></div>
+  <div class="kick" style="margin-bottom:6px">This room</div>
+  <div class="list">
+    <div class="li"><span>📺</span><span class="h3 grow">Show on a TV</span><span class="small">›</span></div>
+    <div class="li"><span>🏆</span><span class="h3 grow">Family Cup</span><span class="small">Day 3/7 ›</span></div>
+    <div class="li"><span>📖</span><span class="h3 grow">Memory Book</span><span class="small">›</span></div>
+  </div>
+  <div class="kick" style="margin:14px 0 6px">This phone</div>
+  <div class="list">
+    <div class="li"><span class="h3 grow">Motion</span><div class="seg" style="grid-template-columns:repeat(3,auto);padding:3px;gap:2px"><div style="min-height:32px;padding:0 9px;background:var(--text)"><b style="color:var(--on);font-size:12px">Full</b></div><div style="min-height:32px;padding:0 9px"><b style="font-size:12px">Less</b></div><div style="min-height:32px;padding:0 9px"><b style="font-size:12px">Off</b></div></div></div>
+    <div class="li"><span class="h3 grow">Sound</span><span class="small">Coming soon</span></div>
+    <div class="li"><span class="h3 grow">Seat backup</span><span class="small">Recovery code ›</span></div>
+  </div>
+  <div class="kick" style="margin:14px 0 6px">Host tools</div>
+  <div class="list">
+    <div class="li"><span class="h3 grow">Players and cohosts</span><span class="small">›</span></div>
+    <div class="li"><span class="h3 grow">Cup admin: days and corrections</span><span class="small">›</span></div>
+  </div>
+  <div class="ghost" style="margin:12px auto 0;color:var(--err)">Leave this room on this phone</div>
+</div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ CONFIRM ADVANCE DAY -->
+<section class="frame" id="confirm">
+<p class="cap"><b>Cup admin: confirm advancing the day</b> A one-way action gets a dialog that states its consequences.</p>
+<div class="phone dim"><div class="notch"></div><div class="status"><span>9:41</span><span>●●● ▮</span></div>
+<div class="sheet" style="top:420px">
+  <div class="grab"></div>
+  <div class="h2">End Day 3 and start Day 4?</div>
+  <p class="p" style="margin-top:8px">Day 3 is locked and can’t be reopened. Games from now on count for Day 4. Amina is Day 3’s winner.</p>
+  <div class="row" style="margin-top:18px;gap:10px"><div class="key sec sm grow" style="margin:0">Not yet</div><div class="key sm grow" style="margin:0">Start Day 4</div></div>
+</div>
+<div class="homebar"></div></div>
+</section>
+
+<!-- ================================================================ TV LOBBY -->
+<section class="frame" id="tv-lobby">
+<p class="cap" style="max-width:1280px"><b>10 · TV / spectator: lobby</b> A big QR code and the Circle of players. A spectator never takes a seat or sees a secret.</p>
+<div class="tv">
+  <div style="position:absolute;left:56px;top:40px" class="wm" data-mark data-size="30"></div>
+  <div style="position:absolute;right:56px;top:40px" class="chip sun" >🏆 Family Cup · Day 3 of 7</div>
+  <div style="position:absolute;left:56px;top:140px;width:520px">
+    <div class="kick" style="font-size:18px;color:var(--iris)">Up next</div>
+    <div class="cover" data-cover="trivia" data-w="520" data-h="292" data-title="1" style="width:520px;height:292px;margin-top:12px"></div>
+    <div style="margin-top:26px;display:flex;gap:22px;align-items:center"><div style="width:150px;height:150px;border-radius:18px;background:#fff;color:#000;display:grid;place-items:center;font:700 16px var(--body)">[ QR ]</div><div><div class="small" style="font-size:20px">Join at mchezo · code</div><div style="font:700 64px var(--disp);letter-spacing:.16em">548BHE</div></div></div>
+  </div>
+  <div style="position:absolute;right:70px;top:120px;width:560px;height:560px" id="tvRing"></div>
+</div>
+</section>
+
+<!-- ================================================================ TV RESULTS -->
+<section class="frame" id="tv-results">
+<p class="cap" style="max-width:1280px"><b>TV: standings after a game</b> Movement arrows, the gap to the leader, and one witty line. Answers appear only after the reveal.</p>
+<div class="tv">
+  <div style="position:absolute;left:80px;top:56px"><div class="kick" style="font-size:20px;color:var(--iris)">After Trivia Showdown</div><div style="font:800 72px/1.05 var(--disp);letter-spacing:-.03em;margin-top:8px">Amina takes the lead.</div><div class="p" style="font-size:26px;margin-top:10px">“Baraka’s comeback is now officially a rumour.”</div></div>
+  <div style="position:absolute;left:80px;right:80px;top:300px" id="tvRows"></div>
+</div>
+</section>
+
+</div>
+<script>
+// ---------------------------------------------------------------- procedural covers
+// Strategy demo: every cover = accent field + one hero glyph built from the kit's
+// four answer shapes + a light pattern + the Circle's seat ring. ~1 KB of SVG each,
+// generated from a table, no image files, original by construction.
+const A = { coral:["#FF6B4A","#B8432A"], sun:["#FFC94A","#B88A1F"], mint:["#3CCFB4","#1E8F7B"], iris:["#9AA5FF","#5D67C2"], pink:["#FF7AC6","#B54489"], lime:["#B6F05A","#6F9B2A"] };
+const G = {
+  "trivia":["iris","Trivia Showdown","quiz"], "word-connections":["mint","Word Connections","grid"], "math-mayhem":["sun","Math Mayhem","math"],
+  "guess-the-year":["coral","Guess the Year","year"], "closest-wins":["pink","Closest Wins","target"], "geography":["lime","Geography Challenge","globe"],
+  "category-sprint":["coral","Category Sprint","sprint"], "caption-clash":["pink","Caption Clash","bubbles"], "who-said-that":["iris","Who Said That?","quote"],
+  "impostor":["sun","Impostor","odd"], "charades":["lime","Charades","act"], "ring":["coral","","ring"],
+};
+const ink = "#16111D", cream = "#F7F1E8";
+function glyph(k) {
+  switch (k) {
+    case "quiz": return `<polygon points="30,62 46,34 62,62" fill="${ink}"/><circle cx="76" cy="48" r="14" fill="${cream}"/><rect x="32" y="70" width="28" height="28" rx="4" fill="${cream}"/><rect x="66" y="70" width="22" height="22" rx="3" transform="rotate(45 77 81)" fill="${ink}"/>`;
+    case "grid": { let s=""; for (let r=0;r<4;r++) for (let c=0;c<4;c++) s+=`<rect x="${22+c*16}" y="${30+r*16}" width="13" height="13" rx="3" fill="${r===1?cream:ink}" opacity="${r===1?1:.82}"/>`; return s; }
+    case "math": return `<rect x="26" y="52" width="40" height="10" rx="5" fill="${ink}"/><rect x="41" y="37" width="10" height="40" rx="5" fill="${ink}"/><g transform="rotate(45 80 70)"><rect x="62" y="65" width="36" height="10" rx="5" fill="${cream}"/><rect x="75" y="52" width="10" height="36" rx="5" fill="${cream}"/></g>`;
+    case "year": return `<circle cx="60" cy="62" r="30" fill="none" stroke="${ink}" stroke-width="9"/><path d="M60 62 L60 42 M60 62 L74 70" stroke="${cream}" stroke-width="7" stroke-linecap="round"/><circle cx="60" cy="62" r="5" fill="${cream}"/>`;
+    case "target": return `<circle cx="58" cy="64" r="32" fill="${ink}"/><circle cx="58" cy="64" r="21" fill="${cream}"/><circle cx="58" cy="64" r="10" fill="${ink}"/><circle cx="88" cy="36" r="7" fill="${cream}"/><path d="M83 41 L64 58" stroke="${cream}" stroke-width="5" stroke-linecap="round"/>`;
+    case "globe": return `<circle cx="60" cy="62" r="32" fill="${ink}"/><ellipse cx="60" cy="62" rx="13" ry="32" fill="none" stroke="${cream}" stroke-width="4"/><path d="M28 62 H92 M33 46 H87 M33 78 H87" stroke="${cream}" stroke-width="4"/>`;
+    case "sprint": return `<circle cx="70" cy="64" r="26" fill="${cream}"/><path d="M70 64 L70 48" stroke="${ink}" stroke-width="6" stroke-linecap="round"/><rect x="64" y="30" width="12" height="8" rx="2" fill="${cream}"/><path d="M18 52 H36 M12 64 H34 M20 76 H38" stroke="${ink}" stroke-width="6" stroke-linecap="round"/>`;
+    case "bubbles": return `<rect x="20" y="32" width="54" height="36" rx="14" fill="${ink}"/><path d="M34 66 L30 80 L46 68 Z" fill="${ink}"/><rect x="50" y="58" width="50" height="32" rx="13" fill="${cream}"/><path d="M86 88 L92 100 L78 90 Z" fill="${cream}"/>`;
+    case "quote": return `<path d="M26 74 Q26 44 50 38 L52 46 Q40 52 40 60 L50 60 L50 82 L26 82 Z" fill="${ink}"/><path d="M62 74 Q62 44 86 38 L88 46 Q76 52 76 60 L86 60 L86 82 L62 82 Z" fill="${cream}"/>`;
+    case "odd": return `<circle cx="34" cy="48" r="11" fill="${ink}"/><circle cx="60" cy="40" r="11" fill="${ink}"/><circle cx="86" cy="48" r="11" fill="${ink}"/><circle cx="40" cy="76" r="11" fill="${ink}"/><polygon points="80,64 92,86 68,86" fill="${cream}"/>`;
+    case "act": return `<circle cx="52" cy="42" r="11" fill="${ink}"/><path d="M52 54 L52 80 M52 62 L34 50 M52 62 L72 46 M52 80 L40 98 M52 80 L64 98" stroke="${ink}" stroke-width="7" stroke-linecap="round"/><path d="M80 30 q10 10 0 20 M90 24 q16 16 0 32" stroke="${cream}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+    case "ring": { let s=""; for (let k=0;k<8;k++){const a=-Math.PI/2+k*Math.PI/4; s+=`<circle cx="${60+Math.cos(a)*30}" cy="${60+Math.sin(a)*30}" r="${k===0?9:6}" fill="${k===0?cream:ink}"/>`;} return s; }
+  }
+  return "";
+}
+function coverSvg(id, w, h, withTitle) {
+  const [acc, title, kind] = G[id]; const [c, d] = A[acc];
+  const s = Math.min(w, h) / 120; const gx = w - 120 * s * (withTitle ? 1.02 : 1) - (withTitle ? 6 * s : (w - 120 * s) / 2);
+  const dots = Array.from({ length: 30 }, (_, i) => `<circle cx="${(i * 37) % w}" cy="${(i * 53) % h}" r="${1.6 * s}" fill="${ink}" opacity=".12"/>`).join("");
+  const ring = Array.from({ length: 8 }, (_, k) => { const a = -Math.PI / 2 + k * Math.PI / 4; return `<circle cx="${w - 22 * s + Math.cos(a) * 9 * s}" cy="${20 * s + Math.sin(a) * 9 * s}" r="${(k === 0 ? 2.6 : 1.7) * s}" fill="${k === 0 ? cream : ink}" opacity="${k === 0 ? 1 : .55}"/>`; }).join("");
+  const t = withTitle && title ? `<text x="${16 * Math.max(1, s * .9)}" y="${h - 18 * Math.max(1, s * .8)}" font-family="Unbounded, system-ui" font-weight="800" font-size="${Math.min(30, 14 * s)}" fill="${ink}" letter-spacing="-.5">${title}</text>` : "";
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${title} cover"><defs><linearGradient id="g${id}${w}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${d}"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#g${id}${w})"/>${dots}<g transform="translate(${withTitle ? gx : (w - 120 * s) / 2} ${withTitle ? -8 * s : (h - 120 * s) / 2}) scale(${s})">${glyph(kind)}</g>${id !== "ring" ? ring : ""}${t}</svg>`;
+}
+document.querySelectorAll("[data-cover]").forEach((el) => {
+  const w = +(el.dataset.w || el.getBoundingClientRect().width || 156), h = +(el.dataset.h || el.getBoundingClientRect().height || 156);
+  el.innerHTML = coverSvg(el.dataset.cover, Math.round(w), Math.round(h), el.dataset.title === "1");
+});
+// wordmark (the existing Circle mark + "mchezo")
+document.querySelectorAll("[data-mark]").forEach((el) => {
+  const sz = +(el.dataset.size || 20); const pal = ["#FF6B4A", "#F7F1E8"];
+  const dots = Array.from({ length: 8 }, (_, k) => { const a = -Math.PI / 2 + k * Math.PI / 4; return `<circle cx="${20 + Math.cos(a) * 14}" cy="${20 + Math.sin(a) * 14}" r="${k === 0 ? 5 : 3}" fill="${k === 0 ? pal[0] : pal[1]}"/>`; }).join("");
+  el.style.fontSize = sz + "px";
+  el.innerHTML = `<svg width="${sz * 1.5}" height="${sz * 1.5}" viewBox="0 0 40 40" aria-hidden="true">${dots}</svg><span>mchezo</span>`;
+});
+// lobby circle
+function circle(el, size, players, center) {
+  const R = size * .38; let html = `<svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="#7A6E8E" stroke-width="1.2" stroke-dasharray="2 5"/></svg>`;
+  const n = Math.max(6, players.length + 1);
+  players.concat([null]).forEach((p, k) => {
+    const a = Math.PI / 2 + k * 2 * Math.PI / n; const x = size / 2 + Math.cos(a) * R, y = size / 2 + Math.sin(a) * R;
+    const ts = size > 400 ? 76 : 40;
+    html += p ? `<div class="seat" style="left:${x}px;top:${y}px"><div class="tok ${p[2] ? "you" : ""}" style="position:relative;width:${ts}px;height:${ts}px;font-size:${ts * .38}px;background:${p[1]};${p[3] ? "opacity:.45" : ""}">${p[0][0]}<span class="badge ${p[3] ? "wait" : ""}">${p[3] ? "…" : "✓"}</span></div><small style="${size > 400 ? "font-size:20px" : ""}">${p[2] ? "You" : p[0]}</small></div>`
+      : `<div class="seat" style="left:${x}px;top:${y}px"><div style="width:${size > 400 ? 60 : 32}px;height:${size > 400 ? 60 : 32}px;border-radius:50%;border:1.5px dashed #7A6E8E"></div></div>`;
+  });
+  html += center; el.innerHTML = html;
+}
+const P = [["Keku", "#FF6B4A", 1], ["Amina", "#FFC94A"], ["Baraka", "#3CCFB4"], ["Juma", "#9AA5FF"], ["Mzee Otieno", "#FF7AC6", 0, 1]];
+circle(document.getElementById("ringA"), 250, P, `<div class="center" style="width:96px;height:96px;border-radius:50%;background:var(--s1);display:grid;place-items:center;text-align:center"><div><div class="num" style="font-size:28px">5</div><div class="small">in the room</div></div></div>`);
+circle(document.getElementById("tvRing"), 560, P, `<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center"><div style="font:800 96px var(--disp)">5</div><div class="p" style="font-size:24px">players ready</div></div>`);
+// picker grid
+const picks = [["trivia","Trivia Showdown","2–10 · 6 min",1], ["word-connections","Word Connections","1–10 · 8 min"], ["caption-clash","Caption Clash","4–10 · 10 min"], ["impostor","Impostor","4–10 · 5 min · practice only"]];
+document.getElementById("pickGrid").innerHTML = picks.map(([id, t, m, sel]) => `<div class="gcard" style="width:auto"><div class="cover" style="width:auto;height:140px;${sel ? "box-shadow:0 0 0 3px var(--ground),0 0 0 6px var(--text)" : ""}">${coverSvg(id, 171, 140, false)}${sel ? '<span class="chip" style="position:absolute;left:8px;top:8px;background:var(--text);color:var(--on)">✓ Up next</span>' : ""}</div><div class="t">${t}</div><div class="m">${m}</div></div>`).join("");
+// day rail
+document.getElementById("days").innerHTML = [1,2,3,4,5,6,7].map((d) => `<div style="flex:1;min-height:44px;border-radius:12px;display:grid;place-items:center;font:700 14px var(--disp);background:${d < 3 ? "var(--s2)" : d === 3 ? "var(--sun)" : "var(--s1)"};color:${d === 3 ? "var(--on)" : d < 3 ? "var(--text)" : "var(--muted)"}">${d < 3 ? "✓" : d}</div>`).join("");
+// tv rows
+const rows = [["Amina","#FFC94A",212,"▲1",1],["Keku","#FF6B4A",205,"▼1"],["Juma","#9AA5FF",198,"–"],["Baraka","#3CCFB4",171,"▲2"],["Mzee Otieno","#FF7AC6",160,"▼2"]];
+document.getElementById("tvRows").innerHTML = rows.map(([n, c, s, mv, lead], i) => `<div style="display:flex;align-items:center;gap:22px;height:70px;margin-bottom:12px"><span style="width:44px;font:800 32px var(--disp);color:${lead ? "var(--sun)" : "var(--muted)"}">${i + 1}</span><div class="tok" style="width:54px;height:54px;font-size:22px;background:${c}">${n[0]}</div><div style="flex:1;height:70px;border-radius:22px;background:${lead ? "var(--sun)" : "var(--s1)"};color:${lead ? "var(--on)" : "var(--text)"};display:flex;align-items:center;padding:0 26px;gap:18px;width:${100 - i * 9}%"><span style="font:800 32px var(--body)">${n}</span><span style="font:800 22px var(--body);color:${lead ? "var(--on)" : mv.startsWith("▲") ? "var(--mint)" : mv.startsWith("▼") ? "var(--err)" : "var(--muted)"}">${mv}</span></div><span style="width:150px;text-align:right;font:700 40px var(--disp)">${s}</span></div>`).join("");
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+{
+  "docBackground": "rgb(16, 44, 37)",
+  "themeColor": null,
+  "title": "Christmas Game Night",
+  "viewportFit": "width=device-width, initial-scale=1",
+  "shareClick": {
+    "urlChanged": false,
+    "dialog": 0,
+    "toast": false
+  },
+  "lobbyOverlaps": {
+    "h1VsBadge": true,
+    "youTokenVsCenterDisc": false,
+    "youTokenVsUpNextName": false,
+    "h1": {
+      "x": 17.9375,
+      "y": 72,
+      "width": 354.125,
+      "height": 27.9375,
+      "top": 72,
+      "right": 372.0625,
+      "bottom": 99.9375,
+      "left": 17.9375
+    },
+    "badge": {
+      "x": 17.9375,
+      "y": 70,
+      "width": 252.546875,
+      "height": 32,
+      "top": 70,
+      "right": 270.484375,
+      "bottom": 102,
+      "left": 17.9375
+    },
+    "center": {
+      "x": 140.7265625,
+      "y": 250.2578125,
+      "width": 108.546875,
+      "height": 108.546875,
+      "top": 250.2578125,
+      "right": 249.2734375,
+      "bottom": 358.8046875,
+      "left": 140.7265625
+    },
+    "you": {
+      "x": 174,
+      "y": 373.203125,
+      "width": 42,
+      "height": 42,
+      "top": 373.203125,
+      "right": 216,
+      "bottom": 415.203125,
+      "left": 174
+    }
+  },
+  "lobbyScrollHeight": 2316,
+  "modeStyles": [
+    {
+      "id": "mode-official",
+      "pressed": "false",
+      "bg": "rgb(33, 26, 43)",
+      "border": "rgb(122, 110, 142)",
+      "color": "rgb(247, 241, 232)"
+    },
+    {
+      "id": "mode-practice",
+      "pressed": "true",
+      "bg": "rgb(33, 26, 43)",
+      "border": "rgb(122, 110, 142)",
+      "color": "rgb(247, 241, 232)"
+    }
+  ],
+  "settingsCard": {
+    "bg": "rgb(36, 83, 68)",
+    "selectBg": "rgb(14, 38, 32)"
+  },
+  "libraryHeight": 3390,
+  "triviaResultsHeight": 844,
+  "championshipHeight": 2809,
+  "championshipBg": "rgb(16, 44, 37)",
+  "history": {
+    "before": 2,
+    "afterNavigating": 2,
+    "url": "http://localhost:3951/"
+  },
+  "cxOverflow375": [],
+  "cxOverflow320": [
+    "Amethyst",
+    "Wardrobe"
+  ]
+}
