@@ -66,4 +66,4 @@
 - `tests/script-inventory.test.ts`: 4.
 - One more assertion in `tests/content-pilot.test.ts`.
 
-The full gate verdict for the exact commit is recorded in `docs/PROGRESS.md`.
+**Full gate (one run, one revision):** `node scripts/gate.mjs full` on `a95e211`, in a fresh clean clone: **PASSED (exit 0)**, run `20261107-145405-a95e2112-7784`. 44 passed, 0 failed, 0 timed out. This covers `a95e211` only; the commit recording it changes docs only.

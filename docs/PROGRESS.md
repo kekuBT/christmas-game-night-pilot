@@ -788,6 +788,8 @@ Milestone: the owner's second Content Quality 2.0 review is carried out. Nothing
 - The closed-set source pages (census.gov, europa.eu, un.org, iupac.org, iau.org, wikipedia.org) are blocked by this session's network, so the membership lists have no source check.
 - E1/E3 real-device verification is still outstanding.
 
+Gate verdict (one run, one revision): `node scripts/gate.mjs full` on `a95e211`, in a fresh clean clone: **PASSED (exit 0)**, run `20261107-145405-a95e2112-7784`. 44 passed, 0 failed, 0 timed out. Unit tests: 760 passed (66 files). This verdict covers `a95e211` only. The commit that records it changes docs only.
+
 **Next:** stop for owner review. See `docs/content-quality-2/STATUS_2026-11-07_E2_IMPLEMENTATION.md`.
 
 **Risks:**
