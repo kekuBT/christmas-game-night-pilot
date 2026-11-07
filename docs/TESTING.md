@@ -73,6 +73,16 @@ node scripts/check-math.mjs http://localhost:3461 # terminal 2
 
 Run by hand like this, drivers still write their reference screenshots into `docs/`, which is how those images are deliberately regenerated. Commit them only on purpose.
 
+## Scripts that are not checks
+
+Only the gate's verdict is evidence. The gate runs every `scripts/check-*.mjs` driver plus `scripts/e2e-browser.mjs`. Every other script in `scripts/` is listed here, and `tests/script-inventory.test.ts` fails if a new one appears without a classification.
+
+| Script | What it is | Can it pass? |
+|---|---|---|
+| `gate.mjs`, `gate-selftest.mjs` | The gate itself, and its self-test (which makes the gate fail on purpose). | — |
+| `screenshot-*.mjs` | Tools that write reference screenshots for visual review. | No verdict: they produce images, not a pass. |
+| `clickthrough-api.mjs` | **Retired 2026-11-07.** A tombstone that always exits 2. It was a manual API playthrough from 2026-11-04 that was never in the gate and went stale as the rules changed. Its coverage map is in the file header. | **Never.** |
+
 ## CI
 
 `.github/workflows/ci.yml` runs the same gate on GitHub (a fast run plus a `restart` + `errors` browser smoke test, or the full gate). It is manual-dispatch only until the account's Actions allowance is confirmed; pushing a branch never triggers it.

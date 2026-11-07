@@ -29,7 +29,7 @@ by token. Official and practice modes; one game at a time (decision L08).
 | Typecheck | `npm run typecheck` | exit 0 |
 | Unit tests | `npm test` | 8 files, 47 passed, 0 failed |
 | Web build | `npm run build:web` | exit 0 (Vite, 34 modules) |
-| API playthrough | `node scripts/clickthrough-api.mjs http://localhost:3457` | ALL GAMES FINISHED, 11 game-finished events, no Connections category leak (re-run 2026-11-04) |
+| API playthrough (**retired 2026-11-07**; see docs/TESTING.md) | `node scripts/clickthrough-api.mjs http://localhost:3457` | ALL GAMES FINISHED, 11 game-finished events, no Connections category leak (re-run 2026-11-04) |
 | Real-browser E2E | `node scripts/e2e-browser.mjs http://localhost:3457 --browser=chromium` | 12/12 passed (11 games + championship/TV/Memory Book/reconnect views), 4-player room, real UI clicks only |
 | Real-browser E2E | same, `--browser=firefox` | 12/12 passed |
 | Checkpoint screenshots | `node scripts/screenshot-checkpoint.mjs http://localhost:3457` | 7 PNGs in `docs/checkpoint-screenshots/` (home, lobby, game playing, game finished, championship, TV dashboard, Memory Book) |
