@@ -39,9 +39,17 @@ console.log(`Christmas Game Night server on http://localhost:${actual} (web app 
 const lan = Object.values(networkInterfaces()).flat()
   .filter((a): a is NonNullable<typeof a> => !!a && a.family === "IPv4" && !a.internal)
   .map((a) => `http://${a.address}:${actual}`);
-console.log(lan.length
-  ? `Phones on the same Wi-Fi: open ${lan.join(" or ")} on the host device (not localhost), so the QR code works.`
-  : "No network address found: phones can't reach this computer. Check that it is on Wi-Fi.");
+// In a GitHub Codespace the port is reached through Codespaces' own HTTPS
+// forwarding (docs/CODESPACES_PREVIEW.md), not the Wi-Fi.
+const codespace = process.env["CODESPACE_NAME"];
+const forwardDomain = process.env["GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN"];
+if (codespace && forwardDomain) {
+  console.log(`Codespaces preview (private: only your signed-in GitHub account can open it): https://${codespace}-${actual}.${forwardDomain}/`);
+} else {
+  console.log(lan.length
+    ? `Phones on the same Wi-Fi: open ${lan.join(" or ")} on the host device (not localhost), so the QR code works.`
+    : "No network address found: phones can't reach this computer. Check that it is on Wi-Fi.");
+}
 
 let closing = false;
 async function shutdown(signal: string): Promise<void> {

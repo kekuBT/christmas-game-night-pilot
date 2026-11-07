@@ -864,3 +864,33 @@ The owner accepted `5bae6de`. This session handled the owner's final content rul
 **Risks:**
 - Real WebKit (iOS) has never run this app.
 - Router or client isolation on some home networks. The guide has the free hotspot fallback; anything else needs owner approval.
+
+## 2026-11-07: Codespaces phone-preview investigation (branch `claude/codespaces-preview`, from `09bc6c6`)
+
+The owner has no laptop for about 10 hours, so this session checked whether GitHub Codespaces can serve Mchezo to iPhone Safari. **Verdict: feasible for a one-person private test, not for a family session** (that needs a public port and owner approval).
+
+**Added:**
+- `.devcontainer/devcontainer.json`: Node 22, 2-core, forwards port 3000 privately, runs `npm ci && npm run build:web`, and starts `serve:device-test` on every start through `.devcontainer/start-preview.sh`, which never starts a second copy.
+- `serve.ts` prints the private `https://<codespace>-3000.app.github.dev/` address when `CODESPACE_NAME` is set.
+- `docs/CODESPACES_PREVIEW.md`: phone steps, costs and limits.
+- Tests: `tests/codespaces-preview.test.ts` (port never public, smallest machine, no prebuilds or secrets, test-mode server) and one more case in `tests/serve-device-test.test.ts`.
+
+**Verified here, not in a real codespace:**
+- An HTTPS reverse proxy on another origin that, like a private port, refuses requests without an auth cookie:
+  - the anonymous page is refused;
+  - the app connects over `wss://` with its session subprotocol intact;
+  - there's no localhost QR warning;
+  - a second tab joins through the QR link as its own seat;
+  - refresh keeps the seat, and a game starts.
+- `start-preview.sh` run twice starts one server and prints the address.
+- Unit tests: 826 passed (71 files); typecheck and lint OK.
+
+**Not verified:**
+- A real codespace. This session can't create one, and creating one is the owner's action on their own account.
+- The real GitHub private-port cookie on a WebSocket upgrade from iOS Safari.
+- The reported WebSocket drops through Codespaces (the app reconnects).
+
+**Limits:**
+- Private means only the owner's signed-in GitHub account can open it.
+- The idle timeout ignores port traffic, so the guide says to raise it to 120 minutes.
+- The private-port auth cookie lasts 3 hours.

@@ -1,0 +1,14 @@
+{
+  "name": "Mchezo phone preview (private)",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "hostRequirements": { "cpus": 2 },
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "Mchezo", "onAutoForward": "notify" }
+  },
+  "postCreateCommand": "npm ci && npm run build:web",
+  "postStartCommand": "bash .devcontainer/start-preview.sh",
+  "customizations": {
+    "codespaces": { "openFiles": ["docs/CODESPACES_PREVIEW.md"] }
+  }
+}

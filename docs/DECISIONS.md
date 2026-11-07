@@ -271,3 +271,6 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
   - The test server defaults to content test mode, which official quiz games need while nothing is approved, and to a separate `./data-device-test`. It is refused in production.
   - The server prints the computer's Wi-Fi addresses, so the host opens a non-localhost address and the QR code works.
   - *Alternative:* a tunnel or temporary hosting. Not used: these are external services that need the owner's approval, and they are offered only if home Wi-Fi fails.
+- **D-DEV-02 An optional private GitHub Codespaces preview for one-person phone testing** (`.devcontainer/`, docs/CODESPACES_PREVIEW.md, branch `claude/codespaces-preview`).
+  - It uses the smallest 2-core machine, keeps the forwarded port private (the default; nothing sets it public), and has no prebuilds or secrets. It runs the same test-mode `serve:device-test`.
+  - *Alternative:* a public port, so family can join. Not done: it exposes the app to anyone with the URL and needs the owner's explicit approval.

@@ -42,6 +42,12 @@ describe("serve:device-test", () => {
     expect(existsSync(join(cwd, "data-device-test"))).toBe(true);
   }, 30_000);
 
+  it("in a GitHub Codespace, prints the private forwarded HTTPS address instead of the Wi-Fi hint", async () => {
+    const { out } = await run({ CODESPACE_NAME: "keku-mchezo-abc123", GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN: "app.github.dev" }, /Codespaces preview/);
+    expect(out).toMatch(/Codespaces preview \(private: only your signed-in GitHub account can open it\): https:\/\/keku-mchezo-abc123-\d+\.app\.github\.dev\//);
+    expect(out).not.toMatch(/Phones on the same Wi-Fi/);
+  }, 30_000);
+
   it("is refused in production (test-mode content must never reach a real night)", async () => {
     const { out, code } = await run({ NODE_ENV: "production" }, /not allowed in production/);
     expect(out).toMatch(/MCHEZO_CONTENT_TEST_MODE is for tests only and is not allowed in production/);
