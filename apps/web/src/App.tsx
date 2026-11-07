@@ -672,7 +672,7 @@ export function App() {
       {(me?.isHost || me?.isCohost) && (
         <div className="mz-card" style={{ marginTop: 12 }}>
           <span className="mz-kicker">Game setup</span>
-          <p className="mz-foot" style={{ margin: "4px 0" }}>Up next is {upNext?.title ?? "—"}.{upNext?.lifecycle ? ` Time limit: about ${minutes(upNext.lifecycle.gameWindowMs)} min — the game ends by itself.` : ""}</p>
+          <p className="mz-foot" style={{ margin: "4px 0" }}>Up next is {upNext?.title ?? "—"}. Official games count toward the {proj?.competition?.label ?? "Family Cup"}; practice games do not.{upNext?.lifecycle ? ` Time limit: about ${minutes(upNext.lifecycle.gameWindowMs)} min — the game ends by itself.` : ""}</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             <button type="button" className="mz-chip-btn" data-testid="choose-game" aria-expanded={chooserOpen} onClick={() => setChooserOpen((o) => !o)}>{chooserOpen ? "Close game list" : "Choose a different game"}</button>
             <button type="button" className="mz-chip-btn" data-testid="surprise-me" onClick={() => runShuffle("random")}>Surprise me</button>
