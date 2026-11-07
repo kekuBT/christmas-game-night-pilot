@@ -859,6 +859,8 @@ The owner accepted `5bae6de`. This session handled the owner's final content rul
 - The server itself answers the upgrade on the same address (101 via curl). With the proxy variables removed, a non-localhost hostname connects and stays connected.
 - This is not an app defect, and a home network is not affected.
 
+Gate verdict (one run, one revision): `node scripts/gate.mjs full` on `09bc6c6`, fresh clean clone, `MCHEZO_CHROMIUM_PATH` = machine headless shell (build 1243): **PASSED (exit 0)**, run `20261107-190035-09bc6c62-5962`. 44 passed, 0 failed, 0 timed out. Unit tests: 821 passed (70 files). This verdict covers `09bc6c6` only; the commit that records it changes docs only.
+
 **Next:** the owner runs the real-device session, then sends the results file, the server log and a zip of `data-device-test`. Blockers get a failing test first, then a fix.
 
 **Risks:**
