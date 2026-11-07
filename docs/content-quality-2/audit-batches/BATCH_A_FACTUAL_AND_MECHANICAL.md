@@ -4,6 +4,8 @@
 
 **Not in scope:** editorial judgements ("too easy", "dull", difficulty relabels). Those are AI opinions and go to separate batches (see the end of this document).
 
+> **Update 2026-11-07:** after owner review, these corrections were applied as a reviewable change on branch `claude/cq2-editorial-revision`; see [BATCH_A_APPLIED.md](BATCH_A_APPLIED.md). The table below is the original proposal, kept unchanged.
+
 **Nothing has been changed.** Every item keeps its current status. The proposed action is applied only if the owner approves it.
 
 How to use: for each row, approve the proposed action, change it, or reject it. "Retire" means setting `review.status: "rejected"` with a note. That only stops future selection; past games and results are untouched.

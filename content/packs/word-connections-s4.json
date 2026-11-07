@@ -72,16 +72,16 @@
    "eligibility": "official",
    "review": {
     "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. 2026-11-07 Audit Batch A A4: corrected red-herring note; group renamed 'Fruits'."
    },
    "source": {
     "kind": "original-creative"
    },
    "tags": [],
-   "redHerrings": "'Sage' is a herb, but the herb group is already complete (Basil, Thyme, Parsley, Rosemary); here it is a shade of green. 'Lime' is a fruit, not a green, on this board.",
+   "redHerrings": "'Sage' is a herb and a green; 'Lime' is a fruit and a green. The herb group is already full without Sage, so Sage is the green, which leaves Lime with the fruits.",
    "groups": [
     {
-     "name": "Citrus and stone fruits",
+     "name": "Fruits",
      "words": [
       "Cherry",
       "Plum",
@@ -246,7 +246,7 @@
    "eligibility": "official",
    "review": {
     "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. 2026-11-07 Audit Batch A A2: Owl, Swan -> Sparrow, Blackbird (not garden birds)."
    },
    "source": {
     "kind": "original-creative"
@@ -269,8 +269,8 @@
      "words": [
       "Robin",
       "Wren",
-      "Owl",
-      "Swan"
+      "Sparrow",
+      "Blackbird"
      ],
      "level": 2
     },
@@ -652,13 +652,13 @@
    "eligibility": "official",
    "review": {
     "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. 2026-11-07 Audit Batch A A3: group renamed 'Gems' (pearl and amber are organic gems, not mineral gemstones)."
    },
    "source": {
     "kind": "original-creative"
    },
    "tags": [],
-   "redHerrings": "'Amber' and 'Pearl' are gems, not flowers or trees; 'Straw', 'Blue', 'Rasp' and 'Goose' come before 'berry'.",
+   "redHerrings": "'Amber' and 'Pearl' are organic gems, not flowers or trees; 'Straw', 'Blue', 'Rasp' and 'Goose' come before 'berry'.",
    "groups": [
     {
      "name": "Trees",
@@ -681,7 +681,7 @@
      "level": 2
     },
     {
-     "name": "Gemstones",
+     "name": "Gems",
      "words": [
       "Ruby",
       "Pearl",

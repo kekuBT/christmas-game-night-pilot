@@ -663,8 +663,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): the answer (Sydney) is in the question."
    },
    "source": {
     "kind": "common-knowledge",
@@ -1083,8 +1083,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): same fact as geo-legacy-8 (Paris, closest capital to London)."
    },
    "source": {
     "kind": "common-knowledge",

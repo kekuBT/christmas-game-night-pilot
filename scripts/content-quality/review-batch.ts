@@ -14,7 +14,7 @@ import { readPilot } from "./pilot-lib.js";
 
 const batchId = process.argv[2] ?? "review-batch-01";
 const root = join(import.meta.dirname, "..", "..");
-const batch = JSON.parse(readFileSync(join(DEFAULT_CONTENT_DIR, "pilot", `${batchId}.json`), "utf8")) as { items: string[]; authorSelection: Record<string, string[]> };
+const batch = JSON.parse(readFileSync(join(DEFAULT_CONTENT_DIR, "pilot", `${batchId}.json`), "utf8")) as { items: string[]; authorSelection: Record<string, string[]>; provenance?: Record<string, string> };
 const pilot = readPilot(join(DEFAULT_CONTENT_DIR, "pilot", "pilot-cq2.json"));
 const byId = new Map(pilot.entries.map((e) => [e.item.id, e]));
 const out = join(root, "docs", "content-quality-2", batchId);
@@ -23,7 +23,7 @@ const DIFF = ["", "Easy", "Medium", "Hard"];
 const GAME: Record<string, string> = { "trivia": "Trivia", "geography": "Geography", "closest-wins": "Closest Wins", "guess-the-year": "Guess the Year", "who-said-that": "Who Said That?", "word-connections": "Word Connections", "caption-clash": "Caption Clash", "category-sprint": "Category Sprint", "impostor": "Impostor (practice)", "charades": "Charades (practice)" };
 
 const md: string[] = [
-  `# Editorial review — ${batchId} (20 pilot items, blind)`, "",
+  `# Editorial review — ${batchId} (${batch.items.length} pilot items, blind)`, "",
   "**Reviewer:** __________________  **Date:** __________", "",
   "## How to review", "",
   "1. Read each item as a player would, then as an editor.",
@@ -48,7 +48,7 @@ const md: string[] = [
   "**Independence:**",
   "- The author's scores and reasons are in `author-key.json`, `content/pilot/" + batchId + ".json`, `content/pilot/pilot-cq2.json` and `PILOT_ITEMS.md`. Please don't open those until your scores are in.",
   "- This batch mixes items the author rates highly with items the author has doubts about; which is which isn't shown.",
-  "- Automated checks (schema, solver, rubric arithmetic) have passed for all 20. **That is not editorial approval and not a fact check.**",
+  "- Automated checks (schema, solver, rubric arithmetic) have passed for every item. **That is not editorial approval and not a fact check.**",
   "",
   "The full standard is in `docs/content-quality-2/EDITORIAL_STANDARD.md`.",
   "",
@@ -78,6 +78,7 @@ batch.items.forEach((id, i) => {
   const reveal = it["explanation"] ?? it["context"];
   if (reveal) md.push(`- Explanation shown to players: ${reveal}`);
   md.push(`- Reveal moment: ${ed.reveal}`);
+  if (ed.tone) md.push(`- Tone: ${ed.tone.join(", ")} · Playlists: ${(ed.playlists ?? []).join(", ")}${ed.mechanic ? ` · Mechanic: ${ed.mechanic}` : ""}`);
   if (it["ambiguity"]) md.push(`- Known ambiguity: ${it["ambiguity"]}`);
   if (ed.proposedFields) md.push(`- Needs fields the engine doesn't support yet: \`${JSON.stringify(ed.proposedFields)}\``);
   if (ed.blockedBy) md.push(`- **Blocked:** ${ed.blockedBy}`);
@@ -86,7 +87,7 @@ batch.items.forEach((id, i) => {
   md.push("| G1 | G2 | G3 | G4 | G5 | G6 | G7 | R1 | R2 | R3 | R4 | R5 | Decision | Your difficulty |", "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|", "| | | | | | | | | | | | | | |", "", "Notes:", "");
   csv.push(`${i + 1},${id},${e.game},,,,,,,,,,,,,,,,`);
   const sel = Object.entries(batch.authorSelection).find(([, ids]) => ids.includes(id))?.[0];
-  key[id] = { authorPick: sel, authorRubric: ed.rubric, authorTotal: Object.values(ed.rubric).reduce((a, b) => a + b, 0), authorExpectedCorrect: ed.expectedCorrect, whyInclude: ed.whyInclude };
+  key[id] = { authorPick: sel, ...(batch.provenance ? { provenance: batch.provenance[id] } : {}), authorRubric: ed.rubric, authorTotal: Object.values(ed.rubric).reduce((a, b) => a + b, 0), authorExpectedCorrect: ed.expectedCorrect, whyInclude: ed.whyInclude };
 });
 writeFileSync(join(out, "REVIEW_SHEET.md"), md.join("\n"));
 writeFileSync(join(out, "SCORES.csv"), csv.join("\n") + "\n");

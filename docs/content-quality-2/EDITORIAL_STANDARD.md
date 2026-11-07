@@ -168,6 +168,49 @@ For every official set of 10 or more items in a game:
 - **Festive share:** at most 25% Christmas items in a Christmas Cup, and 0% in a non-seasonal event. The platform is year-round, and the Christmas Cup is one event.
 - **Tags:** items carry `region:*`, `era:*` and `domain:*` tags, so selection (engine change E9) can enforce the mix.
 
+### 5a. Audience and personality (owner direction, 2026-11-07)
+
+Mchezo is mainly for younger adults, especially Gen Z and millennials, playing together socially. It should be smart, culturally alive, funny, competitive and memorable, not just factually correct. In one night:
+- one question makes someone think hard;
+- another brings back a childhood memory;
+- another starts an argument over a famous film;
+- another makes everyone laugh.
+
+**Mixed Party Night editorial target.** This is a guide, not a per-round quota. Tags overlap.
+
+| Share | Content |
+|---|---|
+| 30% | Modern entertainment, internet culture, music and gaming |
+| 20% | Nostalgia, especially the 2000s and 2010s |
+| 20% | Funny, weird or absurd-but-true |
+| 30% | Classic knowledge: science, geography, history, technology and reasoning |
+
+**Tags on every item:**
+- `tone`: classic, modern, nostalgia or weird (one or more).
+- `playlists`:
+  - Mixed Party Night;
+  - Modern Culture;
+  - Internet & Memes;
+  - Gaming;
+  - Music & Entertainment;
+  - 2000s Nostalgia;
+  - Weird but True;
+  - Brainy & Challenging;
+  - World Knowledge.
+- Quiz items also carry a `mechanic`. A round should not repeat a mechanic more than twice, should hold at most one quote twist, and at most one "never/not" stem (proposal E10).
+
+**Modern content meets the same gates as everything else.**
+- Verify dates, claims, videos and attributions against credible sources. Never invent facts, quotations or lyrics.
+- Date anything that can change, with `timeSensitive`. Prefer fixed history ("in 2019 it spent 19 weeks at No. 1") over live records ("the most-viewed video").
+- **Avoid:**
+  - slang forced into questions;
+  - memes used only because they're trendy;
+  - gossip;
+  - subjective opinions presented as answers;
+  - making every modern question easy;
+  - repeating the same TikTok, YouTube or gaming reference.
+- **Mixed Party Night needs broad references.** Fandom-deep items, such as naming all 151 Pokémon or deep lore, belong in themed playlists. A fandom topic can still go in Mixed Party Night when non-fans can reasonably reason or estimate their way to the answer.
+
 ---
 
 ## 6. Sources and verification levels

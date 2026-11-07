@@ -23,8 +23,46 @@ export interface PilotEntry {
     proposedFields?: Record<string, unknown>;
     /** Connections: other groups on the same board a word could honestly belong to. */
     alsoFits?: Record<string, string[]>;
+    /** Tone mix (owner direction 2026-11-07): classic, modern, nostalgia, weird. */
+    tone?: Tone[];
+    /** Playlists the item suits (Mixed Party Night plus themed playlists). */
+    playlists?: string[];
+    /** Quiz games: how the question works, for the round-variety rule. */
+    mechanic?: string;
+    /** The stem hinges on "never"/"not". */
+    negativeStem?: boolean;
   };
 }
+export const TONES = ["classic", "modern", "nostalgia", "weird"] as const;
+export type Tone = (typeof TONES)[number];
+export const PLAYLISTS = ["Mixed Party Night", "Modern Culture", "Internet & Memes", "Gaming", "Music & Entertainment", "2000s Nostalgia", "Weird but True", "Brainy & Challenging", "World Knowledge"] as const;
+export const MECHANICS = ["recall", "recognition", "deduction", "comparison", "myth-buster", "never-said", "misquote", "misattribution", "definition-twist", "origin-story", "weird-but-true"] as const;
+const QUIZ_GAMES = new Set(["trivia", "geography", "who-said-that"]);
+/** Quote-twist mechanics share one family: at most one per round. */
+const QUOTE_TWIST = new Set(["never-said", "misquote", "misattribution"]);
+
+/**
+ * Round-variety rule (proposal E10, not wired into selection): within one
+ * quiz round, no mechanic more than twice, never the same mechanic back to
+ * back, at most one quote-twist question, and at most one negative stem.
+ */
+export function roundVarietyProblems(round: PilotEntry[]): string[] {
+  const out: string[] = [];
+  const count = new Map<string, number>();
+  let quote = 0, neg = 0;
+  round.forEach((e, idx) => {
+    const m = e.editorial.mechanic ?? "untagged";
+    count.set(m, (count.get(m) ?? 0) + 1);
+    if (QUOTE_TWIST.has(m)) quote++;
+    if (e.editorial.negativeStem) neg++;
+    if (idx > 0 && round[idx - 1]!.editorial.mechanic === m) out.push(`'${m}' twice in a row (${round[idx - 1]!.item.id}, ${e.item.id})`);
+  });
+  for (const [m, n] of count) if (n > 2) out.push(`'${m}' appears ${n} times (max 2)`);
+  if (quote > 1) out.push(`${quote} quote-twist questions (max 1)`);
+  if (neg > 1) out.push(`${neg} negative stems (max 1)`);
+  return out;
+}
+
 export interface PilotFile { schemaVersion: 1; pilotId: string; status: string; entries: PilotEntry[] }
 export interface Finding { id: string; level: "error" | "warn"; message: string }
 
@@ -85,6 +123,10 @@ export function checkPilot(file: PilotFile, libraryIds: Set<string>): Finding[] 
       if (vals.some((v) => v < 3)) err(id, "a rubric dimension is below 3: below the acceptance bar");
       if (r.clarity < 4) warn(id, "clarity below 4: needs an editor's wording decision before review");
     }
+    // Tone, playlists and (for quiz games) mechanic tags.
+    if (!ed.tone?.length || ed.tone.some((t) => !(TONES as readonly string[]).includes(t))) err(id, `editorial.tone must list one or more of ${TONES.join(", ")}`);
+    if (!ed.playlists?.length || ed.playlists.some((p) => !(PLAYLISTS as readonly string[]).includes(p))) err(id, "editorial.playlists must name known playlists");
+    if (QUIZ_GAMES.has(e.game) && !(MECHANICS as readonly string[]).includes(ed.mechanic ?? "")) err(id, `quiz items need editorial.mechanic (one of ${MECHANICS.join(", ")})`);
     // Multiple choice: the answer must not stand out as the uniquely longest option too often (checked across the set below).
     // Numeric input integrity.
     if (e.game === "guess-the-year" || e.game === "closest-wins") {
@@ -108,7 +150,16 @@ export function checkPilot(file: PilotFile, libraryIds: Set<string>): Finding[] 
     // Category Sprint: aliases must point at a canonical answer and must not themselves be canonical.
     if (e.game === "category-sprint") {
       const answers = new Set(it["answers"] as string[]);
-      const aliases = (ed.proposedFields?.["aliases"] ?? {}) as Record<string, string>;
+      const rawAliases = (ed.proposedFields?.["aliases"] ?? {}) as Record<string, string | { to: string; reason: string }>;
+      const aliases: Record<string, string> = {};
+      for (const [a, v] of Object.entries(rawAliases)) {
+        if (typeof v === "string") { warn(id, `alias '${a}' has no reason: E2 v3 aliases are category-scoped and must say why`); aliases[a] = v; }
+        else { if (!v.reason?.trim()) err(id, `alias '${a}' needs a reason`); aliases[a] = v.to; }
+      }
+      const pf = ed.proposedFields ?? {};
+      if (pf["closedSet"] === true && typeof pf["setSize"] === "number" && pf["setSize"] !== answers.size) err(id, `setSize ${String(pf["setSize"])} differs from the ${answers.size} listed answers`);
+      if (it["eligibility"] === "official" && pf["closedSet"] !== true) err(id, "official Category Sprint items must be closed sets (E2 v3)");
+      if (it["eligibility"] === "official" && answers.size < 16) err(id, `official closed sets need at least 16 members even for 4 players (E2 v3 size rule); found ${answers.size}`);
       for (const [a, c] of Object.entries(aliases)) {
         if (!answers.has(c)) err(id, `alias '${a}' points at '${c}', which is not an accepted answer`);
         if (answers.has(a)) err(id, `alias '${a}' is also a canonical answer: it would score twice`);

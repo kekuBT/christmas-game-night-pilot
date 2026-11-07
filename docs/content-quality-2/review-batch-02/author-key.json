@@ -1,0 +1,299 @@
+{
+ "note": "Open only after the independent review is submitted.",
+ "items": {
+  "trv-cq2-21": {
+   "authorPick": "strong",
+   "provenance": "new item (tone rebalance / E2 v3 example)",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "25–45%",
+   "whyInclude": "Gaming culture with a funny origin story; non-gamers can still guess, and Minecraft players get to explain it."
+  },
+  "geo-cq2-04": {
+   "authorPick": "strong",
+   "provenance": "batch-01, revised after owner feedback",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 4,
+    "distractors": 5,
+    "social": 4
+   },
+   "authorTotal": 22,
+   "authorExpectedCorrect": "10–25%",
+   "whyInclude": "Nearly everyone answers Russia, so the reveal is a big 'what?'. The qualifier makes the answer defensible."
+  },
+  "cls-cq2-21": {
+   "authorPick": "average",
+   "provenance": "new item (tone rebalance / E2 v3 example)",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 4,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "estimate",
+   "whyInclude": "Music history young adults lived through; guesses spread from 5 to 30, so ranking is meaningful."
+  },
+  "trv-cq2-14": {
+   "authorPick": "average",
+   "provenance": "batch-01 who-cq2-02, rewritten as Trivia",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 21,
+   "authorExpectedCorrect": "15–35%",
+   "whyInclude": "A famous misattribution with a satisfying reveal. Rewritten from who-cq2-02 so the question ('first written down by') is on screen without engine change E5."
+  },
+  "year-cq2-21": {
+   "authorPick": "average",
+   "provenance": "new item (tone rebalance / E2 v3 example)",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 21,
+   "authorExpectedCorrect": "40–60% within 2 years",
+   "whyInclude": "2000s nostalgia most players have a personal memory of."
+  },
+  "con-cq2-01": {
+   "authorPick": "strong",
+   "provenance": "batch-01, unchanged",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 5,
+    "social": 4
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "puzzle",
+   "whyInclude": "Food and dances from four continents, two layers of misdirection, and a satisfying final group."
+  },
+  "trv-cq2-11": {
+   "authorPick": "average",
+   "provenance": "existing pilot item, newly added to the batch for tone balance",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 4,
+    "distractors": 5,
+    "social": 5
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "15–35%",
+   "whyInclude": "Contradicts everyday language in a fair, verifiable way; the qualifier makes it unambiguous."
+  },
+  "imp-cq2-21": {
+   "authorPick": "average",
+   "provenance": "new item (tone rebalance / E2 v3 example)",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "n/a (social)",
+   "whyInclude": "Everyone has strong feelings about a group chat, so clues are funny ('muted', 'forty unread') while the impostor bluffs with 'apps' and 'notifications'."
+  },
+  "cls-cq2-05": {
+   "authorPick": "average",
+   "provenance": "batch-01, revised after owner feedback",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 19,
+   "authorExpectedCorrect": "estimate",
+   "whyInclude": "A classic estimation question with a wide, fun spread of guesses."
+  },
+  "trv-cq2-22": {
+   "authorPick": "strong",
+   "provenance": "new item (tone rebalance / E2 v3 example)",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 22,
+   "authorExpectedCorrect": "35–55%",
+   "whyInclude": "Internet history everyone uses but few know; the reveal is gloriously mundane."
+  },
+  "spr-cq2-02": {
+   "authorPick": "questionable",
+   "provenance": "batch-01, revised after owner feedback",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 4,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 21,
+   "authorExpectedCorrect": "closed set",
+   "whyInclude": "Cultural range and a natural reveal, but players recite it in order, so it is practice-only under E2 v3. A Vietnamese-zodiac category could be added separately."
+  },
+  "trv-cq2-12": {
+   "authorPick": "strong",
+   "provenance": "batch-01, unchanged",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 5,
+    "clarity": 5,
+    "distractors": 5,
+    "social": 5
+   },
+   "authorTotal": 24,
+   "authorExpectedCorrect": "15–35%",
+   "whyInclude": "A thinking question, not a memory one: players can reason their way to it, so it rewards cleverness and creates table talk."
+  },
+  "year-cq2-07": {
+   "authorPick": "average",
+   "provenance": "existing pilot item, newly added to the batch for tone balance",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "10–30% within 2 years",
+   "whyInclude": "One of the best surprises in the set — but it cannot be entered yet."
+  },
+  "cap-cq2-01": {
+   "authorPick": "strong",
+   "provenance": "batch-01, unchanged",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 5,
+    "social": 5
+   },
+   "authorTotal": 24,
+   "authorExpectedCorrect": "n/a (creative)",
+   "whyInclude": "Gives a format (a review), a character (the cat) and a tension (expensive bed it ignores). Formats make writing easier for less confident players."
+  },
+  "trv-cq2-23": {
+   "authorPick": "questionable",
+   "provenance": "new item (tone rebalance / E2 v3 example)",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "55–75%",
+   "whyInclude": "Anime that crosses over to non-fans; an accessible opener with real distractors."
+  },
+  "who-cq2-01": {
+   "authorPick": "average",
+   "provenance": "batch-01, unchanged",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 19,
+   "authorExpectedCorrect": "70–85%",
+   "whyInclude": "An easy real quote with a true twist: the famous version is a misquote."
+  },
+  "cls-cq2-22": {
+   "authorPick": "questionable",
+   "provenance": "new item (tone rebalance / E2 v3 example)",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 3,
+    "social": 5
+   },
+   "authorTotal": 21,
+   "authorExpectedCorrect": "fans exact; others estimate",
+   "whyInclude": "Pure nostalgia: fans nail it, everyone else can estimate, and the reveal starts stories."
+  },
+  "trv-cq2-10": {
+   "authorPick": "strong",
+   "provenance": "batch-01, revised after owner feedback",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 5,
+    "clarity": 4,
+    "distractors": 5,
+    "social": 4
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "15–35%",
+   "whyInclude": "A genuinely mind-changing fact. 'Dry weight' removes the water ambiguity, and 'Sunlight' is a strong, fair distractor because it supplies energy, not material."
+  },
+  "year-cq2-22": {
+   "authorPick": "questionable",
+   "provenance": "new item (tone rebalance / E2 v3 example)",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 21,
+   "authorExpectedCorrect": "40–60% within 2 years",
+   "whyInclude": "A viral moment with a feel-good ending; most players remember their feed that summer."
+  },
+  "trv-cq2-08": {
+   "authorPick": "average",
+   "provenance": "existing pilot item, newly added to the batch for tone balance",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "40–60%",
+   "whyInclude": "Festive but not Eurocentric; a 'wait, really?' reveal that sparks conversation about family traditions."
+  },
+  "spr-cq2-05": {
+   "authorPick": "average",
+   "provenance": "new item (tone rebalance / E2 v3 example)",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "closed set",
+   "whyInclude": "The E2 v3 example of an official-ready closed set: 50 members, famous-first recall, suitable for 4-10 players by the simulation (min 40 at 10 players)."
+  }
+ }
+}

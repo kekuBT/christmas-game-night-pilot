@@ -172,10 +172,10 @@
    "difficulty": 1,
    "category": "Everyday",
    "language": "en",
-   "eligibility": "official",
+   "eligibility": "practice",
    "review": {
     "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. 2026-11-07 Audit Batch A A17: added eggplant, zucchini; open category, practice-only (E2 v3)."
    },
    "source": {
     "kind": "original-creative",
@@ -195,6 +195,7 @@
     "celery",
     "courgette",
     "cucumber",
+    "eggplant",
     "garlic",
     "kale",
     "leek",
@@ -213,7 +214,8 @@
     "swede",
     "sweetcorn",
     "tomato",
-    "turnip"
+    "turnip",
+    "zucchini"
    ]
   },
   {
@@ -518,10 +520,10 @@
    "difficulty": 1,
    "category": "Everyday",
    "language": "en",
-   "eligibility": "official",
+   "eligibility": "practice",
    "review": {
     "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. 2026-11-07 Audit Batch A A17: added chicken, vulture, stork, pelican, canary; open category, practice-only (E2 v3)."
    },
    "source": {
     "kind": "original-creative",
@@ -531,6 +533,8 @@
    "name": "Birds",
    "answers": [
     "blackbird",
+    "canary",
+    "chicken",
     "crow",
     "dove",
     "duck",
@@ -548,6 +552,7 @@
     "owl",
     "parrot",
     "peacock",
+    "pelican",
     "penguin",
     "pigeon",
     "puffin",
@@ -556,8 +561,10 @@
     "seagull",
     "sparrow",
     "starling",
+    "stork",
     "swan",
     "turkey",
+    "vulture",
     "woodpecker",
     "wren"
    ]

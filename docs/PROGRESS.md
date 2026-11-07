@@ -719,3 +719,37 @@ Risk:
 Verification (code at c70f16b; this note is a docs-only commit on top):
 - `npm run gate:full` on c70f16b in a fresh clone: **PASSED (exit 0)**, run `20261107-035306-c70f16b0-167`. 44 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid.
 - Two earlier full runs were killed by container restarts; their partial results were discarded, not combined.
+
+## Content Quality 2.0 — owner review applied (2026-11-07, branch `claude/cq2-editorial-revision`, from 44b0022)
+Milestone: revision after the owner's review of the E1/E3 checkpoint, review batch 01, E2 v2 and Audit Batch A, plus the new audience and personality direction. The E1/E3 checkpoint and its recorded gate (c70f16b, run 20261107-035306-c70f16b0-167) are untouched on `claude/cq2-integrity-fixes`.
+
+Completed (files):
+- Pilot revision:
+  - `content/pilot/pilot-cq2.json`: 60 → 69 items, all provisional. Owner-priority fixes; qualifiers on measurement-dependent claims; 9 new modern, nostalgic and playful items; tone, playlist and mechanic tags.
+  - Edit script: `scripts/content-quality/revisions/rev01_owner_feedback.py`.
+- Review batch 02 (21 items, blind): `content/pilot/review-batch-02.json` and `docs/content-quality-2/review-batch-02/`, including BEFORE_AFTER.md (`npm run content:pilot-diff`).
+- Round-variety rule (E10 proposal): `roundVarietyProblems` in `scripts/content-quality/pilot-lib.ts`.
+- E2 v3 design: `docs/content-quality-2/E2_CATEGORY_SPRINT_V3.md`. The simulation is `scripts/content-quality/sprint-sim.ts` and `sprint-sim-report.ts` (`npm run content:sprint-sim`), with output in `E2_SET_SIZE_SIMULATION.md`.
+- Audit Batch A applied:
+  - 7 packs in `content/packs/` (14 retired as rejected, 4 boards fixed, 1 distractor fixed, 2 practice lists extended);
+  - `scripts/content-quality/revisions/batch_a_apply.py`;
+  - `docs/content-quality-2/audit-batches/BATCH_A_APPLIED.md`.
+- Standard §5a (audience and personality). Report: `docs/content-quality-2/REVISION_REPORT.md`. Decisions D-CQ2-12..16.
+- Tests: `tests/sprint-sim.test.ts` (5), `tests/audit-batch-a.test.ts` (8), and 6 more in `tests/content-pilot.test.ts`.
+
+Failures found and fixed:
+- `npm run content:pilot` crashed on `review-batch-01.json` (since c70f16b). It now skips non-pilot files.
+- My first A1 test claimed the solver rejects a "Winter words" rename. It doesn't (counting forces one solution), so the test and the rationale were corrected: the rejection is editorial.
+
+External blockers: none.
+
+Not done:
+- human fact-checks and reviews;
+- the real-device check of E1/E3 (still outstanding);
+- E2/E9/E10 implementation (awaiting approval).
+
+Next: stop for owner review. No library expansion and no further content batches until review batch 02 is reviewed.
+
+Risk:
+- A1 edits the only official Connections board; it needs owner sign-off at merge.
+- Batch A retires 14 provisional items, which shrinks the practice pools slightly.

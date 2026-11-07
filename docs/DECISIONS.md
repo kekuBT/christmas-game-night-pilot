@@ -217,3 +217,21 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
 - **D-CQ2-09 Reveal timing.** Independent quiz games (Trivia, Geography, Who Said That?, Guess the Year) reveal answers and explanations only when the game has finished. Closest Wins reveals each question once it has closed. Each player sees only their own choices; the TV sees none. *Alternative:* a per-question reveal once every player has answered that question. Deferred: it adds a rule and a race (late joiners, abstentions) for little gain, and the owner asked for no risk to active questions.
 - **D-CQ2-10 TV answers live on the existing dashboard.** The dashboard keeps its routing; it gains a finished game's answers or Closest's last closed answer. *Alternative:* a new TV stage per game. Deferred, because it would change TV routing that existing drivers and hosts rely on.
 - **D-CQ2-11 E2 v2: official Category Sprint is closed sets only** (`docs/content-quality-2/E2_CATEGORY_SPRINT_V2.md`), with no votes. Proposal only; scoring unchanged.
+- **D-CQ2-12 E2 v3 set-size policy is simulation-backed** (`scripts/content-quality/sprint-sim.ts`, `docs/content-quality-2/E2_SET_SIZE_SIMULATION.md`).
+  - The proposal: an official set needs at least max(15, 4 × players) members. Obscure-tail sets need at least 35, and recited-in-order sets are practice-only.
+  - The model is checked against the closed form (1 − 5/N)^(P−1).
+  - *Alternative:* fixed thresholds by eye (v2). Rejected by the owner, because 12 members for 4 players gives a bonus rate of only about 20%.
+  - Proposal only; nothing implemented.
+- **D-CQ2-13 Aliases are category-scoped and carry reasons.**
+  - For example, sheep → goat holds only in the zodiac, because of the translation of 羊. Zodiac *cat* is a known near-miss (owner ruling).
+  - *Alternative:* a global synonym table. Rejected, because it would merge distinct answers in other categories.
+- **D-CQ2-14 Rousseau item moved from Who Said That? to Trivia** (`trv-cq2-14`), so the question line shows without engine change E5.
+  - *Alternative:* wait for E5. Rejected, because the item was blocked for no gain.
+- **D-CQ2-15 Audit Batch A applied as rejected status plus notes, never deletion.**
+  - Ids stay valid for usage history and results.
+  - The legacy board `con-legacy-1` keeps its legacy status with a one-tile fix (Icicle → Sleet, solver-checked). Making it provisional would have emptied official Connections. It needs owner sign-off at merge.
+  - *Alternative:* rename the group "Winter words". Rejected as a catch-all label, not because of the solver (both are unique by counting).
+- **D-CQ2-16 Tone, playlist and mechanic tags on pilot items, and a round-variety rule (E10), follow the owner's audience direction.**
+  - They live in the pilot's editorial block, not in the live schema, until E9/E10 are approved.
+  - *Alternative:* add schema fields now. Deferred, because it is a schema change to shipped packs.
+

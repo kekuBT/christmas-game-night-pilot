@@ -9,6 +9,8 @@ const lib = loadContent();
 let errors = 0;
 for (const name of readdirSync(dir).filter((f) => f.endsWith(".json")).sort()) {
   const file = readPilot(join(dir, name));
+  // review-batch-*.json files list item ids for editors; they are not pilot item files.
+  if (!Array.isArray(file.entries)) continue;
   const findings = checkPilot(file, new Set(lib.items.keys()));
   const byGame = new Map<string, number>();
   for (const e of file.entries) byGame.set(e.game, (byGame.get(e.game) ?? 0) + 1);

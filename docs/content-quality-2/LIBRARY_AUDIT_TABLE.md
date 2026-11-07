@@ -225,7 +225,7 @@ Word Connections boards with more than one solution (given the overlaps declared
 | cls-k-10 | provisional | 3 | KEEP | INPUT-RANGE | Good estimation item, but blocked until the input range is fixed. |
 | cls-k-11 | provisional | 2 | KEEP |  | Small range, but guesses still spread. |
 | cls-k-12 | provisional | 3 | KEEP |  | A real estimation question with a precise, checkable answer. |
-| cls-k-13 | provisional | 2 | REJECT | DISPUTED | The answer is a range (4.5–6 m), not a value, so close guesses rank arbitrarily. |
+| cls-k-13 | rejected | 2 | REJECT | DISPUTED | The answer is a range (4.5–6 m), not a value, so close guesses rank arbitrarily. |
 | cls-k-14 | provisional | 3 | KEEP |  | A real estimation question with a precise, checkable answer. |
 | cls-k-15 | provisional | 2 | KEEP |  | A real estimation question with a precise, checkable answer. |
 | cls-k-16 | provisional | 3 | KEEP | INPUT-RANGE | Good estimation item, but blocked until the input range is fixed. |
@@ -238,7 +238,7 @@ Word Connections boards with more than one solution (given the overlaps declared
 | cls-k-23 | provisional | 3 | REVISE | INPUT-RANGE | 'Enter without the minus sign' is clumsy and the decimal is truncated. Needs signed decimal input. |
 | cls-k-24 | provisional | 2 | KEEP |  | A real estimation question with a precise, checkable answer. |
 | cls-k-25 | provisional | 1 | REJECT | OBVIOUS | Widely known exactly, so most players tie. |
-| cls-k-26 | provisional | 2 | REJECT | OBSCURE-UNINTERESTING, DISPUTED | A range (146–154 °C), and niche. |
+| cls-k-26 | rejected | 2 | REJECT | OBSCURE-UNINTERESTING, DISPUTED | A range (146–154 °C), and niche. |
 | cls-k-27 | provisional | 2 | KEEP |  | Excellent: festive, and nobody knows it exactly. |
 | cls-k-28 | provisional | 3 | KEEP | INPUT-RANGE | Good estimation item, but blocked until the input range is fixed. |
 | cls-k-29 | provisional | 2 | REVISE | INPUT-RANGE | 8.3 can't be entered. Ask in seconds (about 499). |
@@ -281,7 +281,7 @@ Word Connections boards with more than one solution (given the overlaps declared
 | geo-s4-023 | provisional | 3→1 | REVISE | MISCALIBRATED | Easy. |
 | geo-s4-024 | provisional | 1 | REJECT | OBVIOUS | Near 100%. |
 | geo-s4-025 | provisional | 1 | KEEP |  | Fair. |
-| geo-s4-026 | provisional | 2 | REJECT | ANSWER-IN-QUESTION | 'Sydney Opera House — in which city?' |
+| geo-s4-026 | rejected | 2 | REJECT | ANSWER-IN-QUESTION | 'Sydney Opera House — in which city?' |
 | geo-s4-027 | provisional | 2 | KEEP |  | Fair. |
 | geo-s4-028 | provisional | 2 | REJECT | DUPLICATE, OBVIOUS | Same as trv-hist-039. |
 | geo-s4-029 | provisional | 2 | KEEP |  | Fair. |
@@ -297,7 +297,7 @@ Word Connections boards with more than one solution (given the overlaps declared
 | geo-s4-039 | provisional | 2 | REPLACE | OBVIOUS | Near 100%. |
 | geo-s4-040 | provisional | 2 | KEEP |  | Fair. |
 | geo-s4-041 | provisional | 3 | KEEP |  | Fair. |
-| geo-s4-042 | provisional | 2 | REJECT | DUPLICATE | Same pair as geo-legacy-8. |
+| geo-s4-042 | rejected | 2 | REJECT | DUPLICATE | Same pair as geo-legacy-8. |
 | geo-s4-043 | provisional | 3→1 | REVISE | MISCALIBRATED | Easy. |
 | geo-s4-044 | provisional | 3 | KEEP |  | Fair. |
 
@@ -318,7 +318,7 @@ Word Connections boards with more than one solution (given the overlaps declared
 | year-s4-003 | provisional | 3 | KEEP |  | Fair and checkable. |
 | year-s4-004 | provisional | 3 | KEEP |  | Fair and checkable. |
 | year-s4-005 | provisional | 2 | KEEP |  | Fair and checkable. |
-| year-s4-006 | provisional | 1 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
+| year-s4-006 | rejected | 1 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
 | year-s4-007 | provisional | 2 | KEEP |  | Fair and checkable. |
 | year-s4-008 | provisional | 2 | KEEP |  | Fair and checkable. |
 | year-s4-009 | provisional | 3 | KEEP |  | Fair and checkable. |
@@ -326,13 +326,13 @@ Word Connections boards with more than one solution (given the overlaps declared
 | year-s4-011 | provisional | 2 | KEEP | INPUT-RANGE | Good event, but the year can't be entered (input starts at 1896). |
 | year-s4-012 | provisional | 2 | KEEP |  | Fair and checkable. |
 | year-s4-013 | provisional | 3 | KEEP | INPUT-RANGE | Good event, but the year can't be entered (input starts at 1896). |
-| year-s4-014 | provisional | 2 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
+| year-s4-014 | rejected | 2 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
 | year-s4-015 | provisional | 3 | KEEP |  | Fair and checkable. |
-| year-s4-016 | provisional | 1 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
+| year-s4-016 | rejected | 1 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
 | year-s4-017 | provisional | 1 | KEEP |  | Fair and checkable. |
 | year-s4-018 | provisional | 2 | KEEP |  | Fair and checkable. |
 | year-s4-019 | provisional | 2 | KEEP | INPUT-RANGE | Good event, but the year can't be entered (input starts at 1896). |
-| year-s4-020 | provisional | 2 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
+| year-s4-020 | rejected | 2 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
 | year-s4-021 | provisional | 3 | KEEP | INPUT-RANGE | Good event, but the year can't be entered (input starts at 1896). |
 | year-s4-022 | provisional | 3 | KEEP | INPUT-RANGE | Good event, but the year can't be entered (input starts at 1896). |
 | year-s4-023 | provisional | 3 | KEEP | INPUT-RANGE | Good event, but the year can't be entered (input starts at 1896). |
@@ -354,8 +354,8 @@ Word Connections boards with more than one solution (given the overlaps declared
 | year-s4-039 | provisional | 3 | KEEP |  | Fair and checkable. |
 | year-s4-040 | provisional | 2 | KEEP |  | Fair and checkable. |
 | year-s4-041 | provisional | 2 | KEEP |  | Fair and checkable. |
-| year-s4-042 | provisional | 3 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
-| year-s4-043 | provisional | 3 | REVISE | INPUT-RANGE, DUPLICATE-ANSWER | Both 1843; never use them in the same night. Blocked by the input range. |
+| year-s4-042 | rejected | 3 | REJECT | DUPLICATE | Duplicates a legacy event (Moon landing, iPhone, Titanic, Berlin Wall, Wright brothers). |
+| year-s4-043 | rejected | 3 | REVISE | INPUT-RANGE, DUPLICATE-ANSWER | Both 1843; never use them in the same night. Blocked by the input range. |
 | year-s4-044 | provisional | 3 | REVISE | INPUT-RANGE, DUPLICATE-ANSWER | Both 1843; never use them in the same night. Blocked by the input range. |
 | year-s4-045 | provisional | 3 | KEEP | INPUT-RANGE | Good event, but the year can't be entered (input starts at 1896). |
 
@@ -475,7 +475,7 @@ Word Connections boards with more than one solution (given the overlaps declared
 | trv-geog-025 | provisional | 1 | REJECT | OBVIOUS, DUPLICATE | Same as geo-legacy-6. |
 | trv-geog-026 | provisional | 1 | KEEP |  | Fair easy item. |
 | trv-geog-027 | provisional | 2 | REJECT | OBVIOUS, DUPLICATE | Famous capitals are near 100% and duplicate Geography's capital mode. |
-| trv-geog-028 | provisional | 2 | REJECT | DUPLICATE | Same as geo-legacy-5 (Italy boot). |
+| trv-geog-028 | rejected | 2 | REJECT | DUPLICATE | Same as geo-legacy-5 (Italy boot). |
 | trv-geog-029 | provisional | 2 | REVISE | FLAT-REVEAL | Keep the 'hot' qualifier; add the reveal that Antarctica is the largest desert overall. |
 | trv-geog-030 | provisional | 2 | REJECT | OBVIOUS, DUPLICATE | Overlaps trv-hist-036; near 100%. |
 | trv-geog-031 | provisional | 2 | KEEP |  | Fair medium question. |
@@ -485,7 +485,7 @@ Word Connections boards with more than one solution (given the overlaps declared
 | trv-hist-035 | provisional | 1 | REPLACE | OBVIOUS, DUPLICATE | The year in the prompt gives it away, and Guess the Year has the Titanic twice already. |
 | trv-hist-036 | provisional | 1 | REJECT | OBVIOUS | Near 100%. |
 | trv-hist-037 | provisional | 2→1 | REVISE | MISCALIBRATED, CULTURAL-CONCENTRATION | Easy; US-centric. |
-| trv-hist-038 | provisional | 2 | REJECT | ANSWER-IN-QUESTION | The prompt names Berlin. |
+| trv-hist-038 | rejected | 2 | REJECT | ANSWER-IN-QUESTION | The prompt names Berlin. |
 | trv-hist-039 | provisional | 2 | REJECT | OBVIOUS | Near 100%. |
 | trv-hist-040 | provisional | 2→1 | REVISE | MISCALIBRATED, CULTURAL-CONCENTRATION | Easy for UK players, harder elsewhere: say so in the difficulty notes. |
 | trv-hist-041 | provisional | 3→2 | REVISE | MISCALIBRATED | Good distractors; medium rather than hard. |
@@ -500,7 +500,7 @@ Word Connections boards with more than one solution (given the overlaps declared
 | trv-lite-050 | provisional | 3→2 | REVISE | MISCALIBRATED | Medium rather than hard. |
 | trv-lite-051 | provisional | 3→2 | REVISE | MISCALIBRATED | Medium rather than hard. |
 | trv-lang-052 | provisional | 1 | REJECT | OBVIOUS, AMBIGUOUS-WORDING | Near 100%, and 'Antique' or 'Old' cause arguments. |
-| trv-lang-053 | provisional | 2 | REJECT | DUPLICATE, OBVIOUS | Same as cls-legacy-6. |
+| trv-lang-053 | rejected | 2 | REJECT | DUPLICATE, OBVIOUS | Same as cls-legacy-6. |
 | trv-lang-054 | provisional | 2 | REJECT | OBVIOUS | Near 100%. |
 | trv-lang-055 | provisional | 3→2 | REVISE | MISCALIBRATED | Medium. |
 | trv-lang-056 | provisional | 3 | REJECT | OBVIOUS | Near 100%. |
@@ -576,7 +576,7 @@ Word Connections boards with more than one solution (given the overlaps declared
 | trv-scie-126 | provisional | 3→2 | REVISE | MISCALIBRATED | Medium. |
 | trv-scie-127 | provisional | 3 | KEEP |  | Fair medium question. |
 | trv-hist-128 | provisional | 2→1 | REVISE | MISCALIBRATED | Easy. |
-| trv-hist-129 | provisional | 3 | REJECT | ANSWER-IN-QUESTION | 'The Great Wall … which country?' The answer is in the name everyone knows. |
+| trv-hist-129 | rejected | 3 | REJECT | ANSWER-IN-QUESTION | 'The Great Wall … which country?' The answer is in the name everyone knows. |
 | trv-hist-130 | provisional | 3 | REVISE | NEEDS-QUALIFIER | True as worded (he led it), but the reveal must say Magellan died on the way and Elcano finished. |
 | trv-hist-131 | provisional | 1 | REVISE | WEAK-DISTRACTORS | 'A wall of ice' is a joke option. Use fair alternatives or drop the item. |
 

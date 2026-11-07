@@ -108,8 +108,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): duplicate of year-legacy-1 (same event)."
    },
    "source": {
     "kind": "common-knowledge",
@@ -260,8 +260,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): duplicate of year-legacy-2 (same event)."
    },
    "source": {
     "kind": "common-knowledge",
@@ -298,8 +298,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): duplicate of year-legacy-7 (same event)."
    },
    "source": {
     "kind": "common-knowledge",
@@ -374,8 +374,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): duplicate of year-legacy-3 (same event)."
    },
    "source": {
     "kind": "common-knowledge",
@@ -792,8 +792,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): duplicate of year-legacy-5 (same event)."
    },
    "source": {
     "kind": "common-knowledge",
@@ -811,8 +811,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): same answer year (1843) as year-s4-044; one game could pair them. Reinstate when selection never pairs equal answers (E9)."
    },
    "source": {
     "kind": "common-knowledge",

@@ -1,0 +1,80 @@
+{
+ "batchId": "review-batch-02",
+ "source": "content/pilot/pilot-cq2.json",
+ "note": "Revised batch after the owner's review of review-batch-01 (2026-11-07). Order is deliberately mixed. The author's assessment and each item's provenance are in author-key.json, to be opened only after the review is submitted.",
+ "items": [
+  "trv-cq2-21",
+  "geo-cq2-04",
+  "cls-cq2-21",
+  "trv-cq2-14",
+  "year-cq2-21",
+  "con-cq2-01",
+  "trv-cq2-11",
+  "imp-cq2-21",
+  "cls-cq2-05",
+  "trv-cq2-22",
+  "spr-cq2-02",
+  "trv-cq2-12",
+  "year-cq2-07",
+  "cap-cq2-01",
+  "trv-cq2-23",
+  "who-cq2-01",
+  "cls-cq2-22",
+  "trv-cq2-10",
+  "year-cq2-22",
+  "trv-cq2-08",
+  "spr-cq2-05"
+ ],
+ "authorSelection": {
+  "strong": [
+   "trv-cq2-21",
+   "trv-cq2-12",
+   "con-cq2-01",
+   "geo-cq2-04",
+   "trv-cq2-10",
+   "cap-cq2-01",
+   "trv-cq2-22"
+  ],
+  "average": [
+   "cls-cq2-21",
+   "trv-cq2-14",
+   "year-cq2-21",
+   "trv-cq2-11",
+   "imp-cq2-21",
+   "cls-cq2-05",
+   "year-cq2-07",
+   "who-cq2-01",
+   "trv-cq2-08",
+   "spr-cq2-05"
+  ],
+  "questionable": [
+   "spr-cq2-02",
+   "trv-cq2-23",
+   "cls-cq2-22",
+   "year-cq2-22"
+  ]
+ },
+ "provenance": {
+  "geo-cq2-04": "batch-01, revised after owner feedback",
+  "trv-cq2-10": "batch-01, revised after owner feedback",
+  "cls-cq2-05": "batch-01, revised after owner feedback",
+  "spr-cq2-02": "batch-01, revised after owner feedback",
+  "trv-cq2-14": "batch-01 who-cq2-02, rewritten as Trivia",
+  "con-cq2-01": "batch-01, unchanged",
+  "trv-cq2-12": "batch-01, unchanged",
+  "cap-cq2-01": "batch-01, unchanged",
+  "who-cq2-01": "batch-01, unchanged",
+  "trv-cq2-11": "existing pilot item, newly added to the batch for tone balance",
+  "year-cq2-07": "existing pilot item, newly added to the batch for tone balance",
+  "trv-cq2-08": "existing pilot item, newly added to the batch for tone balance",
+  "trv-cq2-21": "new item (tone rebalance / E2 v3 example)",
+  "cls-cq2-21": "new item (tone rebalance / E2 v3 example)",
+  "year-cq2-21": "new item (tone rebalance / E2 v3 example)",
+  "imp-cq2-21": "new item (tone rebalance / E2 v3 example)",
+  "trv-cq2-22": "new item (tone rebalance / E2 v3 example)",
+  "trv-cq2-23": "new item (tone rebalance / E2 v3 example)",
+  "cls-cq2-22": "new item (tone rebalance / E2 v3 example)",
+  "year-cq2-22": "new item (tone rebalance / E2 v3 example)",
+  "spr-cq2-05": "new item (tone rebalance / E2 v3 example)"
+ }
+}

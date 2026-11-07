@@ -6,7 +6,8 @@
 import { describe, expect, it } from "vitest";
 import { join } from "node:path";
 import { loadContent, DEFAULT_CONTENT_DIR } from "../src/content/registry.js";
-import { checkPilot, connectionsSolutions, enterable, readPilot } from "../scripts/content-quality/pilot-lib.js";
+import { readFileSync } from "node:fs";
+import { checkPilot, connectionsSolutions, enterable, readPilot, roundVarietyProblems } from "../scripts/content-quality/pilot-lib.js";
 
 const pilot = readPilot(join(DEFAULT_CONTENT_DIR, "pilot", "pilot-cq2.json"));
 const lib = loadContent();
@@ -46,5 +47,65 @@ describe("connections uniqueness solver", () => {
   });
   it("accepts a board whose overlaps are forced by counting", () => {
     expect(connectionsSolutions(board, { Mars: ["Planets"] }).length).toBe(1);
+  });
+});
+
+describe("content quality 2.0 revision (owner feedback 2026-11-07)", () => {
+  const byId = new Map(pilot.entries.map((e) => [e.item.id, e]));
+  const batch2 = (JSON.parse(readFileSync(join(DEFAULT_CONTENT_DIR, "pilot", "review-batch-02.json"), "utf8")) as { items: string[] }).items.map((id) => byId.get(id)!);
+
+  it("review batch 02 exists in the pilot and every item is still provisional", () => {
+    expect(batch2.length).toBeGreaterThanOrEqual(18);
+    expect(batch2.length).toBeLessThanOrEqual(22);
+    for (const e of batch2) {
+      expect(e, "batch item missing from the pilot").toBeDefined();
+      expect((e.item["review"] as { status: string }).status).toBe("provisional");
+    }
+  });
+
+  it("batch 02 balances tone: modern or nostalgic >= 40%, classic 25-45%, weird >= 15%", () => {
+    const share = (t: string) => batch2.filter((e) => e.editorial.tone?.includes(t as never)).length / batch2.length;
+    expect(share("modern") + share("nostalgia") - batch2.filter((e) => e.editorial.tone?.includes("modern") && e.editorial.tone.includes("nostalgia")).length / batch2.length).toBeGreaterThanOrEqual(0.4);
+    expect(share("classic")).toBeGreaterThanOrEqual(0.25);
+    expect(share("classic")).toBeLessThanOrEqual(0.45);
+    expect(share("weird")).toBeGreaterThanOrEqual(0.15);
+  });
+
+  it("the batch's Trivia questions form a round with no repeated mechanic problems (E10 proposal)", () => {
+    const trivia = batch2.filter((e) => e.game === "trivia");
+    expect(trivia.length).toBeGreaterThanOrEqual(6);
+    expect(roundVarietyProblems(trivia)).toEqual([]);
+  });
+
+  it("the variety rule catches the repetition the review found (two 'never said' questions, negative stems)", () => {
+    const round = ["trv-cq2-04", "trv-cq2-05", "trv-cq2-12"].map((id) => byId.get(id)!);
+    const problems = roundVarietyProblems(round);
+    expect(problems.some((p) => p.includes("quote-twist"))).toBe(true);
+    expect(problems.some((p) => p.includes("negative stems"))).toBe(true);
+    expect(problems.some((p) => p.includes("twice in a row"))).toBe(true);
+  });
+
+  it("owner-prioritised fixes are in place", () => {
+    expect(byId.has("who-cq2-02")).toBe(false);
+    expect(String(byId.get("trv-cq2-14")!.item["prompt"])).toMatch(/first written down/);
+    expect(byId.get("cls-cq2-05")!.item["answer"]).toBe(5555);
+    expect(String(byId.get("cls-cq2-05")!.item["prompt"])).toMatch(/Heathrow.*JFK/);
+    expect(String(byId.get("geo-cq2-04")!.item["prompt"])).toMatch(/standard time zones/);
+    expect(String(byId.get("trv-cq2-10")!.item["explanation"])).toMatch(/CO2/);
+  });
+
+  it("Category Sprint follows E2 v3: no peer vote, zodiac rejects cat, official sets are closed and large enough", () => {
+    for (const e of pilot.entries.filter((x) => x.game === "category-sprint")) {
+      expect(JSON.stringify(e.editorial)).not.toMatch(/peer-challenge|peerChallenge|go to the peer/i);
+      if (e.item["eligibility"] === "official") {
+        expect(e.editorial.proposedFields?.["closedSet"]).toBe(true);
+        expect((e.item["answers"] as string[]).length).toBeGreaterThanOrEqual(16);
+      }
+    }
+    const z = byId.get("spr-cq2-02")!;
+    const pf = z.editorial.proposedFields as { aliases: Record<string, { to: string }>; knownNotAccepted: Record<string, string> };
+    expect(pf.aliases["cat"]).toBeUndefined();
+    expect(pf.knownNotAccepted["cat"]).toMatch(/Vietnamese/);
+    expect(z.item["eligibility"]).toBe("practice");
   });
 });

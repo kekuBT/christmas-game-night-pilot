@@ -14,7 +14,7 @@
       "eligibility": "official",
       "review": {
         "status": "legacy",
-        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review."
+        "notes": "In official play before Sprint 4 (authored by Muse). Grandfathered; awaiting human editorial review. 2026-11-07 Audit Batch A A1: 'Icicle' replaced by 'Sleet' (an icicle is ice, not weather). Solver re-run: one solution. Owner sign-off required before this edit reaches official play."
       },
       "source": {
         "kind": "common-knowledge"
@@ -39,7 +39,7 @@
             "Snowfall",
             "Frost",
             "Blizzard",
-            "Icicle"
+            "Sleet"
           ],
           "level": 2
         },

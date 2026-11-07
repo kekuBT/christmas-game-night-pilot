@@ -64,10 +64,10 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 
 ### trv-cq2-05 · Medium · Books
 
-**How many times does Sherlock Holmes say 'Elementary, my dear Watson' in Arthur Conan Doyle's stories?**
+**In Arthur Conan Doyle's 60 Sherlock Holmes stories, how often does Holmes say 'Elementary, my dear Watson'?**
 
 - Options: **Never** ✓ · Once · About ten times · More than fifty times
-- Explanation: Never. Holmes says 'Elementary' once ('The Crooked Man') and 'my dear Watson' often, but never together. The full phrase was popularised later, especially by films.
+- Explanation: Never. Holmes says 'Elementary' once ('The Crooked Man') and 'my dear Watson' often, but never together. The full phrase was popularised later, notably by films.
 - Reveal moment: Never! The catchphrase belongs to adaptations, not to Doyle.
 - Expected correct: 35–55%
 - Source basis: Arthur Conan Doyle's Sherlock Holmes canon (full text, e.g. Project Gutenberg)
@@ -135,11 +135,11 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 **Most of a tree's dry weight (wood, leaves and roots) is built from material that came from where?**
 
 - Options: **The air** ✓ · The soil · Rainwater · Sunlight
-- Explanation: The air: carbon dioxide, turned into sugars and wood by photosynthesis. In the 1640s van Helmont grew a willow for five years and the soil barely lost any weight.
-- Reveal moment: From thin air — literally. A tree is mostly solidified carbon dioxide.
+- Explanation: The air. Wood is mostly cellulose and lignin; their carbon and most of their oxygen come from CO2 taken in by the leaves. Water supplies the hydrogen, and soil minerals are only a few per cent.
+- Reveal moment: Mostly from thin air: a tree's dry mass is mainly carbon and oxygen captured from CO2. Van Helmont's 1640s willow gained far more weight than its soil lost; he wrongly credited the water.
 - Expected correct: 15–35%
-- Source basis: Plant physiology: carbon fixation in photosynthesis; van Helmont's willow experiment (1640s)
-- Verification required: Check against a plant physiology textbook (dry mass is mostly carbon, hydrogen and oxygen fixed from CO2 and water; carbon comes from the air). Check van Helmont's figures before adding them.
+- Source basis: Plant physiology textbook treatment of photosynthetic carbon fixation and plant dry-mass composition (e.g. Taiz & Zeiger, Plant Physiology); van Helmont's willow experiment (1640s)
+- Verification required: Check against a plant physiology text: dry mass is mostly C, O and H; C and the O in carbohydrates come from CO2, H from water; minerals (ash) are a few per cent. Confirm the van Helmont summary (no figures are quoted).
 - Why include it: A genuinely mind-changing fact. 'Dry weight' removes the water ambiguity, and 'Sunlight' is a strong, fair distractor because it supplies energy, not material.
 - Rubric: 5/5/4/5/4 = 23
 - Replaces: trv-legacy-06
@@ -188,11 +188,11 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 
 ### cls-cq2-01 · Medium · Buildings
 
-**How tall is the Burj Khalifa in Dubai, in metres?**
+**How tall is the Burj Khalifa in Dubai, to its architectural top, in metres?**
 
 - Answer: **828 m**
-- Explanation: 828 m — more than twice the height of the Eiffel Tower.
-- Reveal moment: 828 m. The Eiffel Tower is 330 m.
+- Explanation: 828 m to the architectural top (CTBUH) — more than twice the height of the Eiffel Tower, which is 330 m including its antennas.
+- Reveal moment: 828 m.
 - Expected correct: estimate
 - Scoring: Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change.
 - Source basis: CTBUH (Council on Tall Buildings and Urban Habitat): Burj Khalifa, 828 m
@@ -245,15 +245,15 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 
 ### cls-cq2-05 · Hard · Geography
 
-**How far is it in a straight line from London to New York, in kilometres?**
+**What is the great-circle (shortest flight path) distance from London Heathrow to New York JFK airport, in km?**
 
-- Answer: **5570 km**
-- Explanation: About 5,570 km as the crow flies (city centre to city centre).
-- Reveal moment: About 5,570 km.
+- Answer: **5555 km**
+- Explanation: About 5,555 km between the two airports on the standard WGS 84 Earth model. Real flights are usually longer because of winds and air routes.
+- Reveal moment: About 5,555 km airport to airport.
 - Expected correct: estimate
 - Scoring: Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change.
-- Source basis: Great-circle (haversine) distance between central London (51.5074, -0.1278) and New York City (40.7128, -74.0060), Earth mean radius 6371 km
-- Verification required: Computed with the haversine formula (5,570.2 km). Editors should agree the 'city centre' convention.
+- Source basis: Geodesic (Vincenty, WGS 84) distance between airport reference points LHR 51.4700 N 0.4543 W and JFK 40.6413 N 73.7781 W = 5,554.9 km (spherical haversine gives 5,540 km)
+- Verification required: Computed: Vincenty geodesic on WGS 84 = 5,554.9 km. Convention fixed: airport reference points, ellipsoidal Earth. A human should confirm against a published great-circle calculator (e.g. Great Circle Mapper).
 - Why include it: A classic estimation question with a wide, fun spread of guesses.
 - Rubric: 4/3/4/4/4 = 19
 
@@ -262,12 +262,12 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 **How old was Mozart when he died?**
 
 - Answer: **35 years old**
-- Explanation: 35. He wrote more than 600 works before then.
+- Explanation: 35. Born January 1756, died December 1791, two months short of his 36th birthday. The Köchel catalogue of his works runs to K. 626, the unfinished Requiem.
 - Reveal moment: 35.
 - Expected correct: estimate
 - Scoring: Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change.
 - Source basis: Wolfgang Amadeus Mozart, born 27 January 1756, died 5 December 1791
-- Verification required: Check the dates against a music reference; verify the '600 works' figure (the Köchel catalogue) or drop it.
+- Verification required: Check birth and death dates against a music reference (e.g. Grove); check that K. 626 is the Requiem's Köchel number.
 - Why include it: Many people guess 50–70, so the reveal lands as a surprise.
 - Rubric: 4/3/5/4/4 = 20
 
@@ -306,7 +306,7 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 
 ### year-cq2-01 · Hard · Film
 
-**India's first full-length feature film, 'Raja Harishchandra', was released**
+**'Raja Harishchandra', widely regarded as India's first full-length feature film, was released**
 
 - Answer: **1913**
 - Explanation: Released in Bombay (Mumbai) in 1913, directed by Dadasaheb Phalke — the start of what became the world's largest film industry.
@@ -422,10 +422,10 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 
 ### geo-cq2-02 · Medium · Coastlines
 
-**Which country has the longest coastline in the world?**
+**By the CIA World Factbook's measure, which country has the longest coastline?**
 
 - Options: **Canada** ✓ · Russia · Australia · Indonesia
-- Explanation: Canada, with about 202,000 km — thanks to tens of thousands of Arctic islands.
+- Explanation: Canada: about 202,000 km by the Factbook's measure, thanks to tens of thousands of Arctic islands. Coastline length depends on how finely you measure it.
 - Known ambiguity: Coastline length depends on measurement scale (the coastline paradox); Canada leads in the standard references.
 - Reveal moment: Canada.
 - Expected correct: 35–55%
@@ -451,16 +451,16 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 
 ### geo-cq2-04 · Hard · Time zones
 
-**Counting its overseas territories, which country uses the most time zones?**
+**Counting overseas territories, which country spans the most standard time zones?**
 
 - Options: **France** ✓ · Russia · United States · United Kingdom
-- Explanation: France: 12 (13 counting its Antarctic claim), thanks to territories from the Pacific to the Indian Ocean. Russia has 11.
-- Known ambiguity: Depends on counting overseas territories, which the prompt states. The US also has 11 counting territories.
+- Explanation: France: 12 standard offsets across its overseas territories (13 with its Antarctic claim). Russia and the US have 11 each; the US count includes uninhabited Pacific islands.
+- Known ambiguity: Counts standard time (not summer time) and includes overseas territories, as the prompt says. Russia's 11 are all on its own territory.
 - Reveal moment: France!
 - Expected correct: 10–25%
 - Scoring: Multiple choice: the one listed answer scores; standard Trivia scoring unchanged.
-- Source basis: Counts of time zones including overseas territories (France 12, or 13 with its Antarctic claim)
-- Verification required: Check current counts for all four countries against a time-zone reference (e.g. the IANA database, or a summary that cites it).
+- Source basis: timeanddate.com 'Which country has the most time zones?'; Guinness World Records 'Country with the most time zones' (France 12, 13 with Adélie Land)
+- Verification required: AI web check 2026-11-07 (not a human fact-check): timeanddate.com and Guinness World Records agree: France 12 (13 with Adélie Land), Russia 11, US 11 with territories. A human should confirm all four counts, including the UK's.
 - Why include it: Nearly everyone answers Russia, so the reveal is a big 'what?'. The qualifier makes the answer defensible.
 - Rubric: 5/4/4/5/4 = 22
 
@@ -522,21 +522,6 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Verification required: Check against a quotation authority that cites the 1897 newspaper (e.g. Quote Investigator or the Mark Twain Project).
 - Why include it: An easy real quote with a true twist: the famous version is a misquote.
 - Rubric: 4/3/4/4/4 = 19
-
-### who-cq2-02 · Hard · Real quotes
-
-**“Let them eat brioche. (The first known printed version of 'Let them eat cake'.)”**
-
-- Options: **Jean-Jacques Rousseau** ✓ · Marie Antoinette · Voltaire · Napoleon Bonaparte
-- Explanation: Rousseau wrote it, about an unnamed 'great princess', when Marie Antoinette was still a child in Austria.
-- Reveal moment: Rousseau wrote it, about an unnamed 'great princess', when Marie Antoinette was still a child in Austria.
-- Expected correct: 15–35%
-- Scoring: Multiple choice of four speakers; standard scoring.
-- Source basis: Jean-Jacques Rousseau, 'Confessions', Book VI (written in the 1760s, published 1782)
-- Verification required: Check against the text of the Confessions and a historian's account of the attribution. The game screen must say 'first printed by'.
-- Why include it: A famous misattribution with a satisfying reveal. Needs the clarified prompt (first printed by), which the engine can't show yet — see engine change E5.
-- Rubric: 5/4/3/4/4 = 20
-- **Blocked:** Who Said That shows only the quote; this item needs a one-line question ('Who first put this in print?'), see engine change E5.
 
 ### who-cq2-03 · Hard · Real quotes
 
@@ -707,13 +692,13 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Accepted (12): argentina, bolivia, brazil, chile, colombia, ecuador, guyana, paraguay, peru, suriname, uruguay, venezuela
 - Reveal moment: All 12, with who found the unique ones.
 - Expected correct: closed set
-- Scoring: Unchanged scoring (20 per valid distinct answer, +20 if nobody else gave it). Proposed: aliases map to one canonical answer, and unlisted answers go to the peer-challenge vote (engine change E2) — needs owner approval.
+- Scoring: Unchanged scoring (20 per valid distinct answer, +20 if nobody else gave it). Proposed matching: E2 v3 (closed sets, category-scoped aliases, no peer vote) — not implemented, needs owner approval.
 - Source basis: UN member states in South America (12)
 - Verification required: Check the list against the UN member list. Rejections are explained on screen: French Guiana (part of France), Falklands (British Overseas Territory).
-- Why include it: A closed set means every correct answer is accepted: no list gaps, no host judgement. Twelve answers is enough for the uniqueness bonus to matter.
+- Why include it: A clean closed set, but only 12 members: the E2 v3 simulation shows about one valid answer in five earns the bonus even with 4 players, so it is practice-only.
 - Rubric: 4/3/5/4/4 = 20
 - Replaces: spr-s4-006
-- Needs fields the engine doesn't have yet: `{"knownNotAccepted":{"french guiana":"An overseas region of France, not a country","falklands":"A British Overseas Territory","falkland islands":"A British Overseas Territory"}}`
+- Needs fields the engine doesn't have yet: `{"knownNotAccepted":{"french guiana":"An overseas region of France, not a country","falklands":"A British Overseas Territory","falkland islands":"A British Overseas Territory"},"closedSet":true,"setSize":12,"recallProfile":"famous-first","definition":"UN member states in South America"}`
 
 ### spr-cq2-02 · Medium · Closed set
 
@@ -722,12 +707,12 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Accepted (12): dog, dragon, goat, horse, monkey, ox, pig, rabbit, rat, rooster, snake, tiger
 - Reveal moment: All 12 in order: Rat, Ox, Tiger, Rabbit, Dragon, Snake, Horse, Goat, Monkey, Rooster, Dog, Pig.
 - Expected correct: closed set
-- Scoring: Unchanged scoring (20 per valid distinct answer, +20 if nobody else gave it). Proposed: aliases map to one canonical answer, and unlisted answers go to the peer-challenge vote (engine change E2) — needs owner approval.
+- Scoring: Unchanged scoring (20 per valid distinct answer, +20 if nobody else gave it). Proposed matching: E2 v3 (closed sets, category-scoped aliases, no peer vote) — not implemented, needs owner approval.
 - Source basis: Chinese zodiac: 12 animals
-- Verification required: Check the list against a cultural reference. Aliases need an editor's decision (see proposedFields).
-- Why include it: Cultural range, a closed set and a natural reveal (the order of the animals). It also shows why aliases are needed.
+- Verification required: Check the 12 animals and each alias reason against a cultural reference. No alias applies outside this category. 'cat' is not accepted (owner ruling).
+- Why include it: Cultural range and a natural reveal, but players recite it in order, so it is practice-only under E2 v3. A Vietnamese-zodiac category could be added separately.
 - Rubric: 4/4/4/4/5 = 21
-- Needs fields the engine doesn't have yet: `{"aliases":{"sheep":"goat","ram":"goat","chicken":"rooster","cockerel":"rooster","hen":"rooster","boar":"pig","hare":"rabbit","buffalo":"ox","cow":"ox","bull":"ox","mouse":"rat"},"needsEditorDecision":{"cat":"The Vietnamese zodiac has the Cat where the Chinese has the Rabbit. Suggest accepting it as an alias of rabbit, so Vietnamese players aren't penalised."}}`
+- Needs fields the engine doesn't have yet: `{"closedSet":true,"setSize":12,"recallProfile":"dominant","definition":"The 12 animals of the Chinese zodiac","aliases":{"sheep":{"to":"goat","reason":"The sign 羊 (yáng) is translated Goat, Sheep or Ram in standard references"},"ram":{"to":"goat","reason":"As above: a standard translation of 羊"},"chicken":{"to":"rooster","reason":"The sign 鸡 (jī) literally means chicken; Rooster is the conventional English name"},"cockerel":{"to":"rooster","reason":"British English for rooster"},"boar":{"to":"pig","reason":"The sign 猪 (zhū) is sometimes translated Boar"},"hare":{"to":"rabbit","reason":"兔 (tù) is translated Rabbit or Hare"},"mouse":{"to":"rat","reason":"鼠 (shǔ) covers both rat and mouse"}},"knownNotAccepted":{"cat":"The Cat replaces the Rabbit in the Vietnamese zodiac, not the Chinese one (owner ruling 2026-11-07)","buffalo":"The Buffalo replaces the Ox in the Vietnamese zodiac, not the Chinese one"}}`
 
 ### spr-cq2-03 · Medium · Closed set
 
@@ -736,12 +721,12 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Accepted (13): ceres, earth, eris, haumea, jupiter, makemake, mars, mercury, neptune, pluto, saturn, uranus, venus
 - Reveal moment: 13 bodies. The rare dwarf planets (Haumea, Makemake, Eris) are where the uniqueness bonus is won.
 - Expected correct: closed set
-- Scoring: Unchanged scoring (20 per valid distinct answer, +20 if nobody else gave it). Proposed: aliases map to one canonical answer, and unlisted answers go to the peer-challenge vote (engine change E2) — needs owner approval.
+- Scoring: Unchanged scoring (20 per valid distinct answer, +20 if nobody else gave it). Proposed matching: E2 v3 (closed sets, category-scoped aliases, no peer vote) — not implemented, needs owner approval.
 - Source basis: IAU: 8 planets and 5 recognised dwarf planets
 - Verification required: Check against the IAU list of recognised dwarf planets; add timeSensitive if the IAU recognises more.
-- Why include it: Easy entry (the planets), with a real reward for people who know more.
+- Why include it: Fun in practice; players recite the planets in order, so the E2 v3 'dominant' profile makes it unsuitable for official play.
 - Rubric: 4/3/5/4/4 = 20
-- Needs fields the engine doesn't have yet: `{"knownNotAccepted":{"moon":"A moon, not a planet","sun":"A star","sedna":"A dwarf-planet candidate the IAU has not formally recognised"}}`
+- Needs fields the engine doesn't have yet: `{"knownNotAccepted":{"moon":"A moon, not a planet","sun":"A star","sedna":"A dwarf-planet candidate the IAU has not formally recognised"},"closedSet":true,"setSize":13,"recallProfile":"dominant","definition":"The 8 planets and the 5 IAU-recognised dwarf planets"}`
 
 ### spr-cq2-04 · Easy · Wordplay
 
@@ -750,12 +735,12 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Accepted (46): ache, awake, bake, brake, break, cornflake, cupcake, drake, earthquake, fake, flake, forsake, hake, handshake, headache, heartache, intake, keepsake, lake, make, mandrake, milkshake, mistake, namesake, opaque, overtake, pancake, partake, quake, rake, rattlesnake, remake, retake, sake, shake, slake, snake, snowflake, stake, steak, sweepstake, take, toothache, undertake, uptake, wake
 - Reveal moment: Shows the rarest valid rhyme found.
 - Expected correct: rule-checkable
-- Scoring: Unchanged scoring (20 per valid distinct answer, +20 if nobody else gave it). Proposed: aliases map to one canonical answer, and unlisted answers go to the peer-challenge vote (engine change E2) — needs owner approval.
+- Scoring: Unchanged scoring (20 per valid distinct answer, +20 if nobody else gave it). Proposed matching: E2 v3 (closed sets, category-scoped aliases, no peer vote) — not implemented, needs owner approval.
 - Source basis: Rhymes with 'cake' (/eɪk/), checkable in a rhyming dictionary
-- Verification required: Every listed word rhymes with 'cake' in standard British and American pronunciation; an editor should read the list aloud once. Unlisted rhymes go to the peer vote.
-- Why include it: Anyone can play, from seven to seventy. The rule can be checked by ear, so a peer vote on unlisted answers is fair.
+- Verification required: Every listed word rhymes with 'cake' in standard British and American pronunciation; an editor should read the list aloud once. Open set: practice only; unlisted rhymes show as 'Not on our list'.
+- Why include it: Anyone can play, from seven to seventy. Open set, so practice only.
 - Rubric: 4/4/4/4/5 = 21
-- Needs fields the engine doesn't have yet: `{"peerChallengeRule":"Accept if it is a real English word that rhymes with 'cake'. Names and made-up words are not accepted."}`
+- Needs fields the engine doesn't have yet: `{"closedSet":false}`
 
 
 ## impostor
@@ -866,3 +851,157 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Why include it: A relatable scene with a built-in comic beat. 'Crisps' is UK English; the US version would use 'chips'.
 - Rubric: 5/5/4/4/5 = 23
 - Needs fields the engine doesn't have yet: `{"acceptedAnswers":["opening crisps","eating crisps in a cinema","opening a crisp packet","quiet crisps","crisps in the cinema"]}`
+
+
+## trivia
+
+### trv-cq2-14 · Hard · History
+
+**'Let them eat cake' (in French, really 'brioche') was first written down by which author, about an unnamed princess?**
+
+- Options: **Jean-Jacques Rousseau** ✓ · Marie Antoinette · Voltaire · Molière
+- Explanation: Rousseau, in his Confessions (Book VI, written in the 1760s), about 'a great princess'. Marie Antoinette was a child in Austria then, and there is no record that she ever said it.
+- Reveal moment: Rousseau — the line was pinned on Marie Antoinette later, by people who wanted her to look heartless.
+- Expected correct: 15–35%
+- Source basis: Jean-Jacques Rousseau, 'Confessions', Book VI (written 1765-69, published 1782); Encyclopaedia Britannica, 'Did Marie-Antoinette really say "Let them eat cake"?'
+- Verification required: AI web check 2026-11-07 (not a human fact-check): Britannica confirms the Book VI 'great princess' anecdote, the brioche wording, and no evidence Marie Antoinette said it. A human should check the Confessions text and dating.
+- Why include it: A famous misattribution with a satisfying reveal. Rewritten from who-cq2-02 so the question ('first written down by') is on screen without engine change E5.
+- Rubric: 5/4/4/4/4 = 21
+- Replaces: who-cq2-02
+
+
+## category-sprint
+
+### spr-cq2-05 · Easy · Closed set
+
+**US states**
+
+- Accepted (50): alabama, alaska, arizona, arkansas, california, colorado, connecticut, delaware, florida, georgia, hawaii, idaho, illinois, indiana, iowa, kansas, kentucky, louisiana, maine, maryland, massachusetts, michigan, minnesota, mississippi, missouri, montana, nebraska, nevada, new hampshire, new jersey, new mexico, new york, north carolina, north dakota, ohio, oklahoma, oregon, pennsylvania, rhode island, south carolina, south dakota, tennessee, texas, utah, vermont, virginia, washington, west virginia, wisconsin, wyoming
+- Reveal moment: All 50 on screen, with the states only one player found highlighted.
+- Expected correct: closed set
+- Scoring: Unchanged scoring (20 per valid distinct answer, +20 if nobody else gave it). Proposed matching: E2 v3 (closed sets, category-scoped aliases, no peer vote) — not implemented, needs owner approval.
+- Source basis: The 50 states of the United States
+- Verification required: Computed list of the 50 state names (same list as trv-cq2-12's letter check). A human should spot-check spelling.
+- Why include it: The E2 v3 example of an official-ready closed set: 50 members, famous-first recall, suitable for 4-10 players by the simulation (min 40 at 10 players).
+- Rubric: 4/3/5/4/4 = 20
+- Needs fields the engine doesn't have yet: `{"closedSet":true,"setSize":50,"recallProfile":"famous-first","definition":"The 50 US states (not DC or territories)","knownNotAccepted":{"district of columbia":"A federal district, not a state","washington dc":"A federal district, not a state","puerto rico":"A US territory, not a state","guam":"A US territory, not a state"}}`
+
+
+## trivia
+
+### trv-cq2-21 · Medium · Gaming
+
+**Minecraft's Creeper was a happy accident. What was Notch trying to make when he mixed up the model's length and height?**
+
+- Options: **A pig** ✓ · A zombie · A tree · A sheep
+- Explanation: A pig. Markus 'Notch' Persson swapped the dimensions, got a tall, thin, four-legged mob instead, and kept it as a monster.
+- Reveal moment: A pig! Gaming's most famous villain started as a bacon bug.
+- Expected correct: 25–45%
+- Source basis: 'Minecraft: The Story of Mojang' (2012 documentary); Wikipedia 'Creeper (Minecraft)'
+- Verification required: AI web check 2026-11-07 (not a human fact-check): Wikipedia's Creeper article and reporting on the 2012 documentary agree (pig model, length and height swapped). A human should confirm against the documentary or Notch's own statement.
+- Why include it: Gaming culture with a funny origin story; non-gamers can still guess, and Minecraft players get to explain it.
+- Rubric: 5/4/5/4/5 = 23
+
+### trv-cq2-22 · Medium · Internet
+
+**The first video ever uploaded to YouTube (2005) shows co-founder Jawed Karim at a zoo. What does he talk about?**
+
+- Options: **Elephants' long trunks** ✓ · A sleeping lion · Penguins at feeding time · A giraffe stealing his hat
+- Explanation: 'Me at the zoo': 19 seconds at San Diego Zoo, where Karim notes the elephants have 'really, really, really long trunks'. That's the whole video.
+- Reveal moment: Elephants. Internet history began with 19 seconds of trunk appreciation.
+- Expected correct: 35–55%
+- Source basis: 'Me at the zoo', uploaded 23 April 2005 by Jawed Karim (Wikipedia; NBC News 20th-anniversary report)
+- Verification required: AI web check 2026-11-07 (not a human fact-check): Wikipedia and NBC confirm the date, uploader, San Diego Zoo and elephants; length is reported as 18 or 19 seconds. A human should watch the video to confirm the quoted line.
+- Why include it: Internet history everyone uses but few know; the reveal is gloriously mundane.
+- Rubric: 5/4/5/4/4 = 22
+
+### trv-cq2-23 · Easy · Film & anime
+
+**In which Studio Ghibli film do a girl's parents turn into pigs after eating food meant for spirits?**
+
+- Options: **Spirited Away** ✓ · My Neighbor Totoro · Howl's Moving Castle · Princess Mononoke
+- Explanation: Spirited Away (2001). Chihiro works in a bathhouse for spirits to save her parents; the film won the Oscar for Best Animated Feature.
+- Reveal moment: Spirited Away — and every option is a Ghibli classic worth a watch.
+- Expected correct: 55–75%
+- Source basis: Studio Ghibli, 'Spirited Away' (2001); Academy Awards database (Best Animated Feature, 2003 ceremony)
+- Verification required: Check the plot point and the Oscar (75th Academy Awards, 2003) against the Academy database.
+- Why include it: Anime that crosses over to non-fans; an accessible opener with real distractors.
+- Rubric: 4/3/5/4/4 = 20
+
+
+## closest-wins
+
+### cls-cq2-21 · Medium · Music
+
+**In 2019, 'Old Town Road' by Lil Nas X set a record for consecutive weeks at No. 1 on the US Billboard Hot 100. How many weeks?**
+
+- Answer: **19 weeks**
+- Explanation: 19 weeks in a row, beating the 16 of 'Despacito' and 'One Sweet Day'. Shaboozey's 'A Bar Song (Tipsy)' matched 19 weeks at No. 1 in 2024, but not in a row.
+- Reveal moment: 19 weeks — most of summer 2019.
+- Expected correct: estimate
+- Scoring: Rank-based Closest Wins scoring (closest 100, then 70/50/25); no change.
+- Source basis: Billboard Hot 100 chart history: 'Old Town Road' No. 1 from the chart dated 13 April to 17 August 2019
+- Verification required: AI web check 2026-11-07 (not a human fact-check): Billboard-based reports (Stereogum, CBC) confirm 19 weeks and the previous 16-week record; reports from Nov 2024 confirm Shaboozey's non-consecutive 19. The answer itself is fixed history; the comparison line should be re-checked if a song passes 19.
+- Why include it: Music history young adults lived through; guesses spread from 5 to 30, so ranking is meaningful.
+- Rubric: 4/4/4/4/4 = 20
+
+### cls-cq2-22 · Easy · Gaming
+
+**How many Pokémon could you register in the Pokédex of the original Pokémon Red and Blue, counting Mew?**
+
+- Answer: **151 Pokémon**
+- Explanation: 151 — the original 'Gotta catch 'em all' target. Mew, number 151, couldn't be caught in normal play; most players got it at official events.
+- Reveal moment: 151. Somewhere in the room, a 90s kid is very smug.
+- Expected correct: fans exact; others estimate
+- Scoring: Rank-based Closest Wins scoring (closest 100, then 70/50/25); exact guesses tie for the top award; no change.
+- Source basis: Pokémon Red and Blue (Game Freak / Nintendo, 1996 Japan as Red and Green; 1998 US): Kanto Pokédex of 151
+- Verification required: Check the Kanto Pokédex count and Mew's event distribution against The Pokémon Company or Bulbapedia.
+- Why include it: Pure nostalgia: fans nail it, everyone else can estimate, and the reveal starts stories.
+- Rubric: 5/3/5/3/5 = 21
+
+
+## guess-the-year
+
+### year-cq2-21 · Easy · Gaming
+
+**The Nintendo Wii went on sale**
+
+- Answer: **2006**
+- Explanation: November 2006 in North America, December 2006 in Japan and Europe. Wii Sports bowling turned living rooms (and grandparents) into gamers.
+- Reveal moment: 2006.
+- Expected correct: 40–60% within 2 years
+- Scoring: Guess the Year scoring unchanged: max(0, 100 − 10 × |guess − year|).
+- Source basis: Nintendo Wii launch: 19 Nov 2006 (North America), 2 Dec 2006 (Japan), 8 Dec 2006 (Europe)
+- Verification required: AI web check 2026-11-07 (not a human fact-check): Mario Wiki and Wikipedia's Wii launch article agree on 19 Nov 2006 (NA) and 2 Dec 2006 (JP). A human should confirm the Europe date against Nintendo.
+- Why include it: 2000s nostalgia most players have a personal memory of.
+- Rubric: 4/3/5/4/5 = 21
+
+### year-cq2-22 · Medium · Internet
+
+**The Ice Bucket Challenge went viral, raising money for ALS research**
+
+- Answer: **2014**
+- Explanation: Summer 2014. Millions filmed themselves under ice water; ALS charities raised more than $100 million in a few weeks.
+- Reveal moment: 2014.
+- Expected correct: 40–60% within 2 years
+- Scoring: Guess the Year scoring unchanged: max(0, 100 − 10 × |guess − year|).
+- Source basis: Ice Bucket Challenge, viral July–August 2014 (Wikipedia; Nature, 2017, 'Was it worth it?')
+- Verification required: AI web check 2026-11-07 (not a human fact-check): Wikipedia and a Nature feature date it to July–August 2014; reported totals vary ($100M–$220M) so the context says 'more than $100 million'. A human should confirm against the ALS Association.
+- Why include it: A viral moment with a feel-good ending; most players remember their feed that summer.
+- Rubric: 4/3/5/4/5 = 21
+
+
+## impostor
+
+### imp-cq2-21 · Easy · Modern life
+
+**Group chat**
+
+- Impostor sees only the hint: **On your phone**
+- Reveal moment: The impostor is revealed at the end of the vote.
+- Expected correct: n/a (social)
+- Scoring: Practice-only game; no Cup points.
+- Source basis: original-creative
+- Verification required: Editorial read-through only.
+- Why include it: Everyone has strong feelings about a group chat, so clues are funny ('muted', 'forty unread') while the impostor bluffs with 'apps' and 'notifications'.
+- Rubric: 5/4/5/4/5 = 23

@@ -82,7 +82,9 @@
     "content:audit": "tsx scripts/content-quality/audit.ts",
     "content:pilot": "tsx scripts/content-quality/check-pilot.ts",
     "content:pilot:render": "tsx scripts/content-quality/render-pilot.ts",
-    "content:review-batch": "tsx scripts/content-quality/review-batch.ts"
+    "content:review-batch": "tsx scripts/content-quality/review-batch.ts",
+    "content:sprint-sim": "tsx scripts/content-quality/sprint-sim-report.ts",
+    "content:pilot-diff": "tsx scripts/content-quality/pilot-diff.ts"
   },
   "type": "module",
   "version": "0.1.0"

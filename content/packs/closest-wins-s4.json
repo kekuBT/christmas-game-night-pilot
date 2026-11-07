@@ -698,8 +698,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): the answer is a range (4.5-6 m), so close guesses rank arbitrarily."
    },
    "source": {
     "kind": "common-knowledge",
@@ -966,8 +966,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): the answer is a range (146-154 °C), so close guesses rank arbitrarily."
    },
    "source": {
     "kind": "common-knowledge",

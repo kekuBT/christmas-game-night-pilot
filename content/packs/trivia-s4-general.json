@@ -688,8 +688,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): same fact as geo-legacy-5 (Italy's boot shape)."
    },
    "source": {
     "kind": "common-knowledge",
@@ -938,8 +938,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): the answer (Berlin) is in the question."
    },
    "source": {
     "kind": "common-knowledge",
@@ -1313,8 +1313,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): same fact as cls-legacy-6 (26 letters)."
    },
    "source": {
     "kind": "common-knowledge",
@@ -3115,7 +3115,7 @@
    "eligibility": "official",
    "review": {
     "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. 2026-11-07 Audit Batch A A8: invented distractor 'Proton cloud' replaced by 'Electron cloud'."
    },
    "source": {
     "kind": "common-knowledge",
@@ -3126,7 +3126,7 @@
    "options": [
     "Electron",
     "Nucleus",
-    "Proton cloud",
+    "Electron cloud",
     "Shell"
    ],
    "answer": "Nucleus",
@@ -3214,8 +3214,8 @@
    "language": "en",
    "eligibility": "official",
    "review": {
-    "status": "provisional",
-    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use."
+    "status": "rejected",
+    "notes": "Authored in Sprint 4 by Claude; self-checked against the cited basis; awaiting human editorial review before official use. Retired 2026-11-07 (Audit Batch A, objective defect): the everyday name 'Great Wall of China' gives the answer away."
    },
    "source": {
     "kind": "common-knowledge",

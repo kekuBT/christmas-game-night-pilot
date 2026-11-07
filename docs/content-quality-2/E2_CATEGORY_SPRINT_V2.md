@@ -1,5 +1,7 @@
 # E2 v2 — Category Sprint adjudication (revised proposal)
 
+> **Superseded by [E2_CATEGORY_SPRINT_V3.md](E2_CATEGORY_SPRINT_V3.md)** after the owner's review (set sizes re-derived by simulation; zodiac *cat* rejected as an alias; aliases category-scoped). Kept unchanged below for history.
+
 **Status:** proposal for owner review. Nothing here is implemented. Category Sprint scoring is unchanged.
 
 **What changed from v1:** the peer vote is withdrawn, as the owner ruled. Competing players never decide whether another player's answer counts.

@@ -32,6 +32,16 @@
 - **Audit batch A:** [audit-batches/BATCH_A_FACTUAL_AND_MECHANICAL.md](audit-batches/BATCH_A_FACTUAL_AND_MECHANICAL.md). Factual and mechanical defects only, with nothing applied.
 - The "14 unenterable official items" finding below is **resolved**.
 
+## Update — owner review applied (branch `claude/cq2-editorial-revision`)
+
+Start with [REVISION_REPORT.md](REVISION_REPORT.md), a one-page summary. It covers:
+- **Review batch 02:** 21 items re-balanced towards modern, nostalgic and playful content. See [review-batch-02/](review-batch-02/README.md), including before/after.
+- **E2 v3:** the final Category Sprint design, with a simulated set-size policy. See [E2_CATEGORY_SPRINT_V3.md](E2_CATEGORY_SPRINT_V3.md).
+- **Audit Batch A:** corrections applied as a reviewable change. See [audit-batches/BATCH_A_APPLIED.md](audit-batches/BATCH_A_APPLIED.md).
+- **The audience and personality section** of the standard: [EDITORIAL_STANDARD.md §5a](EDITORIAL_STANDARD.md).
+
+Nothing is approved, merged or deployed.
+
 ## In one minute (original findings, 88995ae)
 
 - **Quality, not quantity, is the gap.**
