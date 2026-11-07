@@ -215,6 +215,8 @@ export interface QuizQuestion {
   speakers?: string[];
   /** Only present in finished-game projections (post-reveal). Never while playing. */
   correctIndex?: number;
+  /** E3: only with correctIndex (finished games). */
+  explanation?: string;
 }
 
 /** Game-specific state, as projected by the server. All fields optional: each game uses a subset. */

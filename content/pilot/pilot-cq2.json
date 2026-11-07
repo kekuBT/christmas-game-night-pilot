@@ -1518,7 +1518,8 @@
      "Winston Churchill",
      "Groucho Marx"
     ],
-    "answer": "Mark Twain"
+    "answer": "Mark Twain",
+    "explanation": "Mark Twain, 1897 — usually misquoted as 'greatly exaggerated'."
    },
    "editorial": {
     "expectedCorrect": "70–85%",
@@ -1532,10 +1533,7 @@
      "distractors": 4,
      "social": 4
     },
-    "scoring": "Multiple choice of four speakers; standard scoring.",
-    "proposedFields": {
-     "explanation": "Mark Twain, 1897 — usually misquoted as 'greatly exaggerated'."
-    }
+    "scoring": "Multiple choice of four speakers; standard scoring."
    }
   },
   {
@@ -1564,7 +1562,8 @@
      "Voltaire",
      "Napoleon Bonaparte"
     ],
-    "answer": "Jean-Jacques Rousseau"
+    "answer": "Jean-Jacques Rousseau",
+    "explanation": "Rousseau wrote it, about an unnamed 'great princess', when Marie Antoinette was still a child in Austria."
    },
    "editorial": {
     "expectedCorrect": "15–35%",
@@ -1579,9 +1578,6 @@
      "social": 4
     },
     "scoring": "Multiple choice of four speakers; standard scoring.",
-    "proposedFields": {
-     "explanation": "Rousseau wrote it, about an unnamed 'great princess', when Marie Antoinette was still a child in Austria."
-    },
     "blockedBy": "Who Said That shows only the quote; this item needs a one-line question ('Who first put this in print?'), see engine change E5."
    }
   },
@@ -1611,7 +1607,8 @@
      "Fred Haise",
      "Neil Armstrong"
     ],
-    "answer": "Jack Swigert"
+    "answer": "Jack Swigert",
+    "explanation": "Jack Swigert said it first; Jim Lovell repeated it. The film changed it to 'we have a problem'."
    },
    "editorial": {
     "expectedCorrect": "15–30%",
@@ -1625,10 +1622,7 @@
      "distractors": 5,
      "social": 4
     },
-    "scoring": "Multiple choice of four speakers; standard scoring.",
-    "proposedFields": {
-     "explanation": "Jack Swigert said it first; Jim Lovell repeated it. The film changed it to 'we have a problem'."
-    }
+    "scoring": "Multiple choice of four speakers; standard scoring."
    }
   },
   {
@@ -1657,7 +1651,8 @@
      "Mike Tyson",
      "Pelé"
     ],
-    "answer": "Muhammad Ali"
+    "answer": "Muhammad Ali",
+    "explanation": "Muhammad Ali — with help from his cornerman Drew 'Bundini' Brown."
    },
    "editorial": {
     "expectedCorrect": "75–90%",
@@ -1671,10 +1666,7 @@
      "distractors": 4,
      "social": 4
     },
-    "scoring": "Multiple choice of four speakers; standard scoring.",
-    "proposedFields": {
-     "explanation": "Muhammad Ali — with help from his cornerman Drew 'Bundini' Brown."
-    }
+    "scoring": "Multiple choice of four speakers; standard scoring."
    }
   },
   {

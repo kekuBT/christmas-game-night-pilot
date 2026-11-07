@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { PlayerGame, PublicGame, RegistryGame } from "../types.js";
 import { outcomeLines, participationLine } from "../ui/mchezo/lib/lifecycle.js";
+import { AnswerReview, type ReviewRow } from "./mchezo/AnswerReview.js";
 
 /**
  * Show Mode phase screens (M6.2). Intro auto-advances after a few seconds
@@ -36,7 +37,7 @@ export function ShowWaiting(props: { game: PublicGame; title: string }) {
   </div>;
 }
 
-export function ShowResults(props: { game: PlayerGame; title: string; nameOf: (id: string) => string; onBack: () => void; games: RegistryGame[]; official?: boolean; youId?: string }) {
+export function ShowResults(props: { game: PlayerGame; title: string; nameOf: (id: string) => string; onBack: () => void; games: RegistryGame[]; official?: boolean; youId?: string; review?: ReviewRow[] }) {
   const outcome = outcomeLines(props.game.outcome, props.official);
   const scores = Object.entries(props.game.rawScores ?? {}).sort((a, b) => (b[1] as number) - (a[1] as number));
   const top = scores.length > 0 ? scores[0]![1] : null;
@@ -56,6 +57,8 @@ export function ShowResults(props: { game: PlayerGame; title: string; nameOf: (i
       <p className="muted" data-testid="mz-outcome-counts">{outcome.counts}</p>
       {outcome.note && <p className="muted" data-testid="mz-outcome-note">{outcome.note}</p>}
     </div> : <p className="muted">{props.official ? "Official game — these points count toward the Family Cup." : "Practice game — no championship points."}</p>}
+    {/* E3: answers and explanations, now that every answer is locked. */}
+    {props.review && <AnswerReview rows={props.review} />}
     <button data-testid="show-back-to-lobby" onClick={props.onBack}>Back to lobby</button>
   </div>;
 }

@@ -59,7 +59,7 @@ const BaseItem = {
 const fourOptions = z.array(text(80)).length(4);
 
 export const TriviaItem = z.object({ ...BaseItem, prompt: text(160), options: fourOptions, answer: text(80), explanation: text(240) }).strict();
-export const WhoSaidItem = z.object({ ...BaseItem, quote: text(160), speakers: fourOptions, answer: text(80) }).strict();
+export const WhoSaidItem = z.object({ ...BaseItem, quote: text(160), speakers: fourOptions, answer: text(80), explanation: text(240).optional() }).strict();
 export const GeographyItem = z.object({
   ...BaseItem,
   mode: z.enum(["flag", "outline", "capital", "region", "higher-lower", "distance", "landmark"]),

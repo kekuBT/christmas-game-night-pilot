@@ -514,6 +514,7 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 **“The report of my death was an exaggeration.”**
 
 - Options: **Mark Twain** ✓ · Oscar Wilde · Winston Churchill · Groucho Marx
+- Explanation: Mark Twain, 1897 — usually misquoted as 'greatly exaggerated'.
 - Reveal moment: Mark Twain, 1897 — usually misquoted as 'greatly exaggerated'.
 - Expected correct: 70–85%
 - Scoring: Multiple choice of four speakers; standard scoring.
@@ -521,13 +522,13 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Verification required: Check against a quotation authority that cites the 1897 newspaper (e.g. Quote Investigator or the Mark Twain Project).
 - Why include it: An easy real quote with a true twist: the famous version is a misquote.
 - Rubric: 4/3/4/4/4 = 19
-- Needs fields the engine doesn't have yet: `{"explanation":"Mark Twain, 1897 — usually misquoted as 'greatly exaggerated'."}`
 
 ### who-cq2-02 · Hard · Real quotes
 
 **“Let them eat brioche. (The first known printed version of 'Let them eat cake'.)”**
 
 - Options: **Jean-Jacques Rousseau** ✓ · Marie Antoinette · Voltaire · Napoleon Bonaparte
+- Explanation: Rousseau wrote it, about an unnamed 'great princess', when Marie Antoinette was still a child in Austria.
 - Reveal moment: Rousseau wrote it, about an unnamed 'great princess', when Marie Antoinette was still a child in Austria.
 - Expected correct: 15–35%
 - Scoring: Multiple choice of four speakers; standard scoring.
@@ -535,7 +536,6 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Verification required: Check against the text of the Confessions and a historian's account of the attribution. The game screen must say 'first printed by'.
 - Why include it: A famous misattribution with a satisfying reveal. Needs the clarified prompt (first printed by), which the engine can't show yet — see engine change E5.
 - Rubric: 5/4/3/4/4 = 20
-- Needs fields the engine doesn't have yet: `{"explanation":"Rousseau wrote it, about an unnamed 'great princess', when Marie Antoinette was still a child in Austria."}`
 - **Blocked:** Who Said That shows only the quote; this item needs a one-line question ('Who first put this in print?'), see engine change E5.
 
 ### who-cq2-03 · Hard · Real quotes
@@ -543,6 +543,7 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 **“Okay, Houston, we've had a problem here.”**
 
 - Options: **Jack Swigert** ✓ · Jim Lovell · Fred Haise · Neil Armstrong
+- Explanation: Jack Swigert said it first; Jim Lovell repeated it. The film changed it to 'we have a problem'.
 - Reveal moment: Jack Swigert said it first; Jim Lovell repeated it. The film changed it to 'we have a problem'.
 - Expected correct: 15–30%
 - Scoring: Multiple choice of four speakers; standard scoring.
@@ -550,13 +551,13 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Verification required: Check against the NASA transcript (exact wording and speaker).
 - Why include it: The film memory points to Lovell, so the reveal surprises even confident players. Three of the options were really on board.
 - Rubric: 4/4/4/5/4 = 21
-- Needs fields the engine doesn't have yet: `{"explanation":"Jack Swigert said it first; Jim Lovell repeated it. The film changed it to 'we have a problem'."}`
 
 ### who-cq2-04 · Easy · Real quotes
 
 **“Float like a butterfly, sting like a bee.”**
 
 - Options: **Muhammad Ali** ✓ · Bruce Lee · Mike Tyson · Pelé
+- Explanation: Muhammad Ali — with help from his cornerman Drew 'Bundini' Brown.
 - Reveal moment: Muhammad Ali — with help from his cornerman Drew 'Bundini' Brown.
 - Expected correct: 75–90%
 - Scoring: Multiple choice of four speakers; standard scoring.
@@ -564,7 +565,6 @@ Rubric = author's self-score: Entertainment / Creativity / Clarity / Distractors
 - Verification required: Check against a biography or sports-history source.
 - Why include it: An easy, joyful one that every generation knows.
 - Rubric: 4/3/5/4/4 = 20
-- Needs fields the engine doesn't have yet: `{"explanation":"Muhammad Ali — with help from his cornerman Drew 'Bundini' Brown."}`
 
 
 ## word-connections

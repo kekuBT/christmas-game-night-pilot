@@ -1715,7 +1715,7 @@ export class RoomEngine {
       case "geography":
         return { questions: this.quizQuestionsView(g) };
       case "guess-the-year":
-        return { events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })) };
+        return { events: this.yearEventsView(g) };
       case "word-connections":
         return this.connectionsView(g);
       case "category-sprint":
@@ -1742,7 +1742,7 @@ export class RoomEngine {
         return { questions: this.quizQuestionsView(g), myAnswers: (g.extra as { answers: Record<string, Record<string, number>> }).answers[actorId] ?? {} };
       case "guess-the-year":
         return {
-          events: ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event })),
+          events: this.yearEventsView(g),
           myGuesses: (g.extra as { guesses: Record<string, Record<string, number>> }).guesses[actorId] ?? {},
         };
       case "word-connections":
@@ -1754,17 +1754,30 @@ export class RoomEngine {
     }
   }
 
-  /** Quiz questions: prompt + options; the correct index only after a Trivia game finishes. */
+  /**
+   * Quiz questions: prompt + options. E3: the correct answer and its
+   * explanation only once the game has FINISHED, when every player's
+   * answers are locked. These are independent games (each player moves at
+   * their own pace), so a per-question reveal during play could give the
+   * answer to someone still on that question. Only one game plays at a
+   * time per room, and practice retires any official item it uses, so a
+   * finished game can't reveal another game's live or future question.
+   */
   private quizQuestionsView(g: GameInstance): Record<string, unknown>[] {
+    const reveal = g.status === "finished";
     return ((g.extra as { questions: Record<string, unknown>[] }).questions ?? []).map((q) => ({
       id: q["id"],
       prompt: q["prompt"] ?? q["quote"],
       // Who Said That stores its options as `speakers` (the option list, not a secret).
       options: q["options"] ?? q["speakers"],
-      // Post-finish only, trivia only: the correct answer is public once
-      // the game is finished (scores already are). Never while playing.
-      ...(g.status === "finished" && g.gameId === "trivia" ? { correctIndex: q["correctIndex"] } : {}),
+      ...(reveal ? { correctIndex: q["correctIndex"], ...(typeof q["explanation"] === "string" ? { explanation: q["explanation"] } : {}) } : {}),
     }));
+  }
+
+  /** Guess the Year events; E3: the year and its context only once the game has finished. */
+  private yearEventsView(g: GameInstance): Record<string, unknown>[] {
+    const reveal = g.status === "finished";
+    return ((g.extra as { events: YearEvent[] }).events ?? []).map((e) => ({ id: e.id, event: e.event, ...(reveal ? { year: e.year, context: e.context } : {}) }));
   }
 
   private sprintView(g: GameInstance): Record<string, unknown> {

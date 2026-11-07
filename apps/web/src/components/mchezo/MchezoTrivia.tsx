@@ -272,6 +272,7 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
             <ResultCard correct={correct} correctLabel={correctIdx !== undefined ? q.options[correctIdx] ?? "" : "—"} points={earned} rank={meRank?.rank} />
           </div>
           <AnswerDistribution options={q.options.map((label, i) => ({ id: String(i), label }))} counts={countsRecord} correctId={correctIdx === undefined ? "" : String(correctIdx)} total={countsTotal} />
+          {q.explanation && <p className="mz-review__why" data-testid="mz-reveal-explanation">{q.explanation}</p>}
           <p className="mz-foot">This question: {myChoice === undefined ? "you didn't answer" : `you answered ${q.options[myChoice] ?? "—"}`} — {correct === null ? "no result" : correct ? `correct, +${earned ?? 0} points` : "not correct, +0 points"}.</p>
           {totalLine}
           {nav}

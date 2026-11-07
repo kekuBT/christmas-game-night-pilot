@@ -94,10 +94,25 @@ export function closestTotalScores(state: ClosestState): Record<string, number> 
   return total;
 }
 
+/**
+ * E3: a question's answer is revealed once it has CLOSED (everyone guessed,
+ * or its time ran out). Guesses can't change after that (closed phases
+ * refuse actions), and the questions still to come are never included.
+ * Per player: only their own guess, never anyone else's.
+ */
+export function closedQuestions(state: ClosestState, actorId: string): Record<string, unknown>[] {
+  const closed = state.phase === "finished" ? state.questions.length : state.questionIndex;
+  return state.questions.slice(0, closed).map((q) => ({
+    id: q.id, prompt: q.prompt, unit: q.unit, answer: q.answer, explanation: q.source,
+    ...(actorId ? { myGuess: state.guesses[q.id]?.[actorId], myAbstained: (state.abstained?.[q.id] ?? []).includes(actorId) } : {}),
+  }));
+}
+
 export function projectClosest(state: ClosestState, actorId: string, _isTv: boolean): Record<string, unknown> {
   const q = state.questions[state.questionIndex]!;
   const revealed = state.phase === "finished";
   return {
+    revealed: closedQuestions(state, actorId),
     phase: state.phase,
     questionIndex: state.questionIndex,
     prompt: q.prompt,

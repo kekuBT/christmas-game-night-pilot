@@ -58,3 +58,12 @@ export function connectionsBoard(shownWords) {
   const it = items.find((x) => x.gameId === "word-connections" && x.groups.every((g, i) => g.words === words[i]));
   return it.groups.map((g) => ({ name: g.name, words: g.words }));
 }
+
+/** A content item (any game) matched by the prompt shown on screen; E3 drivers read its answer/explanation. */
+export function itemFor(gameId, shownPrompt) {
+  const p = norm(shownPrompt);
+  const hits = items.filter((it) => it.gameId === gameId && norm(it.prompt ?? it.quote ?? it.event ?? "") !== "" && p.includes(norm(it.prompt ?? it.quote ?? it.event)));
+  if (hits.length === 0) throw new Error(`oracle: no ${gameId} item matches "${shownPrompt.slice(0, 80)}"`);
+  hits.sort((a, b) => norm(b.prompt ?? b.quote ?? b.event).length - norm(a.prompt ?? a.quote ?? a.event).length);
+  return hits[0];
+}

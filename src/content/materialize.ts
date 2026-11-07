@@ -57,7 +57,7 @@ export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { s
         answers: {}, times: {},
       };
     case "who-said-that":
-      return { questions: items.map((li): WhoSaidQuestion => { const it = as<"who-said-that">(li); const m = mc(it.speakers, it.answer, rng); return { id: it.id, quote: it.quote, speakers: m.options, correctIndex: m.correctIndex }; }), answers: {} };
+      return { questions: items.map((li): WhoSaidQuestion => { const it = as<"who-said-that">(li); const m = mc(it.speakers, it.answer, rng); return { id: it.id, quote: it.quote, speakers: m.options, correctIndex: m.correctIndex, ...(it.explanation ? { explanation: it.explanation } : {}) }; }), answers: {} };
     case "geography":
       return { questions: items.map((li): GeographyQuestion => { const it = as<"geography">(li); const mode = it.mode === "landmark" ? "region" : it.mode; return { id: it.id, mode, prompt: it.prompt, ...mc(it.options, it.answer, rng), explanation: it.explanation }; }), answers: {} };
     case "guess-the-year":

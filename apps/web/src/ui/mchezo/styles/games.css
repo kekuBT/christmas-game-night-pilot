@@ -119,3 +119,16 @@
 .mz-num__field { display: block; margin-top: 8px; }
 .mz-num__field input { width: 100%; font-size: 20px; font-variant-numeric: tabular-nums; }
 .mz-num__error { min-height: 20px; margin: 6px 0; font-size: 14px; font-weight: 700; color: var(--mz-answer-1); }
+
+/* ------------------------------------------- answer review (E3, CQ2) */
+/* Also used inside the older results card and TV dashboard, so every
+   colour falls back to the surrounding text colour. */
+.mz-review { margin: 16px 0; text-align: left; }
+.mz-review__title { margin: 0 0 8px; font-size: 18px; }
+.mz-review__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.mz-review__item { border-radius: 14px; padding: 10px 14px; border: 1.5px solid var(--mz-line, currentColor); overflow-wrap: anywhere; }
+.mz-review__prompt { margin: 0 0 4px; font-weight: 700; }
+.mz-review__answer, .mz-review__mine { margin: 0; }
+.mz-review__why { margin: 6px 0 0; font-size: 14px; line-height: 1.4; opacity: .85; }
+.mz-review--tv .mz-review__item { font-size: 20px; }
+.mz-review--tv .mz-review__why { font-size: 17px; }

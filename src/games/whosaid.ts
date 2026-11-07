@@ -3,6 +3,8 @@ export interface WhoSaidQuestion {
   quote: string;
   speakers: string[];
   correctIndex: number;
+  /** Reveal text, shown only once the game has finished (E3). */
+  explanation?: string;
 }
 
 /**

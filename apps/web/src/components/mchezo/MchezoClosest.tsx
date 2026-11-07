@@ -35,6 +35,7 @@
 import { AbstainControl, MchezoWaiting, NumericGuess, PhoneScreen } from "../../ui/mchezo/index.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 import { formatNumeric } from "../../../../../src/shared/numericInput.js";
+import { AnswerReview, reviewRows } from "./AnswerReview.js";
 
 export interface MchezoClosestDeps {
   game: PlayerGame;
@@ -54,6 +55,9 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
   // Sprint 3: no host skip here. The server ends the game at its deadline
   // by itself; the waiting view shows the countdown (GameClock).
   const done = st.myGuess !== undefined || st.myAbstained === true;
+  // E3: the previous question's answer, once it has closed (server-revealed).
+  const last = reviewRows(game, game).slice(-1);
+  const lastCard = <div style={{ padding: "0 16px" }}><AnswerReview rows={last} title="Last question" testId="mz-closest-last" /></div>;
   const abstainedNow = game.abstained === true || st.myAbstained === true;
 
   if (done) {
@@ -65,6 +69,7 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
     return (
       <PhoneScreen label={title}>
         <p className="mz-kicker">{title}</p>
+        {lastCard}
         <div className="mz-card">
           <p><b>{st.prompt}</b>{st.unit ? ` (${st.unit})` : ""}</p>
           <p>{st.myAbstained ? "Abstained on this question." : `Your guess: ${formatNumeric(st.myGuess ?? 0)}`}</p>
@@ -80,6 +85,7 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
   return (
     <PhoneScreen label={title}>
       <p className="mz-kicker">{title}</p>
+      {lastCard}
       <div className="mz-card">
         <p><b>{st.prompt}</b>{st.unit ? ` (${st.unit})` : ""}</p>
         <NumericGuess
