@@ -48,6 +48,8 @@ Most frequent findings:
 
 ## 2. Integrity defect: correct answers that can't be entered (urgent)
 
+> **Resolved on `claude/cq2-integrity-fixes` (E1, owner-approved).** The input now accepts every intended answer, the server validates guesses, and selection skips any unenterable item. The text below describes the state at 88995ae.
+
 The client caps numeric input. In `apps/web/src/components/mchezo/MchezoYear.tsx`, Guess the Year accepts 1896–2025. In `MchezoClosest.tsx`, Closest Wins accepts 0–1000, and `NumericGuess` truncates to whole numbers. The server accepts any finite number, so the limit is in the client only.
 
 - **Closest Wins:** 22 of 59 items have answers outside 0–1000 or with decimals. **14 of them are official-eligible today**:

@@ -18,7 +18,21 @@
 | 6 | Editorial tools and approval workflow | [WORKFLOW.md](WORKFLOW.md) |
 | 7 | Engine-level changes needed | [ENGINE_CHANGES.md](ENGINE_CHANGES.md) |
 
-## In one minute
+## Update — owner decisions applied (branch `claude/cq2-integrity-fixes`)
+
+- **E1 shipped.**
+  - Numeric input now accepts every intended answer: Year 1000–2100; Closest 0 to a trillion with 3 decimals; no clamping.
+  - The server validates guesses and refuses guesses from outdated tabs.
+  - Selection skips any unenterable item.
+- **E3 shipped.**
+  - Answers and explanations appear only after answers are locked: at game end for independent games, and per closed question for Closest Wins. This covers the phone and the TV dashboard.
+  - Server tests prove nothing is exposed earlier.
+- **E2 v2:** [E2_CATEGORY_SPRINT_V2.md](E2_CATEGORY_SPRINT_V2.md). Closed sets only for official play, with no votes and no scoring change yet.
+- **Pilot review:** [review-batch-01/REVIEW_SHEET.md](review-batch-01/REVIEW_SHEET.md) has 20 items, with the author's scores hidden.
+- **Audit batch A:** [audit-batches/BATCH_A_FACTUAL_AND_MECHANICAL.md](audit-batches/BATCH_A_FACTUAL_AND_MECHANICAL.md). Factual and mechanical defects only, with nothing applied.
+- The "14 unenterable official items" finding below is **resolved**.
+
+## In one minute (original findings, 88995ae)
 
 - **Quality, not quantity, is the gap.**
   - 571 items, but only 26 of 143 Trivia items meet the bar as written.

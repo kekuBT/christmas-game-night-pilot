@@ -1,0 +1,265 @@
+{
+ "note": "Open only after the independent review is submitted.",
+ "items": {
+  "geo-cq2-04": {
+   "authorPick": "strong",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 4,
+    "distractors": 5,
+    "social": 4
+   },
+   "authorTotal": 22,
+   "authorExpectedCorrect": "10–25%",
+   "whyInclude": "Nearly everyone answers Russia, so the reveal is a big 'what?'. The qualifier makes the answer defensible."
+  },
+  "cls-cq2-06": {
+   "authorPick": "average",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "estimate",
+   "whyInclude": "Many people guess 50–70, so the reveal lands as a surprise."
+  },
+  "who-cq2-02": {
+   "authorPick": "questionable",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 3,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "15–35%",
+   "whyInclude": "A famous misattribution with a satisfying reveal. Needs the clarified prompt (first printed by), which the engine can't show yet — see engine change E5."
+  },
+  "trv-cq2-02": {
+   "authorPick": "average",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 5,
+    "social": 4
+   },
+   "authorTotal": 21,
+   "authorExpectedCorrect": "70–85%",
+   "whyInclude": "Easy for anyone under 40, fair for older players thanks to the films; distractors reward real fans without being obscure."
+  },
+  "con-cq2-01": {
+   "authorPick": "strong",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 5,
+    "social": 4
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "puzzle",
+   "whyInclude": "Food and dances from four continents, two layers of misdirection, and a satisfying final group."
+  },
+  "year-cq2-01": {
+   "authorPick": "questionable",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 4,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "15–35% within 2 years",
+   "whyInclude": "Widens the cultural range; most people guess far too late, so the reveal teaches something."
+  },
+  "spr-cq2-03": {
+   "authorPick": "average",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "closed set",
+   "whyInclude": "Easy entry (the planets), with a real reward for people who know more."
+  },
+  "trv-cq2-12": {
+   "authorPick": "strong",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 5,
+    "clarity": 5,
+    "distractors": 5,
+    "social": 5
+   },
+   "authorTotal": 24,
+   "authorExpectedCorrect": "15–35%",
+   "whyInclude": "A thinking question, not a memory one: players can reason their way to it, so it rewards cleverness and creates table talk."
+  },
+  "chr-cq2-04": {
+   "authorPick": "questionable",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 5,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "n/a (performance)",
+   "whyInclude": "A relatable scene with a built-in comic beat. 'Crisps' is UK English; the US version would use 'chips'."
+  },
+  "cls-cq2-05": {
+   "authorPick": "questionable",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 19,
+   "authorExpectedCorrect": "estimate",
+   "whyInclude": "A classic estimation question with a wide, fun spread of guesses."
+  },
+  "trv-cq2-04": {
+   "authorPick": "strong",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 5,
+    "social": 4
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "40–60%",
+   "whyInclude": "A myth-buster: everyone 'knows' the line, so the reveal produces real surprise. The other options are genuine quotes, which makes it fair rather than a trick."
+  },
+  "imp-cq2-03": {
+   "authorPick": "average",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "n/a (social)",
+   "whyInclude": "Strong clues exist (hot, erupt) but cautious players can stay vague; it tests restraint."
+  },
+  "geo-cq2-02": {
+   "authorPick": "questionable",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 4,
+    "distractors": 5,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "35–55%",
+   "whyInclude": "All four options are big, coastal and plausible."
+  },
+  "year-cq2-04": {
+   "authorPick": "average",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 21,
+   "authorExpectedCorrect": "40–60% within 2 years",
+   "whyInclude": "Known across generations, and the 'Puck Man' reveal gets a laugh."
+  },
+  "cap-cq2-01": {
+   "authorPick": "strong",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 5,
+    "social": 5
+   },
+   "authorTotal": 24,
+   "authorExpectedCorrect": "n/a (creative)",
+   "whyInclude": "Gives a format (a review), a character (the cat) and a tension (expensive bed it ignores). Formats make writing easier for less confident players."
+  },
+  "trv-cq2-05": {
+   "authorPick": "questionable",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 4,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 22,
+   "authorExpectedCorrect": "35–55%",
+   "whyInclude": "Overturns a near-universal belief, and the answer can be proven by a text search — so it is both surprising and indisputable."
+  },
+  "spr-cq2-02": {
+   "authorPick": "questionable",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 4,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 5
+   },
+   "authorTotal": 21,
+   "authorExpectedCorrect": "closed set",
+   "whyInclude": "Cultural range, a closed set and a natural reveal (the order of the animals). It also shows why aliases are needed."
+  },
+  "who-cq2-01": {
+   "authorPick": "average",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 4,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 19,
+   "authorExpectedCorrect": "70–85%",
+   "whyInclude": "An easy real quote with a true twist: the famous version is a misquote."
+  },
+  "trv-cq2-10": {
+   "authorPick": "strong",
+   "authorRubric": {
+    "entertainment": 5,
+    "creativity": 5,
+    "clarity": 4,
+    "distractors": 5,
+    "social": 4
+   },
+   "authorTotal": 23,
+   "authorExpectedCorrect": "15–35%",
+   "whyInclude": "A genuinely mind-changing fact. 'Dry weight' removes the water ambiguity, and 'Sunlight' is a strong, fair distractor because it supplies energy, not material."
+  },
+  "cls-cq2-01": {
+   "authorPick": "average",
+   "authorRubric": {
+    "entertainment": 4,
+    "creativity": 3,
+    "clarity": 5,
+    "distractors": 4,
+    "social": 4
+   },
+   "authorTotal": 20,
+   "authorExpectedCorrect": "estimate",
+   "whyInclude": "A number nobody knows exactly but everyone can estimate, so guesses spread out and the ranking is meaningful."
+  }
+ }
+}

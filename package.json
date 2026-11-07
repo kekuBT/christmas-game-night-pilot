@@ -81,7 +81,8 @@
     "content:approve": "tsx src/content/cli.ts approve",
     "content:audit": "tsx scripts/content-quality/audit.ts",
     "content:pilot": "tsx scripts/content-quality/check-pilot.ts",
-    "content:pilot:render": "tsx scripts/content-quality/render-pilot.ts"
+    "content:pilot:render": "tsx scripts/content-quality/render-pilot.ts",
+    "content:review-batch": "tsx scripts/content-quality/review-batch.ts"
   },
   "type": "module",
   "version": "0.1.0"

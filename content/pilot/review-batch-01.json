@@ -1,0 +1,11 @@
+{
+ "batchId": "review-batch-01",
+ "source": "content/pilot/pilot-cq2.json",
+ "note": "Order is deliberately mixed (not by game, not by quality). The author's own assessment of each item is in author-key.json, to be opened only after the review is submitted.",
+ "items": ["geo-cq2-04", "cls-cq2-06", "who-cq2-02", "trv-cq2-02", "con-cq2-01", "year-cq2-01", "spr-cq2-03", "trv-cq2-12", "chr-cq2-04", "cls-cq2-05", "trv-cq2-04", "imp-cq2-03", "geo-cq2-02", "year-cq2-04", "cap-cq2-01", "trv-cq2-05", "spr-cq2-02", "who-cq2-01", "trv-cq2-10", "cls-cq2-01"],
+ "authorSelection": {
+  "strong": ["trv-cq2-12", "cap-cq2-01", "trv-cq2-04", "trv-cq2-10", "con-cq2-01", "geo-cq2-04"],
+  "average": ["trv-cq2-02", "cls-cq2-01", "year-cq2-04", "cls-cq2-06", "spr-cq2-03", "imp-cq2-03", "who-cq2-01"],
+  "questionable": ["who-cq2-02", "year-cq2-01", "geo-cq2-02", "cls-cq2-05", "chr-cq2-04", "spr-cq2-02", "trv-cq2-05"]
+ }
+}

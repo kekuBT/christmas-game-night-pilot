@@ -686,3 +686,32 @@ Failures: none outstanding. External blockers: none.
 Not done (needs people): human fact-check and editor re-score of the pilot.
 Next task: owner review of the pilot and decisions 1–5 in the README; then the first reviewed batch (at most 30 items).
 Risk: the pilot's facts are self-checked by Claude only, and every item lists its required human check. Rubric scores are self-assessed.
+
+## Content Quality 2.0 — integrity fixes (2026-11-07, branch `claude/cq2-integrity-fixes`, from 88995ae)
+Milestone: owner-approved E1 and E3 implemented; E2 v2 design, a blind 20-item pilot review batch and audit batch A prepared. No scoring rule changed, no content status changed, no approvals recorded, nothing merged or deployed.
+
+Completed (files):
+- E1:
+  - `src/shared/numericInput.ts`, `src/content/select.ts` (`answerEnterable`), `src/content/lint.ts`;
+  - `src/server/room.ts` (INVALID_GUESS, CLIENT_OUTDATED), `src/server/http.ts`, `src/shared/clientProtocol.ts` (protocol 4);
+  - `apps/web/src/ui/mchezo/components/NumericGuess.tsx`, `MchezoClosest.tsx`, `MchezoYear.tsx`.
+- E3:
+  - `src/server/room.ts` (`quizQuestionsView`, `yearEventsView`), `src/games/closest.ts` (`closedQuestions`), `src/content/schema.ts` (Who Said explanation);
+  - `apps/web/src/components/mchezo/AnswerReview.tsx`, `ShowMode.tsx`, `MchezoTrivia.tsx`, `App.tsx` (TV dashboards).
+- Tests:
+  - `tests/numeric-input.test.ts` (12), `tests/reveal-e3.test.ts` (6; all six fail if reveals are made unconditional);
+  - drivers `check-closest`, `check-year` (emulated phone), new `check-answer-reveal`; `scripts/lib/protocol.mjs` for the API drivers.
+- Docs:
+  - `docs/content-quality-2/E2_CATEGORY_SPRINT_V2.md`;
+  - `review-batch-01/` (blind sheet, scores CSV, author key), `audit-batches/BATCH_A_FACTUAL_AND_MECHANICAL.md`, `screenshots/e3-*.png`;
+  - tool `npm run content:review-batch`.
+
+External blockers: none.
+Not done:
+- real-device check on iPhone Safari and Android Chrome (only emulated phones in Chromium here; no WebKit);
+- human review of the pilot batch and audit batch A.
+
+Next: the owner reviews review-batch-01 and batch A, and decides on E2 v2. No new content generation until then.
+Risk:
+- Old tabs must refresh before they can submit numeric guesses (by design).
+- The official Closest pool briefly dropped to 15 items under the interim rule; it is back to 29 with the wider input.
