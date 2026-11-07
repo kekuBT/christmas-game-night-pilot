@@ -715,3 +715,7 @@ Next: the owner reviews review-batch-01 and batch A, and decides on E2 v2. No ne
 Risk:
 - Old tabs must refresh before they can submit numeric guesses (by design).
 - The official Closest pool briefly dropped to 15 items under the interim rule; it is back to 29 with the wider input.
+
+Verification (code at c70f16b; this note is a docs-only commit on top):
+- `npm run gate:full` on c70f16b in a fresh clone: **PASSED (exit 0)**, run `20261107-035306-c70f16b0-167`. 44 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid.
+- Two earlier full runs were killed by container restarts; their partial results were discarded, not combined.
