@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicGame, PublicPlayer, Readiness, RegistryGame, SpectateResponse } from "./types.js";
 import { GamePanel } from "./components/GamePanel.js";
 import { ChampionshipView } from "./components/ChampionshipView.js";
@@ -9,7 +9,10 @@ import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js"
 import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
-import { GameClock, GameIntro, InviteSheet, LandingScreen, linkReach, LobbyScreen, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, SegmentedChoice, themes } from "./ui/mchezo/index.js";
+import { buildCatalog, featuredOfTheDay, GameClock, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, themes, type Route, type RoomSub } from "./ui/mchezo/index.js";
+import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen } from "./components/mchezo/Home.js";
+import { ChooseGameSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
+import { stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
@@ -50,6 +53,29 @@ function tabSet(key: string, value: string | null): void {
 }
 /** Mirrors the server's MIN_OFFICIAL_COMPETITORS (D1). */
 const MIN_OFFICIAL_PLAYERS = 2;
+type View = "lobby" | "championship" | "tv" | "memory" | "library" | "studio";
+const SUB_TO_VIEW: Record<RoomSub, View> = { lobby: "lobby", cup: "championship", tv: "tv", memories: "memory", library: "library", studio: "studio" };
+const VIEW_TO_SUB: Record<View, RoomSub> = { lobby: "lobby", championship: "cup", tv: "tv", memory: "memories", library: "library", studio: "studio" };
+const LOBBY: Route = { name: "room", sub: "lobby" };
+const HOME: Route = { name: "home" };
+/**
+ * Stage 2: before the first render, put a fresh page load on a screen that
+ * matches this tab's seat. A tab that holds a seat and loads Home or Host goes
+ * to its room (a reload never strands a player outside their game); a tab with
+ * no seat that loads a room address goes Home. Nothing about the seat changes.
+ */
+function bootRoute(): void {
+  try {
+    const { route } = parseRoute(location.pathname, location.search);
+    const seated = !!seats.current();
+    const spectating = !!(tabGet("cgn_spec_roomId") && tabGet("cgn_spec_token"));
+    let to: Route | null = null;
+    if (seated && (route.name === "home" || route.name === "host")) to = LOBBY;
+    else if (!seated && !spectating && route.name === "room") to = HOME;
+    if (to) history.replaceState(null, "", routeUrl(to));
+    stampEntry();
+  } catch { /* no history API: render whatever the address says */ }
+}
 const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 async function post<T>(path: string, body: Record<string, unknown>): Promise<T> {
   const headers: Record<string, string> = { "content-type": "application/json" };
@@ -71,6 +97,9 @@ async function get<T>(path: string): Promise<T> {
 }
 
 export function App() {
+  // Stage 2 routing: the boot redirect runs once, before the route is read.
+  useState(() => { bootRoute(); return true; });
+  const { route, sheet, game: sheetGame, navigate, openSheet, closeSheet, back } = useRoute();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   // Seat credentials are owned by the session store (sessionStorage by
@@ -85,7 +114,14 @@ export function App() {
   const [specToken, setSpecToken] = useState<string | null>(tabGet("cgn_spec_token"));
   const [proj, setProj] = useState<Projection | null>(null);
   const [games, setGames] = useState<RegistryGame[]>([]);
-  const [view, setView] = useState<"lobby" | "championship" | "tv" | "memory" | "library" | "studio">("lobby");
+  // The room's screens are addresses now (/room, /room/cup, …), so browser
+  // Back, in-app Back and iOS swipe-back agree. `view` is read from the route.
+  const view: View = route.name === "room" ? SUB_TO_VIEW[route.sub] : "lobby";
+  const toLobby = () => back(LOBBY);
+  function setView(v: View) {
+    if (v !== "lobby") navigate({ name: "room", sub: VIEW_TO_SUB[v] });
+    else if (route.name === "room" && route.sub !== "lobby") toLobby();
+  }
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   // Work Package F: server rejections arrive as terse codes or terse
@@ -112,7 +148,6 @@ export function App() {
   // further, and "Off" stops all motion.
   const osReducedMotion = typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const motion = { reducedMotion: resolveReducedMotion(settings.anim, osReducedMotion) ? true : undefined, still: settings.anim === "off" };
-  const [inviteOpen, setInviteOpen] = useState(false);
   // D3: tell everyone when a briefing ended without play (host cancel or the
   // five-minute guard). The server removed it; nothing was scored or used.
   const [briefingNote, setBriefingNote] = useState("");
@@ -138,7 +173,11 @@ export function App() {
   }, [proj, view, playerId]);
   // Mchezo lobby: the host-chosen "up next" game (default: Trivia, the
   // Phase 2 featured game). The lobby Start button starts this game.
-  const [upNextId, setUpNextId] = useState("trivia");
+  // Kept per tab, so a reload or a trip to the library keeps the host's pick.
+  const [upNextId, setUpNextIdRaw] = useState(() => tabGet("mz_upnext") ?? "trivia");
+  const setUpNextId = (id: string) => { tabSet("mz_upnext", id); setUpNextIdRaw(id); };
+  // A game picked from Home's details sheet before the room exists.
+  const [hostPick, setHostPick] = useState<string | null>(null);
   // Phase 2.1 lobby simplification: one mode for the single Start action,
   // and one compact chooser instead of per-game official/practice buttons.
   const [gameMode, setGameMode] = useState<"official" | "practice">("official");
@@ -147,7 +186,6 @@ export function App() {
   const [seatRemembered, setSeatRemembered] = useState(() => seats.current()?.remembered ?? false);
   const rememberedSeats = useRememberedSeats();
   const [recoverMode, setRecoverMode] = useState(false);
-  const [chooserOpen, setChooserOpen] = useState(false);
   const [shuffleResult, setShuffleResult] = useState<string | null>(null);
   const [numInput, setNumInput] = useState("");
   const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
@@ -201,11 +239,15 @@ export function App() {
   }, [roomId, playerId]);
 
   useEffect(() => { get<RegistryGame[]>("/games").then(setGames).catch(() => {}); }, []);
+  // A QR or invite link (/join?code=…) fills in the code.
+  const routeCode = route.name === "join" || route.name === "watch" ? route.code : undefined;
+  useEffect(() => { if (routeCode) setCode(routeCode); }, [routeCode]);
+  // An invite link to the room this tab already sits in just opens the room.
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const c = params.get("code") ?? params.get("joinCode");
-    if (c) setCode(c.toUpperCase());
-  }, []);
+    if (route.name === "join" && routeCode && roomId && playerId && proj?.joinCode === routeCode) navigate(LOBBY, { replace: true });
+  }, [route.name, routeCode, roomId, playerId, proj?.joinCode, navigate]);
+  const catalog = useMemo(() => buildCatalog(GAME_MANIFESTS, games.map((g) => ({ id: g.id, lifecycle: g.lifecycle }))), [games]);
+  const featured = useMemo(() => featuredOfTheDay(catalog, new Date()), [catalog]);
   useEffect(() => {
     if (!roomId || !playerId) return;
     refresh();
@@ -311,19 +353,25 @@ export function App() {
     seats.begin({ roomId: r.roomId, playerId: r.playerId, token: r.recoveryToken, displayName: r.displayName }, { remember: opts.remember ?? rememberOnJoin });
     setSeatRemembered(seats.current()?.remembered ?? false);
     connection.reset();
-    setRoomId(r.roomId); setPlayerId(r.playerId); setToken(r.recoveryToken); setView("lobby");
+    setRoomId(r.roomId); setPlayerId(r.playerId); setToken(r.recoveryToken);
+    // From a form (Join, Host, recovery) the room replaces it; from Home it is a new step.
+    navigate(LOBBY, { replace: route.name !== "home" });
   }
   /** This device stops using the seat (sign out / session replaced). The seat stays in the game. */
   function leaveSeatOnThisDevice(note?: string) {
     seats.signOut();
     connection.reset();
-    setRoomId(null); setPlayerId(null); setToken(null); setProj(null); setView("lobby");
+    setRoomId(null); setPlayerId(null); setToken(null); setProj(null);
+    navigate(HOME, { replace: true });
     if (note) setMsg(note);
   }
   async function createRoom() {
+    // A-04 (live audit): the host types a name before the room exists, so
+    // nobody hosts as "Player 1".
+    if (!name.trim()) { setErr("Type your name first, so your players know whose party it is."); return; }
     setErr(""); try {
       const r = await post<JoinResponse>("/rooms", { name: "Christmas Game Night" });
-      const j = await post<JoinResponse>(`/rooms/${r.roomId}/join`, { displayName: name || "Player 1", asHost: true, hostClaimToken: r.hostClaimToken });
+      const j = await post<JoinResponse>(`/rooms/${r.roomId}/join`, { displayName: name.trim(), asHost: true, hostClaimToken: r.hostClaimToken });
       await saveSession({ ...j, roomId: r.roomId }); setMsg(`Room created. Code: ${r.joinCode}`);
     } catch (e) { fail(e); }
   }
@@ -338,11 +386,13 @@ export function App() {
       const s = await post<SpectateResponse>("/rooms/spectate-by-code", { joinCode: code });
       tabSet("cgn_spec_roomId", s.roomId); tabSet("cgn_spec_token", s.spectatorToken);
       setSpecRoomId(s.roomId); setSpecToken(s.spectatorToken); setMsg("Watching — no seat taken.");
+      navigate({ name: "watch", code: code.toUpperCase() }, { replace: true });
     } catch (e) { fail(e); }
   }
   function stopWatching() {
     tabSet("cgn_spec_roomId", null); tabSet("cgn_spec_token", null);
     setSpecRoomId(null); setSpecToken(null); setProj(null); setMsg("Stopped watching.");
+    navigate(HOME, { replace: true });
   }
   // Spectator live updates: poll + WebSocket on the spectator credential.
   // A 401 means the spectator token is gone (server restart without a
@@ -521,13 +571,14 @@ export function App() {
   useEffect(() => { if (view === "memory" && roomId) loadMemory(); }, [view, roomId]);
   useEffect(() => {
     if (!proj?.joinCode) return;
-    const url = `${location.origin}/?code=${proj.joinCode}`;
+    const url = `${location.origin}/join?code=${proj.joinCode}`;
     QRCode.toDataURL(url, { width: 220, margin: 2 }).then(setQrUrl).catch(() => {});
   }, [proj?.joinCode]);
 
   // Landing shows unless a player session exists — or a spectator session
   // does (spectator tabs skip landing and render the TV-only branch below).
   if ((!roomId || !playerId) && !(specRoomId && specToken) && recoverMode) {
+    // (Seat recovery keeps its own flow; it starts from Home or Join.)
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <RecoverScreen
@@ -545,36 +596,94 @@ export function App() {
       </MchezoProvider>
     );
   }
-  if ((!roomId || !playerId) && !(specRoomId && specToken)) {
+  // ---- Stage 2 entry screens: Home, Join, Host, the library (no room) ----
+  // Shown to a tab with no seat (and not spectating), and to a seated tab that
+  // stepped out of its room with Back: the room keeps running and Home offers
+  // Rejoin. The seat, socket and polling are untouched by any of these.
+  const seated = !!(roomId && playerId);
+  const spectating = !!(specRoomId && specToken);
+  if ((!seated && !spectating) || (seated && route.name !== "room")) {
+    const status: ReactNode = err || msg ? (
+      <div className="mz-entry__status">
+        {err && <p className="err" data-testid="mz-error" role="alert">{err}</p>}
+        {msg && <p className="ok">{msg}</p>}
+      </div>
+    ) : null;
+    const remember = <RememberChoice checked={rememberOnJoin} onChange={setRememberOnJoin} />;
+    const lostSeat = () => { setErr(""); setRecoverMode(true); };
+    const welcome = !seated ? (
+      <WelcomeBack
+        verified={rememberedSeats.verified}
+        notes={rememberedSeats.notes}
+        onContinue={(v) => { void saveSession({ roomId: v.seat.roomId, playerId: v.seat.playerId, recoveryToken: v.seat.token, displayName: v.displayName } as JoinResponse, { remember: true }); setMsg(`Welcome back, ${v.displayName}.`); }}
+        onForget={(v) => rememberedSeats.forget(v.seat)}
+      />
+    ) : null;
+    // One seat per tab: joining or hosting another room from here would drop
+    // this tab's credential for the current one, so it is a deliberate step.
+    const seatedNotice = seated ? (
+      <NoticeCard tone="info" title={`You’re already in room ${proj?.joinCode ?? ""} on this phone`} testId="seated-notice"
+        action={<button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="seated-go-room" onClick={() => navigate(LOBBY)}>Go to my room</button>}>
+        To join or host a different room, leave this one first: open its room menu, then This device → Sign out on this device. Your seat and points stay in the game.
+      </NoticeCard>
+    ) : null;
+    const myBriefing = (proj?.games ?? []).some((g) => g.status === "briefing" && !!playerId && g.players.includes(playerId));
+    const myPlaying = (proj?.myGames ?? []).some((g) => g.status === "playing" && g.participant !== false);
+    let screen: ReactNode;
+    if (route.name === "join" || route.name === "watch") {
+      screen = (
+        <JoinScreen
+          code={code} onCodeChange={setCode} name={name} onNameChange={setName}
+          onJoin={joinRoom} onSpectate={spectate} onBack={() => back(HOME)} onLostSeat={lostSeat}
+          remember={remember} blocked={seated}
+          notice={seated ? seatedNotice : welcome}
+          watch={route.name === "watch"}
+          status={status}
+        />
+      );
+    } else if (route.name === "host") {
+      screen = (
+        <HostScreen
+          name={name} onNameChange={setName} onHost={createRoom} onBack={() => back(HOME)}
+          remember={remember} blocked={seated} notice={seatedNotice}
+          firstGame={hostPick ? catalog.find((g) => g.id === hostPick) : undefined}
+          status={status}
+        />
+      );
+    } else if (route.name === "library") {
+      screen = <MchezoLibrary manifests={GAME_MANIFESTS} catalog={catalog} canSelect={false} inRoom={false} onSelect={() => {}} onDetails={(id) => openSheet("details", id)} onBack={() => back(HOME)} />;
+    } else {
+      screen = (
+        <HomeScreen
+          catalog={catalog} featured={featured}
+          onOpenGame={(id) => openSheet("details", id)}
+          onJoin={() => navigate({ name: "join" })}
+          onHost={() => navigate({ name: "host" })}
+          onLibrary={() => navigate({ name: "library" })}
+          onSettings={() => openSheet("settings")}
+          onLostSeat={lostSeat}
+          rejoin={seated ? { code: proj?.joinCode ?? "", state: myPlaying ? "game" : myBriefing ? "briefing" : "lobby", onRejoin: () => navigate(LOBBY) } : null}
+          welcome={welcome}
+          status={status}
+        />
+      );
+    }
+    const details = sheet === "details" && sheetGame ? catalog.find((g) => g.id === sheetGame) : undefined;
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <LandingScreen
-          code={code}
-          onCodeChange={(c) => setCode(c)}
-          name={name}
-          onNameChange={setName}
-          onJoin={joinRoom}
-          onHost={createRoom}
-          onSpectate={spectate}
-          top={!roomId && (
-            <WelcomeBack
-              verified={rememberedSeats.verified}
-              notes={rememberedSeats.notes}
-              onContinue={(v) => { void saveSession({ roomId: v.seat.roomId, playerId: v.seat.playerId, recoveryToken: v.seat.token, displayName: v.displayName } as JoinResponse, { remember: true }); setMsg(`Welcome back, ${v.displayName}.`); }}
-              onForget={(v) => rememberedSeats.forget(v.seat)}
-            />
-          )}
-          formExtra={<>
-            <RememberChoice checked={rememberOnJoin} onChange={setRememberOnJoin} />
-            <button type="button" className="mz-linkbtn" data-testid="mz-lost-place" onClick={() => { setErr(""); setRecoverMode(true); }}>Lost your place? Recover your seat</button>
-          </>}
-          extra={
-            <div style={{ padding: "0 16px 16px" }}>
-              {err && <p className="err" data-testid="mz-error" role="alert">{err}</p>}{msg && <p className="ok">{msg}</p>}
-              <p className="mz-foot">No account needed — just the 6-character code from the host.</p>
-            </div>
-          }
-        />
+        {screen}
+        {details && (
+          <GameDetailsSheet
+            game={details}
+            onClose={closeSheet}
+            action={!seated ? <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="details-host" onClick={() => { setUpNextId(details.id); setHostPick(details.id); navigate({ name: "host" }); }}>Host this game</button> : undefined}
+          />
+        )}
+        {sheet === "settings" && (
+          <Sheet title="Settings" onClose={closeSheet} testId="settings-sheet">
+            <SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} />
+          </Sheet>
+        )}
       </MchezoProvider>
     );
   }
@@ -714,7 +823,6 @@ export function App() {
   // before Start, with an explicit switch — the mode is never changed silently.
   const wouldPlayCount = proj?.readiness?.wouldPlay.length ?? players.filter((p) => p.connected).length;
   const officialShort = wouldPlayCount < MIN_OFFICIAL_PLAYERS;
-  const minutes = (ms?: number) => (ms === undefined ? undefined : Math.round(ms / 60_000));
   // Smart Shuffle UI (Milestone H): pure engine call, client-side. The
   // up-next game is client state, so no server round-trip is needed: the
   // engine reads manifests, the connected-player count, and the room's
@@ -743,78 +851,84 @@ export function App() {
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
   const triviaFinished = latestFinished?.gameId === "trivia";
-  const lobbyExtra = (
-    <div>
-      {(me?.isHost || me?.isCohost) && (
-        <RecoveryRequestsCard
-          requests={proj?.recoveryRequests ?? []}
-          onDecide={async (r, approve) => {
-            try { await post(`/rooms/${roomId}/recovery-requests/${r.requestId}/${approve ? "approve" : "deny"}`, approve ? { playerId: r.playerId } : {}); } catch (e) { fail(e); }
-            await refresh();
-          }}
+  // ---- Stage 2: Lobby A and its sheets (Invite, Choose game, Room menu, game details) ----
+  const isHostish = !!(me?.isHost || me?.isCohost);
+  const upNextGame = catalog.find((g) => g.id === upNext?.id);
+  const hostName = players.find((p) => p.isHost)?.displayName;
+  const connectedNow = players.filter((p) => p.connected).length;
+  const cupLabel = proj?.competition?.label ?? "Family Cup";
+  const inviteUrl = proj?.joinCode ? `${location.origin}/join?code=${proj.joinCode}` : "";
+  const roomDetails = sheet === "details" && sheetGame ? catalog.find((g) => g.id === sheetGame) : undefined;
+  const roomSheets = (
+    <>
+      {sheet === "invite" && proj?.joinCode && (
+        <InviteSheet code={proj.joinCode} url={inviteUrl} qrDataUrl={qrUrl || undefined} reach={linkReach(location.hostname)} onClose={closeSheet} />
+      )}
+      {sheet === "choose" && isHostish && (
+        <ChooseGameSheet
+          catalog={catalog}
+          upNextId={upNext?.id}
+          playerCount={connectedNow > 0 ? connectedNow : players.length}
+          onPick={(id) => { setUpNextId(id); setShuffleResult(null); closeSheet(); }}
+          onSurprise={() => { runShuffle("random"); closeSheet(); }}
+          onSmart={() => { runShuffle("smart"); closeSheet(); }}
+          onClose={closeSheet}
         />
       )}
-      {(me?.isHost || me?.isCohost) && (
-        <div className="mz-card" style={{ marginTop: 12 }}>
-          <span className="mz-kicker">Game setup</span>
-          <p className="mz-foot" style={{ margin: "4px 0" }}>Up next is {upNext?.title ?? "—"}. Official games count toward the {proj?.competition?.label ?? "Family Cup"}; practice games do not.{upNext?.lifecycle ? ` Time limit: about ${minutes(upNext.lifecycle.gameWindowMs)} min — the game ends by itself.` : ""}</p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            <button type="button" className="mz-chip-btn" data-testid="choose-game" aria-expanded={chooserOpen} onClick={() => setChooserOpen((o) => !o)}>{chooserOpen ? "Close game list" : "Choose a different game"}</button>
-            <button type="button" className="mz-chip-btn" data-testid="surprise-me" onClick={() => runShuffle("random")}>Surprise me</button>
-            <button type="button" className="mz-chip-btn" data-testid="smart-shuffle" onClick={() => runShuffle("smart")}>Smart shuffle</button>
-          </div>
-          {shuffleResult && <p className="mz-foot" style={{ margin: "8px 0 0" }} data-testid="shuffle-result">{shuffleResult}</p>}
-          {chooserOpen && (
-            <div style={{ marginTop: 8 }}>
-              {games.map((g) => (
-                <button key={g.id} type="button" className="mz-chip-btn" data-testid={`select-game-${g.id}`} aria-current={g.id === upNext?.id ? "true" : undefined} onClick={() => { setUpNextId(g.id); setChooserOpen(false); setShuffleResult(null); }} style={{ display: "block", width: "100%", textAlign: "left", marginBottom: 6 }}>
-                  {g.title} <span className="mz-muted">· {g.minPlayers}–{g.maxPlayers} players · ~{g.defaultDurationMinutes} min{g.lifecycle?.officialEligible === false ? " · Practice only" : ""}</span>{g.id === upNext?.id ? " · Up next" : ""}
-                </button>
+      {sheet === "menu" && (
+        <RoomMenuSheet
+          cupLabel={cupLabel}
+          dayLabel={`Day ${proj?.championshipDay ?? 1}/7`}
+          isHost={isHostish}
+          onTv={() => setView("tv")}
+          onCup={() => setView("championship")}
+          onMemory={() => setView("memory")}
+          onLibrary={() => setView("library")}
+          onStudio={isHostish ? () => setView("studio") : undefined}
+          onHome={() => navigate(HOME)}
+          onReconnect={() => { void reconnect(); }}
+          message={err || msg ? <div className="mz-menu__msg">{err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}</div> : undefined}
+          phone={<SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} />}
+          device={
+            <ThisDeviceCard
+              remembered={seatRemembered}
+              onRemember={(on) => setSeatRemembered(seats.setRemember(on))}
+              onForgetDevice={() => leaveSeatOnThisDevice("Signed out on this device. Your seat and scores stay in the game.")}
+            >
+              <RecoveryCodeSection
+                hasCode={!!proj?.me?.hasRecoveryCode}
+                onIssue={async () => { const r = await post<{ recoveryCode: string }>(`/rooms/${roomId}/recovery-code`, {}); void refresh(); return r.recoveryCode; }}
+              />
+            </ThisDeviceCard>
+          }
+          hostTools={players.filter((p) => p.id !== playerId).length > 0 ? (
+            <div className="mz-card mz-menu__card" aria-label="Players and cohosts">
+              <span className="mz-kicker">Players and cohosts</span>
+              {players.filter((p) => p.id !== playerId).map((p) => (
+                <div key={p.id} className="mz-menu__player">
+                  <span className="mz-menu__pname">{p.displayName}{p.isCohost ? " · cohost" : ""}</span>
+                  {!p.isCohost && <button type="button" className="mz-chip-btn" onClick={async () => { try { await post<Record<string, unknown>>(`/rooms/${roomId}/cohost`, { targetId: p.id }); } catch (e) { fail(e); } await refresh(); }}>Make cohost</button>}
+                </div>
               ))}
             </div>
-          )}
-        </div>
-      )}
-      <ThisDeviceCard
-        remembered={seatRemembered}
-        onRemember={(on) => setSeatRemembered(seats.setRemember(on))}
-        onForgetDevice={() => leaveSeatOnThisDevice("Signed out on this device. Your seat and scores stay in the game.")}
-      >
-        <RecoveryCodeSection
-          hasCode={!!proj?.me?.hasRecoveryCode}
-          onIssue={async () => { const r = await post<{ recoveryCode: string }>(`/rooms/${roomId}/recovery-code`, {}); void refresh(); return r.recoveryCode; }}
+          ) : undefined}
+          onClose={closeSheet}
         />
-      </ThisDeviceCard>
-      <div className="mz-card" style={{ marginTop: 12 }}>
-        <span className="mz-kicker">Invite by QR</span>
-        <p className="mz-foot">Scan to join this room. The 6-character code below works too — that is the manual-code fallback.</p>
-        {linkReach(location.hostname) === "private-preview" && <p className="mz-noticecard__text" data-testid="qr-reach-note"><b>Private preview:</b> this QR code only opens for the GitHub account running this preview. Other people can’t join from it.</p>}
-        {(location.hostname === "localhost" || location.hostname === "127.0.0.1") && <p>⚠️ This QR points to {location.origin}, which only works on this device. A phone scanning it will be sent to its own localhost and cannot join. Open the app from a LAN-reachable address (or the approved deployed domain) so the QR works, or share the 6-character code instead.</p>}
-        {qrUrl && <img src={qrUrl} alt={`QR code to join room ${proj?.joinCode ?? ""}`} width={220} height={220} />}
-        <p>Room code: <b>{proj?.joinCode ?? "…"}</b></p>
-      </div>
-      {(me?.isHost || me?.isCohost) && players.filter((p) => p.id !== playerId).length > 0 && (
-        <div className="mz-card" style={{ marginTop: 12 }}>
-          <span className="mz-kicker">Cohost</span>
-          {players.filter((p) => p.id !== playerId).map((p) => (
-            <div key={p.id} style={{ display: "flex", gap: 8, alignItems: "center", padding: "4px 0" }}>
-              <span>{p.displayName}</span>
-              <button type="button" className="mz-chip-btn" onClick={async () => { await post<Record<string, unknown>>(`/rooms/${roomId}/cohost`, { targetId: p.id }); await refresh(); }}>Make cohost</button>
-            </div>
-          ))}
-        </div>
       )}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
-        <button type="button" className="mz-chip-btn" onClick={() => setView("championship")}>Championship</button>
-        <button type="button" className="mz-chip-btn" onClick={() => setView("tv")}>TV stage</button>
-        <button type="button" className="mz-chip-btn" onClick={() => setView("memory")}>Memory Book</button>
-        <button type="button" className="mz-chip-btn" data-testid="browse-games" onClick={() => setView("library")}>Browse games</button>
-        {(me?.isHost || me?.isCohost) && <button type="button" className="mz-chip-btn" data-testid="studio-button" onClick={() => setView("studio")}>Studio (preview)</button>}
-        <button type="button" className="mz-chip-btn" onClick={reconnect}>Reconnect</button>
-      </div>
-      <SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} />
-      {msg && <p className="ok">{msg}</p>}
-    </div>
+      {roomDetails && (
+        <GameDetailsSheet
+          game={roomDetails}
+          onClose={closeSheet}
+          roomPlayers={connectedNow}
+          action={isHostish && roomDetails.id !== upNext?.id ? (
+            <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="details-make-up-next" onClick={() => {
+              setUpNextId(roomDetails.id); setShuffleResult(null);
+              if (view === "library") toLobby(); else closeSheet();
+            }}>Make this up next</button>
+          ) : undefined}
+        />
+      )}
+    </>
   );
 
   // D3: while a game is in its briefing, every phone shows its rules and who
@@ -841,35 +955,45 @@ export function App() {
   if (view === "lobby" && isLobbyPhase) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <LobbyScreen
-          session={{
-            roomCode: proj?.joinCode ?? "…",
-            sessionLabel: proj?.name ?? "Mchezo",
-            // Family Cup event data: 7 days is the approved championship
-            // length; the current day comes from the server projection.
-            championship: { name: proj?.competition?.label ?? "Family Cup", unitLabel: "Day", current: proj?.championshipDay ?? 1, total: 7 },
-          }}
+        <RoomLobby
+          code={proj?.joinCode ?? "…"}
+          sessionLabel={proj?.name ?? "Mchezo"}
+          // Family Cup event data: 7 days is the approved championship
+          // length; the current day comes from the server projection.
+          championship={{ name: cupLabel, unitLabel: "Day", current: proj?.championshipDay ?? 1, total: 7 }}
           players={mzPlayers}
           youId={playerId ?? ""}
-          isHost={!!(me?.isHost || me?.isCohost)}
-          nextGame={{ name: upNext?.title ?? "Trivia Showdown", kind: "Party game", accentIndex: 3 }}
-          tvConnected={false}
-          onTvChange={(on) => { if (on) setView("tv"); }}
+          isHost={isHostish}
+          hostName={hostName}
+          upNext={upNextGame}
+          onChangeGame={isHostish ? () => openSheet("choose") : undefined}
+          onGameDetails={upNext ? () => openSheet("details", upNext.id) : undefined}
+          shuffleNote={shuffleResult}
+          willPlay={proj?.readiness?.wouldPlay}
+          minPlayers={startMode === "official" ? Math.max(MIN_OFFICIAL_PLAYERS, upNext?.minPlayers ?? 2) : (upNext?.minPlayers ?? 2)}
+          capacity={10}
           reactions={mzReactions}
           onReact={mzReact}
           onNudge={mzNudge}
           nudgedBy={proj?.nudgedBy}
-          onStart={upNext ? () => startGame(upNext.id, startMode === "official") : undefined}
-          startTestId={upNext ? `start-${startMode}-${upNext.id}` : undefined}
-          minPlayers={startMode === "official" ? Math.max(MIN_OFFICIAL_PLAYERS, upNext?.minPlayers ?? 2) : (upNext?.minPlayers ?? 2)}
-          onShare={() => setInviteOpen(true)}
+          onInvite={() => openSheet("invite")}
+          onMenu={() => openSheet("menu")}
+          top={isHostish ? (
+            <RecoveryRequestsCard
+              requests={proj?.recoveryRequests ?? []}
+              onDecide={async (r, approve) => {
+                try { await post(`/rooms/${roomId}/recovery-requests/${r.requestId}/${approve ? "approve" : "deny"}`, approve ? { playerId: r.playerId } : {}); } catch (e) { fail(e); }
+                await refresh();
+              }}
+            />
+          ) : undefined}
           notice={briefingNote ? <NoticeCard tone="info" title="Game cancelled" testId="briefing-cancelled-note" action={<button type="button" className="mz-chip-btn" onClick={() => setBriefingNote("")}>OK</button>}>{briefingNote}</NoticeCard>
             : watchingGame ? <NoticeCard tone="info" title={`${games.find((x) => x.id === watchingGame.gameId)?.title ?? "A game"} is being played`} testId="not-in-game-note">It started before you joined, so you’ll play the next one.</NoticeCard>
             : undefined}
-          capacity={10}
           error={err || undefined}
-          extra={lobbyExtra}
-          beforeStart={(me?.isHost || me?.isCohost) && upNext && (<>
+          onStart={upNext ? () => startGame(upNext.id, startMode === "official") : undefined}
+          startTestId={upNext ? `start-${startMode}-${upNext.id}` : undefined}
+          setup={upNext && (<>
           <div className="mz-mode" data-testid="mode-choice">
             <span className="mz-kicker mz-kicker--muted">How should {upNext.title} count?</span>
             <SegmentedChoice
@@ -877,7 +1001,7 @@ export function App() {
               value={startMode}
               onChange={(v) => setGameMode(v as "official" | "practice")}
               options={[
-                { value: "official", title: "Official", tone: "sun", testId: "mode-official", disabled: upNextPracticeOnly, detail: upNextPracticeOnly ? "Not available for this game" : `Counts toward the ${proj?.competition?.label ?? "Family Cup"}` },
+                { value: "official", title: "Official", tone: "sun", testId: "mode-official", disabled: upNextPracticeOnly, detail: upNextPracticeOnly ? "Not available for this game" : `Counts toward the ${cupLabel}` },
                 { value: "practice", title: "Practice", tone: "mint", testId: "mode-practice", detail: "Just for fun · no Cup points" },
               ]}
             />
@@ -885,7 +1009,7 @@ export function App() {
             {startMode === "official" && officialShort && (
               <NoticeCard testId="official-needs-two" title="Official games need at least 2 players"
                 action={<button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="switch-to-practice" onClick={() => setGameMode("practice")}>Play it as practice instead</button>}>
-                Only games with 2 or more players can count toward the {proj?.competition?.label ?? "Family Cup"}. Wait for someone to join, or play this one as practice.
+                Only games with 2 or more players can count toward the {cupLabel}. Wait for someone to join, or play this one as practice.
               </NoticeCard>
             )}
           </div>
@@ -901,9 +1025,7 @@ export function App() {
           />
         </>)}
         />
-        {inviteOpen && proj?.joinCode && (
-          <InviteSheet code={proj.joinCode} url={`${location.origin}/?code=${proj.joinCode}`} qrDataUrl={qrUrl || undefined} reach={linkReach(location.hostname)} onClose={() => setInviteOpen(false)} />
-        )}
+        {roomSheets}
       </MchezoProvider>
     );
   }
@@ -1103,19 +1225,22 @@ export function App() {
     );
   }
   if (view === "library") {
-    // Game Library (Milestone G): browse only. Selecting sets the up-next
-    // game and returns to the lobby, where the existing Start button starts
-    // it — the library itself never starts a game. Guests browse read-only;
-    // only host/cohost get the select button.
+    // Game Library (Milestone G; Stage 2 visual). Browse only: choosing sets
+    // the up-next game and returns to the lobby, where Start starts it. The
+    // library never starts a game. Guests browse; only host/cohost choose.
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <MchezoLibrary
           manifests={GAME_MANIFESTS}
+          catalog={catalog}
           upNextId={upNextId}
-          canSelect={!!(me?.isHost || me?.isCohost)}
-          onSelect={(id) => { setUpNextId(id); setView("lobby"); }}
-          onBack={() => setView("lobby")}
+          canSelect={isHostish}
+          inRoom
+          onSelect={(id) => { setUpNextId(id); setShuffleResult(null); toLobby(); }}
+          onDetails={(id) => openSheet("details", id)}
+          onBack={toLobby}
         />
+        {roomSheets}
       </MchezoProvider>
     );
   }
@@ -1127,7 +1252,7 @@ export function App() {
     const studioRecent = (proj?.games ?? []).map((g) => g.gameId).reverse();
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <MchezoStudio playerCount={studioPlayerCount} recentIds={studioRecent} onBack={() => setView("lobby")} />
+        <MchezoStudio playerCount={studioPlayerCount} recentIds={studioRecent} onBack={toLobby} />
       </MchezoProvider>
     );
   }

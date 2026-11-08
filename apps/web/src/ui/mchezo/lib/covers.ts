@@ -82,7 +82,13 @@ export function coverSvg(gameId: string, w: number, h: number, uid: string): str
     const a = -Math.PI / 2 + k * Math.PI / 4;
     return `<circle cx="${(w - 22 * s + Math.cos(a) * 9 * s).toFixed(2)}" cy="${(20 * s + Math.sin(a) * 9 * s).toFixed(2)}" r="${((k === 0 ? 2.6 : 1.7) * s).toFixed(2)}" fill="${k === 0 ? CREAM : INK}" opacity="${k === 0 ? 1 : 0.55}"/>`;
   }).join("");
-  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${d}"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#${gid})"/>${dots}<g transform="translate(${((w - 120 * s) / 2).toFixed(2)} ${((h - 120 * s) / 2).toFixed(2)}) scale(${s.toFixed(4)})">${glyphSvg(glyph)}</g>${ring}</svg>`;
+  // Wide covers (Home's featured card) carry a title over their lower left,
+  // so the glyph moves to the right; square covers keep it centred.
+  const wide = w > h * 1.4;
+  const gs = wide ? s * 0.85 : s;
+  const gx = wide ? w - 120 * gs - 0.14 * w : (w - 120 * s) / 2;
+  const gy = wide ? (h - 120 * gs) / 2 + 6 * s : (h - 120 * s) / 2;
+  return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${d}"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#${gid})"/>${dots}<g transform="translate(${gx.toFixed(2)} ${gy.toFixed(2)}) scale(${gs.toFixed(4)})">${glyphSvg(glyph)}</g>${ring}</svg>`;
 }
 
 /** "about 10 min" — the manifest's design estimate of a session, never a deadline. */

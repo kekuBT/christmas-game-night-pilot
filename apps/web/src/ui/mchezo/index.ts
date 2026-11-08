@@ -1,5 +1,6 @@
 import './styles/mchezo.css';
 import './styles/games.css';
+import './styles/stage2.css';
 
 export * from './tokens/tokens.js';
 export * from './types.js';
@@ -10,7 +11,7 @@ export * from './lib/lifecycle.js';
 export { MchezoProvider, useMchezo, useHaptics } from './MchezoProvider.js';
 export * from './components/primitives.js';
 export { CodeInput } from './components/CodeInput.js';
-export { CircleLobby } from './components/CircleLobby.js';
+export { CircleLobby, useArrivals } from './components/CircleLobby.js';
 export { AnswerGrid } from './components/AnswerGrid.js';
 export { NumericGuess } from './components/NumericGuess.js';
 export { AbstainControl } from './components/AbstainControl.js';

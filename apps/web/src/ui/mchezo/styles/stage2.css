@@ -1,0 +1,198 @@
+/* =====================================================================
+   Stage 2 "Night Circle": Home B, Lobby A, the visual library, sheets.
+   Same tokens as mchezo.css (set by <MchezoProvider>). Phone first; wider
+   screens get the same column, a little wider, with more cards per row.
+   Reduced motion: [data-mz-motion="reduced"]; "Off": [data-mz-still].
+   ===================================================================== */
+
+/* ---------------------------------------------------------------- shared */
+.mz-screen--wide { max-width: 560px; }
+@media (min-width: 900px) { .mz-screen--wide { max-width: 880px; } }
+.mz-cover { display: block; width: 100%; border-radius: 18px; overflow: hidden; line-height: 0; background: var(--mz-surface-2); }
+.mz-cover > svg { display: block; width: 100%; height: 100%; }
+
+.mz-appbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; }
+.mz-appbar__spacer { width: 44px; flex: none; }
+.mz-appbar__title { margin: 0; flex: 1; min-width: 0; text-align: center; font: 700 19px/1.2 var(--mz-font-display); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.mz-iconbtn { flex: none; display: inline-grid; place-items: center; width: 46px; height: 46px; padding: 0; border-radius: 14px; border: 1.5px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); cursor: pointer; }
+.mz-iconbtn:active { transform: scale(.96); }
+[data-mz-motion="reduced"] .mz-iconbtn:active { transform: none; }
+
+/* Pills: filters and quick actions. Selected = filled, never border-only. */
+.mz-filterrow { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 4px; margin: 0 -2px; scrollbar-width: none; }
+.mz-filterrow::-webkit-scrollbar { display: none; }
+.mz-filterrow--wrap { flex-wrap: wrap; overflow: visible; }
+.mz-pill { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 22px; border: 1.5px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); font: 700 14px var(--mz-font-body); cursor: pointer; white-space: nowrap; }
+.mz-pill[aria-pressed="true"], .mz-pill--active { background: var(--mz-text); border-color: var(--mz-text); color: var(--mz-ground); }
+.mz-pill[aria-pressed="true"]::before { content: "✓"; font-weight: 800; }
+.mz-pill--action { border-style: dashed; }
+.mz-pill--cat { text-transform: capitalize; }
+.mz-badge { display: inline-flex; align-items: center; align-self: flex-start; min-height: 24px; padding: 0 10px; border-radius: 12px; font: 800 12px/1 var(--mz-font-body); letter-spacing: .02em; }
+.mz-badge--mint { background: var(--mz-success); color: var(--mz-on-accent); }
+
+/* The dock: the one primary action, at the bottom of the visible screen.
+   Sticky inside the screen's own scroller (which is 100dvh tall), so it sits
+   above Safari's toolbar and the home indicator, never covers the last
+   content (it takes its own place in the flow) and never blocks scrolling. */
+.mz-screen--docked { padding-bottom: 0; }
+.mz-dock { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 12px; }
+.mz-dock .mz-key { margin-bottom: var(--mz-depth-key); }
+.mz-dock--sticky { position: sticky; bottom: 0; z-index: 4; margin-left: calc(-1 * clamp(14px, 4.6vw, 20px)); margin-right: calc(-1 * clamp(14px, 4.6vw, 20px)); padding: 14px clamp(14px, 4.6vw, 20px) max(14px, env(safe-area-inset-bottom)); background: var(--mz-ground); box-shadow: 0 -18px 18px -2px var(--mz-ground); }
+.mz-dock__note { margin: 0; text-align: center; font: 600 14px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-dock__note--waiting { padding: 6px 0 4px; }
+.mz-dock__error { margin: 0; }
+
+/* ---------------------------------------------------------------- Home B */
+.mz-home { gap: 0; }
+.mz-home .mz-dock--sticky { margin-top: 12px; }
+.mz-home__section { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+.mz-home__row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mz-home__all { color: var(--mz-text); text-decoration: none; font-weight: 700; }
+.mz-home__lede { margin-top: 18px; text-align: left; }
+.mz-home > .mz-linkbtn { align-self: flex-start; }
+.mz-rejoin { margin-top: 12px; display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; border-radius: 20px; background: var(--mz-surface-1); box-shadow: inset 0 0 0 2px var(--mz-highlight); }
+.mz-rejoin__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mz-rejoin__title { font: 700 16px/1.25 var(--mz-font-display); overflow-wrap: anywhere; }
+.mz-rejoin__sub { font: 600 14px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-rejoin .mz-key { margin-bottom: 4px; flex: none; }
+.mz-hero-card { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 24px; overflow: hidden; background: var(--mz-accent, var(--mz-surface-2)); color: var(--mz-on-accent); text-align: left; cursor: pointer; }
+.mz-hero-card .mz-cover { border-radius: 0; }
+.mz-hero-card__text { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 2px; padding: 40px 18px 14px; background: linear-gradient(to top, color-mix(in srgb, var(--mz-accent, #000) 92%, transparent) 30%, transparent); }
+.mz-hero-card__title { font: 800 clamp(22px, 7vw, 30px)/1.05 var(--mz-font-display); letter-spacing: -0.03em; overflow-wrap: anywhere; }
+.mz-hero-card__meta { font: 700 14px/1.3 var(--mz-font-body); }
+.mz-hero-card:active { transform: scale(.99); }
+.mz-shelf { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(140px, 42%); gap: 12px; overflow-x: auto; padding: 2px 2px 6px; margin: 0 -2px; scroll-snap-type: x proximity; scrollbar-width: none; }
+.mz-shelf::-webkit-scrollbar { display: none; }
+.mz-shelf > * { scroll-snap-align: start; min-width: 0; }
+@media (min-width: 600px) { .mz-shelf { grid-auto-columns: minmax(150px, 30%); } }
+@media (min-width: 900px) { .mz-shelf { grid-auto-flow: row; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: visible; } }
+.mz-gamecard { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 0; border: 0; background: none; color: var(--mz-text); text-align: left; cursor: pointer; font-family: var(--mz-font-body); }
+.mz-gamecard__art { position: relative; display: block; }
+.mz-gamecard__badge { position: absolute; left: 8px; top: 8px; }
+.mz-gamecard__title { font: 700 16px/1.2 var(--mz-font-display); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.mz-gamecard__meta { font: 600 13px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-gamecard:active .mz-cover, .mz-libcard__open:active .mz-cover, .mz-pick:active .mz-cover { transform: scale(.98); }
+[data-mz-motion="reduced"] .mz-gamecard:active .mz-cover, [data-mz-motion="reduced"] .mz-libcard__open:active .mz-cover, [data-mz-motion="reduced"] .mz-pick:active .mz-cover { transform: none; }
+
+/* ---------------------------------------------------------------- Join / Host */
+.mz-entry { gap: 0; }
+.mz-entry .mz-form { margin-top: 16px; }
+.mz-entry__lede { text-align: left; margin-top: 6px; }
+.mz-entry__reason { margin: 0; }
+.mz-entry__watch { align-self: center; margin-top: 12px; }
+.mz-entry > .mz-linkbtn { align-self: center; margin-top: 4px; }
+.mz-entry__game { margin-top: 14px; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 18px; background: var(--mz-surface-1); font: 600 15px/1.35 var(--mz-font-body); }
+.mz-entry__cover { width: 56px; flex: none; border-radius: 12px; }
+.mz-entry__status { margin-top: 10px; }
+.mz-field__help { margin: 0; text-align: left; font-size: 13px; }
+.mz-entry .mz-noticecard .mz-key { margin-bottom: 4px; }
+
+/* ---------------------------------------------------------------- sheets (Stage 2 additions) */
+/* A sheet is a capped-height flex column that scrolls itself: children keep
+   their size (the V1 lesson: shrinking children paint over each other). */
+.mz-sheet > * { flex-shrink: 0; }
+.mz-sheet--wide { max-width: 560px; }
+@media (min-width: 900px) { .mz-sheet--wide { max-width: 760px; } }
+.mz-sheet__head { display: flex; align-items: flex-start; gap: 12px; }
+.mz-sheet__headtext { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mz-sheet__title--left { text-align: left; font-size: 22px; line-height: 1.15; overflow-wrap: anywhere; }
+.mz-sheet .mz-iconbtn { width: 44px; height: 44px; }
+.mz-details__cover { border-radius: 20px; }
+.mz-details__pitch { margin: 0; font: 600 16px/1.45 var(--mz-font-body); }
+.mz-details__fit { margin: 0; color: var(--mz-highlight); }
+.mz-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.mz-chip { display: inline-flex; align-items: center; min-height: 30px; padding: 0 12px; border-radius: 15px; background: var(--mz-surface-2); font: 700 13px/1.2 var(--mz-font-body); }
+.mz-chip--sun { background: var(--mz-highlight); color: var(--mz-on-accent); }
+.mz-chip--mint { background: var(--mz-success); color: var(--mz-on-accent); }
+.mz-sheet .mz-foot { text-align: left; }
+
+/* ---------------------------------------------------------------- Lobby A */
+/* The legacy global `button:disabled { opacity: .5 }` (index.css) faded your
+   own seat (its button is disabled: you can't nudge yourself). Seat tokens
+   carry their own states (offline, dim), so the button itself never fades. */
+.mz-seat__btn:disabled { opacity: 1; }
+.mz-cupchip { flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 18px; background: color-mix(in srgb, var(--mz-highlight) 16%, var(--mz-surface-1)); color: var(--mz-highlight); font: 800 14px var(--mz-font-body); white-space: nowrap; }
+.mz-lobby__bar { flex-wrap: nowrap; }
+.mz-lobby__barend { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mz-codebtn { flex: none; display: inline-flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border-radius: 16px; border: 2px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); cursor: pointer; }
+.mz-codebtn__code { font: 700 17px var(--mz-font-display); letter-spacing: .12em; }
+.mz-codebtn__invite { display: inline-flex; align-items: center; gap: 4px; font: 700 14px var(--mz-font-body); }
+@media (max-width: 359px) { .mz-codebtn__invite { font-size: 0; gap: 0; } .mz-codebtn { gap: 6px; padding: 0 10px; } }
+.mz-lobby__status { margin: 4px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
+.mz-lobby__headline { font: 700 17px/1.25 var(--mz-font-display); letter-spacing: -0.02em; }
+.mz-lobby__counts { font: 600 14px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-lobby__here { color: var(--mz-success); font-weight: 800; }
+.mz-lobby__circle { flex: 1 0 240px; min-height: 240px; max-height: 340px; }
+.mz-circle__count { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.mz-circle__num { font: 800 clamp(26px, 11cqi, 44px)/1 var(--mz-font-display); font-variant-numeric: tabular-nums; }
+.mz-circle__label { font: 600 clamp(12px, 3.8cqi, 15px)/1.15 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-upnext-card { margin-top: 12px; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 22px; background: var(--mz-surface-1); }
+.mz-upnext-card__main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 0; border: 0; background: none; color: var(--mz-text); text-align: left; cursor: pointer; font-family: var(--mz-font-body); }
+.mz-upnext-card__cover { width: 68px; flex: none; border-radius: 14px; }
+.mz-upnext-card__text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mz-upnext-card__kicker { color: var(--mz-accent, var(--mz-answer-3)); font-size: 12px; }
+.mz-upnext-card .mz-upnext__name { font: 700 clamp(16px, 4.8vw, 19px)/1.15 var(--mz-font-display); letter-spacing: -0.02em; overflow-wrap: anywhere; text-wrap: balance; }
+.mz-upnext-card__meta { font: 600 13px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-upnext-card__change { flex: none; }
+.mz-lobby__shuffle { text-align: left; margin-top: 8px; }
+.mz-lobby .mz-mode { margin-top: 14px; margin-bottom: 0; }
+.mz-lobby .mz-ready { margin-bottom: 0; }
+@media (max-height: 700px) { .mz-lobby__circle { flex-basis: 210px; min-height: 210px; } }
+
+/* ---------------------------------------------------------------- Choose game */
+.mz-pickgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
+@media (min-width: 600px) { .mz-pickgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .mz-pickgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.mz-pick { display: flex; flex-direction: column; gap: 6px; padding: 0; border: 0; background: none; color: var(--mz-text); text-align: left; cursor: pointer; font-family: var(--mz-font-body); min-width: 0; }
+.mz-pick__art { position: relative; display: block; border-radius: 20px; }
+.mz-pick--on .mz-pick__art { box-shadow: 0 0 0 3px var(--mz-surface-1), 0 0 0 6px var(--mz-text); }
+.mz-pick__badge { position: absolute; left: 8px; top: 8px; display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: 14px; background: var(--mz-text); color: var(--mz-ground); font: 800 13px/1 var(--mz-font-body); }
+.mz-pick__title { font: 700 15px/1.2 var(--mz-font-display); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.mz-pick__meta { font: 600 13px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-pick__practice { color: var(--mz-success); font-weight: 800; }
+.mz-pickdivider { margin: 8px 0 0; }
+
+/* ---------------------------------------------------------------- Room menu */
+.mz-menu__section { margin-top: 8px; font-size: 12px; }
+.mz-menu__group { display: flex; flex-direction: column; border-radius: 18px; background: var(--mz-ground); overflow: hidden; }
+.mz-menurow { display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 0 14px; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--mz-line) 45%, transparent); background: transparent; color: var(--mz-text); text-align: left; cursor: pointer; font: 700 16px var(--mz-font-body); }
+.mz-menurow:last-child { border-bottom: 0; }
+.mz-menurow__icon { width: 24px; display: inline-grid; place-items: center; flex: none; }
+.mz-menurow__label { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.mz-menurow__detail { flex: none; max-width: 45%; font: 600 13px/1.25 var(--mz-font-body); color: var(--mz-text-muted); text-align: right; }
+.mz-menurow__chev { flex: none; color: var(--mz-text-muted); font-size: 20px; }
+.mz-menurow--danger { color: var(--mz-brand); }
+.mz-menu__note { margin: 0; }
+.mz-menu__msg p { margin: 0; }
+.mz-sheet .mz-card { margin-top: 0 !important; background: var(--mz-ground); }
+.mz-menu__card { display: flex; flex-direction: column; gap: 6px; }
+.mz-menu__player { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; }
+.mz-menu__pname { min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+
+/* ---------------------------------------------------------------- Library */
+.mz-library { gap: 0; }
+.mz-search { position: relative; margin-top: 10px; }
+.mz-search__icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--mz-text-muted); pointer-events: none; }
+.mz-search__input { padding-left: 44px; }
+.mz-lib-tools { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.mz-lib-count { margin: 0; font: 600 14px var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-lib-filters { margin-top: 10px; display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 20px; background: var(--mz-surface-1); }
+.mz-lib-filters__label { margin: 0 0 6px; font: 800 13px var(--mz-font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--mz-text-muted); }
+.mz-activefilters { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mz-activefilters .mz-linkbtn { color: var(--mz-text); font-weight: 700; }
+.mz-lib-note { text-align: left; margin-top: 10px; }
+.mz-lib-empty { margin-top: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.mz-lib-empty__title { margin: 0; font: 700 17px var(--mz-font-display); }
+.mz-lib-empty .mz-foot { margin: 0; text-align: left; }
+.mz-libgrid { margin-top: 14px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; }
+@media (min-width: 600px) { .mz-libgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .mz-libgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.mz-libcard { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.mz-libcard__open { display: flex; flex-direction: column; gap: 6px; padding: 0; border: 0; background: none; color: var(--mz-text); text-align: left; cursor: pointer; font-family: var(--mz-font-body); }
+.mz-libcard__art { position: relative; display: block; border-radius: 20px; }
+.mz-libcard--on .mz-libcard__art { box-shadow: 0 0 0 3px var(--mz-ground), 0 0 0 6px var(--mz-text); }
+.mz-libcard__title { font: 700 15px/1.2 var(--mz-font-display); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.mz-libcard__meta { font: 600 13px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-libcard__tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.mz-lib-tag--practice { background: var(--mz-success); border-color: var(--mz-success); color: var(--mz-on-accent); font-weight: 800; }
+.mz-libcard__select { align-self: flex-start; min-height: 44px; padding: 0 12px; font-size: 13px; }

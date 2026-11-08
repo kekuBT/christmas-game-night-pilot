@@ -4,11 +4,30 @@
  * address bar and the rendered screen in step, so browser Back, in-app Back
  * and iOS swipe-back behave the same way. It never touches seats, sessions,
  * projections or sockets.
+ *
+ * Each history entry we write carries { mz, sheet, depth }. `depth` counts the
+ * entries this tab pushed on top of the first one, so in-app Back can step
+ * back when there is somewhere of ours to go back to, and otherwise replaces
+ * the entry with a sensible screen (never leaving the app by accident).
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseRoute, routeUrl, type Route, type Sheet } from "./ui/mchezo/lib/routes.js";
 
+interface Entry { mz: true; sheet: boolean; depth: number }
 const read = () => parseRoute(location.pathname, location.search);
+const entry = (): Entry | null => {
+  const s = history.state as Partial<Entry> | null;
+  return s && s.mz === true && typeof s.depth === "number" ? (s as Entry) : null;
+};
+
+/** Stamp the first entry (or a reloaded one) so in-app Back knows where it is. */
+export function stampEntry(): void {
+  const here = entry();
+  // A reloaded page with a sheet open was not pushed by this page load's
+  // sheet opener; keep its depth, but treat the sheet as not pushed unless
+  // there is an entry of ours under it.
+  history.replaceState({ mz: true, sheet: !!here?.sheet && (here?.depth ?? 0) > 0, depth: here?.depth ?? 0 } satisfies Entry, "", location.pathname + location.search);
+}
 
 export function useRoute() {
   const [state, setState] = useState(read);
@@ -20,27 +39,50 @@ export function useRoute() {
     return () => removeEventListener("popstate", onPop);
   }, []);
 
-  /** Go to a screen. `replace` swaps the current entry (redirects, fixes). */
-  const navigate = useCallback((route: Route, opts: { replace?: boolean; sheet?: Sheet | null } = {}) => {
-    const url = routeUrl(route, opts.sheet ?? null);
+  /**
+   * Go to a screen. `replace` swaps the current entry (redirects, fixes).
+   * Leaving an open sheet for another screen replaces the sheet's entry, so
+   * Back from that screen returns to the screen under the sheet.
+   */
+  const navigate = useCallback((route: Route, opts: { replace?: boolean; sheet?: Sheet | null; game?: string | null } = {}) => {
+    const url = routeUrl(route, opts.sheet ?? null, opts.game ?? null);
     if (url === location.pathname + location.search) return;
-    const entry = { mz: true, sheet: !!opts.sheet };
-    if (opts.replace) history.replaceState(entry, "", url);
-    else history.pushState(entry, "", url);
+    const here = entry();
+    const depth = here?.depth ?? 0;
+    const replace = opts.replace || (!!here?.sheet && !opts.sheet);
+    if (replace) history.replaceState({ mz: true, sheet: !!opts.sheet && !!here?.sheet, depth } satisfies Entry, "", url);
+    else history.pushState({ mz: true, sheet: !!opts.sheet, depth: depth + 1 } satisfies Entry, "", url);
     setState(read());
   }, []);
 
   /** Open a sheet over the current screen as its own history entry, so Back closes it. */
-  const openSheet = useCallback((sheet: Sheet) => {
-    navigate(stateRef.current.route, { sheet });
-  }, [navigate]);
+  const openSheet = useCallback((sheet: Sheet, game?: string) => {
+    const here = entry();
+    const url = routeUrl(stateRef.current.route, sheet, game ?? null);
+    if (url === location.pathname + location.search) return;
+    // A sheet opened from another sheet replaces it (one sheet at a time, one Back to close).
+    if (here?.sheet) history.replaceState({ mz: true, sheet: true, depth: here.depth } satisfies Entry, "", url);
+    else history.pushState({ mz: true, sheet: true, depth: (here?.depth ?? 0) + 1 } satisfies Entry, "", url);
+    setState(read());
+  }, []);
 
   /** Close the sheet: step back if we pushed it, otherwise drop it from the address. */
   const closeSheet = useCallback(() => {
     if (!stateRef.current.sheet) return;
-    if ((history.state as { sheet?: boolean } | null)?.sheet) history.back();
+    if (entry()?.sheet) history.back();
     else navigate(stateRef.current.route, { replace: true, sheet: null });
   }, [navigate]);
 
-  return { route: state.route, sheet: state.sheet, navigate, openSheet, closeSheet };
+  /**
+   * In-app Back: step back through our own entries (closing an open sheet
+   * first counts as one step), else replace with `fallback`.
+   */
+  const back = useCallback((fallback: Route) => {
+    const here = entry();
+    const steps = here?.sheet ? 2 : 1;
+    if ((here?.depth ?? 0) >= steps) history.go(-steps);
+    else navigate(fallback, { replace: true });
+  }, [navigate]);
+
+  return { route: state.route, sheet: state.sheet, game: state.game, navigate, openSheet, closeSheet, back };
 }

@@ -15,15 +15,16 @@
  *   /room/library         Game library inside a room (host keeps the room)
  *   /room/studio          Studio (preview)
  *
- * A sheet rides in `?sheet=` (invite, choose, menu, settings), so browser and
- * iOS swipe Back close it before leaving the screen.
+ * A sheet rides in `?sheet=` (invite, choose, menu, settings, details), so
+ * browser and iOS swipe Back close it before leaving the screen. The details
+ * sheet names its game in `?game=`.
  *
  * Note: `/games` and `/rooms/...` are server API paths, which is why the
  * library lives at `/library`.
  */
 
 export type RoomSub = "lobby" | "cup" | "tv" | "memories" | "library" | "studio";
-export type Sheet = "invite" | "choose" | "menu" | "settings";
+export type Sheet = "invite" | "choose" | "menu" | "settings" | "details";
 export type Route =
   | { name: "home" }
   | { name: "join"; code?: string }
@@ -32,7 +33,8 @@ export type Route =
   | { name: "watch"; code?: string }
   | { name: "room"; sub: RoomSub; gameId?: string };
 
-const SHEETS: readonly Sheet[] = ["invite", "choose", "menu", "settings"];
+const SHEETS: readonly Sheet[] = ["invite", "choose", "menu", "settings", "details"];
+const GAME_ID = /^[a-z0-9-]{1,40}$/;
 const SUBS: Readonly<Record<string, RoomSub>> = { "": "lobby", cup: "cup", tv: "tv", memories: "memories", library: "library", studio: "studio" };
 const CODE = /^[A-Z0-9]{6}$/;
 
@@ -42,10 +44,13 @@ function cleanCode(raw: string | null): string | undefined {
 }
 
 /** Parse a location (pathname + search). Unknown paths read as Home. */
-export function parseRoute(pathname: string, search = ""): { route: Route; sheet: Sheet | null } {
+export function parseRoute(pathname: string, search = ""): { route: Route; sheet: Sheet | null; game: string | null } {
   const params = new URLSearchParams(search);
   const s = params.get("sheet");
-  const sheet = (SHEETS as readonly string[]).includes(s ?? "") ? (s as Sheet) : null;
+  let sheet = (SHEETS as readonly string[]).includes(s ?? "") ? (s as Sheet) : null;
+  const g = params.get("game");
+  const game = sheet === "details" && g && GAME_ID.test(g) ? g : null;
+  if (sheet === "details" && !game) sheet = null;
   const parts = pathname.replace(/\/+$/, "").split("/").filter(Boolean);
   const code = cleanCode(params.get("code") ?? params.get("joinCode"));
   let route: Route;
@@ -59,11 +64,11 @@ export function parseRoute(pathname: string, search = ""): { route: Route; sheet
     if (!sub) route = { name: "room", sub: "lobby" };
     else route = sub === "library" && parts[2] ? { name: "room", sub, gameId: decodeURIComponent(parts[2]) } : { name: "room", sub };
   } else route = { name: "home" };
-  return { route, sheet };
+  return { route, sheet, game };
 }
 
 /** The URL for a route (and optional sheet). */
-export function routeUrl(route: Route, sheet: Sheet | null = null): string {
+export function routeUrl(route: Route, sheet: Sheet | null = null, game: string | null = null): string {
   let path: string;
   const q = new URLSearchParams();
   switch (route.name) {
@@ -79,6 +84,7 @@ export function routeUrl(route: Route, sheet: Sheet | null = null): string {
     }
   }
   if (sheet) q.set("sheet", sheet);
+  if (sheet === "details" && game) q.set("game", game);
   const qs = q.toString();
   return qs ? `${path}?${qs}` : path;
 }

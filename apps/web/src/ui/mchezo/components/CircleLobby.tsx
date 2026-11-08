@@ -16,6 +16,8 @@ export interface CircleLobbyProps {
   onNudge?: (playerId: string) => void;
   /** Player ids that just nudged you (shows a bubble on their seat). */
   nudgedBy?: readonly string[];
+  /** Stage 2: a badge per seat (e.g. a check for "will play the next game"). Default: offline only. */
+  badgeFor?: (player: Player) => 'check' | 'offline' | null | undefined;
 }
 
 const RING = 38; // ring radius as % of the square
@@ -25,7 +27,7 @@ const RING = 38; // ring radius as % of the square
  * spread around the ring; the ring shows a couple of open seats so it never looks
  * empty with few players, and stops at capacity.
  */
-export function CircleLobby({ players, youId, capacity = 10, center, reactions = [], onNudge, nudgedBy = [] }: CircleLobbyProps) {
+export function CircleLobby({ players, youId, capacity = 10, center, reactions = [], onNudge, nudgedBy = [], badgeFor }: CircleLobbyProps) {
   const { theme, reducedMotion } = useMchezo();
   const buzz = useHaptics();
   const youIdx = Math.max(0, players.findIndex((p) => p.id === youId));
@@ -105,7 +107,7 @@ export function CircleLobby({ players, youId, capacity = 10, center, reactions =
                 aria-label={you ? `You, ${p.name}` : off ? `${p.name}, reconnecting` : `Nudge ${p.name}`}
                 title={p.name}
                 onClick={() => { if (you || off) return; buzz(10); setWobble(p.id); onNudge?.(p.id); }}>
-                <PlayerToken player={p} index={colorIndex(p)} you={you} />
+                <PlayerToken player={p} index={colorIndex(p)} you={you} badge={badgeFor?.(p)} />
               </button>
               <span className={['mz-seat__name', off ? 'mz-seat__name--off' : ''].join(' ')}>{you ? 'You' : off ? 'Away' : p.name}</span>
               {wobble === p.id && <span className="mz-bubble" role="status">Nudged!</span>}

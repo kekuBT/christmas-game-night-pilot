@@ -47,14 +47,14 @@ export function HomeScreen(p: {
   onSettings: () => void;
   onLostSeat: () => void;
   /** This tab is seated in a room (e.g. after Back from the lobby). */
-  rejoin?: { code: string; inGame: boolean; onRejoin: () => void } | null;
+  rejoin?: { code: string; state: "lobby" | "briefing" | "game"; onRejoin: () => void } | null;
   /** Remembered seats on this device (WelcomeBack). */
   welcome?: ReactNode;
   status?: ReactNode;
 }) {
   const party = p.catalog.filter((g) => g.id !== p.featured?.id);
   return (
-    <main className="mz-screen mz-screen--wide mz-home" aria-label="Mchezo home" data-testid="home">
+    <main className="mz-screen mz-screen--wide mz-screen--docked mz-home" aria-label="Mchezo home" data-testid="home">
       <header className="mz-appbar">
         <Wordmark size={22} />
         <button type="button" className="mz-iconbtn" aria-label="Settings for this phone" data-testid="home-settings" onClick={p.onSettings}><SettingsIcon /></button>
@@ -62,8 +62,8 @@ export function HomeScreen(p: {
       {p.rejoin && (
         <section className="mz-rejoin" aria-label="Your room" data-testid="home-rejoin">
           <div className="mz-rejoin__text">
-            <span className="mz-rejoin__title">Rejoin room {p.rejoin.code}</span>
-            <span className="mz-rejoin__sub">{p.rejoin.inGame ? "A game is in progress. Its clock keeps running." : "Your seat is still here."}</span>
+            <span className="mz-rejoin__title">Rejoin {p.rejoin.code ? `room ${p.rejoin.code}` : "your room"}</span>
+            <span className="mz-rejoin__sub">{p.rejoin.state === "game" ? "A game is in progress. Its clock keeps running." : p.rejoin.state === "briefing" ? "A game is about to start. Rejoin to get ready." : "Your seat is still here."}</span>
           </div>
           <button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="home-rejoin-btn" onClick={p.rejoin.onRejoin}>Rejoin</button>
         </section>
@@ -93,8 +93,7 @@ export function HomeScreen(p: {
       <p className="mz-foot mz-home__lede">Party games for the people in the room. Your phone is your controller; no account needed.</p>
       <button type="button" className="mz-linkbtn" data-testid="mz-lost-place" onClick={p.onLostSeat}>Lost your place? Recover your seat</button>
       {p.status}
-      <div className="mz-grow" />
-      <div className="mz-dock" data-testid="home-dock">
+      <div className="mz-dock mz-dock--sticky" data-testid="home-dock">
         <Keycap block data-testid="home-join" onClick={p.onJoin}>Join with a code</Keycap>
         <Keycap block variant="surface" data-testid="home-host" onClick={p.onHost}>Host a party</Keycap>
       </div>
@@ -114,6 +113,10 @@ export function JoinScreen(p: {
   remember: ReactNode;
   notice?: ReactNode;
   status?: ReactNode;
+  /** This tab already holds a seat: explain instead of offering a second one. */
+  blocked?: boolean;
+  /** Arrived from a watch link: lead with watching. */
+  watch?: boolean;
 }) {
   const nameId = useId();
   const ok = p.code.length === 6 && p.name.trim().length > 0;
@@ -121,8 +124,9 @@ export function JoinScreen(p: {
     <main className="mz-screen mz-entry" aria-label="Join a game" data-testid="join-screen">
       <header className="mz-appbar"><BackButton onBack={p.onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
       {p.notice}
-      <h1 className="mz-h1">Join a game</h1>
-      <p className="mz-foot mz-entry__lede">Type the 6-character code on the host’s screen, or scan their QR code.</p>
+      <h1 className="mz-h1">{p.watch ? "Watch a game" : "Join a game"}</h1>
+      <p className="mz-foot mz-entry__lede">{p.watch ? "Watching needs only the room code: no seat, no scores, nothing to tap." : "Type the 6-character code on the host’s screen, or scan their QR code."}</p>
+      {!p.blocked && <>
       <form className="mz-form" onSubmit={(e) => { e.preventDefault(); if (ok) p.onJoin(); }}>
         <CodeInput value={p.code} onChange={p.onCodeChange} length={6} pattern={/[^A-Z0-9]/g} />
         <div className="mz-field">
@@ -136,6 +140,7 @@ export function JoinScreen(p: {
       </form>
       <button type="button" className="mz-chip-btn mz-entry__watch" data-testid="watch-spectator" disabled={p.code.length !== 6} onClick={p.onSpectate}>Watch as spectator — no seat needed</button>
       <button type="button" className="mz-linkbtn" data-testid="mz-lost-place" onClick={p.onLostSeat}>Lost your place? Recover your seat</button>
+      </>}
       {p.status}
     </main>
   );
@@ -150,6 +155,8 @@ export function HostScreen(p: {
   firstGame?: CatalogGame;
   notice?: ReactNode;
   status?: ReactNode;
+  /** This tab already holds a seat. */
+  blocked?: boolean;
 }) {
   const nameId = useId();
   const ok = p.name.trim().length > 0;
@@ -159,13 +166,13 @@ export function HostScreen(p: {
       {p.notice}
       <h1 className="mz-h1">Host a party</h1>
       <p className="mz-foot mz-entry__lede">Your phone runs the room. Everyone else joins with the code or the QR code you’ll see next.</p>
-      {p.firstGame && (
+      {!p.blocked && p.firstGame && (
         <div className="mz-entry__game" data-testid="host-first-game">
           <GameCover gameId={p.firstGame.id} decorative className="mz-entry__cover" />
           <span>First game: <b>{p.firstGame.title}</b>. You can change it in the lobby.</span>
         </div>
       )}
-      <form className="mz-form" onSubmit={(e) => { e.preventDefault(); if (ok) p.onHost(); }}>
+      {!p.blocked && <form className="mz-form" onSubmit={(e) => { e.preventDefault(); if (ok) p.onHost(); }}>
         <div className="mz-field">
           <label htmlFor={nameId} className="mz-field__label">What should we call you?</label>
           <input id={nameId} className="mz-input" value={p.name} maxLength={24} autoComplete="nickname" placeholder="e.g. Auntie June" autoFocus onChange={(e) => p.onNameChange(e.target.value)} aria-describedby={`${nameId}-help`} />
@@ -174,7 +181,7 @@ export function HostScreen(p: {
         {p.remember}
         <Keycap type="submit" block disabled={!ok}>Host a game</Keycap>
         {!ok && <p className="mz-foot mz-entry__reason" data-testid="host-reason">Type your name first, so your players know whose party it is.</p>}
-      </form>
+      </form>}
       {p.status}
     </main>
   );
