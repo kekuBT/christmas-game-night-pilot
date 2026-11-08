@@ -504,6 +504,6 @@
 .mz-brief__note { display: block; color: var(--mz-highlight); font-weight: 700; margin-bottom: 4px; }
 .mz-brief__confirm-row { display: block; color: var(--mz-text); font-weight: 600; }
 .mz-brief__tvgrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; margin-top: 12px; }
-.mz-brief__tvgrid .mz-card + .mz-card { margin-top: 0; }
+.mz-brief__tvgrid .mz-card + .mz-card, .mz-brief__tvgrid .mz-brief__rules { margin-top: 0; }
 .mz-brief--tv .mz-brief__objective { font-size: 26px; }
 .mz-brief__people--tv { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }

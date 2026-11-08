@@ -316,3 +316,38 @@ During a briefing, **every** projection (player, host or cohost, TV, spectator) 
 - Content approvals.
 
 **Effort once approved:** about 3 days (server, client, TV, drivers), up from 2 because of T4, the warning, and the restart guarantee. Its own branch, with a full gate.
+
+## 11. Implementation notes (branch `claude/d3-briefing`, 2026-11-08)
+
+**Where it lives:**
+
+| Part | Files |
+|---|---|
+| Cup timing record | `src/server/cup.ts` (`TIMING_V2`, `timing`) |
+| Briefing engine | `src/server/room.ts`: `startGame`, `briefingReady`, `startNow`, `cancelBriefing`, `beginPlay`, `endBriefing`, `tickBriefing`, `afterRestore`, `briefingView`, `isActiveGame` |
+| Routes and restore | `src/server/http.ts`: `POST /rooms/:id/games/:gid/start-now`, `…/cancel`, `newCupTiming`, `afterRestore` on boot |
+| Snapshot schema | `src/server/persistence.ts` |
+| Client | `apps/web/src/components/mchezo/Briefing.tsx` (phone, TV and spectator) and `apps/web/src/ui/mchezo/lib/briefing.ts` (pure helpers) |
+| Protocol | `CLIENT_PROTOCOL` / `MIN_CLIENT_PROTOCOL` = 5 |
+
+**Behaviour details:**
+- **When (a) is checked:** in the same step as each Ready intent, and on every lifecycle sweep (1 s), which covers presence changes.
+- **Host Start now:** answered with HTTP 409 and `{ code, needsConfirmation, startNowAt }` when refused. `CONTENT_CHANGED` (409) means the briefing was cancelled because a restart loaded different content.
+- **Cancelled briefings:** every phone shows "The game was cancelled before it started…" in the lobby.
+
+**Tests:**
+- `tests/d3-briefing.test.ts`: engine, including secrecy for all 11 games × every audience, and version-2 play identical to version 1 after T_play for all 11 games.
+- `tests/d3-briefing-http.test.ts`: routes, pushes, spectator projection, and a real server restart.
+- `tests/d3-briefing-ui.test.ts`: client helpers.
+- `scripts/check-briefing.mjs`: the browser driver.
+
+**The existing drivers play the briefing like a family would** (`scripts/lib/briefing.mjs`):
+- Each player taps I'm ready.
+- A TV seat kept on the TV view can't tap Ready, so the host uses Start now with confirmation.
+
+**Existing engine and HTTP tests stay on timing version 1** (D-UX-09). Version 1 is unchanged and is still what every existing Cup uses.
+
+**Not done here:**
+- Solo practice (D2).
+- The Home and Lobby redesign.
+- `scripts/screenshot-m6.mjs`: a one-off screenshot helper from M6, not a gate driver. It still expects the old intro and wasn't updated.

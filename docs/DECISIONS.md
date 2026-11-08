@@ -316,3 +316,9 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
 - **D-UX-10 OPEN product question (owner, 2026-11-08), not decided:** how a game should treat players who leave, forfeit, abandon on purpose or barely take part after play begins. Also: whether that opens a way to game the championship.
   - **Today's rule is unchanged:** every roster player has a score from the start, and anyone who never returns scores 0 and counts as a competitor.
   - **D3 doesn't change it.** Alternatives and worked examples will be presented for decision later. No scoring policy is chosen here.
+- **D-UX-11 Browser drivers play the D3 briefing as a family would; nothing bypasses it.**
+  - Every driver that starts a game in a new room now has each player's phone tap I'm ready (`scripts/lib/briefing.mjs`).
+  - Where a seat deliberately can't tap Ready (a TV seat kept on the TV view), the host uses Start now and confirms the named seat, the D3 consent path.
+  - Checks that named the old per-phone intro now name its replacement: the briefing explains the game, and no intro follows.
+  - Coverage was added for the new screen (contrast, overflow, 44 px targets, TV secrecy). No other assertion was changed.
+  - *Alternative:* a test-only switch that starts games without a briefing. Rejected: the gate would stop testing what families actually use.
