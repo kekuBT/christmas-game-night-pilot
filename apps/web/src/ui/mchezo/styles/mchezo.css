@@ -477,3 +477,33 @@
 .mz-settings__label { font: 800 15px var(--mz-font-body); }
 .mz-mode { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 .mz-ready { margin-bottom: 14px; }
+
+/* ---- D3 briefing: rules and Ready before play (no game clock) ---- */
+.mz-brief__mode { display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 16px; font: 700 13px/1.2 var(--mz-font-body); }
+.mz-brief__mode--official { background: var(--mz-highlight); color: var(--mz-on-accent); }
+.mz-brief__mode--practice { background: var(--mz-success); color: var(--mz-on-accent); }
+.mz-brief .mz-noticecard { margin-top: 12px; }
+.mz-brief__rules { margin-top: 12px; }
+.mz-brief__objective { margin: 6px 0 0; font: 700 18px/1.35 var(--mz-font-display); overflow-wrap: anywhere; }
+.mz-brief__steps { margin: 10px 0 0; padding-left: 22px; display: grid; gap: 6px; font: 500 15px/1.45 var(--mz-font-body); }
+.mz-brief__timing { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font: 600 14px/1.4 var(--mz-font-body); }
+.mz-brief__fair { margin: 10px 0 0; }
+.mz-brief .mz-card + .mz-card { margin-top: 12px; }
+.mz-brief__people { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
+.mz-brief__person { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; }
+.mz-brief__person .mz-token { grid-row: span 2; }
+.mz-brief__name { font-weight: 700; overflow-wrap: anywhere; }
+.mz-brief__status { font-size: 14px; color: var(--mz-text-muted); }
+.mz-brief__status--ready { color: var(--mz-success); font-weight: 700; }
+.mz-brief__me { margin-top: 14px; }
+.mz-brief__me .mz-foot { margin: 6px 0 0; }
+.mz-brief__host { margin-top: 14px; padding: 14px; border-radius: 18px; background: var(--mz-surface-1); box-shadow: inset 0 0 0 1.5px var(--mz-line); }
+.mz-brief__host .mz-foot { margin: 4px 0 0; }
+.mz-brief__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; align-items: center; }
+.mz-brief__error { margin: 10px 0 0; color: var(--mz-highlight); font-weight: 700; }
+.mz-brief__note { display: block; color: var(--mz-highlight); font-weight: 700; margin-bottom: 4px; }
+.mz-brief__confirm-row { display: block; color: var(--mz-text); font-weight: 600; }
+.mz-brief__tvgrid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; margin-top: 12px; }
+.mz-brief__tvgrid .mz-card + .mz-card { margin-top: 0; }
+.mz-brief--tv .mz-brief__objective { font-size: 26px; }
+.mz-brief__people--tv { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }

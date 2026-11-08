@@ -47,7 +47,9 @@ export function deriveShowPhase(
   playerId?: string,
 ): ShowPhase {
   if (playing) {
-    if (introDismissedFor !== playing.id) return "intro";
+    // D3: a timing-v2 game's rules were read in the briefing, before any
+    // clock started, so there is no second intro racing the clock.
+    if (introDismissedFor !== playing.id && playing.timingVersion !== 2) return "intro";
     if (myProgressDone(playing, playerId)) return "waiting";
     return "gameplay";
   }

@@ -4,7 +4,8 @@
 // per game in App.tsx; the top-level contract — players, games, standings,
 // me/myGames — is fully typed and checked by apps/web/tsconfig.json.
 
-export type GameStatus = "playing" | "finished";
+/** "briefing": D3 rules and Ready before play (timing-v2 Cups); no content is sent yet. */
+export type GameStatus = "briefing" | "playing" | "finished";
 
 export interface PublicPlayer {
   id: string;
@@ -39,6 +40,12 @@ export interface GameOutcome {
   totalUnits?: number;
 }
 interface LifecycleFields {
+  /** D3: 2 for games of timing-v2 Cups (they open with a briefing). Absent = v1. */
+  timingVersion?: 2;
+  /** D3: when play began, for everyone at once (server time). */
+  playStartedAt?: number;
+  /** D3: the public briefing (only while status is "briefing"). */
+  briefing?: { createdAt: number; startNowAt: number; warnAt: number; expiresAt: number; ready: string[]; warned: boolean };
   deadlineAt?: number;
   phaseDeadlineAt?: number;
   lifecycle?: GameLifecycleInfo;
@@ -67,6 +74,8 @@ export interface PublicGame extends LifecycleFields {
 
 export interface PlayerGame extends LifecycleFields {
   id: string;
+  /** In this game's roster (D3 briefing: may tap Ready). */
+  participant?: boolean;
   official?: boolean;
   gameId: string;
   status: GameStatus;

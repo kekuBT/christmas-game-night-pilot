@@ -130,6 +130,8 @@ export interface LobbyScreenProps {
       lobby — it used to sit at the very bottom of `extra`, below the
       fold on a phone, so a start error was effectively swallowed. */
   error?: string;
+  /** A message for everyone in the room, shown under the title (e.g. a game cancelled before it started). */
+  notice?: ReactNode;
 }
 
 export function LobbyScreen(p: LobbyScreenProps) {
@@ -150,6 +152,7 @@ export function LobbyScreen(p: LobbyScreenProps) {
       </header>
       <h1 className="mz-h1">You’re in, {you?.name ?? 'friend'}.</h1>
       {p.error ? <p className="err" data-testid="mz-error" role="alert">{p.error}</p> : null}
+      {p.notice}
       <p className="mz-sub" role="status" aria-live="polite">
         {arrival ? <span className="mz-sub__new">{arrival} joined</span> : null}
         {arrival ? ' · ' : ''}{connected} here{reconnecting ? ` · ${reconnecting} reconnecting` : ''}{away ? ` · ${away} away` : ''}{arrival ? '' : p.players.length < (p.capacity ?? 10) ? ' · room for more' : ' · room is full'}

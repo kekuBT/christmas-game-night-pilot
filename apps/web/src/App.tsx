@@ -22,6 +22,7 @@ import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { AnswerReview, reviewRows } from "./components/mchezo/AnswerReview.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
 import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
+import { BriefingScreen, BriefingTv, type StartNowResult } from "./components/mchezo/Briefing.js";
 import { resolveReducedMotion } from "./ui/mchezo/lib/motion.js";
 import { GAME_MANIFESTS } from "../../../src/games/manifest.js";
 import { shuffle } from "../../../src/games/shuffle.js";
@@ -112,6 +113,18 @@ export function App() {
   const osReducedMotion = typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const motion = { reducedMotion: resolveReducedMotion(settings.anim, osReducedMotion) ? true : undefined, still: settings.anim === "off" };
   const [inviteOpen, setInviteOpen] = useState(false);
+  // D3: tell everyone when a briefing ended without play (host cancel or the
+  // five-minute guard). The server removed it; nothing was scored or used.
+  const [briefingNote, setBriefingNote] = useState("");
+  const lastBriefingRef = useRef<string | null>(null);
+  useEffect(() => {
+    const now = proj?.games ?? [];
+    const open = now.find((g) => g.status === "briefing");
+    if (open) { lastBriefingRef.current = open.id; setBriefingNote(""); return; }
+    const last = lastBriefingRef.current;
+    lastBriefingRef.current = null;
+    if (last && !now.some((g) => g.id === last)) setBriefingNote("The game was cancelled before it started. Nothing was scored and no questions were used up.");
+  }, [proj]);
   // Mchezo lobby: the host-chosen "up next" game (default: Trivia, the
   // Phase 2 featured game). The lobby Start button starts this game.
   const [upNextId, setUpNextId] = useState("trivia");
@@ -419,6 +432,28 @@ export function App() {
       await refresh(); setShuffleResult(null); setView("lobby");
     } catch (e) { fail(e); } finally { startingRef.current = false; }
   }
+  // ---- D3 briefing actions (the server decides; these only ask) ----
+  async function briefingReady(gameInstanceId: string, ready: boolean) {
+    await intent(gameInstanceId, "briefing-ready", { ready });
+  }
+  async function briefingStartNow(gameInstanceId: string, confirmed: string[]): Promise<StartNowResult> {
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    const t = seats.token();
+    if (t) headers["x-session-token"] = t;
+    try {
+      const resp = await fetch(`/rooms/${roomId}/games/${gameInstanceId}/start-now`, { method: "POST", headers, body: JSON.stringify({ confirmed }) });
+      const body = (await resp.json().catch(() => ({}))) as { error?: string; code?: string; needsConfirmation?: string[] };
+      await refresh();
+      return resp.ok ? { ok: true } : { ok: false, code: body.code, error: body.error, needsConfirmation: body.needsConfirmation };
+    } catch (e) {
+      return { ok: false, error: e instanceof Error ? e.message : "Couldn’t reach the game. Try again." };
+    }
+  }
+  async function briefingCancel(gameInstanceId: string) {
+    try { await post(`/rooms/${roomId}/games/${gameInstanceId}/cancel`, {}); } catch (e) { fail(e); }
+    await refresh();
+  }
+
   async function intent(gameInstanceId: string, action: string, payload: Record<string, unknown>) {
     setErr(""); try {
       // One clientEventId per user action, reused by every retry, so the
@@ -437,7 +472,7 @@ export function App() {
       });
       const r = res.body as { accepted?: boolean; reason?: string; error?: string };
       if (res.status >= 400) throw new Error(r.error || `Request failed (${res.status})`);
-      if (!r.accepted) reportError(r.reason === "PHASE_CLOSED" ? "Time was up for that one — it wasn’t counted." : `Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
+      if (!r.accepted) reportError(r.reason === "PHASE_CLOSED" ? "Time was up for that one — it wasn’t counted." : r.reason === "READY_LOCKED" ? "The game has already started." : `Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
       await refresh();
     } catch (e) { fail(e); }
   }
@@ -553,6 +588,13 @@ export function App() {
             <button type="button" className="mz-chip-btn" onClick={stopWatching}>Stop watching</button>
             {err && <p className="err">{err}</p>}
           </div>
+        </MchezoProvider>
+      );
+    }
+    if (specLatest?.status === "briefing" && specLatest.briefing) {
+      return (
+        <MchezoProvider theme={themes.everyday} {...motion}>
+          <BriefingTv key={specLatest.id} game={specLatest} registry={games.find((x) => x.id === specLatest.gameId)} players={specPlayers} joinCode={proj.joinCode} onBack={stopWatching} backLabel="Stop watching" />
         </MchezoProvider>
       );
     }
@@ -732,6 +774,27 @@ export function App() {
     </div>
   );
 
+  // D3: while a game is in its briefing, every phone shows its rules and who
+  // is ready, whatever it was showing before (lobby or the last results).
+  const briefingGame = (proj?.games ?? []).find((g) => g.status === "briefing");
+  if (view === "lobby" && briefingGame?.briefing) {
+    return (
+      <MchezoProvider theme={themes.everyday} {...motion}>
+        <BriefingScreen
+          key={briefingGame.id}
+          game={briefingGame}
+          registry={games.find((x) => x.id === briefingGame.gameId)}
+          players={players}
+          meId={playerId ?? ""}
+          isHost={!!(me?.isHost || me?.isCohost)}
+          onReady={(ready) => briefingReady(briefingGame.id, ready)}
+          onStartNow={(confirmed) => briefingStartNow(briefingGame.id, confirmed)}
+          onCancel={() => briefingCancel(briefingGame.id)}
+        />
+      </MchezoProvider>
+    );
+  }
+
   if (view === "lobby" && isLobbyPhase) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
@@ -757,6 +820,7 @@ export function App() {
           startTestId={upNext ? `start-${startMode}-${upNext.id}` : undefined}
           minPlayers={startMode === "official" ? Math.max(MIN_OFFICIAL_PLAYERS, upNext?.minPlayers ?? 2) : (upNext?.minPlayers ?? 2)}
           onShare={() => setInviteOpen(true)}
+          notice={briefingNote ? <NoticeCard tone="info" title="Game cancelled" testId="briefing-cancelled-note" action={<button type="button" className="mz-chip-btn" onClick={() => setBriefingNote("")}>OK</button>}>{briefingNote}</NoticeCard> : undefined}
           capacity={10}
           error={err || undefined}
           extra={lobbyExtra}
@@ -1032,6 +1096,13 @@ export function App() {
     // actions (start/finish) therefore drive every TV viewer's screen
     // through server state alone — no per-device phase is consulted.
     const latestGame = (proj?.games ?? []).at(-1);
+    if (latestGame?.status === "briefing" && latestGame.briefing) {
+      return (
+        <MchezoProvider theme={themes.everyday} {...motion}>
+          <BriefingTv key={latestGame.id} game={latestGame} registry={games.find((x) => x.id === latestGame.gameId)} players={players} joinCode={proj?.joinCode} onBack={() => setView("lobby")} backLabel="Back to phone view" />
+        </MchezoProvider>
+      );
+    }
     if (latestGame?.gameId === "word-connections" || latestGame?.gameId === "caption-clash") return connectionsTvScreen(latestGame, () => setView("lobby"), "Back to phone view");
     const tvGame = latestGame?.gameId === "trivia" && (latestGame.status === "playing" || latestGame.status === "finished") ? latestGame : undefined;
     if (tvGame) {

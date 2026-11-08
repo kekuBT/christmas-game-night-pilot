@@ -19,6 +19,7 @@ export { GameClock, OutcomeSummary } from './components/Lifecycle.js';
 export { SegmentedChoice, NoticeCard, type ChoiceOption } from './components/Choice.js';
 export { InviteSheet, ConfirmPanel } from './components/InviteSheet.js';
 export * from './lib/share.js';
+export * from './lib/briefing.js';
 export { GameHeader, FeedbackLine, GameIntro, ScoreList } from './components/GameKit.js';
 export { ReactionBar, ReactionGlyph, REACTION_ICONS } from './components/Reactions.js';
 export * from './components/Results.js';
