@@ -985,3 +985,68 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 3. Then approval of the Lobby A / Home migration and D2.
 
 **Risk:** the stage-1 lobby changes are verified in Chromium phone emulation only, not yet on a real iPhone.
+
+## 2026-11-08: D3, rules and Ready before every game (branch `claude/d3-briefing`, from `a0ea4aa`)
+
+**Approval:** the owner approved D3 with T1–T5, the six safeguards, P1 and P3, and P2 modified (Start now doesn't mark the host ready). The branch is separate and contains Stage 1 underneath it.
+
+**Commits:**
+- `b2bea94`: rulings and decisions (docs).
+- `43a2de7`: failing tests (55 of 58 failing).
+- `f0147c0`: server.
+- `ad2fb89`: client.
+- `70e7b88`, `f0db7e3`, `4906136`: drivers.
+- `a24e1fe`: client helper tests and docs.
+- `063f1c9`: late-joiner fix and the iPhone guide.
+
+**Done:**
+- **Timing version 2 is frozen per Cup** (`POST /rooms`). Existing Cups and stored games are untouched.
+- **Start opens a briefing:**
+  - content is frozen but not recorded as used, and no clock runs;
+  - every audience sees the rules and readiness, never content;
+  - Ready can be withdrawn until play;
+  - play starts automatically when every roster player is ready and nobody is reconnecting, with the connected minimum checked again;
+  - host or cohost Start now after 20 s, with a confirmation the server checks against its own state (the host is not marked ready);
+  - one T_play step starts every clock, records content usage and writes `game-started`;
+  - a pushed warning at 4:00, then cancellation at 5:00, leaving no game, usage or score;
+  - host Cancel.
+- **Briefing is an active game** for Start and Advance day.
+- **Restart:** the snapshot keeps the briefing, and a restart never cancels without 60 s of visible warning. A restart that loads changed content cancels as `content-changed`.
+- **Client protocol 5.**
+- **Phone, TV and spectator briefing screens.** Everyone is told when a briefing is cancelled. Version-2 games have no second intro.
+- **Bug found by `check-readiness` and fixed:** a player who joined after a game started saw its answer buttons. The old intro had hidden it. They now stay in the lobby with a note.
+
+**Tests:**
+- **Unit:** 905 passed (76 files), up 58 + 7 from new D3 tests. A mutation check proved that the secrecy test catches a content leak in all 11 games.
+- **Existing tests on version 1** (D-UX-09):
+  - existing engine tests are unchanged;
+  - six HTTP test files pass `newCupTiming: 1`, with no assertion changed.
+- **Drivers:** every driver that starts a game plays the briefing (D-UX-11). The new driver `check-briefing` runs with its own scaled server.
+- **Targeted runs:**
+  - `20261108-002122-f0147c00-30897`: batch 1, 11/11.
+  - `20261108-003930-49061369-1070`: check-briefing.
+  - `20261108-004229-a24e1fe0-1546`: 12/13, `check-readiness` failed; the fix followed.
+  - `20261108-005648-063f1c9a-3695`: 8/8 on the fix.
+  - One batch run was invalidated by the gate itself (`20261108-002815-…`), because I edited scripts during it. Gate runs were then moved to a separate clone.
+- **Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on `063f1c9`:
+  - PASSED (exit 0), run `20261108-010213-063f1c9a-4572`.
+  - 46 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+  - Unit tests 905 (76 files); e2e-chromium 12/12.
+  - Fresh clone, untracked `node_modules` symlink only; `MCHEZO_CHROMIUM_PATH` = this machine's headless shell 1243.
+  - This verdict covers `063f1c9` only. The recording commit is docs only (this entry and the screenshots copied from that run).
+
+**Screens and iPhone steps:** `docs/ux-redesign/d3/README.md` (new codespace on `claude/d3-briefing`; existing previews untouched).
+
+**Not changed:**
+- Score formulas, eligibility, D1, roster rules, abstention, content approvals, existing Cups.
+- The Codespaces preview branch.
+- No merge, deployment or spend.
+
+**Open:**
+1. The owner tests on an iPhone.
+2. D-UX-10, the forfeit and abandonment question: alternatives and worked examples to come.
+3. Next, if approved: Home B and Lobby A.
+
+**Risk:**
+- Verified in Chromium emulation only, not on a real iPhone.
+- Real-time behaviour (20 s, 5 min) is tested with scaled timers in drivers and fake clocks in unit tests.
