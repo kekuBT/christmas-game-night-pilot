@@ -119,7 +119,9 @@ export function App() {
   const view: View = route.name === "room" ? SUB_TO_VIEW[route.sub] : "lobby";
   const toLobby = () => back(LOBBY);
   function setView(v: View) {
-    if (v !== "lobby") navigate({ name: "room", sub: VIEW_TO_SUB[v] });
+    // One room screen to another (Cup → TV) replaces the entry, so history
+    // is always "lobby → this screen" and Back or "Lobby" returns to the lobby.
+    if (v !== "lobby") navigate({ name: "room", sub: VIEW_TO_SUB[v] }, { replace: route.name === "room" && route.sub !== "lobby" });
     else if (route.name === "room" && route.sub !== "lobby") toLobby();
   }
   const [msg, setMsg] = useState("");
