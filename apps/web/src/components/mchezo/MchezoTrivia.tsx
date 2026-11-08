@@ -10,7 +10,7 @@
 // approved mz-wait styles with an honest count in the centre and
 // PlayerTokens that carry only offline badges.
 import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnswerDistribution, AnswerGrid, Keycap, MchezoWaiting, PhoneScreen, ResultCard, Stamp, StandingsList } from "../../ui/mchezo/index.js";
 import { GameIntroScreen, QuestionScreen } from "../../ui/mchezo/index.js";
 import { clampStep, rankStandings, revealSteps, stepLabel } from "../../ui/mchezo/index.js";
@@ -35,6 +35,8 @@ export interface MchezoTriviaDeps {
   onTv?: () => void;
   /** Previous finished same-type game's scores, for honest gains. */
   previousScores?: Record<string, number>;
+  /** Stage 3: the results header (who won, your place). Shown first, and again on the standings. */
+  hero?: ReactNode;
 }
 
 function stateOf(game: PlayerGame): GameState {
@@ -159,7 +161,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
     No server change — every value below comes from the finished
     projection (correctIndex, answerCounts, questionPoints, rawScores). */
 export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
-  const { game, publicGame, players, playerId, onBackToLobby, onTv, previousScores } = deps;
+  const { game, publicGame, players, playerId, onBackToLobby, onTv, previousScores, hero } = deps;
   const st = stateOf(game);
   const questions = st.questions ?? [];
   const myAnswers: Record<string, number> = st.myAnswers ?? {};
@@ -249,6 +251,7 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
     return (
       <div data-testid="mz-reveal-step" data-step-kind="question" data-step-index={idx}>
         <PhoneScreen label={stepLabel(step, questions.length)}>
+          {idx === 0 && hero}
           <span className="mz-kicker">Trivia Showdown</span>
           <span className="mz-muted">{stepLabel(step, questions.length)}</span>
           <h1 className="mz-question">{q.prompt}</h1>
@@ -287,6 +290,7 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
   return (
     <div data-testid="mz-reveal-step" data-step-kind="standings" data-step-index={idx}>
       <PhoneScreen label="Standings">
+        {hero}
         {totalLine}
         <StandingsList ranked={ranked} youId={playerId} players={mzPlayers} limit={2} />
         <details style={{ marginTop: 8 }}>

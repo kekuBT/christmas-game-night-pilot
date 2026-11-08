@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import type { PlayerGame, PublicGame, RegistryGame } from "../types.js";
 import { outcomeLines, participationLine } from "../ui/mchezo/lib/lifecycle.js";
 import { AnswerReview, type ReviewRow } from "./mchezo/AnswerReview.js";
@@ -37,12 +37,13 @@ export function ShowWaiting(props: { game: PublicGame; title: string }) {
   </div>;
 }
 
-export function ShowResults(props: { game: PlayerGame; title: string; nameOf: (id: string) => string; onBack: () => void; games: RegistryGame[]; official?: boolean; youId?: string; review?: ReviewRow[] }) {
+export function ShowResults(props: { game: PlayerGame; title: string; nameOf: (id: string) => string; onBack: () => void; games: RegistryGame[]; official?: boolean; youId?: string; review?: ReviewRow[]; hero?: ReactNode }) {
   const outcome = outcomeLines(props.game.outcome, props.official);
   const scores = Object.entries(props.game.rawScores ?? {}).sort((a, b) => (b[1] as number) - (a[1] as number));
   const top = scores.length > 0 ? scores[0]![1] : null;
   const winners = scores.filter(([, v]) => v === top).map(([pid]) => props.nameOf(pid));
   return <div className="card show-results" data-testid="show-results">
+    {props.hero}
     <p className="show-kicker">🏆 Results</p>
     <h2>{props.title}</h2>
     {winners.length > 0 && <p className="reveal-winner">{winners.length > 1 ? `It's a tie! ${winners.join(" & ")}` : `${winners[0]} wins this game!`}</p>}

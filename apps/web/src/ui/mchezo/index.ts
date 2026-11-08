@@ -1,6 +1,7 @@
 import './styles/mchezo.css';
 import './styles/games.css';
 import './styles/stage2.css';
+import './styles/stage3.css';
 
 export * from './tokens/tokens.js';
 export * from './types.js';
@@ -26,6 +27,8 @@ export * from './lib/catalog.js';
 export * from './lib/routes.js';
 export { GameCover } from './components/GameCover.js';
 export { Sheet } from './components/Sheet.js';
+export { ResultsHero } from './components/ResultsHero.js';
+export * from './lib/celebrate.js';
 export { GameHeader, FeedbackLine, GameIntro, ScoreList } from './components/GameKit.js';
 export { ReactionBar, ReactionGlyph, REACTION_ICONS } from './components/Reactions.js';
 export * from './components/Results.js';

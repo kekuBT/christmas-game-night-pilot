@@ -9,7 +9,7 @@ import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js"
 import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
-import { buildCatalog, featuredOfTheDay, GameClock, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, themes, type Route, type RoomSub } from "./ui/mchezo/index.js";
+import { buildCatalog, featuredOfTheDay, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, themes, type Route, type RoomSub } from "./ui/mchezo/index.js";
 import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen } from "./components/mchezo/Home.js";
 import { ChooseGameSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
 import { stampEntry, useRoute } from "./nav.js";
@@ -810,6 +810,21 @@ export function App() {
   // Everyday theme throughout: Mchezo is year-round; the Christmas Family
   // Cup is a seasonal event shown as data (below), not as the platform skin.
   const mzPlayers = toMzPlayers(players);
+  // Stage 3: the top of every results screen. Built only from the server's
+  // recorded scores and this player's own participation (lib/celebrate.ts),
+  // so every phone tells the same story.
+  const resultsHero = (g: PlayerGame, pub?: PublicGame) => {
+    const scores = pub?.rawScores ?? g.rawScores ?? {};
+    const title = games.find((x) => x.id === g.gameId)?.title ?? g.gameId;
+    const official = pub?.official ?? g.official ?? false;
+    const story = resultsStory({
+      gameInstanceId: g.id, title, official, scores, nameOf,
+      youId: playerId ?? undefined,
+      yourParticipation: playerId ? g.outcome?.participation[playerId] : undefined,
+      youSatOut: g.abstained === true,
+    });
+    return <ResultsHero story={story} gameId={g.gameId} title={title} official={official} players={mzPlayers} points={playerId && playerId in scores ? scores[playerId] : undefined} />;
+  };
   const mzReactions = toMzReactions(proj?.reactions, players);
   const mzReact = async (r: ReactionId) => {
     try { await post(`/rooms/${roomId}/reactions`, { emoji: reactionIdToEmoji(r) }); await refresh(); } catch { /* non-fatal */ }
@@ -1059,7 +1074,7 @@ export function App() {
   if (view === "lobby" && showPhase === "results" && connectionsFinished && latestFinished) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <MchezoConnectionsResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Word Connections"} onBackToLobby={() => dismissResults(latestFinished.id)} />
+        <MchezoConnectionsResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Word Connections"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} />
       </MchezoProvider>
     );
   }
@@ -1088,7 +1103,7 @@ export function App() {
   if (view === "lobby" && showPhase === "results" && captionFinished && latestFinished) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <MchezoCaptionResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Caption Clash"} onBackToLobby={() => dismissResults(latestFinished.id)} />
+        <MchezoCaptionResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Caption Clash"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} />
       </MchezoProvider>
     );
   }
@@ -1212,6 +1227,8 @@ export function App() {
   if (view === "lobby" && showPhase === "results" && triviaFinished && latestFinished) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
+        {/* Stage 3: the headline first, above the outcome and the reveal. */}
+        {resultsHero(latestFinished, publicFinished)}
         <OutcomeSummary gameId={latestFinished.gameId} outcome={latestFinished.outcome} official={publicFinished?.official} youId={playerId ?? undefined} youChoseSatOut={latestFinished.abstained === true} nameOf={nameOf} showEveryone />
         <MchezoTriviaResults
           game={latestFinished}
@@ -1306,7 +1323,7 @@ export function App() {
       <ShowWaiting game={publicPlaying} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} />
       <p className="muted">The game stays visible below — when the next phase starts, this banner goes away on its own.</p>
     </>}
-    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
+    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={themes.everyday} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
       {showGamePanel && playingGame && <GamePanel game={playingGame} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
     {view === "championship" && <ChampionshipView proj={proj} games={games} players={players} nameOf={nameOf} midrank={midrank} post={post} refresh={refresh} meIsHostOrCohost={!!(me?.isHost || me?.isCohost)} />}

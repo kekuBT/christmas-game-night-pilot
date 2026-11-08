@@ -7,7 +7,7 @@
  *   results -> each round's winning caption, now with its author, + scores.
  * The server owns deadlines, anonymity, voting rules and scores.
  */
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Keycap, MchezoWaiting, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
@@ -136,7 +136,7 @@ export function MchezoCaption({ game, publicGame, players, playerId, title, inte
 }
 
 /** Results: each round's best caption with its author, then the scores. */
-export function MchezoCaptionResults({ game, publicGame, players, playerId, title, onBackToLobby }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void }) {
+export function MchezoCaptionResults({ game, publicGame, players, playerId, title, onBackToLobby, hero }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode }) {
   const st = (game.state ?? {}) as CaptionState;
   const nameOf = (id?: string) => (id ? players.find((p) => p.id === id)?.displayName ?? "Someone" : "Someone");
   const rows = Object.entries(game.rawScores ?? publicGame?.rawScores ?? {}).map(([id, score]) => ({
@@ -145,6 +145,7 @@ export function MchezoCaptionResults({ game, publicGame, players, playerId, titl
   }));
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-cap-results">
+      {hero}
       <GameHeader title={title} objective="The room’s favourites" accent={1} />
       <div className="mz-cap-votes">
         {(st.rounds ?? []).map((r, i) => {

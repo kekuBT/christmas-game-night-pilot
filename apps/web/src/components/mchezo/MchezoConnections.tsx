@@ -8,7 +8,7 @@
  * last guess ("One away…"). The full board is revealed only when the whole
  * game has ended, on the results screen.
  */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ANSWER_SHAPES } from "../../ui/mchezo/tokens/tokens.js";
 import { Keycap, MchezoWaiting, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
@@ -153,7 +153,7 @@ export function MchezoConnections({ game, publicGame, players, playerId, title, 
 }
 
 /** Results: the whole board, which groups you found, and the scores. */
-export function MchezoConnectionsResults({ game, publicGame, players, playerId, title, onBackToLobby }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void }) {
+export function MchezoConnectionsResults({ game, publicGame, players, playerId, title, onBackToLobby, hero }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode }) {
   const st = (game.state ?? {}) as ConnectionsState;
   const tiles = st.tiles ?? [];
   const textOf = (id: string) => tiles.find((t) => t.id === id)?.text ?? id;
@@ -166,6 +166,7 @@ export function MchezoConnectionsResults({ game, publicGame, players, playerId, 
   }));
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-cx-results">
+      {hero}
       <GameHeader title={title} objective="The groups were…" accent={2} />
       <div className="mz-cx-bands">{groups.map((g) => <Band key={g.name} group={g} textOf={textOf} missed={!mine.has(g.name)} />)}</div>
       <p className="mz-foot">Solid bands are groups you found; dashed ones you missed.</p>
