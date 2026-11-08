@@ -89,6 +89,11 @@
 .mz-entry .mz-noticecard .mz-key { margin-bottom: 4px; }
 
 /* ---------------------------------------------------------------- sheets (Stage 2 additions) */
+/* Connection alerts ("This seat moved to another device", "Reconnecting…")
+   always sit above any open sheet: they can need an answer. Room notices
+   (toasts at the bottom) stay under sheets, so they never cover a sheet's
+   buttons. */
+.mz-conn { z-index: 70; }
 /* A sheet is a capped-height flex column that scrolls itself: children keep
    their size (the V1 lesson: shrinking children paint over each other). */
 .mz-sheet > * { flex-shrink: 0; }

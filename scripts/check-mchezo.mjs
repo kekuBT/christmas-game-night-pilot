@@ -63,10 +63,16 @@ try {
   // ---- Room A: landing, lobby sizes, presence -------------------------
   const ctxA = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const hostA = await ctxA.newPage();
-  await hostA.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
+  // Stage 2: Home shows the games, with Join and Host one tap away in the dock.
+  await hostA.goto(BASE, { waitUntil: "domcontentloaded" });
+  await hostA.getByTestId("home").waitFor({ timeout: 15000 });
   const landingText = await hostA.locator("body").textContent();
-  check("landing shows Mchezo wordmark and host action", landingText.toLowerCase().includes("mchezo") && landingText.includes("Host a game"));
-  check("landing has a 6-character code input", (await hostA.locator(".mz-code__input").count()) === 1);
+  check("Home shows the Mchezo wordmark with Join and Host in the dock", landingText.toLowerCase().includes("mchezo") && await hostA.getByTestId("home-join").isVisible() && await hostA.getByTestId("home-host").isVisible());
+  await hostA.getByTestId("home-join").click();
+  check("Join has a 6-character code input", (await hostA.locator(".mz-code__input").count()) === 1);
+  await hostA.getByTestId("nav-back").click();
+  await hostA.getByTestId("home-host").click();
+  check("Host asks for the host's name before the room exists", await hostA.getByRole("button", { name: "Host a game" }).isDisabled());
   const codeA = await createRoom(hostA, "Ada");
   check("room code is 6 alphanumeric", /^[A-Z0-9]{6}$/.test(codeA), codeA);
   const pagesA = [{ page: hostA, name: "Ada" }];
