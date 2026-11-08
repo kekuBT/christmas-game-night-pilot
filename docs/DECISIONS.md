@@ -376,7 +376,7 @@ Owner direction: the optional overnight bonus. Presentation only: no scoring, Cu
   - **Source** (`ui/mchezo/lib/celebrate.ts`): the server's per-game scores; competition ranks over them (equal scores share a rank, tied winners in name order); and the player's own recorded participation and sat-out flag.
   - **The same on every phone and every refresh:** one result, one story.
   - **Placement:** the header goes inside each game's own results screen. For Trivia it sits above the existing outcome card, so the headline is always first.
-  - *Alternative:* each results screen tells its own story. Rejoined: three wordings of "who won" already differed (audit A-09).
+  - *Alternative:* each results screen tells its own story. Rejected: three wordings of "who won" already differed (audit A-09).
 - **D-UX-22 28 Mild lines, each behind a condition that is true of the result.**
   - **Choice:** a line is picked deterministically from the game's id (FNV-1a), so ties and refreshes show the same words everywhere.
   - **Numbers** come only from the real gap or player count.
