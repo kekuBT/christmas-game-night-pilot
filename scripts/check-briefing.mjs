@@ -140,7 +140,8 @@ try {
   for (const [p, n] of [[ada, "Ada"], [bea, "Bea"], [cal, "Cal"]]) await expectSoon(`A. ${n}'s phone shows the rules briefing`, async () => (await p.getByTestId("briefing").count()) === 1);
   await expectSoon("A. the spectator TV shows the rules and who is ready", async () => (await tv.getByTestId("tv-briefing").count()) === 1 && (await tv.getByTestId("briefing-people").count()) === 1);
   check("A. no question or answer control on any screen", (await Promise.all([...phones, tv].map(async (p) => (await p.locator(".mz-question, .mz-slab").count()) === 0))).every(Boolean));
-  const projs = [...(await Promise.all(phones.map(myProj))), await tvProj(tv)];
+  // The TV/spectator projection is the public one; any page may fetch it.
+  const projs = [...(await Promise.all(phones.map(myProj))), await tvProj(ada)];
   const briefGames = projs.flatMap((pr) => [...(pr.games ?? []), ...(pr.myGames ?? [])]).filter((g) => g.status === "briefing");
   check("A. every projection carries the briefing and no game state, questions or deadline",
     briefGames.length === 7 && briefGames.every((g) => g.state === undefined && g.questions === undefined && g.deadlineAt === undefined && g.phaseDeadlineAt === undefined),
