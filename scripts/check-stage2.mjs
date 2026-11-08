@@ -248,6 +248,7 @@ try {
   await host.getByTestId("home-rejoin").waitFor({ timeout: 15000 });
   check("D. Back from the lobby goes Home and offers Rejoin with the room code", (await host.getByTestId("home-rejoin").innerText()).includes(code));
   check("D. ...without leaving the room (same seat on this tab)", (await host.evaluate(() => sessionStorage.getItem("cgn_playerId"))) === myId);
+  await sleep(600); // let the screen finish fading in
   await shot(host, "home-rejoin-390");
   await host.goForward();
   await host.getByRole("heading", { name: "You’re in, Keku." }).waitFor({ timeout: 15000 });
@@ -266,6 +267,7 @@ try {
   const seats2 = await seatsIn(other);
   await host.goto(`${BASE}/join?code=${code2}`, { waitUntil: "domcontentloaded" });
   await host.getByTestId("seated-notice").waitFor({ timeout: 15000 });
+  await sleep(600);
   check("D. a QR link to another room explains instead of taking a second seat", (await host.getByRole("button", { name: "Join the game" }).count()) === 0);
   await shot(host, "join-while-seated-390");
   await host.getByTestId("seated-go-room").click();
