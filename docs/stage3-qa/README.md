@@ -82,7 +82,7 @@ Updated to assert the replacement wording or label (no assertion weakened):
 - `check-stage2` (Start names its mode; the end-of-lobby check scrolls the new area)
 - `check-mchezo`, `check-m6` ("have started")
 
-Exact passing revision and gate verdict: see §E.
+Exact passing revision: `b1dd580` (the full gate there is §E). The recording commit after it is docs only.
 
 ## D. Before and after (Chromium)
 
@@ -104,7 +104,16 @@ Exact passing revision and gate verdict: see §E.
 
 ## E. Full gate
 
-See `docs/PROGRESS.md` (the entry for this sprint): one run, one revision, from a fresh clone.
+`node scripts/gate.mjs full` on `b1dd580`, from a fresh clone: **PASSED (exit 0)**, run `20261108-200931-b1dd5804-360`.
+- 53 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- Unit tests 977. E2E (Chromium) 12/12.
+- `check-tv-reveal` 57, `check-math-timing` 12, `check-lobby-mode` 71, `check-tv-dashboard` 10, `check-results` 32, `check-stage2` 76.
+
+Two earlier runs failed and don't count; they are recorded in `docs/PROGRESS.md`:
+- `bd82ce7`: a driver still asserted the old Math copy.
+- `ef9ea8a`: a driver timing race after a reload.
+
+Both were driver fixes; no assertion was weakened.
 
 ## F. Remaining issues by severity
 

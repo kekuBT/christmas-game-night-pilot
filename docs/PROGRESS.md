@@ -1186,3 +1186,72 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Open:**
 - Per-item "what earned points" breakdowns need the server's recorded scoring details per game (later stage).
 - The real-iPhone pass.
+
+## 2026-11-08: Stage 3 live QA repair sprint (branch `claude/stage3-live-qa-fixes`, from the Stage 3 record `190c020`)
+
+**Owner direction:** "MCHEZO — STAGE 3 LIVE QA REPAIR SPRINT", reconciling the Stage 3 audit package.
+- Correctness, fairness and clear feedback first.
+- No merge, deployment, exposed port, spend, content-approval, Cup-rule or scoring change.
+- The reconciliation, root causes, before/after screens and iPhone checklist are in `docs/stage3-qa/README.md`. Decisions are D-QA-01..07.
+
+**P0:**
+- **S3-TV-05** (touchdown "7 marked correct"): not reproduced.
+  - Both documented option orders (3,7,6,2 and 2,7,3,6) were replayed through the real selection, shuffle, answers, counts, TV and phones, and a restart.
+  - On the server and in a real browser, 6 is marked correct and each count sits over its own label.
+  - Hardened: out-of-range answers are refused, and the TV bars name their options for screen readers (they read as bare counts before).
+- **S3-TV-01:** not reproduced. The TV's Q1–Q10 are the phones'. The quoted TV questions exist nowhere in the content. The featured question and the after-game walk are now labelled.
+- **S3-MTH-01:** fixed on the phone. The server's clock was correct. The problems were in the client:
+  - A hidden page opened the question (the audit played three seats from browser windows).
+  - A lost open left "Getting question 1 of 10…" up for good.
+  - Now a question opens only when visible, and lost opens are asked again (the server keeps the first open time).
+  - No client time is trusted, and scoring is unchanged. The remaining network-stall trade-off is D-QA-02.
+
+**P1:**
+- **S3-RES-01:** complete standings (everyone up to 4 players; a preview plus "Show all N" beyond that).
+- **S3-RES-04:** 7 line conditions corrected, one runner-up line added (29 lines), and an exhaustive audit test.
+- **S3-RES-03:** a drop is shown neutrally.
+- **S3-HOME-01:** Home and the lobby scroll above their docks; card text comes before the picture.
+- **S3-LOB-01/02, S3-HOME-02:**
+  - The host's plan (game and mode) is shared with the room. This also fixes guests seeing their own tab's default game.
+  - The mode is on the up-next card, in the Start label and in both docks.
+  - The default stays Official (an owner decision).
+
+**P2:**
+- **S3-WCN-01:** the score is explained, with your own breakdown.
+- **S3-WCN-02:** "1 mistake left".
+- **S3-TV-02:** the TV shows Word Connections standings.
+- **S3-TV-06:** the TV dashboard has a live Math card (public facts only) and final standings.
+- **S3-TRV-01:** the waiting ring says "have started".
+
+**Tests:**
+- **Unit:** `tv-trivia-reveal` (4), `stage3-qa-results` (16, including more than 80,000 audited stories), `lobby-plan` (4).
+- **New drivers:** `check-tv-reveal`, `check-math-timing`, `check-lobby-mode`, `check-tv-dashboard`.
+- **Extended:** `check-results` (+9).
+- **Before/after:**
+  - On the previous builds, `check-results` fails 5 checks with the audit's symptoms.
+  - On the previous builds, `check-math-timing` fails 3 checks (7.1 s/110 points; stuck).
+  - Both pass on the fixed build.
+- **Updated to assert the replacement copy:** `check-stage2` (Start names its mode), `check-mchezo` and `check-m6` ("have started"). No assertion was weakened.
+
+**Not changed:** scoring, Cup rules, content and approvals, D3 Ready/synchronized start, seats and recovery, Official/Practice separation, private-answer protections, host/guest permissions.
+
+**Open (owner):**
+- The default mode (S3-LOB-01).
+- A-19 (who sees who has finished).
+- Math network-stall compensation (D-QA-02).
+- D2, D-UX-10.
+
+**Deferred:** the rest of the audit's Low/Medium list (§F of the README).
+
+**Limitation:** Chromium emulation only; no real iPhone.
+
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on `b1dd580`: **PASSED (exit 0)**, run `20261108-200931-b1dd5804-360`.
+- 53 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- Unit tests 977. E2E (Chromium) 12/12.
+- Drivers: `check-tv-reveal` 57 checks, `check-math-timing` 12, `check-lobby-mode` 71, `check-tv-dashboard` 10, `check-results` 32, `check-stage2` 76.
+- Run from a fresh clone; the only untracked file was a `node_modules` symlink. `MCHEZO_CHROMIUM_PATH` was set to this machine's headless shell 1243.
+- The verdict covers `b1dd580` only. The recording commit after it is docs only.
+
+**Runs that do not count:**
+- `bd82ce7` (run `20261108-175746-bd82ce7a-13590`): FAILED, 52 passed and 1 failed. `check-math` still asserted the old copy "from when this question appeared", which S3-MTH-01 had changed on purpose. Fixed in `ef9ea8a` to assert the replacement.
+- `ef9ea8a` (run `20261108-191812-ef9…`): FAILED, then cancelled by me. `check-lobby-mode` read the Start label 1.5 s after a reload, before the page saw both seats connected. Fixed in `b1dd580`: bounded polls on the asserted state; no assertion changed.
