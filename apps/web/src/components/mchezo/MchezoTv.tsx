@@ -99,7 +99,15 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectator
       <TVStage>
         <TVTopBar
           game={{ name: "Trivia Showdown", kind: "Trivia", accentIndex: 3 }}
-          questionLabel={finished ? "Game finished" : "Featured question · answer on your phone"}
+          // Say which step of the after-game review is on screen, so the
+          // walk through the answers doesn't read as a TV lagging behind
+          // the phones (S3-TV-01); while playing, the TV shows one featured
+          // question and each phone moves at its own pace.
+          questionLabel={
+            !finished ? `Featured question${questions.length ? ` (Q1 of ${questions.length})` : ""} · each phone goes at its own pace`
+              : stage === "leaderboard" || !q ? "Game finished · standings"
+              : `Game finished · answers, Q${Math.min(picked, questions.length - 1) + 1} of ${questions.length}`
+          }
           roomCode={joinCode}
         />
         {stage === "question" && q && (

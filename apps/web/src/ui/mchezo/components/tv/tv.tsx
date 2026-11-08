@@ -128,9 +128,13 @@ export function TVReveal({ question, options, counts, correctId, phase }: { ques
         {options.map((o, i) => {
           const n = counts[o.id] ?? 0;
           const right = o.id === correctId;
+          // Each bar names its own option: read as text (a screen reader, or
+          // anyone without the picture) a bare count could be paired with
+          // the wrong label (S3-TV-05).
           return (
-            <div key={o.id} className={['mz-tv-bar', mark && !right ? 'mz-tv-bar--dim' : ''].join(' ')}>
-              <span className="mz-tv-bar__n" style={{ opacity: grow ? 1 : 0 }}>{n}</span>
+            <div key={o.id} className={['mz-tv-bar', mark && !right ? 'mz-tv-bar--dim' : ''].join(' ')} data-option={o.label} data-count={n}>
+              <span className="mz-sr">{`${o.label}: ${n} ${n === 1 ? 'vote' : 'votes'}${mark && right ? ', the correct answer' : ''}`}</span>
+              <span className="mz-tv-bar__n" aria-hidden="true" style={{ opacity: grow ? 1 : 0 }}>{n}</span>
               <span className="mz-tv-bar__fill" style={{ height: grow ? Math.max(10, (n / max) * 300) : 10, background: `var(--mz-answer-${i % 4})` }} />
             </div>
           );

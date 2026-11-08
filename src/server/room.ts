@@ -1118,6 +1118,11 @@ export class RoomEngine {
         if (typeof chosen !== "number") return { accepted: false, reason: "INVALID_PAYLOAD" };
         const question = state.questions.find((q) => q.id === qid);
         if (!question) return { accepted: false, reason: "UNKNOWN_QUESTION" };
+        // The answer is an index into this question's own option list (the
+        // order every screen shows). Anything else would lock the question
+        // with an answer no tally or reveal can place (S3-TV-05 hardening).
+        const optionCount = ("speakers" in question ? question.speakers : question.options).length;
+        if (!Number.isInteger(chosen) || chosen < 0 || chosen >= optionCount) return { accepted: false, reason: "INVALID_PAYLOAD" };
         const perPlayer = (state.answers[actorId] ??= {});
         if (perPlayer[qid] !== undefined) return { accepted: false, reason: "ALREADY_ANSWERED" };
         perPlayer[qid] = chosen;
@@ -1940,6 +1945,7 @@ export class RoomEngine {
     if (typeof questionId !== "string" || typeof chosenIndex !== "number") return { accepted: false, reason: "INVALID_PAYLOAD" };
     const question = game.questions?.find((q) => q.id === questionId);
     if (!question) return { accepted: false, reason: "UNKNOWN_QUESTION" };
+    if (!Number.isInteger(chosenIndex) || chosenIndex < 0 || chosenIndex >= question.options.length) return { accepted: false, reason: "INVALID_PAYLOAD" };
     const startedAt = game.startedAt ?? now;
     const elapsedMs = Math.max(0, now - startedAt);
     // Speed is measured per question from when the server revealed it to
