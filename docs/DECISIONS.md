@@ -383,3 +383,62 @@ Owner direction: the optional overnight bonus. Presentation only: no scoring, Cu
   - **Hard limits:** no line is about a named real person, nothing mocks, and a player who dropped out is told without blame.
   - **The celebration:** 14 kit shapes, at most 1.2 s, CSS only, `pointer-events: none`, on a winner's phone only. It never runs under reduced motion (OS, Less or Off): the component doesn't render it, and CSS hides it again.
   - *Alternative:* randomised lines. Rejected: two phones at a tie would read different jokes about the same moment.
+
+## Stage 3 live QA repair sprint (2026-11-08, branch `claude/stage3-live-qa-fixes`, from the Stage 3 record `190c020`)
+
+Owner direction: the Stage 3 live QA repair sprint, which reconciles the Stage 3 audit package. It favours correctness, fairness and clear feedback over new features. It makes no scoring change, no Cup-rule change, no content-approval change, no merge, no deployment and no spend. The full reconciliation is in `docs/stage3-qa/README.md`.
+
+- **D-QA-01 An answer must be one of the question's own options** (Trivia, Who Said That, Geography, Math).
+  - The server now refuses an answer index outside the question's options (−1, 4, 1.5, NaN) with `INVALID_PAYLOAD`.
+  - Before, such an answer locked the question with a choice that no tally or reveal could place.
+  - The app never sends one. This is hardening found while checking S3-TV-05 (`tests/tv-trivia-reveal.test.ts`).
+- **D-QA-02 Math: a question opens only when its page can be seen; lost opens are asked again** (S3-MTH-01).
+  - **Unchanged:** the server stays the only clock. Speed runs from the open it receives to the answer it receives (D-S3-09). No client time is sent or trusted, and scoring is unchanged (100 base, +20 within 5 s, +10 within 10 s).
+  - **Changed (client only):**
+    - A hidden page (a background tab or window, or a phone put away with its browser still running) no longer opens a question; it opens when the page is shown.
+    - While a prompt is missing, the phone asks again every 3 s. The server keeps the first open time, so asking again can't restart the clock.
+  - **Why safe:** hiding a page can only delay an open, never reveal a prompt before its clock starts.
+  - **Trade-off left open:** the open's reply still travels back to the phone.
+    - Normally the reply is pushed within about 100 ms.
+    - With no socket and a slow reply, polling bounds the gap at about 2 s; measured at 3.1 s for a 1 s answer, still within +20.
+    - A connection that stalls completely after the open still counts against the player.
+    - Compensating for that needs a client-reported or round-trip-based allowance. Each can be gamed (delayed pongs) or is a scoring rule, so it is the owner's call; no change was made.
+- **D-QA-03 Results standings list everyone** (S3-RES-01).
+  - Up to 4 players are always listed in full.
+  - A larger field starts as a preview (the top 2 places, never splitting a shared rank, plus your row) with "Showing N of M players" and a "Show all M players" toggle (`aria-expanded`).
+  - It is the same component on every results screen, and ranks and scores are the server's.
+  - Who sat out stays private (only public participation counts are used).
+- **D-QA-04 Results lines: conditions corrected; 29 lines** (S3-RES-04).
+  - 2nd of 2 gets a runner-up line ("Second in a head-to-head. Next game's a clean slate."), never "middle of the pack".
+  - "Middle of the pack" is only for the middle half of a field of 3 or more; other between-places get "Not first, not last".
+  - "Twice the bragging" is for two-way ties only.
+  - "Edged it" is for two-player wins by at most a quarter of the winner's score.
+  - When nobody scored, the line is "no points", not "you share the top spot".
+  - "Diplomacy wins again" lost "again" (a streak nobody recorded). "The questions won" became "The game won".
+  - Every line is checked against its condition over every score combination for 1–5 players and seeded rooms of 6–10.
+  - *Alternative:* remove the humour. Rejected: the owner asked for its conditions to be corrected.
+- **D-QA-05 The host's plan for the next game is shared with the room** (S3-LOB-02; supersedes D-UX-19's "kept per tab" for what other screens show).
+  - **What was wrong:** guests' "Up next" card showed their own tab's default (Trivia), whatever the host had picked, and nobody but the host could see Official/Practice.
+  - **What it is now:** `POST /rooms/:id/plan` (host/cohost only, Zod-validated, refuses Official for practice-only games). Every projection (players, TV, spectators) carries `upNext: { gameId, official }`.
+  - **Limits:**
+    - It is a plan only: Start is still the host's, and every start rule still applies.
+    - It is in memory only. The host's tab publishes it again if it is missing, e.g. after a restart.
+    - Two host tabs can't bounce it, because a tab publishes only on its own choice and adopts the room's plan.
+  - **The default stays Official** (S3-LOB-01): changing it is a product decision for the owner. What changed is clarity.
+    - The up-next card shows the mode to everyone.
+    - Start reads "Start Trivia Showdown · Official".
+    - The host's dock says what Official/Practice means, with Change.
+    - The guests' dock names the game and mode.
+- **D-QA-06 Home and the lobby scroll above their docks, never under them** (S3-HOME-01, S3-HOME-02).
+  - Each screen is a scrolling area above a footer dock (100dvh, safe-area padding), so no card or section is ever behind the dock, with Safari's toolbar shown or hidden.
+  - Home's Join and Host sit side by side (about half the old height).
+  - On Home's game cards the title and "players · minutes" line come before the picture, so a card coming into view shows them first.
+- **D-QA-07 TV and waiting-screen wording.**
+  - TV reveal bars name their option for screen readers ("6: 1 vote, the correct answer"). The TV's top bar names the review step ("Game finished · answers, Q3 of 10"). (S3-TV-05/S3-TV-01)
+  - The TV dashboard shows a public live card for a game without its own TV stage, and the last game's ranked standings. (S3-TV-06)
+    - **Live card:** the game, its mode, who's in it, the clock, "N of M have started" and how Math is timed.
+    - **Never shown while playing:** scores, answers, or who has finished (A-19 is still the owner's decision).
+  - Word Connections' TV ends on the standings as well as the solution. (S3-TV-02)
+  - Word Connections results explain the score: the rule, and your own breakdown, shown only when it adds up to your recorded score. (S3-WCN-01)
+  - The waiting ring says "have started" / "all have started", since it counts players who answered at least once or sat out, not who finished. (S3-TRV-01)
+  - "1 mistake left". (S3-WCN-02)
