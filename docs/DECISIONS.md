@@ -305,3 +305,14 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
   - P3: spectators see readiness like the TV.
 
   *Alternative:* select content at T_play. Rejected: a shortage would surface only after everyone had read the rules, and Category Sprint eligibility and Impostor roles must be fixed with the roster.
+- **D-UX-08 D3 approved for implementation** (owner, 2026-11-08).
+  - P1 approved: a 60 s warning before the five-minute cancellation.
+  - P2 modified: Start now does not mark the host ready. The actor's own tap authorizes the start for them, so they are left out of their own confirmation set, and their real ready state is what gets recorded.
+  - P3 approved: spectators see the TV's public readiness and connection indicators.
+  - Branch `claude/d3-briefing`.
+- **D-UX-09 Timing version for engines built in code.** `POST /rooms` (the only way players create a Cup) creates timing version 2. An engine built directly in code (unit tests, the console demo) stays on version 1 unless asked for 2.
+  - The 191 existing engine-level `startGame` calls therefore keep testing version 1, which every existing Cup still uses. New tests cover version 2, and one checks that `POST /rooms` creates it.
+  - *Alternative:* make the engine default version 2 and edit every existing test to opt back into version 1. Rejected: it's the same coverage with 39 extra file edits, and the default would differ from what a restored old Cup gets.
+- **D-UX-10 OPEN product question (owner, 2026-11-08), not decided:** how a game should treat players who leave, forfeit, abandon on purpose or barely take part after play begins. Also: whether that opens a way to game the championship.
+  - **Today's rule is unchanged:** every roster player has a score from the start, and anyone who never returns scores 0 and counts as a competitor.
+  - **D3 doesn't change it.** Alternatives and worked examples will be presented for decision later. No scoring policy is chosen here.

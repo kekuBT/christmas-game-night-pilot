@@ -1,6 +1,6 @@
 # D3: Rules and Ready timing contract (v2)
 
-**Status:** revised with the owner's rulings T1–T5 and the six required safeguards (2026-11-07). **Not implemented.** Today's timing is unchanged on every branch.
+**Status:** **approved for implementation** (owner, 2026-11-08), with P1 and P3 approved and P2 modified. It is implemented on branch `claude/d3-briefing` only.
 
 **Implementation:** once approved, on its own branch, with a failing test first for each guarantee in §9 and a full gate. Not part of Stage 1.
 
@@ -14,10 +14,12 @@
 | T4 | A player **can withdraw Ready** while the briefing lasts. Once play starts, readiness is locked. |
 | T5 | **Newly created Cups only.** Existing Cups keep their timing version. Games already started or finished are never migrated. |
 
-**Provisional defaults** (configurable; not owner rulings; change any of them before implementation):
-- **P1:** the warning shows 60 s before cancellation.
-- **P2:** tapping "Start now" also marks the host ready.
-- **P3:** spectators see readiness the way the TV does.
+**Defaults, ruled on 2026-11-08:**
+- **P1 (approved):** the warning shows 60 s before the five-minute cancellation.
+- **P2 (modified):** Start now does **not** mark the host ready.
+  - The host's own Start now is their authorization to begin, so they never have to confirm themself.
+  - Their readiness stays exactly as they set it, in every record.
+- **P3 (approved):** spectators see the same public readiness and connection indicators as the TV, through the spectator projection.
 
 **Today** (`room.ts:564-675`):
 - The game clock starts when the host taps Start.
@@ -106,7 +108,9 @@ All three must be true:
 2. **No roster player** is *reconnecting*.
 3. **Safeguard 1:** at least the **required minimum** of roster players are *connected*.
 
-This is checked after every Ready, every presence change, and every sweep tick.
+This is checked:
+- in the same step as every Ready intent;
+- on every lifecycle sweep (every second). The sweep picks up presence changes: reconnects, drops, and grace windows running out.
 
 **Interpretation of "every eligible participant is ready":** every roster player. An *away* player who never tapped Ready therefore blocks (a). Starting without them is the host's explicit decision under (b) (safeguard 4).
 
@@ -122,7 +126,7 @@ This is checked after every Ready, every presence change, and every sweep tick.
    - The server accepts only if its **current** set ⊆ `confirmed`.
    - Otherwise it refuses with `READINESS_CHANGED` and returns the current set. The dialog then refreshes and asks again.
    - So a player who withdraws Ready (or drops) while the dialog is open is never started without fresh consent.
-4. Per P2, Start now marks the host ready first, so the host never has to confirm themself.
+4. **P2 (modified):** the player who taps Start now is left out of their own needs-confirmation set, because the tap is their authorization. Their ready state is not changed, and it is recorded as it really is.
 
 ### The one step at T_play
 
@@ -138,7 +142,7 @@ The same function runs for (a) and (b), synchronously:
    - If not: the briefing is cancelled with reason `content-changed`. Nothing is consumed.
 3. Set `status: "playing"`, `playStartedAt` = T_play, `deadlineAt` = T_play + `gameWindowMs`, and the first phase or turn deadline from T_play.
 4. **Record content usage now:** `recordUsage`, `contentSeq += 1` and the `content-selected` ledger event, exactly as today's Start does.
-5. Ledger `game-play-started`:
+5. Ledger `game-started` (for a timing-v2 game, written at T_play, so it still means "play began"; the T_create event is `game-briefing-started`):
    - `trigger: "all-ready" | "start-now"`;
    - the actor;
    - each roster player's ready state and presence at T_play;
@@ -215,7 +219,7 @@ In one synchronous step:
 
 - §4 (b) step 3: the server checks the host's `confirmed` list against its own current state.
 - Unready players keep their seats and can play the running game when they return, as roster players can today.
-- Their readiness and presence are shown on every screen and recorded in `game-play-started`.
+- Their readiness and presence are shown on every screen and recorded in `game-started`.
 
 ### S5. Secrecy until play begins
 
@@ -261,7 +265,10 @@ During a briefing, **every** projection (player, host or cohost, TV, spectator) 
 ## 8. Timing versions (T5)
 
 **New Cups:**
-- New Cups (`newCupRecord`) store a frozen `timing` record: `{ version: 2, readMinMs: 20000, stallMs: 300000, warnMs: 60000 }`.
+- Cups created through the server (`POST /rooms`, the only way players create one) store a frozen `timing` record: `{ version: 2, readMinMs: 20000, stallMs: 300000, warnMs: 60000 }`.
+- An engine built directly in code (unit tests, the console demo) stays on version 1 unless asked for 2, so the existing engine tests keep covering version 1, which existing Cups still use.
+- A test checks that `POST /rooms` creates version 2, so the product path can't quietly fall back to version 1.
+- `MCHEZO_LIFECYCLE_SCALE` (tests only, refused in production) scales these durations like every other game duration.
 - This is the same pattern as `categorySprint` (D-CQ2-27). Later tuning can't re-rule a Cup already under way.
 
 **Existing Cups:**
