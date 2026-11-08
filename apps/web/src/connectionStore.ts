@@ -5,7 +5,7 @@
  * render branches.
  */
 import { useSyncExternalStore } from "react";
-import type { ConnectionState } from "./ui/mchezo/components/ConnectionBanner.js";
+import type { ConnectionState } from "./ui/mchezo/lib/connection.js";
 
 interface ConnSnapshot {
   state: ConnectionState;

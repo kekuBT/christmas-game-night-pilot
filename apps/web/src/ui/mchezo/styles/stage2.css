@@ -128,7 +128,10 @@
 .mz-lobby__headline { font: 700 17px/1.25 var(--mz-font-display); letter-spacing: -0.02em; }
 .mz-lobby__counts { font: 600 14px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
 .mz-lobby__here { color: var(--mz-success); font-weight: 800; }
-.mz-lobby__circle { flex: 1 0 240px; min-height: 240px; max-height: 340px; }
+.mz-lobby__circle { flex: 1 0 280px; min-height: 280px; max-height: 360px; }
+/* A full ring (9–10 seats): slimmer name labels so neighbours never touch. */
+.mz-circle[data-slots="9"] .mz-seat, .mz-circle[data-slots="10"] .mz-seat { width: 21cqi; }
+.mz-circle[data-slots="9"] .mz-seat__name, .mz-circle[data-slots="10"] .mz-seat__name { font-size: 12px; }
 .mz-circle__count { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .mz-circle__num { font: 800 clamp(26px, 11cqi, 44px)/1 var(--mz-font-display); font-variant-numeric: tabular-nums; }
 .mz-circle__label { font: 600 clamp(12px, 3.8cqi, 15px)/1.15 var(--mz-font-body); color: var(--mz-text-muted); }
@@ -143,7 +146,7 @@
 .mz-lobby__shuffle { text-align: left; margin-top: 8px; }
 .mz-lobby .mz-mode { margin-top: 14px; margin-bottom: 0; }
 .mz-lobby .mz-ready { margin-bottom: 0; }
-@media (max-height: 700px) { .mz-lobby__circle { flex-basis: 210px; min-height: 210px; } }
+@media (max-height: 700px) { .mz-lobby__circle { flex-basis: 260px; min-height: 260px; } }
 
 /* ---------------------------------------------------------------- Choose game */
 .mz-pickgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }

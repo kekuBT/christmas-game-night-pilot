@@ -7,7 +7,8 @@
 // never optimistically when a socket merely opens.
 import { useEffect, useRef } from 'react';
 
-export type ConnectionState = 'online' | 'reconnecting' | 'restored' | 'replaced' | 'signed-out';
+export type { ConnectionState } from '../lib/connection.js';
+import type { ConnectionState } from '../lib/connection.js';
 
 export interface ConnectionBannerProps {
   state: ConnectionState;

@@ -78,6 +78,12 @@ const lobbyLayout = (page) => page.evaluate(() => {
   const start = dock.querySelector('[data-testid^="start-"]');
   if (start) { const s = R(start); if (s.top < 0 || s.bottom > vh) out.push("Start is not fully on screen"); }
   for (const sel of [".mz-h1", ".mz-lobby__status", ".mz-topbar"]) { const el = document.querySelector(sel); if (el && overlap(R(el), d)) out.push(`the dock covers ${sel}`); }
+  const seats = [...document.querySelectorAll(".mz-seat:not(.mz-seat--empty)")];
+  for (const a of seats) for (const b of seats) {
+    if (a === b) continue;
+    const name = a.querySelector(".mz-seat__name"), tok = b.querySelector(".mz-token");
+    if (name && tok && overlap(R(name), R(tok))) out.push(`the name "${name.textContent}" covers another seat's token`);
+  }
   for (const b of document.querySelectorAll("button")) {
     const r = R(b); if (r.width === 0 || r.height === 0) continue;
     const cs = getComputedStyle(b); if (cs.visibility === "hidden") continue;

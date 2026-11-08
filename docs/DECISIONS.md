@@ -331,3 +331,39 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
   - Affected: A-11, A-15, A-16, A-18 ("Word Assembler", "It's the host's job…", "You're not in the Cup yet", "POINTS TO TARGET").
   - The same audit's D3 quotes do match the code word for word, so the preview was D3-era code and these quotes are likely misrecorded.
   - A-13's question is Geography-only content and can't appear in a D3 Trivia TV stage. Guards were added, and a live re-capture is requested.
+
+## Stage 2 "Night Circle" (2026-11-08, branch `claude/stage2-night-circle`, from the Phase 1 triage checkpoint)
+
+Owner direction: the overnight continuation directive, Phase 2 (Home B, Lobby A, visual Library, navigation). Proposal: `docs/ux-redesign/PROPOSAL.md` §1–§7. Presentation and navigation only: no server rule, score, eligibility, content approval or Cup record changes.
+
+- **D-UX-14 Real addresses, no router library** (`apps/web/src/nav.ts`, `ui/mchezo/lib/routes.ts`).
+  - `/`, `/join?code=`, `/host`, `/library`, `/watch?code=`, `/room`, `/room/cup`, `/room/tv`, `/room/memories`, `/room/library`, `/room/studio`.
+  - Sheets ride in `?sheet=invite|choose|menu|settings|details` (details adds `&game=`), so browser Back and iOS swipe-back close a sheet first.
+  - Each history entry records how deep the tab has gone. In-app Back steps back through our own entries, and otherwise replaces the screen (it never leaves the app by accident). Leaving a sheet for another screen replaces the sheet's entry, so Back from the Cup returns to the lobby, not to the menu.
+  - URLs never hold credentials. The server serves the app only for these client paths (`src/shared/clientRoutes.ts`), and `/room/anything-else` is still a 404.
+  - *Alternative:* a router package. Rejected: about 100 lines cover it, and seat and socket logic stay untouched.
+- **D-UX-15 Reload and Back while holding a seat.**
+  - A tab that holds a seat and loads `/` or `/host` opens its room: a reload never strands a player outside their game.
+  - In-app Back from the lobby goes Home with a Rejoin card. The seat, socket and polling keep running there, and the card says when a game is in progress or about to start.
+  - A QR link to the room this tab sits in opens the room. A link to a different room explains that this phone already has a seat, and offers no second seat: the tab holds one credential, and joining elsewhere would drop it. Leaving is the explicit Sign out on this device.
+  - A tab with no seat that opens a room address goes Home.
+  - *Alternative:* Home stays Home after a reload. Rejected for now: drivers and families relied on reload returning to the room.
+- **D-UX-16 Host types a name (A-04).** Host is a screen (`/host`) whose button stays disabled until a name is typed; `createRoom` refuses an empty name. No more "Player 1".
+- **D-UX-17 Lobby A layout.**
+  - The Circle stays the centrepiece. Its centre shows how many are in the room (the up-next name moved to its own card with the cover).
+  - A check on a token means the server's readiness projection says that player would play the next game. It is not the D3 "I'm ready", which exists only in the briefing.
+  - Start lives in a sticky dock inside the screen's own scroller (`100dvh`). It sits above Safari's toolbar and the home indicator, takes its own place in the flow so the end of the page scrolls clear of it, and carries the lobby's error and confirmation lines, so a refused Start is never off screen.
+  - The headline says "Everyone's here", "Waiting for N more", "N reconnecting" or "Ready when you are", computed from the server's presence.
+  - Everything rarely used is in the room menu (☰): TV, Family Cup, Memory Book, all games, motion, This device (remember, seat backup, sign out), Reconnect, Mchezo home, and host tools (cohosts, Studio). A message shows in the menu while it is open, otherwise in the dock; never both.
+- **D-UX-18 One catalog for every games surface** (`ui/mchezo/lib/catalog.ts`).
+  - Titles, descriptions, player counts and the *estimated* length come from the manifests. The real time limit and Cup eligibility come from the server's lifecycle policy (`GET /games`). Covers come from `lib/covers.ts`.
+  - "About N min" (estimate) and "N-min limit" (deadline) are always labelled differently.
+  - The featured game rotates by calendar day: it is not a recommendation. Home shows no rankings, recommendations or recent activity.
+- **D-UX-19 Library: search on screen, the rest folded away.**
+  - Filters open from a "Filters" button showing the number in use. Active filters show as removable chips with "Clear filters"; the empty state has its own Clear filters.
+  - Choosing ("Set as up next", or "Make this up next" in a game's details) is host/cohost-only, inside a room, and returns to the lobby in one Back-step. Outside a room the library only browses, and details offer "Host this game".
+  - The host's up-next pick is kept per tab (sessionStorage), so a trip to the library or a reload keeps it.
+- **D-UX-20 Found while migrating drivers; fixed on the Stage 2 branch.**
+  - **The connection alert sat under sheets.** "This seat moved…" was hidden behind an open room menu. Connection alerts now sit above sheets; room notices stay below so they never cover a sheet's buttons.
+  - **"This seat moved to another device" was overwritten by "Your session ended"** (pre-existing since Sprint 2). The old phone's next poll is refused with 401 after the server's 4001 close, and the second, less specific reason replaced the first within two seconds; `check-recovery` passed only when it read the banner inside that window. A moved seat now keeps its explanation (`tests/connection-store.test.ts`).
+  - **Your own seat looked faded** in the Circle (the legacy global `button:disabled` opacity, the same cause as A-01). Seat buttons no longer inherit it.

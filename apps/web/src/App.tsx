@@ -372,13 +372,14 @@ export function App() {
     setErr(""); try {
       const r = await post<JoinResponse>("/rooms", { name: "Christmas Game Night" });
       const j = await post<JoinResponse>(`/rooms/${r.roomId}/join`, { displayName: name.trim(), asHost: true, hostClaimToken: r.hostClaimToken });
-      await saveSession({ ...j, roomId: r.roomId }); setMsg(`Room created. Code: ${r.joinCode}`);
+      // The lobby itself shows the new room and its code; no extra message.
+      await saveSession({ ...j, roomId: r.roomId }); setMsg("");
     } catch (e) { fail(e); }
   }
   async function joinRoom() {
     setErr(""); try {
       const j = await post<JoinResponse>("/rooms/join-by-code", { joinCode: code, displayName: name || "Player" });
-      await saveSession(j); setMsg("Joined room.");
+      await saveSession(j); setMsg("");
     } catch (e) { fail(e); }
   }
   async function spectate() {
