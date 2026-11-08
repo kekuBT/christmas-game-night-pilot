@@ -48,8 +48,16 @@ export const connection = {
   },
   /** The seat was recovered on another device (server close 4001). */
   replaced(): void { clearTimeout(restoredTimer); emit({ state: "replaced", droppedAt: null }); },
-  /** The server no longer accepts this credential (1008 / 401). */
-  signedOut(): void { clearTimeout(restoredTimer); emit({ state: "signed-out", droppedAt: null }); },
+  /**
+   * The server no longer accepts this credential (1008 / 401). A seat that
+   * already moved to another device keeps that more specific explanation: the
+   * old phone's next poll is always refused afterwards.
+   */
+  signedOut(): void {
+    if (snapshot.state === "replaced") return;
+    clearTimeout(restoredTimer);
+    emit({ state: "signed-out", droppedAt: null });
+  },
   reset(): void { clearTimeout(restoredTimer); emit({ state: "online", droppedAt: null }); },
   setHandlers(h: { retryNow?: () => void; acknowledge?: () => void }): void {
     if (h.retryNow !== undefined) retryNow = h.retryNow;
