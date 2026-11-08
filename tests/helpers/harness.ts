@@ -36,6 +36,12 @@ export interface HarnessOptions {
   clock?: FakeClock;
   /** Inject a content library (fixture packs) instead of the shipped one. */
   content?: import("../../src/content/registry.js").ContentLibrary;
+  /**
+   * Timing version for Cups this harness's server creates (D3). Default 1:
+   * the existing HTTP tests cover timing v1, which every Cup created before
+   * D3 still uses (decision D-UX-09). D3 tests pass 2, the product default.
+   */
+  timing?: 1 | 2;
 }
 
 export class Harness {
@@ -56,7 +62,7 @@ export class Harness {
 
   async start(): Promise<this> {
     // Heartbeat off: tests drive disconnects explicitly (heartbeatTick() can be called by hand).
-    this.server = new LocalServer({ dataDir: this.dataDir, clock: this.opts.clock?.now, heartbeatMs: null, lifecycleSweepMs: null, content: this.opts.content });
+    this.server = new LocalServer({ dataDir: this.dataDir, clock: this.opts.clock?.now, heartbeatMs: null, lifecycleSweepMs: null, content: this.opts.content, newCupTiming: this.opts.timing ?? 1 });
     this.port = await this.server.listen(0);
     this.base = `http://localhost:${this.port}`;
     return this;
