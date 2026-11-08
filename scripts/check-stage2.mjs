@@ -289,8 +289,15 @@ try {
     return { modal: d?.getAttribute("aria-modal"), name: title?.textContent, focused: document.activeElement === title };
   });
   check("E. the room menu is a named modal dialog and takes focus", a11y.modal === "true" && a11y.name === "Room menu" && a11y.focused, JSON.stringify(a11y));
+  let escaped = 0;
+  for (let i = 0; i < 40; i++) {
+    await host.keyboard.press(i % 7 === 6 ? "Shift+Tab" : "Tab");
+    if (!(await host.evaluate(() => !!document.activeElement?.closest('[data-testid="room-menu-sheet"]')))) escaped++;
+  }
+  check("E. Tab and Shift+Tab stay inside the open sheet", escaped === 0, `${escaped} of 40 presses left it`);
   await closeRoomMenu(host);
   check("E. Escape closes it and the address follows", path(host) === "/room");
+  check("E. focus returns to the button that opened it", await host.evaluate(() => document.activeElement?.getAttribute("data-testid") === "room-menu"));
   const labels = await host.evaluate(() => ["room-menu", "share-room"].map((id) => document.querySelector(`[data-testid="${id}"]`)?.getAttribute("aria-label")));
   check("E. icon-led buttons have spoken names", labels[0] === "Room menu" && /^Share room code [A-Z0-9]{6}$/.test(labels[1] ?? ""), JSON.stringify(labels));
   const startName = await host.locator('[data-testid^="start-"]').first().innerText();

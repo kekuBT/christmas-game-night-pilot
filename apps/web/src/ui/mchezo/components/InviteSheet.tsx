@@ -11,6 +11,7 @@
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { LinkReach } from "../lib/share.js";
+import { useDialogFocus } from "../lib/dialogFocus.js";
 
 export function InviteSheet({ code, url, qrDataUrl, reach, onClose }: {
   code: string;
@@ -22,6 +23,8 @@ export function InviteSheet({ code, url, qrDataUrl, reach, onClose }: {
   const [status, setStatus] = useState<{ tone: "ok" | "warn"; text: string } | null>(null);
   const [showLink, setShowLink] = useState(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
+  useDialogFocus(sheetRef);
   useEffect(() => { titleRef.current?.focus(); }, []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -55,7 +58,7 @@ export function InviteSheet({ code, url, qrDataUrl, reach, onClose }: {
   return (
     <div className="mz-sheet-layer" data-testid="invite-sheet">
       <div className="mz-sheet-backdrop" onClick={onClose} aria-hidden="true" />
-      <section className="mz-sheet" role="dialog" aria-modal="true" aria-labelledby="mz-invite-title">
+      <section ref={sheetRef} className="mz-sheet" role="dialog" aria-modal="true" aria-labelledby="mz-invite-title">
         <div className="mz-sheet__grab" aria-hidden="true" />
         <h2 className="mz-sheet__title" id="mz-invite-title" tabIndex={-1} ref={titleRef}>Invite players</h2>
         {reach !== "public" && (

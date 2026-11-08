@@ -1,10 +1,12 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { useDialogFocus } from '../lib/dialogFocus.js';
 
 /**
  * A bottom sheet (Stage 2): grab handle, title, close button. The caller pushes
  * a history entry when it opens one, so browser Back and iOS swipe-back close
  * it first. Escape and the backdrop close it too. Focus moves to the title on
- * open, so screen readers announce what opened.
+ * open, so screen readers announce what opened, stays inside while it is open,
+ * and returns to the opener when it closes.
  */
 export function Sheet({ title, onClose, children, testId, wide, kicker }: {
   title: string;
@@ -16,6 +18,8 @@ export function Sheet({ title, onClose, children, testId, wide, kicker }: {
   kicker?: ReactNode;
 }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const sheetRef = useRef<HTMLElement>(null);
+  useDialogFocus(sheetRef);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   useEffect(() => { titleRef.current?.focus(); }, []);
@@ -28,7 +32,7 @@ export function Sheet({ title, onClose, children, testId, wide, kicker }: {
   return (
     <div className="mz-sheet-layer" data-testid={testId}>
       <div className="mz-sheet-backdrop" onClick={onClose} aria-hidden="true" />
-      <section className={['mz-sheet', wide ? 'mz-sheet--wide' : ''].join(' ')} role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <section ref={sheetRef} className={['mz-sheet', wide ? 'mz-sheet--wide' : ''].join(' ')} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="mz-sheet__grab" aria-hidden="true" />
         <div className="mz-sheet__head">
           <div className="mz-sheet__headtext">
