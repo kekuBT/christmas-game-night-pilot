@@ -124,8 +124,9 @@ try {
       viewport: vp, hasTouch: true, isMobile: true, deviceScaleFactor: 2,
     });
     const host = await ctx.newPage();
+    // Stage 2: Home (games first, Join/Host dock), then the Host screen.
     await host.goto(BASE, { waitUntil: "domcontentloaded" });
-    await host.getByPlaceholder("e.g. Auntie June").waitFor({ timeout: 15000 });
+    await host.getByTestId("home").waitFor({ timeout: 15000 });
     await host.waitForTimeout(1200); // entrance animation settles
     await host.screenshot({ path: join(OUT, `${vp.width}-home.png`) });
 
@@ -133,13 +134,20 @@ try {
     check(`${vp.width}px home: no horizontal overflow`, o.scrollWidth <= o.innerWidth, `scrollWidth=${o.scrollWidth} innerWidth=${o.innerWidth}`);
     let bad = await smallTargets(host);
     check(`${vp.width}px home: all targets >= 44px`, bad.length === 0, bad.slice(0, 5).join("; "));
-    // Enable the host button so keyboard order covers a button too (Join
-    // stays disabled without a code, which correctly excludes it).
-    await host.getByPlaceholder("e.g. Auntie June").fill("Alex");
     await tabFocus(host, `${vp.width}px home`);
 
-    // Lobby: host creates, one joiner joins by code.
+    await host.getByTestId("home-host").click();
+    await host.getByPlaceholder("e.g. Auntie June").waitFor({ timeout: 15000 });
+    await host.waitForTimeout(600);
+    o = await overflow(host);
+    check(`${vp.width}px host screen: no horizontal overflow`, o.scrollWidth <= o.innerWidth, `scrollWidth=${o.scrollWidth} innerWidth=${o.innerWidth}`);
+    bad = await smallTargets(host);
+    check(`${vp.width}px host screen: all targets >= 44px`, bad.length === 0, bad.slice(0, 5).join("; "));
+    // Enable Host so keyboard order covers a button too.
     await host.getByPlaceholder("e.g. Auntie June").fill("Alex");
+    await tabFocus(host, `${vp.width}px host screen`);
+
+    // Lobby: host creates, one joiner joins by code.
     await host.getByRole("button", { name: "Host a game" }).click();
     const shareChip = host.getByRole("button", { name: /^Share room code / });
     await shareChip.waitFor({ timeout: 15000 });
@@ -193,6 +201,7 @@ try {
   const rmCtx = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 375, height: 667 } });
   const rm = await rmCtx.newPage();
   await rm.goto(BASE, { waitUntil: "domcontentloaded" });
+  await rm.getByTestId("home").waitFor({ timeout: 15000 });
   const rmOk = await rm.evaluate(() => {
     const m = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const btn = document.querySelector("button");
