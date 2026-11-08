@@ -634,7 +634,11 @@ export function App() {
   // single-player games: a second scoring engine that could disagree.
   const standings: Record<string, number> = serverStandings ?? {};
   const nameOf = (id: string): string => players.find((p) => p.id === id)?.displayName ?? id;
-  const playingGame = myGames.find((g) => g.status === "playing");
+  // Only a game this player is in. Someone who joined the room after it
+  // started isn't in its roster: they stay in the lobby (the server refuses
+  // their answers anyway). The old 8 s intro used to hide this; D3 removed it.
+  const playingGame = myGames.find((g) => g.status === "playing" && g.participant !== false);
+  const watchingGame = myGames.find((g) => g.status === "playing" && g.participant === false);
   // Countdowns use the server's clock, never this phone's own clock alone.
   noteServerTime(proj?.serverNow);
   // Deferred: the banner is another component and must not update during this render.
@@ -820,7 +824,9 @@ export function App() {
           startTestId={upNext ? `start-${startMode}-${upNext.id}` : undefined}
           minPlayers={startMode === "official" ? Math.max(MIN_OFFICIAL_PLAYERS, upNext?.minPlayers ?? 2) : (upNext?.minPlayers ?? 2)}
           onShare={() => setInviteOpen(true)}
-          notice={briefingNote ? <NoticeCard tone="info" title="Game cancelled" testId="briefing-cancelled-note" action={<button type="button" className="mz-chip-btn" onClick={() => setBriefingNote("")}>OK</button>}>{briefingNote}</NoticeCard> : undefined}
+          notice={briefingNote ? <NoticeCard tone="info" title="Game cancelled" testId="briefing-cancelled-note" action={<button type="button" className="mz-chip-btn" onClick={() => setBriefingNote("")}>OK</button>}>{briefingNote}</NoticeCard>
+            : watchingGame ? <NoticeCard tone="info" title={`${games.find((x) => x.id === watchingGame.gameId)?.title ?? "A game"} is being played`} testId="not-in-game-note">It started before you joined, so you’ll play the next one.</NoticeCard>
+            : undefined}
           capacity={10}
           error={err || undefined}
           extra={lobbyExtra}
