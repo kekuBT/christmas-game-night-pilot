@@ -45,7 +45,8 @@
 // Math's generated questions only into the player projection while
 // playing (room.ts player branch), not into state.questions.
 import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { usePageVisible } from "../../ui/mchezo/lib/visibility.js";
 import { Keycap, MchezoWaiting, Stamp } from "../../ui/mchezo/index.js";
 import { QuestionScreen } from "../../ui/mchezo/index.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
@@ -64,6 +65,9 @@ export interface MchezoMathDeps {
   windowMs?: number;
 }
 
+/** While a question's prompt hasn't arrived, ask for it again this often (the server keeps the first open time). */
+export const OPEN_RETRY_MS = 3000;
+
 export function MchezoMath(deps: MchezoMathDeps) {
   const { game, publicGame, players, playerId, gamesTitle, intent } = deps;
   // Sprint 3: no host skip here. The server ends the game at its deadline
@@ -81,20 +85,31 @@ export function MchezoMath(deps: MchezoMathDeps) {
   const firstUnanswered = questions.find((q) => myAnswers[q.id] === undefined || myAnswers[q.id] === null);
   // Sprint 3 (P10): a question's prompt arrives only when it is opened, and
   // its speed bonus is timed by the server from that moment. Open the
-  // question on screen once; the projection refresh then brings its prompt.
-  const opening = useRef<string | null>(null);
+  // question on screen; the projection refresh (or push) brings its prompt.
   // Open ONLY when the question screen itself is about to show: never while
   // the "locked in" view of the previous answer is still up, or the next
   // question's clock would start before the player can see it.
   const lockedQ = lastAnswered ? questions.find((x) => x.id === lastAnswered) : undefined;
   const lockedChoice = lockedQ ? myAnswers[lockedQ.id] : undefined;
   const lockedShowing = lockedQ !== undefined && lockedChoice !== undefined && lockedChoice !== null;
-  const needsOpen = !game.abstained && !lockedShowing && pending === null && firstUnanswered !== undefined && firstUnanswered.prompt === undefined;
+  // S3-MTH-01: a page nobody can see (a background tab or window, a phone
+  // whose browser keeps running while it is put away) must not open the
+  // question, because opening starts its speed clock. It opens when the page
+  // is shown. The server stays the only clock: hiding the page can only
+  // delay an open, never reveal a prompt before its clock starts.
+  const visible = usePageVisible();
+  const needsOpen = visible && !game.abstained && !lockedShowing && pending === null && firstUnanswered !== undefined && firstUnanswered.prompt === undefined;
+  // An open whose request or reply was lost used to leave the phone on
+  // "Getting question…" for good (the open was sent once per question).
+  // Ask again while the prompt is still missing: the server keeps the FIRST
+  // open time, so asking again can never restart or extend the clock.
+  const [openTry, setOpenTry] = useState(0);
   useEffect(() => {
-    if (!needsOpen || !firstUnanswered || opening.current === firstUnanswered.id) return;
-    opening.current = firstUnanswered.id;
+    if (!needsOpen || !firstUnanswered) return;
     void intent(game.id, "math-open", { questionId: firstUnanswered.id });
-  }, [needsOpen, firstUnanswered?.id, game.id]);
+    const t = setTimeout(() => setOpenTry((n) => n + 1), OPEN_RETRY_MS);
+    return () => clearTimeout(t);
+  }, [needsOpen, firstUnanswered?.id, game.id, openTry]);
   // Server time (offset-corrected), and the game's real window from the policy table.
   const secondsLeft = publicGame?.deadlineAt ? Math.max(0, Math.round((publicGame.deadlineAt - serverNowEstimate()) / 1000)) : 0;
   const totalSeconds = Math.round((deps.windowMs ?? 300_000) / 1000);
@@ -116,7 +131,7 @@ export function MchezoMath(deps: MchezoMathDeps) {
         </section>
         {game.myAnswerTimes?.[lockedQ.id] !== undefined && (
           <p className="mz-foot" data-testid="mz-math-elapsed" style={{ padding: "0 16px", margin: "8px 0 0" }}>
-            Answered in {(game.myAnswerTimes[lockedQ.id]! / 1000).toFixed(1)} s — timed by the game from when this question appeared (+20 within 5 s, +10 within 10 s, if correct).
+            Answered in {(game.myAnswerTimes[lockedQ.id]! / 1000).toFixed(1)} s — timed by the game from when it sent this question to your phone (+20 within 5 s, +10 within 10 s, if correct).
           </p>
         )}
         <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} showClock />
