@@ -322,3 +322,12 @@ Owner decisions of 2026-11-07: E1 approved, E3 approved, E2 peer vote NOT approv
   - Checks that named the old per-phone intro now name its replacement: the briefing explains the game, and no intro follows.
   - Coverage was added for the new screen (contrast, overflow, 44 px targets, TV secrecy). No other assertion was changed.
   - *Alternative:* a test-only switch that starts games without a briefing. Rejected: the gate would stop testing what families actually use.
+- **D-UX-12 Live audit triage** (2026-11-08, branch `claude/audit-defect-triage`; table: `docs/audit-triage/RECONCILIATION.md`).
+  - **Fixed only defects reproduced on D3:** A-01/A-02 (the disabled-button opacity override and paint order), A-03 (standings never split a shared rank), A-05 (reaching the briefing from other screens), A-06 (honest rejoining state) and A-07 (late joiners stay in the lobby).
+  - **None of the fixes touches** server state, scoring, ranks, eligibility, readiness rules or existing Cups.
+  - **A-05:** players in the game are brought from Library, Studio, Championship or Memory Book to the briefing once. The TV view only offers a way back, because a laptop used as a TV seat must keep showing the TV.
+  - *Alternative:* switch every view, the TV included. Rejected: it would break TV seats (`check-tv-lifecycle`).
+- **D-UX-13 Audit observations quoting strings that exist in no commit are not acted on without a live screenshot.**
+  - Affected: A-11, A-15, A-16, A-18 ("Word Assembler", "It's the host's job…", "You're not in the Cup yet", "POINTS TO TARGET").
+  - The same audit's D3 quotes do match the code word for word, so the preview was D3-era code and these quotes are likely misrecorded.
+  - A-13's question is Geography-only content and can't appear in a D3 Trivia TV stage. Guards were added, and a live re-capture is requested.
