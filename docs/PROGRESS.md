@@ -1151,3 +1151,38 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Risk:**
 - Chromium emulation only: Safari's toolbar, swipe-back and keyboard need the real device.
 - The sticky dock depends on `100dvh` support (iOS 15.4+).
+
+## 2026-11-08: Stage 3 (bonus): results and celebrations (branch `claude/stage3-results`, from the verified Stage 2 record `b08ac19`)
+
+**Owner direction:** the optional overnight bonus, started only after Phases 1 and 2 had passed their full gates. Presentation only. The handoff page with screens, the 28 lines and iPhone steps is `docs/stage3/README.md`; decisions are D-UX-21 and D-UX-22.
+
+**Built:**
+- **`ui/mchezo/lib/celebrate.ts` (pure):**
+  - competition ranks over the server's per-game scores (ties share a rank; tied winners in name order);
+  - the headline: winner, two-way tie, N-way tie, everyone tied, nobody scored;
+  - your place, and 28 Mild lines, each behind a condition true of the result, chosen by the game's id.
+- **`ResultsHero`:** cover, kicker (game · Official/Practice), headline, the tokens of everyone in first place, the shared line, and your card (place, points, personal line).
+  - A 14-shape, ≤1.2 s CSS burst on a winner's phone only. It never shows under reduced motion, Less or Off.
+- **Placement:**
+  - At the top of Word Connections, Caption Clash and the shared results of the other eight games.
+  - Above the outcome card for Trivia, so the headline is always first.
+
+**Tests:**
+- **Unit:** `tests/stage3-results.test.ts` (13: ranks and ties, order independence, two/three players, a three-way tie, everyone tied, nobody scored, a close finish with its real gap, practice vs official, dropped out vs sat out, ten long names, the same story on every phone, line limits).
+- **Driver:** `scripts/check-results.mjs`, 23 checks on its own time-scaled server: a two-player win (winner and second, celebration only on the winner's phone, never takes a tap, over in time, refresh), three players (last, middle, official), a three-way tie on three phones, a player who dropped out, practice, ten long names at 375/390/430, and reduced motion.
+- **Local runs** against the Stage 3 build: 16 existing results-related drivers all passed (mchezo, reveal, connections, caption, math, geography, closest, year, abstain, answer-reveal, contrast, m6, multiplayer, reduced-motion, viewports, mobile).
+
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on `3483e0c`: **PASSED (exit 0)**, run `20261108-091845-3483e0c6-17580`.
+- 49 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- Unit tests 953; `check-results` 23 checks; `check-stage2` 76 checks; e2e-chromium 12/12.
+- Fresh clone; untracked `node_modules` symlink only; `MCHEZO_CHROMIUM_PATH` = this machine's headless shell 1243.
+- The verdict covers `3483e0c` only. The recording commit is docs only (this entry and `docs/OVERNIGHT_REPORT_2026-11-08.md`).
+
+**Not changed:**
+- Scoring, Cup rules, games, content approvals, the Championship, TV and Memory Book.
+- No automatic rematches: Start is still the host's.
+- No merge, deployment or spend.
+
+**Open:**
+- Per-item "what earned points" breakdowns need the server's recorded scoring details per game (later stage).
+- The real-iPhone pass.
