@@ -7,6 +7,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-tv-lifecycle.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { hostStartNow, tapReady } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -88,8 +89,17 @@ try {
   await tv.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   check("lobby: TV shows the dashboard", await tvIsDashboard(tv));
 
-  // Trivia starts: the TV view switches to the stage on its own.
+  // Trivia starts with its D3 briefing: the TV shows the rules and who is
+  // ready, never a question. The TV is a seat that can't tap Ready from the
+  // TV view, so the host starts with explicit consent naming it (S4).
   await host.getByTestId("start-official-trivia").click();
+  await tv.getByTestId("tv-briefing").waitFor({ timeout: 20000 });
+  check("trivia briefing: TV shows the rules and who is ready, no question",
+    (await tv.getByTestId("briefing-people").count()) === 1 && (await tv.locator(".mz-question").count()) === 0);
+  await tapReady([host, ...guests]);
+  const namedTrivia = await hostStartNow(host);
+  check("Start now names the not-ready TV seat", /TV/.test(namedTrivia), namedTrivia);
+  // Play begins: the TV view switches to the stage on its own.
   await host.locator(".mz-question").waitFor({ timeout: 30000 });
   await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 20000 });
   check("trivia playing: TV auto-switches to the stage", (await tv.locator("body").textContent()).includes("Featured question"));
@@ -124,7 +134,10 @@ try {
   await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-math-mayhem").click();
   await host.getByTestId("start-official-math-mayhem").click();
-  await host.getByTestId("show-intro").waitFor({ timeout: 15000 });
+  await tv.getByTestId("tv-briefing").waitFor({ timeout: 20000 });
+  check("newer game briefing: TV leaves the Trivia stage for the new rules", !(await tvIsStage(tv)));
+  await tapReady([host, ...guests]);
+  await hostStartNow(host); // the TV seat again isn't ready; the host confirms
   await sleep(2000);
   check("newer game playing: TV leaves the Trivia stage for the dashboard",
     !(await tvIsStage(tv)) && (await tvIsDashboard(tv)));
@@ -133,11 +146,9 @@ try {
 
   // Math finishes (everyone plays, TV included): TV stays on the
   // dashboard with Math in Recent games.
-  await host.getByTestId("show-start-playing").click();
+  // D3: no per-phone intro after the briefing; everyone is straight in play.
   for (const g of [...guests, tv]) {
     if (g === tv) await tv.getByRole("button", { name: "Lobby & Games" }).click();
-    await g.getByTestId("show-intro").waitFor({ timeout: 15000 }).catch(() => {});
-    await g.getByTestId("show-start-playing").click().catch(() => {});
     await answerAllMath(g);
   }
   await answerAllMath(host);
@@ -162,6 +173,8 @@ try {
   await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-trivia").click();
   await host.getByTestId("start-official-trivia").click();
+  await tapReady([host, ...guests]);
+  await hostStartNow(host); // the TV seat isn't ready; the host confirms
   await host.locator(".mz-question").waitFor({ timeout: 30000 });
   // TV is already on TV view from the previous check; only navigate if it
   // left (e.g. it went back to a phone view).

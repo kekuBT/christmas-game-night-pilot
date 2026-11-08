@@ -21,6 +21,7 @@
 import { connectionsGroups } from "./lib/content-oracle.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchBrowser } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const args = process.argv.slice(2);
 const BASE = args.find((a) => !a.startsWith("--")) ?? "http://localhost:3457";
@@ -311,9 +312,9 @@ async function runBrowser(browserName, games) {
                 await host.getByTestId("choose-game").click();
         await host.getByTestId(`select-game-${gameId}`).click();
         await host.locator(`[data-testid="start-${["impostor", "charades"].includes(gameId) ? "practice" : "official"}-${gameId}"]`).click();
-        // Show Mode / Mchezo intro: every player sees an intro screen
-        // first. Dismiss it on every page (or wait for its auto-advance)
-        // before waiting for gameplay; otherwise the wait below times out.
+        // D3: every player reads the rules briefing and taps I'm ready; play
+        // starts for everyone at once and no per-phone intro follows.
+        await passBriefing(pages.map((p) => p.page));
         for (const { page } of pages) {
           if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") {
             // Mchezo Trivia intro is an 8s countdown with no dismiss button;
@@ -323,9 +324,6 @@ async function runBrowser(browserName, games) {
             await page.locator(".mz-question").first().waitFor({ timeout: 30000 });
             continue;
           }
-          const intro = page.getByTestId("show-start-playing");
-          try { await intro.waitFor({ state: "visible", timeout: 15000 }); await intro.click(); }
-          catch { /* intro already auto-advanced; panel wait below covers it */ }
           if (gameId === "closest-wins") {
             // J.3: Closest renders in the Mchezo kit, not the old GamePanel,
             // so there is no "Now playing:" heading — the guess dial is the

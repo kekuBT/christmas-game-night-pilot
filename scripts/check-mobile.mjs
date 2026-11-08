@@ -19,6 +19,7 @@
 // the real-device checklist stays open (see docs/PROGRESS.md).
 
 import { launchChromium, screenshotDir } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
@@ -165,8 +166,15 @@ try {
         await host.getByTestId("choose-game").click();
     await host.getByTestId("select-game-math-mayhem").click();
     await host.locator('[data-testid="start-official-math-mayhem"]').click();
-    // Kit panel since §11: the QuestionScreen's .mz-question is the
-    // gameplay signal (the 8s intro auto-advances first).
+    // D3: the rules briefing is a new phone screen: same layout and target rules.
+    await host.getByTestId("briefing").waitFor({ timeout: 20000 });
+    await host.screenshot({ path: join(OUT, `${vp.width}-briefing.png`) });
+    o = await overflow(host);
+    check(`${vp.width}px briefing: no horizontal overflow`, o.scrollWidth <= o.innerWidth, `scrollWidth=${o.scrollWidth} innerWidth=${o.innerWidth}`);
+    bad = await smallTargetsSampled(host);
+    check(`${vp.width}px briefing: all targets >= 44px at every point of the entry animation`, bad.length === 0, bad.slice(0, 5).join("; "));
+    await passBriefing([host, joiner]);
+    // Kit panel since §11: the QuestionScreen's .mz-question is the gameplay signal.
     await host.locator(".mz-question").waitFor({ timeout: 20000 });
     await host.screenshot({ path: join(OUT, `${vp.width}-game.png`) });
     o = await overflow(host);

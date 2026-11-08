@@ -5,6 +5,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-tv-spectator.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -99,6 +100,8 @@ try {
 
   // 3. TV view does not score: start trivia, everyone except TV answers.
   await host.getByTestId("start-official-trivia").click();
+  // D3: all four players (TV included: it is a seat) tap I'm ready.
+  await passBriefing([host, ...guests, tv]);
   await host.locator(".mz-question").waitFor({ timeout: 30000 });
   for (const g of [host, ...guests]) await answerAllTrivia(g);
   await sleep(3000);

@@ -20,6 +20,7 @@
 // confirmation — the manual real-device checklist stays open.
 
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 
@@ -162,8 +163,12 @@ try {
     await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-math-mayhem").click();
   await host.locator('[data-testid="start-official-math-mayhem"]').click();
-  // Kit panel since §11: the QuestionScreen's .mz-question is the
-  // gameplay signal (the 8s intro auto-advances first).
+  // D3: the rules briefing is a new screen; sample it too, then both tap I'm ready.
+  await host.getByTestId("briefing").waitFor({ timeout: 20000 });
+  console.log("\n== briefing ==");
+  report("briefing", await sampleView(host, "briefing"));
+  await passBriefing([host, joiner]);
+  // Kit panel since §11: the QuestionScreen's .mz-question is the gameplay signal.
   await host.locator(".mz-question").waitFor({ timeout: 20000 });
   console.log("\n== game playing ==");
   report("game-playing", await sampleView(host, "game-playing"));

@@ -6,6 +6,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-viewports.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -39,15 +40,12 @@ async function joinRoom(page, name, code) {
   await page.getByRole("button", { name: "Join the game" }).click();
   await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
 }
-async function startGame(host, gameId) {
+async function startGame(host, gameId, players) {
   await host.getByTestId("choose-game").click();
   await host.getByTestId(`select-game-${gameId}`).click();
   await host.getByTestId(`start-official-${gameId}`).click();
-  try {
-    await host.getByTestId("show-start-playing").click({ timeout: 3000 });
-  } catch {
-    await sleep(8500);
-  }
+  // D3: every player reads the rules and taps I'm ready.
+  await passBriefing(players);
 }
 
 const browser = await launchChromium();
@@ -64,7 +62,7 @@ try {
     await noOverflow(host, `lobby ${w}px`);
   }
   await host.setViewportSize({ width: 390, height: 844 });
-  await startGame(host, "trivia");
+  await startGame(host, "trivia", [host, bea]);
   await host.locator(".mz-question").waitFor({ timeout: 15000 });
   for (const w of [320, 390, 768, 1024]) {
     await host.setViewportSize({ width: w, height: 844 });
@@ -89,7 +87,7 @@ try {
   const code2 = await createRoom(host2, "Ada");
   const bea2 = await ctx2.newPage();
   await joinRoom(bea2, "Bea", code2);
-  await startGame(host2, "closest-wins");
+  await startGame(host2, "closest-wins", [host2, bea2]);
   await host2.getByTestId("mz-num-dial").waitFor({ timeout: 15000 });
   for (const w of [320, 390, 768, 1024]) {
     await host2.setViewportSize({ width: w, height: 844 });

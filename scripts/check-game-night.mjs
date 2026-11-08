@@ -8,6 +8,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-game-night.mjs <baseUrl>
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -94,7 +95,7 @@ async function spectate(page, code) {
 // Sprint 2: an official start asks before leaving out a player who is
 // still reconnecting ("Start without Gus?"). This scenario deliberately
 // continues without them, so answer explicitly and report who was named.
-async function startGame(page, gameId, { expectLeftOut } = {}) {
+async function startGame(page, gameId, { expectLeftOut, players } = {}) {
   await page.getByTestId("choose-game").click();
   await page.getByTestId(`select-game-${gameId}`).click();
   await page.getByTestId(`start-official-${gameId}`).click();
@@ -105,11 +106,8 @@ async function startGame(page, gameId, { expectLeftOut } = {}) {
     check(`start asks before leaving out a reconnecting player${expectLeftOut ? ` (${expectLeftOut})` : ""}`, !expectLeftOut || q.includes(expectLeftOut), q);
     await page.getByTestId("mz-start-without").click();
   }
-  try {
-    await page.getByTestId("show-start-playing").click({ timeout: 3000 });
-  } catch {
-    await sleep(8500);
-  }
+  // D3: every player in this game reads the rules and taps I'm ready.
+  await passBriefing(players);
 }
 // The host's player projection (server ground truth) via the page's own session.
 async function getProjection(page) {
@@ -201,7 +199,7 @@ try {
 
   // --- Game 1: Trivia. Ada/Cal/Dee answer slab 0 (identical => tie),
   // Bea slab 1, Fay slab 2, Eli sits the game out. ---
-  await startGame(host, "trivia");
+  await startGame(host, "trivia", { players: [host, ...Object.values(guests)] });
   await host.locator(".mz-question").waitFor({ timeout: 15000 });
   // Spectator sees no answer key and no answer controls while playing.
   const tvProj = await getTvProjection(tv);
@@ -267,7 +265,7 @@ try {
   await joinRoom(gus, "Gus", code);
 
   // --- Game 2: Closest Wins. ---
-  await startGame(host, "closest-wins");
+  await startGame(host, "closest-wins", { players: [host, ...Object.values(guests), gus] });
   await host.getByTestId("mz-num-dial").waitFor({ timeout: 15000 });
   // Q1: Ada 100, Bea 200 (then the waiting ring shows 2/7), Cal 300,
   // Dee 300, Fay 400, Eli abstains (per-question), Gus 100.
@@ -341,7 +339,7 @@ try {
 
   // --- Game 3: Math Mayhem, started by the cohost (not the host). ---
   check("guest sees no start button", (await guests["Cal"].getByTestId("start-official-math-mayhem").count()) === 0);
-  await startGame(guests["Bea"], "math-mayhem", { expectLeftOut: "Gus" });
+  await startGame(guests["Bea"], "math-mayhem", { expectLeftOut: "Gus", players: [host, ...Object.values(guests)] });
   await guests["Bea"].locator(".mz-question").waitFor({ timeout: 15000 });
   check("cohost can start a game", true);
   // A guest's skip attempt is rejected for permission, not timing.
@@ -407,7 +405,7 @@ try {
   await spectate(tv2, code2);
   let proj2 = await getProjection(host2);
   check("max room holds 10 players + spectator", (proj2.players ?? []).length === 10 && (proj2.spectatorCount ?? 0) === 1);
-  await startGame(host2, "trivia");
+  await startGame(host2, "trivia", { players: [host2, ...Object.values(maxGuests)] });
   await host2.locator(".mz-question").waitFor({ timeout: 15000 });
   const answerers = ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"];
   for (const name of answerers) await answerAllTrivia(maxGuests[name], 0);

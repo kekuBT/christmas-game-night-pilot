@@ -12,6 +12,7 @@
 // at 320/360/390). Usage: build:web, serve on a port, then:
 //   node scripts/check-math.mjs <baseUrl>
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -138,6 +139,7 @@ try {
 
   const roomId = await roomIdOf(host);
   const startedAt = await startMath(host, roomId);
+  await passBriefing([host, bea]); // D3: both tap I'm ready
   for (const [page, name] of [[host, "host"], [bea, "Bea"]]) {
     await page.locator(".mz-question").waitFor({ timeout: 15000 });
     check(`${name} sees the kit math panel`, true);
@@ -222,6 +224,7 @@ try {
   await joinRoom(bea2, "Bea", code2);
   const roomId2 = await roomIdOf(host2);
   const startedAt2 = await startMath(host2, roomId2);
+  await passBriefing([host2, bea2]); // D3: both tap I'm ready
   await bea2.locator(".mz-question").waitFor({ timeout: 15000 });
   await bea2.getByRole("button", { name: "Sit this game out" }).click();
   await bea2.locator(".mz-wait").waitFor({ timeout: 15000 });

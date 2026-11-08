@@ -22,6 +22,19 @@ export async function passBriefing(pages, { timeout = 20000 } = {}) {
 }
 
 /**
+ * Tap "I'm ready" on each page without waiting for play (for games that will
+ * start through the host's Start now because someone else isn't ready).
+ */
+export async function tapReady(pages, { timeout = 20000 } = {}) {
+  for (const p of Array.isArray(pages) ? pages : [pages]) {
+    await p.getByTestId("briefing").waitFor({ timeout });
+    const btn = p.getByTestId("briefing-ready");
+    if ((await btn.getAttribute("aria-pressed")) !== "true") await btn.click({ timeout });
+    await p.locator('[data-testid="briefing-ready"][aria-pressed="true"]').waitFor({ timeout });
+  }
+}
+
+/**
  * API path, for drivers that start games with fetch from the page: each page
  * sends its own `briefing-ready` intent with its own session (the server
  * refuses anyone not in the game). Resolves once the server reports play.

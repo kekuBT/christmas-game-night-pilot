@@ -23,6 +23,7 @@
 // A failed check is recorded and the process exits non-zero.
 
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
@@ -93,8 +94,8 @@ try {
     await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-math-mayhem").click();
   await host.locator('[data-testid="start-official-math-mayhem"]').click();
-  // Kit panel since §11: the QuestionScreen's .mz-question is the
-  // gameplay signal (the 8s intro auto-advances first).
+  await passBriefing(pages.map((p) => p.page)); // D3: all four tap I'm ready
+  // Kit panel since §11: the QuestionScreen's .mz-question is the gameplay signal.
   await host.locator(".mz-question").waitFor({ timeout: 20000 });
   let finishedEverywhere = false;
   const deadline = Date.now() + 120_000;

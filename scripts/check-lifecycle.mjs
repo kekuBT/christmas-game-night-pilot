@@ -25,6 +25,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 import { lifecycleDiagnosis } from "./lib/diagnose.mjs";
 
@@ -139,6 +140,7 @@ try {
 
   // ---- A. Trivia ends at its deadline ----
   const gid = await startViaApi(ada, "trivia", true, 3);
+  await passBriefing([ada, bea, cal]); // D3: everyone taps I'm ready; the clock starts then
   for (const p of [ada, bea, cal]) await p.locator(".mz-question").waitFor({ timeout: 20000 });
   await answerKitQuestions(ada, { player: "Ada", choose: () => 0 });
   const answered = await answerKitQuestions(bea, { player: "Bea", choose: () => 1, limit: 3 });
@@ -196,6 +198,7 @@ try {
 
   // ---- B. Closest Wins: a question's 4 s run out ----
   const cgid = await startViaApi(ada, "closest-wins", false);
+  await passBriefing([ada, bea, cal]); // D3
   await ada.getByTestId("mz-num-input").waitFor({ timeout: 20000 });
   const roundClock = ada.getByTestId("mz-game-clock");
   await expectSoon("B. a per-question countdown is shown", async () => /Time left for this round/.test(await text(roundClock)) || /Time’s up/.test(await text(roundClock)), 5000);
@@ -239,6 +242,7 @@ try {
   }
   for (const p of [ada, bea, cal]) await p.getByRole("heading", { name: /You’re in/ }).waitFor({ timeout: 15000 }).catch(() => {});
   const mgid = await startViaApi(ada, "math-mayhem", false, 2);
+  await passBriefing([ada, bea, cal, dee]); // D3: Dee's outdated tab can tap I'm ready too
   await dee.locator(".mz-question").waitFor({ timeout: 30000 });
   await expectSoon("D. the outdated tab shows the refresh banner", async () => (await dee.getByTestId("mz-refresh-banner").count()) === 1, 10000);
   check("D. the outdated tab can still play (the question is shown, not blank)", /= \?/.test(await text(dee.locator(".mz-question"))));

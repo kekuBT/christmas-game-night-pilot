@@ -7,6 +7,7 @@
 //   playing and after finish, mobile widths 320/360/390, reduced motion.
 // Fictional test players only; run against a local server only.
 import { launchChromium } from "./lib/driver-env.mjs";
+import { hostStartNow, passBriefing, tapReady } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const results = [];
@@ -133,9 +134,10 @@ try {
   check("chooser returns up next to Trivia Showdown",
     (await hostB.locator(".mz-upnext__name").textContent()) === "Trivia Showdown");
   await hostB.getByTestId("start-official-trivia").click();
-  // Intro auto-advances in 8s; the question screen follows.
+  // D3: the rules briefing replaces the 8 s intro; play starts when all are ready.
+  await passBriefing([hostB, ...guestsB]);
   await hostB.locator(".mz-question").waitFor({ timeout: 30000 });
-  check("trivia intro auto-advances to question screen", true);
+  check("everyone ready opens the question screen (no intro countdown)", (await hostB.getByTestId("show-intro").count()) === 0);
   check("trivia question: no horizontal overflow", await noOverflow(hostB));
   const q1Text = await hostB.locator(".mz-question").textContent();
   // Host answers Q1 -> locked view with LOCKED IN stamp.
@@ -179,6 +181,12 @@ try {
   await tvC.getByRole("button", { name: "TV stage" }).click();
   await tvC.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   await hostC.getByTestId("start-official-trivia").click();
+  // D3: the TV shows the rules during the briefing. The TV seat can't tap
+  // Ready from the TV view, so the host starts with explicit consent.
+  await tvC.getByTestId("tv-briefing").waitFor({ timeout: 20000 });
+  check("TV shows the rules briefing, not a question", (await tvC.locator(".mz-question").count()) === 0);
+  await tapReady([hostC, guestC]);
+  await hostStartNow(hostC);
   await hostC.locator(".mz-question").waitFor({ timeout: 30000 });
   await tvC.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
   check("TV stage auto-switches to Mchezo stage on start", (await tvC.locator("body").textContent()).includes("Featured question"));
@@ -206,6 +214,9 @@ try {
     await joinRoom(g, "Bea", code);
     check(`mobile ${width}px: lobby no overflow`, await noOverflow(h));
     await h.getByTestId("start-official-trivia").click();
+    await h.getByTestId("briefing").waitFor({ timeout: 20000 });
+    check(`mobile ${width}px: briefing no overflow`, await noOverflow(h));
+    await passBriefing([h, g]);
     await h.locator(".mz-question").waitFor({ timeout: 30000 });
     check(`mobile ${width}px: question no overflow`, await noOverflow(h));
     await ctx.close();

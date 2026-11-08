@@ -9,6 +9,7 @@
 // the roster shown. Screenshots at 320 and 390 px.
 // Usage: node scripts/check-readiness.mjs <baseUrl>
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 let failures = 0;
@@ -107,6 +108,8 @@ try {
     await host.getByTestId("start-official-trivia").click();
     await expectSoon(`${width}: question shown again`, async () => (await decision.count()) === 1);
     await host.getByTestId("mz-start-without").click();
+    // D3: the two players in this game read the rules and tap I'm ready.
+    await passBriefing([host, bea]);
     await expectSoon(`${width}: game starts for the host`, async () => (await host.locator(".mz-question").count()) > 0);
     await expectSoon(`${width}: game starts for Bea`, async () => (await bea.locator(".mz-question").count()) > 0);
     const roster = await host.evaluate(async () => {

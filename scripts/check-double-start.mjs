@@ -8,6 +8,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-double-start.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -53,6 +54,7 @@ try {
     b.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     b.dispatchEvent(new MouseEvent("click", { bubbles: true }));
   });
+  await passBriefing([host, bea]); // D3: both tap I'm ready
   await host.locator(".mz-question").waitFor({ timeout: 15000 });
   await sleep(500);
   check("double-click sends exactly one start request", startPosts === 1, `saw ${startPosts}`);

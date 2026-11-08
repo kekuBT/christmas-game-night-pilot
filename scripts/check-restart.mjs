@@ -92,8 +92,18 @@ try {
   check("guest joined", guest.status === 201 && !!guest.data.playerId);
   // Start a practice Closest game and have the guest guess (state worth keeping).
   const started = await post(port, `/rooms/${roomId}/games`, { gameId: "closest-wins", official: false }, host.data.sessionToken);
-  check("game started", started.status === 201 && started.data.status === "playing");
+  // D3: a new room opens the game with its rules briefing; both players tap
+  // I'm ready (their own intents) and the last Ready starts play.
+  check("game started (its briefing opens first)", started.status === 201 && started.data.status === "briefing");
   const gameId = started.data.gameId;
+  for (const p of [host, guest]) {
+    const r = await post(port, `/rooms/${roomId}/intents`, {
+      intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId, gameInstanceId: gameId, action: "briefing-ready", payload: { ready: true } },
+    }, p.data.sessionToken);
+    check(`${p === host ? "host" : "guest"} taps I'm ready`, r.status === 200 && r.data.accepted === true);
+  }
+  const playing = await getProj(port, roomId, host.data.sessionToken);
+  check("everyone ready: the game is playing", (playing.data.games ?? []).find((g) => g.id === gameId)?.status === "playing");
   const guess = await post(port, `/rooms/${roomId}/intents`, {
     intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId, gameInstanceId: gameId, action: "closest-guess", payload: { value: 42 } },
   }, guest.data.sessionToken);

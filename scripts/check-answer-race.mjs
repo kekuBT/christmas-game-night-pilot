@@ -8,6 +8,7 @@
 // showing the next question first, and a second tap sends nothing.
 // Usage: node scripts/check-answer-race.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 let failures = 0;
@@ -48,6 +49,7 @@ try {
       const r = await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/games`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") }, body: JSON.stringify({ gameId, official: false, seed: 1 }) });
       if (!r.ok) throw new Error(`start failed ${r.status}`);
     }, gameId);
+    await passBriefing([host, bea]); // D3: both tap I'm ready
     await bea.locator(".mz-question").waitFor({ timeout: 20000 });
     await bea.waitForTimeout(600);
     // Slow ONLY Bea's projection polls/refreshes; the WebSocket push is untouched.

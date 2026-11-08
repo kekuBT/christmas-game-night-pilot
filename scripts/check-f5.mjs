@@ -36,6 +36,7 @@
 import { connectionsGroups } from "./lib/content-oracle.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
@@ -328,6 +329,7 @@ try {
             await host.getByTestId("choose-game").click();
       await host.getByTestId(`select-game-${gameId}`).click();
       await host.locator(`[data-testid="start-${["impostor", "charades"].includes(gameId) ? "practice" : "official"}-${gameId}"]`).click();
+      await passBriefing(pages.map((p) => p.page)); // D3: every player taps I'm ready
       for (const { page } of pages) {
         // Geography is a kit panel too (Work Package E) — the same
         // QuestionScreen renders .mz-question, so the trivia wait covers it.

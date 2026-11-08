@@ -8,6 +8,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 import { connectionsBoard } from "./lib/content-oracle.mjs";
 import { lifecycleDiagnosis } from "./lib/diagnose.mjs";
 
@@ -75,9 +76,10 @@ try {
   if (await decision.waitFor({ timeout: 2000 }).then(() => true, () => false)) await ada.getByTestId("start-official-word-connections").click();
 
   // Intro: objective in plain words, one obvious button.
-  await soon("intro explains the objective", async () => /Find four groups of four/.test(await bodyText(bea)));
+  // D3: the rules briefing explains the objective before any clock runs.
+  await soon("the briefing explains the objective", async () => /Find four groups of four/.test(await bodyText(bea)) && (await bea.getByTestId("briefing").count()) === 1);
   await bea.screenshot({ path: screenshotPath("docs/sprint-4-screenshots/cx-01-intro.png") });
-  for (const p of [ada, bea, cal]) { const s = p.getByTestId("show-start-playing"); await s.waitFor({ timeout: 10000 }); await s.click(); }
+  await passBriefing([ada, bea, cal]);
   for (const p of [ada, bea, cal]) await p.getByTestId("mz-cx").waitFor({ timeout: 15000 });
   const words = await tileTexts(ada);
   check("16 tiles", words.length === 16, words.join(","));
@@ -187,7 +189,8 @@ try {
   await soon("everyone is back in the lobby", async () => (await ada.getByRole("heading", { name: "You’re in, Ada." }).count()) === 1);
   const again = await ada.evaluate(async () => (await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/games`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") }, body: JSON.stringify({ gameId: "word-connections", official: true }) })).status);
   check("a second official Connections game starts (a different board)", again === 201, String(again));
-  const words2 = await (async () => { for (const p of [ada]) { const s = p.getByTestId("show-start-playing"); await s.waitFor({ timeout: 10000 }); await s.click(); } await ada.getByTestId("mz-cx").waitFor({ timeout: 15000 }); return tileTexts(ada); })();
+  await passBriefing([ada, bea, cal]); // D3: everyone taps I'm ready for the second game too
+  const words2 = await (async () => { await ada.getByTestId("mz-cx").waitFor({ timeout: 15000 }); return tileTexts(ada); })();
   check("the second board is different", words2.join() !== words.join() && !words2.every((w) => words.includes(w)));
 } finally {
   await browser.close();

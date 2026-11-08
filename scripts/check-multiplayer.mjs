@@ -22,6 +22,7 @@
 // A failed check is recorded and the process exits non-zero.
 
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
@@ -104,6 +105,7 @@ try {
     await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-math-mayhem").click();
   await host.locator('[data-testid="start-official-math-mayhem"]').click();
+  await passBriefing(pages.map((p) => p.page)); // D3: all four tap I'm ready
   let allSeeGame = true;
   for (const { page, name } of pages) {
     try {
@@ -166,6 +168,7 @@ try {
     await host.getByTestId("select-game-impostor").click();
     await host.locator('[data-testid="start-practice-impostor"]').click();
     try {
+      await passBriefing(pages.map((p) => p.page)); // D3: all four tap I'm ready
       await host.getByRole("heading", { name: "Now playing: impostor" }).waitFor({ timeout: 20000 });
       impostorStarted = true;
     } catch { /* retry once, then let the leak check's own failure surface */ }

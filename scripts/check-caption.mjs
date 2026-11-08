@@ -6,6 +6,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
@@ -52,9 +53,10 @@ try {
   await ada.getByTestId("choose-game").click();
   await ada.getByTestId("select-game-caption-clash").click();
   await ada.getByTestId("start-official-caption-clash").click();
-  await soon("intro explains the game", async () => /Write the funniest caption/.test(await text(bea)));
+  // D3: the rules briefing explains the game before any clock runs.
+  await soon("the briefing explains the game", async () => /Write the funniest caption/.test(await text(bea)) && (await bea.getByTestId("briefing").count()) === 1);
   await bea.screenshot({ path: screenshotPath("docs/sprint-4-screenshots/cap-01-intro.png") });
-  for (const p of all) { const s = p.getByTestId("show-start-playing"); await s.waitFor({ timeout: 10000 }); await s.click(); }
+  await passBriefing(all);
   for (const p of all) await p.getByTestId("mz-cap-write").waitFor({ timeout: 15000 });
   const prompt = await ada.getByTestId("mz-cap-prompt").innerText();
   check("everyone sees the same scene", (await Promise.all(all.map((p) => p.getByTestId("mz-cap-prompt").innerText()))).every((t) => t === prompt), prompt);
@@ -140,7 +142,7 @@ try {
   await soon("back in the lobby", async () => (await ada.getByRole("heading", { name: "You’re in, Ada." }).count()) === 1);
   const again = await ada.evaluate(async () => (await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/games`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") }, body: JSON.stringify({ gameId: "caption-clash", official: true }) })).status);
   check("another Caption Clash starts with new scenes", again === 201, String(again));
-  for (const p of [ada]) { const s = p.getByTestId("show-start-playing"); await s.waitFor({ timeout: 10000 }); await s.click(); }
+  await passBriefing(all); // D3: everyone taps I'm ready for the second game too
   await ada.getByTestId("mz-cap-write").waitFor({ timeout: 15000 });
   check("the new game's first scene differs", (await ada.getByTestId("mz-cap-prompt").innerText()) !== prompt);
 } finally {

@@ -4,6 +4,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-leaderboard.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 import { optionIndex } from "./lib/content-oracle.mjs";
 
@@ -162,6 +163,8 @@ try {
     } else {
       await startOfficialTrivia(host);
     }
+    // D3: every player in this game reads the rules and taps I'm ready.
+    await passBriefing([...new Set(actions.map((a) => a.page))]);
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     for (const a of actions) {
       if (a.kind === "abstain") await a.page.getByRole("button", { name: "Sit this game out" }).click();
@@ -313,6 +316,7 @@ try {
   // others are done, and her three answers still count.
   {
     await startOfficialTrivia(host);
+    await passBriefing([host, P.Bea, P.Cal, P.Dee, tv]); // D3
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     await answerFirstN(P.Dee, 3, 0);
     await P.Dee.getByRole("button", { name: "Next question" }).click();
@@ -352,6 +356,7 @@ try {
     await host.getByRole("button", { name: "Back to lobby" }).click();
     await host.getByRole("heading", { name: "You’re in, Ada." }).waitFor({ timeout: 15000 });
     await startOfficialTrivia(host);
+    await passBriefing([host, P.Bea, P.Cal, tv]); // D3 (Dee left earlier and isn't in this game)
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     await answerOption(P.Cal, 0);
     await P.Cal.close();
