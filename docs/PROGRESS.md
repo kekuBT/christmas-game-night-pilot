@@ -1050,3 +1050,41 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Risk:**
 - Verified in Chromium emulation only, not on a real iPhone.
 - Real-time behaviour (20 s, 5 min) is tested with scaled timers in drivers and fake clocks in unit tests.
+
+## 2026-11-08: live-audit defect triage (branch `claude/audit-defect-triage`, from `claude/d3-briefing` at `0cfb50d`)
+
+**Scope:** the independent live audit, treated as external evidence. Only defects reproduced on D3 were fixed. Reconciliation of every finding (A-01..A-23, L-01..L-07, six categories): `docs/audit-triage/RECONCILIATION.md`. Decisions: D-UX-12, D-UX-13.
+
+**Fixed, each with a failing test first:**
+- **A-01/A-02:** the legacy global `button:disabled { opacity: .5 }` overrode the kit's answer-card states, so "gone" cards showed through the chosen one. The kit now states its disabled looks, and the chosen card paints on top. The "LOCKED IN" stamp sits below a long answer, never over it.
+- **A-03:** standings never split a shared rank: a three-way tie shows all three, and "you" are added below only when outside it (`standingsRows`).
+- **A-05:** a player on Library, Studio, Championship or Memory Book is brought to the briefing once. The TV view offers "Back to my phone to get ready" instead (TV seats keep the TV).
+- **A-06:** until the first projection arrives, the phone says "Rejoining your room…" instead of an empty lobby "You're in, friend · 0 here".
+- **A-07:** someone who joined after a game finished stays in the lobby, not on its results as "Did not answer · 0".
+- **Found by the full gate and fixed:**
+  - **The rejoining screen hid Reconnect.** After a reload with a rejected credential (`check-errors`), its button said "Try again" with its own error line. It now offers the lobby's **Reconnect** and the shared error line.
+  - **The banner covered the button.** The fixed "signed out" banner covered that button (targeted run `…-c4c17e40-14389`), so the actions now sit at the bottom.
+- **Driver hardening (no assertion weakened):** the A-05 setup clicked the TV button by a loose pattern and swallowed errors, so a missed click failed for the wrong reason (targeted run `…-a90031d0-15346`). It now clicks exact names and waits for each view.
+
+**Not changed:** server state, scoring, ranks, eligibility, readiness rules, content approvals, existing Cups.
+
+**Tests:**
+- Unit 910 (A-03 cases in `tests/audit-triage.test.ts`).
+- `scripts/check-audit-fixes.mjs`: 50 checks at 375/390/430, long answers, reduced motion, ties, late joiners, the away screens, slow reloads.
+
+**Runs:**
+- **Targeted:**
+  - `20261108-054451-7e66677d-6605`: PASSED, 20 steps.
+  - `20261108-061936-c4c17e40-14389`: FAILED (check-errors).
+  - `20261108-062422-a90031d0-15346`: FAILED (A-05 setup).
+- **Full gate on `2492a0b`** (`20261108-060756-2492a0bd-10077`): FAILED at `check-errors`. It was stopped after the failure, since it could no longer pass, and does not count.
+- **Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on `f9dfcf2`: **PASSED (exit 0)**, run `20261108-063036-f9dfcf2f-16569`. 47 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled; unit tests 910; e2e-chromium 12/12. Fresh clone; untracked `node_modules` symlink only; `MCHEZO_CHROMIUM_PATH` = this machine's headless shell 1243. The verdict covers `f9dfcf2` only; this recording commit is docs only.
+
+**Outstanding (from the reconciliation):**
+- **Home B / Lobby A (category 2):** A-04 (host name), A-08 (truncated names), L-02 (Start below the fold). A-04 and L-02 are addressed in Stage 2.
+- **Results and TV redesign (category 3):** A-09, A-10, A-12, A-19 (needs a privacy decision), A-21, A-22.
+- **Cosmetic (category 4):** A-14, A-17, L-05, L-06.
+- **Needs a real iPhone or a live screenshot (category 5):** A-05 (rest), A-06 (latency), A-11, A-13, A-15, A-16, A-18, A-20, L-03, L-07.
+- **Older local build only (category 6):** L-01, L-04, the green theme, local timing.
+
+**Risk:** verified in Chromium emulation only, not on a real iPhone.
