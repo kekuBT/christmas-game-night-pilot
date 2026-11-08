@@ -102,7 +102,7 @@ export function CircleLobby({ players, youId, capacity = 10, center, reactions =
           const isFresh = !reducedMotion && fresh[p.id] && Date.now() - fresh[p.id] < 900;
           const nudgedMe = nudgedBy.includes(p.id);
           return (
-            <li key={p.id} className={['mz-seat', x > 62 ? 'mz-seat--right' : x < 38 ? 'mz-seat--left' : '', isFresh ? 'mz-seat--arrive' : '', wobble === p.id && !reducedMotion ? 'mz-seat--wobble' : ''].join(' ')} style={style}>
+            <li key={p.id} className={['mz-seat', x > 62 ? 'mz-seat--right' : x < 38 ? 'mz-seat--left' : '', y > 50 ? 'mz-seat--lower' : 'mz-seat--upper', isFresh ? 'mz-seat--arrive' : '', wobble === p.id && !reducedMotion ? 'mz-seat--wobble' : ''].join(' ')} style={style}>
               <button type="button" className="mz-seat__btn" disabled={you || off}
                 aria-label={you ? `You, ${p.name}` : off ? `${p.name}, reconnecting` : `Nudge ${p.name}`}
                 title={p.name}
