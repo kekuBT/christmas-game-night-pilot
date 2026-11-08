@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { ANSWER_SHAPES } from '../tokens/tokens.js';
-import { formatScore, ordinal } from '../lib/standings.js';
+import { formatScore, ordinal, standingsRows } from '../lib/standings.js';
 import type { AnswerOption, Player, RankedEntry } from '../types.js';
 import { ICON, Icon, PlayerToken } from './primitives.js';
 
@@ -92,14 +92,15 @@ export function AnswerDistribution({ options, counts, correctId, total }: { opti
 /* ----------------------------------------------------- standings (phone) */
 
 export function StandingsList({ ranked, youId, limit = 3, players }: { ranked: readonly RankedEntry[]; youId: string; limit?: number; players: readonly Player[] }) {
-  const top = ranked.slice(0, limit);
+  const rows = standingsRows(ranked, youId, limit);
   const me = ranked.find((r) => r.playerId === youId);
-  const rows = me && !top.includes(me) ? [...top, me] : top;
+  // Your row is shown on its own below the top rows (the "gap" style).
+  const youBelow = !!me && ranked.indexOf(me) >= limit;
   return (
     <ol className="mz-standings" aria-label="Standings">
       {rows.map((r) => {
         const you = r.playerId === youId;
-        const gap = me && !top.includes(me) && r === me;
+        const gap = youBelow && r === me;
         const away = r.player.connection === 'disconnected';
         return (
           <li key={r.playerId} className={['mz-standings__row', you ? 'mz-standings__row--you' : '', gap ? 'mz-standings__row--gap' : ''].join(' ')}>

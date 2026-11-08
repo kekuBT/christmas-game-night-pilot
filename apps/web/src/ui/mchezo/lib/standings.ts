@@ -20,6 +20,16 @@ export function rankStandings(scores: readonly ScoreEntry[], players: readonly P
   return rows;
 }
 
+/**
+ * The rows a phone shows: the top `limit` entries plus your own row if you
+ * are further down. Display only: ranks and scores are the server's.
+ */
+export function standingsRows(ranked: readonly RankedEntry[], youId: string, limit: number): RankedEntry[] {
+  const top = ranked.slice(0, limit);
+  const me = ranked.find((r) => r.playerId === youId);
+  return me && !top.includes(me) ? [...top, me] : top;
+}
+
 /** Previous totals derived from current totals minus the round delta (display helper). */
 export function previousScores(scores: readonly ScoreEntry[]): ScoreEntry[] {
   return scores.map((s) => ({ playerId: s.playerId, score: s.score - (s.delta ?? 0) }));
