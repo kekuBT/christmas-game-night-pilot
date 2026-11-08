@@ -5,6 +5,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-tv-spectator.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -16,7 +17,7 @@ function check(name, ok, detail = "") {
 }
 
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -29,7 +30,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -72,11 +73,11 @@ try {
 
   // 1. A fresh page that never joins sees landing only — no TV, no room.
   const stranger = await ctx.newPage();
-  await stranger.goto(BASE, { waitUntil: "domcontentloaded" });
+  await stranger.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await stranger.waitForTimeout(1000);
-  const hasTvBtn = await stranger.getByRole("button", { name: "TV stage" }).count();
+  const hasTvBtn = (await stranger.getByRole("button", { name: /TV stage|Show on a TV/ }).count()) + (await stranger.getByTestId("room-menu").count());
   const hasHostBtn = await stranger.getByRole("button", { name: "Host a game" }).count();
-  check("unjoined page has no TV stage button", hasTvBtn === 0 && hasHostBtn === 1);
+  check("unjoined page has no TV button and no room menu", hasTvBtn === 0 && hasHostBtn === 1);
   proj = await tvProj(roomId);
   check("unjoined page created no participant", proj.players.length === 3);
 
@@ -86,7 +87,7 @@ try {
   await joinRoom(tv, "TV", code);
   proj = await tvProj(roomId);
   check("joining as TV adds one participant", proj.players.length === 4 && proj.players.some((p) => p.displayName === "TV"));
-  await tv.getByRole("button", { name: "TV stage" }).click();
+  await roomGo(tv, "tv");
   // No game has started yet, so the TV view is still the old dashboard
   // (the Mchezo stage only takes over once a Trivia game exists).
   await tv.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
@@ -149,7 +150,7 @@ try {
   // exists, disconnected); a new name creates a new slot, old slot Away.
   await tv.close();
   const tv2 = await tvCtx.newPage();
-  await tv2.goto(BASE, { waitUntil: "domcontentloaded" });
+  await tv2.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await tv2.getByPlaceholder("e.g. Auntie June").fill("TV");
   await tv2.locator(".mz-code__input").fill(code);
   await tv2.getByRole("button", { name: "Join the game" }).click();

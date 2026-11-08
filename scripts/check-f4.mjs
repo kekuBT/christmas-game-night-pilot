@@ -23,6 +23,7 @@
 // A failed check is recorded and the process exits non-zero.
 
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
@@ -64,7 +65,7 @@ try {
   const hostCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const host = await hostCtx.newPage();
   pages.push({ page: host, name: NAMES[0] });
-  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
   await host.getByRole("button", { name: "Host a game" }).click();
   const shareChip = host.getByRole("button", { name: /^Share room code / });
@@ -80,7 +81,7 @@ try {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const p = await ctx.newPage();
     pages.push({ page: p, name: NAMES[i] });
-    await p.goto(BASE, { waitUntil: "domcontentloaded" });
+    await p.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
     await p.getByPlaceholder("e.g. Auntie June").fill(NAMES[i]);
     await p.locator(".mz-code__input").fill(code);
     await p.getByRole("button", { name: "Join the game" }).click();
@@ -112,7 +113,7 @@ try {
   check("math-mayhem finished on all 4 pages", finishedEverywhere);
 
   // --- Championship view: standings + per-game breakdown. ---
-  await host.getByRole("button", { name: "Championship" }).click();
+  await roomGo(host, "cup");
   await host.getByText("Championship standings").waitFor({ timeout: 15000 });
   await sleep(1500); // allow the 2s poll to refresh standings after the finish
   const champText = await host.locator("body").textContent();
@@ -122,7 +123,7 @@ try {
   check("championship per-game breakdown names the finished game", breakdownOk);
 
   // --- TV Dashboard view: code, roster, standings, recent games. ---
-  await host.getByRole("button", { name: "TV Dashboard" }).click();
+  await roomGo(host, "tv");
   await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   await sleep(1500);
   const tvText = await host.locator("body").textContent();
@@ -132,7 +133,7 @@ try {
     tvText.includes("math-mayhem") && tvText.includes("finished"));
 
   // --- Memory Book: add, approve, export contains it. ---
-  await host.getByRole("button", { name: "Memory Book" }).click();
+  await roomGo(host, "memory");
   await host.getByText("Christmas Memory Book").waitFor({ timeout: 15000 });
   await host.getByPlaceholder(/Ada won Math Mayhem/).fill(HIGHLIGHT);
   await host.getByRole("button", { name: "Add from last finished game" }).click();

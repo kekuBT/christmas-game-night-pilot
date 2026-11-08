@@ -21,7 +21,7 @@ async function noOverflow(page, label) {
   check(`no horizontal overflow at ${label}`, !overflow);
 }
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -34,7 +34,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -71,7 +71,7 @@ try {
 
   // TV stage at TV sizes (spectator tab, so the phone view is untouched).
   const tv = await ctx.newPage();
-  await tv.goto(BASE, { waitUntil: "domcontentloaded" });
+  await tv.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await tv.locator(".mz-code__input").fill(code);
   await tv.getByTestId("watch-spectator").click();
   await tv.getByRole("button", { name: "Stop watching" }).waitFor({ timeout: 15000 });
@@ -97,7 +97,7 @@ try {
   // TV view falls through to the dashboard).
   const tv2 = await ctx2.newPage();
   await tv2.setViewportSize({ width: 1920, height: 1080 });
-  await tv2.goto(BASE, { waitUntil: "domcontentloaded" });
+  await tv2.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await tv2.locator(".mz-code__input").fill(code2);
   await tv2.getByTestId("watch-spectator").click();
   await tv2.getByRole("button", { name: "Stop watching" }).waitFor({ timeout: 15000 });

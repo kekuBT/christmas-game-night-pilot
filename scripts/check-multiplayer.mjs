@@ -22,6 +22,7 @@
 // A failed check is recorded and the process exits non-zero.
 
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
@@ -72,7 +73,7 @@ try {
   const hostCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const host = await hostCtx.newPage();
   pages.push({ page: host, name: NAMES[0] });
-  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
   await host.getByRole("button", { name: "Host a game" }).click();
   const shareChip = host.getByRole("button", { name: /^Share room code / });
@@ -91,7 +92,7 @@ try {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const p = await ctx.newPage();
     pages.push({ page: p, name: NAMES[i] });
-    await p.goto(BASE, { waitUntil: "domcontentloaded" });
+    await p.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
     await p.getByPlaceholder("e.g. Auntie June").fill(NAMES[i]);
     await p.locator(".mz-code__input").fill(code);
     await p.getByRole("button", { name: "Join the game" }).click();
@@ -176,7 +177,7 @@ try {
   check("impostor started after a finished game", impostorStarted);
   await tvLeakCheck("impostor (playing)", roomId);
   // TV Dashboard view itself renders in the browser while a secret game plays.
-  await host.getByRole("button", { name: "TV Dashboard" }).click();
+  await roomGo(host, "tv");
   await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   check("TV Dashboard view renders during a secret-role game", true);
 } catch (e) {

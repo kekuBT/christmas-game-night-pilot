@@ -7,6 +7,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-tv-lifecycle.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { hostStartNow, tapReady } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -17,7 +18,7 @@ function check(name, ok, detail = "") {
   if (!ok) failures++;
 }
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -30,7 +31,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -85,7 +86,7 @@ try {
   await joinRoom(tv, "TV", code);
 
   // Lobby: TV shows the dashboard (no game yet).
-  await tv.getByRole("button", { name: "TV stage" }).click();
+  await roomGo(tv, "tv");
   await tv.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   check("lobby: TV shows the dashboard", await tvIsDashboard(tv));
 
@@ -115,7 +116,7 @@ try {
   await host.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });
   await tv.getByRole("button", { name: "Back to lobby" }).click().catch(() => {});
   await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
-  await tv.getByRole("button", { name: "TV stage" }).click();
+  await roomGo(tv, "tv");
   await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
   // D: finished TV auto-walks the reveal; jump straight to the board.
   await tv.getByRole("tab", { name: "Leaderboard" }).click();
@@ -157,8 +158,7 @@ try {
   console.log("DEBUG TV body at math finish:", (await tv.locator("body").textContent())?.slice(0, 300));
   // Return TV to TV view (it left to play Math) before asserting.
   if (!(await tvIsDashboard(tv)) && !(await tvIsStage(tv))) {
-    if ((await tv.getByRole("button", { name: "TV Dashboard" }).count()) > 0) await tv.getByRole("button", { name: "TV Dashboard" }).click();
-    else await tv.getByRole("button", { name: "TV stage" }).click();
+    await roomGo(tv, "tv"); // the dashboard's own button, or the lobby's room menu
     await sleep(1500);
   }
   const dashText = await tv.locator("body").textContent();
@@ -179,8 +179,7 @@ try {
   // TV is already on TV view from the previous check; only navigate if it
   // left (e.g. it went back to a phone view).
   if (!(await tvIsDashboard(tv)) && !(await tvIsStage(tv))) {
-    if ((await tv.getByRole("button", { name: "TV Dashboard" }).count()) > 0) await tv.getByRole("button", { name: "TV Dashboard" }).click();
-    else await tv.getByRole("button", { name: "TV stage" }).click();
+    await roomGo(tv, "tv"); // the dashboard's own button, or the lobby's room menu
   }
   await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 20000 });
   const stageText = await tv.locator("body").textContent();

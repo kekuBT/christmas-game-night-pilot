@@ -18,7 +18,7 @@ function check(name, ok, detail = "") {
 
 async function setupRoom(ctx, hostName, guestName) {
   const host = await ctx.newPage();
-  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill(hostName);
   await host.getByRole("button", { name: "Host a game" }).click();
   const chip = host.getByRole("button", { name: /^Share room code / });
@@ -29,7 +29,7 @@ async function setupRoom(ctx, hostName, guestName) {
     if (!/^[A-Z0-9]{6}$/.test(code)) await sleep(500);
   }
   const guest = await ctx.newPage();
-  await guest.goto(BASE, { waitUntil: "domcontentloaded" });
+  await guest.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await guest.getByPlaceholder("e.g. Auntie June").fill(guestName);
   await guest.locator(".mz-code__input").fill(code);
   await guest.getByRole("button", { name: "Join the game" }).click();

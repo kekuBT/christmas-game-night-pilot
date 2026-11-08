@@ -7,6 +7,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-spectator.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -18,7 +19,7 @@ function check(name, ok, detail = "") {
 }
 
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -31,7 +32,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -51,7 +52,7 @@ async function joinRoom(page, name, code) {
   throw new Error(`join did not reach lobby for ${name}`);
 }
 async function spectate(page, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.locator(".mz-code__input").fill(code);
   await page.getByTestId("watch-spectator").click();
   await page.getByRole("button", { name: "Stop watching" }).waitFor({ timeout: 15000 });
@@ -125,7 +126,7 @@ try {
 
   // 3. Bad code cannot spectate.
   const stranger = await tvCtx.newPage();
-  await stranger.goto(BASE, { waitUntil: "domcontentloaded" });
+  await stranger.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await stranger.locator(".mz-code__input").fill("ZZZZZZ");
   await stranger.getByTestId("watch-spectator").click();
   await sleep(1000);
@@ -211,7 +212,7 @@ try {
     }
     await sleep(500);
   }
-  await hostTab2.getByRole("button", { name: "TV stage" }).click();
+  await roomGo(hostTab2, "tv");
   await sleep(1500);
   proj = await tvProj(roomId);
   check("player TV on a second tab adds no seat", proj.players.length === 10, `players=${proj.players.length}`);

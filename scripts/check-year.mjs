@@ -24,7 +24,7 @@ function check(name, ok, detail = "") {
 }
 
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -37,7 +37,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();

@@ -37,7 +37,7 @@ const browser = await launchChromium();
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
 try {
   const host = await ctx.newPage();
-  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
   await host.getByRole("button", { name: "Host a game" }).click();
   const shareChip = host.getByRole("button", { name: /^Share room code / });
@@ -49,7 +49,7 @@ try {
   }
 
   const guest = await ctx.newPage();
-  await guest.goto(BASE, { waitUntil: "domcontentloaded" });
+  await guest.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await guest.getByPlaceholder("e.g. Auntie June").fill("Bea");
   await guest.locator(".mz-code__input").fill(code);
   // Intercept ONLY the guest's player WS, before it is created (join click

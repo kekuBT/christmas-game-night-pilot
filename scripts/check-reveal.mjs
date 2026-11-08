@@ -6,6 +6,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-reveal.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -17,7 +18,7 @@ function check(name, ok, detail = "") {
 }
 
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -30,7 +31,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -140,7 +141,7 @@ try {
   // ---- TV auto-director walk --------------------------------------------
   await tv.getByRole("button", { name: "Back to lobby" }).click();
   await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
-  await tv.getByRole("button", { name: "TV stage" }).click();
+  await roomGo(tv, "tv");
   await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
   const q1 = (await tv.locator(".mz-tv-question").first().textContent().catch(() => null)) ?? "";
   check("TV walk opens on a question", q1.length > 0, q1.slice(0, 40));

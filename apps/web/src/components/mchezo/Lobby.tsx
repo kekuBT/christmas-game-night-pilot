@@ -49,6 +49,8 @@ export interface RoomLobbyProps {
   onStart?: () => void;
   startTestId?: string;
   error?: string;
+  /** A short confirmation ("Reconnected to your player slot."). */
+  message?: string;
 }
 
 export function RoomLobby(p: RoomLobbyProps) {
@@ -128,6 +130,7 @@ export function RoomLobby(p: RoomLobbyProps) {
       {p.isHost && p.setup}
       <div className="mz-dock mz-dock--sticky" data-testid="lobby-dock">
         {p.error ? <p className="err mz-dock__error" data-testid="mz-error" role="alert">{p.error}</p> : null}
+        {p.message && !p.error ? <p className="ok mz-dock__ok" role="status">{p.message}</p> : null}
         {p.isHost ? (
           <>
             <Keycap block disabled={!canStart || !p.onStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? `Start ${p.upNext?.title ?? "the game"}` : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>

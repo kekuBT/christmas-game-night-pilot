@@ -26,7 +26,7 @@ try {
   host.on("request", (r) => {
     if (r.method() === "POST" && /\/rooms\/[^/]+\/games$/.test(new URL(r.url()).pathname)) startPosts++;
   });
-  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
   await host.getByRole("button", { name: "Host a game" }).click();
   const chip = host.getByRole("button", { name: /^Share room code / });
@@ -37,7 +37,7 @@ try {
     if (!/^[A-Z0-9]{6}$/.test(code)) await sleep(500);
   }
   const bea = await ctx.newPage();
-  await bea.goto(BASE, { waitUntil: "domcontentloaded" });
+  await bea.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await bea.getByPlaceholder("e.g. Auntie June").fill("Bea");
   await bea.locator(".mz-code__input").fill(code);
   await bea.getByRole("button", { name: "Join the game" }).click();

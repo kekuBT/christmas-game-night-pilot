@@ -34,6 +34,7 @@
 // process exits non-zero.
 
 import { connectionsGroups } from "./lib/content-oracle.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchChromium } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
@@ -291,7 +292,7 @@ try {
   const hostCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const host = await hostCtx.newPage();
   pages.push({ page: host, name: NAMES[0] });
-  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
   await host.getByRole("button", { name: "Host a game" }).click();
   const shareChip = host.getByRole("button", { name: /^Share room code / });
@@ -309,7 +310,7 @@ try {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const p = await ctx.newPage();
     pages.push({ page: p, name: NAMES[i] });
-    await p.goto(BASE, { waitUntil: "domcontentloaded" });
+    await p.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
     await p.getByPlaceholder("e.g. Auntie June").fill(NAMES[i]);
     await p.locator(".mz-code__input").fill(code);
     await p.getByRole("button", { name: "Join the game" }).click();
@@ -401,7 +402,7 @@ try {
     gameIds.every((id) => finishedIds.includes(id)),
     gameIds.filter((id) => !finishedIds.includes(id)).join(", ") || "all finished");
 
-  await host.getByRole("button", { name: "Championship" }).click();
+  await roomGo(host, "cup");
   await host.getByText("Championship standings").waitFor({ timeout: 15000 });
   await sleep(1500);
   const champText = await host.locator("body").textContent();
@@ -414,7 +415,7 @@ try {
   // playlist ends on Math Mayhem, so the TV view is the old dashboard
   // with Now playing + Recent games — not the stale Trivia stage. The
   // stage itself is covered by the dedicated TV lifecycle driver.
-  await host.getByRole("button", { name: "TV Dashboard" }).click();
+  await roomGo(host, "tv");
   await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   await sleep(1500);
   const tvText = await host.locator("body").textContent();
@@ -430,7 +431,7 @@ try {
   await host.getByRole("button", { name: "Lobby & Games" }).click();
   await host.getByRole("heading", { name: `You’re in, ${NAMES[0]}.` }).waitFor({ timeout: 15000 });
   const HIGHLIGHT = "F5 day highlight: full playlist finished";
-  await host.getByRole("button", { name: "Memory Book" }).click();
+  await roomGo(host, "memory");
   await host.getByText("Christmas Memory Book").waitFor({ timeout: 15000 });
   await host.getByPlaceholder(/Ada won Math Mayhem/).fill(HIGHLIGHT);
   await host.getByRole("button", { name: "Add from last finished game" }).click();

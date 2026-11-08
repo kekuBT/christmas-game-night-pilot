@@ -26,7 +26,7 @@ for (let i = 0; i < 120 && !port; i++) { const m = /on http:\/\/localhost:(\d+)/
 if (!port) { console.log(`FAIL server did not start: ${out.slice(-300)}`); process.exit(1); }
 const BASE = `http://localhost:${port}`;
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / }); await chip.waitFor({ timeout: 15000 });
@@ -34,7 +34,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -99,7 +99,7 @@ try {
   await bea.screenshot({ path: screenshotPath("docs/sprint-4-screenshots/cap-04-vote.png") });
   // The TV (a spectator) shows the captions but never names.
   const tv = await mk(1280);
-  await tv.goto(BASE, { waitUntil: "domcontentloaded" });
+  await tv.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await tv.locator(".mz-code__input").fill(code);
   await tv.getByTestId("watch-spectator").click();
   await tv.getByTestId("mz-cap-tv").waitFor({ timeout: 15000 });

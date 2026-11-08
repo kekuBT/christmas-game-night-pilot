@@ -7,6 +7,7 @@
 //   playing and after finish, mobile widths 320/360/390, reduced motion.
 // Fictional test players only; run against a local server only.
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { hostStartNow, passBriefing, tapReady } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
@@ -26,7 +27,7 @@ async function noOverflow(page) {
   return page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
 }
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -39,7 +40,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -62,7 +63,7 @@ try {
   // ---- Room A: landing, lobby sizes, presence -------------------------
   const ctxA = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const hostA = await ctxA.newPage();
-  await hostA.goto(BASE, { waitUntil: "domcontentloaded" });
+  await hostA.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   const landingText = await hostA.locator("body").textContent();
   check("landing shows Mchezo wordmark and host action", landingText.toLowerCase().includes("mchezo") && landingText.includes("Host a game"));
   check("landing has a 6-character code input", (await hostA.locator(".mz-code__input").count()) === 1);
@@ -178,7 +179,7 @@ try {
   await joinRoom(guestC, "Bea", codeC);
   const tvC = await ctxC.newPage();
   await joinRoom(tvC, "TV", codeC);
-  await tvC.getByRole("button", { name: "TV stage" }).click();
+  await roomGo(tvC, "tv");
   await tvC.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   await hostC.getByTestId("start-official-trivia").click();
   // D3: the TV shows the rules during the briefing. The TV seat can't tap
@@ -197,7 +198,7 @@ try {
   await answerAllTrivia(hostC);
   await answerAllTrivia(guestC);
   await tvC.getByRole("button", { name: "Back to lobby" }).click({ timeout: 30000 });
-  await tvC.getByRole("button", { name: "TV stage" }).click();
+  await roomGo(tvC, "tv");
   await tvC.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
   check("TV stage shows leaderboard after finish", await waitFor(async () => (await tvC.locator("body").textContent()).includes("Leaderboard"), 30000));
   await tvC.getByRole("button", { name: "Back to phone view" }).click();

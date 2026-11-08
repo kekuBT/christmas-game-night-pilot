@@ -8,6 +8,7 @@
 //    is back in the same seat; the room sees who restored it.
 // Usage: node scripts/check-recovery.mjs <baseUrl>
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { openRoomMenu } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 let failures = 0;
@@ -27,7 +28,7 @@ async function expectSoon(label, fn, timeout = 15000) {
 }
 const text = async (loc) => ((await loc.textContent({ timeout: 2000 })) ?? "").replace(/\s+/g, " ").trim();
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -40,7 +41,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -60,7 +61,8 @@ try {
   await joinRoom(bea, "Bea", code);
   const beaId = await playerIdOf(bea);
 
-  // Bea saves a recovery code (optional, inside "This device").
+  // Bea saves a recovery code (optional: room menu → "This device").
+  await openRoomMenu(bea);
   await bea.getByTestId("mz-this-device").getByRole("button", { name: /This device/ }).click();
   await bea.getByTestId("mz-get-recovery-code").click();
   const shown = bea.getByTestId("mz-recovery-code");
@@ -106,7 +108,7 @@ try {
   const oldTry = await bea.evaluate(async () => (await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/session`, { headers: { "x-session-token": sessionStorage.getItem("cgn_token") ?? "" } })).status);
   check("1. the old tab's credential is really dead (server says 401)", oldTry === 401, String(oldTry));
   await replaced.getByRole("button", { name: "OK" }).click();
-  await expectSoon("1. after OK the old tab is back at the start screen", async () => (await bea.getByRole("button", { name: "Join the game" }).count()) === 1);
+  await expectSoon("1. after OK the old tab is back at the start screen (Home)", async () => (await bea.getByTestId("home").count()) === 1 && (await bea.getByTestId("room-menu").count()) === 0);
   await expectSoon("1. the room sees a notice", async () => (await text(host.getByTestId("mz-room-notice"))).includes("Bea’s seat was recovered on a new device"));
   await host.getByTestId("mz-room-notice").getByRole("button", { name: "Dismiss" }).click();
 

@@ -20,6 +20,7 @@
 // confirmation — the manual real-device checklist stays open.
 
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
@@ -136,7 +137,7 @@ const browser = await launchChromium({ headless: true });
 try {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const host = await ctx.newPage();
-  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").waitFor({ timeout: 15000 });
   console.log("\n== home ==");
   report("home", await sampleView(host, "home"));
@@ -152,7 +153,7 @@ try {
   }
   const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const joiner = await ctx2.newPage();
-  await joiner.goto(BASE, { waitUntil: "domcontentloaded" });
+  await joiner.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await joiner.getByPlaceholder("e.g. Auntie June").fill("Sam");
   await joiner.locator(".mz-code__input").fill(code);
   await joiner.getByRole("button", { name: "Join the game" }).click();
@@ -192,17 +193,17 @@ try {
   console.log("\n== game finished ==");
   report("game-finished", await sampleView(host, "game-finished"));
 
-  await host.getByRole("button", { name: "Championship" }).click();
+  await roomGo(host, "cup");
   await host.getByText("Championship standings").waitFor({ timeout: 15000 });
   console.log("\n== championship ==");
   report("championship", await sampleView(host, "championship"));
 
-  await host.getByRole("button", { name: "TV Dashboard" }).click();
+  await roomGo(host, "tv");
   await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   console.log("\n== TV dashboard ==");
   report("tv", await sampleView(host, "tv"));
 
-  await host.getByRole("button", { name: "Memory Book" }).click();
+  await roomGo(host, "memory");
   await host.getByText("Christmas Memory Book").waitFor({ timeout: 15000 });
   // The Add button stays disabled until highlight text is entered.
   await host.getByPlaceholder("e.g. Ada won Math Mayhem in a tie-break").fill("Contrast test highlight: a close Math Mayhem finish");

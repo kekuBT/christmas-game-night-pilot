@@ -19,6 +19,7 @@
 //             questions, also in a tab that watched another room first.
 // Usage: node scripts/check-audit-fixes.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -29,7 +30,7 @@ function check(name, ok, detail = "") {
   if (!ok) failures++;
 }
 async function enter(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   if (!code) {
     await page.getByRole("button", { name: "Host a game" }).click();
@@ -44,7 +45,7 @@ async function enter(page, name, code) {
   await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
 }
 async function spectate(page, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.locator(".mz-code__input").fill(code);
   await page.getByTestId("watch-spectator").click();
   await page.getByRole("button", { name: "Stop watching" }).waitFor({ timeout: 15000 });
@@ -189,7 +190,7 @@ try {
 
     // ---------------- A-07: a late joiner after that finished game ----------------
     const late = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
-    await late.goto(BASE, { waitUntil: "domcontentloaded" });
+    await late.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
     await late.getByPlaceholder("e.g. Auntie June").fill("Cal");
     await late.locator(".mz-code__input").fill(code);
     await late.getByRole("button", { name: "Join the game" }).click();
@@ -237,11 +238,11 @@ try {
   for (const [where, w] of [["library", 375], ["championship", 390], ["tv", 430]]) {
     const h = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage(); const code = await enter(h, "Ada");
     const g = await (await browser.newContext({ viewport: { width: w, height: 844 } })).newPage(); await enter(g, "Bea", code);
-    // Each guest really is on that screen before the host starts (exact
-    // button names, nothing swallowed: a missed click must fail loudly).
-    if (where === "library") { await g.getByTestId("browse-games").click(); await g.getByTestId("mz-lib-count").waitFor({ timeout: 15000 }); }
-    if (where === "championship") { await g.getByRole("button", { name: "Championship", exact: true }).click(); await g.getByText("Championship standings").waitFor({ timeout: 15000 }); }
-    if (where === "tv") { await g.getByRole("button", { name: "TV stage", exact: true }).click(); await g.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 }); }
+    // Each guest really is on that screen before the host starts (nothing
+    // swallowed: a missed tap must fail loudly). Stage 2: via the room menu.
+    if (where === "library") { await roomGo(g, "library"); await g.getByTestId("mz-lib-count").waitFor({ timeout: 15000 }); }
+    if (where === "championship") { await roomGo(g, "cup"); await g.getByText("Championship standings").waitFor({ timeout: 15000 }); }
+    if (where === "tv") { await roomGo(g, "tv"); await g.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 }); }
     await sleep(600);
     await startPractice(h, "trivia");
     await h.getByTestId("briefing").waitFor({ timeout: 15000 });

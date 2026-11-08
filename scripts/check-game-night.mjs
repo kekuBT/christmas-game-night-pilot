@@ -8,6 +8,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-game-night.mjs <baseUrl>
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { closeRoomMenu, openRoomMenu, roomGo } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 
@@ -20,7 +21,7 @@ function check(name, ok, detail = "") {
   if (ok) passes++; else failures++;
 }
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -33,7 +34,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   // A joiner does not always land in the lobby: if a game just
@@ -87,7 +88,7 @@ async function joinRoom(page, name, code) {
   }
 }
 async function spectate(page, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.locator(".mz-code__input").fill(code);
   await page.getByTestId("watch-spectator").click();
   await page.getByRole("button", { name: "Stop watching" }).waitFor({ timeout: 15000 });
@@ -183,11 +184,13 @@ try {
     await joinRoom(p, name, code);
     guests[name] = p;
   }
-  // Host grants Bea cohost (UI: "Make cohost" next to the first guest).
+  // Host grants Bea cohost (UI: room menu → Host tools → "Make cohost" next to the first guest).
+  await openRoomMenu(host);
   await host.getByRole("button", { name: "Make cohost" }).first().click();
   await sleep(1500);
+  await closeRoomMenu(host);
   let proj = await getProjection(host);
-  check("cohost granted via the lobby UI", (proj.players ?? []).find((p) => p.displayName === "Bea")?.isCohost === true);
+  check("cohost granted via the room menu", (proj.players ?? []).find((p) => p.displayName === "Bea")?.isCohost === true);
   await host.screenshot({ path: screenshotPath("docs/mchezo-screenshots/14-game-night-lobby.png") });
 
   // Spectator opens the TV (must not consume a player slot).
@@ -382,7 +385,7 @@ try {
   check("no stale game panel in the lobby", (await host.locator(".mz-question").count()) === 0 &&
     (await host.locator('[data-testid="game-panel"]').count()) === 0);
   // Championship view: all seven names in the standings.
-  await host.getByRole("button", { name: "Championship" }).click();
+  await roomGo(host, "cup");
   await host.getByText("Championship standings").waitFor({ timeout: 15000 });
   await sleep(1500);
   const champText = await host.evaluate(() => document.body.innerText);

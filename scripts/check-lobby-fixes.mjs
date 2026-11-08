@@ -16,6 +16,7 @@
 // Usage: build:web, serve on a port (test content mode), then:
 //   node scripts/check-lobby-fixes.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { closeRoomMenu, openRoomMenu, roomGo } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -28,7 +29,7 @@ const SIZES = [[390, 664], [393, 659], [375, 553], [412, 780], [360, 640]];
 const LONG = ["Amina-Josephine Wanjiku", "Bartholomew Otieno", "Christabel Nyambura", "Dmitri Kiprotich", "Esperanza Wambui", "Fitzgerald Mwangi", "Gwendolyn Achieng", "Maximilian Ochieng", "Ngozi Adebayo-Smith"];
 
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -58,11 +59,18 @@ const lobbyProblems = (page) => page.evaluate(() => {
       const r = R(t); const tx = r.left + r.width / 2, ty = r.top + r.height / 2;
       if (Math.hypot(tx - cx, ty - cy) < rd + r.width / 2 - 0.5) out.push(`a seat token touches the centre disc (${t.textContent.trim()})`);
     }
-    for (const n of document.querySelectorAll(".mz-upnext__name, .mz-upnext__kind")) {
+    // Stage 2: the disc shows how many are in the room; the up-next game moved to its own card.
+    for (const n of document.querySelectorAll(".mz-circle__center .mz-circle__num, .mz-circle__center .mz-circle__label")) {
       const r = R(n);
       if (r.width > d.width + 0.5) out.push(`"${n.textContent}" is wider than the centre disc`);
       for (const s of document.querySelectorAll(".mz-seat__btn, .mz-seat__name")) if (overlap(r, R(s))) out.push(`"${n.textContent}" overlaps a seat`);
     }
+  }
+  const card = document.querySelector('[data-testid="up-next-card"]');
+  if (card) {
+    for (const s of document.querySelectorAll(".mz-seat__btn, .mz-seat__name")) if (overlap(R(card), R(s))) out.push(`the up-next card overlaps the seat "${s.textContent.trim()}"`);
+    const name = card.querySelector(".mz-upnext__name");
+    if (name && R(name).right > R(card).right + 0.5) out.push("the up-next title runs out of its card");
   }
   return out;
 });
@@ -86,9 +94,9 @@ try {
     await ctx.addInitScript(() => { try { localStorage.setItem("cgn_anim", "off"); } catch { /* ignore */ } });
     const p = await ctx.newPage();
     await p.goto(BASE, { waitUntil: "domcontentloaded" });
-    await p.getByPlaceholder("e.g. Auntie June").waitFor();
-    const m = await p.evaluate(() => { const r = document.querySelector(".mz-root"); return { still: r?.hasAttribute("data-mz-still"), motion: r?.getAttribute("data-mz-motion"), anim: getComputedStyle(document.querySelector(".mz-hero__ring")).animationName }; });
-    check("Animations Off applies on the landing page", m.still === true && m.motion === "reduced" && m.anim === "none", JSON.stringify(m));
+    await p.getByTestId("home").waitFor();
+    const m = await p.evaluate(() => { const r = document.querySelector(".mz-root"); return { still: r?.hasAttribute("data-mz-still"), motion: r?.getAttribute("data-mz-motion"), anim: getComputedStyle(document.querySelector(".mz-screen")).animationName }; });
+    check("Animations Off applies on the start screen (Home)", m.still === true && m.motion === "reduced" && m.anim === "none", JSON.stringify(m));
     await ctx.close();
   }
   // ---------------------------------------------------------------- lone host: D1, modes, share, settings, day
@@ -128,7 +136,7 @@ try {
   await sleep(300);
   const status = await host.getByTestId("invite-status").innerText();
   const clip = await host.evaluate(() => navigator.clipboard.readText().catch(() => ""));
-  check("F2: Copy link copies the join link and says so", /copied/i.test(status) && clip.endsWith(`/?code=${code}`), `${status} | ${clip}`);
+  check("F2: Copy link copies the join link and says so", /copied/i.test(status) && clip.endsWith(`/join?code=${code}`), `${status} | ${clip}`);
   await host.getByTestId("invite-close").click();
   check("F2: Done closes the sheet", !(await sheet.isVisible().catch(() => false)));
   // F2 fallback: no clipboard → the link is shown to copy by hand
@@ -136,16 +144,19 @@ try {
   await host.getByTestId("share-room").click();
   await host.getByTestId("invite-copy").click();
   await sleep(200);
-  check("F2: without clipboard access the link is shown instead, with an explanation", (await host.getByTestId("invite-link").innerText()).endsWith(`/?code=${code}`) && /press and hold/i.test(await host.getByTestId("invite-status").innerText()));
+  check("F2: without clipboard access the link is shown instead, with an explanation", (await host.getByTestId("invite-link").innerText()).endsWith(`/join?code=${code}`) && /press and hold/i.test(await host.getByTestId("invite-status").innerText()));
   await host.keyboard.press("Escape");
-  // F7 settings
+  await host.getByTestId("invite-sheet").waitFor({ state: "detached", timeout: 5000 });
+  // F7 settings (Stage 2: room menu → This phone)
+  await openRoomMenu(host);
   const settings = host.getByTestId("settings-bar");
   check("F7: no Sound switch that does nothing", (await settings.locator("input[type=checkbox]").count()) === 0 && /doesn’t play any sounds/.test(await host.getByTestId("sound-status").innerText()));
   await host.getByTestId("motion-off").click();
   check("F8: Animations Off applies to the lobby at once", await host.evaluate(() => document.querySelector(".mz-root")?.hasAttribute("data-mz-still")));
   await host.getByTestId("motion-full").click();
+  await closeRoomMenu(host);
   // F5 advance day
-  await host.getByRole("button", { name: "Championship", exact: true }).click();
+  await roomGo(host, "cup");
   await host.getByTestId("advance-day").click();
   check("F5: advancing the day asks first", await host.getByTestId("advance-day-confirm").isVisible({ timeout: 3000 }).catch(() => false));
   await host.getByTestId("advance-day-cancel").click();

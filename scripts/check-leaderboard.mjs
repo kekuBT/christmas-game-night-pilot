@@ -4,6 +4,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-leaderboard.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 import { optionIndex } from "./lib/content-oracle.mjs";
@@ -17,7 +18,7 @@ function check(name, ok, detail = "") {
 }
 
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -30,7 +31,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -178,7 +179,7 @@ try {
     // TV page: results -> lobby -> TV stage -> leaderboard.
     await tv.getByRole("button", { name: "Back to lobby" }).click();
     await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
-    await tv.getByRole("button", { name: "TV stage" }).click();
+    await roomGo(tv, "tv");
     await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
     // D: finished TV auto-walks the reveal; jump straight to the board.
     await tv.getByRole("tab", { name: "Leaderboard" }).click();
@@ -337,7 +338,7 @@ try {
       expected.some((r) => r.name === "Dee"), `Dee=${game.rawScores[dee.id]}`);
     await tv.getByRole("button", { name: "Back to lobby" }).click();
     await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
-    await tv.getByRole("button", { name: "TV stage" }).click();
+    await roomGo(tv, "tv");
     await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
     // D: finished TV auto-walks the reveal; jump straight to the board.
     await tv.getByRole("tab", { name: "Leaderboard" }).click();
@@ -382,7 +383,7 @@ try {
     check("away marker: host phone results mark Cal Away", phoneAway);
     await tv.getByRole("button", { name: "Back to lobby" }).click();
     await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
-    await tv.getByRole("button", { name: "TV stage" }).click();
+    await roomGo(tv, "tv");
     await tv.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
     // D: finished TV auto-walks the reveal; jump straight to the board.
     await tv.getByRole("tab", { name: "Leaderboard" }).click();

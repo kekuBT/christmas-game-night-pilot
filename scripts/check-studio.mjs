@@ -4,6 +4,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-studio.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { closeRoomMenu, openRoomMenu, roomGo } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -14,7 +15,7 @@ function check(name, ok, detail = "") {
 }
 
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -27,7 +28,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -53,10 +54,12 @@ try {
   await joinRoom(bea, "Bea", code);
 
   // Guests never see the Studio: configuring an event is a host action.
-  check("guest sees no Studio button",
-    (await bea.locator('[data-testid="studio-button"]').count()) === 0);
+  await openRoomMenu(bea);
+  check("guest sees no Studio button (not even in the room menu)",
+    (await bea.getByTestId("room-menu-sheet").count()) === 1 && (await bea.locator('[data-testid="studio-button"]').count()) === 0);
+  await closeRoomMenu(bea);
 
-  await host.getByTestId("studio-button").click();
+  await roomGo(host, "studio");
   await host.getByTestId("studio-preview-note").waitFor({ timeout: 15000 });
   check("studio opens with its preview-only note",
     await host.getByText(/not scored, not saved/).isVisible());

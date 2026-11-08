@@ -19,6 +19,7 @@
 //   game; the process exits non-zero if anything failed.
 
 import { connectionsGroups } from "./lib/content-oracle.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchBrowser } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
@@ -276,7 +277,7 @@ async function runBrowser(browserName, games) {
     const hostCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const host = await hostCtx.newPage();
     pages.push({ page: host, name: NAMES[0] });
-    await host.goto(BASE, { waitUntil: "domcontentloaded" });
+    await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
     await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
     await host.getByRole("button", { name: "Host a game" }).click();
     // Mchezo lobby: the room code lives on the share chip's aria-label.
@@ -294,7 +295,7 @@ async function runBrowser(browserName, games) {
       const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
       const p = await ctx.newPage();
       pages.push({ page: p, name: NAMES[i] });
-      await p.goto(BASE, { waitUntil: "domcontentloaded" });
+      await p.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
       await p.getByPlaceholder("e.g. Auntie June").fill(NAMES[i]);
       await p.locator(".mz-code__input").fill(code);
       await p.getByRole("button", { name: "Join the game" }).click();
@@ -368,10 +369,10 @@ async function runBrowser(browserName, games) {
     // the lobby-extra buttons; TV shows the Mchezo stage when a Trivia
     // game is the latest subject, and the old dashboard otherwise (smoke).
     try {
-      await host.getByRole("button", { name: "Championship" }).click();
+      await roomGo(host, "cup");
       await host.getByText("Championship standings").waitFor({ timeout: 15000 });
       await host.getByRole("button", { name: "Lobby & Games" }).click();
-      await host.getByRole("button", { name: "TV stage" }).click();
+      await roomGo(host, "tv");
       // TV subject is the LATEST game overall (Phase 2.1 lifecycle fix):
       // full runs end on Math Mayhem, so the TV view is the old dashboard;
       // a run ending on Trivia would show the Mchezo stage. Accept either.
@@ -382,7 +383,7 @@ async function runBrowser(browserName, games) {
         await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
         await host.getByRole("button", { name: "Lobby & Games" }).click();
       }
-      await host.getByRole("button", { name: "Memory Book" }).click();
+      await roomGo(host, "memory");
       await host.getByPlaceholder("e.g. Ada won Math Mayhem in a tie-break").fill("E2E highlight: Alex won Math Mayhem");
       await host.getByRole("button", { name: "Add from last finished game" }).click();
       await host.getByText("E2E highlight: Alex won Math Mayhem").waitFor({ timeout: 15000 });
@@ -394,7 +395,7 @@ async function runBrowser(browserName, games) {
       await host.getByText(/Day 1 · approved/).waitFor({ timeout: 15000 });
       await host.getByRole("button", { name: "Export approved" }).click();
       await host.getByText(/E2E highlight: Alex won Math Mayhem/).last().waitFor({ timeout: 15000 });
-      await host.getByRole("button", { name: "Reconnect" }).click();
+      await roomGo(host, "reconnect");
       await host.getByText("Reconnected to your player slot.").waitFor({ timeout: 15000 });
       console.log(`[${browserName}] OK views: championship, TV, memory book, reconnect`);
       results.push({ gameId: "(views)", status: "finished" });

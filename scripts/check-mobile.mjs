@@ -150,7 +150,7 @@ try {
     }
     const ctx2 = await browser.newContext({ viewport: vp, hasTouch: true, isMobile: true });
     const joiner = await ctx2.newPage();
-    await joiner.goto(BASE, { waitUntil: "domcontentloaded" });
+    await joiner.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
     await joiner.getByPlaceholder("e.g. Auntie June").fill("Sam");
     await joiner.locator(".mz-code__input").fill(code);
     await joiner.getByRole("button", { name: "Join the game" }).click();

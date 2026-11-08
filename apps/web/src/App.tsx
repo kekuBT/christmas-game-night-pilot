@@ -887,7 +887,8 @@ export function App() {
           onStudio={isHostish ? () => setView("studio") : undefined}
           onHome={() => navigate(HOME)}
           onReconnect={() => { void reconnect(); }}
-          message={err || msg ? <div className="mz-menu__msg">{err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}</div> : undefined}
+          // While the menu is open its messages show here (and not in the dock).
+          message={err || msg ? <div className="mz-menu__msg">{err && <p className="err">{err}</p>}{msg && <p className="ok" role="status">{msg}</p>}</div> : undefined}
           phone={<SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} />}
           device={
             <ThisDeviceCard
@@ -991,6 +992,7 @@ export function App() {
             : watchingGame ? <NoticeCard tone="info" title={`${games.find((x) => x.id === watchingGame.gameId)?.title ?? "A game"} is being played`} testId="not-in-game-note">It started before you joined, so you’ll play the next one.</NoticeCard>
             : undefined}
           error={err || undefined}
+          message={sheet === "menu" ? undefined : msg || undefined}
           onStart={upNext ? () => startGame(upNext.id, startMode === "official") : undefined}
           startTestId={upNext ? `start-${startMode}-${upNext.id}` : undefined}
           setup={upNext && (<>

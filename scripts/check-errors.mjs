@@ -13,6 +13,7 @@
 //     does not match".
 //  3. A successful reconnect afterwards clears the error and confirms.
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -26,7 +27,7 @@ const browser = await launchChromium({ headless: true });
 try {
   const hostCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const host = await hostCtx.newPage();
-  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
   await host.getByRole("button", { name: "Host a game" }).click();
   const shareChip = host.getByRole("button", { name: /^Share room code / });
@@ -42,7 +43,7 @@ try {
   // 1. Duplicate display name: the landing must show the human sentence.
   const guestCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const guest = await guestCtx.newPage();
-  await guest.goto(BASE, { waitUntil: "domcontentloaded" });
+  await guest.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await guest.getByPlaceholder("e.g. Auntie June").fill("Ada");
   await guest.locator(".mz-code__input").fill(code);
   await guest.getByRole("button", { name: "Join the game" }).click();
@@ -69,8 +70,7 @@ try {
   if (!goodToken) throw new Error("guest sessionStorage has no cgn_token");
   await guest.evaluate(() => sessionStorage.setItem("cgn_token", "bad-token"));
   await guest.reload({ waitUntil: "domcontentloaded" });
-  await guest.getByRole("button", { name: "Reconnect" }).waitFor({ timeout: 15000 });
-  await guest.getByRole("button", { name: "Reconnect" }).click();
+  await roomGo(guest, "reconnect");
   const lobbyErr = guest.getByTestId("mz-error");
   await lobbyErr.waitFor({ timeout: 15000 });
   const lobbyText = await lobbyErr.innerText();
@@ -82,8 +82,7 @@ try {
   // mounted state still holds the bad token, so reload after restoring.
   await guest.evaluate((t) => sessionStorage.setItem("cgn_token", t), goodToken);
   await guest.reload({ waitUntil: "domcontentloaded" });
-  await guest.getByRole("button", { name: "Reconnect" }).waitFor({ timeout: 15000 });
-  await guest.getByRole("button", { name: "Reconnect" }).click();
+  await roomGo(guest, "reconnect");
   await guest.getByText("Reconnected to your player slot.").waitFor({ timeout: 15000 });
   check("successful reconnect clears the lobby error", (await guest.getByTestId("mz-error").count()) === 0);
 } finally {

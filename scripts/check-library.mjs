@@ -4,6 +4,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-library.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { roomGo, upNextTitle } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -14,7 +15,7 @@ function check(name, ok, detail = "") {
 }
 
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -27,7 +28,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -54,7 +55,7 @@ try {
   await joinRoom(bea, "Bea", code);
 
   // Host opens the library: full catalog, 11 cards.
-  await host.getByTestId("browse-games").click();
+  await roomGo(host, "library");
   await host.getByTestId("mz-lib-count").waitFor({ timeout: 15000 });
   check("library opens with the full catalog",
     (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
@@ -68,6 +69,11 @@ try {
   check("clearing search restores the catalog",
     (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
 
+  // Stage 2: the rarer filters are folded away; search stays on screen.
+  check("advanced filters start folded away, search is on screen",
+    (await host.getByTestId("mz-lib-style-team").count()) === 0 && await host.getByTestId("mz-lib-search").isVisible());
+  await host.getByTestId("mz-lib-filters-toggle").click();
+
   // Team filter: only Charades.
   await host.getByTestId("mz-lib-style-team").click();
   check("team filter shows only the team game",
@@ -76,6 +82,7 @@ try {
   await host.getByTestId("mz-lib-reset").click();
   check("reset restores the catalog",
     (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
+  check("with no filters left, there is nothing to clear", (await host.getByTestId("mz-lib-active").count()) === 0);
 
   // Duration filter: 5 minutes or less is Math Mayhem alone.
   await host.getByTestId("mz-lib-duration-5").click();
@@ -92,13 +99,19 @@ try {
   check("reset after player filter restores the catalog",
     (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
 
-  // Empty state: no match, with a reset path (no second reset button).
+  // Empty state: no match, with a way out inside it.
   await host.getByTestId("mz-lib-search").fill("zzz-no-match");
   check("empty state on no match",
     (await waitForCount(host, "Showing 0 of 11 games"))
     && await host.getByTestId("mz-lib-empty").isVisible());
+  check("the active search is shown as a removable filter", /zzz-no-match/.test((await host.getByTestId("mz-lib-active").textContent()) ?? ""));
+  await host.getByTestId("mz-lib-empty-clear").click();
+  check("Clear filters in the empty state restores the catalog",
+    (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11
+    && (await host.getByTestId("mz-lib-search").inputValue()) === "");
+  await host.getByTestId("mz-lib-search").fill("zzz-no-match");
   await host.getByTestId("mz-lib-reset").click();
-  check("reset from empty state restores the catalog",
+  check("Clear filters next to the active filters restores the catalog",
     (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
 
   // The library never starts a game: no start button exists in this view.
@@ -109,13 +122,14 @@ try {
   await host.getByTestId("mz-lib-select-charades").click();
   await host.getByRole("heading", { name: "You’re in, Ada." }).waitFor({ timeout: 15000 });
   check("host selection returns to the lobby with the game up next",
-    await host.getByText(/Up next is Charades/).isVisible()
+    (await upNextTitle(host)) === "Charades"
     && await host.getByTestId("start-practice-charades").isVisible());
+  check("the library entry left no extra Back step (lobby is at /room)", new URL(host.url()).pathname === "/room");
   check("selection started no game",
     (await host.locator(".mz-question").count()) === 0);
 
   // Guest browsing: library opens, no select buttons, guest note shown.
-  await bea.getByTestId("browse-games").click();
+  await roomGo(bea, "library");
   await bea.getByTestId("mz-lib-count").waitFor({ timeout: 15000 });
   check("guest can browse the library",
     (await waitForCount(bea, "Showing 11 of 11 games")) && (await cardCount(bea)) === 11);

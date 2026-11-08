@@ -38,7 +38,7 @@ if (!port) { console.log(`FAIL server did not start: ${out.slice(-300)}`); proce
 const BASE = `http://localhost:${port}`;
 
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -48,7 +48,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function joinRoom(page, name, code) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   await page.getByRole("button", { name: "Join the game" }).click();
@@ -163,7 +163,7 @@ try {
 
   // TV (a spectator screen): the board, never the answers.
   const tv = await mk(1280);
-  await tv.goto(BASE, { waitUntil: "domcontentloaded" });
+  await tv.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await tv.locator(".mz-code__input").fill(code);
   await tv.getByTestId("watch-spectator").click();
   await tv.getByTestId("mz-cx-tv").waitFor({ timeout: 15000 });

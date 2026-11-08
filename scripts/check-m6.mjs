@@ -18,7 +18,7 @@ const browser = await launchChromium();
 const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
 try {
   const host = await ctx.newPage();
-  await host.goto(BASE, { waitUntil: "domcontentloaded" });
+  await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   // Mchezo landing: wordmark + host button.
   const landing = await host.locator("body").textContent();
   if (landing.toLowerCase().includes("mchezo") && landing.includes("Host a game")) pass("landing shows Mchezo wordmark");
@@ -35,7 +35,7 @@ try {
   pass("host created room, code " + code);
 
   const guest = await ctx.newPage();
-  await guest.goto(BASE, { waitUntil: "domcontentloaded" });
+  await guest.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await guest.getByPlaceholder("e.g. Auntie June").fill("Bea");
   await guest.locator(".mz-code__input").fill(code);
   await guest.getByRole("button", { name: "Join the game" }).click();

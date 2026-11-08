@@ -5,6 +5,7 @@
 // rejects (never trusted, never a new seat); a browser that refuses storage.
 // Usage: node scripts/check-sessions.mjs <baseUrl>
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { openRoomMenu } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 let failures = 0;
@@ -23,7 +24,7 @@ async function expectSoon(label, fn, timeout = 15000) {
   return false;
 }
 async function createRoom(page, name) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
@@ -36,7 +37,7 @@ async function createRoom(page, name) {
   return code;
 }
 async function fillJoin(page, name, code, { remember = false } = {}) {
-  await page.goto(BASE, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   await page.locator(".mz-code__input").fill(code);
   if (remember) await page.getByTestId("mz-remember-device").check();
@@ -66,7 +67,7 @@ try {
   // 17. Closed tab without Remember: a new tab starts fresh.
   await bea.close();
   bea = await beaCtx.newPage();
-  await bea.goto(BASE, { waitUntil: "domcontentloaded" });
+  await bea.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await expectSoon("17. new tab without Remember shows the join screen", async () => (await bea.getByRole("button", { name: "Join the game" }).count()) === 1);
   await bea.waitForTimeout(800);
   check("17. and offers no saved seat", (await bea.getByTestId("mz-continue-seat").count()) === 0);
@@ -91,7 +92,8 @@ try {
   await expectSoon("18. continuing restores the same seat", async () => (await cal.getByRole("heading", { name: "You’re in, Cal." }).count()) === 1 && (await cal.evaluate(() => sessionStorage.getItem("cgn_playerId"))) === calPlayer);
   check("18. no duplicate seat was created", (await seatCount(host)) === seatsBefore + 1, `seats=${await seatCount(host)}`);
 
-  // 19. Remember revoked from the lobby.
+  // 19. Remember revoked from the lobby (room menu → This device).
+  await openRoomMenu(cal);
   await cal.getByTestId("mz-this-device").getByRole("button", { name: /This device/ }).click();
   await cal.waitForTimeout(200);
   await cal.getByTestId("mz-this-device").scrollIntoViewIfNeeded();
@@ -102,10 +104,11 @@ try {
   await expectSoon("19. this tab still works after revoking", async () => (await cal.getByRole("heading", { name: "You’re in, Cal." }).count()) === 1);
 
   // Sign out on this device: the seat stays in the game.
+  await openRoomMenu(cal);
   await cal.getByTestId("mz-this-device").getByRole("button", { name: /This device/ }).click();
   await cal.getByTestId("mz-forget-device").click();
   await cal.getByTestId("mz-forget-device-confirm").click();
-  await expectSoon("sign out returns to the join screen", async () => (await cal.getByRole("button", { name: "Join the game" }).count()) === 1);
+  await expectSoon("sign out returns to the start screen (Home), saying so", async () => (await cal.getByTestId("home").count()) === 1 && (await cal.getByTestId("room-menu").count()) === 0 && /Signed out on this device/.test(await cal.locator("body").innerText()));
   check("sign out leaves no credential on the device", !(await storages(cal)).session.includes("cgn_token") && !(await storages(cal)).local.includes("mz_remembered"));
   check("sign out keeps the seat in the room", (await seatCount(host)) === seatsBefore + 1);
 
@@ -128,7 +131,7 @@ try {
     for (const k of ["localStorage", "sessionStorage"]) Object.defineProperty(window, k, { get: deny, configurable: true });
   });
   const denied = await deniedCtx.newPage();
-  await denied.goto(BASE, { waitUntil: "domcontentloaded" });
+  await denied.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
   await expectSoon("20. storage-denied browser renders the join screen", async () => (await denied.getByRole("button", { name: "Join the game" }).count()) === 1);
   check("20. Remember is disabled, with a plain explanation", await denied.getByTestId("mz-remember-device").isDisabled() && ((await denied.locator(".mz-remember__help").textContent()) ?? "").includes("won’t let Mchezo remember"));
   await denied.getByPlaceholder("e.g. Auntie June").fill("Dee");
