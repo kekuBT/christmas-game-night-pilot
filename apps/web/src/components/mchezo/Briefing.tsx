@@ -221,7 +221,7 @@ export function BriefingScreen(props: CommonProps & {
 }
 
 /** TV and spectators: the same public rules, readiness and warning. No controls. */
-export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () => void; backLabel: string }) {
+export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () => void; backLabel: string; onBackToReady?: () => void }) {
   const { game, registry, players } = props;
   const b = game.briefing!;
   const now = useServerNow();
@@ -235,6 +235,11 @@ export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () 
         <button type="button" className="mz-chip-btn" onClick={props.onBack}>{props.backLabel}</button>
       </div>
       <h1 className="mz-h1">{title}: get ready</h1>
+      {props.onBackToReady && (
+        <NoticeCard tone="info" title="You're playing in this game" testId="briefing-tv-here" action={<button type="button" className="mz-chip-btn" data-testid="briefing-tv-back" onClick={props.onBackToReady}>Back to my phone to get ready</button>}>
+          The rules and your I'm ready button are on your phone view.
+        </NoticeCard>
+      )}
       {clock.warning && <Warning cancelInMs={clock.cancelInMs} />}
       <div className="mz-brief__tvgrid">
         <Rules gameId={game.gameId} registry={registry} tv />

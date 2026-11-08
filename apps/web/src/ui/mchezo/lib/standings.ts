@@ -21,11 +21,16 @@ export function rankStandings(scores: readonly ScoreEntry[], players: readonly P
 }
 
 /**
- * The rows a phone shows: the top `limit` entries plus your own row if you
+ * The rows a phone shows: the top `limit` places plus your own row if you
  * are further down. Display only: ranks and scores are the server's.
+ *
+ * A-03 (live audit): the cut never splits a shared rank. Cutting by row
+ * count dropped a tied-first player from the other players' phones in a
+ * three-way tie; every player on the cut-off rank is now shown.
  */
 export function standingsRows(ranked: readonly RankedEntry[], youId: string, limit: number): RankedEntry[] {
-  const top = ranked.slice(0, limit);
+  const cutoff = ranked[limit - 1]?.rank;
+  const top = cutoff === undefined ? [...ranked] : ranked.filter((r) => r.rank <= cutoff);
   const me = ranked.find((r) => r.playerId === youId);
   return me && !top.includes(me) ? [...top, me] : top;
 }

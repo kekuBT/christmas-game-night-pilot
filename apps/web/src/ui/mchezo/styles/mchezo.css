@@ -205,13 +205,20 @@
   transition: left .45s var(--mz-ease-out), top .45s var(--mz-ease-out), width .45s var(--mz-ease-out), height .45s var(--mz-ease-out), transform 90ms ease, box-shadow 90ms ease, opacity .3s ease;
   touch-action: manipulation; user-select: none; overflow: hidden;
 }
-.mz-slab:disabled { cursor: default; }
+/* A-01/A-02 (live audit): the legacy global `button:disabled { opacity: .5 }`
+   (index.css) is more specific than the kit's opacity classes, so once the
+   cards were disabled (every locked answer and the whole results review) the
+   "gone" cards showed at 50% on top of the expanded chosen card. The kit's
+   own disabled states are stated explicitly here, and the chosen card is
+   always painted on top (also mid-transition). */
+.mz-slab:disabled { cursor: default; opacity: 1; }
+.mz-slab--selected { z-index: 1; }
 .mz-slab:active:not(:disabled), .mz-slab--selected { transform: translateY(var(--mz-depth-slab)); box-shadow: 0 0 0 var(--mz-slab-deep); }
 .mz-slab__shape { fill: var(--mz-on-accent); flex: none; }
 .mz-slab__label { font-weight: 800; font-size: clamp(18px, 5.8vw, 22px); line-height: 1.08; letter-spacing: -0.01em; overflow-wrap: anywhere; hyphens: auto; transition: font-size .45s var(--mz-ease-out); }
 .mz-slab--big .mz-slab__label { font-size: clamp(30px, 10vw, 44px); }
-.mz-slab--gone { opacity: 0; pointer-events: none; }
-.mz-slab--dim { opacity: .38; }
+.mz-slab--gone, .mz-slab--gone:disabled { opacity: 0; pointer-events: none; }
+.mz-slab--dim, .mz-slab--dim:disabled { opacity: .38; }
 .mz-slab--selected.mz-slab--dim, .mz-answers--locked .mz-slab--selected { opacity: 1; }
 [data-mz-motion="reduced"] .mz-slab { transition: opacity .16s linear, box-shadow .16s linear; }
 [data-mz-motion="reduced"] .mz-slab--selected { transform: none; box-shadow: none; outline: 4px solid var(--mz-text); outline-offset: 3px; }
@@ -225,7 +232,8 @@
 /* ---------------------------------------------------------------- locked / waiting */
 .mz-lockcard { position: relative; min-height: 160px; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
 .mz-lockcard__answer { font-weight: 800; font-size: clamp(30px, 10vw, 40px); line-height: 1.05; overflow-wrap: anywhere; padding-right: 0; }
-.mz-lockcard__stamp { position: absolute; right: 16px; top: 46px; }
+/* A-01: the stamp sits below the answer, never over it (a long answer used to run under it). */
+.mz-lockcard__stamp { align-self: flex-end; }
 .mz-wait { position: relative; width: min(78%, 300px); aspect-ratio: 1; margin: 30px auto 0; }
 .mz-wait__ring { position: absolute; inset: 0; width: 100%; height: 100%; }
 .mz-wait__track { fill: none; stroke: var(--mz-surface-2); stroke-width: 2.2; }

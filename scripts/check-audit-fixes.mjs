@@ -117,13 +117,17 @@ try {
       // The locked-answer card that follows: a long answer must not run under its stamp.
       await host.locator(".mz-lockcard").waitFor({ timeout: 15000 });
       if (q === 0) {
-        lockcardIssue = await host.evaluate((long) => {
+        // Measured once the stamp has landed (its 0.15 s + 0.4 s "slam" starts
+        // invisible at 1.8x scale). The old absolute stamp still overlapped a
+        // long answer by 3,468-4,499 px² at this point; the fix leaves 0.
+        await host.evaluate((long) => { document.querySelector(".mz-lockcard__answer").textContent = long; }, LONG[3]);
+        await sleep(900);
+        lockcardIssue = await host.evaluate(() => {
           const a = document.querySelector(".mz-lockcard__answer"); const s = document.querySelector(".mz-lockcard__stamp");
-          a.textContent = long;
           const r1 = a.getBoundingClientRect(); const r2 = s.getBoundingClientRect();
           const o = Math.max(0, Math.min(r1.right, r2.right) - Math.max(r1.left, r2.left)) * Math.max(0, Math.min(r1.bottom, r2.bottom) - Math.max(r1.top, r2.top));
           return o > 4 ? `stamp overlaps the answer by ${Math.round(o)}px²` : "";
-        }, LONG[3]);
+        });
       }
       const next = host.getByRole("button", { name: /Next question|Waiting for the game to finish/ });
       if ((await next.innerText()).startsWith("Next")) await next.click(); else break;

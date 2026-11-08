@@ -95,7 +95,8 @@ export function StandingsList({ ranked, youId, limit = 3, players }: { ranked: r
   const rows = standingsRows(ranked, youId, limit);
   const me = ranked.find((r) => r.playerId === youId);
   // Your row is shown on its own below the top rows (the "gap" style).
-  const youBelow = !!me && ranked.indexOf(me) >= limit;
+  const cutoff = ranked[limit - 1]?.rank;
+  const youBelow = !!me && cutoff !== undefined && me.rank > cutoff;
   return (
     <ol className="mz-standings" aria-label="Standings">
       {rows.map((r) => {

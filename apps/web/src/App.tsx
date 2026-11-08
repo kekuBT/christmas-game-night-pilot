@@ -117,6 +117,11 @@ export function App() {
   // five-minute guard). The server removed it; nothing was scored or used.
   const [briefingNote, setBriefingNote] = useState("");
   const lastBriefingRef = useRef<string | null>(null);
+  // A-05 (live audit): a player in a game whose briefing just opened, but who
+  // is on another screen (Library, Studio, Championship, Memory Book), is
+  // brought to it once, so they see the rules and can tap Ready. Not the TV
+  // view: a laptop used as a TV seat keeps showing the TV (it offers a way back).
+  const summonedRef = useRef<string | null>(null);
   useEffect(() => {
     const now = proj?.games ?? [];
     const open = now.find((g) => g.status === "briefing");
@@ -125,6 +130,12 @@ export function App() {
     lastBriefingRef.current = null;
     if (last && !now.some((g) => g.id === last)) setBriefingNote("The game was cancelled before it started. Nothing was scored and no questions were used up.");
   }, [proj]);
+  useEffect(() => {
+    const open = (proj?.games ?? []).find((g) => g.status === "briefing");
+    if (!open || !playerId || !open.players.includes(playerId) || summonedRef.current === open.id) return;
+    summonedRef.current = open.id;
+    if (view === "library" || view === "studio" || view === "championship" || view === "memory") setView("lobby");
+  }, [proj, view, playerId]);
   // Mchezo lobby: the host-chosen "up next" game (default: Trivia, the
   // Phase 2 featured game). The lobby Start button starts this game.
   const [upNextId, setUpNextId] = useState("trivia");
@@ -625,6 +636,26 @@ export function App() {
     );
   }
 
+  // A-06 (live audit): until this phone has its room's first projection, say
+  // so honestly. It used to draw an empty lobby ("You're in, friend · 0 here")
+  // while a slow connection (the preview proxy) caught up.
+  if (roomId && playerId && !proj) {
+    return (
+      <MchezoProvider theme={themes.everyday} {...motion}>
+        <main className="mz-screen" aria-label="Rejoining your room" data-testid="rejoining">
+          <span className="mz-kicker" role="status" aria-live="polite">Rejoining your room…</span>
+          <h1 className="mz-h1">One moment</h1>
+          <p className="mz-foot">Your seat, your name and your points are saved on the server. This screen updates by itself as soon as the room answers.</p>
+          {err && <p className="err" role="alert" data-testid="rejoining-error">{err}</p>}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+            <button type="button" className="mz-chip-btn" onClick={() => void reconnect()}>Try again</button>
+            {err && <button type="button" className="mz-chip-btn" onClick={() => leaveSeatOnThisDevice()}>Back to the start</button>}
+          </div>
+        </main>
+      </MchezoProvider>
+    );
+  }
+
   const players: PublicPlayer[] = proj?.players ?? [];
   const myGames: PlayerGame[] = proj?.myGames ?? [];
   const me = players.find((p) => p.id === playerId);
@@ -644,7 +675,10 @@ export function App() {
   // Deferred: the banner is another component and must not update during this render.
   const refreshNeeded = clientNeedsRefresh(proj?.protocol?.min) || myGames.some((g) => g.refreshNeeded === true);
   queueMicrotask(() => setRefreshNeeded(refreshNeeded));
-  const latestFinished = myGames.filter((g) => g.status === "finished").slice(-1)[0];
+  // A-07 (live audit): only a game this player was in. Someone who joined
+  // after a game finished stays in the lobby instead of landing on its
+  // results as "Did not answer · 0 points" (the server never scored them).
+  const latestFinished = myGames.filter((g) => g.status === "finished" && g.participant !== false).slice(-1)[0];
   const publicPlaying = (proj?.games ?? []).find((g) => g.id === playingGame?.id);
   const publicFinished = (proj?.games ?? []).find((g) => g.id === latestFinished?.id);
   const showPhase = view === "lobby" ? deriveShowPhase(playingGame, latestFinished, introDismissed, resultsDismissed, playerId ?? undefined) : "lobby";
@@ -1105,7 +1139,7 @@ export function App() {
     if (latestGame?.status === "briefing" && latestGame.briefing) {
       return (
         <MchezoProvider theme={themes.everyday} {...motion}>
-          <BriefingTv key={latestGame.id} game={latestGame} registry={games.find((x) => x.id === latestGame.gameId)} players={players} joinCode={proj?.joinCode} onBack={() => setView("lobby")} backLabel="Back to phone view" />
+          <BriefingTv key={latestGame.id} game={latestGame} registry={games.find((x) => x.id === latestGame.gameId)} players={players} joinCode={proj?.joinCode} onBack={() => setView("lobby")} backLabel="Back to phone view" onBackToReady={playerId && latestGame.players.includes(playerId) ? () => setView("lobby") : undefined} />
         </MchezoProvider>
       );
     }
