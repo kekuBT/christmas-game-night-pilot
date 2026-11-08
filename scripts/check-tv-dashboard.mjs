@@ -113,8 +113,8 @@ try {
         await intent(room, s, gid, "submit-math-answer", { questionId: q.id, chosenIndex: idx });
       }
     }
-    await sleep(2500);
-    text = await live.innerText();
+    // The TV updates by push or its 2 s poll; give it up to 10 s under load.
+    for (let i = 0; i < 50 && !/2 of 2 have started/.test(text); i++) { await sleep(200); text = await live.innerText(); }
     const shown = await tv.evaluate(() => document.body.innerText);
     check("Math TV live: counts update (2 of 2 have started)", /2 of 2 have started/.test(text), text.replace(/\n/g, " | "));
     check("Math TV live: no scores while it plays", !/\b1,?[0-9]{3}\b|points/.test(text) && !(shown.includes("Ada: ") && shown.includes("Bea: ")));

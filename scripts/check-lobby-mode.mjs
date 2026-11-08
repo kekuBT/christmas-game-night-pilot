@@ -168,8 +168,9 @@ try {
     check(`host ${v.w}×${v.h}: the mode line is on screen without scrolling`, await inView(h, '[data-testid="dock-mode"]'));
     check(`host ${v.w}×${v.h}: the up-next card shows the mode`, /Official · counts toward/.test(await h.getByTestId("up-next-mode").innerText()));
     await h.getByTestId("dock-mode-change").click();
-    await sleep(700);
-    check(`host ${v.w}×${v.h}: Change brings the Official/Practice choice into view`, await inView(h, '[data-testid="mode-choice"]'));
+    let shown = false;
+    for (let i = 0; i < 25 && !shown; i++) { await sleep(150); shown = await inView(h, '[data-testid="mode-choice"]'); } // smooth scroll
+    check(`host ${v.w}×${v.h}: Change brings the Official/Practice choice into view`, shown);
     if ([375, 390, 1440].includes(v.w) && [667, 844, 900].includes(v.h)) {
       await h.evaluate(() => document.querySelector('[data-testid="lobby-scroll"]')?.scrollTo(0, 0));
       await sleep(150);
@@ -202,15 +203,19 @@ try {
     // A reload keeps the plan on both sides.
     await h.reload({ waitUntil: "domcontentloaded" });
     await h.getByTestId("lobby-dock").waitFor({ timeout: 15000 });
-    await sleep(1500);
-    const hs = (await h.getByTestId("lobby-dock").locator(".mz-key").first().innerText()).trim();
+    // The reloaded page sees both seats connected again within a few seconds; read the label once it has.
+    let hs = "";
+    for (let i = 0; i < 50 && !hs.startsWith("Start "); i++) { hs = (await h.getByTestId("lobby-dock").locator(".mz-key").first().innerText()).trim(); if (!hs.startsWith("Start ")) await sleep(200); }
     check("host reload: still Math Mayhem · Practice", hs === "Start Math Mayhem · Practice", hs);
     t = await guestSees((x) => x.name === "Math Mayhem");
     check("guest after the host's reload: unchanged", t.name === "Math Mayhem" && /Practice/.test(t.mode), JSON.stringify(t));
     // Starting still works as before, in the mode shown.
     await h.getByTestId("start-practice-math-mayhem").click();
-    const p = await api(`/rooms/${room.roomId}/projection?audience=player`, { token: host.recoveryToken });
-    const started = p.games.at(-1);
+    let started;
+    for (let i = 0; i < 50 && !started; i++) {
+      started = (await api(`/rooms/${room.roomId}/projection?audience=player`, { token: host.recoveryToken })).games.at(-1);
+      if (!started) await sleep(200);
+    }
     check("Start starts the shown game in the shown mode", started?.gameId === "math-mayhem" && started?.official === false, JSON.stringify({ gameId: started?.gameId, official: started?.official }));
     await h.context().close(); await g.context().close();
   }
