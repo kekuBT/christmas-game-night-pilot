@@ -367,3 +367,19 @@ Owner direction: the overnight continuation directive, Phase 2 (Home B, Lobby A,
   - **The connection alert sat under sheets.** "This seat moved…" was hidden behind an open room menu. Connection alerts now sit above sheets; room notices stay below so they never cover a sheet's buttons.
   - **"This seat moved to another device" was overwritten by "Your session ended"** (pre-existing since Sprint 2). The old phone's next poll is refused with 401 after the server's 4001 close, and the second, less specific reason replaced the first within two seconds; `check-recovery` passed only when it read the banner inside that window. A moved seat now keeps its explanation (`tests/connection-store.test.ts`).
   - **Your own seat looked faded** in the Circle (the legacy global `button:disabled` opacity, the same cause as A-01). Seat buttons no longer inherit it.
+
+## Stage 3 (bonus): results and celebrations (2026-11-08, branch `claude/stage3-results`, from the verified Stage 2 record)
+
+Owner direction: the optional overnight bonus. Presentation only: no scoring, Cup rules, games, content approvals, deployment or spend. The Championship, TV and Memory Book are untouched.
+
+- **D-UX-21 One results header for every game, built only from recorded facts.**
+  - **Source** (`ui/mchezo/lib/celebrate.ts`): the server's per-game scores; competition ranks over them (equal scores share a rank, tied winners in name order); and the player's own recorded participation and sat-out flag.
+  - **The same on every phone and every refresh:** one result, one story.
+  - **Placement:** the header goes inside each game's own results screen. For Trivia it sits above the existing outcome card, so the headline is always first.
+  - *Alternative:* each results screen tells its own story. Rejoined: three wordings of "who won" already differed (audit A-09).
+- **D-UX-22 28 Mild lines, each behind a condition that is true of the result.**
+  - **Choice:** a line is picked deterministically from the game's id (FNV-1a), so ties and refreshes show the same words everywhere.
+  - **Numbers** come only from the real gap or player count.
+  - **Hard limits:** no line is about a named real person, nothing mocks, and a player who dropped out is told without blame.
+  - **The celebration:** 14 kit shapes, at most 1.2 s, CSS only, `pointer-events: none`, on a winner's phone only. It never runs under reduced motion (OS, Less or Off): the component doesn't render it, and CSS hides it again.
+  - *Alternative:* randomised lines. Rejected: two phones at a tie would read different jokes about the same moment.

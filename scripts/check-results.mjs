@@ -45,7 +45,7 @@ function check(name, ok, detail = "") {
   console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`);
   if (!ok) failures++;
 }
-const shot = (page, name) => page.screenshot({ path: screenshotPath(`docs/stage3-screenshots/${name}.png`) });
+const shot = (page, name) => page.screenshot({ path: screenshotPath(`docs/stage3/${name}.png`) });
 
 async function api(path, { token, body, method } = {}) {
   const headers = { "content-type": "application/json" };
