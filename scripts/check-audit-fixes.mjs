@@ -269,6 +269,7 @@ try {
     const early = await g.locator("body").innerText();
     check(`A-06 ${w}px: while the room loads, no fake empty lobby ("friend", "0 here")`, !/You’re in, friend|0 here/.test(early), early.slice(0, 120).replace(/\s+/g, " "));
     check(`A-06 ${w}px: ...an honest "rejoining" status instead`, (await g.getByTestId("rejoining").count()) === 1);
+    check(`A-06 ${w}px: ...which offers the same Reconnect action as the lobby`, (await g.getByTestId("rejoining").getByRole("button", { name: "Reconnect" }).count()) === 1);
     const restored = await g.getByRole("heading", { name: "You’re in, Bea." }).waitFor({ timeout: 15000 }).then(() => true, () => false);
     check(`A-06 ${w}px: the real lobby (name, players) follows`, restored);
   }

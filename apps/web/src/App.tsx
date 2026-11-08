@@ -646,9 +646,11 @@ export function App() {
           <span className="mz-kicker" role="status" aria-live="polite">Rejoining your room…</span>
           <h1 className="mz-h1">One moment</h1>
           <p className="mz-foot">Your seat, your name and your points are saved on the server. This screen updates by itself as soon as the room answers.</p>
-          {err && <p className="err" role="alert" data-testid="rejoining-error">{err}</p>}
+          {/* The same Reconnect action and error line as the lobby (full gate,
+              check-errors: a rejected credential after a reload lands here). */}
+          {err && <p className="err" role="alert" data-testid="mz-error">{err}</p>}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
-            <button type="button" className="mz-chip-btn" onClick={() => void reconnect()}>Try again</button>
+            <button type="button" className="mz-chip-btn" onClick={() => void reconnect()}>Reconnect</button>
             {err && <button type="button" className="mz-chip-btn" onClick={() => leaveSeatOnThisDevice()}>Back to the start</button>}
           </div>
         </main>
