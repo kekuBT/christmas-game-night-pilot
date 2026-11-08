@@ -130,6 +130,7 @@ try {
   await visitor.getByTestId("game-details").waitFor({ timeout: 5000 });
   check("A. a cover opens its details as a sheet with its own address", /[?&]sheet=details/.test(path(visitor)));
   check("A. the details separate the estimate from the real time limit", /design estimate/.test(await visitor.getByTestId("game-details").innerText()));
+  await sleep(500); // let the sheet finish sliding in
   await shot(visitor, "home-details-390");
   await visitor.goBack();
   await visitor.getByTestId("game-details").waitFor({ state: "detached", timeout: 5000 });
@@ -210,6 +211,7 @@ try {
   await host.getByTestId("share-room").click();
   await host.getByTestId("invite-sheet").waitFor({ timeout: 5000 });
   check("D. Invite opens as a sheet with its own address", path(host) === "/room?sheet=invite");
+  await sleep(500); // let the sheet finish sliding in
   await shot(host, "invite-390");
   await host.goBack();
   await host.getByTestId("invite-sheet").waitFor({ state: "detached", timeout: 5000 });
@@ -217,12 +219,14 @@ try {
   await host.getByTestId("choose-game").click();
   await host.getByTestId("choose-sheet").waitFor({ timeout: 5000 });
   check("D. Choose game lists all 11 games with covers", (await host.locator('[data-testid^="select-game-"] [data-cover]').count()) === 11);
+  await sleep(500); // let the sheet finish sliding in
   await shot(host, "choose-390");
   await host.getByTestId("select-game-word-connections").click();
   await host.getByTestId("choose-sheet").waitFor({ state: "detached", timeout: 5000 });
   check("D. picking a game closes the sheet, keeps the room and sets up next", path(host) === "/room" && (await upNextTitle(host)) === "Word Connections");
   await openRoomMenu(host);
   check("D. the room menu has its own address", path(host) === "/room?sheet=menu");
+  await sleep(500); // let the sheet finish sliding in
   await shot(host, "menu-390");
   await host.getByTestId("menu-cup").click();
   await host.getByText("Championship standings").waitFor({ timeout: 15000 });
