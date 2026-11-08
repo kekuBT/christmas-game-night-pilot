@@ -233,3 +233,21 @@ describe("S3-RES-01: one complete standings list", () => {
     }
   });
 });
+
+describe("S3-WCN-01: the Word Connections breakdown matches the server's scorer", () => {
+  it("for every possible result (0–4 groups, 0–4 mistakes)", async () => {
+    const { connectionsScore } = await import("../src/games/connections.js");
+    const { connectionsBreakdown } = await import("../apps/web/src/ui/mchezo/lib/connectionsScore.js");
+    for (let solved = 0; solved <= 4; solved++) {
+      for (let mistakes = 0; mistakes <= 4; mistakes++) {
+        const server = connectionsScore({ solved: ["a", "b", "c", "d"].slice(0, solved), mistakes, guessed: [] } as never);
+        const b = connectionsBreakdown(solved, mistakes);
+        expect(b.total, `${solved} groups, ${mistakes} mistakes`).toBe(server);
+        expect(b.line.endsWith(`= ${server}`)).toBe(true);
+      }
+    }
+    // The audit's two observed results.
+    expect(connectionsBreakdown(4, 1).line).toBe("4 groups × 100 = 400, +20 for one mistake = 420");
+    expect(connectionsBreakdown(4, 3).line).toBe("4 groups × 100 = 400, no bonus (3 mistakes) = 400");
+  });
+});

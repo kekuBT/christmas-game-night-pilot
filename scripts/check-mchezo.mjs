@@ -159,7 +159,7 @@ try {
   await answerAllTrivia(hostB);
   await hostB.getByText("All your answers are in").waitFor({ timeout: 15000 });
   const waitingText = await hostB.locator("body").textContent();
-  check("waiting shows counts only (1 of 4 in)", waitingText.includes("1/4") && waitingText.includes("have played so far"));
+  check("waiting shows counts only (1 of 4 started; S3-TRV-01 wording)", waitingText.includes("1/4") && waitingText.includes("have started"));
   // Guests finish -> host results with standings + question picker.
   for (const g of guestsB) await answerAllTrivia(g);
   await hostB.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });

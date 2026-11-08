@@ -93,11 +93,13 @@ const lobbyLayout = (page) => page.evaluate(() => {
 });
 /** Scroll the lobby to its end: the last content must sit above the dock. */
 const endVisible = (page) => page.evaluate(async () => {
-  const screen = document.querySelector(".mz-screen");
+  // Stage 3 QA: the lobby's content scrolls in its own area above the dock.
+  const screen = document.querySelector('[data-testid="lobby-scroll"]') ?? document.querySelector(".mz-screen");
   screen.scrollTop = screen.scrollHeight;
   await new Promise((r) => setTimeout(r, 120));
   const dock = document.querySelector('[data-testid="lobby-dock"]').getBoundingClientRect();
-  const before = document.querySelector('[data-testid="lobby-dock"]').previousElementSibling;
+  const kids = [...screen.children].filter((el) => el.getBoundingClientRect().height > 0);
+  const before = screen.matches('[data-testid="lobby-scroll"]') ? kids.at(-1) : document.querySelector('[data-testid="lobby-dock"]').previousElementSibling;
   const last = before?.getBoundingClientRect();
   const ok = !last || last.bottom <= dock.top + 1;
   screen.scrollTop = 0;
@@ -323,7 +325,8 @@ try {
   const labels = await host.evaluate(() => ["room-menu", "share-room"].map((id) => document.querySelector(`[data-testid="${id}"]`)?.getAttribute("aria-label")));
   check("E. icon-led buttons have spoken names", labels[0] === "Room menu" && /^Share room code [A-Z0-9]{6}$/.test(labels[1] ?? ""), JSON.stringify(labels));
   const startName = await host.locator('[data-testid^="start-"]').first().innerText();
-  check("E. Start says what it starts", /^Start Geography Challenge$|^Waiting for players/.test(startName.trim()), startName);
+  // Stage 3 QA (S3-LOB-01): Start also names the mode it starts in.
+  check("E. Start says what it starts, and in which mode", /^Start Geography Challenge · (Official|Practice)$|^Waiting for players/.test(startName.trim()), startName);
   const rmCtx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
   const rm = await rmCtx.newPage();
   await rm.goto(BASE, { waitUntil: "domcontentloaded" });

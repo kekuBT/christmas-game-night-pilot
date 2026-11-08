@@ -84,7 +84,7 @@ try {
   await answerAll(host);
   await host.locator(".mz-wait").waitFor({ timeout: 15000 });
   const waitingText = await host.locator(".mz-wait").textContent();
-  if (waitingText.includes("have played so far")) pass("waiting state with counts");
+  if (waitingText.includes("have started")) pass("waiting state with counts"); // S3-TRV-01: "started", not "played"
   else fail("waiting state with counts", waitingText);
   // Guest finishes — then results.
   await answerAll(guest);

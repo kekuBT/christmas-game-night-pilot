@@ -42,3 +42,26 @@
 .mz-standings__gain--down { color: var(--mz-text-muted); }
 /* S3-RES-01: the full-standings toggle under a preview list. */
 .mz-standings__more { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+/* S3-HOME-01: Home is a scrolling area above a fixed footer dock, so the dock
+   never covers a game card (its title or its players · minutes line) at any
+   scroll position, with Safari's toolbar shown or hidden (100dvh). The two
+   actions sit side by side, about half the old height. */
+.mz-screen.mz-home { overflow: hidden; }
+.mz-screen.mz-home > .mz-home__scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; margin: 0 calc(-1 * clamp(14px, 4.6vw, 20px)); padding: 0 clamp(14px, 4.6vw, 20px) 14px; }
+.mz-home__scroll > * { flex-shrink: 0; }
+.mz-screen.mz-home > .mz-dock--home { flex: none; flex-direction: row; gap: 10px; margin: 0 calc(-1 * clamp(14px, 4.6vw, 20px)); padding: 10px clamp(14px, 4.6vw, 20px) max(12px, env(safe-area-inset-bottom)); background: var(--mz-ground); border-top: 1px solid var(--mz-line); }
+.mz-dock--home .mz-key { flex: 1 1 0; min-width: 0; white-space: normal; text-align: center; }
+/* S3-LOB-01/02: the next game's mode, on the up-next card (every screen) and in the host's dock. */
+.mz-modebadge { align-self: flex-start; white-space: normal; text-align: left; }
+.mz-modebadge--official { background: var(--mz-answer-3); color: var(--mz-on-accent); }
+.mz-modebadge--practice { background: var(--mz-success); color: var(--mz-on-accent); }
+.mz-dock__mode { font-weight: 700; color: var(--mz-text); display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.mz-dock__change { flex: none; }
+/* The lobby, like Home: content scrolls above the Start dock, never under it. */
+.mz-screen.mz-lobby { overflow: hidden; }
+.mz-screen.mz-lobby > .mz-lobby__scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; margin: 0 calc(-1 * clamp(14px, 4.6vw, 20px)); padding: 0 clamp(14px, 4.6vw, 20px) 14px; }
+.mz-lobby__scroll > * { flex-shrink: 0; }
+.mz-screen.mz-lobby > .mz-dock--sticky { position: static; flex: none; margin-top: 0; box-shadow: none; border-top: 1px solid var(--mz-line); }
+.mz-home .mz-gamecard { gap: 4px; }
+.mz-home .mz-gamecard__art { margin-top: 4px; }
+.mz-home .mz-gamecard__title { min-height: 2.4em; display: flex; align-items: flex-end; }

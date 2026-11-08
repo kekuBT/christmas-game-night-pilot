@@ -13,6 +13,10 @@ import { ANSWER_SHAPES } from "../../ui/mchezo/tokens/tokens.js";
 import { Keycap, MchezoWaiting, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
+import { CONNECTIONS_RULE, connectionsBreakdown } from "../../ui/mchezo/lib/connectionsScore.js";
+import { StandingsList } from "../../ui/mchezo/components/Results.js";
+import { rankStandings } from "../../ui/mchezo/lib/standings.js";
+import { toMzPlayers } from "./adapters.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
 interface SolvedGroup { name: string; level: number; tileIds: string[] }
@@ -126,7 +130,7 @@ export function MchezoConnections({ game, publicGame, players, playerId, title, 
               </button>
             ))}
           </div>
-          <div className="mz-cx-status" aria-label={`${maxMistakes - mistakes} mistakes left`}>
+          <div className="mz-cx-status" aria-label={`${maxMistakes - mistakes} mistake${maxMistakes - mistakes === 1 ? "" : "s"} left`}>
             <span>Mistakes left</span>
             <span className="mz-cx-dots" aria-hidden="true">{Array.from({ length: maxMistakes }, (_, i) => <span key={i} className={`mz-cx-dot${i < mistakes ? " mz-cx-dot--used" : ""}`} />)}</span>
           </div>
@@ -171,6 +175,20 @@ export function MchezoConnectionsResults({ game, publicGame, players, playerId, 
       <div className="mz-cx-bands">{groups.map((g) => <Band key={g.name} group={g} textOf={textOf} missed={!mine.has(g.name)} />)}</div>
       <p className="mz-foot">Solid bands are groups you found; dashed ones you missed.</p>
       <ScoreList rows={rows} />
+      {(() => {
+        // S3-WCN-01: how the score is made up. Your own breakdown is shown
+        // only when it adds up to the score the server recorded for you.
+        const recorded = (game.rawScores ?? publicGame?.rawScores ?? {})[playerId];
+        const mineNow = st.myState ? connectionsBreakdown(st.myState.solved.length, st.myState.mistakes) : undefined;
+        return (
+          <section className="mz-cx-howscore" aria-label="How the score works" data-testid="mz-cx-howscore">
+            <p className="mz-foot"><b>How the score works:</b> {CONNECTIONS_RULE}</p>
+            {mineNow && recorded !== undefined && mineNow.total === recorded && !game.abstained && (
+              <p className="mz-foot" data-testid="mz-cx-mybreakdown">You: {mineNow.line}.</p>
+            )}
+          </section>
+        );
+      })()}
       <OutcomeSummary gameId="word-connections" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} youChoseSatOut={game.abstained === true} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
@@ -179,15 +197,28 @@ export function MchezoConnectionsResults({ game, publicGame, players, playerId, 
 }
 
 /** TV: the shared board (never the answers) while playing; the solution after. */
-export function ConnectionsTv({ game, title }: { game: PublicGame; title: string }) {
+export function ConnectionsTv({ game, title, players = [] }: { game: PublicGame; title: string; players?: PublicPlayer[] }) {
   const st = (game.state ?? {}) as ConnectionsState;
   const tiles = st.tiles ?? [];
   const textOf = (id: string) => tiles.find((t) => t.id === id)?.text ?? id;
   if (game.status === "finished" && st.groups) {
+    // S3-TV-02: the TV ends on the game's standings as well as the solution.
+    const mz = toMzPlayers(players);
+    const ranked = rankStandings(Object.entries(game.rawScores ?? {}).map(([playerId, score]) => ({ playerId, score })), mz);
     return (
-      <section aria-label={`${title} solution`} style={{ maxWidth: 1100, margin: "24px auto" }}>
-        <div className="mz-cx-bands">{[...st.groups].sort((a, b) => a.level - b.level).map((g) => <Band key={g.name} group={g} textOf={textOf} />)}</div>
-      </section>
+      <>
+        {ranked.length > 0 && (
+          <section aria-label={`${title} standings`} data-testid="mz-cx-tv-standings" style={{ maxWidth: 1100, margin: "24px auto 0" }}>
+            <p className="mz-kicker">This game’s standings</p>
+            <StandingsList ranked={ranked} youId="" players={mz} limit={ranked.length} />
+            <p className="mz-foot">{CONNECTIONS_RULE}</p>
+          </section>
+        )}
+        <section aria-label={`${title} solution`} style={{ maxWidth: 1100, margin: "24px auto" }}>
+          <p className="mz-kicker">The groups were…</p>
+          <div className="mz-cx-bands">{[...st.groups].sort((a, b) => a.level - b.level).map((g) => <Band key={g.name} group={g} textOf={textOf} />)}</div>
+        </section>
+      </>
     );
   }
   return (

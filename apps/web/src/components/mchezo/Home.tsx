@@ -23,16 +23,17 @@ function SettingsIcon() {
   return <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" strokeWidth="2.2" /><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M5.5 18.5l2.1-2.1M16.4 7.6l2.1-2.1" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" /></svg>;
 }
 
-/** A game as a tappable card: cover, title, one line of facts. */
+/** A game as a tappable card: title, one line of facts, cover. */
 export function GameCard({ game, onOpen, badge, size = "md", testId }: { game: CatalogGame; onOpen: (id: string) => void; badge?: ReactNode; size?: "md" | "sm"; testId?: string }) {
   return (
     <button type="button" className={`mz-gamecard mz-gamecard--${size}`} data-testid={testId ?? `game-card-${game.id}`} onClick={() => onOpen(game.id)} aria-label={`${game.title}: ${playersLabel(game)}, ${sessionEstimate(game.estimateMinutes)}${game.officialEligible ? "" : ", practice only"}`}>
+      {/* S3-HOME-01: name and facts first, so a card coming into view shows them before its picture. */}
+      <span className="mz-gamecard__title">{game.title}</span>
+      <span className="mz-gamecard__meta">{playersLabel(game)} · {sessionEstimate(game.estimateMinutes)}{game.officialEligible ? "" : " · practice only"}</span>
       <span className="mz-gamecard__art">
         <GameCover gameId={game.id} decorative />
         {badge && <span className="mz-gamecard__badge">{badge}</span>}
       </span>
-      <span className="mz-gamecard__title">{game.title}</span>
-      <span className="mz-gamecard__meta">{playersLabel(game)} · {sessionEstimate(game.estimateMinutes)}{game.officialEligible ? "" : " · practice only"}</span>
     </button>
   );
 }
@@ -55,6 +56,8 @@ export function HomeScreen(p: {
   const party = p.catalog.filter((g) => g.id !== p.featured?.id);
   return (
     <main className="mz-screen mz-screen--wide mz-screen--docked mz-home" aria-label="Mchezo home" data-testid="home">
+      {/* S3-HOME-01: the games scroll ABOVE the Join/Host dock, never under it. */}
+      <div className="mz-home__scroll" data-testid="home-scroll">
       <header className="mz-appbar">
         <Wordmark size={22} />
         <button type="button" className="mz-iconbtn" aria-label="Settings for this phone" data-testid="home-settings" onClick={p.onSettings}><SettingsIcon /></button>
@@ -93,7 +96,8 @@ export function HomeScreen(p: {
       <p className="mz-foot mz-home__lede">Party games for the people in the room. Your phone is your controller; no account needed.</p>
       <button type="button" className="mz-linkbtn" data-testid="mz-lost-place" onClick={p.onLostSeat}>Lost your place? Recover your seat</button>
       {p.status}
-      <div className="mz-dock mz-dock--sticky" data-testid="home-dock">
+      </div>
+      <div className="mz-dock mz-dock--home" data-testid="home-dock">
         <Keycap block data-testid="home-join" onClick={p.onJoin}>Join with a code</Keycap>
         <Keycap block variant="surface" data-testid="home-host" onClick={p.onHost}>Host a party</Keycap>
       </div>

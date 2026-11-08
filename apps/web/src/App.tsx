@@ -17,6 +17,7 @@ import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./components/mchezo/MchezoConnections.js";
+import { TvLastStandings, TvNowPlaying } from "./components/mchezo/TvDashboardParts.js";
 import { CaptionTv, MchezoCaption, MchezoCaptionResults } from "./components/mchezo/MchezoCaption.js";
 import { MchezoGeography } from "./components/mchezo/MchezoGeography.js";
 import { MchezoMath } from "./components/mchezo/MchezoMath.js";
@@ -177,12 +178,16 @@ export function App() {
   // Phase 2 featured game). The lobby Start button starts this game.
   // Kept per tab, so a reload or a trip to the library keeps the host's pick.
   const [upNextId, setUpNextIdRaw] = useState(() => tabGet("mz_upnext") ?? "trivia");
-  const setUpNextId = (id: string) => { tabSet("mz_upnext", id); setUpNextIdRaw(id); };
+  // S3-LOB-02: the host's own choices are published to the room (planChosen
+  // counts them), so guests and the TV see the same game and mode.
+  const [planChosen, setPlanChosen] = useState(0);
+  const setUpNextId = (id: string) => { tabSet("mz_upnext", id); setUpNextIdRaw(id); setPlanChosen((n) => n + 1); };
   // A game picked from Home's details sheet before the room exists.
   const [hostPick, setHostPick] = useState<string | null>(null);
   // Phase 2.1 lobby simplification: one mode for the single Start action,
   // and one compact chooser instead of per-game official/practice buttons.
-  const [gameMode, setGameMode] = useState<"official" | "practice">("official");
+  const [gameMode, setGameModeRaw] = useState<"official" | "practice">("official");
+  const setGameMode = (m: "official" | "practice") => { setGameModeRaw(m); setPlanChosen((n) => n + 1); };
   // "Remember this device": default OFF, explicit per join (Sprint 2).
   const [rememberOnJoin, setRememberOnJoin] = useState(false);
   const [seatRemembered, setSeatRemembered] = useState(() => seats.current()?.remembered ?? false);
@@ -554,6 +559,30 @@ export function App() {
       ? <AnswerReview rows={rows.slice(-1)} tv title={`${title}: last answer`} testId="tv-answer-review" />
       : <AnswerReview rows={rows} tv title={`${title}: answers`} testId="tv-answer-review" />;
   }
+  // S3-LOB-02 (hooks: above every early return). The host's plan for the
+  // next game is published to the room: on each of the host's own choices,
+  // and once when the room has none (a new room, or after a server restart).
+  // Never in reply to the room's plan, so two host tabs can't bounce it back
+  // and forth; a plan chosen in another host tab (or by the cohost) is adopted.
+  const planMe = proj?.players.find((p) => p.id === playerId);
+  const planner = !!(planMe?.isHost || planMe?.isCohost);
+  const serverPlan = proj?.upNext;
+  const localPlan = (() => {
+    const g = games.find((x) => x.id === upNextId) ?? games[0];
+    return g ? { gameId: g.id, official: g.lifecycle?.officialEligible !== false && gameMode === "official" } : undefined;
+  })();
+  const publishPlan = (plan: { gameId: string; official: boolean } | undefined) => {
+    if (!roomId || !plan) return;
+    void post(`/rooms/${roomId}/plan`, plan).catch(() => { /* the lobby still works; guests just see less */ });
+  };
+  useEffect(() => { if (planner && planChosen > 0) publishPlan(localPlan); }, [planChosen]);
+  useEffect(() => { if (planner && proj && !serverPlan) publishPlan(localPlan); }, [planner, !!proj, !!serverPlan, games.length > 0]);
+  useEffect(() => {
+    if (!planner || !serverPlan) return;
+    if (serverPlan.gameId !== upNextId) { tabSet("mz_upnext", serverPlan.gameId); setUpNextIdRaw(serverPlan.gameId); }
+    const m = serverPlan.official ? "official" : "practice";
+    if (m !== gameMode && games.find((g) => g.id === serverPlan.gameId)?.lifecycle?.officialEligible !== false) setGameModeRaw(m);
+  }, [planner, serverPlan?.gameId, serverPlan?.official]);
   /** TV / spectator screen for the Sprint 4 games (never answers or authors while playing). */
   function connectionsTvScreen(game: PublicGame, onBack: () => void, backLabel: string) {
     const t = games.find((x) => x.id === game.gameId)?.title ?? game.gameId;
@@ -563,7 +592,7 @@ export function App() {
         <main className="mz-screen" style={{ maxWidth: 1200 }} aria-label={`${t} on the TV`} data-testid={isCaption ? "mz-cap-tv" : "mz-cx-tv"}>
           <div className="mz-topbar"><span className="mz-kicker" style={{ color: "var(--mz-answer-2)" }}>{t} · {proj?.joinCode}</span><button type="button" className="mz-chip-btn" onClick={onBack}>{backLabel}</button></div>
           <GameClock game={game} tv />
-          {isCaption ? <CaptionTv game={game} /> : <ConnectionsTv game={game} title={t} />}
+          {isCaption ? <CaptionTv game={game} /> : <ConnectionsTv game={game} title={t} players={proj?.players ?? []} />}
         </main>
       </MchezoProvider>
     );
@@ -737,8 +766,9 @@ export function App() {
         <div className="card"><h2>TV Dashboard — public only</h2><p className="muted">This view never shows secret words, other players' prompts, or an answer that can still be played.</p>
           <p>Players: {specPlayers.map((p) => p.displayName).join(", ") || "—"}</p>
           <h3>Standings (Family Cup totals)</h3>{(proj.championship ?? []).map((r) => <p key={r.playerId}>{specNameOf(r.playerId)}: {r.total} points{r.eligible ? "" : " (not yet qualified)"}</p>)}
-          <h3>Now playing</h3>{(proj.games ?? []).filter((g) => g.status === "playing").map((g) => <p key={g.id}>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId} — players: {g.players.map(specNameOf).join(", ")}</p>)}
+          <h3>Now playing</h3>{(proj.games ?? []).filter((g) => g.status === "playing").map((g) => <TvNowPlaying key={g.id} game={g} title={games.find((x) => x.id === g.gameId)?.title ?? g.gameId} players={specPlayers} />)}
           {(proj.games ?? []).filter((g) => g.status === "playing").length === 0 && <p className="muted">No game in progress — the lobby is choosing the next game.</p>}
+          {(() => { const last = (proj.games ?? []).at(-1); return last ? <TvLastStandings game={last} title={games.find((x) => x.id === last.gameId)?.title ?? last.gameId} players={specPlayers} /> : null; })()}
           {tvAnswers((proj.games ?? []).at(-1))}
           <h3>Recent games</h3>{(proj.games ?? []).slice(-5).map((g) => <p key={g.id}>{g.gameId} — {g.status}{g.rawScores ? ` — ${Object.entries(g.rawScores).map(([pid, v]) => `${specNameOf(pid)}: ${v}`).join(" · ")}` : ""}</p>)}
         </div>
@@ -832,11 +862,16 @@ export function App() {
   const mzNudge = async (targetId: string) => {
     try { await post(`/rooms/${roomId}/nudge`, { targetId }); await refresh(); } catch { /* non-fatal */ }
   };
-  const upNext = games.find((g) => g.id === upNextId) ?? games[0];
+  // S3-LOB-02: the host (or cohost) chooses; everyone else sees the room's
+  // plan, never their own tab's default (which used to show guests "Trivia"
+  // whatever the host had picked). planner/serverPlan are set above the
+  // early returns, with the hooks that publish and adopt the plan.
+  const upNext = planner ? (games.find((g) => g.id === upNextId) ?? games[0]) : games.find((g) => g.id === serverPlan?.gameId);
   // Practice-only games (Impostor, Charades) can't count: the server refuses
   // them as official, so the lobby starts them as practice and says why.
   const upNextPracticeOnly = upNext?.lifecycle?.officialEligible === false;
-  const startMode: "official" | "practice" = upNextPracticeOnly ? "practice" : gameMode;
+  const startMode: "official" | "practice" = upNextPracticeOnly ? "practice" : planner ? gameMode : serverPlan?.official ? "official" : "practice";
+
   // D1: the server refuses official starts with fewer than 2 competitors. Say so
   // before Start, with an explicit switch — the mode is never changed silently.
   const wouldPlayCount = proj?.readiness?.wouldPlay.length ?? players.filter((p) => p.connected).length;
@@ -985,6 +1020,8 @@ export function App() {
           isHost={isHostish}
           hostName={hostName}
           upNext={upNextGame}
+          mode={upNext ? startMode : undefined}
+          cupLabel={cupLabel}
           onChangeGame={isHostish ? () => openSheet("choose") : undefined}
           onGameDetails={upNext ? () => openSheet("details", upNext.id) : undefined}
           shuffleNote={shuffleResult}
@@ -1332,9 +1369,10 @@ export function App() {
       <p>Room code: <b>{proj?.joinCode}</b></p><p>Players: {players.map((p) => p.displayName).join(", ")}</p>
       <h3>Standings (Family Cup totals)</h3>{(proj?.championship ?? []).map((r) => <p key={r.playerId}>{nameOf(r.playerId)}: {r.total} points{r.eligible ? "" : " (not yet qualified)"}</p>)}
       {(proj?.championship ?? []).length === 0 && Object.entries(standings).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([pid, v]) => <p key={pid}>{nameOf(pid)}: {v}</p>)}
-      <h3>Now playing</h3>{(proj?.games ?? []).filter((g) => g.status === "playing").map((g) => <div key={g.id}><p>{games.find((x) => x.id === g.gameId)?.title ?? g.gameId} — players: {g.players.map(nameOf).join(", ")}{g.official ? "" : " (practice)"}</p><GameClock game={g} tv /></div>)}
+      <h3>Now playing</h3>{(proj?.games ?? []).filter((g) => g.status === "playing").map((g) => <TvNowPlaying key={g.id} game={g} title={games.find((x) => x.id === g.gameId)?.title ?? g.gameId} players={players} />)}
       {(proj?.games ?? []).filter((g) => g.status === "playing").length === 0 && <p className="muted">No game in progress — the lobby is choosing the next game.</p>}
       {proj?.ceremony?.winner && <p>🏆 Day {proj.ceremony.day} winner: <b>{proj.ceremony.winner}</b></p>}
+      {(() => { const last = (proj?.games ?? []).at(-1); return last ? <TvLastStandings game={last} title={games.find((x) => x.id === last.gameId)?.title ?? last.gameId} players={players} /> : null; })()}
       {tvAnswers((proj?.games ?? []).at(-1))}
       <h3>Recent games</h3>{(proj?.games ?? []).slice(-5).map((g) => <p key={g.id}>{g.gameId} — {g.status}{g.rawScores ? ` — ${Object.entries(g.rawScores).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}` : ""}</p>)}
       <Reactions proj={proj} post={post} canMute={false} />

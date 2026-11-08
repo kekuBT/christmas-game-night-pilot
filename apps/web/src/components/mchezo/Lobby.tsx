@@ -18,6 +18,10 @@ import {
 
 export interface RoomLobbyProps {
   code: string;
+  /** S3-LOB-01/02: whether the next game counts, as every screen should see it. */
+  mode?: "official" | "practice";
+  /** The Cup's name, for "Counts toward the Family Cup". */
+  cupLabel?: string;
   championship?: ChampionshipConfig;
   sessionLabel: string;
   players: readonly Player[];
@@ -70,6 +74,8 @@ export function RoomLobby(p: RoomLobbyProps) {
   const limit = timeLimitLabel(p.upNext?.timeLimitMs);
   return (
     <main className="mz-screen mz-screen--docked mz-lobby" aria-label="Lobby">
+      {/* The lobby scrolls ABOVE its Start dock, never under it (S3-HOME-01 applied to the lobby). */}
+      <div className="mz-lobby__scroll" data-testid="lobby-scroll">
       <header className="mz-topbar mz-lobby__bar">
         <button type="button" className="mz-codebtn" aria-label={`Share room code ${p.code}`} aria-haspopup="dialog" data-testid="share-room" onClick={p.onInvite}>
           <span className="mz-codebtn__code">{p.code}</span>
@@ -120,7 +126,12 @@ export function RoomLobby(p: RoomLobbyProps) {
               <span className="mz-kicker mz-upnext-card__kicker">Up next</span>
               <span className="mz-upnext__name">{p.upNext.title}</span>
               <span className="mz-upnext-card__meta">{playersLabel(p.upNext)} · {sessionEstimate(p.upNext.estimateMinutes)}{limit ? ` · ${limit}` : ""}</span>
-              {!p.upNext.officialEligible && <span className="mz-badge mz-badge--mint">Practice only</span>}
+              {p.mode && (
+                <span className={`mz-badge mz-modebadge mz-modebadge--${p.mode}`} data-testid="up-next-mode">
+                  {p.mode === "official" ? `Official · counts toward the ${p.cupLabel ?? "Cup"}` : !p.upNext.officialEligible ? "Practice only · no Cup points" : "Practice · no Cup points"}
+                </span>
+              )}
+              {!p.mode && !p.upNext.officialEligible && <span className="mz-badge mz-badge--mint">Practice only</span>}
             </span>
           </button>
           {p.isHost && p.onChangeGame && <button type="button" className="mz-chip-btn mz-upnext-card__change" data-testid="choose-game" aria-haspopup="dialog" onClick={p.onChangeGame}>Change</button>}
@@ -128,16 +139,28 @@ export function RoomLobby(p: RoomLobbyProps) {
       )}
       {p.shuffleNote && <p className="mz-foot mz-lobby__shuffle" data-testid="shuffle-result">{p.shuffleNote}</p>}
       {p.isHost && p.setup}
+      </div>
       <div className="mz-dock mz-dock--sticky" data-testid="lobby-dock">
         {p.error ? <p className="err mz-dock__error" data-testid="mz-error" role="alert">{p.error}</p> : null}
         {p.message && !p.error ? <p className="ok mz-dock__ok" role="status">{p.message}</p> : null}
         {p.isHost ? (
           <>
-            <Keycap block disabled={!canStart || !p.onStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? `Start ${p.upNext?.title ?? "the game"}` : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
+            <Keycap block disabled={!canStart || !p.onStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? `Start ${p.upNext?.title ?? "the game"}${p.mode ? ` · ${p.mode === "official" ? "Official" : "Practice"}` : ""}` : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
+            {p.mode && (
+              // S3-HOME-02: the mode choice can be below the fold; the dock says what Start will do and links to it.
+              <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">
+                {p.mode === "official" ? `Official: counts toward the ${p.cupLabel ?? "Cup"}.` : "Practice: just for fun, no Cup points."}{" "}
+                <button type="button" className="mz-chip-btn mz-dock__change" data-testid="dock-mode-change" onClick={() => { const el = document.querySelector<HTMLElement>('[data-testid="mode-choice"]'); el?.scrollIntoView({ block: "center", behavior: "smooth" }); el?.querySelector<HTMLElement>("button, input")?.focus({ preventScroll: true }); }}>Change</button>
+              </p>
+            )}
             <p className="mz-dock__note">{canStart ? "Tap someone to nudge them. You’re hosting." : `${p.upNext?.title ?? "This game"} needs at least ${p.minPlayers} connected player${p.minPlayers === 1 ? "" : "s"}. Invite more, or choose another game.`}</p>
           </>
         ) : (
-          <p className="mz-dock__note mz-dock__note--waiting">Waiting for {p.hostName ?? "the host"} to start · tap someone to nudge them</p>
+          <p className="mz-dock__note mz-dock__note--waiting" data-testid="dock-guest-note">
+            {p.upNext
+              ? <>Waiting for {p.hostName ?? "the host"} to start {p.upNext.title}{p.mode ? <> · <b>{p.mode === "official" ? `Official, counts toward the ${p.cupLabel ?? "Cup"}` : "Practice, no Cup points"}</b></> : null} · tap someone to nudge them</>
+              : <>Waiting for {p.hostName ?? "the host"} to start · they’re choosing a game · tap someone to nudge them</>}
+          </p>
         )}
       </div>
     </main>

@@ -128,6 +128,8 @@ export interface Projection {
   protocol?: { current: number; min: number };
   /** The Cup's fixed format (Sprint 3): label and one plain sentence. */
   competition?: { format: "individual-only" | "combined-75-25"; label: string; description: string; teamGamesCount: boolean; cupId?: string; qualifying?: string; standingsPaused?: string };
+  /** S3-LOB-02: what the host plans to start next and whether it counts (every screen sees it). */
+  upNext?: { gameId: string; official: boolean };
   roomId: string;
   joinCode: string;
   name: string;

@@ -47,9 +47,11 @@ export function MchezoWaiting({ label, players, playerId, publicGame, onTv, foot
         })}
         <div className="mz-wait__center" role="status" aria-live="polite">
           <span className="mz-wait__count">{done}<small>/{total}</small></span>
-          <span className="mz-wait__label">{done < total ? "have played so far" : "everyone’s in"}</span>
+          {/* S3-TRV-01: this counts players who have STARTED (answered at least once, or sat out), not who has finished. */}
+          <span className="mz-wait__label">{done < total ? "have started" : "all have started"}</span>
         </div>
       </div>
+      <p className="mz-foot" data-testid="mz-wait-meaning">Everyone goes at their own pace. “Started” means they’ve answered at least once or chosen to sit out; it doesn’t mean they’ve finished.</p>
       <p className="mz-foot">{footNote ?? "The reveal plays right here when the game finishes."}</p>
       <PresenceNote players={players} participants={publicGame?.players} youId={playerId} />
       {onTv && <div style={{ padding: "0 16px 16px" }}><button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>TV stage</button></div>}

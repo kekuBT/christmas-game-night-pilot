@@ -8,6 +8,7 @@ import { BriefingRefused, ContentShortage, RoomEngine, StartRefused, type RoomPl
 import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
+import { z } from "zod";
 import type { ContentLibrary } from "../content/registry.js";
 import { parseClientProtocol, PROTOCOL_HEADER, PROTOCOL_PARAM } from "../shared/clientProtocol.js";
 import { MemoryBook } from "./memorybook.js";
@@ -113,6 +114,15 @@ export class LocalServer {
   private reactions = new Map<string, { emoji: string; sender: string; ts: number }[]>();
   private reactionStamps = new Map<string, number[]>();
   private reactionsMuted = new Map<string, boolean>();
+  /**
+   * Stage 3 QA (S3-LOB-02): what the host plans to start next, and whether it
+   * counts. Shown on every screen so guests can tell Official from Practice
+   * before the briefing. It is only a plan: starting is still the host's
+   * Start, and the server still enforces every start rule. In memory only;
+   * the host's tab publishes it again if it's missing (e.g. after a restart).
+   */
+  private lobbyPlans = new Map<string, { gameId: string; official: boolean }>();
+  static readonly PlanSchema = z.object({ gameId: z.string().min(1).max(64), official: z.boolean() }).strict();
   /** Ephemeral nudges (see the /nudge endpoint): never persisted, never ledger. */
   private nudges = new Map<string, { fromId: string; targetId: string; ts: number }[]>();
   private nudgeStamps = new Map<string, number[]>();
@@ -126,7 +136,8 @@ export class LocalServer {
     // Spectators receive exactly the public TV projection — never a player
     // view, never private state. The engine's "tv" audience is that projection.
     const engineAudience = audience === "spectator" ? "tv" : audience;
-    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy };
+    const plan = this.lobbyPlans.get(room.id);
+    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(plan ? { upNext: plan } : {}) };
     // Host-assisted recovery requests: host/cohost only. Shows the seat and
     // the match code to compare; never the requester's secret.
     const me = actorId ? room.players.get(actorId) : undefined;
@@ -924,6 +935,23 @@ export class LocalServer {
           this.reactions.set(room.id, list.slice(-12));
           this.broadcast(room.id);
           this.send(res, 201, { ok: true });
+          return;
+        }
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "plan") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          if (!player.isHost && !player.isCohost) { this.send(res, 403, { error: "Only the host can choose what's next" }); return; }
+          const parsed = LocalServer.PlanSchema.safeParse(await this.readBody(req));
+          if (!parsed.success) { this.send(res, 400, { error: "A plan needs a game and whether it's official" }); return; }
+          const { gameId, official } = parsed.data;
+          if (!GAME_REGISTRY.some((g) => g.id === gameId)) { this.send(res, 400, { error: `Unknown game ${gameId}` }); return; }
+          if (official && GAME_POLICIES[gameId as keyof typeof GAME_POLICIES]?.officialEligible === false) { this.send(res, 400, { error: "That game is practice only" }); return; }
+          const prev = this.lobbyPlans.get(room.id);
+          if (!prev || prev.gameId !== gameId || prev.official !== official) {
+            this.lobbyPlans.set(room.id, { gameId, official });
+            this.broadcast(room.id);
+          }
+          this.send(res, 200, { ok: true, upNext: { gameId, official } });
           return;
         }
         if (req.method === "POST" && parts.length === 4 && parts[2] === "reactions" && parts[3] === "mute") {
