@@ -30,7 +30,7 @@ function check(name, ok, detail = "") {
   if (!ok) failures++;
 }
 async function enter(page, name, code) {
-  await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/${code ? "join" : "host"}`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   if (!code) {
     await page.getByRole("button", { name: "Host a game" }).click();
@@ -228,6 +228,7 @@ try {
     const tvTab = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage();
     await spectate(tvTab, codeA); await sleep(1000);
     await tvTab.getByRole("button", { name: "Stop watching" }).click();
+    await tvTab.getByTestId("home-join").click(); // Stage 2: Stop watching returns Home
     await tvTab.locator(".mz-code__input").fill(codeB); await tvTab.getByTestId("watch-spectator").click();
     await tvTab.getByRole("button", { name: "Stop watching" }).waitFor({ timeout: 15000 }); await sleep(1500);
     const t = await tvTab.locator("body").innerText();
