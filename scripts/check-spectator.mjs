@@ -219,9 +219,10 @@ try {
   const hostSeats = proj.players.filter((p) => p.displayName === "Ada");
   check("host still occupies exactly one seat", hostSeats.length === 1);
 
-  // 9. Stop watching clears the spectator session back to landing.
+  // 9. Stop watching clears the spectator session back to the start (Stage 2: Home).
   await spec3.getByRole("button", { name: "Stop watching" }).click();
-  await spec3.getByRole("button", { name: "Host a game" }).waitFor({ timeout: 15000 });
+  await spec3.getByTestId("home-host").waitFor({ timeout: 15000 });
+  check("stop watching returns to Home with Host and Join", await spec3.getByTestId("home-join").isVisible() && (await spec3.getByRole("button", { name: "Stop watching" }).count()) === 0);
   await sleep(1500);
   proj = await tvProj(roomId);
   check("stop watching drops the count to 1", proj.spectatorCount === 1, `watching=${proj.spectatorCount}`);
