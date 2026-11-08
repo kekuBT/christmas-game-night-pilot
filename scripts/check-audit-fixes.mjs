@@ -237,9 +237,11 @@ try {
   for (const [where, w] of [["library", 375], ["championship", 390], ["tv", 430]]) {
     const h = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage(); const code = await enter(h, "Ada");
     const g = await (await browser.newContext({ viewport: { width: w, height: 844 } })).newPage(); await enter(g, "Bea", code);
-    if (where === "library") await g.getByTestId("browse-games").click();
-    if (where === "championship") await g.getByRole("button", { name: "Championship" }).click();
-    if (where === "tv") await g.getByRole("button", { name: /TV stage|Big screen|TV/ }).first().click().catch(() => {});
+    // Each guest really is on that screen before the host starts (exact
+    // button names, nothing swallowed: a missed click must fail loudly).
+    if (where === "library") { await g.getByTestId("browse-games").click(); await g.getByTestId("mz-lib-count").waitFor({ timeout: 15000 }); }
+    if (where === "championship") { await g.getByRole("button", { name: "Championship", exact: true }).click(); await g.getByText("Championship standings").waitFor({ timeout: 15000 }); }
+    if (where === "tv") { await g.getByRole("button", { name: "TV stage", exact: true }).click(); await g.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 }); }
     await sleep(600);
     await startPractice(h, "trivia");
     await h.getByTestId("briefing").waitFor({ timeout: 15000 });
