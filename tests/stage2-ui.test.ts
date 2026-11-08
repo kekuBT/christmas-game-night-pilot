@@ -45,6 +45,14 @@ describe("routes", () => {
     expect(parseRoute("/", "?sheet=hack").sheet).toBeNull();
   });
 
+  it("the details sheet names its game, and only a well-formed one", () => {
+    expect(parseRoute("/", "?sheet=details&game=trivia")).toEqual({ route: { name: "home" }, sheet: "details", game: "trivia" });
+    expect(routeUrl({ name: "room", sub: "library" }, "details", "word-connections")).toBe("/room/library?sheet=details&game=word-connections");
+    expect(parseRoute("/", "?sheet=details").sheet).toBeNull();
+    expect(parseRoute("/", "?sheet=details&game=%3Cscript%3E").sheet).toBeNull();
+    expect(parseRoute("/room", "?sheet=menu&game=trivia").game).toBeNull();
+  });
+
   it("unknown paths fall back to Home; URLs never carry a token", () => {
     expect(parseRoute("/what/ever").route).toEqual({ name: "home" });
     expect(routeUrl({ name: "room", sub: "lobby" })).toBe("/room");
