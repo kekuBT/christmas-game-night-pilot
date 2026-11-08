@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import { BriefingRefused, ContentShortage, RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
+import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
 import type { ContentLibrary } from "../content/registry.js";
@@ -596,6 +597,12 @@ export class LocalServer {
       }
       if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html" || url.pathname.startsWith("/assets/"))) {
         this.serveStatic(url.pathname, res);
+        return;
+      }
+      // Stage 2: client routes (/join, /host, /room/cup, /library/...) get the
+      // app itself, so a reload or deep link lands on the right screen.
+      if (req.method === "GET" && isClientPath(url.pathname)) {
+        this.serveStatic("/", res);
         return;
       }
       if (req.method === "POST" && parts.length === 1 && parts[0] === "rooms") {

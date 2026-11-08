@@ -20,6 +20,11 @@ export { SegmentedChoice, NoticeCard, type ChoiceOption } from './components/Cho
 export { InviteSheet, ConfirmPanel } from './components/InviteSheet.js';
 export * from './lib/share.js';
 export * from './lib/briefing.js';
+export * from './lib/covers.js';
+export * from './lib/catalog.js';
+export * from './lib/routes.js';
+export { GameCover } from './components/GameCover.js';
+export { Sheet } from './components/Sheet.js';
 export { GameHeader, FeedbackLine, GameIntro, ScoreList } from './components/GameKit.js';
 export { ReactionBar, ReactionGlyph, REACTION_ICONS } from './components/Reactions.js';
 export * from './components/Results.js';
