@@ -180,7 +180,8 @@ try {
   const elapsedText = await elapsedEl.innerText();
   const elapsedSecs = Number((elapsedText.match(/Answered in (\d+(?:\.\d)?) s/) ?? [])[1]);
   check("locked view shows the server-measured time for this question (>= 10 s, past the bonus)",
-    /Answered in \d+(\.\d)? s/.test(elapsedText) && elapsedSecs >= 10 && /from when this question appeared/.test(elapsedText), elapsedText);
+    // S3-MTH-01: the copy says what is measured: from when the game SENT the question to this phone.
+    /Answered in \d+(\.\d)? s/.test(elapsedText) && elapsedSecs >= 10 && /from when it sent this question to your phone/.test(elapsedText), elapsedText);
   // Linger 3 s on the locked view: question 2's clock must NOT be running yet.
   await sleep(3000);
   await host.getByRole("button", { name: "Next question" }).click();

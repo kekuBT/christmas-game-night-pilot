@@ -22,26 +22,28 @@
 
 Decisions: D-UX-21 and D-UX-22 in `docs/DECISIONS.md`.
 
-## The 28 lines (all original, Mild)
+## The 29 lines (all original, Mild)
+
+Conditions corrected in the Stage 3 live QA sprint (D-QA-04, S3-RES-04); `tests/stage3-qa-results.test.ts` checks every line against its condition.
 
 | When it can appear | Line |
 |---|---|
 | One clear winner (no other rule applies) | {w} takes it. Applause is optional but encouraged. |
 | One clear winner (no other rule applies) | {w} wins. Somebody fetch a paper crown. |
 | One clear winner (no other rule applies) | Top of the table: {w}. Modesty optional. |
-| Two players, one winner, not close, not a runaway | Head to head, and {w} edged it. |
+| Two players, one winner, won by more than 10% and at most a quarter of the winner's score | Head to head, and {w} edged it. |
 | One winner, second place within 10% of the winner (the real gap is shown) | Photo finish: {gap} in it. |
 | One winner, second place within 10% of the winner (the real gap is shown) | Close enough to argue about all week. |
 | The winner scored at least twice second place | {w} won by a comfortable margin. Very comfortable. |
 | The winner scored at least twice second place | A runaway win. Everyone else was admiring the view. |
 | Only the winner scored | {w} was the only one on the scoreboard. |
 | 8 or more players, one winner | {n} players, one winner. Tough crowd. |
-| Two or more share first place | A shared win. Twice the bragging, same trophy. |
+| Exactly two share first place | A shared win. Twice the bragging, same trophy. |
 | Two or more share first place | Dead heat at the top. Nobody blinked. |
-| Two or more share first place | Tied for first. Diplomacy wins again. |
+| Two or more share first place | Tied for first. Diplomacy wins. |
 | Everyone has the same score (above 0) | Everyone tied. A perfectly balanced family. |
 | Nobody scored | Nobody scored. A truly level playing field. |
-| Nobody scored | Zero all round. The questions won this one. |
+| Nobody scored | Zero all round. The game won this one. |
 | A practice game (always, whatever the result) | Practice round: all the fun, none of the paperwork. |
 | A practice game (always, whatever the result) | Just practice. Nobody's keeping score. Well, the app is. |
 | Your card: you won outright | That was you. Enjoy it quietly. Or loudly. |
@@ -49,9 +51,10 @@ Decisions: D-UX-21 and D-UX-22 in `docs/DECISIONS.md`.
 | Your card: you share first place | You share the top spot. Sharing is caring. |
 | Your card: last of 3 or more (not an all-tie) | Someone has to make the podium look good. |
 | Your card: last of 3 or more (not an all-tie) | Every champion starts somewhere. Possibly here. |
-| Your card: anywhere else | Solid middle of the pack. Room to climb. |
-| Your card: anywhere else | Not first, not last: perfectly balanced. |
-| Your card: you scored 0 and someone else did not | No points this time. The next game is a fresh start. |
+| Your card: 2nd of exactly 2 (with points) | Second in a head-to-head. Next game's a clean slate. |
+| Your card: neither first nor last of 3 or more, in the middle half of the field | Solid middle of the pack. Room to climb. |
+| Your card: neither first nor last of 3 or more | Not first, not last: perfectly balanced. |
+| Your card: you scored 0 (including when nobody scored) | No points this time. The next game is a fresh start. |
 | Your card: you answered nothing (dropped out) | You missed this one. Your seat's still warm. |
 | Your card: you chose to sit out (only your phone knows) | You sat this one out. Fair enough. |
 
