@@ -1,6 +1,6 @@
-import type { CSSProperties } from 'react';
+import { useId, useState, type CSSProperties } from 'react';
 import { ANSWER_SHAPES } from '../tokens/tokens.js';
-import { formatScore, ordinal, standingsRows } from '../lib/standings.js';
+import { formatScore, ordinal, standingsView } from '../lib/standings.js';
 import type { AnswerOption, Player, RankedEntry } from '../types.js';
 import { ICON, Icon, PlayerToken } from './primitives.js';
 
@@ -92,30 +92,43 @@ export function AnswerDistribution({ options, counts, correctId, total }: { opti
 /* ----------------------------------------------------- standings (phone) */
 
 export function StandingsList({ ranked, youId, limit = 3, players }: { ranked: readonly RankedEntry[]; youId: string; limit?: number; players: readonly Player[] }) {
-  const rows = standingsRows(ranked, youId, limit);
+  const [expanded, setExpanded] = useState(false);
+  const listId = useId();
+  const { rows, collapsible } = standingsView(ranked, youId, limit, expanded);
   const me = ranked.find((r) => r.playerId === youId);
-  // Your row is shown on its own below the top rows (the "gap" style).
+  // In the preview, your row sits on its own below the top rows (the "gap" style).
   const cutoff = ranked[limit - 1]?.rank;
-  const youBelow = !!me && cutoff !== undefined && me.rank > cutoff;
+  const youBelow = collapsible && !expanded && !!me && cutoff !== undefined && me.rank > cutoff;
   return (
-    <ol className="mz-standings" aria-label="Standings">
-      {rows.map((r) => {
-        const you = r.playerId === youId;
-        const gap = youBelow && r === me;
-        const away = r.player.connection === 'disconnected';
-        return (
-          <li key={r.playerId} className={['mz-standings__row', you ? 'mz-standings__row--you' : '', gap ? 'mz-standings__row--gap' : ''].join(' ')}>
-            <span className="mz-standings__rank">{r.rank}</span>
-            <PlayerToken player={r.player} index={players.indexOf(r.player)} size={32} badge={away ? 'offline' : null} />
-            <span className="mz-standings__name">{you ? 'You' : r.player.name}</span>
-            {away && <span className="mz-standings__away">Away</span>}
-            {r.delta !== undefined && r.delta !== 0 && (
-              <span className="mz-standings__gain">{r.delta > 0 ? `+${formatScore(r.delta)}` : `−${formatScore(-r.delta)}`}</span>
-            )}
-            <span className="mz-standings__score">{formatScore(r.score)}</span>
-          </li>
-        );
-      })}
-    </ol>
+    <>
+      <ol id={listId} className="mz-standings" aria-label={`Standings: ${ranked.length} player${ranked.length === 1 ? '' : 's'}`} data-testid="standings-list">
+        {rows.map((r) => {
+          const you = r.playerId === youId;
+          const gap = youBelow && r === me;
+          const away = r.player.connection === 'disconnected';
+          return (
+            <li key={r.playerId} className={['mz-standings__row', you ? 'mz-standings__row--you' : '', gap ? 'mz-standings__row--gap' : ''].join(' ')}>
+              <span className="mz-standings__rank">{r.rank}</span>
+              <PlayerToken player={r.player} index={players.indexOf(r.player)} size={32} badge={away ? 'offline' : null} />
+              <span className="mz-standings__name">{you ? 'You' : r.player.name}</span>
+              {away && <span className="mz-standings__away">Away</span>}
+              {r.delta !== undefined && r.delta !== 0 && (
+                // A drop vs the previous game is not good news: never in the success colour (S3-RES-03).
+                <span className={['mz-standings__gain', r.delta < 0 ? 'mz-standings__gain--down' : ''].join(' ')}>{r.delta > 0 ? `+${formatScore(r.delta)}` : `−${formatScore(-r.delta)}`}</span>
+              )}
+              <span className="mz-standings__score">{formatScore(r.score)}</span>
+            </li>
+          );
+        })}
+      </ol>
+      {collapsible && (
+        <div className="mz-standings__more">
+          <span className="mz-foot" data-testid="standings-count">{expanded ? `All ${ranked.length} players` : `Showing ${rows.length} of ${ranked.length} players`}</span>
+          <button type="button" className="mz-chip-btn" aria-expanded={expanded} aria-controls={listId} data-testid="standings-toggle" onClick={() => setExpanded((e) => !e)}>
+            {expanded ? 'Show fewer' : `Show all ${ranked.length} players`}
+          </button>
+        </div>
+      )}
+    </>
   );
 }

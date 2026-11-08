@@ -286,7 +286,7 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
     );
   }
 
-  // Standings finale: same limit-2 phone contract as before.
+  // Standings finale: everyone in a small room; a top-2 preview that expands to every player in a larger one (S3-RES-01).
   return (
     <div data-testid="mz-reveal-step" data-step-kind="standings" data-step-index={idx}>
       <PhoneScreen label="Standings">

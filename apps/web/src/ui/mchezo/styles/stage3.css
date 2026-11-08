@@ -36,3 +36,9 @@
 }
 [data-mz-motion="reduced"] .mz-confetti, [data-mz-still] .mz-confetti { display: none; }
 @media (prefers-reduced-motion: reduce) { .mz-confetti { display: none; } }
+
+/* ---- Stage 3 live QA ---- */
+/* S3-RES-03: a drop vs the previous game is shown neutrally, not in the success colour. */
+.mz-standings__gain--down { color: var(--mz-text-muted); }
+/* S3-RES-01: the full-standings toggle under a preview list. */
+.mz-standings__more { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 8px; }

@@ -103,6 +103,17 @@ async function phoneFor(browser, room, seat, viewport = { width: 390, height: 84
   await page.getByTestId("results-hero").waitFor({ timeout: waitMs });
   return page;
 }
+/** S3-RES-01: open the Trivia reveal's Standings step; return the names listed and the toggle's state. */
+async function standingsOf(page) {
+  await page.getByTestId("mz-reveal-standings").click();
+  await page.locator("ol.mz-standings").waitFor({ timeout: 10000 });
+  return page.evaluate(() => ({
+    rows: [...document.querySelectorAll("ol.mz-standings .mz-standings__name")].map((e) => e.textContent ?? ""),
+    toggle: document.querySelector('[data-testid="standings-toggle"]')?.textContent ?? null,
+    expanded: document.querySelector('[data-testid="standings-toggle"]')?.getAttribute("aria-expanded") ?? null,
+    count: document.querySelector('[data-testid="standings-count"]')?.textContent ?? null,
+  }));
+}
 const story = (page) => page.evaluate(() => ({
   headline: document.querySelector('[data-testid="results-headline"]')?.textContent ?? "",
   quip: document.querySelector('[data-testid="results-quip"]')?.textContent ?? "",
@@ -128,6 +139,9 @@ try {
     check("2 players: the other phone shows the same headline and line", b.headline === s.headline && b.quip === s.quip);
     check("2 players: no celebration for 2nd", !b.confetti);
     check("2 players: 2nd of 2", b.you.includes("You came 2nd of 2"), b.you);
+    check("2 players: 2nd of 2 is never 'middle of the pack' (S3-RES-04)", !/middle|not first, not last/i.test(b.you), b.you);
+    const bs = await standingsOf(bea);
+    check("2 players: the standings list both players", bs.rows.length === 2 && bs.toggle === null, JSON.stringify(bs));
     await shot(bea, "02-two-player-win-second");
     // The celebration never covers a button.
     const covered = await ada.evaluate(() => {
@@ -181,6 +195,14 @@ try {
     check("dropped out: told without blame", /missed this one/i.test(c.you), c.you);
     await shot(cal, "05-dropped-out");
     await cal.context().close();
+    // S3-RES-01: the player who answered nothing is on every phone's standings, not just their own.
+    for (const [i, who] of [[0, "Ada"], [1, "Bea"]]) {
+      const p = await phoneFor(browser, room, room.seats[i]);
+      const st = await standingsOf(p);
+      check(`dropped out: ${who}'s standings list all 3 players, Cal included`, st.rows.length === 3 && st.rows.includes("Cal"), JSON.stringify(st.rows));
+      if (i === 1) await shot(p, "05b-standings-all-three");
+      await p.context().close();
+    }
   }
   // ---- practice
   {
@@ -191,6 +213,12 @@ try {
     check("practice: the line says it's practice", /[Pp]ractice/.test((await story(ada)).quip));
     await shot(ada, "06-practice");
     await ada.context().close();
+    // S3-RES-04: 2nd of 2 with points is a head-to-head loss, never "the middle".
+    const bea = await phoneFor(browser, room, room.seats[1]);
+    const b = await story(bea);
+    check("2nd of 2 with points: the runner-up line, not 'middle of the pack'", /You came 2nd of 2/.test(b.you) && /Second in a head-to-head/.test(b.you) && !/middle/i.test(b.you), b.you);
+    await shot(bea, "06b-second-of-two");
+    await bea.context().close();
   }
   // ---- ten players, long names; and reduced motion
   {
@@ -202,6 +230,18 @@ try {
       const over = await p.evaluate(() => document.scrollingElement.scrollWidth > innerWidth + 1);
       check(`10 players, long names, ${w}px: no sideways scrolling`, !over);
       await shot(p, `07-ten-players-${w}`);
+      await p.context().close();
+    }
+    {
+      const p = await phoneFor(browser, room, room.seats[6], { width: 375, height: 812 });
+      const pre = await standingsOf(p);
+      check("10 players: the standings start as a preview that says how many are shown", pre.rows.length < 10 && /Showing \d+ of 10 players/.test(pre.count ?? "") && pre.expanded === "false", JSON.stringify(pre));
+      check("10 players: your own row is in the preview", pre.rows.includes("You"), JSON.stringify(pre.rows));
+      await p.getByRole("button", { name: "Show all 10 players" }).click({ timeout: 5000 }).catch(() => {});
+      const all = await p.evaluate(() => ({ rows: document.querySelectorAll("ol.mz-standings li").length, expanded: document.querySelector('[data-testid="standings-toggle"]')?.getAttribute("aria-expanded"), over: document.scrollingElement.scrollWidth > innerWidth + 1 }));
+      check("10 players: Show all lists all 10, and says it is expanded", all.rows === 10 && all.expanded === "true", JSON.stringify(all));
+      check("10 players: the full list fits 375px without sideways scrolling", !all.over);
+      await shot(p, "08-ten-players-full-standings-375");
       await p.context().close();
     }
     const rm = await phoneFor(browser, room, room.seats[0], { width: 390, height: 844 }, { reducedMotion: "reduce" });

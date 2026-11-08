@@ -69,25 +69,35 @@ export function competitionRanks(scores: Readonly<Record<string, number>>, nameO
 /** The Mild lines, each with the fact that must hold. `{w}` = winner, `{gap}` = points between 1st and 2nd. */
 export const QUIPS = {
   win: ["{w} takes it. Applause is optional but encouraged.", "{w} wins. Somebody fetch a paper crown.", "Top of the table: {w}. Modesty optional."],
+  /** Two players, won by a modest margin (more than "close", at most a quarter of the winner's score). */
   headToHead: ["Head to head, and {w} edged it."],
   close: ["Photo finish: {gap} in it.", "Close enough to argue about all week."],
   runaway: ["{w} won by a comfortable margin. Very comfortable.", "A runaway win. Everyone else was admiring the view."],
   shutout: ["{w} was the only one on the scoreboard."],
   bigRoom: ["{n} players, one winner. Tough crowd."],
-  tie: ["A shared win. Twice the bragging, same trophy.", "Dead heat at the top. Nobody blinked.", "Tied for first. Diplomacy wins again."],
+  /** Two-way tie only ("twice"). */
+  tieTwo: ["A shared win. Twice the bragging, same trophy."],
+  tie: ["Dead heat at the top. Nobody blinked.", "Tied for first. Diplomacy wins."],
   everyoneTied: ["Everyone tied. A perfectly balanced family."],
-  noScore: ["Nobody scored. A truly level playing field.", "Zero all round. The questions won this one."],
+  noScore: ["Nobody scored. A truly level playing field.", "Zero all round. The game won this one."],
   practice: ["Practice round: all the fun, none of the paperwork.", "Just practice. Nobody's keeping score. Well, the app is."],
   youWon: ["That was you. Enjoy it quietly. Or loudly.", "You won. Try to look surprised."],
   youTiedFirst: ["You share the top spot. Sharing is caring."],
   youLast: ["Someone has to make the podium look good.", "Every champion starts somewhere. Possibly here."],
-  youMiddle: ["Solid middle of the pack. Room to climb.", "Not first, not last: perfectly balanced."],
+  /** Second of exactly two: a head-to-head, with no middle to be in. */
+  youRunnerUp: ["Second in a head-to-head. Next game's a clean slate."],
+  /** Neither first nor last (three or more players). */
+  youBetween: ["Not first, not last: perfectly balanced."],
+  /** Only when the place really is mid-table: the middle half of the field. */
+  youMidPack: ["Solid middle of the pack. Room to climb."],
   youZero: ["No points this time. The next game is a fresh start."],
   youMissed: ["You missed this one. Your seat's still warm."],
   youSatOut: ["You sat this one out. Fair enough."],
 } as const;
 
 const pick = (lines: readonly string[], key: string) => lines[stableIndex(key, lines.length)]!;
+/** A "close" finish: within a tenth of the winner's score (at least 1 point). */
+export const closeMargin = (top: number) => Math.max(1, Math.round(top * 0.1));
 const pts = (n: number) => `${n} point${n === 1 ? "" : "s"}`;
 
 export function resultsStory(f: ResultFacts): ResultsStory {
@@ -111,13 +121,13 @@ export function resultsStory(f: ResultFacts): ResultsStory {
   if (!f.official) pool = QUIPS.practice;
   else if (tone === "no-score") pool = QUIPS.noScore;
   else if (tone === "everyone-tied") pool = QUIPS.everyoneTied;
-  else if (tone === "tie") pool = QUIPS.tie;
+  else if (tone === "tie") pool = winners.length === 2 ? [...QUIPS.tieTwo, ...QUIPS.tie] : QUIPS.tie;
   else if (tone === "win" && second) {
     const s2 = f.scores[second]!;
     if (s2 === 0) pool = QUIPS.shutout;
-    else if (top - s2 <= Math.max(1, Math.round(top * 0.1))) pool = QUIPS.close;
+    else if (top - s2 <= closeMargin(top)) pool = QUIPS.close;
     else if (top >= 2 * s2) pool = QUIPS.runaway;
-    else if (n === 2) pool = QUIPS.headToHead;
+    else if (n === 2 && top - s2 <= top / 4) pool = QUIPS.headToHead;
     else if (n >= 8) pool = QUIPS.bigRoom;
   }
   const gap = second ? top - f.scores[second]! : 0;
@@ -128,18 +138,25 @@ export function resultsStory(f: ResultFacts): ResultsStory {
     const rank = ranks[f.youId]!;
     const tied = order.filter((id) => ranks[id] === rank).length > 1;
     const score = f.scores[f.youId]!;
-    const last = n >= 3 && rank === Math.max(...Object.values(ranks)) && !everyoneTied && !allZero;
+    const lastRank = Math.max(...Object.values(ranks));
+    const last = n >= 3 && rank === lastRank && !everyoneTied && !allZero;
+    // S3-RES-04: "middle of the pack" only for a place in the middle half of
+    // the field; 2nd of 2 is a head-to-head loss, never "the middle".
+    const midPack = n >= 3 && rank > 1 && rank < lastRank && (rank - 1) / (n - 1) >= 0.25 && (rank - 1) / (n - 1) <= 0.75;
     const label = n <= 1 ? "You played solo" : tied ? `You tied for ${ordinalWord(rank)} of ${n}` : `You came ${ordinalWord(rank)} of ${n}`;
     const p = f.yourParticipation;
     const line =
       f.youSatOut ? pick(QUIPS.youSatOut, `${key}:you`)
       : p && p.of > 0 && p.done === 0 ? pick(QUIPS.youMissed, `${key}:you`)
       : n <= 1 ? ""
+      : allZero ? pick(QUIPS.youZero, `${key}:you`)
       : rank === 1 && !tied ? pick(QUIPS.youWon, `${key}:you`)
       : rank === 1 ? pick(QUIPS.youTiedFirst, `${key}:you`)
-      : score === 0 && top > 0 ? pick(QUIPS.youZero, `${key}:you`)
+      : score === 0 ? pick(QUIPS.youZero, `${key}:you`)
+      : n === 2 ? pick(QUIPS.youRunnerUp, `${key}:you`)
       : last ? pick(QUIPS.youLast, `${key}:you`)
-      : pick(QUIPS.youMiddle, `${key}:you`);
+      : midPack ? pick([...QUIPS.youMidPack, ...QUIPS.youBetween], `${key}:you`)
+      : pick(QUIPS.youBetween, `${key}:you`);
     you = { rank, of: n, score, tied, label, line };
   }
   const celebrate = !!you && you.rank === 1 && (tone === "win" || tone === "tie") && !f.youSatOut;

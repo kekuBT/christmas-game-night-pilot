@@ -35,6 +35,23 @@ export function standingsRows(ranked: readonly RankedEntry[], youId: string, lim
   return me && !top.includes(me) ? [...top, me] : top;
 }
 
+/** Up to this many players, the results standings always list everyone. */
+export const FULL_STANDINGS_MAX = 4;
+
+/**
+ * S3-RES-01: the standings a results screen shows. A small field is always
+ * listed in full. A larger one starts as a preview (the top `limit` places,
+ * never splitting a shared rank, plus your own row) that expands to every
+ * player, so nobody, including a player who sat out or scored 0, is only
+ * visible on their own phone. Display only: ranks and scores are the server's.
+ */
+export function standingsView(ranked: readonly RankedEntry[], youId: string, limit: number, expanded: boolean): { rows: RankedEntry[]; hidden: number; collapsible: boolean } {
+  const preview = standingsRows(ranked, youId, limit);
+  const collapsible = ranked.length > FULL_STANDINGS_MAX && preview.length < ranked.length;
+  const rows = collapsible && !expanded ? preview : [...ranked];
+  return { rows, hidden: ranked.length - rows.length, collapsible };
+}
+
 /** Previous totals derived from current totals minus the round delta (display helper). */
 export function previousScores(scores: readonly ScoreEntry[]): ScoreEntry[] {
   return scores.map((s) => ({ playerId: s.playerId, score: s.score - (s.delta ?? 0) }));
