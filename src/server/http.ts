@@ -4,7 +4,7 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { ContentShortage, RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
+import { BriefingRefused, ContentShortage, RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
 import type { ContentLibrary } from "../content/registry.js";
@@ -51,6 +51,12 @@ export interface ServerOptions {
   lifecycleScale?: number;
   /** Content library for every room (tests inject fixtures). Default: the shipped packs. */
   content?: ContentLibrary;
+  /**
+   * D3: the timing version of Cups created through POST /rooms. Default 2,
+   * the approved rules-and-ready briefing. Tests of timing-v1 behaviour
+   * (every Cup created before D3) pass 1 (decision D-UX-09).
+   */
+  newCupTiming?: 1 | 2;
 }
 
 interface SocketMeta {
@@ -150,6 +156,7 @@ export class LocalServer {
   private heartbeat: ReturnType<typeof setInterval> | null = null;
   private lifecycleTimer: ReturnType<typeof setInterval> | null = null;
   private readonly lifecycleScale: number;
+  private readonly newCupTiming: 1 | 2;
   private readonly contentLib?: ContentLibrary;
   /** Seat recovery: brute-force limits (contract §1.5) and pending host-assisted requests. */
   private recoveries: PendingRecoveries;
@@ -161,6 +168,7 @@ export class LocalServer {
   constructor(opts: ServerOptions = {}) {
     this.clock = opts.clock ?? Date.now;
     this.contentLib = opts.content;
+    this.newCupTiming = opts.newCupTiming ?? 2;
     this.lifecycleScale = opts.lifecycleScale !== undefined && Number.isFinite(opts.lifecycleScale) && opts.lifecycleScale > 0 ? opts.lifecycleScale : 1;
     this.recoveries = new PendingRecoveries(this.clock);
     // Failed recovery-code attempts, 15-minute windows: 5 per device per
@@ -315,6 +323,8 @@ export class LocalServer {
       if (this.contentLib) room.content = this.contentLib;
       const restartedAt = this.clock();
       for (const p of room.players.values()) { p.connected = false; p.disconnectedAt = restartedAt; }
+      // D3 (S6): a briefing is never cancelled without a visible warning while the server is up.
+      room.afterRestore(restartedAt);
       // Same for spectators: no socket exists after a restart, so a
       // restored connected=true would inflate the watching count.
       for (const s of room.spectators.values()) s.connected = false;
@@ -590,7 +600,7 @@ export class LocalServer {
       }
       if (req.method === "POST" && parts.length === 1 && parts[0] === "rooms") {
         const body = await this.readBody(req);
-        const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night");
+        const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night", { timing: this.newCupTiming });
         room.clock = this.clock;
         room.lifecycleScale = this.lifecycleScale;
       if (this.contentLib) room.content = this.contentLib;
@@ -821,6 +831,42 @@ export class LocalServer {
           this.persist(room);
           this.broadcast(room.id);
           this.send(res, 201, { gameId: game.id, gameType: game.gameId, status: game.status, players: game.players });
+          return;
+        }
+        // D3: the host or a cohost begins play for everyone ("Start now"), or cancels the briefing.
+        if (req.method === "POST" && parts.length === 5 && parts[2] === "games" && parts[4] === "start-now") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const body = await this.readBody(req);
+          const confirmed = Array.isArray(body["confirmed"]) ? body["confirmed"].map(String) : [];
+          let result;
+          try {
+            result = room.startNow(player.id, String(parts[3]), { confirmed });
+          } catch (err) {
+            if (err instanceof BriefingRefused) {
+              this.persist(room); // due deadlines processed first may have changed state
+              this.broadcast(room.id);
+              this.send(res, 409, { error: err.message, code: err.code, needsConfirmation: err.needsConfirmation, startNowAt: err.startNowAt });
+              return;
+            }
+            throw err;
+          }
+          this.persist(room);
+          this.broadcast(room.id);
+          if (result.cancelled) {
+            this.send(res, 409, { error: "This game's content changed on the server, so it was cancelled before it started. Nothing was scored. Start it again.", code: "CONTENT_CHANGED" });
+            return;
+          }
+          this.send(res, 200, { ok: true, ...result });
+          return;
+        }
+        if (req.method === "POST" && parts.length === 5 && parts[2] === "games" && parts[4] === "cancel") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          room.cancelBriefing(player.id, String(parts[3]));
+          this.persist(room);
+          this.broadcast(room.id);
+          this.send(res, 200, { ok: true });
           return;
         }
         if (req.method === "POST" && parts.length === 5 && parts[2] === "games" && parts[4] === "skip") {

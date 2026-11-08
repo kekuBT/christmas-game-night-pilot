@@ -96,7 +96,7 @@ describe("spectator mode (HTTP)", () => {
 
   beforeAll(async () => {
     dataDir = mkdtempSync(join(tmpdir(), "cgn-spectator-"));
-    server = new LocalServer({ dataDir });
+    server = new LocalServer({ dataDir, newCupTiming: 1 }); // timing v1, as every Cup before D3 (D-UX-09)
     port = await server.listen(0);
   });
   afterAll(async () => {

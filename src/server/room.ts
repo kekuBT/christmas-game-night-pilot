@@ -7,8 +7,8 @@ import { dayScore, midrankScore } from "../scoring/championship.js";
 import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
 import { formatInfo, type CompetitionFormat } from "../scoring/format.js";
 import { qualifies, QualificationPolicySchema, type GameParticipationRecord, type QualificationPolicy } from "../scoring/qualification.js";
-import { CupRecordSchema, describePolicy, newCupRecord, restoreCupRecord, type CupRecord } from "./cup.js";
-import { contentLibrary, type ContentLibrary } from "../content/registry.js";
+import { CupRecordSchema, describePolicy, newCupRecord, restoreCupRecord, type CupRecord, type CupTiming } from "./cup.js";
+import { contentLibrary, officialEligible, practiceUsable, type ContentLibrary, type LoadedItem } from "../content/registry.js";
 import { recordUsage, selectContent, type UsageHistory } from "../content/select.js";
 import { ITEMS_PER_GAME, materialize } from "../content/materialize.js";
 import { CONTENT_GAMES, type ContentGameId } from "../content/schema.js";
@@ -97,6 +97,11 @@ export const RECONNECT_GRACE_MS = 45_000;
 /** D1: an official game needs at least this many competitors (championship scoring ranks players). */
 export const MIN_OFFICIAL_COMPETITORS = 2;
 
+/** D3 (S2): one active game per room, and a briefing counts as active. */
+export function isActiveGame(g: { status: string }): boolean {
+  return g.status === "briefing" || g.status === "playing";
+}
+
 /**
  * Network presence, derived on read (never stored):
  * - connected: at least one live, current-credential socket;
@@ -184,6 +189,49 @@ export class StartRefused extends Error {
   }
 }
 
+/**
+ * D3: the host's "Start now" (or Ready, at the moment play would begin) was
+ * refused so the host can decide (HTTP 409). Nothing changed.
+ * - READ_WINDOW: everyone gets `readMinMs` to read the rules first (T1).
+ * - OFFICIAL_NEEDS_TWO / NOT_ENOUGH_CONNECTED: too few roster players are
+ *   connected right now (S1). The game is never switched to practice.
+ * - READINESS_CHANGED: the host must confirm every roster player who isn't
+ *   ready or isn't connected (S4); `needsConfirmation` is the current set.
+ */
+export class BriefingRefused extends Error {
+  constructor(
+    readonly code: "READ_WINDOW" | "OFFICIAL_NEEDS_TWO" | "NOT_ENOUGH_CONNECTED" | "READINESS_CHANGED",
+    message: string,
+    readonly needsConfirmation: string[] = [],
+    readonly startNowAt?: number,
+  ) {
+    super(message);
+  }
+}
+
+/** D3 briefing state of a timing-v2 game. All times are server time. */
+export interface BriefingState {
+  /** When the host tapped Start (T_create). */
+  createdAt: number;
+  /** From when the host or a cohost may use Start now (T1). */
+  startNowAt: number;
+  /** From when every screen shows the cancellation warning (P1). */
+  warnAt: number;
+  /** When an unstarted briefing is cancelled (T2). */
+  expiresAt: number;
+  /** Roster player id -> when they tapped Ready (withdrawing removes it; T4). */
+  ready: Record<string, number>;
+  /** The warning has been pushed. */
+  warned: boolean;
+}
+
+/** D3: content frozen at Start, recorded as used only when play begins (S3). */
+export interface PendingContent {
+  mode: "official" | "practice";
+  items: { itemId: string; packId: string; packVersion: string; hash: string }[];
+  reasons: string[];
+}
+
 /** The host can't start an official game: this Cup has run out of unused approved content for it. */
 export class ContentShortage extends Error {
   constructor(message: string, readonly available: number, readonly needed: number, readonly code: "CONTENT_EXHAUSTED" | "NO_SUITABLE_CATEGORY" = "CONTENT_EXHAUSTED") {
@@ -195,7 +243,8 @@ export interface GameInstance {
   id: string;
   gameId: string;
   official: boolean;
-  status: "playing" | "finished";
+  /** "briefing" exists only for timing-v2 Cups (D3): rules and Ready, no game clock. */
+  status: "briefing" | "playing" | "finished";
   players: string[]; // player ids
   timedOut?: boolean; // host-skipped after deadline; never counts toward official standings
   day?: number; // championship day the game was started on (default 1)
@@ -217,7 +266,14 @@ export interface GameInstance {
    */
   promptsExposed?: string[];
   rawScores: Record<string, number>;
+  /** When the host tapped Start. For a timing-v2 game that is the start of the briefing, not of play. */
   startedAt?: number;
+  /** D3: when play began (T_play). Every deadline of a timing-v2 game derives from it. */
+  playStartedAt?: number;
+  /** D3: the briefing (timing-v2 games only). Kept after play begins, as the record of who was ready. */
+  briefing?: BriefingState;
+  /** D3: content chosen at Start but not yet recorded as used. Cleared when play begins. */
+  pendingContent?: PendingContent;
   deadlineAt?: number;
   seed: number;
   /** Player ids that have submitted at least one accepted intent in this game.
@@ -330,11 +386,11 @@ export class RoomEngine {
   /** Server clock. Injectable so tests control time; never the client's clock. */
   clock: () => number = Date.now;
 
-  constructor(name: string) {
+  constructor(name: string, opts: { timing?: 1 | 2 } = {}) {
     this.id = `room-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6)}`;
     this.joinCode = createJoinCode();
     this.name = name;
-    this._cup = newCupRecord(`cup-${Date.now().toString(36)}-${randomInt(0, 2 ** 31).toString(36)}`, Date.now());
+    this._cup = newCupRecord(`cup-${Date.now().toString(36)}-${randomInt(0, 2 ** 31).toString(36)}`, Date.now(), { timing: opts.timing });
   }
 
   private log(type: string, extra: Partial<LedgerEvent> = {}): LedgerEvent {
@@ -572,7 +628,8 @@ export class RoomEngine {
     // The browser UI has a single active-game panel (first playing game), so
     // a second concurrent game would orphan the first: it could never become
     // active again. Reject instead of silently stacking games.
-    if ([...this.games.values()].some((g) => g.status === "playing")) throw new Error("A game is already in progress");
+    // D3 (S2): a briefing is an active game too.
+    if ([...this.games.values()].some(isActiveGame)) throw new Error("A game is already in progress");
     const readiness = this.readiness();
     const playerIds = readiness.wouldPlay;
     if (opts.roster !== undefined) {
@@ -605,7 +662,7 @@ export class RoomEngine {
     // Content for Cups created from Sprint 4 on: chosen by the selection
     // service and recorded in the Cup's history in this same synchronous
     // step, so it is atomic with game creation.
-    let selected: { extra: unknown; record: () => void } | null = null;
+    let selected: { extra: unknown; record: () => void; pending: PendingContent } | null = null;
     if (this._cup.origin === "created" && (CONTENT_GAMES as string[]).includes(gameId)) {
       const cg = gameId as ContentGameId;
       const mode = (opts.official ?? false) ? "official" : "practice";
@@ -623,13 +680,19 @@ export class RoomEngine {
           this.contentSeq += 1;
           this.log("content-selected", { gameInstanceId: id, detail: { items: pick.items.map((li) => li.item.id), packs: [...new Set(pick.items.map((li) => `${li.packId}@${li.packVersion}`))], reasons: pick.reasons } });
         },
+        pending: { mode, items: pick.items.map((li) => ({ itemId: li.item.id, packId: li.packId, packVersion: li.packVersion, hash: li.hash })), reasons: pick.reasons },
       };
     }
+    // D3: a timing-v2 Cup opens a briefing. Content is chosen and frozen now
+    // (a shortage is refused before anyone reads the rules), but it is not
+    // sent to any screen or recorded as used, and no clock runs until play.
+    const timing = this._cup.timing;
+    const briefing = timing ? this.newBriefing(timing, startedAt) : undefined;
     const instance: GameInstance = {
       id,
       gameId,
       official: opts.official ?? false,
-      status: "playing",
+      status: briefing ? "briefing" : "playing",
       players: playerIds,
       questions: gameId === "math-mayhem" ? generateMathQuestions(seed) : undefined,
       answers: {},
@@ -637,8 +700,10 @@ export class RoomEngine {
       ...(gameId === "math-mayhem" ? { openedAt: {} } : {}),
       rawScores: Object.fromEntries(playerIds.map((p) => [p, 0])),
       startedAt,
-      // Overall deadline (independent games) or backstop (phased), from the policy table.
-      deadlineAt: startedAt + Math.round(policy.gameWindowMs * this.lifecycleScale),
+      // Overall deadline (independent games) or backstop (phased), from the
+      // policy table. A briefing has none: it is set when play begins.
+      deadlineAt: briefing ? undefined : startedAt + Math.round(policy.gameWindowMs * this.lifecycleScale),
+      ...(briefing ? { briefing, ...(selected ? { pendingContent: selected.pending } : {}) } : {}),
       lifecycleVersion: 1,
       day: this.championshipDay,
       seed,
@@ -666,12 +731,225 @@ export class RoomEngine {
                             : undefined,
     };
     this.games.set(id, instance);
-    selected?.record();
-    this.syncPhase(instance, startedAt); // phased games: start the first phase's clock
     // Audit who was left out and whether the host chose that explicitly.
     const leftOut = readiness.wouldMiss.map((m) => ({ id: m.id, presence: m.presence }));
-    this.log("game-started", { gameInstanceId: id, actor: hostId, ...(leftOut.length ? { detail: { leftOut, startedWithoutOnPurpose: [...leftOutOnPurpose].filter((x) => leftOut.some((l) => l.id === x)) } } : {}) });
+    const leftOutDetail = leftOut.length ? { leftOut, startedWithoutOnPurpose: [...leftOutOnPurpose].filter((x) => leftOut.some((l) => l.id === x)) } : {};
+    if (briefing) {
+      this.log("game-briefing-started", { gameInstanceId: id, actor: hostId, detail: { gameId, official: instance.official, roster: playerIds, ...leftOutDetail } });
+      return instance;
+    }
+    selected?.record();
+    this.syncPhase(instance, startedAt); // phased games: start the first phase's clock
+    this.log("game-started", { gameInstanceId: id, actor: hostId, ...(leftOut.length ? { detail: leftOutDetail } : {}) });
     return instance;
+  }
+
+  // ---- D3: the briefing (docs/ux-redesign/D3_TIMING_CONTRACT.md) ----
+
+  private newBriefing(timing: CupTiming, at: number): BriefingState {
+    const scaled = (ms: number) => Math.round(ms * this.lifecycleScale);
+    const expiresAt = at + scaled(timing.stallMs);
+    return { createdAt: at, startNowAt: at + scaled(timing.readMinMs), warnAt: expiresAt - scaled(timing.warnMs), expiresAt, ready: {}, warned: false };
+  }
+
+  /** Roster players connected right now (S1 counts these, never reconnecting or away players). */
+  private connectedRoster(game: GameInstance, now: number): string[] {
+    return game.players.filter((id) => this.presenceOf(id, now) === "connected");
+  }
+
+  /** The fewest connected roster players play may begin with: the game's minimum, and two for official games (D1). */
+  private briefingMinimum(game: GameInstance): number {
+    return Math.max(getGame(game.gameId).minPlayers, game.official ? MIN_OFFICIAL_COMPETITORS : 1);
+  }
+
+  /**
+   * (a): every roster player has Ready set (connected or not), no roster
+   * player is reconnecting, and enough of them are connected (S1).
+   */
+  private everyoneReady(game: GameInstance, now: number): boolean {
+    const b = game.briefing;
+    if (!b || game.status !== "briefing") return false;
+    if (game.players.some((id) => b.ready[id] === undefined)) return false;
+    if (game.players.some((id) => this.presenceOf(id, now) === "reconnecting")) return false;
+    return this.connectedRoster(game, now).length >= this.briefingMinimum(game);
+  }
+
+  /**
+   * Who the host must name before Start now (S4): every roster player who
+   * isn't ready or isn't connected, except the person tapping it. Their tap
+   * is their own authorization (P2 modified); it does not make them ready.
+   */
+  private needsConfirmation(game: GameInstance, now: number, actorId: string): string[] {
+    const b = game.briefing!;
+    return game.players.filter((id) => id !== actorId && (b.ready[id] === undefined || this.presenceOf(id, now) !== "connected"));
+  }
+
+  /**
+   * The frozen items, looked up in the library loaded now. null if any is
+   * gone, changed (pack version or content hash), or no longer allowed in
+   * this mode: only possible across a restart, which reloads the library.
+   */
+  private pendingItems(game: GameInstance, now: number): LoadedItem[] | null {
+    const pc = game.pendingContent;
+    if (!pc) return [];
+    const today = new Date(now).toISOString().slice(0, 10);
+    const out: LoadedItem[] = [];
+    for (const ref of pc.items) {
+      const li = this.content.items.get(ref.itemId);
+      if (!li || li.packId !== ref.packId || li.packVersion !== ref.packVersion || li.hash !== ref.hash) return null;
+      if (pc.mode === "official" ? !officialEligible(li, today) : !practiceUsable(li)) return null;
+      out.push(li);
+    }
+    return out;
+  }
+
+  /**
+   * T_play: the one step that begins play, for (a) and (b) alike. Rechecks the
+   * connected minimum (S1) and the frozen content (S3), then starts every clock
+   * from `now`, records the content as used, and writes `game-started`.
+   */
+  private beginPlay(game: GameInstance, now: number, trigger: "all-ready" | "start-now", actor?: string, confirmed: string[] = []): "started" | "below-minimum" | "content-changed" {
+    const b = game.briefing!;
+    if (this.connectedRoster(game, now).length < this.briefingMinimum(game)) return "below-minimum";
+    const items = this.pendingItems(game, now);
+    if (items === null) {
+      this.endBriefing(game, "content-changed", actor);
+      return "content-changed";
+    }
+    game.status = "playing";
+    game.playStartedAt = now;
+    game.deadlineAt = now + Math.round(policyFor(game.gameId).gameWindowMs * this.lifecycleScale);
+    const pc = game.pendingContent;
+    if (pc) {
+      recordUsage(this.contentUsage, items, { gameInstanceId: game.id, day: game.day ?? this.championshipDay, mode: pc.mode, seq: this.contentSeq });
+      this.contentSeq += 1;
+      this.log("content-selected", { gameInstanceId: game.id, detail: { items: items.map((li) => li.item.id), packs: [...new Set(items.map((li) => `${li.packId}@${li.packVersion}`))], reasons: pc.reasons } });
+      delete game.pendingContent;
+    }
+    this.syncPhase(game, now); // phased games: the first phase's clock starts now too
+    this.log("game-started", {
+      gameInstanceId: game.id,
+      ...(actor ? { actor } : {}),
+      detail: {
+        trigger,
+        readyAtStart: Object.fromEntries(game.players.map((id) => [id, b.ready[id] !== undefined])),
+        presenceAtStart: Object.fromEntries(game.players.map((id) => [id, this.presenceOf(id, now)])),
+        confirmed,
+      },
+    });
+    return "started";
+  }
+
+  /** Cancel a briefing (any reason): it leaves no game, no usage, no score (§6). */
+  private endBriefing(game: GameInstance, reason: "host" | "expired" | "content-changed", actor?: string): void {
+    this.games.delete(game.id);
+    // A count only: the items stay available, so their ids must not reach the player-visible ledger.
+    this.log("briefing-cancelled", {
+      gameInstanceId: game.id,
+      ...(actor ? { actor } : {}),
+      detail: { reason, gameId: game.gameId, official: game.official, roster: game.players, ready: game.players.filter((id) => game.briefing?.ready[id] !== undefined), frozenItemCount: game.pendingContent?.items.length ?? 0 },
+    });
+  }
+
+  /** The `briefing-ready` intent (T4: withdrawable during the briefing, locked once play begins). */
+  private briefingReady(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now: number): { accepted: boolean; reason?: string; result?: unknown } {
+    const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
+    if (!game || !game.briefing) return { accepted: false, reason: "PHASE_CLOSED" };
+    if (game.status !== "briefing") return { accepted: false, reason: "READY_LOCKED" };
+    if (!game.players.includes(actorId)) return { accepted: false, reason: "NOT_A_PARTICIPANT" };
+    const want = intent.payload["ready"];
+    if (typeof want !== "boolean") return { accepted: false, reason: "INVALID_INTENT" };
+    const b = game.briefing;
+    if (want !== (b.ready[actorId] !== undefined)) {
+      if (want) b.ready[actorId] = now;
+      else delete b.ready[actorId];
+      this.log("ready-changed", { gameInstanceId: game.id, playerId: actorId, detail: { ready: want } });
+    }
+    // The last Ready starts play in this same step: there is never a moment
+    // where everyone is ready but play hasn't begun.
+    const outcome = want && this.everyoneReady(game, now) ? this.beginPlay(game, now, "all-ready") : null;
+    return { accepted: true, result: { ready: want, started: outcome === "started", ...(outcome === "content-changed" ? { cancelled: "content-changed" } : {}) } };
+  }
+
+  /**
+   * (b) The host or a cohost begins play for everyone (T1, S1, S4). Refusals
+   * change nothing and say what the host must decide. `confirmed` must name
+   * everyone in the current needs-confirmation set (a superset is fine).
+   */
+  startNow(actorId: string, gameInstanceId: string, opts: { confirmed?: string[] } = {}, now = this.clock()): { started: boolean; trigger?: "start-now" | "already-started"; cancelled?: "content-changed" } {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can start a game");
+    this.tick(now);
+    const game = this.games.get(gameInstanceId);
+    if (game?.briefing && game.status !== "briefing") return { started: true, trigger: "already-started" };
+    if (!game || game.status !== "briefing" || !game.briefing) throw new Error("That game isn't waiting to start");
+    const b = game.briefing;
+    if (now < b.startNowAt) {
+      throw new BriefingRefused("READ_WINDOW", `Give everyone a moment to read the rules. Start now unlocks in ${Math.ceil((b.startNowAt - now) / 1000)} s.`, [], b.startNowAt);
+    }
+    const connected = this.connectedRoster(game, now).length;
+    const minimum = this.briefingMinimum(game);
+    if (connected < minimum) {
+      if (game.official && connected < MIN_OFFICIAL_COMPETITORS) {
+        throw new BriefingRefused("OFFICIAL_NEEDS_TWO", "Official games need at least 2 connected players to start. Wait for someone to come back, or cancel and play it as practice.", [], b.startNowAt);
+      }
+      throw new BriefingRefused("NOT_ENOUGH_CONNECTED", `${getGame(game.gameId).title} needs at least ${minimum} connected players to start. Wait for someone to come back, or cancel.`, [], b.startNowAt);
+    }
+    const needs = this.needsConfirmation(game, now, actorId);
+    const ok = new Set(opts.confirmed ?? []);
+    if (needs.some((id) => !ok.has(id))) {
+      const names = needs.map((id) => this.players.get(id)?.displayName ?? id);
+      throw new BriefingRefused("READINESS_CHANGED", `Not everyone is ready: ${names.join(", ")}. Confirm to start their clocks too.`, needs, b.startNowAt);
+    }
+    const outcome = this.beginPlay(game, now, "start-now", actorId, game.players.filter((id) => ok.has(id)));
+    if (outcome === "content-changed") return { started: false, cancelled: "content-changed" };
+    return { started: true, trigger: "start-now" };
+  }
+
+  /** The host or a cohost cancels a briefing (T2): nothing scored, nothing used, no game left behind. */
+  cancelBriefing(actorId: string, gameInstanceId: string): void {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can cancel a game");
+    const game = this.games.get(gameInstanceId);
+    if (!game || game.status !== "briefing") throw new Error("That game isn't waiting to start");
+    this.endBriefing(game, "host", actorId);
+  }
+
+  /**
+   * After a server restart (S6): a briefing is never cancelled without the
+   * warning having been visible while the server was up. If less than the
+   * warning time is left (or none), expiry moves to now + warning time and
+   * the warning is pushed again by the next sweep.
+   */
+  afterRestore(now = this.clock()): number {
+    const warnMs = Math.round((this._cup.timing?.warnMs ?? 0) * this.lifecycleScale);
+    let extended = 0;
+    for (const game of this.games.values()) {
+      const b = game.briefing;
+      if (game.status !== "briefing" || !b || b.expiresAt - now >= warnMs) continue;
+      const before = { warnAt: b.warnAt, expiresAt: b.expiresAt };
+      b.expiresAt = now + warnMs;
+      b.warnAt = now;
+      b.warned = false;
+      this.log("briefing-extended", { gameInstanceId: game.id, detail: { restartedAt: now, before, after: { warnAt: b.warnAt, expiresAt: b.expiresAt } } });
+      extended += 1;
+    }
+    return extended;
+  }
+
+  /** One briefing's due work at `now`: start (a), cancel (T2) or warn (P1). */
+  private tickBriefing(game: GameInstance, now: number): boolean {
+    const b = game.briefing!;
+    if (now < b.expiresAt && this.everyoneReady(game, now)) {
+      if (this.beginPlay(game, now, "all-ready") !== "below-minimum") return true;
+    }
+    if (now >= b.expiresAt) {
+      this.endBriefing(game, "expired");
+      return true;
+    }
+    if (now >= b.warnAt && !b.warned) {
+      b.warned = true;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -726,6 +1004,8 @@ export class RoomEngine {
       // E1: an older tab clamps numeric input (Closest at 1000, the Year to
       // 1896–2025), so its number may not be what the player meant.
       result = { accepted: false, reason: "CLIENT_OUTDATED" };
+    } else if (intent.action === "briefing-ready") {
+      result = this.briefingReady(intent, actorId, now);
     } else if (intent.action === "math-open") {
       result = this.openMathQuestion(intent, actorId, now);
     } else if (intent.action === "submit-math-answer") {
@@ -751,7 +1031,8 @@ export class RoomEngine {
     } else {
       result = { accepted: false, reason: "UNKNOWN_ACTION" };
     }
-    if (result.accepted) {
+    // Ready is not playing: it never counts toward "have played so far".
+    if (result.accepted && intent.action !== "briefing-ready") {
       const game = [...this.games.values()].find((g) => g.id === intent.gameInstanceId);
       if (game) {
         game.submittedPlayers ??= [];
@@ -1157,7 +1438,11 @@ export class RoomEngine {
    */
   tick(now = this.clock()): boolean {
     let changed = false;
-    for (const game of this.games.values()) {
+    for (const game of [...this.games.values()]) {
+      if (game.status === "briefing") {
+        if (this.tickBriefing(game, now)) changed = true;
+        continue;
+      }
       for (let guard = 0; guard < 100 && game.status === "playing"; guard++) {
         const phaseDue = game.phaseDeadlineAt !== undefined && now > game.phaseDeadlineAt ? game.phaseDeadlineAt : Infinity;
         const gameDue = game.deadlineAt !== undefined && now > game.deadlineAt ? game.deadlineAt : Infinity;
@@ -1433,6 +1718,35 @@ export class RoomEngine {
     this.log("game-voided", { gameInstanceId: game.id, reason: why.slice(0, 200) });
   }
 
+  /**
+   * D3 (S5): the ONLY projection of a game in its briefing, for every
+   * audience. Policy timing and readiness, never state, questions, roles,
+   * answers, scores or deadlines: the content isn't sent until play begins.
+   */
+  private briefingView(g: GameInstance): Record<string, unknown> {
+    const b = g.briefing!;
+    return {
+      id: g.id,
+      gameId: g.gameId,
+      official: g.official,
+      status: g.status,
+      timedOut: false,
+      day: g.day ?? 1,
+      players: g.players,
+      totalPlayers: g.players.length,
+      submittedCount: 0,
+      lifecycle: this.lifecycleInfo(g),
+      timingVersion: 2,
+      // T3/P3: who is ready is public; presence rides in the players list.
+      briefing: { createdAt: b.createdAt, startNowAt: b.startNowAt, warnAt: b.warnAt, expiresAt: b.expiresAt, ready: g.players.filter((id) => b.ready[id] !== undefined), warned: b.warned },
+    };
+  }
+
+  /** D3: a timing-v2 game says so after its briefing too (clients skip the old rules overlay). */
+  private timingFacts(g: GameInstance): Record<string, unknown> {
+    return g.briefing ? { timingVersion: 2, playStartedAt: g.playStartedAt } : {};
+  }
+
   /** Public timing/eligibility facts for a game (never answers or who abstained). */
   private lifecycleInfo(g: GameInstance): Record<string, unknown> | undefined {
     if (g.lifecycleVersion === undefined) return undefined;
@@ -1494,7 +1808,7 @@ export class RoomEngine {
    */
   advanceDay(actorId: string): number {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can advance the day");
-    if ([...this.games.values()].some((g) => g.status === "playing")) throw new Error("Cannot advance the day while a game is in progress");
+    if ([...this.games.values()].some(isActiveGame)) throw new Error("Cannot advance the day while a game is in progress");
     if (this.championshipDay >= 7) throw new Error("Championship is already on its final day");
     this.championshipDay += 1;
     this.log("day-advanced", { actor: actorId });
@@ -1982,7 +2296,7 @@ export class RoomEngine {
       // Server time the device dropped; lets clients say "away 2 min" without trusting their own clock.
       awayForMs: p.connected || p.disconnectedAt == null ? 0 : Math.max(0, now - p.disconnectedAt),
     }));
-    const publicGames = [...this.games.values()].map((g) => ({
+    const publicGames = [...this.games.values()].map((g) => g.status === "briefing" ? this.briefingView(g) : ({
       id: g.id,
       gameId: g.gameId,
       official: g.official,
@@ -2011,6 +2325,7 @@ export class RoomEngine {
       answerCounts: g.status === "finished" && g.gameId === "trivia" ? this.quizAnswerCounts(g) : undefined,
       questionPoints: g.status === "finished" && g.gameId === "trivia" ? this.quizQuestionPoints(g) : undefined,
       rawScores: g.status === "finished" ? g.rawScores : undefined,
+      ...this.timingFacts(g),
     }));
     const base: Record<string, unknown> = {
       /** The server's clock when this projection was made (deadline countdowns). */
@@ -2053,6 +2368,8 @@ export class RoomEngine {
       // someone a participant, so a late joiner gets the public state.
       const myGames = [...this.games.values()].map((g) => {
         const participant = g.players.includes(actorId);
+        // D3 (S5): during a briefing nothing game-specific is projected.
+        if (g.status === "briefing") return { ...this.briefingView(g), participant, myAnswers: {}, myScore: 0, abstained: false };
         return {
           id: g.id,
           gameId: g.gameId,
@@ -2088,6 +2405,7 @@ export class RoomEngine {
           // Finished scores are public (same policy as the public games list);
           // without this, ShowResults and the finished panel rendered empty.
           rawScores: g.status === "finished" ? g.rawScores : undefined,
+          ...this.timingFacts(g),
         };
       });
       return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash }, myGames };

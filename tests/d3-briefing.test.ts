@@ -91,18 +91,21 @@ describe("D3: Start creates a BRIEFING with no game clock", () => {
 
   it("every Start check still runs first: one player can't create an official briefing (D1)", () => {
     const { engine, host } = setup(1);
-    expect(() => engine.startGame(host, "trivia", { official: true })).toThrow(/at least 2 players/);
+    // Word Connections allows one player by itself, so only D1 can refuse this.
+    expect(() => engine.startGame(host, "word-connections", { official: true })).toThrow(/Official games need at least 2 players/);
     expect(engine.games.size).toBe(0);
   });
 });
 
 describe("D3 S5: nothing secret is disclosed during the briefing (every game × every audience)", () => {
+  // Every string a value holds: values AND object keys (a map keyed by a secret leaks it too).
   const strings = (v: unknown, out: Set<string>): Set<string> => {
     if (typeof v === "string") out.add(v);
     else if (Array.isArray(v)) v.forEach((x) => strings(x, out));
-    else if (v && typeof v === "object") Object.values(v).forEach((x) => strings(x, out));
+    else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) { out.add(k); strings(x, out); }
     return out;
   };
+  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   for (const desc of GAME_REGISTRY) {
     it(`${desc.id}: no state, questions, roles, answers or content strings reach any projection`, () => {
       const n = Math.max(desc.minPlayers, 4);
@@ -135,8 +138,15 @@ describe("D3 S5: nothing secret is disclosed during the briefing (every game × 
           expect(e["phaseDeadlineAt"], `${who} phaseDeadlineAt`).toBeUndefined();
           if ("myAnswers" in e) expect(e["myAnswers"], `${who} myAnswers`).toEqual({});
         }
-        const json = JSON.stringify(proj);
-        for (const s of secrets) expect(json.includes(s), `${who} leaks ${JSON.stringify(s)}`).toBe(false);
+        // Anything in this view that wasn't public before Start must not equal a
+        // secret or contain one as a whole word. (A raw substring search of the
+        // JSON flagged the Connections tile "Code" inside the key "joinCode".)
+        const fresh = [...strings(proj, new Set())].filter((x) => !baseline.has(x));
+        for (const secret of secrets) {
+          const word = new RegExp(`(^|[^\\p{L}\\p{N}])${escape(secret)}($|[^\\p{L}\\p{N}])`, "u");
+          const hit = fresh.find((x) => x === secret || word.test(x));
+          expect(hit, `${who} leaks ${JSON.stringify(secret)} in ${JSON.stringify(hit)}`).toBeUndefined();
+        }
       }
       // After play begins, the participant projection carries the game again (today's rules).
       for (const pid of ids) ready(engine, pid, g.id);

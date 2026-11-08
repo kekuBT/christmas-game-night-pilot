@@ -101,13 +101,32 @@ const GameRecord = z.object({
   id: z.string().min(1),
   gameId: z.string().refine((g) => KNOWN_GAMES.has(g), { message: "unknown game type" }),
   official: z.boolean(),
-  status: z.enum(["playing", "finished"]),
+  // "briefing": D3 timing-v2 games before play begins (rules and Ready, no clock).
+  status: z.enum(["briefing", "playing", "finished"]),
   players: z.array(z.string()),
   answers: z.record(z.unknown()),
   answerTimes: z.record(z.unknown()),
   rawScores: z.record(num),
   seed: num,
-}).passthrough();
+  // D3 fields: optional, so rooms saved before D3 load unchanged.
+  briefing: z.object({
+    createdAt: num,
+    startNowAt: num,
+    warnAt: num,
+    expiresAt: num,
+    ready: z.record(num),
+    warned: z.boolean(),
+  }).strict().optional(),
+  playStartedAt: num.optional(),
+  pendingContent: z.object({
+    mode: z.enum(["official", "practice"]),
+    items: z.array(z.object({ itemId: z.string().min(1), packId: z.string().min(1), packVersion: z.string().min(1), hash: z.string().min(1) }).strict()),
+    reasons: z.array(z.string()),
+  }).strict().optional(),
+}).passthrough().superRefine((g, ctx) => {
+  if (g.status === "briefing" && !g.briefing) ctx.addIssue({ code: "custom", message: `game ${g.id} is in its briefing but has no briefing record` });
+  if (g.briefing && g.status === "briefing" && g.deadlineAt !== undefined) ctx.addIssue({ code: "custom", message: `game ${g.id} is in its briefing but has a deadline` });
+});
 
 const LedgerRecord = z.object({
   eventId: z.string(),

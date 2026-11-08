@@ -47,10 +47,34 @@ export const CupRecordSchema = z.object({
      */
     answerRules: z.literal(2).optional(),
   }).strict().optional(),
+  /**
+   * D3 rules-and-ready timing (owner-approved 2026-11-08). Fixed when the Cup
+   * is created. Absent = timing version 1, every Cup created before D3: those
+   * Cups keep starting games the moment the host taps Start, so a Cup under
+   * way is never re-timed. docs/ux-redesign/D3_TIMING_CONTRACT.md.
+   */
+  timing: z.object({
+    version: z.literal(2),
+    /** How long everyone can read before the host may use Start now (T1). */
+    readMinMs: z.number().int().positive(),
+    /** An unstarted briefing is cancelled this long after Start (T2). */
+    stallMs: z.number().int().positive(),
+    /** The visible warning before that cancellation (P1). */
+    warnMs: z.number().int().positive(),
+  }).strict().optional(),
 }).strict();
 export type CupRecord = z.infer<typeof CupRecordSchema>;
 
-export function newCupRecord(cupId: string, createdAt: number): CupRecord {
+/** D3 timing version 2, as approved (T1 20 s, T2 5 min, P1 60 s warning). */
+export const TIMING_V2 = Object.freeze({ version: 2 as const, readMinMs: 20_000, stallMs: 300_000, warnMs: 60_000 });
+export type CupTiming = NonNullable<CupRecord["timing"]>;
+
+/**
+ * A new Cup's record. `timing: 2` for Cups players create (POST /rooms);
+ * an engine built directly in code stays on version 1 unless asked
+ * (decision D-UX-09), as every Cup before D3 is.
+ */
+export function newCupRecord(cupId: string, createdAt: number, opts: { timing?: 1 | 2 } = {}): CupRecord {
   return Object.freeze({
     schemaVersion: 1,
     cupId,
@@ -59,6 +83,7 @@ export function newCupRecord(cupId: string, createdAt: number): CupRecord {
     qualificationPolicy: NEW_CUP_QUALIFICATION_POLICY,
     origin: "created",
     categorySprint: Object.freeze({ matcher: 2, sizePolicy: 1, answerRules: 2 }),
+    ...(opts.timing === 2 ? { timing: TIMING_V2 } : {}),
   }) as CupRecord;
 }
 
@@ -88,7 +113,7 @@ export function restoreCupRecord(raw: unknown, ctx: { roomId: string; legacyForm
   if (!parsed.success) {
     return { ok: false, error: `Cup record invalid: ${parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; ").slice(0, 300)}`, raw };
   }
-  return { ok: true, cup: Object.freeze({ ...parsed.data, qualificationPolicy: Object.freeze({ ...parsed.data.qualificationPolicy }), ...(parsed.data.categorySprint ? { categorySprint: Object.freeze({ ...parsed.data.categorySprint }) } : {}) }) as CupRecord };
+  return { ok: true, cup: Object.freeze({ ...parsed.data, qualificationPolicy: Object.freeze({ ...parsed.data.qualificationPolicy }), ...(parsed.data.categorySprint ? { categorySprint: Object.freeze({ ...parsed.data.categorySprint }) } : {}), ...(parsed.data.timing ? { timing: Object.freeze({ ...parsed.data.timing }) } : {}) }) as CupRecord };
 }
 
 export function describePolicy(p: QualificationPolicy): string {

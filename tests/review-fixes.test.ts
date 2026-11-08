@@ -18,7 +18,7 @@ let dataDir: string;
 
 beforeAll(async () => {
   dataDir = mkdtempSync(join(tmpdir(), "cgn-review-"));
-  server = new LocalServer({ dataDir });
+  server = new LocalServer({ dataDir, newCupTiming: 1 }); // timing v1, as every Cup before D3 (D-UX-09)
   port = await server.listen(0);
 });
 
@@ -186,7 +186,7 @@ describe("PR #3 review fixes", () => {
     const guestApprove = await post(`/rooms/${roomId}/memory/${mem.json["id"]}/approve`, {}, players[1]!.token);
     expect(guestApprove.status).toBe(403);
     await server.close();
-    server = new LocalServer({ dataDir });
+    server = new LocalServer({ dataDir, newCupTiming: 1 }); // timing v1, as every Cup before D3 (D-UX-09)
     port = await server.listen(0);
     const after = await get(`/rooms/${roomId}/memory`, hostTok);
     const entries = after.json as unknown as { text: string; approved: boolean }[];

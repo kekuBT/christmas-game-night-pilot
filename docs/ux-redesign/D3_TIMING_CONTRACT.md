@@ -48,7 +48,7 @@ host taps Start ─► BRIEFING (no game clock) ─► PLAYING (every clock star
 - content shortage is refused here (`CONTENT_EXHAUSTED` / `NO_SUITABLE_CATEGORY`), so nobody reads rules for a game that can't run.
 
 **Then, in one synchronous step (new):**
-1. The game record is created with `status: "briefing"`, `lifecycleVersion: 2`, `day` = the current day, and the seed.
+1. The game record is created with `status: "briefing"`, a `briefing` record, `day` = the current day, and the seed. (`lifecycleVersion` stays 1: it describes the Sprint 3 deadline model, which is unchanged.)
 2. **Content is chosen and frozen** on the server with today's selection call. That includes Category Sprint eligibility for this roster, and Impostor roles from the seed. The frozen selection stays on the game record only.
 3. **Nothing is recorded as used:** no `recordUsage`, no `contentSeq` increment, no `content-selected` ledger event.
 4. **No game deadline exists:** `deadlineAt` and `phaseDeadlineAt` are unset.
@@ -275,7 +275,7 @@ During a briefing, **every** projection (player, host or cohost, TV, spectator) 
 - Cups with no `timing` record, which is every Cup created before the change, legacy-restored ones included, stay on **version 1: today's behaviour exactly.** That includes the 8 s rules overlay with the clock running, for practice and official games alike.
 - **Consequence:** the owner's existing test rooms (each room is one Cup) keep today's timing. To try D3, create a new room.
 
-**Games** record `lifecycleVersion: 2` (briefing) or 1. Running and finished games restored after the change keep their stored `startedAt`-based deadlines. No migration touches a stored game.
+**Games:** a timing-v2 game keeps its `briefing` record after play begins, as the record of who was ready. A timing-v1 game has none. Running and finished games restored after the change keep their stored `startedAt`-based deadlines. No migration touches a stored game.
 
 ## 9. Tests (a failing test first for each)
 

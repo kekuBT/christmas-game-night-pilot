@@ -12,7 +12,7 @@ let dataDir: string;
 
 beforeAll(async () => {
   dataDir = mkdtempSync(join(tmpdir(), "cgn-m1-"));
-  server = new LocalServer({ dataDir });
+  server = new LocalServer({ dataDir, newCupTiming: 1 }); // timing v1, as every Cup before D3 (D-UX-09)
   port = await server.listen(0);
 });
 
@@ -156,7 +156,7 @@ describe("M1 HTTP + WebSocket adapter", () => {
 
     // Simulate a restart: new server instance on the same dataDir
     await server.close();
-    server = new LocalServer({ dataDir });
+    server = new LocalServer({ dataDir, newCupTiming: 1 }); // timing v1, as every Cup before D3 (D-UX-09)
     port = await server.listen(0);
     const tv = await get(`/rooms/${roomId}/projection?audience=tv`);
     expect((tv["players"] as unknown[]).length).toBe(2);

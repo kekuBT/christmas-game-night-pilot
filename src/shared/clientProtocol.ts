@@ -14,10 +14,13 @@
  *     Older tabs clamp Closest at 1000 and the Year at 1896–2025, so the
  *     server refuses their numeric guesses (CLIENT_OUTDATED) and they are
  *     told to refresh.
+ * 5 = D3: timing-v2 Cups open each game with a server-side briefing
+ *     (status "briefing": rules, Ready, Start now, Cancel). An older tab
+ *     can't show it, so it is told to refresh.
  * A request with no version comes from a tab loaded before Sprint 3.
  */
-export const CLIENT_PROTOCOL = 4;
-export const MIN_CLIENT_PROTOCOL = 4;
+export const CLIENT_PROTOCOL = 5;
+export const MIN_CLIENT_PROTOCOL = 5;
 /** Math per-question prompts (`math-open`) arrived in protocol 3. */
 export const MATH_OPEN_PROTOCOL = 3;
 /** The first protocol whose numeric input matches src/shared/numericInput.ts. */

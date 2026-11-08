@@ -11,7 +11,7 @@ import { RoomEngine } from "../src/server/room.js";
 let server: LocalServer;
 let port: number;
 beforeAll(async () => {
-  server = new LocalServer({ dataDir: mkdtempSync(join(tmpdir(), "cgn-review2-")) });
+  server = new LocalServer({ dataDir: mkdtempSync(join(tmpdir(), "cgn-review2-")), newCupTiming: 1 }); // timing v1, as every Cup before D3 (D-UX-09)
   port = await server.listen(0);
 });
 afterAll(async () => { await server.close(); });
