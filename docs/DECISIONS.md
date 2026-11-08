@@ -339,7 +339,7 @@ Owner direction: the overnight continuation directive, Phase 2 (Home B, Lobby A,
 - **D-UX-14 Real addresses, no router library** (`apps/web/src/nav.ts`, `ui/mchezo/lib/routes.ts`).
   - `/`, `/join?code=`, `/host`, `/library`, `/watch?code=`, `/room`, `/room/cup`, `/room/tv`, `/room/memories`, `/room/library`, `/room/studio`.
   - Sheets ride in `?sheet=invite|choose|menu|settings|details` (details adds `&game=`), so browser Back and iOS swipe-back close a sheet first.
-  - Each history entry records how deep the tab has gone. In-app Back steps back through our own entries, and otherwise replaces the screen (it never leaves the app by accident). Leaving a sheet for another screen replaces the sheet's entry, so Back from the Cup returns to the lobby, not to the menu.
+  - Each history entry records how deep the tab has gone. In-app Back steps back through our own entries, and otherwise replaces the screen (it never leaves the app by accident). Leaving a sheet for another screen replaces the sheet's entry, so Back from the Cup returns to the lobby, not to the menu. Moving from one room screen to another (Cup → TV) replaces the entry too, so history is always "lobby → this screen" (found by `check-f5`: "Lobby & Games" from the TV used to step back to the Cup).
   - URLs never hold credentials. The server serves the app only for these client paths (`src/shared/clientRoutes.ts`), and `/room/anything-else` is still a 404.
   - *Alternative:* a router package. Rejected: about 100 lines cover it, and seat and socket logic stay untouched.
 - **D-UX-15 Reload and Back while holding a seat.**

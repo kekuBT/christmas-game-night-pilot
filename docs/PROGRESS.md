@@ -1088,3 +1088,66 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - **Older local build only (category 6):** L-01, L-04, the green theme, local timing.
 
 **Risk:** verified in Chromium emulation only, not on a real iPhone.
+
+## 2026-11-08: Stage 2 "Night Circle": Home B, Lobby A, the visual library, real addresses (branch `claude/stage2-night-circle`, from the Phase 1 checkpoint `f9dfcf2`; the Phase 1 record `10fa0d3` merged in)
+
+**Owner direction:** overnight continuation directive, Phase 2. Presentation and navigation only. The handoff page with screens and iPhone steps is `docs/stage2/README.md`; decisions are D-UX-14 to D-UX-20.
+
+**Built:**
+- **Routes:**
+  - Real addresses over pushState (`apps/web/src/nav.ts`, `ui/mchezo/lib/routes.ts`), with sheets in `?sheet=`.
+  - Depth-aware in-app Back, and a boot redirect for seated or unseated tabs.
+  - The server serves the app only for client paths (`src/shared/clientRoutes.ts`).
+- **Home B:** `components/mchezo/Home.tsx`, with procedural covers for all 11 games (`lib/covers.ts`, `GameCover`), one catalog (`lib/catalog.ts`), the featured game of the day, the Join/Host dock, Rejoin and game details.
+- **Join** (`/join?code=`, QR and invite links) and **Host** (`/host`, name required: A-04).
+- **Lobby A:** `components/mchezo/Lobby.tsx`, with code + Invite, Cup day, ☰, an honest headline, the Circle with will-play checks, the up-next cover card, Official/Practice and readiness, and the sticky Start dock.
+  - **Sheets:** Invite, Pick a game (covers, categories, Surprise me, Smart shuffle), Room menu and Game details.
+  - **Sheet behaviour:** focus is trapped inside a sheet and returns on close.
+- **Library:** covers first, search on screen, folded filters, removable active-filter chips, Clear filters (also in the empty state), practice-only tags, "Set as up next" for hosts in a room.
+
+**Found and fixed on the way (D-UX-20):**
+- **Connection alerts under sheets:** they now sit above sheets.
+- **"Seat moved" overwritten by "Your session ended":** pre-existing; unit-tested now.
+- **Your own seat faded:** the legacy disabled opacity.
+- **Full rooms:** name labels in a ring of 9–10 overlapped neighbouring tokens.
+
+**Drivers:**
+- `goto(BASE)` → `/host` or `/join` where a driver hosts or joins.
+- `scripts/lib/room-nav.mjs` reaches room-menu destinations like a person, with the old views' own buttons as fallback.
+- Library, shuffle, lobby-fixes, mchezo, mobile, sessions, recovery and studio follow the new screens.
+- No assertion was weakened. Checks that named removed things were rewritten to assert their replacement (e.g. the share link is `/join?code=`; sign-out lands on Home and says so).
+- **New:** `scripts/check-stage2.mjs` (Home, A-04, QR prefill, Lobby A at 375/390/430/768/1440 with 2 and 10 players, sheets and Back, Rejoin, reloads, deep links while seated, duplicate seats, focus, labels, reduced motion, and the full journey) and `tests/connection-store.test.ts`.
+
+**Runs:** These are local runs against Stage 2 builds on this machine: early feedback, not gate verdicts.
+- **Sweeps:** every `check-*` driver was run at least once against Stage 2.
+- **Failures found and fixed:**
+  - `check-recovery`: the banner under the sheet, and the "seat moved" message overwritten.
+  - `check-stage2`: full-room names covering seats.
+  - `check-spectator`: Stop watching now returns Home; the driver was updated.
+  - `check-audit-fixes`: a helper hosted and joined on the same screen.
+  - `check-f5`: the Cup → TV → Lobby & Games navigation.
+- **Last local runs:**
+  - `check-stage2`: all passed on `929db1c`.
+  - `check-f5`: 30/30.
+  - The second and third sweeps: all passed.
+
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on `f7c5265`: **PASSED (exit 0)**, run `20261108-074616-f7c5265c-5793`.
+- 48 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- Unit tests 940; `check-stage2` 76 checks; e2e-chromium 12/12.
+- Fresh clone; untracked `node_modules` symlink only; `MCHEZO_CHROMIUM_PATH` = this machine's headless shell 1243.
+- The verdict covers `f7c5265` only. The recording commit is docs only (this entry and the D-UX-14 wording).
+
+**Not changed:**
+- Server rules, scoring, eligibility, readiness, D3, content approvals, existing Cups.
+- The Championship, TV, Memory Book and older results screens (reached through the menu).
+- No merge, deployment or spend; the Codespaces port stays private.
+
+**Open:**
+1. Real-iPhone pass (README steps).
+2. "Room found" preview on Join (needs a server endpoint).
+3. Solo practice (D2).
+4. The `screenshot-*.mjs` scripts outside the gate still drive the Stage 1 landing page.
+
+**Risk:**
+- Chromium emulation only: Safari's toolbar, swipe-back and keyboard need the real device.
+- The sticky dock depends on `100dvh` support (iOS 15.4+).
