@@ -9,6 +9,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-closest.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -62,11 +63,8 @@ try {
   await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-closest-wins").click();
   await host.getByTestId("start-official-closest-wins").click();
-  try {
-    await host.getByTestId("show-start-playing").click({ timeout: 3000 });
-  } catch {
-    await sleep(8500);
-  }
+  // D3: every player reads the rules and taps I'm ready; the first question opens for all at once.
+  await passBriefing([host, bea, cal]);
   for (const [page, name] of [[host, "host"], [bea, "Bea"], [cal, "Cal"]]) {
     await page.getByTestId("mz-num-dial").waitFor({ timeout: 15000 });
     check(`${name} sees the kit closest panel`, true);

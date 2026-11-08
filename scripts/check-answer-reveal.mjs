@@ -12,6 +12,7 @@
 import { itemFor, optionIndex } from "./lib/content-oracle.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -48,11 +49,12 @@ async function spectate(page, code) {
   await page.getByTestId("watch-spectator").click();
   await page.getByRole("button", { name: "Stop watching" }).waitFor({ timeout: 15000 });
 }
-async function start(host, gameId) {
+async function start(host, gameId, players) {
   await host.getByTestId("choose-game").click();
   await host.getByTestId(`select-game-${gameId}`).click();
   await host.getByTestId(`start-official-${gameId}`).click();
-  try { await host.getByTestId("show-start-playing").click({ timeout: 3000 }); } catch { await sleep(8500); }
+  // D3: every player reads the rules and taps I'm ready (no intro races the clock).
+  await passBriefing(players);
 }
 const geoChoose = async (_n, page) => {
   const prompt = await page.locator(".mz-question").innerText();
@@ -74,7 +76,7 @@ try {
   await joinRoom(bea, "Bea", code);
   const tv = await tvCtx.newPage();
   await spectate(tv, code);
-  await start(ada, "geography");
+  await start(ada, "geography", [ada, bea]);
   await ada.locator(".mz-question").waitFor({ timeout: 15000 });
   await bea.locator(".mz-question").waitFor({ timeout: 15000 });
   // Bea answers ONE question and keeps her next ones open.
@@ -112,7 +114,7 @@ try {
 
   // ---------------- Closest Wins ----------------
   await sleep(1000);
-  await start(ada, "closest-wins");
+  await start(ada, "closest-wins", [ada, bea]);
   await ada.getByTestId("mz-num-input").waitFor({ timeout: 15000 });
   await bea.getByTestId("mz-num-input").waitFor({ timeout: 15000 });
   const q1 = (await ada.locator(".mz-card p b").first().innerText()).trim();

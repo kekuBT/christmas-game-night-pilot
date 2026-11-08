@@ -6,6 +6,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-reveal.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -85,6 +86,7 @@ try {
 
   // Play one Trivia game: Ada option 0, Bea option 1, TV abstains.
   await host.getByTestId("start-official-trivia").click();
+  await passBriefing([host, bea, tv]); // D3: all three players tap I'm ready
   await host.locator(".mz-question").waitFor({ timeout: 30000 });
   await tv.locator(".mz-question").waitFor({ timeout: 30000 });
   await tv.getByRole("button", { name: "Sit this game out" }).click();

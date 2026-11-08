@@ -13,6 +13,7 @@
 //   node scripts/check-year.mjs <baseUrl>
 import { yearFor } from "./lib/content-oracle.mjs";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -42,15 +43,12 @@ async function joinRoom(page, name, code) {
   await page.getByRole("button", { name: "Join the game" }).click();
   await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
 }
-async function startYear(host) {
+async function startYear(host, players) {
   await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-guess-the-year").click();
   await host.getByTestId("start-official-guess-the-year").click();
-  try {
-    await host.getByTestId("show-start-playing").click({ timeout: 3000 });
-  } catch {
-    await sleep(8500);
-  }
+  // D3: every player reads the rules and taps I'm ready; play starts for all at once.
+  await passBriefing(players);
 }
 // Guess one event by chip index, via the field (default) or the dial.
 // Skips the event if it is already guessed (the confirmation shows).
@@ -92,7 +90,7 @@ try {
   check("guest sees no year start control",
     (await bea.getByTestId("start-official-guess-the-year").count()) === 0);
 
-  await startYear(host);
+  await startYear(host, [host, bea]);
   for (const [page, name] of [[host, "host"], [bea, "Bea"]]) {
     await page.getByTestId("mz-year-progress").waitFor({ timeout: 15000 });
     check(`${name} sees the kit year panel`, true);
@@ -199,7 +197,7 @@ try {
   const code2 = await createRoom(host2, "Ada");
   const bea2 = await ctx2.newPage();
   await joinRoom(bea2, "Bea", code2);
-  await startYear(host2);
+  await startYear(host2, [host2, bea2]);
   await bea2.getByTestId("mz-year-progress").waitFor({ timeout: 15000 });
   await bea2.getByTestId("mz-abstain").click();
   await bea2.getByTestId("mz-year-guessed").waitFor({ timeout: 15000 });

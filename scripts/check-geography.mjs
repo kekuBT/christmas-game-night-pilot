@@ -12,6 +12,7 @@
 //   node scripts/check-geography.mjs <baseUrl>
 import { answerFor, optionIndex } from "./lib/content-oracle.mjs";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -41,15 +42,12 @@ async function joinRoom(page, name, code) {
   await page.getByRole("button", { name: "Join the game" }).click();
   await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
 }
-async function startGeography(host) {
+async function startGeography(host, players) {
   await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-geography").click();
   await host.getByTestId("start-official-geography").click();
-  try {
-    await host.getByTestId("show-start-playing").click({ timeout: 3000 });
-  } catch {
-    await sleep(8500);
-  }
+  // D3: every player reads the rules and taps I'm ready; play starts for all at once.
+  await passBriefing(players);
 }
 // Sprint 4: each game draws its own 8 questions from the content packs.
 // The test oracle (scripts/lib/content-oracle.mjs) finds the right option
@@ -120,7 +118,7 @@ try {
   check("guest sees no geography start control",
     (await bea.getByTestId("start-official-geography").count()) === 0);
 
-  await startGeography(host);
+  await startGeography(host, [host, bea]);
   for (const [page, name] of [[host, "host"], [bea, "Bea"]]) {
     await page.locator(".mz-question").waitFor({ timeout: 15000 });
     check(`${name} sees the kit geography panel`, true);
@@ -182,7 +180,7 @@ try {
   const code2 = await createRoom(host2, "Ada");
   const bea2 = await ctx2.newPage();
   await joinRoom(bea2, "Bea", code2);
-  await startGeography(host2);
+  await startGeography(host2, [host2, bea2]);
   await bea2.locator(".mz-question").waitFor({ timeout: 15000 });
   await bea2.getByRole("button", { name: "Sit this game out" }).click();
   await bea2.locator(".mz-wait").waitFor({ timeout: 15000 });

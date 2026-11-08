@@ -13,6 +13,7 @@
 //      would fail while the guest was still marked away.
 // Checks: 4. Fictional test players only; run against a local server only.
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const results = [];
@@ -97,6 +98,7 @@ try {
   // (Mchezo intro auto-advances in 8s, so wait for the question screen).
   await host.getByTestId("start-official-trivia").click();
   try {
+    await passBriefing([host, guest]); // D3: both tap I'm ready
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
     pass("host can start Trivia after reconnect (2 connected players)");
   } catch (e) {

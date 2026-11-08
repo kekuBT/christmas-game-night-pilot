@@ -7,6 +7,7 @@
 // screen -> back to lobby -> reaction.
 // (The Trivia version of this journey is covered by scripts/check-mchezo.mjs.)
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const results = [];
@@ -47,18 +48,21 @@ try {
     await host.getByTestId("choose-game").click();
   await host.getByTestId("select-game-math-mayhem").click();
   await host.getByTestId("start-official-math-mayhem").click();
-  await host.getByTestId("show-intro").waitFor({ timeout: 15000 });
-  pass("show intro appears on game start");
-  await host.getByTestId("show-start-playing").click();
+  // D3 replaced the per-phone 8 s intro (which ran while the clock did) with
+  // a shared briefing: rules on every phone, no clock until all are ready.
+  await host.getByTestId("briefing").waitFor({ timeout: 15000 });
+  await guest.getByTestId("briefing").waitFor({ timeout: 15000 });
+  pass("the rules briefing appears on both phones at game start");
+  if ((await host.locator(".mz-question").count()) === 0 && (await guest.locator(".mz-question").count()) === 0) pass("no question is on any phone during the briefing");
+  else fail("no question is on any phone during the briefing");
+  await passBriefing([host, guest]);
   // Math Mayhem renders in the Mchezo kit since §11 (no game-panel):
   // the QuestionScreen's .mz-question is the gameplay signal.
   await host.locator(".mz-question").waitFor({ timeout: 20000 });
-  pass("start playing reaches gameplay");
-
-  // Guest must dismiss its own intro too (each player's intro is per-player).
-  await guest.getByTestId("show-intro").waitFor({ timeout: 15000 });
-  await guest.getByTestId("show-start-playing").click();
+  pass("everyone ready reaches gameplay");
   await guest.locator(".mz-question").waitFor({ timeout: 20000 });
+  if ((await host.getByTestId("show-intro").count()) === 0 && (await guest.getByTestId("show-intro").count()) === 0) pass("no second intro races the clock after the briefing");
+  else fail("no second intro races the clock after the briefing");
   // Answer every Math Mayhem question on the host first, and check the
   // waiting state BEFORE the guest finishes — once the guest finishes,
   // the game ends and the host moves to results, so waiting is transient.

@@ -7,6 +7,7 @@
 //   4. The finished results screen scores the abstainer at 0.
 // Checks: 5. Fictional test players only; run against a local server only.
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const results = [];
@@ -48,7 +49,8 @@ try {
   await guest.getByRole("heading", { name: "You’re in, Bea." }).waitFor({ timeout: 15000 });
 
   await host.getByTestId("start-official-trivia").click();
-  // Mchezo Trivia intro auto-advances in 8s; wait for the question screen.
+  // D3: both phones read the rules and tap I'm ready; play starts for both at once.
+  await passBriefing([host, guest]);
   for (const page of [host, guest]) {
     await page.locator(".mz-question").waitFor({ timeout: 30000 });
   }

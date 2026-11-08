@@ -4,6 +4,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-tv-entry.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -61,6 +62,7 @@ try {
   await joinRoom(bea, "Bea", code);
 
   await host.getByTestId("start-official-trivia").click();
+  await passBriefing([host, bea]); // D3: both tap I'm ready
   await bea.locator(".mz-question").waitFor({ timeout: 30000 });
 
   // Mid-game: question screen -> TV stage -> back, progress intact.
