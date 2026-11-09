@@ -186,6 +186,37 @@ try {
     await p.screenshot({ path: screenshotPath("docs/stage4/after/join01-390.png") });
     await ctx.close();
   }
+  // ---- An overtaken poll must not roll the screen back (found by the ten-player run in the gate).
+  // A poll's reply is made, the game finishes and is pushed and shown, then the
+  // older reply lands. Before the fix the results flipped back to the game.
+  {
+    const room = await makeRoom(["Keku", "Amina"]);
+    const { gid, g } = await startPlaying(room, "math-mayhem");
+    const solveQ = (prompt) => { const [a, op, b] = prompt.replace(/[=?]/g, " ").trim().split(/\s+/); const pct = /^(\d+)% of (\d+)/.exec(prompt); if (pct) return (Number(pct[1]) * Number(pct[2])) / 100; const x = Number(a), y = Number(b); return op === "+" ? x + y : op === "−" ? x - y : op === "×" ? x * y : x / y; };
+    const answer = async (seat, q) => { const o = await intent(room, seat, gid, "math-open", { questionId: q.id }); await intent(room, seat, gid, "submit-math-answer", { questionId: q.id, chosenIndex: o.result.options.findIndex((x) => Number(x) === solveQ(o.result.prompt)) }); };
+    for (const q of g.questions) await answer(room.seats[1], q);
+    for (const q of g.questions.slice(0, -1)) await answer(room.seats[0], q);
+    const amina = await seatPage(browser, room, room.seats[1]);
+    await amina.waitForFunction(() => /Waiting|have started|finished/i.test(document.body.innerText), null, { timeout: 15000 });
+    let armed = true; let held; let release;
+    const heldReady = new Promise((r) => { held = r; });
+    const released = new Promise((r) => { release = r; });
+    await amina.route("**/projection?audience=player*", async (route) => {
+      if (!armed) return route.continue();
+      armed = false;
+      const resp = await route.fetch(); // the room as it is now: still playing
+      held();
+      await released;
+      await route.fulfill({ response: resp });
+    });
+    await heldReady; // the next poll is in flight, holding the old state
+    await answer(room.seats[0], g.questions[g.questions.length - 1]); // the game finishes now
+    await amina.getByTestId("show-results").waitFor({ timeout: 15000 }); // pushed and shown
+    release(); // the old reply lands
+    await sleep(400);
+    check("an overtaken poll doesn't roll the results back to the game", await amina.getByTestId("show-results").isVisible());
+    await amina.context().close();
+  }
 } finally {
   await browser.close();
   server.child.kill("SIGTERM");

@@ -25,7 +25,7 @@ import { MchezoYear } from "./components/mchezo/MchezoYear.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { AnswerReview, reviewRows } from "./components/mchezo/AnswerReview.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
-import { isProjection, readJson } from "./http.js";
+import { isOvertakenReply, isProjection, readJson } from "./http.js";
 import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
 import { BriefingScreen, BriefingTv, type StartNowResult } from "./components/mchezo/Briefing.js";
 import { resolveReducedMotion } from "./ui/mchezo/lib/motion.js";
@@ -216,13 +216,22 @@ export function App() {
   // After three consecutive failures (~6s) say so; clear it on recovery.
   const pollFailures = useRef(0);
   const pollNotice = useRef("");
+  // Stage 4: what is on screen, and how many projections have been shown, so
+  // a poll overtaken by a newer push can't roll the screen back (http.ts).
+  const shown = useRef<{ n: number; roomId?: string; seq?: number }>({ n: 0 });
+  const showProjection = useCallback((p: Projection) => {
+    shown.current = { n: shown.current.n + 1, roomId: p.roomId, seq: p.seq };
+    setProj(p);
+  }, []);
   const refresh = useCallback(async () => {
     if (!roomId || !playerId) return;
     try {
+      const before = shown.current.n;
       const next = await get<unknown>(`/rooms/${roomId}/projection?audience=player`);
       // S3-LOB-03: only the room's own projection replaces what's on screen.
       if (!isProjection(next)) throw new Error("The game server sent an unexpected reply. Retrying…");
-      setProj(next as Projection);
+      if (isOvertakenReply(next as Projection, shown.current, shown.current.n !== before)) { pollFailures.current = 0; return; }
+      showProjection(next as Projection);
       pollFailures.current = 0;
       if (pollNotice.current) {
         const shown = pollNotice.current;
@@ -286,7 +295,7 @@ export function App() {
           try {
             const m = JSON.parse(e.data);
             if (m.kind === "projection" && isProjection(m.state)) {
-              setProj(m.state);
+              showProjection(m.state);
               // The server sends a projection only after accepting the
               // session: that, not the socket opening, is "reconnected".
               attempt = 0;
