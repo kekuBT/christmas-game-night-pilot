@@ -32,6 +32,7 @@ import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { AnswerReview, reviewRows } from "./components/mchezo/AnswerReview.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
 import { isOvertakenReply, isProjection, readJson } from "./http.js";
+import { fetchFresh, livenessStep } from "./liveness.js";
 import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
 import { BriefingScreen, BriefingTv, type StartNowResult } from "./components/mchezo/Briefing.js";
 import { resolveReducedMotion } from "./ui/mchezo/lib/motion.js";
@@ -96,7 +97,8 @@ async function get<T>(path: string): Promise<T> {
   const headers: Record<string, string> = {};
   const token = seats.token();
   if (token) headers["x-session-token"] = token;
-  const r = await fetch(path, { headers });
+  // Stage 5.1: a stalled request fails after a timeout instead of hanging forever.
+  const r = await fetchFresh(path, { headers });
   return readJson<T>(r);
 }
 
@@ -202,6 +204,8 @@ export function App() {
   const [numInput, setNumInput] = useState("");
   const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
+  // Stage 5.1 (S5-AUD-07): is the spectator/TV display live, stale, or just reconnected?
+  const [tvLive, setTvLive] = useState<"live" | "stale" | "restored">("live");
 
   // Replaced (seat recovered elsewhere) or signed out: after the player
   // acknowledges, this device forgets the dead credential and goes back to
@@ -227,8 +231,11 @@ export function App() {
   // Stage 4: what is on screen, and how many projections have been shown, so
   // a poll overtaken by a newer push can't roll the screen back (http.ts).
   const shown = useRef<{ n: number; roomId?: string; seq?: number }>({ n: 0 });
+  // Stage 5.1: when a projection (pushed or polled) last proved this screen live.
+  const lastFresh = useRef(Date.now());
   const showProjection = useCallback((p: Projection) => {
     shown.current = { n: shown.current.n + 1, roomId: p.roomId, seq: p.seq };
+    lastFresh.current = Date.now();
     setProj(p);
   }, []);
   const refresh = useCallback(async () => {
@@ -238,7 +245,7 @@ export function App() {
       const next = await get<unknown>(`/rooms/${roomId}/projection?audience=player`);
       // S3-LOB-03: only the room's own projection replaces what's on screen.
       if (!isProjection(next)) throw new Error("The game server sent an unexpected reply. Retrying…");
-      if (isOvertakenReply(next as Projection, shown.current, shown.current.n !== before)) { pollFailures.current = 0; return; }
+      if (isOvertakenReply(next as Projection, shown.current, shown.current.n !== before)) { pollFailures.current = 0; lastFresh.current = Date.now(); return; }
       showProjection(next as Projection);
       pollFailures.current = 0;
       if (pollNotice.current) {
@@ -275,7 +282,14 @@ export function App() {
   useEffect(() => {
     if (!roomId || !playerId) return;
     refresh();
-    const t = setInterval(refresh, 2000);
+    // Stage 5.1: one interval poll at a time (a stalled one times out), so
+    // hung requests can't pile up behind each other.
+    let polling = false;
+    const t = setInterval(() => {
+      if (polling) return;
+      polling = true;
+      void refresh().finally(() => { polling = false; });
+    }, 2000);
     // WS auto-reconnect: a dropped socket used to stay dead — polling kept
     // the UI fresh, but the server had marked the player "(away)" and
     // excluded them from startGame's connected-player count until the
@@ -302,6 +316,8 @@ export function App() {
         next.onmessage = (e) => {
           try {
             const m = JSON.parse(e.data);
+            // Stage 5.1: any frame from the server (a projection or "alive") proves the link is live.
+            if (m.kind === "alive" || m.kind === "projection") lastFresh.current = Date.now();
             if (m.kind === "projection" && isProjection(m.state)) {
               showProjection(m.state);
               // The server sends a projection only after accepting the
@@ -342,7 +358,25 @@ export function App() {
       connect();
       void refresh();
     };
-    const onVisible = () => { if (document.visibilityState === "visible") reconnectNow(); };
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      // Timers sleep while hidden: give the fresh poll below a moment before judging staleness.
+      lastFresh.current = Date.now();
+      reconnectNow();
+    };
+    // Stage 5.1 (S5-AUD-04): nothing pushed or polled for a while means this
+    // screen may be stale. Say so (the connection banner) and recycle a socket
+    // that has gone quiet; the last known screen stays up. Live again: say so.
+    const live = { staleMarked: false };
+    const watchdog = setInterval(() => {
+      const state = connection.get().state;
+      if (state === "replaced" || state === "signed-out") return;
+      const step = livenessStep(live, lastFresh.current, Date.now());
+      if (step === "went-stale") {
+        connection.dropped();
+        if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+      } else if (step === "back") connection.confirmed();
+    }, 1000);
     // The browser knows it lost the network (Wi-Fi off, airplane mode,
     // tunnel): say so now and drop the socket ourselves, instead of
     // waiting minutes for TCP to notice. "online" reconnects at once.
@@ -362,6 +396,7 @@ export function App() {
     return () => {
       stopped = true;
       clearInterval(t);
+      clearInterval(watchdog);
       if (retryTimer !== undefined) clearTimeout(retryTimer);
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("offline", onOffline);
@@ -426,17 +461,39 @@ export function App() {
   useEffect(() => {
     if (!specRoomId || !specToken || roomId) return;
     let stopped = false;
+    // Stage 5.1 (S5-AUD-07): the TV used to swallow every failure and keep a
+    // stale screen up in silence. Any projection proves it live; nothing for
+    // a while and it says so on screen (the last known display stays).
+    let lastFreshAt = Date.now();
+    let polling = false;
     const poll = async () => {
+      if (polling) return;
+      polling = true;
       try {
-        const r = await fetch(`/rooms/${specRoomId}/projection?audience=spectator`, { headers: { "x-spectator-token": specToken } });
+        const r = await fetchFresh(`/rooms/${specRoomId}/projection?audience=spectator`, { headers: { "x-spectator-token": specToken } });
         if (r.status === 401) { if (!stopped) { stopWatching(); setErr("Spectator session expired — enter the code again to keep watching."); } return; }
         if (!r.ok) return;
         const next = await readJson<unknown>(r);
-        if (isProjection(next)) setProj(next as Projection); // S3-LOB-03: never a proxy page
-      } catch { /* poll retry */ }
+        if (isProjection(next)) { lastFreshAt = Date.now(); setProj(next as Projection); } // S3-LOB-03: never a proxy page
+      } catch { /* poll retry; staleness is judged by the watchdog */ } finally { polling = false; }
     };
     poll();
     const t = setInterval(poll, 2000);
+    const live = { staleMarked: false };
+    let restoredTimer: ReturnType<typeof setTimeout> | undefined;
+    const watchdog = setInterval(() => {
+      const step = livenessStep(live, lastFreshAt, Date.now());
+      if (step === "went-stale") {
+        clearTimeout(restoredTimer);
+        setTvLive("stale");
+        if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+      } else if (step === "back") {
+        setTvLive("restored");
+        restoredTimer = setTimeout(() => setTvLive("live"), 4000);
+      }
+    }, 1000);
+    const onVisible = () => { if (document.visibilityState === "visible") { lastFreshAt = Date.now(); void poll(); } };
+    document.addEventListener("visibilitychange", onVisible);
     let attempt = 0;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
     let ws: WebSocket | null = null;
@@ -446,7 +503,7 @@ export function App() {
         const proto = location.protocol === "https:" ? "wss" : "ws";
         const next = new WebSocket(`${proto}://${location.host}/?roomId=${specRoomId}&audience=spectator`, [`cgn-spectator-${specToken}`]);
         ws = next;
-        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection" && isProjection(m.state)) setProj(m.state); } catch { /* ignore malformed WS frame; polling continues */ } };
+        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "alive") lastFreshAt = Date.now(); if (m.kind === "projection" && isProjection(m.state)) { lastFreshAt = Date.now(); setProj(m.state); } } catch { /* ignore malformed WS frame; polling continues */ } };
         next.onclose = (e) => {
           if (stopped || e.code === 1008) return;
           attempt += 1;
@@ -460,8 +517,12 @@ export function App() {
     return () => {
       stopped = true;
       clearInterval(t);
+      clearInterval(watchdog);
+      clearTimeout(restoredTimer);
+      document.removeEventListener("visibilitychange", onVisible);
       if (retryTimer !== undefined) clearTimeout(retryTimer);
       ws?.close();
+      setTvLive("live");
     };
   }, [specRoomId, specToken, roomId]);
   async function reconnect() {
@@ -788,6 +849,7 @@ export function App() {
   // Spectators never hold a playerId, so nothing here can start a game,
   // submit an intent, or appear in a seat.
   if (!playerId && specRoomId && specToken) {
+    const tvNote = tvLive === "live" ? null : <TvConnectionNote state={tvLive} />;
     const specPlayers: PublicPlayer[] = proj?.players ?? [];
     const specLatest = (proj?.games ?? []).at(-1);
     noteServerTime(proj?.serverNow);
@@ -806,6 +868,7 @@ export function App() {
     if (specLatest?.status === "briefing" && specLatest.briefing) {
       return (
         <MchezoProvider theme={themes.everyday} {...motion}>
+          {tvNote}
           <BriefingTv key={specLatest.id} game={specLatest} registry={games.find((x) => x.id === specLatest.gameId)} players={specPlayers} joinCode={proj.joinCode} onBack={stopWatching} backLabel="Stop watching" />
         </MchezoProvider>
       );
@@ -813,11 +876,12 @@ export function App() {
     if (specTvGame) {
       return (
         <MchezoProvider theme={themes.everyday} {...motion} as="bare">
+          {tvNote}
           <MchezoTvStage key={specTvGame.id} publicGame={specTvGame} players={specPlayers} joinCode={proj.joinCode ?? "…"} onBack={stopWatching} spectatorCount={proj.spectatorCount} backLabel="Stop watching" previousScores={previousGameScores(proj?.games ?? [], specTvGame.id)} />
         </MchezoProvider>
       );
     }
-    return tvShowScreen(stopWatching, "Stop watching");
+    return <>{tvNote}{tvShowScreen(stopWatching, "Stop watching")}</>;
   }
 
   // A-06 (live audit): until this phone has its room's first projection, say
@@ -1513,4 +1577,19 @@ export function App() {
 
 
   </div>;
+}
+
+/**
+ * Stage 5.1 (S5-AUD-07): the TV says when what it shows may be out of date.
+ * The last known display stays on screen underneath. No room, host or
+ * recovery details: only that the connection is lost or back.
+ */
+function TvConnectionNote({ state }: { state: "stale" | "restored" }) {
+  return (
+    <div className={`mz-tv-conn mz-tv-conn--${state}`} role="status" aria-live="polite" data-testid="tv-conn" data-state={state}>
+      {state === "stale"
+        ? <><b>Connection to the game lost.</b> This screen may be out of date. Reconnecting…</>
+        : <><b>Reconnected.</b> This screen is up to date.</>}
+    </div>
+  );
 }

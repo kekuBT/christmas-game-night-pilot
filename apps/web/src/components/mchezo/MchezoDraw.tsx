@@ -47,6 +47,9 @@ function Piece({ x }: { x: DrawPiece }) {
   return <polyline points={pts.join(" ")} fill="none" stroke={color} strokeWidth={w} strokeLinecap="round" strokeLinejoin="round" />;
 }
 
+/** A short signature of a drawing: pieces and points (tests compare it with the server's). */
+export const drawSig = (pieces: readonly DrawPiece[]) => `${pieces.length}:${pieces.reduce((n, x) => n + x.p.length / 2, 0)}`;
+
 /** The drawing, from the server's pieces (plus, for the drawer, what hasn't arrived there yet). */
 export function DrawBoard({ pieces, extra = [], label, testId, onPointerDown, onPointerMove, onPointerUp, svgRef, tv }: {
   pieces: DrawPiece[]; extra?: DrawPiece[]; label: string; testId?: string; tv?: boolean;
@@ -56,6 +59,8 @@ export function DrawBoard({ pieces, extra = [], label, testId, onPointerDown, on
   return (
     <svg ref={svgRef} className={`mz-dg-board${onPointerDown ? " mz-dg-board--live" : ""}${tv ? " mz-dg-board--tv" : ""}`} viewBox="0 0 1000 1000" role="img" aria-label={label} data-testid={testId}
       data-pieces={pieces.length + extra.length}
+      // Stage 5.1: what the server has confirmed and this screen shows (count:points), so tests can compare it with the server.
+      data-sig={drawSig(pieces)}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onPointerLeave={onPointerUp}>
       <rect x="0" y="0" width="1000" height="1000" fill="#FFFDF7" />
       {pieces.map((x, i) => <Piece key={`s${i}`} x={x} />)}
