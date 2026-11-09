@@ -30,8 +30,8 @@ function intent(engine: RoomEngine, gameId: string, action: string, payload: Rec
 }
 
 describe("M3 registry", () => {
-  it("all 12 games are implemented (the 11 originals + Stage 5's Majority Rules)", () => {
-    expect(GAME_REGISTRY.map((g) => g.id)).toEqual(["impostor", "caption-clash", "trivia", "word-connections", "who-said-that", "guess-the-year", "closest-wins", "category-sprint", "charades", "geography", "math-mayhem", "majority-rules"]);
+  it("all 13 games are implemented (the 11 originals + Stage 5's Majority Rules and Pattern Pulse)", () => {
+    expect(GAME_REGISTRY.map((g) => g.id)).toEqual(["impostor", "caption-clash", "trivia", "word-connections", "who-said-that", "guess-the-year", "closest-wins", "category-sprint", "charades", "geography", "math-mayhem", "majority-rules", "pattern-pulse"]);
     expect(GAME_REGISTRY.every((g) => g.status === "implemented")).toBe(true);
   });
 });

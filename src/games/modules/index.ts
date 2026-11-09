@@ -4,9 +4,11 @@
  */
 import type { GameModule } from "./types.js";
 import { majorityModule } from "./majority.js";
+import { pulseModule } from "./pulse.js";
 
 export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Object.freeze({
   [majorityModule.id]: majorityModule as GameModule<unknown>,
+  [pulseModule.id]: pulseModule as GameModule<unknown>,
 });
 
 export function moduleFor(gameId: string): GameModule<unknown> | undefined {

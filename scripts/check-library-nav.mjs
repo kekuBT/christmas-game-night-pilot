@@ -42,6 +42,8 @@ const server = await startServer();
 const BASE = `http://localhost:${server.port}`;
 // Stage 5: the catalog grows (practice-only new games); read its size from the server, never assume it.
 const TOTAL = (await (await fetch(`${BASE}/games`)).json()).length;
+// Games that fit a room of 2, counted from the catalogue (Stage 5 adds games).
+const FOR_TWO = (await (await fetch(`${BASE}/games`)).json()).filter((g) => g.minPlayers <= 2 && g.maxPlayers >= 2).length;
 let failures = 0;
 function check(name, ok, detail = "") {
   console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`);
@@ -154,11 +156,11 @@ try {
         check("S3-LIB-01: games needing more players are drawn as not fitting", firstNeeds === "needs-more");
         await host.getByTestId("mz-lib-filters-toggle").click();
         await host.getByTestId("mz-lib-players-room").click();
-        check("S3-LIB-03: 'Your room (2)' shows only games for 2", await waitCount(host, `Showing 6 of ${TOTAL} games`) && /Fits your room \(2\)/.test(await host.getByTestId("mz-lib-active").innerText()));
+        check("S3-LIB-03: 'Your room (2)' shows only games for 2", await waitCount(host, `Showing ${FOR_TWO} of ${TOTAL} games`) && /Fits your room \(2\)/.test(await host.getByTestId("mz-lib-active").innerText()));
         check("the room's library keeps its view in the address", /^\/room\/library\?players=room/.test(pathOf(host)), pathOf(host));
         await host.reload({ waitUntil: "domcontentloaded" });
         await host.getByTestId("mz-lib-count").waitFor({ timeout: 15000 });
-        check("S3-NAV-01 in a room: a refresh keeps 'Your room'", await waitCount(host, `Showing 6 of ${TOTAL} games`));
+        check("S3-NAV-01 in a room: a refresh keeps 'Your room'", await waitCount(host, `Showing ${FOR_TWO} of ${TOTAL} games`));
         await host.getByTestId("mz-lib-reset").click();
         await waitCount(host, `Showing ${TOTAL} of ${TOTAL} games`);
       }

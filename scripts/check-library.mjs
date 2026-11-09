@@ -8,7 +8,11 @@ import { roomGo, upNextTitle } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 // Stage 5: the catalog grows (practice-only new games); read its size from the server, never assume it.
-const TOTAL = (await (await fetch(`${BASE}/games`)).json()).length;
+const GAMES = await (await fetch(`${BASE}/games`)).json();
+const TOTAL = GAMES.length;
+// Expected filter results come from the catalogue itself (Stage 5 adds games).
+const SHORT = GAMES.filter((g) => g.defaultDurationMinutes <= 5).map((g) => g.id);
+const FOR_TWO = GAMES.filter((g) => g.minPlayers <= 2 && g.maxPlayers >= 2).length;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
 function check(name, ok, detail = "") {
@@ -86,17 +90,17 @@ try {
     (await waitForCount(host, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(host)) === TOTAL);
   check("with no filters left, there is nothing to clear", (await host.getByTestId("mz-lib-active").count()) === 0);
 
-  // Duration filter: 5 minutes or less is Math Mayhem alone.
+  // Duration filter: 5 minutes or less (Math Mayhem, and since Stage 5 Pattern Pulse).
   await host.getByTestId("mz-lib-duration-5").click();
-  check("duration filter shows only short games",
-    (await waitForCount(host, `Showing 1 of ${TOTAL} games`))
-    && await host.getByTestId("mz-lib-card-math-mayhem").isVisible());
+  check(`duration filter shows only short games (${SHORT.join(", ")})`,
+    SHORT.includes("math-mayhem") && (await waitForCount(host, `Showing ${SHORT.length} of ${TOTAL} games`))
+    && (await Promise.all(SHORT.map((id) => host.getByTestId(`mz-lib-card-${id}`).isVisible()))).every(Boolean));
   await host.getByTestId("mz-lib-reset").click();
 
-  // Player-count filter: 2 players can play 6 of the games (Majority Rules, Stage 5, starts at 3).
+  // Player-count filter: the games 2 players can play (counted from the catalogue).
   await host.getByTestId("mz-lib-players-2").click();
-  check("player-count filter shows only compatible games",
-    (await waitForCount(host, `Showing 6 of ${TOTAL} games`)) && (await cardCount(host)) === 6);
+  check(`player-count filter shows only compatible games (${FOR_TWO})`,
+    (await waitForCount(host, `Showing ${FOR_TWO} of ${TOTAL} games`)) && (await cardCount(host)) === FOR_TWO);
   await host.getByTestId("mz-lib-reset").click();
   check("reset after player filter restores the catalog",
     (await waitForCount(host, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(host)) === TOTAL);

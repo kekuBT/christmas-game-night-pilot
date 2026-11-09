@@ -125,3 +125,31 @@
 .mz-tvshow-mr__bars .mz-mr-bar__label { font-size: 34px; }
 .mz-tvshow-mr__bars .mz-mr-bar__track { height: 44px; border-radius: 22px; }
 .mz-tvshow-mr__bars .mz-mr-bar__n { font-size: 52px; min-width: 70px; }
+
+/* ------------------------------------------------ Pattern Pulse (Stage 5) */
+/* Every symbol is a shape + a colour + a name; colour is never needed. */
+.mz-pp-shape { display: block; flex: none; }
+.mz-pp-pattern { list-style: none; margin: 14px 0 10px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.mz-pp-cell { display: grid; justify-items: center; gap: 4px; padding: 10px 4px 8px; border-radius: 16px; background: var(--mz-surface-1); border: 2px solid var(--mz-line); position: relative; }
+.mz-pp-cell__n { position: absolute; left: 8px; top: 6px; font: 800 13px/1 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-pp-cell__name { font: 700 12px/1 var(--mz-font-body); color: var(--mz-text-muted); }
+/* Full motion: a highlight sweeps along the row in order, then repeats. Everything stays visible throughout. */
+.mz-pp-pattern--sweep .mz-pp-cell { animation: mz-pp-sweep calc(var(--mz-pp-n) * 600ms) linear infinite; animation-delay: calc(var(--mz-pp-i) * 600ms); }
+@keyframes mz-pp-sweep { 0%, 14% { border-color: var(--mz-text); transform: translateY(-3px); } 18%, 100% { border-color: var(--mz-line); transform: none; } }
+[data-mz-motion="reduced"] .mz-pp-cell { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .mz-pp-cell { animation: none !important; } }
+.mz-pp-slots { list-style: none; margin: 14px 0 12px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.mz-pp-slot { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; border: 2px dashed var(--mz-line); font: 700 14px/1 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-pp-slot--filled { border-style: solid; border-color: var(--mz-text); background: var(--mz-surface-1); }
+.mz-pp-keys { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mz-pp-key { appearance: none; display: grid; justify-items: center; gap: 4px; min-height: 84px; padding: 10px 4px; border-radius: 18px; border: 2px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); font: inherit; cursor: pointer; }
+.mz-pp-key:active:not(:disabled) { transform: translateY(2px); }
+.mz-pp-key:disabled { opacity: .55; cursor: default; }
+.mz-pp-key__name { font: 700 13px/1 var(--mz-font-body); }
+.mz-pp-edit { display: flex; gap: 10px; justify-content: center; margin: 12px 0; }
+.mz-pp-last { margin: 10px 0 0; padding: 10px 12px; border-radius: 14px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); font: 700 16px/1.35 var(--mz-font-body); }
+.mz-pp-last--good { border-color: var(--mz-highlight); }
+.mz-pp-total { margin: 12px 0 0; text-align: center; font: 600 16px/1.3 var(--mz-font-body); }
+.mz-pp-recap__row { display: flex; align-items: center; gap: 8px; font: 600 14px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-pp-mini { display: inline-flex; gap: 3px; flex-wrap: wrap; }
+.mz-tvshow-pp__alphabet { display: flex; gap: 40px; justify-content: center; margin: 40px 0; }

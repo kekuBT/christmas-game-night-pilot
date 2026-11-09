@@ -50,6 +50,7 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   "category-sprint": { verb: "Played", noun: ["round", "rounds"] },
   // Stage 5 (Practice-only games).
   "majority-rules": { verb: "Predicted in", noun: ["round", "rounds"] },
+  "pattern-pulse": { verb: "Answered", noun: ["round", "rounds"] },
 };
 
 /**

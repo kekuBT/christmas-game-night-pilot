@@ -68,7 +68,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
     model: "phased", gameWindowMs: 8 * MIN, phaseMs: { predict: 45 * SEC, reveal: 10 * SEC },
     officialEligible: false, practiceOnlyReason: "Majority Rules is new: practice-only until its Cup scoring is approved.", unit: "rounds",
   },
-
+  // Self-paced: each player opens a round when ready; the module closes a
+  // missed answer window on the server clock (GameModule.dueAt/advance).
+  "pattern-pulse": {
+    model: "game-deadline", gameWindowMs: 5 * MIN,
+    officialEligible: false, practiceOnlyReason: "Pattern Pulse is new: practice-only until its Cup scoring is approved.", unit: "rounds",
+  },
 });
 
 export function policyFor(gameId: string): GamePolicy {

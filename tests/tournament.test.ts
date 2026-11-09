@@ -112,7 +112,7 @@ describe("scheduleTournament shapes", () => {
 
   it("distinct schedule larger than the pool is explicitly infeasible", () => {
     const r = scheduleTournament({ ...base4("gauntlet"), rounds: 20 });
-    expect(r).toEqual({ ok: false, reason: "not-enough-games", eligible: 12, requested: 20 }); // 12 games since Stage 5
+    expect(r).toEqual({ ok: false, reason: "not-enough-games", eligible: 13, requested: 20 }); // 13 games since Stage 5
   });
 
   it("gamesPerRound chunks rounds correctly", () => {
@@ -242,7 +242,7 @@ describe("chaos-night uniform-random selection (J: approved distinction)", () =>
     const r = scheduleTournament(configFromPreset("chaos-night", { playerCount: 2, seed: 3 }));
     expect(r.ok).toBe(true);
     if (r.ok) {
-      const twoPlayer = new Set(["trivia", "word-connections", "guess-the-year", "closest-wins", "geography", "math-mayhem"]);
+      const twoPlayer = new Set(["trivia", "word-connections", "guess-the-year", "closest-wins", "geography", "math-mayhem", "pattern-pulse"]);
       for (const round of r.rounds) {
         for (const g of round.games) expect(twoPlayer.has(g.gameId)).toBe(true);
       }

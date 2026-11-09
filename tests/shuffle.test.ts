@@ -7,8 +7,8 @@ const base: ShuffleRequest = { mode: "random", playerCount: 4, seed: 1 };
 
 describe("eligibleGames hard constraints", () => {
   it("player count is an inclusive range check", () => {
-    expect(ids(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 1 }))).toEqual(["word-connections"]);
-    expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 4 })).toHaveLength(12);
+    expect(ids(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 1 }))).toEqual(["word-connections", "pattern-pulse"]);
+    expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 4 })).toHaveLength(13);
     expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 11 })).toEqual([]);
   });
 
@@ -21,7 +21,7 @@ describe("eligibleGames hard constraints", () => {
 
   it("playStyle filters capability", () => {
     expect(ids(eligibleGames(GAME_MANIFESTS, { ...base, playStyle: "team" }))).toEqual(["charades"]);
-    expect(eligibleGames(GAME_MANIFESTS, { ...base, playStyle: "solo" })).toHaveLength(11);
+    expect(eligibleGames(GAME_MANIFESTS, { ...base, playStyle: "solo" })).toHaveLength(12);
   });
 });
 
@@ -35,9 +35,9 @@ describe("shuffle empty and partial results", () => {
     const r = shuffle({ mode: "tournament", playerCount: 4, seed: 7, count: 20 });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.picks).toHaveLength(12);
+    expect(r.picks).toHaveLength(13);
     expect(r.partial).toBe(true);
-    expect(new Set(r.picks.map((p) => p.gameId)).size).toBe(12);
+    expect(new Set(r.picks.map((p) => p.gameId)).size).toBe(13);
   });
 
   it("tournament picks are distinct", () => {
@@ -65,8 +65,10 @@ describe("shuffle determinism", () => {
 
 describe("shuffle reasons", () => {
   it("a singleton pool is forced, whatever the mode", () => {
+    // Since Stage 5, one player has two games (Word Connections, Pattern
+    // Pulse); excluding one keeps this the singleton-pool path.
     for (const mode of ["random", "smart", "tournament"] as const) {
-      const r = shuffle({ mode, playerCount: 1, seed: 9 });
+      const r = shuffle({ mode, playerCount: 1, seed: 9, excludeIds: ["pattern-pulse"] });
       expect(r.ok).toBe(true);
       if (!r.ok) return;
       expect(r.picks[0]!.gameId).toBe("word-connections");
@@ -152,12 +154,13 @@ describe("shuffle goldens (pinned seeds)", () => {
   });
 
   it("random mode goldens on the full catalog", () => {
-    // Re-pinned when Majority Rules joined the catalog (Stage 5): the same
-    // seeds now draw from 12 games, so the first picks moved.
+    // Re-pinned as Stage 5 games joined the catalog (Majority Rules, then
+    // Pattern Pulse): the same seeds now draw from 13 games, so the first
+    // picks moved. The draw itself is unchanged.
     expect(firstPickId(shuffle({ ...base, seed: 0 }))).toBe("word-connections");
-    expect(firstPickId(shuffle({ ...base, seed: 1 }))).toBe("category-sprint");
-    expect(firstPickId(shuffle({ ...base, seed: 2 }))).toBe("charades");
-    expect(firstPickId(shuffle({ ...base, seed: 3 }))).toBe("charades");
+    expect(firstPickId(shuffle({ ...base, seed: 1 }))).toBe("charades");
+    expect(firstPickId(shuffle({ ...base, seed: 2 }))).toBe("geography");
+    expect(firstPickId(shuffle({ ...base, seed: 3 }))).toBe("geography");
   });
 
   it("tournament category variety: seed 2 rewards a disjoint category on the second pick", () => {

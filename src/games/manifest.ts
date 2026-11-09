@@ -310,7 +310,26 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
     details: "Five rounds. Predict the majority first, then vote; votes stay anonymous, only totals are shown. 100 for a right prediction; a tied room gives every prediction 50. Practice-only (Stage 5).",
   },
-
+  {
+    id: "pattern-pulse",
+    title: "Pattern Pulse",
+    description: "Watch a sequence of coloured shapes, then tap it back in order. Six rounds, three shapes up to eight.",
+    categories: ["memory", "puzzle"],
+    minPlayers: 1,
+    maxPlayers: 10,
+    playStyle: "solo",
+    competition: "competitive",
+    duration: { minutes: 5, source: "design-default", measured: false },
+    inputs: ["tile-selection"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: false },
+    features: { practice: true, official: false, abstention: "whole-game" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: false },
+    details: "Six self-paced rounds; everyone gets the same lengths and timing but their own sequence. 20 points per shape right from the start, plus 50 for the whole sequence. Practice-only (Stage 5).",
+  },
 ];
 
 /**

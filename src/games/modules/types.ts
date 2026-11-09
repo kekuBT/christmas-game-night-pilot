@@ -39,6 +39,14 @@ export interface GameModule<S = unknown> {
   phase(s: S): { key: string; kind: PhaseKind } | null;
   /** The current phase's time ran out: close it with the input received, never inventing any. */
   expirePhase(s: S, ctx: ModuleContext): void;
+  /**
+   * Self-paced games: the earliest server instant at which a player's own
+   * window closes (e.g. an answer window), if any. RoomEngine's tick calls
+   * advance() at that instant, so a window closes even if nobody acts.
+   */
+  dueAt?(s: S): number | undefined;
+  /** Close every player window that ended at or before ctx.now (missed: no points). */
+  advance?(s: S, ctx: ModuleContext): void;
   finished(s: S, ctx: ModuleContext): boolean;
   /** Totals from everything completed so far (the final scores once finished). */
   scores(s: S, players: readonly string[]): Record<string, number>;

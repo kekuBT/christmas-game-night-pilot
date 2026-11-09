@@ -122,6 +122,15 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Votes stay anonymous: only the totals are ever shown.",
     ],
   },
+  "pattern-pulse": {
+    objective: "Watch a sequence of shapes, then tap it back in order.",
+    steps: [
+      "Six rounds at your own pace: 3 shapes, then 4, up to 8.",
+      "Tap “Show me the pattern” when you're ready. It shows for a few seconds, then hides.",
+      "20 points per shape right from the start, plus 50 for the whole sequence.",
+      "Everyone gets their own pattern, with the same lengths and time.",
+    ],
+  },
 };
 
 export function briefingRules(gameId: string, tutorial: string): { objective: string; steps: string[] } {

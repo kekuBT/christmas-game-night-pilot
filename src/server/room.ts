@@ -1495,11 +1495,16 @@ export class RoomEngine {
       for (let guard = 0; guard < 100 && game.status === "playing"; guard++) {
         const phaseDue = game.phaseDeadlineAt !== undefined && now > game.phaseDeadlineAt ? game.phaseDeadlineAt : Infinity;
         const gameDue = game.deadlineAt !== undefined && now > game.deadlineAt ? game.deadlineAt : Infinity;
-        const next = Math.min(phaseDue, gameDue);
+        // Stage 5 self-paced modules: a player's own window that has closed.
+        const mod = moduleFor(game.gameId);
+        const modAt = mod?.dueAt?.(game.extra);
+        const modDue = modAt !== undefined && now > modAt ? modAt : Infinity;
+        const next = Math.min(phaseDue, gameDue, modDue);
         if (next === Infinity) break;
         this.eventTime = next;
         try {
-          if (next === phaseDue && phaseDue <= gameDue) this.expirePhase(game, next);
+          if (next === modDue && modDue < gameDue && modDue < phaseDue) this.advanceModule(game, next);
+          else if (next === phaseDue && phaseDue <= gameDue) this.expirePhase(game, next);
           else this.expireGame(game);
         } finally {
           this.eventTime = null;
@@ -1582,6 +1587,19 @@ export class RoomEngine {
       if (game.phaseKey === before) game.phaseDeadlineAt = undefined;
     }
     this.log("phase-closed", { gameInstanceId: game.id, detail: { phase: before, at } });
+  }
+
+  /** Stage 5: a self-paced module's player window closed (at `at`); the game ends if that was the last one. */
+  private advanceModule(game: GameInstance, at: number): void {
+    const mod = moduleFor(game.gameId)!;
+    try {
+      const ctx = this.moduleCtx(game, at);
+      mod.advance?.(game.extra, ctx);
+      if (mod.finished(game.extra, ctx)) this.finishGame(game, mod.scores(game.extra, game.players));
+      else if (mod.dueAt?.(game.extra) === at) throw new Error("a window did not close");
+    } catch (err) {
+      this.voidGame(game, at, `window could not be processed: ${(err as Error).message}`);
+    }
   }
 
   /** The game deadline (independent games) or backstop (phased) arrived. */
