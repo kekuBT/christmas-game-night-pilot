@@ -1,0 +1,65 @@
+PASS turn 1: the drawer draws, the others guess
+PASS turn 1, first (touch) stroke: every viewer shows the server's drawing (2:12) within 4000 ms — {"Keku":3,"Amina":4,"Wanjiru":4,"TV":5}
+PASS turn 1, a burst of 12 rapid strokes: every viewer shows the server's drawing (22:200) within 4000 ms — {"Keku":2,"Amina":2,"Wanjiru":3,"TV":3}
+PASS turn 1, undo: every viewer shows the server's drawing (20:184) within 4000 ms — {"Keku":4,"TV":5,"Wanjiru":5,"Amina":6}
+PASS turn 1, clear: every viewer shows the server's drawing (0:0) within 4000 ms — {"Keku":4,"Amina":4,"TV":6,"Wanjiru":6}
+PASS turn 1, drawing again after clear: every viewer shows the server's drawing (1:11) within 4000 ms — {"Keku":6,"Amina":6,"Wanjiru":6,"TV":6}
+PASS turn 1: Keku never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 1: Keku never had a received drawing left unrendered — 0 samples
+PASS turn 1: Amina never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 1: Amina never had a received drawing left unrendered — 0 samples
+PASS turn 1: Wanjiru never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 1: Wanjiru never had a received drawing left unrendered — 0 samples
+PASS turn 1: TV never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 1: TV never had a received drawing left unrendered — 0 samples
+PASS turn 1: the reveal
+PASS turn 2: the drawer draws, the others guess
+PASS turn 2, socket silent (polling) and jittered replies: every viewer shows the server's drawing (9:69) within 6000 ms — {"Keku":3,"TV":4,"Wanjiru":4,"Baraka":931}
+PASS turn 2: a spectator joining mid-turn sees the drawing so far
+PASS turn 2, after the spectator joined: every viewer shows the server's drawing (10:80) within 6000 ms — {"Wanjiru":3,"TV2":3,"Baraka":3,"TV":4,"Keku":1134}
+PASS turn 2: Keku never stays behind the server's drawing longer than 5000 ms — worst 619 ms
+PASS turn 2: Keku never had a received drawing left unrendered — 0 samples
+PASS turn 2: Baraka never stays behind the server's drawing longer than 5000 ms — worst 1235 ms
+PASS turn 2: Baraka never had a received drawing left unrendered — 0 samples
+PASS turn 2: Wanjiru never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 2: Wanjiru never had a received drawing left unrendered — 0 samples
+PASS turn 2: TV never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 2: TV never had a received drawing left unrendered — 0 samples
+PASS turn 2: TV2 never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 2: TV2 never had a received drawing left unrendered — 0 samples
+PASS turn 2: the reveal
+PASS turn 3: the drawer draws, the others guess
+PASS turn 3, before reloads: every viewer shows the server's drawing (4:34) within 4000 ms — {"Keku":5,"Amina":5,"Baraka":5,"TV":5,"TV2":5}
+PASS turn 3, a guesser reloaded mid-drawing: every viewer shows the server's drawing (4:34) within 4000 ms — {"Keku":3,"Amina":3,"TV":3,"Baraka":4,"TV2":4}
+PASS turn 3, the drawer reloaded mid-drawing and drew again: every viewer shows the server's drawing (5:45) within 4000 ms — {"Keku":3,"Amina":3,"Baraka":3,"TV2":3,"TV":3}
+PASS turn 3, a page hidden and shown again: every viewer shows the server's drawing (7:57) within 4000 ms — {"Keku":2,"Amina":2,"Baraka":3,"TV":3,"TV2":3}
+PASS turn 3: Keku never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 3: Keku never had a received drawing left unrendered — 0 samples
+PASS turn 3: Amina never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 3: Amina never had a received drawing left unrendered — 0 samples
+PASS turn 3: Baraka never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 3: Baraka never had a received drawing left unrendered — 0 samples
+PASS turn 3: TV never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 3: TV never had a received drawing left unrendered — 0 samples
+PASS turn 3: TV2 never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 3: TV2 never had a received drawing left unrendered — 0 samples
+PASS turn 3: the reveal
+PASS turn 4: the drawer draws, the others guess
+PASS turn 4, first stroke: every viewer shows the server's drawing (2:12) within 4000 ms — {"Baraka":2,"Amina":4,"Wanjiru":4,"TV":4,"TV2":4}
+PASS turn 4, the drawer came back: the stroke drawn offline arrives: every viewer shows the server's drawing (2:12) within 8000 ms — {"Amina":3,"Baraka":3,"Wanjiru":3,"TV2":3,"TV":4}
+FAIL turn 4: a guesser whose replies all stall is told it can't reach the game (not a silent blank) — not within 15000ms
+PASS turn 4: when replies flow again, that guesser catches up
+PASS turn 4: Amina never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 4: Amina never had a received drawing left unrendered — 0 samples
+PASS turn 4: Baraka never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 4: Baraka never had a received drawing left unrendered — 0 samples
+PASS turn 4: Wanjiru never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 4: Wanjiru never had a received drawing left unrendered — 0 samples
+PASS turn 4: TV never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 4: TV never had a received drawing left unrendered — 0 samples
+PASS turn 4: TV2 never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+PASS turn 4: TV2 never had a received drawing left unrendered — 0 samples
+PASS turn 4: the reveal
+SYNC REPORT [{"turn":1,"viewer":"Keku","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":1,"viewer":"Amina","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":1,"viewer":"Wanjiru","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":1,"viewer":"TV","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":2,"viewer":"Keku","worstBehindMs":619,"allow":5000,"receivedButBehind":0},{"turn":2,"viewer":"Baraka","worstBehindMs":1235,"allow":5000,"receivedButBehind":0},{"turn":2,"viewer":"Wanjiru","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":2,"viewer":"TV","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":2,"viewer":"TV2","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"Keku","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"Amina","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"Baraka","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"TV","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"TV2","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"Amina","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"Baraka","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"Wanjiru","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"TV","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"TV2","worstBehindMs":0,"allow":3500,"receivedButBehind":0}]
+DRAW SYNC FAILURES: 1
+rc=1

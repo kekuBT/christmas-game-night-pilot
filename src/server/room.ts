@@ -389,6 +389,21 @@ export class RoomEngine {
    * while stopping the room file from growing without bound. Oldest go first.
    */
   static readonly SEEN_INTENTS_MAX = 4000;
+  /**
+   * Stage 5.1 (2C): each player's last few ACCEPTED event ids, newest last,
+   * shown only to that player (projection `me.acceptedEventIds`). A phone
+   * whose reply was lost learns from the server that its action landed, so it
+   * can stop saying "couldn't confirm" instead of guessing. Derived from
+   * seenIntents (rebuilt from it on restore), so nothing new is saved.
+   */
+  private recentAccepted = new Map<string, string[]>();
+  static readonly RECENT_ACCEPTED_MAX = 16;
+  private noteAccepted(actorId: string, clientEventId: string): void {
+    const list = this.recentAccepted.get(actorId) ?? [];
+    list.push(clientEventId);
+    if (list.length > RoomEngine.RECENT_ACCEPTED_MAX) list.splice(0, list.length - RoomEngine.RECENT_ACCEPTED_MAX);
+    this.recentAccepted.set(actorId, list);
+  }
   private nextPlayer = 1;
   private nextGame = 1;
   private nextSpectator = 1;
@@ -1057,6 +1072,7 @@ export class RoomEngine {
     }
     this.seenIntents.set(key, { accepted: result.accepted, result });
     this.trimSeenIntents();
+    if (result.accepted) this.noteAccepted(actorId, intent.clientEventId);
     return result;
   }
 
@@ -2515,7 +2531,7 @@ export class RoomEngine {
           ...this.timingFacts(g),
         };
       });
-      return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash }, myGames };
+      return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash, acceptedEventIds: [...(this.recentAccepted.get(me.id) ?? [])] }, myGames };
     }
     if (audience === "host" || audience === "cohost") {
       // Host/cohost do NOT get answer keys or recovery tokens pre-reveal in this engine.
@@ -2581,6 +2597,12 @@ export class RoomEngine {
     engine.ledger = data["ledger"] as LedgerEvent[];
     engine.seq = data["seq"] as number;
     engine.seenIntents = new Map(data["seenIntents"] as [string, { accepted: boolean; result: unknown }][]);
+    // Stage 5.1 (2C): rebuild each player's recent accepted ids (key = room:actor:event).
+    for (const [k, v] of engine.seenIntents) {
+      if (!v.accepted) continue;
+      const cut = k.lastIndexOf(":"), prev = k.lastIndexOf(":", cut - 1);
+      if (cut > 0 && prev >= 0) engine.noteAccepted(k.slice(prev + 1, cut), k.slice(cut + 1));
+    }
     engine.trimSeenIntents(); // a room saved before the cap comes back within it
     engine.nextPlayer = data["nextPlayer"] as number;
     engine.nextSpectator = typeof data["nextSpectator"] === "number" ? data["nextSpectator"] : 1;

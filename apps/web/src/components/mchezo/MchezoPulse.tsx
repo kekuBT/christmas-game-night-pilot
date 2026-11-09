@@ -20,7 +20,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Keycap, MchezoWaiting, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
-import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
+import { SendNote } from "./SendNote.js";
 import { pulseMoment } from "../../ui/mchezo/lib/moments.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
@@ -88,9 +88,11 @@ export interface MchezoPulseDeps {
   /** Resolves false when the action did not reach the game or was refused. */
   intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<boolean | void> | boolean | void;
   error?: string;
+  /** Stage 5.1 (2C): the server lists the unconfirmed send as accepted for this player. */
+  landed?: boolean;
 }
 
-export function MchezoPulse({ game, publicGame, players, playerId, title, intent, error }: MchezoPulseDeps) {
+export function MchezoPulse({ game, publicGame, players, playerId, title, intent, error, landed }: MchezoPulseDeps) {
   const st = (game.state ?? {}) as PulseView;
   const { reducedMotion } = useMchezo();
   const of = st.roundCount ?? 6;
@@ -106,7 +108,7 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
     setPending(tag); setFailed(null);
     try { if ((await intent(game.id, action, payload)) === false) setFailed(tag); } finally { setPending(null); }
   };
-  const failure = failed ? <p className="err" role="alert" data-testid="mz-pp-error" style={{ textAlign: "center" }}>{error ?? NOT_DELIVERED}</p> : null;
+  const failure = <SendNote shown={!!failed} landed={landed} error={error} testId="mz-pp-error" />;
   const last = (st.results ?? []).at(-1);
   const total = st.myTotal ?? 0;
 

@@ -17,6 +17,7 @@ import { Keycap, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
+import { SendNote } from "./SendNote.js";
 import { drawMoment } from "../../ui/mchezo/lib/moments.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
@@ -88,6 +89,8 @@ export interface MchezoDrawDeps {
   /** Resolves false when the action did not reach the game or was refused. */
   intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<boolean | void> | boolean | void;
   error?: string;
+  /** Stage 5.1 (2C): the server lists the unconfirmed send as accepted for this player. */
+  landed?: boolean;
 }
 
 /** The drawer's canvas: local strokes are queued and sent in batches; the server's copy is the truth. */
@@ -225,7 +228,7 @@ function DrawerPad({ game, st, intent, title, round, of }: { game: PlayerGame; s
   );
 }
 
-export function MchezoDraw({ game, players, playerId, title, intent, error }: MchezoDrawDeps) {
+export function MchezoDraw({ game, players, playerId, title, intent, error, landed }: MchezoDrawDeps) {
   const st = (game.state ?? {}) as DrawView;
   const round = (st.turn ?? 0) + 1;
   const of = st.turnCount ?? 1;
@@ -267,7 +270,7 @@ export function MchezoDraw({ game, players, playerId, title, intent, error }: Mc
       else { setText(""); setNote({ kind: "wrong", key }); } // a right guess replaces this screen from the server's state
     } finally { setPending(false); }
   };
-  const failure = note?.kind === "failed" ? <p className="err" role="alert" data-testid="mz-dg-error" style={{ textAlign: "center" }}>{error ?? NOT_DELIVERED}</p> : null;
+  const failure = <SendNote shown={note?.kind === "failed"} landed={landed} error={error} testId="mz-dg-error" />;
   const myOrder = correct.find((c) => c.playerId === playerId)?.order;
   return (
     <main className="mz-screen" aria-label={`${title}: turn ${round} of ${of}, ${drawerName} is drawing`} data-testid="mz-dg-guess">

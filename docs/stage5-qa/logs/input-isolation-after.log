@@ -1,0 +1,24 @@
+PASS Sprint round 1: Amina's answers reach the server, and her phone shows them as in (from the server)
+PASS Sprint: other players' answers are never in Amina's view
+PASS Sprint: round 2 opens
+PASS Sprint round 2: the answer box is empty (round 1's words are not carried over)
+PASS Sprint round 2: a send that fails says so
+PASS Sprint round 2: the words stay in the box after the failed send
+PASS Sprint round 2: after the failed send nothing shows as in
+PASS Sprint round 2: the retry is in, once
+PASS Sprint round 2: a second send for the same round is refused (it can't count twice) — {"accepted":false,"reason":"ALREADY_SUBMITTED"}
+PASS Sprint: round 3 opens
+PASS Sprint round 3: the answer box is empty
+PASS Sprint: the game ends (round 3 closes at its deadline)
+PASS Sprint: the retried send counted once (no duplicate answers scored) — {"player-1":0,"player-2":0,"player-3":0,"player-4":0}
+PASS Impostor: the clue box starts empty (not the last Sprint words)
+PASS Impostor: the vote opens
+PASS Impostor: one impostor found — ["impostor","honest","honest","honest"]
+PASS Impostor: caught, the final guess opens
+PASS Impostor: the final-guess box starts empty (not the impostor's own clue)
+PASS Impostor: the game ends
+PASS Closest: a blank number can't be sent (no silent 0)
+PASS Closest: question 2 opens (Amina never sent question 1)
+PASS Closest question 2: the number box is back to its start value (77 is not carried over)
+INPUT ISOLATION ALL PASSED
+rc=0

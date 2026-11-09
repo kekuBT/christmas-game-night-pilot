@@ -12,7 +12,7 @@ import { Keycap, MchezoWaiting, OutcomeSummary, TVRing } from "../../ui/mchezo/i
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { majorityMoment } from "../../ui/mchezo/lib/moments.js";
-import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
+import { SendNote } from "./SendNote.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
 type Choice = "a" | "b";
@@ -77,9 +77,11 @@ export interface MchezoMajorityDeps {
   /** Resolves false when the action did not reach the game or was refused. */
   intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<boolean | void> | boolean | void;
   error?: string;
+  /** Stage 5.1 (2C): the server lists the unconfirmed send as accepted for this player. */
+  landed?: boolean;
 }
 
-export function MchezoMajority({ game, publicGame, players, playerId, title, intent, error }: MchezoMajorityDeps) {
+export function MchezoMajority({ game, publicGame, players, playerId, title, intent, error, landed }: MchezoMajorityDeps) {
   const st = (game.state ?? {}) as MajorityView;
   const round = (st.round ?? 0) + 1;
   const of = st.roundCount ?? 5;
@@ -93,7 +95,7 @@ export function MchezoMajority({ game, publicGame, players, playerId, title, int
     try { if ((await intent(game.id, action, payload)) === false) setFailedAt(at); } finally { setPending(null); }
   };
   const nameOf = (id: string) => players.find((p) => p.id === id)?.displayName ?? "Someone";
-  const failure = failedAt === key ? <p className="err" role="alert" data-testid="mz-mr-error" style={{ textAlign: "center" }}>{error ?? NOT_DELIVERED}</p> : null;
+  const failure = <SendNote shown={failedAt === key} landed={landed} error={error} testId="mz-mr-error" />;
   const counts = `${st.done ?? 0} of ${st.total ?? players.length} locked in`;
 
   if (st.phase === "reveal" && st.result) {

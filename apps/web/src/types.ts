@@ -149,7 +149,8 @@ export interface Projection {
   spectatorCount?: number;
   /** Player ids that nudged me in the last 10s (ephemeral, target-only). */
   nudgedBy?: string[];
-  me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean; hasRecoveryCode?: boolean };
+  /** acceptedEventIds (Stage 5.1, 2C): this player's own recently accepted actions, newest last. */
+  me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean; hasRecoveryCode?: boolean; acceptedEventIds?: string[] };
   /** Seat recoveries in the last few minutes, visible to everyone (accountability). */
   notices?: RoomNotice[];
   /** Host/cohost only: devices asking to recover a seat. */

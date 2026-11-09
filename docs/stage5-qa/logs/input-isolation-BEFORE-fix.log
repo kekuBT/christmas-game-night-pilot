@@ -1,0 +1,22 @@
+PASS Sprint round 1: Amina's answers reach the server
+PASS Sprint: round 2 opens
+FAIL Sprint round 2: the answer box is empty (round 1's words are not carried over) — not within 6000ms
+PASS Sprint round 2: a send that fails says so
+PASS Sprint round 2: the words stay in the box after the failed send
+PASS Sprint: round 3 opens
+FAIL Sprint round 3: the answer box is empty — not within 6000ms (locator.inputValue: Timeout 30000ms exceeded.)
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+locator.fill: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByPlaceholder('e.g. Paris, Rome, Madrid')[22m
+
+    at /home/user/christmas-game-night-pilot/scripts/check-input-isolation.mjs:100:19 {
+  log: [ "  - waiting for getByPlaceholder('e.g. Paris, Rome, Madrid')" ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.4
+rc=1

@@ -8,7 +8,7 @@
  * The server owns deadlines, anonymity, voting rules and scores.
  */
 import { useEffect, useState, type ReactNode } from "react";
-import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
+import { SendNote } from "./SendNote.js";
 import { Keycap, MchezoWaiting, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
@@ -59,6 +59,8 @@ export interface MchezoCaptionDeps {
   intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<boolean | void> | boolean | void;
   /** The app's human sentence for the last failed action, if any. */
   error?: string;
+  /** Stage 5.1 (2C): the server lists the unconfirmed send as accepted for this player. */
+  landed?: boolean;
 }
 
 /**
@@ -67,7 +69,7 @@ export interface MchezoCaptionDeps {
  * view, never from the tap; a tap that fails says so, keeps the words, and
  * can be tried again.
  */
-export function MchezoCaption({ game, publicGame, players, playerId, title, intent, error }: MchezoCaptionDeps) {
+export function MchezoCaption({ game, publicGame, players, playerId, title, intent, error, landed }: MchezoCaptionDeps) {
   const st = (game.state ?? {}) as CaptionState;
   const round = (st.roundIndex ?? 0) + 1;
   const of = st.roundCount ?? 3;
@@ -87,7 +89,7 @@ export function MchezoCaption({ game, publicGame, players, playerId, title, inte
       if (ok === false) setFailedAt(at);
     } finally { setPending(false); setVoting(null); }
   };
-  const failure = failedAt === phaseKey ? <p className="err" role="alert" data-testid="mz-cap-error" style={{ textAlign: "center" }}>{error ?? NOT_DELIVERED}</p> : null;
+  const failure = <SendNote shown={failedAt === phaseKey} landed={landed} error={error} testId="mz-cap-error" />;
   const counts = `${st.submitted ?? 0} of ${st.totalPlayers ?? players.length}`;
 
   if (st.phase === "vote") {

@@ -19,6 +19,7 @@ import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./components/mchezo/MchezoConnections.js";
 import { TvShow } from "./components/mchezo/TvShow.js";
 import { CharadesTv, ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.js";
+import { SendNote } from "./components/mchezo/SendNote.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
@@ -133,7 +134,7 @@ export function App() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   /** Stage 5: the last player action in a game that failed, shown on that game's screen only. */
-  const [actionError, setActionError] = useState<{ gid: string; text: string } | null>(null);
+  const [actionError, setActionError] = useState<{ gid: string; text: string; eventId?: string } | null>(null);
   // Work Package F: server rejections arrive as terse codes or terse
   // server sentences. Show the human mapping on screen and keep the raw
   // text in the console for debugging — it never reaches the player.
@@ -605,7 +606,8 @@ export function App() {
   /** Sends one player action. Resolves true only when the server accepted it (never throws). */
   async function sendAction(gameInstanceId: string, action: string, payload: Record<string, unknown>): Promise<boolean> {
     setErr(""); setActionError(null);
-    const failed = (raw: string) => { reportError(raw); setActionError({ gid: gameInstanceId, text: humanError(raw) }); };
+    const eventId = uuid();
+    const failed = (raw: string) => { reportError(raw); setActionError({ gid: gameInstanceId, text: humanError(raw), eventId }); };
     try {
       // One clientEventId per user action, reused by every retry, so the
       // server's dedupe returns the original result if a response was lost.
@@ -613,7 +615,7 @@ export function App() {
       // that lands after that phase closed is refused, never misfiled.
       const phaseKey = proj?.myGames?.find((g) => g.id === gameInstanceId)?.lifecycle?.phaseKey;
       const sent = phaseKey !== undefined && payload["phaseKey"] === undefined ? { ...payload, phaseKey } : payload;
-      const body = JSON.stringify({ intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId, gameInstanceId, action, payload: sent } });
+      const body = JSON.stringify({ intent: { kind: "intent", schemaVersion: 1, clientEventId: eventId, roomId, gameInstanceId, action, payload: sent } });
       const res = await sendIntent(async () => {
         const headers: Record<string, string> = { "content-type": "application/json" };
         const t = seats.token();
@@ -929,9 +931,13 @@ export function App() {
   const latestFinished = myGames.filter((g) => g.status === "finished" && g.participant !== false).slice(-1)[0];
   // Stage 5: one failure line for every game screen that has no inline one,
   // shown only for the game the failed action was for, cleared by the next send.
+  // Stage 5.1 (2C): a send whose reply was lost but which the server lists
+  // as accepted for this player. Only the server's list decides this.
+  const sendLanded = !!actionError?.eventId && actionError.gid === playingGame?.id && !!proj?.me?.acceptedEventIds?.includes(actionError.eventId);
   const sendFailure = actionError && playingGame && actionError.gid === playingGame.id
-    ? <p className="err mz-send-fail" role="alert" data-testid="mz-send-error">{actionError.text}</p>
+    ? <SendNote shown landed={sendLanded} error={actionError.text} testId="mz-send-error" />
     : null;
+  queueMicrotask(() => { if (sendLanded && actionError && err === actionError.text) setErr(""); });
   const publicPlaying = (proj?.games ?? []).find((g) => g.id === playingGame?.id);
   const publicFinished = (proj?.games ?? []).find((g) => g.id === latestFinished?.id);
   const showPhase = view === "lobby" ? deriveShowPhase(playingGame, latestFinished, introDismissed, resultsDismissed, playerId ?? undefined) : "lobby";
@@ -1252,7 +1258,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoMajority game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Majority Rules"} intent={sendAction} error={err || undefined} />
+        <MchezoMajority game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Majority Rules"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
   }
@@ -1260,7 +1266,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoPulse game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Pattern Pulse"} intent={sendAction} error={err || undefined} />
+        <MchezoPulse game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Pattern Pulse"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
   }
@@ -1268,7 +1274,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoDraw game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Draw & Guess"} intent={sendAction} error={err || undefined} />
+        <MchezoDraw game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Draw & Guess"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
   }
@@ -1310,7 +1316,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoCaption game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"} intent={sendAction} error={err || undefined} />
+        <MchezoCaption game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
   }

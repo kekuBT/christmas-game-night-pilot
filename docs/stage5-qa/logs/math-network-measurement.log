@@ -1,0 +1,29 @@
+PASS 1 hidden at start: nothing is opened while the page is hidden — opens 0
+PASS 1 hidden at start: the phone can answer within 1.5 s of the server opening it — 44 ms
+PASS 1 hidden at start: a 1 s answer earns 120 (+20) — 120
+PASS 2 delayed open: the clock starts when the server opens it, not when the phone asked — 28 ms
+PASS 2 delayed open: +20 still reachable — 120
+PASS 3 stalled reply: the prompt still arrives (pushed) within 1.5 s of the open — 42 ms
+PASS 3 stalled reply: +20 still reachable — 120
+PASS 4 polling only: the prompt arrives within one poll (≤ 3 s) — 2027 ms
+PASS 4 polling only: a 1 s answer still earns +20 (the poll's delay is within the 5 s bracket) — 120
+PASS 5 retries: the open lands and the clock starts then (≤ 1.5 s to answerable) — 20 ms
+PASS 5 retries: +20 still reachable — 120
+PASS 6 reload mid-question: a reload never restarts the server's clock (one open time) — 1794240365207 vs 1794240365207
+PASS 6 reload: the time before the reload still counts (the clock is not reset) — 2668 ms
+PASS 7 brackets: an answer at 6083 ms earns 110 — 110
+PASS 7 brackets: an answer at 11080 ms earns 100 — 100
+PASS 7 normal: a 1 s answer earns 120 (+20)
+MATH TIMING TABLE
+| condition | answerable after open (ms) | tapped after open (ms) | server measured (ms) | points |
+| 1 hidden at start | 44 | 1047 | 1079 | 120 |
+| 2 open request delayed 3 s | 28 | 1031 | 1055 | 120 |
+| 3 open accepted, reply stalls 15 s | 42 | 1044 | 1075 | 120 |
+| 4 socket silent + reply stalls 15 s (polling only) | 2027 | 3030 | 3059 | 120 |
+| 5 first two opens lost, phone retries | 20 | 1023 | 1052 | 120 |
+| 6 reload mid-question | 35 | 2633 | 2668 | 120 |
+| 7 normal, answered at ~1 s | 37 | 1039 | 1069 | 120 |
+| 7 normal, answered at ~6 s | — | — | 6083 | 110 |
+| 7 normal, answered at ~11 s | — | — | 11080 | 100 |
+MATH NETWORK ALL PASSED
+rc=0
