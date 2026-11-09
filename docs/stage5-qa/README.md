@@ -500,7 +500,25 @@ This is **not fixed**, because fixing it changes scoring (§12). It is not repor
 
 **This is visual evidence only.** The checks are the drivers and unit tests. Some drivers also save screenshots while they run, under the `after/` names they print; those come from the revision the driver ran on.
 
-(Filled in after the capture: see the table below.)
+| Finding | Scenario | Viewport | Before (`fa823de`) | After (`4acfea7`) | What to compare | Inspected by eye |
+|---|---|---|---|---|---|---|
+| O-02 | Round 2 of Category Sprint after sending round 1 | 390×844 | [before/o02-sprint-round2-390x844.png](before/o02-sprint-round2-390x844.png) | [after/o02-sprint-round2-390x844.png](after/o02-sprint-round2-390x844.png) | Before: round 1's “school, desk, chalk” still in the box (and the raw id “category-sprint”, “Status: playing”). After: empty box; “Category Sprint”, “In play”. | before and after |
+| O-07 | Closest Wins on the TV as question 2 opens | 1440×900 | [before/o07-closest-tv-q2-1440x900.png](before/o07-closest-tv-q2-1440x900.png) | [after/o07-closest-tv-q2-1440x900.png](after/o07-closest-tv-q2-1440x900.png) | Before: “3 of 3 have guessed” though nobody has answered question 2. After: the count for this question. | before |
+| O-07 | Who Said That waiting card, 2 of 4 finished | 390×844 | [before/o07-whosaid-waiting-390x844.png](before/o07-whosaid-waiting-390x844.png) | [after/o07-whosaid-waiting-390x844.png](after/o07-whosaid-waiting-390x844.png) | Before: “3 of 4 players have played so far”. After: finished and started counts. | no (driver-checked) |
+| S5-AUD-02 | Pattern Pulse, a full entry not yet locked (375×667) | 375×667 | [before/s5aud02-pulse-full-entry-375x667.png](before/s5aud02-pulse-full-entry-375x667.png) | [after/s5aud02-pulse-full-entry-375x667.png](after/s5aud02-pulse-full-entry-375x667.png) | After: time left above the keys; “only counts once locked” line; highlighted Lock. | no (driver-checked) |
+| O-06 | Charades on a guesser's phone | 390×844 | [before/o06-charades-phone-390x844.png](before/o06-charades-phone-390x844.png) | [after/o06-charades-phone-390x844.png](after/o06-charades-phone-390x844.png) | Before: no teams. After: Team A/B with members and scores, who is acting for which team, how scoring works. | after |
+| O-06 | Charades on the TV | 1440×900 | [before/o06-charades-tv-1440x900.png](before/o06-charades-tv-1440x900.png) | [after/o06-charades-tv-1440x900.png](after/o06-charades-tv-1440x900.png) | After: the acting team, both teams and scores. | no (driver-checked) |
+| 3D | Impostor on the TV | 1440×900 | [before/3d-impostor-tv-1440x900.png](before/3d-impostor-tv-1440x900.png) | [after/3d-impostor-tv-1440x900.png](after/3d-impostor-tv-1440x900.png) | Before: “One player has a different word”. After: the impostor sees only the category. | no (driver-checked) |
+| 3D | Draw & Guess briefing | 390×844 | [before/3d-draw-briefing-390x844.png](before/3d-draw-briefing-390x844.png) | [after/3d-draw-briefing-390x844.png](after/3d-draw-briefing-390x844.png) | After: up to six turns (random six in bigger rooms), one swap, 12 guesses per drawing. | no (driver-checked) |
+| 3D | Home's featured game | 390×844 | [before/3d-home-featured-390x844.png](before/3d-home-featured-390x844.png) | [after/3d-home-featured-390x844.png](after/3d-home-featured-390x844.png) | After: a Practice-only featured game says “practice only” (depends on the day's featured game). | no (driver-checked) |
+| 2C | Trivia answer recorded by the server, reply lost | 390×844 | [before/2c-reply-lost-390x844.png](before/2c-reply-lost-390x844.png) | [after/2c-reply-lost-390x844.png](after/2c-reply-lost-390x844.png) | Before: “couldn't confirm” beside the locked answer. After: “That went through after all: the game has it.” | after |
+| 3E | Memory Book open while game 2 (Geography) finishes | 390×844 | [before/3e-memory-link-390x844.png](before/3e-memory-link-390x844.png) | [after/3e-memory-link-390x844.png](after/3e-memory-link-390x844.png) | Before: no indication of which game a highlight cites. After: “Linked to Geography Challenge · Day 1”. | after |
+| S5-AUD-07 | TV 12 s after the server stops | 1440×900 | [before/s5aud07-tv-outage-1440x900.png](before/s5aud07-tv-outage-1440x900.png) | [after/s5aud07-tv-outage-1440x900.png](after/s5aud07-tv-outage-1440x900.png) | Before: nothing; the stale screen looks live. After: “Connection to the game lost. This screen may be out of date. Reconnecting…”, last screen kept. | before and after |
+
+- Revisions: every before image is from `fa823de`, and every after image is from `4acfea7`. Both are recorded in each folder's `manifest.json`.
+- "Inspected by eye" marks the images I opened and checked myself. The others are backed by the drivers named in §9, whose assertions are the evidence.
+- **Observation (not fixed, older than this sprint):** in the after image for 2C, the "You" label under the bottom seat of the waiting ring overlaps the line below it. That ring layout predates Stage 5.1.
+- The TV's connection banner sits over the top line of the TV, the game title. That is acceptable for an alert, but worth a look on a real TV.
 
 ## 9. Regression coverage
 
