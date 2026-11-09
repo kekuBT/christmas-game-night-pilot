@@ -1432,6 +1432,11 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - Cause: my O-06 change renamed the Charades actor's "Correct (+100 team)" button to "Correct (+100 to Team A/B)". Both drivers looked for the old exact name, so Charades ran out every turn's clock, and the games after it never started.
 - Fixed in the drivers, `55ba5d8`, with no product change. Details are in `docs/stage5-qa/README.md` §11.
 
+**Second failed final gate (not a verdict for the fixed code):** `node scripts/gate.mjs full` on `4236788`, run `20261109-193224-42367885-15460`: **FAILED (exit 1)**. 73 passed, 1 failed (`check-draw-guess`).
+- Cause: a driver bug. The driver kept a page reference that turn 2 closes whenever Keku draws turn 2, about one game in four. I reproduced it deterministically with seed 5: the old driver crashed and the fixed one passed.
+- The same crash on `829e1f4` had this cause too. I had first recorded it as load-related, which was wrong.
+- Fixed in `f363811`, with no product change. Details are in README §11.
+
 **Next task (if the owner continues):** the real-device session in README §13 (iPhone Safari first), and owner rulings on README §12.
 
 **Risk:**

@@ -630,11 +630,12 @@ These failures ran on the code before each fix, on purpose:
 - The root typecheck failed twice because a test imported a `.tsx` file (`draftKey`, `TV_HINT`). Both moved to `.ts` modules.
 - An edit overwrote `ui/mchezo/lib/names.ts`, which already existed. Typecheck caught it, and the original was restored from git before the new helpers were appended.
 
-### Load-related crash
+### A crash I first misread as load (it was a driver bug)
 
 `check-draw-guess` on `829e1f4`, in a sweep that ran while the full unit suite was also running:
 - It crashed with "Target page, context or browser has been closed" after 56 of its checks had passed, none failed, while it read the results screen.
 - It passed alone on the same revision, 61 checks, with nothing changed.
+- **I put this down to machine load. That was wrong.** The same crash recurred in the final gate on `4236788` with nothing else running. The real cause, the reproduction and the fix are below.
 
 ### Gate runs that do not count
 
@@ -650,6 +651,16 @@ These failures ran on the code before each fix, on purpose:
     - The 8 games before Charades finished normally in both drivers.
   - **My error:** I made the O-06 change without running the two drivers that tap that button. The only other script that exercises Charades screenshots a guesser's phone.
   - **Fix (`55ba5d8`):** both drivers now match the new exact name, `/^Correct \(\+100 to Team [AB]\)$/`. That is still the actor's Correct button, naming the acting team, so the check is no weaker. There is no product change.
+  - **Targeted check, not a verdict:** run `20261109-190220-55ba5d80-12638` ran only `check-f5` and E2E on `55ba5d8`: both passed (815.8 s and 970.3 s), and Charades finished in both.
+- **`4236788`, run `20261109-193224-42367885-15460`: FAILED (exit 1).** This was the full gate on the fixed drivers, from a fresh clone with a clean tree. 73 steps passed and 1 failed: `check-draw-guess`. `check-f5`, E2E and every other step passed.
+  - **Symptom:** `locator.innerText: Target page, context or browser has been closed` at the results checks, after 56 checks had passed. It was the same crash as on `829e1f4`.
+  - **Cause, a driver bug:** the driver stored `keku = pages[0]` at the start. Turn 2 closes the drawer's page and opens a new one in `pages[d]`. The server shuffles the drawing order from a random seed, so Keku (seat 0) draws turn 2 in about one game in four. In those games `keku` pointed at the closed page. The failing run's drawers were 1,0,2,3. Every passing run in the stored logs had someone else drawing turn 2: 3,2,1,0; 2,1,0,3; 3,1,0,2.
+  - **Deterministic reproduction:** I made scratch copies of the old and fixed driver that start the game with seed 5, which makes the order player-2, player-1, … The game ran against this run's build, and the drawers were 1,0,3,2 both times.
+    - The old driver crashed with the same error after 56 checks.
+    - The fixed driver passed all 61 checks.
+    - These copies are not committed: they start the game through the API instead of the lobby button.
+  - **Fix (`f363811`):** `keku` is now looked up as `pages[0]` at each use. No check changed. No other driver replaces a page in a slot it took an alias of.
+  - **Not an app bug:** the app behaved correctly in both runs. The rejoined phone shows the results.
 
 ### Typo
 
