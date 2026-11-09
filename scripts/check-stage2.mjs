@@ -2,7 +2,7 @@
 // §2–§6): Home B, Join/Host, Lobby A with its sheets, the visual library, and
 // navigation, through the real UI.
 //
-//   A. Home: all 11 covers, the dock, nothing invented, details sheet + Back.
+//   A. Home: every cover (count from /games), the dock, nothing invented, details sheet + Back.
 //   B. Host must type a name (A-04); a QR link fills in the code.
 //   C. Lobby A at 375/390/430/768/1440 with 1 and 10 players (long names):
 //      Start in the dock and on screen, nothing hidden under the dock, no
@@ -106,6 +106,9 @@ const endVisible = (page) => page.evaluate(async () => {
   return { ok, last: last ? Math.round(last.bottom) : null, dock: Math.round(dock.top) };
 });
 
+// The catalogue size comes from the server (Stage 5 added games), never a fixed number.
+const TOTAL = (await (await fetch(`${BASE}/games`)).json()).length;
+
 const browser = await launchChromium();
 try {
   // ======================================================== A. Home
@@ -115,7 +118,7 @@ try {
   await visitor.getByTestId("home").waitFor({ timeout: 15000 });
   await sleep(500);
   const covers = await visitor.evaluate(() => [...new Set([...document.querySelectorAll("[data-cover]")].map((e) => e.getAttribute("data-cover")))]);
-  check("A. Home shows the covers of all 11 games (featured + shelf)", covers.length === 11, covers.join(","));
+  check(`A. Home shows the covers of all ${TOTAL} games (featured + shelf)`, covers.length === TOTAL, covers.join(","));
   check("A. the featured game is labelled as today's feature, not a recommendation", /Featured today/i.test(await visitor.locator("body").innerText()));
   const homeText = await visitor.locator("body").innerText();
   check("A. Home invents nothing (no rankings, recommendations or recent activity)", !/recommended for you|recently played|trending|you’re \d|you're \d|\b(1st|2nd|3rd)\b|players online/i.test(homeText));
@@ -140,7 +143,7 @@ try {
   await visitor.getByTestId("home-all-games").click();
   await visitor.getByTestId("mz-lib-count").waitFor({ timeout: 5000 });
   const libCovers = await visitor.locator('[data-testid^="mz-lib-card-"] [data-cover]').count();
-  check("A. the library shows a cover on every card", libCovers === 11, String(libCovers));
+  check("A. the library shows a cover on every card", libCovers === TOTAL, String(libCovers));
   check("A. practice-only games are marked in the library", (await visitor.getByTestId("mz-lib-card-impostor").innerText()).includes("Practice only") && (await visitor.getByTestId("mz-lib-card-charades").innerText()).includes("Practice only"));
   check("A. the library outside a room offers no 'Set as up next'", (await visitor.locator('[data-testid^="mz-lib-select-"]').count()) === 0);
   await shot(visitor, "library-390");
@@ -220,7 +223,7 @@ try {
   check("D. Back closes the Invite sheet and stays in the lobby", path(host) === "/room" && (await host.getByRole("heading", { name: "You’re in, Keku." }).count()) === 1);
   await host.getByTestId("choose-game").click();
   await host.getByTestId("choose-sheet").waitFor({ timeout: 5000 });
-  check("D. Choose game lists all 11 games with covers", (await host.locator('[data-testid^="select-game-"] [data-cover]').count()) === 11);
+  check(`D. Choose game lists all ${TOTAL} games with covers`, (await host.locator('[data-testid^="select-game-"] [data-cover]').count()) === TOTAL);
   await sleep(500); // let the sheet finish sliding in
   await shot(host, "choose-390");
   await host.getByTestId("select-game-word-connections").click();

@@ -1,3 +1,4 @@
+import { GAME_POLICIES } from "../src/server/lifecycle.js";
 import { describe, expect, it } from "vitest";
 import { GAME_REGISTRY } from "../src/games/registry.js";
 import { GAME_MANIFESTS, getManifest, validateAllManifests, validateManifest } from "../src/games/manifest.js";
@@ -36,10 +37,17 @@ describe("the shipped manifests", () => {
     }
   });
 
-  it("every game supports practice and official play", () => {
+  it("every original game supports practice and official play; Stage 5's new games are practice-only", () => {
+    // Stage 5: new games launch practice-only until the owner approves their
+    // Cup scoring; the manifest and the server's policy must agree.
+    const STAGE5_PRACTICE_ONLY = ["majority-rules"];
     for (const m of GAME_MANIFESTS) {
       expect(m.features.practice).toBe(true);
-      expect(m.features.official).toBe(true);
+      expect(m.features.official).toBe(!STAGE5_PRACTICE_ONLY.includes(m.id));
+    }
+    for (const id of STAGE5_PRACTICE_ONLY) {
+      expect(GAME_POLICIES[id]?.officialEligible).toBe(false);
+      expect(GAME_POLICIES[id]?.practiceOnlyReason).toMatch(/practice-only/);
     }
   });
 
@@ -60,6 +68,7 @@ describe("the shipped manifests", () => {
       charades: "none",
       geography: "whole-game",
       "math-mayhem": "whole-game",
+      "majority-rules": "per-round",
     };
     for (const m of GAME_MANIFESTS) {
       expect(m.features.abstention).toBe(expected[m.id]);

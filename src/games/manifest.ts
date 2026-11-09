@@ -290,6 +290,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
     details: "Ten generated arithmetic questions per game; correct answers earn 100 points plus a capped speed bonus.",
   },
+  {
+    id: "majority-rules",
+    title: "Majority Rules",
+    description: "Predict which way the room will vote on a fun either/or question, then cast your own vote. Right predictions score.",
+    categories: ["social", "party"],
+    minPlayers: 3,
+    maxPlayers: 10,
+    playStyle: "solo",
+    competition: "competitive",
+    duration: { minutes: 6, source: "design-default", measured: false },
+    inputs: ["choice"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: false },
+    features: { practice: true, official: false, abstention: "per-round" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: false },
+    details: "Five rounds. Predict the majority first, then vote; votes stay anonymous, only totals are shown. 100 for a right prediction; a tied room gives every prediction 50. Practice-only (Stage 5).",
+  },
+
 ];
 
 /**

@@ -11,7 +11,7 @@
  */
 
 export type CoverAccent = "coral" | "sun" | "mint" | "iris" | "pink" | "lime";
-export type CoverGlyph = "quiz" | "grid" | "math" | "year" | "target" | "globe" | "sprint" | "bubbles" | "quote" | "odd" | "act" | "ring";
+export type CoverGlyph = "quiz" | "grid" | "math" | "year" | "target" | "globe" | "sprint" | "bubbles" | "quote" | "odd" | "act" | "ring" | "split" | "pulse" | "brush";
 
 export const ACCENTS: Readonly<Record<CoverAccent, readonly [string, string]>> = {
   coral: ["#FF6B4A", "#B8432A"],
@@ -35,6 +35,8 @@ export const COVERS: Readonly<Record<string, { accent: CoverAccent; glyph: Cover
   "who-said-that": { accent: "iris", glyph: "quote" },
   "impostor": { accent: "sun", glyph: "odd" },
   "charades": { accent: "lime", glyph: "act" },
+  // Stage 5 (original glyphs below).
+  "majority-rules": { accent: "sun", glyph: "split" },
 };
 
 export function coverOf(gameId: string): { accent: CoverAccent; glyph: CoverGlyph } {
@@ -64,6 +66,12 @@ export function glyphSvg(kind: CoverGlyph): string {
     case "quote": return `<path d="M26 74 Q26 44 50 38 L52 46 Q40 52 40 60 L50 60 L50 82 L26 82 Z" fill="${ink}"/><path d="M62 74 Q62 44 86 38 L88 46 Q76 52 76 60 L86 60 L86 82 L62 82 Z" fill="${cream}"/>`;
     case "odd": return `<circle cx="34" cy="48" r="11" fill="${ink}"/><circle cx="60" cy="40" r="11" fill="${ink}"/><circle cx="86" cy="48" r="11" fill="${ink}"/><circle cx="40" cy="76" r="11" fill="${ink}"/><polygon points="80,64 92,86 68,86" fill="${cream}"/>`;
     case "act": return `<circle cx="52" cy="42" r="11" fill="${ink}"/><path d="M52 54 L52 80 M52 62 L34 50 M52 62 L72 46 M52 80 L40 98 M52 80 L64 98" stroke="${ink}" stroke-width="7" stroke-linecap="round"/><path d="M80 30 q10 10 0 20 M90 24 q16 16 0 32" stroke="${cream}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+    // Stage 5: two answer cards with their vote bars, and the room's "versus" dot.
+    case "split": return `<rect x="18" y="30" width="38" height="52" rx="8" fill="${ink}"/><rect x="64" y="30" width="38" height="52" rx="8" fill="${cream}"/><circle cx="60" cy="56" r="11" fill="${cream}" stroke="${ink}" stroke-width="5"/><path d="M24 96 H50" stroke="${ink}" stroke-width="8" stroke-linecap="round"/><path d="M70 96 H84" stroke="${cream}" stroke-width="8" stroke-linecap="round"/>`;
+    // Stage 5: a pulse line through a remembered sequence of shapes.
+    case "pulse": return `<polyline points="12,66 32,66 40,46 50,86 60,38 70,74 78,66 108,66" fill="none" stroke="${ink}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/><circle cx="28" cy="34" r="8" fill="${cream}"/><rect x="52" y="90" width="14" height="14" rx="3" fill="${cream}"/><polygon points="90,26 100,42 80,42" fill="${cream}"/>`;
+    // Stage 5: a pencil and the line it just drew.
+    case "brush": return `<path d="M18 90 C32 62 44 98 58 72 S84 66 98 82" fill="none" stroke="${cream}" stroke-width="7" stroke-linecap="round"/><g transform="rotate(40 76 44)"><rect x="68" y="12" width="16" height="50" rx="3" fill="${ink}"/><polygon points="68,62 84,62 76,78" fill="${cream}"/></g>`;
     case "ring": { let s = ""; for (let k = 0; k < 8; k++) { const a = -Math.PI / 2 + k * Math.PI / 4; s += `<circle cx="${(60 + Math.cos(a) * 30).toFixed(2)}" cy="${(60 + Math.sin(a) * 30).toFixed(2)}" r="${k === 0 ? 9 : 6}" fill="${k === 0 ? CREAM : INK}"/>`; } return s; }
   }
 }

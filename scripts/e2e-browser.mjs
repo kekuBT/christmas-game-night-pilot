@@ -18,6 +18,7 @@
 //   reconnect. A failed game is recorded and the run continues to the next
 //   game; the process exits non-zero if anything failed.
 
+import { STAGE5_PRACTICE_ONLY, stage5Act, stage5Finished, stage5Screen } from "./lib/stage5-games.mjs";
 import { connectionsGroups } from "./lib/content-oracle.mjs";
 import { roomGo } from "./lib/room-nav.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
@@ -42,6 +43,7 @@ async function panelText(page) {
   catch { return ""; }
 }
 async function panelFinished(page, gameId) {
+  if (STAGE5_PRACTICE_ONLY.includes(gameId)) return stage5Finished(page, gameId);
   // Kit games (Trivia, Geography, Math Mayhem) render no game-panel, so
   // the panelText lookup below would burn its full 2s timeout on every
   // check — and Math needs ~20 loop iterations (10 questions x 2
@@ -164,6 +166,7 @@ async function actCaption(page, name) {
 }
 
 async function act(page, gameId, name) {
+  if (STAGE5_PRACTICE_ONLY.includes(gameId)) return stage5Act(page, gameId);
   if (gameId === "word-connections") return await actConnections(page);
   if (gameId === "caption-clash") return await actCaption(page, name);
   // Geography is a kit panel too (Work Package E) — same play shape as
@@ -312,11 +315,13 @@ async function runBrowser(browserName, games) {
       try {
                 await host.getByTestId("choose-game").click();
         await host.getByTestId(`select-game-${gameId}`).click();
-        await host.locator(`[data-testid="start-${["impostor", "charades"].includes(gameId) ? "practice" : "official"}-${gameId}"]`).click();
+        // Practice-only games (Impostor, Charades, and Stage 5's new games) start as Practice.
+        await host.locator(`[data-testid="start-${["impostor", "charades", ...STAGE5_PRACTICE_ONLY].includes(gameId) ? "practice" : "official"}-${gameId}"]`).click();
         // D3: every player reads the rules briefing and taps I'm ready; play
         // starts for everyone at once and no per-phone intro follows.
         await passBriefing(pages.map((p) => p.page));
         for (const { page } of pages) {
+          if (STAGE5_PRACTICE_ONLY.includes(gameId)) { await stage5Screen(page, gameId); continue; }
           if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") {
             // Mchezo Trivia intro is an 8s countdown with no dismiss button;
             // Geography is a kit panel too (Work Package E) — the same

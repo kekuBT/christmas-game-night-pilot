@@ -1,8 +1,10 @@
 import { createHash, randomInt } from "node:crypto";
+import { moduleFor, moduleForAction } from "../games/modules/index.js";
+import type { ModuleContext } from "../games/modules/types.js";
 import { getGame } from "../games/registry.js";
 import { CLIENT_PROTOCOL, MATH_OPEN_PROTOCOL, MIN_CLIENT_PROTOCOL, NUMERIC_INPUT_PROTOCOL } from "../shared/clientProtocol.js";
 import { withinNumericInput } from "../shared/numericInput.js";
-import { COUNT_GAMES_WITH_NO_PARTICIPATION, policyFor, type EndReason, type GameOutcome, type Participation } from "./lifecycle.js";
+import { COUNT_GAMES_WITH_NO_PARTICIPATION, policyFor, type EndReason, type GameOutcome, type Participation, type PhaseKind } from "./lifecycle.js";
 import { dayScore, midrankScore } from "../scoring/championship.js";
 import { computeChampionship, type PlayerDay } from "../scoring/ledger.js";
 import { formatInfo, type CompetitionFormat } from "../scoring/format.js";
@@ -728,7 +730,7 @@ export class RoomEngine {
                           ? { roundIndex: 0, submissions: {} }
                           : gameId === "charades"
                             ? initCharades(playerIds)
-                            : undefined,
+                            : moduleFor(gameId)?.init({ players: playerIds, seed }),
     };
     this.games.set(id, instance);
     // Audit who was left out and whether the host chose that explicitly.
@@ -1028,6 +1030,8 @@ export class RoomEngine {
       intent.action === "charades-turn"
     ) {
       result = this.submitSocialIntent(intent, actorId, now);
+    } else if (moduleForAction(intent.action)) {
+      result = this.submitModuleIntent(intent, actorId, now); // Stage 5 game modules
     } else {
       result = { accepted: false, reason: "UNKNOWN_ACTION" };
     }
@@ -1038,13 +1042,44 @@ export class RoomEngine {
         game.submittedPlayers ??= [];
         // Opening a Math question reveals it; it is not playing. Only real
         // actions count toward "have played so far".
-        if (intent.action !== "math-open" && !game.submittedPlayers.includes(actorId)) game.submittedPlayers.push(actorId);
+        const opening = intent.action === "math-open" || (moduleFor(game.gameId)?.nonPlayingActions ?? []).includes(intent.action);
+        if (!opening && !game.submittedPlayers.includes(actorId)) game.submittedPlayers.push(actorId);
         // A phase that ended early (everyone acted) starts the next phase's clock now.
         if (game.status === "playing") this.syncPhase(game, now);
       }
     }
     this.seenIntents.set(key, { accepted: result.accepted, result });
     return result;
+  }
+
+  /** Stage 5: the context a game module acts in. */
+  private moduleCtx(game: GameInstance, now: number): ModuleContext {
+    return { now, players: game.players, active: this.activePlayers(game), scale: this.lifecycleScale };
+  }
+
+  /**
+   * Stage 5: an action for a game module. The same gates as every game
+   * (playing, before the deadline, in the roster, not sat out), then the
+   * module's own rules; a game the module says is over finishes exactly once.
+   */
+  private submitModuleIntent(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now = this.clock()) {
+    const game = intent.gameInstanceId ? this.games.get(intent.gameInstanceId) : undefined;
+    const mod = game ? moduleFor(game.gameId) : undefined;
+    if (!game || !mod || !mod.actions.includes(intent.action)) return { accepted: false, reason: game && game.status === "playing" ? "UNKNOWN_ACTION" : "PHASE_CLOSED" };
+    if (game.status !== "playing") return { accepted: false, reason: "PHASE_CLOSED" };
+    if (game.deadlineAt && now > game.deadlineAt) return { accepted: false, reason: "PHASE_CLOSED" };
+    if (!game.players.includes(actorId)) return { accepted: false, reason: "NOT_IN_GAME" };
+    if ((game.abstained ?? []).includes(actorId)) return { accepted: false, reason: "ALREADY_ABSTAINED" };
+    const ctx = this.moduleCtx(game, now);
+    let r: ReturnType<typeof mod.intent>;
+    try {
+      r = mod.intent(game.extra, actorId, intent.action, intent.payload, ctx);
+    } catch (err) {
+      return { accepted: false, reason: err instanceof Error ? err.message : "INVALID_ACTION" };
+    }
+    if (!r.ok) return { accepted: false, reason: r.reason };
+    if (mod.finished(game.extra, ctx)) this.finishGame(game, mod.scores(game.extra, game.players));
+    return { accepted: true, result: r.result ?? { gameStatus: game.status } };
   }
 
   private submitSocialIntent(intent: ReturnType<typeof IntentSchema.parse>, actorId: string, now = this.clock()) {
@@ -1321,6 +1356,15 @@ export class RoomEngine {
         if (game.abstained.includes(actorId)) throw new Error("ALREADY_ABSTAINED");
         game.abstained.push(actorId);
         this.settleAfterAbstain(game);
+      } else if (moduleFor(game.gameId)) {
+        // Stage 5 game modules: a round, or (whole-game) the rest of the game.
+        const mod = moduleFor(game.gameId)!;
+        if ((game.abstained ?? []).includes(actorId)) throw new Error("ALREADY_ABSTAINED");
+        const ctx = this.moduleCtx(game, now);
+        const r = mod.abstain(game.extra, actorId, ctx);
+        if (!r.ok) throw new Error(r.reason);
+        if (r.wholeGameAbstain) (game.abstained ??= []).push(actorId);
+        if (mod.finished(game.extra, ctx)) this.finishGame(game, mod.scores(game.extra, game.players));
       } else {
         return { accepted: false, reason: "UNKNOWN_ACTION" };
       }
@@ -1387,7 +1431,7 @@ export class RoomEngine {
   }
 
   /** The phase a phased game is in, derived from its own state (e.g. "q:3", "1:vote"). */
-  private phaseOf(game: GameInstance): { key: string; kind: "question" | "write" | "vote" | "round" | "clue" | "guess" | "turn" } | null {
+  private phaseOf(game: GameInstance): { key: string; kind: PhaseKind } | null {
     switch (game.gameId) {
       case "closest-wins": return { key: `q:${(game.extra as ClosestState).questionIndex}`, kind: "question" };
       case "caption-clash": {
@@ -1400,7 +1444,7 @@ export class RoomEngine {
         return { key: ph, kind: ph === "vote" ? "vote" : ph === "guess" ? "guess" : "clue" };
       }
       case "charades": return { key: `turn:${(game.extra as CharadesState).turnIndex}`, kind: "turn" };
-      default: return null;
+      default: return moduleFor(game.gameId)?.phase(game.extra) ?? null;
     }
   }
 
@@ -1519,9 +1563,14 @@ export class RoomEngine {
           }
           break;
         }
-        default:
-          game.phaseDeadlineAt = undefined;
-          return;
+        default: {
+          const mod = moduleFor(game.gameId);
+          if (!mod) { game.phaseDeadlineAt = undefined; return; }
+          const ctx = this.moduleCtx(game, at);
+          mod.expirePhase(game.extra, ctx);
+          if (mod.finished(game.extra, ctx)) this.finishGame(game, mod.scores(game.extra, game.players));
+          break;
+        }
       }
     } catch (err) {
       this.voidGame(game, at, `phase deadline could not be processed: ${(err as Error).message}`);
@@ -1561,6 +1610,9 @@ export class RoomEngine {
       const st = game.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
       for (let r = 0; r < st.roundIndex; r++) add(scoreSprintRound(this.sprintCategory(game, r), st.submissions[r] ?? {}, this.sprintMatcher(game)));
     }
+    // Stage 5 modules: totals from completed rounds only.
+    const mod = moduleFor(game.gameId);
+    if (mod) add(mod.scores(game.extra, game.players));
     // Impostor/Charades: no partial result exists (and they are practice-only).
     return totals;
   }
@@ -1621,8 +1673,11 @@ export class RoomEngine {
         each((pid) => { const n = Array.from({ length: total }, (_, r) => r).filter((r) => r < reached && real(r, pid)).length; return { done: n, of: total, actions: n }; });
         return { participation: out, completedUnits: reached, totalUnits: total };
       }
-      default:
+      default: {
+        const mod = moduleFor(game.gameId);
+        if (mod) return mod.participation(game.extra, game.players);
         each(() => ({ done: 0, of: 0 }));
+      }
     }
     return { participation: out };
   }
@@ -1687,6 +1742,8 @@ export class RoomEngine {
       const st = game.extra as CaptionState;
       return st.rounds.some((r) => Object.keys(r.votes ?? {}).length > 0);
     }
+    const mod = moduleFor(game.gameId);
+    if (mod) return mod.anyAction(game.extra);
     // Impostor/Charades are practice-only; their completion is played, not answered.
     return game.gameId === "impostor" || game.gameId === "charades";
   }
@@ -2067,8 +2124,10 @@ export class RoomEngine {
         return this.connectionsView(g);
       case "category-sprint":
         return this.sprintView(g);
-      default:
-        return undefined;
+      default: {
+        const mod = moduleFor(g.gameId);
+        return mod ? mod.publicView(g.extra, { now: this.clock(), scale: this.lifecycleScale }) : undefined;
+      }
     }
   }
 
@@ -2096,8 +2155,10 @@ export class RoomEngine {
         return this.connectionsView(g, actorId);
       case "category-sprint":
         return this.sprintView(g, actorId);
-      default:
-        return undefined;
+      default: {
+        const mod = moduleFor(g.gameId);
+        return mod ? mod.playerView(g.extra, actorId, { now: this.clock(), scale: this.lifecycleScale }) : undefined;
+      }
     }
   }
 

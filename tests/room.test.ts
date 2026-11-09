@@ -16,8 +16,8 @@ describe("protocol", () => {
     expect(sanitizeText("  hello   world  ")).toBe("hello world");
     expect(sanitizeText("   ")).toBeNull();
   });
-  it("registry lists all 11 games, Math implemented", () => {
-    expect(GAME_REGISTRY).toHaveLength(11);
+  it("registry lists all 12 games (Stage 5 adds Majority Rules), Math implemented", () => {
+    expect(GAME_REGISTRY).toHaveLength(12);
     expect(getGame("math-mayhem").status).toBe("implemented");
   });
 });

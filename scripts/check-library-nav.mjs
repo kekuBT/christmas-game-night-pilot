@@ -40,6 +40,8 @@ async function startServer() {
 }
 const server = await startServer();
 const BASE = `http://localhost:${server.port}`;
+// Stage 5: the catalog grows (practice-only new games); read its size from the server, never assume it.
+const TOTAL = (await (await fetch(`${BASE}/games`)).json()).length;
 let failures = 0;
 function check(name, ok, detail = "") {
   console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`);
@@ -96,24 +98,24 @@ try {
     check("S3-LIB-02: the tag is a toggle that says it's expanded", (await p.getByTestId("mz-lib-practice-charades").getAttribute("aria-expanded")) === "true");
     // S3-NAV-01: search, Back to Home, Forward: the search is still there.
     await p.getByTestId("mz-lib-search").fill("trivia");
-    check("search narrows to Trivia", await waitCount(p, "Showing 1 of 11 games"));
+    check("search narrows to Trivia", await waitCount(p, `Showing 1 of ${TOTAL} games`));
     check("S3-NAV-01: the search is in the address", /[?&]q=trivia/.test(pathOf(p)), pathOf(p));
     await p.goBack();
     await p.getByTestId("home").waitFor({ timeout: 10000 });
     check("Back from the Library is Home", new URL(p.url()).pathname === "/");
     await p.goForward();
     await p.getByTestId("mz-lib-count").waitFor({ timeout: 10000 });
-    check("S3-NAV-01: Forward brings the Library back with the search applied", (await p.getByTestId("mz-lib-search").inputValue()) === "trivia" && await waitCount(p, "Showing 1 of 11 games"));
+    check("S3-NAV-01: Forward brings the Library back with the search applied", (await p.getByTestId("mz-lib-search").inputValue()) === "trivia" && await waitCount(p, `Showing 1 of ${TOTAL} games`));
     await p.reload({ waitUntil: "domcontentloaded" });
     await p.getByTestId("mz-lib-count").waitFor({ timeout: 10000 });
-    check("S3-NAV-01: a refresh keeps the search", (await p.getByTestId("mz-lib-search").inputValue()) === "trivia" && await waitCount(p, "Showing 1 of 11 games"));
+    check("S3-NAV-01: a refresh keeps the search", (await p.getByTestId("mz-lib-search").inputValue()) === "trivia" && await waitCount(p, `Showing 1 of ${TOTAL} games`));
     // Details sheet on top, then Back: the sheet closes, the view stays.
     await p.getByTestId("mz-lib-card-trivia").locator(".mz-libcard__open").click();
     await p.getByTestId("game-details").waitFor({ timeout: 10000 });
     check("S3-NAV-01: the details sheet keeps the view in its address", /[?&]q=trivia/.test(pathOf(p)) && /sheet=details/.test(pathOf(p)), pathOf(p));
     await p.goBack();
     await p.getByTestId("game-details").waitFor({ state: "detached", timeout: 10000 });
-    check("S3-NAV-01: Back closes the details and keeps the search", (await p.getByTestId("mz-lib-search").inputValue()) === "trivia" && await waitCount(p, "Showing 1 of 11 games"));
+    check("S3-NAV-01: Back closes the details and keeps the search", (await p.getByTestId("mz-lib-search").inputValue()) === "trivia" && await waitCount(p, `Showing 1 of ${TOTAL} games`));
     // S3-LIB-04: sorting is not a filter; Done folds the panel; Clear filters keeps the sort.
     await p.getByTestId("mz-lib-search").fill("");
     await p.getByTestId("mz-lib-sort").selectOption("duration");
@@ -122,12 +124,12 @@ try {
     const help = await p.getByTestId("mz-lib-filters").innerText();
     check("S3-LIB-03: the size filter is 'Group size', not 'Players in the room'", /Group size/i.test(help) && !/Players in the room/i.test(help) && /work for this many players/.test(help));
     await p.getByTestId("mz-lib-style-team").click();
-    check("a filter applies while the panel stays open to add more", await waitCount(p, "Showing 1 of 11 games") && await p.getByTestId("mz-lib-filters").isVisible());
+    check("a filter applies while the panel stays open to add more", await waitCount(p, `Showing 1 of ${TOTAL} games`) && await p.getByTestId("mz-lib-filters").isVisible());
     await p.getByTestId("mz-lib-done").click();
     check("S3-LIB-04: Done folds the filters away", (await p.getByTestId("mz-lib-filters").count()) === 0 && /Filters · 1/.test(await p.getByTestId("mz-lib-filters-toggle").innerText()));
     check("the address has the filter and the sort", /type=team/.test(pathOf(p)) && /sort=duration/.test(pathOf(p)), pathOf(p));
     await p.getByTestId("mz-lib-reset").click();
-    check("Clear filters clears filters but keeps the sort", await waitCount(p, "Showing 11 of 11 games") && (await p.getByTestId("mz-lib-sort").inputValue()) === "duration" && !/type=/.test(pathOf(p)));
+    check("Clear filters clears filters but keeps the sort", await waitCount(p, `Showing ${TOTAL} of ${TOTAL} games`) && (await p.getByTestId("mz-lib-sort").inputValue()) === "duration" && !/type=/.test(pathOf(p)));
     await p.screenshot({ path: screenshotPath("docs/stage4/after/lib-visitor-390.png") });
     await ctx.close();
   }
@@ -152,13 +154,13 @@ try {
         check("S3-LIB-01: games needing more players are drawn as not fitting", firstNeeds === "needs-more");
         await host.getByTestId("mz-lib-filters-toggle").click();
         await host.getByTestId("mz-lib-players-room").click();
-        check("S3-LIB-03: 'Your room (2)' shows only games for 2", await waitCount(host, "Showing 6 of 11 games") && /Fits your room \(2\)/.test(await host.getByTestId("mz-lib-active").innerText()));
+        check("S3-LIB-03: 'Your room (2)' shows only games for 2", await waitCount(host, `Showing 6 of ${TOTAL} games`) && /Fits your room \(2\)/.test(await host.getByTestId("mz-lib-active").innerText()));
         check("the room's library keeps its view in the address", /^\/room\/library\?players=room/.test(pathOf(host)), pathOf(host));
         await host.reload({ waitUntil: "domcontentloaded" });
         await host.getByTestId("mz-lib-count").waitFor({ timeout: 15000 });
-        check("S3-NAV-01 in a room: a refresh keeps 'Your room'", await waitCount(host, "Showing 6 of 11 games"));
+        check("S3-NAV-01 in a room: a refresh keeps 'Your room'", await waitCount(host, `Showing 6 of ${TOTAL} games`));
         await host.getByTestId("mz-lib-reset").click();
-        await waitCount(host, "Showing 11 of 11 games");
+        await waitCount(host, `Showing ${TOTAL} of ${TOTAL} games`);
       }
       const over = await host.evaluate(() => document.scrollingElement.scrollWidth > innerWidth + 1);
       check(`library in a room at ${v.width}×${v.height}: no sideways scrolling`, !over);

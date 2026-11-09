@@ -19,6 +19,7 @@ import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./components/mchezo/MchezoConnections.js";
 import { TvShow } from "./components/mchezo/TvShow.js";
 import { ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.js";
+import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
 import { ordinal } from "./ui/mchezo/lib/standings.js";
 import { CaptionTv, MchezoCaption, MchezoCaptionResults } from "./components/mchezo/MchezoCaption.js";
@@ -635,12 +636,14 @@ export function App() {
               ? <div className="mz-tvshow-game" data-testid="mz-cx-tv"><GameClock game={g} tv /><ConnectionsTv game={g} title={titleOf(g.gameId)} players={feed.players} /></div>
               : g.gameId === "closest-wins" ? <ClosestTv game={g} title={titleOf(g.gameId)} />
               : g.gameId === "impostor" ? <ImpostorTv game={g} title={titleOf(g.gameId)} />
+              : g.gameId === "majority-rules" ? <MajorityTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} />
               : null}
           renderFinal={(g) => g.gameId === "word-connections"
             ? <div className="mz-tvshow-game" data-testid="mz-cx-tv"><ConnectionsTv game={g} title={titleOf(g.gameId)} players={feed.players} /></div>
             : null}
           renderReview={(g) => g.gameId === "caption-clash"
             ? <div className="mz-tvshow-game" data-testid="mz-cap-tv"><CaptionTv game={g} /></div>
+            : g.gameId === "majority-rules" ? <div className="mz-tvshow-game"><MajorityReview game={g} /></div>
             : tvAnswers(g)}
         />
       </MchezoProvider>
@@ -935,6 +938,9 @@ export function App() {
   const connectionsFinished = latestFinished?.gameId === "word-connections";
   const captionPlaying = playingGame?.gameId === "caption-clash";
   const captionFinished = latestFinished?.gameId === "caption-clash";
+  // Stage 5 (Practice-only games).
+  const majorityPlaying = playingGame?.gameId === "majority-rules";
+  const majorityFinished = latestFinished?.gameId === "majority-rules";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -1170,6 +1176,21 @@ export function App() {
     );
   }
   // Caption Clash (Sprint 4): its own intro, write/vote screens and results.
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && majorityPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={themes.everyday} {...motion}>
+        <GameClock game={playingGame} />
+        <MchezoMajority game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Majority Rules"} intent={sendAction} error={err || undefined} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && majorityFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={themes.everyday} {...motion}>
+        <MchezoMajorityResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Majority Rules"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} />
+      </MchezoProvider>
+    );
+  }
   if (view === "lobby" && showPhase === "intro" && captionPlaying && playingGame) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>

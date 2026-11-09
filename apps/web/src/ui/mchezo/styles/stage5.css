@@ -85,3 +85,43 @@
 .mz-lobby__howto { margin: 12px 0 0; text-align: left; }
 /* The leader's name is dark on the full-width yellow bar; give the label that background itself. */
 .mz-tvshow-final .mz-tv-row--lead .mz-tv-row__label { background: var(--mz-highlight); border-radius: 14px; }
+
+/* ===================================================== S5-C1: Majority Rules */
+.mz-mr-round { margin: 10px 0 0; font: 700 13px/1 var(--mz-font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--mz-text-muted); }
+.mz-mr-prompt { margin: 8px 0 6px; font: 800 26px/1.15 var(--mz-font-display); letter-spacing: -0.02em; }
+.mz-mr-ask { margin: 2px 0 12px; font: 600 16px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-mr-cards { display: grid; gap: 14px; }
+.mz-mr-card { appearance: none; border: 0; text-align: left; display: flex; flex-direction: column; gap: 8px; min-height: 112px; padding: 18px 20px; border-radius: 22px; color: var(--mz-on-accent); box-shadow: 0 6px 0 var(--mz-mr-deep); cursor: pointer; font: inherit; position: relative; }
+.mz-mr-card--a { background: var(--mz-answer-0); --mz-mr-deep: var(--mz-answer-0-deep); }
+.mz-mr-card--b { background: var(--mz-answer-3); --mz-mr-deep: var(--mz-answer-3-deep); }
+.mz-mr-card:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 var(--mz-mr-deep); }
+.mz-mr-card:disabled { cursor: default; }
+.mz-mr-card:disabled:not(.mz-mr-card--chosen) { opacity: .6; }
+.mz-mr-card--chosen { outline: 4px solid var(--mz-text); outline-offset: 3px; }
+.mz-mr-card__mark { font: 800 14px/1 var(--mz-font-body); letter-spacing: .08em; }
+.mz-mr-card__text { font: 800 22px/1.2 var(--mz-font-display); overflow-wrap: break-word; }
+.mz-mr-card__tag { position: absolute; right: 14px; top: 12px; font: 800 12px/1 var(--mz-font-body); letter-spacing: .08em; text-transform: uppercase; }
+.mz-mr-mine { margin: 12px 0 0; font: 600 17px/1.4 var(--mz-font-body); }
+.mz-mr-verdict { margin: 14px 0 0; font: 800 20px/1.3 var(--mz-font-display); }
+.mz-mr-bars { display: grid; gap: 12px; margin-top: 14px; }
+.mz-mr-bar { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; }
+.mz-mr-bar__label { grid-column: 1 / -1; font: 700 15px/1.3 var(--mz-font-body); overflow-wrap: break-word; }
+.mz-mr-bar__track { height: 18px; border-radius: 9px; background: var(--mz-surface-2); overflow: hidden; }
+.mz-mr-bar__fill { display: block; height: 100%; border-radius: 9px; transition: width .6s var(--mz-ease-out, ease-out); }
+.mz-mr-bar--a .mz-mr-bar__fill { background: var(--mz-answer-0); }
+.mz-mr-bar--b .mz-mr-bar__fill { background: var(--mz-answer-3); }
+.mz-mr-bar--top .mz-mr-bar__label::after { content: " · majority"; color: var(--mz-highlight); }
+.mz-mr-bar__n { font: 800 20px/1 var(--mz-font-display); min-width: 24px; text-align: right; }
+.mz-mr-recap { list-style: none; margin: 14px 0; padding: 0; display: grid; gap: 10px; }
+.mz-mr-recap li { display: grid; gap: 2px; padding: 10px 12px; border-radius: 14px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); }
+.mz-mr-recap__line { font: 600 15px/1.35 var(--mz-font-body); }
+@media (prefers-reduced-motion: reduce) { .mz-mr-bar__fill { transition: none; } }
+/* TV */
+.mz-tvshow-mr__cards { display: grid; grid-template-columns: 1fr 360px 1fr; gap: 40px; align-items: center; margin: 24px 0; }
+.mz-tvshow-mr .mz-mr-card { min-height: 260px; padding: 32px 36px; border-radius: 36px; cursor: default; }
+.mz-tvshow-mr .mz-mr-card__mark { font-size: 26px; }
+.mz-tvshow-mr .mz-mr-card__text { font-size: 48px; }
+.mz-tvshow-mr__bars .mz-mr-bars { gap: 28px; margin: 28px 0; }
+.mz-tvshow-mr__bars .mz-mr-bar__label { font-size: 34px; }
+.mz-tvshow-mr__bars .mz-mr-bar__track { height: 44px; border-radius: 22px; }
+.mz-tvshow-mr__bars .mz-mr-bar__n { font-size: 52px; min-width: 70px; }

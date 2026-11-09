@@ -33,6 +33,7 @@
 // the browser half that was still open. A failed check is recorded and the
 // process exits non-zero.
 
+import { STAGE5_PRACTICE_ONLY, stage5Act, stage5Finished, stage5Screen } from "./lib/stage5-games.mjs";
 import { connectionsGroups } from "./lib/content-oracle.mjs";
 import { roomGo } from "./lib/room-nav.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
@@ -61,6 +62,7 @@ async function panelText(page) {
   catch { return ""; }
 }
 async function panelFinished(page, gameId) {
+  if (STAGE5_PRACTICE_ONLY.includes(gameId)) return stage5Finished(page, gameId);
   // Geography's results are the old ShowResults screen (Work Package E),
   // which carries the same "Back to lobby" button as Trivia's results —
   // and Geography has no game-panel, so the panelText lookup below would
@@ -167,6 +169,7 @@ async function actCaption(page, name) {
 }
 
 async function act(page, gameId, name) {
+  if (STAGE5_PRACTICE_ONLY.includes(gameId)) return stage5Act(page, gameId);
   if (gameId === "word-connections") return await actConnections(page);
   if (gameId === "caption-clash") return await actCaption(page, name);
   // Geography renders in the Mchezo kit too (Work Package E) — same play
@@ -329,13 +332,15 @@ try {
     try {
             await host.getByTestId("choose-game").click();
       await host.getByTestId(`select-game-${gameId}`).click();
-      await host.locator(`[data-testid="start-${["impostor", "charades"].includes(gameId) ? "practice" : "official"}-${gameId}"]`).click();
+      // Practice-only games (Impostor, Charades, and Stage 5's new games) start as Practice.
+      await host.locator(`[data-testid="start-${["impostor", "charades", ...STAGE5_PRACTICE_ONLY].includes(gameId) ? "practice" : "official"}-${gameId}"]`).click();
       await passBriefing(pages.map((p) => p.page)); // D3: every player taps I'm ready
       for (const { page } of pages) {
         // Geography is a kit panel too (Work Package E) — the same
         // QuestionScreen renders .mz-question, so the trivia wait covers it.
         // Math Mayhem (§11) is the same shape again.
-        if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") await page.locator(".mz-question").waitFor({ timeout: 30000 });
+        if (STAGE5_PRACTICE_ONLY.includes(gameId)) await stage5Screen(page, gameId);
+        else if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") await page.locator(".mz-question").waitFor({ timeout: 30000 });
         // J.3: Closest renders in the Mchezo kit, not the old GamePanel, so
         // there is no "Now playing:" heading — the guess dial is the signal
         // (the 8s intro auto-advances inside the 20s wait).

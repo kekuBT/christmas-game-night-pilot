@@ -112,7 +112,7 @@ describe("scheduleTournament shapes", () => {
 
   it("distinct schedule larger than the pool is explicitly infeasible", () => {
     const r = scheduleTournament({ ...base4("gauntlet"), rounds: 20 });
-    expect(r).toEqual({ ok: false, reason: "not-enough-games", eligible: 11, requested: 20 });
+    expect(r).toEqual({ ok: false, reason: "not-enough-games", eligible: 12, requested: 20 }); // 12 games since Stage 5
   });
 
   it("gamesPerRound chunks rounds correctly", () => {

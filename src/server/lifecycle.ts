@@ -22,12 +22,15 @@
 
 export type TimingModel = "game-deadline" | "phased" | "turns";
 
+/** Phase kinds a phased game's clock can be keyed by (Stage 5 adds predict, reveal and draw). */
+export type PhaseKind = "question" | "write" | "vote" | "round" | "clue" | "guess" | "turn" | "predict" | "reveal" | "draw";
+
 export interface GamePolicy {
   model: TimingModel;
   /** Overall deadline (game-deadline) or backstop (phased/turns), from the game start. */
   gameWindowMs: number;
   /** Per-phase durations for phased games, keyed by phase kind. */
-  phaseMs?: Partial<Record<"question" | "write" | "vote" | "round" | "clue" | "guess" | "turn", number>>;
+  phaseMs?: Partial<Record<PhaseKind, number>>;
   /** May a game of this kind count toward an official Family Cup? (P8, P9) */
   officialEligible: boolean;
   /** Plain reason shown when a game is practice-only. */
@@ -60,6 +63,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
     model: "turns", gameWindowMs: 20 * MIN, phaseMs: { turn: 90 * SEC },
     officialEligible: false, practiceOnlyReason: "Charades is practice-only until its team scoring is redesigned.", unit: "turns",
   },
+  // Stage 5 new games: Practice-only until the owner approves their Cup scoring (D-S5).
+  "majority-rules": {
+    model: "phased", gameWindowMs: 8 * MIN, phaseMs: { predict: 45 * SEC, reveal: 10 * SEC },
+    officialEligible: false, practiceOnlyReason: "Majority Rules is new: practice-only until its Cup scoring is approved.", unit: "rounds",
+  },
+
 });
 
 export function policyFor(gameId: string): GamePolicy {

@@ -48,6 +48,8 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   "closest-wins": { verb: "Guessed on", noun: ["question", "questions"] },
   "caption-clash": { verb: "Wrote a caption in", noun: ["round", "rounds"] },
   "category-sprint": { verb: "Played", noun: ["round", "rounds"] },
+  // Stage 5 (Practice-only games).
+  "majority-rules": { verb: "Predicted in", noun: ["round", "rounds"] },
 };
 
 /**

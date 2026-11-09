@@ -23,6 +23,8 @@ export const GAME_REGISTRY: GameDescriptor[] = [
   { id: "charades", title: "Charades", minPlayers: 4, maxPlayers: 10, modes: ["team"], status: "implemented", defaultDurationMinutes: 15, tutorial: "Act it out. No camera or microphone needed." },
   { id: "geography", title: "Geography Challenge", minPlayers: 2, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 12, tutorial: "Flags, capitals, outlines, maps, and distance — six modes, provisional." },
   { id: "math-mayhem", title: "Math Mayhem", minPlayers: 2, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 5, tutorial: "10 quick arithmetic questions. Correct = 100 points, plus a capped speed bonus." },
+  // Stage 5 (Practice-only until the owner approves their Cup scoring).
+  { id: "majority-rules", title: "Majority Rules", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 6, tutorial: "Predict which way the room will vote, then cast your own vote." },
 ];
 
 export function getGame(id: string): GameDescriptor {

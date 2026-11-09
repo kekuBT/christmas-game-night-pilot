@@ -72,6 +72,9 @@ const PHASE_WORDS: Record<string, string> = {
   round: "each round",
   clue: "giving clues",
   guess: "the impostor's guess",
+  predict: "predicting and voting",
+  reveal: "each reveal",
+  draw: "each drawing",
   turn: "each turn",
 };
 
@@ -108,6 +111,16 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
   "trivia": {
     objective: "Ten questions. One tap locks your answer.",
     steps: [],
+  },
+  // Stage 5 (Practice-only).
+  "majority-rules": {
+    objective: "Guess which way the room will vote.",
+    steps: [
+      "Five fun either/or questions.",
+      "First predict which answer most people will pick, then cast your own vote.",
+      "100 points for a right prediction. If the room splits evenly, every prediction scores 50.",
+      "Votes stay anonymous: only the totals are ever shown.",
+    ],
   },
 };
 

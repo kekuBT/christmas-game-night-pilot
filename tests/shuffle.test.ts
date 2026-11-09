@@ -8,7 +8,7 @@ const base: ShuffleRequest = { mode: "random", playerCount: 4, seed: 1 };
 describe("eligibleGames hard constraints", () => {
   it("player count is an inclusive range check", () => {
     expect(ids(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 1 }))).toEqual(["word-connections"]);
-    expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 4 })).toHaveLength(11);
+    expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 4 })).toHaveLength(12);
     expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 11 })).toEqual([]);
   });
 
@@ -21,7 +21,7 @@ describe("eligibleGames hard constraints", () => {
 
   it("playStyle filters capability", () => {
     expect(ids(eligibleGames(GAME_MANIFESTS, { ...base, playStyle: "team" }))).toEqual(["charades"]);
-    expect(eligibleGames(GAME_MANIFESTS, { ...base, playStyle: "solo" })).toHaveLength(10);
+    expect(eligibleGames(GAME_MANIFESTS, { ...base, playStyle: "solo" })).toHaveLength(11);
   });
 });
 
@@ -35,9 +35,9 @@ describe("shuffle empty and partial results", () => {
     const r = shuffle({ mode: "tournament", playerCount: 4, seed: 7, count: 20 });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.picks).toHaveLength(11);
+    expect(r.picks).toHaveLength(12);
     expect(r.partial).toBe(true);
-    expect(new Set(r.picks.map((p) => p.gameId)).size).toBe(11);
+    expect(new Set(r.picks.map((p) => p.gameId)).size).toBe(12);
   });
 
   it("tournament picks are distinct", () => {
@@ -152,10 +152,12 @@ describe("shuffle goldens (pinned seeds)", () => {
   });
 
   it("random mode goldens on the full catalog", () => {
-    expect(firstPickId(shuffle({ ...base, seed: 0 }))).toBe("trivia");
-    expect(firstPickId(shuffle({ ...base, seed: 1 }))).toBe("closest-wins");
+    // Re-pinned when Majority Rules joined the catalog (Stage 5): the same
+    // seeds now draw from 12 games, so the first picks moved.
+    expect(firstPickId(shuffle({ ...base, seed: 0 }))).toBe("word-connections");
+    expect(firstPickId(shuffle({ ...base, seed: 1 }))).toBe("category-sprint");
     expect(firstPickId(shuffle({ ...base, seed: 2 }))).toBe("charades");
-    expect(firstPickId(shuffle({ ...base, seed: 3 }))).toBe("category-sprint");
+    expect(firstPickId(shuffle({ ...base, seed: 3 }))).toBe("charades");
   });
 
   it("tournament category variety: seed 2 rewards a disjoint category on the second pick", () => {

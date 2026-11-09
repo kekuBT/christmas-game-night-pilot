@@ -25,9 +25,9 @@ describe("filterGames search", () => {
 
   it("empty query matches everything, sorted by name", () => {
     const got = filterGames(GAME_MANIFESTS, DEFAULT_FILTERS);
-    expect(got).toHaveLength(11);
+    expect(got).toHaveLength(12);
     expect(titles(got)[0]).toBe("Caption Clash");
-    expect(titles(got)[10]).toBe("Word Connections");
+    expect(titles(got)[11]).toBe("Word Connections");
   });
 
   it("a query with no match gives an empty list", () => {
@@ -62,7 +62,9 @@ describe("filterGames facets", () => {
       "Trivia Showdown",
       "Word Connections",
     ]);
-    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 4 })).toHaveLength(11);
+    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 4 })).toHaveLength(12);
+    // Majority Rules (Stage 5) starts at 3: in at 3, out at 2.
+    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 3 }))).toContain("Majority Rules");
   });
 
   it("player count excludes games whose max is below it (custom catalog)", () => {
@@ -76,6 +78,7 @@ describe("filterGames facets", () => {
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, maxDuration: 8 }))).toEqual([
       "Closest Wins",
       "Guess the Year",
+      "Majority Rules",
       "Math Mayhem",
       "Word Connections",
     ]);
@@ -83,7 +86,7 @@ describe("filterGames facets", () => {
 
   it("play style filters solo vs team", () => {
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "team" }))).toEqual(["Charades"]);
-    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" })).toHaveLength(10);
+    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" })).toHaveLength(11);
   });
 
   it("filters combine (AND across facets)", () => {
@@ -100,8 +103,8 @@ describe("filterGames facets", () => {
 describe("filterGames sorting", () => {
   it("duration sort is minutes ascending with title tie-break", () => {
     const got = filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, sort: "duration" });
-    expect(titles(got).slice(0, 4)).toEqual(["Math Mayhem", "Closest Wins", "Guess the Year", "Word Connections"]);
-    expect(titles(got)[10]).toBe("Charades");
+    expect(titles(got).slice(0, 5)).toEqual(["Math Mayhem", "Majority Rules", "Closest Wins", "Guess the Year", "Word Connections"]);
+    expect(titles(got)[11]).toBe("Charades");
   });
 });
 

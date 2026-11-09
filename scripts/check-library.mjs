@@ -7,6 +7,8 @@ import { launchChromium } from "./lib/driver-env.mjs";
 import { roomGo, upNextTitle } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
+// Stage 5: the catalog grows (practice-only new games); read its size from the server, never assume it.
+const TOTAL = (await (await fetch(`${BASE}/games`)).json()).length;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
 function check(name, ok, detail = "") {
@@ -58,16 +60,16 @@ try {
   await roomGo(host, "library");
   await host.getByTestId("mz-lib-count").waitFor({ timeout: 15000 });
   check("library opens with the full catalog",
-    (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
+    (await waitForCount(host, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(host)) === TOTAL);
 
   // Search narrows to one game, then clears back to all.
   await host.getByTestId("mz-lib-search").fill("trivia");
   check("search narrows to the matching game",
-    (await waitForCount(host, "Showing 1 of 11 games")) && (await cardCount(host)) === 1
+    (await waitForCount(host, `Showing 1 of ${TOTAL} games`)) && (await cardCount(host)) === 1
     && await host.getByTestId("mz-lib-card-trivia").isVisible());
   await host.getByTestId("mz-lib-search").fill("");
   check("clearing search restores the catalog",
-    (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
+    (await waitForCount(host, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(host)) === TOTAL);
 
   // Stage 2: the rarer filters are folded away; search stays on screen.
   check("advanced filters start folded away, search is on screen",
@@ -77,42 +79,42 @@ try {
   // Team filter: only Charades.
   await host.getByTestId("mz-lib-style-team").click();
   check("team filter shows only the team game",
-    (await waitForCount(host, "Showing 1 of 11 games"))
+    (await waitForCount(host, `Showing 1 of ${TOTAL} games`))
     && await host.getByTestId("mz-lib-card-charades").isVisible());
   await host.getByTestId("mz-lib-reset").click();
   check("reset restores the catalog",
-    (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
+    (await waitForCount(host, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(host)) === TOTAL);
   check("with no filters left, there is nothing to clear", (await host.getByTestId("mz-lib-active").count()) === 0);
 
   // Duration filter: 5 minutes or less is Math Mayhem alone.
   await host.getByTestId("mz-lib-duration-5").click();
   check("duration filter shows only short games",
-    (await waitForCount(host, "Showing 1 of 11 games"))
+    (await waitForCount(host, `Showing 1 of ${TOTAL} games`))
     && await host.getByTestId("mz-lib-card-math-mayhem").isVisible());
   await host.getByTestId("mz-lib-reset").click();
 
-  // Player-count filter: 2 players can play 6 of the 11 games.
+  // Player-count filter: 2 players can play 6 of the games (Majority Rules, Stage 5, starts at 3).
   await host.getByTestId("mz-lib-players-2").click();
   check("player-count filter shows only compatible games",
-    (await waitForCount(host, "Showing 6 of 11 games")) && (await cardCount(host)) === 6);
+    (await waitForCount(host, `Showing 6 of ${TOTAL} games`)) && (await cardCount(host)) === 6);
   await host.getByTestId("mz-lib-reset").click();
   check("reset after player filter restores the catalog",
-    (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
+    (await waitForCount(host, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(host)) === TOTAL);
 
   // Empty state: no match, with a way out inside it.
   await host.getByTestId("mz-lib-search").fill("zzz-no-match");
   check("empty state on no match",
-    (await waitForCount(host, "Showing 0 of 11 games"))
+    (await waitForCount(host, `Showing 0 of ${TOTAL} games`))
     && await host.getByTestId("mz-lib-empty").isVisible());
   check("the active search is shown as a removable filter", /zzz-no-match/.test((await host.getByTestId("mz-lib-active").textContent()) ?? ""));
   await host.getByTestId("mz-lib-empty-clear").click();
   check("Clear filters in the empty state restores the catalog",
-    (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11
+    (await waitForCount(host, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(host)) === TOTAL
     && (await host.getByTestId("mz-lib-search").inputValue()) === "");
   await host.getByTestId("mz-lib-search").fill("zzz-no-match");
   await host.getByTestId("mz-lib-reset").click();
   check("Clear filters next to the active filters restores the catalog",
-    (await waitForCount(host, "Showing 11 of 11 games")) && (await cardCount(host)) === 11);
+    (await waitForCount(host, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(host)) === TOTAL);
 
   // The library never starts a game: no start button exists in this view.
   check("library has no start button (browsing never starts)",
@@ -132,7 +134,7 @@ try {
   await roomGo(bea, "library");
   await bea.getByTestId("mz-lib-count").waitFor({ timeout: 15000 });
   check("guest can browse the library",
-    (await waitForCount(bea, "Showing 11 of 11 games")) && (await cardCount(bea)) === 11);
+    (await waitForCount(bea, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(bea)) === TOTAL);
   check("guest sees no select buttons",
     (await bea.locator('[data-testid^="mz-lib-select-"]').count()) === 0);
   check("guest sees the host-only note",
