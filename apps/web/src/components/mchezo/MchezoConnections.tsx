@@ -12,7 +12,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ANSWER_SHAPES } from "../../ui/mchezo/tokens/tokens.js";
 import { Keycap, MchezoWaiting, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
-import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
+import { participationLine, satOutLabel } from "../../ui/mchezo/lib/lifecycle.js";
 import { CONNECTIONS_RULE, connectionsBreakdown } from "../../ui/mchezo/lib/connectionsScore.js";
 import { StandingsList } from "../../ui/mchezo/components/Results.js";
 import { rankStandings } from "../../ui/mchezo/lib/standings.js";
@@ -125,7 +125,7 @@ export function MchezoConnections({ game, publicGame, players, playerId, title, 
   };
 
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} showClock />;
+    return <MchezoWaiting label={satOutLabel(game)} players={players} playerId={playerId} publicGame={publicGame} showClock />;
   }
 
   return (

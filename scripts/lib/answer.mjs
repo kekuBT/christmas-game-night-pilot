@@ -38,7 +38,7 @@ async function stateOf(page) {
     // returns the transformed text ("ALL YOUR ANSWERS ARE IN").
     if (label === "Answer locked in") return { kind: "locked", next: /Next question/i.test(text) };
     if (document.querySelector('[data-testid="mz-reveal-step"], [data-testid="mz-reveal-standings"]') || /Back to lobby/i.test(text)) return { kind: "finished" };
-    if (/All your answers are in|You sat this one out/i.test(text)) return { kind: "waiting" };
+    if (/All your answers are in|You sat this one out|You sat out the rest/i.test(text)) return { kind: "waiting" };
     return { kind: "other", label, snippet: text.replace(/\s+/g, " ").slice(0, 120) };
   });
 }

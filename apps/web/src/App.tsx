@@ -1313,7 +1313,7 @@ export function App() {
           title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"}
           objective="Write the funniest caption."
           accent={1}
-          steps={["Everyone gets the same silly scene.", "Write a caption, then vote for your favourite (not your own).", "Captions are anonymous until the end: 100 points per vote."]}
+          steps={["Everyone gets the same silly scene.", "Write a caption, then vote for your favourite (not your own).", "Captions are anonymous until the end. 25 points for each caption you write, plus 100 for every vote it gets."]}
           onStart={() => dismissIntro(playingGame.id)}
         />
       </MchezoProvider>

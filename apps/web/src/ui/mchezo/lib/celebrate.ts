@@ -145,9 +145,12 @@ export function resultsStory(f: ResultFacts): ResultsStory {
     const midPack = n >= 3 && rank > 1 && rank < lastRank && (rank - 1) / (n - 1) >= 0.25 && (rank - 1) / (n - 1) <= 0.75;
     const label = n <= 1 ? "You played solo" : tied ? `You tied for ${ordinalWord(rank)} of ${n}` : `You came ${ordinalWord(rank)} of ${n}`;
     const p = f.yourParticipation;
-    const line =
-      f.youSatOut ? pick(QUIPS.youSatOut, `${key}:you`)
-      : p && p.of > 0 && p.done === 0 ? pick(QUIPS.youMissed, `${key}:you`)
+    // Stage 5.1 (3D): sitting out after playing part of a game is not
+    // "sitting this one out": the place you earned still stands.
+    const satOutAll = !!f.youSatOut && !(p && p.done > 0);
+    const satOutRest = !!f.youSatOut && !!p && p.done > 0;
+    const rankLine =
+      p && p.of > 0 && p.done === 0 ? pick(QUIPS.youMissed, `${key}:you`)
       : n <= 1 ? ""
       : allZero ? pick(QUIPS.youZero, `${key}:you`)
       : rank === 1 && !tied ? pick(QUIPS.youWon, `${key}:you`)
@@ -157,8 +160,12 @@ export function resultsStory(f: ResultFacts): ResultsStory {
       : last ? pick(QUIPS.youLast, `${key}:you`)
       : midPack ? pick([...QUIPS.youMidPack, ...QUIPS.youBetween], `${key}:you`)
       : pick(QUIPS.youBetween, `${key}:you`);
+    const line = satOutAll ? pick(QUIPS.youSatOut, `${key}:you`)
+      : satOutRest ? `You played ${p!.done} of ${p!.of}, then sat out the rest. ${rankLine}`.trim()
+      : rankLine;
     you = { rank, of: n, score, tied, label, line };
   }
-  const celebrate = !!you && you.rank === 1 && (tone === "win" || tone === "tie") && !f.youSatOut;
+  const satOutWhole = !!f.youSatOut && !(f.yourParticipation && f.yourParticipation.done > 0);
+  const celebrate = !!you && you.rank === 1 && (tone === "win" || tone === "tie") && !satOutWhole;
   return { headline, winners, ranks, order, tone, quip, you, celebrate };
 }

@@ -78,9 +78,13 @@ describe("filterGames facets", () => {
   });
 
   it("max duration is inclusive", () => {
-    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, maxDuration: 5 }))).toEqual(["Math Mayhem", "Pattern Pulse"]);
+    // Stage 5.1 (3D): Category Sprint (about 5 min, 4-min limit) and Geography
+    // (about 7 min, 6-min limit) no longer claim more time than they can run.
+    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, maxDuration: 5 }))).toEqual(["Category Sprint", "Math Mayhem", "Pattern Pulse"]);
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, maxDuration: 8 }))).toEqual([
+      "Category Sprint",
       "Closest Wins",
+      "Geography Challenge",
       "Guess the Year",
       "Majority Rules",
       "Math Mayhem",
@@ -108,7 +112,8 @@ describe("filterGames facets", () => {
 describe("filterGames sorting", () => {
   it("duration sort is minutes ascending with title tie-break", () => {
     const got = filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, sort: "duration" });
-    expect(titles(got).slice(0, 6)).toEqual(["Math Mayhem", "Pattern Pulse", "Majority Rules", "Closest Wins", "Guess the Year", "Word Connections"]);
+    // 5 min (Category Sprint, Math Mayhem, Pattern Pulse), 6, 7 (Geography), then 8.
+    expect(titles(got).slice(0, 6)).toEqual(["Category Sprint", "Math Mayhem", "Pattern Pulse", "Majority Rules", "Geography Challenge", "Closest Wins"]);
     expect(titles(got)[13]).toBe("Charades");
   });
 });

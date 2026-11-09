@@ -27,7 +27,7 @@ export interface DrawView {
   turn?: number; turnCount?: number; phase?: "draw" | "reveal" | "finished"; drawerId?: string;
   pieces?: DrawPiece[]; letters?: number[]; correct?: { playerId: string; order: number }[]; guessers?: number;
   result?: TurnRecap; turns?: TurnRecap[];
-  myWord?: string; canSwap?: boolean; amDrawing?: boolean; myCorrect?: boolean; myGuesses?: number; mySkipped?: boolean; myTotal?: number;
+  myWord?: string; canSwap?: boolean; amDrawing?: boolean; myCorrect?: boolean; myGuesses?: number; guessesLeft?: number; mySkipped?: boolean; myTotal?: number;
 }
 
 /** The palette: every colour has a name (shown and announced), never colour alone. */
@@ -288,6 +288,9 @@ export function MchezoDraw({ game, players, playerId, title, intent, error, land
         </form>
       )}
       {note?.kind === "wrong" && !st.myCorrect && <FeedbackLine testId="mz-dg-wrong" tone="warn">Not it. Keep guessing!</FeedbackLine>}
+      {!st.myCorrect && !st.mySkipped && (st.myGuesses ?? 0) > 0 && st.guessesLeft !== undefined && (
+        <p className="mz-foot" data-testid="mz-dg-left" style={{ textAlign: "center" }}>{st.guessesLeft > 0 ? `${st.guessesLeft} ${st.guessesLeft === 1 ? "guess" : "guesses"} left for this drawing.` : "That's all your guesses for this drawing."}</p>
+      )}
       {failure}
       {got}
       <FeedbackLine testId="mz-dg-progress">{correct.length} of {st.guessers ?? 0} got it</FeedbackLine>

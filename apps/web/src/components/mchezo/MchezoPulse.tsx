@@ -148,8 +148,12 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
       );
     }
     const len = open.length;
-    const left = Math.max(0, Math.ceil((open.inputUntil - now) / 1000));
-    const timeUp = now >= open.inputUntil;
+    // Stage 5.1 (3D): the server takes no answer after the GAME's deadline
+    // either (room.ts), so a round opened late shows the earlier of the two.
+    const gameEndsFirst = game.deadlineAt !== undefined && game.deadlineAt < open.inputUntil;
+    const until = gameEndsFirst ? game.deadlineAt! : open.inputUntil;
+    const left = Math.max(0, Math.ceil((until - now) / 1000));
+    const timeUp = now >= until;
     const sending = pending === "answer";
     const full = entry.length === len;
     return (
@@ -157,7 +161,7 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
         <GameHeader title={title} objective="Tap it back in order" accent={4} />
         <p className="mz-mr-round">Round {round} of {of} · {len} shapes</p>
         {/* Stage 5.1 (S5-AUD-02): the time left sits next to the entry, not below the button. */}
-        <FeedbackLine testId="mz-pp-timer" tone={left <= 5 ? "warn" : "neutral"}>{timeUp ? "Time's up for this round." : `${left}s to answer.`}</FeedbackLine>
+        <FeedbackLine testId="mz-pp-timer" tone={left <= 5 ? "warn" : "neutral"}>{timeUp ? (gameEndsFirst ? "The game's time is up." : "Time's up for this round.") : `${left}s to answer${gameEndsFirst ? " (the game ends then)" : ""}.`}</FeedbackLine>
         <ol className="mz-pp-slots" data-testid="mz-pp-slots" aria-label={`Your entry: ${entry.length} of ${len}${entry.length ? `: ${entry.map((s) => PULSE_SYMBOLS[s]?.name).join(", ")}` : ""}`}>
           {Array.from({ length: len }, (_, i) => (
             <li key={i} className={`mz-pp-slot${entry[i] !== undefined ? " mz-pp-slot--filled" : ""}`} data-symbol={entry[i]}>
@@ -196,7 +200,7 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
       {last && <p className={`mz-pp-last${last.perfect ? " mz-pp-last--good" : ""}`} data-testid="mz-pp-last">Round {last.round + 1}: {pulseResultLine(last)}</p>}
       <p className="mz-mr-round">Round {next + 1} of {of}</p>
       <h2 className="mz-mr-prompt" data-testid="mz-pp-next">{len} shapes this time</h2>
-      <p className="mz-mr-ask">The pattern shows for a few seconds, then hides. Take your time: the clock starts when you tap.</p>
+      <p className="mz-mr-ask">The pattern shows for a few seconds, then hides; then you have 16 to 24 seconds to tap it back. That round's timer starts when you tap, but the game's own clock keeps running.</p>
       <Keycap block disabled={pending !== null} onClick={() => void send("pulse-open", { round: next }, "open")} data-testid="mz-pp-open">
         {pending === "open" ? "Opening…" : "Show me the pattern"}
       </Keycap>

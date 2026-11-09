@@ -219,7 +219,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     maxPlayers: 10,
     playStyle: "solo",
     competition: "competitive",
-    duration: { minutes: 10, source: "design-default", measured: false },
+    duration: { minutes: 5, source: "design-default", measured: false }, // Stage 5.1: 3 rounds of 60 s, 4-min limit, plus the briefing
     inputs: ["text"],
     devices: ["phone"],
     tv: "dashboard",
@@ -259,7 +259,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     maxPlayers: 10,
     playStyle: "solo",
     competition: "competitive",
-    duration: { minutes: 12, source: "design-default", measured: false },
+    duration: { minutes: 7, source: "design-default", measured: false }, // Stage 5.1: 8 questions, 6-min limit, plus the briefing
     inputs: ["choice"],
     devices: ["phone"],
     tv: "dashboard",
@@ -333,7 +333,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
   {
     id: "draw-guess",
     title: "Draw & Guess",
-    description: "One player draws a secret word on their phone; everyone else races to guess it. Everyone gets a turn to draw.",
+    description: "One player draws a secret word on their phone; everyone else races to guess it. Up to six turns: in bigger rooms, six players chosen at random draw.",
     categories: ["creativity", "party"],
     minPlayers: 3,
     maxPlayers: 10,

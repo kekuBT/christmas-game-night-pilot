@@ -37,7 +37,7 @@
 //   only Geography's branch is now dead (App routes geography here
 //   first), left in place like Trivia's dead quiz branch — a future
 //   cleanup removes dead branches as more games migrate.
-import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
+import { satOutLabel, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { useState } from "react";
 import { Keycap, MchezoWaiting, Stamp } from "../../ui/mchezo/index.js";
 import { QuestionScreen } from "../../ui/mchezo/index.js";
@@ -84,7 +84,7 @@ export function MchezoGeography(deps: MchezoGeographyDeps) {
 
   // Sat out: the server records whole-game abstention; show the wait, not Q1.
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} showClock />;
+    return <MchezoWaiting label={satOutLabel(game)} players={players} playerId={playerId} publicGame={publicGame} showClock />;
   }
   // Just answered: locked view until the player moves on. If the poll has
   // not landed yet (answer not in myAnswers), fall through to the question
