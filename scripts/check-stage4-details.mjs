@@ -21,8 +21,9 @@ import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const DATA_DIR = mkdtempSync(join(tmpdir(), "mchezo-s4det-"));
 async function startServer() {
-  const env = { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR, MCHEZO_CONTENT_TEST_MODE: "approve-provisional" };
-  delete env.NODE_ENV;
+  // No content test mode: these checks play practice games only, and practice may use any non-rejected item.
+  const env = { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR };
+  delete env.NODE_ENV; delete env.MCHEZO_CONTENT_TEST_MODE;
   const child = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { cwd: process.cwd(), env, stdio: ["ignore", "pipe", "pipe"] });
   let out = "";
   child.stdout.on("data", (d) => { out += d.toString(); });
@@ -81,7 +82,7 @@ async function startPlaying(room, gameId) {
   throw new Error("play did not begin");
 }
 /** Labels drawn under tokens: their text, and whether any is cut off. */
-const labelsIn = (page, sel) => page.locator(sel).evaluateAll((els) => els.map((e) => ({ text: (e.textContent ?? "").trim(), title: e.getAttribute("title") ?? "", cut: e.scrollWidth > e.clientWidth + 1 })));
+const labelsIn = (page, sel) => page.locator(sel).evaluateAll((els) => els.map((e) => ({ text: (e.textContent ?? "").trim(), title: e.getAttribute("title") ?? "", cut: e.scrollWidth > e.clientWidth + 1 || e.scrollHeight > e.clientHeight + 1 })));
 
 const browser = await launchChromium();
 try {
@@ -104,11 +105,15 @@ try {
     await guest.getByTestId("mz-reveal-step").and(guest.locator('[data-step-kind="standings"]')).waitFor({ timeout: 10000 });
     const disabled = await guest.locator('[data-testid="mz-reveal-step"] button:disabled').count();
     check("S3-TRV-03: the standings step shows no greyed-out control", disabled === 0 && (await guest.getByTestId("mz-reveal-play").count()) === 0, `${disabled} disabled`);
-    await guest.getByTestId("mz-reveal-replay").click();
-    const step = await guest.getByTestId("mz-reveal-step").getAttribute("data-step-kind");
-    const idx = await guest.getByTestId("mz-reveal-step").getAttribute("data-step-index");
-    check("S3-TRV-03: 'Replay from Q1' goes back to the first question and plays", step === "question" && idx === "0" && (await guest.getByTestId("mz-reveal-play").getAttribute("aria-pressed")) === "true", `${step}:${idx}`);
-    await guest.screenshot({ path: screenshotPath("docs/stage4/after/trv03-replay-390.png") });
+    await guest.screenshot({ path: screenshotPath("docs/stage4/after/trv03-standings-390.png") });
+    if ((await guest.getByTestId("mz-reveal-replay").count()) === 0) check("S3-TRV-03: 'Replay from Q1' is offered on the standings step", false, "no replay button");
+    else {
+      await guest.getByTestId("mz-reveal-replay").click();
+      const step = await guest.getByTestId("mz-reveal-step").getAttribute("data-step-kind");
+      const idx = await guest.getByTestId("mz-reveal-step").getAttribute("data-step-index");
+      check("S3-TRV-03: 'Replay from Q1' goes back to the first question and plays", step === "question" && idx === "0" && (await guest.getByTestId("mz-reveal-play").getAttribute("aria-pressed")) === "true", `${step}:${idx}`);
+      await guest.screenshot({ path: screenshotPath("docs/stage4/after/trv03-replay-390.png") });
+    }
     await host.context().close(); await guest.context().close();
   }
   // ---- S3-TRV-02 in a full lobby of 10 similar names.
@@ -123,6 +128,7 @@ try {
     const labels = (await labelsIn(host, ".mz-circle .mz-seat__name")).filter((l) => l.text !== "You");
     check("S3-TRV-02: ten 'Cousin …' names get ten different labels in the lobby circle", labels.length === 9 && new Set(labels.map((l) => l.text)).size === 9, JSON.stringify(labels.map((l) => l.text)));
     check("S3-TRV-02: each label comes from that player's own name", labels.every((l) => l.title.startsWith(l.text.replace(/ .\.$/, ""))));
+    check("S3-TRV-02: no lobby label is cut off (\"Cousin…\" would hide which cousin)", labels.every((l) => !l.cut), JSON.stringify(labels.filter((l) => l.cut).map((l) => l.text)));
     await host.screenshot({ path: screenshotPath("docs/stage4/after/trv02-lobby-10-375.png") });
     for (const p of pages) await p.context().close();
     await host.context().close();

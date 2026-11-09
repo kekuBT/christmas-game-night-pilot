@@ -98,3 +98,16 @@
 
 /* ---- S3-TRV-02: the waiting ring's labels get room to be told apart ---- */
 .mz-wait__seat .mz-seat__name { max-width: 92px; left: 50%; transform: translateX(-50%); width: max-content; font-size: 12.5px; }
+/* S3-TRV-02 / Phase 5B: lobby circle names are never cut. A name may take a
+   second line (between words only: a long single word keeps its width), so
+   "Cousin Amani" and "Cousin Amina" stay readable in a room of ten. Measured
+   with 4, 6, 8 and 10 long or similar names at 320-1440 px: no label cut,
+   split mid-word, off-screen, or touching another label or token
+   (scripts/check-ten-players.mjs). */
+.mz-circle .mz-seat__name { white-space: normal; width: max-content; max-width: 36cqi; line-height: 1.15; overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; text-overflow: clip; }
+.mz-circle:is([data-slots="9"], [data-slots="10"]) .mz-seat__name { font-size: 11.5px; max-width: 30cqi; }
+@media (max-width: 359px) { .mz-circle:is([data-slots="9"], [data-slots="10"]) .mz-seat__name { font-size: 10.5px; max-width: 27cqi; } }
+/* Phase 5B: in a room of ten, long names in the standings were cut
+   ("Wanjiru Kamau-Njoroge the Th…") with no way to read the rest. A name now
+   takes up to two lines, breaking between words. */
+.mz-standings__name { white-space: normal; overflow-wrap: break-word; line-height: 1.2; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; text-overflow: clip; }
