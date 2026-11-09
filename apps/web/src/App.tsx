@@ -228,11 +228,11 @@ export function App() {
   const pollNotice = useRef("");
   // Stage 4: what is on screen, and how many projections have been shown, so
   // a poll overtaken by a newer push can't roll the screen back (http.ts).
-  const shown = useRef<{ n: number; roomId?: string; seq?: number }>({ n: 0 });
+  const shown = useRef<{ n: number; roomId?: string; seq?: number; rev?: number }>({ n: 0 });
   // Stage 5.1: when a projection (pushed or polled) last proved this screen live.
   const lastFresh = useRef(Date.now());
   const showProjection = useCallback((p: Projection) => {
-    shown.current = { n: shown.current.n + 1, roomId: p.roomId, seq: p.seq };
+    shown.current = { n: shown.current.n + 1, roomId: p.roomId, seq: p.seq, rev: p.rev };
     lastFresh.current = Date.now();
     setProj(p);
   }, []);

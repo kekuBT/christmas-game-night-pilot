@@ -15,8 +15,10 @@ export function ClosestTv({ game, title }: { game: PublicGame; title: string }) 
   const st = (game.state ?? {}) as ClosestPublic;
   const last = (st.revealed ?? []).at(-1);
   const n = (st.questionIndex ?? 0) + 1;
-  const done = game.submittedCount ?? 0;
-  const total = game.totalPlayers ?? game.players.length;
+  // Stage 5.1 (O-07): this question's answers, from the server. The old ring
+  // counted anyone who had ever guessed, so a new question read "3 of 3".
+  const done = game.progress?.answeredNow ?? 0;
+  const total = game.progress?.total ?? game.totalPlayers ?? game.players.length;
   return (
     <section className="mz-tvshow-live" data-testid="tv-live-closest-wins">
       <div className="mz-tvshow-live__left">
@@ -27,7 +29,7 @@ export function ClosestTv({ game, title }: { game: PublicGame; title: string }) 
         <div className="mz-tvshow-clock"><GameClock game={game} tv /></div>
       </div>
       <TVRing value={done} total={Math.max(1, total)} color="var(--mz-answer-1)">
-        <span className="mz-tvshow-ring" data-testid="tv-live-progress"><b>{done} of {total}</b> have guessed</span>
+        <span className="mz-tvshow-ring" data-testid="tv-live-progress"><b>{done} of {total}</b> {done === 1 ? "has" : "have"} answered question {n}</span>
       </TVRing>
     </section>
   );

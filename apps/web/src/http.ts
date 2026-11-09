@@ -40,12 +40,17 @@ export function isProjection(x: unknown): boolean {
  * can never freeze the screen; pushes are always applied.
  */
 export function isOvertakenReply(
-  reply: { roomId?: unknown; seq?: unknown },
-  shown: { roomId?: string; seq?: number } | null,
+  reply: { roomId?: unknown; seq?: unknown; rev?: unknown },
+  shown: { roomId?: string; seq?: number; rev?: number } | null,
   newerShownInFlight: boolean,
 ): boolean {
   if (!newerShownInFlight || !shown) return false;
   if (typeof reply.roomId !== "string" || reply.roomId !== shown.roomId) return false;
+  // Stage 5.1 (O-07): the room's revision moves on EVERY change the room is
+  // told about; `seq` only on ledger events, so within a game (a Majority
+  // Rules round, a Closest question) an older reply carried the same seq and
+  // rolled the screen back. Use the revision when both sides have it.
+  if (typeof reply.rev === "number" && typeof shown.rev === "number") return reply.rev < shown.rev;
   if (typeof reply.seq !== "number" || typeof shown.seq !== "number") return false;
   return reply.seq < shown.seq;
 }

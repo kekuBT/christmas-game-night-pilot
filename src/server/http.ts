@@ -130,6 +130,18 @@ export class LocalServer {
   private nudges = new Map<string, { fromId: string; targetId: string; ts: number }[]>();
   private nudgeStamps = new Map<string, number[]>();
   static readonly REACTION_SET = ["🎄", "❄️", "🎉", "👏", "😂", "🔥"];
+  /**
+   * Stage 5.1 (O-07): each room's revision, sent with every projection and
+   * bumped on every broadcast (every change the room is told about), so a
+   * phone can tell an older poll reply from a newer push even when the
+   * ledger `seq` hasn't moved (e.g. a Majority Rules round changing). Kept in
+   * memory only; it starts from the clock at startup, so it keeps rising
+   * across a restart. A change that isn't broadcast just isn't bumped: the
+   * reply is then shown as before, never frozen.
+   */
+  private revs = new Map<string, number>();
+  private readonly revBase = Date.now();
+  private revOf(roomId: string): number { return this.revs.get(roomId) ?? this.revBase; }
   private projectFor(room: RoomEngine, audience: "player" | "tv" | "host" | "cohost" | "spectator", actorId?: string, clientProtocol?: number): Record<string, unknown> {
     const now = Date.now();
     const recent = (this.reactions.get(room.id) ?? []).filter((r) => now - r.ts < 15000);
@@ -140,7 +152,7 @@ export class LocalServer {
     // view, never private state. The engine's "tv" audience is that projection.
     const engineAudience = audience === "spectator" ? "tv" : audience;
     const plan = this.lobbyPlans.get(room.id);
-    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(plan ? { upNext: plan } : {}) };
+    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), rev: this.revOf(room.id), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(plan ? { upNext: plan } : {}) };
     // Host-assisted recovery requests: host/cohost only. Shows the seat and
     // the match code to compare; never the requester's secret.
     const me = actorId ? room.players.get(actorId) : undefined;
@@ -1173,6 +1185,7 @@ export class LocalServer {
   private broadcast(roomId: string): void {
     const room = this.rooms.get(roomId);
     if (!room) return;
+    this.revs.set(roomId, this.revOf(roomId) + 1);
     for (const { ws, meta } of this.sockets) {
       if (meta.roomId !== roomId) continue;
       if (ws.readyState === 1) {

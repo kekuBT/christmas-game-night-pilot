@@ -988,6 +988,48 @@ export class RoomEngine {
     return game.players;
   }
 
+  /**
+   * Stage 5.1 (O-07): what every screen may say about progress. Counts only,
+   * never who (the existing privacy policy). Each count uses the same rule
+   * the game itself uses to move on:
+   *   started     — acted at least once in this game (the old submittedCount);
+   *   answeredNow — Closest Wins: answered or sat out THE CURRENT question;
+   *   finished    — self-paced quiz games and Guess the Year: answered every
+   *                 item or sat the rest out (quizAllDone / yearAllDone).
+   */
+  private progressOf(g: GameInstance): { started: number; total: number; answeredNow?: number; finished?: number } {
+    const base = { started: (g.submittedPlayers ?? []).length, total: g.players.length };
+    const sat = new Set(g.abstained ?? []);
+    if (g.gameId === "trivia" || g.gameId === "who-said-that" || g.gameId === "geography") {
+      const st = g.extra as { questions?: unknown[]; answers?: Record<string, Record<string, unknown>> } | undefined;
+      const n = st?.questions?.length ?? 0;
+      if (n === 0) return base;
+      return { ...base, finished: g.players.filter((pid) => sat.has(pid) || Object.keys(st?.answers?.[pid] ?? {}).length >= n).length };
+    }
+    if (g.gameId === "guess-the-year") {
+      const st = g.extra as { events?: unknown[]; guesses?: Record<string, Record<string, unknown>> } | undefined;
+      const n = st?.events?.length ?? 0;
+      if (n === 0) return base;
+      return { ...base, finished: g.players.filter((pid) => sat.has(pid) || Object.keys(st?.guesses?.[pid] ?? {}).length >= n).length };
+    }
+    if (g.gameId === "closest-wins") {
+      const st = g.extra as ClosestState | undefined;
+      const q = st?.questions[st.questionIndex];
+      if (!st || !q) return base;
+      const guessed = st.guesses[q.id] ?? {};
+      const skipped = new Set(st.abstained[q.id] ?? []);
+      return { ...base, answeredNow: g.players.filter((pid) => guessed[pid] !== undefined || skipped.has(pid)).length };
+    }
+    // Stage 5 modules publish their own counts: Majority Rules "done" this
+    // round (predicted and voted, or skipped); Pattern Pulse "finished".
+    if (g.gameId === "majority-rules" || g.gameId === "pattern-pulse") {
+      const v = this.publicGameState(g) as { done?: unknown; finished?: unknown } | undefined;
+      if (typeof v?.done === "number") return { ...base, answeredNow: v.done };
+      if (typeof v?.finished === "number") return { ...base, finished: v.finished };
+    }
+    return base;
+  }
+
   /** Submit a validated intent. Returns the ack; duplicates return the original result. */
   /**
    * `opts.clientProtocol`: the version the transport saw (http.ts passes 0
@@ -2436,6 +2478,7 @@ export class RoomEngine {
       players: g.players,
       submittedCount: (g.submittedPlayers ?? []).length,
       totalPlayers: g.players.length,
+      progress: g.status === "playing" ? this.progressOf(g) : undefined,
       state: this.publicGameState(g),
       // Public questions: prompt + options only, no correctIndex/correctAnswer, and only after finish for Math.
       questions:
