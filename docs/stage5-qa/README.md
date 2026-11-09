@@ -642,7 +642,14 @@ These failures ran on the code before each fix, on purpose:
   - The unit step failed because `scripts/measure-persistence.mjs` wasn't classified (`tests/script-inventory.test.ts`). Fixed in `9905460`.
   - Before I stopped it, 13 steps had passed: typecheck, lint, build, the browser preflight, and 8 drivers including `check-action-ack`, `check-a11y-surfaces`, `check-audit-fixes` and `check-briefing`. 1 had failed, and 1 (`check-caption`) was cancelled.
   - I stopped it so the final gate could run on the fixed revision without two gates competing for the machine.
-- (Further entries after the final gate.)
+- **`4acfea7`, run `20261109-173134-4acfea70-32411`: FAILED (exit 1).** 72 steps passed and 2 failed: `check-f5` and `e2e-chromium`. Nothing timed out or was cancelled, and there were no infrastructure errors.
+  - **Cause:** I renamed a button for O-06 and broke two drivers. Charades never finished in either one. Both drivers find the actor's button by its exact name, "Correct (+100 team)". O-06 renamed it to "Correct (+100 to Team A)" or "… Team B", so the actor never tapped it. Every turn ran out its full clock (DIAG: `phase=turn:2`, then `turn:3`, `submitted=0/4`, `type=waiting-on-players`).
+  - **Knock-on failures:** every later game in these two drivers failed because Charades was still running.
+    - In E2E, Geography, Math, Majority, Pulse and Draw each waited for the host's `choose-game` control, which isn't offered during a game. E2E finished 9 of 15.
+    - In `check-f5`, the day playlist finished 8 of 14 games. It then failed the ledger and TV checks for the 6 games that never ran.
+    - The 8 games before Charades finished normally in both drivers.
+  - **My error:** I made the O-06 change without running the two drivers that tap that button. The only other script that exercises Charades screenshots a guesser's phone.
+  - **Fix (`55ba5d8`):** both drivers now match the new exact name, `/^Correct \(\+100 to Team [AB]\)$/`. That is still the actor's Correct button, naming the acting team, so the check is no weaker. There is no product change.
 
 ### Typo
 
