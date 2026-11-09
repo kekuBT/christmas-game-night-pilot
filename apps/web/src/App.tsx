@@ -106,7 +106,7 @@ async function get<T>(path: string): Promise<T> {
 export function App() {
   // Stage 2 routing: the boot redirect runs once, before the route is read.
   useState(() => { bootRoute(); return true; });
-  const { route, sheet, game: sheetGame, navigate, openSheet, closeSheet, back } = useRoute();
+  const { route, sheet, game: sheetGame, navigate, openSheet, closeSheet, back, backTo } = useRoute();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   // Seat credentials are owned by the session store (sessionStorage by
@@ -124,11 +124,16 @@ export function App() {
   // The room's screens are addresses now (/room, /room/cup, …), so browser
   // Back, in-app Back and iOS swipe-back agree. `view` is read from the route.
   const view: View = route.name === "room" ? SUB_TO_VIEW[route.sub] : "lobby";
-  const toLobby = () => back(LOBBY);
+  // Stage 5.1 (3E): "Back to lobby" always reaches the lobby (backTo checks
+  // what is beneath; a tab opened straight onto a room screen has Home there).
+  const toLobby = () => backTo(LOBBY);
   function setView(v: View) {
     // One room screen to another (Cup → TV) replaces the entry, so history
     // is always "lobby → this screen" and Back or "Lobby" returns to the lobby.
-    if (v !== "lobby") navigate({ name: "room", sub: VIEW_TO_SUB[v] }, { replace: route.name === "room" && route.sub !== "lobby" });
+    // Stage 5.1 (3E): the room's Library reopens with the view this tab last
+    // had there (search, filters, sort), shown with its "Clear filters".
+    const lib = v === "library" ? tabGet("mz_lib_room") ?? "" : "";
+    if (v !== "lobby") navigate({ name: "room", sub: VIEW_TO_SUB[v], ...(lib ? { lib } : {}) }, { replace: route.name === "room" && route.sub !== "lobby" });
     else if (route.name === "room" && route.sub !== "lobby") toLobby();
   }
   const [msg, setMsg] = useState("");
@@ -719,7 +724,9 @@ export function App() {
   async function loadMemory() {
     try { setBook(await get<MemoryEntry[]>(`/rooms/${roomId}/memory`)); setLedger(await get<LedgerEvent[]>(`/rooms/${roomId}/ledger`)); } catch (e) { fail(e); }
   }
-  useEffect(() => { if (view === "memory" && roomId) loadMemory(); }, [view, roomId]);
+  // Stage 5.1 (3E): also whenever the room's ledger moves on (seq counts its
+  // events), so a Memory Book left open across a game's end cites that game.
+  useEffect(() => { if (view === "memory" && roomId) loadMemory(); }, [view, roomId, proj?.seq]);
   useEffect(() => {
     if (!proj?.joinCode) return;
     const url = `${location.origin}/join?code=${proj.joinCode}`;
@@ -1485,7 +1492,7 @@ export function App() {
           inRoom
           roomPlayers={connectedNow}
           filters={filtersFromQuery(route.name === "room" ? route.lib ?? "" : "")}
-          onFiltersChange={(f) => { const lib = filtersToQuery(f); navigate(lib ? { name: "room", sub: "library", lib } : { name: "room", sub: "library" }, { replace: true }); }}
+          onFiltersChange={(f) => { const lib = filtersToQuery(f); tabSet("mz_lib_room", lib); navigate(lib ? { name: "room", sub: "library", lib } : { name: "room", sub: "library" }, { replace: true }); }}
           onSelect={(id) => { setUpNextId(id); setShuffleResult(null); toLobby(); }}
           onDetails={(id) => openSheet("details", id)}
           onBack={toLobby}
@@ -1509,7 +1516,7 @@ export function App() {
     // Stage 4 (S3-MEM-01): the Memory Book as a Night Circle screen with honest export feedback.
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <MemoryScreen roomId={roomId ?? ""} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
+        <MemoryScreen roomId={roomId ?? ""} roomSeq={proj?.seq} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
         {roomSheets}
       </MchezoProvider>
     );
