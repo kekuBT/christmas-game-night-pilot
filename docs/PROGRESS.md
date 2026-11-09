@@ -1437,6 +1437,12 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - The same crash on `829e1f4` had this cause too. I had first recorded it as load-related, which was wrong.
 - Fixed in `f363811`, with no product change. Details are in README §11.
 
+**Two more full runs without a verdict:**
+- `f363811`, run `20261109-210933-f3638114-28586`: **interrupted** by a container restart during E2E, the last step. 73 of 74 steps had passed, and no report was written.
+- `2508f9d`, run `20261109-223449-2508f9d4-198`: **FAILED** at the unit tests, then **cancelled** by me.
+  - The failing test was my own Stage 5.1 Sprint privacy test. It looked for the answer "school" in the TV projection, and the randomly dealt category happened to be "Things in a school".
+  - It now uses marker answers, and passed 15 of 15 runs. Details are in README §11.
+
 **Next task (if the owner continues):** the real-device session in README §13 (iPhone Safari first), and owner rulings on README §12.
 
 **Risk:**

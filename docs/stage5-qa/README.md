@@ -661,6 +661,11 @@ These failures ran on the code before each fix, on purpose:
     - These copies are not committed: they start the game through the API instead of the lobby button.
   - **Fix (`f363811`):** `keku` is now looked up as `pages[0]` at each use. No check changed. No other driver replaces a page in a slot it took an alias of.
   - **Not an app bug:** the app behaved correctly in both runs. The rejoined phone shows the results.
+- **`f363811`, run `20261109-210933-f3638114-28586`: INTERRUPTED (no verdict).** The container restarted while E2E, the last step, was running. The gate received SIGTERM and stopped its own processes, but the container was gone before it could write `report.json`. Its log shows 73 of 74 steps passed, including `check-draw-guess`. That is not a pass, and I don't count it.
+- **`2508f9d` (code identical to `f363811`, plus docs), run `20261109-223449-2508f9d4-198`: FAILED at the unit tests, then CANCELLED by me (exit 130).**
+  - **Failure:** `tests/stage51-inputs.test.ts`, "Category Sprint: your own answers, from the server". The test is mine, from Stage 5.1. It sent the answers "school" and "desk", then checked that the TV projection doesn't contain "school". This time the randomly dealt category was "Things in a school", so the check failed on the category name, not on a leak. The test depended on which category was dealt, and every earlier run was lucky.
+  - **Fix:** the test now sends marker answers that no category or projection text can contain. It checks the same TV privacy, and it now also checks that another player's own projection doesn't contain them. It passed 15 times in a row across randomly dealt categories.
+  - **Why I cancelled:** I stopped the run after it had passed 8 steps, at `check-action-ack`. The verdict was already FAILED, and the fix needed a new revision with a full gate of its own. The cancellation left no Chromium or server processes.
 
 ### Typo
 

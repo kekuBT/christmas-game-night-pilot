@@ -31,11 +31,16 @@ describe("Category Sprint: your own answers, from the server", () => {
     for (const p of ids) send(p, "briefing-ready", { ready: true });
     t += 10;
     const mineOf = (pid: string) => ((engine.project("player", pid).myGames as { id: string; state: Record<string, unknown> }[]).find((x) => x.id === g.id)!.state);
+    // Marker answers that no category or projection text can contain: the
+    // round's category is dealt at random, and with real words ("school")
+    // the privacy checks below failed whenever "Things in a school" came up.
+    const answers = ["zqmarkerone", "zqmarkertwo"];
     expect(mineOf(ids[1]!)["mySubmission"]).toBeUndefined();
-    expect(send(ids[1]!, "sprint-answers", { answers: ["school", "desk"] }).accepted).toBe(true);
-    expect(mineOf(ids[1]!)["mySubmission"]).toEqual(["school", "desk"]);
+    expect(send(ids[1]!, "sprint-answers", { answers }).accepted).toBe(true);
+    expect(mineOf(ids[1]!)["mySubmission"]).toEqual(answers);
     expect(mineOf(ids[2]!)["mySubmission"]).toBeUndefined(); // Baraka sees nothing of Amina's
-    expect(JSON.stringify(engine.project("tv"))).not.toContain("school");
-    expect(send(ids[1]!, "sprint-answers", { answers: ["school", "desk"] }).accepted).toBe(false); // counted once
+    expect(JSON.stringify(engine.project("player", ids[2]!))).not.toContain("zqmarker"); // nowhere in Baraka's projection
+    expect(JSON.stringify(engine.project("tv"))).not.toContain("zqmarker");
+    expect(send(ids[1]!, "sprint-answers", { answers }).accepted).toBe(false); // counted once
   });
 });
