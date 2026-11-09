@@ -104,6 +104,24 @@ describe("Majority Rules module", () => {
   });
 });
 
+describe("Majority Rules: nothing public tells who voted (independent review)", () => {
+  it("participation counts predictions only, never votes; a split room names nobody", () => {
+    const s = majorityModule.init({ players: P, seed: 1 });
+    majorityModule.intent(s, "a", "majority-predict", { choice: "a" }, ctx(P));
+    majorityModule.intent(s, "a", "majority-vote", { choice: "a" }, ctx(P));
+    majorityModule.intent(s, "b", "majority-predict", { choice: "a" }, ctx(P));
+    majorityModule.intent(s, "b", "majority-vote", { choice: "b" }, ctx(P));
+    majorityModule.intent(s, "c", "majority-predict", { choice: "b" }, ctx(P)); // predicts, never votes
+    majorityModule.expirePhase(s, ctx(P));
+    const part = majorityModule.participation(s, P).participation;
+    for (const p of P) expect(part[p]!.actions).toBe(part[p]!.done);
+    const res = (majorityModule.publicView(s, { now: 0, scale: 1 }) as Json)["result"] as Json;
+    expect(res["majority"]).toBe("tie");
+    expect(res["spotOn"]).toEqual([]);
+    expect(majorityRoundResult(s, 0).points).toEqual({ a: 50, b: 50, c: 50 }); // still scored: 50 each, server-side
+  });
+});
+
 describe("Majority Rules in the room engine", () => {
   const T0 = 1_800_000_000_000;
   function setup(n = 3) {

@@ -50,6 +50,17 @@ const EXACT: Record<string, string> = {
   WRONG_ROOM: "That was for a different room.",
   // Charades abstention is rejected NOT_APPLICABLE (room.ts) — Pass exists.
   NOT_APPLICABLE: "That does not apply to this game.",
+  // Stage 5 games.
+  PREDICT_FIRST: "Make your prediction first, then vote.",
+  WRONG_ROUND: "That round isn't open on this phone. It will catch up in a moment.",
+  ALREADY_FINISHED: "You've finished this game.",
+  DRAWER_CANNOT_GUESS: "You're drawing this one, so you can't guess it.",
+  NOT_YOUR_TURN: "It isn't your turn to draw.",
+  TOO_MANY_GUESSES: "That's all your guesses for this drawing.",
+  RATE_LIMITED: "Slow down a little: that was too quick. Try again.",
+  DRAWING_FULL: "The drawing is full. Clear or undo to make room.",
+  PAYLOAD_TOO_LARGE: "That was too much at once. Try again.",
+  SWAP_NOT_AVAILABLE: "You can only change the word once, before drawing or guessing starts.",
   // HTTP errors (src/server/room.ts startGame / skipTimedOutGame / join).
   "A game is already in progress":
     "A game is already running — finish it or wait for the host.",

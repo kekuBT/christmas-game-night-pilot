@@ -156,6 +156,53 @@ describe("Draw & Guess module", () => {
   });
 });
 
+describe("Draw & Guess: review fixes", () => {
+  it("no swap once anything was drawn (even if cleared) or anyone guessed", () => {
+    const s = drawModule.init({ players: P, seed: 11 });
+    const t = s.turns[0]!;
+    const g = P.find((p) => p !== t.drawer)!;
+    drawModule.intent(s, t.drawer, "draw-strokes", { pieces: [piece()] }, ctx(0));
+    drawModule.intent(s, t.drawer, "draw-clear", {}, ctx(100));
+    expect(drawModule.intent(s, t.drawer, "draw-swap", {}, ctx(200))).toEqual({ ok: false, reason: "SWAP_NOT_AVAILABLE" });
+    expect(drawModule.playerView(s, t.drawer, { now: 0, scale: 1 })["canSwap"]).toBe(false);
+    const s2 = drawModule.init({ players: P, seed: 11 });
+    const t2 = s2.turns[0]!;
+    drawModule.intent(s2, g, "draw-guess", { text: "something else" }, ctx(0));
+    expect(drawModule.intent(s2, t2.drawer, "draw-swap", {}, ctx(10))).toEqual({ ok: false, reason: "SWAP_NOT_AVAILABLE" });
+  });
+
+  it("who sat out stays private: no skip count, no 'passed' in any public view", () => {
+    const s = drawModule.init({ players: ["a", "b", "c"], seed: 12 });
+    const t = s.turns[0]!;
+    const [g1] = ["a", "b", "c"].filter((p) => p !== t.drawer);
+    drawModule.abstain(s, g1!, ctx(0, ["a", "b", "c"]));
+    expect(JSON.stringify(drawModule.publicView(s, { now: 0, scale: 1 }))).not.toMatch(/skipped|gaveUp/);
+    drawModule.abstain(s, t.drawer, ctx(0, ["a", "b", "c"]));
+    expect(JSON.stringify(drawModule.publicView(s, { now: 0, scale: 1 }))).not.toMatch(/skipped|gaveUp|passed/);
+    expect(drawModule.playerView(s, g1!, { now: 0, scale: 1 })["mySkipped"]).toBe(true); // your own phone knows
+  });
+});
+
+describe("the intent replay store is bounded (S5-F)", () => {
+  it("keeps at most SEEN_INTENTS_MAX, oldest first; a recent replay still returns its original result", () => {
+    const engine = new RoomEngine("Cap room", { timing: 2 });
+    const host = engine.join("Keku", { asHost: true }).player.id;
+    const send = (id: string) => engine.submitIntent({ kind: "intent", schemaVersion: 1, clientEventId: id, roomId: engine.id, gameInstanceId: "none", action: "draw-guess", payload: { text: "x" } }, host);
+    const firstId = randomUUID();
+    send(firstId);
+    let recent = "";
+    let recentResult: unknown;
+    for (let i = 0; i < RoomEngine.SEEN_INTENTS_MAX + 50; i++) { recent = randomUUID(); recentResult = send(recent); }
+    const saved = (engine.toJSON() as Json)["seenIntents"] as [string, unknown][];
+    expect(saved.length).toBe(RoomEngine.SEEN_INTENTS_MAX);
+    expect(saved.some(([k]) => k.includes(firstId))).toBe(false); // the oldest went first
+    expect(send(recent)).toBe(recentResult); // a recent replay returns the very same result
+    expect(((engine.toJSON() as Json)["seenIntents"] as unknown[]).length).toBe(RoomEngine.SEEN_INTENTS_MAX);
+    const back = RoomEngine.fromJSON(JSON.parse(JSON.stringify(engine.toJSON())));
+    expect(((back.toJSON() as Json)["seenIntents"] as unknown[]).length).toBe(RoomEngine.SEEN_INTENTS_MAX);
+  });
+});
+
 describe("Draw & Guess in the room engine", () => {
   const T0 = 1_800_000_000_000;
   function setup(n = 3) {

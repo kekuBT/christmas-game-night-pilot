@@ -1507,6 +1507,8 @@ export function App() {
     {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={themes.everyday} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
       {showGamePanel && playingGame && <GamePanel game={playingGame} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
+      {/* S5-F: the older panel (Category Sprint, Who Said That?, Impostor, Charades) says so beside the game when a send fails; typed text stays in its box. */}
+      {showGamePanel && playingGame && sendFailure}
 
 
 

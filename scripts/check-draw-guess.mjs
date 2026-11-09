@@ -225,7 +225,8 @@ try {
   {
     const { d, word, guessers: [ga] } = await turnStart(3);
     await pages[d].getByTestId("mz-dg-giveup").click();
-    await soon("turn 3: giving up reveals the word at once: 'The drawer passed'", async () => /passed on this one/.test(await pages[ga].getByTestId("mz-dg-mine").innerText()) && new RegExp(word, "i").test(await pages[ga].getByTestId("mz-dg-answer").innerText()), 10000);
+    await soon("turn 3: giving up reveals the word at once (said as 'nobody got it': who passed stays private)", async () => /Nobody got it/.test(await pages[ga].getByTestId("mz-dg-mine").innerText()) && !/pass/i.test(await text(pages[ga])) && new RegExp(word, "i").test(await pages[ga].getByTestId("mz-dg-answer").innerText()), 10000);
+    check("turn 3: the public projection has no skip count or 'gave up'", !/skipped|gaveUp/.test(JSON.stringify(await tvGame())));
   }
 
   // ======== Turn 4: one word swap, server limits, everyone gets it.
@@ -268,6 +269,7 @@ try {
     const t = await text(p);
     check(`results ${WIDTHS[i]}px: four turns recapped, how scoring works, no sideways scrolling`, (await p.getByTestId("mz-dg-recap-turn").count()) === 4 && /in the order they got it/.test(t) && await noSideways(p));
   }
+  check("results: the moment line comes from a recorded turn (turn 4: everyone got it)", /^Everyone got .+’s “.+”\.$/.test(await keku.getByTestId("results-moment").innerText()), await keku.getByTestId("results-moment").innerText().catch(() => "none"));
   await keku.screenshot({ path: screenshotPath("docs/stage5/after/dg-results-390.png"), fullPage: true });
   { const f = await contrastFailures(keku); check("contrast (AA): results", f.length === 0, f.join("; ")); }
   await soon("TV: final standings, then the review", async () => (await tv.getByTestId("tv-mode").getAttribute("data-mode")) === "final", 20000);

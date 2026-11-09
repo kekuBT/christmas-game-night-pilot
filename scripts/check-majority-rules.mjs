@@ -13,6 +13,7 @@ import { spawn } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { contrastFailures } from "./lib/contrast.mjs";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -116,6 +117,7 @@ try {
       await p.getByTestId("mz-mr-vote").waitFor({ timeout: 10000 });
       if (n === 1 && i === 0) {
         await p.screenshot({ path: screenshotPath("docs/stage5/after/mr-vote-step-390.png") });
+        { const f = await contrastFailures(p); check("contrast (AA): the vote step", f.length === 0, f.join("; ")); }
         const tvText = await text(tv);
         check("TV during a round: a count, never a vote or a total", /1 of 4 locked in|0 of 4 locked in/.test(tvText) && !/vote[s]?\b.*\d+\s*[–-]\s*\d+/.test(tvText) && (await tv.getByTestId("mz-mr-bars").count()) === 0, (await tv.getByTestId("tv-live-progress").innerText()));
         const pub = JSON.stringify(await tvGame());
@@ -137,11 +139,14 @@ try {
       check("round 1: Keku called it (+100)", /You called it: \+100/.test(await keku.getByTestId("mz-mr-mine").innerText()));
       check("round 1: Bartholomew didn't", /no points this time/.test(await pages[2].getByTestId("mz-mr-mine").innerText()));
       await keku.screenshot({ path: screenshotPath("docs/stage5/after/mr-reveal-390.png") });
+      { const f = await contrastFailures(keku); check("contrast (AA): the reveal", f.length === 0, f.join("; ")); }
       await sleep(400);
       await tv.screenshot({ path: screenshotPath("docs/stage5/after/mr-tv-reveal-1440.png") });
     }
     if (n === 2) {
-      check("round 2: a tie — 'A split room', every prediction scores 50", /split room/.test(await keku.getByTestId("mz-mr-verdict").innerText()) && res.majority === "tie" && res.spotOn.length === 4 && res.spotOn.every((x) => x.points === 50));
+      check("round 2: a tie — 'A split room', every prediction scores 50", /split room/.test(await keku.getByTestId("mz-mr-verdict").innerText()) && res.majority === "tie");
+      check("round 2: a split room names nobody publicly (who skipped stays private)", res.spotOn.length === 0, JSON.stringify(res.spotOn));
+      check("round 2: each phone says its own prediction scored +50", (await Promise.all(pages.map(async (p) => /\+50/.test(await p.getByTestId("mz-mr-mine").innerText())))).every(Boolean));
       await pages[3].screenshot({ path: screenshotPath("docs/stage5/after/mr-tie-320.png") });
     }
     if (n === 3) check("round 3: a skip scores 0 and isn't counted", !res.spotOn.some((x) => x.playerId === seats[3].playerId) && res.votesA + res.votesB === 3);
@@ -161,6 +166,8 @@ try {
     check(`results ${WIDTHS[i]}px: five rounds recapped, how scoring works, no sideways scrolling`, (await p.getByTestId("mz-mr-recap-round").count()) === 5 && /100 points for predicting the majority/.test(t) && await noSideways(p));
   }
   check("results: a tie for first, said as a tie", /Keku and Amina tie for first|Amina and Keku tie for first/.test(await text(keku)));
+  check("results: the moment line comes from a recorded round (round 2's 2–2 split)", (await keku.getByTestId("results-moment").innerText()) === "Round 2 split the room 2–2.");
+  { const f = await contrastFailures(keku); check("contrast (AA): results", f.length === 0, f.join("; ")); }
   await keku.screenshot({ path: screenshotPath("docs/stage5/after/mr-results-390.png"), fullPage: true });
   await soon("TV: final standings, then the post-game review with every round", async () => (await tv.getByTestId("tv-mode").getAttribute("data-mode")) === "final");
   await tv.getByTestId("tv-dir-review").click();
@@ -168,6 +175,7 @@ try {
   await tv.screenshot({ path: screenshotPath("docs/stage5/after/mr-tv-review-1440.png") });
   const pub = JSON.stringify(g);
   check("votes stay anonymous even after the game: no player's vote in the public projection", !seats.some((s) => new RegExp(`"${s.playerId}":"[ab]"`).test(pub)));
+  check("…and no per-player vote count (participation counts predictions only)", Object.values(g.outcome?.participation ?? {}).every((x) => x.actions === x.done), JSON.stringify(g.outcome?.participation));
 } finally {
   await browser.close();
   srv.kill("SIGTERM");

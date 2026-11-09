@@ -140,6 +140,27 @@ try {
     await p.context().close();
   }
 
+  // ---- S5-F: the older game panel (Impostor's clue box): the failure is said beside the game and the words stay.
+  {
+    const room = await makeRoom(["Keku", "Amina", "Bartholomew", "Wanjiru"]);
+    const gid = await practice(room, "impostor");
+    const p = await seatPage(room, room.seats[1]);
+    const box = p.getByPlaceholder("Your clue (max 140 chars)");
+    await box.waitFor({ timeout: 20000 });
+    await box.fill("jingle all the way");
+    await cut(p);
+    await p.getByRole("button", { name: "Submit clue" }).click();
+    await soon("Impostor (older panel): a clue with no answer says it couldn't be confirmed", () => failureShown(p));
+    check("Impostor: the clue is still in the box", (await box.inputValue()) === "jingle all the way");
+    check("Impostor: the server has no clue from Amina", (await mine(room, room.seats[1], gid)).state?.clues?.[room.seats[1].playerId] === undefined);
+    await p.screenshot({ path: screenshotPath("docs/stage5/after/send-fail-impostor-390.png") });
+    await heal(p);
+    await p.getByRole("button", { name: "Submit clue" }).click();
+    await soon("Impostor: submitting again sends it (the server has it)", async () => (await mine(room, room.seats[1], gid)).state?.clues?.[room.seats[1].playerId] === "jingle all the way");
+    await soon("Impostor: the failure line is gone", async () => (await p.getByTestId("mz-send-error").count()) === 0);
+    await p.context().close();
+  }
+
   // ---- The reconnecting banner promises only confirmed answers.
   {
     const room = await makeRoom(["Keku", "Amina"]);

@@ -42,7 +42,7 @@ export const DRAW_LIMITS = {
   /** At most this many drawing messages in any 2-second window. */
   messagesPer2s: 16,
   guessLength: 40,
-  guessesPerTurn: 20,
+  guessesPerTurn: 12,
   swapsPerTurn: 1,
 } as const;
 
@@ -58,6 +58,8 @@ export interface DrawTurn {
   guessCounts: Record<string, number>;
   skipped: string[];
   gaveUp?: boolean;
+  /** Anything was ever drawn this turn (an undo or a clear doesn't reset it). */
+  everDrew?: boolean;
   /** Message times in the current rate window. */
   recent: number[];
 }
@@ -108,6 +110,8 @@ export function drawTurnPoints(t: DrawTurn): Record<string, number> {
 }
 
 const cur = (s: DrawState) => s.turns[s.turn];
+const canSwap = (s: DrawState, t: DrawTurn) =>
+  t.swaps < DRAW_LIMITS.swapsPerTurn && !t.everDrew && t.pieces.length === 0 && Object.keys(t.guessCounts).length === 0 && s.reserve < s.prompts.length;
 const promptOf = (s: DrawState, t: DrawTurn) => s.prompts[t.promptIdx]!;
 
 function guessersDone(s: DrawState, t: DrawTurn, ctx: ModuleContext): boolean {
@@ -181,6 +185,7 @@ export const drawModule: GameModule<DrawState> = {
       if (strokes.size > DRAW_LIMITS.strokesPerTurn) return { ok: false, reason: "DRAWING_FULL" };
       for (const x of pieces as DrawPiece[]) t.pieces.push({ s: x.s, c: x.c, w: x.w, p: [...x.p] });
       t.points += n;
+      t.everDrew = true;
       return { ok: true, result: { points: t.points } };
     }
     if (action === "draw-undo") {
@@ -197,8 +202,8 @@ export const drawModule: GameModule<DrawState> = {
       return { ok: true };
     }
     if (action === "draw-swap") {
-      // A new word, once per turn, before anything is drawn and before anyone has guessed it.
-      if (t.swaps >= DRAW_LIMITS.swapsPerTurn || t.pieces.length > 0 || t.correct.length > 0 || s.reserve >= s.prompts.length) return { ok: false, reason: "SWAP_NOT_AVAILABLE" };
+      // A new word, once per turn, before anything was drawn (even if since cleared) and before any guess.
+      if (!canSwap(s, t)) return { ok: false, reason: "SWAP_NOT_AVAILABLE" };
       t.promptIdx = s.reserve++;
       t.swaps += 1;
       return { ok: true };
@@ -262,12 +267,12 @@ export const drawModule: GameModule<DrawState> = {
       letters: letterPattern(p.word),
       correct: t.correct.map((pid, k) => ({ playerId: pid, order: k + 1 })),
       guessers: guessers.length,
-      skipped: t.skipped.length,
+      // No skip count and no "the drawer passed": who sat out stays private (L33).
     };
     if (!reveal) return base;
     const recap = (k: number) => {
       const tt = s.turns[k]!;
-      return { drawerId: tt.drawer, word: promptOf(s, tt).word, correct: tt.correct.length, gaveUp: !!tt.gaveUp, points: drawTurnPoints(tt) };
+      return { drawerId: tt.drawer, word: promptOf(s, tt).word, correct: tt.correct.length, points: drawTurnPoints(tt) };
     };
     return { ...base, result: recap(i), ...(s.phase === "finished" ? { turns: s.turns.map((_, k) => recap(k)) } : {}) };
   },
@@ -277,7 +282,7 @@ export const drawModule: GameModule<DrawState> = {
     const drawing = s.phase === "draw" && t.drawer === actorId;
     return {
       ...this.publicView(s, ctx),
-      ...(drawing ? { myWord: promptOf(s, t).word, canSwap: t.swaps < DRAW_LIMITS.swapsPerTurn && t.pieces.length === 0 && t.correct.length === 0 && s.reserve < s.prompts.length } : {}),
+      ...(drawing ? { myWord: promptOf(s, t).word, canSwap: canSwap(s, t) } : {}),
       amDrawing: t.drawer === actorId,
       myCorrect: t.correct.includes(actorId),
       myGuesses: t.guessCounts[actorId] ?? 0,

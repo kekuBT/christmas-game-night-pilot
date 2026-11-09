@@ -144,7 +144,8 @@ export const pulseModule: GameModule<PulseState> = {
     const participation = Object.fromEntries(players.map((pid) => {
       const p = s.per[pid];
       const answered = (p?.results ?? []).filter((r) => r.answer !== null).length;
-      return [pid, { done: answered, of: PULSE_LENGTHS.length, actions: answered, finished: !!p?.done && !p.satOut }];
+      // Finished means played to the end: a player whose every window ran out didn't finish it.
+      return [pid, { done: answered, of: PULSE_LENGTHS.length, actions: answered, finished: !!p?.done && !p.satOut && answered > 0 }];
     }));
     return { participation };
   },

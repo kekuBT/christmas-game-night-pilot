@@ -382,6 +382,13 @@ export class RoomEngine {
   }
   seq = 0;
   private seenIntents = new Map<string, { accepted: boolean; result: unknown }>();
+  /**
+   * Stage 5 (S5-F): how many answered intents a room remembers for replays.
+   * A retry comes seconds after its original; this keeps minutes of a busy
+   * room (Draw & Guess sends a drawing batch about three times a second)
+   * while stopping the room file from growing without bound. Oldest go first.
+   */
+  static readonly SEEN_INTENTS_MAX = 4000;
   private nextPlayer = 1;
   private nextGame = 1;
   private nextSpectator = 1;
@@ -1049,7 +1056,16 @@ export class RoomEngine {
       }
     }
     this.seenIntents.set(key, { accepted: result.accepted, result });
+    this.trimSeenIntents();
     return result;
+  }
+
+  /** Forget the oldest answered intents beyond SEEN_INTENTS_MAX (a Map keeps insertion order). */
+  private trimSeenIntents(): void {
+    const extra = this.seenIntents.size - RoomEngine.SEEN_INTENTS_MAX;
+    if (extra <= 0) return;
+    let n = 0;
+    for (const k of this.seenIntents.keys()) { if (n++ >= extra) break; this.seenIntents.delete(k); }
   }
 
   /** Stage 5: the context a game module acts in. */
@@ -2559,6 +2575,7 @@ export class RoomEngine {
     engine.ledger = data["ledger"] as LedgerEvent[];
     engine.seq = data["seq"] as number;
     engine.seenIntents = new Map(data["seenIntents"] as [string, { accepted: boolean; result: unknown }][]);
+    engine.trimSeenIntents(); // a room saved before the cap comes back within it
     engine.nextPlayer = data["nextPlayer"] as number;
     engine.nextSpectator = typeof data["nextSpectator"] === "number" ? data["nextSpectator"] : 1;
     engine.nextGame = data["nextGame"] as number;

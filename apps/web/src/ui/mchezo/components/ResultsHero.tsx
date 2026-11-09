@@ -5,6 +5,7 @@ import { GameCover } from './GameCover.js';
 import { PlayerToken } from './primitives.js';
 import { accentColor } from '../lib/covers.js';
 import type { ResultsStory } from '../lib/celebrate.js';
+import { celebrationMode } from '../lib/moments.js';
 
 /**
  * Stage 3 (bonus): the top of every results screen. The headline names the
@@ -14,7 +15,9 @@ import type { ResultsStory } from '../lib/celebrate.js';
  *
  * The celebration is a short burst of the kit's four shapes (at most 1.2 s,
  * 14 pieces, CSS only), only on the phone of a winner, never under reduced
- * motion or "Off", and it never covers or delays a button.
+ * motion or "Off", and it never covers or delays a button. Stage 5 (S5-E):
+ * with reduced motion ("Less", the phone's own setting) or "Off" the winner
+ * gets the same news as a still ribbon instead: no movement at all.
  */
 export function ResultsHero({ story, gameId, title, official, players, points }: {
   story: ResultsStory;
@@ -27,7 +30,8 @@ export function ResultsHero({ story, gameId, title, official, players, points }:
 }) {
   // reducedMotion already covers the OS setting, in-app "Less" and "Off".
   const { reducedMotion } = useMchezo();
-  const [burst, setBurst] = useState(story.celebrate && !reducedMotion);
+  const mode = celebrationMode(story.celebrate, reducedMotion);
+  const [burst, setBurst] = useState(mode === 'burst');
   useEffect(() => {
     if (!burst) return;
     const t = setTimeout(() => setBurst(false), 1400);
@@ -53,6 +57,12 @@ export function ResultsHero({ story, gameId, title, official, players, points }:
           ))}
           {winners.length > 6 && <li className="mz-rhero__more">+{winners.length - 6} more</li>}
         </ul>
+      )}
+      {mode === 'still' && (
+        <p className="mz-rhero__ribbon" data-testid="results-ribbon">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polygon points="12,2 15,9 22,9.5 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.5 9,9" fill="currentColor" /></svg>
+          {story.you?.tied ? 'You share the win' : 'You won this one'}
+        </p>
       )}
       {story.quip && <p className="mz-rhero__quip" data-testid="results-quip">{story.quip}</p>}
       {story.you && (

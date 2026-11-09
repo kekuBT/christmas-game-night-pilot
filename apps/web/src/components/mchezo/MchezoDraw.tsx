@@ -17,13 +17,14 @@ import { Keycap, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
+import { drawMoment } from "../../ui/mchezo/lib/moments.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
 export interface DrawPiece { s: number; c: number; w: number; p: number[] }
-interface TurnRecap { drawerId: string; word: string; correct: number; gaveUp: boolean; points: Record<string, number> }
+interface TurnRecap { drawerId: string; word: string; correct: number; points: Record<string, number> }
 export interface DrawView {
   turn?: number; turnCount?: number; phase?: "draw" | "reveal" | "finished"; drawerId?: string;
-  pieces?: DrawPiece[]; letters?: number[]; correct?: { playerId: string; order: number }[]; guessers?: number; skipped?: number;
+  pieces?: DrawPiece[]; letters?: number[]; correct?: { playerId: string; order: number }[]; guessers?: number;
   result?: TurnRecap; turns?: TurnRecap[];
   myWord?: string; canSwap?: boolean; amDrawing?: boolean; myCorrect?: boolean; myGuesses?: number; mySkipped?: boolean; myTotal?: number;
 }
@@ -242,7 +243,7 @@ export function MchezoDraw({ game, players, playerId, title, intent, error }: Mc
         <p className="mz-mr-round">Turn {round} of {of} · {drawerName === "You" ? "you drew" : `${drawerName} drew`}</p>
         <h2 className="mz-mr-prompt" data-testid="mz-dg-answer">It was: {r.word}</h2>
         <DrawBoard pieces={st.pieces ?? []} label={`The drawing of ${r.word}`} testId="mz-dg-board" />
-        <p className="mz-mr-mine" data-testid="mz-dg-mine">{r.gaveUp && r.correct === 0 ? "The drawer passed on this one." : r.correct === 0 ? "Nobody got it this time." : mine ? `+${mine} for you.` : `${r.correct} got it.`}</p>
+        <p className="mz-mr-mine" data-testid="mz-dg-mine">{r.correct === 0 ? "Nobody got it this time." : mine ? `+${mine} for you.` : `${r.correct} got it.`}</p>
         {got}
         <p className="mz-foot">{round < of ? "Next drawer coming up." : "That was the last drawing."}</p>
       </main>
@@ -299,11 +300,16 @@ export function MchezoDrawResults({ game, publicGame, players, playerId, title, 
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-dg-results">
       {hero}
       <GameHeader title={title} objective="Every drawing, every guess" accent={5} />
+      {(() => {
+        const roster = publicGame?.players ?? Object.keys(game.rawScores ?? {});
+        const m = drawMoment(st.turns, Math.max(0, roster.length - 1), (id) => nameOf(id));
+        return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null;
+      })()}
       <ol className="mz-mr-recap">
         {(st.turns ?? []).map((t, i) => (
           <li key={i} data-testid="mz-dg-recap-turn">
             <span className="mz-foot" style={{ textAlign: "left" }}>Turn {i + 1}: {nameOf(t.drawerId)} drew</span>
-            <span className="mz-mr-recap__line"><b>{t.word}</b> · {t.correct === 0 ? "nobody got it" : `${t.correct} got it`}{t.gaveUp ? " (passed)" : ""}</span>
+            <span className="mz-mr-recap__line"><b>{t.word}</b> · {t.correct === 0 ? "nobody got it" : `${t.correct} got it`}</span>
           </li>
         ))}
       </ol>

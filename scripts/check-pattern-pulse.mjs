@@ -14,6 +14,7 @@ import { spawn } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { contrastFailures } from "./lib/contrast.mjs";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -117,6 +118,7 @@ try {
   check("memorise: each shape is named (shape + colour, not colour alone)", /circle|square|triangle|diamond|star|hexagon/.test(await keku.getByTestId("mz-pp-pattern").innerText()));
   check("memorise (full motion): the highlight sweep is on", (await keku.locator(".mz-pp-pattern--sweep").count()) === 1);
   await keku.screenshot({ path: screenshotPath("docs/stage5/after/pp-memorise-390.png") });
+  { const f = await contrastFailures(keku); check("contrast (AA): memorise", f.length === 0, f.join("; ")); }
   const tvPub = JSON.stringify(await tvGame());
   check("privacy: the TV projection never has a pattern", !/"pattern"/.test(tvPub) && !/"open"/.test(tvPub));
   check("privacy: another player's projection never has Keku's pattern", !/"pattern"/.test(JSON.stringify(await myGame(1))));
@@ -135,6 +137,7 @@ try {
   await tap(keku, k1);
   check("a full entry: 'Lock it in', and every shape key is done", /Lock it in/.test(await keku.getByTestId("mz-pp-submit").innerText()) && await keku.getByTestId("mz-pp-key-0").isDisabled());
   await keku.screenshot({ path: screenshotPath("docs/stage5/after/pp-input-390.png") });
+  { const f = await contrastFailures(keku); check("contrast (AA): tap it back", f.length === 0, f.join("; ")); }
   await keku.getByTestId("mz-pp-submit").click();
   await soon("round 1 (Keku): all three right, +110, from the server", async () => /All 3 right: \+110/.test(await keku.getByTestId("mz-pp-last").innerText()));
   check("server: Keku's round 1 scored 110", (await myGame(0)).state.results[0].points === 110);
@@ -219,6 +222,16 @@ try {
   check("results: Keku's six rounds recapped (his own patterns, now it's over)", (await keku.getByTestId("mz-pp-recap-round").count()) === 6);
   check("results: Amina's slipped last round says so", /The first one slipped: no points/.test(await text(amina)));
   await keku.screenshot({ path: screenshotPath("docs/stage5/after/pp-results-390.png"), fullPage: true });
+  { const f = await contrastFailures(keku); check("contrast (AA): results", f.length === 0, f.join("; ")); }
+  check("results: Keku's moment is his own recorded rounds", (await keku.getByTestId("results-moment").innerText()) === "Six perfect rounds out of six. Total recall.");
+  check("results: Amina's moment is her own longest perfect sequence (7)", (await amina.getByTestId("results-moment").innerText()) === "Your longest perfect sequence: 7 shapes.");
+  // S5-E: the winner's celebration follows the motion setting.
+  check("celebration with full motion: the short burst, no ribbon", (await keku.getByTestId("results-ribbon").count()) === 0);
+  await keku.emulateMedia({ reducedMotion: "reduce" });
+  await keku.reload({ waitUntil: "domcontentloaded" });
+  await soon("celebration with reduced motion: a still ribbon, no confetti", async () => /You won this one/.test(await keku.getByTestId("results-ribbon").innerText()) && (await keku.getByTestId("results-confetti").count()) === 0, 15000);
+  await keku.screenshot({ path: screenshotPath("docs/stage5/after/pp-results-still-390.png") });
+  check("celebration: only the winner's phone celebrates", (await amina.getByTestId("results-ribbon").count()) === 0 && (await amina.getByTestId("results-confetti").count()) === 0);
   await soon("TV: final standings, then the review", async () => (await tv.getByTestId("tv-mode").getAttribute("data-mode")) === "final");
   await tv.screenshot({ path: screenshotPath("docs/stage5/after/pp-tv-final-1440.png") });
   await tv.getByTestId("tv-dir-review").click();

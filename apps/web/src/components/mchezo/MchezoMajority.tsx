@@ -11,6 +11,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Keycap, MchezoWaiting, OutcomeSummary, TVRing } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
+import { majorityMoment } from "../../ui/mchezo/lib/moments.js";
 import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
@@ -106,7 +107,7 @@ export function MchezoMajority({ game, publicGame, players, playerId, title, int
         <Bars r={r} />
         <p className="mz-mr-verdict" data-testid="mz-mr-verdict">{majorityLine(r)}</p>
         <p className="mz-mr-mine" data-testid="mz-mr-mine">
-          {st.myPrediction === undefined ? "You didn't predict this round." : mine ? `You called it: +${mine.points}.` : `You predicted “${st.myPrediction === "a" ? r.a : r.b}”: no points this time.`}
+          {st.myPrediction === undefined ? "You didn't predict this round." : r.majority === "tie" ? "A split room: your prediction scores +50." : mine ? `You called it: +${mine.points}.` : `You predicted “${st.myPrediction === "a" ? r.a : r.b}”: no points this time.`}
         </p>
         {r.spotOn.length > 0 && <p className="mz-foot" data-testid="mz-mr-spoton">Spot on: {r.spotOn.map((x) => (x.playerId === playerId ? "you" : nameOf(x.playerId))).join(", ")}</p>}
         <p className="mz-foot">{round < of ? "The next question is coming up." : "That was the last question."}</p>
@@ -170,6 +171,7 @@ export function MchezoMajorityResults({ game, publicGame, players, playerId, tit
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-mr-results">
       {hero}
       <GameHeader title={title} objective="How well do you know this room?" accent={2} />
+      {(() => { const m = majorityMoment(st.rounds, publicGame?.players ?? Object.keys(game.rawScores ?? {}), (id) => nameOf(id)); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
       <ol className="mz-mr-recap">
         {(st.rounds ?? []).map((r, i) => (
           <li key={i} data-testid="mz-mr-recap-round">

@@ -183,3 +183,6 @@
 .mz-tvshow-dg .mz-tvshow-h1 { font-size: clamp(36px, 4.2vw, 76px); overflow-wrap: break-word; hyphens: manual; }
 .mz-tvshow-dg .mz-tvshow-line { font-size: clamp(20px, 1.9vw, 30px); }
 
+/* ------------------------------------------------ S5-E: a still celebration (Less / Off / OS reduced motion) */
+.mz-rhero__ribbon { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; margin: 10px 0 0; padding: 6px 14px; border-radius: 999px; background: var(--mz-highlight); color: var(--mz-on-accent, #1B1B1F); font: 800 15px/1.2 var(--mz-font-body); letter-spacing: .02em; }
+.mz-moment { margin: 10px 0 0; padding: 10px 12px; border-radius: 14px; border: 1.5px dashed var(--mz-line); font: 600 15px/1.4 var(--mz-font-body); }

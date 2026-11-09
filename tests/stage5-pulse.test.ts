@@ -107,6 +107,22 @@ describe("Pattern Pulse module", () => {
   });
 });
 
+describe("Pattern Pulse: finished means played (independent review)", () => {
+  it("a player whose every window ran out is done but not 'finished'", () => {
+    const s = pulseModule.init({ players: ["a"], seed: 2 });
+    let t = 0;
+    for (let r = 0; r < PULSE_LENGTHS.length; r++) {
+      pulseModule.intent(s, "a", "pulse-open", { round: r }, { now: t, players: ["a"], active: ["a"], scale: 1 });
+      t = pulseModule.dueAt!(s)!;
+      pulseModule.advance!(s, { now: t, players: ["a"], active: ["a"], scale: 1 });
+      t += 1;
+    }
+    expect(s.per["a"]!.done).toBe(true);
+    expect(pulseModule.participation(s, ["a"]).participation["a"]).toMatchObject({ done: 0, actions: 0, finished: false });
+    expect(pulseModule.anyAction(s)).toBe(false);
+  });
+});
+
 describe("Pattern Pulse in the room engine", () => {
   const T0 = 1_800_000_000_000;
   function setup(n = 2) {

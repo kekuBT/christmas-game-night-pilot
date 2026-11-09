@@ -14,7 +14,8 @@
  *    nobody was wrong. Every prediction scores 50 ("split room").
  *  - No votes at all: no majority, nobody scores.
  * Your own vote counts toward the majority like everyone else's. A round you
- * skipped scores 0. A missing prediction scores 0.
+ * skipped scores 0. A missing prediction scores 0. Nothing public counts
+ * anyone's votes, and a split room names nobody (who skipped stays private).
  */
 import { MAJORITY_PROMPTS, type MajorityPrompt } from "./packs/majority-prompts.js";
 import { moduleRng, seededShuffle, type GameModule, type ModuleContext } from "./types.js";
@@ -128,9 +129,10 @@ export const majorityModule: GameModule<MajorityState> = {
   participation(s, players) {
     const closed = closedRounds(s);
     const participation = Object.fromEntries(players.map((p) => {
+      // Predictions are the scoring actions. Votes are never counted here:
+      // a per-player vote count would let others work out who voted what.
       const done = closed.filter((r) => s.predictions[r]?.[p] !== undefined).length;
-      const actions = closed.reduce((n, r) => n + (s.predictions[r]?.[p] !== undefined ? 1 : 0) + (s.votes[r]?.[p] !== undefined ? 1 : 0), 0);
-      return [p, { done, of: s.prompts.length, actions }];
+      return [p, { done, of: s.prompts.length, actions: done }];
     }));
     return { participation, completedUnits: closed.length, totalUnits: s.prompts.length };
   },
@@ -146,7 +148,10 @@ export const majorityModule: GameModule<MajorityState> = {
     const reveal = (i: number) => {
       const res = majorityRoundResult(s, i);
       const q = s.prompts[i]!;
-      return { prompt: q.prompt, a: q.a, b: q.b, votesA: res.a, votesB: res.b, majority: res.majority, spotOn: Object.entries(res.points).filter(([, v]) => v > 0).map(([pid, v]) => ({ playerId: pid, points: v })) };
+      // Who called a clear majority is named. A split room names nobody: listing
+      // every prediction would show who skipped or stayed silent (L33).
+      const spotOn = res.majority === "a" || res.majority === "b" ? Object.entries(res.points).filter(([, v]) => v > 0).map(([pid, v]) => ({ playerId: pid, points: v })) : [];
+      return { prompt: q.prompt, a: q.a, b: q.b, votesA: res.a, votesB: res.b, majority: res.majority, spotOn };
     };
     return { ...base, result: reveal(r), ...(s.phase === "finished" ? { rounds: s.prompts.map((_, i) => reveal(i)) } : {}) };
   },

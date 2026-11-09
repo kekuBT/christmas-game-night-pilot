@@ -21,6 +21,7 @@ import { Keycap, MchezoWaiting, OutcomeSummary, useMchezo } from "../../ui/mchez
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
+import { pulseMoment } from "../../ui/mchezo/lib/moments.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
 interface PulseResultView { round: number; length: number; answer: number[] | null; correctRun: number; perfect: boolean; points: number; pattern: number[] }
@@ -217,6 +218,7 @@ export function MchezoPulseResults({ game, publicGame, players, playerId, title,
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-pp-results">
       {hero}
       <GameHeader title={title} objective="How sharp was your memory?" accent={4} />
+      {(() => { const m = pulseMoment(st.results); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
       {(st.results ?? []).length > 0 && (
         <ol className="mz-mr-recap">
           {(st.results ?? []).map((r) => (
