@@ -38,6 +38,7 @@ export const COVERS: Readonly<Record<string, { accent: CoverAccent; glyph: Cover
   // Stage 5 (original glyphs below).
   "majority-rules": { accent: "sun", glyph: "split" },
   "pattern-pulse": { accent: "pink", glyph: "pulse" },
+  "draw-guess": { accent: "coral", glyph: "brush" },
 };
 
 export function coverOf(gameId: string): { accent: CoverAccent; glyph: CoverGlyph } {

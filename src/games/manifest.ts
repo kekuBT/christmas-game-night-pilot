@@ -330,6 +330,26 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
     details: "Six self-paced rounds; everyone gets the same lengths and timing but their own sequence. 20 points per shape right from the start, plus 50 for the whole sequence. Practice-only (Stage 5).",
   },
+  {
+    id: "draw-guess",
+    title: "Draw & Guess",
+    description: "One player draws a secret word on their phone; everyone else races to guess it. Everyone gets a turn to draw.",
+    categories: ["creativity", "party"],
+    minPlayers: 3,
+    maxPlayers: 10,
+    playStyle: "solo",
+    competition: "competitive",
+    duration: { minutes: 10, source: "design-default", measured: false },
+    inputs: ["performance", "text"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: false },
+    features: { practice: true, official: false, abstention: "per-round" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: false },
+    details: "Up to six turns of 75 seconds; the server picks who draws and the word. Guessers score 100, 80, 60, then 50 in the order they get it; the drawer 50 for each. Wrong guesses are never shown. Practice-only (Stage 5).",
+  },
 ];
 
 /**

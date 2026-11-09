@@ -8,7 +8,7 @@ const base: ShuffleRequest = { mode: "random", playerCount: 4, seed: 1 };
 describe("eligibleGames hard constraints", () => {
   it("player count is an inclusive range check", () => {
     expect(ids(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 1 }))).toEqual(["word-connections", "pattern-pulse"]);
-    expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 4 })).toHaveLength(13);
+    expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 4 })).toHaveLength(14);
     expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 11 })).toEqual([]);
   });
 
@@ -21,7 +21,7 @@ describe("eligibleGames hard constraints", () => {
 
   it("playStyle filters capability", () => {
     expect(ids(eligibleGames(GAME_MANIFESTS, { ...base, playStyle: "team" }))).toEqual(["charades"]);
-    expect(eligibleGames(GAME_MANIFESTS, { ...base, playStyle: "solo" })).toHaveLength(12);
+    expect(eligibleGames(GAME_MANIFESTS, { ...base, playStyle: "solo" })).toHaveLength(13);
   });
 });
 
@@ -35,9 +35,9 @@ describe("shuffle empty and partial results", () => {
     const r = shuffle({ mode: "tournament", playerCount: 4, seed: 7, count: 20 });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.picks).toHaveLength(13);
+    expect(r.picks).toHaveLength(14);
     expect(r.partial).toBe(true);
-    expect(new Set(r.picks.map((p) => p.gameId)).size).toBe(13);
+    expect(new Set(r.picks.map((p) => p.gameId)).size).toBe(14);
   });
 
   it("tournament picks are distinct", () => {
@@ -154,13 +154,13 @@ describe("shuffle goldens (pinned seeds)", () => {
   });
 
   it("random mode goldens on the full catalog", () => {
-    // Re-pinned as Stage 5 games joined the catalog (Majority Rules, then
-    // Pattern Pulse): the same seeds now draw from 13 games, so the first
-    // picks moved. The draw itself is unchanged.
+    // Re-pinned as Stage 5 games joined the catalog (Majority Rules, Pattern
+    // Pulse, Draw & Guess): the same seeds now draw from 14 games, so the
+    // first picks moved. The draw itself is unchanged.
     expect(firstPickId(shuffle({ ...base, seed: 0 }))).toBe("word-connections");
     expect(firstPickId(shuffle({ ...base, seed: 1 }))).toBe("charades");
-    expect(firstPickId(shuffle({ ...base, seed: 2 }))).toBe("geography");
-    expect(firstPickId(shuffle({ ...base, seed: 3 }))).toBe("geography");
+    expect(firstPickId(shuffle({ ...base, seed: 2 }))).toBe("math-mayhem");
+    expect(firstPickId(shuffle({ ...base, seed: 3 }))).toBe("math-mayhem");
   });
 
   it("tournament category variety: seed 2 rewards a disjoint category on the second pick", () => {

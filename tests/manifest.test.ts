@@ -40,7 +40,7 @@ describe("the shipped manifests", () => {
   it("every original game supports practice and official play; Stage 5's new games are practice-only", () => {
     // Stage 5: new games launch practice-only until the owner approves their
     // Cup scoring; the manifest and the server's policy must agree.
-    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse"];
+    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess"];
     for (const m of GAME_MANIFESTS) {
       expect(m.features.practice).toBe(true);
       expect(m.features.official).toBe(!STAGE5_PRACTICE_ONLY.includes(m.id));
@@ -70,6 +70,7 @@ describe("the shipped manifests", () => {
       "math-mayhem": "whole-game",
       "majority-rules": "per-round",
       "pattern-pulse": "whole-game",
+      "draw-guess": "per-round",
     };
     for (const m of GAME_MANIFESTS) {
       expect(m.features.abstention).toBe(expected[m.id]);

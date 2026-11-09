@@ -16,8 +16,8 @@ describe("protocol", () => {
     expect(sanitizeText("  hello   world  ")).toBe("hello world");
     expect(sanitizeText("   ")).toBeNull();
   });
-  it("registry lists all 13 games (Stage 5 adds Majority Rules and Pattern Pulse), Math implemented", () => {
-    expect(GAME_REGISTRY).toHaveLength(13);
+  it("registry lists all 14 games (Stage 5 adds Majority Rules, Pattern Pulse and Draw & Guess), Math implemented", () => {
+    expect(GAME_REGISTRY).toHaveLength(14);
     expect(getGame("math-mayhem").status).toBe("implemented");
   });
 });

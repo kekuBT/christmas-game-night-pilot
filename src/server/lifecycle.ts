@@ -74,6 +74,10 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
     model: "game-deadline", gameWindowMs: 5 * MIN,
     officialEligible: false, practiceOnlyReason: "Pattern Pulse is new: practice-only until its Cup scoring is approved.", unit: "rounds",
   },
+  "draw-guess": {
+    model: "phased", gameWindowMs: 12 * MIN, phaseMs: { draw: 75 * SEC, reveal: 8 * SEC },
+    officialEligible: false, practiceOnlyReason: "Draw & Guess is new: practice-only until its Cup scoring is approved.", unit: "turns",
+  },
 });
 
 export function policyFor(gameId: string): GamePolicy {

@@ -131,6 +131,15 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Everyone gets their own pattern, with the same lengths and time.",
     ],
   },
+  "draw-guess": {
+    objective: "Draw the secret word, or guess what's being drawn.",
+    steps: [
+      "Everyone takes a turn to draw (up to six turns). Only the drawer sees the word.",
+      "Draw with your finger: colours, three line sizes, undo and clear. No letters or numbers!",
+      "Type guesses on your phone. Wrong guesses stay private.",
+      "Guessers score 100, 80, 60, then 50 in the order they get it; the drawer 50 for each.",
+    ],
+  },
 };
 
 export function briefingRules(gameId: string, tutorial: string): { objective: string; steps: string[] } {

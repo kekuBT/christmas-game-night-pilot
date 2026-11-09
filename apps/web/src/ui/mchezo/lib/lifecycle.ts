@@ -51,6 +51,7 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   // Stage 5 (Practice-only games).
   "majority-rules": { verb: "Predicted in", noun: ["round", "rounds"] },
   "pattern-pulse": { verb: "Answered", noun: ["round", "rounds"] },
+  "draw-guess": { verb: "Drew or guessed in", noun: ["turn", "turns"] },
 };
 
 /**
