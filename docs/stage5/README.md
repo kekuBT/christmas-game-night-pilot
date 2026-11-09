@@ -35,8 +35,8 @@ Stage 4 was already complete before this stage began: its verified code was `84e
 |---|---|
 | Baseline | `b706a84`: the pushed Stage 4 head (docs only), whose code `84ed7ed` passed gate run `20261109-035458-84ed7ed0-4459` |
 | Branch | `claude/stage5-complete-game-night` (pushed; not merged; not deployed) |
-| Checkpoints | `cd61633` S5-P · `23f86e6` S5-A/S5-B · `70fa11b` Majority Rules · `a02588b` Pattern Pulse · `c866125` Draw & Guess · `6371425` S5-E/S5-F |
-| Verified code | not yet (§11: gate run 1 on `6371425` failed one driver step; a new gate follows) |
+| Checkpoints | `cd61633` S5-P · `23f86e6` S5-A/S5-B · `70fa11b` Majority Rules · `a02588b` Pattern Pulse · `c866125` Draw & Guess · `6371425` S5-E/S5-F · `481c1f7` and `8879c3f` two drivers follow the S5-A TV |
+| Verified revision | **`8879c3f`**: full gate **PASSED (exit 0)**, run `20261109-080851-8879c3f6-18873` (§11). Everything after it is docs only. |
 
 ## 3. The TV (S5-A)
 
@@ -159,11 +159,31 @@ The server refuses an Official start with the reason. The lobby disables Officia
 
 ## 9. Screenshot gallery (Chromium; `docs/stage5/after/`)
 
-*Pending:* the gallery is copied from the final gate run's own screenshots (the exact revision) when the run finishes.
+All images come from the passing gate run `20261109-080851-8879c3f6-18873` on `8879c3f` (Chromium, emulated sizes).
+- **Look at these first:**
+  - `dg-drawer-430.png`: the drawer's screen.
+  - `dg-tv-live-1920.png`: the TV during a drawing.
+  - `pp-memorise-reduced-375.png`: Pattern Pulse with reduced motion.
+  - `mr-tie-320.png`: a split room at 320 px.
+  - `flow-last-game-375.png`: the Last game card.
+  - `tv-review-1440.png`: the TV's Post-game review.
+  - `pp-results-still-390.png`: the still win ribbon.
+
+**TV (S5-A):** [lobby 1920](after/tv-lobby-1920.png) · [Closest Wins live 1920](after/tv-closest-live-1920.png) · [Impostor live, no words 1920](after/tv-impostor-live-1920.png) · [Math live 1440](after/tv-math-live-1440.png) · [final standings 1440](after/tv-final-1440.png) · [post-game review 1440](after/tv-review-1440.png)
+
+**Between games (S5-B):** [Last game card 375](after/flow-last-game-375.png) · [needs more players 375](after/flow-needs-more-375.png)
+
+**A failed send says so (S5-P, S5-F):** [Trivia](after/send-fail-trivia-390.png) · [Math](after/send-fail-math-mayhem-390.png) · [Geography](after/send-fail-geography-390.png) · [Guess the Year](after/send-fail-guess-the-year-390.png) · [Closest Wins](after/send-fail-closest-wins-390.png) · [Word Connections](after/send-fail-word-connections-390.png) · [Impostor, older panel](after/send-fail-impostor-390.png) · [reconnecting banner](after/reconnecting-banner-390.png)
+
+**Majority Rules:** [briefing 375](after/mr-briefing-375.png) · [vote step 390](after/mr-vote-step-390.png) · [failed send 375](after/mr-send-failed-375.png) · [reveal 390](after/mr-reveal-390.png) · [split room 320](after/mr-tie-320.png) · [results 390](after/mr-results-390.png) · [TV reveal 1440](after/mr-tv-reveal-1440.png) · [TV review 1440](after/mr-tv-review-1440.png)
+
+**Pattern Pulse:** [briefing 375](after/pp-briefing-375.png) · [ready 390](after/pp-ready-390.png) · [memorise 390](after/pp-memorise-390.png) · [memorise, reduced motion 375](after/pp-memorise-reduced-375.png) · [tap it back 390](after/pp-input-390.png) · [failed send 320](after/pp-send-failed-320.png) · [missed window 375](after/pp-missed-375.png) · [results 390](after/pp-results-390.png) · [results, still ribbon 390](after/pp-results-still-390.png) · [TV live 1440](after/pp-tv-live-1440.png) · [TV final 1440](after/pp-tv-final-1440.png)
+
+**Draw & Guess:** [briefing 375](after/dg-briefing-375.png) · [drawer 430](after/dg-drawer-430.png) · [wrong guess 390](after/dg-guess-wrong-390.png) · [reveal 390](after/dg-reveal-390.png) · [results 390](after/dg-results-390.png) · [TV live 1440](after/dg-tv-live-1440.png) · [TV live 1920](after/dg-tv-live-1920.png) · [TV reveal 1440](after/dg-tv-reveal-1440.png) · [TV review 1440](after/dg-tv-review-1440.png)
 
 ## 10. Regression coverage
 
-- **Unit tests:** 1055 at `6371425`. New in Stage 5:
+- **Unit tests:** 1055 in 92 files, at `8879c3f` (1001 at Stage 4). New in Stage 5:
   - `stage5-majority`, `stage5-pulse`, `stage5-draw`, `stage5-moments`, `stage5-tvfeed`;
   - an `errors` update.
 - **New browser drivers:**
@@ -178,19 +198,39 @@ The server refuses an Official start with the reason. The lobby disables Officia
 
 ## 11. Gate run and revision
 
-**No passing verdict yet.**
-- **Gate run 1:** `node scripts/gate.mjs full` on `6371425`, from a fresh clone (the only untracked file is a `node_modules` symlink), run `20261109-072613-63714256-8119`.
-  - Step 10, `check-answer-reveal`, **FAILED** (TimeoutError). The driver waited for the TV to list a finished Geography game's answers by itself, and for Closest Wins' live TV to show a one-item answer list.
-  - Since S5-A (D-S5-03), a finished game opens on Final standings, its answers are the Post-game review, and live Closest Wins shows `tv-closest-last`.
-  - The product behaves as designed. The driver was moved to reach the review the way a person does; its assertions are unchanged (answers listed after the game; last answer only; nobody's guess).
-  - The run continues to record every step. This run does not count.
-- A new full gate on the revision with the fix follows. Its verdict is recorded in the next docs-only commit.
+**Verdict:** `node scripts/gate.mjs full` on **`8879c3f`**, from a fresh clone, **PASSED (exit 0)**, run `20261109-080851-8879c3f6-18873`.
+- 65 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- Unit tests: 1055 in 92 files. E2E (Chromium): 15/15, every one of the 14 games played to the end on 4 phones, plus the room views.
+- Stage 5 drivers in this run:
 
-**Per-checkpoint verification before the gate** (each on one revision; not a gate verdict):
-- `70fa11b`: unit tests, `check-majority-rules`, `check-f5` and e2e 13/13 passed.
-- `a02588b`: 1030 unit tests, `check-pattern-pulse`, `check-f5` and e2e 14/14 passed. `check-mchezo` failed once under heavy parallel load (a 30 s wait for Trivia results), then passed alone on the same revision.
-- `c866125`: 1046 unit tests, `check-draw-guess`, `check-f5` and e2e 15/15 passed.
-- `6371425` changes: the four new-game and send-failure drivers passed on the build before commit.
+  | Driver | Checks |
+  |---|---|
+  | `check-draw-guess` | 61 |
+  | `check-pattern-pulse` | 54 |
+  | `check-majority-rules` | 49 |
+  | `check-send-failures` | 43 |
+  | `check-tv-show` | 29 |
+  | `check-game-night-flow` | 14 |
+
+- Run conditions:
+  - The only untracked file was a `node_modules` symlink.
+  - Browser: chrome-headless-shell 153.0.8010.12 (set by `MCHEZO_CHROMIUM_PATH`).
+- The verdict covers `8879c3f` only. The commits after it are docs only: this README's final sections, the gallery images, PROGRESS.
+- `8879c3f`'s app code is identical to `6371425`. The two commits between them change only two drivers, `check-answer-reveal` and `check-game-night`.
+
+**Runs that do not count:**
+- **Gate run 1:** `6371425`, run `20261109-072613-63714256-8119`. It was CANCELLED by me (exit 130) after 24 passed and 2 failed.
+  - `check-answer-reveal` and `check-game-night` still expected the pre-S5-A TV:
+    - the answers shown by themselves after a game;
+    - a one-item answer list during Closest Wins;
+    - the raw game ids "closest-wins" and "math-mayhem" in the TV text.
+  - The TV behaves as designed (D-S5-03). Both drivers now reach the TV the way a person does, with the same assertions: `481c1f7` and `8879c3f`.
+  - It was cancelled because its remaining steps tested the same app code as the next run.
+  - Root cause on my side: neither driver was in my targeted sweeps after S5-A.
+- **Targeted runs before the gate** (not verdicts):
+  - The per-checkpoint runs in PROGRESS: each game verified on its own commit, with f5 and e2e.
+  - A 20-driver sweep of TV and results drivers after gate run 1. Every driver passed except `check-game-night` (fixed). `check-leaderboard` was cut by my sweep's 900 s limit; it normally needs about 930 s, and the gate allows 1800 s. It passed in run 2 (1074 s).
+  - `check-mchezo` failed once on `a02588b` under five parallel browser jobs. It passed alone on the same revision, and in run 2.
 
 ## 12. Limitations
 

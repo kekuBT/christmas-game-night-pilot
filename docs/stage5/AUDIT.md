@@ -38,6 +38,7 @@ Contrast (WCAG AA) is checked on every screen of the three new games by their ow
 - **Library and stage drivers hard-coded "11 games"** (`check-library`, `check-library-nav`, `check-stage2`, `check-mchezo`). They now read the catalogue from `/games`, so a new game can't silently break them or be silently skipped.
 - **The older game panel didn't say a send had failed beside the game** (Category Sprint, Who Said That?, Impostor, Charades). Only the app's general error line, at the top, said so. It now shows the same line as the other screens, under the game (`check-send-failures`, Impostor).
 - **Draw & Guess TV layout:** the shared TV panel zoom (1.6×) pushed the drawing off the bottom of the screen and broke a long drawer name mid-word. The board is now sized to the screen; checked at 1280×720, 1440×900 and 1920×1080.
+- **Two older drivers still expected the pre-S5-A TV** (`check-answer-reveal`, `check-game-night`; found by gate run 1). They now open the Post-game review, read the live Closest Wins panel and match game titles, with the same assertions.
 - **Draw & Guess privacy checks:** the driver first matched words inside other words ("hat" in "What is it?"), a false alarm. It now matches whole words, so a real leak would still fail it.
 
 ## Independent review of the new games (S5-F)

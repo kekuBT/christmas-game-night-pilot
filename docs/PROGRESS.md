@@ -1352,10 +1352,19 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 
 **Limitation:** Chromium emulation only; no real iPhone, Android or TV.
 
-**Gate run 1 (does not count):** `node scripts/gate.mjs full` on `6371425` (fresh clone; run `20261109-072613-63714256-8119`).
-- Step 10, `check-answer-reveal`, FAILED. It still expected the pre-S5-A TV: answers shown by themselves after a game, and a one-item list during Closest Wins. The driver now opens the Post-game review and reads `tv-closest-last`, with the same assertions.
-- This driver was not in the per-checkpoint sweeps after S5-A: a gap in my targeted runs, which the full gate caught.
-- A new full gate on the fixed revision follows; its verdict goes in the next docs-only commit.
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on **`8879c3f`**: **PASSED (exit 0)**, run `20261109-080851-8879c3f6-18873`.
+- 65 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- Unit tests 1055 (92 files). E2E (Chromium) 15/15: all 14 games played to the end, plus the room views.
+- Drivers: `check-draw-guess` 61 checks, `check-pattern-pulse` 54, `check-majority-rules` 49, `check-send-failures` 43, `check-tv-show` 29, `check-game-night-flow` 14; `check-leaderboard` 1074 s.
+- Run from a fresh clone; the only untracked file was a `node_modules` symlink. Browser: chrome-headless-shell 153.0.8010.12 via `MCHEZO_CHROMIUM_PATH`.
+- The verdict covers `8879c3f` only. Its app code is identical to `6371425`'s: the commits between them change two drivers. Everything after it is docs only.
+
+**Runs that do not count:**
+- **Gate run 1:** `6371425`, run `20261109-072613-63714256-8119`. CANCELLED by me (exit 130) after 24 passed and 2 failed.
+  - `check-answer-reveal` and `check-game-night` still expected the pre-S5-A TV: answers shown by themselves, a one-item Closest Wins list, and raw game ids in the TV text.
+  - Both drivers now reach the TV as a person does, with the same assertions (`481c1f7`, `8879c3f`).
+  - Neither had been in my targeted sweeps after S5-A; the full gate caught it.
+- **A follow-up 20-driver sweep of TV and results drivers:** all passed except `check-game-night` (fixed). `check-leaderboard` was cut off by my sweep's 900 s cap; it normally needs about 930 s.
 
 **Next task (if the owner continues):** the README §14 real-device session (iPhone Safari first); owner rulings on §13; backlog B-1..B-4.
 **Risk:**
