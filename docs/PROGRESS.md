@@ -1255,3 +1255,53 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Runs that do not count:**
 - `bd82ce7` (run `20261108-175746-bd82ce7a-13590`): FAILED, 52 passed and 1 failed. `check-math` still asserted the old copy "from when this question appeared", which S3-MTH-01 had changed on purpose. Fixed in `ef9ea8a` to assert the replacement.
 - `ef9ea8a` (run `20261108-191812-ef9…`): FAILED, then cancelled by me. `check-lobby-mode` read the Start label 1.5 s after a reload, before the page saw both seats connected. Fixed in `b1dd580`: bounded polls on the asserted state; no assertion changed.
+
+## 2026-11-09: Stage 4, post-audit UX completion and multiplayer validation (branch `claude/stage4-experience-completion`, from the Stage 3 QA record `c307081`)
+
+**Owner direction:** "MCHEZO — STAGE 4: POST-AUDIT UX COMPLETION & MULTIPLAYER VALIDATION".
+- No merge, deployment, exposed port, spend, scoring, Cup-rule or content-approval change. Nothing provisional was approved.
+- The reconciliation by audit ID, root causes, before/after screens, multiplayer and Official/Practice evidence, and the iPhone checklist are in `docs/stage4/README.md`. Decisions are D-S4-01..10; proposals are P-S4-01..05 (README §8).
+
+**Commits (code):**
+- `4fb4b36`: Library (S3-LIB-01..04), the view in the address (S3-NAV-01), Back mid-game (S3-NAV-02), the proxy-page guard (S3-LOB-03).
+- `7fd52db`: Family Cup hierarchy (S3-CUP-01), Memory Book export feedback (S3-MEM-01).
+- `83e3db9`: S3-TRV-02, S3-TRV-03, S3-WCN-03, S3-STU-01/02, S3-JOIN-01.
+- `b7400c8`: Caption Clash counts a caption or vote only when the server has it (root cause of the audit's "Your vote ✓ but 2 of 4"); the four-player driver.
+- `eb23f33`: the ten-player and Official vs Practice drivers; lobby and standings names never cut.
+- `84ed7ed`: an HTTP poll overtaken by a newer push can no longer roll the screen back (found by `check-ten-players` in gate run 1; D-S4-10).
+
+**Tests:**
+- **Unit:** 1001 (977 at the Stage 3 checkpoint, +24): `stage4-http` (10), `stage4-library` (6), `stage4-memory` (2), `stage4-names` (5), `errors` (+1); `library.test.ts` now asserts that sort is not a filter.
+- **New drivers,** each with its own server and no content test mode:
+  - `check-library-nav`, `check-cup-memory`, `check-stage4-details`;
+  - `check-caption-4p` (78 checks), `check-ten-players` (245), `check-official-practice` (29).
+- **On the previous builds:**
+  - `check-library-nav` fails NAV-01 and NAV-02.
+  - `check-stage4-details` fails TRV-02, TRV-03, WCN-03 and STU-01.
+  - `check-caption-4p` fails 4 checks (the vote ✓ and the lost caption).
+  - `check-ten-players` fails 18 (cut names).
+  - `check-stage4-details` fails the overtaken-poll check on `eb23f33`.
+- **Moved to the new screens** (replacements asserted, none weakened): check-f4, check-f5, e2e-browser, check-lobby-fixes, check-stage2.
+
+**Not changed:**
+- Scoring, Cup rules and the 7 days, content and approvals.
+- D3 Ready/synchronized start, seats and recovery tokens, Official/Practice separation, private answers, reveal timing, results/ties.
+- Reduced motion, permissions, sit-out, the default mode (Official), A-19, D2, D-UX-10, Math scoring.
+
+**Open (owner):** P-S4-01..05; D12 (override audit visibility); S3-TRV-04; S3-TV-03/04.
+
+**Limitation:** Chromium emulation only; no real iPhone or Safari.
+
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on `84ed7ed`: **PASSED (exit 0)**, run `20261109-035458-84ed7ed0-4459`.
+- 59 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- Unit tests 1001. E2E (Chromium) 12/12.
+- Drivers: `check-caption-4p` 78 checks, `check-ten-players` 245, `check-official-practice` 29, `check-stage4-details` 21, `check-library-nav` 40, `check-cup-memory` 35.
+- Run from a fresh clone; the only untracked file was a `node_modules` symlink. Browser: chrome-headless-shell 153.0.8010.12 via `MCHEZO_CHROMIUM_PATH`.
+- The verdict covers `84ed7ed` only. The recording commit after it is docs only.
+
+**Run that does not count:** `eb23f33` (run `20261109-023100-eb23f339-21480`): FAILED (exit 1), 58 passed and 1 failed.
+- `check-ten-players` failed 3 checks on the host's phone: the Math results list was empty when read.
+- Root cause: an HTTP poll overtaken by a newer push rolled the screen back. Fixed in `84ed7ed` with a unit test and a deterministic driver repro. No assertion was weakened.
+
+**Next task (if the owner continues):** the §9 iPhone checklist on a real device; owner rulings on P-S4-01..05.
+**Risk:** Safari behaviour (swipe-back, downloads, backgrounding) is untested; Chromium is not Safari.

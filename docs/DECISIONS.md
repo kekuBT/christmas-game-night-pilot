@@ -442,3 +442,57 @@ Owner direction: the Stage 3 live QA repair sprint, which reconciles the Stage 3
   - Word Connections results explain the score: the rule, and your own breakdown, shown only when it adds up to your recorded score. (S3-WCN-01)
   - The waiting ring says "have started" / "all have started", since it counts players who answered at least once or sat out, not who finished. (S3-TRV-01)
   - "1 mistake left". (S3-WCN-02)
+
+## Stage 4: post-audit UX completion and multiplayer validation (2026-11-09, branch `claude/stage4-experience-completion`, from the Stage 3 QA record `c307081`)
+
+Owner direction: "MCHEZO — STAGE 4: POST-AUDIT UX COMPLETION & MULTIPLAYER VALIDATION". It covers the remaining Stage 3 audit items and multiplayer validation. It makes no change to scoring, Cup rules or content approvals, and no merge, deployment or spend. The full reconciliation is in `docs/stage4/README.md`. Owner decisions listed there were kept as they are; proposals are P-S4-01..05 in that README §8.
+
+- **D-S4-01 The Library speaks about group size only** (S3-LIB-01..04, S3-NAV-01).
+  - Inside a room each game says whether it fits the players connected now. Nothing says "playable now": content and Cup rules are checked at Start, and the Library can't promise them.
+  - "Practice only" explains itself with the server's reason. Eligibility is unchanged.
+  - Sort is never a filter.
+  - Search, filters and sort live in the address (`replaceState`), so Back/Forward, refresh and details keep them.
+  - *Alternative:* keep the view in session storage. Rejected: a second source of truth, and invisible to Back/Forward.
+- **D-S4-02 Back during a game lands on Home with Rejoin** (S3-NAV-02).
+  - A room screen with nothing of ours beneath it gets Home placed beneath it once.
+  - It is not a trap: no popstate interception, no confirm. The server clock, seat and answers are untouched, and Forward, refresh and Rejoin return to the game.
+  - *Alternatives:* a "leave the game?" confirm (rejected by the owner as intrusive), or intercepting Back to stay in the room (a Back trap).
+- **D-S4-03 Non-JSON replies are not game data** (S3-LOB-03).
+  - A non-JSON or error reply is refused.
+  - Every projection path checks the shape, and the last good room stays on screen with the existing "Can't reach the game server" notice.
+  - No second recovery system was added.
+- **D-S4-04 Family Cup screen order** (S3-CUP-01):
+  1. Day.
+  2. The server's standings, or an empty state.
+  3. Official games.
+  4. What's next.
+  5. Rules, folded.
+  6. Host tools, separate and host/cohost only.
+  - The client never recalculates standings, and nothing is invented.
+  - The override audit trail stays host-only (D12 unchanged).
+- **D-S4-05 Memory Book exports say "Download started", never "saved"** (S3-MEM-01).
+  - The browser decides where the file goes, so the app can't know it was saved.
+  - File name: `christmas-memory-book-<CODE>-<YYYY-MM-DD>.<ext>`.
+  - Export content, consent, approval and privacy are unchanged. Names in exports are proposal P-S4-01.
+- **D-S4-06 Names are never cut where players tell each other apart** (S3-TRV-02, ten-player room).
+  - Ring and lobby labels use the shortest unambiguous form of the player's own name (first word; "First L."; else the full name), with the full name as the tooltip. No name is invented.
+  - Lobby-circle and standings names may take two lines, breaking between words only.
+  - Measured at 4/6/8/10 players and 320–1440 px.
+- **D-S4-07 Caption Clash shows a caption or vote as counted only when the server has it.**
+  - This was found by the four-player run; it is the root cause of the audit's "Your vote ✓ but 2 of 4".
+  - The tapped card says "Sending…". A failure shows "That didn't reach the game — check your connection and try again." (or the server's reason) and keeps the words.
+  - No server, timing, scoring or anonymity change.
+  - Applying the same error line to the other game screens is proposal P-S4-03.
+- **D-S4-08 Studio is a host tool** (S3-STU-01/02).
+  - The host and cohost reach it from the Library; a guest sees a plain note with no planner and no actions.
+  - Team Clash's copy says it needs a team game (today only Charades). "No games fit" lists the format's games with their ranges.
+  - No new team games.
+- **D-S4-09 Stage 4 drivers never treat provisional content as approved.**
+  - The new drivers (`check-library-nav`, `check-cup-memory`, `check-stage4-details`, `check-caption-4p`, `check-ten-players`, `check-official-practice`) run their own servers without `MCHEZO_CONTENT_TEST_MODE`.
+  - Official games use generated Math questions or Caption Clash's legacy (already official-eligible) scenes.
+  - The older drivers' test mode is unchanged.
+- **D-S4-10 A polled reply overtaken by a newer push is dropped.**
+  - This was found by `check-ten-players` in the first full gate: a results screen briefly showed the game again.
+  - The client shows a polled projection unless a newer projection was shown while the request was in flight and the reply has a lower room `seq`. Pushes always apply.
+  - Without a race nothing is dropped, so a server restored with a lower `seq` can't freeze the screen.
+  - *Alternative:* drop any reply with a lower `seq` than the one shown. Rejected: it could freeze the screen after a restore from an older snapshot.
