@@ -106,6 +106,8 @@ try {
   const overflow = await bea.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   check("Geography: answer list fits a 390px phone (no horizontal scroll)", !overflow);
   await bea.screenshot({ path: screenshotPath("docs/content-quality-2/screenshots/e3-geography-results-phone.png"), fullPage: true });
+  // Stage 5 (S5-A): a finished game opens on Final standings; its answers are the Post-game review.
+  await tv.getByTestId("tv-dir-review").click({ timeout: 15000 });
   await tv.getByTestId("tv-answer-review").waitFor({ timeout: 15000 });
   check("Geography: TV lists the answers after the game", (await tv.getByTestId("tv-answer-review").getByTestId("mz-review-item").count()) === n);
   check("Geography: TV shows no player's choices", (await tv.getByTestId("mz-review-mine").count()) === 0);
@@ -136,10 +138,13 @@ try {
   const q2 = (await ada.locator(".mz-card p b").first().innerText()).trim();
   check("Closest: question 2 is now open and its answer is not shown", q2 !== q1 && (await ada.getByTestId("mz-review-item").count()) === 1);
   await ada.screenshot({ path: screenshotPath("docs/content-quality-2/screenshots/e3-closest-last-phone.png"), fullPage: true });
-  await tv.getByTestId("tv-answer-review").waitFor({ timeout: 15000 });
-  const tvText = await tv.getByTestId("tv-answer-review").innerText();
-  check("Closest: TV shows the last answer only", tvText.includes("last answer") && (await tv.getByTestId("tv-answer-review").getByTestId("mz-review-item").count()) === 1);
-  check("Closest: TV shows nobody's guess", (await tv.getByTestId("mz-review-mine").count()) === 0);
+  // Stage 5 (S5-A): the live Closest Wins panel shows the last closed question's answer, never a guess.
+  await tv.getByTestId("tv-closest-last").waitFor({ timeout: 15000 });
+  const tvText = await tv.getByTestId("tv-closest-last").innerText();
+  const tvDigits = tvText.split("—").at(-1).replace(/[^0-9.]/g, "");
+  check("Closest: TV shows the last answer only", tvText.includes(q1) && Number(tvDigits) === item1.answer && (await tv.getByTestId("tv-closest-last").count()) === 1, tvText);
+  const tvAll = await tv.locator("body").innerText();
+  check("Closest: TV shows nobody's guess", (await tv.getByTestId("mz-review-mine").count()) === 0 && !/12\.5/.test(tvAll), tvText);
   await tv.screenshot({ path: screenshotPath("docs/content-quality-2/screenshots/e3-closest-tv.png"), fullPage: true });
   await pA.close(); await pB.close(); await tvCtx.close();
 } finally {
