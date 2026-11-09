@@ -63,7 +63,8 @@ export interface MchezoConnectionsDeps {
   players: PublicPlayer[];
   playerId: string;
   title: string;
-  intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<void> | void;
+  /** Resolves false when the guess did not reach the game or was refused (Stage 5: keep the selection then). */
+  intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<boolean | void> | boolean | void;
 }
 
 export function MchezoConnections({ game, publicGame, players, playerId, title, intent }: MchezoConnectionsDeps) {
@@ -115,7 +116,12 @@ export function MchezoConnections({ game, publicGame, players, playerId, title, 
     const tried = (st.myState?.guessed ?? []).some((g) => [...g].sort().join() === [...guess].sort().join());
     if (tried) { setNote({ tone: "neutral", text: "You already tried that group." }); return; }
     setPending(true);
-    try { await intent(game.id, "connections-guess", { tileIds: guess }); } finally { setPending(false); setSelected([]); }
+    let ok: boolean | void = undefined;
+    try { ok = await intent(game.id, "connections-guess", { tileIds: guess }); } finally {
+      setPending(false);
+      // Stage 5: a guess that never reached the game keeps its four tiles selected, to try again.
+      if (ok !== false) setSelected([]);
+    }
   };
 
   if (game.abstained) {

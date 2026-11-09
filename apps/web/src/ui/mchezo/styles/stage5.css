@@ -1,0 +1,11 @@
+/* Stage 5: the complete game night. Loaded after stage4.css. */
+
+/* A failed player action, on the game screen it belongs to. Sticky at the
+   top so it is seen without scrolling; never covers the answer controls. */
+.mz-send-fail {
+  position: sticky; top: 0; z-index: 5;
+  margin: 0 auto; padding: 10px 16px; max-width: 560px;
+  background: color-mix(in srgb, var(--mz-ground) 88%, var(--mz-danger, #e5484d));
+  border-bottom: 1px solid color-mix(in srgb, var(--mz-danger, #e5484d) 60%, transparent);
+  text-align: center; font: 600 14px/1.35 var(--mz-font-body);
+}

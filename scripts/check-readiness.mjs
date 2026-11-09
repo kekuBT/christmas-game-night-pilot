@@ -2,7 +2,7 @@
 // A guest's phone drops off the network (its own browser context goes
 // offline, so its WebSocket dies like a locked phone's), then comes back.
 // Checks: the guest's own banner ("Connection lost. Reconnecting…" →
-// "Reconnected. Your progress is saved." only after the server accepts
+// "Reconnected. Answers the game confirmed are safe." only after the server accepts
 // the session); the host's readiness card naming who is reconnecting;
 // Start on an official game asks first instead of silently leaving the
 // player out; "Wait" starts nothing; "Start without" starts with exactly
@@ -97,7 +97,8 @@ try {
 
     // Cal comes back: banner confirms only after the server accepts the session.
     await calCtx.setOffline(false);
-    await expectSoon(`${width}: Cal sees "Reconnected. Your progress is saved."`, async () => (await text(banner)).includes("Reconnected. Your progress is saved."), 20000);
+    // Stage 5 wording: only server-confirmed answers are promised.
+    await expectSoon(`${width}: Cal sees "Reconnected. Answers the game confirmed are safe."`, async () => (await text(banner)).includes("Reconnected. Answers the game confirmed are safe."), 20000);
     if (width === 390) { await cal.waitForTimeout(400); await cal.screenshot({ path: screenshotPath("docs/mchezo-screenshots/32-reconnected-banner.png") }); }
     await expectSoon(`${width}: host sees everyone again`, async () => (await text(summary)).startsWith("Everyone’s here · 3 will play"));
     await expectSoon(`${width}: banner clears by itself`, async () => (await banner.count()) === 0, 10000);

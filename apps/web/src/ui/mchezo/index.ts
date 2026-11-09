@@ -3,6 +3,7 @@ import './styles/games.css';
 import './styles/stage2.css';
 import './styles/stage3.css';
 import './styles/stage4.css';
+import './styles/stage5.css';
 
 export * from './tokens/tokens.js';
 export * from './types.js';

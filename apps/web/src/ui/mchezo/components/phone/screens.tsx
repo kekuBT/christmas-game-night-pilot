@@ -224,6 +224,8 @@ export interface QuestionScreenProps {
   options: readonly AnswerOption[];
   selectedId: string | null;
   locked: boolean;
+  /** Stage 5: the locked answer is still on its way to the server. */
+  sending?: boolean;
   onSelect: (id: string) => void;
   secondsLeft: number;
   totalSeconds: number;
@@ -243,7 +245,7 @@ export function QuestionScreen(p: QuestionScreenProps) {
       </header>
       <h1 className="mz-question">{p.question}</h1>
       <div className="mz-grow mz-grow--min" />
-      <AnswerGrid options={p.options} selectedId={p.selectedId} locked={p.locked} onSelect={p.onSelect} disabled={p.secondsLeft <= 0} />
+      <AnswerGrid options={p.options} selectedId={p.selectedId} locked={p.locked} onSelect={p.onSelect} disabled={p.secondsLeft <= 0} sending={p.sending} />
       <p className="mz-foot" role="status">{p.selectedId ? 'Locked in.' : p.secondsLeft <= 0 ? 'Time’s up.' : 'One tap locks your answer.'}</p>
       {p.extra}
     </PhoneScreen>

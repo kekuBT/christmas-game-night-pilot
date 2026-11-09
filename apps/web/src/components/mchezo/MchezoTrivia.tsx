@@ -126,6 +126,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
       options={firstUnanswered.options.map((label, i) => ({ id: String(i), label }))}
       selectedId={selected === null ? null : String(selected)}
       locked={selected !== null}
+      sending={myAnswers[firstUnanswered.id] === undefined && pendingHere !== null}
       onSelect={(id) => {
         if (pending) return;
         setPending({ qid: firstUnanswered.id, choice: Number(id) });

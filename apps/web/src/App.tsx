@@ -124,6 +124,8 @@ export function App() {
   }
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
+  /** Stage 5: the last player action in a game that failed, shown on that game's screen only. */
+  const [actionError, setActionError] = useState<{ gid: string; text: string } | null>(null);
   // Work Package F: server rejections arrive as terse codes or terse
   // server sentences. Show the human mapping on screen and keep the raw
   // text in the console for debugging — it never reaches the player.
@@ -538,7 +540,9 @@ export function App() {
   }
   /** Sends one player action. Resolves true only when the server accepted it (never throws). */
   async function sendAction(gameInstanceId: string, action: string, payload: Record<string, unknown>): Promise<boolean> {
-    setErr(""); try {
+    setErr(""); setActionError(null);
+    const failed = (raw: string) => { reportError(raw); setActionError({ gid: gameInstanceId, text: humanError(raw) }); };
+    try {
       // One clientEventId per user action, reused by every retry, so the
       // server's dedupe returns the original result if a response was lost.
       // Lock-step games: say which phase this action was made in, so a tap
@@ -555,13 +559,13 @@ export function App() {
       });
       const r = res.body as { accepted?: boolean; reason?: string; error?: string };
       if (res.status >= 400) throw new Error(r.error || `Request failed (${res.status})`);
-      if (!r.accepted) reportError(r.reason === "PHASE_CLOSED" ? "Time was up for that one — it wasn’t counted." : r.reason === "READY_LOCKED" ? "The game has already started." : `Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
+      if (!r.accepted) failed(r.reason === "PHASE_CLOSED" ? "Time was up for that one — it wasn’t counted." : r.reason === "READY_LOCKED" ? "The game has already started." : `Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
       await refresh();
       return r.accepted === true;
     } catch (e) {
       // A TypeError is fetch's "no answer" (offline, dropped connection) after
       // every retry: the server never saw it. Say so, not "Failed to fetch".
-      if (e instanceof TypeError) reportError(NOT_DELIVERED); else fail(e);
+      failed(e instanceof TypeError ? NOT_DELIVERED : e instanceof Error ? e.message : "Request failed");
       return false;
     }
   }
@@ -851,6 +855,11 @@ export function App() {
   // after a game finished stays in the lobby instead of landing on its
   // results as "Did not answer · 0 points" (the server never scored them).
   const latestFinished = myGames.filter((g) => g.status === "finished" && g.participant !== false).slice(-1)[0];
+  // Stage 5: one failure line for every game screen that has no inline one,
+  // shown only for the game the failed action was for, cleared by the next send.
+  const sendFailure = actionError && playingGame && actionError.gid === playingGame.id
+    ? <p className="err mz-send-fail" role="alert" data-testid="mz-send-error">{actionError.text}</p>
+    : null;
   const publicPlaying = (proj?.games ?? []).find((g) => g.id === playingGame?.id);
   const publicFinished = (proj?.games ?? []).find((g) => g.id === latestFinished?.id);
   const showPhase = view === "lobby" ? deriveShowPhase(playingGame, latestFinished, introDismissed, resultsDismissed, playerId ?? undefined) : "lobby";
@@ -1129,7 +1138,8 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoConnections game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Word Connections"} intent={intent} />
+        {sendFailure}
+        <MchezoConnections game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Word Connections"} intent={sendAction} />
       </MchezoProvider>
     );
   }
@@ -1179,6 +1189,7 @@ export function App() {
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && triviaPlaying && playingGame) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
+        {sendFailure}
         <MchezoTriviaPlay
           windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
           game={playingGame}
@@ -1203,6 +1214,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
+        {sendFailure}
         <MchezoClosest
           game={playingGame}
           publicGame={publicPlaying}
@@ -1225,6 +1237,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
+        {sendFailure}
         <MchezoYear
           game={playingGame}
           publicGame={publicPlaying}
@@ -1247,6 +1260,7 @@ export function App() {
     // use the shared old views (ShowIntro, ShowResults).
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
+        {sendFailure}
         <MchezoGeography
           windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
           game={playingGame}
@@ -1271,6 +1285,7 @@ export function App() {
     // shows the player's own elapsed time, because speed is scored.
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
+        {sendFailure}
         <MchezoMath
           windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
           game={playingGame}

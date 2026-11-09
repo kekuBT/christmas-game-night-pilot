@@ -26,8 +26,12 @@
 //    the App sets itself ("Spectator session expired — …", "Request
 //    failed") are not rewritten.
 export const GENERIC_ERROR = "Something went wrong — try again.";
-/** A player action that got no answer at all (offline, dropped connection): the server never saw it. */
-export const NOT_DELIVERED = "That didn’t reach the game — check your connection and try again.";
+/**
+ * A player action that got no answer at all (offline, dropped connection).
+ * Stage 5: it may or may not have reached the server, so say exactly that;
+ * the screen shows it as "in" only once the server's state says so.
+ */
+export const NOT_DELIVERED = "We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.";
 
 const EXACT: Record<string, string> = {
   // Intent rejections (src/server/room.ts submitIntent / submitAbstain).

@@ -42,8 +42,9 @@ export function ConnectionBanner({ state, secondsOffline = 0, onRetryNow, onAckn
       <span className="mz-conn__dot" aria-hidden="true" />
       <span className="mz-conn__text">
         {reconnecting
-          ? <>Connection lost. Reconnecting…<span className="mz-conn__sub"> Your answers are saved.</span></>
-          : 'Reconnected. Your progress is saved.'}
+          // Stage 5: only what the game confirmed is safe; a tap made while offline may not arrive.
+          ? <>Connection lost. Reconnecting…<span className="mz-conn__sub"> Answers the game confirmed are safe. Taps made now may not arrive.</span></>
+          : 'Reconnected. Answers the game confirmed are safe.'}
       </span>
       {reconnecting && secondsOffline >= 10 && onRetryNow && (
         <button type="button" className="mz-conn__retry" onClick={onRetryNow}>Try now</button>

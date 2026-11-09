@@ -86,7 +86,8 @@ describe("humanError", () => {
   });
 
   it("Stage 4: an action that never reached the server says so in words, unchanged", () => {
-    expect(NOT_DELIVERED).toMatch(/didn’t reach the game/);
+    expect(NOT_DELIVERED).toMatch(/couldn’t confirm/);
+    expect(NOT_DELIVERED).not.toMatch(/didn’t reach/); // it may have arrived: never claim either way
     expect(humanError(NOT_DELIVERED)).toBe(NOT_DELIVERED);
   });
 });

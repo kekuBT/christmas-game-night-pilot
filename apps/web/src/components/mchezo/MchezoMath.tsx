@@ -167,6 +167,7 @@ export function MchezoMath(deps: MchezoMathDeps) {
       options={opts.map((label, i) => ({ id: String(i), label: String(label) }))}
       selectedId={selected === null ? null : String(selected)}
       locked={selected !== null}
+      sending={myAnswers[firstUnanswered.id] === undefined && pendingHere !== null}
       onSelect={(id) => {
         if (pending) return;
         setPending({ qid: firstUnanswered.id, choice: Number(id) });

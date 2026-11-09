@@ -11,6 +11,8 @@ export interface AnswerGridProps {
   locked: boolean;
   onSelect: (id: string) => void;
   disabled?: boolean;
+  /** Stage 5: the tap is on its way and the server hasn't confirmed it yet ("Sending…", not "Locked in"). */
+  sending?: boolean;
 }
 
 const GAP = 12;
@@ -20,7 +22,7 @@ const GAP = 12;
  * key grows to fill the area and the "LOCKED IN" stamp lands. Reduced motion: the
  * keys stay put; the chosen one gains a thick outline + stamp (fade only).
  */
-export function AnswerGrid({ options, selectedId, locked, onSelect, disabled }: AnswerGridProps) {
+export function AnswerGrid({ options, selectedId, locked, onSelect, disabled, sending }: AnswerGridProps) {
   const { reducedMotion } = useMchezo();
   const buzz = useHaptics();
   const ref = useRef<HTMLDivElement>(null);
@@ -64,14 +66,14 @@ export function AnswerGrid({ options, selectedId, locked, onSelect, disabled }: 
             className={['mz-slab', selected ? 'mz-slab--selected' : '', other ? (expand ? 'mz-slab--gone' : 'mz-slab--dim') : '', big ? 'mz-slab--big' : ''].join(' ')}
             style={style}
             aria-pressed={selected}
-            aria-label={`Answer ${ANSWER_LETTERS[i]}: ${o.label}${selected ? ', locked in' : ''}`}
+            aria-label={`Answer ${ANSWER_LETTERS[i]}: ${o.label}${selected ? (sending ? ', sending' : ', locked in') : ''}`}
             disabled={disabled || selectedId != null}
             tabIndex={other && expand ? -1 : 0}
             onClick={() => { if (selectedId != null) return; buzz([10, 30, 18]); onSelect(o.id); }}
           >
             <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" className="mz-slab__shape"><path d={ANSWER_SHAPES[i % 4]} /></svg>
             <span className="mz-slab__label">{o.label}</span>
-            {selected && <Stamp className="mz-slab__stamp">LOCKED IN</Stamp>}
+            {selected && <Stamp className="mz-slab__stamp">{sending ? 'SENDING…' : 'LOCKED IN'}</Stamp>}
           </button>
         );
       })}
