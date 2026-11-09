@@ -329,7 +329,8 @@ try {
   // review doc; the check asserts what the dashboard actually renders
   // (Gus listed) and the projection already proved him marked away.
   check("TV lists the disconnected player (Gus)", /Gus/.test(tvText));
-  check("TV follows the active game (closest)", /closest-wins/i.test(tvText));
+  // Stage 5 (S5-A): the live show names the game by its title ("Closest Wins"), not its id.
+  check("TV follows the active game (closest)", /closest[- ]wins/i.test(tvText));
   await host.screenshot({ path: screenshotPath("docs/mchezo-screenshots/16-game-night-closest.png") });
   await backToLobbyAll([host, guests["Bea"], guests["Cal"], guests["Dee"], guests["Eli"], guests["Fay"]]);
   // Gus leaves the night for good before Math (the next game starts without him).
@@ -380,7 +381,7 @@ try {
   const eliId = (proj.players ?? []).find((p) => p.displayName === "Eli")?.id;
   check("reconnected player's answers survived (he scored)", eliId !== undefined && (mathScores[eliId] ?? 0) >= 0);
   const tvText2 = await tv.evaluate(() => document.body.innerText);
-  check("TV follows the active game (math)", /math-mayhem/i.test(tvText2));
+  check("TV follows the active game (math)", /math[- ]mayhem/i.test(tvText2));
   await backToLobbyAll([host, guests["Bea"], guests["Cal"], guests["Dee"], guests["Eli"], guests["Fay"]]);
   check("no stale game panel in the lobby", (await host.locator(".mz-question").count()) === 0 &&
     (await host.locator('[data-testid="game-panel"]').count()) === 0);
