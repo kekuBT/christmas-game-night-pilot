@@ -2233,6 +2233,12 @@ export class RoomEngine {
     const st = g.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
     const cat = this.sprintCategory(g, st.roundIndex);
     const base: Record<string, unknown> = { roundIndex: st.roundIndex, category: cat?.name, ...(cat?.definition ? { definition: cat.definition } : {}) };
+    // Stage 5.1 (2C): your OWN answers for this round, once the server has them, so
+    // your phone shows them as in from the server's state. Never anyone else's.
+    if (actorId !== undefined && g.status === "playing") {
+      const mine = st.submissions[st.roundIndex]?.[actorId];
+      if (mine !== undefined) base["mySubmission"] = [...mine];
+    }
     if (g.status !== "finished") return base;
     const own = (g.extra as { categories?: unknown[] }).categories;
     const rounds = own ? own.length : 3;

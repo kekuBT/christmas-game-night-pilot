@@ -154,6 +154,8 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
       <main className="mz-screen" aria-label={`${title}: round ${round} of ${of}, tap the pattern back`} data-testid="mz-pp-input">
         <GameHeader title={title} objective="Tap it back in order" accent={4} />
         <p className="mz-mr-round">Round {round} of {of} · {len} shapes</p>
+        {/* Stage 5.1 (S5-AUD-02): the time left sits next to the entry, not below the button. */}
+        <FeedbackLine testId="mz-pp-timer" tone={left <= 5 ? "warn" : "neutral"}>{timeUp ? "Time's up for this round." : `${left}s to answer.`}</FeedbackLine>
         <ol className="mz-pp-slots" data-testid="mz-pp-slots" aria-label={`Your entry: ${entry.length} of ${len}${entry.length ? `: ${entry.map((s) => PULSE_SYMBOLS[s]?.name).join(", ")}` : ""}`}>
           {Array.from({ length: len }, (_, i) => (
             <li key={i} className={`mz-pp-slot${entry[i] !== undefined ? " mz-pp-slot--filled" : ""}`} data-symbol={entry[i]}>
@@ -174,11 +176,12 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
           <button type="button" className="mz-chip-btn" data-testid="mz-pp-undo" disabled={entry.length === 0 || sending || timeUp} onClick={() => setEntry((e) => e.slice(0, -1))}>Undo</button>
           <button type="button" className="mz-chip-btn" data-testid="mz-pp-clear" disabled={entry.length === 0 || sending || timeUp} onClick={() => setEntry([])}>Clear</button>
         </div>
-        <Keycap block disabled={!full || sending || timeUp} onClick={() => void send("pulse-answer", { round: open.round, sequence: entry }, "answer")} data-testid="mz-pp-submit">
+        {/* A complete entry only counts once it's locked in: say so the moment it's complete. */}
+        {full && !sending && !timeUp && <p className="mz-pp-lockhint" role="status" data-testid="mz-pp-lockhint">All {len} in. Tap “Lock it in” to send: it only counts once locked.</p>}
+        <Keycap block className={full && !sending && !timeUp ? "mz-pp-lock--ready" : undefined} disabled={!full || sending || timeUp} onClick={() => void send("pulse-answer", { round: open.round, sequence: entry }, "answer")} data-testid="mz-pp-submit">
           {sending ? "Sending…" : full ? "Lock it in" : `${len - entry.length} to go`}
         </Keycap>
         {failure}
-        <FeedbackLine testId="mz-pp-timer" tone={left <= 5 ? "warn" : "neutral"}>{timeUp ? "Time's up for this round." : `${left}s to answer.`}</FeedbackLine>
       </main>
     );
   }

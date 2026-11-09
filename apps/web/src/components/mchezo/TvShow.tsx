@@ -34,7 +34,7 @@ export const TV_HINT: Record<string, string> = {
   "closest-wins": "One number question at a time. Closest guess wins the round.",
   "category-sprint": "Name as many fitting answers as you can before the round ends.",
   "impostor": "One player has a different word. Clues, then a vote. Nobody's word is ever shown here.",
-  "charades": "One player acts, their team guesses out loud. The prompt stays on the actor's phone.",
+  "charades": "One player acts; their own team guesses out loud. When they get it, the actor taps Correct: +100 to that team. The prompt stays on the actor's phone.",
   "word-connections": "Everyone solves their own board of sixteen words. Solutions appear when the game is over.",
   "caption-clash": "Everyone writes a caption, then votes for the funniest. Authors stay hidden until the end.",
 };

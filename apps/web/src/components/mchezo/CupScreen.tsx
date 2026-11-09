@@ -12,6 +12,7 @@
 // projection's (`championship`, ordered by the server). The per-game
 // placements use the same midrank display helper as before. No trends,
 // probabilities or invented achievements; no numbers before an official game.
+import { fmtPoints, sharedPlaces } from "../../ui/mchezo/lib/cupDisplay.js";
 import { useEffect, useState } from "react";
 import type { Achievement, Ceremony, ChampionshipResult, LedgerEvent, Projection, PublicGame, PublicPlayer, RegistryGame } from "../../types.js";
 import { seats } from "../../session.js";
@@ -62,6 +63,9 @@ export function CupScreen(props: {
   const title = (id: string) => games.find((x) => x.id === id)?.title ?? id;
   const eligible = championship.filter((r) => r.eligible);
   const qualifying = championship.filter((r) => !r.eligible);
+  // Stage 5.1 (O-05): shared places on a full tie, exactly as the server ranks.
+  const placesEligible = sharedPlaces(eligible);
+  const placesQualifying = sharedPlaces(qualifying);
 
   async function loadAudit() {
     try {
@@ -72,17 +76,17 @@ export function CupScreen(props: {
   }
   useEffect(() => { if (meIsHostOrCohost && !auditLoaded && roomId) { void loadAudit(); } }, [meIsHostOrCohost, auditLoaded, roomId]);
 
-  const row = (r: ChampionshipResult, position: number | null) => {
+  const row = (r: ChampionshipResult, position: number | null, shared = false) => {
     const p = mz.find((x) => x.id === r.playerId);
     const open = openRow === r.playerId;
     const needs = Math.max(0, QUALIFYING_DAYS_NEEDED - r.qualifyingDays);
     return (
       <li key={r.playerId} className={`mz-cup-row${r.playerId === youId ? " mz-cup-row--you" : ""}`} data-testid={`cup-row-${r.playerId}`}>
         <div className="mz-cup-row__main">
-          <span className="mz-cup-row__rank" aria-label={position ? `Place ${position}` : "Not yet ranked"}>{position ?? "–"}</span>
+          <span className="mz-cup-row__rank" aria-label={position ? `${shared ? "Joint place" : "Place"} ${position}` : "Not yet ranked"} data-testid={`cup-place-${r.playerId}`}>{position ? `${shared ? "=" : ""}${position}` : "–"}</span>
           {p && <PlayerToken player={p} index={mz.indexOf(p)} size={32} />}
           <span className="mz-cup-row__name">{r.playerId === youId ? `${nameOf(r.playerId)} (you)` : nameOf(r.playerId)}</span>
-          <span className="mz-cup-row__total"><b>{r.total}</b> pts</span>
+          <span className="mz-cup-row__total"><b>{fmtPoints(r.total)}</b> pts</span>
         </div>
         <p className="mz-cup-row__status">
           {r.eligible ? "Qualified" : `Needs ${needs} more qualifying day${needs === 1 ? "" : "s"}`} · {r.qualifyingDays} qualifying day{r.qualifyingDays === 1 ? "" : "s"}
@@ -90,7 +94,7 @@ export function CupScreen(props: {
         </p>
         {open && (
           <p className="mz-foot mz-cup-row__detail" data-testid={`cup-detail-${r.playerId}`}>
-            Best three days {r.counted.length ? r.counted.join(" + ") : "0"} = {r.base}, participation +{r.participationBonus}, finale +{r.finaleBonus} = {r.total}. Day scores so far: {r.dayScores.join(", ") || "none"}. Day wins: {r.countedDailyWins}.
+            Best three days {r.counted.length ? r.counted.map(fmtPoints).join(" + ") : "0"} = {fmtPoints(r.base)}, participation +{fmtPoints(r.participationBonus)}, finale +{fmtPoints(r.finaleBonus)} = {fmtPoints(r.total)}. Day scores so far: {r.dayScores.map(fmtPoints).join(", ") || "none"}. Day wins: {r.countedDailyWins}.
           </p>
         )}
       </li>
@@ -134,12 +138,12 @@ export function CupScreen(props: {
           </div>
         ) : (
           <>
-            {eligible.length > 0 && <ol className="mz-cup-list" aria-label="Qualified players">{eligible.map((r, i) => row(r, i + 1))}</ol>}
+            {eligible.length > 0 && <ol className="mz-cup-list" aria-label="Qualified players">{eligible.map((r) => row(r, placesEligible[r.playerId]!, isShared(eligible, placesEligible, r.playerId)))}</ol>}
             {qualifying.length > 0 && (
               <>
                 {eligible.length > 0 && <p className="mz-kicker mz-cup-list__sub">Still qualifying</p>}
-                <ol className="mz-cup-list" aria-label={eligible.length ? "Still qualifying" : "Standings"}>{qualifying.map((r, i) => row(r, eligible.length ? null : i + 1))}</ol>
-                <p className="mz-foot mz-cup-note">A player needs {QUALIFYING_DAYS_NEEDED} qualifying days to be eligible for the Cup. Order comes from the server; ties are broken by day wins.</p>
+                <ol className="mz-cup-list" aria-label={eligible.length ? "Still qualifying" : "Standings"}>{qualifying.map((r) => row(r, eligible.length ? null : placesQualifying[r.playerId]!, !eligible.length && isShared(qualifying, placesQualifying, r.playerId)))}</ol>
+                <p className="mz-foot mz-cup-note">A player needs {QUALIFYING_DAYS_NEEDED} qualifying days to be eligible for the Cup. Order comes from the server: highest total first; ties go to more day wins, then the better middle day score. Players equal on all of those share the place (shown as “=”).</p>
               </>
             )}
           </>
@@ -156,7 +160,7 @@ export function CupScreen(props: {
               return (
                 <li key={g.id} className="mz-cup-game">
                   <span className="mz-cup-game__title">{title(g.gameId)} <span className="mz-muted">· Day {g.day ?? 1}</span></span>
-                  <span className="mz-foot mz-cup-game__places">{places.length >= 2 ? places.map(([pid, v]) => `${nameOf(pid)} ${v}`).join(" · ") : "Not counted (fewer than 2 players)"}</span>
+                  <span className="mz-foot mz-cup-game__places">{places.length >= 2 ? places.map(([pid, v]) => `${nameOf(pid)} ${fmtPoints(v)}`).join(" · ") : "Not counted (fewer than 2 players)"}</span>
                 </li>
               );
             })}
@@ -242,4 +246,10 @@ export function CupScreen(props: {
       )}
     </main>
   );
+}
+
+/** Does this player share their place with someone else in the same list? */
+function isShared(rows: readonly { playerId: string }[], places: Record<string, number>, playerId: string): boolean {
+  const p = places[playerId];
+  return rows.filter((r) => places[r.playerId] === p).length > 1;
 }

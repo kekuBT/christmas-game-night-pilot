@@ -41,6 +41,9 @@ import { launchChromium } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
+// Stage 5.1 (O-14): the older panel names a game by its title ("Now playing: Category Sprint"), never its id.
+const TITLES = Object.fromEntries((await (await fetch(`${BASE}/games`)).json()).map((g) => [g.id, g.title]));
+const nowPlaying = (gameId) => `Now playing: ${TITLES[gameId] ?? gameId}`;
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
 const QUIZ_GAMES = ["math-mayhem", "trivia", "who-said-that", "geography"];
 // Secrets that must never appear anywhere in a TV projection; answer keys
@@ -83,7 +86,7 @@ async function panelFinished(page, gameId) {
   // Heading must match the game: right after a previous game finishes, the
   // panel still shows that finished game until the new game's projection
   // arrives, and a bare "Status: finished" check would false-positive.
-  return t.includes(`Now playing: ${gameId}`) && t.includes("Status: finished");
+  return t.includes(nowPlaying(gameId)) && t.includes("Status: finished");
 }
 
 // Mchezo Closest play (J.3): kit panel with NumericGuess — no game-panel.
@@ -348,7 +351,7 @@ try {
         // Guess the Year is a kit panel too (Work Package D) — there is
         // no "Now playing:" heading; the progress line is the signal.
         else if (gameId === "guess-the-year") await page.getByTestId("mz-year-progress").waitFor({ timeout: 20000 });
-        else await (gameId === "word-connections" ? page.getByTestId("mz-cx").waitFor({ timeout: 25000 }) : gameId === "caption-clash" ? page.getByTestId("mz-cap-write").waitFor({ timeout: 25000 }) : page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 }));
+        else await (gameId === "word-connections" ? page.getByTestId("mz-cx").waitFor({ timeout: 25000 }) : gameId === "caption-clash" ? page.getByTestId("mz-cap-write").waitFor({ timeout: 25000 }) : page.getByRole("heading", { name: nowPlaying(gameId) }).waitFor({ timeout: 20000 }));
       }
       // Leak scan BEFORE driving any answers, while the game is playing.
       await tvLeakCheck(gameId, roomId);

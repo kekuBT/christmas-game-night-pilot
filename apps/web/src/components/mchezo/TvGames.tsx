@@ -6,6 +6,7 @@
 import { GameClock, TVRing } from "../../ui/mchezo/index.js";
 import { TV_HINT } from "./TvShow.js";
 import type { PublicGame } from "../../types.js";
+import { teamName } from "../../ui/mchezo/lib/charades.js";
 
 interface ClosestPublic { prompt?: string; unit?: string; questionIndex?: number; revealed?: { id: string; prompt: string; unit?: string; answer: number }[] }
 
@@ -51,6 +52,32 @@ export function ImpostorTv({ game, title }: { game: PublicGame; title: string })
         <p className="mz-tvshow-line" data-testid="tv-impostor-phase">{IMPOSTOR_PHASE[st.phase ?? ""] ?? "In play"}</p>
         {st.phase !== "clue" && <p className="mz-tvshow-line mz-tvshow-line--muted">{clues} {clues === 1 ? "clue is" : "clues are"} in — read them on your phones.</p>}
         <p className="mz-tvshow-line mz-tvshow-line--muted">{TV_HINT.impostor}</p>
+        <div className="mz-tvshow-clock"><GameClock game={game} tv /></div>
+      </div>
+    </section>
+  );
+}
+
+/** Stage 5.1 (O-06): Charades on the TV: who is acting for which team, both teams, and the team scores. Never the prompt. */
+export function CharadesTv({ game, title, nameOf }: { game: PublicGame; title: string; nameOf: (id: string) => string }) {
+  const st = (game.state ?? {}) as { actor?: string; actorTeam?: number; teams?: string[][]; teamScores?: number[]; passesThisTurn?: number };
+  const teams = st.teams ?? [];
+  const acting = st.actorTeam ?? 0;
+  return (
+    <section className="mz-tvshow-live" data-testid="tv-live-charades">
+      <div className="mz-tvshow-live__left">
+        <span className="mz-tv-kicker">Now playing</span>
+        <h1 className="mz-tvshow-h1">{title}</h1>
+        <p className="mz-tvshow-line" data-testid="tv-charades-actor"><b>{nameOf(st.actor ?? "")}</b> is acting for <b>{teamName(acting)}</b>. {teamName(acting)} guesses out loud.</p>
+        <ul className="mz-tvshow-teams" data-testid="tv-charades-teams">
+          {teams.map((t, i) => (
+            <li key={i} className={i === acting ? "mz-tvshow-team mz-tvshow-team--on" : "mz-tvshow-team"}>
+              <b>{teamName(i)}: {st.teamScores?.[i] ?? 0}</b>
+              <span>{t.map(nameOf).join(", ")}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mz-tvshow-line mz-tvshow-line--muted">{TV_HINT.charades}</p>
         <div className="mz-tvshow-clock"><GameClock game={game} tv /></div>
       </div>
     </section>

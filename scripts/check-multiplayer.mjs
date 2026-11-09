@@ -170,7 +170,7 @@ try {
     await host.locator('[data-testid="start-practice-impostor"]').click();
     try {
       await passBriefing(pages.map((p) => p.page)); // D3: all four tap I'm ready
-      await host.getByRole("heading", { name: "Now playing: impostor" }).waitFor({ timeout: 20000 });
+      await host.getByRole("heading", { name: "Now playing: Impostor" }).waitFor({ timeout: 20000 });
       impostorStarted = true;
     } catch { /* retry once, then let the leak check's own failure surface */ }
   }

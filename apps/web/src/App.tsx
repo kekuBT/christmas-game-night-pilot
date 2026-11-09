@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicGame, PublicPlayer, Readiness, RegistryGame, SpectateResponse } from "./types.js";
-import { GamePanel } from "./components/GamePanel.js";
+import { draftKey, GamePanel } from "./components/GamePanel.js";
 import { CupScreen } from "./components/mchezo/CupScreen.js";
 import { MemoryScreen } from "./components/mchezo/MemoryScreen.js";
 import { Reactions } from "./components/Reactions.js";
@@ -18,7 +18,7 @@ import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./comp
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./components/mchezo/MchezoConnections.js";
 import { TvShow } from "./components/mchezo/TvShow.js";
-import { ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.js";
+import { CharadesTv, ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
@@ -149,7 +149,6 @@ export function App() {
   const [qrUrl, setQrUrl] = useState("");
   const [bookText, setBookText] = useState("");
   const [exportText, setExportText] = useState("");
-  const [textInput, setTextInput] = useState("");
   const [introDismissed, setIntroDismissed] = useState<string | null>(tabGet("cgn_intro_dismissed"));
   const [resultsDismissed, setResultsDismissed] = useState<string | null>(tabGet("cgn_results_dismissed"));
   const settings = useExperienceSettings();
@@ -201,8 +200,6 @@ export function App() {
   const rememberedSeats = useRememberedSeats();
   const [recoverMode, setRecoverMode] = useState(false);
   const [shuffleResult, setShuffleResult] = useState<string | null>(null);
-  const [numInput, setNumInput] = useState("");
-  const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
   // Stage 5.1 (S5-AUD-07): is the spectator/TV display live, stale, or just reconnected?
   const [tvLive, setTvLive] = useState<"live" | "stale" | "restored">("live");
@@ -699,6 +696,7 @@ export function App() {
               ? <div className="mz-tvshow-game" data-testid="mz-cx-tv"><GameClock game={g} tv /><ConnectionsTv game={g} title={titleOf(g.gameId)} players={feed.players} /></div>
               : g.gameId === "closest-wins" ? <ClosestTv game={g} title={titleOf(g.gameId)} />
               : g.gameId === "impostor" ? <ImpostorTv game={g} title={titleOf(g.gameId)} />
+              : g.gameId === "charades" ? <CharadesTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} />
               : g.gameId === "majority-rules" ? <MajorityTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} />
               : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><PulseTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "draw-guess" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><DrawTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
@@ -1570,7 +1568,7 @@ export function App() {
     </>}
     {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={themes.everyday} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
-      {showGamePanel && playingGame && <GamePanel game={playingGame} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
+      {showGamePanel && playingGame && <GamePanel key={draftKey(playingGame)} game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "This game"} players={players} nameOf={nameOf} intent={intent} />}
       {/* S5-F: the older panel (Category Sprint, Who Said That?, Impostor, Charades) says so beside the game when a send fails; typed text stays in its box. */}
       {showGamePanel && playingGame && sendFailure}
 

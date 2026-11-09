@@ -255,6 +255,9 @@ export interface GameState {
   myState?: { mistakes: number; solved: string[]; guessed: string[] };
   actor?: string;
   teamScores?: number[];
+  /** Charades (Stage 5.1): player ids per team (team A = 0, team B = 1), and the acting team. */
+  teams?: string[][];
+  actorTeam?: number;
   passesThisTurn?: number;
   myGuess?: number;
   unit?: string;
@@ -262,6 +265,8 @@ export interface GameState {
   myGuesses?: Record<string, number>;
   questions?: QuizQuestion[];
   myAnswers?: Record<string, number>;
+  /** Category Sprint (Stage 5.1): your own answers for the current round, once the server has them. */
+  mySubmission?: string[];
 }
 
 /** Narrow an unknown JSON value to a record, or return an empty record. */

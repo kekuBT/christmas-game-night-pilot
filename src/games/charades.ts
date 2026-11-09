@@ -75,5 +75,9 @@ export function projectCharades(state: CharadesState, actorId: string, isTv: boo
     // Prompt is private to the actor only, never to TV or other players
     prompt: !isTv && actorId === actor ? prompt : undefined,
     teamScores: state.teamScores,
+    // Stage 5.1 (O-06): who is on which team is public (it's announced at the
+    // table), so every screen can name the teams and the acting team.
+    teams: state.teams.map((t) => [...t]),
+    actorTeam: actorTeam(state, actor),
   };
 }
