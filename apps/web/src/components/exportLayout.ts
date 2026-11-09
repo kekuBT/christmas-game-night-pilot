@@ -33,3 +33,26 @@ export function paginateLines(lineHeights: number[], pageHeight: number, startY:
 export function canvasNoteY(y: number, maxY = 1040): number {
   return Math.min(y, maxY);
 }
+
+/**
+ * Stage 4 (S3-MEM-01): a file name that says what and when: the room's public
+ * code and the local date, e.g. christmas-memory-book-ABC123-2026-11-09.pdf.
+ */
+export function exportFilename(ext: "pdf" | "png", roomCode: string | undefined, now: Date): string {
+  const code = (roomCode ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  return `christmas-memory-book${code ? `-${code}` : ""}-${date}.${ext}`;
+}
+
+/**
+ * A ledger fact ("player-2: 120 points") with the player's room name in
+ * place of the internal id, for screens inside the room. Unknown ids are
+ * left as they are; nothing else in the text changes.
+ */
+export function readableFact(fact: string, nameOf: (id: string) => string | undefined): string {
+  const m = /^([^:]+): (.*)$/.exec(fact);
+  if (!m) return fact;
+  const name = nameOf(m[1]!);
+  return name ? `${name}: ${m[2]}` : fact;
+}

@@ -166,7 +166,7 @@ try {
   await host.getByTestId("advance-day-confirm").click();
   await sleep(1200);
   check("F5: confirming advances to day 2", /Championship day:\s*2/.test(await host.locator("body").innerText()));
-  await host.getByRole("button", { name: "Lobby & Games" }).click();
+  await host.getByTestId("cup-back").click(); // Stage 4: the Cup is a Night Circle screen with Back
   await sleep(500);
   // ---------------------------------------------------------------- geometry: 10 players, long names, longest title
   for (const n of LONG) await joinByHttp(code, n);

@@ -116,10 +116,11 @@ try {
   await roomGo(host, "cup");
   await host.getByText("Championship standings").waitFor({ timeout: 15000 });
   await sleep(1500); // allow the 2s poll to refresh standings after the finish
-  const champText = await host.locator("body").textContent();
-  const standingsOk = NAMES.every((n) => champText.includes(`${n}:`));
+  // Stage 4 (S3-CUP-01): standings in their own section; games by title.
+  const standingsText = await host.getByTestId("cup-standings").innerText();
+  const standingsOk = NAMES.every((n) => standingsText.includes(n));
   check("championship standings list all 4 players", standingsOk);
-  const breakdownOk = champText.includes("Per-game breakdown") && champText.includes("math-mayhem");
+  const breakdownOk = /Official games so far/.test(await host.getByTestId("cup-games").innerText()) && /Math Mayhem/.test(await host.getByTestId("cup-games").innerText());
   check("championship per-game breakdown names the finished game", breakdownOk);
 
   // --- TV Dashboard view: code, roster, standings, recent games. ---
@@ -144,7 +145,7 @@ try {
   // order is the Export button, not the entry's Approve button. That exact
   // pitfall made the first two F4 runs (and the E2E views check, which only
   // asserted the highlight text appears somewhere) never actually approve.
-  const entryCard = host.locator(".card", { hasText: HIGHLIGHT }).last();
+  const entryCard = host.locator('[data-testid="memory-entry"]', { hasText: HIGHLIGHT }).last();
   await entryCard.getByRole("button", { name: "Approve", exact: true }).click();
   // Wait for the entry card itself to flip to approved — NOT the static
   // "Only approved entries appear in the export" paragraph, which also

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicGame, PublicPlayer, Readiness, RegistryGame, SpectateResponse } from "./types.js";
 import { GamePanel } from "./components/GamePanel.js";
-import { ChampionshipView } from "./components/ChampionshipView.js";
-import { MemoryBookView } from "./components/MemoryBookView.js";
+import { CupScreen } from "./components/mchezo/CupScreen.js";
+import { MemoryScreen } from "./components/mchezo/MemoryScreen.js";
 import { Reactions } from "./components/Reactions.js";
 import { ShowIntro, ShowResults, ShowWaiting } from "./components/ShowMode.js";
 import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js";
@@ -1312,6 +1312,25 @@ export function App() {
       </MchezoProvider>
     );
   }
+  if (view === "championship") {
+    // Stage 4 (S3-CUP-01): the Family Cup as a Night Circle screen, standings
+    // first and rules on demand. Values are the server's, as before.
+    return (
+      <MchezoProvider theme={themes.everyday} {...motion}>
+        <CupScreen proj={proj} games={games} players={players} youId={playerId ?? ""} nameOf={nameOf} midrank={midrank} post={post} refresh={refresh} meIsHostOrCohost={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
+        {roomSheets}
+      </MchezoProvider>
+    );
+  }
+  if (view === "memory") {
+    // Stage 4 (S3-MEM-01): the Memory Book as a Night Circle screen with honest export feedback.
+    return (
+      <MchezoProvider theme={themes.everyday} {...motion}>
+        <MemoryScreen roomId={roomId ?? ""} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
+        {roomSheets}
+      </MchezoProvider>
+    );
+  }
   if (view === "studio") {
     // Tournament Studio preview (Milestone I): host-only, schedule-only.
     // No game is started, scored, or saved from this view.
@@ -1372,7 +1391,6 @@ export function App() {
     {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={themes.everyday} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
       {showGamePanel && playingGame && <GamePanel game={playingGame} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
-    {view === "championship" && <ChampionshipView proj={proj} games={games} players={players} nameOf={nameOf} midrank={midrank} post={post} refresh={refresh} meIsHostOrCohost={!!(me?.isHost || me?.isCohost)} />}
 
     {view === "tv" && <div className="card"><h2>TV Dashboard — public only</h2><p className="muted">This view never shows secret words, other players' prompts, or an answer that can still be played.</p>
       <p>Room code: <b>{proj?.joinCode}</b></p><p>Players: {players.map((p) => p.displayName).join(", ")}</p>
@@ -1387,6 +1405,5 @@ export function App() {
       <Reactions proj={proj} post={post} canMute={false} />
     </div>}
 
-    {view === "memory" && <MemoryBookView roomId={roomId ?? ""} book={book} ledger={ledger} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} />}
   </div>;
 }

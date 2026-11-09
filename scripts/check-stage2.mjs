@@ -239,10 +239,10 @@ try {
   await host.goBack();
   await host.getByRole("heading", { name: "You’re in, Keku." }).waitFor({ timeout: 15000 });
   check("D. Back from the Cup returns to the lobby (not to the menu)", path(host) === "/room" && (await host.getByTestId("room-menu-sheet").count()) === 0);
-  // Cup → TV (the older views' own buttons) → "Lobby & Games": the lobby, not the Cup.
+  // Cup → TV (Stage 4: through the Cup's own room menu) → "Lobby & Games": the lobby, not the Cup.
   await roomGo(host, "cup");
   await host.getByText("Championship standings").waitFor({ timeout: 15000 });
-  await host.getByRole("button", { name: "TV Dashboard", exact: true }).click();
+  await roomGo(host, "tv");
   await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   check("D. Cup → TV is one step: /room/tv", path(host) === "/room/tv");
   await host.getByRole("button", { name: "Lobby & Games" }).click();
@@ -250,7 +250,7 @@ try {
   check("D. 'Lobby & Games' from the TV (after the Cup) returns to the lobby", path(host) === "/room");
   await roomGo(host, "cup");
   await host.getByText("Championship standings").waitFor({ timeout: 15000 });
-  await host.getByRole("button", { name: "TV Dashboard", exact: true }).click();
+  await roomGo(host, "tv");
   await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
   await host.goBack();
   await host.getByRole("heading", { name: "You’re in, Keku." }).waitFor({ timeout: 15000 });

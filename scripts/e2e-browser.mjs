@@ -371,7 +371,7 @@ async function runBrowser(browserName, games) {
     try {
       await roomGo(host, "cup");
       await host.getByText("Championship standings").waitFor({ timeout: 15000 });
-      await host.getByRole("button", { name: "Lobby & Games" }).click();
+      await host.getByTestId("cup-back").click(); // Stage 4: the Cup is a Night Circle screen with Back
       await roomGo(host, "tv");
       // TV subject is the LATEST game overall (Phase 2.1 lifecycle fix):
       // full runs end on Math Mayhem, so the TV view is the old dashboard;
@@ -390,7 +390,7 @@ async function runBrowser(browserName, games) {
       // Scoped + exact: unscoped substring "Approve" also matches the
       // "Export approved" button, which comes first in DOM order, so the
       // old .first() click never actually approved (see F4 check notes).
-      await host.locator(".card", { hasText: "E2E highlight: Alex won Math Mayhem" }).last()
+      await host.locator('[data-testid="memory-entry"]', { hasText: "E2E highlight: Alex won Math Mayhem" }).last()
         .getByRole("button", { name: "Approve", exact: true }).click();
       await host.getByText(/Day 1 · approved/).waitFor({ timeout: 15000 });
       await host.getByRole("button", { name: "Export approved" }).click();

@@ -405,11 +405,12 @@ try {
   await roomGo(host, "cup");
   await host.getByText("Championship standings").waitFor({ timeout: 15000 });
   await sleep(1500);
-  const champText = await host.locator("body").textContent();
+  // Stage 4 (S3-CUP-01): standings in their own section; the games played below them.
+  const standingsText = await host.getByTestId("cup-standings").innerText();
   check("championship standings list all 4 players after full day",
-    NAMES.every((n) => champText.includes(`${n}:`)));
+    NAMES.every((n) => standingsText.includes(n)));
   check("championship per-game breakdown present after full day",
-    champText.includes("Per-game breakdown"));
+    /Official games so far/.test(await host.getByTestId("cup-games").innerText()));
 
   // TV subject is the LATEST game overall (Phase 2.1 lifecycle fix): the
   // playlist ends on Math Mayhem, so the TV view is the old dashboard
@@ -436,7 +437,7 @@ try {
   await host.getByPlaceholder(/Ada won Math Mayhem/).fill(HIGHLIGHT);
   await host.getByRole("button", { name: "Add from last finished game" }).click();
   await host.getByText(HIGHLIGHT).waitFor({ timeout: 15000 });
-  const entryCard = host.locator(".card", { hasText: HIGHLIGHT }).last();
+  const entryCard = host.locator('[data-testid="memory-entry"]', { hasText: HIGHLIGHT }).last();
   await entryCard.getByRole("button", { name: "Approve", exact: true }).click();
   await host.getByText(/Day 1 · approved/).waitFor({ timeout: 15000 });
   await host.getByRole("button", { name: "Export approved" }).click();

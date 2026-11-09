@@ -67,6 +67,20 @@ export function useRoute() {
     if (url === location.pathname + location.search) return;
     const here = entry();
     const depth = here?.depth ?? 0;
+    // Stage 4: swapping one screen for another (opts.replace) from a sheet we
+    // pushed (the room menu on the Cup, say) must swap the screen *under* the
+    // sheet, so history stays "lobby → this screen". Step back over the sheet,
+    // then replace what is there.
+    if (opts.replace && here?.sheet && here.depth > 0 && !opts.sheet) {
+      const onPop = () => {
+        removeEventListener("popstate", onPop);
+        history.replaceState({ mz: true, sheet: false, depth: entry()?.depth ?? depth - 1 } satisfies Entry, "", url);
+        setState(read());
+      };
+      addEventListener("popstate", onPop);
+      history.back();
+      return;
+    }
     const replace = opts.replace || (!!here?.sheet && !opts.sheet);
     if (replace) history.replaceState({ mz: true, sheet: !!opts.sheet && !!here?.sheet, depth } satisfies Entry, "", url);
     else history.pushState({ mz: true, sheet: !!opts.sheet, depth: depth + 1 } satisfies Entry, "", url);
