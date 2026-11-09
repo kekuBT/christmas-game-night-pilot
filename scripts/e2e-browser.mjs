@@ -380,8 +380,8 @@ async function runBrowser(browserName, games) {
         await host.getByRole("region", { name: "Mchezo big screen" }).waitFor({ timeout: 15000 });
         await host.getByRole("button", { name: "Back to phone view" }).click();
       } catch {
-        await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
-        await host.getByRole("button", { name: "Lobby & Games" }).click();
+        await host.getByTestId("tv-show").waitFor({ timeout: 15000 }); // Stage 5: the live show
+        await host.getByTestId("tv-back").click();
       }
       await roomGo(host, "memory");
       await host.getByPlaceholder("e.g. Ada won Math Mayhem in a tie-break").fill("E2E highlight: Alex won Math Mayhem");

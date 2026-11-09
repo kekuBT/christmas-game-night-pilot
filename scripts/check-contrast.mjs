@@ -199,8 +199,8 @@ try {
   report("championship", await sampleView(host, "championship"));
 
   await roomGo(host, "tv");
-  await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
-  console.log("\n== TV dashboard ==");
+  await host.getByTestId("tv-show").waitFor({ timeout: 15000 }); // Stage 5: the live show
+  console.log("\n== TV (live show) ==");
   report("tv", await sampleView(host, "tv"));
 
   await roomGo(host, "memory");

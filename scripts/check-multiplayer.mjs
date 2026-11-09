@@ -178,8 +178,8 @@ try {
   await tvLeakCheck("impostor (playing)", roomId);
   // TV Dashboard view itself renders in the browser while a secret game plays.
   await roomGo(host, "tv");
-  await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
-  check("TV Dashboard view renders during a secret-role game", true);
+  await host.getByTestId("tv-show").waitFor({ timeout: 15000 }); // Stage 5: the live show
+  check("TV view renders during a secret-role game", (await host.getByTestId("tv-mode").getAttribute("data-mode")) === "live");
 } catch (e) {
   console.log(`FATAL: ${e.message}`);
   results.push({ label: "script completed without fatal error", ok: false });

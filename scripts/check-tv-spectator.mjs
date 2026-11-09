@@ -88,13 +88,13 @@ try {
   proj = await tvProj(roomId);
   check("joining as TV adds one participant", proj.players.length === 4 && proj.players.some((p) => p.displayName === "TV"));
   await roomGo(tv, "tv");
-  // No game has started yet, so the TV view is still the old dashboard
-  // (the Mchezo stage only takes over once a Trivia game exists).
-  await tv.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
+  // No game has started yet, so the TV shows the live show's lobby
+  // (Stage 5; the Trivia stage only takes over once a Trivia game exists).
+  await tv.getByTestId("tv-show").waitFor({ timeout: 15000 });
   await sleep(1000);
   proj = await tvProj(roomId);
   check("opening TV stage adds no participant", proj.players.length === 4);
-  await tv.getByRole("button", { name: "Lobby & Games" }).click();
+  await tv.getByTestId("tv-back").click(); // Stage 5: the TV show's "Back to phone view"
   await tv.getByRole("heading", { name: "You’re in, TV." }).waitFor({ timeout: 15000 });
   proj = await tvProj(roomId);
   check("closing TV stage removes no participant", proj.players.length === 4);

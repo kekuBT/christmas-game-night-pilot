@@ -124,14 +124,19 @@ try {
   check("championship per-game breakdown names the finished game", breakdownOk);
 
   // --- TV Dashboard view: code, roster, standings, recent games. ---
+  // Stage 5: the live show opens on the finished game's final standings;
+  // its Lobby view has the code, the roster and tonight's games.
   await roomGo(host, "tv");
-  await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
-  await sleep(1500);
+  await host.getByTestId("tv-show").waitFor({ timeout: 15000 });
+  await host.getByTestId("tv-dir-lobby").click();
+  await host.getByTestId("tv-lobby").waitFor({ timeout: 15000 });
+  await sleep(1000);
   const tvText = await host.locator("body").textContent();
-  check("TV Dashboard shows join code", tvText.includes(code));
-  check("TV Dashboard shows full roster", NAMES.every((n) => tvText.includes(n)));
-  check("TV Dashboard shows finished game in recent games",
-    tvText.includes("math-mayhem") && tvText.includes("finished"));
+  check("TV shows join code", tvText.includes(code));
+  check("TV shows full roster", NAMES.every((n) => tvText.includes(n)));
+  const recent = await host.getByTestId("tv-recent").innerText();
+  check("TV shows finished game in tonight so far",
+    recent.includes("Math Mayhem") && recent.includes("finished"), recent.replace(/\n/g, " | "));
 
   // --- Memory Book: add, approve, export contains it. ---
   await roomGo(host, "memory");

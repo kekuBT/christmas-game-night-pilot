@@ -67,7 +67,8 @@ async function tvIsStage(tv) {
   return (await tv.getByRole("region", { name: "Mchezo big screen" }).count()) > 0;
 }
 async function tvIsDashboard(tv) {
-  return ((await tv.locator("body").textContent()) ?? "").includes("TV Dashboard — public only");
+  // Stage 5: the live show replaces the old dashboard for every game without its own stage.
+  return (await tv.getByTestId("tv-show").count()) > 0;
 }
 
 const browser = await launchChromium();
@@ -87,7 +88,7 @@ try {
 
   // Lobby: TV shows the dashboard (no game yet).
   await roomGo(tv, "tv");
-  await tv.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
+  await tv.getByTestId("tv-show").waitFor({ timeout: 15000 });
   check("lobby: TV shows the dashboard", await tvIsDashboard(tv));
 
   // Trivia starts with its D3 briefing: the TV shows the rules and who is
@@ -149,7 +150,7 @@ try {
   // dashboard with Math in Recent games.
   // D3: no per-phone intro after the briefing; everyone is straight in play.
   for (const g of [...guests, tv]) {
-    if (g === tv) await tv.getByRole("button", { name: "Lobby & Games" }).click();
+    if (g === tv) await tv.getByTestId("tv-back").click(); // the TV show's "Back to phone view"
     await answerAllMath(g);
   }
   await answerAllMath(host);
@@ -162,8 +163,8 @@ try {
     await sleep(1500);
   }
   const dashText = await tv.locator("body").textContent();
-  check("newer game finished: TV still on the dashboard, no stale Trivia stage",
-    !(await tvIsStage(tv)) && dashText.includes("math-mayhem"));
+  check("newer game finished: TV still on the live show for Math Mayhem, no stale Trivia stage",
+    !(await tvIsStage(tv)) && (await tv.getByTestId("tv-show").getAttribute("data-game")) === "math-mayhem", dashText.slice(0, 120));
 
   // Trivia starts again: TV returns to a FRESH stage (question, not the
   // old leaderboard) for the new game. The TV page left TV view to play

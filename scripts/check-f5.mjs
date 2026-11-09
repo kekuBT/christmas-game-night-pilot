@@ -416,20 +416,22 @@ try {
   // playlist ends on Math Mayhem, so the TV view is the old dashboard
   // with Now playing + Recent games — not the stale Trivia stage. The
   // stage itself is covered by the dedicated TV lifecycle driver.
+  // Stage 5: the live show opens on the last game's final standings; its
+  // Lobby view lists tonight's games, the last 5 by design (slice(-5)).
   await roomGo(host, "tv");
-  await host.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
-  await sleep(1500);
-  const tvText = await host.locator("body").textContent();
-  // TV Dashboard "Recent games" is intentionally the last 5 by design
-  // (src/server/hub.ts and App.tsx both slice(-5)); assert exactly those.
-  const recentFive = gameIds.slice(-5);
-  check("TV Dashboard shows the 5 most recent finished games",
-    recentFive.every((id) => tvText.includes(id)),
-    recentFive.filter((id) => !tvText.includes(id)).join(", ") || "all 5 listed");
+  await host.getByTestId("tv-show").waitFor({ timeout: 15000 });
+  await host.getByTestId("tv-dir-lobby").click();
+  await host.getByTestId("tv-recent").waitFor({ timeout: 15000 });
+  await sleep(1000);
+  const recentText = await host.getByTestId("tv-recent").innerText();
+  const recentFive = gameIds.slice(-5).map((id) => registry.find((g) => g.id === id).title);
+  check("TV shows the 5 most recent finished games",
+    recentFive.every((t) => recentText.includes(t)) && (await host.getByTestId("tv-recent").locator("li").count()) === 5,
+    recentFive.filter((t) => !recentText.includes(t)).join(", ") || "all 5 listed");
 
-  // The old dashboard's nav returns to the lobby, where the extra carries
-  // Memory Book.
-  await host.getByRole("button", { name: "Lobby & Games" }).click();
+  // The TV's "Back to phone view" returns to the lobby, where the extra
+  // carries Memory Book.
+  await host.getByTestId("tv-back").click();
   await host.getByRole("heading", { name: `You’re in, ${NAMES[0]}.` }).waitFor({ timeout: 15000 });
   const HIGHLIGHT = "F5 day highlight: full playlist finished";
   await roomGo(host, "memory");

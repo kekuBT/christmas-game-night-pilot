@@ -17,7 +17,10 @@ import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./components/mchezo/MchezoConnections.js";
-import { TvLastStandings, TvNowPlaying } from "./components/mchezo/TvDashboardParts.js";
+import { TvShow } from "./components/mchezo/TvShow.js";
+import { ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.js";
+import { tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
+import { ordinal } from "./ui/mchezo/lib/standings.js";
 import { CaptionTv, MchezoCaption, MchezoCaptionResults } from "./components/mchezo/MchezoCaption.js";
 import { MchezoGeography } from "./components/mchezo/MchezoGeography.js";
 import { MchezoMath } from "./components/mchezo/MchezoMath.js";
@@ -610,16 +613,36 @@ export function App() {
     if (m !== gameMode && games.find((g) => g.id === serverPlan.gameId)?.lifecycle?.officialEligible !== false) setGameModeRaw(m);
   }, [planner, serverPlan?.gameId, serverPlan?.official]);
   /** TV / spectator screen for the Sprint 4 games (never answers or authors while playing). */
-  function connectionsTvScreen(game: PublicGame, onBack: () => void, backLabel: string) {
-    const t = games.find((x) => x.id === game.gameId)?.title ?? game.gameId;
-    const isCaption = game.gameId === "caption-clash";
+  /**
+   * Stage 5 (S5-A): the live show, for the room's TV and for spectators. It
+   * gets the room's public feed only (tvFeedFrom), never `me` or `myGames`.
+   * Trivia keeps its own stage and the briefing its own TV screen.
+   */
+  function tvShowScreen(onBack: () => void, backLabel: string) {
+    if (!proj) return null;
+    const feed = tvFeedFrom(proj);
+    const titleOf = (id: string) => games.find((x) => x.id === id)?.title ?? id;
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
-        <main className="mz-screen" style={{ maxWidth: 1200 }} aria-label={`${t} on the TV`} data-testid={isCaption ? "mz-cap-tv" : "mz-cx-tv"}>
-          <div className="mz-topbar"><span className="mz-kicker" style={{ color: "var(--mz-answer-2)" }}>{t} · {proj?.joinCode}</span><button type="button" className="mz-chip-btn" onClick={onBack}>{backLabel}</button></div>
-          <GameClock game={game} tv />
-          {isCaption ? <CaptionTv game={game} /> : <ConnectionsTv game={game} title={t} players={proj?.players ?? []} />}
-        </main>
+      <MchezoProvider theme={themes.everyday} {...motion} as="bare">
+        <TvShow
+          feed={feed}
+          registry={games}
+          onBack={onBack}
+          backLabel={backLabel}
+          renderLive={(g) => g.gameId === "caption-clash"
+            ? <div className="mz-tvshow-game" data-testid="mz-cap-tv"><GameClock game={g} tv /><CaptionTv game={g} /></div>
+            : g.gameId === "word-connections"
+              ? <div className="mz-tvshow-game" data-testid="mz-cx-tv"><GameClock game={g} tv /><ConnectionsTv game={g} title={titleOf(g.gameId)} players={feed.players} /></div>
+              : g.gameId === "closest-wins" ? <ClosestTv game={g} title={titleOf(g.gameId)} />
+              : g.gameId === "impostor" ? <ImpostorTv game={g} title={titleOf(g.gameId)} />
+              : null}
+          renderFinal={(g) => g.gameId === "word-connections"
+            ? <div className="mz-tvshow-game" data-testid="mz-cx-tv"><ConnectionsTv game={g} title={titleOf(g.gameId)} players={feed.players} /></div>
+            : null}
+          renderReview={(g) => g.gameId === "caption-clash"
+            ? <div className="mz-tvshow-game" data-testid="mz-cap-tv"><CaptionTv game={g} /></div>
+            : tvAnswers(g)}
+        />
       </MchezoProvider>
     );
   }
@@ -757,7 +780,6 @@ export function App() {
   // submit an intent, or appear in a seat.
   if (!playerId && specRoomId && specToken) {
     const specPlayers: PublicPlayer[] = proj?.players ?? [];
-    const specNameOf = (id: string): string => specPlayers.find((p) => p.id === id)?.displayName ?? id;
     const specLatest = (proj?.games ?? []).at(-1);
     noteServerTime(proj?.serverNow);
     const specTvGame = specLatest?.gameId === "trivia" && (specLatest.status === "playing" || specLatest.status === "finished") ? specLatest : undefined;
@@ -779,7 +801,6 @@ export function App() {
         </MchezoProvider>
       );
     }
-    if (specLatest?.gameId === "word-connections" || specLatest?.gameId === "caption-clash") return connectionsTvScreen(specLatest, stopWatching, "Stop watching");
     if (specTvGame) {
       return (
         <MchezoProvider theme={themes.everyday} {...motion} as="bare">
@@ -787,24 +808,7 @@ export function App() {
         </MchezoProvider>
       );
     }
-    return (
-      <div className="wrap">
-        <header><h1>🎄 Christmas Game Night</h1><span className="pill">Code: {proj.joinCode ?? "…"}</span></header>
-        <p className="muted">Watching as a spectator — no seat taken, no scores, no controls.</p>
-        {(proj.spectatorCount ?? 0) > 0 && <p className="muted" data-testid="tv-watching-count">👁 {proj.spectatorCount} watching</p>}
-        <div className="card"><h2>TV Dashboard — public only</h2><p className="muted">This view never shows secret words, other players' prompts, or an answer that can still be played.</p>
-          <p>Players: {specPlayers.map((p) => p.displayName).join(", ") || "—"}</p>
-          <h3>Standings (Family Cup totals)</h3>{(proj.championship ?? []).map((r) => <p key={r.playerId}>{specNameOf(r.playerId)}: {r.total} points{r.eligible ? "" : " (not yet qualified)"}</p>)}
-          <h3>Now playing</h3>{(proj.games ?? []).filter((g) => g.status === "playing").map((g) => <TvNowPlaying key={g.id} game={g} title={games.find((x) => x.id === g.gameId)?.title ?? g.gameId} players={specPlayers} />)}
-          {(proj.games ?? []).filter((g) => g.status === "playing").length === 0 && <p className="muted">No game in progress — the lobby is choosing the next game.</p>}
-          {(() => { const last = (proj.games ?? []).at(-1); return last ? <TvLastStandings game={last} title={games.find((x) => x.id === last.gameId)?.title ?? last.gameId} players={specPlayers} /> : null; })()}
-          {tvAnswers((proj.games ?? []).at(-1))}
-          <h3>Recent games</h3>{(proj.games ?? []).slice(-5).map((g) => <p key={g.id}>{g.gameId} — {g.status}{g.rawScores ? ` — ${Object.entries(g.rawScores).map(([pid, v]) => `${specNameOf(pid)}: ${v}`).join(" · ")}` : ""}</p>)}
-        </div>
-        <div style={{ marginTop: 12 }}><button type="button" className="mz-chip-btn" onClick={stopWatching}>Stop watching</button></div>
-        {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
-      </div>
-    );
+    return tvShowScreen(stopWatching, "Stop watching");
   }
 
   // A-06 (live audit): until this phone has its room's first projection, say
@@ -835,11 +839,8 @@ export function App() {
   const players: PublicPlayer[] = proj?.players ?? [];
   const myGames: PlayerGame[] = proj?.myGames ?? [];
   const me = players.find((p) => p.id === playerId);
-  const serverStandings = proj?.officialStandings;
-  // Standings come from the server only (RoomEngine.officialStandings). The
-  // client used to recompute them as a fallback, with different rules for
-  // single-player games: a second scoring engine that could disagree.
-  const standings: Record<string, number> = serverStandings ?? {};
+  // Standings come from the server only (RoomEngine.officialStandings); the
+  // TV and the Cup screen read them from the projection. No client recompute.
   const nameOf = (id: string): string => players.find((p) => p.id === id)?.displayName ?? id;
   // Only a game this player is in. Someone who joined the room after it
   // started isn't in its roster: they stay in the lobby (the server refuses
@@ -1041,9 +1042,27 @@ export function App() {
   }
 
   if (view === "lobby" && isLobbyPhase) {
+    // S5-B: the room's last finished game, for everyone, from recorded scores only.
+    const roomGames = proj?.games ?? [];
+    const gameOn = roomGames.some((g) => g.status === "playing" || g.status === "briefing");
+    const lastDone = gameOn ? undefined : roomGames.filter((g) => g.status === "finished").at(-1);
+    const lastGame = lastDone ? (() => {
+      const scores = lastDone.rawScores ?? {};
+      const mineScore = playerId ? scores[playerId] : undefined;
+      const n = Object.keys(scores).length;
+      const rank = mineScore === undefined ? 0 : 1 + Object.values(scores).filter((v) => v > mineScore).length;
+      const tied = mineScore !== undefined && Object.values(scores).filter((v) => v === mineScore).length > 1;
+      const yourLine = !playerId || !lastDone.players.includes(playerId) ? "You weren’t in this one."
+        : mineScore === undefined ? undefined
+        : n <= 1 ? `You played solo: ${mineScore} points.`
+        : `You ${tied ? "tied for" : "came"} ${ordinal(rank)} of ${n} · ${mineScore} points.`;
+      return { title: games.find((x) => x.id === lastDone.gameId)?.title ?? lastDone.gameId, mode: lastDone.official ? "official" as const : "practice" as const, headline: winnerLine(scores, nameOf), yourLine };
+    })() : undefined;
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <RoomLobby
+          lastGame={lastGame}
+          firstTime={!roomGames.some((g) => g.status === "finished")}
           code={proj?.joinCode ?? "…"}
           sessionLabel={proj?.name ?? "Mchezo"}
           // Family Cup event data: 7 days is the approved championship
@@ -1395,7 +1414,6 @@ export function App() {
         </MchezoProvider>
       );
     }
-    if (latestGame?.gameId === "word-connections" || latestGame?.gameId === "caption-clash") return connectionsTvScreen(latestGame, () => setView("lobby"), "Back to phone view");
     const tvGame = latestGame?.gameId === "trivia" && (latestGame.status === "playing" || latestGame.status === "finished") ? latestGame : undefined;
     if (tvGame) {
       return (
@@ -1404,6 +1422,8 @@ export function App() {
         </MchezoProvider>
       );
     }
+    const show = tvShowScreen(() => setView("lobby"), "Back to phone view");
+    if (show) return show;
   }
 
   return <div className={`wrap anim-${settings.anim}`}>
@@ -1427,18 +1447,7 @@ export function App() {
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
       {showGamePanel && playingGame && <GamePanel game={playingGame} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
 
-    {view === "tv" && <div className="card"><h2>TV Dashboard — public only</h2><p className="muted">This view never shows secret words, other players' prompts, or an answer that can still be played.</p>
-      <p>Room code: <b>{proj?.joinCode}</b></p><p>Players: {players.map((p) => p.displayName).join(", ")}</p>
-      <h3>Standings (Family Cup totals)</h3>{(proj?.championship ?? []).map((r) => <p key={r.playerId}>{nameOf(r.playerId)}: {r.total} points{r.eligible ? "" : " (not yet qualified)"}</p>)}
-      {(proj?.championship ?? []).length === 0 && Object.entries(standings).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([pid, v]) => <p key={pid}>{nameOf(pid)}: {v}</p>)}
-      <h3>Now playing</h3>{(proj?.games ?? []).filter((g) => g.status === "playing").map((g) => <TvNowPlaying key={g.id} game={g} title={games.find((x) => x.id === g.gameId)?.title ?? g.gameId} players={players} />)}
-      {(proj?.games ?? []).filter((g) => g.status === "playing").length === 0 && <p className="muted">No game in progress — the lobby is choosing the next game.</p>}
-      {proj?.ceremony?.winner && <p>🏆 Day {proj.ceremony.day} winner: <b>{proj.ceremony.winner}</b></p>}
-      {(() => { const last = (proj?.games ?? []).at(-1); return last ? <TvLastStandings game={last} title={games.find((x) => x.id === last.gameId)?.title ?? last.gameId} players={players} /> : null; })()}
-      {tvAnswers((proj?.games ?? []).at(-1))}
-      <h3>Recent games</h3>{(proj?.games ?? []).slice(-5).map((g) => <p key={g.id}>{g.gameId} — {g.status}{g.rawScores ? ` — ${Object.entries(g.rawScores).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}` : ""}</p>)}
-      <Reactions proj={proj} post={post} canMute={false} />
-    </div>}
+
 
   </div>;
 }

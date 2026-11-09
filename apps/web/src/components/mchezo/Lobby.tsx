@@ -55,6 +55,10 @@ export interface RoomLobbyProps {
   error?: string;
   /** A short confirmation ("Reconnected to your player slot."). */
   message?: string;
+  /** S5-B: the room's last finished game, for everyone, from recorded scores only. */
+  lastGame?: { title: string; mode: "official" | "practice"; headline: string; yourLine?: string };
+  /** S5-B: no game has finished in this room yet: say once how the night works. */
+  firstTime?: boolean;
 }
 
 export function RoomLobby(p: RoomLobbyProps) {
@@ -72,6 +76,11 @@ export function RoomLobby(p: RoomLobbyProps) {
     : away > 0 ? "Ready when you are"
     : "Everyone’s here";
   const limit = timeLimitLabel(p.upNext?.timeLimitMs);
+  // S5-B: does the host's pick fit the people connected now? (Everyone sees it.)
+  const fit = !p.upNext ? null
+    : connected < p.upNext.minPlayers ? { tone: "warn", text: `Needs ${p.upNext.minPlayers - connected} more ${p.upNext.minPlayers - connected === 1 ? "player" : "players"} · ${connected} here` }
+    : connected > p.upNext.maxPlayers ? { tone: "warn", text: `Up to ${p.upNext.maxPlayers} players · ${connected} here` }
+    : { tone: "ok", text: `Fits the ${connected} here` };
   return (
     <main className="mz-screen mz-screen--docked mz-lobby" aria-label="Lobby">
       {/* The lobby scrolls ABOVE its Start dock, never under it (S3-HOME-01 applied to the lobby). */}
@@ -133,12 +142,23 @@ export function RoomLobby(p: RoomLobbyProps) {
                 </span>
               )}
               {!p.mode && !p.upNext.officialEligible && <span className="mz-badge mz-badge--mint">Practice only</span>}
+              {fit && <span className={`mz-upnext-card__fit mz-upnext-card__fit--${fit.tone}`} data-testid="up-next-fit">{fit.text}</span>}
             </span>
           </button>
           {p.isHost && p.onChangeGame && <button type="button" className="mz-chip-btn mz-upnext-card__change" data-testid="choose-game" aria-haspopup="dialog" onClick={p.onChangeGame}>Change</button>}
         </section>
       )}
       {p.shuffleNote && <p className="mz-foot mz-lobby__shuffle" data-testid="shuffle-result">{p.shuffleNote}</p>}
+      {p.lastGame && (
+        <section className="mz-lastgame" aria-label="Last game" data-testid="last-game-card">
+          <span className="mz-kicker">Last game · {p.lastGame.title} · {p.lastGame.mode === "official" ? "Official" : "Practice"}</span>
+          <p className="mz-lastgame__headline">{p.lastGame.headline}</p>
+          {p.lastGame.yourLine && <p className="mz-lastgame__you" data-testid="last-game-you">{p.lastGame.yourLine}</p>}
+        </section>
+      )}
+      {p.firstTime && !p.isHost && (
+        <p className="mz-foot mz-lobby__howto" data-testid="first-time-help">How tonight works: {p.hostName ?? "the host"} picks a game. The rules come to your phone, you tap I’m ready, and everyone starts together.</p>
+      )}
       {p.isHost && p.setup}
       </div>
       <div className="mz-dock mz-dock--sticky" data-testid="lobby-dock">
@@ -158,7 +178,9 @@ export function RoomLobby(p: RoomLobbyProps) {
           </>
         ) : (
           <p className="mz-dock__note mz-dock__note--waiting" data-testid="dock-guest-note">
-            {p.upNext
+            {p.upNext && fit?.tone === "warn" && connected < p.upNext.minPlayers
+              ? <>{p.upNext.title} needs {p.upNext.minPlayers - connected} more {p.upNext.minPlayers - connected === 1 ? "player" : "players"} before {p.hostName ?? "the host"} can start it · share the code {p.code}</>
+              : p.upNext
               ? <>Waiting for {p.hostName ?? "the host"} to start {p.upNext.title}{p.mode ? <> · <b>{p.mode === "official" ? `Official, counts toward the ${p.cupLabel ?? "Cup"}` : "Practice, no Cup points"}</b></> : null} · tap someone to nudge them</>
               : <>Waiting for {p.hostName ?? "the host"} to start · they’re choosing a game · tap someone to nudge them</>}
           </p>

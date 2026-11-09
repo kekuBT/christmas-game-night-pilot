@@ -243,7 +243,7 @@ try {
     // swallowed: a missed tap must fail loudly). Stage 2: via the room menu.
     if (where === "library") { await roomGo(g, "library"); await g.getByTestId("mz-lib-count").waitFor({ timeout: 15000 }); }
     if (where === "championship") { await roomGo(g, "cup"); await g.getByText("Championship standings").waitFor({ timeout: 15000 }); }
-    if (where === "tv") { await roomGo(g, "tv"); await g.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 }); }
+    if (where === "tv") { await roomGo(g, "tv"); await g.getByTestId("tv-show").waitFor({ timeout: 15000 }); }
     await sleep(600);
     await startPractice(h, "trivia");
     await h.getByTestId("briefing").waitFor({ timeout: 15000 });

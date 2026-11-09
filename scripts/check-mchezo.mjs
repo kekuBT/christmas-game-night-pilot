@@ -186,7 +186,7 @@ try {
   const tvC = await ctxC.newPage();
   await joinRoom(tvC, "TV", codeC);
   await roomGo(tvC, "tv");
-  await tvC.getByText("TV Dashboard — public only").waitFor({ timeout: 15000 });
+  await tvC.getByTestId("tv-show").waitFor({ timeout: 15000 }); // Stage 5: the live show's lobby
   await hostC.getByTestId("start-official-trivia").click();
   // D3: the TV shows the rules during the briefing. The TV seat can't tap
   // Ready from the TV view, so the host starts with explicit consent.

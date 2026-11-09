@@ -254,7 +254,11 @@ try {
   check("results: the game counts officially", fin.outcome?.countsOfficially === true, JSON.stringify(fin.outcome?.note ?? ""));
   await keku.screenshot({ path: screenshotPath("docs/stage4/after/caption-08-results-390.png"), fullPage: true });
   await wanjiru.screenshot({ path: screenshotPath("docs/stage4/after/caption-09-results-320.png"), fullPage: true });
-  await soon("TV: the finished favourites, never the authors", async () => { const t = await text(tv); return /Dancing Dancing/.test(t) && !NAMES.some((n) => t.includes(`by ${n}`)); }, 15000);
+  // Stage 5 (S5-A): the TV opens on the final standings; the favourites are
+  // the labelled post-game review.
+  await soon("TV: FINAL STANDINGS with the winner line (a tie for first)", async () => (await tv.getByTestId("tv-mode").getAttribute("data-mode")) === "final" && /Amina and Wanjiru tie for first|Wanjiru and Amina tie for first/.test(await tv.getByTestId("tv-winner").innerText()), 15000);
+  await tv.getByTestId("tv-dir-review").click();
+  await soon("TV: the post-game review shows the favourites, never the authors", async () => { const t = await text(tv); return (await tv.getByTestId("tv-mode").getAttribute("data-mode")) === "review" && /Dancing Dancing/.test(t) && !NAMES.some((n) => t.includes(`by ${n}`)); }, 15000);
   await tv.screenshot({ path: screenshotPath("docs/stage4/after/caption-10-tv-final-1280.png"), fullPage: true });
 
   // ---- Official: the Family Cup records the game; the server's standings.

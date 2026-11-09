@@ -38,8 +38,14 @@ export async function closeRoomMenu(page) {
 export async function roomGo(page, where, { timeout = 15000 } = {}) {
   if (!(where in MENU)) throw new Error(`roomGo: unknown place ${where}`);
   const legacy = LEGACY[where];
-  // Wait until the page shows either the lobby's menu button or the view's own button.
   const menuBtn = page.getByTestId("room-menu");
+  // Stage 5: the TV show (S5-A) has no room menu; a person taps "Back to
+  // phone view" first, then uses the lobby's menu.
+  if ((await menuBtn.count()) === 0 && (await page.getByTestId("tv-back").count()) > 0) {
+    if (where === "tv") return; // already on the TV
+    await page.getByTestId("tv-back").click({ timeout });
+  }
+  // Wait until the page shows either the lobby's menu button or the view's own button.
   await (legacy ? menuBtn.or(page.getByRole("button", { name: legacy, exact: true })) : menuBtn).first().waitFor({ timeout });
   if ((await menuBtn.count()) === 0 && legacy && (await page.getByRole("button", { name: legacy, exact: true }).count()) > 0) {
     await page.getByRole("button", { name: legacy, exact: true }).click({ timeout });
