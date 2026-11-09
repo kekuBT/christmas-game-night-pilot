@@ -263,7 +263,8 @@ async function act(page, gameId, name) {
     return true;
   }
   if (gameId === "charades") {
-    const correct = panel.getByRole("button", { name: "Correct (+100 team)" });
+    // Stage 5.1 (O-06): the button names the acting team.
+    const correct = panel.getByRole("button", { name: /^Correct \(\+100 to Team [AB]\)$/ });
     if (await isVisible(correct, 800)) {
       await correct.click();
       await sleep(400);
