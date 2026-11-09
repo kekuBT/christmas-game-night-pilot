@@ -1305,3 +1305,59 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 
 **Next task (if the owner continues):** the §9 iPhone checklist on a real device; owner rulings on P-S4-01..05.
 **Risk:** Safari behaviour (swipe-back, downloads, backgrounding) is untested; Chromium is not Safari.
+
+## 2026-11-09: Stage 5, the complete game night (branch `claude/stage5-complete-game-night`, from the Stage 4 record `b706a84`)
+
+**Owner direction:** "MCHEZO — OVERNIGHT CONTINUATION: FINISH STAGE 4, THEN STAGE 5", then "STAGE 5 — UPDATED STARTING INSTRUCTIONS".
+- Stage 4 was already complete: code `84ed7ed`, gate PASSED 59/59, record `b706a84`.
+- No merge, deployment, exposed port, paid service or spend.
+- No change to existing scores, Cup rules, content approvals or Cup history. Nothing provisional was approved; every new game is Practice-only.
+- The full account is in `docs/stage5/README.md` (15 sections), with the audit in `docs/stage5/AUDIT.md` and decisions D-S5-01..13.
+
+**Commits (code):**
+- `cd61633` S5-P: every game screen tells the truth about a send; reconnect wording.
+- `23f86e6` S5-A/S5-B: the live show on the TV; the way from one game to the next.
+- `70fa11b` S5-C1: Majority Rules on the common module contract (`src/games/modules/`).
+- `a02588b` S5-C2: Pattern Pulse (self-paced; server-clock windows via `dueAt`/`advance`).
+- `c866125` S5-C3: Draw & Guess (live strokes, bounded; private word; wrong guesses never stored).
+- `6371425` S5-E/S5-F: moments from recorded facts; a still celebration; the older panel's failed-send line; the independent review's fixes R1–R6, including the intent replay cap.
+
+**Each new game was verified before the next was started** (one revision each):
+- `70fa11b`: unit tests, `check-majority-rules`, a 10-driver sweep, `check-stage2`, `check-mchezo`, `check-f5` (729 s) and e2e 13/13 all passed.
+- `a02588b`: 1030 unit tests, `check-pattern-pulse` (47 checks), `check-f5`, `check-stage2` and e2e 14/14 passed. `check-mchezo` failed once under heavy parallel load, then passed alone on the same revision (below).
+- `c866125`: 1046 unit tests, `check-draw-guess` (60 checks), an 8-driver sweep, `check-f5` (821 s) and e2e 15/15 passed.
+
+**Tests:**
+- **Unit:** 1055 at `6371425` (1001 at Stage 4). New: `stage5-tvfeed`, `stage5-majority`, `stage5-pulse`, `stage5-draw`, `stage5-moments`; an `errors` update. Catalogue tests now list game ids explicitly; shuffle goldens were re-pinned because the catalogue grew.
+- **New drivers:** `check-send-failures`, `check-tv-show`, `check-game-night-flow`, `check-majority-rules`, `check-pattern-pulse`, `check-draw-guess`. Shared helpers: `scripts/lib/stage5-games.mjs` and `scripts/lib/contrast.mjs`.
+- **Moved or updated** (replacements asserted, none weakened): check-readiness, check-audit-fixes, check-caption-4p, check-contrast, check-f4, check-f5, check-mchezo, check-multiplayer, check-stage2, check-tv-lifecycle, check-tv-spectator, check-library, check-library-nav, e2e-browser.
+
+**Every failed attempt this stage** (all before the final gate):
+- `check-send-failures` on the Stage 4 build: 11 failures. This was the expected before-evidence for S5-P.
+- Catalogue unit tests failed as each game joined: 16 for Majority, 18 for Pulse, 2 for Draw. They were updated explicitly, not loosened.
+- `check-stage2` (3), `check-library` (2) and `check-library-nav` (2) hard-coded the catalogue size. They now read it from `/games`.
+- `check-mchezo` on `a02588b`, 1 failure: it timed out at 30 s waiting for Trivia results while five browser jobs ran at once. It passed alone on the same revision; nothing was changed.
+- `check-draw-guess`: 2 failures where the driver's artificial burst used up the rate window before Clear (driver order fixed), then 3 false privacy alarms where "hat" matched inside "What is it?" (now whole-word matching).
+- Earlier in S5-A/B: check-tv-dashboard (a block `<b>` split a line), check-contrast (2 translucent chips), check-tv-show and check-game-night-flow (a test id, and case in an upper-cased kicker), check-majority-rules (upper-cased label). Product fixes were made where the screen was wrong; the rest were driver fixes.
+- The replay-cap unit test failed in its first version because it used non-UUID event ids.
+
+**Independent review** of the new games: no high-severity issue. Five issues were fixed and one narrowed; see AUDIT.md R1–R6.
+
+**Not changed:**
+- Existing games' scoring, the Cup, content and approvals.
+- D3 Ready/synchronized start, seats, recovery, Official/Practice separation for existing games, sit-out (L33).
+- The Stage 4 improvements: the stale-projection guard, server-confirmed Caption Clash sends, ten-player standings, navigation restoration.
+
+**Open (owner):** README §13 (Cup eligibility and scoring for the three new games, Majority's tie policy, Pulse's and Draw's parameters, Bluff Battle); the Stage 4 README §8 items.
+
+**Limitation:** Chromium emulation only; no real iPhone, Android or TV.
+
+**Gate run 1 (does not count):** `node scripts/gate.mjs full` on `6371425` (fresh clone; run `20261109-072613-63714256-8119`).
+- Step 10, `check-answer-reveal`, FAILED. It still expected the pre-S5-A TV: answers shown by themselves after a game, and a one-item list during Closest Wins. The driver now opens the Post-game review and reads `tv-closest-last`, with the same assertions.
+- This driver was not in the per-checkpoint sweeps after S5-A: a gap in my targeted runs, which the full gate caught.
+- A new full gate on the fixed revision follows; its verdict goes in the next docs-only commit.
+
+**Next task (if the owner continues):** the README §14 real-device session (iPhone Safari first); owner rulings on §13; backlog B-1..B-4.
+**Risk:**
+- Safari touch drawing, swipe-back from the canvas edge, and iOS autocorrect on guesses are untested.
+- The new games' timings are design values, not measured.

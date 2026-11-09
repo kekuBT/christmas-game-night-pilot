@@ -496,3 +496,63 @@ Owner direction: "MCHEZO — STAGE 4: POST-AUDIT UX COMPLETION & MULTIPLAYER VAL
   - The client shows a polled projection unless a newer projection was shown while the request was in flight and the reply has a lower room `seq`. Pushes always apply.
   - Without a race nothing is dropped, so a server restored with a lower `seq` can't freeze the screen.
   - *Alternative:* drop any reply with a lower `seq` than the one shown. Rejected: it could freeze the screen after a restore from an older snapshot.
+
+## Stage 5: the complete game night (2026-11-09, branch `claude/stage5-complete-game-night`, from the Stage 4 record `b706a84`)
+
+Owner direction: "MCHEZO — OVERNIGHT CONTINUATION: FINISH STAGE 4, THEN STAGE 5", then "STAGE 5 — UPDATED STARTING INSTRUCTIONS". It makes no change to existing scores, Cup rules, content approvals or Cup history, and no merge, deployment or spend. Every new game is Practice-only. The full account is in `docs/stage5/README.md`; the per-game audit is in `docs/stage5/AUDIT.md`.
+
+- **D-S5-01 A send is shown as in only when the server has it** (review item 1).
+  - Every game screen says when a tap got no answer ("We couldn’t confirm that — check your connection. If it doesn’t show as in, try again.") and keeps what was entered: the number, the tiles, the text, the entry, the drawing.
+  - The six Mchezo answer screens show "Sending…" while waiting.
+  - The older panel (Category Sprint, Who Said That?, Impostor, Charades) now shows the same line beside the game (S5-F).
+  - *Alternative:* keep the app's single general error line. Rejected: it sits away from the control the player just used.
+- **D-S5-02 Reconnect wording promises only what the server confirmed** (review item 2).
+  - "Connection lost. Reconnecting… Answers the game confirmed are safe. Taps made now may not arrive."
+  - Then: "Reconnected. Answers the game confirmed are safe."
+- **D-S5-03 One live show for the TV and spectators, from the public projection only** (S5-A).
+  - A single label always says what the screen is: Lobby, Getting ready, Live, Final standings or Post-game review.
+  - A briefing or live game always takes over.
+  - Director controls are local and presentation-only, so no server clock can be paused. Driver-checked: the deadline is unchanged.
+  - *Alternative:* a separate TV app. Rejected: a second source of truth.
+- **D-S5-04 Between games the host stays in control** (S5-B).
+  - Nothing starts by itself.
+  - The lobby tells everyone that the last game ended, the winner and their own place (from recorded scores), and whether the host's pick fits the people here.
+  - A guest whose pick needs more players is told so, with the code.
+- **D-S5-05 New games share one module contract** (`src/games/modules/`).
+  - Pure state, validated intents, phases, scores, participation, and a private and a public view.
+  - RoomEngine keeps the gates, clocks, briefing, finishing exactly once, the ledger and persistence.
+  - The contract adds `dueAt`/`advance`, so a self-paced player's window closes on the server clock with nobody acting.
+  - The eleven existing games are untouched.
+  - *Alternative:* more branches in `room.ts`. Rejected: no pure tests, and every new game would touch every switch.
+- **D-S5-06 Every new game is Practice-only until the owner approves its Cup scoring.**
+  - Majority Rules, Pattern Pulse and Draw & Guess have `officialEligible: false` with a stated reason.
+  - The server refuses an Official start, and the lobby's Official button is disabled with the reason.
+  - Nothing was enabled for the Cup.
+- **D-S5-07 Majority Rules tie policy** (provisional, Practice-only).
+  - A clear majority gives 100 for each prediction that named it.
+  - A split room (equal votes, at least one) gives every prediction 50.
+  - No votes means no majority and no points.
+  - Votes are anonymous for good: only totals are public, a split room names nobody, and participation counts predictions only (independent review R1).
+- **D-S5-08 Pattern Pulse is self-paced with personal patterns** (provisional, Practice-only).
+  - Everyone gets the same lengths (3–8), the same six symbols and the same windows, but their own sequence. The server generates and checks it.
+  - A pattern is in its own player's projection only during the memorise window.
+  - Scoring: 20 per symbol right from the start, plus 50 for the whole sequence.
+  - Reduced motion and Off get a still numbered row for the same time.
+- **D-S5-09 Draw & Guess.**
+  - The server picks the order and the word.
+  - Wrong guesses are never stored or shown.
+  - Drawing goes in batches over the existing intents and WebSocket, with no paid or third-party service.
+  - Bounded per message, per turn and per 2 s.
+  - Scoring: guessers 100/80/60/50 in order; the drawer 50 per correct guesser.
+  - A drawer who disconnects runs out the clock.
+  - Who skipped or passed is never public (review R2). There is one word swap, only before anything is drawn or guessed (R4), and a 12-guess cap (R3).
+- **D-S5-10 Personality only from recorded facts** (S5-E).
+  - Each new game's results show at most one "moment" line taken from the finished game's recorded state, the same on every phone. A player's own facts appear only on their own phone.
+  - A win is celebrated with the short burst under full motion, and with a still ribbon ("You won this one") under Less, Off or the phone's reduced-motion setting.
+  - No audio.
+  - Reactions are unchanged and already safe: a fixed set, no free text, 1 per 3 s and 30 per hour per player, host mute, and never over a game screen.
+- **D-S5-11 Bluff Battle is deferred** (S5-D).
+  - Three verified games were preferred over four (review item 5).
+  - Bluff Battle needs free-text answers shown to the room. That needs a moderation decision and a careful anonymity model, which shouldn't be rushed overnight.
+- **D-S5-12 The intent replay store keeps the latest 4,000 per room** (review R6). Oldest go first. A retry comes seconds after its original, so replays are unaffected; the room file stops growing without bound.
+- **D-S5-13 Drivers read the catalogue from `/games`.** The library, Stage 2 and Mchezo drivers no longer hard-code the number of games. Whole-registry drivers (f5, e2e) play new games as Practice through `scripts/lib/stage5-games.mjs`.
