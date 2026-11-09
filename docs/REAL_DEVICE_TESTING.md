@@ -4,6 +4,8 @@
 
 **Cost:** nothing. The app runs on your own computer and the phones reach it over your Wi-Fi. There is no deployment, tunnel, public address or external service. If home Wi-Fi turns out not to work (see "If phones can't connect"), stop and tell me: I'll present the alternatives and ask before using any of them.
 
+**Which code to test (updated 2026-11-09, Stage 5.1):** the checkout below is the Stage 5 QA branch `claude/stage5-audit-repairs`, which carries Stage 5 and the Stage 5.1 repairs. It replaces the older `claude/real-device-acceptance` branch. Real-device testing has **not** been done yet. The Stage 5.1 items to check are in `docs/stage5-qa/README.md` §13.
+
 **Time:** about 20 minutes to set up, then about 90 minutes of play with 4 to 6 people.
 
 **People and devices:**
@@ -21,7 +23,7 @@
    ```sh
    git clone https://github.com/kekuBT/christmas-game-night-pilot.git
    cd christmas-game-night-pilot
-   git checkout claude/real-device-acceptance
+   git checkout claude/stage5-audit-repairs
    npm ci
    npm run build:web
    ```
