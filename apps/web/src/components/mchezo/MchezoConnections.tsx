@@ -18,6 +18,7 @@ import { StandingsList } from "../../ui/mchezo/components/Results.js";
 import { rankStandings } from "../../ui/mchezo/lib/standings.js";
 import { toMzPlayers } from "./adapters.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
+import { playerName } from "../../ui/mchezo/lib/names.js";
 
 interface SolvedGroup { name: string; level: number; tileIds: string[] }
 interface ConnectionsState {
@@ -174,7 +175,7 @@ export function MchezoConnectionsResults({ game, publicGame, players, playerId, 
   const textOf = (id: string) => tiles.find((t) => t.id === id)?.text ?? id;
   const mine = new Set((st.mySolved ?? []).map((g) => g.name));
   const groups = [...(st.groups ?? [])].sort((a, b) => a.level - b.level);
-  const nameOf = (id: string) => players.find((p) => p.id === id)?.displayName ?? id;
+  const nameOf = (id: string) => playerName(id, players);
   const rows = Object.entries(game.rawScores ?? publicGame?.rawScores ?? {}).map(([id, score]) => ({
     id, name: nameOf(id), score: score as number, you: id === playerId,
     detail: participationLine("word-connections", game.outcome?.participation[id], { you: id === playerId, choseSatOut: id === playerId && game.abstained === true }),

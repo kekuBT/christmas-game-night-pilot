@@ -237,6 +237,8 @@ export interface QuizQuestion {
   correctIndex?: number;
   /** E3: only with correctIndex (finished games). */
   explanation?: string;
+  /** Stage 5.1 (3F): Geography flag questions: the picture described, never naming an option. */
+  imageAlt?: string;
 }
 
 /** Game-specific state, as projected by the server. All fields optional: each game uses a subset. */

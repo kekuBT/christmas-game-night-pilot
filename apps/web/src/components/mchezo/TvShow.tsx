@@ -26,6 +26,7 @@ import type { PublicGame, RegistryGame } from "../../types.js";
 
 /** One public sentence per game: how it works, never what the answers are. */
 import { TV_HINT } from "../../ui/mchezo/lib/tvHints.js";
+import { titleFor } from "../../ui/mchezo/lib/names.js";
 export { TV_HINT };
 
 export interface TvShowProps {
@@ -49,7 +50,7 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
   // A new game, or a change of status, resets the operator's choice.
   useEffect(() => { setChoice("auto"); }, [latest?.id, latest?.status]);
   const mode: TvMode = tvModeFor(latest, choice);
-  const titleOf = (id: string) => registry.find((r) => r.id === id)?.title ?? id;
+  const titleOf = (id: string) => titleFor(id, registry);
   const nameOf = (id: string) => feed.players.find((p) => p.id === id)?.displayName ?? "A player";
   const review = latest && mode !== "live" && latest.status === "finished" ? renderReview?.(latest) ?? null : null;
   const game = mode === "lobby" ? undefined : latest;

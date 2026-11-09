@@ -60,7 +60,7 @@ import {
 import { generateTrivia, scoreTrivia, type TriviaQuestion } from "../games/trivia.js";
 import { scoreYear, YEAR_EVENTS, type YearEvent } from "../games/year.js";
 import { scoreWhoSaid, WHO_SAID_PACK, type WhoSaidQuestion } from "../games/whosaid.js";
-import { GEOGRAPHY_PACK, scoreGeography, type GeographyQuestion } from "../games/geography.js";
+import { flagAlt, GEOGRAPHY_PACK, scoreGeography, type GeographyQuestion } from "../games/geography.js";
 import {
   CONNECTIONS_BOARD,
   connectionsScore,
@@ -2270,6 +2270,8 @@ export class RoomEngine {
       prompt: q["prompt"] ?? q["quote"],
       // Who Said That stores its options as `speakers` (the option list, not a secret).
       options: q["options"] ?? q["speakers"],
+      // Stage 5.1 (3F): a flag question's picture, described without naming an answer.
+      ...(q["mode"] === "flag" ? { imageAlt: flagAlt(q) } : {}),
       ...(reveal ? { correctIndex: q["correctIndex"], ...(typeof q["explanation"] === "string" ? { explanation: q["explanation"] } : {}) } : {}),
     }));
   }

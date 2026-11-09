@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { GameState, PlayerGame, PublicPlayer } from "../types.js";
 import { seats } from "../session.js";
 import { teamLine, teamName, teamResult } from "../ui/mchezo/lib/charades.js";
+import { statusWords } from "../ui/mchezo/lib/names.js";
 
 export type IntentFn = (gid: string, a: string, p: Record<string, unknown>) => void;
 
@@ -42,14 +43,18 @@ export function GamePanel(props: { game: PlayerGame; title: string; players: Pub
   const abstainedNow = game.abstained === true || st.myAbstained === true;
   const quiz = ["math-mayhem", "trivia", "who-said-that", "geography"].includes(game.gameId);
   const questions = game.questions ?? st.questions ?? [];
-  return <div className="card" data-testid="game-panel"><h2>Now playing: {title}</h2><p className="muted">Status: {game.status}{game.status === "finished" ? ` · Your score: ${game.myScore ?? ""}` : ""}</p>
+  return <div className="card" data-testid="game-panel"><h2>Now playing: {title}</h2><p className="muted">{statusWords(game.status)}{game.status === "finished" ? ` · Your score: ${game.myScore ?? ""}` : ""}</p>
     {game.status === "finished" && game.gameId === "charades" && (st.teams ?? []).length > 0 && <p data-testid="charades-result"><b>{teamResult(st.teamScores ?? [])}</b> {teamLine(st.teams ?? [], st.teamScores ?? [], nameOf)}. Each player gets their team's points.</p>}
     {game.status === "finished" && game.rawScores && <p>{Object.entries(game.rawScores).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>}
     {game.status === "finished" && game.gameId === "category-sprint" && (st.results ?? []).length > 0 && <SprintResults results={st.results!} />}
     {game.status === "playing" && <>
-      {quiz && questions.map((q) => {
+      {quiz && questions.map((q, qi) => {
         const answered = game.abstained === true || game.myAnswers?.[q.id] !== undefined || st.myAnswers?.[q.id] !== undefined;
-        return <div key={q.id} className="card"><p><b>{q.prompt}</b></p>{answered ? <p className="ok">{game.abstained ? "Sat out." : "Answered."}</p> : <div className="grid">{(q.options ?? []).map((opt, i: number) => <button key={i} className="answer-tile" onClick={() => intent(gid, game.gameId === "math-mayhem" ? "submit-math-answer" : game.gameId === "trivia" ? "trivia-answer" : game.gameId === "who-said-that" ? "whosaid-answer" : "geography-answer", { questionId: q.id, chosenIndex: i })}>{opt}</button>)}</div>}</div>;
+        // Stage 5.1 (3F, O-12): each question is its own labelled group, and an
+        // answered one says what YOU chose (your own answer only).
+        const mine = (game.myAnswers?.[q.id] ?? st.myAnswers?.[q.id]) as number | undefined;
+        const myOption = typeof mine === "number" ? (q.options ?? [])[mine] : undefined;
+        return <fieldset key={q.id} className="card" data-testid="quiz-question"><legend><b>{q.prompt}</b><span className="mz-sr">{` (question ${qi + 1} of ${questions.length})`}</span></legend>{answered ? <p className="ok" role="status">{game.abstained && myOption === undefined ? "Sat out." : myOption !== undefined ? `Your answer: ${myOption}` : "Answered."}</p> : <div className="grid">{(q.options ?? []).map((opt, i: number) => <button key={i} className="answer-tile" onClick={() => intent(gid, game.gameId === "math-mayhem" ? "submit-math-answer" : game.gameId === "trivia" ? "trivia-answer" : game.gameId === "who-said-that" ? "whosaid-answer" : "geography-answer", { questionId: q.id, chosenIndex: i })}>{opt}</button>)}</div>}</fieldset>;
       })}
       {game.gameId === "guess-the-year" && (st.events ?? []).map((e) => {
         const done = game.abstained === true || st.myGuesses?.[e.id] !== undefined;

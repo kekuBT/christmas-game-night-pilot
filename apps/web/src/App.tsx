@@ -20,6 +20,7 @@ import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./co
 import { TvShow } from "./components/mchezo/TvShow.js";
 import { CharadesTv, ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.js";
 import { SendNote } from "./components/mchezo/SendNote.js";
+import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
@@ -558,7 +559,7 @@ export function App() {
     const r = proj?.readiness;
     const reconnecting = (r?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id);
     if (official && reconnecting.length > 0 && !proceedWithout) {
-      setStartDecision({ gameId, official, gameTitle: games.find((g) => g.id === gameId)?.title ?? gameId, reconnecting });
+      setStartDecision({ gameId, official, gameTitle: titleFor(gameId, games), reconnecting });
       return;
     }
     startingRef.current = true;
@@ -574,7 +575,7 @@ export function App() {
         // fresh picture and let the host decide again. Nothing started.
         await refresh();
         const again = (body.readiness?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id);
-        if (body.code === "PLAYERS_RECONNECTING" && again.length) setStartDecision({ gameId, official, gameTitle: games.find((g) => g.id === gameId)?.title ?? gameId, reconnecting: again });
+        if (body.code === "PLAYERS_RECONNECTING" && again.length) setStartDecision({ gameId, official, gameTitle: titleFor(gameId, games), reconnecting: again });
         else setErr(body.error ?? "Who is playing changed. Check the list, then start again.");
         return;
       }
@@ -649,7 +650,7 @@ export function App() {
     if (!g || g.gameId === "trivia") return null;
     const rows = reviewRows(g, undefined, g);
     if (rows.length === 0) return null;
-    const title = games.find((x) => x.id === g.gameId)?.title ?? g.gameId;
+    const title = titleFor(g.gameId, games);
     return g.status === "playing"
       ? <AnswerReview rows={rows.slice(-1)} tv title={`${title}: last answer`} testId="tv-answer-review" />
       : <AnswerReview rows={rows} tv title={`${title}: answers`} testId="tv-answer-review" />;
@@ -689,7 +690,7 @@ export function App() {
   function tvShowScreen(onBack: () => void, backLabel: string) {
     if (!proj) return null;
     const feed = tvFeedFrom(proj);
-    const titleOf = (id: string) => games.find((x) => x.id === id)?.title ?? id;
+    const titleOf = (id: string) => titleFor(id, games);
     return (
       <MchezoProvider theme={themes.everyday} {...motion} as="bare">
         <TvShow
@@ -921,7 +922,7 @@ export function App() {
   const me = players.find((p) => p.id === playerId);
   // Standings come from the server only (RoomEngine.officialStandings); the
   // TV and the Cup screen read them from the projection. No client recompute.
-  const nameOf = (id: string): string => players.find((p) => p.id === id)?.displayName ?? id;
+  const nameOf = (id: string): string => playerName(id, players);
   // Only a game this player is in. Someone who joined the room after it
   // started isn't in its roster: they stay in the lobby (the server refuses
   // their answers anyway). The old 8 s intro used to hide this; D3 removed it.
@@ -964,7 +965,7 @@ export function App() {
   // so every phone tells the same story.
   const resultsHero = (g: PlayerGame, pub?: PublicGame) => {
     const scores = pub?.rawScores ?? g.rawScores ?? {};
-    const title = games.find((x) => x.id === g.gameId)?.title ?? g.gameId;
+    const title = titleFor(g.gameId, games);
     const official = pub?.official ?? g.official ?? false;
     const story = resultsStory({
       gameInstanceId: g.id, title, official, scores, nameOf,
@@ -1147,7 +1148,7 @@ export function App() {
         : mineScore === undefined ? undefined
         : n <= 1 ? `You played solo: ${mineScore} points.`
         : `You ${tied ? "tied for" : "came"} ${ordinal(rank)} of ${n} · ${mineScore} points.`;
-      return { title: games.find((x) => x.id === lastDone.gameId)?.title ?? lastDone.gameId, mode: lastDone.official ? "official" as const : "practice" as const, headline: winnerLine(scores, nameOf), yourLine };
+      return { title: titleFor(lastDone.gameId, games), mode: lastDone.official ? "official" as const : "practice" as const, headline: winnerLine(scores, nameOf), yourLine };
     })() : undefined;
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
@@ -1337,7 +1338,7 @@ export function App() {
   if (view === "lobby" && showPhase === "intro" && triviaPlaying && playingGame) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <MchezoTriviaIntro title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} onStart={() => dismissIntro(playingGame.id)} />
+        <MchezoTriviaIntro title={titleFor(playingGame.gameId, games)} onStart={() => dismissIntro(playingGame.id)} />
       </MchezoProvider>
     );
   }
@@ -1351,7 +1352,7 @@ export function App() {
           publicGame={publicPlaying}
           players={players}
           playerId={playerId ?? ""}
-          gamesTitle={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          gamesTitle={titleFor(playingGame.gameId, games)}
           intent={intent}
           post={post}
           onBackToLobby={() => dismissResults(playingGame.id)}
@@ -1379,7 +1380,7 @@ export function App() {
           post={post}
           roomId={roomId ?? ""}
           isHostOrCohost={!!(me?.isHost || me?.isCohost)}
-          title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          title={titleFor(playingGame.gameId, games)}
         />
       </MchezoProvider>
     );
@@ -1402,7 +1403,7 @@ export function App() {
           post={post}
           roomId={roomId ?? ""}
           isHostOrCohost={!!(me?.isHost || me?.isCohost)}
-          title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          title={titleFor(playingGame.gameId, games)}
         />
       </MchezoProvider>
     );
@@ -1422,7 +1423,7 @@ export function App() {
           publicGame={publicPlaying}
           players={players}
           playerId={playerId ?? ""}
-          gamesTitle={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          gamesTitle={titleFor(playingGame.gameId, games)}
           intent={intent}
           post={post}
           roomId={roomId ?? ""}
@@ -1447,7 +1448,7 @@ export function App() {
           publicGame={publicPlaying}
           players={players}
           playerId={playerId ?? ""}
-          gamesTitle={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          gamesTitle={titleFor(playingGame.gameId, games)}
           intent={intent}
           post={post}
           roomId={roomId ?? ""}
@@ -1467,7 +1468,7 @@ export function App() {
           publicGame={publicFinished}
           players={players}
           playerId={playerId ?? ""}
-          gamesTitle={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId}
+          gamesTitle={titleFor(latestFinished.gameId, games)}
           intent={intent}
           post={post}
           onBackToLobby={() => dismissResults(latestFinished.id)}
@@ -1574,12 +1575,12 @@ export function App() {
     </div>
     {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
 
-    {view === "lobby" && showPhase === "intro" && playingGame && <ShowIntro game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} tutorial={games.find((x) => x.id === playingGame.gameId)?.tutorial ?? ""} onStart={() => dismissIntro(playingGame.id)} />}
+    {view === "lobby" && showPhase === "intro" && playingGame && <ShowIntro game={playingGame} title={titleFor(playingGame.gameId, games)} tutorial={games.find((x) => x.id === playingGame.gameId)?.tutorial ?? ""} onStart={() => dismissIntro(playingGame.id)} />}
     {view === "lobby" && showPhase === "waiting" && playingGame && publicPlaying && <>
-      <ShowWaiting game={publicPlaying} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} />
+      <ShowWaiting game={publicPlaying} title={titleFor(playingGame.gameId, games)} />
       <p className="muted">The game stays visible below — when the next phase starts, this banner goes away on its own.</p>
     </>}
-    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={themes.everyday} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
+    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={titleFor(latestFinished.gameId, games)} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={themes.everyday} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
       {showGamePanel && playingGame && <GamePanel key={draftKey(playingGame)} game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "This game"} players={players} nameOf={nameOf} intent={intent} />}
       {/* S5-F: the older panel (Category Sprint, Who Said That?, Impostor, Charades) says so beside the game when a send fails; typed text stays in its box. */}

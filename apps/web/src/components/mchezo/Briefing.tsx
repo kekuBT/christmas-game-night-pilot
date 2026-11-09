@@ -26,6 +26,7 @@ import {
   type BriefingPerson,
 } from "../../ui/mchezo/index.js";
 import { toMzPlayers } from "./adapters.js";
+import { titleFor } from "../../ui/mchezo/lib/names.js";
 
 /** Server time, re-read every second (countdowns only; the server decides). */
 function useServerNow(): number {
@@ -110,7 +111,7 @@ export function BriefingScreen(props: CommonProps & {
   const people = briefingPeople(game.players, b, players, meId);
   const me = people.find((p) => p.you);
   const participant = !!me;
-  const title = registry?.title ?? game.gameId;
+  const title = registry?.title ?? titleFor(game.gameId);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [confirm, setConfirm] = useState<{ ids: string[]; note?: string } | null>(null);
@@ -227,7 +228,7 @@ export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () 
   const now = useServerNow();
   const clock = briefingClock(b, now);
   const people = briefingPeople(game.players, b, players);
-  const title = registry?.title ?? game.gameId;
+  const title = registry?.title ?? titleFor(game.gameId);
   return (
     <main className="mz-screen mz-brief mz-brief--tv" style={{ maxWidth: 1200 }} aria-label={`${title}: rules on the TV`} data-testid="tv-briefing" data-game-id={game.id}>
       <div className="mz-topbar">

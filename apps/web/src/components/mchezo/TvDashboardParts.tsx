@@ -9,13 +9,14 @@ import { StandingsList } from "../../ui/mchezo/components/Results.js";
 import { rankStandings } from "../../ui/mchezo/lib/standings.js";
 import { toMzPlayers } from "./adapters.js";
 import type { PublicGame, PublicPlayer } from "../../types.js";
+import { playerName } from "../../ui/mchezo/lib/names.js";
 
 const HINT: Record<string, string> = {
   "math-mayhem": "Questions appear one at a time on each phone, and each is timed from when the game sends it. Scores appear here when the game ends.",
 };
 
 export function TvNowPlaying({ game, title, players }: { game: PublicGame; title: string; players: PublicPlayer[] }) {
-  const nameOf = (id: string) => players.find((p) => p.id === id)?.displayName ?? id;
+  const nameOf = (id: string) => playerName(id, players);
   const started = game.submittedCount ?? 0;
   const total = game.totalPlayers ?? game.players.length;
   return (

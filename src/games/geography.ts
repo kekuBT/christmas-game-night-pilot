@@ -7,6 +7,27 @@ export interface GeographyQuestion {
   options: string[];
   correctIndex: number;
   explanation: string;
+  /** Stage 5.1 (3F): a text alternative for the prompt's picture (a flag emoji), from the pack's accessibility note. */
+  imageAlt?: string;
+}
+
+/**
+ * Stage 5.1 (3F, O-12): what a screen reader is told instead of a flag
+ * emoji. A screen reader may otherwise read the emoji's own name (often the
+ * country), giving the answer away; this describes the picture instead and
+ * never names any of the options. Order: the pack's own description; the
+ * part of the explanation before its final colon ("Red circle on white:
+ * Japan" → "Red circle on white"); a plain fallback.
+ */
+export function flagAlt(q: { mode?: unknown; explanation?: unknown; options?: unknown; imageAlt?: unknown }): string | undefined {
+  if (q.mode !== "flag") return undefined;
+  const opts = (Array.isArray(q.options) ? q.options : []).map((o) => String(o).toLowerCase());
+  const safe = (t: unknown): t is string => typeof t === "string" && t.trim().length > 0 && !opts.some((o) => t.toLowerCase().includes(o));
+  if (safe(q.imageAlt)) return q.imageAlt.trim();
+  const ex = typeof q.explanation === "string" ? q.explanation : "";
+  const before = ex.includes(":") ? ex.slice(0, ex.lastIndexOf(":")).trim() : "";
+  if (safe(before)) return before;
+  return "A flag (no description available)";
 }
 
 /**

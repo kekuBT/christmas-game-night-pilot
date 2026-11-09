@@ -18,6 +18,7 @@ import type { Achievement, Ceremony, ChampionshipResult, LedgerEvent, Projection
 import { seats } from "../../session.js";
 import { ConfirmPanel, PlayerToken } from "../../ui/mchezo/index.js";
 import { toMzPlayers } from "./adapters.js";
+import { titleFor } from "../../ui/mchezo/lib/names.js";
 
 /** The Cup has exactly seven days (server: RoomEngine.advanceDay). */
 export const CUP_DAYS = 7;
@@ -60,7 +61,7 @@ export function CupScreen(props: {
   const achievements: Achievement[] = proj?.achievements ?? [];
   const ceremony: Ceremony | undefined = proj?.ceremony;
   const mz = toMzPlayers(players);
-  const title = (id: string) => games.find((x) => x.id === id)?.title ?? id;
+  const title = (id: string) => titleFor(id, games);
   const eligible = championship.filter((r) => r.eligible);
   const qualifying = championship.filter((r) => !r.eligible);
   // Stage 5.1 (O-05): shared places on a full tie, exactly as the server ranks.
