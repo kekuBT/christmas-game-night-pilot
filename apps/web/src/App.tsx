@@ -33,7 +33,7 @@ import { GAME_MANIFESTS } from "../../../src/games/manifest.js";
 import { shuffle } from "../../../src/games/shuffle.js";
 import { reactionIdToEmoji, toMzPlayers, toMzReactions } from "./components/mchezo/adapters.js";
 import { previousGameScores } from "./ui/mchezo/lib/standings.js";
-import { humanError } from "./ui/mchezo/lib/errors.js";
+import { humanError, NOT_DELIVERED } from "./ui/mchezo/lib/errors.js";
 import { midrank } from "./components/midrank.js";
 import { sendIntent } from "./components/intentRetry.js";
 import { connection, roomNotices } from "./connectionStore.js";
@@ -524,7 +524,11 @@ export function App() {
     await refresh();
   }
 
-  async function intent(gameInstanceId: string, action: string, payload: Record<string, unknown>) {
+  async function intent(gameInstanceId: string, action: string, payload: Record<string, unknown>): Promise<void> {
+    await sendAction(gameInstanceId, action, payload);
+  }
+  /** Sends one player action. Resolves true only when the server accepted it (never throws). */
+  async function sendAction(gameInstanceId: string, action: string, payload: Record<string, unknown>): Promise<boolean> {
     setErr(""); try {
       // One clientEventId per user action, reused by every retry, so the
       // server's dedupe returns the original result if a response was lost.
@@ -544,7 +548,13 @@ export function App() {
       if (res.status >= 400) throw new Error(r.error || `Request failed (${res.status})`);
       if (!r.accepted) reportError(r.reason === "PHASE_CLOSED" ? "Time was up for that one — it wasn’t counted." : r.reason === "READY_LOCKED" ? "The game has already started." : `Not accepted: ${r.reason || "unknown"}`); else setMsg("Saved.");
       await refresh();
-    } catch (e) { fail(e); }
+      return r.accepted === true;
+    } catch (e) {
+      // A TypeError is fetch's "no answer" (offline, dropped connection) after
+      // every retry: the server never saw it. Say so, not "Failed to fetch".
+      if (e instanceof TypeError) reportError(NOT_DELIVERED); else fail(e);
+      return false;
+    }
   }
   /**
    * E3: the TV dashboard's answers. Only what the public projection already
@@ -1139,7 +1149,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoCaption game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"} intent={intent} />
+        <MchezoCaption game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"} intent={sendAction} error={err || undefined} />
       </MchezoProvider>
     );
   }

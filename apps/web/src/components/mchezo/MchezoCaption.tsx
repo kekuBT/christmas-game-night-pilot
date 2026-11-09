@@ -7,7 +7,8 @@
  *   results -> each round's winning caption, now with its author, + scores.
  * The server owns deadlines, anonymity, voting rules and scores.
  */
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
 import { Keycap, MchezoWaiting, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
@@ -54,25 +55,44 @@ export interface MchezoCaptionDeps {
   players: PublicPlayer[];
   playerId: string;
   title: string;
-  intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<void> | void;
+  /** Resolves false when the action did not reach the game or was refused. */
+  intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<boolean | void> | boolean | void;
+  /** The app's human sentence for the last failed action, if any. */
+  error?: string;
 }
 
-export function MchezoCaption({ game, publicGame, players, playerId, title, intent }: MchezoCaptionDeps) {
+/**
+ * Stage 4 (audit Stage 3, Game 7): a caption or vote counts only when the
+ * server has it. "Your vote ✓" and "Caption is in" come from the server's
+ * view, never from the tap; a tap that fails says so, keeps the words, and
+ * can be tried again.
+ */
+export function MchezoCaption({ game, publicGame, players, playerId, title, intent, error }: MchezoCaptionDeps) {
   const st = (game.state ?? {}) as CaptionState;
   const round = (st.roundIndex ?? 0) + 1;
   const of = st.roundCount ?? 3;
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
   const [voting, setVoting] = useState<string | null>(null);
+  const [failedAt, setFailedAt] = useState<string | null>(null);
+  const phaseKey = `${st.roundIndex ?? 0}:${st.phase ?? ""}`;
+  // A new round starts with an empty box (the last one's words were sent).
+  useEffect(() => { setDraft(""); }, [st.roundIndex]);
   const send = async (action: string, payload: Record<string, unknown>) => {
+    const at = phaseKey;
     setPending(true);
-    try { await intent(game.id, action, payload); } finally { setPending(false); }
+    setFailedAt(null);
+    try {
+      const ok = await intent(game.id, action, payload);
+      if (ok === false) setFailedAt(at);
+    } finally { setPending(false); setVoting(null); }
   };
+  const failure = failedAt === phaseKey ? <p className="err" role="alert" data-testid="mz-cap-error" style={{ textAlign: "center" }}>{error ?? NOT_DELIVERED}</p> : null;
   const counts = `${st.submitted ?? 0} of ${st.totalPlayers ?? players.length}`;
 
   if (st.phase === "vote") {
     const caps = st.captions ?? [];
-    const voted = st.myVote ?? voting;
+    const voted = st.myVote;
     const done = !!st.myVote || st.myAbstained === true;
     return (
       <main className="mz-screen" aria-label={`${title}: vote, round ${round} of ${of}`} data-testid="mz-cap-vote">
@@ -91,12 +111,13 @@ export function MchezoCaption({ game, publicGame, players, playerId, title, inte
                 data-testid={c.mine ? "mz-cap-yours" : "mz-cap-option"}
               >
                 {c.mine && <span className="mz-cap-card__tag">Yours — you can’t vote for it</span>}
-                {voted === c.id && <span className="mz-cap-card__tag">Your vote ✓</span>}
+                {voted === c.id ? <span className="mz-cap-card__tag">Your vote ✓</span> : pending && voting === c.id ? <span className="mz-cap-card__tag">Sending…</span> : null}
                 “{c.text}”
               </button>
             ))}
           </div>
         )}
+        {failure}
         <FeedbackLine tone={done ? "good" : "neutral"} testId="mz-cap-feedback">{st.myVote ? `Voted. ${counts} have voted.` : st.myAbstained ? "You skipped this vote." : `Tap one. Votes are anonymous. ${counts} have voted.`}</FeedbackLine>
         {!done && caps.length > 0 && <button type="button" className="mz-chip-btn" style={{ alignSelf: "center", marginTop: 10 }} onClick={() => void send("abstain", {})}>Skip this vote</button>}
       </main>
@@ -123,12 +144,13 @@ export function MchezoCaption({ game, publicGame, players, playerId, title, inte
       <GameHeader title={title} objective="Write the funniest caption" accent={1} />
       {st.lastRound && <LastRound r={st.lastRound} />}
       <PromptCard prompt={st.prompt ?? ""} round={round} of={of} />
-      <form className="mz-cap-entry" onSubmit={(e) => { e.preventDefault(); const c = draft.trim(); if (c && !pending) { void send("caption-submit", { caption: c }).then(() => setDraft("")); } }}>
+      <form className="mz-cap-entry" onSubmit={(e) => { e.preventDefault(); const c = draft.trim(); if (c && !pending) void send("caption-submit", { caption: c }); }}>
         <label className="mz-sr" htmlFor="mz-cap-input">Your caption</label>
         <textarea id="mz-cap-input" data-testid="mz-cap-input" maxLength={MAX} value={draft} placeholder="Something that would make Grandma laugh…" onChange={(e) => setDraft(e.target.value.slice(0, MAX))} />
         <span className="mz-cap-count" aria-live="off">{left} left</span>
         <Keycap type="submit" block disabled={!draft.trim() || pending} data-testid="mz-cap-submit">{pending ? "Sending…" : "Submit caption"}</Keycap>
       </form>
+      {failure}
       <FeedbackLine testId="mz-cap-feedback">Captions are anonymous while everyone votes.</FeedbackLine>
       <button type="button" className="mz-chip-btn" style={{ alignSelf: "center", marginTop: 6 }} onClick={() => void send("abstain", {})}>Skip this round</button>
     </main>
@@ -179,7 +201,7 @@ export function CaptionTv({ game }: { game: PublicGame }) {
   if (game.status === "finished") {
     return (
       <section aria-label="Caption Clash favourites" className="mz-cap-tv-cards">
-        {(st.rounds ?? []).map((r, i) => r.captions[0] && <div key={i} className="mz-cap-card">“{r.captions[0].text}” — {r.captions[0].votes} votes</div>)}
+        {(st.rounds ?? []).map((r, i) => r.captions[0] && <div key={i} className="mz-cap-card">“{r.captions[0].text}” — {r.captions[0].votes} vote{r.captions[0].votes === 1 ? "" : "s"}</div>)}
       </section>
     );
   }

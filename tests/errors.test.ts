@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { GENERIC_ERROR, humanError } from "../apps/web/src/ui/mchezo/lib/errors.js";
+import { GENERIC_ERROR, NOT_DELIVERED, humanError } from "../apps/web/src/ui/mchezo/lib/errors.js";
 
 describe("humanError", () => {
   it("maps the intent rejection codes to human sentences", () => {
@@ -83,5 +83,10 @@ describe("humanError", () => {
     );
     expect(humanError("Request failed")).toBe("Request failed");
     expect(humanError("Request failed (409)")).toBe("Request failed (409)");
+  });
+
+  it("Stage 4: an action that never reached the server says so in words, unchanged", () => {
+    expect(NOT_DELIVERED).toMatch(/didn’t reach the game/);
+    expect(humanError(NOT_DELIVERED)).toBe(NOT_DELIVERED);
   });
 });
