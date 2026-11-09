@@ -208,8 +208,16 @@ export function decodeSnapshot(text: string): DecodedSnapshot {
   return { format, room: room as Record<string, unknown>, hostClaimHash };
 }
 
+/**
+ * Stage 5.1 (Phase 4): compact JSON. Indenting put every number of a
+ * drawing's stroke arrays on its own line, so a busy Draw & Guess room file
+ * was ~4.5x the size of its data and each save (several a second while
+ * someone draws) wrote all of it, twice with `.prev`. Same content, same
+ * atomic write, fsync, rename and `.prev` generation; readers parse JSON
+ * either way, so older indented files still load unchanged.
+ */
 export function encodeSnapshot(room: Record<string, unknown>, hostClaimHash: string | null): string {
-  return JSON.stringify({ format: SNAPSHOT_FORMAT, savedAt: new Date().toISOString(), hostClaimHash, room }, null, 2);
+  return JSON.stringify({ format: SNAPSHOT_FORMAT, savedAt: new Date().toISOString(), hostClaimHash, room });
 }
 
 // ---------- store ----------

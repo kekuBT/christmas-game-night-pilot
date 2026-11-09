@@ -1,0 +1,63 @@
+{
+  "measuredAt": "2026-11-09T17:19:15.257Z",
+  "node": "v22.23.4",
+  "results": [
+    {
+      "players": 4,
+      "seconds": 40.3,
+      "batchesAcked": 120,
+      "guessesSent": 39,
+      "piecesStored": 120,
+      "roomSaves": 159,
+      "writeSyscalls": 2103,
+      "mbWriteAndSend": 41.3,
+      "mbToDisk": 13,
+      "roomFileKb": 69,
+      "prevFileKb": 68,
+      "roomFileCompactKb": 69,
+      "cpuMsPerSec": 18,
+      "cpuPct": 1.8,
+      "rssMb": 91,
+      "wsKbPerClient": 7100,
+      "wsFramesPerClient": 169
+    },
+    {
+      "players": 6,
+      "seconds": 40.3,
+      "batchesAcked": 120,
+      "guessesSent": 65,
+      "piecesStored": 120,
+      "roomSaves": 185,
+      "writeSyscalls": 2371,
+      "mbWriteAndSend": 67.2,
+      "mbToDisk": 16.6,
+      "roomFileKb": 74,
+      "prevFileKb": 74,
+      "roomFileCompactKb": 74,
+      "cpuMsPerSec": 23,
+      "cpuPct": 2.3,
+      "rssMb": 82,
+      "wsKbPerClient": 8373,
+      "wsFramesPerClient": 195
+    },
+    {
+      "players": 10,
+      "seconds": 40.3,
+      "batchesAcked": 120,
+      "guessesSent": 117,
+      "piecesStored": 120,
+      "roomSaves": 237,
+      "writeSyscalls": 3823,
+      "mbWriteAndSend": 135.5,
+      "mbToDisk": 24.7,
+      "roomFileKb": 85,
+      "prevFileKb": 84,
+      "roomFileCompactKb": 85,
+      "cpuMsPerSec": 39,
+      "cpuPct": 3.9,
+      "rssMb": 85,
+      "wsKbPerClient": 10929,
+      "wsFramesPerClient": 247
+    }
+  ]
+}
