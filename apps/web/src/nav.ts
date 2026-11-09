@@ -29,6 +29,24 @@ export function stampEntry(): void {
   history.replaceState({ mz: true, sheet: !!here?.sheet && (here?.depth ?? 0) > 0, depth: here?.depth ?? 0 } satisfies Entry, "", location.pathname + location.search);
 }
 
+/**
+ * Stage 4 (S3-NAV-02): a room screen with nothing of ours beneath it (the
+ * room was opened from a fresh /join?code= page, a QR code, or a reload of
+ * the first entry) gets Home beneath it, once. Back from the room then lands
+ * on this app's Home, which offers Rejoin, instead of whatever unrelated page
+ * came before (the audit landed on the Library mid-game). Nothing about the
+ * seat, the game or its clock changes; Forward or Rejoin returns to the room.
+ * Not a Back trap: one ordinary entry, and Back from Home leaves as usual.
+ */
+export function anchorHomeBelow(): void {
+  const here = entry();
+  if (!here || here.depth > 0 || here.sheet) return;
+  const url = location.pathname + location.search;
+  if (url === "/") return;
+  history.replaceState({ mz: true, sheet: false, depth: 0 } satisfies Entry, "", "/");
+  history.pushState({ mz: true, sheet: false, depth: 1 } satisfies Entry, "", url);
+}
+
 export function useRoute() {
   const [state, setState] = useState(read);
   const stateRef = useRef(state);

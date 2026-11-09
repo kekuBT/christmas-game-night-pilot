@@ -15,6 +15,10 @@
  *   /room/library         Game library inside a room (host keeps the room)
  *   /room/studio          Studio (preview)
  *
+ * Stage 4 (S3-NAV-01): the library's search, filters and sort ride in its
+ * address too (`?q=…&cat=…&players=…&len=…&type=…&sort=…`), so Back/Forward,
+ * a refresh and a details sheet all come back to the same view.
+ *
  * A sheet rides in `?sheet=` (invite, choose, menu, settings, details), so
  * browser and iOS swipe Back close it before leaving the screen. The details
  * sheet names its game in `?game=`.
@@ -29,9 +33,18 @@ export type Route =
   | { name: "home" }
   | { name: "join"; code?: string }
   | { name: "host" }
-  | { name: "library"; gameId?: string }
+  | { name: "library"; gameId?: string; lib?: string }
   | { name: "watch"; code?: string }
-  | { name: "room"; sub: RoomSub; gameId?: string };
+  | { name: "room"; sub: RoomSub; gameId?: string; lib?: string };
+
+/** The library view keys an address may carry (see lib/library.ts). */
+const LIB_KEYS = ["q", "cat", "players", "len", "type", "sort"];
+function libQuery(params: URLSearchParams): string | undefined {
+  const q = new URLSearchParams();
+  for (const k of LIB_KEYS) for (const v of params.getAll(k)) if (v !== "") q.append(k, v);
+  const s = q.toString();
+  return s ? s : undefined;
+}
 
 const SHEETS: readonly Sheet[] = ["invite", "choose", "menu", "settings", "details"];
 const GAME_ID = /^[a-z0-9-]{1,40}$/;
@@ -58,11 +71,14 @@ export function parseRoute(pathname: string, search = ""): { route: Route; sheet
   else if (parts[0] === "join") route = code ? { name: "join", code } : { name: "join" };
   else if (parts[0] === "host" && parts.length === 1) route = { name: "host" };
   else if (parts[0] === "watch" && parts.length === 1) route = code ? { name: "watch", code } : { name: "watch" };
-  else if (parts[0] === "library") route = parts[1] ? { name: "library", gameId: decodeURIComponent(parts[1]) } : { name: "library" };
-  else if (parts[0] === "room") {
+  else if (parts[0] === "library") {
+    const lib = libQuery(params);
+    route = { name: "library", ...(parts[1] ? { gameId: decodeURIComponent(parts[1]) } : {}), ...(lib ? { lib } : {}) };
+  } else if (parts[0] === "room") {
     const sub = SUBS[parts[1] ?? ""];
+    const lib = sub === "library" ? libQuery(params) : undefined;
     if (!sub) route = { name: "room", sub: "lobby" };
-    else route = sub === "library" && parts[2] ? { name: "room", sub, gameId: decodeURIComponent(parts[2]) } : { name: "room", sub };
+    else route = { name: "room", sub, ...(sub === "library" && parts[2] ? { gameId: decodeURIComponent(parts[2]) } : {}), ...(lib ? { lib } : {}) };
   } else route = { name: "home" };
   return { route, sheet, game };
 }
@@ -83,6 +99,8 @@ export function routeUrl(route: Route, sheet: Sheet | null = null, game: string 
       break;
     }
   }
+  const lib = route.name === "library" || (route.name === "room" && route.sub === "library") ? route.lib : undefined;
+  if (lib) for (const [k, v] of new URLSearchParams(lib)) if (LIB_KEYS.includes(k)) q.append(k, v);
   if (sheet) q.set("sheet", sheet);
   if (sheet === "details" && game) q.set("game", game);
   const qs = q.toString();

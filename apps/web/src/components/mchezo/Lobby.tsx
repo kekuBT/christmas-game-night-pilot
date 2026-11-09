@@ -90,7 +90,8 @@ export function RoomLobby(p: RoomLobbyProps) {
           </button>
         </span>
       </header>
-      <h1 className="mz-h1">You’re in, {you?.name ?? "friend"}.</h1>
+      {/* S3-LOB-03: no seat in the data means the room isn't loaded yet, not an empty room. */}
+      <h1 className="mz-h1">{you ? `You’re in, ${you.name}.` : "Finding your seat…"}</h1>
       {p.notice}
       <p className="mz-lobby__status" role="status" aria-live="polite" data-testid="lobby-status">
         <b className="mz-lobby__headline">{headline}</b>

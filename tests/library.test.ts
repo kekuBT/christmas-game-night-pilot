@@ -121,7 +121,9 @@ describe("library helpers", () => {
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, playerCount: 4 })).toBe(true);
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, maxDuration: 10 })).toBe(true);
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, playStyle: "team" })).toBe(true);
-    expect(hasActiveFilters({ ...DEFAULT_FILTERS, sort: "duration" })).toBe(true);
+    // Stage 4 (S3-LIB-04): sorting orders the list; it is not a filter.
+    expect(hasActiveFilters({ ...DEFAULT_FILTERS, sort: "duration" })).toBe(false);
+    expect(hasActiveFilters({ ...DEFAULT_FILTERS, fitsRoom: true })).toBe(true);
   });
 
   it("filtering never mutates the input array", () => {

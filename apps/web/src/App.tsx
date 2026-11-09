@@ -9,10 +9,10 @@ import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js"
 import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
-import { buildCatalog, featuredOfTheDay, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, themes, type Route, type RoomSub } from "./ui/mchezo/index.js";
+import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, themes, type Route, type RoomSub } from "./ui/mchezo/index.js";
 import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen } from "./components/mchezo/Home.js";
 import { ChooseGameSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
-import { stampEntry, useRoute } from "./nav.js";
+import { anchorHomeBelow, stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
@@ -25,6 +25,7 @@ import { MchezoYear } from "./components/mchezo/MchezoYear.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { AnswerReview, reviewRows } from "./components/mchezo/AnswerReview.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
+import { isProjection, readJson } from "./http.js";
 import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
 import { BriefingScreen, BriefingTv, type StartNowResult } from "./components/mchezo/Briefing.js";
 import { resolveReducedMotion } from "./ui/mchezo/lib/motion.js";
@@ -83,18 +84,14 @@ async function post<T>(path: string, body: Record<string, unknown>): Promise<T> 
   const token = seats.token();
   if (token) headers["x-session-token"] = token;
   const r = await fetch(path, { method: "POST", headers, body: JSON.stringify(body) });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((j as { error?: string }).error || `Request failed (${r.status})`);
-  return j as T;
+  return readJson<T>(r);
 }
 async function get<T>(path: string): Promise<T> {
   const headers: Record<string, string> = {};
   const token = seats.token();
   if (token) headers["x-session-token"] = token;
   const r = await fetch(path, { headers });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((j as { error?: string }).error || `Request failed (${r.status})`);
-  return j as T;
+  return readJson<T>(r);
 }
 
 export function App() {
@@ -222,7 +219,10 @@ export function App() {
   const refresh = useCallback(async () => {
     if (!roomId || !playerId) return;
     try {
-      setProj(await get<Projection>(`/rooms/${roomId}/projection?audience=player`));
+      const next = await get<unknown>(`/rooms/${roomId}/projection?audience=player`);
+      // S3-LOB-03: only the room's own projection replaces what's on screen.
+      if (!isProjection(next)) throw new Error("The game server sent an unexpected reply. Retrying…");
+      setProj(next as Projection);
       pollFailures.current = 0;
       if (pollNotice.current) {
         const shown = pollNotice.current;
@@ -285,7 +285,7 @@ export function App() {
         next.onmessage = (e) => {
           try {
             const m = JSON.parse(e.data);
-            if (m.kind === "projection") {
+            if (m.kind === "projection" && isProjection(m.state)) {
               setProj(m.state);
               // The server sends a projection only after accepting the
               // session: that, not the socket opening, is "reconnected".
@@ -414,7 +414,8 @@ export function App() {
         const r = await fetch(`/rooms/${specRoomId}/projection?audience=spectator`, { headers: { "x-spectator-token": specToken } });
         if (r.status === 401) { if (!stopped) { stopWatching(); setErr("Spectator session expired — enter the code again to keep watching."); } return; }
         if (!r.ok) return;
-        setProj(await r.json());
+        const next = await readJson<unknown>(r);
+        if (isProjection(next)) setProj(next as Projection); // S3-LOB-03: never a proxy page
       } catch { /* poll retry */ }
     };
     poll();
@@ -428,7 +429,7 @@ export function App() {
         const proto = location.protocol === "https:" ? "wss" : "ws";
         const next = new WebSocket(`${proto}://${location.host}/?roomId=${specRoomId}&audience=spectator`, [`cgn-spectator-${specToken}`]);
         ws = next;
-        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection") setProj(m.state); } catch { /* ignore malformed WS frame; polling continues */ } };
+        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection" && isProjection(m.state)) setProj(m.state); } catch { /* ignore malformed WS frame; polling continues */ } };
         next.onclose = (e) => {
           if (stopped || e.code === 1008) return;
           attempt += 1;
@@ -564,6 +565,8 @@ export function App() {
   // and once when the room has none (a new room, or after a server restart).
   // Never in reply to the room's plan, so two host tabs can't bounce it back
   // and forth; a plan chosen in another host tab (or by the cohost) is adopted.
+  // S3-NAV-02: inside the room, Back always has this app's Home (with Rejoin) beneath it.
+  useEffect(() => { if (roomId && playerId && route.name === "room") anchorHomeBelow(); }, [roomId, playerId, route.name]);
   const planMe = proj?.players.find((p) => p.id === playerId);
   const planner = !!(planMe?.isHost || planMe?.isCohost);
   const serverPlan = proj?.upNext;
@@ -683,7 +686,10 @@ export function App() {
         />
       );
     } else if (route.name === "library") {
-      screen = <MchezoLibrary manifests={GAME_MANIFESTS} catalog={catalog} canSelect={false} inRoom={false} onSelect={() => {}} onDetails={(id) => openSheet("details", id)} onBack={() => back(HOME)} />;
+      screen = <MchezoLibrary manifests={GAME_MANIFESTS} catalog={catalog} canSelect={false} inRoom={false}
+        filters={filtersFromQuery(route.lib ?? "")}
+        onFiltersChange={(f) => { const lib = filtersToQuery(f); navigate(lib ? { name: "library", lib } : { name: "library" }, { replace: true }); }}
+        onSelect={() => {}} onDetails={(id) => openSheet("details", id)} onBack={() => back(HOME)} />;
     } else {
       screen = (
         <HomeScreen
@@ -1295,6 +1301,9 @@ export function App() {
           upNextId={upNextId}
           canSelect={isHostish}
           inRoom
+          roomPlayers={connectedNow}
+          filters={filtersFromQuery(route.name === "room" ? route.lib ?? "" : "")}
+          onFiltersChange={(f) => { const lib = filtersToQuery(f); navigate(lib ? { name: "room", sub: "library", lib } : { name: "room", sub: "library" }, { replace: true }); }}
           onSelect={(id) => { setUpNextId(id); setShuffleResult(null); toLobby(); }}
           onDetails={(id) => openSheet("details", id)}
           onBack={toLobby}
