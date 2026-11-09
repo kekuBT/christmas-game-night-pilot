@@ -42,6 +42,34 @@ export function chromiumExecutable() {
 
 const BROWSERS = { chromium, firefox, webkit };
 
+// Stage 5.2: browser use per driver, for the gate's resource report. Under
+// the gate (MCHEZO_GATE_RUN set) the driver prints one MCHEZO_DRIVER_STATS
+// line as it exits: browsers launched, contexts and pages created, and the
+// most pages open at once. Counting only; it never changes a driver.
+const usage = { browsers: 0, contexts: 0, pages: 0, peakOpenPages: 0 };
+let openPages = 0;
+let statsHooked = false;
+function track(browser) {
+  usage.browsers++;
+  if (!statsHooked && process.env.MCHEZO_GATE_RUN) {
+    statsHooked = true;
+    process.on("exit", () => { console.log(`MCHEZO_DRIVER_STATS ${JSON.stringify(usage)}`); });
+  }
+  const newContext = browser.newContext.bind(browser);
+  // Browser.newPage() creates its context through this.newContext, so this covers both.
+  browser.newContext = async (...args) => {
+    const ctx = await newContext(...args);
+    usage.contexts++;
+    ctx.on("page", (page) => {
+      usage.pages++;
+      usage.peakOpenPages = Math.max(usage.peakOpenPages, ++openPages);
+      page.once("close", () => { openPages--; });
+    });
+    return ctx;
+  };
+  return browser;
+}
+
 /** Launch a browser, turning a missing/broken browser into an infrastructure error. */
 export async function launchBrowser(name = "chromium", options = {}) {
   const type = BROWSERS[name];
@@ -55,7 +83,7 @@ export async function launchBrowser(name = "chromium", options = {}) {
     }
   }
   try {
-    return await type.launch(opts);
+    return track(await type.launch(opts));
   } catch (err) {
     const first = String(err?.message ?? err).split("\n")[0];
     if (/Executable doesn't exist/.test(first)) {

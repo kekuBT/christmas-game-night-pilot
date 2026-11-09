@@ -14,6 +14,11 @@ on:
         type: choice
         options: [smoke, full]
         default: smoke
+      workers:
+        description: "Browser drivers in parallel (full gate). auto picks from the runner's CPUs and memory; 1 is the sequential reference mode."
+        type: choice
+        options: [auto, "1", "2", "3"]
+        default: auto
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -43,7 +48,7 @@ jobs:
         run: node scripts/gate.mjs targeted restart errors
       - name: Full gate
         if: inputs.level == 'full'
-        run: node scripts/gate.mjs full
+        run: node scripts/gate.mjs full --workers=${{ inputs.workers }}
       - name: Upload reports and logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -54,4 +59,5 @@ jobs:
             test-results/*/summary.txt
             test-results/*/logs/
             test-results/*/screenshots/
+            test-results/timing-history.jsonl
           retention-days: 14

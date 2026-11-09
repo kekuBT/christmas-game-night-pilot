@@ -52,7 +52,8 @@ async function runGate(args, env) {
   const g = startGate(args, env);
   const code = await g.done;
   const runId = /\| run (\S+)/.exec(g.output())?.[1];
-  const report = runId ? JSON.parse(readFileSync(join(SANDBOX, "test-results", runId, "report.json"), "utf8")) : null;
+  const reportPath = runId ? join(SANDBOX, "test-results", runId, "report.json") : null;
+  const report = reportPath && existsSync(reportPath) ? JSON.parse(readFileSync(reportPath, "utf8")) : null; // --plan writes none
   return { code, report, output: g.output() };
 }
 const step = (report, name) => report?.steps.find((s) => s.name === name);
@@ -144,8 +145,9 @@ try {
   }
 
   // 5. A stale bundle cannot be accepted: editing source mid-run invalidates the run.
+  //    (One worker, so "pass" can only start after the edit; case 13 is the parallel version.)
   {
-    const r = await runGate(["targeted", fx("mutate"), fx("pass")]);
+    const r = await runGate(["targeted", "--workers=1", fx("mutate"), fx("pass")]);
     check("source edited after build → exit 1", r.code === 1, `exit ${r.code}`);
     check("source edited after build → INVALID reported", r.report?.steps.some((s) => s.status === "INVALID"));
     check("no check runs against the stale bundle", !step(r.report, "fixture-pass"));
@@ -170,6 +172,84 @@ try {
       a.report.server.port !== b.report.server.port && a.report.server.dataDir !== b.report.server.dataDir && a.report.runId !== b.report.runId);
   }
 
+  // ---------- Stage 5.2: the parallel scheduler ----------
+  const records = (file) => (existsSync(file) ? readFileSync(file, "utf8").trim().split("\n").filter(Boolean).map((l) => JSON.parse(l)) : []);
+  const overlaps = (a, b) => a.t0 < b.t1 && b.t0 < a.t1;
+
+  // 9. Parallel steps really overlap, each on its own worker, server, data directory and screenshot folder.
+  {
+    const rec = join(SANDBOX, "rec9.jsonl");
+    const r = await runGate(["targeted", "--workers=3", fx("pass"), fx("pass-2"), fx("pass-3")], { FIXTURE_SLEEP_MS: "3000", FIXTURE_RECORD_FILE: rec });
+    const rs = records(rec);
+    check("parallel: three passing steps → exit 0", r.code === 0 && r.report?.verdict === "PASSED", `exit ${r.code}`);
+    check("parallel: the steps ran at the same time", rs.length === 3 && overlaps(rs[0], rs[1]) && overlaps(rs[1], rs[2]) && overlaps(rs[0], rs[2]), JSON.stringify(rs.map((x) => [x.script, x.t0, x.t1])));
+    check("parallel: each step had its own worker and its own server", new Set(rs.map((x) => x.worker)).size === 3 && new Set(rs.map((x) => x.base)).size === 3);
+    check("parallel: one data directory per server", new Set((r.report?.servers ?? []).map((x) => x.dataDir)).size === 3 && (r.report?.servers ?? []).length === 3);
+    check("parallel: each step has its own screenshot folder", new Set(rs.map((x) => x.screenshots)).size === 3);
+    check("parallel: the report records each step's worker and times", r.report?.steps.filter((x) => x.name.startsWith("fixture-")).every((x) => x.worker && x.startOffsetSec != null && x.endOffsetSec != null));
+  }
+
+  // 10. A failure is attributed to the right step and worker while others pass.
+  {
+    const r = await runGate(["targeted", "--workers=3", fx("fail"), fx("pass"), fx("pass-2")], { FIXTURE_SLEEP_MS: "1500" });
+    const f = step(r.report, "fixture-fail");
+    check("parallel failure → exit 1", r.code === 1, `exit ${r.code}`);
+    check("parallel failure → the failing step is named with its assertion and worker", f?.status === "FAIL" && /deliberately failing/.test(f?.detail ?? "") && !!f?.worker, JSON.stringify(f));
+    check("parallel failure → the other steps still pass", step(r.report, "fixture-pass")?.status === "PASS" && step(r.report, "fixture-pass-2")?.status === "PASS");
+    check("parallel failure → each step has its own log", new Set(r.report?.steps.filter((x) => x.log).map((x) => x.log)).size === r.report?.steps.filter((x) => x.log).length);
+  }
+
+  // 11. A timeout kills only that step's processes; a step running beside it is untouched and passes.
+  {
+    const dir = mkdtempSync(join(tmpdir(), "gate-pids-"));
+    const rec = join(SANDBOX, "rec11.jsonl");
+    const r = await runGate(["targeted", "--workers=2", fx("hang"), fx("pass"), "--step-timeout=fixture-hang=3"], { FIXTURE_PID_DIR: dir, FIXTURE_SLEEP_MS: "7000", FIXTURE_RECORD_FILE: rec });
+    const pids = JSON.parse(readFileSync(join(dir, "hang.json"), "utf8"));
+    const hang = step(r.report, "fixture-hang"), pass = step(r.report, "fixture-pass");
+    check("parallel timeout → TIMEOUT for the hanging step, exit 1", r.code === 1 && hang?.status === "TIMEOUT", `exit ${r.code}`);
+    check("parallel timeout → the hanging step and its child are gone", await allGone([pids.pid, pids.child]), JSON.stringify(pids));
+    check("parallel timeout → the step running beside it was alive during the kill and passed", pass?.status === "PASS" && pass.startOffsetSec < hang.endOffsetSec && hang.endOffsetSec < pass.endOffsetSec, JSON.stringify({ pass, hang }));
+    rmSync(dir, { recursive: true, force: true });
+  }
+
+  // 12. A dead worker server stops scheduling; every step that never started is listed as not run.
+  if (process.platform === "linux") {
+    const r = await runGate(["targeted", "--workers=1", fx("kill-server"), fx("pass"), fx("pass-2")]);
+    const names = (r.report?.notRun ?? []).map((n) => n.name);
+    check("dead server → not PASSED (infrastructure, exit 2)", r.code === 2 && r.report?.verdict === "INFRASTRUCTURE ERROR", `exit ${r.code}`);
+    check("dead server → the steps that never started are listed as not run, with the reason", names.includes("fixture-pass") && names.includes("fixture-pass-2") && r.report.notRun.every((n) => /died/.test(n.reason)), JSON.stringify(r.report?.notRun));
+    check("dead server → summary names them", /NOT RUN\s+fixture-pass/.test(r.output));
+  }
+
+  // 13. Parallel invalidation: once the tree changes, nothing new starts, running steps are stopped, the run is INVALID.
+  {
+    const r = await runGate(["targeted", "--workers=2", fx("mutate"), fx("pass"), fx("pass-2")], { FIXTURE_SLEEP_MS: "15000", FIXTURE_MUTATE_DELAY_MS: "1500" });
+    const names = (r.report?.notRun ?? []).map((n) => n.name);
+    const p = step(r.report, "fixture-pass");
+    check("parallel stale tree → exit 1 with INVALID", r.code === 1 && r.report?.steps.some((x) => x.status === "INVALID"), `exit ${r.code}`);
+    check("parallel stale tree → the step running beside it is stopped, not counted as a pass", p?.status === "CANCELLED" && /invalid/.test(p?.detail ?? ""), JSON.stringify(p));
+    check("parallel stale tree → queued steps never start and are listed as not run", names.includes("fixture-pass-2") && !step(r.report, "fixture-pass-2"));
+    resetSandbox();
+  }
+
+  // 14. Sequential reference mode keeps the given order on one worker and one server.
+  {
+    const r = await runGate(["targeted", "--sequential", fx("pass-2"), fx("pass")]);
+    const order = r.report?.steps.filter((x) => x.name.startsWith("fixture-")).map((x) => x.name);
+    check("--sequential → one worker, one server, the given order", r.code === 0 && r.report?.workers === 1 && r.report?.servers.length === 1 && JSON.stringify(order) === JSON.stringify(["fixture-pass-2", "fixture-pass"]), JSON.stringify(order));
+  }
+
+  // 15. Estimates: --plan runs nothing; a run prints progress and predicted vs actual, and records its timing.
+  {
+    const plan = await runGate(["targeted", "--plan", "--workers=2", fx("pass")]);
+    check("--plan → prints an estimate and runs nothing", plan.code === 0 && /estimate this run:/.test(plan.output) && /nothing was run/.test(plan.output) && !plan.report, plan.output.slice(-300));
+    const r = await runGate(["targeted", "--workers=2", "--progress=1", fx("pass"), fx("pass-2")], { FIXTURE_SLEEP_MS: "2500" });
+    check("progress lines show done/total, running steps and time remaining", /── progress\s+\d+\/\d+ done/.test(r.output) && /running\s+fixture-/.test(r.output) && /remaining .* total .* done around/.test(r.output), r.output.slice(0, 600));
+    check("summary compares predicted with actual time", /predicted .* → actual/.test(r.output) && r.report?.timing?.predicted && r.report.timing.wallSec > 0);
+    const hist = readFileSync(join(SANDBOX, "test-results", "timing-history.jsonl"), "utf8");
+    check("the run's timing is appended to the history", hist.includes(r.report.runId));
+  }
+
   // 8. Cancellation cleans up only the run's own processes.
   if (IS_WINDOWS) {
     console.log("SKIP cancellation case: POSIX signals (covered on macOS/Linux; Windows uses taskkill /T on the step's own pid)");
@@ -189,6 +269,26 @@ try {
     check("unrelated process left untouched", alive(sentinel.pid));
     check("cancellation is not misreported as an infrastructure failure", !report.steps.some((s) => s.status === "INFRA"));
     process.kill(sentinel.pid, "SIGKILL");
+  }
+
+  // 16. Cancelling a parallel run stops every worker's steps, children and servers, and nothing else.
+  if (!IS_WINDOWS) {
+    const sentinel = spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { stdio: "ignore", detached: true });
+    const dir = mkdtempSync(join(tmpdir(), "gate-pids-"));
+    const g = startGate(["targeted", "--workers=3", fx("hang"), fx("hang-2"), fx("hang-detached")], { FIXTURE_PID_DIR: dir });
+    for (let i = 0; i < 160 && !["hang", "hang-2", "hang-detached"].every((n) => existsSync(join(dir, `${n}.json`))); i++) await sleep(250);
+    const pids = ["hang", "hang-2", "hang-detached"].flatMap((n) => { const p = JSON.parse(readFileSync(join(dir, `${n}.json`), "utf8")); return [p.pid, p.child]; });
+    const runId = /\| run (\S+)/.exec(g.output())?.[1];
+    g.child.kill("SIGTERM");
+    const code = await g.done;
+    const report = JSON.parse(readFileSync(join(SANDBOX, "test-results", runId, "report.json"), "utf8"));
+    check("parallel cancel → exit 130", code === 130, `exit ${code}`);
+    check("parallel cancel → all three workers' drivers and children are gone (detached one included)", await allGone(pids, 8000), JSON.stringify(pids));
+    check("parallel cancel → every worker server stopped", await allGone(report.servers.map((x) => x.pid)), JSON.stringify(report.servers.map((x) => x.pid)));
+    check("parallel cancel → unrelated process untouched", alive(sentinel.pid));
+    check("parallel cancel → steps reported CANCELLED, none as passes", report.steps.filter((x) => x.name.startsWith("fixture-")).every((x) => x.status === "CANCELLED"));
+    process.kill(sentinel.pid, "SIGKILL");
+    rmSync(dir, { recursive: true, force: true });
   }
 } finally {
   rmSync(SANDBOX, { recursive: true, force: true });

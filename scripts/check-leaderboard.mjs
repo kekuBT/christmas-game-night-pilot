@@ -97,13 +97,26 @@ async function phoneRows(page, hostName) {
     let name = (await li.locator(".mz-standings__name").textContent()) ?? "";
     if (name === "You") name = hostName;
     const score = parseInt(((await li.locator(".mz-standings__score").textContent()) ?? "0").replace(/,/g, ""), 10);
-    const gain = ((await li.locator(".mz-standings__gain").textContent().catch(() => "")) ?? "").trim();
+    // Stage 5.2: the gain chip renders with its row (no animation phase), so
+    // read it without waiting. textContent() on a row that has no chip used
+    // to wait out Playwright's 30s default before the catch.
+    const gain = await optionalText(li.locator(".mz-standings__gain"));
     rows.push({ rank, name, score, gain });
   }
   return rows;
 }
+// Stage 5.2: text of an element that may legitimately be absent, read
+// without auto-waiting (count() never waits); "" when it is not there.
+async function optionalText(loc) {
+  return (await loc.count()) ? ((await loc.first().textContent()) ?? "").trim() : "";
+}
+// The TV board animates before -> delta -> after (useLeaderboardPhases);
+// rank-movement chips and the final order exist only in "after".
+async function tvBoardSettled(page) {
+  await page.locator('section.mz-tv-board[data-phase="after"]').waitFor({ timeout: 15000 });
+}
 async function tvRows(page) {
-  await page.waitForTimeout(3000); // leaderboard phase settles to "after"
+  await tvBoardSettled(page); // was a fixed 3s wait for the same phase
   const rows = [];
   for (const li of await page.locator(".mz-tv-row").all()) {
     rows.push({
@@ -186,9 +199,11 @@ try {
     await tv.locator(".mz-tv-row").first().waitFor({ timeout: 15000 });
     const tvs = await tvRows(tv);
     const moves = {};
+    // tvRows() already waited for the board's "after" phase, where movement
+    // chips render; a row without a chip used to cost a 30s wait here.
     for (const li of await tv.locator(".mz-tv-row").all()) {
       const name = (await li.locator(".mz-tv-row__name").textContent()) ?? "";
-      moves[name] = ((await li.locator(".mz-tv-row__move").textContent().catch(() => "")) ?? "").trim();
+      moves[name] = await optionalText(li.locator(".mz-tv-row__move"));
     }
     const note = await tv.locator("p", { hasText: "Rank movement vs the previous Trivia game" }).count();
     // D: phone results open on the reveal sequence; jump to standings.

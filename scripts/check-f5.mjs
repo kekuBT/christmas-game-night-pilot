@@ -179,11 +179,14 @@ async function act(page, gameId, name) {
   // shape as Trivia (QuestionScreen slabs + locked view + Next question).
   // Math Mayhem (§11) is the same shape again.
   if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem") {
-    if (await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500)) return true;
+    // Stage 5.2: still one action per pass, so players stay interleaved
+    // question by question, but each probe is a check, not a wait. A player
+    // already done used to cost 2.5s of waiting per pass.
+    if (await page.getByRole("button", { name: "Back to lobby" }).isVisible()) return true;
     const slab = page.locator(".mz-slab:not([disabled])").first();
-    if (await isVisible(slab, 1000)) { await slab.click(); await sleep(300); return true; }
+    if (await slab.isVisible()) { await slab.click(); await sleep(300); return true; }
     const next = page.getByRole("button", { name: "Next question" });
-    if (await isVisible(next, 1000)) { await next.click(); await sleep(300); return true; }
+    if (await next.isVisible()) { await next.click(); await sleep(300); return true; }
     return false;
   }
   if (gameId === "closest-wins") return await actClosest(page);
