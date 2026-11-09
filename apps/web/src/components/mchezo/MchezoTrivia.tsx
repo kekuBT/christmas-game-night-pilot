@@ -227,7 +227,12 @@ export function MchezoTriviaResults(deps: MchezoTriviaDeps) {
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
       <button type="button" className="mz-chip-btn" data-testid="mz-reveal-prev" disabled={idx === 0} onClick={() => go(idx - 1)}>Previous</button>
       <button type="button" className="mz-chip-btn" data-testid="mz-reveal-next" onClick={onNext}>{nextLabel}</button>
-      <button type="button" className="mz-chip-btn" data-testid="mz-reveal-play" aria-pressed={auto} disabled={step.kind === "standings"} onClick={() => setAuto((a) => !a)}>{auto ? "Pause reveal" : "Play reveal"}</button>
+      {/* S3-TRV-03: at the standings there is nothing left to play, so instead of a greyed-out
+          "Play reveal" (it read as broken), offer to replay it from the first question. Same
+          finished-game data as before: nothing is revealed that the results don't already show. */}
+      {step.kind === "standings"
+        ? <button type="button" className="mz-chip-btn" data-testid="mz-reveal-replay" onClick={() => { setStepIdx(0); setAuto(true); }}>Replay from Q1</button>
+        : <button type="button" className="mz-chip-btn" data-testid="mz-reveal-play" aria-pressed={auto} onClick={() => setAuto((a) => !a)}>{auto ? "Pause reveal" : "Play reveal"}</button>}
       {step.kind !== "standings" && <button type="button" className="mz-chip-btn" onClick={onBackToLobby}>Back to lobby</button>}
     </div>
   );

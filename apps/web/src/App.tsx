@@ -1307,6 +1307,7 @@ export function App() {
           onSelect={(id) => { setUpNextId(id); setShuffleResult(null); toLobby(); }}
           onDetails={(id) => openSheet("details", id)}
           onBack={toLobby}
+          onStudio={isHostish ? () => setView("studio") : undefined}
         />
         {roomSheets}
       </MchezoProvider>
@@ -1339,7 +1340,7 @@ export function App() {
     const studioRecent = (proj?.games ?? []).map((g) => g.gameId).reverse();
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <MchezoStudio playerCount={studioPlayerCount} recentIds={studioRecent} onBack={toLobby} />
+        <MchezoStudio playerCount={studioPlayerCount} recentIds={studioRecent} onBack={toLobby} canUse={isHostish} />
       </MchezoProvider>
     );
   }

@@ -35,3 +35,4 @@ export { ReactionBar, ReactionGlyph, REACTION_ICONS } from './components/Reactio
 export * from './components/Results.js';
 export * from './components/phone/screens.js';
 export * from './components/tv/tv.js';
+export * from './lib/names.js';

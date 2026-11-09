@@ -9,6 +9,7 @@
 // far (server submittedCount) out of the room; tokens carry offline badges
 // only, never check marks for answers we cannot see.
 import { PlayerToken } from "./primitives.js";
+import { shortNames } from "../lib/names.js";
 import { GameClock } from "./Lifecycle.js";
 import { toMzPlayers } from "../../../components/mchezo/adapters.js";
 import type { PublicGame, PublicPlayer } from "../../../types.js";
@@ -26,6 +27,8 @@ export function MchezoWaiting({ label, players, playerId, publicGame, onTv, foot
   const done = publicGame?.submittedCount ?? 0;
   const total = publicGame?.totalPlayers ?? players.length;
   const mzPlayers = toMzPlayers(players);
+  // S3-TRV-02: "Audit Guest" and "Audit Third" no longer both read "Au…".
+  const short = shortNames(mzPlayers);
   const r = 44;
   const c = 2 * Math.PI * r;
   return (
@@ -41,7 +44,7 @@ export function MchezoWaiting({ label, players, playerId, publicGame, onTv, foot
           return (
             <span key={p.id} className="mz-wait__seat" style={{ left: `${50 + Math.cos(a) * r}%`, top: `${50 + Math.sin(a) * r}%` }}>
               <PlayerToken player={p} index={k} size={40} you={p.id === playerId} badge={p.connection === "disconnected" ? "offline" : null} />
-              <span className="mz-seat__name">{p.id === playerId ? "You" : p.presence === "reconnecting" ? "Reconnecting" : p.connection === "disconnected" ? "Away" : p.name}</span>
+              <span className="mz-seat__name" title={p.name}>{p.id === playerId ? "You" : p.presence === "reconnecting" ? "Reconnecting" : p.connection === "disconnected" ? "Away" : short[p.id] ?? p.name}</span>
             </span>
           );
         })}

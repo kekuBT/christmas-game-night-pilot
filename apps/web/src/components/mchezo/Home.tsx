@@ -132,7 +132,8 @@ export function JoinScreen(p: {
       <p className="mz-foot mz-entry__lede">{p.watch ? "Watching needs only the room code: no seat, no scores, nothing to tap." : "Type the 6-character code on the host’s screen, or scan their QR code."}</p>
       {!p.blocked && <>
       <form className="mz-form" onSubmit={(e) => { e.preventDefault(); if (ok) p.onJoin(); }}>
-        <CodeInput value={p.code} onChange={p.onCodeChange} length={6} pattern={/[^A-Z0-9]/g} />
+        {/* S3-JOIN-01: the lede above already says where the code is; no second hint. */}
+        <CodeInput value={p.code} onChange={p.onCodeChange} length={6} pattern={/[^A-Z0-9]/g} hint="" />
         <div className="mz-field">
           <label htmlFor={nameId} className="mz-field__label">What should we call you?</label>
           <input id={nameId} className="mz-input" value={p.name} maxLength={24} autoComplete="nickname" placeholder="e.g. Auntie June" onChange={(e) => p.onNameChange(e.target.value)} aria-describedby={`${nameId}-help`} />

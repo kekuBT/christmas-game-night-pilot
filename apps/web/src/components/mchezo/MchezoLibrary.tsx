@@ -55,6 +55,8 @@ interface LibraryProps {
   onSelect: (id: string) => void;
   onDetails: (id: string) => void;
   onBack: () => void;
+  /** Host/cohost in a room: a way to Studio (S3-STU-02). */
+  onStudio?: () => void;
 }
 
 const SIZE_OPTIONS: number[] = [2, 4, 6, 8, 10];
@@ -86,7 +88,7 @@ const GROUPS: { fit: RoomFit; title: string; note: (n: number) => string }[] = [
   { fit: "too-many", title: "Too many players for these", note: () => "These have a smaller limit." },
 ];
 
-export function MchezoLibrary({ manifests, catalog, upNextId, canSelect, inRoom, roomPlayers, filters, onFiltersChange, onSelect, onDetails, onBack }: LibraryProps) {
+export function MchezoLibrary({ manifests, catalog, upNextId, canSelect, inRoom, roomPlayers, filters, onFiltersChange, onSelect, onDetails, onBack, onStudio }: LibraryProps) {
   const [open, setOpen] = useState(false);
   const [why, setWhy] = useState<string | null>(null);
   const sortId = useId();
@@ -269,6 +271,9 @@ export function MchezoLibrary({ manifests, catalog, upNextId, canSelect, inRoom,
         })
       ) : (
         <div className="mz-libgrid">{visible.map(card)}</div>
+      )}
+      {onStudio && (
+        <p className="mz-foot mz-lib-studio" data-testid="mz-lib-studio">Planning several games in a row? <button type="button" className="mz-linkbtn" onClick={onStudio}>Studio (preview)</button> sketches a tournament schedule. Host only; nothing is started.</p>
       )}
       <p className="mz-foot">{room !== undefined ? "Group size only: whether a game can count toward the Cup is checked when the host starts it. " : ""}Lengths are design estimates, not measured times. Each game also has a hard time limit and ends by itself.</p>
     </main>

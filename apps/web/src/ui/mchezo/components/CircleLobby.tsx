@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { useHaptics, useMchezo } from '../MchezoProvider.js';
 import type { Player, ReactionEvent } from '../types.js';
 import { PlayerToken } from './primitives.js';
+import { shortNames } from '../lib/names.js';
 import { REACTION_ICONS, ReactionGlyph } from './Reactions.js';
 
 export interface CircleLobbyProps {
@@ -33,6 +34,8 @@ export function CircleLobby({ players, youId, capacity = 10, center, reactions =
   const youIdx = Math.max(0, players.findIndex((p) => p.id === youId));
   // You first, then everyone else in join order, so you are seat 0 at the bottom.
   const ordered = useMemo(() => [players[youIdx], ...players.filter((_, i) => i !== youIdx)].filter(Boolean), [players, youIdx]);
+  // S3-TRV-02: similar names get labels that tell them apart (full name in the tooltip and accessible name).
+  const short = useMemo(() => shortNames(players), [players]);
   const slots = Math.min(capacity, Math.max(6, players.length + (players.length < capacity ? 2 : 0)));
   const colorIndex = (p: Player) => players.indexOf(p);
 
@@ -109,7 +112,7 @@ export function CircleLobby({ players, youId, capacity = 10, center, reactions =
                 onClick={() => { if (you || off) return; buzz(10); setWobble(p.id); onNudge?.(p.id); }}>
                 <PlayerToken player={p} index={colorIndex(p)} you={you} badge={badgeFor?.(p)} />
               </button>
-              <span className={['mz-seat__name', off ? 'mz-seat__name--off' : ''].join(' ')}>{you ? 'You' : off ? 'Away' : p.name}</span>
+              <span className={['mz-seat__name', off ? 'mz-seat__name--off' : ''].join(' ')} title={p.name}>{you ? 'You' : off ? 'Away' : short[p.id] ?? p.name}</span>
               {wobble === p.id && <span className="mz-bubble" role="status">Nudged!</span>}
               {nudgedMe && <span className="mz-bubble mz-bubble--in" role="status">Nudged you</span>}
             </li>

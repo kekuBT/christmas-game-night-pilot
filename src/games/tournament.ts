@@ -70,7 +70,7 @@ export const TOURNAMENT_PRESETS: TournamentPreset[] = [
   {
     format: "team-clash",
     label: "Team Clash",
-    description: "Three team rounds. Only Charades supports teams today, so rounds repeat it — the catalog gap is shown, not hidden.",
+    description: "Three team rounds. It needs a team game, and today the only one is Charades, so every round is Charades.",
     rounds: 3,
     gamesPerRound: 1,
     distinctOnly: false,

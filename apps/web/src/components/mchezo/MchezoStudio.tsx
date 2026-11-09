@@ -7,6 +7,7 @@
 // untouched and no tournament scoring is active.
 import { useMemo, useState } from "react";
 import { PhoneScreen } from "../../ui/mchezo/index.js";
+import { GAME_MANIFESTS } from "../../../../../src/games/manifest.js";
 import {
   configFromPreset,
   presetFor,
@@ -19,9 +20,34 @@ interface StudioProps {
   playerCount: number;
   recentIds: string[];
   onBack: () => void;
+  /** Host or cohost (S3-STU-02): Studio is a host tool; guests are told so. */
+  canUse?: boolean;
 }
 
-export function MchezoStudio({ playerCount, recentIds, onBack }: StudioProps) {
+/** The games a format draws from, whatever the room size (S3-STU-01). */
+function formatGames(playStyle: "solo" | "team" | undefined) {
+  return GAME_MANIFESTS.filter((m) => !playStyle || m.playStyle === playStyle);
+}
+
+export function MchezoStudio({ playerCount, recentIds, onBack, canUse = true }: StudioProps) {
+  if (!canUse) {
+    return (
+      <PhoneScreen label="Tournament Studio preview">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+          <button type="button" className="mz-chip-btn" data-testid="mz-studio-back" onClick={onBack}>← Back to lobby</button>
+          <span className="mz-kicker">Tournament Studio</span>
+        </div>
+        <div className="mz-card" style={{ marginTop: 16 }} data-testid="studio-host-only">
+          <p style={{ margin: 0 }}><strong>Studio is a host tool.</strong></p>
+          <p className="mz-foot" style={{ margin: "6px 0 0", textAlign: "left" }}>The host can use it to preview a schedule of several games. It's a preview only: nothing is started or scored. Ask the host if you'd like a tournament night.</p>
+        </div>
+      </PhoneScreen>
+    );
+  }
+  return <StudioPlanner playerCount={playerCount} recentIds={recentIds} onBack={onBack} />;
+}
+
+function StudioPlanner({ playerCount, recentIds, onBack }: StudioProps) {
   const [format, setFormat] = useState<TournamentFormat>("points-league");
   const [rounds, setRounds] = useState(presetFor("points-league").rounds);
   const [seed, setSeed] = useState(() => Date.now());
@@ -92,7 +118,17 @@ export function MchezoStudio({ playerCount, recentIds, onBack }: StudioProps) {
       ) : (
         <div className="mz-card" style={{ marginTop: 16 }} data-testid="studio-infeasible">
           {schedule.reason === "no-eligible-games" ? (
-            <p>No games fit this format for {playerCount} players.</p>
+            <>
+              <p style={{ margin: 0 }}>No games fit this format for {playerCount} {playerCount === 1 ? "player" : "players"}.</p>
+              {(() => {
+                const pool = formatGames(preset.playStyle);
+                return pool.length > 0 && (
+                  <p className="mz-foot" style={{ margin: "6px 0 0", textAlign: "left" }} data-testid="studio-infeasible-why">
+                    {preset.label} uses {preset.playStyle === "team" ? "team games" : preset.playStyle === "solo" ? "individual games" : "these games"}: {pool.map((m) => `${m.title} (${m.minPlayers}–${m.maxPlayers} players)`).join(", ")}. {pool.every((m) => playerCount < m.minPlayers) ? "Invite more players, or pick another format." : "Pick another format for this group."}
+                  </p>
+                );
+              })()}
+            </>
           ) : (
             <p>Only {schedule.eligible} games fit, but {schedule.requested} slots were requested. Reduce rounds or widen the format.</p>
           )}

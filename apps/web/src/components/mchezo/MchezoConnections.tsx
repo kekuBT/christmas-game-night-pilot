@@ -36,10 +36,15 @@ const LEVEL_SHAPE: Record<number, number> = { 1: 2, 2: 1, 3: 3, 4: 0 };
 function LevelShape({ level }: { level: number }) {
   return <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24"><path d={ANSWER_SHAPES[LEVEL_SHAPE[level] ?? 0]} fill="currentColor" /></svg>;
 }
-/** Size class for a tile's longest single word, so long words shrink instead of breaking. */
-function lenClass(text: string): string {
-  const longest = Math.max(...text.split(/\s+/).map((w) => w.length));
-  return longest >= 11 ? " mz-cx-tile--xlong" : longest >= 9 ? " mz-cx-tile--long" : "";
+/**
+ * One type size for the whole board, from its longest single word, so every
+ * tile reads the same (S3-WCN-03: one-word tiles were large while long and
+ * two-word tiles shrank). Long words shrink instead of breaking mid-word; two
+ * words wrap at the space in the same size.
+ */
+export function boardSizeClass(texts: readonly string[]): string {
+  const longest = Math.max(0, ...texts.flatMap((t) => t.split(/\s+/).map((w) => w.length)));
+  return longest >= 11 ? " mz-cx-grid--xlong" : longest >= 9 ? " mz-cx-grid--long" : "";
 }
 const LEVEL_WORD: Record<number, string> = { 1: "easiest", 2: "medium", 3: "tricky", 4: "trickiest" };
 
@@ -123,9 +128,9 @@ export function MchezoConnections({ game, publicGame, players, playerId, title, 
       {solved.length > 0 && <div className="mz-cx-bands">{solved.map((g) => <Band key={g.name} group={g} textOf={textOf} />)}</div>}
       {!finished && (
         <>
-          <div className={`mz-cx-grid${shake ? " mz-cx-grid--shake" : ""}`} role="group" aria-label={`${remaining.length} words; ${selected.length} of 4 selected`}>
+          <div className={`mz-cx-grid${boardSizeClass(tiles.map((t) => t.text))}${shake ? " mz-cx-grid--shake" : ""}`} role="group" aria-label={`${remaining.length} words; ${selected.length} of 4 selected`}>
             {remaining.map((id) => (
-              <button key={id} type="button" className={`mz-cx-tile${lenClass(textOf(id))}`} aria-pressed={selected.includes(id)} disabled={pending} onClick={() => toggle(id)} data-testid="mz-cx-tile">
+              <button key={id} type="button" className="mz-cx-tile" aria-pressed={selected.includes(id)} disabled={pending} onClick={() => toggle(id)} data-testid="mz-cx-tile">
                 {textOf(id)}
               </button>
             ))}
@@ -224,7 +229,7 @@ export function ConnectionsTv({ game, title, players = [] }: { game: PublicGame;
   return (
     <section aria-label={`${title} board`}>
       <p className="mz-lede" style={{ marginTop: 20 }}>{st.finishedPlayers ?? 0} of {st.totalPlayers ?? game.players.length} players have finished their puzzle</p>
-      <div className="mz-cx-tv">{tiles.map((t) => <div key={t.id} className={`mz-cx-tile${lenClass(t.text)}`} aria-hidden="true">{t.text}</div>)}</div>
+      <div className={`mz-cx-tv${boardSizeClass(tiles.map((t) => t.text))}`}>{tiles.map((t) => <div key={t.id} className="mz-cx-tile" aria-hidden="true">{t.text}</div>)}</div>
     </section>
   );
 }
