@@ -4,7 +4,7 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { BriefingRefused, ContentShortage, ROOM_KINDS, RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
+import { BriefingRefused, ContentShortage, PartyRefused, ROOM_KINDS, RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
@@ -126,6 +126,20 @@ export class LocalServer {
    */
   private lobbyPlans = new Map<string, { gameId: string; official: boolean }>();
   static readonly PlanSchema = z.object({ gameId: z.string().min(1).max(64), official: z.boolean() }).strict();
+  /** Stage 7.1: save or clear the room's Quick Party lineup (RoomEngine.savePartyPlan checks the rest). */
+  static readonly PartyBodySchema = z.union([
+    z.object({
+      baseRevision: z.number().int().min(0),
+      plan: z.object({
+        expectedPlayers: z.number().int().min(1).max(10),
+        budgetMinutes: z.union([z.literal(15), z.literal(30), z.literal(60)]),
+        items: z.array(z.object({ gameId: z.string().min(1).max(64) }).strict()).min(1).max(8),
+      }).strict(),
+    }).strict(),
+    z.object({ baseRevision: z.number().int().min(0), clear: z.literal(true) }).strict(),
+  ]);
+  /** Stage 7.1: the `party` marker on a game start: which lineup item this start is. */
+  static readonly PartyStartSchema = z.object({ revision: z.number().int().min(0), index: z.number().int().min(0).max(7) }).strict();
   /** Stage 6.1: POST /rooms. A missing kind means a Family Cup, as before room kinds. */
   static readonly CreateRoomSchema = z.object({ name: z.string().max(80).optional(), kind: z.enum(ROOM_KINDS).optional() }).passthrough();
   /** Ephemeral nudges (see the /nudge endpoint): never persisted, never ledger. */
@@ -886,17 +900,29 @@ export class LocalServer {
           if (!player) return;
           const body = await this.readBody(req);
           const ids = (v: unknown) => (Array.isArray(v) ? v.map(String) : undefined);
+          // Stage 7.1: a start of the Quick Party lineup's next game (repeat-safe).
+          let party: { revision: number; index: number } | undefined;
+          if (body["party"] !== undefined) {
+            const parsed = LocalServer.PartyStartSchema.safeParse(body["party"]);
+            if (!parsed.success || body["official"] === true) { this.send(res, 400, { error: "A Quick Party start needs the lineup's revision and item, and is never official" }); return; }
+            party = parsed.data;
+          }
           let game;
+          let replay = false;
           try {
-            game = room.startGame(player.id, String(body["gameId"] ?? ""), {
-              official: body["official"] === true,
+            const common = {
               seed: typeof body["seed"] === "number" ? body["seed"] : undefined,
               roster: ids(body["roster"]),
               proceedWithout: ids(body["proceedWithout"]),
-            });
+            };
+            if (party) {
+              ({ game, replay } = room.startPartyGame(player.id, String(body["gameId"] ?? ""), { ...party, ...common, fewerThanPlanned: body["fewerThanPlanned"] === true }));
+            } else {
+              game = room.startGame(player.id, String(body["gameId"] ?? ""), { official: body["official"] === true, ...common });
+            }
           } catch (err) {
             if (err instanceof StartRefused) {
-              this.send(res, 409, { error: err.message, code: err.code, readiness: err.readiness });
+              this.send(res, 409, { error: err.message, code: err.code, readiness: err.readiness, ...(err.detail ?? {}) });
               return;
             }
             if (err instanceof ContentShortage) {
@@ -905,9 +931,36 @@ export class LocalServer {
             }
             throw err;
           }
+          if (replay) {
+            // The same start again (a lost reply, a second tab): the game it already started.
+            this.send(res, 200, { gameId: game.id, gameType: game.gameId, status: game.status, players: game.players, replay: true });
+            return;
+          }
           this.persist(room);
           this.broadcast(room.id);
           this.send(res, 201, { gameId: game.id, gameType: game.gameId, status: game.status, players: game.players });
+          return;
+        }
+        // Stage 7.1: save or clear the room's Quick Party lineup (host/cohost, casual rooms).
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "party") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const parsed = LocalServer.PartyBodySchema.safeParse(await this.readBody(req));
+          if (!parsed.success) { this.send(res, 400, { error: "A lineup needs a group size of 1–10, 15, 30 or 60 minutes, and 1–8 games", code: "INVALID_PLAN" }); return; }
+          const b = parsed.data;
+          try {
+            room.savePartyPlan(player.id, b.baseRevision, "clear" in b ? null : b.plan);
+          } catch (err) {
+            if (err instanceof PartyRefused) {
+              const status = err.code === "NOT_HOST" ? 403 : err.code === "INVALID_PLAN" ? 400 : 409;
+              this.send(res, status, { error: err.message, code: err.code, party: room.kind === "casual" ? room.partyView() : undefined });
+              return;
+            }
+            throw err;
+          }
+          this.persist(room);
+          this.broadcast(room.id);
+          this.send(res, 200, { ok: true, party: room.partyView() });
           return;
         }
         // D3: the host or a cohost begins play for everyone ("Start now"), or cancels the briefing.

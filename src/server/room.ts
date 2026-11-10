@@ -2,6 +2,7 @@ import { createHash, randomInt } from "node:crypto";
 import { moduleFor, moduleForAction } from "../games/modules/index.js";
 import type { ModuleContext } from "../games/modules/types.js";
 import { getGame } from "../games/registry.js";
+import { PARTY_TRANSITION_MINUTES, validatePartyPlan } from "../games/party.js";
 import { CLIENT_PROTOCOL, MATH_OPEN_PROTOCOL, MIN_CLIENT_PROTOCOL, NUMERIC_INPUT_PROTOCOL } from "../shared/clientProtocol.js";
 import { withinNumericInput } from "../shared/numericInput.js";
 import { COUNT_GAMES_WITH_NO_PARTICIPATION, policyFor, type EndReason, type GameOutcome, type Participation, type PhaseKind } from "./lifecycle.js";
@@ -198,11 +199,39 @@ export interface Readiness {
 /**
  * A game start the server refused so the host can decide (HTTP 409):
  * - ROSTER_CHANGED: the roster the host saw is not the roster it would get.
- * - PLAYERS_RECONNECTING: an official game would silently leave out a
- *   player still inside the reconnect grace window.
+ * - PLAYERS_RECONNECTING: an official game (or a Quick Party's game) would
+ *   silently leave out a player still inside the reconnect grace window.
+ * Stage 7.1, a Quick Party start (startPartyGame):
+ * - NOT_A_CASUAL_ROOM, PLAN_CONFLICT (the lineup changed, or this isn't its
+ *   next game), PARTY_FEWER_THAN_PLANNED (fewer here than the group size,
+ *   not acknowledged), PARTY_DOESNT_FIT (the real roster is outside the
+ *   game's player range). `detail` says what the host needs to decide.
  */
+export type StartRefusedCode =
+  | "ROSTER_CHANGED" | "PLAYERS_RECONNECTING" | "OFFICIAL_NEEDS_TWO" | "NOT_A_CUP_ROOM" | "NOT_A_SOLO_GAME"
+  | "NOT_A_CASUAL_ROOM" | "PLAN_CONFLICT" | "PARTY_FEWER_THAN_PLANNED" | "PARTY_DOESNT_FIT";
 export class StartRefused extends Error {
-  constructor(readonly code: "ROSTER_CHANGED" | "PLAYERS_RECONNECTING" | "OFFICIAL_NEEDS_TWO" | "NOT_A_CUP_ROOM" | "NOT_A_SOLO_GAME", message: string, readonly readiness: Readiness) {
+  constructor(readonly code: StartRefusedCode, message: string, readonly readiness: Readiness, readonly detail?: Record<string, unknown>) {
+    super(message);
+  }
+}
+
+/**
+ * Stage 7.1: a Quick Party lineup, saved for the room (docs/stage7/stage71.md
+ * §3.4). Planning data only: no scores, no content, no Cup.
+ * `gameInstanceId` marks the game an item started (kept for the next slice).
+ */
+export interface PartyPlanRecord {
+  revision: number;
+  expectedPlayers: number;
+  budgetMinutes: number;
+  items: { gameId: string; gameInstanceId?: string }[];
+  updatedAt: number;
+}
+
+/** A lineup the server refused to save (HTTP 403/409/400). Nothing changed. */
+export class PartyRefused extends Error {
+  constructor(readonly code: "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "PLAN_CONFLICT" | "INVALID_PLAN", message: string) {
     super(message);
   }
 }
@@ -387,6 +416,13 @@ export class RoomEngine {
    */
   contentUsage: UsageHistory = {};
   contentSeq = 0;
+  /**
+   * Stage 7.1: the room's Quick Party lineup (casual rooms only), and a
+   * revision counter that only grows, so a cleared lineup's number is never
+   * reused and two host tabs can't overwrite each other unseen.
+   */
+  party: PartyPlanRecord | null = null;
+  partyRevision = 0;
   /** The content library (the shipped packs; tests may inject their own). */
   private _content: ContentLibrary | null = null;
   get content(): ContentLibrary { return (this._content ??= contentLibrary()); }
@@ -971,6 +1007,99 @@ export class RoomEngine {
     const game = this.games.get(gameInstanceId);
     if (!game || game.status !== "briefing") throw new Error("That game isn't waiting to start");
     this.endBriefing(game, "host", actorId);
+  }
+
+  /**
+   * Stage 7.1: save (or clear, with `plan` null) the room's Quick Party
+   * lineup. Host or cohost of a casual room only; `baseRevision` must be the
+   * revision the host was looking at (PLAN_CONFLICT otherwise, nothing
+   * changed). The lineup is checked again here (validatePartyPlan): group
+   * size, budget, 1–8 known games that fit the group, no duplicates, within
+   * the time budget. No content is selected and no game starts.
+   */
+  savePartyPlan(actorId: string, baseRevision: number, plan: { expectedPlayers: number; budgetMinutes: number; items: { gameId: string }[] } | null, now = this.clock()): PartyPlanRecord | null {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new PartyRefused("NOT_HOST", "Only the host or a cohost can plan the party.");
+    if (this.kind !== "casual") throw new PartyRefused("NOT_A_CASUAL_ROOM", "Quick Party is for casual rooms.");
+    if (baseRevision !== this.partyRevision) throw new PartyRefused("PLAN_CONFLICT", "The lineup changed somewhere else (another tab, or a cohost). Here is the latest.");
+    if (plan) {
+      const v = validatePartyPlan(plan);
+      if (!v.ok) throw new PartyRefused("INVALID_PLAN", v.error);
+    }
+    this.partyRevision += 1;
+    this.party = plan
+      ? { revision: this.partyRevision, expectedPlayers: plan.expectedPlayers, budgetMinutes: plan.budgetMinutes, items: plan.items.map((i) => ({ gameId: i.gameId })), updatedAt: now }
+      : null;
+    return this.party;
+  }
+
+  /** An item counts as started while the game it started still exists (a cancelled briefing leaves none). */
+  private partyItemStarted(item: { gameInstanceId?: string }): boolean {
+    return !!item.gameInstanceId && this.games.has(item.gameInstanceId);
+  }
+
+  /** The lineup as every member (and the TV) sees it: public planning facts only. */
+  partyView(): { revision: number; lineup: null | { expectedPlayers: number; budgetMinutes: number; estimateMinutes: number; transitionMinutes: number; items: { gameId: string; started: boolean }[]; updatedAt: number } } {
+    const p = this.party;
+    if (!p) return { revision: this.partyRevision, lineup: null };
+    const v = validatePartyPlan(p);
+    return {
+      revision: this.partyRevision,
+      lineup: {
+        expectedPlayers: p.expectedPlayers,
+        budgetMinutes: p.budgetMinutes,
+        estimateMinutes: v.ok ? v.estimateMinutes : 0,
+        transitionMinutes: PARTY_TRANSITION_MINUTES,
+        items: p.items.map((i) => ({ gameId: i.gameId, started: this.partyItemStarted(i) })),
+        updatedAt: p.updatedAt,
+      },
+    };
+  }
+
+  /**
+   * Stage 7.1: start the lineup's next game through the ordinary start
+   * (practice, briefing and all), checking first, in this order:
+   * - a casual room, a current lineup (`revision`), and that `index` is its
+   *   first item not yet started, for this `gameId` (PLAN_CONFLICT);
+   * - repeat-safe: an item that already started a game that still exists
+   *   returns that game (`replay`), never a second one;
+   * - fewer connected than the group size needs `fewerThanPlanned`
+   *   (PARTY_FEWER_THAN_PLANNED);
+   * - anyone reconnecting must be named in `proceedWithout`
+   *   (PLAYERS_RECONNECTING), as for an official game;
+   * - the real connected count must fit the game (PARTY_DOESNT_FIT).
+   * Then startGame (its roster check, one active game, the briefing), and
+   * only then is the item marked, in the same step. A refusal changes nothing.
+   */
+  startPartyGame(actorId: string, gameId: string, opts: { revision: number; index: number; roster?: string[]; proceedWithout?: string[]; fewerThanPlanned?: boolean; seed?: number }): { game: GameInstance; replay: boolean } {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can start a game");
+    this.tick();
+    const readiness = this.readiness();
+    if (this.kind !== "casual") throw new StartRefused("NOT_A_CASUAL_ROOM", "Quick Party is for casual rooms.", readiness);
+    const p = this.party;
+    const conflict = (why: string) => new StartRefused("PLAN_CONFLICT", why, readiness, { party: this.partyView() });
+    if (!p || p.revision !== opts.revision) throw conflict("The lineup changed somewhere else. Here is the latest.");
+    const next = p.items.findIndex((i) => !this.partyItemStarted(i));
+    const item = p.items[opts.index];
+    if (!item || item.gameId !== gameId) throw conflict("That isn't a game in this lineup.");
+    if (this.partyItemStarted(item)) return { game: this.games.get(item.gameInstanceId!)!, replay: true };
+    if (opts.index !== next) throw conflict("That isn't the lineup's next game.");
+    const game = getGame(gameId);
+    const here = readiness.wouldPlay.length;
+    if (here < p.expectedPlayers && opts.fewerThanPlanned !== true) {
+      throw new StartRefused("PARTY_FEWER_THAN_PLANNED", `You planned for ${p.expectedPlayers}; ${here} ${here === 1 ? "is" : "are"} here.`, readiness, { expected: p.expectedPlayers, here });
+    }
+    const leftOut = new Set(opts.proceedWithout ?? []);
+    const reconnecting = readiness.wouldMiss.filter((m) => m.presence === "reconnecting" && !leftOut.has(m.id)).map((m) => m.id);
+    if (reconnecting.length > 0) {
+      const names = reconnecting.map((id) => this.players.get(id)?.displayName ?? id);
+      throw new StartRefused("PLAYERS_RECONNECTING", `${names.join(", ")} ${names.length === 1 ? "is" : "are"} reconnecting. Wait for them, or start without them.`, readiness);
+    }
+    if (here < game.minPlayers || here > game.maxPlayers) {
+      throw new StartRefused("PARTY_DOESNT_FIT", here < game.minPlayers ? `${game.title} needs at least ${game.minPlayers} players; ${here} ${here === 1 ? "is" : "are"} here.` : `${game.title} is for up to ${game.maxPlayers} players; ${here} are here.`, readiness, { gameId, minPlayers: game.minPlayers, maxPlayers: game.maxPlayers, here });
+    }
+    const started = this.startGame(actorId, gameId, { official: false, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}) });
+    item.gameInstanceId = started.id;
+    return { game: started, replay: false };
   }
 
   /**
@@ -2563,6 +2692,8 @@ export class RoomEngine {
       joinCode: this.joinCode,
       name: this.name,
       roomKind: this.kind,
+      // Stage 7.1: the Quick Party lineup (casual rooms): public planning facts only.
+      ...(this.kind === "casual" ? { party: this.partyView() } : {}),
       players: publicPlayers,
       games: publicGames,
       readiness: this.readiness(now),
@@ -2661,6 +2792,8 @@ export class RoomEngine {
       cup: this.cupError ? this.cupRaw : this._cup,
       contentUsage: this.contentUsage,
       contentSeq: this.contentSeq,
+      party: this.party,
+      partyRevision: this.partyRevision,
       players: [...this.players.values()],
       spectators: [...this.spectators.values()],
       games: [...this.games.values()],
@@ -2715,6 +2848,10 @@ export class RoomEngine {
     engine.nextPlayer = data["nextPlayer"] as number;
     engine.nextSpectator = typeof data["nextSpectator"] === "number" ? data["nextSpectator"] : 1;
     engine.nextGame = data["nextGame"] as number;
+    // Stage 7.1: the Quick Party lineup, checked again; a damaged one is
+    // dropped whole (never half-loaded), and the revision still only grows.
+    engine.partyRevision = typeof data["partyRevision"] === "number" && Number.isInteger(data["partyRevision"]) && data["partyRevision"] >= 0 ? data["partyRevision"] : 0;
+    engine.party = restoreParty(data["party"], engine);
     return engine;
   }
 
@@ -2743,4 +2880,21 @@ export class RoomEngine {
   ledgerChecksum(): string {
     return createHash("sha256").update(JSON.stringify(this.ledger)).digest("hex").slice(0, 16);
   }
+}
+
+/** Stage 7.1: a saved Quick Party lineup, if it is whole and valid; otherwise none. */
+function restoreParty(raw: unknown, engine: RoomEngine): PartyPlanRecord | null {
+  if (raw == null) return null;
+  const bad = (why: string) => { console.error(`[party] room ${engine.id}: saved lineup dropped (${why})`); return null; };
+  if (engine.kind !== "casual") return bad("not a casual room");
+  if (typeof raw !== "object") return bad("not an object");
+  const r = raw as Record<string, unknown>;
+  const items = r["items"];
+  if (!Array.isArray(items) || !items.every((i) => i && typeof i === "object" && typeof (i as Record<string, unknown>)["gameId"] === "string" && ((i as Record<string, unknown>)["gameInstanceId"] === undefined || typeof (i as Record<string, unknown>)["gameInstanceId"] === "string"))) return bad("bad items");
+  if (typeof r["revision"] !== "number" || r["revision"] > engine.partyRevision) return bad("bad revision");
+  if (typeof r["updatedAt"] !== "number") return bad("bad time");
+  const plan = { expectedPlayers: r["expectedPlayers"], budgetMinutes: r["budgetMinutes"], items: items as { gameId: string; gameInstanceId?: string }[] };
+  const v = validatePartyPlan(plan);
+  if (!v.ok) return bad(v.error);
+  return { revision: r["revision"] as number, expectedPlayers: plan.expectedPlayers as number, budgetMinutes: plan.budgetMinutes as number, items: plan.items.map((i) => ({ gameId: i.gameId, ...(i.gameInstanceId ? { gameInstanceId: i.gameInstanceId } : {}) })), updatedAt: r["updatedAt"] as number };
 }
