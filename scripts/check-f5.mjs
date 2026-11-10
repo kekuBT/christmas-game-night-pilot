@@ -82,6 +82,9 @@ async function panelFinished(page, gameId) {
   // M6 Show Mode: a finished game shows the results screen instead of the
   // finished panel (same pattern as check-f4.mjs).
   try { if (await page.getByTestId("show-results").isVisible({ timeout: 500 })) return true; } catch { /* not on results */ }
+  // Stage 5.2: Closest Wins and Guess the Year are kit screens with no
+  // game-panel; the panelText lookup below only waited out its 2s for them.
+  if (gameId === "closest-wins" || gameId === "guess-the-year") return false;
   const t = await panelText(page);
   // Heading must match the game: right after a previous game finishes, the
   // panel still shows that finished game until the new game's projection
@@ -96,13 +99,14 @@ async function panelFinished(page, gameId) {
 // scripts with no shared module.)
 async function actClosest(page) {
   const input = page.getByTestId("mz-num-input");
-  if (await isVisible(input, 1000)) {
+  // Stage 5.2: checks, not waits; the polling loop asks again next pass.
+  if (await input.isVisible()) {
     await input.fill("100");
     await page.getByTestId("mz-num-submit").click();
     await sleep(400);
     return true;
   }
-  if (await isVisible(page.getByText(/^Your guess: /), 500)) return true;
+  if (await page.getByText(/^Your guess: /).first().isVisible()) return true;
   return false;
 }
 // Guess the Year in the kit (Work Package D): one event at a time.
@@ -113,11 +117,12 @@ async function actClosest(page) {
 // two scripts share no module.)
 async function actYear(page) {
   const input = page.getByTestId("mz-num-input");
-  if (await isVisible(input, 1000)) {
+  // Stage 5.2: checks, not waits; the polling loop asks again next pass.
+  if (await input.isVisible()) {
     await input.fill("2000");
     await page.getByTestId("mz-num-submit").click();
     await sleep(400);
-  } else if (!(await isVisible(page.getByTestId("mz-year-guessed"), 500))) {
+  } else if (!(await page.getByTestId("mz-year-guessed").isVisible())) {
     return false;
   }
   // After a guess the kit shows that event's confirmation until the
