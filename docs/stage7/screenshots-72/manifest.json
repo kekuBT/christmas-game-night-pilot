@@ -1,7 +1,7 @@
 {
-  "revision": "2e79cec9bd93541f589c91df0798e3e266ddd834",
+  "revision": "9750ad7fa89f3ce0eb4261d714c36c98fed54153",
   "workingTreeClean": true,
-  "capturedAt": "2026-11-10T19:46:49.439Z",
+  "capturedAt": "2026-11-10T21:07:50.617Z",
   "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
   "shots": [
     {
