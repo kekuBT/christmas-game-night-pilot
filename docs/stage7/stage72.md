@@ -1,0 +1,176 @@
+# Stage 7.2: casual results and explicit session continuation
+
+- **Branch:** `claude/stage7-2-session-flow`, stacked on PR #8 at `08bba4d`.
+- **Instruction:** ChatGPT's review and handoff on PR #8 (comment 6776351818, 2026-11-10), under the owner's standing authorization (D-WF-01). It also cleared Stage 7.1 after its own live-site audit of `01fd285`.
+- **Not done here:**
+  - host swaps, full theme modernization, Home Screen installation, new games, other queued polish;
+  - no change to Family Cup or solo behaviour.
+
+  Nothing is merged or deployed, no port is made public, and nothing is paid for.
+- **Order of work:** this spec was written **before** implementation. §6 records what was built and tested.
+
+## 1. Goal
+
+After a casual round, everyone sees one clear Mchezo results screen, with the casual wording rather than "Practice". The host (or a cohost) then chooses what happens next:
+- the lineup's **Next game**;
+- **Play again** (a rematch);
+- **Take a break**, then **Resume**.
+
+Everyone else sees the same state. The server holds the progress, so a reload, a reconnect or a restart changes nothing, and a repeated request never starts a second game or scores twice.
+
+## 2. Acceptance criteria (from the handoff)
+
+- **P1. Casual results and briefing**, in the Mchezo shell with Casual wording:
+  - one clear result summary, the standings, and the player's own answer review;
+  - no Cup-only navigation;
+  - Family Cup and direct solo unchanged.
+- **P2. Explicit continuation:** host/cohost **Next game**, **Play again**, **Take a break / Resume**.
+  - Everyone else sees the waiting, break or next state, in sync.
+  - Nothing starts automatically, and no active game's clock is paused.
+  - Without a lineup: play again, or choose another game.
+  - At the lineup's end: say it's complete, and offer deliberate choices.
+- **P3. Server-authoritative progression:**
+  - persisted, and tied to the lineup's revision and item, and to game instances;
+  - only the next pending item may start;
+  - authenticate first; an identical retry or a lost reply resolves to the same attempt;
+  - transitions defined (§3.1); a cancelled briefing leaves its item available, never silently skipped.
+- **P4. Rematch:**
+  - the ordinary engine, a new game instance, fresh content as usual;
+  - never takes the next lineup item, never erases results, never scores twice;
+  - picking a game by hand never moves the lineup on;
+  - one active game, and content, score and privacy rules, all unchanged.
+- **P5. Persistence and roster:**
+  - a break and progress survive reload, reconnect and restart;
+  - joining or reconnecting never starts or resumes anything;
+  - every new start applies the real roster's eligibility and the reconnect and fewer-players confirmations;
+  - active games' rosters stay frozen, and late joiners are handled as before.
+- **P6. Plans and the TV:**
+  - the Stage 7.1 stale-draft and Clear protections are kept;
+  - clearing or replacing a lineup never changes an active game or erases scores;
+  - a progression request against a replaced lineup is refused;
+  - the TV shows the true current, next, break and complete state, public facts only.
+- **P7. Uncertain Apply:**
+  - say "couldn't confirm whether it saved", not "not saved";
+  - recognise the host's own save when it appears later, under safe revision and content conditions only;
+  - never silently rebase or overwrite a competing edit.
+
+## 3. Design
+
+### 3.1 Lineup item states (derived from the item's game, never stored twice)
+| State | Meaning | Becomes |
+|---|---|---|
+| `pending` | no game for it (never started, or its briefing was cancelled) | `briefing` (Next/Start), or `playing` in a room without briefings |
+| `briefing` | its game is in the briefing | `playing` (Start now), or `pending` (briefing cancelled, or expired before play) |
+| `playing` | its game is being played | `completed` (finished, including by its time limit or a host skip) |
+| `completed` | its game finished; scores recorded once by the engine | final |
+
+- **Derived:** an item points at its game (`gameInstanceId`), and its state comes from that game's status. A cancelled briefing deletes its game, and the item's mark is cleared (Stage 7.1 `reconcilePartyStarts`), so the item is `pending` again, at the same place in the order.
+- **Next pending:** the lowest-index `pending` item. Items before it are `completed` or active, and the one-active-game rule means at most one is active. There is no skipping: an item is never passed over silently.
+- **Complete:** every item `completed`.
+- **Projection** (casual rooms, every audience), added to the lineup:
+  - each item's `status` (`started` is kept: true unless pending);
+  - `next`: the index or null;
+  - `complete`.
+
+### 3.2 Next game (the lineup's next item)
+- **Request:** `POST /rooms/:id/games` with `party: { revision, index }` and the roster shown, as in Stage 7.1.
+- **What changes:** a new start must be the **next pending item** (no longer only item 0). Index 1 can start only after item 0 completed.
+- **Checks, in order:**
+  1. host or cohost;
+  2. casual room;
+  3. current revision, item and game;
+  4. **replay:** an item whose game exists returns that game;
+  5. index = next pending;
+  6. **not on a break** (`ON_BREAK`);
+  7. fewer than planned needs an OK;
+  8. reconnecting players are named or waited for;
+  9. the real roster fits;
+  10. `startGame`.
+- **Concurrent Next from the host and a cohost:** the first starts it; the second is that game's replay. A Next racing a Play again: one-active-game refuses the second, with nothing started twice.
+- **A Next for a replaced or cleared lineup** (old revision) gets `PLAN_CONFLICT`, and nothing starts.
+
+### 3.3 Play again (rematch)
+- **Request:** `POST /rooms/:id/games` with `rematchOf: <finished game id>`, `official: false`, and the roster shown (required).
+- **The server:**
+  1. host or cohost; casual room;
+  2. the source game exists and is `finished`;
+  3. **replay:** if a game with `rematchOf` = that source exists, return it (a lost reply, a double tap, two hosts);
+  4. not on a break;
+  5. reconnecting players are named or waited for;
+  6. `startGame` with the source's game id, as a new instance with fresh content, as usual.
+
+  The new game records `rematchOf`.
+- **The lineup is untouched:** a rematch never marks or takes an item, even when its source was a lineup game.
+- **Picking by hand** (the lobby's own Start for a game the host picked) also never moves the lineup on.
+
+### 3.4 Take a break / Resume
+- **Request:** `POST /rooms/:id/break` with `{ on: true | false }`. Host or cohost, casual rooms only.
+- **On:** only when no game is active (`GAME_ACTIVE` otherwise); a break never pauses a clock. Off: any time.
+- **Repeat-safe:** setting the same state again changes nothing.
+- **While on a break, every new start is refused** (`ON_BREAK`: Next, Play again, and the lobby's own Start). The host resumes deliberately.
+- **Stored:** `session: { onBreak, breakSince }`, persisted in the room and projected to everyone (TV included).
+- **Joining or reconnecting** never changes it.
+
+### 3.5 Casual results (client)
+- **Every finished game in a casual room** shows a Mchezo results screen:
+  - **Games with their own Mchezo results** (Trivia, Word Connections, Caption Clash, Draw & Guess, Pattern Pulse, Majority Rules) keep them, with the Casual wording.
+  - **Every other game** (Math Mayhem, Closest Wins, Guess the Year, Geography, Who Said That?, Category Sprint, Impostor, Charades) gets a new **casual results screen** instead of the legacy shell, which had the 🎄 header, Championship navigation, "Practice" and a second winner block. It holds:
+    - one result heading (the existing results hero);
+    - the standings, every player ranked by the server's recorded scores;
+    - the player's own answer review, where the game has one;
+    - the "What's next" panel.
+- **The "What's next" panel**, on every casual results screen:
+  - **Host or cohost:** **Next game: X** (game n of N), **Play again: Y**, **Take a break**, and the lobby. When the lineup is complete, it says so, with Play again, Plan another lineup, or the lobby.
+  - **Everyone else:** "Up next: X. {host} starts it." / "On a break." / "That was the whole lineup."
+  - A refused start is answered in place, with the same choices as the lobby: fewer than planned, reconnecting, doesn't fit, on a break, or the lineup changed.
+- **The lobby (casual):**
+  - up next follows the lineup: after a lineup game, it is the next pending item, never the game just played;
+  - when on a break, a banner shows it, and the host has **Resume** and the dock's Start waits;
+  - the lineup card shows each item's state (played ✓, now, next);
+  - the host has **Take a break**.
+- **Wording, in casual rooms:** "Casual" (never "Practice") on the briefing, the results heading and its lines, the outcome line, and the TV. Cup rooms keep Official/Practice.
+- **Family Cup** keeps its results, legacy shell included. **Solo** is unchanged.
+
+### 3.6 The TV (public facts only)
+The lobby screen shows "Quick Party: game n of N", Next, "On a break", or "That was the whole lineup", with Casual wording. The final-standings screen's next line follows the lineup.
+
+### 3.7 Uncertain Apply (P7)
+- **No answer, and the room shows neither this draft nor anything else new:** "Couldn't confirm whether the lineup was saved. Try again, or check the lobby."
+- **Recognising the host's own save** (applies when the room holds exactly this draft at base + 1):
+  - the planner keeps watching while an Apply is unconfirmed, and when the room shows it, says "Saved" and closes;
+  - a conflict reply that matches it is treated as saved.
+
+  Anything else stays a conflict for the host to decide.
+
+## 4. Test plan
+- **Unit and HTTP:**
+  - **Progression:** next = first pending; item 1 only after item 0 completed; replay before the index rule; cancel → pending at the same place; complete.
+  - **Concurrency:** host and cohost Next, giving one game and a replay; Next racing Play again, giving one game.
+  - **Rematch:** replay; never takes an item; source must be finished; casual only; reconnecting asks; scores once.
+  - **Break:** on, off, repeat-safe; refused while a game is active; starts refused while on a break; persisted across restart; join and reconnect change nothing.
+  - **Plans:** a stale or replaced lineup is refused for Next.
+  - **Roles:** guest 403; spectator, no token or another room's token 401.
+  - **Projection** for guests and the TV: public only.
+- **Browser** (`check-session-flow`, new): two players and a spectator (the TV view).
+  - a two-game lineup played through (Math, then Trivia): casual results screens with standings and own review, and no legacy shell;
+  - Next from results, lineup complete, then Play again;
+  - break and resume, seen by the guest and the TV;
+  - a reload on results and on a break;
+  - a lost reply on Next (exactly one game);
+  - a guest can't drive.
+
+  Layout at 320, 390 and 1440 px, and keyboard use of the panel.
+- **Regressions:** `check-quick-party`, `check-casual`, `check-briefing`, Family Cup and solo drivers, in the full gate.
+- **Gates:** the fast gate and one parallel full gate on a clean final SHA.
+- **Reporting:** Chromium only; WebKit and real devices are reported as not run.
+
+## 5. Choices for ChatGPT's attention
+Proceeding with these unless you object.
+1. **A break blocks every new start until Resume,** including the lobby's own Start, so a break is never ended by accident.
+2. **"Play again" is a rematch of the game just finished,** tied to it (`rematchOf`). A second Play again is a rematch of the rematch.
+3. **No "skip this item" in this slice.** Items are played in order. To change the order, the host edits the lineup (Stage 7.1).
+4. **Games with their own Mchezo results keep them,** with the new panel added. Only the games that used the legacy shell get the new casual results screen.
+
+## 6. What was built and tested
+
+*(Filled in at the checkpoint.)*
