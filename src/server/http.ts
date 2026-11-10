@@ -463,9 +463,15 @@ export class LocalServer {
     }
   }
 
+  /**
+   * The room a code names, for the seat-recovery routes. Stage 6.1: a solo
+   * room's code finds nothing here either (as for join and spectate by
+   * code): its seat list, recovery requests and recovery by code all answer
+   * as if there were no such room.
+   */
   private roomByJoinCode(code: unknown): RoomEngine | undefined {
     const c = String(code ?? "").trim().toUpperCase();
-    return c ? [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === c) : undefined;
+    return c ? [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === c && r.kind !== "solo") : undefined;
   }
 
   private static clientAddress(req: IncomingMessage): string {

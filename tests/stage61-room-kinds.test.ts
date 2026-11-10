@@ -251,6 +251,18 @@ describe("over HTTP: the server enforces the same rules", () => {
     expect((await post("/rooms/spectate-by-code", { joinCode: s.joinCode })).status).toBe(404);
   });
 
+  it("a solo room's code finds nothing for seat recovery either: no seat list, no request, no recovery", async () => {
+    const s = await create("solo");
+    expect((await post("/rooms/recovery-requests/seats", { joinCode: s.joinCode })).status).toBe(404);
+    const proj = await (await fetch(`${base}/rooms/${s.roomId}/projection?audience=player`, { headers: { "x-session-token": s.token } })).json() as { players: { id: string }[] };
+    expect((await post("/rooms/recovery-requests", { joinCode: s.joinCode, playerId: proj.players[0]!.id })).status).toBe(404);
+    const byCode = await post("/rooms/recover-by-code", { joinCode: s.joinCode, recoveryCode: "ABCD-EFGH" });
+    expect(byCode.status).toBe(400); // the same answer as any wrong code
+    // A Cup room's seat list by code is unchanged.
+    const cup = await create("cup");
+    expect((await post("/rooms/recovery-requests/seats", { joinCode: cup.joinCode })).status).toBe(200);
+  });
+
   it("a solo room has no public view: its TV projection and TV socket answer as if it weren't there", async () => {
     const s = await create("solo");
     expect((await fetch(`${base}/rooms/${s.roomId}`)).status).toBe(404);
