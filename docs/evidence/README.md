@@ -6,6 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261110-171316-97684cbe-5210` | `97684cb` | **Stage 7.1:** full gate, PASSED 79/79, fresh clone, clean tree (PR #8's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261110-171227-97684cbe-2368` | `97684cb` | **Stage 7.1:** fast gate, PASSED, fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-160144-801960b9-8627` | `801960b` | **Stage 6.2:** full gate, PASSED 78/78, fresh clone, clean tree (PR #7's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
 | `20261110-160058-801960b9-5774` | `801960b` | **Stage 6.2:** fast gate, PASSED, fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-151634-be400fb1-19788` | `be400fb` | Stage 6.2, before ChatGPT's clarifications were applied: full gate, **FAILED** 77/78 (superseded). `check-solo-shelf` E expected a different board after Play again; gate servers approve all content, so a solo room repeats one board there (spec §3.4, §6.2) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
@@ -63,3 +65,9 @@ Stage 6.2 browser drivers run by hand from the development checkout, on the sour
 - `check-solo-shelf-test-content-mode.log`: 57/57 against a server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional`, as the gate runs it. Its INFO line shows the same board after Play again, which is the cause of the `be400fb` failure.
 - `check-solo-shelf-shipped-library.log`: 57/57 against a server with the shipped library. A different board after Play again.
 - `check-solo.log` (80), `check-casual.log` (30), `check-connections.log` (39), `check-pattern-pulse.log` (54): regressions against the test-mode server, all passing.
+
+## `stage71-local/`
+
+Stage 7.1 browser drivers run by hand from the development checkout, on the source later committed as `a7060ac`, against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). These are not gate verdicts; the gate runs above are.
+- `check-quick-party.log`: 51/51.
+- `check-casual.log` (30), `check-lobby-mode.log` (71), `check-game-night-flow.log` (14), `check-briefing.log` (43): regressions, all passing.

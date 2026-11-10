@@ -1669,7 +1669,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage62-local/`.
 - `check-quick-party` 51/51;
 - regressions, all passing: `check-casual` 30, `check-lobby-mode` 71, `check-game-night-flow` 14, `check-briefing` 43, `check-solo` 80.
 
-The gate verdicts are recorded in the commit after the tested SHA.
+**Gates on `97684cb`** (fresh clone, clean tree):
+- fast `20261110-171227-97684cbe-2368` PASSED;
+- full `20261110-171316-97684cbe-5210` PASSED, 79/79.
+
+Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage71-local/`.
 
 **External blockers:** none. WebKit and real devices are not available here.
 

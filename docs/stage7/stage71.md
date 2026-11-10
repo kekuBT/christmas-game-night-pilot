@@ -325,5 +325,8 @@ Proceeding with these as stated, unless you object.
 - **Regressions run by hand against a local server in the gate's content mode:** `check-casual` 30, `check-lobby-mode` 71, `check-game-night-flow` 14, `check-briefing` 43 and `check-solo` 80, all passing.
 - **Screenshots:** `docs/stage7/screenshots-71/` holds 8 screens at 320, 390 and 1440 px (24 images), taken on `a7060ac` with a clean tree (`manifest.json`).
 - **Private preview for ChatGPT's interactive audit:** `docs/stage7/PREVIEW.md`.
-- **Gates:** the fast and full gate verdicts on the final source SHA are recorded in the commit after it.
+- **Gates on `97684cbec350d1129fe012b372d0994608fdd889`** (fresh clone, clean tree, fingerprint `324018fc8f27`):
+  - fast `20261110-171227-97684cbe-2368` PASSED;
+  - full `20261110-171316-97684cbe-5210` PASSED, 79/79 in 26 m 54 s with 3 workers: unit 1,222, `check-quick-party` 51/51, every other driver, and E2E.
+  - Raw evidence is in `docs/evidence/gate-runs/`.
 - **Not tested:** WebKit/Safari and real phones. Browser checks ran in Chromium (headless shell) only, with phone sizes emulated.

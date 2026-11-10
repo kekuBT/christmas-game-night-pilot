@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:39503
+# timeout 600s | worker w2 | server http://localhost:39503 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s71-full-97684cb/test-results/20261110-171316-97684cbe-5210/server-data/w2)
+
+[+18.1s] PASS Geography: finished player sees no answers while Bea still plays
+[+18.1s] PASS Geography: TV shows no answers while Bea still plays
+[+18.1s] PASS Geography: Bea (mid-game) sees no answers
+[+26.4s] PASS Geography: results list every question — 8
+[+26.5s] PASS Geography: each answer matches the content pack — 8/8
+[+26.5s] PASS Geography: each explanation is shown — 8/8
+[+26.6s] PASS Geography: Bea sees her own choices marked
+[+26.6s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+26.8s] PASS Geography: TV lists the answers after the game
+[+26.8s] PASS Geography: TV shows no player's choices
+[+32.0s] PASS Closest: no answer anywhere while question 1 is open
+[+32.1s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 32 vs 32
+[+32.1s] PASS Closest: and the player's own guess
+[+32.1s] PASS Closest: Bea sees her own guess, not Ada's
+[+32.1s] PASS Closest: the explanation is shown
+[+32.1s] PASS Closest: question 2 is now open and its answer is not shown
+[+32.2s] PASS Closest: TV shows the last answer only — Last question: How many teeth does an adult usually have, including wisdom teeth? — 32 teeth
+[+32.2s] PASS Closest: TV shows nobody's guess — Last question: How many teeth does an adult usually have, including wisdom teeth? — 32 teeth
+[+32.4s] ANSWER REVEAL ALL PASSED
+[+32.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 32.4s | cpu 3.1s, peak memory 251 MB
