@@ -55,8 +55,9 @@ describe("filterGames facets", () => {
   });
 
   it("player count is an inclusive range check", () => {
-    // Pattern Pulse (Stage 5) is the second game one player can practise.
-    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 1 }))).toEqual(["Pattern Pulse", "Word Connections"]);
+    // Pattern Pulse (Stage 5) is the second game one player can practise;
+    // Math Mayhem (Stage 6.1: hard minimum 1, best with 2+) the third.
+    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 1 }))).toEqual(["Math Mayhem", "Pattern Pulse", "Word Connections"]);
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 2 }))).toEqual([
       "Closest Wins",
       "Geography Challenge",

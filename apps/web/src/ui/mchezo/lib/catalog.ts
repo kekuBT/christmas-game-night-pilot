@@ -22,8 +22,13 @@ export interface CatalogGame {
   title: string;
   description: string;
   categories: readonly string[];
+  /** Hard minimum: the game can't start with fewer. */
   minPlayers: number;
   maxPlayers: number;
+  /** Stage 6.1: better with this many (a recommendation, not a requirement). */
+  recommendedPlayers?: number;
+  /** Stage 6.1: offered under Play solo. */
+  soloPlay: boolean;
   team: boolean;
   /** Design estimate of a session, in minutes (not measured, not a deadline). */
   estimateMinutes: number;
@@ -44,6 +49,8 @@ export function buildCatalog(manifests: readonly GameManifest[], policies: reado
       categories: m.categories,
       minPlayers: m.minPlayers,
       maxPlayers: m.maxPlayers,
+      ...(m.recommendedPlayers && m.recommendedPlayers > m.minPlayers ? { recommendedPlayers: m.recommendedPlayers } : {}),
+      soloPlay: m.soloPlay === true,
       team: m.playStyle === "team",
       estimateMinutes: m.duration.minutes,
       ...(p ? { timeLimitMs: p.gameWindowMs } : {}),
@@ -54,8 +61,10 @@ export function buildCatalog(manifests: readonly GameManifest[], policies: reado
 }
 
 /** "2–10 players", or "1 player" style for a fixed count. */
-export function playersLabel(g: Pick<CatalogGame, "minPlayers" | "maxPlayers">): string {
-  return g.minPlayers === g.maxPlayers ? `${g.minPlayers} player${g.minPlayers === 1 ? "" : "s"}` : `${g.minPlayers}–${g.maxPlayers} players`;
+export function playersLabel(g: Pick<CatalogGame, "minPlayers" | "maxPlayers"> & { recommendedPlayers?: number }): string {
+  const range = g.minPlayers === g.maxPlayers ? `${g.minPlayers} player${g.minPlayers === 1 ? "" : "s"}` : `${g.minPlayers}–${g.maxPlayers} players`;
+  // Stage 6.1: a hard minimum and a recommendation are told apart.
+  return g.recommendedPlayers && g.recommendedPlayers > g.minPlayers ? `${range} · best with ${g.recommendedPlayers}+` : range;
 }
 
 /** Does the game fit this many connected players? */

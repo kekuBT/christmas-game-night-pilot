@@ -7,7 +7,8 @@ const base: ShuffleRequest = { mode: "random", playerCount: 4, seed: 1 };
 
 describe("eligibleGames hard constraints", () => {
   it("player count is an inclusive range check", () => {
-    expect(ids(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 1 }))).toEqual(["word-connections", "pattern-pulse"]);
+    // Stage 6.1: Math Mayhem's hard minimum is 1 (best with 2+).
+    expect(ids(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 1 }))).toEqual(["word-connections", "math-mayhem", "pattern-pulse"]);
     expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 4 })).toHaveLength(14);
     expect(eligibleGames(GAME_MANIFESTS, { ...base, playerCount: 11 })).toEqual([]);
   });
@@ -65,10 +66,11 @@ describe("shuffle determinism", () => {
 
 describe("shuffle reasons", () => {
   it("a singleton pool is forced, whatever the mode", () => {
-    // Since Stage 5, one player has two games (Word Connections, Pattern
-    // Pulse); excluding one keeps this the singleton-pool path.
+    // One player has three games (Word Connections, Pattern Pulse since
+    // Stage 5, Math Mayhem since Stage 6.1); excluding two keeps this the
+    // singleton-pool path.
     for (const mode of ["random", "smart", "tournament"] as const) {
-      const r = shuffle({ mode, playerCount: 1, seed: 9, excludeIds: ["pattern-pulse"] });
+      const r = shuffle({ mode, playerCount: 1, seed: 9, excludeIds: ["pattern-pulse", "math-mayhem"] });
       expect(r.ok).toBe(true);
       if (!r.ok) return;
       expect(r.picks[0]!.gameId).toBe("word-connections");
