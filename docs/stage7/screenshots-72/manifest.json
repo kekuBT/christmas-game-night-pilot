@@ -1,0 +1,224 @@
+{
+  "revision": "2e79cec9bd93541f589c91df0798e3e266ddd834",
+  "workingTreeClean": true,
+  "capturedAt": "2026-11-10T19:46:49.439Z",
+  "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
+  "shots": [
+    {
+      "file": "01-results-host-top-320x640.png",
+      "screen": "Casual results after Math Mayhem, host: one heading saying Casual, the standings",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "02-results-host-next-320x640.png",
+      "screen": "The host's What's next: Next game (game 2 of 2), Play again, Pick a different game, Take a break",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "03-results-guest-waiting-320x640.png",
+      "screen": "The guest's results: up next, game 2 of 2, Keku starts it (no controls)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "05-complete-host-320x640.png",
+      "screen": "Trivia's own results with the panel: that was the whole lineup (Play again, Plan another lineup)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "07-break-results-host-320x640.png",
+      "screen": "On a break, from the results: Resume",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "08-break-results-guest-320x640.png",
+      "screen": "The guest sees the break; nothing starts until Keku resumes",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "09-break-lobby-host-320x640.png",
+      "screen": "Lobby on a break, host: the banner with Resume",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "10-break-lobby-dock-320x640.png",
+      "screen": "Lobby on a break: Start waits (On a break · Resume first)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "11-break-lobby-guest-320x640.png",
+      "screen": "Lobby on a break, guest",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "12-lineup-played-320x640.png",
+      "screen": "After Resume: the lineup card with both games played; Take a break is offered again",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "13-apply-unconfirmed-320x640.png",
+      "screen": "An Apply with no answer: couldn't confirm whether the lineup was saved (P7)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "01-results-host-top-390x844.png",
+      "screen": "Casual results after Math Mayhem, host: one heading saying Casual, the standings",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "02-results-host-next-390x844.png",
+      "screen": "The host's What's next: Next game (game 2 of 2), Play again, Pick a different game, Take a break",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "03-results-guest-waiting-390x844.png",
+      "screen": "The guest's results: up next, game 2 of 2, Keku starts it (no controls)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "05-complete-host-390x844.png",
+      "screen": "Trivia's own results with the panel: that was the whole lineup (Play again, Plan another lineup)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "07-break-results-host-390x844.png",
+      "screen": "On a break, from the results: Resume",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "08-break-results-guest-390x844.png",
+      "screen": "The guest sees the break; nothing starts until Keku resumes",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "09-break-lobby-host-390x844.png",
+      "screen": "Lobby on a break, host: the banner with Resume",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "10-break-lobby-dock-390x844.png",
+      "screen": "Lobby on a break: Start waits (On a break · Resume first)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "11-break-lobby-guest-390x844.png",
+      "screen": "Lobby on a break, guest",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "12-lineup-played-390x844.png",
+      "screen": "After Resume: the lineup card with both games played; Take a break is offered again",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "13-apply-unconfirmed-390x844.png",
+      "screen": "An Apply with no answer: couldn't confirm whether the lineup was saved (P7)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "00-tv-lobby-lineup-1440x900.png",
+      "screen": "TV lobby (spectator): the lineup, game 1 of 2",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "01-results-host-top-1440x900.png",
+      "screen": "Casual results after Math Mayhem, host: one heading saying Casual, the standings",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "02-results-host-next-1440x900.png",
+      "screen": "The host's What's next: Next game (game 2 of 2), Play again, Pick a different game, Take a break",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "03-results-guest-waiting-1440x900.png",
+      "screen": "The guest's results: up next, game 2 of 2, Keku starts it (no controls)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "04-tv-final-next-1440x900.png",
+      "screen": "TV final standings (spectator): Casual, and the lineup's next game",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "05-complete-host-1440x900.png",
+      "screen": "Trivia's own results with the panel: that was the whole lineup (Play again, Plan another lineup)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "06-tv-complete-1440x900.png",
+      "screen": "TV: that was the whole lineup",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "07-break-results-host-1440x900.png",
+      "screen": "On a break, from the results: Resume",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "08-break-results-guest-1440x900.png",
+      "screen": "The guest sees the break; nothing starts until Keku resumes",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "09-break-lobby-host-1440x900.png",
+      "screen": "Lobby on a break, host: the banner with Resume",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "10-break-lobby-dock-1440x900.png",
+      "screen": "Lobby on a break: Start waits (On a break · Resume first)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "11-break-lobby-guest-1440x900.png",
+      "screen": "Lobby on a break, guest",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "12-lineup-played-1440x900.png",
+      "screen": "After Resume: the lineup card with both games played; Take a break is offered again",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "13-apply-unconfirmed-1440x900.png",
+      "screen": "An Apply with no answer: couldn't confirm whether the lineup was saved (P7)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    }
+  ]
+}
