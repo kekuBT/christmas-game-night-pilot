@@ -62,7 +62,7 @@ async function playRound(page, rightFor, { doubleTapFirst = false } = {}) {
   await page.getByTestId("solo-results").waitFor({ timeout: 20000 });
   return {
     score: numOf((await page.getByTestId("solo-score").innerText()).replace(/,/g, "")),
-    correct: Number(/^(\d+) of/.exec(await page.getByTestId("solo-correct").innerText())?.[1]),
+    correct: Number(/^(\d+) of 10 correct$/.exec(await page.getByTestId("solo-headline").innerText())?.[1]),
     pb: await page.getByTestId("solo-pb").innerText().catch(() => ""),
   };
 }
@@ -97,7 +97,7 @@ try {
   await page.getByTestId("home-solo").click(); // tap 1
   await page.getByTestId("solo-home").waitFor({ timeout: 10000 });
   const offered = await page.locator('[data-testid^="solo-game-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")));
-  check("Play solo offers only real solo games (Math Mayhem in this slice)", offered.length === 1 && offered[0] === "solo-game-math-mayhem", offered.join(", "));
+  check("Play solo offers only the real solo games (Stage 6.2: Math Mayhem, Pattern Pulse, Word Connections)", offered.join(",") === "solo-game-math-mayhem,solo-game-pattern-pulse,solo-game-word-connections", offered.join(", "));
   check("the solo list is honest about requirements: 1–10 players, best with 2+", /1–10 players · best with 2\+/.test(await page.getByTestId("solo-game-math-mayhem").innerText()));
   check("the other games are pointed to rooms, with no invented player minimum", /More solo games are on the way\. For now the other games are played in a room/.test(await page.getByTestId("solo-others").innerText()) && !/at least 2/.test(await page.getByTestId("solo-others").innerText()));
   check("a fresh device has no personal best yet", /No personal best on this device yet/.test(await page.getByTestId("solo-best-math-mayhem").innerText()));

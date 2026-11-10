@@ -269,11 +269,26 @@ export class SoloSession {
     // No known seat works: join the room made last time if its join got no
     // answer, else make one. No token from an old seat is sent either way.
     this.seat = null;
-    if (!this.unjoined) {
-      const room = await this.post<{ roomId: string; hostClaimToken: string }>("/rooms", { name: "Solo play", kind: "solo" }, this.budget(deadline));
-      this.unjoined = { roomId: room.roomId, hostClaimToken: room.hostClaimToken };
+    if (this.unjoined) {
+      try {
+        return await this.joinUnjoined(deadline);
+      } catch (e) {
+        if (!(e instanceof SoloRequestError) || e.kind === "transient") throw e;
+        // Refused or gone: that join may well have worked with its reply lost,
+        // so the seat is taken by a token this device never received. The room
+        // is given up (no access is ever claimed from its id alone) and a new
+        // one is made in this same Start (review of PR #6, Stage 6.2 S6).
+        this.unjoined = null;
+      }
     }
-    const { roomId, hostClaimToken } = this.unjoined;
+    const room = await this.post<{ roomId: string; hostClaimToken: string }>("/rooms", { name: "Solo play", kind: "solo" }, this.budget(deadline));
+    this.unjoined = { roomId: room.roomId, hostClaimToken: room.hostClaimToken };
+    return this.joinUnjoined(deadline);
+  }
+
+  /** Join the room this device made, with its creation token; on a refusal it is no longer ours. */
+  private async joinUnjoined(deadline: number): Promise<null> {
+    const { roomId, hostClaimToken } = this.unjoined!;
     try {
       const joined = await this.post<{ playerId: string; recoveryToken: string }>(`/rooms/${roomId}/join`, { displayName: SOLO_NAME, asHost: true, hostClaimToken }, this.budget(deadline));
       this.unjoined = null;
@@ -281,7 +296,6 @@ export class SoloSession {
       writeSeat(this.deps.store, this.seat);
       return null;
     } catch (e) {
-      // A refusal or a lost room: that room can't be ours. Try a fresh one next time.
       if (e instanceof SoloRequestError && e.kind !== "transient") this.unjoined = null;
       throw e;
     }
@@ -387,18 +401,26 @@ export class SoloSession {
     this.set({ ...this.state, phase: "playing", proj, stale: false });
   }
 
-  /** A player action in the round (answer, open a question). */
-  async intent(gameInstanceId: string, action: string, payload: Record<string, unknown>): Promise<void> {
-    if (this.disposed || !this.seat) return;
+  /**
+   * A player action in the round (answer, guess, open a round). Resolves
+   * true when the server took it, false when it was refused or did not get
+   * through: the game screens keep the player's entry then (Pulse's send
+   * note, Connections' four selected tiles), as in multiplayer.
+   */
+  async intent(gameInstanceId: string, action: string, payload: Record<string, unknown>): Promise<boolean> {
+    if (this.disposed || !this.seat) return false;
     const gen = this.generation;
     // A real v4 UUID even on plain http (a phone on the home Wi-Fi), where
     // crypto.randomUUID is missing: see uuid.ts.
     const uuid = this.deps.uuid ?? uuidV4;
+    let taken = false;
     try {
-      await this.post(`/rooms/${this.seat.roomId}/intents`, { intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId: this.seat.roomId, gameInstanceId, action, payload } });
+      const ack = await this.post<{ accepted?: boolean }>(`/rooms/${this.seat.roomId}/intents`, { intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId: this.seat.roomId, gameInstanceId, action, payload } });
+      taken = ack.accepted !== false;
     } catch { /* refused, lost or unanswered: the projection read next shows what counted */ }
-    if (!this.isCurrent(gen)) return;
+    if (!this.isCurrent(gen)) return false;
     await this.refresh();
+    return taken;
   }
 
   /**

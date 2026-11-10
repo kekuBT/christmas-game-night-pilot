@@ -90,9 +90,15 @@ export interface MchezoPulseDeps {
   error?: string;
   /** Stage 5.1 (2C): the server lists the unconfirmed send as accepted for this player. */
   landed?: boolean;
+  /**
+   * Stage 6.2: a solo round. Nobody to wait for and nobody to sit out for:
+   * no "Sit the rest out" (the solo screen has Leave round) and no waiting
+   * for others once all six rounds are done (the results follow at once).
+   */
+  solo?: boolean;
 }
 
-export function MchezoPulse({ game, publicGame, players, playerId, title, intent, error, landed }: MchezoPulseDeps) {
+export function MchezoPulse({ game, publicGame, players, playerId, title, intent, error, landed, solo }: MchezoPulseDeps) {
   const st = (game.state ?? {}) as PulseView;
   const { reducedMotion } = useMchezo();
   const of = st.roundCount ?? 6;
@@ -118,8 +124,10 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
         <GameHeader title={title} objective={st.satOut ? "Sitting the rest out" : "All six rounds done"} accent={4} />
         {!st.satOut && last && <p className="mz-pp-last" data-testid="mz-pp-last">Round {last.round + 1}: {pulseResultLine(last)}</p>}
         <p className="mz-pp-total" data-testid="mz-pp-total">Your total: <b>{total}</b></p>
-        <MchezoWaiting label="Waiting for the others" players={players} playerId={playerId} publicGame={publicGame}
-          footNote={`${st.finished ?? 0} of ${st.total ?? players.length} finished. Results come when everyone's done or time runs out.`} />
+        {solo
+          ? <p className="mz-foot" role="status">Your results are on their way…</p>
+          : <MchezoWaiting label="Waiting for the others" players={players} playerId={playerId} publicGame={publicGame}
+              footNote={`${st.finished ?? 0} of ${st.total ?? players.length} finished. Results come when everyone's done or time runs out.`} />}
       </main>
     );
   }
@@ -206,13 +214,34 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
       </Keycap>
       {failure}
       <p className="mz-pp-total" data-testid="mz-pp-total">Your total: <b>{total}</b></p>
-      <button type="button" className="mz-chip-btn" style={{ alignSelf: "center", marginTop: 8 }} disabled={pending !== null} onClick={() => void send("abstain", {}, "sitout")} data-testid="mz-pp-sitout">Sit the rest out</button>
+      {!solo && <button type="button" className="mz-chip-btn" style={{ alignSelf: "center", marginTop: 8 }} disabled={pending !== null} onClick={() => void send("abstain", {}, "sitout")} data-testid="mz-pp-sitout">Sit the rest out</button>}
     </main>
   );
 }
 
 function Row({ seq }: { seq: number[] }) {
   return <span className="mz-pp-mini" aria-label={seq.map((s) => PULSE_SYMBOLS[s]?.name).join(", ")}>{seq.map((s, i) => <PulseShape key={i} s={s} size={20} />)}</span>;
+}
+
+/**
+ * Your rounds, once the game is over: each pattern, what you tapped and what
+ * it scored (Stage 6.2: shared by the multiplayer and solo results).
+ */
+export function PulseRecap({ game }: { game: PlayerGame }) {
+  const results = ((game.state ?? {}) as PulseView).results ?? [];
+  if (results.length === 0) return null;
+  return (
+    <ol className="mz-mr-recap" data-testid="mz-pp-recap">
+      {results.map((r) => (
+        <li key={r.round} data-testid="mz-pp-recap-round">
+          <span className="mz-foot" style={{ textAlign: "left" }}>Round {r.round + 1} · {r.length} shapes</span>
+          <span className="mz-pp-recap__row">Pattern <Row seq={r.pattern} /></span>
+          {r.answer && <span className="mz-pp-recap__row">You tapped <Row seq={r.answer} /></span>}
+          <span className="mz-mr-recap__line">{pulseResultLine(r)}</span>
+        </li>
+      ))}
+    </ol>
+  );
 }
 
 /** Results: your six rounds (your own patterns and taps, now the game is over), the scores, how scoring works. */
@@ -228,18 +257,7 @@ export function MchezoPulseResults({ game, publicGame, players, playerId, title,
       {hero}
       <GameHeader title={title} objective="How sharp was your memory?" accent={4} />
       {(() => { const m = pulseMoment(st.results); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
-      {(st.results ?? []).length > 0 && (
-        <ol className="mz-mr-recap">
-          {(st.results ?? []).map((r) => (
-            <li key={r.round} data-testid="mz-pp-recap-round">
-              <span className="mz-foot" style={{ textAlign: "left" }}>Round {r.round + 1} · {r.length} shapes</span>
-              <span className="mz-pp-recap__row">Pattern <Row seq={r.pattern} /></span>
-              {r.answer && <span className="mz-pp-recap__row">You tapped <Row seq={r.answer} /></span>}
-              <span className="mz-mr-recap__line">{pulseResultLine(r)}</span>
-            </li>
-          ))}
-        </ol>
-      )}
+      <PulseRecap game={game} />
       <ScoreList rows={rows} />
       <p className="mz-foot" data-testid="mz-pp-howscore">20 points for each shape right from the start of the sequence, plus 50 for the whole sequence. Everyone gets the same lengths and time, but their own pattern. Practice game: no Cup points.</p>
       <OutcomeSummary gameId="pattern-pulse" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />

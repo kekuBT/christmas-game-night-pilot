@@ -1,27 +1,30 @@
 /**
- * Stage 6.1: Play solo. One person, no room code, no name, no lobby.
+ * Play solo (Stage 6.1; the shelf Stage 6.2). One person, no room code, no
+ * name, no lobby.
  *
- *  /solo                  the games that really work alone (soloPlay in the
- *                         manifest; Math Mayhem in this slice), each with its
+ *  /solo                  the games that really work alone (manifest soloPlay
+ *                         AND an adapter in solo/soloGames.tsx: Math Mayhem,
+ *                         Pattern Pulse, Word Connections), each with its
  *                         personal best on this device and Start.
  *  /solo/<gameId>         the round, then its results: Play again, Back to
  *                         solo, Home.
  *
  * The round itself is the existing game: a private solo room on the server
- * (SoloSession) and the existing MchezoMath screen in solo mode. Leaving
- * mid-round asks first and removes the round unscored; a reload lands on the
- * round's start screen and Start begins a fresh round (the server replaces
- * any round left open).
+ * (SoloSession) and the game's existing screen in solo mode, chosen by its
+ * adapter. Nothing here is specific to one game. Leaving mid-round asks first
+ * and removes the round unscored; a reload lands on the round's start screen
+ * and Start begins a fresh round (the server replaces any round left open).
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MATH_RULES_VERSION } from "../../../../../src/games/mathRules.js";
 import { GameCover, Keycap, NoticeCard, Wordmark, accentColor, playersLabel, sessionEstimate, type CatalogGame } from "../../ui/mchezo/index.js";
 import { deviceStore, readBest, recordScore, type KeyValueStore, type PersonalBest, type RecordOutcome } from "../../solo/personalBest.js";
 import { SoloSession, type SoloState } from "../../solo/soloSession.js";
-import { MchezoMath } from "./MchezoMath.js";
+import { SOLO_GAMES, soloAdapter } from "../../solo/soloGames.js";
 
-/** Rules version per solo game: a best only compares with rounds under the same rules. */
-export const SOLO_RULES: Readonly<Record<string, number>> = { "math-mayhem": MATH_RULES_VERSION };
+/** The catalog games on the solo shelf, in shelf order: the manifest says soloPlay and an adapter exists. */
+export function soloShelf(catalog: readonly CatalogGame[]): CatalogGame[] {
+  return SOLO_GAMES.flatMap((a) => catalog.filter((g) => g.id === a.gameId && g.soloPlay));
+}
 
 const fmt = (n: number) => n.toLocaleString("en-US");
 
@@ -41,7 +44,7 @@ function bestLine(best: PersonalBest | undefined, storageOk: boolean): string {
 /** /solo: the solo games list. */
 export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readonly CatalogGame[]; onStart: (gameId: string) => void; onBack: () => void; onHost: () => void }) {
   const store = useMemo(() => deviceStore(), []);
-  const solo = catalog.filter((g) => g.soloPlay && SOLO_RULES[g.id] !== undefined);
+  const solo = soloShelf(catalog);
   return (
     <main className="mz-screen mz-entry mz-solo" aria-label="Play solo" data-testid="solo-home">
       <header className="mz-appbar"><BackButton onBack={onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
@@ -49,7 +52,7 @@ export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readon
       <p className="mz-foot mz-entry__lede">Just you and the clock: no room code, no setup. Solo rounds are just for you; they never count toward a Family Cup.</p>
       <ul className="mz-solo__list" aria-label="Games you can play alone">
         {solo.map((g) => {
-          const best = readBest(store, g.id, SOLO_RULES[g.id]!);
+          const best = readBest(store, g.id, soloAdapter(g.id)!.rulesVersion);
           return (
             <li key={g.id} className="mz-solo__card" style={{ ["--mz-accent" as string]: accentColor(g.id) }} data-testid={`solo-game-${g.id}`}>
               <GameCover gameId={g.id} decorative className="mz-solo__cover" />
@@ -69,22 +72,13 @@ export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readon
   );
 }
 
-/** The finished round's numbers, from the server's own records. */
-function roundSummary(state: SoloState, me: string | undefined): { score: number; correct: number; total: number; review: { prompt: string; mine: string; answer: string; ok: boolean }[] } | null {
-  const proj = state.proj;
+/** This round's private and public views in the latest projection. */
+function roundViews(state: SoloState) {
   const gid = state.gameInstanceId;
-  if (!proj || !gid) return null;
-  const pub = (proj.games ?? []).find((g) => g.id === gid);
-  const mine = (proj.myGames ?? []).find((g) => g.id === gid);
-  if (!pub || !me) return null;
-  const qs = (pub.questions ?? []) as { id: string; prompt: string; options: (string | number)[]; correctAnswer?: number }[];
-  const answers = (mine?.myAnswers ?? {}) as Record<string, number | null>;
-  const review = qs.map((q) => {
-    const pick = answers[q.id];
-    const chosen = pick === undefined || pick === null ? undefined : q.options[pick];
-    return { prompt: q.prompt.replace(/\s*=\s*\?$/, ""), mine: chosen === undefined ? "no answer" : String(chosen), answer: String(q.correctAnswer), ok: chosen !== undefined && String(chosen) === String(q.correctAnswer) };
-  });
-  return { score: Number(pub.rawScores?.[me] ?? 0), correct: review.filter((r) => r.ok).length, total: qs.length, review };
+  return {
+    mine: gid ? (state.proj?.myGames ?? []).find((g) => g.id === gid) : undefined,
+    pub: gid ? (state.proj?.games ?? []).find((g) => g.id === gid) : undefined,
+  };
 }
 
 /** /solo/<gameId>: one round, then its results. */
@@ -97,7 +91,8 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
   store?: KeyValueStore | null;
 }) {
   const store = useMemo(() => (injected !== undefined ? injected : deviceStore()), [injected]);
-  const rules = SOLO_RULES[game.id];
+  const adapter = soloAdapter(game.id)!; // App routes only shelf games here
+  const rules = adapter.rulesVersion;
   const [state, setState] = useState<SoloState>({ phase: "idle" });
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [outcome, setOutcome] = useState<{ gid: string; result: RecordOutcome } | null>(null);
@@ -122,10 +117,15 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
     return () => { void s.leave(); s.dispose(); };
   }, []);
 
-  // File the finished round's score once, against this game's rules version.
-  const summary = state.phase === "finished" ? roundSummary(state, session.playerId) : null;
+  // File the finished round's score once, against this game's rules version,
+  // and only from a round the server finished with this player playing it to
+  // the end (a sat-out round never makes a personal best; a left or replaced
+  // one never finishes).
+  const { mine, pub } = roundViews(state);
+  const summary = state.phase === "finished" ? adapter.summarize(mine, pub, session.playerId ?? "") : null;
+  const counts = !!summary && pub?.status === "finished" && mine?.abstained !== true;
   useEffect(() => {
-    if (state.phase !== "finished" || !summary || !state.gameInstanceId || rules === undefined) return;
+    if (state.phase !== "finished" || !summary || !counts || !state.gameInstanceId) return;
     if (outcome?.gid === state.gameInstanceId) return;
     setOutcome({ gid: state.gameInstanceId, result: recordScore(store, game.id, rules, summary.score, Date.now()) });
   }, [state.phase, state.gameInstanceId]);
@@ -136,8 +136,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
   );
 
   if (state.phase === "playing" && state.proj && state.gameInstanceId) {
-    const mine = (state.proj.myGames ?? []).find((g) => g.id === state.gameInstanceId);
-    const pub = (state.proj.games ?? []).find((g) => g.id === state.gameInstanceId);
+    const Play = adapter.Play;
     return (
       <div className="mz-solo-round" data-testid="solo-round" style={{ ["--mz-accent" as string]: accentColor(game.id) }}>
         <div className="mz-solo-round__bar">
@@ -152,10 +151,12 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
             It won’t be scored, and your personal best stays as it is.
           </NoticeCard>
         )}
+        {/* Keyed by the round: Play again or a switch of game mounts a fresh
+            screen, so no selection, entry, timer or "last guess seen" from
+            an earlier round reaches this one. */}
         {mine ? (
-          <MchezoMath solo game={mine} publicGame={pub} players={state.proj.players ?? []} playerId={session.playerId ?? ""} gamesTitle={game.title}
-            intent={(gid, action, payload) => live().intent(gid, action, payload)}
-            post={async <T,>() => ({}) as T} roomId={session.roomId ?? ""} windowMs={game.timeLimitMs} />
+          <Play key={state.gameInstanceId} game={mine} publicGame={pub} players={state.proj.players ?? []} playerId={session.playerId ?? ""} title={game.title}
+            intent={(gid, action, payload) => live().intent(gid, action, payload)} roomId={session.roomId ?? ""} timeLimitMs={game.timeLimitMs} />
         ) : <p className="mz-foot" role="status">Getting your round…</p>}
       </div>
     );
@@ -173,37 +174,27 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
         {header(onBackToSolo, "Back to solo")}
         <span className="mz-kicker mz-kicker--muted">Solo · {game.title}</span>
         <h1 className="mz-h1" tabIndex={-1} ref={resultsHeading} data-testid="solo-score">{fmt(summary.score)} points</h1>
-        <p className="mz-solo-results__correct" data-testid="solo-correct">{summary.correct} of {summary.total} correct</p>
+        <p className="mz-solo-results__correct" data-testid="solo-headline">{summary.headline}</p>
         {pbText && <p className={`mz-solo-results__pb${r?.isNewBest && r.saved ? " is-new" : ""}`} role="status" data-testid="solo-pb">{pbText}</p>}
         <div className="mz-solo-results__actions">
           <Keycap block data-testid="solo-play-again" onClick={() => { setOutcome(null); void live().start(game.id); }}>Play again</Keycap>
           <Keycap block variant="surface" data-testid="solo-back" onClick={onBackToSolo}>Back to solo</Keycap>
           <button type="button" className="mz-linkbtn" data-testid="solo-home" onClick={onHome}>Mchezo home</button>
         </div>
-        <details className="mz-solo-review" data-testid="solo-review">
-          <summary>Your answers</summary>
-          <ol>
-            {summary.review.map((q, i) => (
-              <li key={i} className={q.ok ? "is-ok" : "is-miss"}>
-                <span className="mz-solo-review__q">{q.prompt}</span>
-                <span className="mz-solo-review__a">{q.ok ? `✓ ${q.answer}` : `✗ ${q.mine} · answer ${q.answer}`}</span>
-              </li>
-            ))}
-          </ol>
-        </details>
-        <p className="mz-foot">100 points per correct answer, plus up to 20 for speed. Personal bests are kept only in this browser on this device.</p>
+        <adapter.Review game={mine} publicGame={pub} me={session.playerId ?? ""} />
+        <p className="mz-foot" data-testid="solo-scoring">{adapter.scoring} Personal bests are kept only in this browser on this device, separately for each game.</p>
       </main>
     );
   }
 
   // Not started (or back here after a reload): the round's start screen.
-  const best = rules !== undefined ? readBest(store, game.id, rules) : undefined;
+  const best = readBest(store, game.id, rules);
   return (
     <main className="mz-screen mz-entry mz-solo" aria-label={`${game.title} solo`} data-testid="solo-ready" style={{ ["--mz-accent" as string]: accentColor(game.id) }}>
       {header(onBackToSolo, "Back to solo")}
       <GameCover gameId={game.id} decorative className="mz-solo__cover mz-solo__cover--wide" />
       <h1 className="mz-h1">{game.title}</h1>
-      <p className="mz-foot mz-entry__lede">10 quick sums, four answers each. 100 points for each right answer, plus up to 20 if you’re fast.</p>
+      <p className="mz-foot mz-entry__lede" data-testid="solo-howto">{adapter.howToPlay}</p>
       <p className="mz-solo__best" data-testid={`solo-best-${game.id}`}>{bestLine(best, store !== null)}</p>
       {state.phase === "error" && <p className="err" role="alert" data-testid="solo-error">{state.error ?? "Something went wrong."}</p>}
       {state.phase === "lost" && (

@@ -202,7 +202,7 @@ export interface Readiness {
  *   player still inside the reconnect grace window.
  */
 export class StartRefused extends Error {
-  constructor(readonly code: "ROSTER_CHANGED" | "PLAYERS_RECONNECTING" | "OFFICIAL_NEEDS_TWO" | "NOT_A_CUP_ROOM", message: string, readonly readiness: Readiness) {
+  constructor(readonly code: "ROSTER_CHANGED" | "PLAYERS_RECONNECTING" | "OFFICIAL_NEEDS_TWO" | "NOT_A_CUP_ROOM" | "NOT_A_SOLO_GAME", message: string, readonly readiness: Readiness) {
     super(message);
   }
 }
@@ -674,6 +674,12 @@ export class RoomEngine {
     // results can never reach a Cup's ledger or standings.
     if ((opts.official ?? false) && this.kind !== "cup") {
       throw new StartRefused("NOT_A_CUP_ROOM", "This room is a casual game, not a Family Cup: its games never count toward a Cup.", this.readiness());
+    }
+    // Stage 6.2: a solo room plays only the games made for one player (the
+    // registry's soloPlay allowlist), whatever a request asks for. Checked
+    // before player minimums so the reason is this, not a head count.
+    if (this.kind === "solo" && !game.soloPlay) {
+      throw new StartRefused("NOT_A_SOLO_GAME", `${game.title} isn't available in solo play.`, this.readiness());
     }
     this.tick(); // a game whose deadline just passed is finalized before anything new starts
     // Stage 6.1: in a solo room, a round left open (reload, leaving mid-round)
