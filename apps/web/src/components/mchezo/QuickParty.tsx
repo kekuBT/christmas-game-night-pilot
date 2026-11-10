@@ -29,6 +29,20 @@ const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? o
 /** What the planner sends on Apply. */
 export interface PartyPlanInput { expectedPlayers: number; budgetMinutes: number; items: { gameId: string }[] }
 
+/**
+ * What came of an Apply. `conflict`: the saved lineup changed after the draft
+ * started (another tab, or a cohost), so nothing was saved; it holds the
+ * lineup saved now, for the host to decide about (review 6775606005).
+ */
+export type PartyApplyResult = { ok: true } | { ok: false; error: string } | { ok: false; conflict: PartyView };
+
+/** One line describing a saved lineup ("Trivia Showdown, Math Mayhem · planned for 4 · about 19 of 30 minutes"). */
+function lineupLine(p: PartyView): string {
+  const l = p.lineup;
+  if (!l) return "No lineup: it was cleared.";
+  return `${l.items.map((i) => titleOf(i.gameId)).join(", ")} · planned for ${l.expectedPlayers} · about ${l.estimateMinutes} of ${l.budgetMinutes} minutes`;
+}
+
 /** The lineup in the lobby: the host's entry when there is none, the list for everyone when there is. */
 export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onEdit, onClear, onUseLineup, onReplan, busy }: {
   party: PartyView | undefined;
@@ -37,13 +51,15 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
   upNextId?: string;
   onPlan: () => void;
   onEdit: () => void;
-  onClear: () => Promise<void>;
+  /** Clear the lineup the host was asked about (its revision); refused if it changed since. */
+  onClear: (baseRevision: number) => Promise<void>;
   onUseLineup: (gameId: string) => void;
   /** Open the planner for this many players (the people here now). */
   onReplan: (size: number) => void;
   busy?: boolean;
 }) {
-  const [confirmClear, setConfirmClear] = useState(false);
+  // The revision the host was asked "Clear?" about: a lineup changed since is never cleared unseen.
+  const [confirmClear, setConfirmClear] = useState<number | null>(null);
   const lineup = party?.lineup ?? null;
   if (!lineup) {
     if (!isHost) return null;
@@ -100,16 +116,21 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
         </p>
       )}
       {isHost && (
-        confirmClear ? (
+        confirmClear !== null && confirmClear !== party!.revision ? (
+          <div className="mz-party__actions" role="group" aria-label="The lineup changed" data-testid="party-clear-changed">
+            <span className="mz-foot">The lineup just changed (another tab, or a cohost), so it wasn’t cleared. Check it, then clear again if you still want to.</span>
+            <button type="button" className="mz-chip-btn" data-testid="party-clear-changed-ok" autoFocus onClick={() => setConfirmClear(null)}>OK</button>
+          </div>
+        ) : confirmClear !== null ? (
           <div className="mz-party__actions" role="group" aria-label="Clear the lineup?">
             <span className="mz-foot">Clear the lineup for everyone?</span>
-            <button type="button" className="mz-chip-btn" data-testid="party-clear-yes" disabled={busy} onClick={() => { void onClear().then(() => setConfirmClear(false)); }}>Clear it</button>
-            <button type="button" className="mz-chip-btn" data-testid="party-clear-no" autoFocus onClick={() => setConfirmClear(false)}>Keep it</button>
+            <button type="button" className="mz-chip-btn" data-testid="party-clear-yes" disabled={busy} onClick={() => { const base = confirmClear; void onClear(base).then(() => setConfirmClear(null)); }}>Clear it</button>
+            <button type="button" className="mz-chip-btn" data-testid="party-clear-no" autoFocus onClick={() => setConfirmClear(null)}>Keep it</button>
           </div>
         ) : (
           <div className="mz-party__actions">
             <button type="button" className="mz-chip-btn" data-testid="party-edit" onClick={onEdit}>Edit lineup</button>
-            <button type="button" className="mz-chip-btn" data-testid="party-clear" onClick={() => setConfirmClear(true)}>Clear</button>
+            <button type="button" className="mz-chip-btn" data-testid="party-clear" onClick={() => setConfirmClear(party!.revision)}>Clear</button>
           </div>
         )
       )}
@@ -118,7 +139,7 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
 }
 
 /** The planner: settings, a suggested lineup to edit, and Apply. Client-only until Apply. */
-export function QuickPartySheet({ connected, recentIds, saved, initialSize, onApply, onPickManually, onClose }: {
+export function QuickPartySheet({ connected, recentIds, saved, initialSize, currentRevision, onApply, onPickManually, onClose }: {
   /** Connected players now: the starting suggestion for the group size. */
   connected: number;
   /** The room's finished games, most recent first (a preference only). */
@@ -127,8 +148,14 @@ export function QuickPartySheet({ connected, recentIds, saved, initialSize, onAp
   saved?: { expectedPlayers: number; budgetMinutes: number; gameIds: string[] };
   /** A replan for a known head count (overrides `saved` and `connected`). */
   initialSize?: number;
-  /** Save the lineup; resolves to an error message, or null when it was saved. */
-  onApply: (plan: PartyPlanInput) => Promise<string | null>;
+  /** The saved lineup's revision now (live). The draft is bound to the one it started from. */
+  currentRevision: number;
+  /**
+   * Save the lineup against `baseRevision`, the saved lineup the draft
+   * started from (never the latest one: a stale draft must not overwrite a
+   * newer lineup unseen).
+   */
+  onApply: (plan: PartyPlanInput, baseRevision: number) => Promise<PartyApplyResult>;
   onPickManually: () => void;
   onClose: () => void;
 }) {
@@ -144,6 +171,12 @@ export function QuickPartySheet({ connected, recentIds, saved, initialSize, onAp
   const [replacing, setReplacing] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  // Review 6775606005: the draft is bound to the saved lineup it started from.
+  // A background change never moves this; only the host's explicit choice
+  // after a conflict does.
+  const [base, setBase] = useState(currentRevision);
+  const [conflict, setConflict] = useState<PartyView | null>(null);
+  const stale = currentRevision !== base;
   const suggest = (excl = exclude) => {
     setReplacing(null);
     setError("");
@@ -155,16 +188,36 @@ export function QuickPartySheet({ connected, recentIds, saved, initialSize, onAp
   const changeBudget = (b: PartyBudget) => { setBudget(b); setLineup(null); setReplacing(null); };
   const options = useMemo(() => (lineup && replacing !== null ? replacementOptions(lineup, replacing, { excludeIds: exclude }) : []), [lineup, replacing, exclude]);
   const longer = PARTY_BUDGETS.find((b) => b > budget);
-  const apply = async () => {
+  /** Save the draft against `against`: the revision it started from, or (after a conflict, by choice) the one just shown. */
+  const apply = async (against: number) => {
     if (!lineup || lineup.items.length === 0) return;
     setBusy(true);
     setError("");
-    const err = await onApply({ expectedPlayers: size, budgetMinutes: budget, items: lineup.items.map((i) => ({ gameId: i.gameId })) });
+    const r = await onApply({ expectedPlayers: size, budgetMinutes: budget, items: lineup.items.map((i) => ({ gameId: i.gameId })) }, against);
     setBusy(false);
-    if (err) setError(err);
+    if ("conflict" in r) setConflict(r.conflict);
+    else if (!r.ok) setError(r.error);
+  };
+  /** After a conflict: start again from the lineup saved now. */
+  const editLatest = (latest: PartyView) => {
+    const l = latest.lineup;
+    setBase(latest.revision);
+    setConflict(null);
+    setExclude([]);
+    setReplacing(null);
+    setError("");
+    if (!l) { setLineup(null); return; }
+    setSize(clampSize(l.expectedPlayers));
+    if ((PARTY_BUDGETS as readonly number[]).includes(l.budgetMinutes)) setBudget(l.budgetMinutes as PartyBudget);
+    setLineup(describeLineup(l.expectedPlayers, l.budgetMinutes, partyItemsFor(l.items.map((i) => i.gameId)).filter((x): x is PartyItem => !!x)));
   };
   return (
     <Sheet title="Plan a Quick Party" onClose={onClose} testId="party-sheet" kicker="Casual · just for fun">
+      {stale && !conflict && (
+        <p className="mz-foot mz-party__aside mz-party__stale" role="status" data-testid="party-stale-note">
+          The saved lineup was changed (another tab, or a cohost) while you were planning. Using yours will ask you first.
+        </p>
+      )}
       <div className="mz-party__field">
         <span className="mz-party__label" id="party-size-label">Expected group size</span>
         <span className="mz-foot mz-party__help">Who’s coming, not who’s here: {connected} here now.</span>
@@ -234,7 +287,18 @@ export function QuickPartySheet({ connected, recentIds, saved, initialSize, onAp
             <button type="button" className="mz-linkbtn" data-testid="party-manual" onClick={onPickManually}>Pick a game myself</button>
           </div>
           {error && <p className="err" role="alert" data-testid="party-error">{error}</p>}
-          <Keycap block data-testid="party-apply" disabled={busy} onClick={() => void apply()}>{busy ? "Saving…" : `Use this lineup (${plural(lineup.items.length, "game")})`}</Keycap>
+          {conflict ? (
+            <NoticeCard tone="warn" testId="party-conflict" title="Someone else changed the lineup"
+              action={<span className="mz-party__actions">
+                <button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="party-conflict-edit-latest" onClick={() => editLatest(conflict)}>Edit the latest</button>
+                <button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="party-conflict-keep" onClick={onClose}>Keep the latest</button>
+                <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="party-conflict-replace" disabled={busy} onClick={() => void apply(conflict.revision)}>{busy ? "Saving…" : "Replace it with mine"}</button>
+              </span>}>
+              While you were planning, the saved lineup changed, so yours wasn’t saved. Saved now: {lineupLine(conflict)}
+            </NoticeCard>
+          ) : (
+            <Keycap block data-testid="party-apply" disabled={busy} onClick={() => void apply(base)}>{busy ? "Saving…" : `Use this lineup (${plural(lineup.items.length, "game")})`}</Keycap>
+          )}
           <p className="mz-foot">Using it shows the lineup to everyone. Nothing starts until you press Start.</p>
         </>
       )}

@@ -1,8 +1,9 @@
 // Stage 7.1: screenshots of Quick Party at a small phone (320), a common phone
 // (390) and desktop (1440): the host's entry, the planner (settings, a
 // suggested lineup, replacing a game), the applied lineup for the host and a
-// guest, "fewer than planned", and a next game that doesn't fit the people
-// here. Writes docs/stage7/screenshots-71/*.png and a manifest naming the
+// guest, "fewer than planned", a next game that doesn't fit the people
+// here, and two hosts editing at once (the stale-draft note and the conflict
+// choice, review 6775606005). Writes docs/stage7/screenshots-71/*.png and a manifest naming the
 // exact revision. Visual evidence only: check-quick-party is the check.
 // Run from the checkout to photograph (it starts ITS OWN server there):
 //   node scripts/screenshot-stage71.mjs [--out <dir>]
@@ -127,6 +128,25 @@ try {
     await h.getByTestId("party-wait").click();
     await into(h, "party-lineup");
     await shot(h, "08-lineup-start", view, "The lineup with Math Mayhem first; Start names it as game 1 of the lineup");
+
+    // Two hosts at once: the guest becomes a cohost and changes the lineup while the host edits.
+    const gid = await g.evaluate(() => sessionStorage.getItem("cgn_playerId"));
+    await h.evaluate(async (targetId) => { await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/cohost`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" }, body: JSON.stringify({ targetId }) }); }, gid);
+    await h.getByTestId("party-edit").click();
+    await h.getByTestId("party-sheet").waitFor({ timeout: 5000 });
+    await g.getByTestId("party-edit").waitFor({ timeout: 10000 });
+    await g.getByTestId("party-edit").click();
+    await g.getByTestId("party-sheet").waitFor({ timeout: 5000 });
+    await g.getByTestId("party-time-60").click();
+    await g.getByTestId("party-suggest").click();
+    await g.getByTestId("party-apply").click();
+    await g.getByTestId("party-sheet").waitFor({ state: "detached", timeout: 10000 });
+    await h.getByTestId("party-stale-note").waitFor({ timeout: 10000 });
+    await shot(h, "09-stale-draft", view, "Two hosts: the cohost changed the lineup while this draft was open, and the planner says so");
+    await h.getByTestId("party-apply").click();
+    await h.getByTestId("party-conflict").waitFor({ timeout: 10000 });
+    await into(h, "party-conflict");
+    await shot(h, "10-conflict", view, "Applying the older draft overwrites nothing: the latest lineup is shown, with Edit the latest, Keep the latest, or Replace it with mine");
     await ctx.close(); await gctx.close(); await g2.context().close();
   }
 } finally {

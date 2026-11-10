@@ -13,7 +13,7 @@ import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameC
 import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen, type HostKind } from "./components/mchezo/Home.js";
 import { SoloHome, SoloRound, soloShelf } from "./components/mchezo/Solo.js";
 import { ChooseGameSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
-import { PartyStartAsk, QuickPartyCard, QuickPartySheet, type PartyAsk, type PartyPlanInput } from "./components/mchezo/QuickParty.js";
+import { PartyStartAsk, QuickPartyCard, QuickPartySheet, type PartyApplyResult, type PartyAsk, type PartyPlanInput } from "./components/mchezo/QuickParty.js";
 import { anchorHomeBelow, stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
@@ -582,43 +582,56 @@ export function App() {
   const lineupIs = (p: PartyView | undefined, plan: PartyPlanInput, revision: number) =>
     !!p?.lineup && p.revision === revision && p.lineup.expectedPlayers === plan.expectedPlayers && p.lineup.budgetMinutes === plan.budgetMinutes &&
     p.lineup.items.map((i) => i.gameId).join() === plan.items.map((i) => i.gameId).join();
-  /** Save the lineup for the room. Resolves to an error message, or null when it was saved. */
-  async function applyParty(plan: PartyPlanInput): Promise<string | null> {
-    const baseRevision = proj?.party?.revision ?? 0;
-    const saved = async () => {
+  /**
+   * Save the lineup against `baseRevision`: the saved lineup the host's draft
+   * started from, never whatever the room says now (review 6775606005). A
+   * newer saved lineup is never overwritten unseen: the server refuses, and
+   * the planner shows the conflict for the host to decide about. Nothing here
+   * retries with a newer revision by itself.
+   */
+  async function applyParty(plan: PartyPlanInput, baseRevision: number): Promise<PartyApplyResult> {
+    const saved = async (): Promise<PartyApplyResult> => {
       partyFewerOk.current = null;
       setPartyAsk(null);
       setUpNextId(plan.items[0]!.gameId);
       setShuffleResult(null);
       await refresh();
       closeSheet();
-      return null;
+      return { ok: true };
     };
     try {
       const r = await postBounded(`/rooms/${roomId}/party`, { baseRevision, plan });
       if (r.status === 200) return await saved();
       await refresh();
-      if (r.body["code"] === "PLAN_CONFLICT") return "The lineup was changed somewhere else (another tab, or a cohost), so this one wasn’t saved. Close this to see the latest, or use this one again to replace it.";
-      return typeof r.body["error"] === "string" ? r.body["error"] : `Couldn’t save the lineup (${r.status}).`;
+      if (r.body["code"] === "PLAN_CONFLICT") {
+        const latest = (r.body["party"] as PartyView | undefined) ?? proj?.party;
+        if (latest) return { ok: false, conflict: latest };
+      }
+      return { ok: false, error: typeof r.body["error"] === "string" ? r.body["error"] : `Couldn’t save the lineup (${r.status}).` };
     } catch {
       // No answer: it may or may not have been saved. Look before saying.
       try {
         const now = await get<Projection>(`/rooms/${roomId}/projection?audience=player`);
         if (lineupIs(now.party, plan, baseRevision + 1)) return await saved();
+        // Saved lineup moved on, and not to this draft: someone else's change. Never overwrite it unseen.
+        if (now.party && now.party.revision !== baseRevision) { await refresh(); return { ok: false, conflict: now.party }; }
       } catch { /* still unreachable */ }
       await refresh();
-      return "Couldn’t reach the game server, so the lineup isn’t saved yet. Try again.";
+      return { ok: false, error: "Couldn’t reach the game server, so the lineup isn’t saved yet. Try again." };
     }
   }
-  async function clearParty(): Promise<void> {
+  /** Clear the lineup the host was asked about (`baseRevision`): refused, not retried, if it changed since. */
+  async function clearParty(baseRevision: number): Promise<void> {
     setPartyBusy(true);
     setErr("");
     try {
-      const r = await postBounded(`/rooms/${roomId}/party`, { baseRevision: proj?.party?.revision ?? 0, clear: true });
-      if (r.status !== 200) setErr(r.body["code"] === "PLAN_CONFLICT" ? "The lineup was changed somewhere else. Here is the latest." : typeof r.body["error"] === "string" ? r.body["error"] : "Couldn’t clear the lineup.");
+      const r = await postBounded(`/rooms/${roomId}/party`, { baseRevision, clear: true });
+      if (r.status !== 200) setErr(r.body["code"] === "PLAN_CONFLICT" ? "The lineup changed before it was cleared (another tab, or a cohost), so it wasn’t cleared. Here is the latest." : typeof r.body["error"] === "string" ? r.body["error"] : "Couldn’t clear the lineup.");
       else { partyFewerOk.current = null; setPartyAsk(null); }
     } catch {
-      setErr("Couldn’t reach the game server, so the lineup is still there. Try again.");
+      // No answer: cleared only if the room now shows exactly that clear.
+      const now = await get<Projection>(`/rooms/${roomId}/projection?audience=player`).catch(() => null);
+      if (!(now?.party && now.party.lineup === null && now.party.revision === baseRevision + 1)) setErr("Couldn’t reach the game server, so the lineup may still be there. Check it, then clear again if you still want to.");
     } finally {
       setPartyBusy(false);
       await refresh();
@@ -1172,6 +1185,7 @@ export function App() {
           recentIds={(proj?.games ?? []).filter((g) => g.status === "finished").map((g) => g.gameId).reverse()}
           saved={proj?.party?.lineup ? { expectedPlayers: proj.party.lineup.expectedPlayers, budgetMinutes: proj.party.lineup.budgetMinutes, gameIds: proj.party.lineup.items.map((i) => i.gameId) } : undefined}
           initialSize={partyReplan}
+          currentRevision={proj?.party?.revision ?? 0}
           onApply={applyParty}
           onPickManually={() => openSheet("choose")}
           onClose={closeSheet}

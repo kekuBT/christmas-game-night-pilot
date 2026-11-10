@@ -18,6 +18,12 @@
 //      lost is recognised as saved; Start whose reply is lost opens the game,
 //      once; the TV view holds only public planning facts
 //   J  layout at 320 px: the card and the planner fit without sideways scroll
+//   K  two hosts (review 6775606005): a host's draft is bound to the lineup it
+//      started from. The cohost saves a different lineup meanwhile; the host
+//      sees that, and applying the old draft overwrites nothing: the conflict
+//      is shown with the latest lineup, and only an explicit choice (edit the
+//      latest, keep it, or replace it with the draft) changes anything. Clear
+//      is bound the same way.
 // Usage: node scripts/check-quick-party.mjs <baseUrl>   (the gate passes its server)
 import { launchChromium } from "./lib/driver-env.mjs";
 import { plainHttpContext } from "./lib/lan.mjs";
@@ -267,6 +273,100 @@ try {
   await h.getByTestId("party-clear").click();
   await h.getByTestId("party-clear-yes").click();
   await soon("I Clear (after asking): the lineup is gone for everyone", async () => (await g1.getByTestId("party-lineup").count()) === 0 && (await myRoom(h)).party?.lineup === null);
+
+  // ---- K. Two hosts: a stale draft never overwrites a newer lineup (review 6775606005) ----
+  const kh = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+  const kcode = await host(kh, "Hana");
+  const kc = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+  await join(kc, "Cleo", kcode);
+  const cohostId = await kc.evaluate(() => sessionStorage.getItem("cgn_playerId"));
+  const granted = await kh.evaluate(async (targetId) => {
+    const roomId = sessionStorage.getItem("cgn_roomId");
+    const r = await fetch(`/rooms/${roomId}/cohost`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" }, body: JSON.stringify({ targetId }) });
+    return r.status;
+  }, cohostId);
+  check("K the second player is made a cohost", granted === 200, String(granted));
+  await soon("K the cohost gets the Quick Party entry", async () => kc.getByTestId("party-entry").isVisible());
+  // 1. The host opens a 15-minute draft.
+  await kh.getByTestId("party-entry").click();
+  await kh.getByTestId("party-sheet").waitFor({ timeout: 5000 });
+  await kh.getByTestId("party-time-15").click();
+  await suggest(kh);
+  const hostDraft = await preview(kh);
+  // 2. The cohost saves a different 30-minute lineup.
+  await kc.getByTestId("party-entry").click();
+  await kc.getByTestId("party-sheet").waitFor({ timeout: 5000 });
+  await suggest(kc);
+  const cohostLineup = await preview(kc);
+  await kc.getByTestId("party-apply").click();
+  await kc.getByTestId("party-sheet").waitFor({ state: "detached", timeout: 10000 });
+  let kroom = await myRoom(kh);
+  check("K the cohost's 30-minute lineup is saved (revision 1)", kroom.party?.revision === 1 && kroom.party.lineup.budgetMinutes === 30 && JSON.stringify(kroom.party.lineup.items.map((i) => i.gameId)) === JSON.stringify(cohostLineup), JSON.stringify(kroom.party));
+  // The host's open draft sees the background change.
+  await soon("K the host's draft says the saved lineup changed while planning", async () => kh.getByTestId("party-stale-note").isVisible());
+  // 3. The host applies the older draft: nothing is overwritten, the conflict is shown.
+  await kh.getByTestId("party-apply").click();
+  await soon("K applying the stale draft shows the conflict with the latest lineup", async () => (await kh.getByTestId("party-conflict").isVisible()) && /30 minutes/.test(await kh.getByTestId("party-conflict").innerText()));
+  kroom = await myRoom(kh);
+  check("K the newer lineup is unchanged on the server (revision 1, the cohost's games)", kroom.party?.revision === 1 && kroom.party.lineup.budgetMinutes === 30 && JSON.stringify(kroom.party.lineup.items.map((i) => i.gameId)) === JSON.stringify(cohostLineup), JSON.stringify(kroom.party));
+  check("K the host's draft is still there to decide about", JSON.stringify(await preview(kh)) === JSON.stringify(hostDraft));
+  // Recovery 1: edit the latest: the draft becomes the cohost's lineup, bound to revision 1.
+  await kh.getByTestId("party-conflict-edit-latest").click();
+  check("K 'Edit the latest' loads the cohost's lineup into the planner", JSON.stringify(await preview(kh)) === JSON.stringify(cohostLineup) && (await kh.getByTestId("party-time-30").getAttribute("aria-checked")) === "true" && (await kh.getByTestId("party-conflict").count()) === 0);
+  // The cohost changes it again, so the host's new draft is stale too.
+  await kc.getByTestId("party-edit").click();
+  await kc.getByTestId("party-sheet").waitFor({ timeout: 5000 });
+  await kc.getByTestId("party-remove-0").click();
+  const cohostSecond = await preview(kc);
+  await kc.getByTestId("party-apply").click();
+  await kc.getByTestId("party-sheet").waitFor({ state: "detached", timeout: 10000 });
+  await soon("K the host sees the second background change", async () => kh.getByTestId("party-stale-note").isVisible());
+  await kh.getByTestId("party-apply").click();
+  await kh.getByTestId("party-conflict").waitFor({ timeout: 10000 });
+  kroom = await myRoom(kh);
+  check("K again nothing is overwritten (revision 2, the cohost's edit)", kroom.party?.revision === 2 && JSON.stringify(kroom.party.lineup.items.map((i) => i.gameId)) === JSON.stringify(cohostSecond), JSON.stringify(kroom.party));
+  // Recovery 2: deliberately replace it with the draft, after seeing the conflict.
+  const mine = await preview(kh);
+  await kh.getByTestId("party-conflict-replace").click();
+  await kh.getByTestId("party-sheet").waitFor({ state: "detached", timeout: 10000 });
+  kroom = await myRoom(kh);
+  check("K 'Replace it with mine' (an explicit choice) saves the draft as revision 3", kroom.party?.revision === 3 && JSON.stringify(kroom.party.lineup.items.map((i) => i.gameId)) === JSON.stringify(mine), JSON.stringify(kroom.party));
+  // Recovery 3: keep the latest discards a stale draft.
+  await kh.getByTestId("party-edit").click();
+  await kh.getByTestId("party-sheet").waitFor({ timeout: 5000 });
+  await kh.getByTestId("party-remove-0").click();
+  await kc.getByTestId("party-edit").click();
+  await kc.getByTestId("party-sheet").waitFor({ timeout: 5000 });
+  await kc.getByTestId("party-time-60").click();
+  await suggest(kc);
+  const cohostThird = await preview(kc);
+  await kc.getByTestId("party-apply").click();
+  await kc.getByTestId("party-sheet").waitFor({ state: "detached", timeout: 10000 });
+  await kh.getByTestId("party-apply").click();
+  await kh.getByTestId("party-conflict").waitFor({ timeout: 10000 });
+  await kh.getByTestId("party-conflict-keep").click();
+  await kh.getByTestId("party-sheet").waitFor({ state: "detached", timeout: 10000 });
+  kroom = await myRoom(kh);
+  check("K 'Keep the latest' discards the stale draft: the cohost's 60-minute lineup stays (revision 4)", kroom.party?.revision === 4 && kroom.party.lineup.budgetMinutes === 60 && JSON.stringify(kroom.party.lineup.items.map((i) => i.gameId)) === JSON.stringify(cohostThird), JSON.stringify(kroom.party));
+  // Clear is bound to the lineup it was asked about.
+  await soon("K host lobby shows the cohost's lineup", async () => (await lobbyLineup(kh)).length === cohostThird.length);
+  await kh.getByTestId("party-clear").click();
+  await kc.getByTestId("party-edit").click();
+  await kc.getByTestId("party-sheet").waitFor({ timeout: 5000 });
+  await kc.getByTestId("party-remove-0").click();
+  await kc.getByTestId("party-apply").click();
+  await kc.getByTestId("party-sheet").waitFor({ state: "detached", timeout: 10000 });
+  await soon("K the host's open 'Clear?' notices the lineup changed and asks again", async () => (await kh.getByTestId("party-clear-changed").isVisible()) && (await kh.getByTestId("party-clear-yes").count()) === 0);
+  kroom = await myRoom(kh);
+  check("K nothing was cleared (revision 5, the cohost's edit)", kroom.party?.revision === 5 && kroom.party.lineup !== null, JSON.stringify(kroom.party));
+  // A clear sent for an older revision (an old tab, a slow click) is refused by the server too.
+  const staleClear = await kh.evaluate(async () => {
+    const roomId = sessionStorage.getItem("cgn_roomId");
+    const r = await fetch(`/rooms/${roomId}/party`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" }, body: JSON.stringify({ baseRevision: 4, clear: true }) });
+    return { status: r.status, body: await r.json() };
+  });
+  check("K a clear for an older revision is refused (409), and the lineup stays", staleClear.status === 409 && staleClear.body.code === "PLAN_CONFLICT" && (await myRoom(kh)).party?.lineup !== null, JSON.stringify(staleClear.body).slice(0, 120));
+  await kh.context().close(); await kc.context().close();
 
   // ---- A (Cup). A Family Cup has no Quick Party ----
   const cctx = await browser.newContext({ viewport: { width: 390, height: 844 } });

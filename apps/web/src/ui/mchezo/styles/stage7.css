@@ -34,3 +34,4 @@
 @media (min-width: 560px) {
   .mz-party__tools { flex: none; }
 }
+.mz-party__stale { margin: 0 0 12px; padding: 8px 10px; border-radius: 12px; background: var(--mz-surface-2); color: var(--mz-highlight); font-weight: 700; }
