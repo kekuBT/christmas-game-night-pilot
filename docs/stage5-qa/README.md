@@ -254,6 +254,23 @@ Every claim here was checked in Chromium (headless, Playwright) and in unit test
 
 **What is not proven:** that this was the auditors' cause. No other fault reproduced a blank canvas: delayed or out-of-order replies, hidden tabs, reloads, the drawer offline, a spectator joining, undo and clear, rapid bursts.
 
+**A gap in that fix, found in review of PR #4 (P2), fixed in `7e7ab16`:**
+- `fetchFresh` cleared its timeout when `fetch()` resolved, which happens when the headers arrive. `readJson()` then read the body with no limit.
+- So a reply that sent its headers and then stalled part-way through the body never timed out. The poll loops' one-at-a-time guard then blocked every later poll, even after the network recovered.
+- `check-draw-sync` didn't catch it, because its stall comes before any headers.
+- **Reproduced on the unchanged code:**
+  - a real loopback server sent the headers and `{`, then nothing;
+  - with a 100 ms timeout, the poll was still pending after 2 s, and the server never saw the request cancelled.
+- **Fix:**
+  - `pollFresh` fetches **and reads** the reply under one timer, cleared in `finally`. On expiry it aborts the request, which cancels the body read and closes the connection, and the poll rejects even if the read ignores the abort.
+  - `oneAtATime` is the guard both loops use, released however a poll ends.
+  - `readSpectatorReply` keeps the TV's 401, error and JSON handling inside the timeout.
+- **Tests:**
+  - `tests/stage51-liveness.test.ts` (11 tests): for the phone and the TV, the stalled poll fails within its timeout, the request is cancelled, and the next poll gets through. With the old semantics put back, exactly the 4 stall tests fail.
+  - `check-poll-body-stall`: a streaming proxy stalls a phone's poll and a TV's poll mid-body, with both sockets silenced. A player who joins afterwards must reach both screens.
+    - Unchanged Stage 5.1 code: **FAILED**. The player never arrived and neither request was cancelled (run `20261110-055708-1ff2d489-11749`).
+    - With the fix: **PASSED**. Both requests were cancelled at 6.0 s, and the player arrived (run `20261110-055708-5a4454c1-11750`, on the uncommitted fix).
+
 ### S5-AUD-07 — the TV hid its outage (verified)
 
 **The defect:** the spectator poll in `App.tsx` swallowed every error and had no watchdog, so the TV kept its last screen and said nothing.
@@ -399,6 +416,7 @@ Every claim here was checked in Chromium (headless, Playwright) and in unit test
 | O-12, O-14 | `a3ac6bf` |
 | Phase 4 (compact snapshots) | `626f150` |
 | The script inventory | `9905460` |
+| Review of PR #4 (P2): the poll timeout covers the reply's body (§3, S5-AUD-04) | `7e7ab16` |
 
 Test and driver fixes found by the final gates (§11; no app change):
 
@@ -567,6 +585,7 @@ The gate discovers every `check-*.mjs`, so these are all in the full gate:
 | `check-progress` | Closest TV, Who Said That waiting, Majority rollback |
 | `check-history-links` | Library deep link, Memory Book |
 | `check-a11y-surfaces` | Flags, groups, no ids; Chromium accessibility tree |
+| `check-poll-body-stall` | A phone's poll and a TV's poll stall mid-body (through a streaming proxy, with their sockets silenced); later polls still deliver (added in `7e7ab16`, after the gate in §10) |
 
 ### Updated drivers
 
@@ -618,7 +637,7 @@ One busy Draw & Guess turn: 120 batches of 40 points at 3 per second, about 40 s
 - **Browser:** `chrome-headless-shell` 153.0.8010.12, through `MCHEZO_CHROMIUM_PATH`, on Node v22.23.4.
 - **Wall time:** 95.4 min, from 00:31 to 02:07 UTC on 2026-11-10, with the existing sequential gate.
 
-This verdict covers `0a3964f` only. The commit that records it changes `docs/` only. Every earlier full-gate attempt on this branch failed, was cancelled or was interrupted (§11). None of them counts, and their results are not combined with this one.
+This verdict covers `0a3964f` only. The commit that records it changes `docs/` only. **`7e7ab16` (the review fix, §3) came after it and is not covered by it.** By the owner's decision, the cumulative Stage 5.2 tree (PR #5) is the review and validation candidate, and its full gate covers this fix. Every earlier full-gate attempt on this branch failed, was cancelled or was interrupted (§11). None of them counts, and their results are not combined with this one.
 
 ## 11. Failed and cancelled attempts
 
