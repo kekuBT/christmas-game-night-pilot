@@ -730,7 +730,15 @@ The spec is `docs/stage7/stage71.md`. The instruction is ChatGPT's review and ha
   - A damaged saved lineup is dropped whole.
 - **D-S71-04 The first game starts through the ordinary start, marked as the lineup's** (`POST /games` with `party: { revision, index }`).
   - It is repeat-safe: an item that already started a game that still exists returns that game. A lost reply, a second tab or a retry never starts a second one, and a cancelled briefing frees the item.
-  - Checks, in order: plan conflict; replay; **fewer than planned needs the host's OK** (`PARTY_FEWER_THAN_PLANNED`); **anyone reconnecting must be named or waited for**, as for an official game; the real roster must fit the game (`PARTY_DOESNT_FIT`). Then `startGame`'s own checks.
+  - Checks, in order:
+    1. the host or a cohost (repeats too);
+    2. plan conflict (revision, item, game);
+    3. replay;
+    4. a new start is item 0 only (D-S71-09);
+    5. **fewer than planned needs the host's OK** (`PARTY_FEWER_THAN_PLANNED`);
+    6. **anyone reconnecting must be named or waited for**, as for an official game;
+    7. the real roster must fit the game (`PARTY_DOESNT_FIT`);
+    8. `startGame`'s own checks.
 - **D-S71-05 A next game that doesn't fit the people here is answered in the lineup card.**
   - The lobby already disables Start then, so the card says why and offers a replan for the people here.
   - The server's refusal stays as the authority.
@@ -738,4 +746,10 @@ The spec is `docs/stage7/stage71.md`. The instruction is ChatGPT's review and ha
 - **D-S71-07 Bounded requests for Quick Party and for every lobby Start** (`postBounded`, the timeout covering the reply).
   - After a request gets no answer, the app reads the room before saying anything. An Apply or a Start that actually happened is recognised; otherwise the screen says nothing was saved or started.
 - **D-S71-08 This slice stops at the first game.** No next-game controls and no automatic advancement; the lineup is kept, with game 1 marked, for the next slice.
+- **D-S71-09 ChatGPT's clarification on PR #8 (6773171824).**
+  - The replay is resolved before the "first game only" rule, so a retry of the first game after it started works.
+  - A new start is item 0 only: no hidden way to item 1 in this slice.
+  - A cancelled briefing clears the item's start mark in the room and the saved file, and restore drops a mark whose game wasn't saved.
+  - Over HTTP a lineup start requires the roster the host was shown.
+  - Host checks cover repeats. "Fewer than planned" never overrides the game's real player range.
 

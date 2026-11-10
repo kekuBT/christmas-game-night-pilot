@@ -1653,8 +1653,19 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage62-local/`.
 - **Web:** `apps/web/src/components/mchezo/QuickParty.tsx`, `App.tsx`, `Lobby.tsx`, `types.ts`, `ui/mchezo/lib/routes.ts`, `ui/mchezo/styles/stage7.css`.
 - **Tests and scripts:** `tests/stage71-quick-party.test.ts`, `scripts/check-quick-party.mjs`, `scripts/screenshot-stage71.mjs`.
 
+**ChatGPT's clarification (6773171824)** is applied (D-S71-09):
+- the replay is checked before "first game only";
+- no hidden start of item 1;
+- cancelled starts are reconciled in the saved room;
+- the roster is required.
+
+**Its interactive audit of Stage 6.1/6.2 (6773609572)** is recorded:
+- four findings queued in `docs/MILESTONES.md`;
+- npm audit triage in `docs/deploy/npm-audit-2026-11-10.md`;
+- the private-preview steps for its Stage 7.1 audit in `docs/stage7/PREVIEW.md`.
+
 **Tests:**
-- 27 unit tests; the full suite passed (1,218);
+- 31 unit tests; the full suite passed (1,222);
 - `check-quick-party` 51/51;
 - regressions, all passing: `check-casual` 30, `check-lobby-mode` 71, `check-game-night-flow` 14, `check-briefing` 43, `check-solo` 80.
 

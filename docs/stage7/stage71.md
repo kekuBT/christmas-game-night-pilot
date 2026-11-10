@@ -2,6 +2,7 @@
 
 - **Branch:** `claude/stage7-1-quick-party`, stacked on PR #7 at `d39bf2e`.
 - **Instruction:** ChatGPT's review and handoff on PR #7 (comment 6773012280, 2026-11-10), under the owner's standing authorization (D-WF-01).
+- **Clarified by ChatGPT on PR #8** (comment 6773171824): the six choices in §5 are accepted, with three details made explicit. Those are applied in §3.5 and listed in §3.7.
 - **Not done here:**
   - automatic advancement; results, rematch, next and break controls;
   - host-transfer changes, or wider join/reconnect behaviour (all the next slice);
@@ -128,19 +129,20 @@ In a casual room, the host (or a cohost) says roughly how many people are playin
 
 ### 3.5 Start first game
 - **Same path:** the existing `POST /rooms/:id/games`, with `official: false`, the shown `roster`, and new optional fields `party: { revision, index }` and `fewerThanPlanned: true` (an explicit acknowledgement).
+- **Over HTTP, `party` also requires `roster`,** the roster the host was shown (400 without it). That ties "who plays" and any "start without them" to the room as it is now.
 - **With `party`, the server checks, in this order:**
-  1. **Casual room only**, otherwise `NOT_A_CASUAL_ROOM`. `official` must be false.
-  2. **The lineup is current:**
-     - its revision must match, and the index must be the first item not yet started (in this slice, item 0);
-     - the item's game must equal `gameId`.
+  1. **The host or a cohost**, for a repeat too. **Casual room only**, otherwise `NOT_A_CASUAL_ROOM`. `official` must be false.
+  2. **The lineup is current:** its revision must match, and the item at `index` must exist and be this `gameId`. Otherwise 409 `PLAN_CONFLICT`. A start sent for a replaced lineup therefore never starts anything under the new one.
+  3. **Repeat-safe:** if that item already started a game that still exists, the reply is that same game (`replay: true`), never a second one. This covers a lost reply, a double tap from two tabs, and a retry after reload or a server restart.
 
-     Otherwise 409 `PLAN_CONFLICT`.
-  3. **Repeat-safe:** if that item already started a game that still exists, the reply is that same game (`replay: true`), never a second one. This covers a lost reply, a double tap from two tabs, and a retry after reload. A briefing that was cancelled leaves no game behind, so the item can be started again.
-  4. **Fewer than planned:** if fewer players are connected than the group size and `fewerThanPlanned` wasn't sent, 409 `PARTY_FEWER_THAN_PLANNED` with how many are here. The host confirms "Start with 4" or replans.
-  5. **Reconnecting players:** anyone in reconnect grace who isn't listed in `proceedWithout` gets 409 `PLAYERS_RECONNECTING`, the existing refusal and decision card. This is stricter than an ordinary practice start, which doesn't ask, so nobody is silently left out.
-  6. **Fits the real roster:** if the game's minimum or maximum doesn't fit the real connected count, 409 `PARTY_DOESNT_FIT` with what is needed, and the host is offered a replan for that count.
-  7. **Existing checks:** then `startGame`, with its own roster check (`ROSTER_CHANGED`), its one-active-game rule, and the briefing.
-  8. **Recorded:** only then is `items[index].gameInstanceId` set and saved, in the same synchronous step as the start. A refused start leaves the lineup untouched.
+     This comes **before** the next check, so a retry of the first game after it started still works.
+  4. **First game only:** a new start must be item 0, otherwise `PLAN_CONFLICT`. Moving on through the lineup is the next slice, and there is no hidden way to it now.
+     - A briefing that was cancelled leaves no game behind. Its item's start mark is cleared in the room and in the saved file, and on restore a mark whose game wasn't saved is dropped. The item can then be started again.
+  5. **Fewer than planned:** if fewer players are connected than the group size and `fewerThanPlanned` wasn't sent, 409 `PARTY_FEWER_THAN_PLANNED` with how many are here. The host confirms "Start with 4" or replans.
+  6. **Reconnecting players:** anyone in reconnect grace who isn't listed in `proceedWithout` gets 409 `PLAYERS_RECONNECTING`, the existing refusal and decision card. This is stricter than an ordinary practice start, which doesn't ask, so nobody is silently left out.
+  7. **Fits the real roster:** if the game's minimum or maximum doesn't fit the real connected count, 409 `PARTY_DOESNT_FIT` with what is needed, and the host is offered a replan for that count.
+  8. **Existing checks:** then `startGame`, with its own roster check (`ROSTER_CHANGED`), its one-active-game rule, and the briefing.
+  9. **Recorded:** only then is `items[index].gameInstanceId` set and saved, in the same synchronous step as the start. A refused start leaves the lineup untouched.
 - **The client:**
   - Start is bounded (a timeout covers the reply).
   - After a timeout or network failure, it reads the room again. If the item now shows as started, the game is on; otherwise it says "Couldn't reach the game server" and offers Try again, which is safe by step 3.
@@ -169,6 +171,14 @@ In a casual room, the host (or a cohost) says roughly how many people are playin
   - The lineup card therefore says so itself ("Impostor needs at least 4; 3 are here. Wait for them, or replan for 3"), with **replan for 3**.
   - The server refusal stays as the authority, and the browser driver checks it over HTTP.
 - **TV:** the public projection carries the lineup, but the TV screens don't show it yet (not in this slice).
+
+### 3.7 Clarification 6773171824, where each item is applied
+1. **Repeat before "first game only", and no hidden start of item 1:** §3.5 steps 3–4.
+   - Tests: the replay is checked before the index rule; item 1 is refused before and after the first game starts; a repeat after a lost reply; a server restart, then the same game again and item 1 still refused.
+2. **Replacing or clearing doesn't touch an active game; an old revision starts nothing; one active game; cancellation reconciled:** §3.4–3.5.
+   - Tests: replace and clear while a game is active; a stale start after a replacement; the one-active-game rule; a cancelled briefing clears the mark in the room and the saved file, and on restore.
+3. **The reconnect acknowledgement is tied to the current roster; host checks on repeats; the expected count never beats eligibility:** §3.5 steps 1, 6–8. The roster is required over HTTP.
+   - Tests: no roster gets 400; a guest's repeat is refused; "fewer" acknowledged but the game doesn't fit is still refused.
 
 ## 4. Test plan
 - **Planner (unit, pure):**
@@ -244,7 +254,7 @@ Proceeding with these as stated, unless you object.
   - a `party` sheet route; `stage7.css`.
 
 ### 6.2 Tested
-- **`tests/stage71-quick-party.test.ts`, 27 tests:**
+- **`tests/stage71-quick-party.test.ts`, 31 tests:**
   - **Planner:**
     - group sizes 1, 2, 3, 4 and 10, with every preset and five seeds each: within budget, every game fits, no duplicates, the estimate adds up;
     - the time-fit arithmetic, including exactly at the budget and one minute over;
@@ -271,13 +281,20 @@ Proceeding with these as stated, unless you object.
     - reconnecting players named or waited for;
     - a stale or wrong start refused, and a changed roster;
     - casual rooms and the host only;
-    - a refused start uses no content; the real start does.
+    - a refused start uses no content; the real start does;
+    - item 1 refused before and after the first game; a start for a replaced lineup starts nothing;
+    - replace and clear leave an active game alone; a repeat needs the host;
+    - a cancelled briefing clears the mark, in the saved file too.
   - **HTTP:**
     - 401 for no token, another room's token or a spectator; 403 for a guest;
     - 12 malformed bodies get 400; a stale revision gets 409 with the latest; a Cup room gets 409;
-    - starts: malformed or official is 400; fewer gets 409 with the numbers; then 201, and a replay 200;
-    - a server restart keeps the lineup and its revision.
+    - starts: malformed, official or without the roster is 400; fewer gets 409 with the numbers; then 201, a replay 200, and a guest's repeat refused;
+    - a server restart keeps the lineup, its revision and the start mark; the retried start is the same game, and item 1 is refused.
 - **Mutation:** each of these makes at least one test fail:
+  - no first-game-only rule;
+  - the index rule before the replay;
+  - no reconciling on cancel or restore;
+  - roster not required;
   - no revision check;
   - no replay;
   - no "fewer" check;
@@ -306,6 +323,7 @@ Proceeding with these as stated, unless you object.
   - **320 px:** the card and the planner fit with no sideways scroll;
   - **Clear** asks first.
 - **Regressions run by hand against a local server in the gate's content mode:** `check-casual` 30, `check-lobby-mode` 71, `check-game-night-flow` 14, `check-briefing` 43 and `check-solo` 80, all passing.
-- **Screenshots:** `docs/stage7/screenshots-71/` holds 8 screens at 320, 390 and 1440 px (24 images), taken on `ebf5c06` with a clean tree (`manifest.json`).
+- **Screenshots:** `docs/stage7/screenshots-71/` holds 8 screens at 320, 390 and 1440 px (24 images), taken on `a7060ac` with a clean tree (`manifest.json`).
+- **Private preview for ChatGPT's interactive audit:** `docs/stage7/PREVIEW.md`.
 - **Gates:** the fast and full gate verdicts on the final source SHA are recorded in the commit after it.
 - **Not tested:** WebKit/Safari and real phones. Browser checks ran in Chromium (headless shell) only, with phone sizes emulated.
