@@ -4,7 +4,7 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { BriefingRefused, ContentShortage, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
+import { BriefingRefused, ContentShortage, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
@@ -142,6 +142,8 @@ export class LocalServer {
   /** Stage 7.2 (§3.8): one press of a continuation control: its own id (the same for its retries) and the session revision it was made against. */
   static readonly AttemptSchema = z.object({ id: z.string().regex(/^[A-Za-z0-9_-]{8,64}$/), sessionRevision: z.number().int().min(0) }).strict();
   static readonly BreakSchema = z.object({ on: z.boolean(), attempt: LocalServer.AttemptSchema }).strict();
+  /** Stage 7.3: hand the host role to `targetId` (one press: its id and the session revision it was made against). */
+  static readonly HostSchema = z.object({ targetId: z.string().min(1).max(64), attempt: LocalServer.AttemptSchema }).strict();
   /** Stage 7.1: the `party` marker on a game start: which lineup item this start is. */
   static readonly PartyStartSchema = z.object({ revision: z.number().int().min(0), index: z.number().int().min(0).max(7) }).strict();
   /** Stage 6.1: POST /rooms. A missing kind means a Family Cup, as before room kinds. */
@@ -170,7 +172,12 @@ export class LocalServer {
       : [];
     // Spectators receive exactly the public TV projection — never a player
     // view, never private state. The engine's "tv" audience is that projection.
-    const engineAudience = audience === "spectator" ? "tv" : audience;
+    // Stage 7.3: a host or cohost audience is checked against the room every
+    // time (a socket keeps the audience it connected with): a former host's
+    // socket is served the ordinary player projection.
+    const who = actorId ? room.players.get(actorId) : undefined;
+    const current = audience === "host" && !who?.isHost ? "player" : audience === "cohost" && !who?.isHost && !who?.isCohost ? "player" : audience;
+    const engineAudience = current === "spectator" ? "tv" : current;
     const plan = this.lobbyPlans.get(room.id);
     const base = { ...room.project(engineAudience, actorId, { clientProtocol }), rev: this.revOf(room.id), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(plan ? { upNext: plan } : {}) };
     // Host-assisted recovery requests: host/cohost only. Shows the seat and
@@ -977,6 +984,26 @@ export class LocalServer {
           }
           if (!done.replay) { this.persist(room); this.broadcast(room.id); }
           this.send(res, 200, { ok: true, session: done.session, ...(done.replay ? { replay: true } : {}) });
+          return;
+        }
+        // Stage 7.3: hand the host role to another connected player (current host, casual rooms, between games).
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "host") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const parsed = LocalServer.HostSchema.safeParse(await this.readBody(req));
+          if (!parsed.success) { this.send(res, 400, { error: "A handover needs the player to hand over to, its request id and the session revision it was made against" }); return; }
+          let done;
+          try {
+            done = room.transferHost(player.id, parsed.data.targetId, parsed.data.attempt);
+          } catch (err) {
+            if (err instanceof HostRefused) {
+              this.send(res, err.code === "NOT_HOST" ? 403 : err.code === "TARGET_INVALID" ? 400 : 409, { error: err.message, code: err.code, ...err.detail });
+              return;
+            }
+            throw err;
+          }
+          if (!done.replay) { this.persist(room); this.broadcast(room.id); }
+          this.send(res, 200, { ok: true, hostId: done.hostId, hostName: room.players.get(done.hostId)?.displayName ?? null, ...(done.replay ? { replay: true } : {}) });
           return;
         }
         // Stage 7.1: save or clear the room's Quick Party lineup (host/cohost, casual rooms).

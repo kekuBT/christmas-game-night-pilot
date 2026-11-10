@@ -257,12 +257,25 @@ export interface SessionAttempt { id: string; sessionRevision: number }
  * asked for (`key`), the session revision it produced, and the game it
  * started. Bounded (SESSION_OPS_LIMIT), persisted with the room.
  */
-export interface SessionOp { id: string; key: string; revision: number; gameInstanceId?: string }
+export interface SessionOp { id: string; key: string; revision: number; gameInstanceId?: string; /** Stage 7.3: who pressed it (a host handover's outcome is told only to its own actor). */ actor?: string }
 export const SESSION_OPS_LIMIT = 64;
 
 /** Stage 7.2: the session state (casual rooms), persisted. */
 export interface SessionState { onBreak: boolean; breakSince?: number; revision: number; ops: SessionOp[] }
 export interface SessionView { onBreak: boolean; breakSince?: number; revision: number }
+
+/**
+ * Stage 7.3 (docs/stage7/stage73.md §4.1): a host handover the server
+ * refused. Nothing changed. NOT_HOST is 403, TARGET_INVALID 400, the rest
+ * 409; each carries the room's current session and host so the app can show
+ * the latest.
+ */
+export type HostRefusedCode = "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "SESSION_CONFLICT" | "GAME_ACTIVE" | "TARGET_INVALID" | "TARGET_NOT_CONNECTED";
+export class HostRefused extends Error {
+  constructor(readonly code: HostRefusedCode, message: string, readonly detail: { session: SessionView; hostId: string | null }) {
+    super(message);
+  }
+}
 
 /** Stage 7.2: a break the server refused (HTTP 403/409). Nothing changed. */
 export class SessionRefused extends Error {
@@ -636,13 +649,14 @@ export class RoomEngine {
   /** Recent seat recoveries, as plain room notices (contract §2.1 step 6: mandatory and visible). */
   recentNotices(now = this.clock(), windowMs = 5 * 60_000): { eventId: string; type: string; playerId: string; displayName: string; method: string; byName: string | null; at: number }[] {
     return this.ledger
-      .filter((e) => e.type === "seat-recovered" && now - e.createdAt < windowMs && e.playerId)
+      .filter((e) => (e.type === "seat-recovered" || e.type === "host-transferred") && now - e.createdAt < windowMs && e.playerId)
       .map((e) => ({
         eventId: e.eventId,
         type: e.type,
         playerId: e.playerId!,
         displayName: this.players.get(e.playerId!)?.displayName ?? "A player",
-        method: String((e.detail as { method?: string } | undefined)?.method ?? "code"),
+        // Stage 7.3: a host handover is announced too (method "handover": byName handed the role to displayName).
+        method: e.type === "host-transferred" ? "handover" : String((e.detail as { method?: string } | undefined)?.method ?? "code"),
         byName: e.actor ? this.players.get(e.actor)?.displayName ?? null : null,
         at: e.createdAt,
       }));
@@ -1244,6 +1258,54 @@ export class RoomEngine {
     }
     this.rememberOp({ id: attempt.id, key, revision: this.session.revision });
     return { session: this.sessionView(), replay: false };
+  }
+
+  /**
+   * Stage 7.3: hand the host role to another player (casual rooms), spec
+   * §4.1. Checked in this order:
+   * - a press seen before (by its id): its own actor learns the recorded
+   *   outcome (`replay`) and nothing changes; that never needs, or gives,
+   *   authority. The same id for anything else is refused;
+   * - the current host only (NOT_HOST): not a cohost, a guest or a former
+   *   host; a casual room;
+   * - made against the current session revision (SESSION_CONFLICT);
+   * - between games: no briefing or game on (GAME_ACTIVE); a break is fine;
+   * - a target who is another player of this room (TARGET_INVALID) and
+   *   connected now (TARGET_NOT_CONNECTED).
+   * Then in one step: the old host is a regular player (no host, no cohost),
+   * the target is the host (and not also a cohost), other cohosts stay, the
+   * revision moves on, the press is remembered, and the ledger records it.
+   * Nothing else changes: no game starts or resumes, the lineup, break,
+   * scores and seats are untouched.
+   */
+  transferHost(actorId: string, targetId: string, attempt: SessionAttempt, now = this.clock()): { replay: boolean; hostId: string; from: string } {
+    const refuse = (code: HostRefusedCode, message: string) => new HostRefused(code, message, { session: this.sessionView(), hostId: this.hostId });
+    const key = `host:${targetId}`;
+    const seen = this.session.ops.find((o) => o.id === attempt.id);
+    if (seen) {
+      if (seen.key !== key || seen.actor !== actorId) throw new Error("That request id was already used for something else.");
+      return { replay: true, hostId: this.hostId ?? targetId, from: actorId };
+    }
+    if (this.hostId !== actorId) throw refuse("NOT_HOST", "Only the host can hand over the host role.");
+    if (this.kind !== "casual") throw refuse("NOT_A_CASUAL_ROOM", "Handing over the host role is for casual rooms.");
+    this.tick(now);
+    if (attempt.sessionRevision !== this.session.revision) throw refuse("SESSION_CONFLICT", "Something changed since you looked. Here is the latest.");
+    if ([...this.games.values()].some(isActiveGame)) throw refuse("GAME_ACTIVE", "A game is on. Hand over the host role after it ends.");
+    const target = this.players.get(targetId);
+    if (!target || targetId === actorId) throw refuse("TARGET_INVALID", "Choose another player in this room.");
+    if (this.presenceOf(targetId, now) !== "connected") throw refuse("TARGET_NOT_CONNECTED", `${target.displayName} isn't connected right now.`);
+    const old = this.players.get(actorId)!;
+    old.isHost = false;
+    old.isCohost = false;
+    this.cohosts.delete(actorId);
+    target.isHost = true;
+    target.isCohost = false;
+    this.cohosts.delete(targetId);
+    this.hostId = targetId;
+    this.session.revision += 1;
+    this.rememberOp({ id: attempt.id, key, revision: this.session.revision, actor: actorId });
+    this.log("host-transferred", { playerId: targetId, actor: actorId });
+    return { replay: false, hostId: targetId, from: actorId };
   }
 
   private assertNotOnBreak(readiness: Readiness): void {
@@ -3105,6 +3167,13 @@ export class RoomEngine {
       console.error(`[cup] room ${engine.id}: ${restored.error} — standings paused, record preserved`);
     }
     engine.players = new Map((data["players"] as RoomPlayer[]).map((p) => [p.id, p]));
+    // Stage 7.3: the role flags follow hostId and the cohost set, so exactly
+    // one host comes back after a restart (never two, whatever a snapshot says).
+    if (engine.hostId) engine.cohosts.delete(engine.hostId);
+    for (const p of engine.players.values()) {
+      p.isHost = p.id === engine.hostId;
+      p.isCohost = !p.isHost && engine.cohosts.has(p.id);
+    }
     // Migration default: snapshots written before spectators existed have
     // no spectators field and resume with none — never with phantom viewers.
     engine.spectators = new Map(((data["spectators"] as Spectator[] | undefined) ?? []).map((s) => [s.id, s]));
@@ -3167,8 +3236,8 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
   const revision = typeof r.revision === "number" && Number.isInteger(r.revision) && r.revision >= 0 ? r.revision : 0;
   const ops = (Array.isArray(r.ops) ? r.ops : []).filter((o): o is SessionOp => {
     const x = o as Partial<SessionOp> | null;
-    return !!x && typeof x.id === "string" && typeof x.key === "string" && typeof x.revision === "number" && (x.gameInstanceId === undefined || typeof x.gameInstanceId === "string");
-  }).slice(-SESSION_OPS_LIMIT).map((o) => ({ id: o.id, key: o.key, revision: o.revision, ...(o.gameInstanceId !== undefined ? { gameInstanceId: o.gameInstanceId } : {}) }));
+    return !!x && typeof x.id === "string" && typeof x.key === "string" && typeof x.revision === "number" && (x.gameInstanceId === undefined || typeof x.gameInstanceId === "string") && (x.actor === undefined || typeof x.actor === "string");
+  }).slice(-SESSION_OPS_LIMIT).map((o) => ({ id: o.id, key: o.key, revision: o.revision, ...(o.gameInstanceId !== undefined ? { gameInstanceId: o.gameInstanceId } : {}), ...(o.actor !== undefined ? { actor: o.actor } : {}) }));
   if (kind !== "casual") return { onBreak: false, revision, ops: [] };
   return r.onBreak === true
     ? { onBreak: true, ...(typeof r.breakSince === "number" ? { breakSince: r.breakSince } : {}), revision, ops }
