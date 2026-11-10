@@ -666,6 +666,13 @@ These failures ran on the code before each fix, on purpose:
   - **Failure:** `tests/stage51-inputs.test.ts`, "Category Sprint: your own answers, from the server". The test is mine, from Stage 5.1. It sent the answers "school" and "desk", then checked that the TV projection doesn't contain "school". This time the randomly dealt category was "Things in a school", so the check failed on the category name, not on a leak. The test depended on which category was dealt, and every earlier run was lucky.
   - **Fix:** the test now sends marker answers that no category or projection text can contain. It checks the same TV privacy, and it now also checks that another player's own projection doesn't contain them. It passed 15 times in a row across randomly dealt categories.
   - **Why I cancelled:** I stopped the run after it had passed 8 steps, at `check-action-ack`. The verdict was already FAILED, and the fix needed a new revision with a full gate of its own. The cancellation left no Chromium or server processes.
+- **`bf6a764`, run `20261109-223744-bf6a764e-4827`: INTERRUPTED (CANCELLED, no verdict).** A second container restart stopped it while `check-leaderboard` was starting. 31 steps had passed, and the report was written.
+- **`bf6a764`, run `20261109-231859-bf6a764e-191`: FAILED, then CANCELLED by me.** 57 steps had passed when `check-shuffle` failed: "surprise me picks a real game as up-next — up-next=Pattern Pulse", and the same for smart shuffle.
+  - **Cause, a driver bug from Stage 5:** the driver hard-coded 11 game titles. The shuffle picks from all 14 games, so a pick of Majority Rules, Pattern Pulse or Draw & Guess failed the check although it was a real game. Earlier runs passed only because the shuffle happened to pick an older game.
+  - **Fix:** the driver now takes the titles from the server's registry (`GET /games`), and the check is otherwise unchanged. Against a test server with the run's build, 10 consecutive runs passed. Their 20 picks included Pattern Pulse, which the old list would have failed.
+  - **Search for the same mistake:** no other driver keeps a list that is meant to hold every game. The other lists are deliberate subsets, such as the quiz-shaped games.
+  - **Why I cancelled:** the verdict was already FAILED.
+  - **Bug in the existing gate:** cancelling made it crash while printing its summary (`TypeError: Cannot read properties of null (reading 'padEnd')`). The step in progress, `check-spectator`, had not recorded a status yet. `report.json` was still written (CANCELLED), and no Chromium or server process was left. This is a pre-existing gate bug that affects only cancelled runs. Stage 5.2's gate fixes it, and its self-test covers it; the Stage 5.1 gate is unchanged.
 
 ### Typo
 

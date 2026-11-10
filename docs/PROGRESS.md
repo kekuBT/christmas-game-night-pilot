@@ -1442,6 +1442,11 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - `2508f9d`, run `20261109-223449-2508f9d4-198`: **FAILED** at the unit tests, then **cancelled** by me.
   - The failing test was my own Stage 5.1 Sprint privacy test. It looked for the answer "school" in the TV projection, and the randomly dealt category happened to be "Things in a school".
   - It now uses marker answers, and passed 15 of 15 runs. Details are in README §11.
+- `bf6a764`, run `20261109-223744-bf6a764e-4827`: **interrupted** by a second container restart, after 31 steps had passed.
+- `bf6a764`, run `20261109-231859-bf6a764e-191`: **FAILED** on `check-shuffle`, then **cancelled** by me.
+  - The driver's hard-coded list of 11 games rejected a shuffle pick of Pattern Pulse, one of the three Stage 5 games.
+  - The driver now reads the titles from `GET /games`, and passed 10 of 10 runs.
+  - Cancelling exposed a pre-existing summary crash in the existing gate, which only affects cancelled runs; Stage 5.2 fixes it.
 
 **Next task (if the owner continues):** the real-device session in README §13 (iPhone Safari first), and owner rulings on README §12.
 
