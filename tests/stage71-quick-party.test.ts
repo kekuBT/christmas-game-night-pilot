@@ -275,8 +275,10 @@ describe("starting the lineup's first game", () => {
     expect(e).toBeInstanceOf(StartRefused);
     expect([e.code, e.detail]).toEqual(["PARTY_FEWER_THAN_PLANNED", { expected: 5, here: 3 }]);
     expect(engine.games.size).toBe(0);
+    expect([engine.contentSeq, JSON.stringify(engine.contentUsage)]).toEqual([0, "{}"]); // a refused start uses no content
     const ok = engine.startPartyGame(host, "trivia", { revision: 1, index: 0, fewerThanPlanned: true });
     expect(ok.game.players).toHaveLength(3);
+    expect(engine.contentSeq).toBe(1); // content is chosen only by the real start
   });
 
   it("the real roster must fit the game, whatever was planned", () => {
