@@ -180,5 +180,9 @@ describe("a seven-day Individual Cup with deadlines and restarts", () => {
     expect(results.every((r) => r.eligible)).toBe(true);
     expect(results.every((r) => r.counted.length === 3 && r.qualifyingDays === 7 && r.participationBonus === 20)).toBe(true);
     expect(results[0]!.total).toBeGreaterThanOrEqual(results[1]!.total);
-  });
+    // Seven simulated days through the HTTP harness with restarts: about 3 s on
+    // an idle machine, and 5.0 s when two gates ran their unit tests at once,
+    // over vitest's 5 s default. An explicit limit, as the other long async
+    // tests have (persistence.test.ts); no assertion changes.
+  }, 30_000);
 });

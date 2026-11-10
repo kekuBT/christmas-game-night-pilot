@@ -6,6 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261110-211133-e65d80ce-5056` | `e65d80c` | **Stage 7.2 repair, before the test-limit fix:** full gate, **FAILED** 79/80. Every browser driver passed. The unit-test step failed: the seven-day Cup test timed out at 5,015 ms while both gates ran their unit tests at once (spec §6.3) | `report.json`, `summary.txt`, `gate-console.log`, `logs/04-unit-tests.log` |
+| `20261110-211133-e65d80ce-5071` | `e65d80c` | **Stage 7.2 repair, before the test-limit fix:** fast gate, **FAILED** 4/5, the same test (5,031 ms) | `report.json`, `summary.txt`, `gate-console.log`, `logs/04-unit-tests.log` |
 | `20261110-195129-acab35f3-19586` | `acab35f` | **Stage 7.2:** full gate, PASSED 80/80 (including the new `check-session-flow`, 52 checks, and `check-quick-party`, 68), fresh clone, clean tree (PR #9's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
 | `20261110-195030-acab35f3-16696` | `acab35f` | **Stage 7.2:** fast gate, PASSED 5/5 (1,253 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-183603-01fd2858-7370` | `01fd285` | **Stage 7.1 repair (review 6775606005):** targeted gate, PASSED 11/11 (`quick-party` 67, `casual`, `lobby-mode`, `game-night-flow`, `briefing`, `solo`, `solo-shelf`, `recovery`, `sessions`), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |

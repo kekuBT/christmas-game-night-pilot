@@ -277,6 +277,12 @@ Accepted in clarification 6776484058.
   2. Play again of it leaves the lineup unchanged.
   3. Trivia picked by hand leaves it unchanged.
   4. The results' explicit Next game then starts that pending Math item.
+- **Gates on `e65d80c` (the repair before this test fix): both FAILED**, on the same step. Neither verdict is claimed.
+  - **Runs:** fast `20261110-211133-e65d80ce-5071` and full `20261110-211133-e65d80ce-5056`. The full gate's other 79 steps, all browser drivers included, passed.
+  - **The failure:** `tests/cup-integrity.test.ts` "a seven-day Individual Cup with deadlines and restarts" timed out at 5,015 and 5,031 ms. Vitest's default limit is 5 s.
+  - **Why:** the two gates ran their unit tests at the same moment on 4 CPUs (load peak 8.14). This async test takes 2.9–3.5 s alone (both `acab35f` runs).
+  - **The fix:** an explicit 30-second limit on that test, as the other long async tests have. No assertion changes.
+  - **Evidence:** `docs/evidence/gate-runs/<run>/`.
 - **Driver fix, from Stage 7.1:** part C of `check-quick-party` removed the last game of a random lineup. When that was Impostor, part G's "Impostor first" could not succeed (a removed game is left out of the rest of the draft). Part C now removes the last game that isn't Impostor.
 
 ### 6.4 Gates
