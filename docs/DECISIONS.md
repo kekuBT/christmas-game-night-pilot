@@ -829,6 +829,7 @@ The spec is `docs/stage7/stage73.md`. The instruction is ChatGPT's review and ha
   - **A press seen before** tells its own actor the recorded outcome and changes nothing; the former host learns this without any authority.
   - **Refused:** a stale press (`SESSION_CONFLICT`), or a press from someone who isn't the host (`NOT_HOST`).
   - So A→B→A followed by A's old press to C is refused, and two tabs can't both hand over.
+  - **A retry must be the whole original command** (clarification 6781456175): the same actor, target and base revision. Its reply is the recorded outcome plus the room's current host, never a saved projection or a past host state.
 - **D-S73-03 Authority is the room's current state.**
   - HTTP reads the session's current player record.
   - Engine actions read `hostId` and the cohosts at call time.

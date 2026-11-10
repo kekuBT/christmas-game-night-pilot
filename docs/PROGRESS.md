@@ -1780,7 +1780,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Tests and scripts:** `tests/stage73-host-handover.test.ts`, `scripts/check-host-handover.mjs` and `scripts/screenshot-stage73.mjs` (all new).
 
 **Tests:**
-- **Unit and HTTP:** 17, with 10 mutations each caught. The full suite passed 1,270.
+- **Unit and HTTP:** 18, with 11 mutations each caught. They include clarification 6781456175's cases: the whole command, a forgotten press then A→B→A, and open host/cohost/player sockets across a transfer to a cohost and a seat recovery.
 - **`check-host-handover`:** 32/32.
 - **Regressions, all passing:** `check-game-night`, `check-casual`, `check-recovery`, `check-sessions`, `check-session-flow` (70), `check-quick-party` (68), `check-tv-show`, `check-lobby-mode`.
 

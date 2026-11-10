@@ -1003,7 +1003,8 @@ export class LocalServer {
             throw err;
           }
           if (!done.replay) { this.persist(room); this.broadcast(room.id); }
-          this.send(res, 200, { ok: true, hostId: done.hostId, hostName: room.players.get(done.hostId)?.displayName ?? null, ...(done.replay ? { replay: true } : {}) });
+          // The press's own outcome (who it handed over to) and the room's current host; never a saved projection or a past host state.
+          this.send(res, 200, { ok: true, outcome: { from: done.from, to: done.to }, hostId: done.hostId, hostName: done.hostId ? room.players.get(done.hostId)?.displayName ?? null : null, ...(done.replay ? { replay: true } : {}) });
           return;
         }
         // Stage 7.1: save or clear the room's Quick Party lineup (host/cohost, casual rooms).

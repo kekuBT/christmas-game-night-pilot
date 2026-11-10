@@ -41,7 +41,7 @@ describe("the handover (H1)", () => {
     engine.savePartyPlan(ada, 0, { expectedPlayers: 4, budgetMinutes: 30, items: [{ gameId: "trivia" }, { gameId: "math-mayhem" }] });
     const before = { party: JSON.stringify(engine.partyView()), games: engine.games.size, code: engine.joinCode, seats: [...engine.players.keys()], revision: engine.session.revision };
     const done = engine.transferHost(ada, bea, press(engine));
-    expect(done).toEqual({ replay: false, hostId: bea, from: ada });
+    expect(done).toEqual({ replay: false, hostId: bea, from: ada, to: bea });
     expect(roles(engine)).toEqual({ hostId: bea, hosts: [bea], cohosts: [cal], cohostFlags: [cal] });
     expect([JSON.stringify(engine.partyView()), engine.games.size, engine.joinCode, [...engine.players.keys()]]).toEqual([before.party, before.games, before.code, before.seats]);
     expect(engine.session.revision).toBe(before.revision + 1);
@@ -147,13 +147,18 @@ describe("repeats, stale presses and restarts (H3, H5)", () => {
     const p = press(engine);
     engine.transferHost(ada, bea, p);
     const rev = engine.session.revision;
-    expect(engine.transferHost(ada, bea, p)).toEqual({ replay: true, hostId: bea, from: ada });
+    expect(engine.transferHost(ada, bea, p)).toEqual({ replay: true, hostId: bea, from: ada, to: bea });
     const back = restart(engine);
-    expect(back.transferHost(ada, bea, p)).toEqual({ replay: true, hostId: bea, from: ada });
+    expect(back.transferHost(ada, bea, p)).toEqual({ replay: true, hostId: bea, from: ada, to: bea });
     expect([back.session.revision, roles(back).hosts]).toEqual([rev, [bea]]);
-    // The same id for anything else is refused.
+    // Only the complete original command: the same id with another target, actor or revision is refused.
     expect(() => engine.transferHost(ada, "player-4", p)).toThrow(/already used/);
     expect(() => engine.transferHost(bea, bea, p)).toThrow(/already used/);
+    expect(() => engine.transferHost(ada, bea, { ...p, sessionRevision: p.sessionRevision + 1 })).toThrow(/already used/);
+    // A replay reports the room's current host, never the one at the time of the press.
+    engine.transferHost(bea, ada, press(engine));
+    expect(engine.transferHost(ada, bea, p)).toEqual({ replay: true, hostId: ada, from: ada, to: bea });
+    expect(roles(engine).hosts).toEqual([ada]);
   });
 
   it("two tabs choosing different players: one handover; the other is refused", () => {
@@ -169,6 +174,20 @@ describe("repeats, stale presses and restarts (H3, H5)", () => {
     const old = press(engine); // made, but delayed
     engine.transferHost(ada, bea, press(engine));
     engine.transferHost(bea, ada, press(engine));
+    expect(codeOf(() => engine.transferHost(ada, cal, old))).toBe("SESSION_CONFLICT");
+    expect(roles(engine).hosts).toEqual([ada]);
+  });
+
+  it("a forgotten press, then A → B → A, then A's old command replayed: refused, never applied again", () => {
+    const { engine, ada, bea, cal } = room();
+    const old = press(engine); // Ada → Bea, its reply lost
+    engine.transferHost(ada, bea, old);
+    // Enough other presses (breaks) that the handover press is forgotten.
+    for (let i = 0; i < SESSION_OPS_LIMIT; i++) engine.setBreak(bea, i % 2 === 0, press(engine));
+    expect(engine.session.ops.some((o) => o.id === old.id)).toBe(false);
+    engine.transferHost(bea, ada, press(engine)); // … back to Ada
+    expect(roles(engine).hosts).toEqual([ada]);
+    expect(codeOf(() => engine.transferHost(ada, bea, old))).toBe("SESSION_CONFLICT"); // Ada is host again, yet her old command is stale
     expect(codeOf(() => engine.transferHost(ada, cal, old))).toBe("SESSION_CONFLICT");
     expect(roles(engine).hosts).toEqual([ada]);
   });
@@ -269,19 +288,57 @@ describe("over HTTP and WebSocket", () => {
     expect(brk.status).toBe(200);
   });
 
-  it("an open WebSocket that connected as the host is served the player projection once its player isn't the host", async () => {
+  it("open host, cohost and player sockets across a transfer to a cohost, then seat recovery: each loses or gains exactly the right view", async () => {
     const r = await casual();
-    const frames: Record<string, unknown>[] = [];
-    const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${r.id}&audience=host`, [`cgn-session-${r.ada.token}`]);
-    ws.on("message", (d) => { const m = JSON.parse(d.toString()) as { kind: string; state?: Record<string, unknown> }; if (m.kind === "projection" && m.state) frames.push(m.state); });
-    await new Promise<void>((res) => ws.on("open", () => res()));
-    await new Promise((res) => setTimeout(res, 150));
-    expect(frames.at(-1)?.["hostView"]).toBe(true);
-    await call("POST", `/rooms/${r.id}/host`, { targetId: r.bea.id, attempt: await attemptNow(r, r.ada.token, "http-hand-ws") }, r.ada.token);
+    const dee = (await call("POST", `/rooms/${r.id}/join`, { displayName: "Dee" })).body;
+    const deeP = { id: String(dee["playerId"]), token: String(dee["recoveryToken"]) };
+    await call("POST", `/rooms/${r.id}/cohost`, { targetId: r.bea.id }, r.ada.token);
+    await call("POST", `/rooms/${r.id}/cohost`, { targetId: r.cal.id }, r.ada.token);
+    type Frame = { me?: { id: string; isHost: boolean; isCohost: boolean }; hostView?: boolean; recoveryRequests?: { playerId: string }[]; players: { id: string; isHost: boolean; isCohost: boolean }[] };
+    const open = async (audience: string, token: string) => {
+      const frames: Frame[] = [];
+      const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${r.id}&audience=${audience}`, [`cgn-session-${token}`]);
+      ws.on("message", (d) => { const m = JSON.parse(d.toString()) as { kind: string; state?: Frame }; if (m.kind === "projection" && m.state) frames.push(m.state); });
+      await new Promise<void>((res, rej) => { ws.on("open", () => res()); ws.on("error", rej); });
+      return { ws, last: () => frames.at(-1)! };
+    };
+    const adaHost = await open("host", r.ada.token);
+    const beaCohost = await open("cohost", r.bea.token);
+    const beaPlayer = await open("player", r.bea.token);
+    const calCohost = await open("cohost", r.cal.token);
+    const deePlayer = await open("player", deeP.token);
     await new Promise((res) => setTimeout(res, 200));
-    const last = frames.at(-1)!;
-    expect([last["hostView"], (last["me"] as { isHost: boolean }).isHost, last["recoveryRequests"]]).toEqual([undefined, false, undefined]);
-    ws.close();
+    expect([adaHost.last().hostView, beaCohost.last().hostView, deePlayer.last().hostView]).toEqual([true, true, undefined]);
+    // The handover, to a cohost.
+    expect((await call("POST", `/rooms/${r.id}/host`, { targetId: r.bea.id, attempt: await attemptNow(r, r.ada.token, "http-hand-ws") }, r.ada.token)).status).toBe(200);
+    // Then a device asks to recover Dee's seat (host-assisted recovery).
+    const reqd = await call("POST", "/rooms/recovery-requests", { joinCode: r.code, playerId: deeP.id });
+    expect(reqd.status).toBe(201);
+    await new Promise((res) => setTimeout(res, 250));
+    const a = adaHost.last(), bc = beaCohost.last(), bp = beaPlayer.last(), c = calCohost.last(), d = deePlayer.last();
+    // The former host's open "host" socket: an ordinary player view, no recovery requests, no secrets.
+    expect([a.hostView, a.me?.isHost, a.me?.isCohost, a.recoveryRequests]).toEqual([undefined, false, false, undefined]);
+    expect(JSON.stringify(a)).not.toContain(String(reqd.body["requestSecret"]));
+    // The new host's open sockets, whatever audience they opened with: host now, sees the request.
+    // (A host or cohost audience has no "me": the roles are read from the players list.)
+    const role = (f: Frame, id: string) => { const p = f.players.find((x) => x.id === id)!; return [p.isHost, p.isCohost]; };
+    expect([role(bc, r.bea.id), bc.hostView, bc.recoveryRequests?.map((x) => x.playerId)]).toEqual([[true, false], true, [deeP.id]]);
+    expect([bp.me?.isHost, bp.recoveryRequests?.map((x) => x.playerId)]).toEqual([true, [deeP.id]]);
+    // The unrelated cohost keeps their role and view; the player sees the new host.
+    expect([role(c, r.cal.id), role(c, r.ada.id), c.hostView, c.recoveryRequests?.length]).toEqual([[false, true], [false, false], true, 1]);
+    expect([d.me?.isHost, d.recoveryRequests, d.players.filter((p) => p.isHost).map((p) => p.id)]).toEqual([false, undefined, [r.bea.id]]);
+    // Approving the recovery: the former host can't; the new host can.
+    const requestId = String(reqd.body["requestId"]);
+    expect((await call("POST", `/rooms/${r.id}/recovery-requests/${requestId}/approve`, { playerId: deeP.id }, r.ada.token)).status).toBe(403);
+    expect((await call("POST", `/rooms/${r.id}/recovery-requests/${requestId}/approve`, { playerId: deeP.id }, r.bea.token)).status).toBe(200);
+    // The former host recovers her own seat on a new device: still a regular player there.
+    const code = String((await call("POST", `/rooms/${r.id}/recovery-code`, {}, r.ada.token)).body["recoveryCode"]);
+    const rec = await call("POST", "/rooms/recover-by-code", { joinCode: r.code, recoveryCode: code });
+    expect(rec.status).toBe(200);
+    const fresh = await view(r, String(rec.body["sessionToken"]));
+    expect([fresh.me.isHost, fresh.me.isCohost, fresh.recoveryRequests]).toEqual([false, false, undefined]);
+    expect(fresh.players.filter((p) => p.isHost).map((p) => p.id)).toEqual([r.bea.id]);
+    for (const s of [adaHost, beaCohost, beaPlayer, calCohost, deePlayer]) s.ws.close();
   });
 
   it("a server restart keeps exactly one host; the host-claim token can't seize the role back", async () => {

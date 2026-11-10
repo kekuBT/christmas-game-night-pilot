@@ -12,6 +12,9 @@
 
   Nothing is merged or deployed, no port is made public, and nothing is paid for.
 - **Order of work:** this spec was written **before** implementation. §7 records what was built and tested.
+- **Clarification:** ChatGPT's comment 6781456175 on PR #10 accepted the six choices in §6 and asked for two details, now in §4.1, §4.2 and §7:
+  - a recorded retry is bound to the whole original command (actor, target and base revision), and returns only its outcome plus the current host;
+  - already-open host, cohost and player sockets are tested across a transfer to a cohost and a later seat recovery.
 
 ## 1. Goal
 The host of a casual room can deliberately give the host role to another connected player, between games, and carry on as a player.
@@ -84,7 +87,8 @@ The host of a casual room can deliberately give the host role to another connect
 **Checks, in order:**
 1. **The session is a player in this room** (HTTP `requireSession`; 401 otherwise).
 2. **A press seen before, by its id:**
-   - if it was this player's transfer to this target, the server answers with its recorded outcome (`replay`) and changes nothing;
+   - if it was the same command (this player, this target, and the same base revision), the server answers with its recorded outcome (`replay`) and changes nothing;
+   - the reply holds who the press handed the role to, plus the room's current host, never a saved projection or a past host state; the app applies neither, and the room's projection decides what shows;
    - the former host may learn their own outcome this way, but it never restores authority or applies anything;
    - the same id used for something else is refused.
 3. **The current host only** (`hostId === actor`). Cohosts, guests and the former host get `NOT_HOST` (403).
@@ -217,7 +221,7 @@ I'm proceeding with these unless you object.
   - `types.ts`, `stage7.css`.
 
 ### 7.2 Tested
-- **`tests/stage73-host-handover.test.ts`** (17):
+- **`tests/stage73-host-handover.test.ts`** (18):
   - the handover from the lobby, after results and during a break;
   - cohost targets, and other cohosts kept;
   - refusals for a guest, a cohost, a former host, self, an unknown player, reconnecting and away players, a Cup room, a game and a briefing;
@@ -227,7 +231,16 @@ I'm proceeding with these unless you object.
   - restart, normalization of a damaged snapshot, and the claim token;
   - HTTP roles; the former host's HTTP actions and their WebSocket projection.
 
-  Ten mutations of the safeguards are each caught: the actor check, the old host's cohost removal, the target's cohost removal, the revision check, the game check, the presence check, the WebSocket re-check, the restore normalization, the revision bump, and cohost authority.
+  Eleven mutations of the safeguards are each caught: the actor check, the base-revision check, the old host's cohost removal, the target's cohost removal, the revision check, the game check, the presence check, the WebSocket re-check, the restore normalization, the revision bump, and cohost authority.
+- **The clarification's two cases** (6781456175):
+  - **The whole command:** a retry with another target, actor or revision is refused, and a replay reports the current host.
+  - **A forgotten press:** forgotten after 64 other presses, then A→B→A, then A's old command replayed is refused as stale, to B or to C.
+  - **Open sockets:** five sockets stay open across a transfer to a cohost (the host's `host` socket, the target's `cohost` and `player` sockets, another cohost's, a player's). Then a seat-recovery request follows:
+    - the former host's socket gets the plain player view, with no recovery requests or secrets;
+    - the new host's sockets gain the host role and the request;
+    - the other cohost keeps theirs;
+    - the former host can't approve, and the new host can;
+    - the former host's seat recovered on a new device is still a regular player.
 - **`check-host-handover`** (new, 32 checks): Ada, Bea and Cal plus the TV.
   - Guest tools; the confirmation's names, focus, Escape and Cancel.
   - Keyboard confirm with a lost reply (the same press id, one handover).

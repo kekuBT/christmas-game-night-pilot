@@ -257,7 +257,16 @@ export interface SessionAttempt { id: string; sessionRevision: number }
  * asked for (`key`), the session revision it produced, and the game it
  * started. Bounded (SESSION_OPS_LIMIT), persisted with the room.
  */
-export interface SessionOp { id: string; key: string; revision: number; gameInstanceId?: string; /** Stage 7.3: who pressed it (a host handover's outcome is told only to its own actor). */ actor?: string }
+export interface SessionOp {
+  id: string;
+  key: string;
+  revision: number;
+  gameInstanceId?: string;
+  /** Stage 7.3: who pressed it (a host handover's outcome is told only to its own actor). */
+  actor?: string;
+  /** Stage 7.3: the session revision the press was made against (a handover's retry must match the whole original command). */
+  base?: number;
+}
 export const SESSION_OPS_LIMIT = 64;
 
 /** Stage 7.2: the session state (casual rooms), persisted. */
@@ -1264,8 +1273,10 @@ export class RoomEngine {
   /**
    * Stage 7.3: hand the host role to another player (casual rooms), spec
    * §4.1. Checked in this order:
-   * - a press seen before (by its id): its own actor learns the recorded
-   *   outcome (`replay`) and nothing changes; that never needs, or gives,
+   * - a press seen before (by its id): only the same command (the same
+   *   actor, target and base revision) learns its recorded outcome
+   *   (`replay`): who it handed over to, plus the room's current host, never
+   *   a past host state. Nothing changes, and that never needs, or gives,
    *   authority. The same id for anything else is refused;
    * - the current host only (NOT_HOST): not a cohost, a guest or a former
    *   host; a casual room;
@@ -1279,13 +1290,13 @@ export class RoomEngine {
    * Nothing else changes: no game starts or resumes, the lineup, break,
    * scores and seats are untouched.
    */
-  transferHost(actorId: string, targetId: string, attempt: SessionAttempt, now = this.clock()): { replay: boolean; hostId: string; from: string } {
+  transferHost(actorId: string, targetId: string, attempt: SessionAttempt, now = this.clock()): { replay: boolean; hostId: string | null; from: string; to: string } {
     const refuse = (code: HostRefusedCode, message: string) => new HostRefused(code, message, { session: this.sessionView(), hostId: this.hostId });
     const key = `host:${targetId}`;
     const seen = this.session.ops.find((o) => o.id === attempt.id);
     if (seen) {
-      if (seen.key !== key || seen.actor !== actorId) throw new Error("That request id was already used for something else.");
-      return { replay: true, hostId: this.hostId ?? targetId, from: actorId };
+      if (seen.key !== key || seen.actor !== actorId || seen.base !== attempt.sessionRevision) throw new Error("That request id was already used for something else.");
+      return { replay: true, hostId: this.hostId, from: actorId, to: targetId };
     }
     if (this.hostId !== actorId) throw refuse("NOT_HOST", "Only the host can hand over the host role.");
     if (this.kind !== "casual") throw refuse("NOT_A_CASUAL_ROOM", "Handing over the host role is for casual rooms.");
@@ -1304,9 +1315,9 @@ export class RoomEngine {
     this.cohosts.delete(targetId);
     this.hostId = targetId;
     this.session.revision += 1;
-    this.rememberOp({ id: attempt.id, key, revision: this.session.revision, actor: actorId });
+    this.rememberOp({ id: attempt.id, key, revision: this.session.revision, actor: actorId, base: attempt.sessionRevision });
     this.log("host-transferred", { playerId: targetId, actor: actorId });
-    return { replay: false, hostId: targetId, from: actorId };
+    return { replay: false, hostId: targetId, from: actorId, to: targetId };
   }
 
   private assertNotOnBreak(readiness: Readiness): void {
@@ -3237,8 +3248,8 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
   const revision = typeof r.revision === "number" && Number.isInteger(r.revision) && r.revision >= 0 ? r.revision : 0;
   const ops = (Array.isArray(r.ops) ? r.ops : []).filter((o): o is SessionOp => {
     const x = o as Partial<SessionOp> | null;
-    return !!x && typeof x.id === "string" && typeof x.key === "string" && typeof x.revision === "number" && (x.gameInstanceId === undefined || typeof x.gameInstanceId === "string") && (x.actor === undefined || typeof x.actor === "string");
-  }).slice(-SESSION_OPS_LIMIT).map((o) => ({ id: o.id, key: o.key, revision: o.revision, ...(o.gameInstanceId !== undefined ? { gameInstanceId: o.gameInstanceId } : {}), ...(o.actor !== undefined ? { actor: o.actor } : {}) }));
+    return !!x && typeof x.id === "string" && typeof x.key === "string" && typeof x.revision === "number" && (x.gameInstanceId === undefined || typeof x.gameInstanceId === "string") && (x.actor === undefined || typeof x.actor === "string") && (x.base === undefined || typeof x.base === "number");
+  }).slice(-SESSION_OPS_LIMIT).map((o) => ({ id: o.id, key: o.key, revision: o.revision, ...(o.gameInstanceId !== undefined ? { gameInstanceId: o.gameInstanceId } : {}), ...(o.actor !== undefined ? { actor: o.actor } : {}), ...(o.base !== undefined ? { base: o.base } : {}) }));
   if (kind !== "casual") return { onBreak: false, revision, ops: [] };
   return r.onBreak === true
     ? { onBreak: true, ...(typeof r.breakSince === "number" ? { breakSince: r.breakSince } : {}), revision, ops }
