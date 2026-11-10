@@ -103,15 +103,24 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
   const [outcome, setOutcome] = useState<{ gid: string; result: RecordOutcome } | null>(null);
   const sessionRef = useRef<SoloSession | null>(null);
   const resultsHeading = useRef<HTMLHeadingElement>(null);
-  if (!sessionRef.current) sessionRef.current = new SoloSession({ store, onChange: setState });
-  const session = sessionRef.current;
+  const newSession = () => new SoloSession({ store, onChange: setState });
+  if (!sessionRef.current) sessionRef.current = newSession();
+  // Handlers read the session when they run, never one captured at render:
+  // the mount effect below may have replaced it since.
+  const live = () => sessionRef.current!;
+  const session = live();
 
   // Leaving this screen any way (Back, Home, browser Back) stops polling and
-  // removes a round still in play, so nothing is left running.
+  // removes a round still in play, so nothing is left running. React's
+  // StrictMode (development) runs this effect, its cleanup and the effect
+  // again on the same component: the cleanup disposed the first session, so
+  // a fresh one takes its place rather than one that ignores every tap.
   useEffect(() => {
-    if (autostart) { onAutostartUsed(); void session.start(game.id); }
-    return () => { void session.leave(); session.dispose(); };
-  }, [session]);
+    if (sessionRef.current!.isDisposed) sessionRef.current = newSession();
+    const s = sessionRef.current!;
+    if (autostart) { onAutostartUsed(); void s.start(game.id); }
+    return () => { void s.leave(); s.dispose(); };
+  }, []);
 
   // File the finished round's score once, against this game's rules version.
   const summary = state.phase === "finished" ? roundSummary(state, session.playerId) : null;
@@ -138,13 +147,13 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
         {state.replacedOpenRound && <p className="mz-foot mz-solo-round__note" role="status" data-testid="solo-replaced">Your last round was interrupted, so this is a fresh one.</p>}
         {confirmLeave && (
           <NoticeCard tone="warn" title="Leave this round?" testId="solo-leave-confirm"
-            action={<span className="mz-solo__actions"><button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="solo-leave-yes" onClick={() => { setConfirmLeave(false); void session.leave(); onBackToSolo(); }}>Leave round</button><button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="solo-leave-no" autoFocus onClick={() => setConfirmLeave(false)}>Keep playing</button></span>}>
+            action={<span className="mz-solo__actions"><button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="solo-leave-yes" onClick={() => { setConfirmLeave(false); void live().leave(); onBackToSolo(); }}>Leave round</button><button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="solo-leave-no" autoFocus onClick={() => setConfirmLeave(false)}>Keep playing</button></span>}>
             It won’t be scored, and your personal best stays as it is.
           </NoticeCard>
         )}
         {mine ? (
           <MchezoMath solo game={mine} publicGame={pub} players={state.proj.players ?? []} playerId={session.playerId ?? ""} gamesTitle={game.title}
-            intent={(gid, action, payload) => session.intent(gid, action, payload)}
+            intent={(gid, action, payload) => live().intent(gid, action, payload)}
             post={async <T,>() => ({}) as T} roomId={session.roomId ?? ""} windowMs={game.timeLimitMs} />
         ) : <p className="mz-foot" role="status">Getting your round…</p>}
       </div>
@@ -166,7 +175,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
         <p className="mz-solo-results__correct" data-testid="solo-correct">{summary.correct} of {summary.total} correct</p>
         {pbText && <p className={`mz-solo-results__pb${r?.isNewBest && r.saved ? " is-new" : ""}`} role="status" data-testid="solo-pb">{pbText}</p>}
         <div className="mz-solo-results__actions">
-          <Keycap block data-testid="solo-play-again" onClick={() => { setOutcome(null); void session.start(game.id); }}>Play again</Keycap>
+          <Keycap block data-testid="solo-play-again" onClick={() => { setOutcome(null); void live().start(game.id); }}>Play again</Keycap>
           <Keycap block variant="surface" data-testid="solo-back" onClick={onBackToSolo}>Back to solo</Keycap>
           <button type="button" className="mz-linkbtn" data-testid="solo-home" onClick={onHome}>Mchezo home</button>
         </div>
@@ -196,7 +205,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
       <p className="mz-foot mz-entry__lede">10 quick sums, four answers each. 100 points for each right answer, plus up to 20 if you’re fast.</p>
       <p className="mz-solo__best" data-testid={`solo-best-${game.id}`}>{bestLine(best, store !== null)}</p>
       {state.phase === "error" && <p className="err" role="alert" data-testid="solo-error">{state.error ?? "Something went wrong."} Try again.</p>}
-      <Keycap block data-testid="solo-round-start" disabled={state.phase === "starting"} onClick={() => void session.start(game.id)}>{state.phase === "starting" ? "Starting…" : "Start"}</Keycap>
+      <Keycap block data-testid="solo-round-start" disabled={state.phase === "starting"} onClick={() => void live().start(game.id)}>{state.phase === "starting" ? "Starting…" : "Start"}</Keycap>
       {state.phase === "starting" && <p className="mz-foot" role="status" data-testid="solo-starting">Starting your round…</p>}
       <button type="button" className="mz-linkbtn" data-testid="solo-home" onClick={onHome}>Mchezo home</button>
     </main>

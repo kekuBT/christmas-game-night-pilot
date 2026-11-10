@@ -12,6 +12,8 @@
 //     play still works and the screens say what they can't do.
 //   - A phone on the home Wi-Fi (plain http, an insecure context with no
 //     crypto.randomUUID): a whole round plays and every answer counts.
+//   - Keyboard only: a whole round with Tab and Enter; the results focus the
+//     score; the leave question focuses Keep playing.
 //   - A late answer, after the round's time is up, is refused by the server
 //     (own server with a short test clock, MCHEZO_LIFECYCLE_SCALE).
 // The round is answered from the prompt itself (the driver computes the sum),
@@ -249,6 +251,47 @@ try {
   const rl = await playRound(lp, (i) => i < 7);
   check("plain http: the whole round plays and every answer counts (7 of 10)", rl.correct === 7, JSON.stringify(rl));
   await lan.ctx.close();
+
+  // ---- H. Keyboard only: a whole round, focus where it should be ----
+  const kctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const kp = await kctx.newPage();
+  const focused = () => kp.evaluate(() => { const a = document.activeElement; return a ? (a.getAttribute("data-testid") ?? (a.classList.contains("mz-slab") ? "slab" : a.tagName.toLowerCase())) : ""; });
+  /** Tab forward until `want(focused)` holds (at most 25 presses); returns whether it did. */
+  async function tabTo(want) {
+    for (let i = 0; i < 25; i++) { await kp.keyboard.press("Tab"); if (want(await focused())) return true; }
+    return false;
+  }
+  await kp.goto(`${BASE}/solo`, { waitUntil: "domcontentloaded" });
+  await kp.getByTestId("solo-home").waitFor({ timeout: 15000 });
+  check("keyboard: Tab reaches Start on the solo list", await tabTo((f) => f === "solo-start-math-mayhem"));
+  await kp.keyboard.press("Enter");
+  await kp.locator("h1.mz-question").waitFor({ timeout: 20000 });
+  check("keyboard: Enter on Start begins the round", true);
+  let byKeyboard = 0;
+  for (let i = 0; i < 10; i++) {
+    await kp.locator(".mz-slab:not([disabled])").first().waitFor({ timeout: 20000 });
+    if (!(await tabTo((f) => f === "slab"))) break;
+    await kp.keyboard.press("Enter");
+    byKeyboard++;
+    if (i < 9) {
+      await kp.getByTestId("mz-math-next").waitFor({ timeout: 20000 });
+      if (!(await tabTo((f) => f === "mz-math-next"))) break;
+      await kp.keyboard.press("Enter");
+    }
+  }
+  check("keyboard: all ten questions answered with Tab and Enter", byKeyboard === 10, `${byKeyboard} answered`);
+  await kp.getByTestId("solo-results").waitFor({ timeout: 20000 });
+  await soon("keyboard: the results move focus to the score heading", async () => (await focused()) === "solo-score", 5000);
+  check("keyboard: Tab from the score reaches Play again", await tabTo((f) => f === "solo-play-again"));
+  await kp.keyboard.press("Enter");
+  await kp.locator("h1.mz-question").waitFor({ timeout: 20000 });
+  check("keyboard: Tab reaches Leave round", await tabTo((f) => f === "solo-leave"));
+  await kp.keyboard.press("Enter");
+  await kp.getByTestId("solo-leave-confirm").waitFor({ timeout: 5000 });
+  check("keyboard: the leave question focuses Keep playing (the safe choice)", (await focused()) === "solo-leave-no");
+  await kp.keyboard.press("Enter");
+  check("keyboard: Enter on Keep playing keeps the round", (await kp.getByTestId("solo-leave-confirm").count()) === 0 && (await kp.getByTestId("solo-round").isVisible()));
+  await kctx.close();
 } finally {
   await browser.close();
 }

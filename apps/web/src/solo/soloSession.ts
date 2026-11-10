@@ -98,6 +98,7 @@ export class SoloSession {
   }
 
   get current(): SoloState { return this.state; }
+  get isDisposed(): boolean { return this.disposed; }
   get roomId(): string | undefined { return this.seat?.roomId; }
   get playerId(): string | undefined { return this.seat?.playerId; }
 
