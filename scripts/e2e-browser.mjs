@@ -290,7 +290,7 @@ async function runBrowser(browserName, games) {
     pages.push({ page: host, name: NAMES[0] });
     await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
     await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
-    await host.getByRole("button", { name: "Host a game" }).click();
+    await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
     // Mchezo lobby: the room code lives on the share chip's aria-label.
     const shareChip = host.getByRole("button", { name: /^Share room code / });
     await shareChip.waitFor({ timeout: 15000 });

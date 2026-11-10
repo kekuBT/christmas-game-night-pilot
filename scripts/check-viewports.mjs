@@ -23,7 +23,7 @@ async function noOverflow(page, label) {
 async function createRoom(page, name) {
   await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
-  await page.getByRole("button", { name: "Host a game" }).click();
+  await page.getByTestId("host-kind-cup").click(); await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
   await chip.waitFor({ timeout: 15000 });
   let code = "";

@@ -13,7 +13,7 @@ import { getGame } from "../src/games/registry.js";
 import { LocalServer } from "../src/server/http.js";
 import { RoomEngine, StartRefused, type RoomKind } from "../src/server/room.js";
 
-function intent(roomId: string, gameId: string, action: string, payload: Record<string, unknown> = {}, clientEventId = randomUUID()) {
+function intent(roomId: string, gameId: string, action: string, payload: Record<string, unknown> = {}, clientEventId: string = randomUUID()) {
   return { kind: "intent", schemaVersion: 1, clientEventId, roomId, gameInstanceId: gameId, action, payload };
 }
 
@@ -236,7 +236,7 @@ describe("over HTTP: the server enforces the same rules", () => {
   it("creates each kind; a missing kind is a Cup; an unknown kind is refused", async () => {
     for (const kind of ["cup", "casual", "solo"]) {
       const r = await create(kind);
-      const proj = await (await fetch(`${base}/rooms/${r.roomId}/projection?audience=tv`)).json() as { roomKind: string };
+      const proj = await (await fetch(`${base}/rooms/${r.roomId}/projection?audience=player`, { headers: { "x-session-token": r.token } })).json() as { roomKind: string };
       expect(proj.roomKind).toBe(kind);
     }
     const legacy = await create();
@@ -249,6 +249,23 @@ describe("over HTTP: the server enforces the same rules", () => {
     const s = await create("solo");
     expect((await post("/rooms/join-by-code", { joinCode: s.joinCode, displayName: "Intruder" })).status).toBe(404);
     expect((await post("/rooms/spectate-by-code", { joinCode: s.joinCode })).status).toBe(404);
+  });
+
+  it("a solo room has no public view: its TV projection and TV socket answer as if it weren't there", async () => {
+    const s = await create("solo");
+    expect((await fetch(`${base}/rooms/${s.roomId}`)).status).toBe(404);
+    expect((await fetch(`${base}/rooms/${s.roomId}/projection?audience=tv`)).status).toBe(404);
+    expect((await fetch(`${base}/rooms/${s.roomId}/projection`)).status).toBe(404); // tv is the default audience
+    expect((await fetch(`${base}/rooms/${s.roomId}/projection?audience=player`)).status).toBe(401); // the seat's token is required
+    expect((await post(`/rooms/${s.roomId}/join`, { displayName: "Intruder" })).status).toBe(404); // no second seat, nor a hint one exists
+    const closed = await new Promise<{ code: number; reason: string }>((resolve) => {
+      const ws = new WebSocket(`${base.replace("http", "ws")}/ws?roomId=${s.roomId}&audience=tv`);
+      ws.addEventListener("close", (e) => resolve({ code: e.code, reason: e.reason }));
+    });
+    expect(closed).toEqual({ code: 1008, reason: "Room not found" });
+    // A Cup room's public TV view is unchanged.
+    const cup = await create("cup");
+    expect((await fetch(`${base}/rooms/${cup.roomId}/projection?audience=tv`)).status).toBe(200);
   });
 
   it("a casual room: someone joins by code; official starts and official plans are refused", async () => {
@@ -269,10 +286,10 @@ describe("over HTTP: the server enforces the same rules", () => {
     expect(start.status).toBe(201);
     const gid = String(start.body["gameId"]);
     expect(start.body["status"]).toBe("playing");
-    const proj = await (await fetch(`${base}/rooms/${s.roomId}/projection?audience=tv`)).json() as { games: { id: string; status: string }[] };
+    const proj = await (await fetch(`${base}/rooms/${s.roomId}/projection?audience=player`, { headers: auth })).json() as { games: { id: string; status: string }[] };
     expect(proj.games.find((g) => g.id === gid)?.status).toBe("playing");
     expect((await post(`/rooms/${s.roomId}/games/${gid}/cancel`, {}, auth)).status).toBe(200);
-    const after = await (await fetch(`${base}/rooms/${s.roomId}/projection?audience=tv`)).json() as { games: { id: string }[] };
+    const after = await (await fetch(`${base}/rooms/${s.roomId}/projection?audience=player`, { headers: auth })).json() as { games: { id: string }[] };
     expect(after.games.some((g) => g.id === gid)).toBe(false);
   });
 });

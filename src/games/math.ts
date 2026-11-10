@@ -1,14 +1,9 @@
 import { seededRng } from "../shared/protocol.js";
+import { MATH_QUESTION_COUNT } from "./mathRules.js";
 
-/**
- * Stage 6.1: the version of Math Mayhem's rules, difficulty and scoring. A
- * personal best is compared only with rounds played under the same version,
- * so bump this whenever the questions (count, kinds, ranges), the time
- * window, or the scoring (100 per correct answer, speed bonus) change.
- */
-export const MATH_RULES_VERSION = 1;
-/** Questions per round under MATH_RULES_VERSION 1. */
-export const MATH_QUESTION_COUNT = 10;
+// Stage 6.1: the rules version lives in mathRules.ts (no dependencies, so the
+// web app can import it too).
+export { MATH_QUESTION_COUNT, MATH_RULES_VERSION } from "./mathRules.js";
 
 export interface MathQuestion {
   id: string;

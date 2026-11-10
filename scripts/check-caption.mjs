@@ -28,7 +28,7 @@ const BASE = `http://localhost:${port}`;
 async function createRoom(page, name) {
   await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
-  await page.getByRole("button", { name: "Host a game" }).click();
+  await page.getByTestId("host-kind-cup").click(); await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / }); await chip.waitFor({ timeout: 15000 });
   let code = ""; for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) { code = ((await chip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim(); if (!/^[A-Z0-9]{6}$/.test(code)) await sleep(250); }
   return code;

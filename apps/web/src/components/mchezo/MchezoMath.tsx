@@ -63,6 +63,10 @@ export interface MchezoMathDeps {
   isHostOrCohost?: boolean;
   /** The game window from the server policy (for the timer ring). */
   windowMs?: number;
+  /** Stage 6.1: a solo round. Nobody to wait for and nobody to sit out for:
+   *  no waiting ring after an answer, no "Sit this game out" (the solo screen
+   *  has its own Leave). Scoring, intents and clocks are unchanged. */
+  solo?: boolean;
 }
 
 /** While a question's prompt hasn't arrived, ask for it again this often (the server keeps the first open time). */
@@ -134,9 +138,9 @@ export function MchezoMath(deps: MchezoMathDeps) {
             Answered in {(game.myAnswerTimes[lockedQ.id]! / 1000).toFixed(1)} s — timed by the game from when it sent this question to your phone (+20 within 5 s, +10 within 10 s, if correct).
           </p>
         )}
-        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} showClock />
+        {!deps.solo && <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} showClock />}
         <div style={{ padding: "0 16px 16px" }}>
-          <Keycap block variant="neutral" onClick={() => setLastAnswered(null)}>
+          <Keycap block variant="neutral" data-testid="mz-math-next" onClick={() => setLastAnswered(null)}>
             {firstUnanswered ? "Next question" : "Waiting for the game to finish"}
           </Keycap>
         </div>
@@ -176,7 +180,7 @@ export function MchezoMath(deps: MchezoMathDeps) {
       }}
       secondsLeft={secondsLeft}
       totalSeconds={totalSeconds}
-      extra={
+      extra={deps.solo ? undefined :
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <button
             type="button"

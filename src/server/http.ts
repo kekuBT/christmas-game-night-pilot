@@ -677,6 +677,13 @@ export class LocalServer {
         }
         // Deadlines that are due are processed (and saved) before this request is served.
         this.tickRoom(room);
+        // Stage 6.1: a solo room is private. Its public (TV) view answers as if
+        // the room weren't there, so only its own seat's token can see it.
+        const publicView = req.method === "GET" && (parts.length === 2 || (parts.length === 3 && parts[2] === "projection" && (url.searchParams.get("audience") ?? "tv") === "tv"));
+        if (publicView && room.kind === "solo") {
+          this.send(res, 404, { error: "Room not found" });
+          return;
+        }
         if (req.method === "GET" && parts.length === 2) {
           this.send(res, 200, this.projectFor(room, "tv"));
           return;
@@ -834,6 +841,12 @@ export class LocalServer {
             return;
           }
           const body = await this.readBody(req);
+          // Stage 6.1: only a solo room's creator takes its one seat; to anyone
+          // else the room isn't there (as for its code and its public view).
+          if (room.kind === "solo" && body["asHost"] !== true) {
+            this.send(res, 404, { error: "Room not found" });
+            return;
+          }
           if (body["asHost"] === true && !this.hostClaimValid(room.id, body["hostClaimToken"])) {
             this.send(res, 400, { error: "Host claim requires the room creation token" });
             return;
@@ -1089,6 +1102,10 @@ export class LocalServer {
       spectatorId = spectator.id;
       actorId = "";
     } else if (requestedAudience === "tv") {
+      if (room.kind === "solo") {
+        ws.close(1008, "Room not found"); // Stage 6.1: a solo room has no public view
+        return;
+      }
       actorId = "";
     } else {
       const offered = String(req.headers["sec-websocket-protocol"] ?? "");
