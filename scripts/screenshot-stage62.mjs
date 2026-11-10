@@ -1,5 +1,7 @@
 // Stage 6.2: screenshots of the solo shelf at a small phone (320), a common
-// phone (390) and desktop (1440): the shelf (full page), Pattern Pulse ready,
+// phone (390) and desktop (1440): the top of the shelf and its Word
+// Connections card (the app scrolls an inner container, so a "full page"
+// shot would show only the first screen), Pattern Pulse ready,
 // memorising, tapping back and its results, Word Connections mid-puzzle and
 // its results. Writes docs/stage6/screenshots-62/*.png and a manifest naming
 // the exact revision. Visual evidence only: check-solo-shelf is the check.
@@ -46,7 +48,10 @@ try {
     const p = await ctx.newPage();
     await p.goto(`${BASE}/solo`, { waitUntil: "domcontentloaded" });
     await p.getByTestId("solo-home").waitFor({ timeout: 15000 });
-    await shot(p, "01-solo-shelf", view, "Play solo: the three solo games, each with its own personal best (full page)", true);
+    await shot(p, "01-solo-shelf", view, "Play solo: the top of the shelf");
+    await p.getByTestId("solo-game-word-connections").scrollIntoViewIfNeeded();
+    await shot(p, "01b-solo-shelf-connections", view, "Play solo: the Word Connections card, its personal best and the note that the best spans boards");
+    await p.getByTestId("solo-game-math-mayhem").scrollIntoViewIfNeeded();
 
     // Pattern Pulse: ready, memorise, tap back, then the rest of the game (round 3 slips) to results.
     await p.getByTestId("solo-start-pattern-pulse").click();
