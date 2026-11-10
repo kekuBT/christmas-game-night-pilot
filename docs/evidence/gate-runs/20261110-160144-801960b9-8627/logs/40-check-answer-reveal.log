@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:40153
+# timeout 600s | worker w3 | server http://localhost:40153 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s62-full-801960b/test-results/20261110-160144-801960b9-8627/server-data/w3)
+
+[+18.2s] PASS Geography: finished player sees no answers while Bea still plays
+[+18.2s] PASS Geography: TV shows no answers while Bea still plays
+[+18.2s] PASS Geography: Bea (mid-game) sees no answers
+[+27.6s] PASS Geography: results list every question — 8
+[+27.7s] PASS Geography: each answer matches the content pack — 8/8
+[+27.7s] PASS Geography: each explanation is shown — 8/8
+[+27.7s] PASS Geography: Bea sees her own choices marked
+[+27.7s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+27.8s] PASS Geography: TV lists the answers after the game
+[+27.9s] PASS Geography: TV shows no player's choices
+[+32.9s] PASS Closest: no answer anywhere while question 1 is open
+[+33.0s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 8.3 vs 8.3
+[+33.0s] PASS Closest: and the player's own guess
+[+33.0s] PASS Closest: Bea sees her own guess, not Ada's
+[+33.0s] PASS Closest: the explanation is shown
+[+33.0s] PASS Closest: question 2 is now open and its answer is not shown
+[+33.1s] PASS Closest: TV shows the last answer only — Last question: How many minutes does sunlight take to reach Earth, roughly? — 8.3 minutes
+[+33.1s] PASS Closest: TV shows nobody's guess — Last question: How many minutes does sunlight take to reach Earth, roughly? — 8.3 minutes
+[+33.3s] ANSWER REVEAL ALL PASSED
+[+33.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 33.3s | cpu 3.1s, peak memory 248 MB

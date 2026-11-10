@@ -1627,7 +1627,11 @@ I had missed that comment when I started the first gates on `be400fb`. Those run
 - `check-solo-shelf` 57/57 on both a test-mode server and a shipped-library server;
 - `check-solo` 80, `check-casual` 30, `check-connections` 39 and `check-pattern-pulse` 54, all passing.
 
-The final gate verdicts are recorded in the commit after the tested SHA.
+**Gates on `801960b`** (fresh clone, clean tree):
+- fast `20261110-160058-801960b9-5774` PASSED;
+- full `20261110-160144-801960b9-8627` PASSED, 78/78.
+
+Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage62-local/`.
 
 **External blockers:** none. WebKit and real devices are not available here.
 

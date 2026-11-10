@@ -241,4 +241,8 @@ Unchanged:
 - **Screenshots:**
   - `docs/stage6/screenshots-62/` holds 8 screens at 320, 390 and 1440 px (24 images), taken on `89904bd` with a clean tree (`manifest.json`).
   - The shelf is shown as its top and its Word Connections card: the app scrolls an inner container, so a "full page" shot shows only the first screen.
-- **Gates:** the fast and full gate verdicts on the final source SHA are recorded in the commit after it.
+- **Gates on `801960b962e6af8b41ceb760d33a51d929619120`** (fresh clone, clean tree):
+  - fast `20261110-160058-801960b9-5774` PASSED;
+  - full `20261110-160144-801960b9-8627` PASSED, 78/78 in 26 m 24 s with 3 workers: unit 1,191, `check-solo-shelf` 57/57, `check-solo`, `check-casual`, `check-connections`, `check-pattern-pulse`, `e2e-chromium` and the Cup drivers.
+  - Raw evidence is in `docs/evidence/gate-runs/`.
+- **Not tested:** WebKit/Safari and real phones. Browser checks ran in Chromium (headless shell 153) only, with phone sizes emulated.
