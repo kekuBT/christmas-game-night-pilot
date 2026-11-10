@@ -121,6 +121,12 @@ export function isActiveGame(g: { status: string }): boolean {
   return g.status === "briefing" || g.status === "playing";
 }
 
+/** A game instance's number (`game-7` → 7): instances are numbered in start order and never reused. */
+function gameNumber(id: string): number {
+  const n = Number(id.slice(id.lastIndexOf("-") + 1));
+  return Number.isFinite(n) ? n : -1;
+}
+
 /**
  * Network presence, derived on read (never stored):
  * - connected: at least one live, current-credential socket;
@@ -209,7 +215,14 @@ export interface Readiness {
  */
 export type StartRefusedCode =
   | "ROSTER_CHANGED" | "PLAYERS_RECONNECTING" | "OFFICIAL_NEEDS_TWO" | "NOT_A_CUP_ROOM" | "NOT_A_SOLO_GAME"
-  | "NOT_A_CASUAL_ROOM" | "PLAN_CONFLICT" | "PARTY_FEWER_THAN_PLANNED" | "PARTY_DOESNT_FIT";
+  | "NOT_A_CASUAL_ROOM" | "PLAN_CONFLICT" | "PARTY_FEWER_THAN_PLANNED" | "PARTY_DOESNT_FIT"
+  // Stage 7.2 (docs/stage7/stage72.md §3.2–3.4): the room is on a break
+  // (resume first); the request was made against an older session state
+  // (SESSION_CONFLICT); a repeat of a start whose briefing was cancelled
+  // (ATTEMPT_ENDED: nothing new starts); Play again for a game that isn't
+  // the last one played (REMATCH_NOT_LATEST); the people here don't fit the
+  // game (GAME_DOESNT_FIT).
+  | "ON_BREAK" | "SESSION_CONFLICT" | "ATTEMPT_ENDED" | "REMATCH_NOT_LATEST" | "GAME_DOESNT_FIT";
 export class StartRefused extends Error {
   constructor(readonly code: StartRefusedCode, message: string, readonly readiness: Readiness, readonly detail?: Record<string, unknown>) {
     super(message);
@@ -227,6 +240,35 @@ export interface PartyPlanRecord {
   budgetMinutes: number;
   items: { gameId: string; gameInstanceId?: string }[];
   updatedAt: number;
+}
+
+/** Stage 7.2: a lineup item's state, derived from its game (docs/stage7/stage72.md §3.1). */
+export type PartyItemStatus = "pending" | "briefing" | "playing" | "completed";
+
+/**
+ * Stage 7.2: one continuation request, as the client sends it: its own id
+ * (kept the same for every retry of that one press) and the session
+ * revision it was made against (stage72.md §3.8).
+ */
+export interface SessionAttempt { id: string; sessionRevision: number }
+
+/**
+ * Stage 7.2: a remembered continuation request that took effect: what it
+ * asked for (`key`), the session revision it produced, and the game it
+ * started. Bounded (SESSION_OPS_LIMIT), persisted with the room.
+ */
+export interface SessionOp { id: string; key: string; revision: number; gameInstanceId?: string }
+export const SESSION_OPS_LIMIT = 64;
+
+/** Stage 7.2: the session state (casual rooms), persisted. */
+export interface SessionState { onBreak: boolean; breakSince?: number; revision: number; ops: SessionOp[] }
+export interface SessionView { onBreak: boolean; breakSince?: number; revision: number }
+
+/** Stage 7.2: a break the server refused (HTTP 403/409). Nothing changed. */
+export class SessionRefused extends Error {
+  constructor(readonly code: "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "GAME_ACTIVE" | "SESSION_CONFLICT", message: string, readonly session?: SessionView) {
+    super(message);
+  }
 }
 
 /** A lineup the server refused to save (HTTP 403/409/400). Nothing changed. */
@@ -289,6 +331,8 @@ export class ContentShortage extends Error {
 export interface GameInstance {
   id: string;
   gameId: string;
+  /** Stage 7.2: a "Play again" of this finished game (casual rooms); its repeat returns this game. */
+  rematchOf?: string;
   official: boolean;
   /** "briefing" exists only for timing-v2 Cups (D3): rules and Ready, no game clock. */
   status: "briefing" | "playing" | "finished";
@@ -423,6 +467,14 @@ export class RoomEngine {
    */
   party: PartyPlanRecord | null = null;
   partyRevision = 0;
+  /**
+   * Stage 7.2: a casual room's session between games (stage72.md §3.4, §3.8):
+   * the break (only the host or a cohost changes it; while on, no new game
+   * starts), a revision that grows with every break change, game start and
+   * cancelled briefing, and the recent requests that took effect (so a
+   * retry is recognised, never applied twice). Persisted.
+   */
+  session: SessionState = { onBreak: false, revision: 0, ops: [] };
   /** The content library (the shipped packs; tests may inject their own). */
   private _content: ContentLibrary | null = null;
   get content(): ContentLibrary { return (this._content ??= contentLibrary()); }
@@ -699,8 +751,15 @@ export class RoomEngine {
    *   in `proceedWithout`. Practice games do not ask.
    * Nobody is ever added to a game after it starts.
    */
-  startGame(hostId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[] } = {}): GameInstance {
+  startGame(hostId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt } = {}): GameInstance {
     if (this.hostId !== hostId && !this.cohosts.has(hostId)) throw new Error("Only host/cohost can start a game");
+    // Stage 7.2: a casual room's own Start may carry an attempt (§3.8): it
+    // must be made against the current session state, and is remembered.
+    // A repeat of it is answered before this (startChosen). Lineup and Play
+    // again starts check and remember their own.
+    const attempt = this.kind === "casual" ? opts.attempt : undefined;
+    const startKey = `start:${gameId}`;
+    if (attempt && this.session.ops.some((o) => o.id === attempt.id)) throw new Error("That request id was already used.");
     const game = getGame(gameId);
     if (game.status === "not-implemented") throw new Error(`Game not implemented yet: ${gameId}`);
     const policy = policyFor(gameId);
@@ -718,6 +777,9 @@ export class RoomEngine {
       throw new StartRefused("NOT_A_SOLO_GAME", `${game.title} isn't available in solo play.`, this.readiness());
     }
     this.tick(); // a game whose deadline just passed is finalized before anything new starts
+    if (attempt) this.assertSessionRevision(attempt, this.readiness());
+    // Stage 7.2: a casual room on a break starts nothing until the host resumes.
+    this.assertNotOnBreak(this.readiness());
     // Stage 6.1: in a solo room, a round left open (reload, leaving mid-round)
     // is replaced by the new one: a safe restart, with nothing scored.
     if (this.kind === "solo") this.abandonOpenRounds(hostId, "restarted");
@@ -827,6 +889,12 @@ export class RoomEngine {
                             : moduleFor(gameId)?.init({ players: playerIds, seed }),
     };
     this.games.set(id, instance);
+    // Stage 7.2: every new game in a casual room is a new session state, so
+    // a continuation request made before it is stale (§3.8).
+    if (this.kind === "casual") {
+      this.session.revision += 1;
+      if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id });
+    }
     // Audit who was left out and whether the host chose that explicitly.
     const leftOut = readiness.wouldMiss.map((m) => ({ id: m.id, presence: m.presence }));
     const leftOutDetail = leftOut.length ? { leftOut, startedWithoutOnPurpose: [...leftOutOnPurpose].filter((x) => leftOut.some((l) => l.id === x)) } : {};
@@ -838,6 +906,22 @@ export class RoomEngine {
     this.syncPhase(instance, startedAt); // phased games: start the first phase's clock
     this.log("game-started", { gameInstanceId: id, actor: hostId, ...(leftOut.length ? { detail: leftOutDetail } : {}) });
     return instance;
+  }
+
+  /**
+   * Stage 7.2: the lobby's own Start (a game the host picked). With an
+   * attempt in a casual room, a repeat of that press returns the game it
+   * started (or ATTEMPT_ENDED after a cancelled briefing) and a new press
+   * must be made against the current session (§3.8). It never moves a
+   * lineup on.
+   */
+  startChosen(actorId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt } = {}): { game: GameInstance; replay: boolean } {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can start a game");
+    if (this.kind === "casual" && opts.attempt) {
+      const seen = this.resolveAttempt(opts.attempt, `start:${gameId}`);
+      if (seen) return seen;
+    }
+    return { game: this.startGame(actorId, gameId, opts), replay: false };
   }
 
   // ---- D3: the briefing (docs/ux-redesign/D3_TIMING_CONTRACT.md) ----
@@ -940,6 +1024,10 @@ export class RoomEngine {
   private endBriefing(game: GameInstance, reason: "host" | "expired" | "content-changed", actor?: string): void {
     this.games.delete(game.id);
     this.reconcilePartyStarts(); // Stage 7.1: a lineup item that started this game is free again
+    // Stage 7.2: the attempt that started it stays remembered (a retry of it
+    // starts nothing), and the session moves on, so a request made before
+    // the cancel is stale; a fresh press can start the same thing again.
+    if (this.kind === "casual") this.session.revision += 1;
     // A count only: the items stay available, so their ids must not reach the player-visible ledger.
     this.log("briefing-cancelled", {
       gameInstanceId: game.id,
@@ -1049,11 +1137,28 @@ export class RoomEngine {
     }
   }
 
+  /** Stage 7.2: an item's state, from its game (a cancelled briefing leaves none: pending again). */
+  partyItemStatus(item: { gameInstanceId?: string }): PartyItemStatus {
+    const g = item.gameInstanceId ? this.games.get(item.gameInstanceId) : undefined;
+    if (!g) return "pending";
+    return g.status === "finished" ? "completed" : g.status === "briefing" ? "briefing" : "playing";
+  }
+
+  /** Stage 7.2: the lineup's next pending item (the lowest index), or -1. Items are never skipped. */
+  partyNextIndex(): number {
+    return this.party ? this.party.items.findIndex((i) => this.partyItemStatus(i) === "pending") : -1;
+  }
+
   /** The lineup as every member (and the TV) sees it: public planning facts only. */
-  partyView(): { revision: number; lineup: null | { expectedPlayers: number; budgetMinutes: number; estimateMinutes: number; transitionMinutes: number; items: { gameId: string; started: boolean }[]; updatedAt: number } } {
+  partyView(): { revision: number; lineup: null | { expectedPlayers: number; budgetMinutes: number; estimateMinutes: number; transitionMinutes: number; items: { gameId: string; started: boolean; status: PartyItemStatus; gameInstanceId?: string }[]; next: number | null; complete: boolean; updatedAt: number } } {
     const p = this.party;
     if (!p) return { revision: this.partyRevision, lineup: null };
     const v = validatePartyPlan(p);
+    const items = p.items.map((i) => {
+      const status = this.partyItemStatus(i);
+      return { gameId: i.gameId, started: status !== "pending", status, ...(status !== "pending" && i.gameInstanceId ? { gameInstanceId: i.gameInstanceId } : {}) };
+    });
+    const next = items.findIndex((i) => i.status === "pending");
     return {
       revision: this.partyRevision,
       lineup: {
@@ -1061,44 +1166,195 @@ export class RoomEngine {
         budgetMinutes: p.budgetMinutes,
         estimateMinutes: v.ok ? v.estimateMinutes : 0,
         transitionMinutes: PARTY_TRANSITION_MINUTES,
-        items: p.items.map((i) => ({ gameId: i.gameId, started: this.partyItemStarted(i) })),
+        items,
+        next: next >= 0 ? next : null,
+        complete: items.length > 0 && items.every((i) => i.status === "completed"),
         updatedAt: p.updatedAt,
       },
     };
   }
 
+  /** Stage 7.2: the session (break and revision), as everyone (and the TV) sees it. Never the remembered requests. */
+  sessionView(): SessionView {
+    const { onBreak, breakSince, revision } = this.session;
+    return onBreak ? { onBreak: true, ...(breakSince !== undefined ? { breakSince } : {}), revision } : { onBreak: false, revision };
+  }
+
   /**
-   * Stage 7.1: start the lineup's first game through the ordinary start
-   * (practice, briefing and all), checking first, in this order:
-   * - the host or a cohost (for a repeat too), a casual room, a current
-   *   lineup (`revision`), and that item `index` is this `gameId`
+   * Stage 7.2 (§3.8): a request seen before, by its id. One that took effect
+   * returns what it did (the game it started, if that game still exists);
+   * the same id for something else is refused. A start whose briefing was
+   * cancelled ends there: ATTEMPT_ENDED, and nothing new starts.
+   */
+  private resolveAttempt(attempt: SessionAttempt, key: string): { game: GameInstance; replay: true } | null;
+  private resolveAttempt(attempt: SessionAttempt, key: string, kind: "break"): SessionOp | null;
+  private resolveAttempt(attempt: SessionAttempt, key: string, kind?: "break"): { game: GameInstance; replay: true } | SessionOp | null {
+    const op = this.session.ops.find((o) => o.id === attempt.id);
+    if (!op) return null;
+    if (op.key !== key) throw new Error("That request id was already used for something else.");
+    if (kind === "break") return op;
+    const game = op.gameInstanceId ? this.games.get(op.gameInstanceId) : undefined;
+    if (game) return { game, replay: true };
+    throw new StartRefused("ATTEMPT_ENDED", "That start was cancelled before play, so nothing new started. Choose again.", this.readiness(), { session: this.sessionView() });
+  }
+
+  /** Stage 7.2 (§3.8): a new action must be made against the session as it is now. */
+  private assertSessionRevision(attempt: SessionAttempt, readiness: Readiness): void {
+    if (attempt.sessionRevision !== this.session.revision) {
+      throw new StartRefused("SESSION_CONFLICT", "Something changed since you looked (another host, a break, or a cancelled start). Here is the latest.", readiness, { session: this.sessionView() });
+    }
+  }
+
+  /** Stage 7.2: remember a request that took effect; the oldest go first (a forgotten one is stale by its revision). */
+  private rememberOp(op: SessionOp): void {
+    this.session.ops.push(op);
+    if (this.session.ops.length > SESSION_OPS_LIMIT) this.session.ops.splice(0, this.session.ops.length - SESSION_OPS_LIMIT);
+  }
+
+  /**
+   * Stage 7.2: Take a break / Resume (host or cohost, casual rooms), §3.4
+   * and §3.8. Checked in this order:
+   * - the host or a cohost, a casual room;
+   * - a request seen before (by its id) changes nothing again: it answers
+   *   with the session as it is now (a delayed Break after a Resume never
+   *   puts the room back on a break);
+   * - it must be made against the current session revision
+   *   (SESSION_CONFLICT otherwise);
+   * - a break starts only between games (GAME_ACTIVE): no clock is paused.
+   * A change moves the revision on. Asking for what is already so changes
+   * nothing. No ledger entry (session state, not a game event, D-S71-03).
+   */
+  setBreak(actorId: string, on: boolean, attempt: SessionAttempt, now = this.clock()): { session: SessionView; replay: boolean } {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new SessionRefused("NOT_HOST", "Only the host or a cohost can take a break.");
+    if (this.kind !== "casual") throw new SessionRefused("NOT_A_CASUAL_ROOM", "Breaks are for casual rooms.");
+    const key = `break:${on}`;
+    if (this.resolveAttempt(attempt, key, "break")) return { session: this.sessionView(), replay: true };
+    this.tick(now);
+    if (attempt.sessionRevision !== this.session.revision) {
+      throw new SessionRefused("SESSION_CONFLICT", "Something changed since you looked (another host, or a game started). Here is the latest.", this.sessionView());
+    }
+    if (on && !this.session.onBreak && [...this.games.values()].some(isActiveGame)) {
+      throw new SessionRefused("GAME_ACTIVE", "A game is on. Take a break when it ends.", this.sessionView());
+    }
+    if (on !== this.session.onBreak) {
+      this.session.revision += 1;
+      this.session.onBreak = on;
+      if (on) this.session.breakSince = now;
+      else delete this.session.breakSince;
+    }
+    this.rememberOp({ id: attempt.id, key, revision: this.session.revision });
+    return { session: this.sessionView(), replay: false };
+  }
+
+  private assertNotOnBreak(readiness: Readiness): void {
+    if (this.kind === "casual" && this.session.onBreak) throw new StartRefused("ON_BREAK", "The room is on a break. Resume first.", readiness, { session: this.sessionView() });
+  }
+
+  /** The room's most recent game (instances are numbered in start order; a cancelled briefing leaves none). */
+  private latestGame(): GameInstance | undefined {
+    let latest: GameInstance | undefined;
+    for (const g of this.games.values()) if (!latest || gameNumber(g.id) > gameNumber(latest.id)) latest = g;
+    return latest;
+  }
+
+  /**
+   * Stage 7.2: Play again, a rematch (casual rooms), §3.3 and §3.8: a new
+   * game of the same kind through the ordinary start (fresh content, the
+   * briefing, the real roster). Checked in this order:
+   * - the host or a cohost (for a repeat too), a casual room;
+   * - a request seen before (by its id): the game it started, or
+   *   ATTEMPT_ENDED if that game's briefing was cancelled (nothing starts);
+   * - the source is a finished game; a game already started as its rematch
+   *   (by anyone) is returned (`replay`), never a second one;
+   * - made against the current session revision (SESSION_CONFLICT);
+   * - the source is the room's last game: no game is active, and nothing was
+   *   played after it (REMATCH_NOT_LATEST);
+   * - not on a break; anyone reconnecting named or waited for; the people
+   *   here fit the game (GAME_DOESNT_FIT);
+   * - then startGame (the roster shown, one active game).
+   * It never takes or marks a lineup item. A cancelled rematch can be asked
+   * for again with a fresh press.
+   */
+  startRematch(actorId: string, sourceGameInstanceId: string, opts: { roster?: string[]; proceedWithout?: string[]; seed?: number; attempt?: SessionAttempt }): { game: GameInstance; replay: boolean } {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can start a game");
+    this.tick();
+    const readiness = this.readiness();
+    if (this.kind !== "casual") throw new StartRefused("NOT_A_CASUAL_ROOM", "Play again is for casual rooms.", readiness);
+    const key = `rematch:${sourceGameInstanceId}`;
+    if (opts.attempt) {
+      const seen = this.resolveAttempt(opts.attempt, key);
+      if (seen) return seen;
+    }
+    const source = this.games.get(sourceGameInstanceId);
+    if (!source || source.status !== "finished") throw new Error("Only a finished game can be played again.");
+    const already = [...this.games.values()].find((g) => g.rematchOf === source.id);
+    if (already) return { game: already, replay: true };
+    if (opts.attempt) this.assertSessionRevision(opts.attempt, readiness);
+    const latest = this.latestGame();
+    if (latest && latest.id !== source.id) {
+      if (isActiveGame(latest)) throw new Error("A game is already in progress");
+      throw new StartRefused("REMATCH_NOT_LATEST", "Play again is for the game just played.", readiness, { latestGameInstanceId: latest.id });
+    }
+    this.assertNotOnBreak(readiness);
+    const leftOut = new Set(opts.proceedWithout ?? []);
+    const reconnecting = readiness.wouldMiss.filter((m) => m.presence === "reconnecting" && !leftOut.has(m.id)).map((m) => m.id);
+    if (reconnecting.length > 0) {
+      const names = reconnecting.map((id) => this.players.get(id)?.displayName ?? id);
+      throw new StartRefused("PLAYERS_RECONNECTING", `${names.join(", ")} ${names.length === 1 ? "is" : "are"} reconnecting. Wait for them, or start without them.`, readiness);
+    }
+    const game = getGame(source.gameId);
+    const here = readiness.wouldPlay.length;
+    if (here < game.minPlayers || here > game.maxPlayers) {
+      throw new StartRefused("GAME_DOESNT_FIT", here < game.minPlayers ? `${game.title} needs at least ${game.minPlayers} players; ${here} ${here === 1 ? "is" : "are"} here.` : `${game.title} is for up to ${game.maxPlayers} players; ${here} are here.`, readiness, { gameId: source.gameId, minPlayers: game.minPlayers, maxPlayers: game.maxPlayers, here });
+    }
+    const started = this.startGame(actorId, source.gameId, { official: false, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}) });
+    started.rematchOf = source.id;
+    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id });
+    return { game: started, replay: false };
+  }
+
+  /**
+   * Stage 7.1/7.2: start the lineup's next game through the ordinary start
+   * (casual, briefing and all), §3.2 and §3.8. Checked in this order:
+   * - the host or a cohost (for a repeat too), a casual room;
+   * - a request seen before (by its id): the game it started, or
+   *   ATTEMPT_ENDED if that game's briefing was cancelled (nothing starts);
+   * - a current lineup (`revision`), and item `index` is this `gameId`
    *   (PLAN_CONFLICT);
-   * - repeat-safe: an item that already started a game that still exists
-   *   returns that game (`replay`), never a second one. This comes before
-   *   the next check, so a retry of the first game after it started works;
-   * - a new start is the lineup's first game (index 0) only: moving on
-   *   through the lineup is the next slice, with no hidden way to it now;
+   * - an item whose game exists returns that game (`replay`: a second host's
+   *   press, a retry), never a second one;
+   * - made against the current session revision (SESSION_CONFLICT);
+   * - a new start is the lineup's next pending item only: items play in
+   *   order and are never skipped (PLAN_CONFLICT);
+   * - not on a break (ON_BREAK);
    * - fewer connected than the group size needs `fewerThanPlanned`
    *   (PARTY_FEWER_THAN_PLANNED);
    * - anyone reconnecting must be named in `proceedWithout`
-   *   (PLAYERS_RECONNECTING), as for an official game;
+   *   (PLAYERS_RECONNECTING);
    * - the real connected count must fit the game (PARTY_DOESNT_FIT).
    * Then startGame (its roster check, one active game, the briefing), and
    * only then is the item marked, in the same step. A refusal changes nothing.
    */
-  startPartyGame(actorId: string, gameId: string, opts: { revision: number; index: number; roster?: string[]; proceedWithout?: string[]; fewerThanPlanned?: boolean; seed?: number }): { game: GameInstance; replay: boolean } {
+  startPartyGame(actorId: string, gameId: string, opts: { revision: number; index: number; roster?: string[]; proceedWithout?: string[]; fewerThanPlanned?: boolean; seed?: number; attempt?: SessionAttempt }): { game: GameInstance; replay: boolean } {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can start a game");
     this.tick();
     const readiness = this.readiness();
     if (this.kind !== "casual") throw new StartRefused("NOT_A_CASUAL_ROOM", "Quick Party is for casual rooms.", readiness);
+    const key = `next:${opts.revision}:${opts.index}:${gameId}`;
+    if (opts.attempt) {
+      const seen = this.resolveAttempt(opts.attempt, key);
+      if (seen) return seen;
+    }
     const p = this.party;
     const conflict = (why: string) => new StartRefused("PLAN_CONFLICT", why, readiness, { party: this.partyView() });
     if (!p || p.revision !== opts.revision) throw conflict("The lineup changed somewhere else. Here is the latest.");
     const item = p.items[opts.index];
     if (!item || item.gameId !== gameId) throw conflict("That isn't a game in this lineup.");
     if (this.partyItemStarted(item)) return { game: this.games.get(item.gameInstanceId!)!, replay: true };
-    if (opts.index !== 0) throw conflict("Only the lineup's first game can be started from here for now.");
     this.reconcilePartyStarts();
+    if (opts.attempt) this.assertSessionRevision(opts.attempt, readiness);
+    if (opts.index !== this.partyNextIndex()) throw conflict("That isn't the lineup's next game.");
+    this.assertNotOnBreak(readiness);
     const game = getGame(gameId);
     const here = readiness.wouldPlay.length;
     if (here < p.expectedPlayers && opts.fewerThanPlanned !== true) {
@@ -1115,6 +1371,7 @@ export class RoomEngine {
     }
     const started = this.startGame(actorId, gameId, { official: false, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}) });
     item.gameInstanceId = started.id;
+    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id });
     return { game: started, replay: false };
   }
 
@@ -2709,7 +2966,7 @@ export class RoomEngine {
       name: this.name,
       roomKind: this.kind,
       // Stage 7.1: the Quick Party lineup (casual rooms): public planning facts only.
-      ...(this.kind === "casual" ? { party: this.partyView() } : {}),
+      ...(this.kind === "casual" ? { party: this.partyView(), session: this.sessionView() } : {}),
       players: publicPlayers,
       games: publicGames,
       readiness: this.readiness(now),
@@ -2810,6 +3067,7 @@ export class RoomEngine {
       contentSeq: this.contentSeq,
       party: this.party,
       partyRevision: this.partyRevision,
+      session: this.session,
       players: [...this.players.values()],
       spectators: [...this.spectators.values()],
       games: [...this.games.values()],
@@ -2868,6 +3126,10 @@ export class RoomEngine {
     // dropped whole (never half-loaded), and the revision still only grows.
     engine.partyRevision = typeof data["partyRevision"] === "number" && Number.isInteger(data["partyRevision"]) && data["partyRevision"] >= 0 ? data["partyRevision"] : 0;
     engine.party = restoreParty(data["party"], engine);
+    // Stage 7.2: the session (casual rooms), checked again: a damaged part
+    // restores as "not on a break" / no remembered requests, and the
+    // revision only grows.
+    engine.session = restoreSession(data["session"], engine.kind);
     engine.reconcilePartyStarts(); // a start mark for a game that wasn't saved is dropped
     return engine;
   }
@@ -2900,6 +3162,19 @@ export class RoomEngine {
 }
 
 /** Stage 7.1: a saved Quick Party lineup, if it is whole and valid; otherwise none. */
+function restoreSession(raw: unknown, kind: RoomKind): SessionState {
+  const r = (raw && typeof raw === "object" ? raw : {}) as { onBreak?: unknown; breakSince?: unknown; revision?: unknown; ops?: unknown };
+  const revision = typeof r.revision === "number" && Number.isInteger(r.revision) && r.revision >= 0 ? r.revision : 0;
+  const ops = (Array.isArray(r.ops) ? r.ops : []).filter((o): o is SessionOp => {
+    const x = o as Partial<SessionOp> | null;
+    return !!x && typeof x.id === "string" && typeof x.key === "string" && typeof x.revision === "number" && (x.gameInstanceId === undefined || typeof x.gameInstanceId === "string");
+  }).slice(-SESSION_OPS_LIMIT).map((o) => ({ id: o.id, key: o.key, revision: o.revision, ...(o.gameInstanceId !== undefined ? { gameInstanceId: o.gameInstanceId } : {}) }));
+  if (kind !== "casual") return { onBreak: false, revision, ops: [] };
+  return r.onBreak === true
+    ? { onBreak: true, ...(typeof r.breakSince === "number" ? { breakSince: r.breakSince } : {}), revision, ops }
+    : { onBreak: false, revision, ops };
+}
+
 function restoreParty(raw: unknown, engine: RoomEngine): PartyPlanRecord | null {
   if (raw == null) return null;
   const bad = (why: string) => { console.error(`[party] room ${engine.id}: saved lineup dropped (${why})`); return null; };

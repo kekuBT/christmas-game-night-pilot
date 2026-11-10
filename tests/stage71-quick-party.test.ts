@@ -249,7 +249,7 @@ describe("starting the lineup's first game", () => {
     expect(replay).toBe(false);
     expect(game.official).toBe(false);
     expect(game.players.sort()).toEqual([...roster].sort());
-    expect(engine.partyView().lineup?.items).toEqual([{ gameId: "trivia", started: true }, { gameId: "math-mayhem", started: false }]);
+    expect(engine.partyView().lineup?.items).toMatchObject([{ gameId: "trivia", started: true, status: "playing", gameInstanceId: game.id }, { gameId: "math-mayhem", started: false, status: "pending" }]);
     expect(engine.games.size).toBe(1); // nothing else started: no automatic next game
     expect(engine.officialStandings()).toEqual(casualRoom(0).engine.officialStandings());
   });
@@ -278,16 +278,18 @@ describe("starting the lineup's first game", () => {
     expect(second.game.id).not.toBe(first.game.id);
   });
 
-  it("only the lineup's first game starts in this slice: item 1 is refused before and after the first starts", () => {
+  it("items start in order (Stage 7.2): item 1 is refused while item 0 is pending, and is next once item 0 has finished", () => {
     const { engine, host } = planned(3, 4, ["trivia", "math-mayhem"]);
-    const code = () => (refusal(() => engine.startPartyGame(host, "math-mayhem", { revision: 1, index: 1 })) as StartRefused).code;
-    expect(code()).toBe("PLAN_CONFLICT");
-    const first = engine.startPartyGame(host, "trivia", { revision: 1, index: 0 });
+    expect((refusal(() => engine.startPartyGame(host, "math-mayhem", { revision: 1, index: 1 })) as StartRefused).code).toBe("PLAN_CONFLICT");
+    const first = engine.startPartyGame(host, "trivia", { revision: 1, index: 0, fewerThanPlanned: true });
+    // While the first game plays, the one-active-game rule holds item 1 back.
+    expect(() => engine.startPartyGame(host, "math-mayhem", { revision: 1, index: 1, fewerThanPlanned: true })).toThrow(/already in progress/);
     engine.games.get(first.game.id)!.status = "finished"; // the first game is over
-    expect(code()).toBe("PLAN_CONFLICT");
-    expect(engine.games.size).toBe(1);
     // A retry of the first game after it started is still its replay (checked before the index rule).
     expect(engine.startPartyGame(host, "trivia", { revision: 1, index: 0 })).toEqual({ game: first.game, replay: true });
+    const second = engine.startPartyGame(host, "math-mayhem", { revision: 1, index: 1, fewerThanPlanned: true });
+    expect(second.replay).toBe(false);
+    expect(engine.partyView().lineup).toMatchObject({ next: null, complete: false, items: [{ status: "completed" }, { status: "playing" }] });
   });
 
   it("a start sent for a replaced lineup starts nothing under the new one", () => {
@@ -427,14 +429,16 @@ describe("over HTTP", () => {
     expect([c.status, c.body["code"]]).toEqual([409, "NOT_A_CASUAL_ROOM"]);
   });
 
-  it("a lineup start: 400 if malformed, official or without the roster shown; 409 with the numbers when fewer are here; then 201, and a replay is 200 with the same game (not for a guest)", async () => {
+  it("a lineup start: 400 if malformed, official, or without the roster shown or the request id (Stage 7.2); 409 with the numbers when fewer are here; then 201, and a replay is 200 with the same game (not for a guest)", async () => {
     const r = await room("casual", 1); // 2 here
     expect((await call("POST", `/rooms/${r.id}/party`, { baseRevision: 0, plan: lineup }, r.host)).status).toBe(200);
     const roster = ((await call("GET", `/rooms/${r.id}/projection?audience=player`, undefined, r.host)).body["readiness"] as { wouldPlay: string[] }).wouldPlay;
-    const start = (extra: Record<string, unknown>, token = r.host) => call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", official: false, party: { revision: 1, index: 0 }, roster, ...extra }, token);
-    expect((await call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", party: { revision: "1", index: 0 }, roster }, r.host)).status).toBe(400);
+    const attempt = { id: "press-0001", sessionRevision: 0 };
+    const start = (extra: Record<string, unknown>, token = r.host) => call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", official: false, party: { revision: 1, index: 0 }, roster, attempt, ...extra }, token);
+    expect((await call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", party: { revision: "1", index: 0 }, roster, attempt }, r.host)).status).toBe(400);
     expect((await start({ official: true })).status).toBe(400);
-    expect((await call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", official: false, party: { revision: 1, index: 0 } }, r.host)).status).toBe(400); // no roster
+    expect((await call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", official: false, party: { revision: 1, index: 0 }, attempt }, r.host)).status).toBe(400); // no roster
+    expect((await call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", official: false, party: { revision: 1, index: 0 }, roster }, r.host)).status).toBe(400); // no request id
     const fewer = await start({});
     expect([fewer.status, fewer.body["code"], fewer.body["expected"], fewer.body["here"]]).toEqual([409, "PARTY_FEWER_THAN_PLANNED", 3, 2]);
     const first = await start({ fewerThanPlanned: true });
@@ -454,7 +458,7 @@ describe("over HTTP", () => {
     expect((await call("POST", `/rooms/${r.id}/party`, { baseRevision: 0, plan: lineup }, r.host)).status).toBe(200);
     expect((await call("POST", `/rooms/${r.id}/party`, { baseRevision: 1, plan: { ...lineup, items: [{ gameId: "closest-wins" }, { gameId: "math-mayhem" }] } }, r.host)).status).toBe(200);
     const roster = ((await call("GET", `/rooms/${r.id}/projection?audience=player`, undefined, r.host)).body["readiness"] as { wouldPlay: string[] }).wouldPlay;
-    const body = { gameId: "closest-wins", official: false, party: { revision: 2, index: 0 }, roster };
+    const body = { gameId: "closest-wins", official: false, party: { revision: 2, index: 0 }, roster, attempt: { id: "press-0001", sessionRevision: 0 } };
     const first = await call("POST", `/rooms/${r.id}/games`, body, r.host);
     expect(first.status).toBe(201);
     const again = new LocalServer({ dataDir });
@@ -464,8 +468,10 @@ describe("over HTTP", () => {
       expect(view["party"]).toMatchObject({ revision: 2, lineup: { expectedPlayers: 3, budgetMinutes: 30, items: [{ gameId: "closest-wins", started: true }, { gameId: "math-mayhem", started: false }] } });
       const retry = await call("POST", `/rooms/${r.id}/games`, body, r.host, at);
       expect([retry.status, retry.body["gameId"], retry.body["replay"]]).toEqual([200, first.body["gameId"], true]);
-      const second = await call("POST", `/rooms/${r.id}/games`, { ...body, gameId: "math-mayhem", party: { revision: 2, index: 1 } }, r.host, at);
-      expect([second.status, second.body["code"]]).toEqual([409, "PLAN_CONFLICT"]);
+      // Item 1 can't start while item 0's game is still on (one active game).
+      const second = await call("POST", `/rooms/${r.id}/games`, { ...body, gameId: "math-mayhem", party: { revision: 2, index: 1 }, attempt: { id: "press-0002", sessionRevision: 1 } }, r.host, at);
+      expect(second.status).toBeGreaterThanOrEqual(400);
+      expect(((await call("GET", `/rooms/${r.id}/projection?audience=player`, undefined, r.host, at)).body["games"] as unknown[]).length).toBe(1);
       expect((await call("POST", `/rooms/${r.id}/party`, { baseRevision: 1, clear: true }, r.host, at)).status).toBe(409);
     } finally {
       await again.close();

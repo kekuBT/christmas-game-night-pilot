@@ -2,6 +2,7 @@
 
 - **Branch:** `claude/stage7-2-session-flow`, stacked on PR #8 at `08bba4d`.
 - **Instruction:** ChatGPT's review and handoff on PR #8 (comment 6776351818, 2026-11-10), under the owner's standing authorization (D-WF-01). It also cleared Stage 7.1 after its own live-site audit of `01fd285`.
+- **Clarification:** ChatGPT's comment 6776484058 on PR #9 accepted the four choices in §5 and asked for three safeguards, now §3.8: a delayed opposite Break/Resume, a retry after a cancelled start, and stricter Play again checks.
 - **Not done here:**
   - host swaps, full theme modernization, Home Screen installation, new games, other queued polish;
   - no change to Family Cup or solo behaviour.
@@ -73,42 +74,48 @@ Everyone else sees the same state. The server holds the progress, so a reload, a
   - `complete`.
 
 ### 3.2 Next game (the lineup's next item)
-- **Request:** `POST /rooms/:id/games` with `party: { revision, index }` and the roster shown, as in Stage 7.1.
+- **Request:** `POST /rooms/:id/games` with `party: { revision, index }` and the roster shown, as in Stage 7.1, plus `attempt: { id, sessionRevision }` (§3.8, required).
 - **What changes:** a new start must be the **next pending item** (no longer only item 0). Index 1 can start only after item 0 completed.
 - **Checks, in order:**
-  1. host or cohost;
+  1. host or cohost (a repeat too);
   2. casual room;
-  3. current revision, item and game;
-  4. **replay:** an item whose game exists returns that game;
-  5. index = next pending;
-  6. **not on a break** (`ON_BREAK`);
-  7. fewer than planned needs an OK;
-  8. reconnecting players are named or waited for;
-  9. the real roster fits;
-  10. `startGame`.
-- **Concurrent Next from the host and a cohost:** the first starts it; the second is that game's replay. A Next racing a Play again: one-active-game refuses the second, with nothing started twice.
+  3. **a press seen before** (its id): the game it started, or `ATTEMPT_ENDED` if that game's briefing was cancelled (§3.8);
+  4. current revision, item and game;
+  5. **replay:** an item whose game exists returns that game;
+  6. made against the current session revision (`SESSION_CONFLICT`);
+  7. index = next pending;
+  8. **not on a break** (`ON_BREAK`);
+  9. fewer than planned needs an OK;
+  10. reconnecting players are named or waited for;
+  11. the real roster fits;
+  12. `startGame`.
+- **Concurrent Next from the host and a cohost:** the first starts it; the second is that game's replay. A Next racing a Play again or a Take a break pressed against the same screen: the second is stale (`SESSION_CONFLICT`), with nothing started twice.
 - **A Next for a replaced or cleared lineup** (old revision) gets `PLAN_CONFLICT`, and nothing starts.
 
 ### 3.3 Play again (rematch)
-- **Request:** `POST /rooms/:id/games` with `rematchOf: <finished game id>`, `official: false`, and the roster shown (required).
+- **Request:** `POST /rooms/:id/games` with `rematchOf: <finished game id>`, `official: false`, the roster shown and `attempt` (all required). With `party` as well, it is refused (400).
 - **The server:**
-  1. host or cohost; casual room;
-  2. the source game exists and is `finished`;
-  3. **replay:** if a game with `rematchOf` = that source exists, return it (a lost reply, a double tap, two hosts);
-  4. not on a break;
-  5. reconnecting players are named or waited for;
-  6. `startGame` with the source's game id, as a new instance with fresh content, as usual.
+  1. host or cohost (a repeat too); casual room;
+  2. **a press seen before:** the game it started, or `ATTEMPT_ENDED` (§3.8);
+  3. the source game exists and is `finished`;
+  4. **replay:** if a game with `rematchOf` = that source exists, return it (a double tap, two hosts);
+  5. made against the current session revision (`SESSION_CONFLICT`);
+  6. **the source is the room's last game:** no game active (one active game), and nothing played after it (`REMATCH_NOT_LATEST`);
+  7. not on a break;
+  8. reconnecting players are named or waited for;
+  9. the people here fit the game (`GAME_DOESNT_FIT`); fewer-than-planned does not apply, since a rematch is not a lineup item;
+  10. `startGame` with the source's game id and the roster shown, as a new instance with fresh content, as usual.
 
-  The new game records `rematchOf`.
+  The new game records `rematchOf`. A cancelled rematch can be pressed again (a new press).
 - **The lineup is untouched:** a rematch never marks or takes an item, even when its source was a lineup game.
 - **Picking by hand** (the lobby's own Start for a game the host picked) also never moves the lineup on.
 
 ### 3.4 Take a break / Resume
-- **Request:** `POST /rooms/:id/break` with `{ on: true | false }`. Host or cohost, casual rooms only.
+- **Request:** `POST /rooms/:id/break` with `{ on: true | false, attempt }`. Host or cohost, casual rooms only.
 - **On:** only when no game is active (`GAME_ACTIVE` otherwise); a break never pauses a clock. Off: any time.
-- **Repeat-safe:** setting the same state again changes nothing.
+- **Repeat-safe** (§3.8): a press seen before is answered with the session as it is now, and changes nothing again. A press made against an older session revision is refused (`SESSION_CONFLICT`). Asking for what is already so changes nothing.
 - **While on a break, every new start is refused** (`ON_BREAK`: Next, Play again, and the lobby's own Start). The host resumes deliberately.
-- **Stored:** `session: { onBreak, breakSince }`, persisted in the room and projected to everyone (TV included).
+- **Stored:** `session: { onBreak, breakSince, revision, ops }`, persisted in the room. Everyone (TV included) sees `{ onBreak, breakSince, revision }`, never the remembered presses.
 - **Joining or reconnecting** never changes it.
 
 ### 3.5 Casual results (client)
@@ -142,6 +149,39 @@ The lobby screen shows "Quick Party: game n of N", Next, "On a break", or "That 
 
   Anything else stays a conflict for the host to decide.
 
+### 3.8 Retries, stale presses and cancelled starts (clarification 6776484058)
+- **Every continuation press** (Next game, Play again, Take a break, Resume, and the lobby's own Start in a casual room) carries `attempt: { id, sessionRevision }`:
+  - `id`: made once per press and kept for that press's retries;
+  - `sessionRevision`: the session revision the screen showed.
+
+  It is required for Next, Play again and the break, and optional for the lobby's own Start (older callers).
+- **The session revision** grows by one with every break change, every game start in the room, and every cancelled briefing. Joins, reconnects and a game ending on its own don't change it.
+- **The server remembers each press that took effect** with its own id, what it asked for, the revision it produced, and the game it started.
+  - The record is persisted with the room and is never projected.
+  - The record is bounded: the newest 64 are kept.
+- **Order:**
+  1. the server authorizes the request (host or cohost), even for a repeat;
+  2. it resolves a press it has seen before. A press it took started a game:
+     - while that game exists (briefing, playing or finished), the server returns it (`replay`), never a new one;
+     - after that game's briefing was cancelled, the server answers `ATTEMPT_ENDED` and starts nothing;
+  3. a press it hasn't seen must be made against the current revision (`SESSION_CONFLICT`); then the action's own checks apply.
+
+  Reusing an id for something else is refused.
+- **Delayed opposite commands:**
+  - Break, then lost, then Resume by another host, then the Break retried: it is recognised, answers "not on a break", and changes nothing.
+  - The same holds the other way round, and across a restart.
+- **A forgotten press:**
+  - A press beyond the newest 64 can't start anything or change the break.
+  - It was made against a revision that has since moved on, at least through its own effect.
+  - So it gets `SESSION_CONFLICT`, unless the item or rematch it asked for already has a game, which is returned.
+- **A cancelled attempt:**
+  - The cancel deletes the game and frees the lineup item, as before.
+  - The press stays remembered, so its retry starts nothing.
+  - The cancel also moves the revision on, so another host's press from before it is stale.
+  - A new press can start the same item or rematch again.
+- **Serialized:** the one-active-game rule, the break, and the session revision are checked and changed in one synchronous step.
+- **The client:** a reply never moves a screen back. Which screen shows (briefing, game or results) comes from the room's projection, never from a start reply. A replayed older game or a late reply only refreshes.
+
 ## 4. Test plan
 - **Unit and HTTP:**
   - **Progression:** next = first pending; item 1 only after item 0 completed; replay before the index rule; cancel → pending at the same place; complete.
@@ -165,7 +205,7 @@ The lobby screen shows "Quick Party: game n of N", Next, "On a break", or "That 
 - **Reporting:** Chromium only; WebKit and real devices are reported as not run.
 
 ## 5. Choices for ChatGPT's attention
-Proceeding with these unless you object.
+Accepted in clarification 6776484058.
 1. **A break blocks every new start until Resume,** including the lobby's own Start, so a break is never ended by accident.
 2. **"Play again" is a rematch of the game just finished,** tied to it (`rematchOf`). A second Play again is a rematch of the rematch.
 3. **No "skip this item" in this slice.** Items are played in order. To change the order, the host edits the lineup (Stage 7.1).
