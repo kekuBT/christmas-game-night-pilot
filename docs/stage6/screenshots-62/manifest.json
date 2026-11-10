@@ -1,15 +1,22 @@
 {
-  "revision": "e218acb8aa9d2354025b78d0590ddc6286a6d9ff",
+  "revision": "89904bdcc2d57fd02a716688838f9c01982f60e0",
   "workingTreeClean": true,
-  "capturedAt": "2026-11-10T15:10:14.655Z",
+  "capturedAt": "2026-11-10T15:58:07.746Z",
   "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
   "shots": [
     {
       "file": "01-solo-shelf-320x640.png",
-      "screen": "Play solo: the three solo games, each with its own personal best (full page)",
+      "screen": "Play solo: the top of the shelf",
       "viewport": "320×640",
       "deviceScaleFactor": 2,
-      "fullPage": true
+      "fullPage": false
+    },
+    {
+      "file": "01b-solo-shelf-connections-320x640.png",
+      "screen": "Play solo: the Word Connections card, its personal best and the note that the best spans boards",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2,
+      "fullPage": false
     },
     {
       "file": "02-pulse-ready-320x640.png",
@@ -55,10 +62,17 @@
     },
     {
       "file": "01-solo-shelf-390x844.png",
-      "screen": "Play solo: the three solo games, each with its own personal best (full page)",
+      "screen": "Play solo: the top of the shelf",
       "viewport": "390×844",
       "deviceScaleFactor": 2,
-      "fullPage": true
+      "fullPage": false
+    },
+    {
+      "file": "01b-solo-shelf-connections-390x844.png",
+      "screen": "Play solo: the Word Connections card, its personal best and the note that the best spans boards",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2,
+      "fullPage": false
     },
     {
       "file": "02-pulse-ready-390x844.png",
@@ -104,10 +118,17 @@
     },
     {
       "file": "01-solo-shelf-1440x900.png",
-      "screen": "Play solo: the three solo games, each with its own personal best (full page)",
+      "screen": "Play solo: the top of the shelf",
       "viewport": "1440×900",
       "deviceScaleFactor": 1,
-      "fullPage": true
+      "fullPage": false
+    },
+    {
+      "file": "01b-solo-shelf-connections-1440x900.png",
+      "screen": "Play solo: the Word Connections card, its personal best and the note that the best spans boards",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1,
+      "fullPage": false
     },
     {
       "file": "02-pulse-ready-1440x900.png",

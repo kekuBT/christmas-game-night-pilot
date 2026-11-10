@@ -181,38 +181,64 @@ Unchanged:
   - **Solo allowlist:** registry `soloPlay` on the three games, with `SOLO_GAME_IDS` derived from it. A solo room refuses any other game with `NOT_A_SOLO_GAME`, HTTP 409, before player minimums are checked (`src/games/registry.ts`, `src/server/room.ts`).
   - **Manifest check:** `validateManifest` requires the manifest's `soloPlay` to match the registry, and a solo game to have a 1-player minimum.
   - **Rules versions:** `PULSE_RULES_VERSION` and `CONNECTIONS_RULES_VERSION`, next to their engines.
+  - Content selection and the abstain handling are unchanged.
 - **Client:**
-  - **The adapter split:** `apps/web/src/solo/soloRules.ts` holds the rules (version, copy, summary from the projection) as plain TypeScript the server-side tests can import. `apps/web/src/solo/soloGames.tsx` adds each game's play screen and review.
+  - **The adapter split:** `apps/web/src/solo/soloRules.ts` holds the rules as plain TypeScript the server-side tests can import: version, copy, `bestNote`, the summary from the projection, and `countsForBest`. `apps/web/src/solo/soloGames.tsx` adds each game's play screen and review.
   - **`Solo.tsx`** is generic, and the play screen is keyed by the round.
+  - **Personal bests:**
+    - a best only from rounds `countsForBest` accepts;
+    - a sat-out round says why it sets none;
+    - the Connections note sits next to its best on the shelf, the start screen and the results.
   - **Solo mode** in `MchezoPulse` and `MchezoConnections`; `PulseRecap` and `ConnectionsSolution` are shared with the multiplayer results.
   - **`SoloSession`:**
     - `intent` returns whether the server took the action;
-    - a refused re-join gives the room up and makes a new one in the same Start;
-    - a personal best is filed only for a round the server finished and the player did not sit out.
+    - a refused re-join gives the room up and makes at most one new room in the same Start, within its time budget.
 - **Copy:** the Connections manifest no longer says it is the only 1-player game.
 
 ### 6.2 Tested
-- **`tests/stage62-solo-shelf.test.ts`, 19 tests:**
-  - **Allowlist:** every non-solo game refused in a solo room; each solo game starts; official play is still refused; casual rooms and player minimums are unchanged; a forged HTTP start gets 409.
-  - **Pulse privacy:** a pattern only while it is memorised, no future pattern, no seed. **Connections privacy:** no group name before the end.
+- **`tests/stage62-solo-shelf.test.ts`, 26 tests:**
+  - **Allowlist:**
+    - every non-solo game is refused in a solo room, and each solo game starts;
+    - official play is still refused;
+    - casual rooms and player minimums are unchanged;
+    - a forged HTTP start gets 409.
+  - **Privacy at each phase boundary:**
+    - **Pulse:** a pattern only while it is memorised, never a later round's; each played round shown back; the seed never.
+    - **Connections:** before any guess, nothing; after one solved group and a near miss, only that group (tiles never carry their group); at the end, the full solution.
   - **Scores through the solo room:** Pulse 960; Connections 450, and 0 after four mistakes.
-  - **Boards:** with the shipped library, 12 then a repeat; with all boards approved, one board (the §5 concern).
-  - **Rules fingerprints** for all three games.
-  - **Summaries** read from real projections.
-  - **Cross-game seat:** Math → Pulse → Connections → Math on one room.
-  - **A lost join reply:** recovered with a new room, never the old id.
-- **Mutation:** with the allowlist check removed, both allowlist tests fail.
-- **`scripts/check-solo-shelf.mjs`, 45 checks:**
+  - **Personal-best eligibility:**
+    - a forged abstain after partial progress (Connections 100, Pulse 110) ends the round and never counts, even replayed or read again;
+    - played-out (0) and time-limit-ended (100) rounds do count;
+    - a round still in play does not.
+  - **Boards:** with the shipped library, 12 then a repeat; with all boards approved, one board (the §5 limitation, kept by decision).
+  - **Rules fingerprints** for all three games, and **summaries** read from real projections.
+  - **Session:**
+    - Math → Pulse → Connections → Math on one room;
+    - the lost-join fallback against the real server: an accepted join whose reply was dropped; 5xx and no answer on the retried join; the fallback's own join refused or lost; its room creation failing; at most one new room per Start; the Start's time budget.
+- **Mutation:**
+  - with the allowlist check removed, both allowlist tests fail;
+  - each of these fails a test: abstain ignored, fallback on a transient failure, a second replacement room, no deadline on the new room.
+- **`scripts/check-solo-shelf.mjs`, 57 checks:**
   - the three-game shelf;
   - Pulse perfect (960), with round 1 by keyboard;
   - Pulse with a slip every round (0; the best stays);
   - Connections solved (450), the first group by keyboard;
-  - Connections out of guesses (0), on a different board, with nothing carried over and all groups missed;
+  - Connections out of guesses (0): a fresh round with nothing carried over, all groups missed;
   - Connections partial (200; 2 found, 2 missed);
   - Math after the others, with one room for everything and each round on the server;
   - one personal best per game; another rules version ignored; blocked storage;
   - Leave mid-Pulse; reload mid-Connections; a second tab's Pulse replacing Connections; Home with no Rejoin;
   - a Connections guess with no reply (fault) that keeps its selection, and then works;
-  - timeouts on a short-clock server: a Pulse round running out, Pulse and Connections ending at their deadlines.
-- **Updated for the three-game shelf:** `check-solo` (now 80 checks) and the Stage 6.1 tests.
-- **Screenshots:** `docs/stage6/screenshots-62/` holds 7 screens at 320, 390 and 1440 px, taken on `e218acb` with a clean tree.
+  - on its own short-clock server with the shipped library: a Pulse round running out, Pulse and Connections ending at their deadlines, and board variety (Play again, and a Start after leaving, each deal an unused board);
+  - a forged abstain over HTTP after partial progress in both games, with the best unchanged after the result, a replayed request and a reload;
+  - the Connections note.
+- **Why check E changed:**
+  - In full gate `20261110-151634-be400fb1-19788` (on `be400fb`, before this work), E failed: "a different board after Play again".
+  - Gate servers approve all content for official play, so a solo room there repeats one board, which is this spec's §3.4 limitation.
+  - E now checks what Play again guarantees on any library; variety is checked in K on the shipped library.
+  - Reproduced locally: on a server in that test mode, E reports the same board; on a server with the shipped library, a different one. Both runs pass 57/57.
+- **Updated for the three-game shelf:** `check-solo` (80 checks) and the Stage 6.1 tests.
+- **Screenshots:**
+  - `docs/stage6/screenshots-62/` holds 8 screens at 320, 390 and 1440 px (24 images), taken on `89904bd` with a clean tree (`manifest.json`).
+  - The shelf is shown as its top and its Word Connections card: the app scrolls an inner container, so a "full page" shot shows only the first screen.
+- **Gates:** the fast and full gate verdicts on the final source SHA are recorded in the commit after it.
