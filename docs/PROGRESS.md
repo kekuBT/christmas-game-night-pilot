@@ -1754,4 +1754,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Placement:** What's next moved right under the result heading on every casual results screen (part K).
 - **Driver fix:** an Impostor-removal flake in `check-quick-party` part C, from Stage 7.1.
 - **Local runs, all passing:** `check-session-flow` 70/70 and `check-quick-party` 68/68; regressions `check-casual`, `check-library`, `check-shuffle`, `check-lobby-mode`, `check-game-night-flow` and `check-briefing`.
-- **Gates:** recorded in the spec §6.4 once run.
+- **Gates on `e65d80c`: both FAILED** (fast `20261110-211133-e65d80ce-5071`, full `20261110-211133-e65d80ce-5056`).
+  - The cause: the seven-day Cup unit test timed out at 5.0 s while both gates ran their unit tests at once.
+  - Fixed in `01cde60` with an explicit 30-second limit on that test. No verdict is claimed for these runs.
+- **Gates on `01cde60`** (fresh clone, clean tree):
+  - fast `20261110-214318-01cde601-21310` PASSED;
+  - full `20261110-214318-01cde601-21321` PASSED, 80/80.

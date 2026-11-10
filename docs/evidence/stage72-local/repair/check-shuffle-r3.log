@@ -1,0 +1,10 @@
+PASS guest sees no shuffle buttons
+PASS guest has no Choose game sheet to open
+PASS surprise me picks a real game as up-next — up-next=Word Connections
+PASS surprise me explains the pick
+PASS smart shuffle picks a real game as up-next — up-next=Trivia Showdown
+PASS shuffling started no game
+PASS manual selection clears the shuffle result
+PASS manual selection sets the chosen game up next
+SHUFFLE ALL PASSED
+exit 0

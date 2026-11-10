@@ -286,7 +286,24 @@ Accepted in clarification 6776484058.
 - **Driver fix, from Stage 7.1:** part C of `check-quick-party` removed the last game of a random lineup. When that was Impostor, part G's "Impostor first" could not succeed (a removed game is left out of the rest of the draft). Part C now removes the last game that isn't Impostor.
 
 ### 6.4 Gates
-**Tested revision:** `acab35f3138e60516916cb588ae28431d4addbbd`. Both runs used a fresh clone with a clean tree (`dirty: []`) and the same source fingerprint (`cdfa0051…`, 425 files).
+**Repair checkpoint (review 6778921208).**
+- **Tested revision:** `01cde601f7f0c64a4efb805e2836541e05406c2c`. Both runs used a fresh clone with a clean tree (`dirty: []`) and the same source fingerprint (`ed0c7586…`, 425 files). The two gates ran at the same time.
+- **Source delta since the first checkpoint `acab35f`:**
+  - `App.tsx`;
+  - the five results components and `WhatsNext.tsx` (placement);
+  - `check-session-flow` (parts J and K) and `check-quick-party` (part C);
+  - `tests/cup-integrity.test.ts` (the test limit).
+
+  The rest is docs.
+
+| Run | Gate | Verdict |
+|---|---|---|
+| `20261110-214318-01cde601-21310` | fast | PASSED, 5/5, 1,253 unit tests |
+| `20261110-214318-01cde601-21321` | full | PASSED, 80/80: `check-session-flow` 70, `check-quick-party` 68, every Family Cup and solo driver |
+
+The seven-day Cup test took 6.27 s and 5.99 s in these runs, so the old 5-second default would have failed again.
+
+**First checkpoint:** tested revision `acab35f3138e60516916cb588ae28431d4addbbd`. Both runs used a fresh clone with a clean tree (`dirty: []`) and the same source fingerprint (`cdfa0051…`, 425 files).
 
 | Run | Gate | Verdict |
 |---|---|---|

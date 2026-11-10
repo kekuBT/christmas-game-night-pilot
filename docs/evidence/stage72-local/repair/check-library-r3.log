@@ -1,0 +1,24 @@
+PASS library opens with the full catalog
+PASS search narrows to the matching game
+PASS clearing search restores the catalog
+PASS advanced filters start folded away, search is on screen
+PASS team filter shows only the team game
+PASS reset restores the catalog
+PASS with no filters left, there is nothing to clear
+PASS duration filter shows only short games (category-sprint, math-mayhem, pattern-pulse)
+PASS player-count filter shows only compatible games (7)
+PASS reset after player filter restores the catalog
+PASS empty state on no match
+PASS the active search is shown as a removable filter
+PASS Clear filters in the empty state restores the catalog
+PASS Clear filters next to the active filters restores the catalog
+PASS library has no start button (browsing never starts)
+PASS host selection returns to the lobby with the game up next
+PASS the library entry left no extra Back step (lobby is at /room)
+PASS selection started no game
+PASS guest can browse the library
+PASS guest sees no select buttons
+PASS guest sees the host-only note
+PASS guest back button returns to the lobby
+LIBRARY ALL PASSED
+exit 0
