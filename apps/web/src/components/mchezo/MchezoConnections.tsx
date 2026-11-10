@@ -12,12 +12,13 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ANSWER_SHAPES } from "../../ui/mchezo/tokens/tokens.js";
 import { Keycap, MchezoWaiting, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
-import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
+import { participationLine, satOutLabel } from "../../ui/mchezo/lib/lifecycle.js";
 import { CONNECTIONS_RULE, connectionsBreakdown } from "../../ui/mchezo/lib/connectionsScore.js";
 import { StandingsList } from "../../ui/mchezo/components/Results.js";
 import { rankStandings } from "../../ui/mchezo/lib/standings.js";
 import { toMzPlayers } from "./adapters.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
+import { playerName } from "../../ui/mchezo/lib/names.js";
 
 interface SolvedGroup { name: string; level: number; tileIds: string[] }
 interface ConnectionsState {
@@ -125,7 +126,7 @@ export function MchezoConnections({ game, publicGame, players, playerId, title, 
   };
 
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} showClock />;
+    return <MchezoWaiting label={satOutLabel(game)} players={players} playerId={playerId} publicGame={publicGame} showClock />;
   }
 
   return (
@@ -174,7 +175,7 @@ export function MchezoConnectionsResults({ game, publicGame, players, playerId, 
   const textOf = (id: string) => tiles.find((t) => t.id === id)?.text ?? id;
   const mine = new Set((st.mySolved ?? []).map((g) => g.name));
   const groups = [...(st.groups ?? [])].sort((a, b) => a.level - b.level);
-  const nameOf = (id: string) => players.find((p) => p.id === id)?.displayName ?? id;
+  const nameOf = (id: string) => playerName(id, players);
   const rows = Object.entries(game.rawScores ?? publicGame?.rawScores ?? {}).map(([id, score]) => ({
     id, name: nameOf(id), score: score as number, you: id === playerId,
     detail: participationLine("word-connections", game.outcome?.participation[id], { you: id === playerId, choseSatOut: id === playerId && game.abstained === true }),

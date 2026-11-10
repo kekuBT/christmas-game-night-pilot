@@ -17,6 +17,7 @@ import { jsPDF } from "jspdf";
 import { useId, useState } from "react";
 import { canvasNoteY, exportFilename, paginateLines, readableFact, selectShareEntries } from "../exportLayout.js";
 import type { LedgerEvent, MemoryEntry, PublicGame, PublicPlayer, RegistryGame } from "../../types.js";
+import { titleFor } from "../../ui/mchezo/lib/names.js";
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
 export type GetFn = <T>(path: string) => Promise<T>;
@@ -27,6 +28,8 @@ export function MemoryScreen(props: {
   roomCode?: string;
   /** The Cup's current day: a new entry is filed under it (it used to be always Day 1). */
   day: number;
+  /** Stage 5.1 (3E): the room's ledger seq from the live projection; the loaded ledger is current when it has reached it. */
+  roomSeq?: number;
   book: MemoryEntry[];
   ledger: LedgerEvent[];
   games: PublicGame[];
@@ -43,21 +46,29 @@ export function MemoryScreen(props: {
   onBack: () => void;
   onMenu: () => void;
 }) {
-  const { roomId, roomCode, day, book, ledger, games, registry, players, bookText, setBookText, exportText, setExportText, post, get, loadMemory, canApprove, onBack, onMenu } = props;
+  const { roomId, roomCode, day, roomSeq, book, ledger, games, registry, players, bookText, setBookText, exportText, setExportText, post, get, loadMemory, canApprove, onBack, onMenu } = props;
   const textId = useId();
   const [exportState, setExportState] = useState<ExportState>({ kind: "idle", text: "" });
   const [addError, setAddError] = useState("");
   const approved = book.filter((e) => e.approved);
   const finishedEvents = ledger.filter((e) => e.type === "game-finished");
   const nameOf = (id: string) => players.find((p) => p.id === id)?.displayName;
-  const title = (gameId: string) => registry.find((g) => g.id === gameId)?.title ?? gameId;
+  const title = (gameId: string) => titleFor(gameId, registry);
+  // Stage 5.1 (3E): the game a new highlight will cite, shown before adding,
+  // and exactly what is sent. While the loaded ledger is behind the room's
+  // (a game just finished), adding waits for the reload instead of citing
+  // the game before it.
+  const target = finishedEvents.at(-1);
+  const targetGame = target?.gameInstanceId ? games.find((g) => g.id === target.gameInstanceId) : undefined;
+  const ledgerSeq = ledger.reduce((m, e) => Math.max(m, e.seq), 0);
+  const syncing = roomSeq !== undefined && ledgerSeq < roomSeq;
 
   /** The recorded final scores of the game(s) an entry cites, by name. */
   const results = (e: MemoryEntry) => e.sourceEventIds.flatMap((id) => {
     const ev = ledger.find((x) => x.eventId === id);
     const g = ev?.gameInstanceId ? games.find((x) => x.id === ev.gameInstanceId) : undefined;
     if (!g?.rawScores) return [];
-    const scores = Object.entries(g.rawScores).sort((a, b) => b[1] - a[1]).map(([pid, v]) => `${nameOf(pid) ?? pid} ${v.toLocaleString("en-US")}`);
+    const scores = Object.entries(g.rawScores).sort((a, b) => b[1] - a[1]).map(([pid, v]) => `${nameOf(pid) ?? "A player"} ${v.toLocaleString("en-US")}`);
     return [`${title(g.gameId)} · Day ${g.day ?? e.day}: ${scores.join(" · ")}`];
   });
 
@@ -155,10 +166,15 @@ export function MemoryScreen(props: {
       <section className="mz-card mz-memory__add" aria-label="Add a highlight">
         <label htmlFor={textId} className="mz-field__label">Highlight text</label>
         <textarea id={textId} className="mz-input mz-memory__text" value={bookText} onChange={(e) => setBookText(e.target.value)} placeholder="e.g. Ada won Math Mayhem in a tie-break" maxLength={280} />
-        <button type="button" className="mz-key mz-key--brand mz-key--md" disabled={!bookText.trim() || finishedEvents.length === 0} onClick={async () => {
+        {target && (
+          <p className="mz-foot mz-memory__target" data-testid="memory-link-target" data-event={target.eventId} aria-live="polite">
+            {syncing ? "Checking for the latest finished game…" : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame ? ` · Day ${targetGame.day ?? day}` : ""}: the last game that finished.</>}
+          </p>
+        )}
+        <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="memory-add" disabled={!bookText.trim() || !target || syncing} onClick={async () => {
           setAddError("");
           try {
-            const src = finishedEvents.slice(-1).map((e) => e.eventId);
+            const src = target ? [target.eventId] : [];
             await post<MemoryEntry>(`/rooms/${roomId}/memory`, { day, text: bookText, sourceEventIds: src });
             setBookText("");
             await loadMemory();

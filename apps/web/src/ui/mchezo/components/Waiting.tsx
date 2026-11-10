@@ -24,8 +24,14 @@ export function MchezoWaiting({ label, players, playerId, publicGame, onTv, foot
   /** Show the deadline countdown here (screens that have no other clock on show). */
   showClock?: boolean;
 }) {
-  const done = publicGame?.submittedCount ?? 0;
-  const total = publicGame?.totalPlayers ?? players.length;
+  // Stage 5.1 (O-07): the ring shows the most specific count the server
+  // gives: finished the game, or answered this question/round; otherwise
+  // started. The label always says which.
+  const pr = publicGame?.progress;
+  const total = pr?.total ?? publicGame?.totalPlayers ?? players.length;
+  const started = pr?.started ?? publicGame?.submittedCount ?? 0;
+  const kind: "finished" | "now" | "started" = pr?.finished !== undefined ? "finished" : pr?.answeredNow !== undefined ? "now" : "started";
+  const done = kind === "finished" ? pr!.finished! : kind === "now" ? pr!.answeredNow! : started;
   const mzPlayers = toMzPlayers(players);
   // S3-TRV-02: "Audit Guest" and "Audit Third" no longer both read "Au…".
   const short = shortNames(mzPlayers);
@@ -50,11 +56,15 @@ export function MchezoWaiting({ label, players, playerId, publicGame, onTv, foot
         })}
         <div className="mz-wait__center" role="status" aria-live="polite">
           <span className="mz-wait__count">{done}<small>/{total}</small></span>
-          {/* S3-TRV-01: this counts players who have STARTED (answered at least once, or sat out), not who has finished. */}
-          <span className="mz-wait__label">{done < total ? "have started" : "all have started"}</span>
+          {/* S3-TRV-01 / Stage 5.1: the label says exactly what the number counts. */}
+          <span className="mz-wait__label" data-testid="mz-wait-label">{kind === "finished" ? (done < total ? "have finished" : "all finished") : kind === "now" ? (done < total ? "are in this round" : "all in this round") : (done < total ? "have started" : "all have started")}</span>
         </div>
       </div>
-      <p className="mz-foot" data-testid="mz-wait-meaning">Everyone goes at their own pace. “Started” means they’ve answered at least once or chosen to sit out; it doesn’t mean they’ve finished.</p>
+      <p className="mz-foot" data-testid="mz-wait-meaning">{kind === "finished"
+        ? `Everyone goes at their own pace. ${done} of ${total} ${done === 1 ? "has" : "have"} finished; ${started} of ${total} ${started === 1 ? "has" : "have"} started.`
+        : kind === "now"
+          ? `${done} of ${total} ${done === 1 ? "has" : "have"} answered this one (or sat it out). Counts only: nobody sees who.`
+          : "Everyone goes at their own pace. “Started” means they’ve answered at least once or chosen to sit out; it doesn’t mean they’ve finished."}</p>
       <p className="mz-foot">{footNote ?? "The reveal plays right here when the game finishes."}</p>
       <PresenceNote players={players} participants={publicGame?.players} youId={playerId} />
       {onTv && <div style={{ padding: "0 16px 16px" }}><button type="button" className="mz-chip-btn" data-testid="mz-tv-stage" onClick={onTv}>TV stage</button></div>}

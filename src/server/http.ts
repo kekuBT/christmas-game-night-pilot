@@ -23,6 +23,9 @@ class PersistError extends Error {
   }
 }
 
+/** Stage 5.1: how often every open socket hears "alive" (clients judge staleness after 8 s). */
+export const ALIVE_MS = 4_000;
+
 export interface ServerOptions {
   port?: number;
   dataDir?: string;
@@ -127,6 +130,18 @@ export class LocalServer {
   private nudges = new Map<string, { fromId: string; targetId: string; ts: number }[]>();
   private nudgeStamps = new Map<string, number[]>();
   static readonly REACTION_SET = ["🎄", "❄️", "🎉", "👏", "😂", "🔥"];
+  /**
+   * Stage 5.1 (O-07): each room's revision, sent with every projection and
+   * bumped on every broadcast (every change the room is told about), so a
+   * phone can tell an older poll reply from a newer push even when the
+   * ledger `seq` hasn't moved (e.g. a Majority Rules round changing). Kept in
+   * memory only; it starts from the clock at startup, so it keeps rising
+   * across a restart. A change that isn't broadcast just isn't bumped: the
+   * reply is then shown as before, never frozen.
+   */
+  private revs = new Map<string, number>();
+  private readonly revBase = Date.now();
+  private revOf(roomId: string): number { return this.revs.get(roomId) ?? this.revBase; }
   private projectFor(room: RoomEngine, audience: "player" | "tv" | "host" | "cohost" | "spectator", actorId?: string, clientProtocol?: number): Record<string, unknown> {
     const now = Date.now();
     const recent = (this.reactions.get(room.id) ?? []).filter((r) => now - r.ts < 15000);
@@ -137,7 +152,7 @@ export class LocalServer {
     // view, never private state. The engine's "tv" audience is that projection.
     const engineAudience = audience === "spectator" ? "tv" : audience;
     const plan = this.lobbyPlans.get(room.id);
-    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(plan ? { upNext: plan } : {}) };
+    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), rev: this.revOf(room.id), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(plan ? { upNext: plan } : {}) };
     // Host-assisted recovery requests: host/cohost only. Shows the seat and
     // the match code to compare; never the requester's secret.
     const me = actorId ? room.players.get(actorId) : undefined;
@@ -166,6 +181,8 @@ export class LocalServer {
 
   readonly clock: () => number;
   private heartbeat: ReturnType<typeof setInterval> | null = null;
+  /** Stage 5.1: a small "alive" frame on every socket, so a screen can tell a quiet room from a dead link. */
+  private aliveTimer: ReturnType<typeof setInterval> | null = null;
   private lifecycleTimer: ReturnType<typeof setInterval> | null = null;
   private readonly lifecycleScale: number;
   private readonly newCupTiming: 1 | 2;
@@ -200,6 +217,8 @@ export class LocalServer {
       // One timer for the whole server (not per player), unref'd so it never keeps the process alive.
       this.heartbeat = setInterval(() => this.heartbeatTick(), beat);
       this.heartbeat.unref();
+      this.aliveTimer = setInterval(() => this.aliveTick(), ALIVE_MS);
+      this.aliveTimer.unref();
     }
     const sweep = opts.lifecycleSweepMs === undefined ? 1_000 : opts.lifecycleSweepMs;
     if (sweep !== null) {
@@ -208,6 +227,17 @@ export class LocalServer {
     }
     // A restart processes everything that fell due while the server was down.
     this.lifecycleSweep();
+  }
+
+  /**
+   * Stage 5.1 (S5-AUD-04/07): tell every open socket the server is there.
+   * Pushes only happen when the room changes, so a quiet room was
+   * indistinguishable from a dead link; screens now count any frame as live.
+   * No room data in it.
+   */
+  private aliveTick(): void {
+    const frame = JSON.stringify({ kind: "alive", at: this.clock() });
+    for (const { ws } of this.sockets) if (ws.readyState === 1) { try { ws.send(frame); } catch { /* the heartbeat cleans up dead sockets */ } }
   }
 
   /** Process due game deadlines in every room; save and broadcast rooms that changed. */
@@ -374,6 +404,7 @@ export class LocalServer {
 
   async close(): Promise<void> {
     if (this.heartbeat) clearInterval(this.heartbeat);
+    if (this.aliveTimer) clearInterval(this.aliveTimer);
     if (this.lifecycleTimer) clearInterval(this.lifecycleTimer);
     for (const s of this.sockets) s.ws.close();
     this.sockets.clear();
@@ -409,7 +440,9 @@ export class LocalServer {
   }
 
   private send(res: ServerResponse, status: number, body: unknown): void {
-    res.writeHead(status, { "content-type": "application/json" });
+    // Stage 5.1: room state is per-viewer and changes constantly: never cached
+    // by a browser or a proxy (a cached projection is a stale or someone else's screen).
+    res.writeHead(status, { "content-type": "application/json", "cache-control": "no-store" });
     res.end(JSON.stringify(body));
   }
 
@@ -1152,6 +1185,7 @@ export class LocalServer {
   private broadcast(roomId: string): void {
     const room = this.rooms.get(roomId);
     if (!room) return;
+    this.revs.set(roomId, this.revOf(roomId) + 1);
     for (const { ws, meta } of this.sockets) {
       if (meta.roomId !== roomId) continue;
       if (ws.readyState === 1) {

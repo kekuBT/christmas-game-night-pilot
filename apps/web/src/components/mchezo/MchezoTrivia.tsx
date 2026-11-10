@@ -9,7 +9,7 @@
 // WaitingCircle is therefore not used here; the ring below reuses the
 // approved mz-wait styles with an honest count in the centre and
 // PlayerTokens that carry only offline badges.
-import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
+import { satOutLabel, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnswerDistribution, AnswerGrid, Keycap, MchezoWaiting, PhoneScreen, ResultCard, Stamp, StandingsList } from "../../ui/mchezo/index.js";
 import { GameIntroScreen, QuestionScreen } from "../../ui/mchezo/index.js";
@@ -86,7 +86,7 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
 
   // Sat out: the server records whole-game abstention; show the wait, not Q1.
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} onTv={onTv} showClock />;
+    return <MchezoWaiting label={satOutLabel(game)} players={players} playerId={playerId} publicGame={publicGame} onTv={onTv} showClock />;
   }
   // Just answered: locked view until the player moves on. If the poll has
   // not landed yet (answer not in myAnswers), fall through to the question

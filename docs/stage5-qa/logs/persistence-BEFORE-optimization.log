@@ -1,0 +1,24 @@
+PASS 4 players: every stroke batch was accepted and stored — {"acked":120,"pieces":120}
+PASS 6 players: every stroke batch was accepted and stored — {"acked":120,"pieces":120}
+PASS 10 players: every stroke batch was accepted and stored — {"acked":120,"pieces":120}
+
+PERSISTENCE TABLE (one busy drawing turn: 120 batches × 40 points at 3/s)
+| players | seconds | batches | room saves (file replaced) | MB to disk (block writes) | MB through write/send syscalls (disk + network) | room file KB (as compact JSON) | .prev KB | server CPU % | RSS MB | WS KB per phone | WS frames per phone |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 4 | 40.3 | 120 | 159 | 52.9 | 81.2 | 306 (68) | 304 | 2 | 87 | 7100 | 169 |
+| 6 | 40.3 | 120 | 185 | 64.5 | 115.1 | 317 (74) | 315 | 2.6 | 85 | 8372 | 195 |
+| 10 | 40.3 | 120 | 237 | 89.3 | 200.1 | 337 (85) | 334 | 4.4 | 81 | 10930 | 247 |
+PASS restart mid-turn: the whole drawing is back — {"beforeStop":30,"afterStart":30}
+PASS restart mid-turn: the drawer can keep drawing — {"accepted":true,"result":{"points":1240}}
+PASS kill 1: the room file is complete JSON and the room loads — {"valid":true,"stored":6}
+PASS kill 1: every acknowledged batch survived (6 acknowledged, 6 stored) — {"acked":6,"stored":6}
+PASS kill 2: the room file is complete JSON and the room loads — {"valid":true,"stored":8}
+PASS kill 2: every acknowledged batch survived (7 acknowledged, 8 stored) — {"acked":7,"stored":8}
+PASS kill 3: the room file is complete JSON and the room loads — {"valid":true,"stored":10}
+PASS kill 3: every acknowledged batch survived (9 acknowledged, 10 stored) — {"acked":9,"stored":10}
+PASS kill 4: the room file is complete JSON and the room loads — {"valid":true,"stored":16}
+PASS kill 4: every acknowledged batch survived (16 acknowledged, 16 stored) — {"acked":16,"stored":16}
+PASS kill 5: the room file is complete JSON and the room loads — {"valid":true,"stored":20}
+PASS kill 5: every acknowledged batch survived (20 acknowledged, 20 stored) — {"acked":20,"stored":20}
+  temp files left behind by the kills: 0 (ignored on load, never read as a room)
+PERSISTENCE MEASUREMENT ALL PASSED

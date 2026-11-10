@@ -286,6 +286,8 @@ export const drawModule: GameModule<DrawState> = {
       amDrawing: t.drawer === actorId,
       myCorrect: t.correct.includes(actorId),
       myGuesses: t.guessCounts[actorId] ?? 0,
+      // Stage 5.1 (3D): said up front, not only once the cap is hit. Own count only.
+      guessesLeft: Math.max(0, DRAW_LIMITS.guessesPerTurn - (t.guessCounts[actorId] ?? 0)),
       mySkipped: t.skipped.includes(actorId),
       myTotal: this.scores(s, [actorId])[actorId] ?? 0,
     };

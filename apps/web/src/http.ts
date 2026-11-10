@@ -18,6 +18,17 @@ export async function readJson<T>(r: Response): Promise<T> {
   return body as T;
 }
 
+/**
+ * The TV's poll reply: a 401 means its spectator session is gone; any other
+ * error status is skipped (the next poll tries again); otherwise the body,
+ * read as the server's own JSON. Read inside the poll's timeout (pollFresh).
+ */
+export async function readSpectatorReply(r: Response): Promise<{ kind: "expired" } | { kind: "skip" } | { kind: "body"; body: unknown }> {
+  if (r.status === 401) return { kind: "expired" };
+  if (!r.ok) return { kind: "skip" };
+  return { kind: "body", body: await readJson<unknown>(r) };
+}
+
 /** A room projection, as the server sends it (players and games are always lists). */
 export function isProjection(x: unknown): boolean {
   if (!x || typeof x !== "object" || Array.isArray(x)) return false;
@@ -40,12 +51,17 @@ export function isProjection(x: unknown): boolean {
  * can never freeze the screen; pushes are always applied.
  */
 export function isOvertakenReply(
-  reply: { roomId?: unknown; seq?: unknown },
-  shown: { roomId?: string; seq?: number } | null,
+  reply: { roomId?: unknown; seq?: unknown; rev?: unknown },
+  shown: { roomId?: string; seq?: number; rev?: number } | null,
   newerShownInFlight: boolean,
 ): boolean {
   if (!newerShownInFlight || !shown) return false;
   if (typeof reply.roomId !== "string" || reply.roomId !== shown.roomId) return false;
+  // Stage 5.1 (O-07): the room's revision moves on EVERY change the room is
+  // told about; `seq` only on ledger events, so within a game (a Majority
+  // Rules round, a Closest question) an older reply carried the same seq and
+  // rolled the screen back. Use the revision when both sides have it.
+  if (typeof reply.rev === "number" && typeof shown.rev === "number") return reply.rev < shown.rev;
   if (typeof reply.seq !== "number" || typeof shown.seq !== "number") return false;
   return reply.seq < shown.seq;
 }

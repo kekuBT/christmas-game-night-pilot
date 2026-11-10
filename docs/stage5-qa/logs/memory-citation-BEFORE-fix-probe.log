@@ -1,0 +1,3 @@
+BEFORE PROBE: page open across game 2's end; the new entry cites ["evt-11"]; game 1 = evt-11, game 2 = evt-19
+FAIL Memory (before): the entry cites game 2, the game that just finished — cites evt-11 — game 1 (the previous game)
+FAIL Memory (before): the page said which game it would cite

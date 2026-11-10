@@ -556,3 +556,52 @@ Owner direction: "MCHEZO — OVERNIGHT CONTINUATION: FINISH STAGE 4, THEN STAGE 
   - Bluff Battle needs free-text answers shown to the room. That needs a moderation decision and a careful anonymity model, which shouldn't be rushed overnight.
 - **D-S5-12 The intent replay store keeps the latest 4,000 per room** (review R6). Oldest go first. A retry comes seconds after its original, so replays are unaffected; the room file stops growing without bound.
 - **D-S5-13 Drivers read the catalogue from `/games`.** The library, Stage 2 and Mchezo drivers no longer hard-code the number of games. Whole-registry drivers (f5, e2e) play new games as Practice through `scripts/lib/stage5-games.mjs`.
+
+## Stage 5.1: combined live audit repair sprint (2026-11-09, branch `claude/stage5-audit-repairs`, from the Stage 5 head `fa823de`)
+
+All reversible technical decisions. None changes scoring, timing, the Cup, content approvals or the Official/Practice rules. Full account: `docs/stage5-qa/README.md`.
+
+- **D-S51-01 A screen knows when it may be stale** (S5-AUD-04, S5-AUD-07).
+  - Polls time out after 6 s.
+  - A screen with nothing fresh for 8 s says so, and closes its socket so it reconnects.
+  - The server sends an `alive` frame every 4 s.
+  - API replies say `no-store`.
+  - *Rejected:* a blind periodic refresh, which would hide the failure instead of detecting it.
+- **D-S51-02 Drafts belong to one game instance and one server phase** (O-02).
+  - The older panel is mounted per `draftKey`: the game id plus the server's `phaseKey`.
+  - A failed send keeps its text, because the key doesn't change.
+  - *Rejected:* clearing inputs on every projection, which would wipe a draft on a harmless refresh.
+- **D-S51-03 A player's own accepted event ids are in their projection** (2C).
+  - The server keeps the last 16 per player, in memory, rebuilt from the saved replay store on restore.
+  - The phone uses them to resolve a "couldn't confirm" line.
+  - *Rejected:* resending the failed action automatically, which would act on the player's behalf after a phase may have changed.
+- **D-S51-04 Every projection carries a room revision** (O-07).
+  - `rev` is bumped on every broadcast and starts from the clock at server start.
+  - The overtaken-reply guard prefers it to the ledger `seq`. The `seq` keeps its ledger meaning.
+  - A change that isn't broadcast isn't bumped, so it falls back to the old behaviour and never freezes the screen.
+- **D-S51-05 Progress counts come from each game's own completion rules** (O-07): `started`, `answeredNow`, `finished`. Counts only, never who. Every label says what its number counts.
+- **D-S51-06 History entries record where in-app Back lands** (3E).
+  - `backTo(target)` steps back only when the entry beneath is the target; otherwise it replaces the entry with the target.
+  - Browser Back is unchanged: Home with Rejoin still sits under a linked room (S3-NAV-02).
+- **D-S51-07 The room's Library reopens with this tab's last view** (3E). Per tab (sessionStorage), always shown with its "Clear filters".
+- **D-S51-08 The Memory Book follows the room's ledger** (3E).
+  - It reloads when the ledger `seq` moves.
+  - It shows which game a highlight will cite.
+  - Adding waits while its copy is behind, and sends exactly the shown game.
+- **D-S51-09 Flag text alternatives never name an option** (O-12).
+  - The source is the pack's accessibility note, else the explanation before its final colon, else a generic line.
+  - Any candidate that contains an option is dropped.
+  - Verified in Chromium's accessibility tree only.
+- **D-S51-10 Room snapshots are compact JSON** (Phase 4).
+  - About 4× less written per save on a busy drawing.
+  - Atomic write, fsync, rename and `.prev` are unchanged. Old indented files still load.
+  - *Deferred:* hard-link `.prev` rotation, and drawing deltas over the socket (the larger cost, needing protocol work).
+- **D-S51-11 Duration estimates must not exceed the hard limit by more than the briefing and results.**
+  - Category Sprint is now 5 (it was 10; the limit is 4), and Geography is 7 (it was 12; the limit is 6).
+  - Impostor, Trivia, Who Said That and Guess the Year are listed for the owner rather than changed silently.
+- **D-S51-12 Charades says the actor's own team guesses**, which matches its scoring (Correct gives +100 to the actor's team). The mechanic is unchanged. Whether the other team may guess is the owner's call.
+- **D-S51-13 Pattern Pulse: clearer interface, same rules.**
+  - Time left above the keys, an "only counts once locked" line, a highlighted Lock.
+  - The measurements don't support a longer window.
+  - Auto-lock at expiry is recommended to the owner, not implemented.
+- **D-S51-14 The Math Mayhem polling residual is documented, not compensated.** About 2 s when only polling delivers. Any compensation is a scoring-policy change (README §12).

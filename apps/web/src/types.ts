@@ -63,6 +63,12 @@ export interface PublicGame extends LifecycleFields {
   players: string[];
   submittedCount?: number;
   totalPlayers?: number;
+  /**
+   * Stage 5.1 (O-07): counts only, from the server. started = acted at least
+   * once; answeredNow = answered the current question (Closest Wins);
+   * finished = done with the whole game (self-paced quizzes, Guess the Year).
+   */
+  progress?: { started: number; total: number; answeredNow?: number; finished?: number };
   state?: unknown;
   questions?: { id: string; prompt: string; options: string[]; correctAnswer?: number }[];
   rawScores?: Record<string, number>;
@@ -143,13 +149,16 @@ export interface Projection {
   achievements?: Achievement[];
   ceremony?: Ceremony;
   seq: number;
+  /** Stage 5.1 (O-07): the room's revision, bumped on every broadcast (see isOvertakenReply). */
+  rev?: number;
   reactions?: { emoji: string; sender: string; ts: number }[];
   reactionsMuted?: boolean;
   /** Connected spectators only. Never part of player counts or standings. */
   spectatorCount?: number;
   /** Player ids that nudged me in the last 10s (ephemeral, target-only). */
   nudgedBy?: string[];
-  me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean; hasRecoveryCode?: boolean };
+  /** acceptedEventIds (Stage 5.1, 2C): this player's own recently accepted actions, newest last. */
+  me?: { id: string; displayName: string; isHost: boolean; isCohost: boolean; hasRecoveryCode?: boolean; acceptedEventIds?: string[] };
   /** Seat recoveries in the last few minutes, visible to everyone (accountability). */
   notices?: RoomNotice[];
   /** Host/cohost only: devices asking to recover a seat. */
@@ -228,6 +237,8 @@ export interface QuizQuestion {
   correctIndex?: number;
   /** E3: only with correctIndex (finished games). */
   explanation?: string;
+  /** Stage 5.1 (3F): Geography flag questions: the picture described, never naming an option. */
+  imageAlt?: string;
 }
 
 /** Game-specific state, as projected by the server. All fields optional: each game uses a subset. */
@@ -255,6 +266,9 @@ export interface GameState {
   myState?: { mistakes: number; solved: string[]; guessed: string[] };
   actor?: string;
   teamScores?: number[];
+  /** Charades (Stage 5.1): player ids per team (team A = 0, team B = 1), and the acting team. */
+  teams?: string[][];
+  actorTeam?: number;
   passesThisTurn?: number;
   myGuess?: number;
   unit?: string;
@@ -262,6 +276,8 @@ export interface GameState {
   myGuesses?: Record<string, number>;
   questions?: QuizQuestion[];
   myAnswers?: Record<string, number>;
+  /** Category Sprint (Stage 5.1): your own answers for the current round, once the server has them. */
+  mySubmission?: string[];
 }
 
 /** Narrow an unknown JSON value to a record, or return an empty record. */

@@ -1,0 +1,45 @@
+PULSE TIMING TABLE
+| size | round | shapes | window (ms) | screen late (ms) | entry at 0.7 s/tap (ms) | locked after input (ms) | spare (ms) | keys + Lock on screen | time shown | points |
+| 320×568 | 1 | 3 | 16500 | 567 | 2260 | 2333 | 13600 | yes | true | 110 |
+| 320×568 | 2 | 4 | 18000 | 344 | 2969 | not locked | — | yes | true | 0 (missed: 0 points) |
+| 375×667 | 1 | 3 | 16500 | 555 | 2249 | 2326 | 13619 | yes | true | 110 |
+| 375×667 | 2 | 4 | 18000 | 368 | 2946 | not locked | — | yes | true | 0 (missed: 0 points) |
+| 390×844 | 1 | 3 | 16500 | 557 | 2226 | 2276 | 13667 | yes | true | 110 |
+| 390×844 | 2 | 4 | 18000 | 340 | 2993 | not locked | — | yes | true | 0 (missed: 0 points) |
+| 430×932 | 1 | 3 | 16500 | 569 | 2245 | 2330 | 13601 | yes | true | 110 |
+| 430×932 | 2 | 4 | 18000 | 347 | 2931 | not locked | — | yes | true | 0 (missed: 0 points) |
+| 375×667 reduced motion | 1 | 3 | 16500 | 543 | 2214 | 2283 | 13674 | yes | true | 110 |
+| 375×667 reduced motion | 2 | 4 | 18000 | 344 | 2935 | not locked | — | yes | true | 0 (missed: 0 points) |
+PASS 320×568 round 1: the answer screen appears within 1 s of the memorise deadline — 567 ms
+PASS 320×568 round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 320×568 round 1: the time left is shown near the keys
+PASS 320×568 round 2: the answer screen appears within 1 s of the memorise deadline — 344 ms
+PASS 320×568 round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 320×568 round 2: the time left is shown near the keys
+PASS 375×667 round 1: the answer screen appears within 1 s of the memorise deadline — 555 ms
+PASS 375×667 round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 375×667 round 1: the time left is shown near the keys
+PASS 375×667 round 2: the answer screen appears within 1 s of the memorise deadline — 368 ms
+PASS 375×667 round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 375×667 round 2: the time left is shown near the keys
+PASS 390×844 round 1: the answer screen appears within 1 s of the memorise deadline — 557 ms
+PASS 390×844 round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 390×844 round 1: the time left is shown near the keys
+PASS 390×844 round 2: the answer screen appears within 1 s of the memorise deadline — 340 ms
+PASS 390×844 round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 390×844 round 2: the time left is shown near the keys
+PASS 430×932 round 1: the answer screen appears within 1 s of the memorise deadline — 569 ms
+PASS 430×932 round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 430×932 round 1: the time left is shown near the keys
+PASS 430×932 round 2: the answer screen appears within 1 s of the memorise deadline — 347 ms
+PASS 430×932 round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 430×932 round 2: the time left is shown near the keys
+PASS 375×667 reduced motion round 1: the answer screen appears within 1 s of the memorise deadline — 543 ms
+PASS 375×667 reduced motion round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 375×667 reduced motion round 1: the time left is shown near the keys
+PASS 375×667 reduced motion round 2: the answer screen appears within 1 s of the memorise deadline — 344 ms
+PASS 375×667 reduced motion round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+PASS 375×667 reduced motion round 2: the time left is shown near the keys
+PASS a complete entry not locked in by the end is recorded as missed (0), as designed — see the recommendation
+PULSE TIMING ALL PASSED
+rc=0

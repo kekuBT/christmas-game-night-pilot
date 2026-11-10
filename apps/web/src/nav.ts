@@ -13,7 +13,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parseRoute, routeUrl, type Route, type Sheet } from "./ui/mchezo/lib/routes.js";
 
-interface Entry { mz: true; sheet: boolean; depth: number }
+/**
+ * `under` (Stage 5.1, 3E): the address in-app Back from this entry lands on
+ * (the screen beneath it; for a sheet, the screen beneath the sheet's
+ * screen), and `base` for a sheet: the screen it covers. Lets backTo() step
+ * back only when that really is the screen it promises (the room's Library
+ * says "Back to lobby", not "back to whatever came before").
+ */
+interface Entry { mz: true; sheet: boolean; depth: number; under?: string; base?: string }
 const read = () => parseRoute(location.pathname, location.search);
 const entry = (): Entry | null => {
   const s = history.state as Partial<Entry> | null;
@@ -26,7 +33,7 @@ export function stampEntry(): void {
   // A reloaded page with a sheet open was not pushed by this page load's
   // sheet opener; keep its depth, but treat the sheet as not pushed unless
   // there is an entry of ours under it.
-  history.replaceState({ mz: true, sheet: !!here?.sheet && (here?.depth ?? 0) > 0, depth: here?.depth ?? 0 } satisfies Entry, "", location.pathname + location.search);
+  history.replaceState({ mz: true, sheet: !!here?.sheet && (here?.depth ?? 0) > 0, depth: here?.depth ?? 0, ...(here?.under !== undefined ? { under: here.under } : {}), ...(here?.base !== undefined ? { base: here.base } : {}) } satisfies Entry, "", location.pathname + location.search);
 }
 
 /**
@@ -44,7 +51,7 @@ export function anchorHomeBelow(): void {
   const url = location.pathname + location.search;
   if (url === "/") return;
   history.replaceState({ mz: true, sheet: false, depth: 0 } satisfies Entry, "", "/");
-  history.pushState({ mz: true, sheet: false, depth: 1 } satisfies Entry, "", url);
+  history.pushState({ mz: true, sheet: false, depth: 1, under: "/" } satisfies Entry, "", url);
 }
 
 export function useRoute() {
@@ -74,7 +81,8 @@ export function useRoute() {
     if (opts.replace && here?.sheet && here.depth > 0 && !opts.sheet) {
       const onPop = () => {
         removeEventListener("popstate", onPop);
-        history.replaceState({ mz: true, sheet: false, depth: entry()?.depth ?? depth - 1 } satisfies Entry, "", url);
+        const screen = entry();
+        history.replaceState({ mz: true, sheet: false, depth: screen?.depth ?? depth - 1, ...(screen?.under !== undefined ? { under: screen.under } : {}) } satisfies Entry, "", url);
         setState(read());
       };
       addEventListener("popstate", onPop);
@@ -82,8 +90,13 @@ export function useRoute() {
       return;
     }
     const replace = opts.replace || (!!here?.sheet && !opts.sheet);
-    if (replace) history.replaceState({ mz: true, sheet: !!opts.sheet && !!here?.sheet, depth } satisfies Entry, "", url);
-    else history.pushState({ mz: true, sheet: !!opts.sheet, depth: depth + 1 } satisfies Entry, "", url);
+    const current = location.pathname + location.search;
+    // What in-app Back from the new entry lands on: replacing a screen keeps
+    // its own; replacing a sheet with a screen puts the new screen over the
+    // sheet's screen; pushing puts it over the current screen.
+    const under = replace ? (here?.sheet && !opts.sheet ? here.base : here?.under) : current;
+    if (replace) history.replaceState({ mz: true, sheet: !!opts.sheet && !!here?.sheet, depth, ...(under !== undefined ? { under } : {}), ...(opts.sheet && here?.base !== undefined ? { base: here.base } : {}) } satisfies Entry, "", url);
+    else history.pushState({ mz: true, sheet: !!opts.sheet, depth: depth + 1, ...(opts.sheet ? { under: here?.under, base: current } : { under }) } satisfies Entry, "", url);
     setState(read());
   }, []);
 
@@ -93,8 +106,9 @@ export function useRoute() {
     const url = routeUrl(stateRef.current.route, sheet, game ?? null);
     if (url === location.pathname + location.search) return;
     // A sheet opened from another sheet replaces it (one sheet at a time, one Back to close).
-    if (here?.sheet) history.replaceState({ mz: true, sheet: true, depth: here.depth } satisfies Entry, "", url);
-    else history.pushState({ mz: true, sheet: true, depth: (here?.depth ?? 0) + 1 } satisfies Entry, "", url);
+    const current = location.pathname + location.search;
+    if (here?.sheet) history.replaceState({ mz: true, sheet: true, depth: here.depth, ...(here.under !== undefined ? { under: here.under } : {}), ...(here.base !== undefined ? { base: here.base } : {}) } satisfies Entry, "", url);
+    else history.pushState({ mz: true, sheet: true, depth: (here?.depth ?? 0) + 1, ...(here?.under !== undefined ? { under: here.under } : {}), base: current } satisfies Entry, "", url);
     setState(read());
   }, []);
 
@@ -116,5 +130,18 @@ export function useRoute() {
     else navigate(fallback, { replace: true });
   }, [navigate]);
 
-  return { route: state.route, sheet: state.sheet, game: state.game, navigate, openSheet, closeSheet, back };
+  /**
+   * Stage 5.1 (3E): in-app Back that promises a particular screen ("Back to
+   * lobby"). Steps back only when the entry beneath is that screen;
+   * otherwise (a tab opened straight onto this screen, with Home put beneath
+   * it) replaces this entry with it, so the promise holds.
+   */
+  const backTo = useCallback((target: Route) => {
+    const here = entry();
+    const steps = here?.sheet ? 2 : 1;
+    if ((here?.depth ?? 0) >= steps && here?.under === routeUrl(target, null, null)) history.go(-steps);
+    else navigate(target, { replace: true });
+  }, [navigate]);
+
+  return { route: state.route, sheet: state.sheet, game: state.game, navigate, openSheet, closeSheet, back, backTo };
 }

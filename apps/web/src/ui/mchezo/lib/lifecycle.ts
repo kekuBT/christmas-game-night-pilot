@@ -51,7 +51,9 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   // Stage 5 (Practice-only games).
   "majority-rules": { verb: "Predicted in", noun: ["round", "rounds"] },
   "pattern-pulse": { verb: "Answered", noun: ["round", "rounds"] },
-  "draw-guess": { verb: "Drew or guessed in", noun: ["turn", "turns"] },
+  // Stage 5.1 (3D): the count is turns you drew in, or guessed RIGHT in
+  // (src/games/modules/draw.ts participation); a wrong guess doesn't count.
+  "draw-guess": { verb: "Drew or guessed right in", noun: ["turn", "turns"] },
 };
 
 /**
@@ -70,7 +72,7 @@ export function participationLine(gameId: string, p: GameParticipation | undefin
   }
   if (p.done === 0) {
     if (opts.you && opts.choseSatOut) return "You chose to sit this one out";
-    return gameId === "caption-clash" ? "Did not submit a caption" : gameId === "category-sprint" ? "Did not submit answers" : gameId === "closest-wins" ? "Did not submit a guess" : `Did not answer (0 of ${p.of})`;
+    return gameId === "caption-clash" ? "Did not submit a caption" : gameId === "category-sprint" ? "Did not submit answers" : gameId === "closest-wins" ? "Did not submit a guess" : gameId === "draw-guess" ? `No drawings or right guesses (0 of ${p.of})` : `Did not answer (0 of ${p.of})`;
   }
   return `${w.verb} ${p.done} of ${p.of} ${noun}`;
 }
@@ -85,4 +87,16 @@ export function outcomeLines(o: GameOutcome | undefined, official: boolean | und
     : "This game was voided because of a technical problem.";
   const counts = o.countsOfficially ? "Counts toward the Family Cup." : official ? "Does not count toward the Family Cup." : "Practice game — does not count toward the Family Cup.";
   return { headline, counts, ...(o.note ? { note: o.note } : {}) };
+}
+
+/**
+ * Stage 5.1 (3D): the waiting line after a whole-game sit-out. "You sat this
+ * one out" only when nothing had been answered; otherwise "the rest".
+ * Reads this player's own answers only.
+ */
+export function satOutLabel(game: { myAnswers?: Record<string, unknown>; state?: unknown }): string {
+  const st = (game.state ?? {}) as { myAnswers?: Record<string, unknown>; myGuesses?: Record<string, unknown>; myState?: { guessed?: unknown[] } };
+  const count = (r?: Record<string, unknown>) => Object.values(r ?? {}).filter((v) => v !== undefined && v !== null).length;
+  const n = count(game.myAnswers) + count(st.myAnswers) + count(st.myGuesses) + (st.myState?.guessed?.length ?? 0);
+  return n > 0 ? "You sat out the rest" : "You sat this one out";
 }

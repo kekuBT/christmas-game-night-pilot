@@ -1,0 +1,10 @@
+PASS Library link: the room's Library opens filtered — /room/library?q=word
+PASS Library: the new search is in the address
+PASS Library: its Back button promises the lobby
+FAIL Library: 'Back to lobby' reaches the lobby (not Home, outside the room) — not within 8000ms
+  after Back to lobby: /
+FAIL Browser Back from the lobby still offers Home with Rejoin (S3-NAV-02) — not within 8000ms
+FAIL Library: ran to the end — locator.click: Timeout 30000ms exceeded.
+PASS Memory: game 1 (Trivia) finished
+FAIL Memory: ran to the end — locator.waitFor: Timeout 15000ms exceeded.
+HISTORY LINKS FAILURES: 4

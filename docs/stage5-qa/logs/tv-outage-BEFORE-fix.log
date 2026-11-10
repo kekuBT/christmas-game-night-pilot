@@ -1,0 +1,27 @@
+PASS TV live: no connection note
+PASS socket silent, polling works: the TV raises no false alarm (12 s)
+PASS polling fails, socket works: the TV raises no false alarm (12 s)
+FAIL server down: the TV says the connection is lost — not within 15000ms
+PASS server down: the last known display stays on screen — mchezo
+LOBBY
+👁 1 watching
+Join
+6VHMGQ
+JOIN THE GAME
+6VHMGQ
+
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+locator.getAttribute: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByTestId('tv-conn')[22m
+
+    at /home/user/christmas-game-night-pilot/scripts/check-tv-outage.mjs:92:103 {
+  log: [ "  - waiting for getByTestId('tv-conn')" ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.4
+rc=1

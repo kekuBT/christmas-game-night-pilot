@@ -75,11 +75,12 @@ export function HomeScreen(p: {
       {p.featured && (
         <section className="mz-home__section" aria-labelledby="mz-featured">
           <span className="mz-kicker" id="mz-featured">Featured today</span>
-          <button type="button" className="mz-hero-card" data-testid="home-featured" onClick={() => p.onOpenGame(p.featured!.id)} style={{ ["--mz-accent" as string]: accentColor(p.featured.id) }} aria-label={`${p.featured.title}: ${p.featured.description}`}>
+          <button type="button" className="mz-hero-card" data-testid="home-featured" onClick={() => p.onOpenGame(p.featured!.id)} style={{ ["--mz-accent" as string]: accentColor(p.featured.id) }} aria-label={`${p.featured.title}: ${p.featured.description}${p.featured.officialEligible ? "" : " Practice only."}`}>
             <GameCover gameId={p.featured.id} ratio={16 / 9} size={180} decorative />
             <span className="mz-hero-card__text">
               <span className="mz-hero-card__title">{p.featured.title}</span>
-              <span className="mz-hero-card__meta">{playersLabel(p.featured)} · {sessionEstimate(p.featured.estimateMinutes)}</span>
+              {/* Stage 5.1 (3D): a Practice-only game says so here too, as on its shelf card. */}
+              <span className="mz-hero-card__meta" data-testid="home-featured-meta">{playersLabel(p.featured)} · {sessionEstimate(p.featured.estimateMinutes)}{p.featured.officialEligible ? "" : " · practice only"}</span>
             </span>
           </button>
         </section>

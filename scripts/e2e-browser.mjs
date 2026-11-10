@@ -27,6 +27,9 @@ import { passBriefing } from "./lib/briefing.mjs";
 
 const args = process.argv.slice(2);
 const BASE = args.find((a) => !a.startsWith("--")) ?? "http://localhost:3457";
+// Stage 5.1 (O-14): the older panel names a game by its title ("Now playing: Category Sprint"), never its id.
+const TITLES = Object.fromEntries((await (await fetch(`${BASE}/games`)).json()).map((g) => [g.id, g.title]));
+const nowPlaying = (gameId) => `Now playing: ${TITLES[gameId] ?? gameId}`;
 const browserArg = (args.find((a) => a.startsWith("--browser=")) ?? "--browser=chromium").split("=")[1];
 const gamesArg = (args.find((a) => a.startsWith("--games=")) ?? "--games=all").split("=")[1];
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
@@ -57,7 +60,7 @@ async function panelFinished(page, gameId) {
   // Heading must match the game: right after a previous game finishes, the
   // panel still shows that finished game until the new game's projection
   // arrives, and a bare "Status: finished" check would false-positive.
-  if (t.includes(`Now playing: ${gameId}`) && t.includes("Status: finished")) return true;
+  if (t.includes(nowPlaying(gameId)) && t.includes("Status: finished")) return true;
   // M6 Show Mode: a finished game shows the results screen instead of the
   // finished panel. The results screen only ever shows the latest finished
   // game, so its presence means the game just played is finished.
@@ -260,7 +263,8 @@ async function act(page, gameId, name) {
     return true;
   }
   if (gameId === "charades") {
-    const correct = panel.getByRole("button", { name: "Correct (+100 team)" });
+    // Stage 5.1 (O-06): the button names the acting team.
+    const correct = panel.getByRole("button", { name: /^Correct \(\+100 to Team [AB]\)$/ });
     if (await isVisible(correct, 800)) {
       await correct.click();
       await sleep(400);
@@ -341,7 +345,7 @@ async function runBrowser(browserName, games) {
             // is the gameplay signal.
             await page.getByTestId("mz-year-progress").waitFor({ timeout: 20000 });
           } else {
-            await (gameId === "word-connections" ? page.getByTestId("mz-cx").waitFor({ timeout: 25000 }) : gameId === "caption-clash" ? page.getByTestId("mz-cap-write").waitFor({ timeout: 25000 }) : page.getByRole("heading", { name: `Now playing: ${gameId}` }).waitFor({ timeout: 20000 }));
+            await (gameId === "word-connections" ? page.getByTestId("mz-cx").waitFor({ timeout: 25000 }) : gameId === "caption-clash" ? page.getByTestId("mz-cap-write").waitFor({ timeout: 25000 }) : page.getByRole("heading", { name: nowPlaying(gameId) }).waitFor({ timeout: 20000 }));
           }
         }
         const deadline = Date.now() + 180_000;

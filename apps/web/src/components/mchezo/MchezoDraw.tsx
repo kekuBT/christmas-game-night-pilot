@@ -17,6 +17,7 @@ import { Keycap, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
+import { SendNote } from "./SendNote.js";
 import { drawMoment } from "../../ui/mchezo/lib/moments.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
@@ -26,7 +27,7 @@ export interface DrawView {
   turn?: number; turnCount?: number; phase?: "draw" | "reveal" | "finished"; drawerId?: string;
   pieces?: DrawPiece[]; letters?: number[]; correct?: { playerId: string; order: number }[]; guessers?: number;
   result?: TurnRecap; turns?: TurnRecap[];
-  myWord?: string; canSwap?: boolean; amDrawing?: boolean; myCorrect?: boolean; myGuesses?: number; mySkipped?: boolean; myTotal?: number;
+  myWord?: string; canSwap?: boolean; amDrawing?: boolean; myCorrect?: boolean; myGuesses?: number; guessesLeft?: number; mySkipped?: boolean; myTotal?: number;
 }
 
 /** The palette: every colour has a name (shown and announced), never colour alone. */
@@ -47,6 +48,9 @@ function Piece({ x }: { x: DrawPiece }) {
   return <polyline points={pts.join(" ")} fill="none" stroke={color} strokeWidth={w} strokeLinecap="round" strokeLinejoin="round" />;
 }
 
+/** A short signature of a drawing: pieces and points (tests compare it with the server's). */
+export const drawSig = (pieces: readonly DrawPiece[]) => `${pieces.length}:${pieces.reduce((n, x) => n + x.p.length / 2, 0)}`;
+
 /** The drawing, from the server's pieces (plus, for the drawer, what hasn't arrived there yet). */
 export function DrawBoard({ pieces, extra = [], label, testId, onPointerDown, onPointerMove, onPointerUp, svgRef, tv }: {
   pieces: DrawPiece[]; extra?: DrawPiece[]; label: string; testId?: string; tv?: boolean;
@@ -56,6 +60,8 @@ export function DrawBoard({ pieces, extra = [], label, testId, onPointerDown, on
   return (
     <svg ref={svgRef} className={`mz-dg-board${onPointerDown ? " mz-dg-board--live" : ""}${tv ? " mz-dg-board--tv" : ""}`} viewBox="0 0 1000 1000" role="img" aria-label={label} data-testid={testId}
       data-pieces={pieces.length + extra.length}
+      // Stage 5.1: what the server has confirmed and this screen shows (count:points), so tests can compare it with the server.
+      data-sig={drawSig(pieces)}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onPointerLeave={onPointerUp}>
       <rect x="0" y="0" width="1000" height="1000" fill="#FFFDF7" />
       {pieces.map((x, i) => <Piece key={`s${i}`} x={x} />)}
@@ -83,6 +89,8 @@ export interface MchezoDrawDeps {
   /** Resolves false when the action did not reach the game or was refused. */
   intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<boolean | void> | boolean | void;
   error?: string;
+  /** Stage 5.1 (2C): the server lists the unconfirmed send as accepted for this player. */
+  landed?: boolean;
 }
 
 /** The drawer's canvas: local strokes are queued and sent in batches; the server's copy is the truth. */
@@ -220,7 +228,7 @@ function DrawerPad({ game, st, intent, title, round, of }: { game: PlayerGame; s
   );
 }
 
-export function MchezoDraw({ game, players, playerId, title, intent, error }: MchezoDrawDeps) {
+export function MchezoDraw({ game, players, playerId, title, intent, error, landed }: MchezoDrawDeps) {
   const st = (game.state ?? {}) as DrawView;
   const round = (st.turn ?? 0) + 1;
   const of = st.turnCount ?? 1;
@@ -262,7 +270,7 @@ export function MchezoDraw({ game, players, playerId, title, intent, error }: Mc
       else { setText(""); setNote({ kind: "wrong", key }); } // a right guess replaces this screen from the server's state
     } finally { setPending(false); }
   };
-  const failure = note?.kind === "failed" ? <p className="err" role="alert" data-testid="mz-dg-error" style={{ textAlign: "center" }}>{error ?? NOT_DELIVERED}</p> : null;
+  const failure = <SendNote shown={note?.kind === "failed"} landed={landed} error={error} testId="mz-dg-error" />;
   const myOrder = correct.find((c) => c.playerId === playerId)?.order;
   return (
     <main className="mz-screen" aria-label={`${title}: turn ${round} of ${of}, ${drawerName} is drawing`} data-testid="mz-dg-guess">
@@ -280,6 +288,9 @@ export function MchezoDraw({ game, players, playerId, title, intent, error }: Mc
         </form>
       )}
       {note?.kind === "wrong" && !st.myCorrect && <FeedbackLine testId="mz-dg-wrong" tone="warn">Not it. Keep guessing!</FeedbackLine>}
+      {!st.myCorrect && !st.mySkipped && (st.myGuesses ?? 0) > 0 && st.guessesLeft !== undefined && (
+        <p className="mz-foot" data-testid="mz-dg-left" style={{ textAlign: "center" }}>{st.guessesLeft > 0 ? `${st.guessesLeft} ${st.guessesLeft === 1 ? "guess" : "guesses"} left for this drawing.` : "That's all your guesses for this drawing."}</p>
+      )}
       {failure}
       {got}
       <FeedbackLine testId="mz-dg-progress">{correct.length} of {st.guessers ?? 0} got it</FeedbackLine>

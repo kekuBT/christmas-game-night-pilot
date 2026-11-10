@@ -1370,3 +1370,90 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Risk:**
 - Safari touch drawing, swipe-back from the canvas edge, and iOS autocorrect on guesses are untested.
 - The new games' timings are design values, not measured.
+
+## 2026-11-09: Stage 5.1, combined live audit repair sprint (branch `claude/stage5-audit-repairs`, from the Stage 5 head `fa823de`)
+
+**Owner direction:** "MCHEZO — STAGE 5.1: COMBINED LIVE AUDIT REPAIR SPRINT".
+- No merge, deployment, public port, paid service or spend.
+- No change to Cup scoring or eligibility, content approvals, forfeits, sit-out, Math compensation or any game's scoring or timing.
+- The three Stage 5 games are still Practice-only.
+- The full account is in `docs/stage5-qa/README.md` (13 sections). Decisions are D-S51-01..14.
+
+**Blocker (external):** the three audit packages were not available in this session (not in the repository or the container). I worked from the brief's descriptions and never saw the auditors' screenshots or manifests. README §1 says, per finding, what I reproduced myself.
+
+**Commits (code):**
+- `5230c36` S5-AUD-04/07: screens know when they're stale (poll timeout, watchdog, `alive` frames, no-store); the TV says so.
+- `47bfff1` O-02 drafts per game and phase; O-06 Charades teams; O-05 Cup places; S5-AUD-02 Pulse lock hint.
+- `02929a8` 2C: a lost reply that landed says so, from the server's record.
+- `aed6055` O-07/S5-AUD-01: progress counts say what they count; the room revision.
+- `829e1f4` 3E: "Back to lobby" reaches the lobby; the Memory Book cites the game shown.
+- `a529ab4` 3D: copy matches the mechanics (nine items).
+- `a3ac6bf` O-12/O-14: flags described; quiz groups; no internal ids.
+- `626f150` Phase 4: persistence measured; compact room snapshots.
+- `9905460` Script inventory; the screenshot tool.
+
+**Reproduced and fixed:**
+- O-02 (Sprint).
+- S5-AUD-07.
+- O-07 (all three cases).
+- 3E Library and Memory Book.
+- The 2C gap.
+- The silent-stall path of S5-AUD-04.
+- O-12 (in Chromium's tree only).
+
+**Fixed from the code:** O-05, O-06, O-14, 3D.
+
+**Not reproduced:** S5-AUD-04's exact live failure (12 faults; worst lag 821 ms); S5-AUD-02 as a timing failure (the windows are 16.5–24 s, not 12 s).
+
+**Measured, owner decision:** the S3-MTH-01 residual, about 2 s when only polling delivers.
+
+**Tests:**
+- 1080 unit tests in 100 files (1055 at Stage 5).
+- New drivers, all in the full gate: `check-draw-sync`, `check-tv-outage`, `check-input-isolation`, `check-math-network`, `check-pulse-timing`, `check-action-ack`, `check-progress`, `check-history-links`, `check-a11y-surfaces`.
+- New tools: `measure-persistence.mjs` and `screenshot-stage51.mjs`.
+- Before and after logs are in `docs/stage5-qa/logs/`.
+
+**Every failed attempt:** README §11. This covers the before-evidence runs, the driver mistakes, one load-related crash of `check-draw-guess` (which passed alone), and gate run `20261109-172002-626f150d-25364` on `626f150`: FAILED on the unit step (an unclassified script, fixed in `9905460`), then cancelled by me after 13 passed, 1 failed and 1 cancelled.
+
+**Open (owner):** README §12.
+- The Math residual.
+- Pulse auto-lock.
+- The Charades other-team rule.
+- Four session estimates above their hard limits.
+- Draw & Guess network deltas.
+- Legacy flag descriptions.
+- The Stage 5 §13 items.
+
+**Limitation:** Chromium only. No real iPhone, Android or TV, and no VoiceOver or TalkBack. Real-device testing is **not done**; `docs/REAL_DEVICE_TESTING.md` now checks out this branch.
+
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on `0a3964f`: **PASSED (exit 0)**, run `20261110-003130-0a3964f3-11617`.
+- 74 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- Unit tests: 1,080 passed in 100 files. All 67 browser drivers passed. E2E (Chromium) passed 15 of 15, with all 14 games.
+- Run from a fresh clone with a clean tree; the browser was `chrome-headless-shell` 153.0.8010.12. Wall time 95.4 min.
+- The verdict covers `0a3964f` only. The commit that records it is docs only. The failed, cancelled and interrupted attempts below don't count.
+
+**Failed final gate (not a verdict for the fixed code):** `node scripts/gate.mjs full` on `4acfea7`, run `20261109-173134-4acfea70-32411`: **FAILED (exit 1)**. 72 passed, 2 failed (`check-f5`, `e2e-chromium`).
+- Cause: my O-06 change renamed the Charades actor's "Correct (+100 team)" button to "Correct (+100 to Team A/B)". Both drivers looked for the old exact name, so Charades ran out every turn's clock, and the games after it never started.
+- Fixed in the drivers, `55ba5d8`, with no product change. Details are in `docs/stage5-qa/README.md` §11.
+
+**Second failed final gate (not a verdict for the fixed code):** `node scripts/gate.mjs full` on `4236788`, run `20261109-193224-42367885-15460`: **FAILED (exit 1)**. 73 passed, 1 failed (`check-draw-guess`).
+- Cause: a driver bug. The driver kept a page reference that turn 2 closes whenever Keku draws turn 2, about one game in four. I reproduced it deterministically with seed 5: the old driver crashed and the fixed one passed.
+- The same crash on `829e1f4` had this cause too. I had first recorded it as load-related, which was wrong.
+- Fixed in `f363811`, with no product change. Details are in README §11.
+
+**Two more full runs without a verdict:**
+- `f363811`, run `20261109-210933-f3638114-28586`: **interrupted** by a container restart during E2E, the last step. 73 of 74 steps had passed, and no report was written.
+- `2508f9d`, run `20261109-223449-2508f9d4-198`: **FAILED** at the unit tests, then **cancelled** by me.
+  - The failing test was my own Stage 5.1 Sprint privacy test. It looked for the answer "school" in the TV projection, and the randomly dealt category happened to be "Things in a school".
+  - It now uses marker answers, and passed 15 of 15 runs. Details are in README §11.
+- `bf6a764`, run `20261109-223744-bf6a764e-4827`: **interrupted** by a second container restart, after 31 steps had passed.
+- `bf6a764`, run `20261109-231859-bf6a764e-191`: **FAILED** on `check-shuffle`, then **cancelled** by me.
+  - The driver's hard-coded list of 11 games rejected a shuffle pick of Pattern Pulse, one of the three Stage 5 games.
+  - The driver now reads the titles from `GET /games`, and passed 10 of 10 runs.
+  - Cancelling exposed a pre-existing summary crash in the existing gate, which only affects cancelled runs; Stage 5.2 fixes it.
+
+**Next task (if the owner continues):** the real-device session in README §13 (iPhone Safari first), and owner rulings on README §12.
+
+**Risk:**
+- Safari's handling of the new connection watchdog (background tabs, suspended timers) is untested.
+- The flag description depends on each pack's accessibility note.

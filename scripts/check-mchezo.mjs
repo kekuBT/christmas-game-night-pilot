@@ -161,7 +161,9 @@ try {
   await answerAllTrivia(hostB);
   await hostB.getByText("All your answers are in").waitFor({ timeout: 15000 });
   const waitingText = await hostB.locator("body").textContent();
-  check("waiting shows counts only (1 of 4 started; S3-TRV-01 wording)", waitingText.includes("1/4") && waitingText.includes("have started"));
+  // Stage 5.1 (O-07): the ring counts who has FINISHED (the server's rule);
+  // the line under it also gives how many have started. Counts only.
+  check("waiting shows counts only (1/4 finished, and 1 of 4 started; Stage 5.1 wording)", waitingText.includes("1/4") && waitingText.includes("have finished") && /1 of 4 has started/.test(waitingText), waitingText.slice(0, 300));
   // Guests finish -> host results with standings + question picker.
   for (const g of guestsB) await answerAllTrivia(g);
   await hostB.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });

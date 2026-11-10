@@ -42,6 +42,7 @@
 import { useState } from "react";
 import { AbstainControl, MchezoWaiting, NumericGuess, PhoneScreen } from "../../ui/mchezo/index.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
+import { satOutLabel } from "../../ui/mchezo/lib/lifecycle.js";
 
 export interface MchezoYearDeps {
   game: PlayerGame;
@@ -92,7 +93,7 @@ export function MchezoYear(deps: MchezoYearDeps) {
           <p data-testid="mz-year-guessed">{abstainedNow ? "You sat this game out — 0 points for what you skipped." : `All 8 events guessed. Your last guess: ${myGuesses[current.id]}`}</p>
         </div>
         {abstainedNow && <div style={{ padding: "0 16px 16px" }}><AbstainControl abstained={true} onAbstain={() => {}} /></div>}
-        <MchezoWaiting label={abstainedNow ? "You sat this one out" : "All your guesses are in"} players={players} playerId={playerId} publicGame={publicGame} footNote="When everyone is done, results appear automatically." />
+        <MchezoWaiting label={abstainedNow ? satOutLabel(game) : "All your guesses are in"} players={players} playerId={playerId} publicGame={publicGame} footNote="When everyone is done, results appear automatically." />
       </PhoneScreen>
     );
   }

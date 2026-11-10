@@ -60,7 +60,7 @@ import {
 import { generateTrivia, scoreTrivia, type TriviaQuestion } from "../games/trivia.js";
 import { scoreYear, YEAR_EVENTS, type YearEvent } from "../games/year.js";
 import { scoreWhoSaid, WHO_SAID_PACK, type WhoSaidQuestion } from "../games/whosaid.js";
-import { GEOGRAPHY_PACK, scoreGeography, type GeographyQuestion } from "../games/geography.js";
+import { flagAlt, GEOGRAPHY_PACK, scoreGeography, type GeographyQuestion } from "../games/geography.js";
 import {
   CONNECTIONS_BOARD,
   connectionsScore,
@@ -389,6 +389,21 @@ export class RoomEngine {
    * while stopping the room file from growing without bound. Oldest go first.
    */
   static readonly SEEN_INTENTS_MAX = 4000;
+  /**
+   * Stage 5.1 (2C): each player's last few ACCEPTED event ids, newest last,
+   * shown only to that player (projection `me.acceptedEventIds`). A phone
+   * whose reply was lost learns from the server that its action landed, so it
+   * can stop saying "couldn't confirm" instead of guessing. Derived from
+   * seenIntents (rebuilt from it on restore), so nothing new is saved.
+   */
+  private recentAccepted = new Map<string, string[]>();
+  static readonly RECENT_ACCEPTED_MAX = 16;
+  private noteAccepted(actorId: string, clientEventId: string): void {
+    const list = this.recentAccepted.get(actorId) ?? [];
+    list.push(clientEventId);
+    if (list.length > RoomEngine.RECENT_ACCEPTED_MAX) list.splice(0, list.length - RoomEngine.RECENT_ACCEPTED_MAX);
+    this.recentAccepted.set(actorId, list);
+  }
   private nextPlayer = 1;
   private nextGame = 1;
   private nextSpectator = 1;
@@ -973,6 +988,48 @@ export class RoomEngine {
     return game.players;
   }
 
+  /**
+   * Stage 5.1 (O-07): what every screen may say about progress. Counts only,
+   * never who (the existing privacy policy). Each count uses the same rule
+   * the game itself uses to move on:
+   *   started     — acted at least once in this game (the old submittedCount);
+   *   answeredNow — Closest Wins: answered or sat out THE CURRENT question;
+   *   finished    — self-paced quiz games and Guess the Year: answered every
+   *                 item or sat the rest out (quizAllDone / yearAllDone).
+   */
+  private progressOf(g: GameInstance): { started: number; total: number; answeredNow?: number; finished?: number } {
+    const base = { started: (g.submittedPlayers ?? []).length, total: g.players.length };
+    const sat = new Set(g.abstained ?? []);
+    if (g.gameId === "trivia" || g.gameId === "who-said-that" || g.gameId === "geography") {
+      const st = g.extra as { questions?: unknown[]; answers?: Record<string, Record<string, unknown>> } | undefined;
+      const n = st?.questions?.length ?? 0;
+      if (n === 0) return base;
+      return { ...base, finished: g.players.filter((pid) => sat.has(pid) || Object.keys(st?.answers?.[pid] ?? {}).length >= n).length };
+    }
+    if (g.gameId === "guess-the-year") {
+      const st = g.extra as { events?: unknown[]; guesses?: Record<string, Record<string, unknown>> } | undefined;
+      const n = st?.events?.length ?? 0;
+      if (n === 0) return base;
+      return { ...base, finished: g.players.filter((pid) => sat.has(pid) || Object.keys(st?.guesses?.[pid] ?? {}).length >= n).length };
+    }
+    if (g.gameId === "closest-wins") {
+      const st = g.extra as ClosestState | undefined;
+      const q = st?.questions[st.questionIndex];
+      if (!st || !q) return base;
+      const guessed = st.guesses[q.id] ?? {};
+      const skipped = new Set(st.abstained[q.id] ?? []);
+      return { ...base, answeredNow: g.players.filter((pid) => guessed[pid] !== undefined || skipped.has(pid)).length };
+    }
+    // Stage 5 modules publish their own counts: Majority Rules "done" this
+    // round (predicted and voted, or skipped); Pattern Pulse "finished".
+    if (g.gameId === "majority-rules" || g.gameId === "pattern-pulse") {
+      const v = this.publicGameState(g) as { done?: unknown; finished?: unknown } | undefined;
+      if (typeof v?.done === "number") return { ...base, answeredNow: v.done };
+      if (typeof v?.finished === "number") return { ...base, finished: v.finished };
+    }
+    return base;
+  }
+
   /** Submit a validated intent. Returns the ack; duplicates return the original result. */
   /**
    * `opts.clientProtocol`: the version the transport saw (http.ts passes 0
@@ -1057,6 +1114,7 @@ export class RoomEngine {
     }
     this.seenIntents.set(key, { accepted: result.accepted, result });
     this.trimSeenIntents();
+    if (result.accepted) this.noteAccepted(actorId, intent.clientEventId);
     return result;
   }
 
@@ -2212,6 +2270,8 @@ export class RoomEngine {
       prompt: q["prompt"] ?? q["quote"],
       // Who Said That stores its options as `speakers` (the option list, not a secret).
       options: q["options"] ?? q["speakers"],
+      // Stage 5.1 (3F): a flag question's picture, described without naming an answer.
+      ...(q["mode"] === "flag" ? { imageAlt: flagAlt(q) } : {}),
       ...(reveal ? { correctIndex: q["correctIndex"], ...(typeof q["explanation"] === "string" ? { explanation: q["explanation"] } : {}) } : {}),
     }));
   }
@@ -2233,6 +2293,12 @@ export class RoomEngine {
     const st = g.extra as { roundIndex: number; submissions: Record<number, Record<string, string[]>> };
     const cat = this.sprintCategory(g, st.roundIndex);
     const base: Record<string, unknown> = { roundIndex: st.roundIndex, category: cat?.name, ...(cat?.definition ? { definition: cat.definition } : {}) };
+    // Stage 5.1 (2C): your OWN answers for this round, once the server has them, so
+    // your phone shows them as in from the server's state. Never anyone else's.
+    if (actorId !== undefined && g.status === "playing") {
+      const mine = st.submissions[st.roundIndex]?.[actorId];
+      if (mine !== undefined) base["mySubmission"] = [...mine];
+    }
     if (g.status !== "finished") return base;
     const own = (g.extra as { categories?: unknown[] }).categories;
     const rounds = own ? own.length : 3;
@@ -2414,6 +2480,7 @@ export class RoomEngine {
       players: g.players,
       submittedCount: (g.submittedPlayers ?? []).length,
       totalPlayers: g.players.length,
+      progress: g.status === "playing" ? this.progressOf(g) : undefined,
       state: this.publicGameState(g),
       // Public questions: prompt + options only, no correctIndex/correctAnswer, and only after finish for Math.
       questions:
@@ -2509,7 +2576,7 @@ export class RoomEngine {
           ...this.timingFacts(g),
         };
       });
-      return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash }, myGames };
+      return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash, acceptedEventIds: [...(this.recentAccepted.get(me.id) ?? [])] }, myGames };
     }
     if (audience === "host" || audience === "cohost") {
       // Host/cohost do NOT get answer keys or recovery tokens pre-reveal in this engine.
@@ -2575,6 +2642,12 @@ export class RoomEngine {
     engine.ledger = data["ledger"] as LedgerEvent[];
     engine.seq = data["seq"] as number;
     engine.seenIntents = new Map(data["seenIntents"] as [string, { accepted: boolean; result: unknown }][]);
+    // Stage 5.1 (2C): rebuild each player's recent accepted ids (key = room:actor:event).
+    for (const [k, v] of engine.seenIntents) {
+      if (!v.accepted) continue;
+      const cut = k.lastIndexOf(":"), prev = k.lastIndexOf(":", cut - 1);
+      if (cut > 0 && prev >= 0) engine.noteAccepted(k.slice(prev + 1, cut), k.slice(cut + 1));
+    }
     engine.trimSeenIntents(); // a room saved before the cap comes back within it
     engine.nextPlayer = data["nextPlayer"] as number;
     engine.nextSpectator = typeof data["nextSpectator"] === "number" ? data["nextSpectator"] : 1;

@@ -37,8 +37,8 @@
 //   only Geography's branch is now dead (App routes geography here
 //   first), left in place like Trivia's dead quiz branch — a future
 //   cleanup removes dead branches as more games migrate.
-import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
-import { useState } from "react";
+import { satOutLabel, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
+import { useState, type ReactNode } from "react";
 import { Keycap, MchezoWaiting, Stamp } from "../../ui/mchezo/index.js";
 import { QuestionScreen } from "../../ui/mchezo/index.js";
 import type { GameState, PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
@@ -84,7 +84,7 @@ export function MchezoGeography(deps: MchezoGeographyDeps) {
 
   // Sat out: the server records whole-game abstention; show the wait, not Q1.
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} showClock />;
+    return <MchezoWaiting label={satOutLabel(game)} players={players} playerId={playerId} publicGame={publicGame} showClock />;
   }
   // Just answered: locked view until the player moves on. If the poll has
   // not landed yet (answer not in myAnswers), fall through to the question
@@ -121,6 +121,7 @@ export function MchezoGeography(deps: MchezoGeographyDeps) {
       questionNumber={idx + 1}
       questionCount={questions.length}
       question={firstUnanswered.prompt}
+      questionNode={withFlagAlt(firstUnanswered.prompt, firstUnanswered.imageAlt)}
       options={firstUnanswered.options.map((label, i) => ({ id: String(i), label }))}
       selectedId={selected === null ? null : String(selected)}
       locked={selected !== null}
@@ -146,4 +147,19 @@ export function MchezoGeography(deps: MchezoGeographyDeps) {
       }
     />
   );
+}
+
+/**
+ * Stage 5.1 (3F, O-12): a flag emoji in a prompt, given to assistive
+ * technology as a picture with a description (from the server's imageAlt,
+ * which never names an option) instead of the emoji's own name, which may
+ * be the answer. Sighted players see the same emoji as before.
+ */
+export function withFlagAlt(prompt: string, alt: string | undefined): ReactNode {
+  if (!alt) return prompt;
+  const parts = prompt.split(/(\p{Regional_Indicator}{2})/u);
+  if (parts.length === 1) return prompt;
+  return parts.map((part, i) => (i % 2 === 1
+    ? <span key={i} role="img" aria-label={`Flag: ${alt}`} data-testid="geo-flag">{part}</span>
+    : part));
 }

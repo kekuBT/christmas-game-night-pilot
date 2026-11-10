@@ -48,7 +48,7 @@ try {
   await host.getByTestId("select-game-math-mayhem").click();
   await host.locator('[data-testid="start-official-math-mayhem"]').click();
   for (const { page } of pages) {
-    await page.getByRole("heading", { name: "Now playing: math-mayhem" }).waitFor({ timeout: 20000 });
+    await page.getByRole("heading", { name: "Now playing: Math Mayhem" }).waitFor({ timeout: 20000 });
   }
   await sleep(800);
   await host.screenshot({ path: `${OUT}/03-math-mayhem-playing.png`, fullPage: true });
@@ -59,7 +59,7 @@ try {
   let finished = false;
   while (Date.now() < deadline) {
     const t = (await panel.textContent()) ?? "";
-    if (t.includes("Now playing: math-mayhem") && t.includes("Status: finished")) { finished = true; break; }
+    if (t.includes("Now playing: Math Mayhem") && t.includes("Status: finished")) { finished = true; break; }
     for (const { page } of pages) {
       const p = page.locator('[data-testid="game-panel"]');
       const pt = (await p.textContent({ timeout: 2000 }).catch(() => "")) ?? "";

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicGame, PublicPlayer, Readiness, RegistryGame, SpectateResponse } from "./types.js";
-import { GamePanel } from "./components/GamePanel.js";
+import { draftKey, GamePanel } from "./components/GamePanel.js";
 import { CupScreen } from "./components/mchezo/CupScreen.js";
 import { MemoryScreen } from "./components/mchezo/MemoryScreen.js";
 import { Reactions } from "./components/Reactions.js";
@@ -18,7 +18,9 @@ import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./comp
 import { MchezoClosest } from "./components/mchezo/MchezoClosest.js";
 import { ConnectionsTv, MchezoConnections, MchezoConnectionsResults } from "./components/mchezo/MchezoConnections.js";
 import { TvShow } from "./components/mchezo/TvShow.js";
-import { ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.js";
+import { CharadesTv, ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.js";
+import { SendNote } from "./components/mchezo/SendNote.js";
+import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
@@ -31,7 +33,8 @@ import { MchezoYear } from "./components/mchezo/MchezoYear.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { AnswerReview, reviewRows } from "./components/mchezo/AnswerReview.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
-import { isOvertakenReply, isProjection, readJson } from "./http.js";
+import { isOvertakenReply, isProjection, readJson, readSpectatorReply } from "./http.js";
+import { livenessStep, oneAtATime, pollFresh } from "./liveness.js";
 import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
 import { BriefingScreen, BriefingTv, type StartNowResult } from "./components/mchezo/Briefing.js";
 import { resolveReducedMotion } from "./ui/mchezo/lib/motion.js";
@@ -96,14 +99,15 @@ async function get<T>(path: string): Promise<T> {
   const headers: Record<string, string> = {};
   const token = seats.token();
   if (token) headers["x-session-token"] = token;
-  const r = await fetch(path, { headers });
-  return readJson<T>(r);
+  // Stage 5.1: a stalled request fails after a timeout instead of hanging
+  // forever; the timeout covers reading the reply's body too.
+  return pollFresh(path, { headers }, (r) => readJson<T>(r));
 }
 
 export function App() {
   // Stage 2 routing: the boot redirect runs once, before the route is read.
   useState(() => { bootRoute(); return true; });
-  const { route, sheet, game: sheetGame, navigate, openSheet, closeSheet, back } = useRoute();
+  const { route, sheet, game: sheetGame, navigate, openSheet, closeSheet, back, backTo } = useRoute();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   // Seat credentials are owned by the session store (sessionStorage by
@@ -121,17 +125,22 @@ export function App() {
   // The room's screens are addresses now (/room, /room/cup, …), so browser
   // Back, in-app Back and iOS swipe-back agree. `view` is read from the route.
   const view: View = route.name === "room" ? SUB_TO_VIEW[route.sub] : "lobby";
-  const toLobby = () => back(LOBBY);
+  // Stage 5.1 (3E): "Back to lobby" always reaches the lobby (backTo checks
+  // what is beneath; a tab opened straight onto a room screen has Home there).
+  const toLobby = () => backTo(LOBBY);
   function setView(v: View) {
     // One room screen to another (Cup → TV) replaces the entry, so history
     // is always "lobby → this screen" and Back or "Lobby" returns to the lobby.
-    if (v !== "lobby") navigate({ name: "room", sub: VIEW_TO_SUB[v] }, { replace: route.name === "room" && route.sub !== "lobby" });
+    // Stage 5.1 (3E): the room's Library reopens with the view this tab last
+    // had there (search, filters, sort), shown with its "Clear filters".
+    const lib = v === "library" ? tabGet("mz_lib_room") ?? "" : "";
+    if (v !== "lobby") navigate({ name: "room", sub: VIEW_TO_SUB[v], ...(lib ? { lib } : {}) }, { replace: route.name === "room" && route.sub !== "lobby" });
     else if (route.name === "room" && route.sub !== "lobby") toLobby();
   }
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   /** Stage 5: the last player action in a game that failed, shown on that game's screen only. */
-  const [actionError, setActionError] = useState<{ gid: string; text: string } | null>(null);
+  const [actionError, setActionError] = useState<{ gid: string; text: string; eventId?: string } | null>(null);
   // Work Package F: server rejections arrive as terse codes or terse
   // server sentences. Show the human mapping on screen and keep the raw
   // text in the console for debugging — it never reaches the player.
@@ -147,7 +156,6 @@ export function App() {
   const [qrUrl, setQrUrl] = useState("");
   const [bookText, setBookText] = useState("");
   const [exportText, setExportText] = useState("");
-  const [textInput, setTextInput] = useState("");
   const [introDismissed, setIntroDismissed] = useState<string | null>(tabGet("cgn_intro_dismissed"));
   const [resultsDismissed, setResultsDismissed] = useState<string | null>(tabGet("cgn_results_dismissed"));
   const settings = useExperienceSettings();
@@ -199,9 +207,9 @@ export function App() {
   const rememberedSeats = useRememberedSeats();
   const [recoverMode, setRecoverMode] = useState(false);
   const [shuffleResult, setShuffleResult] = useState<string | null>(null);
-  const [numInput, setNumInput] = useState("");
-  const [selectedTiles, setSelectedTiles] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
+  // Stage 5.1 (S5-AUD-07): is the spectator/TV display live, stale, or just reconnected?
+  const [tvLive, setTvLive] = useState<"live" | "stale" | "restored">("live");
 
   // Replaced (seat recovered elsewhere) or signed out: after the player
   // acknowledges, this device forgets the dead credential and goes back to
@@ -226,9 +234,12 @@ export function App() {
   const pollNotice = useRef("");
   // Stage 4: what is on screen, and how many projections have been shown, so
   // a poll overtaken by a newer push can't roll the screen back (http.ts).
-  const shown = useRef<{ n: number; roomId?: string; seq?: number }>({ n: 0 });
+  const shown = useRef<{ n: number; roomId?: string; seq?: number; rev?: number }>({ n: 0 });
+  // Stage 5.1: when a projection (pushed or polled) last proved this screen live.
+  const lastFresh = useRef(Date.now());
   const showProjection = useCallback((p: Projection) => {
-    shown.current = { n: shown.current.n + 1, roomId: p.roomId, seq: p.seq };
+    shown.current = { n: shown.current.n + 1, roomId: p.roomId, seq: p.seq, rev: p.rev };
+    lastFresh.current = Date.now();
     setProj(p);
   }, []);
   const refresh = useCallback(async () => {
@@ -238,7 +249,7 @@ export function App() {
       const next = await get<unknown>(`/rooms/${roomId}/projection?audience=player`);
       // S3-LOB-03: only the room's own projection replaces what's on screen.
       if (!isProjection(next)) throw new Error("The game server sent an unexpected reply. Retrying…");
-      if (isOvertakenReply(next as Projection, shown.current, shown.current.n !== before)) { pollFailures.current = 0; return; }
+      if (isOvertakenReply(next as Projection, shown.current, shown.current.n !== before)) { pollFailures.current = 0; lastFresh.current = Date.now(); return; }
       showProjection(next as Projection);
       pollFailures.current = 0;
       if (pollNotice.current) {
@@ -275,7 +286,10 @@ export function App() {
   useEffect(() => {
     if (!roomId || !playerId) return;
     refresh();
-    const t = setInterval(refresh, 2000);
+    // Stage 5.1: one interval poll at a time (a stalled one times out), so
+    // hung requests can't pile up behind each other.
+    const tick = oneAtATime(refresh);
+    const t = setInterval(() => { void tick(); }, 2000);
     // WS auto-reconnect: a dropped socket used to stay dead — polling kept
     // the UI fresh, but the server had marked the player "(away)" and
     // excluded them from startGame's connected-player count until the
@@ -302,6 +316,8 @@ export function App() {
         next.onmessage = (e) => {
           try {
             const m = JSON.parse(e.data);
+            // Stage 5.1: any frame from the server (a projection or "alive") proves the link is live.
+            if (m.kind === "alive" || m.kind === "projection") lastFresh.current = Date.now();
             if (m.kind === "projection" && isProjection(m.state)) {
               showProjection(m.state);
               // The server sends a projection only after accepting the
@@ -342,7 +358,25 @@ export function App() {
       connect();
       void refresh();
     };
-    const onVisible = () => { if (document.visibilityState === "visible") reconnectNow(); };
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      // Timers sleep while hidden: give the fresh poll below a moment before judging staleness.
+      lastFresh.current = Date.now();
+      reconnectNow();
+    };
+    // Stage 5.1 (S5-AUD-04): nothing pushed or polled for a while means this
+    // screen may be stale. Say so (the connection banner) and recycle a socket
+    // that has gone quiet; the last known screen stays up. Live again: say so.
+    const live = { staleMarked: false };
+    const watchdog = setInterval(() => {
+      const state = connection.get().state;
+      if (state === "replaced" || state === "signed-out") return;
+      const step = livenessStep(live, lastFresh.current, Date.now());
+      if (step === "went-stale") {
+        connection.dropped();
+        if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+      } else if (step === "back") connection.confirmed();
+    }, 1000);
     // The browser knows it lost the network (Wi-Fi off, airplane mode,
     // tunnel): say so now and drop the socket ourselves, instead of
     // waiting minutes for TCP to notice. "online" reconnects at once.
@@ -362,6 +396,7 @@ export function App() {
     return () => {
       stopped = true;
       clearInterval(t);
+      clearInterval(watchdog);
       if (retryTimer !== undefined) clearTimeout(retryTimer);
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("offline", onOffline);
@@ -426,17 +461,36 @@ export function App() {
   useEffect(() => {
     if (!specRoomId || !specToken || roomId) return;
     let stopped = false;
-    const poll = async () => {
+    // Stage 5.1 (S5-AUD-07): the TV used to swallow every failure and keep a
+    // stale screen up in silence. Any projection proves it live; nothing for
+    // a while and it says so on screen (the last known display stays).
+    let lastFreshAt = Date.now();
+    // One poll at a time; the timeout covers the whole reply, body included.
+    const poll = oneAtATime(async () => {
       try {
-        const r = await fetch(`/rooms/${specRoomId}/projection?audience=spectator`, { headers: { "x-spectator-token": specToken } });
-        if (r.status === 401) { if (!stopped) { stopWatching(); setErr("Spectator session expired — enter the code again to keep watching."); } return; }
-        if (!r.ok) return;
-        const next = await readJson<unknown>(r);
-        if (isProjection(next)) setProj(next as Projection); // S3-LOB-03: never a proxy page
-      } catch { /* poll retry */ }
-    };
+        const reply = await pollFresh(`/rooms/${specRoomId}/projection?audience=spectator`, { headers: { "x-spectator-token": specToken } }, readSpectatorReply);
+        if (reply.kind === "expired") { if (!stopped) { stopWatching(); setErr("Spectator session expired — enter the code again to keep watching."); } return; }
+        if (reply.kind === "skip") return;
+        if (isProjection(reply.body)) { lastFreshAt = Date.now(); setProj(reply.body as Projection); } // S3-LOB-03: never a proxy page
+      } catch { /* poll retry; staleness is judged by the watchdog */ }
+    });
     poll();
     const t = setInterval(poll, 2000);
+    const live = { staleMarked: false };
+    let restoredTimer: ReturnType<typeof setTimeout> | undefined;
+    const watchdog = setInterval(() => {
+      const step = livenessStep(live, lastFreshAt, Date.now());
+      if (step === "went-stale") {
+        clearTimeout(restoredTimer);
+        setTvLive("stale");
+        if (ws && ws.readyState === WebSocket.OPEN) ws.close();
+      } else if (step === "back") {
+        setTvLive("restored");
+        restoredTimer = setTimeout(() => setTvLive("live"), 4000);
+      }
+    }, 1000);
+    const onVisible = () => { if (document.visibilityState === "visible") { lastFreshAt = Date.now(); void poll(); } };
+    document.addEventListener("visibilitychange", onVisible);
     let attempt = 0;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
     let ws: WebSocket | null = null;
@@ -446,7 +500,7 @@ export function App() {
         const proto = location.protocol === "https:" ? "wss" : "ws";
         const next = new WebSocket(`${proto}://${location.host}/?roomId=${specRoomId}&audience=spectator`, [`cgn-spectator-${specToken}`]);
         ws = next;
-        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "projection" && isProjection(m.state)) setProj(m.state); } catch { /* ignore malformed WS frame; polling continues */ } };
+        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "alive") lastFreshAt = Date.now(); if (m.kind === "projection" && isProjection(m.state)) { lastFreshAt = Date.now(); setProj(m.state); } } catch { /* ignore malformed WS frame; polling continues */ } };
         next.onclose = (e) => {
           if (stopped || e.code === 1008) return;
           attempt += 1;
@@ -460,8 +514,12 @@ export function App() {
     return () => {
       stopped = true;
       clearInterval(t);
+      clearInterval(watchdog);
+      clearTimeout(restoredTimer);
+      document.removeEventListener("visibilitychange", onVisible);
       if (retryTimer !== undefined) clearTimeout(retryTimer);
       ws?.close();
+      setTvLive("live");
     };
   }, [specRoomId, specToken, roomId]);
   async function reconnect() {
@@ -494,7 +552,7 @@ export function App() {
     const r = proj?.readiness;
     const reconnecting = (r?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id);
     if (official && reconnecting.length > 0 && !proceedWithout) {
-      setStartDecision({ gameId, official, gameTitle: games.find((g) => g.id === gameId)?.title ?? gameId, reconnecting });
+      setStartDecision({ gameId, official, gameTitle: titleFor(gameId, games), reconnecting });
       return;
     }
     startingRef.current = true;
@@ -510,7 +568,7 @@ export function App() {
         // fresh picture and let the host decide again. Nothing started.
         await refresh();
         const again = (body.readiness?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id);
-        if (body.code === "PLAYERS_RECONNECTING" && again.length) setStartDecision({ gameId, official, gameTitle: games.find((g) => g.id === gameId)?.title ?? gameId, reconnecting: again });
+        if (body.code === "PLAYERS_RECONNECTING" && again.length) setStartDecision({ gameId, official, gameTitle: titleFor(gameId, games), reconnecting: again });
         else setErr(body.error ?? "Who is playing changed. Check the list, then start again.");
         return;
       }
@@ -547,7 +605,8 @@ export function App() {
   /** Sends one player action. Resolves true only when the server accepted it (never throws). */
   async function sendAction(gameInstanceId: string, action: string, payload: Record<string, unknown>): Promise<boolean> {
     setErr(""); setActionError(null);
-    const failed = (raw: string) => { reportError(raw); setActionError({ gid: gameInstanceId, text: humanError(raw) }); };
+    const eventId = uuid();
+    const failed = (raw: string) => { reportError(raw); setActionError({ gid: gameInstanceId, text: humanError(raw), eventId }); };
     try {
       // One clientEventId per user action, reused by every retry, so the
       // server's dedupe returns the original result if a response was lost.
@@ -555,7 +614,7 @@ export function App() {
       // that lands after that phase closed is refused, never misfiled.
       const phaseKey = proj?.myGames?.find((g) => g.id === gameInstanceId)?.lifecycle?.phaseKey;
       const sent = phaseKey !== undefined && payload["phaseKey"] === undefined ? { ...payload, phaseKey } : payload;
-      const body = JSON.stringify({ intent: { kind: "intent", schemaVersion: 1, clientEventId: uuid(), roomId, gameInstanceId, action, payload: sent } });
+      const body = JSON.stringify({ intent: { kind: "intent", schemaVersion: 1, clientEventId: eventId, roomId, gameInstanceId, action, payload: sent } });
       const res = await sendIntent(async () => {
         const headers: Record<string, string> = { "content-type": "application/json" };
         const t = seats.token();
@@ -584,7 +643,7 @@ export function App() {
     if (!g || g.gameId === "trivia") return null;
     const rows = reviewRows(g, undefined, g);
     if (rows.length === 0) return null;
-    const title = games.find((x) => x.id === g.gameId)?.title ?? g.gameId;
+    const title = titleFor(g.gameId, games);
     return g.status === "playing"
       ? <AnswerReview rows={rows.slice(-1)} tv title={`${title}: last answer`} testId="tv-answer-review" />
       : <AnswerReview rows={rows} tv title={`${title}: answers`} testId="tv-answer-review" />;
@@ -624,7 +683,7 @@ export function App() {
   function tvShowScreen(onBack: () => void, backLabel: string) {
     if (!proj) return null;
     const feed = tvFeedFrom(proj);
-    const titleOf = (id: string) => games.find((x) => x.id === id)?.title ?? id;
+    const titleOf = (id: string) => titleFor(id, games);
     return (
       <MchezoProvider theme={themes.everyday} {...motion} as="bare">
         <TvShow
@@ -638,6 +697,7 @@ export function App() {
               ? <div className="mz-tvshow-game" data-testid="mz-cx-tv"><GameClock game={g} tv /><ConnectionsTv game={g} title={titleOf(g.gameId)} players={feed.players} /></div>
               : g.gameId === "closest-wins" ? <ClosestTv game={g} title={titleOf(g.gameId)} />
               : g.gameId === "impostor" ? <ImpostorTv game={g} title={titleOf(g.gameId)} />
+              : g.gameId === "charades" ? <CharadesTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} />
               : g.gameId === "majority-rules" ? <MajorityTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} />
               : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><PulseTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "draw-guess" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><DrawTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
@@ -658,7 +718,9 @@ export function App() {
   async function loadMemory() {
     try { setBook(await get<MemoryEntry[]>(`/rooms/${roomId}/memory`)); setLedger(await get<LedgerEvent[]>(`/rooms/${roomId}/ledger`)); } catch (e) { fail(e); }
   }
-  useEffect(() => { if (view === "memory" && roomId) loadMemory(); }, [view, roomId]);
+  // Stage 5.1 (3E): also whenever the room's ledger moves on (seq counts its
+  // events), so a Memory Book left open across a game's end cites that game.
+  useEffect(() => { if (view === "memory" && roomId) loadMemory(); }, [view, roomId, proj?.seq]);
   useEffect(() => {
     if (!proj?.joinCode) return;
     const url = `${location.origin}/join?code=${proj.joinCode}`;
@@ -788,6 +850,7 @@ export function App() {
   // Spectators never hold a playerId, so nothing here can start a game,
   // submit an intent, or appear in a seat.
   if (!playerId && specRoomId && specToken) {
+    const tvNote = tvLive === "live" ? null : <TvConnectionNote state={tvLive} />;
     const specPlayers: PublicPlayer[] = proj?.players ?? [];
     const specLatest = (proj?.games ?? []).at(-1);
     noteServerTime(proj?.serverNow);
@@ -806,6 +869,7 @@ export function App() {
     if (specLatest?.status === "briefing" && specLatest.briefing) {
       return (
         <MchezoProvider theme={themes.everyday} {...motion}>
+          {tvNote}
           <BriefingTv key={specLatest.id} game={specLatest} registry={games.find((x) => x.id === specLatest.gameId)} players={specPlayers} joinCode={proj.joinCode} onBack={stopWatching} backLabel="Stop watching" />
         </MchezoProvider>
       );
@@ -813,11 +877,12 @@ export function App() {
     if (specTvGame) {
       return (
         <MchezoProvider theme={themes.everyday} {...motion} as="bare">
+          {tvNote}
           <MchezoTvStage key={specTvGame.id} publicGame={specTvGame} players={specPlayers} joinCode={proj.joinCode ?? "…"} onBack={stopWatching} spectatorCount={proj.spectatorCount} backLabel="Stop watching" previousScores={previousGameScores(proj?.games ?? [], specTvGame.id)} />
         </MchezoProvider>
       );
     }
-    return tvShowScreen(stopWatching, "Stop watching");
+    return <>{tvNote}{tvShowScreen(stopWatching, "Stop watching")}</>;
   }
 
   // A-06 (live audit): until this phone has its room's first projection, say
@@ -850,7 +915,7 @@ export function App() {
   const me = players.find((p) => p.id === playerId);
   // Standings come from the server only (RoomEngine.officialStandings); the
   // TV and the Cup screen read them from the projection. No client recompute.
-  const nameOf = (id: string): string => players.find((p) => p.id === id)?.displayName ?? id;
+  const nameOf = (id: string): string => playerName(id, players);
   // Only a game this player is in. Someone who joined the room after it
   // started isn't in its roster: they stay in the lobby (the server refuses
   // their answers anyway). The old 8 s intro used to hide this; D3 removed it.
@@ -867,9 +932,13 @@ export function App() {
   const latestFinished = myGames.filter((g) => g.status === "finished" && g.participant !== false).slice(-1)[0];
   // Stage 5: one failure line for every game screen that has no inline one,
   // shown only for the game the failed action was for, cleared by the next send.
+  // Stage 5.1 (2C): a send whose reply was lost but which the server lists
+  // as accepted for this player. Only the server's list decides this.
+  const sendLanded = !!actionError?.eventId && actionError.gid === playingGame?.id && !!proj?.me?.acceptedEventIds?.includes(actionError.eventId);
   const sendFailure = actionError && playingGame && actionError.gid === playingGame.id
-    ? <p className="err mz-send-fail" role="alert" data-testid="mz-send-error">{actionError.text}</p>
+    ? <SendNote shown landed={sendLanded} error={actionError.text} testId="mz-send-error" />
     : null;
+  queueMicrotask(() => { if (sendLanded && actionError && err === actionError.text) setErr(""); });
   const publicPlaying = (proj?.games ?? []).find((g) => g.id === playingGame?.id);
   const publicFinished = (proj?.games ?? []).find((g) => g.id === latestFinished?.id);
   const showPhase = view === "lobby" ? deriveShowPhase(playingGame, latestFinished, introDismissed, resultsDismissed, playerId ?? undefined) : "lobby";
@@ -889,7 +958,7 @@ export function App() {
   // so every phone tells the same story.
   const resultsHero = (g: PlayerGame, pub?: PublicGame) => {
     const scores = pub?.rawScores ?? g.rawScores ?? {};
-    const title = games.find((x) => x.id === g.gameId)?.title ?? g.gameId;
+    const title = titleFor(g.gameId, games);
     const official = pub?.official ?? g.official ?? false;
     const story = resultsStory({
       gameInstanceId: g.id, title, official, scores, nameOf,
@@ -1072,7 +1141,7 @@ export function App() {
         : mineScore === undefined ? undefined
         : n <= 1 ? `You played solo: ${mineScore} points.`
         : `You ${tied ? "tied for" : "came"} ${ordinal(rank)} of ${n} · ${mineScore} points.`;
-      return { title: games.find((x) => x.id === lastDone.gameId)?.title ?? lastDone.gameId, mode: lastDone.official ? "official" as const : "practice" as const, headline: winnerLine(scores, nameOf), yourLine };
+      return { title: titleFor(lastDone.gameId, games), mode: lastDone.official ? "official" as const : "practice" as const, headline: winnerLine(scores, nameOf), yourLine };
     })() : undefined;
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
@@ -1190,7 +1259,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoMajority game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Majority Rules"} intent={sendAction} error={err || undefined} />
+        <MchezoMajority game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Majority Rules"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
   }
@@ -1198,7 +1267,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoPulse game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Pattern Pulse"} intent={sendAction} error={err || undefined} />
+        <MchezoPulse game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Pattern Pulse"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
   }
@@ -1206,7 +1275,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoDraw game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Draw & Guess"} intent={sendAction} error={err || undefined} />
+        <MchezoDraw game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Draw & Guess"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
   }
@@ -1238,7 +1307,7 @@ export function App() {
           title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"}
           objective="Write the funniest caption."
           accent={1}
-          steps={["Everyone gets the same silly scene.", "Write a caption, then vote for your favourite (not your own).", "Captions are anonymous until the end: 100 points per vote."]}
+          steps={["Everyone gets the same silly scene.", "Write a caption, then vote for your favourite (not your own).", "Captions are anonymous until the end. 25 points for each caption you write, plus 100 for every vote it gets."]}
           onStart={() => dismissIntro(playingGame.id)}
         />
       </MchezoProvider>
@@ -1248,7 +1317,7 @@ export function App() {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <GameClock game={playingGame} />
-        <MchezoCaption game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"} intent={sendAction} error={err || undefined} />
+        <MchezoCaption game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
   }
@@ -1262,7 +1331,7 @@ export function App() {
   if (view === "lobby" && showPhase === "intro" && triviaPlaying && playingGame) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <MchezoTriviaIntro title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} onStart={() => dismissIntro(playingGame.id)} />
+        <MchezoTriviaIntro title={titleFor(playingGame.gameId, games)} onStart={() => dismissIntro(playingGame.id)} />
       </MchezoProvider>
     );
   }
@@ -1276,7 +1345,7 @@ export function App() {
           publicGame={publicPlaying}
           players={players}
           playerId={playerId ?? ""}
-          gamesTitle={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          gamesTitle={titleFor(playingGame.gameId, games)}
           intent={intent}
           post={post}
           onBackToLobby={() => dismissResults(playingGame.id)}
@@ -1304,7 +1373,7 @@ export function App() {
           post={post}
           roomId={roomId ?? ""}
           isHostOrCohost={!!(me?.isHost || me?.isCohost)}
-          title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          title={titleFor(playingGame.gameId, games)}
         />
       </MchezoProvider>
     );
@@ -1327,7 +1396,7 @@ export function App() {
           post={post}
           roomId={roomId ?? ""}
           isHostOrCohost={!!(me?.isHost || me?.isCohost)}
-          title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          title={titleFor(playingGame.gameId, games)}
         />
       </MchezoProvider>
     );
@@ -1347,7 +1416,7 @@ export function App() {
           publicGame={publicPlaying}
           players={players}
           playerId={playerId ?? ""}
-          gamesTitle={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          gamesTitle={titleFor(playingGame.gameId, games)}
           intent={intent}
           post={post}
           roomId={roomId ?? ""}
@@ -1372,7 +1441,7 @@ export function App() {
           publicGame={publicPlaying}
           players={players}
           playerId={playerId ?? ""}
-          gamesTitle={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId}
+          gamesTitle={titleFor(playingGame.gameId, games)}
           intent={intent}
           post={post}
           roomId={roomId ?? ""}
@@ -1392,7 +1461,7 @@ export function App() {
           publicGame={publicFinished}
           players={players}
           playerId={playerId ?? ""}
-          gamesTitle={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId}
+          gamesTitle={titleFor(latestFinished.gameId, games)}
           intent={intent}
           post={post}
           onBackToLobby={() => dismissResults(latestFinished.id)}
@@ -1417,7 +1486,7 @@ export function App() {
           inRoom
           roomPlayers={connectedNow}
           filters={filtersFromQuery(route.name === "room" ? route.lib ?? "" : "")}
-          onFiltersChange={(f) => { const lib = filtersToQuery(f); navigate(lib ? { name: "room", sub: "library", lib } : { name: "room", sub: "library" }, { replace: true }); }}
+          onFiltersChange={(f) => { const lib = filtersToQuery(f); tabSet("mz_lib_room", lib); navigate(lib ? { name: "room", sub: "library", lib } : { name: "room", sub: "library" }, { replace: true }); }}
           onSelect={(id) => { setUpNextId(id); setShuffleResult(null); toLobby(); }}
           onDetails={(id) => openSheet("details", id)}
           onBack={toLobby}
@@ -1441,7 +1510,7 @@ export function App() {
     // Stage 4 (S3-MEM-01): the Memory Book as a Night Circle screen with honest export feedback.
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <MemoryScreen roomId={roomId ?? ""} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
+        <MemoryScreen roomId={roomId ?? ""} roomSeq={proj?.seq} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
         {roomSheets}
       </MchezoProvider>
     );
@@ -1499,18 +1568,33 @@ export function App() {
     </div>
     {err && <p className="err">{err}</p>}{msg && <p className="ok">{msg}</p>}
 
-    {view === "lobby" && showPhase === "intro" && playingGame && <ShowIntro game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} tutorial={games.find((x) => x.id === playingGame.gameId)?.tutorial ?? ""} onStart={() => dismissIntro(playingGame.id)} />}
+    {view === "lobby" && showPhase === "intro" && playingGame && <ShowIntro game={playingGame} title={titleFor(playingGame.gameId, games)} tutorial={games.find((x) => x.id === playingGame.gameId)?.tutorial ?? ""} onStart={() => dismissIntro(playingGame.id)} />}
     {view === "lobby" && showPhase === "waiting" && playingGame && publicPlaying && <>
-      <ShowWaiting game={publicPlaying} title={games.find((x) => x.id === playingGame.gameId)?.title ?? playingGame.gameId} />
+      <ShowWaiting game={publicPlaying} title={titleFor(playingGame.gameId, games)} />
       <p className="muted">The game stays visible below — when the next phase starts, this banner goes away on its own.</p>
     </>}
-    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? latestFinished.gameId} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={themes.everyday} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
+    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={titleFor(latestFinished.gameId, games)} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={themes.everyday} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
-      {showGamePanel && playingGame && <GamePanel game={playingGame} players={players} nameOf={nameOf} intent={intent} textInput={textInput} setTextInput={setTextInput} numInput={numInput} setNumInput={setNumInput} selectedTiles={selectedTiles} setSelectedTiles={setSelectedTiles} />}
+      {showGamePanel && playingGame && <GamePanel key={draftKey(playingGame)} game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "This game"} players={players} nameOf={nameOf} intent={intent} />}
       {/* S5-F: the older panel (Category Sprint, Who Said That?, Impostor, Charades) says so beside the game when a send fails; typed text stays in its box. */}
       {showGamePanel && playingGame && sendFailure}
 
 
 
   </div>;
+}
+
+/**
+ * Stage 5.1 (S5-AUD-07): the TV says when what it shows may be out of date.
+ * The last known display stays on screen underneath. No room, host or
+ * recovery details: only that the connection is lost or back.
+ */
+function TvConnectionNote({ state }: { state: "stale" | "restored" }) {
+  return (
+    <div className={`mz-tv-conn mz-tv-conn--${state}`} role="status" aria-live="polite" data-testid="tv-conn" data-state={state}>
+      {state === "stale"
+        ? <><b>Connection to the game lost.</b> This screen may be out of date. Reconnecting…</>
+        : <><b>Reconnected.</b> This screen is up to date.</>}
+    </div>
+  );
 }

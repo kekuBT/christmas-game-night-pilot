@@ -89,6 +89,8 @@ export function MchezoClosest(deps: MchezoClosestDeps) {
       <div className="mz-card">
         <p><b>{st.prompt}</b>{st.unit ? ` (${st.unit})` : ""}</p>
         <NumericGuess
+          // Stage 5.1 (O-02): a new question starts from the start value, never the last question's number.
+          key={`${game.id}:${game.lifecycle?.phaseKey ?? st.prompt ?? ""}`}
           game="closest-wins"
           initial={50}
           dialAriaLabel="Guess dial"

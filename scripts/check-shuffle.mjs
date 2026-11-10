@@ -14,7 +14,11 @@ function check(name, ok, detail = "") {
   if (!ok) failures++;
 }
 
-const TITLES = ["Impostor", "Caption Clash", "Trivia Showdown", "Word Connections", "Who Said That?", "Guess the Year", "Closest Wins", "Category Sprint", "Charades", "Geography Challenge", "Math Mayhem"];
+// Stage 5.1: the real games are whatever the server's registry lists (GET
+// /games). The old hard-coded list stopped at 11 games, so a shuffle that
+// picked one of Stage 5's three (Majority Rules, Pattern Pulse, Draw &
+// Guess) failed this check although it had picked a real game.
+const TITLES = (await (await fetch(`${BASE}/games`)).json()).map((g) => g.title);
 
 async function createRoom(page, name) {
   await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });

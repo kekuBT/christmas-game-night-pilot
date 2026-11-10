@@ -25,19 +25,9 @@ import { toMzPlayers } from "./adapters.js";
 import type { PublicGame, RegistryGame } from "../../types.js";
 
 /** One public sentence per game: how it works, never what the answers are. */
-export const TV_HINT: Record<string, string> = {
-  "math-mayhem": "Questions appear one at a time on each phone, and each is timed from when the game sends it. Scores appear here when the game ends.",
-  "trivia": "Everyone answers the same ten questions on their own phone. Answers stay hidden until the game is over.",
-  "who-said-that": "Match each quote to who said it, on your own phone. Answers stay hidden until the game is over.",
-  "geography": "Each phone gets the same questions. Answers stay hidden until the game is over.",
-  "guess-the-year": "Guess the year of each event on your phone. Closer is better; answers come at the end.",
-  "closest-wins": "One number question at a time. Closest guess wins the round.",
-  "category-sprint": "Name as many fitting answers as you can before the round ends.",
-  "impostor": "One player has a different word. Clues, then a vote. Nobody's word is ever shown here.",
-  "charades": "One player acts, their team guesses out loud. The prompt stays on the actor's phone.",
-  "word-connections": "Everyone solves their own board of sixteen words. Solutions appear when the game is over.",
-  "caption-clash": "Everyone writes a caption, then votes for the funniest. Authors stay hidden until the end.",
-};
+import { TV_HINT } from "../../ui/mchezo/lib/tvHints.js";
+import { titleFor } from "../../ui/mchezo/lib/names.js";
+export { TV_HINT };
 
 export interface TvShowProps {
   feed: TvFeed;
@@ -60,7 +50,7 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
   // A new game, or a change of status, resets the operator's choice.
   useEffect(() => { setChoice("auto"); }, [latest?.id, latest?.status]);
   const mode: TvMode = tvModeFor(latest, choice);
-  const titleOf = (id: string) => registry.find((r) => r.id === id)?.title ?? id;
+  const titleOf = (id: string) => titleFor(id, registry);
   const nameOf = (id: string) => feed.players.find((p) => p.id === id)?.displayName ?? "A player";
   const review = latest && mode !== "live" && latest.status === "finished" ? renderReview?.(latest) ?? null : null;
   const game = mode === "lobby" ? undefined : latest;

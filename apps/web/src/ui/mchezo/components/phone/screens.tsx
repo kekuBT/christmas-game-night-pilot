@@ -221,6 +221,8 @@ export interface QuestionScreenProps {
   questionNumber: number;
   questionCount: number;
   question: string;
+  /** Stage 5.1 (3F): the question as rendered, when part of it is a picture (e.g. a flag) with its own text alternative. */
+  questionNode?: ReactNode;
   options: readonly AnswerOption[];
   selectedId: string | null;
   locked: boolean;
@@ -243,7 +245,7 @@ export function QuestionScreen(p: QuestionScreenProps) {
           <span className="mz-muted">Question {p.questionNumber} of {p.questionCount}</span>
         </div>
       </header>
-      <h1 className="mz-question">{p.question}</h1>
+      <h1 className="mz-question">{p.questionNode ?? p.question}</h1>
       <div className="mz-grow mz-grow--min" />
       <AnswerGrid options={p.options} selectedId={p.selectedId} locked={p.locked} onSelect={p.onSelect} disabled={p.secondsLeft <= 0} sending={p.sending} />
       <p className="mz-foot" role="status">{p.selectedId ? 'Locked in.' : p.secondsLeft <= 0 ? 'Time’s up.' : 'One tap locks your answer.'}</p>

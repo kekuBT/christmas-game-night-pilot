@@ -25,12 +25,18 @@ export function ShowIntro(props: { game: PlayerGame; title: string; tutorial: st
 }
 
 export function ShowWaiting(props: { game: PublicGame; title: string }) {
-  const submitted = props.game.submittedCount ?? 0;
-  const total = props.game.totalPlayers ?? props.game.players.length;
+  const pr = props.game.progress;
+  const total = pr?.total ?? props.game.totalPlayers ?? props.game.players.length;
+  const started = pr?.started ?? props.game.submittedCount ?? 0;
+  // Stage 5.1 (O-07): say how many have FINISHED (the server's own rule).
+  // "N of N have played so far" counted anyone who had answered once, so it
+  // read as "everyone's done" while others still had questions left.
   return <div className="card waiting" data-testid="show-waiting">
     <p className="show-kicker">⏳ Waiting for others</p>
     <h2>{props.title}</h2>
-    <p>You are done — nice work. <b>{submitted} of {total} players</b> have played so far in this game.</p>
+    {pr?.finished !== undefined
+      ? <p data-testid="show-waiting-count">You’re done — nice work. <b>{pr.finished} of {total}</b> {pr.finished === 1 ? "has" : "have"} finished; {started} of {total} {started === 1 ? "has" : "have"} started.</p>
+      : <p data-testid="show-waiting-count">You’re done — nice work. <b>{started} of {total}</b> {started === 1 ? "has" : "have"} started this game (answered at least once).</p>}
     <p className="muted">Counts only — nobody can see who submitted or what they answered. When everyone is done, results appear automatically.</p>
     {/* Sprint 3: no host skip; the server ends the game at its time limit. */}
     <p className="muted">If someone doesn’t finish, the game ends by itself when time runs out.</p>

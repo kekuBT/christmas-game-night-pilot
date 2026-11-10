@@ -1,0 +1,24 @@
+PASS Closest: the TV shows the live question
+PASS Closest question 1: nobody has answered yet → 0 of 3
+PASS Closest question 1: one answer in → 1 of 3
+PASS Closest: everyone answered, question 2 opens
+PASS Closest question 2: the TV says 0 of 3 have answered THIS question (not 3 of 3)
+  TV ring on question 2: "0 of 3 have answered question 2"
+PASS Who Said That: the game has questions — 8
+PASS Who Said That: Amina's answer 1 is in
+PASS Who Said That: Amina's answer 2 is in
+PASS Who Said That: Amina's answer 3 is in
+PASS Who Said That: Amina's answer 4 is in
+PASS Who Said That: Amina's answer 5 is in
+PASS Who Said That: Amina's answer 6 is in
+PASS Who Said That: Amina's answer 7 is in
+PASS Who Said That: Amina's answer 8 is in
+  waiting card: "⏳ WAITING FOR OTHERS Who Said That? You’re done — nice work. 2 of 4 have finished; 3 of 4 have started. Counts only — nobody can see who submitted or what they answered. When everyone is done, results appear automatically. If someone doesn’t finish, the game ends by itself when time runs out."
+PASS Who Said That: the waiting card says 2 of 4 have finished (Keku and Amina; Bartholomew and Wanjiru still have questions) — ⏳ WAITING FOR OTHERS Who Said That? You’re done — nice work. 2 of 4 have finished; 3 of 4 have started. Counts only — nobody can see who submitted or what they answered. When everyone is done, results appear automatically. If someone doesn’t finish, the game ends by itself when time runs out.
+PASS Who Said That: it doesn't present the started count as if everyone were done — ⏳ WAITING FOR OTHERS Who Said That? You’re done — nice work. 2 of 4 have finished; 3 of 4 have started. Counts only — nobody can see who submitted or what they answered. When everyone is done, results appear automatically. If someone doesn’t finish, the game ends by itself when time runs out.
+PASS Who Said That: no names on the waiting card
+PASS Majority: a poll is in flight and holding the older state
+PASS Majority: the held reply is the older state (still voting)
+PASS Majority: the push shows the reveal
+PASS Majority: after the older reply lands, the screen stays on the reveal (no roll-back to the earlier step)
+PROGRESS ALL PASSED

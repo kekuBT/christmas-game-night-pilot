@@ -1,0 +1,10 @@
+PASS Geography: a game with a flag question was dealt — 8 questions
+FAIL Geography: the server describes the flag without naming any option — {"options":["Italy","Mexico","Ireland","Hungary"]}
+PASS Geography: the flag question is on screen
+FAIL Geography: the flag is exposed as a picture named 'Flag: <description>' — 0
+  question in the accessibility tree: - heading "Which country does this flag belong to? 🇮🇹" [level=1]
+PASS Geography: the question's accessible text names no option (no answer read out) — - heading "Which country does this flag belong to? 🇮🇹" [level=1]
+PASS Geography: sighted players still see the flag emoji
+FAIL Who Said That: every question is its own labelled group — not within 8000ms
+FAIL Who Said That: ran to the end — locator.evaluate: Timeout 30000ms exceeded.
+A11Y SURFACES FAILURES: 4

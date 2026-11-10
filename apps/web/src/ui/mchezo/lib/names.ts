@@ -1,3 +1,4 @@
+import { GAME_MANIFESTS } from "../../../../../../src/games/manifest.js";
 /**
  * Stage 4 (S3-TRV-02): short labels for tight spots (the waiting ring, the
  * lobby circle) that tell similar names apart. Built only from each player's
@@ -22,4 +23,23 @@ export function shortNames(players: readonly { id: string; name: string }[]): Re
   const again = count(labels);
   labels = labels.map((l, i) => ((again[key(l)] ?? 0) > 1 ? players[i]!.name.trim() : l));
   return Object.fromEntries(players.map((p, i) => [p.id, labels[i]!]));
+}
+
+/**
+ * Stage 5.1 (3F, O-12/O-14): what a player-facing screen calls a game or a
+ * player when its usual lookup misses (the game list still loading, a player
+ * who has left). Never an internal id such as "who-said-that" or "player-3".
+ */
+
+export function titleFor(gameId: string, registry?: readonly { id: string; title: string }[]): string {
+  return registry?.find((g) => g.id === gameId)?.title ?? GAME_MANIFESTS.find((m) => m.id === gameId)?.title ?? "This game";
+}
+
+export function playerName(playerId: string, players: readonly { id: string; displayName: string }[]): string {
+  return players.find((p) => p.id === playerId)?.displayName ?? "A player";
+}
+
+/** A game's status in words, for the older game panel. */
+export function statusWords(status: string): string {
+  return status === "playing" ? "In play" : status === "finished" ? "Finished" : status === "briefing" ? "Getting ready" : "Waiting";
 }

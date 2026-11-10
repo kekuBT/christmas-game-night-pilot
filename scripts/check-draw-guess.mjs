@@ -104,17 +104,21 @@ async function stroke(p, { touch = false, from = [0.2, 0.3], to = [0.8, 0.7] } =
 try {
   let pages = [];
   for (const [i, s] of seats.entries()) pages.push(await phone(s, WIDTHS[i]));
-  const keku = pages[0];
+  // Keku's phone, looked up each time: turn 2 closes the drawer's page and
+  // opens a new one in pages[d], and the drawer is seat 0 in about one game
+  // in four (the server shuffles the order). A page captured here went stale
+  // then, and the results checks crashed with "Target page … has been closed".
+  const keku = () => pages[0];
   for (const [i, p] of pages.entries()) await p.getByRole("heading", { name: `You’re in, ${NAMES[i]}.` }).waitFor({ timeout: 15000 });
   const tv = await watcher();
 
   // ---- Practice-only, in the lobby and on the server.
-  await keku.getByTestId("choose-game").click();
-  await keku.getByTestId("select-game-draw-guess").click();
-  await soon("lobby: Draw & Guess is Practice only, and says why", async () => (await keku.getByTestId("mode-official").isDisabled()) && /practice-only until its Cup scoring is approved/.test(await keku.getByTestId("practice-only-note").innerText()));
+  await keku().getByTestId("choose-game").click();
+  await keku().getByTestId("select-game-draw-guess").click();
+  await soon("lobby: Draw & Guess is Practice only, and says why", async () => (await keku().getByTestId("mode-official").isDisabled()) && /practice-only until its Cup scoring is approved/.test(await keku().getByTestId("practice-only-note").innerText()));
   const off = await call(`/rooms/${room.roomId}/games`, { token: seats[0].token, body: { gameId: "draw-guess", official: true } });
   check("server: an official start is refused", off.status >= 400 && /practice-only/.test(off.body.error ?? ""), `${off.status} ${off.body.error}`);
-  await keku.getByTestId("start-practice-draw-guess").click();
+  await keku().getByTestId("start-practice-draw-guess").click();
   await soon("briefing: every phone explains the game", async () => (await Promise.all(pages.map(async (p) => /Only the drawer sees the word/.test(await text(p)) && /Wrong guesses stay private/.test(await text(p))))).every(Boolean));
   await pages[1].screenshot({ path: screenshotPath("docs/stage5/after/dg-briefing-375.png") });
   for (const p of pages) await p.getByTestId("briefing-ready").click();
@@ -269,9 +273,9 @@ try {
     const t = await text(p);
     check(`results ${WIDTHS[i]}px: four turns recapped, how scoring works, no sideways scrolling`, (await p.getByTestId("mz-dg-recap-turn").count()) === 4 && /in the order they got it/.test(t) && await noSideways(p));
   }
-  check("results: the moment line comes from a recorded turn (turn 4: everyone got it)", /^Everyone got .+’s “.+”\.$/.test(await keku.getByTestId("results-moment").innerText()), await keku.getByTestId("results-moment").innerText().catch(() => "none"));
-  await keku.screenshot({ path: screenshotPath("docs/stage5/after/dg-results-390.png"), fullPage: true });
-  { const f = await contrastFailures(keku); check("contrast (AA): results", f.length === 0, f.join("; ")); }
+  check("results: the moment line comes from a recorded turn (turn 4: everyone got it)", /^Everyone got .+’s “.+”\.$/.test(await keku().getByTestId("results-moment").innerText()), await keku().getByTestId("results-moment").innerText().catch(() => "none"));
+  await keku().screenshot({ path: screenshotPath("docs/stage5/after/dg-results-390.png"), fullPage: true });
+  { const f = await contrastFailures(keku()); check("contrast (AA): results", f.length === 0, f.join("; ")); }
   await soon("TV: final standings, then the review", async () => (await tv.getByTestId("tv-mode").getAttribute("data-mode")) === "final", 20000);
   await tv.getByTestId("tv-dir-review").click();
   await soon("TV review: four turns, each word and who drew it", async () => (await tv.getByTestId("tv-dg-review").locator("li").count()) === 4);

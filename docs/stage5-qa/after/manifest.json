@@ -1,0 +1,92 @@
+{
+  "label": "after",
+  "revision": "4acfea70fa54a52a8066b40154ca437cd20d8b31",
+  "capturedAt": "2026-11-09T17:30:09.509Z",
+  "note": "Chromium headless (Playwright) only; not a real iPhone or Android device.",
+  "shots": [
+    {
+      "id": "o02-sprint-round2",
+      "file": "o02-sprint-round2-390x844.png",
+      "viewport": "390×844",
+      "what": "Round 2 opens; is round 1's text still in the box?",
+      "status": "captured"
+    },
+    {
+      "id": "o07-closest-tv-q2",
+      "file": "o07-closest-tv-q2-1440x900.png",
+      "viewport": "1440×900",
+      "what": "Nobody has answered question 2 yet",
+      "status": "captured"
+    },
+    {
+      "id": "o07-whosaid-waiting",
+      "file": "o07-whosaid-waiting-390x844.png",
+      "viewport": "390×844",
+      "what": "Keku and Amina finished; Bartholomew and Wanjiru still have questions",
+      "status": "captured"
+    },
+    {
+      "id": "s5aud02-pulse-full-entry",
+      "file": "s5aud02-pulse-full-entry-375x667.png",
+      "viewport": "375×667",
+      "what": "All shapes entered, not yet locked in",
+      "status": "captured"
+    },
+    {
+      "id": "o06-charades-phone",
+      "file": "o06-charades-phone-390x844.png",
+      "viewport": "390×844",
+      "what": "Teams, who acts and who guesses",
+      "status": "captured"
+    },
+    {
+      "id": "o06-charades-tv",
+      "file": "o06-charades-tv-1440x900.png",
+      "viewport": "1440×900",
+      "what": "Charades on the TV",
+      "status": "captured"
+    },
+    {
+      "id": "3d-impostor-tv",
+      "file": "3d-impostor-tv-1440x900.png",
+      "viewport": "1440×900",
+      "what": "TV hint for Impostor",
+      "status": "captured"
+    },
+    {
+      "id": "3d-draw-briefing",
+      "file": "3d-draw-briefing-390x844.png",
+      "viewport": "390×844",
+      "what": "The briefing's rules",
+      "status": "captured"
+    },
+    {
+      "id": "3d-home-featured",
+      "file": "3d-home-featured-390x844.png",
+      "viewport": "390×844",
+      "what": "Today's featured game card",
+      "status": "captured"
+    },
+    {
+      "id": "2c-reply-lost",
+      "file": "2c-reply-lost-390x844.png",
+      "viewport": "390×844",
+      "what": "The server has the answer; the phone never heard back",
+      "status": "captured"
+    },
+    {
+      "id": "3e-memory-link",
+      "file": "3e-memory-link-390x844.png",
+      "viewport": "390×844",
+      "what": "Geography just finished; which game will the highlight cite?",
+      "status": "captured"
+    },
+    {
+      "id": "s5aud07-tv-outage",
+      "file": "s5aud07-tv-outage-1440x900.png",
+      "viewport": "1440×900",
+      "what": "Server stopped 12 s ago; does the TV say its picture may be stale?",
+      "status": "captured"
+    }
+  ]
+}

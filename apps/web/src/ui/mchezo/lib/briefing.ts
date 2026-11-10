@@ -106,7 +106,18 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
   },
   "caption-clash": {
     objective: "Write the funniest caption.",
-    steps: ["Everyone gets the same silly scene.", "Write a caption, then vote for your favourite (not your own).", "Captions are anonymous until the end: 100 points per vote."],
+    steps: ["Everyone gets the same silly scene.", "Write a caption, then vote for your favourite (not your own).", "Captions are anonymous until the end. 25 points for each caption you write, plus 100 for every vote it gets."],
+  },
+  // Stage 5.1 (3D): the rules as src/games/impostor.ts plays them.
+  "impostor": {
+    objective: "Find the impostor, or, as the impostor, blend in.",
+    steps: [
+      "Everyone sees the category. Everyone except the impostor also sees the secret word; the impostor sees only the category, and knows it.",
+      "Write a short clue that shows you know the word without giving it away.",
+      "Vote for who you think the impostor is. A tie, or no votes, catches nobody: the impostor wins.",
+      "A caught impostor gets one guess at the word: right, the impostor wins; wrong, everyone else wins.",
+      "The winning side scores 100; honest players who voted for the impostor get 20 more when their side wins.",
+    ],
   },
   "trivia": {
     objective: "Ten questions. One tap locks your answer.",
@@ -126,7 +137,8 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
     objective: "Watch a sequence of shapes, then tap it back in order.",
     steps: [
       "Six rounds at your own pace: 3 shapes, then 4, up to 8.",
-      "Tap “Show me the pattern” when you're ready. It shows for a few seconds, then hides.",
+      "Tap “Show me the pattern” when you're ready. It shows for a few seconds, then hides; you then have 16 to 24 seconds to tap it back (longer patterns get longer).",
+      "Each round's time starts when you open it, but the whole game also has a time limit (below): leave yourself time for every round.",
       "20 points per shape right from the start, plus 50 for the whole sequence.",
       "Everyone gets their own pattern, with the same lengths and time.",
     ],
@@ -134,7 +146,8 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
   "draw-guess": {
     objective: "Draw the secret word, or guess what's being drawn.",
     steps: [
-      "Everyone takes a turn to draw (up to six turns). Only the drawer sees the word.",
+      "Up to six turns: with six players or fewer everyone draws once; with more, six players chosen at random draw. Only the drawer sees the word.",
+      "The drawer can swap the word once, before drawing starts. Each guesser gets 12 guesses per drawing.",
       "Draw with your finger: colours, three line sizes, undo and clear. No letters or numbers!",
       "Type guesses on your phone. Wrong guesses stay private.",
       "Guessers score 100, 80, 60, then 50 in the order they get it; the drawer 50 for each.",

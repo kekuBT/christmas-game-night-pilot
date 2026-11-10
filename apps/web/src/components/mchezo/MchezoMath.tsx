@@ -44,7 +44,7 @@
 // and the player's answers on game.myAnswers — the server projects
 // Math's generated questions only into the player projection while
 // playing (room.ts player branch), not into state.questions.
-import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
+import { satOutLabel, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { useEffect, useState } from "react";
 import { usePageVisible } from "../../ui/mchezo/lib/visibility.js";
 import { Keycap, MchezoWaiting, Stamp } from "../../ui/mchezo/index.js";
@@ -116,7 +116,7 @@ export function MchezoMath(deps: MchezoMathDeps) {
 
   // Sat out: the server records whole-game abstention; show the wait, not Q1.
   if (game.abstained) {
-    return <MchezoWaiting label="You sat this one out" players={players} playerId={playerId} publicGame={publicGame} showClock />;
+    return <MchezoWaiting label={satOutLabel(game)} players={players} playerId={playerId} publicGame={publicGame} showClock />;
   }
   // Just answered: locked view until the player moves on. If the poll has
   // not landed yet (answer not in myAnswers), fall through to the question
