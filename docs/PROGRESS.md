@@ -1642,3 +1642,30 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage62-local/`.
 - A best can come from an easier Connections board.
 - The fault and timeout checks run in Chromium only.
 
+## Stage 7.1: Quick Party planning and first-game entry (2026-11-10)
+
+**Branch:** `claude/stage7-1-quick-party`, stacked on PR #7 at `d39bf2e` (PR #8, base `claude/stage6-2-solo-shelf`). The instruction is ChatGPT's handoff on PR #7 (comment 6773012280). Nothing was merged or deployed, no port was made public, and nothing was paid for. The spec and record are in `docs/stage7/stage71.md`; the decisions are D-S71-01 … 08.
+
+**Milestone:** in a casual room the host plans a Quick Party: expected group size (1–10), 15, 30 or 60 minutes, and a suggested lineup to edit. They apply it for the whole room and start the first game through the ordinary readiness and briefing flow. The lineup is server-authoritative room state with revisions, and is kept for the next slice.
+
+**Files:**
+- **Server:** `src/games/party.ts`, `src/server/room.ts`, `src/server/http.ts`.
+- **Web:** `apps/web/src/components/mchezo/QuickParty.tsx`, `App.tsx`, `Lobby.tsx`, `types.ts`, `ui/mchezo/lib/routes.ts`, `ui/mchezo/styles/stage7.css`.
+- **Tests and scripts:** `tests/stage71-quick-party.test.ts`, `scripts/check-quick-party.mjs`, `scripts/screenshot-stage71.mjs`.
+
+**Tests:**
+- 27 unit tests; the full suite passed (1,218);
+- `check-quick-party` 51/51;
+- regressions, all passing: `check-casual` 30, `check-lobby-mode` 71, `check-game-night-flow` 14, `check-briefing` 43, `check-solo` 80.
+
+The gate verdicts are recorded in the commit after the tested SHA.
+
+**External blockers:** none. WebKit and real devices are not available here.
+
+**Next task:** ChatGPT reviews PR #8; the next session-flow slice starts only when its handoff instructs it.
+
+**Risk:**
+- The time estimates are design defaults, not measured.
+- The TV screens don't show the lineup yet.
+- Browser checks run in Chromium only.
+

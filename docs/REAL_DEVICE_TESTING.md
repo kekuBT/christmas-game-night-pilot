@@ -178,6 +178,9 @@ Do these on phones that open the **Wi-Fi address** (not localhost): plain http t
 | I7 | Play solo → **Pattern Pulse** → Start; play all six rounds | Each pattern shows, hides, and can be tapped back; the results list all six rounds and a personal best |
 | I8 | Play solo → **Word Connections** → Start; find two groups, then make four mistakes | Tiles are easy to tap; the results show the two found groups solid and the two missed dashed, and a short note that the best spans boards of different difficulty |
 | I9 | Switch games: Math → Pulse → Connections → Math | Each starts fresh; each game keeps its own personal best |
+| I10 | In a casual room with 3 phones: **Plan a Quick Party** → set 4 → 30 min → **Suggest a lineup** → move, remove, replace → **Use this lineup** | The planner fits the screen; every button is easy to tap; all 3 phones show the same lineup; nothing starts |
+| I11 | Host: reload, then press Start | The lineup comes back; Start asks "You planned for 4; 3 are here" and **Start with 3** starts the first game through the rules screen |
+| I12 | A guest: look for a way to edit the lineup | None; only the host (or a cohost) sees Edit and Clear |
 | I6 | Host a game without touching the Casual/Family Cup choice; a second phone joins | No Cup chip, no Official/Practice choice; both phones say "Casual, just for fun"; a game plays to results and the lobby says "Last game · … · Casual" |
 
 ---

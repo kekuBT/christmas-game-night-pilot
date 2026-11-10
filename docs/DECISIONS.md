@@ -711,3 +711,31 @@ The spec is `docs/stage6/stage62.md`. The instruction is ChatGPT's review handof
   - The "on this device" label stays.
   - *Alternative rejected:* calibrating difficulty or keeping a best per board. Neither is asked for, and a per-board best would rarely be beaten with 12 boards.
 
+## Stage 7.1: Quick Party planning and first-game entry (2026-11-10, branch `claude/stage7-1-quick-party`, from the Stage 6.2 head `d39bf2e`)
+
+The spec is `docs/stage7/stage71.md`. The instruction is ChatGPT's review and handoff on PR #7 (comment 6773012280).
+
+- **D-S71-01 One pure planner, shared by the browser and the server** (`src/games/party.ts`).
+  - The browser builds and edits a preview; the server checks a lineup with the same code before saving it.
+  - Hard filters come from `shuffle.ts`'s `eligibleGames`. The order comes from `shuffle()`'s `"tournament"` weighting: not-recently-played and category variety, preferences only. That mode is a weighting, not the Tournament Studio's scoring or formats.
+  - *Alternative rejected:* building the lineup on the server. Previewing and editing would then need requests, and a preview must never touch the room.
+- **D-S71-02 The time-fit rule.**
+  - A game counts as its design estimate (manifest `duration.minutes`, "about N min") plus **2 minutes** for the rules, getting ready and results.
+  - A lineup fits when the sum is at or under 15, 30 or 60. A generated lineup always fits.
+  - Edits only offer replacements that keep it fitting, and the server refuses one that doesn't. "Short" says when the eligible games run out before the time does.
+  - No game clock changes, and no finish time is shown.
+- **D-S71-03 The lineup is room state with a revision that only grows** (`RoomEngine.party`, `partyRevision`; persisted).
+  - Saving or clearing needs the revision the host saw, otherwise `PLAN_CONFLICT` and nothing changes. Two host tabs can't overwrite each other unseen.
+  - Saving writes nothing to the ledger, the Cup or the Memory Book.
+  - A damaged saved lineup is dropped whole.
+- **D-S71-04 The first game starts through the ordinary start, marked as the lineup's** (`POST /games` with `party: { revision, index }`).
+  - It is repeat-safe: an item that already started a game that still exists returns that game. A lost reply, a second tab or a retry never starts a second one, and a cancelled briefing frees the item.
+  - Checks, in order: plan conflict; replay; **fewer than planned needs the host's OK** (`PARTY_FEWER_THAN_PLANNED`); **anyone reconnecting must be named or waited for**, as for an official game; the real roster must fit the game (`PARTY_DOESNT_FIT`). Then `startGame`'s own checks.
+- **D-S71-05 A next game that doesn't fit the people here is answered in the lineup card.**
+  - The lobby already disables Start then, so the card says why and offers a replan for the people here.
+  - The server's refusal stays as the authority.
+- **D-S71-06 Apply makes the lineup's first game up next,** through the existing up-next plan. Start uses the lineup only when up next is its next game; the host's own pick starts as before, and the card offers "Use the lineup".
+- **D-S71-07 Bounded requests for Quick Party and for every lobby Start** (`postBounded`, the timeout covering the reply).
+  - After a request gets no answer, the app reads the room before saying anything. An Apply or a Start that actually happened is recognised; otherwise the screen says nothing was saved or started.
+- **D-S71-08 This slice stops at the first game.** No next-game controls and no automatic advancement; the lineup is kept, with game 1 marked, for the next slice.
+

@@ -107,8 +107,8 @@ In a casual room, the host (or a cohost) says roughly how many people are playin
 - **API:** `POST /rooms/:id/party`.
   - **Body:** `{ baseRevision, plan: { expectedPlayers, budgetMinutes, items: [{ gameId }] } }` to save, or `{ baseRevision, clear: true }` to clear. The schema is strict Zod.
   - **Who:** an authenticated player of this room who is its host or a cohost.
-    - No token, or another room's token: 401.
-    - A spectator or player who is not the host: 403.
+    - No token, another room's token, or a spectator's token (a spectator is not a player): 401.
+    - A player who is not the host or a cohost: 403.
   - **Room kind:** casual only. A Cup or solo room gets 409 `NOT_A_CASUAL_ROOM`.
   - **Validation, 400:**
     - group size is a whole number from 1 to 10;
@@ -158,13 +158,17 @@ In a casual room, the host (or a cohost) says roughly how many people are playin
   - **Host:** Edit (opens the planner with the saved lineup) and Clear.
 - **Up next:** applying makes the lineup's first game the up-next game, through the existing up-next plan.
   - The dock's Start uses the Quick Party start (§3.5) when up-next is the lineup's first unstarted game. Otherwise it starts the host's own pick as before; the lineup card says the lineup is waiting and offers "Use the lineup".
-- **Refusals** show inline in the dock, with a way forward:
+- **Refusals** show inline above the dock, with a way forward:
   - fewer than planned: Start with N, or Replan for N;
   - reconnecting: the existing decision card;
   - doesn't fit: Replan for N;
   - conflict: "The lineup changed elsewhere; here's the latest";
   - network: Try again.
-- **TV:** the public projection carries the lineup; showing it on the TV lobby is optional in this slice.
+- **A next game that doesn't fit the people here** (found while building):
+  - The existing lobby already disables Start ("Waiting for players (3/4)"), so the server's `PARTY_DOESNT_FIT` is never reached from the screen.
+  - The lineup card therefore says so itself ("Impostor needs at least 4; 3 are here. Wait for them, or replan for 3"), with **replan for 3**.
+  - The server refusal stays as the authority, and the browser driver checks it over HTTP.
+- **TV:** the public projection carries the lineup, but the TV screens don't show it yet (not in this slice).
 
 ## 4. Test plan
 - **Planner (unit, pure):**
@@ -213,4 +217,95 @@ Proceeding with these as stated, unless you object.
 
 ## 6. What was built and tested
 
-*(Filled in at the checkpoint.)*
+### 6.1 Built
+- **`src/games/party.ts`** (pure; shared by the server and the web bundle):
+  - the planner and the time-fit rule (§3.1–3.2);
+  - `describeLineup`, `replacementOptions`, `moveItem`, `removeItem` and `replaceItem` for editing;
+  - `validatePartyPlan`, the server's check.
+- **`RoomEngine`** (`src/server/room.ts`):
+  - **state:** `party` and `partyRevision`;
+  - **`savePartyPlan`:** host or cohost only, casual rooms only, a revision conflict check, then the plan is validated again;
+  - **`partyView`:** the public projection (casual rooms, every audience);
+  - **`startPartyGame`:** the checks of §3.5, then `startGame`, and the item is marked in the same step;
+  - **persistence:** saved in the room snapshot; a damaged lineup is dropped whole;
+  - `StartRefused` carries `detail` (the numbers a host needs).
+- **HTTP** (`src/server/http.ts`):
+  - `POST /rooms/:id/party`, with a strict Zod body;
+  - `POST /games` takes `party` and `fewerThanPlanned`; a replay answers 200 with the game already started.
+- **Web:**
+  - **`QuickParty.tsx`:** the lobby card, the planner sheet, and the start question;
+  - **App:**
+    - `postBounded`, for Apply, Clear and every Start; the timeout covers the reply;
+    - an Apply or Start whose reply was lost is checked against the room before anything is said;
+    - Applying makes the first game up next;
+    - Start sends the lineup marker when up next is the lineup's next game;
+    - "Start with N" is kept across the reconnecting-players question;
+  - `Lobby.tsx`: a party slot and the Start label ("Start Math Mayhem · game 1 of 3");
+  - a `party` sheet route; `stage7.css`.
+
+### 6.2 Tested
+- **`tests/stage71-quick-party.test.ts`, 27 tests:**
+  - **Planner:**
+    - group sizes 1, 2, 3, 4 and 10, with every preset and five seeds each: within budget, every game fits, no duplicates, the estimate adds up;
+    - the time-fit arithmetic, including exactly at the budget and one minute over;
+    - one player gets a "short" lineup (3 games, 24 minutes of 60);
+    - invalid sizes, budgets and seeds;
+    - deterministic seeds;
+    - none fits: too short (custom catalogue) and no game for the group (exclusions);
+    - exclusions are hard; a not-recently-played game leads more often, but never past eligibility;
+    - editing: replacements fit, aren't in the lineup and stay within budget; move and remove;
+    - the server's check (10 invalid lineups).
+  - **Room:**
+    - only the host or a cohost of a casual room; Cup and solo rooms refused;
+    - revisions only grow; a stale one is refused and changes nothing;
+    - invalid lineups refused;
+    - no content, games, ledger, Cup or standings touched;
+    - the same public view for a guest and the TV, with nothing private;
+    - snapshots round-trip; damaged lineups are dropped; older rooms start at revision 0.
+  - **Starts:**
+    - the ordinary start, practice, roster as shown, the item marked, nothing else started;
+    - a replay returns the same game;
+    - a cancelled briefing frees the item;
+    - fewer than planned needs an OK;
+    - the real roster must fit;
+    - reconnecting players named or waited for;
+    - a stale or wrong start refused, and a changed roster;
+    - casual rooms and the host only;
+    - a refused start uses no content; the real start does.
+  - **HTTP:**
+    - 401 for no token, another room's token or a spectator; 403 for a guest;
+    - 12 malformed bodies get 400; a stale revision gets 409 with the latest; a Cup room gets 409;
+    - starts: malformed or official is 400; fewer gets 409 with the numbers; then 201, and a replay 200;
+    - a server restart keeps the lineup and its revision.
+- **Mutation:** each of these makes at least one test fail:
+  - no revision check;
+  - no replay;
+  - no "fewer" check;
+  - no reconnecting check;
+  - no time fit in the planner;
+  - no budget check on the server;
+  - no host check.
+- **`scripts/check-quick-party.mjs`, 51 checks:**
+  - **entry:** the host only; a Cup room has none;
+  - **the planner by keyboard:** the size starts at who is here and is labelled as expected; 15/30/60; a lineup within budget, every game fitting;
+  - **editing:** a new time clears the lineup; move, remove and replace (only fitting games); suggest again; nothing reaches the server;
+  - **Apply:**
+    - with no network: "isn't saved yet";
+    - with the reply lost: recognised as saved;
+    - the server holds it in the planner's order;
+    - host and guests show the same lineup;
+  - **a guest can't edit:** no controls, and 403;
+  - **reload:** the lineup comes back;
+  - **roster:**
+    - Impostor doesn't fit 3: the card says so and offers a replan, and the server refuses it too (409);
+    - the replan opens for 3;
+    - fewer than planned asks first;
+  - **Start with the reply lost:** the game opens, exactly one game; a replayed start answers with the same game;
+  - **play:** three players play Math Mayhem through the briefing to results; the lineup is kept with game 1 started; nothing else starts; no Cup standings;
+  - **TV view:** public facts only;
+  - **320 px:** the card and the planner fit with no sideways scroll;
+  - **Clear** asks first.
+- **Regressions run by hand against a local server in the gate's content mode:** `check-casual` 30, `check-lobby-mode` 71, `check-game-night-flow` 14, `check-briefing` 43 and `check-solo` 80, all passing.
+- **Screenshots:** `docs/stage7/screenshots-71/` holds 8 screens at 320, 390 and 1440 px (24 images), taken on `ebf5c06` with a clean tree (`manifest.json`).
+- **Gates:** the fast and full gate verdicts on the final source SHA are recorded in the commit after it.
+- **Not tested:** WebKit/Safari and real phones. Browser checks ran in Chromium (headless shell) only, with phone sizes emulated.
