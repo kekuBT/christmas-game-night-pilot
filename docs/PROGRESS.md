@@ -1693,3 +1693,43 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage71-local/`.
 - The TV screens don't show the lineup yet.
 - Browser checks run in Chromium only.
 
+
+## Stage 7.2: casual results and explicit session continuation (2026-11-10)
+
+**Branch:** `claude/stage7-2-session-flow`, stacked on PR #8 at `08bba4d` (PR #9).
+- **Instruction:** ChatGPT's handoff on PR #8 (comment 6776351818) and its clarification on PR #9 (comment 6776484058).
+- **Spec and record:** `docs/stage7/stage72.md`; decisions D-S72-01 … 10.
+- Nothing was merged or deployed, no port was made public, and nothing was paid for.
+
+**Milestone:** after a casual game, everyone sees one clear Mchezo results screen saying Casual, and the host or a cohost chooses what's next:
+- the lineup's **Next game**;
+- **Play again** (a rematch);
+- **Take a break**, then **Resume**.
+
+Everyone else and the TV see the same state. The server holds the progression with:
+- item states;
+- a session revision;
+- press ids, so a retry, a lost reply, a delayed opposite command or a cancelled start never starts or changes anything twice.
+
+**Files:**
+- **Server:** `src/server/room.ts`, `src/server/http.ts`.
+- **Web:**
+  - `apps/web/src/App.tsx`;
+  - `components/mchezo/WhatsNext.tsx` and `whatsNextState.ts` (new);
+  - `Lobby.tsx`, `QuickParty.tsx`, `Briefing.tsx`, `TvShow.tsx`, `MchezoTv.tsx`;
+  - the five results screens that have their own;
+  - `ui/mchezo/MchezoProvider.tsx`, `ResultsHero.tsx`, `Lifecycle.tsx`, `lib/celebrate.ts`, `lib/lifecycle.ts`, `lib/tvfeed.ts`, `styles/stage7.css`;
+  - `types.ts`.
+- **Tests and scripts:**
+  - `tests/stage72-session-flow.test.ts` and `tests/stage72-client.test.ts` (new);
+  - `tests/stage71-quick-party.test.ts` and `tests/stage3-qa-results.test.ts` (updated);
+  - `scripts/check-session-flow.mjs` and `scripts/screenshot-stage72.mjs` (new);
+  - `scripts/check-quick-party.mjs` (updated).
+
+**Tests:**
+- **Unit and HTTP:** 27 session-flow tests and 4 client tests. Eight mutations of the safeguards are each caught.
+- **`check-session-flow`:** 52/52.
+- **`check-quick-party`:** 68/68.
+- **Local regressions, all passing:** `check-casual`, `check-briefing`, `check-game-night-flow`, `check-lobby-mode`, `check-tv-spectator`, `check-f4`, `check-solo`, `check-solo-shelf`.
+
+**Gates:** recorded in `docs/stage7/stage72.md` §6 and below, once run.

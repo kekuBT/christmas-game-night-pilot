@@ -8,7 +8,7 @@
  * The server owns rounds, deadlines, the tie policy and every point.
  */
 import { useEffect, useState, type ReactNode } from "react";
-import { Keycap, MchezoWaiting, OutcomeSummary, TVRing } from "../../ui/mchezo/index.js";
+import { Keycap, MchezoWaiting, OutcomeSummary, TVRing, useMchezo } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { majorityMoment } from "../../ui/mchezo/lib/moments.js";
@@ -162,7 +162,8 @@ export function MchezoMajority({ game, publicGame, players, playerId, title, int
 }
 
 /** Results: each round's majority, your calls, the scores, how scoring works. */
-export function MchezoMajorityResults({ game, publicGame, players, playerId, title, onBackToLobby, hero }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode }) {
+export function MchezoMajorityResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; /** Stage 7.2: a casual room's What's next panel. */ next?: ReactNode }) {
+  const { casual } = useMchezo();
   const st = (game.state ?? {}) as MajorityView;
   const nameOf = (id?: string) => players.find((p) => p.id === id)?.displayName ?? "Someone";
   const rows = Object.entries(game.rawScores ?? publicGame?.rawScores ?? {}).map(([id, score]) => ({
@@ -183,8 +184,9 @@ export function MchezoMajorityResults({ game, publicGame, players, playerId, tit
         ))}
       </ol>
       <ScoreList rows={rows} />
-      <p className="mz-foot" data-testid="mz-mr-howscore">100 points for predicting the majority. When the room splits evenly, every prediction scores 50. Votes stay anonymous. Practice game: no Cup points.</p>
+      <p className="mz-foot" data-testid="mz-mr-howscore">100 points for predicting the majority. When the room splits evenly, every prediction scores 50. Votes stay anonymous. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="majority-rules" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
+      {next}
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>

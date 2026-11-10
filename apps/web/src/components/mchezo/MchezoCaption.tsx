@@ -160,7 +160,7 @@ export function MchezoCaption({ game, publicGame, players, playerId, title, inte
 }
 
 /** Results: each round's best caption with its author, then the scores. */
-export function MchezoCaptionResults({ game, publicGame, players, playerId, title, onBackToLobby, hero }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode }) {
+export function MchezoCaptionResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; /** Stage 7.2: a casual room's What's next panel. */ next?: ReactNode }) {
   const st = (game.state ?? {}) as CaptionState;
   const nameOf = (id?: string) => (id ? players.find((p) => p.id === id)?.displayName ?? "Someone" : "Someone");
   const rows = Object.entries(game.rawScores ?? publicGame?.rawScores ?? {}).map(([id, score]) => ({
@@ -191,6 +191,7 @@ export function MchezoCaptionResults({ game, publicGame, players, playerId, titl
       <ScoreList rows={rows} />
       <p className="mz-foot">25 points for writing a caption, 100 for every vote it gets.</p>
       <OutcomeSummary gameId="caption-clash" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
+      {next}
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>

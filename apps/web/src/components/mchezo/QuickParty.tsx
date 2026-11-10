@@ -71,8 +71,9 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
       </section>
     );
   }
-  // This slice starts the lineup's first game only (moving on through it comes next).
-  const next = lineup.items[0] && !lineup.items[0].started ? 0 : -1;
+  // Stage 7.2: the lineup's next pending item (the server's), played in order.
+  const next = lineup.next !== undefined ? (lineup.next ?? -1) : lineup.items[0] && !lineup.items[0].started ? 0 : -1;
+  const anyPlayed = lineup.items.some((it) => it.status === "completed");
   const nextId = next >= 0 ? lineup.items[next]!.gameId : undefined;
   // The next game doesn't fit the people here now: say so, and offer a lineup for them.
   const nextGame = nextId ? GAME_MANIFESTS.find((m) => m.id === nextId) : undefined;
@@ -89,13 +90,13 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
           const m = GAME_MANIFESTS.find((x) => x.id === it.gameId);
           const short = m && connected < m.minPlayers ? m.minPlayers - connected : 0;
           return (
-            <li key={`${it.gameId}-${i}`} className={`mz-party__row${it.started ? " is-started" : ""}${i === next ? " is-next" : ""}`} data-testid={`party-row-${i}`}>
+            <li key={`${it.gameId}-${i}`} className={`mz-party__row${it.started ? " is-started" : ""}${i === next ? " is-next" : ""}`} data-testid={`party-row-${i}`} data-status={it.status ?? (it.started ? "started" : "pending")}>
               <span className="mz-party__num" aria-hidden="true">{i + 1}</span>
               <span className="mz-party__text">
                 <span className="mz-party__name">{titleOf(it.gameId)}</span>
                 <span className="mz-party__sub">
                   {m ? `${playersText(m)} · about ${m.duration.minutes} min` : ""}
-                  {it.started ? " · started" : i === next ? " · first up" : ""}
+                  {it.status === "completed" ? " · played ✓" : it.status === "briefing" || it.status === "playing" ? " · on now" : it.started ? " · started" : i === next ? (anyPlayed ? " · next up" : " · first up") : ""}
                 </span>
                 {short > 0 && !it.started && <span className="mz-party__warn" data-testid={`party-row-${i}-short`}>Needs {plural(short, "more player")} · {connected} here</span>}
               </span>
@@ -103,6 +104,9 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
           );
         })}
       </ol>
+      {lineup.complete && (
+        <p className="mz-foot mz-party__aside" data-testid="party-complete">That was the whole lineup. {isHost ? "Play one again, plan another lineup, or pick any game." : "The host picks what’s next."}</p>
+      )}
       {isHost && misfit && (
         <p className="mz-foot mz-party__aside" data-testid="party-misfit">
           {misfit.title} {connected < misfit.minPlayers ? `needs at least ${misfit.minPlayers}` : `is for up to ${misfit.maxPlayers}`}; {connected} {connected === 1 ? "is" : "are"} here. Wait for them, or{" "}

@@ -13,7 +13,7 @@
  * or shown to anyone); a right one says so from the server's state.
  */
 import { useCallback, useEffect, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
-import { Keycap, OutcomeSummary } from "../../ui/mchezo/index.js";
+import { Keycap, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { NOT_DELIVERED } from "../../ui/mchezo/lib/errors.js";
@@ -300,7 +300,8 @@ export function MchezoDraw({ game, players, playerId, title, intent, error, land
 }
 
 /** Results: every turn's word and who drew it, the scores, how scoring works. */
-export function MchezoDrawResults({ game, publicGame, players, playerId, title, onBackToLobby, hero }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode }) {
+export function MchezoDrawResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; /** Stage 7.2: a casual room's What's next panel. */ next?: ReactNode }) {
+  const { casual } = useMchezo();
   const st = (game.state ?? {}) as DrawView;
   const nameOf = (id?: string) => players.find((p) => p.id === id)?.displayName ?? "Someone";
   const rows = Object.entries(game.rawScores ?? publicGame?.rawScores ?? {}).map(([id, score]) => ({
@@ -325,8 +326,9 @@ export function MchezoDrawResults({ game, publicGame, players, playerId, title, 
         ))}
       </ol>
       <ScoreList rows={rows} />
-      <p className="mz-foot" data-testid="mz-dg-howscore">Guessers score 100, 80, 60, then 50, in the order they got it. The drawer scores 50 for each player who got it. Wrong guesses are never shown. Practice game: no Cup points.</p>
+      <p className="mz-foot" data-testid="mz-dg-howscore">Guessers score 100, 80, 60, then 50, in the order they got it. The drawer scores 50 for each player who got it. Wrong guesses are never shown. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="draw-guess" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
+      {next}
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>

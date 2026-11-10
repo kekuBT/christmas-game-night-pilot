@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import type { GameOutcome } from "../../../types.js";
 import { activeDeadline, formatRemaining, outcomeLines, participationLine, serverNowEstimate } from "../lib/lifecycle.js";
+import { useMchezo } from "../MchezoProvider.js";
 
 /** Re-render once a second while a deadline is in the future. */
 function useNow(active: boolean): number {
@@ -55,7 +56,8 @@ export function OutcomeSummary({ gameId, outcome, official, youId, youChoseSatOu
   /** TV/results tables: list every player's participation. */
   showEveryone?: boolean;
 }) {
-  const lines = outcomeLines(outcome, official);
+  const { casual } = useMchezo();
+  const lines = outcomeLines(outcome, official, casual);
   if (!outcome || !lines) return null;
   const mine = youId ? participationLine(gameId, outcome.participation[youId], { you: true, choseSatOut: youChoseSatOut }) : null;
   const everyone = showEveryone && nameOf

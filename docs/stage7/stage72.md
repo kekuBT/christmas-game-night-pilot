@@ -213,4 +213,43 @@ Accepted in clarification 6776484058.
 
 ## 6. What was built and tested
 
-*(Filled in at the checkpoint.)*
+### 6.1 Built
+- **Server** (`src/server/room.ts`, `src/server/http.ts`):
+  - item states derived from games (§3.1), and the next pending item (§3.2);
+  - Play again, `rematchOf` (§3.3);
+  - Take a break / Resume, `POST /rooms/:id/break` (§3.4);
+  - the session revision, press ids and remembered presses (§3.8), persisted and checked again on restore;
+  - new refusal codes `ON_BREAK`, `SESSION_CONFLICT`, `ATTEMPT_ENDED`, `REMATCH_NOT_LATEST` and `GAME_DOESNT_FIT`.
+
+  `POST /games` requires `attempt` for a lineup start and for Play again. It is optional for the lobby's own Start, which the app always sends in casual rooms.
+- **Web:**
+  - **The What's next panel** (`WhatsNext.tsx`) sits on every casual results screen: the five with their own results screen, Trivia's (under its heading), and the new casual results screen for the other games.
+  - **The lobby:**
+    - up next follows the lineup;
+    - the break banner, with Resume for the host;
+    - Start waits during a break, and the guests are told why;
+    - Take a break;
+    - the lineup rows say played, on now or next, and when the lineup is complete.
+  - **Casual wording** comes from the Mchezo provider's `casual` switch: the results, outcome, briefing and TV.
+  - **The TV:** the lineup card, a break card, and the next step on the final screens, Trivia's TV stage included.
+  - **Requests:**
+    - every continuation request carries a press id;
+    - a lost reply is asked again as the same press;
+    - a late reply for a finished game never moves a screen back.
+  - **Apply (P7):** "Couldn't confirm whether the lineup was saved", and the host's own later save is recognised.
+
+### 6.2 Tested
+- **Unit and HTTP:**
+  - `tests/stage72-session-flow.test.ts` (27): the item states and the next item, the revision, races, cancelled-then-retried presses and restart, Play again, the break, eviction, a damaged saved session, roles, the public view, and HTTP validation.
+  - `tests/stage72-client.test.ts` (4): what's next, the TV's line, the feed boundaries, and the Casual wording.
+  - Updated: `tests/stage71-quick-party.test.ts` (the next item; the request id) and `tests/stage3-qa-results.test.ts` (30 lines).
+
+  Eight mutations of the safeguards are each caught: the break replay, the revision on cancel, the latest-game rule, the revision on Next, persistence of presses, `ATTEMPT_ENDED`, the break's revision check, and the bound.
+- **Browser:**
+  - `check-session-flow` (new, 52 checks): two players and a spectator, Math then Trivia, a lost reply on Next, Play again by keyboard, a break with reloads, the guest refused, 320 and 1440 px, and the uncertain Apply.
+  - `check-quick-party` (68): updated to the next-item rule, the press id and the new Apply wording.
+- **Regressions:** Family Cup and solo are covered by the full gate (§6.3).
+- **Not run:** WebKit and real devices (the checklist is `docs/REAL_DEVICE_TESTING.md` I13–I16). Emulation is not a device.
+
+### 6.3 Gates
+*(Recorded after the runs.)*

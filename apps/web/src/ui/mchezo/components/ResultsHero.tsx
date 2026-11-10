@@ -29,7 +29,7 @@ export function ResultsHero({ story, gameId, title, official, players, points }:
   points?: number;
 }) {
   // reducedMotion already covers the OS setting, in-app "Less" and "Off".
-  const { reducedMotion } = useMchezo();
+  const { reducedMotion, casual } = useMchezo();
   const mode = celebrationMode(story.celebrate, reducedMotion);
   const [burst, setBurst] = useState(mode === 'burst');
   useEffect(() => {
@@ -43,7 +43,7 @@ export function ResultsHero({ story, gameId, title, official, players, points }:
       <div className="mz-rhero__top">
         <GameCover gameId={gameId} decorative className="mz-rhero__cover" />
         <div className="mz-rhero__text">
-          <span className="mz-kicker mz-rhero__kicker">{title} · {official ? 'Official' : 'Practice'}</span>
+          <span className="mz-kicker mz-rhero__kicker">{title} · {official ? 'Official' : casual ? 'Casual' : 'Practice'}</span>
           <h1 className="mz-rhero__title" id="mz-rhero-title" data-testid="results-headline">{story.headline}</h1>
         </div>
       </div>

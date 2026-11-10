@@ -5,9 +5,11 @@ interface Ctx {
   theme: MchezoTheme;
   reducedMotion: boolean;
   haptics: boolean;
+  /** Stage 7.2: a casual room's games are "Casual" (never "Practice", a Cup word). */
+  casual: boolean;
 }
 
-const MchezoContext = createContext<Ctx>({ theme: everyday, reducedMotion: false, haptics: true });
+const MchezoContext = createContext<Ctx>({ theme: everyday, reducedMotion: false, haptics: true, casual: false });
 
 function useSystemReducedMotion(): boolean {
   const [rm, setRm] = useState(() =>
@@ -30,6 +32,8 @@ export interface MchezoProviderProps {
   haptics?: boolean;
   /** In-app Animations "Off": implies reduced motion, and stops every animation and transition. */
   still?: boolean;
+  /** Stage 7.2: this is a casual room (games are labelled Casual, not Practice). */
+  casual?: boolean;
   /** Render as a full-height phone surface (default) or a bare wrapper. */
   as?: 'surface' | 'bare';
   className?: string;
@@ -38,10 +42,10 @@ export interface MchezoProviderProps {
 }
 
 /** Applies theme CSS variables and motion preference to everything inside. */
-export function MchezoProvider({ theme = everyday, reducedMotion, haptics = true, still = false, as = 'surface', className, style, children }: MchezoProviderProps) {
+export function MchezoProvider({ theme = everyday, reducedMotion, haptics = true, still = false, casual = false, as = 'surface', className, style, children }: MchezoProviderProps) {
   const sys = useSystemReducedMotion();
   const rm = still || (reducedMotion ?? sys);
-  const value = useMemo(() => ({ theme, reducedMotion: rm, haptics }), [theme, rm, haptics]);
+  const value = useMemo(() => ({ theme, reducedMotion: rm, haptics, casual }), [theme, rm, haptics, casual]);
   const vars = useMemo(() => themeToCssVars(theme) as CSSProperties, [theme]);
   return (
     <MchezoContext.Provider value={value}>

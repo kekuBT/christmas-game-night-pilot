@@ -22,6 +22,7 @@ import {
   PlayerToken,
   serverNowEstimate,
   timingLines,
+  useMchezo,
   type BriefingInfo,
   type BriefingPerson,
 } from "../../ui/mchezo/index.js";
@@ -105,6 +106,7 @@ export function BriefingScreen(props: CommonProps & {
   onCancel: () => Promise<void>;
 }) {
   const { game, registry, players, meId, isHost } = props;
+  const { casual } = useMchezo();
   const b = game.briefing!;
   const now = useServerNow();
   const clock = briefingClock(b, now);
@@ -153,7 +155,7 @@ export function BriefingScreen(props: CommonProps & {
   return (
     <main className="mz-screen mz-brief" aria-label={`${title}: rules`} data-testid="briefing" data-game-id={game.id}>
       <div className="mz-topbar">
-        <span className={`mz-brief__mode mz-brief__mode--${game.official ? "official" : "practice"}`} data-testid="briefing-mode">{game.official ? "Official · counts toward the Cup" : "Practice · no Cup points"}</span>
+        <span className={`mz-brief__mode mz-brief__mode--${game.official ? "official" : "practice"}`} data-testid="briefing-mode">{game.official ? "Official · counts toward the Cup" : casual ? "Casual · just for fun" : "Practice · no Cup points"}</span>
       </div>
       <h1 className="mz-h1">{title}</h1>
       {clock.warning && <Warning cancelInMs={clock.cancelInMs} />}
@@ -224,6 +226,7 @@ export function BriefingScreen(props: CommonProps & {
 /** TV and spectators: the same public rules, readiness and warning. No controls. */
 export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () => void; backLabel: string; onBackToReady?: () => void }) {
   const { game, registry, players } = props;
+  const { casual } = useMchezo();
   const b = game.briefing!;
   const now = useServerNow();
   const clock = briefingClock(b, now);
@@ -232,7 +235,7 @@ export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () 
   return (
     <main className="mz-screen mz-brief mz-brief--tv" style={{ maxWidth: 1200 }} aria-label={`${title}: rules on the TV`} data-testid="tv-briefing" data-game-id={game.id}>
       <div className="mz-topbar">
-        <span className="mz-kicker">{game.official ? "Official" : "Practice"} · {props.joinCode ?? ""}</span>
+        <span className="mz-kicker">{game.official ? "Official" : casual ? "Casual" : "Practice"} · {props.joinCode ?? ""}</span>
         <button type="button" className="mz-chip-btn" onClick={props.onBack}>{props.backLabel}</button>
       </div>
       <h1 className="mz-h1">{title}: get ready</h1>
