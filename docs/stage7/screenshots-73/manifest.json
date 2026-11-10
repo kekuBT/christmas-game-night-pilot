@@ -1,0 +1,122 @@
+{
+  "revision": "04bcbb8c2a65931d7f2f4136f18bf3721d15ca5e",
+  "workingTreeClean": true,
+  "capturedAt": "2026-11-10T23:09:30.710Z",
+  "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
+  "shots": [
+    {
+      "file": "01-menu-roles-320x640.png",
+      "screen": "The host's room menu: players and roles, with Make cohost and Make host",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "02-confirm-320x640.png",
+      "screen": "The confirmation names Bea and says what changes; Cancel or Make Bea the host",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "03-uncertain-320x640.png",
+      "screen": "No answer: the app couldn't confirm the handover and says to check the lobby (never 'failed')",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "04-old-host-lobby-320x640.png",
+      "screen": "Ada's lobby right after: 'Bea is the host now. You're a player.' and she waits for Bea",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "05-new-host-lobby-320x640.png",
+      "screen": "Bea's lobby right after: 'Ada made you the host.' and the Start is hers",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "07-not-connected-320x640.png",
+      "screen": "Bea's menu: Cal isn't connected, so Make host isn't offered for Cal",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "01-menu-roles-390x844.png",
+      "screen": "The host's room menu: players and roles, with Make cohost and Make host",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "02-confirm-390x844.png",
+      "screen": "The confirmation names Bea and says what changes; Cancel or Make Bea the host",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "03-uncertain-390x844.png",
+      "screen": "No answer: the app couldn't confirm the handover and says to check the lobby (never 'failed')",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "04-old-host-lobby-390x844.png",
+      "screen": "Ada's lobby right after: 'Bea is the host now. You're a player.' and she waits for Bea",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "05-new-host-lobby-390x844.png",
+      "screen": "Bea's lobby right after: 'Ada made you the host.' and the Start is hers",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "07-not-connected-390x844.png",
+      "screen": "Bea's menu: Cal isn't connected, so Make host isn't offered for Cal",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "01-menu-roles-1440x900.png",
+      "screen": "The host's room menu: players and roles, with Make cohost and Make host",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "02-confirm-1440x900.png",
+      "screen": "The confirmation names Bea and says what changes; Cancel or Make Bea the host",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "03-uncertain-1440x900.png",
+      "screen": "No answer: the app couldn't confirm the handover and says to check the lobby (never 'failed')",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "04-old-host-lobby-1440x900.png",
+      "screen": "Ada's lobby right after: 'Bea is the host now. You're a player.' and she waits for Bea",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "05-new-host-lobby-1440x900.png",
+      "screen": "Bea's lobby right after: 'Ada made you the host.' and the Start is hers",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "06-tv-new-host-1440x900.png",
+      "screen": "The TV marks Bea as host and says Bea starts the next game",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "07-not-connected-1440x900.png",
+      "screen": "Bea's menu: Cal isn't connected, so Make host isn't offered for Cal",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    }
+  ]
+}
