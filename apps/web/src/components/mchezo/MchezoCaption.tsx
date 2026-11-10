@@ -170,6 +170,7 @@ export function MchezoCaptionResults({ game, publicGame, players, playerId, titl
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-cap-results">
       {hero}
+      {next /* Stage 7.2: what's next, right under the result heading (review 6778921208) */}
       <GameHeader title={title} objective="The room’s favourites" accent={1} />
       <div className="mz-cap-votes">
         {(st.rounds ?? []).map((r, i) => {
@@ -191,7 +192,6 @@ export function MchezoCaptionResults({ game, publicGame, players, playerId, titl
       <ScoreList rows={rows} />
       <p className="mz-foot">25 points for writing a caption, 100 for every vote it gets.</p>
       <OutcomeSummary gameId="caption-clash" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
-      {next}
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>

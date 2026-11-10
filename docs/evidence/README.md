@@ -70,6 +70,14 @@ Stage 6.2 browser drivers run by hand from the development checkout, on the sour
 - `check-solo-shelf-shipped-library.log`: 57/57 against a server with the shipped library. A different board after Play again.
 - `check-solo.log` (80), `check-casual.log` (30), `check-connections.log` (39), `check-pattern-pulse.log` (54): regressions against the test-mode server, all passing.
 
+## `review-pr9/`
+
+ChatGPT's review 6778921208 on PR #9: a game picked by hand that matched the lineup's next item used up that item.
+- **`check-session-flow-on-acab35f.log`:** the repaired driver (parts J and K) run against the old candidate `acab35f`, built and served from a separate worktree. 11 checks fail. Among them:
+  - the hand-picked start sent `party: { revision: 1, index: 0 }`;
+  - the Math item completed and the lineup moved to Guess the Year;
+  - What's next came after the standings and answers.
+
 ## `stage72-local/`
 
 Stage 7.2 browser drivers run by hand from the development checkout, against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). The source is that later committed as `0bac2fd`, except that `nextState` was afterwards moved into its own file. These are not gate verdicts; the gate runs above are.

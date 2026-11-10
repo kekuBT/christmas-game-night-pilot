@@ -204,6 +204,7 @@ export function MchezoConnectionsResults({ game, publicGame, players, playerId, 
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-cx-results">
       {hero}
+      {next /* Stage 7.2: what's next, right under the result heading (review 6778921208) */}
       <GameHeader title={title} objective="The groups were…" accent={2} />
       <ConnectionsSolution game={game} />
       <ScoreList rows={rows} />
@@ -222,7 +223,6 @@ export function MchezoConnectionsResults({ game, publicGame, players, playerId, 
         );
       })()}
       <OutcomeSummary gameId="word-connections" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} youChoseSatOut={game.abstained === true} />
-      {next}
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>

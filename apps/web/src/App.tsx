@@ -60,8 +60,14 @@ import { uuidV4 } from "./uuid.js";
 
 /** Per-tab UI state (spectator seat, dismissed screens). Never throws: a
     browser that blocks site data must still be able to play. */
-/** Stage 7.2: how a start goes: the lineup's next item, or Play again (a rematch of a finished game). */
-type StartHow = { kind: "next"; revision: number; index: number } | { kind: "rematch"; source: string };
+/**
+ * Stage 7.2: what a start is, fixed by the control the host pressed and
+ * carried unchanged through every question it asks and every retry (review
+ * 6778921208): a game picked by hand, the lineup's next item, or Play again
+ * (a rematch of a finished game). Never inferred from a matching game id.
+ */
+type StartHow = { kind: "chosen" } | { kind: "next"; revision: number; index: number } | { kind: "rematch"; source: string };
+const CHOSEN: StartHow = { kind: "chosen" };
 
 function tabGet(key: string): string | null {
   try { return sessionStorage.getItem(key); } catch { return null; }
@@ -221,10 +227,15 @@ export function App() {
   // Phase 2 featured game). The lobby Start button starts this game.
   // Kept per tab, so a reload or a trip to the library keeps the host's pick.
   const [upNextId, setUpNextIdRaw] = useState(() => tabGet("mz_upnext") ?? "trivia");
+  // Stage 7.2 (review 6778921208): where up next came from. Only an explicit
+  // lineup action (Apply, "Use the lineup", the lineup moving on after its own
+  // game) makes it "lineup"; the picker, the library, details and shuffle make
+  // it "manual". The lobby's Start is the lineup's only for "lineup".
+  const [upNextSource, setUpNextSourceRaw] = useState<"lineup" | "manual">(() => (tabGet("mz_upnext_src") === "lineup" ? "lineup" : "manual"));
   // S3-LOB-02: the host's own choices are published to the room (planChosen
   // counts them), so guests and the TV see the same game and mode.
   const [planChosen, setPlanChosen] = useState(0);
-  const setUpNextId = (id: string) => { tabSet("mz_upnext", id); setUpNextIdRaw(id); setPlanChosen((n) => n + 1); };
+  const setUpNextId = (id: string, source: "lineup" | "manual") => { tabSet("mz_upnext", id); tabSet("mz_upnext_src", source); setUpNextIdRaw(id); setUpNextSourceRaw(source); setPlanChosen((n) => n + 1); };
   // A game picked from Home's details sheet before the room exists.
   const [hostPick, setHostPick] = useState<string | null>(null);
   // Stage 6.1: Host a game makes a casual room unless the host picks a Family Cup.
@@ -564,14 +575,14 @@ export function App() {
     } catch (e) { fail(e); }
   }
   const startingRef = useRef(false);
-  const [startDecision, setStartDecision] = useState<(StartDecision & { gameId: string; official: boolean; how?: StartHow }) | null>(null);
+  const [startDecision, setStartDecision] = useState<(StartDecision & { gameId: string; official: boolean; how: StartHow }) | null>(null);
   // Stage 7.2: a start, Next, Play again or break request is on its way (the continuation panel waits).
   const [startBusy, setStartBusy] = useState(false);
   const [sessionBusy, setSessionBusy] = useState(false);
   // Stage 7.1: a lineup start the host must decide on, a replan's head count,
   // and the host's "start with fewer than planned" for this lineup and game
   // (kept across the reconnecting-players question, so it isn't asked twice).
-  const [partyAsk, setPartyAsk] = useState<PartyAsk | null>(null);
+  const [partyAsk, setPartyAsk] = useState<(PartyAsk & { how: StartHow }) | null>(null);
   const [partyReplan, setPartyReplan] = useState<number | undefined>(undefined);
   const [partyBusy, setPartyBusy] = useState(false);
   const partyFewerOk = useRef<{ revision: number; gameId: string } | null>(null);
@@ -607,7 +618,7 @@ export function App() {
       pendingApply.current = null;
       partyFewerOk.current = null;
       setPartyAsk(null);
-      setUpNextId(plan.items[0]!.gameId);
+      setUpNextId(plan.items[0]!.gameId, "lineup");
       setShuffleResult(null);
       await refresh();
       closeSheet();
@@ -665,7 +676,7 @@ export function App() {
     const still = new Set((proj?.readiness?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id));
     if (!startDecision.reconnecting.some((id) => still.has(id))) setStartDecision(null);
   }, [proj?.readiness, startDecision]);
-  async function startGame(gameId: string, official: boolean, proceedWithout?: string[], how?: StartHow) {
+  async function startGame(gameId: string, official: boolean, how: StartHow, proceedWithout?: string[]) {
     // Host-action race (Milestone K): a double-tap on Start posts twice;
     // the server correctly rejects the second (a game is already playing),
     // but the rejection surfaced as a spurious error to the host. Ignore
@@ -679,23 +690,24 @@ export function App() {
     const r = proj?.readiness;
     const reconnecting = (r?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id);
     if (official && reconnecting.length > 0 && !proceedWithout) {
-      setStartDecision({ gameId, official, gameTitle: titleFor(gameId, games), reconnecting, ...(how ? { how } : {}) });
+      setStartDecision({ gameId, official, gameTitle: titleFor(gameId, games), reconnecting, how });
       return;
     }
     startingRef.current = true;
     setStartBusy(true);
     setErr("");
     // Stage 7.1/7.2: the lineup's next game starts through the lineup (repeat-safe on the server);
-    // Play again names the game it repeats. A game picked by hand is neither.
-    const route: StartHow | undefined = how ?? (() => { const party = partyStartFor(gameId, official); return party ? { kind: "next" as const, ...party } : undefined; })();
-    const fewerOk = route?.kind === "next" && partyFewerOk.current?.revision === route.revision && partyFewerOk.current.gameId === gameId;
+    // Play again names the game it repeats. A game picked by hand is neither, whatever its id
+    // (review 6778921208): the press's own intent decides, never a match with the lineup.
+    const route = how;
+    const fewerOk = route.kind === "next" && partyFewerOk.current?.revision === route.revision && partyFewerOk.current.gameId === gameId;
     // Stage 7.2 (§3.8): in a casual room every press carries its own id and the session revision it
     // was made against. Its retry is the same press: the server answers it, never twice.
     const attempt = proj?.roomKind === "casual" ? { id: uuidV4(), sessionRevision: proj.session?.revision ?? 0 } : undefined;
     const body = {
-      gameId, official: route?.kind === "rematch" ? false : official, roster: r?.wouldPlay, proceedWithout,
-      ...(route?.kind === "next" ? { party: { revision: route.revision, index: route.index }, ...(fewerOk ? { fewerThanPlanned: true } : {}) } : {}),
-      ...(route?.kind === "rematch" ? { rematchOf: route.source } : {}),
+      gameId, official: route.kind === "rematch" ? false : official, roster: r?.wouldPlay, proceedWithout,
+      ...(route.kind === "next" ? { party: { revision: route.revision, index: route.index }, ...(fewerOk ? { fewerThanPlanned: true } : {}) } : {}),
+      ...(route.kind === "rematch" ? { rematchOf: route.source } : {}),
       ...(attempt ? { attempt } : {}),
     };
     try {
@@ -720,9 +732,9 @@ export function App() {
         // picture and let the host decide again. Nothing started.
         await refresh();
         const again = (body2.readiness?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id);
-        if (body2.code === "PLAYERS_RECONNECTING" && again.length) setStartDecision({ gameId, official, gameTitle: titleFor(gameId, games), reconnecting: again, ...(route ? { how: route } : {}) });
-        else if (body2.code === "PARTY_FEWER_THAN_PLANNED") setPartyAsk({ kind: "fewer", gameId, expected: body2.expected ?? 0, here: body2.here ?? 0 });
-        else if (body2.code === "PARTY_DOESNT_FIT") setPartyAsk({ kind: "doesnt-fit", gameId, here: body2.here ?? 0, minPlayers: body2.minPlayers ?? 1, maxPlayers: body2.maxPlayers ?? 10 });
+        if (body2.code === "PLAYERS_RECONNECTING" && again.length) setStartDecision({ gameId, official, gameTitle: titleFor(gameId, games), reconnecting: again, how: route });
+        else if (body2.code === "PARTY_FEWER_THAN_PLANNED") setPartyAsk({ kind: "fewer", gameId, expected: body2.expected ?? 0, here: body2.here ?? 0, how: route });
+        else if (body2.code === "PARTY_DOESNT_FIT") setPartyAsk({ kind: "doesnt-fit", gameId, here: body2.here ?? 0, minPlayers: body2.minPlayers ?? 1, maxPlayers: body2.maxPlayers ?? 10, how: route });
         else if (body2.code === "PLAN_CONFLICT") setErr("The lineup changed somewhere else. Check it, then choose again.");
         else if (body2.code === "SESSION_CONFLICT") setErr("Something changed since you looked (another host, or a break). Here is the latest: choose again.");
         else if (body2.code === "ATTEMPT_ENDED") setErr("That start was cancelled, so nothing new started. Choose again.");
@@ -856,16 +868,23 @@ export function App() {
   };
   useEffect(() => { if (planner && planChosen > 0) publishPlan(localPlan); }, [planChosen]);
   useEffect(() => { if (planner && proj && !serverPlan) publishPlan(localPlan); }, [planner, !!proj, !!serverPlan, games.length > 0]);
-  // Stage 7.2: when the lineup moves on (an item completed, or a new lineup), up next becomes its
-  // next pending game, never the game just played. Only on that change: a game the host then
-  // picks by hand stays up next (and never moves the lineup on).
+  // Stage 7.2: when the lineup moves on (one of its items started, completed or
+  // was cancelled, or a new lineup was saved), up next becomes its next pending
+  // game, as the lineup's (never the game just played). Only on such a change,
+  // seen while this page is open: a page's first look at the room (a load or a
+  // reload) never turns a game the host picked by hand into the lineup's
+  // (review 6778921208). A hand pick also never moves the lineup on.
   const lineupNow = proj?.roomKind === "casual" ? proj.party?.lineup : undefined;
   const lineupNextKey = lineupNow && lineupNow.next !== undefined && lineupNow.next !== null ? `${proj?.party?.revision}:${lineupNow.next}` : "";
+  const seenLineupKey = useRef<string | null>(null);
   useEffect(() => {
-    if (!planner || !lineupNextKey || !lineupNow) return;
+    if (!proj) return;
+    const before = seenLineupKey.current;
+    seenLineupKey.current = lineupNextKey;
+    if (before === null || before === lineupNextKey || !planner || !lineupNextKey || !lineupNow) return;
     const id = lineupNow.items[lineupNow.next!]?.gameId;
-    if (id && id !== upNextId) setUpNextId(id);
-  }, [planner, lineupNextKey]);
+    if (id) setUpNextId(id, "lineup");
+  }, [!!proj, planner, lineupNextKey]);
   // Stage 7.2 (P7): an Apply with no reply is recognised once the room shows exactly that
   // draft, one revision on from its base (this host's own save). Nothing else counts.
   useEffect(() => {
@@ -881,7 +900,8 @@ export function App() {
   }, [proj?.party?.revision]);
   useEffect(() => {
     if (!planner || !serverPlan) return;
-    if (serverPlan.gameId !== upNextId) { tabSet("mz_upnext", serverPlan.gameId); setUpNextIdRaw(serverPlan.gameId); }
+    // Adopted from another host tab or the cohost: this tab didn't press a lineup control, so it is a plain pick here.
+    if (serverPlan.gameId !== upNextId) { tabSet("mz_upnext", serverPlan.gameId); setUpNextIdRaw(serverPlan.gameId); tabSet("mz_upnext_src", "manual"); setUpNextSourceRaw("manual"); }
     const m = serverPlan.official ? "official" : "practice";
     if (m !== gameMode && games.find((g) => g.id === serverPlan.gameId)?.lifecycle?.officialEligible !== false) setGameModeRaw(m);
   }, [planner, serverPlan?.gameId, serverPlan?.official]);
@@ -1056,7 +1076,7 @@ export function App() {
           <GameDetailsSheet
             game={details}
             onClose={closeSheet}
-            action={!seated ? <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="details-host" onClick={() => { setUpNextId(details.id); setHostPick(details.id); navigate({ name: "host" }); }}>Host this game</button> : undefined}
+            action={!seated ? <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="details-host" onClick={() => { setUpNextId(details.id, "manual"); setHostPick(details.id); navigate({ name: "host" }); }}>Host this game</button> : undefined}
           />
         )}
         {sheet === "settings" && (
@@ -1232,7 +1252,7 @@ export function App() {
       return;
     }
     const pick = r.picks[0]!;
-    setUpNextId(pick.gameId);
+    setUpNextId(pick.gameId, "manual");
     setShuffleResult(`${pick.title}: ${pick.explanation}`);
   };
   const triviaPlaying = playingGame?.gameId === "trivia";
@@ -1257,7 +1277,8 @@ export function App() {
   const upNextGame = catalog.find((g) => g.id === upNext?.id);
   // Stage 7.1: Quick Party is for casual rooms only (not Cups, not solo).
   const partyRoom = proj?.roomKind === "casual";
-  const upNextParty = upNext && partyRoom ? partyStartFor(upNext.id, false) : undefined;
+  // Stage 7.2 (review 6778921208): Start is the lineup's only when up next came from a lineup action.
+  const upNextParty = upNext && partyRoom && upNextSource === "lineup" ? partyStartFor(upNext.id, false) : undefined;
   const hostName = players.find((p) => p.isHost)?.displayName;
   const connectedNow = players.filter((p) => p.connected).length;
   const cupLabel = proj?.competition?.label ?? "Family Cup";
@@ -1272,21 +1293,20 @@ export function App() {
     const party = proj?.party;
     const nextIdx = party?.lineup?.next ?? null;
     const nextGameId = nextIdx !== null ? party?.lineup?.items[nextIdx]?.gameId : undefined;
-    const how: StartHow | undefined = nextIdx !== null && party ? { kind: "next", revision: party.revision, index: nextIdx } : undefined;
     const d = startDecision;
     const ask = d ? (
       <NoticeCard tone="warn" testId="next-ask-reconnecting" title={`${d.reconnecting.map(nameOf).join(", ")} ${d.reconnecting.length === 1 ? "is" : "are"} reconnecting`}
         action={<span className="mz-party__actions">
-          <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="next-start-without" disabled={startBusy} onClick={() => void startGame(d.gameId, d.official, d.reconnecting, d.how)}>Start without them</button>
+          <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="next-start-without" disabled={startBusy} onClick={() => void startGame(d.gameId, d.official, d.how, d.reconnecting)}>Start without them</button>
           <button type="button" className="mz-chip-btn" data-testid="next-wait" onClick={() => setStartDecision(null)}>Wait</button>
         </span>}>
         Wait for them to come back, or start without them. They can play the next game.
       </NoticeCard>
-    ) : partyAsk && how && partyAsk.gameId === nextGameId ? (
+    ) : partyAsk && partyAsk.how.kind === "next" && partyAsk.gameId === nextGameId ? (
       <PartyStartAsk
         ask={partyAsk}
         busy={startBusy}
-        onStartAnyway={() => { partyFewerOk.current = { revision: how.revision, gameId: partyAsk.gameId }; setPartyAsk(null); void startGame(partyAsk.gameId, false, undefined, how); }}
+        onStartAnyway={() => { const a = partyAsk; if (a.how.kind === "next") partyFewerOk.current = { revision: a.how.revision, gameId: a.gameId }; setPartyAsk(null); void startGame(a.gameId, false, a.how); }}
         onReplan={(n) => { setPartyAsk(null); dismissResults(g.id); setPartyReplan(n); openSheet("party"); }}
         onWait={() => setPartyAsk(null)}
       />
@@ -1303,8 +1323,8 @@ export function App() {
         busy={startBusy || sessionBusy}
         ask={ask}
         error={err || undefined}
-        onNext={(index, gameId) => { if (party) void startGame(gameId, false, undefined, { kind: "next", revision: party.revision, index }); }}
-        onPlayAgain={() => void startGame(g.gameId, false, undefined, { kind: "rematch", source: g.id })}
+        onNext={(index, gameId) => { if (party) void startGame(gameId, false, { kind: "next", revision: party.revision, index }); }}
+        onPlayAgain={() => void startGame(g.gameId, false, { kind: "rematch", source: g.id })}
         onBreakChange={(on) => void changeBreak(on)}
         onPlan={() => { dismissResults(g.id); setPartyReplan(undefined); openSheet("party"); }}
         onChoose={() => { dismissResults(g.id); openSheet("choose"); }}
@@ -1342,7 +1362,7 @@ export function App() {
           catalog={catalog}
           upNextId={upNext?.id}
           playerCount={connectedNow > 0 ? connectedNow : players.length}
-          onPick={(id) => { setUpNextId(id); setShuffleResult(null); closeSheet(); }}
+          onPick={(id) => { setUpNextId(id, "manual"); setShuffleResult(null); closeSheet(); }}
           onSurprise={() => { runShuffle("random"); closeSheet(); }}
           onSmart={() => { runShuffle("smart"); closeSheet(); }}
           onClose={closeSheet}
@@ -1396,7 +1416,7 @@ export function App() {
           roomPlayers={connectedNow}
           action={isHostish && roomDetails.id !== upNext?.id ? (
             <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="details-make-up-next" onClick={() => {
-              setUpNextId(roomDetails.id); setShuffleResult(null);
+              setUpNextId(roomDetails.id, "manual"); setShuffleResult(null);
               if (view === "library") toLobby(); else closeSheet();
             }}>Make this up next</button>
           ) : undefined}
@@ -1487,7 +1507,7 @@ export function App() {
             : undefined}
           error={err || undefined}
           message={sheet === "menu" ? undefined : msg || undefined}
-          onStart={upNext ? () => startGame(upNext.id, startMode === "official") : undefined}
+          onStart={upNext ? () => startGame(upNext.id, startMode === "official", upNextParty ? { kind: "next", ...upNextParty } : CHOSEN) : undefined}
           startTestId={upNext ? (upNextParty ? "party-start" : `start-${startMode}-${upNext.id}`) : undefined}
           startLabel={upNext && upNextParty && proj?.party?.lineup ? `Start ${upNext.title} · game ${upNextParty.index + 1} of ${proj.party.lineup.items.length}` : undefined}
           startBlocked={onBreak ? "On a break · Resume first" : undefined}
@@ -1498,12 +1518,12 @@ export function App() {
               party={proj?.party}
               connected={connectedNow}
               isHost={isHostish}
-              upNextId={upNext?.id}
+              upNextId={upNextParty ? upNext?.id : undefined}
               busy={partyBusy}
               onPlan={() => { setPartyReplan(undefined); openSheet("party"); }}
               onEdit={() => { setPartyReplan(undefined); openSheet("party"); }}
               onClear={clearParty}
-              onUseLineup={(id) => { setUpNextId(id); setShuffleResult(null); }}
+              onUseLineup={(id) => { setUpNextId(id, "lineup"); setShuffleResult(null); }}
               onReplan={(n) => { setPartyAsk(null); setPartyReplan(n); openSheet("party"); }}
             />
           </>) : undefined}
@@ -1531,7 +1551,7 @@ export function App() {
             <PartyStartAsk
               ask={partyAsk}
               busy={startingRef.current}
-              onStartAnyway={() => { const rev = proj?.party?.revision; if (rev !== undefined) partyFewerOk.current = { revision: rev, gameId: upNext.id }; setPartyAsk(null); void startGame(upNext.id, false); }}
+              onStartAnyway={() => { const a = partyAsk; if (a.how.kind === "next") partyFewerOk.current = { revision: a.how.revision, gameId: a.gameId }; setPartyAsk(null); void startGame(a.gameId, false, a.how); }}
               onReplan={(n) => { setPartyAsk(null); setPartyReplan(n); openSheet("party"); }}
               onWait={() => setPartyAsk(null)}
             />
@@ -1544,7 +1564,7 @@ export function App() {
             maxPlayers={upNext.maxPlayers}
             decision={startDecision && startDecision.gameId === upNext.id ? startDecision : null}
             onWait={() => setStartDecision(null)}
-            onStartWithout={() => { const d = startDecision; if (d) void startGame(d.gameId, d.official, d.reconnecting, d.how); }}
+            onStartWithout={() => { const d = startDecision; if (d) void startGame(d.gameId, d.official, d.how, d.reconnecting); }}
           />
         </>)}
         />
@@ -1783,8 +1803,8 @@ export function App() {
       <MchezoProvider theme={themes.everyday} {...motion}>
         {/* Stage 3: the headline first, above the outcome and the reveal. */}
         {resultsHero(latestFinished, publicFinished)}
+        {nextPanel(latestFinished) /* Stage 7.2: right under the result heading (review 6778921208) */}
         <OutcomeSummary gameId={latestFinished.gameId} outcome={latestFinished.outcome} official={publicFinished?.official} youId={playerId ?? undefined} youChoseSatOut={latestFinished.abstained === true} nameOf={nameOf} showEveryone />
-        {nextPanel(latestFinished)}
         <MchezoTriviaResults
           game={latestFinished}
           publicGame={publicFinished}
@@ -1816,7 +1836,7 @@ export function App() {
           roomPlayers={connectedNow}
           filters={filtersFromQuery(route.name === "room" ? route.lib ?? "" : "")}
           onFiltersChange={(f) => { const lib = filtersToQuery(f); tabSet("mz_lib_room", lib); navigate(lib ? { name: "room", sub: "library", lib } : { name: "room", sub: "library" }, { replace: true }); }}
-          onSelect={(id) => { setUpNextId(id); setShuffleResult(null); toLobby(); }}
+          onSelect={(id) => { setUpNextId(id, "manual"); setShuffleResult(null); toLobby(); }}
           onDetails={(id) => openSheet("details", id)}
           onBack={toLobby}
           onStudio={isHostish ? () => setView("studio") : undefined}

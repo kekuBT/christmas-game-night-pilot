@@ -147,8 +147,12 @@ try {
     check("C move down: the first two swap", moved[0] === ids[1] && moved[1] === ids[0], moved.join(", "));
   }
   const before = await preview(h);
-  await h.getByTestId(`party-remove-${before.length - 1}`).click();
-  check("C remove: one fewer, the rest in order", JSON.stringify(await preview(h)) === JSON.stringify(before.slice(0, -1)));
+  // Remove the last game that isn't Impostor: a removed game is left out of the rest of this
+  // draft (by design), and part G needs Impostor. Removing it here, when the random lineup
+  // ended with it, made "arrange Impostor first" fail now and then.
+  const drop = before.map((id, i) => (id === "impostor" ? -1 : i)).filter((i) => i >= 0).pop() ?? before.length - 1;
+  await h.getByTestId(`party-remove-${drop}`).click();
+  check("C remove: one fewer, the rest in order", JSON.stringify(await preview(h)) === JSON.stringify(before.filter((_, i) => i !== drop)));
   await h.getByTestId("party-replace-0").click();
   const offered = await h.locator('[data-testid^="party-option-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid").replace("party-option-", "")));
   const now = await preview(h);

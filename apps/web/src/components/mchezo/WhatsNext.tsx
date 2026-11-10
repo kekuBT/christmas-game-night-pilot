@@ -103,9 +103,9 @@ export function WhatsNext(p: WhatsNextProps) {
 /**
  * Stage 7.2: the results screen for a casual game that has no results screen
  * of its own (it used the old shell: the 🎄 header, Championship, "Practice"
- * and a second winner block). One result heading (`hero`), the standings from
- * the server's recorded scores, this player's own answers where the game has
- * them, how the game ended, and what's next.
+ * and a second winner block). One result heading (`hero`), what's next right
+ * under it, the standings from the server's recorded scores, how the game
+ * ended, and this player's own answers where the game has them.
  */
 export function CasualResults({ game, publicGame, players, playerId, title, hero, review, next, onBackToLobby }: {
   game: PlayerGame;
@@ -127,11 +127,11 @@ export function CasualResults({ game, publicGame, players, playerId, title, hero
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="casual-results" data-game-id={game.id}>
       {hero}
+      {next /* right under the result heading, before the standings and the answers (review 6778921208) */}
       <GameHeader title={title} objective="Final standings" accent={3} />
       {rows.length > 0 ? <ScoreList rows={rows} /> : <p className="mz-foot">No scores were recorded for this game.</p>}
       <OutcomeSummary gameId={game.gameId} outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} youChoseSatOut={game.abstained === true} />
       {review && review.length > 0 && <AnswerReview rows={review} title="Your answers" />}
-      {next}
       <div className="mz-grow" />
       <Keycap block variant="surface" onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>

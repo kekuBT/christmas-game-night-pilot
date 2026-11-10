@@ -1746,3 +1746,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - Browser checks run in Chromium only.
 - A server restart is covered by the HTTP tests, not by a browser journey.
 - The lobby's own Start keeps an optional press id at the API for older callers (the app always sends one).
+
+**Repair: review 6778921208** (D-S72-11, D-S72-12; spec §6.3).
+- **Defect:** a game picked by hand that matched the lineup's next item was started as that item and used it up.
+  - Reproduced on `acab35f` by `check-session-flow` part J (11 checks fail there).
+  - Fixed with an explicit start intent from the control pressed.
+- **Placement:** What's next moved right under the result heading on every casual results screen (part K).
+- **Driver fix:** an Impostor-removal flake in `check-quick-party` part C, from Stage 7.1.
+- **Local runs, all passing:** `check-session-flow` 70/70 and `check-quick-party` 68/68; regressions `check-casual`, `check-library`, `check-shuffle`, `check-lobby-mode`, `check-game-night-flow` and `check-briefing`.
+- **Gates:** recorded in the spec §6.4 once run.

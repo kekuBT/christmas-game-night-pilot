@@ -173,6 +173,7 @@ export function MchezoMajorityResults({ game, publicGame, players, playerId, tit
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-mr-results">
       {hero}
+      {next /* Stage 7.2: what's next, right under the result heading (review 6778921208) */}
       <GameHeader title={title} objective="How well do you know this room?" accent={2} />
       {(() => { const m = majorityMoment(st.rounds, publicGame?.players ?? Object.keys(game.rawScores ?? {}), (id) => nameOf(id)); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
       <ol className="mz-mr-recap">
@@ -186,7 +187,6 @@ export function MchezoMajorityResults({ game, publicGame, players, playerId, tit
       <ScoreList rows={rows} />
       <p className="mz-foot" data-testid="mz-mr-howscore">100 points for predicting the majority. When the room splits evenly, every prediction scores 50. Votes stay anonymous. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="majority-rules" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
-      {next}
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>

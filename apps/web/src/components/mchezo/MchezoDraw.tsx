@@ -311,6 +311,7 @@ export function MchezoDrawResults({ game, publicGame, players, playerId, title, 
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-dg-results">
       {hero}
+      {next /* Stage 7.2: what's next, right under the result heading (review 6778921208) */}
       <GameHeader title={title} objective="Every drawing, every guess" accent={5} />
       {(() => {
         const roster = publicGame?.players ?? Object.keys(game.rawScores ?? {});
@@ -328,7 +329,6 @@ export function MchezoDrawResults({ game, publicGame, players, playerId, title, 
       <ScoreList rows={rows} />
       <p className="mz-foot" data-testid="mz-dg-howscore">Guessers score 100, 80, 60, then 50, in the order they got it. The drawer scores 50 for each player who got it. Wrong guesses are never shown. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="draw-guess" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
-      {next}
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>

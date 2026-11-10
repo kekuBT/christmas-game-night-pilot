@@ -806,3 +806,11 @@ The spec is `docs/stage7/stage72.md`. The instruction is ChatGPT's handoff on PR
   - **"Saved"** only when the room shows exactly that draft at base + 1, either later (a watcher) or in a conflict reply.
   - **Anything else** stays a conflict for the host to decide. Nothing rebases or overwrites by itself.
 - **D-S72-10 The TV shows the lineup** (game n of N, played, on now, next), **the break, and the lineup's next step** on its final screens, Trivia's own included. These are public planning facts only.
+- **D-S72-11 What a start is comes from the control pressed** (review 6778921208).
+  - **Picked by hand, the lineup's next item, or Play again:** the intent is fixed at the press and carried through its questions and its retry. It is never inferred from a matching game id or a refreshed room.
+  - **Up next records its source.** Only Apply, "Use the lineup", or the lineup moving on while the page is open make it the lineup's. The picker, library, details, shuffle, and a plan adopted from another tab make it a plain pick.
+  - **A page's first look at the room** never turns a hand pick into the lineup's.
+  - *Alternative rejected:* telling the server which control was pressed. The server already acts on `party` alone, so the client simply never sends it for a hand pick.
+- **D-S72-12 What's next sits right under the result heading** (review 6778921208).
+  - This holds on every casual results screen: before the standings, the game's details and the answer review.
+  - It is not sticky, so nothing is covered. Its controls come early in the keyboard order.

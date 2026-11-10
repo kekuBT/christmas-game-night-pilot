@@ -126,7 +126,7 @@ Everyone else sees the same state. The server holds the progress, so a reload, a
     - the standings, every player ranked by the server's recorded scores;
     - the player's own answer review, where the game has one;
     - the "What's next" panel.
-- **The "What's next" panel**, on every casual results screen:
+- **The "What's next" panel**, on every casual results screen, right under the result heading (the results hero), before the standings, the game's details and the answer review (review 6778921208):
   - **Host or cohost:** **Next game: X** (game n of N), **Play again: Y**, **Take a break**, and the lobby. When the lineup is complete, it says so, with Play again, Plan another lineup, or the lobby.
   - **Everyone else:** "Up next: X. {host} starts it." / "On a break." / "That was the whole lineup."
   - A refused start is answered in place, with the same choices as the lobby: fewer than planned, reconnecting, doesn't fit, on a break, or the lineup changed.
@@ -181,6 +181,17 @@ The lobby screen shows "Quick Party: game n of N", Next, "On a break", or "That 
   - A new press can start the same item or rematch again.
 - **Serialized:** the one-active-game rule, the break, and the session revision are checked and changed in one synchronous step.
 - **The client:** a reply never moves a screen back. Which screen shows (briefing, game or results) comes from the room's projection, never from a start reply. A replayed older game or a late reply only refreshes.
+- **What a start is comes from the control pressed, never from a matching game id** (review 6778921208).
+  - Every start carries one intent, fixed when it is pressed and unchanged through its questions (fewer than planned, reconnecting) and its retry:
+    - **picked by hand:** no lineup selector;
+    - **the lineup's next item:** `party`;
+    - **Play again:** `rematchOf`.
+  - **Only an explicit lineup action** makes the lobby's up next the lineup's:
+    - Apply;
+    - "Use the lineup";
+    - the lineup moving on while the page is open, because one of its items started, completed or was cancelled, or a new lineup was saved.
+  - **A hand pick** (the picker, the library, details, shuffle) or a plan adopted from another tab is a plain Start, even when it is the same game as the lineup's next item. The lineup card then says it is waiting, with "Use the lineup".
+  - **A page's first look at the room** (a load or a reload) never turns a hand pick into the lineup's.
 
 ## 4. Test plan
 - **Unit and HTTP:**
@@ -251,7 +262,24 @@ Accepted in clarification 6776484058.
 - **Regressions:** Family Cup and solo are covered by the full gate (§6.3).
 - **Not run:** WebKit and real devices (the checklist is `docs/REAL_DEVICE_TESTING.md` I13–I16). Emulation is not a device.
 
-### 6.3 Gates
+### 6.3 Repair: review 6778921208
+- **The defect:** the lobby's Start inferred a lineup start from up next's game id. Math picked by hand in the picker, with a lineup of Math then Guess the Year, was started as the lineup's item 1 and used it up.
+  - **Reproduced on `acab35f`** by the new part J of `check-session-flow`. The hand-picked start sent `party: { revision: 1, index: 0 }`; the Math item completed and the lineup moved to Guess the Year. 11 checks fail, including the four placement checks (K).
+  - The log is `docs/evidence/review-pr9/check-session-flow-on-acab35f.log`.
+- **The fix:**
+  - Start carries an explicit intent (§3.8) and up next records whether it came from a lineup action.
+  - The effect that moves up next along the lineup reacts only to a change seen while the page is open.
+  - The server is unchanged: it already starts a lineup item only when asked with `party`.
+- **Placement:** What's next now sits right under the result heading on all eight game screens that use the casual results screen, the five with their own results, and Trivia's.
+  - **Part K** checks it comes before the standings, the outcome, the reveal and the answers, and starts on the first screen at 390 and 320 px.
+- **Part J** (through the real picker):
+  1. Math picked by hand: a plain Start, no lineup selector, and the game completes while the lineup's Math item stays pending.
+  2. Play again of it leaves the lineup unchanged.
+  3. Trivia picked by hand leaves it unchanged.
+  4. The results' explicit Next game then starts that pending Math item.
+- **Driver fix, from Stage 7.1:** part C of `check-quick-party` removed the last game of a random lineup. When that was Impostor, part G's "Impostor first" could not succeed (a removed game is left out of the rest of the draft). Part C now removes the last game that isn't Impostor.
+
+### 6.4 Gates
 **Tested revision:** `acab35f3138e60516916cb588ae28431d4addbbd`. Both runs used a fresh clone with a clean tree (`dirty: []`) and the same source fingerprint (`cdfa0051…`, 425 files).
 
 | Run | Gate | Verdict |

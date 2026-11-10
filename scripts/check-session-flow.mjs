@@ -22,6 +22,15 @@
 //      guest's Next/Play again.
 //   G  keyboard: the panel's choices are reachable with Tab and work with Enter.
 //   H  layout: the results panel at 320 and 1440 px without sideways scroll.
+//   J  a game picked by hand never moves the lineup on (review 6778921208):
+//      the lineup is Math Mayhem then Guess the Year; Math picked in the
+//      picker starts as an ordinary game (not the lineup's), completes, and
+//      the lineup's Math item is still pending; Play again (a rematch of
+//      it) and a hand-picked Trivia leave the lineup as it is; then the
+//      results' explicit Next game starts that pending Math item.
+//   K  What's next sits right under the result heading, before the
+//      standings and the answers, starting on the first screen (review
+//      6778921208); checked in A, C and H.
 //   I  an uncertain Apply (P7): the planner's request is held past the app's
 //      timeout and then reaches the server. The planner says it couldn't
 //      confirm whether it saved (never "not saved"), and recognises the
@@ -75,6 +84,14 @@ const api = (page, method, path, body) => page.evaluate(async ({ method, path, b
 }, { method, path, body });
 const myRoom = async (page) => (await api(page, "GET", "/rooms/:room/projection?audience=player")).body;
 const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+/** Where What's next sits on a results screen: page offsets of the panel and what it must come before. */
+const placement = (page, before) => page.evaluate((before) => {
+  const top = (id) => { const el = document.querySelector(`[data-testid="${id}"]`); return el ? el.getBoundingClientRect().top + window.scrollY : null; };
+  return { hero: top("results-hero"), next: top("whats-next"), after: Object.fromEntries(before.map((id) => [id, top(id)])), screen: window.innerHeight };
+}, before);
+const placedWell = (pl) => pl.next !== null && pl.hero !== null && pl.hero < pl.next && Object.values(pl.after).every((y) => y === null || pl.next < y) && pl.next < pl.screen;
+/** The lobby dock's Start, whichever it is (the lineup's or a plain one). */
+const dockStart = (page) => page.locator('[data-testid="lobby-dock"] button.mz-key--block').first();
 const testIds = (page, prefix) => page.locator(`[data-testid^="${prefix}"]`).evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")));
 
 const browser = await launchChromium();
@@ -108,6 +125,8 @@ try {
     const rows = await p.locator('[data-testid="mz-scores"] li').count();
     check(`A ${who}: standings with both players`, rows === 2, String(rows));
     check(`A ${who}: their own answers to review`, (await p.getByTestId("mz-answer-review").count()) === 1);
+    const pl = await placement(p, ["mz-scores", "mz-answer-review"]);
+    check(`K ${who}: What's next right under the result heading, before the standings and the answers, on the first screen`, placedWell(pl), JSON.stringify(pl));
   }
   await sleep(2500);
   let room = await myRoom(h);
@@ -146,6 +165,8 @@ try {
   await answerKitQuestions(h, { player: "Keku", choose: () => 0 });
   await answerKitQuestions(g, { player: "Amina", choose: (n) => n % 4 });
   await soon("C game 2's own results (Trivia) carry the panel: the lineup is complete", async () => (await h.getByTestId("whats-next").getAttribute("data-state")) === "complete", 60000);
+  const tpl = await placement(h, ["mz-reveal-step", "mz-outcome"]);
+  check("K Trivia's results: What's next right under the result heading, before the outcome and the reveal, on the first screen", placedWell(tpl), JSON.stringify(tpl));
   await soon("C guest: that was the whole lineup", async () => /whole lineup/.test(await g.getByTestId("next-status").innerText()), 30000);
   await soon("C TV: that was the whole lineup", async () => (await tv.getByTestId("tv-next").getAttribute("data-flow")) === "complete");
   check("C host: no Next game once the lineup is complete; Play again and Plan another lineup offered", (await h.getByTestId("next-game").count()) === 0 && (await h.getByTestId("next-play-again").count()) === 1 && (await h.getByTestId("next-plan").count()) === 1);
@@ -173,6 +194,9 @@ try {
   // ---- H. Layout ----
   await g.setViewportSize({ width: 320, height: 640 });
   await soon("H guest at 320 px: the results and panel without sideways scroll", async () => (await g.getByTestId("whats-next").isVisible()) && await noSideScroll(g));
+  await g.evaluate(() => window.scrollTo(0, 0));
+  const spl = await placement(g, ["mz-reveal-step", "mz-outcome"]);
+  check("K guest at 320 px: What's next starts on the first screen, under the result heading", placedWell(spl), JSON.stringify(spl));
   await h.setViewportSize({ width: 1440, height: 900 });
   await soon("H host at 1440 px: the panel without sideways scroll", async () => (await h.getByTestId("whats-next").isVisible()) && await noSideScroll(h));
   await h.setViewportSize({ width: 390, height: 844 });
@@ -224,6 +248,55 @@ try {
   room = await myRoom(h);
   check("I the server holds exactly that draft, one revision on", held === 1 && room.party.revision === baseRevision + 1 && JSON.stringify(room.party.lineup.items.map((i) => i.gameId)) === JSON.stringify(draft) && room.party.lineup.budgetMinutes === 15, JSON.stringify({ held, rev: room.party.revision, items: room.party.lineup.items.map((i) => i.gameId), draft }));
   check("I the new lineup starts at its first game; the played games keep their scores", room.party.lineup.next === 0 && room.games.length === 3 && room.games.every((x) => x.status === "finished"));
+
+  // ---- J. A game picked by hand never moves the lineup on (review 6778921208) ----
+  const jh = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+  const jcode = await host(jh, "Hana");
+  const jg = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+  await join(jg, "Cleo", jcode);
+  const jsaved = await api(jh, "POST", "/rooms/:room/party", { baseRevision: 0, plan: { expectedPlayers: 2, budgetMinutes: 30, items: [{ gameId: "math-mayhem" }, { gameId: "guess-the-year" }] } });
+  check("J setup: a lineup of Math Mayhem, then Guess the Year", jsaved.status === 200, JSON.stringify(jsaved));
+  await soon("J the lineup's Start: game 1 of 2", async () => /game 1 of 2/.test(await jh.getByTestId("party-start").innerText()));
+  // 1. Math, picked by hand in the picker: the same game as the lineup's next item.
+  await jh.getByTestId("choose-game").click();
+  await jh.getByTestId("select-game-math-mayhem").click();
+  await soon("J picked by hand: a plain Start (not the lineup's), and the lineup says it is waiting", async () => (await jh.getByTestId("party-start").count()) === 0 && (await jh.getByTestId("start-practice-math-mayhem").innerText()).trim() === "Start Math Mayhem" && await jh.getByTestId("party-waiting").isVisible());
+  const jposts = [];
+  jh.on("request", (r) => { if (r.method() === "POST" && new URL(r.url()).pathname.endsWith("/games")) jposts.push(JSON.parse(r.postData() ?? "{}")); });
+  await dockStart(jh).click();
+  await passBriefing([jh, jg]);
+  check("J the hand-picked start sent no lineup selector", jposts.length === 1 && jposts[0].party === undefined && jposts[0].rematchOf === undefined && !!jposts[0].attempt?.id, JSON.stringify(jposts));
+  await answerKitQuestions(jh, { player: "Hana", choose: () => 0 });
+  await answerKitQuestions(jg, { player: "Cleo", choose: (n) => n % 4 });
+  await soon("J the hand-picked Math game ends on its results", async () => jh.getByTestId("casual-results").isVisible(), 40000);
+  let jroom = await myRoom(jh);
+  check("J it completed, and the lineup's Math item is still pending: nothing was consumed", jroom.games.length === 1 && jroom.games[0].status === "finished" && jroom.games[0].gameId === "math-mayhem" && jroom.party.lineup.items[0].status === "pending" && !jroom.party.lineup.items[0].gameInstanceId && jroom.party.lineup.next === 0, JSON.stringify({ games: jroom.games.map((x) => [x.gameId, x.status]), items: jroom.party.lineup.items, next: jroom.party.lineup.next }));
+  // 2. Play again (a rematch of the hand-picked game): the lineup stays as it is.
+  await jh.getByTestId("next-play-again").click();
+  await jh.getByTestId("briefing").waitFor({ timeout: 20000 });
+  jroom = await myRoom(jh);
+  check("J Play again: a rematch of Math, and the lineup is unchanged (Math still pending, still next)", jroom.games.length === 2 && jroom.games[1].gameId === "math-mayhem" && jroom.party.lineup.items.every((i) => i.status === "pending") && jroom.party.lineup.next === 0, JSON.stringify({ games: jroom.games.map((x) => [x.gameId, x.status]), items: jroom.party.lineup.items }));
+  await jh.getByTestId("briefing-cancel").click();
+  await jh.getByTestId("briefing-cancel-confirm-confirm").click();
+  await soon("J the rematch is cancelled before play: back on the results, one game", async () => (await jh.getByTestId("briefing").count()) === 0 && (await myRoom(jh)).games.length === 1, 15000);
+  // 3. Another game picked by hand, not in the lineup (Trivia), from the results.
+  await soon("J the results' What's next is back", async () => jh.getByTestId("next-choose").isVisible());
+  await jh.getByTestId("next-choose").click();
+  await jh.getByTestId("select-game-trivia").click();
+  await soon("J Trivia picked by hand: a plain Start", async () => (await jh.getByTestId("start-practice-trivia").innerText()).trim() === "Start Trivia Showdown");
+  await dockStart(jh).click();
+  await passBriefing([jh, jg]);
+  await answerKitQuestions(jh, { player: "Hana", choose: () => 0 });
+  await answerKitQuestions(jg, { player: "Cleo", choose: (n) => n % 4 });
+  await soon("J the hand-picked Trivia ends on its results, with the panel", async () => jh.getByTestId("whats-next").isVisible(), 60000);
+  jroom = await myRoom(jh);
+  check("J after the hand-picked Trivia: the lineup is still at Math, pending", jroom.games.length === 2 && jroom.games[1].gameId === "trivia" && jroom.games[1].status === "finished" && jroom.party.lineup.next === 0 && jroom.party.lineup.items.every((i) => i.status === "pending"), JSON.stringify({ games: jroom.games.map((x) => [x.gameId, x.status]), items: jroom.party.lineup.items }));
+  // 4. Next game, explicitly: it starts the lineup's pending Math item.
+  await soon("J the results offer the lineup's Next game: Math Mayhem", async () => /Next game: Math Mayhem/.test(await jh.getByTestId("next-game").innerText()));
+  await jh.getByTestId("next-game").click();
+  await jh.getByTestId("briefing").waitFor({ timeout: 20000 });
+  jroom = await myRoom(jh);
+  check("J Next starts the pending Math item: that item now has this game", jroom.games.length === 3 && jroom.games[2].gameId === "math-mayhem" && jroom.party.lineup.items[0].gameInstanceId === jroom.games[2].id && jroom.party.lineup.items[0].status === "briefing" && jroom.party.lineup.next === 1, JSON.stringify({ games: jroom.games.map((x) => [x.id, x.gameId, x.status]), items: jroom.party.lineup.items }));
 } catch (e) {
   check("driver ran to the end", false, String(e?.message ?? e).split("\n").slice(0, 3).join(" | "));
 } finally {
