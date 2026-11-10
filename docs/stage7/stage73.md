@@ -251,4 +251,18 @@ I'm proceeding with these unless you object.
 - **Not run:** WebKit and real devices (checklist I17–I19). Emulation is not a device.
 
 ### 7.3 Gates
-*(Recorded after the runs.)*
+On `371c1948fd4c853b460838564849bf156f134f0b`, both at the same time, each in its own fresh clone with a clean tree (`dirty: []`). Both have the same source fingerprint (`8716f3b4…`, 429 files).
+
+| Run | Gate | Verdict |
+|---|---|---|
+| `20261110-231336-371c1948-12599` | fast | **PASSED**, exit 0, 5/5: typecheck ×2, lint, 1,271 unit tests, build |
+| `20261110-231336-371c1948-12591` | full | **PASSED**, exit 0, 81/81, wall 29 min 03 s, 3 workers |
+
+- **The full gate includes:**
+  - `check-host-handover` (32/32);
+  - `check-session-flow` (70) and `check-quick-party` (68);
+  - `check-casual`, `check-recovery`, `check-sessions`, `check-tv-show`, `check-game-night` and the other Family Cup drivers;
+  - `check-solo` and `check-solo-shelf`;
+  - E2E Chromium.
+- **No failed runs** on this checkpoint.
+- **Raw evidence:** `docs/evidence/gate-runs/<run>/`.

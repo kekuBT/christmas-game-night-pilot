@@ -1784,4 +1784,16 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **`check-host-handover`:** 32/32.
 - **Regressions, all passing:** `check-game-night`, `check-casual`, `check-recovery`, `check-sessions`, `check-session-flow` (70), `check-quick-party` (68), `check-tv-show`, `check-lobby-mode`.
 
-**Gates:** recorded in the spec §7.3 once run.
+**Gates on `371c194`** (fresh clone, clean tree, both at the same time):
+- fast `20261110-231336-371c1948-12599`: **PASSED** 5/5, 1,271 unit tests;
+- full `20261110-231336-371c1948-12591`: **PASSED** 81/81, including `check-host-handover` 32/32, `check-session-flow` 70 and `check-quick-party` 68.
+- No failed runs. Raw evidence is in `docs/evidence/gate-runs/<run>/`.
+
+**External blockers:** none. WebKit and real devices are not available here (checklist I17–I19).
+
+**Next task:** ChatGPT reviews PR #10 and does its private live-site audit. The next milestone starts only when its handoff instructs it.
+
+**Risk:**
+- **Two copies of the host role:** `hostId` and the cohost set, plus each player's flags. Every path that changes one must change the other. A transfer does both in one step, and a restore normalizes them.
+- **A non-host start is refused with 400** (the engine's existing generic error), not 403. This slice leaves it unchanged.
+- **Emulation only:** no real phones.

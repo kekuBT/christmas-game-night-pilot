@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:38495
+# timeout 600s | worker w3 | server http://localhost:38495 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s73-full/test-results/20261110-231336-371c1948-12591/server-data/w3)
+
+[+18.0s] PASS Geography: finished player sees no answers while Bea still plays
+[+18.0s] PASS Geography: TV shows no answers while Bea still plays
+[+18.0s] PASS Geography: Bea (mid-game) sees no answers
+[+28.6s] PASS Geography: results list every question — 8
+[+28.7s] PASS Geography: each answer matches the content pack — 8/8
+[+28.7s] PASS Geography: each explanation is shown — 8/8
+[+28.7s] PASS Geography: Bea sees her own choices marked
+[+28.7s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+28.8s] PASS Geography: TV lists the answers after the game
+[+28.8s] PASS Geography: TV shows no player's choices
+[+34.1s] PASS Closest: no answer anywhere while question 1 is open
+[+34.2s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 22 vs 22
+[+34.2s] PASS Closest: and the player's own guess
+[+34.2s] PASS Closest: Bea sees her own guess, not Ada's
+[+34.2s] PASS Closest: the explanation is shown
+[+34.2s] PASS Closest: question 2 is now open and its answer is not shown
+[+34.3s] PASS Closest: TV shows the last answer only — Last question: How long is the gestation of an African elephant, in months? — 22 months
+[+34.3s] PASS Closest: TV shows nobody's guess — Last question: How long is the gestation of an African elephant, in months? — 22 months
+[+34.5s] ANSWER REVEAL ALL PASSED
+[+34.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 34.5s | cpu 3s, peak memory 252 MB
