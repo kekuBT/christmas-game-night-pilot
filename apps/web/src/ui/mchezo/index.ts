@@ -5,6 +5,7 @@ import './styles/stage3.css';
 import './styles/stage4.css';
 import './styles/stage5.css';
 import './styles/stage6.css';
+import './styles/stage7.css';
 
 export * from './tokens/tokens.js';
 export * from './types.js';

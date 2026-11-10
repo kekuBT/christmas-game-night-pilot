@@ -127,6 +127,19 @@ export interface Ceremony {
   standings: { playerId: string; displayName: string; base: number }[];
 }
 
+/** Stage 7.1: the room's Quick Party lineup (casual rooms), as the server projects it to everyone. */
+export interface PartyView {
+  revision: number;
+  lineup: null | {
+    expectedPlayers: number;
+    budgetMinutes: number;
+    estimateMinutes: number;
+    transitionMinutes: number;
+    items: { gameId: string; started: boolean }[];
+    updatedAt: number;
+  };
+}
+
 export interface Projection {
   /** The server's clock when this projection was made; countdowns use deadline − serverNow. */
   serverNow?: number;
@@ -147,6 +160,8 @@ export interface Projection {
   championshipDay?: number;
   /** Stage 6.1: cup (a Family Cup), casual (no Cup at all) or solo. Missing: a Cup. */
   roomKind?: "cup" | "casual" | "solo";
+  /** Stage 7.1: casual rooms only. */
+  party?: PartyView;
   championship?: ChampionshipResult[];
   achievements?: Achievement[];
   ceremony?: Ceremony;
