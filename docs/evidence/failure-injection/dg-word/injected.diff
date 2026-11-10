@@ -1,0 +1,7 @@
+diff --git a/scripts/lib/stage5-games.mjs b/scripts/lib/stage5-games.mjs
+index ca62a88..52a6eea 100644
+--- a/scripts/lib/stage5-games.mjs
++++ b/scripts/lib/stage5-games.mjs
+@@ -74 +74 @@ export async function stage5Act(page, gameId) {
+-      const wordText = await page.getByTestId("mz-dg-word").textContent({ timeout: READ_MS }).catch(() => null);
++      const wordText = await page.getByTestId("mz-dg-word-INJECTED").textContent({ timeout: READ_MS }).catch(() => null);

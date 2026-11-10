@@ -1,0 +1,28 @@
+Mchezo gate targeted | run 20261110-063418-0456f0b1-32300
+  revision 0456f0b1928fc1ed3b53787cc4953b6cf970150e (clean tree) | fingerprint f1cc8a17c5b1 (385 files)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/before-5636d1f/test-results/20261110-063418-0456f0b1-32300
+[ 1] build-web                    PASS         5.9s
+[ 2] browser-preflight            PASS         0.7s
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   http://localhost:45877 (pid 32498, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/before-5636d1f/test-results/20261110-063418-0456f0b1-32300/server-data)
+[ 3] check-poll-body-stall        FAIL        26.6s  FAIL TV: each skipped 500 reply is closed by the page at once (none left open) — not within 5000ms | FAIL TV: each 500 reply was closed within 2 s, not at the 6
+      | PASS polling only: a new player (Amina) reaches the phone
+      | PASS polling only: a new player (Amina) reaches the TV
+      | PASS the phone's next poll is stalled after its headers and "{"
+      | PASS the TV's next poll is stalled after its headers and "{"
+      | PASS after a stalled poll, a new player (Bea) still reaches the phone (within 15 s)
+      | PASS after a stalled poll, a new player (Bea) still reaches the TV (within 15 s)
+      | PASS phone: the stalled request was cancelled by the page at its 6 s timeout — cancelled after 6.0 s
+      | PASS TV: the stalled request was cancelled by the page at its 6 s timeout — cancelled after 6.0 s
+      | (Bea joined 8.1 s ago; 2 poll(s) stalled in all)
+      | PASS the TV's next three polls get a 500 whose body stalls
+      | FAIL TV: each skipped 500 reply is closed by the page at once (none left open) — not within 5000ms
+      | FAIL TV: each 500 reply was closed within 2 s, not at the 6 s timeout — slowest 9.1 s
+      | PASS after the stalled 500 replies, a new player (Cai) still reaches the TV
+      | POLL BODY STALL FAILURES: 2
+
+FAILED (exit 1) | targeted | run 20261110-063418-0456f0b1-32300
+  2 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled
+  FAIL      check-poll-body-stall: FAIL TV: each skipped 500 reply is closed by the page at once (none left open) — not within 5000ms | FAIL TV: each 500 reply was closed within 2 s, not at the 6 s timeout — slowest 9.1 s
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/before-5636d1f/test-results/20261110-063418-0456f0b1-32300/report.json
+exit=1

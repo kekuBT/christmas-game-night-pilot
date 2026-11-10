@@ -1457,3 +1457,70 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Risk:**
 - Safari's handling of the new connection watchdog (background tabs, suspended timers) is untested.
 - The flag description depends on each pack's accessibility note.
+
+## Stage 5.2: parallel testing, performance and time estimates (2026-11-10)
+
+**Branch:** `claude/stage5-parallel-testing`, built on the verified Stage 5.1 head `5a4454c` (PR #4). Nothing was merged or deployed, no port was made public, and nothing was paid for. The full report is `docs/test-optimization/README.md`.
+
+**Milestone:** the full gate runs in parallel, with live time estimates. On this 4-CPU machine it went from **95.4 min** (the sequential gate, Stage 5.1 final) to **24m 17s** on 3 workers: 74.5% less, with the same 74 steps and the same number of checks in each.
+
+**Features:**
+- **`scripts/gate.mjs`:**
+  - a bounded worker pool (`--workers=N|auto`, `--sequential`), with one gate server per worker;
+  - longest-first ordering, and load and memory backpressure;
+  - an explicit not-run list;
+  - failure kinds, DIAG lines and machine-pressure notes for failed steps;
+  - CPU, memory, browser use and rooms per step, and time-stamped step logs;
+  - `--plan`, live progress with remaining-time ranges, predicted vs actual, timing history, and `timings`.
+- **`scripts/lib/`:** `gate-plan.mjs` (scheduler model and estimates), `gate-sampler.mjs` (`/proc` sampling), `gate-timings.mjs` (history) and `gate-timings.json` (a baseline from 111 earlier runs and the benchmarks).
+- **Driver changes, with no check removed:**
+  - `check-leaderboard`: 30 s waits on optional chips replaced by a phase wait;
+  - `e2e-browser` and `check-f5`: probes are checks, not waits;
+  - `lib/stage5-games.mjs`: a Draw & Guess read race fixed, keeping Stage 5.1's 30 s limit for a read or tap stuck on screen (D-S52-01);
+  - `lib/driver-env.mjs`: browser-use counters.
+- **Self-test:** 8 parallel cases (9–16) added; 59 checks in all. **Unit tests:** `tests/gate-plan.test.ts`, 21 tests.
+- **CI:** a `workers` input on the manual dispatch. **Docs:** `TESTING.md`. **npm:** `gate:full:sequential`, `gate:plan`, `gate:timings`.
+
+**Tests:** see the verdict below.
+
+**Failures during the sprint:** all are in the report, §12.
+- The first self-test run scored 55 of 58, from three self-test design errors.
+- The F2 run (2 workers on 2 CPUs) failed `check-f5` on a real race in the shared Draw & Guess helper. It's fixed and validated (V1).
+- F2 was then cancelled, because a validation run on the other CPUs throttled it through the machine-wide load average.
+- **Found in my own review (no gate failed):** the first race fix (`d5e175f`) let a defect confined to one Draw & Guess turn or one Majority round pass `check-f5` and E2E. Failure injection showed it: 3 single-turn/round injections PASSED on `dab1c65`. Fixed in `872add3`, where the same 3 injections FAIL within 35 s with the action named (report §12–§13).
+
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` (automatic worker count: 3 workers on 4 CPUs) on `3ce937a`, the cumulative Stage 5.1 + 5.2 tree with both review fixes: **PASSED (exit 0)**, run `20261110-063622-3ce937a7-2793`.
+- 75 passed (the 74 before, plus `check-poll-body-stall`), 0 failed, 0 timed out, 0 not run.
+- Unit tests: 1,111 in 101 files (Stage 5.1's 1,080, plus 21 gate-plan tests and 10 new liveness tests). All 68 drivers passed. E2E passed 15 of 15.
+- Check lines: the 74 earlier steps made 1,992, the same in every step as the sequential Stage 5.1 run. The stall driver made 12.
+- 24m 15s, from a fresh clone with a clean tree (fingerprint `d38b8718bdeb`, 394 files). The commits after it are documentation only.
+- Gate self-test on `3ce937a`: **59/59**.
+
+**Earlier, superseded:**
+- `735242d` (first review fix only): PASSED, run `20261110-055944-735242dd-14712`, 75/75 in 24m 29s; self-test 59/59.
+- `872add3`: PASSED, run `20261110-052100-872add3c-26825`, 74/74 in 24m 34s. The gate self-test there was 59/59.
+- `dab1c65`: PASSED twice: 24m 17s on 3 workers (run `20261110-033657-dab1c658-18431`), and 38m 06s on 2 workers pinned to 2 CPUs (run `20261110-040231-dab1c658-30930`). The gate self-test there was 59/59.
+
+**Raw evidence:** `docs/evidence/` holds the reports, summaries and logs of the cited gate runs, the failure injection and the poll-stall driver, so they can be reviewed without rerunning.
+
+**Review loop:**
+- PR #4 (Stage 5.1) is ready for review.
+- The Stage 5.2 PR targets `claude/stage5-audit-repairs`. By the owner's decision this cumulative tree is the review candidate.
+- The Draw & Guess helper race stays unfixed on the Stage 5.1 branch, by the owner's decision: no backport, documented on PR #4.
+- The owner authorized the ChatGPT ↔ Claude GitHub handoff loop, including later milestones (D-WF-01, `AGENTS.md`). No merge, deployment, public port or extra spending.
+- **ChatGPT's review of PR #4 (P2):** the poll timeout ended when the headers arrived, so a reply whose body stalled hung the poll loop.
+  - Verified. Reproduced on the unchanged code: still pending after 2 s with a 100 ms timeout.
+  - Fixed on the Stage 5.1 branch in `7e7ab16`: `pollFresh` and `oneAtATime`, 7 new unit tests, and the new driver `check-poll-body-stall`.
+  - Merged here as `735242d`. The details are in `docs/stage5-qa/README.md` §3.
+- **ChatGPT's review of PR #5 (P2):** the TV skipped error replies without reading or closing them, so a stalled error body stayed open and they piled up.
+  - Verified: 3 stalled 500s and a stalled 401 left 4 replies open.
+  - Fixed on the Stage 5.1 branch in `0cb5a78`: the poll aborts its request in `finally`. 3 new unit tests, plus a new driver step that FAILED before the fix and PASSED after.
+  - Merged here as `3ce937a`.
+- **Queued product work:** an installable Home Screen web app, for the mobile-polish milestone (`docs/MILESTONES.md`). It is not a Stage 5.1/5.2 item.
+
+**Next task:** review repair and validation of the cumulative candidate: ChatGPT re-reviews PR #4 and PR #5 at `735242d`, and Claude repairs whatever it finds. The automatic worker cap stays at the benchmarked 3. A later product milestone starts only when a ChatGPT handoff instructs it (D-WF-01).
+
+**Risk:**
+- Backpressure uses the machine-wide 1-minute load average, which lags. Other work on the same machine also throttles the gate.
+- Pattern Pulse's multi-key entry keeps 30 s auto-waits.
+- `check-tv-outage` re-binds its own port.

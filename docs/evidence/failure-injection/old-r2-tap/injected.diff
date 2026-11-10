@@ -1,0 +1,7 @@
+diff --git a/scripts/lib/stage5-games.mjs b/scripts/lib/stage5-games.mjs
+index ca62a88..49568fe 100644
+--- a/scripts/lib/stage5-games.mjs
++++ b/scripts/lib/stage5-games.mjs
+@@ -39 +39 @@ export async function stage5Act(page, gameId) {
+-    const tap = (id) => page.getByTestId(id).click({ timeout: READ_MS }).then(() => true, () => false);
++    const tap = async (id) => page.getByTestId(/^Round 2 /.test(await turnLabel(page)) ? `${id}-INJECTED` : id).click({ timeout: READ_MS }).then(() => true, () => false);

@@ -1,0 +1,7 @@
+diff --git a/scripts/lib/stage5-games.mjs b/scripts/lib/stage5-games.mjs
+index 4aa3423..df6b64c 100644
+--- a/scripts/lib/stage5-games.mjs
++++ b/scripts/lib/stage5-games.mjs
+@@ -103 +103 @@ async function actOnce(page, gameId) {
+-      const wordText = await page.getByTestId("mz-dg-word").textContent({ timeout: READ_MS }).catch(() => null);
++      const wordText = await page.getByTestId(label.startsWith("Turn 2 ") ? "mz-dg-word-INJECTED" : "mz-dg-word").textContent({ timeout: READ_MS }).catch(() => null);

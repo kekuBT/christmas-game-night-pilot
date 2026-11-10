@@ -1,0 +1,13 @@
+Mchezo gate targeted | run 20261110-055708-5a4454c1-11750
+  revision 5a4454c1234986e47288bcf490b3e9eada471191 + 5 uncommitted change(s) | fingerprint ce45f4e88c9e (385 files)
+  results  /home/user/christmas-game-night-pilot/test-results/20261110-055708-5a4454c1-11750
+[ 1] build-web                    PASS         6.2s
+[ 2] browser-preflight            PASS         0.8s
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   http://localhost:42365 (pid 11944, data /home/user/christmas-game-night-pilot/test-results/20261110-055708-5a4454c1-11750/server-data)
+[ 3] check-poll-body-stall        PASS        14.9s
+
+PASSED (exit 0) | targeted | run 20261110-055708-5a4454c1-11750
+  3 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled
+  report /home/user/christmas-game-night-pilot/test-results/20261110-055708-5a4454c1-11750/report.json
+exit=0

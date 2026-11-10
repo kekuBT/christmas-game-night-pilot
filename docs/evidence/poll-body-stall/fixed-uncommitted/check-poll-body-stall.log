@@ -1,0 +1,15 @@
+$ node scripts/check-poll-body-stall.mjs http://localhost:42365
+# timeout 600s
+
+PASS polling only: a new player (Amina) reaches the phone
+PASS polling only: a new player (Amina) reaches the TV
+PASS the phone's next poll is stalled after its headers and "{"
+PASS the TV's next poll is stalled after its headers and "{"
+PASS after a stalled poll, a new player (Bea) still reaches the phone (within 15 s)
+PASS after a stalled poll, a new player (Bea) still reaches the TV (within 15 s)
+PASS phone: the stalled request was cancelled by the page at its 6 s timeout — cancelled after 6.0 s
+PASS TV: the stalled request was cancelled by the page at its 6 s timeout — cancelled after 6.0 s
+(Bea joined 8.1 s ago; 2 poll(s) stalled in all)
+POLL BODY STALL ALL PASSED
+
+# PASS (exit 0) in 14.9s

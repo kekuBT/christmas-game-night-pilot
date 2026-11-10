@@ -1,0 +1,62 @@
+$ node scripts/check-f5.mjs http://localhost:45451
+# timeout 1500s | worker w1 | server http://localhost:45451 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/inject/new-t2-guess/test-results/20261110-051243-d30014a7-20640/server-data/w1)
+
+[+4.3s] PASS lobby roster: 4 players joined
+[+4.3s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games)
+[+5.9s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+17.4s] OK impostor: finished
+[+17.4s] PASS day playlist: impostor finished without sticking
+[+18.5s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+50.9s] OK caption-clash: finished
+[+50.9s] PASS day playlist: caption-clash finished without sticking
+[+52.1s] PASS TV projection leak-free while trivia playing — no forbidden keys
+[+94.8s] OK trivia: finished
+[+94.8s] PASS day playlist: trivia finished without sticking
+[+96.0s] PASS TV projection leak-free while word-connections playing — no forbidden keys
+[+119.4s] OK word-connections: finished
+[+119.4s] PASS day playlist: word-connections finished without sticking
+[+120.6s] PASS TV projection leak-free while who-said-that playing — no forbidden keys
+[+135.3s] OK who-said-that: finished
+[+135.3s] PASS day playlist: who-said-that finished without sticking
+[+136.5s] PASS TV projection leak-free while guess-the-year playing — no forbidden keys
+[+166.6s] OK guess-the-year: finished
+[+166.6s] PASS day playlist: guess-the-year finished without sticking
+[+167.8s] PASS TV projection leak-free while closest-wins playing — no forbidden keys
+[+191.3s] OK closest-wins: finished
+[+191.3s] PASS day playlist: closest-wins finished without sticking
+[+192.4s] PASS TV projection leak-free while category-sprint playing — no forbidden keys
+[+203.3s] OK category-sprint: finished
+[+203.3s] PASS day playlist: category-sprint finished without sticking
+[+204.7s] PASS TV projection leak-free while charades playing — no forbidden keys
+[+214.2s] OK charades: finished
+[+214.2s] PASS day playlist: charades finished without sticking
+[+215.6s] PASS TV projection leak-free while geography playing — no forbidden keys
+[+249.9s] OK geography: finished
+[+249.9s] PASS day playlist: geography finished without sticking
+[+251.9s] PASS TV projection leak-free while math-mayhem playing — no forbidden keys
+[+294.1s] OK math-mayhem: finished
+[+294.1s] PASS day playlist: math-mayhem finished without sticking
+[+295.5s] PASS TV projection leak-free while majority-rules playing — no forbidden keys
+[+357.8s] OK majority-rules: finished
+[+357.8s] PASS day playlist: majority-rules finished without sticking
+[+359.4s] PASS TV projection leak-free while pattern-pulse playing — no forbidden keys
+[+405.3s] OK pattern-pulse: finished
+[+405.3s] PASS day playlist: pattern-pulse finished without sticking
+[+406.6s] PASS TV projection leak-free while draw-guess playing — no forbidden keys
+[+451.5s] FAIL draw-guess: stage5Act: Draw & Guess: sending a guess kept failing for 34 s after its first failure, with its screen still up (not the turn-ending race)
+[+451.6s]   DIAG player=Alex game=draw-guess(game-14) server=playing phase=1:draw deadlineIn=675s phaseIn=39s submitted=4/4 outcome=- | screen="Draw & Guess: turn 2 of 4, Sam is drawing" clock="Time left for this round: 0:39" | type=waiting-on-players
+[+451.6s]   DIAG player=Sam game=draw-guess(game-14) server=playing phase=1:draw deadlineIn=675s phaseIn=38s submitted=4/4 outcome=- | screen="Draw & Guess: your turn to draw, turn 2 of 4" clock="Time left for this round: 0:39" | type=waiting-on-players
+[+451.6s]   DIAG player=Jo game=draw-guess(game-14) server=playing phase=1:draw deadlineIn=675s phaseIn=38s submitted=4/4 outcome=- | screen="Draw & Guess: turn 2 of 4, Sam is drawing" clock="Time left for this round: 0:39" | type=waiting-on-players
+[+451.6s]   DIAG player=Kim game=draw-guess(game-14) server=playing phase=1:draw deadlineIn=675s phaseIn=38s submitted=4/4 outcome=- | screen="Draw & Guess: turn 2 of 4, Sam is drawing" clock="Time left for this round: 0:39" | type=waiting-on-players
+[+451.6s] FAIL day playlist: draw-guess finished without sticking — stage5Act: Draw & Guess: sending a guess kept failing for 34 s after its first failure, with its screen still up (not the turn-ending race)
+[+451.6s] FAIL day playlist: all games finished in one room — 13/14 finished
+[+451.7s] FAIL ledger holds one game-finished event per playlist game — 13/14 finish events
+[+451.7s] FAIL TV projection marks every playlist game finished — draw-guess
+[+466.7s] FATAL: locator.waitFor: Timeout 15000ms exceeded.
+[+466.7s] Call log:
+[+466.7s]   - waiting for getByTestId('room-menu').or(getByRole('button', { name: 'Championship', exact: true })).first() to be visible
+[+466.7s] 
+[+466.8s] F5 FAILED: 5/33 failed
+[+466.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# FAIL (exit 1) in 466.8s | cpu 26.6s, peak memory 267 MB

@@ -1,0 +1,69 @@
+{
+  "runId": "20261110-063418-5636d1f6-32301",
+  "level": "targeted",
+  "startedAt": "2026-11-10T06:34:18.961Z",
+  "finishedAt": "2026-11-10T06:34:48.363Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/home/user/christmas-game-night-pilot",
+  "git": {
+    "head": "5636d1f6309435bdb62e77967fa93d243df7ab0e",
+    "branch": "claude/stage5-audit-repairs",
+    "dirty": [
+      "M apps/web/src/liveness.ts",
+      " M scripts/check-poll-body-stall.mjs",
+      " M tests/stage51-liveness.test.ts"
+    ]
+  },
+  "fingerprint": {
+    "hash": "01e55f88b6f5523faf43453fe3ca8d1524885da475a323da7de938b3612cd810",
+    "files": 385
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261110-063418-5636d1f6-32301/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.7,
+      "log": "./logs/01-build-web.log",
+      "detail": ""
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.7,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": ""
+    },
+    {
+      "name": "check-poll-body-stall",
+      "kind": "browser",
+      "command": "node scripts/check-poll-body-stall.mjs http://localhost:40549",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 22.5,
+      "log": "./logs/03-check-poll-body-stall.log",
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "server": {
+    "port": 40549,
+    "pid": 32437,
+    "dataDir": "/home/user/christmas-game-night-pilot/test-results/20261110-063418-5636d1f6-32301/server-data",
+    "webDist": "/home/user/christmas-game-night-pilot/test-results/20261110-063418-5636d1f6-32301/web-dist"
+  }
+}

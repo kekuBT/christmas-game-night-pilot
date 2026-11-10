@@ -1,0 +1,56 @@
+$ node scripts/check-f5.mjs http://localhost:34561
+# timeout 1500s | worker w1 | server http://localhost:34561 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/inject/new-r2-tap/test-results/20261110-051243-95262c39-20656/server-data/w1)
+
+[+4.8s] PASS lobby roster: 4 players joined
+[+4.8s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games)
+[+6.4s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+19.9s] OK impostor: finished
+[+19.9s] PASS day playlist: impostor finished without sticking
+[+21.1s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+53.5s] OK caption-clash: finished
+[+53.5s] PASS day playlist: caption-clash finished without sticking
+[+54.7s] PASS TV projection leak-free while trivia playing — no forbidden keys
+[+97.4s] OK trivia: finished
+[+97.4s] PASS day playlist: trivia finished without sticking
+[+98.5s] PASS TV projection leak-free while word-connections playing — no forbidden keys
+[+122.0s] OK word-connections: finished
+[+122.0s] PASS day playlist: word-connections finished without sticking
+[+123.1s] PASS TV projection leak-free while who-said-that playing — no forbidden keys
+[+137.8s] OK who-said-that: finished
+[+137.8s] PASS day playlist: who-said-that finished without sticking
+[+138.9s] PASS TV projection leak-free while guess-the-year playing — no forbidden keys
+[+169.0s] OK guess-the-year: finished
+[+169.0s] PASS day playlist: guess-the-year finished without sticking
+[+170.2s] PASS TV projection leak-free while closest-wins playing — no forbidden keys
+[+193.6s] OK closest-wins: finished
+[+193.6s] PASS day playlist: closest-wins finished without sticking
+[+194.7s] PASS TV projection leak-free while category-sprint playing — no forbidden keys
+[+205.6s] OK category-sprint: finished
+[+205.6s] PASS day playlist: category-sprint finished without sticking
+[+206.9s] PASS TV projection leak-free while charades playing — no forbidden keys
+[+216.5s] OK charades: finished
+[+216.5s] PASS day playlist: charades finished without sticking
+[+217.8s] PASS TV projection leak-free while geography playing — no forbidden keys
+[+252.3s] OK geography: finished
+[+252.3s] PASS day playlist: geography finished without sticking
+[+254.0s] PASS TV projection leak-free while math-mayhem playing — no forbidden keys
+[+296.5s] OK math-mayhem: finished
+[+296.5s] PASS day playlist: math-mayhem finished without sticking
+[+297.8s] PASS TV projection leak-free while majority-rules playing — no forbidden keys
+[+346.9s] FAIL majority-rules: stage5Act: Majority Rules: tapping mz-mr-predict-a kept failing for 35 s after its first failure, with its screen still up (not the turn-ending race)
+[+347.0s]   DIAG player=Alex game=majority-rules(game-12) server=playing phase=1:predict deadlineIn=431s phaseIn=7s submitted=4/4 outcome=- | screen="Majority Rules: round 2 of 5, step 1 of 2" clock="Time left for this round: 0:08" | type=waiting-on-players
+[+347.0s]   DIAG player=Sam game=majority-rules(game-12) server=playing phase=1:predict deadlineIn=431s phaseIn=7s submitted=4/4 outcome=- | screen="Majority Rules: round 2 of 5, step 1 of 2" clock="Time left for this round: 0:08" | type=waiting-on-players
+[+347.0s]   DIAG player=Jo game=majority-rules(game-12) server=playing phase=1:predict deadlineIn=431s phaseIn=7s submitted=4/4 outcome=- | screen="Majority Rules: round 2 of 5, step 1 of 2" clock="Time left for this round: 0:08" | type=waiting-on-players
+[+347.0s]   DIAG player=Kim game=majority-rules(game-12) server=playing phase=1:predict deadlineIn=431s phaseIn=7s submitted=4/4 outcome=- | screen="Majority Rules: round 2 of 5, step 1 of 2" clock="Time left for this round: 0:08" | type=waiting-on-players
+[+347.0s] FAIL day playlist: majority-rules finished without sticking — stage5Act: Majority Rules: tapping mz-mr-predict-a kept failing for 35 s after its first failure, with its screen still up (not the turn-ending race)
+[+347.0s] FAIL day playlist: all games finished in one room — 11/14 finished
+[+347.0s] FAIL ledger holds one game-finished event per playlist game — 11/14 finish events
+[+347.0s] FAIL TV projection marks every playlist game finished — majority-rules, pattern-pulse, draw-guess
+[+362.0s] FATAL: locator.waitFor: Timeout 15000ms exceeded.
+[+362.0s] Call log:
+[+362.0s]   - waiting for getByTestId('room-menu').or(getByRole('button', { name: 'Championship', exact: true })).first() to be visible
+[+362.0s] 
+[+362.1s] F5 FAILED: 5/29 failed
+[+362.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# FAIL (exit 1) in 362.1s | cpu 20.2s, peak memory 267 MB

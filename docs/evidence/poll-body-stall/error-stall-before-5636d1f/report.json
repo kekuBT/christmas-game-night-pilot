@@ -1,0 +1,65 @@
+{
+  "runId": "20261110-063418-0456f0b1-32300",
+  "level": "targeted",
+  "startedAt": "2026-11-10T06:34:18.964Z",
+  "finishedAt": "2026-11-10T06:34:53.126Z",
+  "exitCode": 1,
+  "verdict": "FAILED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/before-5636d1f",
+  "git": {
+    "head": "0456f0b1928fc1ed3b53787cc4953b6cf970150e",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "f1cc8a17c5b1e63f37d4b7431329f705355230e02ff5c1558af67424f81b7972",
+    "files": 385
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261110-063418-0456f0b1-32300/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.9,
+      "log": "./logs/01-build-web.log",
+      "detail": ""
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.7,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": ""
+    },
+    {
+      "name": "check-poll-body-stall",
+      "kind": "browser",
+      "command": "node scripts/check-poll-body-stall.mjs http://localhost:45877",
+      "status": "FAIL",
+      "exitCode": 1,
+      "durationSec": 26.6,
+      "log": "./logs/03-check-poll-body-stall.log",
+      "detail": "FAIL TV: each skipped 500 reply is closed by the page at once (none left open) — not within 5000ms | FAIL TV: each 500 reply was closed within 2 s, not at the 6 s timeout — slowest 9.1 s"
+    }
+  ],
+  "notes": [],
+  "server": {
+    "port": 45877,
+    "pid": 32498,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/before-5636d1f/test-results/20261110-063418-0456f0b1-32300/server-data",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/before-5636d1f/test-results/20261110-063418-0456f0b1-32300/web-dist"
+  }
+}

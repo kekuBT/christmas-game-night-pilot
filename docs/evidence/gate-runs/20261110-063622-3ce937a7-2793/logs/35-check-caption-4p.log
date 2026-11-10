@@ -1,0 +1,87 @@
+$ node scripts/check-caption-4p.mjs http://localhost:42041
+# timeout 600s | worker w1 | server http://localhost:42041 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/G3-full-3ce937a/test-results/20261110-063622-3ce937a7-2793/server-data/w1)
+
+[+1.1s] PASS the server runs without the content test mode (nothing provisional treated as approved)
+[+5.0s] PASS briefing: every phone explains the game before any clock runs
+[+5.0s] PASS briefing: says it is Official — Official · counts toward the Cup Caption Clash HOW TO PLAY Write the funniest caption. Everyone gets the same silly scene. Write a caption, then vote for your favourite (not your own). Captions are an
+[+5.6s] PASS the game is official on the server
+[+5.6s] PASS round 1: all four phones show the same scene — A snowman learns to dance
+[+5.6s] PASS round 1: the TV shows the scene and 0 of 4
+[+5.7s] PASS character limit: the box keeps 140 characters
+[+5.7s] PASS character limit: the counter says 0 left
+[+5.7s] PASS character limit: typing more adds nothing
+[+5.7s] PASS character limit: the counter counts down
+[+6.1s] PASS Keku: caption is in, shown back
+[+6.1s] PASS count 1 of 4 on Keku's phone and the TV
+[+6.1s] PASS character limit: the server accepts a long caption only cut to 140
+[+6.1s] PASS character limit: the server stored 140 characters — 140
+[+6.1s] PASS count 2 of 4 everywhere a count is shown
+[+7.8s] PASS a failed caption: the phone says it didn't get through
+[+7.8s] PASS a failed caption: the words are still in the box
+[+7.8s] PASS a failed caption: no 'caption is in' screen
+[+7.8s] PASS a failed caption: the server has 2 of 4
+[+7.8s] PASS a failed caption: the TV still says 2 of 4
+[+8.1s] PASS tapping Submit again sends it: 3 of 4
+[+8.2s] PASS round 1: the fourth caption opens voting on every phone at once
+[+8.2s] PASS round 1: voting began well before the writing deadline — 77ms
+[+8.3s] PASS Keku: three captions to vote for, their own marked and disabled
+[+8.3s] PASS Amina: three captions to vote for, their own marked and disabled
+[+8.3s] PASS Baraka: three captions to vote for, their own marked and disabled
+[+8.3s] PASS Wanjiru: three captions to vote for, their own marked and disabled
+[+8.3s] PASS voting is anonymous: no names on the cards
+[+8.3s] PASS TV: the four captions, anonymous, 0 of 4 done
+[+10.8s] PASS a failed vote: the phone says it didn't get through
+[+10.8s] PASS a failed vote: no card says 'Your vote ✓' — “Frosty finally found his groove” | YOURS — YOU CAN’T VOTE FOR IT | “The snowman's two left feet are both carrots” | “He melts on the dance floor, literally” | “Dancing Dancing Dancing Dancing Dancing
+[+10.8s] PASS a failed vote: the cards can still be tapped
+[+10.8s] PASS a failed vote: the server has no vote from Keku
+[+10.8s] PASS a failed vote: the TV still says 0 of 4
+[+11.1s] PASS Keku's vote is confirmed by the server: ✓ and 1 of 4
+[+11.1s] PASS 1 of 4 voted on every phone and the TV
+[+11.3s] PASS 2 of 4 voted on every phone and the TV
+[+11.5s] PASS after a reload Baraka is back on the ballot, with no vote shown
+[+12.6s] PASS 3 of 4 voted on every phone and the TV
+[+12.6s] PASS offline: Wanjiru's phone says the connection is lost
+[+12.8s] PASS back online: the banner clears or says reconnected
+[+12.8s] PASS back online: Wanjiru still sees 3 of 4
+[+13.1s] PASS round 1: the fourth vote moves everyone to round 2
+[+13.1s] PASS round 2: last round's favourite with 3 votes, no author
+[+13.1s] PASS round 2: a new scene — A cat opens a Christmas present
+[+13.5s] PASS round 2: 2 of 4 written
+[+13.6s] PASS round 2: after a reload Amina still sees her caption
+[+13.7s] PASS round 2: a skip counts toward the total (3 of 4)
+[+13.7s] PASS round 2: Baraka's phone says he's sitting this round out
+[+14.0s] PASS round 2: voting opens with three captions
+[+14.0s] PASS round 2: Baraka (no caption) can vote for all three
+[+14.6s] PASS round 2: 3 of 4 voted
+[+14.8s] PASS round 2: a skipped vote completes the round: round 3 starts
+[+15.3s] PASS round 3: voting opens
+[+15.9s] PASS round 3: 3 of 4 voted
+[+37.7s] PASS round 3: the vote deadline finishes the game (no freeze at 3 of 4)
+[+37.7s]   (results 22s after the third vote; the vote phase is 22 s at this time scale)
+[+37.7s] PASS results: the server's scores are 25 per caption + 100 per vote — {"Keku":175,"Amina":375,"Baraka":350,"Wanjiru":375}
+[+37.7s] PASS results on Keku's phone: every player with the server's score — CAPTION CLASH · OFFICIAL Amina and Wanjiru tie for first A Amina W Wanjiru Tied for first. Diplomacy wins. You came 4th of 4 175 pts Someone has to make the podium look good. CAPTION CLASH The room’s favourites Round 1: A snowman learns to dance “Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Danc” by Amina 3 
+[+37.7s] PASS results at 390px: no sideways scrolling
+[+37.7s] PASS results on Amina's phone: every player with the server's score — CAPTION CLASH · OFFICIAL Amina and Wanjiru tie for first A Amina W Wanjiru Tied for first. Diplomacy wins. You tied for 1st of 4 375 pts You share the top spot. Sharing is caring. CAPTION CLASH The room’s favourites Round 1: A snowman learns to dance “Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Danc” by you
+[+37.7s] PASS results at 375px: no sideways scrolling
+[+37.7s] PASS results on Baraka's phone: every player with the server's score — CAPTION CLASH · OFFICIAL Amina and Wanjiru tie for first A Amina W Wanjiru Tied for first. Diplomacy wins. You came 3rd of 4 350 pts Solid middle of the pack. Room to climb. CAPTION CLASH The room’s favourites Round 1: A snowman learns to dance “Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Danc” by Amina 3 V
+[+37.7s] PASS results at 430px: no sideways scrolling
+[+37.7s] PASS results on Wanjiru's phone: every player with the server's score — CAPTION CLASH · OFFICIAL Amina and Wanjiru tie for first A Amina W Wanjiru Tied for first. Diplomacy wins. You tied for 1st of 4 375 pts You share the top spot. Sharing is caring. CAPTION CLASH The room’s favourites Round 1: A snowman learns to dance “Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Dancing Danc” by Ami
+[+37.7s] PASS results at 320px: no sideways scrolling
+[+37.7s] PASS results: round 1's favourite is credited to its author
+[+37.7s] PASS results: round 2's favourite is credited to its author
+[+37.7s] PASS results: round 3's favourite is credited to its author
+[+37.7s] PASS results: how points work is explained
+[+37.7s] PASS results: the game counts officially — ""
+[+37.9s] PASS TV: FINAL STANDINGS with the winner line (a tie for first)
+[+37.9s] PASS TV: the post-game review shows the favourites, never the authors
+[+38.0s] PASS official: the Cup has standings for all four players — [{"playerId":"player-2","dayScores":[83.33333333333333],"counted":[83.33333333333333],"qualifyingDays":1,"base":83.33333333333333,"participationBonus":0,"finaleBonus":0,"total":83.33333333333333,"eligible":false,"countedDailyWins":1,"countedMedian":83.33333333333333},{"playerId":"player-4","dayScore
+[+38.0s] PASS official: a tie in the game (Amina and Wanjiru, 375 each) is a tie in the standings — {"Keku":0,"Amina":83.33,"Baraka":33.33,"Wanjiru":83.33}
+[+38.0s] PASS official: the standings follow the game's order
+[+38.1s] PASS reload on results: Amina's results come back
+[+38.5s] PASS a phone reopened from scratch returns to the seat (results or lobby)
+[+38.7s] PASS Back to lobby: Keku is in the lobby
+[+39.3s] PASS the Family Cup lists Caption Clash among the official games
+[+39.3s] CAPTION 4P ALL PASSED
+[+39.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":5}
+
+# PASS (exit 0) in 39.4s | cpu 6s, peak memory 355 MB

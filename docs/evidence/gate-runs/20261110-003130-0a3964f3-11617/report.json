@@ -1,0 +1,775 @@
+{
+  "runId": "20261110-003130-0a3964f3-11617",
+  "level": "full",
+  "startedAt": "2026-11-10T00:31:30.002Z",
+  "finishedAt": "2026-11-10T02:06:53.377Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/gate-final7",
+  "git": {
+    "head": "0a3964f342f1ffc9f861a98a551c1de10d87b5d1",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "e07ef3f6db9365da19ea8f6755ecb244e14fcf5ad3bebb741cb2311bd4846c8e",
+    "files": 384
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "typecheck-server",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.5,
+      "log": "./logs/01-typecheck-server.log",
+      "detail": ""
+    },
+    {
+      "name": "typecheck-web",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.8,
+      "log": "./logs/02-typecheck-web.log",
+      "detail": ""
+    },
+    {
+      "name": "lint",
+      "kind": "check",
+      "command": "node ./node_modules/eslint/bin/eslint.js .",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 7.8,
+      "log": "./logs/03-lint.log",
+      "detail": ""
+    },
+    {
+      "name": "unit-tests",
+      "kind": "check",
+      "command": "node ./node_modules/vitest/vitest.mjs run",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 24,
+      "log": "./logs/04-unit-tests.log",
+      "detail": ""
+    },
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261110-003130-0a3964f3-11617/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 4.4,
+      "log": "./logs/05-build-web.log",
+      "detail": ""
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.6,
+      "log": "./logs/06-browser-preflight.log",
+      "detail": ""
+    },
+    {
+      "name": "check-a11y-surfaces",
+      "kind": "browser",
+      "command": "node scripts/check-a11y-surfaces.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 2.6,
+      "log": "./logs/07-check-a11y-surfaces.log",
+      "detail": ""
+    },
+    {
+      "name": "check-abstain",
+      "kind": "browser",
+      "command": "node scripts/check-abstain.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 17.8,
+      "log": "./logs/08-check-abstain.log",
+      "detail": ""
+    },
+    {
+      "name": "check-action-ack",
+      "kind": "browser",
+      "command": "node scripts/check-action-ack.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 27.8,
+      "log": "./logs/09-check-action-ack.log",
+      "detail": ""
+    },
+    {
+      "name": "check-answer-helper",
+      "kind": "browser",
+      "command": "node scripts/check-answer-helper.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 9.4,
+      "log": "./logs/10-check-answer-helper.log",
+      "detail": ""
+    },
+    {
+      "name": "check-answer-race",
+      "kind": "browser",
+      "command": "node scripts/check-answer-race.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 21.2,
+      "log": "./logs/11-check-answer-race.log",
+      "detail": ""
+    },
+    {
+      "name": "check-answer-reveal",
+      "kind": "browser",
+      "command": "node scripts/check-answer-reveal.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 32.5,
+      "log": "./logs/12-check-answer-reveal.log",
+      "detail": ""
+    },
+    {
+      "name": "check-audit-fixes",
+      "kind": "browser",
+      "command": "node scripts/check-audit-fixes.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 217.3,
+      "log": "./logs/13-check-audit-fixes.log",
+      "detail": ""
+    },
+    {
+      "name": "check-briefing",
+      "kind": "browser",
+      "command": "node scripts/check-briefing.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 93.1,
+      "log": "./logs/14-check-briefing.log",
+      "detail": ""
+    },
+    {
+      "name": "check-caption",
+      "kind": "browser",
+      "command": "node scripts/check-caption.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 76.2,
+      "log": "./logs/15-check-caption.log",
+      "detail": ""
+    },
+    {
+      "name": "check-caption-4p",
+      "kind": "browser",
+      "command": "node scripts/check-caption-4p.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 37.9,
+      "log": "./logs/16-check-caption-4p.log",
+      "detail": ""
+    },
+    {
+      "name": "check-closest",
+      "kind": "browser",
+      "command": "node scripts/check-closest.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.8,
+      "log": "./logs/17-check-closest.log",
+      "detail": ""
+    },
+    {
+      "name": "check-connections",
+      "kind": "browser",
+      "command": "node scripts/check-connections.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 55.6,
+      "log": "./logs/18-check-connections.log",
+      "detail": ""
+    },
+    {
+      "name": "check-contrast",
+      "kind": "browser",
+      "command": "node scripts/check-contrast.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 26,
+      "log": "./logs/19-check-contrast.log",
+      "detail": ""
+    },
+    {
+      "name": "check-cup-memory",
+      "kind": "browser",
+      "command": "node scripts/check-cup-memory.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 11.4,
+      "log": "./logs/20-check-cup-memory.log",
+      "detail": ""
+    },
+    {
+      "name": "check-double-start",
+      "kind": "browser",
+      "command": "node scripts/check-double-start.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 3.1,
+      "log": "./logs/21-check-double-start.log",
+      "detail": ""
+    },
+    {
+      "name": "check-draw-guess",
+      "kind": "browser",
+      "command": "node scripts/check-draw-guess.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 67.1,
+      "log": "./logs/22-check-draw-guess.log",
+      "detail": ""
+    },
+    {
+      "name": "check-draw-sync",
+      "kind": "browser",
+      "command": "node scripts/check-draw-sync.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 52.4,
+      "log": "./logs/23-check-draw-sync.log",
+      "detail": ""
+    },
+    {
+      "name": "check-errors",
+      "kind": "browser",
+      "command": "node scripts/check-errors.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 4,
+      "log": "./logs/24-check-errors.log",
+      "detail": ""
+    },
+    {
+      "name": "check-f4",
+      "kind": "browser",
+      "command": "node scripts/check-f4.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 50.5,
+      "log": "./logs/25-check-f4.log",
+      "detail": ""
+    },
+    {
+      "name": "check-f5",
+      "kind": "browser",
+      "command": "node scripts/check-f5.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 815.3,
+      "log": "./logs/26-check-f5.log",
+      "detail": ""
+    },
+    {
+      "name": "check-game-night",
+      "kind": "browser",
+      "command": "node scripts/check-game-night.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 322.8,
+      "log": "./logs/27-check-game-night.log",
+      "detail": ""
+    },
+    {
+      "name": "check-game-night-flow",
+      "kind": "browser",
+      "command": "node scripts/check-game-night-flow.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 9.3,
+      "log": "./logs/28-check-game-night-flow.log",
+      "detail": ""
+    },
+    {
+      "name": "check-geography",
+      "kind": "browser",
+      "command": "node scripts/check-geography.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 37.7,
+      "log": "./logs/29-check-geography.log",
+      "detail": ""
+    },
+    {
+      "name": "check-history-links",
+      "kind": "browser",
+      "command": "node scripts/check-history-links.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 4.8,
+      "log": "./logs/30-check-history-links.log",
+      "detail": ""
+    },
+    {
+      "name": "check-input-isolation",
+      "kind": "browser",
+      "command": "node scripts/check-input-isolation.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 48,
+      "log": "./logs/31-check-input-isolation.log",
+      "detail": ""
+    },
+    {
+      "name": "check-leaderboard",
+      "kind": "browser",
+      "command": "node scripts/check-leaderboard.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 1071.8,
+      "log": "./logs/32-check-leaderboard.log",
+      "detail": ""
+    },
+    {
+      "name": "check-library",
+      "kind": "browser",
+      "command": "node scripts/check-library.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 4.5,
+      "log": "./logs/33-check-library.log",
+      "detail": ""
+    },
+    {
+      "name": "check-library-nav",
+      "kind": "browser",
+      "command": "node scripts/check-library-nav.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 24.7,
+      "log": "./logs/34-check-library-nav.log",
+      "detail": ""
+    },
+    {
+      "name": "check-lifecycle",
+      "kind": "browser",
+      "command": "node scripts/check-lifecycle.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 127.7,
+      "log": "./logs/35-check-lifecycle.log",
+      "detail": ""
+    },
+    {
+      "name": "check-lobby-fixes",
+      "kind": "browser",
+      "command": "node scripts/check-lobby-fixes.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 15.2,
+      "log": "./logs/36-check-lobby-fixes.log",
+      "detail": ""
+    },
+    {
+      "name": "check-lobby-mode",
+      "kind": "browser",
+      "command": "node scripts/check-lobby-mode.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 17.1,
+      "log": "./logs/37-check-lobby-mode.log",
+      "detail": ""
+    },
+    {
+      "name": "check-m6",
+      "kind": "browser",
+      "command": "node scripts/check-m6.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 24.4,
+      "log": "./logs/38-check-m6.log",
+      "detail": ""
+    },
+    {
+      "name": "check-majority-rules",
+      "kind": "browser",
+      "command": "node scripts/check-majority-rules.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 57.3,
+      "log": "./logs/39-check-majority-rules.log",
+      "detail": ""
+    },
+    {
+      "name": "check-math",
+      "kind": "browser",
+      "command": "node scripts/check-math.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 60.2,
+      "log": "./logs/40-check-math.log",
+      "detail": ""
+    },
+    {
+      "name": "check-math-network",
+      "kind": "browser",
+      "command": "node scripts/check-math-network.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 50.8,
+      "log": "./logs/41-check-math-network.log",
+      "detail": ""
+    },
+    {
+      "name": "check-math-timing",
+      "kind": "browser",
+      "command": "node scripts/check-math-timing.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 27.1,
+      "log": "./logs/42-check-math-timing.log",
+      "detail": ""
+    },
+    {
+      "name": "check-mchezo",
+      "kind": "browser",
+      "command": "node scripts/check-mchezo.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 108.1,
+      "log": "./logs/43-check-mchezo.log",
+      "detail": ""
+    },
+    {
+      "name": "check-mobile",
+      "kind": "browser",
+      "command": "node scripts/check-mobile.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 24.7,
+      "log": "./logs/44-check-mobile.log",
+      "detail": ""
+    },
+    {
+      "name": "check-multiplayer",
+      "kind": "browser",
+      "command": "node scripts/check-multiplayer.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 46.8,
+      "log": "./logs/45-check-multiplayer.log",
+      "detail": ""
+    },
+    {
+      "name": "check-official-practice",
+      "kind": "browser",
+      "command": "node scripts/check-official-practice.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 8.4,
+      "log": "./logs/46-check-official-practice.log",
+      "detail": ""
+    },
+    {
+      "name": "check-pattern-pulse",
+      "kind": "browser",
+      "command": "node scripts/check-pattern-pulse.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 59.6,
+      "log": "./logs/47-check-pattern-pulse.log",
+      "detail": ""
+    },
+    {
+      "name": "check-progress",
+      "kind": "browser",
+      "command": "node scripts/check-progress.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 9.5,
+      "log": "./logs/48-check-progress.log",
+      "detail": ""
+    },
+    {
+      "name": "check-pulse-timing",
+      "kind": "browser",
+      "command": "node scripts/check-pulse-timing.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 160.6,
+      "log": "./logs/49-check-pulse-timing.log",
+      "detail": ""
+    },
+    {
+      "name": "check-readiness",
+      "kind": "browser",
+      "command": "node scripts/check-readiness.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 16.9,
+      "log": "./logs/50-check-readiness.log",
+      "detail": ""
+    },
+    {
+      "name": "check-recovery",
+      "kind": "browser",
+      "command": "node scripts/check-recovery.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 11.4,
+      "log": "./logs/51-check-recovery.log",
+      "detail": ""
+    },
+    {
+      "name": "check-reduced-motion",
+      "kind": "browser",
+      "command": "node scripts/check-reduced-motion.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 4.1,
+      "log": "./logs/52-check-reduced-motion.log",
+      "detail": ""
+    },
+    {
+      "name": "check-restart",
+      "kind": "browser",
+      "command": "node scripts/check-restart.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 1.5,
+      "log": "./logs/53-check-restart.log",
+      "detail": ""
+    },
+    {
+      "name": "check-results",
+      "kind": "browser",
+      "command": "node scripts/check-results.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 50.8,
+      "log": "./logs/54-check-results.log",
+      "detail": ""
+    },
+    {
+      "name": "check-reveal",
+      "kind": "browser",
+      "command": "node scripts/check-reveal.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 49.2,
+      "log": "./logs/55-check-reveal.log",
+      "detail": ""
+    },
+    {
+      "name": "check-send-failures",
+      "kind": "browser",
+      "command": "node scripts/check-send-failures.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 21.6,
+      "log": "./logs/56-check-send-failures.log",
+      "detail": ""
+    },
+    {
+      "name": "check-sessions",
+      "kind": "browser",
+      "command": "node scripts/check-sessions.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 7.9,
+      "log": "./logs/57-check-sessions.log",
+      "detail": ""
+    },
+    {
+      "name": "check-shuffle",
+      "kind": "browser",
+      "command": "node scripts/check-shuffle.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 4,
+      "log": "./logs/58-check-shuffle.log",
+      "detail": ""
+    },
+    {
+      "name": "check-spectator",
+      "kind": "browser",
+      "command": "node scripts/check-spectator.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 56.4,
+      "log": "./logs/59-check-spectator.log",
+      "detail": ""
+    },
+    {
+      "name": "check-stage2",
+      "kind": "browser",
+      "command": "node scripts/check-stage2.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 58.9,
+      "log": "./logs/60-check-stage2.log",
+      "detail": ""
+    },
+    {
+      "name": "check-stage4-details",
+      "kind": "browser",
+      "command": "node scripts/check-stage4-details.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 14.4,
+      "log": "./logs/61-check-stage4-details.log",
+      "detail": ""
+    },
+    {
+      "name": "check-studio",
+      "kind": "browser",
+      "command": "node scripts/check-studio.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 3.6,
+      "log": "./logs/62-check-studio.log",
+      "detail": ""
+    },
+    {
+      "name": "check-ten-players",
+      "kind": "browser",
+      "command": "node scripts/check-ten-players.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 26.7,
+      "log": "./logs/63-check-ten-players.log",
+      "detail": ""
+    },
+    {
+      "name": "check-tv-dashboard",
+      "kind": "browser",
+      "command": "node scripts/check-tv-dashboard.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 4.7,
+      "log": "./logs/64-check-tv-dashboard.log",
+      "detail": ""
+    },
+    {
+      "name": "check-tv-entry",
+      "kind": "browser",
+      "command": "node scripts/check-tv-entry.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 22.4,
+      "log": "./logs/65-check-tv-entry.log",
+      "detail": ""
+    },
+    {
+      "name": "check-tv-lifecycle",
+      "kind": "browser",
+      "command": "node scripts/check-tv-lifecycle.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 150.4,
+      "log": "./logs/66-check-tv-lifecycle.log",
+      "detail": ""
+    },
+    {
+      "name": "check-tv-outage",
+      "kind": "browser",
+      "command": "node scripts/check-tv-outage.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 40.5,
+      "log": "./logs/67-check-tv-outage.log",
+      "detail": ""
+    },
+    {
+      "name": "check-tv-reveal",
+      "kind": "browser",
+      "command": "node scripts/check-tv-reveal.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 104.7,
+      "log": "./logs/68-check-tv-reveal.log",
+      "detail": ""
+    },
+    {
+      "name": "check-tv-show",
+      "kind": "browser",
+      "command": "node scripts/check-tv-show.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 11.1,
+      "log": "./logs/69-check-tv-show.log",
+      "detail": ""
+    },
+    {
+      "name": "check-tv-spectator",
+      "kind": "browser",
+      "command": "node scripts/check-tv-spectator.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 44.9,
+      "log": "./logs/70-check-tv-spectator.log",
+      "detail": ""
+    },
+    {
+      "name": "check-viewports",
+      "kind": "browser",
+      "command": "node scripts/check-viewports.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 12.2,
+      "log": "./logs/71-check-viewports.log",
+      "detail": ""
+    },
+    {
+      "name": "check-ws-reconnect",
+      "kind": "browser",
+      "command": "node scripts/check-ws-reconnect.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.2,
+      "log": "./logs/72-check-ws-reconnect.log",
+      "detail": ""
+    },
+    {
+      "name": "check-year",
+      "kind": "browser",
+      "command": "node scripts/check-year.mjs http://localhost:40569",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 17.7,
+      "log": "./logs/73-check-year.log",
+      "detail": ""
+    },
+    {
+      "name": "e2e-chromium",
+      "kind": "browser",
+      "command": "node scripts/e2e-browser.mjs http://localhost:40569 --browser=chromium --games=all",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 984.4,
+      "log": "./logs/74-e2e-chromium.log",
+      "detail": ""
+    }
+  ],
+  "notes": [],
+  "server": {
+    "port": 40569,
+    "pid": 14158,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/gate-final7/test-results/20261110-003130-0a3964f3-11617/server-data",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/gate-final7/test-results/20261110-003130-0a3964f3-11617/web-dist"
+  }
+}

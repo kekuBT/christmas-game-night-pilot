@@ -24,6 +24,7 @@ import { roomGo } from "./lib/room-nav.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchBrowser } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
+import { answerKitQuestions } from "./lib/answer.mjs";
 
 const args = process.argv.slice(2);
 const BASE = args.find((a) => !a.startsWith("--")) ?? "http://localhost:3457";
@@ -54,8 +55,14 @@ async function panelFinished(page, gameId) {
   // The "Back to lobby" button appears only on the results screen,
   // never in play, so check it first (same fast path as check-f5).
   if (gameId === "trivia" || gameId === "geography" || gameId === "math-mayhem" || gameId === "word-connections" || gameId === "caption-clash") {
-    return await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500);
+    // Stage 5.2: a check, not a wait (as in check-f5): the polling loop
+    // asks again, so waiting 0.5s here per page per pass only cost time.
+    return await page.getByRole("button", { name: "Back to lobby" }).isVisible();
   }
+  // Stage 5.2: Closest Wins and Guess the Year are kit screens with no
+  // game-panel, so the panelText lookup below always waited out its 2s
+  // before falling through to show-results; check that directly.
+  if (gameId === "closest-wins" || gameId === "guess-the-year") return await page.getByTestId("show-results").isVisible();
   const t = await panelText(page);
   // Heading must match the game: right after a previous game finishes, the
   // panel still shows that finished game until the new game's projection
@@ -71,22 +78,17 @@ async function panelFinished(page, gameId) {
 // Mchezo Trivia play: AnswerGrid slabs, then "Next question", until the
 // results screen's "Back to lobby" button appears.
 async function actTrivia(page) {
-  let guard = 60;
-  while (guard-- > 0) {
-    if (await isVisible(page.getByRole("button", { name: "Back to lobby" }), 500)) return true;
-    // Last answer locked and no questions left: this page is done — the
-    // "Waiting for the game to finish" keycap clears the lock into the
-    // all-answered waiting screen. Without this, the loop burns its whole
-    // guard here while other players are still answering.
-    const doneBtn = page.getByRole("button", { name: "Waiting for the game to finish" });
-    if (await isVisible(doneBtn, 500)) { await doneBtn.click(); await sleep(400); return true; }
-    const next = page.getByRole("button", { name: "Next question" });
-    if (await isVisible(next, 500)) { await next.click(); await sleep(400); continue; }
-    const slabs = page.locator(".mz-slab:not([disabled])");
-    if ((await slabs.count()) > 0) { await slabs.first().click(); await sleep(500); continue; }
-    await sleep(500);
-  }
-  return false;
+  // Stage 5.2: answer this player's remaining questions through the shared
+  // observable-state helper (scripts/lib/answer.mjs): option 0 each time,
+  // as before, then "Waiting for the game to finish". The old loop probed
+  // for absent buttons with 0.5s waits and slept between taps (~3.5s a
+  // question); the helper polls the screen's own state and throws, with a
+  // DIAG line, if an answer is not confirmed, where the old loop could
+  // give up silently after its guard.
+  if (await page.getByRole("button", { name: "Back to lobby" }).isVisible()) return true;
+  const player = (await page.evaluate(() => sessionStorage.getItem("cgn_name"))) || "player";
+  await answerKitQuestions(page, { player, choose: () => 0 });
+  return true;
 }
 
 // Mchezo Closest play (J.3): kit panel with NumericGuess — no game-panel.
@@ -94,13 +96,14 @@ async function actTrivia(page) {
 // question, the waiting view ("Your guess: N") is showing instead.
 async function actClosest(page) {
   const input = page.getByTestId("mz-num-input");
-  if (await isVisible(input, 1000)) {
+  // Stage 5.2: checks, not waits; the polling loop asks again next pass.
+  if (await input.isVisible()) {
     await input.fill("100");
     await page.getByTestId("mz-num-submit").click();
     await sleep(400);
     return true;
   }
-  if (await isVisible(page.getByText(/^Your guess: /), 500)) return true;
+  if (await page.getByText(/^Your guess: /).first().isVisible()) return true;
   return false;
 }
 // Guess the Year in the kit (Work Package D): one event at a time.
@@ -111,11 +114,12 @@ async function actClosest(page) {
 // two scripts share no module.)
 async function actYear(page) {
   const input = page.getByTestId("mz-num-input");
-  if (await isVisible(input, 1000)) {
+  // Stage 5.2: checks, not waits; the polling loop asks again next pass.
+  if (await input.isVisible()) {
     await input.fill("2000");
     await page.getByTestId("mz-num-submit").click();
     await sleep(400);
-  } else if (!(await isVisible(page.getByTestId("mz-year-guessed"), 500))) {
+  } else if (!(await page.getByTestId("mz-year-guessed").isVisible())) {
     return false;
   }
   // After a guess the kit shows that event's confirmation until the
