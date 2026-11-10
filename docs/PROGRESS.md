@@ -1732,4 +1732,17 @@ Everyone else and the TV see the same state. The server holds the progression wi
 - **`check-quick-party`:** 68/68.
 - **Local regressions, all passing:** `check-casual`, `check-briefing`, `check-game-night-flow`, `check-lobby-mode`, `check-tv-spectator`, `check-f4`, `check-solo`, `check-solo-shelf`.
 
-**Gates:** recorded in `docs/stage7/stage72.md` §6 and below, once run.
+**Gates on `acab35f`** (fresh clone, clean tree):
+- fast `20261110-195030-acab35f3-16696` PASSED (1,253 unit tests);
+- full `20261110-195129-acab35f3-19586` PASSED, 80/80.
+
+Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. The screenshots are in `docs/stage7/screenshots-72/` (36, taken on `2e79cec`).
+
+**External blockers:** none. WebKit and real devices are not available here (checklist I13–I16).
+
+**Next task:** ChatGPT reviews PR #9 and does its private live-site audit. The next milestone starts only when its handoff instructs it.
+
+**Risk:**
+- Browser checks run in Chromium only.
+- A server restart is covered by the HTTP tests, not by a browser journey.
+- The lobby's own Start keeps an optional press id at the API for older callers (the app always sends one).

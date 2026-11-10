@@ -252,4 +252,16 @@ Accepted in clarification 6776484058.
 - **Not run:** WebKit and real devices (the checklist is `docs/REAL_DEVICE_TESTING.md` I13–I16). Emulation is not a device.
 
 ### 6.3 Gates
-*(Recorded after the runs.)*
+**Tested revision:** `acab35f3138e60516916cb588ae28431d4addbbd`. Both runs used a fresh clone with a clean tree (`dirty: []`) and the same source fingerprint (`cdfa0051…`, 425 files).
+
+| Run | Gate | Verdict |
+|---|---|---|
+| `20261110-195030-acab35f3-16696` | fast | PASSED, 5/5 (typecheck ×2, lint, 1,253 unit tests, build) |
+| `20261110-195129-acab35f3-19586` | full | PASSED, 80/80 (every browser driver and E2E), 27 min 47 s on 3 workers |
+
+Highlights of the full gate:
+- `check-session-flow`: 52 checks;
+- `check-quick-party`: 68;
+- the Family Cup drivers (`check-f4`, `check-f5`, `check-leaderboard`, `check-lifecycle` and others) and the solo drivers (`check-solo` 80, `check-solo-shelf` 57) all passed.
+
+The raw evidence is in `docs/evidence/gate-runs/<run>/`. The revision after `acab35f` adds this record only (docs).

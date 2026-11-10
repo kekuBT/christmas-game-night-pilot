@@ -6,6 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261110-195129-acab35f3-19586` | `acab35f` | **Stage 7.2:** full gate, PASSED 80/80 (including the new `check-session-flow`, 52 checks, and `check-quick-party`, 68), fresh clone, clean tree (PR #9's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261110-195030-acab35f3-16696` | `acab35f` | **Stage 7.2:** fast gate, PASSED 5/5 (1,253 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-183603-01fd2858-7370` | `01fd285` | **Stage 7.1 repair (review 6775606005):** targeted gate, PASSED 11/11 (`quick-party` 67, `casual`, `lobby-mode`, `game-night-flow`, `briefing`, `solo`, `solo-shelf`, `recovery`, `sessions`), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-183513-01fd2858-4576` | `01fd285` | **Stage 7.1 repair:** fast gate, PASSED, fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-171316-97684cbe-5210` | `97684cb` | **Stage 7.1:** full gate, PASSED 79/79, fresh clone, clean tree (PR #8's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
@@ -67,6 +69,13 @@ Stage 6.2 browser drivers run by hand from the development checkout, on the sour
 - `check-solo-shelf-test-content-mode.log`: 57/57 against a server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional`, as the gate runs it. Its INFO line shows the same board after Play again, which is the cause of the `be400fb` failure.
 - `check-solo-shelf-shipped-library.log`: 57/57 against a server with the shipped library. A different board after Play again.
 - `check-solo.log` (80), `check-casual.log` (30), `check-connections.log` (39), `check-pattern-pulse.log` (54): regressions against the test-mode server, all passing.
+
+## `stage72-local/`
+
+Stage 7.2 browser drivers run by hand from the development checkout, against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). The source is that later committed as `0bac2fd`, except that `nextState` was afterwards moved into its own file. These are not gate verdicts; the gate runs above are.
+- `check-session-flow.log`: 52/52.
+- `check-quick-party.log`: 68/68.
+- Regressions, all passing: `check-casual.log` (30), `check-briefing.log` (43), `check-solo.log` (80), `check-solo-shelf.log` (57), `check-game-night-flow.log` (14), `check-lobby-mode.log` (71), `check-tv-spectator.log` (15), `check-f4.log` (11).
 
 ## `stage71-local/`
 

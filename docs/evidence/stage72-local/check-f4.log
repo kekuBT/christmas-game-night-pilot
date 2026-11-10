@@ -1,0 +1,13 @@
+PASS lobby roster: 4 players joined
+PASS math-mayhem finished on all 4 pages
+PASS championship standings list all 4 players
+PASS championship per-game breakdown names the finished game
+PASS TV shows join code
+PASS TV shows full roster
+PASS TV shows finished game in tonight so far — TONIGHT SO FAR | Math Mayhem · Official · finished — Alex wins
+PASS Memory Book entry added from last finished game
+PASS export contains the approved entry
+PASS revoked entry disappears from fresh export — export no longer contains highlight
+PASS revoked entry stays listed as pending (not deleted)
+F4 ALL PASSED (11/11)
+exit 0
