@@ -6,6 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261110-231336-371c1948-12591` | `371c194` | **Stage 7.3:** full gate, PASSED 81/81 (including the new `check-host-handover`, 32 checks; `check-session-flow` 70, `check-quick-party` 68), fresh clone, clean tree (PR #10's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261110-231336-371c1948-12599` | `371c194` | **Stage 7.3:** fast gate, PASSED 5/5 (1,271 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-214318-01cde601-21321` | `01cde60` | **Stage 7.2 repair (review 6778921208):** full gate, PASSED 80/80 (`check-session-flow` 70, `check-quick-party` 68), fresh clone, clean tree (PR #9's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
 | `20261110-214318-01cde601-21310` | `01cde60` | **Stage 7.2 repair:** fast gate, PASSED 5/5 (1,253 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-211133-e65d80ce-5056` | `e65d80c` | **Stage 7.2 repair, before the test-limit fix:** full gate, **FAILED** 79/80. Every browser driver passed. The unit-test step failed: the seven-day Cup test timed out at 5,015 ms while both gates ran their unit tests at once (spec §6.3) | `report.json`, `summary.txt`, `gate-console.log`, `logs/04-unit-tests.log` |

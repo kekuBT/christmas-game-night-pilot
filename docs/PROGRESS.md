@@ -1760,3 +1760,40 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Gates on `01cde60`** (fresh clone, clean tree):
   - fast `20261110-214318-01cde601-21310` PASSED;
   - full `20261110-214318-01cde601-21321` PASSED, 80/80.
+
+## Stage 7.3: hand the host role to another player (2026-11-10)
+
+**Branch:** `claude/stage7-3-host-handover`, stacked on PR #9 at `f24934f` (PR #10).
+- **Instruction:** ChatGPT's review and handoff on PR #9 (comment 6781323820). It cleared Stage 7.2 after its own live-site audit of `01cde60`.
+- **Spec and record:** `docs/stage7/stage73.md`; decisions D-S73-01 … 05.
+- Nothing was merged or deployed, no port was made public, and nothing was paid for.
+
+**Milestone:** the host of a casual room can deliberately give the host role to a connected player, between games, and carry on as a player.
+- The transfer is atomic, repeat-safe and persisted, with exactly one host afterwards.
+- A former host's HTTP and WebSocket authority ends at once.
+- Everyone and the TV see the new host.
+- The room, its code, seats, scores, lineup and break don't change.
+
+**Files:**
+- **Server:** `src/server/room.ts`, `src/server/http.ts`.
+- **Web:** `apps/web/src/components/mchezo/HostHandover.tsx` (new), `App.tsx`, `TvShow.tsx`, `types.ts`, `ui/mchezo/styles/stage7.css`.
+- **Tests and scripts:** `tests/stage73-host-handover.test.ts`, `scripts/check-host-handover.mjs` and `scripts/screenshot-stage73.mjs` (all new).
+
+**Tests:**
+- **Unit and HTTP:** 18, with 11 mutations each caught. They include clarification 6781456175's cases: the whole command, a forgotten press then A→B→A, and open host/cohost/player sockets across a transfer to a cohost and a seat recovery.
+- **`check-host-handover`:** 32/32.
+- **Regressions, all passing:** `check-game-night`, `check-casual`, `check-recovery`, `check-sessions`, `check-session-flow` (70), `check-quick-party` (68), `check-tv-show`, `check-lobby-mode`.
+
+**Gates on `371c194`** (fresh clone, clean tree, both at the same time):
+- fast `20261110-231336-371c1948-12599`: **PASSED** 5/5, 1,271 unit tests;
+- full `20261110-231336-371c1948-12591`: **PASSED** 81/81, including `check-host-handover` 32/32, `check-session-flow` 70 and `check-quick-party` 68.
+- No failed runs. Raw evidence is in `docs/evidence/gate-runs/<run>/`.
+
+**External blockers:** none. WebKit and real devices are not available here (checklist I17–I19).
+
+**Next task:** ChatGPT reviews PR #10 and does its private live-site audit. The next milestone starts only when its handoff instructs it.
+
+**Risk:**
+- **Two copies of the host role:** `hostId` and the cohost set, plus each player's flags. Every path that changes one must change the other. A transfer does both in one step, and a restore normalizes them.
+- **A non-host start is refused with 400** (the engine's existing generic error), not 403. This slice leaves it unchanged.
+- **Emulation only:** no real phones.

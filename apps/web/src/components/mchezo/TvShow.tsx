@@ -110,6 +110,8 @@ function TvLobby({ feed, titleOf, nameOf, registry }: { feed: TvFeed; titleOf: (
   const over = next ? Math.max(0, here.length - next.maxPlayers) : 0;
   const finished = feed.games.filter((g) => g.status === "finished").slice(-5).reverse();
   const cup = feed.championship.slice(0, 3);
+  // Stage 7.3: the TV names the host (a public fact), so a handover shows here too.
+  const hostName = feed.players.find((p) => p.isHost)?.displayName;
   // Stage 7.2: a casual room's lineup and break (public planning facts).
   const lineup = feed.party?.lineup;
   const flow = lineupLine(feed, titleOf);
@@ -124,7 +126,7 @@ function TvLobby({ feed, titleOf, nameOf, registry }: { feed: TvFeed; titleOf: (
           {feed.players.map((p, i) => (
             <li key={p.id} className={away(p) ? "is-away" : ""}>
               <PlayerToken player={mz[i]!} index={i} size={48} badge={away(p) ? "offline" : null} />
-              <span>{p.displayName}</span>
+              <span>{p.displayName}{p.isHost && <small className="mz-tvshow-host" data-testid="tv-host-tag">host</small>}</span>
             </li>
           ))}
         </ul>
@@ -158,7 +160,7 @@ function TvLobby({ feed, titleOf, nameOf, registry }: { feed: TvFeed; titleOf: (
               <p className="mz-tvshow-line">{feed.upNext!.official ? "Official · counts toward the Cup" : feed.casual ? "Casual · just for fun" : "Practice · no Cup points"}</p>
               {short > 0 && <p className="mz-tvshow-line mz-tvshow-line--warn">Needs {short} more {short === 1 ? "player" : "players"} ({next.minPlayers}–{next.maxPlayers})</p>}
               {over > 0 && <p className="mz-tvshow-line mz-tvshow-line--warn">Up to {next.maxPlayers} players · {here.length} here</p>}
-              <p className="mz-tvshow-line mz-tvshow-line--muted">The host starts it when everyone's ready.</p>
+              <p className="mz-tvshow-line mz-tvshow-line--muted" data-testid="tv-host-line">{hostName ? `${hostName} starts it` : "The host starts it"} when everyone's ready.</p>
             </>
           ) : <p className="mz-tvshow-line">The host is choosing the next game.</p>}
         </section>

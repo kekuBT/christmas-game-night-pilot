@@ -55,6 +55,7 @@ import { RememberChoice, ThisDeviceCard, WelcomeBack, useRememberedSeats } from 
 import { RecoverScreen, RecoveryCodeSection, RecoveryRequestsCard } from "./components/mchezo/Recovery.js";
 import { ReadinessCard, type StartDecision } from "./components/mchezo/ReadinessCard.js";
 import { CasualResults, WhatsNext } from "./components/mchezo/WhatsNext.js";
+import { PlayersAndRoles, type HandoverResult } from "./components/mchezo/HostHandover.js";
 import QRCode from "qrcode";
 import { uuidV4 } from "./uuid.js";
 
@@ -263,11 +264,16 @@ export function App() {
     connection.setHandlers({ acknowledge: () => leaveSeatOnThisDevice("This device is signed out. Your seat and scores are safe in the game.") });
   });
   // Seat recoveries are announced to everyone (except on the recovered seat's own device).
+  // Stage 7.3: a host handover is announced to everyone, worded for the new host and the former host.
   useEffect(() => {
     const list = proj?.notices ?? [];
-    roomNotices.offer(list.filter((n) => n.playerId !== playerId).map((n) => ({
+    roomNotices.offer(list.filter((n) => n.type === "host-transferred" || n.playerId !== playerId).map((n) => ({
       id: n.eventId,
-      text: n.method === "host" && n.byName
+      text: n.type === "host-transferred"
+        ? n.playerId === playerId ? `${n.byName ?? "The host"} made you the host. You run the room now.`
+          : n.byId && n.byId === playerId ? `${n.displayName} is the host now. You’re a player.`
+          : `${n.byName ?? "The host"} handed the host role to ${n.displayName}.`
+        : n.method === "host" && n.byName
         ? `${n.byName} restored ${n.displayName}’s seat on a new device.`
         : `${n.displayName}’s seat was recovered on a new device with a recovery code.`,
     })));
@@ -759,6 +765,36 @@ export function App() {
    * refused, and if that change was the same (another host also took a
    * break) there is nothing to say.
    */
+  /**
+   * Stage 7.3: hand the host role to `targetId` (the host, casual rooms). One
+   * press, one id: a lost reply is asked again as the same press, which the
+   * server answers without applying it twice. With still no answer, the room
+   * itself says whether it happened; otherwise the outcome is uncertain, never
+   * "failed". Which controls show comes from the room, never from this reply.
+   */
+  async function handOverHost(targetId: string): Promise<HandoverResult> {
+    const name = players.find((p) => p.id === targetId)?.displayName ?? "That player";
+    const body = { targetId, attempt: { id: uuidV4(), sessionRevision: proj?.session?.revision ?? 0 } };
+    let r: { status: number; body: Record<string, unknown> } | null;
+    try { r = await postBounded(`/rooms/${roomId}/host`, body); } catch { r = await postBounded(`/rooms/${roomId}/host`, body).catch(() => null); }
+    if (!r) {
+      const now = await get<Projection>(`/rooms/${roomId}/projection?audience=player`).catch(() => null);
+      await refresh();
+      if (now?.players.find((p) => p.id === targetId)?.isHost) { closeSheet(); return { ok: true }; }
+      return { ok: false, error: "Couldn’t confirm the handover. Check who is host in the lobby, then try again if you still want to." };
+    }
+    await refresh();
+    if (r.status === 200) { closeSheet(); return { ok: true }; }
+    const code = r.body["code"];
+    return {
+      ok: false,
+      error: code === "TARGET_NOT_CONNECTED" ? `${name} isn’t connected right now. Wait for them, or choose someone else.`
+        : code === "GAME_ACTIVE" ? "A game has started. Hand over the host role after it ends."
+        : code === "SESSION_CONFLICT" ? "Something changed since you looked (a game, a break, or another handover). Check the room, then try again."
+        : code === "NOT_HOST" ? "You’re not the host any more, so you can’t hand it over."
+        : typeof r.body["error"] === "string" ? r.body["error"] : "Couldn’t hand over the host role.",
+    };
+  }
   async function changeBreak(on: boolean) {
     if (!roomId || sessionBusy) return;
     setSessionBusy(true);
@@ -1396,15 +1432,14 @@ export function App() {
             </ThisDeviceCard>
           }
           hostTools={players.filter((p) => p.id !== playerId).length > 0 ? (
-            <div className="mz-card mz-menu__card" aria-label="Players and cohosts">
-              <span className="mz-kicker">Players and cohosts</span>
-              {players.filter((p) => p.id !== playerId).map((p) => (
-                <div key={p.id} className="mz-menu__player">
-                  <span className="mz-menu__pname">{p.displayName}{p.isCohost ? " · cohost" : ""}</span>
-                  {!p.isCohost && <button type="button" className="mz-chip-btn" onClick={async () => { try { await post<Record<string, unknown>>(`/rooms/${roomId}/cohost`, { targetId: p.id }); } catch (e) { fail(e); } await refresh(); }}>Make cohost</button>}
-                </div>
-              ))}
-            </div>
+            // Stage 7.3: cohosts as before; the host of a casual room can also hand the host role over, between games.
+            <PlayersAndRoles
+              others={players.filter((p) => p.id !== playerId).map((p) => ({ id: p.id, name: p.displayName, isCohost: p.isCohost, connected: (p.presence ?? (p.connected ? "connected" : "away")) === "connected" }))}
+              canHandOver={!!me?.isHost && proj?.roomKind === "casual" && !(proj?.games ?? []).some((g) => g.status === "briefing" || g.status === "playing")}
+              handoverNote={me?.isHost && proj?.roomKind === "casual" ? "You can hand the host role to someone else between games." : undefined}
+              onMakeCohost={async (targetId) => { try { await post<Record<string, unknown>>(`/rooms/${roomId}/cohost`, { targetId }); } catch (e) { fail(e); } await refresh(); }}
+              onHandOver={handOverHost}
+            />
           ) : undefined}
           onClose={closeSheet}
         />

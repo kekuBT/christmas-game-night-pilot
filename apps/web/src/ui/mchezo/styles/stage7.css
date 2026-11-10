@@ -50,3 +50,11 @@
 .mz-lobby__break .mz-chip-btn { min-height: 44px; padding: 0 14px; }
 .mz-tvshow-break { border-color: var(--mz-highlight, var(--mz-line)); }
 .mz-tvshow-recent li[data-status="completed"] { opacity: 0.75; }
+
+/* Stage 7.3: players and roles, the host handover (docs/stage7/stage73.md §4.4). */
+.mz-menu__roles { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.mz-menu__roles .mz-chip-btn { min-height: 44px; padding: 0 12px; }
+.mz-menu__away { font-weight: 600; color: var(--mz-text-muted); }
+.mz-handover { margin-top: 6px; }
+.mz-handover__error { margin: 0 0 8px; }
+.mz-tvshow-host { margin-left: 6px; font: 800 13px/1 var(--mz-font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--mz-highlight, currentColor); }
