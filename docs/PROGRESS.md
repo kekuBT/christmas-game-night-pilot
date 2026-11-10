@@ -1513,7 +1513,7 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
   - Merged here as `735242d`. The details are in `docs/stage5-qa/README.md` §3.
 - **Queued product work:** an installable Home Screen web app, for the mobile-polish milestone (`docs/MILESTONES.md`). It is not a Stage 5.1/5.2 item.
 
-**Next task:** ChatGPT re-reviews PR #4 and PR #5 at `735242d`. Then the next milestone, as ChatGPT instructs on GitHub (D-WF-01).
+**Next task:** review repair and validation of the cumulative candidate: ChatGPT re-reviews PR #4 and PR #5 at `735242d`, and Claude repairs whatever it finds. The automatic worker cap stays at the benchmarked 3. A later product milestone starts only when a ChatGPT handoff instructs it (D-WF-01).
 
 **Risk:**
 - Backpressure uses the machine-wide 1-minute load average, which lags. Other work on the same machine also throttles the gate.
