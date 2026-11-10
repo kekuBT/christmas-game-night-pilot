@@ -33,8 +33,8 @@ import { MchezoYear } from "./components/mchezo/MchezoYear.js";
 import { MchezoTvStage } from "./components/mchezo/MchezoTv.js";
 import { AnswerReview, reviewRows } from "./components/mchezo/AnswerReview.js";
 import { MchezoLibrary } from "./components/mchezo/MchezoLibrary.js";
-import { isOvertakenReply, isProjection, readJson } from "./http.js";
-import { fetchFresh, livenessStep } from "./liveness.js";
+import { isOvertakenReply, isProjection, readJson, readSpectatorReply } from "./http.js";
+import { livenessStep, oneAtATime, pollFresh } from "./liveness.js";
 import { MchezoStudio } from "./components/mchezo/MchezoStudio.js";
 import { BriefingScreen, BriefingTv, type StartNowResult } from "./components/mchezo/Briefing.js";
 import { resolveReducedMotion } from "./ui/mchezo/lib/motion.js";
@@ -99,9 +99,9 @@ async function get<T>(path: string): Promise<T> {
   const headers: Record<string, string> = {};
   const token = seats.token();
   if (token) headers["x-session-token"] = token;
-  // Stage 5.1: a stalled request fails after a timeout instead of hanging forever.
-  const r = await fetchFresh(path, { headers });
-  return readJson<T>(r);
+  // Stage 5.1: a stalled request fails after a timeout instead of hanging
+  // forever; the timeout covers reading the reply's body too.
+  return pollFresh(path, { headers }, (r) => readJson<T>(r));
 }
 
 export function App() {
@@ -288,12 +288,8 @@ export function App() {
     refresh();
     // Stage 5.1: one interval poll at a time (a stalled one times out), so
     // hung requests can't pile up behind each other.
-    let polling = false;
-    const t = setInterval(() => {
-      if (polling) return;
-      polling = true;
-      void refresh().finally(() => { polling = false; });
-    }, 2000);
+    const tick = oneAtATime(refresh);
+    const t = setInterval(() => { void tick(); }, 2000);
     // WS auto-reconnect: a dropped socket used to stay dead — polling kept
     // the UI fresh, but the server had marked the player "(away)" and
     // excluded them from startGame's connected-player count until the
@@ -469,18 +465,15 @@ export function App() {
     // stale screen up in silence. Any projection proves it live; nothing for
     // a while and it says so on screen (the last known display stays).
     let lastFreshAt = Date.now();
-    let polling = false;
-    const poll = async () => {
-      if (polling) return;
-      polling = true;
+    // One poll at a time; the timeout covers the whole reply, body included.
+    const poll = oneAtATime(async () => {
       try {
-        const r = await fetchFresh(`/rooms/${specRoomId}/projection?audience=spectator`, { headers: { "x-spectator-token": specToken } });
-        if (r.status === 401) { if (!stopped) { stopWatching(); setErr("Spectator session expired — enter the code again to keep watching."); } return; }
-        if (!r.ok) return;
-        const next = await readJson<unknown>(r);
-        if (isProjection(next)) { lastFreshAt = Date.now(); setProj(next as Projection); } // S3-LOB-03: never a proxy page
-      } catch { /* poll retry; staleness is judged by the watchdog */ } finally { polling = false; }
-    };
+        const reply = await pollFresh(`/rooms/${specRoomId}/projection?audience=spectator`, { headers: { "x-spectator-token": specToken } }, readSpectatorReply);
+        if (reply.kind === "expired") { if (!stopped) { stopWatching(); setErr("Spectator session expired — enter the code again to keep watching."); } return; }
+        if (reply.kind === "skip") return;
+        if (isProjection(reply.body)) { lastFreshAt = Date.now(); setProj(reply.body as Projection); } // S3-LOB-03: never a proxy page
+      } catch { /* poll retry; staleness is judged by the watchdog */ }
+    });
     poll();
     const t = setInterval(poll, 2000);
     const live = { staleMarked: false };

@@ -18,6 +18,17 @@ export async function readJson<T>(r: Response): Promise<T> {
   return body as T;
 }
 
+/**
+ * The TV's poll reply: a 401 means its spectator session is gone; any other
+ * error status is skipped (the next poll tries again); otherwise the body,
+ * read as the server's own JSON. Read inside the poll's timeout (pollFresh).
+ */
+export async function readSpectatorReply(r: Response): Promise<{ kind: "expired" } | { kind: "skip" } | { kind: "body"; body: unknown }> {
+  if (r.status === 401) return { kind: "expired" };
+  if (!r.ok) return { kind: "skip" };
+  return { kind: "body", body: await readJson<unknown>(r) };
+}
+
 /** A room projection, as the server sends it (players and games are always lists). */
 export function isProjection(x: unknown): boolean {
   if (!x || typeof x !== "object" || Array.isArray(x)) return false;
