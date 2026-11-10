@@ -55,7 +55,8 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
       </section>
     );
   }
-  const next = lineup.items.findIndex((i) => !i.started);
+  // This slice starts the lineup's first game only (moving on through it comes next).
+  const next = lineup.items[0] && !lineup.items[0].started ? 0 : -1;
   const nextId = next >= 0 ? lineup.items[next]!.gameId : undefined;
   // The next game doesn't fit the people here now: say so, and offer a lineup for them.
   const nextGame = nextId ? GAME_MANIFESTS.find((m) => m.id === nextId) : undefined;

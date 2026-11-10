@@ -567,13 +567,16 @@ export function App() {
   const [partyReplan, setPartyReplan] = useState<number | undefined>(undefined);
   const [partyBusy, setPartyBusy] = useState(false);
   const partyFewerOk = useRef<{ revision: number; gameId: string } | null>(null);
-  /** The lineup's next game, if `gameId` is it: the start then goes through the lineup (repeat-safe). */
+  /**
+   * The lineup's first game, if `gameId` is it and it hasn't started: the
+   * start then goes through the lineup (repeat-safe). This slice starts the
+   * first game only; moving on through the lineup is the next slice.
+   */
   function partyStartFor(gameId: string, official: boolean): { revision: number; index: number } | undefined {
     const party = proj?.roomKind === "casual" ? proj.party : undefined;
-    const lineup = party?.lineup;
-    if (official || !party || !lineup) return undefined;
-    const index = lineup.items.findIndex((i) => !i.started);
-    return index >= 0 && lineup.items[index]!.gameId === gameId ? { revision: party.revision, index } : undefined;
+    const first = party?.lineup?.items[0];
+    if (official || !party || !first || first.started || first.gameId !== gameId) return undefined;
+    return { revision: party.revision, index: 0 };
   }
   /** Did the room's lineup become exactly this plan (an Apply whose reply was lost)? */
   const lineupIs = (p: PartyView | undefined, plan: PartyPlanInput, revision: number) =>

@@ -225,6 +225,10 @@ describe("the room's saved lineup", () => {
       const r = RoomEngine.fromJSON({ ...json, party });
       expect(r.partyView(), why).toEqual({ revision: 2, lineup: null });
     }
+    // A start mark for a game that wasn't saved with the room is dropped on restore.
+    const stale = RoomEngine.fromJSON({ ...json, party: { ...(json["party"] as object), items: [{ gameId: "impostor", gameInstanceId: "game-99" }, { gameId: "math-mayhem" }] } });
+    expect((stale.toJSON()["party"] as { items: { gameInstanceId?: string }[] }).items[0]?.gameInstanceId).toBeUndefined();
+    expect(stale.partyView().lineup?.items.map((i) => i.started)).toEqual([false, false]);
     // Rooms saved before Stage 7.1 have no lineup and start at revision 0.
     const { party: _p, partyRevision: _r, ...older } = json;
     expect(RoomEngine.fromJSON(older).partyView()).toEqual({ revision: 0, lineup: null });
@@ -258,15 +262,58 @@ describe("starting the lineup's first game", () => {
     expect(engine.games.size).toBe(1);
   });
 
-  it("a cancelled briefing leaves no game, so the item can be started again", () => {
+  it("a cancelled briefing leaves no game: the item's start mark is cleared (saved room too), and it can be started again", () => {
     const { engine, host } = planned(3, 4, ["trivia"], { timing: 2 });
     const first = engine.startPartyGame(host, "trivia", { revision: 1, index: 0 });
     expect(first.game.status).toBe("briefing");
+    expect((engine.toJSON()["party"] as { items: { gameInstanceId?: string }[] }).items[0]?.gameInstanceId).toBe(first.game.id);
     engine.cancelBriefing(host, first.game.id);
     expect(engine.partyView().lineup?.items[0]?.started).toBe(false);
+    const saved = JSON.parse(JSON.stringify(engine.toJSON())) as Record<string, unknown>;
+    expect((saved["party"] as { items: { gameInstanceId?: string }[] }).items[0]?.gameInstanceId).toBeUndefined();
+    const reloaded = RoomEngine.fromJSON(saved);
+    expect(reloaded.partyView().lineup?.items[0]?.started).toBe(false);
     const second = engine.startPartyGame(host, "trivia", { revision: 1, index: 0 });
     expect(second.replay).toBe(false);
     expect(second.game.id).not.toBe(first.game.id);
+  });
+
+  it("only the lineup's first game starts in this slice: item 1 is refused before and after the first starts", () => {
+    const { engine, host } = planned(3, 4, ["trivia", "math-mayhem"]);
+    const code = () => (refusal(() => engine.startPartyGame(host, "math-mayhem", { revision: 1, index: 1 })) as StartRefused).code;
+    expect(code()).toBe("PLAN_CONFLICT");
+    const first = engine.startPartyGame(host, "trivia", { revision: 1, index: 0 });
+    engine.games.get(first.game.id)!.status = "finished"; // the first game is over
+    expect(code()).toBe("PLAN_CONFLICT");
+    expect(engine.games.size).toBe(1);
+    // A retry of the first game after it started is still its replay (checked before the index rule).
+    expect(engine.startPartyGame(host, "trivia", { revision: 1, index: 0 })).toEqual({ game: first.game, replay: true });
+  });
+
+  it("a start sent for a replaced lineup starts nothing under the new one", () => {
+    const { engine, host } = planned(3, 4, ["trivia"]);
+    engine.savePartyPlan(host, 1, plan(4, ["math-mayhem"]));
+    expect((refusal(() => engine.startPartyGame(host, "trivia", { revision: 1, index: 0 })) as StartRefused).code).toBe("PLAN_CONFLICT");
+    expect((refusal(() => engine.startPartyGame(host, "math-mayhem", { revision: 1, index: 0 })) as StartRefused).code).toBe("PLAN_CONFLICT");
+    expect(engine.games.size).toBe(0);
+  });
+
+  it("replacing or clearing the lineup leaves an active game alone; one active game still holds", () => {
+    const { engine, host } = planned(3, 4, ["trivia", "math-mayhem"]);
+    const { game } = engine.startPartyGame(host, "trivia", { revision: 1, index: 0 });
+    const before = JSON.stringify(engine.games.get(game.id));
+    engine.savePartyPlan(host, 1, plan(4, ["closest-wins"]));
+    expect(JSON.stringify(engine.games.get(game.id))).toBe(before);
+    expect(() => engine.startPartyGame(host, "closest-wins", { revision: 2, index: 0 })).toThrow(/already in progress/);
+    engine.savePartyPlan(host, 2, null);
+    expect(JSON.stringify(engine.games.get(game.id))).toBe(before);
+    expect(engine.games.size).toBe(1);
+  });
+
+  it("a repeat needs the host or a cohost too", () => {
+    const { engine, host, others } = planned(3, 4, ["trivia"]);
+    engine.startPartyGame(host, "trivia", { revision: 1, index: 0 });
+    expect(() => engine.startPartyGame(others[0]!, "trivia", { revision: 1, index: 0 })).toThrow(/host/);
   });
 
   it("fewer here than planned needs an explicit OK; the planned count never stands in for real players", () => {
@@ -380,32 +427,45 @@ describe("over HTTP", () => {
     expect([c.status, c.body["code"]]).toEqual([409, "NOT_A_CASUAL_ROOM"]);
   });
 
-  it("a lineup start: 400 if malformed or official; 409 with the numbers when fewer are here; then 201, and a replay is 200 with the same game", async () => {
+  it("a lineup start: 400 if malformed, official or without the roster shown; 409 with the numbers when fewer are here; then 201, and a replay is 200 with the same game (not for a guest)", async () => {
     const r = await room("casual", 1); // 2 here
     expect((await call("POST", `/rooms/${r.id}/party`, { baseRevision: 0, plan: lineup }, r.host)).status).toBe(200);
-    const start = (extra: Record<string, unknown>) => call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", official: false, party: { revision: 1, index: 0 }, ...extra }, r.host);
-    expect((await call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", party: { revision: "1", index: 0 } }, r.host)).status).toBe(400);
+    const roster = ((await call("GET", `/rooms/${r.id}/projection?audience=player`, undefined, r.host)).body["readiness"] as { wouldPlay: string[] }).wouldPlay;
+    const start = (extra: Record<string, unknown>, token = r.host) => call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", official: false, party: { revision: 1, index: 0 }, roster, ...extra }, token);
+    expect((await call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", party: { revision: "1", index: 0 }, roster }, r.host)).status).toBe(400);
     expect((await start({ official: true })).status).toBe(400);
+    expect((await call("POST", `/rooms/${r.id}/games`, { gameId: "trivia", official: false, party: { revision: 1, index: 0 } }, r.host)).status).toBe(400); // no roster
     const fewer = await start({});
     expect([fewer.status, fewer.body["code"], fewer.body["expected"], fewer.body["here"]]).toEqual([409, "PARTY_FEWER_THAN_PLANNED", 3, 2]);
     const first = await start({ fewerThanPlanned: true });
     expect(first.status).toBe(201);
     const replay = await start({ fewerThanPlanned: true });
     expect([replay.status, replay.body["gameId"], replay.body["replay"]]).toEqual([200, first.body["gameId"], true]);
+    const guest = await start({ fewerThanPlanned: true }, r.guests[0]);
+    expect(guest.status).toBe(400);
+    expect(guest.body["gameId"]).toBeUndefined();
     const view = (await call("GET", `/rooms/${r.id}/projection?audience=player`, undefined, r.host)).body as { games: unknown[]; party: { lineup: { items: { started: boolean }[] } } };
     expect(view.games).toHaveLength(1);
     expect(view.party.lineup.items.map((i) => i.started)).toEqual([true, false]);
   });
 
-  it("survives a server restart (the room file holds the lineup and its revision)", async () => {
+  it("survives a server restart: the lineup, its revision and its start mark; a retried start after the restart is the same game", async () => {
     const r = await room("casual", 2);
     expect((await call("POST", `/rooms/${r.id}/party`, { baseRevision: 0, plan: lineup }, r.host)).status).toBe(200);
-    expect((await call("POST", `/rooms/${r.id}/party`, { baseRevision: 1, plan: { ...lineup, items: [{ gameId: "closest-wins" }] } }, r.host)).status).toBe(200);
+    expect((await call("POST", `/rooms/${r.id}/party`, { baseRevision: 1, plan: { ...lineup, items: [{ gameId: "closest-wins" }, { gameId: "math-mayhem" }] } }, r.host)).status).toBe(200);
+    const roster = ((await call("GET", `/rooms/${r.id}/projection?audience=player`, undefined, r.host)).body["readiness"] as { wouldPlay: string[] }).wouldPlay;
+    const body = { gameId: "closest-wins", official: false, party: { revision: 2, index: 0 }, roster };
+    const first = await call("POST", `/rooms/${r.id}/games`, body, r.host);
+    expect(first.status).toBe(201);
     const again = new LocalServer({ dataDir });
     const at = `http://127.0.0.1:${await again.listen(0)}`;
     try {
       const view = (await call("GET", `/rooms/${r.id}/projection?audience=player`, undefined, r.host, at)).body;
-      expect(view["party"]).toMatchObject({ revision: 2, lineup: { expectedPlayers: 3, budgetMinutes: 30, items: [{ gameId: "closest-wins", started: false }] } });
+      expect(view["party"]).toMatchObject({ revision: 2, lineup: { expectedPlayers: 3, budgetMinutes: 30, items: [{ gameId: "closest-wins", started: true }, { gameId: "math-mayhem", started: false }] } });
+      const retry = await call("POST", `/rooms/${r.id}/games`, body, r.host, at);
+      expect([retry.status, retry.body["gameId"], retry.body["replay"]]).toEqual([200, first.body["gameId"], true]);
+      const second = await call("POST", `/rooms/${r.id}/games`, { ...body, gameId: "math-mayhem", party: { revision: 2, index: 1 } }, r.host, at);
+      expect([second.status, second.body["code"]]).toEqual([409, "PLAN_CONFLICT"]);
       expect((await call("POST", `/rooms/${r.id}/party`, { baseRevision: 1, clear: true }, r.host, at)).status).toBe(409);
     } finally {
       await again.close();

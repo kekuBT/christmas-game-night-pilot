@@ -904,7 +904,9 @@ export class LocalServer {
           let party: { revision: number; index: number } | undefined;
           if (body["party"] !== undefined) {
             const parsed = LocalServer.PartyStartSchema.safeParse(body["party"]);
-            if (!parsed.success || body["official"] === true) { this.send(res, 400, { error: "A Quick Party start needs the lineup's revision and item, and is never official" }); return; }
+            // The roster the host was shown is required: who plays (and any
+            // "start without them") is tied to the room as it is now.
+            if (!parsed.success || body["official"] === true || !Array.isArray(body["roster"])) { this.send(res, 400, { error: "A Quick Party start needs the lineup's revision and item and the roster you were shown, and is never official" }); return; }
             party = parsed.data;
           }
           let game;

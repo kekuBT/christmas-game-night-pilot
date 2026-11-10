@@ -939,6 +939,7 @@ export class RoomEngine {
   /** Cancel a briefing (any reason): it leaves no game, no usage, no score (§6). */
   private endBriefing(game: GameInstance, reason: "host" | "expired" | "content-changed", actor?: string): void {
     this.games.delete(game.id);
+    this.reconcilePartyStarts(); // Stage 7.1: a lineup item that started this game is free again
     // A count only: the items stay available, so their ids must not reach the player-visible ledger.
     this.log("briefing-cancelled", {
       gameInstanceId: game.id,
@@ -1037,6 +1038,17 @@ export class RoomEngine {
     return !!item.gameInstanceId && this.games.has(item.gameInstanceId);
   }
 
+  /**
+   * Stage 7.1: a lineup item whose game is gone (a cancelled briefing) loses
+   * its start mark, in the saved room too, so a reload or restart sees the
+   * same thing: the item can be started again.
+   */
+  reconcilePartyStarts(): void {
+    for (const item of this.party?.items ?? []) {
+      if (item.gameInstanceId && !this.games.has(item.gameInstanceId)) delete item.gameInstanceId;
+    }
+  }
+
   /** The lineup as every member (and the TV) sees it: public planning facts only. */
   partyView(): { revision: number; lineup: null | { expectedPlayers: number; budgetMinutes: number; estimateMinutes: number; transitionMinutes: number; items: { gameId: string; started: boolean }[]; updatedAt: number } } {
     const p = this.party;
@@ -1056,12 +1068,16 @@ export class RoomEngine {
   }
 
   /**
-   * Stage 7.1: start the lineup's next game through the ordinary start
+   * Stage 7.1: start the lineup's first game through the ordinary start
    * (practice, briefing and all), checking first, in this order:
-   * - a casual room, a current lineup (`revision`), and that `index` is its
-   *   first item not yet started, for this `gameId` (PLAN_CONFLICT);
+   * - the host or a cohost (for a repeat too), a casual room, a current
+   *   lineup (`revision`), and that item `index` is this `gameId`
+   *   (PLAN_CONFLICT);
    * - repeat-safe: an item that already started a game that still exists
-   *   returns that game (`replay`), never a second one;
+   *   returns that game (`replay`), never a second one. This comes before
+   *   the next check, so a retry of the first game after it started works;
+   * - a new start is the lineup's first game (index 0) only: moving on
+   *   through the lineup is the next slice, with no hidden way to it now;
    * - fewer connected than the group size needs `fewerThanPlanned`
    *   (PARTY_FEWER_THAN_PLANNED);
    * - anyone reconnecting must be named in `proceedWithout`
@@ -1078,11 +1094,11 @@ export class RoomEngine {
     const p = this.party;
     const conflict = (why: string) => new StartRefused("PLAN_CONFLICT", why, readiness, { party: this.partyView() });
     if (!p || p.revision !== opts.revision) throw conflict("The lineup changed somewhere else. Here is the latest.");
-    const next = p.items.findIndex((i) => !this.partyItemStarted(i));
     const item = p.items[opts.index];
     if (!item || item.gameId !== gameId) throw conflict("That isn't a game in this lineup.");
     if (this.partyItemStarted(item)) return { game: this.games.get(item.gameInstanceId!)!, replay: true };
-    if (opts.index !== next) throw conflict("That isn't the lineup's next game.");
+    if (opts.index !== 0) throw conflict("Only the lineup's first game can be started from here for now.");
+    this.reconcilePartyStarts();
     const game = getGame(gameId);
     const here = readiness.wouldPlay.length;
     if (here < p.expectedPlayers && opts.fewerThanPlanned !== true) {
@@ -2852,6 +2868,7 @@ export class RoomEngine {
     // dropped whole (never half-loaded), and the revision still only grows.
     engine.partyRevision = typeof data["partyRevision"] === "number" && Number.isInteger(data["partyRevision"]) && data["partyRevision"] >= 0 ? data["partyRevision"] : 0;
     engine.party = restoreParty(data["party"], engine);
+    engine.reconcilePartyStarts(); // a start mark for a game that wasn't saved is dropped
     return engine;
   }
 

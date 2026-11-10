@@ -196,7 +196,9 @@ try {
   check("G Impostor doesn't fit the 3 here: the card says so and offers a replan for 3", /Impostor needs at least 4; 3 are here/.test(await h.getByTestId("party-misfit").innerText()) && /replan for 3/.test(await h.getByTestId("party-replan-card").innerText()));
   const misfit = await h.evaluate(async () => {
     const roomId = sessionStorage.getItem("cgn_roomId");
-    const r = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" }, body: JSON.stringify({ gameId: "impostor", official: false, party: { revision: 1, index: 0 }, fewerThanPlanned: true }) });
+    const headers = { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" };
+    const roster = (await (await fetch(`/rooms/${roomId}/projection?audience=player`, { headers })).json()).readiness.wouldPlay;
+    const r = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers, body: JSON.stringify({ gameId: "impostor", official: false, party: { revision: 1, index: 0 }, roster, fewerThanPlanned: true }) });
     return { status: r.status, body: await r.json() };
   });
   check("G the server refuses it too (409 PARTY_DOESNT_FIT, needs 4, 3 here), nothing started", misfit.status === 409 && misfit.body.code === "PARTY_DOESNT_FIT" && misfit.body.minPlayers === 4 && misfit.body.here === 3 && ((await myRoom(h)).games ?? []).length === 0, JSON.stringify(misfit.body).slice(0, 160));
@@ -232,7 +234,9 @@ try {
   // A second start of the same item (a second tab, a retry) returns the same game.
   const replay = await h.evaluate(async (rev) => {
     const roomId = sessionStorage.getItem("cgn_roomId");
-    const r = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" }, body: JSON.stringify({ gameId: "math-mayhem", official: false, party: { revision: rev, index: 0 }, fewerThanPlanned: true }) });
+    const headers = { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" };
+    const roster = (await (await fetch(`/rooms/${roomId}/projection?audience=player`, { headers })).json()).readiness.wouldPlay;
+    const r = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers, body: JSON.stringify({ gameId: "math-mayhem", official: false, party: { revision: rev, index: 0 }, roster, fewerThanPlanned: true }) });
     return { status: r.status, body: await r.json() };
   }, room.party.revision);
   check("I the same start again answers with the same game (200, replay)", replay.status === 200 && replay.body.replay === true && replay.body.gameId === room.games[0].id, JSON.stringify(replay));
