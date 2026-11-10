@@ -72,6 +72,7 @@
     "check-casual": "node scripts/check-casual.mjs",
     "check-solo-shelf": "node scripts/check-solo-shelf.mjs",
     "screenshot-stage61": "node scripts/screenshot-stage61.mjs",
+    "screenshot-stage62": "node scripts/screenshot-stage62.mjs",
     "screenshot-mchezo": "node scripts/screenshot-mchezo.mjs",
     "dev:web": "vite --config apps/web/vite.config.ts",
     "serve": "tsx src/server/serve.ts",
