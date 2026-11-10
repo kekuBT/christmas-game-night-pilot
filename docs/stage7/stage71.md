@@ -180,6 +180,25 @@ In a casual room, the host (or a cohost) says roughly how many people are playin
 3. **The reconnect acknowledgement is tied to the current roster; host checks on repeats; the expected count never beats eligibility:** §3.5 steps 1, 6–8. The roster is required over HTTP.
    - Tests: no roster gets 400; a guest's repeat is refused; "fewer" acknowledged but the game doesn't fit is still refused.
 
+### 3.8 Review 6775606005: a stale draft must never overwrite a newer lineup
+- **The defect** (found by ChatGPT's live audit; reproduced on `97684cb`):
+  - the host opens a 15-minute draft;
+  - a cohost saves a 30-minute lineup;
+  - the host applies the older draft, which silently replaced the cohost's lineup.
+
+  The planner had sent the room's *latest* revision, which a background update had already moved on, so the server's conflict check never fired.
+- **The repair** (client only; the server already refused stale revisions):
+  - **A draft is bound to the saved lineup it started from.** The planner keeps the revision from when it opened, and a background update never moves it. When the saved lineup changes meanwhile, the planner says so ("The saved lineup was changed … while you were planning").
+  - **Apply sends the bound revision.** On `PLAN_CONFLICT` nothing is saved, and the planner shows the lineup saved now with three explicit choices:
+    - **Edit the latest:** a new draft from it, bound to its revision;
+    - **Keep the latest:** the draft is dropped;
+    - **Replace it with mine:** deliberate, sent against the revision just shown. If that changed too, it is another conflict.
+
+    Nothing retries with a newer revision by itself.
+  - **An uncertain Apply** (no answer) counts as saved only if the room holds exactly this draft at base + 1. If the room moved to something else, that is shown as a conflict.
+  - **Clear is bound to the revision it asked about.** If the lineup changes while "Clear?" is open, it says so and asks again. A clear with no answer counts as done only if the room shows exactly that clear; the server also refuses a clear for an older revision.
+  - **Unchanged:** authorization, roster, active-game and repeat-start protections are all untouched.
+
 ## 4. Test plan
 - **Planner (unit, pure):**
   - group sizes 1, 2, 3, 4 and 10, and invalid sizes;
@@ -302,7 +321,7 @@ Proceeding with these as stated, unless you object.
   - no time fit in the planner;
   - no budget check on the server;
   - no host check.
-- **`scripts/check-quick-party.mjs`, 51 checks:**
+- **`scripts/check-quick-party.mjs`, 67 checks** (51, plus 16 in part K for review 6775606005):
   - **entry:** the host only; a Cup room has none;
   - **the planner by keyboard:** the size starts at who is here and is labelled as expected; 15/30/60; a lineup within budget, every game fitting;
   - **editing:** a new time clears the lineup; move, remove and replace (only fitting games); suggest again; nothing reaches the server;
@@ -321,9 +340,17 @@ Proceeding with these as stated, unless you object.
   - **play:** three players play Math Mayhem through the briefing to results; the lineup is kept with game 1 started; nothing else starts; no Cup standings;
   - **TV view:** public facts only;
   - **320 px:** the card and the planner fit with no sideways scroll;
-  - **Clear** asks first.
+  - **Clear** asks first;
+  - **K, two hosts, through the real UI:**
+    - the cohost saves while the host's draft is open, and the host's planner shows the change;
+    - applying the old draft leaves the cohost's lineup unchanged on the server, shows the conflict, and keeps the draft;
+    - Edit the latest; after a second change, Replace it with mine (explicit); after a third, Keep the latest;
+    - "Clear?" asks again after a change;
+    - a clear for an older revision is refused (409).
+
+    Part K fails on `97684cb`: the server shows revision 2 with the host's 15-minute draft (`docs/evidence/review-pr8/`).
 - **Regressions run by hand against a local server in the gate's content mode:** `check-casual` 30, `check-lobby-mode` 71, `check-game-night-flow` 14, `check-briefing` 43 and `check-solo` 80, all passing.
-- **Screenshots:** `docs/stage7/screenshots-71/` holds 8 screens at 320, 390 and 1440 px (24 images), taken on `a7060ac` with a clean tree (`manifest.json`).
+- **Screenshots:** `docs/stage7/screenshots-71/` holds 10 screens at 320, 390 and 1440 px (30 images), including the stale-draft note and the conflict choice. Taken on `1a89fc6` with a clean tree (`manifest.json`).
 - **Private preview for ChatGPT's interactive audit:** `docs/stage7/PREVIEW.md`.
 - **Gates on `97684cbec350d1129fe012b372d0994608fdd889`** (fresh clone, clean tree, fingerprint `324018fc8f27`):
   - fast `20261110-171227-97684cbe-2368` PASSED;

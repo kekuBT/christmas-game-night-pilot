@@ -752,4 +752,10 @@ The spec is `docs/stage7/stage71.md`. The instruction is ChatGPT's review and ha
   - A cancelled briefing clears the item's start mark in the room and the saved file, and restore drops a mark whose game wasn't saved.
   - Over HTTP a lineup start requires the roster the host was shown.
   - Host checks cover repeats. "Fewer than planned" never overrides the game's real player range.
+- **D-S71-10 A Quick Party draft is bound to the saved lineup it started from** (review 6775606005).
+  - The planner keeps the revision from when it opened and sends that on Apply, never the latest one a background update brought.
+  - A conflict shows the lineup saved now and asks: Edit the latest, Keep the latest, or Replace it with mine. Replace is explicit, against the revision just shown; nothing retries by itself.
+  - An Apply with no answer is "saved" only if the room holds exactly that draft at base + 1, and is otherwise a conflict or "not saved".
+  - Clear is bound to the revision it asked about.
+  - *Alternative rejected:* letting the server merge drafts. A lineup is short and the host decides, so an explicit choice is clearer than a merge.
 

@@ -1,7 +1,7 @@
 {
-  "revision": "a7060acf8ebeb99e663a23af0474b5605b5a9a25",
+  "revision": "1a89fc68f08f59f0d81708979b0ffa498a319c01",
   "workingTreeClean": true,
-  "capturedAt": "2026-11-10T17:10:43.290Z",
+  "capturedAt": "2026-11-10T18:33:43.756Z",
   "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
   "shots": [
     {
@@ -49,6 +49,18 @@
     {
       "file": "08-lineup-start-320x640.png",
       "screen": "The lineup with Math Mayhem first; Start names it as game 1 of the lineup",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "09-stale-draft-320x640.png",
+      "screen": "Two hosts: the cohost changed the lineup while this draft was open, and the planner says so",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "10-conflict-320x640.png",
+      "screen": "Applying the older draft overwrites nothing: the latest lineup is shown, with Edit the latest, Keep the latest, or Replace it with mine",
       "viewport": "320×640",
       "deviceScaleFactor": 2
     },
@@ -101,6 +113,18 @@
       "deviceScaleFactor": 2
     },
     {
+      "file": "09-stale-draft-390x844.png",
+      "screen": "Two hosts: the cohost changed the lineup while this draft was open, and the planner says so",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "10-conflict-390x844.png",
+      "screen": "Applying the older draft overwrites nothing: the latest lineup is shown, with Edit the latest, Keep the latest, or Replace it with mine",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
       "file": "01-lobby-entry-1440x900.png",
       "screen": "Casual lobby, host: the Quick Party entry",
       "viewport": "1440×900",
@@ -145,6 +169,18 @@
     {
       "file": "08-lineup-start-1440x900.png",
       "screen": "The lineup with Math Mayhem first; Start names it as game 1 of the lineup",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "09-stale-draft-1440x900.png",
+      "screen": "Two hosts: the cohost changed the lineup while this draft was open, and the planner says so",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "10-conflict-1440x900.png",
+      "screen": "Applying the older draft overwrites nothing: the latest lineup is shown, with Edit the latest, Keep the latest, or Replace it with mine",
       "viewport": "1440×900",
       "deviceScaleFactor": 1
     }

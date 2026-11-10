@@ -1,0 +1,28 @@
+{
+ "hostDraft15": [
+  "word-connections"
+ ],
+ "cohostSaved30": [
+  "trivia",
+  "math-mayhem",
+  "closest-wins"
+ ],
+ "serverBeforeHostApply": {
+  "revision": 1,
+  "budget": 30,
+  "items": [
+   "trivia",
+   "math-mayhem",
+   "closest-wins"
+  ]
+ },
+ "serverAfterHostApply": {
+  "revision": 2,
+  "budget": 15,
+  "items": [
+   "word-connections"
+  ]
+ },
+ "conflictShown": false,
+ "overwritten": true
+}

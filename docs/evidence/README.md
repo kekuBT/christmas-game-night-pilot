@@ -71,3 +71,13 @@ Stage 6.2 browser drivers run by hand from the development checkout, on the sour
 Stage 7.1 browser drivers run by hand from the development checkout, on the source later committed as `a7060ac`, against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). These are not gate verdicts; the gate runs above are.
 - `check-quick-party.log`: 51/51.
 - `check-casual.log` (30), `check-lobby-mode.log` (71), `check-game-night-flow.log` (14), `check-briefing.log` (43): regressions, all passing.
+
+## `review-pr8/`
+
+ChatGPT's review 6775606005 on PR #8: a stale Quick Party draft silently overwrote a newer lineup.
+- **`repro-stale-draft.mjs.txt`:** the reproduction, run from the scratchpad against a local server: host draft, cohost save, host apply.
+- **`repro-before-97684cb.txt`:** on `97684cb`, the cohost's 30-minute lineup (revision 1) was replaced by the host's 15-minute draft (revision 2), with no conflict shown.
+- **`repro-after-fix.txt`:** after the fix, revision 1 is unchanged and the conflict is shown.
+- **`check-quick-party-on-97684cb.log`:** the new driver (with part K) against the `97684cb` build. Part K fails: "the newer lineup is unchanged" sees revision 2, the host's draft.
+- **`check-quick-party-after-fix.log`:** the driver on the fix, 67/67.
+

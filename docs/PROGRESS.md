@@ -1675,6 +1675,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage62-local/`.
 
 Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage71-local/`.
 
+**Repair: review 6775606005** (`1a89fc6`, D-S71-10).
+- **The defect:** a stale draft overwrote a cohost's newer lineup, because the planner sent the latest background revision. Reproduced on `97684cb` (evidence in `docs/evidence/review-pr8/`).
+- **The fix:** drafts are bound to the revision they started from, conflicts are shown with an explicit choice, and Clear is bound too.
+- **Tests:** `check-quick-party` part K, a two-client UI regression (67 checks; part K fails on `97684cb`).
+- **Gates:** the repair's verdicts are recorded in the commit after its tested SHA.
+
 **External blockers:** none. WebKit and real devices are not available here.
 
 **Next task:** ChatGPT reviews PR #8; the next session-flow slice starts only when its handoff instructs it.
