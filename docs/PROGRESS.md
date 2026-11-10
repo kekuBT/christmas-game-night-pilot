@@ -1457,3 +1457,50 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Risk:**
 - Safari's handling of the new connection watchdog (background tabs, suspended timers) is untested.
 - The flag description depends on each pack's accessibility note.
+
+## Stage 5.2: parallel testing, performance and time estimates (2026-11-10)
+
+**Branch:** `claude/stage5-parallel-testing`, built on the verified Stage 5.1 head `5a4454c` (PR #4). Nothing was merged or deployed, no port was made public, and nothing was paid for. The full report is `docs/test-optimization/README.md`.
+
+**Milestone:** the full gate runs in parallel, with live time estimates. On this 4-CPU machine it went from **95.4 min** (the sequential gate, Stage 5.1 final) to **24m 17s** on 3 workers: 74.5% less, with the same 74 steps and the same number of checks in each.
+
+**Features:**
+- **`scripts/gate.mjs`:**
+  - a bounded worker pool (`--workers=N|auto`, `--sequential`), with one gate server per worker;
+  - longest-first ordering, and load and memory backpressure;
+  - an explicit not-run list;
+  - failure kinds, DIAG lines and machine-pressure notes for failed steps;
+  - CPU, memory, browser use and rooms per step, and time-stamped step logs;
+  - `--plan`, live progress with remaining-time ranges, predicted vs actual, timing history, and `timings`.
+- **`scripts/lib/`:** `gate-plan.mjs` (scheduler model and estimates), `gate-sampler.mjs` (`/proc` sampling), `gate-timings.mjs` (history) and `gate-timings.json` (a baseline from 111 earlier runs and the benchmarks).
+- **Driver changes, with no check removed:**
+  - `check-leaderboard`: 30 s waits on optional chips replaced by a phase wait;
+  - `e2e-browser` and `check-f5`: probes are checks, not waits;
+  - `lib/stage5-games.mjs`: a Draw & Guess read race fixed;
+  - `lib/driver-env.mjs`: browser-use counters.
+- **Self-test:** 8 parallel cases (9–16) added; 59 checks in all. **Unit tests:** `tests/gate-plan.test.ts`, 21 tests.
+- **CI:** a `workers` input on the manual dispatch. **Docs:** `TESTING.md`. **npm:** `gate:full:sequential`, `gate:plan`, `gate:timings`.
+
+**Tests:** see the verdict below.
+
+**Failures during the sprint:** all are in the report, §12.
+- The first self-test run scored 55 of 58, from three self-test design errors.
+- The F2 run (2 workers on 2 CPUs) failed `check-f5` on a real race in the shared Draw & Guess helper. It's fixed and validated (V1).
+- F2 was then cancelled, because a validation run on the other CPUs throttled it through the machine-wide load average.
+
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` (automatic worker count: 3 workers on 4 CPUs) on `dab1c65`: **PASSED (exit 0)**, run `20261110-033657-dab1c658-18431`.
+- 74 passed, 0 failed, 0 timed out, 0 not run.
+- Unit tests: 1,101 in 101 files. All 67 drivers passed. E2E passed 15 of 15.
+- 24m 17s, from a fresh clone with a clean tree. The commits after it are docs only.
+- 2 workers on 2 CPUs, same commit: **PASSED** 74/74 in **38m 06s** (run `20261110-040231-dab1c658-30930`, pinned with `taskset`). Gate self-test on `dab1c65`: 59/59.
+
+**External blockers:** none. CI is still manual-dispatch only, because the account's Actions allowance is unconfirmed.
+
+**For the owner:** the Draw & Guess helper race also exists on the Stage 5.1 branch (PR #4). It hasn't been seen there, and fixing it there needs a new Stage 5.1 gate, so that's the owner's call.
+
+**Next task (if the owner continues):** collect a few more parallel runs, so the three sped-up drivers get 3+ samples and their estimates lose the low-confidence label. Optionally, benchmark 4 workers.
+
+**Risk:**
+- Backpressure uses the machine-wide 1-minute load average, which lags. Other work on the same machine also throttles the gate.
+- Pattern Pulse's multi-key entry keeps 30 s auto-waits.
+- `check-tv-outage` re-binds its own port.

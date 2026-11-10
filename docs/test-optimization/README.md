@@ -10,9 +10,9 @@ Every number below comes from a real run, and each one says which run it came fr
 
 | | Before (the existing sequential gate) | After |
 |---|---|---|
-| Full gate wall time | **95.4 min** (Stage 5.1 final, `0a3964f`, run `20261110-003130-0a3964f3-11617`) | **{{F3_WALL}}** on 3 workers (run `{{F3_RUN}}`) |
-| Sum of step times | 95.4 min | {{F3_SUM}} |
-| Same work, 2 workers on 2 CPUs | – | {{F2_LINE}} |
+| Full gate wall time | **95.4 min** (Stage 5.1 final, `0a3964f`, run `20261110-003130-0a3964f3-11617`) | **24m 17s** on 3 workers (run `20261110-033657-dab1c658-18431`) |
+| Sum of step times | 95.4 min | 70m 40s |
+| Same work, 2 workers on 2 CPUs | – | **38m 06s** (run `20261110-040231-dab1c658-30930`, same commit, 2 workers pinned to 2 CPUs) |
 
 Two changes do the work, and neither removes a test:
 - **A bounded parallel scheduler** runs the drivers on 3 workers by default on this machine, each worker with its own gate server.
@@ -154,9 +154,9 @@ The full-run comparison of every driver's check count, sequential against parall
 | Machine | `auto` picks | Why |
 |---|---|---|
 | 1 CPU | 1 | – |
-| 2 CPUs | 2 | Measured: B4, and F2 (§8) |
+| 2 CPUs | 2 | Measured: B4 (a 21-driver subset) and F2b (the full gate, 38m 06s), both on 2 pinned CPUs (§8) |
 | 3 CPUs | 2 | One CPU kept for the servers and the gate; not measured |
-| 4 CPUs (this machine) | **3** | Measured: B2, B1, F3 |
+| 4 CPUs (this machine) | **3** | Measured: B2, B1, B1b, F3 (the full gate, 24m 17s) |
 | 5+ CPUs | 3 | The cap: 4+ workers were not benchmarked |
 | Under 1.5 GB per worker available | fewer | Each driver peaked at 250–400 MB with Chromium (§8) |
 
@@ -175,9 +175,10 @@ All runs start from fresh clones of one exact commit, through `bench.sh` (kept i
 | B1 | `959eac0` | leaderboard, F5, E2E (first round) | 3 / 4 | PASSED 5/5 | 12m 02s | 29m 00s | 2.41× | 80% | (too few steps) | 0 / 0 |
 | B1b | `4a7e132` | the same, after the Closest/Year change | 3 / 4 | PASSED 5/5 | 8m 26s | 22m 49s | 2.71× | 90% | (too few steps) | 0 / 0 |
 | B4 | `4a7e132` | 21-driver subset | 2 / **2** | PASSED 23/23 | 17m 10s | 31m 48s | 1.85× | 93% | ×1.051 | 0 / 0 |
-| F2 | `8642da0` | **full gate** | 2 / **2** | {{F2_VERDICT}} | {{F2_WALL}} | {{F2_SUM}} | {{F2_SPEEDUP}} | {{F2_UTIL}} | {{F2_CONT}} | {{F2_LEFT}} |
-| V1 | `d5e175f` | F5 and E2E after the race fix | 2 / **2** (CPUs 2–3) | {{V1_VERDICT}} | {{V1_WALL}} | | | | | |
-| F3 | `{{F3_SHA}}` | **full gate, final** | 3 / 4 | {{F3_VERDICT}} | {{F3_WALL}} | {{F3_SUM}} | {{F3_SPEEDUP}} | {{F3_UTIL}} | {{F3_CONT}} | {{F3_LEFT}} |
+| F2 | `8642da0` | full gate | 2 / **2** | FAILED (`check-f5` race, §12), then CANCELLED by me | – | – | – | – | – | 0 (tagged) |
+| F2b | `dab1c65` | **full gate** (the final commit) | 2 / **2** | **PASSED 74/74** | **38m 06s** | 72m 02s | 1.89× | 95% | ×1.039 | 0 (tagged) |
+| V1 | `d5e175f` | F5 and E2E after the race fix | 2 / **2** (CPUs 2–3) | PASSED (run 20261110-032414-d5e175f3-16751: F5 461.5 s, E2E 509.2 s, Draw & Guess finished in both) | 11m 33s | | | | | |
+| F3 | `dab1c65` | **full gate, final** | 3 / 4 | PASSED 74/74 | 24m 17s | 70m 40s | 2.91× | 97% | ×1.017 | 0 (tagged) |
 
 **Machine:**
 
@@ -187,6 +188,8 @@ All runs start from fresh clones of one exact commit, through `bench.sh` (kept i
 | B1 | 21% / 89% | 13,983 MB | 2.64 | none |
 | B1b | 27% / 88% | 13,835 MB | 3.46 | none |
 | B4 | 18% / 55% of 4 CPUs, i.e. up to all of the 2 pinned | 13,764 MB | 3.85 | 4 waits, 140 s |
+| F2b | 20% / 54% of 4 CPUs (2 pinned) | 14,013 MB | 4.22 | 24 waits, 239 s |
+| F3 | 32% / 100% | 13,437 MB | 4.7 | 9 waits, 40 s |
 
 **Per driver** (B2, 3 workers): times were within 0–9% of their sequential medians.
 - `check-caption` read ×1.41, but its own sequential history swings between 76 and 111 s.
@@ -210,11 +213,11 @@ The full per-step profile from the final run is under "Per-step profile" below.
 | Configuration | Full gate | Source |
 |---|---|---|
 | Old gate, sequential | **95.4 min** | measured: `0a3964f`, run `20261110-003130-0a3964f3-11617` |
-| New gate, 3 workers, 4 CPUs | **{{F3_WALL}}** | measured: run `{{F3_RUN}}` |
-| New gate, 2 workers, 2 CPUs | {{F2_WALL}} | measured: F2 (see §12 for its failure) |
-| New gate, 1 worker (sequential, with the driver changes) | about {{SEQ_MODEL}} | **derived**, not run: F3's sum of step times divided by its measured contention |
+| New gate, 3 workers, 4 CPUs | **24m 17s** | measured: run `20261110-033657-dab1c658-18431` |
+| New gate, 2 workers, 2 CPUs | **38m 06s** | measured: F2b, run `20261110-040231-dab1c658-30930` on `dab1c65`, pinned with `taskset` (same CPU speed, memory not limited; not a real 2-core machine) |
+| New gate, 1 worker (sequential, with the driver changes) | about 69.5 min (4,240 s ÷ 1.017) | **derived**, not run: F3's sum of step times divided by its measured contention |
 
-**Improvement:** {{IMPROVEMENT}}.
+**Improvement:** 95.4 min → 24m 17s for the same 74 steps: **74.5% less wall time (3.93× faster)**. About two thirds of the gain comes from parallelism. The driver changes cut the step time from 95.4 to 70.7 min (−24.7 min), and 3 workers cut that to 24.3 min of wall time (−46.4 min).
 
 ## 10. Time-estimation methodology
 
@@ -251,8 +254,8 @@ The full per-step profile from the final run is under "Per-step profile" below.
 | B1 | 16–22 min, about 18m 16s ("measured") | 12m 02s | −34% | **the history was stale**: the leaderboard's samples predated its 62% speed-up. The progress block reported the revision mid-run ("about 18m 22s → about 14m 15s"). This led to the change-point rule. |
 | B1b | about 18m 16s ("measured") | 8m 26s | −54% | the same staleness; the prediction was made before the change-point rule existed |
 | B4 | 14–22 min, about 16m 57s (modelled) | 17m 10s | +1% | |
-| F2 | {{F2_PRED}} | {{F2_WALL}} | {{F2_ERR}} | |
-| F3 | {{F3_PRED}} | {{F3_WALL}} | {{F3_ERR}} | |
+| F2b | 31–45 min, about 36m 13s (low-confidence) | 38m 06s | +5% | 2 workers on 2 CPUs; backpressure cost 239 s, which the estimate does not model |
+| F3 | 20–30 min, about 23m 29s (low-confidence: 3 changed drivers with 2 samples each) | 24m 17s | +3% | |
 
 **Lesson:** a "measured" label describes the samples, not whether the step changed since. The change-point rule and the contention-normalised parallel samples make the history catch up after two runs, without needing a sequential run.
 
@@ -272,12 +275,12 @@ The full per-step profile from the final run is under "Per-step profile" below.
      - in between, a guess sent earlier on the same pass ended the turn, so the word never came back on that phone, and the read threw.
    - 2 busy CPUs widen that window. Sequential runs never hit it. It predates Stage 5.2: the helper came from Stage 5, so the Stage 5.1 branch (PR #4) carries it too. It hasn't been seen there, and changing that verified branch is the owner's call, so it was raised with the owner rather than patched there.
    - **Fix (`d5e175f`):** reads and taps give up after 2 s and retry on the next pass.
-   - **Validation, V1:** F5 and E2E on 2 workers pinned to CPUs 2–3, alongside F2: {{V1_VERDICT}}.
-3. {{F2_OTHER}}
+   - **Validation, V1:** F5 and E2E on 2 workers pinned to CPUs 2–3, alongside F2: PASSED (run 20261110-032414-d5e175f3-16751: F5 461.5 s, E2E 509.2 s, Draw & Guess finished in both).
+3. **F2 was cancelled by me, and its timing is discarded.** While it ran on CPUs 0–1, I started the validation run V1 on CPUs 2–3. Backpressure reads the *machine-wide* load average, so V1's load throttled F2, and V1 was throttled in turn (224 s before `check-f5` started). Both runs' timings are therefore unreliable as 2-CPU measurements; F2b replaced F2 with nothing else running. The harness counted the overlapping run's processes as F2's "orphans". It now counts only processes carrying the run's own tag, and F2 left **0**.
 
 **Exclusivity:** none was needed. No timing-sensitive driver failed or drifted under 2 or 3 workers (§8).
 
-**Backpressure** was active only on 2 CPUs: 4 waits and 140 s in B4, and {{F2_BP}} in F2. The 1-minute load average lags, so a wait can outlast the CPU pressure it reacted to (§15).
+**Backpressure:** on 2 CPUs, 4 waits and 140 s in B4, and 24 waits and 239 s in F2b. On 4 CPUs, 9 waits and 40 s in F3: one right after the fast checks, and eight while many short drivers started near the end. The 1-minute load average lags, so a wait can outlast the CPU pressure it reacted to (§15).
 
 ## 13. Failure and cleanup verification
 
@@ -318,7 +321,17 @@ F2's failure shows this working: the DIAG lines, the worker and the time stamps 
 
 ## 14. Passing gate: revision and run ID
 
-{{F3_VERDICT_BLOCK}}
+**`node scripts/gate.mjs full` (automatic worker count: 3 workers on 4 CPUs) on `dab1c6588036603d4a214557b6e223266734c1f4`: PASSED (exit 0), run `20261110-033657-dab1c658-18431`.**
+
+- **Steps:** 74 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run.
+- **Unit tests:** 1,101 in 101 files: the 1,080 from Stage 5.1, unchanged, plus 21 new tests in `tests/gate-plan.test.ts`.
+- **Browser drivers:** all 67 passed. **E2E (Chromium):** 15 of 15, with all 14 games played to the end.
+- **Check counts:** every one of the 74 steps made exactly as many checks as in the sequential Stage 5.1 final run (1,992 in each), with 0 failures in either (§6).
+- **Environment:** a fresh clone with a clean tree (`git.dirty` empty), source fingerprint `2f06fba17621` (393 files).
+- **Browser and runtime:** `chrome-headless-shell` 153.0.8010.12 (`MCHEZO_CHROMIUM_PATH`), Node v22.23.4.
+- **Wall time:** 24m 17s, from 03:36:57 to 04:01:14 UTC on 2026-11-10. Afterwards no process carrying the run's tag was left.
+
+The verdict covers `dab1c65` only. Later commits on the branch change `docs/` only. The failed, cancelled and interrupted runs are in §12 and §11 and are not combined with this one. Gate self-test on `dab1c65`: **59 of 59 checks passed**, run in the clean clone of `dab1c65`. Afterwards there was no Chromium or server process left.
 
 ## 15. Remaining performance bottlenecks
 
@@ -333,4 +346,80 @@ F2's failure shows this working: the DIAG lines, the worker and the time stamps 
 
 ### Per-step profile (final run)
 
-{{PROFILE_TABLE}}
+From the final run (3 workers). Old median and range: the committed baseline before Stage 5.2 (sequential samples). Peak memory includes the step's Chromium and, for own-server drivers, its server. Contexts / pages are counted by `driver-env` (peak open in brackets); rooms are those created on the step's gate server (own-server drivers create theirs elsewhere).
+
+| Step | Old median (s) | Old range | This run (s) | CPU (s) | Peak memory (MB) | Contexts / pages (peak open) | Rooms on gate server | Own server |
+|---|---|---|---|---|---|---|---|---|
+| check-leaderboard | 1073.7 | 1071.4–1077.6 | 408.1 | 21 | 263 | 2 / 5 (5) | 1 | no |
+| e2e-chromium | 835.4 | 823.6–984.4 | 495.9 | 27.3 | 263 | 4 / 4 (4) | 2 | no |
+| check-f5 | 814.6 | 661.4–817 | 454.4 | 25.8 | 267 | 4 / 4 (4) | 2 | no |
+| check-game-night | 319 | 306.3–322.8 | 319.8 | 23.1 | 275 | 3 / 19 (11) | 2 | no |
+| check-audit-fixes | 218.1 | 215.9–220.2 | 217.9 | 11.4 | 270 | 28 / 28 (20) | 12 | no |
+| check-pulse-timing | 160.5 | 159.9–160.9 | 160.6 | 4.7 | 328 | 5 / 5 (1) | 0 | yes |
+| check-tv-lifecycle | 151.1 | 150.3–151.7 | 151.9 | 8 | 249 | 2 / 4 (4) | 1 | no |
+| check-lifecycle | 127.7 | 126.9–128.2 | 127.5 | 5.9 | 355 | 4 / 4 (4) | 0 | yes |
+| check-mchezo | 109 | 108.1–111.4 | 111.2 | 8.3 | 251 | 7 / 24 (10) | 6 | no |
+| check-briefing | 92.8 | 91.4–93.1 | 92.7 | 4.8 | 349 | 4 / 4 (4) | 0 | yes |
+| check-tv-reveal | 82.6 | 67.1–104.7 | 86.8 | 6.2 | 363 | 7 / 7 (2) | 0 | no |
+| check-caption | 76.2 | 76–107.4 | 76 | 5.6 | 355 | 5 / 5 (5) | 0 | yes |
+| check-draw-guess | 67.6 | 67.1–67.9 | 69.3 | 5.9 | 348 | 7 / 7 (6) | 0 | yes |
+| check-pattern-pulse | 59.4 | 58–59.6 | 59.6 | 5.1 | 340 | 5 / 5 (5) | 0 | yes |
+| check-math | 59.3 | 57–60.4 | 59.1 | 4.3 | 241 | 2 / 4 (4) | 2 | no |
+| check-stage2 | 59.3 | 55.4–60 | 60.9 | 5.2 | 257 | 8 / 8 (5) | 3 | no |
+| check-majority-rules | 57.4 | 57.1–57.9 | 58 | 5.3 | 353 | 5 / 5 (5) | 0 | yes |
+| check-spectator | 56.3 | 56–56.9 | 57.4 | 5.2 | 251 | 2 / 15 (14) | 1 | no |
+| check-connections | 55.1 | 54.7–55.8 | 56 | 4.6 | 348 | 4 / 4 (4) | 0 | yes |
+| check-draw-sync | 51.9 | 51.4–52.4 | 54.5 | 8.3 | 368 | 6 / 6 (6) | 0 | yes |
+| check-f4 | 50.9 | 50.4–51.7 | 51.2 | 4 | 250 | 4 / 4 (4) | 2 | no |
+| check-math-network | 50.7 | 50.1–50.9 | 51.2 | 5.7 | 337 | 14 / 14 (2) | 0 | yes |
+| check-results | 49.6 | 45.1–50.8 | 49.3 | 5.3 | 363 | 17 / 17 (3) | 0 | yes |
+| check-reveal | 48.7 | 47.9–49.5 | 48.5 | 3 | 249 | 2 / 3 (3) | 1 | no |
+| check-input-isolation | 47.5 | 47.1–48 | 48.1 | 4.6 | 437 | 4 / 4 (4) | 0 | yes |
+| check-multiplayer | 46.8 | 46.4–47.1 | 47 | 4 | 253 | 4 / 4 (4) | 1 | no |
+| check-tv-spectator | 45 | 44.7–46 | 44.9 | 3.7 | 250 | 2 / 6 (5) | 1 | no |
+| check-tv-outage | 40.5 | 38.5–40.7 | 40.8 | 3.2 | 403 | 3 / 3 (3) | 0 | yes |
+| check-caption-4p | 38.3 | 37.3–39.1 | 39.2 | 5.2 | 349 | 6 / 6 (5) | 0 | yes |
+| check-geography | 38 | 35–38.7 | 36.5 | 3.7 | 248 | 2 / 4 (4) | 2 | no |
+| check-answer-reveal | 34 | 32.5–34.7 | 33.7 | 2.9 | 255 | 3 / 3 (3) | 1 | no |
+| check-action-ack | 27.4 | 27.1–28.3 | 29.1 | 3.6 | 358 | 7 / 7 (1) | 0 | yes |
+| check-math-timing | 26.7 | 26–27.1 | 27.6 | 4.1 | 342 | 11 / 11 (3) | 0 | yes |
+| check-contrast | 26 | 24.6–26.2 | 25.9 | 2.5 | 247 | 2 / 2 (2) | 2 | no |
+| check-library-nav | 25.3 | 24.7–27.4 | 26.3 | 3.7 | 356 | 9 / 9 (2) | 0 | yes |
+| check-ten-players | 25 | 23.5–26.7 | 27 | 10.4 | 379 | 12 / 12 (12) | 0 | yes |
+| check-m6 | 24.4 | 24–24.6 | 24.5 | 2.5 | 246 | 1 / 2 (2) | 1 | no |
+| check-mobile | 24.1 | 23.5–24.7 | 24.6 | 3.5 | 252 | 7 / 7 (2) | 3 | no |
+| unit-tests | 23.8 | 20.7–26.4 | 29.8 | 43.4 | 625 | – | – | – |
+| check-tv-entry | 22.2 | 21.3–22.7 | 22 | 2.5 | 249 | 1 / 2 (2) | 1 | no |
+| check-send-failures | 21.4 | 20.9–22.9 | 21.7 | 3.7 | 350 | 8 / 8 (1) | 0 | yes |
+| check-answer-race | 21.1 | 20.6–21.9 | 21.3 | 2.1 | 248 | 6 / 6 (2) | 3 | no |
+| check-abstain | 18.3 | 17.5–18.7 | 18.9 | 1.9 | 324 | 1 / 2 (2) | 1 | no |
+| check-lobby-mode | 18.1 | 17.1–23.5 | 18.2 | 4.6 | 341 | 18 / 18 (2) | 0 | yes |
+| check-year | 17.1 | 16.7–17.7 | 17.7 | 3 | 253 | 2 / 4 (4) | 2 | no |
+| check-readiness | 16.7 | 16.2–17.1 | 16.4 | 2.1 | 252 | 6 / 6 (3) | 2 | no |
+| check-lobby-fixes | 15.2 | 14.7–15.7 | 15.5 | 1.7 | 264 | 4 / 4 (2) | 2 | no |
+| check-stage4-details | 13.9 | 10.7–14.5 | 15 | 4.4 | 387 | 20 / 20 (10) | 0 | yes |
+| check-viewports | 12.2 | 11.6–12.6 | 13 | 1.8 | 249 | 2 / 6 (3) | 2 | no |
+| check-cup-memory | 11.3 | 10.6–11.7 | 11.8 | 3.3 | 351 | 11 / 11 (1) | 0 | yes |
+| check-recovery | 10.9 | 10.1–12.4 | 11.5 | 1.9 | 254 | 5 / 5 (4) | 1 | no |
+| check-tv-show | 10.7 | 10.1–11.1 | 11.7 | 3.3 | 360 | 6 / 6 (3) | 0 | yes |
+| check-answer-helper | 9.4 | 9.2–9.5 | 9.3 | 1.1 | 238 | 5 / 5 (1) | 0 | no |
+| check-progress | 9.2 | 9.1–9.7 | 9.5 | 2.6 | 354 | 3 / 3 (1) | 0 | yes |
+| check-game-night-flow | 9.1 | 8.5–9.7 | 9.3 | 2.7 | 342 | 3 / 3 (3) | 0 | yes |
+| lint | 7.7 | 7.1–10.4 | 15.1 | 17.8 | 619 | – | – | – |
+| check-official-practice | 7.7 | 6.9–8.4 | 10 | 5.1 | 356 | 5 / 5 (5) | 0 | yes |
+| check-sessions | 7.6 | 7.3–8 | 9.1 | 1.8 | 253 | 5 / 7 (5) | 1 | no |
+| typecheck-web | 5.9 | 5.1–6.8 | 10.6 | 12.2 | 381 | – | – | – |
+| check-closest | 5.9 | 5.6–6 | 7.1 | 1.5 | 247 | 2 / 3 (3) | 1 | no |
+| typecheck-server | 5.5 | 4.6–8.7 | 10.7 | 13.2 | 451 | – | – | – |
+| check-ws-reconnect | 5 | 4.6–5.2 | 5.5 | 1.1 | 277 | 1 / 2 (2) | 1 | no |
+| check-history-links | 4.7 | 4.5–5.1 | 4.9 | 2 | 343 | 2 / 2 (1) | 0 | yes |
+| check-library | 4.4 | 4.2–4.6 | 4.3 | 1.3 | 239 | 1 / 2 (2) | 1 | no |
+| check-tv-dashboard | 4.4 | 3.7–6.7 | 5.1 | 2.8 | 354 | 5 / 5 (2) | 0 | yes |
+| build-web | 4.3 | 3.7–5.4 | 6.8 | 8.1 | 448 | – | – | – |
+| check-reduced-motion | 4 | 3.6–4.2 | 4.7 | 1.3 | 239 | 2 / 4 (2) | 2 | no |
+| check-errors | 4 | 3.3–4.2 | 4.2 | 1.3 | 239 | 2 / 2 (2) | 1 | no |
+| check-shuffle | 4 | 3.7–4.1 | 4.1 | 1.2 | 242 | 1 / 2 (2) | 1 | no |
+| check-studio | 3.5 | 3.2–3.7 | 4.1 | 1.2 | 240 | 1 / 2 (2) | 1 | no |
+| check-double-start | 3.1 | 2.9–3.6 | 3 | 1.1 | 240 | 1 / 2 (2) | 1 | no |
+| check-a11y-surfaces | 2.1 | 2–2.6 | 2.7 | 1.8 | 337 | 2 / 2 (1) | 0 | yes |
+| check-restart | 1.5 | 1.2–1.8 | 1.8 | 0.8 | 162 | – | 0 | yes |
