@@ -22,6 +22,13 @@
  */
 import { moduleRng, type GameModule, type ModuleContext } from "./types.js";
 
+/**
+ * Stage 6.2: Pattern Pulse's rules version. A solo personal best compares
+ * only with rounds under the same version, so bump it whenever the lengths,
+ * the symbols, the windows or the scoring below change
+ * (tests/stage62-solo-shelf.test.ts fingerprints them).
+ */
+export const PULSE_RULES_VERSION = 1;
 export const PULSE_LENGTHS = [3, 4, 5, 6, 7, 8] as const;
 export const PULSE_SYMBOLS = 6;
 export const PULSE_POINTS = { perSymbol: 20, perfect: 50 } as const;

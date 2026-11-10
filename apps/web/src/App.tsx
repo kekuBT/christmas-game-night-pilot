@@ -11,7 +11,7 @@ import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
 import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, themes, type Route, type RoomSub } from "./ui/mchezo/index.js";
 import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen, type HostKind } from "./components/mchezo/Home.js";
-import { SoloHome, SoloRound } from "./components/mchezo/Solo.js";
+import { SoloHome, SoloRound, soloShelf } from "./components/mchezo/Solo.js";
 import { ChooseGameSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
 import { anchorHomeBelow, stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
@@ -812,7 +812,7 @@ export function App() {
         />
       );
     } else if (route.name === "solo") {
-      const soloGame = route.gameId ? catalog.find((g) => g.id === route.gameId && g.soloPlay) : undefined;
+      const soloGame = route.gameId ? soloShelf(catalog).find((g) => g.id === route.gameId) : undefined;
       screen = soloGame ? (
         // Back to solo / Home step back to that screen when it is the one
         // beneath, else replace this entry, so neither Back nor browser Back

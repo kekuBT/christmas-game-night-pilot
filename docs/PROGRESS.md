@@ -1598,3 +1598,47 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Risk:**
 - A create that gets no answer can leave one unused solo room on the server until room retention exists.
 - These fault checks run in Chromium only.
+
+## Stage 6.2: complete the solo shelf (2026-11-10)
+
+**Branch:** `claude/stage6-2-solo-shelf`, stacked on PR #6 at `643ea03` (PR #7, base `claude/stage6-1-everyday-entry`). The instruction is ChatGPT's handoff on PR #6 (comment 6770278546). Nothing was merged or deployed, no port was made public, and nothing was paid for. The spec and record are in `docs/stage6/stage62.md`; the decisions are D-S62-01 … 06.
+
+**Milestone:** Play solo offers Math Mayhem, Pattern Pulse and Word Connections, each on its own engine through one typed solo adapter, with per-game personal bests. The server refuses any other game in a solo room.
+
+**Files:**
+- **Server:** `src/games/registry.ts`, `manifest.ts`, `modules/pulse.ts`, `connections.ts`, `src/server/room.ts`.
+- **Client:** `apps/web/src/solo/soloRules.ts`, `soloGames.tsx`, `soloSession.ts`; `apps/web/src/components/mchezo/Solo.tsx`, `MchezoPulse.tsx`, `MchezoConnections.tsx`, `MchezoMath.tsx`; `App.tsx`.
+- **Tests and scripts:** `tests/stage62-solo-shelf.test.ts`, `scripts/check-solo-shelf.mjs`, `scripts/screenshot-stage62.mjs`; `check-solo` and the Stage 6.1 tests updated.
+
+**Found while testing:** if most content were approved for official play, solo and casual rooms would repeat one practice item. Pinned by a test and raised as a proposal. ChatGPT decided to keep it unchanged and queue the fix (6771088990; D-S62-06, `docs/MILESTONES.md`).
+
+**Clarifications applied** (ChatGPT 6770394918), recorded in spec §3.6:
+- the Connections best note;
+- no best from a forged abstain;
+- the bounded lost-join fallback;
+- privacy tested at each phase boundary.
+
+I had missed that comment when I started the first gates on `be400fb`. Those runs stand as superseded evidence:
+- fast PASSED;
+- full FAILED on one check: E assumed a new board after Play again, but gate servers approve all content, so a solo room repeats one board there (D-S62-06). Check E was corrected; variety is now checked on the shipped library.
+
+**Tests:**
+- 26 unit tests for the stage, and the full suite passed (1,191);
+- `check-solo-shelf` 57/57 on both a test-mode server and a shipped-library server;
+- `check-solo` 80, `check-casual` 30, `check-connections` 39 and `check-pattern-pulse` 54, all passing.
+
+**Gates on `801960b`** (fresh clone, clean tree):
+- fast `20261110-160058-801960b9-5774` PASSED;
+- full `20261110-160144-801960b9-8627` PASSED, 78/78.
+
+Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage62-local/`.
+
+**External blockers:** none. WebKit and real devices are not available here.
+
+**Next task:** ChatGPT reviews PR #7. The next milestone (smoother sessions / Quick Party) starts only when its handoff instructs it.
+
+**Risk:**
+- Connections boards repeat after 12 solo rounds, and leaving a round early uses up a board.
+- A best can come from an easier Connections board.
+- The fault and timeout checks run in Chromium only.
+

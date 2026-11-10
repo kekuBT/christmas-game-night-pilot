@@ -1,0 +1,14 @@
+$ node scripts/check-tv-entry.mjs http://localhost:43227
+# timeout 600s | worker w3 | server http://localhost:43227 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s62-full-be400fb/test-results/20261110-151634-be400fb1-19788/server-data/w3)
+
+[+3.6s] PASS tv entry mid-game: TV stage opens from a question screen
+[+3.6s] PASS tv entry mid-game: game still playing, no restart — status=playing
+[+3.6s] PASS tv entry mid-game: TV entry added no player seat — players=2
+[+3.7s] PASS tv entry mid-game: back returns to the question screen
+[+21.6s] PASS tv entry mid-game: game finishes with both players scored — status=finished scores={"player-1":240,"player-2":240}
+[+21.9s] PASS tv entry from results: TV stage opens from the results screen
+[+21.9s] PASS tv entry from results: back returns to the results screen
+[+21.9s] TV ENTRY ALL PASSED
+[+21.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 22s | cpu 2.5s, peak memory 246 MB

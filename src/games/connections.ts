@@ -1,3 +1,12 @@
+/**
+ * Stage 6.2: Word Connections' rules version. A solo personal best compares
+ * only with rounds under the same version, so bump it whenever the board
+ * shape (16 tiles, 4 groups), the mistake limit or the scoring change
+ * (tests/stage62-solo-shelf.test.ts fingerprints them). Boards themselves
+ * vary: a best is "the best score on any board under these rules".
+ */
+export const CONNECTIONS_RULES_VERSION = 1;
+
 export interface ConnectionCategory {
   name: string;
   tiles: string[]; // Exactly 4 tile texts

@@ -1,0 +1,56 @@
+$ node scripts/check-caption.mjs http://localhost:36431
+# timeout 600s | worker w1 | server http://localhost:36431 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s62-full-be400fb/test-results/20261110-151634-be400fb1-19788/server-data/w1)
+
+[+4.9s] PASS the briefing explains the game
+[+5.4s] PASS everyone sees the same scene — The weather forecaster looks out of the window
+[+5.4s] PASS no horizontal overflow at 390px (write)
+[+5.4s] PASS no horizontal overflow at 390px (write)
+[+5.4s] PASS no horizontal overflow at 320px (write)
+[+5.4s] PASS no horizontal overflow at 360px (write)
+[+5.4s] PASS character counter counts down
+[+35.8s] PASS Bea's caption is in and shown back to her
+[+35.8s] PASS a double submit sends one caption — 1
+[+35.9s] PASS after a reload Bea still sees her caption, not an empty box
+[+36.3s] PASS keyboard: Cal submits with Tab + Enter
+[+36.4s] PASS vote cards show no names (anonymous) — “Beep boop, that's a knock-knock joke” | “Grandpa's new ringtone” | YOURS — YOU CAN’T VOTE FOR IT | “When the robot laughs at its own joke” | “Error 404: punchline not found”
+[+36.4s] PASS Bea's own caption is marked Yours and disabled
+[+36.4s] PASS Bea can vote for the other three
+[+36.5s] PASS vote cards are at least 44px tall at 320px — 67.39047241210938
+[+38.6s] PASS TV shows the scene and the captions
+[+38.6s] PASS TV never shows who wrote what
+[+38.8s] PASS a vote is confirmed on the card
+[+59.0s] PASS round 2 starts on time without Dee's vote
+[+59.1s] PASS round 2 shows last round's favourite (no names)
+[+105.0s] PASS results reach every phone
+[+105.0s] PASS results credit the winning caption's author — CAPTION CLASH · OFFICIAL
+[+105.0s] Bea wins Caption Clash
+[+105.0s] B
+[+105.0s] Bea
+[+105.0s] 
+[+105.0s] Top of the table: Bea. Modesty optional.
+[+105.0s] 
+[+105.0s] You came 4th of 4
+[+105.0s] 75 pts
+[+105.0s] Someone has to make the podium look good.
+[+105.0s] CAPTION CLASH
+[+105.0s] The room’s favourites
+[+105.0s] 
+[+105.0s] Round 1: The weather forecaster looks out of the window
+[+105.0s] 
+[+105.0s] “Grandpa's new ringtone”
+[+105.0s] by Cal
+[+105.0s] 2
+[+105.0s] VOTES
+[+105.0s] 
+[+105.0s] R
+[+105.0s] PASS results explain points (25 per caption, 100 per vote)
+[+105.0s] PASS results show participation
+[+105.1s] PASS no horizontal overflow on results at 320px
+[+105.1s] PASS the TV results still show no author names
+[+105.6s] PASS back in the lobby
+[+105.6s] PASS another Caption Clash starts with new scenes — 201
+[+106.2s] PASS the new game's first scene differs
+[+106.3s] CAPTION ALL PASSED
+[+106.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 106.3s | cpu 6.5s, peak memory 354 MB

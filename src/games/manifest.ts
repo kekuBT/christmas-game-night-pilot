@@ -141,6 +141,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     description: "Sort 16 words into 4 groups of 4. Playable solo.",
     categories: ["word", "puzzle"],
     minPlayers: 1,
+    soloPlay: true,
     maxPlayers: 10,
     playStyle: "solo",
     competition: "competitive",
@@ -153,7 +154,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     scoring: { type: "per-player-points", teamDerived: false },
     features: { practice: true, official: true, abstention: "whole-game" },
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
-    details: "One shared board; each player solves it independently. The only game with a 1-player minimum.",
+    details: "One shared board; each player solves it independently. Playable alone from Play solo.",
   },
   {
     id: "who-said-that",
@@ -323,6 +324,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     description: "Watch a sequence of coloured shapes, then tap it back in order. Six rounds, three shapes up to eight.",
     categories: ["memory", "puzzle"],
     minPlayers: 1,
+    soloPlay: true,
     maxPlayers: 10,
     playStyle: "solo",
     competition: "competitive",
@@ -380,6 +382,9 @@ export function validateManifest(manifest: unknown): string[] {
   if (m.maxPlayers !== reg.maxPlayers) errors.push(`maxPlayers: ${m.maxPlayers} does not match registry ${reg.maxPlayers}`);
   if (m.recommendedPlayers !== reg.recommendedPlayers) errors.push(`recommendedPlayers: ${m.recommendedPlayers} does not match registry ${reg.recommendedPlayers}`);
   if (m.recommendedPlayers !== undefined && (m.recommendedPlayers < m.minPlayers || m.recommendedPlayers > m.maxPlayers)) errors.push(`recommendedPlayers: ${m.recommendedPlayers} is outside ${m.minPlayers}–${m.maxPlayers}`);
+  // Stage 6.2: the client's solo shelf and the server's solo allowlist must agree.
+  if ((m.soloPlay === true) !== (reg.soloPlay === true)) errors.push(`soloPlay: ${m.soloPlay ?? false} does not match registry ${reg.soloPlay ?? false}`);
+  if (m.soloPlay === true && m.minPlayers > 1) errors.push(`soloPlay: a solo game needs a 1-player minimum (has ${m.minPlayers})`);
   if (m.duration.minutes !== reg.defaultDurationMinutes) errors.push(`duration.minutes: ${m.duration.minutes} does not match registry ${reg.defaultDurationMinutes}`);
   const regPlayStyle = reg.modes.includes("team") ? "team" : "solo";
   if (m.playStyle !== regPlayStyle) errors.push(`playStyle: "${m.playStyle}" contradicts registry modes [${reg.modes.join(", ")}]`);

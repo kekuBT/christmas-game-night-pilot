@@ -1,0 +1,176 @@
+{
+  "revision": "89904bdcc2d57fd02a716688838f9c01982f60e0",
+  "workingTreeClean": true,
+  "capturedAt": "2026-11-10T15:58:07.746Z",
+  "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
+  "shots": [
+    {
+      "file": "01-solo-shelf-320x640.png",
+      "screen": "Play solo: the top of the shelf",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "01b-solo-shelf-connections-320x640.png",
+      "screen": "Play solo: the Word Connections card, its personal best and the note that the best spans boards",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "02-pulse-ready-320x640.png",
+      "screen": "Pattern Pulse, solo: ready for round 1 (no Sit the rest out)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "03-pulse-memorise-320x640.png",
+      "screen": "Pattern Pulse: memorising round 2",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "04-pulse-input-320x640.png",
+      "screen": "Pattern Pulse: tapping round 2 back (2 of 4 in)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "05-pulse-results-320x640.png",
+      "screen": "Pattern Pulse results: score, rounds perfect, personal best, the six-round recap",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "06-connections-play-320x640.png",
+      "screen": "Word Connections, solo: one group found, two tiles selected (no Sit this game out)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "07-connections-results-320x640.png",
+      "screen": "Word Connections results: 2 of 4 found, the found groups solid and the missed dashed",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "01-solo-shelf-390x844.png",
+      "screen": "Play solo: the top of the shelf",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "01b-solo-shelf-connections-390x844.png",
+      "screen": "Play solo: the Word Connections card, its personal best and the note that the best spans boards",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "02-pulse-ready-390x844.png",
+      "screen": "Pattern Pulse, solo: ready for round 1 (no Sit the rest out)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "03-pulse-memorise-390x844.png",
+      "screen": "Pattern Pulse: memorising round 2",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "04-pulse-input-390x844.png",
+      "screen": "Pattern Pulse: tapping round 2 back (2 of 4 in)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "05-pulse-results-390x844.png",
+      "screen": "Pattern Pulse results: score, rounds perfect, personal best, the six-round recap",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "06-connections-play-390x844.png",
+      "screen": "Word Connections, solo: one group found, two tiles selected (no Sit this game out)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "07-connections-results-390x844.png",
+      "screen": "Word Connections results: 2 of 4 found, the found groups solid and the missed dashed",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2,
+      "fullPage": false
+    },
+    {
+      "file": "01-solo-shelf-1440x900.png",
+      "screen": "Play solo: the top of the shelf",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1,
+      "fullPage": false
+    },
+    {
+      "file": "01b-solo-shelf-connections-1440x900.png",
+      "screen": "Play solo: the Word Connections card, its personal best and the note that the best spans boards",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1,
+      "fullPage": false
+    },
+    {
+      "file": "02-pulse-ready-1440x900.png",
+      "screen": "Pattern Pulse, solo: ready for round 1 (no Sit the rest out)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1,
+      "fullPage": false
+    },
+    {
+      "file": "03-pulse-memorise-1440x900.png",
+      "screen": "Pattern Pulse: memorising round 2",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1,
+      "fullPage": false
+    },
+    {
+      "file": "04-pulse-input-1440x900.png",
+      "screen": "Pattern Pulse: tapping round 2 back (2 of 4 in)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1,
+      "fullPage": false
+    },
+    {
+      "file": "05-pulse-results-1440x900.png",
+      "screen": "Pattern Pulse results: score, rounds perfect, personal best, the six-round recap",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1,
+      "fullPage": false
+    },
+    {
+      "file": "06-connections-play-1440x900.png",
+      "screen": "Word Connections, solo: one group found, two tiles selected (no Sit this game out)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1,
+      "fullPage": false
+    },
+    {
+      "file": "07-connections-results-1440x900.png",
+      "screen": "Word Connections results: 2 of 4 found, the found groups solid and the missed dashed",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1,
+      "fullPage": false
+    }
+  ]
+}

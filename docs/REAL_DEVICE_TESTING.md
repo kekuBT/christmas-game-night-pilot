@@ -175,6 +175,9 @@ Do these on phones that open the **Wi-Fi address** (not localhost): plain http t
 | I3 | Mid-round, tap **Leave round**, then **Keep playing**; then leave for real | Keep playing keeps the round; leaving asks first, then lands on Play solo with the best unchanged |
 | I4 | Mid-round, reload the page (or close and reopen the tab) | The round's start screen, not a stuck loading screen; **Start** says the last round was interrupted and begins a fresh one |
 | I5 | In a **private / incognito** tab, play a round | It plays; the screens say a personal best can't be kept or wasn't saved |
+| I7 | Play solo → **Pattern Pulse** → Start; play all six rounds | Each pattern shows, hides, and can be tapped back; the results list all six rounds and a personal best |
+| I8 | Play solo → **Word Connections** → Start; find two groups, then make four mistakes | Tiles are easy to tap; the results show the two found groups solid and the two missed dashed, and a short note that the best spans boards of different difficulty |
+| I9 | Switch games: Math → Pulse → Connections → Math | Each starts fresh; each game keeps its own personal best |
 | I6 | Host a game without touching the Casual/Family Cup choice; a second phone joins | No Cup chip, no Official/Practice choice; both phones say "Casual, just for fun"; a game plays to results and the lobby says "Last game · … · Casual" |
 
 ---

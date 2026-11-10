@@ -1,0 +1,60 @@
+PASS A the shelf lists exactly Math Mayhem, Pattern Pulse and Word Connections — math-mayhem, pattern-pulse, word-connections
+PASS A math-mayhem: no personal best yet, and a Start
+PASS A pattern-pulse: no personal best yet, and a Start
+PASS A word-connections: no personal best yet, and a Start
+PASS B Pulse: no name, code or lobby, and no Sit the rest out
+PASS B Pulse perfect: 960 points, 6 of 6 rounds perfect (round 1 by keyboard) — {"score":960,"headline":"6 of 6 rounds perfect","pb":"Your first personal best on this device!"}
+PASS B Pulse: its first personal best — Your first personal best on this device!
+PASS B Pulse results: its own six-round recap and scoring, no Math copy, no lobby or standings
+PASS B results move focus to the score
+PASS C Pulse replay with a slip each round: 0 points, 0 of 6 perfect — {"score":0,"headline":"0 of 6 rounds perfect","pb":"Your personal best on this device is still 960."}
+PASS C Pulse: a lower score keeps the best (960) — Your personal best on this device is still 960.
+PASS D Connections: no Sit this game out in solo
+PASS D Connections solved with no mistakes: 450, the first group by keyboard — {"score":450,"headline":"All four groups, no mistakes","pb":"Your first personal best on this device!"}
+PASS D Connections: its own first best (not compared with Pulse's 960) — Your first personal best on this device!
+PASS D Connections results: the solution with all four groups found
+PASS E Play again: no tile selected from the last round
+PASS E Play again: a fresh round with nothing found yet (16 tiles, no group bands)
+INFO E the board after Play again is the same one: the server's content selection decides (with all content approved, as on a gate server, a solo room repeats one board; spec §3.4). Board variety is checked in K, on the shipped library.
+PASS E four wrong guesses: 0 points, out of guesses — {"score":0,"headline":"Found 0 of 4 groups · out of guesses","pb":"Your personal best on this device is still 450."}
+PASS E every group shown, all as missed
+PASS E the best stays 450 — Your personal best on this device is still 450.
+PASS F two groups then four wrong: 200 points, 2 of 4 — {"score":200,"headline":"Found 2 of 4 groups · out of guesses","pb":"Your personal best on this device is still 450."}
+PASS F found and missed told apart: 2 solid, 2 dashed
+PASS G Math starts fresh at question 1 after the other games
+PASS G Math: 10 of 10, with the Math headline and its own first best — {"score":1200,"headline":"10 of 10 correct","pb":"Your first personal best on this device!"}
+PASS G one solo room for every round and every switch — 1 rooms
+PASS G the server holds each round in that one room (2 Pulse, 3 Connections, 1 Math) — {"pp":2,"cx":3,"mm":1}
+PASS G solo rounds are never official
+PASS H one best per game and rules version — {"pattern-pulse@1":{"score":960,"at":1794325761115,"rulesVersion":1},"word-connections@1":{"score":450,"at":1794325798514,"rulesVersion":1},"math-mayhem@1":{"score":1200,"at":1794325822866,"rulesVersion":1}}
+PASS H the shelf shows each game's own best
+PASS H a best under other rules is never shown (Pulse v0; a v2 record in Connections' v1 slot)
+PASS H blocked storage: every game says bests can't be kept
+PASS H blocked storage: Connections plays to its result and says the best couldn't be saved — {"score":0,"headline":"Found 0 of 4 groups · out of guesses","pb":"Your score couldn’t be saved as a personal best: this device’s storage is unavailable."}
+PASS I Leave mid-Pulse: the round is removed on the server
+PASS I reload mid-Connections: the round's start screen
+PASS I Start after the reload replaces the interrupted round, and says so
+PASS I a second tab's Pulse replaces this tab's Connections round: it returns to its Start screen
+PASS I exactly one round plays, the second tab's Pulse
+PASS I still one solo room — 1 rooms
+PASS J a guess with no reply ends within the request allowance, the four tiles still selected
+PASS J it ended in about 6 s, not stuck on Checking… — 6179 ms
+PASS J sending again works: the group is found
+PASS I Home from the results: Home, with no phantom Rejoin
+PASS L the shelf says Connections' best spans boards (and only Connections)
+PASS L Connections' start screen: the device best (50) and the note
+PASS L Connections: one group found (100 so far)
+PASS L the server takes the forged abstain (it is the seat's own token) — {"status":200,"body":{"accepted":true,"result":{"gameStatus":"finished"}}}
+PASS L Connections results: the server's 100 and 1 of 4, and why it sets no best — {"score":100,"headline":"Found 1 of 4 groups","pb":"You sat this round out, so it doesn’t count toward a personal best."}
+PASS L Connections results: the note next to the best
+PASS L the stored Connections best is still 50 — {"word-connections@1":{"score":50,"at":1,"rulesVersion":1},"pattern-pulse@1":{"score":20,"at":1,"rulesVersion":1}}
+PASS L the same request replayed: the original answer, and still 50 — {"status":200,"body":{"accepted":true,"result":{"gameStatus":"finished"}}}
+PASS L after a reload: the start screen, still 50 on screen and in storage
+PASS L Pulse: a forged abstain after a perfect first round ends it: 110, and it sets no best — {"a3":{"status":200,"body":{"accepted":true,"result":{"gameStatus":"finished"}}},"lq":{"score":110,"headline":"1 of 6 rounds perfect","pb":"You sat this round out, so it doesn’t count toward a personal best."}}
+PASS L Pulse: the stored best is still 20 (110 would have beaten it); no Connections note here — {"word-connections@1":{"score":50,"at":1,"rulesVersion":1},"pattern-pulse@1":{"score":20,"at":1,"rulesVersion":1}}
+PASS K Pulse: a round left unanswered runs out (Time ran out)
+PASS K Pulse at its game deadline: a finished server result, 0 points, the timed-out round in the recap — {"score":0,"headline":"0 of 6 rounds perfect · 1 ran out of time","pb":"Your first personal best on this device!"}
+PASS K Connections at its deadline with one group found: 100, 1 of 4, one solid band — {"score":100,"headline":"Found 1 of 4 groups","pb":"Your first personal best on this device!"}
+PASS K shipped library: Play again, then a Start after leaving, each deal a board not yet used in this room
+SOLO SHELF ALL PASSED
+exit 0

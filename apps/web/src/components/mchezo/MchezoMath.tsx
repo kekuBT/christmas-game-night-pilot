@@ -57,7 +57,7 @@ export interface MchezoMathDeps {
   players: PublicPlayer[];
   playerId: string;
   gamesTitle: string;
-  intent: (gameInstanceId: string, action: string, payload: Record<string, unknown>) => Promise<void>;
+  intent: (gameInstanceId: string, action: string, payload: Record<string, unknown>) => Promise<boolean | void>;
   post: <T>(path: string, body: Record<string, unknown>) => Promise<T>;
   roomId: string;
   isHostOrCohost?: boolean;

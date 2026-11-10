@@ -84,7 +84,9 @@ describe("honest requirements: Math Mayhem's hard minimum is 1, best with 2+", (
   });
 
   it("social games still refuse to start alone", () => {
-    const { engine, host } = room("solo", 1);
+    // Stage 6.2: in a solo room the solo allowlist refuses them first (stage62-solo-shelf.test.ts);
+    // elsewhere a lone player still meets each game's hard minimum.
+    const { engine, host } = room("casual", 1);
     expect(() => engine.startGame(host, "trivia")).toThrow(/at least 2/);
     expect(() => engine.startGame(host, "impostor")).toThrow(/at least 4/);
   });
