@@ -11,6 +11,9 @@
 // ends. A player who joins after that must still reach both screens (the
 // stalled poll times out and the next one goes through), and the proxy must
 // see each stalled request cancelled by its page.
+// Then (review of PR #5) the TV's next polls get a 500 whose body stalls. The
+// TV skips such a reply without reading it, so it must close each one at
+// once: no open replies may pile up, and the TV must keep updating.
 // Playwright's own routing can't do this: it sends a reply whole or not at
 // all, never headers and then part of the body.
 // Starts and stops ITS OWN server. Usage: node scripts/check-poll-body-stall.mjs
@@ -44,8 +47,20 @@ if (!port) { srv.kill("SIGTERM"); throw new Error(`server did not start: ${out.s
 // poll that is armed to stall.
 const stallNext = { player: 0, spectator: 0 };
 const stalls = []; // { audience, at, cancelledAt }
+let errorStallNext = 0; // TV polls to answer with a 500 whose body stalls
+const errorStalls = []; // { at, cancelledAt }
 const proxy = createServer((req, res) => {
   const audience = /\/projection\?(?:.*&)?audience=(player|spectator)/.exec(req.url ?? "")?.[1];
+  if (audience === "spectator" && errorStallNext > 0) {
+    errorStallNext--;
+    const s = { at: Date.now(), cancelledAt: null };
+    errorStalls.push(s);
+    res.writeHead(500, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
+    res.flushHeaders();
+    res.write("{");
+    res.on("close", () => { s.cancelledAt = Date.now(); });
+    return; // never ended by the proxy
+  }
   if (audience && stallNext[audience] > 0) {
     stallNext[audience]--;
     const s = { audience, at: Date.now(), cancelledAt: null };
@@ -122,6 +137,15 @@ try {
       took === null ? "never cancelled" : `cancelled after ${(took / 1000).toFixed(1)} s`);
   }
   console.log(`(Bea joined ${((Date.now() - stalledAt) / 1000).toFixed(1)} s ago; ${stalls.length} poll(s) stalled in all)`);
+
+  // 4. The TV's next three polls get a 500 whose body stalls after "{".
+  errorStallNext = 3;
+  await soon("the TV's next three polls get a 500 whose body stalls", async () => errorStalls.length === 3, 15000);
+  await soon("TV: each skipped 500 reply is closed by the page at once (none left open)", async () => errorStalls.every((s) => s.cancelledAt !== null), 5000);
+  const slowest = Math.max(...errorStalls.map((s) => (s.cancelledAt ?? Date.now()) - s.at));
+  check("TV: each 500 reply was closed within 2 s, not at the 6 s timeout", slowest < 2000, `slowest ${(slowest / 1000).toFixed(1)} s`);
+  await api("/rooms/join-by-code", { joinCode: room.joinCode, displayName: "Cai" });
+  await soon("after the stalled 500 replies, a new player (Cai) still reaches the TV", () => tvShows("Cai"), 10000);
 } finally {
   await browser.close();
   proxy.closeAllConnections?.();

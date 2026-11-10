@@ -67,13 +67,24 @@ describe("liveness (client)", () => {
 describe("liveness: a reply whose body stalls part-way", () => {
   let server: Server;
   let base = "";
-  let mode: "stall" | "ok" | "401" | "500" = "ok";
+  let mode: "stall" | "ok" | "401" | "500" | "401-stall" | "500-stall" = "ok";
   const hits: string[] = [];
   const cancelled: string[] = [];
+  let openNow = 0; // replies the server has started and not yet seen closed
   beforeAll(async () => {
     server = createServer((req, res) => {
       const url = req.url ?? "";
       hits.push(`${mode} ${url}`);
+      openNow++;
+      res.on("close", () => { openNow--; });
+      if (mode === "401-stall" || mode === "500-stall") {
+        // An error status whose body stalls part-way (review of PR #5).
+        res.writeHead(mode === "401-stall" ? 401 : 500, { "content-type": "application/json" });
+        res.flushHeaders();
+        res.write("{");
+        res.on("close", () => cancelled.push(`${mode} ${url}`));
+        return;
+      }
       if (mode === "stall") {
         res.writeHead(200, { "content-type": "application/json" });
         res.flushHeaders();
@@ -131,6 +142,46 @@ describe("liveness: a reply whose body stalls part-way", () => {
     mode = "500";
     await expect(phonePoll(1000)).rejects.toThrow("boom");
     mode = "ok";
+  });
+
+  // Review of PR #5 (P2): the TV skips an error reply without reading its
+  // body. Its request must still be closed, or a stalled error body stays
+  // open for good and one more piles up with every poll.
+  it("TV: error replies whose body stalls return at once, are closed, and don't pile up", async () => {
+    await vi.waitFor(() => expect(openNow).toBe(0)); // nothing left over from earlier tests
+    mode = "500-stall";
+    cancelled.length = 0;
+    for (let i = 0; i < 3; i++) {
+      const t0 = Date.now();
+      expect(await tvPoll(1000)).toEqual({ kind: "skip" });
+      expect(Date.now() - t0).toBeLessThan(900); // returned at once, not at the timeout
+    }
+    await vi.waitFor(() => expect(cancelled.filter((c) => c.startsWith("500-stall"))).toHaveLength(3));
+    await vi.waitFor(() => expect(openNow).toBe(0));
+    mode = "401-stall";
+    expect(await tvPoll(1000)).toEqual({ kind: "expired" });
+    await vi.waitFor(() => expect(cancelled.some((c) => c.startsWith("401-stall"))).toBe(true));
+    await vi.waitFor(() => expect(openNow).toBe(0));
+    mode = "ok";
+    expect(await tvPoll(1000)).toEqual({ kind: "body", body: { roomId: "r1", players: [], games: [] } });
+  });
+
+  it("phone: an error reply whose body stalls fails at its timeout and is closed", async () => {
+    await vi.waitFor(() => expect(openNow).toBe(0));
+    mode = "500-stall";
+    cancelled.length = 0;
+    const t0 = Date.now();
+    await expect(phonePoll(150)).rejects.toThrow(/did not answer|abort/i);
+    expect(Date.now() - t0).toBeLessThan(2000);
+    await vi.waitFor(() => expect(cancelled).toHaveLength(1));
+    await vi.waitFor(() => expect(openNow).toBe(0));
+    mode = "ok";
+  });
+
+  it("a reply read in full is unaffected by the poll's cleanup", async () => {
+    mode = "ok";
+    for (let i = 0; i < 3; i++) expect(await phonePoll(1000)).toEqual({ roomId: "r1", players: [], games: [] });
+    await vi.waitFor(() => expect(openNow).toBe(0));
   });
 });
 
