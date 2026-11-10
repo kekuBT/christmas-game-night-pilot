@@ -14,7 +14,7 @@ Every number below comes from a real run, and each one says which run it came fr
 | Sum of step times | 95.4 min | 70m 40s |
 | Same work, 2 workers on 2 CPUs | – | **38m 06s** (run `20261110-040231-dab1c658-30930`, same commit, 2 workers pinned to 2 CPUs) |
 
-**Final verdict:** the full gate on `735242d` PASSED (run `20261110-055944-735242dd-14712`, 75/75, 24m 29s, §14). `735242d` is the cumulative Stage 5.1 + 5.2 tree, including the PR #4 review fix.
+**Final verdict:** the full gate on `3ce937a` PASSED (run `20261110-063622-3ce937a7-2793`, 75/75, 24m 15s, §14). `3ce937a` is the cumulative Stage 5.1 + 5.2 tree, including both review fixes.
 
 Two changes do the work, and neither removes a test:
 - **A bounded parallel scheduler** runs the drivers on 3 workers by default on this machine, each worker with its own gate server.
@@ -191,7 +191,8 @@ All runs start from fresh clones of one exact commit, through `bench.sh` (kept i
 | V1 | `d5e175f` | F5 and E2E after the race fix | 2 / **2** (CPUs 2–3) | PASSED (run 20261110-032414-d5e175f3-16751: F5 461.5 s, E2E 509.2 s, Draw & Guess finished in both) | 11m 33s | | | | | |
 | F3 | `dab1c65` | full gate | 3 / 4 | PASSED 74/74 | 24m 17s | 70m 40s | 2.91× | 97% | ×1.017 | 0 (tagged) |
 | G1 | `872add3` | full gate (after the helper's 30 s rule, §12) | 3 / 4 | PASSED 74/74 | 24m 34s | 71m 29s | 2.91× | 97% | ×1.033 | 0 (tagged) |
-| G2 | `735242d` | **full gate, final**: the cumulative Stage 5.1 + 5.2 tree with the PR #4 review fix (one more driver) | 3 / 4 | PASSED 75/75 | 24m 29s | 71m 48s | 2.93× | 98% | ×1.02 | 0 (tagged) |
+| G2 | `735242d` | full gate: the cumulative tree with the PR #4 review fix (one more driver) | 3 / 4 | PASSED 75/75 | 24m 29s | 71m 48s | 2.93× | 98% | ×1.02 | 0 (tagged) |
+| G3 | `3ce937a` | **full gate, final**: the cumulative tree with both review fixes | 3 / 4 | PASSED 75/75 | 24m 15s | 71m 22s | 2.94× | 98% | ×1.023 | 0 (tagged) |
 
 **Machine:**
 
@@ -205,6 +206,7 @@ All runs start from fresh clones of one exact commit, through `bench.sh` (kept i
 | F3 | 32% / 100% | 13,437 MB | 4.7 | 9 waits, 40 s |
 | G1 | 33% / 99% | 13,450 MB | 7.05 | 5 waits, 44 s |
 | G2 | 35% / 99% | 13,399 MB | 4.64 | 5 waits, 17 s |
+| G3 | 35% / 99% | 13,402 MB | 4.47 | 4 waits, 19 s |
 
 **Per driver** (B2, 3 workers): times were within 0–9% of their sequential medians.
 - `check-caption` read ×1.41, but its own sequential history swings between 76 and 111 s.
@@ -273,6 +275,7 @@ The full per-step profile from the final run is under "Per-step profile" below.
 | F3 | 20–30 min, about 23m 29s (low-confidence: 3 changed drivers with 2 samples each) | 24m 17s | +3% | |
 | G1 | 21–28 min, about 23m 29s ("measured") | 24m 34s | +5% | |
 | G2 | 21–34 min, about 24m 00s (low-confidence: the new driver had no history) | 24m 29s | +2% | |
+| G3 | 21–35 min, about 23m 50s (low-confidence: 1–2 samples for the new driver) | 24m 15s | +2% | |
 
 **Lesson:** a "measured" label describes the samples, not whether the step changed since. The change-point rule and the contention-normalised parallel samples make the history catch up after two runs, without needing a sequential run.
 
@@ -361,28 +364,33 @@ F2's failure shows this working: the DIAG lines, the worker and the time stamps 
 
 ## 14. Passing gate: revision and run ID
 
-**`node scripts/gate.mjs full` (automatic worker count: 3 workers on 4 CPUs) on `735242dd9efd7391fc953753aca0c7e0c61754de`: PASSED (exit 0), run `20261110-055944-735242dd-14712`.**
+**`node scripts/gate.mjs full` (automatic worker count: 3 workers on 4 CPUs) on `3ce937a7bce67c810f4a0595ce37d03db87102af`: PASSED (exit 0), run `20261110-063622-3ce937a7-2793`.**
 
-`735242d` is the cumulative review candidate: Stage 5.2 (`872add3`, below) merged with the Stage 5.1 branch's review fix `7e7ab16`. That fix makes a poll's timeout cover the reply's body; see `docs/stage5-qa/README.md` §3.
+`3ce937a` is the cumulative review candidate: Stage 5.2 merged with the Stage 5.1 branch's two review fixes. `7e7ab16` makes a poll's timeout cover the reply's body. `0cb5a78` makes a poll close a reply it didn't read. Both are described in `docs/stage5-qa/README.md` §3.
 
-- **Steps:** 75 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run. That is the 74 from before plus the new driver `check-poll-body-stall`.
-- **Unit tests:** 1,108 in 101 files: Stage 5.1's 1,080, the 21 in `tests/gate-plan.test.ts`, and 7 new in `tests/stage51-liveness.test.ts`.
+- **Steps:** 75 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run.
+- **Unit tests:** 1,111 in 101 files: Stage 5.1's 1,080, the 21 in `tests/gate-plan.test.ts`, and 10 new in `tests/stage51-liveness.test.ts`.
 - **Browser drivers:** all 68 passed. **E2E (Chromium):** 15 of 15, with all 14 games played to the end.
-- **Check counts:** the 74 earlier steps made exactly as many checks as in the sequential Stage 5.1 final run (1,992 in each), with 0 failures in either (§6). The new driver made 8.
-- **Environment:** a fresh clone with a clean tree (`git.dirty` empty), source fingerprint `b68f827bf236` (394 files).
+- **Check counts:** the 74 earlier steps made exactly as many checks as in the sequential Stage 5.1 final run (1,992 in each), with 0 failures in either (§6). `check-poll-body-stall` made 12.
+- **Environment:** a fresh clone with a clean tree (`git.dirty` empty), source fingerprint `d38b8718bdeb` (394 files).
 - **Browser and runtime:** `chrome-headless-shell` 153.0.8010.12 (`MCHEZO_CHROMIUM_PATH`), Node v22.23.4.
-- **Wall time:** 24m 29s, from 05:59:44 to 06:24:13 UTC on 2026-11-10. The prediction was about 24m 00s, so +2%. Afterwards no process carrying the run's tag was left.
-- **Raw evidence:** `docs/evidence/gate-runs/20261110-055944-735242dd-14712/` holds `report.json`, the summary, the console output and every step log.
+- **Wall time:** 24m 15s, from 06:36:22 to 07:00:36 UTC on 2026-11-10. The prediction was about 23m 50s, so +2%. Afterwards no process carrying the run's tag was left.
+- **Raw evidence:** `docs/evidence/gate-runs/20261110-063622-3ce937a7-2793/` holds `report.json`, the summary, the console output and every step log.
 
-The verdict covers `735242d` only. The commits after it change documentation only (`docs/`). The failed, cancelled and interrupted runs are in §12 and §11 and are not combined with this one. **Gate self-test on `735242d`:** **59 of 59 checks passed**, run in the clean clone of `735242d` after the full gate. Afterwards there was no Chromium or server process left.
+The verdict covers `3ce937a` only. The commits after it change documentation only (`docs/`). The failed, cancelled and interrupted runs are in §12 and §11 and are not combined with this one. **Gate self-test on `3ce937a`:** **59 of 59 checks passed**, run in the clean clone of `3ce937a` after the full gate. Afterwards there was no Chromium or server process left.
 
 **Earlier verdicts, superseded by this one:**
+- `735242d` (with the first review fix only): PASSED, run `20261110-055944-735242dd-14712` (75/75, 24m 29s); gate self-test 59/59.
 - `872add3`: PASSED, run `20261110-052100-872add3c-26825` (74/74, 24m 34s); gate self-test 59/59. It differs from `dab1c65` only in `scripts/lib/stage5-games.mjs` (§12, item 3).
 - `dab1c65`: PASSED, run `20261110-033657-dab1c658-18431` (3 workers, 24m 17s).
 - `dab1c65`: PASSED, run `20261110-040231-dab1c658-30930` (2 workers on 2 CPUs, 38m 06s).
 - `dab1c65`: gate self-test 59/59.
 
-The benchmarks in §8–§11 ran on `dab1c65` and earlier commits. Since then, the helper change adds work only after a failed read or tap, a 300 ms visibility check. The review fix adds one 15 s driver. G2's 24m 29s is within 1% of F3's 24m 17s on the same machine.
+The benchmarks in §8–§11 ran on `dab1c65` and earlier commits. Since then:
+- the helper change adds work only after a failed read or tap, a 300 ms visibility check;
+- the review fixes add one driver of about 20 s.
+
+G3's 24m 15s is within 0.1% of F3's 24m 17s on the same machine.
 
 ## 15. Remaining performance bottlenecks
 

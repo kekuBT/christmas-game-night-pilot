@@ -6,7 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
-| `20261110-055944-735242dd-14712` | `735242d` | Full gate on the cumulative Stage 5.1 + 5.2 tree (the review candidate) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261110-063622-3ce937a7-2793` | `3ce937a` | Full gate on the cumulative Stage 5.1 + 5.2 tree with both review fixes (the review candidate) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261110-055944-735242dd-14712` | `735242d` | Full gate, the cumulative tree with the first review fix only (superseded) | `report.json`, `summary.txt`, `gate-console.log`. Its step logs are in this folder at commit `a5fdf4a`. |
 | `20261110-052100-872add3c-26825` | `872add3` | Full gate, Stage 5.2 before the Stage 5.1 review fix (superseded) | `report.json`, `summary.txt`, `gate-console.log` |
 | `20261110-003130-0a3964f3-11617` | `0a3964f` | Full gate, Stage 5.1, the old sequential gate (PR #4's tested revision) | `report.json`, `summary.txt` |
 
@@ -27,8 +28,12 @@ The nine runs in `docs/test-optimization/README.md` §13. Each folder holds:
 
 ## `poll-body-stall/<label>/`
 
-`check-poll-body-stall` (PR #4 review, P2), run before and after the fix:
-- `old-5a4454c`: the unchanged Stage 5.1 code plus only the new driver (FAILED);
-- `fixed-uncommitted`: the fix before it was committed as `7e7ab16` (PASSED).
+`check-poll-body-stall`, run before and after each review fix:
+- **PR #4 review** (a stalled body on a 200):
+  - `old-5a4454c`: the unchanged Stage 5.1 code plus only the new driver (FAILED);
+  - `fixed-uncommitted`: the fix before it was committed as `7e7ab16` (PASSED).
+- **PR #5 review** (a stalled body on a skipped 500):
+  - `error-stall-before-5636d1f`: `5636d1f` plus only the extended driver (FAILED: the 500 replies were left open);
+  - `error-stall-fixed-uncommitted`: the fix before it was committed as `0cb5a78` (PASSED).
 
-The committed fix is covered by the full gate on `735242d` above.
+Both committed fixes are covered by the full gate on `3ce937a` above.
