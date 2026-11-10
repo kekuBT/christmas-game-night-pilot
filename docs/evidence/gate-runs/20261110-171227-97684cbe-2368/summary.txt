@@ -1,0 +1,10 @@
+
+PASSED (exit 0) | fast | run 20261110-171227-97684cbe-2368
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 46s · step time 1m 23s (sum) · 3 workers, 61% busy · 1.80× the same steps run one after another
+           predicted 23–51s (about 30s, measured) → actual 46s (+53%)
+           longest  unit-tests 33s, lint 18s, typecheck-server 12s · the longest step is 72% of the wall time
+           machine  CPU mean 85%, peak 100% · memory available ≥ 14200 MB · load peak 4.33
+           contention ×1.19 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s71-fast-97684cb/test-results/20261110-171227-97684cbe-2368/report.json

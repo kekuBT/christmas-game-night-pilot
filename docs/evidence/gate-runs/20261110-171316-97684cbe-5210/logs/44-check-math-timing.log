@@ -1,0 +1,19 @@
+$ node scripts/check-math-timing.mjs http://localhost:39503
+# timeout 600s | worker w2 | server http://localhost:39503 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s71-full-97684cb/test-results/20261110-171316-97684cbe-5210/server-data/w2)
+
+[+3.0s] PASS start of play: Q1 is on every phone within 1.5 s — 67, 65, 65
+[+4.1s] PASS start of play: a 1-second answer is timed under 5 s and earns 120 — 1086 ms, 120 points
+[+11.6s] PASS hidden page: Q1 is not opened while nobody can see it
+[+11.7s] PASS hidden page: the other phone is unaffected
+[+11.7s] PASS hidden page: Q1 appears as soon as the page is shown — 62 ms
+[+12.8s] PASS hidden page: the hidden seconds don't count (timed under 5 s, 120 points) — 1096 ms, 120 points
+[+17.5s] PASS lost opens: the phone asks again and Q1 appears (no endless 'Getting question') — 3 opens dropped; shown after 3053 ms
+[+18.5s] PASS lost opens: timed from the open that arrived (under 5 s, 120 points) — 1082 ms, 120 points
+[+19.8s] PASS slow reply: Q1 still appears at once (it's pushed, not waited for) — 56 ms
+[+20.8s] PASS slow reply: +20 stays reachable — 1076 ms, 120 points
+[+27.2s] PASS no socket + slow reply: polling brings Q1 within 4.5 s of play starting — 3398 ms
+[+28.3s] PASS no socket + slow reply: +20 stays reachable — 3049 ms, 120 points
+[+28.3s] ALL MATH TIMING CHECKS PASSED
+[+28.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":11,"pages":11,"peakOpenPages":3}
+
+# PASS (exit 0) in 28.3s | cpu 4.4s, peak memory 341 MB

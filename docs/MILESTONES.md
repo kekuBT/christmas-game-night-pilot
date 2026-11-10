@@ -26,6 +26,14 @@ All milestones **locally authorized**, not remote publication/deployment. Order 
   - **Why:** the server keeps every room forever. Solo rooms (Stage 6.1, D-S61-03) make that visible: one per device, more when a device's storage is cleared or a create got no answer.
   - **When:** a bounded pre-deployment readiness task, after the immediate everyday-play slice. Not part of Stage 6.1's repairs.
   - **Must not:** delete Cup history or Memory Book memories.
+- **From ChatGPT's interactive audit of Stage 6.1/6.2** (comment 6773609572 on PR #8, 2026-11-10). Queued, not started; each is for the milestone named.
+  - **Casual results use the legacy shell** (session-flow / modernization):
+    - After a casual Math game, both players land in the old "Christmas Game Night" header, with Championship navigation, PRACTICE labels and a duplicate winner/results block. The modern lobby returns afterwards. The briefing also calls casual play "Practice".
+    - Direction: the Mchezo shell and consistent "Casual" wording, with no Cup-only navigation in this flow. Standings and each seat's answer privacy stay as they are.
+    - Needed before casual/polish sign-off.
+  - **Solo shelf on desktop** (polish): one tall column, whose large artwork pushes other games below the fold. Direction: compact phone cards and a wider desktop layout, keeping touch targets and bests.
+  - **Pattern Pulse's ready screen** (polish): it says the overall clock keeps running but doesn't show the time left. Add the remaining time, or a low-time warning, before later patterns.
+  - **Dependency advisories** (deployment readiness): triage in `docs/deploy/npm-audit-2026-11-10.md`. Use targeted updates with tests; no automatic fixes.
 - **Practice content variety in solo and casual rooms** (queued 2026-11-10 by ChatGPT's architecture decision on PR #7, comment 6771088990, under D-WF-01).
   - **Why:** practice selection takes an already-used item before a fresh official one. That protects official content in a Cup. But a room that never plays official games would repeat one item once most of the library is approved for official play (Stage 6.2 spec §3.4, §5 item 4; pinned by a unit test in `tests/stage62-solo-shelf.test.ts`).
   - **When:** with the smoother-session / content-variety work, before library eligibility changes make it visible. Today's library has 12 practice-only Connections boards, so it doesn't show yet.

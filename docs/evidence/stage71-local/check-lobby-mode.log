@@ -1,0 +1,73 @@
+PASS Home 375×667: the dock never overlaps the games, at any scroll position — overlap 0px; 
+PASS Home 375×667: any card whose picture shows also shows its title and players · minutes in full
+PASS Home 375×667: Join and Host stay on screen — dock 157px
+PASS Home 375×667: the lowest card's details scroll fully into view above the dock
+PASS Home 375×553: the dock never overlaps the games, at any scroll position — overlap 0px; 
+PASS Home 375×553: any card whose picture shows also shows its title and players · minutes in full
+PASS Home 375×553: Join and Host stay on screen — dock 157px
+PASS Home 375×553: the lowest card's details scroll fully into view above the dock
+PASS Home 390×844: the dock never overlaps the games, at any scroll position — overlap 0px; 
+PASS Home 390×844: any card whose picture shows also shows its title and players · minutes in full
+PASS Home 390×844: Join and Host stay on screen — dock 165px
+PASS Home 390×844: the lowest card's details scroll fully into view above the dock
+PASS Home 390×664: the dock never overlaps the games, at any scroll position — overlap 0px; 
+PASS Home 390×664: any card whose picture shows also shows its title and players · minutes in full
+PASS Home 390×664: Join and Host stay on screen — dock 157px
+PASS Home 390×664: the lowest card's details scroll fully into view above the dock
+PASS Home 430×932: the dock never overlaps the games, at any scroll position — overlap 0px; 
+PASS Home 430×932: any card whose picture shows also shows its title and players · minutes in full
+PASS Home 430×932: Join and Host stay on screen — dock 165px
+PASS Home 430×932: the lowest card's details scroll fully into view above the dock
+PASS Home 430×740: the dock never overlaps the games, at any scroll position — overlap 0px; 
+PASS Home 430×740: any card whose picture shows also shows its title and players · minutes in full
+PASS Home 430×740: Join and Host stay on screen — dock 157px
+PASS Home 430×740: the lowest card's details scroll fully into view above the dock
+PASS Home 768×1024: the dock never overlaps the games, at any scroll position — overlap 0px; 
+PASS Home 768×1024: any card whose picture shows also shows its title and players · minutes in full
+PASS Home 768×1024: Join and Host stay on screen — dock 165px
+PASS Home 768×1024: the lowest card's details scroll fully into view above the dock
+PASS Home 1440×900: the dock never overlaps the games, at any scroll position — overlap 0px; 
+PASS Home 1440×900: any card whose picture shows also shows its title and players · minutes in full
+PASS Home 1440×900: Join and Host stay on screen — dock 165px
+PASS Home 1440×900: the lowest card's details scroll fully into view above the dock
+PASS guest, before the host chooses: told the host is choosing, no made-up game — Waiting for Keku to start · they’re choosing a game · tap someone to nudge them
+PASS host 375×667: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+PASS host 375×667: the mode line is on screen without scrolling
+PASS host 375×667: the up-next card shows the mode
+PASS host 375×667: Change brings the Official/Practice choice into view
+PASS host 375×553: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+PASS host 375×553: the mode line is on screen without scrolling
+PASS host 375×553: the up-next card shows the mode
+PASS host 375×553: Change brings the Official/Practice choice into view
+PASS host 390×844: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+PASS host 390×844: the mode line is on screen without scrolling
+PASS host 390×844: the up-next card shows the mode
+PASS host 390×844: Change brings the Official/Practice choice into view
+PASS host 390×664: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+PASS host 390×664: the mode line is on screen without scrolling
+PASS host 390×664: the up-next card shows the mode
+PASS host 390×664: Change brings the Official/Practice choice into view
+PASS host 430×932: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+PASS host 430×932: the mode line is on screen without scrolling
+PASS host 430×932: the up-next card shows the mode
+PASS host 430×932: Change brings the Official/Practice choice into view
+PASS host 430×740: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+PASS host 430×740: the mode line is on screen without scrolling
+PASS host 430×740: the up-next card shows the mode
+PASS host 430×740: Change brings the Official/Practice choice into view
+PASS host 768×1024: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+PASS host 768×1024: the mode line is on screen without scrolling
+PASS host 768×1024: the up-next card shows the mode
+PASS host 768×1024: Change brings the Official/Practice choice into view
+PASS host 1440×900: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+PASS host 1440×900: the mode line is on screen without scrolling
+PASS host 1440×900: the up-next card shows the mode
+PASS host 1440×900: Change brings the Official/Practice choice into view
+PASS guest: sees the host's game and that it's Official — {"name":"Trivia Showdown","mode":"Official · counts toward the Individual Family Cup","note":"Waiting for Keku to start Trivia Showdown · Official, counts toward the Individual Family Cup · tap someone to nudge them"}
+PASS guest: sees Practice within seconds of the host switching — {"name":"Trivia Showdown","mode":"Practice · no Cup points","note":"Waiting for Keku to start Trivia Showdown · Practice, no Cup points · tap someone to nudge them"}
+PASS guest: sees the host's new pick (not this tab's own default) — {"name":"Math Mayhem","mode":"Practice · no Cup points","note":"Waiting for Keku to start Math Mayhem · Practice, no Cup points · tap someone to nudge them"}
+PASS host reload: still Math Mayhem · Practice — Start Math Mayhem · Practice
+PASS guest after the host's reload: unchanged — {"name":"Math Mayhem","mode":"Practice · no Cup points","note":"Waiting for Keku to start Math Mayhem · Practice, no Cup points · tap someone to nudge them"}
+PASS Start starts the shown game in the shown mode — {"gameId":"math-mayhem","official":false}
+ALL LOBBY/HOME CHECKS PASSED
+exit 0

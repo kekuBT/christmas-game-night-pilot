@@ -1,0 +1,188 @@
+{
+  "revision": "1a89fc68f08f59f0d81708979b0ffa498a319c01",
+  "workingTreeClean": true,
+  "capturedAt": "2026-11-10T18:33:43.756Z",
+  "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
+  "shots": [
+    {
+      "file": "01-lobby-entry-320x640.png",
+      "screen": "Casual lobby, host: the Quick Party entry",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "02-planner-settings-320x640.png",
+      "screen": "The planner: expected group size (4; 3 here) and 15/30/60 minutes",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "03-planner-lineup-320x640.png",
+      "screen": "A suggested 30-minute lineup for 4, with its estimate and edit controls",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "04-planner-replace-320x640.png",
+      "screen": "Replacing a game: only games that fit 4 and the time left",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "05-lineup-host-misfit-320x640.png",
+      "screen": "The applied lineup, host: Impostor needs 4 with 3 here, so Start waits and a replan for 3 is offered",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "06-lineup-guest-320x640.png",
+      "screen": "The same lineup on a guest's phone (read-only)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "07-ask-fewer-320x640.png",
+      "screen": "Start with fewer than planned: the host decides (Start with 3, Replan for 3, Wait)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "08-lineup-start-320x640.png",
+      "screen": "The lineup with Math Mayhem first; Start names it as game 1 of the lineup",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "09-stale-draft-320x640.png",
+      "screen": "Two hosts: the cohost changed the lineup while this draft was open, and the planner says so",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "10-conflict-320x640.png",
+      "screen": "Applying the older draft overwrites nothing: the latest lineup is shown, with Edit the latest, Keep the latest, or Replace it with mine",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "01-lobby-entry-390x844.png",
+      "screen": "Casual lobby, host: the Quick Party entry",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "02-planner-settings-390x844.png",
+      "screen": "The planner: expected group size (4; 3 here) and 15/30/60 minutes",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "03-planner-lineup-390x844.png",
+      "screen": "A suggested 30-minute lineup for 4, with its estimate and edit controls",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "04-planner-replace-390x844.png",
+      "screen": "Replacing a game: only games that fit 4 and the time left",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "05-lineup-host-misfit-390x844.png",
+      "screen": "The applied lineup, host: Impostor needs 4 with 3 here, so Start waits and a replan for 3 is offered",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "06-lineup-guest-390x844.png",
+      "screen": "The same lineup on a guest's phone (read-only)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "07-ask-fewer-390x844.png",
+      "screen": "Start with fewer than planned: the host decides (Start with 3, Replan for 3, Wait)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "08-lineup-start-390x844.png",
+      "screen": "The lineup with Math Mayhem first; Start names it as game 1 of the lineup",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "09-stale-draft-390x844.png",
+      "screen": "Two hosts: the cohost changed the lineup while this draft was open, and the planner says so",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "10-conflict-390x844.png",
+      "screen": "Applying the older draft overwrites nothing: the latest lineup is shown, with Edit the latest, Keep the latest, or Replace it with mine",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "01-lobby-entry-1440x900.png",
+      "screen": "Casual lobby, host: the Quick Party entry",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "02-planner-settings-1440x900.png",
+      "screen": "The planner: expected group size (4; 3 here) and 15/30/60 minutes",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "03-planner-lineup-1440x900.png",
+      "screen": "A suggested 30-minute lineup for 4, with its estimate and edit controls",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "04-planner-replace-1440x900.png",
+      "screen": "Replacing a game: only games that fit 4 and the time left",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "05-lineup-host-misfit-1440x900.png",
+      "screen": "The applied lineup, host: Impostor needs 4 with 3 here, so Start waits and a replan for 3 is offered",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "06-lineup-guest-1440x900.png",
+      "screen": "The same lineup on a guest's phone (read-only)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "07-ask-fewer-1440x900.png",
+      "screen": "Start with fewer than planned: the host decides (Start with 3, Replan for 3, Wait)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "08-lineup-start-1440x900.png",
+      "screen": "The lineup with Math Mayhem first; Start names it as game 1 of the lineup",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "09-stale-draft-1440x900.png",
+      "screen": "Two hosts: the cohost changed the lineup while this draft was open, and the planner says so",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "10-conflict-1440x900.png",
+      "screen": "Applying the older draft overwrites nothing: the latest lineup is shown, with Edit the latest, Keep the latest, or Replace it with mine",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    }
+  ]
+}

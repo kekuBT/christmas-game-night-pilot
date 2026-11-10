@@ -1,0 +1,31 @@
+{
+ "hostDraft15": [
+  "pattern-pulse",
+  "math-mayhem"
+ ],
+ "cohostSaved30": [
+  "trivia",
+  "pattern-pulse",
+  "math-mayhem"
+ ],
+ "serverBeforeHostApply": {
+  "revision": 1,
+  "budget": 30,
+  "items": [
+   "trivia",
+   "pattern-pulse",
+   "math-mayhem"
+  ]
+ },
+ "serverAfterHostApply": {
+  "revision": 1,
+  "budget": 30,
+  "items": [
+   "trivia",
+   "pattern-pulse",
+   "math-mayhem"
+  ]
+ },
+ "conflictShown": true,
+ "overwritten": false
+}

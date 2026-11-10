@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { JoinResponse, LedgerEvent, MemoryEntry, PlayerGame, Projection, PublicGame, PublicPlayer, Readiness, RegistryGame, SpectateResponse } from "./types.js";
+import type { JoinResponse, LedgerEvent, MemoryEntry, PartyView, PlayerGame, Projection, PublicGame, PublicPlayer, Readiness, RegistryGame, SpectateResponse } from "./types.js";
 import { draftKey, GamePanel } from "./components/GamePanel.js";
 import { CupScreen } from "./components/mchezo/CupScreen.js";
 import { MemoryScreen } from "./components/mchezo/MemoryScreen.js";
@@ -13,6 +13,7 @@ import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameC
 import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen, type HostKind } from "./components/mchezo/Home.js";
 import { SoloHome, SoloRound, soloShelf } from "./components/mchezo/Solo.js";
 import { ChooseGameSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
+import { PartyStartAsk, QuickPartyCard, QuickPartySheet, type PartyApplyResult, type PartyAsk, type PartyPlanInput } from "./components/mchezo/QuickParty.js";
 import { anchorHomeBelow, stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
 import { MchezoTriviaIntro, MchezoTriviaPlay, MchezoTriviaResults } from "./components/mchezo/MchezoTrivia.js";
@@ -97,6 +98,27 @@ async function post<T>(path: string, body: Record<string, unknown>): Promise<T> 
   if (token) headers["x-session-token"] = token;
   const r = await fetch(path, { method: "POST", headers, body: JSON.stringify(body) });
   return readJson<T>(r);
+}
+/**
+ * Stage 7.1: a POST that ends within `ms`, reading the reply included, so a
+ * stalled server never leaves a button stuck. Throws on no answer (network,
+ * timeout); otherwise returns the status and the parsed reply.
+ */
+async function postBounded(path: string, body: Record<string, unknown>, ms = 8000): Promise<{ status: number; body: Record<string, unknown> }> {
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  const token = seats.token();
+  if (token) headers["x-session-token"] = token;
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), ms);
+  try {
+    const r = await fetch(path, { method: "POST", headers, body: JSON.stringify(body), signal: ac.signal });
+    const text = await r.text();
+    let parsed: Record<string, unknown> = {};
+    try { parsed = text ? (JSON.parse(text) as Record<string, unknown>) : {}; } catch { if (r.ok) throw new Error("The game server sent an unreadable reply."); }
+    return { status: r.status, body: parsed };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 async function get<T>(path: string): Promise<T> {
   const headers: Record<string, string> = {};
@@ -538,6 +560,83 @@ export function App() {
   }
   const startingRef = useRef(false);
   const [startDecision, setStartDecision] = useState<(StartDecision & { gameId: string; official: boolean }) | null>(null);
+  // Stage 7.1: a lineup start the host must decide on, a replan's head count,
+  // and the host's "start with fewer than planned" for this lineup and game
+  // (kept across the reconnecting-players question, so it isn't asked twice).
+  const [partyAsk, setPartyAsk] = useState<PartyAsk | null>(null);
+  const [partyReplan, setPartyReplan] = useState<number | undefined>(undefined);
+  const [partyBusy, setPartyBusy] = useState(false);
+  const partyFewerOk = useRef<{ revision: number; gameId: string } | null>(null);
+  /**
+   * The lineup's first game, if `gameId` is it and it hasn't started: the
+   * start then goes through the lineup (repeat-safe). This slice starts the
+   * first game only; moving on through the lineup is the next slice.
+   */
+  function partyStartFor(gameId: string, official: boolean): { revision: number; index: number } | undefined {
+    const party = proj?.roomKind === "casual" ? proj.party : undefined;
+    const first = party?.lineup?.items[0];
+    if (official || !party || !first || first.started || first.gameId !== gameId) return undefined;
+    return { revision: party.revision, index: 0 };
+  }
+  /** Did the room's lineup become exactly this plan (an Apply whose reply was lost)? */
+  const lineupIs = (p: PartyView | undefined, plan: PartyPlanInput, revision: number) =>
+    !!p?.lineup && p.revision === revision && p.lineup.expectedPlayers === plan.expectedPlayers && p.lineup.budgetMinutes === plan.budgetMinutes &&
+    p.lineup.items.map((i) => i.gameId).join() === plan.items.map((i) => i.gameId).join();
+  /**
+   * Save the lineup against `baseRevision`: the saved lineup the host's draft
+   * started from, never whatever the room says now (review 6775606005). A
+   * newer saved lineup is never overwritten unseen: the server refuses, and
+   * the planner shows the conflict for the host to decide about. Nothing here
+   * retries with a newer revision by itself.
+   */
+  async function applyParty(plan: PartyPlanInput, baseRevision: number): Promise<PartyApplyResult> {
+    const saved = async (): Promise<PartyApplyResult> => {
+      partyFewerOk.current = null;
+      setPartyAsk(null);
+      setUpNextId(plan.items[0]!.gameId);
+      setShuffleResult(null);
+      await refresh();
+      closeSheet();
+      return { ok: true };
+    };
+    try {
+      const r = await postBounded(`/rooms/${roomId}/party`, { baseRevision, plan });
+      if (r.status === 200) return await saved();
+      await refresh();
+      if (r.body["code"] === "PLAN_CONFLICT") {
+        const latest = (r.body["party"] as PartyView | undefined) ?? proj?.party;
+        if (latest) return { ok: false, conflict: latest };
+      }
+      return { ok: false, error: typeof r.body["error"] === "string" ? r.body["error"] : `Couldn’t save the lineup (${r.status}).` };
+    } catch {
+      // No answer: it may or may not have been saved. Look before saying.
+      try {
+        const now = await get<Projection>(`/rooms/${roomId}/projection?audience=player`);
+        if (lineupIs(now.party, plan, baseRevision + 1)) return await saved();
+        // Saved lineup moved on, and not to this draft: someone else's change. Never overwrite it unseen.
+        if (now.party && now.party.revision !== baseRevision) { await refresh(); return { ok: false, conflict: now.party }; }
+      } catch { /* still unreachable */ }
+      await refresh();
+      return { ok: false, error: "Couldn’t reach the game server, so the lineup isn’t saved yet. Try again." };
+    }
+  }
+  /** Clear the lineup the host was asked about (`baseRevision`): refused, not retried, if it changed since. */
+  async function clearParty(baseRevision: number): Promise<void> {
+    setPartyBusy(true);
+    setErr("");
+    try {
+      const r = await postBounded(`/rooms/${roomId}/party`, { baseRevision, clear: true });
+      if (r.status !== 200) setErr(r.body["code"] === "PLAN_CONFLICT" ? "The lineup changed before it was cleared (another tab, or a cohost), so it wasn’t cleared. Here is the latest." : typeof r.body["error"] === "string" ? r.body["error"] : "Couldn’t clear the lineup.");
+      else { partyFewerOk.current = null; setPartyAsk(null); }
+    } catch {
+      // No answer: cleared only if the room now shows exactly that clear.
+      const now = await get<Projection>(`/rooms/${roomId}/projection?audience=player`).catch(() => null);
+      if (!(now?.party && now.party.lineup === null && now.party.revision === baseRevision + 1)) setErr("Couldn’t reach the game server, so the lineup may still be there. Check it, then clear again if you still want to.");
+    } finally {
+      setPartyBusy(false);
+      await refresh();
+    }
+  }
   // A pending "start without them?" question goes away by itself once
   // nobody it names is still reconnecting (they came back, or the grace
   // period ended): the host then just presses Start normally.
@@ -565,23 +664,38 @@ export function App() {
     }
     startingRef.current = true;
     setErr("");
+    // Stage 7.1: the lineup's next game starts through the lineup (repeat-safe on the server).
+    const party = partyStartFor(gameId, official);
+    const fewerOk = !!party && partyFewerOk.current?.revision === party.revision && partyFewerOk.current.gameId === gameId;
     try {
-      const headers: Record<string, string> = { "content-type": "application/json" };
-      const t = seats.token();
-      if (t) headers["x-session-token"] = t;
-      const resp = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers, body: JSON.stringify({ gameId, official, roster: r?.wouldPlay, proceedWithout }) });
-      const body = (await resp.json().catch(() => ({}))) as { error?: string; code?: string; readiness?: Readiness };
+      let resp: { status: number; body: Record<string, unknown> };
+      try {
+        resp = await postBounded(`/rooms/${roomId}/games`, { gameId, official, roster: r?.wouldPlay, proceedWithout, ...(party ? { party, ...(fewerOk ? { fewerThanPlanned: true } : {}) } : {}) }, 10_000);
+      } catch {
+        // No answer: the game may or may not have started. Look before saying.
+        const now = await get<Projection>(`/rooms/${roomId}/projection?audience=player`).catch(() => null);
+        await refresh();
+        if (now?.games?.some((g) => g.status === "briefing" || g.status === "playing")) { setStartDecision(null); setPartyAsk(null); return; }
+        setErr("Couldn’t reach the game server, so nothing started. Try Start again.");
+        return;
+      }
+      const body = resp.body as { error?: string; code?: string; readiness?: Readiness; expected?: number; here?: number; minPlayers?: number; maxPlayers?: number };
       if (resp.status === 409) {
         // The room changed between looking and pressing Start: show the
         // fresh picture and let the host decide again. Nothing started.
         await refresh();
         const again = (body.readiness?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id);
         if (body.code === "PLAYERS_RECONNECTING" && again.length) setStartDecision({ gameId, official, gameTitle: titleFor(gameId, games), reconnecting: again });
+        else if (body.code === "PARTY_FEWER_THAN_PLANNED") setPartyAsk({ kind: "fewer", gameId, expected: body.expected ?? 0, here: body.here ?? 0 });
+        else if (body.code === "PARTY_DOESNT_FIT") setPartyAsk({ kind: "doesnt-fit", gameId, here: body.here ?? 0, minPlayers: body.minPlayers ?? 1, maxPlayers: body.maxPlayers ?? 10 });
+        else if (body.code === "PLAN_CONFLICT") setErr("The lineup changed somewhere else. Check it, then press Start again.");
         else setErr(body.error ?? "Who is playing changed. Check the list, then start again.");
         return;
       }
-      if (!resp.ok) throw new Error(body.error || `Request failed (${resp.status})`);
+      if (resp.status < 200 || resp.status >= 300) throw new Error(body.error || `Request failed (${resp.status})`);
       setStartDecision(null);
+      setPartyAsk(null);
+      partyFewerOk.current = null;
       await refresh(); setShuffleResult(null); setView("lobby");
     } catch (e) { fail(e); } finally { startingRef.current = false; }
   }
@@ -1052,6 +1166,9 @@ export function App() {
   // ---- Stage 2: Lobby A and its sheets (Invite, Choose game, Room menu, game details) ----
   const isHostish = !!(me?.isHost || me?.isCohost);
   const upNextGame = catalog.find((g) => g.id === upNext?.id);
+  // Stage 7.1: Quick Party is for casual rooms only (not Cups, not solo).
+  const partyRoom = proj?.roomKind === "casual";
+  const upNextParty = upNext && partyRoom ? partyStartFor(upNext.id, false) : undefined;
   const hostName = players.find((p) => p.isHost)?.displayName;
   const connectedNow = players.filter((p) => p.connected).length;
   const cupLabel = proj?.competition?.label ?? "Family Cup";
@@ -1061,6 +1178,18 @@ export function App() {
     <>
       {sheet === "invite" && proj?.joinCode && (
         <InviteSheet code={proj.joinCode} url={inviteUrl} qrDataUrl={qrUrl || undefined} reach={linkReach(location.hostname)} onClose={closeSheet} />
+      )}
+      {sheet === "party" && isHostish && partyRoom && (
+        <QuickPartySheet
+          connected={connectedNow}
+          recentIds={(proj?.games ?? []).filter((g) => g.status === "finished").map((g) => g.gameId).reverse()}
+          saved={proj?.party?.lineup ? { expectedPlayers: proj.party.lineup.expectedPlayers, budgetMinutes: proj.party.lineup.budgetMinutes, gameIds: proj.party.lineup.items.map((i) => i.gameId) } : undefined}
+          initialSize={partyReplan}
+          currentRevision={proj?.party?.revision ?? 0}
+          onApply={applyParty}
+          onPickManually={() => openSheet("choose")}
+          onClose={closeSheet}
+        />
       )}
       {sheet === "choose" && isHostish && (
         <ChooseGameSheet
@@ -1213,7 +1342,22 @@ export function App() {
           error={err || undefined}
           message={sheet === "menu" ? undefined : msg || undefined}
           onStart={upNext ? () => startGame(upNext.id, startMode === "official") : undefined}
-          startTestId={upNext ? `start-${startMode}-${upNext.id}` : undefined}
+          startTestId={upNext ? (upNextParty ? "party-start" : `start-${startMode}-${upNext.id}`) : undefined}
+          startLabel={upNext && upNextParty && proj?.party?.lineup ? `Start ${upNext.title} · game ${upNextParty.index + 1} of ${proj.party.lineup.items.length}` : undefined}
+          party={partyRoom ? (
+            <QuickPartyCard
+              party={proj?.party}
+              connected={connectedNow}
+              isHost={isHostish}
+              upNextId={upNext?.id}
+              busy={partyBusy}
+              onPlan={() => { setPartyReplan(undefined); openSheet("party"); }}
+              onEdit={() => { setPartyReplan(undefined); openSheet("party"); }}
+              onClear={clearParty}
+              onUseLineup={(id) => { setUpNextId(id); setShuffleResult(null); }}
+              onReplan={(n) => { setPartyAsk(null); setPartyReplan(n); openSheet("party"); }}
+            />
+          ) : undefined}
           setup={upNext && (<>
           {!casualRoom && <div className="mz-mode" data-testid="mode-choice">
             <span className="mz-kicker mz-kicker--muted">How should {upNext.title} count?</span>
@@ -1234,6 +1378,15 @@ export function App() {
               </NoticeCard>
             )}
           </div>}
+          {partyAsk && partyAsk.gameId === upNext.id && (
+            <PartyStartAsk
+              ask={partyAsk}
+              busy={startingRef.current}
+              onStartAnyway={() => { const rev = proj?.party?.revision; if (rev !== undefined) partyFewerOk.current = { revision: rev, gameId: upNext.id }; setPartyAsk(null); void startGame(upNext.id, false); }}
+              onReplan={(n) => { setPartyAsk(null); setPartyReplan(n); openSheet("party"); }}
+              onWait={() => setPartyAsk(null)}
+            />
+          )}
           <ReadinessCard
             readiness={proj?.readiness}
             players={players}

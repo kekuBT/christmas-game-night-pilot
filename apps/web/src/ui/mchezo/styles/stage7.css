@@ -1,0 +1,37 @@
+/* Stage 7.1: Quick Party (docs/stage7/stage71.md §3.6). Casual lobby card and the planner sheet. */
+.mz-party { margin: 12px 0 0; padding: 12px 14px; border-radius: 16px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); display: grid; gap: 8px; }
+.mz-party--entry .mz-key { justify-self: start; }
+.mz-party__lede { margin: 0; font: 600 15px/1.4 var(--mz-font-body); }
+.mz-party__title { margin: 0; font: 800 20px/1.15 var(--mz-font-display); letter-spacing: -0.01em; }
+.mz-party__meta { margin: 0; font: 600 14px/1.4 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-party__list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.mz-party__row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 8px 10px; border-radius: 12px; background: var(--mz-surface-2); }
+.mz-party__row.is-next { outline: 2px solid var(--mz-accent, var(--mz-line)); outline-offset: -2px; }
+.mz-party__row.is-started { opacity: 0.75; }
+.mz-party__num { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--mz-surface-1); font: 800 14px var(--mz-font-display); }
+.mz-party__text { flex: 1 1 140px; min-width: 0; display: grid; gap: 2px; }
+.mz-party__name { font: 800 16px/1.2 var(--mz-font-display); overflow-wrap: anywhere; }
+.mz-party__sub { font: 600 13px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-party__warn { font: 700 13px/1.3 var(--mz-font-body); color: var(--mz-highlight); }
+.mz-party__tools { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.mz-party__tools .mz-chip-btn { min-height: 44px; padding: 0 12px; }
+.mz-iconbtn--sm { width: 44px; height: 44px; font: 800 18px var(--mz-font-body); }
+.mz-iconbtn:disabled, .mz-stepper__btn:disabled { opacity: 0.4; cursor: default; }
+.mz-party__options { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+.mz-party__options .mz-pill { white-space: normal; text-align: left; }
+.mz-party__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mz-party__aside { margin: 0; text-align: left; }
+.mz-party__estimate { margin: 10px 0 0; font: 600 14px/1.45 var(--mz-font-body); }
+.mz-party__field { display: grid; gap: 6px; margin: 0 0 14px; }
+.mz-party__label { font: 800 15px/1.2 var(--mz-font-body); }
+.mz-party__help { margin: 0; }
+.mz-party__field .mz-filterrow { margin: 0; }
+.mz-pill[aria-checked="true"] { background: var(--mz-text); color: var(--mz-surface-1); border-color: var(--mz-text); }
+.mz-stepper { display: inline-flex; align-items: center; gap: 10px; }
+.mz-stepper__btn { width: 48px; height: 48px; border-radius: 14px; border: 1.5px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); font: 800 22px var(--mz-font-body); cursor: pointer; }
+.mz-stepper__value { min-width: 2ch; text-align: center; font: 800 26px var(--mz-font-display); font-variant-numeric: tabular-nums; }
+.mz-sheet .mz-party__list--edit { margin-top: 12px; }
+@media (min-width: 560px) {
+  .mz-party__tools { flex: none; }
+}
+.mz-party__stale { margin: 0 0 12px; padding: 8px 10px; border-radius: 12px; background: var(--mz-surface-2); color: var(--mz-highlight); font-weight: 700; }

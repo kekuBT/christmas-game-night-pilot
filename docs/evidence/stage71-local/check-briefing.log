@@ -1,0 +1,45 @@
+PASS A. Ada's phone shows the rules briefing
+PASS A. Bea's phone shows the rules briefing
+PASS A. Cal's phone shows the rules briefing
+PASS A. the spectator TV shows the rules and who is ready
+PASS A. no question or answer control on any screen
+PASS A. every projection carries the briefing and no game state, questions or deadline — 7 entries
+PASS A. the rules show the real time limit
+PASS A. it says whether it counts
+PASS A. Bea's Ready shows on Ada's phone
+PASS A. ...and on the spectator TV
+PASS A. Bea's own button says she's ready
+PASS A. Bea can take it back: everyone sees her not ready
+PASS A. Bea is ready again
+PASS A. a refresh lands Bea back on the rules, still ready
+PASS A. Cal's dropped phone shows as reconnecting to the room
+PASS A. Cal is back: connected, rules still on his phone
+PASS A. still no game has started (nobody else was ready)
+PASS B. Ada is in the game the moment the last player is ready
+PASS B. Bea is in the game the moment the last player is ready
+PASS B. Cal is in the game the moment the last player is ready
+PASS B. every phone has the identical server deadline — 1794330494442
+PASS B. the deadline is the game's window after the moment play began — 1794330494442 - 1794330458442
+PASS B. no intro countdown follows the briefing
+PASS C. Start now is locked during the read window
+PASS C. guests have no Start now or Cancel
+PASS C. Start now unlocks after the read window
+PASS C. the confirmation names Cal (not ready) and not the host or Bea — Cal: not ready yet
+PASS C. Keep waiting starts nothing
+PASS C. (Bea's withdrawal reached the host)
+PASS C. a stale confirmation is asked again, now naming Bea too
+PASS C. still nothing started
+PASS C. confirmed: play begins for everyone
+PASS C. nobody lost their seat — ["player-1","player-2","player-3"]
+PASS D. no warning at first
+PASS D. the cancellation warning appears for Ada
+PASS D. the cancellation warning appears for Bea
+PASS D. the cancellation warning appears for the TV
+PASS D. the warning says nothing will be scored
+PASS D. the briefing is cancelled: everyone is back in the lobby and told why
+PASS D. no game is left behind
+PASS D. standings are untouched (the practice game never ran) — {}
+PASS D. the host's Cancel ends the briefing at once for everyone
+PASS D. no horizontal overflow on the phone screens
+BRIEFING ALL PASSED
+exit 0

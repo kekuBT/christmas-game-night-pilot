@@ -53,6 +53,10 @@ export interface RoomLobbyProps {
   setup?: ReactNode;
   onStart?: () => void;
   startTestId?: string;
+  /** Stage 7.1: what Start says when it starts the Quick Party lineup's game. */
+  startLabel?: string;
+  /** Stage 7.1: the Quick Party card (casual rooms). */
+  party?: ReactNode;
   error?: string;
   /** A short confirmation ("Reconnected to your player slot."). */
   message?: string;
@@ -131,6 +135,7 @@ export function RoomLobby(p: RoomLobbyProps) {
         />
       </div>
       <ReactionBar onReact={p.onReact} />
+      {p.party}
       {p.upNext && (
         <section className="mz-upnext-card" aria-label="Up next" data-testid="up-next-card" style={{ ["--mz-accent" as string]: accentColor(p.upNext.id) }}>
           <button type="button" className="mz-upnext-card__main" onClick={p.onGameDetails} aria-label={`Up next: ${p.upNext.title}. Show details`}>
@@ -169,7 +174,7 @@ export function RoomLobby(p: RoomLobbyProps) {
         {p.message && !p.error ? <p className="ok mz-dock__ok" role="status">{p.message}</p> : null}
         {p.isHost ? (
           <>
-            <Keycap block disabled={!canStart || !p.onStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? `Start ${p.upNext?.title ?? "the game"}${p.mode && p.mode !== "casual" ? ` · ${p.mode === "official" ? "Official" : "Practice"}` : ""}` : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
+            <Keycap block disabled={!canStart || !p.onStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? (p.startLabel ?? `Start ${p.upNext?.title ?? "the game"}${p.mode && p.mode !== "casual" ? ` · ${p.mode === "official" ? "Official" : "Practice"}` : ""}`) : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
             {p.mode === "casual" && <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">Casual game: just for fun, no Cup.</p>}
             {p.mode && p.mode !== "casual" && (
               // S3-HOME-02: the mode choice can be below the fold; the dock says what Start will do and links to it.

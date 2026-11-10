@@ -1,0 +1,52 @@
+PASS A host: a Quick Party entry in the casual lobby
+PASS A guests: no Quick Party controls
+PASS A server: a casual room with no lineup yet — {"revision":0,"lineup":null}
+PASS B the group size starts at the 3 here
+PASS B it is labelled as expected, not who's here
+PASS B + by keyboard: 4
+PASS B 30 minutes is the default; 15, 30 and 60 are offered
+PASS B a suggested lineup: 1+ games, each fitting 4, no repeats — pattern-pulse, caption-clash, guess-the-year
+PASS B its estimate is within 30 minutes, and says it's an estimate — About 29 of your 30 minutes. Estimated: each game’s usual length plus 2 minutes to get going. Each game also has its own time limit.
+PASS C a new time clears the lineup (never silently kept)
+PASS C 60 minutes: a longer lineup — who-said-that, trivia, category-sprint, word-connections, pattern-pulse, math-mayhem
+PASS C move down: the first two swap — trivia, who-said-that, category-sprint, word-connections, pattern-pulse, math-mayhem
+PASS C remove: one fewer, the rest in order
+PASS C replace offers only games that fit 4 and aren't in the lineup — impostor, caption-clash, guess-the-year, closest-wins, charades, geography, majority-rules, draw-guess
+PASS C replace: the first game is the chosen one
+PASS C suggest again: still a valid lineup
+PASS C server: still no lineup, no game, nothing used — {"revision":0,"lineup":null}
+PASS C arrange: Impostor first — impostor, closest-wins
+PASS I Apply with no network: 'isn't saved yet', the planner stays open
+PASS I server: nothing was saved
+PASS I Apply whose reply was lost: recognised as saved, the planner closes
+PASS D server: the lineup, in the planner's order, revision 1 — {"revision":1,"lineup":{"expectedPlayers":4,"budgetMinutes":30,"estimateMinutes":22,"transitionMinutes":2,"items":[{"gameId":"impostor","started":false},{"gameId":"closest-wins","started":false}],"updatedAt":1794330410770}}
+PASS D host: the lineup card
+PASS D guests see the same lineup
+PASS D the card says planned for 4, an estimate, and who is here — Planned for 4 players · about 22 of your 30 minutes (estimated) · 3 here now
+PASS D up next is the lineup's first game (Impostor needs 4: Start waits for players)
+PASS D the lineup shows Impostor needs one more
+PASS E guest: no Edit or Clear
+PASS E guest: the server refuses an edit (403) — {"status":403,"body":{"error":"Only the host or a cohost can plan the party.","code":"NOT_HOST","party":{"revision":1,"lineup":{"expectedPlayers":4,"budgetMinutes":30,"estimateMinutes":22,"transitionMinutes":2,"items":[{"gameId":"impostor","started":false},{"gameId":"closest-wins","started":false}],"updatedAt":1794330410770}}}}
+PASS F host reload: the lineup comes back from the server
+PASS F and Start is still the lineup's
+PASS G Impostor doesn't fit the 3 here: the card says so and offers a replan for 3
+PASS G the server refuses it too (409 PARTY_DOESNT_FIT, needs 4, 3 here), nothing started — {"error":"Impostor needs at least 4 players; 3 are here.","code":"PARTY_DOESNT_FIT","readiness":{"registered":3,"connected":3,"reconnecting":0,"away":0,"wouldPl
+PASS G replan: the planner opens for the 3 here
+PASS G arrange: Math Mayhem first — math-mayhem, draw-guess, majority-rules
+PASS G server: the replanned lineup, revision 2
+PASS G Start says Math Mayhem, game 1
+PASS G fewer than planned again (4 planned): asks
+PASS I Start whose reply was lost: the game opens anyway (briefing)
+PASS I exactly one game started, Math Mayhem, practice, with the 3 here — {"lost":1,"games":[["math-mayhem","briefing",3]]}
+PASS H the lineup marks game 1 as started
+PASS I the same start again answers with the same game (200, replay) — {"status":200,"body":{"gameId":"game-1","gameType":"math-mayhem","status":"briefing","players":["player-1","player-2","player-3"],"replay":true}}
+PASS H all three reach the results
+PASS H back in the lobby, the lineup is kept with game 1 started
+PASS H server: one finished practice game; nothing started after it; no Cup standings — [["math-mayhem","finished"]]
+PASS H no automatic next game: Start isn't the lineup's (no next-game controls in this slice)
+PASS I TV view: the same lineup, with no tokens, seeds or answers — {"revision":2,"lineup":{"expectedPlayers":4,"budgetMinutes":30,"estimateMinutes":27,"transitionMinutes":2,"items":[{"gameId":"math-mayhem","started":true},{"gam
+PASS J guest at 320 px: the lineup card fits, no sideways scroll
+PASS J host at 320 px: the planner opens with the saved lineup, no sideways scroll
+PASS I Clear (after asking): the lineup is gone for everyone
+PASS A a Family Cup lobby has no Quick Party
+QUICK PARTY ALL PASSED

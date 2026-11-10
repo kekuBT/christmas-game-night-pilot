@@ -1,0 +1,57 @@
+// Review 6775606005: host opens a 15-minute draft; the cohost saves a 30-minute
+// lineup; the host applies the older draft. Prints the server's lineup before
+// and after the host's Apply, and whether a conflict was shown.
+import pw from "/home/user/christmas-game-night-pilot/node_modules/playwright/index.js";
+const { chromium } = pw;
+const BASE = process.argv[2];
+const exe = process.env.MCHEZO_CHROMIUM_PATH;
+const browser = await chromium.launch(exe ? { executablePath: exe } : {});
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function host(page, name) {
+  await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+  await page.getByTestId("home-host").click();
+  await page.getByPlaceholder("e.g. Auntie June").fill(name);
+  await page.getByRole("button", { name: "Host a game" }).click();
+  const chip = page.getByRole("button", { name: /^Share room code / });
+  await chip.waitFor({ timeout: 15000 });
+  let code = "";
+  for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) { code = ((await chip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim(); if (!/^[A-Z0-9]{6}$/.test(code)) await sleep(300); }
+  return code;
+}
+async function join(page, name, code) {
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
+  await page.getByPlaceholder("e.g. Auntie June").fill(name);
+  await page.locator(".mz-code__input").fill(code);
+  await page.getByRole("button", { name: "Join the game" }).click();
+  await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
+}
+const party = (page) => page.evaluate(async () => (await (await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/projection?audience=player`, { headers: { "x-session-token": sessionStorage.getItem("cgn_token") ?? "" } })).json()).party);
+const preview = (page) => page.locator('[data-testid^="party-item-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-game")));
+try {
+  const h = await (await browser.newContext()).newPage();
+  const code = await host(h, "Hana");
+  const c = await (await browser.newContext()).newPage();
+  await join(c, "Cleo", code);
+  const cid = await c.evaluate(() => sessionStorage.getItem("cgn_playerId"));
+  await h.evaluate(async (targetId) => { await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/cohost`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" }, body: JSON.stringify({ targetId }) }); }, cid);
+  await c.getByTestId("party-entry").waitFor({ timeout: 15000 });
+  // 1. Host opens a 15-minute draft.
+  await h.getByTestId("party-entry").click();
+  await h.getByTestId("party-time-15").click();
+  await h.getByTestId("party-suggest").click();
+  const hostDraft = await preview(h);
+  // 2. Cohost saves a different 30-minute lineup.
+  await c.getByTestId("party-entry").click();
+  await c.getByTestId("party-suggest").click();
+  const cohost = await preview(c);
+  await c.getByTestId("party-apply").click();
+  await c.getByTestId("party-sheet").waitFor({ state: "detached", timeout: 10000 });
+  await sleep(2500); // the host's tab receives the background room update
+  const before = await party(h);
+  // 3. Host applies the older draft.
+  await h.getByTestId("party-apply").click();
+  await sleep(3000);
+  const after = await party(h);
+  const conflictShown = (await h.getByTestId("party-conflict").count()) > 0 || /changed somewhere else/.test(await h.getByTestId("party-sheet").innerText().catch(() => ""));
+  console.log(JSON.stringify({ hostDraft15: hostDraft, cohostSaved30: cohost, serverBeforeHostApply: { revision: before.revision, budget: before.lineup?.budgetMinutes, items: before.lineup?.items.map((i) => i.gameId) }, serverAfterHostApply: { revision: after.revision, budget: after.lineup?.budgetMinutes, items: after.lineup?.items.map((i) => i.gameId) }, conflictShown, overwritten: after.revision !== before.revision }, null, 1));
+} finally { await browser.close(); }
