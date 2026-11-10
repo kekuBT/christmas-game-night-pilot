@@ -6,6 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261110-183603-01fd2858-7370` | `01fd285` | **Stage 7.1 repair (review 6775606005):** targeted gate, PASSED 11/11 (`quick-party` 67, `casual`, `lobby-mode`, `game-night-flow`, `briefing`, `solo`, `solo-shelf`, `recovery`, `sessions`), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
+| `20261110-183513-01fd2858-4576` | `01fd285` | **Stage 7.1 repair:** fast gate, PASSED, fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-171316-97684cbe-5210` | `97684cb` | **Stage 7.1:** full gate, PASSED 79/79, fresh clone, clean tree (PR #8's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
 | `20261110-171227-97684cbe-2368` | `97684cb` | **Stage 7.1:** fast gate, PASSED, fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-160144-801960b9-8627` | `801960b` | **Stage 6.2:** full gate, PASSED 78/78, fresh clone, clean tree (PR #7's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |

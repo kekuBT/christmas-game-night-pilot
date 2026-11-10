@@ -357,3 +357,8 @@ Proceeding with these as stated, unless you object.
   - full `20261110-171316-97684cbe-5210` PASSED, 79/79 in 26 m 54 s with 3 workers: unit 1,222, `check-quick-party` 51/51, every other driver, and E2E.
   - Raw evidence is in `docs/evidence/gate-runs/`.
 - **Not tested:** WebKit/Safari and real phones. Browser checks ran in Chromium (headless shell) only, with phone sizes emulated.
+- **Repair (review 6775606005), gates on `01fd28583eb355212324c7dbcb4ac95ee175a56c`** (fresh clone, clean tree, fingerprint `d0b850115171`):
+  - fast `20261110-183513-01fd2858-4576` PASSED;
+  - targeted `20261110-183603-01fd2858-7370` PASSED, 11/11 (`quick-party` 67/67 and the casual, lobby, briefing, solo, recovery and sessions drivers).
+  - There is no full gate for this client-only repair; the full gate on `97684cb` stands for the rest.
+

@@ -1679,7 +1679,10 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage71-local/`.
 - **The defect:** a stale draft overwrote a cohost's newer lineup, because the planner sent the latest background revision. Reproduced on `97684cb` (evidence in `docs/evidence/review-pr8/`).
 - **The fix:** drafts are bound to the revision they started from, conflicts are shown with an explicit choice, and Clear is bound too.
 - **Tests:** `check-quick-party` part K, a two-client UI regression (67 checks; part K fails on `97684cb`).
-- **Gates:** the repair's verdicts are recorded in the commit after its tested SHA.
+- **Gates on `01fd285`** (fresh clone, clean tree):
+  - fast `20261110-183513-01fd2858-4576` PASSED;
+  - targeted `20261110-183603-01fd2858-7370` PASSED, 11/11: `quick-party` 67, `casual`, `lobby-mode`, `game-night-flow`, `briefing`, `solo`, `solo-shelf`, `recovery`, `sessions`.
+- **Why no full gate:** the full gate on `97684cb` stands for the rest. The repair only changes the client's Quick Party planner, its lobby card, and the Apply and Clear functions in `App.tsx`.
 
 **External blockers:** none. WebKit and real devices are not available here.
 
