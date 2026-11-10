@@ -94,6 +94,8 @@ Drivers launch Chromium through `scripts/lib/driver-env.mjs`, which uses the bui
 
 Server-side deadline behaviour is covered with a fake clock in `tests/lifecycle.test.ts`, `tests/phased.test.ts`, `tests/math-timing.test.ts` and `tests/cup-integrity.test.ts`.
 
+**Plain http, like a phone on the home Wi-Fi (Stage 6.1).** `localhost` is a secure context, so a driver on it can't see what a family phone sees at `http://192.168.x.x:port`: no `crypto.randomUUID`, among other things. `scripts/lib/lan.mjs` gives a driver the same gate server at this machine's first non-loopback IPv4 address, a real insecure context. `check-solo` plays a whole solo round there and `check-casual` puts its guest there; each check line says whether the context was real or, on a machine with no network address, simulated by removing `randomUUID`. A proxy configured in the environment must not intercept that address (run the gate with `HTTPS_PROXY` unset if it does).
+
 ## Running one driver by hand
 
 ```sh

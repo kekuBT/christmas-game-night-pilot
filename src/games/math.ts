@@ -1,4 +1,9 @@
 import { seededRng } from "../shared/protocol.js";
+import { MATH_QUESTION_COUNT } from "./mathRules.js";
+
+// Stage 6.1: the rules version lives in mathRules.ts (no dependencies, so the
+// web app can import it too).
+export { MATH_QUESTION_COUNT, MATH_RULES_VERSION } from "./mathRules.js";
 
 export interface MathQuestion {
   id: string;
@@ -9,7 +14,7 @@ export interface MathQuestion {
 }
 
 /** Deterministic, programmatically verified arithmetic. No trick math. */
-export function generateMathQuestions(seed: number, count = 10): MathQuestion[] {
+export function generateMathQuestions(seed: number, count = MATH_QUESTION_COUNT): MathQuestion[] {
   const rng = seededRng(seed);
   const questions: MathQuestion[] = [];
   const used = new Set<string>();

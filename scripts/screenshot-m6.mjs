@@ -9,7 +9,7 @@ const host = await ctx.newPage();
 await host.goto(BASE, { waitUntil: "domcontentloaded" });
 await host.screenshot({ path: "docs/m6-screenshots/01-landing.png" });
 await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
-await host.getByRole("button", { name: "Host a game" }).click();
+await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
 const shareChip = host.getByRole("button", { name: /^Share room code / });
 await shareChip.waitFor({ timeout: 15000 });
 let code = "";

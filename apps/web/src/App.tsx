@@ -10,7 +10,8 @@ import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
 import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, themes, type Route, type RoomSub } from "./ui/mchezo/index.js";
-import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen } from "./components/mchezo/Home.js";
+import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen, type HostKind } from "./components/mchezo/Home.js";
+import { SoloHome, SoloRound } from "./components/mchezo/Solo.js";
 import { ChooseGameSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
 import { anchorHomeBelow, stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
@@ -53,6 +54,7 @@ import { RememberChoice, ThisDeviceCard, WelcomeBack, useRememberedSeats } from 
 import { RecoverScreen, RecoveryCodeSection, RecoveryRequestsCard } from "./components/mchezo/Recovery.js";
 import { ReadinessCard, type StartDecision } from "./components/mchezo/ReadinessCard.js";
 import QRCode from "qrcode";
+import { uuidV4 } from "./uuid.js";
 
 /** Per-tab UI state (spectator seat, dismissed screens). Never throws: a
     browser that blocks site data must still be able to play. */
@@ -87,7 +89,8 @@ function bootRoute(): void {
     stampEntry();
   } catch { /* no history API: render whatever the address says */ }
 }
-const uuid = () => (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
+// A real v4 UUID on plain http too (a phone on the home Wi-Fi): see uuid.ts.
+const uuid = uuidV4;
 async function post<T>(path: string, body: Record<string, unknown>): Promise<T> {
   const headers: Record<string, string> = { "content-type": "application/json" };
   const token = seats.token();
@@ -197,6 +200,10 @@ export function App() {
   const setUpNextId = (id: string) => { tabSet("mz_upnext", id); setUpNextIdRaw(id); setPlanChosen((n) => n + 1); };
   // A game picked from Home's details sheet before the room exists.
   const [hostPick, setHostPick] = useState<string | null>(null);
+  // Stage 6.1: Host a game makes a casual room unless the host picks a Family Cup.
+  const [hostKind, setHostKind] = useState<HostKind>("casual");
+  // Stage 6.1: Start on the Play solo list starts the round on arrival; a reload does not.
+  const [soloAutostart, setSoloAutostart] = useState<string | null>(null);
   // Phase 2.1 lobby simplification: one mode for the single Start action,
   // and one compact chooser instead of per-game official/practice buttons.
   const [gameMode, setGameModeRaw] = useState<"official" | "practice">("official");
@@ -429,7 +436,8 @@ export function App() {
     // nobody hosts as "Player 1".
     if (!name.trim()) { setErr("Type your name first, so your players know whose party it is."); return; }
     setErr(""); try {
-      const r = await post<JoinResponse>("/rooms", { name: "Christmas Game Night" });
+      // Stage 6.1: casual by default; a Family Cup only when the host chose it.
+      const r = await post<JoinResponse>("/rooms", hostKind === "cup" ? { name: "Christmas Game Night", kind: "cup" } : { name: "Game night", kind: "casual" });
       const j = await post<JoinResponse>(`/rooms/${r.roomId}/join`, { displayName: name.trim(), asHost: true, hostClaimToken: r.hostClaimToken });
       // The lobby itself shows the new room and its code; no extra message.
       await saveSession({ ...j, roomId: r.roomId }); setMsg("");
@@ -660,7 +668,7 @@ export function App() {
   const serverPlan = proj?.upNext;
   const localPlan = (() => {
     const g = games.find((x) => x.id === upNextId) ?? games[0];
-    return g ? { gameId: g.id, official: g.lifecycle?.officialEligible !== false && gameMode === "official" } : undefined;
+    return g ? { gameId: g.id, official: proj?.roomKind !== "casual" && proj?.roomKind !== "solo" && g.lifecycle?.officialEligible !== false && gameMode === "official" } : undefined;
   })();
   const publishPlan = (plan: { gameId: string; official: boolean } | undefined) => {
     if (!roomId || !plan) return;
@@ -797,10 +805,23 @@ export function App() {
       screen = (
         <HostScreen
           name={name} onNameChange={setName} onHost={createRoom} onBack={() => back(HOME)}
+          kind={hostKind} onKindChange={setHostKind}
           remember={remember} blocked={seated} notice={seatedNotice}
           firstGame={hostPick ? catalog.find((g) => g.id === hostPick) : undefined}
           status={status}
         />
+      );
+    } else if (route.name === "solo") {
+      const soloGame = route.gameId ? catalog.find((g) => g.id === route.gameId && g.soloPlay) : undefined;
+      screen = soloGame ? (
+        // Back to solo / Home step back to that screen when it is the one
+        // beneath, else replace this entry, so neither Back nor browser Back
+        // ever returns to a finished or left round's screen.
+        <SoloRound key={soloGame.id} game={soloGame} autostart={soloAutostart === soloGame.id} onAutostartUsed={() => setSoloAutostart(null)}
+          onBackToSolo={() => backTo({ name: "solo" })} onHome={() => navigate(HOME, { replace: true })} />
+      ) : (
+        <SoloHome catalog={catalog} onBack={() => backTo(HOME)} onHost={() => navigate({ name: "host" })}
+          onStart={(id) => { setSoloAutostart(id); navigate({ name: "solo", gameId: id }); }} />
       );
     } else if (route.name === "library") {
       screen = <MchezoLibrary manifests={GAME_MANIFESTS} catalog={catalog} canSelect={false} inRoom={false}
@@ -814,6 +835,7 @@ export function App() {
           onOpenGame={(id) => openSheet("details", id)}
           onJoin={() => navigate({ name: "join" })}
           onHost={() => navigate({ name: "host" })}
+          onSolo={() => navigate({ name: "solo" })}
           onLibrary={() => navigate({ name: "library" })}
           onSettings={() => openSheet("settings")}
           onLostSeat={lostSeat}
@@ -983,7 +1005,10 @@ export function App() {
   // Practice-only games (Impostor, Charades) can't count: the server refuses
   // them as official, so the lobby starts them as practice and says why.
   const upNextPracticeOnly = upNext?.lifecycle?.officialEligible === false;
-  const startMode: "official" | "practice" = upNextPracticeOnly ? "practice" : planner ? gameMode : serverPlan?.official ? "official" : "practice";
+  // Stage 6.1: a casual room has no Cup, so every game in it is just for fun
+  // (the server refuses official starts there). Rooms without a kind are Cups.
+  const casualRoom = proj?.roomKind === "casual" || proj?.roomKind === "solo";
+  const startMode: "official" | "practice" = casualRoom || upNextPracticeOnly ? "practice" : planner ? gameMode : serverPlan?.official ? "official" : "practice";
 
   // D1: the server refuses official starts with fewer than 2 competitors. Say so
   // before Start, with an explicit switch — the mode is never changed silently.
@@ -1050,7 +1075,7 @@ export function App() {
       )}
       {sheet === "menu" && (
         <RoomMenuSheet
-          cupLabel={cupLabel}
+          cupLabel={casualRoom ? undefined : cupLabel}
           dayLabel={`Day ${proj?.championshipDay ?? 1}/7`}
           isHost={isHostish}
           onTv={() => setView("tv")}
@@ -1147,18 +1172,19 @@ export function App() {
       <MchezoProvider theme={themes.everyday} {...motion}>
         <RoomLobby
           lastGame={lastGame}
+          casual={casualRoom}
           firstTime={!roomGames.some((g) => g.status === "finished")}
           code={proj?.joinCode ?? "…"}
           sessionLabel={proj?.name ?? "Mchezo"}
           // Family Cup event data: 7 days is the approved championship
           // length; the current day comes from the server projection.
-          championship={{ name: cupLabel, unitLabel: "Day", current: proj?.championshipDay ?? 1, total: 7 }}
+          championship={casualRoom ? undefined : { name: cupLabel, unitLabel: "Day", current: proj?.championshipDay ?? 1, total: 7 }}
           players={mzPlayers}
           youId={playerId ?? ""}
           isHost={isHostish}
           hostName={hostName}
           upNext={upNextGame}
-          mode={upNext ? startMode : undefined}
+          mode={upNext ? (casualRoom ? "casual" : startMode) : undefined}
           cupLabel={cupLabel}
           onChangeGame={isHostish ? () => openSheet("choose") : undefined}
           onGameDetails={upNext ? () => openSheet("details", upNext.id) : undefined}
@@ -1189,7 +1215,7 @@ export function App() {
           onStart={upNext ? () => startGame(upNext.id, startMode === "official") : undefined}
           startTestId={upNext ? `start-${startMode}-${upNext.id}` : undefined}
           setup={upNext && (<>
-          <div className="mz-mode" data-testid="mode-choice">
+          {!casualRoom && <div className="mz-mode" data-testid="mode-choice">
             <span className="mz-kicker mz-kicker--muted">How should {upNext.title} count?</span>
             <SegmentedChoice
               label="Game mode"
@@ -1207,7 +1233,7 @@ export function App() {
                 Only games with 2 or more players can count toward the {cupLabel}. Wait for someone to join, or play this one as practice.
               </NoticeCard>
             )}
-          </div>
+          </div>}
           <ReadinessCard
             readiness={proj?.readiness}
             players={players}

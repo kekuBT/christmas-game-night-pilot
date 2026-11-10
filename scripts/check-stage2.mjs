@@ -39,7 +39,7 @@ const LONG = ["Amina-Josephine Wanjiku", "Bartholomew Otieno", "Christabel Nyamb
 async function hostRoom(page, name) {
   await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
-  await page.getByRole("button", { name: "Host a game" }).click();
+  await page.getByTestId("host-kind-cup").click(); await page.getByRole("button", { name: "Host a game" }).click();
   await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
   let code = "";
   for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
@@ -163,7 +163,7 @@ try {
   check("B. A-04: spaces are not a name", await host.getByRole("button", { name: "Host a game" }).isDisabled());
   await shot(host, "host-390");
   await host.getByPlaceholder("e.g. Auntie June").fill("Keku");
-  await host.getByRole("button", { name: "Host a game" }).click();
+  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
   await host.getByRole("heading", { name: "You’re in, Keku." }).waitFor({ timeout: 15000 });
   const code = ((await host.getByTestId("share-room").getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
   check("B. the host's room shows their name, never 'Player 1'", !(await host.locator("body").innerText()).includes("Player 1"));
@@ -348,7 +348,7 @@ try {
   await ada.goto(BASE, { waitUntil: "domcontentloaded" });
   await ada.getByTestId("home-host").click();
   await ada.getByPlaceholder("e.g. Auntie June").fill("Ada");
-  await ada.getByRole("button", { name: "Host a game" }).click();
+  await ada.getByTestId("host-kind-cup").click(); await ada.getByRole("button", { name: "Host a game" }).click();
   await ada.getByRole("heading", { name: "You’re in, Ada." }).waitFor({ timeout: 15000 });
   await ada.getByTestId("share-room").click();
   const inviteText = await ada.getByTestId("invite-sheet").innerText();

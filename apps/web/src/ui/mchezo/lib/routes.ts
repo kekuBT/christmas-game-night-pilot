@@ -33,6 +33,8 @@ export type Route =
   | { name: "home" }
   | { name: "join"; code?: string }
   | { name: "host" }
+  /** Stage 6.1: Play solo (the list), or one solo game's round. */
+  | { name: "solo"; gameId?: string }
   | { name: "library"; gameId?: string; lib?: string }
   | { name: "watch"; code?: string }
   | { name: "room"; sub: RoomSub; gameId?: string; lib?: string };
@@ -70,6 +72,7 @@ export function parseRoute(pathname: string, search = ""): { route: Route; sheet
   if (parts.length === 0) route = code ? { name: "join", code } : { name: "home" };
   else if (parts[0] === "join") route = code ? { name: "join", code } : { name: "join" };
   else if (parts[0] === "host" && parts.length === 1) route = { name: "host" };
+  else if (parts[0] === "solo" && parts.length <= 2) route = parts[1] && GAME_ID.test(parts[1]) ? { name: "solo", gameId: parts[1] } : { name: "solo" };
   else if (parts[0] === "watch" && parts.length === 1) route = code ? { name: "watch", code } : { name: "watch" };
   else if (parts[0] === "library") {
     const lib = libQuery(params);
@@ -91,6 +94,7 @@ export function routeUrl(route: Route, sheet: Sheet | null = null, game: string 
     case "home": path = "/"; break;
     case "join": path = "/join"; if (route.code) q.set("code", route.code); break;
     case "host": path = "/host"; break;
+    case "solo": path = route.gameId ? `/solo/${encodeURIComponent(route.gameId)}` : "/solo"; break;
     case "library": path = route.gameId ? `/library/${encodeURIComponent(route.gameId)}` : "/library"; break;
     case "watch": path = "/watch"; if (route.code) q.set("code", route.code); break;
     case "room": {

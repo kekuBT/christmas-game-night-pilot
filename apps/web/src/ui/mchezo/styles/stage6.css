@@ -1,0 +1,48 @@
+/* Stage 6.1: everyday entry (Home's three ways in, Host's casual/Cup choice)
+   and Play solo. Built from the existing tokens; nothing themed per mode. */
+
+/* Home dock: Join a room on its own row, Play solo and Host a game beside
+   each other below it, so all three fit at 320 px. */
+.mz-screen.mz-home > .mz-dock--home.mz-dock--three { flex-wrap: wrap; }
+.mz-dock--three .mz-key { flex: 1 1 calc(50% - 5px); }
+.mz-dock--three .mz-key:first-child { flex-basis: 100%; }
+
+/* Host: casual or Family Cup */
+.mz-entry__kind { margin: 14px 0 4px; }
+.mz-entry__kindnote { margin: 8px 0 0; text-align: left; }
+
+/* Play solo */
+.mz-solo__list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 14px; }
+.mz-solo__card { display: grid; gap: 12px; padding: 14px; border-radius: 22px; background: var(--mz-surface-1); border: 1px solid var(--mz-line); }
+/* Capped so a small phone (320×640) still shows Start without scrolling. */
+.mz-solo__cover { width: 100%; max-height: min(200px, 26vh); border-radius: 16px; overflow: hidden; }
+.mz-solo__cover--wide { margin-top: 12px; max-height: 180px; }
+.mz-solo__title { margin: 0; font: 800 clamp(20px, 6vw, 24px)/1.1 var(--mz-font-display); letter-spacing: -0.02em; }
+.mz-solo__desc { margin: 4px 0 0; font: 500 15px/1.4 var(--mz-font-body); color: var(--mz-text); }
+.mz-solo__meta { margin: 6px 0 0; font: 700 13px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-solo__best { margin: 8px 0 0; font: 700 14px/1.35 var(--mz-font-body); }
+.mz-solo__others { margin-top: 18px; text-align: left; }
+.mz-solo__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.mz-solo.mz-entry > .mz-key { margin-top: 16px; }
+
+/* The round: a slim bar above the existing Math screen */
+.mz-solo-round__bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px clamp(14px, 4.6vw, 20px) 0; }
+.mz-solo-round__note { margin: 6px clamp(14px, 4.6vw, 20px) 0; text-align: left; }
+.mz-solo-round__stale { color: var(--mz-highlight); font-weight: 700; }
+.mz-solo-round .mz-noticecard { margin: 10px clamp(14px, 4.6vw, 20px) 0; }
+
+/* Results */
+.mz-solo-results .mz-h1 { font-size: clamp(30px, 10vw, 42px); }
+.mz-solo-results .mz-h1:focus { outline: none; }
+.mz-solo-results .mz-h1:focus-visible { outline: 3px solid var(--mz-text); outline-offset: 4px; border-radius: 8px; }
+.mz-solo-results__correct { margin: 6px 0 0; font: 800 18px/1.3 var(--mz-font-body); }
+.mz-solo-results__pb { margin: 10px 0 0; padding: 10px 12px; border-radius: 14px; background: var(--mz-surface-2); font: 700 15px/1.4 var(--mz-font-body); }
+.mz-solo-results__pb.is-new { background: var(--mz-accent, var(--mz-surface-2)); color: var(--mz-on-accent); }
+.mz-solo-results__actions { display: grid; gap: 10px; margin-top: 18px; }
+.mz-solo-review { margin-top: 18px; }
+.mz-solo-review summary { cursor: pointer; font: 800 15px/1.4 var(--mz-font-body); padding: 8px 0; }
+.mz-solo-review ol { margin: 6px 0 0; padding-left: 22px; display: grid; gap: 6px; }
+.mz-solo-review li { font: 500 15px/1.35 var(--mz-font-body); }
+.mz-solo-review__q { display: block; font-weight: 700; }
+.mz-solo-review__a { display: block; color: var(--mz-text-muted); }
+.mz-solo-review li.is-ok .mz-solo-review__a { color: var(--mz-success); }

@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | targeted | run 20261110-143047-96eaea57-8299
+  2 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-solo (w1) [functional]: FAIL the other games are pointed to rooms, with no invented player minimum | FAIL I1 Start with no reply ends in an error with Try again (not a stuck Starting…) — not within 15000ms | FAIL I1 it ended
+  timing   wall 2m 49s · step time 2m 48s (sum) · 3 workers, 33% busy · 0.99× the same steps run one after another
+           predicted 0–4m (about 1m 01s, low-confidence) → actual 2m 49s (+177%)
+           longest  check-solo 2m 42s, build-web 5s, browser-preflight 1s · the longest step is 96% of the wall time
+           machine  CPU mean 9%, peak 52% · memory available ≥ 15030 MB · load peak 0.77
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/test-results/20261110-143047-96eaea57-8299/report.json

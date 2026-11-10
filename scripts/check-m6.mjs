@@ -24,7 +24,7 @@ try {
   if (landing.toLowerCase().includes("mchezo") && landing.includes("Host a game")) pass("landing shows Mchezo wordmark");
   else fail("landing shows Mchezo wordmark");
   await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
-  await host.getByRole("button", { name: "Host a game" }).click();
+  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
   const shareChip = host.getByRole("button", { name: /^Share room code / });
   await shareChip.waitFor({ timeout: 15000 });
   let code = "";

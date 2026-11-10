@@ -148,7 +148,7 @@ try {
     await tabFocus(host, `${vp.width}px host screen`);
 
     // Lobby: host creates, one joiner joins by code.
-    await host.getByRole("button", { name: "Host a game" }).click();
+    await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
     const shareChip = host.getByRole("button", { name: /^Share room code / });
     await shareChip.waitFor({ timeout: 15000 });
     let code = "";

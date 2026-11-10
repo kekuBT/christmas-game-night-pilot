@@ -33,8 +33,13 @@ export const GameManifestSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   categories: z.array(z.string().min(1)).min(1).readonly(),
+  /** Hard minimum (the server enforces it). */
   minPlayers: z.number().int().min(1),
   maxPlayers: z.number().int().min(1),
+  /** Stage 6.1: better with this many; a recommendation, never enforced. */
+  recommendedPlayers: z.number().int().min(1).optional(),
+  /** Stage 6.1: offered under Play solo (a complete one-player loop exists). */
+  soloPlay: z.boolean().optional(),
   playStyle: PlayStyleSchema,
   competition: z.literal("competitive"),
   duration: z.object({
@@ -275,7 +280,9 @@ export const GAME_MANIFESTS: GameManifest[] = [
     title: "Math Mayhem",
     description: "Ten quick arithmetic questions. Correct answers score points plus a capped speed bonus.",
     categories: ["math", "speed"],
-    minPlayers: 2,
+    minPlayers: 1,
+    recommendedPlayers: 2,
+    soloPlay: true,
     maxPlayers: 10,
     playStyle: "solo",
     competition: "competitive",
@@ -371,6 +378,8 @@ export function validateManifest(manifest: unknown): string[] {
   if (m.title !== reg.title) errors.push(`title: "${m.title}" does not match registry "${reg.title}"`);
   if (m.minPlayers !== reg.minPlayers) errors.push(`minPlayers: ${m.minPlayers} does not match registry ${reg.minPlayers}`);
   if (m.maxPlayers !== reg.maxPlayers) errors.push(`maxPlayers: ${m.maxPlayers} does not match registry ${reg.maxPlayers}`);
+  if (m.recommendedPlayers !== reg.recommendedPlayers) errors.push(`recommendedPlayers: ${m.recommendedPlayers} does not match registry ${reg.recommendedPlayers}`);
+  if (m.recommendedPlayers !== undefined && (m.recommendedPlayers < m.minPlayers || m.recommendedPlayers > m.maxPlayers)) errors.push(`recommendedPlayers: ${m.recommendedPlayers} is outside ${m.minPlayers}–${m.maxPlayers}`);
   if (m.duration.minutes !== reg.defaultDurationMinutes) errors.push(`duration.minutes: ${m.duration.minutes} does not match registry ${reg.defaultDurationMinutes}`);
   const regPlayStyle = reg.modes.includes("team") ? "team" : "solo";
   if (m.playStyle !== regPlayStyle) errors.push(`playStyle: "${m.playStyle}" contradicts registry modes [${reg.modes.join(", ")}]`);

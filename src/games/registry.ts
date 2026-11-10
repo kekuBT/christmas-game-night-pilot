@@ -3,8 +3,11 @@ export type GameMode = "solo" | "team";
 export interface GameDescriptor {
   id: string;
   title: string;
+  /** Hard minimum: the server refuses to start the game with fewer connected players. */
   minPlayers: number;
   maxPlayers: number;
+  /** Stage 6.1: a recommendation only (better with this many), never enforced. */
+  recommendedPlayers?: number;
   modes: GameMode[];
   status: "implemented" | "not-implemented";
   defaultDurationMinutes: number;
@@ -22,7 +25,8 @@ export const GAME_REGISTRY: GameDescriptor[] = [
   { id: "category-sprint", title: "Category Sprint", minPlayers: 4, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 5, tutorial: "Name unique examples in a category, fast." },
   { id: "charades", title: "Charades", minPlayers: 4, maxPlayers: 10, modes: ["team"], status: "implemented", defaultDurationMinutes: 15, tutorial: "Act it out. No camera or microphone needed." },
   { id: "geography", title: "Geography Challenge", minPlayers: 2, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 7, tutorial: "Flags, capitals, outlines, maps, and distance — six modes, provisional." },
-  { id: "math-mayhem", title: "Math Mayhem", minPlayers: 2, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 5, tutorial: "10 quick arithmetic questions. Correct = 100 points, plus a capped speed bonus." },
+  // Stage 6.1: one player can play it (solo); it is better with 2 or more.
+  { id: "math-mayhem", title: "Math Mayhem", minPlayers: 1, recommendedPlayers: 2, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 5, tutorial: "10 quick arithmetic questions. Correct = 100 points, plus a capped speed bonus." },
   // Stage 5 (Practice-only until the owner approves their Cup scoring).
   { id: "majority-rules", title: "Majority Rules", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 6, tutorial: "Predict which way the room will vote, then cast your own vote." },
   { id: "pattern-pulse", title: "Pattern Pulse", minPlayers: 1, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 5, tutorial: "Watch a sequence of shapes, then tap it back in order. It grows each round." },

@@ -145,6 +145,8 @@ export interface Projection {
   /** Who is here and who a game started now would include or leave out (Sprint 2). */
   readiness?: Readiness;
   championshipDay?: number;
+  /** Stage 6.1: cup (a Family Cup), casual (no Cup at all) or solo. Missing: a Cup. */
+  roomKind?: "cup" | "casual" | "solo";
   championship?: ChampionshipResult[];
   achievements?: Achievement[];
   ceremony?: Ceremony;

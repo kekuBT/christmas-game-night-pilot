@@ -1,0 +1,48 @@
+Mchezo gate targeted | run 20261110-143047-96eaea57-8299
+  revision 96eaea579e7675451fa52aa387c713b993e9d87e + 1 uncommitted change(s) | fingerprint c5eeb3cdf61e (408 files)
+  plan     3 steps: 1 fast/build, 1 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.2 GB available)
+  history  0 local run(s) in ./test-results/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.02 for 3 worker(s) (measured, 1 run(s))
+  estimate this run: 0–4m (low-confidence) · the same steps one after another: about 1m 05s · longest step check-solo ~1m 00s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.02 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-solo
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/test-results/20261110-143047-96eaea57-8299
+        start build-web on w1 (usually 5s)
+[ 1/3] PASS         5.4s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/3] PASS         0.8s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:34689 (pid 8394, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/test-results/20261110-143047-96eaea57-8299/server-data/w1)
+        start check-solo on w1 (no timing history)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-solo 53s (w1)
+   remaining 0–3m · total 1–4m · done around 14:32–14:34 UTC (low-confidence)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-solo 1m 53s (w1)
+   remaining 16–90s · total 2–4m · done around 14:33–14:34 UTC (low-confidence)
+[ 3/3] FAIL         162s  check-solo  w1  FAIL the other games are pointed to rooms, with no invented player minimum | FAIL I1 Start with no reply ends in an error with Try again (not a stuck Starting…)
+      |     at /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/scripts/check-solo.mjs:317:44 {
+      |   log: [
+      |     "  - waiting for getByTestId('solo-round-start')",
+      |     '    - locator resolved to <button disabled type="button" data-testid="solo-round-start" class="mz-key mz-key--brand mz-key--lg mz-key--block">Starting…</button>',
+      |     '  - attempting click action',
+      |     '    - waiting for element to be visible, enabled and stable',
+      |     '    - element is not stable',
+      |     '  - retrying click action',
+      |     '    - waiting for element to be visible, enabled and stable',
+      |     '  - element was detached from the DOM, retrying'
+      |   ],
+      |   name: 'TimeoutError'
+      | }
+      | 
+      | Node.js v22.23.4
+
+FAILED (exit 1) | targeted | run 20261110-143047-96eaea57-8299
+  2 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-solo (w1) [functional]: FAIL the other games are pointed to rooms, with no invented player minimum | FAIL I1 Start with no reply ends in an error with Try again (not a stuck Starting…) — not within 15000ms | FAIL I1 it ended
+  timing   wall 2m 49s · step time 2m 48s (sum) · 3 workers, 33% busy · 0.99× the same steps run one after another
+           predicted 0–4m (about 1m 01s, low-confidence) → actual 2m 49s (+177%)
+           longest  check-solo 2m 42s, build-web 5s, browser-preflight 1s · the longest step is 96% of the wall time
+           machine  CPU mean 9%, peak 52% · memory available ≥ 15030 MB · load peak 0.77
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/test-results/20261110-143047-96eaea57-8299/report.json
+exit 1

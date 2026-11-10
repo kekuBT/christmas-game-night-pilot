@@ -1,0 +1,65 @@
+// Reproduces review 6769583991 on the unchanged code (scratch, not committed).
+import { SoloSession, forgetPageSeat, SOLO_SEAT_KEY } from "./apps/web/src/solo/soloSession.js";
+import { readBest, recordScore, PB_STORAGE_KEY } from "./apps/web/src/solo/personalBest.js";
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+class Mem { d = new Map<string, string>(); getItem(k: string) { return this.d.get(k) ?? null; } setItem(k: string, v: string) { this.d.set(k, v); } }
+
+// 1. A stalled create keeps phase=starting; the request has no abort signal.
+{
+  forgetPageSeat();
+  let sawSignal: unknown = "not called";
+  const f = ((_: string, init: RequestInit) => { sawSignal = init?.signal; return new Promise<Response>(() => {}); }) as typeof fetch;
+  globalThis.fetch = f;
+  const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000 });
+  void s.start("math-mayhem");
+  await sleep(6500);
+  console.log("1 stalled create after 6.5 s:", JSON.stringify({ phase: s.current.phase, requestHasSignal: !!sawSignal }));
+  s.dispose();
+}
+// 2. 401 (and 404) after a good start: the old game stays shown, no error.
+for (const status of [401, 404]) {
+  forgetPageSeat();
+  let projStatus = 200;
+  const proj = { roomKind: "solo", players: [{ id: "p1" }], games: [{ id: "g1", gameId: "math-mayhem", status: "playing" }], myGames: [{ id: "g1" }] };
+  const f = (async (url: string) => {
+    if (url === "/rooms") return json(201, { roomId: "r1", hostClaimToken: "c" });
+    if (url.endsWith("/join")) return json(201, { playerId: "p1", recoveryToken: "t" });
+    if (url.endsWith("/games")) return json(201, { gameId: "g1", status: "playing" });
+    if (url.includes("/projection")) return projStatus === 200 ? json(200, proj) : json(projStatus, { error: "x" });
+    return json(404, {});
+  }) as typeof fetch;
+  globalThis.fetch = f;
+  const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000 });
+  await s.start("math-mayhem");
+  projStatus = status;
+  await s.refresh(); await s.refresh();
+  console.log(`2 projection ${status} after start, refreshed twice:`, JSON.stringify({ phase: s.current.phase, gid: s.current.gameInstanceId, error: s.current.error ?? null }));
+  s.dispose();
+}
+// 3. A transient 500 while checking a good stored seat makes a replacement room.
+{
+  forgetPageSeat();
+  const store = new Mem(); store.setItem(SOLO_SEAT_KEY, JSON.stringify({ roomId: "r1", playerId: "p1", token: "t" }));
+  let roomsCreated = 0;
+  const f = (async (url: string) => {
+    if (url === "/rooms") { roomsCreated++; return json(201, { roomId: "r2", hostClaimToken: "c" }); }
+    if (url.endsWith("/join")) return json(201, { playerId: "p2", recoveryToken: "t2" });
+    if (url.endsWith("/games")) return json(201, { gameId: "g1", status: "playing" });
+    if (url.includes("/projection")) return json(500, { error: "busy" });
+    return json(404, {});
+  }) as typeof fetch;
+  globalThis.fetch = f;
+  const s = new SoloSession({ store, onChange: () => {}, fetch: f, pollMs: 60_000 });
+  await s.start("math-mayhem");
+  console.log("3 transient 500 on the seat check:", JSON.stringify({ roomsCreated, roomId: s.roomId }));
+  s.dispose();
+}
+// 4. Personal best: a record under other rules in this game's slot blocks the new best.
+{
+  const st = new Mem(); st.setItem(PB_STORAGE_KEY, JSON.stringify({ "math-mayhem@1": { score: 900, at: 1, rulesVersion: 2 } }));
+  const before = readBest(st, "math-mayhem", 1);
+  const r = recordScore(st, "math-mayhem", 1, 500, 2);
+  console.log("4 mismatched rulesVersion:", JSON.stringify({ before: before ?? null, result: r, after: readBest(st, "math-mayhem", 1) ?? null }));
+}
+process.exit(0);

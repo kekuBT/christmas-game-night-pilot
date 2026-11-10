@@ -1,0 +1,39 @@
+$ node scripts/check-results.mjs http://localhost:45215
+# timeout 600s | worker w1 | server http://localhost:45215 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61-full-35f90c1/test-results/20261110-112312-35f90c11-18967/server-data/w1)
+
+[+1.8s] PASS 2 players: the winner is named — Ada wins Trivia Showdown
+[+1.8s] PASS 2 players: the winner's phone celebrates
+[+1.8s] PASS 2 players: the winner's card says 1st of 2 — You came 1st of 21200 ptsThat was you. Enjoy it quietly. Or loudly.
+[+2.2s] PASS 2 players: the other phone shows the same headline and line
+[+2.2s] PASS 2 players: no celebration for 2nd
+[+2.2s] PASS 2 players: 2nd of 2 — You came 2nd of 20 ptsNo points this time. The next game is a fresh start.
+[+2.2s] PASS 2 players: 2nd of 2 is never 'middle of the pack' (S3-RES-04) — You came 2nd of 20 ptsNo points this time. The next game is a fresh start.
+[+2.6s] PASS 2 players: the standings list both players — {"rows":["Ada","You"],"toggle":null,"expanded":null,"count":null}
+[+2.7s] PASS the celebration never takes a tap
+[+4.3s] PASS the celebration is over within about a second
+[+4.4s] PASS refresh: same headline, same line
+[+4.9s] PASS 3 players: last place reads 3rd of 3 — You came 3rd of 3120 ptsSomeone has to make the podium look good.
+[+4.9s] PASS 3 players: the kicker says Official
+[+5.2s] PASS 3 players: the middle reads 2nd of 3
+[+6.6s] PASS 3-way tie: named as a tie — 3-way tie for first
+[+6.6s] PASS 3-way tie: identical headline and line on all three phones
+[+6.6s] PASS 3-way tie: each phone says 'tied for 1st of 4'
+[+43.2s] PASS dropped out: told without blame — You came 3rd of 30 ptsYou missed this one. Your seat's still warm.
+[+44.5s] PASS dropped out: Ada's standings list all 3 players, Cal included — ["You","Bea","Cal"]
+[+45.2s] PASS dropped out: Bea's standings list all 3 players, Cal included — ["Ada","You","Cal"]
+[+45.7s] PASS practice: the kicker says Practice
+[+45.7s] PASS practice: the line says it's practice
+[+46.1s] PASS 2nd of 2 with points: the runner-up line, not 'middle of the pack' — You came 2nd of 2240 ptsSecond in a head-to-head. Next game's a clean slate.
+[+47.0s] PASS 10 players, long names, 375px: no sideways scrolling
+[+47.6s] PASS 10 players, long names, 390px: no sideways scrolling
+[+48.1s] PASS 10 players, long names, 430px: no sideways scrolling
+[+49.5s] PASS 10 players: the standings start as a preview that says how many are shown — {"rows":["Bartholomew Otieno","Keku","You"],"toggle":"Show all 10 players","expanded":"false","count":"Showing 3 of 10 players"}
+[+49.5s] PASS 10 players: your own row is in the preview — ["Bartholomew Otieno","Keku","You"]
+[+49.5s] PASS 10 players: Show all lists all 10, and says it is expanded — {"rows":10,"expanded":"true","over":false}
+[+49.5s] PASS 10 players: the full list fits 375px without sideways scrolling
+[+49.8s] PASS 10 players: a two-way tie at the top is named — Bartholomew Otieno and Keku tie for first
+[+49.8s] PASS reduced motion: no celebration, even for a winner
+[+50.4s] RESULTS ALL PASSED
+[+50.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":17,"pages":17,"peakOpenPages":3}
+
+# PASS (exit 0) in 50.4s | cpu 5.5s, peak memory 374 MB

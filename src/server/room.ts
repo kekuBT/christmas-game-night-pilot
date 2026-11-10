@@ -99,6 +99,22 @@ export const RECONNECT_GRACE_MS = 45_000;
 /** D1: an official game needs at least this many competitors (championship scoring ranks players). */
 export const MIN_OFFICIAL_COMPETITORS = 2;
 
+/**
+ * Stage 6.1: what a room is for.
+ *  - "cup": a Family Cup (every room before Stage 6.1, and every saved room
+ *    without a kind): Official and Practice games, days, standings.
+ *  - "casual": an everyday game night. Games never count toward a Cup; the
+ *    server refuses official starts, official plans and Cup days.
+ *  - "solo": one player's private room for solo play. Single seat, no
+ *    spectators, no briefing, never official. Starting a game while an
+ *    interrupted round is still open replaces that round (safe restart).
+ */
+export const ROOM_KINDS = ["cup", "casual", "solo"] as const;
+export type RoomKind = (typeof ROOM_KINDS)[number];
+export function isRoomKind(x: unknown): x is RoomKind {
+  return typeof x === "string" && (ROOM_KINDS as readonly string[]).includes(x);
+}
+
 /** D3 (S2): one active game per room, and a briefing counts as active. */
 export function isActiveGame(g: { status: string }): boolean {
   return g.status === "briefing" || g.status === "playing";
@@ -186,7 +202,7 @@ export interface Readiness {
  *   player still inside the reconnect grace window.
  */
 export class StartRefused extends Error {
-  constructor(readonly code: "ROSTER_CHANGED" | "PLAYERS_RECONNECTING" | "OFFICIAL_NEEDS_TWO", message: string, readonly readiness: Readiness) {
+  constructor(readonly code: "ROSTER_CHANGED" | "PLAYERS_RECONNECTING" | "OFFICIAL_NEEDS_TWO" | "NOT_A_CUP_ROOM", message: string, readonly readiness: Readiness) {
     super(message);
   }
 }
@@ -325,6 +341,8 @@ export class RoomEngine {
    * standings instead of being replaced by a guess.
    */
   private _cup: CupRecord;
+  /** Stage 6.1: cup, casual or solo (see ROOM_KINDS). Fixed for the room's life. */
+  readonly kind: RoomKind;
   private cupError: string | null = null;
   private cupRaw: unknown = undefined;
   get cup(): CupRecord {
@@ -410,11 +428,13 @@ export class RoomEngine {
   /** Server clock. Injectable so tests control time; never the client's clock. */
   clock: () => number = Date.now;
 
-  constructor(name: string, opts: { timing?: 1 | 2 } = {}) {
+  constructor(name: string, opts: { timing?: 1 | 2; kind?: RoomKind } = {}) {
     this.id = `room-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6)}`;
     this.joinCode = createJoinCode();
     this.name = name;
-    this._cup = newCupRecord(`cup-${Date.now().toString(36)}-${randomInt(0, 2 ** 31).toString(36)}`, Date.now(), { timing: opts.timing });
+    this.kind = opts.kind ?? "cup";
+    // A solo room has no briefing: its one player starts the round with Start.
+    this._cup = newCupRecord(`cup-${Date.now().toString(36)}-${randomInt(0, 2 ** 31).toString(36)}`, Date.now(), { timing: this.kind === "solo" ? undefined : opts.timing });
   }
 
   private log(type: string, extra: Partial<LedgerEvent> = {}): LedgerEvent {
@@ -427,6 +447,7 @@ export class RoomEngine {
   join(displayName: string, opts: { asHost?: boolean } = {}): { player: RoomPlayer; recoveryToken: string } {
     const clean = sanitizeText(displayName, 32);
     if (!clean) throw new Error("Display name is required");
+    if (this.kind === "solo" && this.players.size >= 1) throw new Error("This is a private solo room");
     if (this.players.size >= 10) throw new Error("Room is full (10 players)");
     for (const p of this.players.values()) {
       if (p.displayName.toLowerCase() === clean.toLowerCase()) throw new Error("Display name already taken");
@@ -568,6 +589,7 @@ export class RoomEngine {
    *  is kept. Spectators never appear in `players`, so every player-count,
    *  completion, and standings computation ignores them by construction. */
   addSpectator(): { spectator: Spectator; token: string } {
+    if (this.kind === "solo") throw new Error("This is a private solo room");
     const token = createRecoveryToken();
     const spectator: Spectator = {
       id: `spectator-${this.nextSpectator++}`,
@@ -648,7 +670,15 @@ export class RoomEngine {
     const policy = policyFor(gameId);
     // P8/P9: practice-only games can never start as official (server-enforced).
     if ((opts.official ?? false) && !policy.officialEligible) throw new Error(policy.practiceOnlyReason ?? `${game.title} is practice-only`);
+    // Stage 6.1: only a Cup room records official games, so casual and solo
+    // results can never reach a Cup's ledger or standings.
+    if ((opts.official ?? false) && this.kind !== "cup") {
+      throw new StartRefused("NOT_A_CUP_ROOM", "This room is a casual game, not a Family Cup: its games never count toward a Cup.", this.readiness());
+    }
     this.tick(); // a game whose deadline just passed is finalized before anything new starts
+    // Stage 6.1: in a solo room, a round left open (reload, leaving mid-round)
+    // is replaced by the new one: a safe restart, with nothing scored.
+    if (this.kind === "solo") this.abandonOpenRounds(hostId, "restarted");
     // The browser UI has a single active-game panel (first playing game), so
     // a second concurrent game would orphan the first: it could never become
     // active again. Reject instead of silently stacking games.
@@ -935,6 +965,28 @@ export class RoomEngine {
     const game = this.games.get(gameInstanceId);
     if (!game || game.status !== "briefing") throw new Error("That game isn't waiting to start");
     this.endBriefing(game, "host", actorId);
+  }
+
+  /**
+   * Stage 6.1: the solo player leaves a round (or starts another while one is
+   * open). The round is removed with nothing scored: solo rounds are never
+   * official, so no standings or Cup data can change. Solo rooms only.
+   */
+  abandonSoloRound(actorId: string, gameInstanceId: string): void {
+    if (this.kind !== "solo") throw new Error("Only a solo round can be left this way");
+    if (this.hostId !== actorId) throw new Error("Only the solo player can leave this round");
+    const game = this.games.get(gameInstanceId);
+    if (!game || !isActiveGame(game)) return; // already over: nothing to do (idempotent)
+    this.abandonOpenRounds(actorId, "left");
+  }
+
+  private abandonOpenRounds(actorId: string, reason: "left" | "restarted"): void {
+    if (this.kind !== "solo") return;
+    for (const game of [...this.games.values()]) {
+      if (!isActiveGame(game)) continue;
+      this.games.delete(game.id);
+      this.log("solo-round-abandoned", { gameInstanceId: game.id, actor: actorId, detail: { reason, gameId: game.gameId, answered: Object.keys(game.answers?.[actorId] ?? {}).length } });
+    }
   }
 
   /**
@@ -1962,6 +2014,7 @@ export class RoomEngine {
    */
   advanceDay(actorId: string): number {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can advance the day");
+    if (this.kind !== "cup") throw new Error("This room is a casual game, not a Family Cup: it has no Cup days");
     if ([...this.games.values()].some(isActiveGame)) throw new Error("Cannot advance the day while a game is in progress");
     if (this.championshipDay >= 7) throw new Error("Championship is already on its final day");
     this.championshipDay += 1;
@@ -2503,6 +2556,7 @@ export class RoomEngine {
       roomId: this.id,
       joinCode: this.joinCode,
       name: this.name,
+      roomKind: this.kind,
       players: publicPlayers,
       games: publicGames,
       readiness: this.readiness(now),
@@ -2594,6 +2648,7 @@ export class RoomEngine {
       hostId: this.hostId,
       cohosts: [...this.cohosts],
       championshipDay: this.championshipDay,
+      kind: this.kind,
       // Kept for older readers; the Cup record is authoritative. An unreadable
       // record is written back exactly as it was found, never overwritten.
       competitionFormat: this._cup.format,
@@ -2613,7 +2668,9 @@ export class RoomEngine {
   }
 
   static fromJSON(data: Record<string, unknown>): RoomEngine {
-    const engine = new RoomEngine(data["name"] as string);
+    // Stage 6.1: a snapshot without a kind is a room from before room kinds,
+    // which was always a Family Cup.
+    const engine = new RoomEngine(data["name"] as string, { kind: isRoomKind(data["kind"]) ? data["kind"] : "cup" });
     engine.id = data["id"] as string;
     engine.joinCode = data["joinCode"] as string;
     engine.hostId = data["hostId"] as string | null;

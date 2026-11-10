@@ -1,0 +1,28 @@
+$ node scripts/check-stage4-details.mjs http://localhost:38371
+# timeout 600s | worker w2 | server http://localhost:38371 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61-full-35f90c1/test-results/20261110-112312-35f90c11-18967/server-data/w2)
+
+[+2.6s] PASS S3-TRV-02: the waiting ring tells 'Audit Guest' and 'Audit Third' apart — ["Audit G.","Audit T."]
+[+2.6s] PASS S3-TRV-02: the ring's labels aren't cut off, and keep the full name as a tooltip — [{"text":"Audit G.","title":"Audit Guest","cut":false},{"text":"Audit T.","title":"Audit Third","cut":false}]
+[+3.6s] PASS S3-TRV-03: the standings step shows no greyed-out control — 0 disabled
+[+3.7s] PASS S3-TRV-03: 'Replay from Q1' goes back to the first question and plays — question:0
+[+9.0s] PASS S3-TRV-02: ten 'Cousin …' names get ten different labels in the lobby circle — ["Cousin B.","Cousin C.","Cousin D.","Cousin E.","Cousin F.","Cousin G.","Cousin H.","Cousin I.","Cousin J."]
+[+9.0s] PASS S3-TRV-02: each label comes from that player's own name
+[+9.0s] PASS S3-TRV-02: no lobby label is cut off ("Cousin…" would hide which cousin) — []
+[+9.7s] PASS S3-WCN-03 at 375: one type size for all 16 tiles — 13.5px
+[+9.7s] PASS S3-WCN-03 at 375: no tile's words overflow or get clipped
+[+10.3s] PASS S3-WCN-03 at 390: one type size for all 16 tiles — 14.04px
+[+10.3s] PASS S3-WCN-03 at 390: no tile's words overflow or get clipped
+[+10.8s] PASS S3-WCN-03 at 430: one type size for all 16 tiles — 15px
+[+10.8s] PASS S3-WCN-03 at 430: no tile's words overflow or get clipped
+[+12.5s] PASS S3-STU-01: Team Clash's description no longer promises repeated Charades rounds that can't happen
+[+12.5s] PASS S3-STU-01: the 'no games fit' message says what Team Clash needs — Team Clash uses team games: Charades (4–10 players). Invite more players, or pick another format.
+[+12.8s] PASS S3-STU-02: the host finds Studio from the Library too
+[+13.1s] PASS S3-STU-02: a guest opening Studio is told it's a host tool, with no planner
+[+13.3s] PASS S3-STU-02: guests don't get the Studio link
+[+13.6s] PASS S3-JOIN-01: where to find the code is said once — 1 mentions
+[+13.6s] PASS S3-JOIN-01: the code is still pre-filled from the link
+[+16.8s] PASS an overtaken poll doesn't roll the results back to the game
+[+16.8s] ALL STAGE 4 DETAIL CHECKS PASSED
+[+16.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":20,"pages":20,"peakOpenPages":10}
+
+# PASS (exit 0) in 16.8s | cpu 5s, peak memory 397 MB

@@ -18,8 +18,9 @@ import {
 
 export interface RoomLobbyProps {
   code: string;
-  /** S3-LOB-01/02: whether the next game counts, as every screen should see it. */
-  mode?: "official" | "practice";
+  /** S3-LOB-01/02: whether the next game counts, as every screen should see it.
+   *  Stage 6.1: "casual" is a casual room (no Cup at all, nothing to choose). */
+  mode?: "official" | "practice" | "casual";
   /** The Cup's name, for "Counts toward the Family Cup". */
   cupLabel?: string;
   championship?: ChampionshipConfig;
@@ -57,6 +58,8 @@ export interface RoomLobbyProps {
   message?: string;
   /** S5-B: the room's last finished game, for everyone, from recorded scores only. */
   lastGame?: { title: string; mode: "official" | "practice"; headline: string; yourLine?: string };
+  /** Stage 6.1: a casual room (no Cup): its games are labelled Casual, whatever is up next. */
+  casual?: boolean;
   /** S5-B: no game has finished in this room yet: say once how the night works. */
   firstTime?: boolean;
 }
@@ -138,7 +141,7 @@ export function RoomLobby(p: RoomLobbyProps) {
               <span className="mz-upnext-card__meta">{playersLabel(p.upNext)} · {sessionEstimate(p.upNext.estimateMinutes)}{limit ? ` · ${limit}` : ""}</span>
               {p.mode && (
                 <span className={`mz-badge mz-modebadge mz-modebadge--${p.mode}`} data-testid="up-next-mode">
-                  {p.mode === "official" ? `Official · counts toward the ${p.cupLabel ?? "Cup"}` : !p.upNext.officialEligible ? "Practice only · no Cup points" : "Practice · no Cup points"}
+                  {p.mode === "official" ? `Official · counts toward the ${p.cupLabel ?? "Cup"}` : p.mode === "casual" ? "Casual · just for fun" : !p.upNext.officialEligible ? "Practice only · no Cup points" : "Practice · no Cup points"}
                 </span>
               )}
               {!p.mode && !p.upNext.officialEligible && <span className="mz-badge mz-badge--mint">Practice only</span>}
@@ -151,7 +154,7 @@ export function RoomLobby(p: RoomLobbyProps) {
       {p.shuffleNote && <p className="mz-foot mz-lobby__shuffle" data-testid="shuffle-result">{p.shuffleNote}</p>}
       {p.lastGame && (
         <section className="mz-lastgame" aria-label="Last game" data-testid="last-game-card">
-          <span className="mz-kicker">Last game · {p.lastGame.title} · {p.lastGame.mode === "official" ? "Official" : "Practice"}</span>
+          <span className="mz-kicker">Last game · {p.lastGame.title} · {p.lastGame.mode === "official" ? "Official" : p.casual ? "Casual" : "Practice"}</span>
           <p className="mz-lastgame__headline">{p.lastGame.headline}</p>
           {p.lastGame.yourLine && <p className="mz-lastgame__you" data-testid="last-game-you">{p.lastGame.yourLine}</p>}
         </section>
@@ -166,8 +169,9 @@ export function RoomLobby(p: RoomLobbyProps) {
         {p.message && !p.error ? <p className="ok mz-dock__ok" role="status">{p.message}</p> : null}
         {p.isHost ? (
           <>
-            <Keycap block disabled={!canStart || !p.onStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? `Start ${p.upNext?.title ?? "the game"}${p.mode ? ` · ${p.mode === "official" ? "Official" : "Practice"}` : ""}` : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
-            {p.mode && (
+            <Keycap block disabled={!canStart || !p.onStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? `Start ${p.upNext?.title ?? "the game"}${p.mode && p.mode !== "casual" ? ` · ${p.mode === "official" ? "Official" : "Practice"}` : ""}` : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
+            {p.mode === "casual" && <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">Casual game: just for fun, no Cup.</p>}
+            {p.mode && p.mode !== "casual" && (
               // S3-HOME-02: the mode choice can be below the fold; the dock says what Start will do and links to it.
               <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">
                 {p.mode === "official" ? `Official: counts toward the ${p.cupLabel ?? "Cup"}.` : "Practice: just for fun, no Cup points."}{" "}
@@ -181,7 +185,7 @@ export function RoomLobby(p: RoomLobbyProps) {
             {p.upNext && fit?.tone === "warn" && connected < p.upNext.minPlayers
               ? <>{p.upNext.title} needs {p.upNext.minPlayers - connected} more {p.upNext.minPlayers - connected === 1 ? "player" : "players"} before {p.hostName ?? "the host"} can start it · share the code {p.code}</>
               : p.upNext
-              ? <>Waiting for {p.hostName ?? "the host"} to start {p.upNext.title}{p.mode ? <> · <b>{p.mode === "official" ? `Official, counts toward the ${p.cupLabel ?? "Cup"}` : "Practice, no Cup points"}</b></> : null} · tap someone to nudge them</>
+              ? <>Waiting for {p.hostName ?? "the host"} to start {p.upNext.title}{p.mode ? <> · <b>{p.mode === "official" ? `Official, counts toward the ${p.cupLabel ?? "Cup"}` : p.mode === "casual" ? "Casual, just for fun" : "Practice, no Cup points"}</b></> : null} · tap someone to nudge them</>
               : <>Waiting for {p.hostName ?? "the host"} to start · they’re choosing a game · tap someone to nudge them</>}
           </p>
         )}
@@ -254,7 +258,8 @@ function MenuRow({ icon, label, detail, onClick, testId, tone }: { icon?: ReactN
 
 /** Everything secondary in a room, grouped (PROPOSAL §6.11, mockups/menu.png). */
 export function RoomMenuSheet(p: {
-  cupLabel: string;
+  /** The Family Cup's name. Stage 6.1: absent in a casual room, which has no Cup. */
+  cupLabel?: string;
   dayLabel?: string;
   isHost: boolean;
   onTv: () => void;
@@ -279,7 +284,7 @@ export function RoomMenuSheet(p: {
       <span className="mz-kicker mz-kicker--muted mz-menu__section">This room</span>
       <div className="mz-menu__group">
         <MenuRow icon={<Icon d={ICON.tv} size={20} />} label="Show on a TV" testId="menu-tv" onClick={p.onTv} />
-        <MenuRow icon={<Icon d={ICON.trophy} size={20} />} label={p.cupLabel} detail={p.dayLabel} testId="menu-cup" onClick={p.onCup} />
+        {p.cupLabel && <MenuRow icon={<Icon d={ICON.trophy} size={20} />} label={p.cupLabel} detail={p.dayLabel} testId="menu-cup" onClick={p.onCup} />}
         <MenuRow icon={<span>📖</span>} label="Memory Book" testId="menu-memory" onClick={p.onMemory} />
         <MenuRow icon={<span>🎲</span>} label="All games" testId="browse-games" onClick={p.onLibrary} />
       </div>
@@ -294,7 +299,7 @@ export function RoomMenuSheet(p: {
           <span className="mz-kicker mz-kicker--muted mz-menu__section">Host tools</span>
           {p.hostTools}
           {p.onStudio && <div className="mz-menu__group"><MenuRow label="Studio" detail="Labs · preview" testId="studio-button" onClick={p.onStudio} /></div>}
-          <p className="mz-foot mz-menu__note">Advancing the Cup day and score corrections are under {p.cupLabel}, and always ask first.</p>
+          {p.cupLabel && <p className="mz-foot mz-menu__note">Advancing the Cup day and score corrections are under {p.cupLabel}, and always ask first.</p>}
         </>
       )}
     </Sheet>

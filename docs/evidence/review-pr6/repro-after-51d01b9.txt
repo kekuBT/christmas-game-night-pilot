@@ -1,0 +1,5 @@
+1 stalled create after 6.5 s: {"phase":"error","requestHasSignal":true}
+2 projection 401 after start, refreshed twice: {"phase":"lost","error":"This round is no longer on the game server (it may have restarted). Nothing from it was scored."}
+2 projection 404 after start, refreshed twice: {"phase":"lost","error":"This round is no longer on the game server (it may have restarted). Nothing from it was scored."}
+3 transient 500 on the seat check: {"roomsCreated":0,"roomId":"r1"}
+4 mismatched rulesVersion: {"before":null,"result":{"isNewBest":true,"saved":true},"after":{"score":500,"at":2,"rulesVersion":1}}

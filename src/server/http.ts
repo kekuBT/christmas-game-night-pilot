@@ -4,7 +4,7 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { BriefingRefused, ContentShortage, RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
+import { BriefingRefused, ContentShortage, ROOM_KINDS, RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
@@ -126,6 +126,8 @@ export class LocalServer {
    */
   private lobbyPlans = new Map<string, { gameId: string; official: boolean }>();
   static readonly PlanSchema = z.object({ gameId: z.string().min(1).max(64), official: z.boolean() }).strict();
+  /** Stage 6.1: POST /rooms. A missing kind means a Family Cup, as before room kinds. */
+  static readonly CreateRoomSchema = z.object({ name: z.string().max(80).optional(), kind: z.enum(ROOM_KINDS).optional() }).passthrough();
   /** Ephemeral nudges (see the /nudge endpoint): never persisted, never ledger. */
   private nudges = new Map<string, { fromId: string; targetId: string; ts: number }[]>();
   private nudgeStamps = new Map<string, number[]>();
@@ -461,9 +463,15 @@ export class LocalServer {
     }
   }
 
+  /**
+   * The room a code names, for the seat-recovery routes. Stage 6.1: a solo
+   * room's code finds nothing here either (as for join and spectate by
+   * code): its seat list, recovery requests and recovery by code all answer
+   * as if there were no such room.
+   */
   private roomByJoinCode(code: unknown): RoomEngine | undefined {
     const c = String(code ?? "").trim().toUpperCase();
-    return c ? [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === c) : undefined;
+    return c ? [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === c && r.kind !== "solo") : undefined;
   }
 
   private static clientAddress(req: IncomingMessage): string {
@@ -599,7 +607,8 @@ export class LocalServer {
       if (req.method === "POST" && parts.length === 2 && parts[0] === "rooms" && parts[1] === "join-by-code") {
         const body = await this.readBody(req);
         const code = String(body["joinCode"] ?? "").trim().toUpperCase();
-        const room = [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === code);
+        // Stage 6.1: a solo room is private; its code finds nothing.
+        const room = [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === code && r.kind !== "solo");
         if (!room) {
           this.send(res, 404, { error: "Room not found for that code" });
           return;
@@ -622,7 +631,8 @@ export class LocalServer {
       if (req.method === "POST" && parts.length === 2 && parts[0] === "rooms" && parts[1] === "spectate-by-code") {
         const body = await this.readBody(req);
         const code = String(body["joinCode"] ?? "").trim().toUpperCase();
-        const room = [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === code);
+        // Stage 6.1: a solo room is private; its code finds nothing.
+        const room = [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === code && r.kind !== "solo");
         if (!room) {
           this.send(res, 404, { error: "Room not found for that code" });
           return;
@@ -650,8 +660,11 @@ export class LocalServer {
         return;
       }
       if (req.method === "POST" && parts.length === 1 && parts[0] === "rooms") {
-        const body = await this.readBody(req);
-        const room = new RoomEngine(typeof body["name"] === "string" ? body["name"] : "Christmas Game Night", { timing: this.newCupTiming });
+        const parsed = LocalServer.CreateRoomSchema.safeParse(await this.readBody(req));
+        if (!parsed.success) { this.send(res, 400, { error: "A room needs a name of up to 80 characters and a kind of cup, casual or solo" }); return; }
+        const kind = parsed.data.kind ?? "cup";
+        const defaultName = kind === "solo" ? "Solo play" : kind === "casual" ? "Game night" : "Christmas Game Night";
+        const room = new RoomEngine(parsed.data.name || defaultName, { timing: this.newCupTiming, kind });
         room.clock = this.clock;
         room.lifecycleScale = this.lifecycleScale;
       if (this.contentLib) room.content = this.contentLib;
@@ -670,6 +683,13 @@ export class LocalServer {
         }
         // Deadlines that are due are processed (and saved) before this request is served.
         this.tickRoom(room);
+        // Stage 6.1: a solo room is private. Its public (TV) view answers as if
+        // the room weren't there, so only its own seat's token can see it.
+        const publicView = req.method === "GET" && (parts.length === 2 || (parts.length === 3 && parts[2] === "projection" && (url.searchParams.get("audience") ?? "tv") === "tv"));
+        if (publicView && room.kind === "solo") {
+          this.send(res, 404, { error: "Room not found" });
+          return;
+        }
         if (req.method === "GET" && parts.length === 2) {
           this.send(res, 200, this.projectFor(room, "tv"));
           return;
@@ -827,6 +847,12 @@ export class LocalServer {
             return;
           }
           const body = await this.readBody(req);
+          // Stage 6.1: only a solo room's creator takes its one seat; to anyone
+          // else the room isn't there (as for its code and its public view).
+          if (room.kind === "solo" && body["asHost"] !== true) {
+            this.send(res, 404, { error: "Room not found" });
+            return;
+          }
           if (body["asHost"] === true && !this.hostClaimValid(room.id, body["hostClaimToken"])) {
             this.send(res, 400, { error: "Host claim requires the room creation token" });
             return;
@@ -914,7 +940,9 @@ export class LocalServer {
         if (req.method === "POST" && parts.length === 5 && parts[2] === "games" && parts[4] === "cancel") {
           const player = this.requireSession(room, req, res);
           if (!player) return;
-          room.cancelBriefing(player.id, String(parts[3]));
+          // Stage 6.1: in a solo room this also leaves a round in play.
+          if (room.kind === "solo") room.abandonSoloRound(player.id, String(parts[3]));
+          else room.cancelBriefing(player.id, String(parts[3]));
           this.persist(room);
           this.broadcast(room.id);
           this.send(res, 200, { ok: true });
@@ -978,6 +1006,7 @@ export class LocalServer {
           if (!parsed.success) { this.send(res, 400, { error: "A plan needs a game and whether it's official" }); return; }
           const { gameId, official } = parsed.data;
           if (!GAME_REGISTRY.some((g) => g.id === gameId)) { this.send(res, 400, { error: `Unknown game ${gameId}` }); return; }
+          if (official && room.kind !== "cup") { this.send(res, 400, { error: "This room is a casual game, not a Family Cup: its games never count toward a Cup" }); return; }
           if (official && GAME_POLICIES[gameId as keyof typeof GAME_POLICIES]?.officialEligible === false) { this.send(res, 400, { error: "That game is practice only" }); return; }
           const prev = this.lobbyPlans.get(room.id);
           if (!prev || prev.gameId !== gameId || prev.official !== official) {
@@ -1079,6 +1108,10 @@ export class LocalServer {
       spectatorId = spectator.id;
       actorId = "";
     } else if (requestedAudience === "tv") {
+      if (room.kind === "solo") {
+        ws.close(1008, "Room not found"); // Stage 6.1: a solo room has no public view
+        return;
+      }
       actorId = "";
     } else {
       const offered = String(req.headers["sec-websocket-protocol"] ?? "");
