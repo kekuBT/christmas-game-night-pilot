@@ -20,6 +20,7 @@ import { GameCover, Keycap, NoticeCard, Wordmark, accentColor, playersLabel, ses
 import { deviceStore, readBest, recordScore, type KeyValueStore, type PersonalBest, type RecordOutcome } from "../../solo/personalBest.js";
 import { SoloSession, type SoloState } from "../../solo/soloSession.js";
 import { SOLO_GAMES, soloAdapter } from "../../solo/soloGames.js";
+import { countsForBest } from "../../solo/soloRules.js";
 
 /** The catalog games on the solo shelf, in shelf order: the manifest says soloPlay and an adapter exists. */
 export function soloShelf(catalog: readonly CatalogGame[]): CatalogGame[] {
@@ -52,7 +53,8 @@ export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readon
       <p className="mz-foot mz-entry__lede">Just you and the clock: no room code, no setup. Solo rounds are just for you; they never count toward a Family Cup.</p>
       <ul className="mz-solo__list" aria-label="Games you can play alone">
         {solo.map((g) => {
-          const best = readBest(store, g.id, soloAdapter(g.id)!.rulesVersion);
+          const adapter = soloAdapter(g.id)!;
+          const best = readBest(store, g.id, adapter.rulesVersion);
           return (
             <li key={g.id} className="mz-solo__card" style={{ ["--mz-accent" as string]: accentColor(g.id) }} data-testid={`solo-game-${g.id}`}>
               <GameCover gameId={g.id} decorative className="mz-solo__cover" />
@@ -61,6 +63,7 @@ export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readon
                 <p className="mz-solo__desc">{g.description}</p>
                 <p className="mz-solo__meta">{playersLabel(g)} · {sessionEstimate(g.estimateMinutes)}</p>
                 <p className="mz-solo__best" data-testid={`solo-best-${g.id}`}>{bestLine(best, store !== null)}</p>
+                {adapter.bestNote && <p className="mz-solo__best-note" data-testid={`solo-note-${g.id}`}>{adapter.bestNote}</p>}
               </div>
               <Keycap block data-testid={`solo-start-${g.id}`} onClick={() => onStart(g.id)} aria-label={`Start ${g.title}`}>Start</Keycap>
             </li>
@@ -119,11 +122,11 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
 
   // File the finished round's score once, against this game's rules version,
   // and only from a round the server finished with this player playing it to
-  // the end (a sat-out round never makes a personal best; a left or replaced
-  // one never finishes).
+  // the end (countsForBest: a sat-out round never makes a personal best; a
+  // left or replaced one never finishes).
   const { mine, pub } = roundViews(state);
   const summary = state.phase === "finished" ? adapter.summarize(mine, pub, session.playerId ?? "") : null;
-  const counts = !!summary && pub?.status === "finished" && mine?.abstained !== true;
+  const counts = !!summary && countsForBest(mine, pub);
   useEffect(() => {
     if (state.phase !== "finished" || !summary || !counts || !state.gameInstanceId) return;
     if (outcome?.gid === state.gameInstanceId) return;
@@ -164,7 +167,9 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
 
   if (state.phase === "finished" && summary) {
     const r = outcome && outcome.gid === state.gameInstanceId ? outcome.result : undefined;
-    const pbText = !r ? "" : !r.saved && (r.isNewBest || store === null)
+    // Solo screens offer no Sit out, but the server accepts an abstain sent
+    // with this seat's token: say plainly why such a round sets no best.
+    const pbText = mine?.abstained === true ? "You sat this round out, so it doesn’t count toward a personal best." : !r ? "" : !r.saved && (r.isNewBest || store === null)
       ? "Your score couldn’t be saved as a personal best: this device’s storage is unavailable."
       : r.isNewBest
         ? r.previous ? `New personal best on this device! Your previous best was ${fmt(r.previous.score)}.` : "Your first personal best on this device!"
@@ -176,6 +181,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
         <h1 className="mz-h1" tabIndex={-1} ref={resultsHeading} data-testid="solo-score">{fmt(summary.score)} points</h1>
         <p className="mz-solo-results__correct" data-testid="solo-headline">{summary.headline}</p>
         {pbText && <p className={`mz-solo-results__pb${r?.isNewBest && r.saved ? " is-new" : ""}`} role="status" data-testid="solo-pb">{pbText}</p>}
+        {adapter.bestNote && <p className="mz-solo__best-note" data-testid="solo-note">{adapter.bestNote}</p>}
         <div className="mz-solo-results__actions">
           <Keycap block data-testid="solo-play-again" onClick={() => { setOutcome(null); void live().start(game.id); }}>Play again</Keycap>
           <Keycap block variant="surface" data-testid="solo-back" onClick={onBackToSolo}>Back to solo</Keycap>
@@ -196,6 +202,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
       <h1 className="mz-h1">{game.title}</h1>
       <p className="mz-foot mz-entry__lede" data-testid="solo-howto">{adapter.howToPlay}</p>
       <p className="mz-solo__best" data-testid={`solo-best-${game.id}`}>{bestLine(best, store !== null)}</p>
+      {adapter.bestNote && <p className="mz-solo__best-note" data-testid="solo-note">{adapter.bestNote}</p>}
       {state.phase === "error" && <p className="err" role="alert" data-testid="solo-error">{state.error ?? "Something went wrong."}</p>}
       {state.phase === "lost" && (
         <NoticeCard tone="warn" title="This round was lost" testId="solo-lost">

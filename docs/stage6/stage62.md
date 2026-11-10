@@ -2,6 +2,10 @@
 
 - **Branch:** `claude/stage6-2-solo-shelf`, stacked on PR #6 at `643ea03`.
 - **Instruction:** ChatGPT's review handoff on PR #6 (comment 6770278546, 2026-11-10), under the owner's standing authorization (D-WF-01).
+- **Clarified by ChatGPT on PR #7:**
+  - 6770394918, answering this spec's §5 concerns: Connections repeats, its personal best, abstain, the lost-join fallback, and projection checks;
+  - 6771088990: keep content selection unchanged and queue the follow-up.
+  - Both are applied below; §3.6 lists where.
 - **Not done here:** nothing is merged or deployed, no port is made public, and nothing is paid for. Quick Party, theme modernization, installation, new games and room retention are out of scope.
 - **Order of work:** this spec was written **before** implementation. §6 records what was actually built and tested.
 
@@ -81,12 +85,21 @@ Each runs on its existing engine, server scoring and private projection, in the 
   - Results use the shared solo results screen, not the multiplayer standings.
 - **`SoloSession.intent`** returns whether the server took the action. The games' own "keep your entry and try again" behaviour (Pulse's send note, Connections keeping the four tiles selected) then works in solo too.
 - **A join whose reply was lost:** on Try again the room is joined again with its creation token. If the server refuses because the seat is already taken (by that lost join), the room is given up and a new one is made in the same Start. The old room id is never used again without a token.
+  - **Bounds (clarification 6770394918, item 4):**
+    - at most **one** new room per Start that the player triggers;
+    - the whole Start, fallback included, stays inside its one time budget;
+    - only a definite answer gives the room up (a refusal, or 401/403/404). A timeout, 5xx or network failure keeps it, makes no new room, and the next Start asks again.
+    - "Already taken" is never read as "ours": the new seat is authenticated normally.
+    - The room given up stays on the server until room retention exists (the documented orphan-room limitation).
+- **Which rounds set a personal best:** `countsForBest` in `soloRules.ts`, used by the shell and tested on real projections.
+  - A round counts only if the server finished it (played out, or ended by its time limit, even at 0) and this player did not sit it out.
+  - Solo screens offer no Sit out, but the server still accepts an abstain sent with the seat's own token. Such a round ends, shows its recorded score, and says "You sat this round out, so it doesn’t count toward a personal best." It never writes a best: not on the result, not on a replay of the request, not after a reload.
 
 ### 3.4 Word Connections content in solo (reported as it is)
 - A solo room has its own content history, like any room.
   - Practice draws practice-only boards first, then boards it has used, least recently used first.
   - A fresh official board is taken only when none of those is left.
-- Starting a board counts as using it, even if the round is left.
+- **Starting a board counts as using it,** whether the round is finished, left mid-way, or replaced by a new Start or another tab. Leaving early therefore moves the player through the 12 boards faster.
 - The shipped library has 13 boards: 12 practice-only and 1 official-eligible. A solo player therefore sees 12 different boards, and then they repeat in least-recently-used order. While repeats are available, the official-eligible board is not drawn.
 - **Found while testing:** the count depends on how many boards are practice-only.
   - Measured with the real engine, if every board were approved for official play (the test content mode), a solo room would deal **the same board every time**. Practice reuses a used item before it takes a fresh official one.
@@ -94,13 +107,36 @@ Each runs on its existing engine, server scoring and private projection, in the 
   - Today's library is unaffected (12 practice-only boards).
   - A unit test pins the behaviour so a change is deliberate.
   - I have not changed it: the handoff says to reuse the existing selection. It is raised in §5.
-- **Personal best:** "best score on any board under these scoring rules". Boards differ in difficulty, so a best can come from an easier board. The screens say "personal best on this device" and nothing more precise.
+  - **Decided (6771088990):** selection stays unchanged for this checkpoint, and the reproducing test and this limitation are kept.
+    - Queued as a bounded follow-up for the smoother-session/content-variety work, before library eligibility changes make it visible: solo and casual rooms prefer unused practice-usable content, then least recently used.
+    - Cup selection, eligibility validation and Cup usage stay as they are.
+    - This is recorded in `docs/MILESTONES.md`, not implemented.
+  - Protected official content is never consumed to add variety (6770394918, item 1).
+- **Personal best:** "best score on any board under these scoring rules". Boards differ in difficulty, so a best can come from an easier board.
+  - Next to the Connections best, on the shelf, the start screen and the results, a short note says: "Best score across boards. Some boards are harder than others." (6770394918, item 2). The "on this device" label stays.
+  - Connections has no difficulty or rule modes to choose from. If it gets them, each needs its own best key.
 
 ### 3.5 Time limits
 Unchanged:
 - Pattern Pulse: game 5 min; each round a memorise window, then an answer window.
 - Word Connections: game 8 min.
 - A deadline that passes finishes the game with what was done; that is a finished server result.
+
+### 3.6 Where each clarification is applied
+- **6770394918:**
+  1. Repeats: §3.4, plus the unit test of 12 boards then a repeat.
+  2. Personal-best note: §3.4, `bestNote` in `soloRules.ts`, and check-solo-shelf L.
+  3. Abstain: §3.3, `countsForBest`, unit tests (Connections and Pulse, partial progress, a replay, the round read again), and check-solo-shelf L (results, the replayed request, a reload).
+  4. Lost-join fallback: §3.3; unit tests against the real server for:
+     - an accepted join whose reply was dropped;
+     - 5xx and a timeout on the retried join;
+     - the fallback's own join refused or lost;
+     - the fallback's room creation failing;
+     - the time budget.
+  5. Projection checks: unit tests at each phase boundary.
+     - **Connections:** before any guess; after one solved group and a near miss (the solved group is shown, the others are not); at the end (the full solution).
+     - **Pulse:** after each round, its recap; never the seed or a later pattern.
+- **6771088990:** §3.4 and §5, item 4.
 
 ## 4. Test plan
 - **Unit tests:**
@@ -129,13 +165,14 @@ Unchanged:
 - **Reporting:** browser checks run in Chromium (headless shell) only. WebKit and real devices are reported as not run.
 
 ## 5. Concerns raised with ChatGPT
-1. **Connections boards repeat after 12 solo rounds,** least recently used first (§3.4). Making them unlimited or seasonal is the later content milestone.
-2. **A sat-out run** (a forged `abstain`, since the solo screens don't offer it) finishes the game on the server, but it never records a personal best.
-3. **Connections personal bests compare across boards** of different difficulty under the same scoring (§3.4).
+1. **Connections boards repeat after 12 solo rounds,** least recently used first (§3.4). Making them unlimited or seasonal is the later content milestone. *Accepted for this slice (6770394918, item 1).*
+2. **A sat-out run** (a forged `abstain`, since the solo screens don't offer it) finishes the game on the server, but it never records a personal best. *Accepted; tested (§3.3, §3.6).*
+3. **Connections personal bests compare across boards** of different difficulty under the same scoring (§3.4). *Accepted, with the player-facing note (§3.4).*
 4. **Content selection in solo and casual rooms** (found while testing, §3.4):
    - **Problem:** once most boards are approved for official play, a solo room would repeat one board, and casual rooms would repeat practice items of every content game.
    - **Proposal, not implemented:** a room that can never play official games draws from all practice-usable items, unused ones first, least recently used after that. Cups keep today's rule.
    - **Why it waits:** it changes shared server selection, so it needs a decision.
+   - **Decided (6771088990):** kept unchanged for Stage 6.2; queued for the smoother-session/content-variety work (§3.4).
 
 ## 6. What was built and tested
 

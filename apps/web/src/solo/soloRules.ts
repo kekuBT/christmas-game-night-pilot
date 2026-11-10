@@ -27,6 +27,12 @@ export interface SoloGameRules {
   howToPlay: string;
   /** Under the results: how the score is made. */
   scoring: string;
+  /**
+   * Next to the personal best, when one best compares rounds that differ in
+   * a way the score doesn't show (Word Connections: one best across boards
+   * of different difficulty).
+   */
+  bestNote?: string;
   /** The finished round's summary, or null if the projection doesn't hold it yet. */
   summarize: (game: PlayerGame | undefined, publicGame: PublicGame | undefined, me: string) => SoloSummary | null;
 }
@@ -35,6 +41,18 @@ export interface SoloGameRules {
 function recordedScore(game: PlayerGame | undefined, publicGame: PublicGame | undefined, me: string): number | undefined {
   const s = (game?.rawScores ?? publicGame?.rawScores ?? {})[me];
   return typeof s === "number" ? s : undefined;
+}
+
+/**
+ * Whether a finished round may set a personal best: the server finished it
+ * (played out, or ended by its time limit), and this player's own view of it
+ * shows they did not sit it out. A sat-out round is never a best, whatever it
+ * had scored before: the solo screens hide Sit out, but the server still
+ * accepts an abstain sent with the seat's token. A round that was left or
+ * replaced never finishes, so it never gets here.
+ */
+export function countsForBest(game: PlayerGame | undefined, publicGame: PublicGame | undefined): boolean {
+  return publicGame?.status === "finished" && game !== undefined && game.abstained !== true;
 }
 
 export interface MathReviewRow { prompt: string; mine: string; answer: string; ok: boolean }
@@ -84,6 +102,7 @@ export const CONNECTIONS_SOLO: SoloGameRules = {
   rulesVersion: CONNECTIONS_RULES_VERSION,
   howToPlay: "Sort 16 words into four groups of four. Four mistakes and the puzzle is over.",
   scoring: CONNECTIONS_RULE,
+  bestNote: "Best score across boards. Some boards are harder than others.",
   summarize(game, publicGame, me) {
     const score = recordedScore(game, publicGame, me);
     const st = ((game?.state ?? {}) as { myState?: { solved: string[]; mistakes: number } }).myState;

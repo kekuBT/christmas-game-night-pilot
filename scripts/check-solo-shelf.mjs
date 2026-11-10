@@ -5,8 +5,11 @@
 //   C  Play again: Pulse with a slip in every round (0), the best stays
 //   D  switch to Word Connections: solved with no mistakes (450), the first
 //      group chosen by keyboard; its own first best (never compared with Pulse)
-//   E  Play again: four wrong guesses (0, out of guesses), a fresh board, no
-//      selection carried over, every group shown as missed
+//   E  Play again: four wrong guesses (0, out of guesses), a fresh round with
+//      nothing carried over, every group shown as missed. Which board comes
+//      next is the server's content selection: a gate server approves all
+//      content for official play, so its solo rooms repeat one board (spec
+//      §3.4, kept by decision); board variety is checked in K instead
 //   F  Play again: two groups then four wrong (200), found and missed told apart
 //   G  switch to Math Mayhem: a fresh round; one solo room for all of it
 //   H  personal bests: one per game in storage and on the shelf; another rules
@@ -15,10 +18,18 @@
 //      replacing a Connections round, Home from results
 //   J  fault: a Connections guess that gets no reply ends at the request
 //      allowance with the four tiles still selected; sending again works
-//   K  timeouts (own server, short test clock): a Pulse round left to run out,
-//      and a Connections game ending at its deadline with one group found
+//   K  own server (short test clock, the shipped content library): a Pulse
+//      round left to run out, a Connections game ending at its deadline with
+//      one group found, then board variety: Play again and a Start after
+//      leaving each deal a board not yet used in that room
+//   L  a forged abstain (sent with the seat's own token; the solo screens have
+//      no Sit out) after partial progress: the round ends and says why it
+//      sets no best; the stored best is unchanged after the result, a replay
+//      of the request and a reload (Connections and Pulse). Also the note
+//      that Connections' best spans boards, on the shelf, start and results
 // Usage: node scripts/check-solo-shelf.mjs <baseUrl>   (the gate passes its server)
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -150,7 +161,8 @@ try {
   await page.getByTestId("mz-cx").waitFor({ timeout: 20000 });
   check("E Play again: no tile selected from the last round", (await page.locator('[data-testid="mz-cx-tile"][aria-pressed="true"]').count()) === 0);
   const secondBoard = (await page.getByTestId("mz-cx-tile").allInnerTexts()).sort().join("|");
-  check("E Play again: a different board (the room's least recently used)", secondBoard !== firstBoard);
+  check("E Play again: a fresh round with nothing found yet (16 tiles, no group bands)", (await page.getByTestId("mz-cx-tile").count()) === 16 && (await page.getByTestId("mz-cx-band").count()) === 0);
+  console.log(`INFO E the board after Play again is ${secondBoard === firstBoard ? "the same one" : "a different one"}: the server's content selection decides (with all content approved, as on a gate server, a solo room repeats one board; spec §3.4). Board variety is checked in K, on the shipped library.`);
   const c2 = await playConnections(page, ["wrong", "wrong", "wrong", "wrong"]);
   check("E four wrong guesses: 0 points, out of guesses", c2.score === 0 && c2.headline === "Found 0 of 4 groups · out of guesses", JSON.stringify(c2));
   check("E every group shown, all as missed", (await page.getByTestId("mz-cx-band").count()) === 4 && (await page.locator(".mz-cx-band--missed").count()) === 4);
@@ -256,6 +268,60 @@ try {
   await page.getByTestId("home").waitFor({ timeout: 10000 });
   check("I Home from the results: Home, with no phantom Rejoin", (await page.getByTestId("home-rejoin").count()) === 0);
   await ctx.close();
+
+  // ---- L. A forged abstain never sets a best; Connections' best note ----
+  const lctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const lp = await lctx.newPage();
+  await lp.goto(`${BASE}/solo`, { waitUntil: "domcontentloaded" });
+  await lp.evaluate(() => localStorage.setItem("mchezo.pb.v1", JSON.stringify({ "word-connections@1": { score: 50, at: 1, rulesVersion: 1 }, "pattern-pulse@1": { score: 20, at: 1, rulesVersion: 1 } })));
+  await lp.reload({ waitUntil: "domcontentloaded" });
+  await lp.getByTestId("solo-home").waitFor({ timeout: 15000 });
+  const NOTE = "Best score across boards. Some boards are harder than others.";
+  check("L the shelf says Connections' best spans boards (and only Connections)", (await lp.getByTestId("solo-note-word-connections").innerText()).trim() === NOTE && (await lp.locator('[data-testid^="solo-note-"]').count()) === 1 && (await lp.getByTestId("solo-best-word-connections").innerText()).includes("on this device"));
+  await lp.goto(`${BASE}/solo/word-connections`, { waitUntil: "domcontentloaded" });
+  await lp.getByTestId("solo-ready").waitFor({ timeout: 10000 });
+  check("L Connections' start screen: the device best (50) and the note", (await lp.getByTestId("solo-best-word-connections").innerText()).includes("50") && (await lp.getByTestId("solo-note").innerText()).trim() === NOTE);
+  await lp.getByTestId("solo-round-start").click();
+  await lp.getByTestId("mz-cx").waitFor({ timeout: 20000 });
+  const lw = (await lp.getByTestId("mz-cx-tile").allInnerTexts()).map((w) => w.trim());
+  for (const w of connectionsGroups(lw)[0]) await tileFor(lp, w).click();
+  await lp.getByTestId("mz-cx-submit").click();
+  await soon("L Connections: one group found (100 so far)", async () => (await lp.getByTestId("mz-cx-band").count()) === 1, 10000);
+  const lseat = await seatOf(lp);
+  const forge = async (gameInstanceId, clientEventId) => {
+    const r = await fetch(`${BASE}/rooms/${lseat.roomId}/intents`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": lseat.token },
+      body: JSON.stringify({ intent: { kind: "intent", schemaVersion: 1, clientEventId, roomId: lseat.roomId, gameInstanceId, action: "abstain", payload: {} } }) });
+    return { status: r.status, body: await r.json() };
+  };
+  const cxRound = ((await serverRoom(lseat)).games ?? []).find((g) => g.status === "playing" && g.gameId === "word-connections")?.id;
+  const cxEvent = randomUUID();
+  const a1 = await forge(cxRound, cxEvent);
+  check("L the server takes the forged abstain (it is the seat's own token)", a1.status < 300 && a1.body.accepted === true, JSON.stringify(a1));
+  const lc = await results(lp);
+  check("L Connections results: the server's 100 and 1 of 4, and why it sets no best", lc.score === 100 && lc.headline === "Found 1 of 4 groups" && /sat this round out/.test(lc.pb), JSON.stringify(lc));
+  check("L Connections results: the note next to the best", (await lp.getByTestId("solo-note").innerText()).trim() === NOTE);
+  check("L the stored Connections best is still 50", (await bests(lp))["word-connections@1"]?.score === 50, JSON.stringify(await bests(lp)));
+  const a2 = await forge(cxRound, cxEvent);
+  await sleep(2500); // a poll or two
+  check("L the same request replayed: the original answer, and still 50", a2.body.accepted === true && (await bests(lp))["word-connections@1"]?.score === 50, JSON.stringify(a2));
+  await lp.reload({ waitUntil: "domcontentloaded" });
+  await lp.getByTestId("solo-ready").waitFor({ timeout: 10000 });
+  check("L after a reload: the start screen, still 50 on screen and in storage", (await lp.getByTestId("solo-best-word-connections").innerText()).includes("50") && (await bests(lp))["word-connections@1"]?.score === 50);
+
+  await startFromShelf(lp, "pattern-pulse");
+  await lp.getByTestId("mz-pp-open").click();
+  await lp.getByTestId("mz-pp-memorise").waitFor({ timeout: 10000 });
+  const lpat = await lp.locator('[data-testid="mz-pp-pattern"] li').evaluateAll((els) => els.map((e) => Number(e.dataset.symbol)));
+  await lp.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
+  for (const s of lpat) await lp.getByTestId(`mz-pp-key-${s}`).click();
+  await lp.getByTestId("mz-pp-submit").click();
+  await lp.getByTestId("mz-pp-ready").waitFor({ timeout: 15000 }); // round 2 ready
+  const ppRound = ((await serverRoom(lseat)).games ?? []).find((g) => g.status === "playing" && g.gameId === "pattern-pulse")?.id;
+  const a3 = await forge(ppRound, randomUUID());
+  const lq = await results(lp);
+  check("L Pulse: a forged abstain after a perfect first round ends it: 110, and it sets no best", a3.body.accepted === true && lq.score === 110 && /sat this round out/.test(lq.pb), JSON.stringify({ a3, lq }));
+  check("L Pulse: the stored best is still 20 (110 would have beaten it); no Connections note here", (await bests(lp))["pattern-pulse@1"]?.score === 20 && (await lp.getByTestId("solo-note").count()) === 0, JSON.stringify(await bests(lp)));
+  await lctx.close();
 } finally {
   await browser.close();
 }
@@ -264,6 +330,7 @@ try {
 const DATA = mkdtempSync(join(tmpdir(), "mz-shelf-late-"));
 const env = { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA, MCHEZO_LIFECYCLE_SCALE: "0.05" };
 delete env.NODE_ENV;
+delete env.MCHEZO_CONTENT_TEST_MODE; // the shipped library, as players get it
 const srv = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { env, stdio: ["ignore", "pipe", "pipe"] });
 let out = ""; srv.stdout.on("data", (d) => { out += d; }); srv.stderr.on("data", (d) => { out += d; });
 let port = 0;
@@ -282,9 +349,21 @@ try {
   check("K Pulse at its game deadline: a finished server result, 0 points, the timed-out round in the recap", kr.score === 0 && /ran out of time/.test(kr.headline) && /Time ran out/.test(await kp.getByTestId("mz-pp-recap").innerText()), JSON.stringify(kr));
   await kp.getByTestId("solo-back").click();
   await startFromShelf(kp, "word-connections", LB);
-  await playConnectionsUntil(kp);
+  const kb1 = await playConnectionsUntil(kp);
   const kc = await results(kp);
   check("K Connections at its deadline with one group found: 100, 1 of 4, one solid band", kc.score === 100 && kc.headline === "Found 1 of 4 groups" && (await kp.locator(".mz-cx-band--missed").count()) === 3, JSON.stringify(kc));
+  // Board variety on the shipped library (12 practice-only boards): Play
+  // again deals a board this room hasn't used, and so does a Start after
+  // leaving a round (a left round counts as used).
+  await kp.getByTestId("solo-play-again").click();
+  await kp.getByTestId("mz-cx").waitFor({ timeout: 20000 });
+  const kb2 = await boardNow(kp);
+  await kp.getByTestId("solo-leave").click(); await kp.getByTestId("solo-leave-yes").click();
+  await kp.getByTestId("solo-home").waitFor({ timeout: 10000 });
+  await startFromShelf(kp, "word-connections", LB);
+  await kp.getByTestId("mz-cx").waitFor({ timeout: 20000 });
+  const kb3 = await boardNow(kp);
+  check("K shipped library: Play again, then a Start after leaving, each deal a board not yet used in this room", new Set([kb1, kb2, kb3]).size === 3);
 } finally {
   await b2.close();
   srv.kill("SIGTERM");
@@ -292,14 +371,21 @@ try {
   rmSync(DATA, { recursive: true, force: true });
 }
 
-/** One group found, then nothing more: the game's deadline (24 s on the short clock) ends it. */
+/** The Connections board on screen, as one comparable string. */
+async function boardNow(p) {
+  return (await p.getByTestId("mz-cx-tile").allInnerTexts()).map((w) => w.trim().toLowerCase()).sort().join("|");
+}
+
+/** One group found, then nothing more: the game's deadline (24 s on the short clock) ends it. Returns the board. */
 async function playConnectionsUntil(p) {
   await p.getByTestId("mz-cx").waitFor({ timeout: 20000 });
+  const board = await boardNow(p);
   const ws = (await p.getByTestId("mz-cx-tile").allInnerTexts()).map((w) => w.trim());
   for (const w of connectionsGroups(ws)[0]) await tileFor(p, w).click();
   await p.getByTestId("mz-cx-submit").click();
   await p.getByTestId("mz-cx-band").waitFor({ timeout: 10000 });
   await p.getByTestId("solo-results").waitFor({ timeout: 60000 });
+  return board;
 }
 
 console.log(failures === 0 ? "SOLO SHELF ALL PASSED" : `SOLO SHELF FAILURES: ${failures}`);
