@@ -271,6 +271,20 @@ Every claim here was checked in Chromium (headless, Playwright) and in unit test
     - Unchanged Stage 5.1 code: **FAILED**. The player never arrived and neither request was cancelled (run `20261110-055708-1ff2d489-11749`).
     - With the fix: **PASSED**. Both requests were cancelled at 6.0 s, and the player arrived (run `20261110-055708-5a4454c1-11750`, on the uncommitted fix).
 
+**A cleanup gap in that fix, found in review of PR #5 (P2), fixed in `0cb5a78`:**
+- The TV's `readSpectatorReply` returns at once for a 401 or an error status, without reading the body. `pollFresh` only cleared its timer on the way out.
+- So an error reply whose body stalled stayed open for good, and one more piled up with every 2 s poll.
+- **Reproduced:** three stalled 500s and a stalled 401 left 4 replies open.
+- **Fix:** `pollFresh` owns its request for the whole poll and aborts it in `finally`. After a full read that does nothing; after an early return it cancels the unread body and closes the connection.
+- **Tests:**
+  - **3 new unit tests:**
+    - stalled-body 500s (three in a row) and a stalled-body 401 for the TV return at once, are closed, and leave none open;
+    - a stalled-body 500 for the phone fails at its timeout and is closed;
+    - a reply read in full is unaffected.
+  - **`check-poll-body-stall`** gained a step: the TV's next three polls get a 500 whose body stalls.
+    - On `5636d1f`: **FAILED**. The replies were left open; the slowest closed only after 9.1 s (run `20261110-063418-0456f0b1-32300`).
+    - With the fix: **PASSED**. Each reply was closed at once (run `20261110-063418-5636d1f6-32301`, on the uncommitted fix).
+
 ### S5-AUD-07 — the TV hid its outage (verified)
 
 **The defect:** the spectator poll in `App.tsx` swallowed every error and had no watchdog, so the TV kept its last screen and said nothing.
@@ -417,6 +431,7 @@ Every claim here was checked in Chromium (headless, Playwright) and in unit test
 | Phase 4 (compact snapshots) | `626f150` |
 | The script inventory | `9905460` |
 | Review of PR #4 (P2): the poll timeout covers the reply's body (§3, S5-AUD-04) | `7e7ab16` |
+| Review of PR #5 (P2): a poll closes a reply it didn't read (§3, S5-AUD-04) | `0cb5a78` |
 
 Test and driver fixes found by the final gates (§11; no app change):
 
@@ -637,7 +652,7 @@ One busy Draw & Guess turn: 120 batches of 40 points at 3 per second, about 40 s
 - **Browser:** `chrome-headless-shell` 153.0.8010.12, through `MCHEZO_CHROMIUM_PATH`, on Node v22.23.4.
 - **Wall time:** 95.4 min, from 00:31 to 02:07 UTC on 2026-11-10, with the existing sequential gate.
 
-This verdict covers `0a3964f` only. The commit that records it changes `docs/` only. **`7e7ab16` (the review fix, §3) came after it and is not covered by it.** By the owner's decision, the cumulative Stage 5.2 tree (PR #5) is the review and validation candidate, and its full gate covers this fix. Every earlier full-gate attempt on this branch failed, was cancelled or was interrupted (§11). None of them counts, and their results are not combined with this one.
+This verdict covers `0a3964f` only. The commit that records it changes `docs/` only. **`7e7ab16` and `0cb5a78` (the review fixes, §3) came after it and are not covered by it.** By the owner's decision, the cumulative Stage 5.2 tree (PR #5) is the review and validation candidate, and its full gate covers this fix. Every earlier full-gate attempt on this branch failed, was cancelled or was interrupted (§11). None of them counts, and their results are not combined with this one.
 
 ## 11. Failed and cancelled attempts
 

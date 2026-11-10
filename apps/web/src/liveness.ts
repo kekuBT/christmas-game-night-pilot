@@ -31,6 +31,13 @@ export const STALE_AFTER_MS = 8000;
  * until `read` has finished with the body. On expiry it aborts the request,
  * which also cancels a body read in progress and closes the connection, and
  * the poll rejects even if `read` ignores the abort.
+ *
+ * The poll owns its request for its whole life: however it ends, the request
+ * is aborted on the way out. After a body has been read in full that does
+ * nothing. But a reader can return without reading the body, as the TV does
+ * for a 401 or an error status. Then the unread body is cancelled and its
+ * connection closed. Before, an error reply whose body stalled stayed open
+ * for good, and one more piled up with every poll (review of PR #5).
  */
 export async function pollFresh<T>(input: string, init: RequestInit, read: (r: Response) => Promise<T>, timeoutMs = POLL_TIMEOUT_MS): Promise<T> {
   const ac = new AbortController();
@@ -45,6 +52,7 @@ export async function pollFresh<T>(input: string, init: RequestInit, read: (r: R
     return await Promise.race([fetch(input, { ...init, cache: "no-store", signal: ac.signal }).then(read), expired]);
   } finally {
     clearTimeout(timer);
+    ac.abort();
   }
 }
 
