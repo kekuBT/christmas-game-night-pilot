@@ -1559,3 +1559,42 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - No room expiry on the server: solo rooms accumulate (one per device, more when storage is cleared). Deferred, documented (D-S61-03).
 - The plain-http fix is proven in Chromium only; Safari on a real iPhone over the home network is still the real-device checklist's job.
 - A casual room can't become a Cup mid-session; a host who wants a Cup picks it on the Host screen.
+
+## Stage 6.1 review repairs (2026-11-10)
+
+**Source:** ChatGPT's review of PR #6 (comment 6769583991): two P2 findings and two small repairs. **Repairs:** `51d01b9`, on `claude/stage6-1-everyday-entry`. Nothing was merged or deployed, no port was made public, and nothing was paid for.
+
+**Done:**
+- **Bounded solo requests:**
+  - one timeout covers fetch and reply;
+  - Leave, a new Start and the screen going away abort the run's requests;
+  - generation checks drop late replies;
+  - Start finishes within its budget, with Try again;
+  - an uncertain Start or join is reconciled, not repeated.
+- **Lost vs passing failures:**
+  - 401/403/404 ends the round as lost, with Start a new round;
+  - passing failures keep the seat and show "Reconnecting…" after 8 s;
+  - no new room is made on a passing failure.
+- **Personal best:** a record under other rules is ignored on write.
+- **SoloHome copy** fixed.
+- **Room retention** queued as a pre-deployment readiness task (`docs/MILESTONES.md`).
+- D-S61-09 and D-S61-10 added; D-S61-03 and D-S61-05 amended.
+- **Files:**
+  - `apps/web/src/solo/soloSession.ts`, `personalBest.ts`;
+  - `apps/web/src/components/mchezo/Solo.tsx`, `styles/stage6.css`;
+  - `tests/stage61-solo-client.test.ts`, `scripts/check-solo.mjs`.
+
+**Tests** (each verdict is one run on one revision; full detail in `docs/stage6/README.md` §6.6):
+- Every finding was reproduced first on `96eaea5` (`docs/evidence/review-pr6/`).
+- The repaired `check-solo` FAILED on the reviewed app (run `20261110-143047-96eaea57-8299`).
+- Fast gate on `51d01b9`: PASSED, run `20261110-142701-51d01b9f-4372` (1,165 unit tests).
+- Targeted gate on `51d01b9`: PASSED, run `20261110-142749-51d01b9f-7153`, 8 of 8.
+- No full gate for these local repairs, as the review asked.
+
+**External blockers:** none.
+
+**Next task:** ChatGPT re-reviews PR #6. Stage 6.2 (the next solo-play slice) starts only when its handoff instructs it.
+
+**Risk:**
+- A create that gets no answer can leave one unused solo room on the server until room retention exists.
+- These fault checks run in Chromium only.

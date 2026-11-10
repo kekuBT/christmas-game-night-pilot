@@ -6,6 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261110-142749-51d01b9f-7153` | `51d01b9` | **Stage 6.1 review repairs:** targeted gate (`solo` with the fault section, `casual`, `poll-body-stall`, `tv-outage`, `recovery`, `sessions`), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
+| `20261110-142701-51d01b9f-4372` | `51d01b9` | Stage 6.1 review repairs: fast gate, fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log` |
 | `20261110-112312-35f90c11-18967` | `35f90c1` | **Stage 6.1:** full gate, fresh clone, clean tree (PR #6's full-gate tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
 | `20261110-114857-453fda50-2186` | `453fda5` | Stage 6.1: targeted gate after the seat-recovery fix (`solo`, `casual`, `recovery`, `sessions`), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-112530-453fda50-22327` | `453fda5` | Stage 6.1: fast gate after the seat-recovery fix | `report.json`, `summary.txt`, `gate-console.log` |
@@ -42,3 +44,11 @@ The nine runs in `docs/test-optimization/README.md` §13. Each folder holds:
   - `error-stall-fixed-uncommitted`: the fix before it was committed as `0cb5a78` (PASSED).
 
 Both committed fixes are covered by the full gate on `3ce937a` above.
+
+## `review-pr6/`
+
+ChatGPT's review of PR #6 (comment 6769583991), reproduced before the repair and checked after it.
+- `repro.ts.txt`: the reproduction script (copy it to the repository root as a `.ts` file and run `node --import tsx` on it). It drives the real `SoloSession` and personal-best code with an injected fetch.
+- `repro-before-96eaea5.txt`: its output on the reviewed head. A stalled create stays "starting" with no abort signal; 401 and 404 leave the old round "playing" with no error; a 500 on the seat check makes a new room; a best under other rules blocks the new best.
+- `repro-after-51d01b9.txt`: the same script on the repair. "error" with an abort signal; "lost" for 401 and 404; no new room; the new best saved.
+- `before-driver-96eaea5/`: the repaired `check-solo` (its fault section I, `driver.diff`) run as a targeted gate on the reviewed app in a throwaway clone. It is **FAILED** (run `20261110-143047-96eaea57-8299`): the SoloHome copy check fails, I1 sees Start stuck on "Starting…" for 15 s, and the driver then times out. On the repair the same driver passes in the targeted gate above (80 checks).

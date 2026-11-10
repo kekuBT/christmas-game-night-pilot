@@ -22,6 +22,10 @@ All milestones **locally authorized**, not remote publication/deployment. Order 
   - **Verify:** standalone navigation, safe areas, joining a room, reconnecting, and theme consistency.
   - **Reporting:** report automated and browser checks separately from real-device installation checks. Never claim real-device verification without doing it.
   - **Out of scope:** installing does not mean offline play. Offline solo support is not part of this item. Deployment, spending and public ports stay as they are.
+- **Room retention / expiry** (queued 2026-11-10 by ChatGPT's review of PR #6, comment 6769583991, under the standing authorization D-WF-01).
+  - **Why:** the server keeps every room forever. Solo rooms (Stage 6.1, D-S61-03) make that visible: one per device, more when a device's storage is cleared or a create got no answer.
+  - **When:** a bounded pre-deployment readiness task, after the immediate everyday-play slice. Not part of Stage 6.1's repairs.
+  - **Must not:** delete Cup history or Memory Book memories.
 
 ## Stop-the-line defects
 P0: private word/role/answer exposed; host spoof; duplicated or lost official scoring; repeated server crash/data loss; write access to real external services without authorization; harmful secret leak. P1: iPhone unusable, cannot rejoin, game permanently stuck, scores incorrect, 11 games not actually playable, Memory Book fabricates real people/events. P2: minor styling, occasional confetti defect, nonessential animation.

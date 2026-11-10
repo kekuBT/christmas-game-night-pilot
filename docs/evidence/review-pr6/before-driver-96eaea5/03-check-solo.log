@@ -1,0 +1,95 @@
+$ node scripts/check-solo.mjs http://localhost:34689
+# timeout 600s | worker w1 | server http://localhost:34689 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/test-results/20261110-143047-96eaea57-8299/server-data/w1)
+
+[+0.9s] PASS Home offers Play solo, Host a game and Join a room
+[+1.4s] PASS Play solo offers only real solo games (Math Mayhem in this slice) — solo-game-math-mayhem
+[+1.4s] PASS the solo list is honest about requirements: 1–10 players, best with 2+
+[+1.4s] FAIL the other games are pointed to rooms, with no invented player minimum
+[+1.4s] PASS a fresh device has no personal best yet
+[+2.0s] PASS tap 2 is the round itself: no room code, no name, no lobby
+[+15.3s] PASS round 1 (5 right): results show 5 of 10 and a score in range — {"score":600,"correct":5,"pb":"Your first personal best on this device!"}
+[+15.3s] PASS round 1: the first personal best on this device — Your first personal best on this device!
+[+18.3s] PASS on the results screen polling has stopped — 0 projection requests in 3 s
+[+31.3s] PASS round 2 (all wrong): a fresh round, 0 of 10, 0 points (nothing carried over) — {"score":0,"correct":0,"pb":"Your personal best on this device is still 600."}
+[+31.3s] PASS round 2: a lower score keeps the personal best — Your personal best on this device is still 600.
+[+45.5s] PASS round 3 (all right, first answer double-tapped): 10 of 10, at least 1,000 — {"score":1200,"correct":10,"pb":"New personal best on this device! Your previous best was 600."}
+[+45.5s] PASS round 3: a higher score is a new personal best, naming the old one — New personal best on this device! Your previous best was 600.
+[+45.5s] PASS the server holds exactly the three rounds, each with its own score — 600,0,1200
+[+45.5s] PASS the double tap counted once: 10 answers in round 3
+[+45.5s] PASS no round is left playing
+[+45.5s] PASS solo rounds are never official
+[+45.9s] PASS Back to solo: the list shows the new personal best
+[+45.9s] PASS browser Back from the solo list (after three rounds) is Home, not an old round
+[+46.9s] PASS Leave round asks first
+[+46.9s] PASS Keep playing keeps the round
+[+47.0s] PASS after leaving, the round is removed on the server (nothing left playing)
+[+47.0s] PASS leaving left the personal best as it was
+[+50.0s] PASS after leaving, nothing polls any more — 0 projection requests in 3 s
+[+50.0s] PASS back home: no phantom Rejoin for the solo room
+[+51.9s] PASS browser Back mid-round: the round is removed too
+[+53.0s] PASS reload mid-round: the round's start screen, not a trapped loading screen
+[+55.5s] PASS after the reload nothing polls until Start
+[+55.6s] PASS Start after a reload says the interrupted round was replaced
+[+55.6s] PASS the interrupted round is gone; exactly one round plays
+[+56.8s] PASS a second tab's Start says the open round was replaced
+[+57.0s] PASS tab A, whose round was replaced, goes back to its Start screen (not stuck)
+[+57.4s] PASS the earlier tab's round is gone; the replacement plays
+[+57.4s] PASS the earlier tab's tap and leaving scored nothing in the replacement — {}
+[+69.7s] PASS the replacement round plays to its own result (10 of 10) — {"score":1000,"correct":10,"pb":"Your personal best on this device is still 1,200."}
+[+69.7s] PASS the second tab reused the device's solo room (no new room) — 0 rooms created
+[+70.2s] PASS Mchezo home from the results: Home, with no phantom Rejoin
+[+70.2s] PASS one solo room for this device across every round, leave, Back, reload and tab — 1 rooms created
+[+70.4s] PASS blocked storage: the list says bests can't be kept, and still offers Start
+[+84.9s] PASS blocked storage: the round plays to its results — {"score":360,"correct":3,"pb":"Your score couldn’t be saved as a personal best: this device’s storage is unavailable."}
+[+84.9s] PASS blocked storage: the results say the best couldn't be saved — Your score couldn’t be saved as a personal best: this device’s storage is unavailable.
+[+85.4s] PASS blocked storage: Play again still works
+[+86.5s] PASS blocked storage: the seat is kept for the page, one room across replays and a new Start — 1 rooms created
+[+86.8s] PASS malformed stored data reads as no best (no crash)
+[+86.9s] PASS a best under other rules (version 0) is not shown as this game's best
+[+100.9s] PASS a round under the current rules is its own first best (not compared with version 0) — Your first personal best on this device!
+[+100.9s] PASS the other version's entry is kept untouched beside the new one — {"math-mayhem@0":{"score":99999,"at":1,"rulesVersion":0},"math-mayhem@1":{"score":240,"at":1794321155427,"rulesVersion":1}}
+[+101.1s] PASS plain http (real insecure context at 192.0.2.2): no crypto.randomUUID — {"secure":false,"randomUUID":"undefined"}
+[+115.2s] PASS plain http: the whole round plays and every answer counts (7 of 10) — {"score":840,"correct":7,"pb":"Your first personal best on this device!"}
+[+115.5s] PASS keyboard: Tab reaches Start on the solo list
+[+115.5s] PASS keyboard: Enter on Start begins the round
+[+116.2s] PASS keyboard: all ten questions answered with Tab and Enter — 10 answered
+[+116.2s] PASS keyboard: the results move focus to the score heading
+[+116.2s] PASS keyboard: Tab from the score reaches Play again
+[+116.3s] PASS keyboard: Tab reaches Leave round
+[+116.3s] PASS keyboard: the leave question focuses Keep playing (the safe choice)
+[+116.3s] PASS keyboard: Enter on Keep playing keeps the round
+[+132.0s] FAIL I1 Start with no reply ends in an error with Try again (not a stuck Starting…) — not within 15000ms
+[+132.0s] FAIL I1 it ended within the request allowance (about 6 s), and the request had been sent — 15425 ms, 1 held
+[+162.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":7,"peakOpenPages":2}
+[+162.0s] node:internal/modules/run_main:123
+[+162.0s]     triggerUncaughtException(
+[+162.0s]     ^
+[+162.0s] 
+[+162.0s] locator.click: Timeout 30000ms exceeded.
+[+162.0s] Call log:
+[+162.0s]   - waiting for getByTestId('solo-round-start')
+[+162.0s]     - locator resolved to <button disabled type="button" data-testid="solo-round-start" class="mz-key mz-key--brand mz-key--lg mz-key--block">Starting…</button>
+[+162.0s]   - attempting click action
+[+162.0s]     - waiting for element to be visible, enabled and stable
+[+162.0s]     - element is not stable
+[+162.0s]   - retrying click action
+[+162.0s]     - waiting for element to be visible, enabled and stable
+[+162.0s]   - element was detached from the DOM, retrying
+[+162.0s] 
+[+162.0s]     at /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/scripts/check-solo.mjs:317:44 {
+[+162.0s]   log: [
+[+162.0s]     "  - waiting for getByTestId('solo-round-start')",
+[+162.0s]     '    - locator resolved to <button disabled type="button" data-testid="solo-round-start" class="mz-key mz-key--brand mz-key--lg mz-key--block">Starting…</button>',
+[+162.0s]     '  - attempting click action',
+[+162.0s]     '    - waiting for element to be visible, enabled and stable',
+[+162.0s]     '    - element is not stable',
+[+162.0s]     '  - retrying click action',
+[+162.0s]     '    - waiting for element to be visible, enabled and stable',
+[+162.0s]     '  - element was detached from the DOM, retrying'
+[+162.0s]   ],
+[+162.0s]   name: 'TimeoutError'
+[+162.0s] }
+[+162.0s] 
+[+162.0s] Node.js v22.23.4
+
+# FAIL (exit 1) in 162s | cpu 8.4s, peak memory 264 MB

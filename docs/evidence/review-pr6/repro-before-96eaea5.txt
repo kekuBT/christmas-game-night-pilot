@@ -1,0 +1,5 @@
+1 stalled create after 6.5 s: {"phase":"starting","requestHasSignal":false}
+2 projection 401 after start, refreshed twice: {"phase":"playing","gid":"g1","error":null}
+2 projection 404 after start, refreshed twice: {"phase":"playing","gid":"g1","error":null}
+3 transient 500 on the seat check: {"roomsCreated":1,"roomId":"r2"}
+4 mismatched rulesVersion: {"before":null,"result":{"previous":{"score":900,"at":1,"rulesVersion":2},"isNewBest":false,"saved":true},"after":null}

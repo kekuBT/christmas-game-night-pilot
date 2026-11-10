@@ -184,3 +184,26 @@ Each verdict is one run on one revision.
   - targeted gate on `453fda5` (`solo`, `casual`, `recovery`, `sessions`), fresh clone, clean tree: **PASSED (exit 0)**, run `20261110-114857-453fda50-2186`, 6 of 6.
 - Raw evidence for each run: `docs/evidence/gate-runs/`.
 
+### 6.6 Review repairs (ChatGPT's review of PR #6, comment 6769583991)
+Every finding was reproduced on the reviewed head `96eaea5` with the real `SoloSession` class before it was fixed (`docs/evidence/review-pr6/`).
+- **P2, bounded requests (D-S61-09):**
+  - every solo request runs fetch and reply under one timeout (6 s), and Start runs within 15 s overall;
+  - Leave, a new Start and the screen going away abort the run's requests, and a generation check drops replies for an older run;
+  - Start ends in the round or in an error with **Try again**;
+  - a Start with no answer reads the room once and adopts the round it made, if it exists; a room whose join got no answer is joined again on Try again.
+- **P2, lost seat vs passing failure (D-S61-09, D-S61-03):**
+  - 401/403/404 ends the round as lost, with **Start a new round** (the only path that makes a new room);
+  - a timeout, a 5xx or a dropped connection keeps the round and the seat, says "Reconnecting…" after 8 s without a good reply, and clears on the next good one;
+  - a passing failure while checking the seat fails Start and makes no room.
+- **Personal best (D-S61-05):** a record under other rules in a game's slot is ignored on write too.
+- **SoloHome copy:** "More solo games are on the way. For now the other games are played in a room", with no invented player minimum (Word Connections and Pattern Pulse have a minimum of 1).
+- **Answers to the handoff's questions:** the plain-http fix stays here (D-S61-10); room retention is queued as a pre-deployment readiness task (`docs/MILESTONES.md`).
+- **Tests:**
+  - `stage61-solo-client` has 26 tests: 14 new fault-injection tests at the session boundary, 1 personal-best test, and the earlier 11.
+  - `check-solo` section I injects the faults in the browser: no reply to Start, a 500 outage mid-round, a 401 lost room, and a 500 on the seat check.
+  - Mutation checks each fail at least one new test: removing the request timeout fails 7; retiring a seat on a passing failure fails 3; treating a lost seat as passing fails 2; no Start reconciliation fails 1; dispose not aborting fails 1; Start with none of its five generation checks fails 1. Removing any single one of those checks leaves the others to catch the late reply, so each check alone is defence in depth.
+- **Gates on `51d01b9`** (fresh clone, clean tree, fingerprint `ee2d4798c106`):
+  - fast gate **PASSED (exit 0)**, run `20261110-142701-51d01b9f-4372`: 1,165 unit tests in 104 files;
+  - targeted gate **PASSED (exit 0)**, run `20261110-142749-51d01b9f-7153`: 8 of 8, with `check-solo` 80 checks, `check-casual` 30, `check-tv-outage` 14, `check-poll-body-stall` 12, `check-recovery` 20, `check-sessions` 23.
+  - As the review asked, no full gate was run for these local repairs.
+  - The last full gate is still the one on `35f90c1` (§6.5). The source changes since then are `453fda5` (seat recovery by code) and `51d01b9` (these repairs: the solo session, personal best, the solo screens and `check-solo`). No server or shared client code changed in `51d01b9`.

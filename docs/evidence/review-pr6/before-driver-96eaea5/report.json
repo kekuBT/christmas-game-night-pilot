@@ -1,0 +1,238 @@
+{
+  "runId": "20261110-143047-96eaea57-8299",
+  "level": "targeted",
+  "startedAt": "2026-11-10T14:30:47.471Z",
+  "finishedAt": "2026-11-10T14:33:36.690Z",
+  "exitCode": 1,
+  "verdict": "FAILED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5",
+  "git": {
+    "head": "96eaea579e7675451fa52aa387c713b993e9d87e",
+    "branch": "HEAD",
+    "dirty": [
+      "M scripts/check-solo.mjs"
+    ]
+  },
+  "fingerprint": {
+    "hash": "c5eeb3cdf61e5e23c0aacce78a530fbd8a31cef62d11bcf4ccd7531431f3b5a3",
+    "files": 408
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15543
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.2 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261110-143047-96eaea57-8299/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.4,
+      "log": "./logs/01-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 5,
+      "startOffsetSec": 0.1,
+      "endOffsetSec": 5.5,
+      "cpuSec": 9.3,
+      "peakRssMB": 477,
+      "machine": {
+        "memAvailMinMB": 15030,
+        "cpuSaturatedSec": 0,
+        "samples": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.8,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 5.5,
+      "endOffsetSec": 6.3,
+      "cpuSec": 0.8,
+      "peakRssMB": 135,
+      "machine": {
+        "memAvailMinMB": 15295,
+        "cpuSaturatedSec": 0,
+        "samples": 2
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-solo",
+      "kind": "browser",
+      "command": "node scripts/check-solo.mjs http://localhost:34689",
+      "status": "FAIL",
+      "exitCode": 1,
+      "durationSec": 162,
+      "log": "./logs/03-check-solo.log",
+      "detail": "FAIL the other games are pointed to rooms, with no invented player minimum | FAIL I1 Start with no reply ends in an error with Try again (not a stuck Starting…) — not within 15000ms | FAIL I1 it ended within the request allowance (about 6 s), and the request had been sent — 15425 ms, 1 held",
+      "worker": 1,
+      "estSec": 60,
+      "startOffsetSec": 7,
+      "endOffsetSec": 169.1,
+      "cpuSec": 8.4,
+      "peakRssMB": 264,
+      "roomsOnGateServer": 6,
+      "machine": {
+        "memAvailMinMB": 15220,
+        "cpuSaturatedSec": 0,
+        "samples": 163
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 7,
+        "peakOpenPages": 2
+      },
+      "failureKind": "functional"
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 34689,
+      "pid": 8394,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/test-results/20261110-143047-96eaea57-8299/server-data/w1",
+      "log": "./logs/server-w1.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 169,
+    "sumSec": 168,
+    "utilisation": 0.33,
+    "perWorkerBusySec": {
+      "w1": 168
+    },
+    "predicted": {
+      "low": 15,
+      "mid": 61,
+      "high": 202,
+      "confidence": "low-confidence"
+    },
+    "contentionRatio": null,
+    "longest": [
+      {
+        "name": "check-solo",
+        "sec": 162
+      },
+      {
+        "name": "build-web",
+        "sec": 5.4
+      },
+      {
+        "name": "browser-preflight",
+        "sec": 0.8
+      }
+    ],
+    "backpressure": {
+      "waits": 0,
+      "seconds": 0
+    },
+    "system": {
+      "cpuPctMean": 9,
+      "cpuPctPeak": 52,
+      "memAvailMinMB": 15030,
+      "load1Peak": 0.77,
+      "cpuPctEvery10s": [
+        36,
+        8,
+        7,
+        8,
+        6,
+        5,
+        7,
+        16,
+        7,
+        8,
+        16,
+        8,
+        1,
+        1,
+        2,
+        1,
+        2
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 2.1,
+        "peakRssMB": 128
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "check-solo",
+        "phase": "browser",
+        "estSec": 60,
+        "estSource": "none",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 14.549249999999997,
+      "mid": 61.25999999999999,
+      "high": 202.158,
+      "sequentialSec": 65.2,
+      "confidence": "low-confidence",
+      "contention": 1.021,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 34689,
+    "pid": 8394,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/test-results/20261110-143047-96eaea57-8299/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61r-before-96eaea5/test-results/20261110-143047-96eaea57-8299/web-dist"
+  }
+}
