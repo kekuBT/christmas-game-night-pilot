@@ -669,3 +669,23 @@ The spec is `docs/stage6/README.md`. ChatGPT accepted choices 1–4 of its §5 i
   - *Alternative rejected:* retrying Start automatically. Start is not idempotent (it replaces the open round), so a blind retry after a lost reply could replace the round the first request had just started.
 - **D-S61-10 The plain-http event-id fix (D-S61-07) stays in this PR.** ChatGPT's review of PR #6 answered the question in the Stage 6.1 handoff: it directly unblocks the required phone flow, is small, and the regression evidence covers its integration.
 
+## Stage 6.2: complete the solo shelf (2026-11-10, branch `claude/stage6-2-solo-shelf`, from the Stage 6.1 head `643ea03`)
+
+The spec is `docs/stage6/stage62.md`. The instruction is ChatGPT's review handoff on PR #6 (comment 6770278546).
+
+- **D-S62-01 The server keeps a solo allowlist: the registry's `soloPlay`** (`src/games/registry.ts`, `RoomEngine.startGame`).
+  - A solo room starts only Math Mayhem, Pattern Pulse and Word Connections. Any other game is refused with `NOT_A_SOLO_GAME` (HTTP 409), checked before player minimums, so a forged request gets an explicit reason.
+  - The manifest's `soloPlay` must match the registry, and the client lists a game only if it also has a solo adapter.
+  - *Alternative rejected:* relying on player minimums. Pattern Pulse and Word Connections have a minimum of 1 and are solo games, but a future 1-player game might not be suited to solo play, so the list should be explicit.
+- **D-S62-02 One typed solo adapter per game, in two parts.**
+  - `solo/soloRules.ts` (plain TypeScript): the rules version, the copy, and the summary read from the server's projection.
+  - `solo/soloGames.tsx`: the existing game screen in solo mode, and the review.
+  - The shell holds nothing game-specific, and the play screen is keyed by the round.
+  - *Alternative rejected:* a general plugin framework. Three games don't need one.
+- **D-S62-03 Rules versions live next to each engine,** and a unit test fingerprints the rules each one covers. A rule change without a version bump fails the test, so old personal bests never compare with rounds under new rules.
+- **D-S62-04 A personal best is filed only for a round the server finished,** whether played to the end or ended by its deadline, and that the player did not sit out. A deadline-ended round is a real result, even 0; any later higher score replaces it.
+- **D-S62-05 A join whose reply was lost is recovered with a new room.** On Try again, the room is joined again with its creation token. If the server refuses because the lost join took the seat, the room is given up and a new one made in the same Start. Access is never claimed from a room id alone.
+- **D-S62-06 Connections content in solo uses the existing selection, as instructed.**
+  - Today a solo player sees 12 different boards, then least-recently-used repeats.
+  - If most boards were approved for official play, solo (and casual practice) would repeat one item. That is raised as a proposal (spec §5, item 4), not changed.
+

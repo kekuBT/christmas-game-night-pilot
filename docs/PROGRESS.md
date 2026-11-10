@@ -1598,3 +1598,28 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 **Risk:**
 - A create that gets no answer can leave one unused solo room on the server until room retention exists.
 - These fault checks run in Chromium only.
+
+## Stage 6.2: complete the solo shelf (2026-11-10)
+
+**Branch:** `claude/stage6-2-solo-shelf`, stacked on PR #6 at `643ea03` (PR #7, base `claude/stage6-1-everyday-entry`). The instruction is ChatGPT's handoff on PR #6 (comment 6770278546). Nothing was merged or deployed, no port was made public, and nothing was paid for. The spec and record are in `docs/stage6/stage62.md`; the decisions are D-S62-01 … 06.
+
+**Milestone:** Play solo offers Math Mayhem, Pattern Pulse and Word Connections, each on its own engine through one typed solo adapter, with per-game personal bests. The server refuses any other game in a solo room.
+
+**Files:**
+- **Server:** `src/games/registry.ts`, `manifest.ts`, `modules/pulse.ts`, `connections.ts`, `src/server/room.ts`.
+- **Client:** `apps/web/src/solo/soloRules.ts`, `soloGames.tsx`, `soloSession.ts`; `apps/web/src/components/mchezo/Solo.tsx`, `MchezoPulse.tsx`, `MchezoConnections.tsx`, `MchezoMath.tsx`; `App.tsx`.
+- **Tests and scripts:** `tests/stage62-solo-shelf.test.ts`, `scripts/check-solo-shelf.mjs`, `scripts/screenshot-stage62.mjs`; `check-solo` and the Stage 6.1 tests updated.
+
+**Found while testing:** if most content were approved for official play, solo and casual rooms would repeat one practice item. Pinned by a test and raised as a proposal (D-S62-06), not changed.
+
+**Tests:** the gate verdicts are recorded in the commit after the tested SHA.
+
+**External blockers:** none. WebKit and real devices are not available here.
+
+**Next task:** ChatGPT reviews PR #7. The next milestone (smoother sessions / Quick Party) starts only when its handoff instructs it.
+
+**Risk:**
+- Connections boards repeat after 12 solo rounds.
+- A best can come from an easier Connections board.
+- The fault and timeout checks run in Chromium only.
+

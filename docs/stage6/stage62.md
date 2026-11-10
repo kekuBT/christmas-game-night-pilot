@@ -88,6 +88,12 @@ Each runs on its existing engine, server scoring and private projection, in the 
   - A fresh official board is taken only when none of those is left.
 - Starting a board counts as using it, even if the round is left.
 - The shipped library has 13 boards: 12 practice-only and 1 official-eligible. A solo player therefore sees 12 different boards, and then they repeat in least-recently-used order. While repeats are available, the official-eligible board is not drawn.
+- **Found while testing:** the count depends on how many boards are practice-only.
+  - Measured with the real engine, if every board were approved for official play (the test content mode), a solo room would deal **the same board every time**. Practice reuses a used item before it takes a fresh official one.
+  - That rule protects official content in a Cup. Solo and casual rooms never play official games, so there it only causes repeats.
+  - Today's library is unaffected (12 practice-only boards).
+  - A unit test pins the behaviour so a change is deliberate.
+  - I have not changed it: the handoff says to reuse the existing selection. It is raised in §5.
 - **Personal best:** "best score on any board under these scoring rules". Boards differ in difficulty, so a best can come from an easier board. The screens say "personal best on this device" and nothing more precise.
 
 ### 3.5 Time limits
@@ -126,7 +132,50 @@ Unchanged:
 1. **Connections boards repeat after 12 solo rounds,** least recently used first (§3.4). Making them unlimited or seasonal is the later content milestone.
 2. **A sat-out run** (a forged `abstain`, since the solo screens don't offer it) finishes the game on the server, but it never records a personal best.
 3. **Connections personal bests compare across boards** of different difficulty under the same scoring (§3.4).
+4. **Content selection in solo and casual rooms** (found while testing, §3.4):
+   - **Problem:** once most boards are approved for official play, a solo room would repeat one board, and casual rooms would repeat practice items of every content game.
+   - **Proposal, not implemented:** a room that can never play official games draws from all practice-usable items, unused ones first, least recently used after that. Cups keep today's rule.
+   - **Why it waits:** it changes shared server selection, so it needs a decision.
 
 ## 6. What was built and tested
 
-*(Filled in at the checkpoint.)*
+### 6.1 Built
+- **Server:**
+  - **Solo allowlist:** registry `soloPlay` on the three games, with `SOLO_GAME_IDS` derived from it. A solo room refuses any other game with `NOT_A_SOLO_GAME`, HTTP 409, before player minimums are checked (`src/games/registry.ts`, `src/server/room.ts`).
+  - **Manifest check:** `validateManifest` requires the manifest's `soloPlay` to match the registry, and a solo game to have a 1-player minimum.
+  - **Rules versions:** `PULSE_RULES_VERSION` and `CONNECTIONS_RULES_VERSION`, next to their engines.
+- **Client:**
+  - **The adapter split:** `apps/web/src/solo/soloRules.ts` holds the rules (version, copy, summary from the projection) as plain TypeScript the server-side tests can import. `apps/web/src/solo/soloGames.tsx` adds each game's play screen and review.
+  - **`Solo.tsx`** is generic, and the play screen is keyed by the round.
+  - **Solo mode** in `MchezoPulse` and `MchezoConnections`; `PulseRecap` and `ConnectionsSolution` are shared with the multiplayer results.
+  - **`SoloSession`:**
+    - `intent` returns whether the server took the action;
+    - a refused re-join gives the room up and makes a new one in the same Start;
+    - a personal best is filed only for a round the server finished and the player did not sit out.
+- **Copy:** the Connections manifest no longer says it is the only 1-player game.
+
+### 6.2 Tested
+- **`tests/stage62-solo-shelf.test.ts`, 19 tests:**
+  - **Allowlist:** every non-solo game refused in a solo room; each solo game starts; official play is still refused; casual rooms and player minimums are unchanged; a forged HTTP start gets 409.
+  - **Pulse privacy:** a pattern only while it is memorised, no future pattern, no seed. **Connections privacy:** no group name before the end.
+  - **Scores through the solo room:** Pulse 960; Connections 450, and 0 after four mistakes.
+  - **Boards:** with the shipped library, 12 then a repeat; with all boards approved, one board (the §5 concern).
+  - **Rules fingerprints** for all three games.
+  - **Summaries** read from real projections.
+  - **Cross-game seat:** Math → Pulse → Connections → Math on one room.
+  - **A lost join reply:** recovered with a new room, never the old id.
+- **Mutation:** with the allowlist check removed, both allowlist tests fail.
+- **`scripts/check-solo-shelf.mjs`, 45 checks:**
+  - the three-game shelf;
+  - Pulse perfect (960), with round 1 by keyboard;
+  - Pulse with a slip every round (0; the best stays);
+  - Connections solved (450), the first group by keyboard;
+  - Connections out of guesses (0), on a different board, with nothing carried over and all groups missed;
+  - Connections partial (200; 2 found, 2 missed);
+  - Math after the others, with one room for everything and each round on the server;
+  - one personal best per game; another rules version ignored; blocked storage;
+  - Leave mid-Pulse; reload mid-Connections; a second tab's Pulse replacing Connections; Home with no Rejoin;
+  - a Connections guess with no reply (fault) that keeps its selection, and then works;
+  - timeouts on a short-clock server: a Pulse round running out, Pulse and Connections ending at their deadlines.
+- **Updated for the three-game shelf:** `check-solo` (now 80 checks) and the Stage 6.1 tests.
+- **Screenshots:** `docs/stage6/screenshots-62/` holds 7 screens at 320, 390 and 1440 px, taken on `e218acb` with a clean tree.
