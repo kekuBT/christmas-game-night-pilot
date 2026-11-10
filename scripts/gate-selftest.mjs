@@ -204,6 +204,7 @@ try {
     check("parallel failure → exit 1", r.code === 1, `exit ${r.code}`);
     check("parallel failure → the failing step is named with its assertion and worker", f?.status === "FAIL" && /deliberately failing/.test(f?.detail ?? "") && !!f?.worker, JSON.stringify(f));
     check("parallel failure → the other steps still pass", step(r.report, "fixture-pass")?.status === "PASS" && step(r.report, "fixture-pass-2")?.status === "PASS");
+    check("parallel failure → classified as a functional failure, with no false machine-pressure flag", f?.failureKind === "functional" && !f?.resourcePressure, JSON.stringify({ kind: f?.failureKind, machine: f?.machine }));
     check("parallel failure → each step has its own log", new Set(r.report?.steps.filter((x) => x.log).map((x) => x.log)).size === r.report?.steps.filter((x) => x.log).length);
   }
 
@@ -214,7 +215,7 @@ try {
     const r = await runGate(["targeted", "--workers=2", fx("hang"), fx("pass"), "--step-timeout=fixture-hang=3"], { FIXTURE_PID_DIR: dir, FIXTURE_SLEEP_MS: "7000", FIXTURE_RECORD_FILE: rec });
     const pids = JSON.parse(readFileSync(join(dir, "hang.json"), "utf8"));
     const hang = step(r.report, "fixture-hang"), pass = step(r.report, "fixture-pass");
-    check("parallel timeout → TIMEOUT for the hanging step, exit 1", r.code === 1 && hang?.status === "TIMEOUT", `exit ${r.code}`);
+    check("parallel timeout → TIMEOUT for the hanging step, exit 1", r.code === 1 && hang?.status === "TIMEOUT" && hang?.failureKind === "timeout", `exit ${r.code}, kind ${hang?.failureKind}`);
     check("parallel timeout → the hanging step and its child are gone", await allGone([pids.pid, pids.child]), JSON.stringify(pids));
     check("parallel timeout → the step running beside it was alive during the kill and passed", pass?.status === "PASS" && pass.startOffsetSec < hang.endOffsetSec && hang.endOffsetSec < pass.endOffsetSec, JSON.stringify({ pass, hang }));
     rmSync(dir, { recursive: true, force: true });

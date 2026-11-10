@@ -23,12 +23,30 @@ export function percentile(sorted, p) {
 export const median = (xs) => percentile([...xs].sort((a, b) => a - b), 0.5);
 
 /**
+ * When a step changes (a faster driver, a slower game), its old samples
+ * describe a different step. `samples` is newest first. If the two newest
+ * both differ from the median of the rest by more than 30% in the same
+ * direction, only the leading samples within 30% of the newest are kept.
+ * Two new samples are needed, so one outlier run never resets a step.
+ */
+export function currentRegime(samples) {
+  const s = (samples ?? []).filter((x) => Number.isFinite(x) && x >= 0);
+  if (s.length < 4) return s;
+  const rest = median(s.slice(2));
+  const off = (x) => (x > rest * 1.3 ? 1 : x < rest / 1.3 ? -1 : 0);
+  if (off(s[0]) === 0 || off(s[0]) !== off(s[1])) return s;
+  const out = [];
+  for (const x of s) { if (Math.abs(x - s[0]) <= 0.3 * s[0]) out.push(x); else break; }
+  return out;
+}
+
+/**
  * A step's base (uncontended) duration from its PASS samples, in seconds.
  * source: "measured" (3+ samples), "few" (1-2), "none" (no history: the
  * fallback is a guess and the plan says so).
  */
 export function estimateStep(samples, fallbackSec = 60) {
-  const s = (samples ?? []).filter((x) => Number.isFinite(x) && x >= 0).sort((a, b) => a - b);
+  const s = currentRegime(samples).sort((a, b) => a - b);
   if (!s.length) return { mid: fallbackSec, low: fallbackSec * 0.25, high: fallbackSec * 3, n: 0, source: "none" };
   const mid = percentile(s, 0.5);
   if (s.length < 3) return { mid, low: mid * 0.85, high: mid * 1.3, n: s.length, source: "few" };
@@ -41,9 +59,11 @@ export function estimateStep(samples, fallbackSec = 60) {
  * Sequential is 1 by definition. With no measured run at this worker
  * count the factor is modeled (1 + 0.1 per extra worker) with a wide range.
  */
-export function contentionFor(workers, ratiosByWorkers = {}) {
+export function contentionFor(workers, ratiosByWorkers = {}, cpus = null) {
   if (workers <= 1) return { mid: 1, low: 0.97, high: 1.08, n: 0, source: "sequential" };
-  const r = (ratiosByWorkers[String(workers)] ?? []).filter((x) => Number.isFinite(x) && x > 0).sort((a, b) => a - b);
+  // Ratios are keyed "<workers>@<cpus>" (older records: "<workers>").
+  const key = cpus ? `${workers}@${cpus}` : String(workers);
+  const r = (ratiosByWorkers[key] ?? []).filter((x) => Number.isFinite(x) && x > 0).sort((a, b) => a - b);
   if (r.length) {
     const mid = percentile(r, 0.5);
     return { mid, low: Math.min(r[0], mid * 0.95), high: Math.max(r.at(-1), mid * 1.1), n: r.length, source: "measured" };
@@ -129,13 +149,15 @@ export function confidenceOf(steps, contention) {
 /**
  * Default worker count from the machine. Every worker runs one browser
  * driver (one Chromium, up to ~11 pages) plus its own server, so it needs
- * memory as well as CPU. The CPU rule keeps one core free for the servers
- * and the gate; the cap of 3 is the largest count benchmarked as reliable
- * (docs/test-optimization/README.md). A 2-core machine gets 1 worker
- * unless measured otherwise.
+ * memory as well as CPU (each driver peaked at 250-400 MB with its
+ * Chromium, measured). The cap of 3 is the largest count benchmarked as
+ * reliable (docs/test-optimization/README.md).
  */
 export function autoWorkers({ cpus, memAvailMB, perWorkerMB = 1500, cap = 3 }) {
-  const byCpu = Math.max(1, cpus - 1);
+  // Measured: 2 workers on 2 CPUs ran a 21-driver subset 1.85x faster with
+  // contention x1.05 and no failures (README §8), so 2 CPUs get 2 workers;
+  // larger machines keep one CPU spare, up to the cap.
+  const byCpu = cpus <= 2 ? cpus : cpus - 1;
   const byMem = Math.max(1, Math.floor(memAvailMB / perWorkerMB));
   return Math.max(1, Math.min(cap, byCpu, byMem));
 }

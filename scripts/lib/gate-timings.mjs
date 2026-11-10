@@ -10,9 +10,12 @@
 //   someone runs `node scripts/gate.mjs timings --update-baseline` and
 //   commits the result on purpose.
 //
-// A step's base samples are its durations from SEQUENTIAL runs (one
-// worker), where nothing competed with it; parallel runs contribute a
-// contention ratio instead (the median over their steps of actual / base).
+// A step's base samples are its uncontended durations: from sequential
+// runs as measured, and from parallel runs divided by that run's measured
+// contention ratio (the median over its steps of actual / base), so the
+// history keeps up when a driver changes even if only parallel runs follow.
+// Contention is kept per "<workers>@<cpus>": 2 workers on 2 CPUs and on 4
+// CPUs are different machines.
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { median } from "./gate-plan.mjs";
@@ -40,24 +43,34 @@ export function readBaseline(path) {
 export function loadTimings({ baselinePath, historyPath }) {
   const baseline = readBaseline(baselinePath);
   const history = readHistory(historyPath).filter((r) => r && Array.isArray(r.steps));
+  const contention = {};
+  for (const [k, ratios] of Object.entries(baseline.contention ?? {})) contention[k] = [...ratios];
+  for (const r of history) {
+    if ((r.workers ?? 1) > 1 && Number.isFinite(r.contentionRatio)) (contention[contentionKey(r.workers, r.cpus)] ??= []).push(r.contentionRatio);
+  }
   const base = {};
-  // Newest local sequential samples first, topped up from the baseline.
+  // Newest local samples first, topped up from the baseline. Parallel ones
+  // are divided by their run's contention, or, for a run with too few steps
+  // to measure its own, by the median measured for the same workers and
+  // CPUs; with neither, the run adds no samples.
   for (const r of [...history].reverse()) {
-    if ((r.workers ?? 1) !== 1) continue;
+    const parallel = (r.workers ?? 1) > 1;
+    let k = 1;
+    if (parallel) {
+      const own = Number.isFinite(r.contentionRatio) && r.contentionRatio > 0 ? r.contentionRatio : null;
+      const known = contention[contentionKey(r.workers, r.cpus)];
+      k = own ?? (known?.length ? median(known) : null);
+      if (!k) continue;
+    }
     for (const s of r.steps) {
       if (s.status !== "PASS" || !Number.isFinite(s.durationSec)) continue;
       const arr = (base[s.name] ??= []);
-      if (arr.length < MAX_SAMPLES) arr.push(s.durationSec);
+      if (arr.length < MAX_SAMPLES) arr.push(Math.round((s.durationSec / k) * 10) / 10);
     }
   }
   for (const [name, b] of Object.entries(baseline.steps ?? {})) {
     const arr = (base[name] ??= []);
     for (const x of b.samples ?? []) if (arr.length < MAX_SAMPLES) arr.push(x);
-  }
-  const contention = {};
-  for (const [k, ratios] of Object.entries(baseline.contention ?? {})) contention[k] = [...ratios];
-  for (const r of history) {
-    if ((r.workers ?? 1) > 1 && Number.isFinite(r.contentionRatio)) (contention[String(r.workers)] ??= []).push(r.contentionRatio);
   }
   const sequentialWallSec = [
     ...history.filter((r) => (r.workers ?? 1) === 1 && r.level === "full" && r.verdict === "PASSED").map((r) => r.wallSec),
@@ -65,6 +78,9 @@ export function loadTimings({ baselinePath, historyPath }) {
   ];
   return { base, contention, sequentialWallSec, sources: { historyRuns: history.length, baselineGenerated: baseline.generated ?? null } };
 }
+
+/** Contention is measured per worker count AND CPU count ("3@4"). */
+export const contentionKey = (workers, cpus) => (cpus ? `${workers}@${cpus}` : String(workers));
 
 /**
  * Contention ratio of a finished parallel run: the median over its PASS
@@ -118,7 +134,7 @@ export function buildBaseline(records, { note = "" } = {}) {
     }
   }
   const contention = {};
-  for (const r of records) if ((r.workers ?? 1) > 1 && Number.isFinite(r.contentionRatio)) (contention[String(r.workers)] ??= []).push(r.contentionRatio);
+  for (const r of records) if ((r.workers ?? 1) > 1 && Number.isFinite(r.contentionRatio)) (contention[contentionKey(r.workers, r.cpus)] ??= []).push(r.contentionRatio);
   const sequentialWallSec = records.filter((r) => (r.workers ?? 1) === 1 && r.level === "full" && r.verdict === "PASSED" && Number.isFinite(r.wallSec)).map((r) => r.wallSec).slice(-10);
   return { generated: new Date().toISOString(), note, steps: Object.fromEntries(Object.entries(steps).sort(([a], [b]) => a.localeCompare(b))), contention, sequentialWallSec };
 }

@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 // @ts-expect-error -- plain .mjs gate helper, no type declarations
-import { autoWorkers, confidenceOf, contentionFor, estimateMakespan, estimateStep, fmtDur, fmtRange, median, orderSteps, percentile, remainingOf, simulate } from "../scripts/lib/gate-plan.mjs";
+import { autoWorkers, confidenceOf, contentionFor, currentRegime, estimateMakespan, estimateStep, fmtDur, fmtRange, median, orderSteps, percentile, remainingOf, simulate } from "../scripts/lib/gate-plan.mjs";
 // @ts-expect-error -- plain .mjs gate helper, no type declarations
 import { buildBaseline, contentionRatio, historyRecord, loadTimings } from "../scripts/lib/gate-timings.mjs";
 
@@ -31,6 +31,15 @@ describe("percentiles and per-step estimates", () => {
     expect(many.low).toBeLessThanOrEqual(many.mid);
     expect(many.high).toBeGreaterThanOrEqual(many.mid);
   });
+  it("follows a step that changed: two new samples far from the old ones replace them", () => {
+    // newest first: a driver went from ~1,070 s to ~400 s
+    expect(currentRegime([405, 398, 1073, 1056, 1100, 1020])).toEqual([405, 398]);
+    expect(estimateStep([405, 398, 1073, 1056, 1100, 1020]).source).toBe("few"); // honest: few samples since the change
+    // one outlier run never resets a step
+    expect(currentRegime([400, 1073, 1056, 1100, 1020])).toEqual([400, 1073, 1056, 1100, 1020]);
+    // ordinary spread is kept
+    expect(currentRegime([110, 95, 100, 104, 98])).toEqual([110, 95, 100, 104, 98]);
+  });
   it("ignores samples that are not durations", () => {
     expect(estimateStep([Number.NaN, -1, 50]).n).toBe(1);
   });
@@ -44,6 +53,9 @@ describe("contention factor", () => {
     expect(m.mid).toBeCloseTo(1.15, 5);
     const g = contentionFor(2, {});
     expect(g.source).toBe("modeled");
+    // Measured per worker count AND CPU count: 3 workers on 4 CPUs says nothing about 2 CPUs.
+    expect(contentionFor(3, { "3@4": [1.02] }, 4)).toMatchObject({ source: "measured", mid: 1.02 });
+    expect(contentionFor(3, { "3@4": [1.02] }, 2).source).toBe("modeled");
     expect(g.high - g.low).toBeGreaterThan(0.2);
   });
 });
@@ -117,9 +129,10 @@ describe("makespan ranges and confidence", () => {
 });
 
 describe("automatic worker count", () => {
-  it("keeps a core free, needs memory per worker, and caps at the benchmarked maximum", () => {
+  it("uses both CPUs of a 2-CPU machine, keeps one free above that, needs memory per worker, caps at 3", () => {
     expect(autoWorkers({ cpus: 4, memAvailMB: 14000 })).toBe(3);
-    expect(autoWorkers({ cpus: 2, memAvailMB: 7000 })).toBe(1);
+    expect(autoWorkers({ cpus: 2, memAvailMB: 7000 })).toBe(2); // measured safe on 2 CPUs (README §8)
+    expect(autoWorkers({ cpus: 3, memAvailMB: 7000 })).toBe(2);
     expect(autoWorkers({ cpus: 1, memAvailMB: 64000 })).toBe(1);
     expect(autoWorkers({ cpus: 16, memAvailMB: 64000 })).toBe(3);
     expect(autoWorkers({ cpus: 8, memAvailMB: 3200 })).toBe(2);
@@ -143,7 +156,7 @@ describe("timing history", () => {
   const rec = (workers: number, steps: Array<[string, string, number]>, extra = {}) =>
     JSON.stringify({ runId: `r${Math.random()}`, level: "full", workers, verdict: "PASSED", wallSec: 100, steps: steps.map(([name, status, durationSec]) => ({ name, status, durationSec })), ...extra });
 
-  it("takes base samples from sequential PASS runs only (newest first), then the baseline", () => {
+  it("takes base samples newest first: sequential as measured, parallel divided by their run's contention, then the baseline", () => {
     const hist = join(dir, "h.jsonl");
     writeFileSync(hist, [
       rec(1, [["check-a", "PASS", 10], ["check-b", "FAIL", 999]]),
@@ -154,7 +167,7 @@ describe("timing history", () => {
     const base = join(dir, "b.json");
     writeFileSync(base, JSON.stringify({ generated: "2026-11-09T00:00:00Z", steps: { "check-a": { samples: [11] }, "check-c": { samples: [7, 8] } }, contention: { "2": [1.1] }, sequentialWallSec: [5000] }));
     const t = loadTimings({ baselinePath: base, historyPath: hist });
-    expect(t.base["check-a"]).toEqual([12, 10, 11]);
+    expect(t.base["check-a"]).toEqual([12, 41.7, 10, 11]); // 50 s on 3 workers at contention 1.2 counts as 41.7 s
     expect(t.base["check-b"]).toBeUndefined(); // a failed step's time is not a duration estimate
     expect(t.base["check-c"]).toEqual([7, 8]);
     expect(t.contention).toEqual({ "2": [1.1], "3": [1.2] });

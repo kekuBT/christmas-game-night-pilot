@@ -41,6 +41,9 @@ export function createSampler(runId, { intervalMs = 1000 } = {}) {
   const owners = new Map(); // owner -> { cpuTicks: Map(pidKey -> ticks), rssPeak, rssNow }
   const known = new Map(); // pidKey -> owner | null (not ours)
   const sys = { samples: 0, cpuSum: 0, cpuPeak: 0, memMinMB: null, loadPeak: 0, timeline: [] };
+  // The last 2 hours of per-second machine readings, for "was the machine
+  // under pressure while this step ran?" (pressureBetween below).
+  const recent = []; // { t, cpu, memMB }
   let prevCpu = null, timer = null;
 
   function ownerOf(pid) {
@@ -77,6 +80,8 @@ export function createSampler(runId, { intervalMs = 1000 } = {}) {
         const busy = dt > 0 ? 100 * (1 - (now.idle - prevCpu.idle) / dt) : 0;
         sys.samples++; sys.cpuSum += busy; sys.cpuPeak = Math.max(sys.cpuPeak, busy);
         if (sys.samples % 10 === 0) sys.timeline.push(Math.round(busy));
+        recent.push({ t: Date.now(), cpu: busy, memMB: memAvailableMB() });
+        if (recent.length > 7200) recent.shift();
       }
       prevCpu = now;
       const mem = memAvailableMB();
@@ -98,6 +103,17 @@ export function createSampler(runId, { intervalMs = 1000 } = {}) {
       let ticks = 0;
       for (const t of o.cpuTicks.values()) ticks += t;
       return { cpuSec: Math.round((ticks / HZ) * 10) / 10, peakRssMB: Math.round(o.rssPeak / 1048576) };
+    },
+    /**
+     * Machine readings while a step ran (t0..t1, ms): the lowest available
+     * memory, and how many seconds CPU use was at or above 98%. null if
+     * nothing was sampled.
+     */
+    pressureBetween(t0, t1) {
+      const w = recent.filter((r) => r.t >= t0 && r.t <= t1);
+      if (!w.length) return null;
+      const mems = w.map((r) => r.memMB).filter((m) => m !== null);
+      return { memAvailMinMB: mems.length ? Math.min(...mems) : null, cpuSaturatedSec: w.filter((r) => r.cpu >= 98).length, samples: w.length };
     },
     system() {
       if (!enabled || !sys.samples) return null;

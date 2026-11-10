@@ -316,6 +316,13 @@ function runStep(spec, worker) {
       const use = sampler.usage(`step:${index}`);
       if (use) { step.cpuSec = use.cpuSec; step.peakRssMB = use.peakRssMB; }
       if (roomsBefore !== null) step.roomsOnGateServer = countRooms(spec.server.dataDir) - roomsBefore;
+      // Diagnosis next to the verdict: the drivers' DIAG lines (server state
+      // vs screen, scripts/lib/diagnose.mjs), and whether the machine was
+      // short of memory or CPU while this step ran.
+      const diag = output.split("\n").filter((l) => /\bDIAG\b/.test(l)).slice(0, 6).map((l) => l.trim().slice(0, 300));
+      if (diag.length) step.diag = diag;
+      const pres = sampler.pressureBetween(t0, Date.now());
+      if (pres) step.machine = pres;
       const stats = /MCHEZO_DRIVER_STATS (\{.*\})/.exec(output);
       if (stats) { try { step.browserUse = JSON.parse(stats[1]); } catch { /* informational only */ } }
       if (step.status === "INFRA") { /* spawn error already recorded */ }
@@ -332,6 +339,13 @@ function runStep(spec, worker) {
         step.detail = fails.length ? fails.map((l) => l.trim()).join(" | ") : `exit ${code ?? signal}`;
       }
       if (partial) log.write(`[+${((Date.now() - t0) / 1000).toFixed(1)}s] ${partial}\n`);
+      // What kind of failure this is, for the summary and the report.
+      step.failureKind = { PASS: null, FAIL: "functional", TIMEOUT: "timeout", INFRA: "infrastructure", CANCELLED: "cancelled" }[step.status] ?? null;
+      const underPressure = pres && ((pres.memAvailMinMB !== null && pres.memAvailMinMB < LOW_MEM_MB) || pres.cpuSaturatedSec >= 10);
+      if (step.failureKind && step.failureKind !== "cancelled" && underPressure) {
+        step.resourcePressure = true;
+        step.detail = `${step.detail ? `${step.detail} ` : ""}[machine under pressure during this step: memory available fell to ${pres.memAvailMinMB} MB, CPU saturated ${pres.cpuSaturatedSec}s]`;
+      }
       log.end(`\n# ${step.status} (exit ${code ?? signal}) in ${step.durationSec}s${step.cpuSec != null ? ` | cpu ${step.cpuSec}s, peak memory ${step.peakRssMB} MB` : ""}\n`);
       doneCount++;
       const res = `${step.status.padEnd(9)} ${String(step.durationSec).padStart(6)}s`;
@@ -465,7 +479,7 @@ async function runPool(queue, capacity, { before = () => true, after = () => {} 
 // ---------- progress and estimates ----------
 let pending = []; // queued specs not yet started, in order
 let lastShownTotal = null;
-const CONT = contentionFor(WORKERS, TIMINGS.contention);
+const CONT = contentionFor(WORKERS, TIMINGS.contention, CPUS);
 
 function estimateRemaining() {
   const now = Date.now();
@@ -711,7 +725,7 @@ async function finish() {
     "",
     `${report.verdict} (exit ${exitCode}) | ${opts.level} | run ${RUN_ID}`,
     `  ${count("PASS")} passed, ${count("FAIL")} failed, ${count("TIMEOUT")} timed out, ${count("INFRA")} infrastructure, ${count("INVALID")} invalid, ${count("CANCELLED")} cancelled, ${report.notRun.length} not run`,
-    ...report.steps.filter((s) => s.status !== "PASS").map((s) => `  ${s.status.padEnd(9)} ${s.name}${s.worker ? ` (w${s.worker})` : ""}${s.detail ? `: ${s.detail.slice(0, 200)}` : ""}`),
+    ...report.steps.filter((s) => s.status !== "PASS").map((s) => `  ${s.status.padEnd(9)} ${s.name}${s.worker ? ` (w${s.worker})` : ""}${s.failureKind ? ` [${s.failureKind}${s.resourcePressure ? ", machine under pressure" : ""}]` : ""}${s.detail ? `: ${s.detail.slice(0, 200)}` : ""}${s.diag?.length ? `\n            ${s.diag[0].slice(0, 200)}` : ""}`),
     ...report.notRun.map((n) => `  NOT RUN   ${n.name}: ${n.reason}`),
     ...report.notes.map((n) => `  note: ${n}`),
     ...timingLines,
@@ -732,7 +746,7 @@ function showTimings() {
   const specs = names.map((n) => ({ name: n, est: estOf(n), weight: attrs(n).weight ?? 1, exclusive: !!attrs(n).exclusive }));
   console.log(`\nFull gate estimates (${specs.length} steps; sum of medians ${fmtDur(specs.reduce((s, x) => s + x.est.mid, 0))}):`);
   for (const w of [1, 2, 3, 4]) {
-    const c = contentionFor(w, TIMINGS.contention);
+    const c = contentionFor(w, TIMINGS.contention, CPUS);
     const est = estimateMakespan(orderSteps(specs, { parallel: w > 1 }), w, c);
     console.log(`  ${w} worker${w > 1 ? "s" : " "}  ${fmtRange(est.low, est.high).padEnd(8)} about ${fmtDur(est.mid).padEnd(8)} contention ×${c.mid.toFixed(2)} (${c.source}${c.n ? `, ${c.n} run(s)` : ""})`);
   }
