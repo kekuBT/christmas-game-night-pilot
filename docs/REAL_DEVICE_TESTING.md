@@ -81,7 +81,7 @@ Work through the parts in order. Each row has a **Pass if** column, and the reco
 
 | # | Do this | Pass if |
 |---|---|---|
-| A1 | The host opens the Wi-Fi address, types a name and taps **Host a game** | The lobby shows "You're in, *name*", a room code, and an **Invite by QR** card with a QR code and no localhost warning |
+| A1 | The host opens the Wi-Fi address, taps **Host a game**, picks **Family Cup** (this run checks Cup scoring in Part E; hosting is Casual unless you pick it), types a name and taps **Host a game** | The lobby shows "You're in, *name*", a room code, a Cup chip, and an **Invite by QR** card with a QR code and no localhost warning |
 | A2 | An **iPhone** scans the QR with the Camera app | Safari opens the join screen with the code already filled in |
 | A3 | An **Android** phone scans the QR (Camera or Google Lens) | Chrome opens the join screen with the code already filled in |
 | A4 | One phone types the 6-character code by hand instead (try lowercase) | It joins the same room |
@@ -164,6 +164,19 @@ Try each one on at least one iPhone **and** one Android phone.
 | H3 | **Recovery code.** In "This device", get a recovery code, then use it on a second phone via **Lost your place? Recover your seat** | The second phone gets the seat; the first phone says the seat moved. **Copy code** may say to write it down: that's expected on a home-Wi-Fi address (copying needs HTTPS) |
 | H4 | **Host-assisted recovery** on a third phone | Both screens show the same 4-digit number; after the host approves, the phone gets the seat |
 
+### Part I: Play solo and casual hosting (10 min, Stage 6.1)
+
+Do these on phones that open the **Wi-Fi address** (not localhost): plain http there is what a family phone uses, and it is exactly where a Stage 6.1 check found every answer refused before the fix (D-S61-07).
+
+| # | Do this | Pass if |
+|---|---|---|
+| I1 | On an **iPhone** and an **Android** phone: Home → **Play solo** → **Start** | The first question appears after those two taps, with no code, name or lobby |
+| I2 | Play the round to the end, then **Play again** twice | Every answer registers; each round has its own score; the first says "first personal best on this device", a lower one "still …", a higher one "New personal best" |
+| I3 | Mid-round, tap **Leave round**, then **Keep playing**; then leave for real | Keep playing keeps the round; leaving asks first, then lands on Play solo with the best unchanged |
+| I4 | Mid-round, reload the page (or close and reopen the tab) | The round's start screen, not a stuck loading screen; **Start** says the last round was interrupted and begins a fresh one |
+| I5 | In a **private / incognito** tab, play a round | It plays; the screens say a personal best can't be kept or wasn't saved |
+| I6 | Host a game without touching the Casual/Family Cup choice; a second phone joins | No Cup chip, no Official/Practice choice; both phones say "Casual, just for fun"; a game plays to results and the lobby says "Last game · … · Casual" |
+
 ---
 
 ## 4. Did it feel good? (5 min, at the end)
@@ -217,6 +230,7 @@ Earlier device checklists ([DEVICE_ACCEPTANCE_CHECKLIST.md](DEVICE_ACCEPTANCE_CH
 ## 6. What was checked before handing this over, and what wasn't
 
 **Checked automatically (desktop Chromium emulating a phone screen):**
+- Stage 6.1: Play solo and a casual game over plain http at the machine's own network address (an insecure context, as on a family phone), in `check-solo` and `check-casual`;
 - the server lists the computer's Wi-Fi address;
 - a host who opens a non-localhost address gets a QR code pointing at that address, with no localhost warning;
 - players join through the QR link, and the WebSocket connects and stays connected;

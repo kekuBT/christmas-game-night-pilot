@@ -1524,3 +1524,35 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - Backpressure uses the machine-wide 1-minute load average, which lags. Other work on the same machine also throttles the gate.
 - Pattern Pulse's multi-key entry keeps 30 s auto-waits.
 - `check-tv-outage` re-binds its own port.
+
+## Stage 6.1: everyday entry and one complete solo loop (2026-11-10)
+
+**Branch:** `claude/stage6-1-everyday-entry`, stacked on the Stage 5.2 head `8fe4f19` (PR #6, base `claude/stage5-parallel-testing`). Instructed by ChatGPT's handoff on PR #5 (comment 6764848065), with the clarification on PR #6 (comment 6764965143). Nothing was merged or deployed, no port was made public, and nothing was paid for. The spec and the full record are `docs/stage6/README.md`; the decisions are D-S61-01 … 08.
+
+**Milestone:** Mchezo opens for everyday use. Home offers Join a room, Play solo and Host a game. Hosting is casual unless the host picks Family Cup. Play solo reaches a Math Mayhem round in two taps and loops through results, Play again and a personal best on this device. Cup rooms are unchanged and nothing casual or solo can reach a Cup.
+
+**Features and files:**
+- Server: room kinds and their refusals, the private solo room, safe restart and Leave (`src/server/room.ts`, `src/server/http.ts`); honest minimums (`src/games/registry.ts`, `manifest.ts`, `mathRules.ts`).
+- Client: `Home.tsx` (three entries, Casual/Family Cup), `Lobby.tsx` and `App.tsx` (casual lobby), `Solo.tsx`, `solo/soloSession.ts`, `solo/personalBest.ts`, `uuid.ts`, `styles/stage6.css`, routes `/solo` and `/solo/<gameId>`.
+- Tests: `tests/stage61-room-kinds.test.ts`, `tests/stage61-solo-client.test.ts`, `tests/client-uuid.test.ts`. Drivers: `scripts/check-solo.mjs`, `scripts/check-casual.mjs` (with `lib/lan.mjs`, `lib/math-solve.mjs`); `scripts/screenshot-stage61.mjs`. 45 existing scripts that host from the UI now choose Family Cup explicitly.
+
+**Defects found and fixed during the stage:**
+- **Pre-existing, all games:** on plain http at the host's network address (phones on the home Wi-Fi), every intent was refused, because the event-id fallback was not a UUID. Reproduced in Chromium at the machine's own address ("Getting question 1 of 10…", `INVALID_INTENT`), fixed in `uuid.ts`, covered by a unit test and by both new drivers over a real insecure origin (D-S61-07).
+- **In this stage's first version, before commit:** Back to solo pushed a history entry, so Back from the solo list returned to the finished round (D-S61-08); the solo list's cover pushed Start below the fold at 320×640.
+- **In `79a92a9`, development builds only:** React's StrictMode remount left the solo screen holding a disposed session, so on the Vite dev server the round never started. Reproduced there and fixed in `3db8a99`; production builds were never affected.
+- **In my own checks:** a late-answer check passed for the wrong reason (its event id was invalid); it now has an in-time control answer.
+
+**Tests (each verdict is one run on one revision):**
+- fast gate on `79a92a9`: PASSED (exit 0), run `20261110-111110-79a92a9e-12770` (1,149 unit tests in 104 files);
+- targeted gate on `79a92a9`: PASSED (exit 0), run `20261110-111112-79a92a9e-12814`, 18 of 18;
+- `check-solo` (61 checks) and `check-casual` (30) on `3db8a99`, outside the gate;
+- the full gate on the final tested commit is recorded in the next commit.
+
+**External blockers:** none. WebKit and real devices are not available here (not run).
+
+**Next task:** ChatGPT reviews PR #6; Claude repairs what it finds. Stage 6.2 starts only when a handoff instructs it.
+
+**Risk:**
+- No room expiry on the server: solo rooms accumulate (one per device, more when storage is cleared). Deferred, documented (D-S61-03).
+- The plain-http fix is proven in Chromium only; Safari on a real iPhone over the home network is still the real-device checklist's job.
+- A casual room can't become a Cup mid-session; a host who wants a Cup picks it on the Host screen.

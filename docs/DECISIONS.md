@@ -628,3 +628,34 @@ The scheduler, worker and estimate decisions are in `docs/test-optimization/READ
   - The Draw & Guess word read, the guess send and the Majority taps give up after 2 s and are retried on the next pass. That survives the turn-ending race found in the F2 benchmark.
   - An action that keeps failing for 30 s while its screen stays up still throws, as in Stage 5.1. Only the race, where the screen moves on, is forgiven.
   - *Alternative rejected:* relying on the drivers' 180 s game budget alone. A defect confined to one Draw & Guess turn (75 s) or one Majority round (45 s) could then pass (failure injection, report §13).
+
+## Stage 6.1: everyday entry and one complete solo loop (2026-11-10, branch `claude/stage6-1-everyday-entry`, from the Stage 5.2 head `8fe4f19`)
+
+The spec is `docs/stage6/README.md`. ChatGPT accepted choices 1–4 of its §5 in the clarification on PR #6 (comment 6764965143) and added the seat and isolation requirements recorded in D-S61-03.
+
+- **D-S61-01 Every room has a kind: `cup`, `casual` or `solo`** (`src/server/room.ts`, `RoomKind`).
+  - A room's kind is fixed when it is made. Hosting from the UI makes a casual room unless the host picks Family Cup; Play solo makes a solo room.
+  - A room without a kind, including every room saved before this change and an API create without one, is a Cup. Cup data and scoring are untouched.
+  - Casual and solo rooms refuse official starts (`StartRefused` `NOT_A_CUP_ROOM`), official plans and Cup day changes, on the server. Their games can never reach a Cup's ledger or standings.
+  - *Alternative rejected:* a casual room that can become a Cup mid-session. It needs rules for the games already played and for Cup registration, which this slice doesn't have.
+- **D-S61-02 Math Mayhem: hard minimum 1, recommended 2+** (`src/games/registry.ts`, `src/games/manifest.ts`).
+  - The registry now separates the minimum a game cannot start below (`minPlayers`) from a recommendation (`recommendedPlayers`, shown as "best with 2+").
+  - Official play still needs 2 competitors (D1, `MIN_OFFICIAL_COMPETITORS`), so a lone player's official start is still refused. Only Math is solo-capable in this slice (`soloPlay` in the manifest).
+- **D-S61-03 A solo round is a private single-seat room on the server, reused per device as far as the browser allows** (`apps/web/src/solo/soloSession.ts`).
+  - The same engine, intents, scoring and clocks as multiplayer; no second game implementation.
+  - **One room per device is best effort, not a server guarantee.** The seat is kept in `localStorage` (`mchezo.solo.v1`), apart from the multiplayer seat, so Home never offers to rejoin it. When storage is blocked, full or holds a dead seat, the seat is kept for the page's lifetime, so rounds don't each make a room.
+  - **A seat is reused only when the server accepts its token** for a solo room. A room id or code alone gets nothing: join by code, spectate by code, a second seat, join by id, and the public TV view (HTTP and WebSocket) all answer as if the room weren't there.
+  - **Retention limit (deferred):** the server has no room expiry. Solo rooms stay on disk; a device that loses its storage makes a new one. Room expiry is a separate future item.
+- **D-S61-04 Leaving or restarting a solo round removes it unscored; an interrupted round is never resumed** (`RoomEngine.abandonSoloRound`, `startGame`).
+  - Start (or Play again) in a solo room removes any round still open, and Leave round removes the open round. Both are logged (`solo-round-abandoned`, with the reason and how many answers it had). A finished round is kept.
+  - A reload lands on the round's start screen with nothing polling. Start then says the interrupted round was replaced.
+  - Two tabs on one device share the seat: the later Start replaces the earlier tab's round. That tab's late answer is refused and its Leave can't cancel the replacement, because both name the old round, which no longer exists.
+  - *Alternative rejected:* resuming the interrupted round. Its clock kept running during the reload, so a resumed round would be shorter than a fresh one, and resuming adds state for little gain in a 10-question round.
+- **D-S61-05 A personal best is kept on this device only, per game and rules version** (`apps/web/src/solo/personalBest.ts`).
+  - Keyed `<gameId>@<rulesVersion>` in `mchezo.pb.v1`; `MATH_RULES_VERSION` (1) changes whenever Math's questions, difficulty or scoring change, so rounds under other rules never compare. A tie keeps the earlier best.
+  - Missing, blocked or malformed storage never breaks play; the screens say when a best can't be kept or wasn't saved. Every label says "on this device"; nothing suggests sync or accounts.
+- **D-S61-06 Casual rooms keep the readiness briefing; solo skips it.** The briefing is a fairness step for several players, not Cup administration.
+- **D-S61-07 Every intent's event id is a real v4 UUID, on plain http too** (`apps/web/src/uuid.ts`).
+  - A pre-existing defect found while testing Stage 6.1: on plain http at the host's network address (how phones on the home Wi-Fi reach the server) the browser is an insecure context with no `crypto.randomUUID`. The app's fallback `${Date.now()}-${Math.random()}` is not a UUID, and the server's intent schema refused every action (`INVALID_INTENT`). Math stuck on "Getting question 1 of 10…". The drivers ran on localhost, a secure context, so they never saw it.
+  - The id is now built from `crypto.getRandomValues`, which insecure contexts have. `check-solo` and `check-casual` now play over a real insecure origin (the machine's own network address).
+- **D-S61-08 The solo screens' Back buttons go where they say.** Back to solo and the solo list's Back step back to that screen when it is the one beneath, and otherwise replace the current entry (`backTo`). In the first version (found by `check-solo` before it was committed), Back to solo pushed a new entry, so Back from the list returned to the finished round's screen.

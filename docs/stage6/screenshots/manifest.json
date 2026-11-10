@@ -1,0 +1,134 @@
+{
+  "revision": "3db8a99e9cab9d1329a476b22798827343419456",
+  "workingTreeClean": true,
+  "capturedAt": "2026-11-10T11:20:22.249Z",
+  "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
+  "shots": [
+    {
+      "file": "01-home-320x640.png",
+      "screen": "Home: Join a room / Play solo / Host a game",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "02-solo-list-320x640.png",
+      "screen": "Play solo: the games that work alone, no personal best yet",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "03-solo-question-320x640.png",
+      "screen": "A solo Math Mayhem question (two taps from Home)",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "04-solo-results-320x640.png",
+      "screen": "Solo results: score, correct count, personal best on this device, Play again",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "05-solo-list-best-320x640.png",
+      "screen": "Play solo after a round: the personal best on this device",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "06-host-casual-320x640.png",
+      "screen": "Host a game: Casual by default, Family Cup a deliberate choice",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "07-casual-lobby-320x640.png",
+      "screen": "A casual lobby: no Cup chip, no Official/Practice choice, Casual · just for fun",
+      "viewport": "320×640",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "01-home-390x844.png",
+      "screen": "Home: Join a room / Play solo / Host a game",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "02-solo-list-390x844.png",
+      "screen": "Play solo: the games that work alone, no personal best yet",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "03-solo-question-390x844.png",
+      "screen": "A solo Math Mayhem question (two taps from Home)",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "04-solo-results-390x844.png",
+      "screen": "Solo results: score, correct count, personal best on this device, Play again",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "05-solo-list-best-390x844.png",
+      "screen": "Play solo after a round: the personal best on this device",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "06-host-casual-390x844.png",
+      "screen": "Host a game: Casual by default, Family Cup a deliberate choice",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "07-casual-lobby-390x844.png",
+      "screen": "A casual lobby: no Cup chip, no Official/Practice choice, Casual · just for fun",
+      "viewport": "390×844",
+      "deviceScaleFactor": 2
+    },
+    {
+      "file": "01-home-1440x900.png",
+      "screen": "Home: Join a room / Play solo / Host a game",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "02-solo-list-1440x900.png",
+      "screen": "Play solo: the games that work alone, no personal best yet",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "03-solo-question-1440x900.png",
+      "screen": "A solo Math Mayhem question (two taps from Home)",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "04-solo-results-1440x900.png",
+      "screen": "Solo results: score, correct count, personal best on this device, Play again",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "05-solo-list-best-1440x900.png",
+      "screen": "Play solo after a round: the personal best on this device",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "06-host-casual-1440x900.png",
+      "screen": "Host a game: Casual by default, Family Cup a deliberate choice",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    },
+    {
+      "file": "07-casual-lobby-1440x900.png",
+      "screen": "A casual lobby: no Cup chip, no Official/Practice choice, Casual · just for fun",
+      "viewport": "1440×900",
+      "deviceScaleFactor": 1
+    }
+  ]
+}

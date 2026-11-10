@@ -119,6 +119,64 @@ The Family Cup stays as a deliberate, optional event with its data and scoring u
 3. **Solo rooms are saved on the server,** one per device, and reused. The server has no room expiry at all, so cleaning up old rooms is a separate future item.
 4. **Casual rooms keep the pre-game briefing** (everyone taps I'm ready). It is a fairness step for several players, not Cup administration. Solo skips it.
 
+**ChatGPT's answer** (PR #6, comment 6764965143): all four accepted. It added for this slice: one room per device is best effort, not a server guarantee; blocked or cleared storage must not break play or make a room for every replay (keep the seat in memory); reuse must authenticate the seat, never a room code alone; and a focused two-tab/reload check that a stale answer or cancel from an earlier run can't score or cancel its replacement. All are built and tested (D-S61-03, D-S61-04, §6.3).
+
 ## 6. What was built and tested
 
-*(Filled in at the checkpoint.)*
+### 6.1 Built
+- **Server** (`src/server/room.ts`, `src/server/http.ts`):
+  - room kinds `cup | casual | solo` (D-S61-01), Zod-validated on create, saved and restored, legacy rooms restored as Cups;
+  - casual and solo rooms refuse official starts, official plans and Cup days;
+  - a solo room has one seat, no briefing, no spectators and no public view: its code, its id and its TV projection and socket all answer "Room not found" (D-S61-03);
+  - solo safe restart and Leave (`abandonSoloRound`), with the stale-run guarantees of D-S61-04.
+- **Honest requirements** (`src/games/registry.ts`, `manifest.ts`): Math Mayhem's hard minimum is 1, recommended 2+ ("1–10 players · best with 2+"); official still needs 2 (D-S61-02).
+- **Client:**
+  - **Home** offers Join a room, Play solo and Host a game (`Home.tsx`);
+  - **Host a game** is Casual by default, with Family Cup a deliberate, explained choice; a casual lobby has no Cup chip, mode choice or Cup menu row, and says "Casual · just for fun" (`Home.tsx`, `Lobby.tsx`, `App.tsx`);
+  - **Play solo** (`Solo.tsx`, `solo/soloSession.ts`): `/solo` lists only solo games with their personal best; `/solo/math-mayhem` is the round (the existing `MchezoMath` in solo mode), then results with Play again, Back to solo and Mchezo home, and a review of the answers;
+  - **personal best on this device** (`solo/personalBest.ts`, D-S61-05);
+  - **plain-http event ids** (`uuid.ts`, D-S61-07), a pre-existing defect fixed for every game.
+- **Deviations from §3:**
+  - The Host choice is labelled **Casual** / **Family Cup** (each with a one-line explanation), not "Casual game night".
+  - A casual lobby's Start reads **"Start Math Mayhem"**, with "Casual · just for fun" on the up-next card and "Casual game: just for fun, no Cup." under Start, rather than "Casual · no Cup points" on the button.
+  - A reload mid-round lands on the round's start screen; the "interrupted" message appears when Start begins the fresh round.
+
+### 6.2 Tested
+- **Unit tests** (all in the gate's `unit-tests` step):
+  - `tests/stage61-room-kinds.test.ts` (23): kinds and refusals, Cup control, solo privacy and no briefing, honest minimums, the solo round (engine scoring, double tap, late answer, safe restart, leave, three replays), Cup isolation, persistence and the legacy default, and the same rules over HTTP, including the closed public view;
+  - `tests/stage61-solo-client.test.ts` (11): personal best (first, higher, lower, tie, other version, malformed, blocked, write fails), the seat format, and the solo session against a real server: one room with storage working, blocked, or read-only with a dead seat; token-only reuse; two tabs (stale answer and stale cancel can't touch the replacement); dispose;
+  - `tests/client-uuid.test.ts` (4): the old fallback is refused by the server's schema; the new id passes it with and without `randomUUID` and with no Web Crypto.
+  - Mutation checks: removing the page-seat fallback fails 2 client tests; removing the solo public-view refusal fails 2 tests.
+- **Browser drivers** (Chromium headless shell):
+  - `check-solo` (§6.3 lists what it proves);
+  - `check-casual`: Casual by default; casual lobby without Cup UI (host and guest); a guest on plain http; an official start over the API refused; two players through the briefing to results and back to "Last game · Math Mayhem · Casual"; empty Cup standings; a Family Cup still a Cup with Official by default and standings after an official game; isolation both ways; a solo code joins nothing; "best with 2+" on Home; the same theme in both kinds.
+  - The other 45 drivers that host from the UI now pick Family Cup explicitly, so they test exactly what they tested before.
+- **Screenshots:** `docs/stage6/screenshots/` (7 screens × 320, 390 and 1440 px, with `manifest.json` naming the revision).
+
+### 6.3 Behavioural evidence asked for in the handoff
+| Asked for | Where it is shown |
+| --- | --- |
+| Full solo run | `check-solo` A–B: Home → Play solo → Start (two taps), 10 questions answered from the prompts, results |
+| Three consecutive replays | `check-solo` B: 5 right, then all wrong (0), then all right; the server holds exactly 3 rounds with those 3 scores; nothing left playing |
+| Personal best lower / higher | `check-solo` B: "still 600" after the lower round, "New personal best … previous best was 600" after the higher; the list shows it |
+| Storage failure | `check-solo` F: blocked `localStorage` (list and results say so, play and Play again work, one room for the page); malformed data; a version-0 best not shown and kept |
+| Duplicate input | `check-solo` B: the first answer of round 3 double-tapped, 10 answers counted; unit tests for a retried intent and a second tap |
+| Late input | `check-solo` G (own server, short test clock): an in-time answer accepted, a late one refused, only the in-time one counted |
+| Leave / reload | `check-solo` C–E: Leave asks first; Keep playing keeps the round; leaving, browser Back and reload each end in a defined screen with the round removed or replaced; nothing polls afterwards; no phantom Rejoin; one room across all of it |
+| Two tabs (clarification) | `check-solo` E2 and the client unit test: the second tab's Start replaces the round, the first tab returns to its Start screen, its tap and leaving score nothing in the replacement |
+| Two-client casual play | `check-casual` B–D (the guest on plain http) |
+| Cup isolation | `check-casual` C–E and the unit tests |
+| Keyboard | `check-solo` H: a whole round with Tab and Enter, focus on the score at the results, Keep playing focused in the leave question |
+
+### 6.4 Not tested here
+- **WebKit / Safari:** not installed on this machine; not run.
+- **Real iPhone or Android devices:** not run. The plain-http checks use this machine's own network address in Chromium; a phone on a real home network is still the real-device checklist's job (`docs/REAL_DEVICE_TESTING.md`).
+- **Screen readers:** labels and focus order are checked by the driver; no screen reader was run.
+
+### 6.5 Gates
+Each verdict is one run on one revision.
+- **Fast gate** on `79a92a9`: **PASSED (exit 0)**, run `20261110-111110-79a92a9e-12770`: typecheck (server and web), lint, web build, 1,149 unit tests in 104 files.
+- **Targeted gate** on `79a92a9`: **PASSED (exit 0)**, run `20261110-111112-79a92a9e-12814`: 18 of 18 (build, preflight, and `check-solo`, `check-casual`, `check-mchezo`, `check-math`, `check-stage2`, `check-spectator`, `check-library-nav`, `check-lobby-fixes`, `check-mobile`, `check-lobby-mode`, `check-sessions`, `check-recovery`, `check-viewports`, `check-history-links`, `check-library`, `check-poll-body-stall`).
+- `3db8a99` then fixed the StrictMode remount (development builds only) and added the keyboard checks; `check-solo` (61 checks) and `check-casual` (30) passed on it outside the gate.
+- **Full gate:** one parallel run on the final tested commit. Its verdict, run id and raw evidence are recorded in the documentation-only commit after it (`docs/PROGRESS.md`, `docs/evidence/gate-runs/`).
+
