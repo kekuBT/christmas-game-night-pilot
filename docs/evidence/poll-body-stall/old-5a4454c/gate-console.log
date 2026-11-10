@@ -1,0 +1,24 @@
+Mchezo gate targeted | run 20261110-055708-1ff2d489-11749
+  revision 1ff2d48983368c5fc64f139c50165eb3eab6fad4 (clean tree) | fingerprint 55de85646ee2 (385 files)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/old-5a4454c/test-results/20261110-055708-1ff2d489-11749
+[ 1] build-web                    PASS           6s
+[ 2] browser-preflight            PASS         0.9s
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   http://localhost:36251 (pid 11891, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/old-5a4454c/test-results/20261110-055708-1ff2d489-11749/server-data)
+[ 3] check-poll-body-stall        FAIL        36.9s  FAIL after a stalled poll, a new player (Bea) still reaches the phone (within 15 s) — not within 15000ms | FAIL after a stalled poll, a new player (Bea) still r
+      | PASS polling only: a new player (Amina) reaches the phone
+      | PASS polling only: a new player (Amina) reaches the TV
+      | PASS the phone's next poll is stalled after its headers and "{"
+      | PASS the TV's next poll is stalled after its headers and "{"
+      | FAIL after a stalled poll, a new player (Bea) still reaches the phone (within 15 s) — not within 15000ms
+      | FAIL after a stalled poll, a new player (Bea) still reaches the TV (within 15 s) — not within 15000ms
+      | FAIL phone: the stalled request was cancelled by the page at its 6 s timeout — never cancelled
+      | FAIL TV: the stalled request was cancelled by the page at its 6 s timeout — never cancelled
+      | (Bea joined 30.3 s ago; 2 poll(s) stalled in all)
+      | POLL BODY STALL FAILURES: 4
+
+FAILED (exit 1) | targeted | run 20261110-055708-1ff2d489-11749
+  2 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled
+  FAIL      check-poll-body-stall: FAIL after a stalled poll, a new player (Bea) still reaches the phone (within 15 s) — not within 15000ms | FAIL after a stalled poll, a new player (Bea) still reaches the TV (within 15 s) — not within
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/old-5a4454c/test-results/20261110-055708-1ff2d489-11749/report.json
+exit=1

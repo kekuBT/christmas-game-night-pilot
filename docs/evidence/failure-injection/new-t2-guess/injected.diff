@@ -1,0 +1,7 @@
+diff --git a/scripts/lib/stage5-games.mjs b/scripts/lib/stage5-games.mjs
+index 4aa3423..83a8eda 100644
+--- a/scripts/lib/stage5-games.mjs
++++ b/scripts/lib/stage5-games.mjs
+@@ -123 +123 @@ async function actOnce(page, gameId) {
+-      return (await page.getByTestId("mz-dg-input").fill(drawTurn.word, { timeout: READ_MS })
++      return (await page.getByTestId(label.startsWith("Turn 2 ") ? "mz-dg-input-INJECTED" : "mz-dg-input").fill(drawTurn.word, { timeout: READ_MS })

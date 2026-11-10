@@ -1,0 +1,65 @@
+{
+  "runId": "20261110-055708-1ff2d489-11749",
+  "level": "targeted",
+  "startedAt": "2026-11-10T05:57:08.339Z",
+  "finishedAt": "2026-11-10T05:57:53.050Z",
+  "exitCode": 1,
+  "verdict": "FAILED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/old-5a4454c",
+  "git": {
+    "head": "1ff2d48983368c5fc64f139c50165eb3eab6fad4",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "55de85646ee28ff5d10214a3666b6dfc5a46aa81cd00695cf1da0c808b9c972e",
+    "files": 385
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261110-055708-1ff2d489-11749/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 6,
+      "log": "./logs/01-build-web.log",
+      "detail": ""
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.9,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": ""
+    },
+    {
+      "name": "check-poll-body-stall",
+      "kind": "browser",
+      "command": "node scripts/check-poll-body-stall.mjs http://localhost:36251",
+      "status": "FAIL",
+      "exitCode": 1,
+      "durationSec": 36.9,
+      "log": "./logs/03-check-poll-body-stall.log",
+      "detail": "FAIL after a stalled poll, a new player (Bea) still reaches the phone (within 15 s) — not within 15000ms | FAIL after a stalled poll, a new player (Bea) still reaches the TV (within 15 s) — not within 15000ms | FAIL phone: the stalled request was cancelled by the page at its 6 s timeout — never cancelled | FAIL TV: the stalled request was cancelled by the page at its 6 s timeout — never cancelled"
+    }
+  ],
+  "notes": [],
+  "server": {
+    "port": 36251,
+    "pid": 11891,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/old-5a4454c/test-results/20261110-055708-1ff2d489-11749/server-data",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s51fix/old-5a4454c/test-results/20261110-055708-1ff2d489-11749/web-dist"
+  }
+}

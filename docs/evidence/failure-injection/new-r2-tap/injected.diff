@@ -1,0 +1,7 @@
+diff --git a/scripts/lib/stage5-games.mjs b/scripts/lib/stage5-games.mjs
+index 4aa3423..9c5ca92 100644
+--- a/scripts/lib/stage5-games.mjs
++++ b/scripts/lib/stage5-games.mjs
+@@ -67 +67 @@ async function actOnce(page, gameId) {
+-    const tap = async (id) => (await page.getByTestId(id).click({ timeout: READ_MS }).then(() => true, () => false))
++    const tap = async (id) => (await page.getByTestId(/^Round 2 /.test(await turnLabel(page)) ? `${id}-INJECTED` : id).click({ timeout: READ_MS }).then(() => true, () => false))

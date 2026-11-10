@@ -1,0 +1,247 @@
+Mchezo gate full | run 20261110-052100-872add3c-26825
+  revision 872add3c90c518f1966551cec4f06f9a61c55b48 (clean tree) | fingerprint 8e3a6f07c6e0 (393 files)
+  plan     74 steps: 5 fast/build, 67 browser drivers, 2 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  6 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.02 for 3 worker(s) (measured, 2 run(s))
+  estimate this run: 21–28m (measured) · the same steps one after another: about 1h 08m · longest step e2e-chromium ~8m 05s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.02 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/G1-full-872add3/test-results/20261110-052100-872add3c-26825
+        start typecheck-server on w1 (usually 6s)
+        start typecheck-web on w2 (usually 6s)
+        start lint on w3 (usually 8s)
+[ 1/74] PASS         9.9s  typecheck-web  w2
+        start unit-tests on w2 (usually 24s)
+[ 2/74] PASS          10s  typecheck-server  w1
+        start build-web on w1 (usually 5s)
+[ 3/74] PASS        14.6s  lint  w3
+[ 4/74] PASS         6.9s  build-web  w1
+[ 5/74] PASS        27.5s  unit-tests  w2
+        start browser-preflight on w1 (usually 1s)
+[ 6/74] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:38285 (pid 29392, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/G1-full-872add3/test-results/20261110-052100-872add3c-26825/server-data/w1)
+  server   w2 http://localhost:44547 (pid 29393, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/G1-full-872add3/test-results/20261110-052100-872add3c-26825/server-data/w2)
+  server   w3 http://localhost:37729 (pid 29394, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/G1-full-872add3/test-results/20261110-052100-872add3c-26825/server-data/w3)
+        start e2e-chromium on w1 (usually 8m 05s)
+        start check-f5 on w2 (usually 7m 22s)
+        start check-leaderboard on w3 (usually 6m 36s)
+── progress  6/74 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   e2e-chromium 21s (w1), check-f5 21s (w2), check-leaderboard 21s (w3)
+   remaining 20–27m · total 21–28m · done around 05:42–05:48 UTC (measured)
+── progress  6/74 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   e2e-chromium 1m 21s (w1), check-f5 1m 21s (w2), check-leaderboard 1m 21s (w3)
+   remaining 19–26m · total 21–28m · done around 05:42–05:48 UTC (measured)
+── progress  6/74 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   e2e-chromium 2m 21s (w1), check-f5 2m 21s (w2), check-leaderboard 2m 21s (w3)
+   remaining 18–25m · total 21–28m · done around 05:42–05:48 UTC (measured)
+── progress  6/74 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   e2e-chromium 3m 21s (w1), check-f5 3m 21s (w2), check-leaderboard 3m 21s (w3)
+   remaining 17–24m · total 21–28m · done around 05:42–05:48 UTC (measured)
+── progress  6/74 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   e2e-chromium 4m 21s (w1), check-f5 4m 21s (w2), check-leaderboard 4m 21s (w3)
+   remaining 16–23m · total 21–28m · done around 05:42–05:48 UTC (measured)
+── progress  6/74 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   e2e-chromium 5m 21s (w1), check-f5 5m 21s (w2), check-leaderboard 5m 21s (w3)
+   remaining 15–22m · total 21–28m · done around 05:42–05:48 UTC (measured)
+── progress  6/74 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 7m 00s
+   running   e2e-chromium 6m 21s (w1), check-f5 6m 21s (w2), check-leaderboard 6m 21s (w3)
+   remaining 14–21m · total 21–28m · done around 05:42–05:48 UTC (measured)
+[ 7/74] PASS       405.6s  check-leaderboard  w3
+        start check-game-night on w3 (usually 5m 17s)
+── progress  7/74 done · 7 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 8m 00s
+   running   e2e-chromium 7m 21s (w1), check-f5 7m 21s (w2), check-game-night 35s (w3)
+   remaining 14–20m · total 22–28m · done around 05:43–05:48 UTC (measured)
+[ 8/74] PASS       457.9s  check-f5  w2
+        start check-audit-fixes on w2 (usually 3m 36s)
+── progress  8/74 done · 8 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 9m 00s
+   running   e2e-chromium 8m 21s (w1), check-game-night 1m 35s (w3), check-audit-fixes 43s (w2)
+   remaining 13–18m · total 22–27m · done around 05:43–05:47 UTC (measured)
+[ 9/74] PASS       512.3s  e2e-chromium  w1
+        start check-pulse-timing on w1 (usually 2m 37s)
+── progress  9/74 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 10m 00s
+   running   check-game-night 2m 35s (w3), check-audit-fixes 1m 43s (w2), check-pulse-timing 49s (w1)
+   remaining 12–17m · total 22–27m · done around 05:43–05:47 UTC (measured)
+── progress  9/74 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 11m 00s
+   running   check-game-night 3m 35s (w3), check-audit-fixes 2m 43s (w2), check-pulse-timing 1m 49s (w1)
+   remaining 11–16m · total 22–27m · done around 05:43–05:47 UTC (measured)
+[10/74] PASS       160.5s  check-pulse-timing  w1
+        start check-tv-lifecycle on w1 (usually 2m 30s)
+[11/74] PASS       219.2s  check-audit-fixes  w2
+        start check-lifecycle on w2 (usually 2m 06s)
+── progress  11/74 done · 11 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 12m 00s
+   running   check-game-night 4m 35s (w3), check-tv-lifecycle 8s (w1), check-lifecycle 4s (w2)
+   remaining 10–15m · total 22–27m · done around 05:43–05:47 UTC (measured)
+[12/74] PASS       327.9s  check-game-night  w3
+        start check-mchezo on w3 (usually 1m 48s)
+── progress  12/74 done · 12 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 13m 00s
+   running   check-tv-lifecycle 1m 08s (w1), check-lifecycle 1m 04s (w2), check-mchezo 7s (w3)
+   remaining 9–14m · total 22–27m · done around 05:43–05:47 UTC (measured)
+── progress  12/74 done · 12 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 14m 00s
+   running   check-tv-lifecycle 2m 08s (w1), check-lifecycle 2m 04s (w2), check-mchezo 1m 07s (w3)
+   remaining 8–13m · total 22–27m · done around 05:43–05:47 UTC (measured)
+[13/74] PASS       127.8s  check-lifecycle  w2
+        start check-briefing on w2 (usually 1m 31s)
+[14/74] PASS       151.4s  check-tv-lifecycle  w1
+        start check-caption on w1 (usually 1m 30s)
+[15/74] PASS         108s  check-mchezo  w3
+        start check-tv-reveal on w3 (usually 1m 19s)
+── progress  15/74 done · 15 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 15m 00s
+   running   check-briefing 56s (w2), check-caption 37s (w1), check-tv-reveal 19s (w3)
+   remaining 7–11m · total 22–26m · done around 05:43–05:46 UTC (measured)
+[16/74] PASS          93s  check-briefing  w2
+        start check-draw-guess on w2 (usually 1m 07s)
+[17/74] PASS        77.4s  check-caption  w1
+        start check-pattern-pulse on w1 (usually 59s)
+── progress  17/74 done · 17 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 16m 00s
+   running   check-tv-reveal 1m 19s (w3), check-draw-guess 23s (w2), check-pattern-pulse 19s (w1)
+   remaining 7–10m · total 23–26m · done around 05:44–05:46 UTC (measured)
+[18/74] PASS          90s  check-tv-reveal  w3
+        start check-stage2 on w3 (usually 59s)
+[19/74] PASS        60.8s  check-pattern-pulse  w1
+        start check-majority-rules on w1 (usually 57s)
+[20/74] PASS        68.8s  check-draw-guess  w2
+        start check-math on w2 (usually 57s)
+── progress  20/74 done · 20 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 17m 00s
+   running   check-stage2 49s (w3), check-majority-rules 18s (w1), check-math 14s (w2)
+   remaining 6–9m · total 23–26m · done around 05:44–05:46 UTC (measured)
+[21/74] PASS        60.6s  check-stage2  w3
+        start check-spectator on w3 (usually 56s)
+[22/74] PASS        58.8s  check-majority-rules  w1
+        start check-connections on w1 (usually 55s)
+[23/74] PASS        57.8s  check-math  w2
+        start check-draw-sync on w2 (usually 53s)
+── progress  23/74 done · 23 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 18m 00s
+   running   check-spectator 49s (w3), check-connections 20s (w1), check-draw-sync 16s (w2)
+   remaining 5–8m · total 23–26m · done around 05:44–05:46 UTC (measured)
+[24/74] PASS        56.7s  check-spectator  w3
+        start check-f4 on w3 (usually 51s)
+[25/74] PASS        56.3s  check-connections  w1
+        start check-math-network on w1 (usually 50s)
+[26/74] PASS        55.1s  check-draw-sync  w2
+        start check-results on w2 (usually 50s)
+── progress  26/74 done · 26 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 19m 00s
+   running   check-f4 52s (w3), check-math-network 23s (w1), check-results 21s (w2)
+   remaining 4–6m · total 23–25m · done around 05:44–05:45 UTC (measured)
+[27/74] PASS        51.9s  check-f4  w3
+        start check-reveal on w3 (usually 49s)
+[28/74] PASS        52.4s  check-math-network  w1
+        start check-input-isolation on w1 (usually 48s)
+[29/74] PASS          51s  check-results  w2
+        start check-multiplayer on w2 (usually 47s)
+[30/74] PASS        48.7s  check-reveal  w3
+        start check-tv-spectator on w3 (usually 45s)
+── progress  30/74 done · 30 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 20m 00s
+   running   check-input-isolation 31s (w1), check-multiplayer 30s (w2), check-tv-spectator 11s (w3)
+   remaining 3–5m · total 23–25m · done around 05:44–05:45 UTC (measured)
+[31/74] PASS        47.3s  check-multiplayer  w2
+        start check-tv-outage on w2 (usually 40s)
+[32/74] PASS        48.9s  check-input-isolation  w1
+        start check-caption-4p on w1 (usually 39s)
+[33/74] PASS        45.1s  check-tv-spectator  w3
+        start check-geography on w3 (usually 38s)
+[34/74] PASS        40.4s  check-caption-4p  w1
+        start check-answer-reveal on w1 (usually 34s)
+[35/74] PASS        41.3s  check-tv-outage  w2
+        start check-action-ack on w2 (usually 28s)
+── progress  35/74 done · 35 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 21m 00s
+   running   check-geography 26s (w3), check-answer-reveal 2s (w1), check-action-ack 2s (w2)
+   remaining 2–4m · total 23–25m · done around 05:44–05:45 UTC (measured)
+[36/74] PASS        37.7s  check-geography  w3
+        start check-math-timing on w3 (usually 27s)
+[37/74] PASS          29s  check-action-ack  w2
+        start check-ten-players on w2 (usually 27s)
+[38/74] PASS        33.1s  check-answer-reveal  w1
+        start check-contrast on w1 (usually 26s)
+[39/74] PASS        27.8s  check-math-timing  w3
+        start check-library-nav on w3 (usually 25s)
+[40/74] PASS        30.1s  check-ten-players  w2
+        wait  check-m6: load 6.7 > 4 CPUs
+[41/74] PASS        26.7s  check-contrast  w1
+── progress  41/74 done · 41 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 22m 00s
+   running   check-library-nav 21s (w3)
+   remaining 1–3m · total 23–25m · done around 05:44–05:45 UTC (measured)
+[42/74] PASS        27.9s  check-library-nav  w3
+        start check-m6 on w1 (usually 24s)
+        wait  check-mobile: load 5.6 > 4 CPUs
+        start check-mobile on w2 (usually 24s)
+        start check-tv-entry on w3 (usually 22s)
+[43/74] PASS        24.4s  check-m6  w1
+        start check-send-failures on w1 (usually 22s)
+[44/74] PASS        22.2s  check-tv-entry  w3
+        start check-answer-race on w3 (usually 21s)
+[45/74] PASS        21.8s  check-send-failures  w1
+        start check-lobby-mode on w1 (usually 18s)
+[46/74] PASS          25s  check-mobile  w2
+        start check-abstain on w2 (usually 18s)
+── progress  46/74 done · 46 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 23m 00s
+   running   check-answer-race 6s (w3), check-lobby-mode 6s (w1), check-abstain 4s (w2)
+   remaining 1–2m · total 24–25m · done around 05:45–05:45 UTC (measured)
+[47/74] PASS        19.2s  check-lobby-mode  w1
+        start check-year on w1 (usually 17s)
+[48/74] PASS        18.9s  check-abstain  w2
+        start check-readiness on w2 (usually 17s)
+[49/74] PASS          22s  check-answer-race  w3
+        start check-lobby-fixes on w3 (usually 15s)
+[50/74] PASS        17.1s  check-year  w1
+        start check-stage4-details on w1 (usually 14s)
+[51/74] PASS        15.8s  check-lobby-fixes  w3
+        start check-viewports on w3 (usually 12s)
+[52/74] PASS        17.3s  check-readiness  w2
+        start check-cup-memory on w2 (usually 11s)
+[53/74] PASS        12.7s  check-viewports  w3
+        start check-tv-show on w3 (usually 11s)
+[54/74] PASS        13.3s  check-cup-memory  w2
+        start check-recovery on w2 (usually 11s)
+[55/74] PASS        17.6s  check-stage4-details  w1
+        start check-answer-helper on w1 (usually 9s)
+[56/74] PASS        12.1s  check-tv-show  w3
+        start check-progress on w3 (usually 9s)
+[57/74] PASS        11.1s  check-recovery  w2
+        start check-game-night-flow on w2 (usually 9s)
+[58/74] PASS         9.9s  check-answer-helper  w1
+        start check-official-practice on w1 (usually 8s)
+── progress  58/74 done · 58 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 24m 00s
+   running   check-progress 4s (w3), check-game-night-flow 3s (w2), check-official-practice 2s (w1)
+   remaining 21–31s · total 24–25m · done around 05:45–05:45 UTC (measured)
+[59/74] PASS        10.8s  check-progress  w3
+        start check-sessions on w3 (usually 8s)
+[60/74] PASS          10s  check-official-practice  w1
+        start check-closest on w1 (usually 6s)
+[61/74] PASS        11.5s  check-game-night-flow  w2
+        start check-ws-reconnect on w2 (usually 5s)
+[62/74] PASS         5.2s  check-ws-reconnect  w2
+        start check-history-links on w2 (usually 5s)
+[63/74] PASS         6.8s  check-closest  w1
+        start check-library on w1 (usually 4s)
+[64/74] PASS         8.8s  check-sessions  w3
+        wait  check-tv-dashboard: load 4.1 > 4 CPUs
+[65/74] PASS         5.3s  check-history-links  w2
+[66/74] PASS         4.9s  check-library  w1
+        start check-tv-dashboard on w1 (usually 4s)
+        wait  check-reduced-motion: load 4.1 > 4 CPUs
+[67/74] PASS         4.8s  check-tv-dashboard  w1
+        start check-reduced-motion on w1 (usually 4s)
+        wait  check-shuffle: load 4.0 > 4 CPUs
+        start check-shuffle on w2 (usually 4s)
+        start check-errors on w3 (usually 4s)
+[68/74] PASS         4.2s  check-reduced-motion  w1
+        start check-studio on w1 (usually 4s)
+[69/74] PASS         4.2s  check-errors  w3
+        start check-double-start on w3 (usually 3s)
+[70/74] PASS         4.6s  check-shuffle  w2
+        start check-a11y-surfaces on w2 (usually 2s)
+[71/74] PASS         4.1s  check-studio  w1
+        start check-restart on w1 (usually 2s)
+[72/74] PASS           3s  check-a11y-surfaces  w2
+[73/74] PASS         3.6s  check-double-start  w3
+[74/74] PASS         1.8s  check-restart  w1
+
+PASSED (exit 0) | full | run 20261110-052100-872add3c-26825
+  74 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 24m 34s · step time 1h 11m (sum) · 3 workers, 97% busy · 2.91× the same steps run one after another
+           predicted 21–28m (about 23m 29s, measured) → actual 24m 34s (+5%)
+           longest  e2e-chromium 8m 32s, check-f5 7m 38s, check-leaderboard 6m 46s · the longest step is 35% of the wall time
+           machine  CPU mean 33%, peak 99% · memory available ≥ 13450 MB · load peak 7.05 · backpressure 5 wait(s), 44s
+           contention ×1.033 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/G1-full-872add3/test-results/20261110-052100-872add3c-26825/report.json

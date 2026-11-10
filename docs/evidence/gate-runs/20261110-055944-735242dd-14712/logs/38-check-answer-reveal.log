@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:37449
+# timeout 600s | worker w2 | server http://localhost:37449 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/G2-full-735242d/test-results/20261110-055944-735242dd-14712/server-data/w2)
+
+[+17.7s] PASS Geography: finished player sees no answers while Bea still plays
+[+17.7s] PASS Geography: TV shows no answers while Bea still plays
+[+17.7s] PASS Geography: Bea (mid-game) sees no answers
+[+27.8s] PASS Geography: results list every question — 8
+[+27.9s] PASS Geography: each answer matches the content pack — 8/8
+[+27.9s] PASS Geography: each explanation is shown — 8/8
+[+27.9s] PASS Geography: Bea sees her own choices marked
+[+27.9s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+28.1s] PASS Geography: TV lists the answers after the game
+[+28.1s] PASS Geography: TV shows no player's choices
+[+33.8s] PASS Closest: no answer anywhere while question 1 is open
+[+33.9s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 90 vs 90
+[+33.9s] PASS Closest: and the player's own guess
+[+33.9s] PASS Closest: Bea sees her own guess, not Ada's
+[+33.9s] PASS Closest: the explanation is shown
+[+33.9s] PASS Closest: question 2 is now open and its answer is not shown
+[+33.9s] PASS Closest: TV shows the last answer only — Last question: How many days are in the first three months of a non-leap year? — 90 days
+[+33.9s] PASS Closest: TV shows nobody's guess — Last question: How many days are in the first three months of a non-leap year? — 90 days
+[+34.1s] ANSWER REVEAL ALL PASSED
+[+34.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 34.1s | cpu 3.2s, peak memory 250 MB

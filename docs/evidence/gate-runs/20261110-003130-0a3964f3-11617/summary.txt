@@ -1,0 +1,4 @@
+
+PASSED (exit 0) | full | run 20261110-003130-0a3964f3-11617
+  74 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/gate-final7/test-results/20261110-003130-0a3964f3-11617/report.json

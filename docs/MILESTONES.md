@@ -10,6 +10,19 @@ All milestones **locally authorized**, not remote publication/deployment. Order 
 | M4 — Christmas experience | Hub, achievements, day ceremony, Memory Book and exports, full brand/polish, sound/accessibility | TV never sees secrets; book contains only approved factual events/photos; download matches source; participant can revoke approval; screen reader controls | End-to-end day-to-keepsake ceremony |
 | M5 — Hardening/handoff | Threat/performance/accessibility audit, Safari real device (if available), backups, quotas, content provenance, docs and owner demo | 0 open P0/P1, repeatable clean build, test matrix signed with unverified items explicit, no paid/production changes | 7-day family rehearsal with synthetic users |
 
+## Queued product work (owner-approved, not started)
+
+- **Installable Home Screen web app** (queued 2026-11-10; the owner approved it, relayed by ChatGPT's handoff on PR #4).
+  - **When:** in the modernization / mobile-polish milestone, before deployment readiness. It is not a Stage 5.1/5.2 acceptance item.
+  - **Icon:** Mchezo's existing top-left circle-and-dots logo. Keep the identity; don't design a replacement.
+  - **Scope:**
+    - first inspect the existing manifest, icons and standalone support;
+    - add what's missing: app name, icons and launch configuration;
+    - add short install guidance for Safari on iPhone/iPad and for Android Chrome.
+  - **Verify:** standalone navigation, safe areas, joining a room, reconnecting, and theme consistency.
+  - **Reporting:** report automated and browser checks separately from real-device installation checks. Never claim real-device verification without doing it.
+  - **Out of scope:** installing does not mean offline play. Offline solo support is not part of this item. Deployment, spending and public ports stay as they are.
+
 ## Stop-the-line defects
 P0: private word/role/answer exposed; host spoof; duplicated or lost official scoring; repeated server crash/data loss; write access to real external services without authorization; harmful secret leak. P1: iPhone unusable, cannot rejoin, game permanently stuck, scores incorrect, 11 games not actually playable, Memory Book fabricates real people/events. P2: minor styling, occasional confetti defect, nonessential animation.
 

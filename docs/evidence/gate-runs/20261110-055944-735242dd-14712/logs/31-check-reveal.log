@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:45061
+# timeout 600s | worker w1 | server http://localhost:45061 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/G2-full-735242d/test-results/20261110-055944-735242dd-14712/server-data/w1)
+
+[+21.8s] PASS reveal opens on the first question phase — question:0
+[+21.8s] PASS question phase hides the correct answer — count=0
+[+22.1s] PASS Reveal answer steps into the first reveal — reveal:1
+[+22.1s] PASS reveal phase shows the correct answer — count=1
+[+22.1s] PASS reveal phase separates this question from the game total
+[+22.2s] PASS Next question steps into the second question phase — question:2
+[+22.2s] PASS second question phase hides the correct answer again — count=0
+[+22.2s] PASS Q10 jump lands on the last question phase — question:18
+[+22.3s] PASS last reveal reached — reveal:19
+[+22.3s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+22.3s] PASS finale shows the standings list
+[+22.4s] PASS auto-play starts back at the first question — question:0
+[+30.4s] PASS auto-play advances a step within 8s — reveal:1
+[+38.5s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+39.3s] PASS TV walk opens on a question — What type of pastry is used for profiter
+[+43.4s] PASS TV walk advances to the reveal stage
+[+48.4s] PASS TV walk advances to the second question — Who was the first human to travel into s
+[+48.5s] PASS TV manual jump reaches the leaderboard
+[+48.5s] REVEAL ALL PASSED
+[+48.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 48.5s | cpu 3.1s, peak memory 241 MB

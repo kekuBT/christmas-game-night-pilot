@@ -1,0 +1,53 @@
+Mchezo gate targeted | run 20261110-050336-ece173ed-16515
+  revision ece173edc5d5c142ddf5eee908270adeaae980f9 (clean tree) | fingerprint c600072cb608 (393 files)
+  plan     3 steps: 1 fast/build, 1 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 13.6 GB available)
+  history  1 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/inject/history.jsonl + committed baseline (2026-11-10) · contention ×1.02 for 3 worker(s) (measured, 1 run(s))
+  estimate this run: 6–11m (low-confidence) · the same steps one after another: about 7m 30s · longest step check-f5 ~7m 24s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.02 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-f5
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/inject/old-t2-word/test-results/20261110-050336-ece173ed-16515
+        start build-web on w1 (usually 5s)
+[ 1/3] PASS         7.4s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/3] PASS         0.9s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:42581 (pid 16751, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/inject/old-t2-word/test-results/20261110-050336-ece173ed-16515/server-data/w1)
+        start check-f5 on w1 (usually 7m 24s)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-f5 51s (w1)
+   remaining 5–10m · total 6–11m · done around 05:09–05:14 UTC (low-confidence)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-f5 1m 51s (w1)
+   remaining 4–9m · total 6–11m · done around 05:09–05:14 UTC (low-confidence)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-f5 2m 51s (w1)
+   remaining 3–8m · total 6–11m · done around 05:09–05:14 UTC (low-confidence)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-f5 3m 51s (w1)
+   remaining 2–7m · total 6–11m · done around 05:09–05:14 UTC (low-confidence)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-f5 4m 51s (w1)
+   remaining 1–6m · total 6–11m · done around 05:09–05:14 UTC (low-confidence)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-f5 5m 51s (w1)
+   remaining 0–5m · total 6–11m · done around 05:09–05:14 UTC (low-confidence)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 7m 00s
+   running   check-f5 6m 51s (w1)
+   remaining 1–4m · total 8–11m · done around 05:11–05:14 UTC (low-confidence)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 8m 00s
+   running   check-f5 7m 51s (w1)
+   remaining 1–3m · total 9–11m · done around 05:12–05:14 UTC (low-confidence)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 9m 00s
+   running   check-f5 8m 51s (w1)
+   remaining 1–2m · total 10–11m · done around 05:13–05:14 UTC (low-confidence)
+[ 3/3] PASS       530.8s  check-f5  w1
+
+PASSED (exit 0) | targeted | run 20261110-050336-ece173ed-16515
+  3 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 9m 00s · step time 8m 59s (sum) · 3 workers, 33% busy · 1.00× the same steps run one after another
+           predicted 6–11m (about 7m 33s, low-confidence) → actual 9m 00s (+19%)
+           longest  check-f5 8m 51s, build-web 7s, browser-preflight 1s · the longest step is 98% of the wall time
+           machine  CPU mean 30%, peak 96% · memory available ≥ 12647 MB · load peak 5.53
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/inject/old-t2-word/test-results/20261110-050336-ece173ed-16515/report.json
+exit=0
