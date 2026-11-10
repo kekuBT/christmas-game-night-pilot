@@ -6,14 +6,14 @@ One entry point: `scripts/gate.mjs`. It runs the same way on Windows, macOS and 
 |---|---|---|---|
 | fast | `npm run gate` | typecheck (server and web), ESLint, Vitest, production build | ~20–45 s |
 | targeted | `npm run gate:targeted -- math mobile` | production build + the named browser drivers | 1–5 min |
-| full | `npm run gate:full` | fast + every `scripts/check-*.mjs` driver + Chromium E2E, in parallel | see `npm run gate:timings` |
+| full | `npm run gate:full` | fast + every `scripts/check-*.mjs` driver + Chromium E2E, in parallel | ~20–30 min on 3 workers (4 CPUs); `npm run gate:timings` for this machine |
 | full, sequential | `npm run gate:full:sequential` | the same steps on one worker, one at a time (the reference mode) | ~85–95 min |
 
 Use **fast** after every change and **targeted** for the subsystem you touched. Only a **full** run on the final commit counts as release verification. A fast or targeted pass is never reported as "the gate passed".
 
 ## Parallel runs and time estimates (Stage 5.2)
 
-The full gate runs browser drivers on a bounded pool of workers (`--workers=auto` by default: CPUs − 1, at most 3, and at least 1.5 GB of available memory per worker). Each worker has its **own gate server** (own port, own data directory, own log), and a worker runs one step at a time, so no two steps ever share a server at the same time. Drivers that start their own servers were already isolated (port 0, a temporary data directory). Design, measurements and the isolation audit are in `docs/test-optimization/README.md`.
+The full gate runs browser drivers on a bounded pool of workers. The default is `--workers=auto`: 2 workers on a 2-CPU machine, CPUs − 1 above that, at most 3, and at least 1.5 GB of available memory per worker. All of these were benchmarked; see `docs/test-optimization/README.md` §7–8. Each worker has its **own gate server** (own port, own data directory, own log), and a worker runs one step at a time, so no two steps ever share a server at the same time. Drivers that start their own servers were already isolated (port 0, a temporary data directory). Design, measurements and the isolation audit are in `docs/test-optimization/README.md`.
 
 | Command | What it does |
 |---|---|
@@ -37,6 +37,7 @@ The full gate runs browser drivers on a bounded pool of workers (`--workers=auto
 - Once the tree changes, no new step starts, running steps are stopped as CANCELLED, and the run is INVALID (case 13).
 - Every planned step either has a status or is listed as **not run** with the reason; a run with an unexplained missing step cannot pass (case 12, where a worker's server dies).
 - Each step's log lines carry the time since the step started (`[+12.3s] …`), and the report records each step's worker, start and end, CPU seconds and peak memory (Linux), browser use (contexts, pages) and rooms created on its gate server.
+- Every non-passing step has a failure kind: functional, timeout, infrastructure or cancelled. The report also carries the driver's DIAG lines, and says whether the machine was short of memory or CPU while the step ran.
 - The gate never retries a step. A step that fails, fails the run.
 
 ## Verdicts
