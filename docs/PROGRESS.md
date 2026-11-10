@@ -1426,7 +1426,11 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 
 **Limitation:** Chromium only. No real iPhone, Android or TV, and no VoiceOver or TalkBack. Real-device testing is **not done**; `docs/REAL_DEVICE_TESTING.md` now checks out this branch.
 
-**Gate verdict:** recorded below once the final full gate has run.
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` on `0a3964f`: **PASSED (exit 0)**, run `20261110-003130-0a3964f3-11617`.
+- 74 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- Unit tests: 1,080 passed in 100 files. All 67 browser drivers passed. E2E (Chromium) passed 15 of 15, with all 14 games.
+- Run from a fresh clone with a clean tree; the browser was `chrome-headless-shell` 153.0.8010.12. Wall time 95.4 min.
+- The verdict covers `0a3964f` only. The commit that records it is docs only. The failed, cancelled and interrupted attempts below don't count.
 
 **Failed final gate (not a verdict for the fixed code):** `node scripts/gate.mjs full` on `4acfea7`, run `20261109-173134-4acfea70-32411`: **FAILED (exit 1)**. 72 passed, 2 failed (`check-f5`, `e2e-chromium`).
 - Cause: my O-06 change renamed the Charades actor's "Correct (+100 team)" button to "Correct (+100 to Team A/B)". Both drivers looked for the old exact name, so Charades ran out every turn's clock, and the games after it never started.

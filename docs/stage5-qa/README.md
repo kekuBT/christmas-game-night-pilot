@@ -400,6 +400,15 @@ Every claim here was checked in Chromium (headless, Playwright) and in unit test
 | Phase 4 (compact snapshots) | `626f150` |
 | The script inventory | `9905460` |
 
+Test and driver fixes found by the final gates (§11; no app change):
+
+| Fix | Commit |
+|---|---|
+| Two drivers find Charades' renamed Correct button | `55ba5d8` |
+| `check-draw-guess` uses Keku's current page after turn 2 | `f363811` |
+| The Sprint privacy unit test uses marker answers | `bf6a764` |
+| `check-shuffle` reads the real game list from `GET /games` | `0a3964f` |
+
 ### Deferred (owner decision or follow-up, §12)
 
 - The S3-MTH-01 residual.
@@ -599,7 +608,17 @@ One busy Draw & Guess turn: 120 batches of 40 points at 3 per second, about 40 s
 
 ## 10. Passing gate: revision and run ID
 
-(Filled in after the final full gate: see below.)
+**`node scripts/gate.mjs full` on `0a3964f342f1ffc9f861a98a551c1de10d87b5d1`: PASSED (exit 0), run `20261110-003130-0a3964f3-11617`.**
+
+- **Steps:** 74 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled.
+- **Unit tests:** 1,080 passed in 100 files.
+- **Browser drivers:** all 67 passed.
+- **E2E (Chromium):** 15 of 15 passed, which includes all 14 games played to the end in one room.
+- **Environment:** a fresh clone with a clean tree; the only untracked item was the `node_modules` symlink. The source fingerprint was `e07ef3f6db93` (384 files).
+- **Browser:** `chrome-headless-shell` 153.0.8010.12, through `MCHEZO_CHROMIUM_PATH`, on Node v22.23.4.
+- **Wall time:** 95.4 min, from 00:31 to 02:07 UTC on 2026-11-10, with the existing sequential gate.
+
+This verdict covers `0a3964f` only. The commit that records it changes `docs/` only. Every earlier full-gate attempt on this branch failed, was cancelled or was interrupted (§11). None of them counts, and their results are not combined with this one.
 
 ## 11. Failed and cancelled attempts
 
