@@ -1476,7 +1476,7 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - **Driver changes, with no check removed:**
   - `check-leaderboard`: 30 s waits on optional chips replaced by a phase wait;
   - `e2e-browser` and `check-f5`: probes are checks, not waits;
-  - `lib/stage5-games.mjs`: a Draw & Guess read race fixed;
+  - `lib/stage5-games.mjs`: a Draw & Guess read race fixed, keeping Stage 5.1's 30 s limit for a read or tap stuck on screen (D-S52-01);
   - `lib/driver-env.mjs`: browser-use counters.
 - **Self-test:** 8 parallel cases (9–16) added; 59 checks in all. **Unit tests:** `tests/gate-plan.test.ts`, 21 tests.
 - **CI:** a `workers` input on the manual dispatch. **Docs:** `TESTING.md`. **npm:** `gate:full:sequential`, `gate:plan`, `gate:timings`.
@@ -1487,16 +1487,22 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - The first self-test run scored 55 of 58, from three self-test design errors.
 - The F2 run (2 workers on 2 CPUs) failed `check-f5` on a real race in the shared Draw & Guess helper. It's fixed and validated (V1).
 - F2 was then cancelled, because a validation run on the other CPUs throttled it through the machine-wide load average.
+- **Found in my own review (no gate failed):** the first race fix (`d5e175f`) let a defect confined to one Draw & Guess turn or one Majority round pass `check-f5` and E2E. Failure injection showed it: 3 single-turn/round injections PASSED on `dab1c65`. Fixed in `872add3`, where the same 3 injections FAIL within 35 s with the action named (report §12–§13).
 
-**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` (automatic worker count: 3 workers on 4 CPUs) on `dab1c65`: **PASSED (exit 0)**, run `20261110-033657-dab1c658-18431`.
+**Gate verdict (one run, one revision):** `node scripts/gate.mjs full` (automatic worker count: 3 workers on 4 CPUs) on `872add3`: **PASSED (exit 0)**, run `20261110-052100-872add3c-26825`.
 - 74 passed, 0 failed, 0 timed out, 0 not run.
-- Unit tests: 1,101 in 101 files. All 67 drivers passed. E2E passed 15 of 15.
-- 24m 17s, from a fresh clone with a clean tree. The commits after it are docs only.
-- 2 workers on 2 CPUs, same commit: **PASSED** 74/74 in **38m 06s** (run `20261110-040231-dab1c658-30930`, pinned with `taskset`). Gate self-test on `dab1c65`: 59/59.
+- Unit tests: 1,101 in 101 files. All 67 drivers passed. E2E passed 15 of 15. There were 1,992 check lines, the same in every step as in the sequential Stage 5.1 run.
+- 24m 34s, from a fresh clone with a clean tree. The commits after it are documentation only.
+- Gate self-test on `872add3`: **59/59**.
+- **Earlier, superseded:** on `dab1c65` the full gate PASSED twice: 24m 17s on 3 workers (run `20261110-033657-dab1c658-18431`), and 38m 06s on 2 workers pinned to 2 CPUs (run `20261110-040231-dab1c658-30930`). The gate self-test there was 59/59.
 
 **External blockers:** none. CI is still manual-dispatch only, because the account's Actions allowance is unconfirmed.
 
-**For the owner:** the Draw & Guess helper race also exists on the Stage 5.1 branch (PR #4). It hasn't been seen there, and fixing it there needs a new Stage 5.1 gate, so that's the owner's call.
+**Review loop:**
+- PR #4 (Stage 5.1) is ready for review.
+- The Stage 5.2 PR targets `claude/stage5-audit-repairs`. By the owner's decision this cumulative tree is the review candidate.
+- The Draw & Guess helper race stays unfixed on the Stage 5.1 branch, by the owner's decision: no backport, documented on PR #4.
+- The owner authorized the ChatGPT ↔ Claude GitHub handoff loop, including later milestones (D-WF-01, `AGENTS.md`). No merge, deployment, public port or extra spending.
 
 **Next task (if the owner continues):** collect a few more parallel runs, so the three sped-up drivers get 3+ samples and their estimates lose the low-confidence label. Optionally, benchmark 4 workers.
 

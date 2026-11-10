@@ -14,6 +14,8 @@ Every number below comes from a real run, and each one says which run it came fr
 | Sum of step times | 95.4 min | 70m 40s |
 | Same work, 2 workers on 2 CPUs | – | **38m 06s** (run `20261110-040231-dab1c658-30930`, same commit, 2 workers pinned to 2 CPUs) |
 
+**Final verdict:** the full gate on `872add3` PASSED (run `20261110-052100-872add3c-26825`, 24m 34s, §14).
+
 Two changes do the work, and neither removes a test:
 - **A bounded parallel scheduler** runs the drivers on 3 workers by default on this machine, each worker with its own gate server.
 - **Unnecessary waits removed from three drivers:** `check-leaderboard`, E2E and `check-f5`. They waited out Playwright's 30 s default on optional elements, or probed for absent buttons with 0.5–2 s waits. Their step time fell from 45 to 23 minutes, with the same checks.
@@ -143,7 +145,16 @@ The full-run comparison of every driver's check count, sequential against parall
 | `check-leaderboard` | Waits for the TV board's `data-phase="after"`, where movement chips render, then reads optional chips without auto-waiting. The fixed 3 s settle wait became the same phase wait. | Same checks, same values. **Stronger:** a board that never reaches "after" now fails at that wait, instead of silently reading "no movement". |
 | `e2e-browser` | Kit questions are answered through `scripts/lib/answer.mjs` (option 0, as before). The finished-checks and the Closest/Year probes are checks, not waits. | Same games, options and end states. **Stronger:** an unconfirmed answer throws `AnswerStuckError` with a DIAG line, instead of looping silently. |
 | `check-f5` | Kit-question, Closest and Year probes are checks, not waits. There is still one action per player per pass, so players stay interleaved. | Same interleaving, same assertions. |
-| `lib/stage5-games.mjs` (used by E2E and F5) | Draw & Guess reads, and Draw & Guess and Majority taps, give up after 2 s, not 30 s, and retry on the next pass. | Fixes a race that F2 exposed (§12). A game that never finishes still fails at the game deadline. |
+| `lib/stage5-games.mjs` (used by E2E and F5) | Draw & Guess reads, and Draw & Guess and Majority taps, give up after 2 s, not 30 s, and retry on the next pass. An action that keeps failing for 30 s with its screen still up throws (`872add3`). | Fixes a race that F2 exposed (§12). The 30 s limit is Stage 5.1's own, kept for everything except that race. The first version of the fix (`d5e175f`) dropped it, and failure injection showed what that let through (§13). |
+
+**Where a driver now tolerates a failure, and what still catches a real one.** Equal check counts don't prove equal coverage, so here is every such place:
+
+| Where | Stage 5.1 | Stage 5.2 | What still catches a real failure |
+|---|---|---|---|
+| `check-leaderboard`: phone gain chips, TV movement chips | `textContent()` waited up to 30 s, then `""` | read at once (`count()`, then `textContent()`), `""` if absent | Every chip assertion requires the chip (`+240`, `−240`, `▲ 1`, `▼ 1`); none asserts that a chip is absent. The phone chip renders in the same render as its row. The TV chips are read only after a **hard** wait for `data-phase="after"`, which throws; Stage 5.1 slept 3 s instead. |
+| `check-f5`, E2E: probes for answer slabs, Next, Back to lobby, the Closest and Year inputs, finished checks | short waits (0.5–2 s), then `false` | immediate checks, then `false` | The same: the loop asks again on its next pass, and each game must finish within 180 s. |
+| E2E: answering the kit questions | a loop that could give up silently after 60 tries | `scripts/lib/answer.mjs` (option 0, as before) | **Stricter:** an unconfirmed answer throws `AnswerStuckError`, with a DIAG line. |
+| `lib/stage5-games.mjs`: the Draw & Guess word read, guess send and Majority taps | a 30 s auto-wait, then a throw, even when the turn had simply ended | give up after 2 s and retry; throw once the action has kept failing for 30 s with its screen still up | Stage 5.1's 30 s limit, for everything except the turn-ending race, and the 180 s game budget. |
 
 **What E2E and F5 each assert.** This is why both stay:
 - **F5:** the TV projection has no leaks while each game plays. It also checks ledger finish events per game, the Cup view, the Dashboard's 5-game cap, and Memory Book export.
@@ -178,7 +189,8 @@ All runs start from fresh clones of one exact commit, through `bench.sh` (kept i
 | F2 | `8642da0` | full gate | 2 / **2** | FAILED (`check-f5` race, §12), then CANCELLED by me | – | – | – | – | – | 0 (tagged) |
 | F2b | `dab1c65` | **full gate** (the final commit) | 2 / **2** | **PASSED 74/74** | **38m 06s** | 72m 02s | 1.89× | 95% | ×1.039 | 0 (tagged) |
 | V1 | `d5e175f` | F5 and E2E after the race fix | 2 / **2** (CPUs 2–3) | PASSED (run 20261110-032414-d5e175f3-16751: F5 461.5 s, E2E 509.2 s, Draw & Guess finished in both) | 11m 33s | | | | | |
-| F3 | `dab1c65` | **full gate, final** | 3 / 4 | PASSED 74/74 | 24m 17s | 70m 40s | 2.91× | 97% | ×1.017 | 0 (tagged) |
+| F3 | `dab1c65` | full gate | 3 / 4 | PASSED 74/74 | 24m 17s | 70m 40s | 2.91× | 97% | ×1.017 | 0 (tagged) |
+| G1 | `872add3` | **full gate, final** (after the helper's 30 s rule, §12) | 3 / 4 | PASSED 74/74 | 24m 34s | 71m 29s | 2.91× | 97% | ×1.033 | 0 (tagged) |
 
 **Machine:**
 
@@ -190,6 +202,7 @@ All runs start from fresh clones of one exact commit, through `bench.sh` (kept i
 | B4 | 18% / 55% of 4 CPUs, i.e. up to all of the 2 pinned | 13,764 MB | 3.85 | 4 waits, 140 s |
 | F2b | 20% / 54% of 4 CPUs (2 pinned) | 14,013 MB | 4.22 | 24 waits, 239 s |
 | F3 | 32% / 100% | 13,437 MB | 4.7 | 9 waits, 40 s |
+| G1 | 33% / 99% | 13,450 MB | 7.05 | 5 waits, 44 s |
 
 **Per driver** (B2, 3 workers): times were within 0–9% of their sequential medians.
 - `check-caption` read ×1.41, but its own sequential history swings between 76 and 111 s.
@@ -256,6 +269,7 @@ The full per-step profile from the final run is under "Per-step profile" below.
 | B4 | 14–22 min, about 16m 57s (modelled) | 17m 10s | +1% | |
 | F2b | 31–45 min, about 36m 13s (low-confidence) | 38m 06s | +5% | 2 workers on 2 CPUs; backpressure cost 239 s, which the estimate does not model |
 | F3 | 20–30 min, about 23m 29s (low-confidence: 3 changed drivers with 2 samples each) | 24m 17s | +3% | |
+| G1 | 21–28 min, about 23m 29s ("measured") | 24m 34s | +5% | |
 
 **Lesson:** a "measured" label describes the samples, not whether the step changed since. The change-point rule and the contention-normalised parallel samples make the history catch up after two runs, without needing a sequential run.
 
@@ -273,10 +287,15 @@ The full per-step profile from the final run is under "Per-step profile" below.
      - the helper saw the drawer's screen;
      - then it read the secret word with a 30 s auto-wait;
      - in between, a guess sent earlier on the same pass ended the turn, so the word never came back on that phone, and the read threw.
-   - 2 busy CPUs widen that window. Sequential runs never hit it. It predates Stage 5.2: the helper came from Stage 5, so the Stage 5.1 branch (PR #4) carries it too. It hasn't been seen there, and changing that verified branch is the owner's call, so it was raised with the owner rather than patched there.
+   - 2 busy CPUs widen that window. Sequential runs never hit it. It predates Stage 5.2: the helper came from Stage 5, so the Stage 5.1 branch (PR #4) carries it too. It hasn't been seen there. **The owner decided not to backport it** (PR #4, 2026-11-10): PR #4 lists it as a known limitation, and this cumulative branch is the review candidate.
    - **Fix (`d5e175f`):** reads and taps give up after 2 s and retry on the next pass.
    - **Validation, V1:** F5 and E2E on 2 workers pinned to CPUs 2–3, alongside F2: PASSED (run 20261110-032414-d5e175f3-16751: F5 461.5 s, E2E 509.2 s, Draw & Guess finished in both).
-3. **F2 was cancelled by me, and its timing is discarded.** While it ran on CPUs 0–1, I started the validation run V1 on CPUs 2–3. Backpressure reads the *machine-wide* load average, so V1's load throttled F2, and V1 was throttled in turn (224 s before `check-f5` started). Both runs' timings are therefore unreliable as 2-CPU measurements; F2b replaced F2 with nothing else running. The harness counted the overlapping run's processes as F2's "orphans". It now counts only processes carrying the run's own tag, and F2 left **0**.
+3. **A gap in that fix, found in my own review (no gate failed).** The owner's handoff on PR #4 asked whether unexpected failures can now be swallowed.
+   - `d5e175f` had made the three actions return `false` on any failure, dropping Stage 5.1's 30 s limit.
+   - A persistent failure still failed the driver, because each game's own time limit runs past the 180 s budget.
+   - But a defect confined to **one** Draw & Guess turn, or **one** Majority round, would only cost that turn's timer (75 s or 45 s), and the game could still finish inside 180 s.
+   - **Fix (`872add3`):** an action that keeps failing for 30 s with its screen still up throws again. Before-and-after failure injection is in §13.
+4. **F2 was cancelled by me, and its timing is discarded.** While it ran on CPUs 0–1, I started the validation run V1 on CPUs 2–3. Backpressure reads the *machine-wide* load average, so V1's load throttled F2, and V1 was throttled in turn (224 s before `check-f5` started). Both runs' timings are therefore unreliable as 2-CPU measurements; F2b replaced F2 with nothing else running. The harness counted the overlapping run's processes as F2's "orphans". It now counts only processes carrying the run's own tag, and F2 left **0**.
 
 **Exclusivity:** none was needed. No timing-sensitive driver failed or drifted under 2 or 3 workers (§8).
 
@@ -307,7 +326,25 @@ The full per-step profile from the final run is under "Per-step profile" below.
 - **15:** `--plan` runs nothing. Progress lines appear, the summary compares predicted with actual, and the timing history is appended.
 - **16:** cancelling a 3-worker run kills every worker's driver and children (the detached one included) and every worker server. An unrelated process survives, and every step is CANCELLED, none counted as passed.
 
-**Leftovers after every benchmark run:** 0 Chromium and 0 server processes. `bench.sh` counted them before and after each run.
+**Failure injection in the Stage 5 driver helper** (`scripts/lib/stage5-games.mjs`, which `check-f5` and E2E use for the three Stage 5 games). This answers whether a broken read or tap can now be swallowed.
+- **Method:** each run breaks **one** action in a throwaway clone. The action looks up a test id that doesn't exist, so it can never succeed. The clone commits the change locally (never pushed) and runs `node scripts/gate.mjs targeted f5`.
+- F5 plays all 14 games with 4 phones. Majority Rules is game 12 and Draw & Guess game 14. In the clean F3 run, Majority took 63.8 s and Draw & Guess 42.8 s.
+
+| Injection | Commit | Run | Verdict | What happened |
+|---|---|---|---|---|
+| Draw & Guess word read always fails | `dab1c65` | `20261110-045458-0590e471-14905` | FAILED | 180 s budget: stuck on turn 3 of 4 |
+| Draw & Guess guess send always fails | `dab1c65` | `20261110-045458-e0fcef75-14897` | FAILED | 180 s budget: stuck on turn 3 of 4 |
+| Majority tap always fails | `dab1c65` | `20261110-045458-083b5715-14913` | FAILED | 180 s budget: stuck in round 4 of 5 |
+| Draw & Guess word read fails on turn 2 only | `dab1c65` | `20261110-050336-ece173ed-16515` | **PASSED** (the gap) | Draw & Guess took 116.8 s: turn 2 ran out its 75 s timer, and the game still finished |
+| Draw & Guess guess fails on turn 2 only | `dab1c65` | `20261110-050336-19cc1671-16456` | **PASSED** (the gap) | 117.5 s, the same |
+| Majority tap fails in round 2 only | `dab1c65` | `20261110-050336-fc52e217-16458` | **PASSED** (the gap) | Majority took 107.5 s: round 2 ran out its 45 s timer |
+| Draw & Guess word read fails on turn 2 only | `872add3` | `20261110-051243-722de8ba-20647` | **FAILED** (the fix) | `stage5Act: Draw & Guess: reading the drawer's word kept failing for 30 s after its first failure, with its screen still up`. DIAG: turn 2 of 4 |
+| Draw & Guess guess fails on turn 2 only | `872add3` | `20261110-051243-d30014a7-20640` | **FAILED** (the fix) | `… sending a guess kept failing for 34 s …`. DIAG: turn 2 of 4 |
+| Majority tap fails in round 2 only | `872add3` | `20261110-051243-95262c39-20656` | **FAILED** (the fix) | `… tapping mz-mr-predict-a kept failing for 35 s …`. DIAG: round 2 of 5 |
+
+So persistent failures were never swallowed: every Stage 5 game's own time limit runs past the 180 s budget. A defect confined to one turn or round was, on `dab1c65`. `872add3` closes that.
+
+**Leftovers after every benchmark run:** 0 Chromium and 0 server processes. `bench.sh` counted them before and after each run. After the failure-injection runs, no Chromium, server or gate process was left either.
 
 **Diagnosis on failure:**
 - each step's log lines are time-stamped from the step's start;
@@ -321,17 +358,24 @@ F2's failure shows this working: the DIAG lines, the worker and the time stamps 
 
 ## 14. Passing gate: revision and run ID
 
-**`node scripts/gate.mjs full` (automatic worker count: 3 workers on 4 CPUs) on `dab1c6588036603d4a214557b6e223266734c1f4`: PASSED (exit 0), run `20261110-033657-dab1c658-18431`.**
+**`node scripts/gate.mjs full` (automatic worker count: 3 workers on 4 CPUs) on `872add3c90c518f1966551cec4f06f9a61c55b48`: PASSED (exit 0), run `20261110-052100-872add3c-26825`.**
 
 - **Steps:** 74 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run.
 - **Unit tests:** 1,101 in 101 files: the 1,080 from Stage 5.1, unchanged, plus 21 new tests in `tests/gate-plan.test.ts`.
 - **Browser drivers:** all 67 passed. **E2E (Chromium):** 15 of 15, with all 14 games played to the end.
 - **Check counts:** every one of the 74 steps made exactly as many checks as in the sequential Stage 5.1 final run (1,992 in each), with 0 failures in either (§6).
-- **Environment:** a fresh clone with a clean tree (`git.dirty` empty), source fingerprint `2f06fba17621` (393 files).
+- **Environment:** a fresh clone with a clean tree (`git.dirty` empty), source fingerprint `8e3a6f07c6e0` (393 files).
 - **Browser and runtime:** `chrome-headless-shell` 153.0.8010.12 (`MCHEZO_CHROMIUM_PATH`), Node v22.23.4.
-- **Wall time:** 24m 17s, from 03:36:57 to 04:01:14 UTC on 2026-11-10. Afterwards no process carrying the run's tag was left.
+- **Wall time:** 24m 34s, from 05:21:00 to 05:45:34 UTC on 2026-11-10. The prediction was about 23m 29s ("measured"), so +5%. Afterwards no process carrying the run's tag was left.
 
-The verdict covers `dab1c65` only. Later commits on the branch change `docs/` only. The failed, cancelled and interrupted runs are in §12 and §11 and are not combined with this one. Gate self-test on `dab1c65`: **59 of 59 checks passed**, run in the clean clone of `dab1c65`. Afterwards there was no Chromium or server process left.
+The verdict covers `872add3` only. It differs from `dab1c65` in one file, `scripts/lib/stage5-games.mjs` (§12, item 3). The commits after it change documentation only (`AGENTS.md` and `docs/`). The failed, cancelled and interrupted runs are in §12 and §11 and are not combined with this one. **Gate self-test on `872add3`:** **59 of 59 checks passed**, run in the clean clone of `872add3` after the full gate. Afterwards there was no Chromium or server process left.
+
+**Earlier verdicts, superseded by this one:**
+- `dab1c65`: PASSED, run `20261110-033657-dab1c658-18431` (3 workers, 24m 17s).
+- `dab1c65`: PASSED, run `20261110-040231-dab1c658-30930` (2 workers on 2 CPUs, 38m 06s).
+- `dab1c65`: gate self-test 59/59.
+
+The benchmarks in §8–§11 ran on `dab1c65` and earlier commits. The one change since then adds work only after a failed read or tap (a 300 ms visibility check). G1's 24m 34s is within 2% of F3's 24m 17s on the same machine.
 
 ## 15. Remaining performance bottlenecks
 
