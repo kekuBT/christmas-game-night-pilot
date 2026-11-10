@@ -55,6 +55,10 @@ export interface RoomLobbyProps {
   startTestId?: string;
   /** Stage 7.1: what Start says when it starts the Quick Party lineup's game. */
   startLabel?: string;
+  /** Stage 7.2: Start waits, and says why (the room is on a break). */
+  startBlocked?: string;
+  /** Stage 7.2: what guests are told instead of "waiting for the host to start" (a break). */
+  guestNote?: ReactNode;
   /** Stage 7.1: the Quick Party card (casual rooms). */
   party?: ReactNode;
   error?: string;
@@ -174,7 +178,7 @@ export function RoomLobby(p: RoomLobbyProps) {
         {p.message && !p.error ? <p className="ok mz-dock__ok" role="status">{p.message}</p> : null}
         {p.isHost ? (
           <>
-            <Keycap block disabled={!canStart || !p.onStart} onClick={p.onStart} data-testid={p.startTestId}>{canStart ? (p.startLabel ?? `Start ${p.upNext?.title ?? "the game"}${p.mode && p.mode !== "casual" ? ` · ${p.mode === "official" ? "Official" : "Practice"}` : ""}`) : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
+            <Keycap block disabled={!canStart || !p.onStart || !!p.startBlocked} onClick={p.onStart} data-testid={p.startTestId}>{p.startBlocked ? p.startBlocked : canStart ? (p.startLabel ?? `Start ${p.upNext?.title ?? "the game"}${p.mode && p.mode !== "casual" ? ` · ${p.mode === "official" ? "Official" : "Practice"}` : ""}`) : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
             {p.mode === "casual" && <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">Casual game: just for fun, no Cup.</p>}
             {p.mode && p.mode !== "casual" && (
               // S3-HOME-02: the mode choice can be below the fold; the dock says what Start will do and links to it.
@@ -187,7 +191,7 @@ export function RoomLobby(p: RoomLobbyProps) {
           </>
         ) : (
           <p className="mz-dock__note mz-dock__note--waiting" data-testid="dock-guest-note">
-            {p.upNext && fit?.tone === "warn" && connected < p.upNext.minPlayers
+            {p.guestNote ? p.guestNote : p.upNext && fit?.tone === "warn" && connected < p.upNext.minPlayers
               ? <>{p.upNext.title} needs {p.upNext.minPlayers - connected} more {p.upNext.minPlayers - connected === 1 ? "player" : "players"} before {p.hostName ?? "the host"} can start it · share the code {p.code}</>
               : p.upNext
               ? <>Waiting for {p.hostName ?? "the host"} to start {p.upNext.title}{p.mode ? <> · <b>{p.mode === "official" ? `Official, counts toward the ${p.cupLabel ?? "Cup"}` : p.mode === "casual" ? "Casual, just for fun" : "Practice, no Cup points"}</b></> : null} · tap someone to nudge them</>

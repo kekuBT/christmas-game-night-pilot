@@ -153,8 +153,9 @@ describe("every line only where its condition holds", () => {
   });
   it("every one of the lines can appear", () => {
     const seen = new Set<string>();
-    const cases: { scores: Record<string, number>; official: boolean; you: string; satOut?: boolean; done?: number }[] = [
+    const cases: { scores: Record<string, number>; official: boolean; casual?: boolean; you: string; satOut?: boolean; done?: number }[] = [
       { scores: { a: 300, b: 200, c: 100 }, official: true, you: "a" },
+      { scores: { a: 300, b: 200, c: 100 }, official: false, casual: true, you: "a" }, // Stage 7.2
       { scores: { a: 300, b: 200, c: 100 }, official: true, you: "b" },
       { scores: { a: 300, b: 200, c: 100 }, official: true, you: "c" },
       { scores: { a: 300, b: 200, c: 100 }, official: false, you: "a" },
@@ -174,11 +175,11 @@ describe("every line only where its condition holds", () => {
     ];
     for (let g = 0; g < 400; g++) {
       for (const c of cases) {
-        const s = resultsStory({ gameInstanceId: `r${g}`, title: "T", official: c.official, nameOf, scores: c.scores, youId: c.you, youSatOut: c.satOut, yourParticipation: c.done === undefined ? undefined : { done: c.done, of: 10 } });
+        const s = resultsStory({ gameInstanceId: `r${g}`, title: "T", official: c.official, casual: c.casual, nameOf, scores: c.scores, youId: c.you, youSatOut: c.satOut, yourParticipation: c.done === undefined ? undefined : { done: c.done, of: 10 } });
         for (const x of ALL) { if (x.re.test(s.quip) || x.re.test(s.you?.line ?? "")) seen.add(x.text); }
       }
     }
-    expect(ALL.length).toBe(29);
+    expect(ALL.length).toBe(30); // Stage 7.2 added the casual line (the limit is 30)
     expect(ALL.filter((x) => !seen.has(x.text)).map((x) => x.text)).toEqual([]);
   });
   it("no line claims a streak, a comeback or a record nobody recorded", () => {

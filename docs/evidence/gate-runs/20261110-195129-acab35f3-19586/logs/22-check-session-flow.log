@@ -1,0 +1,60 @@
+$ node scripts/check-session-flow.mjs http://localhost:34583
+# timeout 600s | worker w2 | server http://localhost:34583 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s72-full/test-results/20261110-195129-acab35f3-19586/server-data/w2)
+
+[+3.7s] PASS setup: the lineup is saved (Math, Trivia) — {"status":200,"body":{"ok":true,"party":{"revision":1,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":19,"transitionMinutes":2,"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"trivia","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794341366878}}}}
+[+3.7s] PASS setup: the host's Start names game 1 of 2
+[+3.7s] PASS setup: the TV shows the lineup, game 1 of 2
+[+26.4s] PASS A host: the casual results screen
+[+26.5s] PASS A guest: the casual results screen
+[+26.5s] PASS A host: one result heading, Casual (not Practice) — MATH MAYHEM · CASUAL
+[+26.5s] PASS A host: no old shell (no 🎄 header, Championship, Practice, second winner line)
+[+26.5s] PASS A host: standings with both players — 2
+[+26.5s] PASS A host: their own answers to review
+[+26.5s] PASS A guest: one result heading, Casual (not Practice) — MATH MAYHEM · CASUAL
+[+26.5s] PASS A guest: no old shell (no 🎄 header, Championship, Practice, second winner line)
+[+26.5s] PASS A guest: standings with both players — 2
+[+26.5s] PASS A guest: their own answers to review
+[+29.0s] PASS A nothing started by itself: one game, finished; the lineup's next is game 2 — {"games":[["math-mayhem","finished"]],"next":1}
+[+29.0s] PASS B host: Next game: Trivia Showdown
+[+29.0s] PASS B guest: up next, game 2 of 2, Keku starts it
+[+29.0s] PASS B guest: no continuation buttons — ["next-status"]
+[+29.0s] PASS B TV: the next game, game 2 of 2
+[+29.3s] PASS B reload: the host is back on the results with Next game
+[+29.3s] PASS B reload: the guest is back on the results, waiting for Keku
+[+29.3s] PASS F the server refuses the guest's Next and Play again; nothing starts — [400,400]
+[+29.8s] PASS C Next whose reply was lost: the briefing opens for both
+[+29.8s] PASS C exactly one new game: Trivia, game 2 of the lineup — [["math-mayhem","finished"],["trivia","briefing"]]
+[+29.8s] PASS C the retry was the same press (same request id, same session revision) — [{"id":"4bea1370-b866-49a1-b4ef-145f63c40cb2","sessionRevision":1},{"id":"4bea1370-b866-49a1-b4ef-145f63c40cb2","sessionRevision":1}]
+[+57.7s] PASS C game 2's own results (Trivia) carry the panel: the lineup is complete
+[+57.7s] PASS C guest: that was the whole lineup
+[+57.7s] PASS C TV: that was the whole lineup
+[+57.7s] PASS C host: no Next game once the lineup is complete; Play again and Plan another lineup offered
+[+57.7s] PASS G Play again is reachable with Tab
+[+58.0s] PASS D Play again (Enter): a new briefing for Trivia
+[+58.0s] PASS D a rematch: a third game, Trivia, tied to game 2; the lineup is untouched (still complete) — [["math-mayhem","finished"],["trivia","finished"],["trivia","briefing"]]
+[+58.0s] PASS D the earlier games keep their scores
+[+86.0s] PASS D the rematch ends on its results with the panel
+[+86.0s] PASS H guest at 320 px: the results and panel without sideways scroll
+[+86.1s] PASS H host at 1440 px: the panel without sideways scroll
+[+86.2s] PASS E host: on a break, with Resume
+[+86.2s] PASS E guest: on a break, no Resume
+[+86.2s] PASS E TV: on a break
+[+86.3s] PASS E the server refuses the guest's Resume (403); still on a break — 403
+[+116.4s] PASS E host lobby: the break banner with Resume; Start waits
+[+116.4s] PASS E guest lobby: on a break, the host resumes
+[+116.5s] PASS E host reload: still on a break
+[+116.5s] PASS E nothing started during the break (three games)
+[+117.0s] PASS E Resume: the banner goes for both; Start is back
+[+117.0s] PASS E TV: no longer on a break
+[+117.0s] PASS E host lobby: Take a break is offered again
+[+117.0s] PASS F guest lobby: no break or start controls
+[+117.0s] PASS lineup card: both games played
+[+125.9s] PASS I no answer: 'couldn't confirm whether the lineup was saved' (never 'not saved')
+[+127.1s] PASS I the request lands later: the planner recognises its own save and closes, saying so
+[+127.2s] PASS I the server holds exactly that draft, one revision on — {"held":1,"rev":2,"items":["geography"],"draft":["geography"]}
+[+127.2s] PASS I the new lineup starts at its first game; the played games keep their scores
+[+127.3s] 
+[+127.3s] All session-flow checks passed
+[+127.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 127.3s | cpu 6.4s, peak memory 251 MB

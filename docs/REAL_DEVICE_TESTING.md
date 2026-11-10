@@ -181,6 +181,10 @@ Do these on phones that open the **Wi-Fi address** (not localhost): plain http t
 | I10 | In a casual room with 3 phones: **Plan a Quick Party** → set 4 → 30 min → **Suggest a lineup** → move, remove, replace → **Use this lineup** | The planner fits the screen; every button is easy to tap; all 3 phones show the same lineup; nothing starts |
 | I11 | Host: reload, then press Start | The lineup comes back; Start asks "You planned for 4; 3 are here" and **Start with 3** starts the first game through the rules screen |
 | I12 | A guest: look for a way to edit the lineup | None; only the host (or a cohost) sees Edit and Clear |
+| I13 | Casual room, 2 phones and a TV, a lineup of Math then Trivia: play Math to the end | Both phones show one results screen saying Casual (no 🎄 header, no Championship), the standings and your own answers; the host has **Next game: Trivia Showdown**; the other phone says "Keku starts it"; the TV shows the next game; nothing starts by itself |
+| I14 | Host: **Next game**, play Trivia; then **Play again** | Trivia starts through the rules screen; afterwards everyone (and the TV) sees "That was the whole lineup"; Play again starts a fresh Trivia and the lineup stays complete |
+| I15 | Host: **Take a break** on the results; everyone goes back to the lobby; reload a phone; then **Resume** | Every phone and the TV say "On a break"; the host's Start waits; a guest has no Resume; after a reload it's still a break; Resume clears it for everyone |
+| I16 | Host: turn Wi-Fi off just after pressing **Next game**, then on again | Exactly one game starts (the rules screen appears once on every phone); no error about a second game |
 | I6 | Host a game without touching the Casual/Family Cup choice; a second phone joins | No Cup chip, no Official/Practice choice; both phones say "Casual, just for fun"; a game plays to results and the lobby says "Last game · … · Casual" |
 
 ---

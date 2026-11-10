@@ -135,10 +135,18 @@ export interface PartyView {
     budgetMinutes: number;
     estimateMinutes: number;
     transitionMinutes: number;
-    items: { gameId: string; started: boolean }[];
+    /** Stage 7.2: each item's state (derived from its game on the server). */
+    items: { gameId: string; started: boolean; status?: "pending" | "briefing" | "playing" | "completed"; gameInstanceId?: string }[];
+    /** Stage 7.2: the next pending item's index, or null. */
+    next?: number | null;
+    /** Stage 7.2: every item completed. */
+    complete?: boolean;
     updatedAt: number;
   };
 }
+
+/** Stage 7.2: a casual room's break between games. */
+export interface SessionView { onBreak: boolean; breakSince?: number; revision: number }
 
 export interface Projection {
   /** The server's clock when this projection was made; countdowns use deadline − serverNow. */
@@ -162,6 +170,8 @@ export interface Projection {
   roomKind?: "cup" | "casual" | "solo";
   /** Stage 7.1: casual rooms only. */
   party?: PartyView;
+  /** Stage 7.2: casual rooms only. */
+  session?: SessionView;
   championship?: ChampionshipResult[];
   achievements?: Achievement[];
   ceremony?: Ceremony;

@@ -10,7 +10,7 @@
  * `myGames` (their private state); those never enter the feed, so a TV
  * opened on a player's phone can't show that player's secrets either.
  */
-import type { Projection, PublicGame, PublicPlayer } from "../../../types.js";
+import type { PartyView, Projection, PublicGame, PublicPlayer, SessionView } from "../../../types.js";
 
 export interface TvFeed {
   roomId: string;
@@ -22,6 +22,21 @@ export interface TvFeed {
   upNext?: { gameId: string; official: boolean };
   spectatorCount?: number;
   cupLabel?: string;
+  /** Stage 7.2: a casual room (games are Casual), its lineup and its break: public planning facts. */
+  casual?: boolean;
+  party?: PartyView;
+  session?: SessionView;
+}
+
+/** Stage 7.2: what comes next in a casual room, in one public line (the TV, the final screen). */
+export function lineupLine(feed: Pick<TvFeed, "party" | "session">, titleOf: (id: string) => string): { kind: "break" | "next" | "complete"; text: string } | null {
+  if (feed.session?.onBreak) return { kind: "break", text: "On a break. The host resumes when everyone’s back." };
+  const l = feed.party?.lineup;
+  if (!l || l.items.length === 0) return null;
+  if (l.complete) return { kind: "complete", text: "That was the whole lineup. The host picks what’s next." };
+  const n = l.next ?? null;
+  if (n === null) return null; // an item is on now
+  return { kind: "next", text: `Next up: ${titleOf(l.items[n]!.gameId)} · game ${n + 1} of ${l.items.length}. The host starts it.` };
 }
 
 export function tvFeedFrom(p: Projection): TvFeed {
@@ -35,6 +50,7 @@ export function tvFeedFrom(p: Projection): TvFeed {
     upNext: p.upNext,
     spectatorCount: p.spectatorCount,
     cupLabel: p.competition?.label,
+    ...(p.roomKind === "casual" ? { casual: true, ...(p.party ? { party: p.party } : {}), ...(p.session ? { session: p.session } : {}) } : {}),
   };
 }
 

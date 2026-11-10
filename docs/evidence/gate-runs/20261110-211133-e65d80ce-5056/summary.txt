@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261110-211133-e65d80ce-5056
+  79 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w1) [functional, machine under pressure]: [31m[1m[7m FAIL [27m[22m[39m tests/cup-integrity.test.ts[2m > [22ma seven-day Individual Cup with deadlines and restarts[2m > [22mresults are identical before and after each restart, every g
+  timing   wall 29m 44s · step time 1h 23m (sum) · 3 workers, 93% busy · 2.80× the same steps run one after another
+           predicted 24–41m (about 27m 02s, low-confidence) → actual 29m 44s (+10%)
+           longest  e2e-chromium 8m 31s, check-f5 7m 38s, check-leaderboard 6m 44s · the longest step is 29% of the wall time
+           machine  CPU mean 33%, peak 100% · memory available ≥ 12929 MB · load peak 8.14 · backpressure 14 wait(s), 171s
+           contention ×1.027 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s72r-full/test-results/20261110-211133-e65d80ce-5056/report.json

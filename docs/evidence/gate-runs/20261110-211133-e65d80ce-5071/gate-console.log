@@ -1,0 +1,47 @@
+Mchezo gate fast | run 20261110-211133-e65d80ce-5071
+  revision e65d80ce33ff6726a939d1cc65a14270c85a0247 (clean tree) | fingerprint 688d5366149d (425 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  23 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.03 for 3 worker(s) (measured, 18 run(s))
+  estimate this run: 23–48s (measured) · the same steps one after another: about 1m 10s · longest step unit-tests ~29s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.03 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s72r-fast/test-results/20261110-211133-e65d80ce-5071
+        start typecheck-server on w1 (usually 10s)
+        start typecheck-web on w2 (usually 11s)
+        start lint on w3 (usually 15s)
+[ 1/5] PASS        23.7s  typecheck-web  w2
+        wait  unit-tests: load 6.2 > 4 CPUs
+[ 2/5] PASS        25.6s  typecheck-server  w1
+[ 3/5] PASS        29.3s  lint  w3
+        start unit-tests on w1 (usually 29s)
+        wait  build-web: load 6.3 > 4 CPUs
+── progress  3/5 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   unit-tests 31s (w1)
+   remaining 15–18s · total 75–78s · done around 21:12–21:12 UTC (measured)
+[ 4/5] FAIL        51.2s  unit-tests  w1  [31m[1m[7m FAIL [27m[22m[39m tests/cup-integrity.test.ts[2m > [22ma seven-day Individual Cup with deadlines and restarts[2m > [22mresults are identica
+      |  [32m✓[39m tests/client-server-consistency.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 153[2mms[22m[39m
+      |  [32m✓[39m tests/ws-reconnect.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+      |  [32m✓[39m tests/motion.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+      | 
+      | [31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+      | 
+      | [31m[1m[7m FAIL [27m[22m[39m tests/cup-integrity.test.ts[2m > [22ma seven-day Individual Cup with deadlines and restarts[2m > [22mresults are identical before and after each restart, every game ends once, and the Cup is decided
+      | [31m[1mError[22m: Test timed out in 5000ms.
+      | If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".[39m
+      | [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+      | 
+      | [2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m107 passed[39m[22m[90m (108)[39m
+      | [2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1252 passed[39m[22m[90m (1253)[39m
+      | [2m   Start at [22m 21:12:03
+      | [2m   Duration [22m 50.74s[2m (transform 4.45s, setup 0ms, collect 23.77s, tests 82.01s, environment 39ms, prepare 13.36s)[22m
+        start build-web on w1 (usually 6s)
+[ 5/5] PASS         6.8s  build-web  w1
+
+FAILED (exit 1) | fast | run 20261110-211133-e65d80ce-5071
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w1) [functional, machine under pressure]: [31m[1m[7m FAIL [27m[22m[39m tests/cup-integrity.test.ts[2m > [22ma seven-day Individual Cup with deadlines and restarts[2m > [22mresults are identical before and after each restart, every g
+  timing   wall 1m 28s · step time 2m 17s (sum) · 3 workers, 52% busy · 1.56× the same steps run one after another
+           predicted 23–48s (about 29s, measured) → actual 1m 28s (+203%)
+           longest  unit-tests 51s, lint 29s, typecheck-server 26s · the longest step is 58% of the wall time
+           machine  CPU mean 94%, peak 100% · memory available ≥ 12929 MB · load peak 8.14 · backpressure 2 wait(s), 57s
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s72r-fast/test-results/20261110-211133-e65d80ce-5071/report.json

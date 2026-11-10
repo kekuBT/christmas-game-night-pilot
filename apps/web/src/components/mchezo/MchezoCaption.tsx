@@ -160,7 +160,7 @@ export function MchezoCaption({ game, publicGame, players, playerId, title, inte
 }
 
 /** Results: each round's best caption with its author, then the scores. */
-export function MchezoCaptionResults({ game, publicGame, players, playerId, title, onBackToLobby, hero }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode }) {
+export function MchezoCaptionResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; /** Stage 7.2: a casual room's What's next panel. */ next?: ReactNode }) {
   const st = (game.state ?? {}) as CaptionState;
   const nameOf = (id?: string) => (id ? players.find((p) => p.id === id)?.displayName ?? "Someone" : "Someone");
   const rows = Object.entries(game.rawScores ?? publicGame?.rawScores ?? {}).map(([id, score]) => ({
@@ -170,6 +170,7 @@ export function MchezoCaptionResults({ game, publicGame, players, playerId, titl
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-cap-results">
       {hero}
+      {next /* Stage 7.2: what's next, right under the result heading (review 6778921208) */}
       <GameHeader title={title} objective="The room’s favourites" accent={1} />
       <div className="mz-cap-votes">
         {(st.rounds ?? []).map((r, i) => {

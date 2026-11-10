@@ -17,6 +17,8 @@ export interface ResultFacts {
   gameInstanceId: string;
   title: string;
   official: boolean;
+  /** Stage 7.2: a casual room's game (casual lines, not practice ones). */
+  casual?: boolean;
   /** The server's per-game scores for the roster. */
   scores: Readonly<Record<string, number>>;
   nameOf: (playerId: string) => string;
@@ -81,6 +83,8 @@ export const QUIPS = {
   everyoneTied: ["Everyone tied. A perfectly balanced family."],
   noScore: ["Nobody scored. A truly level playing field.", "Zero all round. The game won this one."],
   practice: ["Practice round: all the fun, none of the paperwork.", "Just practice. Nobody's keeping score. Well, the app is."],
+  // Stage 7.2: a casual room's game (one line, within the 30-line limit).
+  casual: ["Just for fun. Bragging rights only."],
   youWon: ["That was you. Enjoy it quietly. Or loudly.", "You won. Try to look surprised."],
   youTiedFirst: ["You share the top spot. Sharing is caring."],
   youLast: ["Someone has to make the podium look good.", "Every champion starts somewhere. Possibly here."],
@@ -118,7 +122,7 @@ export function resultsStory(f: ResultFacts): ResultsStory {
     : `${w[0]} wins ${f.title}`;
   const key = f.gameInstanceId;
   let pool: readonly string[] = QUIPS.win;
-  if (!f.official) pool = QUIPS.practice;
+  if (!f.official) pool = f.casual ? QUIPS.casual : QUIPS.practice;
   else if (tone === "no-score") pool = QUIPS.noScore;
   else if (tone === "everyone-tied") pool = QUIPS.everyoneTied;
   else if (tone === "tie") pool = winners.length === 2 ? [...QUIPS.tieTwo, ...QUIPS.tie] : QUIPS.tie;

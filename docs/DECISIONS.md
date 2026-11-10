@@ -759,3 +759,58 @@ The spec is `docs/stage7/stage71.md`. The instruction is ChatGPT's review and ha
   - Clear is bound to the revision it asked about.
   - *Alternative rejected:* letting the server merge drafts. A lineup is short and the host decides, so an explicit choice is clearer than a merge.
 
+
+## Stage 7.2: casual results and explicit session continuation (2026-11-10, branch `claude/stage7-2-session-flow`, from the Stage 7.1 head `08bba4d`)
+
+The spec is `docs/stage7/stage72.md`. The instruction is ChatGPT's handoff on PR #8 (comment 6776351818), with its clarification on PR #9 (comment 6776484058).
+
+- **D-S72-01 A lineup item's state comes from its game, never stored twice.** The item keeps its game's id.
+  - **States:** pending (no game), briefing, playing, completed.
+  - **Next:** the lowest pending item. Items play in order and are never skipped.
+  - **A cancelled briefing** deletes its game, so the item is pending again at the same place.
+  - *Alternative rejected:* a stored status per item. It could disagree with the game it describes.
+- **D-S72-02 Every continuation press carries its own id and the session revision it was made against** (spec §3.8, clarification 6776484058).
+  - **The presses:** Next game, Play again, Take a break, Resume, and the lobby's own Start in a casual room.
+  - **The revision** grows with every break change, every game start in the room, and every cancelled briefing.
+  - **Remembered presses:** the server keeps the 64 newest that took effect, with the room. They are never projected.
+  - **A press seen before** returns what it did and is never applied twice.
+  - **A press not seen before** must match the current revision, or it is refused (`SESSION_CONFLICT`).
+  - So a delayed Break after another host's Resume changes nothing, before or after a restart. A forgotten press is stale by its revision.
+  - *Alternative rejected:* the boolean alone, idempotent only while nothing else changes (the ordering in the clarification).
+- **D-S72-03 A cancelled start ends its attempt; a fresh press may start the same thing again.**
+  - A retry of the cancelled press gets `ATTEMPT_ENDED` and starts nothing, also after a restart.
+  - The cancel also moves the revision on, so another host's press from before it is stale.
+- **D-S72-04 Play again is a rematch of the room's last game** (`rematchOf`, through the ordinary start).
+  - **Refused:** an older game (`REMATCH_NOT_LATEST`), a game still on, a request combined with a lineup start (400), and one without the roster shown or the request id (400).
+  - **Checked:** reconnect confirmation, the people here fitting the game (`GAME_DOESNT_FIT`), and the roster shown.
+  - **Not checked:** fewer than planned, because a rematch is not a lineup item.
+  - **Two hosts** pressing it get one game: the second press returns it.
+  - It never marks or takes a lineup item.
+- **D-S72-05 A break is only between games and blocks every new start until Resume** (accepted choice §5.1).
+  - No clock is ever paused.
+  - Joins and reconnects never change it.
+  - There is no ledger entry: it is session state (as D-S71-03).
+- **D-S72-06 "Casual" in casual rooms comes from one switch on the Mchezo provider** (`casual`).
+  - **Where:** the results heading and lines, the outcome line, the briefing (phone and TV), the TV's chips, final screen and recent games, and the practice-only games' scoring notes.
+  - **Unchanged:** Cup rooms keep Official/Practice, and solo is unchanged.
+  - **One new results line,** within the existing 30-line limit.
+- **D-S72-07 Results screens** (accepted choice §5.4).
+  - **Games with their own Mchezo results** keep them and gain the What's next panel.
+  - **The rest** (Math, Closest Wins, Guess the Year, Geography, Who Said That?, Category Sprint, Impostor, Charades) get the new casual results screen in casual rooms: one heading, the standings, the player's own answers, the outcome, and the panel.
+  - **The old shell** remains for Family Cup rooms only.
+- **D-S72-08 Which screen shows comes from the room, never from a reply.**
+  - **A lost reply** is asked again once, as the same press.
+  - **A late reply** for a finished game only refreshes, so nobody is taken back to old results.
+  - **Up next** follows the lineup's next item when the lineup moves on. A game the host then picks by hand stays up next, and never moves the lineup on.
+- **D-S72-09 An Apply with no answer "couldn't be confirmed"** (P7).
+  - **"Saved"** only when the room shows exactly that draft at base + 1, either later (a watcher) or in a conflict reply.
+  - **Anything else** stays a conflict for the host to decide. Nothing rebases or overwrites by itself.
+- **D-S72-10 The TV shows the lineup** (game n of N, played, on now, next), **the break, and the lineup's next step** on its final screens, Trivia's own included. These are public planning facts only.
+- **D-S72-11 What a start is comes from the control pressed** (review 6778921208).
+  - **Picked by hand, the lineup's next item, or Play again:** the intent is fixed at the press and carried through its questions and its retry. It is never inferred from a matching game id or a refreshed room.
+  - **Up next records its source.** Only Apply, "Use the lineup", or the lineup moving on while the page is open make it the lineup's. The picker, library, details, shuffle, and a plan adopted from another tab make it a plain pick.
+  - **A page's first look at the room** never turns a hand pick into the lineup's.
+  - *Alternative rejected:* telling the server which control was pressed. The server already acts on `party` alone, so the client simply never sends it for a hand pick.
+- **D-S72-12 What's next sits right under the result heading** (review 6778921208).
+  - This holds on every casual results screen: before the standings, the game's details and the answer review.
+  - It is not sticky, so nothing is covered. Its controls come early in the keyboard order.

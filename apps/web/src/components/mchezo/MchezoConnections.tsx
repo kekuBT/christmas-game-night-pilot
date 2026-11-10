@@ -194,7 +194,7 @@ export function ConnectionsSolution({ game }: { game: PlayerGame }) {
 }
 
 /** Results: the whole board, which groups you found, and the scores. */
-export function MchezoConnectionsResults({ game, publicGame, players, playerId, title, onBackToLobby, hero }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode }) {
+export function MchezoConnectionsResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; /** Stage 7.2: a casual room's What's next panel. */ next?: ReactNode }) {
   const st = (game.state ?? {}) as ConnectionsState;
   const nameOf = (id: string) => playerName(id, players);
   const rows = Object.entries(game.rawScores ?? publicGame?.rawScores ?? {}).map(([id, score]) => ({
@@ -204,6 +204,7 @@ export function MchezoConnectionsResults({ game, publicGame, players, playerId, 
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-cx-results">
       {hero}
+      {next /* Stage 7.2: what's next, right under the result heading (review 6778921208) */}
       <GameHeader title={title} objective="The groups were…" accent={2} />
       <ConnectionsSolution game={game} />
       <ScoreList rows={rows} />

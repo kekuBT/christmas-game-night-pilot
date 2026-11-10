@@ -35,3 +35,18 @@
   .mz-party__tools { flex: none; }
 }
 .mz-party__stale { margin: 0 0 12px; padding: 8px 10px; border-radius: 12px; background: var(--mz-surface-2); color: var(--mz-highlight); font-weight: 700; }
+
+/* Stage 7.2: what's next after a casual game, and the break (docs/stage7/stage72.md §3.5–3.6). */
+.mz-next { display: grid; gap: 8px; padding: 14px; border-radius: 16px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); text-align: left; }
+.mz-next__title { margin: 0; font: 800 20px/1.2 var(--mz-font-display); letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.mz-next__line { margin: 0; text-align: left; }
+.mz-next__error { margin: 0; }
+.mz-next__actions { display: grid; gap: 8px; }
+.mz-next__actions .mz-key { overflow-wrap: anywhere; white-space: normal; }
+.mz-next__more { display: flex; flex-wrap: wrap; gap: 8px; }
+.mz-next__more .mz-chip-btn { min-height: 44px; padding: 0 14px; }
+.mz-next .mz-noticecard { margin: 0; }
+.mz-lobby__break { display: flex; justify-content: flex-end; margin: 12px 0 0; }
+.mz-lobby__break .mz-chip-btn { min-height: 44px; padding: 0 14px; }
+.mz-tvshow-break { border-color: var(--mz-highlight, var(--mz-line)); }
+.mz-tvshow-recent li[data-status="completed"] { opacity: 0.75; }

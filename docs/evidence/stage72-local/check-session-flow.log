@@ -1,0 +1,55 @@
+PASS setup: the lineup is saved (Math, Trivia) — {"status":200,"body":{"ok":true,"party":{"revision":1,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":19,"transitionMinutes":2,"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"trivia","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794339483484}}}}
+PASS setup: the host's Start names game 1 of 2
+PASS setup: the TV shows the lineup, game 1 of 2
+PASS A host: the casual results screen
+PASS A guest: the casual results screen
+PASS A host: one result heading, Casual (not Practice) — MATH MAYHEM · CASUAL
+PASS A host: no old shell (no 🎄 header, Championship, Practice, second winner line)
+PASS A host: standings with both players — 2
+PASS A host: their own answers to review
+PASS A guest: one result heading, Casual (not Practice) — MATH MAYHEM · CASUAL
+PASS A guest: no old shell (no 🎄 header, Championship, Practice, second winner line)
+PASS A guest: standings with both players — 2
+PASS A guest: their own answers to review
+PASS A nothing started by itself: one game, finished; the lineup's next is game 2 — {"games":[["math-mayhem","finished"]],"next":1}
+PASS B host: Next game: Trivia Showdown
+PASS B guest: up next, game 2 of 2, Keku starts it
+PASS B guest: no continuation buttons — ["next-status"]
+PASS B TV: the next game, game 2 of 2
+PASS B reload: the host is back on the results with Next game
+PASS B reload: the guest is back on the results, waiting for Keku
+PASS F the server refuses the guest's Next and Play again; nothing starts — [400,400]
+PASS C Next whose reply was lost: the briefing opens for both
+PASS C exactly one new game: Trivia, game 2 of the lineup — [["math-mayhem","finished"],["trivia","briefing"]]
+PASS C the retry was the same press (same request id, same session revision) — [{"id":"11aafb14-41ae-4398-939a-aa3eea3f81c4","sessionRevision":1},{"id":"11aafb14-41ae-4398-939a-aa3eea3f81c4","sessionRevision":1}]
+PASS C game 2's own results (Trivia) carry the panel: the lineup is complete
+PASS C guest: that was the whole lineup
+PASS C TV: that was the whole lineup
+PASS C host: no Next game once the lineup is complete; Play again and Plan another lineup offered
+PASS G Play again is reachable with Tab
+PASS D Play again (Enter): a new briefing for Trivia
+PASS D a rematch: a third game, Trivia, tied to game 2; the lineup is untouched (still complete) — [["math-mayhem","finished"],["trivia","finished"],["trivia","briefing"]]
+PASS D the earlier games keep their scores
+PASS D the rematch ends on its results with the panel
+PASS H guest at 320 px: the results and panel without sideways scroll
+PASS H host at 1440 px: the panel without sideways scroll
+PASS E host: on a break, with Resume
+PASS E guest: on a break, no Resume
+PASS E TV: on a break
+PASS E the server refuses the guest's Resume (403); still on a break — 403
+PASS E host lobby: the break banner with Resume; Start waits
+PASS E guest lobby: on a break, the host resumes
+PASS E host reload: still on a break
+PASS E nothing started during the break (three games)
+PASS E Resume: the banner goes for both; Start is back
+PASS E TV: no longer on a break
+PASS E host lobby: Take a break is offered again
+PASS F guest lobby: no break or start controls
+PASS lineup card: both games played
+PASS I no answer: 'couldn't confirm whether the lineup was saved' (never 'not saved')
+PASS I the request lands later: the planner recognises its own save and closes, saying so
+PASS I the server holds exactly that draft, one revision on — {"held":1,"rev":2,"items":["closest-wins"],"draft":["closest-wins"]}
+PASS I the new lineup starts at its first game; the played games keep their scores
+
+All session-flow checks passed
+exit 0

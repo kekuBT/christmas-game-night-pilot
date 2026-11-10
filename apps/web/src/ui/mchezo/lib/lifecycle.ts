@@ -78,14 +78,14 @@ export function participationLine(gameId: string, p: GameParticipation | undefin
 }
 
 /** How the game ended and whether it counts, in plain words. */
-export function outcomeLines(o: GameOutcome | undefined, official: boolean | undefined): { headline: string; counts: string; note?: string } | null {
+export function outcomeLines(o: GameOutcome | undefined, official: boolean | undefined, casual = false): { headline: string; counts: string; note?: string } | null {
   if (!o) return null;
   const headline =
     o.reason === "completed" ? "Everyone finished."
     : o.reason === "deadline" ? "Time’s up — the game ended at its time limit. Answers given in time count; anything unanswered scores 0."
     : o.reason === "backstop-partial" ? `The game reached its time limit partway through${o.completedUnits !== undefined && o.totalUnits !== undefined ? ` (${o.completedUnits} of ${o.totalUnits} completed)` : ""}.`
     : "This game was voided because of a technical problem.";
-  const counts = o.countsOfficially ? "Counts toward the Family Cup." : official ? "Does not count toward the Family Cup." : "Practice game — does not count toward the Family Cup.";
+  const counts = o.countsOfficially ? "Counts toward the Family Cup." : official ? "Does not count toward the Family Cup." : casual ? "Casual game: just for fun." : "Practice game — does not count toward the Family Cup.";
   return { headline, counts, ...(o.note ? { note: o.note } : {}) };
 }
 

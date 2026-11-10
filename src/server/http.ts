@@ -4,7 +4,7 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { BriefingRefused, ContentShortage, PartyRefused, ROOM_KINDS, RoomEngine, StartRefused, type RoomPlayer } from "./room.js";
+import { BriefingRefused, ContentShortage, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
@@ -138,6 +138,10 @@ export class LocalServer {
     }).strict(),
     z.object({ baseRevision: z.number().int().min(0), clear: z.literal(true) }).strict(),
   ]);
+  /** Stage 7.2: Take a break / Resume. */
+  /** Stage 7.2 (§3.8): one press of a continuation control: its own id (the same for its retries) and the session revision it was made against. */
+  static readonly AttemptSchema = z.object({ id: z.string().regex(/^[A-Za-z0-9_-]{8,64}$/), sessionRevision: z.number().int().min(0) }).strict();
+  static readonly BreakSchema = z.object({ on: z.boolean(), attempt: LocalServer.AttemptSchema }).strict();
   /** Stage 7.1: the `party` marker on a game start: which lineup item this start is. */
   static readonly PartyStartSchema = z.object({ revision: z.number().int().min(0), index: z.number().int().min(0).max(7) }).strict();
   /** Stage 6.1: POST /rooms. A missing kind means a Family Cup, as before room kinds. */
@@ -909,6 +913,19 @@ export class LocalServer {
             if (!parsed.success || body["official"] === true || !Array.isArray(body["roster"])) { this.send(res, 400, { error: "A Quick Party start needs the lineup's revision and item and the roster you were shown, and is never official" }); return; }
             party = parsed.data;
           }
+          // Stage 7.2: Play again (a rematch of a finished game), repeat-safe; also tied to the roster shown.
+          let rematchOf: string | undefined;
+          if (body["rematchOf"] !== undefined) {
+            if (party || typeof body["rematchOf"] !== "string" || body["rematchOf"].length > 64 || body["official"] === true || !Array.isArray(body["roster"])) { this.send(res, 400, { error: "Play again needs the finished game and the roster you were shown, is never official, and is never a lineup start" }); return; }
+            rematchOf = body["rematchOf"];
+          }
+          // Stage 7.2 (§3.8): the press this is (required for the lineup's Next and Play again; optional for the lobby's own Start).
+          let attempt: { id: string; sessionRevision: number } | undefined;
+          if (body["attempt"] !== undefined || party || rematchOf) {
+            const parsed = LocalServer.AttemptSchema.safeParse(body["attempt"]);
+            if (!parsed.success) { this.send(res, 400, { error: "This start needs its request id and the session revision it was made against" }); return; }
+            attempt = parsed.data;
+          }
           let game;
           let replay = false;
           try {
@@ -918,9 +935,11 @@ export class LocalServer {
               proceedWithout: ids(body["proceedWithout"]),
             };
             if (party) {
-              ({ game, replay } = room.startPartyGame(player.id, String(body["gameId"] ?? ""), { ...party, ...common, fewerThanPlanned: body["fewerThanPlanned"] === true }));
+              ({ game, replay } = room.startPartyGame(player.id, String(body["gameId"] ?? ""), { ...party, ...common, fewerThanPlanned: body["fewerThanPlanned"] === true, attempt }));
+            } else if (rematchOf) {
+              ({ game, replay } = room.startRematch(player.id, rematchOf, { ...common, attempt }));
             } else {
-              game = room.startGame(player.id, String(body["gameId"] ?? ""), { official: body["official"] === true, ...common });
+              ({ game, replay } = room.startChosen(player.id, String(body["gameId"] ?? ""), { official: body["official"] === true, ...common, ...(attempt ? { attempt } : {}) }));
             }
           } catch (err) {
             if (err instanceof StartRefused) {
@@ -941,6 +960,23 @@ export class LocalServer {
           this.persist(room);
           this.broadcast(room.id);
           this.send(res, 201, { gameId: game.id, gameType: game.gameId, status: game.status, players: game.players });
+          return;
+        }
+        // Stage 7.2: Take a break / Resume (host/cohost, casual rooms; persisted).
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "break") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const parsed = LocalServer.BreakSchema.safeParse(await this.readBody(req));
+          if (!parsed.success) { this.send(res, 400, { error: "A break needs on: true or false, its request id and the session revision it was made against" }); return; }
+          let done;
+          try {
+            done = room.setBreak(player.id, parsed.data.on, parsed.data.attempt);
+          } catch (err) {
+            if (err instanceof SessionRefused) { this.send(res, err.code === "NOT_HOST" ? 403 : 409, { error: err.message, code: err.code, ...(err.session ? { session: err.session } : {}) }); return; }
+            throw err;
+          }
+          if (!done.replay) { this.persist(room); this.broadcast(room.id); }
+          this.send(res, 200, { ok: true, session: done.session, ...(done.replay ? { replay: true } : {}) });
           return;
         }
         // Stage 7.1: save or clear the room's Quick Party lineup (host/cohost, casual rooms).

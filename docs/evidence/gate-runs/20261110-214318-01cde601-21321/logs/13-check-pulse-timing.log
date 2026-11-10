@@ -1,0 +1,60 @@
+$ node scripts/check-pulse-timing.mjs http://localhost:37079
+# timeout 600s | worker w1 | server http://localhost:37079 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s72r2-full/test-results/20261110-214318-01cde601-21321/server-data/w1)
+
+[+161.5s] PULSE TIMING TABLE
+[+161.5s] | size | round | shapes | window (ms) | screen late (ms) | entry at 0.7 s/tap (ms) | locked after input (ms) | spare (ms) | keys + Lock on screen | time shown | points |
+[+161.5s] | 320×568 | 1 | 3 | 16500 | 589 | 2216 | 2294 | 13617 | yes | true | 110 |
+[+161.5s] | 320×568 | 2 | 4 | 18000 | 342 | 2952 | not locked | — | yes | true | 0 (missed: 0 points) |
+[+161.5s] | 375×667 | 1 | 3 | 16500 | 565 | 2223 | 2282 | 13653 | yes | true | 110 |
+[+161.5s] | 375×667 | 2 | 4 | 18000 | 339 | 2960 | not locked | — | yes | true | 0 (missed: 0 points) |
+[+161.5s] | 390×844 | 1 | 3 | 16500 | 566 | 2241 | 2316 | 13618 | yes | true | 110 |
+[+161.5s] | 390×844 | 2 | 4 | 18000 | 339 | 2944 | not locked | — | yes | true | 0 (missed: 0 points) |
+[+161.5s] | 430×932 | 1 | 3 | 16500 | 555 | 2223 | 2310 | 13635 | yes | true | 110 |
+[+161.5s] | 430×932 | 2 | 4 | 18000 | 332 | 2933 | not locked | — | yes | true | 0 (missed: 0 points) |
+[+161.5s] | 375×667 reduced motion | 1 | 3 | 16500 | 555 | 2226 | 2293 | 13652 | yes | true | 110 |
+[+161.5s] | 375×667 reduced motion | 2 | 4 | 18000 | 337 | 2944 | not locked | — | yes | true | 0 (missed: 0 points) |
+[+161.5s] PASS 320×568 round 1: the answer screen appears within 1 s of the memorise deadline — 589 ms
+[+161.5s] PASS 320×568 round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 320×568 round 1: the time left is shown near the keys
+[+161.5s] PASS 320×568 round 1: a complete entry says, on screen, to lock it in
+[+161.5s] PASS 320×568 round 2: the answer screen appears within 1 s of the memorise deadline — 342 ms
+[+161.5s] PASS 320×568 round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 320×568 round 2: the time left is shown near the keys
+[+161.5s] PASS 320×568 round 2: a complete entry says, on screen, to lock it in
+[+161.5s] PASS 375×667 round 1: the answer screen appears within 1 s of the memorise deadline — 565 ms
+[+161.5s] PASS 375×667 round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 375×667 round 1: the time left is shown near the keys
+[+161.5s] PASS 375×667 round 1: a complete entry says, on screen, to lock it in
+[+161.5s] PASS 375×667 round 2: the answer screen appears within 1 s of the memorise deadline — 339 ms
+[+161.5s] PASS 375×667 round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 375×667 round 2: the time left is shown near the keys
+[+161.5s] PASS 375×667 round 2: a complete entry says, on screen, to lock it in
+[+161.5s] PASS 390×844 round 1: the answer screen appears within 1 s of the memorise deadline — 566 ms
+[+161.5s] PASS 390×844 round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 390×844 round 1: the time left is shown near the keys
+[+161.5s] PASS 390×844 round 1: a complete entry says, on screen, to lock it in
+[+161.5s] PASS 390×844 round 2: the answer screen appears within 1 s of the memorise deadline — 339 ms
+[+161.5s] PASS 390×844 round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 390×844 round 2: the time left is shown near the keys
+[+161.5s] PASS 390×844 round 2: a complete entry says, on screen, to lock it in
+[+161.5s] PASS 430×932 round 1: the answer screen appears within 1 s of the memorise deadline — 555 ms
+[+161.5s] PASS 430×932 round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 430×932 round 1: the time left is shown near the keys
+[+161.5s] PASS 430×932 round 1: a complete entry says, on screen, to lock it in
+[+161.5s] PASS 430×932 round 2: the answer screen appears within 1 s of the memorise deadline — 332 ms
+[+161.5s] PASS 430×932 round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 430×932 round 2: the time left is shown near the keys
+[+161.5s] PASS 430×932 round 2: a complete entry says, on screen, to lock it in
+[+161.5s] PASS 375×667 reduced motion round 1: the answer screen appears within 1 s of the memorise deadline — 555 ms
+[+161.5s] PASS 375×667 reduced motion round 1: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 375×667 reduced motion round 1: the time left is shown near the keys
+[+161.5s] PASS 375×667 reduced motion round 1: a complete entry says, on screen, to lock it in
+[+161.5s] PASS 375×667 reduced motion round 2: the answer screen appears within 1 s of the memorise deadline — 337 ms
+[+161.5s] PASS 375×667 reduced motion round 2: every shape key and "Lock it in" are on screen without scrolling — {"keys":true,"lock":true}
+[+161.5s] PASS 375×667 reduced motion round 2: the time left is shown near the keys
+[+161.5s] PASS 375×667 reduced motion round 2: a complete entry says, on screen, to lock it in
+[+161.5s] PASS a complete entry not locked in by the end is recorded as missed (0), as designed — see the recommendation
+[+161.5s] PULSE TIMING ALL PASSED
+[+161.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":1}
+
+# PASS (exit 0) in 161.5s | cpu 4.6s, peak memory 327 MB

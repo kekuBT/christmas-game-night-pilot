@@ -13,9 +13,11 @@
 //      (the server refuses it too) and offers a replan for that count; fewer
 //      here than planned asks first, and Start with N starts it
 //   H  the first game goes through its briefing to play and results; the lineup
-//      stays with game 1 marked, and nothing else starts
-//   I  faults: Apply with no network says it wasn't saved; Apply whose reply is
-//      lost is recognised as saved; Start whose reply is lost opens the game,
+//      stays with game 1 played, and nothing else starts by itself (Stage 7.2:
+//      Start now names the lineup's next game)
+//   I  faults: Apply with no network can't confirm it saved (Stage 7.2, P7);
+//      Apply whose reply is lost is recognised as saved; Start whose reply is
+//      lost is asked again as the same press (Stage 7.2) and opens the game,
 //      once; the TV view holds only public planning facts
 //   J  layout at 320 px: the card and the planner fit without sideways scroll
 //   K  two hosts (review 6775606005): a host's draft is bound to the lineup it
@@ -145,8 +147,12 @@ try {
     check("C move down: the first two swap", moved[0] === ids[1] && moved[1] === ids[0], moved.join(", "));
   }
   const before = await preview(h);
-  await h.getByTestId(`party-remove-${before.length - 1}`).click();
-  check("C remove: one fewer, the rest in order", JSON.stringify(await preview(h)) === JSON.stringify(before.slice(0, -1)));
+  // Remove the last game that isn't Impostor: a removed game is left out of the rest of this
+  // draft (by design), and part G needs Impostor. Removing it here, when the random lineup
+  // ended with it, made "arrange Impostor first" fail now and then.
+  const drop = before.map((id, i) => (id === "impostor" ? -1 : i)).filter((i) => i >= 0).pop() ?? before.length - 1;
+  await h.getByTestId(`party-remove-${drop}`).click();
+  check("C remove: one fewer, the rest in order", JSON.stringify(await preview(h)) === JSON.stringify(before.filter((_, i) => i !== drop)));
   await h.getByTestId("party-replace-0").click();
   const offered = await h.locator('[data-testid^="party-option-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid").replace("party-option-", "")));
   const now = await preview(h);
@@ -167,7 +173,7 @@ try {
   // ---- I (part). Apply with no network: not saved, and says so ----
   await h.route((url) => new URL(url).pathname.endsWith("/party"), (route) => route.abort("internetdisconnected"));
   await h.getByTestId("party-apply").click();
-  await soon("I Apply with no network: 'isn't saved yet', the planner stays open", async () => /isn’t saved yet/.test(await h.getByTestId("party-error").innerText()) && await h.getByTestId("party-sheet").isVisible());
+  await soon("I Apply with no network: 'couldn't confirm whether it saved' (P7), the planner stays open", async () => /Couldn’t confirm whether the lineup was saved/.test(await h.getByTestId("party-error").innerText()) && await h.getByTestId("party-sheet").isVisible());
   await h.unrouteAll({ behavior: "ignoreErrors" });
   check("I server: nothing was saved", (await myRoom(h)).party?.lineup === null);
 
@@ -203,8 +209,8 @@ try {
   const misfit = await h.evaluate(async () => {
     const roomId = sessionStorage.getItem("cgn_roomId");
     const headers = { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" };
-    const roster = (await (await fetch(`/rooms/${roomId}/projection?audience=player`, { headers })).json()).readiness.wouldPlay;
-    const r = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers, body: JSON.stringify({ gameId: "impostor", official: false, party: { revision: 1, index: 0 }, roster, fewerThanPlanned: true }) });
+    const view = await (await fetch(`/rooms/${roomId}/projection?audience=player`, { headers })).json();
+    const r = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers, body: JSON.stringify({ gameId: "impostor", official: false, party: { revision: 1, index: 0 }, roster: view.readiness.wouldPlay, fewerThanPlanned: true, attempt: { id: "misfit-press-0001", sessionRevision: view.session.revision } }) });
     return { status: r.status, body: await r.json() };
   });
   check("G the server refuses it too (409 PARTY_DOESNT_FIT, needs 4, 3 here), nothing started", misfit.status === 409 && misfit.body.code === "PARTY_DOESNT_FIT" && misfit.body.minPlayers === 4 && misfit.body.here === 3 && ((await myRoom(h)).games ?? []).length === 0, JSON.stringify(misfit.body).slice(0, 160));
@@ -224,9 +230,13 @@ try {
   await soon("G Start says Math Mayhem, game 1", async () => /^Start Math Mayhem · game 1 of/.test((await h.getByTestId("party-start").innerText()).trim()));
   await h.getByTestId("party-start").click();
   await soon("G fewer than planned again (4 planned): asks", async () => h.getByTestId("party-ask-fewer").isVisible());
+  // Stage 7.2: the first reply is lost; the app asks again as the same press, which the server answers.
   let lost = 0;
+  const startBodies = [];
   await h.route((url) => new URL(url).pathname.endsWith("/games"), async (route) => {
     if (route.request().method() !== "POST") return route.continue();
+    startBodies.push(JSON.parse(route.request().postData() ?? "{}"));
+    if (lost > 0) return route.continue();
     lost++;
     await route.fetch();
     await route.abort("connectionreset");
@@ -235,6 +245,7 @@ try {
   await soon("I Start whose reply was lost: the game opens anyway (briefing)", async () => (await myRoom(h)).games?.some((x) => x.status === "briefing" || x.status === "playing"), 20000);
   await h.unrouteAll({ behavior: "ignoreErrors" });
   room = await myRoom(h);
+  check("I the retry was the same press (same request id)", startBodies.length === 2 && !!startBodies[0].attempt?.id && startBodies[0].attempt.id === startBodies[1].attempt?.id, JSON.stringify(startBodies.map((b) => b.attempt)));
   check("I exactly one game started, Math Mayhem, practice, with the 3 here", lost === 1 && room.games.length === 1 && room.games[0].gameId === "math-mayhem" && room.games[0].official !== true && room.games[0].players.length === 3, JSON.stringify({ lost, games: room.games.map((x) => [x.gameId, x.status, x.players?.length]) }));
   check("H the lineup marks game 1 as started", room.party.lineup.items[0].started === true && room.party.lineup.items.slice(1).every((i) => !i.started));
   // A second start of the same item (a second tab, a retry) returns the same game.
@@ -242,7 +253,8 @@ try {
     const roomId = sessionStorage.getItem("cgn_roomId");
     const headers = { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" };
     const roster = (await (await fetch(`/rooms/${roomId}/projection?audience=player`, { headers })).json()).readiness.wouldPlay;
-    const r = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers, body: JSON.stringify({ gameId: "math-mayhem", official: false, party: { revision: rev, index: 0 }, roster, fewerThanPlanned: true }) });
+    const sessionRevision = (await (await fetch(`/rooms/${roomId}/projection?audience=player`, { headers })).json()).session.revision;
+    const r = await fetch(`/rooms/${roomId}/games`, { method: "POST", headers, body: JSON.stringify({ gameId: "math-mayhem", official: false, party: { revision: rev, index: 0 }, roster, fewerThanPlanned: true, attempt: { id: "second-tab-0001", sessionRevision } }) });
     return { status: r.status, body: await r.json() };
   }, room.party.revision);
   check("I the same start again answers with the same game (200, replay)", replay.status === 200 && replay.body.replay === true && replay.body.gameId === room.games[0].id, JSON.stringify(replay));
@@ -251,10 +263,11 @@ try {
   for (const p of [h, g1, g2]) await p.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 30000 });
   check("H all three reach the results", true);
   for (const p of [h, g1, g2]) await p.getByRole("button", { name: "Back to lobby" }).click();
-  await soon("H back in the lobby, the lineup is kept with game 1 started", async () => /started/.test(await h.getByTestId("party-row-0").innerText()));
+  await soon("H back in the lobby, the lineup is kept with game 1 played", async () => /played/.test(await h.getByTestId("party-row-0").innerText()));
   room = await myRoom(h);
   check("H server: one finished practice game; nothing started after it; no Cup standings", room.games.length === 1 && room.games[0].status === "finished" && JSON.stringify(room.officialStandings ?? {}) === "{}" && room.party.lineup.items.length >= 1, JSON.stringify(room.games.map((x) => [x.gameId, x.status])));
-  check("H no automatic next game: Start isn't the lineup's (no next-game controls in this slice)", (await h.getByTestId("party-start").count()) === 0);
+  // Stage 7.2: nothing starts by itself; the lineup moves on only when the host starts its next game.
+  check("H no automatic next game: one game; up next is the lineup's game 2, marked next (or the lineup is complete)", room.games.length === 1 && (room.party.lineup.items.length > 1 ? room.party.lineup.next === 1 && (await h.getByTestId("party-start").count()) === 1 && /next up/.test(await h.getByTestId("party-row-1").innerText()) : (await h.getByTestId("party-complete").count()) === 1), room.party.lineup.items.length > 1 ? await h.getByTestId("party-row-1").innerText().catch(() => "") : "complete");
 
   // ---- I. The TV view: public planning facts only ----
   const tv = await tvView(h);

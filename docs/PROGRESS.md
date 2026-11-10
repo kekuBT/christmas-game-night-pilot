@@ -1693,3 +1693,70 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage71-local/`.
 - The TV screens don't show the lineup yet.
 - Browser checks run in Chromium only.
 
+
+## Stage 7.2: casual results and explicit session continuation (2026-11-10)
+
+**Branch:** `claude/stage7-2-session-flow`, stacked on PR #8 at `08bba4d` (PR #9).
+- **Instruction:** ChatGPT's handoff on PR #8 (comment 6776351818) and its clarification on PR #9 (comment 6776484058).
+- **Spec and record:** `docs/stage7/stage72.md`; decisions D-S72-01 … 10.
+- Nothing was merged or deployed, no port was made public, and nothing was paid for.
+
+**Milestone:** after a casual game, everyone sees one clear Mchezo results screen saying Casual, and the host or a cohost chooses what's next:
+- the lineup's **Next game**;
+- **Play again** (a rematch);
+- **Take a break**, then **Resume**.
+
+Everyone else and the TV see the same state. The server holds the progression with:
+- item states;
+- a session revision;
+- press ids, so a retry, a lost reply, a delayed opposite command or a cancelled start never starts or changes anything twice.
+
+**Files:**
+- **Server:** `src/server/room.ts`, `src/server/http.ts`.
+- **Web:**
+  - `apps/web/src/App.tsx`;
+  - `components/mchezo/WhatsNext.tsx` and `whatsNextState.ts` (new);
+  - `Lobby.tsx`, `QuickParty.tsx`, `Briefing.tsx`, `TvShow.tsx`, `MchezoTv.tsx`;
+  - the five results screens that have their own;
+  - `ui/mchezo/MchezoProvider.tsx`, `ResultsHero.tsx`, `Lifecycle.tsx`, `lib/celebrate.ts`, `lib/lifecycle.ts`, `lib/tvfeed.ts`, `styles/stage7.css`;
+  - `types.ts`.
+- **Tests and scripts:**
+  - `tests/stage72-session-flow.test.ts` and `tests/stage72-client.test.ts` (new);
+  - `tests/stage71-quick-party.test.ts` and `tests/stage3-qa-results.test.ts` (updated);
+  - `scripts/check-session-flow.mjs` and `scripts/screenshot-stage72.mjs` (new);
+  - `scripts/check-quick-party.mjs` (updated).
+
+**Tests:**
+- **Unit and HTTP:** 27 session-flow tests and 4 client tests. Eight mutations of the safeguards are each caught.
+- **`check-session-flow`:** 52/52.
+- **`check-quick-party`:** 68/68.
+- **Local regressions, all passing:** `check-casual`, `check-briefing`, `check-game-night-flow`, `check-lobby-mode`, `check-tv-spectator`, `check-f4`, `check-solo`, `check-solo-shelf`.
+
+**Gates on `acab35f`** (fresh clone, clean tree):
+- fast `20261110-195030-acab35f3-16696` PASSED (1,253 unit tests);
+- full `20261110-195129-acab35f3-19586` PASSED, 80/80.
+
+Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. The screenshots are in `docs/stage7/screenshots-72/` (36, taken on `2e79cec`).
+
+**External blockers:** none. WebKit and real devices are not available here (checklist I13–I16).
+
+**Next task:** ChatGPT reviews PR #9 and does its private live-site audit. The next milestone starts only when its handoff instructs it.
+
+**Risk:**
+- Browser checks run in Chromium only.
+- A server restart is covered by the HTTP tests, not by a browser journey.
+- The lobby's own Start keeps an optional press id at the API for older callers (the app always sends one).
+
+**Repair: review 6778921208** (D-S72-11, D-S72-12; spec §6.3).
+- **Defect:** a game picked by hand that matched the lineup's next item was started as that item and used it up.
+  - Reproduced on `acab35f` by `check-session-flow` part J (11 checks fail there).
+  - Fixed with an explicit start intent from the control pressed.
+- **Placement:** What's next moved right under the result heading on every casual results screen (part K).
+- **Driver fix:** an Impostor-removal flake in `check-quick-party` part C, from Stage 7.1.
+- **Local runs, all passing:** `check-session-flow` 70/70 and `check-quick-party` 68/68; regressions `check-casual`, `check-library`, `check-shuffle`, `check-lobby-mode`, `check-game-night-flow` and `check-briefing`.
+- **Gates on `e65d80c`: both FAILED** (fast `20261110-211133-e65d80ce-5071`, full `20261110-211133-e65d80ce-5056`).
+  - The cause: the seven-day Cup unit test timed out at 5.0 s while both gates ran their unit tests at once.
+  - Fixed in `01cde60` with an explicit 30-second limit on that test. No verdict is claimed for these runs.
+- **Gates on `01cde60`** (fresh clone, clean tree):
+  - fast `20261110-214318-01cde601-21310` PASSED;
+  - full `20261110-214318-01cde601-21321` PASSED, 80/80.

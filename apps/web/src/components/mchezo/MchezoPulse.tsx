@@ -245,7 +245,8 @@ export function PulseRecap({ game }: { game: PlayerGame }) {
 }
 
 /** Results: your six rounds (your own patterns and taps, now the game is over), the scores, how scoring works. */
-export function MchezoPulseResults({ game, publicGame, players, playerId, title, onBackToLobby, hero }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode }) {
+export function MchezoPulseResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; /** Stage 7.2: a casual room's What's next panel. */ next?: ReactNode }) {
+  const { casual } = useMchezo();
   const st = (game.state ?? {}) as PulseView;
   const nameOf = (id?: string) => players.find((p) => p.id === id)?.displayName ?? "Someone";
   const rows = Object.entries(game.rawScores ?? publicGame?.rawScores ?? {}).map(([id, score]) => ({
@@ -255,11 +256,12 @@ export function MchezoPulseResults({ game, publicGame, players, playerId, title,
   return (
     <main className="mz-screen" aria-label={`${title} results`} data-testid="mz-pp-results">
       {hero}
+      {next /* Stage 7.2: what's next, right under the result heading (review 6778921208) */}
       <GameHeader title={title} objective="How sharp was your memory?" accent={4} />
       {(() => { const m = pulseMoment(st.results); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
       <PulseRecap game={game} />
       <ScoreList rows={rows} />
-      <p className="mz-foot" data-testid="mz-pp-howscore">20 points for each shape right from the start of the sequence, plus 50 for the whole sequence. Everyone gets the same lengths and time, but their own pattern. Practice game: no Cup points.</p>
+      <p className="mz-foot" data-testid="mz-pp-howscore">20 points for each shape right from the start of the sequence, plus 50 for the whole sequence. Everyone gets the same lengths and time, but their own pattern. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="pattern-pulse" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>

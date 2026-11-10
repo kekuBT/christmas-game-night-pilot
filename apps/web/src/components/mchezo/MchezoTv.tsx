@@ -14,8 +14,10 @@ import type { GameState, PublicGame, PublicPlayer } from "../../types.js";
 import { asRecord } from "../../types.js";
 import { toMzPlayers } from "./adapters.js";
 
-export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectatorCount, backLabel, previousScores }: {
+export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectatorCount, backLabel, previousScores, nextLine }: {
   publicGame: PublicGame;
+  /** Stage 7.2: a casual room's next step once this game is over (the lineup, a break): public facts. */
+  nextLine?: { kind: string; text: string } | null;
   players: PublicPlayer[];
   joinCode: string;
   onBack: () => void;
@@ -145,6 +147,7 @@ export function MchezoTvStage({ publicGame, players, joinCode, onBack, spectator
         </div>
       )}
       <div style={{ padding: 12 }}>
+        {finished && nextLine && <p className="mz-tvshow-next" data-testid="tv-next" data-flow={nextLine.kind}>{nextLine.text}</p>}
         <DirectorBar
           stage={stage}
           auto={auto}
