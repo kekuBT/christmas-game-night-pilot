@@ -10,7 +10,7 @@
  * Reproduced by `check-draw-sync`: a guesser whose socket and polls both
  * stalled sat on an empty canvas for the whole turn with no message.
  *
- * Now every poll has a timeout, and any projection (pushed or polled)
+ * Now every poll has a timeout that covers the whole reply, and any projection (pushed or polled)
  * proves the screen is live. When none has arrived for STALE_AFTER_MS the
  * screen says so (phones: the connection banner; TV: a stale-display note)
  * and a silent socket is recycled. The last known screen stays on show.
@@ -20,11 +20,47 @@ export const POLL_TIMEOUT_MS = 6000;
 /** Polls run every 2 s; three missed in a row is not a blip. */
 export const STALE_AFTER_MS = 8000;
 
-/** fetch with a timeout and no HTTP caching: a stalled request fails instead of hanging. */
-export function fetchFresh(input: string, init: RequestInit = {}, timeoutMs = POLL_TIMEOUT_MS): Promise<Response> {
+/**
+ * A poll: fetch AND read the reply under one timeout, with no HTTP caching.
+ *
+ * fetch() resolves as soon as the headers arrive. The first version cleared
+ * its timer there, so a reply that sent its headers and then stalled
+ * part-way through the body (review of PR #4: headers, then "{", then
+ * nothing) hung forever. The poll loops' one-at-a-time guard then held, and
+ * no later poll ran, even after the network recovered. Now the timer runs
+ * until `read` has finished with the body. On expiry it aborts the request,
+ * which also cancels a body read in progress and closes the connection, and
+ * the poll rejects even if `read` ignores the abort.
+ */
+export async function pollFresh<T>(input: string, init: RequestInit, read: (r: Response) => Promise<T>, timeoutMs = POLL_TIMEOUT_MS): Promise<T> {
   const ac = new AbortController();
-  const t = setTimeout(() => ac.abort(), timeoutMs);
-  return fetch(input, { ...init, cache: "no-store", signal: ac.signal }).finally(() => clearTimeout(t));
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expired = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      ac.abort();
+      reject(new DOMException(`The game server did not answer within ${timeoutMs} ms.`, "TimeoutError"));
+    }, timeoutMs);
+  });
+  try {
+    return await Promise.race([fetch(input, { ...init, cache: "no-store", signal: ac.signal }).then(read), expired]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * One poll at a time: a call made while the previous one is still running is
+ * skipped. The guard is released however the run ends (the phone and the TV
+ * both poll through this), so a failed or timed-out poll never blocks the
+ * next.
+ */
+export function oneAtATime(run: () => Promise<unknown>): () => Promise<void> {
+  let busy = false;
+  return async () => {
+    if (busy) return;
+    busy = true;
+    try { await run(); } catch { /* the caller's run reports its own failures */ } finally { busy = false; }
+  };
 }
 
 /** Has nothing proved the screen live for longer than the allowance? */

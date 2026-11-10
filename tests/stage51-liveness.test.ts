@@ -5,11 +5,14 @@
  * stale episode once and its end once; API replies are never cached.
  */
 import { mkdtempSync } from "node:fs";
+import { createServer, type Server } from "node:http";
+import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import WebSocket from "ws";
-import { fetchFresh, isStale, livenessStep, STALE_AFTER_MS } from "../apps/web/src/liveness.js";
+import { readJson, readSpectatorReply } from "../apps/web/src/http.js";
+import { isStale, livenessStep, oneAtATime, pollFresh, STALE_AFTER_MS } from "../apps/web/src/liveness.js";
 import { ALIVE_MS, LocalServer } from "../src/server/http.js";
 
 describe("liveness (client)", () => {
@@ -33,12 +36,101 @@ describe("liveness (client)", () => {
     vi.stubGlobal("fetch", hang);
     try {
       const t0 = Date.now();
-      await expect(fetchFresh("/rooms/x/projection?audience=player", {}, 50)).rejects.toThrow(/abort/i);
+      await expect(pollFresh("/rooms/x/projection?audience=player", {}, (r) => readJson(r), 50)).rejects.toThrow(/did not answer|abort/i);
       expect(Date.now() - t0).toBeLessThan(2000);
       expect(seen[0]!.cache).toBe("no-store");
+      expect(seen[0]!.signal?.aborted).toBe(true);
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it("the one-at-a-time guard skips a call while one runs, and is released however the run ends", async () => {
+    let calls = 0;
+    let release!: () => void;
+    const tick = oneAtATime(async () => { calls++; if (calls === 1) await new Promise<void>((r) => { release = r; }); else throw new Error("a failed poll"); });
+    const first = tick();
+    await tick(); // skipped: the first is still running
+    expect(calls).toBe(1);
+    release(); await first;
+    await tick(); // runs, and throws inside
+    expect(calls).toBe(2);
+    await tick(); // the throw released the guard
+    expect(calls).toBe(3);
+  });
+});
+
+// Review of PR #4 (P2): fetch() resolves on the headers, so a timeout cleared
+// there missed a reply whose body stalls part-way. A real loopback server
+// sends the headers and "{", then nothing; every poll path must give up
+// within its timeout, cancel the request, and let the next poll through.
+describe("liveness: a reply whose body stalls part-way", () => {
+  let server: Server;
+  let base = "";
+  let mode: "stall" | "ok" | "401" | "500" = "ok";
+  const hits: string[] = [];
+  const cancelled: string[] = [];
+  beforeAll(async () => {
+    server = createServer((req, res) => {
+      const url = req.url ?? "";
+      hits.push(`${mode} ${url}`);
+      if (mode === "stall") {
+        res.writeHead(200, { "content-type": "application/json" });
+        res.flushHeaders();
+        res.write("{");
+        res.on("close", () => cancelled.push(url)); // the client gave up and closed it
+        return;
+      }
+      if (mode === "401") { res.writeHead(401, { "content-type": "application/json" }); res.end(JSON.stringify({ error: "Spectator token required" })); return; }
+      if (mode === "500") { res.writeHead(500, { "content-type": "application/json" }); res.end(JSON.stringify({ error: "boom" })); return; }
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ roomId: "r1", players: [], games: [] }));
+    });
+    await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
+    base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  });
+  afterAll(async () => { server.closeAllConnections(); await new Promise<void>((r) => server.close(() => r())); });
+
+  const phonePoll = (timeoutMs = 150) => pollFresh(`${base}/rooms/r1/projection?audience=player`, {}, (r) => readJson<unknown>(r), timeoutMs);
+  const tvPoll = (timeoutMs = 150) => pollFresh(`${base}/rooms/r1/projection?audience=spectator`, {}, readSpectatorReply, timeoutMs);
+
+  for (const [who, poll, audience] of [["phone", phonePoll, "player"], ["TV (spectator)", tvPoll, "spectator"]] as const) {
+    it(`${who}: the poll fails within its timeout and the request is cancelled`, async () => {
+      mode = "stall";
+      const t0 = Date.now();
+      await expect(poll()).rejects.toThrow(/did not answer|abort/i);
+      expect(Date.now() - t0).toBeLessThan(2000);
+      await vi.waitFor(() => expect(cancelled.some((u) => u.includes(`audience=${audience}`))).toBe(true));
+    });
+
+    it(`${who}: after a stalled poll times out, the guard lets the next poll through, and it succeeds`, async () => {
+      const results: unknown[] = [];
+      const tick = oneAtATime(async () => { try { results.push(await poll()); } catch (e) { results.push(`failed: ${(e as Error).message}`); } });
+      mode = "stall";
+      hits.length = 0;
+      const first = tick();
+      await tick(); // while the first is stuck: skipped, no second request
+      await vi.waitFor(() => expect(hits.length).toBe(1));
+      await first; // the stalled poll gives up at its timeout
+      expect(String(results[0])).toMatch(/^failed: /);
+      mode = "ok";
+      await tick();
+      expect(hits).toHaveLength(2);
+      const ok = results[1] as { roomId?: string; kind?: string; body?: { roomId?: string } };
+      expect(ok.roomId ?? ok.body?.roomId).toBe("r1");
+    });
+  }
+
+  it("TV: a 401 still means the spectator session is gone, another error is skipped, JSON is the body", async () => {
+    mode = "401"; expect(await tvPoll(1000)).toEqual({ kind: "expired" });
+    mode = "500"; expect(await tvPoll(1000)).toEqual({ kind: "skip" });
+    mode = "ok"; expect(await tvPoll(1000)).toEqual({ kind: "body", body: { roomId: "r1", players: [], games: [] } });
+  });
+
+  it("phone: an error status still reads as the server's error message", async () => {
+    mode = "500";
+    await expect(phonePoll(1000)).rejects.toThrow("boom");
+    mode = "ok";
   });
 });
 
