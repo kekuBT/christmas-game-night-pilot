@@ -36,10 +36,18 @@ const resetSandbox = () => { git("checkout", "-q", "--", "."); git("clean", "-qf
 console.log(`sandbox ${SANDBOX} (${files.length} files)\n`);
 
 // ---------- helpers ----------
+// Stage 5.2: every gate run gets a fresh, empty timing history (unless a case
+// passes its own), so the parallel queue order (longest first, by history)
+// never depends on what earlier cases ran. Record files written by fixtures
+// live outside the sandbox: a new file inside it is, correctly, a run that
+// modified the working tree.
+const SCRATCH = mkdtempSync(join(tmpdir(), "mchezo-gate-selftest-scratch-"));
+let historyN = 0;
+const freshHistory = () => join(SCRATCH, `history-${++historyN}.jsonl`);
 function startGate(args, env = {}) {
   const child = spawn(process.execPath, [join("scripts", "gate.mjs"), ...args], {
     cwd: SANDBOX,
-    env: { ...process.env, ...env },
+    env: { ...process.env, MCHEZO_GATE_HISTORY: freshHistory(), ...env },
     stdio: ["ignore", "pipe", "pipe"],
   });
   let out = "";
@@ -178,7 +186,7 @@ try {
 
   // 9. Parallel steps really overlap, each on its own worker, server, data directory and screenshot folder.
   {
-    const rec = join(SANDBOX, "rec9.jsonl");
+    const rec = join(SCRATCH, "rec9.jsonl");
     const r = await runGate(["targeted", "--workers=3", fx("pass"), fx("pass-2"), fx("pass-3")], { FIXTURE_SLEEP_MS: "3000", FIXTURE_RECORD_FILE: rec });
     const rs = records(rec);
     check("parallel: three passing steps → exit 0", r.code === 0 && r.report?.verdict === "PASSED", `exit ${r.code}`);
@@ -202,7 +210,7 @@ try {
   // 11. A timeout kills only that step's processes; a step running beside it is untouched and passes.
   {
     const dir = mkdtempSync(join(tmpdir(), "gate-pids-"));
-    const rec = join(SANDBOX, "rec11.jsonl");
+    const rec = join(SCRATCH, "rec11.jsonl");
     const r = await runGate(["targeted", "--workers=2", fx("hang"), fx("pass"), "--step-timeout=fixture-hang=3"], { FIXTURE_PID_DIR: dir, FIXTURE_SLEEP_MS: "7000", FIXTURE_RECORD_FILE: rec });
     const pids = JSON.parse(readFileSync(join(dir, "hang.json"), "utf8"));
     const hang = step(r.report, "fixture-hang"), pass = step(r.report, "fixture-pass");
@@ -243,11 +251,11 @@ try {
   {
     const plan = await runGate(["targeted", "--plan", "--workers=2", fx("pass")]);
     check("--plan → prints an estimate and runs nothing", plan.code === 0 && /estimate this run:/.test(plan.output) && /nothing was run/.test(plan.output) && !plan.report, plan.output.slice(-300));
-    const r = await runGate(["targeted", "--workers=2", "--progress=1", fx("pass"), fx("pass-2")], { FIXTURE_SLEEP_MS: "2500" });
+    const hist = join(SCRATCH, "history-case15.jsonl");
+    const r = await runGate(["targeted", "--workers=2", "--progress=1", fx("pass"), fx("pass-2")], { FIXTURE_SLEEP_MS: "2500", MCHEZO_GATE_HISTORY: hist });
     check("progress lines show done/total, running steps and time remaining", /── progress\s+\d+\/\d+ done/.test(r.output) && /running\s+fixture-/.test(r.output) && /remaining .* total .* done around/.test(r.output), r.output.slice(0, 600));
     check("summary compares predicted with actual time", /predicted .* → actual/.test(r.output) && r.report?.timing?.predicted && r.report.timing.wallSec > 0);
-    const hist = readFileSync(join(SANDBOX, "test-results", "timing-history.jsonl"), "utf8");
-    check("the run's timing is appended to the history", hist.includes(r.report.runId));
+    check("the run's timing is appended to the history", existsSync(hist) && readFileSync(hist, "utf8").includes(r.report.runId));
   }
 
   // 8. Cancellation cleans up only the run's own processes.
@@ -292,6 +300,7 @@ try {
   }
 } finally {
   rmSync(SANDBOX, { recursive: true, force: true });
+  rmSync(SCRATCH, { recursive: true, force: true });
 }
 
 const failed = results.filter((r) => !r.ok).length;
