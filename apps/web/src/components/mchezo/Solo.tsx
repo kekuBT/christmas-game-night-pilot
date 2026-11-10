@@ -64,7 +64,7 @@ export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readon
           );
         })}
       </ul>
-      <p className="mz-foot mz-solo__others" data-testid="solo-others">The other games need at least 2 players, so they aren’t offered here. <button type="button" className="mz-linkbtn" data-testid="solo-host" onClick={onHost}>Host a game</button> to play them together.</p>
+      <p className="mz-foot mz-solo__others" data-testid="solo-others">More solo games are on the way. For now the other games are played in a room: <button type="button" className="mz-linkbtn" data-testid="solo-host" onClick={onHost}>Host a game</button> to play them together.</p>
     </main>
   );
 }
@@ -145,6 +145,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
           <button type="button" className="mz-chip-btn" data-testid="solo-leave" onClick={() => setConfirmLeave(true)}>Leave round</button>
         </div>
         {state.replacedOpenRound && <p className="mz-foot mz-solo-round__note" role="status" data-testid="solo-replaced">Your last round was interrupted, so this is a fresh one.</p>}
+        {state.stale && <p className="mz-foot mz-solo-round__note mz-solo-round__stale" role="status" data-testid="solo-stale">Can’t reach the game server right now. Reconnecting… Answers it already has are kept.</p>}
         {confirmLeave && (
           <NoticeCard tone="warn" title="Leave this round?" testId="solo-leave-confirm"
             action={<span className="mz-solo__actions"><button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="solo-leave-yes" onClick={() => { setConfirmLeave(false); void live().leave(); onBackToSolo(); }}>Leave round</button><button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="solo-leave-no" autoFocus onClick={() => setConfirmLeave(false)}>Keep playing</button></span>}>
@@ -204,8 +205,15 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
       <h1 className="mz-h1">{game.title}</h1>
       <p className="mz-foot mz-entry__lede">10 quick sums, four answers each. 100 points for each right answer, plus up to 20 if you’re fast.</p>
       <p className="mz-solo__best" data-testid={`solo-best-${game.id}`}>{bestLine(best, store !== null)}</p>
-      {state.phase === "error" && <p className="err" role="alert" data-testid="solo-error">{state.error ?? "Something went wrong."} Try again.</p>}
-      <Keycap block data-testid="solo-round-start" disabled={state.phase === "starting"} onClick={() => void live().start(game.id)}>{state.phase === "starting" ? "Starting…" : "Start"}</Keycap>
+      {state.phase === "error" && <p className="err" role="alert" data-testid="solo-error">{state.error ?? "Something went wrong."}</p>}
+      {state.phase === "lost" && (
+        <NoticeCard tone="warn" title="This round was lost" testId="solo-lost">
+          {state.error} Start a new round to keep playing.
+        </NoticeCard>
+      )}
+      <Keycap block data-testid="solo-round-start" disabled={state.phase === "starting"} onClick={() => void live().start(game.id)}>
+        {state.phase === "starting" ? "Starting…" : state.phase === "error" ? "Try again" : state.phase === "lost" ? "Start a new round" : "Start"}
+      </Keycap>
       {state.phase === "starting" && <p className="mz-foot" role="status" data-testid="solo-starting">Starting your round…</p>}
       <button type="button" className="mz-linkbtn" data-testid="solo-home" onClick={onHome}>Mchezo home</button>
     </main>

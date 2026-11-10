@@ -87,7 +87,11 @@ export interface RecordOutcome {
 export function recordScore(store: KeyValueStore | null, gameId: string, rulesVersion: number, score: number, at: number): RecordOutcome {
   const all = readAll(store);
   const key = slot(gameId, rulesVersion);
-  const previous = all[key];
+  // A record in this slot under other rules is not this game's best (readBest
+  // ignores it too), so it never blocks or compares with a new score; a new
+  // best replaces it (review of PR #6).
+  const stored = all[key];
+  const previous = stored && stored.rulesVersion === rulesVersion ? stored : undefined;
   const isNewBest = !previous || score > previous.score;
   if (!isNewBest) return { previous, isNewBest, saved: store !== null };
   if (!store) return { ...(previous ? { previous } : {}), isNewBest, saved: false };

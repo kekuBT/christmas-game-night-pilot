@@ -28,6 +28,7 @@
 /* The round: a slim bar above the existing Math screen */
 .mz-solo-round__bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px clamp(14px, 4.6vw, 20px) 0; }
 .mz-solo-round__note { margin: 6px clamp(14px, 4.6vw, 20px) 0; text-align: left; }
+.mz-solo-round__stale { color: var(--mz-highlight); font-weight: 700; }
 .mz-solo-round .mz-noticecard { margin: 10px clamp(14px, 4.6vw, 20px) 0; }
 
 /* Results */

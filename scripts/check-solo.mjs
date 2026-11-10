@@ -14,6 +14,8 @@
 //     crypto.randomUUID): a whole round plays and every answer counts.
 //   - Keyboard only: a whole round with Tab and Enter; the results focus the
 //     score; the leave question focuses Keep playing.
+//   - Faults (review of PR #6): Start with no reply, a passing outage
+//     mid-round, a lost room, a seat check that fails for a moment.
 //   - A late answer, after the round's time is up, is refused by the server
 //     (own server with a short test clock, MCHEZO_LIFECYCLE_SCALE).
 // The round is answered from the prompt itself (the driver computes the sum),
@@ -97,7 +99,7 @@ try {
   const offered = await page.locator('[data-testid^="solo-game-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")));
   check("Play solo offers only real solo games (Math Mayhem in this slice)", offered.length === 1 && offered[0] === "solo-game-math-mayhem", offered.join(", "));
   check("the solo list is honest about requirements: 1–10 players, best with 2+", /1–10 players · best with 2\+/.test(await page.getByTestId("solo-game-math-mayhem").innerText()));
-  check("the other games are explained (they need at least 2 players)", /need at least 2 players/.test(await page.getByTestId("solo-others").innerText()));
+  check("the other games are pointed to rooms, with no invented player minimum", /More solo games are on the way\. For now the other games are played in a room/.test(await page.getByTestId("solo-others").innerText()) && !/at least 2/.test(await page.getByTestId("solo-others").innerText()));
   check("a fresh device has no personal best yet", /No personal best on this device yet/.test(await page.getByTestId("solo-best-math-mayhem").innerText()));
   await page.getByTestId("solo-start-math-mayhem").click(); // tap 2
   await soon("tap 2 is the round itself: no room code, no name, no lobby", async () => (await page.getByTestId("solo-round").isVisible()) && new URL(page.url()).pathname === "/solo/math-mayhem" && (await page.getByPlaceholder("e.g. Auntie June").count()) === 0, 15000);
@@ -292,6 +294,65 @@ try {
   await kp.keyboard.press("Enter");
   check("keyboard: Enter on Keep playing keeps the round", (await kp.getByTestId("solo-leave-confirm").count()) === 0 && (await kp.getByTestId("solo-round").isVisible()));
   await kctx.close();
+
+  // ---- I. Faults (review of PR #6), injected in the browser ----
+  //   I1 Start's request gets no reply: Start ends with Try again, which works.
+  //   I2 a passing outage mid-round: the round stays, says it's reconnecting, recovers.
+  //   I3 the room is lost (401): the round says so, polling stops, a new room starts.
+  //   I4 the seat check fails for a moment: no new room; Try again reuses the room.
+  const fctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const fp = await fctx.newPage();
+  const fRooms = countRooms(fp);
+  const fPolls = countPolls(fp);
+  const isPath = (re) => (url) => re.test(new URL(url).pathname);
+  await fp.goto(`${BASE}/solo`, { waitUntil: "domcontentloaded" });
+  await fp.getByTestId("solo-home").waitFor({ timeout: 15000 });
+  let held = 0;
+  await fp.route(isPath(/^\/rooms\/[^/]+\/games$/), (route) => { if (route.request().method() === "POST") { held++; return; } return route.continue(); }); // never answered
+  let t0 = Date.now();
+  await fp.getByTestId("solo-start-math-mayhem").click();
+  await soon("I1 Start with no reply ends in an error with Try again (not a stuck Starting…)", async () => (await fp.getByTestId("solo-error").isVisible()) && (await fp.getByTestId("solo-round-start").innerText()).trim() === "Try again", 15000);
+  check("I1 it ended within the request allowance (about 6 s), and the request had been sent", Date.now() - t0 < 12000 && held >= 1, `${Date.now() - t0} ms, ${held} held`);
+  await fp.unrouteAll({ behavior: "ignoreErrors" });
+  await fp.getByTestId("solo-round-start").click();
+  await soon("I1 Try again starts the round", async () => (await fp.locator("h1.mz-question").count()) > 0, 20000);
+  check("I1 still one room for this device", fRooms.n === 1, `${fRooms.n} rooms`);
+  const seatF = await seatOf(fp);
+
+  await fp.route(isPath(/\/projection$/), (route) => route.fulfill({ status: 500, contentType: "application/json", body: '{"error":"busy"}' }));
+  t0 = Date.now();
+  await soon("I2 a passing outage: the round says it's reconnecting", async () => fp.getByTestId("solo-stale").isVisible(), 20000);
+  check("I2 only after the allowance (not on the first failed poll)", Date.now() - t0 >= 4000, `${Date.now() - t0} ms`);
+  check("I2 the round stays on screen meanwhile", (await fp.getByTestId("solo-round").isVisible()) && (await fp.getByTestId("solo-lost").count()) === 0);
+  await fp.unrouteAll({ behavior: "ignoreErrors" });
+  await soon("I2 once the server answers, the reconnecting note goes", async () => (await fp.getByTestId("solo-stale").count()) === 0, 10000);
+  const slabsF = fp.locator(".mz-slab:not([disabled])");
+  await soon("I2 the round carries on: a question to answer", async () => (await slabsF.count()) === 4, 15000);
+  await slabsF.first().click();
+  await soon("I2 the answer is taken", async () => fp.getByTestId("mz-math-next").isVisible(), 10000);
+  check("I2 same room, same seat, no new room", (await seatOf(fp)).roomId === seatF.roomId && fRooms.n === 1, `${fRooms.n} rooms`);
+
+  await fp.route(isPath(new RegExp(`^/rooms/${seatF.roomId}/`)), (route) => route.fulfill({ status: 401, contentType: "application/json", body: '{"error":"Session token required"}' }));
+  await soon("I3 a lost room: the round says it was lost, with Start a new round", async () => (await fp.getByTestId("solo-lost").isVisible()) && (await fp.getByTestId("solo-round-start").innerText()).trim() === "Start a new round", 15000);
+  fPolls.n = 0; await sleep(3000);
+  check("I3 polling has stopped", fPolls.n === 0, `${fPolls.n} projection requests in 3 s`);
+  await fp.getByTestId("solo-round-start").click();
+  await soon("I3 Start a new round plays in a new room", async () => (await fp.locator("h1.mz-question").count()) > 0, 20000);
+  const seatF2 = await seatOf(fp);
+  check("I3 the lost room was replaced by one new room", seatF2.roomId !== seatF.roomId && fRooms.n === 2, `${fRooms.n} rooms, ${seatF.roomId} -> ${seatF2.roomId}`);
+  await fp.unrouteAll({ behavior: "ignoreErrors" });
+
+  await fp.getByTestId("solo-leave").click(); await fp.getByTestId("solo-leave-yes").click();
+  await fp.getByTestId("solo-home").waitFor({ timeout: 10000 });
+  await fp.route(isPath(/\/projection$/), (route) => route.fulfill({ status: 500, contentType: "application/json", body: '{"error":"busy"}' }));
+  await fp.getByTestId("solo-start-math-mayhem").click();
+  await soon("I4 the seat check fails for a moment: Start says so, with Try again", async () => (await fp.getByTestId("solo-error").isVisible()) && (await fp.getByTestId("solo-round-start").innerText()).trim() === "Try again", 15000);
+  check("I4 no new room was made for a passing failure", fRooms.n === 2, `${fRooms.n} rooms`);
+  await fp.unrouteAll({ behavior: "ignoreErrors" });
+  await fp.getByTestId("solo-round-start").click();
+  await soon("I4 Try again plays in the same room", async () => (await fp.locator("h1.mz-question").count()) > 0, 20000);
+  check("I4 same room as before the failure", (await seatOf(fp)).roomId === seatF2.roomId && fRooms.n === 2, `${fRooms.n} rooms`);
+  await fctx.close();
 } finally {
   await browser.close();
 }
