@@ -201,4 +201,41 @@ I'm proceeding with these unless you object.
 
 ## 7. What was built and tested
 
-*(Filled in at the checkpoint.)*
+### 7.1 Built
+- **Server** (`src/server/room.ts`, `src/server/http.ts`):
+  - `RoomEngine.transferHost`, with the checks and the single-step change of §4.1;
+  - `HostRefused`, carrying the codes plus the current session and host;
+  - `POST /rooms/:id/host`;
+  - the press record keeps its `actor`;
+  - `recentNotices` includes `host-transferred` (`method: "handover"`, with `byId`);
+  - on restore, the role flags are set from `hostId` and the cohosts;
+  - `projectFor` re-checks a `host` or `cohost` audience against the room on every projection.
+- **Web:**
+  - `components/mchezo/HostHandover.tsx`, new: the players and roles card, and the confirmation;
+  - `App.tsx`: the handover request (same-press retry, then the room's word, then "couldn't confirm"), the menu wiring, and notices worded per viewer;
+  - `TvShow.tsx`: the host tag, and "Bea starts it";
+  - `types.ts`, `stage7.css`.
+
+### 7.2 Tested
+- **`tests/stage73-host-handover.test.ts`** (17):
+  - the handover from the lobby, after results and during a break;
+  - cohost targets, and other cohosts kept;
+  - refusals for a guest, a cohost, a former host, self, an unknown player, reconnecting and away players, a Cup room, a game and a briefing;
+  - the race with a start, both orders;
+  - repeats, including after a restart;
+  - two tabs, A→B→A with a stale press, and eviction;
+  - restart, normalization of a damaged snapshot, and the claim token;
+  - HTTP roles; the former host's HTTP actions and their WebSocket projection.
+
+  Ten mutations of the safeguards are each caught: the actor check, the old host's cohost removal, the target's cohost removal, the revision check, the game check, the presence check, the WebSocket re-check, the restore normalization, the revision bump, and cohost authority.
+- **`check-host-handover`** (new, 32 checks): Ada, Bea and Cal plus the TV.
+  - Guest tools; the confirmation's names, focus, Escape and Cancel.
+  - Keyboard confirm with a lost reply (the same press id, one handover).
+  - Toasts for all three; controls and waiting lines; the TV host tag.
+  - Ada's refused API calls; Bea runs a game and the results show her controls.
+  - Handover during a break and Resume; a not-connected target; reloads; 320 and 1440 px.
+- **Local regressions, all passing:** `check-game-night` (Cup, cohost grant), `check-casual`, `check-recovery`, `check-sessions`, `check-session-flow`, `check-quick-party`, `check-tv-show`, `check-lobby-mode`.
+- **Not run:** WebKit and real devices (checklist I17–I19). Emulation is not a device.
+
+### 7.3 Gates
+*(Recorded after the runs.)*

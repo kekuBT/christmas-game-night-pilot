@@ -340,6 +340,8 @@ export interface RoomNotice {
   displayName: string;
   method: string;
   byName: string | null;
+  /** Stage 7.3: who acted (a host handover: the former host). Public, like every player id. */
+  byId?: string | null;
   at: number;
 }
 

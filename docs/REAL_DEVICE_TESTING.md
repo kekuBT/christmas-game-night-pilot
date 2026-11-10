@@ -185,6 +185,9 @@ Do these on phones that open the **Wi-Fi address** (not localhost): plain http t
 | I14 | Host: **Next game**, play Trivia; then **Play again** | Trivia starts through the rules screen; afterwards everyone (and the TV) sees "That was the whole lineup"; Play again starts a fresh Trivia and the lineup stays complete |
 | I15 | Host: **Take a break** on the results; everyone goes back to the lobby; reload a phone; then **Resume** | Every phone and the TV say "On a break"; the host's Start waits; a guest has no Resume; after a reload it's still a break; Resume clears it for everyone |
 | I16 | Host: turn Wi-Fi off just after pressing **Next game**, then on again | Exactly one game starts (the rules screen appears once on every phone); no error about a second game |
+| I17 | Casual room, 3 phones and a TV, between games: host → **Room menu** → **Make host** next to a player → read the question → **Cancel**, then do it again and confirm | The question names the player and says the host becomes a regular player; Cancel changes nothing; after confirming, every phone shows who did what, the old host's Start is gone, the new host has it, and the TV marks the new host |
+| I18 | The new host: **Take a break**, then hand the host role back; the old host taps **Resume** | The break stays through the handover; only the current host sees Resume |
+| I19 | Turn one player's Wi-Fi off, then open the host's **Room menu** | That player shows "not connected" and can't be made host |
 | I6 | Host a game without touching the Casual/Family Cup choice; a second phone joins | No Cup chip, no Official/Practice choice; both phones say "Casual, just for fun"; a game plays to results and the lobby says "Last game · … · Casual" |
 
 ---

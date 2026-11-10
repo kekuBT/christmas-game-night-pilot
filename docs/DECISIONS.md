@@ -814,3 +814,29 @@ The spec is `docs/stage7/stage72.md`. The instruction is ChatGPT's handoff on PR
 - **D-S72-12 What's next sits right under the result heading** (review 6778921208).
   - This holds on every casual results screen: before the standings, the game's details and the answer review.
   - It is not sticky, so nothing is covered. Its controls come early in the keyboard order.
+
+## Stage 7.3: hand the host role to another player (2026-11-10, branch `claude/stage7-3-host-handover`, from the Stage 7.2 head `f24934f`)
+
+The spec is `docs/stage7/stage73.md`. The instruction is ChatGPT's review and handoff on PR #9 (comment 6781323820).
+
+- **D-S73-01 One atomic transfer, current host only, between games** (`RoomEngine.transferHost`, `POST /rooms/:id/host`).
+  - **The target:** another connected player of the room. A cohost can be the target.
+  - **In one step:** the old host is a regular player (no host, no cohost), the target is the host and leaves the cohost list, and other cohosts stay.
+  - **Unchanged:** no game starts or resumes; the lineup, break, scores and seats stay as they are.
+  - *Alternative rejected:* letting cohosts transfer. A cohost is a delegate; ownership moves only by the owner's choice.
+- **D-S73-02 Repeat-safe with the Stage 7.2 session revision and press identity.**
+  - The handover moves the revision on.
+  - **A press seen before** tells its own actor the recorded outcome and changes nothing; the former host learns this without any authority.
+  - **Refused:** a stale press (`SESSION_CONFLICT`), or a press from someone who isn't the host (`NOT_HOST`).
+  - So A→B→A followed by A's old press to C is refused, and two tabs can't both hand over.
+- **D-S73-03 Authority is the room's current state.**
+  - HTTP reads the session's current player record.
+  - Engine actions read `hostId` and the cohosts at call time.
+  - A WebSocket's `host` or `cohost` audience is re-checked on every projection, so a former host's socket gets the player projection.
+  - On restore, the role flags are set from `hostId` and the cohosts.
+  - The claim token works only while there is no host.
+- **D-S73-04 Announced to everyone.**
+  - **The ledger:** a `host-transferred` entry (an audit of a privileged role change, like `host-claimed`).
+  - **Notices:** a short public notice, worded for the new host, the former host and everyone else.
+  - **The TV:** marks the host and names them.
+- **D-S73-05 It lives in the room menu's host tools.** The "Players and roles" card has Make cohost as before. The host of a casual room also gets Make host for connected players, with a named confirmation and busy, refused and uncertain states. The results screen's What's next stays uncluttered.

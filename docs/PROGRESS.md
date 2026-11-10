@@ -1760,3 +1760,28 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Gates on `01cde60`** (fresh clone, clean tree):
   - fast `20261110-214318-01cde601-21310` PASSED;
   - full `20261110-214318-01cde601-21321` PASSED, 80/80.
+
+## Stage 7.3: hand the host role to another player (2026-11-10)
+
+**Branch:** `claude/stage7-3-host-handover`, stacked on PR #9 at `f24934f` (PR #10).
+- **Instruction:** ChatGPT's review and handoff on PR #9 (comment 6781323820). It cleared Stage 7.2 after its own live-site audit of `01cde60`.
+- **Spec and record:** `docs/stage7/stage73.md`; decisions D-S73-01 … 05.
+- Nothing was merged or deployed, no port was made public, and nothing was paid for.
+
+**Milestone:** the host of a casual room can deliberately give the host role to a connected player, between games, and carry on as a player.
+- The transfer is atomic, repeat-safe and persisted, with exactly one host afterwards.
+- A former host's HTTP and WebSocket authority ends at once.
+- Everyone and the TV see the new host.
+- The room, its code, seats, scores, lineup and break don't change.
+
+**Files:**
+- **Server:** `src/server/room.ts`, `src/server/http.ts`.
+- **Web:** `apps/web/src/components/mchezo/HostHandover.tsx` (new), `App.tsx`, `TvShow.tsx`, `types.ts`, `ui/mchezo/styles/stage7.css`.
+- **Tests and scripts:** `tests/stage73-host-handover.test.ts`, `scripts/check-host-handover.mjs` and `scripts/screenshot-stage73.mjs` (all new).
+
+**Tests:**
+- **Unit and HTTP:** 17, with 10 mutations each caught. The full suite passed 1,270.
+- **`check-host-handover`:** 32/32.
+- **Regressions, all passing:** `check-game-night`, `check-casual`, `check-recovery`, `check-sessions`, `check-session-flow` (70), `check-quick-party` (68), `check-tv-show`, `check-lobby-mode`.
+
+**Gates:** recorded in the spec §7.3 once run.

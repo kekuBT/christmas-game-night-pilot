@@ -647,7 +647,7 @@ export class RoomEngine {
   }
 
   /** Recent seat recoveries, as plain room notices (contract §2.1 step 6: mandatory and visible). */
-  recentNotices(now = this.clock(), windowMs = 5 * 60_000): { eventId: string; type: string; playerId: string; displayName: string; method: string; byName: string | null; at: number }[] {
+  recentNotices(now = this.clock(), windowMs = 5 * 60_000): { eventId: string; type: string; playerId: string; displayName: string; method: string; byName: string | null; byId: string | null; at: number }[] {
     return this.ledger
       .filter((e) => (e.type === "seat-recovered" || e.type === "host-transferred") && now - e.createdAt < windowMs && e.playerId)
       .map((e) => ({
@@ -658,6 +658,7 @@ export class RoomEngine {
         // Stage 7.3: a host handover is announced too (method "handover": byName handed the role to displayName).
         method: e.type === "host-transferred" ? "handover" : String((e.detail as { method?: string } | undefined)?.method ?? "code"),
         byName: e.actor ? this.players.get(e.actor)?.displayName ?? null : null,
+        byId: e.actor ?? null,
         at: e.createdAt,
       }));
   }
