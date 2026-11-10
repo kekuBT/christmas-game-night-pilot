@@ -21,10 +21,30 @@ const drewOn = new WeakMap();
 // screen can change between a visibility check and the read (the turn ends),
 // and the polling loop asks again on its next pass anyway.
 const READ_MS = 2000;
+// Stage 5.1 gave each of the reads and taps below 30 s and then threw, even
+// when the screen had simply moved on (the race above). Each one now gives up
+// after READ_MS and is retried on the next pass, but the 30 s limit stays for
+// everything except that race: if the action keeps failing on consecutive
+// passes while its screen stays up, it throws once STUCK_MS have passed since
+// its first failure. Any other outcome on that phone (the action going
+// through, the screen moving on, a different action, nothing to do) ends the
+// streak.
+const STUCK_MS = 30_000;
+const FAILED = Symbol("failed");
+const stuck = new WeakMap(); // page -> { action, since }
+async function failedAction(page, action, screenStillUp) {
+  if (!screenStillUp) return false; // the screen moved on: the race, not a defect
+  const s = stuck.get(page);
+  if (s?.action !== action) { stuck.set(page, { action, since: Date.now() }); return FAILED; }
+  const ms = Date.now() - s.since;
+  if (ms >= STUCK_MS) throw new Error(`stage5Act: ${action} kept failing for ${Math.round(ms / 1000)} s after its first failure, with its screen still up (not the turn-ending race)`);
+  return FAILED;
+}
 const turnLabel = async (page) => ((await page.locator(".mz-mr-round").first().textContent({ timeout: READ_MS }).catch(() => "")) ?? "").replace(/·.*$/, "").trim();
 
 /** The game's first play screen (after the briefing). */
 export async function stage5Screen(page, gameId, timeout = 25000) {
+  stuck.delete(page);
   if (gameId === "majority-rules") return page.locator('[data-testid="mz-mr-predict"], [data-testid="mz-mr-vote"], [data-testid="mz-mr-wait"], [data-testid="mz-mr-reveal"]').first().waitFor({ timeout });
   if (gameId === "pattern-pulse") return page.locator('[data-testid="mz-pp-ready"], [data-testid="mz-pp-memorise"], [data-testid="mz-pp-input"], [data-testid="mz-pp-done"]').first().waitFor({ timeout });
   if (gameId === "draw-guess") return page.locator('[data-testid="mz-dg-draw"], [data-testid="mz-dg-guess"], [data-testid="mz-dg-reveal"]').first().waitFor({ timeout });
@@ -33,10 +53,19 @@ export async function stage5Screen(page, gameId, timeout = 25000) {
 
 /** One step of play on this phone. Returns true if it did something. */
 export async function stage5Act(page, gameId) {
+  const r = await actOnce(page, gameId);
+  if (r === FAILED) return false;
+  stuck.delete(page);
+  return r;
+}
+
+async function actOnce(page, gameId) {
   if (gameId === "majority-rules") {
     // Stage 5.2: a click that can't land within 2 s (the round just closed)
-    // is tried again on the next pass, instead of waiting 30 s and throwing.
-    const tap = (id) => page.getByTestId(id).click({ timeout: READ_MS }).then(() => true, () => false);
+    // is tried again on the next pass. A card that stays on screen and can't
+    // be tapped for 30 s still throws (STUCK_MS).
+    const tap = async (id) => (await page.getByTestId(id).click({ timeout: READ_MS }).then(() => true, () => false))
+      || failedAction(page, `Majority Rules: tapping ${id}`, await visible(page.getByTestId(id), 300));
     if (await visible(page.getByTestId("mz-mr-predict-a"), 500)) return tap("mz-mr-predict-a");
     if (await visible(page.getByTestId("mz-mr-vote-a"), 500)) return tap("mz-mr-vote-a");
     return false; // waiting for the room or the reveal
@@ -72,7 +101,7 @@ export async function stage5Act(page, gameId) {
       // threw (seen on 2 busy CPUs, F2 run). If the screen moved on, there is
       // nothing to do on this pass.
       const wordText = await page.getByTestId("mz-dg-word").textContent({ timeout: READ_MS }).catch(() => null);
-      if (wordText === null) return false;
+      if (wordText === null) return failedAction(page, "Draw & Guess: reading the drawer's word", await visible(page.getByTestId("mz-dg-draw"), 300));
       const word = wordText.replace(/^Draw:\s*/i, "").trim();
       drawTurn = { label, word };
       if (drewOn.get(page) === label) return false;
@@ -90,10 +119,11 @@ export async function stage5Act(page, gameId) {
       if (!drawTurn.word || drawTurn.label !== label) return false; // the drawer's phone hasn't been seen this turn yet
       // Same race as the drawer's: the turn can end before the guess is typed.
       // A guess that can't be sent this pass is tried again on the next one; a
-      // game that never finishes still fails at the driver's game deadline.
-      return await page.getByTestId("mz-dg-input").fill(drawTurn.word, { timeout: READ_MS })
+      // guess box that stays up and can't be used for 30 s throws (STUCK_MS).
+      return (await page.getByTestId("mz-dg-input").fill(drawTurn.word, { timeout: READ_MS })
         .then(() => page.getByTestId("mz-dg-send").click({ timeout: READ_MS }))
-        .then(() => true, () => false);
+        .then(() => true, () => false))
+        || failedAction(page, "Draw & Guess: sending a guess", await visible(page.getByTestId("mz-dg-input"), 300));
     }
     return false; // got it already, or the reveal
   }
