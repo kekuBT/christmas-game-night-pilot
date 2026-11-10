@@ -72,10 +72,11 @@ export function loadTimings({ baselinePath, historyPath }) {
     const arr = (base[name] ??= []);
     for (const x of b.samples ?? []) if (arr.length < MAX_SAMPLES) arr.push(x);
   }
+  // Newest first: the comparison is with how long the sequential gate takes now.
   const sequentialWallSec = [
-    ...history.filter((r) => (r.workers ?? 1) === 1 && r.level === "full" && r.verdict === "PASSED").map((r) => r.wallSec),
+    ...[...history].reverse().filter((r) => (r.workers ?? 1) === 1 && r.level === "full" && r.verdict === "PASSED" && Number.isFinite(r.wallSec)).map((r) => r.wallSec),
     ...(baseline.sequentialWallSec ?? []),
-  ];
+  ].slice(0, 10);
   return { base, contention, sequentialWallSec, sources: { historyRuns: history.length, baselineGenerated: baseline.generated ?? null } };
 }
 
@@ -135,7 +136,7 @@ export function buildBaseline(records, { note = "" } = {}) {
   }
   const contention = {};
   for (const r of records) if ((r.workers ?? 1) > 1 && Number.isFinite(r.contentionRatio)) (contention[contentionKey(r.workers, r.cpus)] ??= []).push(r.contentionRatio);
-  const sequentialWallSec = records.filter((r) => (r.workers ?? 1) === 1 && r.level === "full" && r.verdict === "PASSED" && Number.isFinite(r.wallSec)).map((r) => r.wallSec).slice(-10);
+  const sequentialWallSec = records.filter((r) => (r.workers ?? 1) === 1 && r.level === "full" && r.verdict === "PASSED" && Number.isFinite(r.wallSec)).map((r) => r.wallSec).slice(-10).reverse();
   return { generated: new Date().toISOString(), note, steps: Object.fromEntries(Object.entries(steps).sort(([a], [b]) => a.localeCompare(b))), contention, sequentialWallSec };
 }
 

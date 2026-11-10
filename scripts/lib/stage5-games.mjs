@@ -17,7 +17,11 @@ const pulseSeen = new WeakMap();
  */
 let drawTurn = { label: "", word: "" };
 const drewOn = new WeakMap();
-const turnLabel = async (page) => ((await page.locator(".mz-mr-round").first().textContent().catch(() => "")) ?? "").replace(/·.*$/, "").trim();
+// Stage 5.2: reads here use a 2 s limit, not Playwright's 30 s default: a
+// screen can change between a visibility check and the read (the turn ends),
+// and the polling loop asks again on its next pass anyway.
+const READ_MS = 2000;
+const turnLabel = async (page) => ((await page.locator(".mz-mr-round").first().textContent({ timeout: READ_MS }).catch(() => "")) ?? "").replace(/·.*$/, "").trim();
 
 /** The game's first play screen (after the briefing). */
 export async function stage5Screen(page, gameId, timeout = 25000) {
@@ -30,8 +34,11 @@ export async function stage5Screen(page, gameId, timeout = 25000) {
 /** One step of play on this phone. Returns true if it did something. */
 export async function stage5Act(page, gameId) {
   if (gameId === "majority-rules") {
-    if (await visible(page.getByTestId("mz-mr-predict-a"), 500)) { await page.getByTestId("mz-mr-predict-a").click(); return true; }
-    if (await visible(page.getByTestId("mz-mr-vote-a"), 500)) { await page.getByTestId("mz-mr-vote-a").click(); return true; }
+    // Stage 5.2: a click that can't land within 2 s (the round just closed)
+    // is tried again on the next pass, instead of waiting 30 s and throwing.
+    const tap = (id) => page.getByTestId(id).click({ timeout: READ_MS }).then(() => true, () => false);
+    if (await visible(page.getByTestId("mz-mr-predict-a"), 500)) return tap("mz-mr-predict-a");
+    if (await visible(page.getByTestId("mz-mr-vote-a"), 500)) return tap("mz-mr-vote-a");
     return false; // waiting for the room or the reveal
   }
   if (gameId === "pattern-pulse") {
@@ -59,7 +66,14 @@ export async function stage5Act(page, gameId) {
   if (gameId === "draw-guess") {
     if (await visible(page.getByTestId("mz-dg-draw"), 300)) {
       const label = await turnLabel(page);
-      const word = ((await page.getByTestId("mz-dg-word").textContent()) ?? "").replace(/^Draw:\s*/i, "").trim();
+      // The drawer's screen can become the reveal between the check above and
+      // this read: another phone's guess, sent moments earlier on this pass,
+      // ends the turn. The read used to wait 30 s for a word that was gone and
+      // threw (seen on 2 busy CPUs, F2 run). If the screen moved on, there is
+      // nothing to do on this pass.
+      const wordText = await page.getByTestId("mz-dg-word").textContent({ timeout: READ_MS }).catch(() => null);
+      if (wordText === null) return false;
+      const word = wordText.replace(/^Draw:\s*/i, "").trim();
       drawTurn = { label, word };
       if (drewOn.get(page) === label) return false;
       const box = await page.getByTestId("mz-dg-board").boundingBox();
@@ -74,9 +88,12 @@ export async function stage5Act(page, gameId) {
     if (await visible(page.getByTestId("mz-dg-input"), 300) && await page.getByTestId("mz-dg-input").isEnabled()) {
       const label = await turnLabel(page);
       if (!drawTurn.word || drawTurn.label !== label) return false; // the drawer's phone hasn't been seen this turn yet
-      await page.getByTestId("mz-dg-input").fill(drawTurn.word);
-      await page.getByTestId("mz-dg-send").click();
-      return true;
+      // Same race as the drawer's: the turn can end before the guess is typed.
+      // A guess that can't be sent this pass is tried again on the next one; a
+      // game that never finishes still fails at the driver's game deadline.
+      return await page.getByTestId("mz-dg-input").fill(drawTurn.word, { timeout: READ_MS })
+        .then(() => page.getByTestId("mz-dg-send").click({ timeout: READ_MS }))
+        .then(() => true, () => false);
     }
     return false; // got it already, or the reveal
   }

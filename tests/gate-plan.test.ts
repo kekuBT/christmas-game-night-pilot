@@ -171,7 +171,13 @@ describe("timing history", () => {
     expect(t.base["check-b"]).toBeUndefined(); // a failed step's time is not a duration estimate
     expect(t.base["check-c"]).toEqual([7, 8]);
     expect(t.contention).toEqual({ "2": [1.1], "3": [1.2] });
-    expect(t.sequentialWallSec).toEqual([100, 100, 5000]);
+    expect(t.sequentialWallSec).toEqual([100, 100, 5000]); // newest local first, then the baseline
+  });
+  it("keeps the newest sequential wall times, not the oldest", () => {
+    const hist = join(dir, "walls.jsonl");
+    writeFileSync(hist, Array.from({ length: 12 }, (_, i) => JSON.stringify({ level: "full", workers: 1, verdict: "PASSED", wallSec: 1000 + i, steps: [] })).join("\n"));
+    const t = loadTimings({ baselinePath: join(dir, "none.json"), historyPath: hist });
+    expect(t.sequentialWallSec).toEqual([1011, 1010, 1009, 1008, 1007, 1006, 1005, 1004, 1003, 1002]);
   });
   it("contention ratio is the median step slowdown, and needs enough steps", () => {
     const base = { a: [10], b: [20], c: [30], d: [40], e: [50] };
