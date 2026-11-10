@@ -135,6 +135,7 @@ try {
     // P7: an Apply the app couldn't confirm.
     await h.getByTestId("party-edit").click();
     await h.getByTestId("party-sheet").waitFor({ timeout: 5000 });
+    await h.getByTestId("party-time-15").click(); // a new time asks for a new suggestion
     await h.getByTestId("party-suggest").click();
     await h.getByTestId("party-preview").waitFor({ timeout: 5000 });
     await h.route((url) => new URL(url).pathname.endsWith("/party"), (route) => (route.request().method() === "POST" ? route.abort("internetdisconnected") : route.continue()));
