@@ -206,4 +206,5 @@ Every finding was reproduced on the reviewed head `96eaea5` with the real `SoloS
   - fast gate **PASSED (exit 0)**, run `20261110-142701-51d01b9f-4372`: 1,165 unit tests in 104 files;
   - targeted gate **PASSED (exit 0)**, run `20261110-142749-51d01b9f-7153`: 8 of 8, with `check-solo` 80 checks, `check-casual` 30, `check-tv-outage` 14, `check-poll-body-stall` 12, `check-recovery` 20, `check-sessions` 23.
   - As the review asked, no full gate was run for these local repairs.
+- **Screenshots** were retaken on `9da8ac9`, which has the same source as `51d01b9` (only docs between them). The solo list now shows the new copy. `docs/stage6/screenshots/manifest.json` names that revision.
   - The last full gate is still the one on `35f90c1` (§6.5). The source changes since then are `453fda5` (seat recovery by code) and `51d01b9` (these repairs: the solo session, personal best, the solo screens and `check-solo`). No server or shared client code changed in `51d01b9`.
