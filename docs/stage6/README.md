@@ -127,7 +127,7 @@ The Family Cup stays as a deliberate, optional event with its data and scoring u
 - **Server** (`src/server/room.ts`, `src/server/http.ts`):
   - room kinds `cup | casual | solo` (D-S61-01), Zod-validated on create, saved and restored, legacy rooms restored as Cups;
   - casual and solo rooms refuse official starts, official plans and Cup days;
-  - a solo room has one seat, no briefing, no spectators and no public view: its code, its id and its TV projection and socket all answer "Room not found" (D-S61-03);
+  - a solo room has one seat, no briefing, no spectators and no public view: its code (to join, watch or recover a seat), its id and its TV projection and socket all answer as if there were no such room (D-S61-03);
   - solo safe restart and Leave (`abandonSoloRound`), with the stale-run guarantees of D-S61-04.
 - **Honest requirements** (`src/games/registry.ts`, `manifest.ts`): Math Mayhem's hard minimum is 1, recommended 2+ ("1–10 players · best with 2+"); official still needs 2 (D-S61-02).
 - **Client:**
@@ -143,7 +143,7 @@ The Family Cup stays as a deliberate, optional event with its data and scoring u
 
 ### 6.2 Tested
 - **Unit tests** (all in the gate's `unit-tests` step):
-  - `tests/stage61-room-kinds.test.ts` (23): kinds and refusals, Cup control, solo privacy and no briefing, honest minimums, the solo round (engine scoring, double tap, late answer, safe restart, leave, three replays), Cup isolation, persistence and the legacy default, and the same rules over HTTP, including the closed public view;
+  - `tests/stage61-room-kinds.test.ts` (24): kinds and refusals, Cup control, solo privacy and no briefing, honest minimums, the solo round (engine scoring, double tap, late answer, safe restart, leave, three replays), Cup isolation, persistence and the legacy default, and the same rules over HTTP, including the closed public view and seat recovery by a solo room's code;
   - `tests/stage61-solo-client.test.ts` (11): personal best (first, higher, lower, tie, other version, malformed, blocked, write fails), the seat format, and the solo session against a real server: one room with storage working, blocked, or read-only with a dead seat; token-only reuse; two tabs (stale answer and stale cancel can't touch the replacement); dispose;
   - `tests/client-uuid.test.ts` (4): the old fallback is refused by the server's schema; the new id passes it with and without `randomUUID` and with no Web Crypto.
   - Mutation checks: removing the page-seat fallback fails 2 client tests; removing the solo public-view refusal fails 2 tests.
@@ -178,5 +178,9 @@ Each verdict is one run on one revision.
 - **Fast gate** on `79a92a9`: **PASSED (exit 0)**, run `20261110-111110-79a92a9e-12770`: typecheck (server and web), lint, web build, 1,149 unit tests in 104 files.
 - **Targeted gate** on `79a92a9`: **PASSED (exit 0)**, run `20261110-111112-79a92a9e-12814`: 18 of 18 (build, preflight, and `check-solo`, `check-casual`, `check-mchezo`, `check-math`, `check-stage2`, `check-spectator`, `check-library-nav`, `check-lobby-fixes`, `check-mobile`, `check-lobby-mode`, `check-sessions`, `check-recovery`, `check-viewports`, `check-history-links`, `check-library`, `check-poll-body-stall`).
 - `3db8a99` then fixed the StrictMode remount (development builds only) and added the keyboard checks; `check-solo` (61 checks) and `check-casual` (30) passed on it outside the gate.
-- **Full gate:** one parallel run on the final tested commit. Its verdict, run id and raw evidence are recorded in the documentation-only commit after it (`docs/PROGRESS.md`, `docs/evidence/gate-runs/`).
+- **Full gate** on `35f90c1` (the code of `3db8a99` plus this record): **PASSED (exit 0)**, run `20261110-112312-35f90c11-18967`, fresh clone, clean tree (fingerprint `3613e339772f`, 408 files). 77 passed, 0 failed, 0 timed out, 0 not run, in 25m 17s on 3 workers; 1,149 unit tests in 104 files; all 70 drivers (the 68 before plus `check-solo` and `check-casual`) and E2E 15 of 15. `check-solo` made 61 checks and `check-casual` 30, both plain-http checks at a real insecure origin. Chromium headless shell 153.0.8010.12, Node v22.23.4.
+- **After the full gate started,** my own review found seat recovery by a solo room's code still answering (D-S61-03). Fixed in `453fda5` (one lookup, one unit test that failed first). I did not interrupt the running gate; the fix has its own runs:
+  - fast gate on `453fda5`: **PASSED (exit 0)**, run `20261110-112530-453fda50-22327`, 1,150 unit tests in 104 files;
+  - targeted gate on `453fda5` (`solo`, `casual`, `recovery`, `sessions`), fresh clone, clean tree: **PASSED (exit 0)**, run `20261110-114857-453fda50-2186`, 6 of 6.
+- Raw evidence for each run: `docs/evidence/gate-runs/`.
 

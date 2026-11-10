@@ -1541,12 +1541,15 @@ The owner accepted the audit, approved Night Circle, Home B, Lobby A and the pro
 - **In this stage's first version, before commit:** Back to solo pushed a history entry, so Back from the solo list returned to the finished round (D-S61-08); the solo list's cover pushed Start below the fold at 320×640.
 - **In `79a92a9`, development builds only:** React's StrictMode remount left the solo screen holding a disposed session, so on the Vite dev server the round never started. Reproduced there and fixed in `3db8a99`; production builds were never affected.
 - **In my own checks:** a late-answer check passed for the wrong reason (its event id was invalid); it now has an in-time control answer.
+- **In my own review, after the full gate started:** the seat-recovery routes still found a solo room by its code (seat list, host-assisted request). No seat could be recovered, but it broke D-S61-03; fixed in `453fda5` with a test that failed first.
 
 **Tests (each verdict is one run on one revision):**
 - fast gate on `79a92a9`: PASSED (exit 0), run `20261110-111110-79a92a9e-12770` (1,149 unit tests in 104 files);
 - targeted gate on `79a92a9`: PASSED (exit 0), run `20261110-111112-79a92a9e-12814`, 18 of 18;
 - `check-solo` (61 checks) and `check-casual` (30) on `3db8a99`, outside the gate;
-- the full gate on the final tested commit is recorded in the next commit.
+- **full gate on `35f90c1`: PASSED (exit 0)**, run `20261110-112312-35f90c11-18967`, fresh clone, clean tree: 77 of 77 (1,149 unit tests; 70 drivers; E2E 15/15) in 25m 17s on 3 workers;
+- `453fda5` (the seat-recovery fix, after the full gate started): fast gate PASSED, run `20261110-112530-453fda50-22327` (1,150 unit tests); targeted gate (`solo`, `casual`, `recovery`, `sessions`) PASSED, run `20261110-114857-453fda50-2186`, 6 of 6.
+- Raw evidence: `docs/evidence/gate-runs/`.
 
 **External blockers:** none. WebKit and real devices are not available here (not run).
 

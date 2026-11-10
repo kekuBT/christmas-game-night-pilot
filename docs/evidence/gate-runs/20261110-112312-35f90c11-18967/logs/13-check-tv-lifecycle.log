@@ -1,0 +1,20 @@
+$ node scripts/check-tv-lifecycle.mjs http://localhost:45215
+# timeout 900s | worker w1 | server http://localhost:45215 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s61-full-35f90c1/test-results/20261110-112312-35f90c11-18967/server-data/w1)
+
+[+4.8s] PASS lobby: TV shows the dashboard
+[+4.9s] PASS trivia briefing: TV shows the rules and who is ready, no question
+[+25.2s] PASS Start now names the not-ready TV seat — TV: not ready yet
+[+25.2s] PASS trivia playing: TV auto-switches to the stage
+[+65.9s] PASS trivia finished: TV shows the leaderboard stage
+[+67.0s] PASS newer game briefing: TV leaves the Trivia stage for the new rules
+[+89.2s] PASS newer game playing: TV leaves the Trivia stage for the dashboard
+[+89.2s] PASS newer game playing: dashboard names Math Mayhem as now playing
+[+128.5s] DEBUG TV body at math finish: 
+[+128.5s] 🎄 Christmas Game NightCode: 5APXYCPlaying as TV · Room: Christmas Game NightLobby & GamesChampionshipTV DashboardMemory BookReconnectSaved.Math Mayhem · OfficialEveryone tiedAAdaBBeaCCalTTVEveryone tied. A perfectly balanced family.You tied for 1st of 4240 ptsYou share the top spot. Sharing is car
+[+130.1s] PASS newer game finished: TV still on the live show for Math Mayhem, no stale Trivia stage — 
+[+130.1s] mchezoMath MayhemFinal standingsOfficialJoin 5APXYCEveryone tiedMath Mayhem · OfficialThis game's final standingsBigges
+[+151.7s] PASS trivia restarts: TV returns to a fresh question stage
+[+151.7s] TV LIFECYCLE ALL PASSED
+[+151.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 151.8s | cpu 8.6s, peak memory 248 MB
