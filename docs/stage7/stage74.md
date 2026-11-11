@@ -132,7 +132,7 @@
   - **Forgotten presses:** the newest 64 are remembered, persisted and never projected. A press forgotten after 64 newer ones is stale by its revision, so it can never become a new start.
   - **The app:** sends a new id with every press (Start, Play again, Try again), made against the revision of the room it has just read (a room made in this Start is at 0). A `SESSION_CONFLICT` is shown as "Something changed in another tab or window, so this Start didn't go ahead. Try again to start a new round."; Try again reads the room again and makes a new press.
   - **A Start with no answer** (review 6786060026, §7.5): the app sends the same press again, unchanged, and acts only on the server's answer. It never adopts a round because it appeared in the room.
-    - A quick failure (the connection refused or reset) is resent at once.
+    - A quick failure (the connection refused or reset) is resent at once. A request that used its whole allowance is not resent in the same Start.
     - Every send fits within the first request's own allowance, so a Start with no answer ends when it did before.
     - A press still without an answer is kept, and Try again sends it again. Any definite answer, Leave and closing the page end it.
   - **API compatibility, kept explicit:** a solo Start without `attempt` is still a plain new round, as before (tested). The app always sends one.
@@ -254,8 +254,19 @@ On `5d41e5f1cb63bddfdb9b506318e9953dacc5a1cd`, **one after the other** (the full
 | `20261111-034429-8147b726-9520` | fast | **PASSED**, exit 0, 5/5: typecheck ×2, lint, 1,304 unit tests (including the two-tab client tests), build | wall 42 s |
 | `20261111-034515-8147b726-12402` | full | **PASSED**, exit 0, 82/82, 3 workers: `check-content-variety` 57 (A4 included), `check-solo` 80, `check-solo-shelf` 58, `check-session-flow` 70 | wall 28 min 13 s |
 
-- **No failed runs.**
+- **No failed gate runs.**
 - **A note on reporting:** both finished by 04:13 UTC, but this session's worker restarted before the report, so the report came later. Nothing was rerun.
+- **Superseded:** a focused rerun after these gates failed one client test once (§7.5). The fix is `ecb617c`, gated below.
+
+**The timed-out resend fix (§7.5) on `ecb617c625e314ddef3bccaf0a2e3a928649ab62`:** one after the other, each in its own fresh clone with a clean tree (`dirty: []`), with the same source fingerprint (`4a0403e3…`, 432 files).
+
+| Run | Gate | Verdict | Measured |
+|---|---|---|---|
+| `20261111-055510-ecb617c6-15772` | fast | **PASSED**, exit 0, 5/5: typecheck ×2, lint, 1,306 unit tests, build | wall 45 s |
+| `20261111-055600-ecb617c6-18731` | full | **PASSED**, exit 0, 82/82, 3 workers: `check-content-variety` 57 (A4 included), `check-solo` 80 (I1 6.5 s), `check-solo-shelf` 58, `check-session-flow` 70 | wall 28 min 47 s |
+
+- **The estimate posted before the runs** (PR #11, comment 6788331434): about 45 s, then about 28 minutes. The gate's own prediction for the full gate was about 27 min 58 s.
+- **No failed gate runs.** They ran from 05:54:57 to 06:24:50 UTC.
 
 ### 7.5 Repair (review 6786060026, P2, V3): solo Start recovery is tied to its own press
 - **The finding:** a solo Start that got no answer read the room once and adopted any new round of the same game that wasn't there before. Once another tab can start the same game, that is wrong. Tab A's press never reached the server; tab B, on the same seat, started Word Connections; A adopted B's round as its own, and both tabs acted on one round. ChatGPT reproduced it against the real server and client.
@@ -268,7 +279,8 @@ On `5d41e5f1cb63bddfdb9b506318e9953dacc5a1cd`, **one after the other** (the full
     - a replay of its own round, only while that round is still the latest;
     - a round started now, when it never arrived and nothing changed;
     - a stale refusal (`SESSION_CONFLICT`), when the room moved on.
-  - **Timing:** a quick failure is resent at once (up to two resends). Every send fits within the first request's own allowance and the Start's budget, so a Start with no answer ends when it did before (`check-solo` I1: about 6 s).
+  - **Timing:** only a quick failure is resent at once (up to two resends), and every send fits within the first request's own allowance and the Start's budget. A request that used its whole allowance is never resent in the same Start; it ends the Start (Try again resends the same press). So a Start with no answer ends when it did before (`check-solo` I1: about 6 s).
+  - **The timeout is flagged** (`SoloRequestError.timedOut`). It rejects before it aborts, so the request reports the timeout rather than the abort's internal "stopped" error (`ecb617c`, below).
   - **Try again** sends a press still without an answer again, unchanged. Any definite answer, Leave and dispose end it.
   - **"Replaced the interrupted round"** is said only when an open round other than this press's own was there.
   - The server is unchanged: its replay and stale rules (§4.4) give the authoritative answer.
@@ -280,9 +292,27 @@ On `5d41e5f1cb63bddfdb9b506318e9953dacc5a1cd`, **one after the other** (the full
     - A's request hangs while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale;
     - no network at all: the Start ends within its budget; Try again sends the same press, so a press that never arrived starts once and one that did arrive is a replay; Leave while a press is unanswered ends it.
   - **The Stage 6.1 client tests** (fake server): the fake now follows the server's press rules. The old "adopted" test is now two tests: a dropped connection is resent and replayed; a reply that never comes ends the Start within its allowance, and Try again replays.
-  - **Five client mutations** each make the tests fail: Try again making a new press; no resend after a quick failure; resends not bound to the first request's allowance; the pending press kept after Leave; a resend with a new press id.
+  - **Two more Stage 6.1 client tests** (`ecb617c`):
+    - a lagging clock, where the timer fires a moment before the clock says the allowance is over: the timed-out Start is not resent;
+    - a connection that fails 300 ms in, then a resend that hangs: the Start ends at the first 400 ms allowance, not two.
+  - **Seven client mutations** each make the tests fail (the figure is how many tests fail; script and output in `docs/evidence/stage74-local/repair/client-mutations-on-ecb617c.txt`):
+    - C1, Try again making a new press: 3;
+    - C2, no resend after a quick failure: 5;
+    - C3, resends not bound to the first request's allowance: 1;
+    - C4, the pending press kept after Leave: 1;
+    - C5, a resend with a new press id: 4;
+    - C6, a timed-out request resent: 1;
+    - C7, abort before reporting the timeout: 2.
+    - Until `ecb617c`'s late-failure test, C3 was not caught. C6 and C7 are new with `ecb617c`.
   - **`check-content-variety` A4** (57 checks in all): the reviewer's scenario in the browser. Tab A's Start is dropped by the network while tab B starts the same game. A is told something changed and never plays B's round, B keeps playing, and A sent the same press twice.
-  - **Regressions:** `check-solo` (80, I1 at about 6.5 s), `check-solo-shelf` (58), unit suite 1,304.
+  - **Regressions:** `check-solo` (80, I1 at about 6.5 s), `check-solo-shelf` (58), unit suite 1,306 (1,304 at `8147b72`).
+- **A failure observed after the gates on `8147b72`, and its fix (`ecb617c`):**
+  - **What:** both gates on `8147b72` passed (§7.3). A focused verbose run afterwards, of `stage61-solo-client` and `stage74-content-variety` on `0180dfd` (source identical to `8147b72`), had 58 passed and 1 failed. The failing test was the Stage 6.1 test "Start's reply never comes after the server started the round…": it expected `phase: "error"` and received `"playing"`. All five two-tab tests passed in that run. Raw log: `docs/evidence/stage74-local/repair/two-tab-and-client-tests-on-8147b72.log`.
+  - **Why:**
+    - a timer can fire a few ms before `Date.now()` reaches the allowance, so the "time left" check let a timed-out send be resent;
+    - `request()` aborted before it rejected, so the race settled with the abort's "stopped" error, which wasn't marked as a timeout.
+  - **The impact:** not a safety problem. The resend was the identical press, so the server answered with a replay of the Start's own, still-latest round. No other tab's round was adopted, nothing more was used, and the extra send stayed within the first request's allowance. But it broke the rule above (a timed-out Start ends), and made that test depend on timing.
+  - **The fix:** the timeout rejects first, flagged `timedOut`, then aborts; only a quick failure is resent. The two tests above cover it; the lagging-clock test fails on `8147b72`.
 
 ### 7.4 A pre-existing defect found while testing V3: solo play after a server restart
 - **What:** a server restart marks every player not connected (`http.ts`, restore). A solo room has no socket, so nothing marked its one player present again, and every solo Start was refused: 400 "Need at least 1 connected players". The solo app shows a refusal as given (`soloSession.ts`, "refused"), so every Try again failed the same way: solo play was stuck in that room until its storage was cleared.

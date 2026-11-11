@@ -1802,7 +1802,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **Branch:** `claude/stage7-4-content-variety`, stacked on PR #10 at `af39c78` (PR #11).
 - **Instruction:** ChatGPT's review and handoff on PR #10 (comment 6783345938). It cleared Stage 7.3 after its own review and private live-site audit of `371c194`.
-- **Spec and record:** `docs/stage7/stage74.md`; decisions D-S74-01 … 07.
+- **Spec and record:** `docs/stage7/stage74.md`; decisions D-S74-01 … 08.
 - Nothing was merged or deployed, no port was made public, and nothing was paid for.
 
 **Milestone:**
@@ -1835,7 +1835,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Gates on `8147b72`** (fresh clone, clean tree, one after the other):
   - fast `20261111-034429-8147b726-9520`: **PASSED** 5/5, 1,304 unit tests, 42 s;
   - full `20261111-034515-8147b726-12402`: **PASSED** 82/82, `check-content-variety` 57/57, in 28 min 13 s.
-  - No failed runs.
+  - No failed gate runs.
+- **A failure observed after those gates:** a focused rerun of the two solo client test files failed one Stage 6.1 test once (58 passed, 1 failed; `docs/evidence/stage74-local/repair/two-tab-and-client-tests-on-8147b72.log`).
+  - **The cause:** a timed-out Start send was resent, because a timer fired a few ms early and the timeout wasn't flagged.
+  - **The impact:** not a safety problem. It was the same press, answered as a replay, but it broke the stated rule.
+  - **Reported** on PR #11 (comment 6788331434) while the new gates ran.
+- **The fix (`ecb617c`, client only):**
+  - only a quick failure is resent, and a timed-out request ends the Start;
+  - 2 new Stage 6.1 tests (a lagging clock; a late failure then a hang);
+  - unit suite 1,306;
+  - seven client mutations, each caught (C3 had not been caught before; `…/repair/client-mutations-on-ecb617c.txt`).
+- **Gates on `ecb617c`** (fresh clone, clean tree, one after the other; PR #11's tested revision):
+  - fast `20261111-055510-ecb617c6-15772`: **PASSED** 5/5, 1,306 unit tests, 45 s;
+  - full `20261111-055600-ecb617c6-18731`: **PASSED** 82/82, `check-content-variety` 57/57 (A4 included), `check-solo` 80, in 28 min 47 s.
+  - No failed gate runs.
 - **Noted for later:** two shipped Connections boards have Christmas clues; queued in `docs/MILESTONES.md` for the seasonal-content milestone.
 
 **Gates on `5d41e5f`** (fresh clone, clean tree, one after the other):
