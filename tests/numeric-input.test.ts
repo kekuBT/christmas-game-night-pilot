@@ -34,7 +34,7 @@ describe("selection skips unenterable numeric items", () => {
       let seq = 0;
       for (const mode of ["official", "practice"] as const) {
         for (let n = 0; n < 40; n++) {
-          const r = selectContent({ lib, gameId, count: 8, mode, cupId: "cup-e1", usage, seq: ++seq, today: TODAY });
+          const r = selectContent({ roomKind: "cup", lib, gameId, count: 8, mode, cupId: "cup-e1", usage, seq: ++seq, today: TODAY });
           if (!r.ok) break;
           for (const li of r.items) expect(answerEnterable(li), li.item.id).toBe(true);
           recordUsage(usage, r.items, { gameInstanceId: `g${seq}`, day: 1, mode, seq });
@@ -48,8 +48,8 @@ describe("selection skips unenterable numeric items", () => {
     const usage: UsageHistory = {};
     for (const li of skipped) usage[li.item.id] = [{ gameInstanceId: "past", day: 1, mode: "official", seq: 1 }];
     const before = JSON.stringify(usage);
-    selectContent({ lib, gameId: "closest-wins", count: 8, mode: "practice", cupId: "cup-hist", usage, seq: 2, today: TODAY });
-    selectContent({ lib, gameId: "guess-the-year", count: 8, mode: "practice", cupId: "cup-hist", usage, seq: 3, today: TODAY });
+    selectContent({ roomKind: "cup", lib, gameId: "closest-wins", count: 8, mode: "practice", cupId: "cup-hist", usage, seq: 2, today: TODAY });
+    selectContent({ roomKind: "cup", lib, gameId: "guess-the-year", count: 8, mode: "practice", cupId: "cup-hist", usage, seq: 3, today: TODAY });
     expect(JSON.stringify(usage)).toBe(before);
   });
 

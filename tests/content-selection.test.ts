@@ -129,7 +129,7 @@ describe("practice can never preview official content", () => {
 describe("determinism, atomicity and persistence", () => {
   it("the same saved state and seed select the same items", () => {
     const lib = fixtureLib(40);
-    const req = { lib, gameId: "trivia" as const, count: 10, mode: "official" as const, cupId: "cup-fixed-1234", usage: {} as UsageHistory, seq: 3, today: "2026-11-06" };
+    const req = { roomKind: "cup" as const, lib, gameId: "trivia" as const, count: 10, mode: "official" as const, cupId: "cup-fixed-1234", usage: {} as UsageHistory, seq: 3, today: "2026-11-06" };
     const a = selectContent(req);
     const b = selectContent({ ...req, usage: {} });
     expect(a.ok && b.ok && a.items.map((i) => i.item.id)).toEqual(b.ok && b.items.map((i) => i.item.id));

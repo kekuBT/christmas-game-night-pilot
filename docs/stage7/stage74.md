@@ -106,7 +106,9 @@
 4. **No eligible items:** refused as today ("No practice content is available for this game yet.").
 5. **One eligible item:** it is dealt every time.
 
-**Effect on today's library in normal mode:** no Connections board was official-eligible except the legacy one. So the order of the 12 provisional boards is unchanged (same seed, same shuffle), and the legacy board joins as the 13th.
+**Effect on today's library in normal mode:**
+- **More boards:** the approved legacy Connections board now joins the 12 provisional ones, so a solo room deals 13 different boards before any repeat.
+- **A different order:** the seeded shuffle now runs over 13 boards, not 12, so the order changes too. It is still deterministic.
 
 ### 4.3 Persistence and consumption (V3)
 **Unchanged path:** `contentUsage` and `contentSeq` are written in the same synchronous step as the start (or, with a briefing, as the start of play) and saved with the room.

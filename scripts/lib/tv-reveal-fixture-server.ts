@@ -39,7 +39,7 @@ createInterface({ input: process.stdin }).on("line", (line) => {
   try {
     const engine = server.rooms.get(roomId);
     if (!engine) throw new Error(`no room ${roomId}`);
-    const pick = selectContent({ lib, gameId: "trivia", count: 10, mode: "practice", cupId: engine.cup.cupId, usage: engine.contentUsage, seq: engine.contentSeq, today: new Date().toISOString().slice(0, 10) });
+    const pick = selectContent({ roomKind: engine.kind, lib, gameId: "trivia", count: 10, mode: "practice", cupId: engine.cup.cupId, usage: engine.contentUsage, seq: engine.contentSeq, today: new Date().toISOString().slice(0, 10) });
     if (!pick.ok) throw new Error(pick.message);
     for (let seed = 1; seed < 200_000; seed++) {
       const extra = materialize("trivia", pick.items, { seed, playerIds: ids.split(",") }) as { questions: { id: string; options: string[] }[] };

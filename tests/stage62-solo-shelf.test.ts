@@ -206,12 +206,12 @@ describe("Word Connections in a solo room", () => {
     expect(done.rawScores[z.me]).toBe(0);
   });
 
-  /** The boards a solo room deals in 14 starts (each left at once: a left round still counts as used). */
+  /** The boards a solo room deals in 15 starts (each left at once: a left round still counts as used). */
   function dealt(lib: ReturnType<typeof loadContent>): string[] {
     const { engine, me } = soloRoom();
     engine.content = lib;
     const out: string[] = [];
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 15; i++) {
       const g = engine.startGame(me, "word-connections", { official: false });
       out.push(boardOf(engine, g.id).categories.map((c) => c.name).sort().join("|"));
       engine.abandonSoloRound(me, g.id);
@@ -219,21 +219,28 @@ describe("Word Connections in a solo room", () => {
     return out;
   }
 
-  it("with the shipped library: 12 different boards, then repeats, least recently used first", () => {
+  // Stage 7.4 (docs/stage7/stage74.md §4.2, D-S74-01) changed both tests
+  // below on purpose. Before it, a solo room used the Cup's practice rule:
+  // practice-only and already-used items first, a fresh official item only
+  // after those. So the 12 provisional boards cycled and the one approved
+  // (legacy) board was never dealt, and with every board approved the room
+  // dealt the same board every time ("CURRENT BEHAVIOUR", Stage 6.2 spec §5
+  // concern 1: `new Set(boards).size` was 1). Now a solo room deals every
+  // practice-usable board it hasn't used, then the least recently used.
+  it("with the shipped library: all 13 boards (the approved legacy one too), then repeats, least recently used first", () => {
     const shipped = loadContent(DEFAULT_CONTENT_DIR, { testApproveProvisional: false });
     const boards = dealt(shipped);
-    expect(new Set(boards.slice(0, 12)).size).toBe(12);
-    expect(boards[12]).toBe(boards[0]);
-    expect(boards[13]).toBe(boards[1]);
+    expect(new Set(boards.slice(0, 13)).size).toBe(13);
+    expect(boards[13]).toBe(boards[0]);
+    expect(boards[14]).toBe(boards[1]);
   });
 
-  it("CURRENT BEHAVIOUR (spec §5, concern 1): if every board were approved for official play, a solo room would deal the same board every time", () => {
-    // The Cup rule (practice reuses used items before retiring a fresh
-    // official one) protects official content, which a solo room never
-    // plays. Pinned here so a decision to change it is deliberate.
+  it("Stage 7.4 (was concern 1): with every board approved for official play, a solo room still deals all 13 before any repeats", () => {
     const allApproved = loadContent(DEFAULT_CONTENT_DIR, { testApproveProvisional: true });
     const boards = dealt(allApproved);
-    expect(new Set(boards).size).toBe(1);
+    expect(new Set(boards.slice(0, 13)).size).toBe(13);
+    expect(boards[13]).toBe(boards[0]);
+    expect(boards[14]).toBe(boards[1]);
   });
 });
 

@@ -255,7 +255,7 @@ describe("size policy (provisional): max(15, 4 x players), with obscure-tail and
 
 describe("selection: closed sets suited to the room, and no fallback", () => {
   const req = (players: number, usage: UsageHistory = {}, mode: "official" | "practice" = "official") => selectContent({
-    lib, gameId: "category-sprint", count: 3, mode, cupId: "cup-e2v3-test", usage, seq: 0, today: "2026-11-07", sprint: { players, sizePolicy: 1 },
+    roomKind: "cup", lib, gameId: "category-sprint", count: 3, mode, cupId: "cup-e2v3-test", usage, seq: 0, today: "2026-11-07", sprint: { players, sizePolicy: 1 },
   });
   it("official games use only suitable closed sets, chosen at game start for the roster size", () => {
     for (let p = 4; p <= 10; p++) {
@@ -266,7 +266,7 @@ describe("selection: closed sets suited to the room, and no fallback", () => {
     }
     const seven = new Set<string>();
     for (let seq = 0; seq < 20; seq++) {
-      const r = selectContent({ lib, gameId: "category-sprint", count: 3, mode: "official", cupId: `cup-${seq}`, usage: {}, seq, today: "2026-11-07", sprint: { players: 7, sizePolicy: 1 } });
+      const r = selectContent({ roomKind: "cup", lib, gameId: "category-sprint", count: 3, mode: "official", cupId: `cup-${seq}`, usage: {}, seq, today: "2026-11-07", sprint: { players: 7, sizePolicy: 1 } });
       if (r.ok) r.items.forEach((li) => seven.add(li.item.id));
     }
     expect(seven).toEqual(new Set(["spr-cs-us-states", "spr-cs-africa", "spr-cs-elements"]));
@@ -285,7 +285,7 @@ describe("selection: closed sets suited to the room, and no fallback", () => {
   });
 
   it("without E2 v3 rules (older Cups) selection is unchanged", () => {
-    const r = selectContent({ lib, gameId: "category-sprint", count: 3, mode: "official", cupId: "cup-old", usage: {}, seq: 0, today: "2026-11-07" });
+    const r = selectContent({ roomKind: "cup", lib, gameId: "category-sprint", count: 3, mode: "official", cupId: "cup-old", usage: {}, seq: 0, today: "2026-11-07" });
     expect(r.ok).toBe(true);
   });
 });

@@ -328,8 +328,12 @@ export class SoloSession {
       const before = new Set((proj?.games ?? []).map((g) => g.id));
       const openRound = (proj?.games ?? []).some((g) => isOpen(g.status));
       let gid: string;
+      // Stage 7.4: each press has its own id, so a duplicated request returns
+      // this press's round instead of starting (and using up content for) another.
+      // A solo room has no session revision to check; 0 is a placeholder.
+      const attempt = { id: uuidV4(), sessionRevision: 0 };
       try {
-        gid = (await this.post<{ gameId: string }>(`/rooms/${this.seat!.roomId}/games`, { gameId, official: false }, this.budget(deadline))).gameId;
+        gid = (await this.post<{ gameId: string }>(`/rooms/${this.seat!.roomId}/games`, { gameId, official: false, attempt }, this.budget(deadline))).gameId;
       } catch (e) {
         if (!this.isCurrent(gen)) return;
         if (!(e instanceof SoloRequestError) || e.kind !== "transient") throw e;

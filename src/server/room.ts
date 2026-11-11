@@ -807,6 +807,12 @@ export class RoomEngine {
     // Stage 6.1: in a solo room, a round left open (reload, leaving mid-round)
     // is replaced by the new one: a safe restart, with nothing scored.
     if (this.kind === "solo") this.abandonOpenRounds(hostId, "restarted");
+    // Stage 7.4 (pre-existing defect, docs/stage7/stage74.md §7): a solo room
+    // has no socket, so after a server restart (which marks every player not
+    // connected) nothing marked its one player present again, and every Start
+    // was refused ("Need at least 1 connected players"). The one pressing
+    // Start in a private solo room is the player, and is here.
+    if (this.kind === "solo") this.markConnected(hostId);
     // The browser UI has a single active-game panel (first playing game), so
     // a second concurrent game would orphan the first: it could never become
     // active again. Reject instead of silently stacking games.
@@ -853,7 +859,9 @@ export class RoomEngine {
       // game start, from the Cup's own rules (absent on older Cups = v1).
       const sprintRules = cg === "category-sprint" ? this._cup.categorySprint : undefined;
       const sprintSel = sprintRules && mode === "official" ? { players: playerIds.length, sizePolicy: sprintRules.sizePolicy } : undefined;
-      const pick = selectContent({ lib: this.content, gameId: cg, count: need, mode, cupId: this._cup.cupId, usage: this.contentUsage, seq: this.contentSeq, today: new Date(startedAt).toISOString().slice(0, 10), ...(sprintSel ? { sprint: sprintSel } : {}) });
+      // Stage 7.4: the room's kind decides the rules (a Cup protects its
+      // official content; casual and solo rooms deal unused content first).
+      const pick = selectContent({ lib: this.content, gameId: cg, count: need, mode, roomKind: this.kind, cupId: this._cup.cupId, usage: this.contentUsage, seq: this.contentSeq, today: new Date(startedAt).toISOString().slice(0, 10), ...(sprintSel ? { sprint: sprintSel } : {}) });
       if (!pick.ok) throw new ContentShortage(pick.message, pick.available, pick.needed, pick.reason === "no-suitable-category" ? "NO_SUITABLE_CATEGORY" : "CONTENT_EXHAUSTED");
       selected = {
         extra: materialize(cg, pick.items, { seed, playerIds, sprintAnswerRules: this._cup.categorySprint?.answerRules ?? 1, ...(sprintRules ? { sprint: { matcherVersion: sprintRules.matcher, ...(sprintSel ? { eligibility: sprintSel } : {}) } } : {}) }),
@@ -919,6 +927,10 @@ export class RoomEngine {
       this.session.revision += 1;
       if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id });
     }
+    // Stage 7.4 (§4.4): remember a solo press, so a repeat of it starts nothing.
+    if (this.kind === "solo" && opts.attempt && !this.session.ops.some((o) => o.id === opts.attempt!.id)) {
+      this.rememberOp({ id: opts.attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id });
+    }
     // Audit who was left out and whether the host chose that explicitly.
     const leftOut = readiness.wouldMiss.map((m) => ({ id: m.id, presence: m.presence }));
     const leftOutDetail = leftOut.length ? { leftOut, startedWithoutOnPurpose: [...leftOutOnPurpose].filter((x) => leftOut.some((l) => l.id === x)) } : {};
@@ -941,7 +953,10 @@ export class RoomEngine {
    */
   startChosen(actorId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt } = {}): { game: GameInstance; replay: boolean } {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can start a game");
-    if (this.kind === "casual" && opts.attempt) {
+    // Stage 7.4 (§4.4): a solo room's Start may carry a press id too. A repeat
+    // returns the round that press started: nothing is abandoned, started or
+    // selected again. (A solo room has no session revision to check.)
+    if ((this.kind === "casual" || this.kind === "solo") && opts.attempt) {
       const seen = this.resolveAttempt(opts.attempt, `start:${gameId}`);
       if (seen) return seen;
     }
@@ -1219,6 +1234,8 @@ export class RoomEngine {
     if (kind === "break") return op;
     const game = op.gameInstanceId ? this.games.get(op.gameInstanceId) : undefined;
     if (game) return { game, replay: true };
+    // Stage 7.4: a solo round that was left or replaced is gone too; its press starts nothing again.
+    if (this.kind === "solo") throw new StartRefused("ATTEMPT_ENDED", "That round was left or replaced, so nothing new started.", this.readiness());
     throw new StartRefused("ATTEMPT_ENDED", "That start was cancelled before play, so nothing new started. Choose again.", this.readiness(), { session: this.sessionView() });
   }
 
@@ -3250,6 +3267,8 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
     const x = o as Partial<SessionOp> | null;
     return !!x && typeof x.id === "string" && typeof x.key === "string" && typeof x.revision === "number" && (x.gameInstanceId === undefined || typeof x.gameInstanceId === "string") && (x.actor === undefined || typeof x.actor === "string") && (x.base === undefined || typeof x.base === "number");
   }).slice(-SESSION_OPS_LIMIT).map((o) => ({ id: o.id, key: o.key, revision: o.revision, ...(o.gameInstanceId !== undefined ? { gameInstanceId: o.gameInstanceId } : {}), ...(o.actor !== undefined ? { actor: o.actor } : {}), ...(o.base !== undefined ? { base: o.base } : {}) }));
+  // Stage 7.4: a solo room keeps its remembered Start presses (§4.4); a Cup room has none.
+  if (kind === "solo") return { onBreak: false, revision, ops };
   if (kind !== "casual") return { onBreak: false, revision, ops: [] };
   return r.onBreak === true
     ? { onBreak: true, ...(typeof r.breakSince === "number" ? { breakSince: r.breakSince } : {}), revision, ops }
