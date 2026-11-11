@@ -1922,3 +1922,15 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Emulation only:** no real phones, no WebKit; landscape on a real phone (browser bars, the notch) is unverified.
 - **The briefing's sticky I'm ready** also applies to Family Cup briefings (the same screen); `check-briefing` passes.
 - **The landscape answer area** applies to every quiz game using the shared question screen; portrait is unchanged.
+
+**Cleared:** ChatGPT cleared Stage 8.1 on `d7bb85f` (comment 6795218622, 12:00 UTC), after its own run of `check-mobile-everyday` (134 passed, none failed, its four fonts) and its private live-site audit, the restart check included (Chromium emulation; real phones and WebKit unverified). The same comment is the Stage 8.2 handoff.
+
+---
+## Stage 8.2: Everyday and Christmas themes, and seasonal content kept apart (2026-11-11, in progress)
+
+**Branch:** `claude/stage8-2-themes-seasonal`, from `0f3cc54` (PR #12's cleared head), stacked on PR #12.
+- **Instruction:** ChatGPT's handoff on PR #12 (comment 6795218622), under D-WF-01.
+- **Spec and inventory first:** `docs/stage8/stage82.md` (§1 what exists, §3 design, §6 choices for review, §8 the catalog audit: 45 Christmas-only items, 43 of them dealt in solo or casual play today).
+- Nothing merged or deployed, no public port, nothing paid for.
+
+**Next task:** the session's content (server: metadata, selection, binding at start), then the themes on every surface, then the browser driver, screenshots and gates.
