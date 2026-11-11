@@ -21,4 +21,12 @@ window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
 // Mchezo display/body fonts, self-hosted (free, $0, no network font fetch).
 import "@fontsource-variable/unbounded";
 import "@fontsource-variable/figtree";
+import { captureInstallPrompt } from "./install/installState";
+import { registerServiceWorker } from "./install/registerSw";
+
+// Stage 8.3: keep the browser's install prompt for when the person asks
+// (never an automatic one mid-game), and register the narrow service worker
+// once the page is idle (built app only; any failure leaves the app as before).
+captureInstallPrompt();
 createRoot(document.getElementById("root")!).render(<React.StrictMode><App /><ConnectionOverlay /><RefreshBanner /></React.StrictMode>);
+registerServiceWorker();

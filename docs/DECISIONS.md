@@ -980,3 +980,80 @@ Instructed by ChatGPT's clearance of Stage 8.1 and handoff 6795218622 on PR #12,
     - Always stacking the options: it costs height on every phone, and the R81-01 shelf must keep its first Start on the first screen.
     - Dropping the ✓: it is the choice's non-colour cue.
 
+
+## Stage 8.3: Home Screen installation foundation (2026-11-11, branch `claude/stage8-3-home-screen`, from the Stage 8.2 head `4c13e2b`)
+
+Handoff 6801615731 (PR #13), under D-WF-01. Spec: `docs/stage8/stage83.md`.
+
+- **D-S83-01 A narrow service worker, by allowlist.**
+  - **What:**
+    - It answers only same-origin GETs for the public shell: client-route page loads (network first; the cached shell only when the network fails), this build's `/assets`, and the public install files.
+    - Every API path, non-GET request, WebSocket and other origin is untouched. Chromium's static routing skips the worker for them entirely.
+    - Nothing is queued or retried.
+    - It installs only if the server is serving its own build.
+  - **Why:**
+    - Chromium's install prompt still needs a fetch handler.
+    - An installed app opened offline should say Mchezo's own honest thing, not show a browser error.
+    - The cache must never hold anything private.
+  - *Alternatives rejected:*
+    - Cache-first pages: an old version would be shown while online.
+    - A library such as Workbox: more code to trust, and the rules harder to see.
+    - No worker: no prompt on Android, and a browser error page offline.
+- **D-S83-02 Updates never take over a page.**
+  - **What:**
+    - A new build's worker waits: no `skipWaiting`, no `clients.claim`. It activates only when no old page is open, then deletes only other `mchezo-shell-*` caches.
+    - Page loads are network first, so any reload while online is the newest build.
+    - "A newer version is ready" appears only on calm screens. **Reload** reloads this tab only, and there is **Later**.
+    - Incompatible updates keep the existing protocol refresh.
+  - *Alternatives rejected:*
+    - `skipWaiting` with an automatic reload: it could reload a game in play.
+    - A reload on `controllerchange`: it would disturb other tabs.
+- **D-S83-03 Install guidance is asked for, and says only what the browser said.**
+  - **What:**
+    - A Home card and a Settings row, never in a room or a game.
+    - Chromium's prompt is captured (its mini-infobar suppressed) and shown only when the person presses Install. "Added" appears only on `appinstalled`, and "Not added" when the prompt is dismissed.
+    - iPhone and iPad get the Share steps.
+    - **Not now** is a device choice (as in R82-01).
+    - It is hidden when the app runs installed.
+  - *Alternatives rejected:* an automatic prompt or banner, or guidance on every screen.
+- **D-S83-04 One static identity.**
+  - **What:**
+    - A static manifest: `id`, `start_url` and `scope` `/`, standalone, the Everyday ground.
+    - One icon for everyone, the circle mark in the Everyday palette; the app opens in the device's own look.
+  - *Alternative rejected:* a manifest generated per device or per look. Installation metadata would then depend on the device, the first step toward personal data in it.
+- **D-S83-05 The server's side.**
+  - **What:**
+    - `GET /health`: no data, `no-store`.
+    - The install files served with their real types.
+    - `no-cache` for pages, the manifest, the icons and `sw.js`, so updates are always seen; `immutable` for content-hashed `/assets`.
+    - A missing build file is a 404, never a 200 stand-in page a cache could keep.
+  - *Alternative rejected:* probing reachability with `/games`, which is heavier and carries data.
+- **D-S83-06 Where "Can't reach Mchezo" shows.**
+  - **What:**
+    - Home, Join, Host, the solo shelf and the library: every entry outside a room. Join is the invite link's screen.
+    - Rooms keep their connection banner, which already says the seat is saved. The room's "Rejoining" screen starts below that banner, so its heading is never covered.
+  - *Alternative rejected:* the notice on every screen. In a room it would repeat the banner.
+- **D-S83-07 Spec feedback 6802191261: an exact build, validated, and truthful** (revises D-S83-01 and D-S83-02).
+  - **The allowlist** is the build's own emitted list (scripts, styles, fonts, the install files, the shell), not an `/assets` prefix. Another build's files pass through an old worker without entering its cache.
+  - **Every stored response is validated:** a direct same-origin 200 of the expected type, with no redirect, no `no-store` or `private`, and no HTML standing in for a file.
+  - **Install is all-or-nothing:** a partial cache is deleted, and the worker in charge stays.
+  - **The update notice** appears only when the server answers and the page isn't already the waiting build. Reload claims nothing about the worker.
+  - **`/health` counts only as `{"ok":true}`;** `navigator.onLine` only starts a check.
+  - **Nothing promises moving seats, bests or choices into an installed app.** The iPhone steps point to the existing seat recovery.
+  - *Alternative rejected:* trusting any `/assets` file or any 200. A private preview's sign-in page or another build's file could then be stored.
+- **D-S83-08 Repair R83-01: the build version covers the worker; an install owns only its own candidate cache** (review 6805055962; stage83.md §3.3, §7.5).
+  - **The defect, on `96b3970`:** the version didn't cover the worker's code, so a worker-only change kept the version and cache name. The installing worker wrote into that cache and deleted it on failure, so a failed update emptied the active worker's cache, and offline there was no shell.
+  - **Identity** (`apps/web/swBuild.ts`):
+    - The worker is built with a stand-in version.
+    - Its code is hashed with the bundle and the public files, then the version is written in.
+    - The same source gives the same worker, byte for byte. A worker-only or worker-policy change is a new version.
+  - **Ownership** (`apps/web/src/install/swLifecycle.ts`):
+    - An install writes only into a fresh candidate, `mchezo-stage-<build>-<install>`, and on failure deletes only that.
+    - On activation (no page of the old generation open), the old caches go and a complete candidate is copied into `mchezo-shell-<build>`.
+    - If the copy fails, the candidate is served from.
+    - Only an active worker writes its live cache.
+  - *Alternatives rejected:*
+    - A version from the time or a counter: every build would be an update, even an unchanged one.
+    - Guarding only the delete: a same-name install would still write into the active cache.
+    - `skipWaiting`, `claim` or a forced reload: an open game would be disturbed.
+    - Serving straight from per-install caches without promotion: a worker that restarts couldn't tell which candidate is its own.

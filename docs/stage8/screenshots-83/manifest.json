@@ -1,0 +1,281 @@
+{
+  "revision": "96b3970e6c77615e2a0d395232d70ae571300114",
+  "codeOutsideDocsClean": true,
+  "capturedAt": "2026-11-11T18:20:30.182Z",
+  "by": "scripts/screenshot-stage83.mjs",
+  "note": "Chromium headless (Playwright) only. 'emulated' = a platform signal faked (an iPhone user agent, the install prompt event, standalone display mode); the service worker, Cache Storage and offline are the real engine's. Not a real phone, not WebKit.",
+  "shots": [
+    {
+      "file": "01-home-install-card-iphone-everyday-320x640.png",
+      "screen": "Home, the install card on an iPhone (below the games)",
+      "viewport": "320×640",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "02-install-steps-iphone-everyday-320x640.png",
+      "screen": "Show me how: the Share → Add to Home Screen → Add steps",
+      "viewport": "320×640",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "03-settings-add-to-home-screen-iphone-everyday-320x640.png",
+      "screen": "Settings → Add to Home Screen (iPhone)",
+      "viewport": "320×640",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "07-home-offline-everyday-320x640.png",
+      "screen": "Home with no connection: Can't reach Mchezo, Try again",
+      "viewport": "320×640",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "08-join-link-offline-everyday-320x640.png",
+      "screen": "An invite link opened with no connection",
+      "viewport": "320×640",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "09-room-reloaded-offline-everyday-320x640.png",
+      "screen": "A room reloaded with no connection: rejoining, seat saved on the server",
+      "viewport": "320×640",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "01-home-install-card-iphone-everyday-390x844.png",
+      "screen": "Home, the install card on an iPhone (below the games)",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "02-install-steps-iphone-everyday-390x844.png",
+      "screen": "Show me how: the Share → Add to Home Screen → Add steps",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "03-settings-add-to-home-screen-iphone-everyday-390x844.png",
+      "screen": "Settings → Add to Home Screen (iPhone)",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "04-home-install-card-chromium-everyday-390x844.png",
+      "screen": "Home, Chromium offered its install prompt: Install Mchezo",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "beforeinstallprompt event"
+    },
+    {
+      "file": "05-home-install-accepted-everyday-390x844.png",
+      "screen": "After the browser's prompt was accepted: follow your browser (no success claim yet)",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "beforeinstallprompt event"
+    },
+    {
+      "file": "06-settings-standalone-everyday-390x844.png",
+      "screen": "Opened from the Home Screen: no install card; Settings says so",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "navigator.standalone on an iPhone user agent"
+    },
+    {
+      "file": "07-home-offline-everyday-390x844.png",
+      "screen": "Home with no connection: Can't reach Mchezo, Try again",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "08-join-link-offline-everyday-390x844.png",
+      "screen": "An invite link opened with no connection",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "09-room-reloaded-offline-everyday-390x844.png",
+      "screen": "A room reloaded with no connection: rejoining, seat saved on the server",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "01-home-install-card-iphone-christmas-320x640.png",
+      "screen": "Home, the install card on an iPhone (below the games)",
+      "viewport": "320×640",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "02-install-steps-iphone-christmas-320x640.png",
+      "screen": "Show me how: the Share → Add to Home Screen → Add steps",
+      "viewport": "320×640",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "03-settings-add-to-home-screen-iphone-christmas-320x640.png",
+      "screen": "Settings → Add to Home Screen (iPhone)",
+      "viewport": "320×640",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "07-home-offline-christmas-320x640.png",
+      "screen": "Home with no connection: Can't reach Mchezo, Try again",
+      "viewport": "320×640",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "08-join-link-offline-christmas-320x640.png",
+      "screen": "An invite link opened with no connection",
+      "viewport": "320×640",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "09-room-reloaded-offline-christmas-320x640.png",
+      "screen": "A room reloaded with no connection: rejoining, seat saved on the server",
+      "viewport": "320×640",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "01-home-install-card-iphone-christmas-390x844.png",
+      "screen": "Home, the install card on an iPhone (below the games)",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "02-install-steps-iphone-christmas-390x844.png",
+      "screen": "Show me how: the Share → Add to Home Screen → Add steps",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "03-settings-add-to-home-screen-iphone-christmas-390x844.png",
+      "screen": "Settings → Add to Home Screen (iPhone)",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "iPhone user agent"
+    },
+    {
+      "file": "04-home-install-card-chromium-christmas-390x844.png",
+      "screen": "Home, Chromium offered its install prompt: Install Mchezo",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "beforeinstallprompt event"
+    },
+    {
+      "file": "05-home-install-accepted-christmas-390x844.png",
+      "screen": "After the browser's prompt was accepted: follow your browser (no success claim yet)",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "beforeinstallprompt event"
+    },
+    {
+      "file": "06-settings-standalone-christmas-390x844.png",
+      "screen": "Opened from the Home Screen: no install card; Settings says so",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "navigator.standalone on an iPhone user agent"
+    },
+    {
+      "file": "07-home-offline-christmas-390x844.png",
+      "screen": "Home with no connection: Can't reach Mchezo, Try again",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "08-join-link-offline-christmas-390x844.png",
+      "screen": "An invite link opened with no connection",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "09-room-reloaded-offline-christmas-390x844.png",
+      "screen": "A room reloaded with no connection: rejoining, seat saved on the server",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "none (real offline)"
+    },
+    {
+      "file": "10-solo-shelf-update-ready-everyday-320x640.png",
+      "screen": "The solo shelf when a newer build is waiting: Reload or Later",
+      "viewport": "320×640",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "none (a real next build)"
+    },
+    {
+      "file": "10-solo-shelf-update-ready-everyday-390x844.png",
+      "screen": "The solo shelf when a newer build is waiting: Reload or Later",
+      "viewport": "390×844",
+      "look": "everyday",
+      "rendered": "everyday",
+      "emulated": "none (a real next build)"
+    },
+    {
+      "file": "10-solo-shelf-update-ready-christmas-320x640.png",
+      "screen": "The solo shelf when a newer build is waiting: Reload or Later",
+      "viewport": "320×640",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "none (a real next build)"
+    },
+    {
+      "file": "10-solo-shelf-update-ready-christmas-390x844.png",
+      "screen": "The solo shelf when a newer build is waiting: Reload or Later",
+      "viewport": "390×844",
+      "look": "christmas",
+      "rendered": "christmas",
+      "emulated": "none (a real next build)"
+    }
+  ]
+}

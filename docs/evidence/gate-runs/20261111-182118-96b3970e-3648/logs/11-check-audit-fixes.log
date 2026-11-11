@@ -1,0 +1,57 @@
+$ node scripts/check-audit-fixes.mjs http://localhost:38491
+# timeout 600s | worker w2 | server http://localhost:38491 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83-full3/test-results/20261111-182118-96b3970e-3648/server-data/w2)
+
+[+29.2s] PASS A-01 375px: while answers lock, no visible card overlaps another and the chosen card is on top
+[+29.2s] PASS A-01 375px: a long answer never runs under the LOCKED IN stamp on the locked card
+[+41.1s] PASS A-02 375px: results review shows only the chosen card, on top, for every question and jump
+[+41.8s] PASS A-02 375px: long labels on the review stay clear of the stamp
+[+46.5s] PASS A-02 375px: auto reveal never shows overlapping cards
+[+75.7s] PASS A-01 390px: while answers lock, no visible card overlaps another and the chosen card is on top
+[+75.7s] PASS A-01 390px: a long answer never runs under the LOCKED IN stamp on the locked card
+[+87.1s] PASS A-02 390px: results review shows only the chosen card, on top, for every question and jump
+[+87.8s] PASS A-02 390px: long labels on the review stay clear of the stamp
+[+92.5s] PASS A-02 390px: auto reveal never shows overlapping cards
+[+121.6s] PASS A-01 430px: while answers lock, no visible card overlaps another and the chosen card is on top
+[+121.6s] PASS A-01 430px: a long answer never runs under the LOCKED IN stamp on the locked card
+[+133.0s] PASS A-02 430px: results review shows only the chosen card, on top, for every question and jump
+[+133.8s] PASS A-02 430px: long labels on the review stay clear of the stamp
+[+138.5s] PASS A-02 430px: auto reveal never shows overlapping cards
+[+156.2s] PASS A-01 390px reduced motion: while answers lock, no visible card overlaps another and the chosen card is on top
+[+156.2s] PASS A-01 390px reduced motion: a long answer never runs under the LOCKED IN stamp on the locked card
+[+167.2s] PASS A-02 390px reduced motion: results review shows only the chosen card, on top, for every question and jump
+[+167.9s] PASS A-02 390px reduced motion: long labels on the review stay clear of the stamp
+[+172.6s] PASS A-02 390px reduced motion: auto reveal never shows overlapping cards
+[+176.5s] PASS A-03 setup: the server has a three-way tie
+[+177.0s] PASS A-03 375px (Player 1): all three tied-first players are listed
+[+177.0s] PASS A-03 375px (Player 1): every row shows rank 1
+[+177.0s] PASS A-03 375px: no horizontal overflow on standings
+[+177.0s] PASS A-03 390px (Audit Guest): all three tied-first players are listed
+[+177.0s] PASS A-03 390px (Audit Guest): every row shows rank 1
+[+177.0s] PASS A-03 390px: no horizontal overflow on standings
+[+177.1s] PASS A-03 430px (Audit Third): all three tied-first players are listed
+[+177.1s] PASS A-03 430px (Audit Third): every row shows rank 1
+[+177.1s] PASS A-03 430px: no horizontal overflow on standings
+[+177.9s] PASS A-07: someone who joins after a game finished lands in the lobby
+[+177.9s] PASS A-07: ...and is not shown that game's results as if they had played
+[+177.9s] PASS A-07: the server never made the late joiner a participant or gave them a score
+[+180.1s] PASS A-13: a spectator joining after the game sees that game's own questions
+[+191.2s] PASS A-13: after switching rooms, the TV shows the new room's game only
+[+194.8s] PASS A-05 375px: a guest on the library screen reaches the briefing and its I'm ready button
+[+195.2s] PASS A-05 375px: after Ready, play starts for the guest too
+[+198.5s] PASS A-05 390px: a guest on the championship screen reaches the briefing and its I'm ready button
+[+199.0s] PASS A-05 390px: after Ready, play starts for the guest too
+[+202.5s] PASS A-05 430px: a player on the TV view is offered a way back to Ready
+[+202.9s] PASS A-05 430px: a guest on the tv screen reaches the briefing and its I'm ready button
+[+203.3s] PASS A-05 430px: after Ready, play starts for the guest too
+[+206.1s] PASS A-06 375px: while the room loads, no fake empty lobby ("friend", "0 here")
+[+206.1s] PASS A-06 375px: ...an honest "rejoining" status instead
+[+206.1s] PASS A-06 375px: ...which offers the same Reconnect action as the lobby
+[+209.4s] PASS A-06 375px: the real lobby (name, players) follows
+[+212.3s] PASS A-06 430px: while the room loads, no fake empty lobby ("friend", "0 here")
+[+212.3s] PASS A-06 430px: ...an honest "rejoining" status instead
+[+212.3s] PASS A-06 430px: ...which offers the same Reconnect action as the lobby
+[+215.1s] PASS A-06 430px: the real lobby (name, players) follows
+[+215.3s] AUDIT FIXES ALL PASSED
+[+217.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":28,"pages":28,"peakOpenPages":20}
+
+# PASS (exit 0) in 217.1s | cpu 12.5s, peak memory 320 MB

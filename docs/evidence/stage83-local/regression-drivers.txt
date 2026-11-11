@@ -1,0 +1,12 @@
+check-themes-seasonal: exit 0, 251 PASS, 0 FAIL
+check-mobile-everyday: exit 0, 134 PASS, 0 FAIL
+check-solo: exit 0, 80 PASS, 0 FAIL
+check-solo-shelf: exit 0, 58 PASS, 0 FAIL
+check-casual: exit 0, 30 PASS, 0 FAIL
+check-session-flow: exit 0, 70 PASS, 0 FAIL
+check-lobby-mode: exit 0, 71 PASS, 0 FAIL
+check-briefing: exit 0, 43 PASS, 0 FAIL
+check-audit-fixes: exit 0, 50 PASS, 0 FAIL
+check-tv-spectator: exit 0, 15 PASS, 0 FAIL
+check-errors: exit 0, 5 PASS, 0 FAIL
+check-sessions: exit 0, 23 PASS, 0 FAIL

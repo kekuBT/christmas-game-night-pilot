@@ -1,0 +1,22 @@
+$ node scripts/check-leaderboard.mjs http://localhost:46211
+# timeout 1800s | worker w3 | server http://localhost:46211 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83w-full/test-results/20261111-192055-c74befa4-28821/server-data/w3)
+
+[+69.9s] PASS all tied: every player shares rank 1
+[+69.9s] PASS all tied: TV leaderboard matches server — tv=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240 TV:5:0 | server=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240 TV:5:0
+[+69.9s] PASS all tied: phone rows match server — visible=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240
+[+69.9s] PASS first game: no movement note without a previous game — note=0
+[+71.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":5,"peakOpenPages":5}
+[+71.2s] node:internal/modules/run_main:123
+[+71.2s]     triggerUncaughtException(
+[+71.2s]     ^
+[+71.2s] 
+[+71.2s] locator.waitFor: Target page, context or browser has been closed
+[+71.2s]     at passBriefing (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83w-full/scripts/lib/briefing.mjs:15:57)
+[+71.2s]     at playGame (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83w-full/scripts/check-leaderboard.mjs:181:11)
+[+71.2s]     at async file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83w-full/scripts/check-leaderboard.mjs:236:39 {
+[+71.2s]   log: []
+[+71.2s] }
+[+71.2s] 
+[+71.2s] Node.js v22.23.4
+
+# CANCELLED (exit 1) in 71.2s | cpu 5s, peak memory 265 MB

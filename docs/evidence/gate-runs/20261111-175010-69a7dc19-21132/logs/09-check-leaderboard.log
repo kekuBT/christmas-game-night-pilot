@@ -1,0 +1,37 @@
+$ node scripts/check-leaderboard.mjs http://localhost:37093
+# timeout 1800s | worker w3 | server http://localhost:37093 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83-full2/test-results/20261111-175010-69a7dc19-21132/server-data/w3)
+
+[+66.0s] PASS all tied: every player shares rank 1
+[+66.0s] PASS all tied: TV leaderboard matches server — tv=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240 TV:5:0 | server=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240 TV:5:0
+[+66.0s] PASS all tied: phone rows match server — visible=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240
+[+66.0s] PASS first game: no movement note without a previous game — note=0
+[+130.5s] PASS pair ties: Ada=Bea and Cal=Dee share ranks, pairs differ — Ada:1 Bea:1 Cal:3 Dee:3 TV:5
+[+130.5s] PASS pair ties: TV leaderboard matches server — tv=Ada:1:600 Bea:1:600 Cal:3:360 Dee:3:360 TV:5:0 | server=Ada:1:600 Bea:1:600 Cal:3:360 Dee:3:360 TV:5:0
+[+130.5s] PASS pair ties: phone rows match server — visible=Ada:1:600 Bea:1:600
+[+154.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":5,"peakOpenPages":5}
+[+154.5s] node:internal/modules/run_main:123
+[+154.5s]     triggerUncaughtException(
+[+154.5s]     ^
+[+154.5s] 
+[+154.5s] locator.click: Target page, context or browser has been closed
+[+154.5s] Call log:
+[+154.5s]   - waiting for getByRole('button', { name: 'Next question' })
+[+154.5s]     - locator resolved to <button type="button" class="mz-key mz-key--neutral mz-key--lg mz-key--block">Next question</button>
+[+154.5s]   - attempting click action
+[+154.5s]     - waiting for element to be visible, enabled and stable
+[+154.5s] 
+[+154.5s]     at answerKitQuestions (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83-full2/scripts/lib/answer.mjs:75:65)
+[+154.5s]     at async answerCorrect (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83-full2/scripts/check-leaderboard.mjs:55:3)
+[+154.5s]     at async playGame (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83-full2/scripts/check-leaderboard.mjs:185:38)
+[+154.5s]     at async file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83-full2/scripts/check-leaderboard.mjs:253:39 {
+[+154.5s]   log: [
+[+154.5s]     "  - waiting for getByRole('button', { name: 'Next question' })",
+[+154.5s]     '    - locator resolved to <button type="button" class="mz-key mz-key--neutral mz-key--lg mz-key--block">Next question</button>',
+[+154.5s]     '  - attempting click action',
+[+154.5s]     '    - waiting for element to be visible, enabled and stable'
+[+154.5s]   ]
+[+154.5s] }
+[+154.5s] 
+[+154.5s] Node.js v22.23.4
+
+# CANCELLED (exit 1) in 154.6s | cpu 9.6s, peak memory 264 MB

@@ -1,0 +1,5 @@
+$ node ./node_modules/typescript/bin/tsc --noEmit
+# timeout 300s | worker w1
+
+
+# PASS (exit 0) in 10.3s | cpu 12.6s, peak memory 492 MB

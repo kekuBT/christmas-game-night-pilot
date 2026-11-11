@@ -92,3 +92,29 @@ Use phone sizes (320×640, 390×844, 844×390) and a laptop. Separate tabs are s
 4. **Back to Everyday** in the lobby: the next game deals a year-round board. A guest's reload keeps both the room's content and their own look.
 5. **A server restart:** stop the server and start it with the same data directory. Reload: the solo and casual content choices are kept.
 6. **A Family Cup:** host a Cup. It stays in the everyday look under Match the game, and its content is unchanged (Christmas items stay in the Cup). A phone set to **Look → Christmas** shows it in Christmas colours.
+
+## Stage 8.3: Home Screen installation (about 15 minutes)
+Service workers need a secure context, so use the private HTTPS preview (a forwarded Codespaces port) or `localhost`. On a plain-http address the worker is off by browser rule, and steps 3 to 6 don't apply. Chromium's DevTools → Application shows the manifest, the worker and Cache Storage.
+1. **Identity:** open `/manifest.webmanifest`. It has `id`, `start_url` and `scope` `/`, standalone, and four icons; nothing about a room or a person. DevTools → Application → Manifest shows no errors and the circle-and-dots icons.
+2. **Guidance:** Home, below the games.
+   - Chromium shows **Install Mchezo** only when it offers to install (not in headless or every browser). An iPhone, or DevTools' iPhone emulation, shows **Show me how**.
+   - **Not now** hides it; Settings → **Add to Home Screen** still explains.
+   - It never appears in a room or a game.
+3. **The worker:** reload once.
+   - DevTools → Application → Cache Storage shows one `mchezo-shell-<build>` cache, with only `/index.html`, `/assets/…`, the manifest, the favicon and the icons.
+   - Play a solo round, host a room and join it from a second tab, then look again: still no `/rooms/…` entry.
+   - In the Network panel, API rows are never "from ServiceWorker".
+4. **Offline:**
+   - DevTools → Network → Offline, then reload Home: "Can't reach Mchezo … Nothing has started", with **Try again**.
+   - Open `/join?code=ABCDEF`: the same.
+   - In a room, reload offline: "Rejoining your room…".
+   - Back online: the same seat.
+5. **An update while playing**, with two tabs:
+   - Tab A starts a solo round.
+   - Rebuild (`npm run build:web`) after any source change; the server picks up the new files.
+   - Tab B reloads: it is the new build's page, still under the old worker. DevTools → Application → Service Workers shows the new one *waiting*, and B shows no notice.
+   - Offline, B reloads to the old build's complete page.
+   - The round carries on.
+   - Leave it: Play solo says "A newer version of Mchezo is ready". **Later** hides it; **Reload** loads the new build.
+   - Close every tab of the old build: Cache Storage then keeps only the new build's cache.
+6. **Storage:** in a private window, Not now hides the card for that page only; the app and the worker still work.

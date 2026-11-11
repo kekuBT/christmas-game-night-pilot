@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { SegmentedChoice } from "../ui/mchezo/index.js";
 import type { LookPref } from "../ui/mchezo/look.js";
+import { InstallSettingsRow } from "./mchezo/InstallUi.js";
 
 export type AnimSetting = "full" | "reduced" | "off";
 
@@ -38,7 +39,7 @@ const LOOK_HELP: Record<LookPref, string> = {
   christmas: "Christmas colours on this phone, always.",
 };
 
-export function SettingsBar(props: { anim: AnimSetting; onSetAnim: (v: AnimSetting) => void; osReducedMotion?: boolean; look?: LookPref; onSetLook?: (v: LookPref) => void; lookSaved?: boolean }) {
+export function SettingsBar(props: { anim: AnimSetting; onSetAnim: (v: AnimSetting) => void; osReducedMotion?: boolean; look?: LookPref; onSetLook?: (v: LookPref) => void; lookSaved?: boolean; /** Stage 8.3: offer Add to Home Screen (outside a room only). */ install?: boolean }) {
   return (
     <section className="mz-card" style={{ marginTop: 12 }} data-testid="settings-bar" aria-labelledby="mz-settings-title">
       <span className="mz-kicker" id="mz-settings-title">This phone</span>
@@ -84,6 +85,7 @@ export function SettingsBar(props: { anim: AnimSetting; onSetAnim: (v: AnimSetti
         <span className="mz-settings__label">Sound</span>
         <p className="mz-foot" style={{ margin: 0, textAlign: "left" }} data-testid="sound-status">Mchezo doesn’t play any sounds yet.</p>
       </div>
+      {props.install && <InstallSettingsRow />}
     </section>
   );
 }

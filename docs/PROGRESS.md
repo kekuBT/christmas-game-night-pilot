@@ -1985,9 +1985,85 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - full `20261111-154845-546a9c6f-21442`: **PASSED** 84/84, `check-themes-seasonal` 251 (G 85), `check-mobile-everyday` 134, in 30 min 42 s.
 - Screenshots retaken on `546a9c6`: `after/` (40) and `r82-01/` (5).
 
-**Next task:** the repair report on PR #13. After that, ChatGPT's repair verification and private audit, then the Home Screen installation milestone. After that, ChatGPT's review and private audit, then the Home Screen installation milestone.
+**Repair report:** PR #13 comment 6801151583 (tested `546a9c6`, head `4c13e2b`).
+
+**Cleared:** ChatGPT's review 6801615731 (PR #13) cleared Stage 8.2 for development continuation and handed off Stage 8.3.
+- It independently ran 115/115 focused unit tests and `check-themes-seasonal` 251/251 on `546a9c6`, plus its mandatory private interactive host/guest/TV audit, which included a restart and reconnect.
+- R82-01 is resolved.
+- Its non-blocking observation is for the memorable-results milestone, not this stage: a casual room's Memory Book said "Finish a game first" after completed casual rounds.
+- Real iPhone, Android and WebKit are still unverified. Clearance is not merge, deployment or championship approval.
 
 **Risk:**
 - **Emulation only:** Safari's toolbar colour and Android's status bar are untested on real phones.
 - **Existing casual and solo rooms turn Everyday** (intended; D-S82-05). A room that was dealing a Christmas board stops until the host chooses Christmas.
 - **The audit's word net** misses a Christmas item with no Christmas word ("Decorating a tree"). Tagging stays a reviewer's job.
+
+## Stage 8.3: Home Screen installation foundation (2026-11-11)
+
+**Branch:** `claude/stage8-3-home-screen`, from `4c13e2b` (PR #13's reviewed head), stacked on PR #13.
+- **Instruction:** ChatGPT's handoff on PR #13 (comment 6801615731), under D-WF-01.
+- **Spec and inventory first:** `docs/stage8/stage83.md`.
+  - §1: what exists. There is no manifest, icon or service worker, and static files are served without cache headers.
+  - §2: the platform facts, with sources.
+  - §3: the design: install identity, guidance, the offline and privacy boundary, the update lifecycle.
+  - §6: choices for review.
+- Nothing merged or deployed, no public port, nothing paid for.
+
+**Milestone (built; spec §7, D-S83-01 … 06):**
+- **Identity:** a static manifest, and icons drawn from the circle mark (regular and maskable 192 and 512 px, an opaque 180 px Apple touch icon, an SVG favicon). Nothing about a room or a person.
+- **Server:** the install files with real types; `no-cache` for pages, the manifest, the icons and `sw.js`; `immutable` hashed assets; a 404 for a missing build file; `GET /health`.
+- **A narrow service worker:**
+  - It works from an allowlist: page loads are network first, with the cached shell only offline, plus this build's assets and the public files.
+  - Every API path, non-GET request, WebSocket and other origin is untouched. Nothing is queued.
+  - A new build's worker waits; old caches are deleted only when no old page is open.
+- **Guidance:** a Home card and a Settings row. Chromium's prompt only when asked; "added" only on `appinstalled`. The iPhone steps, **Not now**, and hidden when installed.
+- **Notices:** "Can't reach Mchezo" and "A newer version is ready" on Home, Join, Host, the solo shelf and the library, never in a room or a round.
+
+**Tested (Chromium; spec §7.2):**
+- **Unit:** 22 new tests, 1,401 in all, plus lint and typecheck.
+- **`check-install`, 91 of 91:**
+  - Chromium's manifest and installability verdicts are clean.
+  - The cache holds 14 public shell entries and no secrets, and 28 of 28 API replies came from the network.
+  - Offline, every entry screen is honest and recovers.
+  - The guidance passes, as does a new build arriving mid-round.
+  - A room reopened offline shows its "Rejoining" heading below the connection banner. That fix is for a pre-Stage 8.3 layout found in this stage's screenshots; O2 fails 8 of 8 on `8b8a7ef`.
+- **Eight regression drivers** pass with the worker in place.
+- Evidence: `docs/evidence/stage83-local/`.
+
+**Spec feedback 6802191261 applied** (stage83.md §7.3, D-S83-07):
+- **The allowlist:** an exact build list, fonts included; another build's files never enter an old cache.
+- **Storing:** only validated responses, and an all-or-nothing install.
+- **The update notice:** only when the server answers and the page isn't already the waiting build.
+- **`/health`:** must answer `{"ok":true}`.
+- **Wording:** no promise of moving seats or bests.
+- **New tests:** `check-install` sections U (two tabs) and F (a partial deploy, a sign-in page, a redirect, quota denied, no static routing) and O3, 113 checks in all; 25 unit tests.
+- **Platform claims** were rechecked through search; the primary sites are blocked from this environment.
+
+**External blocker for real phones:** service workers need HTTPS. Over the plain-http LAN preview, an iPhone can still Add to Home Screen, but the offline and update checks need a private HTTPS preview (REAL_DEVICE_TESTING Part J; spec §6 point 6).
+
+**Gates on the final candidate, `96b3970`** (fresh clones, clean tree, fingerprint `7f36233e758c`, 468 files, one after the other):
+- fast `20261111-181930-96b3970e-32718`: **PASSED** 5/5, 1,404 unit tests.
+- full `20261111-182118-96b3970e-3648`: **PASSED** 85/85, `check-install` 113, in 31 min 11 s.
+- Earlier candidates `8b8a7ef` (rejoin fix) and `69a7dc1` (spec feedback): each passed its fast gate; I stopped each full gate (CANCELLED). Not verdicts.
+- Screenshots: `docs/stage8/screenshots-83/`, 34 shots on `96b3970`.
+
+**Completed report:** posted on PR #14 (comment 6804614713) for `96b3970`, head `afd5ae1`. ChatGPT's independent review started (6804653156).
+
+**ChatGPT's verdict 6805055962: repair required (R83-01).** I had found the same defect after the report (correction 6805122200). The rest of the independent review passed: the private live-site audit of solo, host, guest, TV, reconnect and break, 25/25 unit tests and 113/113 `check-install` checks.
+
+**Repair R83-01** (stage83.md §3.3 and §7.5, D-S83-08):
+- **The defect:** a failed worker-only update deleted the active worker's offline shell. The version didn't cover the worker's code, and the installing worker wrote into, then deleted, the shared cache.
+- **Identity:** `apps/web/swBuild.ts` hashes the worker's own code into the version. The same source gives the same worker, byte for byte.
+- **Ownership:** `apps/web/src/install/swLifecycle.ts` makes an install write only into a fresh candidate cache and delete only that on failure. The live cache is replaced only on activation.
+- **Tests:**
+  - 12 new unit tests: identity, plus ownership against a recording fake, with a failure at every file and every write.
+  - A new real-build driver, `check-install-builds` (34 checks, in the full gate). It makes four real builds (A, A again, a worker-only change, a worker-policy change) and covers the failed missing-file and storage-full installs, the old tab's play, the offline shell, waiting and activation, scoped cleanup, and the defensive same-version case.
+  - On `96b3970`'s code the driver fails 11 of 34; on the repair it passes 34 of 34.
+- **Superseded:** my first local fix `c74befa` (identity, and a guard on the delete) is kept in history. Its fast gate passed and its full gate was CANCELLED; neither is a verdict on the repair.
+
+**Gates on the repair candidate `8340668`** (fresh clones, clean tree, fingerprint `feb72b0807ae`, 471 files, one after another):
+- fast `20261111-193930-83406685-4884`: **PASSED** 5/5, 1,416 unit tests.
+- full `20261111-194026-83406685-7879`: **FAILED**, 85/86. `unit-tests`: three solo-session tests with 300 ms timeouts failed under the start-up load. They are unrelated to the repair and pass alone. A separate hardening task has been suggested.
+- full `20261111-201230-83406685-23681`: **PASSED** 86/86 in 31 min 21 s, with `check-install` 113 and `check-install-builds` 34.
+
+**Next task:** push, then a new completed report on PR #14. After that, ChatGPT's confirmation of R83-01.
