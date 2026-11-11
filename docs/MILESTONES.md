@@ -39,6 +39,10 @@ All milestones **locally authorized**, not remote publication/deployment. Order 
   - **When:** with the smoother-session / content-variety work, before library eligibility changes make it visible. Today's library has 12 practice-only Connections boards, so it doesn't show yet.
   - **Direction:** solo and casual rooms prefer unused practice-usable content, then the least recently used.
   - **Must not:** change Cup selection, eligibility validation or Cup usage. Update the pinned test deliberately.
+- **Seasonal content in everyday play** (a concrete check from ChatGPT's review 6786060026 on PR #11, for the seasonal-content separation milestone it calls already approved). Not started.
+  - **Seen:** a shipped Word Connections board with Christmas clues dealt in everyday solo play.
+  - **The boards:** `con-s4-03` ("On a Christmas tree", "Santa's reindeer") and `con-legacy-1` (Christmas foods, Christmas decorations, reindeer names). Stage 7.4 put `con-legacy-1` into solo and casual rotation (it is approved; D-S74-01).
+  - **Direction, when that milestone starts:** keep seasonal content out of everyday solo and casual play unless a seasonal mode is chosen. Content isn't changed before then.
 
 ## Stop-the-line defects
 P0: private word/role/answer exposed; host spoof; duplicated or lost official scoring; repeated server crash/data loss; write access to real external services without authorization; harmful secret leak. P1: iPhone unusable, cannot rejoin, game permanently stuck, scores incorrect, 11 games not actually playable, Memory Book fabricates real people/events. P2: minor styling, occasional confetti defect, nonessential animation.

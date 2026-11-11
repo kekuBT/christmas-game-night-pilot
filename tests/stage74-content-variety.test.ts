@@ -7,11 +7,12 @@ import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_CONTENT_DIR, loadContent, type ContentLibrary } from "../src/content/registry.js";
 import { recordUsage, selectContent, type SelectionRequest, type UsageHistory } from "../src/content/select.js";
 import { LocalServer } from "../src/server/http.js";
 import { RoomEngine, SESSION_OPS_LIMIT, type SessionAttempt } from "../src/server/room.js";
+import { SoloSession, forgetPageSeat } from "../apps/web/src/solo/soloSession.js";
 // @ts-expect-error -- plain .mjs helper shared with the browser driver, no type declarations
 import { SMALL_CONNECTIONS_USABLE as SMALL_USABLE, writeSmallPool as writePool } from "../scripts/lib/small-pool.mjs";
 const SMALL_CONNECTIONS_USABLE = SMALL_USABLE as string[];
@@ -426,4 +427,173 @@ describe("the shipped library (normal and test mode)", () => {
       expect(seq[13]).toBe(seq[0]);
     });
   }
+});
+
+// Review 6786060026 (P2, V3): a solo Start that gets no answer is recovered
+// only by the server's answer to that same press (sent again unchanged), never
+// by adopting a round that merely appeared in the room. Real server, the real
+// SoloSession client, two "tabs" sharing one solo seat (the page seat), and
+// injected network faults on tab A's Start requests.
+describe("solo Start recovery is tied to its own press (review 6786060026)", () => {
+  type Fault = "pass" | "drop" | "hang" | "reset" | "refused";
+  let server: LocalServer; let base = "";
+  const realFetch = globalThis.fetch;
+  const sessions: SoloSession[] = [];
+  beforeAll(async () => { server = new LocalServer({ dataDir: mkdtempSync(join(tmpdir(), "mz-s74-recover-")), content: small }); base = `http://127.0.0.1:${await server.listen(0)}`; });
+  afterAll(async () => { await server.close(); });
+  beforeEach(() => { forgetPageSeat(); });
+  afterEach(() => { for (const s of sessions.splice(0)) s.dispose(); });
+  /**
+   * A tab. `faults` decides each of its Start requests in turn: "pass";
+   * "drop" (it reaches the server and acts, but the reply never arrives: the
+   * request uses its whole allowance); "hang" (it never reaches the server and
+   * never answers); "reset" (it reaches the server and acts, then the
+   * connection drops: the fetch fails at once); "refused" (it never reaches the
+   * server: the fetch fails at once). `around` runs another tab's action at
+   * that moment: before the request ("before") or after the server acted ("after").
+   */
+  function tab(opts: { faults?: Fault[]; around?: { at: number; when: "before" | "after"; run: () => Promise<void> } } = {}) {
+    const sent: { id: string; sessionRevision: number }[] = [];
+    let n = 0;
+    const f = (async (input: string, init: RequestInit = {}) => {
+      const { cache: _c, keepalive: _k, ...rest } = init;
+      const never = () => new Promise<Response>((_, reject) => rest.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")), { once: true }));
+      if (!(/\/games$/.test(input) && rest.method === "POST")) return realFetch(`${base}${input}`, rest);
+      const i = n++;
+      sent.push((JSON.parse(String(rest.body)) as { attempt: { id: string; sessionRevision: number } }).attempt);
+      const fault = opts.faults?.[i] ?? "pass";
+      if (opts.around?.at === i && opts.around.when === "before") await opts.around.run();
+      if (fault === "hang") return never();
+      if (fault === "refused") throw new TypeError("fetch failed");
+      const reply = await realFetch(`${base}${input}`, rest);
+      if (opts.around?.at === i && opts.around.when === "after") await opts.around.run();
+      if (fault === "reset") throw new TypeError("fetch failed");
+      return fault === "drop" ? never() : reply;
+    }) as unknown as typeof fetch;
+    const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000, requestTimeoutMs: 250, startBudgetMs: 4_000 });
+    sessions.push(s);
+    return { s, sent };
+  }
+  const roomOf = (s: SoloSession) => (server as unknown as { rooms: Map<string, RoomEngine> }).rooms.get(s.roomId!)!;
+  const open = (r: RoomEngine) => [...r.games.values()].filter((g) => g.status === "playing").map((g) => g.id);
+  /** A solo room already made and joined (so both tabs share its seat), at revision 1 with nothing open. */
+  async function seatedRoom() {
+    const first = tab();
+    await first.s.start("pattern-pulse");
+    expect(first.s.current.phase).toBe("playing");
+    await first.s.leave();
+    return roomOf(first.s);
+  }
+
+  it("A's reply is lost (the connection drops) after the server started its round: the same press, sent again at once, is answered as a replay; one round, one use", async () => {
+    const room = await seatedRoom();
+    const a = tab({ faults: ["reset", "pass"] });
+    await a.s.start("word-connections");
+    expect(a.s.current.phase).toBe("playing");
+    expect(open(room)).toEqual([a.s.current.gameInstanceId]);
+    expect(a.sent).toHaveLength(2);
+    expect(a.sent[1]).toEqual(a.sent[0]); // the same press: id, revision and game
+    expect([room.contentSeq, room.session.revision]).toEqual([1, 2]); // Pulse uses no content; one Connections use
+  });
+
+  it("A never reaches the server while B starts the same game: A is refused as stale and never adopts B's round; B is undisturbed; no extra use", async () => {
+    const room = await seatedRoom();
+    const b = tab();
+    const a = tab({ faults: ["refused", "pass"], around: { at: 0, when: "before", run: async () => { await b.s.start("word-connections"); } } });
+    await a.s.start("word-connections");
+    const bRound = b.s.current.gameInstanceId!;
+    expect(b.s.current.phase).toBe("playing");
+    expect([a.s.current.phase, a.s.current.failure, a.s.current.gameInstanceId]).toEqual(["error", "refused", undefined]);
+    expect(a.s.current.error).toMatch(/another tab or window/);
+    expect(open(room)).toEqual([bRound]);
+    expect(a.sent.every((x) => x.id === a.sent[0]!.id && x.sessionRevision === 1)).toBe(true);
+    expect([room.contentSeq, room.session.revision]).toEqual([1, 2]); // B's round only
+    // Try again: a new press against the room as it is now (it replaces B's round, as a Start does).
+    await a.s.start("word-connections");
+    expect(a.s.current.phase).toBe("playing");
+    expect(a.sent.at(-1)!.id).not.toBe(a.sent[0]!.id);
+    expect(a.sent.at(-1)!.sessionRevision).toBe(2);
+  });
+
+  it("A started, but B replaced it before A's press was sent again: A is refused, never adopts B's round; B is undisturbed; no extra use", async () => {
+    const room = await seatedRoom();
+    const b = tab();
+    const a = tab({ faults: ["reset", "pass"], around: { at: 0, when: "after", run: async () => { await b.s.start("word-connections"); } } });
+    await a.s.start("word-connections");
+    const bRound = b.s.current.gameInstanceId!;
+    expect(b.s.current.phase).toBe("playing");
+    expect([a.s.current.phase, a.s.current.failure, a.s.current.gameInstanceId]).toEqual(["error", "refused", undefined]);
+    expect(a.s.current.error).toMatch(/isn.t the latest/);
+    expect(open(room)).toEqual([bRound]);
+    expect([room.contentSeq, room.session.revision]).toEqual([2, 3]); // A's real start and B's; the resend used nothing
+  });
+
+  it("A's request hangs (never arrives) while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale; B is undisturbed", async () => {
+    const room = await seatedRoom();
+    const b = tab();
+    const a = tab({ faults: ["hang", "pass"], around: { at: 0, when: "before", run: async () => { await b.s.start("word-connections"); } } });
+    await a.s.start("word-connections");
+    const bRound = b.s.current.gameInstanceId!;
+    expect([a.s.current.phase, a.s.current.failure, a.s.current.gameInstanceId]).toEqual(["error", "transient", undefined]);
+    expect(a.sent).toHaveLength(1); // the hang used the whole allowance: no resend in this Start
+    await a.s.start("word-connections"); // Try again: the same press, now answered
+    expect([a.s.current.phase, a.s.current.failure, a.s.current.gameInstanceId]).toEqual(["error", "refused", undefined]);
+    expect([a.sent.length, a.sent[1]]).toEqual([2, a.sent[0]]);
+    expect(open(room)).toEqual([bRound]);
+    expect(b.s.current.phase).toBe("playing");
+    expect([room.contentSeq, room.session.revision]).toEqual([1, 2]);
+  });
+
+  it("no network at all: the Start ends within its budget; Try again sends the same press (a replay if it had arrived), so nothing starts twice", async () => {
+    // The press never arrives: Try again starts it once.
+    let room = await seatedRoom();
+    let faults: Fault[] = ["hang", "hang", "hang"];
+    const a = tab({ faults });
+    const t0 = Date.now();
+    await a.s.start("word-connections");
+    expect(Date.now() - t0).toBeLessThan(4_000);
+    expect([a.s.current.phase, a.s.current.failure]).toEqual(["error", "transient"]);
+    expect([open(room), room.contentSeq]).toEqual([[], 0]);
+    faults.length = 0; // the network is back
+    await a.s.start("word-connections");
+    expect(a.s.current.phase).toBe("playing");
+    expect(new Set(a.sent.map((x) => x.id)).size).toBe(1);
+    expect([open(room), room.contentSeq]).toEqual([[a.s.current.gameInstanceId], 1]);
+
+    // The press arrived but no reply ever came back: Try again is answered as a replay of that same round.
+    forgetPageSeat();
+    room = await seatedRoom();
+    faults = ["drop", "drop", "drop"];
+    const c = tab({ faults });
+    await c.s.start("word-connections");
+    expect([c.s.current.phase, c.s.current.failure]).toEqual(["error", "transient"]);
+    const started = open(room);
+    expect([started.length, room.contentSeq]).toEqual([1, 1]);
+    faults.length = 0;
+    await c.s.start("word-connections");
+    expect([c.s.current.phase, c.s.current.gameInstanceId]).toEqual(["playing", started[0]]);
+    expect(c.s.current.replacedOpenRound).toBeUndefined();
+    expect(new Set(c.sent.map((x) => x.id)).size).toBe(1);
+    expect(room.contentSeq).toBe(1);
+
+    // After Leave, a Start is a new press (not the old one).
+    await c.s.leave();
+    await c.s.start("word-connections");
+    expect(c.s.current.phase).toBe("playing");
+    expect(new Set(c.sent.map((x) => x.id)).size).toBe(2);
+
+    // Leave while a press is still unanswered ends that press: the next Start is a new one, made against the room as it is then.
+    forgetPageSeat();
+    room = await seatedRoom();
+    faults = ["hang"];
+    const d = tab({ faults });
+    await d.s.start("word-connections");
+    expect([d.s.current.phase, d.s.current.failure]).toEqual(["error", "transient"]);
+    await d.s.leave();
+    faults.length = 0;
+    await d.s.start("word-connections");
+    expect(d.s.current.phase).toBe("playing");
+    expect([d.sent.length, d.sent[1]!.id === d.sent[0]!.id]).toEqual([2, false]);
+    expect(room.contentSeq).toBe(1);
+  });
 });

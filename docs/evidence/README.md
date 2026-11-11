@@ -95,6 +95,13 @@ Stage 7.4 browser drivers run by hand from the development checkout against a lo
 - `check-content-variety-on-af39c78.log` and `check-content-variety-without-solo-restart-fix.log` were run on the source committed as `c78cb43` plus A2 (before A3 existed).
 - Regressions, all passing: `check-session-flow` (70), `check-solo` (80), `check-solo-shelf` (58, part E now asserted) and `check-recovery` (20) on the final source; `check-briefing` (43), `check-casual` (30), `check-quick-party` (68) and `check-host-handover` (32) on the source committed as `c78cb43` (the clarification changed only solo starts).
 
+## `stage74-local/repair/`
+
+ChatGPT's review 6786060026 (solo Start recovery adopted another tab's round). These are not gate verdicts.
+- `client-recovery-tests-on-5d41e5f.log`: the new client-recovery tests (real server, two tabs, injected faults) with the reviewed client from `5d41e5f` swapped in. 5 of 5 fail; three of them adopt B's round (`game-2`, `game-3`).
+- `check-content-variety-with-5d41e5f-solo-client.log`: the driver with the web app built from the reviewed client. A4 fails: tab A plays B's round and never resends its press.
+- `check-content-variety.log`, `check-solo.log`, `check-solo-shelf.log`: the drivers on the repaired source, 57/57, 80/80 (I1 at about 6.5 s) and 58/58.
+
 ## `stage72-local/`
 
 Stage 7.2 browser drivers run by hand from the development checkout, against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). The source is that later committed as `0bac2fd`, except that `nextState` was afterwards moved into its own file. These are not gate verdicts; the gate runs above are.

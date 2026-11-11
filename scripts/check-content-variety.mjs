@@ -9,6 +9,14 @@
 //   A  solo Word Connections, played four times through Play again: the
 //      three usable boards, each once (practice-only and approved alike),
 //      then the least recently used; the rejected board never.
+//   A2 the own server restarts (same port, same data): Play again in the same
+//      tab starts a round (a pre-existing solo defect, spec §7.4) and deals
+//      the least recently used board.
+//   A3 a stale press: tab 1's Start is held while tab 2 starts Pulse; tab 1 is
+//      refused (another tab), nothing changes, and Try again starts.
+//   A4 review 6786060026: tab A's Start never reaches the server while tab B
+//      starts the same game; A sends its press again unchanged, is refused,
+//      and never adopts B's round; B is undisturbed.
 //   B  a casual room, Ada hosting and Bea, with a lineup of Word Connections
 //      then Math Mayhem:
 //        1. Connections picked by hand: board 1; the lineup's item stays pending;
@@ -214,6 +222,41 @@ try {
   check("A3 …against the current revision, with a new press id", t1posts.length === 2 && t1posts[1].attempt?.sessionRevision === 2 && t1posts[1].attempt?.id !== t1posts[0].attempt?.id, JSON.stringify(t1posts.map((x) => x.attempt)));
   check("A3 …and its board is a usable pool board", SMALL_CONNECTIONS_USABLE.includes(tb), String(tb));
   await tctx.close();
+
+  // A4. Review 6786060026: tab A's Start never reaches the server (the network
+  // drops it) while tab B, on the same solo seat, starts the same game. A must
+  // not adopt B's round: its press is sent again unchanged and refused as
+  // stale. B keeps playing; one round, one use.
+  const actx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const a = await actx.newPage();
+  await a.goto(`${OWN}/solo/pattern-pulse`, { waitUntil: "domcontentloaded" });
+  await a.getByTestId("solo-round-start").click();
+  await a.getByTestId("mz-pp-open").waitFor({ timeout: 20000 });
+  await a.getByTestId("solo-leave").click(); await a.getByTestId("solo-leave-yes").click();
+  await a.goto(`${OWN}/solo/word-connections`, { waitUntil: "domcontentloaded" });
+  await a.getByTestId("solo-round-start").waitFor({ timeout: 10000 });
+  const aseat = JSON.parse((await a.evaluate(() => localStorage.getItem("mchezo.solo.v1"))) ?? "null");
+  const aroom = async () => (await fetch(`${OWN}/rooms/${aseat.roomId}/projection?audience=player`, { headers: { "x-session-token": aseat.token } })).json();
+  const b = await actx.newPage();
+  const aposts = [];
+  a.on("request", (r) => { if (r.method() === "POST" && new URL(r.url()).pathname.endsWith("/games")) aposts.push(JSON.parse(r.postData() ?? "{}").attempt); });
+  let firstA = true;
+  await a.route((url) => new URL(url).pathname.endsWith("/games"), async (route) => {
+    if (route.request().method() !== "POST" || !firstA) return route.continue();
+    firstA = false;
+    await b.goto(`${OWN}/solo/word-connections`, { waitUntil: "domcontentloaded" });
+    await b.getByTestId("solo-round-start").click();
+    await b.getByTestId("mz-cx").waitFor({ timeout: 20000 });
+    return route.abort("internetdisconnected"); // A's press never reached the server
+  });
+  await a.getByTestId("solo-round-start").click();
+  await soon("A4 tab A is told something changed (another tab) and does not play B's round", async () => /another tab or window/.test(await text(a.getByTestId("solo-error"))) && (await a.getByTestId("mz-cx").count()) === 0, 20000);
+  const a4 = await aroom();
+  const openA4 = (a4.games ?? []).filter((g) => g.status === "playing");
+  check("A4 tab B is undisturbed: its round is the only one playing, and B still plays it", openA4.length === 1 && openA4[0].gameId === "word-connections" && (await b.getByTestId("mz-cx").isVisible()), JSON.stringify(openA4.map((g) => g.id)));
+  check("A4 tab A sent the same press again (same id and revision), never a new one", aposts.length === 2 && aposts[0]?.id === aposts[1]?.id && aposts[0]?.sessionRevision === aposts[1]?.sessionRevision, JSON.stringify(aposts));
+  await a.unrouteAll({ behavior: "ignoreErrors" });
+  await actx.close();
 
   // ---- B. A casual room: hand pick, rematch (cancelled, then played), the lineup's Next, rematch ----
   const h = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();

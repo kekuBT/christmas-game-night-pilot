@@ -130,7 +130,11 @@
   - **A press seen before:** replays only as the whole original command (the same actor, game and base revision). The same id for anything else is refused.
   - **Only the latest:** a replay returns its round only while that press is still the room's latest Start (no newer round since, and its round not left). Otherwise it is `SESSION_CONFLICT`. No older round is ever handed back as current.
   - **Forgotten presses:** the newest 64 are remembered, persisted and never projected. A press forgotten after 64 newer ones is stale by its revision, so it can never become a new start.
-  - **The app:** sends a new id with every press (Start, Play again, Try again), made against the revision of the room it has just read (a room made in this Start is at 0). A `SESSION_CONFLICT` is shown as "Something changed in another tab or window, so this Start didn't go ahead. Try again to start a new round."; Try again reads the room again and makes a new press. Its lost-reply handling is unchanged: it reads the room and adopts the round.
+  - **The app:** sends a new id with every press (Start, Play again, Try again), made against the revision of the room it has just read (a room made in this Start is at 0). A `SESSION_CONFLICT` is shown as "Something changed in another tab or window, so this Start didn't go ahead. Try again to start a new round."; Try again reads the room again and makes a new press.
+  - **A Start with no answer** (review 6786060026, §7.5): the app sends the same press again, unchanged, and acts only on the server's answer. It never adopts a round because it appeared in the room.
+    - A quick failure (the connection refused or reset) is resent at once.
+    - Every send fits within the first request's own allowance, so a Start with no answer ends when it did before.
+    - A press still without an answer is kept, and Try again sends it again. Any definite answer, Leave and closing the page end it.
   - **API compatibility, kept explicit:** a solo Start without `attempt` is still a plain new round, as before (tested). The app always sends one.
 
 ### 4.5 The cancel wording (C1)
@@ -242,6 +246,33 @@ On `5d41e5f1cb63bddfdb9b506318e9953dacc5a1cd`, **one after the other** (the full
   - E2E Chromium.
 - **No failed runs** on this checkpoint.
 - **Raw evidence:** `docs/evidence/gate-runs/<run>/`.
+
+### 7.5 Repair (review 6786060026, P2, V3): solo Start recovery is tied to its own press
+- **The finding:** a solo Start that got no answer read the room once and adopted any new round of the same game that wasn't there before. Once another tab can start the same game, that is wrong. Tab A's press never reached the server; tab B, on the same seat, started Word Connections; A adopted B's round as its own, and both tabs acted on one round. ChatGPT reproduced it against the real server and client.
+- **Confirmed** with the reviewed client (`5d41e5f`):
+  - the new client tests fail on it, three of them by adopting B's round (`docs/evidence/stage74-local/repair/client-recovery-tests-on-5d41e5f.log`);
+  - in the browser, the driver's A4 fails on it: tab A plays B's round and never resends its press (`…/repair/check-content-variety-with-5d41e5f-solo-client.log`).
+- **The fix** (`apps/web/src/solo/soloSession.ts`, D-S74-08):
+  - The adopt-by-reading recovery (`reconcileStart`) is gone.
+  - A Start with no answer sends **the same press** again (its id, base revision and game, unchanged), and only the server's answer counts:
+    - a replay of its own round, only while that round is still the latest;
+    - a round started now, when it never arrived and nothing changed;
+    - a stale refusal (`SESSION_CONFLICT`), when the room moved on.
+  - **Timing:** a quick failure is resent at once (up to two resends). Every send fits within the first request's own allowance and the Start's budget, so a Start with no answer ends when it did before (`check-solo` I1: about 6 s).
+  - **Try again** sends a press still without an answer again, unchanged. Any definite answer, Leave and dispose end it.
+  - **"Replaced the interrupted round"** is said only when an open round other than this press's own was there.
+  - The server is unchanged: its replay and stale rules (§4.4) give the authoritative answer.
+- **Tests:**
+  - **Real server, the real client, two tabs on one seat** (`tests/stage74-content-variety.test.ts`, 5):
+    - A's reply lost to a dropped connection after the server started it: resent at once and answered as a replay; one round, one use;
+    - A's press refused by the network while B starts the same game: A is refused as stale and never adopts B's round; B is undisturbed; no extra use; Try again then starts a new press;
+    - A started, but B replaced it before A resent: A is refused, never adopts B's round; B is undisturbed;
+    - A's request hangs while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale;
+    - no network at all: the Start ends within its budget; Try again sends the same press, so a press that never arrived starts once and one that did arrive is a replay; Leave while a press is unanswered ends it.
+  - **The Stage 6.1 client tests** (fake server): the fake now follows the server's press rules. The old "adopted" test is now two tests: a dropped connection is resent and replayed; a reply that never comes ends the Start within its allowance, and Try again replays.
+  - **Five client mutations** each make the tests fail: Try again making a new press; no resend after a quick failure; resends not bound to the first request's allowance; the pending press kept after Leave; a resend with a new press id.
+  - **`check-content-variety` A4** (57 checks in all): the reviewer's scenario in the browser. Tab A's Start is dropped by the network while tab B starts the same game. A is told something changed and never plays B's round, B keeps playing, and A sent the same press twice.
+  - **Regressions:** `check-solo` (80, I1 at about 6.5 s), `check-solo-shelf` (58), unit suite 1,304.
 
 ### 7.4 A pre-existing defect found while testing V3: solo play after a server restart
 - **What:** a server restart marks every player not connected (`http.ts`, restore). A solo room has no socket, so nothing marked its one player present again, and every solo Start was refused: 400 "Need at least 1 connected players". The solo app shows a refusal as given (`soloSession.ts`, "refused"), so every Try again failed the same way: solo play was stuck in that room until its storage was cleared.

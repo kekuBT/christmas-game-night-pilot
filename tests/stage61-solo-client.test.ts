@@ -241,12 +241,13 @@ describe("the solo session under faults (review of PR #6)", () => {
   const noReply = (init: RequestInit) => new Promise<Response>((_, reject) => {
     init.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")), { once: true });
   });
-  interface Room { token: string; claim: string; joined: boolean; games: { id: string; gameId: string; status: string }[] }
+  // Stage 7.4: a solo room's revision and remembered presses, as the real server keeps them (spec §4.4).
+  interface Room { token: string; claim: string; joined: boolean; games: { id: string; gameId: string; status: string }[]; revision: number; presses: Map<string, { gameId: string; base: number; gid: string; revision: number }> }
   type Handler = (url: string, init: RequestInit) => Promise<Response>;
 
   function soloServer() {
     const rooms = new Map<string, Room>();
-    const counts = { rooms: 0, join: 0, games: 0, projection: 0 };
+    const counts = { rooms: 0, join: 0, games: 0, gamePosts: 0, projection: 0 }; // games = rounds started; gamePosts = Start requests handled
     let seq = 0;
     const handle: Handler = async (url, init) => {
       const method = init.method ?? "GET";
@@ -255,7 +256,7 @@ describe("the solo session under faults (review of PR #6)", () => {
       if (method === "POST" && url === "/rooms") {
         counts.rooms++;
         const id = `r${counts.rooms}`;
-        rooms.set(id, { token: `t-${id}`, claim: `c-${id}`, joined: false, games: [] });
+        rooms.set(id, { token: `t-${id}`, claim: `c-${id}`, joined: false, games: [], revision: 0, presses: new Map() });
         return json(201, { roomId: id, hostClaimToken: `c-${id}` });
       }
       const m = /^\/rooms\/([^/]+)\/([a-z]+)(?:\/([^/]+)\/cancel)?/.exec(url);
@@ -271,14 +272,30 @@ describe("the solo session under faults (review of PR #6)", () => {
       if (token !== room.token) return json(401, { error: "Session token required" });
       if (m[2] === "projection") {
         counts.projection++;
-        return json(200, { roomKind: "solo", players: [{ id: "p1" }], games: room.games, myGames: room.games.map((g) => ({ id: g.id })) });
+        return json(200, { roomKind: "solo", players: [{ id: "p1" }], games: room.games, myGames: room.games.map((g) => ({ id: g.id })), session: { onBreak: false, revision: room.revision } });
       }
       if (m[2] === "games" && m[3]) { room.games = room.games.filter((g) => g.id !== m[3] || g.status === "finished"); return json(200, {}); }
       if (m[2] === "games") {
+        counts.gamePosts++;
+        const gameId = String(body["gameId"]);
+        const attempt = body["attempt"] as { id: string; sessionRevision: number } | undefined;
+        // The real server's rules (Stage 7.4, §4.4): a press seen before replays
+        // only as the same command and only while it is the latest; a new
+        // press must be made against the current revision.
+        const seen = attempt ? room.presses.get(attempt.id) : undefined;
+        if (attempt && seen) {
+          if (seen.gameId !== gameId || seen.base !== attempt.sessionRevision) return json(400, { error: "That request id was already used for something else." });
+          const g = room.games.find((x) => x.id === seen.gid);
+          if (g && seen.revision === room.revision) return json(200, { gameId: g.id, status: g.status, replay: true });
+          return json(409, { error: "That Start isn't the latest any more (its round was left or replaced), so nothing new started.", code: "SESSION_CONFLICT", session: { revision: room.revision } });
+        }
+        if (attempt && attempt.sessionRevision !== room.revision) return json(409, { error: "Something changed in another tab or window, so this Start didn't go ahead. Try again to start a new round.", code: "SESSION_CONFLICT", session: { revision: room.revision } });
         counts.games++;
         room.games = room.games.filter((g) => g.status === "finished");
-        const g = { id: `g${++seq}`, gameId: String(body["gameId"]), status: "playing" };
+        const g = { id: `g${++seq}`, gameId, status: "playing" };
         room.games.push(g);
+        room.revision++;
+        if (attempt) room.presses.set(attempt.id, { gameId, base: attempt.sessionRevision, gid: g.id, revision: room.revision });
         return json(201, { gameId: g.id, status: "playing" });
       }
       if (m[2] === "intents") return json(200, { accepted: true });
@@ -376,18 +393,40 @@ describe("the solo session under faults (review of PR #6)", () => {
     expect(srv.counts.projection).toBe(polls); // no polling started for the left run
   });
 
-  it("Start gets no answer but the server did start the round: it is adopted, not started twice", async () => {
+  it("Start's reply is lost to a dropped connection after the server started the round: the same press is sent again at once and answered as a replay, not started twice", async () => {
+    // Stage 7.4 (review 6786060026): only the server's answer to this press
+    // counts; a round is never adopted because it appeared in the room.
     const srv = soloServer();
+    let lost = 1; // the first Start's connection drops after the server acts on it
     const h = harness(async (url, init) => {
-      if (url.endsWith("/games") && (init.method ?? "GET") === "POST") { await srv.handle(url, init); return noReply(init); }
+      if (url.endsWith("/games") && (init.method ?? "GET") === "POST" && lost-- > 0) { await srv.handle(url, init); throw new TypeError("fetch failed"); }
       return srv.handle(url, init);
     });
     const { s } = session(h.f);
     await s.start("math-mayhem");
     expect(s.current).toMatchObject({ phase: "playing", gameInstanceId: "g1" });
     expect(s.current.replacedOpenRound).toBeUndefined();
-    expect(srv.counts.games).toBe(1);
+    expect([srv.counts.games, srv.counts.gamePosts]).toEqual([1, 2]);
     expect([...srv.rooms.values()][0]!.games.filter((g) => g.status === "playing")).toHaveLength(1);
+  });
+
+  it("Start's reply never comes after the server started the round: the Start ends within its request allowance, and Try again sends the same press, answered as a replay; one round", async () => {
+    const srv = soloServer();
+    let lost = 1;
+    const h = harness(async (url, init) => {
+      if (url.endsWith("/games") && (init.method ?? "GET") === "POST" && lost-- > 0) { await srv.handle(url, init); return noReply(init); }
+      return srv.handle(url, init);
+    });
+    const { s } = session(h.f);
+    const t0 = Date.now();
+    await s.start("math-mayhem");
+    expect(Date.now() - t0).toBeLessThan(1_000); // one request allowance (150 ms here), not the whole Start budget
+    expect(s.current).toMatchObject({ phase: "error", failure: "transient" });
+    expect([srv.counts.games, srv.counts.gamePosts]).toEqual([1, 1]);
+    await s.start("math-mayhem"); // Try again: the same press
+    expect(s.current).toMatchObject({ phase: "playing", gameInstanceId: "g1" });
+    expect(s.current.replacedOpenRound).toBeUndefined();
+    expect([srv.counts.games, srv.counts.gamePosts]).toEqual([1, 2]);
   });
 
   it("Start gets no answer and the round never reached the server: an error, and Try again starts one", async () => {
