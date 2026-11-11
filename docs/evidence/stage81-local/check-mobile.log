@@ -1,4 +1,4 @@
-source: 947ffae46cc1ab09d9fd4c0add9ecd562bcc2539 (clean tree; web app built from it), server: local, MCHEZO_CONTENT_TEST_MODE=approve-provisional, 2026-11-11T09:00:45Z. Not a gate verdict.
+source: the working tree committed as a856fa4 (identical app, test and driver code), web app built from it, server: local, MCHEZO_CONTENT_TEST_MODE=approve-provisional. Not a gate verdict.
 
 == viewport 320x568 ==
   PASS 320px home: no horizontal overflow (scrollWidth=320 innerWidth=320)

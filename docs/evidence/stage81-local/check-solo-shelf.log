@@ -1,4 +1,4 @@
-source: the working tree later committed as 5eb3711 (its app code is that of 5eb3711; 947ffae then changed only the landscape briefing dock and the new driver), web app built from it, server: local, MCHEZO_CONTENT_TEST_MODE=approve-provisional. Not a gate verdict.
+source: the working tree committed as a856fa4 (identical app, test and driver code), web app built from it, server: local, MCHEZO_CONTENT_TEST_MODE=approve-provisional. Not a gate verdict.
 PASS A the shelf lists exactly Math Mayhem, Pattern Pulse and Word Connections — math-mayhem, pattern-pulse, word-connections
 PASS A math-mayhem: no personal best yet, and a Start
 PASS A pattern-pulse: no personal best yet, and a Start
@@ -27,7 +27,7 @@ PASS G Math: 10 of 10, with the Math headline and its own first best — {"score
 PASS G one solo room for every round and every switch — 1 rooms
 PASS G the server holds each round in that one room (2 Pulse, 3 Connections, 1 Math) — {"pp":2,"cx":3,"mm":1}
 PASS G solo rounds are never official
-PASS H one best per game and rules version — {"pattern-pulse@1":{"score":960,"at":1794386596400,"rulesVersion":1},"word-connections@1":{"score":450,"at":1794386635038,"rulesVersion":1},"math-mayhem@1":{"score":1200,"at":1794386658501,"rulesVersion":1}}
+PASS H one best per game and rules version — {"pattern-pulse@1":{"score":960,"at":1794388496060,"rulesVersion":1},"word-connections@1":{"score":450,"at":1794388534783,"rulesVersion":1},"math-mayhem@1":{"score":1200,"at":1794388557726,"rulesVersion":1}}
 PASS H the shelf shows each game's own best
 PASS H a best under other rules is never shown (Pulse v0; a v2 record in Connections' v1 slot)
 PASS H blocked storage: every game says bests can't be kept
@@ -39,7 +39,7 @@ PASS I a second tab's Pulse replaces this tab's Connections round: it returns to
 PASS I exactly one round plays, the second tab's Pulse
 PASS I still one solo room — 1 rooms
 PASS J a guess with no reply ends within the request allowance, the four tiles still selected
-PASS J it ended in about 6 s, not stuck on Checking… — 6198 ms
+PASS J it ended in about 6 s, not stuck on Checking… — 6205 ms
 PASS J sending again works: the group is found
 PASS I Home from the results: Home, with no phantom Rejoin
 PASS L the shelf says Connections' best spans boards (and only Connections)

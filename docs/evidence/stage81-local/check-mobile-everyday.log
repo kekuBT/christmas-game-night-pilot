@@ -1,4 +1,4 @@
-source: 947ffae46cc1ab09d9fd4c0add9ecd562bcc2539 (clean tree; web app built from it), server: local, MCHEZO_CONTENT_TEST_MODE=approve-provisional, 2026-11-11T09:00:45Z. Not a gate verdict.
+source: the working tree committed as a856fa4 (identical app, test and driver code), web app built from it, server: local, MCHEZO_CONTENT_TEST_MODE=approve-provisional. Not a gate verdict.
 PASS A 320×640 shelf: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
 PASS A 320×640 shelf: no control smaller than 44 px
 PASS A 320×640 shelf: no text clipped inside its box
@@ -53,14 +53,23 @@ PASS B Play again: a second round played to its results
 PASS B back on the shelf, with the personal best on its card
 PASS C with under a minute left, the panel shows the warning tone, in words too
 PASS C under 20 seconds: the clock turns urgent
+PASS C three seconds before the deadline
 PASS C time up on the ready screen: Show me the pattern gives way to a status
 PASS C …which says what happens next
 PASS C …and nothing else on the screen can start a round (no Sit out, no Show me)
-PASS C then the results, once the server has ended the game
+PASS C the server still isn't answering: the status says so instead of promising results, and offers Check again
+PASS C …in plain words
+PASS C …with the reconnecting note and Leave round still there (never stuck)
+PASS C the server answers again: Check again brings the results
 PASS C announcements: under a minute, under 20 seconds, time up, each once and nothing else — ["Under a minute of game time left.","Under 20 seconds of game time left.","The game’s time is up."]
 PASS C at no moment were Show me the pattern and time up on screen together — [{"open":true,"up":false,"band":"low","results":false},{"open":true,"up":false,"band":"urgent","results":false},{"open":false,"up":true,"band":"up","results":false},{"open":false,"up":false,"band":null,"results":true}]
-PASS C the screens went: ready (low) → time up → results — ["open:low","open:urgent","up:up","results:null"]
-PASS C the server ended the game at its deadline; no round was played — {"serverNow":1794387621219,"deadlineAt":1794387620567,"status":"finished","gameId":"pattern-pulse","results":0}
+PASS C the screens went: ready (low) → time up → results (through the offline status) — ["open:low","open:urgent","up:up","results:null"]
+PASS C the server ended the game at its deadline; no round was played — {"serverNow":1794388297249,"deadlineAt":1794388285612,"status":"finished","gameId":"pattern-pulse","results":0}
+PASS C2 room: three seconds before the deadline on the guest's ready screen
+PASS C2 room: time up while the guest is offline: the status says the server isn't answering and offers Check again
+PASS C2 …next to the room's own reconnecting banner
+PASS C2 …and no Show me the pattern or Sit the rest out
+PASS C2 room: back online, Check again reconnects and the results show
 PASS D 844×390 Pulse ready: the game clock and Show me the pattern on screen, no scrolling
 PASS D …and the solo bar's Leave round stays on screen
 PASS D 844×390 Pulse ready: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
@@ -72,6 +81,16 @@ PASS D 844×390 Pulse tap-back: no control smaller than 44 px
 PASS D 844×390 Pulse tap-back: no text clipped inside its box
 PASS D 844×390 Math Mayhem: all four answers on screen, no scrolling (before: the second row below the fold)
 PASS D …each still a full-size target
+PASS D2 650×300 (130 %) Pulse tap-back: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS D2 650×300 (130 %) Pulse tap-back: no control smaller than 44 px
+PASS D2 650×300 (130 %) Pulse tap-back: no text clipped inside its box
+PASS D2 every shape key at least 44 px, its name readable (12 px or more) and not clipped — []
+PASS D2 the screen scrolls rather than clipping: every shape, Undo and Lock it in can be scrolled to and shown whole
+PASS D2 650×300 (130 %) Math: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS D2 650×300 (130 %) Math: no control smaller than 44 px
+PASS D2 650×300 (130 %) Math: no text clipped inside its box
+PASS D2 Math: every answer at least 44 px tall, its number not clipped — []
+PASS D2 Math: every answer can be scrolled to and shown whole
 PASS E the host's lobby shows both long names
 PASS E 390×844 host lobby: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
 PASS E 390×844 host lobby: no control smaller than 44 px
@@ -112,4 +131,3 @@ PASS E game 2 (Play again): the results, with What's next, on both phones
 PASS E Play again played a second game: two finished, nothing left open — finished 2
 
 All mobile everyday checks passed
-exit 0

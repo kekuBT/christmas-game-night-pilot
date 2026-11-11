@@ -93,8 +93,8 @@ ChatGPT's review 6778921208 on PR #9: a game picked by hand that matched the lin
 ## `stage81-local/`
 
 Stage 8.1 browser drivers run by hand against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). These are not gate verdicts; each log's first line names its source.
-- `check-mobile-everyday.log`: the new driver, 111/111, on `947ffae`.
-- `check-briefing.log` (43) and `check-mobile.log` (50) on `947ffae`; `check-solo.log` (80), `check-solo-shelf.log` (58), `check-pattern-pulse.log` (54), `check-pulse-timing.log` (41), `check-session-flow.log` (70) and `check-lifecycle.log` (37) on the source later committed as `5eb3711` (the app code since changed only in the landscape briefing dock).
+- `check-mobile-everyday.log`: the new driver, 130/130, on `a856fa4` (after spec feedback 6790913242).
+- `check-solo.log` (80), `check-solo-shelf.log` (58), `check-pattern-pulse.log` (54), `check-pulse-timing.log` (41), `check-briefing.log` (43), `check-session-flow.log` (70), `check-lifecycle.log` (37), `check-math.log` (28) and `check-mobile.log` (50), all on `a856fa4`.
 - `probe.mjs` and `probe-before-58196cb.json` / `probe-after-947ffae.json`: the measuring probe behind spec §1 and §7.2 (shelf and card heights, page height, sideways overflow, small controls) at 320×640, 390×844, 844×390 and 1440×900.
 
 ## `stage74-local/`

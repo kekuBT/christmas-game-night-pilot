@@ -1876,7 +1876,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **Milestone:**
 - **S1, the solo shelf:** row cards on phones (a small square cover beside the words, Start across the bottom), a grid of up to three from 600 px. On desktop all three games and their Start buttons are on the first screen (before: one column, one game above the fold).
-- **S2, Pattern Pulse's game clock:** between patterns, the game's time left on the server's clock, said to keep running; a warning tone at one minute; announcements only at under a minute, under 20 s and time up; at time up, Show me the pattern gives way to a status and the results follow. Pulse draws one clock per screen (App no longer adds its own).
+- **S2, Pattern Pulse's game clock:** between patterns, the game's time left on the server's clock, said to keep running; a warning tone at one minute; announcements only at under a minute, under 20 s and time up, once per game; at time up, Show me the pattern gives way to a status and the results follow, or, while the server isn't answering, a plain note with Check again. Pulse draws one clock per screen (App no longer adds its own).
 - **S3, touch and responsive:** the solo round fits the screen; held sideways, Pulse's Lock it in and Math's four answers are on screen; the briefing's I'm ready waits at the bottom while the rules are read.
 - **Found and fixed:**
   - **F3 (pre-existing):** solo countdowns ran on the phone's own clock (the solo session never recorded the server's). Fixed; tested against a real server with a skewed clock.
@@ -1889,12 +1889,15 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Server:** unchanged.
 
 **Tests:**
-- **Unit:** 10 new; 1,316 in all. F3's two tests fail with the fix removed.
-- **`check-mobile-everyday`:** 111/111 locally (the shelf at four sizes; Pulse's clock on a phone 10 minutes fast; time up with a short game window; landscape; a casual room with the longest names, Play again included).
-- **Regressions, local:** `check-solo` 80, `check-solo-shelf` 58, `check-pattern-pulse` 54, `check-pulse-timing` 41, `check-briefing` 43, `check-session-flow` 70, `check-lifecycle` 37, `check-mobile` 50.
-- **Screenshots:** before (`58196cb`) and after (`947ffae`), 36 each, `docs/stage8/screenshots-81/`.
+- **Unit:** 16 new; 1,322 in all. F3's tests and the three feedback mutations (order guard, clock from every reply, history per game) each fail a test.
+- **`check-mobile-everyday`:** 130/130 locally (the shelf at four sizes; Pulse's clock on a phone 10 minutes fast; time up with a short game window, also while the server isn't answering, solo and in a room; landscape, also at 130 % zoom; a casual room with the longest names, Play again included).
+- **Regressions, local, on `a856fa4`:** `check-solo` 80, `check-solo-shelf` 58, `check-pattern-pulse` 54, `check-pulse-timing` 41, `check-briefing` 43, `check-session-flow` 70, `check-lifecycle` 37, `check-math` 28, `check-mobile` 50.
+- **Screenshots:** before (`58196cb`) and after (`a856fa4`), 36 each, `docs/stage8/screenshots-81/`.
+- **Spec feedback 6790913242** (ChatGPT, 08:23 UTC; it reached this session at 09:04, after the first build): applied in `a856fa4` (spec §3.2, §3.3, §6 choices 9–10).
 
-**Gates:** to be run on the completed checkpoint, fast then full, one after the other.
+**Gates:**
+- **`2300bcc`** (before the feedback): fast PASSED (`20261111-090358-2300bccc-8008`); full stopped by me a minute in when the feedback arrived, self-recorded CANCELLED (`20261111-090450-2300bccc-10963`). Not a verdict on the checkpoint.
+- **The checkpoint:** fast then full, one after the other, on the next commit.
 
 **External blockers:** none. WebKit and real devices are not available here (checklist I22–I24).
 

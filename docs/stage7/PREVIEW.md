@@ -35,6 +35,7 @@ Use the browser's device emulation for phone sizes (320×640, 390×844, and 844�
    PORT=3459 MCHEZO_DATA_DIR=/tmp/mz-short-data MCHEZO_LIFECYCLE_SCALE=0.1 npm run serve
    ```
    Solo Pattern Pulse, then wait on its first screen without pressing anything: the clock shows the warning tone with "Running low"; at 0:00 **Show me the pattern** is replaced by "The game's time is up. Your results are on their way.", then the results. The server refuses `MCHEZO_LIFECYCLE_SCALE` when `NODE_ENV=production`.
+   Then again, but stop that server a few seconds before 0:00: the screen says the game server isn't answering and offers **Check again** (and Leave round). Start it again with the same data directory and press Check again: the results.
 4. **Sideways (844×390):** Pattern Pulse's tap-back screen shows all six shapes and **Lock it in** without scrolling; Math Mayhem shows all four answers.
 5. **Casual room with long names** (24 characters, e.g. "Wolfeschlegelsteinhausen"): lobby, rules screen (**I'm ready** waits at the bottom while the rules scroll), Pattern Pulse (one game clock on each screen), results with **What's next** on the first screen, **Play again**.
 
