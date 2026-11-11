@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:43105
+# timeout 600s | worker w3 | server http://localhost:43105 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-c27570f/test-results/20261111-134957-c27570f7-15819/server-data/w3)
+
+[+21.6s] PASS reveal opens on the first question phase — question:0
+[+21.6s] PASS question phase hides the correct answer — count=0
+[+21.9s] PASS Reveal answer steps into the first reveal — reveal:1
+[+21.9s] PASS reveal phase shows the correct answer — count=1
+[+21.9s] PASS reveal phase separates this question from the game total
+[+22.0s] PASS Next question steps into the second question phase — question:2
+[+22.0s] PASS second question phase hides the correct answer again — count=0
+[+22.0s] PASS Q10 jump lands on the last question phase — question:18
+[+22.1s] PASS last reveal reached — reveal:19
+[+22.1s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+22.1s] PASS finale shows the standings list
+[+22.2s] PASS auto-play starts back at the first question — question:0
+[+30.2s] PASS auto-play advances a step within 8s — reveal:1
+[+38.3s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+39.2s] PASS TV walk opens on a question — Which organ pumps blood around the human
+[+43.2s] PASS TV walk advances to the reveal stage
+[+48.2s] PASS TV walk advances to the second question — How many days are in a week?
+[+48.3s] PASS TV manual jump reaches the leaderboard
+[+48.4s] REVEAL ALL PASSED
+[+48.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 48.4s | cpu 3.1s, peak memory 247 MB

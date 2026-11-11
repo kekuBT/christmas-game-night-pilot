@@ -2,7 +2,7 @@
 
 - **How they were taken:** by `scripts/screenshot-stage82.mjs`, the same script for both, each run against its own server with its own build. Chromium headless emulation, not real phones or WebKit. Each folder's `manifest.json` names the exact revision, says whether the tree was clean, and records which look each shot actually rendered.
 - **`before/`:** `0f3cc54`, PR #12's cleared head, with a clean tree.
-- **`after/`:** `d4e06c3`, the Stage 8.2 candidate tested by both gates, with a clean tree.
+- **`after/`:** `c27570f`, the final Stage 8.2 candidate tested by both gates, with a clean tree. The first candidate `d4e06c3` was photographed too; those shots were replaced after the spec feedback.
 
 **What each shot is.** Every surface is photographed twice, with this device's look set to Everyday and then to Christmas (`localStorage` `mz_look`).
 - **Before:** nothing read that setting, so all 20 "christmas" shots rendered in the everyday look. The manifest records `rendered: everyday`, which is the finding in §1.1: the Christmas theme never rendered. The content choice didn't exist yet, so those steps are listed as skipped.

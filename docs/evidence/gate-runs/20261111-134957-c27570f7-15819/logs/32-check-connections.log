@@ -1,0 +1,63 @@
+$ node scripts/check-connections.mjs http://localhost:43105
+# timeout 600s | worker w3 | server http://localhost:43105 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-c27570f/test-results/20261111-134957-c27570f7-15819/server-data/w3)
+
+[+6.4s] PASS the briefing explains the objective
+[+6.7s] PASS 16 tiles — PLUM,GARNET,SAGE,POKER,BRIDGE,CHERRY,JADE,SAPPHIRE,LIME,AMETHYST,EMERALD,LEMON,SNAP,TOPAZ,MOSS,RUMMY
+[+6.7s] PASS tiles are shuffled (the first four are not one group)
+[+7.0s] PASS no horizontal overflow at 320px
+[+7.0s] PASS tiles are at least 44px at 320px — 63.999359130859375
+[+7.3s] PASS no horizontal overflow at 360px
+[+7.3s] PASS tiles are at least 44px at 360px — 64
+[+7.6s] PASS no horizontal overflow at 390px
+[+7.6s] PASS tiles are at least 44px at 390px — 64
+[+7.6s] PASS a tapped tile is marked selected (aria-pressed)
+[+7.7s] PASS tapping again deselects
+[+7.7s] PASS Submit is disabled until four are picked
+[+8.5s] PASS one-away feedback after a near miss
+[+8.5s] PASS a double tap sends one guess — 1
+[+8.5s] PASS mistake dots show 3 left
+[+8.9s] PASS re-trying the same group is refused locally
+[+9.4s] PASS group 1 found shows a band
+[+9.8s] PASS Ada sees the name of the group she found, not the others
+[+10.3s] PASS group 2 found shows a band
+[+10.7s] PASS group 3 found shows a band
+[+11.1s] PASS group 4 found shows a band
+[+11.1s] PASS Ada's puzzle is solved
+[+14.7s] PASS four mistakes end Bea's puzzle
+[+14.7s] PASS unsolved group names stay hidden until the game ends
+[+15.1s] PASS Cal finds a group
+[+16.9s] PASS after reconnecting Cal still has his group and 12 tiles
+[+16.9s] PASS keyboard: Space toggles a focused tile
+[+17.0s] PASS keyboard focus is visible
+[+17.7s] PASS the TV shows the board's 16 words
+[+17.7s] PASS the TV never shows group names while the game is on
+[+18.5s] DIAG player=Cal game=word-connections(game-1) server=playing phase=- deadlineIn=36s phaseIn=- submitted=3/3 outcome=- | screen="Word Connections: find four groups of four" clock="Time left in this game: 0:37" | type=waiting-on-players
+[+54.7s] PASS the deadline brings everyone to the results
+[+54.7s] PASS results show all four groups
+[+54.7s] PASS results mark groups Cal missed (dashed)
+[+54.7s] PASS results explain the deadline ending
+[+54.7s] PASS results show Cal's participation — WORD CONNECTIONS · OFFICIAL
+[+54.7s] Ada wins Word Connections
+[+54.7s] A
+[+54.7s] Ada
+[+54.7s] 
+[+54.7s] Ada won by a comfortable margin. Very comfortable.
+[+54.7s] 
+[+54.7s] You came 2nd of 3
+[+54.7s] 100 pts
+[+54.7s] Solid middle of the pack. Room to climb.
+[+54.7s] WORD CONNECTIONS
+[+54.7s] The groups were…
+[+54.7s] FRUITS
+[+54.7s] Cherry · Plum · Lemon · Lime
+[+54.7s] CARD GAMES
+[+54.7s] Snap · Bridge · Poker · Rummy
+[+54.7s] GEMSTONES
+[+54.8s] PASS no horizontal overflow on results at 320px
+[+55.3s] PASS everyone is back in the lobby
+[+55.3s] PASS a second official Connections game starts (a different board) — 201
+[+56.4s] PASS the second board is different
+[+56.4s] CONNECTIONS ALL PASSED
+[+56.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 56.5s | cpu 5.1s, peak memory 343 MB

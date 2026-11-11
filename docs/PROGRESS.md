@@ -1959,11 +1959,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **Gates:**
 - **`d4e06c3`** (before the feedback): fast PASSED (`20261111-132206-d4e06c34-24970`); full stopped by me about a minute in when the feedback arrived, self-recorded CANCELLED (`20261111-132514-d4e06c34-28633`). Not a verdict on the final candidate.
-- **The final candidate:** see §7.3.
+- **The final candidate, `c27570f`** (fresh clones, clean tree, one after the other):
+  - fast `20261111-134753-c27570f7-12465`: **PASSED** 5/5, 1,374 unit tests, 49 s;
+  - full `20261111-134957-c27570f7-15819`: **PASSED** 84/84, `check-themes-seasonal` 139, in 30 min 00 s.
+- **Screenshots:** before (`0f3cc54`) and after (`c27570f`), 40 each, `docs/stage8/screenshots-82/`.
 
 **External blockers:** none. Real phones and WebKit are not available here (checklist I26, I27).
 
-**Next task:** sequential fast and full gates on the candidate, then before and after screenshots and the completed report on PR #13.
+**Next task:** ChatGPT's independent review and private interactive audit of `c27570f`. After that, the Home Screen installation milestone.
 
 **Risk:**
 - **Emulation only:** Safari's toolbar colour and Android's status bar are untested on real phones.

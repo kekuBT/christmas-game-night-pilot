@@ -356,7 +356,11 @@ Labels say which game they mean, in words, never by colour alone. The briefing s
   - fast `20261111-132206-d4e06c34-24970`: PASSED, 5/5, 49 s;
   - full `20261111-132514-d4e06c34-28633`: stopped by me about a minute in, when the feedback arrived, and self-recorded CANCELLED (exit 130).
   - Neither is a verdict on the final candidate. Their raw evidence is kept in `docs/evidence/gate-runs/`.
-- **The final candidate:** recorded below once its gates have run, one after the other.
+- **The final candidate, `c27570f`** (fresh clones, clean tree, fingerprint `9e319219e52c…`, 447 files; one after the other):
+  - **fast** `20261111-134753-c27570f7-12465`: **PASSED** 5/5, 1,374 unit tests, 49 s (predicted 26–59 s);
+  - **full** `20261111-134957-c27570f7-15819`: **PASSED** 84/84 in 30 min 00 s (predicted 22–55 min, about 29 min 25 s); `check-themes-seasonal` 139, `check-mobile-everyday` 134, `check-content-variety` 58; no browsers or servers left behind.
+  - No failed gate runs. Raw evidence for all four runs is in `docs/evidence/gate-runs/<run>/`.
+- **Screenshots:** `docs/stage8/screenshots-82/`, 40 before (`0f3cc54`) and 40 after (`c27570f`). Before, all 20 Christmas-look shots rendered Everyday; after, all 20 render Christmas.
 
 ## 8. Catalog audit: every item considered
 Text matching was used **only** to find candidates for this review. The game filters on the `season` tag alone.
