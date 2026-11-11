@@ -149,4 +149,15 @@ No control smaller than 44 px was found on the solo journey at these sizes. The 
 
 - **The estimate posted before the runs** (PR #12's description): about 1 minute, then 29–35 minutes. They ran from 09:27:22 to 09:58:20 UTC.
 - **No failed gate runs** on this checkpoint. Raw evidence for all four runs (these two and the two on `2300bcc`): `docs/evidence/gate-runs/<run>/`.
+- **Then R81-01** (§7.5): ChatGPT's independent run of `check-mobile-everyday` on `de913bf`, in its Codespace, failed 1 check of 130. So `de913bf` passed its own gates but not on every machine; it is superseded.
+
+**The repaired checkpoint, `d7bb85f01d31a81032392df921edd77a02bb1df2`:** one after the other, each in its own fresh clone with a clean tree (`dirty: []`), the same source fingerprint (`127fca6b…`, 437 files).
+
+| Run | Gate | Verdict | Measured |
+|---|---|---|---|
+| `20261111-103446-d7bb85f0-2862` | fast | **PASSED**, exit 0, 5/5: typecheck ×2, lint, 1,322 unit tests, build | wall 47 s |
+| `20261111-103537-d7bb85f0-5864` | full | **PASSED**, exit 0, 83/83, 3 workers: `check-mobile-everyday` 134 (the shelf measured with the page's own font stack, DejaVu Sans, Liberation Sans and FreeSans), `check-solo` 80, `check-solo-shelf` 58, `check-pattern-pulse` 54, `check-pulse-timing` 41, `check-briefing` 43, `check-session-flow` 70, `check-lifecycle` 37, `check-math` 28, `check-mobile` 50 | wall 30 min 48 s |
+
+- **The estimate posted before the runs** (PR #12's description): about 1 minute, then 30–35 minutes. They ran from 10:34:43 to 11:06:28 UTC.
+- **No failed gate runs** on this checkpoint.
 

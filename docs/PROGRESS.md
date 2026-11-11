@@ -1911,7 +1911,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/evidence/stage81-local/r81-01/`; spec §7.5.
 - **ChatGPT's live-site restart check** was blocked by the preview's GitHub sign-in after the tunnel was recreated (its audit boundary, not an app change; review 6793171907).
 
-**Next task:** the gates on the repaired checkpoint, a new completed report on PR #12, then ChatGPT's review and the rest of its private live-site audit.
+- **Gates on `d7bb85f`** (fresh clone, clean tree, one after the other):
+  - fast `20261111-103446-d7bb85f0-2862`: **PASSED** 5/5, 1,322 unit tests, 47 s;
+  - full `20261111-103537-d7bb85f0-5864`: **PASSED** 83/83, `check-mobile-everyday` 134/134 (four fonts), in 30 min 48 s.
+  - No failed gate runs.
+
+**Next task:** ChatGPT's review of the repair and the rest of its private live-site audit (the restart check).
 
 **Risk:**
 - **Emulation only:** no real phones, no WebKit; landscape on a real phone (browser bars, the notch) is unverified.
