@@ -12,6 +12,7 @@
  */
 import type { SessionSeason } from "../../shared/season.js";
 import type { Participation, PhaseKind } from "../../server/lifecycle.js";
+import type { GameSettings } from "../settings.js";
 
 export interface ModuleContext {
   /** Server time of this event (a deadline instant when a deadline is processed). */
@@ -37,7 +38,7 @@ export interface GameModule<S = unknown> {
    * at its start; absent in a Cup, whose games keep their full content.
    * Modules without seasonal content ignore it.
    */
-  init(args: { players: readonly string[]; seed: number; season?: SessionSeason }): S;
+  init(args: { players: readonly string[]; seed: number; season?: SessionSeason; settings?: GameSettings }): S;
   intent(s: S, actorId: string, action: string, payload: Record<string, unknown>, ctx: ModuleContext): ModuleResult;
   /** "Sit this one out": a round, or (wholeGameAbstain) the rest of the game. */
   abstain(s: S, actorId: string, ctx: ModuleContext): ModuleResult;

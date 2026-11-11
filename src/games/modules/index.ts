@@ -1,16 +1,19 @@
 /**
  * Stage 5: the game modules RoomEngine plays through the common contract.
- * Every module here is Practice-only (src/server/lifecycle.ts).
+ * Every module here is Practice-only (src/server/lifecycle.ts). Stage 9.1
+ * adds Jebena Rush (casual rooms only).
  */
 import type { GameModule } from "./types.js";
 import { majorityModule } from "./majority.js";
 import { pulseModule } from "./pulse.js";
 import { drawModule } from "./draw.js";
+import { jebenaModule } from "./jebena.js";
 
 export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Object.freeze({
   [majorityModule.id]: majorityModule as GameModule<unknown>,
   [pulseModule.id]: pulseModule as GameModule<unknown>,
   [drawModule.id]: drawModule as GameModule<unknown>,
+  [jebenaModule.id]: jebenaModule as GameModule<unknown>,
 });
 
 export function moduleFor(gameId: string): GameModule<unknown> | undefined {

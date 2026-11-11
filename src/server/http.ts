@@ -983,7 +983,8 @@ export class LocalServer {
             } else if (rematchOf) {
               ({ game, replay } = room.startRematch(player.id, rematchOf, { ...common, attempt }));
             } else {
-              ({ game, replay } = room.startChosen(player.id, String(body["gameId"] ?? ""), { official: body["official"] === true, ...common, ...(attempt ? { attempt } : {}) }));
+              // Stage 9.1: a chosen game's settings (Jebena Rush's hearts); the room validates them. Play again reuses its game's own.
+              ({ game, replay } = room.startChosen(player.id, String(body["gameId"] ?? ""), { official: body["official"] === true, ...common, ...(attempt ? { attempt } : {}), ...(body["settings"] !== undefined ? { settings: body["settings"] } : {}) }));
             }
           } catch (err) {
             if (err instanceof StartRefused) {

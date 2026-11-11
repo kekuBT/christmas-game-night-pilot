@@ -78,6 +78,13 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
     model: "phased", gameWindowMs: 12 * MIN, phaseMs: { draw: 75 * SEC, reveal: 8 * SEC },
     officialEligible: false, practiceOnlyReason: "Draw & Guess is new: practice-only until its Cup scoring is approved.", unit: "turns",
   },
+  // Stage 9.1 (docs/stage9/stage91.md §3–§4): one turn at a time, each its own
+  // phase ("turn:<n>"): 10 s shown + 500 ms network grace (src/games/modules/jebena.ts).
+  // The game deadline is the match limit (12 min): it ends the match with places.
+  "jebena-rush": {
+    model: "game-deadline", gameWindowMs: 12 * MIN, phaseMs: { turn: 10 * SEC + 500 },
+    officialEligible: false, practiceOnlyReason: "Jebena Rush is new: practice-only, in casual rooms.", unit: "turns",
+  },
 });
 
 export function policyFor(gameId: string): GamePolicy {

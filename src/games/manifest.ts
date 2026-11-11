@@ -359,6 +359,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
     details: "Up to six turns of 75 seconds; the server picks who draws and the word. Guessers score 100, 80, 60, then 50 in the order they get it; the drawer 50 for each. Wrong guesses are never shown. Practice-only (Stage 5).",
   },
+  {
+    id: "jebena-rush",
+    title: "Jebena Rush",
+    description: "Name it. Pass it. Beat the steam. Name something in the category before your 10 seconds run out, then pass the jebena on. Time out and lose a heart.",
+    categories: ["word", "speed"],
+    minPlayers: 2,
+    recommendedPlayers: 3,
+    maxPlayers: 10,
+    playStyle: "solo",
+    competition: "competitive",
+    duration: { minutes: 8, source: "design-default", measured: false },
+    inputs: ["text"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: false },
+    features: { practice: true, official: false, abstention: "whole-game" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: false },
+    details: "Turns of 10 seconds in a seeded order; an answer the bank accepts passes the jebena, a timeout costs one heart (5 by default; 3, 5 or 7). The last player with hearts keeps the jebena; the match ends by 12 minutes. 100 points for each player you outlast, 10 for each heart you keep. Casual rooms only; practice-only (Stage 9.1).",
+  },
 ];
 
 /**
