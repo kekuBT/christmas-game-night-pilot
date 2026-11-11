@@ -8,7 +8,7 @@
 import { SegmentedChoice } from "../../ui/mchezo/index.js";
 import { SEASON_LABEL, type SessionSeason } from "../../../../../src/shared/season.js";
 
-export function ContentSeasonChoice({ value, onChange, testIdPrefix, note, busy }: {
+export function ContentSeasonChoice({ value, onChange, testIdPrefix, note, busy, unsaved }: {
   value: SessionSeason;
   onChange: (season: SessionSeason) => void;
   /** solo | lobby: test ids are `${prefix}-content-everyday` and `…-christmas`. */
@@ -16,6 +16,8 @@ export function ContentSeasonChoice({ value, onChange, testIdPrefix, note, busy 
   note?: string;
   /** A change is on its way to the server: the choice waits for its answer. */
   busy?: boolean;
+  /** Repair R82-01: this device couldn't save the choice; say it lasts only until reload (never promise it is kept). */
+  unsaved?: boolean;
 }) {
   return (
     <div className="mz-content-choice" data-testid={`${testIdPrefix}-content`} data-season={value}>
@@ -31,6 +33,7 @@ export function ContentSeasonChoice({ value, onChange, testIdPrefix, note, busy 
         ]}
       />
       {note && <p className="mz-foot mz-content-choice__note" data-testid={`${testIdPrefix}-content-note`}>{note}</p>}
+      {unsaved && <p className="mz-foot mz-content-choice__note" role="status" data-testid={`${testIdPrefix}-content-unsaved`}>This device can’t save your choice right now, so it applies until you reload this page.</p>}
     </div>
   );
 }

@@ -1966,7 +1966,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **External blockers:** none. Real phones and WebKit are not available here (checklist I26, I27).
 
-**Next task:** ChatGPT's independent review and private interactive audit of `c27570f`. After that, the Home Screen installation milestone.
+**Repair R82-01** (ChatGPT's review 6799134510 on `c27570f`, not cleared):
+- **The finding:** a `localStorage` write that failed undid the look or content choice at once. Listeners re-read stale or default storage.
+- **The fix:** `ui/mchezo/deviceChoice.ts`. The page's choice is held in memory and is authoritative for the page, on every screen. Other tabs' saves still arrive. Failed saves are said plainly ("until you reload").
+- **The check:** `check-themes-seasonal` section F, in three storage modes, for both the look and the content: the shelf → Word Connections Start reaches the server as Christmas. 19 of its checks fail on `c27570f`; all 166 pass after the repair. Five new unit tests call the setters themselves (1,379 unit tests in all). Ten regression drivers were rerun with 0 failures. Evidence: `docs/evidence/stage82-local/r82-01/`.
+- **Gates:** to be run on the repaired candidate, one after the other.
+
+**Next task:** sequential fast and full gates on the repaired candidate, then the repair report on PR #13. After that, ChatGPT's review and private audit, then the Home Screen installation milestone.
 
 **Risk:**
 - **Emulation only:** Safari's toolbar colour and Android's status bar are untested on real phones.

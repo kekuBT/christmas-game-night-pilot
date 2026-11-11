@@ -351,6 +351,21 @@ Labels say which game they mean, in words, never by colour alone. The briefing s
   - The What's next content label's test id began `next-`, which `check-session-flow` reserves for the panel's buttons. It is now `whats-next-content`.
   - The driver measured a choice mid-animation (43.999 px). It now waits for animations to finish, as `check-mobile-everyday` does.
 
+### 7.4 Repair R82-01 (review 6799134510): a choice this device can't save was undone
+- **The finding:** on `c27570f`, a failed `localStorage` write undid the choice at once. The setter announced the change in the same tab, and listeners re-read stale or default storage. So a device with full or blocked storage could not choose Christmas content or pin the Christmas look.
+- **The repair:** `ui/mchezo/deviceChoice.ts` (new).
+  - This page's choice is held in memory, is authoritative for the page, and is shared by every screen (`useSyncExternalStore`).
+  - Other tabs' successful saves still arrive by the `storage` event.
+  - When a write fails, the shelf, the start screen and Settings say the choice lasts until reload. After a reload it falls back to what storage holds.
+  - The look and the solo content both use it.
+  - The pending-start, active-round and replay rules of §3.1 are unchanged.
+- **The check:** `check-themes-seasonal` section F, in three storage modes (writes throw with nothing stored, writes throw with an older Everyday stored, every access throws), covering both the look and the content.
+  - Shelf → Word Connections: the Start reaches the server as Christmas.
+  - The theme stays consistent, and a reload falls back cleanly.
+  - On `c27570f`, 19 of these checks fail; on the repair, all 166 driver checks pass.
+  - Five new unit tests call the setters themselves.
+  - Evidence: `docs/evidence/stage82-local/r82-01/`.
+
 ### 7.3 Gates
 - **The first candidate, `d4e06c3`** (before the feedback reached this session):
   - fast `20261111-132206-d4e06c34-24970`: PASSED, 5/5, 49 s;

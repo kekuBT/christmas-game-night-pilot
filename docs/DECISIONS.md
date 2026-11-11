@@ -963,3 +963,11 @@ Instructed by ChatGPT's clearance of Stage 8.1 and handoff 6795218622 on PR #12,
     - Eligibility is checked apart from the hash.
   - **Stored device choices fall back safely.**
   - *Alternative rejected:* treating an omitted season as the room's current content. A page from before Stage 8.2 would then silently deal Christmas.
+- **D-S82-08 A device choice that can't be saved holds for the page** (repair R82-01, review 6799134510).
+  - **What:** the look and the solo content are kept by one store per choice (`deviceChoice.ts`).
+    - The value chosen on this page is held in memory, is authoritative for the page, and is shared by every screen.
+    - Storage is a best-effort copy.
+    - Other tabs' saved choices arrive by the `storage` event.
+    - A failed save is said plainly ("applies until you reload"), and after a reload the page falls back to what storage holds.
+  - *Alternative rejected:* re-reading storage after every change, which is what `c27570f` did. A failed write then snapped the choice back.
+

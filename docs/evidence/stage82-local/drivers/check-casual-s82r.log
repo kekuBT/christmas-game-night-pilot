@@ -1,0 +1,32 @@
+PASS Home is honest about Math Mayhem: 1–10 players, best with 2+ — Math Mayhem 1–10 players · best with 2+ · about 5 min
+PASS Host a game: Casual is chosen by default
+PASS Host a game: the note says casual games count toward no Cup
+PASS a casual room is made and shows its room code — H3E3GV
+PASS casual lobby: no Cup chip
+PASS casual lobby: Math Mayhem is up next
+PASS casual lobby: no Official/Practice choice
+PASS casual lobby: up next says Casual · just for fun
+PASS casual lobby: the dock says just for fun, no Cup
+PASS casual room menu: no Family Cup row
+PASS guest on plain http (real insecure context at 192.0.2.2) — {"secure":false,"randomUUID":"undefined"}
+PASS guest: waits for the host's game, marked Casual, just for fun
+PASS guest: no Cup chip either
+PASS host: Start names the game, with no Official/Practice suffix
+PASS server: the room is casual — casual
+PASS server: an official start sent straight to the API is refused — {"status":409,"body":{"error":"This room is a casual game, not a Family Cup: its games never count toward a Cup.","code":"NOT_A_CUP_ROOM","readiness":{"registered":2,"connected":2,"reconnecting":0,"away":0,"wouldPlay":["player-1","player-2"],"wouldMiss":[]}}}
+PASS both players reach the results
+PASS back in the lobby: Last game · Math Mayhem · Casual
+PASS server: the game finished, unofficial, with both players scored — [{"s":"finished","o":false,"r":{"player-1":720,"player-2":720}}]
+PASS server: the casual room has empty Cup standings — {}
+PASS Family Cup lobby: the Cup chip is shown
+PASS Family Cup lobby: the Official/Practice choice is there
+PASS Family Cup room menu: the Cup row is there
+PASS the theme is the same in a casual room and a Family Cup — {"attr":"everyday","ground":"#16111D","body":"rgb(22, 17, 29)","meta":"#16111D"} vs {"attr":"everyday","ground":"#16111D","body":"rgb(22, 17, 29)","meta":"#16111D"}
+PASS Family Cup: Start is Official by default
+PASS Family Cup: the official game produces Cup standings for both players
+PASS server: the Cup room is a Cup and its game was official
+PASS isolation: the casual room's standings are still empty after the Cup's game — {}
+PASS a solo room's code joins nothing: Room not found
+PASS the solo round is untouched by the attempt
+CASUAL ALL PASSED
+exit 0

@@ -8,8 +8,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { DEFAULT_CONTENT_DIR, loadContent } from "../src/content/registry.js";
 import { LocalServer } from "../src/server/http.js";
 import type { RoomEngine } from "../src/server/room.js";
-import { LOOK_KEY, lookTheme, readLookPref, resolveLook, type LookContext, type LookPref } from "../apps/web/src/ui/mchezo/look.js";
-import { readSoloSeason, SOLO_SEASON_KEY } from "../apps/web/src/solo/soloSeason.js";
+import { LOOK_KEY, lookChoice, lookTheme, readLookPref, resolveLook, writeLookPref, type LookContext, type LookPref } from "../apps/web/src/ui/mchezo/look.js";
+import { readSoloSeason, SOLO_SEASON_KEY, soloSeasonChoice, writeSoloSeason } from "../apps/web/src/solo/soloSeason.js";
 import { themes, themeToCssVars, type MchezoTheme } from "../apps/web/src/ui/mchezo/tokens/tokens.js";
 import { forgetPageSeat, SoloSession } from "../apps/web/src/solo/soloSession.js";
 
@@ -42,7 +42,10 @@ describe("stored choices degrade safely (feedback 6795825877, 5)", () => {
   const g = globalThis as unknown as { localStorage?: unknown };
   const saved = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
   const use = (store: unknown) => Object.defineProperty(globalThis, "localStorage", { value: store, configurable: true, writable: true });
-  afterEach(() => { if (saved) Object.defineProperty(globalThis, "localStorage", saved); else delete g.localStorage; });
+  afterEach(() => {
+    if (saved) Object.defineProperty(globalThis, "localStorage", saved); else delete g.localStorage;
+    lookChoice.resetForTests(); soloSeasonChoice.resetForTests();
+  });
   const map = (entries: Record<string, string>) => ({ getItem: (k: string) => entries[k] ?? null, setItem: () => {}, removeItem: () => {} });
   it("a missing, unknown or damaged value falls back: Match the game, and Everyday content", () => {
     for (const v of [undefined, "", "summer", "CHRISTMAS", "{\"x\":1}"]) {
@@ -57,6 +60,44 @@ describe("stored choices degrade safely (feedback 6795825877, 5)", () => {
     expect([readLookPref(), readSoloSeason()]).toEqual(["auto", "everyday"]);
     use(undefined);
     expect([readLookPref(), readSoloSeason()]).toEqual(["auto", "everyday"]);
+  });
+});
+
+describe("repair R82-01 (review 6799134510): a choice that can't be saved is never undone on this page", () => {
+  const g = globalThis as unknown as { localStorage?: unknown };
+  const saved = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const use = (store: unknown) => Object.defineProperty(globalThis, "localStorage", { value: store, configurable: true, writable: true });
+  afterEach(() => {
+    if (saved) Object.defineProperty(globalThis, "localStorage", saved); else delete g.localStorage;
+    lookChoice.resetForTests(); soloSeasonChoice.resetForTests();
+  });
+  /** Reads work; every write throws (a full or blocked store). */
+  const writesThrow = (entries: Record<string, string>) => ({ getItem: (k: string) => entries[k] ?? null, setItem: () => { throw new DOMException("quota", "QuotaExceededError"); }, removeItem: () => {} });
+  const cases: [string, () => unknown][] = [
+    ["writes throw, nothing stored yet", () => writesThrow({})],
+    ["writes throw, an older choice stored", () => writesThrow({ [LOOK_KEY]: "everyday", [SOLO_SEASON_KEY]: "everyday" })],
+    ["every access throws", () => ({ getItem: () => { throw new Error("SecurityError"); }, setItem: () => { throw new Error("SecurityError"); } })],
+    ["no storage at all", () => undefined],
+  ];
+  for (const [name, store] of cases) {
+    it(`${name}: the new look and content stay chosen, every reader sees them, and the page says they weren't saved`, () => {
+      use(store());
+      const seen: string[] = [];
+      expect(writeLookPref("christmas")).toBe(false);
+      expect(writeSoloSeason("christmas")).toBe(false);
+      seen.push(readLookPref(), readSoloSeason());
+      expect(seen).toEqual(["christmas", "christmas"]);
+      expect([lookChoice.saved(), soloSeasonChoice.saved()]).toEqual([false, false]);
+      // Back again, still unsaved: the page follows the latest choice.
+      writeSoloSeason("everyday");
+      expect(readSoloSeason()).toBe("everyday");
+    });
+  }
+  it("a working store: saved, and the stored value matches", () => {
+    const entries: Record<string, string> = {};
+    use({ getItem: (k: string) => entries[k] ?? null, setItem: (k: string, v: string) => { entries[k] = v; }, removeItem: () => {} });
+    expect([writeLookPref("christmas"), writeSoloSeason("christmas")]).toEqual([true, true]);
+    expect([entries[LOOK_KEY], entries[SOLO_SEASON_KEY], lookChoice.saved()]).toEqual(["christmas", "christmas", true]);
   });
 });
 

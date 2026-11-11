@@ -38,7 +38,7 @@ const LOOK_HELP: Record<LookPref, string> = {
   christmas: "Christmas colours on this phone, always.",
 };
 
-export function SettingsBar(props: { anim: AnimSetting; onSetAnim: (v: AnimSetting) => void; osReducedMotion?: boolean; look?: LookPref; onSetLook?: (v: LookPref) => void }) {
+export function SettingsBar(props: { anim: AnimSetting; onSetAnim: (v: AnimSetting) => void; osReducedMotion?: boolean; look?: LookPref; onSetLook?: (v: LookPref) => void; lookSaved?: boolean }) {
   return (
     <section className="mz-card" style={{ marginTop: 12 }} data-testid="settings-bar" aria-labelledby="mz-settings-title">
       <span className="mz-kicker" id="mz-settings-title">This phone</span>
@@ -77,6 +77,7 @@ export function SettingsBar(props: { anim: AnimSetting; onSetAnim: (v: AnimSetti
           <p className="mz-foot" style={{ margin: 0, textAlign: "left" }} data-testid="look-help">
             {LOOK_HELP[props.look]} Only this phone changes: it never changes what anyone is dealt.
           </p>
+          {props.lookSaved === false && <p className="mz-foot" role="status" style={{ margin: 0, textAlign: "left" }} data-testid="look-unsaved">This phone can’t save settings right now, so this look applies until you reload this page.</p>}
         </div>
       )}
       <div className="mz-settings__row">

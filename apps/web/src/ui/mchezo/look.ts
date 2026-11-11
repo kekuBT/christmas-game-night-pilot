@@ -10,7 +10,8 @@
  * Pure parts (resolveLook, lookTheme) are unit-tested; the rest touches the
  * document and storage, each access guarded (private mode, blocked storage).
  */
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
+import { createDeviceChoice } from './deviceChoice.js';
 import type { SessionSeason } from '../../../../../src/shared/season.js';
 import { themes, themeToCssVars, type MchezoTheme } from './tokens/tokens.js';
 
@@ -40,32 +41,21 @@ export function isLookPref(v: unknown): v is LookPref {
   return v === 'auto' || v === 'everyday' || v === 'christmas';
 }
 
-export function readLookPref(): LookPref {
-  try {
-    const v = localStorage.getItem(LOOK_KEY);
-    return isLookPref(v) ? v : 'auto';
-  } catch { return 'auto'; }
-}
+/**
+ * This device's look preference (repair R82-01): the choice made on this page
+ * is authoritative for the page even when it can't be saved; other tabs'
+ * saved choices still arrive (deviceChoice.ts).
+ */
+export const lookChoice = createDeviceChoice<LookPref>(LOOK_KEY, isLookPref, 'auto');
+export const readLookPref = (): LookPref => lookChoice.get();
+export const writeLookPref = (p: LookPref): boolean => lookChoice.set(p);
 
-const LOOK_EVENT = 'mz-look-change';
-
-/** This device's look preference, kept in step across this tab's screens and other tabs. */
+/** This device's look preference, the same on every screen of this page and kept in step with other tabs. */
 export function useLookPref(): [LookPref, (p: LookPref) => void] {
-  const [pref, setPref] = useState<LookPref>(readLookPref);
-  useEffect(() => {
-    const sync = () => setPref(readLookPref());
-    const onStorage = (e: StorageEvent) => { if (e.key === null || e.key === LOOK_KEY) sync(); };
-    window.addEventListener(LOOK_EVENT, sync);
-    window.addEventListener('storage', onStorage);
-    return () => { window.removeEventListener(LOOK_EVENT, sync); window.removeEventListener('storage', onStorage); };
-  }, []);
-  const set = (p: LookPref) => {
-    setPref(p);
-    try { localStorage.setItem(LOOK_KEY, p); } catch { /* storage unavailable: this screen still changes */ }
-    try { window.dispatchEvent(new Event(LOOK_EVENT)); } catch { /* no window */ }
-  };
-  return [pref, set];
+  return [lookChoice.use(), (p) => { lookChoice.set(p); }];
 }
+/** Whether this device's last look choice could be saved (false: it lasts until this page is reloaded). */
+export const useLookSaved = (): boolean => lookChoice.useSaved();
 
 /**
  * Legacy variables (index.css, D-UX-04) and the tokens they follow, so the

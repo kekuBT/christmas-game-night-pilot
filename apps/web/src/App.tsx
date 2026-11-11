@@ -58,7 +58,7 @@ import { CasualResults, WhatsNext } from "./components/mchezo/WhatsNext.js";
 import { PlayersAndRoles, type HandoverResult } from "./components/mchezo/HostHandover.js";
 import QRCode from "qrcode";
 import { uuidV4 } from "./uuid.js";
-import { lookTheme, resolveLook, useDocumentLook, useLookPref, useShownSeason, type LookContext } from "./ui/mchezo/look.js";
+import { lookTheme, resolveLook, useDocumentLook, useLookPref, useLookSaved, useShownSeason, type LookContext } from "./ui/mchezo/look.js";
 import { useSoloSeason } from "./solo/soloSeason.js";
 import type { SessionSeason } from "../../../src/shared/season.js";
 
@@ -226,6 +226,7 @@ export function App() {
   // room's setting for the next start, which may have changed since. Between
   // games the room's setting (what the next game deals) applies.
   const [lookPref, setLookPref] = useLookPref();
+  const lookSaved = useLookSaved();
   const [soloSeason] = useSoloSeason();
   const soloShown = useShownSeason();
   const inRoomScreen = (!!roomId && !!playerId && route.name === "room") || (!playerId && !!specRoomId && !!specToken);
@@ -1191,7 +1192,7 @@ export function App() {
         )}
         {sheet === "settings" && (
           <Sheet title="Settings" onClose={closeSheet} testId="settings-sheet">
-            <SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} />
+            <SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} lookSaved={lookSaved} />
           </Sheet>
         )}
       </MchezoProvider>
@@ -1493,7 +1494,7 @@ export function App() {
           onReconnect={() => { void reconnect(); }}
           // While the menu is open its messages show here (and not in the dock).
           message={err || msg ? <div className="mz-menu__msg">{err && <p className="err">{err}</p>}{msg && <p className="ok" role="status">{msg}</p>}</div> : undefined}
-          phone={<SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} />}
+          phone={<SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} lookSaved={lookSaved} />}
           device={
             <ThisDeviceCard
               remembered={seatRemembered}

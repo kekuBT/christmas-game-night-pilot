@@ -23,6 +23,12 @@
 //      when tab B changes the remembered choice; A's round keeps the content
 //      it was pressed with, and its look; A's Play again repeats the finished
 //      round's content, not the changed choice; B's own Start uses B's choice.
+//   F  this device can't save (repair R82-01, review 6799134510): localStorage
+//      writes throw (nothing stored yet, and an older choice stored), and every
+//      localStorage access throws. Choosing Christmas content on the shelf and
+//      the Christmas look in Settings stays chosen (the page says it lasts
+//      until reload), the content survives shelf → Word Connections, the
+//      Start reaches the server as Christmas, and the theme stays consistent.
 //   Also (C, feedback 6795825877): a guest still on a Christmas game's results
 //   keeps that game's look while the host sets the NEXT game to Everyday; the
 //   labels say "This game" and "Next game", not colours alone.
@@ -345,6 +351,65 @@ try {
     await soon("E tab B's round is in the Everyday look", () => isLook(b, "everyday"));
     await a.unroute("**/rooms/*/games").catch(() => {});
     await ctx.close();
+  }
+
+  // ---- F. This device can't save its choices (repair R82-01) ----
+  {
+    const MODES = {
+      "writes throw, nothing stored": () => {
+        const orig = Storage.prototype.setItem;
+        Storage.prototype.setItem = function (k, v) { if (this === window.localStorage) throw new DOMException("The quota has been exceeded.", "QuotaExceededError"); return orig.call(this, k, v); };
+      },
+      "writes throw, an older Everyday choice stored": () => {
+        try { window.localStorage.setItem("mz_solo_season", "everyday"); window.localStorage.setItem("mz_look", "everyday"); } catch { /* none */ }
+        const orig = Storage.prototype.setItem;
+        Storage.prototype.setItem = function (k, v) { if (this === window.localStorage) throw new DOMException("The quota has been exceeded.", "QuotaExceededError"); return orig.call(this, k, v); };
+      },
+      "every localStorage access throws": () => {
+        const set = Storage.prototype.setItem, get = Storage.prototype.getItem, rem = Storage.prototype.removeItem;
+        Storage.prototype.setItem = function (k, v) { if (this === window.localStorage) throw new DOMException("denied", "SecurityError"); return set.call(this, k, v); };
+        Storage.prototype.getItem = function (k) { if (this === window.localStorage) throw new DOMException("denied", "SecurityError"); return get.call(this, k); };
+        Storage.prototype.removeItem = function (k) { if (this === window.localStorage) throw new DOMException("denied", "SecurityError"); return rem.call(this, k); };
+      },
+    };
+    for (const [mode, init] of Object.entries(MODES)) {
+      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      await ctx.addInitScript(init);
+      const starts = [];
+      ctx.on("request", (r) => { const b = r.postData(); if (b && /\/games$/.test(r.url()) && r.method() === "POST") starts.push(JSON.parse(b)); });
+      const p = await ctx.newPage();
+      const pageErrors = [];
+      p.on("pageerror", (e) => pageErrors.push(String(e)));
+      // The look, in Settings.
+      await p.goto(`${GATE_BASE}/`, { waitUntil: "domcontentloaded" });
+      await p.getByTestId("home-settings").click();
+      await p.getByTestId("look-christmas").click();
+      await sleep(400);
+      check(`F ${mode}: Settings → Look → Christmas stays chosen and the page turns Christmas`, (await pressed(p, "look-christmas")) && (await isLook(p, "christmas")), JSON.stringify(await look(p)));
+      check(`F ${mode}: Settings says the look lasts until reload (never promises it is kept)`, await p.getByTestId("look-unsaved").isVisible());
+      await p.getByTestId("look-auto").click();
+      await sleep(200);
+      check(`F ${mode}: back to Match the game, still unsaved, the page follows it (Everyday at home)`, (await pressed(p, "look-auto")) && (await isLook(p, "everyday")));
+      await p.keyboard.press("Escape");
+      // The solo content, on the shelf, reached inside the app (no reload: this page's choices hold).
+      await p.getByTestId("home-solo").click();
+      await p.getByTestId("solo-home").waitFor({ timeout: 15000 });
+      await p.getByTestId("solo-content-christmas").click();
+      await sleep(400);
+      check(`F ${mode}: the shelf's Christmas stays chosen, with the Christmas look (Match the game)`, (await p.getByTestId("solo-content").getAttribute("data-season")) === "christmas" && (await pressed(p, "solo-content-christmas")) && (await isLook(p, "christmas")), `${await p.getByTestId("solo-content").getAttribute("data-season")} ${JSON.stringify(await look(p))}`);
+      check(`F ${mode}: the shelf says the choice lasts until reload`, await p.getByTestId("solo-content-unsaved").isVisible());
+      await p.getByTestId("solo-start-word-connections").click();
+      const board = await shownBoard(p);
+      check(`F ${mode}: shelf → Word Connections: the Start reached the server as Christmas and dealt a Christmas board`, starts.length >= 1 && starts.every((b) => b.season === "christmas") && !!board && CHRISTMAS_BOARDS.includes(board.id), `${JSON.stringify(starts.map((b) => b.season))} ${board?.id}`);
+      check(`F ${mode}: the round keeps the Christmas look and label`, (await isLook(p, "christmas")) && /Christmas content/.test(await p.getByTestId("solo-round-content").innerText()));
+      // A reload: nothing could be saved, so the page falls back to what storage holds (as the notes said).
+      const stored = "everyday"; // in every mode: the default, or the older stored Everyday
+      await p.reload({ waitUntil: "domcontentloaded" });
+      await p.getByTestId("solo-ready").waitFor({ timeout: 15000 });
+      check(`F ${mode}: after a reload the unsaved choice falls back (${stored}), never a broken page`, (await p.getByTestId("solo-content").getAttribute("data-season")) === stored && (await isLook(p, "everyday")));
+      check(`F ${mode}: no page errors`, pageErrors.length === 0, pageErrors.slice(0, 2).join(" | "));
+      await ctx.close();
+    }
   }
 
   // ---- D. The looks at each size, in both looks ----

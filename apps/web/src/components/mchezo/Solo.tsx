@@ -21,7 +21,7 @@ import { deviceStore, readBest, recordScore, type KeyValueStore, type PersonalBe
 import { SoloSession, type SoloState } from "../../solo/soloSession.js";
 import { SOLO_GAMES, soloAdapter } from "../../solo/soloGames.js";
 import { countsForBest } from "../../solo/soloRules.js";
-import { useSoloSeason } from "../../solo/soloSeason.js";
+import { useSoloSeason, useSoloSeasonSaved } from "../../solo/soloSeason.js";
 import { ContentSeasonChoice, ContentSeasonLabel } from "./ContentChoice.js";
 import type { SessionSeason } from "../../../../../src/shared/season.js";
 import { setShownSeason } from "../../ui/mchezo/look.js";
@@ -60,12 +60,13 @@ export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readon
   const store = useMemo(() => deviceStore(), []);
   const solo = soloShelf(catalog);
   const [season, setSeason] = useSoloSeason();
+  const saved = useSoloSeasonSaved();
   return (
     <main className="mz-screen mz-entry mz-solo mz-solo-shelf" aria-label="Play solo" data-testid="solo-home">
       <header className="mz-appbar"><BackButton onBack={onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
       <h1 className="mz-h1">Play solo</h1>
       <p className="mz-foot mz-entry__lede">Just you and the clock: no room code, no setup. Solo rounds are just for you; they never count toward a Family Cup.</p>
-      <ContentSeasonChoice value={season} onChange={setSeason} testIdPrefix="solo" note={soloContentNote(season)} />
+      <ContentSeasonChoice value={season} onChange={setSeason} testIdPrefix="solo" note={soloContentNote(season)} unsaved={!saved} />
       <ul className="mz-solo__list" aria-label="Games you can play alone">
         {solo.map((g) => {
           const adapter = soloAdapter(g.id)!;
@@ -114,6 +115,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
   const [state, setState] = useState<SoloState>({ phase: "idle" });
   // Stage 8.2: the solo content choice (this device's), sent with every Start; the server binds it to the round.
   const [season, setSeason] = useSoloSeason();
+  const seasonSaved = useSoloSeasonSaved();
   const seasonRef = useRef(season);
   seasonRef.current = season;
   const [confirmLeave, setConfirmLeave] = useState(false);
@@ -229,7 +231,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
       <GameCover gameId={game.id} decorative className="mz-solo__cover mz-solo__cover--wide" />
       <h1 className="mz-h1">{game.title}</h1>
       <p className="mz-foot mz-entry__lede" data-testid="solo-howto">{adapter.howToPlay}</p>
-      {adapter.seasonalContent && <ContentSeasonChoice value={season} onChange={setSeason} testIdPrefix="solo" note={soloContentNote(season)} />}
+      {adapter.seasonalContent && <ContentSeasonChoice value={season} onChange={setSeason} testIdPrefix="solo" note={soloContentNote(season)} unsaved={!seasonSaved} />}
       <p className="mz-solo__best" data-testid={`solo-best-${game.id}`}>{bestLine(best, store !== null)}</p>
       {adapter.bestNote && <p className="mz-solo__best-note" data-testid="solo-note">{adapter.bestNote}</p>}
       {state.phase === "error" && <p className="err" role="alert" data-testid="solo-error">{state.error ?? "Something went wrong."}</p>}
