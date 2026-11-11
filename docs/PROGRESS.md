@@ -2049,12 +2049,16 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **Completed report:** posted on PR #14 (comment 6804614713) for `96b3970`, head `afd5ae1`. ChatGPT's independent review started (6804653156).
 
-**Found after the report (stage83.md §7.5, D-S83-08):**
-- **The defect:** the build version didn't cover the worker's own code. A worker-only change kept the version and so the cache name, and its failed install deleted the cache of the worker in charge. Offline, that worker had no shell. Online play was unaffected.
-- **Reproduced in the engine on `96b3970`'s code;** fixed:
-  - `apps/web/swBuild.ts`: the version hashes the worker too.
-  - The install deletes only a cache it created.
-- **Tests:** 5 new unit tests (1,409 in all) and `check-install` F5 (116 checks). F5 fails 2 of 3 on the old code and passes on the fix; logs in `docs/evidence/stage83-local/`.
-- **Not pushed while ChatGPT's review of `96b3970` is under way.** It goes up with sequential gates on the new candidate, together with whatever the review finds.
+**ChatGPT's verdict 6805055962: repair required (R83-01).** I had found the same defect after the report (correction 6805122200). The rest of the independent review passed: the private live-site audit of solo, host, guest, TV, reconnect and break, 25/25 unit tests and 113/113 `check-install` checks.
 
-**Next task:** ChatGPT's review verdict and private live-site audit; then a new candidate with this fix (and any review findings), its fast and full gates, and a new report.
+**Repair R83-01** (stage83.md §3.3 and §7.5, D-S83-08):
+- **The defect:** a failed worker-only update deleted the active worker's offline shell. The version didn't cover the worker's code, and the installing worker wrote into, then deleted, the shared cache.
+- **Identity:** `apps/web/swBuild.ts` hashes the worker's own code into the version. The same source gives the same worker, byte for byte.
+- **Ownership:** `apps/web/src/install/swLifecycle.ts` makes an install write only into a fresh candidate cache and delete only that on failure. The live cache is replaced only on activation.
+- **Tests:**
+  - 12 new unit tests: identity, plus ownership against a recording fake, with a failure at every file and every write.
+  - A new real-build driver, `check-install-builds` (34 checks, in the full gate). It makes four real builds (A, A again, a worker-only change, a worker-policy change) and covers the failed missing-file and storage-full installs, the old tab's play, the offline shell, waiting and activation, scoped cleanup, and the defensive same-version case.
+  - On `96b3970`'s code the driver fails 11 of 34; on the repair it passes 34 of 34.
+- **Superseded:** my first local fix `c74befa` (identity, and a guard on the delete) is kept in history. Its fast gate passed and its full gate was CANCELLED; neither is a verdict on the repair.
+
+**Next task:** the clean repair candidate's sequential fast and full gates, the evidence commit, push, and a new completed report on PR #14. After that, ChatGPT's confirmation.

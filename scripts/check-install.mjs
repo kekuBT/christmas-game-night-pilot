@@ -33,9 +33,7 @@
 //   N  deep links and reloads on a controlled page land on the same screen.
 //   F  failure modes: a next build missing a listed file, a sign-in page or a
 //      redirect instead of a file, storage quota denied: nothing half-made is
-//      installed and play carries on; privacy without static routing; and a
-//      failed install of a worker sharing the build's version (F5) leaves the
-//      cache of the worker in charge, and its offline shell, whole.
+//      installed and play carries on; and privacy without static routing.
 // Usage: node scripts/check-install.mjs <baseUrl>   (the gate passes its server)
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -641,43 +639,6 @@ try {
       await stopServer(own); own = null;
       rmSync(liveDir, { recursive: true, force: true }); liveDir = null;
     }
-    // F5: a new worker with THIS build's version (different bytes, the same version: a cache that outlived its
-    // registration, or any other same-name cache) fails to install. The cache the worker in charge relies on is not
-    // that install's to remove: it stays whole, and offline the worker in charge still opens its shell.
-    // (Every real change to what a build ships, the worker's own code included, is a new version: tests/stage83-install.test.ts.)
-    {
-      liveDir = mkdtempSync(join(tmpdir(), "mz-s83-f5-"));
-      cpSync(DIST, liveDir, { recursive: true });
-      const V1 = buildOf(readFileSync(join(liveDir, "index.html"), "utf8"));
-      own = await ownServer(liveDir);
-      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
-      const p = await ctx.newPage();
-      await p.goto(`${own.base}/`, { waitUntil: "load" });
-      await controlled(p);
-      const before = (await cacheContents(p))[`mchezo-shell-${V1}`] ?? [];
-      writeFileSync(join(liveDir, "sw.js"), readFileSync(join(liveDir, "sw.js"), "utf8") + "\n/* the same build, different bytes */\n");
-      unlinkSync(join(liveDir, "icons", "mark.svg"));
-      const fate = await p.evaluate(async () => {
-        const reg = await navigator.serviceWorker.getRegistration();
-        await reg.update().catch(() => {});
-        const w = reg.installing;
-        if (!w) return "no new worker";
-        const end = Date.now() + 15000;
-        while (w.state !== "redundant" && w.state !== "installed" && w.state !== "activated" && Date.now() < end) await new Promise((r) => setTimeout(r, 100));
-        return w.state;
-      });
-      const after = (await cacheContents(p))[`mchezo-shell-${V1}`] ?? [];
-      check("F5 a new worker with this build's version installs and fails (one listed file missing)", fate === "redundant" && (await workerBuild(p, "active")) === V1, fate);
-      // The same entries (in any order: a same-name install may have re-put a validated file of this same build).
-      check("F5 its failed install leaves the cache of the worker in charge whole", before.length > 0 && JSON.stringify([...after].sort()) === JSON.stringify([...before].sort()), `${before.length} entries before, ${after.length} after`);
-      await ctx.setOffline(true);
-      await p.reload({ waitUntil: "load" });
-      check("F5 and offline, the worker in charge still opens its whole shell (the app's own notice, not a bare error page)", (await soon(() => visible(p, "offline-notice"), 10000)) !== null && (await pageBuild(p)) === V1);
-      await ctx.setOffline(false);
-      await ctx.close();
-      await stopServer(own); own = null;
-      rmSync(liveDir, { recursive: true, force: true }); liveDir = null;
-    }
     // F2: a sign-in page or a redirect instead of a file (a private preview's login), on a first visit: nothing installs, nothing is stored, the app works.
     for (const [label, path, fulfil] of [
       ["a sign-in page (200 HTML) instead of an icon", "**/icons/mark.svg", { status: 200, contentType: "text/html", body: "<!doctype html><title>Sign in</title><h1>Sign in to continue</h1>" }],
@@ -689,7 +650,7 @@ try {
       await p.goto(`${GATE_BASE}/`, { waitUntil: "load" });
       await p.getByTestId("home").waitFor({ timeout: 10000 });
       const s = await soon(async () => { const st = await regState(p); return !st.installing && st.active === null ? st : null; }, 15000);
-      check(`F2 ${label}: no worker installs and nothing is stored`, !!s && !s.waiting && s.caches.filter((n) => n.startsWith("mchezo-shell-")).length === 0, JSON.stringify(s));
+      check(`F2 ${label}: no worker installs and nothing is stored (no shell cache, no candidate left)`, !!s && !s.waiting && s.caches.filter((n) => /^mchezo-(shell|stage)-/.test(n)).length === 0, JSON.stringify(s));
       check(`F2 ${label}: the app still works online (a solo round starts)`, await playsOnline(p, GATE_BASE));
       await ctx.close();
     }
@@ -707,7 +668,7 @@ try {
       await p.goto(`${own.base}/`, { waitUntil: "load" });
       await p.getByTestId("home").waitFor({ timeout: 10000 });
       const s = await soon(async () => { const st = await regState(p); return !st.installing ? st : null; }, 15000);
-      check("F3 engine: storage quota denied: no worker installs, no half-made cache, no page errors", !!s && s.active === null && s.caches.filter((n) => n.startsWith("mchezo-shell-")).length === 0 && errors.length === 0, JSON.stringify({ s, errors: errors.slice(0, 2) }));
+      check("F3 engine: storage quota denied: no worker installs, no half-made cache (shell or candidate), no page errors", !!s && s.active === null && s.caches.filter((n) => /^mchezo-(shell|stage)-/.test(n)).length === 0 && errors.length === 0, JSON.stringify({ s, errors: errors.slice(0, 2) }));
       check("F3 and play carries on (a solo round starts)", await playsOnline(p, own.base));
       await cdp.send("Storage.overrideQuotaForOrigin", { origin: own.base }).catch(() => {});
       await ctx.close();

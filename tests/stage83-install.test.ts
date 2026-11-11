@@ -7,7 +7,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { LocalServer } from "../src/server/http.js";
-import { cacheable, expectedType, isAppPage, isNetworkOnlyPath, isObsoleteShellCache, PUBLIC_FILES, SHELL_CACHE_PREFIX, swRoute, type ResponseLike } from "../apps/web/src/install/swPolicy.js";
+import { cacheable, expectedType, isAppPage, isNetworkOnlyPath, isObsoleteCache, liveCacheName, PUBLIC_FILES, SHELL_CACHE_PREFIX, STAGE_CACHE_PREFIX, stageCachePrefix, swRoute, type ResponseLike } from "../apps/web/src/install/swPolicy.js";
+import { activateGeneration, installCandidate, matchOwn, type CacheLike, type CacheStorageLike } from "../apps/web/src/install/swLifecycle.js";
 import { installPath, isAppleMobile } from "../apps/web/src/install/installState.js";
 import { probeServer } from "../apps/web/src/install/reachability.js";
 import { buildServiceWorker } from "../apps/web/swBuild.js";
@@ -126,12 +127,18 @@ describe("Stage 8.3: what the service worker may touch (§3.3; feedback 68021912
     expect(r("/manifest.webmanifest?x=1")).toBe("network");
   });
 
-  it("deletes only other builds' shell caches, never anything else", () => {
-    const current = SHELL_CACHE_PREFIX + "aaa";
-    expect(isObsoleteShellCache(SHELL_CACHE_PREFIX + "bbb", current)).toBe(true);
-    expect(isObsoleteShellCache(current, current)).toBe(false);
-    expect(isObsoleteShellCache("someone-elses-cache", current)).toBe(false);
-    expect(isObsoleteShellCache("mchezo-other", current)).toBe(false);
+  it("on activation, deletes only other builds' caches: their live caches, and their candidates unless a worker is installing; never this build's, never anything else", () => {
+    expect(liveCacheName("aaa")).toBe(SHELL_CACHE_PREFIX + "aaa");
+    expect(stageCachePrefix("aaa")).toBe(STAGE_CACHE_PREFIX + "aaa-");
+    for (const installing of [false, true]) {
+      expect(isObsoleteCache(liveCacheName("bbb"), "aaa", installing)).toBe(true);
+      expect(isObsoleteCache(liveCacheName("aaa"), "aaa", installing)).toBe(false);
+      expect(isObsoleteCache(stageCachePrefix("aaa") + "n1", "aaa", installing)).toBe(false);
+      expect(isObsoleteCache("someone-elses-cache", "aaa", installing)).toBe(false);
+      expect(isObsoleteCache("mchezo-other", "aaa", installing)).toBe(false);
+    }
+    expect(isObsoleteCache(stageCachePrefix("bbb") + "n1", "aaa", false)).toBe(true);
+    expect(isObsoleteCache(stageCachePrefix("bbb") + "n1", "aaa", true)).toBe(false);
   });
 });
 
@@ -288,13 +295,14 @@ describe("Stage 8.3: the build version covers everything the build ships, the wo
   const pub = [{ path: "/manifest.webmanifest", bytes: new TextEncoder().encode("{}") }, { path: "/icons/mark.svg", bytes: new TextEncoder().encode("<svg/>") }];
   const dirs: string[] = [];
   afterEach(() => { for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true }); });
-  /** A copy of the worker's source (using the real policy module), changed by `edit`: a worker-only change, the app bundle stays the same. */
+  /** A copy of the worker's source (using the real modules it imports), changed by `edit`: a worker-only change, the app bundle stays the same. */
   const workerCopy = (edit: (sw: string) => string = (sw) => sw) => {
     const d = mkdtempSync(join(tmpdir(), "mz-swbuild-"));
     dirs.push(d);
     const sw = readFileSync(join(SRC, "sw.ts"), "utf8");
     expect(sw).toContain('from "./swPolicy.js"');
-    writeFileSync(join(d, "sw.ts"), edit(sw.replace('from "./swPolicy.js"', `from ${JSON.stringify(join(SRC, "swPolicy.ts"))}`)));
+    const absolute = sw.replace(/from "\.\/([A-Za-z]+)\.js"/g, (_m, mod: string) => `from ${JSON.stringify(join(SRC, `${mod}.ts`))}`);
+    writeFileSync(join(d, "sw.ts"), edit(absolute));
     return join(d, "sw.ts");
   };
 
@@ -334,10 +342,134 @@ describe("Stage 8.3: the build version covers everything the build ships, the wo
     expect(r.precache).toEqual(["/index.html", "/assets/index-abc.js", "/assets/index-def.css", "/icons/mark.svg", "/manifest.webmanifest"]);
   });
 
-  it("a failed install removes only a cache it created, never one that was already there", () => {
-    const sw = readFileSync(join(SRC, "sw.ts"), "utf8");
-    expect(sw).toMatch(/ours = !\(await caches\.has\(CACHE\)\)/);
-    expect(sw).toMatch(/if \(ours\) await caches\.delete\(CACHE\)/);
-    expect(sw).not.toMatch(/^\s*await caches\.delete\(CACHE\)/m);
+});
+
+/** A Cache Storage in memory that records every operation by cache name, and can fail a write on demand. */
+class FakeCaches implements CacheStorageLike {
+  readonly stores = new Map<string, Map<string, Response>>();
+  readonly log: string[] = [];
+  failPut: (name: string, key: string) => boolean = () => false;
+  constructor(init: Record<string, string[]> = {}) {
+    for (const [name, paths] of Object.entries(init)) this.stores.set(name, new Map(paths.map((p) => [p, new Response(`${name}:${p}`)])));
+  }
+  private static key(k: string | { url: string }) { return typeof k === "string" ? k : new URL(k.url).pathname; }
+  async open(name: string): Promise<CacheLike> {
+    this.log.push(`open ${name}`);
+    if (!this.stores.has(name)) this.stores.set(name, new Map());
+    const m = this.stores.get(name)!;
+    return {
+      put: async (k, res) => {
+        const key = FakeCaches.key(k);
+        this.log.push(`put ${name} ${key}`);
+        if (this.failPut(name, key)) throw new Error("QuotaExceededError");
+        m.set(key, res);
+      },
+      match: async (k) => m.get(FakeCaches.key(k)),
+      keys: async () => [...m.keys()].map((p) => ({ url: `https://mchezo.test${p}` })),
+    };
+  }
+  async delete(name: string) { this.log.push(`delete ${name}`); return this.stores.delete(name); }
+  async has(name: string) { return this.stores.has(name); }
+  async keys() { return [...this.stores.keys()]; }
+  async match(key: string, { cacheName }: { cacheName: string }) { return this.stores.get(cacheName)?.get(key); }
+  /** Every operation on one cache. */
+  touched(name: string) { return this.log.filter((l) => l.split(" ")[1] === name); }
+  /** A cache's entries, with the identity of each stored response. */
+  entries(name: string) { return [...(this.stores.get(name) ?? new Map<string, Response>()).entries()]; }
+}
+
+describe("Stage 8.3 repair R83-01: who owns which cache (apps/web/src/install/swLifecycle.ts)", () => {
+  const PRE = ["/index.html", "/assets/index-abc.js", "/assets/index-def.css", "/manifest.webmanifest", "/icons/mark.svg"];
+  const ok = async (url: string) => new Response(`new:${url}`);
+  const nonces = (...n: string[]) => { let i = 0; return () => n[Math.min(i++, n.length - 1)]!; };
+
+  it("a successful install fills a new candidate of its own; the live cache of the worker in charge is never opened, written or deleted", async () => {
+    for (const activeVersion of ["old", "v2"]) { // another build in charge, and (defensively) one with the same version
+      const cs = new FakeCaches({ [liveCacheName(activeVersion)]: PRE, "not-mchezo": ["/x"] });
+      const before = cs.entries(liveCacheName(activeVersion));
+      const name = await installCandidate(cs, "v2", PRE, ok, nonces("n1"));
+      expect(name).toBe(stageCachePrefix("v2") + "n1");
+      expect(cs.entries(name).map(([p]) => p)).toEqual(PRE);
+      expect(cs.touched(liveCacheName(activeVersion))).toEqual([]);
+      expect(cs.entries(liveCacheName(activeVersion))).toEqual(before);
+      expect(cs.touched("not-mchezo")).toEqual([]);
+    }
+  });
+
+  it("a failed install, at ANY file (missing, a sign-in page, a redirect) or ANY write (storage full), deletes only its own candidate and leaves the live cache in charge exactly as it was", async () => {
+    for (const activeVersion of ["old", "v2"]) {
+      for (let i = 0; i < PRE.length; i++) {
+        for (const how of ["fetch", "write"] as const) {
+          const cs = new FakeCaches({ [liveCacheName(activeVersion)]: PRE, "not-mchezo": ["/x"] });
+          const before = cs.entries(liveCacheName(activeVersion));
+          const fetchOne = async (url: string) => { if (how === "fetch" && url === PRE[i]) throw new Error("not a valid file of this build"); return ok(url); };
+          if (how === "write") cs.failPut = (_n, key) => key === PRE[i];
+          await expect(installCandidate(cs, "v2", PRE, fetchOne, nonces("n1"))).rejects.toThrow();
+          expect(cs.touched(liveCacheName(activeVersion)), `${activeVersion} ${how} ${PRE[i]}`).toEqual([]);
+          expect(cs.entries(liveCacheName(activeVersion))).toEqual(before);
+          expect((await cs.keys()).sort()).toEqual([liveCacheName(activeVersion), "not-mchezo"].sort());
+        }
+      }
+    }
+  });
+
+  it("each install gets a candidate no cache has yet, so two installs never share one", async () => {
+    const cs = new FakeCaches();
+    const next = nonces("same", "same", "other");
+    const a = await installCandidate(cs, "v2", PRE, ok, next);
+    const b = await installCandidate(cs, "v2", PRE, ok, next);
+    expect(a).not.toBe(b);
+    expect([a, b].every((n) => n.startsWith(stageCachePrefix("v2")))).toBe(true);
+  });
+
+  it("activation (no page of the old generation open): the old generation's caches go, a complete candidate becomes the live cache, candidates are cleared; nothing else is touched", async () => {
+    const cs = new FakeCaches({
+      [liveCacheName("old")]: PRE,
+      [stageCachePrefix("older") + "x"]: ["/index.html"],
+      [stageCachePrefix("v2") + "partial"]: ["/index.html"],
+      "not-mchezo": ["/x"],
+      "mchezo-other": ["/y"],
+    });
+    const full = await installCandidate(cs, "v2", PRE, ok, nonces("full"));
+    const staged = cs.entries(full);
+    await activateGeneration(cs, "v2", PRE, { installing: false });
+    expect((await cs.keys()).sort()).toEqual([liveCacheName("v2"), "not-mchezo", "mchezo-other"].sort());
+    expect(cs.entries(liveCacheName("v2"))).toEqual(staged);
+    expect(cs.touched("not-mchezo")).toEqual([]);
+    expect(cs.touched("mchezo-other")).toEqual([]);
+  });
+
+  it("while another worker is installing, its candidate (another build's) is left alone", async () => {
+    const cs = new FakeCaches({ [stageCachePrefix("v3") + "n"]: ["/index.html"] });
+    await installCandidate(cs, "v2", PRE, ok, nonces("full"));
+    await activateGeneration(cs, "v2", PRE, { installing: true });
+    expect((await cs.keys()).sort()).toEqual([liveCacheName("v2"), stageCachePrefix("v3") + "n"].sort());
+  });
+
+  it("with no complete candidate, an existing live cache is left as it was, and the incomplete candidate is never promoted", async () => {
+    const cs = new FakeCaches({ [liveCacheName("v2")]: PRE, [stageCachePrefix("v2") + "partial"]: ["/index.html"] });
+    const before = cs.entries(liveCacheName("v2"));
+    await activateGeneration(cs, "v2", PRE, { installing: false });
+    expect(await cs.keys()).toEqual([liveCacheName("v2")]);
+    expect(cs.entries(liveCacheName("v2"))).toEqual(before);
+  });
+
+  it("if the promotion fails (storage full), the candidate stays and the worker still serves this build's files from it", async () => {
+    const cs = new FakeCaches({ [liveCacheName("old")]: PRE });
+    const full = await installCandidate(cs, "v2", PRE, ok, nonces("full"));
+    cs.failPut = (name) => name === liveCacheName("v2");
+    await expect(activateGeneration(cs, "v2", PRE, { installing: false })).rejects.toThrow();
+    expect(await cs.has(full)).toBe(true);
+    expect(await cs.has(liveCacheName("old"))).toBe(false);
+    expect(await (await matchOwn(cs, "v2", "/index.html"))?.text()).toBe("new:/index.html");
+  });
+
+  it("serving: this build's live cache first, then its own candidates; never another build's cache, and it creates nothing", async () => {
+    const cs = new FakeCaches({ [liveCacheName("old")]: ["/index.html", "/icons/mark.svg"], [liveCacheName("v2")]: ["/index.html"], [stageCachePrefix("v2") + "n"]: ["/index.html", "/manifest.webmanifest"] });
+    expect(await (await matchOwn(cs, "v2", "/index.html"))?.text()).toBe(`${liveCacheName("v2")}:/index.html`);
+    expect(await (await matchOwn(cs, "v2", "/manifest.webmanifest"))?.text()).toBe(`${stageCachePrefix("v2")}n:/manifest.webmanifest`);
+    expect(await matchOwn(cs, "v2", "/icons/mark.svg")).toBeUndefined();
+    expect(cs.log.filter((l) => !l.startsWith("match"))).toEqual([]);
   });
 });
+

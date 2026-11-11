@@ -102,11 +102,13 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
   - from the expected address;
   - free of `no-store` or `private`;
   - of the type its extension requires. An HTML page standing in for a script, a style, a font or an icon is refused.
-- **Install is all-or-nothing:**
-  - Each precached file is fetched and validated individually, and the shell must carry the worker's own build.
-  - One missing, redirected or wrong file, or storage quota denied, and the new worker doesn't install. The half-filled cache it created is deleted; a cache of that name that was already there is never its to remove (§7.5).
-  - The worker already in charge (if any) carries on with its own cache.
-  - A failed later cache write (quota) never fails the request.
+- **Who owns which cache** (`swLifecycle.ts`; repair R83-01, §7.5):
+  - **An install writes only into a candidate cache of its own,** `mchezo-stage-<build>-<install>`, made fresh for that install. Each precached file is fetched and validated individually, and the shell must carry the worker's own build.
+  - **One missing, redirected or wrong file, or storage full, and the new worker doesn't install.** The install deletes its own candidate and nothing else.
+  - **The active worker's live cache (`mchezo-shell-<build>`) is never opened, written or deleted by an install,** whatever the two builds are, even, defensively, if they shared a version.
+  - **Only on activation** (no page of the previous generation open) is the previous generation's cache deleted, and a complete candidate copied into this build's live cache. The candidates are then deleted.
+  - **If that copy fails** (storage full), the candidate stays, and the worker serves from it: this build's validated files, nothing mixed.
+  - **Only an active worker writes its live cache** (fonts kept on use). A failed later cache write (quota) never fails the request.
 - **Nothing is queued:** no background sync, no retry by the worker. A request that can't go fails as today, and no score or game action is ever stored for later.
 - **Honest offline:**
   - A new `GET /health` (`no-store`, no data) lets Home, Join, Host, the solo shelf and the library say "Can't reach Mchezo".
@@ -120,7 +122,7 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
 
 ### 3.4 Update lifecycle (revised by spec feedback 6802191261 §1)
 - **A new page is not a new worker.**
-  - A new build's worker installs in the background and **waits**: no `skipWaiting`, no `clients.claim`. It activates only when no page it would replace is open, then deletes the other `mchezo-shell-*` caches and nothing else: no other cache, no `localStorage`, `sessionStorage` or cookies.
+  - A new build's worker installs in the background and **waits**: no `skipWaiting`, no `clients.claim`. It activates only when no page it would replace is open. Only then does it delete the other builds' `mchezo-shell-*` caches (and their leftover candidates, unless another worker is installing) and make its own candidate its live cache. Nothing else is touched: no other cache, no `localStorage`, `sessionStorage` or cookies.
   - Page loads are network first, so a reload while online gets the newest **page**, under the old worker, until the new worker activates. A reload does not activate it.
   - **The new build's files pass through the old worker without entering its cache:** they are not on its list.
   - An old page still playing keeps every file it needs from its own build's cache, even after the server has dropped them.
@@ -228,7 +230,7 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
   - The install path.
   - The reachability probe: only `{"ok":true}` JSON counts; a sign-in page, `{}`, junk and a redirect don't.
   - The server's types, headers, 404s and `/health`.
-- **`scripts/check-install.mjs` (116 checks), by section:**
+- **`scripts/check-install.mjs` (113 checks), by section:**
 
 | Section | What it covers |
 |---|---|
@@ -241,7 +243,7 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
 | S | With storage unavailable, the worker still registers and a round starts. |
 | N | Deep links reload to the same screen, served fresh. |
 | U | Two tabs and a real next build (feedback §1), as described below. |
-| F | A next build missing a listed file, a sign-in page (200 HTML) or a redirect instead of a file, and storage quota denied (Chromium's own quota override): nothing half-made installs, no partial cache is left, the worker in charge (if any) carries on, and a solo round still starts. **Without static routing** (a worker built without it), every cached entry is still one of this build's files, and no API reply came from the worker. **F5** (§7.5): a new worker with this build's version fails to install, and the cache of the worker in charge stays whole; offline, it still opens its shell. |
+| F | A next build missing a listed file, a sign-in page (200 HTML) or a redirect instead of a file, and storage quota denied (Chromium's own quota override): nothing half-made installs, no partial cache is left, the worker in charge (if any) carries on, and a solo round still starts. **Without static routing** (a worker built without it), every cached entry is still one of this build's files, and no API reply came from the worker. Since R83-01, F2 and F3 also require that no candidate cache is left. |
 
 Section U in detail:
 - A plays a round on the old build throughout: never reloaded, still playing after B goes offline and comes back, with its files still served from its cache after the server drops them. No notice appears in the round.
@@ -289,27 +291,43 @@ Section U in detail:
 - Raw evidence for all six runs is in `docs/evidence/gate-runs/<run>/`.
 - **Screenshots:** `docs/stage8/screenshots-83/`, 34 shots on `96b3970`, and `cache-inventory.json`.
 
-### 7.5 Found after the completed report: a worker-only change kept the build's version (D-S83-08)
-- **What was wrong, on `96b3970`:**
-  - The build version hashed the app bundle and the public files, but not the worker's own code.
-  - So a change only to `sw.ts` or `swPolicy.ts` made a new `/sw.js` (different bytes, so the browser installs it) under the **same** version, and so the same cache name as the worker in charge.
-  - If that install then failed (one file missing, a sign-in page, storage full), its clean-up deleted the cache the worker in charge relied on.
-  - Offline, that worker then had no shell: a bare "Can't reach Mchezo" page instead of the app and its own notice.
-  - Online play was never affected: files fall back to the network.
-- **Reproduced first, in the engine:**
-  - Two builds of `96b3970`'s code, differing only in the worker, gave the same version `77f9ad4250045e33` and different `sw.js` bytes.
-  - With the first worker in charge (14 cached entries) and the second failing to install, Cache Storage was left empty, and an offline reload showed the bare page.
-- **The fix:**
-  - `apps/web/swBuild.ts` builds the worker with a stand-in version, hashes its code with everything else the build ships, then writes the version in. A worker-only change is now a new version (in the reproduction, `afad7cd5c0a233ea` became `b9dcd95654740e14`), and an unchanged build still gives the same worker, byte for byte.
-  - As a second guard, an install deletes its cache only if it created it, so a same-name cache that was already there is never its to remove.
-- **Tests:**
-  - **Unit** (`tests/stage83-install.test.ts`, 5 new):
-    - the same build gives the same version and worker;
-    - a worker-only change gives a new version (this test fails when the worker's code is left out of the hash);
-    - a bundle or public-file change gives a new version;
-    - the worker carries its version with no stand-in left, and lists exactly the build's files;
-    - the install guard.
-  - **Engine** (`check-install` F5, 3 checks): a worker with the same version but different bytes fails to install. The cache of the worker in charge stays whole, and offline it still opens its shell.
-    - On a build of `96b3970`'s code, two of the three fail: 14 entries before and 0 after, and no shell.
-    - On the fixed code, all three pass.
+### 7.5 Repair R83-01: a failed worker-only update deleted the active offline shell (D-S83-08)
+I found this after the completed report (correction 6805122200), and ChatGPT's independent review found it too: verdict 6805055962, a checkpoint blocker.
 
+- **What was wrong, on `96b3970`:**
+  - **Identity:** the build version hashed the app bundle and the public files, but not the worker. A change only to the worker (`sw.ts`, or `swPolicy.ts`, which only the worker uses) made a new `/sw.js`, with different bytes so the browser installs it, under the **same** version and so the same cache name.
+  - **Ownership:** the installing worker wrote straight into that cache, and on failure deleted it.
+  - So a failed worker-only update (a missing file, a sign-in page, storage full) deleted the cache of the worker in charge. Offline, it then had no shell: a bare "Can't reach Mchezo" page instead of the app.
+  - Online play was not affected.
+  - The U and F checks missed it because their fake next builds always changed the version.
+- **The repair, part 1, identity** (`apps/web/swBuild.ts`):
+  - The worker is built first with a stand-in version.
+  - Its code (with its dependencies, the file list and the precache list built in) is hashed with everything else the build ships, and the version is then written in.
+  - The same source gives the same version and the same worker, byte for byte. A worker-only or worker-policy change is a new version.
+- **The repair, part 2, ownership** (`apps/web/src/install/swLifecycle.ts`, §3.3):
+  - An install writes only into a candidate cache of its own and, on failure, deletes only that.
+  - The active worker's cache is never opened, written or deleted by an install.
+  - On activation (no page of the old generation open), the old caches go and the candidate becomes the live cache. If that copy fails, the candidate is served from.
+  - No `skipWaiting`, no `claim`, no forced reload. The allowlist and response validation are unchanged.
+- **Tests, unit** (`tests/stage83-install.test.ts`, 37 in all, 12 new for R83-01):
+  - **Identity:** the same source gives the same version and worker; a worker-only change gives a new version (this test fails if the worker is left out of the hash); a bundle or public-file change gives a new version; the worker carries its version, with no stand-in left.
+  - **Ownership,** against a Cache Storage fake that records every operation by cache name:
+    - an install makes a fresh candidate, and never two installs on one;
+    - a failure at **every** file and **every** write leaves the live cache in charge unopened and identical, with no candidate left, with another build or the same version in charge;
+    - activation removes the old generation and its leftover candidates, leaves another installing worker's candidate alone, and never promotes an incomplete candidate;
+    - a failed promotion still serves from the candidate;
+    - serving never reads another build's cache and creates nothing;
+    - cache names: only other builds' caches are ever obsolete.
+- **Tests, engine, with real builds** (`scripts/check-install-builds.mjs`, 34 checks, in the full gate):
+  - It copies this checkout's source and makes four real builds: A as it is, A again, W with a worker-only change (`sw.ts`), and P with a worker-policy change (`swPolicy.ts`).
+  - **B, identity:** the same source gives the same version, worker, page and files, also matching the gate's own build. W and P are new versions, with the app's files byte for byte the same.
+  - **E1:** A in charge, a solo round in play in another tab; W deployed with a listed file missing. W's install fails, A's live cache is exactly as it was (every entry, the same bytes, the same order), no candidate is left, the round plays on (a guess answered by the server), and offline A's shell is whole.
+  - **E2:** the same with storage full (Chromium's quota override).
+  - **E3:** W complete waits, and A's cache is untouched while it waits. With every A page closed, W activates: its live cache is complete, A's cache and every candidate are gone, someone else's cache stays, and offline W's shell is whole.
+  - **E4:** P after W: a failed install keeps W's cache exactly; then P installs, waits, activates and cleans up.
+  - **E5, defensive:** a worker with P's version but different bytes, which no real build can now make (B). A failed install keeps P's cache exactly; a successful one doesn't touch it while waiting, and activation leaves one complete live cache.
+- **Before and after:**
+  - The same driver on `96b3970`'s code fails 11 of 34: W and P keep A's version `77f9ad4250045e33`, A's cache is emptied, and offline there is no shell.
+  - On the repair, it passes 34 of 34. Logs are in `docs/evidence/stage83-local/`.
+  - Screenshots: `docs/stage8/screenshots-83/r83-before-offline-after-failed-update.png` and `r83-after-offline-after-failed-update.png`.
+- `check-install`'s F2 and F3 now also require that no candidate cache is left.

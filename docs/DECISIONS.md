@@ -1041,9 +1041,19 @@ Handoff 6801615731 (PR #13), under D-WF-01. Spec: `docs/stage8/stage83.md`.
   - **`/health` counts only as `{"ok":true}`;** `navigator.onLine` only starts a check.
   - **Nothing promises moving seats, bests or choices into an installed app.** The iPhone steps point to the existing seat recovery.
   - *Alternative rejected:* trusting any `/assets` file or any 200. A private preview's sign-in page or another build's file could then be stored.
-- **D-S83-08 The build version covers the worker's own code; a failed install removes only what it made** (found after the completed report, on `96b3970`; stage83.md §7.5).
-  - **The defect:** the version hashed the app bundle and the public files, not `sw.js`. A worker-only change was a new worker under the same version, so it shared the cache of the worker in charge, and its failed install deleted that cache. Offline, the worker in charge then had no shell: a bare "Can't reach Mchezo" page instead of the app's own notice. Online play was unaffected.
-  - **What:**
-    - `apps/web/swBuild.ts` builds the worker with a stand-in version, hashes its code with everything else, then writes the version in. The same build gives the same worker, byte for byte.
-    - The install deletes its cache only if it created it.
-  - *Alternative rejected:* a version from the time or a counter. Every build would then be an update, even an unchanged one.
+- **D-S83-08 Repair R83-01: the build version covers the worker; an install owns only its own candidate cache** (review 6805055962; stage83.md §3.3, §7.5).
+  - **The defect, on `96b3970`:** the version didn't cover the worker's code, so a worker-only change kept the version and cache name. The installing worker wrote into that cache and deleted it on failure, so a failed update emptied the active worker's cache, and offline there was no shell.
+  - **Identity** (`apps/web/swBuild.ts`):
+    - The worker is built with a stand-in version.
+    - Its code is hashed with the bundle and the public files, then the version is written in.
+    - The same source gives the same worker, byte for byte. A worker-only or worker-policy change is a new version.
+  - **Ownership** (`apps/web/src/install/swLifecycle.ts`):
+    - An install writes only into a fresh candidate, `mchezo-stage-<build>-<install>`, and on failure deletes only that.
+    - On activation (no page of the old generation open), the old caches go and a complete candidate is copied into `mchezo-shell-<build>`.
+    - If the copy fails, the candidate is served from.
+    - Only an active worker writes its live cache.
+  - *Alternatives rejected:*
+    - A version from the time or a counter: every build would be an update, even an unchanged one.
+    - Guarding only the delete: a same-name install would still write into the active cache.
+    - `skipWaiting`, `claim` or a forced reload: an open game would be disturbed.
+    - Serving straight from per-install caches without promotion: a worker that restarts couldn't tell which candidate is its own.

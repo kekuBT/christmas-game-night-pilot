@@ -21,3 +21,11 @@
 | 10 | The solo shelf when a newer build is waiting: **Reload** or **Later** (a real next build was swapped in) | the same |
 
 **`cache-inventory.json`** was captured after a solo round and a casual room joined by a guest in a second tab. It lists every Cache Storage entry, with its type and size: one cache, `mchezo-shell-<build>`, holding 14 entries, all public shell files. It also lists every API reply with whether the service worker answered it: 0 of 19 did.
+
+**Repair R83-01** (stage83.md §7.5), taken by `scripts/check-install-builds.mjs` at 390×844, after a failed worker-only update. A is in charge; W's deploy is missing a listed file. Then A's tab goes offline and reloads:
+
+| File | What it shows |
+|---|---|
+| `r83-before-offline-after-failed-update.png` | `96b3970`'s code: the failed install deleted A's cache, so offline there is no shell, only the worker's bare "Can't reach Mchezo" page. |
+| `r83-after-offline-after-failed-update.png` | The repair: A's cache is exactly as it was, so offline A's whole shell opens, with the app's own notice and **Try again**. |
+

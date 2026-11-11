@@ -18,7 +18,10 @@
  */
 import { isClientPath } from "../../../../src/shared/clientRoutes.js";
 
+/** Live shell caches: `mchezo-shell-<build>`, one per build, written only by that build's ACTIVE worker. */
 export const SHELL_CACHE_PREFIX = "mchezo-shell-";
+/** Candidate caches: `mchezo-stage-<build>-<install>`, one per install attempt, owned by that install alone (R83-01). */
+export const STAGE_CACHE_PREFIX = "mchezo-stage-";
 /** The canonical shell every failed page load falls back to. */
 export const SHELL_PATH = "/index.html";
 
@@ -118,7 +121,25 @@ export function cacheable(pathname: string, res: ResponseLike): boolean {
   return want !== null && want.test(type);
 }
 
-/** Is this cache one of ours, from another build (safe to delete once no page of that build is open)? */
-export function isObsoleteShellCache(name: string, current: string): boolean {
-  return name.startsWith(SHELL_CACHE_PREFIX) && name !== current;
+/** A build's live shell cache: what its active worker serves from. Only an ACTIVE worker ever writes to it. */
+export function liveCacheName(version: string): string {
+  return SHELL_CACHE_PREFIX + version;
+}
+/** The start of every candidate cache an installing worker of this build makes (one per install, never shared). */
+export function stageCachePrefix(version: string): string {
+  return STAGE_CACHE_PREFIX + version + "-";
+}
+
+/**
+ * Is this cache one of ours from ANOTHER build, safe to delete when this
+ * build's worker activates (no page of an older build is open any more)?
+ * - another build's live shell cache: yes;
+ * - another build's candidate cache: yes, unless a worker is installing right
+ *   now (it may be that worker's candidate);
+ * - this build's own caches, and anything that isn't ours: never.
+ */
+export function isObsoleteCache(name: string, version: string, installing: boolean): boolean {
+  if (name.startsWith(SHELL_CACHE_PREFIX)) return name !== liveCacheName(version);
+  if (name.startsWith(STAGE_CACHE_PREFIX)) return !installing && !name.startsWith(stageCachePrefix(version));
+  return false;
 }
