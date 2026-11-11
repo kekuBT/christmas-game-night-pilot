@@ -980,3 +980,56 @@ Instructed by ChatGPT's clearance of Stage 8.1 and handoff 6795218622 on PR #12,
     - Always stacking the options: it costs height on every phone, and the R81-01 shelf must keep its first Start on the first screen.
     - Dropping the ✓: it is the choice's non-colour cue.
 
+
+## Stage 8.3: Home Screen installation foundation (2026-11-11, branch `claude/stage8-3-home-screen`, from the Stage 8.2 head `4c13e2b`)
+
+Handoff 6801615731 (PR #13), under D-WF-01. Spec: `docs/stage8/stage83.md`.
+
+- **D-S83-01 A narrow service worker, by allowlist.**
+  - **What:**
+    - It answers only same-origin GETs for the public shell: client-route page loads (network first; the cached shell only when the network fails), this build's `/assets`, and the public install files.
+    - Every API path, non-GET request, WebSocket and other origin is untouched. Chromium's static routing skips the worker for them entirely.
+    - Nothing is queued or retried.
+    - It installs only if the server is serving its own build.
+  - **Why:**
+    - Chromium's install prompt still needs a fetch handler.
+    - An installed app opened offline should say Mchezo's own honest thing, not show a browser error.
+    - The cache must never hold anything private.
+  - *Alternatives rejected:*
+    - Cache-first pages: an old version would be shown while online.
+    - A library such as Workbox: more code to trust, and the rules harder to see.
+    - No worker: no prompt on Android, and a browser error page offline.
+- **D-S83-02 Updates never take over a page.**
+  - **What:**
+    - A new build's worker waits: no `skipWaiting`, no `clients.claim`. It activates only when no old page is open, then deletes only other `mchezo-shell-*` caches.
+    - Page loads are network first, so any reload while online is the newest build.
+    - "A newer version is ready" appears only on calm screens. **Reload** reloads this tab only, and there is **Later**.
+    - Incompatible updates keep the existing protocol refresh.
+  - *Alternatives rejected:*
+    - `skipWaiting` with an automatic reload: it could reload a game in play.
+    - A reload on `controllerchange`: it would disturb other tabs.
+- **D-S83-03 Install guidance is asked for, and says only what the browser said.**
+  - **What:**
+    - A Home card and a Settings row, never in a room or a game.
+    - Chromium's prompt is captured (its mini-infobar suppressed) and shown only when the person presses Install. "Added" appears only on `appinstalled`, and "Not added" when the prompt is dismissed.
+    - iPhone and iPad get the Share steps.
+    - **Not now** is a device choice (as in R82-01).
+    - It is hidden when the app runs installed.
+  - *Alternatives rejected:* an automatic prompt or banner, or guidance on every screen.
+- **D-S83-04 One static identity.**
+  - **What:**
+    - A static manifest: `id`, `start_url` and `scope` `/`, standalone, the Everyday ground.
+    - One icon for everyone, the circle mark in the Everyday palette; the app opens in the device's own look.
+  - *Alternative rejected:* a manifest generated per device or per look. Installation metadata would then depend on the device, the first step toward personal data in it.
+- **D-S83-05 The server's side.**
+  - **What:**
+    - `GET /health`: no data, `no-store`.
+    - The install files served with their real types.
+    - `no-cache` for pages, the manifest, the icons and `sw.js`, so updates are always seen; `immutable` for content-hashed `/assets`.
+    - A missing build file is a 404, never a 200 stand-in page a cache could keep.
+  - *Alternative rejected:* probing reachability with `/games`, which is heavier and carries data.
+- **D-S83-06 Where "Can't reach Mchezo" shows.**
+  - **What:**
+    - Home, Join, Host, the solo shelf and the library: every entry outside a room. Join is the invite link's screen.
+    - Rooms keep their connection banner, which already says the seat is saved.
+  - *Alternative rejected:* the notice on every screen. In a room it would repeat the banner.

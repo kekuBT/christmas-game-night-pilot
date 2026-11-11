@@ -94,7 +94,7 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
 - **Page loads are network-first:** a navigation to a client route uses the network. Only if the network fails does it get the cached shell, and only for client routes, never for an API path.
 - **Nothing is queued:** no background sync, no retry by the worker. A request that can't go fails as today, and no score or game action is ever stored for later.
 - **Honest offline:**
-  - A new `GET /health` (`no-store`, no data) lets Home, the solo shelf and the library say "Can't reach Mchezo".
+  - A new `GET /health` (`no-store`, no data) lets Home, Join, Host, the solo shelf and the library say "Can't reach Mchezo".
   - It explains that every game, solo rounds included, runs on the game server, and offers **Try again**.
   - A room keeps its `ConnectionBanner`.
   - A press that fails offline says so and never shows a started game.
@@ -157,3 +157,59 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
 3. **The update notice is optional** (**Later**), and never shown in a room or round. Incompatible updates keep the protocol refresh.
 4. **`GET /health`** is added for the offline check: it has no data, is never cached, and never reaches the worker's cache.
 5. **Fonts are cached when first used,** not precached. Offline, a first-ever visit falls back to system fonts.
+6. **A secure context is required.** Browsers run service workers only on HTTPS or `localhost`. A phone on the plain-http LAN preview gets no worker: no offline shell, no update notice, no Chromium prompt. The iPhone steps still work there.
+   - Android Chrome can treat the LAN address as secure (`chrome://flags/#unsafely-treat-insecure-origin-as-secure`).
+   - An iPhone needs a private HTTPS preview, such as the Codespaces private port.
+   - Choosing how a real phone reaches an HTTPS preview is the owner's call (Part J says what each path can test).
+
+## 7. What was built and tested
+
+### 7.1 Built
+- **Identity** (§3.1):
+  - `apps/web/public/manifest.webmanifest`.
+  - The icons, from `scripts/make-icons.mjs`:
+    - `icon-192`, `icon-512` and their maskable versions, the opaque 180 px `apple-touch-icon`, and `favicon.svg`;
+    - `mark.svg`, the mark's SVG source.
+  - `index.html` links them, and carries `<meta name="mchezo-build">`.
+- **Server** (`src/server/http.ts`):
+  - The public install files, with real types.
+  - `no-cache` for HTML, the manifest, the icons and `sw.js`; `immutable` for hashed `/assets`.
+  - A 404, never a 200 stand-in page, for a file the build doesn't have.
+  - `GET /health`.
+- **The worker:**
+  - `apps/web/src/install/swPolicy.ts`, the allowlist.
+  - `sw.ts`, the worker, bundled per build by the plugin in `apps/web/vite.config.ts`, which stamps the build's version into `index.html` and `sw.js`.
+  - `registerSw.ts`: registration when idle, and the update notice's state.
+- **Guidance:**
+  - `installState.ts`: the captured prompt, standalone detection, the path, and **Not now** as a device choice.
+  - `components/mchezo/InstallUi.tsx`: the Home card, the iPhone steps sheet, the Settings row, and the calm-screen notices.
+  - `styles/stage83.css`.
+- **Where the notices show:**
+  - "Can't reach Mchezo" and "A newer version is ready" appear on Home, Join, Host, the solo shelf and the library (outside a room).
+  - Join and Host were added after the first offline probe: an invite link opened offline showed the Join form with no warning.
+- **The prompt dismissed:** when the browser's prompt is dismissed, the card says "No problem, add it later from your browser's menu", because the prompt can't be shown twice. The first version showed nothing; `check-install` found it.
+
+### 7.2 Tested (Chromium; engine where marked)
+- **Unit, `tests/stage83-install.test.ts` (22):**
+  - The manifest and icons: sizes, alpha, no personal fields.
+  - The worker policy over every API path, method and origin.
+  - Old-cache deletion.
+  - The install path.
+  - The reachability probe.
+  - The server's types, headers, 404s and `/health`.
+- **`scripts/check-install.mjs` (83 checks), by section:**
+
+| Section | What it covers |
+|---|---|
+| M | Chromium parses the manifest with no errors and reports **no installability errors** (engine, headless). The icons decode at their sizes, and the worker belongs to this build. |
+| W | After a solo round, a casual room with a guest (two tabs) and the session, ledger, Memory Book and projection reads (all 200 with the seat's token), Cache Storage holds exactly one cache with 14 public shell entries (engine). No cached body holds the room id, code or either token, and none of the 28 API replies came from the worker. |
+| O | Offline, Home, an invite link and the solo shelf say "Can't reach Mchezo … Nothing has started". Start shows no round and says the server can't be reached. A room reloaded offline says it is rejoining; back online, it is the same seat. |
+| I | No card without a real path. The emulated prompt is suppressed (`preventDefault`), shown once when asked, "added" only on `appinstalled`, and "Not added" when dismissed. Nothing appears mid-round. On an emulated iPhone, the steps sheet works in both looks, with no overflow, 44 px targets and readable contrast. **Not now** holds after a reload, or only for the page when storage can't save it. Standalone mode (script-emulated `display-mode`, and `navigator.standalone`) hides the card. |
+| S | With storage unavailable, the worker still registers and a round starts. |
+| N | Deep links reload to the same screen, served fresh. |
+| U | A real next build replaces the files while a solo round is in play. The round isn't reloaded and keeps playing, and its old main file still comes from its cache after the server drops it. The next worker waits. The notice appears on calm screens only, with **Later** and **Reload** (this tab only; another tab is untouched), both 44 px targets. Once no old page is open, the next worker is active and only its cache remains. `localStorage` (the look, the solo content, the solo seat) and a room seat survive. |
+
+- **Regression drivers rerun with the worker in place, 0 failures:**
+  - `check-themes-seasonal` 251, `check-mobile-everyday` 134, `check-solo` 80, `check-solo-shelf` 58;
+  - `check-casual` 30, `check-session-flow` 70, `check-lobby-mode` 71, `check-briefing` 43.
+- **Pictures:** `docs/stage8/screenshots-83/` (`scripts/screenshot-stage83.mjs`). Its `cache-inventory.json` lists every Cache Storage entry and every API reply's source.

@@ -494,6 +494,8 @@ try {
     await round.getByTestId("update-later").click();
     check("U Later hides it for this page", !(await visible(round, "update-notice")));
     check("U Home (another old-build tab) offers it too", (await soon(() => visible(home, "update-notice"), 8000)) !== null);
+    const targets = await home.evaluate(() => [...document.querySelectorAll('[data-testid="update-notice"] button')].map((b) => { const r = b.getBoundingClientRect(); return [b.textContent?.trim(), Math.round(r.width), Math.round(r.height)]; }));
+    check("U the notice's Reload and Later are 44 px targets", targets.length === 2 && targets.every(([, w, h]) => w >= 44 && h >= 44), JSON.stringify(targets));
     await Promise.all([home.waitForEvent("load"), home.getByTestId("update-reload").click()]);
     check("U the notice's Reload reloads only its own tab, onto the next build", (await pageBuild(home)) === V2 && (await round.evaluate(() => window.__mzMarker)) === "still-the-same-page" && (await pageBuild(round)) === V1);
     // A page loaded now is network-first: it is already the next build, so it offers nothing.

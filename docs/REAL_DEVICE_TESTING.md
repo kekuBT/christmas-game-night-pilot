@@ -198,6 +198,26 @@ Do these on phones that open the **Wi-Fi address** (not localhost): plain http t
 | I27 | **Settings → Look → Christmas** on one phone, then home, a Family Cup lobby and the library | That phone shows Christmas colours everywhere; another phone on Match the game shows the Cup in everyday colours; both read easily in daylight |
 | I6 | Host a game without touching the Casual/Family Cup choice; a second phone joins | No Cup chip, no Official/Practice choice; both phones say "Casual, just for fun"; a game plays to results and the lobby says "Last game · … · Casual" |
 
+### Part J: Put Mchezo on the Home Screen (15 min, Stage 8.3)
+
+**Read first.** Browsers run Mchezo's service worker (the offline screen, the update notice, Android's install prompt) only on **HTTPS**, or on `localhost`. Over the plain-http Wi-Fi address:
+- an **iPhone** can still Add to Home Screen (J2, J3), but J5 to J8 need an HTTPS preview, such as a private Codespaces port opened on the phone;
+- an **Android** phone can treat the Wi-Fi address as secure: in Chrome open `chrome://flags/#unsafely-treat-insecure-origin-as-secure`, add `http://<the address>:<port>`, and relaunch.
+
+Write down which way you reached the app for each row.
+
+| # | Do this | Pass if |
+|---|---|---|
+| J1 | **Android Chrome** (HTTPS, or the flag above): Home, scroll below the games → **Install Mchezo** → the browser's Install | The browser's own dialog appears only after you press Install. The Home screen gets the circle-and-dots icon ("Mchezo"); it opens full screen, with no address bar, on Home |
+| J2 | **iPhone Safari**: Home, scroll below the games → **Show me how** → follow the three steps | The steps match what you see (Share, Add to Home Screen, Add). The icon is the circle-and-dots mark, not a screenshot of the page; it opens without Safari's bars, on Home |
+| J3 | Open the installed app → **Settings** | It says you're using Mchezo from your Home Screen; Home shows no install card |
+| J4 | In the browser (not the app): **Not now** on the card, reload; then play a whole game | The card stays gone (Settings still explains how); no install pop-up ever appears during a game |
+| J5 | Installed app (HTTPS): airplane mode on, then open it | Mchezo's own screen says "Can't reach Mchezo … Nothing has started" (not a browser error page); **Try again** keeps saying so until the connection is back, then it goes |
+| J6 | In a room, airplane mode for 20 seconds, then off; also close and reopen the app while offline | "Connection lost. Reconnecting…", then the same seat in the same room. Reopened offline it says it is rejoining, then you are back |
+| J7 | Join a room in the browser, then open the installed app | On an iPhone the app does not have the browser's seat (it keeps its own data, as the steps said): join again with the code. Android: say what you see |
+| J8 | **Update during play** (HTTPS; someone rebuilds and restarts the preview server while you play a solo round) | The round carries on (no reload). Back on Play solo, "A newer version of Mchezo is ready" with **Reload** and **Later**; Reload shows the new build; your look, content choice and bests are kept |
+| J9 | **Settings → Look → Christmas**, then reopen the installed app | The app opens in Christmas colours (the icon stays the circle mark); the status bar matches the page |
+
 ---
 
 ## 4. Did it feel good? (5 min, at the end)

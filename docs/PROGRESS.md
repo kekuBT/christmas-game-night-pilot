@@ -2009,4 +2009,26 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - §6: choices for review.
 - Nothing merged or deployed, no public port, nothing paid for.
 
-**Next task:** install identity and assets, then the guidance, then the service worker boundary and update lifecycle, then `check-install`, screenshots, the gates and one completed report.
+**Milestone (built; spec §7, D-S83-01 … 06):**
+- **Identity:** a static manifest, and icons drawn from the circle mark (regular and maskable 192 and 512 px, an opaque 180 px Apple touch icon, an SVG favicon). Nothing about a room or a person.
+- **Server:** the install files with real types; `no-cache` for pages, the manifest, the icons and `sw.js`; `immutable` hashed assets; a 404 for a missing build file; `GET /health`.
+- **A narrow service worker:**
+  - It works from an allowlist: page loads are network first, with the cached shell only offline, plus this build's assets and the public files.
+  - Every API path, non-GET request, WebSocket and other origin is untouched. Nothing is queued.
+  - A new build's worker waits; old caches are deleted only when no old page is open.
+- **Guidance:** a Home card and a Settings row. Chromium's prompt only when asked; "added" only on `appinstalled`. The iPhone steps, **Not now**, and hidden when installed.
+- **Notices:** "Can't reach Mchezo" and "A newer version is ready" on Home, Join, Host, the solo shelf and the library, never in a room or a round.
+
+**Tested (Chromium; spec §7.2):**
+- **Unit:** 22 new tests, 1,401 in all, plus lint and typecheck.
+- **`check-install`, 83 of 83:**
+  - Chromium's manifest and installability verdicts are clean.
+  - The cache holds 14 public shell entries and no secrets, and 28 of 28 API replies came from the network.
+  - Offline, every entry screen is honest and recovers.
+  - The guidance passes, as does a new build arriving mid-round.
+- **Eight regression drivers** pass with the worker in place.
+- Evidence: `docs/evidence/stage83-local/`.
+
+**External blocker for real phones:** service workers need HTTPS. Over the plain-http LAN preview, an iPhone can still Add to Home Screen, but the offline and update checks need a private HTTPS preview (REAL_DEVICE_TESTING Part J; spec §6 point 6).
+
+**Next task:** screenshots, sequential fast and full gates on the final candidate, then one completed report on PR #14.

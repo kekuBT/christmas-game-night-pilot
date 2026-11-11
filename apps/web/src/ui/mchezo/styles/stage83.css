@@ -11,3 +11,5 @@
 .mz-install__note { margin: 12px 0 0; text-align: left; font-size: 13px; line-height: 1.4; }
 .mz-install__glyph { display: inline-block; vertical-align: -3px; margin: 0 2px; color: var(--mz-highlight); }
 .mz-home .mz-noticecard, .mz-solo-shelf .mz-noticecard, .mz-library > .mz-noticecard { margin-top: 12px; }
+/* A short text action in a notice ("Later") still gets a 44 × 44 target. */
+.mz-noticecard__actions .mz-linkbtn { min-width: 44px; padding: 0 10px; }
