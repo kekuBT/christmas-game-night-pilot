@@ -20,11 +20,14 @@ import { FeedbackLine, GameHeader } from "../../ui/mchezo/components/GameKit.js"
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { SendNote } from "./SendNote.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
+import {
+  jebenaEndLine, keptTheJebena, lastPlayLine, shownSeconds, turnLeftMs, URGENCY_LABEL, urgencyFor, verdictLine,
+  type JebenaAttemptView, type JebenaLogEntry, type JebenaStanding, type Urgency,
+} from "../../ui/mchezo/lib/jebena.js";
 
-export type JebenaVerdict = "accepted" | "used" | "not-in-bank" | "ambiguous" | "near-miss" | "empty";
 interface Seat { id: string; hearts: number; out: boolean; satOut: boolean; answers: number; timeouts: number }
-interface LogEntry { seq: number; turn: number; kind: "accepted" | "timeout" | "out" | "category" | "sat-out"; player?: string; answer?: string; via?: string; categoryId?: string; hearts?: number }
-interface Standing { id: string; place: number; hearts: number; out: boolean; satOut: boolean; answers: number; timeouts: number; points: number }
+type LogEntry = JebenaLogEntry;
+type Standing = JebenaStanding;
 export interface JebenaView {
   rulesVersion?: number;
   startHearts?: number;
@@ -40,18 +43,10 @@ export interface JebenaView {
   // The player's own view only.
   me?: { hearts: number; out: boolean; satOut: boolean; answers: number };
   myTurn?: boolean;
-  attempt?: { turn: number; text: string; verdict: JebenaVerdict; reason?: string; answer?: string };
+  attempt?: JebenaAttemptView;
 }
 
 export const JEBENA_HEART_OPTIONS = [3, 5, 7] as const;
-
-/** How hot the jebena is: a word and a steam count, from the share of the turn left. */
-export type Urgency = "warm" | "steaming" | "boiling";
-export const URGENCY_LABEL: Record<Urgency, string> = { warm: "Warm", steaming: "Steaming", boiling: "Boiling over!" };
-export function urgencyFor(leftMs: number, turnMs: number): Urgency {
-  const share = turnMs > 0 ? leftMs / turnMs : 0;
-  return share > 0.6 ? "warm" : share > 0.3 ? "steaming" : "boiling";
-}
 
 /** Server time, re-read a few times a second while a turn is running. */
 function useServerNow(active: boolean, everyMs = 200): number {
@@ -65,23 +60,13 @@ function useServerNow(active: boolean, everyMs = 200): number {
   return now;
 }
 
-/**
- * What's left of the turn as players see it: the room's phase deadline less
- * the network grace (the server still takes an answer during the grace).
- */
-export function turnLeftMs(phaseDeadlineAt: number | undefined, graceMs: number, now: number): number | null {
-  if (phaseDeadlineAt === undefined) return null;
-  return Math.max(0, phaseDeadlineAt - graceMs - now);
-}
-
 function useTurnClock(game: { status: string; phaseDeadlineAt?: number }, st: JebenaView) {
   const running = game.status === "playing" && !!st.turn && game.phaseDeadlineAt !== undefined;
   const now = useServerNow(running);
   const left = running ? turnLeftMs(game.phaseDeadlineAt, st.graceMs ?? 500, now) : null;
   const turnMs = st.turnMs ?? 10_000;
   const urgency: Urgency = left === null ? "warm" : urgencyFor(left, turnMs);
-  // Never more than the turn itself (a clock estimate a little behind the server's would show 11).
-  const seconds = left === null ? null : Math.min(Math.ceil(left / 1000), Math.ceil(turnMs / 1000));
+  const seconds = left === null ? null : shownSeconds(left, turnMs);
   return { left, seconds, urgency, turnMs };
 }
 
@@ -146,33 +131,6 @@ function TurnClock({ seconds, urgency, testId = "jr-clock" }: { seconds: number 
       <span className="mz-jr-clock__word" data-testid={`${testId}-word`}>{URGENCY_LABEL[urgency]}</span>
     </p>
   );
-}
-
-/** What the player's last try this turn means, in plain words. */
-export function verdictLine(a: NonNullable<JebenaView["attempt"]>, category: string): { tone: "good" | "warn" | "neutral"; text: string } {
-  const typed = a.text.trim();
-  switch (a.verdict) {
-    case "accepted": return { tone: "good", text: `“${a.answer ?? typed}” counts!` };
-    case "used": return { tone: "warn", text: `“${a.answer ?? typed}” was already named in ${category}. Try another!` };
-    case "not-in-bank": return { tone: "warn", text: `“${typed}” isn't on our ${category} list. Try another!` };
-    case "ambiguous": return { tone: "warn", text: `“${typed}” is close, but we can't be sure which answer you mean. Check the spelling.` };
-    case "near-miss": return { tone: "warn", text: a.reason ? `“${typed}”: ${a.reason}` : `“${typed}” isn't quite it. Try another!` };
-    case "empty": return { tone: "neutral", text: "Type an answer first." };
-  }
-}
-
-/** The last thing that happened, for everyone: an answer, a timeout, an out. */
-export function lastPlayLine(log: LogEntry[] | undefined, nameOf: (id?: string) => string, meId?: string): string | null {
-  const e = [...(log ?? [])].reverse().find((x) => x.kind !== "category");
-  if (!e) return null;
-  const who = e.player === meId ? "You" : nameOf(e.player);
-  switch (e.kind) {
-    case "accepted": return `${who} named “${e.answer}”.`;
-    case "timeout": return `${who} ran out of time: ${e.hearts === 0 ? "no hearts left" : `${e.hearts} ${e.hearts === 1 ? "heart" : "hearts"} left`}.`;
-    case "out": return `${who} ${who === "You" ? "are" : "is"} out of hearts.`;
-    case "sat-out": return `${who} left the game.`;
-    default: return null;
-  }
 }
 
 /** Seat order with hearts; the holder marked in words and with a ▶ mark. */
@@ -359,7 +317,7 @@ export function MchezoJebenaResults({ game, publicGame, players, playerId, title
     <main className="mz-screen mz-jr" aria-label={`${title} results`} data-testid="jr-results">
       {hero}
       {next}
-      <GameHeader title={title} objective={endLine(st, nameOf, playerId)} accent={1} />
+      <GameHeader title={title} objective={jebenaEndLine(st.end, st.standings, nameOf, playerId)} accent={1} />
       <Standings st={st} nameOf={nameOf} meId={playerId} />
       <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every heart you keep. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="jebena-rush" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
@@ -367,13 +325,6 @@ export function MchezoJebenaResults({ game, publicGame, players, playerId, title
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>
   );
-}
-
-function endLine(st: JebenaView, nameOf: (id?: string) => string, meId?: string): string {
-  const top = (st.standings ?? []).filter((r) => r.place === 1);
-  if (st.end === "last-standing" && top.length === 1) return top[0]!.id === meId ? "You kept the jebena!" : `${nameOf(top[0]!.id)} kept the jebena!`;
-  if (st.end === "banks-exhausted") return "Every answer was named: what a room!";
-  return top.length > 1 ? "Time's up: a shared first place" : top.length === 1 ? `Time's up: ${top[0]!.id === meId ? "you" : nameOf(top[0]!.id)} came first` : "Time's up";
 }
 
 function Standings({ st, nameOf, meId, tv }: { st: JebenaView; nameOf: (id?: string) => string; meId?: string; tv?: boolean }) {
@@ -386,7 +337,7 @@ function Standings({ st, nameOf, meId, tv }: { st: JebenaView; nameOf: (id?: str
           <span className="mz-jr-row__who">
             <b>{r.id === meId ? `${nameOf(r.id)} (you)` : nameOf(r.id)}</b>
             <span className="mz-jr-row__line">
-              {r.place === 1 && !r.out && st.end === "last-standing" ? "Kept the jebena · " : ""}
+              {keptTheJebena(st.end, st.standings, r.id) ? "Kept the jebena · " : ""}
               {r.out ? (r.satOut ? "Left the game · " : "Out · ") : `${r.hearts} of ${startHearts} hearts left · `}
               {r.answers} {r.answers === 1 ? "answer" : "answers"} · {r.timeouts} {r.timeouts === 1 ? "timeout" : "timeouts"}
             </span>
@@ -427,7 +378,7 @@ export function JebenaReview({ game, nameOf }: { game: PublicGame; nameOf: (id: 
   const name = (id?: string) => (id ? nameOf(id) : "Someone");
   return (
     <div data-testid="tv-jr-review">
-      <p className="mz-tvshow-line">{endLine(st, name)}</p>
+      <p className="mz-tvshow-line">{jebenaEndLine(st.end, st.standings, name)}</p>
       <Standings st={st} nameOf={name} tv />
     </div>
   );

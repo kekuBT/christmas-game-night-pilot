@@ -152,6 +152,7 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "A right answer passes the jebena to the next player. A wrong one costs only time: try again.",
       "Each answer counts once. Time runs out: you lose a heart, and a new category starts.",
       "No hearts left and you're out. The last player with hearts keeps the jebena.",
+      "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or hearts back.",
     ],
   },
   "draw-guess": {

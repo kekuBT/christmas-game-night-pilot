@@ -1496,7 +1496,8 @@ export function App() {
       )}
       {sheet === "choose" && isHostish && (
         <ChooseGameSheet
-          catalog={catalog}
+          // Stage 9.1: a casual-only game (Jebena Rush) is offered in casual rooms only; a Cup would refuse to start it.
+          catalog={proj?.roomKind === "casual" ? catalog : catalog.filter((g) => !games.find((x) => x.id === g.id)?.casualOnly)}
           upNextId={upNext?.id}
           playerCount={connectedNow > 0 ? connectedNow : players.length}
           onPick={(id) => { setUpNextId(id, "manual"); setShuffleResult(null); closeSheet(); }}

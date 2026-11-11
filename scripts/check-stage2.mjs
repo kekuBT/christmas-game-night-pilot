@@ -108,6 +108,8 @@ const endVisible = (page) => page.evaluate(async () => {
 
 // The catalogue size comes from the server (Stage 5 added games), never a fixed number.
 const TOTAL = (await (await fetch(`${BASE}/games`)).json()).length;
+// Stage 9.1: a Family Cup's picker leaves out casual-only games (Jebena Rush), which a Cup can't start.
+const CUP_TOTAL = (await (await fetch(`${BASE}/games`)).json()).filter((g) => !g.casualOnly).length;
 
 const browser = await launchChromium();
 try {
@@ -223,7 +225,7 @@ try {
   check("D. Back closes the Invite sheet and stays in the lobby", path(host) === "/room" && (await host.getByRole("heading", { name: "You’re in, Keku." }).count()) === 1);
   await host.getByTestId("choose-game").click();
   await host.getByTestId("choose-sheet").waitFor({ timeout: 5000 });
-  check(`D. Choose game lists all ${TOTAL} games with covers`, (await host.locator('[data-testid^="select-game-"] [data-cover]').count()) === TOTAL);
+  check(`D. Choose game lists all ${CUP_TOTAL} games a Cup can play, with covers`, (await host.locator('[data-testid^="select-game-"] [data-cover]').count()) === CUP_TOTAL);
   await sleep(500); // let the sheet finish sliding in
   await shot(host, "choose-390");
   await host.getByTestId("select-game-word-connections").click();

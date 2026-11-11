@@ -1903,7 +1903,7 @@ export class RoomEngine {
 
   /** Stage 5: the context a game module acts in. */
   private moduleCtx(game: GameInstance, now: number): ModuleContext {
-    return { now, players: game.players, active: this.activePlayers(game), scale: this.lifecycleScale };
+    return { now, players: game.players, active: this.activePlayers(game), scale: this.lifecycleScale, ...(game.deadlineAt !== undefined ? { gameDeadlineAt: game.deadlineAt } : {}) };
   }
 
   /**

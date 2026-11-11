@@ -27,17 +27,23 @@
 //   H  motion and looks: full motion animates steam; reduced motion keeps it
 //      still; the urgency word is always there; Everyday and Christmas.
 //   I  privacy: no projection carries the bank (aliases, unused answers), and
-//      nothing from a room enters the app-shell cache.
+//      nothing from a room enters the app-shell cache. The shipped app never
+//      carries the bank: bank-only canaries (its version, source notes,
+//      near-miss reasons, distinctive answers) appear in no built file and no
+//      public response (the page, the service worker, the manifest, assets,
+//      the game list), so the service worker can't cache it either.
 //   J  two rooms: each has its own hearts, turns and answers.
+//   K  a Family Cup never offers it: its picker leaves Jebena Rush out, and
+//      the server refuses a Cup start of it (CASUAL_ONLY).
 // Starts ITS OWN server. Usage: node scripts/check-jebena-rush.mjs
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join as joinPath } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
-import { freshAnswer, jebenaOracle } from "./lib/jebena-oracle.mjs";
+import { bankCanaries, freshAnswer, jebenaOracle } from "./lib/jebena-oracle.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
@@ -320,6 +326,24 @@ try {
     check("I nothing from the room is in the app-shell cache", !cached.some((u) => /\/rooms\b|projection|intents/.test(u)), cached.filter((u) => /rooms/.test(u)).slice(0, 3).join(", "));
   }
 
+  // ---------- I2. The shipped app never carries the bank (review 6808081378, 4) ----------
+  {
+    const canaries = bankCanaries();
+    const found = (text) => canaries.filter((c) => text.toLowerCase().includes(c.toLowerCase()));
+    check("I2 the canary check finds a canary when one is there (self-test)", found(`x ${canaries[canaries.length - 1]} y`).length === 1);
+    const dist = process.env.MCHEZO_WEB_DIST || "apps/web/dist";
+    const files = [];
+    const walk = (d) => { for (const f of readdirSync(d)) { const p = joinPath(d, f); if (statSync(p).isDirectory()) walk(p); else files.push(p); } };
+    walk(dist);
+    const leaks = files.flatMap((f) => found(readFileSync(f, "latin1")).map((c) => `${f}: ${c}`));
+    check(`I2 no built file carries the bank (${files.length} files, ${canaries.length} canaries)`, files.length > 5 && leaks.length === 0, leaks.slice(0, 3).join(" | "));
+    const paths = ["/", "/index.html", "/sw.js", "/manifest.webmanifest", "/games", "/health", ...readdirSync(joinPath(dist, "assets")).map((f) => `/assets/${f}`)];
+    const pub = [];
+    for (const p of paths) { const r = await fetch(`${BASE}${p}`); pub.push({ p, status: r.status, text: await r.text() }); }
+    const pubLeaks = pub.flatMap((r) => found(r.text).map((c) => `${r.p}: ${c}`));
+    check(`I2 no public response carries the bank (${pub.length} responses)`, pub.every((r) => r.status === 200) && pubLeaks.length === 0, `${pub.filter((r) => r.status !== 200).map((r) => `${r.p} ${r.status}`).join(", ")} ${pubLeaks.slice(0, 3).join(" | ")}`);
+  }
+
   // ---------- J. Two rooms ----------
   {
     const b = await stB();
@@ -437,6 +461,23 @@ try {
     const backBtn = p.getByTestId("show-back-to-lobby");
     if (await backBtn.isVisible().catch(() => false)) await backBtn.click();
     await soon(`G ${who} is back in the lobby`, async () => p.getByTestId("lobby-dock").isVisible(), 15000);
+  }
+  // ---------- K. A Family Cup never offers Jebena Rush ----------
+  {
+    const cupCtx = await phoneCtx(390);
+    const C = await cupCtx.newPage();
+    await C.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+    await C.getByTestId("home-host").click();
+    await C.getByPlaceholder("e.g. Auntie June").fill("Cupholder");
+    await C.getByTestId("host-kind-cup").click();
+    await C.getByRole("button", { name: "Host a game" }).click();
+    await C.getByTestId("choose-game").waitFor({ timeout: 15000 });
+    await C.getByTestId("choose-game").click();
+    await C.getByTestId("choose-sheet").waitFor({ timeout: 5000 });
+    const listed = await C.locator('[data-testid^="select-game-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid")));
+    check("K a Cup's picker leaves Jebena Rush out (and lists the others)", !listed.includes("select-game-jebena-rush") && listed.length >= 10, `${listed.length} games`);
+    const cupStart = await api(C, "POST", "/rooms/:room/games", { gameId: "jebena-rush", official: false });
+    check("K the server refuses Jebena Rush in a Cup (409 CASUAL_ONLY)", cupStart.status === 409 && cupStart.body.code === "CASUAL_ONLY", JSON.stringify(cupStart.body).slice(0, 160));
   }
 } catch (e) {
   check("driver ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 4).join(" | "));

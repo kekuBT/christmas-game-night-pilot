@@ -6,7 +6,11 @@
  * meaning. Then, against ONE category:
  *   1. an exact answer or one of its aliases;
  *   2. a typed answer the bank deliberately doesn't accept (with its reason);
- *   3. a plural folded onto exactly one listed answer or alias;
+ *   3. a plural: every singular reading of it ("berries" → berry, berrie,
+ *      berri) is looked up, and the candidates are deduplicated by answer
+ *      id across names and aliases. Exactly one id: accepted. Two ids, or an
+ *      answer and a not-accepted word: ambiguous. Only a not-accepted word:
+ *      its near miss;
  *   4. a one-edit typo, only at 6+ letters, and only when exactly one answer
  *      is within one edit and NO other answer (or not-accepted word) is
  *      within two;
@@ -81,12 +85,18 @@ export function matchJebena(cat: JebenaCategory, raw: string): JebenaMatch {
   if (exact) return { kind: "accepted", answerId: exact, via: formKind.get(n) === "name" ? "exact" : "alias" };
   const na = notAccepted.get(n);
   if (na) return { kind: "near-miss", normalized: n, reason: na };
+  // Plurals (review 6808081378, 1): collect every candidate first, by answer id, then decide.
+  const pluralIds = new Set<string>();
+  let pluralNearMiss: string | undefined;
   for (const s of singulars(n)) {
     const id = forms.get(s);
-    if (id) return { kind: "accepted", answerId: id, via: "plural" };
+    if (id) pluralIds.add(id);
     const nas = notAccepted.get(s);
-    if (nas) return { kind: "near-miss", normalized: n, reason: nas };
+    if (nas && pluralNearMiss === undefined) pluralNearMiss = nas;
   }
+  if (pluralIds.size === 1 && pluralNearMiss === undefined) return { kind: "accepted", answerId: [...pluralIds][0]!, via: "plural" };
+  if (pluralIds.size > 1 || (pluralIds.size === 1 && pluralNearMiss !== undefined)) return { kind: "ambiguous", normalized: n };
+  if (pluralNearMiss !== undefined) return { kind: "near-miss", normalized: n, reason: pluralNearMiss };
   // How close is it to each answer (any of its forms)?
   const closest = new Map<string, number>();
   for (const [form, id] of forms) {

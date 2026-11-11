@@ -336,8 +336,11 @@ try {
   check("lobby roster: 4 players joined", true);
 
   const registry = await (await fetch(`${BASE}/games`)).json();
-  const gameIds = registry.map((g) => g.id);
-  console.log(`day playlist: ${gameIds.join(", ")} (${gameIds.length} games)`);
+  // Stage 9.1: this day is a Family Cup; casual-only games (Jebena Rush) can't start in a Cup and
+  // are played end to end by their own driver (check-jebena-rush).
+  const casualOnly = registry.filter((g) => g.casualOnly).map((g) => g.id);
+  const gameIds = registry.filter((g) => !g.casualOnly).map((g) => g.id);
+  console.log(`day playlist: ${gameIds.join(", ")} (${gameIds.length} games; casual-only, not in a Cup: ${casualOnly.join(", ") || "none"})`);
 
   const finishedGames = [];
   for (const gameId of gameIds) {

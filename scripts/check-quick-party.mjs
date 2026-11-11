@@ -243,6 +243,10 @@ try {
   });
   await h.getByTestId("party-start-anyway").click();
   await soon("I Start whose reply was lost: the game opens anyway (briefing)", async () => (await myRoom(h)).games?.some((x) => x.status === "briefing" || x.status === "playing"), 20000);
+  // The room (read straight from the server) can show the new game before the lost reply has even
+  // reached the page and the app has asked again (full gate 20261111-224616 saw that race). Keep the
+  // route until the app's retry is recorded; if the app never asks again, the check below fails.
+  for (let i = 0; i < 50 && startBodies.length < 2; i++) await sleep(200);
   await h.unrouteAll({ behavior: "ignoreErrors" });
   room = await myRoom(h);
   check("I the retry was the same press (same request id)", startBodies.length === 2 && !!startBodies[0].attempt?.id && startBodies[0].attempt.id === startBodies[1].attempt?.id, JSON.stringify(startBodies.map((b) => b.attempt)));

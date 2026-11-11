@@ -200,3 +200,70 @@ describe("Jebena Rush over real sockets: disconnects and the deadline boundary",
     expect(st(h, gid).per[p1.playerId]!.hearts).toBe(2);
   });
 });
+
+describe("Jebena Rush over real sockets: a continuous clock (review 6808081378, 3)", () => {
+  it("everyone disconnected: nobody is out for being away, the turns still run out on time, and the match ends; back online, everyone sees the result", async () => {
+    const { h, clock, ps } = await casualRoom(3);
+    const gid = await startJebena(h, ps, 3);
+    for (const p of ps) await h.disconnect(p);
+    // Away is not out: same hearts, nobody eliminated, the same turn, until its deadline.
+    clock.advance(TURN - 100);
+    h.lifecycleTick();
+    let s = st(h, gid);
+    expect(s.turn!.n).toBe(1);
+    expect(Object.values(s.per).every((p) => p.hearts === 3 && p.outOrder === null)).toBe(true);
+    // A long outage: the clock never waited for anyone.
+    clock.advance(10 * 60_000);
+    h.lifecycleTick();
+    s = st(h, gid);
+    expect(h.game(gid).status).toBe("finished");
+    expect(s.end).toBe("last-standing");
+    // Every turn ran out in seat order: two players lost all 3 hearts, the last one 2 of 3 (8 timeouts), and keeps the jebena.
+    expect(s.log.filter((e) => e.kind === "timeout").length).toBe(3 + 3 + 2);
+    for (const p of ps) await h.connect(p);
+    await allPushes(ps, (proj) => myGame(proj, gid)?.["status"] === "finished");
+  });
+
+  it("one player connected: the others' turns run out on time while the connected one plays; the connected one keeps the jebena", async () => {
+    const { h, clock, ps } = await casualRoom(4);
+    const gid = await startJebena(h, ps, 3);
+    const keku = ps[0]!;
+    for (const p of ps.slice(1)) await h.disconnect(p);
+    for (let guard = 0; guard < 100 && h.game(gid).status === "playing"; guard++) {
+      const s = st(h, gid);
+      if (s.turn!.player === keku.playerId) {
+        expect((await h.intent(keku, gid, "jebena-answer", { turn: s.turn!.n, text: fresh(s), phaseKey: `turn:${s.turn!.n}` }))["accepted"]).toBe(true);
+        clock.advance(2000);
+      } else {
+        clock.advance(h.game(gid).phaseDeadlineAt! - clock.t + 1);
+        h.lifecycleTick();
+      }
+    }
+    const s = st(h, gid);
+    expect(s.end).toBe("last-standing");
+    expect(s.per[keku.playerId]!.outOrder).toBeNull();
+    expect(s.per[keku.playerId]!.hearts).toBe(3);
+    await waitFor(() => !!keku.lastPush && myGame(keku.lastPush, gid)?.["status"] === "finished");
+  });
+
+  it("a real server restart mid-match after a prolonged outage: the turns that ran out meanwhile are processed at their own instants; nothing is reset or replayed", async () => {
+    const { h, clock, ps } = await casualRoom(3);
+    const gid = await startJebena(h, ps, 5);
+    const t0 = clock.t;
+    const firstHolder = st(h, gid).turn!.player;
+    await h.stop();
+    clock.advance(3 * TURN + 2000); // three turns ran out while the server was down
+    await h.start(); // the start runs the deadline sweep (catch-up)
+    const s = st(h, gid);
+    const timeouts = s.log.filter((e) => e.kind === "timeout");
+    expect(timeouts.map((e) => e.at)).toEqual([t0 + TURN, t0 + 2 * TURN, t0 + 3 * TURN]);
+    expect(timeouts[0]!.player).toBe(firstHolder);
+    expect(h.game(gid).phaseDeadlineAt).toBe(t0 + 4 * TURN); // the current turn's time comes from the event, not the restart
+    expect(Object.values(s.per).reduce((n, p) => n + p.hearts, 0)).toBe(3 * 5 - 3);
+    // Reconnect: the current turn, no hearts given back.
+    for (const p of ps) await h.connect(p);
+    await allPushes(ps, (proj) => ((myGame(proj, gid)?.["state"] as Json | undefined)?.["turn"] as Json | undefined)?.["n"] === 4);
+    expect(Object.values(st(h, gid).per).reduce((n, p) => n + p.hearts, 0)).toBe(3 * 5 - 3);
+  });
+});
+

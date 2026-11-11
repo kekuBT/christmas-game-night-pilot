@@ -190,7 +190,8 @@ function publicView(s: JebenaState, scale = 1) {
     graceMs: Math.round(JEBENA_GRACE_MS * scale),
     order: s.order.map((id) => {
       const p = s.per[id]!;
-      return { id, hearts: p.hearts, out: p.outOrder !== null, satOut: !!p.satOut, answers: p.answers, timeouts: p.timeouts };
+      // Out is out: a player who left keeps no hearts in any view (review 6808081378, 3).
+      return { id, hearts: p.outOrder === null ? p.hearts : 0, out: p.outOrder !== null, satOut: !!p.satOut, answers: p.answers, timeouts: p.timeouts };
     }),
     turn: s.turn ? { n: s.turn.n, player: s.turn.player } : null,
     category: { id: cat.id, name: cat.name, definition: cat.definition, round: s.categoryRound, named: thisCategory.length },
@@ -293,6 +294,9 @@ export const jebenaModule: GameModule<JebenaState> = {
   expirePhase(s, ctx) {
     // The turn's time ran out: exactly one heart, a new category, and the jebena passes.
     if (s.end || !s.turn) return;
+    // A turn that runs out at the very instant of the match limit (or after it) is cut by the limit:
+    // the match ends and nobody loses a heart for it (§3). RoomEngine then ends the game at its deadline.
+    if (ctx.gameDeadlineAt !== undefined && ctx.now >= ctx.gameDeadlineAt) return;
     const who = s.turn.player;
     const p = s.per[who]!;
     const turnNo = s.turn.n;
@@ -331,7 +335,7 @@ export const jebenaModule: GameModule<JebenaState> = {
     const attempt = s.attempts[actorId];
     return {
       ...base,
-      me: { hearts: p.hearts, out: p.outOrder !== null, satOut: !!p.satOut, answers: p.answers },
+      me: { hearts: p.outOrder === null ? p.hearts : 0, out: p.outOrder !== null, satOut: !!p.satOut, answers: p.answers },
       myTurn: !!s.turn && s.turn.player === actorId,
       // Only this player's own last attempt, and only while that turn is still on.
       attempt: attempt && s.turn && attempt.turn === s.turn.n ? attempt : undefined,

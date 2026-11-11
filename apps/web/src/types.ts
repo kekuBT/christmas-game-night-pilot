@@ -212,6 +212,8 @@ export interface RegistryGame {
   maxPlayers: number;
   defaultDurationMinutes: number;
   tutorial: string;
+  /** Stage 9.1: plays in casual rooms only (Jebena Rush); a Cup's picker never offers it. */
+  casualOnly?: boolean;
   /** Server lifecycle policy (Sprint 3): time limits and whether it can count officially. */
   lifecycle?: {
     model: "game-deadline" | "phased" | "turns";

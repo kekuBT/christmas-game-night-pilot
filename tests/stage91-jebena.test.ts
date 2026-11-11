@@ -7,7 +7,7 @@
  */
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { JEBENA_BANK_VERSION, JEBENA_CATEGORIES } from "../src/games/modules/packs/jebena-banks.js";
+import { JEBENA_BANK_VERSION, JEBENA_CATEGORIES, type JebenaCategory } from "../src/games/modules/packs/jebena-banks.js";
 import { bankReport, matchJebena } from "../src/games/modules/jebenaMatch.js";
 import {
   JEBENA_GRACE_MS, JEBENA_MAX_ATTEMPTS, JEBENA_MAX_INPUT, JEBENA_TURN_MS, jebenaModule, jebenaPoints, jebenaStandings, type JebenaState,
@@ -20,6 +20,7 @@ import { GAME_MANIFESTS, validateManifest } from "../src/games/manifest.js";
 
 type Json = Record<string, unknown>;
 const cat = (id: string) => JEBENA_CATEGORIES.find((c) => c.id === id)!;
+const africa = () => cat("jr-africa");
 const ctx = (now: number, players: string[] = ["a", "b", "c"]) => ({ now, players, active: players, scale: 1 });
 /** An answer that is in the current category and not yet used (the test plays it on purpose). */
 const unused = (s: JebenaState) => cat(s.category).answers.find((x) => !(s.used[s.category] ?? []).includes(x.id))!;
@@ -84,6 +85,73 @@ describe("Jebena Rush matching (§7)", () => {
     expect(matchJebena(animals, "spaceship")).toMatchObject({ kind: "not-in-bank" });
     expect(matchJebena(animals, "   ")).toEqual({ kind: "empty" });
     expect(matchJebena(animals, "!!!")).toEqual({ kind: "empty" });
+  });
+});
+
+describe("Jebena Rush matching: the ambiguity layer (review 6808081378, 1)", () => {
+  // A small made-up category, so each rule is tested on its own.
+  const fixture: JebenaCategory = {
+    id: "jr-fixture", name: "Fixture", definition: "Test only.", source: "tests",
+    answers: [
+      { id: "fx-caramel", name: "Caramel" },
+      { id: "fx-toffee", name: "Toffee", aliases: ["Carmel"] }, // an alias one edit from ANOTHER answer's name
+      { id: "fx-hippo", name: "Hippopotamus", aliases: ["Hippo", "River horse", "Hipopotamus"] }, // several aliases of ONE answer
+      { id: "fx-berry", name: "Berry" },
+      { id: "fx-berrie", name: "Berrie" }, // "berries" reads as either
+      { id: "fx-fig", name: "Fig" },
+      { id: "fx-figs-tree", name: "Fig tree" },
+      { id: "fx-plum", name: "Plum" },
+    ],
+    notAccepted: { "Congo": "Say which one.", "Plume": "That's a feather." },
+  };
+  it("exact names and aliases come first, whatever else is near", () => {
+    expect(matchJebena(fixture, "Carmel")).toEqual({ kind: "accepted", answerId: "fx-toffee", via: "alias" });
+    expect(matchJebena(fixture, "Caramel")).toEqual({ kind: "accepted", answerId: "fx-caramel", via: "exact" });
+  });
+  it("an alias of ANOTHER answer is a rival: a typo between them is ambiguous", () => {
+    // "caramell": one edit from Caramel, two from Toffee's alias "carmel".
+    expect(matchJebena(fixture, "Caramell")).toEqual({ kind: "ambiguous", normalized: "caramell" });
+  });
+  it("aliases of the SAME answer are never rivals: a typo near several of them is still that answer", () => {
+    // "hippopotamous": one edit from the name, two from the alias "hipopotamus": both the same id.
+    expect(matchJebena(fixture, "Hippopotamous")).toEqual({ kind: "accepted", answerId: "fx-hippo", via: "typo" });
+    expect(matchJebena(fixture, "River horses")).toEqual({ kind: "accepted", answerId: "fx-hippo", via: "plural" });
+    expect(matchJebena(fixture, "Hippos")).toEqual({ kind: "accepted", answerId: "fx-hippo", via: "plural" });
+  });
+  it("a plural whose readings map to DIFFERENT answers is ambiguous, never the first one found", () => {
+    expect(matchJebena(fixture, "Berries")).toEqual({ kind: "ambiguous", normalized: "berries" });
+    expect(matchJebena(fixture, "Plums")).toEqual({ kind: "accepted", answerId: "fx-plum", via: "plural" });
+  });
+  it("a plural that reads as both an answer and a not-accepted word is ambiguous; a not-accepted word alone stays its near miss", () => {
+    expect(matchJebena(fixture, "Plumes")).toEqual({ kind: "ambiguous", normalized: "plumes" }); // plume (not accepted) or plum
+    expect(matchJebena(fixture, "Congos")).toEqual({ kind: "near-miss", normalized: "congos", reason: "Say which one." });
+  });
+  it("named near misses are decided before any fuzzy matching", () => {
+    expect(matchJebena(fixture, "Congo")).toEqual({ kind: "near-miss", normalized: "congo", reason: "Say which one." });
+    expect(matchJebena(africa(), "Congo")).toMatchObject({ kind: "near-miss" });
+  });
+  it("short words: never a typo; one edit from an answer is ambiguous", () => {
+    expect(matchJebena(fixture, "Fug")).toEqual({ kind: "ambiguous", normalized: "fug" });
+    expect(matchJebena(fixture, "Fig")).toEqual({ kind: "accepted", answerId: "fx-fig", via: "exact" });
+    expect(matchJebena(fixture, "Zzz")).toEqual({ kind: "not-in-bank", normalized: "zzz" });
+  });
+  it("a used answer is used whichever way it is typed: name, alias, plural or typo", () => {
+    const s = jebenaModule.init({ players: ["a", "b", "c"], seed: 3 });
+    s.category = "jr-animals";
+    s.used["jr-animals"] = ["jr-ani-hippo"];
+    for (const typed of ["Hippo", "hippopotamus", "Hippos", "Hippopotamous"]) {
+      const r = answer(s, s.turn!.player, typed);
+      expect(r).toMatchObject({ ok: true, result: { verdict: "used", answer: "Hippo" } });
+    }
+    expect(s.used["jr-animals"]).toEqual(["jr-ani-hippo"]);
+  });
+  it("the feedback never names a hidden answer: an ambiguous or not-in-bank try carries no suggestion", () => {
+    const s = jebenaModule.init({ players: ["a", "b", "c"], seed: 3 });
+    s.category = "jr-animals";
+    const r = answer(s, s.turn!.player, "monkee") as { ok: true; result: Json };
+    expect(r.result).toEqual({ verdict: "ambiguous", turn: s.turn!.n });
+    const mine = jebenaModule.playerView(s, s.turn!.player, { now: 1, scale: 1 }) as { attempt: Json };
+    expect(mine.attempt).toEqual({ turn: s.turn!.n, text: "monkee", verdict: "ambiguous" });
   });
 });
 
@@ -283,6 +351,15 @@ describe("Jebena Rush module: the rules (§3)", () => {
       expect(theirs).not.toContain(`"${a.name}"`);
     }
     expect(pub).not.toContain("aliases");
+    // The feedback ends with its turn: after a timeout, and after an accepted answer, it is gone from every view and from the state.
+    jebenaModule.expirePhase(s, ctx(2, s.order));
+    expect((jebenaModule.playerView(s, p0, { now: 2, scale: 1 }) as Json)["attempt"]).toBeUndefined();
+    expect(JSON.stringify(s)).not.toContain("my secret typing");
+    const holder = s.turn!.player;
+    answer(s, holder, "another private try");
+    answer(s, holder, unused(s).name);
+    for (const id of [p0, p1]) expect(JSON.stringify(jebenaModule.playerView(s, id, { now: 3, scale: 1 }))).not.toContain("another private try");
+    expect(JSON.stringify(s)).not.toContain("another private try");
   });
 
   it("persists as JSON and carries on", () => {
@@ -481,6 +558,128 @@ describe("Jebena Rush in the room engine (§4–§6)", () => {
     expect(rg.phaseDeadlineAt).toBe(game.phaseDeadlineAt);
     restored.tick(game.phaseDeadlineAt! + 1);
     expect((rg.extra as JebenaState).per[p0]!.hearts).toBe(JEBENA_DEFAULT_HEARTS - 1);
+  });
+
+  // ---- Review 6808081378 (2): the exact cutoff, the match limit, catch-up ----
+  const TURN = JEBENA_TURN_MS + JEBENA_GRACE_MS;
+  it("the cutoff is inclusive, the same for a request and the clock: 1 ms before and AT the deadline an answer counts; 1 ms after, the turn is over", () => {
+    const env = setup();
+    const { gid, game, st } = start(env);
+    const playStart = env.now();
+    const d1 = game.phaseDeadlineAt!;
+    expect(d1).toBe(playStart + TURN); // the briefing never used up the first turn
+    const p0 = st().turn!.player;
+    env.set(d1 - 1);
+    expect(env.send(p0, gid, "jebena-answer", { turn: 1, text: "Zzqxv" })).toMatchObject({ accepted: true, result: { verdict: "not-in-bank" } });
+    env.set(d1); // exactly the cutoff: the clock hasn't closed it, and a request finds it open
+    expect(st().turn!.n).toBe(1);
+    expect(st().per[p0]!.timeouts).toBe(0);
+    expect(env.send(p0, gid, "jebena-answer", { turn: 1, text: unused(st()).name })).toMatchObject({ accepted: true, result: { verdict: "accepted", turn: 1 } });
+    // Turn 2 starts at that instant: its own full turn.
+    const d2 = game.phaseDeadlineAt!;
+    expect(d2).toBe(d1 + TURN);
+    const p1 = st().turn!.player;
+    // A duplicate at the cutoff and after it: the same reply, counted once.
+    env.set(d2);
+    const id = randomUUID();
+    const text = unused(st()).name;
+    const first = env.send(p1, gid, "jebena-answer", { turn: 2, text }, id);
+    expect(first).toMatchObject({ accepted: true, result: { verdict: "accepted", turn: 2 } });
+    env.set(d2 + 5000);
+    expect(env.send(p1, gid, "jebena-answer", { turn: 2, text }, id)).toEqual(first);
+    expect(st().per[p1]!.answers).toBe(1);
+    // Turn 3 runs out: processed at its own instant (not when someone next asks), and turn 4 starts from that instant.
+    const d3 = game.phaseDeadlineAt!;
+    const p2 = st().turn!.player;
+    env.set(d3 + 1);
+    expect(st().per[p2]!.timeouts).toBe(1);
+    expect(st().log.filter((e) => e.kind === "timeout").map((e) => e.at)).toEqual([d3]);
+    expect(game.phaseDeadlineAt).toBe(d3 + TURN);
+    // One millisecond late for turn 3: the turn is over, nothing changes.
+    const late = env.send(p2, gid, "jebena-answer", { turn: 3, text: unused(st()).name });
+    expect(late.accepted).toBe(false);
+    expect(st().per[p2]!.answers).toBe(0);
+    expect(st().per[p2]!.hearts).toBe(JEBENA_DEFAULT_HEARTS - 1);
+  });
+
+  it("a turn that runs out at the same instant as the match limit: the limit wins, nobody loses a heart", () => {
+    const env = setup();
+    const { game, st } = start(env);
+    const holder = st().turn!.player;
+    game.deadlineAt = game.phaseDeadlineAt; // test seam: the cutoffs coincide
+    env.set(game.deadlineAt! + 1);
+    expect(game.status).toBe("finished");
+    expect(game.outcome?.reason).toBe("deadline");
+    expect(st().per[holder]!.hearts).toBe(JEBENA_DEFAULT_HEARTS);
+    expect(st().per[holder]!.timeouts).toBe(0);
+    expect(game.phaseDeadlineAt).toBeUndefined();
+    // Everyone still in, equal hearts: one shared first place, equal points; nobody "kept the jebena" alone.
+    expect(new Set(jebenaStandings(st()).map((r) => r.place))).toEqual(new Set([1]));
+    expect(new Set(Object.values(game.rawScores))).toEqual(new Set([JEBENA_DEFAULT_HEARTS * 10]));
+  });
+
+  it("restart after an outage: catch-up runs each timeout at its own instant, bounded and idempotent; the same as a server that never stopped", () => {
+    const run = (n: number, hearts: number, outageMs: number) => {
+      const env = setup(n);
+      const { gid, game } = start(env, { hearts });
+      const snap = JSON.parse(JSON.stringify(env.engine.toJSON())) as Json;
+      const t0 = env.now();
+      // A: never stopped, ticking every second.
+      for (let t = t0 + 1000; t <= t0 + outageMs; t += 1000) env.set(t);
+      // B: down the whole time, then one catch-up at restart.
+      const restored = RoomEngine.fromJSON(snap);
+      restored.clock = () => t0 + outageMs;
+      const changed = restored.tick(t0 + outageMs);
+      const rg = restored.games.get(gid)!;
+      expect(changed).toBe(true);
+      expect(rg.extra).toEqual(game.extra);
+      expect(rg.status).toBe(game.status);
+      expect(rg.phaseDeadlineAt).toBe(game.phaseDeadlineAt);
+      expect(rg.rawScores).toEqual(game.rawScores);
+      // Every timeout happened at its own deadline: play start + k turns, never the restart's clock.
+      const ats = (rg.extra as JebenaState).log.filter((e) => e.kind === "timeout").map((e) => e.at);
+      ats.forEach((at, k) => expect(at).toBe(t0 + (k + 1) * TURN));
+      if (rg.status === "playing") {
+        expect(rg.phaseDeadlineAt).toBe(ats[ats.length - 1]! + TURN);
+        expect(rg.phaseDeadlineAt!).toBeGreaterThan(t0 + outageMs - TURN);
+      }
+      // Idempotent: catching up again changes nothing.
+      expect(restored.tick(t0 + outageMs)).toBe(false);
+      return { rg, ats };
+    };
+    // Two minutes down: eleven turns ran out, the match goes on.
+    const short = run(3, 7, 120_000);
+    expect(short.rg.status).toBe("playing");
+    expect(short.ats.length).toBe(Math.floor(120_000 / TURN));
+    // Longer than the whole match, ten players, seven hearts: it ends by the limit, within one bounded catch-up.
+    const long = run(10, 7, 20 * 60_000);
+    expect(long.rg.status).toBe("finished");
+    expect(long.rg.outcome?.reason).toBe("deadline");
+    expect(long.ats.length).toBe(Math.floor((12 * 60_000) / TURN));
+    expect(long.ats.every((at) => at <= long.rg.deadlineAt!)).toBe(true);
+  });
+
+  it("sitting out from the engine: on your turn the jebena passes with a fresh turn; out shows no hearts and earns no heart points; the last one left ends it with no deadline pending", () => {
+    const env = setup(3);
+    const { gid, game, st } = start(env);
+    const holder = st().turn!.player;
+    env.advance(4000);
+    expect(env.send(holder, gid, "abstain", {}).accepted).toBe(true);
+    expect(st().turn!.player).not.toBe(holder);
+    expect(game.phaseDeadlineAt).toBe(env.now() + TURN);
+    const pub = env.engine.project("tv") as { games: { id: string; state: { order: { id: string; hearts: number; out: boolean }[] } }[] };
+    expect(pub.games.find((g) => g.id === gid)!.state.order.find((o) => o.id === holder)).toMatchObject({ hearts: 0, out: true });
+    expect(jebenaPoints(st())[holder]).toBe(0);
+    // A second player leaves (not on their turn): the last one keeps the jebena; nothing is left pending.
+    const other = st().order.find((id) => id !== holder && id !== st().turn!.player)!;
+    expect(env.send(other, gid, "abstain", {}).accepted).toBe(true);
+    expect(game.status).toBe("finished");
+    expect(game.phaseDeadlineAt).toBeUndefined();
+    expect(st().end).toBe("last-standing");
+    expect(st().turn).toBeNull();
+    const winner = jebenaStandings(st())[0]!;
+    expect(winner.out).toBe(false);
+    expect(winner.points).toBe(200 + JEBENA_DEFAULT_HEARTS * 10);
   });
 
   it("projections: no bank, no unused answer, no token, no other player's attempt; two rooms never mix", () => {

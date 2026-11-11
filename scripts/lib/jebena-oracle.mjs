@@ -7,7 +7,7 @@
 import { execFileSync } from "node:child_process";
 
 const SCRIPT = `
-const { JEBENA_CATEGORIES } = await import("./src/games/modules/packs/jebena-banks.ts");
+const { JEBENA_BANK_VERSION, JEBENA_CATEGORIES } = await import("./src/games/modules/packs/jebena-banks.ts");
 const { matchJebena } = await import("./src/games/modules/jebenaMatch.ts");
 const out = {};
 for (const c of JEBENA_CATEGORIES) {
@@ -26,18 +26,41 @@ for (const c of JEBENA_CATEGORIES) {
     }
   }
   const nearMiss = Object.keys(c.notAccepted ?? {}).filter((f) => matchJebena(c, f).kind === "near-miss").slice(0, 3);
-  out[c.id] = { id: c.id, name: c.name, answers, typos, ambiguous, nearMiss, notInBank: matchJebena(c, "Zzqxv Plonk").kind === "not-in-bank" ? "Zzqxv Plonk" : null };
+  out[c.id] = { id: c.id, name: c.name, source: c.source, reasons: Object.values(c.notAccepted ?? {}), answers, typos, ambiguous, nearMiss, notInBank: matchJebena(c, "Zzqxv Plonk").kind === "not-in-bank" ? "Zzqxv Plonk" : null };
 }
+out.__version = JEBENA_BANK_VERSION;
 console.log(JSON.stringify(out));
 `;
 
 let cached = null;
+let version = null;
 /** Every category's samples, keyed by category id. */
 export function jebenaOracle() {
   if (cached) return cached;
   const raw = execFileSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", SCRIPT], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
-  cached = JSON.parse(raw.trim().split("\n").pop());
+  const all = JSON.parse(raw.trim().split("\n").pop());
+  version = all.__version;
+  delete all.__version;
+  cached = all;
   return cached;
+}
+
+/** Distinctive answer names that exist only in the bank (checked present in it). */
+const DISTINCTIVE = ["Blackcurrant", "Breadfruit", "Celeriac", "Bobsleigh", "Kickboxing", "Elderberry", "Chimpanzee", "Hairdresser"];
+
+/**
+ * Canaries (review 6808081378, 4): strings that exist only in the answer
+ * bank module, so finding one in a shipped file or a public response means
+ * the bank shipped. The bank's version, each category's source note, each
+ * near-miss reason, and distinctive answers. (Common words such as "Orange"
+ * or "Algeria" also appear in the app for other reasons, so they are not
+ * canaries.)
+ */
+export function bankCanaries() {
+  const o = jebenaOracle();
+  const names = new Set(Object.values(o).flatMap((c) => c.answers.map((a) => a.name)));
+  for (const d of DISTINCTIVE) if (!names.has(d)) throw new Error(`oracle: canary "${d}" is not in the bank`);
+  return [version, ...Object.values(o).map((c) => c.source), ...Object.values(o).flatMap((c) => c.reasons), ...DISTINCTIVE].filter((x) => typeof x === "string" && x.length >= 6);
 }
 
 /** An answer in `categoryId` that isn't in `used` (canonical names, case-insensitive), optionally one with an alias or a typo. */

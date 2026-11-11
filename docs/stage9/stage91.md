@@ -62,7 +62,9 @@ Everything else below is an architect default for this first slice (the handoff'
 
 ## 4. Timing and boundaries (D-S91-02)
 - **One deadline per turn,** `turn.deadline` (server ms), shown as a 10-second countdown.
-- **The server accepts an answer until `deadline + 500 ms`** of network grace. The timeout is processed at that same instant, by the tick or by the first request after it.
+- **The server accepts an answer until `deadline + 500 ms`** of network grace, inclusive (*as built*, review 6808081378): an answer at exactly that instant counts, for a request and for the clock alike. The timeout is processed for any time after it, always as of that instant, by the tick or by the first request after it.
+- **The match limit wins a tie** (*as built*): a turn that runs out at the same instant as the 12-minute limit is cut by the limit, and nobody loses a heart for it.
+- **Catch-up after a restart or an outage** (*as built*): every turn that ran out meanwhile is processed at its own instant, and the next turn's time starts from that instant, never from the restart's clock. It is bounded (at most 69 turns fit in 12 minutes, under the engine's 100-step guard per tick) and idempotent. The briefing never uses up the first turn: its clock starts when play starts.
 - **A boundary race resolves once,** because RoomEngine runs `tick()` before every action:
   - an answer arriving after the instant finds the turn already timed out;
   - its `turn` number no longer matches, so it is refused as stale, with no heart change and no second pass.
@@ -71,7 +73,7 @@ Everything else below is an architect default for this first slice (the handoff'
 - **A turn takes at most 20 attempts** (an abuse guard). Input is at most 40 characters.
 
 ## 5. Disconnects, reconnects and leaving (D-S91-05)
-- **Connection never changes the rules.** A turn runs on the server clock whether or not its player is connected.
+- **Connection never changes the rules.** A turn runs on the server clock whether or not its player is connected. The briefing says so: "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or hearts back."
 - **Reconnecting or reloading** shows the current state. It never restores a heart, resets a deadline or replays an old turn.
 - **No stall:** every turn ends by its deadline, and the match ends at one survivor, at the match limit or when the banks run out. It can't hang, even when fewer than two players are connected.
 - **No win just because a socket dropped:** only hearts decide. An absent player's turns time out like anyone's, one heart each, so a short drop costs nothing if they're back within their turn.
@@ -86,6 +88,7 @@ Everything else below is an architect default for this first slice (the handoff'
   - private per-player feedback on the current turn's last attempt;
   - `end` (`last-standing` or `banks-exhausted`; it stays null when the room's match limit ends the game, whose outcome reason is then `deadline`).
 - **Start:** the casual start request may carry `settings: { hearts: 3 | 5 | 7 }`, for Jebena Rush only. The server validates it (default 5), records it with the game, and Play again reuses it. A repeated start attempt must carry the same settings (as with the content choice in Stage 8.2).
+- **Out is out** (*as built*): a player who is out (no hearts, or sat out) shows 0 hearts in every view, and earns no heart points.
 - **Lobby settings** (*as built*, D-S91-08): the host or a cohost sets them with `POST /rooms/:id/game-settings` `{ gameId, settings, baseRevision }` (casual rooms only; revision-checked; persisted). Every projection of a casual room carries `lobbySettings`. A Start's settings must equal the lobby's, or it is refused with `SETTINGS_CHANGED` and nothing starts.
 - **Intent `jebena-answer` `{ turn, text }`:**
   - **Refused, nothing changes:** `NOT_IN_GAME`, `OUT`, `NOT_YOUR_TURN`, `STALE_TURN` (the turn has moved on), `ALREADY_FINISHED`, `INVALID_PAYLOAD` (text missing or over 40 characters), `TOO_MANY_ATTEMPTS`. *As built:* there is no separate `TOO_LATE`: the tick runs first, so a late answer finds the turn already over (`STALE_TURN`, or the room's `PHASE_CLOSED` when it carries the old phase key).
@@ -111,22 +114,23 @@ Everything else below is an architect default for this first slice (the handoff'
   - Year-round items play under both the Everyday and Christmas content settings. No Christmas category is in this slice.
 - **Matching:** Sprint's v2 normalisation (case, accents, spacing, punctuation, a leading article), then:
   1. **An exact answer or listed alias:** that canonical answer.
-  2. **A plural that folds onto one listed answer or alias:** that answer.
+  1b. **A named near miss** ("Congo", "sport"): its reason, decided before anything fuzzy.
+  2. **A plural** (*as built*, review 6808081378): every singular reading is looked up and the candidates are deduplicated by canonical id across names and aliases. Exactly one id: that answer. Two ids, or an answer and a not-accepted word: ambiguous.
   3. **A one-edit typo at 6 or more letters,** only when exactly one canonical answer is within one edit and no other answer or alias is within two. It is accepted as that answer.
-  4. **A near-miss:** two or more answers within one edit, or one within one edit with a rival within two, or a short word within one edit of an answer. It is **ambiguous**, never silently another answer: "Did you mean…?" without naming the hidden answer when it is unused.
+  4. **A near-miss:** two or more answers within one edit, or one within one edit with a rival within two, or a short word within one edit of an answer. It is **ambiguous**, never silently another answer. *As built:* no "Did you mean…?" (it would have nothing to suggest without naming a hidden answer); the player reads "“…” is close, but we can't be sure which answer you mean. Check the spelling." Aliases of the same answer are never rivals of each other; an alias of another answer is.
   5. **Anything else:** "not in this bank". The screen never claims the bank knows every valid answer.
 - **Duplicates are decided on canonical ids.** An alias or typo uses up the same answer.
 - **A bank report** (a unit test and §9): counts per category, any alias claimed by two answers, any alias equal to another answer, and every pair of answers within two edits (where the typo rule stays off).
 
 ## 8. Screens
 - **Lobby:**
-  - Jebena Rush is in the library as practice-only.
+  - Jebena Rush is in the library as practice-only. *As built:* a casual room's picker offers it; a Family Cup's picker doesn't (a Cup would refuse to start it).
   - When it is chosen, the host picks 3, 5 or 7 hearts (5 preselected), and guests see the choice.
   - The existing briefing explains the rules, and players get ready.
 - **Phone, while playing:**
   - The category, the jebena (steam and wobble rise as the deadline nears), and whose turn it is ("Your turn!" or a name).
   - A countdown in text, and hearts as icons with the number in text.
-  - **On your turn:** a text field that is focused and sends with Enter or the Send key, then feedback (accepted, already used, not in this bank, did you mean…).
+  - **On your turn:** a text field that is focused and sends with Enter or the Send key, then feedback (accepted, already used, not in this bank, close but not certain, or a named near miss's reason). The feedback is the player's own and ends with the turn.
   - **Off your turn:** the recent answers and the seat order.
   - **Out:** you watch the rest.
 - **TV:** the jebena, the category, the current player and countdown, everyone's hearts, and the last answer. Public facts only.
@@ -166,6 +170,7 @@ Everything else below is an architect default for this first slice (the handoff'
 - **D-S91-07:** game settings at start (`hearts`), validated, recorded, reused by Play again, and part of a start attempt's identity.
 - **D-S91-08 (added while building):** the lobby's hearts are room state, seen by everyone; a Start carries what it showed.
 - **D-S91-09 (added while building):** the jebena on screen: steam count and a word for urgency; motion only with full motion.
+- **D-S91-10 (added after review 6808081378):** the bank never ships to browsers (an import-graph test and a canary scan of built files and public responses).
 
 ## 11. Questions for you (defaults are in place; say if you want otherwise)
 1. **A new category after every lost heart.** The alternative, keeping it until its bank is used up, lets one hard category knock several players out in a row.
@@ -190,6 +195,10 @@ Each row of §9, with where it is shown. Results and run IDs are in the complete
 | Projections | `tests/stage91-jebena.test.ts` and every push in `tests/stage91-jebena-sockets.test.ts` (no bank, no unused answer, no other player's tries); `check-jebena-rush` I (the TV's and a player's projection; nothing from the room in the app-shell cache) |
 | Lifecycle | `tests/stage91-jebena-sockets.test.ts` at 2, 4 and 10 players (whole matches to results over real WebSockets; a holder's socket dropping costs the heart on time, reconnecting resubmits nothing); `tests/stage91-jebena.test.ts` (restart mid-turn, the match limit with places, two rooms); `check-jebena-rush` E–G and J (offline on your turn, reload, outs, results equal to the server's scores, Play again, cancel, back to lobby, a second room with 7 hearts) |
 | Browser | `scripts/check-jebena-rush.mjs`: host 390 px Everyday, guest 320 px Christmas look, guest 390 px reduced motion, TV 1440 px; keyboard (focus, Enter, Tab to Send); no sideways scroll; screenshots in `docs/stage9/screenshots/` |
+| Endings (review 6808081378) | `tests/stage91-jebena-endings.test.ts`: normal elimination, the match limit with a shared first place and with one leader, every answer used up, voluntary exit, each on its own; "outlasted" counts only earlier outs; seat order never breaks a shared place; "kept the jebena" only when one player is left |
+| Cutoff and catch-up (review 6808081378) | `tests/stage91-jebena.test.ts`: 1 ms before, at and after the cutoff, duplicates; the limit at the same instant as a turn (no heart lost); restart after 2 and 20 minutes equals a server that never stopped, bounded and idempotent; sit-out leaves nothing pending |
+| Continuous clock (review 6808081378) | `tests/stage91-jebena-sockets.test.ts`: everyone disconnected, one connected, a real server restart after a long outage |
+| Shipped files (review 6808081378) | `tests/stage91-bank-privacy.test.ts` (the web app's import graph never reaches the bank, matcher, module or module registry) and `check-jebena-rush` I2 (bank-only canaries in no built file and no public response); both shown to fail on a deliberately leaking build |
 | Gates | Sequential clean fast then full gates on the completed checkpoint (in the report) |
 
 Desktop Chromium emulating phone sizes is not a real phone. Real iOS Safari and Android Chrome (keyboards, autocorrect, the Send key) are in `docs/REAL_DEVICE_TESTING.md` Part K, not yet run.

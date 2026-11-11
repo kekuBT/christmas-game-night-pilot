@@ -23,6 +23,12 @@ export interface ModuleContext {
   active: readonly string[];
   /** Test time scale (1 in real play); multiply any module-owned durations by it. */
   scale: number;
+  /**
+   * Stage 9.1: the game's overall deadline (server ms), if it has one. A
+   * phase that runs out at the same instant may yield to it (Jebena Rush:
+   * the match limit wins, nobody loses a heart for the turn it cut).
+   */
+  gameDeadlineAt?: number;
 }
 
 export type ModuleResult = { ok: true; result?: unknown; wholeGameAbstain?: boolean } | { ok: false; reason: string };

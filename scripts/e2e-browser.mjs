@@ -423,7 +423,10 @@ async function runBrowser(browserName, games) {
 }
 
 const registry = await (await fetch(`${BASE}/games`)).json();
-const allIds = registry.map((g) => g.id);
+// Stage 9.1: every game here plays in a Family Cup room; casual-only games (Jebena Rush) can't start
+// in one and are played end to end by their own driver (check-jebena-rush).
+const allIds = registry.filter((g) => !g.casualOnly).map((g) => g.id);
+console.log(`casual-only, not played here: ${registry.filter((g) => g.casualOnly).map((g) => g.id).join(", ") || "none"}`);
 const wanted = gamesArg === "smoke" ? allIds.filter((id) => SMOKE_GAMES.includes(id)) : allIds;
 console.log(`games: ${wanted.join(", ")} (registry order, ${allIds.length} total)`);
 const browserNames = browserArg === "all" ? ["chromium", "firefox"] : [browserArg];
