@@ -1,0 +1,57 @@
+source: the working tree later committed as 5eb3711 (its app code is that of 5eb3711; 947ffae then changed only the landscape briefing dock and the new driver), web app built from it, server: local, MCHEZO_CONTENT_TEST_MODE=approve-provisional. Not a gate verdict.
+PASS lobby: Pattern Pulse is Practice only, and says why
+PASS server: an official start is refused — 400 Pattern Pulse is new: practice-only until its Cup scoring is approved.
+PASS briefing: every phone explains the game
+PASS every phone: round 1 of 6, 3 shapes, ready when you are
+PASS TV: Pattern Pulse live, counts only
+PASS memorise: the phone shows exactly the server's pattern for Keku (3 shapes) — 0,5,0 vs {"round":0,"length":3,"showUntil":1794386568188,"inputUntil":1794386576438,"pattern":[0,5,0]}
+PASS memorise: each shape is named (shape + colour, not colour alone)
+PASS memorise (full motion): the highlight sweep is on
+PASS contrast (AA): memorise
+PASS privacy: the TV projection never has a pattern
+PASS privacy: another player's projection never has Keku's pattern
+PASS privacy: the TV screen shows no sequence
+PASS hidden: once the window passes the pattern is gone from the screen
+PASS hidden: …and from Keku's own projection
+PASS undo removes the last shape
+PASS clear empties the entry
+PASS a full entry: 'Lock it in', and every shape key is done
+PASS contrast (AA): tap it back
+PASS round 1 (Keku): all three right, +110, from the server
+PASS server: Keku's round 1 scored 110
+PASS reduced motion: a still, numbered row (no animation), same window
+PASS round 1 (Amina): 2 of 3 before the first slip, +40
+PASS a failed send says it couldn't be confirmed, and keeps the entry
+PASS a failed send: the server has no answer from Bartholomew
+PASS the retry counts: All 3 right, +110
+PASS a late joiner: no Pattern Pulse play screen
+PASS a late joiner's projection has no pattern
+PASS sitting out: 'Sitting the rest out', with his total
+PASS sitting out: further opens are refused by the server
+PASS reload mid-round: back on the answer screen, round 2, no pattern
+PASS round 2 (Keku): all 4 right after the reload, +130
+PASS a window nobody answers: the server closes it as missed, with nobody acting
+PASS …after the answer window (≈ 9 s at this scale), not before — 10564ms
+PASS round 3: 5 shapes for Keku
+PASS round 4: 6 shapes for Keku
+PASS round 5: 7 shapes for Keku
+PASS round 6: 8 shapes for Keku
+PASS results on every phone
+PASS results: the server's scores are the plan's (960, 550, 110) — {"player-1":960,"player-2":550,"player-3":110}
+PASS results: ended because everyone finished (or sat out); practice, not counted — {"reason":"completed","endedAt":1794386621118,"countsOfficially":false,"participation":{"player-1":{"done":6,"of":6,"actions":6,"finished":true},"player-2":{"done":5,"of":6,"actions":5,"finished":true},"player-3":{"done":1,"of":6,"actions":1,"finished":false}}}
+PASS results 390px: how scoring works, no sideways scrolling
+PASS results 375px: how scoring works, no sideways scrolling
+PASS results 320px: how scoring works, no sideways scrolling
+PASS results: Keku's six rounds recapped (his own patterns, now it's over)
+PASS results: Amina's slipped last round says so
+PASS contrast (AA): results
+PASS results: Keku's moment is his own recorded rounds
+PASS results: Amina's moment is her own longest perfect sequence (7)
+PASS celebration with full motion: the short burst, no ribbon
+PASS celebration with reduced motion: a still ribbon, no confetti
+PASS celebration: only the winner's phone celebrates
+PASS TV: final standings, then the review
+PASS TV review: the room's totals only
+PASS privacy after the game: no pattern in the public projection
+PATTERN PULSE ALL PASSED
+exit 0

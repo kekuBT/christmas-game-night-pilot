@@ -1,0 +1,115 @@
+source: 947ffae46cc1ab09d9fd4c0add9ecd562bcc2539 (clean tree; web app built from it), server: local, MCHEZO_CONTENT_TEST_MODE=approve-provisional, 2026-11-11T09:00:45Z. Not a gate verdict.
+PASS A 320×640 shelf: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS A 320×640 shelf: no control smaller than 44 px
+PASS A 320×640 shelf: no text clipped inside its box
+PASS A 320×640 shelf: every card keeps its description, players and time, and its personal best line
+PASS A 320×640 shelf: Word Connections keeps its note that the best spans boards
+PASS A 320×640 shelf: Start is a full-size target (at least 48 px tall) — 52 px
+PASS A 320×640 shelf: compact cards (each at most 320 px tall; before: 421–481) — 303 px
+PASS A 320×640 shelf: the cover is a small square beside the title, not a banner
+PASS A 390×844 shelf: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS A 390×844 shelf: no control smaller than 44 px
+PASS A 390×844 shelf: no text clipped inside its box
+PASS A 390×844 shelf: every card keeps its description, players and time, and its personal best line
+PASS A 390×844 shelf: Word Connections keeps its note that the best spans boards
+PASS A 390×844 shelf: Start is a full-size target (at least 48 px tall) — 52 px
+PASS A 390×844 shelf: compact cards (each at most 300 px tall; before: 421–481) — 268 px
+PASS A 390×844 shelf: the cover is a small square beside the title, not a banner
+PASS A 390×844 shelf: two games' Start buttons on the first screen, no scrolling
+PASS A 844×390 shelf: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS A 844×390 shelf: no control smaller than 44 px
+PASS A 844×390 shelf: no text clipped inside its box
+PASS A 844×390 shelf: every card keeps its description, players and time, and its personal best line
+PASS A 844×390 shelf: Word Connections keeps its note that the best spans boards
+PASS A 844×390 shelf: Start is a full-size target (at least 48 px tall) — 52 px
+PASS A 844×390 shelf: a grid: the first two games side by side — [[20,162],[430,162],[20,493]]
+PASS A 1440×900 shelf: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS A 1440×900 shelf: no control smaller than 44 px
+PASS A 1440×900 shelf: no text clipped inside its box
+PASS A 1440×900 shelf: every card keeps its description, players and time, and its personal best line
+PASS A 1440×900 shelf: Word Connections keeps its note that the best spans boards
+PASS A 1440×900 shelf: Start is a full-size target (at least 48 px tall) — 52 px
+PASS A 1440×900 shelf: a grid: the first two games side by side — [[200,166],[552,166],[904,166]]
+PASS A 1440×900 shelf: all three games side by side, every Start on the first screen
+PASS B the ready screen shows the game's time left
+PASS B the time left is the server's (deadline − server time), not this phone's clock (10 min fast) — shown 300s, server 300s
+PASS B it says plainly that the clock keeps running between patterns
+PASS B the number is a timer read on demand, not announced every second
+PASS B with minutes left, nothing is announced
+PASS B one clock on the ready screen (no second clock line above it)
+PASS B no Sit the rest out in a solo round
+PASS B 390×844 Pulse ready: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS B 390×844 Pulse ready: no control smaller than 44 px
+PASS B 390×844 Pulse ready: no text clipped inside its box
+PASS B memorising: one game clock line
+PASS B …and it too is on the server's clock — shown 300s
+PASS B tapping back: one game clock line
+PASS B round 2's ready screen: the game time has kept running
+PASS B Math results: the score, and Play again on the first screen
+PASS B 390×844 solo results: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS B 390×844 solo results: no control smaller than 44 px
+PASS B 390×844 solo results: no text clipped inside its box
+PASS B Play again: a second round played to its results
+PASS B back on the shelf, with the personal best on its card
+PASS C with under a minute left, the panel shows the warning tone, in words too
+PASS C under 20 seconds: the clock turns urgent
+PASS C time up on the ready screen: Show me the pattern gives way to a status
+PASS C …which says what happens next
+PASS C …and nothing else on the screen can start a round (no Sit out, no Show me)
+PASS C then the results, once the server has ended the game
+PASS C announcements: under a minute, under 20 seconds, time up, each once and nothing else — ["Under a minute of game time left.","Under 20 seconds of game time left.","The game’s time is up."]
+PASS C at no moment were Show me the pattern and time up on screen together — [{"open":true,"up":false,"band":"low","results":false},{"open":true,"up":false,"band":"urgent","results":false},{"open":false,"up":true,"band":"up","results":false},{"open":false,"up":false,"band":null,"results":true}]
+PASS C the screens went: ready (low) → time up → results — ["open:low","open:urgent","up:up","results:null"]
+PASS C the server ended the game at its deadline; no round was played — {"serverNow":1794387621219,"deadlineAt":1794387620567,"status":"finished","gameId":"pattern-pulse","results":0}
+PASS D 844×390 Pulse ready: the game clock and Show me the pattern on screen, no scrolling
+PASS D …and the solo bar's Leave round stays on screen
+PASS D 844×390 Pulse ready: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS D 844×390 Pulse ready: no control smaller than 44 px
+PASS D 844×390 Pulse ready: no text clipped inside its box
+PASS D 844×390 tapping back: all six shapes and the Lock it in button on screen, no scrolling (before: below the fold)
+PASS D 844×390 Pulse tap-back: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS D 844×390 Pulse tap-back: no control smaller than 44 px
+PASS D 844×390 Pulse tap-back: no text clipped inside its box
+PASS D 844×390 Math Mayhem: all four answers on screen, no scrolling (before: the second row below the fold)
+PASS D …each still a full-size target
+PASS E the host's lobby shows both long names
+PASS E 390×844 host lobby: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS E 390×844 host lobby: no control smaller than 44 px
+PASS E 390×844 host lobby: no text clipped inside its box
+PASS E 320×640 guest lobby: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS E 320×640 guest lobby: no control smaller than 44 px
+PASS E 320×640 guest lobby: no text clipped inside its box
+PASS E the host's Start is on the first screen
+PASS E briefing: the guest's I'm ready is on the first screen, under the rules (320×640; before: below the fold)
+PASS E briefing: the host's I'm ready is on the first screen too (390×844)
+PASS E briefing: the host's Start now and Cancel game, scrolled to, are on screen and not covered
+PASS E 390×844 host briefing: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS E 390×844 host briefing: no control smaller than 44 px
+PASS E 390×844 host briefing: no text clipped inside its box
+PASS E 320×640 guest briefing: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS E 320×640 guest briefing: no control smaller than 44 px
+PASS E 320×640 guest briefing: no text clipped inside its box
+PASS E game 1 host: Pattern Pulse in a room shows one game clock (the panel), not two
+PASS E game 1 guest: Pattern Pulse in a room shows one game clock (the panel), not two
+PASS E game 1 320×640 guest Pulse ready (room): no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS E game 1 320×640 guest Pulse ready (room): no control smaller than 44 px
+PASS E game 1 320×640 guest Pulse ready (room): no text clipped inside its box
+PASS E game 1: the results, with What's next, on both phones
+PASS E results: What's next and Play again on the host's first screen
+PASS E results: What's next on the guest's first screen (320×640)
+PASS E 390×844 host results: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS E 390×844 host results: no control smaller than 44 px
+PASS E 390×844 host results: no text clipped inside its box
+PASS E 320×640 guest results: no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS E 320×640 guest results: no control smaller than 44 px
+PASS E 320×640 guest results: no text clipped inside its box
+PASS E game 2 (Play again) host: Pattern Pulse in a room shows one game clock (the panel), not two
+PASS E game 2 (Play again) guest: Pattern Pulse in a room shows one game clock (the panel), not two
+PASS E game 2 (Play again) 320×640 guest Pulse ready (room): no sideways overflow, nothing past the screen's edges — {"pageOverflow":0,"offscreen":[]}
+PASS E game 2 (Play again) 320×640 guest Pulse ready (room): no control smaller than 44 px
+PASS E game 2 (Play again) 320×640 guest Pulse ready (room): no text clipped inside its box
+PASS E game 2 (Play again): the results, with What's next, on both phones
+PASS E Play again played a second game: two finished, nothing left open — finished 2
+
+All mobile everyday checks passed
+exit 0

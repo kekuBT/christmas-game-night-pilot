@@ -190,6 +190,9 @@ Do these on phones that open the **Wi-Fi address** (not localhost): plain http t
 | I19 | Turn one player's Wi-Fi off, then open the host's **Room menu** | That player shows "not connected" and can't be made host |
 | I20 | Solo **Word Connections** on a phone: play, then **Play again** five times | Every board is new to this phone's solo room; no board repeats before all 13 have come up |
 | I21 | Casual room, on the results: **Play again**, then **Cancel game** in the rules screen; then **Back to lobby**, start a game and cancel it | The first question says you'll go back to the results, and you do; the second says the lobby, and you go there |
+| I22 | **Play solo** on a small phone and on a large one, then on a laptop | Phones: compact cards, two games' Start on the first screen of a large phone; laptop: all three games side by side |
+| I23 | Solo **Pattern Pulse**: play a round, then wait on the next round's screen; turn the phone's clock a few minutes wrong first if you can | "Game time left" counts down on the screen between patterns and matches the real time left; when it runs out, Show me the pattern is replaced by "The game's time is up", then the results |
+| I24 | Hold the phone sideways: solo Pattern Pulse (tap a pattern back) and Math Mayhem; a casual room's rules screen | Every shape, Lock it in and all four answers are on screen without scrolling; on the rules screen, I'm ready stays at the bottom while you scroll the rules |
 | I6 | Host a game without touching the Casual/Family Cup choice; a second phone joins | No Cup chip, no Official/Practice choice; both phones say "Casual, just for fun"; a game plays to results and the lobby says "Last game · … · Casual" |
 
 ---

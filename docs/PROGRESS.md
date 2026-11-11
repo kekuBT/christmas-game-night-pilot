@@ -1867,10 +1867,40 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Two solo tabs pressing Start within the same moment:** one wins and the other is told something changed, with Try again. This is by design (D-S74-04).
 - **Emulation only:** no real phones.
 
-## Stage 8.1: mobile usability and solo presentation (2026-11-11, in progress)
+## Stage 8.1: mobile usability and solo presentation (2026-11-11)
 
-**Branch:** `claude/stage8-1-mobile-solo`, from `58196cb` (PR #11's cleared head), stacked on PR #11.
+**Branch:** `claude/stage8-1-mobile-solo`, from `58196cb` (PR #11's cleared head), stacked on PR #11 (PR #12).
 - **Instruction:** ChatGPT's review and handoff on PR #11 (comment 6790743334), under D-WF-01.
-- **Spec:** `docs/stage8/stage81.md`: the solo shelf (S1), Pattern Pulse's game clock (S2), and a touch and responsive pass on the everyday journey (S3).
-- **Found before building** (spec §1): the shelf's tall artwork cards (F1); no game time on Pulse's ready screen (F2); solo countdowns running on the phone's own clock, a pre-existing defect (F3); in landscape, Pulse's Lock it in and Math's second answer row below the fold (F4).
-- **Also recorded:** the roadmap after this slice and the owner's direction for Jebena Rush (`docs/MILESTONES.md`; not implemented here).
+- **Spec and record:** `docs/stage8/stage81.md`; decisions D-S81-01 … 06.
+- Nothing was merged or deployed, no port was made public, and nothing was paid for.
+
+**Milestone:**
+- **S1, the solo shelf:** row cards on phones (a small square cover beside the words, Start across the bottom), a grid of up to three from 600 px. On desktop all three games and their Start buttons are on the first screen (before: one column, one game above the fold).
+- **S2, Pattern Pulse's game clock:** between patterns, the game's time left on the server's clock, said to keep running; a warning tone at one minute; announcements only at under a minute, under 20 s and time up; at time up, Show me the pattern gives way to a status and the results follow. Pulse draws one clock per screen (App no longer adds its own).
+- **S3, touch and responsive:** the solo round fits the screen; held sideways, Pulse's Lock it in and Math's four answers are on screen; the briefing's I'm ready waits at the bottom while the rules are read.
+- **Found and fixed:**
+  - **F3 (pre-existing):** solo countdowns ran on the phone's own clock (the solo session never recorded the server's). Fixed; tested against a real server with a skewed clock.
+  - **F5:** the briefing's I'm ready was below the fold at 320 and 390 px.
+  - **F6:** a solo round's page was a bar's height taller than the screen.
+
+**Changed:**
+- **Web:** `apps/web/src/components/mchezo/pulseClock.ts` (new), `MchezoPulse.tsx`, `Solo.tsx`, `App.tsx`, `apps/web/src/solo/soloSession.ts`, `apps/web/src/ui/mchezo/styles/stage8.css` (new), `ui/mchezo/index.ts`.
+- **Tests and scripts:** `tests/stage81-mobile-solo.test.ts`, `scripts/check-mobile-everyday.mjs`, `scripts/screenshot-stage81.mjs` (all new).
+- **Server:** unchanged.
+
+**Tests:**
+- **Unit:** 10 new; 1,316 in all. F3's two tests fail with the fix removed.
+- **`check-mobile-everyday`:** 111/111 locally (the shelf at four sizes; Pulse's clock on a phone 10 minutes fast; time up with a short game window; landscape; a casual room with the longest names, Play again included).
+- **Regressions, local:** `check-solo` 80, `check-solo-shelf` 58, `check-pattern-pulse` 54, `check-pulse-timing` 41, `check-briefing` 43, `check-session-flow` 70, `check-lifecycle` 37, `check-mobile` 50.
+- **Screenshots:** before (`58196cb`) and after (`947ffae`), 36 each, `docs/stage8/screenshots-81/`.
+
+**Gates:** to be run on the completed checkpoint, fast then full, one after the other.
+
+**External blockers:** none. WebKit and real devices are not available here (checklist I22–I24).
+
+**Next task:** the gates, then a completed report on PR #12; ChatGPT's review and private live-site audit follow.
+
+**Risk:**
+- **Emulation only:** no real phones, no WebKit; landscape on a real phone (browser bars, the notch) is unverified.
+- **The briefing's sticky I'm ready** also applies to Family Cup briefings (the same screen); `check-briefing` passes.
+- **The landscape answer area** applies to every quiz game using the shared question screen; portrait is unchanged.

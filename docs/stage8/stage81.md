@@ -1,6 +1,6 @@
 # Stage 8.1: mobile usability and solo presentation
 
-**Status:** in progress (spec first). **Do not merge.** Merge and deployment decisions belong to the owner.
+**Status:** built and tested (§7); gates in §7.3. **Do not merge.** Merge and deployment decisions belong to the owner.
 
 - **Instruction:** ChatGPT's review and handoff on PR #11 (comment 6790743334), under the owner's standing authorization (`docs/DECISIONS.md` D-WF-01). It cleared Stage 7.4 (tested `ecb617c`, head `58196cb`) and set this bounded milestone.
 - **Branch:** `claude/stage8-1-mobile-solo`, from `58196cb938e6d859d2e20895f71ba2eefde05f0c`, stacked on PR #11 (`claude/stage7-4-content-variety`). PRs #4–#11 stay unmerged.
@@ -16,7 +16,8 @@ Measured with a probe in Chromium headless (Playwright) at 320×640, 390×844, 8
 | F2 | Pattern Pulse, between patterns | The ready screen says "the game's own clock keeps running" but shows no time. In a solo round no overall game time is shown anywhere. In a room, App's `GameClock` line sits above the game. |
 | F3 | Every solo round (pre-existing defect) | The solo app never records the server's clock (`noteServerTime` is called only by room screens). So solo countdowns — Pulse's "Hides in", "Ns to answer" and when its keys lock, Math's timer — run on the phone's own clock. A phone whose clock is off by 30 s shows the wrong time, and one that is ahead locks the keys early. The server still enforces every deadline, so scores are never wrong, but the screen can be. |
 | F4 | Phone in landscape (844×390) | Pattern Pulse's tap-back screen: the second row of shapes and **Lock it in** are below the fold during a timed answer (514 px of content in 390). Math Mayhem: the second row of answers is below the fold. |
-| F5 | Casual lobby, briefing, results and What's next | To be measured by the new driver at the same sizes with long names (24 characters, the maximum). Findings will be added here. |
+| F5 | Casual lobby, briefing, results and What's next | Measured by the new driver with the longest names (24 characters, one with no space to break at), host at 390×844 and guest at 320×640. The briefing's **I'm ready** was below the fold for both: the rules card comes first and runs past the first screen. Lobby, results and What's next: no overflow, names wrap, no control under 44 px, What's next and Play again on the first screen. |
+| F6 | Every solo round | The round's bar sits above a game screen that is itself one viewport tall, so the page was always a bar's height (about 46 px) taller than the screen and the bar scrolled away; in landscape that pushed timed controls further down. |
 
 No control smaller than 44 px was found on the solo journey at these sizes. The home screen's game row scrolls sideways inside its own container by design.
 
@@ -29,7 +30,7 @@ No control smaller than 44 px was found on the solo journey at these sizes. The 
 ## 3. Design
 
 ### 3.1 Solo shelf (S1)
-- **Phones (narrower than 600 px):** each card is a row: a small square cover (decorative) beside the title, description and players/time line; the personal best and any note below; **Start** full width at the bottom (at least 48 px tall). Target: at 390×844 the first two cards and the top of the third are on the first screen; at 320×640 the shelf is under half its current height.
+- **Phones (narrower than 600 px):** each card is a row: a small square cover (decorative) beside the title, description and players/time line; the personal best and any note below; **Start** full width at the bottom (at least 48 px tall). Target: at 390×844 the first two cards and the top of the third are on the first screen. (At 320×640 I first aimed for under half the shelf's height; the descriptions wrap more at that width and it came to 1,192 of 1,609 px, with each card 283–303 px. Shortening it further would mean cutting words, which the handoff keeps.)
 - **Wider (600 px and up, including a phone in landscape):** a grid that fits as many columns as there is room for, each at least 260 px wide, up to three. The cover becomes a short banner. The shelf's container widens to 1,080 px (only the shelf; other screens keep their width). At 1440×900 all three games and their Start buttons are above the fold.
 - **Unchanged:** the order (Math, Pulse, Connections), every text line, `data-testid`s, the "More solo games…" footer and Host a game.
 
@@ -45,9 +46,10 @@ No control smaller than 44 px was found on the solo journey at these sizes. The 
 - **Server:** unchanged. Deadlines and scoring stay where they are.
 
 ### 3.3 Touch and responsive pass (S3)
-- **Short landscape screens** (height 520 px or less, landscape): Pulse's six shapes in one row with smaller slots, and Math's four answers in one row, so the timed controls and **Lock it in** fit without scrolling; the solo round bar and the game header become compact. Only these screens; other games are not restyled.
-- **Safe areas:** screens already pad for the top and bottom insets. Left and right insets are added too. Today they are zero (the page doesn't ask for `viewport-fit=cover`, so Safari keeps content out of the notch itself); they matter once the Home Screen milestone turns full-screen display on.
-- **Casual lobby, briefing, results and What's next:** fix what the driver finds (F5): long names wrapping, controls clipped or pushed off screen, overflow. Nothing about who may press what changes.
+- **Short landscape screens** (height 520 px or less, landscape): Pattern Pulse's ready and tap-back screens in two columns (what's next or what to tap | the clock, the shapes and the buttons), so **Lock it in** and **Show me the pattern** fit without scrolling; the question screen's answer area may shrink below its portrait minimum (260 px) so Math's two rows of answers fit; the solo bar is slimmer. The question screen is shared by the quiz games (Trivia, Geography, Who Said That, Guess the Year), so they get the same landscape answer area; portrait is unchanged for all of them.
+- **Safe areas:** screens already pad for the top and bottom insets, and the new docks do too. Left and right insets are **left to the Home Screen milestone**: today they are zero (the page doesn't ask for `viewport-fit=cover`, so Safari keeps content out of the notch itself), and adding them to every screen's padding would collide with screens that set their own (`.mz-screen--game`). That milestone turns full-screen display on and should add them with it.
+- **Casual lobby, briefing, results and What's next:** fix what the driver finds (F5). It found one thing: the briefing's **I'm ready** below the fold. I'm ready (with its help line) is now a sticky dock at the bottom of the screen while the rules are read, in the lobby dock's existing style, and settles into place at the end; slimmer on a short landscape screen. The host's Start now and Cancel follow it as before (checked: not covered). The briefing is shared with Family Cups, so they get the same dock; nothing about who may press what changes.
+- **The solo round fits the screen (F6):** the round is one viewport tall, the bar takes its height and the game screen the rest (scrolling inside itself when it must).
 - **Forms with the keyboard open:** only if a form on this journey is touched; checked by shrinking the viewport's height (an emulation, not a real keyboard).
 
 ## 4. Must stay as it is
@@ -73,4 +75,40 @@ No control smaller than 44 px was found on the solo journey at these sizes. The 
 3. **Time up on the ready screen** replaces Show me the pattern with a status rather than disabling it, so nothing looks pressable. The server stays the authority.
 4. **F3** (solo countdowns on the phone's clock) is fixed here, as a pre-existing defect in the clock this milestone touches.
 5. **Breakpoints:** a list under 600 px; an auto-fit grid (columns at least 260 px, up to three) from 600 px, with the shelf container widened to 1,080 px.
-6. **Landscape compaction** uses a height-and-orientation query and is limited to the screens named in §3.3.
+6. **Landscape compaction** uses a height-and-orientation query and is limited to the screens named in §3.3. The answer area belongs to the shared question screen, so the quiz games that use it get the same landscape fix (portrait unchanged).
+7. **The briefing's I'm ready is a sticky dock** (F5), shared with Family Cup briefings. *Alternative:* moving I'm ready above the rules; rejected because the rules should be read first.
+8. **Left and right safe areas** are left to the Home Screen milestone (§3.3).
+
+## 7. What was built and tested
+
+### 7.1 Built
+- **S1 the solo shelf** (`apps/web/src/ui/mchezo/styles/stage8.css`, `Solo.tsx`): row cards on phones (a 76 px square cover beside the words, Start across the bottom, at least 48 px tall); an auto-fit grid from 600 px (columns at least 260 px, three at most) in a 1,080 px shelf, with Start aligned along the bottom. Every line of text, best and note kept.
+- **S2 Pattern Pulse's game clock** (`apps/web/src/components/mchezo/pulseClock.ts`, `MchezoPulse.tsx`, `App.tsx`): as designed in §3.2. The ready screen's explanation now says the round's own timer starts at Show me the pattern; the panel says the game clock keeps running.
+- **F3** (`apps/web/src/solo/soloSession.ts`): the solo session notes `serverNow` from every projection it reads.
+- **S3** (`stage8.css`, `MchezoPulse.tsx`): the solo round fits the screen; landscape two-column Pulse and the shorter answer area; the briefing's sticky I'm ready.
+- **Server:** unchanged.
+
+### 7.2 Tested
+- **Unit** (`tests/stage81-mobile-solo.test.ts`, 10):
+  - the clock helper: m:ss from the server's deadline and time, never negative; low at one minute, urgent at 20 s, up at the deadline; a second-by-second countdown announces exactly three times; a clock jumping back and forth across a threshold announces once; arriving already low or up announces that state once;
+  - a real solo room's projection carries the deadline and the server's time (5:00 at the start, 1:00 and low after four minutes);
+  - time up between patterns: the server refuses a late Show me the pattern and ends the game itself, once; with nobody pressing, the server's clock alone ends it;
+  - **F3:** against a real server with the phone's clock 90 s behind and 120 s ahead of the server's, the solo session's countdown equals the server's own numbers. Both F3 tests fail with the fix removed.
+- **Unit suite:** 1,316 (1,306 before).
+- **Browser driver** `scripts/check-mobile-everyday.mjs` (new, 111 checks; Chromium emulation): A the shelf at four sizes; B solo Pulse on a phone clock 10 minutes fast (the panel within 3 s of the server's numbers, one clock per screen, keeps-running words, timer not live) and a complete Math journey with Play again; C time up on the ready screen with its own server and a 30 s game (warning tone; announcements exactly under a minute, under 20 s, time up; Show me never on screen with time up; ready → time up → results; the server ended it with no round played); D landscape (Pulse's ready and tap-back, Math's answers, the solo bar, all on screen without scrolling); E a casual room with the longest names (lobby, briefing, Pulse in a room with one clock, results with What's next, Play again, results again; nothing covered, nothing clipped, no overflow).
+- **Regressions, local** (`docs/evidence/stage81-local/`, not gate verdicts): `check-solo` 80, `check-solo-shelf` 58, `check-pattern-pulse` 54, `check-pulse-timing` 41, `check-briefing` 43, `check-session-flow` 70, `check-lifecycle` 37, `check-mobile` 50.
+- **Measured** with the same probe before and after (`docs/evidence/stage81-local/probe-*.json`):
+
+| Size | Shelf height, before → after | Cards |
+|---|---|---|
+| 320×640 | 1,609 → 1,192 px | 421–439 → 283–303 px tall |
+| 390×844 | 1,741 → 1,131 px | 463–481 → 266–268 px; two Start buttons on the first screen |
+| 844×390 | 1,311 → 908 px | one column → two side by side |
+| 1440×900 | 1,623 → 900 px (no scrolling) | one column → three side by side, every Start on the first screen |
+
+  In a solo round the page is now exactly one screen tall at every size (it was a bar's height taller). The probe also found no control under 44 px and no sideways overflow on the solo journey, before or after.
+- **Screenshots:** `docs/stage8/screenshots-81/before/` (`58196cb`) and `after/` (`947ffae`), 36 each, at 320×640, 390×844, 844×390 and 1440×900, both from clean trees (`manifest.json`), by `scripts/screenshot-stage81.mjs`.
+
+### 7.3 Gates
+To be run on the completed checkpoint: fast, then full, one after the other.
+

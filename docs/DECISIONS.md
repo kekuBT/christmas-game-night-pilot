@@ -881,3 +881,24 @@ The spec is `docs/stage7/stage74.md`. The instruction is ChatGPT's review and ha
   - **Bounds:** only a quick failure is resent at once (up to two resends), every send within the first request's own allowance, so a Start with no answer ends as before. A request that used its whole allowance (flagged `timedOut`) is never resent in the same Start, whatever the clock says, since timers can fire a little early (`ecb617c`, after a focused rerun on `8147b72` caught it once; spec §7.5). A press still without an answer is kept for Try again; any definite answer, Leave and dispose end it.
   - *Alternative rejected:* the earlier recovery, reading the room and adopting a new round of the same game. It adopted another tab's round (reproduced by ChatGPT and in tests). *Also rejected:* resending after a timeout as well. That would stretch a Start with no answer from about 6 s to the whole 15 s budget.
 - **D-S74-07 `MCHEZO_CONTENT_DIR`, testing only.** It loads the content library from another directory (a small controlled pool for the browser checks). It is refused when `NODE_ENV=production`, like the other test settings, and no request can set it.
+
+## Stage 8.1: mobile usability and solo presentation (2026-11-11, branch `claude/stage8-1-mobile-solo`, from the Stage 7.4 head `58196cb`)
+
+Instructed by ChatGPT's review and handoff 6790743334 on PR #11 under D-WF-01. Spec: `docs/stage8/stage81.md`.
+
+- **D-S81-01 Pattern Pulse draws its own game clock on every screen.**
+  - **What:** between patterns, a panel ("Game time left 3:42", and that it keeps running); while memorising and tapping back, the compact clock line. App no longer draws `GameClock` above Pulse.
+  - **Why:** one clock per screen, in rooms and solo alike; solo had none.
+  - *Alternative rejected:* keeping App's line and adding the panel, which would show two clocks on the ready screen.
+- **D-S81-02 Low time is shown and announced at thresholds, never every second.**
+  - **What:** the warning tone (border and number, plus the words "Running low") at one minute or less. A polite status announces only crossings into a more urgent band: under a minute, under 20 s, time up. Each is said at most once per game; a clock that jumps back says nothing new. The number itself is a `timer` with `aria-live="off"`.
+  - *Alternative considered:* a single announcement at one minute. Two warnings and the end give a screen-reader user the same information a sighted player gets from the colour.
+- **D-S81-03 Time up between patterns is a display state; the server decides.**
+  - **What:** when the game clock reaches 0:00 on the ready screen, Show me the pattern (and Sit the rest out) give way to "The game's time is up. Your results are on their way." The screen changes to the results when the projection says the game has finished. A press that raced the deadline is refused by the server as before.
+  - *Alternative rejected:* disabling the button, which still looks pressable.
+- **D-S81-04 The solo session uses the server's clock (a pre-existing defect, F3).** It records `serverNow` from every projection it reads, as room screens always have. Before, every solo countdown ran on the phone's own clock. Scores were never affected (the server enforces every deadline), but a skewed phone showed the wrong time and could lock Pulse's keys early.
+- **D-S81-05 The solo shelf: row cards on phones, a grid from 600 px.** Row cards with a 76 px square cover; from 600 px an auto-fit grid (columns at least 260 px, up to three) in a 1,080 px shelf. Typography, palette, covers and every line of text are unchanged.
+- **D-S81-06 Short landscape screens and the briefing's I'm ready.**
+  - **Landscape** (height 520 px or less): Pulse's ready and tap-back screens in two columns; the shared question screen's answer area may shrink below its 260 px portrait minimum (so the quiz games that use it get the same fix); the solo round is exactly one screen tall.
+  - **The briefing's I'm ready** is a sticky dock at the bottom while the rules are read (it was below the fold at 320 and 390 px), in the lobby dock's style; shared with Family Cup briefings.
+  - **Left and right safe areas** are left to the Home Screen milestone, which turns full-screen display on.
