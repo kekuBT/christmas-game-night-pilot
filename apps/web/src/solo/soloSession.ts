@@ -47,6 +47,7 @@
 import { readJson } from "../http.js";
 import { oneAtATime, POLL_TIMEOUT_MS, STALE_AFTER_MS } from "../liveness.js";
 import type { Projection } from "../types.js";
+import { noteServerTime } from "../ui/mchezo/lib/lifecycle.js";
 import type { KeyValueStore } from "./personalBest.js";
 import { uuidV4 } from "../uuid.js";
 
@@ -159,6 +160,14 @@ export class SoloSession {
   private run = new AbortController();
   /** When a reply last proved the round on screen is current. */
   private lastFreshAt = 0;
+  /**
+   * Stage 8.1 (spec feedback 6790913242): each read of the room is numbered
+   * when sent. A reply is taken only if no later-sent read has been taken
+   * already, so a slow, older reply never overwrites the round on screen or
+   * the server-clock estimate taken from a newer one.
+   */
+  private readsSent = 0;
+  private readTaken = 0;
   /** A room this device made but could not yet join (the join got no answer). */
   private unjoined: { roomId: string; hostClaimToken: string } | null = null;
   /**
@@ -394,6 +403,7 @@ export class SoloSession {
     const gid = this.state.gameInstanceId;
     if (!gid) return;
     const gen = this.generation;
+    const read = ++this.readsSent;
     let proj: Projection;
     try {
       proj = await this.projectionOf(this.seat);
@@ -412,6 +422,12 @@ export class SoloSession {
       return;
     }
     if (!this.isCurrent(gen) || this.state.gameInstanceId !== gid) return; // a newer round started meanwhile
+    if (read < this.readTaken) return; // an older read answered after a newer one: never shown over it
+    this.readTaken = read;
+    // Stage 8.1 (F3): countdowns use the server's clock, as room screens do,
+    // never this phone's own clock alone: taken from each reply accepted here
+    // (the first one after Start included), never from a refused or stale one.
+    noteServerTime(proj.serverNow);
     this.lastFreshAt = this.now();
     const game = (proj.games ?? []).find((g) => g.id === gid);
     if (!game) {

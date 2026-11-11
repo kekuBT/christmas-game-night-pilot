@@ -31,8 +31,8 @@ All milestones **locally authorized**, not remote publication/deployment. Order 
     - After a casual Math game, both players land in the old "Christmas Game Night" header, with Championship navigation, PRACTICE labels and a duplicate winner/results block. The modern lobby returns afterwards. The briefing also calls casual play "Practice".
     - Direction: the Mchezo shell and consistent "Casual" wording, with no Cup-only navigation in this flow. Standings and each seat's answer privacy stay as they are.
     - Needed before casual/polish sign-off.
-  - **Solo shelf on desktop** (polish): one tall column, whose large artwork pushes other games below the fold. Direction: compact phone cards and a wider desktop layout, keeping touch targets and bests.
-  - **Pattern Pulse's ready screen** (polish): it says the overall clock keeps running but doesn't show the time left. Add the remaining time, or a low-time warning, before later patterns.
+  - **Solo shelf on desktop** (polish): one tall column, whose large artwork pushes other games below the fold. Direction: compact phone cards and a wider desktop layout, keeping touch targets and bests. **Done in Stage 8.1** (PR #12, `docs/stage8/stage81.md`, D-S81-05).
+  - **Pattern Pulse's ready screen** (polish): it says the overall clock keeps running but doesn't show the time left. Add the remaining time, or a low-time warning, before later patterns. **Done in Stage 8.1** (D-S81-01 … 03).
   - **Dependency advisories** (deployment readiness): triage in `docs/deploy/npm-audit-2026-11-10.md`. Use targeted updates with tests; no automatic fixes.
 - **Practice content variety in solo and casual rooms** (queued 2026-11-10 by ChatGPT's architecture decision on PR #7, comment 6771088990, under D-WF-01). **Done in Stage 7.4** (PR #11, `docs/stage7/stage74.md`, D-S74-01 … 07); kept here for its history.
   - **Why:** practice selection takes an already-used item before a fresh official one. That protects official content in a Cup. But a room that never plays official games would repeat one item once most of the library is approved for official play (Stage 6.2 spec §3.4, §5 item 4; pinned by a unit test in `tests/stage62-solo-shelf.test.ts`).
@@ -43,6 +43,21 @@ All milestones **locally authorized**, not remote publication/deployment. Order 
   - **Seen:** a shipped Word Connections board with Christmas clues dealt in everyday solo play.
   - **The boards:** `con-s4-03` ("On a Christmas tree", "Santa's reindeer") and `con-legacy-1` (Christmas foods, Christmas decorations, reindeer names). Stage 7.4 put `con-legacy-1` into solo and casual rotation (it is approved; D-S74-01).
   - **Direction, when that milestone starts:** keep seasonal content out of everyday solo and casual play unless a seasonal mode is chosen. Content isn't changed before then.
+
+## Roadmap after Stage 8.1 (owner direction, relayed by ChatGPT's handoff 6790743334 on PR #11, 2026-11-11)
+
+Each item waits for its own brief. In order:
+1. **Everyday and Christmas themes, complete,** with seasonal-content separation (the item above).
+2. **Home Screen installation** using the existing circle-and-dots logo (the first queued item above).
+3. **New games:** Jebena Rush first, then Spectrum.
+
+- **Jebena Rush: the owner's settled direction** (recorded so it isn't lost; **not to be implemented in Stage 8.1**).
+  - **Name and tagline:** Jebena Rush, "Name it. Pass it. Beat the steam."
+  - **Play:** a category game. Players name answers in a category and pass the jebena on.
+  - **Look:** an original animated jebena whose steam and wobble increase, and which is passed between players.
+  - **Lives:** five by default, configurable to 3, 5 or 7.
+  - **Answers:** a large curated answer bank with aliases, and careful normalization of obvious typos to the canonical answer.
+- **Spectrum** follows Jebena Rush; no direction recorded yet.
 
 ## Stop-the-line defects
 P0: private word/role/answer exposed; host spoof; duplicated or lost official scoring; repeated server crash/data loss; write access to real external services without authorization; harmful secret leak. P1: iPhone unusable, cannot rejoin, game permanently stuck, scores incorrect, 11 games not actually playable, Memory Book fabricates real people/events. P2: minor styling, occasional confetti defect, nonessential animation.

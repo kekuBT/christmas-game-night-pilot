@@ -1,0 +1,189 @@
+{
+  "revision": "58196cb938e6d859d2e20895f71ba2eefde05f0c",
+  "workingTreeClean": true,
+  "capturedAt": "2026-11-11T08:51:20.872Z",
+  "by": "scripts/screenshot-stage81.mjs",
+  "note": "Chromium headless (Playwright) emulation only; not a real iPhone or Android device, not WebKit. Viewport-sized shots (the app scrolls an inner container).",
+  "shots": [
+    {
+      "file": "01-solo-shelf-320x640.png",
+      "screen": "Play solo: the shelf, first screen",
+      "viewport": "320×640"
+    },
+    {
+      "file": "02-pulse-between-patterns-320x640.png",
+      "screen": "Pattern Pulse between patterns (round 2 next)",
+      "viewport": "320×640"
+    },
+    {
+      "file": "03-pulse-tap-back-320x640.png",
+      "screen": "Pattern Pulse tapping round 2 back (1 of 4 in)",
+      "viewport": "320×640"
+    },
+    {
+      "file": "04-math-question-320x640.png",
+      "screen": "Math Mayhem, solo: the first question",
+      "viewport": "320×640"
+    },
+    {
+      "file": "05-solo-results-320x640.png",
+      "screen": "Math Mayhem, solo: results with Play again",
+      "viewport": "320×640"
+    },
+    {
+      "file": "06-casual-lobby-host-320x640.png",
+      "screen": "Casual lobby, host, the longest names (24 characters)",
+      "viewport": "320×640"
+    },
+    {
+      "file": "07-casual-briefing-guest-320x640.png",
+      "screen": "Casual briefing, guest: the first screen",
+      "viewport": "320×640"
+    },
+    {
+      "file": "08-casual-pulse-ready-guest-320x640.png",
+      "screen": "Pattern Pulse in a casual room, guest, before round 1",
+      "viewport": "320×640"
+    },
+    {
+      "file": "09-casual-results-host-320x640.png",
+      "screen": "Casual results with What's next, host",
+      "viewport": "320×640"
+    },
+    {
+      "file": "01-solo-shelf-390x844.png",
+      "screen": "Play solo: the shelf, first screen",
+      "viewport": "390×844"
+    },
+    {
+      "file": "02-pulse-between-patterns-390x844.png",
+      "screen": "Pattern Pulse between patterns (round 2 next)",
+      "viewport": "390×844"
+    },
+    {
+      "file": "03-pulse-tap-back-390x844.png",
+      "screen": "Pattern Pulse tapping round 2 back (1 of 4 in)",
+      "viewport": "390×844"
+    },
+    {
+      "file": "04-math-question-390x844.png",
+      "screen": "Math Mayhem, solo: the first question",
+      "viewport": "390×844"
+    },
+    {
+      "file": "05-solo-results-390x844.png",
+      "screen": "Math Mayhem, solo: results with Play again",
+      "viewport": "390×844"
+    },
+    {
+      "file": "06-casual-lobby-host-390x844.png",
+      "screen": "Casual lobby, host, the longest names (24 characters)",
+      "viewport": "390×844"
+    },
+    {
+      "file": "07-casual-briefing-guest-390x844.png",
+      "screen": "Casual briefing, guest: the first screen",
+      "viewport": "390×844"
+    },
+    {
+      "file": "08-casual-pulse-ready-guest-390x844.png",
+      "screen": "Pattern Pulse in a casual room, guest, before round 1",
+      "viewport": "390×844"
+    },
+    {
+      "file": "09-casual-results-host-390x844.png",
+      "screen": "Casual results with What's next, host",
+      "viewport": "390×844"
+    },
+    {
+      "file": "01-solo-shelf-844x390.png",
+      "screen": "Play solo: the shelf, first screen",
+      "viewport": "844×390"
+    },
+    {
+      "file": "02-pulse-between-patterns-844x390.png",
+      "screen": "Pattern Pulse between patterns (round 2 next)",
+      "viewport": "844×390"
+    },
+    {
+      "file": "03-pulse-tap-back-844x390.png",
+      "screen": "Pattern Pulse tapping round 2 back (1 of 4 in)",
+      "viewport": "844×390"
+    },
+    {
+      "file": "04-math-question-844x390.png",
+      "screen": "Math Mayhem, solo: the first question",
+      "viewport": "844×390"
+    },
+    {
+      "file": "05-solo-results-844x390.png",
+      "screen": "Math Mayhem, solo: results with Play again",
+      "viewport": "844×390"
+    },
+    {
+      "file": "06-casual-lobby-host-844x390.png",
+      "screen": "Casual lobby, host, the longest names (24 characters)",
+      "viewport": "844×390"
+    },
+    {
+      "file": "07-casual-briefing-guest-844x390.png",
+      "screen": "Casual briefing, guest: the first screen",
+      "viewport": "844×390"
+    },
+    {
+      "file": "08-casual-pulse-ready-guest-844x390.png",
+      "screen": "Pattern Pulse in a casual room, guest, before round 1",
+      "viewport": "844×390"
+    },
+    {
+      "file": "09-casual-results-host-844x390.png",
+      "screen": "Casual results with What's next, host",
+      "viewport": "844×390"
+    },
+    {
+      "file": "01-solo-shelf-1440x900.png",
+      "screen": "Play solo: the shelf, first screen",
+      "viewport": "1440×900"
+    },
+    {
+      "file": "02-pulse-between-patterns-1440x900.png",
+      "screen": "Pattern Pulse between patterns (round 2 next)",
+      "viewport": "1440×900"
+    },
+    {
+      "file": "03-pulse-tap-back-1440x900.png",
+      "screen": "Pattern Pulse tapping round 2 back (1 of 4 in)",
+      "viewport": "1440×900"
+    },
+    {
+      "file": "04-math-question-1440x900.png",
+      "screen": "Math Mayhem, solo: the first question",
+      "viewport": "1440×900"
+    },
+    {
+      "file": "05-solo-results-1440x900.png",
+      "screen": "Math Mayhem, solo: results with Play again",
+      "viewport": "1440×900"
+    },
+    {
+      "file": "06-casual-lobby-host-1440x900.png",
+      "screen": "Casual lobby, host, the longest names (24 characters)",
+      "viewport": "1440×900"
+    },
+    {
+      "file": "07-casual-briefing-guest-1440x900.png",
+      "screen": "Casual briefing, guest: the first screen",
+      "viewport": "1440×900"
+    },
+    {
+      "file": "08-casual-pulse-ready-guest-1440x900.png",
+      "screen": "Pattern Pulse in a casual room, guest, before round 1",
+      "viewport": "1440×900"
+    },
+    {
+      "file": "09-casual-results-host-1440x900.png",
+      "screen": "Casual results with What's next, host",
+      "viewport": "1440×900"
+    }
+  ]
+}

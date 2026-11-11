@@ -10,8 +10,8 @@ import { ReactionBar } from '../Reactions.js';
 import { AnswerDistribution, ResultCard, StandingsList, WaitingCircle } from '../Results.js';
 
 /** Every phone screen: full height, one primary action at the bottom, no persistent nav. */
-export function PhoneScreen({ children, label, tone }: { children: ReactNode; label: string; tone?: 'game' }) {
-  return <main className={['mz-screen', tone === 'game' ? 'mz-screen--game' : ''].join(' ')} aria-label={label}>{children}</main>;
+export function PhoneScreen({ children, label, tone, className }: { children: ReactNode; label: string; tone?: 'game'; className?: string }) {
+  return <main className={['mz-screen', tone === 'game' ? 'mz-screen--game' : '', className ?? ''].filter(Boolean).join(' ')} aria-label={label}>{children}</main>;
 }
 
 /* =========================================================== 1. landing */
@@ -233,11 +233,13 @@ export interface QuestionScreenProps {
   totalSeconds: number;
   /** Integration slot: per-game actions our server supports (e.g. abstain). */
   extra?: ReactNode;
+  /** Stage 8.1: a per-game class on the screen (Math's landscape answer area). */
+  className?: string;
 }
 
 export function QuestionScreen(p: QuestionScreenProps) {
   return (
-    <PhoneScreen label={`Question ${p.questionNumber} of ${p.questionCount}`}>
+    <PhoneScreen label={`Question ${p.questionNumber} of ${p.questionCount}`} className={p.className}>
       <header className="mz-qhead">
         <RingTimer seconds={p.secondsLeft} total={p.totalSeconds} />
         <div className="mz-qhead__text">

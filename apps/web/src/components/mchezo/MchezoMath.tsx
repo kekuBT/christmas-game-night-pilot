@@ -164,6 +164,7 @@ export function MchezoMath(deps: MchezoMathDeps) {
   const selected = myAnswers[firstUnanswered.id] ?? pendingHere;
   return (
     <QuestionScreen
+      className="mz-math-screen"
       game={{ name: gamesTitle, kind: "Math", accentIndex: 2 }}
       questionNumber={idx + 1}
       questionCount={questions.length}

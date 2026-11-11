@@ -1,0 +1,5 @@
+$ node ./node_modules/eslint/bin/eslint.js .
+# timeout 300s | worker w3
+
+
+# CANCELLED (exit SIGTERM) in 13.1s | cpu 16.5s, peak memory 674 MB

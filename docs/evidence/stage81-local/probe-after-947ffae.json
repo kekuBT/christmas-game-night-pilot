@@ -1,0 +1,315 @@
+[
+ {
+  "label": "home",
+  "view": "320x640",
+  "docScrollW": 320,
+  "innerW": 320,
+  "contentH": 699,
+  "sideways": [
+   "div. [317..457]",
+   "button.mz-gamecard [317..457]",
+   "span.mz-gamecard__title [317..457]",
+   "span.mz-gamecard__meta [317..457]",
+   "span.mz-gamecard__art [317..457]",
+   "span.mz-cover [317..457]"
+  ],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "shelf",
+  "view": "320x640",
+  "docScrollW": 320,
+  "innerW": 320,
+  "contentH": 1192,
+  "sideways": [],
+  "small": [],
+  "cards": [
+   {
+    "top": 176,
+    "h": 283
+   },
+   {
+    "top": 471,
+    "h": 286
+   },
+   {
+    "top": 769,
+    "h": 303
+   }
+  ]
+ },
+ {
+  "label": "pulse-ready-r1",
+  "view": "320x640",
+  "docScrollW": 320,
+  "innerW": 320,
+  "contentH": 640,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "pulse-input",
+  "view": "320x640",
+  "docScrollW": 320,
+  "innerW": 320,
+  "contentH": 640,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "pulse-ready-r2",
+  "view": "320x640",
+  "docScrollW": 320,
+  "innerW": 320,
+  "contentH": 640,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "math-playing",
+  "view": "320x640",
+  "docScrollW": 320,
+  "innerW": 320,
+  "contentH": 640,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "home",
+  "view": "390x844",
+  "docScrollW": 390,
+  "innerW": 390,
+  "contentH": 735,
+  "sideways": [
+   "div. [320..460]",
+   "button.mz-gamecard [320..460]",
+   "span.mz-gamecard__title [320..460]",
+   "span.mz-gamecard__meta [320..460]",
+   "span.mz-gamecard__art [320..460]",
+   "span.mz-cover [320..460]"
+  ],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "shelf",
+  "view": "390x844",
+  "docScrollW": 390,
+  "innerW": 390,
+  "contentH": 1131,
+  "sideways": [],
+  "small": [],
+  "cards": [
+   {
+    "top": 185,
+    "h": 266
+   },
+   {
+    "top": 462,
+    "h": 268
+   },
+   {
+    "top": 743,
+    "h": 268
+   }
+  ]
+ },
+ {
+  "label": "pulse-ready-r1",
+  "view": "390x844",
+  "docScrollW": 390,
+  "innerW": 390,
+  "contentH": 844,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "pulse-input",
+  "view": "390x844",
+  "docScrollW": 390,
+  "innerW": 390,
+  "contentH": 844,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "pulse-ready-r2",
+  "view": "390x844",
+  "docScrollW": 390,
+  "innerW": 390,
+  "contentH": 844,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "math-playing",
+  "view": "390x844",
+  "docScrollW": 390,
+  "innerW": 390,
+  "contentH": 844,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "home",
+  "view": "844x390",
+  "docScrollW": 844,
+  "innerW": 844,
+  "contentH": 818,
+  "sideways": [
+   "div. [808..958]",
+   "button.mz-gamecard [808..958]",
+   "span.mz-gamecard__title [808..958]",
+   "span.mz-gamecard__meta [808..958]",
+   "span.mz-gamecard__art [808..958]",
+   "span.mz-cover [808..958]"
+  ],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "shelf",
+  "view": "844x390",
+  "docScrollW": 844,
+  "innerW": 844,
+  "contentH": 908,
+  "sideways": [],
+  "small": [],
+  "cards": [
+   {
+    "top": 162,
+    "h": 315
+   },
+   {
+    "top": 162,
+    "h": 315
+   },
+   {
+    "top": 493,
+    "h": 335
+   }
+  ]
+ },
+ {
+  "label": "pulse-ready-r1",
+  "view": "844x390",
+  "docScrollW": 844,
+  "innerW": 844,
+  "contentH": 390,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "pulse-input",
+  "view": "844x390",
+  "docScrollW": 844,
+  "innerW": 844,
+  "contentH": 390,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "pulse-ready-r2",
+  "view": "844x390",
+  "docScrollW": 844,
+  "innerW": 844,
+  "contentH": 390,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "math-playing",
+  "view": "844x390",
+  "docScrollW": 844,
+  "innerW": 844,
+  "contentH": 346,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "home",
+  "view": "1440x900",
+  "docScrollW": 1440,
+  "innerW": 1440,
+  "contentH": 1495,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "shelf",
+  "view": "1440x900",
+  "docScrollW": 1440,
+  "innerW": 1440,
+  "contentH": 900,
+  "sideways": [],
+  "small": [],
+  "cards": [
+   {
+    "top": 166,
+    "h": 401
+   },
+   {
+    "top": 166,
+    "h": 401
+   },
+   {
+    "top": 166,
+    "h": 401
+   }
+  ]
+ },
+ {
+  "label": "pulse-ready-r1",
+  "view": "1440x900",
+  "docScrollW": 1440,
+  "innerW": 1440,
+  "contentH": 900,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "pulse-input",
+  "view": "1440x900",
+  "docScrollW": 1440,
+  "innerW": 1440,
+  "contentH": 900,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "pulse-ready-r2",
+  "view": "1440x900",
+  "docScrollW": 1440,
+  "innerW": 1440,
+  "contentH": 900,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ },
+ {
+  "label": "math-playing",
+  "view": "1440x900",
+  "docScrollW": 1440,
+  "innerW": 1440,
+  "contentH": 900,
+  "sideways": [],
+  "small": [],
+  "cards": []
+ }
+]

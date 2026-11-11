@@ -1,0 +1,19 @@
+$ node scripts/check-m6.mjs http://localhost:39769
+# timeout 600s | worker w3 | server http://localhost:39769 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s81c-full/test-results/20261111-103537-d7bb85f0-5864/server-data/w3)
+
+[+1.0s] PASS landing shows Mchezo wordmark
+[+1.5s] PASS host created room, code 89552L
+[+2.3s] PASS Circle lobby visible after join
+[+2.3s] PASS host sees guest seat in Circle lobby
+[+2.9s] PASS the rules briefing appears on both phones at game start
+[+2.9s] PASS no question is on any phone during the briefing
+[+3.4s] PASS everyone ready reaches gameplay
+[+3.4s] PASS no second intro races the clock after the briefing
+[+13.9s] PASS waiting state with counts
+[+23.4s] PASS results screen after finish
+[+23.5s] PASS back to lobby from results
+[+24.9s] PASS reaction sent from Mchezo lobby
+[+25.0s] M6 ALL PASSED
+[+25.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 25s | cpu 2.5s, peak memory 286 MB

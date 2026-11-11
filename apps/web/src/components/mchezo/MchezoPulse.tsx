@@ -16,8 +16,9 @@
  * What you tap is kept on this phone until the server confirms it; a send
  * that fails says so and keeps your entry for another try.
  */
-import { useEffect, useState, type ReactNode } from "react";
-import { Keycap, MchezoWaiting, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { GameClock, Keycap, MchezoWaiting, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
+import { NO_ANNOUNCEMENTS, clockAnnouncementText, gameClockView, nextAnnouncement, type AnnouncementHistory, type GameClockView } from "./pulseClock.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { SendNote } from "./SendNote.js";
@@ -96,14 +97,60 @@ export interface MchezoPulseDeps {
    * for others once all six rounds are done (the results follow at once).
    */
   solo?: boolean;
+  /**
+   * Stage 8.1 (spec feedback 6790913242): the game server can't be reached
+   * right now (solo: no fresh reply for a while; a room: the socket is
+   * reconnecting). With the game's time up, the screen then says so and
+   * offers `onCheckAgain` rather than promising results that may not come.
+   */
+  stale?: boolean;
+  onCheckAgain?: () => void;
 }
 
-export function MchezoPulse({ game, publicGame, players, playerId, title, intent, error, landed, solo }: MchezoPulseDeps) {
+/**
+ * Stage 8.1 (S2): the whole game's time left, between patterns. The number
+ * is a timer read on demand (never announced each second); crossings into a
+ * more urgent band are announced once by the screen's polite status.
+ */
+function GameTimePanel({ clock }: { clock: GameClockView }) {
+  const note = clock.up
+    ? "Rounds you didn’t get to score nothing."
+    : `${clock.low ? "Running low. " : ""}It keeps running between patterns, even now. Rounds you haven’t played when it reaches 0:00 score nothing.`;
+  return (
+    <section className={`mz-pp-clock${clock.up ? " is-up" : clock.low ? " is-low" : ""}`} aria-label="Game time" data-testid="mz-pp-gameclock" data-band={clock.band}>
+      <p className="mz-pp-clock__row">
+        <span className="mz-pp-clock__label">Game time left</span>
+        <span className="mz-pp-clock__time" role="timer" aria-live="off" data-testid="mz-pp-gameclock-left">{clock.label}</span>
+      </p>
+      <p className="mz-pp-clock__note" data-testid="mz-pp-gameclock-note">{note}</p>
+    </section>
+  );
+}
+
+export function MchezoPulse({ game, publicGame, players, playerId, title, intent, error, landed, solo, stale, onCheckAgain }: MchezoPulseDeps) {
   const st = (game.state ?? {}) as PulseView;
   const { reducedMotion } = useMchezo();
   const of = st.roundCount ?? 6;
   const open = st.open;
-  const now = useNow(!!open);
+  const finishedHere = !!st.done || !!st.satOut;
+  // Stage 8.1: tick between patterns too, so the game's time left stays current.
+  const now = useNow(!!open || (!finishedHere && game.deadlineAt !== undefined));
+  const clock = gameClockView(game.deadlineAt, now);
+  // Announce only crossings into a more urgent band, each once per GAME (the
+  // history is keyed by the game instance: screens never repeat a warning,
+  // a new game starts afresh), and only between patterns (never over a
+  // pattern being memorised or tapped).
+  const announced = useRef<AnnouncementHistory>(NO_ANNOUNCEMENTS);
+  const [said, setSaid] = useState("");
+  const between = !open && !finishedHere;
+  const band = clock?.band ?? "none";
+  useEffect(() => {
+    if (announced.current.gameId !== game.id) setSaid("");
+    if (!between) return;
+    const next = nextAnnouncement(announced.current, game.id, band);
+    announced.current = next.history;
+    if (next.say) setSaid(clockAnnouncementText(next.say));
+  }, [between, band, game.id]);
   const [entry, setEntry] = useState<number[]>([]);
   const [pending, setPending] = useState<string | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
@@ -122,7 +169,9 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
     return (
       <main className="mz-screen" aria-label={`${title}: finished`} data-testid="mz-pp-done">
         <GameHeader title={title} objective={st.satOut ? "Sitting the rest out" : "All six rounds done"} accent={4} />
-        {!st.satOut && last && <p className="mz-pp-last" data-testid="mz-pp-last">Round {last.round + 1}: {pulseResultLine(last)}</p>}
+        {/* Stage 8.1: Pulse draws its own game clock (App no longer does); results here come at the deadline at the latest. */}
+        {!solo && <GameClock game={game} />}
+        {!st.satOut && last &&<p className="mz-pp-last" data-testid="mz-pp-last">Round {last.round + 1}: {pulseResultLine(last)}</p>}
         <p className="mz-pp-total" data-testid="mz-pp-total">Your total: <b>{total}</b></p>
         {solo
           ? <p className="mz-foot" role="status">Your results are on their way…</p>
@@ -140,6 +189,7 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
       return (
         <main className="mz-screen" aria-label={`${title}: round ${round} of ${of}, memorise the pattern`} data-testid="mz-pp-memorise">
           <GameHeader title={title} objective="Memorise it" accent={4} />
+          <GameClock game={game} />
           <p className="mz-mr-round">Round {round} of {of} · {open.length} shapes</p>
           <ol className={`mz-pp-pattern${reducedMotion ? " mz-pp-pattern--still" : " mz-pp-pattern--sweep"}`} data-testid="mz-pp-pattern"
             style={{ ["--mz-pp-n" as string]: open.pattern!.length }} aria-label={`The pattern: ${open.pattern!.map((s) => PULSE_SYMBOLS[s]?.name).join(", ")}`}>
@@ -165,8 +215,11 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
     const sending = pending === "answer";
     const full = entry.length === len;
     return (
-      <main className="mz-screen" aria-label={`${title}: round ${round} of ${of}, tap the pattern back`} data-testid="mz-pp-input">
+      <main className="mz-screen mz-pp-play" aria-label={`${title}: round ${round} of ${of}, tap the pattern back`} data-testid="mz-pp-input">
+        {/* Stage 8.1: two columns on a short landscape screen (what to tap | the keys and Lock it in); one column otherwise. */}
+        <div className="mz-pp-play__info">
         <GameHeader title={title} objective="Tap it back in order" accent={4} />
+        <GameClock game={game} />
         <p className="mz-mr-round">Round {round} of {of} · {len} shapes</p>
         {/* Stage 5.1 (S5-AUD-02): the time left sits next to the entry, not below the button. */}
         <FeedbackLine testId="mz-pp-timer" tone={left <= 5 ? "warn" : "neutral"}>{timeUp ? (gameEndsFirst ? "The game's time is up." : "Time's up for this round.") : `${left}s to answer${gameEndsFirst ? " (the game ends then)" : ""}.`}</FeedbackLine>
@@ -177,6 +230,8 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
             </li>
           ))}
         </ol>
+        </div>
+        <div className="mz-pp-play__act">
         <div className="mz-pp-keys" role="group" aria-label="Shapes">
           {PULSE_SYMBOLS.map((sym, s) => (
             <button key={s} type="button" className="mz-pp-key" data-testid={`mz-pp-key-${s}`} aria-label={sym.name}
@@ -196,6 +251,7 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
           {sending ? "Sending…" : full ? "Lock it in" : `${len - entry.length} to go`}
         </Keycap>
         {failure}
+        </div>
       </main>
     );
   }
@@ -203,18 +259,42 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
   const next = st.next ?? 0;
   const len = st.lengths?.[next] ?? next + 3;
   return (
-    <main className="mz-screen" aria-label={`${title}: round ${next + 1} of ${of}, ready when you are`} data-testid="mz-pp-ready">
+    <main className="mz-screen mz-pp-play" aria-label={`${title}: round ${next + 1} of ${of}, ready when you are`} data-testid="mz-pp-ready">
+      {/* Stage 8.1: two columns on a short landscape screen (the next round | the game clock and Show me); one column otherwise. */}
+      <div className="mz-pp-play__info">
       <GameHeader title={title} objective={next === 0 ? "Watch, remember, repeat" : "Ready for the next one?"} accent={4} />
       {last && <p className={`mz-pp-last${last.perfect ? " mz-pp-last--good" : ""}`} data-testid="mz-pp-last">Round {last.round + 1}: {pulseResultLine(last)}</p>}
       <p className="mz-mr-round">Round {next + 1} of {of}</p>
       <h2 className="mz-mr-prompt" data-testid="mz-pp-next">{len} shapes this time</h2>
-      <p className="mz-mr-ask">The pattern shows for a few seconds, then hides; then you have 16 to 24 seconds to tap it back. That round's timer starts when you tap, but the game's own clock keeps running.</p>
-      <Keycap block disabled={pending !== null} onClick={() => void send("pulse-open", { round: next }, "open")} data-testid="mz-pp-open">
-        {pending === "open" ? "Opening…" : "Show me the pattern"}
-      </Keycap>
+      <p className="mz-mr-ask">The pattern shows for a few seconds, then hides; then you have 16 to 24 seconds to tap it back. This round’s own timer starts when you tap Show me the pattern.</p>
+      </div>
+      <div className="mz-pp-play__act">
+      {clock && <GameTimePanel clock={clock} />}
+      {/* Stage 8.1: once the game's time is up, nothing here looks pressable.
+          A display state only: the server ends the game at its deadline and
+          this screen follows the next projection (it refuses a late open anyway). */}
+      {clock?.up
+        ? (stale
+          ? (
+            // The server can't be reached: say so plainly and offer a way on
+            // (Leave round stays in the solo bar; a room keeps its reconnect banner).
+            <div className="mz-pp-timeup mz-pp-timeup--stale" role="status" data-testid="mz-pp-timeup" data-stale="true">
+              <p>The game’s time is up, but the game server isn’t answering right now, so your results can’t show yet. They will as soon as it answers.</p>
+              {onCheckAgain && <Keycap block variant="surface" size="md" data-testid="mz-pp-checkagain" onClick={onCheckAgain}>Check again</Keycap>}
+            </div>
+          )
+          : <p className="mz-pp-timeup" role="status" data-testid="mz-pp-timeup">The game’s time is up. {solo ? "Your results are on their way." : "The results follow."}</p>)
+        : (
+          <Keycap block disabled={pending !== null} onClick={() => void send("pulse-open", { round: next }, "open")} data-testid="mz-pp-open">
+            {pending === "open" ? "Opening…" : "Show me the pattern"}
+          </Keycap>
+        )}
       {failure}
       <p className="mz-pp-total" data-testid="mz-pp-total">Your total: <b>{total}</b></p>
-      {!solo && <button type="button" className="mz-chip-btn" style={{ alignSelf: "center", marginTop: 8 }} disabled={pending !== null} onClick={() => void send("abstain", {}, "sitout")} data-testid="mz-pp-sitout">Sit the rest out</button>}
+      {!solo && !clock?.up && <button type="button" className="mz-chip-btn" style={{ alignSelf: "center", marginTop: 8 }} disabled={pending !== null} onClick={() => void send("abstain", {}, "sitout")} data-testid="mz-pp-sitout">Sit the rest out</button>}
+      </div>
+      {/* Announced once per band (under a minute, under 20 s, time up); never every second. */}
+      <p className="mz-sr" role="status" aria-live="polite" data-testid="mz-pp-clock-say">{said}</p>
     </main>
   );
 }

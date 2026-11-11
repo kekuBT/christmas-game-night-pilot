@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:42581
+# timeout 600s | worker w2 | server http://localhost:42581 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s81c-full/test-results/20261111-103537-d7bb85f0-5864/server-data/w2)
+
+[+22.3s] PASS reveal opens on the first question phase — question:0
+[+22.3s] PASS question phase hides the correct answer — count=0
+[+22.6s] PASS Reveal answer steps into the first reveal — reveal:1
+[+22.6s] PASS reveal phase shows the correct answer — count=1
+[+22.6s] PASS reveal phase separates this question from the game total
+[+22.6s] PASS Next question steps into the second question phase — question:2
+[+22.6s] PASS second question phase hides the correct answer again — count=0
+[+22.7s] PASS Q10 jump lands on the last question phase — question:18
+[+22.7s] PASS last reveal reached — reveal:19
+[+22.8s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+22.8s] PASS finale shows the standings list
+[+22.9s] PASS auto-play starts back at the first question — question:0
+[+30.9s] PASS auto-play advances a step within 8s — reveal:1
+[+39.0s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+40.3s] PASS TV walk opens on a question — How many hours are in a day?
+[+44.4s] PASS TV walk advances to the reveal stage
+[+49.4s] PASS TV walk advances to the second question — What is the boiling point of water at se
+[+49.5s] PASS TV manual jump reaches the leaderboard
+[+49.5s] REVEAL ALL PASSED
+[+49.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 49.6s | cpu 3.3s, peak memory 246 MB

@@ -1858,9 +1858,67 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **External blockers:** none. WebKit and real devices are not available here (checklist I20–I21).
 
-**Next task:** ChatGPT reviews PR #11 and does its private live-site audit. The next milestone (mobile polish and the Home Screen web app, per the roadmap) starts only when its handoff instructs it.
+**Cleared:** ChatGPT's review 6790743334 on PR #11 (2026-11-11) cleared Stage 7.4 on tested `ecb617c` (head `58196cb`, docs only after it), after its own focused checks (87/87; `check-content-variety` 57/57 in its Codespace) and a private live-site retest in desktop Chromium. Real iPhone Safari, Android Chrome and WebKit remain unverified. Seasonal Connections content stays queued. Cleared for development continuation, not merge or deployment.
+
+**Next task:** Stage 8.1 (mobile usability and solo presentation), instructed by the same comment; below.
 
 **Risk:**
 - **Variety is per room:** a new solo room (another device, cleared storage) starts fresh.
 - **Two solo tabs pressing Start within the same moment:** one wins and the other is told something changed, with Try again. This is by design (D-S74-04).
 - **Emulation only:** no real phones.
+
+## Stage 8.1: mobile usability and solo presentation (2026-11-11)
+
+**Branch:** `claude/stage8-1-mobile-solo`, from `58196cb` (PR #11's cleared head), stacked on PR #11 (PR #12).
+- **Instruction:** ChatGPT's review and handoff on PR #11 (comment 6790743334), under D-WF-01.
+- **Spec and record:** `docs/stage8/stage81.md`; decisions D-S81-01 … 06.
+- Nothing was merged or deployed, no port was made public, and nothing was paid for.
+
+**Milestone:**
+- **S1, the solo shelf:** row cards on phones (a small square cover beside the words, Start across the bottom), a grid of up to three from 600 px. On desktop all three games and their Start buttons are on the first screen (before: one column, one game above the fold).
+- **S2, Pattern Pulse's game clock:** between patterns, the game's time left on the server's clock, said to keep running; a warning tone at one minute; announcements only at under a minute, under 20 s and time up, once per game; at time up, Show me the pattern gives way to a status and the results follow, or, while the server isn't answering, a plain note with Check again. Pulse draws one clock per screen (App no longer adds its own).
+- **S3, touch and responsive:** the solo round fits the screen; held sideways, Pulse's Lock it in and Math's four answers are on screen; the briefing's I'm ready waits at the bottom while the rules are read.
+- **Found and fixed:**
+  - **F3 (pre-existing):** solo countdowns ran on the phone's own clock (the solo session never recorded the server's). Fixed; tested against a real server with a skewed clock.
+  - **F5:** the briefing's I'm ready was below the fold at 320 and 390 px.
+  - **F6:** a solo round's page was a bar's height taller than the screen.
+
+**Changed:**
+- **Web:** `apps/web/src/components/mchezo/pulseClock.ts` (new), `MchezoPulse.tsx`, `Solo.tsx`, `App.tsx`, `apps/web/src/solo/soloSession.ts`, `apps/web/src/ui/mchezo/styles/stage8.css` (new), `ui/mchezo/index.ts`.
+- **Tests and scripts:** `tests/stage81-mobile-solo.test.ts`, `scripts/check-mobile-everyday.mjs`, `scripts/screenshot-stage81.mjs` (all new).
+- **Server:** unchanged.
+
+**Tests:**
+- **Unit:** 16 new; 1,322 in all. F3's tests and the three feedback mutations (order guard, clock from every reply, history per game) each fail a test.
+- **`check-mobile-everyday`:** 130/130 locally (the shelf at four sizes; Pulse's clock on a phone 10 minutes fast; time up with a short game window, also while the server isn't answering, solo and in a room; landscape, also at 130 % zoom; a casual room with the longest names, Play again included).
+- **Regressions, local, on `a856fa4`:** `check-solo` 80, `check-solo-shelf` 58, `check-pattern-pulse` 54, `check-pulse-timing` 41, `check-briefing` 43, `check-session-flow` 70, `check-lifecycle` 37, `check-math` 28, `check-mobile` 50.
+- **Screenshots:** before (`58196cb`) and after (`a856fa4`), 36 each, `docs/stage8/screenshots-81/`.
+- **Spec feedback 6790913242** (ChatGPT, 08:23 UTC; it reached this session at 09:04, after the first build): applied in `a856fa4` (spec §3.2, §3.3, §6 choices 9–10).
+
+**Gates:**
+- **`2300bcc`** (before the feedback): fast PASSED (`20261111-090358-2300bccc-8008`); full stopped by me a minute in when the feedback arrived, self-recorded CANCELLED (`20261111-090450-2300bccc-10963`). Not a verdict on the checkpoint.
+- **The checkpoint, `de913bf`** (fresh clone, clean tree, one after the other):
+  - fast `20261111-092723-de913bf1-17062`: **PASSED** 5/5, 1,322 unit tests, 47 s;
+  - full `20261111-092815-de913bf1-20032`: **PASSED** 83/83, `check-mobile-everyday` 130/130, in 30 min 02 s.
+  - No failed gate runs. Raw evidence for all four runs is in `docs/evidence/gate-runs/<run>/`.
+
+**External blockers:** none. WebKit and real devices are not available here (checklist I22–I24).
+
+**Repair R81-01** (ChatGPT's review 6793171907, not cleared: its Codespace run of `check-mobile-everyday` was 129/130, a 320 px card 341 px tall):
+- **Cause:** the app loads no web font; my runs measured Inter (installed here), the Codespace a wider fallback. DejaVu Sans reproduces 302/302/341 exactly.
+- **Fix (`86baf14`):** on phones the cover sits beside the title and players line only; the description, best and note run full width. Worst case now 284 px (DejaVu Sans), 265 with the others.
+- **The check** keeps its caps and now measures them with every installed fallback font too; against the tested stylesheet it fails here as in the Codespace.
+- **Evidence:** `docs/evidence/stage81-local/r81-01/`; spec §7.5.
+- **ChatGPT's live-site restart check** was blocked by the preview's GitHub sign-in after the tunnel was recreated (its audit boundary, not an app change; review 6793171907).
+
+- **Gates on `d7bb85f`** (fresh clone, clean tree, one after the other):
+  - fast `20261111-103446-d7bb85f0-2862`: **PASSED** 5/5, 1,322 unit tests, 47 s;
+  - full `20261111-103537-d7bb85f0-5864`: **PASSED** 83/83, `check-mobile-everyday` 134/134 (four fonts), in 30 min 48 s.
+  - No failed gate runs.
+
+**Next task:** ChatGPT's review of the repair and the rest of its private live-site audit (the restart check).
+
+**Risk:**
+- **Emulation only:** no real phones, no WebKit; landscape on a real phone (browser bars, the notch) is unverified.
+- **The briefing's sticky I'm ready** also applies to Family Cup briefings (the same screen); `check-briefing` passes.
+- **The landscape answer area** applies to every quiz game using the shared question screen; portrait is unchanged.

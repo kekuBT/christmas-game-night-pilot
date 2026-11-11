@@ -1,0 +1,125 @@
+/* Stage 8.1: mobile usability and solo presentation (docs/stage8/stage81.md).
+   Layout only: the existing tokens, type and palette; nothing themed anew. */
+
+/* ------------------------------------------------ S1: the solo shelf
+   Phones: a small square cover beside the title and the players line only;
+   the description, the personal best and any note run the card's full width
+   below (R81-01: with a wide fallback font such as DejaVu Sans, wrapping
+   them beside the cover made a 320 px card 341 px tall); Start across the
+   bottom. Two games and the top of the third fit a 390×844 screen.
+   600 px and wider: a grid of as many columns as fit (each at least 260 px,
+   three at most), the cover a short banner, Start aligned along the bottom
+   of every card. */
+.mz-solo-shelf .mz-solo__list { gap: 12px; margin-top: 14px; }
+.mz-solo-shelf .mz-solo__card {
+  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-areas: "cover title" "cover meta" "desc desc" "best best" "note note" "start start";
+  align-items: start; gap: 0 12px; padding: 12px; border-radius: 20px;
+}
+/* The words take their places in the card's grid (their reading order is unchanged). */
+.mz-solo-shelf .mz-solo__text { display: contents; }
+.mz-solo-shelf .mz-solo__cover { grid-area: cover; width: 56px; max-height: none; border-radius: 14px; }
+.mz-solo-shelf .mz-solo__title { grid-area: title; align-self: end; font-size: clamp(19px, 5.4vw, 22px); overflow-wrap: anywhere; }
+.mz-solo-shelf .mz-solo__meta { grid-area: meta; margin-top: 3px; }
+.mz-solo-shelf .mz-solo__desc { grid-area: desc; margin-top: 10px; font-size: 14px; }
+.mz-solo-shelf .mz-solo__best { grid-area: best; margin-top: 6px; }
+.mz-solo-shelf .mz-solo__best-note { grid-area: note; }
+.mz-solo-shelf .mz-solo__card > .mz-key { grid-area: start; min-height: 52px; margin-top: 12px; }
+
+@media (min-width: 600px) {
+  .mz-screen.mz-solo-shelf { max-width: 1080px; }
+  .mz-solo-shelf .mz-solo__list { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: stretch; }
+  .mz-solo-shelf .mz-solo__card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto auto 1fr auto;
+    grid-template-areas: "cover" "title" "desc" "meta" "best" "note" "start";
+    gap: 0; padding: 14px;
+  }
+  .mz-solo-shelf .mz-solo__cover { width: 100%; height: clamp(88px, 15vh, 136px); margin-bottom: 12px; }
+  .mz-solo-shelf .mz-solo__title { align-self: start; }
+  .mz-solo-shelf .mz-solo__desc { margin-top: 4px; }
+  .mz-solo-shelf .mz-solo__meta { margin-top: 6px; }
+  /* The last row before Start takes the slack, so Start lines up along the bottom of every card. */
+  .mz-solo-shelf .mz-solo__best-note { align-self: start; }
+  .mz-solo-shelf .mz-entry__lede { max-width: 62ch; }
+}
+
+/* ------------------------------------------------ S2: Pattern Pulse's game clock */
+.mz-pp-clock { margin: 4px 0 14px; padding: 12px 14px; border-radius: 16px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); }
+.mz-pp-clock.is-low, .mz-pp-clock.is-up { border-color: var(--mz-highlight); }
+.mz-pp-clock__row { margin: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.mz-pp-clock__label { font: 800 13px/1.2 var(--mz-font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--mz-text-muted); }
+.mz-pp-clock__time { font: 800 30px/1 var(--mz-font-display); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.mz-pp-clock.is-low .mz-pp-clock__time, .mz-pp-clock.is-up .mz-pp-clock__time { color: var(--mz-highlight); }
+.mz-pp-clock__note { margin: 6px 0 0; font: 600 14px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-pp-clock.is-low .mz-pp-clock__note { color: var(--mz-text); }
+.mz-pp-timeup { margin: 0; padding: 14px; border-radius: 16px; background: var(--mz-surface-2); text-align: center; font: 800 16px/1.35 var(--mz-font-body); }
+.mz-pp-timeup--stale { text-align: left; font-weight: 700; border: 1.5px solid var(--mz-highlight); }
+.mz-pp-timeup--stale p { margin: 0 0 12px; }
+
+/* Pulse's two groups are plain parts of the one-column screen, except on a
+   short landscape screen (below). */
+.mz-pp-play__info, .mz-pp-play__act { display: contents; }
+
+/* ------------------------------------------------ S3: the solo round fits the screen
+   The bar sits above the game inside one viewport-tall column, and the game
+   screen takes what is left (it scrolls inside itself when it must), so the
+   page never runs a bar's height past the screen and the bar never scrolls away. */
+.mz-solo-round { height: 100dvh; display: flex; flex-direction: column; }
+.mz-solo-round > :not(.mz-screen) { flex: none; }
+.mz-solo-round > .mz-screen { height: auto; flex: 1 1 auto; min-height: 0; }
+
+/* ------------------------------------------------ S3: the briefing's I'm ready stays in reach
+   The rules come first and run past a phone's first screen (F5: at 320×640
+   and 390×844 I'm ready was below the fold). I'm ready now waits at the
+   bottom while the rules are read, like the lobby's Start dock (the same
+   look), and settles into place at the end. The host's Start now and Cancel
+   follow it as before. */
+.mz-brief > .mz-brief__me {
+  position: sticky; bottom: 0; z-index: 3;
+  margin-left: calc(-1 * clamp(14px, 4.6vw, 20px)); margin-right: calc(-1 * clamp(14px, 4.6vw, 20px));
+  padding: 12px clamp(14px, 4.6vw, 20px) max(12px, env(safe-area-inset-bottom));
+  background: var(--mz-ground); box-shadow: 0 -18px 18px -2px var(--mz-ground);
+}
+
+/* ------------------------------------------------ S3: a phone held sideways
+   Only screens on the everyday journey: Pattern Pulse's ready and tap-back
+   screens in two columns, a tighter answer area for the shared question
+   screen (Math), and a slimmer solo bar. Portrait is unchanged. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .mz-solo-round__bar { padding-top: 6px; }
+  .mz-solo-round__note { margin-top: 4px; }
+  /* The briefing's I'm ready dock takes less of a short screen. */
+  .mz-brief > .mz-brief__me { padding-top: 8px; }
+  .mz-brief > .mz-brief__me .mz-key { min-height: 52px; }
+  .mz-brief > .mz-brief__me .mz-foot { margin-top: 4px; font-size: 13px; }
+
+  .mz-screen.mz-pp-play {
+    max-width: 860px;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(16px, 3vw, 28px); align-content: start;
+    padding-top: max(8px, env(safe-area-inset-top)); padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .mz-pp-play__info, .mz-pp-play__act { display: flex; flex-direction: column; min-width: 0; }
+  .mz-pp-play__act { justify-content: flex-start; }
+  .mz-pp-play .mz-mr-prompt { font-size: 22px; margin: 6px 0 4px; }
+  .mz-pp-play .mz-mr-ask { font-size: 14px; margin-bottom: 6px; }
+  .mz-pp-play .mz-pp-slots { margin: 8px 0 4px; justify-content: flex-start; }
+  .mz-pp-play .mz-pp-keys { gap: 8px; }
+  .mz-pp-play .mz-pp-key { min-height: 64px; padding: 6px 4px; }
+  .mz-pp-play .mz-pp-edit { margin: 8px 0; }
+  .mz-pp-play .mz-pp-clock { margin: 0 0 10px; }
+  .mz-pp-play .mz-pp-total { margin-top: 8px; }
+  /* The game clock line (GameClock sets its margin inline) and the answer
+     timer line up with the left column instead of floating in its middle. */
+  .mz-pp-play .mz-game-clock { margin: 6px 0 0 !important; text-align: left; }
+  .mz-pp-play .mz-feedback { text-align: left; margin-top: 6px; }
+
+  /* Math Mayhem's question screen only (its answers are short numbers): the
+     answer area may shrink below its portrait minimum so both rows and the
+     line under them fit, each answer still at least 64 px tall. Other quiz
+     games keep their answer area (longer answers would clip). The screen
+     still scrolls when text is larger than this. */
+  .mz-math-screen .mz-answers { height: clamp(140px, 42dvh, 260px); }
+  .mz-math-screen .mz-question { margin-top: 10px; font-size: clamp(20px, 5vw, 24px); }
+}

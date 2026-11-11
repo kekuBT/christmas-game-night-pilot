@@ -1,6 +1,6 @@
 # Private preview of Stage 7, for an interactive audit
 
-- **For:** ChatGPT's interactive site audits of the Stage 7 slices (Quick Party, session flow, host handover, content variety).
+- **For:** ChatGPT's interactive site audits of the Stage 7 slices (Quick Party, session flow, host handover, content variety) and Stage 8.1 (mobile usability and solo presentation).
 - **How it runs:** on a private Codespace (or any machine), with the shipped content and normal timing.
 - **Keep the port Private.** No public port and nothing paid is needed.
 
@@ -10,6 +10,7 @@ Replace `<SHA>` with the tested SHA from the developer handoff, and `<branch>` w
 - Stage 7.2 (PR #9): `claude/stage7-2-session-flow`;
 - Stage 7.3 (PR #10): `claude/stage7-3-host-handover`;
 - Stage 7.4 (PR #11): `claude/stage7-4-content-variety`.
+- Stage 8.1 (PR #12): `claude/stage8-1-mobile-solo`.
 
 ```bash
 git fetch origin <branch>
@@ -24,6 +25,19 @@ PORT=3457 MCHEZO_DATA_DIR=/tmp/mz-audit-data npm run serve
 - **Separate players:** each browser tab keeps its own seat (session storage). Separate tabs or windows of one browser are therefore separate players. A private window works too.
 - **The TV:** on another tab, **Join a room** → enter the code → **Watch as spectator**.
 - **Clean up:** stop the server (Ctrl+C), then `rm -rf /tmp/mz-audit-data` and `git worktree remove /tmp/mz-audit`.
+
+## Stage 8.1: mobile usability and solo presentation (about 10 minutes)
+Use the browser's device emulation for phone sizes (320×640, 390×844, and 844×390 for a phone held sideways), or real phones on the same network.
+1. **The solo shelf:** Home → **Play solo**. On a phone: compact cards, a small square cover beside each game's words, two Start buttons on a 390×844 screen. On a laptop: all three games side by side, every Start on the first screen.
+2. **Pattern Pulse's game clock:** Start **Pattern Pulse**, play round 1. The screen before round 2 shows **Game time left** and says it keeps running between patterns, even now. It is the server's time: change the computer's clock a few minutes and reload; the time left stays right.
+3. **Time up on that screen** (optional, about 30 s): a second server with a short game window, testing only:
+   ```bash
+   PORT=3459 MCHEZO_DATA_DIR=/tmp/mz-short-data MCHEZO_LIFECYCLE_SCALE=0.1 npm run serve
+   ```
+   Solo Pattern Pulse, then wait on its first screen without pressing anything: the clock shows the warning tone with "Running low"; at 0:00 **Show me the pattern** is replaced by "The game's time is up. Your results are on their way.", then the results. The server refuses `MCHEZO_LIFECYCLE_SCALE` when `NODE_ENV=production`.
+   Then again, but stop that server a few seconds before 0:00: the screen says the game server isn't answering and offers **Check again** (and Leave round). Start it again with the same data directory and press Check again: the results.
+4. **Sideways (844×390):** Pattern Pulse's tap-back screen shows all six shapes and **Lock it in** without scrolling; Math Mayhem shows all four answers.
+5. **Casual room with long names** (24 characters, e.g. "Wolfeschlegelsteinhausen"): lobby, rules screen (**I'm ready** waits at the bottom while the rules scroll), Pattern Pulse (one game clock on each screen), results with **What's next** on the first screen, **Play again**.
 
 ## Stage 7.4: content variety and the cancel wording (about 10 minutes)
 1. **Solo, shipped content:** Home → **Play solo** → **Word Connections**. Play a board (or leave it), then **Play again** a few times.

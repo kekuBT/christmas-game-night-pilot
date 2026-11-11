@@ -24,7 +24,7 @@ import { CharadesTv, ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.j
 import { SendNote } from "./components/mchezo/SendNote.js";
 import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
-import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv } from "./components/mchezo/MchezoPulse.js";
+import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
 import { lineupLine, tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
 import { ordinal } from "./ui/mchezo/lib/standings.js";
@@ -47,7 +47,7 @@ import { previousGameScores } from "./ui/mchezo/lib/standings.js";
 import { humanError, NOT_DELIVERED } from "./ui/mchezo/lib/errors.js";
 import { midrank } from "./components/midrank.js";
 import { sendIntent } from "./components/intentRetry.js";
-import { connection, roomNotices } from "./connectionStore.js";
+import { connection, roomNotices, useConnection } from "./connectionStore.js";
 import { seats } from "./session.js";
 import { setRefreshNeeded } from "./components/RefreshBanner.js";
 import { CLIENT_PROTOCOL, clientNeedsRefresh, PROTOCOL_PARAM } from "../../../src/shared/clientProtocol.js";
@@ -138,6 +138,16 @@ async function get<T>(path: string): Promise<T> {
   // Stage 5.1: a stalled request fails after a timeout instead of hanging
   // forever; the timeout covers reading the reply's body too.
   return pollFresh(path, { headers }, (r) => readJson<T>(r));
+}
+
+/**
+ * Stage 8.1 (spec feedback 6790913242): Pattern Pulse in a room is told when
+ * the socket is reconnecting, so a game whose time ran out meanwhile says the
+ * server isn't answering and offers Try again, as the connection banner does.
+ */
+function RoomPulse(p: Omit<MchezoPulseDeps, "stale" | "onCheckAgain">) {
+  const conn = useConnection();
+  return <MchezoPulse {...p} stale={conn.state === "reconnecting"} onCheckAgain={connection.retryNow} />;
 }
 
 export function App() {
@@ -1655,8 +1665,8 @@ export function App() {
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && pulsePlaying && playingGame) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <GameClock game={playingGame} />
-        <MchezoPulse game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Pattern Pulse"} intent={sendAction} error={err || undefined} landed={sendLanded} />
+        {/* Stage 8.1: Pulse draws its own game clock on every screen (one clock per screen). */}
+        <RoomPulse game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Pattern Pulse"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
   }

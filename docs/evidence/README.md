@@ -6,6 +6,12 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261111-103537-d7bb85f0-5864` | `d7bb85f` | **Stage 8.1, repair R81-01:** full gate, PASSED 83/83 (`check-mobile-everyday` 134 with the shelf measured in four fonts, `check-solo` 80, `check-solo-shelf` 58, `check-mobile` 50), fresh clone, clean tree, run after the fast gate finished (PR #12's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261111-103446-d7bb85f0-2862` | `d7bb85f` | **Stage 8.1, repair R81-01:** fast gate, PASSED 5/5 (1,322 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
+| `20261111-092815-de913bf1-20032` | `de913bf` | **Stage 8.1:** full gate, PASSED 83/83 (`check-mobile-everyday` 130, `check-solo` 80, `check-solo-shelf` 58, `check-pattern-pulse` 54, `check-briefing` 43, `check-math` 28, `check-mobile` 50), fresh clone, clean tree. Superseded by `d7bb85f` after ChatGPT's run of the same driver failed 1 of 130 in its Codespace (R81-01) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261111-092723-de913bf1-17062` | `de913bf` | **Stage 8.1:** fast gate, PASSED 5/5 (1,322 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
+| `20261111-090450-2300bccc-10963` | `2300bcc` | **Stage 8.1, an earlier candidate:** full gate **stopped by me** a minute in when spec feedback 6790913242 arrived; it recorded itself CANCELLED (exit 130: 2 passed, 3 cancelled, 78 not run). Not a verdict | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
+| `20261111-090358-2300bccc-8008` | `2300bcc` | **Stage 8.1, an earlier candidate:** fast gate, PASSED 5/5 (1,316 unit tests); superseded by `de913bf` | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261111-055600-ecb617c6-18731` | `ecb617c` | **Stage 7.4 repair, timed-out resend fix:** full gate, PASSED 82/82 (`check-content-variety` 57 with A4, `check-solo` 80, `check-solo-shelf` 58, `check-session-flow` 70), fresh clone, clean tree, run after the fast gate finished (PR #11's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
 | `20261111-055510-ecb617c6-15772` | `ecb617c` | **Stage 7.4 repair, timed-out resend fix:** fast gate, PASSED 5/5 (1,306 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261111-034515-8147b726-12402` | `8147b72` | **Stage 7.4 repair (review 6786060026):** full gate, PASSED 82/82 (`check-content-variety` 57 with A4, `check-solo` 80, `check-solo-shelf` 58, `check-session-flow` 70), fresh clone, clean tree, run after the fast gate finished. Superseded by `ecb617c` after a focused rerun failed once (`stage74-local/repair/`) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
@@ -89,6 +95,14 @@ ChatGPT's review 6778921208 on PR #9: a game picked by hand that matched the lin
   - the hand-picked start sent `party: { revision: 1, index: 0 }`;
   - the Math item completed and the lineup moved to Guess the Year;
   - What's next came after the standings and answers.
+
+## `stage81-local/`
+
+Stage 8.1 browser drivers run by hand against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). These are not gate verdicts; each log's first line names its source.
+- `check-mobile-everyday.log`: the new driver, 130/130, on `a856fa4` (after spec feedback 6790913242).
+- `check-solo.log` (80), `check-solo-shelf.log` (58), `check-pattern-pulse.log` (54), `check-pulse-timing.log` (41), `check-briefing.log` (43), `check-session-flow.log` (70), `check-lifecycle.log` (37), `check-math.log` (28) and `check-mobile.log` (50), all on `a856fa4`.
+- `r81-01/` (repair R81-01, review 6793171907): `card-heights-by-font.md` (the narrow cards with Inter, Figtree, Roboto, Liberation Sans, FreeSans and DejaVu Sans forced, before and after the repair; `fontprobe.mjs` made it), `check-mobile-everyday-on-de913bf-stylesheet.log` (the new font-aware check failing on the tested stylesheet, as in the Codespace), the driver and shelf regressions on `86baf14`, and two screenshots with DejaVu Sans forced.
+- `probe.mjs` and `probe-before-58196cb.json` / `probe-after-947ffae.json`: the measuring probe behind spec §1 and §7.2 (shelf and card heights, page height, sideways overflow, small controls) at 320×640, 390×844, 844×390 and 1440×900.
 
 ## `stage74-local/`
 
