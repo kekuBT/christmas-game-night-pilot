@@ -1,6 +1,6 @@
 # Stage 8.3 screenshots: Home Screen installation
 
-- **How they were taken:** by `scripts/screenshot-stage83.mjs` on `69a7dc1`, the final candidate tested by both gates, with clean code. It starts its own server on a copy of the build.
+- **How they were taken:** by `scripts/screenshot-stage83.mjs` on `96b3970`, the final candidate tested by both gates, with clean code. It starts its own server on a copy of the build.
 - **What is real:** this is Chromium headless (Playwright). The service worker, Cache Storage and offline are the real engine's.
 - **What is emulated:** an iPhone user agent, Chromium's install prompt event, and standalone mode via `navigator.standalone`. Each shot's `manifest.json` entry says which, and records the look it rendered.
 - **Not covered:** real phones and WebKit.

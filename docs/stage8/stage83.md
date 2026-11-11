@@ -277,3 +277,13 @@ Section U in detail:
    - no promise of moving seats or bests, and joining with a code is not presented as recovering a seat;
    - the synthetic prompt is labelled as not native evidence;
    - the platform claims were rechecked (§2).
+
+### 7.4 Gates
+- **The final candidate, `96b3970`** (fresh clones, clean tree, fingerprint `7f36233e758c`, 468 files; one after the other):
+  - **fast** `20261111-181930-96b3970e-32718`: **PASSED** 5/5, 1,404 unit tests, 43 s;
+  - **full** `20261111-182118-96b3970e-3648`: **PASSED** 85/85 in 31 min 11 s (predicted 23–55 min, about 30 min 02 s); `check-install` 113, `check-themes-seasonal` 251, `check-mobile-everyday` 134; no browsers or servers left behind.
+- **Earlier candidates, superseded** (neither is a verdict on `96b3970`):
+  - **`8b8a7ef`:** fast `20261111-173824-8b8a7ef3-11175` PASSED. Its full gate `…-174012-…` was stopped by me for the rejoin fix (CANCELLED).
+  - **`69a7dc1`:** fast `20261111-174819-69a7dc19-17727` PASSED. Its full gate `…-175010-…` was stopped by me when spec feedback 6802191261 was read (CANCELLED).
+- Raw evidence for all six runs is in `docs/evidence/gate-runs/<run>/`.
+- **Screenshots:** `docs/stage8/screenshots-83/`, 34 shots on `96b3970`, and `cache-inventory.json`.

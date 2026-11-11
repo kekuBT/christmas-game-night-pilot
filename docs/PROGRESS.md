@@ -2041,4 +2041,10 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **External blocker for real phones:** service workers need HTTPS. Over the plain-http LAN preview, an iPhone can still Add to Home Screen, but the offline and update checks need a private HTTPS preview (REAL_DEVICE_TESTING Part J; spec §6 point 6).
 
-**Next task:** screenshots, sequential fast and full gates on the final candidate, then one completed report on PR #14.
+**Gates on the final candidate, `96b3970`** (fresh clones, clean tree, fingerprint `7f36233e758c`, 468 files, one after the other):
+- fast `20261111-181930-96b3970e-32718`: **PASSED** 5/5, 1,404 unit tests.
+- full `20261111-182118-96b3970e-3648`: **PASSED** 85/85, `check-install` 113, in 31 min 11 s.
+- Earlier candidates `8b8a7ef` (rejoin fix) and `69a7dc1` (spec feedback): each passed its fast gate; I stopped each full gate (CANCELLED). Not verdicts.
+- Screenshots: `docs/stage8/screenshots-83/`, 34 shots on `96b3970`.
+
+**Next task:** the completed report on PR #14. After that, ChatGPT's review and private live-site audit.

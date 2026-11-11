@@ -1,0 +1,33 @@
+$ node scripts/check-f5.mjs http://localhost:36145
+# timeout 1500s | worker w2 | server http://localhost:36145 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83-full2/test-results/20261111-175010-69a7dc19-21132/server-data/w2)
+
+[+4.4s] PASS lobby roster: 4 players joined
+[+4.4s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games)
+[+6.1s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+17.6s] OK impostor: finished
+[+17.6s] PASS day playlist: impostor finished without sticking
+[+19.2s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+51.5s] OK caption-clash: finished
+[+51.5s] PASS day playlist: caption-clash finished without sticking
+[+52.6s] PASS TV projection leak-free while trivia playing — no forbidden keys
+[+95.2s] OK trivia: finished
+[+95.2s] PASS day playlist: trivia finished without sticking
+[+96.3s] PASS TV projection leak-free while word-connections playing — no forbidden keys
+[+119.8s] OK word-connections: finished
+[+119.8s] PASS day playlist: word-connections finished without sticking
+[+120.9s] PASS TV projection leak-free while who-said-that playing — no forbidden keys
+[+135.5s] OK who-said-that: finished
+[+135.5s] PASS day playlist: who-said-that finished without sticking
+[+136.7s] PASS TV projection leak-free while guess-the-year playing — no forbidden keys
+[+154.8s] FAIL guess-the-year: locator.count: Target page, context or browser has been closed
+[+154.8s]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+154.8s]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+154.8s]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+154.8s]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+154.8s] FAIL day playlist: guess-the-year finished without sticking — locator.count: Target page, context or browser has been closed
+[+154.8s] FAIL day playlist: all games finished in one room — 5/14 finished
+[+154.8s] FATAL: page.evaluate: Target page, context or browser has been closed
+[+154.8s] F5 FAILED: 3/15 failed
+[+154.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# CANCELLED (exit 1) in 154.8s | cpu 10.4s, peak memory 277 MB

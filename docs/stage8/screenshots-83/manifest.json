@@ -1,7 +1,7 @@
 {
-  "revision": "69a7dc1975d2798b2a903a6083703b3db920cb68",
+  "revision": "96b3970e6c77615e2a0d395232d70ae571300114",
   "codeOutsideDocsClean": true,
-  "capturedAt": "2026-11-11T17:49:20.509Z",
+  "capturedAt": "2026-11-11T18:20:30.182Z",
   "by": "scripts/screenshot-stage83.mjs",
   "note": "Chromium headless (Playwright) only. 'emulated' = a platform signal faked (an iPhone user agent, the install prompt event, standalone display mode); the service worker, Cache Storage and offline are the real engine's. Not a real phone, not WebKit.",
   "shots": [
