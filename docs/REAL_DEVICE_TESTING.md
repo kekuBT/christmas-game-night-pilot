@@ -188,6 +188,8 @@ Do these on phones that open the **Wi-Fi address** (not localhost): plain http t
 | I17 | Casual room, 3 phones and a TV, between games: host → **Room menu** → **Make host** next to a player → read the question → **Cancel**, then do it again and confirm | The question names the player and says the host becomes a regular player; Cancel changes nothing; after confirming, every phone shows who did what, the old host's Start is gone, the new host has it, and the TV marks the new host |
 | I18 | The new host: **Take a break**, then hand the host role back; the old host taps **Resume** | The break stays through the handover; only the current host sees Resume |
 | I19 | Turn one player's Wi-Fi off, then open the host's **Room menu** | That player shows "not connected" and can't be made host |
+| I20 | Solo **Word Connections** on a phone: play, then **Play again** five times | Every board is new to this phone's solo room; no board repeats before all 13 have come up |
+| I21 | Casual room, on the results: **Play again**, then **Cancel game** in the rules screen; then **Back to lobby**, start a game and cancel it | The first question says you'll go back to the results, and you do; the second says the lobby, and you go there |
 | I6 | Host a game without touching the Casual/Family Cup choice; a second phone joins | No Cup chip, no Official/Practice choice; both phones say "Casual, just for fun"; a game plays to results and the lobby says "Last game · … · Casual" |
 
 ---

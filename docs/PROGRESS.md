@@ -1797,3 +1797,28 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Two copies of the host role:** `hostId` and the cohost set, plus each player's flags. Every path that changes one must change the other. A transfer does both in one step, and a restore normalizes them.
 - **A non-host start is refused with 400** (the engine's existing generic error), not 403. This slice leaves it unchanged.
 - **Emulation only:** no real phones.
+
+## Stage 7.4: content variety in solo and casual rooms; the cancel wording (2026-11-11)
+
+**Branch:** `claude/stage7-4-content-variety`, stacked on PR #10 at `af39c78` (PR #11).
+- **Instruction:** ChatGPT's review and handoff on PR #10 (comment 6783345938). It cleared Stage 7.3 after its own review and private live-site audit of `371c194`.
+- **Spec and record:** `docs/stage7/stage74.md`; decisions D-S74-01 … 07.
+- Nothing was merged or deployed, no port was made public, and nothing was paid for.
+
+**Milestone:**
+- **Variety:** solo and casual rooms deal content the room hasn't used before repeating any, then the least recently used. The queued item in `docs/MILESTONES.md` is done.
+- **Cup unchanged:** Family Cup selection is identical to `af39c78` (pinned in tests).
+- **Cancel wording:** the briefing's cancel confirmation names where you actually go back to (results or lobby).
+- **A pre-existing defect, found and fixed:** after a server restart, every solo Start was refused ("Need at least 1 connected players"); spec §7.4.
+
+**Files:**
+- **Server:** `src/content/select.ts`, `src/server/room.ts`, `src/server/serve.ts` (`MCHEZO_CONTENT_DIR`, testing only).
+- **Web:** `apps/web/src/solo/soloSession.ts`, `apps/web/src/components/mchezo/Briefing.tsx`, `App.tsx`.
+- **Tests and scripts:** `tests/stage74-content-variety.test.ts`, `scripts/check-content-variety.mjs`, `scripts/lib/small-pool.mjs` (all new). Also changed: the Stage 6.2 pinned tests (on purpose), `check-solo-shelf` part E (now asserted), and every other `selectContent` caller (`roomKind`).
+
+**Tests:**
+- **Unit and HTTP:** 21 new; 1,292 in all. Nine mutations each caught.
+- **`check-content-variety`:** 47/47. It fails on an `af39c78` server (one board for all 13 starts) and without the solo-restart fix.
+- **Regressions, all passing:** `check-session-flow` (70), `check-quick-party` (68), `check-solo` (80), `check-solo-shelf` (58), `check-briefing` (43), `check-casual` (30), `check-host-handover` (32).
+
+**Gates:** recorded in the spec §7.3 once run (the fast gate, then the full gate, one after the other).

@@ -127,6 +127,7 @@
   - The start may carry `attempt: { id, sessionRevision }`. A solo room has no session revision to check, so it ignores that field.
   - A repeat of the same id returns the round it started, as a replay. It starts nothing, abandons nothing and selects nothing.
   - The same id for another game is refused.
+  - A repeat of a press whose round was later left or replaced (a solo room deletes those) starts nothing: "That round was left or replaced, so nothing new started."
   - The ids are remembered in the room's bounded, persisted session records (the newest 64), as in casual rooms, and never projected.
   - The solo app sends a new id with every press: Start, Play again, Try again.
   - Its lost-reply handling is unchanged: it reads the room and adopts the round.
@@ -178,4 +179,44 @@
 7. **Wording over routing for C1:** the cancel text names where you actually go. Navigation stays as Stage 7.2 audited it.
 
 ## 7. What was built and tested
-*(Recorded after implementation.)*
+
+### 7.1 Built
+- **Selection** (`src/content/select.ts`): `roomKind` is required. `"cup"` keeps the official and practice rules; `"casual"` and `"solo"` use the variety rule of §4.2 (`selectForVariety`).
+- **The room** (`src/server/room.ts`):
+  - passes its kind to selection;
+  - a solo Start may carry a press id: a repeat returns its round; the id is remembered in the session records, which a solo room now keeps across a restart; a press whose round was left or replaced starts nothing;
+  - **a pre-existing defect, fixed (§7.4):** a solo Start marks its player present.
+- **The solo app** (`apps/web/src/solo/soloSession.ts`): a new press id with each Start.
+- **The cancel wording** (`Briefing.tsx`, `App.tsx`): the destination comes from `deriveShowPhase` with no game on.
+- **`MCHEZO_CONTENT_DIR`** (`src/server/serve.ts`), testing only, refused in production.
+- **`scripts/lib/small-pool.mjs`:** the controlled pool, shared by the tests and the driver.
+
+### 7.2 Tested
+- **`tests/stage74-content-variety.test.ts`** (21):
+  - **selection:** practice-only and approved items before any repeat; then LRU, again and again; a game of 10 items across three games; determinism; one and zero eligible items; rejected items never; no official selection outside a Cup;
+  - **Cup unchanged:** Cup practice still repeats the practice-only board; Cup official play takes fresh approved boards and is refused when none are left; **the same plans give exactly the items recorded at `af39c78`**, for the small pool and the shipped library in both modes; a casual room's plays leave a Cup room's usage untouched;
+  - **in a room:** solo order across a restart; a solo press repeated (also after a restart), the same id for another game, a press whose round was replaced; a casual briefing (chosen at start, used only when play begins, a cancel uses nothing and the next start deals the same board, a repeat before and after play, a rematch deals an unused board);
+  - **HTTP:** a solo press twice (201, then 200 replay), one round and one use, remembered across a server restart;
+  - **the solo restart defect** (§7.4);
+  - **`MCHEZO_CONTENT_DIR`:** refused in production; otherwise loads the pool and says so;
+  - **the shipped library:** a casual room deals all 13 Connections boards before repeating, in normal and test mode.
+- **The pinned Stage 6.2 tests** (`tests/stage62-solo-shelf.test.ts`) changed on purpose (D-S74-01): 13 boards, then LRU, in both modes. Before: 12 then repeats in normal mode, and one board every time in test mode.
+- **Every other `selectContent` caller** names `roomKind: "cup"` (the TV-reveal ones name the engine's kind). No expectation changed.
+- **Nine mutations** each make the tests fail: casual/solo using the Cup rule; a Cup using the variety rule; the room always saying "cup"; no LRU sort; rejected items allowed; a solo press not remembered; a solo replay not checked; solo presses dropped on restore; a solo Start not marking presence.
+- **Unit suite:** 1,292 passing (1,271 before).
+- **`check-content-variety`** (new, 47): parts A, B and C of §5, plus **A2**: its own server restarts on the same port and data, and Play again in the same solo tab starts a round and deals the least recently used board.
+  - Against a server at `af39c78` (test mode, as the gate runs it), part C fails: one board for all 13 starts (`docs/evidence/stage74-local/check-content-variety-on-af39c78.log`).
+  - With the solo-restart fix removed, A2 fails: Play again never starts a round (`…/check-content-variety-without-solo-restart-fix.log`).
+- **`check-solo-shelf` part E:** the board after Play again was only logged; it is now asserted to be one the room hasn't used.
+- **Local regressions, all passing:** `check-session-flow` (70), `check-quick-party` (68), `check-solo` (80), `check-solo-shelf` (58), `check-briefing` (43), `check-casual` (30), `check-host-handover` (32).
+- **Screenshots:** `docs/stage7/screenshots-74/` (3, manifest revision `c78cb43`, clean tree): the rematch cancel naming the results (390), the lobby start cancel naming the lobby (390), and Math's rematch cancel at 320.
+- **Not run:** WebKit and real devices. Emulation is not a device.
+
+### 7.3 Gates
+*(Recorded after the runs.)*
+
+### 7.4 A pre-existing defect found while testing V3: solo play after a server restart
+- **What:** a server restart marks every player not connected (`http.ts`, restore). A solo room has no socket, so nothing marked its one player present again, and every solo Start was refused: 400 "Need at least 1 connected players". The solo app shows a refusal as given (`soloSession.ts`, "refused"), so every Try again failed the same way: solo play was stuck in that room until its storage was cleared.
+- **Reproduced** over HTTP on `af39c78` (solo room, a start: 201; restart; read the room: 200; start: 400 with that message).
+- **Fixed** (D-S74-05): in a solo room, the one pressing Start is the player and is present. Casual and Cup rooms still count who is connected (tested).
+- **Test:** "pre-existing defect … a solo Start after a server restart" (HTTP, a real restart); the mutation without the fix fails it.

@@ -67,8 +67,8 @@ const POOL_DIR = mkdtempSync(join(tmpdir(), "mz-variety-pool-"));
 const DATA_DIR = mkdtempSync(join(tmpdir(), "mz-variety-data-"));
 const POOL = writeSmallPool(POOL_DIR);
 const groupsOf = (id) => POOL.boards.find((b) => b.id === id).groups;
-async function startServer() {
-  const env = { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR, MCHEZO_CONTENT_DIR: POOL_DIR };
+async function startServer(fixedPort = 0) {
+  const env = { ...process.env, PORT: String(fixedPort), MCHEZO_DATA_DIR: DATA_DIR, MCHEZO_CONTENT_DIR: POOL_DIR };
   delete env.NODE_ENV;
   delete env.MCHEZO_CONTENT_TEST_MODE; // the pool's statuses are explicit
   const child = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { cwd: process.cwd(), env, stdio: ["ignore", "pipe", "pipe"] });
@@ -137,7 +137,7 @@ async function poolBoard(page) {
 }
 
 const browser = await launchChromium();
-const own = await startServer();
+let own = await startServer();
 const OWN = `http://localhost:${own.port}`;
 check("setup: the own server loaded the small pool (not the shipped library)", /TEST MODE: content loaded from .* \(29 items\), not the shipped library/.test(own.out()) && !/\[content\]/.test(own.out()), own.out().split("\n").find((l) => /content loaded/.test(l)) ?? "");
 try {
@@ -161,6 +161,16 @@ try {
   const sroom = await (await fetch(`${OWN}/rooms/${seat.roomId}/projection?audience=player`, { headers: { "x-session-token": seat.token } })).json();
   check("A solo: the server holds four finished Connections rounds in one room", (sroom.games ?? []).filter((g) => g.gameId === "word-connections" && g.status === "finished").length === 4);
   check("A solo: no item id reaches the phone", !/con-t-/.test(JSON.stringify(sroom)));
+
+  // A2. The server restarts (same port and data): Play again in the same tab starts a round.
+  // Before Stage 7.4 every solo Start after a restart was refused ("Need at least 1
+  // connected players"): a solo room has no socket to mark its player present again.
+  await stopServer(own);
+  own = await startServer(own.port);
+  check("A2 the server restarted on the same port with the same data", own.port === Number(new URL(OWN).port));
+  await sp.getByTestId("solo-play-again").click();
+  const afterRestart = await soon("A2 after the restart, Play again starts a round (no refusal)", async () => (await sp.getByTestId("mz-cx").isVisible()) && (await sp.getByTestId("solo-error").count()) === 0 ? await poolBoard(sp) : null, 20000);
+  check("A2 …and deals the least recently used board (the usage survived the restart)", afterRestart === solo[1], JSON.stringify({ afterRestart, expected: solo[1] }));
   await sctx.close();
 
   // ---- B. A casual room: hand pick, rematch (cancelled, then played), the lineup's Next, rematch ----
