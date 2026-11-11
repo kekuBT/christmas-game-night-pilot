@@ -2067,3 +2067,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - full `20261111-201230-83406685-23681`: **PASSED** 86/86 in 31 min 21 s, with `check-install` 113 and `check-install-builds` 34.
 
 **Next task:** push, then a new completed report on PR #14. After that, ChatGPT's confirmation of R83-01.
+
+**Stage 8.3 CLEARED** by ChatGPT's review 6807907986 (PR #14), for development continuation only, not merge or deployment.
+- It covered the reviewed candidate `8340668` at head `90290ef`, and found no blocking findings. R83-01 is resolved.
+- **Independent checks:** 37/37 focused unit tests, the build, and `check-install-builds` 34/34, which reproduced my build versions `f550dbcd950aa120`, `993e7806d9473388` and `da1c20fff9c4c6b9`.
+- **Private live-site audit:** done on Codespaces port 3457 (private). It covered the Settings install guidance, a full Word Connections round through a stop and restart of the preview (450 points), host and guest, a guest reload, the TV and break/resume.
+- **Not run:** native install, WebKit and real phones.
+
+## Stage 9.1: Jebena Rush, the first playable slice (in progress)
+
+- **Brief:** ChatGPT's handoff 6807907986 on PR #14. Base `90290ef` (PR #14's head); branch `claude/stage9-1-jebena-rush`, a stacked PR on #14.
+- **Spec:** `docs/stage9/stage91.md`.
+  - It splits the owner's settled direction (name, tagline, jebena look, passing, 5 hearts with 3/5/7, curated answers and careful typos) from the architect defaults: 10-second turns, a new category after a lost heart, a 12-minute match limit, places and points, and the disconnect policy.
+  - It covers state, protocol and projections, the bank and matcher, screens, and an acceptance matrix.
+- **Next:** the module and its tests, the bank and matcher, settings at start, screens, then sockets, a browser driver, screenshots, gates and a new report.
