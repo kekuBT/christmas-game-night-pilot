@@ -47,6 +47,7 @@
 import { readJson } from "../http.js";
 import { oneAtATime, POLL_TIMEOUT_MS, STALE_AFTER_MS } from "../liveness.js";
 import type { Projection } from "../types.js";
+import { noteServerTime } from "../ui/mchezo/lib/lifecycle.js";
 import type { KeyValueStore } from "./personalBest.js";
 import { uuidV4 } from "../uuid.js";
 
@@ -245,8 +246,12 @@ export class SoloSession {
     }
   }
 
-  private projectionOf(seat: SoloSeat, timeoutMs?: number): Promise<Projection> {
-    return this.request<Projection>(`/rooms/${seat.roomId}/projection?audience=player`, { headers: { "x-session-token": seat.token } }, timeoutMs);
+  private async projectionOf(seat: SoloSeat, timeoutMs?: number): Promise<Projection> {
+    const proj = await this.request<Projection>(`/rooms/${seat.roomId}/projection?audience=player`, { headers: { "x-session-token": seat.token } }, timeoutMs);
+    // Stage 8.1 (F3): countdowns use the server's clock, as room screens do,
+    // never this phone's own clock alone. Every projection carries it.
+    noteServerTime(proj?.serverNow);
+    return proj;
   }
 
   private post<T>(path: string, body: unknown, timeoutMs?: number, token?: string): Promise<T> {

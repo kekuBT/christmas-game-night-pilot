@@ -47,7 +47,7 @@ export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readon
   const store = useMemo(() => deviceStore(), []);
   const solo = soloShelf(catalog);
   return (
-    <main className="mz-screen mz-entry mz-solo" aria-label="Play solo" data-testid="solo-home">
+    <main className="mz-screen mz-entry mz-solo mz-solo-shelf" aria-label="Play solo" data-testid="solo-home">
       <header className="mz-appbar"><BackButton onBack={onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
       <h1 className="mz-h1">Play solo</h1>
       <p className="mz-foot mz-entry__lede">Just you and the clock: no room code, no setup. Solo rounds are just for you; they never count toward a Family Cup.</p>

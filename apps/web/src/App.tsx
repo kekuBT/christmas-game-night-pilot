@@ -1655,7 +1655,7 @@ export function App() {
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && pulsePlaying && playingGame) {
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
-        <GameClock game={playingGame} />
+        {/* Stage 8.1: Pulse draws its own game clock on every screen (one clock per screen). */}
         <MchezoPulse game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Pattern Pulse"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
     );
