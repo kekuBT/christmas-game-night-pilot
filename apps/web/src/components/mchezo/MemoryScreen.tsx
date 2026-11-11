@@ -18,6 +18,7 @@ import { useId, useState } from "react";
 import { canvasNoteY, exportFilename, paginateLines, readableFact, selectShareEntries } from "../exportLayout.js";
 import type { LedgerEvent, MemoryEntry, PublicGame, PublicPlayer, RegistryGame } from "../../types.js";
 import { titleFor } from "../../ui/mchezo/lib/names.js";
+import { useMchezo } from "../../ui/mchezo/MchezoProvider.js";
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
 export type GetFn = <T>(path: string) => Promise<T>;
@@ -48,6 +49,7 @@ export function MemoryScreen(props: {
 }) {
   const { roomId, roomCode, day, roomSeq, book, ledger, games, registry, players, bookText, setBookText, exportText, setExportText, post, get, loadMemory, canApprove, onBack, onMenu } = props;
   const textId = useId();
+  const look = useMchezo().theme.color;
   const [exportState, setExportState] = useState<ExportState>({ kind: "idle", text: "" });
   const [addError, setAddError] = useState("");
   const approved = book.filter((e) => e.approved);
@@ -107,9 +109,11 @@ export function MemoryScreen(props: {
     canvas.width = 1080; canvas.height = 1080;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("no canvas"); // used to fail silently
-    ctx.fillStyle = "#102C25"; ctx.fillRect(0, 0, 1080, 1080);
-    ctx.fillStyle = "#E5BC70"; ctx.font = "bold 64px system-ui"; ctx.fillText("🎄 Christmas Memory Book", 60, 120);
-    ctx.fillStyle = "#F7F2E8"; ctx.font = "36px system-ui";
+    // Stage 8.2 (§3.6): the share image takes this device's look (the
+    // retired "Midnight Christmas" colours are gone); its words are unchanged.
+    ctx.fillStyle = look.ground; ctx.fillRect(0, 0, 1080, 1080);
+    ctx.fillStyle = look.highlight; ctx.font = "bold 64px system-ui"; ctx.fillText("🎄 Christmas Memory Book", 60, 120);
+    ctx.fillStyle = look.text; ctx.font = "36px system-ui";
     let y = 200;
     // At most 8 entries, and it says so (review 5769121221 #5).
     const { shown, overflow } = selectShareEntries(approved);

@@ -33,6 +33,8 @@ export interface SoloGameRules {
    * of different difficulty).
    */
   bestNote?: string;
+  /** Stage 8.2: this game deals content that has seasons (Word Connections' boards), so the round's start screen offers the content choice. */
+  seasonalContent?: boolean;
   /** The finished round's summary, or null if the projection doesn't hold it yet. */
   summarize: (game: PlayerGame | undefined, publicGame: PublicGame | undefined, me: string) => SoloSummary | null;
 }
@@ -99,6 +101,7 @@ export const PULSE_SOLO: SoloGameRules = {
 
 export const CONNECTIONS_SOLO: SoloGameRules = {
   gameId: "word-connections",
+  seasonalContent: true,
   rulesVersion: CONNECTIONS_RULES_VERSION,
   howToPlay: "Sort 16 words into four groups of four. Four mistakes and the puzzle is over.",
   scoring: CONNECTIONS_RULE,

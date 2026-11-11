@@ -21,6 +21,18 @@ import { deviceStore, readBest, recordScore, type KeyValueStore, type PersonalBe
 import { SoloSession, type SoloState } from "../../solo/soloSession.js";
 import { SOLO_GAMES, soloAdapter } from "../../solo/soloGames.js";
 import { countsForBest } from "../../solo/soloRules.js";
+import { useSoloSeason } from "../../solo/soloSeason.js";
+import { ContentSeasonChoice, ContentSeasonLabel } from "./ContentChoice.js";
+import type { SessionSeason } from "../../../../../src/shared/season.js";
+
+/**
+ * Stage 8.2 (§3.7): what the solo content changes, honestly: only Word
+ * Connections has seasonal boards (Math Mayhem and Pattern Pulse generate
+ * their rounds).
+ */
+const soloContentNote = (s: SessionSeason) => s === "christmas"
+  ? "Christmas boards come first in Word Connections. Math Mayhem and Pattern Pulse don’t change."
+  : "Year-round boards in Word Connections.";
 
 /** The catalog games on the solo shelf, in shelf order: the manifest says soloPlay and an adapter exists. */
 export function soloShelf(catalog: readonly CatalogGame[]): CatalogGame[] {
@@ -46,11 +58,13 @@ function bestLine(best: PersonalBest | undefined, storageOk: boolean): string {
 export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readonly CatalogGame[]; onStart: (gameId: string) => void; onBack: () => void; onHost: () => void }) {
   const store = useMemo(() => deviceStore(), []);
   const solo = soloShelf(catalog);
+  const [season, setSeason] = useSoloSeason();
   return (
     <main className="mz-screen mz-entry mz-solo mz-solo-shelf" aria-label="Play solo" data-testid="solo-home">
       <header className="mz-appbar"><BackButton onBack={onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
       <h1 className="mz-h1">Play solo</h1>
       <p className="mz-foot mz-entry__lede">Just you and the clock: no room code, no setup. Solo rounds are just for you; they never count toward a Family Cup.</p>
+      <ContentSeasonChoice value={season} onChange={setSeason} testIdPrefix="solo" note={soloContentNote(season)} />
       <ul className="mz-solo__list" aria-label="Games you can play alone">
         {solo.map((g) => {
           const adapter = soloAdapter(g.id)!;
@@ -97,6 +111,10 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
   const adapter = soloAdapter(game.id)!; // App routes only shelf games here
   const rules = adapter.rulesVersion;
   const [state, setState] = useState<SoloState>({ phase: "idle" });
+  // Stage 8.2: the solo content choice (this device's), sent with every Start; the server binds it to the round.
+  const [season, setSeason] = useSoloSeason();
+  const seasonRef = useRef(season);
+  seasonRef.current = season;
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [outcome, setOutcome] = useState<{ gid: string; result: RecordOutcome } | null>(null);
   const sessionRef = useRef<SoloSession | null>(null);
@@ -116,7 +134,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
   useEffect(() => {
     if (sessionRef.current!.isDisposed) sessionRef.current = newSession();
     const s = sessionRef.current!;
-    if (autostart) { onAutostartUsed(); void s.start(game.id); }
+    if (autostart) { onAutostartUsed(); void s.start(game.id, seasonRef.current); }
     return () => { void s.leave(); s.dispose(); };
   }, []);
 
@@ -144,6 +162,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
       <div className="mz-solo-round" data-testid="solo-round" style={{ ["--mz-accent" as string]: accentColor(game.id) }}>
         <div className="mz-solo-round__bar">
           <span className="mz-kicker mz-kicker--muted">Solo · {game.title}</span>
+          {pub?.season === "christmas" && <ContentSeasonLabel season="christmas" testId="solo-round-content" />}
           <button type="button" className="mz-chip-btn" data-testid="solo-leave" onClick={() => setConfirmLeave(true)}>Leave round</button>
         </div>
         {state.replacedOpenRound && <p className="mz-foot mz-solo-round__note" role="status" data-testid="solo-replaced">Your last round was interrupted, so this is a fresh one.</p>}
@@ -179,12 +198,13 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
       <main className="mz-screen mz-solo-results" aria-label={`${game.title} solo results`} data-testid="solo-results" style={{ ["--mz-accent" as string]: accentColor(game.id) }}>
         {header(onBackToSolo, "Back to solo")}
         <span className="mz-kicker mz-kicker--muted">Solo · {game.title}</span>
+        {pub?.season && <ContentSeasonLabel season={pub.season} testId="solo-results-content" />}
         <h1 className="mz-h1" tabIndex={-1} ref={resultsHeading} data-testid="solo-score">{fmt(summary.score)} points</h1>
         <p className="mz-solo-results__correct" data-testid="solo-headline">{summary.headline}</p>
         {pbText && <p className={`mz-solo-results__pb${r?.isNewBest && r.saved ? " is-new" : ""}`} role="status" data-testid="solo-pb">{pbText}</p>}
         {adapter.bestNote && <p className="mz-solo__best-note" data-testid="solo-note">{adapter.bestNote}</p>}
         <div className="mz-solo-results__actions">
-          <Keycap block data-testid="solo-play-again" onClick={() => { setOutcome(null); void live().start(game.id); }}>Play again</Keycap>
+          <Keycap block data-testid="solo-play-again" onClick={() => { setOutcome(null); void live().start(game.id, seasonRef.current); }}>Play again</Keycap>
           <Keycap block variant="surface" data-testid="solo-back" onClick={onBackToSolo}>Back to solo</Keycap>
           <button type="button" className="mz-linkbtn" data-testid="solo-home" onClick={onHome}>Mchezo home</button>
         </div>
@@ -202,6 +222,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
       <GameCover gameId={game.id} decorative className="mz-solo__cover mz-solo__cover--wide" />
       <h1 className="mz-h1">{game.title}</h1>
       <p className="mz-foot mz-entry__lede" data-testid="solo-howto">{adapter.howToPlay}</p>
+      {adapter.seasonalContent && <ContentSeasonChoice value={season} onChange={setSeason} testIdPrefix="solo" note={soloContentNote(season)} />}
       <p className="mz-solo__best" data-testid={`solo-best-${game.id}`}>{bestLine(best, store !== null)}</p>
       {adapter.bestNote && <p className="mz-solo__best-note" data-testid="solo-note">{adapter.bestNote}</p>}
       {state.phase === "error" && <p className="err" role="alert" data-testid="solo-error">{state.error ?? "Something went wrong."}</p>}
@@ -210,7 +231,7 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
           {state.error} Start a new round to keep playing.
         </NoticeCard>
       )}
-      <Keycap block data-testid="solo-round-start" disabled={state.phase === "starting"} onClick={() => void live().start(game.id)}>
+      <Keycap block data-testid="solo-round-start" disabled={state.phase === "starting"} onClick={() => void live().start(game.id, seasonRef.current)}>
         {state.phase === "starting" ? "Starting…" : state.phase === "error" ? "Try again" : state.phase === "lost" ? "Start a new round" : "Start"}
       </Keycap>
       {state.phase === "starting" && <p className="mz-foot" role="status" data-testid="solo-starting">Starting your round…</p>}

@@ -15,6 +15,8 @@ import {
   CircleLobby, GameCover, ICON, Icon, Keycap, ReactionBar, Sheet, accentColor, fits, playersLabel, sessionEstimate, timeLimitLabel, useArrivals,
   type CatalogGame, type ChampionshipConfig, type Player, type ReactionEvent, type ReactionId,
 } from "../../ui/mchezo/index.js";
+import { ContentSeasonChoice } from "./ContentChoice.js";
+import { SEASON_LABEL, type SessionSeason } from "../../../../../src/shared/season.js";
 
 export interface RoomLobbyProps {
   code: string;
@@ -70,6 +72,12 @@ export interface RoomLobbyProps {
   casual?: boolean;
   /** S5-B: no game has finished in this room yet: say once how the night works. */
   firstTime?: boolean;
+  /**
+   * Stage 8.2 (§3.7): a casual room's content, shown to everyone before
+   * Start (the up-next card and the dock); the host or a cohost changes it
+   * here (`onChange`). It applies from the next game started.
+   */
+  content?: { season: SessionSeason; onChange?: (season: SessionSeason) => void; busy?: boolean };
 }
 
 export function RoomLobby(p: RoomLobbyProps) {
@@ -154,11 +162,16 @@ export function RoomLobby(p: RoomLobbyProps) {
                 </span>
               )}
               {!p.mode && !p.upNext.officialEligible && <span className="mz-badge mz-badge--mint">Practice only</span>}
+              {p.content && <span className="mz-badge mz-contentbadge" data-season={p.content.season} data-testid="up-next-content">{p.content.season === "christmas" ? "🎄 " : ""}{SEASON_LABEL[p.content.season]} content</span>}
               {fit && <span className={`mz-upnext-card__fit mz-upnext-card__fit--${fit.tone}`} data-testid="up-next-fit">{fit.text}</span>}
             </span>
           </button>
           {p.isHost && p.onChangeGame && <button type="button" className="mz-chip-btn mz-upnext-card__change" data-testid="choose-game" aria-haspopup="dialog" onClick={p.onChangeGame}>Change</button>}
         </section>
+      )}
+      {p.content && p.isHost && p.content.onChange && (
+        <ContentSeasonChoice value={p.content.season} onChange={p.content.onChange} busy={p.content.busy} testIdPrefix="lobby"
+          note="What the next game deals. Each phone still picks its own look in Settings." />
       )}
       {p.shuffleNote && <p className="mz-foot mz-lobby__shuffle" data-testid="shuffle-result">{p.shuffleNote}</p>}
       {p.lastGame && (
@@ -179,7 +192,7 @@ export function RoomLobby(p: RoomLobbyProps) {
         {p.isHost ? (
           <>
             <Keycap block disabled={!canStart || !p.onStart || !!p.startBlocked} onClick={p.onStart} data-testid={p.startTestId}>{p.startBlocked ? p.startBlocked : canStart ? (p.startLabel ?? `Start ${p.upNext?.title ?? "the game"}${p.mode && p.mode !== "casual" ? ` · ${p.mode === "official" ? "Official" : "Practice"}` : ""}`) : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
-            {p.mode === "casual" && <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">Casual game: just for fun, no Cup.</p>}
+            {p.mode === "casual" && <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">Casual game: just for fun, no Cup.{p.content ? ` ${SEASON_LABEL[p.content.season]} content.` : ""}</p>}
             {p.mode && p.mode !== "casual" && (
               // S3-HOME-02: the mode choice can be below the fold; the dock says what Start will do and links to it.
               <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">
@@ -194,7 +207,7 @@ export function RoomLobby(p: RoomLobbyProps) {
             {p.guestNote ? p.guestNote : p.upNext && fit?.tone === "warn" && connected < p.upNext.minPlayers
               ? <>{p.upNext.title} needs {p.upNext.minPlayers - connected} more {p.upNext.minPlayers - connected === 1 ? "player" : "players"} before {p.hostName ?? "the host"} can start it · share the code {p.code}</>
               : p.upNext
-              ? <>Waiting for {p.hostName ?? "the host"} to start {p.upNext.title}{p.mode ? <> · <b>{p.mode === "official" ? `Official, counts toward the ${p.cupLabel ?? "Cup"}` : p.mode === "casual" ? "Casual, just for fun" : "Practice, no Cup points"}</b></> : null} · tap someone to nudge them</>
+              ? <>Waiting for {p.hostName ?? "the host"} to start {p.upNext.title}{p.mode ? <> · <b>{p.mode === "official" ? `Official, counts toward the ${p.cupLabel ?? "Cup"}` : p.mode === "casual" ? "Casual, just for fun" : "Practice, no Cup points"}</b></> : null}{p.content ? <> · <span data-testid="dock-guest-content">{SEASON_LABEL[p.content.season]} content</span></> : null} · tap someone to nudge them</>
               : <>Waiting for {p.hostName ?? "the host"} to start · they’re choosing a game · tap someone to nudge them</>}
           </p>
         )}

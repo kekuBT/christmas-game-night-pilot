@@ -45,6 +45,7 @@
  *   another.
  */
 import { readJson } from "../http.js";
+import { DEFAULT_SESSION_SEASON, type SessionSeason } from "../../../../src/shared/season.js";
 import { oneAtATime, POLL_TIMEOUT_MS, STALE_AFTER_MS } from "../liveness.js";
 import type { Projection } from "../types.js";
 import { noteServerTime } from "../ui/mchezo/lib/lifecycle.js";
@@ -176,7 +177,7 @@ export class SoloSession {
    * unchanged, so a round it did start is answered as a replay instead of a
    * second round. Any definite answer, Leave and dispose end it.
    */
-  private pendingStart: { roomId: string; gameId: string; attempt: { id: string; sessionRevision: number } } | null = null;
+  private pendingStart: { roomId: string; gameId: string; season: SessionSeason; attempt: { id: string; sessionRevision: number } } | null = null;
 
   constructor(private readonly deps: {
     store: KeyValueStore | null;
@@ -330,8 +331,12 @@ export class SoloSession {
     }
   }
 
-  /** Start a new round (Start, Play again, Try again). A round still open is replaced by the server. */
-  async start(gameId: string): Promise<void> {
+  /**
+   * Start a new round (Start, Play again, Try again). A round still open is
+   * replaced by the server. `season` (Stage 8.2): the content this round
+   * deals, the player's choice; the server binds it to the round.
+   */
+  async start(gameId: string, season: SessionSeason = DEFAULT_SESSION_SEASON): Promise<void> {
     if (this.disposed || this.state.phase === "starting") return; // a double tap on Start
     this.stopPolling();
     const gen = this.newRun();
@@ -350,16 +355,17 @@ export class SoloSession {
       // Try again, which makes a new press. A press that got no answer at all
       // is sent again unchanged (here, and by the next Start of this game).
       const roomId = this.seat!.roomId;
-      const pending = this.pendingStart?.roomId === roomId && this.pendingStart.gameId === gameId ? this.pendingStart : null;
+      // Stage 8.2: the same press is the same game with the same content; another content is a new press.
+      const pending = this.pendingStart?.roomId === roomId && this.pendingStart.gameId === gameId && this.pendingStart.season === season ? this.pendingStart : null;
       const attempt = pending?.attempt ?? { id: uuidV4(), sessionRevision: proj?.session?.revision ?? 0 };
-      this.pendingStart = { roomId, gameId, attempt };
+      this.pendingStart = { roomId, gameId, season, attempt };
       let gid: string | undefined;
       // Every send of this press fits in the first request's allowance (and
       // the Start's budget), so a Start with no answer ends when it did before.
       const sendsEnd = Math.min(deadline, this.now() + (this.deps.requestTimeoutMs ?? SOLO_REQUEST_TIMEOUT_MS));
       for (let resent = 0; gid === undefined; resent++) {
         try {
-          gid = (await this.post<{ gameId: string }>(`/rooms/${roomId}/games`, { gameId, official: false, attempt }, Math.max(1, Math.min(this.budget(deadline), sendsEnd - this.now())))).gameId;
+          gid = (await this.post<{ gameId: string }>(`/rooms/${roomId}/games`, { gameId, official: false, season, attempt }, Math.max(1, Math.min(this.budget(deadline), sendsEnd - this.now())))).gameId;
         } catch (e) {
           if (!this.isCurrent(gen)) return;
           const noAnswer = e instanceof SoloRequestError && e.kind === "transient";

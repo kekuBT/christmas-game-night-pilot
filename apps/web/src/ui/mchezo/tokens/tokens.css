@@ -13,6 +13,7 @@
   --mz-success: #3CCFB4;
   --mz-highlight: #FFC94A;
   --mz-spotlight: rgba(154,165,255,.18);
+  --mz-danger: #FF8A7A;
   --mz-font-display: 'Unbounded', 'Inter Display', 'Inter', system-ui, sans-serif;
   --mz-font-body: 'Figtree', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mz-depth-key: 6px;
@@ -42,6 +43,7 @@
   --mz-success: #7FD6A8;
   --mz-highlight: #F2C14E;
   --mz-spotlight: rgba(242,193,78,.16);
+  --mz-danger: #FF8A7A;
   --mz-font-display: 'Unbounded', 'Inter Display', 'Inter', system-ui, sans-serif;
   --mz-font-body: 'Figtree', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mz-depth-key: 6px;
