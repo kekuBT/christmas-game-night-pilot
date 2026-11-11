@@ -1,0 +1,70 @@
+$ node scripts/check-draw-sync.mjs http://localhost:39837
+# timeout 600s | worker w1 | server http://localhost:39837 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-c27570f/test-results/20261111-134957-c27570f7-15819/server-data/w1)
+
+[+4.8s] PASS turn 1: the drawer draws, the others guess
+[+6.1s] PASS turn 1, first (touch) stroke: every viewer shows the server's drawing (2:12) within 4000 ms — {"Keku":3,"Amina":3,"TV":3,"Baraka":4}
+[+10.1s] PASS turn 1, a burst of 12 rapid strokes: every viewer shows the server's drawing (19:197) within 4000 ms — {"Keku":3,"Baraka":4,"TV":4,"Amina":4}
+[+10.9s] PASS turn 1, undo: every viewer shows the server's drawing (18:182) within 4000 ms — {"Baraka":4,"Keku":4,"Amina":4,"TV":5}
+[+11.7s] PASS turn 1, clear: every viewer shows the server's drawing (0:0) within 4000 ms — {"Amina":3,"Keku":3,"TV":3,"Baraka":3}
+[+12.8s] PASS turn 1, drawing again after clear: every viewer shows the server's drawing (1:11) within 4000 ms — {"TV":4,"Keku":7,"Baraka":7,"Amina":7}
+[+12.9s] PASS turn 1: Keku never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+12.9s] PASS turn 1: Keku never had a received drawing left unrendered — 0 samples
+[+12.9s] PASS turn 1: Amina never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+12.9s] PASS turn 1: Amina never had a received drawing left unrendered — 0 samples
+[+12.9s] PASS turn 1: Baraka never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+12.9s] PASS turn 1: Baraka never had a received drawing left unrendered — 0 samples
+[+12.9s] PASS turn 1: TV never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+12.9s] PASS turn 1: TV never had a received drawing left unrendered — 0 samples
+[+13.1s] PASS turn 1: the reveal
+[+17.4s] PASS turn 2: the drawer draws, the others guess
+[+22.0s] PASS turn 2, socket silent (polling) and jittered replies: every viewer shows the server's drawing (9:69) within 6000 ms — {"Baraka":10,"Wanjiru":10,"TV":11,"Amina":222}
+[+22.9s] PASS turn 2: a spectator joining mid-turn sees the drawing so far
+[+24.0s] PASS turn 2, after the spectator joined: every viewer shows the server's drawing (10:80) within 6000 ms — {"Amina":4,"Baraka":4,"TV":5,"TV2":5,"Wanjiru":5}
+[+24.1s] PASS turn 2: Amina never stays behind the server's drawing longer than 5000 ms — worst 417 ms
+[+24.1s] PASS turn 2: Amina never had a received drawing left unrendered — 0 samples
+[+24.1s] PASS turn 2: Baraka never stays behind the server's drawing longer than 5000 ms — worst 0 ms
+[+24.1s] PASS turn 2: Baraka never had a received drawing left unrendered — 0 samples
+[+24.1s] PASS turn 2: Wanjiru never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+24.1s] PASS turn 2: Wanjiru never had a received drawing left unrendered — 0 samples
+[+24.1s] PASS turn 2: TV never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+24.1s] PASS turn 2: TV never had a received drawing left unrendered — 0 samples
+[+24.1s] PASS turn 2: TV2 never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+24.1s] PASS turn 2: TV2 never had a received drawing left unrendered — 0 samples
+[+24.3s] PASS turn 2: the reveal
+[+28.6s] PASS turn 3: the drawer draws, the others guess
+[+30.3s] PASS turn 3, before reloads: every viewer shows the server's drawing (5:35) within 4000 ms — {"Amina":9,"Wanjiru":9,"TV":12,"Keku":13,"TV2":15}
+[+31.2s] PASS turn 3, a guesser reloaded mid-drawing: every viewer shows the server's drawing (5:35) within 4000 ms — {"Keku":4,"Wanjiru":4,"Amina":4,"TV2":4,"TV":4}
+[+32.5s] PASS turn 3, the drawer reloaded mid-drawing and drew again: every viewer shows the server's drawing (6:46) within 4000 ms — {"Keku":5,"Wanjiru":5,"TV2":5,"Amina":5,"TV":6}
+[+35.0s] PASS turn 3, a page hidden and shown again: every viewer shows the server's drawing (7:57) within 4000 ms — {"Keku":4,"Amina":4,"TV":4,"Wanjiru":4,"TV2":5}
+[+35.1s] PASS turn 3: Keku never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+35.1s] PASS turn 3: Keku never had a received drawing left unrendered — 0 samples
+[+35.1s] PASS turn 3: Amina never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+35.1s] PASS turn 3: Amina never had a received drawing left unrendered — 0 samples
+[+35.1s] PASS turn 3: Wanjiru never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+35.1s] PASS turn 3: Wanjiru never had a received drawing left unrendered — 0 samples
+[+35.1s] PASS turn 3: TV never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+35.1s] PASS turn 3: TV never had a received drawing left unrendered — 0 samples
+[+35.1s] PASS turn 3: TV2 never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+35.1s] PASS turn 3: TV2 never had a received drawing left unrendered — 0 samples
+[+35.3s] PASS turn 3: the reveal
+[+39.4s] PASS turn 4: the drawer draws, the others guess
+[+40.6s] PASS turn 4, first stroke: every viewer shows the server's drawing (1:11) within 4000 ms — {"Wanjiru":3,"Keku":3,"Baraka":4,"TV2":4,"TV":4}
+[+44.0s] PASS turn 4, the drawer came back: the stroke drawn offline arrives: every viewer shows the server's drawing (1:11) within 8000 ms — {"Keku":4,"Baraka":4,"TV":4,"Wanjiru":4,"TV2":5}
+[+52.3s] PASS turn 4: a guesser whose replies all stall is told it can't reach the game (not a silent blank)
+[+52.5s] PASS turn 4: when replies flow again, that guesser catches up
+[+52.7s] PASS turn 4: Keku never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+52.7s] PASS turn 4: Keku never had a received drawing left unrendered — 0 samples
+[+52.7s] PASS turn 4: Baraka never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+52.7s] PASS turn 4: Baraka never had a received drawing left unrendered — 0 samples
+[+52.7s] PASS turn 4: Wanjiru never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+52.7s] PASS turn 4: Wanjiru never had a received drawing left unrendered — 0 samples
+[+52.7s] PASS turn 4: TV never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+52.7s] PASS turn 4: TV never had a received drawing left unrendered — 0 samples
+[+52.7s] PASS turn 4: TV2 never stays behind the server's drawing longer than 3500 ms — worst 0 ms
+[+52.7s] PASS turn 4: TV2 never had a received drawing left unrendered — 0 samples
+[+53.0s] PASS turn 4: the reveal
+[+53.0s] SYNC REPORT [{"turn":1,"viewer":"Keku","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":1,"viewer":"Amina","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":1,"viewer":"Baraka","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":1,"viewer":"TV","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":2,"viewer":"Amina","worstBehindMs":417,"allow":5000,"receivedButBehind":0},{"turn":2,"viewer":"Baraka","worstBehindMs":0,"allow":5000,"receivedButBehind":0},{"turn":2,"viewer":"Wanjiru","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":2,"viewer":"TV","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":2,"viewer":"TV2","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"Keku","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"Amina","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"Wanjiru","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"TV","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":3,"viewer":"TV2","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"Keku","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"Baraka","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"Wanjiru","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"TV","worstBehindMs":0,"allow":3500,"receivedButBehind":0},{"turn":4,"viewer":"TV2","worstBehindMs":0,"allow":3500,"receivedButBehind":0}]
+[+53.1s] DRAW SYNC ALL PASSED
+[+53.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":6}
+
+# PASS (exit 0) in 53.1s | cpu 8.8s, peak memory 355 MB

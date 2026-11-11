@@ -1,0 +1,52 @@
+PASS guest sees no game setup (host-only)
+PASS guest sees no math start control
+PASS host sees the kit math panel
+PASS Bea sees the kit math panel
+PASS first question is 16 ÷ 2
+PASS question counter reads 1 of 10
+PASS four answer options
+PASS no TV stage chip (Math has no TV stage)
+PASS no horizontal overflow at 320px
+PASS no horizontal overflow at 360px
+PASS no horizontal overflow at 390px
+PASS locked view shows the chosen answer (8)
+PASS locked view shows the server-measured time for this question (>= 10 s, past the bonus) — Answered in 12.6 s — timed by the game from when it sent this question to your phone (+20 within 5 s, +10 within 10 s, if correct).
+PASS next question is 7 × 4
+PASS Bea sees the waiting ring after all 10 answers
+PASS Bea's done state says all answers are in
+PASS game finishes and shows results
+PASS server measured a time for each of the host's 10 answers — {"math-1":12595,"math-2":530,"math-3":13064,"math-4":432,"math-5":429,"math-6":536,"math-7":428,"math-8":433,"math-9":431,"math-10":434}
+PASS question 1 (answered after 12 s) earned no speed bonus — {"math-1":12595,"math-2":530,"math-3":13064,"math-4":432,"math-5":429,"math-6":536,"math-7":428,"math-8":433,"math-9":431,"math-10":434}
+PASS question 2's clock started when it was shown, not while the locked view of question 1 was up (< 3 s) — {"math-1":12595,"math-2":530,"math-3":13064,"math-4":432,"math-5":429,"math-6":536,"math-7":428,"math-8":433,"math-9":431,"math-10":434}
+PASS host scores 1160 (all ten correct + per-question speed bonuses from server times) — Mchezo
+Code: JQE4CV
+
+Playing as Ada (host) · Room: Christmas Game Night
+
+Lobby & Games
+Championship
+TV Dashboard
+Memory Book
+Reconnect
+
+Saved.
+
+MATH MAYHEM · OFFICIAL
+Ada wins Math Mayhem
+A
+Ada
+
+Ada was the only one on the scoreboard.
+
+You came 1st of 2
+1160 pts
+That was you. Enjoy it quietly. Or lo
+PASS Bea scores 0 (all ten wrong)
+PASS host wins the game
+PASS abstention shows the sat-out waiting ring
+PASS no skip button before the deadline (host only, stalled only)
+PASS reloaded player is still sat out (abstention survived)
+PASS game finishes without the abstained player
+PASS abstained player scores 0
+MATH ALL PASSED
+exit 0

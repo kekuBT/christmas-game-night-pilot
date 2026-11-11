@@ -806,6 +806,7 @@
   },
   {
    "id": "year-s4-043",
+   "season": "christmas",
    "difficulty": 3,
    "category": "Festive",
    "language": "en",
@@ -825,6 +826,7 @@
   },
   {
    "id": "year-s4-044",
+   "season": "christmas",
    "difficulty": 3,
    "category": "Festive",
    "language": "en",
@@ -844,6 +846,7 @@
   },
   {
    "id": "year-s4-045",
+   "season": "christmas",
    "difficulty": 3,
    "category": "Festive",
    "language": "en",

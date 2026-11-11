@@ -504,6 +504,7 @@
   },
   {
    "id": "chr-s4-032",
+   "season": "christmas",
    "difficulty": 2,
    "category": "Actions",
    "language": "en",
@@ -984,6 +985,7 @@
   },
   {
    "id": "chr-s4-062",
+   "season": "christmas",
    "difficulty": 1,
    "category": "Actions",
    "language": "en",
@@ -1208,6 +1210,7 @@
   },
   {
    "id": "chr-s4-076",
+   "season": "christmas",
    "difficulty": 2,
    "category": "Actions",
    "language": "en",

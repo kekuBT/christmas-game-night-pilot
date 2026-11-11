@@ -9,7 +9,7 @@ import { SettingsBar, useExperienceSettings } from "./components/SettingsBar.js"
 import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
-import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, themes, type Route, type RoomSub } from "./ui/mchezo/index.js";
+import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, type Route, type RoomSub } from "./ui/mchezo/index.js";
 import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen, type HostKind } from "./components/mchezo/Home.js";
 import { SoloHome, SoloRound, soloShelf } from "./components/mchezo/Solo.js";
 import { ChooseGameSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
@@ -58,6 +58,9 @@ import { CasualResults, WhatsNext } from "./components/mchezo/WhatsNext.js";
 import { PlayersAndRoles, type HandoverResult } from "./components/mchezo/HostHandover.js";
 import QRCode from "qrcode";
 import { uuidV4 } from "./uuid.js";
+import { lookTheme, resolveLook, useDocumentLook, useLookPref, useLookSaved, useShownSeason, type LookContext } from "./ui/mchezo/look.js";
+import { useSoloSeason } from "./solo/soloSeason.js";
+import type { SessionSeason } from "../../../src/shared/season.js";
 
 /** Per-tab UI state (spectator seat, dismissed screens). Never throws: a
     browser that blocks site data must still be able to play. */
@@ -211,6 +214,39 @@ export function App() {
   const osReducedMotion = typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   // Stage 7.2: a casual room's games say "Casual" on every Mchezo screen (never "Practice", a Cup word).
   const motion = { reducedMotion: resolveReducedMotion(settings.anim, osReducedMotion) ? true : undefined, still: settings.anim === "off", casual: proj?.roomKind === "casual" };
+  // Stage 8.2 (docs/stage8/stage82.md §3.1, §3.6): one look for this device,
+  // worked out here and passed to every screen and the page itself. A pinned
+  // look always wins; "Match the game" follows what this screen is showing:
+  // the solo choice on solo screens, a casual room's content in its room, and
+  // Everyday for a Cup room, home and the library. The look stays on this
+  // device: it never reaches the server and never changes content.
+  //
+  // Feedback 6795825877 (3): while a game is shown (its briefing, the game, its
+  // results), Match the game follows THAT game's bound content, never the
+  // room's setting for the next start, which may have changed since. Between
+  // games the room's setting (what the next game deals) applies.
+  const [lookPref, setLookPref] = useLookPref();
+  const lookSaved = useLookSaved();
+  const [soloSeason] = useSoloSeason();
+  const soloShown = useShownSeason();
+  const inRoomScreen = (!!roomId && !!playerId && route.name === "room") || (!playerId && !!specRoomId && !!specToken);
+  const shownGameSeason = ((): SessionSeason | undefined => {
+    const all = proj?.games ?? [];
+    const live = all.find((g) => g.status === "briefing" || g.status === "playing");
+    if (live) return live.season ?? "everyday";
+    // The TV (a spectator, or a seat's TV view) keeps showing the last game until the next one starts.
+    if (!playerId || view === "tv") { const last = all.at(-1); return last ? last.season ?? "everyday" : undefined; }
+    if (view !== "lobby") return undefined;
+    // A player's results stay on screen until they go back to the lobby.
+    const fin = (proj?.myGames ?? []).filter((g) => g.status === "finished" && g.participant !== false).slice(-1)[0];
+    if (fin && resultsDismissed !== fin.id) return all.find((g) => g.id === fin.id)?.season ?? "everyday";
+    return undefined;
+  })();
+  const lookContext: LookContext = route.name === "solo" ? { kind: "solo", season: soloShown ?? soloSeason }
+    : inRoomScreen && proj ? { kind: proj.roomKind ?? "cup", ...((shownGameSeason ?? proj.contentSeason) ? { season: shownGameSeason ?? proj.contentSeason } : {}) }
+    : { kind: "none" };
+  const theme = lookTheme(resolveLook(lookPref, lookContext));
+  useDocumentLook(theme);
   // D3: tell everyone when a briefing ended without play (host cancel or the
   // five-minute guard). The server removed it; nothing was scored or used.
   const [briefingNote, setBriefingNote] = useState("");
@@ -226,7 +262,13 @@ export function App() {
     if (open) { lastBriefingRef.current = open.id; setBriefingNote(""); return; }
     const last = lastBriefingRef.current;
     lastBriefingRef.current = null;
-    if (last && !now.some((g) => g.id === last)) setBriefingNote("The game was cancelled before it started. Nothing was scored and no questions were used up.");
+    // Stage 8.2 (feedback 6795825877, 4): say plainly when the game was cancelled because what it froze no longer suits the room.
+    const why = proj?.briefingCancelled?.gameInstanceId === last ? proj.briefingCancelled : undefined;
+    if (last && !now.some((g) => g.id === last)) setBriefingNote(why?.reason === "content-changed"
+      ? why.contentWhy === "season"
+        ? "The game was cancelled before it started: what it was going to deal no longer suits this room’s content. Nothing was scored and nothing was used up. Press Start to deal again."
+        : "The game was cancelled before it started: its questions changed after an update. Nothing was scored and nothing was used up. Press Start to deal again."
+      : "The game was cancelled before it started. Nothing was scored and no questions were used up.");
   }, [proj]);
   useEffect(() => {
     const open = (proj?.games ?? []).find((g) => g.status === "briefing");
@@ -692,6 +734,26 @@ export function App() {
     const still = new Set((proj?.readiness?.wouldMiss ?? []).filter((m) => m.presence === "reconnecting").map((m) => m.id));
     if (!startDecision.reconnecting.some((id) => still.has(id))) setStartDecision(null);
   }, [proj?.readiness, startDecision]);
+  /**
+   * Stage 8.2 (§3.4): the host or a cohost changes what this casual room
+   * deals, against the session revision on screen. Asking for the content
+   * already chosen changes nothing, so a press with no answer is safe to
+   * press again; a press made before someone else's change is refused and
+   * the latest is shown.
+   */
+  const [contentBusy, setContentBusy] = useState(false);
+  async function changeContent(season: SessionSeason) {
+    if (!roomId || contentBusy) return;
+    setContentBusy(true);
+    setErr("");
+    try {
+      const r = await postBounded(`/rooms/${roomId}/season`, { season, baseRevision: proj?.session?.revision ?? 0 }, 10_000).catch(() => null);
+      if (!r) setErr("Couldn’t reach the game server, so the content may not have changed. Check it, then try again.");
+      else if (r.status === 409) setErr(r.body["code"] === "SESSION_CONFLICT" ? "Something changed since you looked. Here is the latest: choose again." : String(r.body["error"] ?? "The content didn’t change."));
+      else if (r.status < 200 || r.status >= 300) setErr(String(r.body["error"] ?? "The content didn’t change."));
+      await refresh();
+    } finally { setContentBusy(false); }
+  }
   async function startGame(gameId: string, official: boolean, how: StartHow, proceedWithout?: string[]) {
     // Host-action race (Milestone K): a double-tap on Start posts twice;
     // the server correctly rejects the second (a game is already playing),
@@ -725,6 +787,8 @@ export function App() {
       ...(route.kind === "next" ? { party: { revision: route.revision, index: route.index }, ...(fewerOk ? { fewerThanPlanned: true } : {}) } : {}),
       ...(route.kind === "rematch" ? { rematchOf: route.source } : {}),
       ...(attempt ? { attempt } : {}),
+      // Stage 8.2 (§3.4): the content this host saw; the server refuses a Start made against other content.
+      ...(proj?.roomKind === "casual" && proj.contentSeason ? { season: proj.contentSeason } : {}),
     };
     try {
       let resp: { status: number; body: Record<string, unknown> } | null = null;
@@ -755,6 +819,7 @@ export function App() {
         else if (body2.code === "SESSION_CONFLICT") setErr("Something changed since you looked (another host, or a break). Here is the latest: choose again.");
         else if (body2.code === "ATTEMPT_ENDED") setErr("That start was cancelled, so nothing new started. Choose again.");
         else if (body2.code === "ON_BREAK") setErr("The room is on a break. Resume first.");
+        else if (body2.code === "CONTENT_CHANGED") setErr(body2.error ?? "The room’s content changed since you looked, so nothing started. Check it, then press Start again.");
         else setErr(body2.error ?? "Who is playing changed. Check the list, then start again.");
         return;
       }
@@ -962,7 +1027,7 @@ export function App() {
     const feed = tvFeedFrom(proj);
     const titleOf = (id: string) => titleFor(id, games);
     return (
-      <MchezoProvider theme={themes.everyday} {...motion} as="bare">
+      <MchezoProvider theme={theme} {...motion} as="bare">
         <TvShow
           feed={feed}
           registry={games}
@@ -1009,7 +1074,7 @@ export function App() {
   if ((!roomId || !playerId) && !(specRoomId && specToken) && recoverMode) {
     // (Seat recovery keeps its own flow; it starts from Home or Join.)
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <RecoverScreen
           initialCode={code}
           onBack={() => setRecoverMode(false)}
@@ -1116,7 +1181,7 @@ export function App() {
     }
     const details = sheet === "details" && sheetGame ? catalog.find((g) => g.id === sheetGame) : undefined;
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         {screen}
         {details && (
           <GameDetailsSheet
@@ -1127,7 +1192,7 @@ export function App() {
         )}
         {sheet === "settings" && (
           <Sheet title="Settings" onClose={closeSheet} testId="settings-sheet">
-            <SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} />
+            <SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} lookSaved={lookSaved} />
           </Sheet>
         )}
       </MchezoProvider>
@@ -1148,7 +1213,7 @@ export function App() {
     const specTvGame = specLatest?.gameId === "trivia" && (specLatest.status === "playing" || specLatest.status === "finished") ? specLatest : undefined;
     if (!proj) {
       return (
-        <MchezoProvider theme={themes.everyday} {...motion}>
+        <MchezoProvider theme={theme} {...motion}>
           <div style={{ padding: 24 }}>
             <p className="mz-foot">Finding the game…</p>
             <button type="button" className="mz-chip-btn" onClick={stopWatching}>Stop watching</button>
@@ -1159,7 +1224,7 @@ export function App() {
     }
     if (specLatest?.status === "briefing" && specLatest.briefing) {
       return (
-        <MchezoProvider theme={themes.everyday} {...motion}>
+        <MchezoProvider theme={theme} {...motion}>
           {tvNote}
           <BriefingTv key={specLatest.id} game={specLatest} registry={games.find((x) => x.id === specLatest.gameId)} players={specPlayers} joinCode={proj.joinCode} onBack={stopWatching} backLabel="Stop watching" />
         </MchezoProvider>
@@ -1167,7 +1232,7 @@ export function App() {
     }
     if (specTvGame) {
       return (
-        <MchezoProvider theme={themes.everyday} {...motion} as="bare">
+        <MchezoProvider theme={theme} {...motion} as="bare">
           {tvNote}
           <MchezoTvStage key={specTvGame.id} publicGame={specTvGame} players={specPlayers} joinCode={proj.joinCode ?? "…"} onBack={stopWatching} spectatorCount={proj.spectatorCount} backLabel="Stop watching" previousScores={previousGameScores(proj?.games ?? [], specTvGame.id)} nextLine={lineupLine(tvFeedFrom(proj), (id) => titleFor(id, games))} />
         </MchezoProvider>
@@ -1181,7 +1246,7 @@ export function App() {
   // while a slow connection (the preview proxy) caught up.
   if (roomId && playerId && !proj) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <main className="mz-screen" aria-label="Rejoining your room" data-testid="rejoining">
           <span className="mz-kicker" role="status" aria-live="polite">Rejoining your room…</span>
           <h1 className="mz-h1">One moment</h1>
@@ -1371,6 +1436,7 @@ export function App() {
         error={err || undefined}
         onNext={(index, gameId) => { if (party) void startGame(gameId, false, { kind: "next", revision: party.revision, index }); }}
         onPlayAgain={() => void startGame(g.gameId, false, { kind: "rematch", source: g.id })}
+        {...(proj?.roomKind === "casual" && proj.contentSeason ? { content: proj.contentSeason } : {})}
         onBreakChange={(on) => void changeBreak(on)}
         onPlan={() => { dismissResults(g.id); setPartyReplan(undefined); openSheet("party"); }}
         onChoose={() => { dismissResults(g.id); openSheet("choose"); }}
@@ -1428,7 +1494,7 @@ export function App() {
           onReconnect={() => { void reconnect(); }}
           // While the menu is open its messages show here (and not in the dock).
           message={err || msg ? <div className="mz-menu__msg">{err && <p className="err">{err}</p>}{msg && <p className="ok" role="status">{msg}</p>}</div> : undefined}
-          phone={<SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} />}
+          phone={<SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} lookSaved={lookSaved} />}
           device={
             <ThisDeviceCard
               remembered={seatRemembered}
@@ -1480,7 +1546,7 @@ export function App() {
       ? { to: "results" as const, title: titleFor(latestFinished.gameId, games) }
       : { to: "lobby" as const };
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <BriefingScreen
           key={briefingGame.id}
           game={briefingGame}
@@ -1515,11 +1581,12 @@ export function App() {
       return { title: titleFor(lastDone.gameId, games), mode: lastDone.official ? "official" as const : "practice" as const, headline: winnerLine(scores, nameOf), yourLine };
     })() : undefined;
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <RoomLobby
           lastGame={lastGame}
           casual={casualRoom}
           firstTime={!roomGames.some((g) => g.status === "finished")}
+          content={proj?.roomKind === "casual" ? { season: proj.contentSeason ?? "everyday", ...(isHostish ? { onChange: (s: SessionSeason) => void changeContent(s), busy: contentBusy } : {}) } : undefined}
           code={proj?.joinCode ?? "…"}
           sessionLabel={proj?.name ?? "Mchezo"}
           // Family Cup event data: 7 days is the approved championship
@@ -1626,7 +1693,7 @@ export function App() {
   // Word Connections (Sprint 4): its own intro, puzzle and results screens.
   if (view === "lobby" && showPhase === "intro" && connectionsPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <GameIntro
           title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Word Connections"}
           objective="Find four groups of four."
@@ -1639,7 +1706,7 @@ export function App() {
   }
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && connectionsPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <GameClock game={playingGame} />
         {sendFailure}
         <MchezoConnections game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Word Connections"} intent={sendAction} />
@@ -1648,7 +1715,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && connectionsFinished && latestFinished) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <MchezoConnectionsResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Word Connections"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -1656,7 +1723,7 @@ export function App() {
   // Caption Clash (Sprint 4): its own intro, write/vote screens and results.
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && majorityPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <GameClock game={playingGame} />
         <MchezoMajority game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Majority Rules"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
@@ -1664,7 +1731,7 @@ export function App() {
   }
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && pulsePlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         {/* Stage 8.1: Pulse draws its own game clock on every screen (one clock per screen). */}
         <RoomPulse game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Pattern Pulse"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
@@ -1672,7 +1739,7 @@ export function App() {
   }
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && drawPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <GameClock game={playingGame} />
         <MchezoDraw game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Draw & Guess"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
@@ -1680,28 +1747,28 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && drawFinished && latestFinished) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <MchezoDrawResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Draw & Guess"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }
   if (view === "lobby" && showPhase === "results" && pulseFinished && latestFinished) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <MchezoPulseResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Pattern Pulse"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }
   if (view === "lobby" && showPhase === "results" && majorityFinished && latestFinished) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <MchezoMajorityResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Majority Rules"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }
   if (view === "lobby" && showPhase === "intro" && captionPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <GameIntro
           title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"}
           objective="Write the funniest caption."
@@ -1714,7 +1781,7 @@ export function App() {
   }
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && captionPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <GameClock game={playingGame} />
         <MchezoCaption game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Caption Clash"} intent={sendAction} error={err || undefined} landed={sendLanded} />
       </MchezoProvider>
@@ -1722,21 +1789,21 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && captionFinished && latestFinished) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <MchezoCaptionResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Caption Clash"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }
   if (view === "lobby" && showPhase === "intro" && triviaPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <MchezoTriviaIntro title={titleFor(playingGame.gameId, games)} onStart={() => dismissIntro(playingGame.id)} />
       </MchezoProvider>
     );
   }
   if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && triviaPlaying && playingGame) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         {sendFailure}
         <MchezoTriviaPlay
           windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
@@ -1760,7 +1827,7 @@ export function App() {
     // + GamePanel, mirroring the Trivia play branch. Intro and finished
     // results still use the shared old views (ShowIntro, ShowResults).
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <GameClock game={playingGame} />
         {sendFailure}
         <MchezoClosest
@@ -1783,7 +1850,7 @@ export function App() {
     // branches. Intro and finished results still use the shared old
     // views (ShowIntro, ShowResults).
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <GameClock game={playingGame} />
         {sendFailure}
         <MchezoYear
@@ -1807,7 +1874,7 @@ export function App() {
     // correctIndex for Geography), so intro and finished results still
     // use the shared old views (ShowIntro, ShowResults).
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         {sendFailure}
         <MchezoGeography
           windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
@@ -1832,7 +1899,7 @@ export function App() {
     // the shared old views (ShowIntro, ShowResults). The locked view
     // shows the player's own elapsed time, because speed is scored.
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         {sendFailure}
         <MchezoMath
           windowMs={games.find((x) => x.id === playingGame.gameId)?.lifecycle?.gameWindowMs}
@@ -1851,7 +1918,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && triviaFinished && latestFinished) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         {/* Stage 3: the headline first, above the outcome and the reveal. */}
         {resultsHero(latestFinished, publicFinished)}
         {nextPanel(latestFinished) /* Stage 7.2: right under the result heading (review 6778921208) */}
@@ -1877,7 +1944,7 @@ export function App() {
     // the up-next game and returns to the lobby, where Start starts it. The
     // library never starts a game. Guests browse; only host/cohost choose.
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <MchezoLibrary
           manifests={GAME_MANIFESTS}
           catalog={catalog}
@@ -1900,7 +1967,7 @@ export function App() {
     // Stage 4 (S3-CUP-01): the Family Cup as a Night Circle screen, standings
     // first and rules on demand. Values are the server's, as before.
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <CupScreen proj={proj} games={games} players={players} youId={playerId ?? ""} nameOf={nameOf} midrank={midrank} post={post} refresh={refresh} meIsHostOrCohost={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
         {roomSheets}
       </MchezoProvider>
@@ -1909,7 +1976,7 @@ export function App() {
   if (view === "memory") {
     // Stage 4 (S3-MEM-01): the Memory Book as a Night Circle screen with honest export feedback.
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <MemoryScreen roomId={roomId ?? ""} roomSeq={proj?.seq} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
         {roomSheets}
       </MchezoProvider>
@@ -1922,7 +1989,7 @@ export function App() {
     const studioPlayerCount = connectedCount > 0 ? connectedCount : players.length;
     const studioRecent = (proj?.games ?? []).map((g) => g.gameId).reverse();
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <MchezoStudio playerCount={studioPlayerCount} recentIds={studioRecent} onBack={toLobby} canUse={isHostish} />
       </MchezoProvider>
     );
@@ -1939,7 +2006,7 @@ export function App() {
     const latestGame = (proj?.games ?? []).at(-1);
     if (latestGame?.status === "briefing" && latestGame.briefing) {
       return (
-        <MchezoProvider theme={themes.everyday} {...motion}>
+        <MchezoProvider theme={theme} {...motion}>
           <BriefingTv key={latestGame.id} game={latestGame} registry={games.find((x) => x.id === latestGame.gameId)} players={players} joinCode={proj?.joinCode} onBack={() => setView("lobby")} backLabel="Back to phone view" onBackToReady={playerId && latestGame.players.includes(playerId) ? () => setView("lobby") : undefined} />
         </MchezoProvider>
       );
@@ -1947,7 +2014,7 @@ export function App() {
     const tvGame = latestGame?.gameId === "trivia" && (latestGame.status === "playing" || latestGame.status === "finished") ? latestGame : undefined;
     if (tvGame) {
       return (
-        <MchezoProvider theme={themes.everyday} {...motion} as="bare">
+        <MchezoProvider theme={theme} {...motion} as="bare">
           <MchezoTvStage key={tvGame.id} publicGame={tvGame} players={players} joinCode={proj?.joinCode ?? "…"} onBack={() => setView("lobby")} previousScores={previousGameScores(proj?.games ?? [], tvGame.id)} nextLine={proj ? lineupLine(tvFeedFrom(proj), (id) => titleFor(id, games)) : null} />
         </MchezoProvider>
       );
@@ -1959,7 +2026,7 @@ export function App() {
   // Stage 7.2: a casual room's game without its own results screen gets the casual one (never the old shell).
   if (view === "lobby" && showPhase === "results" && latestFinished && partyRoom) {
     return (
-      <MchezoProvider theme={themes.everyday} {...motion}>
+      <MchezoProvider theme={theme} {...motion}>
         <CasualResults
           game={latestFinished}
           publicGame={publicFinished}
@@ -1975,7 +2042,8 @@ export function App() {
     );
   }
   return <div className={`wrap anim-${settings.anim}`}>
-    <header><h1>🎄 Christmas Game Night</h1><span className="pill">Code: {proj?.joinCode ?? "…"}</span></header>
+    {/* Stage 8.2 (§3.6): the older screens say Mchezo, in this device's look; the 🎄 only in the Christmas look. */}
+    <header><h1 data-testid="legacy-title">{theme.id === "christmas" ? "🎄 " : ""}Mchezo</h1><span className="pill">Code: {proj?.joinCode ?? "…"}</span></header>
     <p className="muted">Playing as <b>{me?.displayName ?? "…"}</b>{me?.isHost ? " (host)" : ""} · Room: {proj?.name ?? ""}</p>
     <div className="row">
       <button className="secondary" onClick={() => setView("lobby")}>Lobby &amp; Games</button>
@@ -1991,7 +2059,7 @@ export function App() {
       <ShowWaiting game={publicPlaying} title={titleFor(playingGame.gameId, games)} />
       <p className="muted">The game stays visible below — when the next phase starts, this banner goes away on its own.</p>
     </>}
-    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={titleFor(latestFinished.gameId, games)} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={themes.everyday} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
+    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={titleFor(latestFinished.gameId, games)} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={theme} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
       {showGamePanel && playingGame && <GamePanel key={draftKey(playingGame)} game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "This game"} players={players} nameOf={nameOf} intent={intent} />}
       {/* S5-F: the older panel (Category Sprint, Who Said That?, Impostor, Charades) says so beside the game when a send fails; typed text stays in its box. */}

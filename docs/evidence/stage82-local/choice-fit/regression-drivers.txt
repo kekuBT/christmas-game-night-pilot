@@ -1,0 +1,10 @@
+check-solo: exit 0, 81 PASS lines, 0 FAIL lines
+check-solo-shelf: exit 0, 59 PASS lines, 0 FAIL lines
+check-casual: exit 0, 31 PASS lines, 0 FAIL lines
+check-session-flow: exit 0, 70 PASS lines, 0 FAIL lines
+check-lobby-fixes: exit 0, 29 PASS lines, 0 FAIL lines
+check-lobby-mode: exit 0, 72 PASS lines, 0 FAIL lines
+check-contrast: exit 0, 78 PASS lines, 0 FAIL lines
+check-reduced-motion: exit 0, 3 PASS lines, 0 FAIL lines
+check-a11y-surfaces: exit 0, 12 PASS lines, 0 FAIL lines
+check-briefing: exit 0, 44 PASS lines, 0 FAIL lines

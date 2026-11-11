@@ -1,0 +1,30 @@
+PASS theme-color is the Mchezo ground — #16111D
+PASS document background is the Mchezo ground, not green — rgb(22, 17, 29) / rgb(22, 17, 29)
+PASS page title is Mchezo — Mchezo
+PASS Animations Off applies on the start screen (Home) — {"still":true,"motion":"reduced","anim":"none"}
+PASS D1: a lone host choosing Official is told why it can't count
+PASS D1: Start is not offered as an official start for one player
+PASS F3: selected Official is filled and checked, Practice is not — [{"pressed":"true","bg":"rgb(255, 201, 74)","text":"Official✓Counts toward the Individual Family Cup"},{"pressed":"false","bg":"rgba(0, 0, 0, 0)","text":"PracticeJust for fun · no Cup points"}]
+PASS D1: the switch to practice is explicit and visible — [{"pressed":"false","bg":"rgb(255, 201, 74)","text":"OfficialCounts toward the Individual Family Cup"},{"pressed":"true","bg":"rgba(0, 0, 0, 0)","text":"Practice✓Just for fun · no Cup points"}]
+PASS D1: practice Start is available for one player
+PASS D1: the notice goes away in practice
+PASS D1: the server refuses an official one-player start (409 OFFICIAL_NEEDS_TWO) — {"status":409,"body":{"error":"Official games need at least 2 players to count toward the Cup. Play it as practice, or wait for someone to join.","code":"OFFICIAL_NEEDS_TWO","readiness":{"registered":1,"connected":1,"reconnecting":0,"away":0,"wouldPlay":["player-1"],"wouldMiss":[]}}}
+PASS F2: Share opens the invite sheet
+PASS F2: the sheet shows the room code and QR
+PASS F2: the sheet has an accessible dialog name
+PASS F2: Copy link copies the join link and says so — Link copied. Paste it in your group chat. | http://localhost:3482/join?code=QUPKAS
+PASS F2: Done closes the sheet
+PASS F2: without clipboard access the link is shown instead, with an explanation
+PASS F7: no Sound switch that does nothing
+PASS F8: Animations Off applies to the lobby at once
+PASS F5: advancing the day asks first
+PASS F5: 'Not yet' leaves the day unchanged
+PASS F5: confirming advances to day 2
+PASS V1/V6 390x664, 10 players, "Geography Challenge": no overlaps in the lobby
+PASS V1/V6 393x659, 10 players, "Geography Challenge": no overlaps in the lobby
+PASS V1/V6 375x553, 10 players, "Geography Challenge": no overlaps in the lobby
+PASS V1/V6 412x780, 10 players, "Geography Challenge": no overlaps in the lobby
+PASS V1/V6 360x640, 10 players, "Geography Challenge": no overlaps in the lobby
+PASS V1/V6 375x553, 1 player with a long name: no overlaps
+LOBBY FIXES ALL PASSED
+exit 0

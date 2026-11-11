@@ -1,0 +1,39 @@
+PASS C. the lobby names the Individual Family Cup
+PASS C. the game list marks Impostor practice only
+PASS C. the practice-only reason is shown
+PASS C. the Official mode is disabled for Impostor
+PASS C. Start starts practice
+PASS A. Bea answered 3
+PASS A. the waiting screen shows a countdown
+PASS A. the countdown uses server time, not the phone's wrong clock — shown 19s, server says 18s
+PASS A. no Skip button for the host
+PASS H. diagnosis while waiting: server playing, deadline ahead, type waiting-on-players — DIAG player=Ada game=trivia(game-1) server=playing phase=- deadlineIn=18s phaseIn=- submitted=2/3 outcome=- | screen="ALL YOUR ANSWERS ARE IN A You B Reconnecting C Cal 1/3 have finished Everyone go" clock="Ends automatically in: 0:19" | type=waiting-on-players
+PASS H. diagnosis for an offline phone says the server is unreachable — DIAG player=Bea server=unavailable(page.evaluate: TypeError: Failed to fetch) | screen="Question 3 of 10" clock="" | type=server-unreachable
+PASS A. the waiting screen says the game ends by itself
+PASS A. Ada's phone reaches the results with no host action
+PASS A. Cal's phone reaches the results too
+PASS A. results say time ran out
+PASS A. results say it counts toward the Family Cup
+PASS A. Ada: Answered 10 of 10
+PASS A. Ada sees Bea: Answered 3 of 10 — Bea: Answered 3 of 10 questionsCal: Did not answer (0 of 10)
+PASS A. Ada sees Cal: Did not answer (never 'abstained') — Bea: Answered 3 of 10 questionsCal: Did not answer (0 of 10)
+PASS A. Cal's own line: Did not answer
+PASS H. diagnosis after the end: server finished with outcome deadline, Cal 0/10 — DIAG player=Cal game=trivia(game-1) server=finished phase=- deadlineIn=-1s phaseIn=- submitted=2/3 outcome=deadline mine=0/10 | screen="Question 1 of 10" clock="" shownOutcome=deadline | type=finished-and-shown
+PASS A. Bea, back online, sees the results
+PASS A. Bea: Answered 3 of 10
+PASS A. server: Bea scored only her 3 answers (0-360, a multiple of 120) — 0
+PASS A. server: Cal scored 0 and is still ranked (not dropped) — {"player-1":360,"player-2":0,"player-3":0}
+PASS A. server: outcome is deadline and counts
+PASS B. a per-question countdown is shown
+PASS B. the question moves on for everyone without waiting for silent players
+PASS B. Cal's screen shows the next question
+PASS no horizontal overflow on results/countdown screens
+PASS D. Closest has ended (its questions time out)
+PASS D. the outdated tab shows the refresh banner
+PASS D. the outdated tab can still play (the question is shown, not blank)
+PASS D. an up-to-date phone shows no refresh banner
+PASS D. the server marked only Dee as untimed for this game — ["player-4"]
+PASS D. 'Later' hides the banner so it never blocks answering
+PASS D. the outdated tab can answer (even the bottom option)
+LIFECYCLE ALL PASSED
+exit 0

@@ -1,6 +1,6 @@
 # Private preview of Stage 7, for an interactive audit
 
-- **For:** ChatGPT's interactive site audits of the Stage 7 slices (Quick Party, session flow, host handover, content variety) and Stage 8.1 (mobile usability and solo presentation).
+- **For:** ChatGPT's interactive site audits of the Stage 7 slices (Quick Party, session flow, host handover, content variety), Stage 8.1 (mobile usability and solo presentation) and Stage 8.2 (Everyday and Christmas looks, seasonal content kept apart).
 - **How it runs:** on a private Codespace (or any machine), with the shipped content and normal timing.
 - **Keep the port Private.** No public port and nothing paid is needed.
 
@@ -11,6 +11,7 @@ Replace `<SHA>` with the tested SHA from the developer handoff, and `<branch>` w
 - Stage 7.3 (PR #10): `claude/stage7-3-host-handover`;
 - Stage 7.4 (PR #11): `claude/stage7-4-content-variety`.
 - Stage 8.1 (PR #12): `claude/stage8-1-mobile-solo`.
+- Stage 8.2 (PR #13): `claude/stage8-2-themes-seasonal`.
 
 ```bash
 git fetch origin <branch>
@@ -75,3 +76,19 @@ A two-game lineup (Quick Party), played through: the casual results screen with 
 
 ## Stage 7.1: Quick Party
 Plan a lineup (size, 15/30/60 minutes, suggest, edit, apply). Start says "game 1 of N". A lineup for 4 with 3 here asks first.
+
+## Stage 8.2: Everyday and Christmas looks, seasonal content kept apart (about 15 minutes)
+Use phone sizes (320×640, 390×844, 844×390) and a laptop. Separate tabs are separate devices for seats; the **look** is kept per browser (localStorage), so use a private window, or another browser, for a phone with a different look.
+1. **Solo:** Home → **Play solo**. The shelf says **Content: Everyday**, in the everyday colours.
+   - Choose **Christmas**: the page turns pine and cranberry, including the browser's toolbar colour. The note says only Word Connections changes.
+   - Reload: Christmas is kept.
+   - Start **Word Connections**: a Christmas board (Christmas foods, decorations, reindeer, or "On a Christmas tree"), labelled "Christmas content". Play again: the other Christmas board.
+   - Choose **Everyday** on its start screen: year-round boards only.
+2. **A casual room, two phones:** the host chooses **Word Connections**. Both see "Everyday content" on the up-next card; only the host has the **Content** choice.
+   - The guest opens the room menu → **Look → Christmas**: only the guest's phone changes. The room still says Everyday.
+   - The host chooses **Christmas**: both phones and the TV say "Christmas content". The host's phone and the TV turn Christmas (Match the game).
+   - The guest sets **Look → Everyday**: their phone turns everyday, and the room still deals Christmas.
+3. **Start:** the briefing says "Christmas content" and the board is a Christmas one. **Sit this game out** on both phones; What's next says Christmas; **Play again** keeps it.
+4. **Back to Everyday** in the lobby: the next game deals a year-round board. A guest's reload keeps both the room's content and their own look.
+5. **A server restart:** stop the server and start it with the same data directory. Reload: the solo and casual content choices are kept.
+6. **A Family Cup:** host a Cup. It stays in the everyday look under Match the game, and its content is unchanged (Christmas items stay in the Cup). A phone set to **Look → Christmas** shows it in Christmas colours.

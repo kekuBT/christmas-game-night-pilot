@@ -1,3 +1,4 @@
+import type { SessionSeason } from "../../../src/shared/season.js";
 // Typed server/client projection contracts for the browser app.
 // These mirror src/server/room.ts project() output. Game-specific state
 // (state, questions) stays as unknown/Record<string, unknown> and is narrowed
@@ -58,6 +59,8 @@ export interface PublicGame extends LifecycleFields {
   gameId: string;
   official: boolean;
   status: GameStatus;
+  /** Stage 8.2: the content this solo or casual game was started with (absent in a Cup). */
+  season?: SessionSeason;
   timedOut: boolean;
   day?: number;
   players: string[];
@@ -172,6 +175,10 @@ export interface Projection {
   party?: PartyView;
   /** Stage 7.2: casual rooms only. */
   session?: SessionView;
+  /** Stage 8.2: what this solo or casual session deals (absent in a Cup). Never a device's look. */
+  contentSeason?: SessionSeason;
+  /** Stage 8.2: the latest briefing that ended without play (last 10 minutes), and why. */
+  briefingCancelled?: { gameInstanceId: string; reason: string; contentWhy?: "changed" | "season" };
   championship?: ChampionshipResult[];
   achievements?: Achievement[];
   ceremony?: Ceremony;

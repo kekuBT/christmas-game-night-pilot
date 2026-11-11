@@ -59,6 +59,8 @@ export interface MchezoTheme {
     success: string;
     highlight: string;
     spotlight: string;
+    /** Stage 8.2: error and refusal text (was used by CSS but never defined). At least 4.5:1 on the ground and both surfaces. */
+    danger: string;
   };
   /** Decoration of the Circle ring. Seasonal skins can swap this without touching layout. */
   ring: { style: 'plain' | 'wreath'; colors: readonly string[] };
@@ -86,6 +88,7 @@ export const everyday: MchezoTheme = {
     success: '#3CCFB4',
     highlight: '#FFC94A',
     spotlight: 'rgba(154,165,255,.18)',
+    danger: '#FF8A7A',
   },
   ring: { style: 'plain', colors: ['#7A6E8E'] },
   reactions: ['love', 'bravo', 'ha', 'wow'],
@@ -109,6 +112,7 @@ export const christmasFamilyCup: MchezoTheme = {
     success: '#7FD6A8',
     highlight: '#F2C14E',
     spotlight: 'rgba(242,193,78,.16)',
+    danger: '#FF8A7A',
   },
   ring: { style: 'wreath', colors: ['#F2545B', '#7FD6A8', '#4E7A62'] },
   reactions: ['love', 'bravo', 'ha', 'brr'],
@@ -153,6 +157,7 @@ export function themeToCssVars(t: MchezoTheme): Record<string, string> {
     '--mz-success': c.success,
     '--mz-highlight': c.highlight,
     '--mz-spotlight': c.spotlight,
+    '--mz-danger': c.danger,
     '--mz-font-display': foundation.font.display,
     '--mz-font-body': foundation.font.body,
     '--mz-depth-key': foundation.depth.key + 'px',

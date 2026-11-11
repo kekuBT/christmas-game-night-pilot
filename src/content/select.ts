@@ -27,6 +27,10 @@
  *                         nothing to protect. Every practice-usable item the
  *                         room hasn't used comes first, then the least
  *                         recently used (§4.2).
+ *                         Stage 8.2: only items the session's content allows
+ *                         (`season`, required here): Everyday never deals a
+ *                         Christmas-only item; Christmas deals its unused
+ *                         Christmas items first (docs/stage8/stage82.md §3.3).
  *
  * Balance: the difficulty mix of an official game mirrors the remaining
  * pool (proportional stratified sampling), so whichever day someone plays,
@@ -36,6 +40,7 @@
 import { createHash } from "node:crypto";
 import { seededRng } from "../shared/rng.js";
 import { officialEligible, practiceUsable, type ContentLibrary, type LoadedItem } from "./registry.js";
+import { SEASON_LABEL, seasonAllows, type SessionSeason } from "../shared/season.js";
 import type { ContentGameId } from "./schema.js";
 import { isNumericGame, withinNumericInput } from "../shared/numericInput.js";
 import { officialSprintSuitable, SPRINT_SIZE_POLICY_VERSION } from "./closedSet.js";
@@ -65,6 +70,12 @@ export interface SelectionRequest {
    * here, and recorded in the game. Absent = Sprint 4 behaviour.
    */
   sprint?: { players: number; sizePolicy: typeof SPRINT_SIZE_POLICY_VERSION };
+  /**
+   * Stage 8.2: the content a solo or casual session plays (bound to the game
+   * at its start). Required for those rooms and refused for a Cup, whose
+   * selection never reads seasons: neither is ever filled in by default.
+   */
+  season?: SessionSeason;
 }
 
 export type SelectionResult =
@@ -143,6 +154,8 @@ export function selectContent(req: SelectionRequest): SelectionResult {
   const seed = selectionSeed(req.cupId, req.gameId, req.seq);
   const rng = seededRng(seed);
   if (req.roomKind !== "cup") return selectForVariety(req, all, rng, seed, excludedNote);
+  // A Cup's selection (official and practice) never reads seasons (§3.3).
+  if (req.season !== undefined) throw new Error("A Family Cup's content isn't chosen by season.");
   if (req.mode === "official") {
     const sprint = req.gameId === "category-sprint" ? req.sprint : undefined;
     const eligible = all.filter((li) => officialEligible(li, req.today) && (!sprint || officialSprintSuitable(li.item as never, sprint.players).ok));
@@ -190,21 +203,40 @@ export function selectContent(req: SelectionRequest): SelectionResult {
  * in this room: never used first, then the oldest. Practice-only and
  * official-approved items are alike here. Items repeat within one game only
  * when the pool is smaller than the game needs.
+ *
+ * Stage 8.2 (§3.3): only items the session's content allows, by their season
+ * tag alone. A Christmas session puts its never-used Christmas items ahead of
+ * its never-used year-round ones, so Christmas content leads; used items stay
+ * least recently used first, whatever their season. An empty pool refuses
+ * the game in plain words: it never borrows from the other season.
  */
 function selectForVariety(req: SelectionRequest, all: LoadedItem[], rng: () => number, seed: number, excludedNote: string[]): SelectionResult {
   if (req.mode === "official") {
     // The room refuses this first (NOT_A_CUP_ROOM); a second guard, never a silent switch.
     return { ok: false, reason: "insufficient-content", available: 0, needed: req.count, message: "Only a Family Cup room plays official games." };
   }
+  const season = req.season;
+  if (season === undefined) throw new Error(`A ${req.roomKind} room's selection needs the session's content (season).`);
   const usable = all.filter((li) => practiceUsable(li));
-  if (usable.length === 0) {
-    return { ok: false, reason: "insufficient-content", available: 0, needed: req.count, message: "No practice content is available for this game yet." };
+  const eligible = usable.filter((li) => seasonAllows(season, li.item.season));
+  if (eligible.length === 0) {
+    return { ok: false, reason: "insufficient-content", available: 0, needed: req.count, message: usable.length === 0 ? "No practice content is available for this game yet." : `No ${SEASON_LABEL[season]} content is available for this game yet.` };
   }
-  const ranked = shuffled(usable, rng).sort((a, b) => lastUsedSeq(req.usage, a.item.id) - lastUsedSeq(req.usage, b.item.id));
+  const seasonal = (li: LoadedItem) => li.item.season !== undefined;
+  const ranked = shuffled(eligible, rng).sort((a, b) => {
+    const ua = lastUsedSeq(req.usage, a.item.id), ub = lastUsedSeq(req.usage, b.item.id);
+    if (ua !== ub) return ua - ub;
+    // Both never used, in a Christmas session: Christmas items first (stable sort keeps the shuffle otherwise).
+    return season === "christmas" && ua < 0 ? Number(seasonal(b)) - Number(seasonal(a)) : 0;
+  });
   const items: LoadedItem[] = [];
   for (let i = 0; items.length < req.count; i++) items.push(ranked[i % ranked.length]!);
-  const unused = usable.filter((li) => !usedInCup(req.usage, li.item.id)).length;
-  return { ok: true, items, seed, reasons: [`variety pool (${req.roomKind} room): ${unused} unused of ${usable.length} practice-usable, least recently used next${req.count > usable.length ? " (small pool: items repeat)" : ""}`, ...excludedNote] };
+  const unused = eligible.filter((li) => !usedInCup(req.usage, li.item.id)).length;
+  const excludedSeasonal = usable.length - eligible.length;
+  const seasonNote = season === "everyday"
+    ? `${excludedSeasonal} Christmas-only excluded`
+    : `${eligible.filter(seasonal).length} Christmas, unused Christmas first`;
+  return { ok: true, items, seed, reasons: [`variety pool (${req.roomKind} room, ${season}): ${unused} unused of ${eligible.length} eligible, ${seasonNote}, least recently used next${req.count > eligible.length ? " (small pool: items repeat)" : ""}`, ...excludedNote] };
 }
 
 /** Record the selection in the Cup's usage history (same synchronous step as game creation). */

@@ -1,0 +1,76 @@
+$ node scripts/check-leaderboard.mjs http://localhost:40825
+# timeout 1800s | worker w3 | server http://localhost:40825 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-d4e06c3/test-results/20261111-132514-d4e06c34-28633/server-data/w3)
+
+[+35.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":5,"peakOpenPages":5}
+[+35.1s] node:internal/modules/run_main:123
+[+35.1s]     triggerUncaughtException(
+[+35.1s]     ^
+[+35.1s] 
+[+35.1s] locator.click: Target page, context or browser has been closed
+[+35.1s] Browser logs:
+[+35.1s] 
+[+35.1s] <launching> /opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,AvoidCorsURLLoaderRestartOnRedirect,Translate,AutoDeElevate,OptimizationHints,NetworkTimeServiceQuerying,AimEnabled,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-9p4aiv --remote-debugging-pipe --no-startup-window
+[+35.1s] <launched> pid=31596
+[+35.1s] [pid=31596][err] [1111/132605.811179:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+[+35.1s] [pid=31596][err] [1111/132605.811235:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[+35.1s] [pid=31596][err] [1111/132605.811250:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+[+35.1s] [pid=31596][err] [1111/132605.811264:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+[+35.1s] [pid=31596][err] [1111/132605.821951:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[+35.1s] [pid=31596][err] [1111/132605.824714:WARNING:device/bluetooth/dbus/bluez_dbus_manager.cc:209] Floss manager service not available, cannot set Floss enable/disable.
+[+35.1s] [pid=31596][err] [1111/132605.829491:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[+35.1s] [pid=31596][err] [1111/132605.830220:ERROR:dbus/object_proxy.cc:572] Failed to call method: org.freedesktop.DBus.NameHasOwner: object_path= /org/freedesktop/DBus: unknown error type: 
+[+35.1s] [pid=31596][err] [1111/132605.832222:WARNING:media/gpu/vaapi/vaapi_wrapper.cc:1660] drmGetDevices2() has not found any devices
+[+35.1s] [pid=31596][err] [1111/132605.837310:WARNING:sandbox/policy/linux/sandbox_linux.cc:405] InitializeSandbox() called with multiple threads in process gpu-process.
+[+35.1s] [pid=31596][err] [1111/132605.926454:ERROR:net/socket/socket_posix.cc:121] CreatePlatformSocket() failed: Address family not supported by protocol (97)
+[+35.1s] [pid=31596][err] [1111/132605.956708:ERROR:net/socket/socket_posix.cc:121] CreatePlatformSocket() failed: Address family not supported by protocol (97)
+[+35.1s] [pid=31596][err] [1111/132606.671651:ERROR:net/socket/socket_posix.cc:121] CreatePlatformSocket() failed: Address family not supported by protocol (97)
+[+35.1s] [pid=31596][err] [1111/132607.669171:ERROR:net/socket/socket_posix.cc:121] CreatePlatformSocket() failed: Address family not supported by protocol (97)
+[+35.1s] [pid=31596][err] [1111/132608.673360:ERROR:net/socket/socket_posix.cc:121] CreatePlatformSocket() failed: Address family not supported by protocol (97)
+[+35.1s] [pid=31596][err] [1111/132609.570176:ERROR:net/socket/socket_posix.cc:121] CreatePlatformSocket() failed: Address family not supported by protocol (97)
+[+35.1s] [pid=31596][err] [1111/132609.721615:ERROR:net/socket/socket_posix.cc:121] CreatePlatformSocket() failed: Address family not supported by protocol (97)
+[+35.1s] [pid=31596][err] [1111/132609.750437:ERROR:net/socket/socket_posix.cc:121] CreatePlatformSocket() failed: Address family not supported by protocol (97)
+[+35.1s] [pid=31596][err] [1111/132610.610050:ERROR:net/socket/socket_posix.cc:121] CreatePlatformSocket() failed: Address family not supported by protocol (97)
+[+35.1s] [pid=31596] <gracefully close start>
+[+35.1s] Call log:
+[+35.1s]   - waiting for getByRole('button', { name: 'Next question' })
+[+35.1s]     - locator resolved to <button type="button" class="mz-key mz-key--neutral mz-key--lg mz-key--block">Next question</button>
+[+35.1s]   - attempting click action
+[+35.1s]     2 × waiting for element to be visible, enabled and stable
+[+35.1s]       - element is not stable
+[+35.1s]     - retrying click action
+[+35.1s]     - waiting 20ms
+[+35.1s]     2 × waiting for element to be visible, enabled and stable
+[+35.1s]       - element is not stable
+[+35.1s]     - retrying click action
+[+35.1s]       - waiting 100ms
+[+35.1s]     - waiting for element to be visible, enabled and stable
+[+35.1s]     - element is not stable
+[+35.1s]   - retrying click action
+[+35.1s]     - waiting 500ms
+[+35.1s]     - waiting for element to be visible, enabled and stable
+[+35.1s] 
+[+35.1s]     at answerKitQuestions (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-d4e06c3/scripts/lib/answer.mjs:75:65)
+[+35.1s]     at async answerCorrect (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-d4e06c3/scripts/check-leaderboard.mjs:55:3)
+[+35.1s]     at async playGame (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-d4e06c3/scripts/check-leaderboard.mjs:185:38)
+[+35.1s]     at async file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-d4e06c3/scripts/check-leaderboard.mjs:222:45 {
+[+35.1s]   log: [
+[+35.1s]     "  - waiting for getByRole('button', { name: 'Next question' })",
+[+35.1s]     '    - locator resolved to <button type="button" class="mz-key mz-key--neutral mz-key--lg mz-key--block">Next question</button>',
+[+35.1s]     '  - attempting click action',
+[+35.1s]     '    2 × waiting for element to be visible, enabled and stable',
+[+35.1s]     '      - element is not stable',
+[+35.1s]     '    - retrying click action',
+[+35.1s]     '    - waiting 20ms',
+[+35.1s]     '    2 × waiting for element to be visible, enabled and stable',
+[+35.1s]     '      - element is not stable',
+[+35.1s]     '    - retrying click action',
+[+35.1s]     '      - waiting 100ms',
+[+35.1s]     '    - waiting for element to be visible, enabled and stable',
+[+35.1s]     '    - element is not stable',
+[+35.1s]     '  - retrying click action',
+[+35.1s]     '    - waiting 500ms',
+[+35.1s]     '    - waiting for element to be visible, enabled and stable'
+[+35.1s]   ]
+[+35.1s] }
+[+35.1s] 
+[+35.1s] Node.js v22.23.4

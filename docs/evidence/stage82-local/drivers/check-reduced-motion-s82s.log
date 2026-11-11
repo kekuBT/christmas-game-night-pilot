@@ -1,0 +1,4 @@
+PASS control: arriving seat animates under default motion
+PASS reduced: arriving seat never animates under reduced motion
+REDUCED MOTION ALL PASSED
+exit 0

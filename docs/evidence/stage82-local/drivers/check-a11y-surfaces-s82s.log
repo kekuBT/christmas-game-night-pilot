@@ -1,0 +1,16 @@
+PASS Geography: a game with a flag question was dealt — 8 questions
+PASS Geography: the server describes the flag without naming any option — {"imageAlt":"Red bands at each side, white centre with a red maple leaf.","options":["Peru","Canada","Switzerland","Austria"]}
+PASS Geography: the flag question is on screen
+PASS Geography: the flag is exposed as a picture named 'Flag: <description>' — 1
+  question in the accessibility tree: - 'heading "Which country does this flag belong to? Flag: Red bands at each side, white centre with a red maple leaf." [level=1]': |   - text: Which country does this flag belong to? |   - 'img "Flag: Red bands at each side, white centre with a red maple leaf."': 🇨🇦
+PASS Geography: the question's accessible text names no option (no answer read out) — - 'heading "Which country does this flag belong to? Flag: Red bands at each side, white centre with a red maple leaf." [level=1]':
+  - text: Which country does this flag belong to?
+  - 'img "Flag: Red bands at each side, white centre with a red maple leaf."': 🇨🇦
+PASS Geography: sighted players still see the flag emoji
+PASS Who Said That: every question is its own labelled group
+PASS Who Said That: the group is named by its quote and says which question it is — Nobody leaves my kitchen without a second slice. (question 1 of 8)
+PASS Who Said That: an answered question says YOUR answer
+PASS Who Said That: no internal game or player ids on the screen
+PASS Who Said That: no internal status word ('Status: playing')
+A11Y SURFACES ALL PASSED
+exit 0

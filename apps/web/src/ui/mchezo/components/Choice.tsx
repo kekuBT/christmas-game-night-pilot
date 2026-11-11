@@ -26,7 +26,7 @@ export function SegmentedChoice({ label, options, value, onChange, compact, test
   testId?: string;
 }) {
   return (
-    <div className={`mz-choice${compact ? " mz-choice--compact" : ""}`} role="group" aria-label={label} data-testid={testId} style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
+    <div className={`mz-choice${compact ? " mz-choice--compact" : ""}`} role="group" aria-label={label} data-testid={testId} style={compact ? undefined : { gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}>
       {options.map((o) => {
         const on = o.value === value;
         return (

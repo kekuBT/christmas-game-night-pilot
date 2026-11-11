@@ -7,6 +7,7 @@ import './styles/stage5.css';
 import './styles/stage6.css';
 import './styles/stage7.css';
 import './styles/stage8.css';
+import './styles/stage82.css';
 
 export * from './tokens/tokens.js';
 export * from './types.js';

@@ -1,0 +1,290 @@
+{
+  "revision": "546a9c6feb1e94a8aa9d0bc1ba5557f758135390",
+  "workingTreeClean": true,
+  "capturedAt": "2026-11-11T15:47:38.696Z",
+  "by": "scripts/screenshot-stage82.mjs",
+  "note": "Chromium headless (Playwright) emulation only; not a real iPhone or Android device, not WebKit. Viewport-sized shots.",
+  "shots": [
+    {
+      "file": "01-home-everyday-320x640.png",
+      "screen": "Home",
+      "viewport": "320×640",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "02-solo-shelf-everyday-320x640.png",
+      "screen": "Solo shelf",
+      "viewport": "320×640",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "01-home-everyday-390x844.png",
+      "screen": "Home",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "02-solo-shelf-everyday-390x844.png",
+      "screen": "Solo shelf",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "03-library-everyday-390x844.png",
+      "screen": "Game library",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "04-solo-connections-start-everyday-390x844.png",
+      "screen": "Word Connections solo start screen",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "05-solo-connections-round-everyday-390x844.png",
+      "screen": "A solo Word Connections round",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "01-home-everyday-844x390.png",
+      "screen": "Home",
+      "viewport": "844×390",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "02-solo-shelf-everyday-844x390.png",
+      "screen": "Solo shelf",
+      "viewport": "844×390",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "01-home-everyday-1440x900.png",
+      "screen": "Home",
+      "viewport": "1440×900",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "02-solo-shelf-everyday-1440x900.png",
+      "screen": "Solo shelf",
+      "viewport": "1440×900",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "06-casual-lobby-host-everyday-390x844.png",
+      "screen": "Casual lobby, host",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "07-casual-lobby-guest-everyday-320x640.png",
+      "screen": "Casual lobby, guest",
+      "viewport": "320×640",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "08-tv-lobby-everyday-1280x720.png",
+      "screen": "TV (spectator) between games",
+      "viewport": "1280×720",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "09-briefing-host-everyday-390x844.png",
+      "screen": "Briefing, host",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "10-tv-briefing-everyday-1280x720.png",
+      "screen": "TV briefing",
+      "viewport": "1280×720",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "11-casual-connections-guest-everyday-320x640.png",
+      "screen": "Word Connections in a casual room, guest",
+      "viewport": "320×640",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "12-casual-results-host-everyday-390x844.png",
+      "screen": "Casual results with What's next, host",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "13-legacy-sprint-host-everyday-390x844.png",
+      "screen": "An older game screen (Category Sprint): its header",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "14-cup-lobby-everyday-390x844.png",
+      "screen": "Family Cup lobby (one player)",
+      "viewport": "390×844",
+      "deviceLook": "everyday",
+      "rendered": "everyday"
+    },
+    {
+      "file": "01-home-christmas-320x640.png",
+      "screen": "Home",
+      "viewport": "320×640",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "02-solo-shelf-christmas-320x640.png",
+      "screen": "Solo shelf, Christmas content chosen (where it exists)",
+      "viewport": "320×640",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "01-home-christmas-390x844.png",
+      "screen": "Home",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "02-solo-shelf-christmas-390x844.png",
+      "screen": "Solo shelf, Christmas content chosen (where it exists)",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "03-library-christmas-390x844.png",
+      "screen": "Game library",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "04-solo-connections-start-christmas-390x844.png",
+      "screen": "Word Connections solo start screen",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "05-solo-connections-round-christmas-390x844.png",
+      "screen": "A solo Word Connections round (Christmas content: a Christmas board)",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "01-home-christmas-844x390.png",
+      "screen": "Home",
+      "viewport": "844×390",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "02-solo-shelf-christmas-844x390.png",
+      "screen": "Solo shelf, Christmas content chosen (where it exists)",
+      "viewport": "844×390",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "01-home-christmas-1440x900.png",
+      "screen": "Home",
+      "viewport": "1440×900",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "02-solo-shelf-christmas-1440x900.png",
+      "screen": "Solo shelf, Christmas content chosen (where it exists)",
+      "viewport": "1440×900",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "06-casual-lobby-host-christmas-390x844.png",
+      "screen": "Casual lobby, host (Christmas content where it exists)",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "07-casual-lobby-guest-christmas-320x640.png",
+      "screen": "Casual lobby, guest",
+      "viewport": "320×640",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "08-tv-lobby-christmas-1280x720.png",
+      "screen": "TV (spectator) between games",
+      "viewport": "1280×720",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "09-briefing-host-christmas-390x844.png",
+      "screen": "Briefing, host",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "10-tv-briefing-christmas-1280x720.png",
+      "screen": "TV briefing",
+      "viewport": "1280×720",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "11-casual-connections-guest-christmas-320x640.png",
+      "screen": "Word Connections in a casual room, guest",
+      "viewport": "320×640",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "12-casual-results-host-christmas-390x844.png",
+      "screen": "Casual results with What's next, host",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "13-legacy-sprint-host-christmas-390x844.png",
+      "screen": "An older game screen (Category Sprint): its header",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    },
+    {
+      "file": "14-cup-lobby-christmas-390x844.png",
+      "screen": "Family Cup lobby (one player)",
+      "viewport": "390×844",
+      "deviceLook": "christmas",
+      "rendered": "christmas"
+    }
+  ],
+  "skipped": []
+}

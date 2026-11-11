@@ -33,6 +33,9 @@
 //   C  shipped library, the gate's server: solo Word Connections started over
 //      and over: every shipped board (none rejected) before any repeats,
 //      then the least recently used; each board is a real shipped board.
+//      Stage 8.2: a solo room is Everyday unless Christmas is chosen, so that
+//      is every year-round board (no season tag), and never a Christmas one
+//      (check-themes-seasonal covers Christmas sessions).
 // Board identity is read from the words on screen and checked against the
 // pool (or the shipped packs): never assumed from "a random draw differs".
 // Usage: node scripts/check-content-variety.mjs <baseUrl>   (the gate passes its server)
@@ -384,9 +387,11 @@ try {
     const p = JSON.parse(readFileSync(join(packs, f), "utf8"));
     return p.gameId === "word-connections" ? p.items : [];
   });
-  const usable = shipped.filter((it) => it.review.status !== "rejected");
+  const usable = shipped.filter((it) => it.review.status !== "rejected" && it.season === undefined);
   const keyOfWords = (words) => words.map((w) => w.toLowerCase()).sort().join("|");
   const shippedKeys = new Map(usable.map((it) => [keyOfWords(it.groups.flatMap((x) => x.words)), it.id]));
+  const christmasKeys = new Set(shipped.filter((it) => it.season === "christmas").map((it) => keyOfWords(it.groups.flatMap((x) => x.words))));
+  let christmasDealt = 0;
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const cp = await ctx.newPage();
   const dealt = [];
@@ -396,10 +401,13 @@ try {
     await cp.getByTestId("solo-round-start").click();
     await cp.getByTestId("mz-cx").waitFor({ timeout: 20000 });
     await cp.waitForFunction(() => document.querySelectorAll('[data-testid="mz-cx-tile"]').length === 16, null, { timeout: 10000 });
-    dealt.push(shippedKeys.get(keyOfWords(await shownWords(cp))) ?? null);
+    const key = keyOfWords(await shownWords(cp));
+    if (christmasKeys.has(key)) christmasDealt += 1;
+    dealt.push(shippedKeys.get(key) ?? null);
   }
   const n = usable.length;
-  check(`C shipped library: every board dealt is a shipped, usable board (${n} of them)`, dealt.every((id) => id !== null), JSON.stringify(dealt));
+  check(`C shipped library: every board dealt is a shipped, usable, year-round board (${n} of them)`, dealt.every((id) => id !== null), JSON.stringify(dealt));
+  check("C an Everyday solo room never deals a Christmas board", christmasDealt === 0, `${christmasDealt} dealt`);
   check(`C all ${n} shipped boards come before any repeats`, new Set(dealt.slice(0, n)).size === n, `${new Set(dealt.slice(0, n)).size} different in the first ${n}`);
   check("C then the least recently used (the first again)", dealt[n] === dealt[0], JSON.stringify([dealt[0], dealt[n]]));
   await ctx.close();

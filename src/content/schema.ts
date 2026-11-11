@@ -17,6 +17,7 @@
  * are also marked eligibility "official" and not past their review date.
  */
 import { z } from "zod";
+import { ITEM_SEASONS } from "../shared/season.js";
 
 export const REVIEW_STATUSES = ["approved", "verified-computed", "legacy", "provisional", "rejected"] as const;
 export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
@@ -53,6 +54,15 @@ const BaseItem = {
   ambiguity: z.string().max(300).optional(),
   accessibility: z.string().max(200).optional(),
   tags: z.array(z.string().regex(/^[a-z0-9-]+$/)).max(12).default([]),
+  /**
+   * Stage 8.2: a seasonal item ("christmas") is dealt in solo and casual
+   * sessions only when that session's content is the same season; no tag =
+   * year-round. A closed list, so a typo fails loading. Selection reads only
+   * this tag (never an item's words), and it is left out of the content hash
+   * (registry.ts itemHash): it says where an item may be dealt, not what
+   * players see, so tagging never voids an approval. Cups ignore it.
+   */
+  season: z.enum(ITEM_SEASONS).optional(),
   estSeconds: z.number().int().min(3).max(600).optional(),
 };
 

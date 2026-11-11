@@ -25,6 +25,7 @@
  * scores nothing for anyone.
  */
 import { DRAW_PROMPTS, type DrawPrompt } from "./packs/draw-prompts.js";
+import { seasonAllows, type SessionSeason } from "../../shared/season.js";
 import { moduleRng, seededShuffle, type GameModule, type ModuleContext } from "./types.js";
 
 export const DRAW_MAX_TURNS = 6;
@@ -138,14 +139,27 @@ function closedTurns(s: DrawState): number[] {
   return Array.from({ length: Math.min(upto, s.turns.length) }, (_, i) => i);
 }
 
+/**
+ * Stage 8.2 (§3.3): the prompts a game may deal, in dealing order. A Cup game
+ * (no season) keeps the whole list, shuffled exactly as before. Everyday:
+ * year-round prompts only. Christmas: its Christmas prompts first, then the
+ * rest (each part shuffled). Read from each prompt's season tag only.
+ */
+export function drawPromptsFor(season: SessionSeason | undefined, rng: () => number): DrawPrompt[] {
+  if (season === undefined) return seededShuffle(DRAW_PROMPTS, rng);
+  const allowed = DRAW_PROMPTS.filter((p) => seasonAllows(season, p.season));
+  if (season === "everyday") return seededShuffle(allowed, rng);
+  return [...seededShuffle(allowed.filter((p) => p.season !== undefined), rng), ...seededShuffle(allowed.filter((p) => p.season === undefined), rng)];
+}
+
 export const drawModule: GameModule<DrawState> = {
   id: "draw-guess",
   actions: ["draw-strokes", "draw-undo", "draw-clear", "draw-swap", "draw-guess"],
-  init({ players, seed }) {
+  init({ players, seed, season }) {
     const rng = moduleRng(seed);
     const order = seededShuffle(players, rng);
     const turnCount = Math.min(order.length, DRAW_MAX_TURNS);
-    const prompts = seededShuffle(DRAW_PROMPTS, rng).slice(0, turnCount * (1 + DRAW_LIMITS.swapsPerTurn));
+    const prompts = drawPromptsFor(season, rng).slice(0, turnCount * (1 + DRAW_LIMITS.swapsPerTurn));
     const turns: DrawTurn[] = Array.from({ length: turnCount }, (_, i) => ({
       drawer: order[i]!, promptIdx: i, swaps: 0, pieces: [], points: 0, correct: [], guessCounts: {}, skipped: [], recent: [],
     }));

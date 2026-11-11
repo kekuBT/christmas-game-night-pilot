@@ -13,6 +13,7 @@ import type { ContentLibrary } from "../content/registry.js";
 import { parseClientProtocol, PROTOCOL_HEADER, PROTOCOL_PARAM } from "../shared/clientProtocol.js";
 import { MemoryBook } from "./memorybook.js";
 import { hashToken } from "../shared/protocol.js";
+import { isSessionSeason, SESSION_SEASONS, type SessionSeason } from "../shared/season.js";
 import { RoomStore, type RestoreReport } from "./persistence.js";
 import { FailureLimiter, PendingRecoveries } from "./recovery.js";
 
@@ -142,6 +143,8 @@ export class LocalServer {
   /** Stage 7.2 (§3.8): one press of a continuation control: its own id (the same for its retries) and the session revision it was made against. */
   static readonly AttemptSchema = z.object({ id: z.string().regex(/^[A-Za-z0-9_-]{8,64}$/), sessionRevision: z.number().int().min(0) }).strict();
   static readonly BreakSchema = z.object({ on: z.boolean(), attempt: LocalServer.AttemptSchema }).strict();
+  /** Stage 8.2: a casual room's content (host/cohost), against the session revision the host saw. */
+  static readonly SeasonSchema = z.object({ season: z.enum(SESSION_SEASONS), baseRevision: z.number().int().min(0) }).strict();
   /** Stage 7.3: hand the host role to `targetId` (one press: its id and the session revision it was made against). */
   static readonly HostSchema = z.object({ targetId: z.string().min(1).max(64), attempt: LocalServer.AttemptSchema }).strict();
   /** Stage 7.1: the `party` marker on a game start: which lineup item this start is. */
@@ -933,6 +936,9 @@ export class LocalServer {
             if (!parsed.success) { this.send(res, 400, { error: "This start needs its request id and the session revision it was made against" }); return; }
             attempt = parsed.data;
           }
+          // Stage 8.2 (§3.4): the content the presser saw (solo and casual rooms; never a device's look).
+          if (body["season"] !== undefined && !isSessionSeason(body["season"])) { this.send(res, 400, { error: "Content is everyday or christmas" }); return; }
+          const season = body["season"] as SessionSeason | undefined;
           let game;
           let replay = false;
           try {
@@ -940,6 +946,7 @@ export class LocalServer {
               seed: typeof body["seed"] === "number" ? body["seed"] : undefined,
               roster: ids(body["roster"]),
               proceedWithout: ids(body["proceedWithout"]),
+              ...(season ? { season } : {}),
             };
             if (party) {
               ({ game, replay } = room.startPartyGame(player.id, String(body["gameId"] ?? ""), { ...party, ...common, fewerThanPlanned: body["fewerThanPlanned"] === true, attempt }));
@@ -967,6 +974,23 @@ export class LocalServer {
           this.persist(room);
           this.broadcast(room.id);
           this.send(res, 201, { gameId: game.id, gameType: game.gameId, status: game.status, players: game.players });
+          return;
+        }
+        // Stage 8.2 (§3.4): what a casual room deals (host/cohost; persisted; applies to the next Start).
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "season") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const parsed = LocalServer.SeasonSchema.safeParse(await this.readBody(req));
+          if (!parsed.success) { this.send(res, 400, { error: "Content is everyday or christmas, with the session revision it was chosen against" }); return; }
+          let done;
+          try {
+            done = room.setContentSeason(player.id, parsed.data.season, parsed.data.baseRevision);
+          } catch (err) {
+            if (err instanceof SessionRefused) { this.send(res, err.code === "NOT_HOST" ? 403 : 409, { error: err.message, code: err.code, contentSeason: room.kind !== "cup" ? room.contentSeason : undefined, ...(err.session ? { session: err.session } : {}) }); return; }
+            throw err;
+          }
+          if (done.changed) { this.persist(room); this.broadcast(room.id); }
+          this.send(res, 200, { ok: true, contentSeason: done.contentSeason, session: done.session, ...(done.changed ? {} : { unchanged: true }) });
           return;
         }
         // Stage 7.2: Take a break / Resume (host/cohost, casual rooms; persisted).

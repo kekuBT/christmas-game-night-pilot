@@ -10,6 +10,7 @@
  * everything else: who may act, deadlines and clocks, the briefing,
  * finishing exactly once, the ledger, persistence and broadcast.
  */
+import type { SessionSeason } from "../../shared/season.js";
 import type { Participation, PhaseKind } from "../../server/lifecycle.js";
 
 export interface ModuleContext {
@@ -31,7 +32,12 @@ export interface GameModule<S = unknown> {
   actions: readonly string[];
   /** Actions that open something rather than play it: they don't count toward "have started". */
   nonPlayingActions?: readonly string[];
-  init(args: { players: readonly string[]; seed: number }): S;
+  /**
+   * `season` (Stage 8.2): the content a solo or casual session plays, bound
+   * at its start; absent in a Cup, whose games keep their full content.
+   * Modules without seasonal content ignore it.
+   */
+  init(args: { players: readonly string[]; seed: number; season?: SessionSeason }): S;
   intent(s: S, actorId: string, action: string, payload: Record<string, unknown>, ctx: ModuleContext): ModuleResult;
   /** "Sit this one out": a round, or (wholeGameAbstain) the rest of the game. */
   abstain(s: S, actorId: string, ctx: ModuleContext): ModuleResult;

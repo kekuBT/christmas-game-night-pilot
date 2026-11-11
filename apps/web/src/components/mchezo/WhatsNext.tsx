@@ -18,6 +18,8 @@ import { Keycap, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { AnswerReview, type ReviewRow } from "./AnswerReview.js";
+import { ContentSeasonLabel } from "./ContentChoice.js";
+import type { SessionSeason } from "../../../../../src/shared/season.js";
 
 export { nextState, type NextState } from "./whatsNextState.js";
 import { nextState } from "./whatsNextState.js";
@@ -43,6 +45,8 @@ export interface WhatsNextProps {
   onPlan?: () => void;
   /** Pick any game in the lobby. */
   onChoose: () => void;
+  /** Stage 8.2 (§3.7): what the next game will deal (the room's content now; changed in the lobby). */
+  content?: SessionSeason;
 }
 
 export function WhatsNext(p: WhatsNextProps) {
@@ -54,6 +58,7 @@ export function WhatsNext(p: WhatsNextProps) {
   return (
     <section className="mz-card mz-next" aria-labelledby="mz-next-title" data-testid="whats-next" data-state={state} style={{ margin: "8px 16px" }}>
       <span className="mz-kicker" id="mz-next-title">What’s next</span>
+      {p.content && <> <ContentSeasonLabel season={p.content} prefix="Next game: " testId="whats-next-content" /></>}
       {state === "break" && (
         <>
           <h2 className="mz-next__title" data-testid="next-status">On a break</h2>

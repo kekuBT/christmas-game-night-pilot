@@ -1922,3 +1922,72 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Emulation only:** no real phones, no WebKit; landscape on a real phone (browser bars, the notch) is unverified.
 - **The briefing's sticky I'm ready** also applies to Family Cup briefings (the same screen); `check-briefing` passes.
 - **The landscape answer area** applies to every quiz game using the shared question screen; portrait is unchanged.
+
+**Cleared:** ChatGPT cleared Stage 8.1 on `d7bb85f` (comment 6795218622, 12:00 UTC), after its own run of `check-mobile-everyday` (134 passed, none failed, its four fonts) and its private live-site audit, the restart check included (Chromium emulation; real phones and WebKit unverified). The same comment is the Stage 8.2 handoff.
+
+---
+## Stage 8.2: Everyday and Christmas themes, and seasonal content kept apart (2026-11-11)
+
+**Branch:** `claude/stage8-2-themes-seasonal`, from `0f3cc54` (PR #12's cleared head), stacked on PR #12.
+- **Instruction:** ChatGPT's handoff on PR #12 (comment 6795218622), under D-WF-01.
+- **Spec and inventory first:** `docs/stage8/stage82.md` (§1 what exists, §3 design, §6 choices for review, §8 the catalog audit: 45 Christmas-only items, 43 of them dealt in solo or casual play today).
+- Nothing merged or deployed, no public port, nothing paid for.
+
+**Milestone (built; spec §7, D-S82-01 … 06):**
+- **Seasonal content:** 45 Christmas-only items are tagged `season: "christmas"` (outside the content hash; no item's hash changed). Everyday solo and casual sessions never deal them; Christmas sessions deal them first. Cups are unchanged.
+- **The session's content:**
+  - Everyday unless Christmas is chosen (solo shelf; casual host or cohost).
+  - Persisted and shown before Start (up-next card, dock, briefing, What's next, TV).
+  - Bound at Start: a casual mismatch is refused (CONTENT_CHANGED); a solo Start's content is part of its press; a frozen briefing re-checks its items.
+  - Older rooms are Everyday.
+- **The look:** per device, never sent (Settings → Look: Match the game, Everyday, Christmas). Every screen and the page itself follow it, the browser toolbar colour included. The legacy shell header says Mchezo. Token gaps are closed, and contrast is checked in both themes.
+
+**Changed:** see spec §7.1 (server `51301ee`, web `ea2bbff`, then the browser driver and the What's next label's test id).
+
+**Tests (local, the working tree):**
+- **Unit:** 1,359 tests, 35 of them new; eight mutations each caught.
+- **Browser:** `check-themes-seasonal` 125 checks, and 26 regression drivers with 0 failures (`docs/evidence/stage82-local/`).
+
+**Spec feedback 6795825877** (ChatGPT, 12:28 UTC; it reached this session at 13:25, after the first candidate `d4e06c3`): applied (spec §3.1, §3.4, §3.5, §3.7, D-S82-07).
+- **A Start without content** is a legacy Everyday press.
+- **Every press's content is part of its identity** on every path.
+- **The game on screen** drives Match the game and its labels ("This game" / "Next game").
+- **Solo:** Play again repeats its round's content, and a pending press is resent unchanged.
+- **Migration by room kind,** with restart fixtures.
+- **Stored choices** fall back safely.
+- **Tests:** 15 more unit tests (1,374 in all); the driver now has 139 checks (two tabs, and active versus next); 18 regression drivers rerun with 0 failures.
+
+**Gates:**
+- **`d4e06c3`** (before the feedback): fast PASSED (`20261111-132206-d4e06c34-24970`); full stopped by me about a minute in when the feedback arrived, self-recorded CANCELLED (`20261111-132514-d4e06c34-28633`). Not a verdict on the final candidate.
+- **The final candidate, `c27570f`** (fresh clones, clean tree, one after the other):
+  - fast `20261111-134753-c27570f7-12465`: **PASSED** 5/5, 1,374 unit tests, 49 s;
+  - full `20261111-134957-c27570f7-15819`: **PASSED** 84/84, `check-themes-seasonal` 139, in 30 min 00 s.
+- **Screenshots:** before (`0f3cc54`) and after (`c27570f`), 40 each, `docs/stage8/screenshots-82/`.
+
+**External blockers:** none. Real phones and WebKit are not available here (checklist I26, I27).
+
+**Repair R82-01** (ChatGPT's review 6799134510 on `c27570f`, not cleared):
+- **The finding:** a `localStorage` write that failed undid the look or content choice at once. Listeners re-read stale or default storage.
+- **The fix:** `ui/mchezo/deviceChoice.ts`. The page's choice is held in memory and is authoritative for the page, on every screen. Other tabs' saves still arrive. Failed saves are said plainly ("until you reload").
+- **The check:** `check-themes-seasonal` section F, in three storage modes, for both the look and the content: the shelf → Word Connections Start reaches the server as Christmas. 19 of its checks fail on `c27570f`; all 166 pass after the repair. Five new unit tests call the setters themselves (1,379 unit tests in all). Ten regression drivers were rerun with 0 failures. Evidence: `docs/evidence/stage82-local/r82-01/`.
+- **Gates on the first repair candidate, `224a2d2`:**
+  - fast `20261111-150823-224a2d23-5811` PASSED (5/5, 51 s).
+  - Its full gate `20261111-151310-224a2d23-9331` was stopped by me within seconds (self-recorded CANCELLED, exit 130), because the R82-01 shots had just shown the defect below. Neither run is a verdict on the final candidate.
+
+**Found while validating the repair** (mine, not a reviewer's; stage82.md §7.5, D-S82-09):
+- **The finding:** compact choices clipped their labels. At 320×640, Settings → Look read "Match | Everyday | hristmas", and the shelf's content choice also overflowed in wider fonts. It dates from the first Stage 8.2 candidate.
+- **The fix** (CSS only): compact choices wrap instead of clipping, and the ✓ never changes a width.
+- **The check:** new section G of `check-themes-seasonal`, covering three sizes and every installed wide font. It fails 19 checks on `224a2d2`, and all 251 pass after the fix. `check-mobile-everyday` (R81-01's first screen) passes 134/134. Ten regression drivers had 0 failures. Unit tests, lint and typecheck are clean.
+- Evidence: `docs/evidence/stage82-local/choice-fit/`.
+
+**Gates on the final repair candidate, `546a9c6`** (fresh clones, clean tree, fingerprint `9537c8d89ade`, 449 files, one after the other):
+- fast `20261111-154635-546a9c6f-17994`: **PASSED** 5/5, 1,379 unit tests, 49 s.
+- full `20261111-154845-546a9c6f-21442`: **PASSED** 84/84, `check-themes-seasonal` 251 (G 85), `check-mobile-everyday` 134, in 30 min 42 s.
+- Screenshots retaken on `546a9c6`: `after/` (40) and `r82-01/` (5).
+
+**Next task:** the repair report on PR #13. After that, ChatGPT's repair verification and private audit, then the Home Screen installation milestone. After that, ChatGPT's review and private audit, then the Home Screen installation milestone.
+
+**Risk:**
+- **Emulation only:** Safari's toolbar colour and Android's status bar are untested on real phones.
+- **Existing casual and solo rooms turn Everyday** (intended; D-S82-05). A room that was dealing a Christmas board stops until the host chooses Christmas.
+- **The audit's word net** misses a Christmas item with no Christmas word ("Decorating a tree"). Tagging stays a reviewer's job.

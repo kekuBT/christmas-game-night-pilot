@@ -450,6 +450,16 @@
 .mz-choice__title { font-weight: 800; font-size: 16px; display: inline-flex; align-items: center; gap: 6px; }
 .mz-choice__detail { font-weight: 600; font-size: 13px; line-height: 1.3; color: var(--mz-text-muted); }
 .mz-choice__check { font-size: 15px; }
+/* Compact choices (Settings, the content choice; stage82.md §7.5): every label
+   whole at any width and in any font. The options share the row but never
+   shrink below their label; when the labels can't all fit on one line the row
+   wraps instead of clipping. The ✓ hangs just after the label, out of the
+   flow, inside the side padding every option has (chosen or not), so choosing
+   never changes a width or moves the others, and it never touches the label. */
+.mz-choice--compact { display: flex; flex-wrap: wrap; }
+.mz-choice--compact .mz-choice__opt { flex: 1 1 0; min-width: max-content; padding: 6px 12px; }
+.mz-choice--compact .mz-choice__title { position: relative; font-size: 15px; white-space: nowrap; }
+.mz-choice--compact .mz-choice__check { position: absolute; left: calc(100% + 2px); top: 50%; transform: translateY(-50%); font-size: 10px; line-height: 1; }
 .mz-choice__opt.is-on { color: var(--mz-on-accent); box-shadow: 0 3px 0 rgba(0,0,0,.35); }
 .mz-choice__opt.is-on .mz-choice__detail { color: color-mix(in srgb, var(--mz-on-accent) 78%, transparent); }
 .mz-choice__opt--sun.is-on { background: var(--mz-highlight); }

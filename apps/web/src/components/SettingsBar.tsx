@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { SegmentedChoice } from "../ui/mchezo/index.js";
+import type { LookPref } from "../ui/mchezo/look.js";
 
 export type AnimSetting = "full" | "reduced" | "off";
 
@@ -30,7 +31,14 @@ const ANIM_HELP: Record<AnimSetting, string> = {
   off: "No motion: nothing animates.",
 };
 
-export function SettingsBar(props: { anim: AnimSetting; onSetAnim: (v: AnimSetting) => void; osReducedMotion?: boolean }) {
+/** Stage 8.2 (§3.1): what each look choice does, and that it never changes content. */
+const LOOK_HELP: Record<LookPref, string> = {
+  auto: "Match the game: Christmas colours when a game deals Christmas content, the everyday colours otherwise.",
+  everyday: "Everyday colours on this phone, always.",
+  christmas: "Christmas colours on this phone, always.",
+};
+
+export function SettingsBar(props: { anim: AnimSetting; onSetAnim: (v: AnimSetting) => void; osReducedMotion?: boolean; look?: LookPref; onSetLook?: (v: LookPref) => void; lookSaved?: boolean }) {
   return (
     <section className="mz-card" style={{ marginTop: 12 }} data-testid="settings-bar" aria-labelledby="mz-settings-title">
       <span className="mz-kicker" id="mz-settings-title">This phone</span>
@@ -52,6 +60,26 @@ export function SettingsBar(props: { anim: AnimSetting; onSetAnim: (v: AnimSetti
           {ANIM_HELP[props.anim]} Nothing important depends on animation.
         </p>
       </div>
+      {props.look && props.onSetLook && (
+        <div className="mz-settings__row">
+          <span className="mz-settings__label" id="mz-look-label">Look</span>
+          <SegmentedChoice
+            label="Look"
+            compact
+            value={props.look}
+            onChange={(v) => props.onSetLook?.(v as LookPref)}
+            options={[
+              { value: "auto", title: "Match", testId: "look-auto", tone: "neutral" },
+              { value: "everyday", title: "Everyday", testId: "look-everyday", tone: "neutral" },
+              { value: "christmas", title: "Christmas", testId: "look-christmas", tone: "neutral" },
+            ]}
+          />
+          <p className="mz-foot" style={{ margin: 0, textAlign: "left" }} data-testid="look-help">
+            {LOOK_HELP[props.look]} Only this phone changes: it never changes what anyone is dealt.
+          </p>
+          {props.lookSaved === false && <p className="mz-foot" role="status" style={{ margin: 0, textAlign: "left" }} data-testid="look-unsaved">This phone can’t save settings right now, so this look applies until you reload this page.</p>}
+        </div>
+      )}
       <div className="mz-settings__row">
         <span className="mz-settings__label">Sound</span>
         <p className="mz-foot" style={{ margin: 0, textAlign: "left" }} data-testid="sound-status">Mchezo doesn’t play any sounds yet.</p>

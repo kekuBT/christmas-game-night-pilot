@@ -227,20 +227,29 @@ describe("Word Connections in a solo room", () => {
   // dealt the same board every time ("CURRENT BEHAVIOUR", Stage 6.2 spec §5
   // concern 1: `new Set(boards).size` was 1). Now a solo room deals every
   // practice-usable board it hasn't used, then the least recently used.
-  it("with the shipped library: all 13 boards (the approved legacy one too), then repeats, least recently used first", () => {
+  //
+  // Stage 8.2 (docs/stage8/stage82.md §3.3) changed them again on purpose: a
+  // solo room is Everyday unless Christmas is chosen, so its two Christmas
+  // boards (con-legacy-1, the approved legacy one, and con-s4-03) are not
+  // dealt; the other 11 rotate as before. A Christmas solo room deals all 13
+  // (tests/stage82-seasonal.test.ts).
+  const christmasBoards = (lib: ReturnType<typeof loadContent>) => ["con-legacy-1", "con-s4-03"].map((id) => (lib.items.get(id)!.item as unknown as { groups: { name: string }[] }).groups.map((g) => g.name).sort().join("|"));
+  it("with the shipped library: all 11 year-round boards, then repeats, least recently used first; never a Christmas board", () => {
     const shipped = loadContent(DEFAULT_CONTENT_DIR, { testApproveProvisional: false });
     const boards = dealt(shipped);
-    expect(new Set(boards.slice(0, 13)).size).toBe(13);
-    expect(boards[13]).toBe(boards[0]);
-    expect(boards[14]).toBe(boards[1]);
+    expect(new Set(boards.slice(0, 11)).size).toBe(11);
+    expect(boards[11]).toBe(boards[0]);
+    expect(boards[12]).toBe(boards[1]);
+    expect(boards.filter((b) => christmasBoards(shipped).includes(b))).toEqual([]);
   });
 
-  it("Stage 7.4 (was concern 1): with every board approved for official play, a solo room still deals all 13 before any repeats", () => {
+  it("Stage 7.4 (was concern 1): with every board approved for official play, a solo room still deals all 11 year-round boards before any repeats", () => {
     const allApproved = loadContent(DEFAULT_CONTENT_DIR, { testApproveProvisional: true });
     const boards = dealt(allApproved);
-    expect(new Set(boards.slice(0, 13)).size).toBe(13);
-    expect(boards[13]).toBe(boards[0]);
-    expect(boards[14]).toBe(boards[1]);
+    expect(new Set(boards.slice(0, 11)).size).toBe(11);
+    expect(boards[11]).toBe(boards[0]);
+    expect(boards[12]).toBe(boards[1]);
+    expect(boards.filter((b) => christmasBoards(allApproved).includes(b))).toEqual([]);
   });
 });
 

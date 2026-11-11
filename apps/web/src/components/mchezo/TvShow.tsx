@@ -158,6 +158,7 @@ function TvLobby({ feed, titleOf, nameOf, registry }: { feed: TvFeed; titleOf: (
             <>
               <h2 className="mz-tvshow-h2">{next.title}</h2>
               <p className="mz-tvshow-line">{feed.upNext!.official ? "Official · counts toward the Cup" : feed.casual ? "Casual · just for fun" : "Practice · no Cup points"}</p>
+              {feed.contentSeason && <p className="mz-tvshow-line" data-testid="tv-content" data-season={feed.contentSeason}>{feed.contentSeason === "christmas" ? "🎄 Christmas content" : "Everyday content"}</p>}
               {short > 0 && <p className="mz-tvshow-line mz-tvshow-line--warn">Needs {short} more {short === 1 ? "player" : "players"} ({next.minPlayers}–{next.maxPlayers})</p>}
               {over > 0 && <p className="mz-tvshow-line mz-tvshow-line--warn">Up to {next.maxPlayers} players · {here.length} here</p>}
               <p className="mz-tvshow-line mz-tvshow-line--muted" data-testid="tv-host-line">{hostName ? `${hostName} starts it` : "The host starts it"} when everyone's ready.</p>
