@@ -2,34 +2,45 @@
    Layout only: the existing tokens, type and palette; nothing themed anew. */
 
 /* ------------------------------------------------ S1: the solo shelf
-   Phones: a row card (a small square cover beside the words) with Start
-   across the bottom, so two games and the top of the third fit a 390×844
-   screen. 600 px and wider: a grid of as many columns as fit (each at least
-   260 px, three at most), the cover a short banner, Start aligned along
-   the bottom of every card. */
+   Phones: a small square cover beside the title and the players line only;
+   the description, the personal best and any note run the card's full width
+   below (R81-01: with a wide fallback font such as DejaVu Sans, wrapping
+   them beside the cover made a 320 px card 341 px tall); Start across the
+   bottom. Two games and the top of the third fit a 390×844 screen.
+   600 px and wider: a grid of as many columns as fit (each at least 260 px,
+   three at most), the cover a short banner, Start aligned along the bottom
+   of every card. */
 .mz-solo-shelf .mz-solo__list { gap: 12px; margin-top: 14px; }
 .mz-solo-shelf .mz-solo__card {
-  grid-template-columns: 76px minmax(0, 1fr);
-  grid-template-areas: "cover text" "start start";
-  align-items: start; gap: 12px 14px; padding: 12px; border-radius: 20px;
+  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-areas: "cover title" "cover meta" "desc desc" "best best" "note note" "start start";
+  align-items: start; gap: 0 12px; padding: 12px; border-radius: 20px;
 }
-.mz-solo-shelf .mz-solo__cover { grid-area: cover; width: 76px; max-height: none; border-radius: 16px; }
-.mz-solo-shelf .mz-solo__text { grid-area: text; min-width: 0; }
-.mz-solo-shelf .mz-solo__card > .mz-key { grid-area: start; min-height: 52px; }
-.mz-solo-shelf .mz-solo__title { font-size: clamp(19px, 5.4vw, 22px); overflow-wrap: anywhere; }
-.mz-solo-shelf .mz-solo__desc { font-size: 14px; }
-.mz-solo-shelf .mz-solo__best { margin-top: 6px; }
+/* The words take their places in the card's grid (their reading order is unchanged). */
+.mz-solo-shelf .mz-solo__text { display: contents; }
+.mz-solo-shelf .mz-solo__cover { grid-area: cover; width: 56px; max-height: none; border-radius: 14px; }
+.mz-solo-shelf .mz-solo__title { grid-area: title; align-self: end; font-size: clamp(19px, 5.4vw, 22px); overflow-wrap: anywhere; }
+.mz-solo-shelf .mz-solo__meta { grid-area: meta; margin-top: 3px; }
+.mz-solo-shelf .mz-solo__desc { grid-area: desc; margin-top: 10px; font-size: 14px; }
+.mz-solo-shelf .mz-solo__best { grid-area: best; margin-top: 6px; }
+.mz-solo-shelf .mz-solo__best-note { grid-area: note; }
+.mz-solo-shelf .mz-solo__card > .mz-key { grid-area: start; min-height: 52px; margin-top: 12px; }
 
 @media (min-width: 600px) {
   .mz-screen.mz-solo-shelf { max-width: 1080px; }
   .mz-solo-shelf .mz-solo__list { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; align-items: stretch; }
   .mz-solo-shelf .mz-solo__card {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto 1fr auto;
-    grid-template-areas: "cover" "text" "start";
-    gap: 12px; padding: 14px;
+    grid-template-rows: auto auto auto auto auto 1fr auto;
+    grid-template-areas: "cover" "title" "desc" "meta" "best" "note" "start";
+    gap: 0; padding: 14px;
   }
-  .mz-solo-shelf .mz-solo__cover { width: 100%; height: clamp(88px, 15vh, 136px); }
+  .mz-solo-shelf .mz-solo__cover { width: 100%; height: clamp(88px, 15vh, 136px); margin-bottom: 12px; }
+  .mz-solo-shelf .mz-solo__title { align-self: start; }
+  .mz-solo-shelf .mz-solo__desc { margin-top: 4px; }
+  .mz-solo-shelf .mz-solo__meta { margin-top: 6px; }
+  /* The last row before Start takes the slack, so Start lines up along the bottom of every card. */
+  .mz-solo-shelf .mz-solo__best-note { align-self: start; }
   .mz-solo-shelf .mz-entry__lede { max-width: 62ch; }
 }
 

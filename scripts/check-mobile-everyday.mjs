@@ -88,6 +88,23 @@ async function checkLayout(page, where, { allowSmall = [] } = {}) {
   check(`${where}: no text clipped inside its box`, l.clipped.length === 0, l.clipped.join("; "));
   return l;
 }
+/**
+ * Which of these font families are installed on this machine. A font is
+ * installed when text set in it (with a generic fallback) measures differently
+ * from the generic fallback alone, checked against two generics.
+ * (document.fonts.check can't tell: it says true for any font not loaded as a web font.)
+ */
+async function installedFonts(browser, families) {
+  const ctx = await browser.newContext();
+  const p = await ctx.newPage();
+  const found = await p.evaluate((fams) => {
+    const c = document.createElement("canvas").getContext("2d");
+    const w = (font) => { c.font = font; return c.measureText("mmmmmmmmmmlliWWWQQ1234567890 abc").width; };
+    return fams.filter((f) => ["monospace", "serif"].some((g) => w(`32px "${f}", ${g}`) !== w(`32px ${g}`)));
+  }, families);
+  await ctx.close();
+  return found;
+}
 /** The element is entirely on screen as things stand (no scrolling). */
 async function inView(loc) {
   const box = await loc.boundingBox();
@@ -159,11 +176,38 @@ try {
     check(`${where}: every card keeps its description, players and time, and its personal best line`, wordsKept);
     check(`${where}: Word Connections keeps its note that the best spans boards`, /across boards/.test(await text(p.getByTestId("solo-note-word-connections"))));
     const startH = (await p.getByTestId("solo-start-math-mayhem").boundingBox())?.height ?? 0;
-    check(`${where}: Start is a full-size target (at least 48 px tall)`, startH >= 48, `${Math.round(startH)} px`);
+    check(`${where}: Start is a full-size target (at least 52 px tall)`, startH >= 52, `${Math.round(startH)} px`);
     if (vp.width < 600) {
-      const tallest = Math.max(...boxes.map((b) => b.height));
-      check(`${where}: compact cards (each at most ${vp.width === 320 ? 320 : 300} px tall; before: 421–481)`, tallest <= (vp.width === 320 ? 320 : 300), `${Math.round(tallest)} px`);
       check(`${where}: the cover is a small square beside the title, not a banner`, ((await p.locator(".mz-solo__cover").first().boundingBox())?.width ?? 999) <= 90);
+      // R81-01: the cards must stay compact whatever font the phone renders.
+      // The app names Figtree and Inter but loads no web font, so most phones
+      // and machines fall back to their own (DejaVu Sans on many Linux
+      // machines, the widest common one). Measured with the page's own font
+      // and with every fallback installed here, each forced in turn.
+      const cap = vp.width === 320 ? 320 : 300;
+      const fonts = [null, ...(await installedFonts(browser, ["DejaVu Sans", "Liberation Sans", "FreeSans"]))];
+      const results = [];
+      for (const fam of fonts) {
+        const fctx = await browser.newContext({ viewport: vp });
+        const fp = await fctx.newPage();
+        await fp.goto(`${GATE_BASE}/solo`, { waitUntil: "domcontentloaded" });
+        await fp.getByTestId("solo-home").waitFor({ timeout: 15000 });
+        if (fam) await fp.addStyleTag({ content: `:root, :root * { --mz-font-body: "${fam}" !important; --mz-font-display: "${fam}" !important; }` });
+        await settled(fp);
+        const m = await fp.evaluate(() => ({
+          heights: [...document.querySelectorAll(".mz-solo__card")].map((el) => Math.round(el.getBoundingClientRect().height)),
+          family: getComputedStyle(document.querySelector(".mz-solo__desc")).fontFamily.split(",")[0].replace(/"/g, "").trim(),
+        }));
+        const firsts = vp.width === 320
+          ? (await inView(fp.getByTestId("solo-start-math-mayhem"))) && (await fp.locator(".mz-solo__title").nth(1).evaluate((el) => el.getBoundingClientRect().bottom <= innerHeight))
+          : (await inView(fp.getByTestId("solo-start-math-mayhem"))) && (await inView(fp.getByTestId("solo-start-pattern-pulse")));
+        results.push({ font: fam ?? `the page's own font stack (${m.family} first; whichever is installed renders)`, tallest: Math.max(...m.heights), heights: m.heights, firsts });
+        await fctx.close();
+      }
+      const worst = results.reduce((a, b) => (b.tallest > a.tallest ? b : a));
+      check(`${where}: compact cards with every font measured: each at most ${cap} px tall (before: 421–481)`, results.every((r) => r.tallest <= cap), results.map((r) => `${r.font}: ${r.heights.join("/")}`).join("; "));
+      check(`${where}: ${vp.width === 320 ? "the first Start and the second game's title" : "two games' Start buttons"} on the first screen with every font measured`, results.every((r) => r.firsts), `worst ${worst.font} ${worst.tallest} px`);
+      check(`${where}: fonts measured`, results.length >= 1, results.map((r) => r.font).join(", ") + (results.length === 1 ? " (no fallback font installed on this machine)" : ""));
     } else {
       check(`${where}: a grid: the first two games side by side`, Math.abs(boxes[0].y - boxes[1].y) < 2 && boxes[1].x > boxes[0].x + boxes[0].width - 1, JSON.stringify(boxes.map((b) => [Math.round(b.x), Math.round(b.y)])));
     }
