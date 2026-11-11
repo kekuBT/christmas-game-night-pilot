@@ -26,7 +26,7 @@ PASS G Math: 10 of 10, with the Math headline and its own first best — {"score
 PASS G one solo room for every round and every switch — 1 rooms
 PASS G the server holds each round in that one room (2 Pulse, 3 Connections, 1 Math) — {"pp":2,"cx":3,"mm":1}
 PASS G solo rounds are never official
-PASS H one best per game and rules version — {"pattern-pulse@1":{"score":960,"at":1794359154887,"rulesVersion":1},"word-connections@1":{"score":450,"at":1794359192785,"rulesVersion":1},"math-mayhem@1":{"score":1200,"at":1794359218669,"rulesVersion":1}}
+PASS H one best per game and rules version — {"pattern-pulse@1":{"score":960,"at":1794360466969,"rulesVersion":1},"word-connections@1":{"score":450,"at":1794360504833,"rulesVersion":1},"math-mayhem@1":{"score":1200,"at":1794360530183,"rulesVersion":1}}
 PASS H the shelf shows each game's own best
 PASS H a best under other rules is never shown (Pulse v0; a v2 record in Connections' v1 slot)
 PASS H blocked storage: every game says bests can't be kept
@@ -38,7 +38,7 @@ PASS I a second tab's Pulse replaces this tab's Connections round: it returns to
 PASS I exactly one round plays, the second tab's Pulse
 PASS I still one solo room — 1 rooms
 PASS J a guess with no reply ends within the request allowance, the four tiles still selected
-PASS J it ended in about 6 s, not stuck on Checking… — 6192 ms
+PASS J it ended in about 6 s, not stuck on Checking… — 6164 ms
 PASS J sending again works: the group is found
 PASS I Home from the results: Home, with no phantom Rejoin
 PASS L the shelf says Connections' best spans boards (and only Connections)

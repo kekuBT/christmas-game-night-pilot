@@ -13,6 +13,7 @@
 
   Nothing is merged or deployed, no port is made public, and nothing is paid for.
 - **Order of work:** this spec was written **before** implementation. §7 records what was built and tested.
+- **Clarification:** ChatGPT's comment 6783492788 on PR #11 accepted choices 1–4, 6 and 7. It asked that solo press ids be bound to the whole command, replay only while still the latest, and be fresh-checked against a persisted monotonic revision (§4.4). It also asked that §4.2 promise determinism and unused-first/LRU, not the old order (done).
 
 ## 1. Goal
 
@@ -121,16 +122,16 @@
 
 **No rollback** is introduced.
 
-### 4.4 Retries (V3)
+### 4.4 Retries (V3), as clarified by 6783492788
 - **Casual rooms:** unchanged (Stage 7.2 press ids).
-- **Solo rooms:** gain the same press id.
-  - The start may carry `attempt: { id, sessionRevision }`. A solo room has no session revision to check, so it ignores that field.
-  - A repeat of the same id returns the round it started, as a replay. It starts nothing, abandons nothing and selects nothing.
-  - The same id for another game is refused.
-  - A repeat of a press whose round was later left or replaced (a solo room deletes those) starts nothing: "That round was left or replaced, so nothing new started."
-  - The ids are remembered in the room's bounded, persisted session records (the newest 64), as in casual rooms, and never projected.
-  - The solo app sends a new id with every press: Start, Play again, Try again.
-  - Its lost-reply handling is unchanged: it reads the room and adopts the round.
+- **Solo rooms:** each Start carries `attempt: { id, sessionRevision }`, checked like a casual press against the solo room's own revision.
+  - **The revision:** persisted and monotonic. Every new solo round moves it on. It is projected to the solo player (`session.revision`); the remembered presses are not.
+  - **A fresh press:** must be made against the current revision. One made before a newer round (another tab, or a request delayed on its way) is refused as stale: `SESSION_CONFLICT` with the current session. It starts, abandons and uses up nothing.
+  - **A press seen before:** replays only as the whole original command (the same actor, game and base revision). The same id for anything else is refused.
+  - **Only the latest:** a replay returns its round only while that press is still the room's latest Start (no newer round since, and its round not left). Otherwise it is `SESSION_CONFLICT`. No older round is ever handed back as current.
+  - **Forgotten presses:** the newest 64 are remembered, persisted and never projected. A press forgotten after 64 newer ones is stale by its revision, so it can never become a new start.
+  - **The app:** sends a new id with every press (Start, Play again, Try again), made against the revision of the room it has just read (a room made in this Start is at 0). A `SESSION_CONFLICT` is shown as "Something changed in another tab or window, so this Start didn't go ahead. Try again to start a new round."; Try again reads the room again and makes a new press. Its lost-reply handling is unchanged: it reads the room and adopts the round.
+  - **API compatibility, kept explicit:** a solo Start without `attempt` is still a plain new round, as before (tested). The app always sends one.
 
 ### 4.5 The cancel wording (C1)
 - **The text** names the actual destination. It is worked out from the same state that decides it (`deriveShowPhase` with no game on), for the person cancelling:
@@ -174,7 +175,7 @@
 2. **No preference** between practice-only and official-approved items in casual and solo rooms. Both are just "unused".
 3. **A cancelled briefing doesn't use its content**, as today. The next start of that game deals the same frozen choice, which nobody saw.
 4. **A solo round that is left or replaced counts as used**, as today. Its content was shown.
-5. **Solo starts get a press id** (§4.4). It is optional at the API and always sent by the app.
+5. **Solo starts get a press id** (§4.4). It is optional at the API and always sent by the app. *Accepted with clarification 6783492788:* whole-command binding, latest-only replay, and a persisted monotonic revision.
 6. **`MCHEZO_CONTENT_DIR`** is a testing-only setting for the controlled pool.
 7. **Wording over routing for C1:** the cancel text names where you actually go. Navigation stays as Stage 7.2 audited it.
 
@@ -184,31 +185,44 @@
 - **Selection** (`src/content/select.ts`): `roomKind` is required. `"cup"` keeps the official and practice rules; `"casual"` and `"solo"` use the variety rule of §4.2 (`selectForVariety`).
 - **The room** (`src/server/room.ts`):
   - passes its kind to selection;
-  - a solo Start may carry a press id: a repeat returns its round; the id is remembered in the session records, which a solo room now keeps across a restart; a press whose round was left or replaced starts nothing;
+  - solo Starts are repeat-safe and fresh-checked (§4.4): every new solo round moves the room's persisted revision on; a press is checked against it (`SESSION_CONFLICT` when stale); a seen press replays only as the whole command and only while it is the latest (`resolveSoloStart`); the revision is projected to the solo player; the records survive a restart;
   - **a pre-existing defect, fixed (§7.4):** a solo Start marks its player present.
-- **The solo app** (`apps/web/src/solo/soloSession.ts`): a new press id with each Start.
+- **The solo app** (`apps/web/src/solo/soloSession.ts`): a new press id with each Start, made against the revision of the room it has just read; a conflict is shown with Try again.
 - **The cancel wording** (`Briefing.tsx`, `App.tsx`): the destination comes from `deriveShowPhase` with no game on.
 - **`MCHEZO_CONTENT_DIR`** (`src/server/serve.ts`), testing only, refused in production.
 - **`scripts/lib/small-pool.mjs`:** the controlled pool, shared by the tests and the driver.
 
 ### 7.2 Tested
-- **`tests/stage74-content-variety.test.ts`** (21):
+- **`tests/stage74-content-variety.test.ts`** (27):
   - **selection:** practice-only and approved items before any repeat; then LRU, again and again; a game of 10 items across three games; determinism; one and zero eligible items; rejected items never; no official selection outside a Cup;
   - **Cup unchanged:** Cup practice still repeats the practice-only board; Cup official play takes fresh approved boards and is refused when none are left; **the same plans give exactly the items recorded at `af39c78`**, for the small pool and the shipped library in both modes; a casual room's plays leave a Cup room's usage untouched;
-  - **in a room:** solo order across a restart; a solo press repeated (also after a restart), the same id for another game, a press whose round was replaced; a casual briefing (chosen at start, used only when play begins, a cancel uses nothing and the next start deals the same board, a repeat before and after play, a rematch deals an unused board);
-  - **HTTP:** a solo press twice (201, then 200 replay), one round and one use, remembered across a server restart;
+  - **in a room:** solo order across a restart; a casual briefing (chosen at start, used only when play begins, a cancel uses nothing and the next start deals the same board, a repeat before and after play, a rematch deals an unused board);
+  - **solo presses (clarification 6783492788):**
+    - an identical duplicate (the same round, nothing more used, also after a restart);
+    - a mismatched command with a known id (another game, another revision: refused);
+    - A, then B, then A replayed (`SESSION_CONFLICT`; B keeps playing, nothing abandoned or used, A never handed back; the same once B has finished and C started);
+    - a press made before a newer round but never seen (stale, with the current state in the reply; a fresh press then starts);
+    - a press forgotten after 64 newer ones (stale by its revision, also after a restart);
+    - no press id (API compatibility: a plain new round);
+    - the projection carries the revision, never the presses;
+  - **HTTP:** a solo press twice (201, then 200 replay), one round and one use; across a server restart the press still replays, a new press against an old revision is refused (409 with the current session), a press against the read revision starts, and the first press replayed afterwards is refused while the new round keeps playing;
   - **the solo restart defect** (§7.4);
   - **`MCHEZO_CONTENT_DIR`:** refused in production; otherwise loads the pool and says so;
   - **the shipped library:** a casual room deals all 13 Connections boards before repeating, in normal and test mode.
 - **The pinned Stage 6.2 tests** (`tests/stage62-solo-shelf.test.ts`) changed on purpose (D-S74-01): 13 boards, then LRU, in both modes. Before: 12 then repeats in normal mode, and one board every time in test mode.
 - **Every other `selectContent` caller** names `roomKind: "cup"` (the TV-reveal ones name the engine's kind). No expectation changed.
-- **Nine mutations** each make the tests fail: casual/solo using the Cup rule; a Cup using the variety rule; the room always saying "cup"; no LRU sort; rejected items allowed; a solo press not remembered; a solo replay not checked; solo presses dropped on restore; a solo Start not marking presence.
-- **Unit suite:** 1,292 passing (1,271 before).
-- **`check-content-variety`** (new, 47): parts A, B and C of §5, plus **A2**: its own server restarts on the same port and data, and Play again in the same solo tab starts a round and deals the least recently used board.
+- **Fourteen mutations** each make the tests fail:
+  - selection: casual/solo using the Cup rule; a Cup using the variety rule; the room always saying "cup"; no LRU sort; rejected items allowed;
+  - solo presses: the freshness check skipped; a replay not limited to the latest; a replay not bound to the whole command; the revision not moved on; the revision lost on restore; the presses dropped on restore; the revision not projected; the replay check skipped;
+  - the restart fix: a solo Start not marking presence.
+- **Unit suite:** 1,298 passing (1,271 before).
+- **`check-content-variety`** (new, 54): parts A, B and C of §5, plus:
+  - **A2:** its own server restarts on the same port and data; Play again in the same solo tab starts a round and deals the least recently used board;
+  - **A3:** a stale press in the browser: tab 1's Start is held on its way while tab 2 starts Pattern Pulse. Tab 1's press is refused ("Something changed in another tab or window…", with Try again), nothing changes (tab 2's round keeps playing), and Try again makes a new press against the current revision and starts.
   - Against a server at `af39c78` (test mode, as the gate runs it), part C fails: one board for all 13 starts (`docs/evidence/stage74-local/check-content-variety-on-af39c78.log`).
   - With the solo-restart fix removed, A2 fails: Play again never starts a round (`…/check-content-variety-without-solo-restart-fix.log`).
 - **`check-solo-shelf` part E:** the board after Play again was only logged; it is now asserted to be one the room hasn't used.
-- **Local regressions, all passing:** `check-session-flow` (70), `check-quick-party` (68), `check-solo` (80), `check-solo-shelf` (58), `check-briefing` (43), `check-casual` (30), `check-host-handover` (32).
+- **Local regressions, all passing:** `check-session-flow` (70), `check-quick-party` (68), `check-solo` (80), `check-solo-shelf` (58), `check-briefing` (43), `check-casual` (30), `check-host-handover` (32), `check-recovery` (20). The solo ones and `check-session-flow` were run again after the clarification's changes.
 - **Screenshots:** `docs/stage7/screenshots-74/` (3, manifest revision `c78cb43`, clean tree): the rematch cancel naming the results (390), the lobby start cancel naming the lobby (390), and Math's rematch cancel at 320.
 - **Not run:** WebKit and real devices. Emulation is not a device.
 

@@ -862,10 +862,12 @@ The spec is `docs/stage7/stage74.md`. The instruction is ChatGPT's review and ha
   - **Not shown, so not used:** a casual briefing's frozen content until play begins; a cancelled briefing uses nothing, so the next start of that game deals the same choice.
   - **No effect:** reloads and reconnects. **Restored:** usage and sequence after a restart.
   - No rollback is introduced.
-- **D-S74-04 Solo starts carry a press id.**
-  - **The rule:** a repeat of the same id returns its round and starts, abandons and selects nothing; the same id for another game is refused; a press whose round was later left or replaced starts nothing ("That round was left or replaced").
-  - **Records:** the room's bounded, persisted session records (64), never projected. A solo room has no session revision, so the field is ignored.
-  - **The app** sends a new id with each press; its lost-reply handling (read the room, adopt the round) is unchanged.
+- **D-S74-04 Solo starts carry a press id, fresh-checked against a persisted revision** (clarification 6783492788).
+  - **The revision:** every new solo round moves the room's persisted, monotonic revision on; it is projected to the solo player. A press must be made against the current revision; one made before a newer round (another tab, a delayed request, or a press forgotten after 64 newer ones) is refused as stale (`SESSION_CONFLICT`, with the current session) and starts, abandons and uses up nothing.
+  - **Replays:** a seen press replays only as the whole original command (actor, game and base revision), and only while it is still the room's latest Start; otherwise `SESSION_CONFLICT`. No older round is ever returned as current. Records: the room's bounded, persisted session records (64), never projected.
+  - **The app** sends a new id with each press, against the revision it has just read; a conflict is shown with Try again, which reads the room and presses again. Its lost-reply handling (read the room, adopt the round) is unchanged.
+  - **API compatibility:** a solo Start without a press id is still a plain new round (explicit and tested); the app always sends one.
+  - *Alternative rejected (the first draft):* a press id with no revision check. A forgotten or delayed old press could then still start a round (review of that draft, 6783492788).
 - **D-S74-05 A solo Start marks its player present** (a pre-existing defect, found while testing D-S74-03).
   - **The defect:** a server restart marks every player not connected, and a solo room has no socket, so nothing marked its player present again. Every solo Start was refused ("Need at least 1 connected players"), and the app showed that refusal on every Try again. Reproduced over HTTP on `af39c78`.
   - **The fix:** in a solo room, the one pressing Start is the player and is present. Casual and Cup rooms still count who is actually connected (tested).

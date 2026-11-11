@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { DEFAULT_CONTENT_DIR, loadContent, type ContentLibrary } from "../src/content/registry.js";
 import { recordUsage, selectContent, type SelectionRequest, type UsageHistory } from "../src/content/select.js";
 import { LocalServer } from "../src/server/http.js";
-import { RoomEngine, type SessionAttempt } from "../src/server/room.js";
+import { RoomEngine, SESSION_OPS_LIMIT, type SessionAttempt } from "../src/server/room.js";
 // @ts-expect-error -- plain .mjs helper shared with the browser driver, no type declarations
 import { SMALL_CONNECTIONS_USABLE as SMALL_USABLE, writeSmallPool as writePool } from "../scripts/lib/small-pool.mjs";
 const SMALL_CONNECTIONS_USABLE = SMALL_USABLE as string[];
@@ -182,29 +182,98 @@ describe("in a room: persistence, briefings and retries (V3)", () => {
     expect(back.contentSeq).toBe(4);
   });
 
-  it("solo: a repeated press (same id) returns its round and uses nothing more; a new press is a new round with an unused board", () => {
+  // Solo presses (spec §4.4, clarification 6783492788): bound to the whole
+  // command, replayed only while still the latest, and fresh-checked against
+  // a persisted, monotonic revision (every new solo round moves it on).
+  const codeOf = (fn: () => unknown) => { try { fn(); } catch (e) { return (e as { code?: string; message?: string }).code ?? (e as Error).message; } return undefined; };
+  let n = 0;
+  const pressOn = (engine: RoomEngine): SessionAttempt => ({ id: `solo-press-${String(++n).padStart(4, "0")}`, sessionRevision: engine.session.revision });
+  const snapshot = (engine: RoomEngine) => JSON.stringify({ usage: engine.contentUsage, seq: engine.contentSeq, games: [...engine.games.values()].map((g) => [g.id, g.gameId, g.status]), revision: engine.session.revision });
+
+  it("solo, an identical duplicate: the same round, nothing more used; also after a restart", () => {
     const { engine, me } = soloRoom();
-    const p: SessionAttempt = { id: "solo-press-1", sessionRevision: 0 };
-    const first = engine.startChosen(me, "word-connections", { official: false, attempt: p });
-    expect(first.replay).toBe(false);
-    const firstBoard = boardId(engine, first.game.id);
-    const usage = JSON.stringify(engine.contentUsage);
-    const again = engine.startChosen(me, "word-connections", { official: false, attempt: p });
+    const a = pressOn(engine);
+    const first = engine.startChosen(me, "word-connections", { official: false, attempt: a });
+    expect([first.replay, engine.session.revision]).toEqual([false, 1]);
+    const before = snapshot(engine);
+    const again = engine.startChosen(me, "word-connections", { official: false, attempt: a });
     expect([again.replay, again.game.id, again.game.status]).toEqual([true, first.game.id, "playing"]);
-    expect([JSON.stringify(engine.contentUsage), engine.contentSeq, engine.games.size]).toEqual([usage, 1, 1]);
-    // After a restart too.
+    expect(snapshot(engine)).toBe(before);
     const back = restart(engine);
     back.content = small;
-    expect(back.startChosen(me, "word-connections", { official: false, attempt: p }).game.id).toBe(first.game.id);
-    // The same id for another game is refused.
-    expect(() => back.startChosen(me, "pattern-pulse", { official: false, attempt: p })).toThrow(/already used for something else/);
-    const next = back.startChosen(me, "word-connections", { official: false, attempt: { id: "solo-press-2", sessionRevision: 0 } });
-    expect(next.replay).toBe(false);
-    expect(boardId(back, next.game.id)).not.toBe(firstBoard);
-    expect(back.contentSeq).toBe(2);
-    // The first round was replaced by the new press: a late repeat of the first press starts nothing.
-    expect(() => back.startChosen(me, "word-connections", { official: false, attempt: p })).toThrow(/left or replaced, so nothing new started/);
-    expect([back.contentSeq, back.games.size]).toEqual([2, 1]);
+    expect([back.session.revision, back.startChosen(me, "word-connections", { official: false, attempt: a }).game.id]).toEqual([1, first.game.id]);
+    expect(snapshot(back)).toBe(before);
+  });
+
+  it("solo, a mismatched command with a known id (another game, another revision): refused, nothing changes", () => {
+    const { engine, me } = soloRoom();
+    const a = pressOn(engine);
+    engine.startChosen(me, "word-connections", { official: false, attempt: a });
+    const before = snapshot(engine);
+    expect(codeOf(() => engine.startChosen(me, "pattern-pulse", { official: false, attempt: a }))).toMatch(/already used for something else/);
+    expect(codeOf(() => engine.startChosen(me, "word-connections", { official: false, attempt: { ...a, sessionRevision: 1 } }))).toMatch(/already used for something else/);
+    expect(snapshot(engine)).toBe(before);
+  });
+
+  it("solo, start A then B, then A replayed (late): SESSION_CONFLICT; B keeps playing, nothing abandoned or used, A never handed back", () => {
+    const { engine, me } = soloRoom();
+    const a = pressOn(engine);
+    const ga = engine.startChosen(me, "word-connections", { official: false, attempt: a }).game;
+    const b = pressOn(engine);
+    const gb = engine.startChosen(me, "word-connections", { official: false, attempt: b }).game; // B replaces A
+    const before = snapshot(engine);
+    expect(codeOf(() => engine.startChosen(me, "word-connections", { official: false, attempt: a }))).toBe("SESSION_CONFLICT");
+    expect(snapshot(engine)).toBe(before);
+    expect([engine.games.get(gb.id)?.status, engine.games.has(ga.id)]).toEqual(["playing", false]);
+    // A finished round is no different: once a newer round started, its press is stale.
+    engine.games.get(gb.id)!.status = "finished";
+    const gc = engine.startChosen(me, "word-connections", { official: false, attempt: pressOn(engine) }).game;
+    expect(codeOf(() => engine.startChosen(me, "word-connections", { official: false, attempt: b }))).toBe("SESSION_CONFLICT");
+    expect(engine.games.get(gc.id)?.status).toBe("playing");
+  });
+
+  it("solo, a press made before a newer round but never seen (a delayed request, another tab): stale, nothing abandoned or used", () => {
+    const { engine, me } = soloRoom();
+    const stale = pressOn(engine); // made against revision 0 …
+    const gb = engine.startChosen(me, "word-connections", { official: false, attempt: pressOn(engine) }).game; // … another press wins first
+    const before = snapshot(engine);
+    const err = (() => { try { engine.startChosen(me, "pattern-pulse", { official: false, attempt: stale }); } catch (e) { return e as { code: string; detail?: { session?: { revision: number } } }; } return null; })();
+    expect([err?.code, err?.detail?.session?.revision]).toEqual(["SESSION_CONFLICT", 1]); // the reply carries the current state
+    expect(snapshot(engine)).toBe(before);
+    expect(engine.games.get(gb.id)?.status).toBe("playing");
+    // A fresh press (made against the current revision) starts, as Try again does.
+    expect(engine.startChosen(me, "pattern-pulse", { official: false, attempt: pressOn(engine) }).replay).toBe(false);
+  });
+
+  it("solo, a press forgotten after 64 newer ones and replayed: stale by its revision, never a new start", () => {
+    const { engine, me } = soloRoom();
+    const old = pressOn(engine);
+    engine.startChosen(me, "word-connections", { official: false, attempt: old });
+    for (let i = 0; i < SESSION_OPS_LIMIT; i++) engine.startChosen(me, "pattern-pulse", { official: false, attempt: pressOn(engine) });
+    expect(engine.session.ops.some((o) => o.id === old.id)).toBe(false);
+    const before = snapshot(engine);
+    expect(codeOf(() => engine.startChosen(me, "word-connections", { official: false, attempt: old }))).toBe("SESSION_CONFLICT");
+    expect(snapshot(engine)).toBe(before);
+    const back = restart(engine);
+    back.content = small;
+    expect(codeOf(() => back.startChosen(me, "word-connections", { official: false, attempt: old }))).toBe("SESSION_CONFLICT");
+    expect(back.session.ops).toHaveLength(SESSION_OPS_LIMIT);
+  });
+
+  it("solo, without a press id (API compatibility, kept explicit): a plain new round, as before; the app always sends one", () => {
+    const { engine, me } = soloRoom();
+    const a = engine.startChosen(me, "word-connections", { official: false });
+    const b = engine.startChosen(me, "word-connections", { official: false });
+    expect([a.replay, b.replay, engine.games.has(a.game.id), engine.session.revision, engine.contentSeq]).toEqual([false, false, false, 2, 2]);
+    expect(boardId(engine, b.game.id)).not.toBe(undefined);
+  });
+
+  it("solo: the projection carries the room revision (for the app's next press), never the remembered presses", () => {
+    const { engine, me } = soloRoom();
+    engine.startChosen(me, "word-connections", { official: false, attempt: pressOn(engine) });
+    const proj = engine.project("player", me) as { session?: { revision: number; ops?: unknown } };
+    expect(proj.session).toEqual({ onBreak: false, revision: 1 });
+    expect(JSON.stringify(proj)).not.toContain("solo-press-");
   });
 
   it("casual with a briefing: the board is chosen at the start, used only when play begins; a cancel uses nothing and the next start deals the same board", () => {
@@ -272,11 +341,20 @@ describe("over HTTP: a solo press id and a restart", () => {
       // Pre-existing defect fixed here (§7): a restart marks every player not
       // connected and a solo room has no socket, so this Start was refused
       // ("Need at least 1 connected players") on af39c78, forever.
-      const d = await call("POST", `/rooms/${id}/games`, { gameId: "word-connections", official: false, attempt: { id: "http-solo-2", sessionRevision: 0 } }, token, at);
+      // A new press made against an old revision is stale (409), with the current state; nothing changes.
+      const stale = await call("POST", `/rooms/${id}/games`, { gameId: "word-connections", official: false, attempt: { id: "http-solo-2", sessionRevision: 0 } }, token, at);
+      expect([stale.status, stale.body["code"], (stale.body["session"] as { revision: number }).revision]).toEqual([409, "SESSION_CONFLICT", 1]);
+      // The app reads the room (its revision) and presses again.
+      const rev = ((await call("GET", `/rooms/${id}/projection?audience=player`, undefined, token, at)).body["session"] as { revision: number }).revision;
+      const d = await call("POST", `/rooms/${id}/games`, { gameId: "word-connections", official: false, attempt: { id: "http-solo-3", sessionRevision: rev } }, token, at);
       expect([d.status, d.body["error"]]).toEqual([201, undefined]);
       const again = later.rooms.get(id)!;
       expect(boardId(again, String(d.body["gameId"]))).not.toBe(firstBoard);
-      expect(again.contentSeq).toBe(2);
+      expect([again.contentSeq, again.session.revision]).toEqual([2, 2]);
+      // The first press, replayed now that a newer round exists: stale, and the new round keeps playing.
+      const late = await call("POST", `/rooms/${id}/games`, { gameId: "word-connections", official: false, attempt }, token, at);
+      expect([late.status, late.body["code"]]).toEqual([409, "SESSION_CONFLICT"]);
+      expect([again.games.get(String(d.body["gameId"]))?.status, again.contentSeq]).toEqual(["playing", 2]);
     } finally { await later.close(); }
   });
 });

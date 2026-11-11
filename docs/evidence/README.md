@@ -86,11 +86,12 @@ ChatGPT's review 6778921208 on PR #9: a game picked by hand that matched the lin
 
 ## `stage74-local/`
 
-Stage 7.4 browser drivers run by hand from the development checkout against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). The source is that committed as `c78cb43`, plus the driver's A2 part (the restart) added after it. These are not gate verdicts.
-- `check-content-variety.log`: 47/47.
+Stage 7.4 browser drivers run by hand from the development checkout against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). These are not gate verdicts.
+- `check-content-variety.log`: 54/54, on the final source (clarification 6783492788 included).
 - `check-content-variety-on-af39c78.log`: the same driver, with part C pointed at a server built from `af39c78`. Part C fails: one board for all 13 solo starts. Parts A and B use the driver's own server (this revision).
 - `check-content-variety-without-solo-restart-fix.log`: the driver with the solo-restart fix removed from the server. A2 fails: Play again after the restart never starts a round.
-- Regressions, all passing: `check-session-flow` (70), `check-solo` (80), `check-briefing` (43), `check-solo-shelf` (58, part E now asserted), `check-casual` (30), `check-quick-party` (68), `check-host-handover` (32).
+- `check-content-variety-on-af39c78.log` and `check-content-variety-without-solo-restart-fix.log` were run on the source committed as `c78cb43` plus A2 (before A3 existed).
+- Regressions, all passing: `check-session-flow` (70), `check-solo` (80), `check-solo-shelf` (58, part E now asserted) and `check-recovery` (20) on the final source; `check-briefing` (43), `check-casual` (30), `check-quick-party` (68) and `check-host-handover` (32) on the source committed as `c78cb43` (the clarification changed only solo starts).
 
 ## `stage72-local/`
 

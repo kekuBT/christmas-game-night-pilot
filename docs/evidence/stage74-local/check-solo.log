@@ -44,7 +44,7 @@ PASS blocked storage: the seat is kept for the page, one room across replays and
 PASS malformed stored data reads as no best (no crash)
 PASS a best under other rules (version 0) is not shown as this game's best
 PASS a round under the current rules is its own first best (not compared with version 0) — Your first personal best on this device!
-PASS the other version's entry is kept untouched beside the new one — {"math-mayhem@0":{"score":99999,"at":1,"rulesVersion":0},"math-mayhem@1":{"score":240,"at":1794359019319,"rulesVersion":1}}
+PASS the other version's entry is kept untouched beside the new one — {"math-mayhem@0":{"score":99999,"at":1,"rulesVersion":0},"math-mayhem@1":{"score":240,"at":1794360534770,"rulesVersion":1}}
 PASS plain http (real insecure context at 192.0.2.2): no crypto.randomUUID — {"secure":false,"randomUUID":"undefined"}
 PASS plain http: the whole round plays and every answer counts (7 of 10) — {"score":840,"correct":7,"pb":"Your first personal best on this device!"}
 PASS keyboard: Tab reaches Start on the solo list
@@ -56,11 +56,11 @@ PASS keyboard: Tab reaches Leave round
 PASS keyboard: the leave question focuses Keep playing (the safe choice)
 PASS keyboard: Enter on Keep playing keeps the round
 PASS I1 Start with no reply ends in an error with Try again (not a stuck Starting…)
-PASS I1 it ended within the request allowance (about 6 s), and the request had been sent — 6542 ms, 1 held
+PASS I1 it ended within the request allowance (about 6 s), and the request had been sent — 6531 ms, 1 held
 PASS I1 Try again starts the round
 PASS I1 still one room for this device — 1 rooms
 PASS I2 a passing outage: the round says it's reconnecting
-PASS I2 only after the allowance (not on the first failed poll) — 8871 ms
+PASS I2 only after the allowance (not on the first failed poll) — 8999 ms
 PASS I2 the round stays on screen meanwhile
 PASS I2 once the server answers, the reconnecting note goes
 PASS I2 the round carries on: a question to answer
@@ -69,13 +69,13 @@ PASS I2 same room, same seat, no new room — 1 rooms
 PASS I3 a lost room: the round says it was lost, with Start a new round
 PASS I3 polling has stopped — 0 projection requests in 3 s
 PASS I3 Start a new round plays in a new room
-PASS I3 the lost room was replaced by one new room — 2 rooms, room-mwbf1gmj-657043 -> room-mwbf1wac-173542
+PASS I3 the lost room was replaced by one new room — 2 rooms, room-mwbfxxfv-622333 -> room-mwbfyd2t-540708
 PASS I4 the seat check fails for a moment: Start says so, with Try again
 PASS I4 no new room was made for a passing failure — 2 rooms
 PASS I4 Try again plays in the same room
 PASS I4 same room as before the failure — 2 rooms
-PASS short test clock: the solo round's window is about 12 s — 11994 ms
-PASS control: the same answer, in time, is accepted — {"accepted":true,"result":{"points":0,"total":0,"speedBonus":"not-timed","refreshAdvice":"This question wasn’t timed, so no speed bonus. Refresh the page to get the latest version of the game."}}
+PASS short test clock: the solo round's window is about 12 s — 11996 ms
+PASS control: the same answer, in time, is accepted — {"accepted":true,"result":{"points":100,"total":100,"speedBonus":"not-timed","refreshAdvice":"This question wasn’t timed, so no speed bonus. Refresh the page to get the latest version of the game."}}
 PASS a late answer after the round's time is up is refused — {"accepted":false,"reason":"PHASE_CLOSED"}
 PASS the round finished on its deadline with only the in-time answer counted — finished answers ["math-1"]
 SOLO ALL PASSED

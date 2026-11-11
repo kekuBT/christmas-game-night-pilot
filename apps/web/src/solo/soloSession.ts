@@ -328,10 +328,14 @@ export class SoloSession {
       const before = new Set((proj?.games ?? []).map((g) => g.id));
       const openRound = (proj?.games ?? []).some((g) => isOpen(g.status));
       let gid: string;
-      // Stage 7.4: each press has its own id, so a duplicated request returns
-      // this press's round instead of starting (and using up content for) another.
-      // A solo room has no session revision to check; 0 is a placeholder.
-      const attempt = { id: uuidV4(), sessionRevision: 0 };
+      // Stage 7.4 (clarification 6783492788): each press has its own id and
+      // the room revision it was made against (read just now; a room made in
+      // this Start is at 0). A duplicated request returns this press's round
+      // only while it is still the latest; a press made before a newer round
+      // (another tab, or a delayed request) is refused as stale (SESSION_CONFLICT)
+      // and starts, abandons and uses up nothing. That refusal is shown with
+      // Try again, which reads the room again and makes a new press.
+      const attempt = { id: uuidV4(), sessionRevision: proj?.session?.revision ?? 0 };
       try {
         gid = (await this.post<{ gameId: string }>(`/rooms/${this.seat!.roomId}/games`, { gameId, official: false, attempt }, this.budget(deadline))).gameId;
       } catch (e) {

@@ -1,38 +1,45 @@
-PASS setup: the own server loaded the small pool (not the shipped library) — TEST MODE: content loaded from /tmp/mz-variety-pool-aY9wH8 (29 items), not the shipped library
-PASS A solo: every board dealt is a pool board, and never the rejected one — ["con-t-official-b","con-t-practice","con-t-official-a","con-t-official-b"]
-PASS A solo: the first three are the three usable boards, each once (practice-only and both approved) — ["con-t-official-b","con-t-practice","con-t-official-a"]
-PASS A solo: the fourth is the least recently used (the first again) — ["con-t-official-b","con-t-practice","con-t-official-a","con-t-official-b"]
+PASS setup: the own server loaded the small pool (not the shipped library) — TEST MODE: content loaded from /tmp/mz-variety-pool-5EckQx (29 items), not the shipped library
+PASS A solo: every board dealt is a pool board, and never the rejected one — ["con-t-practice","con-t-official-b","con-t-official-a","con-t-practice"]
+PASS A solo: the first three are the three usable boards, each once (practice-only and both approved) — ["con-t-practice","con-t-official-b","con-t-official-a"]
+PASS A solo: the fourth is the least recently used (the first again) — ["con-t-practice","con-t-official-b","con-t-official-a","con-t-practice"]
 PASS A solo: the server holds four finished Connections rounds in one room
 PASS A solo: no item id reaches the phone
 PASS A2 the server restarted on the same port with the same data
 PASS A2 after the restart, Play again starts a round (no refusal)
-PASS A2 …and deals the least recently used board (the usage survived the restart) — {"afterRestart":"con-t-practice","expected":"con-t-practice"}
+PASS A2 …and deals the least recently used board (the usage survived the restart) — {"afterRestart":"con-t-official-b","expected":"con-t-official-b"}
+PASS A3 tab 1's Start is on its way (held), made against the room's revision
+PASS A3 tab 2 started Pattern Pulse first (the room moved on) — {"revision":2,"games":[["pattern-pulse","playing"]]}
+PASS A3 tab 1's late press is refused: “Something changed in another tab or window…”, with Try again
+PASS A3 nothing changed: tab 2's Pulse still plays, no new round, the revision unchanged
+PASS A3 Try again reads the room and starts a Connections round
+PASS A3 …against the current revision, with a new press id — [{"id":"8de9e7d0-06d7-46fb-87aa-12d3f6692406","sessionRevision":1},{"id":"efcedd98-df73-4ece-8bfd-9017ccc9d7e6","sessionRevision":2}]
+PASS A3 …and its board is a usable pool board — con-t-practice
 PASS B setup: a lineup of Word Connections, then Math Mayhem — {"ok":true,"party":{"revision":1,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":17,"transitionMinutes":2,"items":[{"gameId":"word-connection
 PASS B1 picked by hand: a plain Start (not the lineup's)
-PASS B1 hand-picked: both phones show the same pool board — ["con-t-official-b","con-t-official-b"]
+PASS B1 hand-picked: both phones show the same pool board — ["con-t-official-a","con-t-official-a"]
 PASS B1 hand-picked: the results, with What's next
 PASS B1 the lineup's Connections item is still pending (a hand pick never moves it) — [{"gameId":"word-connections","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}]
-PASS B2 Play again sent a rematch with a press id — {"gameId":"word-connections","official":false,"roster":["player-1","player-2"],"rematchOf":"game-1","attempt":{"id":"3b0c6b5f-cdf3-4544-acd9-ee1a88fe0aa2","sessionRevision":1}}
+PASS B2 Play again sent a rematch with a press id — {"gameId":"word-connections","official":false,"roster":["player-1","player-2"],"rematchOf":"game-1","attempt":{"id":"91af5bd2-afc4-4824-aea6-01c09dec7d54","sessionRevision":1}}
 PASS B2 the cancel confirmation names the results: “You’ll go back to the Word Connections results.” — You’ll go back to the Word Connections results.
 PASS B2 …and never promises the lobby — Cancel Word Connections? You’ll go back to the Word Connections results. Nothing is scored or used up, and everyone else goes back to what they had open. Keep it Cancel the game
 PASS B2 after the cancel, Ada is back on the Word Connections results (What's next)
 PASS B2 …and so is Bea
 PASS B2 the cancel left nothing behind: the same games, the lineup unchanged — {"games":1,"before":1,"items":[{"gameId":"word-connections","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}]}
 PASS B2 the cancelled press sent again starts nothing (ATTEMPT_ENDED) — {"status":409,"code":"ATTEMPT_ENDED","games":1}
-PASS B3 rematch: both phones show the same pool board — ["con-t-official-a","con-t-official-a"]
+PASS B3 rematch: both phones show the same pool board — ["con-t-official-b","con-t-official-b"]
 PASS B3 rematch: the results, with What's next
-PASS B3 the rematch deals an unused board — ["con-t-official-b","con-t-official-a"]
+PASS B3 the rematch deals an unused board — ["con-t-official-a","con-t-official-b"]
 PASS B3 the lineup is unchanged by the rematch — [{"gameId":"word-connections","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}]
 PASS B4 the results offer the lineup's Next game: Word Connections
 PASS B4 lineup Next: both phones show the same pool board — ["con-t-practice","con-t-practice"]
 PASS B4 lineup Next: the results, with What's next
-PASS B4 the lineup's game deals the last unused board — ["con-t-official-b","con-t-official-a","con-t-practice"]
+PASS B4 the lineup's game deals the last unused board — ["con-t-official-a","con-t-official-b","con-t-practice"]
 PASS B4 the lineup moved on: Connections played, Math next — [{"gameId":"word-connections","started":true,"status":"completed","gameInstanceId":"game-4"},{"gameId":"math-mayhem","started":false,"status":"pending"}]
-PASS B5 rematch after all were used: both phones show the same pool board — ["con-t-official-b","con-t-official-b"]
+PASS B5 rematch after all were used: both phones show the same pool board — ["con-t-official-a","con-t-official-a"]
 PASS B5 rematch after all were used: the results, with What's next
-PASS B5 the least recently used board comes back (board 1) — ["con-t-official-b","con-t-official-a","con-t-practice","con-t-official-b"]
+PASS B5 the least recently used board comes back (board 1) — ["con-t-official-a","con-t-official-b","con-t-practice","con-t-official-a"]
 PASS B5 the lineup is unchanged (Math still next) — [{"gameId":"word-connections","started":true,"status":"completed","gameInstanceId":"game-4"},{"gameId":"math-mayhem","started":false,"status":"pending"}]
-PASS B every board dealt is a usable pool board, never the rejected one — ["con-t-official-b","con-t-official-a","con-t-practice","con-t-official-b"]
+PASS B every board dealt is a usable pool board, never the rejected one — ["con-t-official-a","con-t-official-b","con-t-practice","con-t-official-a"]
 PASS B6 Ada is in the lobby, the lineup's Math up next
 PASS B6 the cancel confirmation names the lobby: “You’ll go back to the lobby.” — You’ll go back to the lobby.
 PASS B6 after the cancel, Ada is in the lobby, Math still up next
@@ -42,7 +49,7 @@ PASS B7 the lineup's Math plays to its results
 PASS B7 the lineup is complete — [{"gameId":"word-connections","started":true,"status":"completed","gameInstanceId":"game-4"},{"gameId":"math-mayhem","started":true,"status":"completed","gameInstanceId":"game-7"}]
 PASS B8 at 320 px the cancel confirmation names Math's results and fits
 PASS B8 back on the results
-PASS C shipped library: every board dealt is a shipped, usable board (13 of them) — ["con-s4-12","con-s4-11","con-s4-03","con-s4-05","con-s4-01","con-s4-10","con-s4-04","con-s4-07","con-s4-08","con-s4-09","con-legacy-1","con-s4-06","con-s4-02","con-s4-12"]
+PASS C shipped library: every board dealt is a shipped, usable board (13 of them) — ["con-s4-12","con-s4-04","con-s4-06","con-s4-09","con-s4-01","con-legacy-1","con-s4-05","con-s4-11","con-s4-03","con-s4-07","con-s4-02","con-s4-08","con-s4-10","con-s4-12"]
 PASS C all 13 shipped boards come before any repeats — 13 different in the first 13
 PASS C then the least recently used (the first again) — ["con-s4-12","con-s4-12"]
 

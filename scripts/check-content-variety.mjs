@@ -173,6 +173,48 @@ try {
   check("A2 …and deals the least recently used board (the usage survived the restart)", afterRestart === solo[1], JSON.stringify({ afterRestart, expected: solo[1] }));
   await sctx.close();
 
+  // A3. A press made before a newer round (clarification 6783492788): tab 1's
+  // Start is held on its way while tab 2 (same device, same solo room) starts
+  // Pattern Pulse. Tab 1's press arrives stale: refused, nothing abandoned or
+  // used, and tab 2's round keeps playing. Try again reads the room and starts.
+  const tctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const t1 = await tctx.newPage();
+  await t1.goto(`${OWN}/solo/word-connections`, { waitUntil: "domcontentloaded" });
+  await t1.getByTestId("solo-round-start").click();
+  await poolBoard(t1);
+  const tseat = JSON.parse((await t1.evaluate(() => localStorage.getItem("mchezo.solo.v1"))) ?? "null");
+  const troom = async () => (await fetch(`${OWN}/rooms/${tseat.roomId}/projection?audience=player`, { headers: { "x-session-token": tseat.token } })).json();
+  await t1.reload({ waitUntil: "domcontentloaded" });
+  await t1.getByTestId("solo-ready").waitFor({ timeout: 10000 });
+  let release = () => {};
+  const held = new Promise((r) => { release = r; });
+  const t1posts = [];
+  t1.on("request", (r) => { if (r.method() === "POST" && new URL(r.url()).pathname.endsWith("/games")) t1posts.push(JSON.parse(r.postData() ?? "{}")); });
+  await t1.route((url) => new URL(url).pathname.endsWith("/games"), async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    await held;
+    await route.continue();
+  });
+  await t1.getByTestId("solo-round-start").click();
+  await soon("A3 tab 1's Start is on its way (held), made against the room's revision", async () => t1posts.length === 1 && t1posts[0].attempt?.sessionRevision === 1, 10000);
+  const t2 = await tctx.newPage();
+  await t2.goto(`${OWN}/solo/pattern-pulse`, { waitUntil: "domcontentloaded" });
+  await t2.getByTestId("solo-round-start").click();
+  await t2.getByTestId("mz-pp-open").waitFor({ timeout: 20000 });
+  const mid = await troom();
+  const pulse = (mid.games ?? []).find((g) => g.gameId === "pattern-pulse" && g.status === "playing");
+  check("A3 tab 2 started Pattern Pulse first (the room moved on)", !!pulse && mid.session?.revision === 2, JSON.stringify({ revision: mid.session?.revision, games: (mid.games ?? []).map((g) => [g.gameId, g.status]) }));
+  release();
+  await soon("A3 tab 1's late press is refused: “Something changed in another tab or window…”, with Try again", async () => /another tab or window/.test(await text(t1.getByTestId("solo-error"))) && (await text(t1.getByTestId("solo-round-start"))) === "Try again", 15000);
+  const after = await troom();
+  check("A3 nothing changed: tab 2's Pulse still plays, no new round, the revision unchanged", JSON.stringify((after.games ?? []).map((g) => [g.id, g.status])) === JSON.stringify((mid.games ?? []).map((g) => [g.id, g.status])) && after.session?.revision === 2 && (after.games ?? []).find((g) => g.id === pulse?.id)?.status === "playing");
+  await t1.unrouteAll({ behavior: "ignoreErrors" });
+  await t1.getByTestId("solo-round-start").click();
+  const tb = await soon("A3 Try again reads the room and starts a Connections round", async () => (await t1.getByTestId("mz-cx").isVisible()) ? await poolBoard(t1) : null, 20000);
+  check("A3 …against the current revision, with a new press id", t1posts.length === 2 && t1posts[1].attempt?.sessionRevision === 2 && t1posts[1].attempt?.id !== t1posts[0].attempt?.id, JSON.stringify(t1posts.map((x) => x.attempt)));
+  check("A3 …and its board is a usable pool board", SMALL_CONNECTIONS_USABLE.includes(tb), String(tb));
+  await tctx.close();
+
   // ---- B. A casual room: hand pick, rematch (cancelled, then played), the lineup's Next, rematch ----
   const h = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
   const code = await host(h, OWN, "Ada");

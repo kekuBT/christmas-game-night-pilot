@@ -781,7 +781,9 @@ export class RoomEngine {
     // must be made against the current session state, and is remembered.
     // A repeat of it is answered before this (startChosen). Lineup and Play
     // again starts check and remember their own.
-    const attempt = this.kind === "casual" ? opts.attempt : undefined;
+    // Stage 7.4 (§4.4, clarification 6783492788): a solo room's Start is
+    // repeat-safe and fresh-checked the same way, against its own revision.
+    const attempt = this.kind === "casual" || this.kind === "solo" ? opts.attempt : undefined;
     const startKey = `start:${gameId}`;
     if (attempt && this.session.ops.some((o) => o.id === attempt.id)) throw new Error("That request id was already used.");
     const game = getGame(gameId);
@@ -922,14 +924,12 @@ export class RoomEngine {
     };
     this.games.set(id, instance);
     // Stage 7.2: every new game in a casual room is a new session state, so
-    // a continuation request made before it is stale (§3.8).
-    if (this.kind === "casual") {
+    // a continuation request made before it is stale (§3.8). Stage 7.4: every
+    // new solo round too, so a solo press made before it is stale (persisted,
+    // monotonic: a forgotten old press can never start anything).
+    if (this.kind === "casual" || this.kind === "solo") {
       this.session.revision += 1;
-      if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id });
-    }
-    // Stage 7.4 (§4.4): remember a solo press, so a repeat of it starts nothing.
-    if (this.kind === "solo" && opts.attempt && !this.session.ops.some((o) => o.id === opts.attempt!.id)) {
-      this.rememberOp({ id: opts.attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id });
+      if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id, ...(this.kind === "solo" ? { actor: hostId, base: attempt.sessionRevision } : {}) });
     }
     // Audit who was left out and whether the host chose that explicitly.
     const leftOut = readiness.wouldMiss.map((m) => ({ id: m.id, presence: m.presence }));
@@ -953,14 +953,35 @@ export class RoomEngine {
    */
   startChosen(actorId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt } = {}): { game: GameInstance; replay: boolean } {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can start a game");
-    // Stage 7.4 (§4.4): a solo room's Start may carry a press id too. A repeat
-    // returns the round that press started: nothing is abandoned, started or
-    // selected again. (A solo room has no session revision to check.)
-    if ((this.kind === "casual" || this.kind === "solo") && opts.attempt) {
+    if (this.kind === "solo" && opts.attempt) {
+      const seen = this.resolveSoloStart(actorId, gameId, opts.attempt);
+      if (seen) return seen;
+    } else if (this.kind === "casual" && opts.attempt) {
       const seen = this.resolveAttempt(opts.attempt, `start:${gameId}`);
       if (seen) return seen;
     }
     return { game: this.startGame(actorId, gameId, opts), replay: false };
+  }
+
+  /**
+   * Stage 7.4 (§4.4, clarification 6783492788): a solo Start seen before.
+   * - Only the whole original command replays: the same actor, game and base
+   *   revision. The same id for anything else is refused.
+   * - It replays only while that press is still the room's latest Start (no
+   *   newer round since, and its round not left): the reply is that round,
+   *   which is the room's current one.
+   * - Otherwise SESSION_CONFLICT with the room's current state: nothing is
+   *   abandoned, started or selected, and no older round is handed back.
+   * A press not seen before (or forgotten after 64 newer ones) is checked by
+   * its revision in startGame, so a delayed or evicted press is stale too.
+   */
+  private resolveSoloStart(actorId: string, gameId: string, attempt: SessionAttempt): { game: GameInstance; replay: true } | null {
+    const op = this.session.ops.find((o) => o.id === attempt.id);
+    if (!op) return null;
+    if (op.key !== `start:${gameId}` || op.actor !== actorId || op.base !== attempt.sessionRevision) throw new Error("That request id was already used for something else.");
+    const game = op.gameInstanceId ? this.games.get(op.gameInstanceId) : undefined;
+    if (game && op.revision === this.session.revision) return { game, replay: true };
+    throw new StartRefused("SESSION_CONFLICT", "That Start isn't the latest any more (its round was left or replaced), so nothing new started.", this.readiness(), { session: this.sessionView() });
   }
 
   // ---- D3: the briefing (docs/ux-redesign/D3_TIMING_CONTRACT.md) ----
@@ -1234,15 +1255,16 @@ export class RoomEngine {
     if (kind === "break") return op;
     const game = op.gameInstanceId ? this.games.get(op.gameInstanceId) : undefined;
     if (game) return { game, replay: true };
-    // Stage 7.4: a solo round that was left or replaced is gone too; its press starts nothing again.
-    if (this.kind === "solo") throw new StartRefused("ATTEMPT_ENDED", "That round was left or replaced, so nothing new started.", this.readiness());
     throw new StartRefused("ATTEMPT_ENDED", "That start was cancelled before play, so nothing new started. Choose again.", this.readiness(), { session: this.sessionView() });
   }
 
   /** Stage 7.2 (§3.8): a new action must be made against the session as it is now. */
   private assertSessionRevision(attempt: SessionAttempt, readiness: Readiness): void {
     if (attempt.sessionRevision !== this.session.revision) {
-      throw new StartRefused("SESSION_CONFLICT", "Something changed since you looked (another host, a break, or a cancelled start). Here is the latest.", readiness, { session: this.sessionView() });
+      const message = this.kind === "solo"
+        ? "Something changed in another tab or window, so this Start didn't go ahead. Try again to start a new round."
+        : "Something changed since you looked (another host, a break, or a cancelled start). Here is the latest.";
+      throw new StartRefused("SESSION_CONFLICT", message, readiness, { session: this.sessionView() });
     }
   }
 
@@ -3057,7 +3079,7 @@ export class RoomEngine {
       name: this.name,
       roomKind: this.kind,
       // Stage 7.1: the Quick Party lineup (casual rooms): public planning facts only.
-      ...(this.kind === "casual" ? { party: this.partyView(), session: this.sessionView() } : {}),
+      ...(this.kind === "casual" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
       players: publicPlayers,
       games: publicGames,
       readiness: this.readiness(now),

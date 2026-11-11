@@ -1817,8 +1817,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Tests and scripts:** `tests/stage74-content-variety.test.ts`, `scripts/check-content-variety.mjs`, `scripts/lib/small-pool.mjs` (all new). Also changed: the Stage 6.2 pinned tests (on purpose), `check-solo-shelf` part E (now asserted), and every other `selectContent` caller (`roomKind`).
 
 **Tests:**
-- **Unit and HTTP:** 21 new; 1,292 in all. Nine mutations each caught.
-- **`check-content-variety`:** 47/47. It fails on an `af39c78` server (one board for all 13 starts) and without the solo-restart fix.
-- **Regressions, all passing:** `check-session-flow` (70), `check-quick-party` (68), `check-solo` (80), `check-solo-shelf` (58), `check-briefing` (43), `check-casual` (30), `check-host-handover` (32).
+- **Unit and HTTP:** 27 new; 1,298 in all. Fourteen mutations each caught.
+- **`check-content-variety`:** 54/54, including the server restart (A2) and a stale press across two tabs (A3). It fails on an `af39c78` server (one board for all 13 starts) and without the solo-restart fix.
+- **Regressions, all passing:** `check-session-flow` (70), `check-quick-party` (68), `check-solo` (80), `check-solo-shelf` (58), `check-briefing` (43), `check-casual` (30), `check-host-handover` (32), `check-recovery` (20).
+- **Clarification 6783492788** (solo press ids: whole command, latest-only replay, persisted monotonic revision) is built and tested (spec §4.4).
 
 **Gates:** recorded in the spec §7.3 once run (the fast gate, then the full gate, one after the other).
