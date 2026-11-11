@@ -1,0 +1,61 @@
+$ node scripts/check-year.mjs http://localhost:39681
+# timeout 600s | worker w2 | server http://localhost:39681 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r83-full2/test-results/20261111-201230-83406685-23681/server-data/w2)
+
+[+2.1s] PASS guest sees no game setup (host-only)
+[+2.1s] PASS guest sees no year start control
+[+3.7s] PASS host sees the kit year panel
+[+3.7s] PASS Bea sees the kit year panel
+[+3.7s] PASS progress line reads Event 1 of 8
+[+4.4s] PASS every event comes from the content (oracle knows all 8 years) — 2007,1937,1877,1971,1066,1953,1927,1928
+[+4.4s] PASS eight jump chips
+[+4.8s] PASS no horizontal overflow at 320px
+[+5.1s] PASS no horizontal overflow at 360px
+[+5.4s] PASS no horizontal overflow at 390px
+[+5.4s] PASS phone gets a numeric keypad (inputmode=numeric)
+[+5.5s] PASS 1066 is accepted as typed (old input clamped it to 1896)
+[+5.6s] PASS 999 shows a message and disables Submit (no silent clamp)
+[+5.8s] PASS nudges reach 1896
+[+5.8s] PASS Submit is labelled with 1896
+[+5.9s] PASS 1896 guess confirmed
+[+6.0s] PASS dial start is 1000
+[+6.0s] PASS dial end is 2100
+[+6.3s] PASS 2025 guess confirmed
+[+6.3s] PASS 1800 is kept as typed
+[+6.3s] PASS Submit shows 1800
+[+6.4s] PASS 1800 guess confirmed
+[+6.4s] PASS guessed event shows its confirmation, not the controls
+[+6.4s] PASS guessed chips carry a check mark
+[+9.0s] PASS Bea sees the waiting ring after all 8 guesses
+[+9.0s] PASS Bea's done state says all guesses are in
+[+11.3s] PASS game finishes and shows results
+[+11.3s] PASS host's results show his exact score (30, from the oracle's years) — Mchezo
+[+11.3s] Code: QLXVHD
+[+11.3s] 
+[+11.3s] Playing as Ada (host) · Room: Christmas Game Night
+[+11.3s] 
+[+11.3s] Lobby & Games
+[+11.3s] Championship
+[+11.3s] TV Dashboard
+[+11.3s] Memory Book
+[+11.3s] Reconnect
+[+11.3s] 
+[+11.3s] Saved.
+[+11.3s] 
+[+11.3s] GUESS THE YEAR · OFFICIAL
+[+11.3s] Everyone tied
+[+11.3s] A
+[+11.3s] Ada
+[+11.3s] B
+[+11.3s] Bea
+[+11.3s] 
+[+11.3s] Eve
+[+11.3s] PASS Bea's exact score (30)
+[+15.2s] PASS abstention shows the sat-out note
+[+15.2s] PASS no skip button before the deadline (host only, stalled only)
+[+15.3s] PASS reloaded player is still sat out (abstention survived)
+[+17.8s] PASS game finishes without the abstained player
+[+17.9s] PASS abstained player scores 0
+[+17.9s] YEAR ALL PASSED
+[+17.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 18s | cpu 3.4s, peak memory 268 MB

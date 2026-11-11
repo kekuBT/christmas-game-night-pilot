@@ -1,0 +1,11 @@
+
+PASSED (exit 0) | full | run 20261111-201230-83406685-23681
+  86 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 31m 21s · step time 1h 31m (sum) · 3 workers, 98% busy · 2.93× the same steps run one after another
+           predicted 24–56m (about 30m 45s, low-confidence) → actual 31m 21s (+2%)
+           longest  e2e-chromium 8m 32s, check-f5 7m 38s, check-leaderboard 6m 41s · the longest step is 27% of the wall time
+           machine  CPU mean 33%, peak 100% · memory available ≥ 12924 MB · load peak 5.13 · backpressure 5 wait(s), 30s
+           contention ×1.03 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r83-full2/test-results/20261111-201230-83406685-23681/report.json

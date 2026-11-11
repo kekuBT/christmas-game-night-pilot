@@ -331,3 +331,13 @@ I found this after the completed report (correction 6805122200), and ChatGPT's i
   - On the repair, it passes 34 of 34. Logs are in `docs/evidence/stage83-local/`.
   - Screenshots: `docs/stage8/screenshots-83/r83-before-offline-after-failed-update.png` and `r83-after-offline-after-failed-update.png`.
 - `check-install`'s F2 and F3 now also require that no candidate cache is left.
+- **Gates on the repair candidate `8340668`** (fresh clones, clean tree, fingerprint `feb72b0807ae`, 471 files, one after another):
+  - **fast** `20261111-193930-83406685-4884`: **PASSED** 5/5, 1,416 unit tests, in 47 s.
+  - **full** `20261111-194026-83406685-7879`: **FAILED**, 85 passed and 1 failed.
+    - The failure was `unit-tests`: three solo-session tests with a 300 ms request timeout (`stage62-solo-shelf`, `stage74-content-variety`), under the gate's start-up load (load peak 5.65 on 4 CPUs).
+    - The repair doesn't touch them. They pass 97 of 97 three times running alone, and in the 53 earlier recorded gate runs.
+    - Every driver passed in this run, `check-install-builds` included.
+  - **full** `20261111-201230-83406685-23681`: **PASSED** 86/86 in 31 min 21 s: `check-install` 113, `check-install-builds` 34, `check-themes-seasonal` 251, `check-mobile-everyday` 134. No browsers or servers were left behind.
+  - **Superseded, not verdicts on `8340668`:** `c74befa` (my first local fix). Its fast gate `20261111-191957-c74befa4-25785` passed; its full gate `20261111-192055-c74befa4-28821` was stopped when the verdict was read (CANCELLED).
+  - Raw evidence for every run is in `docs/evidence/gate-runs/<run>/`.
+

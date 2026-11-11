@@ -2061,4 +2061,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - On `96b3970`'s code the driver fails 11 of 34; on the repair it passes 34 of 34.
 - **Superseded:** my first local fix `c74befa` (identity, and a guard on the delete) is kept in history. Its fast gate passed and its full gate was CANCELLED; neither is a verdict on the repair.
 
-**Next task:** the clean repair candidate's sequential fast and full gates, the evidence commit, push, and a new completed report on PR #14. After that, ChatGPT's confirmation.
+**Gates on the repair candidate `8340668`** (fresh clones, clean tree, fingerprint `feb72b0807ae`, 471 files, one after another):
+- fast `20261111-193930-83406685-4884`: **PASSED** 5/5, 1,416 unit tests.
+- full `20261111-194026-83406685-7879`: **FAILED**, 85/86. `unit-tests`: three solo-session tests with 300 ms timeouts failed under the start-up load. They are unrelated to the repair and pass alone. A separate hardening task has been suggested.
+- full `20261111-201230-83406685-23681`: **PASSED** 86/86 in 31 min 21 s, with `check-install` 113 and `check-install-builds` 34.
+
+**Next task:** push, then a new completed report on PR #14. After that, ChatGPT's confirmation of R83-01.

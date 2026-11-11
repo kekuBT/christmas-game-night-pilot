@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:41153
+# timeout 600s | worker w3 | server http://localhost:41153 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r83-full2/test-results/20261111-201230-83406685-23681/server-data/w3)
+
+[+16.7s] PASS Geography: finished player sees no answers while Bea still plays
+[+16.8s] PASS Geography: TV shows no answers while Bea still plays
+[+16.8s] PASS Geography: Bea (mid-game) sees no answers
+[+26.2s] PASS Geography: results list every question — 8
+[+26.3s] PASS Geography: each answer matches the content pack — 8/8
+[+26.3s] PASS Geography: each explanation is shown — 8/8
+[+26.3s] PASS Geography: Bea sees her own choices marked
+[+26.3s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+26.5s] PASS Geography: TV lists the answers after the game
+[+26.5s] PASS Geography: TV shows no player's choices
+[+32.2s] PASS Closest: no answer anywhere while question 1 is open
+[+32.3s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 88 vs 88
+[+32.3s] PASS Closest: and the player's own guess
+[+32.3s] PASS Closest: Bea sees her own guess, not Ada's
+[+32.3s] PASS Closest: the explanation is shown
+[+32.3s] PASS Closest: question 2 is now open and its answer is not shown
+[+32.4s] PASS Closest: TV shows the last answer only — Last question: How many keys does a standard piano have? — 88 keys
+[+32.4s] PASS Closest: TV shows nobody's guess — Last question: How many keys does a standard piano have? — 88 keys
+[+32.6s] ANSWER REVEAL ALL PASSED
+[+32.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 32.6s | cpu 3.2s, peak memory 271 MB

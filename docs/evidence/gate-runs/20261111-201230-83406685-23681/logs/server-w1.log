@@ -1,0 +1,4 @@
+TEST MODE: provisional content treated as approved (not a human review)
+Christmas Game Night server on http://localhost:34985 (web app at / after npm run build:web)
+Phones on the same Wi-Fi: open http://192.0.2.2:34985 on the host device (not localhost), so the QR code works.
+received SIGTERM, closing server

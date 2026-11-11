@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261111-194026-83406685-7879
+  85 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w2) [functional]: [31m[1m[7m FAIL [27m[22m[39m tests/stage62-solo-shelf.test.ts[2m > [22mthe solo session across games, and a join whose reply was lost[2m > [22monly a definite answer gives the room up: a tim
+  timing   wall 31m 44s · step time 1h 31m (sum) · 3 workers, 97% busy · 2.90× the same steps run one after another
+           predicted 23–57m (about 30m 53s, low-confidence) → actual 31m 44s (+3%)
+           longest  e2e-chromium 8m 19s, check-f5 7m 38s, check-leaderboard 6m 34s · the longest step is 26% of the wall time
+           machine  CPU mean 34%, peak 97% · memory available ≥ 12949 MB · load peak 5.65 · backpressure 12 wait(s), 62s
+           contention ×1.036 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r83-full/test-results/20261111-194026-83406685-7879/report.json

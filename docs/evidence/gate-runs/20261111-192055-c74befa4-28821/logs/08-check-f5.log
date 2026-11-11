@@ -1,0 +1,22 @@
+$ node scripts/check-f5.mjs http://localhost:32917
+# timeout 1500s | worker w2 | server http://localhost:32917 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s83w-full/test-results/20261111-192055-c74befa4-28821/server-data/w2)
+
+[+4.0s] PASS lobby roster: 4 players joined
+[+4.1s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games)
+[+5.5s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+17.1s] OK impostor: finished
+[+17.1s] PASS day playlist: impostor finished without sticking
+[+18.2s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+50.4s] OK caption-clash: finished
+[+50.4s] PASS day playlist: caption-clash finished without sticking
+[+51.6s] PASS TV projection leak-free while trivia playing — no forbidden keys
+[+71.2s] FAIL trivia: locator.isVisible: Target page, context or browser has been closed
+[+71.2s]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+71.2s]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+71.2s]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+71.2s]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+71.2s] FAIL day playlist: trivia finished without sticking — locator.isVisible: Target page, context or browser has been closed
+[+71.2s] FAIL day playlist: all games finished in one room — 2/14 finished
+[+71.2s] FATAL: page.evaluate: Target page, context or browser has been closed
+[+71.2s] F5 FAILED: 3/9 failed
+[+71.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
