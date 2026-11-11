@@ -78,6 +78,8 @@ export interface RoomLobbyProps {
    * here (`onChange`). It applies from the next game started.
    */
   content?: { season: SessionSeason; onChange?: (season: SessionSeason) => void; busy?: boolean };
+  /** Stage 9.1 (§8): the up-next game's settings (Jebena Rush's hearts): the host's choice, or everyone else's label. */
+  gameSettings?: ReactNode;
 }
 
 export function RoomLobby(p: RoomLobbyProps) {
@@ -173,6 +175,7 @@ export function RoomLobby(p: RoomLobbyProps) {
         <ContentSeasonChoice value={p.content.season} onChange={p.content.onChange} busy={p.content.busy} testIdPrefix="lobby"
           note="What the next game deals. Each phone still picks its own look in Settings." />
       )}
+      {p.gameSettings}
       {p.shuffleNote && <p className="mz-foot mz-lobby__shuffle" data-testid="shuffle-result">{p.shuffleNote}</p>}
       {p.lastGame && (
         <section className="mz-lastgame" aria-label="Last game" data-testid="last-game-card">

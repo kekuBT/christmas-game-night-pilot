@@ -179,14 +179,15 @@ export function jebenaPoints(s: JebenaState): Record<string, number> {
   return out;
 }
 
-function publicView(s: JebenaState) {
+function publicView(s: JebenaState, scale = 1) {
   const cat = categoryById(s.category);
   const thisCategory = s.log.filter((e) => e.kind === "accepted" && e.categoryId === s.category).map((e) => ({ answer: e.answer!, player: e.player! }));
   return {
     rulesVersion: s.rulesVersion,
     startHearts: s.startHearts,
-    turnMs: JEBENA_TURN_MS,
-    graceMs: JEBENA_GRACE_MS,
+    // The turn as players see it, and the network grace on top (both under the test time scale; 1 in real play).
+    turnMs: Math.round(JEBENA_TURN_MS * scale),
+    graceMs: Math.round(JEBENA_GRACE_MS * scale),
     order: s.order.map((id) => {
       const p = s.per[id]!;
       return { id, hearts: p.hearts, out: p.outOrder !== null, satOut: !!p.satOut, answers: p.answers, timeouts: p.timeouts };
@@ -320,9 +321,9 @@ export const jebenaModule: GameModule<JebenaState> = {
     return { participation };
   },
   anyAction: (s) => Object.values(s.per).some((p) => p.tries > 0),
-  publicView: (s) => publicView(s),
-  playerView(s, actorId) {
-    const base = publicView(s);
+  publicView: (s, ctx) => publicView(s, ctx.scale),
+  playerView(s, actorId, ctx) {
+    const base = publicView(s, ctx.scale);
     const p = s.per[actorId];
     if (!p) return base;
     const attempt = s.attempts[actorId];

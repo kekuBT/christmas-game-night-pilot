@@ -14,7 +14,7 @@ import {
 } from "../src/games/modules/jebena.js";
 import { JEBENA_DEFAULT_HEARTS, sameSettings, validateGameSettings } from "../src/games/settings.js";
 import { policyFor } from "../src/server/lifecycle.js";
-import { RoomEngine, StartRefused } from "../src/server/room.js";
+import { RoomEngine, SessionRefused, StartRefused } from "../src/server/room.js";
 import { NOT_IN_QUICK_PARTY, partyPool, planParty } from "../src/games/party.js";
 import { GAME_MANIFESTS, validateManifest } from "../src/games/manifest.js";
 
@@ -307,6 +307,8 @@ describe("Jebena Rush in the room engine (§4–§6)", () => {
     return { engine, ids, send, now: () => t, set: (ms: number) => { t = ms; engine.tick(t); }, advance: (ms: number) => { t += ms; engine.tick(t); } };
   }
   function start(env: ReturnType<typeof setup>, settings?: unknown) {
+    // The host chooses the hearts in the lobby first; the Start carries what it showed (§8).
+    if (settings !== undefined) env.engine.setLobbySettings(env.ids[0]!, "jebena-rush", settings, env.engine.session.revision);
     const g = env.engine.startGame(env.ids[0]!, "jebena-rush", { official: false, ...(settings !== undefined ? { settings } : {}) });
     for (const p of env.ids) expect(env.send(p, g.id, "briefing-ready", { ready: true }).accepted).toBe(true);
     const game = env.engine.games.get(g.id)!;
@@ -324,6 +326,40 @@ describe("Jebena Rush in the room engine (§4–§6)", () => {
     const { game, st } = start(env, { hearts: 7 });
     expect(game.settings).toEqual({ hearts: 7 });
     expect(st().startHearts).toBe(7);
+  });
+
+  it("lobby hearts (§8): host or cohost only, casual only, revision-checked, shown to everyone, bound at Start, persisted", () => {
+    const env = setup();
+    const host = env.ids[0]!, guest = env.ids[1]!;
+    expect(env.engine.lobbySettingsView()["jebena-rush"]).toEqual({ hearts: JEBENA_DEFAULT_HEARTS });
+    expect(() => env.engine.setLobbySettings(guest, "jebena-rush", { hearts: 3 }, env.engine.session.revision)).toThrow(SessionRefused);
+    expect(() => env.engine.setLobbySettings(host, "jebena-rush", { hearts: 4 }, env.engine.session.revision)).toThrow(/3, 5 or 7/);
+    expect(() => env.engine.setLobbySettings(host, "trivia", { hearts: 3 }, env.engine.session.revision)).toThrow(SessionRefused);
+    const rev = env.engine.session.revision;
+    expect(env.engine.setLobbySettings(host, "jebena-rush", { hearts: 3 }, rev).changed).toBe(true);
+    expect(env.engine.session.revision).toBe(rev + 1);
+    // The same choice again changes nothing, whatever its revision (a retry, a second tab).
+    expect(env.engine.setLobbySettings(host, "jebena-rush", { hearts: 3 }, rev).changed).toBe(false);
+    // A delayed change made against an older revision never undoes a newer one.
+    expect(() => env.engine.setLobbySettings(host, "jebena-rush", { hearts: 7 }, rev)).toThrow(/changed since/);
+    // Every audience sees the choice (public projection, a guest's own and the TV's).
+    for (const view of [env.engine.project("player", guest), env.engine.project("tv")]) expect((view as { lobbySettings?: unknown }).lobbySettings).toEqual(expect.objectContaining({ "jebena-rush": { hearts: 3 } }));
+    // A Start that shows other hearts (or none: the default) is refused; nothing starts.
+    const before = env.engine.games.size;
+    let refused: unknown;
+    try { env.engine.startGame(host, "jebena-rush", { official: false, settings: { hearts: 5 } }); } catch (e) { refused = e; }
+    expect(refused).toBeInstanceOf(StartRefused);
+    expect((refused as StartRefused).code).toBe("SETTINGS_CHANGED");
+    expect(() => env.engine.startGame(host, "jebena-rush", { official: false })).toThrow(StartRefused);
+    expect(env.engine.games.size).toBe(before);
+    // Persisted with the room, and only valid choices come back.
+    const saved = JSON.parse(JSON.stringify(env.engine.toJSON())) as Record<string, unknown>;
+    expect(RoomEngine.fromJSON(saved).lobbySettingsFor("jebena-rush")).toEqual({ hearts: 3 });
+    expect(RoomEngine.fromJSON({ ...saved, lobbySettings: { "jebena-rush": { hearts: 9 }, trivia: { hearts: 3 } } }).lobbySettingsView()["jebena-rush"]).toEqual({ hearts: JEBENA_DEFAULT_HEARTS });
+    // A Cup has no lobby settings.
+    const cup = setup(3, "cup");
+    expect(() => cup.engine.setLobbySettings(cup.ids[0]!, "jebena-rush", { hearts: 3 }, cup.engine.session.revision)).toThrow(SessionRefused);
+    expect((cup.engine.project("player", cup.ids[0]!) as { lobbySettings?: unknown }).lobbySettings).toBeUndefined();
   });
 
   it("the turn clock is the room's phase clock: 10.5 s after play starts; a timeout is processed once, on time, with nobody acting", () => {

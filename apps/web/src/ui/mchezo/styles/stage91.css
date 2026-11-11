@@ -1,0 +1,93 @@
+/* Stage 9.1: Jebena Rush (docs/stage9/stage91.md §8).
+   Phone (320 px and up), TV, both looks. The jebena sits on its own cream
+   stage so it reads on either background. Motion only with full motion:
+   reduced motion and Animations "Off" ([data-mz-still]) show a still
+   jebena, and the countdown, its word and the steam count carry the same
+   meaning. Nothing relies on colour alone. */
+
+.mz-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.mz-jr { gap: 12px; }
+.mz-jr-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 0 16px; }
+.mz-jr-cat { min-width: 0; }
+.mz-jr-cat__name { margin: 2px 0 0; font-family: var(--mz-font-display); font-size: clamp(24px, 7vw, 32px); line-height: 1.1; overflow-wrap: anywhere; }
+.mz-jr-cat__def { text-align: left; margin: 4px 0 0; }
+
+.mz-jr-stage { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 0 16px; }
+.mz-jr-stage__side { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.mz-jr-holder { margin: 0; font-weight: 800; font-size: 20px; line-height: 1.2; overflow-wrap: anywhere; }
+.mz-jr-holder[data-you="true"] { font-size: 24px; }
+
+/* The countdown: the number first, then its unit and the jebena's word.
+   The word's badge changes shape with urgency (plain, dashed, solid). */
+.mz-jr-clock { margin: 0; display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 4px 8px; font-variant-numeric: tabular-nums; }
+.mz-jr-clock__s { font-size: 40px; line-height: 1; font-family: var(--mz-font-display); }
+.mz-jr-clock__unit { color: var(--mz-text-muted); font-weight: 600; }
+.mz-jr-clock__word { grid-column: 1 / -1; justify-self: start; padding: 2px 10px; border-radius: 999px; font-weight: 800; border: 2px solid transparent; }
+.mz-jr-clock[data-urgency="warm"] .mz-jr-clock__word { border-color: var(--mz-line); }
+.mz-jr-clock[data-urgency="steaming"] .mz-jr-clock__word { border-style: dashed; border-color: var(--mz-highlight); }
+.mz-jr-clock[data-urgency="boiling"] .mz-jr-clock__word { border-width: 3px; border-color: var(--mz-danger); background: var(--mz-surface-2); }
+
+/* Hearts: icons plus the number. */
+.mz-jr-hearts { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 700; }
+.mz-jr-hearts__icons { display: inline-flex; gap: 1px; font-size: 18px; line-height: 1; }
+.mz-jr-hearts--compact .mz-jr-hearts__icons { font-size: 14px; }
+.mz-jr-heart--full { color: var(--mz-danger); }
+.mz-jr-heart--empty { color: var(--mz-text-muted); opacity: .7; }
+.mz-jr-hearts__n { font-variant-numeric: tabular-nums; font-size: 14px; color: var(--mz-text-muted); }
+
+/* Typing an answer: one big field and Send, keyboard friendly. */
+.mz-jr-form { display: flex; gap: 8px; padding: 0 16px; align-items: stretch; }
+.mz-jr-input { flex: 1; min-width: 0; min-height: 52px; padding: 0 14px; border-radius: 14px; border: 2px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); font: 600 18px/1.2 var(--mz-font-body); }
+.mz-jr-input:focus { outline: 3px solid var(--mz-brand); outline-offset: 1px; border-color: var(--mz-brand); }
+.mz-jr-form .mz-key { flex: none; min-width: 88px; }
+@media (max-width: 340px) { .mz-jr-form .mz-key { min-width: 72px; padding-inline: 10px; } }
+
+.mz-jr-named { list-style: none; margin: 0; padding: 0 16px; display: flex; flex-wrap: wrap; gap: 6px; }
+.mz-jr-named li { padding: 4px 10px; border-radius: 999px; background: var(--mz-surface-2); border: 1px solid var(--mz-line); font-size: 14px; max-width: 100%; overflow-wrap: anywhere; }
+.mz-jr-named__by { color: var(--mz-text-muted); font-size: 12px; }
+
+.mz-jr-seats { list-style: none; margin: 0; padding: 0 16px; display: grid; gap: 4px; }
+.mz-jr-seat { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 12px; background: var(--mz-surface-1); border: 1px solid var(--mz-line); min-width: 0; }
+.mz-jr-seat__name { min-width: 0; overflow-wrap: anywhere; }
+.mz-jr-seat__tag { color: var(--mz-text-muted); font-size: 13px; }
+.mz-jr-seat--holder { border-width: 2px; border-color: var(--mz-brand); font-weight: 700; }
+.mz-jr-seat--out { opacity: .7; }
+.mz-jr-seat--out .mz-jr-seat__name { text-decoration: line-through; }
+.mz-jr-seat__status { font-size: 13px; font-weight: 700; color: var(--mz-text-muted); }
+
+.mz-jr-standings { list-style: none; margin: 0; padding: 0 16px; display: grid; gap: 6px; }
+.mz-jr-row { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 14px; background: var(--mz-surface-1); border: 1px solid var(--mz-line); }
+.mz-jr-row--you { border-width: 2px; border-color: var(--mz-brand); }
+.mz-jr-row__place { font-family: var(--mz-font-display); font-size: 22px; text-align: center; }
+.mz-jr-row__who { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+.mz-jr-row__line { font-size: 13px; color: var(--mz-text-muted); }
+.mz-jr-row__pts { font-variant-numeric: tabular-nums; font-size: 18px; }
+
+.mz-jr-heartschoice .mz-content-choice__note { text-align: left; }
+.mz-jr-heartsbadge { white-space: nowrap; }
+
+/* TV. */
+.mz-jr-tv { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+.mz-jr-tv__main { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
+.mz-jr-tv__info { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1; }
+.mz-jr-tv .mz-jr-clock__s { font-size: 72px; }
+.mz-jr-tv .mz-jr-seats { padding: 0; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.mz-jr-tv .mz-jr-seat { font-size: 18px; }
+.mz-jr-tv .mz-jr-seat__tag { display: block; }
+.mz-jr-standings--tv { padding: 0; font-size: 20px; }
+
+/* The jebena's motion: full motion only. Steam rises; the pot wobbles,
+   gently while steaming and hard when boiling over. */
+.mz-jr-art { flex: none; display: block; }
+.mz-jr-pot, .mz-jr-steam__curl { transform-box: view-box; }
+.mz-jr-pot { transform-origin: 60px 102px; }
+[data-mz-motion="full"] .mz-jr-art .mz-jr-steam__curl { animation: mz-jr-rise 1.8s ease-in-out infinite; }
+[data-mz-motion="full"] .mz-jr-art .mz-jr-steam__curl--2 { animation-delay: .45s; }
+[data-mz-motion="full"] .mz-jr-art .mz-jr-steam__curl--3 { animation-delay: .9s; }
+[data-mz-motion="full"] .mz-jr-art[data-urgency="boiling"] .mz-jr-steam__curl { animation-duration: .9s; }
+[data-mz-motion="full"] .mz-jr-art[data-urgency="steaming"] .mz-jr-pot { animation: mz-jr-wobble 1.4s ease-in-out infinite; }
+[data-mz-motion="full"] .mz-jr-art[data-urgency="boiling"] .mz-jr-pot { animation: mz-jr-shake .42s ease-in-out infinite; }
+@keyframes mz-jr-rise { 0% { transform: translateY(2px); opacity: .95; } 70% { opacity: .45; } 100% { transform: translateY(-7px); opacity: .15; } }
+@keyframes mz-jr-wobble { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+@keyframes mz-jr-shake { 0%, 100% { transform: rotate(-5deg) translateX(-1px); } 50% { transform: rotate(5deg) translateX(1px); } }

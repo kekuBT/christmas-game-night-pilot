@@ -55,7 +55,12 @@ const EXACT: Record<string, string> = {
   WRONG_ROUND: "That round isn't open on this phone. It will catch up in a moment.",
   ALREADY_FINISHED: "You've finished this game.",
   DRAWER_CANNOT_GUESS: "You're drawing this one, so you can't guess it.",
-  NOT_YOUR_TURN: "It isn't your turn to draw.",
+  // Draw & Guess and Jebena Rush both take turns.
+  NOT_YOUR_TURN: "It isn't your turn.",
+  // Stage 9.1 (Jebena Rush).
+  STALE_TURN: "Time ran out on that turn, so that answer didn't count. The jebena has moved on.",
+  OUT: "You're out of hearts. Watch the rest!",
+  TOO_MANY_ATTEMPTS: "That's all your tries for this turn.",
   TOO_MANY_GUESSES: "That's all your guesses for this drawing.",
   RATE_LIMITED: "Slow down a little: that was too quick. Try again.",
   DRAWING_FULL: "The drawing is full. Clear or undo to make room.",
