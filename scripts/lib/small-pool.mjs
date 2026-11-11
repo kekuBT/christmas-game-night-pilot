@@ -39,7 +39,7 @@ export function writeSmallPool(dir) {
   }));
   writeFileSync(join(dir, "packs", "trivia-small.json"), JSON.stringify({ ...header(tv, "trivia-small", "Stage 7.4 test pool: Trivia"), items: questions }, null, 2));
   return {
-    boards: boards.map((b) => ({ id: b.id, status: b.review.status, eligibility: b.eligibility, words: b.groups.flatMap((g) => g.words) })),
+    boards: boards.map((b) => ({ id: b.id, status: b.review.status, eligibility: b.eligibility, words: b.groups.flatMap((g) => g.words), groups: b.groups.map((g) => [...g.words]) })),
     questions: questions.map((q) => ({ id: q.id, status: q.review.status, eligibility: q.eligibility, prompt: q.prompt })),
   };
 }

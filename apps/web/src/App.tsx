@@ -1464,6 +1464,11 @@ export function App() {
   // is ready, whatever it was showing before (lobby or the last results).
   const briefingGame = (proj?.games ?? []).find((g) => g.status === "briefing");
   if (view === "lobby" && briefingGame?.briefing) {
+    // Stage 7.4 (C1): name where a cancel takes this person, from the same
+    // rule that will show it (no game on: the last results unless closed, else the lobby).
+    const afterCancel = latestFinished && deriveShowPhase(undefined, latestFinished, introDismissed, resultsDismissed, playerId ?? undefined) === "results"
+      ? { to: "results" as const, title: titleFor(latestFinished.gameId, games) }
+      : { to: "lobby" as const };
     return (
       <MchezoProvider theme={themes.everyday} {...motion}>
         <BriefingScreen
@@ -1476,6 +1481,7 @@ export function App() {
           onReady={(ready) => briefingReady(briefingGame.id, ready)}
           onStartNow={(confirmed) => briefingStartNow(briefingGame.id, confirmed)}
           onCancel={() => briefingCancel(briefingGame.id)}
+          afterCancel={afterCancel}
         />
       </MchezoProvider>
     );
