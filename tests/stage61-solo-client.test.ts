@@ -429,6 +429,50 @@ describe("the solo session under faults (review of PR #6)", () => {
     expect([srv.counts.games, srv.counts.gamePosts]).toEqual([1, 2]);
   });
 
+  it("a Start request that timed out is never resent in the same Start, even when a timer fires a moment before the clock says the allowance is over", async () => {
+    // Stage 7.4 (review 6786060026 repair): timers can fire a little early
+    // against the clock. The rule is exact: only a quick failure is resent;
+    // a request that used its allowance ends the Start (Try again resends it).
+    const srv = soloServer();
+    let lag = 0;
+    let lost = 1;
+    const h = harness(async (url, init) => {
+      if (url.endsWith("/games") && (init.method ?? "GET") === "POST" && lost-- > 0) { await srv.handle(url, init); lag = 40; return noReply(init); }
+      return srv.handle(url, init);
+    });
+    const seen: SoloState[] = [];
+    const s = new SoloSession({ store: null, onChange: (st) => seen.push(st), fetch: h.f, pollMs: 60_000, requestTimeoutMs: 150, startBudgetMs: 2_000, now: () => Date.now() - lag });
+    sessions.push(s);
+    await s.start("math-mayhem");
+    expect(s.current).toMatchObject({ phase: "error", failure: "transient" });
+    expect([srv.counts.games, srv.counts.gamePosts]).toEqual([1, 1]);
+  });
+
+  it("a connection that fails late, then a resend that hangs: the Start still ends within the first request's allowance, not two", async () => {
+    const srv = soloServer();
+    let n = 0;
+    const h = harness(async (url, init) => {
+      if (url.endsWith("/games") && (init.method ?? "GET") === "POST") {
+        n++;
+        if (n === 1) { await new Promise((r) => setTimeout(r, 300)); throw new TypeError("fetch failed"); } // reset 300 ms in
+        return noReply(init);
+      }
+      return srv.handle(url, init);
+    });
+    const seen: SoloState[] = [];
+    const s = new SoloSession({ store: null, onChange: (st) => seen.push(st), fetch: h.f, pollMs: 60_000, requestTimeoutMs: 400, startBudgetMs: 4_000 });
+    sessions.push(s);
+    await s.start("math-mayhem"); // makes and joins the room first
+    await s.leave();
+    n = 0;
+    const t0 = Date.now();
+    await s.start("math-mayhem");
+    const took = Date.now() - t0;
+    expect(s.current).toMatchObject({ phase: "error", failure: "transient" });
+    expect(n).toBe(2); // the failed send was resent once, and that resend hung
+    expect(took).toBeLessThan(600); // ends at the first send's 400 ms allowance; a fresh allowance for the resend would make it about 700 ms
+  });
+
   it("Start gets no answer and the round never reached the server: an error, and Try again starts one", async () => {
     const srv = soloServer();
     let drop = true;

@@ -108,7 +108,8 @@ export type SoloFailure = "lost" | "transient" | "refused";
 
 /** A request that did not succeed, and why (see the file comment). */
 export class SoloRequestError extends Error {
-  constructor(readonly kind: SoloFailure, message: string, readonly status?: number) {
+  /** `timedOut`: the request used its whole allowance (as opposed to failing quickly). */
+  constructor(readonly kind: SoloFailure, message: string, readonly status?: number, readonly timedOut = false) {
     super(message);
     this.name = "SoloRequestError";
   }
@@ -222,7 +223,9 @@ export class SoloSession {
     if (run.signal.aborted) ac.abort(); else run.signal.addEventListener("abort", onRunAbort, { once: true });
     let timer: ReturnType<typeof setTimeout> | undefined;
     const expired = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => { ac.abort(); reject(new SoloRequestError("transient", SOLO_UNREACHABLE)); }, Math.max(1, timeoutMs ?? this.deps.requestTimeoutMs ?? SOLO_REQUEST_TIMEOUT_MS));
+      // Reject as timed out first, then abort: aborting settles `stopped` too,
+      // and the race must report the timeout (Stage 7.4: a timed-out Start is not resent).
+      timer = setTimeout(() => { reject(new SoloRequestError("transient", SOLO_UNREACHABLE, undefined, true)); ac.abort(); }, Math.max(1, timeoutMs ?? this.deps.requestTimeoutMs ?? SOLO_REQUEST_TIMEOUT_MS));
     });
     const stopped = new Promise<never>((_, reject) => {
       const stop = () => reject(new SoloRequestError("transient", "stopped"));
@@ -351,7 +354,11 @@ export class SoloSession {
         } catch (e) {
           if (!this.isCurrent(gen)) return;
           const noAnswer = e instanceof SoloRequestError && e.kind === "transient";
-          if (noAnswer && resent < SOLO_START_RESENDS && sendsEnd - this.now() > 0) continue;
+          // Only a quick failure is resent. A request that used its whole
+          // allowance ends the Start, whatever the clock says (timers can fire
+          // a little early); Try again resends the same press.
+          const quickFailure = noAnswer && !(e as SoloRequestError).timedOut;
+          if (quickFailure && resent < SOLO_START_RESENDS && sendsEnd - this.now() > 0) continue;
           if (!noAnswer) this.pendingStart = null; // a definite answer ends the press
           throw e;
         }
