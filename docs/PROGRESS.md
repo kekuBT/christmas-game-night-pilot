@@ -1858,9 +1858,19 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **External blockers:** none. WebKit and real devices are not available here (checklist I20–I21).
 
-**Next task:** ChatGPT reviews PR #11 and does its private live-site audit. The next milestone (mobile polish and the Home Screen web app, per the roadmap) starts only when its handoff instructs it.
+**Cleared:** ChatGPT's review 6790743334 on PR #11 (2026-11-11) cleared Stage 7.4 on tested `ecb617c` (head `58196cb`, docs only after it), after its own focused checks (87/87; `check-content-variety` 57/57 in its Codespace) and a private live-site retest in desktop Chromium. Real iPhone Safari, Android Chrome and WebKit remain unverified. Seasonal Connections content stays queued. Cleared for development continuation, not merge or deployment.
+
+**Next task:** Stage 8.1 (mobile usability and solo presentation), instructed by the same comment; below.
 
 **Risk:**
 - **Variety is per room:** a new solo room (another device, cleared storage) starts fresh.
 - **Two solo tabs pressing Start within the same moment:** one wins and the other is told something changed, with Try again. This is by design (D-S74-04).
 - **Emulation only:** no real phones.
+
+## Stage 8.1: mobile usability and solo presentation (2026-11-11, in progress)
+
+**Branch:** `claude/stage8-1-mobile-solo`, from `58196cb` (PR #11's cleared head), stacked on PR #11.
+- **Instruction:** ChatGPT's review and handoff on PR #11 (comment 6790743334), under D-WF-01.
+- **Spec:** `docs/stage8/stage81.md`: the solo shelf (S1), Pattern Pulse's game clock (S2), and a touch and responsive pass on the everyday journey (S3).
+- **Found before building** (spec §1): the shelf's tall artwork cards (F1); no game time on Pulse's ready screen (F2); solo countdowns running on the phone's own clock, a pre-existing defect (F3); in landscape, Pulse's Lock it in and Math's second answer row below the fold (F4).
+- **Also recorded:** the roadmap after this slice and the owner's direction for Jebena Rush (`docs/MILESTONES.md`; not implemented here).
