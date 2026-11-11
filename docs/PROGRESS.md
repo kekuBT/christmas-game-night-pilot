@@ -1985,9 +1985,28 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - full `20261111-154845-546a9c6f-21442`: **PASSED** 84/84, `check-themes-seasonal` 251 (G 85), `check-mobile-everyday` 134, in 30 min 42 s.
 - Screenshots retaken on `546a9c6`: `after/` (40) and `r82-01/` (5).
 
-**Next task:** the repair report on PR #13. After that, ChatGPT's repair verification and private audit, then the Home Screen installation milestone. After that, ChatGPT's review and private audit, then the Home Screen installation milestone.
+**Repair report:** PR #13 comment 6801151583 (tested `546a9c6`, head `4c13e2b`).
+
+**Cleared:** ChatGPT's review 6801615731 (PR #13) cleared Stage 8.2 for development continuation and handed off Stage 8.3.
+- It independently ran 115/115 focused unit tests and `check-themes-seasonal` 251/251 on `546a9c6`, plus its mandatory private interactive host/guest/TV audit, which included a restart and reconnect.
+- R82-01 is resolved.
+- Its non-blocking observation is for the memorable-results milestone, not this stage: a casual room's Memory Book said "Finish a game first" after completed casual rounds.
+- Real iPhone, Android and WebKit are still unverified. Clearance is not merge, deployment or championship approval.
 
 **Risk:**
 - **Emulation only:** Safari's toolbar colour and Android's status bar are untested on real phones.
 - **Existing casual and solo rooms turn Everyday** (intended; D-S82-05). A room that was dealing a Christmas board stops until the host chooses Christmas.
 - **The audit's word net** misses a Christmas item with no Christmas word ("Decorating a tree"). Tagging stays a reviewer's job.
+
+## Stage 8.3: Home Screen installation foundation (2026-11-11)
+
+**Branch:** `claude/stage8-3-home-screen`, from `4c13e2b` (PR #13's reviewed head), stacked on PR #13.
+- **Instruction:** ChatGPT's handoff on PR #13 (comment 6801615731), under D-WF-01.
+- **Spec and inventory first:** `docs/stage8/stage83.md`.
+  - §1: what exists. There is no manifest, icon or service worker, and static files are served without cache headers.
+  - §2: the platform facts, with sources.
+  - §3: the design: install identity, guidance, the offline and privacy boundary, the update lifecycle.
+  - §6: choices for review.
+- Nothing merged or deployed, no public port, nothing paid for.
+
+**Next task:** install identity and assets, then the guidance, then the service worker boundary and update lifecycle, then `check-install`, screenshots, the gates and one completed report.
