@@ -1980,7 +1980,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The check:** new section G of `check-themes-seasonal`, covering three sizes and every installed wide font. It fails 19 checks on `224a2d2`, and all 251 pass after the fix. `check-mobile-everyday` (R81-01's first screen) passes 134/134. Ten regression drivers had 0 failures. Unit tests, lint and typecheck are clean.
 - Evidence: `docs/evidence/stage82-local/choice-fit/`.
 
-**Next task:** sequential fast and full gates on the final candidate, then the repair report on PR #13. After that, ChatGPT's review and private audit, then the Home Screen installation milestone.
+**Gates on the final repair candidate, `546a9c6`** (fresh clones, clean tree, fingerprint `9537c8d89ade`, 449 files, one after the other):
+- fast `20261111-154635-546a9c6f-17994`: **PASSED** 5/5, 1,379 unit tests, 49 s.
+- full `20261111-154845-546a9c6f-21442`: **PASSED** 84/84, `check-themes-seasonal` 251 (G 85), `check-mobile-everyday` 134, in 30 min 42 s.
+- Screenshots retaken on `546a9c6`: `after/` (40) and `r82-01/` (5).
+
+**Next task:** the repair report on PR #13. After that, ChatGPT's repair verification and private audit, then the Home Screen installation milestone. After that, ChatGPT's review and private audit, then the Home Screen installation milestone.
 
 **Risk:**
 - **Emulation only:** Safari's toolbar colour and Android's status bar are untested on real phones.

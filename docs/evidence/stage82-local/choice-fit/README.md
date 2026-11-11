@@ -28,7 +28,8 @@
 | Run | Section G | File |
 |---|---|---|
 | `224a2d2` web build | **19 of the new checks FAIL**: Settings → Look at 320 and 390, and the shelf and start-screen content choices at 320; the rest of the driver passes | `check-themes-seasonal-on-224a2d2.log` |
-| the fix (working tree) | all 251 driver checks pass | `check-themes-seasonal-fixed.log` |
+| the fix (working tree, committed as `546a9c6`) | all 251 driver checks pass | `check-themes-seasonal-fixed.log` |
+| `546a9c6` in its full gate `20261111-154845-546a9c6f-21442` | all 251 pass, 85 of them in section G | `docs/evidence/gate-runs/20261111-154845-546a9c6f-21442/logs/41-check-themes-seasonal.log` |
 
 **Not made worse.**
 - **The R81-01 compact shelf** still keeps the first Start and the second game's title on the first screen at 320×640 with every font: `check-mobile-everyday` passes all 134 checks (`check-mobile-everyday-fixed.log`).

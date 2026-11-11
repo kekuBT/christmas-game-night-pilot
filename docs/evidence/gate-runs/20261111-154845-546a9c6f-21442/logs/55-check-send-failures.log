@@ -1,0 +1,53 @@
+$ node scripts/check-send-failures.mjs http://localhost:36225
+# timeout 600s | worker w3 | server http://localhost:36225 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-546a9c6/test-results/20261111-154845-546a9c6f-21442/server-data/w3)
+
+[+2.3s] PASS Trivia: while it's on its way the tile says Sending…, not Locked in — Nectar
+[+2.3s] SENDING…
+[+3.9s] PASS Trivia: a send with no answer says it couldn't be confirmed
+[+4.0s] PASS Trivia: nothing claims it is locked in
+[+4.0s] PASS Trivia: the server has no answer from Amina
+[+4.0s] PASS Trivia: the question can be answered again
+[+4.4s] PASS Trivia: tapping again sends it (the server has it)
+[+4.4s] PASS Trivia: the failure line is gone
+[+5.7s] PASS Math Mayhem: while it's on its way the tile says Sending…, not Locked in — 5
+[+5.7s] SENDING…
+[+7.4s] PASS Math Mayhem: a send with no answer says it couldn't be confirmed
+[+7.4s] PASS Math Mayhem: nothing claims it is locked in
+[+7.4s] PASS Math Mayhem: the server has no answer from Amina
+[+7.4s] PASS Math Mayhem: the question can be answered again
+[+7.9s] PASS Math Mayhem: tapping again sends it (the server has it)
+[+7.9s] PASS Math Mayhem: the failure line is gone
+[+8.7s] PASS Geography: while it's on its way the tile says Sending…, not Locked in — Atlantic
+[+8.7s] SENDING…
+[+10.3s] PASS Geography: a send with no answer says it couldn't be confirmed
+[+10.4s] PASS Geography: nothing claims it is locked in
+[+10.4s] PASS Geography: the server has no answer from Amina
+[+10.4s] PASS Geography: the question can be answered again
+[+10.8s] PASS Geography: tapping again sends it (the server has it)
+[+10.8s] PASS Geography: the failure line is gone
+[+13.3s] PASS Guess the Year: a send with no answer says it couldn't be confirmed
+[+13.3s] PASS Guess the Year: the number is still in the box — 1969
+[+13.3s] PASS Guess the Year: the server has no guess from Amina
+[+13.4s] PASS Guess the Year: submitting again sends it (the server has it)
+[+13.4s] PASS Guess the Year: the failure line is gone
+[+15.9s] PASS Closest Wins: a send with no answer says it couldn't be confirmed
+[+15.9s] PASS Closest Wins: the number is still in the box — 42
+[+15.9s] PASS Closest Wins: the server has no guess from Amina
+[+16.0s] PASS Closest Wins: submitting again sends it (the server has it)
+[+16.0s] PASS Closest Wins: the failure line is gone
+[+18.7s] PASS Word Connections: a guess with no answer says it couldn't be confirmed
+[+18.7s] PASS Word Connections: the same four tiles are still selected — ["Violin","Ravioli","Roast","Wedding"]
+[+18.7s] PASS Word Connections: the server has no guess from Amina
+[+18.8s] PASS Word Connections: submitting again sends it (the server has it)
+[+18.8s] PASS Word Connections: the failure line is gone
+[+21.2s] PASS Impostor (older panel): a clue with no answer says it couldn't be confirmed
+[+21.2s] PASS Impostor: the clue is still in the box
+[+21.2s] PASS Impostor: the server has no clue from Amina
+[+21.3s] PASS Impostor: submitting again sends it (the server has it)
+[+21.3s] PASS Impostor: the failure line is gone
+[+21.7s] PASS offline: the banner says only confirmed answers are safe, and taps may not arrive
+[+21.9s] PASS back online: 'Reconnected. Answers the game confirmed are safe.'
+[+22.0s] SEND FAILURES ALL PASSED
+[+22.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":8,"pages":8,"peakOpenPages":1}
+
+# PASS (exit 0) in 22s | cpu 4s, peak memory 363 MB

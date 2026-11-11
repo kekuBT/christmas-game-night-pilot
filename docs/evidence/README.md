@@ -6,6 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261111-154845-546a9c6f-21442` | `546a9c6` | **Stage 8.2, repair R82-01 (final candidate):** full gate, **PASSED 84/84** in 30 min 42 s (`check-themes-seasonal` 251 including section G, `check-mobile-everyday` 134, `check-content-variety` 58), fresh clone, clean tree, fingerprint `9537c8d89ade` (449 files), run after the fast gate finished (PR #13's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261111-154635-546a9c6f-17994` | `546a9c6` | **Stage 8.2, repair R82-01 (final candidate):** fast gate, **PASSED 5/5** in 49 s, 1,379 unit tests, fresh clone, clean tree | the same |
 | `20261111-151310-224a2d23-9331` | `224a2d2` | **Stage 8.2, first R82-01 repair candidate:** full gate stopped by me within seconds, when the R82-01 screenshots showed compact choices clipping their labels (stage82.md §7.5); self-recorded **CANCELLED** (exit 130). Not a verdict | the same (partial) |
 | `20261111-150823-224a2d23-5811` | `224a2d2` | **Stage 8.2, first R82-01 repair candidate:** fast gate, PASSED 5/5 in 51 s (1,379 unit tests); superseded by the final repair candidate | the same |
 | `20261111-134957-c27570f7-15819` | `c27570f` | **Stage 8.2:** full gate, **PASSED 84/84** in 30 min 00 s (`check-themes-seasonal` 139, `check-mobile-everyday` 134, `check-content-variety` 58), fresh clone, clean tree, fingerprint `9e319219…` (447 files), run after the fast gate finished (PR #13's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |

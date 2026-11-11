@@ -39,7 +39,7 @@ All milestones **locally authorized**, not remote publication/deployment. Order 
   - **When:** with the smoother-session / content-variety work, before library eligibility changes make it visible. Today's library has 12 practice-only Connections boards, so it doesn't show yet.
   - **Direction:** solo and casual rooms prefer unused practice-usable content, then the least recently used.
   - **Must not:** change Cup selection, eligibility validation or Cup usage. Update the pinned test deliberately.
-- **Seasonal content in everyday play** (a concrete check from ChatGPT's review 6786060026 on PR #11, for the seasonal-content separation milestone it calls already approved). **Done in Stage 8.2** (PR #13, `docs/stage8/stage82.md`, D-S82-01 … 06): Everyday solo and casual sessions never deal Christmas-only items; Christmas is an explicit choice.
+- **Seasonal content in everyday play** (a concrete check from ChatGPT's review 6786060026 on PR #11, for the seasonal-content separation milestone it calls already approved). **Done in Stage 8.2** (PR #13, `docs/stage8/stage82.md`, D-S82-01 … 09): Everyday solo and casual sessions never deal Christmas-only items; Christmas is an explicit choice.
   - **Seen:** a shipped Word Connections board with Christmas clues dealt in everyday solo play.
   - **The boards:** `con-s4-03` ("On a Christmas tree", "Santa's reindeer") and `con-legacy-1` (Christmas foods, Christmas decorations, reindeer names). Stage 7.4 put `con-legacy-1` into solo and casual rotation (it is approved; D-S74-01).
   - **Direction, when that milestone starts:** keep seasonal content out of everyday solo and casual play unless a seasonal mode is chosen. Content isn't changed before then.

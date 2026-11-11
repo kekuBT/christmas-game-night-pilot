@@ -1,0 +1,18 @@
+$ node scripts/check-f4.mjs http://localhost:45291
+# timeout 600s | worker w2 | server http://localhost:45291 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-546a9c6/test-results/20261111-154845-546a9c6f-21442/server-data/w2)
+
+[+4.2s] PASS lobby roster: 4 players joined
+[+46.1s] PASS math-mayhem finished on all 4 pages
+[+47.7s] PASS championship standings list all 4 players
+[+47.7s] PASS championship per-game breakdown names the finished game
+[+49.1s] PASS TV shows join code
+[+49.1s] PASS TV shows full roster
+[+49.1s] PASS TV shows finished game in tonight so far — TONIGHT SO FAR | Math Mayhem · Official · finished — Alex wins
+[+49.7s] PASS Memory Book entry added from last finished game
+[+50.3s] PASS export contains the approved entry
+[+51.5s] PASS revoked entry disappears from fresh export — export no longer contains highlight
+[+51.5s] PASS revoked entry stays listed as pending (not deleted)
+[+51.6s] F4 ALL PASSED (11/11)
+[+51.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 51.6s | cpu 4.2s, peak memory 249 MB

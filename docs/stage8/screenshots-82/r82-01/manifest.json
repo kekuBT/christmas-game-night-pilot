@@ -1,0 +1,60 @@
+{
+  "revision": "546a9c6feb1e94a8aa9d0bc1ba5557f758135390",
+  "codeOutsideDocsClean": true,
+  "capturedAt": "2026-11-11T15:48:32.700Z",
+  "by": "docs/evidence/stage82-local/r82-01/shots.mjs",
+  "storage": "localStorage.setItem throws QuotaExceededError; nothing stored",
+  "note": "Chromium headless (Playwright) emulation only; not a real device or WebKit.",
+  "shots": [
+    {
+      "file": "01-settings-look-christmas-unsaved-390x844.png",
+      "screen": "Settings → Look → Christmas, on a device that can't save: it stays chosen and says it lasts until reload",
+      "viewport": "390×844",
+      "rendered": "christmas",
+      "stored": {
+        "mz_look": null,
+        "mz_solo_season": null
+      }
+    },
+    {
+      "file": "02-shelf-christmas-unsaved-390x844.png",
+      "screen": "Solo shelf, Christmas content chosen (Look: Match the game), on a device that can't save",
+      "viewport": "390×844",
+      "rendered": "christmas",
+      "stored": {
+        "mz_look": null,
+        "mz_solo_season": null
+      }
+    },
+    {
+      "file": "03-connections-round-christmas-unsaved-390x844.png",
+      "screen": "Shelf → Word Connections: a Christmas board in the Christmas look, the choice never saved",
+      "viewport": "390×844",
+      "rendered": "christmas",
+      "stored": {
+        "mz_look": null,
+        "mz_solo_season": null
+      }
+    },
+    {
+      "file": "01-settings-look-christmas-unsaved-320x640.png",
+      "screen": "Settings → Look → Christmas, on a device that can't save: it stays chosen and says it lasts until reload",
+      "viewport": "320×640",
+      "rendered": "christmas",
+      "stored": {
+        "mz_look": null,
+        "mz_solo_season": null
+      }
+    },
+    {
+      "file": "02-shelf-christmas-unsaved-320x640.png",
+      "screen": "Solo shelf, Christmas content chosen (Look: Match the game), on a device that can't save",
+      "viewport": "320×640",
+      "rendered": "christmas",
+      "stored": {
+        "mz_look": null,
+        "mz_solo_season": null
+      }
+    }
+  ]
+}

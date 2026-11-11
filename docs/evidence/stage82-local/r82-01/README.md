@@ -26,7 +26,10 @@ Each mode checks the following:
 | Revision | Section F | File |
 |---|---|---|
 | `c27570f` (reviewed) | **19 of the new checks FAIL**: the choice snaps back to Everyday, and the solo Start goes out as Everyday | `check-themes-seasonal-on-c27570f.log` |
-| the repair (working tree) | all pass; 166 checks in the driver | `check-themes-seasonal-repaired.log` |
+| the repair (working tree, committed as `224a2d2`) | all pass; 166 checks in the driver | `check-themes-seasonal-repaired.log` |
+| the final candidate `546a9c6` (with section G, stage82.md §7.5) | all pass; 251 checks in the driver, in the full gate `20261111-154845-546a9c6f-21442` | `docs/evidence/gate-runs/20261111-154845-546a9c6f-21442/logs/41-check-themes-seasonal.log` |
+
+**Pictures:** `docs/stage8/screenshots-82/r82-01/`, taken on `546a9c6` by `shots.mjs` (in this folder) with `localStorage` writes throwing.
 
 **Unit tests** (`tests/stage82-look.test.ts`, 5 new) call the real setters (`writeLookPref`, `writeSoloSeason`) in four storage modes: writes throw with nothing stored, writes throw with an older value stored, every access throws, and no storage at all. After each failed write, the reader returns the new choice and `saved()` is false. A working store saves. On `c27570f` these fail: `writeLookPref` didn't exist, and `readSoloSeason` returned the stale stored value.
 

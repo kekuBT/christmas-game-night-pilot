@@ -2,7 +2,11 @@
 
 - **How they were taken:** by `scripts/screenshot-stage82.mjs`, the same script for both, each run against its own server with its own build. Chromium headless emulation, not real phones or WebKit. Each folder's `manifest.json` names the exact revision, says whether the tree was clean, and records which look each shot actually rendered.
 - **`before/`:** `0f3cc54`, PR #12's cleared head, with a clean tree.
-- **`after/`:** `c27570f`, the final Stage 8.2 candidate tested by both gates, with a clean tree. The first candidate `d4e06c3` was photographed too; those shots were replaced after the spec feedback.
+- **`after/`:** `546a9c6`, the final candidate after repair R82-01 and the compact-choice fix (stage82.md §7.4, §7.5), with a clean tree. Earlier candidates (`d4e06c3`, `c27570f`, `224a2d2`) were photographed too; their shots were replaced as each was superseded.
+- **`r82-01/`:** `546a9c6`, a device that can't save its choices (`localStorage` writes throw, nothing stored). Taken by `docs/evidence/stage82-local/r82-01/shots.mjs`; its `manifest.json` records the look each shot rendered and that storage stayed empty. The shots:
+  - Settings → Look → Christmas, stays chosen, says it lasts until reload (320×640, 390×844). At 320 px the Look control wraps to two lines, every label whole.
+  - The solo shelf with Christmas content chosen (320×640, 390×844).
+  - Shelf → Word Connections: a Christmas board in the Christmas look (390×844).
 
 **What each shot is.** Every surface is photographed twice, with this device's look set to Everyday and then to Christmas (`localStorage` `mz_look`).
 - **Before:** nothing read that setting, so all 20 "christmas" shots rendered in the everyday look. The manifest records `rendered: everyday`, which is the finding in §1.1: the Christmas theme never rendered. The content choice didn't exist yet, so those steps are listed as skipped.

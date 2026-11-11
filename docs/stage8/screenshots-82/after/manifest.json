@@ -1,7 +1,7 @@
 {
-  "revision": "c27570f78c3a34ff1c2100dce4517cd508232038",
+  "revision": "546a9c6feb1e94a8aa9d0bc1ba5557f758135390",
   "workingTreeClean": true,
-  "capturedAt": "2026-11-11T13:48:57.206Z",
+  "capturedAt": "2026-11-11T15:47:38.696Z",
   "by": "scripts/screenshot-stage82.mjs",
   "note": "Chromium headless (Playwright) emulation only; not a real iPhone or Android device, not WebKit. Viewport-sized shots.",
   "shots": [
