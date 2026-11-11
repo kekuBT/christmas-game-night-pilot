@@ -76,6 +76,10 @@
 @media (orientation: landscape) and (max-height: 520px) {
   .mz-solo-round__bar { padding-top: 6px; }
   .mz-solo-round__note { margin-top: 4px; }
+  /* The briefing's I'm ready dock takes less of a short screen. */
+  .mz-brief > .mz-brief__me { padding-top: 8px; }
+  .mz-brief > .mz-brief__me .mz-key { min-height: 52px; }
+  .mz-brief > .mz-brief__me .mz-foot { margin-top: 4px; font-size: 13px; }
 
   .mz-screen.mz-pp-play {
     max-width: 860px;
