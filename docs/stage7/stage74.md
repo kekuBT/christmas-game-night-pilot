@@ -227,7 +227,21 @@
 - **Not run:** WebKit and real devices. Emulation is not a device.
 
 ### 7.3 Gates
-*(Recorded after the runs.)*
+On `5d41e5f1cb63bddfdb9b506318e9953dacc5a1cd`, **one after the other** (the full gate started when the fast gate had finished, so their unit phases never overlapped), each in its own fresh clone with a clean tree (`dirty: []`). Both have the same source fingerprint (`56591718…`, 432 files).
+
+| Run | Gate | Verdict | Measured |
+|---|---|---|---|
+| `20261111-013325-5d41e5f1-17311` | fast | **PASSED**, exit 0, 5/5: typecheck ×2, lint, 1,298 unit tests, build | wall 39 s |
+| `20261111-013409-5d41e5f1-20255` | full | **PASSED**, exit 0, 82/82, 3 workers | wall 28 min 00 s |
+
+- **The estimate posted before the runs:** fast about 1 minute, full about 28–33 minutes. The gate's own prediction for the full gate was about 28 min 05 s.
+- **The full gate includes:**
+  - `check-content-variety` (54/54);
+  - `check-solo-shelf` (58), `check-solo` (80), `check-session-flow` (70), `check-quick-party` (68), `check-host-handover` (32);
+  - every Family Cup driver;
+  - E2E Chromium.
+- **No failed runs** on this checkpoint.
+- **Raw evidence:** `docs/evidence/gate-runs/<run>/`.
 
 ### 7.4 A pre-existing defect found while testing V3: solo play after a server restart
 - **What:** a server restart marks every player not connected (`http.ts`, restore). A solo room has no socket, so nothing marked its one player present again, and every solo Start was refused: 400 "Need at least 1 connected players". The solo app shows a refusal as given (`soloSession.ts`, "refused"), so every Try again failed the same way: solo play was stuck in that room until its storage was cleared.

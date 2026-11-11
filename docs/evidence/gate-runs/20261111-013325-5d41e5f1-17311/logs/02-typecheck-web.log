@@ -1,0 +1,5 @@
+$ node ./node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit
+# timeout 300s | worker w2
+
+
+# PASS (exit 0) in 9.8s | cpu 11.1s, peak memory 390 MB

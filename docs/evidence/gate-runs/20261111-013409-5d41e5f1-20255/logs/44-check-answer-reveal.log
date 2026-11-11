@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:33471
+# timeout 600s | worker w2 | server http://localhost:33471 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s74-full/test-results/20261111-013409-5d41e5f1-20255/server-data/w2)
+
+[+18.2s] PASS Geography: finished player sees no answers while Bea still plays
+[+18.2s] PASS Geography: TV shows no answers while Bea still plays
+[+18.2s] PASS Geography: Bea (mid-game) sees no answers
+[+29.2s] PASS Geography: results list every question — 8
+[+29.3s] PASS Geography: each answer matches the content pack — 8/8
+[+29.3s] PASS Geography: each explanation is shown — 8/8
+[+29.3s] PASS Geography: Bea sees her own choices marked
+[+29.3s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+29.5s] PASS Geography: TV lists the answers after the game
+[+29.5s] PASS Geography: TV shows no player's choices
+[+34.6s] PASS Closest: no answer anywhere while question 1 is open
+[+34.7s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 1280 vs 1280
+[+34.7s] PASS Closest: and the player's own guess
+[+34.7s] PASS Closest: Bea sees her own guess, not Ada's
+[+34.7s] PASS Closest: the explanation is shown
+[+34.7s] PASS Closest: question 2 is now open and its answer is not shown
+[+34.8s] PASS Closest: TV shows the last answer only — Last question: How long is the Golden Gate Bridge's main span, in metres? — 1,280 m
+[+34.8s] PASS Closest: TV shows nobody's guess — Last question: How long is the Golden Gate Bridge's main span, in metres? — 1,280 m
+[+34.9s] ANSWER REVEAL ALL PASSED
+[+34.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 35s | cpu 3s, peak memory 255 MB

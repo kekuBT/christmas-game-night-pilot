@@ -1822,4 +1822,16 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Regressions, all passing:** `check-session-flow` (70), `check-quick-party` (68), `check-solo` (80), `check-solo-shelf` (58), `check-briefing` (43), `check-casual` (30), `check-host-handover` (32), `check-recovery` (20).
 - **Clarification 6783492788** (solo press ids: whole command, latest-only replay, persisted monotonic revision) is built and tested (spec §4.4).
 
-**Gates:** recorded in the spec §7.3 once run (the fast gate, then the full gate, one after the other).
+**Gates on `5d41e5f`** (fresh clone, clean tree, one after the other):
+- fast `20261111-013325-5d41e5f1-17311`: **PASSED** 5/5, 1,298 unit tests, 39 s;
+- full `20261111-013409-5d41e5f1-20255`: **PASSED** 82/82, including `check-content-variety` 54/54, in 28 min 00 s.
+- No failed runs. Raw evidence is in `docs/evidence/gate-runs/<run>/`.
+
+**External blockers:** none. WebKit and real devices are not available here (checklist I20–I21).
+
+**Next task:** ChatGPT reviews PR #11 and does its private live-site audit. The next milestone (mobile polish and the Home Screen web app, per the roadmap) starts only when its handoff instructs it.
+
+**Risk:**
+- **Variety is per room:** a new solo room (another device, cleared storage) starts fresh.
+- **Two solo tabs pressing Start within the same moment:** one wins and the other is told something changed, with Try again. This is by design (D-S74-04).
+- **Emulation only:** no real phones.
