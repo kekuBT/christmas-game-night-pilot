@@ -1,0 +1,49 @@
+PASS Home shows the Mchezo wordmark with Join and Host in the dock
+PASS Join has a 6-character code input
+PASS Host asks for the host's name before the room exists
+PASS room code is 6 alphanumeric — A6QCPS
+PASS 4-player lobby: host sees all seats
+PASS 4-player lobby: up next is Trivia Showdown
+PASS 4-player lobby: no horizontal overflow
+PASS 8-player lobby: seats render
+PASS 8-player lobby: no horizontal overflow
+PASS 10-player lobby: room is full
+PASS 10-player lobby: no horizontal overflow
+PASS disconnection: host sees reconnecting
+PASS disconnection: seat shows Away
+PASS guest sees no game-setup controls
+PASS host sees chooser and mode controls
+PASS chooser lists all 14 games
+PASS chooser sets up next to Math Mayhem
+PASS practice mode moves the Start testid
+PASS chooser returns up next to Trivia Showdown
+PASS everyone ready opens the question screen (no intro countdown)
+PASS trivia question: no horizontal overflow
+PASS answer selection locks (LOCKED IN stamp)
+PASS second question presented after Next
+PASS waiting shows counts only (1/4 finished, and 1 of 4 started; Stage 5.1 wording) — 
+All your answers are inAYouBBeaCCalDDee1/4have finishedEveryone goes at their own pace. 1 of 4 has finished; 1 of 4 has started.The reveal plays right here when the game finishes.TV stageEnds automatically in: 5:51If someone doesn’t finish, the game ends by itself when time runs out.
+
+
+
+PASS results screen after all players finish
+PASS results separate this question from the game total and rank
+PASS results show standings list
+PASS results show question picker
+PASS question picker switches the inspected question
+PASS TV shows the rules briefing, not a question
+PASS TV stage auto-switches to Mchezo stage on start
+PASS TV stage shows leaderboard after finish
+PASS TV stage returns to phone view
+PASS mobile 320px: lobby no overflow
+PASS mobile 320px: briefing no overflow
+PASS mobile 320px: question no overflow
+PASS mobile 360px: lobby no overflow
+PASS mobile 360px: briefing no overflow
+PASS mobile 360px: question no overflow
+PASS mobile 390px: lobby no overflow
+PASS mobile 390px: briefing no overflow
+PASS mobile 390px: question no overflow
+PASS reduced motion: provider root reports reduced
+MCHEZO ALL PASSED
+exit 0

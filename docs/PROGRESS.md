@@ -1926,11 +1926,35 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 **Cleared:** ChatGPT cleared Stage 8.1 on `d7bb85f` (comment 6795218622, 12:00 UTC), after its own run of `check-mobile-everyday` (134 passed, none failed, its four fonts) and its private live-site audit, the restart check included (Chromium emulation; real phones and WebKit unverified). The same comment is the Stage 8.2 handoff.
 
 ---
-## Stage 8.2: Everyday and Christmas themes, and seasonal content kept apart (2026-11-11, in progress)
+## Stage 8.2: Everyday and Christmas themes, and seasonal content kept apart (2026-11-11)
 
 **Branch:** `claude/stage8-2-themes-seasonal`, from `0f3cc54` (PR #12's cleared head), stacked on PR #12.
 - **Instruction:** ChatGPT's handoff on PR #12 (comment 6795218622), under D-WF-01.
 - **Spec and inventory first:** `docs/stage8/stage82.md` (§1 what exists, §3 design, §6 choices for review, §8 the catalog audit: 45 Christmas-only items, 43 of them dealt in solo or casual play today).
 - Nothing merged or deployed, no public port, nothing paid for.
 
-**Next task:** the session's content (server: metadata, selection, binding at start), then the themes on every surface, then the browser driver, screenshots and gates.
+**Milestone (built; spec §7, D-S82-01 … 06):**
+- **Seasonal content:** 45 Christmas-only items are tagged `season: "christmas"` (outside the content hash; no item's hash changed). Everyday solo and casual sessions never deal them; Christmas sessions deal them first. Cups are unchanged.
+- **The session's content:**
+  - Everyday unless Christmas is chosen (solo shelf; casual host or cohost).
+  - Persisted and shown before Start (up-next card, dock, briefing, What's next, TV).
+  - Bound at Start: a casual mismatch is refused (CONTENT_CHANGED); a solo Start's content is part of its press; a frozen briefing re-checks its items.
+  - Older rooms are Everyday.
+- **The look:** per device, never sent (Settings → Look: Match the game, Everyday, Christmas). Every screen and the page itself follow it, the browser toolbar colour included. The legacy shell header says Mchezo. Token gaps are closed, and contrast is checked in both themes.
+
+**Changed:** see spec §7.1 (server `51301ee`, web `ea2bbff`, then the browser driver and the What's next label's test id).
+
+**Tests (local, the working tree):**
+- **Unit:** 1,359 tests, 35 of them new; eight mutations each caught.
+- **Browser:** `check-themes-seasonal` 125 checks, and 26 regression drivers with 0 failures (`docs/evidence/stage82-local/`).
+
+**Gates:** to be run on the final candidate, one after the other (§7.3).
+
+**External blockers:** none. Real phones and WebKit are not available here (checklist I26, I27).
+
+**Next task:** sequential fast and full gates on the candidate, then before and after screenshots and the completed report on PR #13.
+
+**Risk:**
+- **Emulation only:** Safari's toolbar colour and Android's status bar are untested on real phones.
+- **Existing casual and solo rooms turn Everyday** (intended; D-S82-05). A room that was dealing a Christmas board stops until the host chooses Christmas.
+- **The audit's word net** misses a Christmas item with no Christmas word ("Decorating a tree"). Tagging stays a reviewer's job.

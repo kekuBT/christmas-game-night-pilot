@@ -905,3 +905,49 @@ Instructed by ChatGPT's review and handoff 6790743334 on PR #11 under D-WF-01. S
   - **Landscape** (height 520 px or less): Pulse's ready and tap-back screens in two columns; Math Mayhem's answer area may shrink below its 260 px portrait minimum (only Math's: other quiz games' longer answers would clip; feedback 6790913242); controls stay at least 44 px and the screens scroll rather than clip at larger text; the solo round is exactly one screen tall.
   - **The briefing's I'm ready** is a sticky dock at the bottom while the rules are read (it was below the fold at 320 and 390 px), in the lobby dock's style; shared with Family Cup briefings.
   - **Left and right safe areas** are left to the Home Screen milestone, which turns full-screen display on.
+
+## Stage 8.2: Everyday and Christmas themes, seasonal content kept apart (2026-11-11, branch `claude/stage8-2-themes-seasonal`, from the Stage 8.1 head `0f3cc54`)
+
+Instructed by ChatGPT's clearance of Stage 8.1 and handoff 6795218622 on PR #12, under D-WF-01. Spec: `docs/stage8/stage82.md` (the spec's §6 lists the choices open for review).
+
+- **D-S82-01 A device's look and a session's content are two separate choices.**
+  - **The look:** per device: Match the game (default), Everyday or Christmas. It is kept in `localStorage` (`mz_look`), never sent to the server, and changes colours and decoration only. A guest's look can never change what the room deals.
+  - **The content:** per session: Everyday (default) or Christmas.
+    - The solo player chooses it on the shelf; it is remembered on the device (`mz_solo_season`) and sent with each Start.
+    - In a casual room the host or a cohost chooses it in the lobby.
+    - It is kept on the room (`contentSeason`, persisted and public) and shown to everyone before Start.
+  - **Match the game:** Christmas only for a solo or casual session dealing Christmas content. Cup rooms, home and the library stay Everyday (L35, A10).
+  - *Alternative rejected:* one setting for both. It would let a phone's appearance change a shared room's content.
+- **D-S82-02 Seasonal eligibility is item metadata: `season: "christmas"`, outside the content hash.**
+  - **The field:** a closed enum (a typo fails loading); no tag means year-round. The 45 items in the spec's §8 audit are tagged: 42 in packs, 3 Draw & Guess prompts.
+  - **The hash:** the content hash still binds approvals to everything players see. The season says only where an item may be dealt, and Cups never read it, so tagging changed no item's hash (pinned by a test).
+  - **No text matching:** selection never reads words. `content:check` reports untagged items with Christmas words, as an editorial net only.
+  - *Alternatives rejected:* a separate season index file (it keeps metadata away from the item it describes), and the season inside the hash (tagging would have voided approvals and cancelled briefings frozen before an upgrade).
+- **D-S82-03 Selection by season (solo and casual rooms only).**
+  - **Everyday:** excludes Christmas-only items.
+  - **Christmas:** all items, with the unused Christmas ones before the unused year-round ones; then least recently used, whatever the season.
+  - **Empty pool:** an empty eligible pool refuses in plain words and never borrows from the other season.
+  - **Requests:** a solo or casual request must name a season; a Cup request must not. Neither is ever filled in by default.
+  - **Draw & Guess:** filtered the same way.
+  - **Cups:** official and practice selection and history are unchanged; Christmas items stay in the Family Cup.
+- **D-S82-04 The content is bound at Start.**
+  - **Casual:** a Start carries the content its presser saw. A mismatch is 409 `CONTENT_CHANGED` and starts nothing. A content change (`POST /rooms/:id/season`, host or cohost, against the session revision, idempotent) moves the session revision on, so an earlier press is stale. A replayed press returns its original game.
+  - **Solo:** the Start's content is part of the press: the same id with other content is refused.
+  - **Recorded:** each game records its content (`season`), and so does a frozen briefing (`pendingContent.season`). When play begins, the frozen items are checked against that content; a briefing frozen before Stage 8.2 is checked as Everyday.
+  - **When a change applies:** to the next Start. A game in play or a frozen briefing keeps its content.
+  - **Not in the ledger:** a change is session state, like a break (D-S71-03). Each game's start records the content it was bound to.
+- **D-S82-05 Compatibility.**
+  - Rooms saved without `contentSeason`, or with an unreadable value, restore as Everyday.
+  - So a casual or solo room that used to be dealt Christmas boards now gets year-round ones until Christmas is chosen. Usage history is kept.
+  - A Start without `season` (a page loaded before an upgrade) gets the room's current content.
+  - The test pool (`scripts/lib/small-pool.mjs`) copies shipped items without their season, so the Stage 7.4 rotation tests still test rotation. The Stage 6.2 and 7.4 tests that counted 13 boards were changed on purpose: Everyday has 11.
+- **D-S82-06 The look reaches every surface; nothing new is designed.**
+  - **Applied once:** the device's look is worked out once and given to every Mchezo screen (38 places were hard-coded Everyday). The page itself follows it too: theme variables and the legacy variables on `<html>`, `theme-color` and `data-mz-theme`.
+  - **What Christmas is:** the existing Christmas theme only: palette, wreath ring and the "brr" reaction.
+  - **Legacy shell header:** it says Mchezo (the 🎄 only in the Christmas look), never "Christmas Game Night" in an Everyday room. The Cup room's own default name is event data and is unchanged.
+  - **Gaps closed:**
+    - `--mz-danger` is defined in both themes.
+    - The neutral key edge and the TV's stale note use tokens.
+    - The Memory Book share image uses the look's colours (its words and file names are unchanged).
+  - **Contrast:** checked in both themes, by a unit test on the token pairs and in the browser on rendered screens.
+  - **Game art** (covers, Pulse keys, Draw & Guess pens) keeps its own colours.

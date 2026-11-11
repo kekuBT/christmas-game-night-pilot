@@ -58,7 +58,7 @@ export function WhatsNext(p: WhatsNextProps) {
   return (
     <section className="mz-card mz-next" aria-labelledby="mz-next-title" data-testid="whats-next" data-state={state} style={{ margin: "8px 16px" }}>
       <span className="mz-kicker" id="mz-next-title">What’s next</span>
-      {p.content && <> <ContentSeasonLabel season={p.content} testId="next-content" /></>}
+      {p.content && <> <ContentSeasonLabel season={p.content} testId="whats-next-content" /></>}
       {state === "break" && (
         <>
           <h2 className="mz-next__title" data-testid="next-status">On a break</h2>

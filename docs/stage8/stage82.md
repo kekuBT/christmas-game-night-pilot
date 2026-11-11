@@ -111,6 +111,7 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
   - A test pins that tagging leaves every shipped item's hash unchanged.
 - **Audit safety net (text only, never a filter).** `npm run content:check` reports any item whose words look Christmas-specific (the §8 word list) but which has no tag and is not on a reviewed year-round list.
   - It is a review warning only, so a new Christmas item can't slip into Everyday unnoticed. A unit test keeps the shipped library free of such warnings.
+  - It catches 41 of the 42 tagged pack items. The one it can't, "Decorating a tree" (`chr-s4-032`), has no Christmas word; only a reviewer can tag it. The net catches words, not meanings.
   - The game itself never matches text.
 
 ### 3.3 Selection (server)
@@ -151,7 +152,7 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
   - A frozen briefing records `pendingContent.season`.
   - When play begins, the re-check (`pendingItems`) also checks each frozen item against that season. A briefing frozen under an older build has no season and is checked as Everyday, so an Everyday room never begins play with a Christmas-only item. A failure cancels the briefing with the existing content-changed notice.
 - **Rematch and the Quick Party lineup** use the room's current content. The lineup holds games, not content.
-- **The ledger** gets a `content-season-changed` event (actor, from, to, revision) when the host changes it.
+- **Not a ledger event** (as built; D-S82-04): a content change is session state, like a break (D-S71-03). Each game's start records the content it was bound to: `game-started` and `game-briefing-started` carry `season`, and `content-selected`'s reasons name it.
 
 ### 3.5 Compatibility
 - **Existing rooms** (snapshots without `contentSeason`) restore as `everyday`.
@@ -239,7 +240,78 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
 10. **The solo choice is remembered per device,** like personal bests.
 
 ## 7. What was built and tested
-To be filled in when the milestone is complete.
+
+### 7.1 Built
+- **Server** (`51301ee`):
+  - `src/shared/season.ts` (new);
+  - the season tag in `src/content/schema.ts`, kept outside the hash in `registry.ts`;
+  - selection in `select.ts`;
+  - `seasonAudit.ts` (new) and its use in `cli.ts`;
+  - Draw & Guess prompts and `init`;
+  - the room's `contentSeason`, `setContentSeason`, binding at Start and the briefing re-check (`room.ts`);
+  - `POST /rooms/:id/season` and the Start's `season` (`http.ts`);
+  - persistence of `pendingContent.season`;
+  - 42 pack items tagged.
+- **Web** (`ea2bbff`, then the test id below):
+  - `ui/mchezo/look.ts` and `solo/soloSeason.ts` (new); `components/mchezo/ContentChoice.tsx` (new);
+  - App: one look for every screen and the page, the Start's `season`, the host's content change, the legacy header;
+  - Settings → Look;
+  - the solo shelf, start screen, round and results;
+  - the lobby, briefing, What's next and TV;
+  - the danger token, the neutral key edge, the TV's stale note and the Memory Book share colours;
+  - `styles/stage82.css` (new).
+- **Tests and scripts:**
+  - `tests/stage82-seasonal.test.ts` (28) and `tests/stage82-look.test.ts` (7), both new;
+  - `scripts/check-themes-seasonal.mjs` (new; 125 checks) and `scripts/screenshot-stage82.mjs` (new);
+  - updated on purpose: the Stage 6.2 and 7.4 rotation tests (11 Everyday boards), the small test pool (copies without seasons), and `check-content-variety` part C (year-round boards, never a Christmas one).
+- **Server behaviour otherwise unchanged:** Cup selection, scoring, privacy, and the Stage 7.x start identity.
+
+### 7.2 Tested (local, Chromium emulation)
+- **Unit tests:** 1,359 in all, 35 of them new.
+- **Mutations, each caught by a failing test** (`tests/stage82-seasonal.test.ts`; evidence in `docs/evidence/stage82-local/`):
+  - the Everyday filter removed;
+  - Christmas-first ordering removed;
+  - the CONTENT_CHANGED check removed;
+  - the briefing's season re-check removed;
+  - `contentSeason` not restored;
+  - a solo replay ignoring its season;
+  - the season inside the hash;
+  - Draw & Guess unfiltered.
+- **`check-themes-seasonal`:** 125 of 125 passed.
+  - **Solo:** Everyday at first; Christmas and its look, kept after a reload; two Christmas boards first, then year-round boards only after switching back; no request carries a look; every Start carries its content.
+  - **Server restart:** the content and history survive.
+  - **Casual room:**
+    - two phones with different looks never change the room's content;
+    - the host's change reaches both phones and the TV;
+    - a Start whose reply is lost is sent again as the same press and starts one game;
+    - the briefing names the content, and the boards are Christmas ones through Play again;
+    - Everyday again deals a year-round board;
+    - a guest's reload keeps the content and their own look.
+  - **Sizes:** home, the solo shelf, Word Connections' start screen and the library at 320×640, 390×844, 844×390 and 1440×900, in both looks, with reduced motion, readable contrast and no overflow.
+- **Regression drivers:**
+
+  | Driver | Checks | Driver | Checks |
+  |---|---|---|---|
+  | `check-casual` | 30 | `check-lobby-fixes` | 28 |
+  | `check-session-flow` | 70 | `check-solo-shelf` | 58 |
+  | `check-content-variety` | 58 | `check-contrast` | 78 pairs |
+  | `check-briefing` | 43 | `check-lobby-mode` | 71 |
+  | `check-host-handover` | 32 | `check-spectator` | 19 |
+  | `check-solo` | 80 | `check-mobile-everyday` | 134 |
+  | `check-mobile` | 50 | `check-game-night-flow` | 14 |
+  | `check-tv-spectator` | 15 | `check-cup-memory` | 35 |
+  | `check-history-links` | 15 | `check-lifecycle` | 37 |
+  | `check-math` | 28 | `check-mchezo` | 43 |
+  | `check-reduced-motion` | 2 | `check-viewports` | 16 |
+  | `check-tv-show` | 29 | `check-quick-party` | 68 |
+  | `check-draw-guess` | 61 | `check-a11y-surfaces` | 11 |
+
+- **Found and fixed while testing:**
+  - The What's next content label's test id began `next-`, which `check-session-flow` reserves for the panel's buttons. It is now `whats-next-content`.
+  - The driver measured a choice mid-animation (43.999 px). It now waits for animations to finish, as `check-mobile-everyday` does.
+
+### 7.3 Gates
+To be recorded on the final candidate.
 
 ## 8. Catalog audit: every item considered
 Text matching was used **only** to find candidates for this review. The game filters on the `season` tag alone.

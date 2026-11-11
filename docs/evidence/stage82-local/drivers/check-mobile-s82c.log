@@ -1,0 +1,62 @@
+
+== viewport 320x568 ==
+  PASS 320px home: no horizontal overflow (scrollWidth=320 innerWidth=320)
+  PASS 320px home: all targets >= 44px
+  PASS 320px home: Tab lands on interactive controls (10 control stops, 10 interactive, 0 body wrap stops)
+  PASS 320px home: focused controls show a visible outline (10/10 outlined)
+  PASS 320px host screen: no horizontal overflow (scrollWidth=320 innerWidth=320)
+  PASS 320px host screen: all targets >= 44px
+  PASS 320px host screen: Tab lands on interactive controls (8 control stops, 8 interactive, 2 body wrap stops)
+  PASS 320px host screen: focused controls show a visible outline (8/8 outlined)
+  PASS 320px lobby: no horizontal overflow (scrollWidth=320 innerWidth=320)
+  PASS 320px lobby: all targets >= 44px
+  PASS 320px briefing: no horizontal overflow (scrollWidth=320 innerWidth=320)
+  PASS 320px briefing: all targets >= 44px at every point of the entry animation
+  PASS 320px game panel: no horizontal overflow (scrollWidth=320 innerWidth=320)
+  PASS 320px game panel: all targets >= 44px at every point of the entry animation
+  PASS 320px game panel: Tab lands on interactive controls (9 control stops, 9 interactive, 1 body wrap stops)
+  PASS 320px game panel: focused controls show a visible outline (9/9 outlined)
+
+== viewport 375x667 ==
+  PASS 375px home: no horizontal overflow (scrollWidth=375 innerWidth=375)
+  PASS 375px home: all targets >= 44px
+  PASS 375px home: Tab lands on interactive controls (10 control stops, 10 interactive, 0 body wrap stops)
+  PASS 375px home: focused controls show a visible outline (10/10 outlined)
+  PASS 375px host screen: no horizontal overflow (scrollWidth=375 innerWidth=375)
+  PASS 375px host screen: all targets >= 44px
+  PASS 375px host screen: Tab lands on interactive controls (8 control stops, 8 interactive, 2 body wrap stops)
+  PASS 375px host screen: focused controls show a visible outline (8/8 outlined)
+  PASS 375px lobby: no horizontal overflow (scrollWidth=375 innerWidth=375)
+  PASS 375px lobby: all targets >= 44px
+  PASS 375px briefing: no horizontal overflow (scrollWidth=375 innerWidth=375)
+  PASS 375px briefing: all targets >= 44px at every point of the entry animation
+  PASS 375px game panel: no horizontal overflow (scrollWidth=375 innerWidth=375)
+  PASS 375px game panel: all targets >= 44px at every point of the entry animation
+  PASS 375px game panel: Tab lands on interactive controls (9 control stops, 9 interactive, 1 body wrap stops)
+  PASS 375px game panel: focused controls show a visible outline (9/9 outlined)
+
+== viewport 390x844 ==
+  PASS 390px home: no horizontal overflow (scrollWidth=390 innerWidth=390)
+  PASS 390px home: all targets >= 44px
+  PASS 390px home: Tab lands on interactive controls (10 control stops, 10 interactive, 0 body wrap stops)
+  PASS 390px home: focused controls show a visible outline (10/10 outlined)
+  PASS 390px host screen: no horizontal overflow (scrollWidth=390 innerWidth=390)
+  PASS 390px host screen: all targets >= 44px
+  PASS 390px host screen: Tab lands on interactive controls (8 control stops, 8 interactive, 2 body wrap stops)
+  PASS 390px host screen: focused controls show a visible outline (8/8 outlined)
+  PASS 390px lobby: no horizontal overflow (scrollWidth=390 innerWidth=390)
+  PASS 390px lobby: all targets >= 44px
+  PASS 390px briefing: no horizontal overflow (scrollWidth=390 innerWidth=390)
+  PASS 390px briefing: all targets >= 44px at every point of the entry animation
+  PASS 390px game panel: no horizontal overflow (scrollWidth=390 innerWidth=390)
+  PASS 390px game panel: all targets >= 44px at every point of the entry animation
+  PASS 390px game panel: Tab lands on interactive controls (9 control stops, 9 interactive, 1 body wrap stops)
+  PASS 390px game panel: focused controls show a visible outline (9/9 outlined)
+
+== reduced motion ==
+  PASS reduced-motion media query matches
+  PASS reduced-motion disables transitions/animations (transition=0s property=none animation=none)
+
+50 passed, 0 failed
+MOBILE CHECK OK
+exit 0
