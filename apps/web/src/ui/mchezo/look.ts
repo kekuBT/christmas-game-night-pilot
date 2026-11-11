@@ -10,7 +10,7 @@
  * Pure parts (resolveLook, lookTheme) are unit-tested; the rest touches the
  * document and storage, each access guarded (private mode, blocked storage).
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { SessionSeason } from '../../../../../src/shared/season.js';
 import { themes, themeToCssVars, type MchezoTheme } from './tokens/tokens.js';
 
@@ -86,6 +86,23 @@ export function applyDocumentLook(theme: MchezoTheme): void {
   root.dataset['mzTheme'] = theme.id;
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', theme.color.ground);
+}
+
+/**
+ * Feedback 6795825877 (3): the content of the game a screen is SHOWING (a solo
+ * round in play or its results), which Match the game follows, rather than
+ * the remembered choice for the next start. Set by the screen showing it and
+ * cleared when it stops; null when no game is shown.
+ */
+let shownSeason: SessionSeason | null = null;
+const shownListeners = new Set<() => void>();
+export function setShownSeason(season: SessionSeason | null): void {
+  if (shownSeason === season) return;
+  shownSeason = season;
+  for (const l of shownListeners) l();
+}
+export function useShownSeason(): SessionSeason | null {
+  return useSyncExternalStore((cb) => { shownListeners.add(cb); return () => { shownListeners.delete(cb); }; }, () => shownSeason, () => null);
 }
 
 /** Keep the document painted with `theme` while this component shows it. */

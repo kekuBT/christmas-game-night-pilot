@@ -177,6 +177,8 @@ export interface Projection {
   session?: SessionView;
   /** Stage 8.2: what this solo or casual session deals (absent in a Cup). Never a device's look. */
   contentSeason?: SessionSeason;
+  /** Stage 8.2: the latest briefing that ended without play (last 10 minutes), and why. */
+  briefingCancelled?: { gameInstanceId: string; reason: string; contentWhy?: "changed" | "season" };
   championship?: ChampionshipResult[];
   achievements?: Achievement[];
   ceremony?: Ceremony;

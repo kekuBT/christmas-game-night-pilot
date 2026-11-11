@@ -58,7 +58,7 @@ import { CasualResults, WhatsNext } from "./components/mchezo/WhatsNext.js";
 import { PlayersAndRoles, type HandoverResult } from "./components/mchezo/HostHandover.js";
 import QRCode from "qrcode";
 import { uuidV4 } from "./uuid.js";
-import { lookTheme, resolveLook, useDocumentLook, useLookPref, type LookContext } from "./ui/mchezo/look.js";
+import { lookTheme, resolveLook, useDocumentLook, useLookPref, useShownSeason, type LookContext } from "./ui/mchezo/look.js";
 import { useSoloSeason } from "./solo/soloSeason.js";
 import type { SessionSeason } from "../../../src/shared/season.js";
 
@@ -220,11 +220,29 @@ export function App() {
   // the solo choice on solo screens, a casual room's content in its room, and
   // Everyday for a Cup room, home and the library. The look stays on this
   // device: it never reaches the server and never changes content.
+  //
+  // Feedback 6795825877 (3): while a game is shown (its briefing, the game, its
+  // results), Match the game follows THAT game's bound content, never the
+  // room's setting for the next start, which may have changed since. Between
+  // games the room's setting (what the next game deals) applies.
   const [lookPref, setLookPref] = useLookPref();
   const [soloSeason] = useSoloSeason();
+  const soloShown = useShownSeason();
   const inRoomScreen = (!!roomId && !!playerId && route.name === "room") || (!playerId && !!specRoomId && !!specToken);
-  const lookContext: LookContext = route.name === "solo" ? { kind: "solo", season: soloSeason }
-    : inRoomScreen && proj ? { kind: proj.roomKind ?? "cup", ...(proj.contentSeason ? { season: proj.contentSeason } : {}) }
+  const shownGameSeason = ((): SessionSeason | undefined => {
+    const all = proj?.games ?? [];
+    const live = all.find((g) => g.status === "briefing" || g.status === "playing");
+    if (live) return live.season ?? "everyday";
+    // The TV (a spectator, or a seat's TV view) keeps showing the last game until the next one starts.
+    if (!playerId || view === "tv") { const last = all.at(-1); return last ? last.season ?? "everyday" : undefined; }
+    if (view !== "lobby") return undefined;
+    // A player's results stay on screen until they go back to the lobby.
+    const fin = (proj?.myGames ?? []).filter((g) => g.status === "finished" && g.participant !== false).slice(-1)[0];
+    if (fin && resultsDismissed !== fin.id) return all.find((g) => g.id === fin.id)?.season ?? "everyday";
+    return undefined;
+  })();
+  const lookContext: LookContext = route.name === "solo" ? { kind: "solo", season: soloShown ?? soloSeason }
+    : inRoomScreen && proj ? { kind: proj.roomKind ?? "cup", ...((shownGameSeason ?? proj.contentSeason) ? { season: shownGameSeason ?? proj.contentSeason } : {}) }
     : { kind: "none" };
   const theme = lookTheme(resolveLook(lookPref, lookContext));
   useDocumentLook(theme);
@@ -243,7 +261,13 @@ export function App() {
     if (open) { lastBriefingRef.current = open.id; setBriefingNote(""); return; }
     const last = lastBriefingRef.current;
     lastBriefingRef.current = null;
-    if (last && !now.some((g) => g.id === last)) setBriefingNote("The game was cancelled before it started. Nothing was scored and no questions were used up.");
+    // Stage 8.2 (feedback 6795825877, 4): say plainly when the game was cancelled because what it froze no longer suits the room.
+    const why = proj?.briefingCancelled?.gameInstanceId === last ? proj.briefingCancelled : undefined;
+    if (last && !now.some((g) => g.id === last)) setBriefingNote(why?.reason === "content-changed"
+      ? why.contentWhy === "season"
+        ? "The game was cancelled before it started: what it was going to deal no longer suits this room’s content. Nothing was scored and nothing was used up. Press Start to deal again."
+        : "The game was cancelled before it started: its questions changed after an update. Nothing was scored and nothing was used up. Press Start to deal again."
+      : "The game was cancelled before it started. Nothing was scored and no questions were used up.");
   }, [proj]);
   useEffect(() => {
     const open = (proj?.games ?? []).find((g) => g.status === "briefing");

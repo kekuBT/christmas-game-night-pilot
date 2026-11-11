@@ -19,6 +19,13 @@
 //   D  the looks at 320×640, 390×844, 844×390, 1440×900 and a 1920×1080 TV,
 //      in both looks: no sideways overflow, 44 px choices, readable contrast,
 //      reduced motion honoured.
+//   E  one device, two tabs (feedback 6795825877): tab A's Start is in flight
+//      when tab B changes the remembered choice; A's round keeps the content
+//      it was pressed with, and its look; A's Play again repeats the finished
+//      round's content, not the changed choice; B's own Start uses B's choice.
+//   Also (C, feedback 6795825877): a guest still on a Christmas game's results
+//   keeps that game's look while the host sets the NEXT game to Everyday; the
+//   labels say "This game" and "Next game", not colours alone.
 // Board identity is read from the words on screen and checked against the
 // shipped packs (their season tags): never assumed.
 // Usage: node scripts/check-themes-seasonal.mjs <baseUrl>   (the gate passes its server)
@@ -227,6 +234,11 @@ try {
     await sleep(1500);
     check("C …and nothing else does: the room still deals Christmas on every screen", /Christmas content/.test(await h.getByTestId("up-next-content").innerText()) && /Christmas content/.test(await g.getByTestId("up-next-content").innerText()) && /Christmas content/.test(await tv.getByTestId("tv-content").innerText()));
     check("C no request from either phone ever carried a look", !carriesLook(hBodies) && !carriesLook(gBodies));
+    // The guest returns to Match the game (the default): the room's Christmas content shows.
+    await g.getByTestId("room-menu").click();
+    await g.getByTestId("look-auto").click();
+    await g.keyboard.press("Escape");
+    await soon("C the guest back on Match the game: the room's Christmas look", () => isLook(g, "christmas"));
     // The host's Start: its first reply is lost after the server acted; the app asks again as the same press.
     const starts = [];
     let dropped = false;
@@ -243,8 +255,8 @@ try {
     await h.unroute("**/rooms/*/games");
     check("C the lost reply: the same press sent again (same id, same content), and it carried Christmas", starts.length === 2 && starts[0].attempt?.id === starts[1].attempt?.id && starts.every((s) => s.season === "christmas"), JSON.stringify(starts.map((s) => [s.attempt?.id, s.season])));
     await layoutOk(h, "C 390×844 host briefing, Christmas look");
-    await layoutOk(g, "C 320×640 guest briefing, Everyday look (pinned)");
-    check("C both briefings name the content this game was frozen with", /Christmas content/.test(await h.getByTestId("briefing-content").innerText()) && /Christmas content/.test(await g.getByTestId("briefing-content").innerText()));
+    await layoutOk(g, "C 320×640 guest briefing, Christmas look");
+    check("C both briefings name the content this game was frozen with, as this game's", /This game: Christmas content/.test(await h.getByTestId("briefing-content").innerText()) && /This game: Christmas content/.test(await g.getByTestId("briefing-content").innerText()));
     await passBriefing([h, g]);
     const cb1 = await shownBoard(g);
     check("C the game deals a Christmas board", !!cb1 && CHRISTMAS_BOARDS.includes(cb1.id), cb1?.id);
@@ -252,7 +264,7 @@ try {
     check("C exactly one game started from the two sends, bound to Christmas", proj.games.length === 1 && proj.games[0].season === "christmas", JSON.stringify(proj.games.map((x) => [x.id, x.status, x.season])));
     // Both sit the game out: results, What's next, Play again.
     for (const p of [h, g]) await p.getByRole("button", { name: "Sit this game out" }).click();
-    await soon("C results: What's next says the next game deals Christmas content", async () => /Christmas content/.test(await h.getByTestId("whats-next-content").innerText()), 25000);
+    await soon("C results: What's next says the next game deals Christmas content", async () => /Next game: Christmas content/.test(await h.getByTestId("whats-next-content").innerText()), 25000);
     await layoutOk(h, "C 390×844 host results with What's next, Christmas look");
     await h.getByTestId("next-play-again").click();
     await h.getByTestId("briefing").waitFor({ timeout: 20000 });
@@ -263,23 +275,76 @@ try {
     check("C Play again deals the other Christmas board", !!cb2 && CHRISTMAS_BOARDS.includes(cb2.id) && cb2.id !== cb1?.id, `${cb1?.id} then ${cb2?.id}`);
     for (const p of [h, g]) await p.getByRole("button", { name: "Sit this game out" }).click();
     await h.getByTestId("whats-next").waitFor({ timeout: 25000 });
-    // Back to the lobby; the host chooses Everyday; the guest reloads.
+    // The host goes back to the lobby and sets the NEXT game to Everyday; the guest keeps the results open.
     await h.getByRole("button", { name: /Back to (the )?lobby/ }).first().click();
     await h.getByTestId("lobby-content-everyday").waitFor({ timeout: 15000 });
     await h.getByTestId("lobby-content-everyday").click();
-    await soon("C Everyday again: the host's phone and the TV return to the Everyday look", async () => (await isLook(h, "everyday")) && (await isLook(tv, "everyday")));
-    // The guest kept the results open; back to the lobby, then a reload (a reconnect).
-    if (await g.getByTestId("whats-next").count()) await g.getByRole("button", { name: /Back to (the )?lobby/ }).first().click();
+    await soon("C the host's lobby: the Everyday look, and the next game says Everyday", async () => (await isLook(h, "everyday")) && /Everyday content/.test(await h.getByTestId("up-next-content").innerText()));
+    await soon("C the guest's results: What's next now says the NEXT game is Everyday", async () => /Next game: Everyday content/.test(await g.getByTestId("whats-next-content").innerText()));
+    check("C …while the Christmas game on the guest's screen keeps its Christmas look (a setting for the next game never recolours a game shown)", await isLook(g, "christmas"), JSON.stringify(await look(g)));
+    check("C the TV still shows the last game (Christmas), so it keeps that game's look until the next one starts", await isLook(tv, "christmas"), JSON.stringify(await look(tv)));
+    // The guest goes back to the lobby, then reloads (a reconnect).
+    await g.getByRole("button", { name: /Back to (the )?lobby/ }).first().click();
+    await soon("C the guest in the lobby: the Everyday look (Match the game, the next game)", () => isLook(g, "everyday"));
     await g.reload({ waitUntil: "domcontentloaded" });
-    await soon("C the guest reloads: the room's content (Everyday) and their own pinned look are kept", async () => /Everyday content/.test(await g.getByTestId("up-next-content").innerText()) && (await isLook(g, "everyday")), 20000);
+    await soon("C the guest reloads: the room's content (Everyday) and their own look choice (Match the game) are kept", async () => /Everyday content/.test(await g.getByTestId("up-next-content").innerText()) && (await isLook(g, "everyday")), 20000);
     await startBtn.click();
     await h.getByTestId("briefing").waitFor({ timeout: 20000 });
     await g.getByTestId("briefing").waitFor({ timeout: 20000 });
-    check("C the Everyday game's briefing says Everyday", /Everyday content/.test(await g.getByTestId("briefing-content").innerText()));
+    check("C the Everyday game's briefing says Everyday (this game)", /This game: Everyday content/.test(await g.getByTestId("briefing-content").innerText()));
+    await soon("C the TV shows the new (Everyday) game, in the Everyday look", () => isLook(tv, "everyday"));
     await passBriefing([h, g]);
     const cb3 = await shownBoard(g);
     check("C an Everyday game deals a year-round board", !!cb3 && !CHRISTMAS_BOARDS.includes(cb3.id), cb3?.id);
     await Promise.all([hctx.close(), gctx.close(), tctx.close()]);
+  }
+
+  // ---- E. One device, two tabs: in-flight starts and a changed choice ----
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const bodies = [];
+    ctx.on("request", (r) => { const b = r.postData(); if (b && /\/games$/.test(r.url()) && r.method() === "POST") bodies.push({ page: r.frame()?.page(), body: JSON.parse(b) }); });
+    const a = await ctx.newPage();
+    await a.goto(`${GATE_BASE}/solo`, { waitUntil: "domcontentloaded" });
+    await a.getByTestId("solo-home").waitFor({ timeout: 15000 });
+    await a.getByTestId("solo-content-christmas").click();
+    // Tab A's Start is held in flight while tab B changes the device's remembered choice.
+    let release; const held = new Promise((r) => { release = r; });
+    await a.route("**/rooms/*/games", async (route) => { if (route.request().method() === "POST") await held; return route.continue(); });
+    await a.getByTestId("solo-start-word-connections").click();
+    const b = await ctx.newPage();
+    await b.goto(`${GATE_BASE}/solo`, { waitUntil: "domcontentloaded" });
+    await b.getByTestId("solo-home").waitFor({ timeout: 15000 });
+    check("E tab B sees the device's remembered choice (Christmas)", await pressed(b, "solo-content-christmas"));
+    await b.getByTestId("solo-content-everyday").click();
+    await soon("E tab B changes it to Everyday; tab B's shelf turns Everyday", () => isLook(b, "everyday"));
+    release();
+    const ab = await shownBoard(a);
+    check("E tab A's held Start went out with the content it was pressed with (Christmas), and dealt a Christmas board", bodies.filter((x) => x.page === a).map((x) => x.body.season).join(",") === "christmas" && !!ab && CHRISTMAS_BOARDS.includes(ab.id), `${JSON.stringify(bodies.filter((x) => x.page === a).map((x) => x.body.season))} ${ab?.id}`);
+    await soon("E tab A's round keeps its own Christmas look while the device's choice is now Everyday", () => isLook(a, "christmas"));
+    // Tab A ends its round (four wrong guesses), then Play again.
+    const groups = ab.groups.map((x) => x.words);
+    for (let k = 0; k < 4; k++) {
+      if (await a.getByTestId("solo-results").count()) break;
+      for (const gi of [0, 1, 2, 3]) await a.getByTestId("mz-cx-tile").filter({ hasText: new RegExp(`^\\s*${groups[gi][k].replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`, "i") }).click();
+      await a.getByTestId("mz-cx-submit").click();
+      await sleep(400);
+    }
+    await a.getByTestId("solo-results").waitFor({ timeout: 20000 });
+    check("E tab A's results say this round's content, and keep its look", /This round: Christmas content/.test(await a.getByTestId("solo-results-content").innerText()) && (await isLook(a, "christmas")));
+    const n0 = bodies.length;
+    await a.getByTestId("solo-play-again").click();
+    const ab2 = await shownBoard(a);
+    const again = bodies.slice(n0).filter((x) => x.page === a).map((x) => x.body.season);
+    check("E tab A's Play again repeats the finished round's content (Christmas), not the device's changed choice", again.length >= 1 && again.every((v) => v === "christmas") && !!ab2 && CHRISTMAS_BOARDS.includes(ab2.id), `${JSON.stringify(again)} ${ab2?.id}`);
+    // Tab B's own Start uses tab B's choice.
+    const n1 = bodies.length;
+    await b.getByTestId("solo-start-word-connections").click();
+    const bb = await shownBoard(b);
+    check("E tab B's own Start uses its choice (Everyday): a year-round board", bodies.slice(n1).filter((x) => x.page === b).map((x) => x.body.season).join(",") === "everyday" && !!bb && !CHRISTMAS_BOARDS.includes(bb.id), bb?.id);
+    await soon("E tab B's round is in the Everyday look", () => isLook(b, "everyday"));
+    await a.unroute("**/rooms/*/games").catch(() => {});
+    await ctx.close();
   }
 
   // ---- D. The looks at each size, in both looks ----

@@ -2,7 +2,7 @@
 // a season tag (metadata, never text matching); a solo or casual session's
 // content (Everyday unless Christmas is chosen) decides what may be dealt, and
 // is bound to each game at its start. A Family Cup's selection never reads it.
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { cpSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -256,13 +256,19 @@ describe("the session's content, in a room (§3.4)", () => {
     expect([again.replay, again.game.id, again.game.season]).toEqual([true, g.id, "everyday"]);
   });
 
-  it("Play again and the lineup's next game use the room's current content; a body without content (an older page) gets the room's", () => {
+  it("Play again uses the room's current content; a body without content (an older page) is a legacy Everyday press, never the room's Christmas", () => {
     const { engine, host } = casual();
     engine.setContentSeason(host, "christmas", engine.session.revision);
-    const g1 = engine.startChosen(host, "word-connections", { official: false, attempt: press(engine) }).game;
-    expect(g1.season).toBe("christmas");
+    // Feedback 6795825877 (1): an omitted season is Everyday, so in a Christmas room it is refused, telling the page it is out of date.
+    const before = JSON.stringify([engine.contentUsage, engine.contentSeq, engine.games.size]);
+    let msg = "";
+    try { engine.startChosen(host, "word-connections", { official: false, attempt: press(engine) }); } catch (e) { msg = (e as Error).message; expect((e as { code?: string }).code).toBe("CONTENT_CHANGED"); }
+    expect(msg).toMatch(/out of date.*Refresh/);
+    expect(JSON.stringify([engine.contentUsage, engine.contentSeq, engine.games.size])).toBe(before);
+    const g1 = engine.startChosen(host, "word-connections", { official: false, attempt: press(engine), season: "christmas" }).game;
     engine.games.get(g1.id)!.status = "finished";
     expect(codeOf(() => engine.startRematch(host, g1.id, { attempt: press(engine), season: "everyday" }))).toBe("CONTENT_CHANGED");
+    expect(codeOf(() => engine.startRematch(host, g1.id, { attempt: press(engine) }))).toBe("CONTENT_CHANGED");
     const g2 = engine.startRematch(host, g1.id, { attempt: press(engine), season: "christmas" }).game;
     expect(g2.season).toBe("christmas");
   });
@@ -414,5 +420,196 @@ describe("over HTTP (§3.4)", () => {
     const r = await call("POST", `/rooms/${solo.id}/games`, { gameId: "word-connections", official: false, season: "christmas", attempt: { id: "s82-solo-1", sessionRevision: 0 } }, solo.host);
     expect(r.status).toBe(201);
     expect((await call("GET", `/rooms/${solo.id}/projection?audience=player`, undefined, solo.host)).body["contentSeason"]).toBe("christmas");
+  });
+});
+
+// Feedback 6795825877 on PR #13: binding and compatibility clarifications.
+describe("feedback 6795825877: the whole press, legacy presses, migration", () => {
+  const codeOf = (fn: () => unknown) => { try { fn(); } catch (e) { return (e as { code?: string; message?: string }).code ?? (e as Error).message; } return undefined; };
+  const restart = (engine: RoomEngine, lib: ContentLibrary = shipped) => { const back = RoomEngine.fromJSON(JSON.parse(JSON.stringify(engine.toJSON())) as Record<string, unknown>); back.content = lib; return back; };
+  const state = (engine: RoomEngine) => JSON.stringify({ usage: engine.contentUsage, seq: engine.contentSeq, games: [...engine.games.keys()], party: engine.party?.items.map((i) => i.gameInstanceId ?? null) ?? null });
+  let n = 0;
+  const press = (engine: RoomEngine): SessionAttempt => ({ id: `s82-fb-${String(++n).padStart(4, "0")}`, sessionRevision: engine.session.revision });
+  function casual(timing?: 2) {
+    const engine = new RoomEngine("Party", { kind: "casual", ...(timing ? { timing } : {}) });
+    engine.content = shipped;
+    const host = engine.join("Ada", { asHost: true }).player.id;
+    const guest = engine.join("Bea").player.id;
+    return { engine, host, guest };
+  }
+  const boardOf = (engine: RoomEngine, gid: string) => {
+    const g = engine.games.get(gid)!;
+    return g.pendingContent?.items[0]?.itemId ?? (g.extra as { boardId: string }).boardId;
+  };
+
+  describe("(1) a Start without content is a legacy Everyday press", () => {
+    it("casual: starts Everyday in an Everyday room; refused with refresh wording in a Christmas room, nothing used", () => {
+      const a = casual();
+      const g = a.engine.startChosen(a.host, "word-connections", { official: false, attempt: press(a.engine) }).game;
+      expect(g.season).toBe("everyday");
+      const b = casual();
+      b.engine.setContentSeason(b.host, "christmas", b.engine.session.revision);
+      const before = state(b.engine);
+      expect(codeOf(() => b.engine.startChosen(b.host, "word-connections", { official: false, attempt: press(b.engine) }))).toBe("CONTENT_CHANGED");
+      expect(state(b.engine)).toBe(before);
+    });
+    it("solo: Everyday, even after the room's last round was Christmas", () => {
+      const engine = new RoomEngine("Solo", { kind: "solo" });
+      engine.content = shipped;
+      const me = engine.join("You", { asHost: true }).player.id;
+      engine.startChosen(me, "word-connections", { official: false, attempt: press(engine), season: "christmas" });
+      const g = engine.startChosen(me, "word-connections", { official: false, attempt: press(engine) }).game;
+      expect([g.season, engine.contentSeason, isChristmas(shipped, boardOf(engine, g.id))]).toEqual(["everyday", "everyday", false]);
+    });
+    it("a Cup keeps its own path: no content named, none needed", () => {
+      const cup = new RoomEngine("Cup", { timing: 2 });
+      cup.content = shipped;
+      const h = cup.join("Ada", { asHost: true }).player.id;
+      cup.join("Bea");
+      const g = cup.startGame(h, "word-connections", { official: false });
+      expect([g.season, g.pendingContent?.season]).toEqual([undefined, undefined]);
+    });
+  });
+
+  describe("(1, 2) a recorded press resolves against its own command, across a content change and a restart", () => {
+    it("casual Start: same id + same content returns its game; same id + other content (or none, for a Christmas press) is refused; nothing used", () => {
+      const { engine, host } = casual();
+      const a = press(engine);
+      const g = engine.startChosen(host, "word-connections", { official: false, attempt: a, season: "everyday" }).game;
+      engine.games.get(g.id)!.status = "finished";
+      engine.setContentSeason(host, "christmas", engine.session.revision);
+      for (const e of [engine, restart(engine)]) {
+        const before = state(e);
+        // The same command (and the same command with its content omitted: legacy Everyday) returns the bound game, never re-read from the room (now Christmas).
+        expect(e.startChosen(host, "word-connections", { official: false, attempt: a, season: "everyday" })).toMatchObject({ replay: true, game: { id: g.id, season: "everyday" } });
+        expect(e.startChosen(host, "word-connections", { official: false, attempt: a }).game.id).toBe(g.id);
+        // The same id asking for other content is another command.
+        expect(codeOf(() => e.startChosen(host, "word-connections", { official: false, attempt: a, season: "christmas" }))).toMatch(/already used for something else/);
+        expect(state(e)).toBe(before);
+      }
+    });
+    it("a press recorded before Stage 8.2 (no content in its record) is a legacy Everyday press", () => {
+      const { engine, host } = casual();
+      const a = press(engine);
+      const g = engine.startChosen(host, "word-connections", { official: false, attempt: a }).game;
+      // Strip the newer identity fields, as a room saved by an older build has them.
+      const data = JSON.parse(JSON.stringify(engine.toJSON())) as { session: { ops: Record<string, unknown>[] }; games: Record<string, unknown>[] };
+      for (const op of data.session.ops) delete op["season"];
+      for (const x of data.games) delete x["season"];
+      const back = RoomEngine.fromJSON(data as unknown as Record<string, unknown>);
+      back.content = shipped;
+      expect(back.startChosen(host, "word-connections", { official: false, attempt: a }).game.id).toBe(g.id);
+      expect(back.startChosen(host, "word-connections", { official: false, attempt: a, season: "everyday" }).game.id).toBe(g.id);
+      expect(codeOf(() => back.startChosen(host, "word-connections", { official: false, attempt: a, season: "christmas" }))).toMatch(/already used for something else/);
+    });
+    it("solo Start: the same across a restart, and an older press without content is Everyday", () => {
+      const engine = new RoomEngine("Solo", { kind: "solo" });
+      engine.content = shipped;
+      const me = engine.join("You", { asHost: true }).player.id;
+      const a = press(engine);
+      const g = engine.startChosen(me, "word-connections", { official: false, attempt: a }).game;
+      const back = restart(engine);
+      expect(back.startChosen(me, "word-connections", { official: false, attempt: a }).game.id).toBe(g.id);
+      expect(back.startChosen(me, "word-connections", { official: false, attempt: a, season: "everyday" }).game.id).toBe(g.id);
+      const before = state(back);
+      expect(codeOf(() => back.startChosen(me, "word-connections", { official: false, attempt: a, season: "christmas" }))).toMatch(/already used for something else/);
+      expect(state(back)).toBe(before);
+    });
+  });
+
+  describe("(2) every entry path binds the content", () => {
+    it("Play again: a second press with other content can't pass as the first; the same content returns the same rematch", () => {
+      const { engine, host, guest } = casual();
+      engine.cohosts.add(guest);
+      engine.setContentSeason(host, "christmas", engine.session.revision);
+      const g1 = engine.startChosen(host, "word-connections", { official: false, attempt: press(engine), season: "christmas" }).game;
+      engine.games.get(g1.id)!.status = "finished";
+      const a = press(engine);
+      const r = engine.startRematch(host, g1.id, { attempt: a, season: "christmas" }).game;
+      const before = state(engine);
+      // The cohost's own press (another id) for the same Play again: other content is refused, nothing used.
+      expect(codeOf(() => engine.startRematch(guest, g1.id, { attempt: press(engine), season: "everyday" }))).toBe("CONTENT_CHANGED");
+      expect(codeOf(() => engine.startRematch(guest, g1.id, { attempt: { id: "s82-fb-legacy-rm", sessionRevision: engine.session.revision } }))).toBe("CONTENT_CHANGED");
+      // The host's own press again with other content: the same id, another command.
+      expect(codeOf(() => engine.startRematch(host, g1.id, { attempt: a, season: "everyday" }))).toMatch(/already used for something else/);
+      expect(state(engine)).toBe(before);
+      expect(engine.startRematch(guest, g1.id, { attempt: press(engine), season: "christmas" })).toMatchObject({ replay: true, game: { id: r.id } });
+      expect(engine.startRematch(host, g1.id, { attempt: a, season: "christmas" })).toMatchObject({ replay: true, game: { id: r.id } });
+    });
+    it("the lineup's Next: an item already started returns only to a press with the same content", () => {
+      const { engine, host, guest } = casual();
+      engine.cohosts.add(guest);
+      engine.savePartyPlan(host, 0, { expectedPlayers: 2, budgetMinutes: 30, items: [{ gameId: "word-connections" }, { gameId: "trivia" }] });
+      engine.setContentSeason(host, "christmas", engine.session.revision);
+      const rev = engine.party!.revision;
+      const a = press(engine);
+      const g = engine.startPartyGame(host, "word-connections", { revision: rev, index: 0, attempt: a, season: "christmas" }).game;
+      expect(g.season).toBe("christmas");
+      const before = state(engine);
+      expect(codeOf(() => engine.startPartyGame(guest, "word-connections", { revision: rev, index: 0, attempt: press(engine), season: "everyday" }))).toBe("CONTENT_CHANGED");
+      expect(codeOf(() => engine.startPartyGame(host, "word-connections", { revision: rev, index: 0, attempt: a, season: "everyday" }))).toMatch(/already used for something else/);
+      expect(state(engine)).toBe(before);
+      expect(engine.startPartyGame(guest, "word-connections", { revision: rev, index: 0, attempt: press(engine), season: "christmas" })).toMatchObject({ replay: true, game: { id: g.id } });
+    });
+  });
+
+  describe("(4) migration: eligibility apart from the hash, by room kind (restart fixtures)", () => {
+    /** A Christmas board as a briefing frozen by an older build would hold it: no season in its record. */
+    const frozenChristmas = () => { const li = shipped.items.get("con-legacy-1")!; return { itemId: li.item.id, packId: li.packId, packVersion: li.packVersion, hash: li.hash }; };
+    it("a Cup briefing from before Stage 8.2 holding a Christmas board begins play unchanged (no Everyday filtering in a Cup)", () => {
+      const cup = new RoomEngine("Cup", { timing: 2 });
+      cup.content = shipped;
+      const h = cup.join("Ada", { asHost: true }).player.id;
+      const b = cup.join("Bea").player.id;
+      const g = cup.startGame(h, "word-connections", { official: false });
+      g.pendingContent!.items = [frozenChristmas()];
+      delete g.pendingContent!.season;
+      const back = restart(cup);
+      expect(back.startNow(h, g.id, { confirmed: [h, b] }, g.briefing!.startNowAt + 1).started).toBe(true);
+      expect(Object.keys(back.contentUsage)).toEqual(["con-legacy-1"]); // the frozen Christmas board was used, unfiltered
+    });
+    it("a casual briefing from before Stage 8.2 holding a Christmas board is cancelled, and the room says why", () => {
+      const { engine, host, guest } = casual(2);
+      const g = engine.startChosen(host, "word-connections", { official: false, attempt: press(engine) }).game;
+      g.pendingContent!.items = [frozenChristmas()];
+      delete g.pendingContent!.season;
+      delete g.season;
+      const back = restart(engine);
+      const r = back.startNow(host, g.id, { confirmed: [host, guest] }, g.briefing!.startNowAt + 1);
+      expect([r.started, r.cancelled, back.games.has(g.id)]).toEqual([false, "content-changed", false]);
+      expect(back.project("player", guest)["briefingCancelled"]).toEqual({ gameInstanceId: g.id, reason: "content-changed", contentWhy: "season" });
+      expect(Object.keys(back.contentUsage)).toEqual([]); // nothing used
+    });
+    it("a casual game already playing a Christmas board when the build changed plays on and finishes unchanged", () => {
+      const { engine, host, guest } = casual();
+      engine.setContentSeason(host, "christmas", engine.session.revision);
+      const g = engine.startChosen(host, "word-connections", { official: false, attempt: press(engine), season: "christmas" }).game;
+      expect(isChristmas(shipped, boardOf(engine, g.id))).toBe(true);
+      // As an older build left it: playing, a Christmas board, no season recorded.
+      const old = JSON.parse(JSON.stringify(engine.toJSON())) as { games: Record<string, unknown>[] };
+      const rec = old.games.find((x) => x["id"] === g.id)!;
+      delete rec["season"];
+      const back = RoomEngine.fromJSON(old as unknown as Record<string, unknown>);
+      back.content = shipped;
+      const live = back.games.get(g.id)!;
+      expect(live.status).toBe("playing");
+      for (const p of [host, guest]) back.markConnected(p);
+      // The room is Everyday again by now: the game in play is untouched by that.
+      back.setContentSeason(host, "everyday", back.session.revision);
+      for (const p of [host, guest]) expect(back.submitIntent({ kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: back.id, gameInstanceId: g.id, action: "abstain", payload: {} }, p).accepted).toBe(true);
+      expect(back.games.get(g.id)!.status).toBe("finished");
+    });
+    it("an item re-tagged Christmas after an Everyday briefing froze it keeps its hash, and the briefing is cancelled by eligibility", () => {
+      const { engine, host, guest } = casual(2);
+      const g = engine.startChosen(host, "word-connections", { official: false, attempt: press(engine), season: "everyday" }).game;
+      const frozen = g.pendingContent!.items[0]!;
+      expect(isChristmas(shipped, frozen.itemId)).toBe(false);
+      const retagged = editedLibrary((_f, pack) => { for (const it of pack.items) if (it["id"] === frozen.itemId) it["season"] = "christmas"; });
+      expect(retagged.items.get(frozen.itemId)!.hash).toBe(frozen.hash); // the hash is unchanged
+      const back = restart(engine, retagged);
+      const r = back.startNow(host, g.id, { confirmed: [host, guest] }, g.briefing!.startNowAt + 1);
+      expect([r.started, r.cancelled]).toEqual([false, "content-changed"]);
+      expect(back.project("player", host)["briefingCancelled"]).toMatchObject({ contentWhy: "season" });
+    });
   });
 });

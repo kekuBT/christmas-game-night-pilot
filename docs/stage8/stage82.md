@@ -94,6 +94,11 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
 | Where it is kept | This device only (`localStorage` `mz_look`). Never sent to the server. | On the server: the room's `contentSeason`, persisted. Solo also remembers the last choice on the device (`mz_solo_season`). |
 | Bound at start | — | Yes. Each game records the content it was started with, and so does its frozen briefing (§3.4). |
 
+**Match the game follows the game on screen** (feedback 6795825877, 3):
+- **While a game is shown,** the look follows that game's own bound content, never the room's setting for the next start. That covers a briefing, the game, a player's results until they go back to the lobby, a solo round and its results, and the TV until the next game starts.
+- **Between games,** the room's next setting applies.
+- **Solo Play again** repeats the finished round's content. A solo press that got no answer is resent unchanged, its content included. The remembered shelf choice is only the default for a new start.
+
 **Match the game** works as follows:
 - In a solo or casual session whose content is Christmas, the device shows the Christmas look. Otherwise it shows Everyday.
 - So choosing Christmas content shows on every phone and the TV at once, while any device can still pin its own look.
@@ -150,8 +155,13 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
 - **Bound at start.**
   - Each game records `season`, so Play again and rematch can show what was played.
   - A frozen briefing records `pendingContent.season`.
-  - When play begins, the re-check (`pendingItems`) also checks each frozen item against that season. A briefing frozen under an older build has no season and is checked as Everyday, so an Everyday room never begins play with a Christmas-only item. A failure cancels the briefing with the existing content-changed notice.
+  - When play begins, the re-check (`pendingItems`) also checks each frozen item against that season. A briefing frozen under an older build has no season and is checked as Everyday, so an Everyday room never begins play with a Christmas-only item. A failure cancels the briefing, and the room says why: the projection's `briefingCancelled` reports `contentWhy: "season"`, and every phone says "what it was going to deal no longer suits this room's content".
 - **Rematch and the Quick Party lineup** use the room's current content. The lineup holds games, not content.
+- **The whole press is bound, on every path** (feedback 6795825877, 2): the manual Start, the solo Start, the lineup's Next, Play again, and every resend.
+  - **Recording:** a press's content is recorded with it, normalized (none means Everyday).
+  - **A repeat of the same id** resolves against that recorded command, never against the room's content now. The same content returns the bound game; other content is refused ("already used for something else").
+  - **A different press that would get an already-started game** (a second host's press, Play again already pressed, a lineup item already started) gets that game only if it asked for the same content. Otherwise it gets `CONTENT_CHANGED`.
+  - **A refusal changes nothing:** it starts no game and uses no content.
 - **Not a ledger event** (as built; D-S82-04): a content change is session state, like a break (D-S71-03). Each game's start records the content it was bound to: `game-started` and `game-briefing-started` carry `season`, and `content-selected`'s reasons name it.
 
 ### 3.5 Compatibility
@@ -165,7 +175,19 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
   - `pendingContent.season`, optional because the persistence schema is strict;
   - device `localStorage` `mz_look` and `mz_solo_season`.
   None is required on read; an absent value means `everyday` (or "Match the game" for the look).
-- **Old clients:** a start body without `season` is accepted with the room's current content. The app always sends it, so this only covers a page loaded before an upgrade. An unknown value is refused with a 400.
+- **Old clients** (feedback 6795825877, 1): a start body without `season` is a **legacy Everyday press**, and never silently takes the room's current content.
+  - In an Everyday room, it starts as before.
+  - In a Christmas room, it is refused with `CONTENT_CHANGED`: "this page is out of date… Refresh the page, check, then press Start again".
+  - A solo press without one is Everyday.
+  - A press recorded by an older build (no content in its record) counts as Everyday too.
+  - An unknown value is refused with a 400.
+  - Cup requests keep their own path: no season, none read.
+- **Migration, by room kind** (feedback 6795825877, 4; restart fixtures in `tests/stage82-seasonal.test.ts`):
+  - **A Cup briefing frozen by an older build** begins play unchanged. Cups never acquire season filtering.
+  - **A solo or casual briefing frozen by an older build** is checked as Everyday. If any frozen item is Christmas-only, it is cancelled and says so.
+  - **A game already playing** when the build changed finishes unchanged.
+  - **An item re-tagged after a briefing froze it** keeps its hash, and the briefing is cancelled by the eligibility check, which is separate from the hash.
+- **Stored device choices** (feedback 6795825877, 5): a missing, unknown or damaged `mz_look` or `mz_solo_season`, or storage that throws or doesn't exist, falls back to Match the game and Everyday without breaking entry or play.
 
 ### 3.6 The themes on every surface (client)
 - **One look, worked out once.** A pure `resolveLook(pref, sessionKind, contentSeason)` gives `everyday` or `christmas`. App and Solo pass the result to every `MchezoProvider` instead of `themes.everyday`.
@@ -186,6 +208,7 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
 - **Unchanged:** reduced motion and Animations Off, Stage 8.1's sizing and touch targets, and every projection and answer-privacy rule.
 
 ### 3.7 Where the content choice is shown
+Labels say which game they mean, in words, never by colour alone. The briefing says "This game: … content", solo results say "This round: …", and What's next and the host's dock say "Next game: …". The up-next card and the TV's up-next card sit under "Up next".
 - **Solo shelf:** an "Everyday / Christmas" choice above the games, with one line on what it changes. The shelf's look follows it under Match the game. Each game's Start uses it.
 - **Solo round and results:** a small "Christmas content" label when Christmas is chosen. Play again keeps the choice.
 - **Casual lobby:**
@@ -264,10 +287,21 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
   - `tests/stage82-seasonal.test.ts` (28) and `tests/stage82-look.test.ts` (7), both new;
   - `scripts/check-themes-seasonal.mjs` (new; 125 checks) and `scripts/screenshot-stage82.mjs` (new);
   - updated on purpose: the Stage 6.2 and 7.4 rotation tests (11 Everyday boards), the small test pool (copies without seasons), and `check-content-variety` part C (year-round boards, never a Christmas one).
+- **Feedback 6795825877** (12:28 UTC; it reached this session at 13:25, after the first candidate `d4e06c3`):
+  - **Server:**
+    - a Start without content is a legacy Everyday press;
+    - every press's content is part of its identity (`resolveAttempt`, `resolveSoloStart`, Play again's and the lineup's already-started games);
+    - the briefing re-check reports why (`briefingCancelled`).
+  - **Web:**
+    - the shown game drives Match the game (App, plus `setShownSeason` for solo);
+    - solo Play again repeats its round's content, and a pending solo press keeps its content;
+    - the labels say "This game", "This round" and "Next game";
+    - a clear cancel note.
+  - **Tests:** 15 new unit tests (restart fixtures for the three migration cases and the re-tag, legacy presses across a change and a restart, the identity on every path, storage fallbacks, and the pending press). The driver gained section E (two tabs) and the active-versus-next checks in C.
 - **Server behaviour otherwise unchanged:** Cup selection, scoring, privacy, and the Stage 7.x start identity.
 
 ### 7.2 Tested (local, Chromium emulation)
-- **Unit tests:** 1,359 in all, 35 of them new.
+- **Unit tests:** 1,374 in all (113 files), 50 of them new for Stage 8.2.
 - **Mutations, each caught by a failing test** (`tests/stage82-seasonal.test.ts`; evidence in `docs/evidence/stage82-local/`):
   - the Everyday filter removed;
   - Christmas-first ordering removed;
@@ -277,7 +311,7 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
   - a solo replay ignoring its season;
   - the season inside the hash;
   - Draw & Guess unfiltered.
-- **`check-themes-seasonal`:** 125 of 125 passed.
+- **`check-themes-seasonal`:** 139 of 139 passed (125 before the feedback).
   - **Solo:** Everyday at first; Christmas and its look, kept after a reload; two Christmas boards first, then year-round boards only after switching back; no request carries a look; every Start carries its content.
   - **Server restart:** the content and history survive.
   - **Casual room:**
@@ -306,12 +340,23 @@ This spec comes first. The inventory (§1) and the catalog audit (§8) were made
   | `check-tv-show` | 29 | `check-quick-party` | 68 |
   | `check-draw-guess` | 61 | `check-a11y-surfaces` | 11 |
 
+- **More mutations after the feedback, each caught:**
+  - an omitted season adopting the room's;
+  - a replay ignoring its content;
+  - an already-started game returned whatever the content;
+  - the eligibility re-check applied in a Cup;
+  - a pending solo press switching to the changed choice.
+- **Regression drivers rerun after the feedback,** with 0 failures: casual, session-flow, briefing, solo, solo-shelf, content-variety, mobile-everyday, lobby-mode, host-handover, quick-party, tv-show, contrast, spectator, game-night-flow, tv-spectator, lobby-fixes, cup-memory and draw-guess.
 - **Found and fixed while testing:**
   - The What's next content label's test id began `next-`, which `check-session-flow` reserves for the panel's buttons. It is now `whats-next-content`.
   - The driver measured a choice mid-animation (43.999 px). It now waits for animations to finish, as `check-mobile-everyday` does.
 
 ### 7.3 Gates
-To be recorded on the final candidate.
+- **The first candidate, `d4e06c3`** (before the feedback reached this session):
+  - fast `20261111-132206-d4e06c34-24970`: PASSED, 5/5, 49 s;
+  - full `20261111-132514-d4e06c34-28633`: stopped by me about a minute in, when the feedback arrived, and self-recorded CANCELLED (exit 130).
+  - Neither is a verdict on the final candidate. Their raw evidence is kept in `docs/evidence/gate-runs/`.
+- **The final candidate:** recorded below once its gates have run, one after the other.
 
 ## 8. Catalog audit: every item considered
 Text matching was used **only** to find candidates for this review. The game filters on the `season` tag alone.

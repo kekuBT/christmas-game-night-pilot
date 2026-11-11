@@ -24,6 +24,7 @@ import { countsForBest } from "../../solo/soloRules.js";
 import { useSoloSeason } from "../../solo/soloSeason.js";
 import { ContentSeasonChoice, ContentSeasonLabel } from "./ContentChoice.js";
 import type { SessionSeason } from "../../../../../src/shared/season.js";
+import { setShownSeason } from "../../ui/mchezo/look.js";
 
 /**
  * Stage 8.2 (§3.7): what the solo content changes, honestly: only Word
@@ -143,6 +144,12 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
   // the end (countsForBest: a sat-out round never makes a personal best; a
   // left or replaced one never finishes).
   const { mine, pub } = roundViews(state);
+  // Feedback 6795825877 (3): while a round or its results are shown, the look
+  // follows that round's own content (bound at its start), not the remembered
+  // choice for the next start, which another tab may have changed.
+  const shown = (state.phase === "playing" || state.phase === "finished") && pub?.season ? pub.season : null;
+  useEffect(() => { setShownSeason(shown); }, [shown]);
+  useEffect(() => () => setShownSeason(null), []);
   const summary = state.phase === "finished" ? adapter.summarize(mine, pub, session.playerId ?? "") : null;
   const counts = !!summary && countsForBest(mine, pub);
   useEffect(() => {
@@ -198,13 +205,13 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
       <main className="mz-screen mz-solo-results" aria-label={`${game.title} solo results`} data-testid="solo-results" style={{ ["--mz-accent" as string]: accentColor(game.id) }}>
         {header(onBackToSolo, "Back to solo")}
         <span className="mz-kicker mz-kicker--muted">Solo · {game.title}</span>
-        {pub?.season && <ContentSeasonLabel season={pub.season} testId="solo-results-content" />}
+        {pub?.season && <ContentSeasonLabel season={pub.season} prefix="This round: " testId="solo-results-content" />}
         <h1 className="mz-h1" tabIndex={-1} ref={resultsHeading} data-testid="solo-score">{fmt(summary.score)} points</h1>
         <p className="mz-solo-results__correct" data-testid="solo-headline">{summary.headline}</p>
         {pbText && <p className={`mz-solo-results__pb${r?.isNewBest && r.saved ? " is-new" : ""}`} role="status" data-testid="solo-pb">{pbText}</p>}
         {adapter.bestNote && <p className="mz-solo__best-note" data-testid="solo-note">{adapter.bestNote}</p>}
         <div className="mz-solo-results__actions">
-          <Keycap block data-testid="solo-play-again" onClick={() => { setOutcome(null); void live().start(game.id, seasonRef.current); }}>Play again</Keycap>
+          <Keycap block data-testid="solo-play-again" onClick={() => { setOutcome(null); void live().start(game.id, pub?.season ?? seasonRef.current); }}>Play again</Keycap>
           <Keycap block variant="surface" data-testid="solo-back" onClick={onBackToSolo}>Back to solo</Keycap>
           <button type="button" className="mz-linkbtn" data-testid="solo-home" onClick={onHome}>Mchezo home</button>
         </div>

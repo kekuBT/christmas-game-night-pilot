@@ -1,0 +1,90 @@
+
+CANCELLED (exit 130) | full | run 20261111-132514-d4e06c34-28633
+  6 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 3 cancelled, 75 not run
+  CANCELLED e2e-chromium (w1) [cancelled]
+            [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been cl
+  CANCELLED check-f5 (w2) [cancelled]
+            DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock=
+  CANCELLED check-leaderboard (w3): stopped by cancellation
+  NOT RUN   check-game-night: run cancelled
+  NOT RUN   check-audit-fixes: run cancelled
+  NOT RUN   check-session-flow: run cancelled
+  NOT RUN   check-mobile-everyday: run cancelled
+  NOT RUN   check-solo-shelf: run cancelled
+  NOT RUN   check-pulse-timing: run cancelled
+  NOT RUN   check-solo: run cancelled
+  NOT RUN   check-tv-lifecycle: run cancelled
+  NOT RUN   check-lifecycle: run cancelled
+  NOT RUN   check-mchezo: run cancelled
+  NOT RUN   check-caption: run cancelled
+  NOT RUN   check-briefing: run cancelled
+  NOT RUN   check-tv-reveal: run cancelled
+  NOT RUN   check-content-variety: run cancelled
+  NOT RUN   check-draw-guess: run cancelled
+  NOT RUN   check-themes-seasonal: run cancelled
+  NOT RUN   check-pattern-pulse: run cancelled
+  NOT RUN   check-stage2: run cancelled
+  NOT RUN   check-host-handover: run cancelled
+  NOT RUN   check-majority-rules: run cancelled
+  NOT RUN   check-math: run cancelled
+  NOT RUN   check-spectator: run cancelled
+  NOT RUN   check-connections: run cancelled
+  NOT RUN   check-casual: run cancelled
+  NOT RUN   check-draw-sync: run cancelled
+  NOT RUN   check-math-network: run cancelled
+  NOT RUN   check-f4: run cancelled
+  NOT RUN   check-results: run cancelled
+  NOT RUN   check-reveal: run cancelled
+  NOT RUN   check-input-isolation: run cancelled
+  NOT RUN   check-quick-party: run cancelled
+  NOT RUN   check-multiplayer: run cancelled
+  NOT RUN   check-tv-spectator: run cancelled
+  NOT RUN   check-tv-outage: run cancelled
+  NOT RUN   check-caption-4p: run cancelled
+  NOT RUN   check-geography: run cancelled
+  NOT RUN   check-answer-reveal: run cancelled
+  NOT RUN   check-action-ack: run cancelled
+  NOT RUN   check-math-timing: run cancelled
+  NOT RUN   check-ten-players: run cancelled
+  NOT RUN   check-library-nav: run cancelled
+  NOT RUN   check-contrast: run cancelled
+  NOT RUN   check-mobile: run cancelled
+  NOT RUN   check-m6: run cancelled
+  NOT RUN   check-poll-body-stall: run cancelled
+  NOT RUN   check-send-failures: run cancelled
+  NOT RUN   check-tv-entry: run cancelled
+  NOT RUN   check-answer-race: run cancelled
+  NOT RUN   check-lobby-mode: run cancelled
+  NOT RUN   check-abstain: run cancelled
+  NOT RUN   check-year: run cancelled
+  NOT RUN   check-readiness: run cancelled
+  NOT RUN   check-stage4-details: run cancelled
+  NOT RUN   check-lobby-fixes: run cancelled
+  NOT RUN   check-viewports: run cancelled
+  NOT RUN   check-cup-memory: run cancelled
+  NOT RUN   check-tv-show: run cancelled
+  NOT RUN   check-recovery: run cancelled
+  NOT RUN   check-game-night-flow: run cancelled
+  NOT RUN   check-progress: run cancelled
+  NOT RUN   check-answer-helper: run cancelled
+  NOT RUN   check-official-practice: run cancelled
+  NOT RUN   check-sessions: run cancelled
+  NOT RUN   check-closest: run cancelled
+  NOT RUN   check-tv-dashboard: run cancelled
+  NOT RUN   check-ws-reconnect: run cancelled
+  NOT RUN   check-history-links: run cancelled
+  NOT RUN   check-library: run cancelled
+  NOT RUN   check-reduced-motion: run cancelled
+  NOT RUN   check-shuffle: run cancelled
+  NOT RUN   check-errors: run cancelled
+  NOT RUN   check-studio: run cancelled
+  NOT RUN   check-double-start: run cancelled
+  NOT RUN   check-a11y-surfaces: run cancelled
+  NOT RUN   check-restart: run cancelled
+  timing   wall 1m 26s · step time 2m 38s (sum) · 3 workers, 61% busy · 1.84× the same steps run one after another
+           longest  unit-tests 36s, e2e-chromium 35s, check-f5 35s · the longest step is 42% of the wall time
+           machine  CPU mean 63%, peak 99% · memory available ≥ 13922 MB · load peak 4.54
+           contention ×1.143 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-full-d4e06c3/test-results/20261111-132514-d4e06c34-28633/report.json

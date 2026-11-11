@@ -1,0 +1,7 @@
+$ node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();
+# timeout 120s | worker w1
+
+[+0.6s] {"version":"153.0.8010.12","executable":"/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell","source":"MCHEZO_CHROMIUM_PATH"}
+[+0.7s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":0,"pages":0,"peakOpenPages":0}
+
+# PASS (exit 0) in 0.7s | cpu 0.3s, peak memory 78 MB

@@ -8,7 +8,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { DEFAULT_CONTENT_DIR, loadContent } from "../src/content/registry.js";
 import { LocalServer } from "../src/server/http.js";
 import type { RoomEngine } from "../src/server/room.js";
-import { lookTheme, resolveLook, type LookContext, type LookPref } from "../apps/web/src/ui/mchezo/look.js";
+import { LOOK_KEY, lookTheme, readLookPref, resolveLook, type LookContext, type LookPref } from "../apps/web/src/ui/mchezo/look.js";
+import { readSoloSeason, SOLO_SEASON_KEY } from "../apps/web/src/solo/soloSeason.js";
 import { themes, themeToCssVars, type MchezoTheme } from "../apps/web/src/ui/mchezo/tokens/tokens.js";
 import { forgetPageSeat, SoloSession } from "../apps/web/src/solo/soloSession.js";
 
@@ -34,6 +35,28 @@ describe("the look (§3.1)", () => {
     expect(lookTheme("christmas")).toBe(themes.christmas);
     expect(themes.christmas.ring.style).toBe("wreath");
     expect(themeToCssVars(themes.christmas)["--mz-danger"]).toBeDefined();
+  });
+});
+
+describe("stored choices degrade safely (feedback 6795825877, 5)", () => {
+  const g = globalThis as unknown as { localStorage?: unknown };
+  const saved = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+  const use = (store: unknown) => Object.defineProperty(globalThis, "localStorage", { value: store, configurable: true, writable: true });
+  afterEach(() => { if (saved) Object.defineProperty(globalThis, "localStorage", saved); else delete g.localStorage; });
+  const map = (entries: Record<string, string>) => ({ getItem: (k: string) => entries[k] ?? null, setItem: () => {}, removeItem: () => {} });
+  it("a missing, unknown or damaged value falls back: Match the game, and Everyday content", () => {
+    for (const v of [undefined, "", "summer", "CHRISTMAS", "{\"x\":1}"]) {
+      use(map(v === undefined ? {} : { [LOOK_KEY]: v, [SOLO_SEASON_KEY]: v }));
+      expect([readLookPref(), readSoloSeason()]).toEqual(["auto", "everyday"]);
+    }
+    use(map({ [LOOK_KEY]: "christmas", [SOLO_SEASON_KEY]: "christmas" }));
+    expect([readLookPref(), readSoloSeason()]).toEqual(["christmas", "christmas"]);
+  });
+  it("storage that throws (private mode, blocked site data) or is missing altogether: the same defaults, no error", () => {
+    use({ getItem: () => { throw new Error("SecurityError"); }, setItem: () => { throw new Error("QuotaExceeded"); } });
+    expect([readLookPref(), readSoloSeason()]).toEqual(["auto", "everyday"]);
+    use(undefined);
+    expect([readLookPref(), readSoloSeason()]).toEqual(["auto", "everyday"]);
   });
 });
 
@@ -96,6 +119,35 @@ describe("the solo client sends its content choice (§3.4)", () => {
       expect(shipped.items.get((e.extra as { boardId: string }).boardId)?.item.season).toBeUndefined();
     }
     expect(room.contentSeason).toBe("everyday");
+  });
+
+  it("a press with no answer is sent again unchanged, its content included, even if the remembered choice changed since (feedback 6795825877, 3)", async () => {
+    // Every send of the first Start reaches the server, which acts, then the connection drops: the Start ends with no answer.
+    let resets = 0;
+    const sent: Record<string, unknown>[] = [];
+    const f = (async (input: string, init: RequestInit = {}) => {
+      const { cache: _c, keepalive: _k, ...rest } = init;
+      const reply = await realFetch(`${base}${input}`, rest);
+      if (/\/games$/.test(input) && rest.method === "POST") {
+        sent.push(JSON.parse(String(rest.body)) as Record<string, unknown>);
+        if (resets < 3) { resets++; throw new TypeError("fetch failed"); }
+      }
+      return reply;
+    }) as unknown as typeof fetch;
+    const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000, requestTimeoutMs: 2_000, startBudgetMs: 6_000 });
+    sessions.push(s);
+    await s.start("word-connections", "christmas");
+    expect(s.current.phase).toBe("error");
+    // Try again, after another tab switched the remembered choice to Everyday: the same press, Christmas.
+    await s.start("word-connections", "everyday");
+    expect(s.current.phase).toBe("playing");
+    const ids = new Set(sent.map((b) => (b["attempt"] as { id: string }).id));
+    expect([ids.size, [...new Set(sent.map((b) => b["season"]))]]).toEqual([1, ["christmas"]]);
+    const room = roomOf(s);
+    expect([room.games.size, room.games.get(s.current.gameInstanceId!)!.season]).toEqual([1, "christmas"]);
+    // The next press is new, and takes the choice it is given.
+    await s.start("word-connections", "everyday");
+    expect(room.games.get(s.current.gameInstanceId!)!.season).toBe("everyday");
   });
 
   it("without a choice it sends Everyday (the default), never nothing", async () => {

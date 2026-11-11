@@ -953,7 +953,7 @@ export class RoomEngine {
     // monotonic: a forgotten old press can never start anything).
     if (this.kind === "casual" || this.kind === "solo") {
       this.session.revision += 1;
-      if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id, ...(this.kind === "solo" ? { actor: hostId, base: attempt.sessionRevision, ...(season ? { season } : {}) } : {}) });
+      if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id, ...(season ? { season } : {}), ...(this.kind === "solo" ? { actor: hostId, base: attempt.sessionRevision } : {}) });
     }
     // Stage 8.2: a solo Start's content is the solo player's choice; the room keeps it (reload, Play again).
     if (this.kind === "solo" && season) this.contentSeason = season;
@@ -983,7 +983,7 @@ export class RoomEngine {
       const seen = this.resolveSoloStart(actorId, gameId, opts.attempt, opts.season);
       if (seen) return seen;
     } else if (this.kind === "casual" && opts.attempt) {
-      const seen = this.resolveAttempt(opts.attempt, `start:${gameId}`);
+      const seen = this.resolveAttempt(opts.attempt, `start:${gameId}`, "start", opts.season);
       if (seen) return seen;
     }
     return { game: this.startGame(actorId, gameId, opts), replay: false };
@@ -1006,7 +1006,7 @@ export class RoomEngine {
     if (!op) return null;
     if (op.key !== `start:${gameId}` || op.actor !== actorId || op.base !== attempt.sessionRevision) throw new Error("That request id was already used for something else.");
     // Stage 8.2: the same press carries the same content; another content is another press.
-    if (op.season !== undefined && (season ?? DEFAULT_SESSION_SEASON) !== op.season) throw new Error("That request id was already used for something else.");
+    if ((op.season ?? DEFAULT_SESSION_SEASON) !== (season ?? DEFAULT_SESSION_SEASON)) throw new Error("That request id was already used for something else.");
     const game = op.gameInstanceId ? this.games.get(op.gameInstanceId) : undefined;
     if (game && op.revision === this.session.revision) return { game, replay: true };
     throw new StartRefused("SESSION_CONFLICT", "That Start isn't the latest any more (its round was left or replaced), so nothing new started.", this.readiness(), { session: this.sessionView() });
@@ -1057,22 +1057,25 @@ export class RoomEngine {
    * gone, changed (pack version or content hash), or no longer allowed in
    * this mode: only possible across a restart, which reloads the library.
    */
-  private pendingItems(game: GameInstance, now: number): LoadedItem[] | null {
+  private pendingItems(game: GameInstance, now: number): { items: LoadedItem[] } | { problem: "changed" | "season" } {
     const pc = game.pendingContent;
-    if (!pc) return [];
+    if (!pc) return { items: [] };
     const today = new Date(now).toISOString().slice(0, 10);
     const out: LoadedItem[] = [];
     for (const ref of pc.items) {
       const li = this.content.items.get(ref.itemId);
-      if (!li || li.packId !== ref.packId || li.packVersion !== ref.packVersion || li.hash !== ref.hash) return null;
-      if (pc.mode === "official" ? !officialEligible(li, today) : !practiceUsable(li)) return null;
-      // Stage 8.2 (§3.4): a solo or casual briefing's items must still suit the
-      // content it was frozen with; one frozen before Stage 8.2 has none and is
-      // checked as Everyday, so it never begins play with a Christmas-only item.
-      if (this.kind !== "cup" && !seasonAllows(pc.season ?? DEFAULT_SESSION_SEASON, li.item.season)) return null;
+      if (!li || li.packId !== ref.packId || li.packVersion !== ref.packVersion || li.hash !== ref.hash) return { problem: "changed" };
+      if (pc.mode === "official" ? !officialEligible(li, today) : !practiceUsable(li)) return { problem: "changed" };
+      // Stage 8.2 (§3.4, feedback 6795825877): eligibility is checked on its own,
+      // apart from the hash (which leaves the season out). Solo and casual rooms
+      // only: a Cup's briefing never acquires season filtering. A briefing frozen
+      // before Stage 8.2 has no season and is checked as Everyday, so it never
+      // begins play with a Christmas-only item; nor does one whose item was
+      // re-tagged Christmas since (its hash unchanged).
+      if (this.kind !== "cup" && !seasonAllows(pc.season ?? DEFAULT_SESSION_SEASON, li.item.season)) return { problem: "season" };
       out.push(li);
     }
-    return out;
+    return { items: out };
   }
 
   /**
@@ -1083,11 +1086,12 @@ export class RoomEngine {
   private beginPlay(game: GameInstance, now: number, trigger: "all-ready" | "start-now", actor?: string, confirmed: string[] = []): "started" | "below-minimum" | "content-changed" {
     const b = game.briefing!;
     if (this.connectedRoster(game, now).length < this.briefingMinimum(game)) return "below-minimum";
-    const items = this.pendingItems(game, now);
-    if (items === null) {
-      this.endBriefing(game, "content-changed", actor);
+    const frozen = this.pendingItems(game, now);
+    if ("problem" in frozen) {
+      this.endBriefing(game, "content-changed", actor, frozen.problem);
       return "content-changed";
     }
+    const items = frozen.items;
     game.status = "playing";
     game.playStartedAt = now;
     game.deadlineAt = now + Math.round(policyFor(game.gameId).gameWindowMs * this.lifecycleScale);
@@ -1113,7 +1117,7 @@ export class RoomEngine {
   }
 
   /** Cancel a briefing (any reason): it leaves no game, no usage, no score (§6). */
-  private endBriefing(game: GameInstance, reason: "host" | "expired" | "content-changed", actor?: string): void {
+  private endBriefing(game: GameInstance, reason: "host" | "expired" | "content-changed", actor?: string, contentWhy?: "changed" | "season"): void {
     this.games.delete(game.id);
     this.reconcilePartyStarts(); // Stage 7.1: a lineup item that started this game is free again
     // Stage 7.2: the attempt that started it stays remembered (a retry of it
@@ -1124,7 +1128,7 @@ export class RoomEngine {
     this.log("briefing-cancelled", {
       gameInstanceId: game.id,
       ...(actor ? { actor } : {}),
-      detail: { reason, gameId: game.gameId, official: game.official, roster: game.players, ready: game.players.filter((id) => game.briefing?.ready[id] !== undefined), frozenItemCount: game.pendingContent?.items.length ?? 0 },
+      detail: { reason, ...(contentWhy ? { contentWhy } : {}), gameId: game.gameId, official: game.official, roster: game.players, ready: game.players.filter((id) => game.briefing?.ready[id] !== undefined), frozenItemCount: game.pendingContent?.items.length ?? 0 },
     });
   }
 
@@ -1278,13 +1282,18 @@ export class RoomEngine {
    * the same id for something else is refused. A start whose briefing was
    * cancelled ends there: ATTEMPT_ENDED, and nothing new starts.
    */
-  private resolveAttempt(attempt: SessionAttempt, key: string): { game: GameInstance; replay: true } | null;
+  private resolveAttempt(attempt: SessionAttempt, key: string, kind: "start", season: SessionSeason | undefined): { game: GameInstance; replay: true } | null;
   private resolveAttempt(attempt: SessionAttempt, key: string, kind: "break"): SessionOp | null;
-  private resolveAttempt(attempt: SessionAttempt, key: string, kind?: "break"): { game: GameInstance; replay: true } | SessionOp | null {
+  private resolveAttempt(attempt: SessionAttempt, key: string, kind: "start" | "break", season?: SessionSeason): { game: GameInstance; replay: true } | SessionOp | null {
     const op = this.session.ops.find((o) => o.id === attempt.id);
     if (!op) return null;
     if (op.key !== key) throw new Error("That request id was already used for something else.");
     if (kind === "break") return op;
+    // Feedback 6795825877 (1, 2): a start's content is part of its command, both
+    // normalized (absent = legacy Everyday, an op recorded before Stage 8.2
+    // too). The same id with other content is another command: refused, with
+    // nothing started or used; never resolved against the room's content now.
+    if ((op.season ?? DEFAULT_SESSION_SEASON) !== (season ?? DEFAULT_SESSION_SEASON)) throw new Error("That request id was already used for something else.");
     const game = op.gameInstanceId ? this.games.get(op.gameInstanceId) : undefined;
     if (game) return { game, replay: true };
     throw new StartRefused("ATTEMPT_ENDED", "That start was cancelled before play, so nothing new started. Choose again.", this.readiness(), { session: this.sessionView() });
@@ -1315,11 +1324,32 @@ export class RoomEngine {
       if (requested !== undefined) throw new Error("A Family Cup's content isn't chosen by season.");
       return undefined;
     }
-    if (this.kind === "solo") return requested ?? this.contentSeason;
-    if (requested !== undefined && requested !== this.contentSeason) {
-      throw new StartRefused("CONTENT_CHANGED", `This room's content changed to ${SEASON_LABEL[this.contentSeason]} since you looked, so nothing started. Check, then press Start again.`, this.readiness(), { contentSeason: this.contentSeason, session: this.sessionView() });
+    // Feedback 6795825877 (1): a Start that names no content (a page from
+    // before Stage 8.2) is a legacy Everyday press. It never silently adopts
+    // the room's current content.
+    const asked = requested ?? DEFAULT_SESSION_SEASON;
+    if (this.kind === "solo") return asked;
+    if (asked !== this.contentSeason) {
+      const message = requested === undefined
+        ? `This room now deals ${SEASON_LABEL[this.contentSeason]} content and this page is out of date, so nothing started. Refresh the page, check, then press Start again.`
+        : `This room's content changed to ${SEASON_LABEL[this.contentSeason]} since you looked, so nothing started. Check, then press Start again.`;
+      throw new StartRefused("CONTENT_CHANGED", message, this.readiness(), { contentSeason: this.contentSeason, session: this.sessionView() });
     }
-    return this.contentSeason;
+    return asked;
+  }
+
+  /**
+   * Feedback 6795825877 (2): a game this press would return as "already
+   * started" (a second host's press, Play again already pressed, the lineup's
+   * item already started) must have been started with the same content.
+   * Otherwise the press is a different command: CONTENT_CHANGED, nothing
+   * started, nothing used. A game from before Stage 8.2 counts as Everyday.
+   */
+  private assertSameContent(game: GameInstance, requested: SessionSeason | undefined, readiness: Readiness): void {
+    const bound = game.season ?? DEFAULT_SESSION_SEASON;
+    if (bound !== (requested ?? DEFAULT_SESSION_SEASON)) {
+      throw new StartRefused("CONTENT_CHANGED", `That game already started with ${SEASON_LABEL[bound]} content, not what this press asked for, so nothing new started. Check the room, then choose again.`, readiness, { contentSeason: this.contentSeason, session: this.sessionView() });
+    }
   }
 
   /** Stage 7.2: remember a request that took effect; the oldest go first (a forgotten one is stale by its revision). */
@@ -1472,13 +1502,17 @@ export class RoomEngine {
     if (this.kind !== "casual") throw new StartRefused("NOT_A_CASUAL_ROOM", "Play again is for casual rooms.", readiness);
     const key = `rematch:${sourceGameInstanceId}`;
     if (opts.attempt) {
-      const seen = this.resolveAttempt(opts.attempt, key);
+      const seen = this.resolveAttempt(opts.attempt, key, "start", opts.season);
       if (seen) return seen;
     }
     const source = this.games.get(sourceGameInstanceId);
     if (!source || source.status !== "finished") throw new Error("Only a finished game can be played again.");
     const already = [...this.games.values()].find((g) => g.rematchOf === source.id);
-    if (already) return { game: already, replay: true };
+    if (already) {
+      // A second press for the same Play again returns it only if it asked for the same content.
+      this.assertSameContent(already, opts.season, readiness);
+      return { game: already, replay: true };
+    }
     if (opts.attempt) this.assertSessionRevision(opts.attempt, readiness);
     const latest = this.latestGame();
     if (latest && latest.id !== source.id) {
@@ -1499,7 +1533,7 @@ export class RoomEngine {
     }
     const started = this.startGame(actorId, source.gameId, { official: false, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}), ...(opts.season ? { season: opts.season } : {}) });
     started.rematchOf = source.id;
-    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id });
+    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id, ...(started.season ? { season: started.season } : {}) });
     return { game: started, replay: false };
   }
 
@@ -1532,7 +1566,7 @@ export class RoomEngine {
     if (this.kind !== "casual") throw new StartRefused("NOT_A_CASUAL_ROOM", "Quick Party is for casual rooms.", readiness);
     const key = `next:${opts.revision}:${opts.index}:${gameId}`;
     if (opts.attempt) {
-      const seen = this.resolveAttempt(opts.attempt, key);
+      const seen = this.resolveAttempt(opts.attempt, key, "start", opts.season);
       if (seen) return seen;
     }
     const p = this.party;
@@ -1540,7 +1574,12 @@ export class RoomEngine {
     if (!p || p.revision !== opts.revision) throw conflict("The lineup changed somewhere else. Here is the latest.");
     const item = p.items[opts.index];
     if (!item || item.gameId !== gameId) throw conflict("That isn't a game in this lineup.");
-    if (this.partyItemStarted(item)) return { game: this.games.get(item.gameInstanceId!)!, replay: true };
+    if (this.partyItemStarted(item)) {
+      // Another press for an item already started returns it only if it asked for the same content.
+      const game = this.games.get(item.gameInstanceId!)!;
+      this.assertSameContent(game, opts.season, readiness);
+      return { game, replay: true };
+    }
     this.reconcilePartyStarts();
     if (opts.attempt) this.assertSessionRevision(opts.attempt, readiness);
     if (opts.index !== this.partyNextIndex()) throw conflict("That isn't the lineup's next game.");
@@ -1561,7 +1600,7 @@ export class RoomEngine {
     }
     const started = this.startGame(actorId, gameId, { official: false, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}), ...(opts.season ? { season: opts.season } : {}) });
     item.gameInstanceId = started.id;
-    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id });
+    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id, ...(started.season ? { season: started.season } : {}) });
     return { game: started, replay: false };
   }
 
@@ -2547,6 +2586,18 @@ export class RoomEngine {
     };
   }
 
+  /** The latest briefing that ended without play in the last 10 minutes: which game, and why (no item ids, no answers). */
+  private lastBriefingCancel(now: number): { gameInstanceId: string; reason: string; contentWhy?: string } | null {
+    for (let i = this.ledger.length - 1; i >= 0; i--) {
+      const ev = this.ledger[i]!;
+      if (now - ev.createdAt > 10 * 60_000) return null;
+      if (ev.type !== "briefing-cancelled" || !ev.gameInstanceId) continue;
+      const d = (ev.detail ?? {}) as { reason?: unknown; contentWhy?: unknown };
+      return { gameInstanceId: ev.gameInstanceId, reason: String(d.reason ?? ""), ...(typeof d.contentWhy === "string" ? { contentWhy: d.contentWhy } : {}) };
+    }
+    return null;
+  }
+
   /** D3: a timing-v2 game says so after its briefing too (clients skip the old rules overlay). */
   private timingFacts(g: GameInstance): Record<string, unknown> {
     return g.briefing ? { timingVersion: 2, playStartedAt: g.playStartedAt } : {};
@@ -3161,6 +3212,9 @@ export class RoomEngine {
       ...(this.kind === "casual" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
       // Stage 8.2: what this solo or casual session deals (public; never a device's look).
       ...(this.kind !== "cup" ? { contentSeason: this.contentSeason } : {}),
+      // Stage 8.2 (feedback 6795825877, 4): why the latest briefing ended without
+      // play, so every screen can say it plainly (public facts only).
+      ...(((c) => (c ? { briefingCancelled: c } : {}))(this.lastBriefingCancel(now))),
       players: publicPlayers,
       games: publicGames,
       readiness: this.readiness(now),

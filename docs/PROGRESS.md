@@ -1948,7 +1948,18 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Unit:** 1,359 tests, 35 of them new; eight mutations each caught.
 - **Browser:** `check-themes-seasonal` 125 checks, and 26 regression drivers with 0 failures (`docs/evidence/stage82-local/`).
 
-**Gates:** to be run on the final candidate, one after the other (§7.3).
+**Spec feedback 6795825877** (ChatGPT, 12:28 UTC; it reached this session at 13:25, after the first candidate `d4e06c3`): applied (spec §3.1, §3.4, §3.5, §3.7, D-S82-07).
+- **A Start without content** is a legacy Everyday press.
+- **Every press's content is part of its identity** on every path.
+- **The game on screen** drives Match the game and its labels ("This game" / "Next game").
+- **Solo:** Play again repeats its round's content, and a pending press is resent unchanged.
+- **Migration by room kind,** with restart fixtures.
+- **Stored choices** fall back safely.
+- **Tests:** 15 more unit tests (1,374 in all); the driver now has 139 checks (two tabs, and active versus next); 18 regression drivers rerun with 0 failures.
+
+**Gates:**
+- **`d4e06c3`** (before the feedback): fast PASSED (`20261111-132206-d4e06c34-24970`); full stopped by me about a minute in when the feedback arrived, self-recorded CANCELLED (`20261111-132514-d4e06c34-28633`). Not a verdict on the final candidate.
+- **The final candidate:** see §7.3.
 
 **External blockers:** none. Real phones and WebKit are not available here (checklist I26, I27).
 

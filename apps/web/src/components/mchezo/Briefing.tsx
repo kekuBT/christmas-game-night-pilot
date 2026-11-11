@@ -164,7 +164,7 @@ export function BriefingScreen(props: CommonProps & {
       <div className="mz-topbar">
         <span className={`mz-brief__mode mz-brief__mode--${game.official ? "official" : "practice"}`} data-testid="briefing-mode">{game.official ? "Official · counts toward the Cup" : casual ? "Casual · just for fun" : "Practice · no Cup points"}</span>
         {/* Stage 8.2 (§3.7): the content this game was frozen with. */}
-        {game.season && <ContentSeasonLabel season={game.season} testId="briefing-content" />}
+        {game.season && <ContentSeasonLabel season={game.season} prefix="This game: " testId="briefing-content" />}
       </div>
       <h1 className="mz-h1">{title}</h1>
       {clock.warning && <Warning cancelInMs={clock.cancelInMs} />}
@@ -247,7 +247,7 @@ export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () 
   return (
     <main className="mz-screen mz-brief mz-brief--tv" style={{ maxWidth: 1200 }} aria-label={`${title}: rules on the TV`} data-testid="tv-briefing" data-game-id={game.id}>
       <div className="mz-topbar">
-        <span className="mz-kicker">{game.official ? "Official" : casual ? "Casual" : "Practice"}{game.season ? ` · ${game.season === "christmas" ? "Christmas" : "Everyday"} content` : ""} · {props.joinCode ?? ""}</span>
+        <span className="mz-kicker">{game.official ? "Official" : casual ? "Casual" : "Practice"}{game.season ? ` · this game: ${game.season === "christmas" ? "Christmas" : "Everyday"} content` : ""} · {props.joinCode ?? ""}</span>
         <button type="button" className="mz-chip-btn" onClick={props.onBack}>{props.backLabel}</button>
       </div>
       <h1 className="mz-h1">{title}: get ready</h1>

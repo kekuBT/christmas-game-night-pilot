@@ -1,0 +1,16 @@
+PASS first time: a guest gets one line on how the night works
+PASS first time: the host doesn't (they're the one picking)
+PASS fit: everyone sees that Caption Clash needs 1 more player
+PASS guest dock: says the game needs 1 more player before Keku can start it, with the code
+PASS fit: Math Mayhem fits the 3 here, on a guest's phone
+PASS guest dock: waiting for Keku to start Math Mayhem, Practice
+PASS after: the last game's card, with the winner, on every phone
+PASS after: Amina's own place and points, from the recorded scores — You came 2nd of 3 · 720 points.
+PASS after: Baraka's own place
+PASS after: the first-time line is gone once a game has finished
+PASS next: guests see the host's next pick
+PASS next: no game starts by itself — 1 games
+PASS reload: Amina's lobby still has the last game and the next pick
+PASS start: every phone moves to the next briefing
+GAME NIGHT FLOW ALL PASSED
+exit 0

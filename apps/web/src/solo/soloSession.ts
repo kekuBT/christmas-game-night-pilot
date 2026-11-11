@@ -355,9 +355,12 @@ export class SoloSession {
       // Try again, which makes a new press. A press that got no answer at all
       // is sent again unchanged (here, and by the next Start of this game).
       const roomId = this.seat!.roomId;
-      // Stage 8.2: the same press is the same game with the same content; another content is a new press.
-      const pending = this.pendingStart?.roomId === roomId && this.pendingStart.gameId === gameId && this.pendingStart.season === season ? this.pendingStart : null;
+      // Stage 8.2 (feedback 6795825877, 3): a press that got no answer is sent
+      // again unchanged, its content included: the remembered choice (which
+      // another tab may have changed since) is a default for a NEW press only.
+      const pending = this.pendingStart?.roomId === roomId && this.pendingStart.gameId === gameId ? this.pendingStart : null;
       const attempt = pending?.attempt ?? { id: uuidV4(), sessionRevision: proj?.session?.revision ?? 0 };
+      season = pending?.season ?? season;
       this.pendingStart = { roomId, gameId, season, attempt };
       let gid: string | undefined;
       // Every send of this press fits in the first request's allowance (and

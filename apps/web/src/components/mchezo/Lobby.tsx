@@ -192,7 +192,7 @@ export function RoomLobby(p: RoomLobbyProps) {
         {p.isHost ? (
           <>
             <Keycap block disabled={!canStart || !p.onStart || !!p.startBlocked} onClick={p.onStart} data-testid={p.startTestId}>{p.startBlocked ? p.startBlocked : canStart ? (p.startLabel ?? `Start ${p.upNext?.title ?? "the game"}${p.mode && p.mode !== "casual" ? ` · ${p.mode === "official" ? "Official" : "Practice"}` : ""}`) : `Waiting for players (${connected}/${p.minPlayers})`}</Keycap>
-            {p.mode === "casual" && <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">Casual game: just for fun, no Cup.{p.content ? ` ${SEASON_LABEL[p.content.season]} content.` : ""}</p>}
+            {p.mode === "casual" && <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">Casual game: just for fun, no Cup.{p.content ? ` Next game: ${SEASON_LABEL[p.content.season]} content.` : ""}</p>}
             {p.mode && p.mode !== "casual" && (
               // S3-HOME-02: the mode choice can be below the fold; the dock says what Start will do and links to it.
               <p className="mz-dock__note mz-dock__mode" data-testid="dock-mode">

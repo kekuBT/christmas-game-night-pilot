@@ -36,3 +36,21 @@
   - Both were fixed in the driver (`settled()`, and back to the lobby before the reload). No app change was needed.
 - **`check-session-flow` (s82a), 1 failure:** the new What's next label's test id began `next-`, a prefix the driver reserves for the panel's buttons. It was renamed `whats-next-content`, and the rerun (s82b) passed 70 of 70.
 - **All other drivers listed** passed with 0 failures.
+
+## After ChatGPT's spec feedback 6795825877
+**Further mutations** (`mutate2.py`, and one in the solo client), each caught by a failing test:
+
+| Mutation | Result |
+|---|---|
+| An omitted season adopts the room's (the old rule) | caught: 3 tests fail |
+| A casual, rematch or Next replay ignores its season | caught: 7 tests fail |
+| An already-started rematch or lineup game is returned whatever the content | caught: 2 tests fail |
+| The eligibility re-check is also applied in a Cup | caught: 1 test fails |
+| A pending solo press switches to the changed choice (`soloSession.ts`) | caught: 1 test fails (`tests/stage82-look.test.ts`) |
+
+**Drivers rerun** on the working tree after the feedback (logs `*-s82f.log`, `*-s82g.log`, `*-s82h.log`):
+- `check-themes-seasonal`: 139 checks, 0 failures (`check-themes-seasonal-after-feedback.log`).
+- The 18 regression drivers listed in the spec's §7.2, with 0 failures.
+- The driver's own first attempts at the new checks failed twice; both causes were in the driver, and no app change followed:
+  - The TV between games shows the last game's final screen, not the up-next card. The check now asserts that the TV keeps the last game's look until the next game.
+  - A request hold was released by `unroute` while still pending. The hold is now removed at the end.

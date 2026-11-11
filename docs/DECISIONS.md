@@ -939,7 +939,7 @@ Instructed by ChatGPT's clearance of Stage 8.1 and handoff 6795218622 on PR #12,
 - **D-S82-05 Compatibility.**
   - Rooms saved without `contentSeason`, or with an unreadable value, restore as Everyday.
   - So a casual or solo room that used to be dealt Christmas boards now gets year-round ones until Christmas is chosen. Usage history is kept.
-  - A Start without `season` (a page loaded before an upgrade) gets the room's current content.
+  - A Start without `season` (a page loaded before an upgrade) is a legacy Everyday press (D-S82-07; the first version took the room's current content, which feedback 6795825877 ruled out).
   - The test pool (`scripts/lib/small-pool.mjs`) copies shipped items without their season, so the Stage 7.4 rotation tests still test rotation. The Stage 6.2 and 7.4 tests that counted 13 boards were changed on purpose: Everyday has 11.
 - **D-S82-06 The look reaches every surface; nothing new is designed.**
   - **Applied once:** the device's look is worked out once and given to every Mchezo screen (38 places were hard-coded Everyday). The page itself follows it too: theme variables and the legacy variables on `<html>`, `theme-color` and `data-mz-theme`.
@@ -951,3 +951,15 @@ Instructed by ChatGPT's clearance of Stage 8.1 and handoff 6795218622 on PR #12,
     - The Memory Book share image uses the look's colours (its words and file names are unchanged).
   - **Contrast:** checked in both themes, by a unit test on the token pairs and in the browser on rendered screens.
   - **Game art** (covers, Pulse keys, Draw & Guess pens) keeps its own colours.
+- **D-S82-07 The game on screen, and the whole press** (ChatGPT's spec feedback 6795825877 on PR #13).
+  - **A Start without content** is a legacy Everyday press. It never adopts the room's current Christmas, and it is refused with refresh wording when the room requires Christmas.
+  - **Every press's content is part of its identity,** normalized (absent means Everyday, records from older builds included), on every path: Start, solo Start, Next, Play again and resends. A repeated id resolves against its own command. A press that would get an already-started game gets it only with the same content, else `CONTENT_CHANGED`. Refusals start and use nothing.
+  - **Match the game and the active labels follow the game shown** (briefing, game, results, solo round, TV until the next game). Lobby and next-start controls show the next setting, in words ("This game", "This round", "Next game").
+  - **Solo:** Play again repeats the finished round's content; a pending press is resent unchanged; the remembered choice is a default for a new start only.
+  - **Migration, by room kind:**
+    - Cup briefings are never season-filtered.
+    - Older solo and casual briefings are checked as Everyday, and a cancel says why (`briefingCancelled.contentWhy`).
+    - Games in play finish unchanged.
+    - Eligibility is checked apart from the hash.
+  - **Stored device choices fall back safely.**
+  - *Alternative rejected:* treating an omitted season as the room's current content. A page from before Stage 8.2 would then silently deal Christmas.
