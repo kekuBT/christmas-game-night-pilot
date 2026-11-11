@@ -44,9 +44,15 @@ function stable(v: unknown): string {
   return JSON.stringify(v);
 }
 
+/**
+ * The content hash an approval is bound to: what players see and answer.
+ * Left out: `review` (the approval itself) and, since Stage 8.2, `season`
+ * (where an item may be dealt, which Cups never read), so tagging an item
+ * seasonal never voids its approval or a briefing frozen before the tag.
+ */
 export function itemHash(gameId: string, item: AnyItem | Record<string, unknown>): string {
-  const { review: _review, ...rest } = item as Record<string, unknown>;
-  void _review;
+  const { review: _review, season: _season, ...rest } = item as Record<string, unknown>;
+  void _review; void _season;
   return createHash("sha256").update(`${gameId}\n${stable(rest)}`).digest("hex").slice(0, 16);
 }
 

@@ -35,6 +35,7 @@ import { basename, dirname, join } from "node:path";
 import { z } from "zod";
 import { GAME_REGISTRY } from "../games/registry.js";
 import { hashToken } from "../shared/protocol.js";
+import { SESSION_SEASONS } from "../shared/season.js";
 
 export const SNAPSHOT_FORMAT = 2;
 const TMP_MARKER = ".tmp-";
@@ -122,6 +123,8 @@ const GameRecord = z.object({
     mode: z.enum(["official", "practice"]),
     items: z.array(z.object({ itemId: z.string().min(1), packId: z.string().min(1), packVersion: z.string().min(1), hash: z.string().min(1) }).strict()),
     reasons: z.array(z.string()),
+    // Stage 8.2: the content a solo or casual briefing was frozen with (optional: older briefings have none).
+    season: z.enum(SESSION_SEASONS).optional(),
   }).strict().optional(),
 }).passthrough().superRefine((g, ctx) => {
   if (g.status === "briefing" && !g.briefing) ctx.addIssue({ code: "custom", message: `game ${g.id} is in its briefing but has no briefing record` });

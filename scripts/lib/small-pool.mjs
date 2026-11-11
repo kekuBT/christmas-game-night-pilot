@@ -7,12 +7,16 @@
 //   Trivia: 10 practice-only questions, 14 approved official ones, 1 rejected.
 // Written to a directory that a server loads with MCHEZO_CONTENT_DIR (testing
 // only) or a test loads with loadContent(dir). Never part of the shipped library.
+// Stage 8.2: the copies are year-round (a shipped item's season tag is not
+// copied: board 2 is con-s4-03, a Christmas board), so this pool tests
+// rotation in any room's content; tests/stage82-seasonal.test.ts tests seasons.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SHIPPED = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "content", "packs");
 const read = (file) => JSON.parse(readFileSync(join(SHIPPED, file), "utf8"));
+const yearRound = ({ season: _season, ...item }) => item;
 const header = (pack, packId, title) => ({ schemaVersion: 1, packId, gameId: pack.gameId, version: "1.0.0", title, language: "en" });
 
 export const SMALL_CONNECTIONS = [
@@ -28,11 +32,11 @@ export const SMALL_CONNECTIONS_USABLE = SMALL_CONNECTIONS.filter((b) => b.status
 export function writeSmallPool(dir) {
   mkdirSync(join(dir, "packs"), { recursive: true });
   const cx = read("word-connections-s4.json");
-  const boards = SMALL_CONNECTIONS.map((b) => ({ ...cx.items[b.from], id: b.id, eligibility: b.eligibility, review: { status: b.status, notes: "Stage 7.4 test pool (a copy of a shipped board)." } }));
+  const boards = SMALL_CONNECTIONS.map((b) => ({ ...yearRound(cx.items[b.from]), id: b.id, eligibility: b.eligibility, review: { status: b.status, notes: "Stage 7.4 test pool (a copy of a shipped board)." } }));
   writeFileSync(join(dir, "packs", "word-connections-small.json"), JSON.stringify({ ...header(cx, "word-connections-small", "Stage 7.4 test pool: Word Connections"), items: boards }, null, 2));
   const tv = read("trivia-s4-general.json");
   const questions = tv.items.slice(0, 25).map((q, i) => ({
-    ...q,
+    ...yearRound(q),
     id: `trv-t-${String(i + 1).padStart(2, "0")}`,
     eligibility: i < 10 ? "practice" : "official",
     review: { status: i === 24 ? "rejected" : i < 10 ? "provisional" : "legacy", notes: "Stage 7.4 test pool (a copy of a shipped question)." },

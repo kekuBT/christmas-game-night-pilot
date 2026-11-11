@@ -8,6 +8,7 @@
   "items": [
     {
       "id": "chr-legacy-1",
+      "season": "christmas",
       "difficulty": 1,
       "category": "Christmas",
       "language": "en",
@@ -26,6 +27,7 @@
     },
     {
       "id": "chr-legacy-2",
+      "season": "christmas",
       "difficulty": 1,
       "category": "Christmas",
       "language": "en",
@@ -44,6 +46,7 @@
     },
     {
       "id": "chr-legacy-3",
+      "season": "christmas",
       "difficulty": 1,
       "category": "Christmas",
       "language": "en",
@@ -62,6 +65,7 @@
     },
     {
       "id": "chr-legacy-4",
+      "season": "christmas",
       "difficulty": 1,
       "category": "Christmas",
       "language": "en",
@@ -80,6 +84,7 @@
     },
     {
       "id": "chr-legacy-5",
+      "season": "christmas",
       "difficulty": 1,
       "category": "Christmas",
       "language": "en",
@@ -98,6 +103,7 @@
     },
     {
       "id": "chr-legacy-6",
+      "season": "christmas",
       "difficulty": 1,
       "category": "Christmas",
       "language": "en",

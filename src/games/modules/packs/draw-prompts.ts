@@ -5,13 +5,18 @@
  * also ignores case, accents, punctuation, a leading "a/an/the" and a
  * plural "s"). Ids are stable: never reuse one for a different word.
  */
-export interface DrawPrompt { id: string; word: string; alts?: string[] }
+import type { ItemSeason } from "../../../shared/season.js";
+export interface DrawPrompt {
+  id: string; word: string; alts?: string[];
+  /** Stage 8.2: a Christmas-only prompt (dealt in Christmas sessions and Cups, never in Everyday ones); absent = year-round. */
+  season?: ItemSeason;
+}
 
 export const DRAW_PROMPTS: readonly DrawPrompt[] = [
   { id: "dg-001", word: "snowman", alts: ["snow man"] },
-  { id: "dg-002", word: "reindeer" },
-  { id: "dg-003", word: "candy cane" },
-  { id: "dg-004", word: "gingerbread house" },
+  { id: "dg-002", word: "reindeer", season: "christmas" },
+  { id: "dg-003", word: "candy cane", season: "christmas" },
+  { id: "dg-004", word: "gingerbread house", season: "christmas" },
   { id: "dg-005", word: "mitten", alts: ["glove"] },
   { id: "dg-006", word: "scarf" },
   { id: "dg-007", word: "sled", alts: ["sledge", "toboggan"] },

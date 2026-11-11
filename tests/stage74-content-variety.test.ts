@@ -13,6 +13,7 @@ import { recordUsage, selectContent, type SelectionRequest, type UsageHistory } 
 import { LocalServer } from "../src/server/http.js";
 import { RoomEngine, SESSION_OPS_LIMIT, type SessionAttempt } from "../src/server/room.js";
 import { SoloSession, forgetPageSeat } from "../apps/web/src/solo/soloSession.js";
+import type { SessionSeason } from "../src/shared/season.js";
 // @ts-expect-error -- plain .mjs helper shared with the browser driver, no type declarations
 import { SMALL_CONNECTIONS_USABLE as SMALL_USABLE, writeSmallPool as writePool } from "../scripts/lib/small-pool.mjs";
 const SMALL_CONNECTIONS_USABLE = SMALL_USABLE as string[];
@@ -27,12 +28,14 @@ const OFFICIAL = ["con-t-official-a", "con-t-official-b"];
 const REJECTED = "con-t-rejected";
 
 /** Deal `n` games one after another as a room does: select, then record the use and move the sequence on. */
-function deal(lib: ContentLibrary, roomKind: SelectionRequest["roomKind"], gameId: "word-connections" | "trivia", n: number, opts: { count?: number; usage?: UsageHistory; seq?: number } = {}) {
+function deal(lib: ContentLibrary, roomKind: SelectionRequest["roomKind"], gameId: "word-connections" | "trivia", n: number, opts: { count?: number; usage?: UsageHistory; seq?: number; season?: SessionSeason } = {}) {
   const usage = opts.usage ?? {};
   let seq = opts.seq ?? 0;
   const games: string[][] = [];
+  // Stage 8.2: a solo or casual room's selection names its content (Everyday unless a test says otherwise); a Cup's never does.
+  const season = roomKind === "cup" ? {} : { season: opts.season ?? "everyday" };
   for (let i = 0; i < n; i++) {
-    const r = selectContent({ lib, gameId, count: opts.count ?? (gameId === "trivia" ? 10 : 1), mode: "practice", roomKind, cupId: "cup-s74-test", usage, seq, today: TODAY });
+    const r = selectContent({ lib, gameId, count: opts.count ?? (gameId === "trivia" ? 10 : 1), mode: "practice", roomKind, cupId: "cup-s74-test", usage, seq, today: TODAY, ...season });
     if (!r.ok) throw new Error(r.message);
     recordUsage(usage, r.items, { gameInstanceId: `game-${i}`, day: 1, mode: "practice", seq });
     seq += 1;
@@ -81,7 +84,7 @@ describe("selection: casual and solo rooms deal unused content first, then the l
   });
 
   it("deterministic: the same library, history and sequence give the same items; tie-breaking follows the seed", () => {
-    const req: SelectionRequest = { lib: small, gameId: "trivia", count: 10, mode: "practice", roomKind: "solo", cupId: "cup-det", usage: {}, seq: 5, today: TODAY };
+    const req: SelectionRequest = { lib: small, gameId: "trivia", count: 10, mode: "practice", roomKind: "solo", cupId: "cup-det", usage: {}, seq: 5, today: TODAY, season: "everyday" };
     const a = selectContent(req), b = selectContent({ ...req, usage: {} });
     expect(a.ok && b.ok && a.items.map((i) => i.item.id)).toEqual(b.ok && b.items.map((i) => i.item.id));
   });
@@ -94,7 +97,7 @@ describe("selection: casual and solo rooms deal unused content first, then the l
     lib1.byGame.set("word-connections", lib1.byGame.get("word-connections")!.filter((li) => li.item.id === PRACTICE_ONLY || li.item.id === REJECTED));
     expect(deal(lib1, "solo", "word-connections", 4).games.map((g) => g[0])).toEqual([PRACTICE_ONLY, PRACTICE_ONLY, PRACTICE_ONLY, PRACTICE_ONLY]);
     lib1.byGame.set("word-connections", lib1.byGame.get("word-connections")!.filter((li) => li.item.id === REJECTED));
-    const none = selectContent({ lib: lib1, gameId: "word-connections", count: 1, mode: "practice", roomKind: "casual", cupId: "c", usage: {}, seq: 0, today: TODAY });
+    const none = selectContent({ lib: lib1, gameId: "word-connections", count: 1, mode: "practice", roomKind: "casual", cupId: "c", usage: {}, seq: 0, today: TODAY, season: "everyday" });
     expect(none).toMatchObject({ ok: false, reason: "insufficient-content", message: "No practice content is available for this game yet." });
   });
 
@@ -419,10 +422,21 @@ describe("MCHEZO_CONTENT_DIR is for tests only (§4.6)", () => {
 });
 
 describe("the shipped library (normal and test mode)", () => {
+  // Stage 8.2 (docs/stage8/stage82.md §3.3) changed these on purpose: before
+  // it, a casual room played all 13 boards, the two Christmas ones included.
+  const CHRISTMAS_BOARDS = ["con-legacy-1", "con-s4-03"];
   for (const testApproveProvisional of [false, true]) {
-    it(`${testApproveProvisional ? "test mode (all approved)" : "normal mode"}: a casual room plays all 13 Connections boards before repeating`, () => {
+    it(`${testApproveProvisional ? "test mode (all approved)" : "normal mode"}: an Everyday casual room plays all 11 year-round Connections boards before repeating, never a Christmas one`, () => {
       const lib = loadContent(DEFAULT_CONTENT_DIR, { testApproveProvisional });
-      const seq = deal(lib, "casual", "word-connections", 14).games.map((g) => g[0]!);
+      const seq = deal(lib, "casual", "word-connections", 23).games.map((g) => g[0]!);
+      expect(new Set(seq.slice(0, 11)).size).toBe(11);
+      expect(seq[11]).toBe(seq[0]);
+      expect(seq.filter((id) => CHRISTMAS_BOARDS.includes(id))).toEqual([]);
+    });
+    it(`${testApproveProvisional ? "test mode (all approved)" : "normal mode"}: a Christmas casual room plays all 13, its two Christmas boards first`, () => {
+      const lib = loadContent(DEFAULT_CONTENT_DIR, { testApproveProvisional });
+      const seq = deal(lib, "casual", "word-connections", 14, { season: "christmas" }).games.map((g) => g[0]!);
+      expect(new Set(seq.slice(0, 2))).toEqual(new Set(CHRISTMAS_BOARDS));
       expect(new Set(seq.slice(0, 13)).size).toBe(13);
       expect(seq[13]).toBe(seq[0]);
     });

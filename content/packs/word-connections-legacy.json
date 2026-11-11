@@ -8,6 +8,7 @@
   "items": [
     {
       "id": "con-legacy-1",
+      "season": "christmas",
       "difficulty": 1,
       "category": "Christmas",
       "language": "en",

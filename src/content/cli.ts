@@ -11,6 +11,7 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { DEFAULT_CONTENT_DIR, loadContent, officialEligible, type LoadedItem } from "./registry.js";
 import { inventory, lintLibrary } from "./lint.js";
+import { seasonAuditFindings } from "./seasonAudit.js";
 import { ApprovalsSchema } from "./schema.js";
 
 const today = new Date().toISOString().slice(0, 10);
@@ -44,6 +45,10 @@ if (cmd === "check" || cmd === undefined) {
   for (const r of rows) console.log(`${r.gameId.padEnd(18)} ${String(r.total).padStart(5)} ${String(r.approved).padStart(8)} ${String(r.computed).padStart(8)} ${String(r.legacy).padStart(6)} ${String(r.provisional).padStart(11)} ${String(r.rejected).padStart(8)} | ${String(r.official).padStart(8)} ${String(r.practiceOnly).padStart(13)} ${String(r.stale).padStart(5)} | ${String(r.errors).padStart(6)} ${String(r.warnings).padStart(8)}`);
   for (const i of issues.filter((x) => x.level === "error")) console.log(`ERROR ${i.gameId} ${i.itemId} [${i.code}] ${i.message}`);
   if (args.includes("--warnings")) for (const i of issues.filter((x) => x.level === "warn")) console.log(`warn  ${i.gameId} ${i.itemId} [${i.code}] ${i.message}`);
+  // Stage 8.2: untagged items with Christmas words (an editorial net; the game reads only the season tag).
+  const seasonal = seasonAuditFindings(lib);
+  for (const f of seasonal) console.log(`warn  ${f.gameId} ${f.itemId} [season-untagged] words ${f.words.join(", ")}: tag it season "christmas", or review it and list it in src/content/seasonAudit.ts as year-round`);
+  console.log(`season audit: ${seasonal.length} untagged item(s) with Christmas words; ${[...lib.items.values()].filter((li) => li.item.season === "christmas").length} tagged Christmas`);
   const errors = lib.problems.length + issues.filter((x) => x.level === "error").length;
   console.log(errors === 0 ? "CONTENT OK" : `CONTENT ERRORS: ${errors}`);
   process.exit(errors === 0 ? 0 : 1);
