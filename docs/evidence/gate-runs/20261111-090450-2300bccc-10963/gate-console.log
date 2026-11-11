@@ -1,0 +1,110 @@
+Mchezo gate full | run 20261111-090450-2300bccc-10963
+  revision 2300bccc7c6fa598f543549b236d76ad0872b5e0 (clean tree) | fingerprint 349fd20223c5 (437 files)
+  plan     83 steps: 5 fast/build, 76 browser drivers, 2 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  36 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.03 for 3 worker(s) (measured, 30 run(s))
+  estimate this run: 22–53m (low-confidence) · the same steps one after another: about 1h 22m · longest step e2e-chromium ~8m 10s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.03 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-mobile-everyday
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s81-full/test-results/20261111-090450-2300bccc-10963
+        start typecheck-server on w1 (usually 12s)
+        start typecheck-web on w2 (usually 11s)
+        start lint on w3 (usually 16s)
+[ 1/83] PASS        11.6s  typecheck-server  w1
+        start unit-tests on w1 (usually 33s)
+[ 2/83] PASS        11.7s  typecheck-web  w2
+        start build-web on w2 (usually 6s)
+
+SIGTERM received: stopping run 20261111-090450-2300bccc-10963 and cleaning up its own processes
+[ 3/83] CANCELLED    1.5s  unit-tests  w1
+[ 4/83] CANCELLED    1.4s  build-web  w2
+[ 5/83] CANCELLED   13.1s  lint  w3
+
+CANCELLED (exit 130) | full | run 20261111-090450-2300bccc-10963
+  2 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 3 cancelled, 78 not run
+  CANCELLED lint (w3) [cancelled]
+  CANCELLED unit-tests (w1) [cancelled]
+  CANCELLED build-web (w2) [cancelled]
+  NOT RUN   browser-preflight: run cancelled
+  NOT RUN   e2e-chromium: run cancelled
+  NOT RUN   check-f5: run cancelled
+  NOT RUN   check-leaderboard: run cancelled
+  NOT RUN   check-game-night: run cancelled
+  NOT RUN   check-audit-fixes: run cancelled
+  NOT RUN   check-session-flow: run cancelled
+  NOT RUN   check-solo-shelf: run cancelled
+  NOT RUN   check-pulse-timing: run cancelled
+  NOT RUN   check-solo: run cancelled
+  NOT RUN   check-tv-lifecycle: run cancelled
+  NOT RUN   check-lifecycle: run cancelled
+  NOT RUN   check-mchezo: run cancelled
+  NOT RUN   check-briefing: run cancelled
+  NOT RUN   check-tv-reveal: run cancelled
+  NOT RUN   check-caption: run cancelled
+  NOT RUN   check-content-variety: run cancelled
+  NOT RUN   check-draw-guess: run cancelled
+  NOT RUN   check-mobile-everyday: run cancelled
+  NOT RUN   check-pattern-pulse: run cancelled
+  NOT RUN   check-stage2: run cancelled
+  NOT RUN   check-host-handover: run cancelled
+  NOT RUN   check-majority-rules: run cancelled
+  NOT RUN   check-math: run cancelled
+  NOT RUN   check-spectator: run cancelled
+  NOT RUN   check-connections: run cancelled
+  NOT RUN   check-casual: run cancelled
+  NOT RUN   check-draw-sync: run cancelled
+  NOT RUN   check-math-network: run cancelled
+  NOT RUN   check-f4: run cancelled
+  NOT RUN   check-results: run cancelled
+  NOT RUN   check-reveal: run cancelled
+  NOT RUN   check-input-isolation: run cancelled
+  NOT RUN   check-quick-party: run cancelled
+  NOT RUN   check-multiplayer: run cancelled
+  NOT RUN   check-tv-spectator: run cancelled
+  NOT RUN   check-tv-outage: run cancelled
+  NOT RUN   check-caption-4p: run cancelled
+  NOT RUN   check-geography: run cancelled
+  NOT RUN   check-answer-reveal: run cancelled
+  NOT RUN   check-action-ack: run cancelled
+  NOT RUN   check-math-timing: run cancelled
+  NOT RUN   check-ten-players: run cancelled
+  NOT RUN   check-library-nav: run cancelled
+  NOT RUN   check-contrast: run cancelled
+  NOT RUN   check-mobile: run cancelled
+  NOT RUN   check-m6: run cancelled
+  NOT RUN   check-poll-body-stall: run cancelled
+  NOT RUN   check-tv-entry: run cancelled
+  NOT RUN   check-send-failures: run cancelled
+  NOT RUN   check-answer-race: run cancelled
+  NOT RUN   check-lobby-mode: run cancelled
+  NOT RUN   check-abstain: run cancelled
+  NOT RUN   check-year: run cancelled
+  NOT RUN   check-readiness: run cancelled
+  NOT RUN   check-stage4-details: run cancelled
+  NOT RUN   check-lobby-fixes: run cancelled
+  NOT RUN   check-viewports: run cancelled
+  NOT RUN   check-cup-memory: run cancelled
+  NOT RUN   check-tv-show: run cancelled
+  NOT RUN   check-recovery: run cancelled
+  NOT RUN   check-game-night-flow: run cancelled
+  NOT RUN   check-progress: run cancelled
+  NOT RUN   check-official-practice: run cancelled
+  NOT RUN   check-answer-helper: run cancelled
+  NOT RUN   check-sessions: run cancelled
+  NOT RUN   check-closest: run cancelled
+  NOT RUN   check-tv-dashboard: run cancelled
+  NOT RUN   check-ws-reconnect: run cancelled
+  NOT RUN   check-library: run cancelled
+  NOT RUN   check-history-links: run cancelled
+  NOT RUN   check-reduced-motion: run cancelled
+  NOT RUN   check-shuffle: run cancelled
+  NOT RUN   check-errors: run cancelled
+  NOT RUN   check-studio: run cancelled
+  NOT RUN   check-double-start: run cancelled
+  NOT RUN   check-a11y-surfaces: run cancelled
+  NOT RUN   check-restart: run cancelled
+  timing   wall 14s · step time 39s (sum) · 3 workers, 97% busy · 2.79× the same steps run one after another
+           longest  lint 13s, typecheck-web 12s, typecheck-server 12s · the longest step is 94% of the wall time
+           machine  CPU mean 85%, peak 97% · memory available ≥ 14041 MB · load peak 3.64
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s81-full/test-results/20261111-090450-2300bccc-10963/report.json

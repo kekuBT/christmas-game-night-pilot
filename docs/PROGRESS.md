@@ -1897,11 +1897,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **Gates:**
 - **`2300bcc`** (before the feedback): fast PASSED (`20261111-090358-2300bccc-8008`); full stopped by me a minute in when the feedback arrived, self-recorded CANCELLED (`20261111-090450-2300bccc-10963`). Not a verdict on the checkpoint.
-- **The checkpoint:** fast then full, one after the other, on the next commit.
+- **The checkpoint, `de913bf`** (fresh clone, clean tree, one after the other):
+  - fast `20261111-092723-de913bf1-17062`: **PASSED** 5/5, 1,322 unit tests, 47 s;
+  - full `20261111-092815-de913bf1-20032`: **PASSED** 83/83, `check-mobile-everyday` 130/130, in 30 min 02 s.
+  - No failed gate runs. Raw evidence for all four runs is in `docs/evidence/gate-runs/<run>/`.
 
 **External blockers:** none. WebKit and real devices are not available here (checklist I22–I24).
 
-**Next task:** the gates, then a completed report on PR #12; ChatGPT's review and private live-site audit follow.
+**Next task:** ChatGPT's review of PR #12 and its private live-site audit. The roadmap's next item (themes and seasonal-content separation) waits for its own brief.
 
 **Risk:**
 - **Emulation only:** no real phones, no WebKit; landscape on a real phone (browser bars, the notch) is unverified.

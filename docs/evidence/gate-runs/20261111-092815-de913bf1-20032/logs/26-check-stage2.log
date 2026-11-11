@@ -1,0 +1,84 @@
+$ node scripts/check-stage2.mjs http://localhost:38057
+# timeout 600s | worker w2 | server http://localhost:38057 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s81b-full/test-results/20261111-092815-de913bf1-20032/server-data/w2)
+
+[+1.4s] PASS A. Home shows the covers of all 14 games (featured + shelf) — guess-the-year,impostor,caption-clash,trivia,word-connections,who-said-that,closest-wins,category-sprint,charades,geography,math-mayhem,majority-rules,pattern-pulse,draw-guess
+[+1.4s] PASS A. the featured game is labelled as today's feature, not a recommendation
+[+1.4s] PASS A. Home invents nothing (no rankings, recommendations or recent activity)
+[+1.4s] PASS A. no Rejoin card without a seat
+[+1.7s] PASS A. 375x667: Join and Host are on screen in the dock
+[+2.0s] PASS A. 390x844: Join and Host are on screen in the dock
+[+2.3s] PASS A. 430x932: Join and Host are on screen in the dock
+[+2.5s] PASS A. a cover opens its details as a sheet with its own address
+[+2.5s] PASS A. the details separate the estimate from the real time limit
+[+3.1s] PASS A. Back closes the sheet and stays Home
+[+3.2s] PASS A. the library shows a cover on every card — 14
+[+3.2s] PASS A. practice-only games are marked in the library
+[+3.2s] PASS A. the library outside a room offers no 'Set as up next'
+[+3.6s] PASS A. in-app Back from the library returns Home
+[+4.3s] PASS B. A-04: Host is not possible without a name
+[+4.3s] PASS B. A-04: spaces are not a name
+[+4.9s] PASS B. the host's room shows their name, never 'Player 1'
+[+4.9s] PASS B. hosting replaced the Host screen: the lobby is /room
+[+5.1s] PASS B. a QR/invite link fills in the room code — DV9KK4
+[+6.9s] PASS C. 375x667, 2 players: Start in the dock, nothing covered, no sideways scroll, 44px targets
+[+7.0s] PASS C. 375x667: the end of the lobby scrolls clear of the dock — {"ok":true,"last":454,"dock":468}
+[+7.5s] PASS C. 390x844, 2 players: Start in the dock, nothing covered, no sideways scroll, 44px targets
+[+7.6s] PASS C. 390x844: the end of the lobby scrolls clear of the dock — {"ok":true,"last":627,"dock":641}
+[+8.0s] PASS C. 430x932, 2 players: Start in the dock, nothing covered, no sideways scroll, 44px targets
+[+8.2s] PASS C. 430x932: the end of the lobby scrolls clear of the dock — {"ok":true,"last":715,"dock":729}
+[+8.6s] PASS C. 768x1024, 2 players: Start in the dock, nothing covered, no sideways scroll, 44px targets
+[+8.7s] PASS C. 768x1024: the end of the lobby scrolls clear of the dock — {"ok":true,"last":834,"dock":848}
+[+9.2s] PASS C. 1440x900, 2 players: Start in the dock, nothing covered, no sideways scroll, 44px targets
+[+9.3s] PASS C. 1440x900: the end of the lobby scrolls clear of the dock — {"ok":true,"last":710,"dock":724}
+[+9.4s] PASS C. the up-next card shows the game's cover
+[+9.4s] PASS C. guests get no Change, mode or Start
+[+9.4s] PASS C. guests' dock says who will start
+[+12.5s] PASS C. 375x667, 10 players with long names: layout holds
+[+12.6s] PASS C. 375x667, 10 players: the end of the lobby scrolls clear of the dock — {"ok":true,"last":454,"dock":468}
+[+13.1s] PASS C. 390x844, 10 players with long names: layout holds
+[+13.2s] PASS C. 390x844, 10 players: the end of the lobby scrolls clear of the dock — {"ok":true,"last":627,"dock":641}
+[+13.7s] PASS C. 430x932, 10 players with long names: layout holds
+[+13.8s] PASS C. 430x932, 10 players: the end of the lobby scrolls clear of the dock — {"ok":true,"last":715,"dock":729}
+[+14.2s] PASS C. 768x1024, 10 players with long names: layout holds
+[+14.4s] PASS C. 768x1024, 10 players: the end of the lobby scrolls clear of the dock — {"ok":true,"last":834,"dock":848}
+[+14.8s] PASS C. 1440x900, 10 players with long names: layout holds
+[+14.9s] PASS C. 1440x900, 10 players: the end of the lobby scrolls clear of the dock — {"ok":true,"last":710,"dock":724}
+[+15.0s] PASS C. a full room says so — Everyone’s here
+[+15.0s] 10 here · room is full
+[+15.1s] PASS D. Invite opens as a sheet with its own address
+[+15.6s] PASS D. Back closes the Invite sheet and stays in the lobby
+[+15.7s] PASS D. Choose game lists all 14 games with covers
+[+16.3s] PASS D. picking a game closes the sheet, keeps the room and sets up next
+[+16.4s] PASS D. the room menu has its own address
+[+17.0s] PASS D. Family Cup opens at /room/cup
+[+17.1s] PASS D. reloading /room/cup shows the Cup again
+[+17.2s] PASS D. Back from the Cup returns to the lobby (not to the menu)
+[+19.3s] PASS D. Cup → TV is one step: /room/tv
+[+19.3s] PASS D. 'Back to phone view' from the TV (after the Cup) returns to the lobby
+[+21.0s] PASS D. browser Back from the TV (after the Cup) returns to the lobby too
+[+21.0s] PASS D. the host's pick survived the trip and the reload
+[+22.6s] PASS D. 'Make this up next' from the library's details returns to the lobby in one step
+[+22.6s] PASS D. Back from the lobby goes Home and offers Rejoin with the room code
+[+22.6s] PASS D. ...without leaving the room (same seat on this tab)
+[+23.3s] PASS D. Forward returns to the lobby
+[+24.2s] PASS D. Rejoin opens the room again
+[+24.4s] PASS D. a QR link to my own room opens my room
+[+25.9s] PASS D. a QR link to another room explains instead of taking a second seat
+[+26.0s] PASS D. no duplicate seat after Back, Forward, reload and QR links (this room) — 10 vs 10
+[+26.0s] PASS D. ...and none in the other room
+[+26.3s] PASS D. a room address without a seat lands Home
+[+26.3s] PASS D. unknown addresses are not served the app (404)
+[+26.4s] PASS E. the room menu is a named modal dialog and takes focus — {"modal":"true","name":"Room menu","focused":true}
+[+26.6s] PASS E. Tab and Shift+Tab stay inside the open sheet — 0 of 40 presses left it
+[+26.6s] PASS E. Escape closes it and the address follows
+[+26.6s] PASS E. focus returns to the button that opened it
+[+26.6s] PASS E. icon-led buttons have spoken names — ["Room menu","Share room code DV9KK4"]
+[+26.6s] PASS E. Start says what it starts, and in which mode — Start Geography Challenge · Official
+[+26.9s] PASS E. reduced motion: screens never slide in — none
+[+28.5s] PASS F. Invite shows the room code
+[+58.5s] PASS F. the journey reaches results
+[+58.9s] PASS F. ...and returns to the lobby at /room
+[+58.9s] STAGE 2 ALL PASSED
+[+58.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":8,"pages":8,"peakOpenPages":5}
+
+# PASS (exit 0) in 58.9s | cpu 5.7s, peak memory 260 MB

@@ -118,5 +118,13 @@ No control smaller than 44 px was found on the solo journey at these sizes. The 
 
 ### 7.3 Gates
 - **An earlier candidate, `2300bcc`** (before the spec feedback was applied): fast **PASSED** (`20261111-090358-2300bccc-8008`, 5/5); the full gate was **stopped by me** a minute in, when the spec feedback arrived, and recorded its own verdict **CANCELLED** (exit 130, `20261111-090450-2300bccc-10963`: 2 passed, 3 cancelled, 78 not run). Neither is a verdict on the checkpoint.
-- **The checkpoint:** fast, then full, one after the other, on the commit after this one (§7.4 when done).
+- **The checkpoint, `de913bf15ade107ea89eadc428478cf02d90421c`:** one after the other (the full gate started when the fast one had finished), each in its own fresh clone with a clean tree (`dirty: []`), the same source fingerprint (`ea63d49a…`, 437 files).
+
+| Run | Gate | Verdict | Measured |
+|---|---|---|---|
+| `20261111-092723-de913bf1-17062` | fast | **PASSED**, exit 0, 5/5: typecheck ×2, lint, 1,322 unit tests, build | wall 47 s |
+| `20261111-092815-de913bf1-20032` | full | **PASSED**, exit 0, 83/83, 3 workers: `check-mobile-everyday` 130, `check-solo` 80, `check-solo-shelf` 58, `check-pattern-pulse` 54, `check-pulse-timing` 41, `check-briefing` 43, `check-session-flow` 70, `check-lifecycle` 37, `check-math` 28, `check-mobile` 50 | wall 30 min 02 s |
+
+- **The estimate posted before the runs** (PR #12's description): about 1 minute, then 29–35 minutes. They ran from 09:27:22 to 09:58:20 UTC.
+- **No failed gate runs** on this checkpoint. Raw evidence for all four runs (these two and the two on `2300bcc`): `docs/evidence/gate-runs/<run>/`.
 
