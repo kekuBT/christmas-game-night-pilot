@@ -1248,7 +1248,7 @@ export function App() {
   if (roomId && playerId && !proj) {
     return (
       <MchezoProvider theme={theme} {...motion}>
-        <main className="mz-screen" aria-label="Rejoining your room" data-testid="rejoining">
+        <main className="mz-screen mz-rejoining" aria-label="Rejoining your room" data-testid="rejoining">
           <span className="mz-kicker" role="status" aria-live="polite">Rejoining your room…</span>
           <h1 className="mz-h1">One moment</h1>
           <p className="mz-foot">Your seat, your name and your points are saved on the server. This screen updates by itself as soon as the room answers.</p>

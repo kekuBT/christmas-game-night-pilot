@@ -1,0 +1,199 @@
+{
+  "revision": "8b8a7ef3c1392167e27ace6a5b56fb0831c0da6e",
+  "capturedAt": "2026-11-11T17:40:05.965Z",
+  "what": "Every Cache Storage entry after a solo round and a casual room joined by a guest (the same device, two tabs), and every API reply with whether the service worker answered it.",
+  "caches": {
+    "mchezo-shell-3c7ef2e6467570c7": [
+      {
+        "url": "/index.html",
+        "type": "text/html; charset=utf-8",
+        "bytes": 1114
+      },
+      {
+        "url": "/assets/html2canvas.esm-CBrSDip1.js",
+        "type": "text/javascript; charset=utf-8",
+        "bytes": 202301
+      },
+      {
+        "url": "/assets/index-8b-RGHOT.css",
+        "type": "text/css; charset=utf-8",
+        "bytes": 116724
+      },
+      {
+        "url": "/assets/index-VLQJ7KoQ.js",
+        "type": "text/javascript; charset=utf-8",
+        "bytes": 1122408
+      },
+      {
+        "url": "/assets/index.es-HnkhlXIE.js",
+        "type": "text/javascript; charset=utf-8",
+        "bytes": 150873
+      },
+      {
+        "url": "/assets/purify.es-CAi2OJFm.js",
+        "type": "text/javascript; charset=utf-8",
+        "bytes": 30469
+      },
+      {
+        "url": "/favicon.svg",
+        "type": "image/svg+xml",
+        "bytes": 610
+      },
+      {
+        "url": "/icons/apple-touch-icon.png",
+        "type": "image/png",
+        "bytes": 3726
+      },
+      {
+        "url": "/icons/icon-192.png",
+        "type": "image/png",
+        "bytes": 5769
+      },
+      {
+        "url": "/icons/icon-512.png",
+        "type": "image/png",
+        "bytes": 17435
+      },
+      {
+        "url": "/icons/icon-maskable-192.png",
+        "type": "image/png",
+        "bytes": 3667
+      },
+      {
+        "url": "/icons/icon-maskable-512.png",
+        "type": "image/png",
+        "bytes": 10955
+      },
+      {
+        "url": "/icons/mark.svg",
+        "type": "image/svg+xml",
+        "bytes": 641
+      },
+      {
+        "url": "/manifest.webmanifest",
+        "type": "application/manifest+json",
+        "bytes": 760
+      }
+    ]
+  },
+  "apiReplies": {
+    "total": 19,
+    "fromServiceWorker": 0,
+    "list": [
+      {
+        "method": "GET",
+        "path": "/health",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/games",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/health",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/games",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "POST",
+        "path": "/rooms",
+        "status": 201,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "POST",
+        "path": "/rooms/room-mwcemi5e-552420/join",
+        "status": 201,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "POST",
+        "path": "/rooms/room-mwcemi5e-552420/games",
+        "status": 201,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/rooms/room-mwcemi5e-552420/projection",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/health",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/games",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "POST",
+        "path": "/rooms",
+        "status": 201,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "POST",
+        "path": "/rooms/room-mwcemip6-522927/join",
+        "status": 201,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/rooms/room-mwcemip6-522927/projection",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/rooms/room-mwcemip6-522927",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "POST",
+        "path": "/rooms/room-mwcemip6-522927/plan",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/health",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/games",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "POST",
+        "path": "/rooms/join-by-code",
+        "status": 201,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/rooms/room-mwcemip6-522927/projection",
+        "status": 200,
+        "fromServiceWorker": false
+      }
+    ]
+  }
+}

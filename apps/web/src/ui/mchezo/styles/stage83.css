@@ -13,3 +13,7 @@
 .mz-home .mz-noticecard, .mz-solo-shelf .mz-noticecard, .mz-library > .mz-noticecard { margin-top: 12px; }
 /* A short text action in a notice ("Later") still gets a 44 × 44 target. */
 .mz-noticecard__actions .mz-linkbtn { min-width: 44px; padding: 0 10px; }
+/* Stage 8.3: a room reopened offline lands on "Rejoining your room…" with the
+   connection banner pinned to the top: the heading starts below the banner's
+   tallest form (three or four lines in a wide font on a 320 px phone), never under it. */
+.mz-rejoining { padding-top: calc(env(safe-area-inset-top, 0px) + 128px); }

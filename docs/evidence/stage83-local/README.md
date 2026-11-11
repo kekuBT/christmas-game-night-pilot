@@ -7,7 +7,8 @@ Every check here ran in **Chromium** (Playwright's headless shell) on this machi
 
 | File | What |
 |---|---|
-| `check-install.log` | `scripts/check-install.mjs`, 83 of 83 checks. The sections are M (identity), W (the worker's boundary, inspected), O (offline), I (guidance), S (storage unavailable), N (deep links) and U (a new build while a round is in play). |
+| `check-install.log` | `scripts/check-install.mjs`, 91 of 91 checks. The sections are M (identity), W (the worker's boundary, inspected), O (offline), O2 (the room's offline heading clear of the banner), I (guidance), S (storage unavailable), N (deep links) and U (a new build while a round is in play). |
+| `check-install-O2-on-8b8a7ef.log` | The same driver on the first candidate `8b8a7ef`: section O2 fails 8 of 8 (the "Rejoining your room" heading under the banner); everything else passes. |
 | `regression-drivers.txt` | Eight existing drivers, rerun with the worker in place: 0 failures. |
 
 **How the privacy boundary was shown,** by real contents, not mocks:

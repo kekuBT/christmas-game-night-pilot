@@ -13,6 +13,8 @@
 //      worker, and no cached body holds a room id, code or token.
 //   O  offline: Home, Join (a deep link), the solo shelf and a room each say
 //      honestly what is wrong; nothing starts; back online, they recover.
+//   O2 the room's offline screen: its heading never under the connection
+//      banner, at 320 and 390 px, with the page's font and each wide fallback.
 //   I  install guidance: none without a real path; the browser's prompt only
 //      when asked (its mini-infobar suppressed, also mid-round); "added" only
 //      on appinstalled; iPhone steps; Not now holds (and, when storage can't
@@ -33,6 +35,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium } from "./lib/driver-env.mjs";
 import { contrastFailures } from "./lib/contrast.mjs";
+import { forceFont, installedFonts, WIDE_FONTS } from "./lib/fonts.mjs";
 
 const GATE_BASE = process.argv[2] ?? "http://localhost:3461";
 const DIST = process.env.MCHEZO_WEB_DIST ?? join(process.cwd(), "apps", "web", "dist");
@@ -262,6 +265,31 @@ try {
     const back = await soon(async () => /You’re in, Ola/.test(await p.locator("body").innerText()), 20000);
     check("O back online: the same seat in the same room, no new seat", !!back && (await p.evaluate(() => sessionStorage.getItem("cgn_playerId"))) === seat);
     await ctx.close();
+  }
+
+  // ---- O2. The room's offline screen: its heading is never under the connection banner (any size, any font) ----
+  {
+    const fonts = [null, ...(await installedFonts(browser, WIDE_FONTS))];
+    for (const vp of [{ width: 320, height: 640 }, { width: 390, height: 844 }]) for (const fam of fonts) {
+      const ctx = await browser.newContext({ viewport: vp });
+      await forceFont(ctx, fam);
+      const p = await ctx.newPage();
+      await p.goto(`${GATE_BASE}/`, { waitUntil: "load" });
+      await controlled(p);
+      await hostRoom(p, GATE_BASE, "Ida");
+      await ctx.setOffline(true);
+      await p.reload({ waitUntil: "load" });
+      await p.getByTestId("rejoining").waitFor({ timeout: 10000 });
+      await soon(() => p.locator(".mz-conn").count().then((n) => n > 0), 8000);
+      await sleep(400);
+      const m = await p.evaluate(() => {
+        const b = document.querySelector(".mz-conn")?.getBoundingClientRect();
+        const heads = [...document.querySelectorAll('[data-testid="rejoining"] .mz-kicker, [data-testid="rejoining"] .mz-h1')].map((e) => e.getBoundingClientRect());
+        return { banner: b ? Math.round(b.bottom) : null, heads: heads.map((h) => [Math.round(h.top), Math.round(h.bottom)]) };
+      });
+      check(`O2 ${vp.width}×${vp.height}, ${fam ?? "the page's own font"}: reopened offline, "Rejoining your room… One moment" sits below the connection banner`, m.banner !== null && m.heads.length === 2 && m.heads.every(([top]) => top >= m.banner), JSON.stringify(m));
+      await ctx.close();
+    }
   }
 
   // ---- I. Install guidance ----

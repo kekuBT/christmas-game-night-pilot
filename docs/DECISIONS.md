@@ -1031,5 +1031,5 @@ Handoff 6801615731 (PR #13), under D-WF-01. Spec: `docs/stage8/stage83.md`.
 - **D-S83-06 Where "Can't reach Mchezo" shows.**
   - **What:**
     - Home, Join, Host, the solo shelf and the library: every entry outside a room. Join is the invite link's screen.
-    - Rooms keep their connection banner, which already says the seat is saved.
+    - Rooms keep their connection banner, which already says the seat is saved. The room's "Rejoining" screen starts below that banner, so its heading is never covered.
   - *Alternative rejected:* the notice on every screen. In a room it would repeat the banner.

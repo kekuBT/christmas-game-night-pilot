@@ -188,6 +188,10 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
   - "Can't reach Mchezo" and "A newer version is ready" appear on Home, Join, Host, the solo shelf and the library (outside a room).
   - Join and Host were added after the first offline probe: an invite link opened offline showed the Join form with no warning.
 - **The prompt dismissed:** when the browser's prompt is dismissed, the card says "No problem, add it later from your browser's menu", because the prompt can't be shown twice. The first version showed nothing; `check-install` found it.
+- **A room reopened offline:**
+  - The "Rejoining your room… One moment" heading was hidden under the pinned connection banner, at 320 and 390 px (a pre-Stage 8.3 layout).
+  - Stage 8.3 makes this screen what an installed app shows when reopened offline in a room, so its heading now starts below the banner's tallest form (`.mz-rejoining`).
+  - Found in this stage's screenshots on `8b8a7ef`; `check-install` O2 fails 8 of 8 there (`docs/evidence/stage83-local/check-install-O2-on-8b8a7ef.log`).
 
 ### 7.2 Tested (Chromium; engine where marked)
 - **Unit, `tests/stage83-install.test.ts` (22):**
@@ -197,7 +201,7 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
   - The install path.
   - The reachability probe.
   - The server's types, headers, 404s and `/health`.
-- **`scripts/check-install.mjs` (83 checks), by section:**
+- **`scripts/check-install.mjs` (91 checks), by section:**
 
 | Section | What it covers |
 |---|---|
@@ -205,6 +209,7 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
 | W | After a solo round, a casual room with a guest (two tabs) and the session, ledger, Memory Book and projection reads (all 200 with the seat's token), Cache Storage holds exactly one cache with 14 public shell entries (engine). No cached body holds the room id, code or either token, and none of the 28 API replies came from the worker. |
 | O | Offline, Home, an invite link and the solo shelf say "Can't reach Mchezo … Nothing has started". Start shows no round and says the server can't be reached. A room reloaded offline says it is rejoining; back online, it is the same seat. |
 | I | No card without a real path. The emulated prompt is suppressed (`preventDefault`), shown once when asked, "added" only on `appinstalled`, and "Not added" when dismissed. Nothing appears mid-round. On an emulated iPhone, the steps sheet works in both looks, with no overflow, 44 px targets and readable contrast. **Not now** holds after a reload, or only for the page when storage can't save it. Standalone mode (script-emulated `display-mode`, and `navigator.standalone`) hides the card. |
+| O2 | A room reopened offline: "Rejoining your room… One moment" sits below the connection banner at 320 and 390 px, with the page's font and each wide fallback (8 checks). |
 | S | With storage unavailable, the worker still registers and a round starts. |
 | N | Deep links reload to the same screen, served fresh. |
 | U | A real next build replaces the files while a solo round is in play. The round isn't reloaded and keeps playing, and its old main file still comes from its cache after the server drops it. The next worker waits. The notice appears on calm screens only, with **Later** and **Reload** (this tab only; another tab is untouched), both 44 px targets. Once no old page is open, the next worker is active and only its cache remains. `localStorage` (the look, the solo content, the solo seat) and a room seat survive. |
@@ -212,4 +217,5 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
 - **Regression drivers rerun with the worker in place, 0 failures:**
   - `check-themes-seasonal` 251, `check-mobile-everyday` 134, `check-solo` 80, `check-solo-shelf` 58;
   - `check-casual` 30, `check-session-flow` 70, `check-lobby-mode` 71, `check-briefing` 43.
+  - After the rejoin fix: `check-audit-fixes` 50, `check-tv-spectator` 15, `check-errors` 5, `check-sessions` 23.
 - **Pictures:** `docs/stage8/screenshots-83/` (`scripts/screenshot-stage83.mjs`). Its `cache-inventory.json` lists every Cache Storage entry and every API reply's source.

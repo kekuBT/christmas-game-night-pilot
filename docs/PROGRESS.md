@@ -2021,11 +2021,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **Tested (Chromium; spec §7.2):**
 - **Unit:** 22 new tests, 1,401 in all, plus lint and typecheck.
-- **`check-install`, 83 of 83:**
+- **`check-install`, 91 of 91:**
   - Chromium's manifest and installability verdicts are clean.
   - The cache holds 14 public shell entries and no secrets, and 28 of 28 API replies came from the network.
   - Offline, every entry screen is honest and recovers.
   - The guidance passes, as does a new build arriving mid-round.
+  - A room reopened offline shows its "Rejoining" heading below the connection banner. That fix is for a pre-Stage 8.3 layout found in this stage's screenshots; O2 fails 8 of 8 on `8b8a7ef`.
 - **Eight regression drivers** pass with the worker in place.
 - Evidence: `docs/evidence/stage83-local/`.
 
