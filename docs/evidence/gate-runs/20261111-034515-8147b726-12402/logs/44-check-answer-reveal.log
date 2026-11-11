@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:32969
+# timeout 600s | worker w3 | server http://localhost:32969 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s74r-full/test-results/20261111-034515-8147b726-12402/server-data/w3)
+
+[+17.4s] PASS Geography: finished player sees no answers while Bea still plays
+[+17.4s] PASS Geography: TV shows no answers while Bea still plays
+[+17.4s] PASS Geography: Bea (mid-game) sees no answers
+[+27.2s] PASS Geography: results list every question — 8
+[+27.3s] PASS Geography: each answer matches the content pack — 8/8
+[+27.3s] PASS Geography: each explanation is shown — 8/8
+[+27.3s] PASS Geography: Bea sees her own choices marked
+[+27.3s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+27.5s] PASS Geography: TV lists the answers after the game
+[+27.5s] PASS Geography: TV shows no player's choices
+[+33.2s] PASS Closest: no answer anywhere while question 1 is open
+[+33.3s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 14 vs 14
+[+33.3s] PASS Closest: and the player's own guess
+[+33.3s] PASS Closest: Bea sees her own guess, not Ada's
+[+33.3s] PASS Closest: the explanation is shown
+[+33.3s] PASS Closest: question 2 is now open and its answer is not shown
+[+33.3s] PASS Closest: TV shows the last answer only — Last question: How many lines are in a sonnet? — 14 lines
+[+33.3s] PASS Closest: TV shows nobody's guess — Last question: How many lines are in a sonnet? — 14 lines
+[+33.5s] ANSWER REVEAL ALL PASSED
+[+33.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 33.6s | cpu 2.9s, peak memory 251 MB

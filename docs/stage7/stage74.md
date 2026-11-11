@@ -247,6 +247,16 @@ On `5d41e5f1cb63bddfdb9b506318e9953dacc5a1cd`, **one after the other** (the full
 - **No failed runs** on this checkpoint.
 - **Raw evidence:** `docs/evidence/gate-runs/<run>/`.
 
+**The repair (§7.5) on `8147b7267935e2beb7470ebe16bec908f97e19b3`:** again one after the other, each in its own fresh clone with a clean tree (`dirty: []`), with the same source fingerprint (`dee70359…`, 432 files).
+
+| Run | Gate | Verdict | Measured |
+|---|---|---|---|
+| `20261111-034429-8147b726-9520` | fast | **PASSED**, exit 0, 5/5: typecheck ×2, lint, 1,304 unit tests (including the two-tab client tests), build | wall 42 s |
+| `20261111-034515-8147b726-12402` | full | **PASSED**, exit 0, 82/82, 3 workers: `check-content-variety` 57 (A4 included), `check-solo` 80, `check-solo-shelf` 58, `check-session-flow` 70 | wall 28 min 13 s |
+
+- **No failed runs.**
+- **A note on reporting:** both finished by 04:13 UTC, but this session's worker restarted before the report, so the report came later. Nothing was rerun.
+
 ### 7.5 Repair (review 6786060026, P2, V3): solo Start recovery is tied to its own press
 - **The finding:** a solo Start that got no answer read the room once and adopted any new round of the same game that wasn't there before. Once another tab can start the same game, that is wrong. Tab A's press never reached the server; tab B, on the same seat, started Word Connections; A adopted B's round as its own, and both tabs acted on one round. ChatGPT reproduced it against the real server and client.
 - **Confirmed** with the reviewed client (`5d41e5f`):

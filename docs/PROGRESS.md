@@ -1832,7 +1832,10 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `check-content-variety` A4 (57 checks);
   - `check-solo` 80, `check-solo-shelf` 58.
 - **Shown failing with the reviewed client:** five of the new tests (three by adopting B's round) and A4 in the browser.
-- **Gates for the repair:** recorded in the spec §7.3 once run.
+- **Gates on `8147b72`** (fresh clone, clean tree, one after the other):
+  - fast `20261111-034429-8147b726-9520`: **PASSED** 5/5, 1,304 unit tests, 42 s;
+  - full `20261111-034515-8147b726-12402`: **PASSED** 82/82, `check-content-variety` 57/57, in 28 min 13 s.
+  - No failed runs.
 - **Noted for later:** two shipped Connections boards have Christmas clues; queued in `docs/MILESTONES.md` for the seasonal-content milestone.
 
 **Gates on `5d41e5f`** (fresh clone, clean tree, one after the other):

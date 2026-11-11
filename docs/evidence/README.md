@@ -6,6 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261111-034515-8147b726-12402` | `8147b72` | **Stage 7.4 repair (review 6786060026):** full gate, PASSED 82/82 (`check-content-variety` 57 with A4, `check-solo` 80, `check-solo-shelf` 58, `check-session-flow` 70), fresh clone, clean tree, run after the fast gate finished (PR #11's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261111-034429-8147b726-9520` | `8147b72` | **Stage 7.4 repair:** fast gate, PASSED 5/5 (1,304 unit tests, including the two-tab client tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261111-013409-5d41e5f1-20255` | `5d41e5f` | **Stage 7.4:** full gate, PASSED 82/82 (including the new `check-content-variety`, 54 checks; `check-solo-shelf` 58, `check-solo` 80, `check-session-flow` 70, `check-quick-party` 68), fresh clone, clean tree, run after the fast gate finished (PR #11's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
 | `20261111-013325-5d41e5f1-17311` | `5d41e5f` | **Stage 7.4:** fast gate, PASSED 5/5 (1,298 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-231336-371c1948-12591` | `371c194` | **Stage 7.3:** full gate, PASSED 81/81 (including the new `check-host-handover`, 32 checks; `check-session-flow` 70, `check-quick-party` 68), fresh clone, clean tree (PR #10's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
