@@ -43,7 +43,7 @@ const text = async (loc) => ((await loc.innerText({ timeout: 5000 })) ?? "").rep
 const shots = [];
 async function shot(page, name, screen) {
   const vp = page.viewportSize();
-  const path = screenshotPath(`docs/stage8/screenshots-81/${name}-${vp.width}x${vp.height}.png`);
+  const path = screenshotPath(`docs/stage8/screenshots-81/driver/${name}-${vp.width}x${vp.height}.png`);
   await sleep(300);
   await page.screenshot({ path });
   shots.push({ path, file: basename(path), screen, viewport: `${vp.width}×${vp.height}` });
