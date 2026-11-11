@@ -60,6 +60,27 @@ export function clockAnnouncement(announced: ClockBand, current: ClockBand): Clo
   return SEVERITY[current] > SEVERITY[announced] ? current : null;
 }
 
+/**
+ * What has been announced, for one game instance (spec feedback 6790913242):
+ * the history belongs to the game, not to a screen, so moving between the
+ * ready, memorise and tap-back screens never repeats a warning, and a new
+ * game (Play again, a rematch) starts with a clean history.
+ */
+export interface AnnouncementHistory { gameId: string | null; band: ClockBand }
+export const NO_ANNOUNCEMENTS: AnnouncementHistory = { gameId: null, band: "none" };
+
+/**
+ * The history after the clock reads `current` in game `gameId`, and the band
+ * to announce now (null for none). A clock correction that skips a band
+ * announces only the band it lands in (never the ones it skipped); one that
+ * goes back and then forward again announces nothing it already said.
+ */
+export function nextAnnouncement(history: AnnouncementHistory, gameId: string, current: ClockBand): { history: AnnouncementHistory; say: ClockBand | null } {
+  const base = history.gameId === gameId ? history : { gameId, band: "none" as ClockBand };
+  const say = clockAnnouncement(base.band, current);
+  return { history: say ? { gameId, band: say } : base, say };
+}
+
 /** The words announced for a band (polite, once). */
 export function clockAnnouncementText(band: ClockBand): string {
   switch (band) {

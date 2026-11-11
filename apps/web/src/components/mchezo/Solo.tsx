@@ -159,7 +159,8 @@ export function SoloRound({ game, autostart, onAutostartUsed, onBackToSolo, onHo
             an earlier round reaches this one. */}
         {mine ? (
           <Play key={state.gameInstanceId} game={mine} publicGame={pub} players={state.proj.players ?? []} playerId={session.playerId ?? ""} title={game.title}
-            intent={(gid, action, payload) => live().intent(gid, action, payload)} roomId={session.roomId ?? ""} timeLimitMs={game.timeLimitMs} />
+            intent={(gid, action, payload) => live().intent(gid, action, payload)} roomId={session.roomId ?? ""} timeLimitMs={game.timeLimitMs}
+            stale={!!state.stale} onCheckAgain={() => void live().refresh()} />
         ) : <p className="mz-foot" role="status">Getting your round…</p>}
       </div>
     );

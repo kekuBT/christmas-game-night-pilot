@@ -22,7 +22,8 @@ import { RoomEngine } from "../src/server/room.js";
 import { SoloSession, forgetPageSeat } from "../apps/web/src/solo/soloSession.js";
 import { noteServerTime, serverNowEstimate, serverOffsetMs } from "../apps/web/src/ui/mchezo/lib/lifecycle.js";
 import {
-  PULSE_CLOCK_LOW_MS, PULSE_CLOCK_URGENT_MS, clockAnnouncement, clockAnnouncementText, clockBand, gameClockView, type ClockBand,
+  NO_ANNOUNCEMENTS, PULSE_CLOCK_LOW_MS, PULSE_CLOCK_URGENT_MS, clockAnnouncement, clockAnnouncementText, clockBand, gameClockView, nextAnnouncement,
+  type AnnouncementHistory, type ClockBand,
 } from "../apps/web/src/components/mchezo/pulseClock.js";
 import type { PlayerGame, Projection } from "../apps/web/src/types.js";
 
@@ -81,6 +82,43 @@ describe("Pattern Pulse's game clock (pure)", () => {
     expect(clockAnnouncement("none", clockBand(5_000))).toBe("urgent");
     expect(clockAnnouncement("none", clockBand(-1))).toBe("up");
     expect(clockAnnouncementText("none")).toBe("");
+  });
+});
+
+describe("announcement history belongs to the game instance (spec feedback 6790913242)", () => {
+  /** Feed readings (game id, ms left) through the history; return what was said. */
+  function run(readings: [string, number][], start: AnnouncementHistory = NO_ANNOUNCEMENTS) {
+    let h = start;
+    const said: string[] = [];
+    for (const [gid, left] of readings) {
+      const next = nextAnnouncement(h, gid, clockBand(left));
+      h = next.history;
+      if (next.say) said.push(`${gid}:${next.say}`);
+    }
+    return { said, h };
+  }
+
+  it("moving between the ready, memorise and tap-back screens never repeats a warning (the same game, the same band)", () => {
+    // The component reads the clock each time the ready screen returns; the band stays "low".
+    const { said } = run([["g1", 55_000], ["g1", 50_000], ["g1", 41_000], ["g1", 30_000], ["g1", 25_000]]);
+    expect(said).toEqual(["g1:low"]);
+  });
+
+  it("a new game (Play again, a rematch) starts with a clean history: its warnings are said again", () => {
+    const first = run([["g1", 59_000], ["g1", 10_000], ["g1", -1]]);
+    expect(first.said).toEqual(["g1:low", "g1:urgent", "g1:up"]);
+    const second = run([["g2", 299_000], ["g2", 59_000], ["g2", 10_000]], first.h);
+    expect(second.said).toEqual(["g2:low", "g2:urgent"]);
+  });
+
+  it("a clock correction that skips a threshold says only where it lands, not every band it jumped over", () => {
+    expect(run([["g", 90_000], ["g", 12_000]]).said).toEqual(["g:urgent"]); // never "low" then "urgent" in a burst
+    expect(run([["g", 90_000], ["g", -500]]).said).toEqual(["g:up"]);
+  });
+
+  it("a correction back across a threshold and forward again repeats nothing outdated", () => {
+    const { said } = run([["g", 18_000], ["g", 65_000], ["g", 75_000], ["g", 55_000], ["g", 19_000], ["g", 70_000], ["g", 0]]);
+    expect(said).toEqual(["g:urgent", "g:up"]);
   });
 });
 
@@ -174,6 +212,71 @@ describe("F3: the solo session uses the server's clock, as room screens do", () 
     const view = gameClockView(game.deadlineAt, serverNowEstimate())!;
     expect(Math.abs(view.leftMs - byServer)).toBeLessThan(1_500);
     expect(Math.abs(view.leftMs - (game.deadlineAt! - Date.now()))).toBeGreaterThan(85_000);
+  });
+
+  it("recovery after the server was unreachable: the clock is taken again from the first reply after it", async () => {
+    let skew = 90_000;
+    let down = false;
+    const f = (async (input: string, init: RequestInit = {}) => {
+      const { cache: _c, keepalive: _k, ...rest } = init;
+      if (down && /\/projection\?/.test(input)) throw new TypeError("fetch failed");
+      const res = await realFetch(`${base}${input}`, rest);
+      if (!/\/projection\?/.test(input) || !res.ok) return res;
+      const body = (await res.json()) as Projection;
+      if (typeof body.serverNow === "number") body.serverNow += skew;
+      return new Response(JSON.stringify(body), { status: res.status, headers: { "content-type": "application/json" } });
+    }) as unknown as typeof fetch;
+    let t = Date.now();
+    const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000, requestTimeoutMs: 2_000, startBudgetMs: 6_000, staleAfterMs: 1_000, now: () => t });
+    sessions.push(s);
+    await s.start("pattern-pulse");
+    expect(serverOffsetMs()).toBeGreaterThan(88_000); // the first accepted reply, from Start
+    down = true;
+    t += 2_000;
+    await s.refresh();
+    expect(s.current.stale).toBe(true); // unreachable: the round is kept and says so
+    expect(serverOffsetMs()).toBeGreaterThan(88_000); // a failed read changes nothing
+    // Back, and meanwhile this phone's clock was corrected (or the server's
+    // time moved): the next accepted reply sets the clock again.
+    down = false;
+    skew = -30_000;
+    t += 1_000;
+    await s.refresh();
+    expect(s.current.stale).toBe(false);
+    expect(serverOffsetMs()).toBeLessThan(-28_000);
+    expect(serverOffsetMs()).toBeGreaterThan(-32_000);
+  });
+
+  it("an older read answering after a newer one changes nothing: not the round shown, not the clock", async () => {
+    let slowNext = false;
+    let n = 0;
+    const f = (async (input: string, init: RequestInit = {}) => {
+      const { cache: _c, keepalive: _k, ...rest } = init;
+      const isProj = /\/projection\?/.test(input);
+      const mine = isProj ? ++n : 0;
+      const slow = isProj && slowNext;
+      if (slow) slowNext = false;
+      const res = await realFetch(`${base}${input}`, rest);
+      if (!isProj || !res.ok) return res;
+      const body = (await res.json()) as Projection;
+      // The slow (older) read says the server's clock is 50 s ahead; the newer one 20 s behind.
+      if (typeof body.serverNow === "number") body.serverNow += slow ? 50_000 : -20_000;
+      (body as unknown as { readNo: number }).readNo = mine;
+      if (slow) await new Promise((r) => setTimeout(r, 300));
+      return new Response(JSON.stringify(body), { status: res.status, headers: { "content-type": "application/json" } });
+    }) as unknown as typeof fetch;
+    const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000, requestTimeoutMs: 2_000, startBudgetMs: 6_000 });
+    sessions.push(s);
+    await s.start("pattern-pulse");
+    slowNext = true;
+    const older = s.refresh(); // sent first, answers last
+    await new Promise((r) => setTimeout(r, 20));
+    const newer = s.refresh();
+    await Promise.all([older, newer]);
+    const shown = (s.current.proj as unknown as { readNo: number }).readNo;
+    expect(shown).toBe(n); // the newest read's reply is on screen, not the older one that came later
+    expect(serverOffsetMs()).toBeLessThan(-18_000); // and the clock is the newer reply's
+    expect(serverOffsetMs()).toBeGreaterThan(-22_000);
   });
 
   it("a phone whose clock is ahead of the server's: the offset goes the other way", async () => {

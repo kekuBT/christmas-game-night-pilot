@@ -43,6 +43,8 @@
 .mz-pp-clock__note { margin: 6px 0 0; font: 600 14px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
 .mz-pp-clock.is-low .mz-pp-clock__note { color: var(--mz-text); }
 .mz-pp-timeup { margin: 0; padding: 14px; border-radius: 16px; background: var(--mz-surface-2); text-align: center; font: 800 16px/1.35 var(--mz-font-body); }
+.mz-pp-timeup--stale { text-align: left; font-weight: 700; border: 1.5px solid var(--mz-highlight); }
+.mz-pp-timeup--stale p { margin: 0 0 12px; }
 
 /* Pulse's two groups are plain parts of the one-column screen, except on a
    short landscape screen (below). */
@@ -102,9 +104,11 @@
   .mz-pp-play .mz-game-clock { margin: 6px 0 0 !important; text-align: left; }
   .mz-pp-play .mz-feedback { text-align: left; margin-top: 6px; }
 
-  /* The shared question screen (Math, and the quiz games that use it): the
+  /* Math Mayhem's question screen only (its answers are short numbers): the
      answer area may shrink below its portrait minimum so both rows and the
-     line under them fit. */
-  .mz-answers { height: clamp(140px, 42dvh, 260px); }
-  .mz-question { margin-top: 10px; font-size: clamp(20px, 5vw, 24px); }
+     line under them fit, each answer still at least 64 px tall. Other quiz
+     games keep their answer area (longer answers would clip). The screen
+     still scrolls when text is larger than this. */
+  .mz-math-screen .mz-answers { height: clamp(140px, 42dvh, 260px); }
+  .mz-math-screen .mz-question { margin-top: 10px; font-size: clamp(20px, 5vw, 24px); }
 }

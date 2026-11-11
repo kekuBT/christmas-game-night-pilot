@@ -18,7 +18,7 @@
  */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { GameClock, Keycap, MchezoWaiting, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
-import { clockAnnouncement, clockAnnouncementText, gameClockView, type ClockBand, type GameClockView } from "./pulseClock.js";
+import { NO_ANNOUNCEMENTS, clockAnnouncementText, gameClockView, nextAnnouncement, type AnnouncementHistory, type GameClockView } from "./pulseClock.js";
 import { FeedbackLine, GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { SendNote } from "./SendNote.js";
@@ -97,6 +97,14 @@ export interface MchezoPulseDeps {
    * for others once all six rounds are done (the results follow at once).
    */
   solo?: boolean;
+  /**
+   * Stage 8.1 (spec feedback 6790913242): the game server can't be reached
+   * right now (solo: no fresh reply for a while; a room: the socket is
+   * reconnecting). With the game's time up, the screen then says so and
+   * offers `onCheckAgain` rather than promising results that may not come.
+   */
+  stale?: boolean;
+  onCheckAgain?: () => void;
 }
 
 /**
@@ -119,7 +127,7 @@ function GameTimePanel({ clock }: { clock: GameClockView }) {
   );
 }
 
-export function MchezoPulse({ game, publicGame, players, playerId, title, intent, error, landed, solo }: MchezoPulseDeps) {
+export function MchezoPulse({ game, publicGame, players, playerId, title, intent, error, landed, solo, stale, onCheckAgain }: MchezoPulseDeps) {
   const st = (game.state ?? {}) as PulseView;
   const { reducedMotion } = useMchezo();
   const of = st.roundCount ?? 6;
@@ -128,17 +136,21 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
   // Stage 8.1: tick between patterns too, so the game's time left stays current.
   const now = useNow(!!open || (!finishedHere && game.deadlineAt !== undefined));
   const clock = gameClockView(game.deadlineAt, now);
-  // Announce only crossings into a more urgent band, each once per game, and
-  // only between patterns (never over a pattern being memorised or tapped).
-  const announced = useRef<ClockBand>("none");
+  // Announce only crossings into a more urgent band, each once per GAME (the
+  // history is keyed by the game instance: screens never repeat a warning,
+  // a new game starts afresh), and only between patterns (never over a
+  // pattern being memorised or tapped).
+  const announced = useRef<AnnouncementHistory>(NO_ANNOUNCEMENTS);
   const [said, setSaid] = useState("");
   const between = !open && !finishedHere;
   const band = clock?.band ?? "none";
   useEffect(() => {
+    if (announced.current.gameId !== game.id) setSaid("");
     if (!between) return;
-    const due = clockAnnouncement(announced.current, band);
-    if (due) { announced.current = due; setSaid(clockAnnouncementText(due)); }
-  }, [between, band]);
+    const next = nextAnnouncement(announced.current, game.id, band);
+    announced.current = next.history;
+    if (next.say) setSaid(clockAnnouncementText(next.say));
+  }, [between, band, game.id]);
   const [entry, setEntry] = useState<number[]>([]);
   const [pending, setPending] = useState<string | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
@@ -262,7 +274,16 @@ export function MchezoPulse({ game, publicGame, players, playerId, title, intent
           A display state only: the server ends the game at its deadline and
           this screen follows the next projection (it refuses a late open anyway). */}
       {clock?.up
-        ? <p className="mz-pp-timeup" role="status" data-testid="mz-pp-timeup">The game’s time is up. {solo ? "Your results are on their way." : "The results follow."}</p>
+        ? (stale
+          ? (
+            // The server can't be reached: say so plainly and offer a way on
+            // (Leave round stays in the solo bar; a room keeps its reconnect banner).
+            <div className="mz-pp-timeup mz-pp-timeup--stale" role="status" data-testid="mz-pp-timeup" data-stale="true">
+              <p>The game’s time is up, but the game server isn’t answering right now, so your results can’t show yet. They will as soon as it answers.</p>
+              {onCheckAgain && <Keycap block variant="surface" size="md" data-testid="mz-pp-checkagain" onClick={onCheckAgain}>Check again</Keycap>}
+            </div>
+          )
+          : <p className="mz-pp-timeup" role="status" data-testid="mz-pp-timeup">The game’s time is up. {solo ? "Your results are on their way." : "The results follow."}</p>)
         : (
           <Keycap block disabled={pending !== null} onClick={() => void send("pulse-open", { round: next }, "open")} data-testid="mz-pp-open">
             {pending === "open" ? "Opening…" : "Show me the pattern"}

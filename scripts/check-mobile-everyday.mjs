@@ -260,23 +260,69 @@ try {
     // second. Hold the room's replies from the last seconds (a slow
     // connection) so the screen's own clock reaches 0:00 first.
     await soon("C under 20 seconds: the clock turns urgent", async () => (await p.getByTestId("mz-pp-gameclock").getAttribute("data-band")) === "urgent", 30000);
+    // Three seconds before the deadline the server stops answering (its
+    // replies are held): first the plain time-up status, then, once nothing
+    // has come back for a while, the honest version with a way on.
+    await soon("C three seconds before the deadline", async () => (parseClock(await text(p.getByTestId("mz-pp-gameclock-left"))) ?? 99) <= 3, 25000);
     let hold = true;
     await p.route("**/projection**", async (route) => { while (hold) await sleep(200); await route.continue().catch(() => {}); });
-    await soon("C time up on the ready screen: Show me the pattern gives way to a status", async () => (await p.getByTestId("mz-pp-timeup").count()) === 1 && (await p.getByTestId("mz-pp-open").count()) === 0, 30000);
+    await soon("C time up on the ready screen: Show me the pattern gives way to a status", async () => (await p.getByTestId("mz-pp-timeup").count()) === 1 && (await p.getByTestId("mz-pp-open").count()) === 0, 15000);
     check("C …which says what happens next", /The game’s time is up\. Your results are on their way\./.test(await text(p.getByTestId("mz-pp-timeup"))));
     check("C …and nothing else on the screen can start a round (no Sit out, no Show me)", (await p.locator('[data-testid="mz-pp-ready"] button.mz-key').count()) === 0);
     await shot(p, "05-pulse-time-up", "Pattern Pulse: the game's time ran out on the ready screen");
+    await soon("C the server still isn't answering: the status says so instead of promising results, and offers Check again", async () => (await p.getByTestId("mz-pp-timeup").getAttribute("data-stale")) === "true" && (await p.getByTestId("mz-pp-checkagain").isVisible()), 20000);
+    check("C …in plain words", /isn’t answering right now/.test(await text(p.getByTestId("mz-pp-timeup"))) && !/on their way/.test(await text(p.getByTestId("mz-pp-timeup"))));
+    check("C …with the reconnecting note and Leave round still there (never stuck)", (await p.getByTestId("solo-stale").isVisible()) && (await p.getByTestId("solo-leave").isVisible()));
+    await shot(p, "05b-pulse-time-up-offline", "Pattern Pulse: time up while the game server isn't answering: Check again and Leave round");
     hold = false;
     await p.unrouteAll({ behavior: "ignoreErrors" });
-    await soon("C then the results, once the server has ended the game", async () => (await p.getByTestId("solo-results").count()) === 1, 20000);
+    await p.getByTestId("mz-pp-checkagain").click();
+    await soon("C the server answers again: Check again brings the results", async () => (await p.getByTestId("solo-results").count()) === 1, 10000);
     const truth = await soonTruth(p);
     const said = await p.evaluate(() => window.__said);
     const moments = await p.evaluate(() => window.__moments);
     check("C announcements: under a minute, under 20 seconds, time up, each once and nothing else", JSON.stringify(said) === JSON.stringify(["Under a minute of game time left.", "Under 20 seconds of game time left.", "The game’s time is up."]), JSON.stringify(said));
     check("C at no moment were Show me the pattern and time up on screen together", !moments.some((m) => m.open && (m.up || m.band === "up")), JSON.stringify(moments));
-    check("C the screens went: ready (low) → time up → results", (() => { const iUp = moments.findIndex((m) => m.up); const iRes = moments.findIndex((m) => m.results); return iUp > 0 && iRes > iUp && moments.slice(0, iUp).some((m) => m.open && (m.band === "low" || m.band === "urgent")); })(), JSON.stringify(moments.map((m) => `${m.open ? "open" : ""}${m.up ? "up" : ""}${m.results ? "results" : ""}:${m.band}`)));
+    check("C the screens went: ready (low) → time up → results (through the offline status)", (() => { const iUp = moments.findIndex((m) => m.up); const iRes = moments.findIndex((m) => m.results); return iUp > 0 && iRes > iUp && moments.slice(0, iUp).some((m) => m.open && (m.band === "low" || m.band === "urgent")); })(), JSON.stringify(moments.map((m) => `${m.open ? "open" : ""}${m.up ? "up" : ""}${m.results ? "results" : ""}:${m.band}`)));
     check("C the server ended the game at its deadline; no round was played", truth !== null && truth.status === "finished" && truth.results === 0, JSON.stringify(truth));
     await ctx.close();
+  }
+
+  // ---- C2. The same in a casual room: the guest's phone goes offline just before time runs out ----
+  {
+    const hctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const gctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const h = await hctx.newPage();
+    const g = await gctx.newPage();
+    await h.goto(`${own.base}/`, { waitUntil: "domcontentloaded" });
+    await h.getByTestId("home-host").click();
+    await h.getByPlaceholder("e.g. Auntie June").fill("Ada");
+    await h.getByRole("button", { name: "Host a game" }).click();
+    const chip = h.getByRole("button", { name: /^Share room code / });
+    await chip.waitFor({ timeout: 15000 });
+    let code = "";
+    for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) { code = ((await chip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim(); if (!/^[A-Z0-9]{6}$/.test(code)) await sleep(300); }
+    await g.goto(`${own.base}/join`, { waitUntil: "domcontentloaded" });
+    await g.getByPlaceholder("e.g. Auntie June").fill("Bea");
+    await g.locator(".mz-code__input").fill(code);
+    await g.getByRole("button", { name: "Join the game" }).click();
+    await g.getByRole("heading", { name: "You’re in, Bea." }).waitFor({ timeout: 15000 });
+    await h.getByTestId("choose-game").click();
+    await h.getByTestId("select-game-pattern-pulse").click();
+    await h.locator('[data-testid="lobby-dock"] button.mz-key--block').first().click();
+    await passBriefing([h, g]);
+    await g.getByTestId("mz-pp-ready").waitFor({ timeout: 20000 });
+    await soon("C2 room: three seconds before the deadline on the guest's ready screen", async () => (parseClock(await text(g.getByTestId("mz-pp-gameclock-left"))) ?? 99) <= 3, 40000);
+    await gctx.setOffline(true);
+    await soon("C2 room: time up while the guest is offline: the status says the server isn't answering and offers Check again", async () => (await g.getByTestId("mz-pp-timeup").getAttribute("data-stale")) === "true" && (await g.getByTestId("mz-pp-checkagain").isVisible()), 40000);
+    check("C2 …next to the room's own reconnecting banner", await g.getByTestId("mz-conn").isVisible());
+    check("C2 …and no Show me the pattern or Sit the rest out", (await g.getByTestId("mz-pp-open").count()) === 0 && (await g.getByTestId("mz-pp-sitout").count()) === 0);
+    await shot(g, "05c-room-pulse-time-up-offline", "Pattern Pulse in a room: time up while this phone is offline: Check again, beside the reconnecting banner");
+    await gctx.setOffline(false);
+    await g.getByTestId("mz-pp-checkagain").click().catch(() => {});
+    await soon("C2 room: back online, Check again reconnects and the results show", async () => (await g.getByTestId("whats-next").count()) === 1 || (await g.getByTestId("mz-pp-results").count()) === 1, 30000);
+    await hctx.close();
+    await gctx.close();
   }
 
   // ---- D. A phone held sideways: nothing timed below the fold ----
@@ -309,6 +355,38 @@ try {
     check("D 844×390 Math Mayhem: all four answers on screen, no scrolling (before: the second row below the fold)", allSlabs);
     check("D …each still a full-size target", (await p.locator(".mz-slab").nth(3).boundingBox()).height >= 56);
     await shot(p, "08-math-landscape", "Math Mayhem, phone held sideways: all four answers on screen");
+    await ctx.close();
+  }
+
+  // ---- D2. Sideways with larger text (130 % zoom: 650×300 CSS px on an 844×390 phone) ----
+  // The screens may scroll then; they must never clip a control or shrink it under 44 px.
+  {
+    const ctx = await browser.newContext({ viewport: { width: 650, height: 300 } });
+    const p = await ctx.newPage();
+    await p.goto(`${GATE_BASE}/solo`, { waitUntil: "domcontentloaded" });
+    await p.getByTestId("solo-start-pattern-pulse").click();
+    await p.getByTestId("mz-pp-ready").waitFor({ timeout: 20000 });
+    await p.getByTestId("mz-pp-open").click();
+    await p.getByTestId("mz-pp-input").waitFor({ timeout: 15000 });
+    await checkLayout(p, "D2 650×300 (130 %) Pulse tap-back");
+    const keyIssues = await p.evaluate(() => [...document.querySelectorAll(".mz-pp-key")].map((k) => { const r = k.getBoundingClientRect(); const name = k.querySelector(".mz-pp-key__name"); return { h: r.height, clipped: !!name && name.scrollWidth > name.clientWidth + 1, font: name ? parseFloat(getComputedStyle(name).fontSize) : 0 }; }).filter((k) => k.h < 44 || k.clipped || k.font < 12));
+    check("D2 every shape key at least 44 px, its name readable (12 px or more) and not clipped", keyIssues.length === 0, JSON.stringify(keyIssues));
+    let reach = true;
+    for (const id of ["mz-pp-key-0", "mz-pp-key-5", "mz-pp-undo", "mz-pp-submit"]) { await p.getByTestId(id).scrollIntoViewIfNeeded(); reach &&= await inView(p.getByTestId(id)); }
+    check("D2 the screen scrolls rather than clipping: every shape, Undo and Lock it in can be scrolled to and shown whole", reach);
+    await shot(p, "08b-pulse-input-landscape-130", "Pattern Pulse tapping back, sideways at 130 %: the screen scrolls, nothing clipped");
+    await p.getByTestId("solo-leave").click();
+    await p.getByTestId("solo-leave-yes").click();
+    await p.getByTestId("solo-home").waitFor({ timeout: 10000 });
+    await p.getByTestId("solo-start-math-mayhem").click();
+    await p.locator("h1.mz-question").waitFor({ timeout: 20000 });
+    for (let k = 0; k < 50 && (await p.locator(".mz-slab").count()) !== 4; k++) await sleep(100);
+    await checkLayout(p, "D2 650×300 (130 %) Math");
+    const slabIssues = await p.evaluate(() => [...document.querySelectorAll(".mz-slab")].map((b) => { const r = b.getBoundingClientRect(); const l = b.querySelector(".mz-slab__label"); return { h: r.height, clipped: !!l && (l.scrollWidth > l.clientWidth + 1 || l.scrollHeight > b.clientHeight) }; }).filter((x) => x.h < 44 || x.clipped));
+    check("D2 Math: every answer at least 44 px tall, its number not clipped", slabIssues.length === 0, JSON.stringify(slabIssues));
+    let slabsReach = true;
+    for (let i = 0; i < 4; i++) { await p.locator(".mz-slab").nth(i).scrollIntoViewIfNeeded(); slabsReach &&= await inView(p.locator(".mz-slab").nth(i)); }
+    check("D2 Math: every answer can be scrolled to and shown whole", slabsReach);
     await ctx.close();
   }
 

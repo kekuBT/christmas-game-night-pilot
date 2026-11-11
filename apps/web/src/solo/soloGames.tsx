@@ -30,6 +30,10 @@ export interface SoloPlayProps {
   timeLimitMs?: number;
   /** Resolves true when the server took the action (SoloSession.intent). */
   intent: (gid: string, action: string, payload: Record<string, unknown>) => Promise<boolean>;
+  /** Stage 8.1: no fresh reply from the server for a while (SoloState.stale). */
+  stale?: boolean;
+  /** Stage 8.1: read the room again now (SoloSession.refresh). */
+  onCheckAgain?: () => void;
 }
 
 export interface SoloGameAdapter extends SoloGameRules {
@@ -65,7 +69,7 @@ const MATH: SoloGameAdapter = {
 
 const PULSE: SoloGameAdapter = {
   ...PULSE_SOLO,
-  Play: (p) => <MchezoPulse solo game={p.game} publicGame={p.publicGame} players={p.players} playerId={p.playerId} title={p.title} intent={p.intent} />,
+  Play: (p) => <MchezoPulse solo game={p.game} publicGame={p.publicGame} players={p.players} playerId={p.playerId} title={p.title} intent={p.intent} stale={p.stale} onCheckAgain={p.onCheckAgain} />,
   Review: ({ game }) => (game ? <PulseRecap game={game} /> : null),
 };
 
