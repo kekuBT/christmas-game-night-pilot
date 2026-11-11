@@ -197,7 +197,9 @@ function publicView(s: JebenaState, scale = 1) {
     named: thisCategory.slice(-12),
     log: s.log.slice(-LOG_IN_VIEW),
     end: s.end,
-    standings: s.end ? jebenaStandings(s) : undefined,
+    // Always (public facts only): when the room's match limit ends the game, the module's own
+    // `end` stays null, and the results still need the places.
+    standings: jebenaStandings(s),
   };
 }
 

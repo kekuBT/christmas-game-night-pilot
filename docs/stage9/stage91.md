@@ -80,19 +80,20 @@ Everything else below is an architect default for this first slice (the handoff'
 ## 6. State, protocol and projections
 - **State** (`game.extra`, JSON, persisted with the room):
   - `rulesVersion`, `bankVersion`, `seed`, `startHearts`, the seat `order`;
-  - per player: `hearts`, `outAt` (its order of going out), `answers` (a count), `timeouts`;
-  - the current `category` and the `rotation`; `used` (canonical ids per category); `turn` (`n`, `player`, `startedAt`, `deadline`, `attempts`);
+  - per player: `hearts`, `outOrder` (its order of going out), `answers` (a count), `timeouts`, `tries`;
+  - the current `category` and the `rotation`; `used` (canonical ids per category); `turn` (`n`, `player`, `attempts`). *As built:* the turn's deadline is the room's phase deadline (`turn:<n>`), not a field of the module, so it is set, persisted and processed by RoomEngine like every other phase;
   - a public `log` of played facts (accepted answers, timeouts, outs, category changes);
   - private per-player feedback on the current turn's last attempt;
-  - `end` (`last-standing`, `banks-exhausted`, or the room's `deadline`).
+  - `end` (`last-standing` or `banks-exhausted`; it stays null when the room's match limit ends the game, whose outcome reason is then `deadline`).
 - **Start:** the casual start request may carry `settings: { hearts: 3 | 5 | 7 }`, for Jebena Rush only. The server validates it (default 5), records it with the game, and Play again reuses it. A repeated start attempt must carry the same settings (as with the content choice in Stage 8.2).
+- **Lobby settings** (*as built*, D-S91-08): the host or a cohost sets them with `POST /rooms/:id/game-settings` `{ gameId, settings, baseRevision }` (casual rooms only; revision-checked; persisted). Every projection of a casual room carries `lobbySettings`. A Start's settings must equal the lobby's, or it is refused with `SETTINGS_CHANGED` and nothing starts.
 - **Intent `jebena-answer` `{ turn, text }`:**
-  - **Refused, nothing changes:** `NOT_IN_GAME`, `OUT`, `NOT_YOUR_TURN`, `STALE_TURN` (the turn has moved on), `TOO_LATE`, `INVALID_PAYLOAD` (text missing or over 40 characters), `TOO_MANY_ATTEMPTS`.
+  - **Refused, nothing changes:** `NOT_IN_GAME`, `OUT`, `NOT_YOUR_TURN`, `STALE_TURN` (the turn has moved on), `ALREADY_FINISHED`, `INVALID_PAYLOAD` (text missing or over 40 characters), `TOO_MANY_ATTEMPTS`. *As built:* there is no separate `TOO_LATE`: the tick runs first, so a late answer finds the turn already over (`STALE_TURN`, or the room's `PHASE_CLOSED` when it carries the old phase key).
   - **Answered:** `{ verdict: "accepted", answer, via }`, or a rejection with the deadline unchanged: `{ verdict: "used" | "not-in-bank" | "ambiguous" | "near-miss" | "empty", hint? }`.
 - **Public projection** (TV, spectators and everyone):
   - the order, with hearts and who is out;
-  - the turn (number, player, deadline) and the category (name and definition);
-  - this category's accepted answers so far, the last event, places and points when finished.
+  - the turn (number and player; its deadline is the game's `phaseDeadlineAt`) and the category (name and definition);
+  - this category's accepted answers so far, the recent played facts, and the places and points (always: they are public facts).
 - **Player projection:** the public one, plus their own hearts and their last attempt this turn (their own text and its verdict only).
 - **Never sent:**
   - the bank, or any unused answer;
@@ -163,6 +164,8 @@ Everything else below is an architect default for this first slice (the handoff'
 - **D-S91-05:** connection never changes the rules (§5).
 - **D-S91-06:** a module bank with canonical ids and aliases, Sprint v2 normalisation, and an explicit "ambiguous" outcome.
 - **D-S91-07:** game settings at start (`hearts`), validated, recorded, reused by Play again, and part of a start attempt's identity.
+- **D-S91-08 (added while building):** the lobby's hearts are room state, seen by everyone; a Start carries what it showed.
+- **D-S91-09 (added while building):** the jebena on screen: steam count and a word for urgency; motion only with full motion.
 
 ## 11. Questions for you (defaults are in place; say if you want otherwise)
 1. **A new category after every lost heart.** The alternative, keeping it until its bank is used up, lets one hard category knock several players out in a row.
@@ -174,3 +177,20 @@ Everything else below is an architect default for this first slice (the handoff'
 - Then sequential clean fast and full gates on the completed checkpoint.
 - One new completed report on the Stage 9.1 PR with the tested SHA and head delta, run IDs and verdicts, raw evidence, screenshots, and limitations.
 - Emulation and engines are labelled apart from real devices.
+
+## 13. As built and tested
+Each row of §9, with where it is shown. Results and run IDs are in the completed report on the Stage 9.1 PR and in `docs/PROGRESS.md`.
+
+| Area | Tests |
+|---|---|
+| Rules | `tests/stage91-jebena.test.ts`: the module (init, pass on accept, rejections keep the deadline, a timeout costs one heart and passes, out at 0, rotation and used-up banks, one survivor, places and points, abstain) |
+| Boundaries | `tests/stage91-jebena.test.ts` (engine: the deadline instant, a boundary race, spoofing, duplicates, a late joiner) and `tests/stage91-jebena-sockets.test.ts` (an answer at the deadline counts, one millisecond later doesn't, decided once); `check-jebena-rush` D (out of turn, stale turn, duplicate client id, late joiner, from real pages) |
+| Matching | `tests/stage91-jebena.test.ts` (aliases, plurals, typos only when unambiguous, short words, near misses, the bank report); `check-jebena-rush` C (not in the bank, ambiguous, near miss, a repeat in any case, an alias and a typo counted under their canonical names) |
+| Settings | `tests/stage91-jebena.test.ts` (3/5/7, default 5, invalid refused, lobby settings host-only, casual-only, revision-checked, persisted, `SETTINGS_CHANGED`, Play again keeps them); `check-jebena-rush` A and G (the host chooses, guests see it, a guest is refused, 4 is refused, the rematch's briefing says 3) |
+| Projections | `tests/stage91-jebena.test.ts` and every push in `tests/stage91-jebena-sockets.test.ts` (no bank, no unused answer, no other player's tries); `check-jebena-rush` I (the TV's and a player's projection; nothing from the room in the app-shell cache) |
+| Lifecycle | `tests/stage91-jebena-sockets.test.ts` at 2, 4 and 10 players (whole matches to results over real WebSockets; a holder's socket dropping costs the heart on time, reconnecting resubmits nothing); `tests/stage91-jebena.test.ts` (restart mid-turn, the match limit with places, two rooms); `check-jebena-rush` E–G and J (offline on your turn, reload, outs, results equal to the server's scores, Play again, cancel, back to lobby, a second room with 7 hearts) |
+| Browser | `scripts/check-jebena-rush.mjs`: host 390 px Everyday, guest 320 px Christmas look, guest 390 px reduced motion, TV 1440 px; keyboard (focus, Enter, Tab to Send); no sideways scroll; screenshots in `docs/stage9/screenshots/` |
+| Gates | Sequential clean fast then full gates on the completed checkpoint (in the report) |
+
+Desktop Chromium emulating phone sizes is not a real phone. Real iOS Safari and Android Chrome (keyboards, autocorrect, the Send key) are in `docs/REAL_DEVICE_TESTING.md` Part K, not yet run.
+

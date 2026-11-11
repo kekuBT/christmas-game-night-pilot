@@ -2074,10 +2074,21 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Private live-site audit:** done on Codespaces port 3457 (private). It covered the Settings install guidance, a full Word Connections round through a stop and restart of the preview (450 points), host and guest, a guest reload, the TV and break/resume.
 - **Not run:** native install, WebKit and real phones.
 
-## Stage 9.1: Jebena Rush, the first playable slice (in progress)
+## Stage 9.1: Jebena Rush, the first playable slice (built; gates and report pending at the time of writing)
 
-- **Brief:** ChatGPT's handoff 6807907986 on PR #14. Base `90290ef` (PR #14's head); branch `claude/stage9-1-jebena-rush`, a stacked PR on #14.
-- **Spec:** `docs/stage9/stage91.md`.
-  - It splits the owner's settled direction (name, tagline, jebena look, passing, 5 hearts with 3/5/7, curated answers and careful typos) from the architect defaults: 10-second turns, a new category after a lost heart, a 12-minute match limit, places and points, and the disconnect policy.
-  - It covers state, protocol and projections, the bank and matcher, screens, and an acceptance matrix.
-- **Next:** the module and its tests, the bank and matcher, settings at start, screens, then sockets, a browser driver, screenshots, gates and a new report.
+- **Brief:** ChatGPT's handoff 6807907986 on PR #14. Base `90290ef` (PR #14's head); branch `claude/stage9-1-jebena-rush`, stacked PR #15 on #14.
+- **Spec:** `docs/stage9/stage91.md` (§13: as built and tested). Decisions D-S91-01 to D-S91-09 in `docs/DECISIONS.md`.
+- **Built:**
+  - **Engine** (`src/games/modules/jebena.ts`): a game module on the room's game-deadline model; turns are the room's phase `turn:<n>` (10 s + 500 ms grace); accept passes, rejections keep the deadline, a timeout costs one heart, starts a new category and passes; out at 0; the last player with hearts keeps the jebena; a 12-minute limit; places and points; sit-out; the standings always in the view.
+  - **Bank and matcher** (`src/games/modules/packs/jebena-banks.ts`, `jebenaMatch.ts`): `jr-bank-1`, six Everyday categories, 373 canonical answers (48–97 each) with aliases and named near misses; exact, alias, plural, and typos only when unambiguous; "ambiguous" otherwise.
+  - **Settings** (`src/games/settings.ts`, `room.ts`, `http.ts`): hearts 3/5/7 (default 5) validated at Start, recorded, public, reused by Play again; the lobby's hearts are room state (`POST /rooms/:id/game-settings`, host/cohost, casual, revision-checked, persisted), and a Start that shows other hearts is refused (`SETTINGS_CHANGED`). Casual rooms only (`CASUAL_ONLY`); never picked automatically (Quick Party, Smart shuffle).
+  - **Screens** (`apps/web/src/components/mchezo/MchezoJebena.tsx`, `styles/stage91.css`): the lobby hearts choice and guests' label; briefing rules and hearts; the phone's turn screen (category, the jebena with steam and wobble by urgency, holder, text countdown, hearts with numbers, a focused field that sends with Enter, plain feedback for every rejection); watching and out screens; results (places, "kept the jebena", hearts, answers, timeouts, points explained); TV live view and post-game review. Reduced motion and Animations Off keep the jebena still with the same words.
+- **Tests:**
+  - `tests/stage91-jebena.test.ts` (34): bank, matcher, settings, module rules, the room engine (phase clock, boundary race, spoofing, duplicates, late joiner, whole loop with Play again, the match limit with places, restart mid-turn, projections and two rooms, lobby hearts), catalogue and Quick Party.
+  - `tests/stage91-jebena-sockets.test.ts` (5): a real LocalServer with every player on a WebSocket, whole matches at 2, 4 and 10 players; a holder's socket dropping; the deadline boundary.
+  - `scripts/check-jebena-rush.mjs` (101 checks, its own server, real 10-second turns): host 390 px Everyday, guest 320 px Christmas look, guest 390 px reduced motion, TV 1440 px, a second room; screenshots in `docs/stage9/screenshots/`.
+  - Updated for a fifteenth game: `m3`, `manifest`, `room`, `test-batch-200`, `library`, `stage71-quick-party`, `d3-briefing`.
+- **Fixed while building:** a match ended by the room's limit had no standings in its views (the module's `end` stays null), so the results list would have been empty; the standings are now always in the view, with a test.
+- **Not done / limits:** desktop Chromium emulating phone sizes only; real iOS and Android keyboards are `docs/REAL_DEVICE_TESTING.md` Part K, not yet run. The bank is a curated first version (owner review welcome). Practice-only and casual-only, as the brief asks.
+- **Questions for the owner** (defaults in place): spec §11.
+- **Next:** sequential clean fast then full gates on the candidate, the evidence commit, and a new completed report on PR #15; then ChatGPT's review before Stage 9.2.

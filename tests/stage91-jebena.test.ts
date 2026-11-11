@@ -459,8 +459,15 @@ describe("Jebena Rush in the room engine (§4–§6)", () => {
       env.advance(5_000);
     }
     expect(game.status).toBe("finished");
-    expect(["deadline", "completed"]).toContain(game.outcome?.reason);
-    expect(Object.values(game.rawScores).every((v) => Number.isFinite(v))).toBe(true);
+    expect(game.outcome?.reason).toBe("deadline");
+    expect(st().end).toBeNull(); // the room's limit, not the module, ended it
+    // Nobody lost a heart: both still in, equal hearts share first place, equal points.
+    expect(Object.values(game.rawScores)).toEqual([JEBENA_DEFAULT_HEARTS * 10, JEBENA_DEFAULT_HEARTS * 10]);
+    // Every view still carries the places for the results screen.
+    for (const pid of env.ids) {
+      const mine = (env.engine.project("player", pid) as { myGames: { id: string; state: { standings?: { place: number }[] } }[] }).myGames.find((g) => g.id === gid)!;
+      expect(mine.state.standings?.map((r) => r.place)).toEqual([1, 1]);
+    }
   });
 
   it("restart recovery mid-turn: the absolute deadline still applies, nothing is reset or replayed", () => {
