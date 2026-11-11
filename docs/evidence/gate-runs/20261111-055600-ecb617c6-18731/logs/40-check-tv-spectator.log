@@ -1,0 +1,26 @@
+$ node scripts/check-tv-spectator.mjs http://localhost:34627
+# timeout 600s | worker w2 | server http://localhost:34627 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s74r2-full/test-results/20261111-055600-ecb617c6-18731/server-data/w2)
+
+[+3.3s] PASS baseline roster is 3 players — Ada,Bea,Cal
+[+4.7s] PASS unjoined page has no TV button and no room menu
+[+4.7s] PASS unjoined page created no participant
+[+5.5s] PASS joining as TV adds one participant
+[+7.3s] PASS opening TV stage adds no participant
+[+7.3s] PASS closing TV stage removes no participant
+[+37.2s] PASS game stays unfinished while connected TV has not answered — status=playing
+[+37.2s] PASS TV has no answers while only viewing — answers keys=0
+[+37.3s] PASS game finishes once TV abstains
+[+37.3s] PASS TV scores 0 after viewing + abstaining — tvScore=0
+[+37.3s] DEBUG finished rawScores: {"player-1":480,"player-2":480,"player-3":480,"player-4":0} players: [{"id":"player-1","name":"Ada"},{"id":"player-2","name":"Bea"},{"id":"player-3","name":"Cal"},{"id":"player-4","name":"TV"}]
+[+37.3s] PASS identical answers give identical scores for all answering players — scores=480,480,480
+[+40.4s] DEBUG after reload body: 
+[+40.4s] Trivia Showdown · Official3-way tie for firstAAdaBBeaCCalDead heat at the top. Nobody blinked.You came 4th of 40 ptsYou sat this one out. Fair enough.Everyone finished.You: You chose to sit this one outAda: Answered 10 of 10 questionsBea: Answered 10 of 10 questionsCal: Answered 10 of 10 questionsC
+[+40.5s] PASS refresh restores the same TV slot, no duplicate — entries=1
+[+42.7s] PASS rejoining as TV is refused while the old slot exists — 
+[+42.7s] mchezoJoin a gameType the 6-character code on the host’s screen, or scan their 
+[+42.7s] PASS failed rejoin added no participant
+[+45.8s] PASS new name joins as a new slot; old TV slot shows disconnected — Ada:true,Bea:true,Cal:true,TV:false,TV2:true
+[+45.8s] TV SPECTATOR ALL PASSED
+[+45.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":6,"peakOpenPages":5}
+
+# PASS (exit 0) in 45.8s | cpu 4s, peak memory 249 MB

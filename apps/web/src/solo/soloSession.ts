@@ -28,8 +28,16 @@
  * - "refused": any other answer with an error (400/409): shown as given.
  *
  * Mutations whose outcome is uncertain are not blindly repeated:
- * - Start (POST /games) that gets no answer: the room is read once; a new
- *   round of this game that was not there before is adopted as this run's.
+ * - Start (POST /games) that gets no answer (Stage 7.4, review 6786060026):
+ *   the same press (its id, revision and game, unchanged) is sent again, but
+ *   only within the first request's own allowance: a quick failure (the
+ *   connection refused or reset) is resent at once; a request that used its
+ *   whole allowance ends the Start as before. Only the server's answer counts:
+ *   the round it started (a replay, only while that round is still the room's
+ *   latest), a round started now (it never arrived and nothing changed), or a
+ *   stale refusal (the room moved on). A round is never adopted because it
+ *   merely appeared in the room: another tab may have started the same game.
+ *   A press still without an answer is kept, and Try again sends it again.
  * - A room made but not yet joined (the join got no answer): the next try
  *   joins that room with its creation token instead of making another.
  * - Making a room (POST /rooms) that gets no answer can leave an unused room
@@ -48,6 +56,8 @@ export const SOLO_POLL_MS = 1000;
 export const SOLO_REQUEST_TIMEOUT_MS = POLL_TIMEOUT_MS;
 /** Everything Start does (checking the seat, making a room, starting the round). */
 export const SOLO_START_BUDGET_MS = 15_000;
+/** Stage 7.4: times a Start's press is sent again (unchanged) after a quick failure, within the first request's allowance. */
+export const SOLO_START_RESENDS = 2;
 /** The name on the solo seat; nobody else ever sees it. */
 export const SOLO_NAME = "You";
 
@@ -98,7 +108,8 @@ export type SoloFailure = "lost" | "transient" | "refused";
 
 /** A request that did not succeed, and why (see the file comment). */
 export class SoloRequestError extends Error {
-  constructor(readonly kind: SoloFailure, message: string, readonly status?: number) {
+  /** `timedOut`: the request used its whole allowance (as opposed to failing quickly). */
+  constructor(readonly kind: SoloFailure, message: string, readonly status?: number, readonly timedOut = false) {
     super(message);
     this.name = "SoloRequestError";
   }
@@ -150,6 +161,13 @@ export class SoloSession {
   private lastFreshAt = 0;
   /** A room this device made but could not yet join (the join got no answer). */
   private unjoined: { roomId: string; hostClaimToken: string } | null = null;
+  /**
+   * Stage 7.4 (review 6786060026): a Start press still without any answer.
+   * The next Start of the same game in the same room sends it again,
+   * unchanged, so a round it did start is answered as a replay instead of a
+   * second round. Any definite answer, Leave and dispose end it.
+   */
+  private pendingStart: { roomId: string; gameId: string; attempt: { id: string; sessionRevision: number } } | null = null;
 
   constructor(private readonly deps: {
     store: KeyValueStore | null;
@@ -205,7 +223,9 @@ export class SoloSession {
     if (run.signal.aborted) ac.abort(); else run.signal.addEventListener("abort", onRunAbort, { once: true });
     let timer: ReturnType<typeof setTimeout> | undefined;
     const expired = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => { ac.abort(); reject(new SoloRequestError("transient", SOLO_UNREACHABLE)); }, Math.max(1, timeoutMs ?? this.deps.requestTimeoutMs ?? SOLO_REQUEST_TIMEOUT_MS));
+      // Reject as timed out first, then abort: aborting settles `stopped` too,
+      // and the race must report the timeout (Stage 7.4: a timed-out Start is not resent).
+      timer = setTimeout(() => { reject(new SoloRequestError("transient", SOLO_UNREACHABLE, undefined, true)); ac.abort(); }, Math.max(1, timeoutMs ?? this.deps.requestTimeoutMs ?? SOLO_REQUEST_TIMEOUT_MS));
     });
     const stopped = new Promise<never>((_, reject) => {
       const stop = () => reject(new SoloRequestError("transient", "stopped"));
@@ -301,20 +321,6 @@ export class SoloSession {
     }
   }
 
-  /**
-   * Start's POST /games got no answer, so the round may or may not exist.
-   * Read the room once: a round of this game that was not there before is
-   * the one this Start made, and is adopted. Otherwise nothing is assumed.
-   */
-  private async reconcileStart(gameId: string, before: Set<string>, deadline: number): Promise<string | undefined> {
-    try {
-      const proj = await this.projectionOf(this.seat!, this.budget(deadline));
-      return (proj.games ?? []).find((g) => g.gameId === gameId && !before.has(g.id) && isOpen(g.status))?.id;
-    } catch {
-      return undefined;
-    }
-  }
-
   /** Start a new round (Start, Play again, Try again). A round still open is replaced by the server. */
   async start(gameId: string): Promise<void> {
     if (this.disposed || this.state.phase === "starting") return; // a double tap on Start
@@ -325,22 +331,43 @@ export class SoloSession {
     try {
       const proj = await this.ensureSeat(gen, deadline);
       if (!this.isCurrent(gen)) return;
-      const before = new Set((proj?.games ?? []).map((g) => g.id));
-      const openRound = (proj?.games ?? []).some((g) => isOpen(g.status));
-      let gid: string;
-      try {
-        gid = (await this.post<{ gameId: string }>(`/rooms/${this.seat!.roomId}/games`, { gameId, official: false }, this.budget(deadline))).gameId;
-      } catch (e) {
-        if (!this.isCurrent(gen)) return;
-        if (!(e instanceof SoloRequestError) || e.kind !== "transient") throw e;
-        const adopted = await this.reconcileStart(gameId, before, deadline);
-        if (!this.isCurrent(gen)) return;
-        if (!adopted) throw e;
-        gid = adopted;
+      const openIds = (proj?.games ?? []).filter((g) => isOpen(g.status)).map((g) => g.id);
+      // Stage 7.4 (clarification 6783492788, review 6786060026): a press has
+      // its own id and the room revision it was made against (read just now;
+      // a room made in this Start is at 0). The server replays it only while
+      // its round is still the latest, and refuses it as stale (SESSION_CONFLICT)
+      // once the room has moved on (another tab, a delayed request): then it
+      // starts, abandons and uses up nothing, and the refusal is shown with
+      // Try again, which makes a new press. A press that got no answer at all
+      // is sent again unchanged (here, and by the next Start of this game).
+      const roomId = this.seat!.roomId;
+      const pending = this.pendingStart?.roomId === roomId && this.pendingStart.gameId === gameId ? this.pendingStart : null;
+      const attempt = pending?.attempt ?? { id: uuidV4(), sessionRevision: proj?.session?.revision ?? 0 };
+      this.pendingStart = { roomId, gameId, attempt };
+      let gid: string | undefined;
+      // Every send of this press fits in the first request's allowance (and
+      // the Start's budget), so a Start with no answer ends when it did before.
+      const sendsEnd = Math.min(deadline, this.now() + (this.deps.requestTimeoutMs ?? SOLO_REQUEST_TIMEOUT_MS));
+      for (let resent = 0; gid === undefined; resent++) {
+        try {
+          gid = (await this.post<{ gameId: string }>(`/rooms/${roomId}/games`, { gameId, official: false, attempt }, Math.max(1, Math.min(this.budget(deadline), sendsEnd - this.now())))).gameId;
+        } catch (e) {
+          if (!this.isCurrent(gen)) return;
+          const noAnswer = e instanceof SoloRequestError && e.kind === "transient";
+          // Only a quick failure is resent. A request that used its whole
+          // allowance ends the Start, whatever the clock says (timers can fire
+          // a little early); Try again resends the same press.
+          const quickFailure = noAnswer && !(e as SoloRequestError).timedOut;
+          if (quickFailure && resent < SOLO_START_RESENDS && sendsEnd - this.now() > 0) continue;
+          if (!noAnswer) this.pendingStart = null; // a definite answer ends the press
+          throw e;
+        }
       }
+      this.pendingStart = null;
       if (!this.isCurrent(gen)) return;
       this.lastFreshAt = this.now();
-      this.set({ phase: "playing", gameInstanceId: gid, ...(openRound ? { replacedOpenRound: true } : {}) });
+      // "Replaced" only when an open round other than this press's own was there.
+      this.set({ phase: "playing", gameInstanceId: gid, ...(openIds.some((id) => id !== gid) ? { replacedOpenRound: true } : {}) });
       await this.refresh();
       if (this.isCurrent(gen) && this.state.phase === "playing") this.startPolling();
     } catch (e) {
@@ -433,6 +460,7 @@ export class SoloSession {
     const seat = this.seat;
     const playing = this.state.phase === "playing" || this.state.phase === "starting";
     this.newRun(); // whatever the round still has in flight is aborted, and its replies ignored
+    this.pendingStart = null; // a later Start is a new press, made against the room as it is then
     this.set({ phase: "idle" });
     if (!playing || !gid || !seat) return;
     const f = this.deps.fetch ?? fetch;
@@ -449,6 +477,7 @@ export class SoloSession {
   dispose(): void {
     this.stopPolling();
     this.disposed = true;
+    this.pendingStart = null;
     this.generation++;
     this.run.abort();
   }

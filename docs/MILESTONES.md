@@ -34,11 +34,15 @@ All milestones **locally authorized**, not remote publication/deployment. Order 
   - **Solo shelf on desktop** (polish): one tall column, whose large artwork pushes other games below the fold. Direction: compact phone cards and a wider desktop layout, keeping touch targets and bests.
   - **Pattern Pulse's ready screen** (polish): it says the overall clock keeps running but doesn't show the time left. Add the remaining time, or a low-time warning, before later patterns.
   - **Dependency advisories** (deployment readiness): triage in `docs/deploy/npm-audit-2026-11-10.md`. Use targeted updates with tests; no automatic fixes.
-- **Practice content variety in solo and casual rooms** (queued 2026-11-10 by ChatGPT's architecture decision on PR #7, comment 6771088990, under D-WF-01).
+- **Practice content variety in solo and casual rooms** (queued 2026-11-10 by ChatGPT's architecture decision on PR #7, comment 6771088990, under D-WF-01). **Done in Stage 7.4** (PR #11, `docs/stage7/stage74.md`, D-S74-01 … 07); kept here for its history.
   - **Why:** practice selection takes an already-used item before a fresh official one. That protects official content in a Cup. But a room that never plays official games would repeat one item once most of the library is approved for official play (Stage 6.2 spec §3.4, §5 item 4; pinned by a unit test in `tests/stage62-solo-shelf.test.ts`).
   - **When:** with the smoother-session / content-variety work, before library eligibility changes make it visible. Today's library has 12 practice-only Connections boards, so it doesn't show yet.
   - **Direction:** solo and casual rooms prefer unused practice-usable content, then the least recently used.
   - **Must not:** change Cup selection, eligibility validation or Cup usage. Update the pinned test deliberately.
+- **Seasonal content in everyday play** (a concrete check from ChatGPT's review 6786060026 on PR #11, for the seasonal-content separation milestone it calls already approved). Not started.
+  - **Seen:** a shipped Word Connections board with Christmas clues dealt in everyday solo play.
+  - **The boards:** `con-s4-03` ("On a Christmas tree", "Santa's reindeer") and `con-legacy-1` (Christmas foods, Christmas decorations, reindeer names). Stage 7.4 put `con-legacy-1` into solo and casual rotation (it is approved; D-S74-01).
+  - **Direction, when that milestone starts:** keep seasonal content out of everyday solo and casual play unless a seasonal mode is chosen. Content isn't changed before then.
 
 ## Stop-the-line defects
 P0: private word/role/answer exposed; host spoof; duplicated or lost official scoring; repeated server crash/data loss; write access to real external services without authorization; harmful secret leak. P1: iPhone unusable, cannot rejoin, game permanently stuck, scores incorrect, 11 games not actually playable, Memory Book fabricates real people/events. P2: minor styling, occasional confetti defect, nonessential animation.

@@ -1,0 +1,28 @@
+Mchezo gate fast | run 20261111-034429-8147b726-9520
+  revision 8147b7267935e2beb7470ebe16bec908f97e19b3 (clean tree) | fingerprint dee703599024 (432 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  31 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.03 for 3 worker(s) (measured, 25 run(s))
+  estimate this run: 24–80s (low-confidence) · the same steps one after another: about 1m 15s · longest step unit-tests ~31s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.03 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: typecheck-server, typecheck-web
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s74r-fast/test-results/20261111-034429-8147b726-9520
+        start typecheck-server on w1 (usually 11s)
+        start typecheck-web on w2 (usually 10s)
+        start lint on w3 (usually 17s)
+[ 1/5] PASS         9.9s  typecheck-web  w2
+        start unit-tests on w2 (usually 31s)
+[ 2/5] PASS        10.8s  typecheck-server  w1
+        start build-web on w1 (usually 6s)
+[ 3/5] PASS        15.3s  lint  w3
+[ 4/5] PASS         6.2s  build-web  w1
+[ 5/5] PASS        31.6s  unit-tests  w2
+
+PASSED (exit 0) | fast | run 20261111-034429-8147b726-9520
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 42s · step time 1m 14s (sum) · 3 workers, 59% busy · 1.76× the same steps run one after another
+           predicted 24–79s (about 32s, low-confidence) → actual 42s (+31%)
+           longest  unit-tests 32s, lint 15s, typecheck-server 11s · the longest step is 75% of the wall time
+           machine  CPU mean 82%, peak 98% · memory available ≥ 14230 MB · load peak 3.48
+           contention ×0.919 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s74r-fast/test-results/20261111-034429-8147b726-9520/report.json

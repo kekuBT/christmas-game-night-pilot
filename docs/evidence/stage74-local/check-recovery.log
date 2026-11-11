@@ -1,0 +1,22 @@
+PASS Bea gets a recovery code
+PASS touch target: 'I’ve saved it' ≥ 44px
+PASS 2. a wrong code gets a plain error
+PASS 2. the wrong code changed nothing (old tab still in)
+PASS 1. recovery shows a fresh code
+PASS 1. the new device is back in Bea's seat
+PASS 1. no duplicate seat
+PASS 1. the old tab is told its seat moved
+PASS 1. the old tab's credential is really dead (server says 401) — 401
+PASS 1. after OK the old tab is back at the start screen (Home)
+PASS 1. the room sees a notice
+PASS 3. Cal's new device shows a match code
+PASS 3. the host sees the request with the same number
+PASS 3. approving needs a second, deliberate tap
+PASS 3. Cal's new device gets the seat and a fresh code
+PASS 3. no Back button while the new code is shown
+PASS 3. same seat as before
+PASS 3. the room is told who restored the seat
+PASS 3. the request card is gone
+PASS no horizontal overflow on the recovery screens
+RECOVERY ALL PASSED
+exit 0

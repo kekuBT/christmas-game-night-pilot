@@ -108,7 +108,7 @@ describe("draft batch 1 (Asia, 2026 World Cup, NFL)", () => {
   it("never reaches official selection, even in test mode", () => {
     for (let seq = 0; seq < 40; seq++) {
       for (const players of [4, 7, 10]) {
-        const r = selectContent({ lib, gameId: "category-sprint", count: 3, mode: "official", cupId: `cup-${seq}`, usage: {}, seq, today: "2026-11-07", sprint: { players, sizePolicy: 1 } });
+        const r = selectContent({ roomKind: "cup", lib, gameId: "category-sprint", count: 3, mode: "official", cupId: `cup-${seq}`, usage: {}, seq, today: "2026-11-07", sprint: { players, sizePolicy: 1 } });
         if (r.ok) for (const it of r.items) expect(drafts.map((d) => d.id)).not.toContain(it.item.id);
       }
     }

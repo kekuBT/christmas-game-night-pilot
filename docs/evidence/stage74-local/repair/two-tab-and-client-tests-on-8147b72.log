@@ -1,0 +1,102 @@
+source: 0180dfd423f8c31870fbabe7c47d510b0df09757 (identical to 8147b72 outside docs/), Wed Nov 11 05:43:22 UTC 2026
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt74
+
+ ✓ tests/stage61-solo-client.test.ts > personal best on this device > first score, higher, lower and a tie
+ ✓ tests/stage61-solo-client.test.ts > personal best on this device > rounds under other rules never compare, and their entries are kept
+ ✓ tests/stage61-solo-client.test.ts > personal best on this device > a record in this game's slot under other rules neither blocks nor compares with a new score (review of PR #6)
+ ✓ tests/stage61-solo-client.test.ts > personal best on this device > malformed or hostile stored data reads as no best and is replaced on the next save
+ ✓ tests/stage61-solo-client.test.ts > personal best on this device > no storage, or a write that throws, never breaks play: the caller is told it wasn't saved
+ ✓ tests/stage61-solo-client.test.ts > personal best on this device > a stored solo seat must be complete to be used
+ ✓ tests/stage61-solo-client.test.ts > the solo session against a real server > with storage working: one room for the device, reused round after round and by a new screen
+ ✓ tests/stage61-solo-client.test.ts > the solo session against a real server > with storage blocked: the seat is kept for the page, so rounds don't each make a room
+ ✓ tests/stage61-solo-client.test.ts > the solo session against a real server > storage that reads but can't be written (holding a dead seat): still one room for the page
+ ✓ tests/stage61-solo-client.test.ts > the solo session against a real server > a seat is reused only with its token: a known room id with a wrong token gets a new room of its own
+ ✓ tests/stage74-content-variety.test.ts > selection: casual and solo rooms deal unused content first, then the least recently used (V1) > casual: the practice-only board and both approved official boards come before any repeat; the rejected one never
+ ✓ tests/stage74-content-variety.test.ts > selection: casual and solo rooms deal unused content first, then the least recently used (V1) > casual: once all are used, the least recently used comes next, in the same order again
+ ✓ tests/stage74-content-variety.test.ts > selection: casual and solo rooms deal unused content first, then the least recently used (V1) > solo: the practice-only board and both approved official boards come before any repeat; the rejected one never
+ ✓ tests/stage74-content-variety.test.ts > selection: casual and solo rooms deal unused content first, then the least recently used (V1) > solo: once all are used, the least recently used comes next, in the same order again
+ ✓ tests/stage74-content-variety.test.ts > selection: casual and solo rooms deal unused content first, then the least recently used (V1) > a game that needs several items: unused ones first across games, then the oldest
+ ✓ tests/stage74-content-variety.test.ts > selection: casual and solo rooms deal unused content first, then the least recently used (V1) > deterministic: the same library, history and sequence give the same items; tie-breaking follows the seed
+ ✓ tests/stage74-content-variety.test.ts > selection: casual and solo rooms deal unused content first, then the least recently used (V1) > one eligible item: dealt every time; none: refused with the same reason as before
+ ✓ tests/stage74-content-variety.test.ts > selection: casual and solo rooms deal unused content first, then the least recently used (V1) > a casual or solo room never selects official content (the room refuses first; the selector too)
+ ✓ tests/stage74-content-variety.test.ts > a Family Cup's selection is unchanged (V2) > Cup practice keeps its rule: practice-only and used items first, a fresh official item only after (so this pool repeats the practice board)
+ ✓ tests/stage74-content-variety.test.ts > a Family Cup's selection is unchanged (V2) > Cup official play takes only fresh approved boards and is refused once they are used; practice that took one retired it
+ ✓ tests/stage74-content-variety.test.ts > a Family Cup's selection is unchanged (V2) > a Cup gives exactly what it gave before Stage 7.4: practice and official, small pool and shipped library (pinned at af39c78)
+ ✓ tests/stage74-content-variety.test.ts > a Family Cup's selection is unchanged (V2) > rooms never share history: a casual room's plays leave a Cup room's usage untouched
+ ✓ tests/stage74-content-variety.test.ts > in a room: persistence, briefings and retries (V3) > solo: three different boards, then the least recently used; a restart in between continues the order
+ ✓ tests/stage74-content-variety.test.ts > in a room: persistence, briefings and retries (V3) > solo, an identical duplicate: the same round, nothing more used; also after a restart
+ ✓ tests/stage74-content-variety.test.ts > in a room: persistence, briefings and retries (V3) > solo, a mismatched command with a known id (another game, another revision): refused, nothing changes
+ ✓ tests/stage74-content-variety.test.ts > in a room: persistence, briefings and retries (V3) > solo, start A then B, then A replayed (late): SESSION_CONFLICT; B keeps playing, nothing abandoned or used, A never handed back
+ ✓ tests/stage74-content-variety.test.ts > in a room: persistence, briefings and retries (V3) > solo, a press made before a newer round but never seen (a delayed request, another tab): stale, nothing abandoned or used
+ ✓ tests/stage74-content-variety.test.ts > in a room: persistence, briefings and retries (V3) > solo, a press forgotten after 64 newer ones and replayed: stale by its revision, never a new start
+ ✓ tests/stage74-content-variety.test.ts > in a room: persistence, briefings and retries (V3) > solo, without a press id (API compatibility, kept explicit): a plain new round, as before; the app always sends one
+ ✓ tests/stage74-content-variety.test.ts > in a room: persistence, briefings and retries (V3) > solo: the projection carries the room revision (for the app's next press), never the remembered presses
+ ✓ tests/stage74-content-variety.test.ts > in a room: persistence, briefings and retries (V3) > casual with a briefing: the board is chosen at the start, used only when play begins; a cancel uses nothing and the next start deals the same board
+ ✓ tests/stage61-solo-client.test.ts > the solo session against a real server > two tabs on one seat: the later Start replaces the round; the earlier tab's answer and Leave can't touch it
+ ✓ tests/stage61-solo-client.test.ts > the solo session against a real server > after dispose, nothing a request still in flight returns reaches the screen
+stdout | tests/stage74-content-variety.test.ts > over HTTP: a solo press id and a restart > the same press twice: 201 then 200 (replay), one round, one use; restored after a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-s74-http-pKrTh0)
+
+ ✓ tests/stage74-content-variety.test.ts > over HTTP: a solo press id and a restart > the same press twice: 201 then 200 (replay), one round, one use; restored after a restart
+stdout | tests/stage74-content-variety.test.ts > pre-existing defect (found while testing V3): a solo Start after a server restart > is no longer refused: the one pressing Start in a solo room is present (reproduced on af39c78: 400 'Need at least 1 connected players', every time)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-s74-solo-restart-7xwv73)
+
+ ✓ tests/stage74-content-variety.test.ts > pre-existing defect (found while testing V3): a solo Start after a server restart > is no longer refused: the one pressing Start in a solo room is present (reproduced on af39c78: 400 'Need at least 1 connected players', every time)
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > a create that never answers ends Start at its timeout with the request aborted; Try again works
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > headers, then a body that stalls: Start still ends at its timeout and the body read is aborted
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > dispose while a request is pending: it is aborted, Start returns at once, and nothing reaches the screen after
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > Leave while Start waits: a reply that still arrives afterwards cannot revive the run
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > Start's reply is lost to a dropped connection after the server started the round: the same press is sent again at once and answered as a replay, not started twice
+ × tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > Start's reply never comes after the server started the round: the Start ends within its request allowance, and Try again sends the same press, answered as a replay; one round
+   → expected { phase: 'playing', …(3) } to match object { Object (phase, failure) }
+(8 matching properties omitted from actual)
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > Start gets no answer and the round never reached the server: an error, and Try again starts one
+ ✓ tests/stage74-content-variety.test.ts > MCHEZO_CONTENT_DIR is for tests only (§4.6) > is refused when NODE_ENV=production (the server does not start) 700ms
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > a room made but whose join got no answer is joined on Try again, not replaced
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > a lost seat (401: the server no longer accepts the seat): the round says so, polling stops, and a new round starts in a new room
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > a lost seat (404: the server no longer has the room): the round says so, polling stops, and a new round starts in a new room
+ ✓ tests/stage74-content-variety.test.ts > MCHEZO_CONTENT_DIR is for tests only (§4.6) > otherwise loads that directory instead of the shipped library, and says so
+ ✓ tests/stage74-content-variety.test.ts > the shipped library (normal and test mode) > normal mode: a casual room plays all 13 Connections boards before repeating
+ ✓ tests/stage74-content-variety.test.ts > the shipped library (normal and test mode) > test mode (all approved): a casual room plays all 13 Connections boards before repeating
+ ✓ tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A's reply is lost (the connection drops) after the server started its round: the same press, sent again at once, is answered as a replay; one round, one use
+ ✓ tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A never reaches the server while B starts the same game: A is refused as stale and never adopts B's round; B is undisturbed; no extra use
+ ✓ tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A started, but B replaced it before A's press was sent again: A is refused, never adopts B's round; B is undisturbed; no extra use
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > a passing outage (500s, then no network) keeps the round and the seat, says so after the allowance, and recovers
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > checking a good seat fails (500): Start fails, no new room is made, and Try again reuses the room
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > checking a good seat fails (network): Start fails, no new room is made, and Try again reuses the room
+ ✓ tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A's request hangs (never arrives) while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale; B is undisturbed
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > checking a good seat fails (no reply): Start fails, no new room is made, and Try again reuses the room
+ ✓ tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > an answer whose request gets no reply is bounded too, and the round carries on
+ ✓ tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > no network at all: the Start ends within its budget; Try again sends the same press (a replay if it had arrived), so nothing starts twice 817ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage61-solo-client.test.ts > the solo session under faults (review of PR #6) > Start's reply never comes after the server started the round: the Start ends within its request allowance, and Try again sends the same press, answered as a replay; one round
+AssertionError: expected { phase: 'playing', …(3) } to match object { Object (phase, failure) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+-   "failure": "transient",
+-   "phase": "error",
++   "phase": "playing",
+  }
+
+ ❯ tests/stage61-solo-client.test.ts:424:23
+    422|     await s.start("math-mayhem");
+    423|     expect(Date.now() - t0).toBeLessThan(1_000); // one request allowa…
+    424|     expect(s.current).toMatchObject({ phase: "error", failure: "transi…
+       |                       ^
+    425|     expect([srv.counts.games, srv.counts.gamePosts]).toEqual([1, 1]);
+    426|     await s.start("math-mayhem"); // Try again: the same press
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 58 passed (59)
+   Start at  05:43:25
+   Duration  3.94s (transform 963ms, setup 0ms, collect 1.89s, tests 4.22s, environment 0ms, prepare 139ms)
+

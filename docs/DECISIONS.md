@@ -841,3 +841,43 @@ The spec is `docs/stage7/stage73.md`. The instruction is ChatGPT's review and ha
   - **Notices:** a short public notice, worded for the new host, the former host and everyone else.
   - **The TV:** marks the host and names them.
 - **D-S73-05 It lives in the room menu's host tools.** The "Players and roles" card has Make cohost as before. The host of a casual room also gets Make host for connected players, with a named confirmation and busy, refused and uncertain states. The results screen's What's next stays uncluttered.
+
+## Stage 7.4: content variety in solo and casual rooms; the cancel wording (2026-11-11, branch `claude/stage7-4-content-variety`, from the Stage 7.3 head `af39c78`)
+
+The spec is `docs/stage7/stage74.md`. The instruction is ChatGPT's review and handoff on PR #10 (comment 6783345938).
+
+- **D-S74-01 Casual and solo rooms deal unused content first, then the least recently used** (`selectContent`, the variety rule).
+  - **The pool:** every practice-usable item (not rejected) whose answer the game's input accepts, the same checks as before.
+  - **The order:** a seeded shuffle for ties, then by last use in this room: never used first, then the oldest. Practice-only and approved items are alike here.
+  - **Edge cases:** one eligible item is dealt every time; none is refused as before.
+  - **Why:** these rooms never play official games and their history belongs to no Cup, so the Cup's rule (keep fresh official items for official play) protected nothing and made a room that never plays official games repeat one item once most content is approved.
+  - **The Stage 6.2 pinned test** ("a solo room would deal the same board every time") was changed on purpose: 13 boards now come before any repeat, in normal and test mode.
+  - *Alternative rejected:* practice-only items first, then approved ones. It adds an order that protects nothing in these rooms.
+- **D-S74-02 The room kind is explicit and required** (`SelectionRequest.roomKind`).
+  - The room passes its own kind. `"cup"` runs the official and practice rules unchanged, pinned against `af39c78` in tests: the small pool and the shipped library in both modes give identical items.
+  - An official request from a non-Cup room is refused by the selector too (the room refuses it first, `NOT_A_CUP_ROOM`).
+  - *Alternative rejected:* an optional field defaulting to the Cup's rules. A future caller could get a room's rules by omission.
+- **D-S74-03 Consumption semantics are kept, now written down** (spec §3.2, §4.3).
+  - **Shown, so used:** a solo round, from its start, including one left or replaced.
+  - **Not shown, so not used:** a casual briefing's frozen content until play begins; a cancelled briefing uses nothing, so the next start of that game deals the same choice.
+  - **No effect:** reloads and reconnects. **Restored:** usage and sequence after a restart.
+  - No rollback is introduced.
+- **D-S74-04 Solo starts carry a press id, fresh-checked against a persisted revision** (clarification 6783492788).
+  - **The revision:** every new solo round moves the room's persisted, monotonic revision on; it is projected to the solo player. A press must be made against the current revision; one made before a newer round (another tab, a delayed request, or a press forgotten after 64 newer ones) is refused as stale (`SESSION_CONFLICT`, with the current session) and starts, abandons and uses up nothing.
+  - **Replays:** a seen press replays only as the whole original command (actor, game and base revision), and only while it is still the room's latest Start; otherwise `SESSION_CONFLICT`. No older round is ever returned as current. Records: the room's bounded, persisted session records (64), never projected.
+  - **The app** sends a new id with each press, against the revision it has just read; a conflict is shown with Try again, which reads the room and presses again. A Start with no answer is recovered by the same press (D-S74-08).
+  - **API compatibility:** a solo Start without a press id is still a plain new round (explicit and tested); the app always sends one.
+  - *Alternative rejected (the first draft):* a press id with no revision check. A forgotten or delayed old press could then still start a round (review of that draft, 6783492788).
+- **D-S74-05 A solo Start marks its player present** (a pre-existing defect, found while testing D-S74-03).
+  - **The defect:** a server restart marks every player not connected, and a solo room has no socket, so nothing marked its player present again. Every solo Start was refused ("Need at least 1 connected players"), and the app showed that refusal on every Try again. Reproduced over HTTP on `af39c78`.
+  - **The fix:** in a solo room, the one pressing Start is the player and is present. Casual and Cup rooms still count who is actually connected (tested).
+  - *Alternative rejected:* treating any authenticated request as presence for every room kind. That would change casual and Cup presence, which sockets track.
+- **D-S74-06 The cancel confirmation names the actual destination** (review 6783345938).
+  - **The text:** "You'll go back to the {game} results." or "You'll go back to the lobby.", then "Nothing is scored or used up, and everyone else goes back to what they had open."
+  - **How:** it is worked out with the same rule that decides the screen after a cancel (`deriveShowPhase` with no game on), for the person cancelling.
+  - *Alternative rejected:* routing everyone to the lobby after a cancel. Stage 7.2's audited behaviour (a cancelled rematch returns to the results, with What's next) is right; only the words were wrong.
+- **D-S74-08 A solo Start with no answer is recovered only by the same press** (review 6786060026).
+  - **The rule:** the app sends the same press again (id, base revision and game, unchanged) and acts only on the server's answer: a replay of its own round while still the latest, a round started now, or a stale refusal. It never adopts a round because it appeared in the room, since another tab may have started the same game.
+  - **Bounds:** only a quick failure is resent at once (up to two resends), every send within the first request's own allowance, so a Start with no answer ends as before. A request that used its whole allowance (flagged `timedOut`) is never resent in the same Start, whatever the clock says, since timers can fire a little early (`ecb617c`, after a focused rerun on `8147b72` caught it once; spec §7.5). A press still without an answer is kept for Try again; any definite answer, Leave and dispose end it.
+  - *Alternative rejected:* the earlier recovery, reading the room and adopting a new round of the same game. It adopted another tab's round (reproduced by ChatGPT and in tests). *Also rejected:* resending after a timeout as well. That would stretch a Start with no answer from about 6 s to the whole 15 s budget.
+- **D-S74-07 `MCHEZO_CONTENT_DIR`, testing only.** It loads the content library from another directory (a small controlled pool for the browser checks). It is refused when `NODE_ENV=production`, like the other test settings, and no request can set it.

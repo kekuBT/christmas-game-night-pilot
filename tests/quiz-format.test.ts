@@ -90,8 +90,8 @@ describe("E10 selection is not activated", () => {
     for (const g of QUIZ) for (const li of stripped.byGame.get(g) ?? []) { delete (li.item as Tagged).mechanic; delete (li.item as Tagged).negativeStem; }
     for (const g of QUIZ) for (const mode of ["official", "practice"] as const) for (let seq = 0; seq < 5; seq++) {
       const req = { gameId: g, count: 10, mode, cupId: "cup-e10", usage: {}, seq, today: "2026-11-07" };
-      const a = selectContent({ lib, ...req });
-      const b = selectContent({ lib: stripped, ...req });
+      const a = selectContent({ roomKind: "cup", lib, ...req });
+      const b = selectContent({ roomKind: "cup", lib: stripped, ...req });
       expect(a.ok, `${g} ${mode}`).toBe(b.ok);
       if (a.ok && b.ok) expect(a.items.map((x) => x.item.id)).toEqual(b.items.map((x) => x.item.id));
     }

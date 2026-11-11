@@ -1,0 +1,87 @@
+$ node scripts/check-solo.mjs http://localhost:32969
+# timeout 600s | worker w3 | server http://localhost:32969 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s74r-full/test-results/20261111-034515-8147b726-12402/server-data/w3)
+
+[+1.0s] PASS Home offers Play solo, Host a game and Join a room
+[+1.4s] PASS Play solo offers only the real solo games (Stage 6.2: Math Mayhem, Pattern Pulse, Word Connections) — solo-game-math-mayhem, solo-game-pattern-pulse, solo-game-word-connections
+[+1.4s] PASS the solo list is honest about requirements: 1–10 players, best with 2+
+[+1.4s] PASS the other games are pointed to rooms, with no invented player minimum
+[+1.4s] PASS a fresh device has no personal best yet
+[+2.0s] PASS tap 2 is the round itself: no room code, no name, no lobby
+[+15.5s] PASS round 1 (5 right): results show 5 of 10 and a score in range — {"score":600,"correct":5,"pb":"Your first personal best on this device!"}
+[+15.5s] PASS round 1: the first personal best on this device — Your first personal best on this device!
+[+18.5s] PASS on the results screen polling has stopped — 0 projection requests in 3 s
+[+32.3s] PASS round 2 (all wrong): a fresh round, 0 of 10, 0 points (nothing carried over) — {"score":0,"correct":0,"pb":"Your personal best on this device is still 600."}
+[+32.3s] PASS round 2: a lower score keeps the personal best — Your personal best on this device is still 600.
+[+46.5s] PASS round 3 (all right, first answer double-tapped): 10 of 10, at least 1,000 — {"score":1200,"correct":10,"pb":"New personal best on this device! Your previous best was 600."}
+[+46.5s] PASS round 3: a higher score is a new personal best, naming the old one — New personal best on this device! Your previous best was 600.
+[+46.5s] PASS the server holds exactly the three rounds, each with its own score — 600,0,1200
+[+46.5s] PASS the double tap counted once: 10 answers in round 3
+[+46.5s] PASS no round is left playing
+[+46.5s] PASS solo rounds are never official
+[+46.9s] PASS Back to solo: the list shows the new personal best
+[+46.9s] PASS browser Back from the solo list (after three rounds) is Home, not an old round
+[+47.9s] PASS Leave round asks first
+[+48.0s] PASS Keep playing keeps the round
+[+48.1s] PASS after leaving, the round is removed on the server (nothing left playing)
+[+48.1s] PASS leaving left the personal best as it was
+[+51.1s] PASS after leaving, nothing polls any more — 0 projection requests in 3 s
+[+51.1s] PASS back home: no phantom Rejoin for the solo room
+[+53.0s] PASS browser Back mid-round: the round is removed too
+[+54.0s] PASS reload mid-round: the round's start screen, not a trapped loading screen
+[+56.5s] PASS after the reload nothing polls until Start
+[+56.6s] PASS Start after a reload says the interrupted round was replaced
+[+56.6s] PASS the interrupted round is gone; exactly one round plays
+[+58.2s] PASS a second tab's Start says the open round was replaced
+[+58.4s] PASS tab A, whose round was replaced, goes back to its Start screen (not stuck)
+[+58.8s] PASS the earlier tab's round is gone; the replacement plays
+[+58.8s] PASS the earlier tab's tap and leaving scored nothing in the replacement — {}
+[+72.0s] PASS the replacement round plays to its own result (10 of 10) — {"score":1000,"correct":10,"pb":"Your personal best on this device is still 1,200."}
+[+72.0s] PASS the second tab reused the device's solo room (no new room) — 0 rooms created
+[+73.0s] PASS Mchezo home from the results: Home, with no phantom Rejoin
+[+73.0s] PASS one solo room for this device across every round, leave, Back, reload and tab — 1 rooms created
+[+73.2s] PASS blocked storage: the list says bests can't be kept, and still offers Start
+[+87.7s] PASS blocked storage: the round plays to its results — {"score":360,"correct":3,"pb":"Your score couldn’t be saved as a personal best: this device’s storage is unavailable."}
+[+87.7s] PASS blocked storage: the results say the best couldn't be saved — Your score couldn’t be saved as a personal best: this device’s storage is unavailable.
+[+88.7s] PASS blocked storage: Play again still works
+[+89.7s] PASS blocked storage: the seat is kept for the page, one room across replays and a new Start — 1 rooms created
+[+90.0s] PASS malformed stored data reads as no best (no crash)
+[+90.1s] PASS a best under other rules (version 0) is not shown as this game's best
+[+104.2s] PASS a round under the current rules is its own first best (not compared with version 0) — Your first personal best on this device!
+[+104.2s] PASS the other version's entry is kept untouched beside the new one — {"math-mayhem@0":{"score":99999,"at":1,"rulesVersion":0},"math-mayhem@1":{"score":240,"at":1794369593369,"rulesVersion":1}}
+[+104.3s] PASS plain http (real insecure context at 192.0.2.2): no crypto.randomUUID — {"secure":false,"randomUUID":"undefined"}
+[+118.3s] PASS plain http: the whole round plays and every answer counts (7 of 10) — {"score":840,"correct":7,"pb":"Your first personal best on this device!"}
+[+118.6s] PASS keyboard: Tab reaches Start on the solo list
+[+118.7s] PASS keyboard: Enter on Start begins the round
+[+119.4s] PASS keyboard: all ten questions answered with Tab and Enter — 10 answered
+[+119.4s] PASS keyboard: the results move focus to the score heading
+[+119.4s] PASS keyboard: Tab from the score reaches Play again
+[+119.5s] PASS keyboard: Tab reaches Leave round
+[+119.5s] PASS keyboard: the leave question focuses Keep playing (the safe choice)
+[+119.5s] PASS keyboard: Enter on Keep playing keeps the round
+[+126.2s] PASS I1 Start with no reply ends in an error with Try again (not a stuck Starting…)
+[+126.2s] PASS I1 it ended within the request allowance (about 6 s), and the request had been sent — 6522 ms, 1 held
+[+126.4s] PASS I1 Try again starts the round
+[+126.4s] PASS I1 still one room for this device — 1 rooms
+[+135.3s] PASS I2 a passing outage: the round says it's reconnecting
+[+135.3s] PASS I2 only after the allowance (not on the first failed poll) — 8875 ms
+[+135.3s] PASS I2 the round stays on screen meanwhile
+[+136.4s] PASS I2 once the server answers, the reconnecting note goes
+[+136.4s] PASS I2 the round carries on: a question to answer
+[+136.6s] PASS I2 the answer is taken
+[+136.6s] PASS I2 same room, same seat, no new room — 1 rooms
+[+137.4s] PASS I3 a lost room: the round says it was lost, with Start a new round
+[+140.4s] PASS I3 polling has stopped — 0 projection requests in 3 s
+[+140.5s] PASS I3 Start a new round plays in a new room
+[+140.5s] PASS I3 the lost room was replaced by one new room — 2 rooms, room-mwblc3n0-984415 -> room-mwblcjaf-882620
+[+141.7s] PASS I4 the seat check fails for a moment: Start says so, with Try again
+[+141.7s] PASS I4 no new room was made for a passing failure — 2 rooms
+[+142.1s] PASS I4 Try again plays in the same room
+[+142.1s] PASS I4 same room as before the failure — 2 rooms
+[+142.7s] PASS short test clock: the solo round's window is about 12 s — 11996 ms
+[+142.7s] PASS control: the same answer, in time, is accepted — {"accepted":true,"result":{"points":0,"total":0,"speedBonus":"not-timed","refreshAdvice":"This question wasn’t timed, so no speed bonus. Refresh the page to get the latest version of the game."}}
+[+156.2s] PASS a late answer after the round's time is up is refused — {"accepted":false,"reason":"PHASE_CLOSED"}
+[+156.2s] PASS the round finished on its deadline with only the in-time answer counted — finished answers ["math-1"]
+[+156.2s] SOLO ALL PASSED
+[+156.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":7,"peakOpenPages":2}
+
+# PASS (exit 0) in 156.2s | cpu 8.3s, peak memory 263 MB

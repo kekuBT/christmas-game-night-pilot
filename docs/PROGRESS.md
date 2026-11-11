@@ -1797,3 +1797,70 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Two copies of the host role:** `hostId` and the cohost set, plus each player's flags. Every path that changes one must change the other. A transfer does both in one step, and a restore normalizes them.
 - **A non-host start is refused with 400** (the engine's existing generic error), not 403. This slice leaves it unchanged.
 - **Emulation only:** no real phones.
+
+## Stage 7.4: content variety in solo and casual rooms; the cancel wording (2026-11-11)
+
+**Branch:** `claude/stage7-4-content-variety`, stacked on PR #10 at `af39c78` (PR #11).
+- **Instruction:** ChatGPT's review and handoff on PR #10 (comment 6783345938). It cleared Stage 7.3 after its own review and private live-site audit of `371c194`.
+- **Spec and record:** `docs/stage7/stage74.md`; decisions D-S74-01 … 08.
+- Nothing was merged or deployed, no port was made public, and nothing was paid for.
+
+**Milestone:**
+- **Variety:** solo and casual rooms deal content the room hasn't used before repeating any, then the least recently used. The queued item in `docs/MILESTONES.md` is done.
+- **Cup unchanged:** Family Cup selection is identical to `af39c78` (pinned in tests).
+- **Cancel wording:** the briefing's cancel confirmation names where you actually go back to (results or lobby).
+- **A pre-existing defect, found and fixed:** after a server restart, every solo Start was refused ("Need at least 1 connected players"); spec §7.4.
+
+**Files:**
+- **Server:** `src/content/select.ts`, `src/server/room.ts`, `src/server/serve.ts` (`MCHEZO_CONTENT_DIR`, testing only).
+- **Web:** `apps/web/src/solo/soloSession.ts`, `apps/web/src/components/mchezo/Briefing.tsx`, `App.tsx`.
+- **Tests and scripts:** `tests/stage74-content-variety.test.ts`, `scripts/check-content-variety.mjs`, `scripts/lib/small-pool.mjs` (all new). Also changed: the Stage 6.2 pinned tests (on purpose), `check-solo-shelf` part E (now asserted), and every other `selectContent` caller (`roomKind`).
+
+**Tests:**
+- **Unit and HTTP:** 27 new; 1,298 in all. Fourteen mutations each caught.
+- **`check-content-variety`:** 54/54, including the server restart (A2) and a stale press across two tabs (A3). It fails on an `af39c78` server (one board for all 13 starts) and without the solo-restart fix.
+- **Regressions, all passing:** `check-session-flow` (70), `check-quick-party` (68), `check-solo` (80), `check-solo-shelf` (58), `check-briefing` (43), `check-casual` (30), `check-host-handover` (32), `check-recovery` (20).
+- **Clarification 6783492788** (solo press ids: whole command, latest-only replay, persisted monotonic revision) is built and tested (spec §4.4).
+
+**Repair (ChatGPT's review 6786060026, P2, V3), on the same branch:**
+- **The finding:** a solo Start with no answer adopted any new round of the same game, including another tab's.
+- **The fix:** the app now sends the same press again and acts only on the server's answer (spec §7.5, D-S74-08). The server is unchanged.
+- **Tests:**
+  - 5 new real-server client tests (two tabs, injected faults) and 2 reworked Stage 6.1 client tests;
+  - unit suite 1,304;
+  - five client mutations, each caught;
+  - `check-content-variety` A4 (57 checks);
+  - `check-solo` 80, `check-solo-shelf` 58.
+- **Shown failing with the reviewed client:** five of the new tests (three by adopting B's round) and A4 in the browser.
+- **Gates on `8147b72`** (fresh clone, clean tree, one after the other):
+  - fast `20261111-034429-8147b726-9520`: **PASSED** 5/5, 1,304 unit tests, 42 s;
+  - full `20261111-034515-8147b726-12402`: **PASSED** 82/82, `check-content-variety` 57/57, in 28 min 13 s.
+  - No failed gate runs.
+- **A failure observed after those gates:** a focused rerun of the two solo client test files failed one Stage 6.1 test once (58 passed, 1 failed; `docs/evidence/stage74-local/repair/two-tab-and-client-tests-on-8147b72.log`).
+  - **The cause:** a timed-out Start send was resent, because a timer fired a few ms early and the timeout wasn't flagged.
+  - **The impact:** not a safety problem. It was the same press, answered as a replay, but it broke the stated rule.
+  - **Reported** on PR #11 (comment 6788331434) while the new gates ran.
+- **The fix (`ecb617c`, client only):**
+  - only a quick failure is resent, and a timed-out request ends the Start;
+  - 2 new Stage 6.1 tests (a lagging clock; a late failure then a hang);
+  - unit suite 1,306;
+  - seven client mutations, each caught (C3 had not been caught before; `…/repair/client-mutations-on-ecb617c.txt`).
+- **Gates on `ecb617c`** (fresh clone, clean tree, one after the other; PR #11's tested revision):
+  - fast `20261111-055510-ecb617c6-15772`: **PASSED** 5/5, 1,306 unit tests, 45 s;
+  - full `20261111-055600-ecb617c6-18731`: **PASSED** 82/82, `check-content-variety` 57/57 (A4 included), `check-solo` 80, in 28 min 47 s.
+  - No failed gate runs.
+- **Noted for later:** two shipped Connections boards have Christmas clues; queued in `docs/MILESTONES.md` for the seasonal-content milestone.
+
+**Gates on `5d41e5f`** (fresh clone, clean tree, one after the other):
+- fast `20261111-013325-5d41e5f1-17311`: **PASSED** 5/5, 1,298 unit tests, 39 s;
+- full `20261111-013409-5d41e5f1-20255`: **PASSED** 82/82, including `check-content-variety` 54/54, in 28 min 00 s.
+- No failed runs. Raw evidence is in `docs/evidence/gate-runs/<run>/`.
+
+**External blockers:** none. WebKit and real devices are not available here (checklist I20–I21).
+
+**Next task:** ChatGPT reviews PR #11 and does its private live-site audit. The next milestone (mobile polish and the Home Screen web app, per the roadmap) starts only when its handoff instructs it.
+
+**Risk:**
+- **Variety is per room:** a new solo room (another device, cleared storage) starts fresh.
+- **Two solo tabs pressing Start within the same moment:** one wins and the other is told something changed, with Try again. This is by design (D-S74-04).
+- **Emulation only:** no real phones.

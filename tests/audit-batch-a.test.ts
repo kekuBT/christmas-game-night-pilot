@@ -39,7 +39,7 @@ describe("Audit Batch A corrections", () => {
       const usage: UsageHistory = {};
       let seq = 0;
       for (const mode of ["official", "practice"] as const) for (let i = 0; i < 12; i++) {
-        const r = selectContent({ lib, gameId, count: 5, mode, cupId: "cup-batch-a", usage, seq: ++seq, today: TODAY });
+        const r = selectContent({ roomKind: "cup", lib, gameId, count: 5, mode, cupId: "cup-batch-a", usage, seq: ++seq, today: TODAY });
         if (!r.ok) continue;
         for (const li of r.items) expect(RETIRED, `${gameId} ${mode} picked ${li.item.id}`).not.toContain(li.item.id);
         recordUsage(usage, r.items, { gameInstanceId: `g${seq}`, day: 1, mode, seq });
@@ -52,7 +52,7 @@ describe("Audit Batch A corrections", () => {
     for (const id of RETIRED) usage[id] = [{ gameInstanceId: "past-cup-game", day: 1, mode: "official", seq: 1 }];
     const before = JSON.stringify(usage);
     for (const gameId of ["trivia", "geography", "guess-the-year", "closest-wins"] as const) {
-      const r = selectContent({ lib, gameId, count: 5, mode: "official", cupId: "cup-old", usage, seq: 2, today: TODAY });
+      const r = selectContent({ roomKind: "cup", lib, gameId, count: 5, mode: "official", cupId: "cup-old", usage, seq: 2, today: TODAY });
       expect(r.ok).toBe(true);
     }
     expect(JSON.stringify(usage)).toBe(before);

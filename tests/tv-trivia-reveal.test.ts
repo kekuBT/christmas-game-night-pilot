@@ -45,7 +45,7 @@ type Q = { id: string; prompt: string; options: string[]; correctIndex?: number 
  */
 function seedFor(h: Harness, playerIds: string[], order: string[], now: number): number {
   const engine = h.engine();
-  const pick = selectContent({ lib: engine.content, gameId: "trivia", count: 10, mode: "practice", cupId: engine.cup.cupId, usage: engine.contentUsage, seq: engine.contentSeq, today: new Date(now).toISOString().slice(0, 10) });
+  const pick = selectContent({ roomKind: engine.kind, lib: engine.content, gameId: "trivia", count: 10, mode: "practice", cupId: engine.cup.cupId, usage: engine.contentUsage, seq: engine.contentSeq, today: new Date(now).toISOString().slice(0, 10) });
   if (!pick.ok) throw new Error(pick.message);
   for (let seed = 1; seed < 200_000; seed++) {
     const extra = materialize("trivia", pick.items, { seed, playerIds }) as { questions: Q[] };

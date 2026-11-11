@@ -1,4 +1,5 @@
 import { networkInterfaces } from "node:os";
+import { contentTestMode, loadContent, type ContentLibrary } from "../content/registry.js";
 import { LocalServer } from "./http.js";
 
 // Configuration (all optional):
@@ -9,6 +10,10 @@ import { LocalServer } from "./http.js";
 //                        provisional content as approved. Refused in production.
 //   MCHEZO_LIFECYCLE_SCALE  TESTING ONLY: multiply game/phase time limits
 //                        (e.g. 0.1). Refused when NODE_ENV=production.
+//   MCHEZO_CONTENT_DIR   TESTING ONLY: load the content library from this
+//                        directory instead of the shipped one (Stage 7.4: a
+//                        small controlled pool for browser checks). Refused
+//                        when NODE_ENV=production.
 const port = Number(process.env.PORT ?? 3000);
 const scaleRaw = process.env.MCHEZO_LIFECYCLE_SCALE;
 if (process.env.MCHEZO_CONTENT_TEST_MODE && process.env.NODE_ENV === "production") {
@@ -26,10 +31,22 @@ if (lifecycleScale !== undefined && !(lifecycleScale > 0)) {
   process.exit(2);
 }
 if (lifecycleScale !== undefined) console.log(`TEST MODE: game time limits scaled by ${lifecycleScale}`);
+const contentDir = process.env.MCHEZO_CONTENT_DIR;
+if (contentDir && process.env.NODE_ENV === "production") {
+  console.error("MCHEZO_CONTENT_DIR is for tests only and is not allowed in production.");
+  process.exit(2);
+}
+let content: ContentLibrary | undefined;
+if (contentDir) {
+  content = loadContent(contentDir, { testApproveProvisional: contentTestMode() });
+  for (const p of content.problems) console.error(`[content] ${p.file}${p.itemId ? ` ${p.itemId}` : ""}: ${p.message}`);
+  console.log(`TEST MODE: content loaded from ${contentDir} (${content.items.size} items), not the shipped library`);
+}
 const server = new LocalServer({
   dataDir: process.env.MCHEZO_DATA_DIR || undefined,
   webDistDir: process.env.MCHEZO_WEB_DIST || undefined,
   lifecycleScale,
+  ...(content ? { content } : {}),
 });
 const actual = await server.listen(port);
 // The test gate and drivers parse this exact line to learn the real port.

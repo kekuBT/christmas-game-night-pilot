@@ -1,0 +1,132 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt74
+
+ ❯ tests/stage74-content-variety.test.ts (32 tests | 5 failed | 27 skipped) 727ms
+   × solo Start recovery is tied to its own press (review 6786060026) > A's reply is lost (the connection drops) after the server started its round: the same press, sent again at once, is answered as a replay; one round, one use 117ms
+     → expected [ { …(2) } ] to have a length of 2 but got 1
+   × solo Start recovery is tied to its own press (review 6786060026) > A never reaches the server while B starts the same game: A is refused as stale and never adopts B's round; B is undisturbed; no extra use 33ms
+     → expected [ 'playing', undefined, 'game-2' ] to deeply equal [ 'error', 'refused', undefined ]
+   × solo Start recovery is tied to its own press (review 6786060026) > A started, but B replaced it before A's press was sent again: A is refused, never adopts B's round; B is undisturbed; no extra use 24ms
+     → expected [ 'playing', undefined, 'game-3' ] to deeply equal [ 'error', 'refused', undefined ]
+   × solo Start recovery is tied to its own press (review 6786060026) > A's request hangs (never arrives) while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale; B is undisturbed 267ms
+     → expected [ 'playing', undefined, 'game-2' ] to deeply equal [ 'error', 'transient', undefined ]
+   × solo Start recovery is tied to its own press (review 6786060026) > no network at all: the Start ends within its budget; Try again sends the same press (a replay if it had arrived), so nothing starts twice 280ms
+     → expected 2 to be 1 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A's reply is lost (the connection drops) after the server started its round: the same press, sent again at once, is answered as a replay; one round, one use
+AssertionError: expected [ { …(2) } ] to have a length of 2 but got 1
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ tests/stage74-content-variety.test.ts:494:20
+    492|     expect(a.s.current.phase).toBe("playing");
+    493|     expect(open(room)).toEqual([a.s.current.gameInstanceId]);
+    494|     expect(a.sent).toHaveLength(2);
+       |                    ^
+    495|     expect(a.sent[1]).toEqual(a.sent[0]); // the same press: id, revis…
+    496|     expect([room.contentSeq, room.session.revision]).toEqual([1, 2]); …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A never reaches the server while B starts the same game: A is refused as stale and never adopts B's round; B is undisturbed; no extra use
+AssertionError: expected [ 'playing', undefined, 'game-2' ] to deeply equal [ 'error', 'refused', undefined ]
+
+- Expected
++ Received
+
+  Array [
+-   "error",
+-   "refused",
++   "playing",
+    undefined,
++   "game-2",
+  ]
+
+ ❯ tests/stage74-content-variety.test.ts:506:82
+    504|     const bRound = b.s.current.gameInstanceId!;
+    505|     expect(b.s.current.phase).toBe("playing");
+    506|     expect([a.s.current.phase, a.s.current.failure, a.s.current.gameIn…
+       |                                                                                  ^
+    507|     expect(a.s.current.error).toMatch(/another tab or window/);
+    508|     expect(open(room)).toEqual([bRound]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A started, but B replaced it before A's press was sent again: A is refused, never adopts B's round; B is undisturbed; no extra use
+AssertionError: expected [ 'playing', undefined, 'game-3' ] to deeply equal [ 'error', 'refused', undefined ]
+
+- Expected
++ Received
+
+  Array [
+-   "error",
+-   "refused",
++   "playing",
+    undefined,
++   "game-3",
+  ]
+
+ ❯ tests/stage74-content-variety.test.ts:525:82
+    523|     const bRound = b.s.current.gameInstanceId!;
+    524|     expect(b.s.current.phase).toBe("playing");
+    525|     expect([a.s.current.phase, a.s.current.failure, a.s.current.gameIn…
+       |                                                                                  ^
+    526|     expect(a.s.current.error).toMatch(/isn.t the latest/);
+    527|     expect(open(room)).toEqual([bRound]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A's request hangs (never arrives) while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale; B is undisturbed
+AssertionError: expected [ 'playing', undefined, 'game-2' ] to deeply equal [ 'error', 'transient', undefined ]
+
+- Expected
++ Received
+
+  Array [
+-   "error",
+-   "transient",
++   "playing",
+    undefined,
++   "game-2",
+  ]
+
+ ❯ tests/stage74-content-variety.test.ts:537:82
+    535|     await a.s.start("word-connections");
+    536|     const bRound = b.s.current.gameInstanceId!;
+    537|     expect([a.s.current.phase, a.s.current.failure, a.s.current.gameIn…
+       |                                                                                  ^
+    538|     expect(a.sent).toHaveLength(1); // the hang used the whole allowan…
+    539|     await a.s.start("word-connections"); // Try again: the same press,…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > no network at all: the Start ends within its budget; Try again sends the same press (a replay if it had arrived), so nothing starts twice
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ tests/stage74-content-variety.test.ts:560:51
+    558|     await a.s.start("word-connections");
+    559|     expect(a.s.current.phase).toBe("playing");
+    560|     expect(new Set(a.sent.map((x) => x.id)).size).toBe(1);
+       |                                                   ^
+    561|     expect([open(room), room.contentSeq]).toEqual([[a.s.current.gameIn…
+    562| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 27 skipped (32)
+   Start at  03:41:57
+   Duration  2.08s (transform 784ms, setup 0ms, collect 1.02s, tests 727ms, environment 0ms, prepare 74ms)
+

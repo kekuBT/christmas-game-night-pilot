@@ -1,0 +1,20 @@
+$ node scripts/check-studio.mjs http://localhost:41057
+# timeout 600s | worker w3 | server http://localhost:41057 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s74-full/test-results/20261111-013409-5d41e5f1-20255/server-data/w3)
+
+[+2.8s] PASS guest sees no Studio button (not even in the room menu)
+[+3.2s] PASS studio opens with its preview-only note
+[+3.2s] PASS studio states the player count the schedule assumes
+[+3.3s] PASS default format previews its rounds
+[+3.3s] PASS round input changes the preview
+[+3.7s] PASS infeasible format shows the no-games message
+[+3.7s] PASS returning to a feasible format restores the preview
+[+3.8s] PASS chaos preview shows its 6 rounds
+[+3.8s] PASS chaos description names the uniform-random distinction
+[+3.8s] PASS chaos picks are all uniform random draws
+[+3.8s] PASS chaos picks carry no variety-weighted reasons
+[+3.8s] PASS studio has no start button (preview never starts)
+[+3.8s] PASS studio back button returns to the lobby
+[+3.9s] STUDIO ALL PASSED
+[+3.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 3.9s | cpu 1.3s, peak memory 238 MB

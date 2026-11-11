@@ -104,6 +104,12 @@ export function BriefingScreen(props: CommonProps & {
   onReady: (ready: boolean) => Promise<void>;
   onStartNow: (confirmed: string[]) => Promise<StartNowResult>;
   onCancel: () => Promise<void>;
+  /**
+   * Stage 7.4 (C1): where cancelling takes this person, worked out by the
+   * caller from the same state that decides it: the last results they haven't
+   * closed (a rematch or Next game started from there), or the lobby.
+   */
+  afterCancel?: { to: "results"; title: string } | { to: "lobby" };
 }) {
   const { game, registry, players, meId, isHost } = props;
   const { casual } = useMchezo();
@@ -216,7 +222,10 @@ export function BriefingScreen(props: CommonProps & {
           onConfirm={() => { setCancelAsk(false); setBusy(true); void props.onCancel().finally(() => setBusy(false)); }}
           onCancel={() => setCancelAsk(false)}
         >
-          Nothing is scored and no questions are used up. Everyone goes back to the lobby.
+          <span data-testid="briefing-cancel-destination">
+            {props.afterCancel?.to === "results" ? `You’ll go back to the ${props.afterCancel.title} results.` : "You’ll go back to the lobby."}
+          </span>{" "}
+          Nothing is scored or used up, and everyone else goes back to what they had open.
         </ConfirmPanel>
       )}
     </main>

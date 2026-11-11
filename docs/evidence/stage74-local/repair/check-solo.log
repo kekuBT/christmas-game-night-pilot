@@ -1,0 +1,82 @@
+PASS Home offers Play solo, Host a game and Join a room
+PASS Play solo offers only the real solo games (Stage 6.2: Math Mayhem, Pattern Pulse, Word Connections) — solo-game-math-mayhem, solo-game-pattern-pulse, solo-game-word-connections
+PASS the solo list is honest about requirements: 1–10 players, best with 2+
+PASS the other games are pointed to rooms, with no invented player minimum
+PASS a fresh device has no personal best yet
+PASS tap 2 is the round itself: no room code, no name, no lobby
+PASS round 1 (5 right): results show 5 of 10 and a score in range — {"score":600,"correct":5,"pb":"Your first personal best on this device!"}
+PASS round 1: the first personal best on this device — Your first personal best on this device!
+PASS on the results screen polling has stopped — 0 projection requests in 3 s
+PASS round 2 (all wrong): a fresh round, 0 of 10, 0 points (nothing carried over) — {"score":0,"correct":0,"pb":"Your personal best on this device is still 600."}
+PASS round 2: a lower score keeps the personal best — Your personal best on this device is still 600.
+PASS round 3 (all right, first answer double-tapped): 10 of 10, at least 1,000 — {"score":1200,"correct":10,"pb":"New personal best on this device! Your previous best was 600."}
+PASS round 3: a higher score is a new personal best, naming the old one — New personal best on this device! Your previous best was 600.
+PASS the server holds exactly the three rounds, each with its own score — 600,0,1200
+PASS the double tap counted once: 10 answers in round 3
+PASS no round is left playing
+PASS solo rounds are never official
+PASS Back to solo: the list shows the new personal best
+PASS browser Back from the solo list (after three rounds) is Home, not an old round
+PASS Leave round asks first
+PASS Keep playing keeps the round
+PASS after leaving, the round is removed on the server (nothing left playing)
+PASS leaving left the personal best as it was
+PASS after leaving, nothing polls any more — 0 projection requests in 3 s
+PASS back home: no phantom Rejoin for the solo room
+PASS browser Back mid-round: the round is removed too
+PASS reload mid-round: the round's start screen, not a trapped loading screen
+PASS after the reload nothing polls until Start
+PASS Start after a reload says the interrupted round was replaced
+PASS the interrupted round is gone; exactly one round plays
+PASS a second tab's Start says the open round was replaced
+PASS tab A, whose round was replaced, goes back to its Start screen (not stuck)
+PASS the earlier tab's round is gone; the replacement plays
+PASS the earlier tab's tap and leaving scored nothing in the replacement — {}
+PASS the replacement round plays to its own result (10 of 10) — {"score":1000,"correct":10,"pb":"Your personal best on this device is still 1,200."}
+PASS the second tab reused the device's solo room (no new room) — 0 rooms created
+PASS Mchezo home from the results: Home, with no phantom Rejoin
+PASS one solo room for this device across every round, leave, Back, reload and tab — 1 rooms created
+PASS blocked storage: the list says bests can't be kept, and still offers Start
+PASS blocked storage: the round plays to its results — {"score":360,"correct":3,"pb":"Your score couldn’t be saved as a personal best: this device’s storage is unavailable."}
+PASS blocked storage: the results say the best couldn't be saved — Your score couldn’t be saved as a personal best: this device’s storage is unavailable.
+PASS blocked storage: Play again still works
+PASS blocked storage: the seat is kept for the page, one room across replays and a new Start — 1 rooms created
+PASS malformed stored data reads as no best (no crash)
+PASS a best under other rules (version 0) is not shown as this game's best
+PASS a round under the current rules is its own first best (not compared with version 0) — Your first personal best on this device!
+PASS the other version's entry is kept untouched beside the new one — {"math-mayhem@0":{"score":99999,"at":1,"rulesVersion":0},"math-mayhem@1":{"score":240,"at":1794368370438,"rulesVersion":1}}
+PASS plain http (real insecure context at 192.0.2.2): no crypto.randomUUID — {"secure":false,"randomUUID":"undefined"}
+PASS plain http: the whole round plays and every answer counts (7 of 10) — {"score":840,"correct":7,"pb":"Your first personal best on this device!"}
+PASS keyboard: Tab reaches Start on the solo list
+PASS keyboard: Enter on Start begins the round
+PASS keyboard: all ten questions answered with Tab and Enter — 10 answered
+PASS keyboard: the results move focus to the score heading
+PASS keyboard: Tab from the score reaches Play again
+PASS keyboard: Tab reaches Leave round
+PASS keyboard: the leave question focuses Keep playing (the safe choice)
+PASS keyboard: Enter on Keep playing keeps the round
+PASS I1 Start with no reply ends in an error with Try again (not a stuck Starting…)
+PASS I1 it ended within the request allowance (about 6 s), and the request had been sent — 6525 ms, 1 held
+PASS I1 Try again starts the round
+PASS I1 still one room for this device — 1 rooms
+PASS I2 a passing outage: the round says it's reconnecting
+PASS I2 only after the allowance (not on the first failed poll) — 8865 ms
+PASS I2 the round stays on screen meanwhile
+PASS I2 once the server answers, the reconnecting note goes
+PASS I2 the round carries on: a question to answer
+PASS I2 the answer is taken
+PASS I2 same room, same seat, no new room — 1 rooms
+PASS I3 a lost room: the round says it was lost, with Start a new round
+PASS I3 polling has stopped — 0 projection requests in 3 s
+PASS I3 Start a new round plays in a new room
+PASS I3 the lost room was replaced by one new room — 2 rooms, room-mwbklvlb-364880 -> room-mwbkmb97-51414
+PASS I4 the seat check fails for a moment: Start says so, with Try again
+PASS I4 no new room was made for a passing failure — 2 rooms
+PASS I4 Try again plays in the same room
+PASS I4 same room as before the failure — 2 rooms
+PASS short test clock: the solo round's window is about 12 s — 11997 ms
+PASS control: the same answer, in time, is accepted — {"accepted":true,"result":{"points":100,"total":100,"speedBonus":"not-timed","refreshAdvice":"This question wasn’t timed, so no speed bonus. Refresh the page to get the latest version of the game."}}
+PASS a late answer after the round's time is up is refused — {"accepted":false,"reason":"PHASE_CLOSED"}
+PASS the round finished on its deadline with only the in-time answer counted — finished answers ["math-1"]
+SOLO ALL PASSED
+exit 0

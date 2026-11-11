@@ -1,0 +1,24 @@
+{
+  "revision": "02176dd2c6b0081529f92767534ea5d1502a3fd5",
+  "workingTreeClean": true,
+  "capturedAt": "2026-11-11T01:33:05.780Z",
+  "by": "scripts/check-content-variety.mjs",
+  "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
+  "shots": [
+    {
+      "file": "01-cancel-rematch-390x844.png",
+      "screen": "Play again cancelled from the results: the confirmation says you go back to the Word Connections results",
+      "viewport": "390×844"
+    },
+    {
+      "file": "02-cancel-lobby-390x844.png",
+      "screen": "A start from the lobby cancelled: the confirmation says you go back to the lobby",
+      "viewport": "390×844"
+    },
+    {
+      "file": "03-cancel-rematch-320x640.png",
+      "screen": "At 320 px: Play again (Math) cancelled, the confirmation names the Math Mayhem results",
+      "viewport": "320×640"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+$ node scripts/check-input-isolation.mjs http://localhost:35921
+# timeout 600s | worker w2 | server http://localhost:35921 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s74r-full/test-results/20261111-034515-8147b726-12402/server-data/w2)
+
+[+2.5s] PASS Sprint round 1: Amina's answers reach the server, and her phone shows them as in (from the server)
+[+2.5s] PASS Sprint: other players' answers are never in Amina's view
+[+2.5s] PASS Sprint: round 2 opens
+[+2.5s] PASS Sprint round 2: the answer box is empty (round 1's words are not carried over)
+[+4.7s] PASS Sprint round 2: a send that fails says so
+[+4.7s] PASS Sprint round 2: the words stay in the box after the failed send
+[+4.7s] PASS Sprint round 2: after the failed send nothing shows as in
+[+4.7s] PASS Sprint round 2: the retry is in, once
+[+4.7s] PASS Sprint round 2: a second send for the same round is refused (it can't count twice) — {"accepted":false,"reason":"ALREADY_SUBMITTED"}
+[+4.7s] PASS Sprint: round 3 opens
+[+4.7s] PASS Sprint round 3: the answer box is empty
+[+28.7s] PASS Sprint: the game ends (round 3 closes at its deadline)
+[+28.7s] PASS Sprint: the retried send counted once (no duplicate answers scored) — {"player-1":0,"player-2":0,"player-3":0,"player-4":0}
+[+29.8s] PASS Impostor: the clue box starts empty (not the last Sprint words)
+[+30.4s] PASS Impostor: the vote opens
+[+30.4s] PASS Impostor: one impostor found — ["honest","impostor","honest","honest"]
+[+30.5s] PASS Impostor: caught, the final guess opens
+[+30.5s] PASS Impostor: the final-guess box starts empty (not the impostor's own clue)
+[+30.6s] PASS Impostor: the game ends
+[+31.7s] PASS Closest: a blank number can't be sent (no silent 0)
+[+47.7s] PASS Closest: question 2 opens (Amina never sent question 1)
+[+47.7s] PASS Closest question 2: the number box is back to its start value (77 is not carried over)
+[+47.8s] INPUT ISOLATION ALL PASSED
+[+47.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 47.8s | cpu 4.4s, peak memory 350 MB

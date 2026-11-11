@@ -6,10 +6,11 @@
 //   D  switch to Word Connections: solved with no mistakes (450), the first
 //      group chosen by keyboard; its own first best (never compared with Pulse)
 //   E  Play again: four wrong guesses (0, out of guesses), a fresh round with
-//      nothing carried over, every group shown as missed. Which board comes
-//      next is the server's content selection: a gate server approves all
-//      content for official play, so its solo rooms repeat one board (spec
-//      §3.4, kept by decision); board variety is checked in K instead
+//      nothing carried over, every group shown as missed. Play again deals a
+//      board this room hasn't used: since Stage 7.4 (docs/stage7/stage74.md)
+//      that holds on a gate server too, where all content counts as approved
+//      (before, its solo rooms repeated one board; spec §3.4). K checks it on
+//      the shipped library; check-content-variety checks it in depth
 //   F  Play again: two groups then four wrong (200), found and missed told apart
 //   G  switch to Math Mayhem: a fresh round; one solo room for all of it
 //   H  personal bests: one per game in storage and on the shelf; another rules
@@ -162,7 +163,7 @@ try {
   check("E Play again: no tile selected from the last round", (await page.locator('[data-testid="mz-cx-tile"][aria-pressed="true"]').count()) === 0);
   const secondBoard = (await page.getByTestId("mz-cx-tile").allInnerTexts()).sort().join("|");
   check("E Play again: a fresh round with nothing found yet (16 tiles, no group bands)", (await page.getByTestId("mz-cx-tile").count()) === 16 && (await page.getByTestId("mz-cx-band").count()) === 0);
-  console.log(`INFO E the board after Play again is ${secondBoard === firstBoard ? "the same one" : "a different one"}: the server's content selection decides (with all content approved, as on a gate server, a solo room repeats one board; spec §3.4). Board variety is checked in K, on the shipped library.`);
+  check("E Play again deals a board this room hasn't used (Stage 7.4: also with all content approved)", secondBoard !== firstBoard);
   const c2 = await playConnections(page, ["wrong", "wrong", "wrong", "wrong"]);
   check("E four wrong guesses: 0 points, out of guesses", c2.score === 0 && c2.headline === "Found 0 of 4 groups · out of guesses", JSON.stringify(c2));
   check("E every group shown, all as missed", (await page.getByTestId("mz-cx-band").count()) === 4 && (await page.locator(".mz-cx-band--missed").count()) === 4);

@@ -6,6 +6,12 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261111-055600-ecb617c6-18731` | `ecb617c` | **Stage 7.4 repair, timed-out resend fix:** full gate, PASSED 82/82 (`check-content-variety` 57 with A4, `check-solo` 80, `check-solo-shelf` 58, `check-session-flow` 70), fresh clone, clean tree, run after the fast gate finished (PR #11's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261111-055510-ecb617c6-15772` | `ecb617c` | **Stage 7.4 repair, timed-out resend fix:** fast gate, PASSED 5/5 (1,306 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
+| `20261111-034515-8147b726-12402` | `8147b72` | **Stage 7.4 repair (review 6786060026):** full gate, PASSED 82/82 (`check-content-variety` 57 with A4, `check-solo` 80, `check-solo-shelf` 58, `check-session-flow` 70), fresh clone, clean tree, run after the fast gate finished. Superseded by `ecb617c` after a focused rerun failed once (`stage74-local/repair/`) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261111-034429-8147b726-9520` | `8147b72` | **Stage 7.4 repair:** fast gate, PASSED 5/5 (1,304 unit tests, including the two-tab client tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
+| `20261111-013409-5d41e5f1-20255` | `5d41e5f` | **Stage 7.4:** full gate, PASSED 82/82 (including the new `check-content-variety`, 54 checks; `check-solo-shelf` 58, `check-solo` 80, `check-session-flow` 70, `check-quick-party` 68), fresh clone, clean tree, run after the fast gate finished (PR #11's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
+| `20261111-013325-5d41e5f1-17311` | `5d41e5f` | **Stage 7.4:** fast gate, PASSED 5/5 (1,298 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-231336-371c1948-12591` | `371c194` | **Stage 7.3:** full gate, PASSED 81/81 (including the new `check-host-handover`, 32 checks; `check-session-flow` 70, `check-quick-party` 68), fresh clone, clean tree (PR #10's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
 | `20261110-231336-371c1948-12599` | `371c194` | **Stage 7.3:** fast gate, PASSED 5/5 (1,271 unit tests), fresh clone, clean tree | `report.json`, `summary.txt`, `gate-console.log`, `logs/` |
 | `20261110-214318-01cde601-21321` | `01cde60` | **Stage 7.2 repair (review 6778921208):** full gate, PASSED 80/80 (`check-session-flow` 70, `check-quick-party` 68), fresh clone, clean tree (PR #9's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
@@ -83,6 +89,24 @@ ChatGPT's review 6778921208 on PR #9: a game picked by hand that matched the lin
   - the hand-picked start sent `party: { revision: 1, index: 0 }`;
   - the Math item completed and the lineup moved to Guess the Year;
   - What's next came after the standings and answers.
+
+## `stage74-local/`
+
+Stage 7.4 browser drivers run by hand from the development checkout against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). These are not gate verdicts.
+- `check-content-variety.log`: 54/54, on the final source (clarification 6783492788 included).
+- `check-content-variety-on-af39c78.log`: the same driver, with part C pointed at a server built from `af39c78`. Part C fails: one board for all 13 solo starts. Parts A and B use the driver's own server (this revision).
+- `check-content-variety-without-solo-restart-fix.log`: the driver with the solo-restart fix removed from the server. A2 fails: Play again after the restart never starts a round.
+- `check-content-variety-on-af39c78.log` and `check-content-variety-without-solo-restart-fix.log` were run on the source committed as `c78cb43` plus A2 (before A3 existed).
+- Regressions, all passing: `check-session-flow` (70), `check-solo` (80), `check-solo-shelf` (58, part E now asserted) and `check-recovery` (20) on the final source; `check-briefing` (43), `check-casual` (30), `check-quick-party` (68) and `check-host-handover` (32) on the source committed as `c78cb43` (the clarification changed only solo starts).
+
+## `stage74-local/repair/`
+
+ChatGPT's review 6786060026 (solo Start recovery adopted another tab's round). These are not gate verdicts.
+- `client-recovery-tests-on-5d41e5f.log`: the new client-recovery tests (real server, two tabs, injected faults) with the reviewed client from `5d41e5f` swapped in. 5 of 5 fail; three of them adopt B's round (`game-2`, `game-3`).
+- `check-content-variety-with-5d41e5f-solo-client.log`: the driver with the web app built from the reviewed client. A4 fails: tab A plays B's round and never resends its press.
+- `check-content-variety.log`, `check-solo.log`, `check-solo-shelf.log`: the drivers on the repaired source, 57/57, 80/80 (I1 at about 6.5 s) and 58/58.
+- `two-tab-and-client-tests-on-8147b72.log`: **an observed failure.** A focused verbose run of `stage61-solo-client` and `stage74-content-variety` on `0180dfd` (source identical to `8147b72`), after both gates on `8147b72` had passed. Result: 58 passed, 1 failed. The failing test is the Stage 6.1 "Start's reply never comes…" (`phase: "playing"`, expected `"error"`): a timed-out send was resent. All five two-tab tests passed. It was fixed in `ecb617c` (spec §7.5).
+- `client-mutations-on-ecb617c.txt`: the seven client mutations (script and output) on `ecb617c`'s source, run before its gates. Each is caught.
 
 ## `stage72-local/`
 

@@ -1,0 +1,43 @@
+Client mutations on ecb617c625e314ddef3bccaf0a2e3a928649ab62 (run locally before the gates; not a gate verdict).
+Each mutation is applied to apps/web/src/solo/soloSession.ts, then tests/stage74-content-variety.test.ts, tests/stage61-solo-client.test.ts and tests/stage62-solo-shelf.test.ts run (87 tests), then the file is restored.
+
+## Script (s74-client-mutations.sh, which calls s74-mutate-client.sh)
+```
+#!/bin/bash
+# Run from the worktree root. Each mutation is applied, the three solo test files run, the file restored.
+M="$(dirname "$0")/s74-mutate-client.sh"; F=apps/web/src/solo/soloSession.ts
+$M "C1 Try again makes a new press" $F 's/const pending = this\.pendingStart\?\.roomId === roomId && this\.pendingStart\.gameId === gameId \? this\.pendingStart : null;/const pending = null as typeof this.pendingStart;/'
+$M "C2 no resend after a quick failure" $F 's/export const SOLO_START_RESENDS = 2;/export const SOLO_START_RESENDS = 0;/'
+$M "C3 resends not bound to the first request's allowance" $F 's/const sendsEnd = Math\.min\(deadline, this\.now\(\) \+ \(this\.deps\.requestTimeoutMs \?\? SOLO_REQUEST_TIMEOUT_MS\)\);/const sendsEnd = deadline;/'
+$M "C4 the pending press kept after Leave" $F 's/    this\.pendingStart = null; \/\/ a later Start is a new press, made against the room as it is then\n//'
+$M "C5 a resend gets a new press id" $F 's/gid = \(await this\.post<\{ gameId: string \}>\(`\/rooms\/\$\{roomId\}\/games`, \{ gameId, official: false, attempt \}/gid = (await this.post<{ gameId: string }>(`\/rooms\/\${roomId}\/games`, { gameId, official: false, attempt: resent ? { ...attempt, id: uuidV4() } : attempt }/'
+$M "C6 a timed-out request resent (timedOut ignored)" $F 's/const quickFailure = noAnswer && !\(e as SoloRequestError\)\.timedOut;/const quickFailure = noAnswer;/'
+$M "C7 abort before reporting the timeout" $F 's/timer = setTimeout\(\(\) => \{ reject\(new SoloRequestError\("transient", SOLO_UNREACHABLE, undefined, true\)\); ac\.abort\(\); \}/timer = setTimeout(() => { ac.abort(); reject(new SoloRequestError("transient", SOLO_UNREACHABLE, undefined, true)); }/'
+
+#!/bin/bash
+label="$1"; file="$2"; sub="$3"
+cp "$file" "$file.orig"
+perl -0pi -e "$sub" "$file"
+if cmp -s "$file" "$file.orig"; then echo "MUTATION NOT APPLIED: $label"; mv "$file.orig" "$file"; exit 0; fi
+out=$(timeout 300 npx vitest run tests/stage74-content-variety.test.ts tests/stage61-solo-client.test.ts tests/stage62-solo-shelf.test.ts 2>&1 | grep -E "Tests ")
+mv "$file.orig" "$file"
+echo "$label => $out"
+```
+
+## Output
+```
+C1 Try again makes a new press => ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 84 passed (87)
+C2 no resend after a quick failure => ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  5 failed | 82 passed (87)
+C3 resends not bound to the first request's allowance => ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 86 passed (87)
+C4 the pending press kept after Leave => ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 86 passed (87)
+C5 a resend gets a new press id => ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  4 failed | 83 passed (87)
+C6 a timed-out request resent (timedOut ignored) => ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 86 passed (87)
+C7 abort before reporting the timeout => ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 85 passed (87)
+```

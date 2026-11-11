@@ -1,6 +1,6 @@
 # Private preview of Stage 7, for an interactive audit
 
-- **For:** ChatGPT's interactive site audits of the Stage 7 slices (Quick Party, session flow, host handover).
+- **For:** ChatGPT's interactive site audits of the Stage 7 slices (Quick Party, session flow, host handover, content variety).
 - **How it runs:** on a private Codespace (or any machine), with the shipped content and normal timing.
 - **Keep the port Private.** No public port and nothing paid is needed.
 
@@ -8,7 +8,8 @@
 Replace `<SHA>` with the tested SHA from the developer handoff, and `<branch>` with the PR's branch:
 - Stage 7.1 (PR #8): `claude/stage7-1-quick-party`;
 - Stage 7.2 (PR #9): `claude/stage7-2-session-flow`;
-- Stage 7.3 (PR #10): `claude/stage7-3-host-handover`.
+- Stage 7.3 (PR #10): `claude/stage7-3-host-handover`;
+- Stage 7.4 (PR #11): `claude/stage7-4-content-variety`.
 
 ```bash
 git fetch origin <branch>
@@ -23,6 +24,22 @@ PORT=3457 MCHEZO_DATA_DIR=/tmp/mz-audit-data npm run serve
 - **Separate players:** each browser tab keeps its own seat (session storage). Separate tabs or windows of one browser are therefore separate players. A private window works too.
 - **The TV:** on another tab, **Join a room** → enter the code → **Watch as spectator**.
 - **Clean up:** stop the server (Ctrl+C), then `rm -rf /tmp/mz-audit-data` and `git worktree remove /tmp/mz-audit`.
+
+## Stage 7.4: content variety and the cancel wording (about 10 minutes)
+1. **Solo, shipped content:** Home → **Play solo** → **Word Connections**. Play a board (or leave it), then **Play again** a few times.
+   - Each board should be one you haven't had in this solo room. With 13 shipped boards, a repeat comes only after all 13, oldest first.
+   - Before Stage 7.4, normal mode cycled 12 of the 13 boards and never dealt the approved legacy one; with every board approved (the gate's test mode), it dealt the same board every time.
+2. **Casual room, Ada and Bea:** play Word Connections, then on the results **Play again** → in the briefing **Cancel game**.
+   - The question says **"You'll go back to the Word Connections results."**, and that is where both tabs go.
+   - Then **Back to lobby** → start any game → **Cancel game**: it says **"You'll go back to the lobby."**
+3. **Play again** (now played): a board this room hasn't used.
+4. **Optional, a small controlled pool** (testing only, as the browser check runs it): one practice-only board, two approved and one rejected.
+   ```bash
+   node -e "import('./scripts/lib/small-pool.mjs').then((m) => m.writeSmallPool('/tmp/mz-pool'))"
+   PORT=3458 MCHEZO_DATA_DIR=/tmp/mz-pool-data MCHEZO_CONTENT_DIR=/tmp/mz-pool npm run serve
+   ```
+   Solo Word Connections four times: three different boards, then the first again; the rejected one never. The server refuses `MCHEZO_CONTENT_DIR` when `NODE_ENV=production`.
+5. **A server restart** (stop it, start it again with the same data directory), then **Play again** in the same solo tab: it starts. Before Stage 7.4 every solo Start after a restart was refused ("Need at least 1 connected players").
 
 ## Stage 7.3: hand the host role over (about 10 minutes)
 1. **Tab 1 (Ada):** Home → **Host a game** (Casual is the default). **Tabs 2 and 3 (Bea, Cal):** join with the code. **Tab 4:** watch as the TV. The TV marks Ada as host.

@@ -19,6 +19,15 @@
  *                     preview a question a later official game will ask, and
  *                     practice never runs dry. Practice may repeat items.
  *
+ * Which rules apply depends on the room kind, always named by the caller
+ * (Stage 7.4, docs/stage7/stage74.md §4.1):
+ *   "cup"              -> the official and practice pools above, unchanged.
+ *   "casual" / "solo"  -> variety: these rooms never play official games
+ *                         and their history belongs to no Cup, so there is
+ *                         nothing to protect. Every practice-usable item the
+ *                         room hasn't used comes first, then the least
+ *                         recently used (§4.2).
+ *
  * Balance: the difficulty mix of an official game mirrors the remaining
  * pool (proportional stratified sampling), so whichever day someone plays,
  * the expected difficulty is the same; within a game, no category takes
@@ -35,11 +44,15 @@ export interface UsageRecord { gameInstanceId: string; day: number; mode: "offic
 /** Per Cup: item id -> every time it was used. Saved with the room. */
 export type UsageHistory = Record<string, UsageRecord[]>;
 
+/** Stage 7.4: who the selection is for. Required, so no caller gets a room's rules by default. */
+export type SelectionRoomKind = "cup" | "casual" | "solo";
+
 export interface SelectionRequest {
   lib: ContentLibrary;
   gameId: ContentGameId;
   count: number;
   mode: "official" | "practice";
+  roomKind: SelectionRoomKind;
   cupId: string;
   usage: UsageHistory;
   /** Monotonic per Cup: makes successive games differ, reproducibly. */
@@ -129,6 +142,7 @@ export function selectContent(req: SelectionRequest): SelectionResult {
   const excludedNote = unenterable ? [`${unenterable} item(s) skipped: answer can't be entered with this game's input`] : [];
   const seed = selectionSeed(req.cupId, req.gameId, req.seq);
   const rng = seededRng(seed);
+  if (req.roomKind !== "cup") return selectForVariety(req, all, rng, seed, excludedNote);
   if (req.mode === "official") {
     const sprint = req.gameId === "category-sprint" ? req.sprint : undefined;
     const eligible = all.filter((li) => officialEligible(li, req.today) && (!sprint || officialSprintSuitable(li.item as never, sprint.players).ok));
@@ -167,6 +181,30 @@ export function selectContent(req: SelectionRequest): SelectionResult {
   for (let i = 0; items.length < req.count; i++) items.push(ranked[i % ranked.length]!);
   const retired = items.filter((li) => freshOfficial.includes(li)).length;
   return { ok: true, items, seed, reasons: [`practice pool: ${safe.length} practice-only/already used${retired ? `, ${retired} fresh official item(s) retired from official play` : ""}${req.count > usable.length ? " (small pool: items repeat)" : ""}`, ...excludedNote] };
+}
+
+/**
+ * Stage 7.4 (§4.2): a casual or solo room's practice game. The pool is every
+ * practice-usable item whose answer the game's input accepts (the same checks
+ * as a Cup). Seeded shuffle first (deterministic tie-break), then by last use
+ * in this room: never used first, then the oldest. Practice-only and
+ * official-approved items are alike here. Items repeat within one game only
+ * when the pool is smaller than the game needs.
+ */
+function selectForVariety(req: SelectionRequest, all: LoadedItem[], rng: () => number, seed: number, excludedNote: string[]): SelectionResult {
+  if (req.mode === "official") {
+    // The room refuses this first (NOT_A_CUP_ROOM); a second guard, never a silent switch.
+    return { ok: false, reason: "insufficient-content", available: 0, needed: req.count, message: "Only a Family Cup room plays official games." };
+  }
+  const usable = all.filter((li) => practiceUsable(li));
+  if (usable.length === 0) {
+    return { ok: false, reason: "insufficient-content", available: 0, needed: req.count, message: "No practice content is available for this game yet." };
+  }
+  const ranked = shuffled(usable, rng).sort((a, b) => lastUsedSeq(req.usage, a.item.id) - lastUsedSeq(req.usage, b.item.id));
+  const items: LoadedItem[] = [];
+  for (let i = 0; items.length < req.count; i++) items.push(ranked[i % ranked.length]!);
+  const unused = usable.filter((li) => !usedInCup(req.usage, li.item.id)).length;
+  return { ok: true, items, seed, reasons: [`variety pool (${req.roomKind} room): ${unused} unused of ${usable.length} practice-usable, least recently used next${req.count > usable.length ? " (small pool: items repeat)" : ""}`, ...excludedNote] };
 }
 
 /** Record the selection in the Cup's usage history (same synchronous step as game creation). */

@@ -1,0 +1,67 @@
+$ node scripts/check-mobile.mjs http://localhost:41283
+# timeout 600s | worker w1 | server http://localhost:41283 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s74r-full/test-results/20261111-034515-8147b726-12402/server-data/w1)
+
+[+0.6s] 
+[+0.6s] == viewport 320x568 ==
+[+2.1s]   PASS 320px home: no horizontal overflow (scrollWidth=320 innerWidth=320)
+[+2.1s]   PASS 320px home: all targets >= 44px
+[+2.2s]   PASS 320px home: Tab lands on interactive controls (10 control stops, 10 interactive, 0 body wrap stops)
+[+2.2s]   PASS 320px home: focused controls show a visible outline (10/10 outlined)
+[+2.9s]   PASS 320px host screen: no horizontal overflow (scrollWidth=320 innerWidth=320)
+[+2.9s]   PASS 320px host screen: all targets >= 44px
+[+2.9s]   PASS 320px host screen: Tab lands on interactive controls (8 control stops, 8 interactive, 2 body wrap stops)
+[+2.9s]   PASS 320px host screen: focused controls show a visible outline (8/8 outlined)
+[+5.1s]   PASS 320px lobby: no horizontal overflow (scrollWidth=320 innerWidth=320)
+[+5.1s]   PASS 320px lobby: all targets >= 44px
+[+5.7s]   PASS 320px briefing: no horizontal overflow (scrollWidth=320 innerWidth=320)
+[+6.9s]   PASS 320px briefing: all targets >= 44px at every point of the entry animation
+[+7.1s]   PASS 320px game panel: no horizontal overflow (scrollWidth=320 innerWidth=320)
+[+8.3s]   PASS 320px game panel: all targets >= 44px at every point of the entry animation
+[+8.3s]   PASS 320px game panel: Tab lands on interactive controls (9 control stops, 9 interactive, 1 body wrap stops)
+[+8.3s]   PASS 320px game panel: focused controls show a visible outline (9/9 outlined)
+[+8.4s] 
+[+8.4s] == viewport 375x667 ==
+[+10.0s]   PASS 375px home: no horizontal overflow (scrollWidth=375 innerWidth=375)
+[+10.0s]   PASS 375px home: all targets >= 44px
+[+10.0s]   PASS 375px home: Tab lands on interactive controls (10 control stops, 10 interactive, 0 body wrap stops)
+[+10.0s]   PASS 375px home: focused controls show a visible outline (10/10 outlined)
+[+10.7s]   PASS 375px host screen: no horizontal overflow (scrollWidth=375 innerWidth=375)
+[+10.7s]   PASS 375px host screen: all targets >= 44px
+[+10.7s]   PASS 375px host screen: Tab lands on interactive controls (8 control stops, 8 interactive, 2 body wrap stops)
+[+10.7s]   PASS 375px host screen: focused controls show a visible outline (8/8 outlined)
+[+12.8s]   PASS 375px lobby: no horizontal overflow (scrollWidth=375 innerWidth=375)
+[+12.8s]   PASS 375px lobby: all targets >= 44px
+[+13.4s]   PASS 375px briefing: no horizontal overflow (scrollWidth=375 innerWidth=375)
+[+14.6s]   PASS 375px briefing: all targets >= 44px at every point of the entry animation
+[+14.8s]   PASS 375px game panel: no horizontal overflow (scrollWidth=375 innerWidth=375)
+[+16.0s]   PASS 375px game panel: all targets >= 44px at every point of the entry animation
+[+16.1s]   PASS 375px game panel: Tab lands on interactive controls (9 control stops, 9 interactive, 1 body wrap stops)
+[+16.1s]   PASS 375px game panel: focused controls show a visible outline (9/9 outlined)
+[+16.1s] 
+[+16.1s] == viewport 390x844 ==
+[+17.6s]   PASS 390px home: no horizontal overflow (scrollWidth=390 innerWidth=390)
+[+17.6s]   PASS 390px home: all targets >= 44px
+[+17.7s]   PASS 390px home: Tab lands on interactive controls (10 control stops, 10 interactive, 0 body wrap stops)
+[+17.7s]   PASS 390px home: focused controls show a visible outline (10/10 outlined)
+[+18.4s]   PASS 390px host screen: no horizontal overflow (scrollWidth=390 innerWidth=390)
+[+18.4s]   PASS 390px host screen: all targets >= 44px
+[+18.4s]   PASS 390px host screen: Tab lands on interactive controls (8 control stops, 8 interactive, 2 body wrap stops)
+[+18.4s]   PASS 390px host screen: focused controls show a visible outline (8/8 outlined)
+[+20.5s]   PASS 390px lobby: no horizontal overflow (scrollWidth=390 innerWidth=390)
+[+20.5s]   PASS 390px lobby: all targets >= 44px
+[+21.1s]   PASS 390px briefing: no horizontal overflow (scrollWidth=390 innerWidth=390)
+[+22.4s]   PASS 390px briefing: all targets >= 44px at every point of the entry animation
+[+22.5s]   PASS 390px game panel: no horizontal overflow (scrollWidth=390 innerWidth=390)
+[+23.8s]   PASS 390px game panel: all targets >= 44px at every point of the entry animation
+[+23.8s]   PASS 390px game panel: Tab lands on interactive controls (9 control stops, 9 interactive, 1 body wrap stops)
+[+23.8s]   PASS 390px game panel: focused controls show a visible outline (9/9 outlined)
+[+23.8s] 
+[+23.8s] == reduced motion ==
+[+24.0s]   PASS reduced-motion media query matches
+[+24.0s]   PASS reduced-motion disables transitions/animations (transition=0s property=none animation=none)
+[+24.0s] 
+[+24.0s] 50 passed, 0 failed
+[+24.0s] MOBILE CHECK OK
+[+24.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":7,"pages":7,"peakOpenPages":2}
+
+# PASS (exit 0) in 24.1s | cpu 3.2s, peak memory 255 MB
