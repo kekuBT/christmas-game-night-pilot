@@ -6,6 +6,14 @@
 <!-- Night Circle ground: Safari and Chrome tint their toolbars with this, so it must match the app (audit V2). -->
 <meta name="theme-color" content="#16111D" />
 <meta name="color-scheme" content="dark" />
+<!-- Stage 8.3: install identity (docs/stage8/stage83.md §3.1). Public, the same for everyone. -->
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-title" content="Mchezo" />
+<meta name="mobile-web-app-capable" content="yes" />
+<!-- This page's build, filled in by the build (vite.config.ts); "dev" under the dev server. -->
+<meta name="mchezo-build" content="dev" />
 <title>Mchezo</title>
 </head>
 <body>

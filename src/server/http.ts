@@ -476,19 +476,44 @@ export class LocalServer {
     res.end(JSON.stringify(body));
   }
 
+  /** Stage 8.3: the public install files at the site root (apps/web/public, built into dist/), plus the service worker. */
+  static isPublicFile(pathname: string): boolean {
+    return pathname === "/manifest.webmanifest" || pathname === "/favicon.svg" || pathname === "/sw.js" || /^\/icons\/[A-Za-z0-9._-]+\.(png|svg)$/.test(pathname);
+  }
+
+  private static readonly STATIC_TYPES: Record<string, string> = {
+    ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".html": "text/html; charset=utf-8",
+    ".webmanifest": "application/manifest+json", ".png": "image/png", ".svg": "image/svg+xml",
+    ".woff2": "font/woff2", ".woff": "font/woff", ".json": "application/json",
+  };
+
   private serveStatic(pathname: string, res: ServerResponse): void {
     const root = this.webDistDir;
     const file = pathname === "/" || pathname === "/index.html" ? join(root, "index.html") : join(root, pathname.replace(/^\//, ""));
     const safe = file.startsWith(root + sep) ? file : join(root, "index.html");
+    let data: Buffer;
     try {
-      const data = readFileSync(safe);
-      const type = safe.endsWith(".js") ? "text/javascript" : safe.endsWith(".css") ? "text/css" : safe.endsWith(".html") ? "text/html" : "application/octet-stream";
-      res.writeHead(200, { "content-type": type });
-      res.end(data);
+      data = readFileSync(safe);
     } catch {
-      res.writeHead(200, { "content-type": "text/html" });
+      if (existsSync(join(root, "index.html"))) {
+        // Stage 8.3: a file this build doesn't have is missing, never a 200 page
+        // (a service worker or a browser must not keep a stand-in as the file).
+        res.writeHead(404, { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
+        res.end("Not found");
+        return;
+      }
+      res.writeHead(200, { "content-type": "text/html", "cache-control": "no-store" });
       res.end("<h1>Christmas Game Night</h1><p>Web app not built yet. Run: npm run build:web, then restart the server.</p>");
+      return;
     }
+    const ext = safe.slice(safe.lastIndexOf("."));
+    const type = LocalServer.STATIC_TYPES[ext] ?? "application/octet-stream";
+    // Stage 8.3 (stage83.md §3.1, §3.4): content-hashed build files never
+    // change, so browsers may keep them; the page, the manifest, the icons
+    // and the service worker are always checked, so an update is always seen.
+    const cache = pathname.startsWith("/assets/") ? "public, max-age=31536000, immutable" : "no-cache";
+    res.writeHead(200, { "content-type": type, "cache-control": cache, "x-content-type-options": "nosniff" });
+    res.end(data);
   }
 
   /**
@@ -677,8 +702,13 @@ export class LocalServer {
         this.send(res, 201, { roomId: room.id, joinCode: room.joinCode, spectatorId: spectator.id, spectatorToken: token });
         return;
       }
-      if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html" || url.pathname.startsWith("/assets/"))) {
+      if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html" || url.pathname.startsWith("/assets/") || LocalServer.isPublicFile(url.pathname))) {
         this.serveStatic(url.pathname, res);
+        return;
+      }
+      // Stage 8.3: "can this device reach the game server?" No data, never cached.
+      if ((req.method === "GET" || req.method === "HEAD") && url.pathname === "/health") {
+        this.send(res, 200, { ok: true });
         return;
       }
       // Stage 2: client routes (/join, /host, /room/cup, /library/...) get the

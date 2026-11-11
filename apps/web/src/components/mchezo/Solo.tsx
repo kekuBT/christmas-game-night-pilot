@@ -25,6 +25,7 @@ import { useSoloSeason, useSoloSeasonSaved } from "../../solo/soloSeason.js";
 import { ContentSeasonChoice, ContentSeasonLabel } from "./ContentChoice.js";
 import type { SessionSeason } from "../../../../../src/shared/season.js";
 import { setShownSeason } from "../../ui/mchezo/look.js";
+import { CalmNotices } from "./InstallUi.js";
 
 /**
  * Stage 8.2 (§3.7): what the solo content changes, honestly: only Word
@@ -64,6 +65,7 @@ export function SoloHome({ catalog, onStart, onBack, onHost }: { catalog: readon
   return (
     <main className="mz-screen mz-entry mz-solo mz-solo-shelf" aria-label="Play solo" data-testid="solo-home">
       <header className="mz-appbar"><BackButton onBack={onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
+      <CalmNotices />
       <h1 className="mz-h1">Play solo</h1>
       <p className="mz-foot mz-entry__lede">Just you and the clock: no room code, no setup. Solo rounds are just for you; they never count toward a Family Cup.</p>
       <ContentSeasonChoice value={season} onChange={setSeason} testIdPrefix="solo" note={soloContentNote(season)} unsaved={!saved} />

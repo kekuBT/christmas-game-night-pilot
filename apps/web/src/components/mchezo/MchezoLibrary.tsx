@@ -38,6 +38,7 @@ import {
   type RoomFit,
 } from "../../ui/mchezo/index.js";
 import type { GameManifest } from "../../../../../src/games/manifest.js";
+import { CalmNotices } from "./InstallUi.js";
 
 interface LibraryProps {
   manifests: readonly GameManifest[];
@@ -160,6 +161,8 @@ export function MchezoLibrary({ manifests, catalog, upNextId, canSelect, inRoom,
         <h1 className="mz-appbar__title">All games</h1>
         <span className="mz-appbar__spacer" />
       </header>
+      {/* Stage 8.3: outside a room only (a room has its own connection banner). */}
+      {!inRoom && <CalmNotices />}
 
       <div className="mz-search">
         <label className="mz-sr" htmlFor="mz-lib-search-input">Search games</label>

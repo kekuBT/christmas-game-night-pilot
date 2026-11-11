@@ -1192,7 +1192,8 @@ export function App() {
         )}
         {sheet === "settings" && (
           <Sheet title="Settings" onClose={closeSheet} testId="settings-sheet">
-            <SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} lookSaved={lookSaved} />
+            {/* Stage 8.3: outside a room only (the room menu's Settings never offers installing). */}
+            <SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} lookSaved={lookSaved} install />
           </Sheet>
         )}
       </MchezoProvider>

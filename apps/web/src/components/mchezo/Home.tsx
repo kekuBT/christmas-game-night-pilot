@@ -10,6 +10,7 @@
  */
 import { useId, type ReactNode } from "react";
 import { CodeInput, GameCover, Keycap, SegmentedChoice, Sheet, Wordmark, accentColor, playersLabel, sessionEstimate, timeLimitLabel, type CatalogGame } from "../../ui/mchezo/index.js";
+import { CalmNotices, InstallCard } from "./InstallUi.js";
 
 /** Stage 6.1: what Host a game creates. Casual is the default; a Family Cup is a deliberate choice. */
 export type HostKind = "casual" | "cup";
@@ -67,6 +68,7 @@ export function HomeScreen(p: {
         <Wordmark size={22} />
         <button type="button" className="mz-iconbtn" aria-label="Settings for this phone" data-testid="home-settings" onClick={p.onSettings}><SettingsIcon /></button>
       </header>
+      <CalmNotices />
       {p.rejoin && (
         <section className="mz-rejoin" aria-label="Your room" data-testid="home-rejoin">
           <div className="mz-rejoin__text">
@@ -99,6 +101,8 @@ export function HomeScreen(p: {
           {party.map((g) => <div role="listitem" key={g.id}><GameCard game={g} onOpen={p.onOpenGame} /></div>)}
         </div>
       </section>
+      {/* Stage 8.3: low emphasis, below the games; hidden when installed or after Not now. */}
+      <InstallCard />
       <p className="mz-foot mz-home__lede">Play on your own, or host games for the people in the room. Your phone is your controller; no account needed.</p>
       <button type="button" className="mz-linkbtn" data-testid="mz-lost-place" onClick={p.onLostSeat}>Lost your place? Recover your seat</button>
       {p.status}
@@ -136,6 +140,7 @@ export function JoinScreen(p: {
   return (
     <main className="mz-screen mz-entry" aria-label="Join a game" data-testid="join-screen">
       <header className="mz-appbar"><BackButton onBack={p.onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
+      <CalmNotices />
       {p.notice}
       <h1 className="mz-h1">{p.watch ? "Watch a game" : "Join a game"}</h1>
       <p className="mz-foot mz-entry__lede">{p.watch ? "Watching needs only the room code: no seat, no scores, nothing to tap." : "Type the 6-character code on the host’s screen, or scan their QR code."}</p>
@@ -180,6 +185,7 @@ export function HostScreen(p: {
   return (
     <main className="mz-screen mz-entry" aria-label="Host a game" data-testid="host-screen">
       <header className="mz-appbar"><BackButton onBack={p.onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
+      <CalmNotices />
       {p.notice}
       <h1 className="mz-h1">Host a game</h1>
       <p className="mz-foot mz-entry__lede">Your phone runs the room. Everyone else joins with the code or the QR code you’ll see next.</p>

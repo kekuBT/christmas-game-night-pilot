@@ -17,6 +17,7 @@ const NOT_CHECKS: Record<string, string> = {
   "gate-selftest.mjs": "the gate's self-test",
   "clickthrough-api.mjs": "retired tombstone",
   "measure-persistence.mjs": "a measurement tool (Stage 5.1, Phase 4)",
+  "make-icons.mjs": "an asset generator (Stage 8.3: the install icons)",
 };
 const isTool = (f: string) => /^screenshot-.+\.mjs$/.test(f);
 
