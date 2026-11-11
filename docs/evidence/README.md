@@ -99,6 +99,7 @@ ChatGPT's review 6778921208 on PR #9: a game picked by hand that matched the lin
 Stage 8.1 browser drivers run by hand against a local server with `MCHEZO_CONTENT_TEST_MODE=approve-provisional` (as the gate runs it). These are not gate verdicts; each log's first line names its source.
 - `check-mobile-everyday.log`: the new driver, 130/130, on `a856fa4` (after spec feedback 6790913242).
 - `check-solo.log` (80), `check-solo-shelf.log` (58), `check-pattern-pulse.log` (54), `check-pulse-timing.log` (41), `check-briefing.log` (43), `check-session-flow.log` (70), `check-lifecycle.log` (37), `check-math.log` (28) and `check-mobile.log` (50), all on `a856fa4`.
+- `r81-01/` (repair R81-01, review 6793171907): `card-heights-by-font.md` (the narrow cards with Inter, Figtree, Roboto, Liberation Sans, FreeSans and DejaVu Sans forced, before and after the repair; `fontprobe.mjs` made it), `check-mobile-everyday-on-de913bf-stylesheet.log` (the new font-aware check failing on the tested stylesheet, as in the Codespace), the driver and shelf regressions on `86baf14`, and two screenshots with DejaVu Sans forced.
 - `probe.mjs` and `probe-before-58196cb.json` / `probe-after-947ffae.json`: the measuring probe behind spec §1 and §7.2 (shelf and card heights, page height, sideways overflow, small controls) at 320×640, 390×844, 844×390 and 1440×900.
 
 ## `stage74-local/`

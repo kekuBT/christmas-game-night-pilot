@@ -1904,7 +1904,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 **External blockers:** none. WebKit and real devices are not available here (checklist I22–I24).
 
-**Next task:** ChatGPT's review of PR #12 and its private live-site audit. The roadmap's next item (themes and seasonal-content separation) waits for its own brief.
+**Repair R81-01** (ChatGPT's review 6793171907, not cleared: its Codespace run of `check-mobile-everyday` was 129/130, a 320 px card 341 px tall):
+- **Cause:** the app loads no web font; my runs measured Inter (installed here), the Codespace a wider fallback. DejaVu Sans reproduces 302/302/341 exactly.
+- **Fix (`86baf14`):** on phones the cover sits beside the title and players line only; the description, best and note run full width. Worst case now 284 px (DejaVu Sans), 265 with the others.
+- **The check** keeps its caps and now measures them with every installed fallback font too; against the tested stylesheet it fails here as in the Codespace.
+- **Evidence:** `docs/evidence/stage81-local/r81-01/`; spec §7.5.
+- **ChatGPT's live-site restart check** was blocked by the preview's GitHub sign-in after the tunnel was recreated (its audit boundary, not an app change; review 6793171907).
+
+**Next task:** the gates on the repaired checkpoint, a new completed report on PR #12, then ChatGPT's review and the rest of its private live-site audit.
 
 **Risk:**
 - **Emulation only:** no real phones, no WebKit; landscape on a real phone (browser bars, the notch) is unverified.

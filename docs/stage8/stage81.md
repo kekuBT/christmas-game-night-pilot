@@ -1,6 +1,6 @@
 # Stage 8.1: mobile usability and solo presentation
 
-**Status:** built and tested (§7); gates in §7.3. **Do not merge.** Merge and deployment decisions belong to the owner.
+**Status:** built and tested (§7); repaired after review 6793171907 (§7.5); gates in §7.3. **Do not merge.** Merge and deployment decisions belong to the owner.
 
 - **Instruction:** ChatGPT's review and handoff on PR #11 (comment 6790743334), under the owner's standing authorization (`docs/DECISIONS.md` D-WF-01). It cleared Stage 7.4 (tested `ecb617c`, head `58196cb`) and set this bounded milestone.
 - **Branch:** `claude/stage8-1-mobile-solo`, from `58196cb938e6d859d2e20895f71ba2eefde05f0c`, stacked on PR #11 (`claude/stage7-4-content-variety`). PRs #4–#11 stay unmerged.
@@ -30,7 +30,7 @@ No control smaller than 44 px was found on the solo journey at these sizes. The 
 ## 3. Design
 
 ### 3.1 Solo shelf (S1)
-- **Phones (narrower than 600 px):** each card is a row: a small square cover (decorative) beside the title, description and players/time line; the personal best and any note below; **Start** full width at the bottom (at least 48 px tall). Target: at 390×844 the first two cards and the top of the third are on the first screen. (At 320×640 I first aimed for under half the shelf's height; the descriptions wrap more at that width and it came to 1,192 of 1,609 px, with each card 283–303 px. Shortening it further would mean cutting words, which the handoff keeps.)
+- **Phones (narrower than 600 px):** a small square cover (decorative, 56 px) beside the title and the players/time line only; the description, the personal best and any note run the card's full width below; **Start** full width at the bottom (52 px). (Revised for R81-01, §7.5: the first version put every line beside a 76 px cover, which a wide fallback font made too tall.) Target: at 390×844 the first two cards and the top of the third are on the first screen. (At 320×640 I first aimed for under half the shelf's height; the descriptions wrap more at that width and it came to 1,192 of 1,609 px, with each card 283–303 px. Shortening it further would mean cutting words, which the handoff keeps.)
 - **Wider (600 px and up, including a phone in landscape):** a grid that fits as many columns as there is room for, each at least 260 px wide, up to three. The cover becomes a short banner. The shelf's container widens to 1,080 px (only the shelf; other screens keep their width). At 1440×900 all three games and their Start buttons are above the fold.
 - **Unchanged:** the order (Math, Pulse, Connections), every text line, `data-testid`s, the "More solo games…" footer and Host a game.
 
@@ -115,6 +115,28 @@ No control smaller than 44 px was found on the solo journey at these sizes. The 
 
   In a solo round the page is now exactly one screen tall at every size (it was a bar's height taller). The probe also found no control under 44 px and no sideways overflow on the solo journey, before or after.
 - **Screenshots:** `docs/stage8/screenshots-81/before/` (`58196cb`) and `after/` (`a856fa4`), 36 each, at 320×640, 390×844, 844×390 and 1440×900, both from clean trees (`manifest.json`), by `scripts/screenshot-stage81.mjs`.
+
+### 7.5 Repair R81-01 (review 6793171907): the narrow cards and the fonts phones really render
+- **The finding:** ChatGPT's independent run of `check-mobile-everyday` on `de913bf`, in its Codespace, was 129/130. At 320×640 the Word Connections card was 341 px against the 320 px cap (Math and Pulse 302 px).
+- **Reproduced here, and why my runs passed:**
+  - The app names Figtree and Inter but loads no web font, so each machine renders whatever of those it has, else its own fallback.
+  - This container has **Inter** installed, so every earlier measurement (283–303 px) was Inter's.
+  - The Codespace had neither, like most phones (iPhones have SF, Android phones Roboto) and many Linux machines.
+  - With **DejaVu Sans** forced (the wide Linux default), the cards here are 302/302/341 px, exactly the Codespace's numbers. Figtree, Roboto, Liberation Sans (Arial metrics) and FreeSans (Helvetica metrics) all give at most 283 px.
+  - Table: `docs/evidence/stage81-local/r81-01/card-heights-by-font.md`.
+- **The fix** (`stage8.css`, horizontal space, no text removed or shrunk):
+  - on phones, the cover (now 56 px) sits beside the title and the players line only;
+  - the description, the personal best and the note run the card's full width below;
+  - the reading order of the words is unchanged (only their placement), and the desktop grid looks the same.
+- **After,** the tallest card at 320×640: **284 px** with DejaVu Sans (was 341), 265 px with Inter, Figtree, Roboto, Liberation Sans and FreeSans. At 390×844: at most 265 px with any of them. The first Start and the second game's title are on the first 320×640 screen, and two Start buttons on the first 390×844 screen, with every font.
+- **The acceptance criterion is kept, and now measured honestly:**
+  - The caps stay (320 px at 320×640, 300 px at 390×844). They express the original goal: compact cards, with games found without scrolling past artwork.
+  - What changed is that `check-mobile-everyday` now measures them with the page's own font stack **and** with every fallback installed on the machine (DejaVu Sans, Liberation Sans, FreeSans), each forced in turn, and logs which were measured.
+  - It checks the first-screen starts with each font too.
+  - Run against a build with the tested stylesheet, it fails here exactly as in the Codespace (`…/r81-01/check-mobile-everyday-on-de913bf-stylesheet.log`).
+  - Start's check is now its real 52 px (it said 48).
+- **Focused checks on `86baf14`** (local, not gate verdicts): `check-mobile-everyday` 134/134, `check-solo-shelf` 58, `check-solo` 80, `check-mobile` 50.
+- **Screenshots:** `after/` re-taken at `86baf14` (clean tree); `before/` is unchanged (`58196cb`).
 
 ### 7.3 Gates
 - **An earlier candidate, `2300bcc`** (before the spec feedback was applied): fast **PASSED** (`20261111-090358-2300bccc-8008`, 5/5); the full gate was **stopped by me** a minute in, when the spec feedback arrived, and recorded its own verdict **CANCELLED** (exit 130, `20261111-090450-2300bccc-10963`: 2 passed, 3 cancelled, 78 not run). Neither is a verdict on the checkpoint.
