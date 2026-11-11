@@ -10,6 +10,7 @@ import { LocalServer } from "../src/server/http.js";
 import { cacheable, expectedType, isAppPage, isNetworkOnlyPath, isObsoleteShellCache, PUBLIC_FILES, SHELL_CACHE_PREFIX, swRoute, type ResponseLike } from "../apps/web/src/install/swPolicy.js";
 import { installPath, isAppleMobile } from "../apps/web/src/install/installState.js";
 import { probeServer } from "../apps/web/src/install/reachability.js";
+import { buildServiceWorker } from "../apps/web/swBuild.js";
 
 const WEB = join(process.cwd(), "apps", "web");
 const pngSize = (file: string) => { const b = readFileSync(file); return { png: b.subarray(1, 4).toString() === "PNG", w: b.readUInt32BE(16), h: b.readUInt32BE(20), colorType: b[25] }; };
@@ -273,5 +274,70 @@ describe("Stage 8.3: the server's public files and /health (§3.1, §3.3)", () =
   it("knows exactly which root files are public", () => {
     for (const p of ["/manifest.webmanifest", "/favicon.svg", "/sw.js", "/icons/icon-192.png", "/icons/mark.svg"]) expect(LocalServer.isPublicFile(p), p).toBe(true);
     for (const p of ["/icons/../x.png", "/icons/a/b.png", "/robots.txt", "/rooms", "/manifest.json", "/icons/x.js"]) expect(LocalServer.isPublicFile(p), p).toBe(false);
+  });
+});
+
+describe("Stage 8.3: the build version covers everything the build ships, the worker's own code included (apps/web/swBuild.ts)", () => {
+  const SRC = join(WEB, "src", "install");
+  const bundle = (main = "console.log('app')") => ({
+    "index.html": { type: "asset" as const, source: '<!doctype html><meta name="mchezo-build" content="dev" /><script src="/assets/index-abc.js"></script>' },
+    "assets/index-abc.js": { type: "chunk" as const, code: main },
+    "assets/index-def.css": { type: "asset" as const, source: "body{}" },
+    "assets/font-123.woff2": { type: "asset" as const, source: new Uint8Array([1, 2, 3]) },
+  });
+  const pub = [{ path: "/manifest.webmanifest", bytes: new TextEncoder().encode("{}") }, { path: "/icons/mark.svg", bytes: new TextEncoder().encode("<svg/>") }];
+  const dirs: string[] = [];
+  afterEach(() => { for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true }); });
+  /** A copy of the worker's source (using the real policy module), changed by `edit`: a worker-only change, the app bundle stays the same. */
+  const workerCopy = (edit: (sw: string) => string = (sw) => sw) => {
+    const d = mkdtempSync(join(tmpdir(), "mz-swbuild-"));
+    dirs.push(d);
+    const sw = readFileSync(join(SRC, "sw.ts"), "utf8");
+    expect(sw).toContain('from "./swPolicy.js"');
+    writeFileSync(join(d, "sw.ts"), edit(sw.replace('from "./swPolicy.js"', `from ${JSON.stringify(join(SRC, "swPolicy.ts"))}`)));
+    return join(d, "sw.ts");
+  };
+
+  it("the same build gives the same version and the same worker, byte for byte (an unchanged build is no update)", async () => {
+    const a = await buildServiceWorker({ bundle: bundle(), publicFiles: pub, workerEntry: join(SRC, "sw.ts") });
+    const b = await buildServiceWorker({ bundle: bundle(), publicFiles: pub, workerEntry: join(SRC, "sw.ts") });
+    expect(a.version).toMatch(/^[0-9a-f]{16}$/);
+    expect(b.version).toBe(a.version);
+    expect(b.sw).toBe(a.sw);
+  });
+
+  it("a worker-only change is a new version, so the new worker never shares the cache of the worker in charge", async () => {
+    const a = await buildServiceWorker({ bundle: bundle(), publicFiles: pub, workerEntry: workerCopy() });
+    const edit = (sw: string) => { const c = sw.replace("Check your connection, then reload.", "Check your connection, then reload this page."); expect(c).not.toBe(sw); return c; };
+    const b = await buildServiceWorker({ bundle: bundle(), publicFiles: pub, workerEntry: workerCopy(edit) });
+    expect(b.sw).not.toBe(a.sw);
+    expect(b.version).not.toBe(a.version);
+    // Its cache is named by its own version (the worker's shell cache is SHELL_CACHE_PREFIX + its version).
+    expect(b.sw).toContain(JSON.stringify(b.version));
+    expect(b.sw).not.toContain(a.version);
+  });
+
+  it("a change to the app bundle or to a public file is a new version too", async () => {
+    const a = await buildServiceWorker({ bundle: bundle(), publicFiles: pub, workerEntry: join(SRC, "sw.ts") });
+    const b = await buildServiceWorker({ bundle: bundle("console.log('app 2')"), publicFiles: pub, workerEntry: join(SRC, "sw.ts") });
+    const c = await buildServiceWorker({ bundle: bundle(), publicFiles: [pub[0]!, { path: "/icons/mark.svg", bytes: new TextEncoder().encode("<svg id='2'/>") }], workerEntry: join(SRC, "sw.ts") });
+    expect(new Set([a.version, b.version, c.version]).size).toBe(3);
+  });
+
+  it("the worker carries its build (the header and the version its cache and shell check use), with no stand-in left, and lists exactly this build's files", async () => {
+    const r = await buildServiceWorker({ bundle: bundle(), publicFiles: pub, workerEntry: join(SRC, "sw.ts") });
+    expect(r.sw.startsWith(`/* Mchezo service worker, build ${r.version} */`)).toBe(true);
+    expect(r.sw).toContain(JSON.stringify(r.version));
+    expect(r.sw).toContain(JSON.stringify(SHELL_CACHE_PREFIX));
+    expect(r.sw).not.toMatch(/version_slot/);
+    expect(r.files).toEqual(["/index.html", "/assets/font-123.woff2", "/assets/index-abc.js", "/assets/index-def.css", "/icons/mark.svg", "/manifest.webmanifest"]);
+    expect(r.precache).toEqual(["/index.html", "/assets/index-abc.js", "/assets/index-def.css", "/icons/mark.svg", "/manifest.webmanifest"]);
+  });
+
+  it("a failed install removes only a cache it created, never one that was already there", () => {
+    const sw = readFileSync(join(SRC, "sw.ts"), "utf8");
+    expect(sw).toMatch(/ours = !\(await caches\.has\(CACHE\)\)/);
+    expect(sw).toMatch(/if \(ours\) await caches\.delete\(CACHE\)/);
+    expect(sw).not.toMatch(/^\s*await caches\.delete\(CACHE\)/m);
   });
 });

@@ -7,9 +7,11 @@ Every check here ran in **Chromium** (Playwright's headless shell) on this machi
 
 | File | What |
 |---|---|
-| `check-install.log` | `scripts/check-install.mjs`, 113 of 113 checks. The sections are M (identity), W (the worker's boundary, inspected), O (offline), O3 (reachability as evidence, no gate, no polling), O2 (the room's offline heading clear of the banner), I (guidance), S (storage unavailable), N (deep links), U (two tabs and a next build, spec feedback §1) and F (a partial deploy, a sign-in page, a redirect, quota denied, and privacy without static routing). |
+| `check-install.log` | `scripts/check-install.mjs` on `96b3970`, 113 of 113 checks. The sections are M (identity), W (the worker's boundary, inspected), O (offline), O3 (reachability as evidence, no gate, no polling), O2 (the room's offline heading clear of the banner), I (guidance), S (storage unavailable), N (deep links), U (two tabs and a next build, spec feedback §1) and F (a partial deploy, a sign-in page, a redirect, quota denied, and privacy without static routing). |
 | `check-install-O2-on-8b8a7ef.log` | The same driver on the first candidate `8b8a7ef`: section O2 fails 8 of 8 (the "Rejoining your room" heading under the banner); everything else passes. |
 | `regression-drivers.txt` | Twelve existing drivers, rerun on the final code: 0 failures. |
+| `check-install-W-before-fix.log` | Found after the completed report (stage83.md §7.5, D-S83-08): the driver with its new section F5, on a build of `96b3970`'s code. F5 fails 2 of 3: a failed install of a worker sharing the build's version emptied the cache of the worker in charge (14 entries before, 0 after), and offline it had no shell. The other 114 checks pass. |
+| `check-install-W-after-fix.log` | The same driver on the fixed code: 116 of 116, F5 included. |
 
 **How the privacy boundary was shown,** by real contents, not mocks:
 - **The cache:** check-install section W lists every Cache Storage entry after a solo round, a casual room joined by a guest in a second tab, and that room's session, ledger, Memory Book and projection reads (each 200 with the seat's token).

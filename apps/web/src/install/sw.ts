@@ -12,8 +12,12 @@
  * - Every stored response is validated (cacheable()): a direct, successful,
  *   same-origin reply of the expected type, never a redirect or sign-in page.
  * - Install is all-or-nothing: one file missing or wrong and this worker
- *   doesn't install, its half-filled cache is deleted, and the worker already
- *   in charge (if any) carries on with its own cache.
+ *   doesn't install, the half-filled cache it created is deleted (never a
+ *   cache that was already there), and the worker already in charge (if any)
+ *   carries on with its own cache.
+ * - Its version covers everything the build ships, its own code included
+ *   (apps/web/swBuild.ts), so a new worker never shares the cache of the one
+ *   in charge.
  * - Nothing is queued or retried.
  * - A new build's worker waits: no skipWaiting(), no clients.claim(). It takes
  *   over only when no page of the old build is open, then deletes the other
@@ -64,12 +68,17 @@ scope.addEventListener("install", (event) => {
         await event.addRoutes(["/rooms/*", "/games", "/games/*", "/health", "/sw.js"].map((pathname) => ({ condition: { urlPattern: new URLPattern({ pathname }) }, source: "network" })));
       }
     } catch { /* not supported here: the fetch handler's allowlist is the boundary */ }
+    // A cache of this name that is already here is not this install's to remove: a worker in charge may rely on it.
+    // (Every change to what a build ships, the worker's own code included, is a new version, so this is rare.)
+    let ours = false;
     try {
+      ours = !(await caches.has(CACHE));
       const cache = await caches.open(CACHE);
       for (const url of __MCHEZO_PRECACHE__) await precacheOne(cache, url);
     } catch (e) {
-      // Partial or failed (a missing file, a sign-in page, storage full): leave nothing half-made behind.
-      await caches.delete(CACHE).catch(() => false);
+      // Partial or failed (a missing file, a sign-in page, storage full): leave nothing half-made behind,
+      // and nothing of anyone else's removed.
+      if (ours) await caches.delete(CACHE).catch(() => false);
       throw e;
     }
   })());

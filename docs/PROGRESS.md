@@ -2047,4 +2047,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - Earlier candidates `8b8a7ef` (rejoin fix) and `69a7dc1` (spec feedback): each passed its fast gate; I stopped each full gate (CANCELLED). Not verdicts.
 - Screenshots: `docs/stage8/screenshots-83/`, 34 shots on `96b3970`.
 
-**Next task:** the completed report on PR #14. After that, ChatGPT's review and private live-site audit.
+**Completed report:** posted on PR #14 (comment 6804614713) for `96b3970`, head `afd5ae1`. ChatGPT's independent review started (6804653156).
+
+**Found after the report (stage83.md §7.5, D-S83-08):**
+- **The defect:** the build version didn't cover the worker's own code. A worker-only change kept the version and so the cache name, and its failed install deleted the cache of the worker in charge. Offline, that worker had no shell. Online play was unaffected.
+- **Reproduced in the engine on `96b3970`'s code;** fixed:
+  - `apps/web/swBuild.ts`: the version hashes the worker too.
+  - The install deletes only a cache it created.
+- **Tests:** 5 new unit tests (1,409 in all) and `check-install` F5 (116 checks). F5 fails 2 of 3 on the old code and passes on the fix; logs in `docs/evidence/stage83-local/`.
+- **Not pushed while ChatGPT's review of `96b3970` is under way.** It goes up with sequential gates on the new candidate, together with whatever the review finds.
+
+**Next task:** ChatGPT's review verdict and private live-site audit; then a new candidate with this fix (and any review findings), its fast and full gates, and a new report.

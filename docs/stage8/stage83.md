@@ -90,7 +90,8 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
 - **Accessibility and looks:** proper headings, 44 px targets, and the existing `Sheet` for focus. The tokens are used, so it reads right in both looks.
 
 ### 3.3 Offline and privacy boundary (service worker; revised by spec feedback 6802191261 §2)
-- **`/sw.js`** is generated at build time (a Vite plugin) and its scope is `/`. It embeds this build's version and an exact list of the files the build emitted: scripts, styles, fonts, the public install files and the shell page.
+- **`/sw.js`** is generated at build time (a Vite plugin, `apps/web/swBuild.ts`) and its scope is `/`. It embeds this build's version and an exact list of the files the build emitted: scripts, styles, fonts, the public install files and the shell page.
+- **The version** is a hash of everything the build ships: the bundle's files and contents, the public files, and **the worker's own code** (§7.5). Any change, a worker-only one included, is a new version and so a new shell cache; the same build always gives the same version and the same worker, byte for byte.
 - **A positive, exact-build allowlist** (`swPolicy.ts`): the worker answers only these, and nothing else is ever stored.
   - A **page load** (navigation) of an app page is network first. The real address, query included, goes to the network. Only if the network fails does the worker return the canonical cached shell (`/index.html`). The navigation and its reply are never stored.
   - A **GET for one of this build's files,** by its exact path with no query: this build's cache first, else the network. It is kept only if it validates.
@@ -103,7 +104,7 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
   - of the type its extension requires. An HTML page standing in for a script, a style, a font or an icon is refused.
 - **Install is all-or-nothing:**
   - Each precached file is fetched and validated individually, and the shell must carry the worker's own build.
-  - One missing, redirected or wrong file, or storage quota denied, and the new worker doesn't install. Its half-filled cache is deleted.
+  - One missing, redirected or wrong file, or storage quota denied, and the new worker doesn't install. The half-filled cache it created is deleted; a cache of that name that was already there is never its to remove (§7.5).
   - The worker already in charge (if any) carries on with its own cache.
   - A failed later cache write (quota) never fails the request.
 - **Nothing is queued:** no background sync, no retry by the worker. A request that can't go fails as today, and no score or game action is ever stored for later.
@@ -227,7 +228,7 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
   - The install path.
   - The reachability probe: only `{"ok":true}` JSON counts; a sign-in page, `{}`, junk and a redirect don't.
   - The server's types, headers, 404s and `/health`.
-- **`scripts/check-install.mjs` (113 checks), by section:**
+- **`scripts/check-install.mjs` (116 checks), by section:**
 
 | Section | What it covers |
 |---|---|
@@ -240,7 +241,7 @@ So a service worker is needed: for the feature-detected Chromium prompt, and for
 | S | With storage unavailable, the worker still registers and a round starts. |
 | N | Deep links reload to the same screen, served fresh. |
 | U | Two tabs and a real next build (feedback §1), as described below. |
-| F | A next build missing a listed file, a sign-in page (200 HTML) or a redirect instead of a file, and storage quota denied (Chromium's own quota override): nothing half-made installs, no partial cache is left, the worker in charge (if any) carries on, and a solo round still starts. **Without static routing** (a worker built without it), every cached entry is still one of this build's files, and no API reply came from the worker. |
+| F | A next build missing a listed file, a sign-in page (200 HTML) or a redirect instead of a file, and storage quota denied (Chromium's own quota override): nothing half-made installs, no partial cache is left, the worker in charge (if any) carries on, and a solo round still starts. **Without static routing** (a worker built without it), every cached entry is still one of this build's files, and no API reply came from the worker. **F5** (§7.5): a new worker with this build's version fails to install, and the cache of the worker in charge stays whole; offline, it still opens its shell. |
 
 Section U in detail:
 - A plays a round on the old build throughout: never reloaded, still playing after B goes offline and comes back, with its files still served from its cache after the server drops them. No notice appears in the round.
@@ -287,3 +288,28 @@ Section U in detail:
   - **`69a7dc1`:** fast `20261111-174819-69a7dc19-17727` PASSED. Its full gate `…-175010-…` was stopped by me when spec feedback 6802191261 was read (CANCELLED).
 - Raw evidence for all six runs is in `docs/evidence/gate-runs/<run>/`.
 - **Screenshots:** `docs/stage8/screenshots-83/`, 34 shots on `96b3970`, and `cache-inventory.json`.
+
+### 7.5 Found after the completed report: a worker-only change kept the build's version (D-S83-08)
+- **What was wrong, on `96b3970`:**
+  - The build version hashed the app bundle and the public files, but not the worker's own code.
+  - So a change only to `sw.ts` or `swPolicy.ts` made a new `/sw.js` (different bytes, so the browser installs it) under the **same** version, and so the same cache name as the worker in charge.
+  - If that install then failed (one file missing, a sign-in page, storage full), its clean-up deleted the cache the worker in charge relied on.
+  - Offline, that worker then had no shell: a bare "Can't reach Mchezo" page instead of the app and its own notice.
+  - Online play was never affected: files fall back to the network.
+- **Reproduced first, in the engine:**
+  - Two builds of `96b3970`'s code, differing only in the worker, gave the same version `77f9ad4250045e33` and different `sw.js` bytes.
+  - With the first worker in charge (14 cached entries) and the second failing to install, Cache Storage was left empty, and an offline reload showed the bare page.
+- **The fix:**
+  - `apps/web/swBuild.ts` builds the worker with a stand-in version, hashes its code with everything else the build ships, then writes the version in. A worker-only change is now a new version (in the reproduction, `afad7cd5c0a233ea` became `b9dcd95654740e14`), and an unchanged build still gives the same worker, byte for byte.
+  - As a second guard, an install deletes its cache only if it created it, so a same-name cache that was already there is never its to remove.
+- **Tests:**
+  - **Unit** (`tests/stage83-install.test.ts`, 5 new):
+    - the same build gives the same version and worker;
+    - a worker-only change gives a new version (this test fails when the worker's code is left out of the hash);
+    - a bundle or public-file change gives a new version;
+    - the worker carries its version with no stand-in left, and lists exactly the build's files;
+    - the install guard.
+  - **Engine** (`check-install` F5, 3 checks): a worker with the same version but different bytes fails to install. The cache of the worker in charge stays whole, and offline it still opens its shell.
+    - On a build of `96b3970`'s code, two of the three fail: 14 entries before and 0 after, and no shell.
+    - On the fixed code, all three pass.
+

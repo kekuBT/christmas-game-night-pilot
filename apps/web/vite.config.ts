@@ -1,10 +1,9 @@
 import react from "@vitejs/plugin-react";
-import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { build as esbuild } from "esbuild";
 import { defineConfig, type Plugin } from "vite";
+import { buildServiceWorker, type BundleLike } from "./swBuild.js";
 
 const WEB = fileURLToPath(new URL(".", import.meta.url));
 const BUILD_META = '<meta name="mchezo-build" content="dev" />';
@@ -21,14 +20,16 @@ function publicFiles(dir = join(WEB, "public")): string[] {
 }
 
 /**
- * Stage 8.3 (docs/stage8/stage83.md §3.3, §3.4): /sw.js for this build.
- * - The version is a hash of everything the build ships (the bundle's
- *   files and contents, and the public files), so a new build means a new
- *   worker and a new shell cache, and an unchanged build means none.
+ * Stage 8.3 (docs/stage8/stage83.md §3.3, §3.4): /sw.js for this build
+ * (built by swBuild.ts).
+ * - The version is a hash of everything the build ships: the bundle's files
+ *   and contents, the public files, and the worker's own code. So any new
+ *   build, a worker-only change included, means a new worker and a new shell
+ *   cache, and an unchanged build means none.
  * - index.html carries the same version (<meta name="mchezo-build">), so a
  *   page can tell whether a waiting worker belongs to a newer build.
  * - Precached: the shell page, this build's JS and CSS, and the public
- *   install files. Fonts and other assets are kept when first used.
+ *   install files. Fonts are kept when first used.
  */
 function mchezoServiceWorker(): Plugin {
   return {
@@ -40,33 +41,13 @@ function mchezoServiceWorker(): Plugin {
       if (!html || html.type !== "asset" || typeof html.source !== "string" || !html.source.includes(BUILD_META)) {
         this.error("mchezo-service-worker: index.html (with its mchezo-build meta) is not in the bundle");
       }
-      const pub = publicFiles();
-      const hash = createHash("sha256");
-      for (const name of Object.keys(bundle).sort()) {
-        const item = bundle[name]!;
-        hash.update(name).update("\0").update(item.type === "chunk" ? item.code : item.source).update("\0");
-      }
-      for (const p of pub) hash.update(p).update("\0").update(readFileSync(join(WEB, "public", p.slice(1)))).update("\0");
-      const version = hash.digest("hex").slice(0, 16);
-      // The exact allowlist (feedback 6802191261 §2): every file this build emitted under /assets
-      // (scripts, styles, fonts), the public install files and the shell page. Nothing else is ever the worker's.
-      const assets = Object.keys(bundle).filter((n) => /^assets\/[^/]+$/.test(n)).map((n) => "/" + n).sort();
-      const files = ["/index.html", ...assets, ...pub];
-      // Precached: what a page of this build needs to start (the shell, its scripts and styles, the install files).
-      // Fonts are kept when first used (still only from this list).
-      const precache = ["/index.html", ...assets.filter((a) => /\.(js|css)$/.test(a)), ...pub];
-      (html as { source: string }).source = (html as { source: string }).source.replace(BUILD_META, `<meta name="mchezo-build" content="${version}" />`);
-      const out = await esbuild({
-        entryPoints: [join(WEB, "src", "install", "sw.ts")],
-        bundle: true,
-        write: false,
-        format: "iife",
-        target: "es2020",
-        minify: true,
-        legalComments: "none",
-        define: { __MCHEZO_VERSION__: JSON.stringify(version), __MCHEZO_FILES__: JSON.stringify(files), __MCHEZO_PRECACHE__: JSON.stringify(precache) },
+      const { version, sw } = await buildServiceWorker({
+        bundle: bundle as unknown as BundleLike,
+        publicFiles: publicFiles().map((path) => ({ path, bytes: readFileSync(join(WEB, "public", path.slice(1))) })),
+        workerEntry: join(WEB, "src", "install", "sw.ts"),
       });
-      this.emitFile({ type: "asset", fileName: "sw.js", source: `/* Mchezo service worker, build ${version} */\n${out.outputFiles[0]!.text}` });
+      (html as { source: string }).source = (html as { source: string }).source.replace(BUILD_META, `<meta name="mchezo-build" content="${version}" />`);
+      this.emitFile({ type: "asset", fileName: "sw.js", source: sw });
     },
   };
 }

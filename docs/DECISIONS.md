@@ -1041,3 +1041,9 @@ Handoff 6801615731 (PR #13), under D-WF-01. Spec: `docs/stage8/stage83.md`.
   - **`/health` counts only as `{"ok":true}`;** `navigator.onLine` only starts a check.
   - **Nothing promises moving seats, bests or choices into an installed app.** The iPhone steps point to the existing seat recovery.
   - *Alternative rejected:* trusting any `/assets` file or any 200. A private preview's sign-in page or another build's file could then be stored.
+- **D-S83-08 The build version covers the worker's own code; a failed install removes only what it made** (found after the completed report, on `96b3970`; stage83.md §7.5).
+  - **The defect:** the version hashed the app bundle and the public files, not `sw.js`. A worker-only change was a new worker under the same version, so it shared the cache of the worker in charge, and its failed install deleted that cache. Offline, the worker in charge then had no shell: a bare "Can't reach Mchezo" page instead of the app's own notice. Online play was unaffected.
+  - **What:**
+    - `apps/web/swBuild.ts` builds the worker with a stand-in version, hashes its code with everything else, then writes the version in. The same build gives the same worker, byte for byte.
+    - The install deletes its cache only if it created it.
+  - *Alternative rejected:* a version from the time or a counter. Every build would then be an update, even an unchanged one.
