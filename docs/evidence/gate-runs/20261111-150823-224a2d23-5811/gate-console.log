@@ -1,0 +1,27 @@
+Mchezo gate fast | run 20261111-150823-224a2d23-5811
+  revision 224a2d23f5d665593c5786d8886e0e5a7b0dfd1e (clean tree) | fingerprint 6d8a924fedcf (448 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.2 GB available)
+  history  45 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.03 for 3 worker(s) (measured, 38 run(s))
+  estimate this run: 26–62s (measured) · the same steps one after another: about 1m 17s · longest step unit-tests ~32s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.03 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-fast-224a2d2/test-results/20261111-150823-224a2d23-5811
+        start typecheck-server on w1 (usually 11s)
+        start typecheck-web on w2 (usually 11s)
+        start lint on w3 (usually 16s)
+[ 1/5] PASS        12.6s  typecheck-web  w2
+        start unit-tests on w2 (usually 32s)
+[ 2/5] PASS        13.4s  typecheck-server  w1
+        start build-web on w1 (usually 7s)
+[ 3/5] PASS        19.4s  lint  w3
+[ 4/5] PASS           8s  build-web  w1
+[ 5/5] PASS        38.2s  unit-tests  w2
+
+PASSED (exit 0) | fast | run 20261111-150823-224a2d23-5811
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 51s · step time 1m 32s (sum) · 3 workers, 60% busy · 1.80× the same steps run one after another
+           predicted 26–61s (about 33s, measured) → actual 51s (+55%)
+           longest  unit-tests 38s, lint 19s, typecheck-server 13s · the longest step is 75% of the wall time
+           machine  CPU mean 84%, peak 98% · memory available ≥ 14148 MB · load peak 4.37
+           contention ×1.194 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s82-fast-224a2d2/test-results/20261111-150823-224a2d23-5811/report.json

@@ -1970,9 +1970,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The finding:** a `localStorage` write that failed undid the look or content choice at once. Listeners re-read stale or default storage.
 - **The fix:** `ui/mchezo/deviceChoice.ts`. The page's choice is held in memory and is authoritative for the page, on every screen. Other tabs' saves still arrive. Failed saves are said plainly ("until you reload").
 - **The check:** `check-themes-seasonal` section F, in three storage modes, for both the look and the content: the shelf → Word Connections Start reaches the server as Christmas. 19 of its checks fail on `c27570f`; all 166 pass after the repair. Five new unit tests call the setters themselves (1,379 unit tests in all). Ten regression drivers were rerun with 0 failures. Evidence: `docs/evidence/stage82-local/r82-01/`.
-- **Gates:** to be run on the repaired candidate, one after the other.
+- **Gates on the first repair candidate, `224a2d2`:**
+  - fast `20261111-150823-224a2d23-5811` PASSED (5/5, 51 s).
+  - Its full gate `20261111-151310-224a2d23-9331` was stopped by me within seconds (self-recorded CANCELLED, exit 130), because the R82-01 shots had just shown the defect below. Neither run is a verdict on the final candidate.
 
-**Next task:** sequential fast and full gates on the repaired candidate, then the repair report on PR #13. After that, ChatGPT's review and private audit, then the Home Screen installation milestone.
+**Found while validating the repair** (mine, not a reviewer's; stage82.md §7.5, D-S82-09):
+- **The finding:** compact choices clipped their labels. At 320×640, Settings → Look read "Match | Everyday | hristmas", and the shelf's content choice also overflowed in wider fonts. It dates from the first Stage 8.2 candidate.
+- **The fix** (CSS only): compact choices wrap instead of clipping, and the ✓ never changes a width.
+- **The check:** new section G of `check-themes-seasonal`, covering three sizes and every installed wide font. It fails 19 checks on `224a2d2`, and all 251 pass after the fix. `check-mobile-everyday` (R81-01's first screen) passes 134/134. Ten regression drivers had 0 failures. Unit tests, lint and typecheck are clean.
+- Evidence: `docs/evidence/stage82-local/choice-fit/`.
+
+**Next task:** sequential fast and full gates on the final candidate, then the repair report on PR #13. After that, ChatGPT's review and private audit, then the Home Screen installation milestone.
 
 **Risk:**
 - **Emulation only:** Safari's toolbar colour and Android's status bar are untested on real phones.

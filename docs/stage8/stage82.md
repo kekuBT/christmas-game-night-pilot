@@ -366,6 +366,23 @@ Labels say which game they mean, in words, never by colour alone. The briefing s
   - Five new unit tests call the setters themselves.
   - Evidence: `docs/evidence/stage82-local/r82-01/`.
 
+### 7.5 Found while validating the repair: compact choices clipped their labels
+- **The finding** (mine, not a reviewer's): the R82-01 shots on `224a2d2` showed Settings → Look at 320×640 as "Match | Everyday | hristmas".
+  - Every compact choice was a fixed grid of equal columns with non-wrapping labels, and the ✓ was laid out after the label.
+  - So a label wider than its share of the row overflowed its button and was cut off. The worst cases were "Christmas ✓" in a third of a 320 px row, and the content choice at 320 px in wider fonts.
+  - It dates from the first Stage 8.2 candidate. The drivers' clip check only sees boxes that hide their overflow, and none opened Settings at 320 px.
+- **The fix** (CSS; D-S82-09):
+  - A compact choice is a wrapping flex row whose options never shrink below their label, so it wraps rather than clipping.
+  - The ✓ hangs after the label in the side padding every option has, so choosing never changes a width.
+  - The content choice keeps its "Content" label on the same line when both fit.
+- **The check:** `check-themes-seasonal` section G.
+  - Settings → Look in all three states, and the shelf and start-screen content choices in both, at 320, 390 and 1440 px.
+  - It runs with the page's font and every wide fallback installed here.
+  - It measures the label's own text against its button, the ✓ against the label, 44 px, and no option moving.
+  - 19 checks fail on `224a2d2`, and all pass after the fix. `check-mobile-everyday` (R81-01's first-screen shelf with every font) still passes.
+  - Evidence: `docs/evidence/stage82-local/choice-fit/`.
+- **Now:** at 320 px, the Look control shows Match and Everyday on one line and Christmas on the next. From 390 px up, all three fit on one line.
+
 ### 7.3 Gates
 - **The first candidate, `d4e06c3`** (before the feedback reached this session):
   - fast `20261111-132206-d4e06c34-24970`: PASSED, 5/5, 49 s;

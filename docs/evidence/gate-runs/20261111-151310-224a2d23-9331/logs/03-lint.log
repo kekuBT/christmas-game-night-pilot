@@ -1,0 +1,3 @@
+$ node ./node_modules/eslint/bin/eslint.js .
+# timeout 300s | worker w3
+

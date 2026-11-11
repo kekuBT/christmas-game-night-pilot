@@ -29,6 +29,14 @@
 //      the Christmas look in Settings stays chosen (the page says it lasts
 //      until reload), the content survives shelf → Word Connections, the
 //      Start reaches the server as Christmas, and the theme stays consistent.
+//   G  every compact choice shows its whole label (found by the R82-01
+//      screenshots on 224a2d2: at 320 px, Settings → Look clipped
+//      "Christmas ✓" to "hristmas"): Settings → Look in each of its three
+//      states, and the solo content choice on the shelf and the Word
+//      Connections start screen in both, at 320×640, 390×844 and 1440×900,
+//      with the page's own font and every wide fallback installed here. The
+//      label's own text box lies inside its button, the ✓ never covers it,
+//      every option is at least 44 px, and choosing never moves the others.
 //   Also (C, feedback 6795825877): a guest still on a Christmas game's results
 //   keeps that game's look while the host sets the NEXT game to Everyday; the
 //   labels say "This game" and "Next game", not colours alone.
@@ -42,6 +50,7 @@ import { join } from "node:path";
 import { launchChromium } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 import { contrastFailures } from "./lib/contrast.mjs";
+import { forceFont, installedFonts, WIDE_FONTS } from "./lib/fonts.mjs";
 
 const GATE_BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -76,6 +85,41 @@ const roomProjection = (p) => p.evaluate(async () => {
   return r.json();
 });
 const pressed = async (p, testId) => (await p.getByTestId(testId).getAttribute("aria-pressed")) === "true";
+/**
+ * Section G: every visible choice option (inside `scope`) shows its whole
+ * label. Measures the label's own text (a Range over its text, so text that
+ * spills out of a box with visible overflow is caught too) against the
+ * option's box, the ✓ against the label, and the option's size. Returns the
+ * problems, plus each option's box so a later call can tell whether it moved.
+ */
+const choiceProblems = (page, scope) => page.evaluate((sel) => {
+  const problems = [], boxes = {};
+  const root = sel ? document.querySelector(sel) : document;
+  for (const opt of root ? root.querySelectorAll(".mz-choice__opt") : []) {
+    const b = opt.getBoundingClientRect();
+    if (b.width === 0 || b.height === 0) continue;
+    const id = opt.getAttribute("data-testid") ?? opt.textContent.trim();
+    // Relative to its group: a sheet that grows with a longer help text moves the whole row, which isn't reflow.
+    const g = (opt.closest(".mz-choice") ?? opt).getBoundingClientRect();
+    boxes[id] = { x: Math.round(b.left - g.left), y: Math.round(b.top - g.top), w: Math.round(b.width), h: Math.round(b.height) };
+    const title = opt.querySelector(".mz-choice__title");
+    const text = title && [...title.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+    if (!text) { problems.push(`${id}: no label`); continue; }
+    const r = document.createRange(); r.selectNodeContents(text);
+    const t = r.getBoundingClientRect();
+    if (t.left < b.left - 0.5 || t.right > b.right + 0.5 || t.top < b.top - 0.5 || t.bottom > b.bottom + 0.5) problems.push(`${id}: "${text.textContent.trim()}" spills out of its button (text ${Math.round(t.left)}–${Math.round(t.right)}, button ${Math.round(b.left)}–${Math.round(b.right)})`);
+    const check = opt.querySelector(".mz-choice__check");
+    if (check) {
+      const c = check.getBoundingClientRect();
+      if (c.left < b.left - 0.5 || c.right > b.right + 0.5 || c.top < b.top - 0.5 || c.bottom > b.bottom + 0.5) problems.push(`${id}: the ✓ lies outside its button`);
+      const cr = document.createRange(); cr.selectNodeContents(check); const g = cr.getBoundingClientRect();
+      if (g.width > 0 && g.left < t.right && g.right > t.left && g.top < t.bottom && g.bottom > t.top) problems.push(`${id}: the ✓ covers the label`);
+    }
+    if (b.height < 44 || b.width < 44) problems.push(`${id}: ${Math.round(b.width)}×${Math.round(b.height)} px, under 44`);
+  }
+  if (root && Object.keys(boxes).length === 0) problems.push("no choice shown");
+  return { problems, boxes };
+}, scope ?? null);
 
 // ---- The shipped Word Connections boards, by their words, with their season tags ----
 const packs = join(process.cwd(), "content", "packs");
@@ -430,6 +474,43 @@ try {
         const bad = await contrastFailures(p);
         check(`${where}: readable contrast (WCAG AA)`, bad.length === 0, bad.slice(0, 3).join("; "));
       }
+      await ctx.close();
+    }
+  }
+
+  // ---- G. Every compact choice shows its whole label, whatever the font ----
+  {
+    const fonts = [null, ...(await installedFonts(browser, WIDE_FONTS))];
+    check(`G fonts measured: the page's own font stack${fonts.length > 1 ? `, ${fonts.slice(1).join(", ")}` : " (no wide fallback installed on this machine)"}`, true);
+    for (const vp of [{ width: 320, height: 640 }, { width: 390, height: 844 }, { width: 1440, height: 900 }]) for (const fam of fonts) {
+      const ctx = await browser.newContext({ viewport: vp });
+      await forceFont(ctx, fam);
+      const p = await ctx.newPage();
+      const where = `G ${vp.width}×${vp.height}, ${fam ?? "the page's own font"}`;
+      // Choose each option in turn; after each: every label whole, the ✓ clear of it, 44 px, and no option moved.
+      const each = async (what, scope, ids) => {
+        let before = null;
+        for (const id of ids) {
+          await p.getByTestId(id).click();
+          await settled(p);
+          const { problems, boxes } = await choiceProblems(p, scope);
+          const moved = before ? Object.keys(boxes).filter((k) => JSON.stringify(boxes[k]) !== JSON.stringify(before[k])) : [];
+          check(`${where}: ${what}, ${id} chosen: every label whole, the ✓ clear of it, options at least 44 px${before ? ", nothing moved" : ""}`,
+            (await pressed(p, id)) && problems.length === 0 && moved.length === 0,
+            [...problems, ...moved.map((k) => `${k} moved ${JSON.stringify(before[k])} → ${JSON.stringify(boxes[k])}`)].join("; "));
+          before = boxes;
+        }
+      };
+      await p.goto(`${GATE_BASE}/`, { waitUntil: "domcontentloaded" });
+      await p.getByTestId("home-settings").click();
+      await each("Settings → Look", '[role="group"][aria-label="Look"]', ["look-christmas", "look-everyday", "look-auto"]);
+      await p.keyboard.press("Escape");
+      await p.goto(`${GATE_BASE}/solo`, { waitUntil: "domcontentloaded" });
+      await p.getByTestId("solo-home").waitFor({ timeout: 15000 });
+      await each("the shelf's content choice", '[data-testid="solo-content"]', ["solo-content-christmas", "solo-content-everyday"]);
+      await p.goto(`${GATE_BASE}/solo/word-connections`, { waitUntil: "domcontentloaded" });
+      await p.getByTestId("solo-ready").waitFor({ timeout: 15000 });
+      await each("the Word Connections start screen's content choice", '[data-testid="solo-content"]', ["solo-content-christmas", "solo-content-everyday"]);
       await ctx.close();
     }
   }

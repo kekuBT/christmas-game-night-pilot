@@ -29,6 +29,7 @@ import { basename, dirname, join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 import { slabNumber, solveMath } from "./lib/math-solve.mjs";
+import { installedFonts } from "./lib/fonts.mjs";
 
 const GATE_BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -87,23 +88,6 @@ async function checkLayout(page, where, { allowSmall = [] } = {}) {
   check(`${where}: no control smaller than 44 px`, small.length === 0, small.join("; "));
   check(`${where}: no text clipped inside its box`, l.clipped.length === 0, l.clipped.join("; "));
   return l;
-}
-/**
- * Which of these font families are installed on this machine. A font is
- * installed when text set in it (with a generic fallback) measures differently
- * from the generic fallback alone, checked against two generics.
- * (document.fonts.check can't tell: it says true for any font not loaded as a web font.)
- */
-async function installedFonts(browser, families) {
-  const ctx = await browser.newContext();
-  const p = await ctx.newPage();
-  const found = await p.evaluate((fams) => {
-    const c = document.createElement("canvas").getContext("2d");
-    const w = (font) => { c.font = font; return c.measureText("mmmmmmmmmmlliWWWQQ1234567890 abc").width; };
-    return fams.filter((f) => ["monospace", "serif"].some((g) => w(`32px "${f}", ${g}`) !== w(`32px ${g}`)));
-  }, families);
-  await ctx.close();
-  return found;
 }
 /** The element is entirely on screen as things stand (no scrolling). */
 async function inView(loc) {

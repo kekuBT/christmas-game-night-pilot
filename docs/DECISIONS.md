@@ -970,4 +970,13 @@ Instructed by ChatGPT's clearance of Stage 8.1 and handoff 6795218622 on PR #12,
     - Other tabs' saved choices arrive by the `storage` event.
     - A failed save is said plainly ("applies until you reload"), and after a reload the page falls back to what storage holds.
   - *Alternative rejected:* re-reading storage after every change, which is what `c27570f` did. A failed write then snapped the choice back.
+- **D-S82-09 Compact choices wrap; they never clip** (found while validating R82-01; stage82.md §7.5).
+  - **What:** a compact two- or three-way choice is a wrapping row.
+    - Its options share the row but never shrink below their label. When the labels can't all fit on one line in the phone's font, the row wraps (at 320 px, Settings → Look shows two options and then one).
+    - The ✓ hangs after the label, inside side padding that every option has, so choosing never changes a width or moves the others.
+  - **Why:** the phone's font is unknown (no web font is loaded; R81-01), so no fixed column width or font size can promise a whole label.
+  - *Alternatives rejected:*
+    - Smaller text at narrow widths: it still depends on the font, and 13 px labels are hard to read.
+    - Always stacking the options: it costs height on every phone, and the R81-01 shelf must keep its first Start on the first screen.
+    - Dropping the ✓: it is the choice's non-colour cue.
 

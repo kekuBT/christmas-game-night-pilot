@@ -6,6 +6,8 @@ Raw output from the gate runs and checks that the PR handoffs cite, committed so
 
 | Run | Revision | What | Files |
 |---|---|---|---|
+| `20261111-151310-224a2d23-9331` | `224a2d2` | **Stage 8.2, first R82-01 repair candidate:** full gate stopped by me within seconds, when the R82-01 screenshots showed compact choices clipping their labels (stage82.md §7.5); self-recorded **CANCELLED** (exit 130). Not a verdict | the same (partial) |
+| `20261111-150823-224a2d23-5811` | `224a2d2` | **Stage 8.2, first R82-01 repair candidate:** fast gate, PASSED 5/5 in 51 s (1,379 unit tests); superseded by the final repair candidate | the same |
 | `20261111-134957-c27570f7-15819` | `c27570f` | **Stage 8.2:** full gate, **PASSED 84/84** in 30 min 00 s (`check-themes-seasonal` 139, `check-mobile-everyday` 134, `check-content-variety` 58), fresh clone, clean tree, fingerprint `9e319219…` (447 files), run after the fast gate finished (PR #13's tested revision) | `report.json`, `summary.txt`, `gate-console.log`, and every step log in `logs/` |
 | `20261111-134753-c27570f7-12465` | `c27570f` | **Stage 8.2:** fast gate, **PASSED 5/5** in 49 s, 1,374 unit tests, fresh clone, clean tree | the same |
 | `20261111-132514-d4e06c34-28633` | `d4e06c3` | **Stage 8.2, first candidate:** full gate stopped by me about a minute in, when ChatGPT's spec feedback 6795825877 arrived; self-recorded **CANCELLED** (exit 130). Not a verdict | the same (partial) |
