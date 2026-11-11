@@ -1,7 +1,7 @@
 {
-  "revision": "0c525fcc58960d923c99837c221e7725adb935b6",
+  "revision": "02176dd2c6b0081529f92767534ea5d1502a3fd5",
   "workingTreeClean": true,
-  "capturedAt": "2026-11-11T01:17:50.537Z",
+  "capturedAt": "2026-11-11T01:33:05.780Z",
   "by": "scripts/check-content-variety.mjs",
   "note": "Chromium headless (Playwright) only; not a real iPhone or Android device, not WebKit.",
   "shots": [
