@@ -1,9 +1,9 @@
 {
-  "revision": "8b8a7ef3c1392167e27ace6a5b56fb0831c0da6e",
-  "capturedAt": "2026-11-11T17:40:05.965Z",
+  "revision": "69a7dc1975d2798b2a903a6083703b3db920cb68",
+  "capturedAt": "2026-11-11T17:50:04.385Z",
   "what": "Every Cache Storage entry after a solo round and a casual room joined by a guest (the same device, two tabs), and every API reply with whether the service worker answered it.",
   "caches": {
-    "mchezo-shell-3c7ef2e6467570c7": [
+    "mchezo-shell-c305201189544feb": [
       {
         "url": "/index.html",
         "type": "text/html; charset=utf-8",
@@ -15,17 +15,17 @@
         "bytes": 202301
       },
       {
-        "url": "/assets/index-8b-RGHOT.css",
-        "type": "text/css; charset=utf-8",
-        "bytes": 116724
-      },
-      {
-        "url": "/assets/index-VLQJ7KoQ.js",
+        "url": "/assets/index-MjX3m6pK.js",
         "type": "text/javascript; charset=utf-8",
-        "bytes": 1122408
+        "bytes": 1122421
       },
       {
-        "url": "/assets/index.es-HnkhlXIE.js",
+        "url": "/assets/index-Oym351nI.css",
+        "type": "text/css; charset=utf-8",
+        "bytes": 116793
+      },
+      {
+        "url": "/assets/index.es-DpTnd5YD.js",
         "type": "text/javascript; charset=utf-8",
         "bytes": 150873
       },
@@ -112,19 +112,19 @@
       },
       {
         "method": "POST",
-        "path": "/rooms/room-mwcemi5e-552420/join",
+        "path": "/rooms/room-mwcezbwe-36260/join",
         "status": 201,
         "fromServiceWorker": false
       },
       {
         "method": "POST",
-        "path": "/rooms/room-mwcemi5e-552420/games",
+        "path": "/rooms/room-mwcezbwe-36260/games",
         "status": 201,
         "fromServiceWorker": false
       },
       {
         "method": "GET",
-        "path": "/rooms/room-mwcemi5e-552420/projection",
+        "path": "/rooms/room-mwcezbwe-36260/projection",
         "status": 200,
         "fromServiceWorker": false
       },
@@ -148,25 +148,25 @@
       },
       {
         "method": "POST",
-        "path": "/rooms/room-mwcemip6-522927/join",
+        "path": "/rooms/room-mwcezcfm-340513/join",
         "status": 201,
         "fromServiceWorker": false
       },
       {
         "method": "GET",
-        "path": "/rooms/room-mwcemip6-522927/projection",
-        "status": 200,
-        "fromServiceWorker": false
-      },
-      {
-        "method": "GET",
-        "path": "/rooms/room-mwcemip6-522927",
+        "path": "/rooms/room-mwcezcfm-340513/projection",
         "status": 200,
         "fromServiceWorker": false
       },
       {
         "method": "POST",
-        "path": "/rooms/room-mwcemip6-522927/plan",
+        "path": "/rooms/room-mwcezcfm-340513/plan",
+        "status": 200,
+        "fromServiceWorker": false
+      },
+      {
+        "method": "GET",
+        "path": "/rooms/room-mwcezcfm-340513",
         "status": 200,
         "fromServiceWorker": false
       },
@@ -190,7 +190,7 @@
       },
       {
         "method": "GET",
-        "path": "/rooms/room-mwcemip6-522927/projection",
+        "path": "/rooms/room-mwcezcfm-340513/projection",
         "status": 200,
         "fromServiceWorker": false
       }

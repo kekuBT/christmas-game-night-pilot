@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { LocalServer } from "../src/server/http.js";
-import { isAppPage, isNetworkOnlyPath, isObsoleteShellCache, PUBLIC_FILES, SHELL_CACHE_PREFIX, swRoute } from "../apps/web/src/install/swPolicy.js";
+import { cacheable, expectedType, isAppPage, isNetworkOnlyPath, isObsoleteShellCache, PUBLIC_FILES, SHELL_CACHE_PREFIX, swRoute, type ResponseLike } from "../apps/web/src/install/swPolicy.js";
 import { installPath, isAppleMobile } from "../apps/web/src/install/installState.js";
 import { probeServer } from "../apps/web/src/install/reachability.js";
 
@@ -75,53 +75,54 @@ describe("Stage 8.3: the manifest and icons (§3.1)", () => {
   });
 });
 
-describe("Stage 8.3: what the service worker may touch (§3.3)", () => {
+describe("Stage 8.3: what the service worker may touch (§3.3; feedback 6802191261 §2: an exact-build allowlist)", () => {
   const O = "https://mchezo.example";
-  const r = (url: string, method = "GET", mode = "cors") => swRoute({ method, url: url.startsWith("http") ? url : O + url, mode }, O);
+  // This build's emitted files, as the build plugin lists them.
+  const FILES = new Set(["/index.html", "/assets/index-CpHcJJUZ.js", "/assets/index-DxqG2FY2.css", "/assets/figtree-latin-wght-normal-D_ZTVpCC.woff2", ...PUBLIC_FILES]);
+  const r = (url: string, method = "GET", mode = "cors") => swRoute({ method, url: url.startsWith("http") ? url : O + url, mode }, O, FILES);
 
-  it("page loads of the app are network-first pages; every client route, deep links included", () => {
+  it("page loads of the app are network-first pages; every client route, deep links and queries included", () => {
     for (const path of ["/", "/index.html", "/join?code=ABC123", "/host", "/watch", "/solo", "/solo/word-connections", "/library", "/library/trivia", "/room", "/room/cup", "/room/tv", "/room/memories"]) {
       expect(r(path, "GET", "navigate"), path).toBe("page");
     }
   });
 
-  it("no API path is ever the worker's: rooms, projections, sessions, intents, Memory Book, exports, games, health", () => {
+  it("no API path is ever the worker's, as a fetch or a page load, even if a list ever named one", () => {
     const api = ["/rooms", "/rooms/abc", "/rooms/abc/projection?audience=player", "/rooms/abc/session", "/rooms/abc/intents", "/rooms/abc/memory", "/rooms/abc/memory/export",
       "/rooms/abc/ledger", "/rooms/abc/games", "/rooms/join-by-code", "/rooms/abc/recovery-code", "/games", "/health", "/sw.js"];
+    const poisoned = new Set([...FILES, ...api.map((a) => new URL(O + a).pathname)]);
     for (const path of api) {
       expect(r(path), path).toBe("network");
       expect(r(path, "GET", "navigate"), `${path} as a page`).toBe("network");
+      expect(swRoute({ method: "GET", url: O + path, mode: "cors" }, O, poisoned), `${path} listed by mistake`).toBe("network");
       expect(isNetworkOnlyPath(new URL(O + path).pathname), path).toBe(true);
     }
   });
 
+  it("a future API route, an unknown path or another build's file is not on the list, so it is the network's", () => {
+    for (const path of ["/api/anything", "/v2/rooms", "/assets/index-NEWBUILD.js", "/assets/figtree-latin-wght-normal-OTHER.woff2", "/icons/other.png", "/robots.txt"]) expect(r(path), path).toBe("network");
+    expect(r("/unknown", "GET", "navigate")).toBe("network");
+    expect(isAppPage("/rooms")).toBe(false);
+  });
+
   it("no non-GET request, whatever its path", () => {
     for (const m of ["POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]) {
-      for (const path of ["/", "/assets/index-abc.js", "/manifest.webmanifest", "/rooms/abc/intents"]) expect(r(path, m), `${m} ${path}`).toBe("network");
+      for (const path of ["/", "/assets/index-CpHcJJUZ.js", "/manifest.webmanifest", "/rooms/abc/intents"]) expect(r(path, m), `${m} ${path}`).toBe("network");
     }
   });
 
   it("no other origin, no WebSocket and no other scheme", () => {
-    expect(r("https://elsewhere.example/assets/index-abc.js")).toBe("network");
+    expect(r("https://elsewhere.example/assets/index-CpHcJJUZ.js")).toBe("network");
     expect(r("https://elsewhere.example/", "GET", "navigate")).toBe("network");
     expect(r("wss://mchezo.example/ws?roomId=x&token=y")).toBe("network");
     expect(r("not a url")).toBe("network");
   });
 
-  it("this build's assets and the public install files only, and never with a query", () => {
-    expect(r("/assets/index-CpHcJJUZ.js")).toBe("asset");
-    expect(r("/assets/figtree-latin-wght-normal-D_ZTVpCC.woff2")).toBe("asset");
+  it("exactly this build's files (fonts included), and never with a query", () => {
+    for (const f of FILES) expect(r(f), f).toBe("file");
     expect(r("/assets/index-CpHcJJUZ.js?token=abc")).toBe("network");
-    expect(r("/assets/sub/dir.js")).toBe("network");
-    for (const f of PUBLIC_FILES) expect(r(f), f).toBe("public");
+    expect(r("/assets/figtree-latin-wght-normal-D_ZTVpCC.woff2?v=1")).toBe("network");
     expect(r("/manifest.webmanifest?x=1")).toBe("network");
-    expect(r("/icons/other.png")).toBe("network");
-  });
-
-  it("anything else is left alone (an unknown path is not a page, even as a navigation)", () => {
-    expect(r("/unknown")).toBe("network");
-    expect(r("/unknown", "GET", "navigate")).toBe("network");
-    expect(isAppPage("/rooms")).toBe(false);
   });
 
   it("deletes only other builds' shell caches, never anything else", () => {
@@ -130,6 +131,38 @@ describe("Stage 8.3: what the service worker may touch (§3.3)", () => {
     expect(isObsoleteShellCache(current, current)).toBe(false);
     expect(isObsoleteShellCache("someone-elses-cache", current)).toBe(false);
     expect(isObsoleteShellCache("mchezo-other", current)).toBe(false);
+  });
+});
+
+describe("Stage 8.3: what may be stored (feedback 6802191261 §2: validated responses only)", () => {
+  const res = (o: Partial<ResponseLike> & { type?: string; ct?: string; cc?: string; url?: string } = {}): ResponseLike => ({
+    ok: o.ok ?? true, status: o.status ?? 200, type: o.type ?? "basic", redirected: o.redirected ?? false, url: o.url,
+    headers: { get: (n: string) => (n === "content-type" ? (o.ct ?? null) : n === "cache-control" ? (o.cc ?? null) : null) },
+  });
+  it("a direct, successful, same-origin reply of the expected type", () => {
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript; charset=utf-8", url: "https://x/assets/index-a.js" }))).toBe(true);
+    expect(cacheable("/assets/index-a.css", res({ ct: "text/css; charset=utf-8" }))).toBe(true);
+    expect(cacheable("/assets/f.woff2", res({ ct: "font/woff2" }))).toBe(true);
+    expect(cacheable("/icons/icon-192.png", res({ ct: "image/png", cc: "no-cache" }))).toBe(true);
+    expect(cacheable("/manifest.webmanifest", res({ ct: "application/manifest+json" }))).toBe(true);
+    expect(cacheable("/index.html", res({ ct: "text/html; charset=utf-8" }))).toBe(true);
+  });
+  it("never a redirect (a private preview's sign-in), an opaque or failed reply, a reply from another address, or one that forbids storing", () => {
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript", redirected: true }))).toBe(false);
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript", type: "opaqueredirect", ok: false, status: 0 }))).toBe(false);
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript", type: "opaque", ok: false, status: 0 }))).toBe(false);
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript", type: "cors" }))).toBe(false);
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript", ok: false, status: 404 }))).toBe(false);
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript", status: 206 }))).toBe(false);
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript", url: "https://x/login" }))).toBe(false);
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript", cc: "no-store" }))).toBe(false);
+    expect(cacheable("/assets/index-a.js", res({ ct: "text/javascript", cc: "private, max-age=60" }))).toBe(false);
+  });
+  it("never an HTML page (a sign-in or error page) standing in for a script, a style, a font or an icon", () => {
+    for (const p of ["/assets/index-a.js", "/assets/index-a.css", "/assets/f.woff2", "/icons/icon-192.png", "/manifest.webmanifest"]) expect(cacheable(p, res({ ct: "text/html; charset=utf-8" })), p).toBe(false);
+    expect(cacheable("/assets/index-a.js", res({}))).toBe(false); // no type at all
+    expect(expectedType("/assets/unknown.bin")).toBeNull();
+    expect(cacheable("/assets/unknown.bin", res({ ct: "application/octet-stream" }))).toBe(false);
   });
 });
 
@@ -152,9 +185,14 @@ describe("Stage 8.3: the install path (§3.2)", () => {
 
 describe("Stage 8.3: can the device reach the server? (§3.3)", () => {
   const fake = (impl: () => Promise<Response>) => (async () => impl()) as unknown as typeof fetch;
-  it("ok only when the server answers successfully", async () => {
-    expect(await probeServer(1000, fake(async () => new Response("{}", { status: 200 })))).toBe("ok");
+  const json = (body: string, status = 200) => new Response(body, { status, headers: { "content-type": "application/json" } });
+  it("ok only when the server itself answers {\"ok\":true}: not a gateway error, a sign-in page or any other 200", async () => {
+    expect(await probeServer(1000, fake(async () => json('{"ok":true}')))).toBe("ok");
+    expect(await probeServer(1000, fake(async () => json('{"ok":true}', 503)))).toBe("unreachable");
     expect(await probeServer(1000, fake(async () => new Response("down", { status: 502 })))).toBe("unreachable");
+    expect(await probeServer(1000, fake(async () => new Response("<html>Sign in</html>", { status: 200, headers: { "content-type": "text/html" } })))).toBe("unreachable");
+    expect(await probeServer(1000, fake(async () => json("{}")))).toBe("unreachable");
+    expect(await probeServer(1000, fake(async () => json("not json")))).toBe("unreachable");
     expect(await probeServer(1000, fake(async () => { throw new TypeError("Failed to fetch"); }))).toBe("unreachable");
   });
   it("a server that never answers is unreachable after the timeout", async () => {
@@ -166,6 +204,7 @@ describe("Stage 8.3: can the device reach the server? (§3.3)", () => {
     await probeServer(1000, ((url: string, init?: RequestInit) => { seen.push({ url, init }); return Promise.resolve(new Response("{}")); }) as unknown as typeof fetch);
     expect(seen[0]!.url).toBe("/health");
     expect(seen[0]!.init?.cache).toBe("no-store");
+    expect(seen[0]!.init?.redirect).toBe("error"); // a redirect (a sign-in) is not the server answering
   });
 });
 

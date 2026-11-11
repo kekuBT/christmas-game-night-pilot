@@ -214,8 +214,9 @@ Write down which way you reached the app for each row.
 | J4 | In the browser (not the app): **Not now** on the card, reload; then play a whole game | The card stays gone (Settings still explains how); no install pop-up ever appears during a game |
 | J5 | Installed app (HTTPS): airplane mode on, then open it | Mchezo's own screen says "Can't reach Mchezo … Nothing has started" (not a browser error page); **Try again** keeps saying so until the connection is back, then it goes |
 | J6 | In a room, airplane mode for 20 seconds, then off; also close and reopen the app while offline | "Connection lost. Reconnecting…", then the same seat in the same room. Reopened offline it says it is rejoining, then you are back |
-| J7 | Join a room in the browser, then open the installed app | On an iPhone the app does not have the browser's seat (it keeps its own data, as the steps said): join again with the code. Android: say what you see |
+| J7 | Join a room in the browser; note your personal best and look. Then open the installed app | **Record what the app has:** the seat, the best, the look. The steps only say it *may not* share the browser's data. If the seat isn't there, **Lost your place? Recover your seat** with a recovery code or the host's help gets it back. Joining with the code again makes a new seat, not the old one |
 | J8 | **Update during play** (HTTPS; someone rebuilds and restarts the preview server while you play a solo round) | The round carries on (no reload). Back on Play solo, "A newer version of Mchezo is ready" with **Reload** and **Later**; Reload shows the new build; your look, content choice and bests are kept |
+| J10 | On the private HTTPS preview, if it asks you to sign in: open the app before signing in, then sign in and reload | No sign-in page is ever kept as Mchezo's offline screen: offline afterwards, you see Mchezo's own "Can't reach Mchezo" (or nothing installed yet), never the sign-in page |
 | J9 | **Settings → Look → Christmas**, then reopen the installed app | The app opens in Christmas colours (the icon stays the circle mark); the status bar matches the page |
 
 ---

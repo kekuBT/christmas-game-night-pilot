@@ -48,8 +48,13 @@ function mchezoServiceWorker(): Plugin {
       }
       for (const p of pub) hash.update(p).update("\0").update(readFileSync(join(WEB, "public", p.slice(1)))).update("\0");
       const version = hash.digest("hex").slice(0, 16);
-      const shellFiles = Object.keys(bundle).filter((n) => /^assets\/[^/]+\.(js|css)$/.test(n)).map((n) => "/" + n).sort();
-      const precache = ["/index.html", ...shellFiles, ...pub];
+      // The exact allowlist (feedback 6802191261 §2): every file this build emitted under /assets
+      // (scripts, styles, fonts), the public install files and the shell page. Nothing else is ever the worker's.
+      const assets = Object.keys(bundle).filter((n) => /^assets\/[^/]+$/.test(n)).map((n) => "/" + n).sort();
+      const files = ["/index.html", ...assets, ...pub];
+      // Precached: what a page of this build needs to start (the shell, its scripts and styles, the install files).
+      // Fonts are kept when first used (still only from this list).
+      const precache = ["/index.html", ...assets.filter((a) => /\.(js|css)$/.test(a)), ...pub];
       (html as { source: string }).source = (html as { source: string }).source.replace(BUILD_META, `<meta name="mchezo-build" content="${version}" />`);
       const out = await esbuild({
         entryPoints: [join(WEB, "src", "install", "sw.ts")],
@@ -59,7 +64,7 @@ function mchezoServiceWorker(): Plugin {
         target: "es2020",
         minify: true,
         legalComments: "none",
-        define: { __MCHEZO_VERSION__: JSON.stringify(version), __MCHEZO_PRECACHE__: JSON.stringify(precache) },
+        define: { __MCHEZO_VERSION__: JSON.stringify(version), __MCHEZO_FILES__: JSON.stringify(files), __MCHEZO_PRECACHE__: JSON.stringify(precache) },
       });
       this.emitFile({ type: "asset", fileName: "sw.js", source: `/* Mchezo service worker, build ${version} */\n${out.outputFiles[0]!.text}` });
     },

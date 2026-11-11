@@ -63,21 +63,32 @@ export function registerServiceWorker(): void {
   started = true;
   if (pageBuild() === "dev") return; // the dev server: no worker
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator) || !window.isSecureContext) return;
+  const watched = new WeakSet<ServiceWorkerRegistration>();
+  const watch = (reg: ServiceWorkerRegistration) => {
+    void checkWaiting(reg);
+    if (watched.has(reg)) return;
+    watched.add(reg);
+    reg.addEventListener("updatefound", () => {
+      const w = reg.installing;
+      w?.addEventListener("statechange", () => { if (w.state === "installed" || w.state === "activated") void checkWaiting(reg); });
+    });
+    // A phone that keeps the app open for days still hears about a new build: check when it
+    // comes back into view (at most every 10 minutes) and when the network returns.
+    let last = Date.now();
+    const recheck = (force: boolean) => {
+      if (!force && Date.now() - last < 10 * 60_000) return;
+      last = Date.now();
+      reg.update().then(() => checkWaiting(reg)).catch(() => { void checkWaiting(reg); /* offline: what is already known still counts */ });
+    };
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") recheck(false); });
+    window.addEventListener("online", () => recheck(true));
+  };
   const go = () => {
-    navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).then((reg) => {
-      void checkWaiting(reg);
-      reg.addEventListener("updatefound", () => {
-        const w = reg.installing;
-        w?.addEventListener("statechange", () => { if (w.state === "installed" || w.state === "activated") void checkWaiting(reg); });
-      });
-      // A phone that keeps the app open for days still hears about a new build: check when it comes back, at most every 10 minutes.
-      let last = Date.now();
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState !== "visible" || Date.now() - last < 10 * 60_000) return;
-        last = Date.now();
-        reg.update().then(() => checkWaiting(reg)).catch(() => { /* offline: try again later */ });
-      });
-    }).catch(() => { /* no worker (private mode, blocked storage): the app works as before */ });
+    // What this browser already knows needs no network: a page loaded offline still learns that a newer build is waiting.
+    navigator.serviceWorker.getRegistration("/").then((reg) => { if (reg) watch(reg); }).catch(() => { /* none yet */ });
+    navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" })
+      .then(watch)
+      .catch(() => { /* offline, private mode or blocked storage: the app works as before */ });
   };
   const idle = () => {
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void }).requestIdleCallback;

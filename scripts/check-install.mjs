@@ -15,18 +15,25 @@
 //      honestly what is wrong; nothing starts; back online, they recover.
 //   O2 the room's offline screen: its heading never under the connection
 //      banner, at 320 and 390 px, with the page's font and each wide fallback.
+//   O3 reachability is evidence (only the server's own /health answer counts),
+//      never a gate on play, and never polled.
 //   I  install guidance: none without a real path; the browser's prompt only
 //      when asked (its mini-infobar suppressed, also mid-round); "added" only
 //      on appinstalled; iPhone steps; Not now holds (and, when storage can't
 //      save it, only for the page); hidden when installed (standalone).
 //   S  storage unavailable: the app, the worker and the guidance still work.
-//   U  a new build while a round is in play (its own server, its own copy of
-//      the build): the round carries on untouched (no reload, its old files
-//      still served from its cache though the server dropped them); the
-//      notice appears only on calm screens; Reload gives the new build; the
-//      old cache goes once no old page is open; preferences, the solo seat
-//      and a room seat survive.
+//   U  two tabs and a new build mid-round (its own server, its own copy of
+//      the build; feedback 6802191261 §1): A keeps playing the old build,
+//      untouched; B reloads online to the next build's page under the old
+//      worker (no notice: it already is that build; none of the next build's
+//      files enter the old cache); B offline reloads to the old build's shell,
+//      whole and of one build, offering no update; Reload never claims the
+//      worker updated; every old page closed, the next worker activates and
+//      cleanup removes only the old shell cache; preferences and seats survive.
 //   N  deep links and reloads on a controlled page land on the same screen.
+//   F  failure modes: a next build missing a listed file, a sign-in page or a
+//      redirect instead of a file, storage quota denied: nothing half-made is
+//      installed and play carries on; and privacy without static routing.
 // Usage: node scripts/check-install.mjs <baseUrl>   (the gate passes its server)
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -199,7 +206,8 @@ try {
     const entries = Object.values(contents).flat();
     check(`W engine: exactly one cache, this build's shell (mchezo-shell-${BUILD})`, names.length === 1 && names[0] === `mchezo-shell-${BUILD}`, JSON.stringify(names));
     const bad = entries.filter((e) => !(e === "/index.html" || PUBLIC_FILES.includes(e) || distAssets.has(e)));
-    check(`W engine: every one of the ${entries.length} cached entries is a public shell file of this build (no API path, no query)`, entries.length > 0 && bad.length === 0, bad.slice(0, 5).join(", "));
+    check(`W engine: every one of the ${entries.length} cached entries is one of this build's files (no API path, no query, no page address)`, entries.length > 0 && bad.length === 0, bad.slice(0, 5).join(", "));
+    check("W engine: page loads are never stored (the guest's /join?code= address, /room, /solo: none in the cache)", !entries.some((e) => /^\/(join|room|solo|host|library|watch)(\/|\?|$)/.test(e) || e === "/"));
     const secrets = [room.roomId, room.token, gtoken, code].filter(Boolean);
     const leaks = await host.evaluate(async (needles) => {
       const found = [];
@@ -264,6 +272,21 @@ try {
     await ctx.setOffline(false);
     const back = await soon(async () => /You’re in, Ola/.test(await p.locator("body").innerText()), 20000);
     check("O back online: the same seat in the same room, no new seat", !!back && (await p.evaluate(() => sessionStorage.getItem("cgn_playerId"))) === seat);
+    await ctx.close();
+  }
+
+  // ---- O3. Reachability is evidence, never a gate (feedback 6802191261 §3) ----
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    let probes = 0;
+    await ctx.route("**/health", (route) => { probes++; return route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>Sign in</title><h1>Sign in</h1>" }); });
+    const p = await ctx.newPage();
+    await p.goto(`${GATE_BASE}/`, { waitUntil: "load" });
+    check("O3 a stand-in page answering /health (a sign-in page, 200 HTML) is not the server: Home says it can't be reached", (await soon(() => visible(p, "offline-notice"), 8000)) !== null);
+    check("O3 the notice never gates play: Play solo still starts a round", await (async () => { await p.getByTestId("home-solo").click(); await p.getByTestId("solo-start-word-connections").click(); return (await soon(() => visible(p, "mz-cx"), 20000)) !== null; })());
+    const before = probes;
+    await sleep(6000);
+    check("O3 no polling: no further /health checks while the screen sits there", probes === before, `${before} → ${probes}`);
     await ctx.close();
   }
 
@@ -367,7 +390,7 @@ try {
     const sheet = p.getByTestId("install-sheet");
     await sheet.waitFor();
     const steps = await sheet.innerText();
-    check(`I iPhone, ${look} look: the sheet's steps say Share, Add to Home Screen, Add, and that the app keeps its own data`, /Share/.test(steps) && /Add to Home Screen/.test(steps) && /\bAdd\b/.test(steps) && /keeps its own data/.test(steps) && (await sheet.getByRole("dialog").count()) === 1);
+    check(`I iPhone, ${look} look: the sheet's steps say Share, Add to Home Screen, Add; that a seat, bests and choices may not move to the app (no promise either way); and point to seat recovery (no promise a code gets the same seat)`, /Share/.test(steps) && /Add to Home Screen/.test(steps) && /\bAdd\b/.test(steps) && /may not move to it/.test(steps) && /Recover your seat/.test(steps) && !/room’s code/.test(steps) && (await sheet.getByRole("dialog").count()) === 1);
     await p.keyboard.press("Escape");
     check(`I iPhone, ${look} look: the sheet closes with Escape`, (await soon(async () => (await p.getByTestId("install-sheet").count()) === 0, 3000)) !== null);
     if (look === "everyday") {
@@ -465,39 +488,50 @@ try {
     await ctx.close();
   }
 
-  // ---- U. A new build while a round is in play (its own server and its own copy of the build) ----
+  // ---- U. Two tabs and a new build mid-round (its own server, its own copy of the build; feedback 6802191261 §1) ----
   {
     liveDir = mkdtempSync(join(tmpdir(), "mz-s83-live-"));
     cpSync(DIST, liveDir, { recursive: true });
     const v1Html = readFileSync(join(liveDir, "index.html"), "utf8");
     const V1 = buildOf(v1Html);
+    const v1Files = new Set(readdirSync(join(liveDir, "assets")).map((f) => `/assets/${f}`));
     const mainOld = /src="\/assets\/(index-[^"]+\.js)"/.exec(v1Html)?.[1];
     const V2 = createHash("sha256").update(`${V1}:next`).digest("hex").slice(0, 16);
     const mainNew = `index-next${V2.slice(0, 6)}.js`;
     own = await ownServer(liveDir);
     const B = own.base;
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
-    const home = await ctx.newPage();
+    const home = await ctx.newPage(); // tab B
     await home.goto(`${B}/`, { waitUntil: "load" });
     check("U setup: controlled by this build's worker", (await controlled(home)) && (await workerBuild(home, "active")) === V1);
-    // Preferences and seats to keep: a pinned look, the solo content, a room seat in another tab.
+    // Preferences and seats to keep: a pinned look, the solo content, a room seat in another tab; and someone else's cache, which cleanup must not touch.
     await home.getByTestId("home-settings").click();
     await home.getByTestId("look-christmas").click();
     await home.keyboard.press("Escape");
+    await home.evaluate(async () => { const c = await caches.open("not-mchezo"); await c.put("/not-mchezo.txt", new Response("keep me")); });
     const roomTab = await ctx.newPage();
     await hostRoom(roomTab, B, "Uma");
     const roomSeat = await roomTab.evaluate(() => ({ roomId: sessionStorage.getItem("cgn_roomId"), playerId: sessionStorage.getItem("cgn_playerId") }));
-    const round = await ctx.newPage();
+    const round = await ctx.newPage(); // tab A
     await round.goto(`${B}/solo`, { waitUntil: "load" });
     await round.getByTestId("solo-content-christmas").click();
     await round.getByTestId("solo-start-word-connections").click();
     await round.getByTestId("mz-cx").waitFor({ timeout: 20000 });
     await round.evaluate(() => { window.__mzMarker = "still-the-same-page"; });
-    const local = () => home.evaluate(() => Object.fromEntries(Object.keys(localStorage).filter((k) => k.startsWith("mz_") || k.startsWith("cgn_") || k.startsWith("mchezo")).sort().map((k) => [k, localStorage.getItem(k)])));
+    const local = () => roomTab.evaluate(() => Object.fromEntries(Object.keys(localStorage).filter((k) => k.startsWith("mz_") || k.startsWith("cgn_") || k.startsWith("mchezo")).sort().map((k) => [k, localStorage.getItem(k)])));
     const localBefore = await local();
+    const guess = async () => {
+      const tiles = round.getByTestId("mz-cx-tile");
+      // The server's answer to a guess shows as new feedback text ("Not a group. N mistakes left.") or a solved band.
+      const feedback = () => round.getByTestId("mz-cx-feedback").allInnerTexts().then((t) => t.join(" | ")).catch(() => "");
+      const mistakes = () => round.locator("body").innerText().then((t) => /(\d+) mistakes? left/i.exec(t)?.[1] ?? "");
+      const [fb0, m0, bands0] = [await feedback(), await mistakes(), await round.getByTestId("mz-cx-band").count()];
+      for (let i = 0; i < 4; i++) await tiles.nth(i).click();
+      await round.getByTestId("mz-cx-submit").click();
+      return (await soon(async () => (await feedback()) !== fb0 || (await mistakes()) !== m0 || (await round.getByTestId("mz-cx-band").count()) > bands0, 8000)) !== null;
+    };
     // The deploy: the next build replaces the files on the server (its main file renamed, the old one gone).
-    const v2Main = readFileSync(join(liveDir, "assets", mainOld), "utf8") + "\n/* the next build */\n";
-    writeFileSync(join(liveDir, "assets", mainNew), v2Main);
+    writeFileSync(join(liveDir, "assets", mainNew), readFileSync(join(liveDir, "assets", mainOld), "utf8") + "\n/* the next build */\n");
     writeFileSync(join(liveDir, "index.html"), v1Html.split(V1).join(V2).split(mainOld).join(mainNew));
     writeFileSync(join(liveDir, "sw.js"), readFileSync(join(liveDir, "sw.js"), "utf8").split(V1).join(V2).split(mainOld).join(mainNew));
     unlinkSync(join(liveDir, "assets", mainOld));
@@ -505,50 +539,172 @@ try {
     await home.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
     const waiting = await soon(() => workerBuild(home, "waiting").then((v) => (v === V2 ? v : null)), 15000);
     check("U the next build's worker installs and waits (no skipWaiting); the old one stays active", waiting === V2 && (await workerBuild(home, "active")) === V1);
-    // The round in play: untouched.
-    check("U the round in play was not reloaded and is still the old build", (await round.evaluate(() => window.__mzMarker)) === "still-the-same-page" && (await pageBuild(round)) === V1);
-    const tiles = round.getByTestId("mz-cx-tile");
-    for (let i = 0; i < 4; i++) await tiles.nth(i).click();
-    await round.getByTestId("mz-cx-submit").click();
-    check("U the round keeps playing: a guess is answered by the server", (await soon(() => round.getByTestId("mz-cx-feedback").count().then((n) => n > 0), 8000)) !== null || (await soon(() => visible(round, "mz-cx-band"), 3000)) !== null);
-    const oldFile = await round.evaluate(async (f) => (await fetch(`/assets/${f}`)).status, mainOld);
-    check("U the old page's own files still come from its cache, though the server dropped them", oldFile === 200);
+    check("U A, mid-round, was not reloaded and is still the old build", (await round.evaluate(() => window.__mzMarker)) === "still-the-same-page" && (await pageBuild(round)) === V1);
+    // B reloads online: the next build's PAGE, under the OLD worker (a reload doesn't activate a waiting worker).
+    await home.reload({ waitUntil: "load" });
+    await home.getByTestId("home").waitFor({ timeout: 10000 });
+    await sleep(1500);
+    check("U B reloaded online: the next build's page, still controlled by the old worker; the next one still waits", (await pageBuild(home)) === V2 && (await home.evaluate(() => !!navigator.serviceWorker.controller)) && (await workerBuild(home, "active")) === V1 && (await workerBuild(home, "waiting")) === V2);
+    check("U B already is the waiting build, so it offers no update", !(await visible(home, "update-notice")));
+    const c1 = await cacheContents(home);
+    const oldCache = c1[`mchezo-shell-${V1}`] ?? [];
+    check("U the next build's files passed through the old worker without entering its cache", oldCache.length > 0 && oldCache.every((e) => e === "/index.html" || PUBLIC_FILES.includes(e) || v1Files.has(e)) && !oldCache.includes(`/assets/${mainNew}`), oldCache.filter((e) => !v1Files.has(e)).join(", "));
+    check("U A is untouched by B's reload", (await round.evaluate(() => window.__mzMarker)) === "still-the-same-page");
+    // B goes offline and reloads: the old worker's shell, whole and of one build.
+    await ctx.setOffline(true);
+    await home.reload({ waitUntil: "load" });
+    await home.getByTestId("home").waitFor({ timeout: 10000 });
+    await sleep(800);
+    const gen = await home.evaluate(() => ({
+      build: document.querySelector('meta[name="mchezo-build"]')?.getAttribute("content"),
+      scripts: [...document.querySelectorAll("script[src]")].map((s) => new URL(s.src).pathname),
+      styles: [...document.querySelectorAll('link[rel="stylesheet"]')].map((l) => new URL(l.href).pathname),
+      assets: [...new Set(performance.getEntriesByType("resource").map((r) => new URL(r.name).pathname).filter((p) => p.startsWith("/assets/")))],
+    }));
+    check("U B offline: the old build's shell, whole: its HTML, scripts, styles and every asset it loaded are the old build's (no mix, not blank)", gen.build === V1 && gen.scripts.includes(`/assets/${mainOld}`) && gen.assets.length > 0 && [...gen.scripts, ...gen.styles, ...gen.assets].every((p) => v1Files.has(p)), JSON.stringify(gen).slice(0, 300));
+    check("U B offline: says Mchezo can't be reached, and offers no update (Reload couldn't get it)", (await soon(() => visible(home, "offline-notice"), 8000)) !== null && !(await visible(home, "update-notice")));
+    check("U A, mid-round, not reloaded while B was offline", (await round.evaluate(() => window.__mzMarker)) === "still-the-same-page");
+    await ctx.setOffline(false);
+    const answered = (await soon(() => round.getByTestId("mz-cx").isVisible(), 15000)) !== null && (await guess());
+    check("U back online: A's round plays on (a guess answered), the same page, the old build", answered && (await round.evaluate(() => window.__mzMarker)) === "still-the-same-page" && (await pageBuild(round)) === V1, answered ? "" : (await round.locator("body").innerText()).slice(0, 400).replace(/\n/g, " | "));
+    check("U A's own files still come from its cache, though the server dropped them", (await round.evaluate(async (f) => (await fetch(`/assets/${f}`)).status, mainOld)) === 200);
     check("U no update notice in the round", !(await visible(round, "update-notice")));
-    // Leave the round deliberately, in-app: the same old-build page, now on the shelf (a calm screen).
+    // B, the old build's page again and online: now the update is offered.
+    check("U B (the old build's page again), back online: the update is offered", (await soon(() => visible(home, "update-notice"), 15000)) !== null);
+    const targets = await home.evaluate(() => [...document.querySelectorAll('[data-testid="update-notice"] button')].map((b) => { const r = b.getBoundingClientRect(); return [b.textContent?.trim(), Math.round(r.width), Math.round(r.height)]; }));
+    check("U the notice's Reload and Later are 44 px targets", targets.length === 2 && targets.every(([, w, h]) => w >= 44 && h >= 44), JSON.stringify(targets));
+    await home.getByTestId("update-later").click();
+    check("U Later hides it for this page", !(await visible(home, "update-notice")));
+    // A leaves the round deliberately, in-app: the same old-build page, on the shelf (a calm screen).
     await round.getByTestId("solo-leave").click();
     await round.getByTestId("solo-leave-yes").click();
     await round.locator('main[data-testid="solo-home"]').waitFor({ timeout: 10000 });
-    check("U back on the shelf (in-app, the same old page): the update is offered", (await round.evaluate(() => window.__mzMarker)) === "still-the-same-page" && (await soon(() => visible(round, "update-notice"), 8000)) !== null);
-    await round.getByTestId("update-later").click();
-    check("U Later hides it for this page", !(await visible(round, "update-notice")));
-    check("U Home (another old-build tab) offers it too", (await soon(() => visible(home, "update-notice"), 8000)) !== null);
-    const targets = await home.evaluate(() => [...document.querySelectorAll('[data-testid="update-notice"] button')].map((b) => { const r = b.getBoundingClientRect(); return [b.textContent?.trim(), Math.round(r.width), Math.round(r.height)]; }));
-    check("U the notice's Reload and Later are 44 px targets", targets.length === 2 && targets.every(([, w, h]) => w >= 44 && h >= 44), JSON.stringify(targets));
-    await Promise.all([home.waitForEvent("load"), home.getByTestId("update-reload").click()]);
-    check("U the notice's Reload reloads only its own tab, onto the next build", (await pageBuild(home)) === V2 && (await round.evaluate(() => window.__mzMarker)) === "still-the-same-page" && (await pageBuild(round)) === V1);
-    // A page loaded now is network-first: it is already the next build, so it offers nothing.
-    await round.goto(`${B}/solo`, { waitUntil: "load" });
-    check("U a page loaded now is already the next build, and offers no update", (await pageBuild(round)) === V2 && !(await visible(round, "update-notice")));
+    check("U A back on the shelf (in-app, the same page): the update is offered", (await round.evaluate(() => window.__mzMarker)) === "still-the-same-page" && (await soon(() => visible(round, "update-notice"), 8000)) !== null);
+    await Promise.all([round.waitForEvent("load"), round.getByTestId("update-reload").click()]);
+    check("U the notice's Reload reloads only its own tab onto the next build's page (B stays the old build's)", (await pageBuild(round)) === V2 && (await pageBuild(home)) === V1);
+    check("U nothing claims the worker updated: after Reload the old worker still controls, the next one still waits", (await workerBuild(round, "active")) === V1 && (await workerBuild(round, "waiting")) === V2);
+    await round.getByTestId("home-solo").click().catch(async () => { await round.goto(`${B}/solo`, { waitUntil: "load" }); });
+    await round.locator('main[data-testid="solo-home"]').waitFor({ timeout: 10000 });
     await round.getByTestId("solo-start-word-connections").click();
-    check("U solo replay on the next build: a round starts with the same solo seat", (await soon(() => visible(round, "mz-cx"), 20000)) !== null);
+    check("U solo replay on the next build's page: a round starts with the same solo seat", (await soon(() => visible(round, "mz-cx"), 20000)) !== null);
     const localAfter = await local();
-    check("U preferences and the solo seat survived the update (localStorage unchanged)", JSON.stringify(localAfter) === JSON.stringify(localBefore) && localAfter["mz_look"] === "christmas", JSON.stringify(Object.keys(localAfter)));
+    check("U preferences and the solo seat survived (localStorage unchanged)", JSON.stringify(localAfter) === JSON.stringify(localBefore) && localAfter["mz_look"] === "christmas", JSON.stringify(Object.keys(localAfter)));
     await roomTab.reload({ waitUntil: "load" });
     const rejoined = await soon(async () => /You’re in, Uma/.test(await roomTab.locator("body").innerText()), 15000);
-    check("U the room tab, reloaded onto the next build: the same seat in the same room", !!rejoined && JSON.stringify(await roomTab.evaluate(() => ({ roomId: sessionStorage.getItem("cgn_roomId"), playerId: sessionStorage.getItem("cgn_playerId") }))) === JSON.stringify(roomSeat));
-    // Every old-worker page closed: the next worker activates, and only its cache remains.
+    check("U the room tab, reloaded: the same seat in the same room", !!rejoined && JSON.stringify(await roomTab.evaluate(() => ({ roomId: sessionStorage.getItem("cgn_roomId"), playerId: sessionStorage.getItem("cgn_playerId") }))) === JSON.stringify(roomSeat));
+    // Every page the old worker controls closed: the next worker activates; cleanup removes only the old build's shell cache.
     await home.close(); await round.close(); await roomTab.close();
     const fresh = await ctx.newPage();
     await fresh.goto(`${B}/`, { waitUntil: "load" });
     const active = await soon(() => workerBuild(fresh, "active").then((v) => (v === V2 ? v : null)), 15000);
     if (!(await fresh.evaluate(() => !!navigator.serviceWorker.controller))) await fresh.reload({ waitUntil: "load" });
     const caches2 = await cacheContents(fresh);
-    check("U once no old page is open, the next worker is active and controls new pages", active === V2 && (await fresh.evaluate(() => !!navigator.serviceWorker.controller)));
-    check("U the old build's cache is gone; only the next build's remains", JSON.stringify(Object.keys(caches2)) === JSON.stringify([`mchezo-shell-${V2}`]), JSON.stringify(Object.keys(caches2)));
+    check("U every old page closed and one reopened: the next worker is active and controls it", active === V2 && (await fresh.evaluate(() => !!navigator.serviceWorker.controller)));
+    check("U scoped cleanup: the old build's shell cache is gone, the next build's and someone else's cache remain", JSON.stringify(Object.keys(caches2).sort()) === JSON.stringify([`mchezo-shell-${V2}`, "not-mchezo"].sort()), JSON.stringify(Object.keys(caches2)));
     check("U the next build's cache holds its own main file, not the old one", caches2[`mchezo-shell-${V2}`]?.includes(`/assets/${mainNew}`) && !caches2[`mchezo-shell-${V2}`]?.includes(`/assets/${mainOld}`));
-    check("U preferences still there after the old cache was cleaned", (await fresh.evaluate(() => localStorage.getItem("mz_look"))) === "christmas");
+    check("U preferences still there after cleanup", (await fresh.evaluate(() => localStorage.getItem("mz_look"))) === "christmas");
     await ctx.close();
     await stopServer(own); own = null;
+    rmSync(liveDir, { recursive: true, force: true }); liveDir = null;
+  }
+
+  // ---- F. When a file can't be trusted, nothing is installed and play carries on (feedback 6802191261 §2) ----
+  {
+    const regState = (p) => p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); return { active: r?.active ? r.active.state : null, waiting: !!r?.waiting, installing: !!r?.installing, caches: await caches.keys() }; });
+    const playsOnline = async (p, base) => {
+      await p.goto(`${base}/solo`, { waitUntil: "load" });
+      await p.getByTestId("solo-start-word-connections").click();
+      return (await soon(() => visible(p, "mz-cx"), 20000)) !== null;
+    };
+    // F1: the next build is missing a file it lists (a partial deploy): its worker doesn't install, no half-made cache is left, the current worker carries on.
+    {
+      liveDir = mkdtempSync(join(tmpdir(), "mz-s83-f1-"));
+      cpSync(DIST, liveDir, { recursive: true });
+      const html = readFileSync(join(liveDir, "index.html"), "utf8");
+      const V1 = buildOf(html);
+      const V2 = createHash("sha256").update(`${V1}:partial`).digest("hex").slice(0, 16);
+      own = await ownServer(liveDir);
+      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const p = await ctx.newPage();
+      await p.goto(`${own.base}/`, { waitUntil: "load" });
+      await controlled(p);
+      writeFileSync(join(liveDir, "index.html"), html.split(V1).join(V2));
+      writeFileSync(join(liveDir, "sw.js"), readFileSync(join(liveDir, "sw.js"), "utf8").split(V1).join(V2));
+      unlinkSync(join(liveDir, "icons", "mark.svg"));
+      await p.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()).catch(() => {}));
+      const settled = await soon(async () => { const s = await regState(p); return !s.installing ? s : null; }, 15000);
+      check("F1 a next build missing a listed file: its worker doesn't install, no half-made cache is left, the current worker stays", !!settled && settled.active === "activated" && !settled.waiting && JSON.stringify(settled.caches) === JSON.stringify([`mchezo-shell-${V1}`]) && (await workerBuild(p, "active")) === V1, JSON.stringify(settled));
+      check("F1 and play carries on (a solo round starts)", await playsOnline(p, own.base));
+      await ctx.close();
+      await stopServer(own); own = null;
+      rmSync(liveDir, { recursive: true, force: true }); liveDir = null;
+    }
+    // F2: a sign-in page or a redirect instead of a file (a private preview's login), on a first visit: nothing installs, nothing is stored, the app works.
+    for (const [label, path, fulfil] of [
+      ["a sign-in page (200 HTML) instead of an icon", "**/icons/mark.svg", { status: 200, contentType: "text/html", body: "<!doctype html><title>Sign in</title><h1>Sign in to continue</h1>" }],
+      ["a redirect to a sign-in page instead of the manifest", "**/manifest.webmanifest", { status: 302, headers: { location: "/login" } }],
+    ]) {
+      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      await ctx.route(path, (route) => route.fulfill(fulfil));
+      const p = await ctx.newPage();
+      await p.goto(`${GATE_BASE}/`, { waitUntil: "load" });
+      await p.getByTestId("home").waitFor({ timeout: 10000 });
+      const s = await soon(async () => { const st = await regState(p); return !st.installing && st.active === null ? st : null; }, 15000);
+      check(`F2 ${label}: no worker installs and nothing is stored`, !!s && !s.waiting && s.caches.filter((n) => n.startsWith("mchezo-shell-")).length === 0, JSON.stringify(s));
+      check(`F2 ${label}: the app still works online (a solo round starts)`, await playsOnline(p, GATE_BASE));
+      await ctx.close();
+    }
+    // F3: storage quota denied (Chromium's own quota override, on this driver's own origin): no worker, the app works; nothing breaks.
+    {
+      liveDir = mkdtempSync(join(tmpdir(), "mz-s83-f3-"));
+      cpSync(DIST, liveDir, { recursive: true });
+      own = await ownServer(liveDir);
+      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const p = await ctx.newPage();
+      const errors = [];
+      p.on("pageerror", (e) => errors.push(String(e)));
+      const cdp = await ctx.newCDPSession(p);
+      await cdp.send("Storage.overrideQuotaForOrigin", { origin: own.base, quotaSize: 1 });
+      await p.goto(`${own.base}/`, { waitUntil: "load" });
+      await p.getByTestId("home").waitFor({ timeout: 10000 });
+      const s = await soon(async () => { const st = await regState(p); return !st.installing ? st : null; }, 15000);
+      check("F3 engine: storage quota denied: no worker installs, no half-made cache, no page errors", !!s && s.active === null && s.caches.filter((n) => n.startsWith("mchezo-shell-")).length === 0 && errors.length === 0, JSON.stringify({ s, errors: errors.slice(0, 2) }));
+      check("F3 and play carries on (a solo round starts)", await playsOnline(p, own.base));
+      await cdp.send("Storage.overrideQuotaForOrigin", { origin: own.base }).catch(() => {});
+      await ctx.close();
+      await stopServer(own); own = null;
+      rmSync(liveDir, { recursive: true, force: true }); liveDir = null;
+    }
+    // F4: privacy without Chromium's static routing (a worker built without it): the allowlist alone keeps every API reply out.
+    {
+      liveDir = mkdtempSync(join(tmpdir(), "mz-s83-f4-"));
+      cpSync(DIST, liveDir, { recursive: true });
+      const swText = readFileSync(join(liveDir, "sw.js"), "utf8");
+      writeFileSync(join(liveDir, "sw.js"), swText.split("addRoutes").join("noStaticRoutes"));
+      own = await ownServer(liveDir);
+      const files = new Set(["/index.html", ...readdirSync(join(liveDir, "assets")).map((f) => `/assets/${f}`), ...PUBLIC_FILES]);
+      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const fromWorker = [], api = [];
+      ctx.on("response", (r) => { const u = new URL(r.url()); if (u.origin !== own.base) return; if (/^\/(rooms|games|health)(\/|$)/.test(u.pathname)) { api.push(u.pathname); if (r.fromServiceWorker()) fromWorker.push(u.pathname); } });
+      const host = await ctx.newPage();
+      await host.goto(`${own.base}/`, { waitUntil: "load" });
+      check("F4 setup: the worker without static routing controls the page", (await controlled(host)) && swText.includes("addRoutes") && !readFileSync(join(liveDir, "sw.js"), "utf8").includes("addRoutes"));
+      await playsOnline(host, own.base);
+      await hostRoom(host, own.base, "Fay");
+      const room = await host.evaluate(() => ({ id: sessionStorage.getItem("cgn_roomId"), token: sessionStorage.getItem("cgn_token") }));
+      const code = await host.evaluate(async (id) => (await (await fetch(`/rooms/${id}`)).json()).joinCode, room.id);
+      const guest = await ctx.newPage();
+      await joinRoom(guest, own.base, code, "Gus");
+      await host.evaluate(async ({ id, token }) => { for (const p of [`/rooms/${id}/session`, `/rooms/${id}/ledger`, `/rooms/${id}/memory`]) await fetch(p, { headers: { "x-session-token": token } }); }, room);
+      await guest.goto(`${own.base}/join?code=${code}`, { waitUntil: "load" });
+      await sleep(500);
+      const entries = Object.entries(await cacheContents(host)).filter(([n]) => n.startsWith("mchezo-shell-")).flatMap(([, v]) => v);
+      check(`F4 without static routing: every one of the ${entries.length} cached entries is one of this build's files (no API path, no navigation, no query)`, entries.length > 0 && entries.every((e) => files.has(e)), entries.filter((e) => !files.has(e)).join(", "));
+      check(`F4 without static routing: none of the ${api.length} API replies came from the worker`, api.length > 10 && fromWorker.length === 0, fromWorker.slice(0, 3).join(", "));
+      await ctx.close();
+      await stopServer(own); own = null;
+      rmSync(liveDir, { recursive: true, force: true }); liveDir = null;
+    }
   }
 } catch (e) {
   check("no unexpected error", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));

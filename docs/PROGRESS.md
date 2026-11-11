@@ -2030,6 +2030,15 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Eight regression drivers** pass with the worker in place.
 - Evidence: `docs/evidence/stage83-local/`.
 
+**Spec feedback 6802191261 applied** (stage83.md §7.3, D-S83-07):
+- **The allowlist:** an exact build list, fonts included; another build's files never enter an old cache.
+- **Storing:** only validated responses, and an all-or-nothing install.
+- **The update notice:** only when the server answers and the page isn't already the waiting build.
+- **`/health`:** must answer `{"ok":true}`.
+- **Wording:** no promise of moving seats or bests.
+- **New tests:** `check-install` sections U (two tabs) and F (a partial deploy, a sign-in page, a redirect, quota denied, no static routing) and O3, 113 checks in all; 25 unit tests.
+- **Platform claims** were rechecked through search; the primary sites are blocked from this environment.
+
 **External blocker for real phones:** service workers need HTTPS. Over the plain-http LAN preview, an iPhone can still Add to Home Screen, but the offline and update checks need a private HTTPS preview (REAL_DEVICE_TESTING Part J; spec §6 point 6).
 
 **Next task:** screenshots, sequential fast and full gates on the final candidate, then one completed report on PR #14.

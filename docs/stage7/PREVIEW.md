@@ -109,7 +109,11 @@ Service workers need a secure context, so use the private HTTPS preview (a forwa
    - Open `/join?code=ABCDEF`: the same.
    - In a room, reload offline: "Rejoining your room…".
    - Back online: the same seat.
-5. **An update while playing:** start a solo round. Rebuild (`npm run build:web`) after any source change; the server picks up the new files.
+5. **An update while playing**, with two tabs:
+   - Tab A starts a solo round.
+   - Rebuild (`npm run build:web`) after any source change; the server picks up the new files.
+   - Tab B reloads: it is the new build's page, still under the old worker. DevTools → Application → Service Workers shows the new one *waiting*, and B shows no notice.
+   - Offline, B reloads to the old build's complete page.
    - The round carries on.
    - Leave it: Play solo says "A newer version of Mchezo is ready". **Later** hides it; **Reload** loads the new build.
    - Close every tab of the old build: Cache Storage then keeps only the new build's cache.

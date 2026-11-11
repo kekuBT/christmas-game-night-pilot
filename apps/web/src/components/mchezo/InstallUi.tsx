@@ -32,7 +32,7 @@ export function InstallSteps({ path }: { path: InstallPath }) {
           <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
           <li>Tap <strong>Add</strong>. Mchezo appears on your Home Screen.</li>
         </ol>
-        <p className="mz-foot mz-install__note">Not every browser on iPhone offers this; Safari does. The Home Screen app keeps its own data: to play in a room you joined here, rejoin it there with the room’s code.</p>
+        <p className="mz-foot mz-install__note">Not every browser on iPhone offers this; Safari does. The Home Screen app may not share this browser’s data: a seat you hold here, your personal bests and your choices may not move to it. To get a seat back in the app, use <strong>Lost your place? Recover your seat</strong> on its Home screen.</p>
       </div>
     );
   }
@@ -114,13 +114,14 @@ export function CalmNotices() {
           Every game, solo rounds included, runs on Mchezo’s game server, and this device can’t reach it right now. Check your connection, then try again. Nothing has started.
         </NoticeCard>
       )}
-      {update && !later && (
+      {/* A newer build is offered only when Reload can get it (the server answers); offline, Reload would bring back this page. */}
+      {update && !later && reach === "ok" && (
         <NoticeCard tone="info" title="A newer version of Mchezo is ready" testId="update-notice"
           action={<>
             <Keycap size="md" variant="surface" data-testid="update-reload" onClick={() => location.reload()}>Reload</Keycap>
             <button type="button" className="mz-linkbtn" data-testid="update-later" onClick={() => setLater(true)}>Later</button>
           </>}>
-          Reload to use it. Your seat, your bests and your choices stay on this device.
+          Reload this tab to use it. The tab keeps its seat, and your bests and choices stay on this device.
         </NoticeCard>
       )}
     </>

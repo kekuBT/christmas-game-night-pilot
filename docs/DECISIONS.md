@@ -1033,3 +1033,11 @@ Handoff 6801615731 (PR #13), under D-WF-01. Spec: `docs/stage8/stage83.md`.
     - Home, Join, Host, the solo shelf and the library: every entry outside a room. Join is the invite link's screen.
     - Rooms keep their connection banner, which already says the seat is saved. The room's "Rejoining" screen starts below that banner, so its heading is never covered.
   - *Alternative rejected:* the notice on every screen. In a room it would repeat the banner.
+- **D-S83-07 Spec feedback 6802191261: an exact build, validated, and truthful** (revises D-S83-01 and D-S83-02).
+  - **The allowlist** is the build's own emitted list (scripts, styles, fonts, the install files, the shell), not an `/assets` prefix. Another build's files pass through an old worker without entering its cache.
+  - **Every stored response is validated:** a direct same-origin 200 of the expected type, with no redirect, no `no-store` or `private`, and no HTML standing in for a file.
+  - **Install is all-or-nothing:** a partial cache is deleted, and the worker in charge stays.
+  - **The update notice** appears only when the server answers and the page isn't already the waiting build. Reload claims nothing about the worker.
+  - **`/health` counts only as `{"ok":true}`;** `navigator.onLine` only starts a check.
+  - **Nothing promises moving seats, bests or choices into an installed app.** The iPhone steps point to the existing seat recovery.
+  - *Alternative rejected:* trusting any `/assets` file or any 200. A private preview's sign-in page or another build's file could then be stored.
