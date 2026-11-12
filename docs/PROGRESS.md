@@ -2108,7 +2108,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - Local runs of `check-jebena-rush` on a clean clone of `4d91cd6` with that full run's build: 105 and 106 checks, 0 failed (`docs/evidence/stage91/`).
 - **Next:** the completed report on PR #15; then ChatGPT's review and private audit before Stage 9.2.
 
-## Stage 9.2: Spectrum foundation: rules, privacy, a pure module (in progress)
+## Stage 9.2: Spectrum foundation: rules, privacy, a pure module (CLEARED by ChatGPT's independent review 6813167965 on `3ca8ac7`/`0765222`)
+
+- **Cleared** 2026-11-12 (6813167965): no blocking finding for the unwired foundation or the Jebena cleanup.
+  - The reviewer ran 57/57 focused tests, the web build, and the Jebena browser driver (ALL PASS, 105 PASS lines in its run).
+  - Its private live audit (host, guest and spectator TV) covered real turns and timeouts, two last-standing endings with consistent scores on every role, Play again keeping 3 hearts, guest reload recovery, a rejected try seen only by its sender, and a final-turn rejected try followed by an ending. No rejected text remained in finished views or the persisted room.
+  - This is development clearance, not merge, deployment, real devices or a Spectrum UI (none existed).
+- **Nonblocking note, for a later copy cleanup:** in Jebena Rush, a winner with no accepted answers can see both "You won this one" and "You missed this one". Spectrum's cooperative result must avoid generic personal-result messaging.
 
 - **Brief:** ChatGPT's handoff 6811101479 on PR #15. Base `aaa6981` (PR #15's cleared head); branch `claude/stage9-2-spectrum`, stacked PR #16 on #15.
 - **Architecture answers 6811445149 (PR #16), applied:** the team result accepted for this unwired slice (`spectrumTeamResult` authoritative; `scores()` copies the total to every original roster player as a compatibility representation; a cooperative results/TV branch is required before production registration); digits allowed in clues (D-S92-03 reversed); the existing product described as **changed** by the Jebena cleanup.
@@ -2136,4 +2142,10 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `adb5e75`: fast `20261112-011445-adb5e758-10813` PASSED (exit 0, 5/5); then full `20261112-011539-adb5e758-13971` PASSED (exit 0, 87/87, 31 min 43 s). It ran untouched while 6811445149 was applied elsewhere.
   - `3ca8ac7` (final candidate, 6811445149 applied): fast `20261112-014738-3ca8ac75-30336` **PASSED** (exit 0, 5/5, 49 s); then full `20261112-014837-3ca8ac75-1032` **PASSED** (exit 0, 87/87, 31 min 47 s, no leftover processes). Unit tests 1,536 in 120 files; `check-jebena-rush` 106 checks, 0 failed, with the last-one-standing ending (F) and Play again (G).
 - **Next:** the new completed report on PR #16; then ChatGPT's review and the private browser audit of Jebena endings and replay.
+
+## Stage 9.3: playable Spectrum, one complete cooperative journey (in progress)
+
+- **Brief:** ChatGPT's handoff 6813167965 on PR #16 (with the Stage 9.2 clearance). Base `0765222` (PR #16's cleared head); branch `claude/stage9-3-spectrum-play`, a stacked PR on #16.
+- **Scope:** casual-room selection, briefing, phone play, spectator/TV play, a typed cooperative result and Play again, on the cleared Stage 9.2 rules. No solo, Cup, Quick Party scheduling, new content, Memory Book saving or humour.
+- **Spec:** `docs/stage9/stage93.md`.
 
