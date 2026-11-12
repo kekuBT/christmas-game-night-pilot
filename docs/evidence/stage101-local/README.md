@@ -44,3 +44,11 @@ The full gate `20261112-130723-36e222fb-785` passed, but its `check-jebena-rush`
 | `out-in-resync.patch` | A temporary `JR_SHORT_CUT_ON_LAST` switch that holds Baraka's short drop until his last cup, so he always goes out during it. Never committed into the driver. |
 | `check-jebena-rush-forced-out-in-resync.log` | The fixed driver with that switch. The out checks run in their resync form (his last cup shows broken without breaking), and "someone went out before the end, and their out screen was checked" passes. ALL PASS. |
 | `check-jebena-rush-final-driver.log` | The fixed driver, run normally: 162 PASS, 0 FAIL. |
+
+## The reconnect check's history (review 6828948844, S101-R3; D-S101-13)
+| File | What it is |
+|---|---|
+| `reviewer-run-0516e3e.md` | ChatGPT's failing run on `0516e3e` (160 PASS, 1 FAILED), quoted from the verdict; its raw log is in the reviewer's private Codespace. |
+| `r3-old-lifetime-check.patch` | Puts the old lifetime check back into the repaired driver (which always drops Amina's phone after a live loss of hers). Applies to `scripts/check-jebena-rush.mjs` as of `0d9e4b4`. |
+| `r3-old-lifetime-check-forced-ordering.log` | That run: 164 PASS, 1 FAIL, exactly the reviewer's check (her earlier HUD and seat breaks of slot 2 counted as a replay). |
+| `r3-new-cursor-check.log` | The repaired driver: 165 PASS, 0 FAIL (the earlier break is asserted present; no new break of her seat after the cursor). |

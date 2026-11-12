@@ -1,0 +1,227 @@
+{
+  "runId": "20261112-161936-0d9e4b43-1259",
+  "level": "targeted",
+  "startedAt": "2026-11-12T16:19:36.064Z",
+  "finishedAt": "2026-11-12T16:21:01.568Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r5-tgt",
+  "git": {
+    "head": "0d9e4b4315a9be7d03768ec077c784117e9a7889",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "d578bd1902d099fd91995882981e7aeb8eda944b55f4c5a061f0113750cda08a",
+    "files": 502
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15580
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.2 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261112-161936-0d9e4b43-1259/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.5,
+      "log": "./logs/01-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 7,
+      "startOffsetSec": 0.4,
+      "endOffsetSec": 5.9,
+      "cpuSec": 9.4,
+      "peakRssMB": 526,
+      "machine": {
+        "memAvailMinMB": 15039,
+        "cpuSaturatedSec": 0,
+        "samples": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 1.1,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 5.9,
+      "endOffsetSec": 7,
+      "cpuSec": 0.6,
+      "peakRssMB": 134,
+      "machine": {
+        "memAvailMinMB": 15369,
+        "cpuSaturatedSec": 0,
+        "samples": 2
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-jebena-rush",
+      "kind": "browser",
+      "command": "node scripts/check-jebena-rush.mjs http://localhost:34909",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 77.7,
+      "log": "./logs/03-check-jebena-rush.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 85,
+      "startOffsetSec": 7.8,
+      "endOffsetSec": 85.5,
+      "cpuSec": 11.3,
+      "peakRssMB": 398,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14895,
+        "cpuSaturatedSec": 0,
+        "samples": 78
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 10,
+        "pages": 10,
+        "peakOpenPages": 7
+      },
+      "failureKind": null
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 34909,
+      "pid": 1374,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r5-tgt/test-results/20261112-161936-0d9e4b43-1259/server-data/w1",
+      "log": "./logs/server-w1.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 86,
+    "sumSec": 84,
+    "utilisation": 0.33,
+    "perWorkerBusySec": {
+      "w1": 84
+    },
+    "predicted": {
+      "low": 63,
+      "mid": 88,
+      "high": 162,
+      "confidence": "measured"
+    },
+    "contentionRatio": null,
+    "longest": [
+      {
+        "name": "check-jebena-rush",
+        "sec": 77.7
+      },
+      {
+        "name": "build-web",
+        "sec": 5.5
+      },
+      {
+        "name": "browser-preflight",
+        "sec": 1.1
+      }
+    ],
+    "backpressure": {
+      "waits": 0,
+      "seconds": 0
+    },
+    "system": {
+      "cpuPctMean": 23,
+      "cpuPctPeak": 57,
+      "memAvailMinMB": 14895,
+      "load1Peak": 0.74,
+      "cpuPctEvery10s": [
+        36,
+        22,
+        16,
+        16,
+        15,
+        20,
+        19,
+        16
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 1.4,
+        "peakRssMB": 134
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 7,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "check-jebena-rush",
+        "phase": "browser",
+        "estSec": 85,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 62.853030000000004,
+      "mid": 88.4744,
+      "high": 162.07424999999998,
+      "sequentialSec": 93.2,
+      "confidence": "measured",
+      "contention": 1.036,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 34909,
+    "pid": 1374,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r5-tgt/test-results/20261112-161936-0d9e4b43-1259/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r5-tgt/test-results/20261112-161936-0d9e4b43-1259/web-dist"
+  }
+}

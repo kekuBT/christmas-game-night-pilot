@@ -1238,3 +1238,26 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - A normal run passes, 162 checks.
     - In targeted `20261112-134621-0516e3ea-17341`, Amina went out first and the checks ran on her phone.
   - **Alternative rejected:** moving the short drop to a turn where Baraka can't go out. Which turn that is depends on earlier losses, so the R2 reconnect check could itself stop running.
+- **D-S101-13 Reconnect checks read a page's break log from a cursor and never erase it (review 6828948844, S101-R3).**
+  - **Trigger:** ChatGPT's own run of `check-jebena-rush` on `0516e3e` failed "E the resync showed her broken cup without replaying the break" (160 PASS, 1 FAILED). The check filtered Amina's whole log for her seat, so a cup she lost live before her phone dropped (her own row and the seat list, slot 2) counted as a replay. A driver defect; the cups code is not involved.
+  - **The fix (test-only):**
+    - Every logged break has a number on its page (`n`).
+    - `scripts/lib/break-log.mjs` takes a cursor (`cursorOf`) and returns only what came after it (`since`, `newSeatBreaks`).
+    - These checks now take a cursor instead of reading or erasing the history:
+      - E, Amina offline;
+      - R2, Baraka's short drop. It used to erase his log, which hid his earlier breaks from the end-of-match checks;
+      - the out screen's resync form;
+      - the same-tab room switch;
+      - the wrong tries;
+      - Play again.
+    - The end-of-match checks still see the whole match.
+  - **The reviewer's ordering always runs:**
+    - Amina's phone drops only on a turn after a live loss of hers.
+    - The driver asserts that earlier break is in the log, on her own row and in the seat list, before checking the resync.
+    - It also fails if the offline resync, Keku's reload or the R2 short drop never ran.
+  - **Regression:** `tests/stage101-break-log.test.ts` (7). A prior own break on the HUD and the seat list passes; a newly replayed break on either fails, for the lost slot too; other seats don't count; the history is never erased.
+  - **Before and after, locally:** the repaired driver with the old lifetime check put back fails exactly the reviewer's check (164 PASS, 1 FAIL). The repaired driver passes (165 PASS, 0 FAIL).
+  - **Alternatives rejected:**
+    - erasing the log at the offline boundary: it hides history from the integrity checks;
+    - filtering by timestamp: clocks across pages and the server aren't one sequence;
+    - retrying the check.

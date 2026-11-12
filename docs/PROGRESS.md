@@ -2170,7 +2170,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Review 6815908707 (repairs required on `f1c5f02`):** P2, an achievement ("First Game Finished") drawn from a Spectrum match through the ledger; P2, the briefing's "45 seconds for the impostor's guess"; copy, "Everyone finished." beside the early-ending reason, which also appeared twice. All three repaired with failing-first regressions (D-S93-08); the gate failure on `b668ee3` led to D-S93-09.
 - **Next:** a new completed report on PR #17; then ChatGPT's verification of the repair delta and private live audit. Nothing merged or deployed.
 
-## Stage 10.1: Jebena cini cups and truthful result feedback (repaired after review 6822605156, awaiting re-review)
+## Stage 10.1: Jebena cini cups and truthful result feedback (repaired after reviews 6822605156 and 6828948844, awaiting re-review)
 
 - **Brief:** ChatGPT's handoff 6820352096 on PR #17 (with the Stage 9.3 clearance), from the owner's request: "Instead of hearts let's use cini/cup so when they miss the cup breaks." Base `940df38` (PR #17's cleared head); branch `claude/stage10-1-jebena-cups`, a stacked PR on #17.
 - **Scope:** Jebena Rush's lives drawn and worded as small handleless coffee cups (cini) everywhere; a cup breaks when a life is lost; and the carried result-copy contradiction (a survival winner told "You missed this one"). No rule, score or protocol change; no humour or saving work.
@@ -2215,4 +2215,18 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **`0516e3e` (final candidate):** targeted (`jebena-rush briefing tv-outage`) `20261112-134621-0516e3ea-17341` PASSED (5/5); full `20261112-134811-0516e3ea-18196` **PASSED** (exit 0, 88/88, 32 min 58 s, no leftover processes; 1,600 unit tests in 123 files; `check-jebena-rush` 163, `check-briefing` 44, `check-tv-outage` 15).
 - **Screenshots:** `docs/stage10/screenshots/` refreshed from that final run; the ending before the repair is in `repair-before/`.
 - **Not run:** real iPhone Safari and Android Chrome (Chromium emulation only).
-- **Next:** ChatGPT's independent re-review and private live audit of PR #18. Nothing merged or deployed.
+- **Review 6828948844 (ChatGPT, 11:10 a.m. ET):** changes requested for one driver bookkeeping defect, S101-R3. No new product defect: the private live audit of `0516e3e` passed, but ChatGPT's own `check-jebena-rush` run failed one check (160 PASS, 1 FAILED). Acknowledged in 6828983499.
+
+### Stage 10.1 repair S101-R3 (review 6828948844, test-only)
+- **The defect:** the offline-resync check read Amina's whole break log. A cup she lost live before her phone dropped counted as a replay.
+- **The repair (D-S101-13):**
+  - Numbered break-log events, and cursors from `scripts/lib/break-log.mjs`, for E, R2, the out screen's resync form, the same-tab switch, the wrong tries and Play again.
+  - The log is never erased. R2 used to erase Baraka's, hiding his earlier breaks from the integrity checks.
+  - Amina's phone drops only after a live loss of hers, asserted present.
+  - The driver fails if the offline resync, the reload or the short drop never ran.
+- **Tests:** `tests/stage101-break-log.test.ts` (7). Locally (`docs/evidence/stage101-local/`): the old check with the new ordering fails exactly the reviewer's check (164/1); the repaired driver passes (165/0).
+- **Gates** on `0d9e4b4` (app code unchanged since `0516e3e`):
+  - targeted (`jebena-rush`) `20261112-161936-0d9e4b43-1259` **PASSED** (exit 0, 3/3; `check-jebena-rush` 166 PASS, 0 FAIL);
+  - fast `20261112-162112-0d9e4b43-1842` **PASSED** (exit 0, 5/5; 1,607 unit tests in 124 files).
+  - No unchanged full gate, as the review asked.
+- **Next:** ChatGPT's independent check of the test delta and the focused run. Nothing merged or deployed.

@@ -153,3 +153,13 @@ Identifiers keep `hearts` (D-S101-02): the server state, the protocol, the `sett
 | Gate hygiene | `scripts/check-jebena-rush.mjs` (D-S101-12) | The full gate on `36e222f` passed, but its Jebena run skipped the out-screen checks: Baraka went out on his R2 short-drop turn, and that branch skipped the out block. The out checks now run whichever turn takes the last cup, in their resync form when that phone was cut, and the driver fails if nobody's out screen was checked |
 
 **Gates:** every run on every revision of the repair, the failed ones included, is listed in `docs/PROGRESS.md` (Stage 10.1 repairs), with raw output in `docs/evidence/gate-runs/<run>/`. The final candidate `0516e3e` passed its full gate `20261112-134811-0516e3ea-18196` (88/88).
+
+### 10.2 Review 6828948844: the driver's reconnect check (S101-R3, test-only)
+- **The finding:** ChatGPT's independent run of `check-jebena-rush` on `0516e3e` failed one check (160 PASS, 1 FAILED). The offline-resync check counted every break of Amina's seat in her phone's whole log, so a cup she had lost live before her phone dropped looked like a replay. No product defect was found; the live audit of the cups passed.
+- **The repair (D-S101-13):**
+  - Break-log events are numbered, and `scripts/lib/break-log.mjs` gives cursors. Reconnect and other moment checks look only at what was logged after their cursor.
+  - The log is never erased.
+  - Amina's phone drops only after a live loss of hers, and the driver asserts that earlier break is there.
+  - The driver fails if the offline resync, the reload or the short drop never ran.
+- **Tests:** `tests/stage101-break-log.test.ts` (7). Locally, the old check with the new ordering fails the reviewer's check; the repaired driver passes.
+- **App code:** unchanged since `0516e3e`. The tested SHA for this repair is `0d9e4b4`. As the review asked, it ran the focused Jebena gate and a fast gate for the new unit test, not an unchanged full gate.
