@@ -1360,3 +1360,25 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - Christmas: they keep "Christmas Memory Book" and its 🎄.
   - **The server's Markdown:** it has no look, so it says "Mchezo Memory Book".
   - **What the look changes:** only titles and decoration, never facts or content.
+
+## Stage 10.4: save a memory without leaving the result screen
+- **D-S104-01 Bind to the game on screen.**
+  - **How:** the results screen sends `fromGame` (the game it shows), and the server resolves that game's own `game-finished` event in this room. An old result can't save a newer match, even if one finished while the composer was open.
+  - **Facts and checks:** facts and refusals are exactly Stage 10.3's (`teamFactsFor` for Spectrum, score events for Jebena).
+  - **Alternatives rejected:**
+    - "the last finished game" at request time: it races a replay;
+    - the client sending the finish event id it found: it would need the ledger on the results screen, and the server can resolve it just as safely.
+- **D-S104-02 Idempotency by member and key.**
+  - **The key:** a `requestId` the screen makes once per draft, scoped to the room and the member and kept with the book. The same key and request return the same entry. The same key with a different request gets 409 `ATTEMPT_MISMATCH` and the original entry, so nothing is overwritten.
+  - **The boundary:** a new draft is a new note on purpose; no deduplication by game.
+  - **Alternatives rejected:**
+    - deduplicating by game and member: it would forbid a second, intentional note;
+    - by note text: an edited retry would duplicate;
+    - client-only "disable the button": a lost reply and a reconnect would duplicate.
+- **D-S104-03 An inline composer on the result screen.**
+  - **What:** the facts are read-only, the note is the player's, and Save and Cancel are explicit.
+  - **Where:** it sits under the result line, so What's next and its controls don't move.
+  - **Alternative rejected:** a dialog over the results, which would hide the result it describes and needs focus trapping for little gain.
+- **D-S104-04 Spectrum and Jebena Rush only.**
+  - **Why:** their facts are already trusted (Stage 10.3 team record; Jebena's score events), and the handoff names them.
+  - **Other games** keep the manual Add in the Memory Book. A later slice can extend the action.

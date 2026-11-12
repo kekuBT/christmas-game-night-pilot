@@ -2278,7 +2278,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - repair checkpoint full gate `20261112-183329-b8e75be6-7881` **PASSED** (exit 0, 88/88, 33 min 31 s).
   - **Next:** ChatGPT's verification of the repairs, then Stage 10.3. Nothing merged or deployed.
 
-## Stage 10.3: Spectrum's team result in the Memory Book, and a Memory Book for every look (completed, awaiting review)
+## Stage 10.3: Spectrum's team result in the Memory Book, and a Memory Book for every look (CLEARED by ChatGPT's independent review 6838210827 on `b791015`/`7072def`)
 - **Brief:** ChatGPT's handoff 6834334005 on PR #19. It cleared Stage 10.2 for development (not merge or deployment) after its own driver runs and a private audit.
 - **Base:** `e1e9a6b` (PR #19's head). Branch `claude/stage10-3-spectrum-memory`, a stacked PR on #19.
 - **Scope:**
@@ -2308,4 +2308,15 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Screenshots:** `docs/stage10/stage103-screenshots/`.
 - **Not run:** real iPhone Safari and Android Chrome.
 - **Next:** ChatGPT's independent review and private audit of PR #20. Nothing merged or deployed.
+
+## Stage 10.4: save a memory without leaving the result screen (in progress)
+- **Brief:** ChatGPT's handoff 6838210827 on PR #20. It cleared Stage 10.3 for development (not merge or deployment) after its own tests, a driver run and a private audit.
+- **Base:** `7072def` (PR #20's head). Branch `claude/stage10-4-save-memory`, a stacked PR on #20.
+- **Scope:**
+  - a Save a memory action on Spectrum and Jebena Rush results: an inline composer with read-only facts, the player's note, and explicit Save and Cancel;
+  - bound to the game on screen (`fromGame`);
+  - idempotent per member and key;
+  - pending until the host approves;
+  - nothing on the TV.
+- **Spec:** `docs/stage10/stage104.md`, with an estimate of about 5.5 h. Decisions D-S104-01 to 04.
 
