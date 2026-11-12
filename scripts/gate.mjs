@@ -114,7 +114,8 @@ const workersWhy = opts.sequential ? "--sequential" : opts.workers === "auto" ? 
 // game-night 270s; every other driver finished in under 160s. A budget is
 // a hang detector, not a performance assertion.
 const DEFAULT_DRIVER_TIMEOUT_SEC = 600;
-const DRIVER_TIMEOUT_SEC = { "check-leaderboard": 1800, "e2e-chromium": 1800, "check-f5": 1500, "check-mchezo": 900, "check-tv-lifecycle": 900, "check-game-night": 900 };
+// Stage 9.3: check-spectrum plays real 60/45/8-second phases (one clue phase runs out), about 4–5 minutes.
+const DRIVER_TIMEOUT_SEC = { "check-leaderboard": 1800, "e2e-chromium": 1800, "check-f5": 1500, "check-mchezo": 900, "check-tv-lifecycle": 900, "check-game-night": 900, "check-spectrum": 900 };
 // Scheduling attributes, from measurements (docs/test-optimization/README.md §5):
 // weight = worker slots a step occupies; exclusive = it runs with nothing else.
 const STEP_ATTRS = {};

@@ -33,7 +33,7 @@ import { closeSync, copyFileSync, existsSync, fsyncSync, mkdirSync, openSync, re
 import { randomBytes } from "node:crypto";
 import { basename, dirname, join } from "node:path";
 import { z } from "zod";
-import { GAME_REGISTRY } from "../games/registry.js";
+import { GAME_REGISTRY, isCooperative } from "../games/registry.js";
 import { hashToken } from "../shared/protocol.js";
 import { SESSION_SEASONS } from "../shared/season.js";
 
@@ -75,6 +75,35 @@ export function atomicWriteFileSync(path: string, data: string, hooks: AtomicWri
 
 const KNOWN_GAMES = new Set(GAME_REGISTRY.map((g) => g.id));
 const num = z.number().finite();
+const whole = z.number().int();
+
+/**
+ * Stage 9.3: a cooperative game's one shared result (src/shared/teamResult.ts),
+ * checked on every restore: whole numbers in range, revealed facts only (no
+ * player id, no individual guess: strict objects reject extra fields).
+ */
+export const TeamResultSchema = z.object({
+  kind: z.literal("spectrum"),
+  total: whole.min(0),
+  max: whole.min(1),
+  roundsPlanned: whole.min(1),
+  end: z.enum(["completed", "too-few-players"]).nullable(),
+  rounds: z.array(z.object({
+    roundNo: whole.min(1),
+    pair: z.object({ left: z.string().min(1), right: z.string().min(1), meaning: z.string() }).strict(),
+    clue: z.string().nullable(),
+    reason: z.enum(["scored", "no-clue", "giver-left", "no-guesses"]),
+    target: whole.min(0).max(100),
+    aggregate: whole.min(0).max(100).nullable(),
+    distance: whole.min(0).max(100).nullable(),
+    points: whole.min(0),
+    guesses: whole.min(0),
+  }).strict()),
+}).strict().superRefine((t, ctx) => {
+  if (t.total > t.max) ctx.addIssue({ code: "custom", message: `team total ${t.total} exceeds ${t.max}` });
+  if (t.rounds.length > t.roundsPlanned) ctx.addIssue({ code: "custom", message: "more revealed rounds than planned" });
+  if (t.rounds.reduce((a, r) => a + r.points, 0) !== t.total) ctx.addIssue({ code: "custom", message: "the rounds don't add up to the team total" });
+});
 
 const PlayerRecord = z.object({
   id: z.string().min(1),
@@ -129,6 +158,16 @@ const GameRecord = z.object({
 }).passthrough().superRefine((g, ctx) => {
   if (g.status === "briefing" && !g.briefing) ctx.addIssue({ code: "custom", message: `game ${g.id} is in its briefing but has no briefing record` });
   if (g.briefing && g.status === "briefing" && g.deadlineAt !== undefined) ctx.addIssue({ code: "custom", message: `game ${g.id} is in its briefing but has a deadline` });
+  // Stage 9.3: a finished cooperative game carries its one team result (a voided game has none); no other game may.
+  const outcome = g.outcome as { reason?: unknown; team?: unknown } | undefined;
+  const team = outcome?.team;
+  if (team !== undefined) {
+    if (!isCooperative(g.gameId)) ctx.addIssue({ code: "custom", message: `game ${g.id} has a team result but ${g.gameId} is not cooperative` });
+    const parsed = TeamResultSchema.safeParse(team);
+    if (!parsed.success) ctx.addIssue({ code: "custom", message: `game ${g.id} has an invalid team result: ${parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")}` });
+  } else if (isCooperative(g.gameId) && g.status === "finished" && outcome !== undefined && outcome.reason !== "void") {
+    ctx.addIssue({ code: "custom", message: `cooperative game ${g.id} finished without its team result` });
+  }
 });
 
 const LedgerRecord = z.object({

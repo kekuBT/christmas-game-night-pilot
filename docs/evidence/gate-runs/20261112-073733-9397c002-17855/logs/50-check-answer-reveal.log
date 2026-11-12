@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:33181
+# timeout 600s | worker w3 | server http://localhost:33181 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93t-full/test-results/20261112-073733-9397c002-17855/server-data/w3)
+
+[+18.3s] PASS Geography: finished player sees no answers while Bea still plays
+[+18.3s] PASS Geography: TV shows no answers while Bea still plays
+[+18.3s] PASS Geography: Bea (mid-game) sees no answers
+[+27.1s] PASS Geography: results list every question — 8
+[+27.2s] PASS Geography: each answer matches the content pack — 8/8
+[+27.2s] PASS Geography: each explanation is shown — 8/8
+[+27.2s] PASS Geography: Bea sees her own choices marked
+[+27.2s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+27.4s] PASS Geography: TV lists the answers after the game
+[+27.4s] PASS Geography: TV shows no player's choices
+[+33.0s] PASS Closest: no answer anywhere while question 1 is open
+[+33.1s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 8849 vs 8849
+[+33.1s] PASS Closest: and the player's own guess
+[+33.2s] PASS Closest: Bea sees her own guess, not Ada's
+[+33.2s] PASS Closest: the explanation is shown
+[+33.2s] PASS Closest: question 2 is now open and its answer is not shown
+[+33.2s] PASS Closest: TV shows the last answer only — Last question: How tall is Mount Everest, in metres? — 8,849 m
+[+33.2s] PASS Closest: TV shows nobody's guess — Last question: How tall is Mount Everest, in metres? — 8,849 m
+[+33.5s] ANSWER REVEAL ALL PASSED
+[+33.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 33.5s | cpu 3s, peak memory 271 MB

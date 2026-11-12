@@ -1,0 +1,55 @@
+$ node scripts/check-caption.mjs http://localhost:33413
+# timeout 600s | worker w3 | server http://localhost:33413 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93b-full/test-results/20261112-042322-f1c5f02a-2551/server-data/w3)
+
+[+5.4s] PASS the briefing explains the game
+[+6.0s] PASS everyone sees the same scene — A penguin tries out for the school football team
+[+6.0s] PASS no horizontal overflow at 390px (write)
+[+6.0s] PASS no horizontal overflow at 390px (write)
+[+6.0s] PASS no horizontal overflow at 320px (write)
+[+6.0s] PASS no horizontal overflow at 360px (write)
+[+6.1s] PASS character counter counts down
+[+36.4s] PASS Bea's caption is in and shown back to her
+[+36.4s] PASS a double submit sends one caption — 1
+[+36.7s] PASS after a reload Bea still sees her caption, not an empty box
+[+37.0s] PASS keyboard: Cal submits with Tab + Enter
+[+37.2s] PASS vote cards show no names (anonymous) — “Grandpa's new ringtone” | “Error 404: punchline not found” | YOURS — YOU CAN’T VOTE FOR IT | “When the robot laughs at its own joke” | “Beep boop, that's a knock-knock joke”
+[+37.2s] PASS Bea's own caption is marked Yours and disabled
+[+37.2s] PASS Bea can vote for the other three
+[+37.2s] PASS vote cards are at least 44px tall at 320px — 69.3267822265625
+[+39.3s] PASS TV shows the scene and the captions
+[+39.3s] PASS TV never shows who wrote what
+[+39.5s] PASS a vote is confirmed on the card
+[+60.0s] PASS round 2 starts on time without Dee's vote
+[+60.0s] PASS round 2 shows last round's favourite (no names)
+[+106.0s] PASS results reach every phone
+[+106.0s] PASS results credit the winning caption's author — CAPTION CLASH · OFFICIAL
+[+106.0s] Bea wins Caption Clash
+[+106.0s] B
+[+106.0s] Bea
+[+106.0s] 
+[+106.0s] Top of the table: Bea. Modesty optional.
+[+106.0s] 
+[+106.0s] You came 3rd of 4
+[+106.0s] 175 pts
+[+106.0s] Solid middle of the pack. Room to climb.
+[+106.0s] CAPTION CLASH
+[+106.0s] The room’s favourites
+[+106.0s] 
+[+106.0s] Round 1: A penguin tries out for the school football team
+[+106.0s] 
+[+106.0s] “Grandpa's new ringtone”
+[+106.0s] by Cal
+[+106.0s] 2
+[+106.0s] VOTES
+[+106.0s] 
+[+106.0s] PASS results explain points (25 per caption, 100 per vote)
+[+106.0s] PASS results show participation
+[+106.1s] PASS no horizontal overflow on results at 320px
+[+106.1s] PASS the TV results still show no author names
+[+106.5s] PASS back in the lobby
+[+106.5s] PASS another Caption Clash starts with new scenes — 201
+[+107.2s] PASS the new game's first scene differs
+[+107.4s] CAPTION ALL PASSED
+[+107.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 107.4s | cpu 6.6s, peak memory 373 MB

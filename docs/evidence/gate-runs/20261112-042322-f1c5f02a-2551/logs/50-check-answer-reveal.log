@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:40493
+# timeout 600s | worker w1 | server http://localhost:40493 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93b-full/test-results/20261112-042322-f1c5f02a-2551/server-data/w1)
+
+[+16.5s] PASS Geography: finished player sees no answers while Bea still plays
+[+16.5s] PASS Geography: TV shows no answers while Bea still plays
+[+16.5s] PASS Geography: Bea (mid-game) sees no answers
+[+25.9s] PASS Geography: results list every question — 8
+[+26.0s] PASS Geography: each answer matches the content pack — 8/8
+[+26.0s] PASS Geography: each explanation is shown — 8/8
+[+26.0s] PASS Geography: Bea sees her own choices marked
+[+26.0s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+26.1s] PASS Geography: TV lists the answers after the game
+[+26.1s] PASS Geography: TV shows no player's choices
+[+31.7s] PASS Closest: no answer anywhere while question 1 is open
+[+31.9s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 366 vs 366
+[+31.9s] PASS Closest: and the player's own guess
+[+31.9s] PASS Closest: Bea sees her own guess, not Ada's
+[+31.9s] PASS Closest: the explanation is shown
+[+31.9s] PASS Closest: question 2 is now open and its answer is not shown
+[+31.9s] PASS Closest: TV shows the last answer only — Last question: How many days are in a leap year? — 366 days
+[+31.9s] PASS Closest: TV shows nobody's guess — Last question: How many days are in a leap year? — 366 days
+[+32.1s] ANSWER REVEAL ALL PASSED
+[+32.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 32.1s | cpu 3s, peak memory 267 MB

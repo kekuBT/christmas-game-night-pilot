@@ -1,0 +1,129 @@
+$ node scripts/check-spectrum.mjs http://localhost:41725
+# timeout 900s | worker w1 | server http://localhost:41725 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93s-tgt/test-results/20261112-064204-b668ee3c-24853/server-data/w1)
+
+[+4.1s] PASS J room B: Spectrum starts — {"gameId":"game-1","gameType":"spectrum","status":"briefing","players":["player-1","player-2"]}
+[+4.1s] PASS J room B: playing, round 1
+[+4.4s] PASS A the library lists Spectrum, tagged Co-op: one team score
+[+4.4s] PASS A library at 390: no sideways scroll
+[+4.5s] PASS A the casual picker lists Spectrum (practice only) — Spectrum 2–10 players · best with 4+ · about 8 min · Practice only
+[+4.9s] PASS A lobby, host 390: no sideways scroll
+[+4.9s] PASS A lobby, guest 320: no sideways scroll
+[+5.0s] PASS B Keku: the briefing explains the team goal and "Give a clue, not the target number"
+[+5.0s] PASS B Keku: the briefing's timing names Spectrum's own phases, never an impostor — 60 seconds for the clue. 45 seconds for everyone's guesses. 8 seconds for each reveal. The whole game ends by itself after about 10 minutes.
+[+5.0s] PASS B Amina: the briefing explains the team goal and "Give a clue, not the target number"
+[+5.0s] PASS B Amina: the briefing's timing names Spectrum's own phases, never an impostor — 60 seconds for the clue. 45 seconds for everyone's guesses. 8 seconds for each reveal. The whole game ends by itself after about 10 minutes.
+[+5.0s] PASS B Baraka: the briefing explains the team goal and "Give a clue, not the target number"
+[+5.0s] PASS B Baraka: the briefing's timing names Spectrum's own phases, never an impostor — 60 seconds for the clue. 45 seconds for everyone's guesses. 8 seconds for each reveal. The whole game ends by itself after about 10 minutes.
+[+5.0s] PASS B the TV: the briefing explains the team goal and "Give a clue, not the target number"
+[+5.1s] PASS B the TV: the briefing's timing names Spectrum's own phases, never an impostor — 60 seconds for the clue. 45 seconds for everyone's guesses. 8 seconds for each reveal. The whole game ends by itself after about 10 minutes.
+[+5.6s] PASS C play: round 1, clue phase
+[+5.6s] PASS C the server's truth is readable (driver only)
+[+5.6s] PASS C the clue-giver (Amina) alone sees the target, 44
+[+5.7s] PASS C Keku waits for Amina's clue
+[+5.7s] PASS C Keku's phone shows no target
+[+5.7s] PASS C Keku's projection has no target and no future pair
+[+5.7s] PASS C Baraka waits for Amina's clue
+[+5.7s] PASS C Baraka's phone shows no target
+[+5.7s] PASS C Baraka's projection has no target and no future pair
+[+5.7s] PASS C the TV projection has no target and no future pair
+[+5.7s] PASS C the TV: Amina is thinking of a clue; no target marker
+[+5.7s] PASS C the TV shows a running clock
+[+5.7s] PASS C clue-giver phone: no sideways scroll
+[+5.9s] PASS C an 81-character clue can't be sent (too long)
+[+5.9s] PASS C the clue with digits is sent with Enter: guessing starts
+[+5.9s] PASS C Keku sees the clue as text
+[+6.0s] PASS C Baraka sees the clue as text
+[+6.0s] PASS C the TV shows the clue and the count
+[+6.0s] PASS C keyboard: Home moves the guess to 0
+[+6.0s] PASS C keyboard: Page Up twice moves it to 20
+[+6.0s] PASS C keyboard: arrows move it by 1
+[+6.0s] PASS C keyboard: Page Down moves it by 10
+[+6.0s] PASS C keyboard: End moves it to 100
+[+6.0s] PASS C keyboard: the draft reads 46 and says where it sits
+[+6.0s] PASS C the scale's accessible name names both ends — Your guess. From Cold (0) to Hot (100)
+[+6.7s] PASS C moving the scale sent nothing (the server has no guess yet)
+[+6.7s] PASS C Keku's guess (46) is locked in
+[+6.8s] PASS C touch: the nudges move Baraka's draft to 40
+[+6.8s] PASS C Baraka's guess screen: no sideways scroll
+[+6.9s] PASS C every guess in: the reveal
+[+6.9s] PASS C the team's guess is the middle of the two guesses (half up) — {"roundNo":1,"pair":{"id":"sp-cold-hot","left":"Cold","right":"Hot","meaning":"How hot something is."},"giver":"player-2","clue":"a 10-minute walk","reason":"scored","target":44,"aggregate":43,"distance":1,"points":10,"guesses":2}
+[+6.9s] PASS C Keku's reveal explains it in words
+[+6.9s] PASS C Amina's reveal explains it in words
+[+6.9s] PASS C Baraka's reveal explains it in words
+[+6.9s] PASS C the TV reveal: the target and the team's guess, in words and on the scale
+[+6.9s] PASS C Baraka's phone shows their own guess, never Keku's
+[+6.9s] PASS C Amina (the clue-giver) sees no one's individual guess
+[+6.9s] PASS C the TV never carries an individual guess
+[+7.0s] PASS C a stale send is refused and changes nothing — {"accepted":false,"reason":"PHASE_CLOSED"}
+[+14.9s] PASS D round 2, clue phase
+[+14.9s] PASS D the clue-giver role moved on
+[+15.0s] PASS D Amina reloads and is back in round 2
+[+19.1s] PASS D offline: the clue never reached the server
+[+24.1s] PASS D back online: nothing was resent
+[+74.9s] PASS D the clue phase runs out on the server clock: the round is skipped
+[+74.9s] PASS D Keku: "No clue in time · 0 points"
+[+74.9s] PASS D Amina: "No clue in time · 0 points"
+[+74.9s] PASS D Baraka: "No clue in time · 0 points"
+[+74.9s] PASS D the TV: No clue in time
+[+82.9s] PASS E round 3, clue phase
+[+82.9s] PASS E round 3: guessing
+[+82.9s] PASS E round 3: Keku sees the clue exactly as typed, as text
+[+83.0s] PASS E round 3: Amina sees the clue exactly as typed, as text
+[+83.0s] PASS E round 3: the reveal
+[+91.2s] PASS E round 4, clue phase
+[+91.2s] PASS E round 4: guessing
+[+91.2s] PASS E round 4: Keku sees the clue exactly as typed, as text
+[+91.3s] PASS E round 4: Baraka sees the clue exactly as typed, as text
+[+91.3s] PASS E round 4: the reveal
+[+99.4s] PASS F the match finishes after four rounds
+[+99.4s] PASS F the server's one team result: four rounds, out of 40 — {"kind":"spectrum","total":17,"max":40,"roundsPlanned":4,"end":"completed","rounds":[{"roundNo":1,"pair":{"left":"Cold","right":"Hot","meaning":"How hot something is."},"clue":"a 10-minute walk","reas
+[+99.4s] PASS F no projection carries per-player scores
+[+99.4s] PASS F Keku sees the team result: 17 out of 40
+[+99.4s] PASS F Keku's results name no winner, place or credit
+[+99.4s] PASS F Keku's results explain all four rounds
+[+99.4s] PASS F Keku's results say "4 of 4 rounds played", not "Everyone finished"
+[+99.4s] PASS F Keku's results: no sideways scroll
+[+99.4s] PASS F Amina sees the team result: 17 out of 40
+[+99.4s] PASS F Amina's results name no winner, place or credit
+[+99.4s] PASS F Amina's results explain all four rounds
+[+99.4s] PASS F Amina's results say "4 of 4 rounds played", not "Everyone finished"
+[+99.4s] PASS F Amina's results: no sideways scroll
+[+99.4s] PASS F Baraka sees the team result: 17 out of 40
+[+99.4s] PASS F Baraka's results name no winner, place or credit
+[+99.4s] PASS F Baraka's results explain all four rounds
+[+99.4s] PASS F Baraka's results say "4 of 4 rounds played", not "Everyone finished"
+[+99.4s] PASS F Baraka's results: no sideways scroll
+[+99.5s] PASS F the TV's final view: the team result, no winner or standings
+[+99.5s] PASS F the TV final names no winner and says Team result, not standings — TEAM RESULT
+[+99.7s] PASS F the TV's post-game review: every round of the team's match
+[+99.8s] PASS G the host has Play again
+[+99.8s] PASS G Play again opens a fresh briefing
+[+99.9s] PASS G the rematch is a new match, linked to the last one
+[+100.8s] PASS G the rematch is cancelled
+[+101.2s] PASS G Keku is back in the lobby
+[+101.3s] PASS G Amina is back in the lobby
+[+101.3s] PASS G Baraka is back in the lobby
+[+101.3s] PASS G the lobby's last game: the team result, no place
+[+101.4s] PASS G the TV's Tonight so far: Spectrum's team result, no winner
+[+103.2s] PASS G the new match starts clean: round 1, no clue, team 0
+[+103.2s] PASS G nothing carried over: no guess and no revealed round
+[+103.6s] PASS G Amina is asked to confirm
+[+112.0s] PASS G Amina has left and watches
+[+112.0s] PASS G Baraka is asked to confirm
+[+112.1s] PASS G fewer than two left: the match ends early
+[+112.1s] PASS G the early ending keeps what was earned and says why
+[+112.1s] PASS G Keku's results say why it ended early
+[+112.1s] PASS G the early ending is explained once, never 'Everyone finished'; score and rounds explicit — 1× · 1 of 4 rounds played.
+[+112.1s] PASS H Amina's phone uses the Christmas look
+[+112.1s] PASS H Keku's phone uses the Everyday look
+[+112.1s] PASS H Baraka's phone is in reduced motion
+[+112.1s] PASS I the canary check finds a canary when one is there (self-test)
+[+112.1s] PASS I no built file carries the pack (22 files)
+[+112.2s] PASS I no public response carries the pack (15 responses)
+[+112.2s] PASS J room B ran its own match: its own clock, no clue or guess from room A — ["no-clue"]
+[+113.8s] PASS K a Cup's picker leaves Spectrum out — 14 games
+[+113.8s] PASS K the server refuses Spectrum in a Cup (409 CASUAL_ONLY) — {"error":"Spectrum plays in casual rooms only.","code":"CASUAL_ONLY","readiness":{"registered":1,"connected":1,"reconnecting":0,"away":0,"wouldPlay":["player-1"
+[+113.8s] ALL PASS
+[+113.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":5}
+
+# PASS (exit 0) in 113.9s | cpu 10.4s, peak memory 381 MB

@@ -1,7 +1,8 @@
 import { createHash, randomInt } from "node:crypto";
 import { moduleFor, moduleForAction } from "../games/modules/index.js";
 import type { ModuleContext } from "../games/modules/types.js";
-import { GAME_REGISTRY, getGame } from "../games/registry.js";
+import { GAME_REGISTRY, getGame, isCooperative } from "../games/registry.js";
+import type { TeamResult } from "../shared/teamResult.js";
 import { sameSettings, validateGameSettings, type GameSettings } from "../games/settings.js";
 import { PARTY_TRANSITION_MINUTES, validatePartyPlan } from "../games/party.js";
 import { CLIENT_PROTOCOL, MATH_OPEN_PROTOCOL, MIN_CLIENT_PROTOCOL, NUMERIC_INPUT_PROTOCOL } from "../shared/clientProtocol.js";
@@ -2562,6 +2563,7 @@ export class RoomEngine {
     let finalScores: Record<string, number>;
     let part: ReturnType<RoomEngine["participationOf"]>;
     let nobodyPlayed: boolean;
+    let team: TeamResult | undefined;
     try {
       if (scores !== undefined) finalScores = scores;
       else if (game.gameId === "math-mayhem") finalScores = { ...game.rawScores }; // already scored live, per answer
@@ -2569,6 +2571,12 @@ export class RoomEngine {
       if (Object.values(finalScores).some((v) => typeof v !== "number" || !Number.isFinite(v))) throw new Error("non-numeric score");
       part = this.participationOf(game, reason);
       nobodyPlayed = !this.anyoneParticipated(game, part.participation);
+      // Stage 9.3: a cooperative game's one shared result (docs/stage9/stage93.md §3). Without
+      // it there is no truthful result to record, so the game is voided rather than shown per player.
+      if (isCooperative(game.gameId)) {
+        team = moduleFor(game.gameId)?.teamResult?.(game.extra);
+        if (!team || !Number.isFinite(team.total) || team.total < 0 || team.total > team.max) throw new Error("a cooperative game has no valid team result");
+      }
       // Stage 9.2: a module may drop private state it no longer needs (Jebena's last rejected try).
       moduleFor(game.gameId)?.onFinish?.(game.extra, this.moduleCtx(game, at));
     } catch (err) {
@@ -2591,8 +2599,12 @@ export class RoomEngine {
       ...(game.official && policy.officialEligible && nobodyPlayed && !COUNT_GAMES_WITH_NO_PARTICIPATION
         ? { note: "Nobody answered before time ran out, so there is no result to count." } : {}),
       ...part,
+      ...(team ? { team } : {}),
     };
-    if (game.gameId !== "math-mayhem") {
+    if (team) {
+      // Stage 9.3: one team event, never a per-player score: the per-player copies stay internal.
+      this.log("team-score-recorded", { gameInstanceId: game.id, points: team.total, reason: `game:${game.gameId}`, detail: { max: team.max, rounds: team.rounds.length } });
+    } else if (game.gameId !== "math-mayhem") {
       for (const [pid, pts] of Object.entries(finalScores)) {
         this.log("score-awarded", { playerId: pid, gameInstanceId: game.id, points: pts, reason: `game:${game.gameId}` });
       }
@@ -2772,6 +2784,8 @@ export class RoomEngine {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can override a score");
     const game = this.games.get(gameInstanceId);
     if (!game || game.status !== "finished" || game.timedOut) throw new Error("Only a finished, non-timed-out game can be overridden");
+    // Stage 9.3: a cooperative game has one team result and no per-player score to change.
+    if (isCooperative(game.gameId)) throw new Error("A cooperative game has one team result; there is no per-player score to change");
     if (!game.players.includes(playerId)) throw new Error("Player is not in this game");
     if (!Number.isFinite(points) || points < 0 || points > 10000) throw new Error("Override points out of range");
     const cleanReason = reason.trim();
@@ -2797,7 +2811,8 @@ export class RoomEngine {
   private cupGames(): GameInstance[] {
     if (this.cupError) return [];
     const teamGamesCount = formatInfo(this._cup.format).teamGamesCount;
-    return [...this.games.values()].filter((g) => this.countsOfficially(g) && (teamGamesCount || !getGame(g.gameId).modes.includes("team")));
+    // Stage 9.3: a cooperative game can never count (casual-only, practice-only); excluded here as well, by kind.
+    return [...this.games.values()].filter((g) => !isCooperative(g.gameId) && this.countsOfficially(g) && (teamGamesCount || !getGame(g.gameId).modes.includes("team")));
   }
 
   /**
@@ -2832,8 +2847,11 @@ export class RoomEngine {
 
   achievements() {
     const rawScoresByGame: Record<string, Record<string, number>> = {};
-    for (const g of this.games.values()) if (g.status === "finished") rawScoresByGame[g.id] = g.rawScores;
-    return evaluateAchievements(this.ledger, rawScoresByGame);
+    // Stage 9.3: no achievement is ever drawn from a cooperative game: not from its per-player copies, and
+    // (review 6815042876) not from its events either, so "First Game Finished" never cites a Spectrum match.
+    for (const g of this.games.values()) if (g.status === "finished" && !isCooperative(g.gameId)) rawScoresByGame[g.id] = g.rawScores;
+    const coop = new Set([...this.games.values()].filter((g) => isCooperative(g.gameId)).map((g) => g.id));
+    return evaluateAchievements(this.ledger.filter((e) => !e.gameInstanceId || !coop.has(e.gameInstanceId)), rawScoresByGame);
   }
 
   /**
@@ -3288,7 +3306,8 @@ export class RoomEngine {
       // the room can see HOW it answered, never WHO answered what.
       answerCounts: g.status === "finished" && g.gameId === "trivia" ? this.quizAnswerCounts(g) : undefined,
       questionPoints: g.status === "finished" && g.gameId === "trivia" ? this.quizQuestionPoints(g) : undefined,
-      rawScores: g.status === "finished" ? g.rawScores : undefined,
+      // Stage 9.3: a cooperative game's per-player copies stay internal; its result is outcome.team.
+      rawScores: g.status === "finished" && !isCooperative(g.gameId) ? g.rawScores : undefined,
       ...this.timingFacts(g),
     }));
     const base: Record<string, unknown> = {
@@ -3357,7 +3376,7 @@ export class RoomEngine {
           countsOfficially: g.status === "finished" ? this.countsOfficially(g) : undefined,
           participant,
           myAnswers: participant ? g.answers[actorId] ?? {} : {},
-          myScore: participant ? g.rawScores[actorId] ?? 0 : 0,
+          myScore: participant && !isCooperative(g.gameId) ? g.rawScores[actorId] ?? 0 : 0,
           // Own whole-game abstention only; phase abstentions ride in state.myAbstained.
           abstained: participant && (g.abstained ?? []).includes(actorId),
           state: participant ? this.participantGameState(g, actorId) : this.publicGameState(g),
@@ -3378,7 +3397,8 @@ export class RoomEngine {
           myAnswerTimes: participant && g.gameId === "math-mayhem" && g.openedAt !== undefined ? g.answerTimes[actorId] ?? {} : undefined,
           // Finished scores are public (same policy as the public games list);
           // without this, ShowResults and the finished panel rendered empty.
-          rawScores: g.status === "finished" ? g.rawScores : undefined,
+          // Stage 9.3: a cooperative game's per-player copies stay internal; its result is outcome.team.
+          rawScores: g.status === "finished" && !isCooperative(g.gameId) ? g.rawScores : undefined,
           ...this.timingFacts(g),
         };
       });

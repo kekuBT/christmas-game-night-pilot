@@ -1,0 +1,24 @@
+$ node scripts/check-history-links.mjs http://localhost:33273
+# timeout 600s | worker w3 | server http://localhost:33273 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93r-full/test-results/20261112-060355-a25a0880-8435/server-data/w3)
+
+[+1.8s] PASS Library link: the room's Library opens filtered — /room/library?q=word
+[+1.8s] PASS Library: the new search is in the address
+[+1.8s] PASS Library: its Back button promises the lobby
+[+2.3s] PASS Library: 'Back to lobby' reaches the lobby (not Home, outside the room)
+[+2.3s]   after Back to lobby: /room
+[+2.3s] PASS Browser Back from the lobby still offers Home with Rejoin (S3-NAV-02)
+[+4.6s] PASS Reopening the room's Library keeps its filters (in the room, not the standalone Library)
+[+4.6s] PASS …and it is still the room's Library (Back to lobby, room fit)
+[+4.8s] PASS Memory: game 1 (Trivia) finished
+[+5.3s] PASS Memory: before adding, it says the highlight will cite Trivia
+[+5.4s] PASS Memory: game 2 (Geography) finishes while the page is open
+[+5.4s] PASS Memory: still on the Memory Book — /room/memories
+[+5.6s] PASS Memory: the shown link follows the room: it now says Geography
+[+5.6s] PASS Memory: the typed highlight is still there
+[+5.7s] PASS Memory: the added entry cites exactly the game shown (Geography), not the one before
+[+5.7s]   added entry cites: ["evt-19"] (game 1 evt-11, game 2 evt-19)
+[+5.7s] PASS Memory: still pending approval (approval rules unchanged)
+[+5.7s] HISTORY LINKS ALL PASSED
+[+5.7s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":2,"peakOpenPages":1}
+
+# PASS (exit 0) in 5.7s | cpu 2.4s, peak memory 356 MB

@@ -1,0 +1,33 @@
+Mchezo gate targeted | run 20261112-073424-9397c002-13982
+  revision 9397c0024a4d7268bcce42c451361dfb6027bf8e (clean tree) | fingerprint 5dbab0f520a7 (496 files)
+  plan     4 steps: 1 fast/build, 2 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  81 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.03 for 3 worker(s) (measured, 68 run(s))
+  estimate this run: 1–4m (measured) · the same steps one after another: about 2m 37s · longest step check-spectrum ~1m 50s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.03 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93t-tgt/test-results/20261112-073424-9397c002-13982
+        start build-web on w1 (usually 6s)
+[ 1/4] PASS         5.5s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/4] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:33391 (pid 14098, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93t-tgt/test-results/20261112-073424-9397c002-13982/server-data/w1)
+  server   w2 http://localhost:36479 (pid 14099, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93t-tgt/test-results/20261112-073424-9397c002-13982/server-data/w2)
+        start check-spectrum on w1 (usually 1m 50s)
+        start check-tv-outage on w2 (usually 40s)
+[ 3/4] PASS        41.1s  check-tv-outage  w2
+── progress  3/4 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-spectrum 53s (w1)
+   remaining 0–3m · total 1–4m · done around 07:36–07:37 UTC (measured)
+── progress  3/4 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-spectrum 1m 53s (w1)
+   remaining 0–2m · total 2–4m · done around 07:36–07:37 UTC (measured)
+[ 4/4] PASS       114.7s  check-spectrum  w1
+
+PASSED (exit 0) | targeted | run 20261112-073424-9397c002-13982
+  4 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 2m 02s · step time 2m 42s (sum) · 3 workers, 44% busy · 1.33× the same steps run one after another
+           predicted 1–4m (about 1m 54s, measured) → actual 2m 02s (+7%)
+           longest  check-spectrum 1m 55s, check-tv-outage 41s, build-web 6s · the longest step is 94% of the wall time
+           machine  CPU mean 13%, peak 72% · memory available ≥ 14495 MB · load peak 1.66
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93t-tgt/test-results/20261112-073424-9397c002-13982/report.json

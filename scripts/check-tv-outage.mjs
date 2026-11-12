@@ -33,12 +33,28 @@ let port = 0;
 async function startServer(p = 0) {
   const env = { ...process.env, PORT: String(p), MCHEZO_DATA_DIR: DATA };
   delete env.NODE_ENV; delete env.MCHEZO_CONTENT_TEST_MODE;
-  srv = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { env, stdio: ["ignore", "pipe", "pipe"] });
-  let out = ""; srv.stdout.on("data", (d) => { out += d; }); srv.stderr.on("data", (d) => { out += d; });
-  for (let i = 0; i < 120; i++) { const m = /on http:\/\/localhost:(\d+)/.exec(out); if (m) return Number(m[1]); await sleep(250); }
-  throw new Error(`server did not start: ${out.slice(-300)}`);
+  const proc = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { env, stdio: ["ignore", "pipe", "pipe"] });
+  srv = proc; proc.out = "";
+  proc.stdout.on("data", (d) => { proc.out += d; }); proc.stderr.on("data", (d) => { proc.out += d; });
+  for (let i = 0; i < 120; i++) { const m = /on http:\/\/localhost:(\d+)/.exec(proc.out); if (m) return Number(m[1]); await sleep(250); }
+  throw new Error(`server did not start: ${proc.out.slice(-300)}`);
 }
-async function stopServer() { const s = srv; srv = null; if (!s) return; s.kill("SIGTERM"); await new Promise((r) => s.once("exit", r)); }
+/**
+ * Stops this driver's own server, never waiting without a bound: a server that already exited, or one still running
+ * STOP_MS after SIGTERM, is a FAIL that shows the server's own last output, then it is killed so the run can finish.
+ * (Full gate 20261112-064509-b668ee3c-28530 timed out here with nothing in its log.)
+ */
+const STOP_MS = 20_000;
+const tail = (s) => JSON.stringify(s.out.slice(-600));
+async function stopServer() {
+  const s = srv; srv = null; if (!s) return;
+  if (s.exitCode !== null || s.signalCode !== null) { check("the driver's server was still running when stopped", false, `it had already exited (${s.exitCode ?? s.signalCode}); its output: ${tail(s)}`); return; }
+  const exited = new Promise((r) => s.once("exit", () => r(true)));
+  s.kill("SIGTERM");
+  if (await Promise.race([exited, sleep(STOP_MS).then(() => false)])) return;
+  check(`the driver's server exits within ${STOP_MS / 1000} s of SIGTERM`, false, `its output: ${tail(s)}`);
+  s.kill("SIGKILL"); await exited;
+}
 port = await startServer();
 const BASE = () => `http://localhost:${port}`;
 async function api(path, body) {

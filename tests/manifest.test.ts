@@ -37,11 +37,11 @@ describe("the shipped manifests", () => {
     }
   });
 
-  it("every original game supports practice and official play; Stage 5's and Stage 9.1's new games are practice-only", () => {
+  it("every original game supports practice and official play; Stage 5's, Stage 9.1's and Stage 9.3's new games are practice-only", () => {
     // Stage 5: new games launch practice-only until the owner approves their
     // Cup scoring; the manifest and the server's policy must agree. Stage 9.1:
     // Jebena Rush too (casual rooms only).
-    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush"];
+    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush", "spectrum"];
     for (const m of GAME_MANIFESTS) {
       expect(m.features.practice).toBe(true);
       expect(m.features.official).toBe(!STAGE5_PRACTICE_ONLY.includes(m.id));
@@ -74,6 +74,8 @@ describe("the shipped manifests", () => {
       "draw-guess": "per-round",
       // Stage 9.1: sitting out leaves the match (the player is out from then).
       "jebena-rush": "whole-game",
+      // Stage 9.3: sitting out leaves the match (no future role; a guess already sent stays).
+      spectrum: "whole-game",
     };
     for (const m of GAME_MANIFESTS) {
       expect(m.features.abstention).toBe(expected[m.id]);

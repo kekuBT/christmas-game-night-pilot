@@ -1,0 +1,231 @@
+{
+  "runId": "20261112-064204-b668ee3c-24853",
+  "level": "targeted",
+  "startedAt": "2026-11-12T06:42:04.453Z",
+  "finishedAt": "2026-11-12T06:44:04.986Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93s-tgt",
+  "git": {
+    "head": "b668ee3ca4972be0523450c4bc16ed7678ea500a",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "82962a27787e68487ab72c29997c70c1e5f22bcc5c191da19aef22ee33b534d6",
+    "files": 496
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15510
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.1 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261112-064204-b668ee3c-24853/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 4.8,
+      "log": "./logs/01-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 6,
+      "startOffsetSec": 0.2,
+      "endOffsetSec": 5.1,
+      "cpuSec": 8.1,
+      "peakRssMB": 455,
+      "machine": {
+        "memAvailMinMB": 15054,
+        "cpuSaturatedSec": 0,
+        "samples": 5
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.7,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 5.1,
+      "endOffsetSec": 5.8,
+      "cpuSec": 0.2,
+      "peakRssMB": 75,
+      "machine": {
+        "memAvailMinMB": 15284,
+        "cpuSaturatedSec": 0,
+        "samples": 2
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-spectrum",
+      "kind": "browser",
+      "command": "node scripts/check-spectrum.mjs http://localhost:41725",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 113.9,
+      "log": "./logs/03-check-spectrum.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 104,
+      "startOffsetSec": 6.5,
+      "endOffsetSec": 120.4,
+      "cpuSec": 10.4,
+      "peakRssMB": 381,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14943,
+        "cpuSaturatedSec": 0,
+        "samples": 115
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 5
+      },
+      "failureKind": null
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 41725,
+      "pid": 24964,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93s-tgt/test-results/20261112-064204-b668ee3c-24853/server-data/w1",
+      "log": "./logs/server-w1.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 121,
+    "sumSec": 119,
+    "utilisation": 0.33,
+    "perWorkerBusySec": {
+      "w1": 119
+    },
+    "predicted": {
+      "low": 84,
+      "mid": 107,
+      "high": 196,
+      "confidence": "measured"
+    },
+    "contentionRatio": null,
+    "longest": [
+      {
+        "name": "check-spectrum",
+        "sec": 113.9
+      },
+      {
+        "name": "build-web",
+        "sec": 4.8
+      },
+      {
+        "name": "browser-preflight",
+        "sec": 0.7
+      }
+    ],
+    "backpressure": {
+      "waits": 0,
+      "seconds": 0
+    },
+    "system": {
+      "cpuPctMean": 11,
+      "cpuPctPeak": 59,
+      "memAvailMinMB": 14943,
+      "load1Peak": 0.95,
+      "cpuPctEvery10s": [
+        33,
+        5,
+        3,
+        5,
+        5,
+        5,
+        6,
+        4,
+        6,
+        13,
+        19,
+        3
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 1.4,
+        "peakRssMB": 130
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 6,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "check-spectrum",
+        "phase": "browser",
+        "estSec": 104,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 84.46117499999998,
+      "mid": 107.07075,
+      "high": 195.57719999999998,
+      "sequentialSec": 110.55,
+      "confidence": "measured",
+      "contention": 1.0345,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 41725,
+    "pid": 24964,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93s-tgt/test-results/20261112-064204-b668ee3c-24853/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93s-tgt/test-results/20261112-064204-b668ee3c-24853/web-dist"
+  }
+}

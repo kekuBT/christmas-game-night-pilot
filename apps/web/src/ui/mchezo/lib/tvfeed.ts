@@ -82,6 +82,17 @@ export function tvModeFor(latest: PublicGame | undefined, choice: "auto" | "lobb
   return "lobby";
 }
 
+/**
+ * Stage 9.3: the headline for any finished game. A cooperative game has one
+ * team result (outcome.team) and never a winner; every other game keeps its
+ * winner line from the recorded scores.
+ */
+export function resultLine(game: { rawScores?: Record<string, number>; outcome?: { team?: { total: number; max: number } } }, nameOf: (id: string) => string): string {
+  const team = game.outcome?.team;
+  if (team) return `Team result: ${team.total} out of ${team.max}`;
+  return winnerLine(game.rawScores, nameOf);
+}
+
 /** The headline for a finished game, from its recorded scores only. */
 export function winnerLine(scores: Record<string, number> | undefined, nameOf: (id: string) => string): string {
   const entries = Object.entries(scores ?? {});

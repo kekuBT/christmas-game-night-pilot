@@ -52,6 +52,8 @@ export function ShowResults(props: { game: PlayerGame; title: string; nameOf: (i
     {props.hero}
     <p className="show-kicker">🏆 Results</p>
     <h2>{props.title}</h2>
+    {/* Stage 9.3: a cooperative game's one team result (it has no per-player scores, so no winner). */}
+    {props.game.outcome?.team && <p className="reveal-winner" data-testid="show-team-result">Team result: {props.game.outcome.team.total} out of {props.game.outcome.team.max}</p>}
     {winners.length > 0 && <p className="reveal-winner">{winners.length > 1 ? `It's a tie! ${winners.join(" & ")}` : `${winners[0]} wins this game!`}</p>}
     <ol className="reveal-list">
       {scores.map(([pid, v], i) => {

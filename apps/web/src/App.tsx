@@ -27,6 +27,7 @@ import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } fro
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
 import { JebenaHeartsChoice, JebenaReview, JebenaTv, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
+import { MchezoSpectrum, MchezoSpectrumResults, SpectrumReview, SpectrumTv, SpectrumTvFinal, TeamResultsHero } from "./components/mchezo/MchezoSpectrum.js";
 import { lineupLine, tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
 import { ordinal } from "./ui/mchezo/lib/standings.js";
 import { CaptionTv, MchezoCaption, MchezoCaptionResults } from "./components/mchezo/MchezoCaption.js";
@@ -1063,9 +1064,13 @@ export function App() {
               : g.gameId === "draw-guess" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><DrawTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               // Stage 9.1: Jebena Rush draws its own turn clock (the turn, not the match).
               : g.gameId === "jebena-rush" ? <div className="mz-tvshow-game"><JebenaTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
+              // Stage 9.3: Spectrum draws its own phase clock (clue, guesses, next round).
+              : g.gameId === "spectrum" ? <div className="mz-tvshow-game"><SpectrumTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               : null}
           renderFinal={(g) => g.gameId === "word-connections"
             ? <div className="mz-tvshow-game" data-testid="mz-cx-tv"><ConnectionsTv game={g} title={titleOf(g.gameId)} players={feed.players} /></div>
+            // Stage 9.3: one team result, never standings.
+            : g.gameId === "spectrum" ? <div className="mz-tvshow-game"><SpectrumTvFinal game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : null}
           renderReview={(g) => g.gameId === "caption-clash"
             ? <div className="mz-tvshow-game" data-testid="mz-cap-tv"><CaptionTv game={g} /></div>
@@ -1073,6 +1078,7 @@ export function App() {
             : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><PulseReview game={g} /></div>
             : g.gameId === "draw-guess" ? <div className="mz-tvshow-game"><DrawReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "jebena-rush" ? <div className="mz-tvshow-game"><JebenaReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
+            : g.gameId === "spectrum" ? <div className="mz-tvshow-game"><SpectrumReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : tvAnswers(g)}
         />
       </MchezoProvider>
@@ -1335,9 +1341,12 @@ export function App() {
   // recorded scores and this player's own participation (lib/celebrate.ts),
   // so every phone tells the same story.
   const resultsHero = (g: PlayerGame, pub?: PublicGame) => {
-    const scores = pub?.rawScores ?? g.rawScores ?? {};
     const title = titleFor(g.gameId, games);
     const official = pub?.official ?? g.official ?? false;
+    // Stage 9.3: a cooperative game's hero is its one team result: no winner, place, "you won/missed" or confetti.
+    const team = g.outcome?.team ?? pub?.outcome?.team;
+    if (team) return <TeamResultsHero team={team} gameId={g.gameId} title={title} official={official} roomReason={g.outcome?.reason ?? pub?.outcome?.reason} />;
+    const scores = pub?.rawScores ?? g.rawScores ?? {};
     const story = resultsStory({
       gameInstanceId: g.id, title, official, casual: proj?.roomKind === "casual", scores, nameOf,
       youId: playerId ?? undefined,
@@ -1404,6 +1413,9 @@ export function App() {
   // Stage 9.1 (practice-only, casual rooms).
   const jebenaPlaying = playingGame?.gameId === "jebena-rush";
   const jebenaFinished = latestFinished?.gameId === "jebena-rush";
+  // Stage 9.3 (cooperative, casual rooms).
+  const spectrumPlaying = playingGame?.gameId === "spectrum";
+  const spectrumFinished = latestFinished?.gameId === "spectrum";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -1595,6 +1607,12 @@ export function App() {
     const gameOn = roomGames.some((g) => g.status === "playing" || g.status === "briefing");
     const lastDone = gameOn ? undefined : roomGames.filter((g) => g.status === "finished").at(-1);
     const lastGame = lastDone ? (() => {
+      // Stage 9.3: a cooperative game is summarised by its one team result, never a winner or a place.
+      const team = lastDone.outcome?.team;
+      if (team) {
+        const inIt = !!playerId && lastDone.players.includes(playerId);
+        return { title: titleFor(lastDone.gameId, games), mode: lastDone.official ? "official" as const : "practice" as const, headline: `Team result: ${team.total} out of ${team.max}`, yourLine: inIt ? "You played on the team." : "You weren’t in this one." };
+      }
       const scores = lastDone.rawScores ?? {};
       const mineScore = playerId ? scores[playerId] : undefined;
       const n = Object.keys(scores).length;
@@ -1765,6 +1783,21 @@ export function App() {
     return (
       <MchezoProvider theme={theme} {...motion}>
         <MchezoJebenaResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Jebena Rush"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
+      </MchezoProvider>
+    );
+  }
+  // Stage 9.3: Spectrum. Its own phase clock is on screen (clue, guesses, next round).
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && spectrumPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <MchezoSpectrum game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Spectrum"} intent={sendAction} error={err || undefined} landed={sendLanded} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && spectrumFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <MchezoSpectrumResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Spectrum"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }

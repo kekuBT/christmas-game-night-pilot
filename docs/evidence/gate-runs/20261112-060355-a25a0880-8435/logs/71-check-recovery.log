@@ -1,0 +1,27 @@
+$ node scripts/check-recovery.mjs http://localhost:33273
+# timeout 600s | worker w3 | server http://localhost:33273 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93r-full/test-results/20261112-060355-a25a0880-8435/server-data/w3)
+
+[+3.3s] PASS Bea gets a recovery code
+[+3.7s] PASS touch target: 'I’ve saved it' ≥ 44px
+[+5.2s] PASS 2. a wrong code gets a plain error
+[+5.2s] PASS 2. the wrong code changed nothing (old tab still in)
+[+5.3s] PASS 1. recovery shows a fresh code
+[+5.7s] PASS 1. the new device is back in Bea's seat
+[+5.7s] PASS 1. no duplicate seat
+[+5.7s] PASS 1. the old tab is told its seat moved
+[+6.1s] PASS 1. the old tab's credential is really dead (server says 401) — 401
+[+6.1s] PASS 1. after OK the old tab is back at the start screen (Home)
+[+6.1s] PASS 1. the room sees a notice
+[+8.6s] PASS 3. Cal's new device shows a match code
+[+8.7s] PASS 3. the host sees the request with the same number
+[+9.0s] PASS 3. approving needs a second, deliberate tap
+[+10.7s] PASS 3. Cal's new device gets the seat and a fresh code
+[+10.7s] PASS 3. no Back button while the new code is shown
+[+11.1s] PASS 3. same seat as before
+[+11.1s] PASS 3. the room is told who restored the seat
+[+11.1s] PASS 3. the request card is gone
+[+11.1s] PASS no horizontal overflow on the recovery screens
+[+11.2s] RECOVERY ALL PASSED
+[+11.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":4}
+
+# PASS (exit 0) in 11.2s | cpu 2.6s, peak memory 275 MB

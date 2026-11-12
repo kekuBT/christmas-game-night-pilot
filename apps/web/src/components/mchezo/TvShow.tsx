@@ -20,7 +20,7 @@
  */
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { GameClock, PlayerToken, TVLeaderboard, TVRing, TVStage, Wordmark, rankStandings } from "../../ui/mchezo/index.js";
-import { lineupLine, TV_MODE_LABEL, tvModeFor, winnerLine, type TvFeed, type TvMode } from "../../ui/mchezo/lib/tvfeed.js";
+import { lineupLine, resultLine, TV_MODE_LABEL, tvModeFor, winnerLine, type TvFeed, type TvMode } from "../../ui/mchezo/lib/tvfeed.js";
 import { toMzPlayers } from "./adapters.js";
 import type { PublicGame, RegistryGame } from "../../types.js";
 
@@ -57,6 +57,9 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
   const nameOf = (id: string) => feed.players.find((p) => p.id === id)?.displayName ?? "A player";
   const review = latest && mode !== "live" && latest.status === "finished" ? renderReview?.(latest) ?? null : null;
   const game = mode === "lobby" ? undefined : latest;
+  // Stage 9.3: a cooperative game's final view is its team result, never "standings".
+  const finalLabel = latest?.outcome?.team ? "Team result" : TV_MODE_LABEL.final;
+  const modeLabel = mode === "final" ? finalLabel : TV_MODE_LABEL[mode];
 
   return (
     <div className={`mz-tvshow${paused ? " mz-tvshow--paused" : ""}`} data-testid="tv-show" data-mode={mode} data-game={game?.gameId ?? ""}>
@@ -64,7 +67,7 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
         <header className="mz-tvshow-top">
           <div className="mz-tvshow-top__left"><Wordmark size={34} />{game && <span className="mz-tvshow-title">{titleOf(game.gameId)}</span>}</div>
           <div className="mz-tvshow-top__mid">
-            <span className={`mz-tvshow-mode mz-tvshow-mode--${mode}`} data-testid="tv-mode" data-mode={mode}>{mode === "live" && <i aria-hidden="true" />}{TV_MODE_LABEL[mode]}</span>
+            <span className={`mz-tvshow-mode mz-tvshow-mode--${mode}`} data-testid="tv-mode" data-mode={mode}>{mode === "live" && <i aria-hidden="true" />}{modeLabel}</span>
             {game && <span className={`mz-tvshow-chip mz-tvshow-chip--${game.official ? "official" : "practice"}`}>{modeWord(game.official, feed.casual)}</span>}
           </div>
           <div className="mz-tvshow-top__right">
@@ -86,7 +89,7 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
         <footer className="mz-tvshow-foot">
           <span className="mz-tvshow-privacy">Public view: no secret words, private answers, or answers that can still be played.</span>
           <nav className="mz-tvshow-director" aria-label="TV controls">
-            {latest?.status === "finished" && <button type="button" className="mz-chip-btn" aria-pressed={mode === "final"} data-testid="tv-dir-final" onClick={() => setChoice("final")}>Final standings</button>}
+            {latest?.status === "finished" && <button type="button" className="mz-chip-btn" aria-pressed={mode === "final"} data-testid="tv-dir-final" onClick={() => setChoice("final")}>{finalLabel}</button>}
             {latest?.status === "finished" && review && <button type="button" className="mz-chip-btn" aria-pressed={mode === "review"} data-testid="tv-dir-review" onClick={() => setChoice("review")}>Post-game review</button>}
             {latest?.status === "finished" && <button type="button" className="mz-chip-btn" aria-pressed={mode === "lobby"} data-testid="tv-dir-lobby" onClick={() => setChoice("lobby")}>Lobby view</button>}
             <button type="button" className="mz-chip-btn" aria-pressed={paused} data-testid="tv-dir-pause" onClick={() => setPaused((p) => !p)}>{paused ? "Resume animations" : "Pause animations"}</button>
@@ -174,7 +177,7 @@ function TvLobby({ feed, titleOf, nameOf, registry }: { feed: TvFeed; titleOf: (
         {finished.length > 0 && (
           <section className="mz-tvshow-card" data-testid="tv-recent">
             <span className="mz-tv-kicker">Tonight so far</span>
-            <ol className="mz-tvshow-recent">{finished.map((g) => <li key={g.id} data-game={g.gameId}><b>{titleOf(g.gameId)}</b> · {modeWord(g.official, feed.casual)} · finished — {winnerLine(g.rawScores, nameOf)}</li>)}</ol>
+            <ol className="mz-tvshow-recent">{finished.map((g) => <li key={g.id} data-game={g.gameId}><b>{titleOf(g.gameId)}</b> · {modeWord(g.official, feed.casual)} · finished — {resultLine(g, nameOf)}</li>)}</ol>
           </section>
         )}
       </div>
@@ -207,6 +210,25 @@ export function TvLive({ game, title, nameOf, casual }: { game: PublicGame; titl
 /* ------------------------------------------------------------- final */
 
 function TvFinal({ game, title, feed, nameOf, titleOf }: { game: PublicGame; title: string; feed: TvFeed; nameOf: (id: string) => string; titleOf: (id: string) => string }) {
+  // Stage 9.3: a cooperative game's final view is its one team result (no winner, no standings).
+  if (game.outcome?.team) return <TvTeamFinal game={game} title={title} feed={feed} titleOf={titleOf} />;
+  return <TvCompetitiveFinal game={game} title={title} feed={feed} nameOf={nameOf} titleOf={titleOf} />;
+}
+
+function TvTeamFinal({ game, title, feed, titleOf }: { game: PublicGame; title: string; feed: TvFeed; titleOf: (id: string) => string }) {
+  const team = game.outcome!.team!;
+  const flow = lineupLine(feed, titleOf);
+  const next = feed.upNext;
+  return (
+    <section className="mz-tvshow-final" data-testid="tv-team-final">
+      <p className="mz-tvshow-winner" data-testid="tv-team-result">Team result: {team.total} out of {team.max}</p>
+      <p className="mz-tvshow-line">{title} · {modeWord(game.official, feed.casual)} · one shared score for everyone who played</p>
+      <p className="mz-tvshow-next" data-testid="tv-next" data-flow={flow?.kind ?? ""}>{flow ? flow.text : next ? `Next up: ${titleOf(next.gameId)} · ${modeWord(next.official, feed.casual)}. The host starts it from the lobby.` : "The host picks the next game from the lobby."}</p>
+    </section>
+  );
+}
+
+function TvCompetitiveFinal({ game, title, feed, nameOf, titleOf }: { game: PublicGame; title: string; feed: TvFeed; nameOf: (id: string) => string; titleOf: (id: string) => string }) {
   const mz = useMemo(() => toMzPlayers(feed.players), [feed.players]);
   const scores = useMemo(() => Object.entries(game.rawScores ?? {}).map(([playerId, score]) => ({ playerId, score })), [game.rawScores]);
   const ranked = rankStandings(scores, mz);

@@ -23,11 +23,13 @@
 import type { PhaseKind } from "../../server/lifecycle.js";
 import { SPECTRUM_PACK_VERSION, SPECTRUM_PAIRS, type SpectrumPair } from "./packs/spectrum-pairs.js";
 import { moduleRng, seededShuffle, type GameModule, type ModuleContext } from "./types.js";
+import { SPECTRUM_PHASE_MS } from "./spectrum-timing.js";
+import type { TeamResult } from "../../shared/teamResult.js";
 
 export const SPECTRUM_RULES_VERSION = 1;
 export const SPECTRUM_ROUNDS = 4;
-/** One source for the phase durations (the integration slice's policy uses these). */
-export const SPECTRUM_PHASE_MS = { clue: 60_000, guess: 45_000, reveal: 8_000 } as const;
+/** One source for the phase durations, shared with the room's lifecycle policy (spectrum-timing.ts). */
+export { SPECTRUM_PHASE_MS };
 export const SPECTRUM_CLUE_MAX = 80;
 export const SPECTRUM_TARGET = { min: 10, max: 90 } as const;
 /** Points for the team, by distance from the target (first band that fits). */
@@ -188,13 +190,34 @@ function phaseIsDue(s: SpectrumState, ctx: ModuleContext): boolean {
 const CLUE_KEYS = new Set(["round", "text", "phaseKey"]);
 const GUESS_KEYS = new Set(["round", "value", "phaseKey"]);
 
-/** The single authoritative team result (spec §8): one total out of 40, the revealed rounds, the end reason; no player named. */
-export function spectrumTeamResult(s: SpectrumState) {
+/**
+ * The single authoritative team result (9.2 spec §8; 9.3 §3): one total out
+ * of 40, the revealed rounds (pair labels, clue, target, team guess, points,
+ * a count of guesses) and the module's end reason. It names no player and
+ * holds no individual guess. The room records it as `outcome.team`.
+ */
+export function spectrumTeamResult(s: SpectrumState): TeamResult {
   return {
+    kind: "spectrum",
     total: s.total,
     max: SPECTRUM_MAX_POINTS,
+    roundsPlanned: SPECTRUM_ROUNDS,
     end: s.end,
-    rounds: s.rounds.filter((r) => r.outcome !== null).map((r, i) => ({ roundNo: i + 1, pairId: r.pairId, ...r.outcome! })),
+    rounds: s.rounds.filter((r) => r.outcome !== null).map((r, i) => {
+      const p = pairById(r.pairId);
+      const o = r.outcome!;
+      return {
+        roundNo: i + 1,
+        pair: { left: p.left, right: p.right, meaning: p.meaning },
+        clue: r.clue,
+        reason: o.reason,
+        target: o.target,
+        aggregate: o.aggregate,
+        distance: o.distance,
+        points: o.points,
+        guesses: o.guesses,
+      };
+    }),
   };
 }
 
@@ -327,6 +350,8 @@ export const spectrumModule: GameModule<SpectrumState> = {
   // roster player, sat-out players included. Never sum the copies or read them as individual achievement;
   // spectrumTeamResult is the result. A cooperative results branch is required before registration.
   scores: (s, players) => Object.fromEntries(players.map((p) => [p, s.total])),
+  // Stage 9.3: the authoritative result the room records as outcome.team.
+  teamResult: (s) => spectrumTeamResult(s),
   participation(s, players) {
     const started = s.rounds.slice(0, s.end ? s.rounds.filter((r) => r.giver !== null).length : s.round + 1);
     const participation = Object.fromEntries(players.map((p) => {

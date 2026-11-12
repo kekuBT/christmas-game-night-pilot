@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261112-064509-b668ee3c-28530
+  87 passed, 0 failed, 1 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  TIMEOUT   check-tv-outage (w2) [timeout]: exceeded 600s; process group killed
+  timing   wall 38m 17s · step time 1h 44m (sum) · 3 workers, 91% busy · 2.73× the same steps run one after another
+           predicted 24–57m (about 31m 45s, measured) → actual 38m 17s (+21%)
+           longest  check-tv-outage 10m 03s, e2e-chromium 8m 20s, check-f5 7m 39s · the longest step is 26% of the wall time
+           machine  CPU mean 30%, peak 100% · memory available ≥ 13041 MB · load peak 6.4 · backpressure 5 wait(s), 51s
+           contention ×1.032 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93s-full/test-results/20261112-064509-b668ee3c-28530/report.json

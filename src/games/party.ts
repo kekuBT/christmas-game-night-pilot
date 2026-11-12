@@ -98,7 +98,7 @@ export function lineupMinutes(items: readonly Pick<PartyItem, "minutes">[]): num
  * Stage 9.1: games Quick Party never adds by itself (docs/stage9/stage91.md
  * §3). Jebena Rush is new and casual-only; a host starts it from the library.
  */
-export const NOT_IN_QUICK_PARTY: ReadonlySet<string> = new Set(["jebena-rush"]);
+export const NOT_IN_QUICK_PARTY: ReadonlySet<string> = new Set(["jebena-rush", "spectrum"]);
 
 export function partyPool(expectedPlayers: number, opts: { excludeIds?: readonly string[]; manifests?: readonly GameManifest[] } = {}): PartyItem[] {
   if (!isPartyGroupSize(expectedPlayers)) throw new Error(`party: group size must be a whole number from ${PARTY_MIN_PLAYERS} to ${PARTY_MAX_PLAYERS}`);

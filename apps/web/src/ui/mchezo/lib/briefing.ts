@@ -71,20 +71,31 @@ const PHASE_WORDS: Record<string, string> = {
   vote: "voting",
   round: "each round",
   clue: "giving clues",
-  guess: "the impostor's guess",
+  guess: "guessing",
   predict: "predicting and voting",
   reveal: "each reveal",
   draw: "each drawing",
   turn: "each turn",
 };
 
-/** The real time limits, from the lifecycle policy the server enforces. */
-export function timingLines(lifecycle?: { gameWindowMs: number; phaseMs?: Partial<Record<string, number>> }): string[] {
+/**
+ * Stage 9.3 (review 6815042876): a phase kind can mean different things in
+ * different games ("guess" is the impostor's one guess in Impostor, but
+ * everyone's guesses in Spectrum), so a game may name its own phases.
+ */
+const GAME_PHASE_WORDS: Record<string, Record<string, string>> = {
+  "impostor": { guess: "the impostor's guess" },
+  "spectrum": { clue: "the clue", guess: "everyone's guesses", reveal: "each reveal" },
+};
+
+/** The real time limits, from the lifecycle policy the server enforces, in this game's own words. */
+export function timingLines(lifecycle?: { gameWindowMs: number; phaseMs?: Partial<Record<string, number>> }, gameId?: string): string[] {
   if (!lifecycle) return [];
   const lines: string[] = [];
   const phases = Object.entries(lifecycle.phaseMs ?? {}).filter(([, ms]) => typeof ms === "number" && ms > 0) as [string, number][];
   // Whole seconds, rounded down: a phase may carry a fraction of a second of network grace (Jebena Rush: 10 s + 0.5 s).
-  for (const [k, ms] of phases) lines.push(`${Math.floor(ms / 1000)} seconds for ${PHASE_WORDS[k] ?? k}.`);
+  const words = (gameId && GAME_PHASE_WORDS[gameId]) || {};
+  for (const [k, ms] of phases) lines.push(`${Math.floor(ms / 1000)} seconds for ${words[k] ?? PHASE_WORDS[k] ?? k}.`);
   const min = Math.round(lifecycle.gameWindowMs / 60_000);
   lines.push(min >= 1 ? `The whole game ends by itself after about ${min} minute${min === 1 ? "" : "s"}.` : `The whole game ends by itself after ${Math.round(lifecycle.gameWindowMs / 1000)} seconds.`);
   return lines;
@@ -153,6 +164,18 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Each answer counts once. Time runs out: you lose a heart, and a new category starts.",
       "No hearts left and you're out. The last player with hearts keeps the jebena.",
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or hearts back.",
+    ],
+  },
+  // Stage 9.3 (docs/stage9/stage93.md §4): one team, one score.
+  "spectrum": {
+    objective: "One team, one score: find the secret spot on the scale together.",
+    steps: [
+      "Four rounds. Each round shows a scale with two ends, like Cold to Hot, from 0 to 100.",
+      "Each round one player gives the clue, and the role moves round the room. Only the clue-giver sees the secret target on the scale.",
+      "Give a clue, not the target number: a word or a few that sit at about that spot. 60 seconds.",
+      "Everyone else places a guess from 0 to 100 and sends it: 45 seconds. A guess can't be changed once it's sent.",
+      "The team's guess is the middle of everyone's guesses. Within 5 of the target scores 10, within 10 scores 7, within 20 scores 4: one shared score out of 40.",
+      "No clue in time skips the round for 0. Leaving hands your role on. The clock never stops, and only guesses that are sent count.",
     ],
   },
   "draw-guess": {

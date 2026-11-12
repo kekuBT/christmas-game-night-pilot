@@ -66,6 +66,15 @@ const EXACT: Record<string, string> = {
   DRAWING_FULL: "The drawing is full. Clear or undo to make room.",
   PAYLOAD_TOO_LARGE: "That was too much at once. Try again.",
   SWAP_NOT_AVAILABLE: "You can only change the word once, before drawing or guessing starts.",
+  // Stage 9.3 (Spectrum).
+  INVALID_CLUE: "A clue needs 1 to 80 characters. Give a clue, not the target number.",
+  NOT_CLUE_GIVER: "Someone else is giving the clue this round.",
+  GIVER_CANNOT_GUESS: "You gave the clue this round, so your team does the guessing.",
+  NOT_A_GUESSER: "You're watching this round.",
+  INVALID_GUESS: "A guess is a whole number from 0 to 100.",
+  STALE_ROUND: "That round has moved on, so it didn't count. Your phone will catch up in a moment.",
+  WRONG_PHASE: "That round has moved on, so it didn't count. Your phone will catch up in a moment.",
+  SAT_OUT: "You left this game. Watch the rest!",
   // HTTP errors (src/server/room.ts startGame / skipTimedOutGame / join).
   "A game is already in progress":
     "A game is already running — finish it or wait for the host.",

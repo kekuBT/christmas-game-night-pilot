@@ -133,8 +133,18 @@ export function CasualResults({ game, publicGame, players, playerId, title, hero
     <main className="mz-screen" aria-label={`${title} results`} data-testid="casual-results" data-game-id={game.id}>
       {hero}
       {next /* right under the result heading, before the standings and the answers (review 6778921208) */}
-      <GameHeader title={title} objective="Final standings" accent={3} />
-      {rows.length > 0 ? <ScoreList rows={rows} /> : <p className="mz-foot">No scores were recorded for this game.</p>}
+      {/* Stage 9.3: a cooperative game has one team result, never standings. */}
+      {game.outcome?.team ? (
+        <>
+          <GameHeader title={title} objective="Team result" accent={3} />
+          <p className="mz-foot" data-testid="casual-team-result">Team result: {game.outcome.team.total} out of {game.outcome.team.max} · one shared score for everyone who played.</p>
+        </>
+      ) : (
+        <>
+          <GameHeader title={title} objective="Final standings" accent={3} />
+          {rows.length > 0 ? <ScoreList rows={rows} /> : <p className="mz-foot">No scores were recorded for this game.</p>}
+        </>
+      )}
       <OutcomeSummary gameId={game.gameId} outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} youChoseSatOut={game.abstained === true} />
       {review && review.length > 0 && <AnswerReview rows={review} title="Your answers" />}
       <div className="mz-grow" />

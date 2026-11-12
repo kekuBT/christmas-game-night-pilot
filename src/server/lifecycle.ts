@@ -20,6 +20,9 @@
  * disconnected player can come back and keep playing until the deadline.
  */
 
+import { SPECTRUM_PHASE_MS } from "../games/modules/spectrum-timing.js";
+import type { TeamResult } from "../shared/teamResult.js";
+
 export type TimingModel = "game-deadline" | "phased" | "turns";
 
 /** Phase kinds a phased game's clock can be keyed by (Stage 5 adds predict, reveal and draw). */
@@ -85,6 +88,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
     model: "game-deadline", gameWindowMs: 12 * MIN, phaseMs: { turn: 10 * SEC + 500 },
     officialEligible: false, practiceOnlyReason: "Jebena Rush is new: practice-only, in casual rooms.", unit: "turns",
   },
+  // Stage 9.3 (docs/stage9/stage93.md §2): clue → guess → reveal, four rounds, the
+  // durations from the module's own constant; 10 minutes is a backstop (4 rounds ≤ 452 s).
+  "spectrum": {
+    model: "phased", gameWindowMs: 10 * MIN, phaseMs: { ...SPECTRUM_PHASE_MS },
+    officialEligible: false, practiceOnlyReason: "Spectrum is cooperative and practice-only: one team score, in casual rooms.", unit: "rounds",
+  },
 });
 
 export function policyFor(gameId: string): GamePolicy {
@@ -133,4 +142,9 @@ export interface GameOutcome {
   /** Phased games: how many questions/rounds were fully completed. */
   completedUnits?: number;
   totalUnits?: number;
+  /**
+   * Stage 9.3: a cooperative game's one shared result (src/shared/teamResult.ts).
+   * Present exactly when the game is cooperative; then no per-player score is projected.
+   */
+  team?: TeamResult;
 }
