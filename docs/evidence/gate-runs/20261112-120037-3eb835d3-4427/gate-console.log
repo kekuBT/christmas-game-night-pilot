@@ -1,0 +1,30 @@
+Mchezo gate targeted | run 20261112-120037-3eb835d3-4427
+  revision 3eb835d31ae4e3961d94ba3034790f6873179e0a (clean tree) | fingerprint 3a50a9636823 (500 files)
+  plan     4 steps: 1 fast/build, 2 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.2 GB available)
+  history  89 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 72 run(s))
+  estimate this run: 1–3m (measured) · the same steps one after another: about 2m 52s · longest step check-briefing ~1m 30s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r-tgt/test-results/20261112-120037-3eb835d3-4427
+        start build-web on w1 (usually 7s)
+[ 1/4] PASS         5.6s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/4] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:37963 (pid 4541, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r-tgt/test-results/20261112-120037-3eb835d3-4427/server-data/w1)
+  server   w2 http://localhost:38857 (pid 4542, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r-tgt/test-results/20261112-120037-3eb835d3-4427/server-data/w2)
+        start check-briefing on w1 (usually 1m 30s)
+        start check-jebena-rush on w2 (usually 1m 15s)
+── progress  2/4 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-briefing 53s (w1), check-jebena-rush 53s (w2)
+   remaining 0–2m · total 1–3m · done around 12:01–12:03 UTC (measured)
+[ 3/4] PASS          93s  check-briefing  w1
+[ 4/4] PASS        94.2s  check-jebena-rush  w2
+
+PASSED (exit 0) | targeted | run 20261112-120037-3eb835d3-4427
+  4 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 42s · step time 3m 13s (sum) · 3 workers, 64% busy · 1.89× the same steps run one after another
+           predicted 1–3m (about 1m 33s, measured) → actual 1m 42s (+10%)
+           longest  check-jebena-rush 1m 34s, check-briefing 1m 33s, build-web 6s · the longest step is 92% of the wall time
+           machine  CPU mean 27%, peak 70% · memory available ≥ 14363 MB · load peak 1.35
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r-tgt/test-results/20261112-120037-3eb835d3-4427/report.json

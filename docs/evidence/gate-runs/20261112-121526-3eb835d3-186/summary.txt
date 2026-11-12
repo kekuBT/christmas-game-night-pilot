@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | fast | run 20261112-121526-3eb835d3-186
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w2) [functional]: [31m[1m[7m FAIL [27m[22m[39m tests/stage62-solo-shelf.test.ts[2m > [22mthe solo session across games, and a join whose reply was lost[2m > [22mMath → Pulse → Connections → Math: one room, ea
+  timing   wall 54s · step time 1m 36s (sum) · 3 workers, 59% busy · 1.78× the same steps run one after another
+           predicted 28–70s (about 37s, measured) → actual 54s (+46%)
+           longest  unit-tests 41s, lint 21s, typecheck-server 13s · the longest step is 76% of the wall time
+           machine  CPU mean 82%, peak 99% · memory available ≥ 14118 MB · load peak 3.56
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r-fast/test-results/20261112-121526-3eb835d3-186/report.json

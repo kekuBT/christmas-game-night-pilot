@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:41927
+# timeout 600s | worker w1 | server http://localhost:41927 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r3-full/test-results/20261112-130723-36e222fb-785/server-data/w1)
+
+[+22.1s] PASS reveal opens on the first question phase — question:0
+[+22.1s] PASS question phase hides the correct answer — count=0
+[+22.4s] PASS Reveal answer steps into the first reveal — reveal:1
+[+22.4s] PASS reveal phase shows the correct answer — count=1
+[+22.4s] PASS reveal phase separates this question from the game total
+[+22.4s] PASS Next question steps into the second question phase — question:2
+[+22.4s] PASS second question phase hides the correct answer again — count=0
+[+22.5s] PASS Q10 jump lands on the last question phase — question:18
+[+22.6s] PASS last reveal reached — reveal:19
+[+22.6s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+22.6s] PASS finale shows the standings list
+[+22.7s] PASS auto-play starts back at the first question — question:0
+[+30.7s] PASS auto-play advances a step within 8s — reveal:1
+[+38.8s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+39.7s] PASS TV walk opens on a question — Which country gives London a Christmas t
+[+43.7s] PASS TV walk advances to the reveal stage
+[+48.8s] PASS TV walk advances to the second question — What type of animal is a frog?
+[+48.8s] PASS TV manual jump reaches the leaderboard
+[+48.9s] REVEAL ALL PASSED
+[+48.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 48.9s | cpu 3.5s, peak memory 261 MB

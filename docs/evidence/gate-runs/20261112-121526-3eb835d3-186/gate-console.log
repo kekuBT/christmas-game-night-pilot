@@ -1,0 +1,42 @@
+Mchezo gate fast | run 20261112-121526-3eb835d3-186
+  revision 3eb835d31ae4e3961d94ba3034790f6873179e0a (clean tree) | fingerprint 3a50a9636823 (500 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.2 GB available)
+  history  90 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 72 run(s))
+  estimate this run: 28–70s (measured) · the same steps one after another: about 1m 24s · longest step unit-tests ~35s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r-fast/test-results/20261112-121526-3eb835d3-186
+        start typecheck-server on w1 (usually 12s)
+        start typecheck-web on w2 (usually 12s)
+        start lint on w3 (usually 17s)
+[ 1/5] PASS        12.3s  typecheck-web  w2
+        start unit-tests on w2 (usually 35s)
+[ 2/5] PASS        13.4s  typecheck-server  w1
+        start build-web on w1 (usually 7s)
+[ 3/5] PASS        20.6s  lint  w3
+[ 4/5] PASS         8.5s  build-web  w1
+[ 5/5] FAIL        40.9s  unit-tests  w2  [31m[1m[7m FAIL [27m[22m[39m tests/stage62-solo-shelf.test.ts[2m > [22mthe solo session across games, and a join whose reply was lost[2m > [22mMath → 
+      | 
+      | [36m [2m❯[22m tests/stage62-solo-shelf.test.ts:[2m442:35[22m[39m
+      |     [90m440| [39m      [35mconst[39m s [33m=[39m [34msession[39m()[33m;[39m [90m// a new screen per game, as the app mounts[39m…
+      |     [90m441| [39m      [35mawait[39m s[33m.[39m[34mstart[39m(id)[33m;[39m
+      |     [90m442| [39m      [34mexpect[39m(s[33m.[39mcurrent[33m.[39mphase[33m,[39m id)[33m.[39m[34mtoBe[39m([32m"playing"[39m)[33m;[39m
+      |     [90m   | [39m                                  [31m^[39m
+      |     [90m443| [39m      [35mconst[39m gid [33m=[39m s[33m.[39mcurrent[33m.[39mgameInstanceId[33m![39m[33m;[39m
+      |     [90m444| [39m      gids[33m.[39m[34mpush[39m(gid)[33m;[39m
+      | 
+      | [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+      | 
+      | [2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m122 passed[39m[22m[90m (123)[39m
+      | [2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1599 passed[39m[22m[90m (1600)[39m
+      | [2m   Start at [22m 12:15:39
+      | [2m   Duration [22m 40.14s[2m (transform 4.42s, setup 0ms, collect 21.65s, tests 65.60s, environment 29ms, prepare 9.53s)[22m
+
+FAILED (exit 1) | fast | run 20261112-121526-3eb835d3-186
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w2) [functional]: [31m[1m[7m FAIL [27m[22m[39m tests/stage62-solo-shelf.test.ts[2m > [22mthe solo session across games, and a join whose reply was lost[2m > [22mMath → Pulse → Connections → Math: one room, ea
+  timing   wall 54s · step time 1m 36s (sum) · 3 workers, 59% busy · 1.78× the same steps run one after another
+           predicted 28–70s (about 37s, measured) → actual 54s (+46%)
+           longest  unit-tests 41s, lint 21s, typecheck-server 13s · the longest step is 76% of the wall time
+           machine  CPU mean 82%, peak 99% · memory available ≥ 14118 MB · load peak 3.56
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r-fast/test-results/20261112-121526-3eb835d3-186/report.json

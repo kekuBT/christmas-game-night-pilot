@@ -1226,3 +1226,15 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Reproduced deterministically:** a temporary 4.5 s gap between the helper's two calls (`docs/evidence/stage101-local/tv-note-race.patch`) fails the check with the gate's exact message.
   - **The fix:** one `evaluate` returns the note's state, or `null`. The same 4.5 s delay placed before that single read passes, and a normal run passes all 14 checks. What the driver checks is unchanged.
   - **Alternative rejected:** a short `getAttribute` timeout. It narrows the window but keeps the race, and a timeout of 0 means no timeout in Playwright.
+- **D-S101-12 `check-jebena-rush` checks the out screen whichever turn takes the last cup, and fails if it never does.**
+  - **Trigger:** full gate `20261112-130723-36e222fb-785` on `36e222f` passed 88/88, but its Jebena run had no "is out and watches the rest" checks and no out screenshot.
+  - **Root cause (my R2 driver addition):** Baraka had lost a cup earlier in that run, so his R2 short-drop turn took his last cup. That branch, like Amina's offline turn, ends with `continue`, skipping the out block after the ordinary timeout. A section that silently doesn't run is a coverage hole, even in a green run.
+  - **The fix:**
+    - One `outChecks()` runs from all three branches.
+    - A last cup lost while the driver had cut that phone must show broken without breaking (S101-R2); a live one must break on the player's own row, as before.
+    - With three players someone always goes out before the end, so the driver fails if the match ends without these checks having run.
+  - **Verified:**
+    - A temporary switch holding Baraka's short drop until his last cup runs the resync form, ALL PASS (`docs/evidence/stage101-local/`).
+    - A normal run passes, 162 checks.
+    - In targeted `20261112-134621-0516e3ea-17341`, Amina went out first and the checks ran on her phone.
+  - **Alternative rejected:** moving the short drop to a turn where Baraka can't go out. Which turn that is depends on earlier losses, so the R2 reconnect check could itself stop running.

@@ -1,0 +1,66 @@
+$ node scripts/check-tv-reveal.mjs http://localhost:39883
+# timeout 600s | worker w1 | server http://localhost:39883 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r2-full/test-results/20261112-122710-25c28143-13503/server-data/w1)
+
+[+2.3s] PASS Game 4: the touchdown question is in the game (Q1)
+[+2.3s] PASS Game 4: the phones' option order is the documented 3, 7, 6, 2 — 3,7,6,2
+[+2.3s] PASS Game 4: while playing the TV shows no CORRECT and no tallies
+[+37.9s] PASS Game 4: the game finished
+[+37.9s] PASS Game 4: Host's phone asked all 10 in the game's order — 1,2,3,4,5,6,7,8,9,10
+[+37.9s] PASS Game 4: Guest's phone asked all 10 in the game's order — 1,2,3,4,5,6,7,8,9,10
+[+44.0s] PASS Game 4 (auto walk): the reveal is for the touchdown question — How many points is a touchdown worth in American football?
+[+44.0s] PASS Game 4 (auto walk): each count sits above its own label — {"2":0,"3":1,"6":1,"7":0}
+[+44.0s] PASS Game 4 (auto walk): bars and labels line up — [0,0,0,0]
+[+44.0s] PASS Game 4 (auto walk): CORRECT is stamped on 6 and nothing else — 6
+[+44.0s] PASS Game 4 (auto walk): only 6's bar and label stay lit — 6
+[+44.0s] PASS Game 4 (auto walk): each bar names its option and count for screen readers — 2: 0 votes | 3: 1 vote | 6: 1 vote, the correct answer | 7: 0 votes
+[+44.2s] PASS Game 4 (Q1 button): the reveal is for the touchdown question — How many points is a touchdown worth in American football?
+[+44.2s] PASS Game 4 (Q1 button): each count sits above its own label — {"2":0,"3":1,"6":1,"7":0}
+[+44.2s] PASS Game 4 (Q1 button): bars and labels line up — [0,0,0,0]
+[+44.2s] PASS Game 4 (Q1 button): CORRECT is stamped on 6 and nothing else — 6
+[+44.2s] PASS Game 4 (Q1 button): only 6's bar and label stay lit — 6
+[+44.2s] PASS Game 4 (Q1 button): each bar names its option and count for screen readers — 2: 0 votes | 3: 1 vote | 6: 1 vote, the correct answer | 7: 0 votes
+[+44.2s] PASS Game 4: the TV says which answer of the review is showing — Trivia Showdown
+[+44.2s] Game finished · answers, Q1 of 10
+[+45.0s] PASS Game 4: the TV's Q1..Q10 are the phones' Q1..Q10 — ==========
+[+47.3s] PASS Game 4 (after reload): the reveal is for the touchdown question — How many points is a touchdown worth in American football?
+[+47.3s] PASS Game 4 (after reload): each count sits above its own label — {"2":0,"3":1,"6":1,"7":0}
+[+47.3s] PASS Game 4 (after reload): bars and labels line up — [0,0,0,0]
+[+47.3s] PASS Game 4 (after reload): CORRECT is stamped on 6 and nothing else — 6
+[+47.3s] PASS Game 4 (after reload): only 6's bar and label stay lit — 6
+[+47.3s] PASS Game 4 (after reload): each bar names its option and count for screen readers — 2: 0 votes | 3: 1 vote | 6: 1 vote, the correct answer | 7: 0 votes
+[+50.1s] PASS Game 4 (390px spectator): the reveal is for the touchdown question — How many points is a touchdown worth in American football?
+[+50.1s] PASS Game 4 (390px spectator): each count sits above its own label — {"2":0,"3":1,"6":1,"7":0}
+[+50.1s] PASS Game 4 (390px spectator): bars and labels line up — [0,0,0,0]
+[+50.1s] PASS Game 4 (390px spectator): CORRECT is stamped on 6 and nothing else — 6
+[+50.1s] PASS Game 4 (390px spectator): only 6's bar and label stay lit — 6
+[+50.1s] PASS Game 4 (390px spectator): each bar names its option and count for screen readers — 2: 0 votes | 3: 1 vote | 6: 1 vote, the correct answer | 7: 0 votes
+[+51.0s] PASS Game 5: the touchdown question is in the game (Q1)
+[+51.0s] PASS Game 5: the phones' option order is the documented 2, 7, 3, 6 — 2,7,3,6
+[+51.0s] PASS Game 5: while playing the TV shows no CORRECT and no tallies
+[+79.0s] PASS Game 5: the game finished
+[+79.0s] PASS Game 5: Host's phone asked all 10 in the game's order — 1,2,3,4,5,6,7,8,9,10
+[+81.1s] PASS Game 5 (Q1 button): the reveal is for the touchdown question — How many points is a touchdown worth in American football?
+[+81.1s] PASS Game 5 (Q1 button): each count sits above its own label — {"2":0,"3":0,"6":2,"7":0}
+[+81.1s] PASS Game 5 (Q1 button): bars and labels line up — [0,0,0,0]
+[+81.1s] PASS Game 5 (Q1 button): CORRECT is stamped on 6 and nothing else — 6
+[+81.1s] PASS Game 5 (Q1 button): only 6's bar and label stay lit — 6
+[+81.1s] PASS Game 5 (Q1 button): each bar names its option and count for screen readers — 2: 0 votes | 3: 0 votes | 6: 2 votes, the correct answer | 7: 0 votes
+[+81.1s] PASS Game 5: the TV says which answer of the review is showing — Trivia Showdown
+[+81.1s] Game finished · answers, Q1 of 10
+[+82.0s] PASS Game 5: the TV's Q1..Q10 are the phones' Q1..Q10 — ==========
+[+84.3s] PASS Game 5 (after reload): the reveal is for the touchdown question — How many points is a touchdown worth in American football?
+[+84.3s] PASS Game 5 (after reload): each count sits above its own label — {"2":0,"3":0,"6":2,"7":0}
+[+84.3s] PASS Game 5 (after reload): bars and labels line up — [0,0,0,0]
+[+84.3s] PASS Game 5 (after reload): CORRECT is stamped on 6 and nothing else — 6
+[+84.3s] PASS Game 5 (after reload): only 6's bar and label stay lit — 6
+[+84.3s] PASS Game 5 (after reload): each bar names its option and count for screen readers — 2: 0 votes | 3: 0 votes | 6: 2 votes, the correct answer | 7: 0 votes
+[+87.2s] PASS Game 5 (390px spectator): the reveal is for the touchdown question — How many points is a touchdown worth in American football?
+[+87.2s] PASS Game 5 (390px spectator): each count sits above its own label — {"2":0,"3":0,"6":2,"7":0}
+[+87.2s] PASS Game 5 (390px spectator): bars and labels line up — [0,0,0,0]
+[+87.2s] PASS Game 5 (390px spectator): CORRECT is stamped on 6 and nothing else — 6
+[+87.2s] PASS Game 5 (390px spectator): only 6's bar and label stay lit — 6
+[+87.2s] PASS Game 5 (390px spectator): each bar names its option and count for screen readers — 2: 0 votes | 3: 0 votes | 6: 2 votes, the correct answer | 7: 0 votes
+[+87.2s] ALL TV REVEAL CHECKS PASSED
+[+87.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":7,"pages":7,"peakOpenPages":2}
+
+# PASS (exit 0) in 87.2s | cpu 7.6s, peak memory 393 MB
