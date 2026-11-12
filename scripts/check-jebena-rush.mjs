@@ -59,6 +59,7 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:f
 import { tmpdir } from "node:os";
 import { join as joinPath } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
+import { cursorOf, newSeatBreaks, since } from "./lib/break-log.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 import { bankCanaries, freshAnswer, jebenaOracle } from "./lib/jebena-oracle.mjs";
 
@@ -80,11 +81,12 @@ const noHearts = (text) => !/heart|♥|♡/i.test(text);
  */
 const BREAK_LOG = () => {
   const log = [];
+  let n = 0; // each event's number on this page (S101-R3: checks take a cursor; the log is never erased)
   Object.defineProperty(window, "__cupBreaks", { value: log, configurable: true });
   const rec = (svg) => {
     const row = svg.closest("[data-cup-surface]");
     const shard = svg.querySelector(".mz-cini__shard--r");
-    log.push({ surface: row?.getAttribute("data-cup-surface") ?? null, seat: row?.getAttribute("data-cup-seat") ?? null, slot: Number(svg.getAttribute("data-cup-slot")), cups: Number(row?.getAttribute("data-cups")), anim: shard ? getComputedStyle(shard).animationName : null, t: Date.now() });
+    log.push({ n: n++, surface: row?.getAttribute("data-cup-surface") ?? null, seat: row?.getAttribute("data-cup-seat") ?? null, slot: Number(svg.getAttribute("data-cup-slot")), cups: Number(row?.getAttribute("data-cups")), anim: shard ? getComputedStyle(shard).animationName : null, t: Date.now() });
   };
   new MutationObserver((ms) => {
     for (const m of ms) {
@@ -98,7 +100,8 @@ const BREAK_LOG = () => {
   }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-breaking"] });
 };
 const breaks = (page) => page.evaluate(() => [...(window.__cupBreaks ?? [])]).catch(() => []);
-const clearBreaks = (page) => page.evaluate(() => { if (window.__cupBreaks) window.__cupBreaks.length = 0; }).catch(() => {});
+/** A cursor on a page's break log: a later check looks only at what was logged after it (scripts/lib/break-log.mjs). */
+const mark = async (page) => cursorOf(await breaks(page));
 /** A cups row: the count it shows, its whole and broken cups, its words. */
 const cupsIn = (locator) => locator.evaluate((el) => {
   const row = el.matches("[data-cups]") ? el : el.querySelector("[data-cups]");
@@ -337,6 +340,7 @@ try {
   const cat1 = v.st.category.id;
   const deadline1 = v.g.phaseDeadlineAt;
   const o1 = ORACLE[cat1];
+  const cMarks = await Promise.all([K, A, B, TV].map(mark));
   let st = await typeAndSend(H1, o1.notInBank);
   check("C not in the bank: explained, no pass", st?.attempt?.verdict === "not-in-bank" && st.turn.n === 1);
   await soon("C the phone explains it isn't on the list", async () => /isn't on our/.test(await H1.getByTestId("jr-feedback").innerText()));
@@ -352,7 +356,7 @@ try {
   }
   await shot(H1, `jr-myturn-feedback-${H1 === A ? "320-christmas" : "390"}`);
   {
-    const logs = await Promise.all([K, A, B, TV].map(breaks));
+    const logs = await Promise.all([K, A, B, TV].map(async (p, i) => since(await breaks(p), cMarks[i])));
     const mine = await cupsIn(H1.getByTestId("jr-my-hearts"));
     check("C wrong tries (not on the list, ambiguous, near miss) break no cup anywhere", logs.every((l) => l.length === 0) && mine.whole === 3 && mine.broken === 0, JSON.stringify(logs).slice(0, 200));
   }
@@ -515,7 +519,7 @@ try {
     if (dLoss) {
       const bIds = new Set((await stB()).state.order.map((r) => r.id));
       const collide = startD.body.gameId === startB.body.gameId && dLoss.g.state.order.every((r) => bIds.has(r.id));
-      await clearBreaks(S);
+      const sMark = await mark(S);
       await S.evaluate(() => { window.__sameTab = "still here"; });
       await S.getByRole("button", { name: "Stop watching" }).click();
       await S.evaluate(() => { history.pushState({}, "", "/join"); dispatchEvent(new PopStateEvent("popstate")); });
@@ -525,7 +529,7 @@ try {
       const sinceLoss = arrived ? arrived - dLoss.t.at : null;
       const sameTab = await S.evaluate(() => window.__sameTab);
       await sleep(1200);
-      const sLog = await breaks(S);
+      const sLog = since(await breaks(S), sMark);
       check(`R2 same tab (no reload), colliding ids (${startD.body.gameId}, ${[...bIds].join("/")}), arrived ${sinceLoss} ms after room D's loss: no cup broke`, sameTab === "still here" && collide && sinceLoss !== null && sinceLoss < 3000 && sLog.length === 0, JSON.stringify({ sameTab, collide, sinceLoss, sLog }).slice(0, 240));
     }
     await sCtx.close();
@@ -543,22 +547,22 @@ try {
    * before the end, so these checks always run (checked after the loop). `live`: their phone saw that loss live; if
    * not, the last cup shows broken without breaking (S101-R2).
    */
-  async function outChecks(h, hp, live) {
+  async function outChecks(h, hp, live, cursor = 0) {
     outShot = true;
     await soon(`F ${nameOf[h]} is out and watches the rest`, async () => hp.getByTestId("jr-out").isVisible());
     await soon(`F ${nameOf[h]}'s own row: every cup broken, "0 of 3 cups: out"`, async () => { const c = await cupsIn(hp.getByTestId("jr-my-hearts")); return c.cups === 0 && c.whole === 0 && c.broken === 3 && c.label === "0 of 3 cups: out"; });
     if (live) check(`F ${nameOf[h]}'s last cup broke on their own row`, (await breaks(hp)).some((x) => x.surface === "hud" && x.seat === h && x.slot === 0));
-    else check(`F ${nameOf[h]}'s phone was cut when the last cup went: it shows broken without breaking (a resync)`, (await breaks(hp)).filter((x) => x.surface === "hud" && x.seat === h && x.slot === 0).length === 0, JSON.stringify(await breaks(hp)));
+    else { const replayed = newSeatBreaks(await breaks(hp), cursor, h, 0); check(`F ${nameOf[h]}'s phone was cut when the last cup went: it shows broken without breaking (a resync; no new break of slot 0 on any surface since the drop)`, replayed.length === 0, JSON.stringify(replayed)); }
     check("F the out screen says the cups are broken", /All your cups are broken/.test(await hp.locator("body").innerText()) && noHearts(await hp.locator("body").innerText()));
     check("F the out screen: no sideways scroll", await noSideScroll(hp));
     await shot(hp, `jr-out-${hp === A ? "320-christmas" : "390"}`);
     await soon("F the TV marks them out: every cup broken, and \"Out\"", async () => { const c = await cupsIn(TV.getByTestId(`jr-seat-${h}`)); return (await TV.getByTestId(`jr-seat-${h}`).getAttribute("data-out")) === "true" && c.broken === 3 && c.whole === 0 && /Out/.test(c.text); });
   }
   /** After a turn the driver handled itself: the out checks, if that turn took the player's last cup. */
-  async function outIfOut(h, hp) {
+  async function outIfOut(h, hp, cursor) {
     const v = await playerView(K);
     const r = (v.st?.order ?? v.st?.standings ?? []).find((x) => x.id === h);
-    if (r?.out && v.g.status !== "finished" && !outShot) await outChecks(h, hp, false);
+    if (r?.out && v.g.status !== "finished" && !outShot) await outChecks(h, hp, false, cursor);
   }
   for (let guard = 0; guard < 40; guard++) {
     const now = await playerView(K);
@@ -577,12 +581,19 @@ try {
     const hp = pageOf[h];
     const heartsBefore = now.st.order.find((s) => s.id === h).hearts;
     const catBefore = now.st.category.id;
-    if (!offlineDone && h === seat.A.playerId) {
+    // S101-R3 (review 6828948844): her phone drops only once she has already lost a cup live (her first turn here
+    // times out normally), so a prior legitimate break of her own is always in the log when the resync is checked.
+    if (!offlineDone && h === seat.A.playerId && heartsBefore < 3) {
       // E: Amina's phone drops on her turn; what she typed never reaches the server, and the clock keeps running.
       offlineDone = true;
       const ans = freshAnswer(now.st.category.id, used);
       await soon("E Amina's turn: her field has focus", async () => (await A.evaluate(() => document.activeElement?.id)) === "jr-input");
       await shot(A, "jr-myturn-320-christmas");
+      {
+        const prior = newSeatBreaks(await breaks(A), 0, seat.A.playerId);
+        check("E before her phone drops, it already broke one of her cups live (on her own row and the seat list)", prior.some((x) => x.surface === "hud") && prior.some((x) => x.surface === "seat"), JSON.stringify(prior));
+      }
+      const aMark = await mark(A); // only events after this point can be a replay of the loss she misses
       aminaAway = true;
       await aCtx.setOffline(true);
       await A.keyboard.type(ans.typed);
@@ -596,11 +607,14 @@ try {
       await aCtx.setOffline(false);
       await soon("E back online, Amina's phone catches up with one cup fewer, shown broken", async () => { const c = await cupsIn(A.getByTestId("jr-my-hearts")); return c.cups === heartsBefore - 1 && c.broken === 3 - (heartsBefore - 1); }, 20000);
       // (Other players' cups may break live on her phone meanwhile; only her own lost cup must not replay.)
-      check("E the resync showed her broken cup without replaying the break", (await breaks(A)).filter((x) => x.seat === seat.A.playerId).length === 0, JSON.stringify(await breaks(A)));
+      {
+        const replayed = newSeatBreaks(await breaks(A), aMark, seat.A.playerId);
+        check(`E the resync showed her broken cup (slot ${heartsBefore - 1}) without replaying the break (no new break of her seat since her phone dropped; earlier ones stay in the log)`, replayed.length === 0, JSON.stringify(replayed));
+      }
       await sleep(2500);
       const back = (await playerView(K)).st;
       check("E reconnecting never resubmitted what she typed offline", !(back.log ?? []).some((e) => e.kind === "accepted" && e.answer === ans.name) && back.order.find((s) => s.id === seat.A.playerId).answers === now.st.order.find((s) => s.id === seat.A.playerId).answers);
-      await outIfOut(h, hp);
+      await outIfOut(h, hp, aMark);
       continue;
     }
     if (reloadDone && !shortCutDone && h === seat.B.playerId) {
@@ -610,7 +624,7 @@ try {
       shortCutDone = true;
       const wait = now.g.phaseDeadlineAt - 1500 - Date.now();
       if (wait > 0) await sleep(wait);
-      await clearBreaks(B);
+      const bMark = await mark(B);
       baraCut = true;
       const after = await soon("R2 Baraka's turn runs out while his phone hears nothing", async () => { const x = await playerView(K); return x.st.turn?.n !== n || x.g.status === "finished" ? x : null; }, 8000);
       const lossAt = Date.now();
@@ -621,8 +635,8 @@ try {
       const resynced = await soon("R2 Baraka's phone reconnects and resyncs: his cups as the server has them", async () => { const c = await cupsIn(B.getByTestId("jr-my-hearts")); return c.cups === left && c.broken === 3 - left ? Date.now() : null; }, 6000);
       const inWindow = resynced ? resynced - lossAt : null;
       baraReconnectedAt = Date.now();
-      check(`R2 the resync came inside the window (${inWindow} ms after the loss) and the lost cup showed broken without breaking`, inWindow !== null && inWindow < 3000 && (await breaks(B)).filter((x) => x.seat === h).length === 0, JSON.stringify(await breaks(B)));
-      await outIfOut(h, hp);
+      check(`R2 the resync came inside the window (${inWindow} ms after the loss) and the lost cup showed broken without breaking`, inWindow !== null && inWindow < 3000 && newSeatBreaks(await breaks(B), bMark, h).length === 0, JSON.stringify(newSeatBreaks(await breaks(B), bMark, h)));
+      await outIfOut(h, hp, bMark);
       continue;
     }
     if (!reloadDone && h === seat.B.playerId) {
@@ -662,6 +676,9 @@ try {
   }
 
   check("F someone went out before the end, and their out screen was checked", outShot);
+  check("E Amina's offline resync ran, after a cup of hers broke live (S101-R3)", offlineDone);
+  check("E Keku's mid-game reload ran", reloadDone);
+  check("R2 Baraka's short reconnect ran", shortCutDone);
 
   // ---------- F. Results ----------
   const fin = await soon("F the match finishes: one player left", async () => { const x = await playerView(K); return x.g?.status === "finished" ? x : null; }, 30000);
@@ -735,7 +752,7 @@ try {
   }
 
   // ---------- G. Play again: the same cups, all whole; leaving breaks nothing; back to the lobby ----------
-  for (const p of [K, A, B, TV]) await clearBreaks(p);
+  const gMarks = await Promise.all([K, A, B, TV].map(mark)); // the F checks above saw the whole match; G looks only at what follows
   await soon("G the host has Play again", async () => K.getByTestId("next-play-again").isVisible());
   await K.getByTestId("next-play-again").click();
   await soon("G Play again's briefing: everyone starts with 3 cups again", async () => /starts with 3 cups/.test(await K.getByTestId("briefing-hearts").innerText()), 20000);
@@ -756,7 +773,7 @@ try {
     const fin2 = await soon("G with both of them gone, the replay ends: Keku kept the jebena", async () => { const x = await playerView(K); return x.g?.id === replay.g.id && x.g.status === "finished" ? x : null; }, 20000);
     if (fin2) check("G both leavers sat out; Keku kept all 3 cups", fin2.st.standings.filter((r) => r.satOut).length === 2 && fin2.st.standings.find((r) => r.id === seat.K.playerId)?.hearts === 3);
     await sleep(1500);
-    const logs = await Promise.all([K, A, B, TV].map(breaks));
+    const logs = await Promise.all([K, A, B, TV].map(async (p, i) => since(await breaks(p), gMarks[i])));
     check("G leaving broke no cup on any screen (phones or TV)", logs.every((l) => l.length === 0), JSON.stringify(logs).slice(0, 200));
   }
   for (const [who, p] of [["Keku", K], ["Amina", A], ["Baraka", B]]) {
