@@ -96,6 +96,57 @@ describe("a cup breaks only on an authoritative decrement, once (D-S101-03)", ()
   });
 });
 
+describe("review 6822605156 (S101-R2): cup memory belongs to one room and to unbroken continuity (D-S101-09)", () => {
+  it("the reviewer's repro: a loss first seen on a resync inside the time window does not break", () => {
+    const m = new CupMemory();
+    m.setScope("tv:room-A");
+    m.record("game-1:player-2:tv", 3);
+    m.rebaseline(); // the socket closed (or went stale, or the page was hidden) and came back
+    const b = m.breaks("game-1:player-2:tv", 2);
+    expect(b).toBeNull(); // before the repair: { from: 2, to: 3 }, and isLiveBreak(…, 10000, 10500) was true
+    m.record("game-1:player-2:tv", 2); // the resync snapshot is this row's new baseline
+    expect(m.breaks("game-1:player-2:tv", 1)).toEqual({ from: 1, to: 2 }); // the next genuine connected loss breaks, once
+    m.record("game-1:player-2:tv", 1);
+    expect(m.breaks("game-1:player-2:tv", 1)).toBeNull(); // repeated snapshots: nothing more
+  });
+  it("another room (same tab) forgets everything: colliding game and seat ids never compare", () => {
+    const m = new CupMemory();
+    m.setScope("player:room-A:player-2");
+    m.record("game-1:player-1:seat", 3);
+    m.record("game-1:player-2:hud", 2);
+    expect(m.size).toBe(2);
+    m.setScope("player:room-B:player-2"); // left room A, joined room B, whose first game is game-1 too
+    expect(m.size).toBe(0); // cleaned up
+    expect(m.breaks("game-1:player-1:seat", 1)).toBeNull(); // a first view in room B, not a break
+    expect(m.breaks("game-1:player-2:hud", 0)).toBeNull();
+  });
+  it("setting the same scope again keeps the memory and its continuity", () => {
+    const m = new CupMemory();
+    m.setScope("tv:room-A");
+    m.record("game-1:player-1:tv", 3);
+    m.setScope("tv:room-A");
+    expect(m.breaks("game-1:player-1:tv", 2)).toEqual({ from: 2, to: 3 });
+  });
+  it("every row must re-record after a rebaseline: an old-epoch count is never a baseline", () => {
+    const m = new CupMemory();
+    m.setScope("tv:room-A");
+    m.record("g:a:tv", 3);
+    m.record("g:b:tv", 3);
+    m.rebaseline();
+    m.record("g:a:tv", 3); // a's row saw the first snapshot after the reconnect
+    expect(m.breaks("g:a:tv", 2)).toEqual({ from: 2, to: 3 });
+    expect(m.breaks("g:b:tv", 2)).toBeNull(); // b's row hasn't: its old count can't break a cup
+  });
+  it("Play again (a new game id) and the results continue the same rules: a new game starts whole, never broken", () => {
+    const m = new CupMemory();
+    m.setScope("player:room-A:player-2");
+    m.record("game-1:player-2:hud", 1);
+    expect(m.breaks("game-1:player-2:hud", 0)).toEqual({ from: 0, to: 1 }); // the deciding cup, on the results row that continues the live row
+    m.record("game-1:player-2:hud", 0);
+    expect(m.breaks("game-2:player-2:hud", 3)).toBeNull(); // the replay
+  });
+});
+
 describe("the rules, and what costs a cup, are unchanged (D-S101-01)", () => {
   const ctx = (s: JebenaState, now = 1) => ({ now, players: s.order, active: s.order, scale: 1 });
   const timeout = (s: JebenaState, now = 1) => jebenaModule.expirePhase(s, ctx(s, now));

@@ -26,6 +26,7 @@ import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { SendNote } from "./SendNote.js";
 import { CiniCups } from "./CiniCups.js";
 import { lastLossAt } from "../../ui/mchezo/lib/cups.js";
+import { resultLine } from "../../ui/mchezo/lib/tvfeed.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 import {
   jebenaEndLine, keptTheJebena, lastPlayLine, shownSeconds, turnLeftMs, URGENCY_LABEL, urgencyFor, verdictLine,
@@ -330,7 +331,7 @@ export function MchezoJebenaResults({ game, publicGame, players, playerId, title
       {hero}
       {next}
       <GameHeader title={title} objective={jebenaEndLine(st.end, st.standings, nameOf, playerId)} accent={1} />
-      <Standings st={st} nameOf={nameOf} meId={playerId} />
+      <Standings st={st} nameOf={nameOf} meId={playerId} cups={{ gameId: game.id, surface: "result" }} />
       <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every cup still whole. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="jebena-rush" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
@@ -339,7 +340,20 @@ export function MchezoJebenaResults({ game, publicGame, players, playerId, title
   );
 }
 
-function Standings({ st, nameOf, meId, tv }: { st: JebenaView; nameOf: (id?: string) => string; meId?: string; tv?: boolean }) {
+/**
+ * Stage 10.1 repair (S101-R1, D-S101-08): every row draws the player's cups and
+ * continues the memory of the screen that showed them live (your own row ← your
+ * live row; others ← the seat list; the TV ← its seat list). So the cup that
+ * decided the match, lost in the same snapshot that ended it, breaks here once
+ * on a screen that watched the match; a reload or a later visit shows it still.
+ */
+interface StandingsCups { gameId: string; surface: "result" | "tv" }
+function rowCupsKey(c: StandingsCups, id: string, meId?: string): string {
+  if (c.surface === "tv") return `${c.gameId}:${id}:tv`;
+  return id === meId ? `${c.gameId}:${id}:hud` : `${c.gameId}:${id}:seat`;
+}
+
+function Standings({ st, nameOf, meId, tv, cups }: { st: JebenaView; nameOf: (id?: string) => string; meId?: string; tv?: boolean; cups?: StandingsCups }) {
   const startHearts = st.startHearts ?? 5;
   return (
     <ol className={`mz-jr-standings${tv ? " mz-jr-standings--tv" : ""}`} data-testid="jr-standings">
@@ -350,8 +364,13 @@ function Standings({ st, nameOf, meId, tv }: { st: JebenaView; nameOf: (id?: str
             <b>{r.id === meId ? `${nameOf(r.id)} (you)` : nameOf(r.id)}</b>
             <span className="mz-jr-row__line">
               {keptTheJebena(st.end, st.standings, r.id) ? "Kept the jebena · " : ""}
-              {r.out ? (r.satOut ? "Left the game · " : "Out: every cup broken · ") : (
-                <><span className="mz-jr-row__cups"><CiniCups n={r.hearts} of={startHearts} compact decorative /></span>{`${r.hearts} of ${startHearts} cups whole · `}</>
+              {r.satOut ? "Left the game · " : (
+                <>
+                  <span className="mz-jr-row__cups">
+                    <CiniCups n={r.hearts} of={startHearts} compact decorative memoryKey={cups ? rowCupsKey(cups, r.id, meId) : undefined} lostAt={lastLossAt(st.log, r.id)} seat={r.id} surface={cups ? `${cups.surface}-row` : undefined} />
+                  </span>
+                  {r.out ? "Out: every cup broken · " : `${r.hearts} of ${startHearts} cups whole · `}
+                </>
               )}
               {r.answers} {r.answers === 1 ? "answer" : "answers"} · {r.timeouts} {r.timeouts === 1 ? "timeout" : "timeouts"}
             </span>
@@ -393,8 +412,28 @@ export function JebenaReview({ game, nameOf }: { game: PublicGame; nameOf: (id: 
   return (
     <div data-testid="tv-jr-review">
       <p className="mz-tvshow-line">{jebenaEndLine(st.end, st.standings, name)}</p>
-      <Standings st={st} nameOf={name} tv />
+      <Standings st={st} nameOf={name} tv cups={{ gameId: game.id, surface: "tv" }} />
     </div>
+  );
+}
+
+/**
+ * TV, the match over (Stage 10.1 repair, S101-R1): who won, the last play and
+ * everyone's cups. It continues the live seat list's memory, so the cup that
+ * decided the match breaks here once; the post-game review shows it still.
+ */
+export function JebenaTvFinal({ game, title, nameOf }: { game: PublicGame; title: string; nameOf: (id: string) => string }) {
+  const st = (game.state ?? {}) as JebenaView;
+  const name = (id?: string) => (id ? nameOf(id) : "Someone");
+  const last = lastPlayLine(st.log, name);
+  return (
+    <section className="mz-jr-tv mz-jr-tv--final" data-testid="tv-jr-final">
+      <span className="mz-tv-kicker">{title} · {st.startHearts ?? 5} cups each · final</span>
+      <h1 className="mz-tvshow-h1" data-testid="tv-jr-final-winner">{resultLine(game, nameOf)}</h1>
+      <p className="mz-tvshow-line" data-testid="tv-jr-final-line">{jebenaEndLine(st.end, st.standings, name)}</p>
+      {last && <p className="mz-tvshow-line mz-tvshow-line--muted" data-testid="tv-jr-final-last">{last}</p>}
+      <Standings st={st} nameOf={name} tv cups={{ gameId: game.id, surface: "tv" }} />
+    </section>
   );
 }
 

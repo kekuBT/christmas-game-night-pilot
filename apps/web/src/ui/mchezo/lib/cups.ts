@@ -53,20 +53,47 @@ export interface CupBreak { from: number; to: number }
  * The last count this page showed for each place cups are drawn (a game, a
  * seat and a surface). Nothing is stored anywhere else, so a reload starts
  * empty and never replays a break.
+ *
+ * Stage 10.1 repair (review 6822605156, S101-R2; D-S101-09): a count only
+ * counts while this page has watched continuously.
+ * - The memory belongs to one scope: a room and seat, or a watched room.
+ *   Another scope clears it, so ids that repeat in another room (game-1,
+ *   player-2) never compare.
+ * - Every loss of continuity (a socket closing, staleness, going offline,
+ *   coming back from the background) starts a new epoch. A count recorded in
+ *   an earlier epoch never breaks a cup: the next view is a first view.
  */
 export class CupMemory {
-  private readonly seen = new Map<string, number>();
-  /** What a view of `n` cups breaks, against the last count recorded for `key`; nothing on a first view or when nothing was lost. */
+  private readonly seen = new Map<string, { n: number; epoch: number }>();
+  private scope: string | null = null;
+  private epoch = 0;
+  /** Use the memory for this room and seat (or watched room); anything else is forgotten. */
+  setScope(scope: string | null): void {
+    if (scope === this.scope) return;
+    this.scope = scope;
+    this.seen.clear();
+    this.epoch += 1;
+  }
+  /** Continuity was lost: what this page saw before can no longer break a cup. */
+  rebaseline(): void {
+    this.epoch += 1;
+  }
+  /** What a view of `n` cups breaks, against the last count recorded for `key` in this epoch; nothing on a first view or when nothing was lost. */
   breaks(key: string, n: number): CupBreak | null {
     const before = this.seen.get(key);
-    return before !== undefined && n < before ? { from: Math.max(0, n), to: before } : null;
+    if (!before || before.epoch !== this.epoch) return null;
+    return n < before.n ? { from: Math.max(0, n), to: before.n } : null;
   }
   record(key: string, n: number): void {
-    this.seen.set(key, n);
+    this.seen.set(key, { n, epoch: this.epoch });
+  }
+  /** How many places are remembered (for tests: a new scope starts empty). */
+  get size(): number {
+    return this.seen.size;
   }
 }
 
-/** Animate this break? Only a live one: the server recorded the loss within LIVE_BREAK_MS of now. */
+/** Animate this break? Only a live one: the server recorded the loss within LIVE_BREAK_MS of now (a second guard; continuity is the first). */
 export function isLiveBreak(brk: CupBreak | null, lostAt: number | undefined, serverNow: number): boolean {
   if (!brk || lostAt === undefined) return false;
   const age = serverNow - lostAt;

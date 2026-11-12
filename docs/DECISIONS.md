@@ -1192,3 +1192,11 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **History:** the same assertion failed once before, in full gate `20261111-194026-83406685-7879` (Stage 8.3). Five local runs under heavy CPU load all passed.
   - **The fix:** only that setup tab gets a 5 s request timeout. The faulted tabs, which test the 250 ms behaviour and the 4 s Start budget, are unchanged.
   - **Alternative rejected:** re-running the gate until it passed.
+- **D-S101-08 The deciding cup breaks in the results (review 6822605156, S101-R1).**
+  - **How:** the phone results rows and a Jebena-specific TV final screen draw everyone's cups, continuing the live screens' memory (your own row ← your live row; others ← the seat list; the TV ← its seat list). The match-deciding 1→0 loss breaks once, where the result appears.
+  - **Alternative rejected:** holding the live screen for a moment before the results. It delays the result and the continuation controls, and it needs a special render of a finished game on every screen.
+- **D-S101-09 Cup memory is scoped to a room and to unbroken continuity (review 6822605156, S101-R2).**
+  - **Scope:** a room and seat, or a watched room. Changing it clears the memory.
+  - **Epoch:** a new one on every loss of continuity (socket close, staleness, offline, coming back from the background). Only a count recorded in the current epoch can break a cup.
+  - **Elapsed time** (3 s) is kept only as a second guard.
+  - **Alternative rejected:** relying on room revisions. Those move for unrelated changes (presence, readiness), so a jump doesn't mean a cup was missed.

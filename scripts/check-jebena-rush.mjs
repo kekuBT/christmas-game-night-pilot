@@ -32,6 +32,11 @@
 //      lost life, once; reduced motion breaks without animating.
 //   G  Play again keeps the cups (its briefing says 3) and starts with
 //      whole cups; two players leave and nothing breaks; back to the lobby.
+//   R  review 6822605156: (R1) the timeout that decides the match breaks the
+//      runner-up's last cup once, on the TV's final screen and on the phones'
+//      results; (R2) a short reconnect inside the 3-second window never
+//      breaks a cup it didn't see live, and a TV that switches rooms in the
+//      same tab (same game and seat ids) never breaks one either.
 //   H  motion and looks: full motion animates steam; reduced motion keeps it
 //      still; the urgency word is always there; Everyday and Christmas.
 //   I  privacy: no projection carries the bank (aliases, unused answers), and
@@ -182,6 +187,16 @@ try {
   const A = await aCtx.newPage();
   await join(A, "Amina", code);
   const bCtx = await phoneCtx(390, { reducedMotion: true });
+  // R2: Baraka's socket and polls go through the driver, so it can cut his phone off for a moment and close its socket.
+  let baraCut = false;
+  const baraSockets = [];
+  await bCtx.routeWebSocket(/.*/, (ws) => {
+    const server = ws.connectToServer();
+    baraSockets.push(ws);
+    ws.onMessage((m) => { if (!baraCut) server.send(m); });
+    server.onMessage((m) => { if (!baraCut) ws.send(m); });
+  });
+  await bCtx.route(/\/projection\?/, (route) => (baraCut ? route.abort("connectionfailed") : route.continue()));
   const B = await bCtx.newPage();
   await join(B, "Baraka", code);
   const tvCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
@@ -477,11 +492,48 @@ try {
       await shot(J, "jr-seven-cups-320-christmas");
     }
     await jCtx.close();
+
+    // R2 (review 6822605156): a TV that switches rooms in the same tab. Room D's first game and seats reuse room B's ids
+    // (game-1, player-1/2); its first turn has just run out (a cup lost moments ago) when the tab arrives. Nothing may break.
+    const sCtx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    await sCtx.addInitScript(BREAK_LOG);
+    ctxs.push(sCtx);
+    const S = await sCtx.newPage();
+    await spectate(S, roomB.joinCode);
+    await soon("R2 a TV watches room B: seven cups a seat", async () => (await cupsIn(S.getByTestId("tv-jr-seats"))).of === 7, 15000);
+    await sleep(1000);
+    const roomD = (await call("/rooms", { body: { name: "Room D", kind: "casual" } })).body;
+    const dHost = (await call(`/rooms/${roomD.roomId}/join`, { body: { displayName: "Neema", asHost: true, hostClaimToken: roomD.hostClaimToken } })).body;
+    const dGuest = (await call("/rooms/join-by-code", { body: { joinCode: roomD.joinCode, displayName: "Tumaini" } })).body;
+    const projD = async () => (await call(`/rooms/${roomD.roomId}/projection?audience=player`, { token: dHost.recoveryToken })).body;
+    await call(`/rooms/${roomD.roomId}/game-settings`, { token: dHost.recoveryToken, body: { gameId: "jebena-rush", settings: { hearts: 3 }, baseRevision: (await projD()).session?.revision ?? 0 } });
+    const pD = await projD();
+    const startD = await call(`/rooms/${roomD.roomId}/games`, { token: dHost.recoveryToken, body: { gameId: "jebena-rush", official: false, roster: pD.readiness?.wouldPlay, attempt: { id: randomUUID(), sessionRevision: pD.session?.revision ?? 0 }, season: pD.contentSeason, settings: { hearts: 3 } } });
+    for (const who of [dHost, dGuest]) await call(`/rooms/${roomD.roomId}/intents`, { token: who.recoveryToken, body: { intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: roomD.roomId, gameInstanceId: startD.body.gameId, action: "briefing-ready", payload: { ready: true } } } });
+    const gD = async () => ((await projD()).myGames ?? []).find((g) => g.id === startD.body.gameId);
+    const dLoss = await soon("R2 room D: its first turn runs out (a cup lost just now)", async () => { const g = await gD(); const t = (g?.state?.log ?? []).find((e) => e.kind === "timeout"); return t ? { g, t } : null; }, 20000);
+    if (dLoss) {
+      const bIds = new Set((await stB()).state.order.map((r) => r.id));
+      const collide = startD.body.gameId === startB.body.gameId && dLoss.g.state.order.every((r) => bIds.has(r.id));
+      await clearBreaks(S);
+      await S.evaluate(() => { window.__sameTab = "still here"; });
+      await S.getByRole("button", { name: "Stop watching" }).click();
+      await S.evaluate(() => { history.pushState({}, "", "/join"); dispatchEvent(new PopStateEvent("popstate")); });
+      await S.locator(".mz-code__input").fill(roomD.joinCode);
+      await S.getByTestId("watch-spectator").click();
+      const arrived = await soon("R2 the same tab now watches room D: three cups a seat, the lost one broken", async () => { const c = await cupsIn(S.getByTestId("tv-jr-seats")); return c.of === 3 && c.broken === 1 ? Date.now() : null; }, 10000);
+      const sinceLoss = arrived ? arrived - dLoss.t.at : null;
+      const sameTab = await S.evaluate(() => window.__sameTab);
+      await sleep(1200);
+      const sLog = await breaks(S);
+      check(`R2 same tab (no reload), colliding ids (${startD.body.gameId}, ${[...bIds].join("/")}), arrived ${sinceLoss} ms after room D's loss: no cup broke`, sameTab === "still here" && collide && sinceLoss !== null && sinceLoss < 3000 && sLog.length === 0, JSON.stringify({ sameTab, collide, sinceLoss, sLog }).slice(0, 240));
+    }
+    await sCtx.close();
   }
 
   // ---------- E/F. Timeouts, offline, reload, elimination ----------
   // Keku answers whenever he holds the jebena; Amina and Baraka let time run out.
-  let offlineDone = false, reloadDone = false, firstTimeoutChecked = false, outShot = false, tvShot = false;
+  let offlineDone = false, reloadDone = false, firstTimeoutChecked = false, outShot = false, tvShot = false, shortCutDone = false, baraReconnectedAt = 0;
   /** Every life lost (seat, the slot that broke), from the server's own counts; `final` ended the match. */
   const lost = [];
   const turnTotal = 10_500;
@@ -525,6 +577,27 @@ try {
       await sleep(2500);
       const back = (await playerView(K)).st;
       check("E reconnecting never resubmitted what she typed offline", !(back.log ?? []).some((e) => e.kind === "accepted" && e.answer === ans.name) && back.order.find((s) => s.id === seat.A.playerId).answers === now.st.order.find((s) => s.id === seat.A.playerId).answers);
+      continue;
+    }
+    if (reloadDone && !shortCutDone && h === seat.B.playerId) {
+      // R2 (review 6822605156): a short reconnect inside the 3-second window. On Baraka's own (second) turn his phone
+      // hears nothing for the last 1.5 s, then its socket closes and it reconnects; the resync shows his lost cup within
+      // 3 s of the loss. It must show it broken without breaking it (it didn't see it live). Later losses still break once.
+      shortCutDone = true;
+      const wait = now.g.phaseDeadlineAt - 1500 - Date.now();
+      if (wait > 0) await sleep(wait);
+      await clearBreaks(B);
+      baraCut = true;
+      const after = await soon("R2 Baraka's turn runs out while his phone hears nothing", async () => { const x = await playerView(K); return x.st.turn?.n !== n || x.g.status === "finished" ? x : null; }, 8000);
+      const lossAt = Date.now();
+      await sleep(300);
+      for (const ws of baraSockets.splice(0)) await ws.close({ code: 4000, reason: "driver: a short drop" }).catch(() => {});
+      baraCut = false;
+      const left = after ? (after.st.order ?? after.st.standings ?? []).find((x) => x.id === h)?.hearts : null;
+      const resynced = await soon("R2 Baraka's phone reconnects and resyncs: his cups as the server has them", async () => { const c = await cupsIn(B.getByTestId("jr-my-hearts")); return c.cups === left && c.broken === 3 - left ? Date.now() : null; }, 6000);
+      const inWindow = resynced ? resynced - lossAt : null;
+      baraReconnectedAt = Date.now();
+      check(`R2 the resync came inside the window (${inWindow} ms after the loss) and the lost cup showed broken without breaking`, inWindow !== null && inWindow < 3000 && (await breaks(B)).filter((x) => x.seat === h).length === 0, JSON.stringify(await breaks(B)));
       continue;
     }
     if (!reloadDone && h === seat.B.playerId) {
@@ -610,9 +683,25 @@ try {
         const stray = b.filter((x) => !lostKeys.has(`${x.seat}:${x.slot}`) || x.cups !== x.slot);
         check(`F ${who}: every cup that broke was a real lost life, in its slot, once`, dup.length === 0 && stray.length === 0, `${b.length} breaks; ${JSON.stringify({ dup, stray }).slice(0, 200)}`);
       }
-      const live = lost.filter((l) => !l.final);
+      // R1 (review 6822605156): no exception for the life that ended the match: the TV breaks every lost cup, once.
       const tv = await breaks(TV);
-      check(`F the TV broke exactly one cup for each life lost during play (${live.length})`, tv.length >= live.length && live.every((l) => tv.filter((x) => x.seat === l.seat && x.slot === l.slot).length === 1), `${tv.length} breaks for ${live.length} lives: ${JSON.stringify(tv.map((x) => [x.seat.slice(0, 4), x.slot]))}`);
+      check(`F the TV broke exactly one cup for each life lost (${lost.length}), the match-deciding one included`, lost.every((l) => tv.filter((x) => x.seat === l.seat && x.slot === l.slot).length === 1), `${tv.length} breaks for ${lost.length} lives: ${JSON.stringify(tv.map((x) => [x.surface, x.seat.slice(-2), x.slot]))}`);
+      if (runnerUp) {
+        const ru = runnerUp.id;
+        const decidingOn = async (p) => (await breaks(p)).filter((x) => x.seat === ru && x.slot === 0);
+        const tvD = await decidingOn(TV);
+        check("R1 the TV's final screen breaks the deciding cup once, animated", tvD.length === 1 && tvD[0].surface === "tv-row" && tvD[0].anim === "mz-cini-tip", JSON.stringify(tvD));
+        const finalTxt = await TV.getByTestId("tv-jr-final").innerText().catch(() => "");
+        check("R1 the TV's final screen says who won and how the last cup went", /wins/.test(finalTxt) && /the last cup broke|every cup is broken/.test(finalTxt), finalTxt.replace(/\s+/g, " ").slice(0, 200));
+        const kD = await decidingOn(K);
+        check("R1 the winner's phone (Keku) breaks the runner-up's last cup once, on the results", kD.length === 1 && kD[0].surface === "result-row" && kD[0].anim === "mz-cini-tip", JSON.stringify(kD));
+        const loserPage = pageOf[ru];
+        const lD = await decidingOn(loserPage);
+        check(`R1 the runner-up's own phone (${nameOf[ru]}) breaks their last cup once, ${loserPage === B ? "still (reduced motion)" : "animated"}`, lD.length === 1 && lD[0].surface === "result-row" && lD[0].anim === (loserPage === B ? "none" : "mz-cini-tip"), JSON.stringify(lD));
+        const ruRow = await cupsIn(K.getByTestId(`jr-row-${ru}`));
+        check("R1 the results show the runner-up's cups all broken, as the server has them", ruRow.cups === 0 && ruRow.broken === 3 && ruRow.whole === 0, JSON.stringify(ruRow));
+      }
+      if (baraReconnectedAt) check("R2 after the short reconnect, Baraka's phone still breaks cups for live losses", (await breaks(B)).some((x) => x.t > baraReconnectedAt), JSON.stringify((await breaks(B)).map((x) => [x.seat.slice(-2), x.slot, x.t > baraReconnectedAt])));
       const bLog = await breaks(B);
       check("F reduced motion (Baraka): cups break without animating", bLog.length > 0 && bLog.every((x) => x.anim === "none"), JSON.stringify(bLog.map((x) => x.anim)));
       check("F full motion (the TV): each break animates", tv.length > 0 && tv.every((x) => x.anim === "mz-cini-tip"), JSON.stringify(tv.map((x) => x.anim)));

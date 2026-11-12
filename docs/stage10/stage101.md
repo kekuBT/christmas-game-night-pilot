@@ -121,3 +121,20 @@ Identifiers keep `hearts` (D-S101-02): the server state, the protocol, the `sett
 | Truthful results | `apps/web/src/ui/mchezo/lib/celebrate.ts` (`absent` needs no recorded action and no first place in a won game), `types.ts` (`actions`) | `tests/stage101-cups.test.ts` (8; the 4 winner/attempt cases fail on the base); `tests/stage3-qa-results.test.ts` audit extended to first places with nothing completed |
 | In real browsers | `scripts/check-jebena-rush.mjs` | A break log on every page. It checks: cups in lobby, briefing, own row, seat lists and TV; wrong tries break nothing; a timeout breaks exactly the lost slot, once, on the holder's row and the TV; a reload and a resync (Amina's socket cut by the driver) replay nothing; the last cup and "Out"; every break on every page is a real lost life (from the server's own totals), once; reduced motion breaks without animating; Play again starts whole, and two players leaving break nothing; seven cups fit 320 px; a third room's zero-answer survivor reads a winner's line, the absent player "You missed this one" |
 | Gate hygiene | `tests/stage74-content-variety.test.ts` (D-S101-07) | The setup tab gets a 5 s request timeout; the faulted tabs keep 250 ms |
+
+## 10. Repairs after review 6822605156
+- **S101-R1, the deciding cup:** the timeout that decides the match ends it in the same snapshot, so phones went straight to results and the TV to its final screen, and the 1→0 break was never drawn. The repair makes the results themselves the cue (D-S101-08):
+  - **Phone results:** every row draws the player's cups. Your own row continues your live row's memory, and the others continue the seat list's, so on a phone that watched the match the runner-up's last cup breaks once when the results appear. The runner-up is always row 2, on screen at 320 px.
+  - **The TV:** Jebena Rush gets its own final screen: the winner line, the last play ("… the last cup broke.") and every player's cups. It continues the live seat list's memory, so the deciding cup breaks there once.
+  - **Unchanged:** server finalization, scores, places and Play again. Nothing waits and no second loss is drawn. Reduced motion shows the still broken cups. A reload, a later visit or the post-game review shows them still.
+- **S101-R2, continuity:** the cup memory was page-wide and keyed by game, seat and surface. Those ids repeat across rooms, and elapsed time can't tell a live loss from a quick resync. Now (D-S101-09):
+  - **Scope:** the memory belongs to one room and seat (or one watched room). A different room, seat or watched room clears it.
+  - **Epoch:** every loss of continuity starts a new epoch. That covers a socket closing, the staleness watchdog, the browser going offline, and the page coming back from the background. A count recorded in an earlier epoch can't break a cup: the next view is a first view.
+  - **The time window stays** as a second guard, never the only one.
+- **Estimate for the repair:**
+  - code (R1 + R2): about 1.5 h;
+  - unit tests: 0.5 h;
+  - browser regressions: 1–1.5 h (the deciding timeout on phone and TV, a short reconnect inside the window, a same-tab switch between rooms whose game and seat ids collide);
+  - one final fast and full gate: about 35 min;
+  - docs and the report: 0.5 h.
+  - **Total: about 4–4.5 h.**

@@ -11,9 +11,10 @@
  * cups remaining").
  *
  * A cup breaks (a short animation, full motion only) when this page saw more
- * cups for the same game and seat before and the server recorded the loss
- * moments ago (lib/cups.ts). Otherwise broken cups simply show: on a first
- * view, a reload, a resync after a gap, or a repeated view.
+ * cups for the same game and seat before, in the same room and without
+ * losing continuity since, and the server recorded the loss moments ago
+ * (lib/cups.ts). Otherwise broken cups simply show: on a first view, a
+ * reload, a resync or reconnect, a room change, or a repeated view.
  */
 import { useEffect, useState } from "react";
 import { serverNowEstimate } from "../../ui/mchezo/index.js";
@@ -21,6 +22,21 @@ import { CUP_BREAK_MS, CupMemory, cupSlots, cupsLabel, isLiveBreak, type CupBrea
 
 /** The last count each place on this page showed (lost on reload, by design). */
 const MEMORY = new CupMemory();
+/** How many projections this page has applied: every fresh snapshot re-records each row in the current epoch. */
+let snapshots = 0;
+
+/**
+ * Stage 10.1 repair (S101-R2, D-S101-09): App tells the cups when continuity
+ * holds. `setScope` on a room or seat change (and for a watched room),
+ * `rebaseline` whenever continuity is lost (a socket closing, staleness,
+ * offline, coming back from the background), `snapshot` whenever it applies
+ * a fresh projection. The first snapshot after a rebaseline is a first view.
+ */
+export const cupContinuity = {
+  setScope: (scope: string | null): void => MEMORY.setScope(scope),
+  rebaseline: (): void => MEMORY.rebaseline(),
+  snapshot: (): void => { snapshots += 1; },
+};
 
 /** The cup's outline: rim at the top, a gently curved body, a short foot. */
 const BODY = "M3.5 6 H20.5 C20.2 12 18.6 16.4 15.6 19 H8.4 C5.4 16.4 3.8 12 3.5 6 Z";
@@ -96,12 +112,15 @@ export function CiniCups({ n, of, testId, compact, memoryKey, lostAt, decorative
   const fresh = memoryKey ? MEMORY.breaks(memoryKey, whole) : null;
   const freshLive = isLiveBreak(fresh, lostAt, serverNowEstimate());
   const [anim, setAnim] = useState<(CupBreak & { key: string }) | null>(null);
+  // Re-recorded on every fresh snapshot (not only when the count changes), so after a
+  // rebaseline the first snapshot becomes this row's baseline in the new epoch.
+  const seq = snapshots;
   useEffect(() => {
     if (!memoryKey) return;
     const b = MEMORY.breaks(memoryKey, whole);
     MEMORY.record(memoryKey, whole);
     if (b && isLiveBreak(b, lostAt, serverNowEstimate())) setAnim({ key: memoryKey, ...b });
-  }, [memoryKey, whole, lostAt]);
+  }, [memoryKey, whole, lostAt, seq]);
   useEffect(() => {
     if (!anim) return;
     const t = setTimeout(() => setAnim(null), CUP_BREAK_MS);

@@ -56,3 +56,10 @@
 /* The lobby note flows as text, with the cups at its start (never pushed under the Start dock). */
 .mz-content-choice__note.mz-jr-cupslabel { display: block; }
 .mz-content-choice__note.mz-jr-cupslabel > .mz-cini-row { margin-right: 6px; }
+
+/* Stage 10.1 repair (S101-R1): the TV's final screen. A compact heading, so the standings (and the deciding cup) sit on screen. */
+.mz-jr-tv--final { gap: 10px; }
+.mz-jr-tv--final .mz-tvshow-h1 { font-size: clamp(40px, 4.2vw, 64px); line-height: 1.05; margin: 0; }
+.mz-jr-tv--final .mz-tvshow-line { margin: 0; }
+.mz-jr-standings--tv .mz-jr-row { padding-block: 6px; }
+.mz-jr-row__cups { margin-right: 8px; }
