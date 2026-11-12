@@ -83,7 +83,8 @@ export function timingLines(lifecycle?: { gameWindowMs: number; phaseMs?: Partia
   if (!lifecycle) return [];
   const lines: string[] = [];
   const phases = Object.entries(lifecycle.phaseMs ?? {}).filter(([, ms]) => typeof ms === "number" && ms > 0) as [string, number][];
-  for (const [k, ms] of phases) lines.push(`${Math.round(ms / 1000)} seconds for ${PHASE_WORDS[k] ?? k}.`);
+  // Whole seconds, rounded down: a phase may carry a fraction of a second of network grace (Jebena Rush: 10 s + 0.5 s).
+  for (const [k, ms] of phases) lines.push(`${Math.floor(ms / 1000)} seconds for ${PHASE_WORDS[k] ?? k}.`);
   const min = Math.round(lifecycle.gameWindowMs / 60_000);
   lines.push(min >= 1 ? `The whole game ends by itself after about ${min} minute${min === 1 ? "" : "s"}.` : `The whole game ends by itself after ${Math.round(lifecycle.gameWindowMs / 1000)} seconds.`);
   return lines;
@@ -141,6 +142,17 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Each round's time starts when you open it, but the whole game also has a time limit (below): leave yourself time for every round.",
       "20 points per shape right from the start, plus 50 for the whole sequence.",
       "Everyone gets their own pattern, with the same lengths and time.",
+    ],
+  },
+  // Stage 9.1 (docs/stage9/stage91.md §3).
+  "jebena-rush": {
+    objective: "Name it. Pass it. Beat the steam.",
+    steps: [
+      "Hold the jebena? Name something in the category before the steam boils over: 10 seconds a turn.",
+      "A right answer passes the jebena to the next player. A wrong one costs only time: try again.",
+      "Each answer counts once. Time runs out: you lose a heart, and a new category starts.",
+      "No hearts left and you're out. The last player with hearts keeps the jebena.",
+      "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or hearts back.",
     ],
   },
   "draw-guess": {

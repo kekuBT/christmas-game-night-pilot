@@ -145,6 +145,8 @@ export class LocalServer {
   static readonly BreakSchema = z.object({ on: z.boolean(), attempt: LocalServer.AttemptSchema }).strict();
   /** Stage 8.2: a casual room's content (host/cohost), against the session revision the host saw. */
   static readonly SeasonSchema = z.object({ season: z.enum(SESSION_SEASONS), baseRevision: z.number().int().min(0) }).strict();
+  // Stage 9.1: the settings themselves are checked by the game (src/games/settings.ts).
+  static readonly GameSettingsSchema = z.object({ gameId: z.string().min(1).max(64), settings: z.record(z.unknown()), baseRevision: z.number().int().min(0) }).strict();
   /** Stage 7.3: hand the host role to `targetId` (one press: its id and the session revision it was made against). */
   static readonly HostSchema = z.object({ targetId: z.string().min(1).max(64), attempt: LocalServer.AttemptSchema }).strict();
   /** Stage 7.1: the `party` marker on a game start: which lineup item this start is. */
@@ -983,7 +985,8 @@ export class LocalServer {
             } else if (rematchOf) {
               ({ game, replay } = room.startRematch(player.id, rematchOf, { ...common, attempt }));
             } else {
-              ({ game, replay } = room.startChosen(player.id, String(body["gameId"] ?? ""), { official: body["official"] === true, ...common, ...(attempt ? { attempt } : {}) }));
+              // Stage 9.1: a chosen game's settings (Jebena Rush's hearts); the room validates them. Play again reuses its game's own.
+              ({ game, replay } = room.startChosen(player.id, String(body["gameId"] ?? ""), { official: body["official"] === true, ...common, ...(attempt ? { attempt } : {}), ...(body["settings"] !== undefined ? { settings: body["settings"] } : {}) }));
             }
           } catch (err) {
             if (err instanceof StartRefused) {
@@ -1021,6 +1024,23 @@ export class LocalServer {
           }
           if (done.changed) { this.persist(room); this.broadcast(room.id); }
           this.send(res, 200, { ok: true, contentSeason: done.contentSeason, session: done.session, ...(done.changed ? {} : { unchanged: true }) });
+          return;
+        }
+        // Stage 9.1 (§8): a game's lobby settings, e.g. Jebena Rush's hearts (host/cohost, casual rooms; persisted).
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "game-settings") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const parsed = LocalServer.GameSettingsSchema.safeParse(await this.readBody(req));
+          if (!parsed.success) { this.send(res, 400, { error: "Send the game, its settings, and the session revision they were chosen against" }); return; }
+          let done;
+          try {
+            done = room.setLobbySettings(player.id, parsed.data.gameId, parsed.data.settings, parsed.data.baseRevision);
+          } catch (err) {
+            if (err instanceof SessionRefused) { this.send(res, err.code === "NOT_HOST" ? 403 : err.code === "INVALID_SETTINGS" ? 400 : 409, { error: err.message, code: err.code, ...(room.kind === "casual" ? { lobbySettings: room.lobbySettingsView() } : {}), ...(err.session ? { session: err.session } : {}) }); return; }
+            throw err;
+          }
+          if (done.changed) { this.persist(room); this.broadcast(room.id); }
+          this.send(res, 200, { ok: true, lobbySettings: done.lobbySettings, session: done.session, ...(done.changed ? {} : { unchanged: true }) });
           return;
         }
         // Stage 7.2: Take a break / Resume (host/cohost, casual rooms; persisted).

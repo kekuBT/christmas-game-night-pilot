@@ -16,8 +16,9 @@ type Json = Record<string, unknown>;
 const lib = loadContent(DEFAULT_CONTENT_DIR, { testApproveProvisional: true });
 const T0 = 1_800_000_000_000;
 
-function setup(n: number, opts: { timing?: 1 | 2; names?: string[] } = {}) {
-  const engine = new RoomEngine("D3 Cup", opts.timing === 1 ? {} : { timing: 2 });
+function setup(n: number, opts: { timing?: 1 | 2; names?: string[]; casual?: boolean } = {}) {
+  // Stage 9.1: a casual-only game (Jebena Rush) is briefed in a casual room, with the same briefing.
+  const engine = new RoomEngine("D3 Cup", opts.timing === 1 ? {} : { timing: 2, ...(opts.casual ? { kind: "casual" as const } : {}) });
   let t = T0;
   engine.clock = () => t;
   engine.content = lib;
@@ -109,7 +110,7 @@ describe("D3 S5: nothing secret is disclosed during the briefing (every game × 
   for (const desc of GAME_REGISTRY) {
     it(`${desc.id}: no state, questions, roles, answers or content strings reach any projection`, () => {
       const n = Math.max(desc.minPlayers, 4);
-      const { engine, host, ids } = setup(n, { names: ["Keku", "Amina", "Baraka", "Chausiku", "Dalila", "Eshe"] });
+      const { engine, host, ids } = setup(n, { names: ["Keku", "Amina", "Baraka", "Chausiku", "Dalila", "Eshe"], casual: desc.casualOnly === true });
       const official = policyFor(desc.id).officialEligible;
       const spectatorView = () => engine.project("tv");
       const baseline = new Set<string>();
@@ -477,7 +478,8 @@ describe("D3 S3 + S6: restarts keep the briefing, its content and its timing", (
 });
 
 describe("D3: after T_play, every game plays exactly as it does under version 1", () => {
-  for (const desc of GAME_REGISTRY) {
+  // Timing versions 1 and 2 are a Cup's; a casual-only game (Stage 9.1) never plays in a Cup.
+  for (const desc of GAME_REGISTRY.filter((d) => !d.casualOnly)) {
     it(`${desc.id}: same seed, same initial play state, deadlines shifted to T_play`, () => {
       const n = Math.max(getGame(desc.id).minPlayers, 4);
       const official = policyFor(desc.id).officialEligible;

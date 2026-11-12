@@ -2067,3 +2067,37 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - full `20261111-201230-83406685-23681`: **PASSED** 86/86 in 31 min 21 s, with `check-install` 113 and `check-install-builds` 34.
 
 **Next task:** push, then a new completed report on PR #14. After that, ChatGPT's confirmation of R83-01.
+
+**Stage 8.3 CLEARED** by ChatGPT's review 6807907986 (PR #14), for development continuation only, not merge or deployment.
+- It covered the reviewed candidate `8340668` at head `90290ef`, and found no blocking findings. R83-01 is resolved.
+- **Independent checks:** 37/37 focused unit tests, the build, and `check-install-builds` 34/34, which reproduced my build versions `f550dbcd950aa120`, `993e7806d9473388` and `da1c20fff9c4c6b9`.
+- **Private live-site audit:** done on Codespaces port 3457 (private). It covered the Settings install guidance, a full Word Connections round through a stop and restart of the preview (450 points), host and guest, a guest reload, the TV and break/resume.
+- **Not run:** native install, WebKit and real phones.
+
+## Stage 9.1: Jebena Rush, the first playable slice (completed checkpoint `4d91cd6`: fast and full gates PASSED; awaiting review)
+
+- **Brief:** ChatGPT's handoff 6807907986 on PR #14. Base `90290ef` (PR #14's head); branch `claude/stage9-1-jebena-rush`, stacked PR #15 on #14.
+- **Spec:** `docs/stage9/stage91.md` (§13: as built and tested). Decisions D-S91-01 to D-S91-09 in `docs/DECISIONS.md`.
+- **Built:**
+  - **Engine** (`src/games/modules/jebena.ts`): a game module on the room's game-deadline model; turns are the room's phase `turn:<n>` (10 s + 500 ms grace); accept passes, rejections keep the deadline, a timeout costs one heart, starts a new category and passes; out at 0; the last player with hearts keeps the jebena; a 12-minute limit; places and points; sit-out; the standings always in the view.
+  - **Bank and matcher** (`src/games/modules/packs/jebena-banks.ts`, `jebenaMatch.ts`): `jr-bank-1`, six Everyday categories, 373 canonical answers (48–97 each) with aliases and named near misses; exact, alias, plural, and typos only when unambiguous; "ambiguous" otherwise.
+  - **Settings** (`src/games/settings.ts`, `room.ts`, `http.ts`): hearts 3/5/7 (default 5) validated at Start, recorded, public, reused by Play again; the lobby's hearts are room state (`POST /rooms/:id/game-settings`, host/cohost, casual, revision-checked, persisted), and a Start that shows other hearts is refused (`SETTINGS_CHANGED`). Casual rooms only (`CASUAL_ONLY`); never picked automatically (Quick Party, Smart shuffle).
+  - **Screens** (`apps/web/src/components/mchezo/MchezoJebena.tsx`, `styles/stage91.css`): the lobby hearts choice and guests' label; briefing rules and hearts; the phone's turn screen (category, the jebena with steam and wobble by urgency, holder, text countdown, hearts with numbers, a focused field that sends with Enter, plain feedback for every rejection); watching and out screens; results (places, "kept the jebena", hearts, answers, timeouts, points explained); TV live view and post-game review. Reduced motion and Animations Off keep the jebena still with the same words.
+- **Review 6808081378 (spec feedback, "continue implementation"):** answers to §11 accepted as given. Two real gaps found and fixed with tests:
+  - plurals now collect every singular reading by canonical id across names and aliases (two ids is ambiguous), with fixtures for alias-vs-name rivals, several aliases of one answer, plural readings to different ids, short words and used answers;
+  - a turn cutoff at the same instant as the match limit expired the phase first (a heart lost); the module context now carries the game deadline and the limit wins.
+  - Added: inclusive-cutoff tests (1 ms before, at, after; duplicates), restart catch-up equal to a server that never stopped (2 and 20 minutes; bounded, idempotent), sockets with everyone disconnected / one connected / a real restart, the briefing's "the clock never stops" line, out players show 0 hearts, endings tested one by one (`tests/stage91-jebena-endings.test.ts`, with the words in `apps/web/src/ui/mchezo/lib/jebena.ts`), and bank privacy in shipped files (`tests/stage91-bank-privacy.test.ts`; `check-jebena-rush` I2), both shown to fail on a deliberately leaking build.
+- **Tests:**
+  - `tests/stage91-jebena.test.ts` (47): bank, matcher, settings, module rules, the room engine (phase clock, boundary race, spoofing, duplicates, late joiner, whole loop with Play again, the match limit with places, restart mid-turn, projections and two rooms, lobby hearts), catalogue and Quick Party.
+  - `tests/stage91-jebena-sockets.test.ts` (8): a real LocalServer with every player on a WebSocket, whole matches at 2, 4 and 10 players; a holder's socket dropping; the deadline boundary; everyone disconnected; one connected; a real restart after an outage.
+  - `tests/stage91-jebena-endings.test.ts` (7) and `tests/stage91-bank-privacy.test.ts` (1).
+  - `scripts/check-jebena-rush.mjs` (105–107 checks depending on the seeded seat order; its own server, real 10-second turns): host 390 px Everyday, guest 320 px Christmas look, guest 390 px reduced motion, TV 1440 px, a second room, a Family Cup; screenshots in `docs/stage9/screenshots/` (provenance in its README).
+  - Updated for a fifteenth game: `m3`, `manifest`, `room`, `test-batch-200`, `library`, `stage71-quick-party`, `d3-briefing`.
+- **Fixed while building:** a match ended by the room's limit had no standings in its views (the module's `end` stays null), so the results list would have been empty; the standings are now always in the view, with a test.
+- **Not done / limits:** desktop Chromium emulating phone sizes only; real iOS and Android keyboards are `docs/REAL_DEVICE_TESTING.md` Part K, not yet run. The bank is a curated first version (owner review welcome). Practice-only and casual-only, as the brief asks.
+- **Questions for the owner** (defaults in place): spec §11.
+- **Gates** (each verdict is one run on one revision; evidence in `docs/evidence/gate-runs/<run>/`):
+  - `1b6b69e` (first candidate): fast `20261111-224520-1b6b69ee-21122` PASSED (exit 0, 47 s); full `20261111-224616-1b6b69ee-24197` **FAILED** (exit 1; 84 passed, 3 failed). `check-f5` and `e2e-chromium` played every game in one Family Cup room and could not start Jebena Rush there (casual-only by design); `check-quick-party` I hit a race in the driver (the room showed the new game before the lost reply reached the page and the app asked again; it had passed 16 earlier recorded runs). Fixed in `4d91cd6`: those Cup playlists leave casual-only games out (`check-jebena-rush` plays it, and its new section K checks a Cup never offers it); a Cup's picker no longer offers casual-only games; `check-mchezo`/`check-stage2` count the Cup's catalogue; the quick-party driver keeps its route until the app's retry is recorded.
+  - `4d91cd6` (final candidate): targeted (`jebena-rush f5 quick-party mchezo stage2 --e2e`) `20261111-231957-4d91cd63-11612` PASSED (8/8); then, sequentially, fast `20261111-232840-4d91cd63-13143` **PASSED** (exit 0, 5/5, 47 s) and full `20261111-232938-4d91cd63-16286` **PASSED** (exit 0, 87/87, 31 min 49 s, no leftover processes).
+  - Local runs of `check-jebena-rush` on a clean clone of `4d91cd6` with that full run's build: 105 and 106 checks, 0 failed (`docs/evidence/stage91/`).
+- **Next:** the completed report on PR #15; then ChatGPT's review and private audit before Stage 9.2.

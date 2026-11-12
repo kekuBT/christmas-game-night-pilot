@@ -59,7 +59,8 @@ async function answerAllTrivia(page) {
 }
 
 // The catalogue size comes from the server (Stage 5 added games), never a fixed number.
-const TOTAL = (await (await fetch(`${BASE}/games`)).json()).length;
+// Stage 9.1: a Family Cup's picker leaves out casual-only games (Jebena Rush), which a Cup can't start.
+const CUP_TOTAL = (await (await fetch(`${BASE}/games`)).json()).filter((g) => !g.casualOnly).length;
 const browser = await launchChromium();
 try {
   // ---- Room A: landing, lobby sizes, presence -------------------------
@@ -129,8 +130,8 @@ try {
     (await hostB.getByTestId("choose-game").count()) === 1 &&
     (await hostB.getByTestId("mode-official").count()) === 1);
   await hostB.getByTestId("choose-game").click();
-  check(`chooser lists all ${TOTAL} games`,
-    (await hostB.locator('[data-testid^="select-game-"]').count()) === TOTAL);
+  check(`chooser lists all ${CUP_TOTAL} games a Cup can play`,
+    (await hostB.locator('[data-testid^="select-game-"]').count()) === CUP_TOTAL);
   await hostB.getByTestId("select-game-math-mayhem").click();
   check("chooser sets up next to Math Mayhem",
     (await hostB.locator(".mz-upnext__name").textContent()) === "Math Mayhem");

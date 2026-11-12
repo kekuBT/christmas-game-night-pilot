@@ -219,6 +219,21 @@ Write down which way you reached the app for each row.
 | J10 | On the private HTTPS preview, if it asks you to sign in: open the app before signing in, then sign in and reload | No sign-in page is ever kept as Mchezo's offline screen: offline afterwards, you see Mchezo's own "Can't reach Mchezo" (or nothing installed yet), never the sign-in page |
 | J9 | **Settings → Look → Christmas**, then reopen the installed app | The app opens in Christmas colours (the icon stays the circle mark); the status bar matches the page |
 
+### Part K: Jebena Rush (15 min, Stage 9.1; practice-only, casual rooms)
+
+Three or more phones in a casual room (Host a game), ideally an iPhone and an Android among them, and the TV if you have one. Turns are 10 seconds; everything below is about how it feels on a real phone keyboard.
+
+| # | Do this | Pass if |
+|---|---|---|
+| K1 | Host: **Change** → Jebena Rush; choose **3 ♥** | Guests' lobbies say "Everyone starts with 3 hearts" within a couple of seconds; the briefing on every phone says 3 hearts |
+| K2 | On your turn | The keyboard comes up by itself on the answer field (if it doesn't, write down the phone and browser: iOS may need one tap); the keyboard's Send/Go key sends; autocorrect doesn't change a right answer into a wrong one (write down any it does) |
+| K3 | Type something silly, then a real answer | The silly one is explained ("isn't on our … list") and your time keeps running; the real one passes the jebena to the next player at once |
+| K4 | Type an answer someone already gave; then one with a small typo (e.g. "Bdminton" in Sports) | "Already named"; the typo counts under its proper name |
+| K5 | Let your time run out once | One heart gone (you see the number change), a new category, the jebena moves on |
+| K6 | Lock your phone during your turn for 15 seconds, then unlock | You lost that heart (no free life) and are back in the game; nothing you'd typed was sent by itself |
+| K7 | Watch the jebena for a whole turn on a phone with full animations, then with **Settings → Animations: Less** (and **Off**) | Full: steam rises and the pot wobbles faster near the end. Less or Off: still, but the words "Warm / Steaming / Boiling over!" and the seconds say the same |
+| K8 | Play to the end | The last player with hearts "kept the jebena"; every phone and the TV show the same places and points; **Play again** keeps 3 hearts |
+
 ---
 
 ## 4. Did it feel good? (5 min, at the end)
@@ -285,6 +300,7 @@ Earlier device checklists ([DEVICE_ACCEPTANCE_CHECKLIST.md](DEVICE_ACCEPTANCE_CH
 - background and lock behaviour of real mobile browsers;
 - real keyboards (autocorrect, number pads);
 - real TV browsers;
+- real phone keyboards in Jebena Rush (focus on your turn, the Send key, autocorrect against the answer list);
 - whether it is fun.
 
 *Note:* inside the cloud sandbox where this was prepared, browser WebSockets to a non-localhost address are refused by the sandbox's own network proxy. With the proxy taken out of the path they connect normally. This is a property of that sandbox, not of the app or of a home network.

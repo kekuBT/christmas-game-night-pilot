@@ -61,6 +61,8 @@ export interface PublicGame extends LifecycleFields {
   status: GameStatus;
   /** Stage 8.2: the content this solo or casual game was started with (absent in a Cup). */
   season?: SessionSeason;
+  /** Stage 9.1: the settings this game was started with (Jebena Rush: hearts each). */
+  settings?: { hearts?: number };
   timedOut: boolean;
   day?: number;
   players: string[];
@@ -177,6 +179,8 @@ export interface Projection {
   session?: SessionView;
   /** Stage 8.2: what this solo or casual session deals (absent in a Cup). Never a device's look. */
   contentSeason?: SessionSeason;
+  /** Stage 9.1: casual rooms: the host's choice for each game that takes settings (Jebena Rush's hearts). */
+  lobbySettings?: Record<string, { hearts?: number }>;
   /** Stage 8.2: the latest briefing that ended without play (last 10 minutes), and why. */
   briefingCancelled?: { gameInstanceId: string; reason: string; contentWhy?: "changed" | "season" };
   championship?: ChampionshipResult[];
@@ -208,6 +212,8 @@ export interface RegistryGame {
   maxPlayers: number;
   defaultDurationMinutes: number;
   tutorial: string;
+  /** Stage 9.1: plays in casual rooms only (Jebena Rush); a Cup's picker never offers it. */
+  casualOnly?: boolean;
   /** Server lifecycle policy (Sprint 3): time limits and whether it can count officially. */
   lifecycle?: {
     model: "game-deadline" | "phased" | "turns";

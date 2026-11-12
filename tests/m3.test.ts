@@ -30,8 +30,8 @@ function intent(engine: RoomEngine, gameId: string, action: string, payload: Rec
 }
 
 describe("M3 registry", () => {
-  it("all 14 games are implemented (the 11 originals + Stage 5's Majority Rules, Pattern Pulse and Draw & Guess)", () => {
-    expect(GAME_REGISTRY.map((g) => g.id)).toEqual(["impostor", "caption-clash", "trivia", "word-connections", "who-said-that", "guess-the-year", "closest-wins", "category-sprint", "charades", "geography", "math-mayhem", "majority-rules", "pattern-pulse", "draw-guess"]);
+  it("all 15 games are implemented (the 11 originals + Stage 5's Majority Rules, Pattern Pulse and Draw & Guess + Stage 9.1's Jebena Rush)", () => {
+    expect(GAME_REGISTRY.map((g) => g.id)).toEqual(["impostor", "caption-clash", "trivia", "word-connections", "who-said-that", "guess-the-year", "closest-wins", "category-sprint", "charades", "geography", "math-mayhem", "majority-rules", "pattern-pulse", "jebena-rush", "draw-guess"]);
     expect(GAME_REGISTRY.every((g) => g.status === "implemented")).toBe(true);
   });
 });

@@ -1057,3 +1057,40 @@ Handoff 6801615731 (PR #13), under D-WF-01. Spec: `docs/stage8/stage83.md`.
     - Guarding only the delete: a same-name install would still write into the active cache.
     - `skipWaiting`, `claim` or a forced reload: an open game would be disturbed.
     - Serving straight from per-install caches without promotion: a worker that restarts couldn't tell which candidate is its own.
+
+## Stage 9.1: Jebena Rush, the first playable slice (2026-11-11, branch `claude/stage9-1-jebena-rush`, from the Stage 8.3 head `90290ef`)
+
+Handoff 6807907986 (PR #14), under D-WF-01. Spec: `docs/stage9/stage91.md`. The owner's settled direction (the name, "Name it. Pass it. Beat the steam.", an original jebena with steam and wobble, answers passed around, 5 hearts with 3/5/7, curated answers and careful typos) is kept as given. Everything below is an architect default for local play, practice-only, until the owner says otherwise.
+
+- **D-S91-01 A game module on the room's lifecycle.**
+  - **What:** Jebena Rush is a `GameModule` (`src/games/modules/jebena.ts`) on RoomEngine's existing game-deadline model: the briefing, the phase clock, finishing once, the ledger, persistence and broadcast are the room's. It is practice-only, casual rooms only (`casualOnly` in the registry; a Cup or solo start is refused with `CASUAL_ONLY`, and a Cup's game picker doesn't offer it), and never picked automatically (Quick Party, Smart shuffle). Browser drivers that play every game in one Cup room (`check-f5`, `e2e-chromium`) leave casual-only games out; `check-jebena-rush` plays it end to end.
+  - **Why:** no new room machinery, and every existing guarantee (one clock, one finish, dedupe by client event id) applies as is.
+  - *Alternatives rejected:* a branch inside `room.ts` like the eleven older games (harder to test purely); a new turn engine (a second clock to trust).
+- **D-S91-02 One server deadline per turn.**
+  - **What:** a turn is the room's phase `turn:<n>`: 10 s for players plus 500 ms of network grace (`phaseMs.turn = 10.5 s`), processed by the tick at its own instant, before any request. The cutoff is inclusive for a request and the clock alike (an answer at exactly the cutoff counts; the timeout is processed for any time after it, as of the cutoff). A turn that runs out at the same instant as the match limit yields to it: the module context carries the game's deadline (`ModuleContext.gameDeadlineAt`), so the limit wins and nobody loses a heart; RoomEngine's ordering for other games is unchanged. Catch-up after a restart processes each timeout at its own instant and starts the next turn from it: bounded and idempotent. Every answer names its turn; the client also sends the phase key. Wrong tries keep the deadline; at most 20 tries and 40 characters a turn. The countdown on screen is the deadline less the grace, on the server's clock, never more than 10.
+  - **Why:** a race at the boundary resolves once, on server time; a late, replayed or duplicated send is stale and changes nothing.
+  - *Alternatives rejected:* a client timer (unfair across phones); no grace (a send typed in time but carried late would lose a heart).
+- **D-S91-03 A new category after every lost heart.**
+  - **What:** six Everyday categories in a seeded rotation. A timeout, or a bank used up, moves to the next; answers stay used for the whole match; every bank used up ends the match.
+  - **Why:** one hard category can't knock several players out in a row. (Question 1 for the owner.)
+- **D-S91-04 The end, places and points.**
+  - **What:** the last player with hearts keeps the jebena ("kept the jebena" is said only then); otherwise the room's 12-minute limit ends it (the turn in progress costs nothing), and a shared first place is said as shared. "Outlasted" counts only players who went out earlier: survivors never outlast each other, and seat order never breaks a shared place (owner's reviewer, 6808081378). Places: in above out; more hearts higher, equal hearts share; out players by when they went out. Points: 100 per player outlasted, 10 per heart kept, so points follow places. The standings are public facts and are in every view, so a match ended by the limit still shows places.
+  - *Alternatives rejected:* points for answers named (they would reward whoever held the jebena most); no points (questions 2 and 3 for the owner).
+- **D-S91-05 Connection never changes the rules.**
+  - **What:** turns run on the server clock whether or not their player is connected (the briefing says so); reconnecting shows the current state and never restores a heart, resets a deadline or resubmits; nobody wins because a socket dropped; "sit this one out" leaves the match (the jebena passes if it was their turn; nothing is left pending), and a player who is out shows 0 hearts in every view and earns no heart points.
+- **D-S91-06 A curated bank and a conservative matcher.**
+  - **What:** `jr-bank-1`, six categories with 373 canonical answers (48 to 97 each) and aliases, stable ids, and named near misses ("Congo", "sport"). Matching uses the Sprint v2 normaliser (Sprint's own matcher and scoring are unchanged): exact or alias, then named near misses, then plurals (every singular reading, deduplicated by answer id: two ids is ambiguous), then a typo only when it is unambiguous (6+ letters, exactly one answer within 1 edit, no rival within 2). Anything closer to two answers, or a short word one letter off, is "ambiguous" and the player is asked to check the spelling. Repeats are by canonical id. A bank report (counts, collisions, close pairs) is a unit test.
+  - **Why:** a wrong accept is worse than a retry: the deadline doesn't move on a rejection, so asking costs only time.
+- **D-S91-07 Game settings at the start.**
+  - **What:** a start may carry `settings` (Jebena Rush: `hearts` 3, 5 or 7; default 5), validated by the game (`src/games/settings.ts`), recorded with the game, public in its projection, reused by Play again, and part of a start attempt's identity.
+- **D-S91-08 The lobby's hearts are room state.**
+  - **What:** the host or a cohost chooses the hearts in a casual lobby (`POST /rooms/:id/game-settings`, revision-checked like the room's content); everyone sees the choice; it is persisted. A Start carries the settings its presser saw; if the lobby changed since, `SETTINGS_CHANGED` and nothing starts. A Start that names none asks for the defaults (it never silently adopts the lobby's).
+  - **Why:** the spec promised guests see the host's choice before the game. Keeping it local to the host's phone would have shown it to guests only in the briefing.
+  - *Alternatives rejected:* the hearts only in the start request (guests learn them late); adopting the lobby's settings when a start names none (a stale page could start with hearts nobody saw, as Stage 8.2 found for content).
+- **D-S91-09 The jebena on screen.**
+  - **What:** an original SVG (round clay body with a cream band, a narrow neck with a straw stopper, a spout and a handle) on a cream stage that reads on either look. Steam curls count the urgency (1 warm, 2 steaming, 3 boiling over) and a word says it ("Warm", "Steaming", "Boiling over!"); the countdown is a number. Wobble and rising steam are CSS, full motion only; reduced motion and Animations Off show the same jebena still.
+  - **Why:** nothing relies on colour or motion alone.
+- **D-S91-10 The bank never ships to browsers.**
+  - **What:** the answer bank, the matcher and the module live on the server only. A unit test walks the web app's import graph and fails if it reaches them (or the module registry); the browser driver scans every built file and the public responses (page, service worker, manifest, assets, game list) for bank-only canaries (its version, source notes, near-miss reasons, distinctive answers). Both were shown to fail on a deliberately leaking build. So the service worker can never cache the bank as ordinary JS.
+  - **Why:** projections were already checked; an import is the other way a bank leaks (review 6808081378, 4).
+

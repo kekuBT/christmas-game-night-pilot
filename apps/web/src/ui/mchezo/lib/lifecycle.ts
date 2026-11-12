@@ -54,6 +54,8 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   // Stage 5.1 (3D): the count is turns you drew in, or guessed RIGHT in
   // (src/games/modules/draw.ts participation); a wrong guess doesn't count.
   "draw-guess": { verb: "Drew or guessed right in", noun: ["turn", "turns"] },
+  // Stage 9.1: a turn answered in time (src/games/modules/jebena.ts participation).
+  "jebena-rush": { verb: "Answered in time on", noun: ["turn", "turns"] },
 };
 
 /**

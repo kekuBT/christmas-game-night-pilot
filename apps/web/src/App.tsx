@@ -26,6 +26,7 @@ import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
+import { JebenaHeartsChoice, JebenaReview, JebenaTv, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
 import { lineupLine, tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
 import { ordinal } from "./ui/mchezo/lib/standings.js";
 import { CaptionTv, MchezoCaption, MchezoCaptionResults } from "./components/mchezo/MchezoCaption.js";
@@ -754,6 +755,20 @@ export function App() {
       await refresh();
     } finally { setContentBusy(false); }
   }
+  /** Stage 9.1 (§8): the host or a cohost chooses Jebena Rush's hearts in the lobby (everyone sees it). */
+  const [settingsBusy, setSettingsBusy] = useState(false);
+  async function changeHearts(hearts: number) {
+    if (!roomId || settingsBusy) return;
+    setSettingsBusy(true);
+    setErr("");
+    try {
+      const r = await postBounded(`/rooms/${roomId}/game-settings`, { gameId: "jebena-rush", settings: { hearts }, baseRevision: proj?.session?.revision ?? 0 }, 10_000).catch(() => null);
+      if (!r) setErr("Couldn’t reach the game server, so the hearts may not have changed. Check them, then try again.");
+      else if (r.status === 409) setErr(r.body["code"] === "SESSION_CONFLICT" ? "Something changed since you looked. Here is the latest: choose again." : String(r.body["error"] ?? "The hearts didn’t change."));
+      else if (r.status < 200 || r.status >= 300) setErr(String(r.body["error"] ?? "The hearts didn’t change."));
+      await refresh();
+    } finally { setSettingsBusy(false); }
+  }
   async function startGame(gameId: string, official: boolean, how: StartHow, proceedWithout?: string[]) {
     // Host-action race (Milestone K): a double-tap on Start posts twice;
     // the server correctly rejects the second (a game is already playing),
@@ -789,6 +804,8 @@ export function App() {
       ...(attempt ? { attempt } : {}),
       // Stage 8.2 (§3.4): the content this host saw; the server refuses a Start made against other content.
       ...(proj?.roomKind === "casual" && proj.contentSeason ? { season: proj.contentSeason } : {}),
+      // Stage 9.1 (§8): the settings this host saw (Jebena Rush's hearts); Play again replays its game's own.
+      ...(proj?.roomKind === "casual" && route.kind !== "rematch" && proj.lobbySettings?.[gameId] ? { settings: proj.lobbySettings[gameId] } : {}),
     };
     try {
       let resp: { status: number; body: Record<string, unknown> } | null = null;
@@ -820,6 +837,7 @@ export function App() {
         else if (body2.code === "ATTEMPT_ENDED") setErr("That start was cancelled, so nothing new started. Choose again.");
         else if (body2.code === "ON_BREAK") setErr("The room is on a break. Resume first.");
         else if (body2.code === "CONTENT_CHANGED") setErr(body2.error ?? "The room’s content changed since you looked, so nothing started. Check it, then press Start again.");
+        else if (body2.code === "SETTINGS_CHANGED") setErr(body2.error ?? "The game’s settings changed since you looked, so nothing started. Check them, then press Start again.");
         else setErr(body2.error ?? "Who is playing changed. Check the list, then start again.");
         return;
       }
@@ -1043,6 +1061,8 @@ export function App() {
               : g.gameId === "majority-rules" ? <MajorityTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} />
               : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><PulseTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "draw-guess" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><DrawTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
+              // Stage 9.1: Jebena Rush draws its own turn clock (the turn, not the match).
+              : g.gameId === "jebena-rush" ? <div className="mz-tvshow-game"><JebenaTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               : null}
           renderFinal={(g) => g.gameId === "word-connections"
             ? <div className="mz-tvshow-game" data-testid="mz-cx-tv"><ConnectionsTv game={g} title={titleOf(g.gameId)} players={feed.players} /></div>
@@ -1052,6 +1072,7 @@ export function App() {
             : g.gameId === "majority-rules" ? <div className="mz-tvshow-game"><MajorityReview game={g} /></div>
             : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><PulseReview game={g} /></div>
             : g.gameId === "draw-guess" ? <div className="mz-tvshow-game"><DrawReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
+            : g.gameId === "jebena-rush" ? <div className="mz-tvshow-game"><JebenaReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : tvAnswers(g)}
         />
       </MchezoProvider>
@@ -1380,6 +1401,9 @@ export function App() {
   const pulseFinished = latestFinished?.gameId === "pattern-pulse";
   const drawPlaying = playingGame?.gameId === "draw-guess";
   const drawFinished = latestFinished?.gameId === "draw-guess";
+  // Stage 9.1 (practice-only, casual rooms).
+  const jebenaPlaying = playingGame?.gameId === "jebena-rush";
+  const jebenaFinished = latestFinished?.gameId === "jebena-rush";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -1472,7 +1496,8 @@ export function App() {
       )}
       {sheet === "choose" && isHostish && (
         <ChooseGameSheet
-          catalog={catalog}
+          // Stage 9.1: a casual-only game (Jebena Rush) is offered in casual rooms only; a Cup would refuse to start it.
+          catalog={proj?.roomKind === "casual" ? catalog : catalog.filter((g) => !games.find((x) => x.id === g.id)?.casualOnly)}
           upNextId={upNext?.id}
           playerCount={connectedNow > 0 ? connectedNow : players.length}
           onPick={(id) => { setUpNextId(id, "manual"); setShuffleResult(null); closeSheet(); }}
@@ -1588,6 +1613,13 @@ export function App() {
           casual={casualRoom}
           firstTime={!roomGames.some((g) => g.status === "finished")}
           content={proj?.roomKind === "casual" ? { season: proj.contentSeason ?? "everyday", ...(isHostish ? { onChange: (s: SessionSeason) => void changeContent(s), busy: contentBusy } : {}) } : undefined}
+          // Stage 9.1 (§8): Jebena Rush's hearts: the host or a cohost chooses; everyone sees the choice.
+          gameSettings={proj?.roomKind === "casual" && upNext?.id === "jebena-rush" ? (() => {
+            const hearts = proj.lobbySettings?.["jebena-rush"]?.hearts ?? 5;
+            return isHostish
+              ? <JebenaHeartsChoice value={hearts} onChange={(h) => void changeHearts(h)} busy={settingsBusy} />
+              : <p className="mz-foot mz-lobby__hearts" data-testid="lobby-hearts-guest" data-hearts={hearts}>Everyone starts with {hearts} hearts ({"♥".repeat(hearts)}).</p>;
+          })() : undefined}
           code={proj?.joinCode ?? "…"}
           sessionLabel={proj?.name ?? "Mchezo"}
           // Family Cup event data: 7 days is the approved championship
@@ -1718,6 +1750,21 @@ export function App() {
     return (
       <MchezoProvider theme={theme} {...motion}>
         <MchezoConnectionsResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Word Connections"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
+      </MchezoProvider>
+    );
+  }
+  // Stage 9.1: Jebena Rush. Its own turn clock is on screen; the match limit isn't a race, so no game clock.
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && jebenaPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <MchezoJebena game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Jebena Rush"} intent={sendAction} error={err || undefined} landed={sendLanded} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && jebenaFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <MchezoJebenaResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Jebena Rush"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }

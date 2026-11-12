@@ -12,7 +12,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { GAME_MANIFESTS, type GameManifest } from "../src/games/manifest.js";
 import {
   PARTY_BUDGETS, PARTY_MAX_GAMES, PARTY_TRANSITION_MINUTES, describeLineup, lineupMinutes, moveItem, partyItemsFor, partyPool, planParty, removeItem, replacementOptions,
-  validatePartyPlan, type PartyItem,
+  validatePartyPlan, type PartyItem, NOT_IN_QUICK_PARTY,
 } from "../src/games/party.js";
 import { LocalServer } from "../src/server/http.js";
 import { PartyRefused, RoomEngine, StartRefused } from "../src/server/room.js";
@@ -34,7 +34,8 @@ describe("the planner (pure)", () => {
           expect(l.estimateMinutes, tag).toBe(l.items.reduce((s, i) => s + manifestOf(i.gameId).duration.minutes + PARTY_TRANSITION_MINUTES, 0));
           expect(new Set(l.items.map((i) => i.gameId)).size, tag).toBe(l.items.length);
           for (const it of l.items) expect(fitsGroup(it, n), `${tag} ${it.gameId}`).toBe(true);
-          expect(l.poolSize, tag).toBe(GAME_MANIFESTS.filter((m) => n >= m.minPlayers && n <= m.maxPlayers).length);
+          // Stage 9.1: games Quick Party never adds (Jebena Rush) are not in its pool.
+          expect(l.poolSize, tag).toBe(GAME_MANIFESTS.filter((m) => !NOT_IN_QUICK_PARTY.has(m.id) && n >= m.minPlayers && n <= m.maxPlayers).length);
         }
       }
     }

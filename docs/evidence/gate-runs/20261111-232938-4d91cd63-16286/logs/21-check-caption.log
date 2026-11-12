@@ -1,0 +1,56 @@
+$ node scripts/check-caption.mjs http://localhost:36537
+# timeout 600s | worker w1 | server http://localhost:36537 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s91r-full/test-results/20261111-232938-4d91cd63-16286/server-data/w1)
+
+[+5.2s] PASS the briefing explains the game
+[+5.9s] PASS everyone sees the same scene — A reindeer tries to bake cookies
+[+5.9s] PASS no horizontal overflow at 390px (write)
+[+5.9s] PASS no horizontal overflow at 390px (write)
+[+5.9s] PASS no horizontal overflow at 320px (write)
+[+5.9s] PASS no horizontal overflow at 360px (write)
+[+5.9s] PASS character counter counts down
+[+36.4s] PASS Bea's caption is in and shown back to her
+[+36.4s] PASS a double submit sends one caption — 1
+[+36.7s] PASS after a reload Bea still sees her caption, not an empty box
+[+36.8s] PASS keyboard: Cal submits with Tab + Enter
+[+37.0s] PASS vote cards show no names (anonymous) — YOURS — YOU CAN’T VOTE FOR IT | “When the robot laughs at its own joke” | “Grandpa's new ringtone” | “Beep boop, that's a knock-knock joke” | “Error 404: punchline not found”
+[+37.0s] PASS Bea's own caption is marked Yours and disabled
+[+37.0s] PASS Bea can vote for the other three
+[+37.1s] PASS vote cards are at least 44px tall at 320px — 67.38626098632812
+[+39.2s] PASS TV shows the scene and the captions
+[+39.2s] PASS TV never shows who wrote what
+[+39.4s] PASS a vote is confirmed on the card
+[+59.6s] PASS round 2 starts on time without Dee's vote
+[+59.6s] PASS round 2 shows last round's favourite (no names)
+[+105.6s] PASS results reach every phone
+[+105.6s] PASS results credit the winning caption's author — CAPTION CLASH · OFFICIAL
+[+105.6s] Bea wins Caption Clash
+[+105.6s] B
+[+105.6s] Bea
+[+105.6s] 
+[+105.6s] Top of the table: Bea. Modesty optional.
+[+105.6s] 
+[+105.6s] You came 3rd of 4
+[+105.6s] 75 pts
+[+105.6s] Solid middle of the pack. Room to climb.
+[+105.6s] CAPTION CLASH
+[+105.6s] The room’s favourites
+[+105.6s] 
+[+105.6s] Round 1: A reindeer tries to bake cookies
+[+105.6s] 
+[+105.6s] “Grandpa's new ringtone”
+[+105.6s] by Cal
+[+105.6s] 2
+[+105.6s] VOTES
+[+105.6s] 
+[+105.6s] Round 2: A hedge
+[+105.6s] PASS results explain points (25 per caption, 100 per vote)
+[+105.6s] PASS results show participation
+[+105.7s] PASS no horizontal overflow on results at 320px
+[+105.7s] PASS the TV results still show no author names
+[+106.1s] PASS back in the lobby
+[+106.1s] PASS another Caption Clash starts with new scenes — 201
+[+106.8s] PASS the new game's first scene differs
+[+106.9s] CAPTION ALL PASSED
+[+106.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 107s | cpu 6.9s, peak memory 370 MB

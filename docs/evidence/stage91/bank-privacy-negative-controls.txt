@@ -1,0 +1,6 @@
+Stage 9.1 bank-privacy negative controls (2026-11-11, working tree on 1b6b69e + review changes; probes removed afterwards)
+1. Import graph: added apps/web/src/zz-leak-probe.ts importing src/games/modules/packs/jebena-banks.js.
+   tests/stage91-bank-privacy.test.ts -> 1 failed; reported chain: "src/games/modules/packs/jebena-banks.ts <- apps/web/src/zz-leak-probe.ts".
+2. Built bundle: main.tsx imported the probe; vite build into a scratch outDir; bankCanaries() scan -> 38 canary hits in index-*.js
+   (e.g. "Category Sprint spr-s4-002 (38 reviewed), extended for Stage 9.1"). The real build: 0 hits.
+Both probes deleted; git status showed only the intended changes.

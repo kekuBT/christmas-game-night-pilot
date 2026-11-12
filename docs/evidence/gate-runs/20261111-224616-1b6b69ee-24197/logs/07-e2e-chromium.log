@@ -1,0 +1,34 @@
+$ node scripts/e2e-browser.mjs http://localhost:46225 --browser=chromium --games=all
+# timeout 1800s | worker w1 | server http://localhost:46225 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s91-full/test-results/20261111-224616-1b6b69ee-24197/server-data/w1)
+
+[+0.6s] games: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, jebena-rush, draw-guess (registry order, 15 total)
+[+1.7s] [chromium] room code 5KRVHZ
+[+4.4s] [chromium] lobby roster: 4 players joined
+[+21.3s] [chromium] OK impostor: finished
+[+52.7s] [chromium] OK caption-clash: finished
+[+113.6s] [chromium] OK trivia: finished
+[+135.8s] [chromium] OK word-connections: finished
+[+153.5s] [chromium] OK who-said-that: finished
+[+182.5s] [chromium] OK guess-the-year: finished
+[+204.3s] [chromium] OK closest-wins: finished
+[+223.6s] [chromium] OK category-sprint: finished
+[+239.3s] [chromium] OK charades: finished
+[+286.4s] [chromium] OK geography: finished
+[+331.8s] [chromium] OK math-mayhem: finished
+[+393.9s] [chromium] OK majority-rules: finished
+[+440.8s] [chromium] OK pattern-pulse: finished
+[+472.1s] [chromium] FAIL jebena-rush: locator.click: Timeout 30000ms exceeded.
+[+472.1s] Call log:
+[+472.1s]   - waiting for locator('[data-testid="start-official-jebena-rush"]')
+[+472.1s] 
+[+472.2s] [chromium]   DIAG player=Alex game=pattern-pulse(game-13) server=finished phase=- deadlineIn=224s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Lobby" clock="" | type=server-ended-client-behind
+[+472.2s] [chromium]   DIAG player=Sam game=pattern-pulse(game-13) server=finished phase=- deadlineIn=224s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Pattern Pulse results" clock="" shownOutcome=completed | type=finished-and-shown
+[+472.2s] [chromium]   DIAG player=Jo game=pattern-pulse(game-13) server=finished phase=- deadlineIn=224s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Pattern Pulse results" clock="" shownOutcome=completed | type=finished-and-shown
+[+472.2s] [chromium]   DIAG player=Kim game=pattern-pulse(game-13) server=finished phase=- deadlineIn=224s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Pattern Pulse results" clock="" shownOutcome=completed | type=finished-and-shown
+[+512.6s] [chromium] OK draw-guess: finished
+[+533.7s] [chromium] OK views: championship, TV, memory book, reconnect
+[+533.8s] [chromium] 15/16 passed
+[+533.8s] E2E FAILED: 1 item(s)
+[+533.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# FAIL (exit 1) in 533.8s | cpu 26.9s, peak memory 279 MB

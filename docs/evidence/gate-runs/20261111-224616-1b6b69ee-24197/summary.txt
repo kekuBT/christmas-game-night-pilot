@@ -1,0 +1,16 @@
+
+FAILED (exit 1) | full | run 20261111-224616-1b6b69ee-24197
+  84 passed, 3 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      e2e-chromium (w1) [functional]: [chromium] FAIL jebena-rush: locator.click: Timeout 30000ms exceeded.
+            [chromium]   DIAG player=Alex game=pattern-pulse(game-13) server=finished phase=- deadlineIn=224s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Lobby" clock="" | type=server-ended-clien
+  FAIL      check-f5 (w2) [functional]: FAIL jebena-rush: locator.click: Timeout 30000ms exceeded. | FAIL day playlist: jebena-rush finished without sticking — locator.click: Timeout 30000ms exceeded. | FAIL day playlist: all games finished
+            DIAG player=Alex game=pattern-pulse(game-13) server=finished phase=- deadlineIn=222s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Lobby" clock="" | type=server-ended-client-behind
+  FAIL      check-quick-party (w3) [functional]: FAIL I the retry was the same press (same request id) — [{"id":"8cb821ed-6e8c-435e-8ae0-5e47a8cc55f0","sessionRevision":0}]
+  timing   wall 31m 27s · step time 1h 32m (sum) · 3 workers, 98% busy · 2.94× the same steps run one after another
+           predicted 24–57m (about 31m 04s, low-confidence) → actual 31m 27s (+1%)
+           longest  e2e-chromium 8m 54s, check-f5 7m 23s, check-leaderboard 6m 42s · the longest step is 28% of the wall time
+           machine  CPU mean 33%, peak 99% · memory available ≥ 12856 MB · load peak 5.3 · backpressure 5 wait(s), 21s
+           contention ×1.02 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s91-full/test-results/20261111-224616-1b6b69ee-24197/report.json

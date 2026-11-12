@@ -53,7 +53,7 @@ interface CommonProps {
   players: PublicPlayer[];
 }
 
-function Rules({ gameId, registry, tv }: { gameId: string; registry?: RegistryGame; tv?: boolean }) {
+function Rules({ gameId, registry, tv, hearts }: { gameId: string; registry?: RegistryGame; tv?: boolean; /** Stage 9.1: Jebena Rush's hearts, bound at Start. */ hearts?: number }) {
   const rules = briefingRules(gameId, registry?.tutorial ?? "");
   const timing = timingLines(registry?.lifecycle);
   return (
@@ -61,6 +61,7 @@ function Rules({ gameId, registry, tv }: { gameId: string; registry?: RegistryGa
       <span className="mz-kicker" id="mz-brief-rules">How to play</span>
       <p className="mz-brief__objective" data-testid="briefing-objective">{rules.objective}</p>
       {rules.steps.length > 0 && <ol className="mz-brief__steps">{rules.steps.map((s) => <li key={s}>{s}</li>)}</ol>}
+      {hearts !== undefined && <p className="mz-brief__objective" data-testid="briefing-hearts">This game: everyone starts with {hearts} hearts ({"♥".repeat(hearts)}).</p>}
       {timing.length > 0 && <ul className="mz-brief__timing" data-testid="briefing-timing">{timing.map((s) => <li key={s}>{s}</li>)}</ul>}
       <p className="mz-foot mz-brief__fair">Nobody’s clock is running yet. It starts at the same moment for everyone, once everyone is ready.</p>
     </section>
@@ -168,7 +169,7 @@ export function BriefingScreen(props: CommonProps & {
       </div>
       <h1 className="mz-h1">{title}</h1>
       {clock.warning && <Warning cancelInMs={clock.cancelInMs} />}
-      <Rules gameId={game.gameId} registry={registry} />
+      <Rules gameId={game.gameId} registry={registry} hearts={game.settings?.hearts} />
       <People people={people} allPlayers={players} />
       {participant ? (
         <div className="mz-brief__me">
@@ -258,7 +259,7 @@ export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () 
       )}
       {clock.warning && <Warning cancelInMs={clock.cancelInMs} />}
       <div className="mz-brief__tvgrid">
-        <Rules gameId={game.gameId} registry={registry} tv />
+        <Rules gameId={game.gameId} registry={registry} tv hearts={game.settings?.hearts} />
         <People people={people} allPlayers={players} tv />
       </div>
     </main>

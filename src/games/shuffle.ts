@@ -24,6 +24,7 @@
 // never sends them. Validation is by hand, not Zod, so the web bundle
 // stays free of extra dependencies; the rules are unit-tested.
 import { GAME_MANIFESTS, type GameManifest } from "./manifest.js";
+import { GAME_REGISTRY } from "./registry.js";
 import { seededRng } from "../shared/rng.js";
 
 export type ShuffleMode = "random" | "smart" | "tournament";
@@ -105,11 +106,20 @@ function validateRequest(r: ShuffleRequest): { count: number; exclude: Set<strin
   };
 }
 
+/**
+ * Stage 9.1 (docs/stage9/stage91.md §3): casual-only games (Jebena Rush) are
+ * never picked automatically. Smart Shuffle, Quick Party and tournament
+ * schedules all draw from here and serve Cups too, where such a game can't
+ * play; a host starts it from the library.
+ */
+const NEVER_AUTO_PICKED: ReadonlySet<string> = new Set(GAME_REGISTRY.filter((g) => g.casualOnly).map((g) => g.id));
+
 /** The hard-constraint filter. Exported so callers (and the UI) can show how many games fit before picking. */
 export function eligibleGames(manifests: readonly GameManifest[], req: ShuffleRequest): GameManifest[] {
   const { exclude, incompatible } = validateRequest(req);
   return manifests.filter(
     (m) =>
+      !NEVER_AUTO_PICKED.has(m.id) &&
       req.playerCount >= m.minPlayers &&
       req.playerCount <= m.maxPlayers &&
       !exclude.has(m.id) &&

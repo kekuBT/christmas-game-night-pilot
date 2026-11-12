@@ -1,7 +1,8 @@
 import { createHash, randomInt } from "node:crypto";
 import { moduleFor, moduleForAction } from "../games/modules/index.js";
 import type { ModuleContext } from "../games/modules/types.js";
-import { getGame } from "../games/registry.js";
+import { GAME_REGISTRY, getGame } from "../games/registry.js";
+import { sameSettings, validateGameSettings, type GameSettings } from "../games/settings.js";
 import { PARTY_TRANSITION_MINUTES, validatePartyPlan } from "../games/party.js";
 import { CLIENT_PROTOCOL, MATH_OPEN_PROTOCOL, MIN_CLIENT_PROTOCOL, NUMERIC_INPUT_PROTOCOL } from "../shared/clientProtocol.js";
 import { withinNumericInput } from "../shared/numericInput.js";
@@ -226,7 +227,13 @@ export type StartRefusedCode =
   | "ON_BREAK" | "SESSION_CONFLICT" | "ATTEMPT_ENDED" | "REMATCH_NOT_LATEST" | "GAME_DOESNT_FIT"
   // Stage 8.2 (docs/stage8/stage82.md §3.4): the host changed the room's
   // content since this Start was pressed (nothing started; press again).
-  | "CONTENT_CHANGED";
+  | "CONTENT_CHANGED"
+  // Stage 9.1 (docs/stage9/stage91.md §6): a game's settings were not valid
+  // (nothing started), or the game plays in casual rooms only.
+  | "INVALID_SETTINGS" | "CASUAL_ONLY"
+  // Stage 9.1 (§8): the host changed the game's settings (Jebena Rush's
+  // hearts) since this Start was pressed (nothing started; press again).
+  | "SETTINGS_CHANGED";
 export class StartRefused extends Error {
   constructor(readonly code: StartRefusedCode, message: string, readonly readiness: Readiness, readonly detail?: Record<string, unknown>) {
     super(message);
@@ -272,6 +279,8 @@ export interface SessionOp {
   base?: number;
   /** Stage 8.2: a solo Start's content (its retry must be the same press: the same content). */
   season?: SessionSeason;
+  /** Stage 9.1: a start's game settings (its retry must carry the same ones). */
+  settings?: GameSettings;
 }
 export const SESSION_OPS_LIMIT = 64;
 
@@ -294,7 +303,7 @@ export class HostRefused extends Error {
 
 /** Stage 7.2: a break the server refused (HTTP 403/409). Nothing changed. */
 export class SessionRefused extends Error {
-  constructor(readonly code: "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "GAME_ACTIVE" | "SESSION_CONFLICT", message: string, readonly session?: SessionView) {
+  constructor(readonly code: "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "GAME_ACTIVE" | "SESSION_CONFLICT" | "INVALID_SETTINGS", message: string, readonly session?: SessionView) {
     super(message);
   }
 }
@@ -401,6 +410,8 @@ export interface GameInstance {
    * started before Stage 8.2.
    */
   season?: SessionSeason;
+  /** Stage 9.1: the game's validated settings (Jebena Rush's hearts), bound at Start; Play again reuses them. */
+  settings?: GameSettings;
   deadlineAt?: number;
   seed: number;
   /** Player ids that have submitted at least one accepted intent in this game.
@@ -518,6 +529,13 @@ export class RoomEngine {
    * Each game binds it at its start. Persisted; unused in a Cup.
    */
   contentSeason: SessionSeason = DEFAULT_SESSION_SEASON;
+  /**
+   * Stage 9.1 (docs/stage9/stage91.md §8, D-S91-07): what a casual room's
+   * host or cohost has chosen for a game that takes settings (Jebena Rush's
+   * hearts). Everyone sees it in the lobby; a Start binds it. Only valid,
+   * non-default choices are kept; persisted.
+   */
+  lobbySettings: Record<string, GameSettings> = {};
   /** The content library (the shipped packs; tests may inject their own). */
   private _content: ContentLibrary | null = null;
   get content(): ContentLibrary { return (this._content ??= contentLibrary()); }
@@ -796,7 +814,7 @@ export class RoomEngine {
    *   in `proceedWithout`. Practice games do not ask.
    * Nobody is ever added to a game after it starts.
    */
-  startGame(hostId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt; season?: SessionSeason } = {}): GameInstance {
+  startGame(hostId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt; season?: SessionSeason; settings?: unknown; /** Play again: the settings are the finished game's, not the lobby's. */ settingsFromSource?: boolean } = {}): GameInstance {
     if (this.hostId !== hostId && !this.cohosts.has(hostId)) throw new Error("Only host/cohost can start a game");
     // Stage 7.2: a casual room's own Start may carry an attempt (§3.8): it
     // must be made against the current session state, and is remembered.
@@ -827,6 +845,9 @@ export class RoomEngine {
     if (attempt) this.assertSessionRevision(attempt, this.readiness());
     // Stage 8.2 (§3.4): the content this game deals, bound now.
     const season = this.seasonForStart(opts.season);
+    // Stage 9.1 (§6, D-S91-07): a game's settings, validated and bound now. Jebena Rush plays in casual rooms only.
+    if (game.casualOnly && this.kind !== "casual") throw new StartRefused("CASUAL_ONLY", `${game.title} plays in casual rooms only.`, this.readiness());
+    const settings = this.settingsForStart(gameId, opts.settings, opts.settingsFromSource === true);
     // Stage 7.2: a casual room on a break starts nothing until the host resumes.
     this.assertNotOnBreak(this.readiness());
     // Stage 6.1: in a solo room, a round left open (reload, leaving mid-round)
@@ -907,6 +928,7 @@ export class RoomEngine {
       id,
       gameId,
       official: opts.official ?? false,
+      ...(settings ? { settings } : {}),
       status: briefing ? "briefing" : "playing",
       players: playerIds,
       questions: gameId === "math-mayhem" ? generateMathQuestions(seed) : undefined,
@@ -944,7 +966,7 @@ export class RoomEngine {
                           ? { roundIndex: 0, submissions: {} }
                           : gameId === "charades"
                             ? initCharades(playerIds)
-                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}) }),
+                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}) }),
     };
     this.games.set(id, instance);
     // Stage 7.2: every new game in a casual room is a new session state, so
@@ -953,7 +975,7 @@ export class RoomEngine {
     // monotonic: a forgotten old press can never start anything).
     if (this.kind === "casual" || this.kind === "solo") {
       this.session.revision += 1;
-      if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id, ...(season ? { season } : {}), ...(this.kind === "solo" ? { actor: hostId, base: attempt.sessionRevision } : {}) });
+      if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(this.kind === "solo" ? { actor: hostId, base: attempt.sessionRevision } : {}) });
     }
     // Stage 8.2: a solo Start's content is the solo player's choice; the room keeps it (reload, Play again).
     if (this.kind === "solo" && season) this.contentSeason = season;
@@ -977,13 +999,16 @@ export class RoomEngine {
    * must be made against the current session (§3.8). It never moves a
    * lineup on.
    */
-  startChosen(actorId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt; season?: SessionSeason } = {}): { game: GameInstance; replay: boolean } {
+  startChosen(actorId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt; season?: SessionSeason; settings?: unknown } = {}): { game: GameInstance; replay: boolean } {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can start a game");
+    // Stage 9.1: settings are part of the command; a repeat with other settings is another command.
+    const settingsCheck = validateGameSettings(gameId, opts.settings);
+    if (!settingsCheck.ok) throw new StartRefused("INVALID_SETTINGS", settingsCheck.reason, this.readiness());
     if (this.kind === "solo" && opts.attempt) {
       const seen = this.resolveSoloStart(actorId, gameId, opts.attempt, opts.season);
       if (seen) return seen;
     } else if (this.kind === "casual" && opts.attempt) {
-      const seen = this.resolveAttempt(opts.attempt, `start:${gameId}`, "start", opts.season);
+      const seen = this.resolveAttempt(opts.attempt, `start:${gameId}`, "start", opts.season, settingsCheck.settings);
       if (seen) return seen;
     }
     return { game: this.startGame(actorId, gameId, opts), replay: false };
@@ -1282,9 +1307,9 @@ export class RoomEngine {
    * the same id for something else is refused. A start whose briefing was
    * cancelled ends there: ATTEMPT_ENDED, and nothing new starts.
    */
-  private resolveAttempt(attempt: SessionAttempt, key: string, kind: "start", season: SessionSeason | undefined): { game: GameInstance; replay: true } | null;
+  private resolveAttempt(attempt: SessionAttempt, key: string, kind: "start", season: SessionSeason | undefined, settings?: GameSettings): { game: GameInstance; replay: true } | null;
   private resolveAttempt(attempt: SessionAttempt, key: string, kind: "break"): SessionOp | null;
-  private resolveAttempt(attempt: SessionAttempt, key: string, kind: "start" | "break", season?: SessionSeason): { game: GameInstance; replay: true } | SessionOp | null {
+  private resolveAttempt(attempt: SessionAttempt, key: string, kind: "start" | "break", season?: SessionSeason, settings?: GameSettings): { game: GameInstance; replay: true } | SessionOp | null {
     const op = this.session.ops.find((o) => o.id === attempt.id);
     if (!op) return null;
     if (op.key !== key) throw new Error("That request id was already used for something else.");
@@ -1294,6 +1319,8 @@ export class RoomEngine {
     // too). The same id with other content is another command: refused, with
     // nothing started or used; never resolved against the room's content now.
     if ((op.season ?? DEFAULT_SESSION_SEASON) !== (season ?? DEFAULT_SESSION_SEASON)) throw new Error("That request id was already used for something else.");
+    // Stage 9.1: so are its settings (Jebena Rush's hearts).
+    if (!sameSettings(op.settings, settings)) throw new Error("That request id was already used for something else.");
     const game = op.gameInstanceId ? this.games.get(op.gameInstanceId) : undefined;
     if (game) return { game, replay: true };
     throw new StartRefused("ATTEMPT_ENDED", "That start was cancelled before play, so nothing new started. Choose again.", this.readiness(), { session: this.sessionView() });
@@ -1350,6 +1377,64 @@ export class RoomEngine {
     if (bound !== (requested ?? DEFAULT_SESSION_SEASON)) {
       throw new StartRefused("CONTENT_CHANGED", `That game already started with ${SEASON_LABEL[bound]} content, not what this press asked for, so nothing new started. Check the room, then choose again.`, readiness, { contentSeason: this.contentSeason, session: this.sessionView() });
     }
+  }
+
+  /** Stage 9.1: the lobby's settings for a game that takes any (its defaults when none were chosen). */
+  lobbySettingsFor(gameId: string): GameSettings | undefined {
+    const check = validateGameSettings(gameId, this.lobbySettings[gameId]);
+    return check.ok ? check.settings : undefined;
+  }
+
+  /** Stage 9.1: every game's lobby settings, for the projection (casual rooms). */
+  lobbySettingsView(): Record<string, GameSettings> {
+    const out: Record<string, GameSettings> = {};
+    for (const g of GAME_REGISTRY) {
+      const s = this.lobbySettingsFor(g.id);
+      if (s) out[g.id] = s;
+    }
+    return out;
+  }
+
+  /**
+   * Stage 9.1 (§6, §8, D-S91-07): the settings a game starts with, validated
+   * and bound now.
+   * - Anything a game doesn't take is refused (INVALID_SETTINGS).
+   * - In a casual room, a Start carries the settings its presser saw. If the
+   *   lobby's changed since (the host or a cohost chose other hearts),
+   *   SETTINGS_CHANGED and nothing starts. Like content (Stage 8.2), a Start
+   *   that names none is a press for the defaults, never a silent adoption.
+   * - Play again plays the finished game's own settings.
+   */
+  private settingsForStart(gameId: string, requested: unknown, fromSource: boolean): GameSettings | undefined {
+    const check = validateGameSettings(gameId, requested);
+    if (!check.ok) throw new StartRefused("INVALID_SETTINGS", check.reason, this.readiness());
+    if (fromSource || this.kind !== "casual" || !check.settings) return check.settings;
+    const current = this.lobbySettingsFor(gameId);
+    if (!sameSettings(check.settings, current)) {
+      const title = getGame(gameId).title;
+      throw new StartRefused("SETTINGS_CHANGED", `${title} is now set to ${current?.hearts ?? "other"} hearts each, not what this press asked for, so nothing started. Check, then press Start again.`, this.readiness(), { lobbySettings: this.lobbySettingsView(), session: this.sessionView() });
+    }
+    return check.settings;
+  }
+
+  /**
+   * Stage 9.1 (§8): the host or a cohost chooses a game's settings in a
+   * casual lobby (Jebena Rush: 3, 5 or 7 hearts), the same way as content
+   * (setContentSeason): casual rooms only; asking for what's already set
+   * changes nothing; otherwise it must be made against the current session
+   * revision, and moves it on, so a Start pressed before it is stale. A game
+   * in play or a briefing already frozen keeps the settings it started with.
+   */
+  setLobbySettings(actorId: string, gameId: string, raw: unknown, baseRevision: number): { lobbySettings: Record<string, GameSettings>; session: SessionView; changed: boolean } {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new SessionRefused("NOT_HOST", "Only the host or a cohost can change a game's settings.");
+    if (this.kind !== "casual") throw new SessionRefused("NOT_A_CASUAL_ROOM", "Game settings are chosen in a casual room's lobby.");
+    const check = validateGameSettings(gameId, raw);
+    if (!check.ok || !check.settings) throw new SessionRefused("INVALID_SETTINGS", check.ok ? "This game has no settings." : check.reason);
+    if (sameSettings(check.settings, this.lobbySettingsFor(gameId))) return { lobbySettings: this.lobbySettingsView(), session: this.sessionView(), changed: false };
+    if (baseRevision !== this.session.revision) throw new SessionRefused("SESSION_CONFLICT", "Something changed since you looked. Here is the latest.", this.sessionView());
+    this.lobbySettings = { ...this.lobbySettings, [gameId]: check.settings };
+    this.session.revision += 1;
+    return { lobbySettings: this.lobbySettingsView(), session: this.sessionView(), changed: true };
   }
 
   /** Stage 7.2: remember a request that took effect; the oldest go first (a forgotten one is stale by its revision). */
@@ -1531,9 +1616,10 @@ export class RoomEngine {
     if (here < game.minPlayers || here > game.maxPlayers) {
       throw new StartRefused("GAME_DOESNT_FIT", here < game.minPlayers ? `${game.title} needs at least ${game.minPlayers} players; ${here} ${here === 1 ? "is" : "are"} here.` : `${game.title} is for up to ${game.maxPlayers} players; ${here} are here.`, readiness, { gameId: source.gameId, minPlayers: game.minPlayers, maxPlayers: game.maxPlayers, here });
     }
-    const started = this.startGame(actorId, source.gameId, { official: false, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}), ...(opts.season ? { season: opts.season } : {}) });
+    // Stage 9.1: Play again plays with the same settings (Jebena Rush's hearts).
+    const started = this.startGame(actorId, source.gameId, { official: false, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}), ...(opts.season ? { season: opts.season } : {}), ...(source.settings ? { settings: source.settings, settingsFromSource: true } : {}) });
     started.rematchOf = source.id;
-    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id, ...(started.season ? { season: started.season } : {}) });
+    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id, ...(started.season ? { season: started.season } : {}), ...(started.settings ? { settings: started.settings } : {}) });
     return { game: started, replay: false };
   }
 
@@ -1600,7 +1686,7 @@ export class RoomEngine {
     }
     const started = this.startGame(actorId, gameId, { official: false, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}), ...(opts.season ? { season: opts.season } : {}) });
     item.gameInstanceId = started.id;
-    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id, ...(started.season ? { season: started.season } : {}) });
+    if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id, ...(started.season ? { season: started.season } : {}), ...(started.settings ? { settings: started.settings } : {}) });
     return { game: started, replay: false };
   }
 
@@ -1817,7 +1903,7 @@ export class RoomEngine {
 
   /** Stage 5: the context a game module acts in. */
   private moduleCtx(game: GameInstance, now: number): ModuleContext {
-    return { now, players: game.players, active: this.activePlayers(game), scale: this.lifecycleScale };
+    return { now, players: game.players, active: this.activePlayers(game), scale: this.lifecycleScale, ...(game.deadlineAt !== undefined ? { gameDeadlineAt: game.deadlineAt } : {}) };
   }
 
   /**
@@ -2574,6 +2660,8 @@ export class RoomEngine {
       official: g.official,
       status: g.status,
       ...(g.season ? { season: g.season } : {}),
+      // Stage 9.1: a game's start settings (Jebena Rush's hearts) are public rules, not secrets.
+      ...(g.settings ? { settings: g.settings } : {}),
       timedOut: false,
       day: g.day ?? 1,
       players: g.players,
@@ -3172,6 +3260,8 @@ export class RoomEngine {
       official: g.official,
       status: g.status,
       ...(g.season ? { season: g.season } : {}),
+      // Stage 9.1: a game's start settings (Jebena Rush's hearts) are public rules, not secrets.
+      ...(g.settings ? { settings: g.settings } : {}),
       timedOut: g.timedOut ?? false,
       day: g.day ?? 1,
       deadlineAt: g.deadlineAt,
@@ -3212,6 +3302,8 @@ export class RoomEngine {
       ...(this.kind === "casual" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
       // Stage 8.2: what this solo or casual session deals (public; never a device's look).
       ...(this.kind !== "cup" ? { contentSeason: this.contentSeason } : {}),
+      // Stage 9.1 (§8): each settings game's lobby choice (Jebena Rush's hearts), shown to everyone.
+      ...(this.kind === "casual" ? { lobbySettings: this.lobbySettingsView() } : {}),
       // Stage 8.2 (feedback 6795825877, 4): why the latest briefing ended without
       // play, so every screen can say it plainly (public facts only).
       ...(((c) => (c ? { briefingCancelled: c } : {}))(this.lastBriefingCancel(now))),
@@ -3314,6 +3406,8 @@ export class RoomEngine {
       contentUsage: this.contentUsage,
       contentSeq: this.contentSeq,
       ...(this.kind !== "cup" ? { contentSeason: this.contentSeason } : {}),
+      // Stage 9.1: the lobby's game settings (casual rooms).
+      ...(Object.keys(this.lobbySettings).length ? { lobbySettings: this.lobbySettings } : {}),
       party: this.party,
       partyRevision: this.partyRevision,
       session: this.session,
@@ -3345,6 +3439,15 @@ export class RoomEngine {
     // Stage 8.2 (§3.5): a room saved before content seasons (or with an
     // unreadable value) is Everyday.
     engine.contentSeason = isSessionSeason(data["contentSeason"]) ? data["contentSeason"] : DEFAULT_SESSION_SEASON;
+    // Stage 9.1: only settings that are still valid come back (anything else is the game's default).
+    engine.lobbySettings = {};
+    const savedSettings = data["lobbySettings"];
+    if (savedSettings && typeof savedSettings === "object" && !Array.isArray(savedSettings)) {
+      for (const [gid, raw] of Object.entries(savedSettings as Record<string, unknown>)) {
+        const check = validateGameSettings(gid, raw);
+        if (check.ok && check.settings) engine.lobbySettings[gid] = check.settings;
+      }
+    }
     // The Cup's rules come from its saved record; a snapshot from before
     // Sprint 4 keeps the rules it was played under (src/server/cup.ts).
     const firstEvent = (data["ledger"] as LedgerEvent[] | undefined)?.[0]?.createdAt ?? 0;

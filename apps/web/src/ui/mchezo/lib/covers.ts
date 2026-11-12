@@ -11,7 +11,7 @@
  */
 
 export type CoverAccent = "coral" | "sun" | "mint" | "iris" | "pink" | "lime";
-export type CoverGlyph = "quiz" | "grid" | "math" | "year" | "target" | "globe" | "sprint" | "bubbles" | "quote" | "odd" | "act" | "ring" | "split" | "pulse" | "brush";
+export type CoverGlyph = "quiz" | "grid" | "math" | "year" | "target" | "globe" | "sprint" | "bubbles" | "quote" | "odd" | "act" | "ring" | "split" | "pulse" | "brush" | "jebena";
 
 export const ACCENTS: Readonly<Record<CoverAccent, readonly [string, string]>> = {
   coral: ["#FF6B4A", "#B8432A"],
@@ -39,6 +39,8 @@ export const COVERS: Readonly<Record<string, { accent: CoverAccent; glyph: Cover
   "majority-rules": { accent: "sun", glyph: "split" },
   "pattern-pulse": { accent: "pink", glyph: "pulse" },
   "draw-guess": { accent: "coral", glyph: "brush" },
+  // Stage 9.1: an original jebena (clay coffee pot) with its steam.
+  "jebena-rush": { accent: "coral", glyph: "jebena" },
 };
 
 export function coverOf(gameId: string): { accent: CoverAccent; glyph: CoverGlyph } {
@@ -71,6 +73,9 @@ export function glyphSvg(kind: CoverGlyph): string {
     // Stage 5: two answer cards with their vote bars, and the room's "versus" dot.
     case "split": return `<rect x="18" y="30" width="38" height="52" rx="8" fill="${ink}"/><rect x="64" y="30" width="38" height="52" rx="8" fill="${cream}"/><circle cx="60" cy="56" r="11" fill="${cream}" stroke="${ink}" stroke-width="5"/><path d="M24 96 H50" stroke="${ink}" stroke-width="8" stroke-linecap="round"/><path d="M70 96 H84" stroke="${cream}" stroke-width="8" stroke-linecap="round"/>`;
     // Stage 5: a pulse line through a remembered sequence of shapes.
+    // Stage 9.1: an original jebena: a round clay body with a cream band, a narrow neck,
+    // a spout, a handle from neck to body, and two curls of steam rising from the spout.
+    case "jebena": return `<ellipse cx="56" cy="104" rx="18" ry="4" fill="${ink}"/><circle cx="56" cy="78" r="25" fill="${ink}"/><path d="M48,56 L50,30 Q56,24 62,30 L64,56 Z" fill="${ink}"/><path d="M62,44 L84,30" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M50,36 C30,34 24,60 36,72" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M36,80 Q56,94 76,80" stroke="${cream}" stroke-width="4" stroke-linecap="round" fill="none"/><circle cx="56" cy="70" r="4" fill="${cream}"/><path d="M90,24 C84,17 96,12 90,4" stroke="${cream}" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M101,30 C95,23 107,18 101,10" stroke="${cream}" stroke-width="4" stroke-linecap="round" fill="none"/>`;
     case "pulse": return `<polyline points="12,66 32,66 40,46 50,86 60,38 70,74 78,66 108,66" fill="none" stroke="${ink}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/><circle cx="28" cy="34" r="8" fill="${cream}"/><rect x="52" y="90" width="14" height="14" rx="3" fill="${cream}"/><polygon points="90,26 100,42 80,42" fill="${cream}"/>`;
     // Stage 5: a pencil and the line it just drew.
     case "brush": return `<path d="M18 90 C32 62 44 98 58 72 S84 66 98 82" fill="none" stroke="${cream}" stroke-width="7" stroke-linecap="round"/><g transform="rotate(40 76 44)"><rect x="68" y="12" width="16" height="50" rx="3" fill="${ink}"/><polygon points="68,62 84,62 76,78" fill="${cream}"/></g>`;

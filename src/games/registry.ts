@@ -13,6 +13,8 @@ export interface GameDescriptor {
    * solo room refuses every other game (RoomEngine.startGame, NOT_A_SOLO_GAME).
    */
   soloPlay?: true;
+  /** Stage 9.1: plays in casual rooms only (never a Cup or solo room); the server refuses it elsewhere. */
+  casualOnly?: true;
   modes: GameMode[];
   status: "implemented" | "not-implemented";
   defaultDurationMinutes: number;
@@ -35,6 +37,8 @@ export const GAME_REGISTRY: GameDescriptor[] = [
   // Stage 5 (Practice-only until the owner approves their Cup scoring).
   { id: "majority-rules", title: "Majority Rules", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 6, tutorial: "Predict which way the room will vote, then cast your own vote." },
   { id: "pattern-pulse", title: "Pattern Pulse", minPlayers: 1, soloPlay: true, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 5, tutorial: "Watch a sequence of shapes, then tap it back in order. It grows each round." },
+  // Stage 9.1: casual rooms only (no solo variant), practice-only.
+  { id: "jebena-rush", title: "Jebena Rush", minPlayers: 2, recommendedPlayers: 3, maxPlayers: 10, casualOnly: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "Name something in the category before the steam boils over, then pass the jebena. Run out of time and you lose a heart." },
   { id: "draw-guess", title: "Draw & Guess", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 10, tutorial: "One player draws a secret word; everyone else races to guess it." },
 ];
 
