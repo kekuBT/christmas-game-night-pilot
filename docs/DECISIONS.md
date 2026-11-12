@@ -1094,3 +1094,38 @@ Handoff 6807907986 (PR #14), under D-WF-01. Spec: `docs/stage9/stage91.md`. The 
   - **What:** the answer bank, the matcher and the module live on the server only. A unit test walks the web app's import graph and fails if it reaches them (or the module registry); the browser driver scans every built file and the public responses (page, service worker, manifest, assets, game list) for bank-only canaries (its version, source notes, near-miss reasons, distinctive answers). Both were shown to fail on a deliberately leaking build. So the service worker can never cache the bank as ordinary JS.
   - **Why:** projections were already checked; an import is the other way a bank leaks (review 6808081378, 4).
 
+
+## Stage 9.2: Spectrum foundation (2026-11-12, branch `claude/stage9-2-spectrum`, from the Stage 9.1 head `aaa6981`)
+
+Handoff 6811101479 (PR #15), under D-WF-01. Spec: `docs/stage9/stage92.md`. The rules are the handoff's reversible defaults unless marked as mine.
+
+- **D-S92-01 A pure module, not yet in the product.**
+  - **What:** `src/games/modules/spectrum.ts` and `packs/spectrum-pairs.ts`. It is not registered in `GAME_MODULES`, the registry, the manifest or the lifecycle policy; a test checks that. The planned policy entry is in the spec (§5).
+  - **Why:** the rules and privacy contract get reviewed before any player can reach them.
+- **D-S92-02 Four seeded rounds, chosen at the start.**
+  - **What:** four different pairs and targets (whole numbers from 10 to 90), chosen once from the seed and persisted.
+  - **The clue-giver:** rotates to the next player in seat order who is still taking part.
+  - **The guessers:** everyone else still taking part.
+- **D-S92-03 Clue rules (the digit rule is mine).**
+  - **What:** control characters are removed, spaces collapsed and the clue trimmed; it must be 1–80 characters, with **no digits**.
+  - **Why:** a clue of "73" would make the round pointless. It is a reversible default; the owner or reviewer may allow digits.
+- **D-S92-04 The team's guess and the points.**
+  - **What:** the median of the guesses received. With an even count, the mean of the middle two, rounded half up. The points are 10 within 5, 7 within 10, 4 within 20, otherwise 0, for a maximum of 40.
+  - **No invented guesses:** no guesses means 0 points.
+- **D-S92-05 Sit-outs and endings.**
+  - **The clue-giver leaving before the clue,** or no clue in time: the round is skipped for 0.
+  - **The clue-giver leaving after the clue:** the round goes on.
+  - **A guesser leaving:** their required guess is removed, and any guess they already sent stays.
+  - **Fewer than two still taking part:** the match finishes with the points earned so far; an unrevealed round scores nothing.
+  - **Disconnects change nothing.**
+- **D-S92-06 Exactly once.**
+  - **What:** every send names its round; the phase must fit; payloads are strict (only the action's own fields and the client's `phaseKey`, so no target or score can be sent in); a guess is immutable.
+  - **The module's own idempotent expiry:** it records each phase's start (the event's instant) and expires a phase only at `start + duration`. So a repeated or early expiry does nothing, and catch-up walks the original deadlines.
+- **D-S92-07 Privacy by role and phase (spec §7).**
+  - **What:** before the reveal, only the clue-giver sees the target. Individual guesses are never shown to anyone but their sender, even after the reveal: only the team's guess and counts. Future rounds, the seed and the pack are server-only.
+- **D-S92-08 One team score in a per-player pipeline.**
+  - **What:** `scores()` gives every roster player the same team total, so no generic ranking can name one winner. `spectrumTeamResult()` is for the next slice's results screen.
+  - **Proposed next:** an optional `teamResult` on the module contract and a team results branch. Practice and casual only, so it never reaches a Cup ledger, and no personal best.
+- **D-S92-09 An optional `GameModule.onFinish`.**
+  - **What:** RoomEngine's `finalize` calls it once, for every ending, before the result is recorded. Jebena Rush uses it to drop private tries when the room's match limit ends a match. Its own endings use one finish helper.
+  - **Scope:** no other module defines it.

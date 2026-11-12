@@ -2121,5 +2121,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - One shared team score (the per-player results pipeline conflict and a bounded proposal, §8).
   - An accessibility contract for the next UI slice.
 - **Done so far:** `abafb95`, the Jebena terminal-feedback cleanup: an optional `GameModule.onFinish`, called once by `finalize`. It has 7 terminal-path tests; 6 of them fail without the change.
-- **Next:** the module and pack, the tests, the gates, and a new completed report.
+- **Built:**
+  - `src/games/modules/spectrum.ts` and `packs/spectrum-pairs.ts` (`sp-pairs-1`, 30 original pairs), not registered anywhere.
+  - D-S92-01..09 in `docs/DECISIONS.md`; spec §13 maps the tests.
+- **Tests:**
+  - `tests/stage92-spectrum.test.ts` (39);
+  - `tests/stage92-jebena-terminal.test.ts` (7);
+  - `tests/stage91-bank-privacy.test.ts` now also keeps Spectrum's module out of the web app.
+- **Mutation checks:** a public target leak fails 4 tests; other players' guesses in a view fail 2; half-down rounding fails 1.
+- **Next:** sequential clean fast then full gates, and a new completed report. The existing product is unchanged; the Spectrum UI and real devices are not run.
 

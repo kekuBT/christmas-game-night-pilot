@@ -57,7 +57,7 @@ The copy, the art direction and the content are original. No external AI and no 
     - Their required guess for this round is removed. A guess they already sent stays, because accepted guesses can't be changed.
     - They take no future role.
     - If every remaining required guess is then in, the guess phase ends.
-    - If no one can still guess and no guess was sent, the round is skipped for 0.
+    - A round can't run out of guessers while the match goes on: with fewer than two players still taking part, the match ends (next point).
   - **Fewer than two players still taking part:** the match ends cleanly with the points earned so far and the reason. An unrevealed round scores nothing.
   - **A disconnect alone changes nothing.** No role or roster changes, and no clock pauses. A disconnected guesser simply may not guess in time.
 
@@ -174,3 +174,25 @@ Nothing in the room changes in this slice.
   - the existing product is unchanged;
   - the Spectrum UI and real devices are not run;
   - there are no screenshots of a flow that doesn't exist yet.
+
+## 13. As built and tested
+| Area | Tests |
+|---|---|
+| Content | `tests/stage92-spectrum.test.ts`: 30 pairs, stable ids, two different ends, a one-line meaning, no repeats; nothing Christmas-specific and nothing that ranks people; four different pairs and targets from 10 to 90 for 300 seeds; the same seed gives the same match |
+| Rules | the median and its rounding; every scoring boundary, both directly and through real rounds on either side of the target |
+| Whole matches | at 2, 4 and 10 players: the rotation, the early end of the guess phase, the total, an equal team score for everyone, participation |
+| Nobody acting | everyone disconnected, at 2, 4 and 10 players: every round skips on its clock, roles never change, and the match ends |
+| Missing input | no clue, no guesses, and only the guesses received (one player connected) |
+| Sit-outs | the clue-giver before and after the clue; a guesser before and after their guess; fewer than two left; two players; during a reveal |
+| Refusals (state unchanged, deep-equal) | injected targets, points and scores; the wrong actor; a stale round; the wrong phase; a duplicate clue or guess; invalid numbers; empty, long or digit clues; after the end |
+| Exactly once | a repeated or early expiry; the exact deadline; the time scale; catch-up after a restart equal to a clock that never stopped (bounded, idempotent, every phase starting at the previous deadline) |
+| Privacy | canaries (the seed 987654321, targets 73/61/37/29, guesses 44/58), checked first to be in the state. For each phase (clue, guess, reveal, next round, finished) and each role: the clue-giver, the host as a guesser, the other guessers, a sat-out player, spectators/TV and late joiners. Plus the views after a save and reload |
+| Not in the product | not a registered module, game, manifest or policy; its actions reach nothing; `tests/stage91-bank-privacy.test.ts` keeps the module and its pairs out of the web app |
+| Jebena cleanup | `tests/stage92-jebena-terminal.test.ts`: every terminal path |
+
+**Mutation checks (temporary, reverted):**
+- a target in the public view fails 4 tests;
+- other players' guesses in a guesser's view fail 2;
+- rounding .5 down fails 1;
+- the Jebena cleanup removed fails 6 of its 7 tests.
+
