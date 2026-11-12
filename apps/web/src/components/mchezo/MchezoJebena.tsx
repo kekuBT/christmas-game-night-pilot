@@ -323,7 +323,7 @@ export function MchezoJebena({ game, players, playerId, title, intent, error, la
 }
 
 /** Results: places (the winner kept the jebena), cups, answers, timeouts; points explained. */
-export function MchezoJebenaResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; next?: ReactNode }) {
+export function MchezoJebenaResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next, save }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; next?: ReactNode; save?: ReactNode }) {
   const { casual } = useMchezo();
   const st = (game.state ?? publicGame?.state ?? {}) as JebenaView;
   const nameOf = (id?: string) => players.find((p) => p.id === id)?.displayName ?? "Someone";
@@ -334,6 +334,8 @@ export function MchezoJebenaResults({ game, publicGame, players, playerId, title
       <GameHeader title={title} objective={jebenaEndLine(st.end, st.standings, nameOf, playerId)} accent={1} />
       {/* Stage 10.2 (D-S102-02/04): a line for a genuine moment, under the result; nothing when no fact fits. */}
       {(() => { const m = jebenaMoment(st); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
+      {/* Stage 10.4: Save a memory, under the result (What's next and its controls stay above). */}
+      {save}
       <Standings st={st} nameOf={nameOf} meId={playerId} cups={{ gameId: game.id, surface: "result" }} />
       <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every cup still whole. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="jebena-rush" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />

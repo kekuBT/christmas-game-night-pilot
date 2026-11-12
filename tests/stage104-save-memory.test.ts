@@ -4,6 +4,8 @@
 // different request overwrite it; facts, refusals and authority are Stage 10.3's; nothing touches a score.
 import { afterEach, describe, expect, it } from "vitest";
 import { SPECTRUM_ROUNDS, type SpectrumState } from "../src/games/modules/spectrum.js";
+import { saveMemoryFacts, SAVE_MEMORY_GAMES } from "../apps/web/src/ui/mchezo/lib/saveMemory.js";
+import type { PlayerGame, PublicPlayer } from "../apps/web/src/types.js";
 import { FakeClock, Harness, type Json, type Player } from "./helpers/harness.js";
 
 async function casualRoom(h: Harness, name = "Save night"): Promise<void> {
@@ -182,5 +184,32 @@ describe("Stage 10.4: Save a memory from a result screen (over HTTP)", () => {
     await save(h, amina, { fromGame: sp, text: "Team!", requestId: KEY });
     await save(h, host, { fromGame: jr, text: "Kept it", requestId: KEY });
     expect(snapshot()).toBe(before);
+  });
+});
+
+// ---------- the composer's preview (pure) ----------
+
+const players = [{ id: "player-1", displayName: "Keku" }, { id: "player-2", displayName: "Amina" }, { id: "player-3", displayName: "Baraka" }] as unknown as PublicPlayer[];
+const team = (end: "completed" | "too-few-players" | null, revealed: number, total = revealed * 10) => ({ kind: "spectrum" as const, total, max: 40, roundsPlanned: 4, end, rounds: Array.from({ length: revealed }, (_, i) => ({ roundNo: i + 1, pair: { left: "a", right: "b", meaning: "" }, clue: "c", reason: "scored" as const, target: 50, aggregate: 50, distance: 0, points: 10, guesses: 2 })) });
+const pg = (o: Partial<PlayerGame> & { gameId: string }) => ({ id: "game-7", status: "finished", ...o }) as unknown as PlayerGame;
+
+describe("saveMemoryFacts: what the composer shows, and whether it may save", () => {
+  it("Spectrum, completed or genuinely early: the shared team line; early says so", () => {
+    expect(saveMemoryFacts({ game: pg({ gameId: "spectrum", outcome: { reason: "completed", team: team("completed", 4) } as never }), players, title: "Spectrum" }))
+      .toEqual({ saveable: true, lines: ["Spectrum team result: 40 out of 40 · all 4 rounds played"] });
+    expect(saveMemoryFacts({ game: pg({ gameId: "spectrum", outcome: { reason: "completed", team: team("too-few-players", 1) } as never }), players, title: "Spectrum" }).lines)
+      .toEqual(["Spectrum team result: 10 out of 40 · ended early, 1 of 4 rounds played (fewer than two players were left)"]);
+  });
+  it("unavailable, said plainly: a room-ended Spectrum match, a voided game, an unfinished one, a game without the action", () => {
+    expect(saveMemoryFacts({ game: pg({ gameId: "spectrum", outcome: { reason: "backstop-partial", team: team(null, 2) } as never }), players, title: "Spectrum" })).toMatchObject({ saveable: false, why: expect.stringMatching(/stopped before its team result was final/) });
+    expect(saveMemoryFacts({ game: pg({ gameId: "jebena-rush", outcome: { reason: "void" } as never }), players, title: "Jebena Rush" })).toMatchObject({ saveable: false, why: expect.stringMatching(/voided/) });
+    expect(saveMemoryFacts({ game: pg({ gameId: "jebena-rush", status: "playing" as never }), players, title: "Jebena Rush" })).toMatchObject({ saveable: false, why: expect.stringMatching(/hasn't finished/) });
+    expect(saveMemoryFacts({ game: pg({ gameId: "trivia", rawScores: { "player-1": 10 } }), players, title: "Trivia" }).saveable).toBe(false);
+    expect(SAVE_MEMORY_GAMES).toEqual(["spectrum", "jebena-rush"]);
+  });
+  it("Jebena: the final points by name, highest first (the server keeps the same scores)", () => {
+    const f = saveMemoryFacts({ game: pg({ gameId: "jebena-rush", rawScores: { "player-2": 100, "player-1": 230, "player-3": 1 }, outcome: { reason: "completed" } as never }), players, title: "Jebena Rush" });
+    expect(f).toEqual({ saveable: true, lines: ["Keku: 230 points", "Amina: 100 points", "Baraka: 1 point"] });
+    expect(saveMemoryFacts({ game: pg({ gameId: "jebena-rush", rawScores: {} }), players, title: "Jebena Rush" }).saveable).toBe(false);
   });
 });
