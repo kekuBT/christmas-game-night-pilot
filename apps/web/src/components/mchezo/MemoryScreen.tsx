@@ -18,6 +18,7 @@ import { useId, useState } from "react";
 import { canvasNoteY, exportFilename, paginateLines, readableFact, selectShareEntries } from "../exportLayout.js";
 import type { LedgerEvent, MemoryEntry, PublicGame, PublicPlayer, RegistryGame } from "../../types.js";
 import { titleFor } from "../../ui/mchezo/lib/names.js";
+import { memoryLink } from "../../ui/mchezo/lib/memoryLink.js";
 import { useMchezo } from "../../ui/mchezo/MchezoProvider.js";
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
@@ -29,8 +30,10 @@ export function MemoryScreen(props: {
   roomCode?: string;
   /** The Cup's current day: a new entry is filed under it (it used to be always Day 1). */
   day: number;
-  /** Stage 5.1 (3E): the room's ledger seq from the live projection; the loaded ledger is current when it has reached it. */
+  /** Stage 5.1 (3E): the room's ledger seq from the live projection; the loaded ledger is current when its watermark has reached it. */
   roomSeq?: number;
+  /** Stage 10.2 repair (S102-R1): the freshness watermark of the loaded ledger (the room's seq when it was read); undefined before the first load. */
+  ledgerAt?: number;
   book: MemoryEntry[];
   ledger: LedgerEvent[];
   games: PublicGame[];
@@ -47,23 +50,24 @@ export function MemoryScreen(props: {
   onBack: () => void;
   onMenu: () => void;
 }) {
-  const { roomId, roomCode, day, roomSeq, book, ledger, games, registry, players, bookText, setBookText, exportText, setExportText, post, get, loadMemory, canApprove, onBack, onMenu } = props;
+  const { roomId, roomCode, day, roomSeq, ledgerAt, book, ledger, games, registry, players, bookText, setBookText, exportText, setExportText, post, get, loadMemory, canApprove, onBack, onMenu } = props;
   const textId = useId();
   const look = useMchezo().theme.color;
   const [exportState, setExportState] = useState<ExportState>({ kind: "idle", text: "" });
   const [addError, setAddError] = useState("");
   const approved = book.filter((e) => e.approved);
-  const finishedEvents = ledger.filter((e) => e.type === "game-finished");
   const nameOf = (id: string) => players.find((p) => p.id === id)?.displayName;
   const title = (gameId: string) => titleFor(gameId, registry);
   // Stage 5.1 (3E): the game a new highlight will cite, shown before adding,
   // and exactly what is sent. While the loaded ledger is behind the room's
   // (a game just finished), adding waits for the reload instead of citing
-  // the game before it.
-  const target = finishedEvents.at(-1);
-  const targetGame = target?.gameInstanceId ? games.find((g) => g.id === target.gameInstanceId) : undefined;
-  const ledgerSeq = ledger.reduce((m, e) => Math.max(m, e.seq), 0);
-  const syncing = roomSeq !== undefined && ledgerSeq < roomSeq;
+  // the game before it. Stage 10.2 repair (S102-R1, D-S102-06): "behind" is
+  // judged by the loaded ledger's own watermark, never by its newest visible
+  // event (which trails for good when the room's newest events are private
+  // to someone else); a team game says plainly that it can't be saved yet.
+  const link = memoryLink({ ledger, ledgerAt, roomSeq, games, registry });
+  const { target, targetGame } = link;
+  const syncing = link.state === "loading" || link.state === "syncing";
 
   /** The recorded final scores of the game(s) an entry cites, by name. */
   const results = (e: MemoryEntry) => e.sourceEventIds.flatMap((id) => {
@@ -170,12 +174,14 @@ export function MemoryScreen(props: {
       <section className="mz-card mz-memory__add" aria-label="Add a highlight">
         <label htmlFor={textId} className="mz-field__label">Highlight text</label>
         <textarea id={textId} className="mz-input mz-memory__text" value={bookText} onChange={(e) => setBookText(e.target.value)} placeholder="e.g. Ada won Math Mayhem in a tie-break" maxLength={280} />
-        {target && (
-          <p className="mz-foot mz-memory__target" data-testid="memory-link-target" data-event={target.eventId} aria-live="polite">
-            {syncing ? "Checking for the latest finished game…" : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame ? ` · Day ${targetGame.day ?? day}` : ""}: the last game that finished.</>}
+        {link.state !== "none" && (
+          <p className="mz-foot mz-memory__target" data-testid="memory-link-target" data-state={link.state} data-event={target?.eventId} aria-live="polite">
+            {syncing ? "Checking for the latest finished game…"
+              : link.state === "unavailable" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>, a team game: team games aren&rsquo;t saved to the Memory Book yet.</>
+              : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame ? ` · Day ${targetGame.day ?? day}` : ""}: the last game that finished.</>}
           </p>
         )}
-        <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="memory-add" disabled={!bookText.trim() || !target || syncing} onClick={async () => {
+        <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="memory-add" disabled={!bookText.trim() || link.state !== "ready"} onClick={async () => {
           setAddError("");
           try {
             const src = target ? [target.eventId] : [];
@@ -185,7 +191,7 @@ export function MemoryScreen(props: {
           } catch (e) { setAddError(e instanceof Error ? e.message : "The highlight could not be added."); }
         }}>Add from last finished game</button>
         <p className="mz-foot mz-memory__hint" data-testid="memory-add-hint">
-          {finishedEvents.length === 0 ? "Finish a game first — then you can add a Memory Book entry." : !bookText.trim() ? "Write the highlight, then add it. It's linked to the last finished game." : canApprove ? "You can approve it straight after adding it." : "The host approves it before it goes into the exports."}
+          {link.state === "none" ? "Finish a game first — then you can add a Memory Book entry." : link.state === "unavailable" ? "You can add a highlight after the next game that isn't a team game." : !bookText.trim() ? "Write the highlight, then add it. It's linked to the last finished game." : canApprove ? "You can approve it straight after adding it." : "The host approves it before it goes into the exports."}
         </p>
         {addError && <p className="err" role="alert">{addError}</p>}
       </section>

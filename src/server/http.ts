@@ -847,7 +847,10 @@ export class LocalServer {
           if (!viewer) return;
           // Redacted per viewer: other players' abstentions and live
           // in-game scores are private (RoomEngine.ledgerFor).
-          this.send(res, 200, room.ledgerFor(viewer.id));
+          // Stage 10.2 repair (S102-R1): `?watermark=1` opts into { seq, events }, the
+          // room's freshness watermark next to the same redacted events; without it the
+          // response stays the plain array every existing consumer reads.
+          this.send(res, 200, url.searchParams.get("watermark") === "1" ? room.ledgerViewFor(viewer.id) : room.ledgerFor(viewer.id));
           return;
         }
         if (parts.length >= 3 && parts[2] === "memory") {

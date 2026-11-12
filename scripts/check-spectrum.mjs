@@ -43,6 +43,7 @@ import { tmpdir } from "node:os";
 import { join as joinPath } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
+import { memoryLinkOf, openMemoryBook } from "./lib/memory-book.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
@@ -459,6 +460,35 @@ try {
   await soon("10.2 G the early ending: no moment line on Keku's results (none carried over)", async () => (await K.getByTestId("sp-results").isVisible()) && (await K.getByTestId("results-moment").count()) === 0, 15000);
   check("10.2 G the TV shows no moment line for the early ending", (await TV.getByTestId("tv-results-moment").count()) === 0);
   await shot(K, "sp-results-early-390");
+
+  // ---------- 10.2 repair (review 6831760093, S102-R1): Keku's Memory Book after the early ending ----------
+  {
+    // The last leaver's sit-out is logged after the match ends, so the room's newest event is private to them.
+    // Keku's ledger is current, yet its newest visible event is older than the room's seq: the screen used to
+    // wait forever on "Checking for the latest finished game…". Spectrum still isn't saved (NOT_IN_MEMORY_BOOK).
+    const led = (await call(`/rooms/${ROOM}/ledger?watermark=1`, { token: seat.K.token })).body;
+    const pk = (await call(`/rooms/${ROOM}/projection?audience=player`, { token: seat.K.token })).body;
+    const evs = Array.isArray(led?.events) ? led.events : [];
+    const fin = evs.filter((e) => e.type === "game-finished").at(-1);
+    const newestSeen = Math.max(0, ...evs.map((e) => e.seq));
+    check("R1 Keku's ledger carries the room's seq as its watermark", Number.isInteger(led?.seq) && led.seq === pk.seq, `${led?.seq} vs ${pk.seq}`);
+    check("R1 the room's newest event is hidden from Keku (someone else's sit-out), and his last finished game is this match", newestSeen < led.seq && fin?.gameInstanceId === gid2, `newest seen ${newestSeen}, seq ${led?.seq}, finished ${fin?.gameInstanceId}`);
+    check("R1 no one else's sit-out reaches Keku's ledger", !evs.some((e) => e.type === "player-abstained" && e.playerId !== seat.K.playerId));
+    const memCtx = await phoneCtx(390, { look: "everyday" });
+    const M = await openMemoryBook(memCtx, BASE, seat.K);
+    await M.locator(".mz-memory__text").fill("We nearly had round 2");
+    const seen = await soon("R1 Keku's Memory Book says plainly the last game was a team game, not 'Checking…'", async () => { const x = await memoryLinkOf(M); return x.state === "unavailable" ? x : null; }, 15000);
+    check("R1 it names Spectrum, says team games aren't saved yet, and keeps Add off", !!seen && /Spectrum/.test(seen.text) && /team games aren.t saved to the Memory Book yet/.test(seen.text) && seen.addDisabled === true && /next game that isn't a team game/.test(seen.hint), JSON.stringify(seen));
+    await sleep(2500);
+    const later = await memoryLinkOf(M);
+    check("R1 it stays that way (no 'Checking…' after a few seconds)", later.state === "unavailable" && !/Checking/.test(later.text), JSON.stringify(later));
+    await shot(M, "sp-memory-team-game-390");
+    await M.reload({ waitUntil: "domcontentloaded" });
+    await soon("R1 after a reload, the same: unavailable, not 'Checking…'", async () => { const x = await memoryLinkOf(M); return x.state === "unavailable" && x.addDisabled === true; }, 15000);
+    const refused = await call(`/rooms/${ROOM}/memory`, { token: seat.K.token, body: { day: 1, text: "We nearly had round 2", sourceEventIds: [fin?.eventId] } });
+    check("R1 the server still refuses a Spectrum entry (409 NOT_IN_MEMORY_BOOK): no Spectrum saving in this repair", refused.status === 409 && refused.body?.code === "NOT_IN_MEMORY_BOOK", `${refused.status} ${JSON.stringify(refused.body).slice(0, 120)}`);
+    await memCtx.close();
+  }
 
   // ---------- H. Looks and motion ----------
   check("H Amina's phone uses the Christmas look", (await A.locator("[data-mz-theme]").first().getAttribute("data-mz-theme")) === "christmas");

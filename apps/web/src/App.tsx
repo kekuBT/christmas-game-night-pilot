@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { JoinResponse, LedgerEvent, MemoryEntry, PartyView, PlayerGame, Projection, PublicGame, PublicPlayer, Readiness, RegistryGame, SessionView, SpectateResponse } from "./types.js";
+import type { JoinResponse, LedgerEvent, LedgerView, MemoryEntry, PartyView, PlayerGame, Projection, PublicGame, PublicPlayer, Readiness, RegistryGame, SessionView, SpectateResponse } from "./types.js";
 import { draftKey, GamePanel } from "./components/GamePanel.js";
 import { CupScreen } from "./components/mchezo/CupScreen.js";
 import { MemoryScreen } from "./components/mchezo/MemoryScreen.js";
@@ -27,6 +27,7 @@ import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } fro
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
 import { JebenaCupsLabel, JebenaHeartsChoice, JebenaReview, JebenaTv, JebenaTvFinal, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
+import { newerLedger } from "./ui/mchezo/lib/memoryLink.js";
 import { cupContinuity } from "./components/mchezo/CiniCups.js";
 import { MchezoSpectrum, MchezoSpectrumResults, SpectrumReview, SpectrumTv, SpectrumTvFinal, TeamResultsHero } from "./components/mchezo/MchezoSpectrum.js";
 import { lineupLine, tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
@@ -205,6 +206,11 @@ export function App() {
   }
   const [book, setBook] = useState<MemoryEntry[]>([]);
   const [ledger, setLedger] = useState<LedgerEvent[]>([]);
+  // Stage 10.2 repair (S102-R1, D-S102-06): the freshness watermark of the ledger on screen
+  // (the room's seq when it was read), and which room it belongs to. Loads overlap; an older
+  // response never replaces a newer one, and nothing from another room is applied.
+  const [ledgerAt, setLedgerAt] = useState<number | undefined>(undefined);
+  const memLoad = useRef<{ roomId: string | null; at: number | undefined; issued: number; bookApplied: number }>({ roomId: null, at: undefined, issued: 0, bookApplied: 0 });
   const [qrUrl, setQrUrl] = useState("");
   const [bookText, setBookText] = useState("");
   const [exportText, setExportText] = useState("");
@@ -1099,7 +1105,20 @@ export function App() {
     );
   }
   async function loadMemory() {
-    try { setBook(await get<MemoryEntry[]>(`/rooms/${roomId}/memory`)); setLedger(await get<LedgerEvent[]>(`/rooms/${roomId}/ledger`)); } catch (e) { fail(e); }
+    const rid = roomId;
+    if (!rid) return;
+    const m = memLoad.current;
+    if (m.roomId !== rid) {
+      Object.assign(m, { roomId: rid, at: undefined, bookApplied: 0 });
+      setBook([]); setLedger([]); setLedgerAt(undefined);
+    }
+    const n = ++m.issued;
+    try {
+      const [b, view] = await Promise.all([get<MemoryEntry[]>(`/rooms/${rid}/memory`), get<LedgerView>(`/rooms/${rid}/ledger?watermark=1`)]);
+      if (memLoad.current.roomId !== rid) return; // the room changed while this was in flight
+      if (n > m.bookApplied) { m.bookApplied = n; setBook(b); }
+      if (newerLedger(m.at, view)) { m.at = view.seq; setLedger(view.events); setLedgerAt(view.seq); }
+    } catch (e) { fail(e); }
   }
   // Stage 5.1 (3E): also whenever the room's ledger moves on (seq counts its
   // events), so a Memory Book left open across a game's end cites that game.
@@ -2072,7 +2091,7 @@ export function App() {
     // Stage 4 (S3-MEM-01): the Memory Book as a Night Circle screen with honest export feedback.
     return (
       <MchezoProvider theme={theme} {...motion}>
-        <MemoryScreen roomId={roomId ?? ""} roomSeq={proj?.seq} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
+        <MemoryScreen roomId={roomId ?? ""} roomSeq={proj?.seq} ledgerAt={ledgerAt} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
         {roomSheets}
       </MchezoProvider>
     );
