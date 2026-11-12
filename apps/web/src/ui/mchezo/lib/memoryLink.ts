@@ -11,6 +11,7 @@
  * can trail forever on a ledger that is fully current.
  */
 import type { LedgerEvent, LedgerView, PublicGame, RegistryGame } from "../../../types.js";
+import type { TeamResult } from "../../../../../../src/shared/teamResult.js";
 
 export type MemoryLinkState =
   /** Nothing loaded yet. */
@@ -19,13 +20,20 @@ export type MemoryLinkState =
   | "syncing"
   /** No game has finished yet. */
   | "none"
-  /** The last finished game can't be saved yet (a cooperative game, like Spectrum): said plainly. */
+  /** The last finished game can't be saved (see `why`): said plainly. */
   | "unavailable"
   /** The last finished game can be cited. */
   | "ready";
 
+/**
+ * Why the last finished game can't be saved (Stage 10.3): a team game the Memory Book doesn't save,
+ * or a team result that isn't final (stopped by the room's time limit, voided, or missing).
+ */
+export type MemoryUnavailableWhy = "team-not-supported" | "team-not-final";
+
 export interface MemoryLink {
   state: MemoryLinkState;
+  why?: MemoryUnavailableWhy;
   /** The game-finished event a new highlight would cite (when one is loaded). */
   target?: LedgerEvent;
   targetGame?: PublicGame;
@@ -46,8 +54,26 @@ export function memoryLink(o: {
   const found = { ...(target ? { target } : {}), ...(targetGame ? { targetGame } : {}) };
   if (o.roomSeq !== undefined && o.ledgerAt < o.roomSeq) return { state: "syncing", ...found };
   if (!target) return { state: "none" };
-  if (targetGame && o.registry.find((g) => g.id === targetGame.gameId)?.cooperative === true) return { state: "unavailable", ...found };
+  const reg = targetGame ? o.registry.find((g) => g.id === targetGame.gameId) : undefined;
+  if (targetGame && reg?.cooperative === true) {
+    // Stage 10.3 (D-S103-02, D-S103-03): a team game is saved only when enabled by name and only with a final
+    // result. The server decides (and refuses anything else); this only lets the screen say so before Add.
+    if (reg.memoryBookTeam !== true) return { state: "unavailable", why: "team-not-supported", ...found };
+    if (!teamResultSaveable(targetGame.outcome?.reason === "void" ? undefined : targetGame.outcome?.team)) return { state: "unavailable", why: "team-not-final", ...found };
+  }
   return { state: "ready", ...found };
+}
+
+/**
+ * Stage 10.3 (D-S103-03), the same rule the server applies (src/server/memorybook.ts `teamFactsFor`): a team
+ * result can be saved when the module ended it, completed with every planned round revealed, or ended early
+ * (too few players) with fewer. An ending the room imposed (`end: null`) is not final.
+ */
+export function teamResultSaveable(team: TeamResult | undefined): boolean {
+  if (!team) return false;
+  if (team.end === "completed") return team.rounds.length === team.roundsPlanned;
+  if (team.end === "too-few-players") return team.rounds.length < team.roundsPlanned;
+  return false;
 }
 
 /**
