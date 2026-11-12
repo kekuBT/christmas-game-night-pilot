@@ -1,0 +1,11 @@
+--- a/scripts/check-jebena-rush.mjs
++++ b/scripts/check-jebena-rush.mjs
+@@ -608,7 +608,7 @@
+       await soon("E back online, Amina's phone catches up with one cup fewer, shown broken", async () => { const c = await cupsIn(A.getByTestId("jr-my-hearts")); return c.cups === heartsBefore - 1 && c.broken === 3 - (heartsBefore - 1); }, 20000);
+       // (Other players' cups may break live on her phone meanwhile; only her own lost cup must not replay.)
+       {
+-        const replayed = newSeatBreaks(await breaks(A), aMark, seat.A.playerId);
++        const replayed = (await breaks(A)).filter((x) => x.seat === seat.A.playerId); // TEMP: the old lifetime check (review 6828948844 repro)
+         check(`E the resync showed her broken cup (slot ${heartsBefore - 1}) without replaying the break (no new break of her seat since her phone dropped; earlier ones stay in the log)`, replayed.length === 0, JSON.stringify(replayed));
+       }
+       await sleep(2500);

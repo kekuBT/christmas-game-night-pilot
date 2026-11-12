@@ -1,0 +1,9 @@
+$ node scripts/check-reduced-motion.mjs http://localhost:42905
+# timeout 600s | worker w2 | server http://localhost:42905 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r4-full/test-results/20261112-134811-0516e3ea-18196/server-data/w2)
+
+[+3.1s] PASS control: arriving seat animates under default motion
+[+5.6s] PASS reduced: arriving seat never animates under reduced motion
+[+5.7s] REDUCED MOTION ALL PASSED
+[+5.7s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":4,"peakOpenPages":2}
+
+# PASS (exit 0) in 5.7s | cpu 1.9s, peak memory 252 MB

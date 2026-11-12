@@ -1413,7 +1413,7 @@ export class RoomEngine {
     const current = this.lobbySettingsFor(gameId);
     if (!sameSettings(check.settings, current)) {
       const title = getGame(gameId).title;
-      throw new StartRefused("SETTINGS_CHANGED", `${title} is now set to ${current?.hearts ?? "other"} hearts each, not what this press asked for, so nothing started. Check, then press Start again.`, this.readiness(), { lobbySettings: this.lobbySettingsView(), session: this.sessionView() });
+      throw new StartRefused("SETTINGS_CHANGED", `${title} is now set to ${current?.hearts ?? "other"} cups each, not what this press asked for, so nothing started. Check, then press Start again.`, this.readiness(), { lobbySettings: this.lobbySettingsView(), session: this.sessionView() });
     }
     return check.settings;
   }

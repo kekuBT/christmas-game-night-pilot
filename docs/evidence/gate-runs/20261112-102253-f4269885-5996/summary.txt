@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | targeted | run 20261112-102253-f4269885-5996
+  3 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-jebena-rush (w2) [functional]: FAIL E Baraka's own row: exactly that cup broke, once — not within 5000ms | FAIL E the TV: that one cup broke, once, in its slot — not within 5000ms | FAIL E repeated views break nothing more — 0,2,4,
+  timing   wall 1m 39s · step time 3m 10s (sum) · 3 workers, 64% busy · 1.92× the same steps run one after another
+           predicted 1–3m (about 1m 34s, measured) → actual 1m 39s (+5%)
+           longest  check-briefing 1m 33s, check-jebena-rush 1m 31s, build-web 5s · the longest step is 94% of the wall time
+           machine  CPU mean 26%, peak 76% · memory available ≥ 14364 MB · load peak 1.51
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101-tgt/test-results/20261112-102253-f4269885-5996/report.json

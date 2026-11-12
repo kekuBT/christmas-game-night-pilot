@@ -5,7 +5,7 @@
  * repeated start request must carry the same ones.
  */
 export interface GameSettings {
-  /** Jebena Rush: hearts each player starts with. */
+  /** Jebena Rush: lives each player starts with (shown as cups since Stage 10.1; the key keeps its name, D-S101-02). */
   hearts?: number;
 }
 
@@ -32,7 +32,7 @@ export function validateGameSettings(gameId: string, raw: unknown): SettingsChec
   for (const k of keys) {
     const v = (given as Record<string, unknown>)[k];
     if (k === "hearts" && gameId === "jebena-rush") {
-      if (typeof v !== "number" || !(JEBENA_HEART_CHOICES as readonly number[]).includes(v)) return { ok: false, reason: "Hearts must be 3, 5 or 7." };
+      if (typeof v !== "number" || !(JEBENA_HEART_CHOICES as readonly number[]).includes(v)) return { ok: false, reason: "Cups must be 3, 5 or 7." };
       out.hearts = v;
     } else {
       return { ok: false, reason: `Unknown setting: ${k}.` };

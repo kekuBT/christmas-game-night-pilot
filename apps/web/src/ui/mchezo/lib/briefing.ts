@@ -161,9 +161,9 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
     steps: [
       "Hold the jebena? Name something in the category before the steam boils over: 10 seconds a turn.",
       "A right answer passes the jebena to the next player. A wrong one costs only time: try again.",
-      "Each answer counts once. Time runs out: you lose a heart, and a new category starts.",
-      "No hearts left and you're out. The last player with hearts keeps the jebena.",
-      "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or hearts back.",
+      "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
+      "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena.",
+      "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
     ],
   },
   // Stage 9.3 (docs/stage9/stage93.md §4): one team, one score.

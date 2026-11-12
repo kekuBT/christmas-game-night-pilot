@@ -458,6 +458,16 @@ describe("solo Start recovery is tied to its own press (review 6786060026)", () 
   beforeEach(() => { forgetPageSeat(); });
   afterEach(() => { for (const s of sessions.splice(0)) s.dispose(); });
   /**
+   * Each request's allowance (D-S101-10). A "drop" or "hang" uses all of it, so
+   * a tab with faults keeps it short; its other requests, and every request of
+   * a tab without faults, go to the real server in this same thread, where a
+   * loaded gate can stall the event loop past a short allowance (the session's
+   * timer then fires before the reply is read). 250 ms failed gates; a tab with
+   * faults gets 2 s, a tab without them 5 s.
+   */
+  const WITH_FAULTS_MS = 2_000;
+  const NO_FAULTS_MS = 5_000;
+  /**
    * A tab. `faults` decides each of its Start requests in turn: "pass";
    * "drop" (it reaches the server and acts, but the reply never arrives: the
    * request uses its whole allowance); "hang" (it never reaches the server and
@@ -466,7 +476,7 @@ describe("solo Start recovery is tied to its own press (review 6786060026)", () 
    * server: the fetch fails at once). `around` runs another tab's action at
    * that moment: before the request ("before") or after the server acted ("after").
    */
-  function tab(opts: { faults?: Fault[]; around?: { at: number; when: "before" | "after"; run: () => Promise<void> } } = {}) {
+  function tab(opts: { faults?: Fault[]; around?: { at: number; when: "before" | "after"; run: () => Promise<void> }; requestTimeoutMs?: number } = {}) {
     const sent: { id: string; sessionRevision: number }[] = [];
     let n = 0;
     const f = (async (input: string, init: RequestInit = {}) => {
@@ -484,7 +494,7 @@ describe("solo Start recovery is tied to its own press (review 6786060026)", () 
       if (fault === "reset") throw new TypeError("fetch failed");
       return fault === "drop" ? never() : reply;
     }) as unknown as typeof fetch;
-    const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000, requestTimeoutMs: 250, startBudgetMs: 4_000 });
+    const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000, requestTimeoutMs: opts.requestTimeoutMs ?? (opts.faults?.length ? WITH_FAULTS_MS : NO_FAULTS_MS), startBudgetMs: 4_000 });
     sessions.push(s);
     return { s, sent };
   }
@@ -492,6 +502,8 @@ describe("solo Start recovery is tied to its own press (review 6786060026)", () 
   const open = (r: RoomEngine) => [...r.games.values()].filter((g) => g.status === "playing").map((g) => g.id);
   /** A solo room already made and joined (so both tabs share its seat), at revision 1 with nothing open. */
   async function seatedRoom() {
+    // Setup, not the behaviour under test: a real, unfaulted Start, with the no-faults allowance
+    // (it failed twice under a loaded gate with 250 ms: D-S101-07, D-S101-10).
     const first = tab();
     await first.s.start("pattern-pulse");
     expect(first.s.current.phase).toBe("playing");
@@ -556,7 +568,7 @@ describe("solo Start recovery is tied to its own press (review 6786060026)", () 
     expect(open(room)).toEqual([bRound]);
     expect(b.s.current.phase).toBe("playing");
     expect([room.contentSeq, room.session.revision]).toEqual([1, 2]);
-  });
+  }, 30_000); // each no-answer fault waits its whole allowance
 
   it("no network at all: the Start ends within its budget; Try again sends the same press (a replay if it had arrived), so nothing starts twice", async () => {
     // The press never arrives: Try again starts it once.
@@ -609,5 +621,5 @@ describe("solo Start recovery is tied to its own press (review 6786060026)", () 
     expect(d.s.current.phase).toBe("playing");
     expect([d.sent.length, d.sent[1]!.id === d.sent[0]!.id]).toEqual([2, false]);
     expect(room.contentSeq).toBe(1);
-  });
+  }, 30_000); // each no-answer fault waits its whole allowance
 });

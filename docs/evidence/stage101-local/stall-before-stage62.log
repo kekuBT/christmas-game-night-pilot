@@ -1,0 +1,91 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt101
+
+ ❯ tests/stage62-solo-shelf.test.ts (26 tests | 4 failed | 21 skipped) 3701ms
+   × the solo session across games, and a join whose reply was lost > Math → Pulse → Connections → Math: one room, each round fresh, nothing carried over 426ms
+     → math-mayhem: expected 'error' to be 'playing' // Object.is equality
+   × the solo session across games, and a join whose reply was lost > a join the server accepted but whose reply was lost: Try again gives that room up and makes exactly one new one 423ms
+     → expected [] to have a length of 1 but got +0
+   × the solo session across games, and a join whose reply was lost > only a definite answer gives the room up: a timeout or 5xx on the retried join keeps it, with no new room 729ms
+     → expected 2 to be 1 // Object.is equality
+   × the solo session across games, and a join whose reply was lost > the fallback itself failing: at most one new room per Start, whatever goes wrong 714ms
+     → expected 'transient' to be 'refused' // Object.is equality
+   ✓ the solo session across games, and a join whose reply was lost > the whole Start, fallback included, ends within its time budget 1403ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage62-solo-shelf.test.ts > the solo session across games, and a join whose reply was lost > Math → Pulse → Connections → Math: one room, each round fresh, nothing carried over
+AssertionError: math-mayhem: expected 'error' to be 'playing' // Object.is equality
+
+Expected: "playing"
+Received: "error"
+
+ ❯ tests/stage62-solo-shelf.test.ts:443:35
+    441|       const s = session(); // a new screen per game, as the app mounts…
+    442|       await s.start(id);
+    443|       expect(s.current.phase, id).toBe("playing");
+       |                                   ^
+    444|       const gid = s.current.gameInstanceId!;
+    445|       gids.push(gid);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/stage62-solo-shelf.test.ts > the solo session across games, and a join whose reply was lost > a join the server accepted but whose reply was lost: Try again gives that room up and makes exactly one new one
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/stage62-solo-shelf.test.ts:463:23
+    461|     expect(s.current.phase).toBe("error");
+    462|     expect(s.current.failure).toBe("transient");
+    463|     expect(madeRooms).toHaveLength(1);
+       |                       ^
+    464|     expect(playersIn(madeRooms[0]!)).toBe(1); // the lost join really …
+    465|     await s.start("word-connections"); // Try again: the server refuse…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/stage62-solo-shelf.test.ts > the solo session across games, and a join whose reply was lost > only a definite answer gives the room up: a timeout or 5xx on the retried join keeps it, with no new room
+AssertionError: expected 2 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ tests/stage62-solo-shelf.test.ts:479:26
+    477|     await s.start("pattern-pulse"); // the retried join: 503
+    478|     expect(s.current.failure).toBe("transient");
+    479|     expect(roomsCreated).toBe(1);
+       |                          ^
+    480|     await s.start("pattern-pulse"); // the retried join: no answer at …
+    481|     expect(s.current.failure).toBe("transient");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/stage62-solo-shelf.test.ts > the solo session across games, and a join whose reply was lost > the fallback itself failing: at most one new room per Start, whatever goes wrong
+AssertionError: expected 'transient' to be 'refused' // Object.is equality
+
+Expected: "refused"
+Received: "transient"
+
+ ❯ tests/stage62-solo-shelf.test.ts:496:31
+    494|     await a.start("word-connections");
+    495|     expect(a.current.phase).toBe("error");
+    496|     expect(a.current.failure).toBe("refused");
+       |                               ^
+    497|     expect(roomsCreated).toBe(2);
+    498|     a.dispose();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed | 21 skipped (26)
+   Start at  12:21:20
+   Duration  4.88s (transform 625ms, setup 0ms, collect 838ms, tests 3.70s, environment 1ms, prepare 75ms)
+

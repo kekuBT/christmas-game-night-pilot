@@ -1,0 +1,20 @@
+--- a/scripts/check-tv-outage.mjs	2026-11-12 13:04:50.182741928 +0000
++++ b/scripts/check-tv-outage.mjs	2026-11-12 13:04:50.201916614 +0000
+@@ -88,7 +88,7 @@
+   await tv.locator(".mz-code__input").fill(room.joinCode);
+   await tv.getByTestId("watch-spectator").click();
+   await tv.getByTestId("tv-show").waitFor({ timeout: 15000 });
+-  const tvNote = async () => ((await tv.getByTestId("tv-conn").count()) ? await tv.getByTestId("tv-conn").getAttribute("data-state") : null);
++  const tvNote = async (gap = 0) => ((await tv.getByTestId("tv-conn").count()) ? (gap ? await sleep(gap) : 0, await tv.getByTestId("tv-conn").getAttribute("data-state")) : null);
+   check("TV live: no connection note", (await tvNote()) === null);
+ 
+   // 1. Only the socket goes silent: polling keeps the TV live.
+@@ -116,7 +116,7 @@
+   port = await startServer(port);
+   await soon("server back: the TV says it reconnected", async () => (await tvNote()) === "restored", 30000);
+   await tv.screenshot({ path: screenshotPath("docs/stage5-qa/after/tv-outage-restored-1440.png") });
+-  await soon("server back: the note goes away and the room is shown", async () => (await tvNote()) === null && (await tv.getByTestId("tv-show").innerText()).includes(room.joinCode), 15000);
++  await soon("server back: the note goes away and the room is shown", async () => (await tvNote(Number(process.env.TVNOTE_GAP_MS ?? 0))) === null && (await tv.getByTestId("tv-show").innerText()).includes(room.joinCode), 15000);
+   // A change after the restart reaches the TV.
+   await api(`/rooms/join-by-code`, { joinCode: room.joinCode, displayName: "Amina" });
+   await soon("server back: a new player shows on the TV", async () => /Amina/.test(await tv.getByTestId("tv-show").innerText()), 15000);

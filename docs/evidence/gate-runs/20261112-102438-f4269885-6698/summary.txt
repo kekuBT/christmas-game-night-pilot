@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | fast | run 20261112-102438-f4269885-6698
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w2) [functional]: [31m[1m[7m FAIL [27m[22m[39m tests/stage74-content-variety.test.ts[2m > [22msolo Start recovery is tied to its own press (review 6786060026)[2m > [22mno network at all: the Start ends within
+  timing   wall 56s · step time 1m 40s (sum) · 3 workers, 60% busy · 1.79× the same steps run one after another
+           predicted 28–67s (about 36s, measured) → actual 56s (+56%)
+           longest  unit-tests 43s, lint 22s, typecheck-server 13s · the longest step is 76% of the wall time
+           machine  CPU mean 81%, peak 100% · memory available ≥ 13979 MB · load peak 4.34
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101-fast/test-results/20261112-102438-f4269885-6698/report.json

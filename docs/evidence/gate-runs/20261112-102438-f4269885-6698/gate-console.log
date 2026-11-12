@@ -1,0 +1,42 @@
+Mchezo gate fast | run 20261112-102438-f4269885-6698
+  revision f4269885ae685867dbec92e6f2d7739f16537942 (clean tree) | fingerprint c0d565a0d0cc (500 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.2 GB available)
+  history  85 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 70 run(s))
+  estimate this run: 28–67s (measured) · the same steps one after another: about 1m 20s · longest step unit-tests ~35s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101-fast/test-results/20261112-102438-f4269885-6698
+        start typecheck-server on w1 (usually 11s)
+        start typecheck-web on w2 (usually 11s)
+        start lint on w3 (usually 16s)
+[ 1/5] PASS          13s  typecheck-web  w2
+        start unit-tests on w2 (usually 35s)
+[ 2/5] PASS          13s  typecheck-server  w1
+        start build-web on w1 (usually 6s)
+[ 3/5] PASS        21.9s  lint  w3
+[ 4/5] PASS         9.4s  build-web  w1
+[ 5/5] FAIL        42.7s  unit-tests  w2  [31m[1m[7m FAIL [27m[22m[39m tests/stage74-content-variety.test.ts[2m > [22msolo Start recovery is tied to its own press (review 6786060026)[2m > [22m
+      | [36m [2m❯[22m seatedRoom tests/stage74-content-variety.test.ts:[2m497:35[22m[39m
+      |     [90m495| [39m    [35mconst[39m first [33m=[39m [34mtab[39m()[33m;[39m
+      |     [90m496| [39m    [35mawait[39m first[33m.[39ms[33m.[39m[34mstart[39m([32m"pattern-pulse"[39m)[33m;[39m
+      |     [90m497| [39m    [34mexpect[39m(first[33m.[39ms[33m.[39mcurrent[33m.[39mphase)[33m.[39m[34mtoBe[39m([32m"playing"[39m)[33m;[39m
+      |     [90m   | [39m                                  [31m^[39m
+      |     [90m498| [39m    [35mawait[39m first[33m.[39ms[33m.[39m[34mleave[39m()[33m;[39m
+      |     [90m499| [39m    [35mreturn[39m [34mroomOf[39m(first[33m.[39ms)[33m;[39m
+      | [90m [2m❯[22m tests/stage74-content-variety.test.ts:[2m563:16[22m[39m
+      | 
+      | [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+      | 
+      | [2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m122 passed[39m[22m[90m (123)[39m
+      | [2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1594 passed[39m[22m[90m (1595)[39m
+      | [2m   Start at [22m 10:24:52
+      | [2m   Duration [22m 41.98s[2m (transform 4.39s, setup 0ms, collect 21.98s, tests 70.94s, environment 39ms, prepare 9.77s)[22m
+
+FAILED (exit 1) | fast | run 20261112-102438-f4269885-6698
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w2) [functional]: [31m[1m[7m FAIL [27m[22m[39m tests/stage74-content-variety.test.ts[2m > [22msolo Start recovery is tied to its own press (review 6786060026)[2m > [22mno network at all: the Start ends within
+  timing   wall 56s · step time 1m 40s (sum) · 3 workers, 60% busy · 1.79× the same steps run one after another
+           predicted 28–67s (about 36s, measured) → actual 56s (+56%)
+           longest  unit-tests 43s, lint 22s, typecheck-server 13s · the longest step is 76% of the wall time
+           machine  CPU mean 81%, peak 100% · memory available ≥ 13979 MB · load peak 4.34
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101-fast/test-results/20261112-102438-f4269885-6698/report.json

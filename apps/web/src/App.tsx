@@ -26,7 +26,8 @@ import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
-import { JebenaHeartsChoice, JebenaReview, JebenaTv, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
+import { JebenaCupsLabel, JebenaHeartsChoice, JebenaReview, JebenaTv, JebenaTvFinal, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
+import { cupContinuity } from "./components/mchezo/CiniCups.js";
 import { MchezoSpectrum, MchezoSpectrumResults, SpectrumReview, SpectrumTv, SpectrumTvFinal, TeamResultsHero } from "./components/mchezo/MchezoSpectrum.js";
 import { lineupLine, tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
 import { ordinal } from "./ui/mchezo/lib/standings.js";
@@ -345,6 +346,7 @@ export function App() {
   const showProjection = useCallback((p: Projection) => {
     shown.current = { n: shown.current.n + 1, roomId: p.roomId, seq: p.seq, rev: p.rev };
     lastFresh.current = Date.now();
+    cupContinuity.snapshot(); // Stage 10.1 (S101-R2): a fresh snapshot
     setProj(p);
   }, []);
   const refresh = useCallback(async () => {
@@ -390,6 +392,8 @@ export function App() {
   const featured = useMemo(() => featuredOfTheDay(catalog, new Date()), [catalog]);
   useEffect(() => {
     if (!roomId || !playerId) return;
+    // Stage 10.1 (S101-R2, D-S101-09): Jebena's cup memory belongs to this room and seat.
+    cupContinuity.setScope(`player:${roomId}:${playerId}`);
     refresh();
     // Stage 5.1: one interval poll at a time (a stalled one times out), so
     // hung requests can't pile up behind each other.
@@ -437,6 +441,7 @@ export function App() {
           if (e.code === 4001) { connection.replaced(); return; } // seat recovered on another device
           if (e.code === 1008) { connection.signedOut(); return; } // credential no longer accepted
           connection.dropped();
+          cupContinuity.rebaseline(); // what this page saw before the drop can't break a cup
           attempt += 1;
           retryTimer = setTimeout(connect, wsReconnectDelayMs(attempt));
         };
@@ -455,6 +460,7 @@ export function App() {
     // socket and a long backoff pending: reconnect at once instead.
     const reconnectNow = () => {
       if (stopped) return;
+      cupContinuity.rebaseline();
       const state = connection.get().state;
       if (state === "replaced" || state === "signed-out") return;
       if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) { void refresh(); return; }
@@ -467,7 +473,7 @@ export function App() {
       if (document.visibilityState !== "visible") return;
       // Timers sleep while hidden: give the fresh poll below a moment before judging staleness.
       lastFresh.current = Date.now();
-      reconnectNow();
+      reconnectNow(); // (rebaselines the cups: snapshots may have been missed while hidden)
     };
     // Stage 5.1 (S5-AUD-04): nothing pushed or polled for a while means this
     // screen may be stale. Say so (the connection banner) and recycle a socket
@@ -479,6 +485,7 @@ export function App() {
       const step = livenessStep(live, lastFresh.current, Date.now());
       if (step === "went-stale") {
         connection.dropped();
+        cupContinuity.rebaseline();
         if (ws && ws.readyState === WebSocket.OPEN) ws.close();
       } else if (step === "back") connection.confirmed();
     }, 1000);
@@ -490,6 +497,7 @@ export function App() {
       const state = connection.get().state;
       if (state === "replaced" || state === "signed-out") return;
       connection.dropped();
+      cupContinuity.rebaseline();
       ws?.close();
     };
     document.addEventListener("visibilitychange", onVisible);
@@ -567,6 +575,8 @@ export function App() {
   useEffect(() => {
     if (!specRoomId || !specToken || roomId) return;
     let stopped = false;
+    // Stage 10.1 (S101-R2): the TV's cup memory belongs to the room it watches.
+    cupContinuity.setScope(`tv:${specRoomId}`);
     // Stage 5.1 (S5-AUD-07): the TV used to swallow every failure and keep a
     // stale screen up in silence. Any projection proves it live; nothing for
     // a while and it says so on screen (the last known display stays).
@@ -577,7 +587,7 @@ export function App() {
         const reply = await pollFresh(`/rooms/${specRoomId}/projection?audience=spectator`, { headers: { "x-spectator-token": specToken } }, readSpectatorReply);
         if (reply.kind === "expired") { if (!stopped) { stopWatching(); setErr("Spectator session expired — enter the code again to keep watching."); } return; }
         if (reply.kind === "skip") return;
-        if (isProjection(reply.body)) { lastFreshAt = Date.now(); setProj(reply.body as Projection); } // S3-LOB-03: never a proxy page
+        if (isProjection(reply.body)) { lastFreshAt = Date.now(); cupContinuity.snapshot(); setProj(reply.body as Projection); } // S3-LOB-03: never a proxy page
       } catch { /* poll retry; staleness is judged by the watchdog */ }
     });
     poll();
@@ -588,6 +598,7 @@ export function App() {
       const step = livenessStep(live, lastFreshAt, Date.now());
       if (step === "went-stale") {
         clearTimeout(restoredTimer);
+        cupContinuity.rebaseline();
         setTvLive("stale");
         if (ws && ws.readyState === WebSocket.OPEN) ws.close();
       } else if (step === "back") {
@@ -595,7 +606,7 @@ export function App() {
         restoredTimer = setTimeout(() => setTvLive("live"), 4000);
       }
     }, 1000);
-    const onVisible = () => { if (document.visibilityState === "visible") { lastFreshAt = Date.now(); void poll(); } };
+    const onVisible = () => { if (document.visibilityState === "visible") { lastFreshAt = Date.now(); cupContinuity.rebaseline(); void poll(); } };
     document.addEventListener("visibilitychange", onVisible);
     let attempt = 0;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
@@ -606,9 +617,10 @@ export function App() {
         const proto = location.protocol === "https:" ? "wss" : "ws";
         const next = new WebSocket(`${proto}://${location.host}/?roomId=${specRoomId}&audience=spectator`, [`cgn-spectator-${specToken}`]);
         ws = next;
-        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "alive") lastFreshAt = Date.now(); if (m.kind === "projection" && isProjection(m.state)) { lastFreshAt = Date.now(); setProj(m.state); } } catch { /* ignore malformed WS frame; polling continues */ } };
+        next.onmessage = (e) => { try { const m = JSON.parse(e.data); if (m.kind === "alive") lastFreshAt = Date.now(); if (m.kind === "projection" && isProjection(m.state)) { lastFreshAt = Date.now(); cupContinuity.snapshot(); setProj(m.state); } } catch { /* ignore malformed WS frame; polling continues */ } };
         next.onclose = (e) => {
           if (stopped || e.code === 1008) return;
+          cupContinuity.rebaseline();
           attempt += 1;
           retryTimer = setTimeout(connect, wsReconnectDelayMs(attempt));
         };
@@ -756,7 +768,7 @@ export function App() {
       await refresh();
     } finally { setContentBusy(false); }
   }
-  /** Stage 9.1 (§8): the host or a cohost chooses Jebena Rush's hearts in the lobby (everyone sees it). */
+  /** Stage 9.1 (§8): the host or a cohost chooses Jebena Rush's lives in the lobby, shown as cups (Stage 10.1); everyone sees it. */
   const [settingsBusy, setSettingsBusy] = useState(false);
   async function changeHearts(hearts: number) {
     if (!roomId || settingsBusy) return;
@@ -764,9 +776,9 @@ export function App() {
     setErr("");
     try {
       const r = await postBounded(`/rooms/${roomId}/game-settings`, { gameId: "jebena-rush", settings: { hearts }, baseRevision: proj?.session?.revision ?? 0 }, 10_000).catch(() => null);
-      if (!r) setErr("Couldn’t reach the game server, so the hearts may not have changed. Check them, then try again.");
-      else if (r.status === 409) setErr(r.body["code"] === "SESSION_CONFLICT" ? "Something changed since you looked. Here is the latest: choose again." : String(r.body["error"] ?? "The hearts didn’t change."));
-      else if (r.status < 200 || r.status >= 300) setErr(String(r.body["error"] ?? "The hearts didn’t change."));
+      if (!r) setErr("Couldn’t reach the game server, so the cups may not have changed. Check them, then try again.");
+      else if (r.status === 409) setErr(r.body["code"] === "SESSION_CONFLICT" ? "Something changed since you looked. Here is the latest: choose again." : String(r.body["error"] ?? "The cups didn’t change."));
+      else if (r.status < 200 || r.status >= 300) setErr(String(r.body["error"] ?? "The cups didn’t change."));
       await refresh();
     } finally { setSettingsBusy(false); }
   }
@@ -1071,6 +1083,8 @@ export function App() {
             ? <div className="mz-tvshow-game" data-testid="mz-cx-tv"><ConnectionsTv game={g} title={titleOf(g.gameId)} players={feed.players} /></div>
             // Stage 9.3: one team result, never standings.
             : g.gameId === "spectrum" ? <div className="mz-tvshow-game"><SpectrumTvFinal game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
+            // Stage 10.1 (S101-R1): Jebena's final shows everyone's cups, so the deciding cup breaks here.
+            : g.gameId === "jebena-rush" ? <div className="mz-tvshow-game"><JebenaTvFinal game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : null}
           renderReview={(g) => g.gameId === "caption-clash"
             ? <div className="mz-tvshow-game" data-testid="mz-cap-tv"><CaptionTv game={g} /></div>
@@ -1631,12 +1645,12 @@ export function App() {
           casual={casualRoom}
           firstTime={!roomGames.some((g) => g.status === "finished")}
           content={proj?.roomKind === "casual" ? { season: proj.contentSeason ?? "everyday", ...(isHostish ? { onChange: (s: SessionSeason) => void changeContent(s), busy: contentBusy } : {}) } : undefined}
-          // Stage 9.1 (§8): Jebena Rush's hearts: the host or a cohost chooses; everyone sees the choice.
+          // Stage 9.1 (§8): Jebena Rush's lives (cups, Stage 10.1): the host or a cohost chooses; everyone sees the choice.
           gameSettings={proj?.roomKind === "casual" && upNext?.id === "jebena-rush" ? (() => {
             const hearts = proj.lobbySettings?.["jebena-rush"]?.hearts ?? 5;
             return isHostish
               ? <JebenaHeartsChoice value={hearts} onChange={(h) => void changeHearts(h)} busy={settingsBusy} />
-              : <p className="mz-foot mz-lobby__hearts" data-testid="lobby-hearts-guest" data-hearts={hearts}>Everyone starts with {hearts} hearts ({"♥".repeat(hearts)}).</p>;
+              : <p className="mz-foot mz-lobby__hearts"><JebenaCupsLabel hearts={hearts} testId="lobby-hearts-guest" text={`Everyone starts with ${hearts} cups.`} /></p>;
           })() : undefined}
           code={proj?.joinCode ?? "…"}
           sessionLabel={proj?.name ?? "Mchezo"}

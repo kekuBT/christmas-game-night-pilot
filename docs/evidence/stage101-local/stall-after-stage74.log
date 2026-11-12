@@ -1,0 +1,15 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt101
+
+ ✓ tests/stage74-content-variety.test.ts (34 tests | 29 skipped) 10244ms
+   ✓ solo Start recovery is tied to its own press (review 6786060026) > A's reply is lost (the connection drops) after the server started its round: the same press, sent again at once, is answered as a replay; one round, one use 493ms
+   ✓ solo Start recovery is tied to its own press (review 6786060026) > A never reaches the server while B starts the same game: A is refused as stale and never adopts B's round; B is undisturbed; no extra use 432ms
+   ✓ solo Start recovery is tied to its own press (review 6786060026) > A started, but B replaced it before A's press was sent again: A is refused, never adopts B's round; B is undisturbed; no extra use 425ms
+   ✓ solo Start recovery is tied to its own press (review 6786060026) > A's request hangs (never arrives) while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale; B is undisturbed 2421ms
+   ✓ solo Start recovery is tied to its own press (review 6786060026) > no network at all: the Start ends within its budget; Try again sends the same press (a replay if it had arrived), so nothing starts twice 6468ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed | 29 skipped (34)
+   Start at  12:22:51
+   Duration  11.36s (transform 601ms, setup 0ms, collect 810ms, tests 10.24s, environment 0ms, prepare 73ms)
+

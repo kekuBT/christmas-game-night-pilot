@@ -1,0 +1,11 @@
+--- a/scripts/check-jebena-rush.mjs	2026-11-12 13:46:10.171418775 +0000
++++ b/scripts/check-jebena-rush.mjs	2026-11-12 13:46:10.174709572 +0000
+@@ -603,7 +603,7 @@
+       await outIfOut(h, hp);
+       continue;
+     }
+-    if (reloadDone && !shortCutDone && h === seat.B.playerId) {
++    if (reloadDone && !shortCutDone && h === seat.B.playerId && !(process.env.JR_SHORT_CUT_ON_LAST && heartsBefore > 1)) {
+       // R2 (review 6822605156): a short reconnect inside the 3-second window. On Baraka's own (second) turn his phone
+       // hears nothing for the last 1.5 s, then its socket closes and it reconnects; the resync shows his lost cup within
+       // 3 s of the loss. It must show it broken without breaking it (it didn't see it live). Later losses still break once.

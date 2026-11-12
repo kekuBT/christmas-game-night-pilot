@@ -1,0 +1,65 @@
+/* Stage 10.1: Jebena Rush's cini cups (docs/stage10/stage101.md §2, §4–§5).
+   A white ceramic cup with a dark outline reads on every look. Whole and
+   broken differ by silhouette: a broken cup is split, its right shard tipped
+   away so a gap shows (the muted glaze is a second signal, never the only
+   one). The break plays only with full motion, on that one cup; reduced
+   motion and Animations "Off" show the still broken cup at once. */
+
+.mz-cini-row { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 700; vertical-align: middle; }
+.mz-cini-row__cups { display: inline-flex; align-items: flex-end; gap: 2px; line-height: 0; }
+.mz-cini-row--compact .mz-cini-row__cups { gap: 1px; }
+.mz-cini-row__n { font-variant-numeric: tabular-nums; font-size: 14px; color: var(--mz-text-muted); }
+
+.mz-cini { display: block; flex: none; overflow: visible; }
+.mz-cini__glaze { fill: #FFFDF7; stroke: #2B1A14; stroke-width: 1.3; stroke-linejoin: round; }
+.mz-cini__foot { fill: #EFE7DA; stroke: #2B1A14; stroke-width: 1.1; stroke-linejoin: round; }
+.mz-cini__mouth { fill: #E9DFD0; stroke: #2B1A14; stroke-width: 1.1; }
+.mz-cini__stripe { fill: none; stroke: #178A8A; stroke-width: 1.2; stroke-linecap: round; }
+.mz-cini__flower { fill: #C8323C; }
+.mz-cini__leaf { fill: #1F8A55; }
+.mz-cini__crack { fill: none; stroke: #2B1A14; stroke-width: 1.2; stroke-linejoin: round; stroke-linecap: round; }
+
+/* Broken: the shards apart, the glaze muted. */
+.mz-cini--broken .mz-cini__glaze { fill: #E3D9CB; }
+.mz-cini--broken .mz-cini__flower, .mz-cini--broken .mz-cini__leaf, .mz-cini--broken .mz-cini__stripe { opacity: .7; }
+.mz-cini__shard { transform-box: view-box; }
+.mz-cini__shard--l { transform-origin: 8.4px 21px; transform: rotate(-5deg); }
+.mz-cini__shard--r { transform-origin: 15.6px 21px; transform: translate(1.4px, .4px) rotate(20deg); }
+.mz-cini--broken .mz-cini__crack { opacity: 0; }
+
+/* The break: a crack shows across the cup, then the right shard tips away (about 0.6 s). Nothing else moves. */
+[data-mz-motion="full"] .mz-cini--breaking .mz-cini__shard--l { animation: mz-cini-settle .6s ease-out both; }
+[data-mz-motion="full"] .mz-cini--breaking .mz-cini__shard--r { animation: mz-cini-tip .6s cubic-bezier(.3, .7, .4, 1) both; }
+[data-mz-motion="full"] .mz-cini--breaking .mz-cini__crack { animation: mz-cini-crack .6s linear both; }
+@keyframes mz-cini-settle { 0%, 30% { transform: none; } 100% { transform: rotate(-5deg); } }
+@keyframes mz-cini-tip { 0%, 30% { transform: none; } 100% { transform: translate(1.4px, .4px) rotate(20deg); } }
+@keyframes mz-cini-crack { 0% { opacity: 0; } 20%, 35% { opacity: 1; } 100% { opacity: 0; } }
+
+/* Your cups sit beside the category; on a narrow phone they wrap under it rather than squeeze it. */
+.mz-jr-top { flex-wrap: wrap; }
+.mz-jr-top > .mz-cini-row { margin-left: auto; }
+
+/* Seat lists: the name keeps its room; the cups go to the right, or to a second line when seven don't fit. */
+.mz-jr-seat { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.mz-jr-seat__mark { flex: none; width: 16px; text-align: center; }
+.mz-jr-seat__name { flex: 1 1 8em; }
+.mz-jr-seat__cups { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+.mz-jr-seat--out .mz-jr-seat__cups { opacity: .85; }
+/* The TV is read from across the room: bigger cups. */
+.mz-jr-tv .mz-cini { width: 26px; height: 26px; }
+.mz-jr-tv .mz-cini-row__cups { gap: 2px; }
+.mz-jr-tv .mz-cini-row__n { font-size: 17px; }
+
+/* Results rows and labels: cups beside the words. */
+.mz-jr-row__cups { display: inline-flex; vertical-align: middle; margin-right: 4px; }
+.mz-jr-cupslabel { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+/* The lobby note flows as text, with the cups at its start (never pushed under the Start dock). */
+.mz-content-choice__note.mz-jr-cupslabel { display: block; }
+.mz-content-choice__note.mz-jr-cupslabel > .mz-cini-row { margin-right: 6px; }
+
+/* Stage 10.1 repair (S101-R1): the TV's final screen. A compact heading, so the standings (and the deciding cup) sit on screen. */
+.mz-jr-tv--final { gap: 10px; }
+.mz-jr-tv--final .mz-tvshow-h1 { font-size: clamp(40px, 4.2vw, 64px); line-height: 1.05; margin: 0; }
+.mz-jr-tv--final .mz-tvshow-line { margin: 0; }
+.mz-jr-standings--tv .mz-jr-row { padding-block: 6px; }
+.mz-jr-row__cups { margin-right: 8px; }

@@ -23,8 +23,12 @@ export interface ResultFacts {
   scores: Readonly<Record<string, number>>;
   nameOf: (playerId: string) => string;
   youId?: string;
-  /** Your own participation (done of total); absent if unknown. */
-  yourParticipation?: { done: number; of: number };
+  /**
+   * Your own participation (done of total); absent if unknown. `actions` is
+   * every genuine action you took (answers or tries, right or wrong), when
+   * the game reports it (Stage 10.1, D-S101-06).
+   */
+  yourParticipation?: { done: number; of: number; actions?: number };
   /** True when you chose to sit this game out (only your phone knows). */
   youSatOut?: boolean;
 }
@@ -153,8 +157,15 @@ export function resultsStory(f: ResultFacts): ResultsStory {
     // "sitting this one out": the place you earned still stands.
     const satOutAll = !!f.youSatOut && !(p && p.done > 0);
     const satOutRest = !!f.youSatOut && !!p && p.done > 0;
+    // Stage 10.1 (D-S101-06): "You missed this one" needs evidence of
+    // absence: nothing completed AND no recorded action at all (in Jebena
+    // Rush a survivor can have no accepted answer). A game that doesn't
+    // report actions keeps the old rule. And it's never said beside "You
+    // won this one": a player placed first in a game somebody won took part.
+    const wonIt = rank === 1 && (tone === "win" || tone === "tie");
+    const absent = !!p && p.of > 0 && p.done === 0 && (p.actions ?? p.done) === 0 && !wonIt;
     const rankLine =
-      p && p.of > 0 && p.done === 0 ? pick(QUIPS.youMissed, `${key}:you`)
+      absent ? pick(QUIPS.youMissed, `${key}:you`)
       : n <= 1 ? ""
       : allZero ? pick(QUIPS.youZero, `${key}:you`)
       : rank === 1 && !tied ? pick(QUIPS.youWon, `${key}:you`)

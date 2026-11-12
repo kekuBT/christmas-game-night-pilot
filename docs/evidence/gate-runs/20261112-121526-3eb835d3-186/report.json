@@ -1,0 +1,258 @@
+{
+  "runId": "20261112-121526-3eb835d3-186",
+  "level": "fast",
+  "startedAt": "2026-11-12T12:15:26.723Z",
+  "finishedAt": "2026-11-12T12:16:20.401Z",
+  "exitCode": 1,
+  "verdict": "FAILED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r-fast",
+  "git": {
+    "head": "3eb835d31ae4e3961d94ba3034790f6873179e0a",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "3a50a96368234e5f9c476961e2c9ae5b0987f6a8cd8e29a76dd105b235b7d9dd",
+    "files": 500
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15602
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.2 GB available",
+  "browser": null,
+  "steps": [
+    {
+      "name": "typecheck-server",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 13.4,
+      "log": "./logs/01-typecheck-server.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 12,
+      "startOffsetSec": 0.2,
+      "endOffsetSec": 13.7,
+      "cpuSec": 16.7,
+      "peakRssMB": 516,
+      "machine": {
+        "memAvailMinMB": 14132,
+        "cpuSaturatedSec": 0,
+        "samples": 15
+      },
+      "failureKind": null
+    },
+    {
+      "name": "typecheck-web",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 12.3,
+      "log": "./logs/02-typecheck-web.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 12,
+      "startOffsetSec": 0.2,
+      "endOffsetSec": 12.5,
+      "cpuSec": 15.1,
+      "peakRssMB": 410,
+      "machine": {
+        "memAvailMinMB": 14132,
+        "cpuSaturatedSec": 0,
+        "samples": 13
+      },
+      "failureKind": null
+    },
+    {
+      "name": "lint",
+      "kind": "check",
+      "command": "node ./node_modules/eslint/bin/eslint.js .",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 20.6,
+      "log": "./logs/03-lint.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 17,
+      "startOffsetSec": 0.2,
+      "endOffsetSec": 20.8,
+      "cpuSec": 23,
+      "peakRssMB": 667,
+      "machine": {
+        "memAvailMinMB": 14118,
+        "cpuSaturatedSec": 4,
+        "samples": 23
+      },
+      "failureKind": null
+    },
+    {
+      "name": "unit-tests",
+      "kind": "check",
+      "command": "node ./node_modules/vitest/vitest.mjs run",
+      "status": "FAIL",
+      "exitCode": 1,
+      "durationSec": 40.9,
+      "log": "./logs/04-unit-tests.log",
+      "detail": "\u001b[31m\u001b[1m\u001b[7m FAIL \u001b[27m\u001b[22m\u001b[39m tests/stage62-solo-shelf.test.ts\u001b[2m > \u001b[22mthe solo session across games, and a join whose reply was lost\u001b[2m > \u001b[22mMath → Pulse → Connections → Math: one room, each round fresh, nothing carried over | \u001b[2m Test Files \u001b[22m \u001b[1m\u001b[31m1 failed\u001b[39m\u001b[22m\u001b[2m | \u001b[22m\u001b[1m\u001b[32m122 passed\u001b[39m\u001b[22m\u001b[90m (123)\u001b[39m | \u001b[2m      Tests \u001b[22m \u001b[1m\u001b[31m1 failed\u001b[39m\u001b[22m\u001b[2m | \u001b[22m\u001b[1m\u001b[32m1599 passed\u001b[39m\u001b[22m\u001b[90m (1600)\u001b[39m",
+      "worker": 2,
+      "estSec": 35,
+      "startOffsetSec": 12.5,
+      "endOffsetSec": 53.5,
+      "cpuSec": 58.1,
+      "peakRssMB": 676,
+      "machine": {
+        "memAvailMinMB": 14118,
+        "cpuSaturatedSec": 4,
+        "samples": 45
+      },
+      "failureKind": "functional"
+    },
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261112-121526-3eb835d3-186/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 8.5,
+      "log": "./logs/05-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 7,
+      "startOffsetSec": 13.7,
+      "endOffsetSec": 22.2,
+      "cpuSec": 9.1,
+      "peakRssMB": 429,
+      "machine": {
+        "memAvailMinMB": 14118,
+        "cpuSaturatedSec": 4,
+        "samples": 10
+      },
+      "failureKind": null
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [],
+  "timing": {
+    "wallSec": 54,
+    "sumSec": 96,
+    "utilisation": 0.59,
+    "perWorkerBusySec": {
+      "w1": 22,
+      "w2": 53,
+      "w3": 21
+    },
+    "predicted": {
+      "low": 28,
+      "mid": 37,
+      "high": 70,
+      "confidence": "measured"
+    },
+    "contentionRatio": null,
+    "longest": [
+      {
+        "name": "unit-tests",
+        "sec": 40.9
+      },
+      {
+        "name": "lint",
+        "sec": 20.6
+      },
+      {
+        "name": "typecheck-server",
+        "sec": 13.4
+      },
+      {
+        "name": "typecheck-web",
+        "sec": 12.3
+      },
+      {
+        "name": "build-web",
+        "sec": 8.5
+      }
+    ],
+    "backpressure": {
+      "waits": 0,
+      "seconds": 0
+    },
+    "system": {
+      "cpuPctMean": 82,
+      "cpuPctPeak": 99,
+      "memAvailMinMB": 14118,
+      "load1Peak": 3.56,
+      "cpuPctEvery10s": [
+        93,
+        98,
+        80,
+        85,
+        89
+      ]
+    },
+    "serverUse": [],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "typecheck-server",
+        "phase": "fast",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "typecheck-web",
+        "phase": "fast",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "lint",
+        "phase": "fast",
+        "estSec": 17,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 4,
+        "name": "unit-tests",
+        "phase": "fast",
+        "estSec": 35,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 5,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 7,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 28.106479999999998,
+      "mid": 36.519,
+      "high": 69.83144999999999,
+      "sequentialSec": 83.55,
+      "confidence": "measured",
+      "contention": 1.036,
+      "contentionSource": "measured"
+    }
+  }
+}

@@ -2143,7 +2143,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `3ca8ac7` (final candidate, 6811445149 applied): fast `20261112-014738-3ca8ac75-30336` **PASSED** (exit 0, 5/5, 49 s); then full `20261112-014837-3ca8ac75-1032` **PASSED** (exit 0, 87/87, 31 min 47 s, no leftover processes). Unit tests 1,536 in 120 files; `check-jebena-rush` 106 checks, 0 failed, with the last-one-standing ending (F) and Play again (G).
 - **Next:** the new completed report on PR #16; then ChatGPT's review and the private browser audit of Jebena endings and replay.
 
-## Stage 9.3: playable Spectrum, one complete cooperative journey (repairs complete, awaiting review)
+## Stage 9.3: playable Spectrum, one complete cooperative journey (CLEARED by ChatGPT's independent review 6820352096 on `9397c00`/`940df38`)
+
+- **Cleared** 2026-11-12 (6820352096): the achievement leakage, the Spectrum timing words and the early-ending copy are resolved; no remaining blocking finding.
+  - The reviewer ran 85/85 focused tests and its own targeted gate `20261112-084652-9397c002-13286` (PASS 4/4: Spectrum and TV outage); it reviewed the developer's full run `20261112-073733-9397c002-17855` as developer evidence.
+  - Its private live audit covered host, guest and TV through four rounds (40/40), keyboard and button sends, a reload with an unsent guess, Play again, and a two-tap sit-out to an early ending (one reason, 0/40, no "Everyone finished").
+  - Nonblocking notes: the team hero and body repeat some summary text; "You: Did not answer (0 of 1)" after another player's immediate departure could be role-aware. The old `check-tv-outage` hang's cause remains unproven.
+  - This is development clearance, not merge, deployment or real-device certification. Real iPhone Safari and Android Chrome are not run.
 
 - **Brief:** ChatGPT's handoff 6813167965 on PR #16 (with the Stage 9.2 clearance). Base `0765222` (PR #16's cleared head); branch `claude/stage9-3-spectrum-play`, a stacked PR on #16.
 - **Scope:** casual-room selection, briefing, phone play, spectator/TV play, a typed cooperative result and Play again, on the cleared Stage 9.2 rules. No solo, Cup, Quick Party scheduling, new content, Memory Book saving or humour.
@@ -2164,3 +2170,63 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Review 6815908707 (repairs required on `f1c5f02`):** P2, an achievement ("First Game Finished") drawn from a Spectrum match through the ledger; P2, the briefing's "45 seconds for the impostor's guess"; copy, "Everyone finished." beside the early-ending reason, which also appeared twice. All three repaired with failing-first regressions (D-S93-08); the gate failure on `b668ee3` led to D-S93-09.
 - **Next:** a new completed report on PR #17; then ChatGPT's verification of the repair delta and private live audit. Nothing merged or deployed.
 
+## Stage 10.1: Jebena cini cups and truthful result feedback (repaired after reviews 6822605156 and 6828948844, awaiting re-review)
+
+- **Brief:** ChatGPT's handoff 6820352096 on PR #17 (with the Stage 9.3 clearance), from the owner's request: "Instead of hearts let's use cini/cup so when they miss the cup breaks." Base `940df38` (PR #17's cleared head); branch `claude/stage10-1-jebena-cups`, a stacked PR on #17.
+- **Scope:** Jebena Rush's lives drawn and worded as small handleless coffee cups (cini) everywhere; a cup breaks when a life is lost; and the carried result-copy contradiction (a survival winner told "You missed this one"). No rule, score or protocol change; no humour or saving work.
+- **Spec:** `docs/stage10/stage101.md` (§9: as built and tested). Decisions D-S101-01 to D-S101-07 in `docs/DECISIONS.md`.
+- **Built:**
+  - **The cup:** an original inline SVG cini, `CiniCups.tsx` and `stage101.css`, on every surface that showed hearts: lobby, briefing, your own row (kept once you're out), seat lists, TV, last play, out screen, refusal, results and scoring, library, settings and Start refusals.
+  - **When a cup breaks:** only on a live authoritative decrement (`lib/cups.ts`). Never on a wrong try, reload, resync, repeated view or leaving; Play again starts whole. The break animates with full motion only.
+  - **Truthful results:** `celebrate.ts` says "You missed this one" only with no recorded action, and never to a first-placed player in a won game.
+  - **Unchanged:** server fields, rules and scores (D-S101-01/02).
+- **Tests:** `tests/stage101-cups.test.ts` (22; the 4 result cases fail on the base); the results audit is extended. Full unit suite: 1,595 tests in 123 files.
+- **Browser driver:** `scripts/check-jebena-rush.mjs`, 148 checks. A break log on every page, a third room for the zero-answer survivor, seven cups at 320 px. Screenshots: `docs/stage10/screenshots/` (after) and `before/` (hearts); provenance in its README.
+- **Gates** (each verdict is one run on one revision; evidence in `docs/evidence/gate-runs/<run>/`):
+  - `f426988`: targeted (`jebena-rush briefing`) `20261112-102253-f4269885-5996` **FAILED**. The driver's loop missed two real lost lives (one during Amina's resync, one when slow checks ran out Keku's turn), so they looked "stray".
+  - `f426988`: fast `20261112-102438-f4269885-6698` **FAILED** (`stage74-content-variety` setup timed out at 250 ms under load, as in `20261111-194026-83406685-7879`). Both fixed in `f157422` (D-S101-07).
+  - `f157422` (final candidate): targeted `20261112-103432-f1574229-11563` PASSED; then, one after another, fast `20261112-103623-f1574229-12269` **PASSED** (exit 0, 5/5, 52 s) and full `20261112-103723-f1574229-15489` **PASSED** (exit 0, 88/88, 33 min 24 s, no leftover processes).
+- **Not run:** real iPhone Safari and Android Chrome (Chromium emulation only).
+- **Review 6822605156 (ChatGPT, 6:40 a.m. ET):** two P2 findings, not cleared. Acknowledged in 6822641851. Repairs below.
+
+### Stage 10.1 repairs (review 6822605156)
+- **S101-R1, the deciding cup (D-S101-08):** the match-deciding timeout ends the match in the same snapshot, so its 1→0 break was never drawn.
+  - The phone results rows and a new Jebena TV final screen (`JebenaTvFinal`) now draw everyone's cups, continuing the live screens' memory.
+  - The deciding cup breaks there once on a screen that watched the match, and shows still under reduced motion. A reload, later visit or the review never replays it.
+  - Server, scores, places and Play again are unchanged.
+- **S101-R2, continuity (D-S101-09):** `CupMemory` now has a scope (one room and seat, or one watched room) and continuity epochs.
+  - `App.tsx` rebaselines on a socket close, staleness, offline, coming back from the background, and pageshow, and marks every applied projection.
+  - The 3 s window stays as a second guard only.
+- **Tests:**
+  - `tests/stage101-cups.test.ts` +5 (27 in all), including the reviewer's helper repro.
+  - `check-jebena-rush`:
+    - R1 on the actual match-deciding timeout, with no final-loss exception: the TV, the winner's phone and the runner-up's phone each break the deciding cup once, and results equal the server's scores;
+    - R2 a short reconnect inside the window, and a same-tab TV switch to a room with colliding ids;
+    - the out screen is checked whichever turn takes the last cup (D-S101-12).
+  - The new driver fails 10 checks on `f157422`'s build (`docs/evidence/stage101-local/`).
+- **Gate fixes found on the way** (none in the cups code; each reproduced on demand before fixing; evidence in `docs/evidence/stage101-local/`):
+  - **D-S101-10:** two solo test harnesses that use the real server gave passing requests 250–300 ms; an event-loop stall under load timed them out. Now 2 s with faults, 5 s without.
+  - **D-S101-11:** `check-tv-outage` counted the TV's connection note, then read it in a second call; the "reconnected" note can go away in between. Now one read.
+  - **D-S101-12:** in the full gate on `36e222f`, the Jebena run skipped the out-screen checks (Baraka went out on his R2 short-drop turn). Now they always run, and the driver fails if they didn't.
+- **Gates** (each verdict is one run on one revision; run one after another; evidence in `docs/evidence/gate-runs/<run>/`):
+  - `3eb835d` (the repair): targeted `20261112-120037-3eb835d3-4427` PASSED (4/4); fast `20261112-121526-3eb835d3-186` **FAILED** (`stage62-solo-shelf`, D-S101-10).
+  - `25c2814`: fast `20261112-122601-25c28143-10294` PASSED (5/5); full `20261112-122710-25c28143-13503` **FAILED** (87/88, `check-tv-outage`, D-S101-11).
+  - `36e222f`: fast `20261112-130616-36e222fb-30085` PASSED (5/5); full `20261112-130723-36e222fb-785` PASSED (88/88), but its Jebena run skipped the out-screen checks (D-S101-12). Not used as the final verdict.
+  - **`0516e3e` (final candidate):** targeted (`jebena-rush briefing tv-outage`) `20261112-134621-0516e3ea-17341` PASSED (5/5); full `20261112-134811-0516e3ea-18196` **PASSED** (exit 0, 88/88, 32 min 58 s, no leftover processes; 1,600 unit tests in 123 files; `check-jebena-rush` 163, `check-briefing` 44, `check-tv-outage` 15).
+- **Screenshots:** `docs/stage10/screenshots/` refreshed from that final run; the ending before the repair is in `repair-before/`.
+- **Not run:** real iPhone Safari and Android Chrome (Chromium emulation only).
+- **Review 6828948844 (ChatGPT, 11:10 a.m. ET):** changes requested for one driver bookkeeping defect, S101-R3. No new product defect: the private live audit of `0516e3e` passed, but ChatGPT's own `check-jebena-rush` run failed one check (160 PASS, 1 FAILED). Acknowledged in 6828983499.
+
+### Stage 10.1 repair S101-R3 (review 6828948844, test-only)
+- **The defect:** the offline-resync check read Amina's whole break log. A cup she lost live before her phone dropped counted as a replay.
+- **The repair (D-S101-13):**
+  - Numbered break-log events, and cursors from `scripts/lib/break-log.mjs`, for E, R2, the out screen's resync form, the same-tab switch, the wrong tries and Play again.
+  - The log is never erased. R2 used to erase Baraka's, hiding his earlier breaks from the integrity checks.
+  - Amina's phone drops only after a live loss of hers, asserted present.
+  - The driver fails if the offline resync, the reload or the short drop never ran.
+- **Tests:** `tests/stage101-break-log.test.ts` (7). Locally (`docs/evidence/stage101-local/`): the old check with the new ordering fails exactly the reviewer's check (164/1); the repaired driver passes (165/0).
+- **Gates** on `0d9e4b4` (app code unchanged since `0516e3e`):
+  - targeted (`jebena-rush`) `20261112-161936-0d9e4b43-1259` **PASSED** (exit 0, 3/3; `check-jebena-rush` 166 PASS, 0 FAIL);
+  - fast `20261112-162112-0d9e4b43-1842` **PASSED** (exit 0, 5/5; 1,607 unit tests in 124 files).
+  - No unchanged full gate, as the review asked.
+- **Next:** ChatGPT's independent check of the test delta and the focused run. Nothing merged or deployed.

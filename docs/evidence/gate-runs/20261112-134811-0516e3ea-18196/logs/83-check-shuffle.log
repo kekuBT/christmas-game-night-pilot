@@ -1,0 +1,15 @@
+$ node scripts/check-shuffle.mjs http://localhost:41325
+# timeout 600s | worker w3 | server http://localhost:41325 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r4-full/test-results/20261112-134811-0516e3ea-18196/server-data/w3)
+
+[+2.9s] PASS guest sees no shuffle buttons
+[+2.9s] PASS guest has no Choose game sheet to open
+[+3.5s] PASS surprise me picks a real game as up-next — up-next=Guess the Year
+[+3.5s] PASS surprise me explains the pick
+[+4.0s] PASS smart shuffle picks a real game as up-next — up-next=Geography Challenge
+[+4.0s] PASS shuffling started no game
+[+4.9s] PASS manual selection clears the shuffle result
+[+4.9s] PASS manual selection sets the chosen game up next
+[+5.0s] SHUFFLE ALL PASSED
+[+5.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 5s | cpu 1.4s, peak memory 249 MB

@@ -1,0 +1,88 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt101
+
+ ❯ tests/stage74-content-variety.test.ts (34 tests | 4 failed | 29 skipped) 2766ms
+   × solo Start recovery is tied to its own press (review 6786060026) > A's reply is lost (the connection drops) after the server started its round: the same press, sent again at once, is answered as a replay; one round, one use 489ms
+     → expected 'error' to be 'playing' // Object.is equality
+   × solo Start recovery is tied to its own press (review 6786060026) > A never reaches the server while B starts the same game: A is refused as stale and never adopts B's round; B is undisturbed; no extra use 433ms
+     → expected 'idle' to be 'playing' // Object.is equality
+   × solo Start recovery is tied to its own press (review 6786060026) > A started, but B replaced it before A's press was sent again: A is refused, never adopts B's round; B is undisturbed; no extra use 421ms
+     → expected 'idle' to be 'playing' // Object.is equality
+   × solo Start recovery is tied to its own press (review 6786060026) > A's request hangs (never arrives) while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale; B is undisturbed 425ms
+     → expected [] to have a length of 1 but got +0
+   ✓ solo Start recovery is tied to its own press (review 6786060026) > no network at all: the Start ends within its budget; Try again sends the same press (a replay if it had arrived), so nothing starts twice 992ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A's reply is lost (the connection drops) after the server started its round: the same press, sent again at once, is answered as a replay; one round, one use
+AssertionError: expected 'error' to be 'playing' // Object.is equality
+
+Expected: "playing"
+Received: "error"
+
+ ❯ tests/stage74-content-variety.test.ts:508:31
+    506|     const a = tab({ faults: ["reset", "pass"] });
+    507|     await a.s.start("word-connections");
+    508|     expect(a.s.current.phase).toBe("playing");
+       |                               ^
+    509|     expect(open(room)).toEqual([a.s.current.gameInstanceId]);
+    510|     expect(a.sent).toHaveLength(2);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A never reaches the server while B starts the same game: A is refused as stale and never adopts B's round; B is undisturbed; no extra use
+AssertionError: expected 'idle' to be 'playing' // Object.is equality
+
+Expected: "playing"
+Received: "idle"
+
+ ❯ tests/stage74-content-variety.test.ts:521:31
+    519|     await a.s.start("word-connections");
+    520|     const bRound = b.s.current.gameInstanceId!;
+    521|     expect(b.s.current.phase).toBe("playing");
+       |                               ^
+    522|     expect([a.s.current.phase, a.s.current.failure, a.s.current.gameIn…
+    523|     expect(a.s.current.error).toMatch(/another tab or window/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A started, but B replaced it before A's press was sent again: A is refused, never adopts B's round; B is undisturbed; no extra use
+AssertionError: expected 'idle' to be 'playing' // Object.is equality
+
+Expected: "playing"
+Received: "idle"
+
+ ❯ tests/stage74-content-variety.test.ts:540:31
+    538|     await a.s.start("word-connections");
+    539|     const bRound = b.s.current.gameInstanceId!;
+    540|     expect(b.s.current.phase).toBe("playing");
+       |                               ^
+    541|     expect([a.s.current.phase, a.s.current.failure, a.s.current.gameIn…
+    542|     expect(a.s.current.error).toMatch(/isn.t the latest/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/stage74-content-variety.test.ts > solo Start recovery is tied to its own press (review 6786060026) > A's request hangs (never arrives) while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale; B is undisturbed
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/stage74-content-variety.test.ts:554:20
+    552|     const bRound = b.s.current.gameInstanceId!;
+    553|     expect([a.s.current.phase, a.s.current.failure, a.s.current.gameIn…
+    554|     expect(a.sent).toHaveLength(1); // the hang used the whole allowan…
+       |                    ^
+    555|     await a.s.start("word-connections"); // Try again: the same press,…
+    556|     expect([a.s.current.phase, a.s.current.failure, a.s.current.gameIn…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed | 29 skipped (34)
+   Start at  12:21:51
+   Duration  3.90s (transform 613ms, setup 0ms, collect 825ms, tests 2.77s, environment 0ms, prepare 71ms)
+

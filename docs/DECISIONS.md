@@ -1162,3 +1162,102 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Timing lines in each game's words:** `timingLines(lifecycle, gameId)` takes per-game phase words. A "guess" phase is the impostor's one guess in Impostor and everyone's guesses in Spectrum; the generic word is "guessing".
   - **A cooperative outcome line says how many rounds were played** ("2 of 4 rounds played."), never "Everyone finished."; why a match ended early is said once, by the team result in the results hero.
 - **D-S93-07 The Spectrum driver plays real time.** `scripts/check-spectrum.mjs` runs the real 60/45/8-second phases (one clue phase runs out), so its gate timeout is 900 s.
+
+## Stage 10.1: Jebena cini cups and truthful result feedback (2026-11-12, branch `claude/stage10-1-jebena-cups`, from the Stage 9.3 head `940df38`)
+
+- **D-S101-01 Cups are a picture of the existing lives.** 3, 5 or 7 (default 5); one is lost on a timeout; scoring is unchanged (100 per player outlasted, 10 per life kept). Only the drawing and the words change (owner's request, handoff 6820352096).
+- **D-S101-02 Identifiers keep `hearts`.**
+  - **What stays:** the server state, the protocol, the `settings.hearts` key, test ids and data attributes.
+  - **What changes:** only user-facing words and pictures.
+  - **Alternative rejected:** a rename. It would churn persisted rooms, stored lobby settings and every client, for no change a player can see.
+- **D-S101-03 A break is detected on the page, from consecutive authoritative views.**
+  - **How:** each place cups are drawn remembers the last count it showed for that game and seat. A smaller count breaks exactly the newly lost slots, once.
+  - **What follows:**
+    - a first view or a reload has nothing to compare, so it shows broken cups without animating;
+    - a repeated view changes nothing;
+    - a new game id (Play again) starts fresh.
+  - **Alternative rejected:** a server "cup broke" event. That would be a protocol change, and it would need its own replay rules on reconnect.
+- **D-S101-04 An original inline SVG cup.**
+  - **The shape:** handleless, flared rim, white body with a dark outline, a teal rim stripe, a red flower and green leaves.
+  - **Broken:** split in two along a zigzag, with the right shard tipped away.
+  - **Why:** no external file, photograph or font glyph, and intact vs broken differ by silhouette.
+- **D-S101-05 Leaving is not breaking.** A seat that left shows "Left" with no cups, so sitting out never looks like cups breaking. An eliminated seat shows every cup broken and "Out", and your own row stays visible once you're out.
+- **D-S101-06 "You missed this one" needs evidence of absence.**
+  - **When it shows:** only with no recorded action at all (`participation.actions`, or the completed count where a game doesn't report actions), and never for a player placed first in a game somebody won.
+  - **The case it fixes:** Jebena Rush counts completed items as accepted answers, so a survival winner could read "You won this one" beside "You missed this one".
+  - **Unchanged:** the sat-out lines, the zero-score line, ranking and scores.
+- **D-S101-07 A flaky setup step in `stage74-content-variety` gets a realistic request timeout.**
+  - **Trigger:** fast gate `20261112-102438-f4269885-6698` on `f426988` failed in "no network at all: the Start ends within its budget…".
+  - **The failure:** `seatedRoom()`'s first real, unfaulted Start ended in `error` instead of `playing` (line 497), because every request in that tab was limited to 250 ms.
+  - **History:** the same assertion failed once before, in full gate `20261111-194026-83406685-7879` (Stage 8.3). Five local runs under heavy CPU load all passed.
+  - **The fix:** only that setup tab gets a 5 s request timeout. The faulted tabs, which test the 250 ms behaviour and the 4 s Start budget, are unchanged.
+  - **Alternative rejected:** re-running the gate until it passed.
+- **D-S101-08 The deciding cup breaks in the results (review 6822605156, S101-R1).**
+  - **How:** the phone results rows and a Jebena-specific TV final screen draw everyone's cups, continuing the live screens' memory (your own row ← your live row; others ← the seat list; the TV ← its seat list). The match-deciding 1→0 loss breaks once, where the result appears.
+  - **Alternative rejected:** holding the live screen for a moment before the results. It delays the result and the continuation controls, and it needs a special render of a finished game on every screen.
+- **D-S101-09 Cup memory is scoped to a room and to unbroken continuity (review 6822605156, S101-R2).**
+  - **Scope:** a room and seat, or a watched room. Changing it clears the memory.
+  - **Epoch:** a new one on every loss of continuity (socket close, staleness, offline, coming back from the background). Only a count recorded in the current epoch can break a cup.
+  - **Elapsed time** (3 s) is kept only as a second guard.
+  - **Alternative rejected:** relying on room revisions. Those move for unrelated changes (presence, readiness), so a jump doesn't mean a cup was missed.
+- **D-S101-10 The two solo harnesses that use the real server give passing requests room (supersedes the part of D-S101-07 that kept the faulted tabs at 250 ms).**
+  - **Trigger:** fast gate `20261112-121526-3eb835d3-186` on `3eb835d` failed in `stage62-solo-shelf` "Math → Pulse → Connections → Math…": `math-mayhem: expected 'error' to be 'playing'`. That test has no faults at all.
+  - **History:** full gate `20261111-194026-83406685-7879` failed two other tests in the same `stage62` describe, plus the `stage74` setup that D-S101-07 fixed.
+  - **Root cause:** each solo request there had 300 ms (`stage62`) or 250 ms (`stage74`, faulted tabs). The real server runs in the test's own thread.
+    - Under gate-like load a passing request took at most 29 ms (55 requests, median 4.6 ms), so the cause is not slowness. It is an event-loop stall longer than the allowance.
+    - When the loop resumes, due timers run before I/O, so the session's timeout fires even though the reply has arrived.
+  - **Reproduced deterministically:** a temporary switch (not committed) blocked the loop for 400 ms during one passing request per test.
+    - Before the fix it failed 4 of 5 tests in each harness, the first `stage62` test with the gate's exact error.
+    - After the fix, all 10 pass with the same stall.
+  - **The fix (tests only):**
+    - A session or tab with no faults gets 5 s.
+    - One with no-answer faults gets 2 s, the same allowance the `stage81`/`stage82` harnesses use. A "drop" or "hang" still ends through the session's own timeout, so what these tests check (timed out vs quick failure, no resend after a timeout, rooms made, the 700 ms Start budget) is unchanged.
+    - The tests that wait through those faults get a 30 s test timeout.
+    - Cost: the `stage62` file takes about 16 s and `stage74` about 10 s (they run in parallel with other files). The whole suite under load took 44.6 s, against 40.1 s in the failing gate run.
+  - **Not affected:** `stage61`'s 150 ms harness answers from an in-memory server, so its replies resolve before any timer.
+  - **Alternative rejected:** re-running the gate until it passed, and adding a timer seam to `SoloSession` (a product change for a test-only problem).
+- **D-S101-11 `check-tv-outage` reads the TV's connection note in one call.**
+  - **Trigger:** full gate `20261112-122710-25c28143-13503` on `25c2814` failed, 87 of 88 passed. The failure was `check-tv-outage` "server back: the note goes away and the room is shown — not within 15000ms (locator.getAttribute: Timeout 30000ms exceeded.)". The next check passed at once.
+  - **Root cause (a driver race, unchanged since Stage 5.1):**
+    - The helper counted the `tv-conn` note, then read its `data-state` in a second call.
+    - The "reconnected" note goes away 4 s after it appears (`App.tsx`). If that happens between the two calls, `getAttribute` waits its whole 30 s default for an element that no longer exists, and the 15 s check fails.
+    - The timeline matches: reconnected at +36 s, removed at about +40 s, the failure at +70 s.
+    - The repair's `App.tsx` change adds only synchronous cup-memory calls and doesn't touch the note.
+  - **Reproduced deterministically:** a temporary 4.5 s gap between the helper's two calls (`docs/evidence/stage101-local/tv-note-race.patch`) fails the check with the gate's exact message.
+  - **The fix:** one `evaluate` returns the note's state, or `null`. The same 4.5 s delay placed before that single read passes, and a normal run passes all 14 checks. What the driver checks is unchanged.
+  - **Alternative rejected:** a short `getAttribute` timeout. It narrows the window but keeps the race, and a timeout of 0 means no timeout in Playwright.
+- **D-S101-12 `check-jebena-rush` checks the out screen whichever turn takes the last cup, and fails if it never does.**
+  - **Trigger:** full gate `20261112-130723-36e222fb-785` on `36e222f` passed 88/88, but its Jebena run had no "is out and watches the rest" checks and no out screenshot.
+  - **Root cause (my R2 driver addition):** Baraka had lost a cup earlier in that run, so his R2 short-drop turn took his last cup. That branch, like Amina's offline turn, ends with `continue`, skipping the out block after the ordinary timeout. A section that silently doesn't run is a coverage hole, even in a green run.
+  - **The fix:**
+    - One `outChecks()` runs from all three branches.
+    - A last cup lost while the driver had cut that phone must show broken without breaking (S101-R2); a live one must break on the player's own row, as before.
+    - With three players someone always goes out before the end, so the driver fails if the match ends without these checks having run.
+  - **Verified:**
+    - A temporary switch holding Baraka's short drop until his last cup runs the resync form, ALL PASS (`docs/evidence/stage101-local/`).
+    - A normal run passes, 162 checks.
+    - In targeted `20261112-134621-0516e3ea-17341`, Amina went out first and the checks ran on her phone.
+  - **Alternative rejected:** moving the short drop to a turn where Baraka can't go out. Which turn that is depends on earlier losses, so the R2 reconnect check could itself stop running.
+- **D-S101-13 Reconnect checks read a page's break log from a cursor and never erase it (review 6828948844, S101-R3).**
+  - **Trigger:** ChatGPT's own run of `check-jebena-rush` on `0516e3e` failed "E the resync showed her broken cup without replaying the break" (160 PASS, 1 FAILED). The check filtered Amina's whole log for her seat, so a cup she lost live before her phone dropped (her own row and the seat list, slot 2) counted as a replay. A driver defect; the cups code is not involved.
+  - **The fix (test-only):**
+    - Every logged break has a number on its page (`n`).
+    - `scripts/lib/break-log.mjs` takes a cursor (`cursorOf`) and returns only what came after it (`since`, `newSeatBreaks`).
+    - These checks now take a cursor instead of reading or erasing the history:
+      - E, Amina offline;
+      - R2, Baraka's short drop. It used to erase his log, which hid his earlier breaks from the end-of-match checks;
+      - the out screen's resync form;
+      - the same-tab room switch;
+      - the wrong tries;
+      - Play again.
+    - The end-of-match checks still see the whole match.
+  - **The reviewer's ordering always runs:**
+    - Amina's phone drops only on a turn after a live loss of hers.
+    - The driver asserts that earlier break is in the log, on her own row and in the seat list, before checking the resync.
+    - It also fails if the offline resync, Keku's reload or the R2 short drop never ran.
+  - **Regression:** `tests/stage101-break-log.test.ts` (7). A prior own break on the HUD and the seat list passes; a newly replayed break on either fails, for the lost slot too; other seats don't count; the history is never erased.
+  - **Before and after, locally:** the repaired driver with the old lifetime check put back fails exactly the reviewer's check (164 PASS, 1 FAIL). The repaired driver passes (165 PASS, 0 FAIL).
+  - **Alternatives rejected:**
+    - erasing the log at the offline boundary: it hides history from the integrity checks;
+    - filtering by timestamp: clocks across pages and the server aren't one sequence;
+    - retrying the check.

@@ -1,0 +1,36 @@
+$ node scripts/check-official-practice.mjs http://localhost:41749
+# timeout 600s | worker w3 | server http://localhost:41749 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101b-full/test-results/20261112-103723-f1574229-15489/server-data/w3)
+
+[+1.4s] PASS the server runs without the content test mode
+[+4.3s] PASS start: the Cup is empty on the server
+[+4.3s] PASS default: the host's lobby starts an eligible game as Official — start-official-trivia
+[+4.9s] PASS practice-only: Charades offers Practice only, and says why
+[+5.0s] PASS refused: an official start of a practice-only game (Charades) — 400 {"error":"Charades is practice-only until its team scoring is redesigned."}
+[+5.0s] PASS refused: an official start of a practice-only game (Charades) — standings and games unchanged — {"standings":{},"championship":[],"games":0}
+[+5.0s] PASS refused: an official start by a guest — 400 {"error":"Only host/cohost can start a game"}
+[+5.0s] PASS refused: an official start by a guest — standings and games unchanged — {"standings":{},"championship":[],"games":0}
+[+5.1s] PASS refused: an official Category Sprint with no approved content — 409 {"error":"No suitable official Category Sprint categories are left for 4 players in this Cup (0 suitable, 3 needed). Official categories must be closed lists la
+[+5.1s] PASS refused: an official Category Sprint with no approved content — standings and games unchanged — {"standings":{},"championship":[],"games":0}
+[+6.4s] PASS practice: the game finished as practice and does not count
+[+6.4s] PASS practice: the official standings did not move
+[+6.7s] PASS practice: Amina's results say it doesn't count
+[+7.6s] PASS practice: the Cup screen is still empty
+[+9.1s] PASS official: the official standings now have all four players — {"player-1":100,"player-2":66.67,"player-3":33.33,"player-4":0}
+[+9.1s] PASS official: the order follows the game (Keku > Amina > Baraka > Dee)
+[+9.2s] PASS official: Amina's results say it counts
+[+9.9s] PASS official: the Cup screen shows the server's order
+[+9.9s] PASS official: the Cup lists the official game, not the practice one — Official games so far Math Mayhem · Day 1 Keku 100 · Amina 66.7 · Baraka 33.3 · Dee 0 Placement points: 100 for the top, 0 for the bottom, shared on ties. A day's score is the average of that day's placements.
+[+11.0s] PASS practice again (reversed scores): the official standings did not move
+[+11.0s] PASS override: a guest is refused — 400 Only host/cohost can override a score
+[+11.0s] PASS override: the host without a reason is refused — 400 Override reason is required
+[+11.0s] PASS override: after both refusals the standings did not move
+[+11.0s] PASS override: the host may correct a practice score… — 200 {"ok":true}
+[+11.0s] PASS override: …and the official standings still did not move
+[+11.7s] PASS the Cup screen reads exactly as before the practice game and the overrides
+[+12.2s] PASS one player: the lobby explains Official needs 2 and offers Practice
+[+12.3s] PASS one player: the server refuses an official Word Connections (OFFICIAL_NEEDS_TWO) — 409 OFFICIAL_NEEDS_TWO
+[+12.3s] PASS one player: nothing was created and the Cup is empty
+[+12.4s] OFFICIAL VS PRACTICE ALL PASSED
+[+12.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 12.4s | cpu 7.2s, peak memory 393 MB

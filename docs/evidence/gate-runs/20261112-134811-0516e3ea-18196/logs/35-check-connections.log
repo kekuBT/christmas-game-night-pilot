@@ -1,0 +1,62 @@
+$ node scripts/check-connections.mjs http://localhost:42905
+# timeout 600s | worker w2 | server http://localhost:42905 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101r4-full/test-results/20261112-134811-0516e3ea-18196/server-data/w2)
+
+[+6.3s] PASS the briefing explains the objective
+[+6.6s] PASS 16 tiles — SHORT,STAR,TINSEL,PLANET,BLITZEN,GALAXY,COMET,GARLAND,FLAT,CUPID,CORN,GINGER,METEOR,DONNER,BAUBLE,ANGEL
+[+6.6s] PASS tiles are shuffled (the first four are not one group)
+[+6.9s] PASS no horizontal overflow at 320px
+[+6.9s] PASS tiles are at least 44px at 320px — 63.99993896484375
+[+7.2s] PASS no horizontal overflow at 360px
+[+7.2s] PASS tiles are at least 44px at 360px — 64
+[+7.4s] PASS no horizontal overflow at 390px
+[+7.4s] PASS tiles are at least 44px at 390px — 64
+[+7.5s] PASS a tapped tile is marked selected (aria-pressed)
+[+7.6s] PASS tapping again deselects
+[+7.6s] PASS Submit is disabled until four are picked
+[+8.1s] PASS one-away feedback after a near miss
+[+8.1s] PASS a double tap sends one guess — 1
+[+8.1s] PASS mistake dots show 3 left
+[+8.7s] PASS re-trying the same group is refused locally
+[+8.9s] PASS group 1 found shows a band
+[+9.4s] PASS Ada sees the name of the group she found, not the others
+[+9.8s] PASS group 2 found shows a band
+[+10.2s] PASS group 3 found shows a band
+[+10.6s] PASS group 4 found shows a band
+[+10.6s] PASS Ada's puzzle is solved
+[+14.3s] PASS four mistakes end Bea's puzzle
+[+14.3s] PASS unsolved group names stay hidden until the game ends
+[+14.7s] PASS Cal finds a group
+[+16.4s] PASS after reconnecting Cal still has his group and 12 tiles
+[+16.4s] PASS keyboard: Space toggles a focused tile
+[+16.4s] PASS keyboard focus is visible
+[+17.3s] PASS the TV shows the board's 16 words
+[+17.3s] PASS the TV never shows group names while the game is on
+[+18.1s] DIAG player=Cal game=word-connections(game-1) server=playing phase=- deadlineIn=36s phaseIn=- submitted=3/3 outcome=- | screen="Word Connections: find four groups of four" clock="Time left in this game: 0:38" | type=waiting-on-players
+[+55.1s] PASS the deadline brings everyone to the results
+[+55.1s] PASS results show all four groups
+[+55.1s] PASS results mark groups Cal missed (dashed)
+[+55.1s] PASS results explain the deadline ending
+[+55.1s] PASS results show Cal's participation — WORD CONNECTIONS · OFFICIAL
+[+55.1s] Ada wins Word Connections
+[+55.1s] A
+[+55.1s] Ada
+[+55.1s] 
+[+55.1s] Ada won by a comfortable margin. Very comfortable.
+[+55.1s] 
+[+55.1s] You came 2nd of 3
+[+55.1s] 100 pts
+[+55.1s] Solid middle of the pack. Room to climb.
+[+55.1s] WORD CONNECTIONS
+[+55.1s] The groups were…
+[+55.1s] ON A CHRISTMAS TREE
+[+55.1s] Angel · Tinsel · Bauble · Garland
+[+55.1s] SANTA'S REINDEER
+[+55.1s] Comet · Cupid ·
+[+55.2s] PASS no horizontal overflow on results at 320px
+[+55.5s] PASS everyone is back in the lobby
+[+55.6s] PASS a second official Connections game starts (a different board) — 201
+[+56.2s] PASS the second board is different
+[+56.3s] CONNECTIONS ALL PASSED
+[+56.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 56.4s | cpu 5.4s, peak memory 366 MB
