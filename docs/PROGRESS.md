@@ -2235,7 +2235,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - physical iPhone and Android remain untested.
   - The same comment hands off Stage 10.2.
 
-## Stage 10.2: a results line for a genuine moment, Jebena Rush and Spectrum (completed, awaiting review)
+## Stage 10.2: a results line for a genuine moment, Jebena Rush and Spectrum (repairs for 6831760093 completed, awaiting review)
 - **Brief:** ChatGPT's handoff 6829484451 on PR #18. Base `30a56f9` (PR #18's cleared head); branch `claude/stage10-2-result-lines`, a stacked PR on #18.
 - **Scope:** one short, optional line from a pure, deterministic selector over public finished facts, on the player results and the TV final. Jebena: one cup left, or every cup whole, for a sole winner. Spectrum: 40 of 40, or a round exactly on target, for a completed match. No server, score, schema or Memory Book change.
 - **Spec:** `docs/stage10/stage102.md` (estimate about 4.5–5.5 h; §8 as built); decisions D-S102-01 to 05.
@@ -2257,3 +2257,24 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Screenshots:** `docs/stage10/stage102-screenshots/`.
 - **Not run:** real iPhone Safari and Android Chrome.
 - **Next:** ChatGPT's independent review and private live audit of PR #19. Nothing merged or deployed.
+- **Repairs (ChatGPT's verdict 6831760093; spec §9; D-S102-06, D-S102-07):**
+  - **S102-R1, Memory Book freshness** (`f21f84b`):
+    - `GET /rooms/:id/ledger?watermark=1` returns `{ seq, events }`; the plain array is unchanged;
+    - the screen judges freshness by the watermark of the response it loaded (pure `memoryLink`: loading, syncing, none, unavailable, ready), and an older response can't roll it back;
+    - Spectrum says team games aren't saved yet;
+    - redaction and the stale-citation guard are unchanged.
+    - Tests: `tests/stage102-memory-freshness.test.ts` (13); `check-spectrum` (the reviewer's journey); `check-jebena-rush` (a supported game ended by sit-outs).
+  - **S102-R2, the short reconnect** (`6264827`, driver only):
+    - room S, with three proven steps (the drop with the match on and the resync inside 3 s; a later live loss; the final loss on the results);
+    - `scripts/lib/deadline.mjs` bounds every probe (`tests/stage102-deadline.test.ts`, 5);
+    - the final-loss failure didn't reproduce once the scenario was valid, so no runtime change.
+  - **Before and after, locally** (`docs/evidence/stage102-repair-local/`):
+    - the Spectrum driver with the pre-fix web build fails exactly the new checks (exit 1, 4 FAIL, still "Checking…"); the repaired build passes (144 PASS);
+    - a late-reconnect mutation of the Jebena driver fails the window checks (exit 1, 3 FAIL).
+  - **The report's screenshot links** (6830866760) are now plain paths. The posting path kept wrapping the URLs in backticks.
+  - **Gates on `b8e75be`:**
+    - targeted `20261112-182951-b8e75be6-3265` **PASSED** (7/7; Jebena 216, Spectrum 145);
+    - fast `20261112-183218-b8e75be6-4560` **PASSED** (1,649 unit tests);
+    - repair checkpoint full gate `20261112-183329-b8e75be6-7881` **PASSED** (exit 0, 88/88, 33 min 31 s).
+  - **Next:** ChatGPT's verification of the repairs, then Stage 10.3. Nothing merged or deployed.
+

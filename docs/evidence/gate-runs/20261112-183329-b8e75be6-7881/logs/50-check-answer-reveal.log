@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:36861
+# timeout 600s | worker w3 | server http://localhost:36861 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s102r-full/test-results/20261112-183329-b8e75be6-7881/server-data/w3)
+
+[+16.9s] PASS Geography: finished player sees no answers while Bea still plays
+[+17.0s] PASS Geography: TV shows no answers while Bea still plays
+[+17.0s] PASS Geography: Bea (mid-game) sees no answers
+[+25.7s] PASS Geography: results list every question — 8
+[+25.8s] PASS Geography: each answer matches the content pack — 8/8
+[+25.8s] PASS Geography: each explanation is shown — 8/8
+[+25.8s] PASS Geography: Bea sees her own choices marked
+[+25.8s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+26.0s] PASS Geography: TV lists the answers after the game
+[+26.0s] PASS Geography: TV shows no player's choices
+[+31.3s] PASS Closest: no answer anywhere while question 1 is open
+[+31.4s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 343 vs 343
+[+31.4s] PASS Closest: and the player's own guess
+[+31.4s] PASS Closest: Bea sees her own guess, not Ada's
+[+31.4s] PASS Closest: the explanation is shown
+[+31.4s] PASS Closest: question 2 is now open and its answer is not shown
+[+31.5s] PASS Closest: TV shows the last answer only — Last question: How fast does sound travel in air at 20°C, in metres per second? — 343 m/s
+[+31.5s] PASS Closest: TV shows nobody's guess — Last question: How fast does sound travel in air at 20°C, in metres per second? — 343 m/s
+[+31.6s] ANSWER REVEAL ALL PASSED
+[+31.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 31.6s | cpu 3.7s, peak memory 348 MB

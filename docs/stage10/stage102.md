@@ -212,3 +212,12 @@ Screenshots: `docs/stage10/stage102-screenshots/`.
 - **Before and after:**
   - the Spectrum driver against the pre-fix web build fails exactly the new Memory Book checks (still "Checking…"), and passes against the repaired build;
   - a copy of the Jebena driver that keeps the phone cut past the window fails the window checks instead of passing late.
+
+### Gates on `b8e75be` (each verdict is one run on one revision; raw output in `docs/evidence/gate-runs/<run>/`)
+- **targeted** (`jebena-rush spectrum history-links cup-memory contrast`): `20261112-182951-b8e75be6-3265` **PASSED** (exit 0, 7/7, 2 min 14 s; Jebena 216, Spectrum 145, contrast 79, cup-memory 36, history-links 16).
+- **fast:** `20261112-183218-b8e75be6-4560` **PASSED** (exit 0, 5/5, 62 s; 1,649 unit tests in 127 files).
+- **full**, the one repair checkpoint since runtime code changed: `20261112-183329-b8e75be6-7881` **PASSED** (exit 0, 88/88, 33 min 31 s; no leftover Chrome or servers).
+- **Room S's resync:** 1,396 ms after the server's loss in the targeted run, and 1,373 ms in the full run.
+
+Screenshots: `docs/stage10/stage102-screenshots/` (README, "Repairs").
+
