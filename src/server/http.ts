@@ -89,6 +89,9 @@ export const WS_SESSION_REPLACED = 4001;
  * players, games, deadlines, ledger, and deduplication state, and each room
  * restores independently of any damaged file.
  */
+/** Stage 10.4 (D-S104-05): how long close() waits for clients to say goodbye before cutting them off. */
+const SHUTDOWN_GRACE_MS = 1500;
+
 export class LocalServer {
   rooms = new Map<string, RoomEngine>();
   private books = new Map<string, MemoryBook>();
@@ -434,14 +437,31 @@ export class LocalServer {
     });
   }
 
+  /**
+   * Stage 10.4 (D-S104-05): shuts down in bounded time, whatever the clients do. Every socket of the WebSocket
+   * server gets a close frame first (a polite goodbye), including one refused at the door that is still closing,
+   * not only the sessions tracked here. Any socket that hasn't finished its close handshake within the grace is then
+   * terminated: a client that never answers would otherwise hold the process open until ws's own 30-second close
+   * timeout. HTTP keep-alive connections get the same grace, then are closed.
+   */
   async close(): Promise<void> {
     if (this.heartbeat) clearInterval(this.heartbeat);
     if (this.aliveTimer) clearInterval(this.aliveTimer);
     if (this.lifecycleTimer) clearInterval(this.lifecycleTimer);
-    for (const s of this.sockets) s.ws.close();
+    const grace = () => new Promise<void>((resolve) => { setTimeout(resolve, SHUTDOWN_GRACE_MS).unref(); });
+    for (const ws of new Set([...this.wss.clients, ...[...this.sockets].map((s) => s.ws)])) {
+      try { ws.close(); } catch { /* already closing */ }
+    }
     this.sockets.clear();
-    await new Promise<void>((resolve) => this.wss.close(() => resolve()));
-    await new Promise<void>((resolve) => this.http.close(() => resolve()));
+    const wssClosed = new Promise<void>((resolve) => this.wss.close(() => resolve()));
+    await Promise.race([wssClosed, grace()]);
+    for (const ws of this.wss.clients) ws.terminate();
+    await wssClosed;
+    const httpClosed = new Promise<void>((resolve) => this.http.close(() => resolve()));
+    this.http.closeIdleConnections();
+    await Promise.race([httpClosed, grace()]);
+    this.http.closeAllConnections();
+    await httpClosed;
   }
 
   private async readBody(req: IncomingMessage): Promise<Record<string, unknown>> {

@@ -1382,3 +1382,11 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
 - **D-S104-04 Spectrum and Jebena Rush only.**
   - **Why:** their facts are already trusted (Stage 10.3 team record; Jebena's score events), and the handoff names them.
   - **Other games** keep the manual Add in the Memory Book. A later slice can extend the action.
+- **D-S104-05 The server shuts down in bounded time, whatever its clients do.**
+  - **Why:** the full gate on `c634500` failed `check-tv-outage`'s "the driver's server exits within 20 s of SIGTERM" (an earlier full gate, `20261112-064509-b668ee3c-28530`, hung at the same step). `close()` sent a close frame to each tracked socket, then waited for the WebSocket and HTTP servers to close. Those wait for every client's close handshake, and a client that never answers is only cut off by `ws`'s own 30-second close timeout. A socket refused at the door (no such room) was never tracked at all.
+  - **How:** `LocalServer.close()` sends every open socket (`wss.clients` and the tracked ones) a close frame, waits up to 1.5 s for the goodbyes, then terminates whatever is left; the HTTP server gets the same bounded wait before `closeAllConnections()`. Well-behaved clients still get a close frame first.
+  - **Tests:** `tests/stage104-shutdown.test.ts` (a deaf TV socket, a refused socket still closing, a polite close that isn't cut). Before the fix the first two waited past 5 s; after it, all three pass.
+  - **Alternatives rejected:**
+    - raising the driver's 20 s limit: it hides a shutdown that can stall a restart for 30 s;
+    - retrying the step: "flake" isn't a root cause;
+    - terminating every socket at once: it skips the polite goodbye clients rely on to show "reconnecting" rather than "lost".
