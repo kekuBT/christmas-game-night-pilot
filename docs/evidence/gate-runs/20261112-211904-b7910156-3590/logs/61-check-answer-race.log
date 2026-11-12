@@ -1,0 +1,16 @@
+$ node scripts/check-answer-race.mjs http://localhost:35479
+# timeout 600s | worker w2 | server http://localhost:35479 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s103-full/test-results/20261112-211904-b7910156-3590/server-data/w2)
+
+[+7.3s] PASS trivia: the answer locks on the same question — Answer locked in
+[+7.3s] PASS trivia: no other question flashes before the lock — tapped "Question 1 of 10": Answer locked in
+[+7.3s] PASS trivia: a double tap sends one answer — 1 answer requests
+[+14.5s] PASS geography: the answer locks on the same question — Question 1 of 8 → Answer locked in
+[+14.5s] PASS geography: no other question flashes before the lock — tapped "Question 1 of 8": Question 1 of 8 → Answer locked in
+[+14.5s] PASS geography: a double tap sends one answer — 1 answer requests
+[+21.2s] PASS math-mayhem: the answer locks on the same question — Question 1 of 10 → Answer locked in
+[+21.2s] PASS math-mayhem: no other question flashes before the lock — tapped "Question 1 of 10": Question 1 of 10 → Answer locked in
+[+21.2s] PASS math-mayhem: a double tap sends one answer — 1 answer requests
+[+21.3s] ANSWER RACE ALL PASSED
+[+21.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":2}
+
+# PASS (exit 0) in 21.3s | cpu 2.5s, peak memory 259 MB

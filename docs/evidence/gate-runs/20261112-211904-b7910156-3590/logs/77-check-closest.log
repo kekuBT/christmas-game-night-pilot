@@ -1,0 +1,35 @@
+$ node scripts/check-closest.mjs http://localhost:34991
+# timeout 600s | worker w1 | server http://localhost:34991 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s103-full/test-results/20261112-211904-b7910156-3590/server-data/w1)
+
+[+3.1s] PASS guest sees no game setup (host-only)
+[+3.2s] PASS guest sees no closest start control
+[+4.3s] PASS host sees the kit closest panel
+[+4.3s] PASS Bea sees the kit closest panel
+[+4.3s] PASS Cal sees the kit closest panel
+[+4.6s] PASS no horizontal overflow at 320px
+[+4.9s] PASS no horizontal overflow at 360px
+[+5.2s] PASS no horizontal overflow at 390px
+[+5.2s] PASS phone gets a decimal keypad (inputmode=decimal)
+[+5.2s] PASS field is a text field (no browser number clamping)
+[+5.4s] PASS '5,570' reads as 5,570 (no clamp to 1000)
+[+5.5s] PASS a seven-digit answer is accepted as typed
+[+5.6s] PASS a negative number shows a message and disables Submit
+[+5.7s] PASS too many decimals shows a message (no silent rounding)
+[+5.9s] PASS decimal guess 42.195 submits and confirms (server stored it exactly)
+[+5.9s] PASS guessed player sees the waiting ring
+[+6.0s] PASS reload restores the guessed state
+[+6.0s] PASS abstain shows the abstained state
+[+6.0s] PASS abstained player sees the sat-out note
+[+6.0s] PASS abstained player loses the guess controls
+[+6.0s] PASS field value moves the dial
+[+6.0s] PASS Submit button is labelled with the value
+[+6.1s] PASS clearing the field disables Submit (no invisible 0)
+[+6.1s] PASS there is exactly one submit button
+[+6.1s] PASS dial at mid-track gives a mid-magnitude value (log scale) — 1,000,000
+[+6.1s] PASS field follows the dial
+[+6.1s] PASS Submit button follows the dial
+[+6.4s] PASS dial guess accepted (game advances or confirms)
+[+6.5s] CLOSEST ALL PASSED
+[+6.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 6.5s | cpu 1.7s, peak memory 258 MB

@@ -2278,7 +2278,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - repair checkpoint full gate `20261112-183329-b8e75be6-7881` **PASSED** (exit 0, 88/88, 33 min 31 s).
   - **Next:** ChatGPT's verification of the repairs, then Stage 10.3. Nothing merged or deployed.
 
-## Stage 10.3: Spectrum's team result in the Memory Book, and a Memory Book for every look (in progress)
+## Stage 10.3: Spectrum's team result in the Memory Book, and a Memory Book for every look (completed, awaiting review)
 - **Brief:** ChatGPT's handoff 6834334005 on PR #19. It cleared Stage 10.2 for development (not merge or deployment) after its own driver runs and a private audit.
 - **Base:** `e1e9a6b` (PR #19's head). Branch `claude/stage10-3-spectrum-memory`, a stacked PR on #19.
 - **Scope:**
@@ -2286,4 +2286,26 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the Memory Book's titles follow the device's look, and the server's Markdown is neutral.
   - No one-tap results action (the next slice), automatic saving, AI or new dependency.
 - **Spec:** `docs/stage10/stage103.md`, with an estimate of about 5–5.75 h. Decisions D-S103-01 to 06.
+- **Built:**
+  - **Server** (`dd66035`):
+    - a typed team record frozen from the cited game's finalized `outcome.team` (`src/server/memorybook.ts`);
+    - only Spectrum (`memoryBookTeam`);
+    - completed and too-few-players endings save;
+    - a room-ended, voided, unfinished or invalid result and a second citation are refused with codes;
+    - the shared wording is in `src/shared/memoryTeam.ts`;
+    - the Markdown title is neutral, and team records are re-checked on restore.
+  - **Web** (`c00bbfa`, `b791015`): the link line previews the facts; "From the game" on entry cards, the PDF and the share image; titles and file names follow the device's look.
+- **Tests:**
+  - `tests/stage103-memory-team.test.ts` (18);
+  - `tests/stage4-memory.test.ts` (file names);
+  - the Stage 9.3 and 10.2 tests that asserted the old refusal now assert the save.
+  - `check-spectrum` M1–M3: guest save by keyboard (Christmas, 320 px); host approve, export, PDF and reload (Everyday, 390 px); an open page moving to the early finish; forged facts ignored; cohost revoke and approve.
+  - `check-cup-memory`, `check-contrast`, `check-f4`, `check-f5`: titles for the look.
+- **Gates on `b791015`:**
+  - targeted `20261112-201742-b7910156-5587` **PASSED**;
+  - fast `20261112-211748-b7910156-251` **PASSED** (1,667 unit tests);
+  - checkpoint full gate `20261112-211904-b7910156-3590` **PASSED** (exit 0, 88/88, 32 min 21 s).
+- **Screenshots:** `docs/stage10/stage103-screenshots/`.
+- **Not run:** real iPhone Safari and Android Chrome.
+- **Next:** ChatGPT's independent review and private audit of PR #20. Nothing merged or deployed.
 

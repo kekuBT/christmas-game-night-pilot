@@ -112,3 +112,49 @@ D-S103-01 to D-S103-06 in `docs/DECISIONS.md`:
 | **Total** | **about 5–5.75 h** |
 
 **Calibration note:** the last two slices came in well under their estimates: 10.2 took about 1 h against 4.5–5.5 h, and its repairs about 1 h 10 min against 2–2.5 h. That is because the drivers and layers they used already existed. This slice adds a new stored record and a longer browser journey, so I expect about 2.5–3.5 h in practice and report against the range above.
+
+## 8. As built and tested
+| Area | Where | Tests |
+|---|---|---|
+| The team record | `src/server/memorybook.ts`: `teamFactsFor` derives from the cited game's `outcome.team`; `addTeamResult`; `MemoryTeamFactsSchema`, re-checked on restore; refusals `RESULT_NOT_SAVEABLE`, `ONE_TEAM_GAME`, `NOT_A_FINISH` | `tests/stage103-memory-team.test.ts` (18) |
+| The route | `src/server/http.ts` `POST /rooms/:id/memory`: a cited team game goes the team path; only Spectrum (`isMemoryBookTeam`) is saved, and every other cooperative game still gets `NOT_IN_MEMORY_BOOK`. The Markdown title is neutral. | the same tests, over HTTP, with real Spectrum matches |
+| Spectrum by name | `src/games/registry.ts`: `memoryBookTeam: true`; `isMemoryBookTeam`. It reaches the web through `GET /games`. | the registry test in the same file |
+| One wording | `src/shared/memoryTeam.ts` `memoryTeamLine` | its own tests |
+| The screen | `MemoryScreen.tsx`: the title follows the look; the link line previews "Saved with: …"; "From the game" on entry cards; the PDF and share image carry the team line; `memoryLink.ts`: `teamResultSaveable`, `why` | `tests/stage103-memory-team.test.ts` (pure link states) |
+| File names | `exportLayout.ts` `exportFilename(…, look)`: `mchezo-memory-book-…` or `christmas-memory-book-…` | `tests/stage4-memory.test.ts` |
+| Changed on purpose | The two tests that asserted the old Spectrum refusal (`stage93-spectrum-room`, `stage102-memory-freshness`) now assert the save. The drivers that waited for "Christmas Memory Book" in Cup rooms (`check-contrast`, `check-f4`, `check-f5`, `check-cup-memory`) now check the title for the look (Cup rooms show Everyday). | the drivers below |
+
+### In real browsers (`check-spectrum`, the driver's own copy of the wording rule)
+- **M1, the completed match:**
+  - Amina, a guest (Christmas, 320 px), opens the Christmas Memory Book. It links the completed match and previews its facts.
+  - She reaches Add with Tab from her note and presses Enter.
+  - Her entry is pending with "From the game: Spectrum team result: N out of 40 · all 4 rounds played" under her note. The server froze the match's own facts, citing exactly its finish.
+  - She has no Approve or Revoke, and the page has no sideways scroll at 320 px.
+  - Keku, the host (Everyday, 390 px), sees the Mchezo Memory Book, with nothing Christmas on it. He approves the entry, and the export starts "# Mchezo Memory Book — …" with the note and then the facts.
+  - The PDF is `mchezo-memory-book-….pdf`; Amina's share image is `christmas-memory-book-….png`.
+  - After a reload, the entry is still approved with the same facts.
+- **M2, the early-ended match:**
+  - Keku opens the Memory Book while the next match is being played. It links the completed match.
+  - When the match ends early, the open page moves to the new finish, never the old one, and previews "ended early, R of 4 rounds played (fewer than two players were left)". His note is kept.
+  - Add saves an entry citing exactly the early finish, with its facts. The completed match's entry is untouched.
+  - A forged save straight to the server can't change the facts.
+  - The 10.2 watermark checks still pass: his ledger is current with the newest event hidden.
+- **M3, permissions:**
+  - Baraka is made a cohost. He revokes the completed entry, and it leaves the export. He approves the early one, and the export says it ended early.
+  - Amina still has no Approve or Revoke.
+- **Regressions:**
+  - `check-jebena-rush`: a competitive replay's Memory Book is ready and cites it;
+  - `check-cup-memory`: titles and file names for the look;
+  - `check-history-links`: the open page follows a newly finished game;
+  - `check-contrast`, `check-f4`, `check-f5`: unchanged.
+- **Screenshots:** `docs/stage10/stage103-screenshots/`.
+
+### Gates on `b791015` (each verdict is one run on one revision; raw output in `docs/evidence/gate-runs/<run>/`)
+- **targeted** (`spectrum jebena-rush cup-memory history-links contrast f4 f5`): `20261112-201742-b7910156-5587` **PASSED** (exit 0, 9/9, 7 min 43 s). Spectrum 173, Jebena 218, contrast 79, cup-memory 37, f5 37, history-links 16, f4 12.
+- **fast:** `20261112-211748-b7910156-251` **PASSED** (exit 0, 5/5, 63 s; 1,667 unit tests in 128 files).
+- **full**, the one checkpoint: `20261112-211904-b7910156-3590` **PASSED** (exit 0, 88/88, 32 min 21 s). Spectrum 173, Jebena 217, contrast 78, briefing 44, f5 37, cup-memory 37; 1,667 unit tests.
+
+### Found along the way, unchanged
+- **Approvals aren't pushed live.** An approval isn't a room event, so another open Memory Book page sees it on its next load. The driver reloads before the guest's share image.
+- **A starting match pulls players in.** It brings its players to it, including a Memory Book tab opened earlier, so the driver opens the book once the match is playing, as `check-history-links` does.
+- **Player ids in the Markdown.** Competitive facts in the Markdown export still show player ids ("player-1: 30 points"); the screen shows names. Team entries have no per-player line.
