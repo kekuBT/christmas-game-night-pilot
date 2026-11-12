@@ -13,6 +13,7 @@
 import type { SessionSeason } from "../../shared/season.js";
 import type { Participation, PhaseKind } from "../../server/lifecycle.js";
 import type { GameSettings } from "../settings.js";
+import type { TeamResult } from "../../shared/teamResult.js";
 
 export interface ModuleContext {
   /** Server time of this event (a deadline instant when a deadline is processed). */
@@ -68,6 +69,13 @@ export interface GameModule<S = unknown> {
    * Called once, before the result is recorded; never changes scores.
    */
   onFinish?(s: S, ctx: ModuleContext): void;
+  /**
+   * Stage 9.3: a cooperative game's one shared result (registry
+   * `cooperative: true`). The room records it as `outcome.team` at finalize
+   * and projects it instead of per-player scores; `scores()` then stays an
+   * internal compatibility copy. Required for a cooperative game.
+   */
+  teamResult?(s: S): TeamResult;
   /** Totals from everything completed so far (the final scores once finished). */
   scores(s: S, players: readonly string[]): Record<string, number>;
   participation(s: S, players: readonly string[]): { participation: Record<string, Participation>; completedUnits?: number; totalUnits?: number };

@@ -41,7 +41,8 @@ export const GameManifestSchema = z.object({
   /** Stage 6.1: offered under Play solo (a complete one-player loop exists). */
   soloPlay: z.boolean().optional(),
   playStyle: PlayStyleSchema,
-  competition: z.literal("competitive"),
+  // Stage 9.3: "cooperative" = one shared team result (Spectrum); everything else competes per player.
+  competition: z.enum(["competitive", "cooperative"]),
   duration: z.object({
     minutes: z.number().int().positive(),
     source: z.literal("design-default"),
@@ -55,7 +56,7 @@ export const GameManifestSchema = z.object({
   intensity: IntensitySchema,
   intensityNote: z.string(),
   scoring: z.object({
-    type: z.literal("per-player-points"),
+    type: z.enum(["per-player-points", "shared-team-total"]),
     teamDerived: z.boolean(),
   }),
   features: z.object({
@@ -380,6 +381,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
     details: "Turns of 10 seconds in a seeded order; an answer the bank accepts passes the jebena, a timeout costs one heart (5 by default; 3, 5 or 7). The last player with hearts keeps the jebena; the match ends by 12 minutes. 100 points for each player you outlast, 10 for each heart you keep. Casual rooms only; practice-only (Stage 9.1).",
   },
+  {
+    id: "spectrum",
+    title: "Spectrum",
+    description: "One team, one secret spot on a scale. Take turns giving a clue; everyone else places a guess. The closer the team gets, the more points you share.",
+    categories: ["party", "guessing"],
+    minPlayers: 2,
+    recommendedPlayers: 4,
+    maxPlayers: 10,
+    playStyle: "solo",
+    competition: "cooperative",
+    duration: { minutes: 8, source: "design-default", measured: false },
+    inputs: ["text", "numeric"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "shared-team-total", teamDerived: false },
+    features: { practice: true, official: false, abstention: "whole-game" },
+    tournament: { usesPerPlayerScores: false, supportsTeams: false },
+    details: "Four rounds. Each round, one player sees a secret target on a scale (for example Cold to Hot) and gives a clue; everyone else places a guess from 0 to 100. The team's guess is the middle of the guesses: within 5 of the target scores 10, within 10 scores 7, within 20 scores 4. One shared team score out of 40. Casual rooms only; practice-only (Stage 9.3).",
+  },
 ];
 
 /**
@@ -421,6 +443,14 @@ export function validateManifest(manifest: unknown): string[] {
   // the play style, or a consumer would schedule a solo game as a team game.
   if (m.tournament.supportsTeams !== (m.playStyle === "team")) errors.push(`tournament.supportsTeams: ${m.tournament.supportsTeams} contradicts playStyle "${m.playStyle}"`);
   if (m.scoring.teamDerived !== (m.playStyle === "team")) errors.push(`scoring.teamDerived: ${m.scoring.teamDerived} contradicts playStyle "${m.playStyle}"`);
+  // Stage 9.3: a cooperative game has one shared total and nothing per player: never official, never per-player
+  // for a tournament, and its registry entry says so too (the room's result branch keys on the registry).
+  const coop = m.competition === "cooperative";
+  if (coop !== (reg.cooperative === true)) errors.push(`competition: "${m.competition}" does not match registry cooperative ${reg.cooperative ?? false}`);
+  if (coop !== (m.scoring.type === "shared-team-total")) errors.push(`scoring.type: "${m.scoring.type}" contradicts competition "${m.competition}"`);
+  if (coop && (m.features.official || m.tournament.usesPerPlayerScores || m.playStyle === "team" || reg.casualOnly !== true)) {
+    errors.push("competition: a cooperative game is casual-only and practice-only, with no per-player or team-split scores");
+  }
   return errors;
 }
 

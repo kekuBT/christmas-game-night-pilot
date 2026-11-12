@@ -29,9 +29,9 @@ describe("filterGames search", () => {
 
   it("empty query matches everything, sorted by name", () => {
     const got = filterGames(GAME_MANIFESTS, DEFAULT_FILTERS);
-    expect(got).toHaveLength(15);
+    expect(got).toHaveLength(16);
     expect(titles(got)[0]).toBe("Caption Clash");
-    expect(titles(got)[14]).toBe("Word Connections");
+    expect(titles(got)[15]).toBe("Word Connections");
   });
 
   it("a query with no match gives an empty list", () => {
@@ -67,10 +67,11 @@ describe("filterGames facets", () => {
       "Jebena Rush",
       "Math Mayhem",
       "Pattern Pulse",
+      "Spectrum",
       "Trivia Showdown",
       "Word Connections",
     ]);
-    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 4 })).toHaveLength(15);
+    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 4 })).toHaveLength(16);
     // Majority Rules (Stage 5) starts at 3: in at 3, out at 2.
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 3 }))).toContain("Majority Rules");
   });
@@ -94,13 +95,15 @@ describe("filterGames facets", () => {
       "Majority Rules",
       "Math Mayhem",
       "Pattern Pulse",
+      "Spectrum",
       "Word Connections",
     ]);
   });
 
-  it("play style filters solo vs team", () => {
-    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "team" }))).toEqual(["Charades"]);
+  it("play style filters solo vs team; a cooperative game (one team) is a team game, never an individual one", () => {
+    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "team" }))).toEqual(["Charades", "Spectrum"]);
     expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" })).toHaveLength(14);
+    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" }))).not.toContain("Spectrum");
   });
 
   it("filters combine (AND across facets)", () => {
@@ -119,7 +122,7 @@ describe("filterGames sorting", () => {
     const got = filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, sort: "duration" });
     // 5 min (Category Sprint, Math Mayhem, Pattern Pulse), 6, 7 (Geography), then 8.
     expect(titles(got).slice(0, 6)).toEqual(["Category Sprint", "Math Mayhem", "Pattern Pulse", "Majority Rules", "Geography Challenge", "Closest Wins"]);
-    expect(titles(got)[14]).toBe("Charades");
+    expect(titles(got)[15]).toBe("Charades");
   });
 });
 

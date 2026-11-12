@@ -117,12 +117,14 @@ function matchesQuery(m: GameManifest, query: string): boolean {
 
 export function filterGames(manifests: readonly GameManifest[], filters: LibraryFilters, roomPlayers?: number): GameManifest[] {
   const size = filters.fitsRoom && roomPlayers !== undefined ? roomPlayers : filters.playerCount;
+  // Stage 9.3: a cooperative game (everyone on one team) is a team game, never an individual one.
+  const styleOf = (m: GameManifest): "solo" | "team" => (m.competition === "cooperative" ? "team" : m.playStyle);
   const visible = manifests.filter((m) => {
     if (!matchesQuery(m, filters.query)) return false;
     if (filters.categories.length > 0 && !filters.categories.some((c) => m.categories.includes(c))) return false;
     if (size !== null && (size < m.minPlayers || size > m.maxPlayers)) return false;
     if (filters.maxDuration !== null && m.duration.minutes > filters.maxDuration) return false;
-    if (filters.playStyle !== "all" && m.playStyle !== filters.playStyle) return false;
+    if (filters.playStyle !== "all" && styleOf(m) !== filters.playStyle) return false;
     return true;
   });
   const sorted = [...visible];

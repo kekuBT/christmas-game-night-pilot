@@ -1,7 +1,8 @@
 /**
  * Stage 9.2: the Spectrum foundation (docs/stage9/stage92.md), as a pure
  * module: rules, timing, exactly-once handling, partial endings, privacy by
- * role and phase, content, and that nothing in the product offers it yet.
+ * role and phase, and content. Stage 9.3 registers it (the last block); the
+ * room-level journey is tests/stage93-spectrum-room.test.ts.
  */
 import { describe, expect, it } from "vitest";
 import {
@@ -284,8 +285,12 @@ function expectTeamResult(s: SpectrumState, total: number, end: string, revealed
   expect(result.total).toBe(s.total);
   expect(result.rounds).toHaveLength(revealed);
   expect(result.rounds.reduce((a, r) => a + r.points, 0)).toBe(total); // the rounds add up to the one total
-  expect(Object.keys(result).sort()).toEqual(["end", "max", "rounds", "total"]);
-  for (const r of result.rounds) expect(Object.keys(r).sort()).toEqual(["aggregate", "distance", "guesses", "pairId", "points", "reason", "roundNo", "target"]);
+  // Stage 9.3: the result the room records as outcome.team (src/shared/teamResult.ts): revealed facts only.
+  expect(Object.keys(result).sort()).toEqual(["end", "kind", "max", "rounds", "roundsPlanned", "total"]);
+  for (const r of result.rounds) {
+    expect(Object.keys(r).sort()).toEqual(["aggregate", "clue", "distance", "guesses", "pair", "points", "reason", "roundNo", "target"]);
+    expect(Object.keys(r.pair).sort()).toEqual(["left", "meaning", "right"]);
+  }
   const json = JSON.stringify(result);
   for (const p of s.order) expect(json).not.toContain(`"${p}"`); // no player is credited with anything
   const copies = spectrumModule.scores(s, s.order);
@@ -635,13 +640,14 @@ describe("Spectrum privacy: every role, every phase, with canaries", () => {
   });
 });
 
-describe("Spectrum is not in the product yet (foundation only)", () => {
-  it("not registered as a module, a game, a manifest or a lifecycle policy; its actions reach nothing", () => {
-    expect(moduleFor("spectrum")).toBeUndefined();
-    expect(moduleForAction("spectrum-clue")).toBeUndefined();
-    expect(moduleForAction("spectrum-guess")).toBeUndefined();
-    expect(GAME_REGISTRY.some((g) => g.id === "spectrum")).toBe(false);
-    expect(GAME_MANIFESTS.some((m) => m.id === "spectrum")).toBe(false);
-    expect(() => policyFor("spectrum")).toThrow();
+describe("Spectrum's registration (Stage 9.3: registered together with the cooperative result branch)", () => {
+  it("a casual-only cooperative game, practice-only, phased on the module's own durations, with a team result", () => {
+    expect(moduleFor("spectrum")).toBe(spectrumModule);
+    expect(moduleForAction("spectrum-clue")).toBe(spectrumModule);
+    expect(moduleForAction("spectrum-guess")).toBe(spectrumModule);
+    expect(spectrumModule.teamResult).toBeTypeOf("function");
+    expect(GAME_REGISTRY.find((g) => g.id === "spectrum")).toMatchObject({ minPlayers: 2, maxPlayers: 10, casualOnly: true, cooperative: true });
+    expect(GAME_MANIFESTS.find((m) => m.id === "spectrum")).toMatchObject({ competition: "cooperative", scoring: { type: "shared-team-total", teamDerived: false }, features: { official: false }, tournament: { usesPerPlayerScores: false } });
+    expect(policyFor("spectrum")).toMatchObject({ model: "phased", gameWindowMs: 10 * 60_000, officialEligible: false, phaseMs: { ...SPECTRUM_PHASE_MS } });
   });
 });

@@ -6,7 +6,7 @@ import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import { BriefingRefused, ContentShortage, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
-import { GAME_REGISTRY } from "../games/registry.js";
+import { GAME_REGISTRY, isCooperative } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
 import { z } from "zod";
 import type { ContentLibrary } from "../content/registry.js";
@@ -866,11 +866,21 @@ export class LocalServer {
           if (req.method === "POST" && parts.length === 3) {
             if (!this.requireSession(room, req, res)) return;
             const body = await this.readBody(req);
+            const sourceIds = Array.isArray(body["sourceEventIds"]) ? body["sourceEventIds"].map(String) : [];
+            // Stage 9.3: a cooperative game (Spectrum) is not saved to the Memory Book in this slice
+            // (its result is one team total, which the per-player derived facts can't express).
+            const ledger = room.ledger;
+            const cites = new Set(sourceIds);
+            const coop = ledger.find((e) => cites.has(e.eventId) && e.gameInstanceId && isCooperative(room.games.get(e.gameInstanceId)?.gameId ?? ""));
+            if (coop) {
+              this.send(res, 409, { error: "Cooperative games like Spectrum aren't saved to the Memory Book yet.", code: "NOT_IN_MEMORY_BOOK" });
+              return;
+            }
             const entry = book.addFromLedger(
               Number(body["day"] ?? 1),
               String(body["text"] ?? ""),
-              Array.isArray(body["sourceEventIds"]) ? body["sourceEventIds"].map(String) : [],
-              (room.toJSON().ledger ?? []) as never,
+              sourceIds,
+              ledger as never,
             );
             this.persistBook(room.id);
             this.send(res, 201, entry);

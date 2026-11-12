@@ -131,6 +131,7 @@ export function MchezoLibrary({ manifests, catalog, upNextId, canSelect, inRoom,
         <span className="mz-libcard__tags">
           {m.categories.slice(0, 2).map((c) => <span key={c} className="mz-lib-tag">{c}</span>)}
           {m.playStyle === "team" && <span className="mz-lib-tag">Team game</span>}
+          {m.competition === "cooperative" && <span className="mz-lib-tag" data-testid={`mz-lib-coop-${m.id}`}>Co-op: one team score</span>}
           {practiceOnly && (
             <button type="button" className="mz-lib-tag mz-lib-tag--practice mz-lib-tag--btn" aria-expanded={whyOpen} aria-controls={`mz-lib-why-${m.id}`} data-testid={`mz-lib-practice-${m.id}`} onClick={() => setWhy(whyOpen ? null : m.id)}>
               Practice only <span aria-hidden="true">ⓘ</span>

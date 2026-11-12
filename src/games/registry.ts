@@ -15,6 +15,12 @@ export interface GameDescriptor {
   soloPlay?: true;
   /** Stage 9.1: plays in casual rooms only (never a Cup or solo room); the server refuses it elsewhere. */
   casualOnly?: true;
+  /**
+   * Stage 9.3: one shared team result, never a per-player one. The room
+   * records `outcome.team`, never projects per-player scores, and every
+   * summary says "team" (docs/stage9/stage93.md §3).
+   */
+  cooperative?: true;
   modes: GameMode[];
   status: "implemented" | "not-implemented";
   defaultDurationMinutes: number;
@@ -39,6 +45,8 @@ export const GAME_REGISTRY: GameDescriptor[] = [
   { id: "pattern-pulse", title: "Pattern Pulse", minPlayers: 1, soloPlay: true, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 5, tutorial: "Watch a sequence of shapes, then tap it back in order. It grows each round." },
   // Stage 9.1: casual rooms only (no solo variant), practice-only.
   { id: "jebena-rush", title: "Jebena Rush", minPlayers: 2, recommendedPlayers: 3, maxPlayers: 10, casualOnly: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "Name something in the category before the steam boils over, then pass the jebena. Run out of time and you lose a heart." },
+  // Stage 9.3: cooperative (one team result), casual rooms only, practice-only.
+  { id: "spectrum", title: "Spectrum", minPlayers: 2, recommendedPlayers: 4, maxPlayers: 10, casualOnly: true, cooperative: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "One team, four rounds. One player gives a clue for a secret spot on a scale; everyone else guesses where it sits. The closer the team, the more points." },
   { id: "draw-guess", title: "Draw & Guess", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 10, tutorial: "One player draws a secret word; everyone else races to guess it." },
 ];
 
@@ -46,6 +54,11 @@ export function getGame(id: string): GameDescriptor {
   const g = GAME_REGISTRY.find((x) => x.id === id);
   if (!g) throw new Error(`Unknown game: ${id}`);
   return g;
+}
+
+/** Stage 9.3: does this game have one shared team result (no per-player result anywhere)? */
+export function isCooperative(gameId: string): boolean {
+  return GAME_REGISTRY.find((g) => g.id === gameId)?.cooperative === true;
 }
 
 /** Stage 6.2: the games a solo room may start (the server's allowlist). */
