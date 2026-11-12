@@ -110,3 +110,14 @@ Identifiers keep `hearts` (D-S101-02): the server state, the protocol, the `sett
 | Driver, before/after screenshots | 1.5–2 h |
 | Final fast and full gates (about 35 min) and the report | 1 h |
 | **Total** | **about 6.5–8 h** |
+
+## 9. As built and tested
+| Area | Where | Tests |
+|---|---|---|
+| The cup | `apps/web/src/components/mchezo/CiniCups.tsx` (`CiniCup`, `CiniCups`), `apps/web/src/ui/mchezo/styles/stage101.css` | Rendered checks in `check-jebena-rush` (whole and broken counts, accessible names, both looks, 320/390 px, TV) |
+| When a cup breaks | `apps/web/src/ui/mchezo/lib/cups.ts` (`CupMemory`, `isLiveBreak`, `lastLossAt`, `cupSlots`, `cupsLabel`) | `tests/stage101-cups.test.ts`: first view, repeated view, one loss, the last cup, Play again, per-surface memory, live vs resync, leaving |
+| Every surface's words | `MchezoJebena.tsx`, `Briefing.tsx`, `App.tsx`, `lib/jebena.ts` (last play), `lib/briefing.ts`, `lib/errors.ts`, `src/games/manifest.ts`, `registry.ts`, `settings.ts`, `server/room.ts` | `tests/stage101-cups.test.ts` (last play, briefing, refusal, library, tutorial, settings refusal); the driver checks no "heart" or ♥ on the lobby, briefing, play, results and TV |
+| Rules unchanged | `src/games/modules/jebena.ts` untouched | `tests/stage101-cups.test.ts` (3/5/7, a wrong try free, one cup per timeout, scoring); the Stage 9.1/9.2 Jebena suites unchanged and passing |
+| Truthful results | `apps/web/src/ui/mchezo/lib/celebrate.ts` (`absent` needs no recorded action and no first place in a won game), `types.ts` (`actions`) | `tests/stage101-cups.test.ts` (8; the 4 winner/attempt cases fail on the base); `tests/stage3-qa-results.test.ts` audit extended to first places with nothing completed |
+| In real browsers | `scripts/check-jebena-rush.mjs` | A break log on every page. It checks: cups in lobby, briefing, own row, seat lists and TV; wrong tries break nothing; a timeout breaks exactly the lost slot, once, on the holder's row and the TV; a reload and a resync (Amina's socket cut by the driver) replay nothing; the last cup and "Out"; every break on every page is a real lost life (from the server's own totals), once; reduced motion breaks without animating; Play again starts whole, and two players leaving break nothing; seven cups fit 320 px; a third room's zero-answer survivor reads a winner's line, the absent player "You missed this one" |
+| Gate hygiene | `tests/stage74-content-variety.test.ts` (D-S101-07) | The setup tab gets a 5 s request timeout; the faulted tabs keep 250 ms |

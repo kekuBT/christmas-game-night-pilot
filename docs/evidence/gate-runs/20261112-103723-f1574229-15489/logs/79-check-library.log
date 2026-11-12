@@ -1,0 +1,29 @@
+$ node scripts/check-library.mjs http://localhost:32993
+# timeout 600s | worker w1 | server http://localhost:32993 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101b-full/test-results/20261112-103723-f1574229-15489/server-data/w1)
+
+[+2.8s] PASS library opens with the full catalog
+[+2.8s] PASS search narrows to the matching game
+[+2.9s] PASS clearing search restores the catalog
+[+2.9s] PASS advanced filters start folded away, search is on screen
+[+3.3s] PASS team filter shows only the 2 team and co-op games — charades, spectrum
+[+3.4s] PASS reset restores the catalog
+[+3.4s] PASS with no filters left, there is nothing to clear
+[+3.4s] PASS duration filter shows only short games (category-sprint, math-mayhem, pattern-pulse)
+[+3.5s] PASS player-count filter shows only compatible games (9)
+[+3.6s] PASS reset after player filter restores the catalog
+[+3.6s] PASS empty state on no match
+[+3.6s] PASS the active search is shown as a removable filter
+[+3.7s] PASS Clear filters in the empty state restores the catalog
+[+3.8s] PASS Clear filters next to the active filters restores the catalog
+[+3.8s] PASS library has no start button (browsing never starts)
+[+3.8s] PASS host selection returns to the lobby with the game up next
+[+3.8s] PASS the library entry left no extra Back step (lobby is at /room)
+[+3.8s] PASS selection started no game
+[+4.3s] PASS guest can browse the library
+[+4.3s] PASS guest sees no select buttons
+[+4.3s] PASS guest sees the host-only note
+[+4.7s] PASS guest back button returns to the lobby
+[+4.8s] LIBRARY ALL PASSED
+[+4.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 4.8s | cpu 1.9s, peak memory 329 MB

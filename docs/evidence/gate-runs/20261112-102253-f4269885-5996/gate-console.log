@@ -1,0 +1,46 @@
+Mchezo gate targeted | run 20261112-102253-f4269885-5996
+  revision f4269885ae685867dbec92e6f2d7739f16537942 (clean tree) | fingerprint c0d565a0d0cc (500 files)
+  plan     4 steps: 1 fast/build, 2 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.2 GB available)
+  history  84 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 70 run(s))
+  estimate this run: 1–3m (measured) · the same steps one after another: about 2m 51s · longest step check-briefing ~1m 31s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101-tgt/test-results/20261112-102253-f4269885-5996
+        start build-web on w1 (usually 6s)
+[ 1/4] PASS         4.8s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/4] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:40501 (pid 6105, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101-tgt/test-results/20261112-102253-f4269885-5996/server-data/w1)
+  server   w2 http://localhost:41895 (pid 6106, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101-tgt/test-results/20261112-102253-f4269885-5996/server-data/w2)
+        start check-briefing on w1 (usually 1m 31s)
+        start check-jebena-rush on w2 (usually 1m 14s)
+── progress  2/4 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-briefing 54s (w1), check-jebena-rush 54s (w2)
+   remaining 0–2m · total 1–3m · done around 10:24–10:25 UTC (measured)
+[ 3/4] FAIL        91.4s  check-jebena-rush  w2  FAIL E Baraka's own row: exactly that cup broke, once — not within 5000ms | FAIL E the TV: that one cup broke, once, in its slot — not within 5000ms | FAIL E re
+      | PASS G Baraka leaves the replay — {"accepted":true,"result":{"gameStatus":"finished"}}
+      | PASS G with both of them gone, the replay ends: Keku kept the jebena
+      | PASS G both leavers sat out; Keku kept all 3 cups
+      | PASS G leaving broke no cup on any screen (phones or TV) — [[],[],[],[]]
+      | PASS G Keku is back in the lobby
+      | PASS G Amina is back in the lobby
+      | PASS G Baraka is back in the lobby
+      | PASS K a Cup's picker leaves Jebena Rush out (and lists the others) — 14 games
+      | PASS K the server refuses Jebena Rush in a Cup (409 CASUAL_ONLY) — {"error":"Jebena Rush plays in casual rooms only.","code":"CASUAL_ONLY","readiness":{"registered":1,"connected":1,"reconnecting":0,"away":0,"wouldPlay":["player
+      | PASS Z room C ran to the end: the survivor tried (an action), had no answer accepted, and kept the jebena — {"status":"finished","tried":{"accepted":true,"result":{"verdict":"not-in-bank","turn":2}},"part":{"done":0,"of":2,"actions":1,"finished":true},"top":{"id":"player-2","place":1,"hearts":1,"out":false,"satOut":false,"answers":0,"timeouts":2,"points":110}}
+      | PASS Z the survivor's results: first place, with a winner's line
+      | PASS Z ... and never "You missed this one" — JEBENA RUSH · CASUAL Otieno wins Jebena Rush O Otieno Just for fun. Bragging rights only. You came 1st of 2 110 pts That was you. Enjoy it quietly. Or loudly.
+      | PASS Z the player who did nothing at all is truthfully told they missed it
+      | 7 FAILED
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":9,"pages":9,"peakOpenPages":7}
+[ 4/4] PASS        92.8s  check-briefing  w1
+
+FAILED (exit 1) | targeted | run 20261112-102253-f4269885-5996
+  3 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-jebena-rush (w2) [functional]: FAIL E Baraka's own row: exactly that cup broke, once — not within 5000ms | FAIL E the TV: that one cup broke, once, in its slot — not within 5000ms | FAIL E repeated views break nothing more — 0,2,4,
+  timing   wall 1m 39s · step time 3m 10s (sum) · 3 workers, 64% busy · 1.92× the same steps run one after another
+           predicted 1–3m (about 1m 34s, measured) → actual 1m 39s (+5%)
+           longest  check-briefing 1m 33s, check-jebena-rush 1m 31s, build-web 5s · the longest step is 94% of the wall time
+           machine  CPU mean 26%, peak 76% · memory available ≥ 14364 MB · load peak 1.51
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s101-tgt/test-results/20261112-102253-f4269885-5996/report.json

@@ -2170,9 +2170,21 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Review 6815908707 (repairs required on `f1c5f02`):** P2, an achievement ("First Game Finished") drawn from a Spectrum match through the ledger; P2, the briefing's "45 seconds for the impostor's guess"; copy, "Everyone finished." beside the early-ending reason, which also appeared twice. All three repaired with failing-first regressions (D-S93-08); the gate failure on `b668ee3` led to D-S93-09.
 - **Next:** a new completed report on PR #17; then ChatGPT's verification of the repair delta and private live audit. Nothing merged or deployed.
 
-## Stage 10.1: Jebena cini cups and truthful result feedback (in progress)
+## Stage 10.1: Jebena cini cups and truthful result feedback (completed, awaiting review)
 
 - **Brief:** ChatGPT's handoff 6820352096 on PR #17 (with the Stage 9.3 clearance), from the owner's request: "Instead of hearts let's use cini/cup so when they miss the cup breaks." Base `940df38` (PR #17's cleared head); branch `claude/stage10-1-jebena-cups`, a stacked PR on #17.
 - **Scope:** Jebena Rush's lives drawn and worded as small handleless coffee cups (cini) everywhere; a cup breaks when a life is lost; and the carried result-copy contradiction (a survival winner told "You missed this one"). No rule, score or protocol change; no humour or saving work.
-- **Spec:** `docs/stage10/stage101.md`. Decisions D-S101-01 onward in `docs/DECISIONS.md`.
-- **Next:** the cups and copy, tests, the browser driver and screenshots, one final full gate, and a new completed report.
+- **Spec:** `docs/stage10/stage101.md` (§9: as built and tested). Decisions D-S101-01 to D-S101-07 in `docs/DECISIONS.md`.
+- **Built:**
+  - **The cup:** an original inline SVG cini, `CiniCups.tsx` and `stage101.css`, on every surface that showed hearts: lobby, briefing, your own row (kept once you're out), seat lists, TV, last play, out screen, refusal, results and scoring, library, settings and Start refusals.
+  - **When a cup breaks:** only on a live authoritative decrement (`lib/cups.ts`). Never on a wrong try, reload, resync, repeated view or leaving; Play again starts whole. The break animates with full motion only.
+  - **Truthful results:** `celebrate.ts` says "You missed this one" only with no recorded action, and never to a first-placed player in a won game.
+  - **Unchanged:** server fields, rules and scores (D-S101-01/02).
+- **Tests:** `tests/stage101-cups.test.ts` (22; the 4 result cases fail on the base); the results audit is extended. Full unit suite: 1,595 tests in 123 files.
+- **Browser driver:** `scripts/check-jebena-rush.mjs`, 148 checks. A break log on every page, a third room for the zero-answer survivor, seven cups at 320 px. Screenshots: `docs/stage10/screenshots/` (after) and `before/` (hearts); provenance in its README.
+- **Gates** (each verdict is one run on one revision; evidence in `docs/evidence/gate-runs/<run>/`):
+  - `f426988`: targeted (`jebena-rush briefing`) `20261112-102253-f4269885-5996` **FAILED**. The driver's loop missed two real lost lives (one during Amina's resync, one when slow checks ran out Keku's turn), so they looked "stray".
+  - `f426988`: fast `20261112-102438-f4269885-6698` **FAILED** (`stage74-content-variety` setup timed out at 250 ms under load, as in `20261111-194026-83406685-7879`). Both fixed in `f157422` (D-S101-07).
+  - `f157422` (final candidate): targeted `20261112-103432-f1574229-11563` PASSED; then, one after another, fast `20261112-103623-f1574229-12269` **PASSED** (exit 0, 5/5, 52 s) and full `20261112-103723-f1574229-15489` **PASSED** (exit 0, 88/88, 33 min 24 s, no leftover processes).
+- **Not run:** real iPhone Safari and Android Chrome (Chromium emulation only).
+- **Next:** ChatGPT's independent review and private live audit of PR #18. Nothing merged or deployed.
