@@ -1,0 +1,68 @@
+$ node scripts/check-draw-guess.mjs http://localhost:33273
+# timeout 600s | worker w3 | server http://localhost:33273 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93r-full/test-results/20261112-060355-a25a0880-8435/server-data/w3)
+
+[+4.4s] PASS lobby: Draw & Guess is Practice only, and says why
+[+4.4s] PASS server: an official start is refused — 400 Draw & Guess is new: practice-only until its Cup scoring is approved.
+[+4.6s] PASS briefing: every phone explains the game
+[+5.4s] PASS turn 1: one phone draws, the others guess
+[+5.4s] PASS turn 1: the drawer (Wanjiru) sees the word — owl
+[+5.4s] PASS turn 1: no guesser's screen shows the word — owl
+[+5.4s] PASS turn 1: the TV and the public projection don't have the word
+[+6.0s] PASS a finger stroke reaches the server and shows on the TV and the guessers' phones
+[+6.4s] PASS a mouse stroke too (two strokes on the server)
+[+6.7s] PASS a third stroke
+[+6.7s] PASS undo removes the last stroke (two left), for everyone
+[+6.8s] PASS contrast (AA): the drawer's screen
+[+6.8s] PASS contrast (AA): a guesser's screen
+[+6.8s] PASS contrast (AA): the TV during a drawing
+[+7.1s] PASS TV 1280×720: the whole board is on screen, no sideways scrolling — {"inside":true,"noScroll":true,"lines":1,"words":3}
+[+7.4s] PASS TV 1920×1080: the whole board is on screen, no sideways scrolling — {"inside":true,"noScroll":true,"lines":1,"words":3}
+[+7.8s] PASS TV 1440×900: the whole board is on screen, no sideways scrolling — {"inside":true,"noScroll":true,"lines":1,"words":3}
+[+8.6s] PASS a spectator joining mid-turn sees the drawing so far
+[+8.6s] PASS …and not the word
+[+8.7s] PASS a wrong guess: 'Not it', and the box is ready again
+[+8.7s] PASS the wrong guess's text appears nowhere (TV, drawer, other guessers, projections)
+[+10.6s] PASS a failed guess says it couldn't be confirmed, and keeps the text
+[+10.6s] PASS a failed guess: the server has nothing from them
+[+10.7s] PASS a right guess (any case): 'Right! You were first'
+[+10.8s] PASS the retried guess counts: number 2
+[+10.8s] PASS the drawer sees '2 of 3 got it'
+[+10.8s] PASS turn 1: the last guesser skips, the reveal comes at once on every phone and the TV
+[+10.9s] PASS contrast (AA): the reveal
+[+14.9s] PASS turn 2: one phone draws, the others guess
+[+15.3s] PASS turn 2: the drawing starts
+[+52.4s] PASS turn 2: with the drawer gone and nobody guessing, the clock ends the turn (≈ 37 s at this scale)
+[+52.4s] PASS …not before its time — 37167ms
+[+52.4s] PASS turn 2's reveal says nobody got it
+[+52.9s] PASS the drawer comes back (same seat) and is on the game again
+[+56.4s] PASS turn 3: one phone draws, the others guess
+[+57.4s] PASS turn 3: giving up reveals the word at once (said as 'nobody got it': who passed stays private)
+[+57.4s] PASS turn 3: the public projection has no skip count or 'gave up'
+[+61.5s] PASS turn 4: one phone draws, the others guess
+[+62.1s] PASS turn 4: 'New word' gives a different word, once
+[+62.1s] PASS server: a message over 400 points is refused — {"accepted":false,"reason":"PAYLOAD_TOO_LARGE"}
+[+62.2s] PASS server: a burst of drawing messages is rate limited
+[+62.2s] PASS server: a guesser can't draw
+[+64.4s] PASS clear empties the drawing for everyone
+[+64.7s] PASS drawing again after the clear
+[+64.8s] PASS turn 4: guesser 1 gets it
+[+64.8s] PASS turn 4: guesser 2 gets it
+[+64.9s] PASS turn 4: guesser 3 gets it
+[+64.9s] PASS turn 4: everyone got it, the reveal comes at once
+[+64.9s] PASS rotation: four turns, four different drawers (everyone drew once) — 3,2,1,0
+[+69.1s] PASS results on every phone
+[+69.1s] PASS results: the server's scores are the plan's (250, 180, 80, 160) — {"player-1":250,"player-2":180,"player-3":80,"player-4":160} vs {"player-1":250,"player-2":180,"player-3":80,"player-4":160}
+[+69.1s] PASS results: practice, not counted
+[+69.1s] PASS results 390px: four turns recapped, how scoring works, no sideways scrolling
+[+69.1s] PASS results 375px: four turns recapped, how scoring works, no sideways scrolling
+[+69.1s] PASS results 430px: four turns recapped, how scoring works, no sideways scrolling
+[+69.1s] PASS results 320px: four turns recapped, how scoring works, no sideways scrolling
+[+69.1s] PASS results: the moment line comes from a recorded turn (turn 4: everyone got it) — Everyone got Keku’s “bell”.
+[+69.3s] PASS contrast (AA): results
+[+69.3s] PASS TV: final standings, then the review
+[+69.3s] PASS TV review: four turns, each word and who drew it
+[+69.4s] PASS privacy after the game: no wrong guess anywhere in the public projection
+[+69.5s] DRAW & GUESS ALL PASSED
+[+69.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":7,"pages":7,"peakOpenPages":6}
+
+# PASS (exit 0) in 69.5s | cpu 7s, peak memory 386 MB

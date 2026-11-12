@@ -1,0 +1,38 @@
+$ node scripts/check-game-night.mjs http://localhost:33273
+# timeout 900s | worker w3 | server http://localhost:33273 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93r-full/test-results/20261112-060355-a25a0880-8435/server-data/w3)
+
+[+7.8s] PASS cohost granted via the room menu
+[+8.6s] PASS spectator does not consume a player slot — players=6 spectators=1
+[+12.1s] PASS spectator sees no correct answers while playing
+[+12.1s] PASS spectator has no answer controls
+[+84.6s] PASS trivia finishes (Eli abstained, no one blocked)
+[+85.7s] PASS trivia scores agree: TV vs server — tvRows=6
+[+85.7s] PASS tied players share a rank and a score (Cal = Dee) — Cal rank 1 score 360; Dee rank 1 score 360
+[+85.7s] PASS identical answers give identical scores (no double-count)
+[+86.3s] PASS phone standings show the same leader as the TV and the server — leader: Ada; phone top: 1AYou3601BBea3601CCal3601DDee360
+[+88.6s] PASS host returns to the lobby after trivia
+[+93.9s] PASS waiting ring shows honest counts (2/7 after two guesses) — ring: 2/7
+[+95.4s] PASS disconnected player is marked away
+[+98.5s] PASS the question waits for the disconnected player (no early finish) — phase q:1
+[+98.7s] PASS the returning player catches up in the same question
+[+101.2s] PASS abstained player is back in for the next question (per-question scope)
+[+113.1s] PASS closest finishes with everyone, including the player who dropped and came back
+[+113.1s] PASS TV lists the disconnected player (Gus)
+[+113.1s] PASS TV follows the active game (closest)
+[+113.7s] PASS guest sees no start button
+[+114.2s] PASS start asks before leaving out a reconnecting player (Gus) — Gus is reconnecting. Start Math Mayhem without them?If you start now, they sit this official game out and keep their seat for the next one.Wait for GusStart without Gus
+[+115.2s] PASS cohost can start a game
+[+115.2s] PASS guest skip is rejected (host/cohost only) — status 400: {"error":"Only host/cohost can skip a timed-out game"}
+[+167.6s] PASS reloaded player lands back in the game (not the landing)
+[+177.8s] PASS math finishes (reconnected player included)
+[+177.8s] PASS reconnected player's answers survived (he scored)
+[+177.8s] PASS TV follows the active game (math)
+[+178.4s] PASS no stale game panel in the lobby
+[+180.4s] PASS championship standings list all seven players
+[+188.9s] PASS max room holds 10 players + spectator
+[+321.9s] PASS max-room trivia finishes
+[+323.0s] PASS max-room TV leaderboard shows all 10 players
+[+323.1s] GAME NIGHT ALL PASSED (31 checks)
+[+323.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":19,"peakOpenPages":11}
+
+# PASS (exit 0) in 323.1s | cpu 24s, peak memory 280 MB

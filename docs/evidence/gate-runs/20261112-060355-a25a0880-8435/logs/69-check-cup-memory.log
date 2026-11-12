@@ -1,0 +1,42 @@
+$ node scripts/check-cup-memory.mjs http://localhost:33273
+# timeout 600s | worker w3 | server http://localhost:33273 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93r-full/test-results/20261112-060355-a25a0880-8435/server-data/w3)
+
+[+2.3s] PASS empty Cup: Day 1 of 7 first
+[+2.3s] PASS empty Cup: an honest empty state
+[+2.3s] PASS empty Cup: no numbers before an official game
+[+2.3s] PASS empty Cup: the rules are folded away
+[+2.3s] PASS empty Cup: a guest sees no host tools
+[+2.3s] PASS S3-CUP-01: the order is day, standings, what's next, then rules — [75,229,393,453]
+[+2.4s] PASS empty Cup: the content keeps the screen's side margin — 18px
+[+2.4s] PASS S3-CUP-01 at 390×844: the standings start on the first screen — 228px
+[+3.0s] PASS empty Cup: the host's tools are there, separate
+[+3.7s] PASS Memory Book empty: says how to start
+[+3.8s] PASS Memory Book empty: downloads are off, and it says why
+[+4.5s] PASS Cup with results at 375×667: no sideways scrolling
+[+5.8s] PASS Cup: the standings are the server's, in the server's order — player-1,player-2,player-3
+[+5.8s] PASS Cup: every total is the server's total — [100,50,0]
+[+5.8s] PASS Cup: the games played are listed by title
+[+5.8s] PASS Cup: the day winner is named
+[+5.8s] PASS Cup: a long name doesn't break the row
+[+6.2s] PASS Cup: 'How it adds up' shows the server's parts — Best three days 100 = 100, participation +0, finale +0 = 100. Day scores so far: 100. Day wins: 1.
+[+6.3s] PASS Cup: the rules open on demand
+[+6.3s] PASS Cup with results at 390×844: no sideways scrolling
+[+7.5s] PASS Cup with results at 430×932: no sideways scrolling
+[+8.8s] PASS Cup with results at 768×1024: no sideways scrolling
+[+10.1s] PASS Cup with results at 1440×900: no sideways scrolling
+[+11.8s] PASS a guest can add a highlight; it waits for the host
+[+11.8s] PASS a guest sees no approve or revoke buttons
+[+11.8s] PASS the entry shows the game's recorded scores by name — Keku went ten for ten in Math Mayhem |  | Day 1 · pending |  | Math Mayhem · Day 1: Keku 1,200 · Amina 720 · Bartholomew Otieno-Wanjiku 360 |  | From the ledger (30 score events) |  | Waiting for the host to approve it.
+[+11.8s] PASS the ledger facts are folded and use names, not ids
+[+12.6s] PASS the host approves; downloads open
+[+12.7s] PASS PDF: the file is named for the room and the date — christmas-memory-book-G9QND7-2026-11-12.pdf
+[+12.7s] PASS PDF: says the download started (not that it was saved), with the name — Download started: christmas-memory-book-G9QND7-2026-11-12.pdf. If you don’t see it, check your browser’s downloads.
+[+12.8s] PASS share image: a real download, named for the room and date — christmas-memory-book-G9QND7-2026-11-12.png
+[+13.4s] PASS a failed export says it couldn't be prepared, and no download happens
+[+13.5s] PASS Export approved shows the entry
+[+13.5s] PASS Memory Book at 390: no sideways scrolling
+[+13.9s] PASS Memory Book at 1440: no sideways scrolling
+[+14.0s] ALL CUP/MEMORY CHECKS PASSED
+[+14.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":11,"pages":11,"peakOpenPages":1}
+
+# PASS (exit 0) in 14s | cpu 4.8s, peak memory 404 MB

@@ -1,0 +1,50 @@
+$ node scripts/check-briefing.mjs http://localhost:34277
+# timeout 600s | worker w2 | server http://localhost:34277 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93r-tgt/test-results/20261112-055905-a25a0880-4316/server-data/w2)
+
+[+5.8s] PASS A. Ada's phone shows the rules briefing
+[+5.8s] PASS A. Bea's phone shows the rules briefing
+[+5.8s] PASS A. Cal's phone shows the rules briefing
+[+5.8s] PASS A. the spectator TV shows the rules and who is ready
+[+5.9s] PASS A. no question or answer control on any screen
+[+5.9s] PASS A. every projection carries the briefing and no game state, questions or deadline — 7 entries
+[+5.9s] PASS A. the rules show the real time limit
+[+5.9s] PASS A. it says whether it counts
+[+6.2s] PASS A. Bea's Ready shows on Ada's phone
+[+6.2s] PASS A. ...and on the spectator TV
+[+6.2s] PASS A. Bea's own button says she's ready
+[+6.5s] PASS A. Bea can take it back: everyone sees her not ready
+[+6.7s] PASS A. Bea is ready again
+[+7.1s] PASS A. a refresh lands Bea back on the rules, still ready
+[+7.1s] PASS A. Cal's dropped phone shows as reconnecting to the room
+[+7.1s] PASS A. Cal is back: connected, rules still on his phone
+[+7.2s] PASS A. still no game has started (nobody else was ready)
+[+10.4s] PASS B. Ada is in the game the moment the last player is ready
+[+10.4s] PASS B. Bea is in the game the moment the last player is ready
+[+10.4s] PASS B. Cal is in the game the moment the last player is ready
+[+10.4s] PASS B. every phone has the identical server deadline — 1794463198560
+[+10.4s] PASS B. the deadline is the game's window after the moment play began — 1794463198560 - 1794463162560
+[+10.4s] PASS B. no intro countdown follows the briefing
+[+12.8s] PASS C. Start now is locked during the read window
+[+12.8s] PASS C. guests have no Start now or Cancel
+[+14.8s] PASS C. Start now unlocks after the read window
+[+14.8s] PASS C. the confirmation names Cal (not ready) and not the host or Bea — Cal: not ready yet
+[+15.0s] PASS C. Keep waiting starts nothing
+[+15.2s] PASS C. (Bea's withdrawal reached the host)
+[+15.5s] PASS C. a stale confirmation is asked again, now naming Bea too
+[+15.5s] PASS C. still nothing started
+[+15.7s] PASS C. confirmed: play begins for everyone
+[+15.7s] PASS C. nobody lost their seat — ["player-1","player-2","player-3"]
+[+61.7s] PASS D. no warning at first
+[+85.9s] PASS D. the cancellation warning appears for Ada
+[+85.9s] PASS D. the cancellation warning appears for Bea
+[+85.9s] PASS D. the cancellation warning appears for the TV
+[+85.9s] PASS D. the warning says nothing will be scored
+[+92.2s] PASS D. the briefing is cancelled: everyone is back in the lobby and told why
+[+92.2s] PASS D. no game is left behind
+[+92.2s] PASS D. standings are untouched (the practice game never ran) — {}
+[+94.2s] PASS D. the host's Cancel ends the briefing at once for everyone
+[+94.2s] PASS D. no horizontal overflow on the phone screens
+[+94.3s] BRIEFING ALL PASSED
+[+94.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 94.3s | cpu 5.5s, peak memory 379 MB

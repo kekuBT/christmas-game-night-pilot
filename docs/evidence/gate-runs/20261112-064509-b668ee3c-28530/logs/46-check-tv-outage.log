@@ -1,0 +1,8 @@
+$ node scripts/check-tv-outage.mjs http://localhost:45525
+# timeout 600s | worker w2 | server http://localhost:45525 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93s-full/test-results/20261112-064509-b668ee3c-28530/server-data/w2)
+
+[+2.9s] PASS TV live: no connection note
+[+15.1s] PASS socket silent, polling works: the TV raises no false alarm (12 s)
+[+27.2s] PASS polling fails, socket works: the TV raises no false alarm (12 s)
+
+# TIMEOUT (exit SIGKILL) in 603s | cpu 5.9s, peak memory 346 MB

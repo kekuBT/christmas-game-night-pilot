@@ -1,0 +1,78 @@
+$ node scripts/check-lobby-mode.mjs http://localhost:41173
+# timeout 600s | worker w3 | server http://localhost:41173 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93s-full/test-results/20261112-064509-b668ee3c-28530/server-data/w3)
+
+[+1.9s] PASS Home 375×667: the dock never overlaps the games, at any scroll position — overlap 0px; 
+[+1.9s] PASS Home 375×667: any card whose picture shows also shows its title and players · minutes in full
+[+1.9s] PASS Home 375×667: Join and Host stay on screen — dock 157px
+[+1.9s] PASS Home 375×667: the lowest card's details scroll fully into view above the dock
+[+2.9s] PASS Home 375×553: the dock never overlaps the games, at any scroll position — overlap 0px; 
+[+2.9s] PASS Home 375×553: any card whose picture shows also shows its title and players · minutes in full
+[+2.9s] PASS Home 375×553: Join and Host stay on screen — dock 157px
+[+2.9s] PASS Home 375×553: the lowest card's details scroll fully into view above the dock
+[+3.5s] PASS Home 390×844: the dock never overlaps the games, at any scroll position — overlap 0px; 
+[+3.5s] PASS Home 390×844: any card whose picture shows also shows its title and players · minutes in full
+[+3.5s] PASS Home 390×844: Join and Host stay on screen — dock 165px
+[+3.5s] PASS Home 390×844: the lowest card's details scroll fully into view above the dock
+[+4.5s] PASS Home 390×664: the dock never overlaps the games, at any scroll position — overlap 0px; 
+[+4.5s] PASS Home 390×664: any card whose picture shows also shows its title and players · minutes in full
+[+4.5s] PASS Home 390×664: Join and Host stay on screen — dock 157px
+[+4.5s] PASS Home 390×664: the lowest card's details scroll fully into view above the dock
+[+5.2s] PASS Home 430×932: the dock never overlaps the games, at any scroll position — overlap 0px; 
+[+5.2s] PASS Home 430×932: any card whose picture shows also shows its title and players · minutes in full
+[+5.2s] PASS Home 430×932: Join and Host stay on screen — dock 165px
+[+5.2s] PASS Home 430×932: the lowest card's details scroll fully into view above the dock
+[+5.8s] PASS Home 430×740: the dock never overlaps the games, at any scroll position — overlap 0px; 
+[+5.8s] PASS Home 430×740: any card whose picture shows also shows its title and players · minutes in full
+[+5.8s] PASS Home 430×740: Join and Host stay on screen — dock 157px
+[+5.8s] PASS Home 430×740: the lowest card's details scroll fully into view above the dock
+[+6.5s] PASS Home 768×1024: the dock never overlaps the games, at any scroll position — overlap 0px; 
+[+6.5s] PASS Home 768×1024: any card whose picture shows also shows its title and players · minutes in full
+[+6.5s] PASS Home 768×1024: Join and Host stay on screen — dock 165px
+[+6.5s] PASS Home 768×1024: the lowest card's details scroll fully into view above the dock
+[+7.5s] PASS Home 1440×900: the dock never overlaps the games, at any scroll position — overlap 0px; 
+[+7.5s] PASS Home 1440×900: any card whose picture shows also shows its title and players · minutes in full
+[+7.5s] PASS Home 1440×900: Join and Host stay on screen — dock 165px
+[+7.5s] PASS Home 1440×900: the lowest card's details scroll fully into view above the dock
+[+9.0s] PASS guest, before the host chooses: told the host is choosing, no made-up game — Waiting for Keku to start · they’re choosing a game · tap someone to nudge them
+[+9.4s] PASS host 375×667: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+[+9.4s] PASS host 375×667: the mode line is on screen without scrolling
+[+9.4s] PASS host 375×667: the up-next card shows the mode
+[+9.9s] PASS host 375×667: Change brings the Official/Practice choice into view
+[+10.5s] PASS host 375×553: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+[+10.5s] PASS host 375×553: the mode line is on screen without scrolling
+[+10.5s] PASS host 375×553: the up-next card shows the mode
+[+11.0s] PASS host 375×553: Change brings the Official/Practice choice into view
+[+11.4s] PASS host 390×844: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+[+11.4s] PASS host 390×844: the mode line is on screen without scrolling
+[+11.4s] PASS host 390×844: the up-next card shows the mode
+[+12.0s] PASS host 390×844: Change brings the Official/Practice choice into view
+[+12.6s] PASS host 390×664: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+[+12.6s] PASS host 390×664: the mode line is on screen without scrolling
+[+12.6s] PASS host 390×664: the up-next card shows the mode
+[+13.1s] PASS host 390×664: Change brings the Official/Practice choice into view
+[+13.5s] PASS host 430×932: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+[+13.5s] PASS host 430×932: the mode line is on screen without scrolling
+[+13.5s] PASS host 430×932: the up-next card shows the mode
+[+14.0s] PASS host 430×932: Change brings the Official/Practice choice into view
+[+14.3s] PASS host 430×740: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+[+14.4s] PASS host 430×740: the mode line is on screen without scrolling
+[+14.4s] PASS host 430×740: the up-next card shows the mode
+[+14.9s] PASS host 430×740: Change brings the Official/Practice choice into view
+[+15.3s] PASS host 768×1024: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+[+15.3s] PASS host 768×1024: the mode line is on screen without scrolling
+[+15.3s] PASS host 768×1024: the up-next card shows the mode
+[+15.9s] PASS host 768×1024: Change brings the Official/Practice choice into view
+[+16.2s] PASS host 1440×900: Start names the game and the mode (default Official, unchanged) — Start Trivia Showdown · Official
+[+16.2s] PASS host 1440×900: the mode line is on screen without scrolling
+[+16.2s] PASS host 1440×900: the up-next card shows the mode
+[+16.7s] PASS host 1440×900: Change brings the Official/Practice choice into view
+[+17.3s] PASS guest: sees the host's game and that it's Official — {"name":"Trivia Showdown","mode":"Official · counts toward the Individual Family Cup","note":"Waiting for Keku to start Trivia Showdown · Official, counts toward the Individual Family Cup · tap someone to nudge them"}
+[+17.7s] PASS guest: sees Practice within seconds of the host switching — {"name":"Trivia Showdown","mode":"Practice · no Cup points","note":"Waiting for Keku to start Trivia Showdown · Practice, no Cup points · tap someone to nudge them"}
+[+18.2s] PASS guest: sees the host's new pick (not this tab's own default) — {"name":"Math Mayhem","mode":"Practice · no Cup points","note":"Waiting for Keku to start Math Mayhem · Practice, no Cup points · tap someone to nudge them"}
+[+18.4s] PASS host reload: still Math Mayhem · Practice — Start Math Mayhem · Practice
+[+18.4s] PASS guest after the host's reload: unchanged — {"name":"Math Mayhem","mode":"Practice · no Cup points","note":"Waiting for Keku to start Math Mayhem · Practice, no Cup points · tap someone to nudge them"}
+[+18.8s] PASS Start starts the shown game in the shown mode — {"gameId":"math-mayhem","official":false}
+[+18.9s] ALL LOBBY/HOME CHECKS PASSED
+[+18.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":18,"pages":18,"peakOpenPages":2}
+
+# PASS (exit 0) in 18.9s | cpu 7s, peak memory 359 MB

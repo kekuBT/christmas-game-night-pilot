@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:41417
+# timeout 600s | worker w2 | server http://localhost:41417 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s93r-full/test-results/20261112-060355-a25a0880-8435/server-data/w2)
+
+[+22.3s] PASS reveal opens on the first question phase — question:0
+[+22.3s] PASS question phase hides the correct answer — count=0
+[+22.6s] PASS Reveal answer steps into the first reveal — reveal:1
+[+22.6s] PASS reveal phase shows the correct answer — count=1
+[+22.6s] PASS reveal phase separates this question from the game total
+[+22.6s] PASS Next question steps into the second question phase — question:2
+[+22.6s] PASS second question phase hides the correct answer again — count=0
+[+22.7s] PASS Q10 jump lands on the last question phase — question:18
+[+22.7s] PASS last reveal reached — reveal:19
+[+22.8s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+22.8s] PASS finale shows the standings list
+[+22.8s] PASS auto-play starts back at the first question — question:0
+[+30.9s] PASS auto-play advances a step within 8s — reveal:1
+[+38.9s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+39.8s] PASS TV walk opens on a question — How many minutes are in 2 hours?
+[+43.8s] PASS TV walk advances to the reveal stage
+[+48.9s] PASS TV walk advances to the second question — Which blood cells help fight infection?
+[+49.0s] PASS TV manual jump reaches the leaderboard
+[+49.0s] REVEAL ALL PASSED
+[+49.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 49.1s | cpu 3.2s, peak memory 263 MB
