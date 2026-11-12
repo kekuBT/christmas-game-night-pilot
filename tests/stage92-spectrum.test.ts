@@ -33,12 +33,11 @@ function playRound(s: SpectrumState, t: number, values: (number | undefined)[]):
   expect(clue(s, t)).toMatchObject({ ok: true, result: { phase: "guess" } });
   const gs = [...guessers(s)];
   gs.forEach((g, i) => { if (values[i] !== undefined) expect(guess(s, g, values[i]!, t + 1 + i)).toMatchObject({ ok: true }); });
-  let now = t + 1 + gs.length;
-  if (s.phase === "guess") { now = dueAt(s); expire(s, now); }
+  if (s.phase === "guess") expire(s, dueAt(s)); // someone didn't guess: the phase runs out
   expect(s.phase).toBe("reveal");
-  now = dueAt(s);
-  expire(s, now);
-  return now;
+  const revealEnd = dueAt(s);
+  expire(s, revealEnd);
+  return revealEnd;
 }
 
 describe("Spectrum content (sp-pairs-1)", () => {
