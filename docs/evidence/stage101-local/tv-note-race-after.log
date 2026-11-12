@@ -1,0 +1,22 @@
+PASS TV live: no connection note
+PASS socket silent, polling works: the TV raises no false alarm (12 s)
+PASS polling fails, socket works: the TV raises no false alarm (12 s)
+PASS server down: the TV says the connection is lost
+PASS server down: the last known display stays on screen — mchezo
+LOBBY
+👁 1 watching
+Join
+87MMSG
+JOIN THE GAME
+87MMSG
+
+PASS server down: the note is announced politely (role=status)
+PASS server down: the note shows nothing private (no tokens, codes or host tools) — Connection to the game lost. This screen may be out of date. Reconnecting…
+PASS server down: the phone shows its connection banner
+PASS server back: the TV says it reconnected
+PASS server back: the note goes away and the room is shown
+PASS server back: a new player shows on the TV
+PASS server back: the phone is back too
+PASS invalid spectator session: told plainly to enter the code again
+PASS invalid spectator session: no room details shown
+TV OUTAGE ALL PASSED

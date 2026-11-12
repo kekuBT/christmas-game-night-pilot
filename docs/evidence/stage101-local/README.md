@@ -26,3 +26,12 @@ S74_STALL_MS=400 npx vitest run tests/stage74-content-variety.test.ts -t "solo S
 git apply -R docs/evidence/stage101-local/event-loop-stall.patch
 ```
 To see the failure, also set the allowances back to 300 ms and 250 ms.
+
+## The TV outage driver's note race (D-S101-11)
+Full gate `20261112-122710-25c28143-13503` failed one check in `check-tv-outage`: "server back: the note goes away… (locator.getAttribute: Timeout 30000ms exceeded.)".
+
+| File | What it is |
+|---|---|
+| `tv-note-race.patch` | A temporary `TVNOTE_GAP_MS` gap between the old helper's two calls (count the note, then read it), in the "note goes away" check only. It applies to `scripts/check-tv-outage.mjs` as of `25c2814`. |
+| `tv-note-race-before.log` | The old helper with `TVNOTE_GAP_MS=4500`: the note's 4 s removal falls in the gap, and the check fails with the gate's exact message. |
+| `tv-note-race-after.log` | The fixed helper (one `evaluate`), with the same 4.5 s delay before its single read: all checks pass. |

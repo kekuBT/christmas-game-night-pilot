@@ -1216,3 +1216,13 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - Cost: the `stage62` file takes about 16 s and `stage74` about 10 s (they run in parallel with other files). The whole suite under load took 44.6 s, against 40.1 s in the failing gate run.
   - **Not affected:** `stage61`'s 150 ms harness answers from an in-memory server, so its replies resolve before any timer.
   - **Alternative rejected:** re-running the gate until it passed, and adding a timer seam to `SoloSession` (a product change for a test-only problem).
+- **D-S101-11 `check-tv-outage` reads the TV's connection note in one call.**
+  - **Trigger:** full gate `20261112-122710-25c28143-13503` on `25c2814` failed, 87 of 88 passed. The failure was `check-tv-outage` "server back: the note goes away and the room is shown — not within 15000ms (locator.getAttribute: Timeout 30000ms exceeded.)". The next check passed at once.
+  - **Root cause (a driver race, unchanged since Stage 5.1):**
+    - The helper counted the `tv-conn` note, then read its `data-state` in a second call.
+    - The "reconnected" note goes away 4 s after it appears (`App.tsx`). If that happens between the two calls, `getAttribute` waits its whole 30 s default for an element that no longer exists, and the 15 s check fails.
+    - The timeline matches: reconnected at +36 s, removed at about +40 s, the failure at +70 s.
+    - The repair's `App.tsx` change adds only synchronous cup-memory calls and doesn't touch the note.
+  - **Reproduced deterministically:** a temporary 4.5 s gap between the helper's two calls (`docs/evidence/stage101-local/tv-note-race.patch`) fails the check with the gate's exact message.
+  - **The fix:** one `evaluate` returns the note's state, or `null`. The same 4.5 s delay placed before that single read passes, and a normal run passes all 14 checks. What the driver checks is unchanged.
+  - **Alternative rejected:** a short `getAttribute` timeout. It narrows the window but keeps the race, and a timeout of 0 means no timeout in Playwright.

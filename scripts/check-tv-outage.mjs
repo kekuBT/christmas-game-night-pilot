@@ -88,7 +88,10 @@ try {
   await tv.locator(".mz-code__input").fill(room.joinCode);
   await tv.getByTestId("watch-spectator").click();
   await tv.getByTestId("tv-show").waitFor({ timeout: 15000 });
-  const tvNote = async () => ((await tv.getByTestId("tv-conn").count()) ? await tv.getByTestId("tv-conn").getAttribute("data-state") : null);
+  // The note's state in ONE read (D-S101-11). The "reconnected" note goes away 4 s after it appears, so counting it and
+  // then reading it in a second call can find it gone in between; getAttribute then waits its whole 30 s for an element
+  // that no longer exists (full gate 20261112-122710-25c28143-13503).
+  const tvNote = () => tv.evaluate(() => document.querySelector('[data-testid="tv-conn"]')?.getAttribute("data-state") ?? null);
   check("TV live: no connection note", (await tvNote()) === null);
 
   // 1. Only the socket goes silent: polling keeps the TV live.
