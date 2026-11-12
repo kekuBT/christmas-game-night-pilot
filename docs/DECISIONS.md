@@ -1261,3 +1261,25 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - erasing the log at the offline boundary: it hides history from the integrity checks;
     - filtering by timestamp: clocks across pages and the server aren't one sequence;
     - retrying the check.
+
+## Stage 10.2: a results line for a genuine moment (Jebena Rush and Spectrum)
+- **D-S102-01 Extend the existing moment layer.**
+  - **How:** `jebenaMoment` and `spectrumMoment` join `apps/web/src/ui/mchezo/lib/moments.ts` (Stage 5, S5-E), which already holds one pure, deterministic line per finished game. They render with the same element as the Stage 5 lines (`results-moment`), and on the TV as `tv-results-moment`.
+  - **Alternative rejected:** a new results framework. It would duplicate the Stage 5 rules for the same job.
+- **D-S102-02 Jebena's guards.**
+  - **When a line can appear:** only when the module ended the match (`end` not null), with one sole winner (first place, not out, not sat out), and at least one opponent knocked out by losing every cup, not by leaving.
+  - **J1:** exactly one cup left. **J2:** every starting cup still whole.
+  - **No line for:** ties, room-ended games, wins by others leaving, and ordinary wins.
+  - **Alternative rejected:** allowing a line when every opponent left. It would comment on absence.
+- **D-S102-03 Spectrum's guards.**
+  - **When a line can appear:** only for a match the module completed with every planned round revealed.
+  - **S1:** every round scored and 40 of 40. It takes priority over **S2:** one or more scored rounds at distance 0.
+  - **Team words only:** no names, no winner, place or Cup, and never anyone's own guess.
+  - **Alternative rejected:** a bullseye line in an early-ended match. The early ending is the main fact there, and a quip beside it reads as commentary on who left.
+- **D-S102-04 Placement.**
+  - **Phone:** right under the game's own result line, after the result hero and What's next, so Play again, Pick another game and Take a break don't move.
+  - **TV:** under the final view's result line.
+  - **No line:** nothing is rendered, not even an empty box.
+- **D-S102-05 Fixed, unnamed copy.**
+  - **Why:** the lines are authored strings, never chosen at random, so a host, a guest, the TV and a reload read the same words.
+  - **Names:** Jebena's lines name nobody, because the headline above already names the winner. Spectrum's lines speak of the team and its rounds.
