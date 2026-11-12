@@ -2,12 +2,17 @@
 
 - **Handoff:** ChatGPT's 6811101479 on PR #15, which also cleared Stage 9.1.
 - **Base:** `aaa6981`, on branch `claude/stage9-2-spectrum`, as a PR stacked on #15.
+- **Architecture answers:** ChatGPT's 6811445149 on PR #16 (the team result accepted for this unwired foundation; digits allowed in clues; the existing product described as changed). Guidance during development, not clearance.
 - **Authorization:** the owner's standing D-WF-01.
 
 ## 1. What this slice is, and isn't
 - **It is:** the rules contract, a pure game module (`src/games/modules/spectrum.ts`), a curated content pack (`src/games/modules/packs/spectrum-pairs.ts`), and tests.
 - **It isn't wired into the product.** The module is not registered in `GAME_MODULES`, the registry, the manifest or the lifecycle policy table. So nothing offers it: no picker, Quick Party, Cup, solo, Memory Book or navigation entry.
-- **The existing product is unchanged.** The only shared change is an optional `onFinish` hook on the module contract, used by Jebena Rush (see the Stage 9.1 clearance note). It is a separate commit with its own tests.
+- **The existing product IS changed** (6811445149), even though Spectrum is unregistered, by the separate Jebena Rush terminal cleanup (commit `abafb95`, D-S92-09, for the Stage 9.1 clearance note):
+  - the module contract gains an optional `onFinish`, and the room's `finalize` now calls it for every finishing game, before the result is recorded. Only Jebena Rush defines it; for every other game the call does nothing;
+  - Jebena Rush's own endings (the last one standing, every bank used up) now also drop every player's last rejected try;
+  - at the room's own ending (the match limit), the holder's last rejected try is dropped too. Before, it stayed in the saved state, and the holder's own view of the finished game could still show it (nobody else's);
+  - scores, standings, endings, results and replay are meant to be untouched. Engine tests pin every terminal path; the gate's Jebena browser driver covers an ending and Play again. The reviewer's private existing-product browser audit (Jebena endings and replay) is still needed before clearance.
 - **Next slice:** the phone and TV journey, after this contract is independently reviewed.
 - **Spend:** no paid AI, no new service, no deployment, no public port, nothing paid for.
 
@@ -30,8 +35,8 @@ The copy, the art direction and the content are original. No external AI and no 
 - **The match:** four rounds. Each round's opposing pair and its target are chosen once, at the start, from the seed, and persisted. No pair repeats within a match. Targets are whole numbers from 10 to 90.
 - **The phases of a round:**
   1. **Clue (60 s):** the clue-giver sends one clue.
-     - It is trimmed and its inner spaces collapsed; it must be 1–80 characters.
-     - It may not contain digits (D-S92-03), so a clue can't simply give the number away.
+     - Control characters become spaces, inner spaces are collapsed and the ends trimmed; it must then be 1–80 Unicode code points (so 80 Amharic or accented letters are fine, though they take more bytes).
+     - Any language, and digits too: "a 10-minute walk" is a fair clue (D-S92-03, 6811445149). "Give a clue, not the target number" is a social rule the briefing explains (§10). It is not a filter: a digit ban would be bypassed by spelling the number out, and there is no semantic policing.
      - An accepted clue moves the round to guessing at once.
   2. **Guess (45 s):** every other player taking part sends one whole number from 0 to 100.
      - A guess can't be changed once accepted.
@@ -99,7 +104,7 @@ The copy, the art direction and the content are original. No external AI and no 
   - `STALE_ROUND`, `WRONG_PHASE`;
   - `NOT_CLUE_GIVER`, `GIVER_CANNOT_GUESS`, `NOT_A_GUESSER` (joined the round's roles later);
   - `ALREADY_GUESSED`;
-  - `INVALID_PAYLOAD`, `INVALID_CLUE` (empty, too long, or with digits), `INVALID_GUESS` (not a whole number from 0 to 100).
+  - `INVALID_PAYLOAD`, `INVALID_CLUE` (not text, empty or blank once cleaned, or more than 80 code points), `INVALID_GUESS` (not a whole number from 0 to 100).
 - **Accepted:** `{ ok: true, result: { round, phase } }`. No secret is ever in a result.
 
 ## 7. Privacy (who sees what)
@@ -117,15 +122,17 @@ The copy, the art direction and the content are original. No external AI and no 
 **The conflict.** The room's results pipeline is per player:
 - `GameModule.scores()` feeds `rawScores`, the "score-awarded" log and the results hero ("X wins").
 
-**The bounded proposal:**
-- **In this slice:** `scores()` gives **every roster player the same team total**. A player who sat out gets it too: the team earned it together. So any generic ranking shows a full tie and never names a single winner.
-- **Plus a team result:** the module also exports `spectrumTeamResult(state)` (rounds, total, out of 40, end reason).
-- **In the integration slice:**
-  - an optional `teamResult` on the module contract, and a results branch that shows the team result instead of standings;
-  - Spectrum stays practice-only and casual-only, so it never reaches a Cup ledger;
-  - there is no personal best for it.
+**Accepted for this unwired foundation only (6811445149 §1):**
+- **The authoritative result** is `spectrumTeamResult(state)`: one shared total (0–40), the revealed rounds and the end reason. It names no player.
+- **`scores()` is a compatibility representation:** the same earned total copied to every **original** roster player, those who sat out included (the team earned it together).
+  - The copies are never summed into the team total; summing would count it once per player.
+  - They are never described as individual achievement.
+  - Tests at 2, 4 and 10 players, for a completed match, a partial ending and an ending before anything is earned, pin all of this.
+- **Equal scores are not enough on their own.** They don't prove that every downstream surface avoids naming a winner.
+- **Before any production registration** (the integration slice), there must be an explicit cooperative results branch for the phone results and the TV. It shows the team result, and it prevents any individual winner, personal best, achievement or Cup credit from being drawn from the adapter scores.
+- **Spectrum stays practice-only and casual-only,** so it never reaches a Cup ledger.
 
-Nothing in the room changes in this slice.
+The room contract is not widened for Spectrum now.
 
 ## 9. Content (`sp-pairs-1`)
 - **30 curated, year-round opposing pairs.** Each has a stable id (`sp-…`), a left and a right label, and a one-line meaning (what the scale measures).
@@ -133,6 +140,7 @@ Nothing in the room changes in this slice.
 - **Themes never choose content.** A match draws four different pairs from the seed. A test checks the ids, the labels, that no pair repeats within a pack or within a match, and the counts.
 
 ## 10. Accessibility contract for the next UI slice
+- **The briefing** tells the clue-giver, in words: "Give a clue, not the target number." (6811445149 §2).
 - **The scale:**
   - a real, keyboard-operable control with an accessible name naming both ends, for example "From Cold (0) to Hot (100)";
   - the arrow keys move it by 1 and Page Up/Down by 10;
@@ -146,13 +154,13 @@ Nothing in the room changes in this slice.
 ## 11. Decisions (details in docs/DECISIONS.md)
 - **D-S92-01:** a pure module, not registered; the planned wiring is in §5.
 - **D-S92-02:** four seeded rounds, chosen at the start: pair, target 10–90, and clue-giver rotation over players still taking part.
-- **D-S92-03:** clue rules: trimmed, 1–80 characters, no digits. The digit rule is a reversible default of mine, not from the handoff; say if you'd rather allow digits.
+- **D-S92-03:** clue rules: cleaned and trimmed, 1–80 Unicode code points, any language, digits allowed (revised by 6811445149, which reversed my earlier no-digits default). The briefing says "Give a clue, not the target number."
 - **D-S92-04:** the median team guess (even count: the mean of the middle two, rounded half up); scoring bands 10/7/4/0; no invented guesses.
 - **D-S92-05:** sit-outs, skipped rounds and the fewer-than-two ending as in §3; disconnects change nothing.
 - **D-S92-06:** exactly once: round and phase checks, strict payloads, and phase expiry by the module's own recorded start (§4).
 - **D-S92-07:** privacy as in §7; individual guesses are never shown, even after the reveal.
-- **D-S92-08:** one team score, given equally to every roster player in this slice (§8).
-- **D-S92-09:** Jebena Rush's terminal cleanup via an optional `onFinish` hook, called once by the room's `finalize`.
+- **D-S92-08:** `spectrumTeamResult` is the single authoritative result. `scores()` copies the team total to every original roster player as a compatibility representation, never to be summed or read as individual achievement. A cooperative results and TV branch is required before production registration (§8, accepted by 6811445149 for this unwired slice).
+- **D-S92-09:** Jebena Rush's terminal cleanup via an optional `onFinish` hook, called once by the room's `finalize`. This changes the existing product (§1).
 
 ## 12. Validation and report
 - **Unit scenarios** at 2, 4 and 10 players: every phase, clue-giver rotation, four-round completion, partial endings, no guesses, clue timeout, one or all disconnected, explicit sit-outs, ties and median rounding, every scoring boundary.
@@ -161,7 +169,7 @@ Nothing in the room changes in this slice.
   - the wrong actor;
   - a stale round or phase;
   - a duplicate clue or guess;
-  - invalid numbers, and empty or oversized clues;
+  - invalid numbers; blank, oversized or non-text clues (and clues with digits or non-ASCII text accepted);
   - repeated deadline processing.
 - **Exhaustive projection checks** for each role and phase, with unmistakable canaries:
   - the host as a guesser, spectators and late joiners;
@@ -170,9 +178,9 @@ Nothing in the room changes in this slice.
   - both the positive path (at the reveal) and the negative path (before it).
 - **Content checks:** the inventory and its ids.
 - **Gates:** sequential clean fast then full gates on the completed checkpoint, then a new completed report.
-- **This slice has no UI:**
-  - the existing product is unchanged;
-  - the Spectrum UI and real devices are not run;
+- **This slice has no Spectrum UI:**
+  - the existing product is changed by the Jebena cleanup (§1): engine tests, and the gate's existing browser drivers, Jebena Rush's included; the reviewer's private browser audit is still to come;
+  - the Spectrum UI and real devices are NOT RUN;
   - there are no screenshots of a flow that doesn't exist yet.
 
 ## 13. As built and tested
@@ -181,10 +189,12 @@ Nothing in the room changes in this slice.
 | Content | `tests/stage92-spectrum.test.ts`: 30 pairs, stable ids, two different ends, a one-line meaning, no repeats; nothing Christmas-specific and nothing that ranks people; four different pairs and targets from 10 to 90 for 300 seeds; the same seed gives the same match |
 | Rules | the median and its rounding; every scoring boundary, both directly and through real rounds on either side of the target |
 | Whole matches | at 2, 4 and 10 players: the rotation, the early end of the guess phase, the total, an equal team score for everyone, participation |
+| The team result | at 2, 4 and 10 players: a completed match with a sit-out (40), a partial ending (10), an ending before anything is earned (0). `spectrumTeamResult` holds the one total, its rounds add up to it, and it names no player; `scores()` has a key for every original roster player, sat-out included, each the same total; their sum is n × the total, never the team's result |
 | Nobody acting | everyone disconnected, at 2, 4 and 10 players: every round skips on its clock, roles never change, and the match ends |
 | Missing input | no clue, no guesses, and only the guesses received (one player connected) |
 | Sit-outs | the clue-giver before and after the clue; a guesser before and after their guess; fewer than two left; two players; during a reveal |
-| Refusals (state unchanged, deep-equal) | injected targets, points and scores; the wrong actor; a stale round; the wrong phase; a duplicate clue or guess; invalid numbers; empty, long or digit clues; after the end |
+| Refusals (state unchanged, deep-equal) | injected targets, points and scores; the wrong actor; a stale round; the wrong phase; a duplicate clue or guess; invalid numbers; empty, blank (spaces or control characters only), over 80 code points (ASCII and Amharic) or non-text clues; after the end |
+| Clues accepted | digits ("a 10-minute walk", "about 70", Arabic-Indic digits), accents, Amharic, emoji; exactly 80 code points of multi-byte letters (more than 80 bytes) |
 | Exactly once | a repeated or early expiry; the exact deadline; the time scale; catch-up after a restart equal to a clock that never stopped (bounded, idempotent, every phase starting at the previous deadline) |
 | Privacy | canaries (the seed 987654321, targets 73/61/37/29, guesses 44/58), checked first to be in the state. For each phase (clue, guess, reveal, next round, finished) and each role: the clue-giver, the host as a guesser, the other guessers, a sat-out player, spectators/TV and late joiners. Plus the views after a save and reload |
 | Not in the product | not a registered module, game, manifest or policy; its actions reach nothing; `tests/stage91-bank-privacy.test.ts` keeps the module and its pairs out of the web app |
@@ -194,5 +204,7 @@ Nothing in the room changes in this slice.
 - a target in the public view fails 4 tests;
 - other players' guesses in a guesser's view fail 2;
 - rounding .5 down fails 1;
-- the Jebena cleanup removed fails 6 of its 7 tests.
+- the Jebena cleanup removed fails 6 of its 7 tests;
+- `scores()` leaving out sat-out players fails 8 tests;
+- the team result made a sum of the per-player copies fails 10.
 

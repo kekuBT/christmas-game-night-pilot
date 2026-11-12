@@ -271,6 +271,72 @@ describe("Spectrum: sitting out", () => {
   });
 });
 
+/**
+ * The team result (6811445149 §1): spectrumTeamResult is the authoritative
+ * cooperative result. scores() is only a compatibility representation: the
+ * same earned total copied to every ORIGINAL roster player, those who sat
+ * out included. The copies must never be summed or read as individual
+ * achievement, so the team result names nobody.
+ */
+function expectTeamResult(s: SpectrumState, total: number, end: string, revealed: number): void {
+  const result = spectrumTeamResult(s);
+  expect(result).toMatchObject({ total, max: SPECTRUM_MAX_POINTS, end });
+  expect(result.total).toBe(s.total);
+  expect(result.rounds).toHaveLength(revealed);
+  expect(result.rounds.reduce((a, r) => a + r.points, 0)).toBe(total); // the rounds add up to the one total
+  expect(Object.keys(result).sort()).toEqual(["end", "max", "rounds", "total"]);
+  for (const r of result.rounds) expect(Object.keys(r).sort()).toEqual(["aggregate", "distance", "guesses", "pairId", "points", "reason", "roundNo", "target"]);
+  const json = JSON.stringify(result);
+  for (const p of s.order) expect(json).not.toContain(`"${p}"`); // no player is credited with anything
+  const copies = spectrumModule.scores(s, s.order);
+  expect(Object.keys(copies)).toEqual(s.order); // every original roster player
+  for (const p of s.order) expect(copies[p]).toBe(total); // sat-out players too: the same copy
+  const summed = Object.values(copies).reduce((a, b) => a + b, 0);
+  expect(summed).toBe(s.order.length * total); // summing the copies would overcount n-fold: never the team's result
+  if (total > 0 && s.order.length > 1) expect(summed).not.toBe(result.total);
+}
+
+/** A round where every guess lands on the target: 10 points. */
+function playPerfectRound(s: SpectrumState, t: number): number {
+  const target = cur(s).target;
+  return playRound(s, t, guessers(s).map(() => target));
+}
+
+describe.each([2, 4, 10])("Spectrum team result with %i players (6811445149)", (n) => {
+  it("a completed match: one total, the same copy for everyone (a sat-out player too), no individual credit", () => {
+    const s = start(n, 60 + n);
+    let t = playPerfectRound(s, T0 + 1000);
+    const leaver = n > 2 ? s.order[n - 1]! : null; // with 2 players, sitting out ends the match (the next test)
+    if (leaver) expect(spectrumModule.abstain(s, leaver, ctx(s, t + 1))).toEqual({ ok: true, wholeGameAbstain: true });
+    for (let r = 1; r < SPECTRUM_ROUNDS; r++) t = playPerfectRound(s, t + 1000);
+    expect(s).toMatchObject({ end: "completed", phase: "finished", total: 40 });
+    if (leaver) expect(s.satOut[leaver]).toBe(1);
+    expectTeamResult(s, 40, "completed", 4);
+  });
+
+  it("a partial ending (fewer than two left): what was earned, copied to everyone who started; the unrevealed round counts for nothing", () => {
+    const s = start(n, 70 + n);
+    const t = playPerfectRound(s, T0 + 1000);
+    expect(clue(s, t + 1000)).toMatchObject({ ok: true }); // round 2 is under way
+    const keeper = giver(s);
+    const leaving = s.order.filter((p) => p !== keeper);
+    leaving.forEach((p, i) => {
+      expect(s.end).toBeNull();
+      expect(spectrumModule.abstain(s, p, ctx(s, t + 1001 + i))).toEqual({ ok: true, wholeGameAbstain: true });
+    });
+    expect(s).toMatchObject({ end: "too-few-players", phase: "finished", total: 10 });
+    expect(Object.keys(s.satOut)).toHaveLength(n - 1);
+    expectTeamResult(s, 10, "too-few-players", 1);
+  });
+
+  it("a match that ends before anything is earned: zero for the team, zero copies, nothing revealed", () => {
+    const s = start(n, 80 + n);
+    for (const p of s.order.slice(1)) spectrumModule.abstain(s, p, ctx(s, T0 + 1));
+    expect(s).toMatchObject({ end: "too-few-players", total: 0 });
+    expectTeamResult(s, 0, "too-few-players", 0);
+  });
+});
+
 /** Drive round 1 to its reveal (a clue and one guess each). */
 function playRoundStartOnly(s: SpectrumState): void {
   clue(s, T0 + 1);
@@ -343,14 +409,23 @@ describe("Spectrum: every refusal changes nothing", () => {
     }
   });
 
-  it("invalid clues: empty, too long, with digits; a clue is trimmed and its spaces collapsed", () => {
+  it("invalid clues: empty or blank, too long, not text; a clue is trimmed and its spaces collapsed", () => {
     const s = start(3, 26);
-    for (const t of ["", "   ", "x".repeat(SPECTRUM_CLUE_MAX + 1), "7 up", "about 70", "١٢", 42, null]) refused(s, giver(s), "spectrum-clue", { round: 1, text: t as unknown }, "INVALID_CLUE");
+    for (const t of ["", "   ", "\t\n ", "\u0000\u0007", "x".repeat(SPECTRUM_CLUE_MAX + 1), "ቡ".repeat(SPECTRUM_CLUE_MAX + 1), 42, null, ["tea"]]) refused(s, giver(s), "spectrum-clue", { round: 1, text: t as unknown }, "INVALID_CLUE");
     expect(cleanClue("  a   cup\tof\n tea  ")).toBe("a cup of tea");
     expect(cleanClue("x".repeat(SPECTRUM_CLUE_MAX))).toBe("x".repeat(SPECTRUM_CLUE_MAX));
     expect(cleanClue("tea\u0000time")).toBe("tea time");
     expect(clue(s, T0 + 1, "  a   cup of tea ")).toMatchObject({ ok: true });
     expect(cur(s).clue).toBe("a cup of tea");
+  });
+
+  it("clues may contain digits and any language: the limit is 80 code points, not bytes (6811445149)", () => {
+    for (const ok of ["a 10-minute walk", "about 70", "7 up", "١٢ minutes", "café au lait", "ቡና በጣም ሞቃት", "🌶️ chilli", "ቡ".repeat(SPECTRUM_CLUE_MAX), "é".repeat(SPECTRUM_CLUE_MAX)]) {
+      const s = start(3, 28);
+      expect(spectrumModule.intent(s, giver(s), "spectrum-clue", { round: 1, text: ok }, ctx(s, T0 + 1)), ok).toMatchObject({ ok: true, result: { phase: "guess" } });
+      expect(cur(s).clue).toBe(ok);
+    }
+    expect(new TextEncoder().encode("ቡ".repeat(SPECTRUM_CLUE_MAX)).length).toBeGreaterThan(SPECTRUM_CLUE_MAX); // more bytes than the limit, still allowed
   });
 
   it("after the end, nothing is accepted", () => {

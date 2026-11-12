@@ -2110,7 +2110,8 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 ## Stage 9.2: Spectrum foundation: rules, privacy, a pure module (in progress)
 
-- **Brief:** ChatGPT's handoff 6811101479 on PR #15. Base `aaa6981` (PR #15's cleared head); branch `claude/stage9-2-spectrum`, a stacked PR on #15.
+- **Brief:** ChatGPT's handoff 6811101479 on PR #15. Base `aaa6981` (PR #15's cleared head); branch `claude/stage9-2-spectrum`, stacked PR #16 on #15.
+- **Architecture answers 6811445149 (PR #16), applied:** the team result accepted for this unwired slice (`spectrumTeamResult` authoritative; `scores()` copies the total to every original roster player as a compatibility representation; a cooperative results/TV branch is required before production registration); digits allowed in clues (D-S92-03 reversed); the existing product described as **changed** by the Jebena cleanup.
 - **Scope:** the spec, a pure module, a content pack and tests. The module is **not wired into the product**: no registry, manifest, policy, picker, Quick Party, Cup, solo or navigation entry. The next slice wires the phone and TV journey after review.
 - **Spec:** `docs/stage9/stage92.md`.
   - Four seeded rounds: clue 60 s, guess 45 s, reveal 8 s.
@@ -2125,9 +2126,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `src/games/modules/spectrum.ts` and `packs/spectrum-pairs.ts` (`sp-pairs-1`, 30 original pairs), not registered anywhere.
   - D-S92-01..09 in `docs/DECISIONS.md`; spec §13 maps the tests.
 - **Tests:**
-  - `tests/stage92-spectrum.test.ts` (39);
+  - `tests/stage92-spectrum.test.ts` (49, including the team result at 2, 4 and 10 players with partial endings, and clues with digits and non-ASCII text);
   - `tests/stage92-jebena-terminal.test.ts` (7);
   - `tests/stage91-bank-privacy.test.ts` now also keeps Spectrum's module out of the web app.
-- **Mutation checks:** a public target leak fails 4 tests; other players' guesses in a view fail 2; half-down rounding fails 1.
-- **Next:** sequential clean fast then full gates, and a new completed report. The existing product is unchanged; the Spectrum UI and real devices are not run.
+- **Mutation checks:** a public target leak fails 4 tests; other players' guesses in a view fail 2; half-down rounding fails 1; `scores()` leaving out sat-out players fails 8; a summed team result fails 10.
+- **The existing product is changed** by the Jebena cleanup (the shared `onFinish` in `finalize`); the reviewer's private browser audit of Jebena endings and replay is needed before clearance. The Spectrum UI and real devices are NOT RUN.
+- **Gates so far** (each verdict is one run on one revision): `a6579c6` fast `20261112-011311-a6579c6b-7434` **FAILED** (lint: a useless assignment in the test helper); `adb5e75` fast `20261112-011445-adb5e758-10813` PASSED; `adb5e75` full: see the report.
+- **Next:** sequential clean fast then full gates on the candidate with 6811445149 applied, and a new completed report.
 

@@ -107,12 +107,17 @@ export function spectrumPoints(distance: number): number {
   return 0;
 }
 
-/** A clue as kept: control characters removed, spaces collapsed, trimmed. Null if not allowed. */
+/**
+ * A clue as kept: control characters removed, spaces collapsed, trimmed;
+ * 1–80 Unicode code points. Null if not allowed. Digits are fine ("a
+ * 10-minute walk"): "give a clue, not the target number" is a social rule
+ * the briefing explains, not a filter (6811445149: a digit ban would also be
+ * bypassed by spelling the number out).
+ */
 export function cleanClue(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
   const cleaned = raw.replace(/\p{Cc}/gu, " ").replace(/\s+/g, " ").trim();
   if (cleaned.length === 0 || [...cleaned].length > SPECTRUM_CLUE_MAX) return null;
-  if (/\p{Nd}/u.test(cleaned)) return null; // no digits: a clue can't just state the number
   return cleaned;
 }
 
@@ -183,7 +188,7 @@ function phaseIsDue(s: SpectrumState, ctx: ModuleContext): boolean {
 const CLUE_KEYS = new Set(["round", "text", "phaseKey"]);
 const GUESS_KEYS = new Set(["round", "value", "phaseKey"]);
 
-/** The shared team result (for the integration slice's results screen). */
+/** The single authoritative team result (spec §8): one total out of 40, the revealed rounds, the end reason; no player named. */
 export function spectrumTeamResult(s: SpectrumState) {
   return {
     total: s.total,
@@ -318,7 +323,9 @@ export const spectrumModule: GameModule<SpectrumState> = {
     }
   },
   finished: (s) => s.end !== null,
-  // One team score: every roster player gets the same total, so no ranking can name a single winner (spec §8).
+  // A compatibility representation only (spec §8, 6811445149): the same team total copied to every original
+  // roster player, sat-out players included. Never sum the copies or read them as individual achievement;
+  // spectrumTeamResult is the result. A cooperative results branch is required before registration.
   scores: (s, players) => Object.fromEntries(players.map((p) => [p, s.total])),
   participation(s, players) {
     const started = s.rounds.slice(0, s.end ? s.rounds.filter((r) => r.giver !== null).length : s.round + 1);

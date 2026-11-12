@@ -1106,9 +1106,10 @@ Handoff 6811101479 (PR #15), under D-WF-01. Spec: `docs/stage9/stage92.md`. The 
   - **What:** four different pairs and targets (whole numbers from 10 to 90), chosen once from the seed and persisted.
   - **The clue-giver:** rotates to the next player in seat order who is still taking part.
   - **The guessers:** everyone else still taking part.
-- **D-S92-03 Clue rules (the digit rule is mine).**
-  - **What:** control characters are removed, spaces collapsed and the clue trimmed; it must be 1–80 characters, with **no digits**.
-  - **Why:** a clue of "73" would make the round pointless. It is a reversible default; the owner or reviewer may allow digits.
+- **D-S92-03 Clue rules (revised by 6811445149: digits allowed).**
+  - **What:** control characters become spaces, inner spaces are collapsed and the clue trimmed; it must then be 1–80 Unicode code points. Any language; digits allowed ("a 10-minute walk"). Strict payload fields and the server's role and round checks stay.
+  - **Why:** the rule "Give a clue, not the target number" is social in a cooperative game, and the briefing says it in words. A digit ban blocked fair clues and was bypassed by spelling the number out. No semantic policing, no paid AI, no new filter.
+  - **Superseded:** my first default rejected any clue with a digit; ChatGPT reversed it in 6811445149.
 - **D-S92-04 The team's guess and the points.**
   - **What:** the median of the guesses received. With an even count, the mean of the middle two, rounded half up. The points are 10 within 5, 7 within 10, 4 within 20, otherwise 0, for a maximum of 40.
   - **No invented guesses:** no guesses means 0 points.
@@ -1123,9 +1124,11 @@ Handoff 6811101479 (PR #15), under D-WF-01. Spec: `docs/stage9/stage92.md`. The 
   - **The module's own idempotent expiry:** it records each phase's start (the event's instant) and expires a phase only at `start + duration`. So a repeated or early expiry does nothing, and catch-up walks the original deadlines.
 - **D-S92-07 Privacy by role and phase (spec §7).**
   - **What:** before the reveal, only the clue-giver sees the target. Individual guesses are never shown to anyone but their sender, even after the reveal: only the team's guess and counts. Future rounds, the seed and the pack are server-only.
-- **D-S92-08 One team score in a per-player pipeline.**
-  - **What:** `scores()` gives every roster player the same team total, so no generic ranking can name one winner. `spectrumTeamResult()` is for the next slice's results screen.
-  - **Proposed next:** an optional `teamResult` on the module contract and a team results branch. Practice and casual only, so it never reaches a Cup ledger, and no personal best.
+- **D-S92-08 One team result in a per-player pipeline (accepted by 6811445149 for this unwired slice only).**
+  - **What:** `spectrumTeamResult()` is the single authoritative result: one total (0–40), the revealed rounds and the end reason, naming no player. `scores()` is a compatibility representation: the same earned total copied to every original roster player, sat-out players included. The copies are never summed into the team total, and never described as individual achievement. Tests at 2, 4 and 10 players and for partial endings pin this.
+  - **Before production registration:** equal scores don't prove that no surface names a winner. The integration slice needs an explicit cooperative results branch, for the phone results and the TV, that prevents individual winner, personal-best, achievement and Cup-credit attribution from these scores. Practice and casual only.
+  - **Not now:** the room contract is not widened for Spectrum.
 - **D-S92-09 An optional `GameModule.onFinish`.**
   - **What:** RoomEngine's `finalize` calls it once, for every ending, before the result is recorded. Jebena Rush uses it to drop private tries when the room's match limit ends a match. Its own endings use one finish helper.
   - **Scope:** no other module defines it.
+  - **This changes the existing product** (6811445149): the room's shared `finalize` path, and Jebena Rush's endings. It awaits review and the reviewer's private browser audit of Jebena endings and replay; it is not independently approved yet.
