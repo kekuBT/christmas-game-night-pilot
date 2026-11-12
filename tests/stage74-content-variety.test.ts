@@ -466,7 +466,7 @@ describe("solo Start recovery is tied to its own press (review 6786060026)", () 
    * server: the fetch fails at once). `around` runs another tab's action at
    * that moment: before the request ("before") or after the server acted ("after").
    */
-  function tab(opts: { faults?: Fault[]; around?: { at: number; when: "before" | "after"; run: () => Promise<void> } } = {}) {
+  function tab(opts: { faults?: Fault[]; around?: { at: number; when: "before" | "after"; run: () => Promise<void> }; requestTimeoutMs?: number } = {}) {
     const sent: { id: string; sessionRevision: number }[] = [];
     let n = 0;
     const f = (async (input: string, init: RequestInit = {}) => {
@@ -484,7 +484,7 @@ describe("solo Start recovery is tied to its own press (review 6786060026)", () 
       if (fault === "reset") throw new TypeError("fetch failed");
       return fault === "drop" ? never() : reply;
     }) as unknown as typeof fetch;
-    const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000, requestTimeoutMs: 250, startBudgetMs: 4_000 });
+    const s = new SoloSession({ store: null, onChange: () => {}, fetch: f, pollMs: 60_000, requestTimeoutMs: opts.requestTimeoutMs ?? 250, startBudgetMs: 4_000 });
     sessions.push(s);
     return { s, sent };
   }
@@ -492,7 +492,9 @@ describe("solo Start recovery is tied to its own press (review 6786060026)", () 
   const open = (r: RoomEngine) => [...r.games.values()].filter((g) => g.status === "playing").map((g) => g.id);
   /** A solo room already made and joined (so both tabs share its seat), at revision 1 with nothing open. */
   async function seatedRoom() {
-    const first = tab();
+    // Setup, not the behaviour under test: a real, unfaulted Start, so it gets a generous request
+    // timeout. With 250 ms it failed twice under a loaded gate (D-S101-07); the faulted tabs keep 250 ms.
+    const first = tab({ requestTimeoutMs: 5_000 });
     await first.s.start("pattern-pulse");
     expect(first.s.current.phase).toBe("playing");
     await first.s.leave();

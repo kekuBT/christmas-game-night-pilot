@@ -1186,3 +1186,9 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **When it shows:** only with no recorded action at all (`participation.actions`, or the completed count where a game doesn't report actions), and never for a player placed first in a game somebody won.
   - **The case it fixes:** Jebena Rush counts completed items as accepted answers, so a survival winner could read "You won this one" beside "You missed this one".
   - **Unchanged:** the sat-out lines, the zero-score line, ranking and scores.
+- **D-S101-07 A flaky setup step in `stage74-content-variety` gets a realistic request timeout.**
+  - **Trigger:** fast gate `20261112-102438-f4269885-6698` on `f426988` failed in "no network at all: the Start ends within its budget…".
+  - **The failure:** `seatedRoom()`'s first real, unfaulted Start ended in `error` instead of `playing` (line 497), because every request in that tab was limited to 250 ms.
+  - **History:** the same assertion failed once before, in full gate `20261111-194026-83406685-7879` (Stage 8.3). Five local runs under heavy CPU load all passed.
+  - **The fix:** only that setup tab gets a 5 s request timeout. The faulted tabs, which test the 250 ms behaviour and the 4 s Start budget, are unchanged.
+  - **Alternative rejected:** re-running the gate until it passed.

@@ -171,6 +171,14 @@ try {
   const K = await kCtx.newPage();
   const code = await host(K, "Keku");
   const aCtx = await phoneCtx(320, { look: "christmas" });
+  // Amina's socket goes through the driver, so "away" can mean truly away: setOffline alone doesn't
+  // reliably cut an open WebSocket in Chromium, and a push that still arrives is a live break, not a resync.
+  let aminaAway = false;
+  await aCtx.routeWebSocket(/.*/, (ws) => {
+    const server = ws.connectToServer();
+    ws.onMessage((m) => { if (!aminaAway) server.send(m); });
+    server.onMessage((m) => { if (!aminaAway) ws.send(m); });
+  });
   const A = await aCtx.newPage();
   await join(A, "Amina", code);
   const bCtx = await phoneCtx(390, { reducedMotion: true });
@@ -500,6 +508,7 @@ try {
       const ans = freshAnswer(now.st.category.id, used);
       await soon("E Amina's turn: her field has focus", async () => (await A.evaluate(() => document.activeElement?.id)) === "jr-input");
       await shot(A, "jr-myturn-320-christmas");
+      aminaAway = true;
       await aCtx.setOffline(true);
       await A.keyboard.type(ans.typed);
       await A.keyboard.press("Enter");
@@ -508,6 +517,7 @@ try {
       lost.push({ seat: h, slot: heartsBefore - 1 });
       // Stay away a little longer than a live break lasts (lib/cups.ts LIVE_BREAK_MS = 3 s): coming back is a resync.
       await sleep(4500);
+      aminaAway = false;
       await aCtx.setOffline(false);
       await soon("E back online, Amina's phone catches up with one cup fewer, shown broken", async () => { const c = await cupsIn(A.getByTestId("jr-my-hearts")); return c.cups === heartsBefore - 1 && c.broken === 3 - (heartsBefore - 1); }, 20000);
       // (Other players' cups may break live on her phone meanwhile; only her own lost cup must not replay.)
@@ -534,7 +544,7 @@ try {
     if (!timedOut) break;
     const tsOrder = timedOut.st.order ?? timedOut.st.standings ?? [];
     const row = tsOrder.find((s) => s.id === h);
-    if (row && row.hearts < heartsBefore) lost.push({ seat: h, slot: row.hearts, final: timedOut.g.status === "finished" });
+    if (row && row.hearts < heartsBefore) lost.push({ seat: h, slot: row.hearts, final: timedOut.g.status === "finished" }); // (the F checks use the server's own totals)
     if (!firstTimeoutChecked && timedOut.g.status !== "finished") {
       firstTimeoutChecked = true;
       check("E a timeout costs exactly one life (the server's count)", row.hearts === heartsBefore - 1, `${heartsBefore} → ${row.hearts}`);
@@ -542,17 +552,13 @@ try {
       check("E and the jebena passes", timedOut.st.turn.player !== h);
       const slot = heartsBefore - 1;
       await soon(`E ${nameOf[h]}'s phone: ${slot} whole, the lost cup broken in its slot, "${slot} of 3 cups remaining"`, async () => { const c = await cupsIn(hp.getByTestId("jr-my-hearts")); return c.cups === slot && c.whole === slot && c.broken === 3 - slot && c.label === `${slot} of 3 cups remaining`; });
-      await soon(`E ${nameOf[h]}'s own row: exactly that cup broke, once`, async () => { const b = (await breaks(hp)).filter((x) => x.surface === "hud"); return b.length === 1 && b[0].seat === h && b[0].slot === slot && b[0].cups === slot; }, 5000);
+      await soon(`E ${nameOf[h]}'s own row: exactly that cup broke, once`, async () => { const b = (await breaks(hp)).filter((x) => x.surface === "hud" && x.slot === slot); return b.length === 1 && b[0].seat === h && b[0].cups === slot; }, 5000);
       await soon("E the TV seat shows the cup lost", async () => { const c = await cupsIn(TV.getByTestId(`jr-seat-${h}`)); return c.cups === slot && c.broken === 3 - slot && c.text.includes(`${slot}/3`); });
-      await soon("E the TV: that one cup broke, once, in its slot", async () => { const b = (await breaks(TV)).filter((x) => x.seat === h); return b.length === 1 && b[0].slot === slot; }, 5000);
-      const hudAnim = (await breaks(hp)).find((x) => x.surface === "hud")?.anim;
+      await soon("E the TV: that one cup broke, once, in its slot", async () => (await breaks(TV)).filter((x) => x.seat === h && x.slot === slot).length === 1, 5000);
+      const hudAnim = (await breaks(hp)).find((x) => x.surface === "hud" && x.slot === slot)?.anim;
       check(`E the break plays only with full motion (${nameOf[h]}: ${hp === B ? "reduced, so still" : "full"})`, hp === B ? hudAnim === "none" : hudAnim === "mz-cini-tip", String(hudAnim));
       await shot(TV, "jr-tv-cup-broken-1440");
-      // Repeated views (pushes, clock ticks) never break it again.
-      const before = await Promise.all([K, A, B, TV].map(async (p) => (await breaks(p)).length));
-      await sleep(3000);
-      const after = await Promise.all([K, A, B, TV].map(async (p) => (await breaks(p)).length));
-      check("E repeated views break nothing more", JSON.stringify(before) === JSON.stringify(after), `${before} → ${after}`);
+      // Repeated views (pushes, clock ticks) never break a cup twice: checked on every page at the end of the match (F).
     }
     if (row?.out && timedOut.g.status !== "finished" && !outShot) {
       outShot = true;
@@ -588,7 +594,14 @@ try {
       check("F no hearts on any results screen", noHearts(await K.locator("body").innerText()) && noHearts(await A.locator("body").innerText()) && noHearts(await B.locator("body").innerText()));
     }
     // Every break on every page was a real lost life, once; the TV (always watching, always live) broke each one.
+    // The lives lost come from the server's own totals: each timeout broke the next cup down (3 → slot 2, then 1, then 0),
+    // including any the driver's loop didn't watch (one during Amina's resync, or Keku's turn running out under load).
     {
+      const all = stds.flatMap((r) => Array.from({ length: r.timeouts }, (_, i) => ({ seat: r.id, slot: 2 - i })));
+      // The life that ended the match (the runner-up's last cup) can end it in the same view, so the TV may go straight to the final screen.
+      const runnerUp = stds.find((r) => r.place === 2);
+      const finalKey = runnerUp ? `${runnerUp.id}:0` : "";
+      const lost = all.map((l) => ({ ...l, final: `${l.seat}:${l.slot}` === finalKey }));
       const lostKeys = new Set(lost.map((l) => `${l.seat}:${l.slot}`));
       for (const [who, p] of [["Keku", K], ["Amina", A], ["Baraka", B], ["the TV", TV]]) {
         const b = await breaks(p);
