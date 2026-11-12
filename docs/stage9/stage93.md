@@ -25,6 +25,7 @@ Spectrum is registered only together with its cooperative result path (§3), in 
   - The roster is fixed at the start. Late joiners and spectators watch.
 - **Manifest:** a typed cooperative variant. `competition: "cooperative"` and `scoring: { type: "shared-team-total" }`, cross-checked: a cooperative game is never official, never per-player-scored for tournaments, and never team-derived.
 - **Quick Party:** never adds it (like Jebena Rush). A host starts it from the library.
+- **The library** tags it "Co-op: one team score" and lists it with the team games, never as an individual game (D-S93-01).
 - **Lifecycle policy:** `{ model: "phased", gameWindowMs: 10 min, phaseMs: SPECTRUM_PHASE_MS, officialEligible: false, unit: "rounds" }`.
   - The durations come from the module's own constant, the one source.
   - Four rounds take at most 452 s, so the 10-minute window is a backstop. If it ever fires mid-round, the result keeps only the revealed rounds and says why (`backstop-partial`).
@@ -38,13 +39,14 @@ Spectrum is registered only together with its cooperative result path (§3), in 
   - `total` and `max` (40);
   - the revealed rounds: pair labels, clue, target, team guess, distance, points, guess count and reason;
   - the module's end reason, beside the room's own `reason`.
-  - It is validated with Zod when the room is saved and restored.
+  - It is validated with Zod (`TeamResultSchema`) whenever a room is restored: strict, whole numbers, and the rounds must add up to the total. A finished cooperative game must carry it, and no other game may.
 - **Adapter copies stay internal.** For a cooperative game, the server:
   - never projects `rawScores` to any audience;
   - never logs per-player `score-awarded` events, logging one `team-score-recorded` event instead;
   - leaves it out of achievements and any cross-game ranking.
   - The copies are never summed.
-- **Every reachable summary says "team".** That covers the phone results hero, the lobby's last-game summary, the TV's live, final and review views, show mode and the What's next panel:
+- **The Memory Book doesn't save it in this slice:** an entry citing a cooperative game is refused (409 `NOT_IN_MEMORY_BOOK`).
+- **Every reachable summary says "team".** That covers the phone results hero, the lobby's last-game summary, the TV's live, final and review views (the TV's mode label reads "Team result", not "Final standings"), "Tonight so far", show mode and the generic casual results:
   - no individual winner, place, achievement, personal best or Cup credit is derived from Spectrum;
   - no "You won", "You came 2nd" or "You missed this one" lines (the 9.2 clearance note).
 - **Existing competitive games are unchanged.** Every branch is keyed on the game being cooperative.
@@ -79,7 +81,7 @@ In plain words, for everyone:
   - every send names its round and phase key, so a stale one is refused and changes nothing.
 
 ## 6. The scale (accessibility contract, from 9.2 §10)
-- **A native range input** (0–100, step 1) with an accessible name naming both ends ("From Cold (0) to Hot (100)").
+- **A native range input** (0–100, step 1) named "Your guess. From Cold (0) to Hot (100)", with `aria-valuetext` such as "62, toward Hot".
   - The arrow keys move it by 1, and Page Up/Down by 10 (native behaviour, also handled explicitly).
   - The number is always shown as text beside it.
 - **Send** is a button and also Enter. The states "Not sent yet", "Sending…" and "Locked in: 62" are text.
@@ -103,9 +105,10 @@ In plain words, for everyone:
   - catch-up walks the original deadlines;
   - the room drops a repeated client event id;
   - a reloaded phone shows only what its projection holds.
+- **Leaving is two taps:** "Sit the rest out", then "Yes, leave" (it can't be undone).
 - **Sit-outs and host changes:**
   - Explicit sit-outs, and the clue-giver leaving before or after the clue, follow the cleared rules (9.2 §3).
-  - Handing over the host changes nothing in Spectrum: roles come from the seat order, not from the host.
+  - Roles come from the seat order, never from the host. Handing over the host waits until the match has ended (the Stage 7.3 rule), and changes nothing in the finished result.
 
 ## 9. Privacy
 The cleared projection rules (9.2 §7) apply through the real room for every audience: the clue-giver, a guesser (the host included), a sat-out player, spectators/TV and late joiners. Plus:
@@ -133,3 +136,12 @@ See `docs/DECISIONS.md` D-S93-01 onward.
   - no individual winner or credit on any Spectrum summary.
 - **Regression:** the existing competitive drivers stay in the gate.
 - **Gates:** sequential clean fast then full gates on the completed checkpoint, then a new completed report with screenshots and limitations. Real iPhone Safari and Android Chrome are kept separate from emulation (not run).
+
+## 12. As built and tested
+| Area | Where | Tests |
+|---|---|---|
+| Registration | `src/games/registry.ts` (`cooperative`, `isCooperative`), `manifest.ts` (cooperative variant, cross-checks), `party.ts`, `modules/index.ts`, `server/lifecycle.ts` (durations from `modules/spectrum-timing.ts`) | `tests/stage92-spectrum.test.ts` (registration), `tests/manifest.test.ts`, `tests/library.test.ts`, `tests/m3.test.ts`, `tests/room.test.ts`, `tests/test-batch-200.test.ts` |
+| The cooperative branch | `src/shared/teamResult.ts`, `GameModule.teamResult`, `RoomEngine.finalize` (`outcome.team`, `team-score-recorded`), projections (no `rawScores`, `myScore` 0), override/Cup/achievements, `http.ts` (Memory Book 409), `persistence.ts` (`TeamResultSchema`) | `tests/stage93-spectrum-room.test.ts` (18): eligibility; whole matches at 2/4/10 through the room; phase keys, duplicates, deadline instants; restart catch-up equal to a room that never stopped; the backstop; sit-outs; host handover after the match; Play again; privacy canaries for every role and phase through projections; persistence and tampering; the Memory Book over HTTP |
+| The web | `components/mchezo/MchezoSpectrum.tsx`, `ui/mchezo/lib/spectrum.ts`, `styles/stage93.css`; team branches in `App.tsx` (results hero, lobby card, TV live/final/review), `TvShow.tsx`, `WhatsNext.tsx`, `ShowMode.tsx`, `tvfeed.ts` (`resultLine`); briefing, unit words, TV hint, refusal texts, cover, library | `tests/stage93-spectrum-ui.test.ts` (12): the keyboard, the clue draft, every reveal line, the team lines, `resultLine` vs `winnerLine`, briefing/participation/TV hint/refusals, cover and library |
+| The journey in real browsers | `scripts/check-spectrum.mjs` (real 60/45/8-second phases; gate timeout 900 s) | A–K: library and lobby; briefing on phones and TV; round 1 privacy (DOM and projections), clue rules, keyboard-only and touch guesses, the reveal in words, own-guess privacy, a stale send; round 2 reload, offline send never arrives or resends, the clue running out; non-ASCII and HTML-looking clues as text; the team result on every phone and the TV with no winner, place, ribbon, confetti or Cup credit; Play again cancelled; the lobby card and "Tonight so far"; a clean new match; two-tap sit-outs to an early ending; looks and motion; no pack in the built app or public responses; two rooms; Cup refusal |
+

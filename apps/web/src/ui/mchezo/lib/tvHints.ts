@@ -14,4 +14,6 @@ export const TV_HINT: Record<string, string> = {
   "charades": "One player acts; their own team guesses out loud. When they get it, the actor taps Correct: +100 to that team. The prompt stays on the actor's phone.",
   "word-connections": "Everyone solves their own board of sixteen words. Solutions appear when the game is over.",
   "caption-clash": "Everyone writes a caption, then votes for the funniest. Authors stay hidden until the end.",
+  // Stage 9.3: cooperative. The target stays on the clue-giver's phone; guesses stay on each phone.
+  "spectrum": "One team: the clue-giver sees a secret spot on the scale and gives a clue; everyone else guesses on their phone. One shared score.",
 };

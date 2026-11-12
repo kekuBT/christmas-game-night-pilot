@@ -1,4 +1,5 @@
 import type { SessionSeason } from "../../../src/shared/season.js";
+import type { TeamResult } from "../../../src/shared/teamResult.js";
 // Typed server/client projection contracts for the browser app.
 // These mirror src/server/room.ts project() output. Game-specific state
 // (state, questions) stays as unknown/Record<string, unknown> and is narrowed
@@ -39,6 +40,8 @@ export interface GameOutcome {
   participation: Record<string, GameParticipation>;
   completedUnits?: number;
   totalUnits?: number;
+  /** Stage 9.3: a cooperative game's one shared result (src/shared/teamResult.ts); then no per-player scores exist. */
+  team?: TeamResult;
 }
 interface LifecycleFields {
   /** D3: 2 for games of timing-v2 Cups (they open with a briefing). Absent = v1. */
@@ -214,6 +217,8 @@ export interface RegistryGame {
   tutorial: string;
   /** Stage 9.1: plays in casual rooms only (Jebena Rush); a Cup's picker never offers it. */
   casualOnly?: boolean;
+  /** Stage 9.3: one shared team result (Spectrum): no winner, place or per-player score anywhere. */
+  cooperative?: boolean;
   /** Server lifecycle policy (Sprint 3): time limits and whether it can count officially. */
   lifecycle?: {
     model: "game-deadline" | "phased" | "turns";

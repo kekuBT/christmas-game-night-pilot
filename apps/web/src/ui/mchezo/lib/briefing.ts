@@ -155,6 +155,18 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or hearts back.",
     ],
   },
+  // Stage 9.3 (docs/stage9/stage93.md §4): one team, one score.
+  "spectrum": {
+    objective: "One team, one score: find the secret spot on the scale together.",
+    steps: [
+      "Four rounds. Each round shows a scale with two ends, like Cold to Hot, from 0 to 100.",
+      "Each round one player gives the clue, and the role moves round the room. Only the clue-giver sees the secret target on the scale.",
+      "Give a clue, not the target number: a word or a few that sit at about that spot. 60 seconds.",
+      "Everyone else places a guess from 0 to 100 and sends it: 45 seconds. A guess can't be changed once it's sent.",
+      "The team's guess is the middle of everyone's guesses. Within 5 of the target scores 10, within 10 scores 7, within 20 scores 4: one shared score out of 40.",
+      "No clue in time skips the round for 0. Leaving hands your role on. The clock never stops, and only guesses that are sent count.",
+    ],
+  },
   "draw-guess": {
     objective: "Draw the secret word, or guess what's being drawn.",
     steps: [

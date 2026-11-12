@@ -1132,3 +1132,22 @@ Handoff 6811101479 (PR #15), under D-WF-01. Spec: `docs/stage9/stage92.md`. The 
   - **What:** RoomEngine's `finalize` calls it once, for every ending, before the result is recorded. Jebena Rush uses it to drop private tries when the room's match limit ends a match. Its own endings use one finish helper.
   - **Scope:** no other module defines it.
   - **This changes the existing product** (6811445149): the room's shared `finalize` path, and Jebena Rush's endings. It awaits review and the reviewer's private browser audit of Jebena endings and replay; it is not independently approved yet.
+
+## Stage 9.3: playable Spectrum, one cooperative journey (2026-11-12, branch `claude/stage9-3-spectrum-play`, from the Stage 9.2 head `0765222`)
+
+Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md`. Reversible technical decisions under D-WF-01; the rules are the cleared 9.2 ones.
+
+- **D-S93-01 Registered only together with the cooperative result path.**
+  - **What:** registry `cooperative: true` (`isCooperative()`), casual-only, 2–10; manifest `competition: "cooperative"` and `scoring.type: "shared-team-total"`, cross-checked (practice-only, casual-only, no per-player or team-split scores); a phased policy (clue/guess/reveal, 10-minute backstop); never in Quick Party, never auto-picked.
+  - **One source for the durations:** `src/games/modules/spectrum-timing.ts`, shared by the module and `lifecycle.ts`, so the lifecycle table never imports the module or its pairs (the web bundle imports shared game metadata).
+  - **Library:** a cooperative game lists as a team game (everyone on one team), never as an individual one, with a "Co-op: one team score" tag. `playStyle` stays "solo" so the Cup's team channel and tournament logic never treat it as a two-team game.
+- **D-S93-02 A typed cooperative branch in the result pipeline, keyed on the registry.**
+  - **What:** `GameModule.teamResult` → `outcome.team` (`src/shared/teamResult.ts`), recorded at `finalize`: the total out of 40, the revealed rounds (pair labels, clue, target, team guess, distance, points, guess count), the module's end reason. Persisted with the room and checked by `TeamResultSchema` on restore (strict, whole numbers, the rounds add up; a finished cooperative game must carry it, no other game may).
+  - **The per-player copies stay internal:** `rawScores` is never projected for a cooperative game (`myScore` 0); one `team-score-recorded` ledger event replaces per-player `score-awarded`; score override, the Cup and achievements refuse or skip it; a cooperative game without a valid team result is voided rather than shown per player.
+  - **Every summary keys on `outcome.team`:** the phone results hero (`TeamResultsHero`: no winner, place, ribbon, "you won/missed" or confetti), the lobby's last-game card, the TV's final view (its mode label says "Team result"), "Tonight so far", show mode and the generic casual results. Competitive games are unchanged.
+  - **Alternative considered:** a cooperative flag on the outcome with per-player scores still projected and every surface filtering them. Rejected: one missed surface would name a winner.
+- **D-S93-03 The Memory Book doesn't save a cooperative game in this slice.** Its entries derive per-player facts from `score-awarded` events, which a cooperative game doesn't have; an entry citing one is refused (409 `NOT_IN_MEMORY_BOOK`). A team-result entry is for a later slice.
+- **D-S93-04 The scale.** A native range (0–100, step 1) named "Your guess. From <left> (0) to <right> (100)", with `aria-valuetext` ("62, toward Hot"); arrows ±1 and Home/End natively, Page Up/Down ±10 handled explicitly; four touch nudges (−10, −1, +1, +10); the number always shown. Only Send or Enter sends; the draft is local, starts at 50 each round and is never sent by a reconnect.
+- **D-S93-05 Markers by shape and position, plus a text legend.** ◆ target above the track, ● team guess on it, ▲ your guess below, so they never hide each other; the legend and the reveal sentence carry the meaning without colour. The only motion is a marker sliding into place, with full motion only.
+- **D-S93-06 Leaving is two taps.** "Sit the rest out" asks before it sends the room's whole-game abstain, because it can't be undone; the cleared sit-out rules then apply.
+- **D-S93-07 The Spectrum driver plays real time.** `scripts/check-spectrum.mjs` runs the real 60/45/8-second phases (one clue phase runs out), so its gate timeout is 900 s.

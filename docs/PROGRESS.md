@@ -2147,5 +2147,10 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 - **Brief:** ChatGPT's handoff 6813167965 on PR #16 (with the Stage 9.2 clearance). Base `0765222` (PR #16's cleared head); branch `claude/stage9-3-spectrum-play`, a stacked PR on #16.
 - **Scope:** casual-room selection, briefing, phone play, spectator/TV play, a typed cooperative result and Play again, on the cleared Stage 9.2 rules. No solo, Cup, Quick Party scheduling, new content, Memory Book saving or humour.
-- **Spec:** `docs/stage9/stage93.md`.
+- **Spec:** `docs/stage9/stage93.md` (§12: as built and tested). Decisions D-S93-01 to D-S93-07 in `docs/DECISIONS.md`.
+- **Built:**
+  - **Server:** Spectrum registered (casual-only, cooperative, 2–10, phased policy from one timing file, never in Quick Party) together with a typed cooperative result branch: `outcome.team` recorded at `finalize`, persisted and checked on restore; per-player copies never projected, logged, overridden, used for the Cup or achievements, or saved to the Memory Book.
+  - **Web:** the briefing; the clue-giver's and guessers' phone screens with an accessible 0–100 scale (±1, ±10, Home/End, touch nudges, explicit Send/Enter); the reveal in words; a two-tap sit-out; the team results hero and results; TV live, final ("Team result") and review; the lobby's last-game card and "Tonight so far" keyed on `outcome.team`; a co-op library tag and an original dial cover.
+- **Tests:** `tests/stage93-spectrum-room.test.ts` (18), `tests/stage93-spectrum-ui.test.ts` (12), the Stage 9.2 tests updated for registration; game-count tests for a sixteenth game. Full unit suite: 1,567 tests in 122 files (local).
+- **Browser driver:** `scripts/check-spectrum.mjs`, 114 checks, ALL PASS locally (not a gate verdict).
 

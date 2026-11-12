@@ -1,0 +1,101 @@
+/* Stage 9.3: Spectrum (docs/stage9/stage93.md §5–§7).
+   Phone (320 px and up), TV, both looks. The scale's ends are words, the
+   number is text, and markers differ by shape (◆ target, ● team guess,
+   ▲ your guess) with a text legend, so nothing relies on colour. The only
+   motion is a marker sliding into place, with full motion only. */
+
+.mz-sp { gap: 12px; }
+.mz-sp-top { margin: 0; padding: 0 16px; font-size: 14px; color: var(--mz-text-muted); font-variant-numeric: tabular-nums; }
+.mz-sp-top b { color: var(--mz-text); }
+.mz-sp-meaning { margin: 0; padding: 0 16px; text-align: left; }
+.mz-sp-clock { margin: 0; padding: 0 16px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.mz-sp-clock b { font-size: 20px; }
+.mz-sp-clock[data-low="true"] b { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 4px; }
+.mz-sp-secret { margin: 0; padding: 10px 14px; margin-inline: 16px; border-radius: 14px; border: 2px dashed var(--mz-highlight); background: var(--mz-surface-2); font-size: 15px; }
+.mz-sp-secret b { font-family: var(--mz-font-display); font-size: 24px; font-variant-numeric: tabular-nums; }
+
+/* The scale. */
+.mz-sp-scale { margin: 0; padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+.mz-sp-scale__ends { display: flex; justify-content: space-between; gap: 12px; font-weight: 800; font-size: 16px; line-height: 1.2; }
+.mz-sp-end { min-width: 0; max-width: 48%; overflow-wrap: break-word; hyphens: auto; }
+.mz-sp-end--right { text-align: right; }
+.mz-sp-end small { font-weight: 600; color: var(--mz-text-muted); font-variant-numeric: tabular-nums; }
+.mz-sp-scale__track { position: relative; height: 18px; margin: 18px 8px 26px; border-radius: 999px; background: var(--mz-surface-2); border: 2px solid var(--mz-line); }
+.mz-sp-tick { position: absolute; top: 2px; bottom: 2px; width: 2px; margin-left: -1px; background: var(--mz-line); }
+.mz-sp-mark { position: absolute; top: 50%; width: 22px; height: 22px; margin-left: -11px; margin-top: -11px; box-sizing: border-box; }
+[data-mz-motion="full"] .mz-sp-mark { transition: left .45s ease-out; }
+/* Staggered so they never hide each other: the target sits above the track, the team guess on it, your guess below. */
+.mz-sp-mark--target { margin-top: -22px; transform: rotate(45deg) scale(.85); background: var(--mz-highlight); border: 3px solid var(--mz-text); border-radius: 3px; }
+.mz-sp-mark--team { border-radius: 50%; background: var(--mz-brand); border: 3px solid var(--mz-text); }
+.mz-sp-mark--mine { top: 100%; width: 0; height: 0; margin-left: -11px; margin-top: 2px; border-left: 11px solid transparent; border-right: 11px solid transparent; border-bottom: 20px solid var(--mz-text); }
+.mz-sp-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mz-sp-legend__item { display: inline-flex; align-items: center; gap: 6px; }
+.mz-sp-legend__shape { display: inline-block; width: 12px; height: 12px; box-sizing: border-box; }
+.mz-sp-legend__item--target .mz-sp-legend__shape { transform: rotate(45deg); background: var(--mz-highlight); border: 2px solid var(--mz-text); }
+.mz-sp-legend__item--team .mz-sp-legend__shape { border-radius: 50%; background: var(--mz-brand); border: 2px solid var(--mz-text); }
+.mz-sp-legend__item--mine .mz-sp-legend__shape { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 11px solid var(--mz-text); }
+
+/* The clue. */
+.mz-sp-clue { margin: 0 16px; padding: 12px 16px; border-radius: 16px; background: var(--mz-surface-1); border: 2px solid var(--mz-line); }
+.mz-sp-clue__text { margin: 0 0 4px; font-family: var(--mz-font-display); font-size: clamp(22px, 6.5vw, 30px); line-height: 1.2; overflow-wrap: anywhere; }
+.mz-sp-clueform { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
+.mz-sp-clueform__label { font-weight: 800; }
+.mz-sp-clueform__input { width: 100%; box-sizing: border-box; }
+.mz-sp-clueform__help { margin: 0; text-align: left; }
+.mz-sp-clueform__help--over { color: var(--mz-danger); font-weight: 700; }
+
+/* Your guess. */
+.mz-sp-guess { display: flex; flex-direction: column; gap: 10px; padding: 0 16px; }
+.mz-sp-guess__label { font-weight: 700; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.mz-sp-guess__n { font-family: var(--mz-font-display); font-size: 36px; line-height: 1; font-variant-numeric: tabular-nums; min-width: 2.2ch; }
+.mz-sp-guess__where { color: var(--mz-text-muted); font-weight: 600; font-size: 14px; }
+.mz-sp-guess__row { display: grid; grid-template-columns: minmax(0, auto) 1fr minmax(0, auto); align-items: center; gap: 8px; }
+.mz-sp-guess__end { font-size: 13px; font-weight: 700; max-width: 26vw; overflow-wrap: anywhere; }
+.mz-sp-range { width: 100%; min-width: 0; height: 44px; margin: 0; accent-color: var(--mz-brand); cursor: pointer; }
+.mz-sp-range:focus-visible { outline: 3px solid var(--mz-brand); outline-offset: 2px; border-radius: 8px; }
+.mz-sp-nudge { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.mz-sp-nudge__btn { min-height: 44px; font-weight: 800; font-variant-numeric: tabular-nums; justify-content: center; }
+.mz-sp-guess .mz-foot { margin: 0; text-align: left; }
+
+/* Results. */
+.mz-sp-total { margin: 0; padding: 0 16px; font-family: var(--mz-font-display); font-size: 64px; line-height: 1; font-variant-numeric: tabular-nums; }
+.mz-sp-total span { font-size: 28px; color: var(--mz-text-muted); }
+.mz-sp-rounds { list-style: none; margin: 0; padding: 0 16px; display: grid; gap: 10px; }
+.mz-sp-round { display: flex; flex-direction: column; gap: 6px; padding: 10px 0 12px; border-radius: 16px; background: var(--mz-surface-1); border: 1px solid var(--mz-line); }
+.mz-sp-round > span { padding: 0 14px; }
+.mz-sp-round .mz-sp-scale { padding: 0 14px; }
+.mz-sp-round__head { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; overflow-wrap: break-word; }
+.mz-sp-round__pair { color: var(--mz-text-muted); }
+.mz-sp-round__pts { margin-left: auto; font-variant-numeric: tabular-nums; }
+.mz-sp-round__clue { font-style: italic; overflow-wrap: anywhere; }
+.mz-sp-round__line { font-size: 14px; color: var(--mz-text-muted); font-variant-numeric: tabular-nums; }
+.mz-rhero--team .mz-rhero__line { margin: 6px 0 0; }
+
+/* TV. */
+.mz-sp-tv { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.mz-sp-scale--tv { padding: 0; }
+.mz-sp-scale--tv .mz-sp-scale__ends { font-size: 28px; }
+.mz-sp-scale--tv .mz-sp-scale__track { height: 28px; }
+.mz-sp-scale--tv .mz-sp-mark { width: 34px; height: 34px; margin-left: -17px; margin-top: -17px; }
+.mz-sp-scale--tv .mz-sp-scale__track { margin: 28px 8px 40px; }
+.mz-sp-scale--tv .mz-sp-mark--target { margin-top: -34px; }
+.mz-sp-scale--tv .mz-sp-mark--mine { margin-left: -17px; margin-top: 3px; border-left-width: 17px; border-right-width: 17px; border-bottom-width: 30px; }
+.mz-sp-scale--tv .mz-sp-legend { font-size: 22px; }
+.mz-sp-tv__clue { margin: 0; font-family: var(--mz-font-display); font-size: 44px; line-height: 1.15; overflow-wrap: anywhere; }
+.mz-sp-tv .mz-sp-clock { padding: 0; font-size: 24px; }
+.mz-sp-tv .mz-sp-clock b { font-size: 40px; }
+.mz-sp-rounds--tv { padding: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); font-size: 17px; }
+
+/* A compact scale for round lists (results and the TV's review): small ends, small markers. */
+.mz-sp-scale--compact .mz-sp-scale__ends, .mz-sp-scale--tv.mz-sp-scale--compact .mz-sp-scale__ends { font-size: 14px; font-weight: 700; }
+.mz-sp-scale--compact .mz-sp-scale__track, .mz-sp-scale--tv.mz-sp-scale--compact .mz-sp-scale__track { height: 12px; margin: 14px 6px 18px; }
+.mz-sp-scale--compact .mz-sp-mark, .mz-sp-scale--tv.mz-sp-scale--compact .mz-sp-mark { width: 16px; height: 16px; margin-left: -8px; margin-top: -8px; }
+.mz-sp-scale--compact .mz-sp-mark--target, .mz-sp-scale--tv.mz-sp-scale--compact .mz-sp-mark--target { margin-top: -17px; }
+.mz-sp-scale--compact .mz-sp-legend, .mz-sp-scale--tv.mz-sp-scale--compact .mz-sp-legend { font-size: 13px; }
+.mz-sp-rounds--tv .mz-sp-round__line { font-size: 15px; }
+
+/* Leaving the rest of the match: two taps. */
+.mz-sp-sitout { align-self: center; margin-top: 4px; }
+.mz-sp-sitout-confirm { margin: 0 16px; padding: 10px 14px; border-radius: 14px; border: 2px solid var(--mz-line); background: var(--mz-surface-1); }
+.mz-sp-sitout-confirm .mz-foot { margin: 0 0 8px; text-align: left; }
+.mz-sp-sitout-confirm__row { display: flex; gap: 8px; flex-wrap: wrap; }
