@@ -10,6 +10,8 @@ const BASE = process.argv[2] ?? "http://localhost:3461";
 // Stage 5: the catalog grows (practice-only new games); read its size from the server, never assume it.
 const GAMES = await (await fetch(`${BASE}/games`)).json();
 const TOTAL = GAMES.length;
+// Stage 9.3: the Team filter lists team games and cooperative ones (everyone on one team), counted from the catalogue.
+const TEAM = GAMES.filter((g) => (g.modes ?? []).includes("team") || g.cooperative === true).map((g) => g.id);
 // Expected filter results come from the catalogue itself (Stage 5 adds games).
 const SHORT = GAMES.filter((g) => g.defaultDurationMinutes <= 5).map((g) => g.id);
 const FOR_TWO = GAMES.filter((g) => g.minPlayers <= 2 && g.maxPlayers >= 2).length;
@@ -80,11 +82,12 @@ try {
     (await host.getByTestId("mz-lib-style-team").count()) === 0 && await host.getByTestId("mz-lib-search").isVisible());
   await host.getByTestId("mz-lib-filters-toggle").click();
 
-  // Team filter: only Charades.
+  // Team filter: the team games (Charades) and the cooperative ones (Spectrum), nothing individual.
   await host.getByTestId("mz-lib-style-team").click();
-  check("team filter shows only the team game",
-    (await waitForCount(host, `Showing 1 of ${TOTAL} games`))
-    && await host.getByTestId("mz-lib-card-charades").isVisible());
+  check(`team filter shows only the ${TEAM.length} team and co-op games`,
+    (await waitForCount(host, `Showing ${TEAM.length} of ${TOTAL} games`))
+    && (await Promise.all(TEAM.map((id) => host.getByTestId(`mz-lib-card-${id}`).isVisible()))).every(Boolean)
+    && TEAM.includes("charades") && TEAM.includes("spectrum"), TEAM.join(", "));
   await host.getByTestId("mz-lib-reset").click();
   check("reset restores the catalog",
     (await waitForCount(host, `Showing ${TOTAL} of ${TOTAL} games`)) && (await cardCount(host)) === TOTAL);

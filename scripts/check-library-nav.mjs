@@ -42,6 +42,8 @@ const server = await startServer();
 const BASE = `http://localhost:${server.port}`;
 // Stage 5: the catalog grows (practice-only new games); read its size from the server, never assume it.
 const TOTAL = (await (await fetch(`${BASE}/games`)).json()).length;
+// Stage 9.3: the Team filter lists team games and cooperative ones, counted from the catalogue.
+const TEAM = (await (await fetch(`${BASE}/games`)).json()).filter((g) => (g.modes ?? []).includes("team") || g.cooperative === true).length;
 // Games that fit a room of 2, counted from the catalogue (Stage 5 adds games).
 const FOR_TWO = (await (await fetch(`${BASE}/games`)).json()).filter((g) => g.minPlayers <= 2 && g.maxPlayers >= 2).length;
 let failures = 0;
@@ -126,7 +128,7 @@ try {
     const help = await p.getByTestId("mz-lib-filters").innerText();
     check("S3-LIB-03: the size filter is 'Group size', not 'Players in the room'", /Group size/i.test(help) && !/Players in the room/i.test(help) && /work for this many players/.test(help));
     await p.getByTestId("mz-lib-style-team").click();
-    check("a filter applies while the panel stays open to add more", await waitCount(p, `Showing 1 of ${TOTAL} games`) && await p.getByTestId("mz-lib-filters").isVisible());
+    check("a filter applies while the panel stays open to add more", await waitCount(p, `Showing ${TEAM} of ${TOTAL} games`) && await p.getByTestId("mz-lib-filters").isVisible());
     await p.getByTestId("mz-lib-done").click();
     check("S3-LIB-04: Done folds the filters away", (await p.getByTestId("mz-lib-filters").count()) === 0 && /Filters · 1/.test(await p.getByTestId("mz-lib-filters-toggle").innerText()));
     check("the address has the filter and the sort", /type=team/.test(pathOf(p)) && /sort=duration/.test(pathOf(p)), pathOf(p));
