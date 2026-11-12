@@ -184,12 +184,16 @@ try {
         const name = dl.suggestedFilename();
         const today = new Date();
         const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-        check("PDF: the file is named for the room and the date", name === `christmas-memory-book-${played.code}-${ymd}.pdf`, name);
+        // Stage 10.3 (D-S103-06): files are named for the device's look, like the title inside them (a Cup room shows Everyday).
+        const lookNow = await host.locator("[data-mz-theme]").first().getAttribute("data-mz-theme");
+        const stem = lookNow === "christmas" ? "christmas-memory-book" : "mchezo-memory-book";
+        check(`the Memory Book's title follows the look (${lookNow})`, (await host.getByTestId("memory-title").innerText()) === (lookNow === "christmas" ? "Christmas Memory Book" : "Mchezo Memory Book"), await host.getByTestId("memory-title").innerText());
+        check("PDF: the file is named for the room and the date", name === `${stem}-${played.code}-${ymd}.pdf`, name);
         await host.waitForFunction(() => document.querySelector('[data-testid="memory-export-status"]')?.getAttribute("data-state") === "done", null, { timeout: 10000 });
         const status = await host.getByTestId("memory-export-status").innerText();
-        check("PDF: says the download started (not that it was saved), with the name", /^Download started: christmas-memory-book-/.test(status) && !/saved/i.test(status), status);
+        check("PDF: says the download started (not that it was saved), with the name", status.startsWith(`Download started: ${stem}-`) && !/saved/i.test(status), status);
         const [img] = await Promise.all([host.waitForEvent("download", { timeout: 15000 }), host.getByTestId("memory-image").click()]);
-        check("share image: a real download, named for the room and date", img.suggestedFilename() === `christmas-memory-book-${played.code}-${ymd}.png`, img.suggestedFilename());
+        check("share image: a real download, named for the room and date", img.suggestedFilename() === `${stem}-${played.code}-${ymd}.png`, img.suggestedFilename());
         // A failure says so, and nothing claims success.
         await host.evaluate(() => { HTMLCanvasElement.prototype.getContext = () => null; });
         let downloaded = false;

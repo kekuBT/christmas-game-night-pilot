@@ -172,7 +172,9 @@ describe("over HTTP: the reviewer's Spectrum case (casual room, the guest leaves
   let h: Harness | null = null;
   afterEach(async () => { await h?.dispose(); h = null; });
 
-  it("the host's ledger is current with the guest's sit-out hidden: 'unavailable', said plainly; the server still refuses it", async () => {
+  // Stage 10.3 changed what happens next: Spectrum is now saved (D-S103-01..03), so the link is "ready" and the
+  // entry is added with its team facts. The 10.2 point stays: the hidden sit-out never leaves it "syncing".
+  it("the host's ledger is current with the guest's sit-out hidden: ready (Stage 10.3), never 'syncing'; it saves", async () => {
     h = new Harness(undefined, { clock: new FakeClock(), timing: 2 });
     await h.start();
     const r = await h.post("/rooms", { name: "Spectrum night", kind: "casual" });
@@ -193,10 +195,10 @@ describe("over HTTP: the reviewer's Spectrum case (casual room, the guest leaves
     expect(oldSyncing(v.events, proj["seq"] as number)).toBe(true); // the observed "Checking…" forever
     const registry = (await h.get("/games")).body as unknown as RegistryGame[];
     const link = memoryLink({ ledger: v.events, ledgerAt: v.seq, roomSeq: proj["seq"] as number, games: (proj["games"] as unknown as PublicGame[]) ?? [], registry });
-    expect(link.state).toBe("unavailable");
+    expect(link.state).toBe("ready");
     expect(link.target?.gameInstanceId).toBe(gid);
-    const refused = await h.post(`/rooms/${h.roomId}/memory`, { day: 1, text: "So close", sourceEventIds: [link.target!.eventId] }, host.token);
-    expect(refused.status).toBe(409);
-    expect(refused.body["code"]).toBe("NOT_IN_MEMORY_BOOK");
+    const saved = await h.post(`/rooms/${h.roomId}/memory`, { day: 1, text: "So close", sourceEventIds: [link.target!.eventId] }, host.token);
+    expect(saved.status).toBe(201);
+    expect(saved.body["team"]).toMatchObject({ gameInstanceId: gid, end: "too-few-players" });
   });
 });

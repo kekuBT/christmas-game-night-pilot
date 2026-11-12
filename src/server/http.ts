@@ -6,12 +6,12 @@ import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import { BriefingRefused, ContentShortage, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
-import { GAME_REGISTRY, isCooperative } from "../games/registry.js";
+import { GAME_REGISTRY, getGame, isCooperative, isMemoryBookTeam } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
 import { z } from "zod";
 import type { ContentLibrary } from "../content/registry.js";
 import { parseClientProtocol, PROTOCOL_HEADER, PROTOCOL_PARAM } from "../shared/clientProtocol.js";
-import { MemoryBook } from "./memorybook.js";
+import { MemoryBook, MemoryRefused, teamFactsFor } from "./memorybook.js";
 import { hashToken } from "../shared/protocol.js";
 import { isSessionSeason, SESSION_SEASONS, type SessionSeason } from "../shared/season.js";
 import { RoomStore, type RestoreReport } from "./persistence.js";
@@ -870,13 +870,31 @@ export class LocalServer {
             if (!this.requireSession(room, req, res)) return;
             const body = await this.readBody(req);
             const sourceIds = Array.isArray(body["sourceEventIds"]) ? body["sourceEventIds"].map(String) : [];
-            // Stage 9.3: a cooperative game (Spectrum) is not saved to the Memory Book in this slice
-            // (its result is one team total, which the per-player derived facts can't express).
             const ledger = room.ledger;
             const cites = new Set(sourceIds);
             const coop = ledger.find((e) => cites.has(e.eventId) && e.gameInstanceId && isCooperative(room.games.get(e.gameInstanceId)?.gameId ?? ""));
             if (coop) {
-              this.send(res, 409, { error: "Cooperative games like Spectrum aren't saved to the Memory Book yet.", code: "NOT_IN_MEMORY_BOOK" });
+              // Stage 10.3 (D-S103-01..04): a team game's result, from this room's own finalized game.
+              // Only `day`, the note and the cited id are read from the request; every fact is derived here.
+              const game = room.games.get(coop.gameInstanceId!)!;
+              if (!isMemoryBookTeam(game.gameId)) {
+                // Stage 9.3: any other cooperative game is still not saved (enabled by name only, D-S103-02).
+                this.send(res, 409, { error: "Cooperative games like this one aren't saved to the Memory Book yet.", code: "NOT_IN_MEMORY_BOOK" });
+                return;
+              }
+              if (sourceIds.length !== 1) {
+                this.send(res, 400, { error: "A team game's entry cites that one game's finish, and nothing else.", code: "ONE_TEAM_GAME" });
+                return;
+              }
+              try {
+                const facts = teamFactsFor(game, coop as never);
+                const entry = book.addTeamResult(Number(body["day"] ?? 1), String(body["text"] ?? ""), facts, getGame(game.gameId).title);
+                this.persistBook(room.id);
+                this.send(res, 201, entry);
+              } catch (err) {
+                if (err instanceof MemoryRefused) { this.send(res, err.status, { error: err.message, code: err.code }); return; }
+                throw err;
+              }
               return;
             }
             const entry = book.addFromLedger(

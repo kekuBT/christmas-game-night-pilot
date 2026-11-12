@@ -204,7 +204,8 @@ try {
   report("tv", await sampleView(host, "tv"));
 
   await roomGo(host, "memory");
-  await host.getByText("Christmas Memory Book").waitFor({ timeout: 15000 });
+  // Stage 10.3 (D-S103-06): the title follows the device's look (a Cup room shows Everyday: "Mchezo Memory Book").
+  await host.getByTestId("memory-title").waitFor({ timeout: 15000 });
   // The Add button stays disabled until highlight text is entered.
   await host.getByPlaceholder("e.g. Ada won Math Mayhem in a tie-break").fill("Contrast test highlight: a close Math Mayhem finish");
   await host.getByRole("button", { name: "Add from last finished game" }).click();

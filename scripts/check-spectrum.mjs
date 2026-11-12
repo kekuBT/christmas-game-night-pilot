@@ -145,6 +145,18 @@ async function phoneCtx(width, { look, reducedMotion } = {}) {
   ctxs.push(ctx);
   return ctx;
 }
+/**
+ * Stage 10.3 (D-S103-03, D-S103-05): the Memory Book line a saved team result should carry, worked out here from the
+ * server's own outcome.team with the driver's own copy of the rule (not the app's formatter). null: not saveable.
+ */
+function expectedTeamLine(t) {
+  if (!t) return null;
+  const rounds = (n) => `${n} ${n === 1 ? "round" : "rounds"}`;
+  if (t.end === "completed" && t.rounds.length === t.roundsPlanned) return `Spectrum team result: ${t.total} out of ${t.max} · all ${rounds(t.roundsPlanned)} played`;
+  if (t.end === "too-few-players" && t.rounds.length < t.roundsPlanned) return `Spectrum team result: ${t.total} out of ${t.max} · ended early, ${t.rounds.length} of ${rounds(t.roundsPlanned)} played (fewer than two players were left)`;
+  return null;
+}
+const entryCard = (page, text) => page.locator('[data-testid="memory-entry"]', { hasText: text });
 const WINNER_WORDS = /\bwins\b|won this|You came|tied for|\b(1st|2nd|3rd)\b|personal best|Cup point|Kept the|share the win/i;
 
 try {
@@ -409,6 +421,54 @@ try {
   await soon("F the TV's post-game review: every round of the team's match", async () => (await TV.getByTestId("tv-sp-review-rounds").locator("li").count()) === 4, 15000);
   await shot(TV, "sp-tv-review-1440");
 
+  // ---------- 10.3 M1. The completed match into the Memory Book (D-S103-01..06) ----------
+  // Amina (a guest; Christmas look, 320 px) saves it with the keyboard; Keku (the host; Everyday, 390 px) approves,
+  // exports, downloads the PDF and reloads. The facts come from the server's own team result, never the page.
+  const NOTE1 = "Round 3 was a bullseye";
+  const wantDone = expectedTeamLine(team);
+  check("10.3 M1 the completed match's facts call for a saved team line", wantDone === `Spectrum team result: ${team?.total} out of 40 · all 4 rounds played`, wantDone);
+  const finDone = ((await call(`/rooms/${ROOM}/ledger?watermark=1`, { token: seat.K.token })).body.events ?? []).filter((e) => e.type === "game-finished" && e.gameInstanceId === gid).at(-1);
+  const aMemCtx = await phoneCtx(320, { look: "christmas" });
+  const MA = await openMemoryBook(aMemCtx, BASE, seat.A);
+  check("10.3 M1 Amina's Memory Book (Christmas look) is the Christmas Memory Book", (await MA.getByTestId("memory-title").innerText()) === "Christmas Memory Book");
+  await MA.locator(".mz-memory__text").fill(NOTE1);
+  const linkDone = await soon("10.3 M1 Amina's Memory Book links the completed match and previews its team facts", async () => { const x = await memoryLinkOf(MA); return x.state === "ready" && x.event === finDone?.eventId && x.facts === `Saved with: ${wantDone}` ? x : null; }, 15000);
+  check("10.3 M1 it names Spectrum, and Add is on", !!linkDone && /Linked to Spectrum/.test(linkDone.text) && linkDone.addDisabled === false, JSON.stringify(linkDone));
+  // Keyboard: from the note, Tab reaches Add, and Enter adds.
+  await MA.locator(".mz-memory__text").focus();
+  await MA.keyboard.press("Tab");
+  check("10.3 M1 keyboard: Tab from the note reaches Add", (await MA.evaluate(() => document.activeElement?.getAttribute("data-testid"))) === "memory-add");
+  await MA.keyboard.press("Enter");
+  await soon("10.3 M1 Amina's entry is added, pending, with the server's team facts under her note", async () => (await entryCard(MA, NOTE1).count()) === 1 && /pending/.test(await entryCard(MA, NOTE1).innerText()) && (await entryCard(MA, NOTE1).getByTestId("memory-entry-team").innerText()) === `From the game: ${wantDone}`, 15000);
+  {
+    const saved = ((await call(`/rooms/${ROOM}/memory`, { token: seat.A.token })).body ?? []).find((e) => e.text === NOTE1);
+    check("10.3 M1 the server froze the match's own facts, citing exactly its finish", !!saved && saved.approved === false && JSON.stringify(saved.sourceEventIds) === JSON.stringify([finDone?.eventId]) && saved.team?.gameInstanceId === gid && saved.team.total === team.total && saved.team.max === 40 && saved.team.roundsRevealed === 4 && saved.team.roundsPlanned === 4 && saved.team.end === "completed", JSON.stringify(saved).slice(0, 240));
+    check("10.3 M1 a guest can't approve: no Approve or Revoke on Amina's page, and it says the host decides", (await MA.getByRole("button", { name: "Approve", exact: true }).count()) === 0 && (await MA.getByRole("button", { name: "Revoke", exact: true }).count()) === 0 && /Waiting for the host to approve it/.test(await entryCard(MA, NOTE1).innerText()));
+    check("10.3 M1 the note stays the person's words, apart from the facts", (await entryCard(MA, NOTE1).locator(".mz-memory__entrytext").innerText()) === NOTE1);
+  }
+  check("10.3 M1 Amina's Memory Book at 320: no sideways scroll", await noSideScroll(MA));
+  await shot(MA, "sp-memory-pending-320-christmas");
+  const kMemCtx = await phoneCtx(390, { look: "everyday" });
+  const MK = await openMemoryBook(kMemCtx, BASE, seat.K);
+  check("10.3 M1 Keku's Memory Book (Everyday look) is the Mchezo Memory Book, nothing Christmas", (await MK.getByTestId("memory-title").innerText()) === "Mchezo Memory Book" && !/Christmas/.test(await MK.getByTestId("memory-screen").innerText()));
+  await soon("10.3 M1 Keku sees Amina's pending entry with the same facts", async () => (await entryCard(MK, NOTE1).getByTestId("memory-entry-team").innerText().catch(() => "")) === `From the game: ${wantDone}`, 15000);
+  await entryCard(MK, NOTE1).getByRole("button", { name: "Approve", exact: true }).click();
+  await soon("10.3 M1 the host approves it", async () => /approved/.test(await entryCard(MK, NOTE1).innerText()), 15000);
+  await MK.getByRole("button", { name: "Export approved" }).click();
+  await soon("10.3 M1 the export has it: a neutral title, the note, then the facts", async () => { const md = await MK.locator(".mz-memory__md").innerText().catch(() => ""); return md.startsWith("# Mchezo Memory Book — ") && md.includes(`Note: ${NOTE1}\nFrom the game:\n- ${wantDone}`) && !/player-\d|points/.test(md); }, 15000);
+  {
+    const [dl] = await Promise.all([MK.waitForEvent("download", { timeout: 15000 }), MK.getByTestId("memory-pdf").click()]);
+    check("10.3 M1 the PDF downloads, named for the Everyday look", /^mchezo-memory-book-[A-Z0-9]{6}-\d{4}-\d{2}-\d{2}\.pdf$/.test(dl.suggestedFilename()), dl.suggestedFilename());
+    // An approval isn't a room event, so Amina's open page learns of it on its next load (existing behaviour).
+    await MA.reload({ waitUntil: "domcontentloaded" });
+    await soon("10.3 M1 after a reload, Amina sees her entry approved, and downloads open", async () => /approved/.test(await entryCard(MA, NOTE1).innerText().catch(() => "")) && await MA.getByTestId("memory-image").isEnabled(), 15000);
+    const [img] = await Promise.all([MA.waitForEvent("download", { timeout: 15000 }), MA.getByTestId("memory-image").click()]);
+    check("10.3 M1 Amina's share image downloads, named for her Christmas look", /^christmas-memory-book-[A-Z0-9]{6}-\d{4}-\d{2}-\d{2}\.png$/.test(img.suggestedFilename()), img.suggestedFilename());
+  }
+  await shot(MK, "sp-memory-approved-390");
+  await MK.reload({ waitUntil: "domcontentloaded" });
+  await soon("10.3 M1 after a reload: still approved, the same facts", async () => /approved/.test(await entryCard(MK, NOTE1).innerText().catch(() => "")) && (await entryCard(MK, NOTE1).getByTestId("memory-entry-team").innerText().catch(() => "")) === `From the game: ${wantDone}`, 20000);
+
   // ---------- G. Play again (cancelled), the lobby, a new match, an early ending ----------
   await soon("G the host has Play again", async () => K.getByTestId("next-play-again").isVisible());
   await K.getByTestId("next-play-again").click();
@@ -437,6 +497,15 @@ try {
   const v2 = await soon("G the new match starts clean: round 1, no clue, team 0", async () => { const x = await playerView(K); return x.g?.id !== gid && x.g?.status === "playing" && x.st.roundNo === 1 && x.st.total === 0 && x.st.current?.clue === null ? x : null; });
   const gid2 = v2.g.id;
   check("G nothing carried over: no guess and no revealed round", (v2.st.revealed ?? []).length === 0 && v2.st.me?.myGuess === undefined);
+  // 10.3 M2: Keku opens the Memory Book (a fresh load, as from a link) while the new match is being played (a starting
+  // match brings its players to it, so a page opened before would be pulled in) and leaves it open as the match ends
+  // early. Before it ends, it links the completed match (the last finished game); it must move to the new finish
+  // before Add, never cite the old one.
+  await MK.close();
+  const MK2 = await openMemoryBook(kMemCtx, BASE, seat.K);
+  const NOTE2 = "We'll get the wavelength next time";
+  await MK2.locator(".mz-memory__text").fill(NOTE2);
+  await soon("10.3 M2 while the new match plays, Keku's open Memory Book links the completed match", async () => { const x = await memoryLinkOf(MK2); return x.state === "ready" && x.event === finDone?.eventId; }, 15000);
   // Two players sit the rest out (two taps each); fewer than two are left.
   const leavers = Object.keys(pageOf).filter((id) => id !== seat.K.playerId);
   for (const id of leavers) {
@@ -461,33 +530,50 @@ try {
   check("10.2 G the TV shows no moment line for the early ending", (await TV.getByTestId("tv-results-moment").count()) === 0);
   await shot(K, "sp-results-early-390");
 
-  // ---------- 10.2 repair (review 6831760093, S102-R1): Keku's Memory Book after the early ending ----------
+  // ---------- 10.3 M2. The early-ended match into the Memory Book; the open page moves to it ----------
   {
-    // The last leaver's sit-out is logged after the match ends, so the room's newest event is private to them.
-    // Keku's ledger is current, yet its newest visible event is older than the room's seq: the screen used to
-    // wait forever on "Checking for the latest finished game…". Spectrum still isn't saved (NOT_IN_MEMORY_BOOK).
+    // 10.2 (S102-R1) still holds: the last leaver's sit-out is logged after the match ends, so the room's newest event is
+    // private to them; Keku's ledger is current all the same (its watermark), never stuck on "Checking…".
     const led = (await call(`/rooms/${ROOM}/ledger?watermark=1`, { token: seat.K.token })).body;
     const pk = (await call(`/rooms/${ROOM}/projection?audience=player`, { token: seat.K.token })).body;
     const evs = Array.isArray(led?.events) ? led.events : [];
-    const fin = evs.filter((e) => e.type === "game-finished").at(-1);
+    const finEarly = evs.filter((e) => e.type === "game-finished").at(-1);
     const newestSeen = Math.max(0, ...evs.map((e) => e.seq));
     check("R1 Keku's ledger carries the room's seq as its watermark", Number.isInteger(led?.seq) && led.seq === pk.seq, `${led?.seq} vs ${pk.seq}`);
-    check("R1 the room's newest event is hidden from Keku (someone else's sit-out), and his last finished game is this match", newestSeen < led.seq && fin?.gameInstanceId === gid2, `newest seen ${newestSeen}, seq ${led?.seq}, finished ${fin?.gameInstanceId}`);
+    check("R1 the room's newest event is hidden from Keku (someone else's sit-out), and his last finished game is this match", newestSeen < led.seq && finEarly?.gameInstanceId === gid2, `newest seen ${newestSeen}, seq ${led?.seq}, finished ${finEarly?.gameInstanceId}`);
     check("R1 no one else's sit-out reaches Keku's ledger", !evs.some((e) => e.type === "player-abstained" && e.playerId !== seat.K.playerId));
-    const memCtx = await phoneCtx(390, { look: "everyday" });
-    const M = await openMemoryBook(memCtx, BASE, seat.K);
-    await M.locator(".mz-memory__text").fill("We nearly had round 2");
-    const seen = await soon("R1 Keku's Memory Book says plainly the last game was a team game, not 'Checking…'", async () => { const x = await memoryLinkOf(M); return x.state === "unavailable" ? x : null; }, 15000);
-    check("R1 it names Spectrum, says team games aren't saved yet, and keeps Add off", !!seen && /Spectrum/.test(seen.text) && /team games aren.t saved to the Memory Book yet/.test(seen.text) && seen.addDisabled === true && /next game that isn't a team game/.test(seen.hint), JSON.stringify(seen));
-    await sleep(2500);
-    const later = await memoryLinkOf(M);
-    check("R1 it stays that way (no 'Checking…' after a few seconds)", later.state === "unavailable" && !/Checking/.test(later.text), JSON.stringify(later));
-    await shot(M, "sp-memory-team-game-390");
-    await M.reload({ waitUntil: "domcontentloaded" });
-    await soon("R1 after a reload, the same: unavailable, not 'Checking…'", async () => { const x = await memoryLinkOf(M); return x.state === "unavailable" && x.addDisabled === true; }, 15000);
-    const refused = await call(`/rooms/${ROOM}/memory`, { token: seat.K.token, body: { day: 1, text: "We nearly had round 2", sourceEventIds: [fin?.eventId] } });
-    check("R1 the server still refuses a Spectrum entry (409 NOT_IN_MEMORY_BOOK): no Spectrum saving in this repair", refused.status === 409 && refused.body?.code === "NOT_IN_MEMORY_BOOK", `${refused.status} ${JSON.stringify(refused.body).slice(0, 120)}`);
-    await memCtx.close();
+    const wantEarly = expectedTeamLine(early?.g.outcome?.team);
+    check("10.3 M2 the early ending's facts call for an 'ended early' line", !!wantEarly && /ended early, \d of 4 rounds played \(fewer than two players were left\)$/.test(wantEarly) && !/all 4 rounds/.test(wantEarly), wantEarly);
+    const moved = await soon("10.3 M2 Keku's open page moves to the early finish (never the completed match) and previews 'ended early'", async () => { const x = await memoryLinkOf(MK2); return x.state === "ready" && x.event === finEarly?.eventId && x.facts === `Saved with: ${wantEarly}` ? x : null; }, 15000);
+    check("10.3 M2 the note he typed is still there", (await MK2.locator(".mz-memory__text").inputValue()) === NOTE2);
+    if (moved) await MK2.getByTestId("memory-add").click();
+    await soon("10.3 M2 the entry is added with the early facts, under his note", async () => (await entryCard(MK2, NOTE2).getByTestId("memory-entry-team").innerText().catch(() => "")) === `From the game: ${wantEarly}`, 15000);
+    const saved = ((await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body ?? []).find((e) => e.text === NOTE2);
+    check("10.3 M2 it cites exactly the early match's finish; its facts say it ended early, with the rounds actually played", !!saved && JSON.stringify(saved.sourceEventIds) === JSON.stringify([finEarly?.eventId]) && saved.team?.gameInstanceId === gid2 && saved.team.end === "too-few-players" && saved.team.roundsRevealed === early.g.outcome.team.rounds.length && saved.team.total === early.g.outcome.team.total, JSON.stringify(saved).slice(0, 240));
+    check("10.3 M2 the completed match's entry is untouched", ((await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body ?? []).find((e) => e.text === NOTE1)?.team?.gameInstanceId === gid);
+    await shot(MK2, "sp-memory-early-390");
+    await MK2.reload({ waitUntil: "domcontentloaded" });
+    await soon("R1 after a reload, the page is current (not 'Checking…') and both entries keep their facts", async () => { const x = await memoryLinkOf(MK2); return x.state === "ready" && x.event === finEarly?.eventId && (await entryCard(MK2, NOTE2).getByTestId("memory-entry-team").innerText().catch(() => "")) === `From the game: ${wantEarly}`; }, 20000);
+    // A forged save straight to the server can't change the facts.
+    const forged = await call(`/rooms/${ROOM}/memory`, { token: seat.B.token, body: { day: 1, text: "forged", sourceEventIds: [finEarly?.eventId], team: { kind: "spectrum", total: 40, max: 40, roundsRevealed: 4, roundsPlanned: 4, end: "completed" } } });
+    check("10.3 M2 forged facts in a request are ignored: the server's own early facts are kept", forged.status === 201 && forged.body.team?.end === "too-few-players" && forged.body.team.total === early.g.outcome.team.total, JSON.stringify(forged.body).slice(0, 200));
+
+    // Permissions: Baraka is made a cohost; he can revoke and approve. A revoked entry leaves the export.
+    const grant = await call(`/rooms/${ROOM}/cohost`, { token: seat.K.token, body: { targetId: seat.B.playerId } });
+    check("10.3 M3 the host makes Baraka a cohost", grant.status === 200, JSON.stringify(grant.body).slice(0, 120));
+    const bMemCtx = await phoneCtx(390, { reducedMotion: true });
+    const MB = await openMemoryBook(bMemCtx, BASE, seat.B);
+    await soon("10.3 M3 the cohost sees Revoke on the approved entry", async () => (await entryCard(MB, NOTE1).getByRole("button", { name: "Revoke", exact: true }).count()) === 1, 15000);
+    await entryCard(MB, NOTE1).getByRole("button", { name: "Revoke", exact: true }).click();
+    await soon("10.3 M3 revoked: it leaves the export", async () => { const md = (await call(`/rooms/${ROOM}/memory/export`, { token: seat.A.token })).body.markdown ?? ""; return !md.includes(NOTE1); }, 15000);
+    await entryCard(MB, NOTE2).getByRole("button", { name: "Approve", exact: true }).click();
+    await soon("10.3 M3 the cohost approves the early entry: the export has it, saying it ended early", async () => { const md = (await call(`/rooms/${ROOM}/memory/export`, { token: seat.A.token })).body.markdown ?? ""; return md.includes(`Note: ${NOTE2}\nFrom the game:\n- ${wantEarly}`); }, 15000);
+    // (Amina's earlier Memory Book tab was brought into the new match when it started; she opens the book afresh.)
+    const MA2 = await openMemoryBook(aMemCtx, BASE, seat.A);
+    await soon("10.3 M3 Amina (a guest) opens the Memory Book again and sees both entries", async () => (await entryCard(MA2, NOTE1).count()) === 1 && (await entryCard(MA2, NOTE2).count()) === 1, 15000);
+    check("10.3 M3 Amina (a guest) still has no Approve or Revoke", (await MA2.getByRole("button", { name: "Approve", exact: true }).count()) === 0 && (await MA2.getByRole("button", { name: "Revoke", exact: true }).count()) === 0);
+    await shot(MB, "sp-memory-cohost-390");
+    for (const c of [aMemCtx, kMemCtx, bMemCtx]) await c.close();
   }
 
   // ---------- H. Looks and motion ----------

@@ -1,5 +1,6 @@
 import type { SessionSeason } from "../../../src/shared/season.js";
 import type { TeamResult } from "../../../src/shared/teamResult.js";
+import type { MemoryTeamFacts } from "../../../src/shared/memoryTeam.js";
 // Typed server/client projection contracts for the browser app.
 // These mirror src/server/room.ts project() output. Game-specific state
 // (state, questions) stays as unknown/Record<string, unknown> and is narrowed
@@ -220,6 +221,8 @@ export interface RegistryGame {
   casualOnly?: boolean;
   /** Stage 9.3: one shared team result (Spectrum): no winner, place or per-player score anywhere. */
   cooperative?: boolean;
+  /** Stage 10.3 (D-S103-02): this team game's finished result can be saved in the Memory Book. */
+  memoryBookTeam?: boolean;
   /** Server lifecycle policy (Sprint 3): time limits and whether it can count officially. */
   lifecycle?: {
     model: "game-deadline" | "phased" | "turns";
@@ -238,6 +241,8 @@ export interface MemoryEntry {
   approved: boolean;
   approvedBy?: string;
   derivedFacts: string[];
+  /** Stage 10.3 (D-S103-01): a team game's result, derived and frozen by the server. */
+  team?: MemoryTeamFacts;
 }
 
 export interface LedgerEvent {

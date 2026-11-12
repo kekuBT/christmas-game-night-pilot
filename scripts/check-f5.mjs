@@ -455,7 +455,8 @@ try {
   await host.getByRole("heading", { name: `You’re in, ${NAMES[0]}.` }).waitFor({ timeout: 15000 });
   const HIGHLIGHT = "F5 day highlight: full playlist finished";
   await roomGo(host, "memory");
-  await host.getByText("Christmas Memory Book").waitFor({ timeout: 15000 });
+  // Stage 10.3 (D-S103-06): the title follows the device's look (a Cup room shows Everyday: "Mchezo Memory Book").
+  await host.getByTestId("memory-title").waitFor({ timeout: 15000 });
   await host.getByPlaceholder(/Ada won Math Mayhem/).fill(HIGHLIGHT);
   await host.getByRole("button", { name: "Add from last finished game" }).click();
   await host.getByText(HIGHLIGHT).waitFor({ timeout: 15000 });

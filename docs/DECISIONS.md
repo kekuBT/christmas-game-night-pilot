@@ -1327,3 +1327,36 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - a longer wait (a late resync would pass);
     - accepting a finished game in the drop step (the original gap);
     - skipping a step whose precondition fails (it fails instead).
+
+## Stage 10.3: Spectrum's team result in the Memory Book, and a Memory Book for every look
+- **D-S103-01 A typed team record, derived and frozen by the server.**
+  - **How:** when an entry cites a Spectrum game's `game-finished`, the server reads that game's finalized `outcome.team` (checked against `TeamResultSchema`) and stores a `team` record on the entry. The record holds kind, game and event ids, total and max, revealed and planned rounds, and the ending.
+  - **Readable lines:** the matching `derivedFacts` lines are added too.
+  - **Request data:** nothing but the day, the note and the cited ids is read from the request.
+  - **Alternatives rejected:**
+    - storing only text lines: a later surface would have to re-parse them;
+    - reading facts from the client's projection or the request: the client can lie;
+    - writing per-player copies: a team game has no per-player result.
+- **D-S103-02 Spectrum by name.**
+  - **How:** a `memoryBookTeam: true` flag on Spectrum's registry entry, which reaches the web through `GET /games`. Every other cooperative game still gets `NOT_IN_MEMORY_BOOK`.
+  - **Alternative rejected:** enabling every `cooperative` game, which would silently save shapes nobody reviewed.
+- **D-S103-03 The endings that can be saved.**
+  - **Saveable:** `completed`, with every planned round revealed, and `too-few-players`, with fewer revealed than planned. The early ending says so in every line.
+  - **Refused** (409 `RESULT_NOT_SAVEABLE`, said on the screen):
+    - an ending of `null` (the room's time limit cut the match mid-round; its own note says it counts as practice);
+    - a voided or unfinished game;
+    - a missing or invalid team record;
+    - a round count that doesn't fit the ending.
+  - **Alternative rejected:** saving a room-ended match as "ended early". Its last round was cut, not finished, so "the actual played rounds" would be unclear. It can be added later on its own.
+- **D-S103-04 One citation per team entry.**
+  - **Why:** a team entry stands for one match. An entry citing a team finish together with anything else is refused (400 `ONE_TEAM_GAME`), so facts from two games never mix.
+  - **Competitive entries** keep their existing rules.
+- **D-S103-05 One wording, shared.**
+  - **How:** `src/shared/memoryTeam.ts` turns a team record into its lines. The server uses it for `derivedFacts` and the Markdown export; the web uses it for the entry card, the PDF and the share image. So every surface says the same thing.
+  - **Content:** the lines name no player and claim no winner, place or Cup point.
+- **D-S103-06 Titles follow the device's look; the server's are neutral.**
+  - **On a device:**
+    - Everyday: the screen, PDF and share image say "Mchezo Memory Book", with no tree;
+    - Christmas: they keep "Christmas Memory Book" and its 🎄.
+  - **The server's Markdown:** it has no look, so it says "Mchezo Memory Book".
+  - **What the look changes:** only titles and decoration, never facts or content.

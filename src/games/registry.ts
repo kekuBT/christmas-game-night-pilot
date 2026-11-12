@@ -21,6 +21,12 @@ export interface GameDescriptor {
    * summary says "team" (docs/stage9/stage93.md §3).
    */
   cooperative?: true;
+  /**
+   * Stage 10.3 (D-S103-02): this team game's finished result can be saved in
+   * the Memory Book (server-derived team facts). Enabled by name: a future
+   * cooperative game stays refused (NOT_IN_MEMORY_BOOK) until it is set here.
+   */
+  memoryBookTeam?: true;
   modes: GameMode[];
   status: "implemented" | "not-implemented";
   defaultDurationMinutes: number;
@@ -46,7 +52,7 @@ export const GAME_REGISTRY: GameDescriptor[] = [
   // Stage 9.1: casual rooms only (no solo variant), practice-only.
   { id: "jebena-rush", title: "Jebena Rush", minPlayers: 2, recommendedPlayers: 3, maxPlayers: 10, casualOnly: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "Name something in the category before the steam boils over, then pass the jebena. Run out of time and one of your cups breaks." },
   // Stage 9.3: cooperative (one team result), casual rooms only, practice-only.
-  { id: "spectrum", title: "Spectrum", minPlayers: 2, recommendedPlayers: 4, maxPlayers: 10, casualOnly: true, cooperative: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "One team, four rounds. One player gives a clue for a secret spot on a scale; everyone else guesses where it sits. The closer the team, the more points." },
+  { id: "spectrum", title: "Spectrum", minPlayers: 2, recommendedPlayers: 4, maxPlayers: 10, casualOnly: true, cooperative: true, memoryBookTeam: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "One team, four rounds. One player gives a clue for a secret spot on a scale; everyone else guesses where it sits. The closer the team, the more points." },
   { id: "draw-guess", title: "Draw & Guess", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 10, tutorial: "One player draws a secret word; everyone else races to guess it." },
 ];
 
@@ -59,6 +65,12 @@ export function getGame(id: string): GameDescriptor {
 /** Stage 9.3: does this game have one shared team result (no per-player result anywhere)? */
 export function isCooperative(gameId: string): boolean {
   return GAME_REGISTRY.find((g) => g.id === gameId)?.cooperative === true;
+}
+
+/** Stage 10.3 (D-S103-02): a team game whose finished result the Memory Book may save. */
+export function isMemoryBookTeam(gameId: string): boolean {
+  const g = GAME_REGISTRY.find((x) => x.id === gameId);
+  return g?.cooperative === true && g.memoryBookTeam === true;
 }
 
 /** Stage 6.2: the games a solo room may start (the server's allowlist). */

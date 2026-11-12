@@ -1,0 +1,121 @@
+$ node scripts/check-install.mjs http://localhost:35479
+# timeout 600s | worker w2 | server http://localhost:35479 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s103-full/test-results/20261112-211904-b7910156-3590/server-data/w2)
+
+[+0.5s] PASS setup: the build under test carries its build marker (c56b917308c87a95)
+[+0.8s] PASS M the page links the manifest, the Apple touch icon and the favicon, and names the app for iOS — {"manifest":"/manifest.webmanifest","apple":"/icons/apple-touch-icon.png","icon":"/favicon.svg","title":"Mchezo","build":"c56b917308c87a95"}
+[+0.8s] PASS M the page served is the build under test — c56b917308c87a95 vs c56b917308c87a95
+[+0.8s] PASS M the manifest: application/manifest+json, always revalidated — {"content-type":"application/manifest+json","cache-control":"no-cache","x-content-type-options":"nosniff","date":"Thu, 12 Nov 2026 21:37:11 GMT","connection":"keep-alive","keep-alive":"timeout=5","transfer-encoding":"chunked"}
+[+0.8s] PASS M the manifest: id, start_url and scope '/', standalone, Mchezo, the Everyday ground
+[+0.8s] PASS M every icon decodes at its stated size (192, 512, maskable 192 and 512, Apple 180) — ["192x192","512x512","192x192","512x512","180x180"]
+[+1.1s] PASS M engine: the service worker registers and controls the page after a reload
+[+1.1s] PASS M engine: Chromium parses the manifest with no errors — []
+[+1.1s] PASS M engine: Chromium reports no installability errors (headless; a real phone's install is checklist J1/J2) — []
+[+1.1s] PASS M the worker belongs to this build
+[+1.1s] PASS M /sw.js: JavaScript, never cached by HTTP (updates are always seen)
+[+1.1s] PASS M a file the build doesn't have is a 404 (no stand-in page for a cache to keep)
+[+1.6s] PASS W setup: controlled
+[+5.8s] PASS W setup: the room's private reads succeeded with the seat's token (session, ledger, Memory Book, projection) — [200,200,200,200]
+[+6.3s] PASS W engine: exactly one cache, this build's shell (mchezo-shell-c56b917308c87a95) — ["mchezo-shell-c56b917308c87a95"]
+[+6.3s] PASS W engine: every one of the 14 cached entries is one of this build's files (no API path, no query, no page address)
+[+6.3s] PASS W engine: page loads are never stored (the guest's /join?code= address, /room, /solo: none in the cache)
+[+6.3s] PASS W engine: no cached body holds the room's id, code or either seat's token
+[+6.3s] PASS W engine: none of the 26 API replies came from the worker (all from the network)
+[+6.3s] PASS W engine: the worker did answer shell files (it is really there) — /, /assets/index-BwxUzayD.css, /assets/index-Bf1v0q8p.js
+[+7.0s] PASS O setup: online, Home has no offline notice
+[+7.1s] PASS O offline: Home still opens (the cached shell) and says Mchezo can't be reached, solo rounds included, nothing started
+[+8.3s] PASS O offline: Try again while still offline keeps the notice (no false recovery)
+[+8.4s] PASS O offline: an invite link (/join?code=) opens Join, says Mchezo can't be reached
+[+8.6s] PASS O offline: the solo shelf says so too
+[+11.5s] PASS O offline: pressing Start shows no round and says why — The game server can’t be reached right now. Check the connection, then try again.
+[+41.5s] PASS O back online: the notice goes
+[+42.2s] PASS O offline: a room reloaded offline opens and says it is reconnecting (no game claimed) — REJOINING YOUR ROOM… | One moment |  | Your seat, your name and your points are saved on the server. This screen updates by it
+[+42.2s] PASS O back online: the same seat in the same room, no new seat
+[+42.7s] PASS O3 a stand-in page answering /health (a sign-in page, 200 HTML) is not the server: Home says it can't be reached
+[+43.6s] PASS O3 the notice never gates play: Play solo still starts a round
+[+49.6s] PASS O3 no polling: no further /health checks while the screen sits there — 2 → 2
+[+51.2s] PASS O2 320×640, the page's own font: reopened offline, "Rejoining your room… One moment" sits below the connection banner — {"banner":87,"heads":[[128,147],[157,180]]}
+[+52.8s] PASS O2 320×640, DejaVu Sans: reopened offline, "Rejoining your room… One moment" sits below the connection banner — {"banner":106,"heads":[[128,147],[157,180]]}
+[+54.3s] PASS O2 320×640, Liberation Sans: reopened offline, "Rejoining your room… One moment" sits below the connection banner — {"banner":87,"heads":[[128,147],[157,180]]}
+[+56.0s] PASS O2 320×640, FreeSans: reopened offline, "Rejoining your room… One moment" sits below the connection banner — {"banner":87,"heads":[[128,147],[157,180]]}
+[+57.7s] PASS O2 390×844, the page's own font: reopened offline, "Rejoining your room… One moment" sits below the connection banner — {"banner":87,"heads":[[128,147],[161,189]]}
+[+59.4s] PASS O2 390×844, DejaVu Sans: reopened offline, "Rejoining your room… One moment" sits below the connection banner — {"banner":87,"heads":[[128,147],[161,189]]}
+[+61.1s] PASS O2 390×844, Liberation Sans: reopened offline, "Rejoining your room… One moment" sits below the connection banner — {"banner":87,"heads":[[128,147],[161,189]]}
+[+62.7s] PASS O2 390×844, FreeSans: reopened offline, "Rejoining your room… One moment" sits below the connection banner — {"banner":87,"heads":[[128,147],[161,189]]}
+[+63.5s] PASS I no real path (no prompt, not an iPhone): Home shows no install card
+[+63.6s] PASS I Settings → Add to Home Screen explains the browser's own menu
+[+64.1s] PASS I emulated prompt (accepted): the browser's mini-infobar is suppressed (preventDefault)
+[+64.1s] PASS I emulated prompt (accepted): Home offers Install Mchezo; nothing was shown until asked
+[+64.7s] PASS I emulated prompt (accepted): pressing Install shows the browser's prompt once
+[+64.7s] PASS I accepted: says to follow the browser, never 'added' before the browser says so
+[+64.7s] PASS I appinstalled: only now says Mchezo is added
+[+65.2s] PASS I emulated prompt (dismissed): the browser's mini-infobar is suppressed (preventDefault)
+[+65.2s] PASS I emulated prompt (dismissed): Home offers Install Mchezo; nothing was shown until asked
+[+65.8s] PASS I emulated prompt (dismissed): pressing Install shows the browser's prompt once
+[+65.9s] PASS I dismissed: no install claim; says it can be added later from the menu
+[+67.0s] PASS I mid-round: the browser's own prompt is suppressed and the round shows no install UI
+[+67.7s] PASS I iPhone (emulated), everyday look: the card offers Show me how; no sideways overflow, 44 px targets, readable contrast — {"over":0,"small":0,"contrast":[]}
+[+67.7s] PASS I iPhone, everyday look: the sheet's steps say Share, Add to Home Screen, Add; that a seat, bests and choices may not move to the app (no promise either way); and point to seat recovery (no promise a code gets the same seat)
+[+67.7s] PASS I iPhone, everyday look: the sheet closes with Escape
+[+67.8s] PASS I Not now: the card goes
+[+68.4s] PASS I Not now holds after a reload (saved on this device)
+[+68.4s] PASS I Settings still offers the steps after Not now
+[+69.1s] PASS I iPhone (emulated), christmas look: the card offers Show me how; no sideways overflow, 44 px targets, readable contrast — {"over":0,"small":0,"contrast":[]}
+[+69.2s] PASS I iPhone, christmas look: the sheet's steps say Share, Add to Home Screen, Add; that a seat, bests and choices may not move to the app (no promise either way); and point to seat recovery (no promise a code gets the same seat)
+[+69.2s] PASS I iPhone, christmas look: the sheet closes with Escape
+[+69.8s] PASS I storage can't save: Not now still hides the card for this page
+[+69.9s] PASS I storage can't save: after a reload the card is back (nothing was kept, nothing claimed)
+[+70.8s] PASS I installed (display-mode (script-emulated)): Home shows no install card
+[+70.8s] PASS I installed (display-mode (script-emulated)): Settings says it is the Home Screen app
+[+71.5s] PASS I installed (navigator.standalone): Home shows no install card
+[+71.6s] PASS I installed (navigator.standalone): Settings says it is the Home Screen app
+[+72.1s] PASS S storage unavailable: Home opens, the worker still registers and controls, no page errors
+[+72.8s] PASS S storage unavailable: a solo round still starts
+[+73.6s] PASS N controlled: /solo/word-connections opens and reloads to the same screen (served fresh: network first)
+[+73.8s] PASS N controlled: /library opens and reloads to the same screen (served fresh: network first)
+[+74.1s] PASS N controlled: /join?code=ABC123 opens and reloads to the same screen (served fresh: network first)
+[+74.3s] PASS N controlled: /solo opens and reloads to the same screen (served fresh: network first)
+[+74.5s] PASS N controlled: / opens and reloads to the same screen (served fresh: network first)
+[+74.6s] PASS N an invite link still fills in its code — QWERTY
+[+75.7s] PASS U setup: controlled by this build's worker
+[+78.1s] PASS U setup: the server now serves the next build and no longer has the old main file
+[+78.4s] PASS U the next build's worker installs and waits (no skipWaiting); the old one stays active
+[+78.4s] PASS U A, mid-round, was not reloaded and is still the old build
+[+80.1s] PASS U B reloaded online: the next build's page, still controlled by the old worker; the next one still waits
+[+80.1s] PASS U B already is the waiting build, so it offers no update
+[+80.1s] PASS U the next build's files passed through the old worker without entering its cache — /index.html, /favicon.svg, /icons/apple-touch-icon.png, /icons/icon-192.png, /icons/icon-512.png, /icons/icon-maskable-192.png, /icons/icon-maskable-512.png, /icons/mark.svg, /manifest.webmanifest
+[+80.1s] PASS U A is untouched by B's reload
+[+81.0s] PASS U B offline: the old build's shell, whole: its HTML, scripts, styles and every asset it loaded are the old build's (no mix, not blank) — {"build":"c56b917308c87a95","scripts":["/assets/index-Bf1v0q8p.js"],"styles":["/assets/index-BwxUzayD.css"],"assets":["/assets/index-Bf1v0q8p.js","/assets/index-BwxUzayD.css"]}
+[+81.0s] PASS U B offline: says Mchezo can't be reached, and offers no update (Reload couldn't get it)
+[+81.0s] PASS U A, mid-round, not reloaded while B was offline
+[+81.3s] PASS U back online: A's round plays on (a guess answered), the same page, the old build
+[+81.3s] PASS U A's own files still come from its cache, though the server dropped them
+[+81.3s] PASS U no update notice in the round
+[+81.3s] PASS U B (the old build's page again), back online: the update is offered
+[+81.3s] PASS U the notice's Reload and Later are 44 px targets — [["Reload",93,52],["Later",55,56]]
+[+81.3s] PASS U Later hides it for this page
+[+81.4s] PASS U A back on the shelf (in-app, the same page): the update is offered
+[+82.0s] PASS U the notice's Reload reloads only its own tab onto the next build's page (B stays the old build's)
+[+82.0s] PASS U nothing claims the worker updated: after Reload the old worker still controls, the next one still waits
+[+113.2s] PASS U solo replay on the next build's page: a round starts with the same solo seat
+[+113.2s] PASS U preferences and the solo seat survived (localStorage unchanged) — ["mchezo.solo.v1","mz_look","mz_solo_season"]
+[+113.6s] PASS U the room tab, reloaded: the same seat in the same room
+[+114.9s] PASS U every old page closed and one reopened: the next worker is active and controls it
+[+114.9s] PASS U scoped cleanup: the old build's shell cache is gone, the next build's and someone else's cache remain — ["not-mchezo","mchezo-shell-8b8db5bc031dce29"]
+[+114.9s] PASS U the next build's cache holds its own main file, not the old one
+[+114.9s] PASS U preferences still there after cleanup
+[+116.4s] PASS F1 a next build missing a listed file: its worker doesn't install, no half-made cache is left, the current worker stays — {"active":"activated","waiting":false,"installing":false,"caches":["mchezo-shell-c56b917308c87a95"]}
+[+117.2s] PASS F1 and play carries on (a solo round starts)
+[+117.6s] PASS F2 a sign-in page (200 HTML) instead of an icon: no worker installs and nothing is stored (no shell cache, no candidate left) — {"active":null,"waiting":false,"installing":false,"caches":[]}
+[+118.4s] PASS F2 a sign-in page (200 HTML) instead of an icon: the app still works online (a solo round starts)
+[+118.7s] PASS F2 a redirect to a sign-in page instead of the manifest: no worker installs and nothing is stored (no shell cache, no candidate left) — {"active":null,"waiting":false,"installing":false,"caches":[]}
+[+119.5s] PASS F2 a redirect to a sign-in page instead of the manifest: the app still works online (a solo round starts)
+[+120.3s] PASS F3 engine: storage quota denied: no worker installs, no half-made cache (shell or candidate), no page errors — {"s":{"active":null,"waiting":false,"installing":false,"caches":[]},"errors":[]}
+[+121.6s] PASS F3 and play carries on (a solo round starts)
+[+122.8s] PASS F4 setup: the worker without static routing controls the page
+[+125.9s] PASS F4 without static routing: every one of the 14 cached entries is one of this build's files (no API path, no navigation, no query)
+[+125.9s] PASS F4 without static routing: none of the 25 API replies came from the worker
+[+126.1s] 
+[+126.1s] All install checks passed
+[+126.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":30,"pages":35,"peakOpenPages":3}
+
+# PASS (exit 0) in 126.1s | cpu 14.7s, peak memory 362 MB

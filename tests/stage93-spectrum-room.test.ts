@@ -353,11 +353,13 @@ describe("Spectrum's team result is persisted and checked on restore (§3)", () 
   });
 });
 
-describe("Spectrum and the Memory Book over HTTP (§3: not saved in this slice)", () => {
+// Stage 9.3 refused this (§3: not saved in that slice). Stage 10.3 (D-S103-01..03) saves it with the team facts the
+// server derives; the refusals that remain are covered in tests/stage103-memory-team.test.ts.
+describe("Spectrum and the Memory Book over HTTP (Stage 10.3: saved with its team facts)", () => {
   let h: Harness | null = null;
   afterEach(async () => { await h?.dispose(); h = null; });
 
-  it("an entry citing a finished Spectrum match is refused; nothing is added", async () => {
+  it("an entry citing a finished (early-ended) Spectrum match is saved with its team facts, and no per-player score", async () => {
     h = new Harness(undefined, { clock: new FakeClock(), timing: 2 });
     await h.start();
     const r = await h.post("/rooms", { name: "Spectrum night", kind: "casual" });
@@ -374,9 +376,11 @@ describe("Spectrum and the Memory Book over HTTP (§3: not saved in this slice)"
     expect(h.game(gid).status).toBe("finished");
     const finishedEvent = h.engine().ledger.find((e) => e.type === "game-finished" && e.gameInstanceId === gid)!;
     const res = await h.post(`/rooms/${h.roomId}/memory`, { day: 1, text: "We played Spectrum", sourceEventIds: [finishedEvent.eventId] }, host.token);
-    expect(res.status).toBe(409);
-    expect(res.body["code"]).toBe("NOT_IN_MEMORY_BOOK");
-    expect((await h.get(`/rooms/${h.roomId}/memory`, { "x-session-token": host.token })).body).toEqual([]);
+    expect(res.status).toBe(201);
+    expect(res.body["team"]).toMatchObject({ kind: "spectrum", gameInstanceId: gid, finishedEventId: finishedEvent.eventId, end: "too-few-players", roundsPlanned: SPECTRUM_ROUNDS });
+    expect((res.body["derivedFacts"] as string[])[0]).toMatch(/^Spectrum team result: \d+ out of 40 · ended early/);
+    expect((res.body["derivedFacts"] as string[]).some((f) => /player-|points/.test(f))).toBe(false);
+    expect(((await h.get(`/rooms/${h.roomId}/memory`, { "x-session-token": host.token })).body as unknown as unknown[]).length).toBe(1);
   });
 });
 

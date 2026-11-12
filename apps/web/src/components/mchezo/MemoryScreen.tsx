@@ -19,6 +19,7 @@ import { canvasNoteY, exportFilename, paginateLines, readableFact, selectShareEn
 import type { LedgerEvent, MemoryEntry, PublicGame, PublicPlayer, RegistryGame } from "../../types.js";
 import { titleFor } from "../../ui/mchezo/lib/names.js";
 import { memoryLink } from "../../ui/mchezo/lib/memoryLink.js";
+import { memoryTeamLine, type MemoryTeamFacts } from "../../../../../src/shared/memoryTeam.js";
 import { useMchezo } from "../../ui/mchezo/MchezoProvider.js";
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
@@ -52,7 +53,11 @@ export function MemoryScreen(props: {
 }) {
   const { roomId, roomCode, day, roomSeq, ledgerAt, book, ledger, games, registry, players, bookText, setBookText, exportText, setExportText, post, get, loadMemory, canApprove, onBack, onMenu } = props;
   const textId = useId();
-  const look = useMchezo().theme.color;
+  const theme = useMchezo().theme;
+  const look = theme.color;
+  // Stage 10.3 (D-S103-06): the title follows this device's look; only the title and decoration change, never a fact.
+  const christmas = theme.id === "christmas";
+  const bookTitle = christmas ? "Christmas Memory Book" : "Mchezo Memory Book";
   const [exportState, setExportState] = useState<ExportState>({ kind: "idle", text: "" });
   const [addError, setAddError] = useState("");
   const approved = book.filter((e) => e.approved);
@@ -68,6 +73,12 @@ export function MemoryScreen(props: {
   const link = memoryLink({ ledger, ledgerAt, roomSeq, games, registry });
   const { target, targetGame } = link;
   const syncing = link.state === "loading" || link.state === "syncing";
+  /** Stage 10.3: a team entry's facts, in the one shared wording (src/shared/memoryTeam.ts). */
+  const teamLine = (t: MemoryTeamFacts) => memoryTeamLine(t, title(t.kind));
+  // What a team game would be saved with (a preview from the public result; the server derives the facts it keeps).
+  const teamPreview = link.state === "ready" && targetGame?.outcome?.team && target?.eventId
+    ? teamLine({ kind: targetGame.outcome.team.kind, gameInstanceId: targetGame.id, finishedEventId: target.eventId, total: targetGame.outcome.team.total, max: targetGame.outcome.team.max, roundsRevealed: targetGame.outcome.team.rounds.length, roundsPlanned: targetGame.outcome.team.roundsPlanned, end: targetGame.outcome.team.end === "too-few-players" ? "too-few-players" : "completed" })
+    : null;
 
   /** The recorded final scores of the game(s) an entry cites, by name. */
   const results = (e: MemoryEntry) => e.sourceEventIds.flatMap((id) => {
@@ -81,15 +92,16 @@ export function MemoryScreen(props: {
   function downloadPdf(): string {
     const doc = new jsPDF();
     doc.setFontSize(20);
-    doc.text("Christmas Memory Book", 14, 20);
+    doc.text(bookTitle, 14, 20);
     doc.setFontSize(12);
     // Flatten to lines, then paginate lines (review 5769441799 P2): a single
     // oversized entry is split across pages at line boundaries.
     const lines: { text: string; height: number }[] = [];
     for (const e of approved) {
       for (const l of doc.splitTextToSize(`${e.text} (Day ${e.day})`, 180)) lines.push({ text: l, height: 7 });
-      for (const f of e.derivedFacts) {
-        for (const l of doc.splitTextToSize(`From the ledger: ${f}`, 180)) lines.push({ text: l, height: 7 });
+      // Stage 10.3: a team entry's facts come from its frozen team record ("From the game"), others as before.
+      for (const f of e.team ? [teamLine(e.team)] : e.derivedFacts) {
+        for (const l of doc.splitTextToSize(`${e.team ? "From the game" : "From the ledger"}: ${f}`, 180)) lines.push({ text: l, height: 7 });
       }
       lines.push({ text: "", height: 4 });
     }
@@ -103,7 +115,7 @@ export function MemoryScreen(props: {
       }
       if (page !== pages[pages.length - 1]) doc.addPage();
     }
-    const name = exportFilename("pdf", roomCode, new Date());
+    const name = exportFilename("pdf", roomCode, new Date(), christmas ? "christmas" : "everyday");
     doc.save(name);
     return name;
   }
@@ -116,26 +128,35 @@ export function MemoryScreen(props: {
     // Stage 8.2 (§3.6): the share image takes this device's look (the
     // retired "Midnight Christmas" colours are gone); its words are unchanged.
     ctx.fillStyle = look.ground; ctx.fillRect(0, 0, 1080, 1080);
-    ctx.fillStyle = look.highlight; ctx.font = "bold 64px system-ui"; ctx.fillText("🎄 Christmas Memory Book", 60, 120);
+    // Stage 10.3 (D-S103-06): the title and its decoration follow the look; Everyday has no tree.
+    ctx.fillStyle = look.highlight; ctx.font = "bold 64px system-ui"; ctx.fillText(christmas ? `🎄 ${bookTitle}` : bookTitle, 60, 120);
     ctx.fillStyle = look.text; ctx.font = "36px system-ui";
     let y = 200;
     // At most 8 entries, and it says so (review 5769121221 #5).
     const { shown, overflow } = selectShareEntries(approved);
     let truncated = false;
-    for (const e of shown) {
-      const words = e.text.split(" ");
+    const wrap = (text: string, step: number) => {
       let line = "";
-      for (const w of words) {
+      for (const w of text.split(" ")) {
         const test = line ? `${line} ${w}` : w;
-        if (ctx.measureText(test).width > 940 && line) { ctx.fillText(line, 60, y); y += 48; line = w; } else line = test;
+        if (ctx.measureText(test).width > 940 && line) { ctx.fillText(line, 60, y); y += step; line = w; } else line = test;
       }
-      if (line) { ctx.fillText(line, 60, y); y += 48; }
+      if (line) { ctx.fillText(line, 60, y); y += step; }
+    };
+    for (const e of shown) {
+      wrap(e.text, 48);
+      if (e.team) {
+        // Stage 10.3: a team entry's facts line under its note, smaller, in the shared wording.
+        ctx.font = "28px system-ui";
+        wrap(teamLine(e.team), 38);
+        ctx.font = "36px system-ui";
+      }
       y += 24;
       if (y > 980) { truncated = true; break; }
     }
     if (truncated) { ctx.fillText("…entry continues in the PDF export.", 60, canvasNoteY(y + 24)); }
     else if (overflow > 0) { ctx.fillText(`…and ${overflow} more in the PDF export.`, 60, canvasNoteY(y + 24)); }
-    const name = exportFilename("png", roomCode, new Date());
+    const name = exportFilename("png", roomCode, new Date(), christmas ? "christmas" : "everyday");
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/png");
     a.download = name;
@@ -167,7 +188,7 @@ export function MemoryScreen(props: {
           <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" /></svg>
         </button>
       </header>
-      <h2 className="mz-memory__title">Christmas Memory Book</h2>
+      <h2 className="mz-memory__title" data-testid="memory-title">{bookTitle}</h2>
       <p className="mz-foot mz-memory__lede">Highlights from real games in this room. Only entries the host approves go into the exports; revoked entries never do.</p>
 
       {/* Add a highlight. */}
@@ -177,10 +198,12 @@ export function MemoryScreen(props: {
         {link.state !== "none" && (
           <p className="mz-foot mz-memory__target" data-testid="memory-link-target" data-state={link.state} data-event={target?.eventId} aria-live="polite">
             {syncing ? "Checking for the latest finished game…"
-              : link.state === "unavailable" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>, a team game: team games aren&rsquo;t saved to the Memory Book yet.</>
+              : link.state === "unavailable" && link.why === "team-not-final" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>. It was stopped before its team result was final, so it can&rsquo;t be saved.</>
+              : link.state === "unavailable" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>, a team game: team games like this one aren&rsquo;t saved to the Memory Book yet.</>
               : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame ? ` · Day ${targetGame.day ?? day}` : ""}: the last game that finished.</>}
           </p>
         )}
+        {teamPreview && <p className="mz-foot mz-memory__target" data-testid="memory-link-facts">Saved with: {teamPreview}</p>}
         <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="memory-add" disabled={!bookText.trim() || link.state !== "ready"} onClick={async () => {
           setAddError("");
           try {
@@ -191,7 +214,7 @@ export function MemoryScreen(props: {
           } catch (e) { setAddError(e instanceof Error ? e.message : "The highlight could not be added."); }
         }}>Add from last finished game</button>
         <p className="mz-foot mz-memory__hint" data-testid="memory-add-hint">
-          {link.state === "none" ? "Finish a game first — then you can add a Memory Book entry." : link.state === "unavailable" ? "You can add a highlight after the next game that isn't a team game." : !bookText.trim() ? "Write the highlight, then add it. It's linked to the last finished game." : canApprove ? "You can approve it straight after adding it." : "The host approves it before it goes into the exports."}
+          {link.state === "none" ? "Finish a game first — then you can add a Memory Book entry." : link.state === "unavailable" ? "You can add a highlight after the next game." : !bookText.trim() ? "Write the highlight, then add it. It's linked to the last finished game." : canApprove ? "You can approve it straight after adding it." : "The host approves it before it goes into the exports."}
         </p>
         {addError && <p className="err" role="alert">{addError}</p>}
       </section>
@@ -201,13 +224,15 @@ export function MemoryScreen(props: {
         {book.length === 0 ? (
           <p className="mz-foot mz-memory__empty" data-testid="memory-empty">No entries yet. Add the first highlight after a game.</p>
         ) : book.map((e) => {
-          const res = results(e);
+          const res = e.team ? [] : results(e);
           return (
             <article key={e.id} className={`mz-card mz-memory__entry${e.approved ? " mz-memory__entry--approved" : ""}`} data-testid="memory-entry">
               <p className="mz-memory__entrytext">{e.text}</p>
               <p className="mz-memory__status"><span className={`mz-badge ${e.approved ? "mz-badge--mint" : "mz-memory__pending"}`}>Day {e.day} · {e.approved ? "approved" : "pending"}</span></p>
               {res.map((r) => <p key={r} className="mz-foot mz-memory__result">{r}</p>)}
-              {e.derivedFacts.length > 0 && (
+              {/* Stage 10.3: the server's team facts, visibly apart from the note above. */}
+              {e.team && <p className="mz-foot mz-memory__result" data-testid="memory-entry-team">From the game: {teamLine(e.team)}</p>}
+              {!e.team && e.derivedFacts.length > 0 && (
                 <details className="mz-memory__facts">
                   <summary>From the ledger ({e.derivedFacts.length} score {e.derivedFacts.length === 1 ? "event" : "events"})</summary>
                   <ul>{e.derivedFacts.map((f, i) => <li key={i}>{readableFact(f, nameOf)}</li>)}</ul>
