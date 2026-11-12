@@ -84,8 +84,12 @@ export function participationLine(gameId: string, p: GameParticipation | undefin
 /** How the game ended and whether it counts, in plain words. */
 export function outcomeLines(o: GameOutcome | undefined, official: boolean | undefined, casual = false): { headline: string; counts: string; note?: string } | null {
   if (!o) return null;
+  // Stage 9.3 (review 6815908707): a cooperative game says how many rounds were played, never "Everyone
+  // finished." (a match can end early with players gone); why it ended is said once, by the team result.
+  const team = o.team;
   const headline =
-    o.reason === "completed" ? "Everyone finished."
+    team && o.reason !== "void" && o.reason !== "backstop-partial" ? `${team.rounds.length} of ${team.roundsPlanned} rounds played.`
+    : o.reason === "completed" ? "Everyone finished."
     : o.reason === "deadline" ? "Time’s up — the game ended at its time limit. Answers given in time count; anything unanswered scores 0."
     : o.reason === "backstop-partial" ? `The game reached its time limit partway through${o.completedUnits !== undefined && o.totalUnits !== undefined ? ` (${o.completedUnits} of ${o.totalUnits} completed)` : ""}.`
     : "This game was voided because of a technical problem.";

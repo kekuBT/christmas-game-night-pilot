@@ -408,7 +408,6 @@ export function MchezoSpectrumResults({ game, publicGame, players, playerId, tit
         <>
           <p className="mz-sp-total" data-testid="sp-team-total" data-total={team.total} data-max={team.max}>{team.total}<span> / {team.max}</span></p>
           <p className="mz-foot" data-testid="sp-team-note">One shared score for everyone who played. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
-          {teamEndLine(team, game.outcome?.reason) && <p className="mz-foot" data-testid="sp-end-line">{teamEndLine(team, game.outcome?.reason)}</p>}
           <RoundList rounds={team.rounds} revealed={st.revealed ?? []} nameOf={nameOf} />
         </>
       ) : <p className="mz-foot" data-testid="sp-no-result">This match has no team result.</p>}

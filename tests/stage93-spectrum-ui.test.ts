@@ -140,3 +140,14 @@ describe("review 6815042876: the briefing's timing lines speak of this game's ph
     expect(timingLines(policyFor("impostor"), "impostor").join(" ")).toContain("the impostor's guess");
   });
 });
+
+describe("review 6815908707: a cooperative game's outcome line never says 'Everyone finished'", () => {
+  it("rounds played, for a completed match and an early ending; competitive games unchanged", async () => {
+    const { outcomeLines } = await import("../apps/web/src/ui/mchezo/lib/lifecycle.js");
+    const team = (n: number, end: "completed" | "too-few-players") => ({ kind: "spectrum" as const, total: 10, max: 40, roundsPlanned: 4, end, rounds: Array.from({ length: n }, () => ({}) as never) });
+    const base = { endedAt: 1, countsOfficially: false, participation: {} };
+    expect(outcomeLines({ ...base, reason: "completed", team: team(4, "completed") }, false, true)?.headline).toBe("4 of 4 rounds played.");
+    expect(outcomeLines({ ...base, reason: "completed", team: team(1, "too-few-players") }, false, true)?.headline).toBe("1 of 4 rounds played.");
+    expect(outcomeLines({ ...base, reason: "completed" }, false, true)?.headline).toBe("Everyone finished.");
+  });
+});

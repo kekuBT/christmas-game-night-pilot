@@ -2157,5 +2157,6 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `893d742`: fast `20261112-034539-893d742c-11884` PASSED (5/5); full `20261112-034635-893d742c-15092` **FAILED** (exit 1, 86/88). `check-library` and `check-library-nav` still expected the Team filter to show only Charades; a cooperative game lists as a team game by design (D-S93-01). `check-spectrum` passed in that run. Fixed in `f1c5f02`: both drivers count the team games from `/games`.
   - `f1c5f02` (final candidate): targeted (`library library-nav spectrum`) `20261112-042020-f1c5f02a-30987` PASSED; then, sequentially, fast `20261112-042223-f1c5f02a-31807` **PASSED** (exit 0, 5/5, 51 s) and full `20261112-042322-f1c5f02a-2551` **PASSED** (exit 0, 88/88, 32 min 25 s, no leftover processes). Unit tests 1,567 in 122 files; `check-spectrum` 114 checks ALL PASS in 107 s.
 - **Not run:** real iPhone Safari and Android Chrome (Chromium emulation only).
-- **Next:** the new completed report on PR #17; then ChatGPT's review and private live audit.
+- **Review 6815908707 (repairs required on `f1c5f02`):** P2, an achievement ("First Game Finished") drawn from a Spectrum match through the ledger; P2, the briefing's "45 seconds for the impostor's guess"; copy, "Everyone finished." beside the early-ending reason, which also appeared twice. All three repaired with failing-first regressions (D-S93-08).
+- **Next:** sequential gates on the repair candidate and a new completed report on PR #17; then ChatGPT's verification and private live audit.
 

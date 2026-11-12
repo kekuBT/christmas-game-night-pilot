@@ -402,3 +402,52 @@ describe("review 6815042876: no achievement is ever drawn from a cooperative gam
     expect(cited.every((e) => e.gameInstanceId === g.id)).toBe(true);
   });
 });
+
+describe("review 6815908707: no achievement may cite a cooperative game, in any order, after a restore", () => {
+  const finishTrivia = (env: Env) => {
+    const g = env.engine.startGame(env.ids[0]!, "trivia", { official: false });
+    for (const p of env.ids) env.send(p, g.id, "briefing-ready", { ready: true });
+    for (const p of env.ids) env.send(p, g.id, "abstain", {});
+    expect(env.engine.games.get(g.id)!.status).toBe("finished");
+    return g.id;
+  };
+  const citesOnly = (engine: RoomEngine, gid: string) => {
+    const ach = engine.achievements();
+    const cited = engine.ledger.filter((e) => ach.flatMap((a) => a.sourceEventIds).includes(e.eventId));
+    return ach.length > 0 && cited.length > 0 && cited.every((e) => e.gameInstanceId === gid);
+  };
+
+  it("the reviewer's repro: Spectrum alone, finished by its own timeouts (nobody acts), gives no achievement", () => {
+    const env = setup(2);
+    const m = start(env);
+    env.set(env.now() + 600_001);
+    expect(m.game.status).toBe("finished");
+    expect(m.game.outcome?.team).toMatchObject({ total: 0, end: "completed" });
+    expect(env.engine.achievements()).toEqual([]);
+  });
+
+  it("a competitive game first, then Spectrum: First Game Finished stays the competitive game's; Spectrum adds nothing", () => {
+    const env = setup(3);
+    const tid = finishTrivia(env);
+    expect(citesOnly(env.engine, tid)).toBe(true);
+    const before = JSON.stringify(env.engine.achievements());
+    const m = start(env);
+    for (let r = 0; r < SPECTRUM_ROUNDS; r++) perfectRound(env, m);
+    expect(m.game.status).toBe("finished");
+    expect(JSON.stringify(env.engine.achievements())).toBe(before);
+    expect(citesOnly(env.engine, tid)).toBe(true);
+  });
+
+  it("after a save and restore: still nothing from Spectrum, and the later competitive game's achievement works", () => {
+    const env = setup(3);
+    const m = start(env);
+    for (let r = 0; r < SPECTRUM_ROUNDS; r++) perfectRound(env, m);
+    const restored = RoomEngine.fromJSON(JSON.parse(JSON.stringify(env.engine.toJSON())));
+    restored.clock = () => env.now();
+    expect(restored.achievements()).toEqual([]);
+    for (const p of env.ids) expect((restored.project("player", p) as { achievements?: unknown[] }).achievements ?? []).toEqual([]);
+    const env2 = { ...env, engine: restored, send: (pid: string, gid: string, action: string, payload: Json = {}) => restored.submitIntent({ kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: restored.id, gameInstanceId: gid, action, payload }, pid) };
+    const tid = finishTrivia(env2);
+    expect(citesOnly(restored, tid)).toBe(true);
+  });
+});

@@ -43,7 +43,7 @@ Spectrum is registered only together with its cooperative result path (§3), in 
 - **Adapter copies stay internal.** For a cooperative game, the server:
   - never projects `rawScores` to any audience;
   - never logs per-player `score-awarded` events, logging one `team-score-recorded` event instead;
-  - leaves it out of achievements and any cross-game ranking.
+  - leaves it out of achievements (its per-player copies and its ledger events alike, so no achievement ever cites it) and any cross-game ranking.
   - The copies are never summed.
 - **The Memory Book doesn't save it in this slice:** an entry citing a cooperative game is refused (409 `NOT_IN_MEMORY_BOOK`).
 - **Every reachable summary says "team".** That covers the phone results hero, the lobby's last-game summary, the TV's live, final and review views (the TV's mode label reads "Team result", not "Final standings"), "Tonight so far", show mode and the generic casual results:
@@ -144,4 +144,9 @@ See `docs/DECISIONS.md` D-S93-01 onward.
 | The cooperative branch | `src/shared/teamResult.ts`, `GameModule.teamResult`, `RoomEngine.finalize` (`outcome.team`, `team-score-recorded`), projections (no `rawScores`, `myScore` 0), override/Cup/achievements, `http.ts` (Memory Book 409), `persistence.ts` (`TeamResultSchema`) | `tests/stage93-spectrum-room.test.ts` (18): eligibility; whole matches at 2/4/10 through the room; phase keys, duplicates, deadline instants; restart catch-up equal to a room that never stopped; the backstop; sit-outs; host handover after the match; Play again; privacy canaries for every role and phase through projections; persistence and tampering; the Memory Book over HTTP |
 | The web | `components/mchezo/MchezoSpectrum.tsx`, `ui/mchezo/lib/spectrum.ts`, `styles/stage93.css`; team branches in `App.tsx` (results hero, lobby card, TV live/final/review), `TvShow.tsx`, `WhatsNext.tsx`, `ShowMode.tsx`, `tvfeed.ts` (`resultLine`); briefing, unit words, TV hint, refusal texts, cover, library | `tests/stage93-spectrum-ui.test.ts` (12): the keyboard, the clue draft, every reveal line, the team lines, `resultLine` vs `winnerLine`, briefing/participation/TV hint/refusals, cover and library |
 | The journey in real browsers | `scripts/check-spectrum.mjs` (real 60/45/8-second phases; gate timeout 900 s) | A–K: library and lobby; briefing on phones and TV; round 1 privacy (DOM and projections), clue rules, keyboard-only and touch guesses, the reveal in words, own-guess privacy, a stale send; round 2 reload, offline send never arrives or resends, the clue running out; non-ASCII and HTML-looking clues as text; the team result on every phone and the TV with no winner, place, ribbon, confetti or Cup credit; Play again cancelled; the lobby card and "Tonight so far"; a clean new match; two-tap sit-outs to an early ending; looks and motion; no pack in the built app or public responses; two rooms; Cup refusal |
+
+### Repairs after review 6815908707
+- **No achievement from a cooperative game:** cooperative games' events are left out of what achievements read. Regressions cover Spectrum alone (finished normally, and by its own timeouts), Spectrum then Trivia, Trivia then Spectrum, and a save and restore. Three of them fail on `f1c5f02`.
+- **The briefing's timing lines** use this game's words: "60 seconds for the clue", "45 seconds for everyone's guesses", "8 seconds for each reveal". Impostor keeps "the impostor's guess". `check-spectrum` asserts them on every phone and the TV.
+- **Endings:** the outcome line of a cooperative game says "N of 4 rounds played." (never "Everyone finished."); the early-ending reason appears once (the results hero), with the score and round count explicit.
 

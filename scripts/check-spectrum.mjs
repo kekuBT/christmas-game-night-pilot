@@ -191,6 +191,10 @@ try {
       const t = await p.getByTestId(tid).innerText();
       return /One team, one score/.test(t) && /Give a clue, not the target number/.test(t) && /can't be changed/.test(t) && /out of 40/.test(t);
     });
+    // Review 6815908707: the timing lines name this game's phases, never another game's ("the impostor's guess").
+    const timing = await p.getByTestId("briefing-timing").innerText();
+    check(`B ${who}: the briefing's timing names Spectrum's own phases, never an impostor`,
+      /60 seconds for the clue/.test(timing) && /45 seconds for everyone's guesses/.test(timing) && /8 seconds for each reveal/.test(timing) && !/impostor/i.test(await p.getByTestId(tid).innerText()), timing.replace(/\s+/g, " "));
   }
   await shot(A, "sp-briefing-320-christmas");
   await shot(TV, "sp-briefing-tv-1440");
@@ -341,6 +345,7 @@ try {
     const text = await p.getByTestId("sp-results").innerText();
     check(`F ${nameOf[id]}'s results name no winner, place or credit`, !WINNER_WORDS.test(text) && (await p.getByTestId("results-ribbon").count()) === 0 && (await p.getByTestId("results-you").count()) === 0 && (await p.getByTestId("results-confetti").count()) === 0, (text.match(WINNER_WORDS) ?? [""])[0]);
     check(`F ${nameOf[id]}'s results explain all four rounds`, (await p.getByTestId("sp-rounds").locator("li").count()) === 4 && /No clue in time/.test(await p.getByTestId("sp-rounds-2").innerText()));
+    check(`F ${nameOf[id]}'s results say "4 of 4 rounds played", not "Everyone finished"`, (await p.getByTestId("mz-outcome-headline").innerText()) === "4 of 4 rounds played." && !/Everyone finished/.test(text));
     check(`F ${nameOf[id]}'s results: no sideways scroll`, await noSideScroll(p));
   }
   await shot(K, "sp-results-390");
@@ -392,7 +397,13 @@ try {
   }
   const early = await soon("G fewer than two left: the match ends early", async () => { const x = await playerView(K); return x.g?.id === gid2 && x.g.status === "finished" ? x : null; }, 15000);
   check("G the early ending keeps what was earned and says why", early?.g.outcome?.team?.end === "too-few-players");
-  await soon("G Keku's results say why it ended early", async () => /Fewer than two players were left/.test(await K.getByTestId("sp-end-line").innerText()), 15000);
+  await soon("G Keku's results say why it ended early", async () => /Fewer than two players were left/.test(await K.getByTestId("results-team-end").innerText()), 15000);
+  {
+    // Review 6815908707: said once, never contradicted by "Everyone finished", the partial score and round count explicit.
+    const t = await K.getByTestId("sp-results").innerText();
+    const once = (t.match(/Fewer than two players were left/g) ?? []).length;
+    check("G the early ending is explained once, never 'Everyone finished'; score and rounds explicit", once === 1 && !/Everyone finished/.test(t) && /Team result: \d+ out of 40/.test(t) && /\d+ of 4 rounds/.test(t), `${once}× · ${(await K.getByTestId("mz-outcome-headline").innerText())}`);
+  }
   await shot(K, "sp-results-early-390");
 
   // ---------- H. Looks and motion ----------
