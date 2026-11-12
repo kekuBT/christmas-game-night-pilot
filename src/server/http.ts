@@ -11,7 +11,7 @@ import { GAME_POLICIES } from "./lifecycle.js";
 import { z } from "zod";
 import type { ContentLibrary } from "../content/registry.js";
 import { parseClientProtocol, PROTOCOL_HEADER, PROTOCOL_PARAM } from "../shared/clientProtocol.js";
-import { MemoryBook, MemoryRefused, teamFactsFor } from "./memorybook.js";
+import { attemptFingerprint, MemoryBook, MemoryRefused, teamFactsFor, type MemoryBookEntry } from "./memorybook.js";
 import { hashToken } from "../shared/protocol.js";
 import { isSessionSeason, SESSION_SEASONS, type SessionSeason } from "../shared/season.js";
 import { RoomStore, type RestoreReport } from "./persistence.js";
@@ -867,10 +867,48 @@ export class LocalServer {
             return;
           }
           if (req.method === "POST" && parts.length === 3) {
-            if (!this.requireSession(room, req, res)) return;
+            // Every save rechecks the session: a member of this room, now (Stage 10.4).
+            const member = this.requireSession(room, req, res);
+            if (!member) return;
             const body = await this.readBody(req);
-            const sourceIds = Array.isArray(body["sourceEventIds"]) ? body["sourceEventIds"].map(String) : [];
+            const day = Number(body["day"] ?? 1);
+            const text = String(body["text"] ?? "");
             const ledger = room.ledger;
+            let sourceIds = Array.isArray(body["sourceEventIds"]) ? body["sourceEventIds"].map(String) : [];
+            // Stage 10.4 (D-S104-01): a save from a result screen names the game it shows; the server resolves that
+            // game's own finish in this room, so an old result can never save a newer match.
+            if (body["fromGame"] !== undefined) {
+              if (body["sourceEventIds"] !== undefined) { this.send(res, 400, { error: "Cite a game or its events, not both.", code: "ONE_SOURCE" }); return; }
+              const shown = room.games.get(String(body["fromGame"]));
+              if (!shown) { this.send(res, 400, { error: "That game isn't in this room.", code: "UNKNOWN_GAME" }); return; }
+              // A voided game is "finished" but has no finish event and no result (RoomEngine.voidGame).
+              if (shown.outcome?.reason === "void") { this.send(res, 409, { error: "That game was voided, so there is no result to save.", code: "RESULT_NOT_SAVEABLE" }); return; }
+              const finish = ledger.find((e) => e.type === "game-finished" && e.gameInstanceId === shown.id);
+              if (shown.status !== "finished" || !finish) { this.send(res, 409, { error: "That game hasn't finished yet.", code: "NOT_FINISHED" }); return; }
+              if (!text.trim()) { this.send(res, 400, { error: "Write a note first.", code: "NOTE_REQUIRED" }); return; }
+              if (text.length > 280) { this.send(res, 400, { error: "Keep the note to 280 characters.", code: "NOTE_TOO_LONG" }); return; }
+              sourceIds = [finish.eventId];
+            }
+            // Stage 10.4 (D-S104-02): one save, once. A key is this member's own (room-scoped: one book per room).
+            // The same request again returns its entry; a different request under the same key is refused, never
+            // allowed to overwrite.
+            let requestId: string | undefined;
+            let fingerprint = "";
+            if (body["requestId"] !== undefined) {
+              const key = body["requestId"];
+              if (typeof key !== "string" || !/^[A-Za-z0-9-]{8,64}$/.test(key)) { this.send(res, 400, { error: "That save had an unreadable request key.", code: "BAD_REQUEST_ID" }); return; }
+              requestId = key;
+              fingerprint = attemptFingerprint(sourceIds, text, day);
+              const prior = book.attemptFor(member.id, key);
+              if (prior?.entry && prior.attempt.fingerprint === fingerprint) { this.send(res, 200, prior.entry); return; }
+              if (prior) { this.send(res, 409, { error: "Your earlier save already reached the Memory Book, so it was kept as it was.", code: "ATTEMPT_MISMATCH", ...(prior.entry ? { entry: prior.entry } : {}) }); return; }
+            }
+            const created = (entry: MemoryBookEntry) => {
+              entry.addedBy = member.id;
+              if (requestId) book.recordAttempt(member.id, requestId, entry.id, fingerprint);
+              this.persistBook(room.id);
+              this.send(res, 201, entry);
+            };
             const cites = new Set(sourceIds);
             const coop = ledger.find((e) => cites.has(e.eventId) && e.gameInstanceId && isCooperative(room.games.get(e.gameInstanceId)?.gameId ?? ""));
             if (coop) {
@@ -888,23 +926,14 @@ export class LocalServer {
               }
               try {
                 const facts = teamFactsFor(game, coop as never);
-                const entry = book.addTeamResult(Number(body["day"] ?? 1), String(body["text"] ?? ""), facts, getGame(game.gameId).title);
-                this.persistBook(room.id);
-                this.send(res, 201, entry);
+                created(book.addTeamResult(day, text, facts, getGame(game.gameId).title));
               } catch (err) {
                 if (err instanceof MemoryRefused) { this.send(res, err.status, { error: err.message, code: err.code }); return; }
                 throw err;
               }
               return;
             }
-            const entry = book.addFromLedger(
-              Number(body["day"] ?? 1),
-              String(body["text"] ?? ""),
-              sourceIds,
-              ledger as never,
-            );
-            this.persistBook(room.id);
-            this.send(res, 201, entry);
+            created(book.addFromLedger(day, text, sourceIds, ledger as never));
             return;
           }
           if (req.method === "POST" && parts.length === 5 && parts[4] === "approve") {

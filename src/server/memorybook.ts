@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { LedgerEvent } from "./room.js";
 import { TeamResultSchema } from "./persistence.js";
@@ -19,6 +20,19 @@ export interface MemoryBookEntry {
    * competitive entry (and on every entry saved before Stage 10.3).
    */
   team?: MemoryTeamFacts;
+  /** Stage 10.4: the member who added it (set by the server; absent on older entries). */
+  addedBy?: string;
+}
+
+/**
+ * Stage 10.4 (D-S104-02): one save attempt, by a member's own key. The fingerprint is of the request (the cited
+ * finish, the note, the day), so a repeat of the same request returns the same entry and a different one is refused.
+ */
+export interface MemoryAttempt { entryId: string; fingerprint: string }
+
+/** Stage 10.4: a fingerprint of what a save asks for (never stored as text). */
+export function attemptFingerprint(sourceEventIds: string[], text: string, day: number): string {
+  return createHash("sha256").update(JSON.stringify([sourceEventIds, text, day])).digest("hex").slice(0, 32);
 }
 
 /** Stage 10.3: a refusal with its own status and code (the HTTP layer sends both). */
@@ -99,6 +113,19 @@ export function teamFactsFor(game: FinishedGameView, finished: LedgerEvent): Mem
 export class MemoryBook {
   entries: MemoryBookEntry[] = [];
   private next = 1;
+  /** Stage 10.4: save attempts by `${memberId}|${requestId}` (room-scoped: one book per room). */
+  private attempts = new Map<string, MemoryAttempt>();
+
+  /** Stage 10.4: an earlier attempt by this member with this key, and its entry, if any. */
+  attemptFor(memberId: string, requestId: string): { attempt: MemoryAttempt; entry: MemoryBookEntry | undefined } | null {
+    const attempt = this.attempts.get(`${memberId}|${requestId}`);
+    return attempt ? { attempt, entry: this.entries.find((e) => e.id === attempt.entryId) } : null;
+  }
+
+  /** Stage 10.4: remember that this member's key made this entry. */
+  recordAttempt(memberId: string, requestId: string, entryId: string, fingerprint: string): void {
+    this.attempts.set(`${memberId}|${requestId}`, { entryId, fingerprint });
+  }
 
   addFromLedger(day: number, text: string, sourceEventIds: string[], ledger: LedgerEvent[]): MemoryBookEntry {
     if (!Array.isArray(sourceEventIds) || sourceEventIds.length === 0) {
@@ -186,7 +213,7 @@ export class MemoryBook {
   }
 
   toJSON(): Record<string, unknown> {
-    return { entries: this.entries, next: this.next };
+    return { entries: this.entries, next: this.next, attempts: Object.fromEntries(this.attempts) };
   }
 
   /**
@@ -207,6 +234,15 @@ export class MemoryBook {
       return restored;
     });
     book.next = typeof data["next"] === "number" ? data["next"] : book.entries.length + 1;
+    // Stage 10.4: save attempts (absent in older books). A malformed one is dropped: losing it can only let a
+    // retry create a second pending entry, never change or approve one.
+    const attempts = data["attempts"];
+    if (attempts && typeof attempts === "object") {
+      for (const [k, v] of Object.entries(attempts as Record<string, unknown>)) {
+        const a = v as Partial<MemoryAttempt> | null;
+        if (a && typeof a.entryId === "string" && typeof a.fingerprint === "string" && book.entries.some((e) => e.id === a.entryId)) book.attempts.set(k, { entryId: a.entryId, fingerprint: a.fingerprint });
+      }
+    }
     return book;
   }
 }
