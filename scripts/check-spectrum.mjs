@@ -118,6 +118,26 @@ async function spectate(page, code) {
 
 const browser = await launchChromium();
 const ctxs = [];
+/**
+ * Stage 10.2 (docs/stage10/stage102.md §3): the team line a finished match should show, worked out here from the
+ * server's team result with the driver's own copy of the rules (not the app's selector): only a completed match with
+ * every round revealed; 40 of 40, else the rounds exactly on target; team words only.
+ */
+function expectedSpectrumLine(t) {
+  if (!t || t.end !== "completed" || !t.roundsPlanned || t.rounds?.length !== t.roundsPlanned) return null;
+  if (t.max > 0 && t.total === t.max && t.rounds.every((r) => r.reason === "scored")) return `${t.max} out of ${t.max}. The whole team was on one wavelength.`;
+  const ex = t.rounds.filter((r) => r.reason === "scored" && r.distance === 0).map((r) => r.roundNo).sort((a, b) => a - b);
+  if (!ex.length) return null;
+  if (ex.length === 1) return `Round ${ex[0]} landed exactly on the target.`;
+  return `Rounds ${ex.slice(0, -1).join(", ")} and ${ex.at(-1)} ${ex.length === 2 ? "both" : "all"} landed exactly on the target.`;
+}
+/** Under the result: below the result hero and the What's next panel, so its controls stay where they were. */
+async function underResult(page) {
+  const box = (id) => page.getByTestId(id).first().boundingBox().catch(() => null);
+  const [m, hero, next] = [await box("results-moment"), await box("results-hero"), await box("whats-next")];
+  return !!m && !!hero && m.y >= hero.y + hero.height - 1 && (!next || m.y >= next.y + next.height - 1);
+}
+
 async function phoneCtx(width, { look, reducedMotion } = {}) {
   const ctx = await browser.newContext({ viewport: { width, height: 800 }, ...(reducedMotion ? { reducedMotion: "reduce" } : {}) });
   if (look) await ctx.addInitScript((l) => { try { localStorage.setItem("mz_look", l); } catch { /* none */ } }, look);
@@ -321,7 +341,17 @@ try {
   await soon("D the TV: No clue in time", async () => /No clue in time/.test(await TV.getByTestId("tv-sp-reveal").innerText()));
 
   // ---------- E. Rounds 3 and 4: clues shown as text ----------
-  const playRound = async (roundNo, clueText) => {
+  /** Touch nudges from wherever the draft is to `to` (as in C). */
+  const nudgeTo = async (Q, to) => {
+    let at = Number(await Q.getByTestId("sp-draft").innerText());
+    for (let i = 0; i < 40 && at !== to; i++) {
+      const d = to - at;
+      await Q.getByTestId(d >= 10 ? "sp-nudge-up-10" : d <= -10 ? "sp-nudge-down-10" : d > 0 ? "sp-nudge-up-1" : "sp-nudge-down-1").click();
+      at = Number(await Q.getByTestId("sp-draft").innerText());
+    }
+    return at;
+  };
+  const playRound = async (roundNo, clueText, onTarget = false) => {
     const x = await soon(`E round ${roundNo}, clue phase`, async () => { const y = await playerView(K); return y.st.roundNo === roundNo && y.st.phase === "clue" ? y : null; }, 20000);
     const g = x.st.current.giver;
     const P = pageOf[g];
@@ -331,11 +361,17 @@ try {
     for (const id of Object.keys(pageOf).filter((y) => y !== g)) {
       const Q = pageOf[id];
       await soon(`E round ${roundNo}: ${nameOf[id]} sees the clue exactly as typed, as text`, async () => (await Q.getByTestId("sp-clue-text").innerText()) === `“${clueText}”` && (await Q.getByTestId("sp-clue-text").locator("b, a, script").count()) === 0);
+      if (onTarget) {
+        // Stage 10.2: everyone's guess on the target, so the team's guess (the middle) lands on it exactly.
+        const target = truth(ROOM, gid)?.st.rounds[roundNo - 1]?.target;
+        const at = await nudgeTo(Q, target);
+        check(`E round ${roundNo}: ${nameOf[id]}'s guess is on the target (${target})`, typeof target === "number" && at === target, String(at));
+      }
       await Q.getByTestId("sp-guess-send").click();
     }
     await soon(`E round ${roundNo}: the reveal`, async () => (await playerView(K)).st.phase === "reveal" || (await playerView(K)).g?.status === "finished");
   };
-  await playRound(3, "ቡና በጣም ሞቃት");
+  await playRound(3, "ቡና በጣም ሞቃት", true);
   await playRound(4, "<b>hot</b> & cold");
 
   // ---------- F. The team result ----------
@@ -351,10 +387,22 @@ try {
     check(`F ${nameOf[id]}'s results say "4 of 4 rounds played", not "Everyone finished"`, (await p.getByTestId("mz-outcome-headline").innerText()) === "4 of 4 rounds played." && !/Everyone finished/.test(text));
     check(`F ${nameOf[id]}'s results: no sideways scroll`, await noSideScroll(p));
   }
+  const wantSp = expectedSpectrumLine(team);
+  check("10.2 F round 3 landed exactly on the target, so the team line is due", team?.rounds?.[2]?.distance === 0 && /^Rounds? .*\b3\b.* landed exactly on the target\.$/.test(wantSp ?? ""), `${wantSp} ${JSON.stringify(team?.rounds?.map((r) => [r.roundNo, r.reason, r.distance, r.points]))}`);
+  for (const [id, p] of Object.entries(pageOf)) {
+    await soon(`10.2 F ${nameOf[id]}: “${wantSp}”`, async () => (await p.getByTestId("results-moment").innerText().catch(() => "")) === wantSp, 15000);
+  }
+  check("10.2 F the line sits under the result and What's next", await underResult(K));
+  check("10.2 F the line names nobody and no winner, place or Cup", !WINNER_WORDS.test(wantSp ?? "") && !Object.values(nameOf).some((n) => (wantSp ?? "").includes(n)));
+  await A.reload({ waitUntil: "domcontentloaded" });
+  await soon("10.2 F after a reload, Amina's phone: the same line", async () => (await A.getByTestId("results-moment").innerText().catch(() => "")) === wantSp, 20000);
   await shot(K, "sp-results-390");
   await shot(A, "sp-results-320-christmas");
   await soon("F the TV's final view: the team result, no winner or standings", async () => /Team result: \d+ out of 40/.test(await TV.getByTestId("tv-team-result").innerText()) && (await TV.getByTestId("tv-winner").count()) === 0 && (await TV.getByTestId("tv-last-standings").count()) === 0, 20000);
   check("F the TV final names no winner and says Team result, not standings", !WINNER_WORDS.test(await TV.locator("body").innerText()) && (await TV.getByTestId("tv-mode").innerText()).toLowerCase() === "team result" && !/standings/i.test(await TV.locator("body").innerText()), await TV.getByTestId("tv-mode").innerText());
+  await soon(`10.2 F the TV's final view: “${wantSp}”`, async () => (await TV.getByTestId("tv-results-moment").innerText().catch(() => "")) === wantSp, 15000);
+  await TV.reload({ waitUntil: "domcontentloaded" });
+  await soon("10.2 F after a reload, the TV's final view: the same line", async () => (await TV.getByTestId("tv-results-moment").innerText().catch(() => "")) === wantSp, 20000);
   await shot(TV, "sp-tv-final-1440");
   await TV.getByTestId("tv-dir-review").click();
   await soon("F the TV's post-game review: every round of the team's match", async () => (await TV.getByTestId("tv-sp-review-rounds").locator("li").count()) === 4, 15000);
@@ -407,6 +455,9 @@ try {
     const once = (t.match(/Fewer than two players were left/g) ?? []).length;
     check("G the early ending is explained once, never 'Everyone finished'; score and rounds explicit", once === 1 && !/Everyone finished/.test(t) && /Team result: \d+ out of 40/.test(t) && /\d+ of 4 rounds/.test(t), `${once}× · ${(await K.getByTestId("mz-outcome-headline").innerText())}`);
   }
+  check("10.2 G the early ending's facts call for no line", expectedSpectrumLine(early?.g.outcome?.team) === null);
+  await soon("10.2 G the early ending: no moment line on Keku's results (none carried over)", async () => (await K.getByTestId("sp-results").isVisible()) && (await K.getByTestId("results-moment").count()) === 0, 15000);
+  check("10.2 G the TV shows no moment line for the early ending", (await TV.getByTestId("tv-results-moment").count()) === 0);
   await shot(K, "sp-results-early-390");
 
   // ---------- H. Looks and motion ----------

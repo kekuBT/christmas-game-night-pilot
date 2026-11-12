@@ -75,6 +75,37 @@ const shot = (page, name) => page.screenshot({ path: screenshotPath(`docs/stage1
 const noHearts = (text) => !/heart|♥|♡/i.test(text);
 
 /**
+ * Stage 10.2 (docs/stage10/stage102.md §3): the moment line a finished Jebena game should show, worked out here from
+ * the server's own state with the driver's own copy of the rules (not the app's selector): a sole winner, in a match
+ * the module ended, with an opponent knocked out (not just left); one cup left, or every cup still whole.
+ */
+const JR_LINE_LAST_CUP = "One cup left. Still enough for the win.";
+function expectedJebenaLine(st) {
+  if (!st || (st.end !== "last-standing" && st.end !== "banks-exhausted")) return null;
+  const rows = st.standings ?? [];
+  const firsts = rows.filter((r) => r.place === 1);
+  if (firsts.length !== 1 || firsts[0].out || firsts[0].satOut) return null;
+  const w = firsts[0];
+  if (!rows.some((r) => r.id !== w.id && r.out && !r.satOut)) return null;
+  if (w.hearts === 1) return JR_LINE_LAST_CUP;
+  if (w.hearts === st.startHearts) return `All ${st.startHearts} cups still whole. Not a single crack.`;
+  return null;
+}
+/** The line on a phone's results: exactly `want`, or none at all. */
+const momentOn = (page, want, who) => want === null
+  ? soon(`10.2 ${who}: no moment line`, async () => (await page.getByTestId("jr-results").isVisible().catch(() => false)) && (await page.getByTestId("results-moment").count()) === 0, 20000)
+  : soon(`10.2 ${who}: “${want}”`, async () => (await page.getByTestId("results-moment").innerText().catch(() => "")) === want, 20000);
+/** The line on a TV's final view: exactly `want`, or none. */
+const tvMomentOn = (page, want, who) => soon(`10.2 ${who}: ${want === null ? "no moment line" : `“${want}”`}`, async () => (await page.getByTestId("tv-jr-final").isVisible().catch(() => false))
+  && (want === null ? (await page.getByTestId("tv-results-moment").count()) === 0 : (await page.getByTestId("tv-results-moment").innerText().catch(() => "")) === want), 20000);
+/** Under the result: below the result hero and the What's next panel, so its controls stay where they were. */
+async function underResult(page) {
+  const box = (id) => page.getByTestId(id).first().boundingBox().catch(() => null);
+  const [m, hero, next] = [await box("results-moment"), await box("results-hero"), await box("whats-next")];
+  return !!m && !!hero && m.y >= hero.y + hero.height - 1 && (!next || m.y >= next.y + next.height - 1);
+}
+
+/**
  * Stage 10.1: every page logs each cup that breaks (data-breaking="true"
  * appearing): the place (surface), the seat, the slot, the count shown and
  * the animation the cup is playing (reduced motion: none).
@@ -263,7 +294,7 @@ try {
       }
       await sleep(250);
     }
-    return { roomC, survivor, other, gidC, tried, g };
+    return { roomC, survivor, other, gidC, tried, g, projC, hostId: wanjiru.playerId, hostToken: wanjiru.recoveryToken, names: { [wanjiru.playerId]: "Wanjiru", [otieno.playerId]: "Otieno" } };
   })();
 
   // ---------- A. Lobby: pick Jebena Rush, choose cups ----------
@@ -742,9 +773,20 @@ try {
       check("F full motion (the TV): each break animates", tv.length > 0 && tv.every((x) => x.anim === "mz-cini-tip"), JSON.stringify(tv.map((x) => x.anim)));
     }
     check("F results at 320: no sideways scroll", await noSideScroll(A));
+    {
+      // Stage 10.2: whatever this match's facts call for (a line or none), every phone shows the same, under the result.
+      const want = expectedJebenaLine(fin.st);
+      const kw = fin.st.standings.find((r) => r.place === 1);
+      check(`10.2 the main match's facts (Keku: ${kw?.hearts} of ${fin.st.startHearts} cups, ${fin.st.end}) call for ${want === null ? "no line" : `“${want}”`}`, true);
+      for (const [who, p] of [["Keku's phone (Everyday, 390)", K], ["Amina's phone (Christmas, 320)", A], ["Baraka's phone (390, reduced motion)", B]]) await momentOn(p, want, `F ${who}`);
+      if (want !== null) check("10.2 F the line sits under the result and What's next", await underResult(K));
+      await A.reload({ waitUntil: "domcontentloaded" });
+      await momentOn(A, want, "F after a reload, Amina's phone");
+    }
     await shot(K, "jr-results-390");
     await shot(A, "jr-results-320-christmas");
     await soon("F the TV shows the final standings: Keku wins", async () => /Keku wins/.test(await TV.locator("body").innerText()), 20000);
+    await tvMomentOn(TV, expectedJebenaLine(fin.st), "F the TV's final view");
     await shot(TV, "jr-tv-final-1440");
     await TV.getByRole("button", { name: "Post-game review" }).click();
     await soon("F the TV's post-game review: Keku kept the jebena, with the places", async () => /Keku kept the jebena/.test(await TV.getByTestId("tv-jr-review").innerText()) && (await TV.getByTestId("tv-jr-review").locator("li").count()) === 3, 15000);
@@ -775,6 +817,10 @@ try {
     await sleep(1500);
     const logs = await Promise.all([K, A, B, TV].map(async (p, i) => since(await breaks(p), gMarks[i])));
     check("G leaving broke no cup on any screen (phones or TV)", logs.every((l) => l.length === 0), JSON.stringify(logs).slice(0, 200));
+    // Stage 10.2: Keku kept every cup, but both others left: a win by absence gets no line, and none is carried over.
+    if (fin2) check("10.2 G the replay's facts call for no line (both others left)", expectedJebenaLine(fin2.st) === null);
+    await momentOn(K, null, "G the replay's results on Keku's phone");
+    check("10.2 G the TV shows no moment line for the replay", (await TV.getByTestId("tv-results-moment").count()) === 0);
   }
   for (const [who, p] of [["Keku", K], ["Amina", A], ["Baraka", B]]) {
     const backBtn = p.getByTestId("show-back-to-lobby");
@@ -822,6 +868,44 @@ try {
       await shot(W, "jr-results-zero-answers-winner-390");
       const O = await openAs(z.other, "christmas", 320);
       await soon("Z the player who did nothing at all is truthfully told they missed it", async () => /You missed this one/.test(await O.getByTestId("results-hero").innerText()), 20000);
+
+      // ---------- Stage 10.2: room C's line, on both phones, a TV and after reloads; the replay carries none ----------
+      const want = expectedJebenaLine(z.g?.state);
+      check("10.2 Z room C's facts call for the one-cup line (a sole winner with no accepted answer, one cup left, the other knocked out)", want === JR_LINE_LAST_CUP, JSON.stringify({ end: z.g?.state?.end, startHearts: z.g?.state?.startHearts, standings: zs }).slice(0, 240));
+      await momentOn(W, want, "Z the survivor's phone (Everyday, 390)");
+      await momentOn(O, want, "Z the other player's phone (Christmas, 320)");
+      check("10.2 Z the line sits under the result and What's next, on both", (await underResult(W)) && (await underResult(O)));
+      check("10.2 Z both phones: no sideways scroll", (await noSideScroll(W)) && (await noSideScroll(O)));
+      await shot(O, "jr-results-moment-320-christmas");
+      const zTvCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      ctxs.push(zTvCtx);
+      const ZT = await zTvCtx.newPage();
+      await ZT.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
+      await ZT.locator(".mz-code__input").fill(z.roomC.joinCode);
+      await ZT.getByTestId("watch-spectator").click();
+      await tvMomentOn(ZT, want, "Z room C's TV, its final view");
+      await shot(ZT, "jr-tv-final-moment-1440");
+      await W.reload({ waitUntil: "domcontentloaded" });
+      await momentOn(W, want, "Z after a reload, the survivor's phone");
+      await ZT.reload({ waitUntil: "domcontentloaded" });
+      await tvMomentOn(ZT, want, "Z after a reload, room C's TV");
+      // Play again; last match's winner leaves the replay, so the other player wins it by absence: no line, and the
+      // TV's final is the replay's (a different winner), not the last one with its line.
+      const H = z.hostId === z.survivor.playerId ? W : O;
+      await soon("10.2 Z room C's host has Play again", async () => H.getByTestId("next-play-again").isVisible(), 15000);
+      await H.getByTestId("next-play-again").click();
+      await passBriefing([W, O]);
+      const repG = await soon("10.2 Z room C's replay is on", async () => ((await z.projC(z.hostToken)).myGames ?? []).find((x) => x.gameId === "jebena-rush" && x.id !== z.gidC && x.status === "playing") ?? null, 20000);
+      if (repG) {
+        const left = await call(`/rooms/${z.roomC.roomId}/intents`, { token: z.survivor.recoveryToken, body: { intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: z.roomC.roomId, gameInstanceId: repG.id, action: "abstain", payload: {} } } });
+        check("10.2 Z last match's winner leaves the replay", left.body?.accepted === true, JSON.stringify(left.body).slice(0, 160));
+        const fin3 = await soon("10.2 Z the replay ends: the one who stayed keeps the jebena", async () => { const g3 = ((await z.projC(z.hostToken)).myGames ?? []).find((x) => x.id === repG.id); return g3?.status === "finished" ? g3 : null; }, 20000);
+        check("10.2 Z the replay's facts call for no line (a win by the other leaving)", !!fin3 && expectedJebenaLine(fin3.state) === null, JSON.stringify(fin3?.state?.standings ?? null).slice(0, 200));
+        await momentOn(W, null, "Z the replay's results, the phone of the one who left");
+        await momentOn(O, null, "Z the replay's results, the phone of the one who stayed");
+        const otherName = z.names[z.other.playerId];
+        await soon(`10.2 Z room C's TV: the replay's final (${otherName} wins), with no line carried over`, async () => (await ZT.getByTestId("tv-jr-final-winner").innerText().catch(() => "")).includes(otherName) && (await ZT.getByTestId("tv-results-moment").count()) === 0, 20000);
+      }
     }
   }
 } catch (e) {
