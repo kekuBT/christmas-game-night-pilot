@@ -197,6 +197,9 @@ try {
       /60 seconds for the clue/.test(timing) && /45 seconds for everyone's guesses/.test(timing) && /8 seconds for each reveal/.test(timing) && !/impostor/i.test(await p.getByTestId(tid).innerText()), timing.replace(/\s+/g, " "));
   }
   await shot(A, "sp-briefing-320-christmas");
+  // The phone's timing lines sit below the fold: centre them, clear of the Ready dock, for the picture (review 6815908707).
+  await K.getByTestId("briefing-timing").evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await shot(K, "sp-briefing-timing-390");
   await shot(TV, "sp-briefing-tv-1440");
   await passBriefing([K, A, B]);
 
