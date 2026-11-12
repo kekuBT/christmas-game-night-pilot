@@ -133,6 +133,13 @@ function expectedSpectrumLine(t) {
   return `Rounds ${ex.slice(0, -1).join(", ")} and ${ex.at(-1)} ${ex.length === 2 ? "both" : "all"} landed exactly on the target.`;
 }
 /** Under the result: below the result hero and the What's next panel, so its controls stay where they were. */
+/** Stage 10.4: an element sits under the result hero and What's next (so their controls don't move). */
+async function belowNext(page, id) {
+  const box = (t) => page.getByTestId(t).first().boundingBox().catch(() => null);
+  const [m, hero, next] = [await box(id), await box("results-hero"), await box("whats-next")];
+  return !!m && !!hero && m.y >= hero.y + hero.height - 1 && (!next || m.y >= next.y + next.height - 1);
+}
+const focusedId = (page) => page.evaluate(() => document.activeElement?.getAttribute("data-testid") ?? null);
 async function underResult(page) {
   const box = (id) => page.getByTestId(id).first().boundingBox().catch(() => null);
   const [m, hero, next] = [await box("results-moment"), await box("results-hero"), await box("whats-next")];
@@ -421,6 +428,61 @@ try {
   await soon("F the TV's post-game review: every round of the team's match", async () => (await TV.getByTestId("tv-sp-review-rounds").locator("li").count()) === 4, 15000);
   await shot(TV, "sp-tv-review-1440");
 
+  // ---------- 10.4 S1. Save a memory from the result screen (D-S104-01..04) ----------
+  // Amina (a guest; Christmas, 320 px) uses the keyboard, cancels a draft, then saves through a lost reply; Keku (the
+  // host; Everyday, 390 px) double-taps Save. Each save names this match (fromGame); the server keeps the facts.
+  const wantSaved = expectedTeamLine(team);
+  const SAVE1 = "Round three: everybody on the very same spot, and nobody believed it — a long note that has to wrap neatly on a small phone";
+  const SAVE2 = "Keku's quick note";
+  const finS1 = ((await call(`/rooms/${ROOM}/ledger?watermark=1`, { token: seat.K.token })).body.events ?? []).filter((e) => e.type === "game-finished" && e.gameInstanceId === gid).at(-1);
+  const bookNow = async () => (await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body ?? [];
+  check("10.4 S1 the TV's final view has no Save a memory (a spectator surface)", (await TV.getByTestId("save-memory").count()) === 0);
+  await soon("10.4 S1 Amina's results offer Save a memory", async () => A.getByTestId("save-memory-open").isVisible(), 15000);
+  check("10.4 S1 it sits under the result and What's next (their controls don't move)", await belowNext(A, "save-memory"));
+  await A.getByTestId("save-memory-open").focus();
+  await A.keyboard.press("Enter");
+  await soon("10.4 S1 Enter opens the composer with focus in the note", async () => (await focusedId(A)) === "save-memory-note", 5000);
+  check("10.4 S1 the composer shows this match's facts, read-only, apart from the note", (await A.getByTestId("save-memory-facts").innerText()).includes(wantSaved) && (await A.getByTestId("save-memory-facts").locator("textarea, input").count()) === 0, await A.getByTestId("save-memory-facts").innerText());
+  check("10.4 S1 Save is off until there's a note", await A.getByTestId("save-memory-save").isDisabled());
+  await A.keyboard.press("Escape");
+  await soon("10.4 S1 Escape closes it, and focus returns to Save a memory", async () => (await focusedId(A)) === "save-memory-open", 5000);
+  await A.getByTestId("save-memory-open").click();
+  await A.getByTestId("save-memory-note").fill("A draft I won't keep");
+  await A.getByTestId("save-memory-cancel").click();
+  await soon("10.4 S1 Cancel closes it, focus back on the button", async () => (await focusedId(A)) === "save-memory-open", 5000);
+  check("10.4 S1 a cancelled draft saves nothing", !(await bookNow()).some((e) => e.text === "A draft I won't keep"));
+  // A lost reply: the save reaches the server, but its answer never comes back.
+  let lost = 0;
+  await A.route(/\/rooms\/[^/]+\/memory$/, async (route) => {
+    if (route.request().method() === "POST" && lost === 0) { lost++; await route.fetch().catch(() => null); await route.abort("connectionreset"); return; }
+    await route.continue();
+  });
+  await A.getByTestId("save-memory-open").click();
+  await A.getByTestId("save-memory-note").fill(SAVE1);
+  await A.getByTestId("save-memory-save").click();
+  await soon("10.4 S1 the lost reply: it says so, keeps the draft, and offers Try again", async () => /Couldn't reach the game/.test(await A.getByTestId("save-memory-error").innerText().catch(() => "")) && (await A.getByTestId("save-memory-note").inputValue()) === SAVE1 && (await A.getByTestId("save-memory-save").innerText()) === "Try again", 15000);
+  check("10.4 S1 (the first save did reach the server: one entry)", (await bookNow()).filter((e) => e.text === SAVE1).length === 1);
+  check("10.4 S1 the composer at 320 px: no sideways scroll; the long note wraps", await noSideScroll(A));
+  await shot(A, "sp-save-error-320-christmas");
+  await A.getByTestId("save-memory-save").click();
+  await soon("10.4 S1 Try again: saved, waiting for the host", async () => /Saved to the Memory Book\. It's waiting for the host to approve it\./.test(await A.getByTestId("save-memory-saved").innerText().catch(() => "")), 15000);
+  await A.unroute(/\/rooms\/[^/]+\/memory$/);
+  check("10.4 S1 focus moves to the saved message, and the book link is there", (await focusedId(A)) === "save-memory-saved" && await A.getByTestId("save-memory-open-book").isVisible());
+  {
+    const mine = (await bookNow()).filter((e) => e.text === SAVE1);
+    check("10.4 S1 the retry saved once: exactly one entry, pending, citing this match's finish, with the server's team facts", mine.length === 1 && mine[0].approved === false && JSON.stringify(mine[0].sourceEventIds) === JSON.stringify([finS1?.eventId]) && mine[0].team?.gameInstanceId === gid && mine[0].addedBy === seat.A.playerId && mine[0].derivedFacts?.[0] === wantSaved, JSON.stringify(mine).slice(0, 260));
+  }
+  await shot(A, "sp-save-saved-320-christmas");
+  // Keku (the host): a double tap saves once.
+  await K.getByTestId("save-memory-open").click();
+  await K.getByTestId("save-memory-note").fill(SAVE2);
+  await shot(K, "sp-save-composer-390");
+  await K.getByTestId("save-memory-save").dblclick();
+  await soon("10.4 S1 Keku's save: saved; as host he approves it in the Memory Book", async () => /Approve it there to put it in the exports/.test(await K.getByTestId("save-memory-saved").innerText().catch(() => "")), 15000);
+  await sleep(500);
+  check("10.4 S1 the double tap saved once", (await bookNow()).filter((e) => e.text === SAVE2).length === 1);
+  check("10.4 S1 Play again and the What's next controls are still there, and nothing advanced", await K.getByTestId("next-play-again").isVisible() && (await playerView(K)).g?.id === gid && (await playerView(K)).g?.status === "finished");
+
   // ---------- 10.3 M1. The completed match into the Memory Book (D-S103-01..06) ----------
   // Amina (a guest; Christmas look, 320 px) saves it with the keyboard; Keku (the host; Everyday, 390 px) approves,
   // exports, downloads the PDF and reloads. The facts come from the server's own team result, never the page.
@@ -454,7 +516,11 @@ try {
   await soon("10.3 M1 Keku sees Amina's pending entry with the same facts", async () => (await entryCard(MK, NOTE1).getByTestId("memory-entry-team").innerText().catch(() => "")) === `From the game: ${wantDone}`, 15000);
   await entryCard(MK, NOTE1).getByRole("button", { name: "Approve", exact: true }).click();
   await soon("10.3 M1 the host approves it", async () => /approved/.test(await entryCard(MK, NOTE1).innerText()), 15000);
+  // 10.4 S1, continued: the host approves Amina's save from her result screen; it joins the export like any entry.
+  await entryCard(MK, SAVE1).getByRole("button", { name: "Approve", exact: true }).click();
+  await soon("10.4 S1 the host approves Amina's results-screen save", async () => /approved/.test(await entryCard(MK, SAVE1).innerText()), 15000);
   await MK.getByRole("button", { name: "Export approved" }).click();
+  await soon("10.4 S1 the export has Amina's note, then the team facts", async () => (await MK.locator(".mz-memory__md").innerText().catch(() => "")).includes(`Note: ${SAVE1}\nFrom the game:\n- ${wantSaved}`), 15000);
   await soon("10.3 M1 the export has it: a neutral title, the note, then the facts", async () => { const md = await MK.locator(".mz-memory__md").innerText().catch(() => ""); return md.startsWith("# Mchezo Memory Book — ") && md.includes(`Note: ${NOTE1}\nFrom the game:\n- ${wantDone}`) && !/player-\d|points/.test(md); }, 15000);
   {
     const [dl] = await Promise.all([MK.waitForEvent("download", { timeout: 15000 }), MK.getByTestId("memory-pdf").click()]);
@@ -574,6 +640,22 @@ try {
     check("10.3 M3 Amina (a guest) still has no Approve or Revoke", (await MA2.getByRole("button", { name: "Approve", exact: true }).count()) === 0 && (await MA2.getByRole("button", { name: "Revoke", exact: true }).count()) === 0);
     await shot(MB, "sp-memory-cohost-390");
     for (const c of [aMemCtx, kMemCtx, bMemCtx]) await c.close();
+  }
+
+  // ---------- 10.4 S2. The early-ended replay's result screen saves the replay, never the match before ----------
+  {
+    const finEarly2 = ((await call(`/rooms/${ROOM}/ledger?watermark=1`, { token: seat.K.token })).body.events ?? []).filter((e) => e.type === "game-finished" && e.gameInstanceId === gid2).at(-1);
+    const wantEarly2 = expectedTeamLine(early?.g.outcome?.team);
+    await soon("10.4 S2 Keku's replay result offers Save a memory", async () => K.getByTestId("save-memory-open").isVisible(), 15000);
+    await K.getByTestId("save-memory-open").click();
+    check("10.4 S2 its facts say it ended early", (await K.getByTestId("save-memory-facts").innerText()).includes(wantEarly2));
+    await K.getByTestId("save-memory-note").fill("The replay we cut short");
+    await K.getByTestId("save-memory-save").click();
+    await soon("10.4 S2 saved", async () => (await K.getByTestId("save-memory-saved").count()) === 1, 15000);
+    const e = ((await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body ?? []).find((x) => x.text === "The replay we cut short");
+    check("10.4 S2 it cites the replay's own finish, with its early facts (never the completed match)", !!e && JSON.stringify(e.sourceEventIds) === JSON.stringify([finEarly2?.eventId]) && e.team?.gameInstanceId === gid2 && e.team.end === "too-few-players" && e.sourceEventIds[0] !== finS1?.eventId, JSON.stringify(e).slice(0, 220));
+    await K.getByTestId("save-memory-open-book").click();
+    await soon("10.4 S2 Open the Memory Book shows it, pending, with its facts", async () => (await entryCard(K, "The replay we cut short").getByTestId("memory-entry-team").innerText().catch(() => "")) === `From the game: ${wantEarly2}`, 15000);
   }
 
   // ---------- H. Looks and motion ----------
