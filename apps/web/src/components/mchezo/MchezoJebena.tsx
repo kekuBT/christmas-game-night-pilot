@@ -27,6 +27,7 @@ import { SendNote } from "./SendNote.js";
 import { CiniCups } from "./CiniCups.js";
 import { lastLossAt } from "../../ui/mchezo/lib/cups.js";
 import { resultLine } from "../../ui/mchezo/lib/tvfeed.js";
+import { jebenaMoment } from "../../ui/mchezo/lib/moments.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 import {
   jebenaEndLine, keptTheJebena, lastPlayLine, shownSeconds, turnLeftMs, URGENCY_LABEL, urgencyFor, verdictLine,
@@ -331,6 +332,8 @@ export function MchezoJebenaResults({ game, publicGame, players, playerId, title
       {hero}
       {next}
       <GameHeader title={title} objective={jebenaEndLine(st.end, st.standings, nameOf, playerId)} accent={1} />
+      {/* Stage 10.2 (D-S102-02/04): a line for a genuine moment, under the result; nothing when no fact fits. */}
+      {(() => { const m = jebenaMoment(st); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
       <Standings st={st} nameOf={nameOf} meId={playerId} cups={{ gameId: game.id, surface: "result" }} />
       <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every cup still whole. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="jebena-rush" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
@@ -431,6 +434,7 @@ export function JebenaTvFinal({ game, title, nameOf }: { game: PublicGame; title
       <span className="mz-tv-kicker">{title} · {st.startHearts ?? 5} cups each · final</span>
       <h1 className="mz-tvshow-h1" data-testid="tv-jr-final-winner">{resultLine(game, nameOf)}</h1>
       <p className="mz-tvshow-line" data-testid="tv-jr-final-line">{jebenaEndLine(st.end, st.standings, name)}</p>
+      {(() => { const m = jebenaMoment(st); return m ? <p className="mz-tvshow-line mz-tv-moment" data-testid="tv-results-moment">{m}</p> : null; })()}
       {last && <p className="mz-tvshow-line mz-tvshow-line--muted" data-testid="tv-jr-final-last">{last}</p>}
       <Standings st={st} nameOf={name} tv cups={{ gameId: game.id, surface: "tv" }} />
     </section>
