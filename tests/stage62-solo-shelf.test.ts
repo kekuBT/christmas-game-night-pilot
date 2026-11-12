@@ -425,8 +425,20 @@ describe("the solo session across games, and a join whose reply was lost", () =>
     });
   });
   afterEach(() => { for (const s of sessions.splice(0)) s.dispose(); vi.unstubAllGlobals(); });
+  /**
+   * Each request's allowance here (D-S101-10). A request the plan never
+   * answers ("drop", "hang") uses all of it, so a session with faults keeps it
+   * short. Every other request goes to the real server in this same thread,
+   * and a loaded gate can stall the event loop past a short allowance: the
+   * session's timer then fires before the reply is read, and a passing request
+   * fails. With 300 ms this failed two gates (20261111-194026, 20261112-121526).
+   * 2 s leaves passing requests room beside a fault; a test with no faults gets 5 s.
+   */
+  const WITH_FAULTS_MS = 2_000;
+  const NO_FAULTS_MS = 5_000;
   const session = (o: { requestTimeoutMs?: number; startBudgetMs?: number } = {}) => {
-    const s = new SoloSession({ store: null, onChange: () => {}, pollMs: 60_000, requestTimeoutMs: o.requestTimeoutMs ?? 300, ...(o.startBudgetMs ? { startBudgetMs: o.startBudgetMs } : {}) });
+    const faulted = faults.rooms.length + faults.join.length > 0;
+    const s = new SoloSession({ store: null, onChange: () => {}, pollMs: 60_000, requestTimeoutMs: o.requestTimeoutMs ?? (faulted ? WITH_FAULTS_MS : NO_FAULTS_MS), ...(o.startBudgetMs ? { startBudgetMs: o.startBudgetMs } : {}) });
     sessions.push(s);
     return s;
   };
@@ -467,7 +479,7 @@ describe("the solo session across games, and a join whose reply was lost", () =>
     expect(s.roomId).toBe(madeRooms[1]);
     expect(s.roomId).not.toBe(madeRooms[0]); // never claimed from the id alone
     expect(playersIn(madeRooms[1]!)).toBe(1);
-  });
+  }, 30_000); // each no-answer fault waits its whole allowance
 
   it("only a definite answer gives the room up: a timeout or 5xx on the retried join keeps it, with no new room", async () => {
     faults.join = ["drop", 503, "hang"];
@@ -483,7 +495,7 @@ describe("the solo session across games, and a join whose reply was lost", () =>
     expect(s.current.phase).toBe("playing");
     expect(roomsCreated).toBe(2);
     expect(s.roomId).toBe(madeRooms[1]);
-  });
+  }, 30_000); // each no-answer fault waits its whole allowance
 
   it("the fallback itself failing: at most one new room per Start, whatever goes wrong", async () => {
     // Its join refused: the Start ends there, with no third room.
@@ -521,7 +533,7 @@ describe("the solo session across games, and a join whose reply was lost", () =>
     expect(c.current.phase).toBe("playing");
     expect(roomsCreated).toBe(3);
     expect(c.roomId).toBe(madeRooms[2]);
-  });
+  }, 30_000); // each no-answer fault waits its whole allowance
 
   it("the whole Start, fallback included, ends within its time budget", async () => {
     faults = { rooms: ["pass", "hang"], join: ["drop"] };

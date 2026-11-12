@@ -1200,3 +1200,19 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Epoch:** a new one on every loss of continuity (socket close, staleness, offline, coming back from the background). Only a count recorded in the current epoch can break a cup.
   - **Elapsed time** (3 s) is kept only as a second guard.
   - **Alternative rejected:** relying on room revisions. Those move for unrelated changes (presence, readiness), so a jump doesn't mean a cup was missed.
+- **D-S101-10 The two solo harnesses that use the real server give passing requests room (supersedes the part of D-S101-07 that kept the faulted tabs at 250 ms).**
+  - **Trigger:** fast gate `20261112-121526-3eb835d3-186` on `3eb835d` failed in `stage62-solo-shelf` "Math → Pulse → Connections → Math…": `math-mayhem: expected 'error' to be 'playing'`. That test has no faults at all.
+  - **History:** full gate `20261111-194026-83406685-7879` failed two other tests in the same `stage62` describe, plus the `stage74` setup that D-S101-07 fixed.
+  - **Root cause:** each solo request there had 300 ms (`stage62`) or 250 ms (`stage74`, faulted tabs). The real server runs in the test's own thread.
+    - Under gate-like load a passing request took at most 29 ms (55 requests, median 4.6 ms), so the cause is not slowness. It is an event-loop stall longer than the allowance.
+    - When the loop resumes, due timers run before I/O, so the session's timeout fires even though the reply has arrived.
+  - **Reproduced deterministically:** a temporary switch (not committed) blocked the loop for 400 ms during one passing request per test.
+    - Before the fix it failed 4 of 5 tests in each harness, the first `stage62` test with the gate's exact error.
+    - After the fix, all 10 pass with the same stall.
+  - **The fix (tests only):**
+    - A session or tab with no faults gets 5 s.
+    - One with no-answer faults gets 2 s, the same allowance the `stage81`/`stage82` harnesses use. A "drop" or "hang" still ends through the session's own timeout, so what these tests check (timed out vs quick failure, no resend after a timeout, rooms made, the 700 ms Start budget) is unchanged.
+    - The tests that wait through those faults get a 30 s test timeout.
+    - Cost: the `stage62` file takes about 16 s and `stage74` about 10 s (they run in parallel with other files). The whole suite under load took 44.6 s, against 40.1 s in the failing gate run.
+  - **Not affected:** `stage61`'s 150 ms harness answers from an in-memory server, so its replies resolve before any timer.
+  - **Alternative rejected:** re-running the gate until it passed, and adding a timer seam to `SoloSession` (a product change for a test-only problem).

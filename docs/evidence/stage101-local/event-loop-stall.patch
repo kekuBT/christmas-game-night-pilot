@@ -1,0 +1,30 @@
+--- a/tests/stage62-solo-shelf.test.ts	2026-11-12 12:25:22.642008502 +0000
++++ b/tests/stage62-solo-shelf.test.ts	2026-11-12 12:25:22.661939945 +0000
+@@ -411,6 +411,7 @@
+   afterAll(async () => { await server.close(); });
+   beforeEach(() => {
+     forgetPageSeat(); roomsCreated = 0; joins = 0; madeRooms = []; faults = { rooms: [], join: [] };
++    (globalThis as { __stalled?: boolean }).__stalled = false;
+     vi.stubGlobal("fetch", async (input: string, init: RequestInit = {}) => {
+       const { cache: _c, keepalive: _k, ...rest } = init;
+       const isRooms = input === "/rooms" && rest.method === "POST";
+@@ -419,7 +420,7 @@
+       const never = () => new Promise<Response>((_, reject) => rest.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")), { once: true }));
+       if (typeof fault === "number") return new Response(JSON.stringify({ error: `injected ${fault}` }), { status: fault, headers: { "content-type": "application/json" } });
+       if (fault === "hang") return never();
+-      const reply = await realFetch(`${base}${input}`, rest);
++      const __p = realFetch(`${base}${input}`, rest); if (process.env.S62_STALL_MS && !(globalThis as { __stalled?: boolean }).__stalled) { (globalThis as { __stalled?: boolean }).__stalled = true; const end = Date.now() + Number(process.env.S62_STALL_MS); while (Date.now() < end) { /* a loaded gate: the event loop stalls */ } } const reply = await __p;
+       if (isRooms && reply.ok) madeRooms.push(((await reply.clone().json()) as { roomId: string }).roomId);
+       return fault === "drop" ? never() : reply;
+     });
+--- a/tests/stage74-content-variety.test.ts	2026-11-12 12:25:22.642059757 +0000
++++ b/tests/stage74-content-variety.test.ts	2026-11-12 12:25:22.662287756 +0000
+@@ -482,7 +482,7 @@
+     const f = (async (input: string, init: RequestInit = {}) => {
+       const { cache: _c, keepalive: _k, ...rest } = init;
+       const never = () => new Promise<Response>((_, reject) => rest.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")), { once: true }));
+-      if (!(/\/games$/.test(input) && rest.method === "POST")) return realFetch(`${base}${input}`, rest);
++      if (!(/\/games$/.test(input) && rest.method === "POST")) { const __p = realFetch(`${base}${input}`, rest); if (process.env.S74_STALL_MS && opts.faults?.length && !(globalThis as { __stalled74?: string }).__stalled74?.startsWith(expect.getState().currentTestName ?? "?")) { (globalThis as { __stalled74?: string }).__stalled74 = expect.getState().currentTestName ?? "?"; const end = Date.now() + Number(process.env.S74_STALL_MS); while (Date.now() < end) { /* stall */ } } return __p; }
+       const i = n++;
+       sent.push((JSON.parse(String(rest.body)) as { attempt: { id: string; sessionRevision: number } }).attempt);
+       const fault = opts.faults?.[i] ?? "pass";

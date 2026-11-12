@@ -1,0 +1,15 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt101
+
+ ✓ tests/stage62-solo-shelf.test.ts (26 tests | 21 skipped) 17278ms
+   ✓ the solo session across games, and a join whose reply was lost > Math → Pulse → Connections → Math: one room, each round fresh, nothing carried over 562ms
+   ✓ the solo session across games, and a join whose reply was lost > a join the server accepted but whose reply was lost: Try again gives that room up and makes exactly one new one 2427ms
+   ✓ the solo session across games, and a join whose reply was lost > only a definite answer gives the room up: a timeout or 5xx on the retried join keeps it, with no new room 4426ms
+   ✓ the solo session across games, and a join whose reply was lost > the fallback itself failing: at most one new room per Start, whatever goes wrong 8457ms
+   ✓ the solo session across games, and a join whose reply was lost > the whole Start, fallback included, ends within its time budget 1402ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed | 21 skipped (26)
+   Start at  12:22:32
+   Duration  18.33s (transform 592ms, setup 0ms, collect 778ms, tests 17.28s, environment 1ms, prepare 67ms)
+
