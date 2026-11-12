@@ -254,6 +254,17 @@ export interface LedgerEvent {
   createdAt: number;
 }
 
+/**
+ * Stage 10.2 repair (S102-R1): GET /rooms/:id/ledger?watermark=1. `events` is the
+ * ledger as this viewer may see it; `seq` is the room's ledger seq when it was read
+ * (its freshness watermark), which the newest visible event can be behind when the
+ * newest events are private to someone else.
+ */
+export interface LedgerView {
+  seq: number;
+  events: LedgerEvent[];
+}
+
 export interface JoinResponse {
   roomId: string;
   joinCode: string;

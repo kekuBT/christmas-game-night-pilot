@@ -1,0 +1,25 @@
+$ node scripts/check-readiness.mjs http://localhost:45973
+# timeout 600s | worker w2 | server http://localhost:45973 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s102-full/test-results/20261112-165001-cdb77add-5562/server-data/w2)
+
+[+0.7s] == 390px
+[+3.6s] PASS 390: no missing-player list when everyone is here
+[+3.6s] PASS 390: banner is a polite status, not an alert
+[+4.3s] PASS 390: the question sits directly above the Start button — {"box":{"x":33.9375,"y":362.046875,"width":322.125,"height":171.09375},"startBox":{"x":17.9375,"y":576.21875,"width":354.125,"height":56}}
+[+4.3s] PASS 390: decision buttons are at least 44px
+[+4.4s] PASS 390: "Wait" started nothing
+[+9.3s] PASS 390: roster is exactly the one shown (Ada, Bea) — ["Ada","Bea"]
+[+9.6s] PASS 390: Cal (not in this game) gets no question screen
+[+9.6s] PASS 390: no horizontal overflow on the host lobby
+[+9.6s] == 320px
+[+12.1s] PASS 320: no missing-player list when everyone is here
+[+12.1s] PASS 320: banner is a polite status, not an alert
+[+12.3s] PASS 320: the question sits directly above the Start button — {"box":{"x":30.71875,"y":249.515625,"width":258.5625,"height":245.390625},"startBox":{"x":14.71875,"y":538.4375,"width":290.5625,"height":56}}
+[+12.3s] PASS 320: decision buttons are at least 44px
+[+12.3s] PASS 320: "Wait" started nothing
+[+17.6s] PASS 320: roster is exactly the one shown (Ada, Bea) — ["Ada","Bea"]
+[+17.8s] PASS 320: Cal (not in this game) gets no question screen
+[+17.8s] PASS 320: no horizontal overflow on the host lobby
+[+17.9s] READINESS ALL PASSED
+[+17.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":3}
+
+# PASS (exit 0) in 18s | cpu 3s, peak memory 272 MB

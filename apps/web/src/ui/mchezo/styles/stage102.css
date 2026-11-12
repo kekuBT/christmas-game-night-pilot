@@ -1,0 +1,4 @@
+/* Stage 10.2 (docs/stage10/stage102.md §4, D-S102-04): the moment line on the TV's final view.
+   On phones the line reuses Stage 5's .mz-moment (a dashed box under the result). On the TV it is one
+   more line under the result, set apart by a dashed rule and the accent colour, never by colour alone. */
+.mz-tv-moment { margin: 2px 0 0; padding-left: 14px; border-left: 3px dashed var(--mz-accent, currentColor); font-weight: 700; }

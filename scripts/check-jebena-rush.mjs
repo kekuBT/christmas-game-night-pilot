@@ -34,9 +34,13 @@
 //      whole cups; two players leave and nothing breaks; back to the lobby.
 //   R  review 6822605156: (R1) the timeout that decides the match breaks the
 //      runner-up's last cup once, on the TV's final screen and on the phones'
-//      results; (R2) a short reconnect inside the 3-second window never
-//      breaks a cup it didn't see live, and a TV that switches rooms in the
-//      same tab (same game and seat ids) never breaks one either.
+//      results; (R2) a TV that switches rooms in the same tab (same game and
+//      seat ids) never breaks a cup it didn't see live.
+//   S  review 6831760093 (S102-R2), a room of its own: a short reconnect
+//      inside the 3-second window shows the lost cup broken without breaking
+//      it, with the match still on; a later live loss breaks once; the final
+//      loss breaks once on the results. Each step proves its preconditions;
+//      every probe is bounded by the step's deadline.
 //   H  motion and looks: full motion animates steam; reduced motion keeps it
 //      still; the urgency word is always there; Everyday and Christmas.
 //   I  privacy: no projection carries the bank (aliases, unused answers), and
@@ -60,8 +64,10 @@ import { tmpdir } from "node:os";
 import { join as joinPath } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { cursorOf, newSeatBreaks, since } from "./lib/break-log.mjs";
+import { soonUntil as soonUntilWith } from "./lib/deadline.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 import { bankCanaries, freshAnswer, jebenaOracle } from "./lib/jebena-oracle.mjs";
+import { memoryLinkOf, openMemoryBook } from "./lib/memory-book.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
@@ -71,8 +77,41 @@ async function soon(label, fn, timeout = 15000) {
   while (Date.now() < end) { try { const v = await fn(); if (v) { check(label, true); return v; } } catch (e) { last = e; } await sleep(150); }
   check(label, false, `not within ${timeout}ms${last ? ` (${String(last.message ?? last).split("\n")[0]})` : ""}`); return null;
 }
+/** Review 6831760093 (S102-R2): soon against an absolute deadline; no probe may run past it (scripts/lib/deadline.mjs). */
+const soonUntil = (label, fn, until) => soonUntilWith(check, label, fn, until);
 const shot = (page, name) => page.screenshot({ path: screenshotPath(`docs/stage10/screenshots/${name}.png`), fullPage: false });
 const noHearts = (text) => !/heart|♥|♡/i.test(text);
+
+/**
+ * Stage 10.2 (docs/stage10/stage102.md §3): the moment line a finished Jebena game should show, worked out here from
+ * the server's own state with the driver's own copy of the rules (not the app's selector): a sole winner, in a match
+ * the module ended, with an opponent knocked out (not just left); one cup left, or every cup still whole.
+ */
+const JR_LINE_LAST_CUP = "One cup left. Still enough for the win.";
+function expectedJebenaLine(st) {
+  if (!st || (st.end !== "last-standing" && st.end !== "banks-exhausted")) return null;
+  const rows = st.standings ?? [];
+  const firsts = rows.filter((r) => r.place === 1);
+  if (firsts.length !== 1 || firsts[0].out || firsts[0].satOut) return null;
+  const w = firsts[0];
+  if (!rows.some((r) => r.id !== w.id && r.out && !r.satOut)) return null;
+  if (w.hearts === 1) return JR_LINE_LAST_CUP;
+  if (w.hearts === st.startHearts) return `All ${st.startHearts} cups still whole. Not a single crack.`;
+  return null;
+}
+/** The line on a phone's results: exactly `want`, or none at all. */
+const momentOn = (page, want, who) => want === null
+  ? soon(`10.2 ${who}: no moment line`, async () => (await page.getByTestId("jr-results").isVisible().catch(() => false)) && (await page.getByTestId("results-moment").count()) === 0, 20000)
+  : soon(`10.2 ${who}: “${want}”`, async () => (await page.getByTestId("results-moment").innerText().catch(() => "")) === want, 20000);
+/** The line on a TV's final view: exactly `want`, or none. */
+const tvMomentOn = (page, want, who) => soon(`10.2 ${who}: ${want === null ? "no moment line" : `“${want}”`}`, async () => (await page.getByTestId("tv-jr-final").isVisible().catch(() => false))
+  && (want === null ? (await page.getByTestId("tv-results-moment").count()) === 0 : (await page.getByTestId("tv-results-moment").innerText().catch(() => "")) === want), 20000);
+/** Under the result: below the result hero and the What's next panel, so its controls stay where they were. */
+async function underResult(page) {
+  const box = (id) => page.getByTestId(id).first().boundingBox().catch(() => null);
+  const [m, hero, next] = [await box("results-moment"), await box("results-hero"), await box("whats-next")];
+  return !!m && !!hero && m.y >= hero.y + hero.height - 1 && (!next || m.y >= next.y + next.height - 1);
+}
 
 /**
  * Stage 10.1: every page logs each cup that breaks (data-breaking="true"
@@ -102,6 +141,13 @@ const BREAK_LOG = () => {
 const breaks = (page) => page.evaluate(() => [...(window.__cupBreaks ?? [])]).catch(() => []);
 /** A cursor on a page's break log: a later check looks only at what was logged after it (scripts/lib/break-log.mjs). */
 const mark = async (page) => cursorOf(await breaks(page));
+/** The phone's own cups now, without waiting: null when that row isn't on screen (e.g. the results). */
+const myCups = (page) => page.evaluate(() => {
+  const el = document.querySelector('[data-testid="jr-my-hearts"]');
+  if (!el) return null;
+  const row = el.matches("[data-cups]") ? el : el.querySelector("[data-cups]");
+  return { cups: Number(row?.getAttribute("data-cups")), whole: el.querySelectorAll('svg[data-state="whole"]').length, broken: el.querySelectorAll('svg[data-state="broken"]').length };
+});
 /** A cups row: the count it shows, its whole and broken cups, its words. */
 const cupsIn = (locator) => locator.evaluate((el) => {
   const row = el.matches("[data-cups]") ? el : el.querySelector("[data-cups]");
@@ -190,16 +236,6 @@ try {
   const A = await aCtx.newPage();
   await join(A, "Amina", code);
   const bCtx = await phoneCtx(390, { reducedMotion: true });
-  // R2: Baraka's socket and polls go through the driver, so it can cut his phone off for a moment and close its socket.
-  let baraCut = false;
-  const baraSockets = [];
-  await bCtx.routeWebSocket(/.*/, (ws) => {
-    const server = ws.connectToServer();
-    baraSockets.push(ws);
-    ws.onMessage((m) => { if (!baraCut) server.send(m); });
-    server.onMessage((m) => { if (!baraCut) ws.send(m); });
-  });
-  await bCtx.route(/\/projection\?/, (route) => (baraCut ? route.abort("connectionfailed") : route.continue()));
   const B = await bCtx.newPage();
   await join(B, "Baraka", code);
   const tvCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
@@ -263,7 +299,7 @@ try {
       }
       await sleep(250);
     }
-    return { roomC, survivor, other, gidC, tried, g };
+    return { roomC, survivor, other, gidC, tried, g, projC, hostId: wanjiru.playerId, hostToken: wanjiru.recoveryToken, names: { [wanjiru.playerId]: "Wanjiru", [otieno.playerId]: "Otieno" } };
   })();
 
   // ---------- A. Lobby: pick Jebena Rush, choose cups ----------
@@ -537,13 +573,13 @@ try {
 
   // ---------- E/F. Timeouts, offline, reload, elimination ----------
   // Keku answers whenever he holds the jebena; Amina and Baraka let time run out.
-  let offlineDone = false, reloadDone = false, firstTimeoutChecked = false, outShot = false, tvShot = false, shortCutDone = false, baraReconnectedAt = 0;
+  let offlineDone = false, reloadDone = false, firstTimeoutChecked = false, outShot = false, tvShot = false;
   /** Every life lost (seat, the slot that broke), from the server's own counts; `final` ended the match. */
   const lost = [];
   const turnTotal = 10_500;
   /**
    * The out screen, whichever turn took the last cup. A player can go out on an ordinary timeout, or on a turn where
-   * the driver had cut their phone (Amina offline, Baraka's short drop). With three players someone always goes out
+   * the driver had cut their phone (Amina offline). With three players someone always goes out
    * before the end, so these checks always run (checked after the loop). `live`: their phone saw that loss live; if
    * not, the last cup shows broken without breaking (S101-R2).
    */
@@ -617,28 +653,6 @@ try {
       await outIfOut(h, hp, aMark);
       continue;
     }
-    if (reloadDone && !shortCutDone && h === seat.B.playerId) {
-      // R2 (review 6822605156): a short reconnect inside the 3-second window. On Baraka's own (second) turn his phone
-      // hears nothing for the last 1.5 s, then its socket closes and it reconnects; the resync shows his lost cup within
-      // 3 s of the loss. It must show it broken without breaking it (it didn't see it live). Later losses still break once.
-      shortCutDone = true;
-      const wait = now.g.phaseDeadlineAt - 1500 - Date.now();
-      if (wait > 0) await sleep(wait);
-      const bMark = await mark(B);
-      baraCut = true;
-      const after = await soon("R2 Baraka's turn runs out while his phone hears nothing", async () => { const x = await playerView(K); return x.st.turn?.n !== n || x.g.status === "finished" ? x : null; }, 8000);
-      const lossAt = Date.now();
-      await sleep(300);
-      for (const ws of baraSockets.splice(0)) await ws.close({ code: 4000, reason: "driver: a short drop" }).catch(() => {});
-      baraCut = false;
-      const left = after ? (after.st.order ?? after.st.standings ?? []).find((x) => x.id === h)?.hearts : null;
-      const resynced = await soon("R2 Baraka's phone reconnects and resyncs: his cups as the server has them", async () => { const c = await cupsIn(B.getByTestId("jr-my-hearts")); return c.cups === left && c.broken === 3 - left ? Date.now() : null; }, 6000);
-      const inWindow = resynced ? resynced - lossAt : null;
-      baraReconnectedAt = Date.now();
-      check(`R2 the resync came inside the window (${inWindow} ms after the loss) and the lost cup showed broken without breaking`, inWindow !== null && inWindow < 3000 && newSeatBreaks(await breaks(B), bMark, h).length === 0, JSON.stringify(newSeatBreaks(await breaks(B), bMark, h)));
-      await outIfOut(h, hp, bMark);
-      continue;
-    }
     if (!reloadDone && h === seat.B.playerId) {
       // A reload (Keku's, mid-game) keeps the game.
       reloadDone = true;
@@ -678,7 +692,6 @@ try {
   check("F someone went out before the end, and their out screen was checked", outShot);
   check("E Amina's offline resync ran, after a cup of hers broke live (S101-R3)", offlineDone);
   check("E Keku's mid-game reload ran", reloadDone);
-  check("R2 Baraka's short reconnect ran", shortCutDone);
 
   // ---------- F. Results ----------
   const fin = await soon("F the match finishes: one player left", async () => { const x = await playerView(K); return x.g?.status === "finished" ? x : null; }, 30000);
@@ -736,15 +749,25 @@ try {
         const ruRow = await cupsIn(K.getByTestId(`jr-row-${ru}`));
         check("R1 the results show the runner-up's cups all broken, as the server has them", ruRow.cups === 0 && ruRow.broken === 3 && ruRow.whole === 0, JSON.stringify(ruRow));
       }
-      if (baraReconnectedAt) check("R2 after the short reconnect, Baraka's phone still breaks cups for live losses", (await breaks(B)).some((x) => x.t > baraReconnectedAt), JSON.stringify((await breaks(B)).map((x) => [x.seat.slice(-2), x.slot, x.t > baraReconnectedAt])));
       const bLog = await breaks(B);
       check("F reduced motion (Baraka): cups break without animating", bLog.length > 0 && bLog.every((x) => x.anim === "none"), JSON.stringify(bLog.map((x) => x.anim)));
       check("F full motion (the TV): each break animates", tv.length > 0 && tv.every((x) => x.anim === "mz-cini-tip"), JSON.stringify(tv.map((x) => x.anim)));
     }
     check("F results at 320: no sideways scroll", await noSideScroll(A));
+    {
+      // Stage 10.2: whatever this match's facts call for (a line or none), every phone shows the same, under the result.
+      const want = expectedJebenaLine(fin.st);
+      const kw = fin.st.standings.find((r) => r.place === 1);
+      check(`10.2 the main match's facts (Keku: ${kw?.hearts} of ${fin.st.startHearts} cups, ${fin.st.end}) call for ${want === null ? "no line" : `“${want}”`}`, true);
+      for (const [who, p] of [["Keku's phone (Everyday, 390)", K], ["Amina's phone (Christmas, 320)", A], ["Baraka's phone (390, reduced motion)", B]]) await momentOn(p, want, `F ${who}`);
+      if (want !== null) check("10.2 F the line sits under the result and What's next", await underResult(K));
+      await A.reload({ waitUntil: "domcontentloaded" });
+      await momentOn(A, want, "F after a reload, Amina's phone");
+    }
     await shot(K, "jr-results-390");
     await shot(A, "jr-results-320-christmas");
     await soon("F the TV shows the final standings: Keku wins", async () => /Keku wins/.test(await TV.locator("body").innerText()), 20000);
+    await tvMomentOn(TV, expectedJebenaLine(fin.st), "F the TV's final view");
     await shot(TV, "jr-tv-final-1440");
     await TV.getByRole("button", { name: "Post-game review" }).click();
     await soon("F the TV's post-game review: Keku kept the jebena, with the places", async () => /Keku kept the jebena/.test(await TV.getByTestId("tv-jr-review").innerText()) && (await TV.getByTestId("tv-jr-review").locator("li").count()) === 3, 15000);
@@ -775,6 +798,39 @@ try {
     await sleep(1500);
     const logs = await Promise.all([K, A, B, TV].map(async (p, i) => since(await breaks(p), gMarks[i])));
     check("G leaving broke no cup on any screen (phones or TV)", logs.every((l) => l.length === 0), JSON.stringify(logs).slice(0, 200));
+    // Stage 10.2: Keku kept every cup, but both others left: a win by absence gets no line, and none is carried over.
+    if (fin2) check("10.2 G the replay's facts call for no line (both others left)", expectedJebenaLine(fin2.st) === null);
+    await momentOn(K, null, "G the replay's results on Keku's phone");
+    check("10.2 G the TV shows no moment line for the replay", (await TV.getByTestId("tv-results-moment").count()) === 0);
+
+    // ---------- 10.2 repair (review 6831760093, S102-R1): a supported game, its last event private ----------
+    // Baraka's sit-out ended the replay and is logged after it finished, so the room's newest event is his and is
+    // hidden from Keku. Keku's Memory Book must still finish loading and cite exactly this replay.
+    if (fin2) {
+      const led = (await call(`/rooms/${ROOM}/ledger?watermark=1`, { token: seat.K.token })).body;
+      const pk = (await call(`/rooms/${ROOM}/projection?audience=player`, { token: seat.K.token })).body;
+      const evs = Array.isArray(led?.events) ? led.events : [];
+      const finEv = evs.filter((e) => e.type === "game-finished").at(-1);
+      const newestSeen = Math.max(0, ...evs.map((e) => e.seq));
+      check("R1 Keku's ledger carries the room's seq as its watermark", Number.isInteger(led?.seq) && led.seq === pk.seq, `${led?.seq} vs ${pk.seq}`);
+      check("R1 the room's newest event (a sit-out) is hidden from Keku; his last finished game is the replay", newestSeen < led.seq && finEv?.gameInstanceId === replay.g.id && !evs.some((e) => e.type === "player-abstained" && e.playerId !== seat.K.playerId), `newest seen ${newestSeen}, seq ${led?.seq}, finished ${finEv?.gameInstanceId}`);
+      const memCtx = await phoneCtx(390, { look: "everyday" });
+      const M = await openMemoryBook(memCtx, BASE, seat.K);
+      const text = "Keku kept every cup when the others left";
+      await M.locator(".mz-memory__text").fill(text);
+      const seen = await soon("R1 Keku's Memory Book finishes loading: linked to Jebena Rush, Add on", async () => { const x = await memoryLinkOf(M); return x.state === "ready" && x.addDisabled === false ? x : null; }, 15000);
+      check("R1 it links the replay's own finish (the right event), never 'Checking…'", !!seen && seen.event === finEv?.eventId && /Linked to Jebena Rush/.test(seen.text) && !/Checking/.test(seen.text), JSON.stringify(seen));
+      await sleep(800); // past the screen's entrance fade, so the shot isn't dimmed
+      await shot(M, "jr-memory-ready-390");
+      await M.getByTestId("memory-add").click();
+      const added = await soon("R1 the highlight is added, citing exactly the replay's finish", async () => {
+        const book = (await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body;
+        const e = Array.isArray(book) ? book.find((x) => x.text === text) : undefined;
+        return e && e.sourceEventIds.length === 1 && e.sourceEventIds[0] === finEv?.eventId ? e : null;
+      }, 10000);
+      check("R1 the entry is one entry, in this room only", !!added && (await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body.filter((x) => x.text === text).length === 1);
+      await memCtx.close();
+    }
   }
   for (const [who, p] of [["Keku", K], ["Amina", A], ["Baraka", B]]) {
     const backBtn = p.getByTestId("show-back-to-lobby");
@@ -782,6 +838,137 @@ try {
     if (await backBtn.isVisible().catch(() => false)) await backBtn.click();
     await soon(`G ${who} is back in the lobby`, async () => p.getByTestId("lobby-dock").isVisible(), 15000);
   }
+  // ---------- R2 (review 6831760093, S102-R2): a short reconnect, in a room of its own ----------
+  // Moved out of the main match, where other turns ran out while the driver was busy and the drop could land on the
+  // turn that ended it. Here the driver sets every precondition: Pendo's phone (390 px, reduced motion; its socket
+  // and polls go through the driver) plays Halima, who answers at once whenever the jebena is hers, so Halima never
+  // loses a cup and only Pendo's own turns run out. Three cups, three of Pendo's turns:
+  //   1. the short drop, 3 → 2: the match goes on; the resync, inside 3 s of the server's loss, shows that cup
+  //      broken without breaking it;
+  //   2. a later live loss, 2 → 1: Pendo's own row breaks that cup once (still: reduced motion);
+  //   3. the final loss, 1 → 0: the match ends, and Pendo's results break the last cup once.
+  // Each step checks its preconditions before acting. A missed window or a missing observation is a FAIL, never a skip.
+  {
+    const roomS = (await call("/rooms", { body: { name: "Room S", kind: "casual" } })).body;
+    const halima = (await call(`/rooms/${roomS.roomId}/join`, { body: { displayName: "Halima", asHost: true, hostClaimToken: roomS.hostClaimToken } })).body;
+    const sCtx = await phoneCtx(390, { reducedMotion: true });
+    let cut = false;
+    const sockets = [];
+    await sCtx.routeWebSocket(/.*/, (ws) => {
+      const server = ws.connectToServer();
+      sockets.push(ws);
+      ws.onMessage((m) => { if (!cut) server.send(m); });
+      server.onMessage((m) => { if (!cut) ws.send(m); });
+    });
+    await sCtx.route(/\/projection\?/, (route) => (cut ? route.abort("connectionfailed") : route.continue()));
+    const P = await sCtx.newPage();
+    await join(P, "Pendo", roomS.joinCode);
+    const pendo = await seatOf(P);
+    const projS = async () => (await call(`/rooms/${roomS.roomId}/projection?audience=player`, { token: halima.recoveryToken })).body;
+    await call(`/rooms/${roomS.roomId}/game-settings`, { token: halima.recoveryToken, body: { gameId: "jebena-rush", settings: { hearts: 3 }, baseRevision: (await projS()).session?.revision ?? 0 } });
+    const s0 = await soon("R2 room S: Pendo's phone is connected and would play", async () => { const x = await projS(); return (x.readiness?.wouldPlay ?? []).includes(pendo.playerId) ? x : null; }, 15000);
+    const startS = await call(`/rooms/${roomS.roomId}/games`, { token: halima.recoveryToken, body: { gameId: "jebena-rush", official: false, roster: s0?.readiness?.wouldPlay, attempt: { id: randomUUID(), sessionRevision: s0?.session?.revision ?? 0 }, season: s0?.contentSeason, settings: { hearts: 3 } } });
+    check("R2 room S: Jebena Rush starts, three cups, Pendo and Halima", startS.status === 201, JSON.stringify(startS.body).slice(0, 160));
+    const gidS = startS.body.gameId;
+    const intentS = (action, payload) => call(`/rooms/${roomS.roomId}/intents`, { token: halima.recoveryToken, body: { intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: roomS.roomId, gameInstanceId: gidS, action, payload } } });
+    await intentS("briefing-ready", { ready: true });
+    await api(P, "POST", "/rooms/:room/intents", { intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: roomS.roomId, gameInstanceId: gidS, action: "briefing-ready", payload: { ready: true } } });
+    const gS = async () => ((await projS()).myGames ?? []).find((g) => g.id === gidS);
+    const rowOf = (g, id) => (g?.state?.order ?? g?.state?.standings ?? []).find((r) => r.id === id);
+    const lossOf = (g, n) => (g?.state?.log ?? []).find((e) => e.kind === "timeout" && e.turn === n && e.player === pendo.playerId);
+    const usedS = new Set();
+    /**
+     * Halima answers whenever the jebena is hers (an accepted answer passes it at once; one that isn't accepted is
+     * simply followed by another); resolves once it's Pendo's turn, or the match is over.
+     */
+    async function pendosTurn(timeout = 25000) {
+      const end = Date.now() + timeout;
+      while (Date.now() < end) {
+        const g = await gS();
+        if (g?.status === "finished") return g;
+        if (g?.status === "playing" && g.state.turn?.player === pendo.playerId) return g;
+        if (g?.status === "playing" && g.state.turn?.player === halima.playerId) {
+          for (const e of g.state.log ?? []) if (e.kind === "accepted") usedS.add(e.answer);
+          const a = freshAnswer(g.state.category.id, usedS);
+          usedS.add(a.name);
+          await intentS("jebena-answer", { turn: g.state.turn.n, text: a.typed });
+        }
+        await sleep(100);
+      }
+      return null;
+    }
+    const playing = await soon("R2 room S is playing: three whole cups each", async () => { const g = await gS(); return g?.status === "playing" && (g.state.order ?? []).length === 2 && g.state.order.every((r) => r.hearts === 3) ? g : null; }, 20000);
+    /** One of Pendo's turns runs out (no answer): the game as the server has it right after. */
+    const runsOut = (label, g) => soonUntil(label, async () => { const x = await gS(); return x && (x.status === "finished" || x.state.turn?.n !== g.state.turn.n) ? x : null; }, g.phaseDeadlineAt + 4000);
+
+    // Step 1: the short drop.
+    const g1 = playing ? await pendosTurn() : null;
+    const pre1 = rowOf(g1, pendo.playerId);
+    check("R2 step 1 precondition: Pendo's turn, 3 cups, Halima in (so this loss can't end the match)", g1?.status === "playing" && g1.state.turn?.player === pendo.playerId && pre1?.hearts === 3 && rowOf(g1, halima.playerId)?.hearts === 3, JSON.stringify({ status: g1?.status, pre1 }));
+    let s1ok = false;
+    if (g1?.status === "playing" && pre1?.hearts === 3) {
+      await soonUntil("R2 step 1: before the drop, Pendo's phone shows 3 whole cups", async () => (await myCups(P))?.whole === 3, Date.now() + 5000);
+      const wait = g1.phaseDeadlineAt - 1500 - Date.now();
+      if (wait > 0) await sleep(wait);
+      const m1 = await mark(P);
+      cut = true; // the phone hears nothing for the last 1.5 s of the turn
+      const after1 = await runsOut("R2 step 1: Pendo's turn runs out while the phone hears nothing", g1);
+      const loss1 = lossOf(after1, g1.state.turn.n);
+      const row1 = rowOf(after1, pendo.playerId);
+      s1ok = after1?.status === "playing" && row1?.hearts === 2 && !row1.out && !!loss1;
+      check("R2 step 1: the loss leaves the match on: Pendo 2 cups and still in, Halima in", s1ok, JSON.stringify({ status: after1?.status, row1, loss1 }));
+      await sleep(300);
+      for (const ws of sockets.splice(0)) await ws.close({ code: 4000, reason: "driver: a short drop" }).catch(() => {});
+      cut = false; // the socket closed; the phone reconnects and resyncs
+      const lossAt = loss1?.at ?? Date.now();
+      const seenAt = await soonUntil("R2 step 1: Pendo's phone reconnects and resyncs within 3 s of the server's loss: 2 whole, 1 broken", async () => { const c = await myCups(P); return c && c.cups === 2 && c.whole === 2 && c.broken === 1 ? Date.now() : null; }, lossAt + 3000);
+      check(`R2 step 1: the resync came inside the window (${seenAt ? seenAt - lossAt : "none"} ms after the server's loss)`, seenAt !== null && seenAt - lossAt <= 3000);
+      await sleep(1500);
+      const replayed = newSeatBreaks(await breaks(P), m1, pendo.playerId);
+      check("R2 step 1: the resync showed the lost cup broken without breaking it (no break of Pendo's seat since the drop)", seenAt !== null && replayed.length === 0, JSON.stringify(replayed));
+    }
+
+    // Step 2: a later live loss, the phone connected throughout.
+    const g2 = s1ok ? await pendosTurn() : null;
+    const pre2 = rowOf(g2, pendo.playerId);
+    check("R2 step 2 precondition: Pendo's next turn, 2 cups, Halima in (so this loss can't end the match)", g2?.status === "playing" && g2.state.turn?.player === pendo.playerId && pre2?.hearts === 2 && !!rowOf(g2, halima.playerId) && !rowOf(g2, halima.playerId).out, JSON.stringify({ status: g2?.status, pre2 }));
+    let s2ok = false;
+    if (g2?.status === "playing" && pre2?.hearts === 2) {
+      const m2 = await mark(P);
+      const after2 = await runsOut("R2 step 2: Pendo's turn runs out, the phone connected", g2);
+      const row2 = rowOf(after2, pendo.playerId);
+      s2ok = after2?.status === "playing" && row2?.hearts === 1 && !row2.out && !!lossOf(after2, g2.state.turn.n);
+      check("R2 step 2: the loss leaves the match on: Pendo 1 cup and still in", s2ok, JSON.stringify({ status: after2?.status, row2 }));
+      await soonUntil("R2 step 2: after the short reconnect, Pendo's own row breaks the lost cup live", async () => newSeatBreaks(await breaks(P), m2, pendo.playerId, 1).some((x) => x.surface === "hud"), Date.now() + 4000);
+      await sleep(1000);
+      const b2 = newSeatBreaks(await breaks(P), m2, pendo.playerId);
+      const hud2 = b2.filter((x) => x.surface === "hud");
+      check("R2 step 2: exactly that cup (slot 1) broke, once on Pendo's row, still (reduced motion); no other slot of Pendo's", hud2.length === 1 && hud2[0].slot === 1 && hud2[0].anim === "none" && b2.every((x) => x.slot === 1), JSON.stringify(b2));
+    }
+
+    // Step 3: the final loss ends the match.
+    const g3 = s2ok ? await pendosTurn() : null;
+    const pre3 = rowOf(g3, pendo.playerId);
+    check("R2 step 3 precondition: Pendo's last turn, 1 cup left, Halima in", g3?.status === "playing" && g3.state.turn?.player === pendo.playerId && pre3?.hearts === 1, JSON.stringify({ status: g3?.status, pre3 }));
+    if (g3?.status === "playing" && pre3?.hearts === 1) {
+      const m3 = await mark(P);
+      const after3 = await runsOut("R2 step 3: Pendo's last turn runs out", g3);
+      const stds = after3?.state?.standings ?? [];
+      check("R2 step 3: the match ends: Halima keeps the jebena, Pendo out with every cup broken", after3?.status === "finished" && after3.state.end === "last-standing" && stds[0]?.id === halima.playerId && stds[0].place === 1 && stds.find((r) => r.id === pendo.playerId)?.out === true && stds.find((r) => r.id === pendo.playerId)?.hearts === 0, JSON.stringify({ status: after3?.status, end: after3?.state?.end, stds }).slice(0, 240));
+      await soonUntil("R2 step 3: Pendo's phone shows the results", async () => P.getByTestId("jr-results").isVisible(), Date.now() + 15000);
+      await soonUntil("R2 step 3: Pendo's results break the last cup", async () => newSeatBreaks(await breaks(P), m3, pendo.playerId, 0).length > 0, Date.now() + 5000);
+      await sleep(1000);
+      const b3 = newSeatBreaks(await breaks(P), m3, pendo.playerId);
+      check("R2 step 3: the final loss broke Pendo's last cup exactly once, on the results, still (reduced motion)", b3.length === 1 && b3[0].slot === 0 && b3[0].surface === "result-row" && b3[0].anim === "none", JSON.stringify(b3));
+      const all = (await breaks(P)).filter((x) => x.seat === pendo.playerId);
+      const keys = all.map((x) => `${x.surface}:${x.slot}`);
+      check("R2 the whole match on Pendo's phone: slot 2 never broke (the resync), and no cup broke twice anywhere", !all.some((x) => x.slot === 2) && keys.every((k, i) => keys.indexOf(k) === i), JSON.stringify(all.map((x) => [x.surface, x.slot])));
+      await momentOn(P, expectedJebenaLine(after3?.state), "R2 room S, Pendo's results (Halima kept every cup and Pendo was knocked out)");
+      await shot(P, "jr-short-reconnect-results-390-reduced");
+    }
+    await sCtx.close();
+  }
+
   // ---------- K. A Family Cup never offers Jebena Rush ----------
   {
     const cupCtx = await phoneCtx(390);
@@ -822,6 +1009,44 @@ try {
       await shot(W, "jr-results-zero-answers-winner-390");
       const O = await openAs(z.other, "christmas", 320);
       await soon("Z the player who did nothing at all is truthfully told they missed it", async () => /You missed this one/.test(await O.getByTestId("results-hero").innerText()), 20000);
+
+      // ---------- Stage 10.2: room C's line, on both phones, a TV and after reloads; the replay carries none ----------
+      const want = expectedJebenaLine(z.g?.state);
+      check("10.2 Z room C's facts call for the one-cup line (a sole winner with no accepted answer, one cup left, the other knocked out)", want === JR_LINE_LAST_CUP, JSON.stringify({ end: z.g?.state?.end, startHearts: z.g?.state?.startHearts, standings: zs }).slice(0, 240));
+      await momentOn(W, want, "Z the survivor's phone (Everyday, 390)");
+      await momentOn(O, want, "Z the other player's phone (Christmas, 320)");
+      check("10.2 Z the line sits under the result and What's next, on both", (await underResult(W)) && (await underResult(O)));
+      check("10.2 Z both phones: no sideways scroll", (await noSideScroll(W)) && (await noSideScroll(O)));
+      await shot(O, "jr-results-moment-320-christmas");
+      const zTvCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      ctxs.push(zTvCtx);
+      const ZT = await zTvCtx.newPage();
+      await ZT.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
+      await ZT.locator(".mz-code__input").fill(z.roomC.joinCode);
+      await ZT.getByTestId("watch-spectator").click();
+      await tvMomentOn(ZT, want, "Z room C's TV, its final view");
+      await shot(ZT, "jr-tv-final-moment-1440");
+      await W.reload({ waitUntil: "domcontentloaded" });
+      await momentOn(W, want, "Z after a reload, the survivor's phone");
+      await ZT.reload({ waitUntil: "domcontentloaded" });
+      await tvMomentOn(ZT, want, "Z after a reload, room C's TV");
+      // Play again; last match's winner leaves the replay, so the other player wins it by absence: no line, and the
+      // TV's final is the replay's (a different winner), not the last one with its line.
+      const H = z.hostId === z.survivor.playerId ? W : O;
+      await soon("10.2 Z room C's host has Play again", async () => H.getByTestId("next-play-again").isVisible(), 15000);
+      await H.getByTestId("next-play-again").click();
+      await passBriefing([W, O]);
+      const repG = await soon("10.2 Z room C's replay is on", async () => ((await z.projC(z.hostToken)).myGames ?? []).find((x) => x.gameId === "jebena-rush" && x.id !== z.gidC && x.status === "playing") ?? null, 20000);
+      if (repG) {
+        const left = await call(`/rooms/${z.roomC.roomId}/intents`, { token: z.survivor.recoveryToken, body: { intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: z.roomC.roomId, gameInstanceId: repG.id, action: "abstain", payload: {} } } });
+        check("10.2 Z last match's winner leaves the replay", left.body?.accepted === true, JSON.stringify(left.body).slice(0, 160));
+        const fin3 = await soon("10.2 Z the replay ends: the one who stayed keeps the jebena", async () => { const g3 = ((await z.projC(z.hostToken)).myGames ?? []).find((x) => x.id === repG.id); return g3?.status === "finished" ? g3 : null; }, 20000);
+        check("10.2 Z the replay's facts call for no line (a win by the other leaving)", !!fin3 && expectedJebenaLine(fin3.state) === null, JSON.stringify(fin3?.state?.standings ?? null).slice(0, 200));
+        await momentOn(W, null, "Z the replay's results, the phone of the one who left");
+        await momentOn(O, null, "Z the replay's results, the phone of the one who stayed");
+        const otherName = z.names[z.other.playerId];
+        await soon(`10.2 Z room C's TV: the replay's final (${otherName} wins), with no line carried over`, async () => (await ZT.getByTestId("tv-jr-final-winner").innerText().catch(() => "")).includes(otherName) && (await ZT.getByTestId("tv-results-moment").count()) === 0, 20000);
+      }
     }
   }
 } catch (e) {

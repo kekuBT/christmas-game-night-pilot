@@ -1,0 +1,43 @@
+$ node scripts/check-install-builds.mjs http://localhost:43733
+# timeout 600s | worker w2 | server http://localhost:43733 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s102r-full/test-results/20261112-183329-b8e75be6-7881/server-data/w2)
+
+[+23.8s]   (four real builds in 23 s: A 3b50ef404e159e8a, W a0b45db272b885e8, P b38fb0b1e8af0057)
+[+23.8s] PASS B setup: build A names its version in its page and its worker
+[+23.8s] PASS B setup: build A2 names its version in its page and its worker
+[+23.8s] PASS B setup: build W names its version in its page and its worker
+[+23.8s] PASS B setup: build P names its version in its page and its worker
+[+23.8s] PASS B the same source built twice gives the same version, the same worker byte for byte, the same page and the same files
+[+23.8s] PASS B and the same as the build under test (built separately, elsewhere) — 3b50ef404e159e8a vs 3b50ef404e159e8a
+[+23.8s] PASS B a worker-only change (sw.ts) is a new version and a new worker
+[+23.8s] PASS B a worker-policy change (swPolicy.ts, a dependency of the worker only) is a new version too
+[+23.8s] PASS B neither change touches the app: the same files, byte for byte, and the same page apart from its build marker
+[+25.3s] PASS E setup: A's worker is active and controls the page
+[+26.4s] PASS E setup: A's live cache holds every file it precaches (14 entries)
+[+26.6s] PASS E1 W deployed with a listed file missing: W's install runs and fails — redundant
+[+26.6s] PASS E1 A's live cache is exactly as it was: every entry, the same bytes, the same order
+[+26.6s] PASS E1 no candidate is left, nothing else is touched — ["mchezo-shell-3b50ef404e159e8a","not-mchezo"]
+[+26.9s] PASS E1 the round in the other tab plays on (a guess answered, the same page)
+[+28.1s] PASS E1 offline, A's shell is whole: A's page, scripts, styles and assets, saying it can't reach Mchezo — {"notice":true,"build":"3b50ef404e159e8a","files":2,"foreign":[]}
+[+28.2s] PASS E2 W with storage full (Chromium's quota override): W's install runs and fails — redundant
+[+28.2s] PASS E2 A's live cache is exactly as it was
+[+28.2s] PASS E2 no candidate is left — ["mchezo-shell-3b50ef404e159e8a","not-mchezo"]
+[+28.5s] PASS E2 the round plays on
+[+28.7s] PASS E3 W complete: it installs and waits; A stays in charge — installed
+[+28.7s] PASS E3 while W waits, A's live cache is untouched, and W's files are only in W's own candidate
+[+29.1s] PASS E3 the round plays on while W waits
+[+30.4s] PASS E3 every A page closed and one reopened: W is activated and controls it
+[+30.4s] PASS E3 scoped cleanup: W's live cache and someone else's remain; A's cache and every candidate are gone — ["mchezo-shell-a0b45db272b885e8","not-mchezo"]
+[+30.4s] PASS E3 W's live cache holds every file it precaches, and nothing of A's that W doesn't list
+[+31.5s] PASS E3 offline, W's shell is whole — {"notice":true,"build":"a0b45db272b885e8","files":2,"foreign":[]}
+[+31.8s] PASS E4 P (a policy change) deployed with a listed file missing: its install fails; W's cache exactly as it was; no candidate left — redundant
+[+32.0s] PASS E4 P complete: it installs and waits; W's cache untouched — installed
+[+33.3s] PASS E4 P activates; only P's live cache and someone else's remain — ["mchezo-shell-b38fb0b1e8af0057","not-mchezo"]
+[+33.5s] PASS E5 a worker with P's version but different bytes, a listed file missing: its install fails; P's cache exactly as it was; no candidate left — redundant
+[+33.8s] PASS E5 complete, it installs and waits without touching P's live cache (only its own candidate) — installed
+[+35.1s] PASS E5 on activation: one complete live cache, no candidate left — ["mchezo-shell-b38fb0b1e8af0057","not-mchezo"]
+[+36.3s] PASS E5 offline, the shell is whole — {"notice":true,"build":"b38fb0b1e8af0057","files":2,"foreign":[]}
+[+36.6s] 
+[+36.6s] All build-update checks passed
+[+36.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":5,"peakOpenPages":2}
+
+# PASS (exit 0) in 36.7s | cpu 40s, peak memory 732 MB

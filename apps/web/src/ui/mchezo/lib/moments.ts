@@ -60,3 +60,84 @@ export function celebrationMode(celebrate: boolean, reducedMotion: boolean): "bu
   if (!celebrate) return "none";
   return reducedMotion ? "still" : "burst";
 }
+
+/*
+ * Stage 10.2 (docs/stage10/stage102.md §3; D-S102-01..05): one line for a
+ * genuine moment in a finished Jebena Rush or Spectrum result. Same rules as
+ * the moments above: only finished, public facts every role already has (no
+ * private state, no individual guess); fixed, authored lines (never random),
+ * so a host, a guest, the TV and a reload read the same words; and nothing
+ * when no fact fits. Scores, places and the team summary stay the result;
+ * these lines only add a moment.
+ */
+
+/** A finished Jebena Rush game's public facts (its public state). */
+export interface JebenaFinished {
+  /** The module's own ending; null when the room ended the game (its match limit, an abort). */
+  end?: string | null;
+  startHearts?: number;
+  standings?: readonly { id: string; place: number; hearts: number; out: boolean; satOut: boolean }[];
+}
+
+export const JEBENA_LINES = {
+  lastCup: "One cup left. Still enough for the win.",
+  allCups: (n: number) => `All ${n} cups still whole. Not a single crack.`,
+} as const;
+
+/**
+ * Jebena Rush (D-S102-02): a line only for a sole winner, in a match the
+ * module ended, with at least one opponent knocked out by losing every cup
+ * (a win by others leaving gets none: the line never comments on absence).
+ * J1: exactly one cup left. J2: every starting cup still whole. Nothing else.
+ */
+export function jebenaMoment(st: JebenaFinished | null | undefined): string | null {
+  if (!st || (st.end !== "last-standing" && st.end !== "banks-exhausted")) return null;
+  const start = st.startHearts;
+  const rows = st.standings ?? [];
+  if (typeof start !== "number" || !Number.isInteger(start) || start < 2 || rows.length < 2) return null;
+  const firsts = rows.filter((r) => r.place === 1);
+  if (firsts.length !== 1) return null;
+  const w = firsts[0]!;
+  if (w.out || w.satOut || !Number.isInteger(w.hearts) || w.hearts < 1 || w.hearts > start) return null;
+  if (!rows.some((r) => r.id !== w.id && r.out && !r.satOut)) return null;
+  if (w.hearts === 1) return JEBENA_LINES.lastCup;
+  if (w.hearts === start) return JEBENA_LINES.allCups(start);
+  return null;
+}
+
+/** A finished Spectrum match's team result (public: outcome.team). */
+export interface SpectrumFinished {
+  end?: string | null;
+  roundsPlanned?: number;
+  rounds?: readonly { roundNo: number; reason: string; distance: number | null; points: number }[];
+  total?: number;
+  max?: number;
+}
+
+/** "1", "1 and 3", "1, 2 and 4". */
+const listRounds = (ns: readonly number[]) => (ns.length === 1 ? `${ns[0]}` : `${ns.slice(0, -1).join(", ")} and ${ns[ns.length - 1]}`);
+
+export const SPECTRUM_LINES = {
+  perfect: (max: number) => `${max} out of ${max}. The whole team was on one wavelength.`,
+  exact: (rounds: readonly number[]) =>
+    rounds.length === 1 ? `Round ${rounds[0]} landed exactly on the target.`
+      : `Rounds ${listRounds(rounds)} ${rounds.length === 2 ? "both" : "all"} landed exactly on the target.`,
+} as const;
+
+/**
+ * Spectrum (D-S102-03), team words only: a line only for a match the module
+ * completed with every planned round revealed (an early or room ending gets
+ * none). S1, every round scored and the full score, comes before S2, one or
+ * more scored rounds at distance 0. Never a name, a winner, a place, the Cup
+ * or anyone's own guess.
+ */
+export function spectrumMoment(team: SpectrumFinished | null | undefined): string | null {
+  if (!team || team.end !== "completed") return null;
+  const rounds = team.rounds ?? [];
+  const planned = team.roundsPlanned ?? 0;
+  if (!Number.isInteger(planned) || planned < 1 || rounds.length !== planned) return null;
+  const max = team.max ?? 0;
+  if (max > 0 && team.total === max && rounds.every((r) => r.reason === "scored")) return SPECTRUM_LINES.perfect(max);
+  const exact = rounds.filter((r) => r.reason === "scored" && r.distance === 0).map((r) => r.roundNo).sort((a, b) => a - b);
+  return exact.length ? SPECTRUM_LINES.exact(exact) : null;
+}

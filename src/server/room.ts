@@ -3539,6 +3539,19 @@ export class RoomEngine {
     });
   }
 
+  /**
+   * Stage 10.2 repair (review 6831760093, S102-R1; D-S102-06): the viewer's
+   * ledger with the room's freshness watermark, from one synchronous read.
+   * `seq` is the room's ledger seq (already public: every projection carries
+   * it), so a client can tell "current, with the newest events hidden from
+   * me" apart from "stale": the highest seq among the events it may see is
+   * not enough once the newest event is private (another player's
+   * abstention or recovery code, a live game's scores).
+   */
+  ledgerViewFor(actorId: string): { seq: number; events: LedgerEvent[] } {
+    return { seq: this.seq, events: this.ledgerFor(actorId) };
+  }
+
   /** Export a hash of the ledger for audit, without exposing tokens. */
   ledgerChecksum(): string {
     return createHash("sha256").update(JSON.stringify(this.ledger)).digest("hex").slice(0, 16);

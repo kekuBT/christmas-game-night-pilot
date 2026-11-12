@@ -26,6 +26,7 @@ import {
   type SpectrumPairView, type SpectrumRevealed, type SpectrumView, type TeamResult, type TeamRound,
 } from "../../ui/mchezo/lib/spectrum.js";
 import { SendNote } from "./SendNote.js";
+import { spectrumMoment } from "../../ui/mchezo/lib/moments.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
 const PHASE_MS = { clue: 60_000, guess: 45_000, reveal: 8_000 } as const;
@@ -407,6 +408,8 @@ export function MchezoSpectrumResults({ game, publicGame, players, playerId, tit
       {team ? (
         <>
           <p className="mz-sp-total" data-testid="sp-team-total" data-total={team.total} data-max={team.max}>{team.total}<span> / {team.max}</span></p>
+          {/* Stage 10.2 (D-S102-03/04): a team line for a genuine moment, under the result; nothing when no fact fits. */}
+          {(() => { const m = spectrumMoment(team); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
           <p className="mz-foot" data-testid="sp-team-note">One shared score for everyone who played. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
           <RoundList rounds={team.rounds} revealed={st.revealed ?? []} nameOf={nameOf} />
         </>
@@ -453,6 +456,7 @@ export function SpectrumTvFinal({ game, nameOf }: { game: PublicGame; nameOf: (i
     <section className="mz-tvshow-final mz-sp-tvfinal" data-testid="tv-team-final">
       <p className="mz-tvshow-winner" data-testid="tv-team-result">{teamTotalLine(team)}</p>
       <p className="mz-tvshow-line">One shared score for everyone who played.{end ? ` ${end}` : ""}</p>
+      {(() => { const m = spectrumMoment(team); return m ? <p className="mz-tvshow-line mz-tv-moment" data-testid="tv-results-moment">{m}</p> : null; })()}
       <RoundList rounds={team.rounds} revealed={st.revealed ?? []} nameOf={(id) => (id ? nameOf(id) : "someone")} tv testId="tv-sp-rounds" />
     </section>
   );

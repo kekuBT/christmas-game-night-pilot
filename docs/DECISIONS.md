@@ -1261,3 +1261,69 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - erasing the log at the offline boundary: it hides history from the integrity checks;
     - filtering by timestamp: clocks across pages and the server aren't one sequence;
     - retrying the check.
+
+## Stage 10.2: a results line for a genuine moment (Jebena Rush and Spectrum)
+- **D-S102-01 Extend the existing moment layer.**
+  - **How:** `jebenaMoment` and `spectrumMoment` join `apps/web/src/ui/mchezo/lib/moments.ts` (Stage 5, S5-E), which already holds one pure, deterministic line per finished game. They render with the same element as the Stage 5 lines (`results-moment`), and on the TV as `tv-results-moment`.
+  - **Alternative rejected:** a new results framework. It would duplicate the Stage 5 rules for the same job.
+- **D-S102-02 Jebena's guards.**
+  - **When a line can appear:** only when the module ended the match (`end` not null), with one sole winner (first place, not out, not sat out), and at least one opponent knocked out by losing every cup, not by leaving.
+  - **J1:** exactly one cup left. **J2:** every starting cup still whole.
+  - **No line for:** ties, room-ended games, wins by others leaving, and ordinary wins.
+  - **Alternative rejected:** allowing a line when every opponent left. It would comment on absence.
+- **D-S102-03 Spectrum's guards.**
+  - **When a line can appear:** only for a match the module completed with every planned round revealed.
+  - **S1:** every round scored and 40 of 40. It takes priority over **S2:** one or more scored rounds at distance 0.
+  - **Team words only:** no names, no winner, place or Cup, and never anyone's own guess.
+  - **Alternative rejected:** a bullseye line in an early-ended match. The early ending is the main fact there, and a quip beside it reads as commentary on who left.
+- **D-S102-04 Placement.**
+  - **Phone:** right under the game's own result line, after the result hero and What's next, so Play again, Pick another game and Take a break don't move.
+  - **TV:** under the final view's result line.
+  - **No line:** nothing is rendered, not even an empty box.
+- **D-S102-05 Fixed, unnamed copy.**
+  - **Why:** the lines are authored strings, never chosen at random, so a host, a guest, the TV and a reload read the same words.
+  - **Names:** Jebena's lines name nobody, because the headline above already names the winner. Spectrum's lines speak of the team and its rounds.
+- **D-S102-06 The Memory Book judges freshness by the loaded response's watermark (review 6831760093, S102-R1).**
+  - **The defect:** the screen compared the newest event this viewer may see with the room's unfiltered seq. When the room's newest event is private to someone else, the two never meet, and "Checking for the latest finished game…" waits forever. Private events here are another player's sit-out or recovery code, or a live game's scores. The defect was older than Stage 10.2. A sit-out that ends a game is logged after its `game-finished`, so it is the newest event in exactly the rooms where a highlight is wanted (the reviewer's Spectrum room, and any game ended by the last leaver).
+  - **The repair:**
+    - `GET /rooms/:id/ledger?watermark=1` returns `{ seq, events }`, where `seq` is the room's seq (already public in every projection) at the moment the events were filtered for this viewer. Without the opt-in, the same plain array goes to every existing consumer (`RoomEngine.ledgerViewFor`).
+    - The web keeps the watermark of the response it actually loaded (`ledgerAt`), not the projection's seq at completion time.
+    - The pure `memoryLink` (`apps/web/src/ui/mchezo/lib/memoryLink.ts`) gives one of five states:
+      - `loading` (nothing loaded);
+      - `syncing` (the loaded watermark is behind the room, so a newer game may have finished);
+      - `none`;
+      - `unavailable` (the last finished game is a team game, not saved yet);
+      - `ready`.
+    - Add is enabled only when `ready`.
+    - `newerLedger` refuses a response whose watermark is older than the one loaded, so overlapping loads can't roll the screen back.
+  - **Unchanged:**
+    - redaction (`ledgerFor` filters exactly as before; the watermark is a number every role already sees);
+    - the stale-citation guard (a ledger behind the room still can't cite the game before);
+    - the Memory Book's own rules (`NOT_IN_MEMORY_BOOK` for Spectrum).
+  - **Spectrum:** says plainly that the last game was a team game and team games aren't saved yet. Saving them is the next slice, not this repair.
+  - **Alternatives rejected:**
+    - the max visible seq (the defect);
+    - dropping the guard (could cite an earlier game);
+    - sending private events' seqs (leaks that something private happened, and when);
+    - a separate context endpoint (one opt-in on the existing route is smaller, and the watermark comes from the same filtering pass).
+  - **Tests:**
+    - `tests/stage102-memory-freshness.test.ts` (13), over HTTP: another player's recovery code; a sit-out in a running game; a supported game ended by the last sit-out; the reviewer's Spectrum case; the plain array unchanged; the opt-in needs a session from this room;
+    - pure: current, stale, out-of-order, Spectrum, loading and none;
+    - browser: `check-spectrum` (the reviewer's journey: "unavailable", never "Checking…", after a reload too) and `check-jebena-rush` (a replay ended by sit-outs: ready, and the highlight cites exactly that replay's finish).
+    - The Spectrum driver run against the pre-fix web build fails exactly these checks, still showing "Checking for the latest finished game…".
+- **D-S102-07 The short reconnect gets a room of its own, and its waits a hard deadline (review 6831760093, S102-R2).**
+  - **What went wrong:** in the main match, turns kept running out while the driver handled Amina's offline resync. So Baraka's "short drop" could land on the turn that ended the match: Amina was already out, and his phone was cut through the deciding loss. The driver then waited for a playing-screen element on the results (a locator that blocks for 30 s), and the "later live loss" never happened. All four failures follow from that, not from the app.
+  - **The repair (driver only):**
+    - The short reconnect moved to room S: Pendo's phone (390 px, reduced motion, socket and polls through the driver) against Halima, who answers whenever the jebena is hers, with 3 cups.
+    - Each step checks its preconditions first (whose turn, the cups, the match still on), then acts:
+      1. the drop, 3 → 2: the match goes on, and the resync must be seen within 3 s of the server's recorded loss;
+      2. a later live loss, 2 → 1: it breaks once;
+      3. the final loss, 1 → 0: it ends the match and breaks once on the results.
+    - `scripts/lib/deadline.mjs` `soonUntil` races every probe against the time left. A late or missing observation is a FAIL, and nothing is retried after the deadline (`tests/stage102-deadline.test.ts`, 5).
+    - The main match keeps Amina's offline resync, Keku's reload, and the R1 checks on the runner-up's phone, which is never cut now.
+  - **The final-loss question:** with the scenario valid, Pendo's reduced-motion phone breaks the last cup exactly once on the results after an earlier short reconnect. So the reviewer's R1 failure didn't reproduce, and no runtime change was made.
+  - **Negative control:** a copy of the driver that keeps the phone cut past the window fails the window checks instead of passing late.
+  - **Alternatives rejected:**
+    - a longer wait (a late resync would pass);
+    - accepting a finished game in the drop step (the original gap);
+    - skipping a step whose precondition fails (it fails instead).

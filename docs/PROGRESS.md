@@ -2170,7 +2170,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Review 6815908707 (repairs required on `f1c5f02`):** P2, an achievement ("First Game Finished") drawn from a Spectrum match through the ledger; P2, the briefing's "45 seconds for the impostor's guess"; copy, "Everyone finished." beside the early-ending reason, which also appeared twice. All three repaired with failing-first regressions (D-S93-08); the gate failure on `b668ee3` led to D-S93-09.
 - **Next:** a new completed report on PR #17; then ChatGPT's verification of the repair delta and private live audit. Nothing merged or deployed.
 
-## Stage 10.1: Jebena cini cups and truthful result feedback (repaired after reviews 6822605156 and 6828948844, awaiting re-review)
+## Stage 10.1: Jebena cini cups and truthful result feedback (CLEARED by ChatGPT's independent review 6829484451 on `0d9e4b4`/`30a56f9`)
 
 - **Brief:** ChatGPT's handoff 6820352096 on PR #17 (with the Stage 9.3 clearance), from the owner's request: "Instead of hearts let's use cini/cup so when they miss the cup breaks." Base `940df38` (PR #17's cleared head); branch `claude/stage10-1-jebena-cups`, a stacked PR on #17.
 - **Scope:** Jebena Rush's lives drawn and worded as small handleless coffee cups (cini) everywhere; a cup breaks when a life is lost; and the carried result-copy contradiction (a survival winner told "You missed this one"). No rule, score or protocol change; no humour or saving work.
@@ -2229,4 +2229,52 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - targeted (`jebena-rush`) `20261112-161936-0d9e4b43-1259` **PASSED** (exit 0, 3/3; `check-jebena-rush` 166 PASS, 0 FAIL);
   - fast `20261112-162112-0d9e4b43-1842` **PASSED** (exit 0, 5/5; 1,607 unit tests in 124 files).
   - No unchanged full gate, as the review asked.
-- **Next:** ChatGPT's independent check of the test delta and the focused run. Nothing merged or deployed.
+- **Cleared:** ChatGPT's review 6829484451 (11:30 a.m. ET) cleared Stage 10.1 on `0d9e4b4`/`30a56f9`:
+  - its own `check-jebena-rush` run passed 166, ALL PASS;
+  - its private live audit of the exact build found no blocking finding;
+  - physical iPhone and Android remain untested.
+  - The same comment hands off Stage 10.2.
+
+## Stage 10.2: a results line for a genuine moment, Jebena Rush and Spectrum (repairs for 6831760093 completed, awaiting review)
+- **Brief:** ChatGPT's handoff 6829484451 on PR #18. Base `30a56f9` (PR #18's cleared head); branch `claude/stage10-2-result-lines`, a stacked PR on #18.
+- **Scope:** one short, optional line from a pure, deterministic selector over public finished facts, on the player results and the TV final. Jebena: one cup left, or every cup whole, for a sole winner. Spectrum: 40 of 40, or a round exactly on target, for a completed match. No server, score, schema or Memory Book change.
+- **Spec:** `docs/stage10/stage102.md` (estimate about 4.5–5.5 h; §8 as built); decisions D-S102-01 to 05.
+- **Built:**
+  - `jebenaMoment` and `spectrumMoment` in `lib/moments.ts` (the Stage 5 moment layer): pure, deterministic, fixed lines, finished public facts only.
+  - **Rendered:** under the result on the phone results (`results-moment`) and on the TV final views (`tv-results-moment`).
+  - **Unchanged:** no server, score, projection, schema or Memory Book change.
+- **Tests:**
+  - `tests/stage102-moments.test.ts` (24).
+  - `check-jebena-rush`:
+    - room C's one-cup line on both phones (Everyday 390, Christmas 320) and a TV, after reloads;
+    - a replay won by absence gets none, and none is carried over;
+    - the main match is checked by the driver's own oracle.
+  - `check-spectrum`: round 3 on target, so the line shows on three phones and the TV, after reloads; the early-ended match gets none.
+- **Gates** on `cdb77ad` (each verdict is one run on one revision; evidence in `docs/evidence/gate-runs/<run>/`):
+  - targeted (`jebena-rush spectrum`) `20261112-164638-cdb77add-1528` **PASSED** (4/4; Jebena 193, Spectrum 137);
+  - fast `20261112-164851-cdb77add-2300` **PASSED** (5/5; 1,631 unit tests);
+  - checkpoint full gate `20261112-165001-cdb77add-5562` **PASSED** (exit 0, 88/88, 33 min 25 s, no leftover processes).
+- **Screenshots:** `docs/stage10/stage102-screenshots/`.
+- **Not run:** real iPhone Safari and Android Chrome.
+- **Next:** ChatGPT's independent review and private live audit of PR #19. Nothing merged or deployed.
+- **Repairs (ChatGPT's verdict 6831760093; spec §9; D-S102-06, D-S102-07):**
+  - **S102-R1, Memory Book freshness** (`f21f84b`):
+    - `GET /rooms/:id/ledger?watermark=1` returns `{ seq, events }`; the plain array is unchanged;
+    - the screen judges freshness by the watermark of the response it loaded (pure `memoryLink`: loading, syncing, none, unavailable, ready), and an older response can't roll it back;
+    - Spectrum says team games aren't saved yet;
+    - redaction and the stale-citation guard are unchanged.
+    - Tests: `tests/stage102-memory-freshness.test.ts` (13); `check-spectrum` (the reviewer's journey); `check-jebena-rush` (a supported game ended by sit-outs).
+  - **S102-R2, the short reconnect** (`6264827`, driver only):
+    - room S, with three proven steps (the drop with the match on and the resync inside 3 s; a later live loss; the final loss on the results);
+    - `scripts/lib/deadline.mjs` bounds every probe (`tests/stage102-deadline.test.ts`, 5);
+    - the final-loss failure didn't reproduce once the scenario was valid, so no runtime change.
+  - **Before and after, locally** (`docs/evidence/stage102-repair-local/`):
+    - the Spectrum driver with the pre-fix web build fails exactly the new checks (exit 1, 4 FAIL, still "Checking…"); the repaired build passes (144 PASS);
+    - a late-reconnect mutation of the Jebena driver fails the window checks (exit 1, 3 FAIL).
+  - **The report's screenshot links** (6830866760) are now plain paths. The posting path kept wrapping the URLs in backticks.
+  - **Gates on `b8e75be`:**
+    - targeted `20261112-182951-b8e75be6-3265` **PASSED** (7/7; Jebena 216, Spectrum 145);
+    - fast `20261112-183218-b8e75be6-4560` **PASSED** (1,649 unit tests);
+    - repair checkpoint full gate `20261112-183329-b8e75be6-7881` **PASSED** (exit 0, 88/88, 33 min 31 s).
+  - **Next:** ChatGPT's verification of the repairs, then Stage 10.3. Nothing merged or deployed.
+

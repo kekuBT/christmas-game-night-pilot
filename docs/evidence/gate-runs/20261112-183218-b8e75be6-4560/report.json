@@ -1,0 +1,259 @@
+{
+  "runId": "20261112-183218-b8e75be6-4560",
+  "level": "fast",
+  "startedAt": "2026-11-12T18:32:18.831Z",
+  "finishedAt": "2026-11-12T18:33:20.507Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s102r-fast",
+  "git": {
+    "head": "b8e75be63129129492bce8bcc814174ac369d2bf",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "eae4549343e8873869717a7a73d1ac25a44106b06d23c6d934d9d3a473c5d544",
+    "files": 509
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15514
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.2 GB available",
+  "browser": null,
+  "steps": [
+    {
+      "name": "typecheck-server",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 13.7,
+      "log": "./logs/01-typecheck-server.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 12,
+      "startOffsetSec": 0.3,
+      "endOffsetSec": 14,
+      "cpuSec": 17.2,
+      "peakRssMB": 527,
+      "machine": {
+        "memAvailMinMB": 14039,
+        "cpuSaturatedSec": 0,
+        "samples": 15
+      },
+      "failureKind": null
+    },
+    {
+      "name": "typecheck-web",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 13.5,
+      "log": "./logs/02-typecheck-web.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 12,
+      "startOffsetSec": 0.3,
+      "endOffsetSec": 13.8,
+      "cpuSec": 16.3,
+      "peakRssMB": 392,
+      "machine": {
+        "memAvailMinMB": 14039,
+        "cpuSaturatedSec": 0,
+        "samples": 14
+      },
+      "failureKind": null
+    },
+    {
+      "name": "lint",
+      "kind": "check",
+      "command": "node ./node_modules/eslint/bin/eslint.js .",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 20.5,
+      "log": "./logs/03-lint.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 18,
+      "startOffsetSec": 0.3,
+      "endOffsetSec": 20.8,
+      "cpuSec": 23.7,
+      "peakRssMB": 668,
+      "machine": {
+        "memAvailMinMB": 13978,
+        "cpuSaturatedSec": 1,
+        "samples": 23
+      },
+      "failureKind": null
+    },
+    {
+      "name": "unit-tests",
+      "kind": "check",
+      "command": "node ./node_modules/vitest/vitest.mjs run",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 47.8,
+      "log": "./logs/04-unit-tests.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 41,
+      "startOffsetSec": 13.8,
+      "endOffsetSec": 61.6,
+      "cpuSec": 53.8,
+      "peakRssMB": 663,
+      "machine": {
+        "memAvailMinMB": 13978,
+        "cpuSaturatedSec": 1,
+        "samples": 52
+      },
+      "failureKind": null
+    },
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261112-183218-b8e75be6-4560/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 8.5,
+      "log": "./logs/05-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 7,
+      "startOffsetSec": 14,
+      "endOffsetSec": 22.5,
+      "cpuSec": 9.9,
+      "peakRssMB": 619,
+      "machine": {
+        "memAvailMinMB": 13978,
+        "cpuSaturatedSec": 1,
+        "samples": 11
+      },
+      "failureKind": null
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [],
+  "timing": {
+    "wallSec": 62,
+    "sumSec": 104,
+    "utilisation": 0.56,
+    "perWorkerBusySec": {
+      "w1": 22,
+      "w2": 61,
+      "w3": 21
+    },
+    "predicted": {
+      "low": 33,
+      "mid": 43,
+      "high": 75,
+      "confidence": "measured"
+    },
+    "contentionRatio": 1.139,
+    "longest": [
+      {
+        "name": "unit-tests",
+        "sec": 47.8
+      },
+      {
+        "name": "lint",
+        "sec": 20.5
+      },
+      {
+        "name": "typecheck-server",
+        "sec": 13.7
+      },
+      {
+        "name": "typecheck-web",
+        "sec": 13.5
+      },
+      {
+        "name": "build-web",
+        "sec": 8.5
+      }
+    ],
+    "backpressure": {
+      "waits": 0,
+      "seconds": 0
+    },
+    "system": {
+      "cpuPctMean": 76,
+      "cpuPctPeak": 99,
+      "memAvailMinMB": 13978,
+      "load1Peak": 4.08,
+      "cpuPctEvery10s": [
+        93,
+        98,
+        35,
+        62,
+        73,
+        85
+      ]
+    },
+    "serverUse": [],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "typecheck-server",
+        "phase": "fast",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "typecheck-web",
+        "phase": "fast",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "lint",
+        "phase": "fast",
+        "estSec": 18,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 4,
+        "name": "unit-tests",
+        "phase": "fast",
+        "estSec": 41,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 5,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 7,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 32.76226,
+      "mid": 42.5061,
+      "high": 75.4606125,
+      "sequentialSec": 90.25000000000001,
+      "confidence": "measured",
+      "contention": 1.038,
+      "contentionSource": "measured"
+    }
+  }
+}
