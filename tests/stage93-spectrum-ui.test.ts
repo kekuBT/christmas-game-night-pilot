@@ -124,3 +124,19 @@ describe("the shared surfaces' cooperative branch (§3): a team result, never a 
     expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" }).map((x) => x.id)).not.toContain("spectrum");
   });
 });
+
+describe("review 6815042876: the briefing's timing lines speak of this game's phases", () => {
+  it("Spectrum's clue, guesses and reveal; never another game's words (Impostor's are its own)", async () => {
+    const { timingLines } = await import("../apps/web/src/ui/mchezo/lib/briefing.js");
+    const { policyFor } = await import("../src/server/lifecycle.js");
+    const sp = timingLines(policyFor("spectrum"), "spectrum");
+    expect(sp).toEqual([
+      "60 seconds for the clue.",
+      "45 seconds for everyone's guesses.",
+      "8 seconds for each reveal.",
+      "The whole game ends by itself after about 10 minutes.",
+    ]);
+    expect(sp.join(" ")).not.toMatch(/impostor/i);
+    expect(timingLines(policyFor("impostor"), "impostor").join(" ")).toContain("the impostor's guess");
+  });
+});

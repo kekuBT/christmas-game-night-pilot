@@ -55,7 +55,7 @@ interface CommonProps {
 
 function Rules({ gameId, registry, tv, hearts }: { gameId: string; registry?: RegistryGame; tv?: boolean; /** Stage 9.1: Jebena Rush's hearts, bound at Start. */ hearts?: number }) {
   const rules = briefingRules(gameId, registry?.tutorial ?? "");
-  const timing = timingLines(registry?.lifecycle);
+  const timing = timingLines(registry?.lifecycle, gameId);
   return (
     <section className={`mz-card mz-brief__rules${tv ? " mz-brief__rules--tv" : ""}`} aria-labelledby="mz-brief-rules">
       <span className="mz-kicker" id="mz-brief-rules">How to play</span>

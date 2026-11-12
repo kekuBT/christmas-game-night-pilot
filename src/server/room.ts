@@ -2847,9 +2847,11 @@ export class RoomEngine {
 
   achievements() {
     const rawScoresByGame: Record<string, Record<string, number>> = {};
-    // Stage 9.3: no achievement is ever drawn from a cooperative game's per-player copies.
+    // Stage 9.3: no achievement is ever drawn from a cooperative game: not from its per-player copies, and
+    // (review 6815042876) not from its events either, so "First Game Finished" never cites a Spectrum match.
     for (const g of this.games.values()) if (g.status === "finished" && !isCooperative(g.gameId)) rawScoresByGame[g.id] = g.rawScores;
-    return evaluateAchievements(this.ledger, rawScoresByGame);
+    const coop = new Set([...this.games.values()].filter((g) => isCooperative(g.gameId)).map((g) => g.id));
+    return evaluateAchievements(this.ledger.filter((e) => !e.gameInstanceId || !coop.has(e.gameInstanceId)), rawScoresByGame);
   }
 
   /**

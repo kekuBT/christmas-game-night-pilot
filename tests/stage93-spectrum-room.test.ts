@@ -379,3 +379,26 @@ describe("Spectrum and the Memory Book over HTTP (§3: not saved in this slice)"
     expect((await h.get(`/rooms/${h.roomId}/memory`, { "x-session-token": host.token })).body).toEqual([]);
   });
 });
+
+describe("review 6815042876: no achievement is ever drawn from a cooperative game", () => {
+  it("a room whose only finished game is Spectrum has no achievement; the next competitive game is the room's first", () => {
+    const env = setup(3);
+    const m = start(env);
+    for (let r = 0; r < SPECTRUM_ROUNDS; r++) perfectRound(env, m);
+    expect(m.game.status).toBe("finished");
+    expect(env.engine.achievements()).toEqual([]);
+    for (const p of env.ids) expect((env.engine.project("player", p) as { achievements?: unknown[] }).achievements ?? []).toEqual([]);
+    expect((env.engine.project("tv") as { achievements?: unknown[] }).achievements ?? []).toEqual([]);
+    // A competitive game afterwards: "First Game Finished" cites that game, never the Spectrum match.
+    const g = env.engine.startGame(env.ids[0]!, "trivia", { official: false });
+    for (const p of env.ids) env.send(p, g.id, "briefing-ready", { ready: true });
+    const trivia = env.engine.games.get(g.id)!;
+    expect(trivia.status).toBe("playing");
+    for (const p of env.ids) env.send(p, g.id, "abstain", {});
+    expect(trivia.status).toBe("finished");
+    const first = env.engine.achievements().find((a) => a.ruleId === "first-game");
+    expect(first).toBeDefined();
+    const cited = env.engine.ledger.filter((e) => first!.sourceEventIds.includes(e.eventId));
+    expect(cited.every((e) => e.gameInstanceId === g.id)).toBe(true);
+  });
+});

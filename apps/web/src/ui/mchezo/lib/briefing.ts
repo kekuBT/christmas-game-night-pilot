@@ -71,20 +71,31 @@ const PHASE_WORDS: Record<string, string> = {
   vote: "voting",
   round: "each round",
   clue: "giving clues",
-  guess: "the impostor's guess",
+  guess: "guessing",
   predict: "predicting and voting",
   reveal: "each reveal",
   draw: "each drawing",
   turn: "each turn",
 };
 
-/** The real time limits, from the lifecycle policy the server enforces. */
-export function timingLines(lifecycle?: { gameWindowMs: number; phaseMs?: Partial<Record<string, number>> }): string[] {
+/**
+ * Stage 9.3 (review 6815042876): a phase kind can mean different things in
+ * different games ("guess" is the impostor's one guess in Impostor, but
+ * everyone's guesses in Spectrum), so a game may name its own phases.
+ */
+const GAME_PHASE_WORDS: Record<string, Record<string, string>> = {
+  "impostor": { guess: "the impostor's guess" },
+  "spectrum": { clue: "the clue", guess: "everyone's guesses", reveal: "each reveal" },
+};
+
+/** The real time limits, from the lifecycle policy the server enforces, in this game's own words. */
+export function timingLines(lifecycle?: { gameWindowMs: number; phaseMs?: Partial<Record<string, number>> }, gameId?: string): string[] {
   if (!lifecycle) return [];
   const lines: string[] = [];
   const phases = Object.entries(lifecycle.phaseMs ?? {}).filter(([, ms]) => typeof ms === "number" && ms > 0) as [string, number][];
   // Whole seconds, rounded down: a phase may carry a fraction of a second of network grace (Jebena Rush: 10 s + 0.5 s).
-  for (const [k, ms] of phases) lines.push(`${Math.floor(ms / 1000)} seconds for ${PHASE_WORDS[k] ?? k}.`);
+  const words = (gameId && GAME_PHASE_WORDS[gameId]) || {};
+  for (const [k, ms] of phases) lines.push(`${Math.floor(ms / 1000)} seconds for ${words[k] ?? PHASE_WORDS[k] ?? k}.`);
   const min = Math.round(lifecycle.gameWindowMs / 60_000);
   lines.push(min >= 1 ? `The whole game ends by itself after about ${min} minute${min === 1 ? "" : "s"}.` : `The whole game ends by itself after ${Math.round(lifecycle.gameWindowMs / 1000)} seconds.`);
   return lines;
