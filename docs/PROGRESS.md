@@ -2074,7 +2074,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Private live-site audit:** done on Codespaces port 3457 (private). It covered the Settings install guidance, a full Word Connections round through a stop and restart of the preview (450 points), host and guest, a guest reload, the TV and break/resume.
 - **Not run:** native install, WebKit and real phones.
 
-## Stage 9.1: Jebena Rush, the first playable slice (completed checkpoint `4d91cd6`: fast and full gates PASSED; awaiting review)
+## Stage 9.1: Jebena Rush, the first playable slice (CLEARED by ChatGPT's independent review 6811101479 on `4d91cd6`/`aaa6981`)
+
+- **Cleared** 2026-11-11 (6811101479): no remaining blocking finding.
+  - The reviewer ran 63/63 focused tests, the web build, and the browser driver (106 checks, 0 failed).
+  - Its private live-site audit covered phone 320/390, host, guest and TV, answers and timeouts, replay and cancel, reload, a server interruption with catch-up, and break/resume.
+  - This is development clearance, not merge, deployment or real-device certification. Real phones, WebKit and Part K are not run.
+- **One nonblocking note:** terminal branches could keep the holder's last rejected try in the saved module state. Fixed in Stage 9.2's first commit (`abafb95`).
 
 - **Brief:** ChatGPT's handoff 6807907986 on PR #14. Base `90290ef` (PR #14's head); branch `claude/stage9-1-jebena-rush`, stacked PR #15 on #14.
 - **Spec:** `docs/stage9/stage91.md` (§13: as built and tested). Decisions D-S91-01 to D-S91-09 in `docs/DECISIONS.md`.
@@ -2101,3 +2107,19 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `4d91cd6` (final candidate): targeted (`jebena-rush f5 quick-party mchezo stage2 --e2e`) `20261111-231957-4d91cd63-11612` PASSED (8/8); then, sequentially, fast `20261111-232840-4d91cd63-13143` **PASSED** (exit 0, 5/5, 47 s) and full `20261111-232938-4d91cd63-16286` **PASSED** (exit 0, 87/87, 31 min 49 s, no leftover processes).
   - Local runs of `check-jebena-rush` on a clean clone of `4d91cd6` with that full run's build: 105 and 106 checks, 0 failed (`docs/evidence/stage91/`).
 - **Next:** the completed report on PR #15; then ChatGPT's review and private audit before Stage 9.2.
+
+## Stage 9.2: Spectrum foundation: rules, privacy, a pure module (in progress)
+
+- **Brief:** ChatGPT's handoff 6811101479 on PR #15. Base `aaa6981` (PR #15's cleared head); branch `claude/stage9-2-spectrum`, a stacked PR on #15.
+- **Scope:** the spec, a pure module, a content pack and tests. The module is **not wired into the product**: no registry, manifest, policy, picker, Quick Party, Cup, solo or navigation entry. The next slice wires the phone and TV journey after review.
+- **Spec:** `docs/stage9/stage92.md`.
+  - Four seeded rounds: clue 60 s, guess 45 s, reveal 8 s.
+  - The median team guess, scored 10/7/4/0 for a maximum of 40.
+  - Sit-outs, skipped rounds and the fewer-than-two ending; disconnects change nothing.
+  - Exactly once, including the module's own idempotent expiry.
+  - Privacy by role and phase.
+  - One shared team score (the per-player results pipeline conflict and a bounded proposal, §8).
+  - An accessibility contract for the next UI slice.
+- **Done so far:** `abafb95`, the Jebena terminal-feedback cleanup: an optional `GameModule.onFinish`, called once by `finalize`. It has 7 terminal-path tests; 6 of them fail without the change.
+- **Next:** the module and pack, the tests, the gates, and a new completed report.
+
