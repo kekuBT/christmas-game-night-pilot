@@ -115,7 +115,7 @@ export function MemoryScreen(props: {
       }
       if (page !== pages[pages.length - 1]) doc.addPage();
     }
-    const name = exportFilename("pdf", roomCode, new Date());
+    const name = exportFilename("pdf", roomCode, new Date(), christmas ? "christmas" : "everyday");
     doc.save(name);
     return name;
   }
@@ -156,7 +156,7 @@ export function MemoryScreen(props: {
     }
     if (truncated) { ctx.fillText("…entry continues in the PDF export.", 60, canvasNoteY(y + 24)); }
     else if (overflow > 0) { ctx.fillText(`…and ${overflow} more in the PDF export.`, 60, canvasNoteY(y + 24)); }
-    const name = exportFilename("png", roomCode, new Date());
+    const name = exportFilename("png", roomCode, new Date(), christmas ? "christmas" : "everyday");
     const a = document.createElement("a");
     a.href = canvas.toDataURL("image/png");
     a.download = name;

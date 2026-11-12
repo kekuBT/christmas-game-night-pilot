@@ -91,7 +91,7 @@ try {
   await main.page.getByRole("heading", { name: "TV Dashboard" }).waitFor({ timeout: 15000 });
   await main.page.screenshot({ path: `${OUT}/08-tv-hub.png`, fullPage: true });
   await main.page.getByRole("button", { name: "Memory Book" }).click();
-  await main.page.getByRole("heading", { name: "Christmas Memory Book" }).waitFor({ timeout: 15000 });
+  await main.page.getByTestId("memory-title").waitFor({ timeout: 15000 });
   await main.page.screenshot({ path: `${OUT}/09-memory-book.png`, fullPage: true });
   // Add + approve an entry, then screenshot the ceremony section of the championship view.
   const proj = await fetch(`${base}/rooms/${main.room.roomId}/ledger`, { headers: { "x-session-token": main.players[0].recoveryToken } }).then((r) => r.json());

@@ -37,12 +37,14 @@ export function canvasNoteY(y: number, maxY = 1040): number {
 /**
  * Stage 4 (S3-MEM-01): a file name that says what and when: the room's public
  * code and the local date, e.g. christmas-memory-book-ABC123-2026-11-09.pdf.
+ * Stage 10.3 (D-S103-06): named for the device's look, like the title inside
+ * it: mchezo-memory-book-… on Everyday, christmas-memory-book-… on Christmas.
  */
-export function exportFilename(ext: "pdf" | "png", roomCode: string | undefined, now: Date): string {
+export function exportFilename(ext: "pdf" | "png", roomCode: string | undefined, now: Date, look: "everyday" | "christmas" = "christmas"): string {
   const code = (roomCode ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
   const pad = (n: number) => String(n).padStart(2, "0");
   const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-  return `christmas-memory-book${code ? `-${code}` : ""}-${date}.${ext}`;
+  return `${look === "christmas" ? "christmas" : "mchezo"}-memory-book${code ? `-${code}` : ""}-${date}.${ext}`;
 }
 
 /**
