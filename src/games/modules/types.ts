@@ -61,6 +61,13 @@ export interface GameModule<S = unknown> {
   /** Close every player window that ended at or before ctx.now (missed: no points). */
   advance?(s: S, ctx: ModuleContext): void;
   finished(s: S, ctx: ModuleContext): boolean;
+  /**
+   * Stage 9.2 (review 6811101479): the room has finished this game, for any
+   * reason (the module's own end, a match limit, a backstop). Drop private
+   * state that no longer serves anyone (e.g. a player's last rejected try).
+   * Called once, before the result is recorded; never changes scores.
+   */
+  onFinish?(s: S, ctx: ModuleContext): void;
   /** Totals from everything completed so far (the final scores once finished). */
   scores(s: S, players: readonly string[]): Record<string, number>;
   participation(s: S, players: readonly string[]): { participation: Record<string, Participation>; completedUnits?: number; totalUnits?: number };

@@ -2569,6 +2569,8 @@ export class RoomEngine {
       if (Object.values(finalScores).some((v) => typeof v !== "number" || !Number.isFinite(v))) throw new Error("non-numeric score");
       part = this.participationOf(game, reason);
       nobodyPlayed = !this.anyoneParticipated(game, part.participation);
+      // Stage 9.2: a module may drop private state it no longer needs (Jebena's last rejected try).
+      moduleFor(game.gameId)?.onFinish?.(game.extra, this.moduleCtx(game, at));
     } catch (err) {
       // Nothing has been written yet: the game is voided, never half-finished.
       this.voidGame(game, at, `scores could not be calculated: ${(err as Error).message}`);

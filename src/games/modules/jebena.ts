@@ -111,12 +111,23 @@ function nextAfter(s: JebenaState, from: string): string | null {
   return null;
 }
 
+/**
+ * The one way a match ends inside the module: no turn, and no private
+ * feedback kept (review 6811101479: a last rejected try must not outlive its
+ * turn in the saved state). The room's own match limit ends a game through
+ * `onFinish`, which clears the same.
+ */
+function finish(s: JebenaState, end: NonNullable<JebenaState["end"]>): void {
+  s.end = end;
+  s.turn = null;
+  s.attempts = {};
+}
+
 /** End the match if one player (or nobody) is left; true if it ended. */
 function endIfOver(s: JebenaState): boolean {
   if (s.end) return true;
   if (alive(s).length <= 1) {
-    s.end = "last-standing";
-    s.turn = null;
+    finish(s, "last-standing");
     return true;
   }
   return false;
@@ -135,8 +146,7 @@ function nextCategory(s: JebenaState, at: number, turn: number): boolean {
       return true;
     }
   }
-  s.end = "banks-exhausted";
-  s.turn = null;
+  finish(s, "banks-exhausted");
   return false;
 }
 
@@ -144,7 +154,7 @@ function nextCategory(s: JebenaState, at: number, turn: number): boolean {
 function passFrom(s: JebenaState, from: string): void {
   if (endIfOver(s)) return;
   const next = nextAfter(s, from);
-  if (!next) { s.end = "last-standing"; s.turn = null; return; }
+  if (!next) { finish(s, "last-standing"); return; }
   s.turn = { n: (s.turn?.n ?? 0) + 1, player: next, attempts: 0 };
   s.attempts = {};
 }
@@ -313,6 +323,10 @@ export const jebenaModule: GameModule<JebenaState> = {
     passFrom(s, who);
   },
   finished: (s) => s.end !== null,
+  // The room ended the game (its match limit, or any other reason): nothing private outlives it.
+  onFinish(s) {
+    s.attempts = {};
+  },
   scores(s, players) {
     const pts = jebenaPoints(s);
     return Object.fromEntries(players.map((pid) => [pid, pts[pid] ?? 0]));
