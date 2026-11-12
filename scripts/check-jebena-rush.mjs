@@ -537,6 +537,29 @@ try {
   /** Every life lost (seat, the slot that broke), from the server's own counts; `final` ended the match. */
   const lost = [];
   const turnTotal = 10_500;
+  /**
+   * The out screen, whichever turn took the last cup. A player can go out on an ordinary timeout, or on a turn where
+   * the driver had cut their phone (Amina offline, Baraka's short drop). With three players someone always goes out
+   * before the end, so these checks always run (checked after the loop). `live`: their phone saw that loss live; if
+   * not, the last cup shows broken without breaking (S101-R2).
+   */
+  async function outChecks(h, hp, live) {
+    outShot = true;
+    await soon(`F ${nameOf[h]} is out and watches the rest`, async () => hp.getByTestId("jr-out").isVisible());
+    await soon(`F ${nameOf[h]}'s own row: every cup broken, "0 of 3 cups: out"`, async () => { const c = await cupsIn(hp.getByTestId("jr-my-hearts")); return c.cups === 0 && c.whole === 0 && c.broken === 3 && c.label === "0 of 3 cups: out"; });
+    if (live) check(`F ${nameOf[h]}'s last cup broke on their own row`, (await breaks(hp)).some((x) => x.surface === "hud" && x.seat === h && x.slot === 0));
+    else check(`F ${nameOf[h]}'s phone was cut when the last cup went: it shows broken without breaking (a resync)`, (await breaks(hp)).filter((x) => x.surface === "hud" && x.seat === h && x.slot === 0).length === 0, JSON.stringify(await breaks(hp)));
+    check("F the out screen says the cups are broken", /All your cups are broken/.test(await hp.locator("body").innerText()) && noHearts(await hp.locator("body").innerText()));
+    check("F the out screen: no sideways scroll", await noSideScroll(hp));
+    await shot(hp, `jr-out-${hp === A ? "320-christmas" : "390"}`);
+    await soon("F the TV marks them out: every cup broken, and \"Out\"", async () => { const c = await cupsIn(TV.getByTestId(`jr-seat-${h}`)); return (await TV.getByTestId(`jr-seat-${h}`).getAttribute("data-out")) === "true" && c.broken === 3 && c.whole === 0 && /Out/.test(c.text); });
+  }
+  /** After a turn the driver handled itself: the out checks, if that turn took the player's last cup. */
+  async function outIfOut(h, hp) {
+    const v = await playerView(K);
+    const r = (v.st?.order ?? v.st?.standings ?? []).find((x) => x.id === h);
+    if (r?.out && v.g.status !== "finished" && !outShot) await outChecks(h, hp, false);
+  }
   for (let guard = 0; guard < 40; guard++) {
     const now = await playerView(K);
     if (now.g.status === "finished" || !now.st.turn) break;
@@ -577,6 +600,7 @@ try {
       await sleep(2500);
       const back = (await playerView(K)).st;
       check("E reconnecting never resubmitted what she typed offline", !(back.log ?? []).some((e) => e.kind === "accepted" && e.answer === ans.name) && back.order.find((s) => s.id === seat.A.playerId).answers === now.st.order.find((s) => s.id === seat.A.playerId).answers);
+      await outIfOut(h, hp);
       continue;
     }
     if (reloadDone && !shortCutDone && h === seat.B.playerId) {
@@ -598,6 +622,7 @@ try {
       const inWindow = resynced ? resynced - lossAt : null;
       baraReconnectedAt = Date.now();
       check(`R2 the resync came inside the window (${inWindow} ms after the loss) and the lost cup showed broken without breaking`, inWindow !== null && inWindow < 3000 && (await breaks(B)).filter((x) => x.seat === h).length === 0, JSON.stringify(await breaks(B)));
+      await outIfOut(h, hp);
       continue;
     }
     if (!reloadDone && h === seat.B.playerId) {
@@ -633,17 +658,10 @@ try {
       await shot(TV, "jr-tv-cup-broken-1440");
       // Repeated views (pushes, clock ticks) never break a cup twice: checked on every page at the end of the match (F).
     }
-    if (row?.out && timedOut.g.status !== "finished" && !outShot) {
-      outShot = true;
-      await soon(`F ${nameOf[h]} is out and watches the rest`, async () => hp.getByTestId("jr-out").isVisible());
-      await soon(`F ${nameOf[h]}'s own row: every cup broken, "0 of 3 cups: out"`, async () => { const c = await cupsIn(hp.getByTestId("jr-my-hearts")); return c.cups === 0 && c.whole === 0 && c.broken === 3 && c.label === "0 of 3 cups: out"; });
-      check(`F ${nameOf[h]}'s last cup broke on their own row`, (await breaks(hp)).some((x) => x.surface === "hud" && x.seat === h && x.slot === 0));
-      check("F the out screen says the cups are broken", /All your cups are broken/.test(await hp.locator("body").innerText()) && noHearts(await hp.locator("body").innerText()));
-      check("F the out screen: no sideways scroll", await noSideScroll(hp));
-      await shot(hp, `jr-out-${hp === A ? "320-christmas" : "390"}`);
-      await soon("F the TV marks them out: every cup broken, and \"Out\"", async () => { const c = await cupsIn(TV.getByTestId(`jr-seat-${h}`)); return (await TV.getByTestId(`jr-seat-${h}`).getAttribute("data-out")) === "true" && c.broken === 3 && c.whole === 0 && /Out/.test(c.text); });
-    }
+    if (row?.out && timedOut.g.status !== "finished" && !outShot) await outChecks(h, hp, true);
   }
+
+  check("F someone went out before the end, and their out screen was checked", outShot);
 
   // ---------- F. Results ----------
   const fin = await soon("F the match finishes: one player left", async () => { const x = await playerView(K); return x.g?.status === "finished" ? x : null; }, 30000);

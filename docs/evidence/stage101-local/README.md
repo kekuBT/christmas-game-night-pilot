@@ -35,3 +35,12 @@ Full gate `20261112-122710-25c28143-13503` failed one check in `check-tv-outage`
 | `tv-note-race.patch` | A temporary `TVNOTE_GAP_MS` gap between the old helper's two calls (count the note, then read it), in the "note goes away" check only. It applies to `scripts/check-tv-outage.mjs` as of `25c2814`. |
 | `tv-note-race-before.log` | The old helper with `TVNOTE_GAP_MS=4500`: the note's 4 s removal falls in the gap, and the check fails with the gate's exact message. |
 | `tv-note-race-after.log` | The fixed helper (one `evaluate`), with the same 4.5 s delay before its single read: all checks pass. |
+
+## The out screen, whichever turn takes the last cup (D-S101-12)
+The full gate `20261112-130723-36e222fb-785` passed, but its `check-jebena-rush` never ran the out-screen checks: Baraka's last cup went on his R2 short-drop turn, and that branch skipped them.
+
+| File | What it is |
+|---|---|
+| `out-in-resync.patch` | A temporary `JR_SHORT_CUT_ON_LAST` switch that holds Baraka's short drop until his last cup, so he always goes out during it. Never committed into the driver. |
+| `check-jebena-rush-forced-out-in-resync.log` | The fixed driver with that switch. The out checks run in their resync form (his last cup shows broken without breaking), and "someone went out before the end, and their out screen was checked" passes. ALL PASS. |
+| `check-jebena-rush-final-driver.log` | The fixed driver, run normally: 162 PASS, 0 FAIL. |
