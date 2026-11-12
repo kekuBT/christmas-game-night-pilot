@@ -1162,3 +1162,27 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Timing lines in each game's words:** `timingLines(lifecycle, gameId)` takes per-game phase words. A "guess" phase is the impostor's one guess in Impostor and everyone's guesses in Spectrum; the generic word is "guessing".
   - **A cooperative outcome line says how many rounds were played** ("2 of 4 rounds played."), never "Everyone finished."; why a match ended early is said once, by the team result in the results hero.
 - **D-S93-07 The Spectrum driver plays real time.** `scripts/check-spectrum.mjs` runs the real 60/45/8-second phases (one clue phase runs out), so its gate timeout is 900 s.
+
+## Stage 10.1: Jebena cini cups and truthful result feedback (2026-11-12, branch `claude/stage10-1-jebena-cups`, from the Stage 9.3 head `940df38`)
+
+- **D-S101-01 Cups are a picture of the existing lives.** 3, 5 or 7 (default 5); one is lost on a timeout; scoring is unchanged (100 per player outlasted, 10 per life kept). Only the drawing and the words change (owner's request, handoff 6820352096).
+- **D-S101-02 Identifiers keep `hearts`.**
+  - **What stays:** the server state, the protocol, the `settings.hearts` key, test ids and data attributes.
+  - **What changes:** only user-facing words and pictures.
+  - **Alternative rejected:** a rename. It would churn persisted rooms, stored lobby settings and every client, for no change a player can see.
+- **D-S101-03 A break is detected on the page, from consecutive authoritative views.**
+  - **How:** each place cups are drawn remembers the last count it showed for that game and seat. A smaller count breaks exactly the newly lost slots, once.
+  - **What follows:**
+    - a first view or a reload has nothing to compare, so it shows broken cups without animating;
+    - a repeated view changes nothing;
+    - a new game id (Play again) starts fresh.
+  - **Alternative rejected:** a server "cup broke" event. That would be a protocol change, and it would need its own replay rules on reconnect.
+- **D-S101-04 An original inline SVG cup.**
+  - **The shape:** handleless, flared rim, white body with a dark outline, a teal rim stripe, a red flower and green leaves.
+  - **Broken:** split in two along a zigzag, with the right shard tipped away.
+  - **Why:** no external file, photograph or font glyph, and intact vs broken differ by silhouette.
+- **D-S101-05 Leaving is not breaking.** A seat that left shows "Left" with no cups, so sitting out never looks like cups breaking. An eliminated seat shows every cup broken and "Out", and your own row stays visible once you're out.
+- **D-S101-06 "You missed this one" needs evidence of absence.**
+  - **When it shows:** only with no recorded action at all (`participation.actions`, or the completed count where a game doesn't report actions), and never for a player placed first in a game somebody won.
+  - **The case it fixes:** Jebena Rush counts completed items as accepted answers, so a survival winner could read "You won this one" beside "You missed this one".
+  - **Unchanged:** the sat-out lines, the zero-score line, ranking and scores.

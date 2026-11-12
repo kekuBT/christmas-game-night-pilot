@@ -1,0 +1,112 @@
+# Stage 10.1: Jebena cini cups and truthful result feedback
+
+- **Handoff:** ChatGPT's 6820352096 on PR #17, which also cleared Stage 9.3.
+- **The owner's request:** "Instead of hearts let's use cini/cup so when they miss the cup breaks."
+- **Base:** `940df38` (PR #17's cleared head), on branch `claude/stage10-1-jebena-cups`, as a PR stacked on #17.
+- **Authorization:** the owner's standing D-WF-01.
+
+## 1. What this slice is, and isn't
+- **It is:**
+  - Jebena Rush's lives, drawn and worded as small handleless Ethiopian coffee cups (cini) on every surface that showed hearts;
+  - a cup that breaks when a life is lost;
+  - the carried result-copy contradiction: a survival winner told both "You won this one" and "You missed this one".
+- **It isn't:**
+  - a rule or score change (3/5/7 lives, default 5; 100 points per player outlasted plus 10 per life kept);
+  - a protocol or storage rename;
+  - humour, Memory Book saving, or any other game.
+- **Spend:** no new dependency, no external or generated asset, no paid service, no deployment, no public port.
+
+## 2. The cup
+- **An original inline SVG** (24×24 viewBox), no photograph, watermark, emoji or mug. It shows:
+  - a small handleless cup with a slightly flared rim and a short foot;
+  - a white ceramic body with a dark outline, so it reads on light and dark backgrounds;
+  - a thin teal rim stripe, a small red flower and green leaves.
+- **Broken:**
+  - the same cup split along a zigzag crack, with the right shard tipped away from the left so a gap shows, and a muted glaze;
+  - intact and broken differ by silhouette (one piece, or two with a gap), not by colour alone.
+- **Both looks:** the shape is the same in Everyday and Christmas. A seasonal look never turns it into a handled mug.
+
+## 3. Where the cups appear, and the words
+| Surface | Before | After |
+|---|---|---|
+| Lobby, host or cohost choice | "Hearts": `3 ♥` `5 ♥` `7 ♥`; "Each player starts with 5 hearts. Run out of time and you lose one; lose them all and you're out." | "Cups each": `3 cups` `5 cups` `7 cups`; "Each player starts with 5 cups. Run out of time and one breaks; when all of yours are broken, you're out." |
+| Lobby, everyone else | "Everyone starts with 5 hearts (♥♥♥♥♥)." | "Everyone starts with 5 cups." plus five intact cups (decorative) |
+| Briefing, phone and TV | "This game: everyone starts with 5 hearts (♥…)"; rules about losing a heart | "This game: everyone starts with 5 cups." plus the cups; rules: "Time runs out: one of your cups breaks, and a new category starts." · "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena." · "…coming back gives no time or cups back." |
+| Your cups (playing, watching, out) | ♥♥♥♡♡ 3/5, hidden once out | the cups, "3/5", accessible name "3 of 5 cups remaining". Once out: every cup broken and "Out". Hidden only after leaving |
+| Seat list, phone and TV | ♥ per seat; "Out" or "Left" | cups per seat (compact); an eliminated seat shows every cup broken and "Out"; a seat that left shows "Left" with no cups |
+| TV heading | "Jebena Rush · 5 ♥ each" | "Jebena Rush · 5 cups each" |
+| Last play | "Amina ran out of time: 3 hearts left." · "Amina is out of hearts." | "Amina ran out of time: a cup broke (3 left)." · "…: the last cup broke." · "Amina is out: every cup is broken." |
+| Out screen | "Out of hearts: watch the rest" | "All your cups are broken: watch the rest" |
+| Refusal when out | "You're out of hearts. Watch the rest!" | "All your cups are broken. Watch the rest!" |
+| Results rows, scoring | "3 of 5 hearts left"; "plus 10 for every heart you keep" | "3 of 5 cups whole"; "plus 10 for every cup still whole" |
+| Library, settings refusal, Start refusal | "Time out and lose a heart"; "Hearts must be 3, 5 or 7."; "set to 5 hearts each" | "Time out and a cup breaks"; "Cups must be 3, 5 or 7."; "set to 5 cups each" |
+
+Identifiers keep `hearts` (D-S101-02): the server state, the protocol, the `settings.hearts` key, test ids and data attributes. Only words and pictures change.
+
+## 4. When a cup breaks
+- **Only on an authoritative decrement.**
+  - The count shown is always the server's (`me.hearts`, `order[].hearts`).
+  - A cup breaks only when a later view of the same game and seat, on this page, shows fewer cups than the view before it (D-S101-03).
+  - Exactly the newly lost slot breaks, and it stays broken in that slot: intact cups fill from the left, broken ones from the right.
+- **Nothing else breaks a cup.**
+  - **A wrong or repeated try:** costs nothing; the server rule is unchanged.
+  - **A reconnect or a repeated snapshot:** shows the same count, so nothing changes.
+  - **A reload:** shows the broken cups at once, without replaying a break.
+  - **Leaving:** shows "Left" and no cups, so no cups break (D-S101-05).
+  - **Play again:** a new game, so fresh intact cups.
+- **The animation:**
+  - about 600 ms, local to that cup: the crack shows and the right shard tips away;
+  - nothing else moves; no flashing, confetti or sound, and controls are never blocked;
+  - full motion only. With reduced motion or Animations "Off", the static broken cup shows at once.
+
+## 5. Accessibility and layout
+- **The number is always there:** "3/5" beside the cups, and an accessible name such as "3 of 5 cups remaining". At zero it says "0 of 5 cups: out".
+- **Intact vs broken** differ by shape, not only colour (§2).
+- **Seven cups fit a 320 px phone** in your own row and in the seat list. The category, the countdown, the answer field and Send stay reachable.
+- **The TV** uses the same cups and reads the same public view; no projection changes.
+
+## 6. Truthful result feedback
+- **The defect:**
+  - The results story (`apps/web/src/ui/mchezo/lib/celebrate.ts`) said "You missed this one" whenever a player had items and completed none.
+  - Jebena Rush counts completed items as accepted answers.
+  - So a survival winner whose tries weren't accepted, or who never needed one because the others' clocks ran out first, read "You won this one" beside "You missed this one".
+- **The fix (D-S101-06):** "missed" needs evidence of absence:
+  - no recorded action at all (the outcome's `participation.actions`, falling back to the completed count for a game that doesn't report actions);
+  - and never for a player the result places first (alone or shared) in a game somebody won.
+- **Unchanged:**
+  - the zero-score, sat-out and "played part, then sat out the rest" lines;
+  - competitive ranking and scores;
+  - Spectrum's separate cooperative result.
+
+## 7. Validation plan
+- **Unit:**
+  - the pure break detector: a decrement breaks the lost slots; the same count again breaks nothing; a first view or reload breaks nothing; a new game breaks nothing; 3/5/7 cups; zero, out and left;
+  - the results story: a survival winner with 0 accepted answers (with tries, and with none) is never "missed"; a truly absent player still is; sat-out lines are unchanged; the line audit covers the new conditions.
+- **Server:** unchanged. The existing Jebena tests cover one life per timeout, free wrong tries, sitting out and reconnecting.
+- **Browser** (`scripts/check-jebena-rush.mjs`, extended):
+  - cups in the lobby, the briefing, your own row, the seat lists and the TV;
+  - a page observer that logs every cup break by surface, seat and slot:
+    - a timeout breaks exactly the lost slot, once, on the holder's phone, the others' seat lists and the TV;
+    - a wrong try breaks nothing;
+    - the last cup breaks when a player is out;
+    - a reload shows the broken cups with no break event;
+    - repeated views never re-break;
+    - Play again starts with whole cups;
+    - with reduced motion, a break has no animation;
+  - the count shown always equals the server's;
+  - 320 and 390 px in both looks, and the TV;
+  - the results copy for a zero-answer winner.
+- **Screenshots:** before (`940df38`, hearts) and after (cups), on phones (320/390, both looks) and the TV.
+- **Gates:** focused checks while developing; then one fast gate and one full gate on the final candidate. No full gate is repeated for docs-only changes.
+
+## 8. Estimate
+| Part | Estimate |
+|---|---|
+| Spec, decisions, PR | 0.5 h |
+| The cup component and every surface's words | 1.5–2 h |
+| Break detection and animation | 1 h |
+| Result copy | 0.5 h |
+| Unit tests | 0.5–1 h |
+| Driver, before/after screenshots | 1.5–2 h |
+| Final fast and full gates (about 35 min) and the report | 1 h |
+| **Total** | **about 6.5–8 h** |

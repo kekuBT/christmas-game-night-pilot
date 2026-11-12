@@ -2143,7 +2143,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `3ca8ac7` (final candidate, 6811445149 applied): fast `20261112-014738-3ca8ac75-30336` **PASSED** (exit 0, 5/5, 49 s); then full `20261112-014837-3ca8ac75-1032` **PASSED** (exit 0, 87/87, 31 min 47 s, no leftover processes). Unit tests 1,536 in 120 files; `check-jebena-rush` 106 checks, 0 failed, with the last-one-standing ending (F) and Play again (G).
 - **Next:** the new completed report on PR #16; then ChatGPT's review and the private browser audit of Jebena endings and replay.
 
-## Stage 9.3: playable Spectrum, one complete cooperative journey (repairs complete, awaiting review)
+## Stage 9.3: playable Spectrum, one complete cooperative journey (CLEARED by ChatGPT's independent review 6820352096 on `9397c00`/`940df38`)
+
+- **Cleared** 2026-11-12 (6820352096): the achievement leakage, the Spectrum timing words and the early-ending copy are resolved; no remaining blocking finding.
+  - The reviewer ran 85/85 focused tests and its own targeted gate `20261112-084652-9397c002-13286` (PASS 4/4: Spectrum and TV outage); it reviewed the developer's full run `20261112-073733-9397c002-17855` as developer evidence.
+  - Its private live audit covered host, guest and TV through four rounds (40/40), keyboard and button sends, a reload with an unsent guess, Play again, and a two-tap sit-out to an early ending (one reason, 0/40, no "Everyone finished").
+  - Nonblocking notes: the team hero and body repeat some summary text; "You: Did not answer (0 of 1)" after another player's immediate departure could be role-aware. The old `check-tv-outage` hang's cause remains unproven.
+  - This is development clearance, not merge, deployment or real-device certification. Real iPhone Safari and Android Chrome are not run.
 
 - **Brief:** ChatGPT's handoff 6813167965 on PR #16 (with the Stage 9.2 clearance). Base `0765222` (PR #16's cleared head); branch `claude/stage9-3-spectrum-play`, a stacked PR on #16.
 - **Scope:** casual-room selection, briefing, phone play, spectator/TV play, a typed cooperative result and Play again, on the cleared Stage 9.2 rules. No solo, Cup, Quick Party scheduling, new content, Memory Book saving or humour.
@@ -2164,3 +2170,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Review 6815908707 (repairs required on `f1c5f02`):** P2, an achievement ("First Game Finished") drawn from a Spectrum match through the ledger; P2, the briefing's "45 seconds for the impostor's guess"; copy, "Everyone finished." beside the early-ending reason, which also appeared twice. All three repaired with failing-first regressions (D-S93-08); the gate failure on `b668ee3` led to D-S93-09.
 - **Next:** a new completed report on PR #17; then ChatGPT's verification of the repair delta and private live audit. Nothing merged or deployed.
 
+## Stage 10.1: Jebena cini cups and truthful result feedback (in progress)
+
+- **Brief:** ChatGPT's handoff 6820352096 on PR #17 (with the Stage 9.3 clearance), from the owner's request: "Instead of hearts let's use cini/cup so when they miss the cup breaks." Base `940df38` (PR #17's cleared head); branch `claude/stage10-1-jebena-cups`, a stacked PR on #17.
+- **Scope:** Jebena Rush's lives drawn and worded as small handleless coffee cups (cini) everywhere; a cup breaks when a life is lost; and the carried result-copy contradiction (a survival winner told "You missed this one"). No rule, score or protocol change; no humour or saving work.
+- **Spec:** `docs/stage10/stage101.md`. Decisions D-S101-01 onward in `docs/DECISIONS.md`.
+- **Next:** the cups and copy, tests, the browser driver and screenshots, one final full gate, and a new completed report.
