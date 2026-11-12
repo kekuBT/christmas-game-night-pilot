@@ -17,3 +17,25 @@ Desktop Chromium (chrome-headless-shell) emulating phone and TV sizes; not real 
 | `jr-tv-1440.png` | The TV: category, holder, countdown and word, everyone's hearts, the last play |
 | `jr-results-390.png`, `jr-results-320-christmas.png` | Results: places, "kept the jebena", hearts, answers, timeouts, points |
 | `jr-tv-final-1440.png`, `jr-tv-review-1440.png` | The TV's final standings and its post-game review |
+
+# Stage 9.3 screenshots: Spectrum
+
+Desktop Chromium (chrome-headless-shell) emulating phone and TV sizes; not real devices. Every `sp-*.png` comes from the full gate run `20261112-042322-f1c5f02a-2551` on commit `f1c5f02` (driver `check-spectrum`, its screenshot folder; 114 checks, ALL PASS). Which player gives which round's clue follows the seeded seat order, so the phone in a picture can change between runs.
+
+| File | What it shows |
+|---|---|
+| `sp-library-390.png` | The library: Spectrum's card with "Co-op: one team score" |
+| `sp-lobby-host-390.png` | The host's casual lobby with Spectrum up next |
+| `sp-briefing-320-christmas.png`, `sp-briefing-tv-1440.png` | The briefing on a phone (Christmas look, 320 px) and the TV: one team, rotating roles, "Give a clue, not the target number" |
+| `sp-giver-clue-390.png` | The clue-giver: the secret target on the scale and in words, the clue field, the rule, the clock |
+| `sp-tv-clue-1440.png` | The TV while the clue is being written: the pair, who is thinking, no target |
+| `sp-guess-390-reduced.png` | A guesser (reduced motion): the clue as text, the scale with its number, the nudges, Send |
+| `sp-guess-locked-320-christmas.png` | A guess sent and locked in (320 px, Christmas look) |
+| `sp-reveal-390.png`, `sp-tv-reveal-1440.png` | The reveal on a phone and the TV: target ◆, team guess ●, the distance and points in words |
+| `sp-results-390.png`, `sp-results-320-christmas.png` | The team result: one total out of 40, every round explained; no winner or place |
+| `sp-tv-final-1440.png`, `sp-tv-review-1440.png` | The TV's final view (labelled "Team result") and its post-game review |
+| `sp-tv-lobby-1440.png` | The TV lobby's "Tonight so far": Spectrum's team result |
+| `sp-lobby-last-game-320-christmas.png` | The lobby's last-game card: "Team result … · You played on the team." |
+| `sp-sitout-confirm-320-christmas.png` | Leaving the match: the second tap that confirms |
+| `sp-results-early-390.png` | An early ending (fewer than two left): the team result says why, and the points earned stand |
+
