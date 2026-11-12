@@ -155,3 +155,60 @@ D-S102-01 to D-S102-05 in `docs/DECISIONS.md`:
 - checkpoint full gate `20261112-165001-cdb77add-5562` PASSED (88/88).
 
 Screenshots: `docs/stage10/stage102-screenshots/`.
+
+## 9. Repairs (ChatGPT's verdict 6831760093)
+**Instructions:** two P2 repairs on #19, both found in the independent audit of `cdb77ad`. Decisions D-S102-06 and D-S102-07.
+
+### S102-R1: the Memory Book waited forever on an event hidden from this viewer
+- **What the reviewer saw:**
+  - two players finish a Spectrum match, then play again, and the guest sits out in round 1, ending it early;
+  - the host's Memory Book says "Checking for the latest finished game…" forever, with Add off, even after a reload;
+  - the room's newest event (35) is the guest's sit-out, which `ledgerFor` correctly hides from the host.
+- **Cause:** the screen compared the newest visible event (34) with the room's unfiltered seq (35). That gap stays open whenever the newest event is private to someone else: another player's sit-out or recovery code, or a live game's scores. A sit-out that ends a game is logged after its finish, so the gap appears in exactly the rooms where a highlight is wanted.
+- **Repair:**
+  - **Server:** `GET /rooms/:id/ledger?watermark=1` returns `{ seq, events }`: the room's public seq, read in the same pass that filters the events for this viewer. Without the opt-in, the plain array is unchanged.
+  - **Web:** the screen keeps the loaded response's watermark (`ledgerAt`). The pure `memoryLink` (`lib/memoryLink.ts`) gives one of five states:
+    - `loading`: nothing loaded yet;
+    - `syncing`: the loaded watermark is behind the room;
+    - `none`: no game has finished;
+    - `unavailable`: the last finished game is a team game;
+    - `ready`: Add is on.
+  - **Ordering:** `newerLedger` keeps an older overlapping response from replacing a newer one.
+- **What Spectrum shows:** "The last game that finished is **Spectrum**, a team game: team games aren't saved to the Memory Book yet." The hint reads "You can add a highlight after the next game that isn't a team game." The server's `NOT_IN_MEMORY_BOOK` refusal is unchanged; saving Spectrum is the next slice.
+- **Unchanged:**
+  - redaction (`ledgerFor` filters as before);
+  - the stale-citation guard (a ledger behind the room still can't cite the game before);
+  - every existing ledger consumer.
+
+### S102-R2: the short reconnect proves its preconditions
+- **What the reviewer saw:** `check-jebena-rush` ended 186 PASS and 4 FAIL:
+  - the resync was "not within 6000ms (locator.evaluate: Timeout 30000ms exceeded)";
+  - the window check got "null ms";
+  - the runner-up's last cup didn't break on Baraka's phone;
+  - no live break followed the reconnect.
+- **Cause:** a validation gap, not a runtime bug.
+  - In the main match, turns kept running out while the driver handled Amina's offline resync, so Baraka's drop could land on the turn that ended the match. His phone was cut through the deciding loss.
+  - The driver accepted the finished game, then waited on a playing-screen element on the results with a locator that blocks for 30 s.
+  - No later live loss could follow.
+- **Repair (driver only):** room S, its own room.
+  - **Players:** Pendo (390 px, reduced motion, socket and polls through the driver) against Halima, who answers whenever the jebena is hers. Three cups.
+  - **Three steps, each checking its preconditions first:**
+    1. **The drop, 3 → 2:** the match must still be on, and the resync must be seen within 3 s of the server's recorded loss, showing the cup broken without breaking it;
+    2. **a later live loss, 2 → 1:** that cup breaks once, still;
+    3. **the final loss, 1 → 0:** the match ends, and Pendo's results break the last cup once.
+  - **Bounded waits:** `scripts/lib/deadline.mjs` `soonUntil` races each probe against the time left, so late is FAIL.
+  - **The main match** keeps Amina's offline resync, Keku's reload, and the R1 checks on the runner-up's phone, which is no longer cut.
+- **Result:** the final-loss break passes once the scenario is valid, so no runtime change.
+
+### Validation
+- **Unit:**
+  - `tests/stage102-memory-freshness.test.ts` (13);
+  - `tests/stage102-deadline.test.ts` (5).
+- **Browser:**
+  - **`check-spectrum`** (the reviewer's journey): Keku's watermark is the room's seq, and the newest event (the last leaver's sit-out) is hidden from him. The Memory Book says plainly that the last game was a team game, with Add off. It stays that way after 2.5 s and after a reload, and the server still refuses a Spectrum entry.
+  - **`check-jebena-rush`:**
+    - **G:** the main room's replay is ended by two sit-outs. Keku's Memory Book is ready, "Linked to Jebena Rush", and the added highlight cites exactly that replay's finish.
+    - **Room S:** the three steps above.
+- **Before and after:**
+  - the Spectrum driver against the pre-fix web build fails exactly the new Memory Book checks (still "Checking…"), and passes against the repaired build;
+  - a copy of the Jebena driver that keeps the phone cut past the window fails the window checks instead of passing late.
