@@ -1,0 +1,67 @@
+$ node scripts/check-f5.mjs http://localhost:40429
+# timeout 1500s | worker w2 | server http://localhost:40429 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s91-full/test-results/20261111-224616-1b6b69ee-24197/server-data/w2)
+
+[+4.3s] PASS lobby roster: 4 players joined
+[+4.3s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, jebena-rush, draw-guess (15 games)
+[+6.0s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+17.3s] OK impostor: finished
+[+17.3s] PASS day playlist: impostor finished without sticking
+[+18.5s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+50.9s] OK caption-clash: finished
+[+50.9s] PASS day playlist: caption-clash finished without sticking
+[+51.9s] PASS TV projection leak-free while trivia playing — no forbidden keys
+[+94.5s] OK trivia: finished
+[+94.5s] PASS day playlist: trivia finished without sticking
+[+95.6s] PASS TV projection leak-free while word-connections playing — no forbidden keys
+[+118.8s] OK word-connections: finished
+[+118.8s] PASS day playlist: word-connections finished without sticking
+[+119.9s] PASS TV projection leak-free while who-said-that playing — no forbidden keys
+[+134.5s] OK who-said-that: finished
+[+134.5s] PASS day playlist: who-said-that finished without sticking
+[+135.5s] PASS TV projection leak-free while guess-the-year playing — no forbidden keys
+[+165.5s] OK guess-the-year: finished
+[+165.5s] PASS day playlist: guess-the-year finished without sticking
+[+167.1s] PASS TV projection leak-free while closest-wins playing — no forbidden keys
+[+190.6s] OK closest-wins: finished
+[+190.6s] PASS day playlist: closest-wins finished without sticking
+[+191.8s] PASS TV projection leak-free while category-sprint playing — no forbidden keys
+[+202.7s] OK category-sprint: finished
+[+202.7s] PASS day playlist: category-sprint finished without sticking
+[+204.1s] PASS TV projection leak-free while charades playing — no forbidden keys
+[+213.8s] OK charades: finished
+[+213.8s] PASS day playlist: charades finished without sticking
+[+215.2s] PASS TV projection leak-free while geography playing — no forbidden keys
+[+249.5s] OK geography: finished
+[+249.5s] PASS day playlist: geography finished without sticking
+[+251.1s] PASS TV projection leak-free while math-mayhem playing — no forbidden keys
+[+293.7s] OK math-mayhem: finished
+[+293.7s] PASS day playlist: math-mayhem finished without sticking
+[+295.1s] PASS TV projection leak-free while majority-rules playing — no forbidden keys
+[+357.8s] OK majority-rules: finished
+[+357.8s] PASS day playlist: majority-rules finished without sticking
+[+359.4s] PASS TV projection leak-free while pattern-pulse playing — no forbidden keys
+[+406.7s] OK pattern-pulse: finished
+[+406.7s] PASS day playlist: pattern-pulse finished without sticking
+[+437.1s] FAIL jebena-rush: locator.click: Timeout 30000ms exceeded.
+[+437.1s] Call log:
+[+437.1s]   - waiting for locator('[data-testid="start-official-jebena-rush"]')
+[+437.1s] 
+[+437.2s]   DIAG player=Alex game=pattern-pulse(game-13) server=finished phase=- deadlineIn=222s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Lobby" clock="" | type=server-ended-client-behind
+[+437.2s]   DIAG player=Sam game=pattern-pulse(game-13) server=finished phase=- deadlineIn=222s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Pattern Pulse results" clock="" shownOutcome=completed | type=finished-and-shown
+[+437.2s]   DIAG player=Jo game=pattern-pulse(game-13) server=finished phase=- deadlineIn=222s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Pattern Pulse results" clock="" shownOutcome=completed | type=finished-and-shown
+[+437.2s]   DIAG player=Kim game=pattern-pulse(game-13) server=finished phase=- deadlineIn=222s phaseIn=- submitted=4/4 outcome=completed mine=6/6 | screen="Pattern Pulse results" clock="" shownOutcome=completed | type=finished-and-shown
+[+437.2s] FAIL day playlist: jebena-rush finished without sticking — locator.click: Timeout 30000ms exceeded.
+[+437.2s] Call log:
+[+437.2s]   - waiting for locator('[data-testid="start-official-jebena-rush"]')
+[+437.2s] 
+[+437.2s] FAIL day playlist: all games finished in one room — 13/15 finished
+[+437.3s] FAIL ledger holds one game-finished event per playlist game — 13/15 finish events
+[+437.3s] FAIL TV projection marks every playlist game finished — jebena-rush, draw-guess
+[+439.2s] PASS championship standings list all 4 players after full day
+[+439.2s] PASS championship per-game breakdown present after full day
+[+440.7s] FAIL TV shows the 5 most recent finished games — Jebena Rush, Draw & Guess
+[+443.1s] PASS Memory Book export contains the full-day entry
+[+443.2s] F5 FAILED: 5/35 failed
+[+443.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# FAIL (exit 1) in 443.2s | cpu 23.6s, peak memory 281 MB

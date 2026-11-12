@@ -1,0 +1,62 @@
+Mchezo gate targeted | run 20261111-231957-4d91cd63-11612
+  revision 4d91cd63e72c3d84f77ed21c405ef85f28349701 (clean tree) | fingerprint e9586879cf3e (484 files)
+  plan     8 steps: 1 fast/build, 5 browser drivers, 2 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  62 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.03 for 3 worker(s) (measured, 53 run(s))
+  estimate this run: 6–16m (low-confidence) · the same steps one after another: about 20m 30s · longest step e2e-chromium ~8m 10s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.03 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-jebena-rush
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s91r-targeted/test-results/20261111-231957-4d91cd63-11612
+        start build-web on w1 (usually 7s)
+[ 1/8] PASS         4.4s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/8] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:44389 (pid 11724, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s91r-targeted/test-results/20261111-231957-4d91cd63-11612/server-data/w1)
+  server   w2 http://localhost:42147 (pid 11725, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s91r-targeted/test-results/20261111-231957-4d91cd63-11612/server-data/w2)
+  server   w3 http://localhost:41159 (pid 11726, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s91r-targeted/test-results/20261111-231957-4d91cd63-11612/server-data/w3)
+        start e2e-chromium on w1 (usually 8m 10s)
+        start check-f5 on w2 (usually 7m 26s)
+        start check-mchezo on w3 (usually 1m 47s)
+── progress  2/8 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   e2e-chromium 54s (w1), check-f5 54s (w2), check-mchezo 54s (w3)
+   remaining 5–15m · total 6–16m · done around 23:26–23:35 UTC (low-confidence)
+[ 3/8] PASS       111.3s  check-mchezo  w3
+        start check-jebena-rush on w3 (usually 1m 14s)
+── progress  3/8 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   e2e-chromium 1m 54s (w1), check-f5 1m 54s (w2), check-jebena-rush 3s (w3)
+   remaining 4–14m · total 6–16m · done around 23:26–23:35 UTC (low-confidence)
+── progress  3/8 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   e2e-chromium 2m 54s (w1), check-f5 2m 54s (w2), check-jebena-rush 1m 03s (w3)
+   remaining 3–13m · total 6–16m · done around 23:26–23:35 UTC (low-confidence)
+[ 4/8] PASS        73.7s  check-jebena-rush  w3
+        start check-stage2 on w3 (usually 58s)
+── progress  4/8 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   e2e-chromium 3m 54s (w1), check-f5 3m 54s (w2), check-stage2 49s (w3)
+   remaining 2–12m · total 6–16m · done around 23:26–23:35 UTC (low-confidence)
+[ 5/8] PASS        61.5s  check-stage2  w3
+        start check-quick-party on w3 (usually 47s)
+── progress  5/8 done · 5 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   e2e-chromium 4m 54s (w1), check-f5 4m 54s (w2), check-quick-party 47s (w3)
+   remaining 1–11m · total 6–16m · done around 23:26–23:35 UTC (low-confidence)
+[ 6/8] PASS        49.1s  check-quick-party  w3
+── progress  6/8 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   e2e-chromium 5m 54s (w1), check-f5 5m 54s (w2)
+   remaining 0–10m · total 6–16m · done around 23:26–23:35 UTC (low-confidence)
+── progress  6/8 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 7m 00s
+   running   e2e-chromium 6m 54s (w1), check-f5 6m 54s (w2)
+   remaining 1–9m · total 8–16m · done around 23:27–23:35 UTC (low-confidence)
+[ 7/8] PASS       455.3s  check-f5  w2
+── progress  7/8 done · 7 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 8m 00s
+   running   e2e-chromium 7m 54s (w1)
+   remaining 1–8m · total 9–16m · done around 23:29–23:35 UTC (low-confidence)
+[ 8/8] PASS       498.2s  e2e-chromium  w1
+
+PASSED (exit 0) | targeted | run 20261111-231957-4d91cd63-11612
+  8 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 8m 24s · step time 20m 54s (sum) · 3 workers, 83% busy · 2.49× the same steps run one after another
+           predicted 6–16m (about 8m 27s, low-confidence) → actual 8m 24s (-1%)
+           longest  e2e-chromium 8m 18s, check-f5 7m 35s, check-mchezo 1m 51s · the longest step is 99% of the wall time
+           machine  CPU mean 26%, peak 84% · memory available ≥ 13785 MB · load peak 2.79
+           contention ×1.032 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s91r-targeted/test-results/20261111-231957-4d91cd63-11612/report.json

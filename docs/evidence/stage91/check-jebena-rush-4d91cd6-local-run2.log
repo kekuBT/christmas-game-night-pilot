@@ -1,0 +1,108 @@
+PASS J room B: its host sets 7 hearts — {"ok":true,"lobbySettings":{"jebena-rush":{"hearts":7}},"session":{"onBreak":false,"revision":1}}
+PASS J room B: Jebena Rush starts with 7 hearts — {"gameId":"game-1","gameType":"jebena-rush","status":"briefing","players":["player-1","player-2"]}
+PASS J room B: playing
+PASS A the picker lists Jebena Rush as practice-only — Jebena Rush 2–10 players · best with 3+ · about 8 min · Practice only
+PASS A the host sees the hearts choice, 5 preselected
+PASS A guests see 5 hearts each
+PASS A the host chose 3 hearts
+PASS A guests see the host's choice: 3 hearts each
+PASS A a guest can't change the hearts (403) — {"status":403,"body":{"error":"Only the host or a cohost can change a game's settings.","code":"NOT_HOST","lobbySettings":{"jebena-rush":{"hearts":3}}}}
+PASS A 4 hearts is refused (400) — {"status":400,"body":{"error":"Hearts must be 3, 5 or 7.","code":"INVALID_SETTINGS","lobbySettings":{"jebena-rush":{"hearts":3}}}}
+PASS A lobby, host 390: no sideways scroll
+PASS A lobby, guest 320: no sideways scroll
+PASS B Keku's briefing says everyone starts with 3 hearts
+PASS B Amina's briefing says everyone starts with 3 hearts
+PASS B Baraka's briefing says everyone starts with 3 hearts
+PASS B the TV briefing says 3 hearts
+PASS B the briefing states 10 seconds a turn — 10 seconds for each turn.
+The whole game ends by itself after about 12 minutes.
+PASS C play: a turn is on
+PASS C every player starts with 3 hearts
+PASS C the holder's phone says Your turn! and its field has focus
+PASS C Keku sees Baraka has the jebena
+PASS C Amina sees Baraka has the jebena
+PASS C the TV: category, holder, countdown and hearts
+PASS C keyboard: Tab from the field reaches Send
+PASS C sent “Zzqxv Plonk”
+PASS C not in the bank: explained, no pass
+PASS C the phone explains it isn't on the list
+PASS C a rejected try keeps the deadline
+PASS C sent “Bdger”
+PASS C ambiguous (“Bdger”): asks to check the spelling
+PASS C the phone says it can't be sure
+PASS C sent “animal”
+PASS C near miss (“animal”): its reason is shown
+PASS C the holder's turn screen: no sideways scroll
+PASS C sent “Badger”
+PASS C “Badger” is accepted and the jebena passes
+PASS C the previous holder reads “You named …”
+PASS C the TV shows the last play
+PASS C sent “BADGER”
+PASS C a repeat (any case) is “already named”, no pass
+PASS C the phone says it was already named
+PASS C sent “kitten”
+PASS C an alias (“kitten”) counts as “Cat”
+PASS C sent “Ceetah”
+PASS C a typo (“Ceetah”) counts as “Cheetah”
+PASS C the named list shows canonical names
+PASS D an out-of-turn answer is refused — {"accepted":false,"reason":"NOT_YOUR_TURN"}
+PASS D a stale turn's answer is refused — {"accepted":false,"reason":"STALE_TURN"}
+PASS D neither changed the turn or the answers
+PASS D a duplicate send replays its first answer, counted once — {"accepted":true,"result":{"verdict":"accepted","turn":4,"answer":"Bat","via":"exact"}} | {"accepted":true,"result":{"verdict":"accepted","turn":4,"answer":"Bat","via":"exact"}}
+PASS D a late joiner is told the game started before they joined
+PASS D a late joiner's answer is refused — {"accepted":false,"reason":"NOT_IN_GAME"}
+PASS H full motion: steam rises on Keku's phone
+PASS H reduced motion: Baraka's jebena is still
+PASS H the urgency word is shown with reduced motion
+PASS H Amina's phone has the Christmas look, Keku's Everyday
+PASS I the TV's projection carries no unused answer and no aliases
+PASS I a player's projection carries no unused answer and no aliases
+PASS I nothing from the room is in the app-shell cache
+PASS I2 the canary check finds a canary when one is there (self-test)
+PASS I2 no built file carries the bank (22 files, 39 canaries)
+PASS I2 no public response carries the bank (17 responses) —  
+PASS J the rooms keep their own hearts (A 3, B 7)
+PASS J an answer in room B counts there and never shows in room A
+PASS E Amina's turn: her field has focus
+PASS E offline: the send says it didn't get through
+PASS E the turn times out while she's away (no free life)
+PASS E back online, Amina's phone catches up with one heart fewer
+PASS E reconnecting never resubmitted what she typed offline
+PASS C sent “Apple”
+PASS E after a reload, Keku is back in the game, same category
+PASS E Baraka times out (turn 7)
+PASS E a timeout costs exactly one heart — 3 → 2
+PASS E a timeout starts a new category
+PASS E and the jebena passes
+PASS E Baraka's phone shows 2 hearts
+PASS E the TV seat shows the hearts lost
+PASS E Amina times out (turn 8)
+PASS C sent “Actor”
+PASS E Baraka times out (turn 10)
+PASS E Amina times out (turn 11)
+PASS F Amina is out and watches the rest
+PASS F the out screen: no sideways scroll
+PASS F the TV marks them out
+PASS C sent “Algeria”
+PASS E Baraka times out (turn 13)
+PASS F the match finishes: one player left
+PASS F Keku kept the jebena (place 1, still in)
+PASS F Keku sees the results
+PASS F Keku's results equal the server's scores — [{"id":"player-1","pts":230},{"id":"player-3","pts":100},{"id":"player-2","pts":0}]
+PASS F Amina sees the results
+PASS F Amina's results equal the server's scores — [{"id":"player-1","pts":230},{"id":"player-3","pts":100},{"id":"player-2","pts":0}]
+PASS F Baraka sees the results
+PASS F Baraka's results equal the server's scores — [{"id":"player-1","pts":230},{"id":"player-3","pts":100},{"id":"player-2","pts":0}]
+PASS F the winner's line says they kept the jebena
+PASS F results at 320: no sideways scroll
+PASS F the TV shows the final standings: Keku wins
+PASS F the TV's post-game review: Keku kept the jebena, with the places
+PASS G the host has Play again
+PASS G Play again's briefing: everyone starts with 3 hearts again
+PASS G the rematch carries the same settings
+PASS G the rematch is cancelled
+PASS G Amina is back in the lobby
+PASS G Baraka is back in the lobby
+PASS K a Cup's picker leaves Jebena Rush out (and lists the others) — 14 games
+PASS K the server refuses Jebena Rush in a Cup (409 CASUAL_ONLY) — {"error":"Jebena Rush plays in casual rooms only.","code":"CASUAL_ONLY","readiness":{"registered":1,"connected":1,"reconnecting":0,"away":0,"wouldPlay":["player
+ALL PASS
