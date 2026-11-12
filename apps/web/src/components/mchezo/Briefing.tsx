@@ -9,6 +9,7 @@
  */
 import { useEffect, useState } from "react";
 import type { PublicGame, PublicPlayer, RegistryGame } from "../../types.js";
+import { CiniCups } from "./CiniCups.js";
 import {
   briefingClock,
   briefingPeople,
@@ -53,7 +54,7 @@ interface CommonProps {
   players: PublicPlayer[];
 }
 
-function Rules({ gameId, registry, tv, hearts }: { gameId: string; registry?: RegistryGame; tv?: boolean; /** Stage 9.1: Jebena Rush's hearts, bound at Start. */ hearts?: number }) {
+function Rules({ gameId, registry, tv, hearts }: { gameId: string; registry?: RegistryGame; tv?: boolean; /** Stage 9.1: Jebena Rush's lives (cups since Stage 10.1), bound at Start. */ hearts?: number }) {
   const rules = briefingRules(gameId, registry?.tutorial ?? "");
   const timing = timingLines(registry?.lifecycle, gameId);
   return (
@@ -61,7 +62,12 @@ function Rules({ gameId, registry, tv, hearts }: { gameId: string; registry?: Re
       <span className="mz-kicker" id="mz-brief-rules">How to play</span>
       <p className="mz-brief__objective" data-testid="briefing-objective">{rules.objective}</p>
       {rules.steps.length > 0 && <ol className="mz-brief__steps">{rules.steps.map((s) => <li key={s}>{s}</li>)}</ol>}
-      {hearts !== undefined && <p className="mz-brief__objective" data-testid="briefing-hearts">This game: everyone starts with {hearts} hearts ({"♥".repeat(hearts)}).</p>}
+      {hearts !== undefined && (
+        <p className="mz-brief__objective mz-jr-cupslabel" data-testid="briefing-hearts" data-hearts={hearts}>
+          <span>This game: everyone starts with {hearts} cups.</span>
+          <CiniCups n={hearts} of={hearts} compact decorative />
+        </p>
+      )}
       {timing.length > 0 && <ul className="mz-brief__timing" data-testid="briefing-timing">{timing.map((s) => <li key={s}>{s}</li>)}</ul>}
       <p className="mz-foot mz-brief__fair">Nobody’s clock is running yet. It starts at the same moment for everyone, once everyone is ready.</p>
     </section>

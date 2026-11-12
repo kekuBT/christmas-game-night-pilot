@@ -26,7 +26,7 @@ import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
-import { JebenaHeartsChoice, JebenaReview, JebenaTv, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
+import { JebenaCupsLabel, JebenaHeartsChoice, JebenaReview, JebenaTv, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
 import { MchezoSpectrum, MchezoSpectrumResults, SpectrumReview, SpectrumTv, SpectrumTvFinal, TeamResultsHero } from "./components/mchezo/MchezoSpectrum.js";
 import { lineupLine, tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
 import { ordinal } from "./ui/mchezo/lib/standings.js";
@@ -756,7 +756,7 @@ export function App() {
       await refresh();
     } finally { setContentBusy(false); }
   }
-  /** Stage 9.1 (§8): the host or a cohost chooses Jebena Rush's hearts in the lobby (everyone sees it). */
+  /** Stage 9.1 (§8): the host or a cohost chooses Jebena Rush's lives in the lobby, shown as cups (Stage 10.1); everyone sees it. */
   const [settingsBusy, setSettingsBusy] = useState(false);
   async function changeHearts(hearts: number) {
     if (!roomId || settingsBusy) return;
@@ -764,9 +764,9 @@ export function App() {
     setErr("");
     try {
       const r = await postBounded(`/rooms/${roomId}/game-settings`, { gameId: "jebena-rush", settings: { hearts }, baseRevision: proj?.session?.revision ?? 0 }, 10_000).catch(() => null);
-      if (!r) setErr("Couldn’t reach the game server, so the hearts may not have changed. Check them, then try again.");
-      else if (r.status === 409) setErr(r.body["code"] === "SESSION_CONFLICT" ? "Something changed since you looked. Here is the latest: choose again." : String(r.body["error"] ?? "The hearts didn’t change."));
-      else if (r.status < 200 || r.status >= 300) setErr(String(r.body["error"] ?? "The hearts didn’t change."));
+      if (!r) setErr("Couldn’t reach the game server, so the cups may not have changed. Check them, then try again.");
+      else if (r.status === 409) setErr(r.body["code"] === "SESSION_CONFLICT" ? "Something changed since you looked. Here is the latest: choose again." : String(r.body["error"] ?? "The cups didn’t change."));
+      else if (r.status < 200 || r.status >= 300) setErr(String(r.body["error"] ?? "The cups didn’t change."));
       await refresh();
     } finally { setSettingsBusy(false); }
   }
@@ -1631,12 +1631,12 @@ export function App() {
           casual={casualRoom}
           firstTime={!roomGames.some((g) => g.status === "finished")}
           content={proj?.roomKind === "casual" ? { season: proj.contentSeason ?? "everyday", ...(isHostish ? { onChange: (s: SessionSeason) => void changeContent(s), busy: contentBusy } : {}) } : undefined}
-          // Stage 9.1 (§8): Jebena Rush's hearts: the host or a cohost chooses; everyone sees the choice.
+          // Stage 9.1 (§8): Jebena Rush's lives (cups, Stage 10.1): the host or a cohost chooses; everyone sees the choice.
           gameSettings={proj?.roomKind === "casual" && upNext?.id === "jebena-rush" ? (() => {
             const hearts = proj.lobbySettings?.["jebena-rush"]?.hearts ?? 5;
             return isHostish
               ? <JebenaHeartsChoice value={hearts} onChange={(h) => void changeHearts(h)} busy={settingsBusy} />
-              : <p className="mz-foot mz-lobby__hearts" data-testid="lobby-hearts-guest" data-hearts={hearts}>Everyone starts with {hearts} hearts ({"♥".repeat(hearts)}).</p>;
+              : <p className="mz-foot mz-lobby__hearts"><JebenaCupsLabel hearts={hearts} testId="lobby-hearts-guest" text={`Everyone starts with ${hearts} cups.`} /></p>;
           })() : undefined}
           code={proj?.joinCode ?? "…"}
           sessionLabel={proj?.name ?? "Mchezo"}

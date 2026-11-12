@@ -91,7 +91,8 @@ function audit(scores: Record<string, number>, official: boolean, gid: string, y
   const ok = pools.some((p) => {
     switch (p) {
       case "youSatOut": return !!extra.satOut;
-      case "youMissed": return extra.done === 0 && !extra.satOut;
+      // Stage 10.1 (D-S101-06): never beside "You won this one" (first place in a game somebody won).
+      case "youMissed": return extra.done === 0 && !extra.satOut && !(rank === 1 && score > 0);
       case "youZero": return score === 0;
       case "youWon": return rank === 1 && !tied && score > 0;
       case "youTiedFirst": return rank === 1 && tied && score > 0;
@@ -136,6 +137,9 @@ describe("every line only where its condition holds", () => {
       audit({ a: 300, b: 0, c: 100 }, true, g, "b", { satOut: true });
       audit({ a: 300, b: 0, c: 100 }, true, g, "b", { done: 0 });
       audit({ a: 0, b: 0 }, true, g, "b", { done: 0 });
+      // Stage 10.1: a first place with nothing completed (a Jebena Rush survivor) is a win, never "missed".
+      audit({ a: 300, b: 0 }, true, g, "a", { done: 0 });
+      audit({ a: 300, b: 300, c: 0 }, false, g, "b", { done: 0 });
     }
   });
   it("nobody scored: your line says no points, not 'you share the top spot'", () => {

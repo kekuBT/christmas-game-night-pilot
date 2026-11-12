@@ -31,7 +31,8 @@ export interface GameLifecycleInfo {
   /** The phase now running (phased games); sent back with actions so a late one is refused. */
   phaseKey?: string;
 }
-export interface GameParticipation { done: number; of: number; finished?: boolean }
+/** `actions` (Stage 10.1): genuine actions taken, right or wrong, when the game reports them. */
+export interface GameParticipation { done: number; of: number; finished?: boolean; actions?: number }
 export interface GameOutcome {
   reason: "completed" | "deadline" | "backstop-partial" | "void";
   endedAt: number;
@@ -64,7 +65,7 @@ export interface PublicGame extends LifecycleFields {
   status: GameStatus;
   /** Stage 8.2: the content this solo or casual game was started with (absent in a Cup). */
   season?: SessionSeason;
-  /** Stage 9.1: the settings this game was started with (Jebena Rush: hearts each). */
+  /** Stage 9.1: the settings this game was started with (Jebena Rush: lives each, shown as cups; the key keeps its name, D-S101-02). */
   settings?: { hearts?: number };
   timedOut: boolean;
   day?: number;

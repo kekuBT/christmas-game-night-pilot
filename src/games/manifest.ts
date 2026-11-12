@@ -363,7 +363,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
   {
     id: "jebena-rush",
     title: "Jebena Rush",
-    description: "Name it. Pass it. Beat the steam. Name something in the category before your 10 seconds run out, then pass the jebena on. Time out and lose a heart.",
+    description: "Name it. Pass it. Beat the steam. Name something in the category before your 10 seconds run out, then pass the jebena on. Time out and one of your cups breaks.",
     categories: ["word", "speed"],
     minPlayers: 2,
     recommendedPlayers: 3,
@@ -379,7 +379,7 @@ export const GAME_MANIFESTS: GameManifest[] = [
     scoring: { type: "per-player-points", teamDerived: false },
     features: { practice: true, official: false, abstention: "whole-game" },
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
-    details: "Turns of 10 seconds in a seeded order; an answer the bank accepts passes the jebena, a timeout costs one heart (5 by default; 3, 5 or 7). The last player with hearts keeps the jebena; the match ends by 12 minutes. 100 points for each player you outlast, 10 for each heart you keep. Casual rooms only; practice-only (Stage 9.1).",
+    details: "Turns of 10 seconds in a seeded order; an answer the bank accepts passes the jebena, a timeout breaks one of your cups (5 by default; 3, 5 or 7). The last player with a whole cup keeps the jebena; the match ends by 12 minutes. 100 points for each player you outlast, 10 for each cup still whole. Casual rooms only; practice-only (Stage 9.1).",
   },
   {
     id: "spectrum",

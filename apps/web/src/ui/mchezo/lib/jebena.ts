@@ -1,11 +1,13 @@
 /**
  * Stage 9.1: Jebena Rush's words, pure (no React), so every ending and every
  * verdict is tested on its own (review 6808081378). Display only: the server
- * decides turns, hearts, places and points; these only say them.
+ * decides turns, lives, places and points; these only say them. Stage 10.1:
+ * a life is a cini (a small coffee cup), so a lost life is a broken cup.
  */
 
 export type JebenaVerdict = "accepted" | "used" | "not-in-bank" | "ambiguous" | "near-miss" | "empty";
-export interface JebenaLogEntry { seq: number; turn: number; kind: "accepted" | "timeout" | "out" | "category" | "sat-out"; player?: string; answer?: string; via?: string; categoryId?: string; hearts?: number }
+/** `hearts` is the server's name for whole cups left (D-S101-02); `at` is the server time it happened. */
+export interface JebenaLogEntry { seq: number; turn: number; kind: "accepted" | "timeout" | "out" | "category" | "sat-out"; player?: string; answer?: string; via?: string; categoryId?: string; hearts?: number; at?: number }
 export interface JebenaStanding { id: string; place: number; hearts: number; out: boolean; satOut: boolean; answers: number; timeouts: number; points: number }
 export interface JebenaAttemptView { turn: number; text: string; verdict: JebenaVerdict; reason?: string; answer?: string }
 export type JebenaEnd = null | "last-standing" | "banks-exhausted";
@@ -52,8 +54,8 @@ export function lastPlayLine(log: readonly JebenaLogEntry[] | undefined, nameOf:
   const who = e.player === meId ? "You" : nameOf(e.player);
   switch (e.kind) {
     case "accepted": return `${who} named “${e.answer}”.`;
-    case "timeout": return `${who} ran out of time: ${e.hearts === 0 ? "no hearts left" : `${e.hearts} ${e.hearts === 1 ? "heart" : "hearts"} left`}.`;
-    case "out": return `${who} ${who === "You" ? "are" : "is"} out of hearts.`;
+    case "timeout": return `${who} ran out of time: ${e.hearts === 0 ? "the last cup broke" : `a cup broke (${e.hearts} left)`}.`;
+    case "out": return `${who} ${who === "You" ? "are" : "is"} out: every cup is broken.`;
     case "sat-out": return `${who} left the game.`;
     default: return null;
   }
@@ -61,7 +63,7 @@ export function lastPlayLine(log: readonly JebenaLogEntry[] | undefined, nameOf:
 
 /**
  * Did this player keep the jebena? Only when the match ended with exactly one
- * player left with hearts. A match the limit ended, or one that ran out of
+ * player left with a whole cup. A match the limit ended, or one that ran out of
  * answers, has no single keeper, even if one player came first.
  */
 export function keptTheJebena(end: JebenaEnd | undefined, standings: readonly JebenaStanding[] | undefined, id: string): boolean {

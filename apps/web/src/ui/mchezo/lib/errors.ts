@@ -59,7 +59,7 @@ const EXACT: Record<string, string> = {
   NOT_YOUR_TURN: "It isn't your turn.",
   // Stage 9.1 (Jebena Rush).
   STALE_TURN: "Time ran out on that turn, so that answer didn't count. The jebena has moved on.",
-  OUT: "You're out of hearts. Watch the rest!",
+  OUT: "All your cups are broken. Watch the rest!",
   TOO_MANY_ATTEMPTS: "That's all your tries for this turn.",
   TOO_MANY_GUESSES: "That's all your guesses for this drawing.",
   RATE_LIMITED: "Slow down a little: that was too quick. Try again.",

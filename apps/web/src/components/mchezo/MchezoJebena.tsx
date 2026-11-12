@@ -3,7 +3,7 @@
  * Beat the steam." Spec: docs/stage9/stage91.md §8.
  *
  * Display only. The server owns the seat order, whose turn it is, the
- * category, the answers already named, every heart and the turn's deadline
+ * category, the answers already named, every life and the turn's deadline
  * (the room's phase clock). This screen reads the player's own view: the
  * public facts plus their own last try on the current turn. It never sees
  * the answer bank. An answer names the turn it was typed for, so one that
@@ -11,14 +11,21 @@
  *
  * Meaning never rides on colour or motion alone: the countdown is text, the
  * urgency has a word ("Warm", "Steaming", "Boiling over!") and a count of
- * steam curls, hearts have a number, and with reduced or no motion the
+ * steam curls, cups have a number, and with reduced or no motion the
  * jebena is still while the same words carry the urgency.
+ *
+ * Stage 10.1 (docs/stage10/stage101.md): each life is a cini, a small
+ * handleless coffee cup (CiniCups.tsx), and a lost life is a broken cup. The
+ * server's fields keep the name `hearts` (D-S101-02); only the pictures and
+ * the words changed.
  */
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Keycap, OutcomeSummary, SegmentedChoice, serverNowEstimate, useMchezo } from "../../ui/mchezo/index.js";
 import { FeedbackLine, GameHeader } from "../../ui/mchezo/components/GameKit.js";
 import { participationLine } from "../../ui/mchezo/lib/lifecycle.js";
 import { SendNote } from "./SendNote.js";
+import { CiniCups } from "./CiniCups.js";
+import { lastLossAt } from "../../ui/mchezo/lib/cups.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 import {
   jebenaEndLine, keptTheJebena, lastPlayLine, shownSeconds, turnLeftMs, URGENCY_LABEL, urgencyFor, verdictLine,
@@ -107,20 +114,6 @@ export function JebenaArt({ urgency, size = 140, label, testId = "jr-art" }: { u
   );
 }
 
-/** Hearts as icons with the number in words: "3 of 5 hearts". */
-export function Hearts({ n, of, testId, compact }: { n: number; of: number; testId?: string; compact?: boolean }) {
-  const shown = Math.max(0, Math.min(n, of));
-  const text = `${n} of ${of} ${of === 1 ? "heart" : "hearts"}`;
-  return (
-    <span className={`mz-jr-hearts${compact ? " mz-jr-hearts--compact" : ""}`} data-testid={testId} data-hearts={n} aria-label={text} role="img">
-      <span aria-hidden="true" className="mz-jr-hearts__icons">
-        {Array.from({ length: of }, (_, i) => <span key={i} className={i < shown ? "mz-jr-heart mz-jr-heart--full" : "mz-jr-heart mz-jr-heart--empty"}>{i < shown ? "♥" : "♡"}</span>)}
-      </span>
-      <span aria-hidden="true" className="mz-jr-hearts__n">{n}/{of}</span>
-    </span>
-  );
-}
-
 /** The countdown, in text first; the jebena's word next to it. */
 function TurnClock({ seconds, urgency, testId = "jr-clock" }: { seconds: number | null; urgency: Urgency; testId?: string }) {
   if (seconds === null) return null;
@@ -133,15 +126,24 @@ function TurnClock({ seconds, urgency, testId = "jr-clock" }: { seconds: number 
   );
 }
 
-/** Seat order with hearts; the holder marked in words and with a ▶ mark. */
-function SeatList({ order, holder, startHearts, nameOf, meId, testId = "jr-seats" }: { order: Seat[]; holder?: string; startHearts: number; nameOf: (id?: string) => string; meId?: string; testId?: string }) {
+/**
+ * Seat order with each player's cups; the holder marked in words and with a ▶ mark.
+ * An eliminated seat shows every cup broken and "Out"; a seat that left shows
+ * "Left" and no cups, so leaving never looks like cups breaking (D-S101-05).
+ */
+function SeatList({ order, holder, startHearts, nameOf, meId, testId = "jr-seats", gameId, log, surface = "seat" }: { order: Seat[]; holder?: string; startHearts: number; nameOf: (id?: string) => string; meId?: string; testId?: string; gameId?: string; log?: LogEntry[]; surface?: string }) {
   return (
     <ol className="mz-jr-seats" data-testid={testId} aria-label="Seat order">
       {order.map((s) => (
         <li key={s.id} className={`mz-jr-seat${s.id === holder ? " mz-jr-seat--holder" : ""}${s.out ? " mz-jr-seat--out" : ""}`} data-testid={`jr-seat-${s.id}`} data-holder={String(s.id === holder)} data-out={String(s.out)}>
           <span className="mz-jr-seat__mark" aria-hidden="true">{s.id === holder ? "▶" : s.out ? "✕" : "·"}</span>
           <span className="mz-jr-seat__name">{s.id === meId ? `${nameOf(s.id)} (you)` : nameOf(s.id)}{s.id === holder ? <span className="mz-jr-seat__tag"> · has the jebena</span> : null}</span>
-          {s.out ? <span className="mz-jr-seat__status">{s.satOut ? "Left" : "Out"}</span> : <Hearts n={s.hearts} of={startHearts} compact />}
+          {s.satOut ? <span className="mz-jr-seat__status">Left</span> : (
+            <span className="mz-jr-seat__cups">
+              <CiniCups n={s.hearts} of={startHearts} compact memoryKey={gameId ? `${gameId}:${s.id}:${surface}` : undefined} lostAt={lastLossAt(log, s.id)} seat={s.id} surface={surface} />
+              {s.out && <span className="mz-jr-seat__status">Out</span>}
+            </span>
+          )}
         </li>
       ))}
     </ol>
@@ -157,26 +159,34 @@ function Named({ named, nameOf, meId }: { named: { answer: string; player: strin
   );
 }
 
-/** Lobby (host or cohost): 3, 5 or 7 hearts, 5 preselected. */
+/** Lobby (host or cohost): 3, 5 or 7 cups each, 5 preselected. */
 export function JebenaHeartsChoice({ value, onChange, busy }: { value: number; onChange: (hearts: number) => void; busy?: boolean }) {
   return (
     <div className="mz-content-choice mz-jr-heartschoice" data-testid="lobby-hearts" data-hearts={value}>
-      <span className="mz-content-choice__label" aria-hidden="true">Hearts</span>
+      <span className="mz-content-choice__label" aria-hidden="true">Cups</span>
       <SegmentedChoice
-        label="Hearts each"
+        label="Cups each"
         compact
         value={String(value)}
         onChange={(v) => { const n = Number(v); if (!busy && n !== value) onChange(n); }}
-        options={JEBENA_HEART_OPTIONS.map((h) => ({ value: String(h), title: `${h} ♥`, testId: `lobby-hearts-${h}`, tone: "neutral" as const, disabled: busy }))}
+        options={JEBENA_HEART_OPTIONS.map((h) => ({ value: String(h), title: `${h} cups`, testId: `lobby-hearts-${h}`, tone: "neutral" as const, disabled: busy }))}
       />
-      <p className="mz-foot mz-content-choice__note" data-testid="lobby-hearts-note">Each player starts with {value} hearts. Run out of time and you lose one; lose them all and you're out.</p>
+      <p className="mz-foot mz-content-choice__note mz-jr-cupslabel" data-testid="lobby-hearts-note">
+        <CiniCups n={value} of={value} compact decorative />
+        Each player starts with {value} cups. Run out of time and one breaks; when all of yours are broken, you're out.
+      </p>
     </div>
   );
 }
 
-/** Everyone else (guests, the briefing, the TV): the hearts, as a label. */
-export function JebenaHeartsLabel({ hearts, testId, prefix = "" }: { hearts: number; testId?: string; prefix?: string }) {
-  return <span className="mz-badge mz-jr-heartsbadge" data-testid={testId} data-hearts={hearts}>{prefix}{hearts} ♥ each</span>;
+/** Everyone else (guests, the briefing): the cups each player starts with, in words, with the cups beside them. */
+export function JebenaCupsLabel({ hearts, testId, text }: { hearts: number; testId?: string; text: string }) {
+  return (
+    <span className="mz-jr-cupslabel" data-testid={testId} data-hearts={hearts}>
+      <span>{text}</span>
+      <CiniCups n={hearts} of={hearts} compact decorative />
+    </span>
+  );
 }
 
 export interface MchezoJebenaDeps {
@@ -231,7 +241,9 @@ export function MchezoJebena({ game, players, playerId, title, intent, error, la
         <h2 className="mz-jr-cat__name" data-testid="jr-category-name">{cat?.name ?? "…"}</h2>
         {cat?.definition && <p className="mz-foot mz-jr-cat__def">{cat.definition}</p>}
       </div>
-      {me && !me.out && <Hearts n={me.hearts} of={startHearts} testId="jr-my-hearts" />}
+      {me && !me.satOut && (
+        <CiniCups n={me.hearts} of={startHearts} testId="jr-my-hearts" memoryKey={`${game.id}:${playerId}:hud`} lostAt={lastLossAt(st.log, playerId)} seat={playerId} surface="hud" />
+      )}
     </div>
   );
   const stage = (
@@ -247,12 +259,12 @@ export function MchezoJebena({ game, players, playerId, title, intent, error, la
   if (me?.out) {
     return (
       <main className="mz-screen mz-jr" aria-label={`${title}: you're out, watching the rest`} data-testid="jr-out">
-        <GameHeader title={title} objective={me.satOut ? "You left this game" : "Out of hearts: watch the rest"} accent={1} />
+        <GameHeader title={title} objective={me.satOut ? "You left this game" : "All your cups are broken: watch the rest"} accent={1} />
         {header}
         {stage}
         {last && <FeedbackLine testId="jr-last">{last}</FeedbackLine>}
         <Named named={st.named ?? []} nameOf={nameOf} meId={playerId} />
-        <SeatList order={st.order ?? []} holder={holder} startHearts={startHearts} nameOf={nameOf} meId={playerId} />
+        <SeatList order={st.order ?? []} holder={holder} startHearts={startHearts} nameOf={nameOf} meId={playerId} gameId={game.id} log={st.log} />
       </main>
     );
   }
@@ -265,7 +277,7 @@ export function MchezoJebena({ game, players, playerId, title, intent, error, la
         {stage}
         {last && <FeedbackLine testId="jr-last">{last}</FeedbackLine>}
         <Named named={st.named ?? []} nameOf={nameOf} meId={playerId} />
-        <SeatList order={st.order ?? []} holder={holder} startHearts={startHearts} nameOf={nameOf} meId={playerId} />
+        <SeatList order={st.order ?? []} holder={holder} startHearts={startHearts} nameOf={nameOf} meId={playerId} gameId={game.id} log={st.log} />
       </main>
     );
   }
@@ -308,7 +320,7 @@ export function MchezoJebena({ game, players, playerId, title, intent, error, la
   );
 }
 
-/** Results: places (the winner kept the jebena), hearts, answers, timeouts; points explained. */
+/** Results: places (the winner kept the jebena), cups, answers, timeouts; points explained. */
 export function MchezoJebenaResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; next?: ReactNode }) {
   const { casual } = useMchezo();
   const st = (game.state ?? publicGame?.state ?? {}) as JebenaView;
@@ -319,7 +331,7 @@ export function MchezoJebenaResults({ game, publicGame, players, playerId, title
       {next}
       <GameHeader title={title} objective={jebenaEndLine(st.end, st.standings, nameOf, playerId)} accent={1} />
       <Standings st={st} nameOf={nameOf} meId={playerId} />
-      <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every heart you keep. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
+      <p className="mz-foot" data-testid="jr-howscore">100 points for each player you outlast, plus 10 for every cup still whole. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
       <OutcomeSummary gameId="jebena-rush" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
@@ -338,7 +350,9 @@ function Standings({ st, nameOf, meId, tv }: { st: JebenaView; nameOf: (id?: str
             <b>{r.id === meId ? `${nameOf(r.id)} (you)` : nameOf(r.id)}</b>
             <span className="mz-jr-row__line">
               {keptTheJebena(st.end, st.standings, r.id) ? "Kept the jebena · " : ""}
-              {r.out ? (r.satOut ? "Left the game · " : "Out · ") : `${r.hearts} of ${startHearts} hearts left · `}
+              {r.out ? (r.satOut ? "Left the game · " : "Out: every cup broken · ") : (
+                <><span className="mz-jr-row__cups"><CiniCups n={r.hearts} of={startHearts} compact decorative /></span>{`${r.hearts} of ${startHearts} cups whole · `}</>
+              )}
               {r.answers} {r.answers === 1 ? "answer" : "answers"} · {r.timeouts} {r.timeouts === 1 ? "timeout" : "timeouts"}
             </span>
           </span>
@@ -349,7 +363,7 @@ function Standings({ st, nameOf, meId, tv }: { st: JebenaView; nameOf: (id?: str
   );
 }
 
-/** TV: the jebena, the category, who has it and the countdown, everyone's hearts, the last play. Public facts only. */
+/** TV: the jebena, the category, who has it and the countdown, everyone's cups, the last play. Public facts only. */
 export function JebenaTv({ game, title, nameOf }: { game: PublicGame; title: string; nameOf: (id: string) => string }) {
   const st = (game.state ?? {}) as JebenaView;
   const { seconds, urgency } = useTurnClock(game, st);
@@ -357,7 +371,7 @@ export function JebenaTv({ game, title, nameOf }: { game: PublicGame; title: str
   const last = lastPlayLine(st.log, name);
   return (
     <section className="mz-jr-tv" data-testid="tv-live-jebena-rush">
-      <span className="mz-tv-kicker">{title} · {st.startHearts ?? 5} ♥ each · category {st.category?.round ?? 1}</span>
+      <span className="mz-tv-kicker">{title} · {st.startHearts ?? 5} cups each · category {st.category?.round ?? 1}</span>
       <div className="mz-jr-tv__main">
         <JebenaArt urgency={urgency} size={220} testId="tv-jr-art" label={`The jebena, with ${name(st.turn?.player)}: ${URGENCY_LABEL[urgency]}`} />
         <div className="mz-jr-tv__info">
@@ -367,7 +381,7 @@ export function JebenaTv({ game, title, nameOf }: { game: PublicGame; title: str
           {last && <p className="mz-tvshow-line mz-tvshow-line--muted" data-testid="tv-jr-last">{last}</p>}
         </div>
       </div>
-      <SeatList order={st.order ?? []} holder={st.turn?.player} startHearts={st.startHearts ?? 5} nameOf={name} testId="tv-jr-seats" />
+      <SeatList order={st.order ?? []} holder={st.turn?.player} startHearts={st.startHearts ?? 5} nameOf={name} testId="tv-jr-seats" gameId={game.id} log={st.log} surface="tv" />
     </section>
   );
 }
