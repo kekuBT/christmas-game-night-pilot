@@ -1,0 +1,26 @@
+$ node scripts/check-spectator.mjs http://localhost:44947
+# timeout 600s | worker w2 | server http://localhost:44947 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92r-full/test-results/20261112-011539-adb5e758-13971/server-data/w2)
+
+[+4.0s] PASS baseline roster is 3 players, 0 watching — players=3 watching=0
+[+6.3s] PASS spectating adds no player — players=3
+[+6.3s] PASS spectator counted as watching — watching=1
+[+6.3s] PASS spectator sees no lobby seat and no Start control
+[+6.3s] PASS spectator token denied on games/intents/reactions — {"games":401,"intents":401,"reactions":401}
+[+7.9s] PASS bad code spectate fails on landing — Room not found for that code
+[+7.9s] PASS failed spectate changed nothing
+[+10.7s] PASS mid-game spectator adds no player — players=3 watching=2
+[+10.7s] PASS mid-game spectator sees the TV view
+[+39.3s] PASS game finished with spectators watching — status=finished
+[+39.3s] PASS scores cover exactly the 3 players — scores=3
+[+47.5s] PASS room filled to 10 players — players=10
+[+49.7s] PASS full room still admits a spectator — players=10 watching=3
+[+50.2s] PASS closing a spectator tab drops the watching count — watching=2
+[+51.9s] PASS refresh keeps the same spectator (no duplicate, no new seat) — players=10 watching=2
+[+55.6s] PASS player TV on a second tab adds no seat — players=10
+[+55.6s] PASS host still occupies exactly one seat
+[+55.6s] PASS stop watching returns to Home with Host and Join
+[+57.1s] PASS stop watching drops the count to 1 — watching=1
+[+57.1s] SPECTATOR ALL PASSED
+[+57.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":15,"peakOpenPages":14}
+
+# PASS (exit 0) in 57.2s | cpu 5.5s, peak memory 262 MB

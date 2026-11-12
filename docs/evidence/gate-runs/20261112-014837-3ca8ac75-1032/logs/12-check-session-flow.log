@@ -1,0 +1,78 @@
+$ node scripts/check-session-flow.mjs http://localhost:36949
+# timeout 600s | worker w1 | server http://localhost:36949 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92c-full/test-results/20261112-014837-3ca8ac75-1032/server-data/w1)
+
+[+3.7s] PASS setup: the lineup is saved (Math, Trivia) — {"status":200,"body":{"ok":true,"party":{"revision":1,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":19,"transitionMinutes":2,"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"trivia","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794448674435}}}}
+[+3.7s] PASS setup: the host's Start names game 1 of 2
+[+3.7s] PASS setup: the TV shows the lineup, game 1 of 2
+[+26.7s] PASS A host: the casual results screen
+[+26.7s] PASS A guest: the casual results screen
+[+26.7s] PASS A host: one result heading, Casual (not Practice) — MATH MAYHEM · CASUAL
+[+26.7s] PASS A host: no old shell (no 🎄 header, Championship, Practice, second winner line)
+[+26.7s] PASS A host: standings with both players — 2
+[+26.7s] PASS A host: their own answers to review
+[+26.7s] PASS K host: What's next right under the result heading, before the standings and the answers, on the first screen — {"hero":15.3396635055542,"next":306.7641906738281,"after":{"mz-scores":745.8292846679688,"mz-answer-review":1006.5890502929688},"screen":844}
+[+26.7s] PASS A guest: one result heading, Casual (not Practice) — MATH MAYHEM · CASUAL
+[+26.7s] PASS A guest: no old shell (no 🎄 header, Championship, Practice, second winner line)
+[+26.7s] PASS A guest: standings with both players — 2
+[+26.7s] PASS A guest: their own answers to review
+[+26.7s] PASS K guest: What's next right under the result heading, before the standings and the answers, on the first screen — {"hero":15.009547233581543,"next":287.60723876953125,"after":{"mz-scores":496.5842590332031,"mz-answer-review":757.3916015625},"screen":844}
+[+29.2s] PASS A nothing started by itself: one game, finished; the lineup's next is game 2 — {"games":[["math-mayhem","finished"]],"next":1}
+[+29.2s] PASS B host: Next game: Trivia Showdown
+[+29.2s] PASS B guest: up next, game 2 of 2, Keku starts it
+[+29.2s] PASS B guest: no continuation buttons — ["next-status"]
+[+29.2s] PASS B TV: the next game, game 2 of 2
+[+29.5s] PASS B reload: the host is back on the results with Next game
+[+29.5s] PASS B reload: the guest is back on the results, waiting for Keku
+[+29.6s] PASS F the server refuses the guest's Next and Play again; nothing starts — [400,400]
+[+30.0s] PASS C Next whose reply was lost: the briefing opens for both
+[+30.1s] PASS C exactly one new game: Trivia, game 2 of the lineup — [["math-mayhem","finished"],["trivia","briefing"]]
+[+30.1s] PASS C the retry was the same press (same request id, same session revision) — [{"id":"be313157-77b0-4ced-9815-2b6920d8f313","sessionRevision":1},{"id":"be313157-77b0-4ced-9815-2b6920d8f313","sessionRevision":1}]
+[+58.9s] PASS C game 2's own results (Trivia) carry the panel: the lineup is complete
+[+58.9s] PASS K Trivia's results: What's next right under the result heading, before the outcome and the reveal, on the first screen — {"hero":8,"next":289.640625,"after":{"mz-reveal-step":768.265625,"mz-outcome":639.078125},"screen":844}
+[+58.9s] PASS C guest: that was the whole lineup
+[+58.9s] PASS C TV: that was the whole lineup
+[+58.9s] PASS C host: no Next game once the lineup is complete; Play again and Plan another lineup offered
+[+59.0s] PASS G Play again is reachable with Tab
+[+59.2s] PASS D Play again (Enter): a new briefing for Trivia
+[+59.2s] PASS D a rematch: a third game, Trivia, tied to game 2; the lineup is untouched (still complete) — [["math-mayhem","finished"],["trivia","finished"],["trivia","briefing"]]
+[+59.2s] PASS D the earlier games keep their scores
+[+87.5s] PASS D the rematch ends on its results with the panel
+[+87.5s] PASS H guest at 320 px: the results and panel without sideways scroll
+[+87.5s] PASS K guest at 320 px: What's next starts on the first screen, under the result heading — {"hero":8,"next":277.5625,"after":{"mz-reveal-step":555.890625,"mz-outcome":426.703125},"screen":640}
+[+87.5s] PASS H host at 1440 px: the panel without sideways scroll
+[+87.8s] PASS E host: on a break, with Resume
+[+87.8s] PASS E guest: on a break, no Resume
+[+87.8s] PASS E TV: on a break
+[+87.8s] PASS E the server refuses the guest's Resume (403); still on a break — 403
+[+117.9s] PASS E host lobby: the break banner with Resume; Start waits
+[+118.0s] PASS E guest lobby: on a break, the host resumes
+[+118.1s] PASS E host reload: still on a break
+[+118.2s] PASS E nothing started during the break (three games)
+[+118.8s] PASS E Resume: the banner goes for both; Start is back
+[+118.8s] PASS E TV: no longer on a break
+[+118.8s] PASS E host lobby: Take a break is offered again
+[+118.8s] PASS F guest lobby: no break or start controls
+[+118.8s] PASS lineup card: both games played
+[+127.7s] PASS I no answer: 'couldn't confirm whether the lineup was saved' (never 'not saved')
+[+128.9s] PASS I the request lands later: the planner recognises its own save and closes, saying so
+[+128.9s] PASS I the server holds exactly that draft, one revision on — {"held":1,"rev":2,"items":["math-mayhem","pattern-pulse"],"draft":["math-mayhem","pattern-pulse"]}
+[+128.9s] PASS I the new lineup starts at its first game; the played games keep their scores
+[+130.8s] PASS J setup: a lineup of Math Mayhem, then Guess the Year — {"status":200,"body":{"ok":true,"party":{"revision":1,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":17,"transitionMinutes":2,"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"guess-the-year","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794448801548}}}}
+[+130.8s] PASS J the lineup's Start: game 1 of 2
+[+131.3s] PASS J picked by hand: a plain Start (not the lineup's), and the lineup says it is waiting
+[+131.9s] PASS J the hand-picked start sent no lineup selector — [{"gameId":"math-mayhem","official":false,"roster":["player-1","player-2"],"attempt":{"id":"c37dc664-0a6d-4c53-aa39-664e6aa2ff03","sessionRevision":0},"season":"everyday"}]
+[+154.1s] PASS J the hand-picked Math game ends on its results
+[+154.1s] PASS J it completed, and the lineup's Math item is still pending: nothing was consumed — {"games":[["math-mayhem","finished"]],"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"guess-the-year","started":false,"status":"pending"}],"next":0}
+[+154.5s] PASS J Play again: a rematch of Math, and the lineup is unchanged (Math still pending, still next) — {"games":[["math-mayhem","finished"],["math-mayhem","briefing"]],"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"guess-the-year","started":false,"status":"pending"}]}
+[+155.1s] PASS J the rematch is cancelled before play: back on the results, one game
+[+155.1s] PASS J the results' What's next is back
+[+155.8s] PASS J Trivia picked by hand: a plain Start
+[+183.6s] PASS J the hand-picked Trivia ends on its results, with the panel
+[+183.6s] PASS J after the hand-picked Trivia: the lineup is still at Math, pending — {"games":[["math-mayhem","finished"],["trivia","finished"]],"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"guess-the-year","started":false,"status":"pending"}]}
+[+183.6s] PASS J the results offer the lineup's Next game: Math Mayhem
+[+183.7s] PASS J Next starts the pending Math item: that item now has this game — {"games":[["game-1","math-mayhem","finished"],["game-3","trivia","finished"],["game-4","math-mayhem","briefing"]],"items":[{"gameId":"math-mayhem","started":true,"status":"briefing","gameInstanceId":"game-4"},{"gameId":"guess-the-year","started":false,"status":"pending"}]}
+[+183.8s] 
+[+183.8s] All session-flow checks passed
+[+183.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 183.9s | cpu 9.8s, peak memory 270 MB

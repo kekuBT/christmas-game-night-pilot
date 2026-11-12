@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:33839
+# timeout 600s | worker w3 | server http://localhost:33839 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92r-full/test-results/20261112-011539-adb5e758-13971/server-data/w3)
+
+[+22.1s] PASS reveal opens on the first question phase — question:0
+[+22.1s] PASS question phase hides the correct answer — count=0
+[+22.4s] PASS Reveal answer steps into the first reveal — reveal:1
+[+22.4s] PASS reveal phase shows the correct answer — count=1
+[+22.4s] PASS reveal phase separates this question from the game total
+[+22.5s] PASS Next question steps into the second question phase — question:2
+[+22.5s] PASS second question phase hides the correct answer again — count=0
+[+22.5s] PASS Q10 jump lands on the last question phase — question:18
+[+22.6s] PASS last reveal reached — reveal:19
+[+22.6s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+22.6s] PASS finale shows the standings list
+[+22.7s] PASS auto-play starts back at the first question — question:0
+[+30.7s] PASS auto-play advances a step within 8s — reveal:1
+[+38.7s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+40.1s] PASS TV walk opens on a question — What is the next prime number after 7?
+[+44.1s] PASS TV walk advances to the reveal stage
+[+49.2s] PASS TV walk advances to the second question — In which country are the pyramids of Giz
+[+49.3s] PASS TV manual jump reaches the leaderboard
+[+49.3s] REVEAL ALL PASSED
+[+49.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 49.3s | cpu 3.1s, peak memory 261 MB

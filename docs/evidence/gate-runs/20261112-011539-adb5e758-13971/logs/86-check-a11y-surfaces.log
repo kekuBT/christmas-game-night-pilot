@@ -1,0 +1,21 @@
+$ node scripts/check-a11y-surfaces.mjs http://localhost:36189
+# timeout 600s | worker w1 | server http://localhost:36189 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92r-full/test-results/20261112-011539-adb5e758-13971/server-data/w1)
+
+[+1.3s] PASS Geography: a game with a flag question was dealt — 8 questions
+[+1.3s] PASS Geography: the server describes the flag without naming any option — {"imageAlt":"Three vertical stripes: green, white, red.","options":["Mexico","Ireland","Hungary","Italy"]}
+[+1.7s] PASS Geography: the flag question is on screen
+[+1.7s] PASS Geography: the flag is exposed as a picture named 'Flag: <description>' — 1
+[+1.7s]   question in the accessibility tree: - 'heading "Which country does this flag belong to? Flag: Three vertical stripes: green, white, red." [level=1]': |   - text: Which country does this flag belong to? |   - 'img "Flag: Three vertical stripes: green, white, red."': 🇮🇹
+[+1.7s] PASS Geography: the question's accessible text names no option (no answer read out) — - 'heading "Which country does this flag belong to? Flag: Three vertical stripes: green, white, red." [level=1]':
+[+1.7s]   - text: Which country does this flag belong to?
+[+1.7s]   - 'img "Flag: Three vertical stripes: green, white, red."': 🇮🇹
+[+1.7s] PASS Geography: sighted players still see the flag emoji
+[+2.1s] PASS Who Said That: every question is its own labelled group
+[+2.1s] PASS Who Said That: the group is named by its quote and says which question it is — I built a robot that wraps presents, but it wrapped the cat. (question 1 of 8)
+[+2.4s] PASS Who Said That: an answered question says YOUR answer
+[+2.4s] PASS Who Said That: no internal game or player ids on the screen
+[+2.4s] PASS Who Said That: no internal status word ('Status: playing')
+[+2.5s] A11Y SURFACES ALL PASSED
+[+2.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":2,"peakOpenPages":1}
+
+# PASS (exit 0) in 2.5s | cpu 1.9s, peak memory 351 MB

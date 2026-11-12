@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | fast | run 20261112-011311-a6579c6b-7434
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      lint (w3) [functional]: ✖ 1 problem (1 error, 0 warnings)
+  timing   wall 46s · step time 1m 20s (sum) · 3 workers, 58% busy · 1.74× the same steps run one after another
+           predicted 27–61s (about 34s, measured) → actual 46s (+35%)
+           longest  unit-tests 35s, lint 16s, typecheck-server 11s · the longest step is 76% of the wall time
+           machine  CPU mean 83%, peak 99% · memory available ≥ 14067 MB · load peak 3.95
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92-fast/test-results/20261112-011311-a6579c6b-7434/report.json

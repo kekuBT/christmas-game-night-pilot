@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:33839
+# timeout 600s | worker w3 | server http://localhost:33839 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92r-full/test-results/20261112-011539-adb5e758-13971/server-data/w3)
+
+[+18.1s] PASS Geography: finished player sees no answers while Bea still plays
+[+18.1s] PASS Geography: TV shows no answers while Bea still plays
+[+18.1s] PASS Geography: Bea (mid-game) sees no answers
+[+27.0s] PASS Geography: results list every question — 8
+[+27.0s] PASS Geography: each answer matches the content pack — 8/8
+[+27.0s] PASS Geography: each explanation is shown — 8/8
+[+27.0s] PASS Geography: Bea sees her own choices marked
+[+27.0s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+27.2s] PASS Geography: TV lists the answers after the game
+[+27.2s] PASS Geography: TV shows no player's choices
+[+32.3s] PASS Closest: no answer anywhere while question 1 is open
+[+32.4s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 3600 vs 3600
+[+32.4s] PASS Closest: and the player's own guess
+[+32.4s] PASS Closest: Bea sees her own guess, not Ada's
+[+32.4s] PASS Closest: the explanation is shown
+[+32.4s] PASS Closest: question 2 is now open and its answer is not shown
+[+32.6s] PASS Closest: TV shows the last answer only — Last question: How many seconds are in one hour? — 3,600 seconds
+[+32.6s] PASS Closest: TV shows nobody's guess — Last question: How many seconds are in one hour? — 3,600 seconds
+[+32.8s] ANSWER REVEAL ALL PASSED
+[+32.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 32.8s | cpu 3.2s, peak memory 268 MB

@@ -2131,6 +2131,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - `tests/stage91-bank-privacy.test.ts` now also keeps Spectrum's module out of the web app.
 - **Mutation checks:** a public target leak fails 4 tests; other players' guesses in a view fail 2; half-down rounding fails 1; `scores()` leaving out sat-out players fails 8; a summed team result fails 10.
 - **The existing product is changed** by the Jebena cleanup (the shared `onFinish` in `finalize`); the reviewer's private browser audit of Jebena endings and replay is needed before clearance. The Spectrum UI and real devices are NOT RUN.
-- **Gates so far** (each verdict is one run on one revision): `a6579c6` fast `20261112-011311-a6579c6b-7434` **FAILED** (lint: a useless assignment in the test helper); `adb5e75` fast `20261112-011445-adb5e758-10813` PASSED; `adb5e75` full: see the report.
-- **Next:** sequential clean fast then full gates on the candidate with 6811445149 applied, and a new completed report.
+- **Gates** (each verdict is one run on one revision; evidence in `docs/evidence/gate-runs/<run>/`):
+  - `a6579c6`: fast `20261112-011311-a6579c6b-7434` **FAILED** (exit 1, 4/5): lint `no-useless-assignment` in the Spectrum test helper. Fixed in `adb5e75`.
+  - `adb5e75`: fast `20261112-011445-adb5e758-10813` PASSED (exit 0, 5/5); then full `20261112-011539-adb5e758-13971` PASSED (exit 0, 87/87, 31 min 43 s). It ran untouched while 6811445149 was applied elsewhere.
+  - `3ca8ac7` (final candidate, 6811445149 applied): fast `20261112-014738-3ca8ac75-30336` **PASSED** (exit 0, 5/5, 49 s); then full `20261112-014837-3ca8ac75-1032` **PASSED** (exit 0, 87/87, 31 min 47 s, no leftover processes). Unit tests 1,536 in 120 files; `check-jebena-rush` 106 checks, 0 failed, with the last-one-standing ending (F) and Play again (G).
+- **Next:** the new completed report on PR #16; then ChatGPT's review and the private browser audit of Jebena endings and replay.
 
