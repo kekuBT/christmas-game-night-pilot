@@ -2235,7 +2235,25 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - physical iPhone and Android remain untested.
   - The same comment hands off Stage 10.2.
 
-## Stage 10.2: a results line for a genuine moment, Jebena Rush and Spectrum (in progress)
+## Stage 10.2: a results line for a genuine moment, Jebena Rush and Spectrum (completed, awaiting review)
 - **Brief:** ChatGPT's handoff 6829484451 on PR #18. Base `30a56f9` (PR #18's cleared head); branch `claude/stage10-2-result-lines`, a stacked PR on #18.
 - **Scope:** one short, optional line from a pure, deterministic selector over public finished facts, on the player results and the TV final. Jebena: one cup left, or every cup whole, for a sole winner. Spectrum: 40 of 40, or a round exactly on target, for a completed match. No server, score, schema or Memory Book change.
-- **Spec:** `docs/stage10/stage102.md` (estimate about 4.5–5.5 h); decisions D-S102-01 to 05.
+- **Spec:** `docs/stage10/stage102.md` (estimate about 4.5–5.5 h; §8 as built); decisions D-S102-01 to 05.
+- **Built:**
+  - `jebenaMoment` and `spectrumMoment` in `lib/moments.ts` (the Stage 5 moment layer): pure, deterministic, fixed lines, finished public facts only.
+  - **Rendered:** under the result on the phone results (`results-moment`) and on the TV final views (`tv-results-moment`).
+  - **Unchanged:** no server, score, projection, schema or Memory Book change.
+- **Tests:**
+  - `tests/stage102-moments.test.ts` (24).
+  - `check-jebena-rush`:
+    - room C's one-cup line on both phones (Everyday 390, Christmas 320) and a TV, after reloads;
+    - a replay won by absence gets none, and none is carried over;
+    - the main match is checked by the driver's own oracle.
+  - `check-spectrum`: round 3 on target, so the line shows on three phones and the TV, after reloads; the early-ended match gets none.
+- **Gates** on `cdb77ad` (each verdict is one run on one revision; evidence in `docs/evidence/gate-runs/<run>/`):
+  - targeted (`jebena-rush spectrum`) `20261112-164638-cdb77add-1528` **PASSED** (4/4; Jebena 193, Spectrum 137);
+  - fast `20261112-164851-cdb77add-2300` **PASSED** (5/5; 1,631 unit tests);
+  - checkpoint full gate `20261112-165001-cdb77add-5562` **PASSED** (exit 0, 88/88, 33 min 25 s, no leftover processes).
+- **Screenshots:** `docs/stage10/stage102-screenshots/`.
+- **Not run:** real iPhone Safari and Android Chrome.
+- **Next:** ChatGPT's independent review and private live audit of PR #19. Nothing merged or deployed.

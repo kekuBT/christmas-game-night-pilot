@@ -123,3 +123,35 @@ D-S102-01 to D-S102-05 in `docs/DECISIONS.md`:
 | Gates (targeted, fast, one full gate of about 33 min) | about 40 min |
 | Docs and the report | 0.5 h |
 | **Total** | **about 4.5–5.5 h** |
+
+## 8. As built and tested
+| Area | Where | Tests |
+|---|---|---|
+| The selectors | `apps/web/src/ui/mchezo/lib/moments.ts`: `jebenaMoment`, `spectrumMoment`, `JEBENA_LINES`, `SPECTRUM_LINES` | `tests/stage102-moments.test.ts` (24): every trigger, guard and priority, missing and partial data, ties, room and early endings, wins by absence, the zero-answer winner, team-only wording, determinism, and the real modules' finished views (scores unchanged) |
+| Phone results | `MchezoJebenaResults` (under the game's result line), `MchezoSpectrumResults` (under the team total): `results-moment`, the Stage 5 element | The browser checks below |
+| TV final | `JebenaTvFinal`, `SpectrumTvFinal`: `tv-results-moment`; `styles/stage102.css` (a dashed rule, the accent, bold) | The browser checks below |
+| In real browsers | `scripts/check-jebena-rush.mjs`, `scripts/check-spectrum.mjs`. Each works out the expected line from the server's own state with its own copy of the rules | See below |
+| Unchanged | No file under `src/` (server, modules, projections) or `src/shared/`, and the Memory Book is untouched | `git diff 30a56f9 cdb77ad -- src` is empty; the drivers compare results with the server's scores |
+
+### In real browsers
+- **Jebena, room C** (the zero-answer survivor, one cup left):
+  - the line on the winner's phone (Everyday, 390 px), the other player's (Christmas, 320 px) and a TV opened on that room;
+  - under the result and What's next, no sideways scroll;
+  - the same after reloading the phone and the TV.
+- **Jebena, Play again in room C:** last match's winner leaves, so the other player wins by absence. No line on either phone, and the TV shows the replay's final (a new winner) with no line carried over.
+- **Jebena, the main match:**
+  - the expected line, or none, on all three phones and the TV, and after a reload;
+  - Keku kept 2 of 3 cups in these runs, so no line, correctly;
+  - its replay (both others left) gets none.
+- **Spectrum:**
+  - round 3's guesses are put on the target, so it lands at distance 0: "Round 3 landed exactly on the target." on all three phones and the TV, naming nobody;
+  - the same after reloading a phone and the TV;
+  - the next match ends early (too few players) with no line, so nothing carries over.
+
+### Gates
+`docs/PROGRESS.md`, Stage 10.2. On `cdb77ad`:
+- targeted (`jebena-rush`, `spectrum`) `20261112-164638-cdb77add-1528` PASSED;
+- fast `20261112-164851-cdb77add-2300` PASSED;
+- checkpoint full gate `20261112-165001-cdb77add-5562` PASSED (88/88).
+
+Screenshots: `docs/stage10/stage102-screenshots/`.
