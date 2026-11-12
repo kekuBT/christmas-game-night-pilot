@@ -1,0 +1,113 @@
+$ node scripts/check-jebena-rush.mjs http://localhost:36949
+# timeout 600s | worker w1 | server http://localhost:36949 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92c-full/test-results/20261112-014837-3ca8ac75-1032/server-data/w1)
+
+[+5.5s] PASS J room B: its host sets 7 hearts — {"ok":true,"lobbySettings":{"jebena-rush":{"hearts":7}},"session":{"onBreak":false,"revision":1}}
+[+5.5s] PASS J room B: Jebena Rush starts with 7 hearts — {"gameId":"game-1","gameType":"jebena-rush","status":"briefing","players":["player-1","player-2"]}
+[+5.5s] PASS J room B: playing
+[+5.6s] PASS A the picker lists Jebena Rush as practice-only — Jebena Rush 2–10 players · best with 3+ · about 8 min · Practice only
+[+6.0s] PASS A the host sees the hearts choice, 5 preselected
+[+6.0s] PASS A guests see 5 hearts each
+[+6.2s] PASS A the host chose 3 hearts
+[+6.2s] PASS A guests see the host's choice: 3 hearts each
+[+6.2s] PASS A a guest can't change the hearts (403) — {"status":403,"body":{"error":"Only the host or a cohost can change a game's settings.","code":"NOT_HOST","lobbySettings":{"jebena-rush":{"hearts":3}}}}
+[+6.2s] PASS A 4 hearts is refused (400) — {"status":400,"body":{"error":"Hearts must be 3, 5 or 7.","code":"INVALID_SETTINGS","lobbySettings":{"jebena-rush":{"hearts":3}}}}
+[+6.2s] PASS A lobby, host 390: no sideways scroll
+[+6.2s] PASS A lobby, guest 320: no sideways scroll
+[+6.4s] PASS B Keku's briefing says everyone starts with 3 hearts
+[+6.4s] PASS B Amina's briefing says everyone starts with 3 hearts
+[+6.4s] PASS B Baraka's briefing says everyone starts with 3 hearts
+[+6.4s] PASS B the TV briefing says 3 hearts
+[+6.4s] PASS B the briefing states 10 seconds a turn — 10 seconds for each turn.
+[+6.4s] The whole game ends by itself after about 12 minutes.
+[+7.1s] PASS C play: a turn is on
+[+7.1s] PASS C every player starts with 3 hearts
+[+7.1s] PASS C the holder's phone says Your turn! and its field has focus
+[+7.1s] PASS C Amina sees Keku has the jebena
+[+7.1s] PASS C Baraka sees Keku has the jebena
+[+7.1s] PASS C the TV: category, holder, countdown and hearts
+[+7.1s] PASS C keyboard: Tab from the field reaches Send
+[+7.2s] PASS C sent “Zzqxv Plonk”
+[+7.2s] PASS C not in the bank: explained, no pass
+[+7.2s] PASS C the phone explains it isn't on the list
+[+7.2s] PASS C a rejected try keeps the deadline
+[+7.3s] PASS C sent “Ban”
+[+7.3s] PASS C ambiguous (“Ban”): asks to check the spelling
+[+7.3s] PASS C the phone says it can't be sure
+[+7.4s] PASS C sent “vegetable”
+[+7.4s] PASS C near miss (“vegetable”): its reason is shown
+[+7.4s] PASS C the holder's turn screen: no sideways scroll
+[+7.5s] PASS C sent “Asparagus”
+[+7.5s] PASS C “Asparagus” is accepted and the jebena passes
+[+7.5s] PASS C the previous holder reads “You named …”
+[+7.5s] PASS C the TV shows the last play
+[+7.6s] PASS C sent “ASPARAGUS”
+[+7.6s] PASS C a repeat (any case) is “already named”, no pass
+[+7.6s] PASS C the phone says it was already named
+[+7.7s] PASS C sent “eggplant”
+[+7.7s] PASS C an alias (“eggplant”) counts as “Aubergine”
+[+7.9s] PASS C sent “Betroot”
+[+7.9s] PASS C a typo (“Betroot”) counts as “Beetroot”
+[+7.9s] PASS C the named list shows canonical names
+[+7.9s] PASS D an out-of-turn answer is refused — {"accepted":false,"reason":"NOT_YOUR_TURN"}
+[+7.9s] PASS D a stale turn's answer is refused — {"accepted":false,"reason":"STALE_TURN"}
+[+7.9s] PASS D neither changed the turn or the answers
+[+8.0s] PASS D a duplicate send replays its first answer, counted once — {"accepted":true,"result":{"verdict":"accepted","turn":4,"answer":"Bean","via":"exact"}} | {"accepted":true,"result":{"verdict":"accepted","turn":4,"answer":"Bean","via":"exact"}}
+[+8.7s] PASS D a late joiner is told the game started before they joined
+[+8.7s] PASS D a late joiner's answer is refused — {"accepted":false,"reason":"NOT_IN_GAME"}
+[+8.7s] PASS H full motion: steam rises on Keku's phone
+[+8.8s] PASS H reduced motion: Baraka's jebena is still
+[+8.8s] PASS H the urgency word is shown with reduced motion
+[+8.8s] PASS H Amina's phone has the Christmas look, Keku's Everyday
+[+8.8s] PASS I the TV's projection carries no unused answer and no aliases
+[+8.8s] PASS I a player's projection carries no unused answer and no aliases
+[+8.8s] PASS I nothing from the room is in the app-shell cache
+[+8.8s] PASS I2 the canary check finds a canary when one is there (self-test)
+[+8.9s] PASS I2 no built file carries the bank (22 files, 39 canaries)
+[+9.4s] PASS I2 no public response carries the bank (17 responses) —  
+[+9.4s] PASS J the rooms keep their own hearts (A 3, B 7)
+[+9.4s] PASS J an answer in room B counts there and never shows in room A
+[+9.4s] PASS E Amina's turn: her field has focus
+[+11.2s] PASS E offline: the send says it didn't get through
+[+18.6s] PASS E the turn times out while she's away (no free life)
+[+18.7s] PASS E back online, Amina's phone catches up with one heart fewer
+[+21.2s] PASS E reconnecting never resubmitted what she typed offline
+[+21.4s] PASS E after a reload, Keku is back in the game, same category
+[+29.1s] PASS E Baraka times out (turn 6)
+[+29.1s] PASS E a timeout costs exactly one heart — 3 → 2
+[+29.1s] PASS E a timeout starts a new category
+[+29.1s] PASS E and the jebena passes
+[+29.1s] PASS E Baraka's phone shows 2 hearts
+[+29.1s] PASS E the TV seat shows the hearts lost
+[+29.3s] PASS C sent “Badger”
+[+39.8s] PASS E Amina times out (turn 8)
+[+50.3s] PASS E Baraka times out (turn 9)
+[+50.5s] PASS C sent “Archery”
+[+61.0s] PASS E Amina times out (turn 11)
+[+61.0s] PASS F Amina is out and watches the rest
+[+61.0s] PASS F the out screen: no sideways scroll
+[+61.0s] PASS F the TV marks them out
+[+71.6s] PASS E Baraka times out (turn 12)
+[+71.6s] PASS F the match finishes: one player left
+[+71.6s] PASS F Keku kept the jebena (place 1, still in)
+[+71.6s] PASS F Keku sees the results
+[+71.7s] PASS F Keku's results equal the server's scores — [{"id":"player-1","pts":230},{"id":"player-3","pts":100},{"id":"player-2","pts":0}]
+[+71.7s] PASS F Amina sees the results
+[+71.7s] PASS F Amina's results equal the server's scores — [{"id":"player-1","pts":230},{"id":"player-3","pts":100},{"id":"player-2","pts":0}]
+[+71.7s] PASS F Baraka sees the results
+[+71.7s] PASS F Baraka's results equal the server's scores — [{"id":"player-1","pts":230},{"id":"player-3","pts":100},{"id":"player-2","pts":0}]
+[+71.7s] PASS F the winner's line says they kept the jebena
+[+71.7s] PASS F results at 320: no sideways scroll
+[+71.8s] PASS F the TV shows the final standings: Keku wins
+[+72.0s] PASS F the TV's post-game review: Keku kept the jebena, with the places
+[+72.0s] PASS G the host has Play again
+[+72.1s] PASS G Play again's briefing: everyone starts with 3 hearts again
+[+72.1s] PASS G the rematch carries the same settings
+[+72.6s] PASS G the rematch is cancelled
+[+73.0s] PASS G Amina is back in the lobby
+[+73.0s] PASS G Baraka is back in the lobby
+[+74.7s] PASS K a Cup's picker leaves Jebena Rush out (and lists the others) — 14 games
+[+74.7s] PASS K the server refuses Jebena Rush in a Cup (409 CASUAL_ONLY) — {"error":"Jebena Rush plays in casual rooms only.","code":"CASUAL_ONLY","readiness":{"registered":1,"connected":1,"reconnecting":0,"away":0,"wouldPlay":["player
+[+74.8s] ALL PASS
+[+74.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":5}
+
+# PASS (exit 0) in 74.8s | cpu 10.8s, peak memory 387 MB

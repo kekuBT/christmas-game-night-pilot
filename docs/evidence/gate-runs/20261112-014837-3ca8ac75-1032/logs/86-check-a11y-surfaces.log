@@ -1,0 +1,21 @@
+$ node scripts/check-a11y-surfaces.mjs http://localhost:34233
+# timeout 600s | worker w2 | server http://localhost:34233 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92c-full/test-results/20261112-014837-3ca8ac75-1032/server-data/w2)
+
+[+1.5s] PASS Geography: a game with a flag question was dealt — 8 questions
+[+1.5s] PASS Geography: the server describes the flag without naming any option — {"imageAlt":"Three vertical stripes: green, white, red.","options":["Italy","Hungary","Mexico","Ireland"]}
+[+1.9s] PASS Geography: the flag question is on screen
+[+1.9s] PASS Geography: the flag is exposed as a picture named 'Flag: <description>' — 1
+[+1.9s]   question in the accessibility tree: - 'heading "Which country does this flag belong to? Flag: Three vertical stripes: green, white, red." [level=1]': |   - text: Which country does this flag belong to? |   - 'img "Flag: Three vertical stripes: green, white, red."': 🇮🇹
+[+1.9s] PASS Geography: the question's accessible text names no option (no answer read out) — - 'heading "Which country does this flag belong to? Flag: Three vertical stripes: green, white, red." [level=1]':
+[+1.9s]   - text: Which country does this flag belong to?
+[+1.9s]   - 'img "Flag: Three vertical stripes: green, white, red."': 🇮🇹
+[+1.9s] PASS Geography: sighted players still see the flag emoji
+[+2.4s] PASS Who Said That: every question is its own labelled group
+[+2.4s] PASS Who Said That: the group is named by its quote and says which question it is — I do not burn toast. I caramelise it with confidence. (question 1 of 8)
+[+2.7s] PASS Who Said That: an answered question says YOUR answer
+[+2.7s] PASS Who Said That: no internal game or player ids on the screen
+[+2.7s] PASS Who Said That: no internal status word ('Status: playing')
+[+2.8s] A11Y SURFACES ALL PASSED
+[+2.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":2,"peakOpenPages":1}
+
+# PASS (exit 0) in 2.8s | cpu 2.2s, peak memory 340 MB

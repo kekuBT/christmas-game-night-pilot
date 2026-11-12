@@ -1,0 +1,56 @@
+$ node scripts/check-caption.mjs http://localhost:41647
+# timeout 600s | worker w3 | server http://localhost:41647 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92c-full/test-results/20261112-014837-3ca8ac75-1032/server-data/w3)
+
+[+5.0s] PASS the briefing explains the game
+[+5.6s] PASS everyone sees the same scene — An owl who just can't stay awake at night
+[+5.6s] PASS no horizontal overflow at 390px (write)
+[+5.6s] PASS no horizontal overflow at 390px (write)
+[+5.6s] PASS no horizontal overflow at 320px (write)
+[+5.6s] PASS no horizontal overflow at 360px (write)
+[+5.7s] PASS character counter counts down
+[+36.1s] PASS Bea's caption is in and shown back to her
+[+36.1s] PASS a double submit sends one caption — 1
+[+36.5s] PASS after a reload Bea still sees her caption, not an empty box
+[+36.8s] PASS keyboard: Cal submits with Tab + Enter
+[+37.0s] PASS vote cards show no names (anonymous) — “Grandpa's new ringtone” | “Beep boop, that's a knock-knock joke” | “Error 404: punchline not found” | YOURS — YOU CAN’T VOTE FOR IT | “When the robot laughs at its own joke”
+[+37.0s] PASS Bea's own caption is marked Yours and disabled
+[+37.0s] PASS Bea can vote for the other three
+[+37.1s] PASS vote cards are at least 44px tall at 320px — 71.30058288574219
+[+39.4s] PASS TV shows the scene and the captions
+[+39.4s] PASS TV never shows who wrote what
+[+39.7s] PASS a vote is confirmed on the card
+[+59.6s] PASS round 2 starts on time without Dee's vote
+[+59.6s] PASS round 2 shows last round's favourite (no names)
+[+105.6s] PASS results reach every phone
+[+105.6s] PASS results credit the winning caption's author — CAPTION CLASH · OFFICIAL
+[+105.6s] Bea wins Caption Clash
+[+105.6s] B
+[+105.6s] Bea
+[+105.6s] 
+[+105.6s] Top of the table: Bea. Modesty optional.
+[+105.6s] 
+[+105.6s] You came 4th of 4
+[+105.6s] 75 pts
+[+105.6s] Someone has to make the podium look good.
+[+105.6s] CAPTION CLASH
+[+105.6s] The room’s favourites
+[+105.6s] 
+[+105.6s] Round 1: An owl who just can't stay awake at night
+[+105.6s] 
+[+105.6s] “Grandpa's new ringtone”
+[+105.6s] by Cal
+[+105.6s] 2
+[+105.6s] VOTES
+[+105.6s] 
+[+105.6s] Round 
+[+105.6s] PASS results explain points (25 per caption, 100 per vote)
+[+105.6s] PASS results show participation
+[+105.8s] PASS no horizontal overflow on results at 320px
+[+105.8s] PASS the TV results still show no author names
+[+106.1s] PASS back in the lobby
+[+106.2s] PASS another Caption Clash starts with new scenes — 201
+[+106.9s] PASS the new game's first scene differs
+[+106.9s] CAPTION ALL PASSED
+[+106.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 106.9s | cpu 7.1s, peak memory 372 MB

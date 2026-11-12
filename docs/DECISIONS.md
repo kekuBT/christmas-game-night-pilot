@@ -1094,3 +1094,41 @@ Handoff 6807907986 (PR #14), under D-WF-01. Spec: `docs/stage9/stage91.md`. The 
   - **What:** the answer bank, the matcher and the module live on the server only. A unit test walks the web app's import graph and fails if it reaches them (or the module registry); the browser driver scans every built file and the public responses (page, service worker, manifest, assets, game list) for bank-only canaries (its version, source notes, near-miss reasons, distinctive answers). Both were shown to fail on a deliberately leaking build. So the service worker can never cache the bank as ordinary JS.
   - **Why:** projections were already checked; an import is the other way a bank leaks (review 6808081378, 4).
 
+
+## Stage 9.2: Spectrum foundation (2026-11-12, branch `claude/stage9-2-spectrum`, from the Stage 9.1 head `aaa6981`)
+
+Handoff 6811101479 (PR #15), under D-WF-01. Spec: `docs/stage9/stage92.md`. The rules are the handoff's reversible defaults unless marked as mine.
+
+- **D-S92-01 A pure module, not yet in the product.**
+  - **What:** `src/games/modules/spectrum.ts` and `packs/spectrum-pairs.ts`. It is not registered in `GAME_MODULES`, the registry, the manifest or the lifecycle policy; a test checks that. The planned policy entry is in the spec (§5).
+  - **Why:** the rules and privacy contract get reviewed before any player can reach them.
+- **D-S92-02 Four seeded rounds, chosen at the start.**
+  - **What:** four different pairs and targets (whole numbers from 10 to 90), chosen once from the seed and persisted.
+  - **The clue-giver:** rotates to the next player in seat order who is still taking part.
+  - **The guessers:** everyone else still taking part.
+- **D-S92-03 Clue rules (revised by 6811445149: digits allowed).**
+  - **What:** control characters become spaces, inner spaces are collapsed and the clue trimmed; it must then be 1–80 Unicode code points. Any language; digits allowed ("a 10-minute walk"). Strict payload fields and the server's role and round checks stay.
+  - **Why:** the rule "Give a clue, not the target number" is social in a cooperative game, and the briefing says it in words. A digit ban blocked fair clues and was bypassed by spelling the number out. No semantic policing, no paid AI, no new filter.
+  - **Superseded:** my first default rejected any clue with a digit; ChatGPT reversed it in 6811445149.
+- **D-S92-04 The team's guess and the points.**
+  - **What:** the median of the guesses received. With an even count, the mean of the middle two, rounded half up. The points are 10 within 5, 7 within 10, 4 within 20, otherwise 0, for a maximum of 40.
+  - **No invented guesses:** no guesses means 0 points.
+- **D-S92-05 Sit-outs and endings.**
+  - **The clue-giver leaving before the clue,** or no clue in time: the round is skipped for 0.
+  - **The clue-giver leaving after the clue:** the round goes on.
+  - **A guesser leaving:** their required guess is removed, and any guess they already sent stays.
+  - **Fewer than two still taking part:** the match finishes with the points earned so far; an unrevealed round scores nothing.
+  - **Disconnects change nothing.**
+- **D-S92-06 Exactly once.**
+  - **What:** every send names its round; the phase must fit; payloads are strict (only the action's own fields and the client's `phaseKey`, so no target or score can be sent in); a guess is immutable.
+  - **The module's own idempotent expiry:** it records each phase's start (the event's instant) and expires a phase only at `start + duration`. So a repeated or early expiry does nothing, and catch-up walks the original deadlines.
+- **D-S92-07 Privacy by role and phase (spec §7).**
+  - **What:** before the reveal, only the clue-giver sees the target. Individual guesses are never shown to anyone but their sender, even after the reveal: only the team's guess and counts. Future rounds, the seed and the pack are server-only.
+- **D-S92-08 One team result in a per-player pipeline (accepted by 6811445149 for this unwired slice only).**
+  - **What:** `spectrumTeamResult()` is the single authoritative result: one total (0–40), the revealed rounds and the end reason, naming no player. `scores()` is a compatibility representation: the same earned total copied to every original roster player, sat-out players included. The copies are never summed into the team total, and never described as individual achievement. Tests at 2, 4 and 10 players and for partial endings pin this.
+  - **Before production registration:** equal scores don't prove that no surface names a winner. The integration slice needs an explicit cooperative results branch, for the phone results and the TV, that prevents individual winner, personal-best, achievement and Cup-credit attribution from these scores. Practice and casual only.
+  - **Not now:** the room contract is not widened for Spectrum.
+- **D-S92-09 An optional `GameModule.onFinish`.**
+  - **What:** RoomEngine's `finalize` calls it once, for every ending, before the result is recorded. Jebena Rush uses it to drop private tries when the room's match limit ends a match. Its own endings use one finish helper.
+  - **Scope:** no other module defines it.
+  - **This changes the existing product** (6811445149): the room's shared `finalize` path, and Jebena Rush's endings. It awaits review and the reviewer's private browser audit of Jebena endings and replay; it is not independently approved yet.

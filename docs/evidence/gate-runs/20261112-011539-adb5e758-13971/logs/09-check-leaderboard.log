@@ -1,0 +1,31 @@
+$ node scripts/check-leaderboard.mjs http://localhost:33839
+# timeout 1800s | worker w3 | server http://localhost:33839 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92r-full/test-results/20261112-011539-adb5e758-13971/server-data/w3)
+
+[+69.6s] PASS all tied: every player shares rank 1
+[+69.6s] PASS all tied: TV leaderboard matches server — tv=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240 TV:5:0 | server=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240 TV:5:0
+[+69.6s] PASS all tied: phone rows match server — visible=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240
+[+69.6s] PASS first game: no movement note without a previous game — note=0
+[+133.6s] PASS pair ties: Ada=Bea and Cal=Dee share ranks, pairs differ — Ada:1 Bea:1 Cal:3 Dee:3 TV:5
+[+133.6s] PASS pair ties: TV leaderboard matches server — tv=Ada:1:600 Bea:1:600 Cal:3:360 Dee:3:360 TV:5:0 | server=Ada:1:600 Bea:1:600 Cal:3:360 Dee:3:360 TV:5:0
+[+133.6s] PASS pair ties: phone rows match server — visible=Ada:1:600 Bea:1:600
+[+196.1s] PASS distinct scores: Ada 600 / Bea 360 / Dee 240 / Cal 0, ranks 1/2/3/4 — Ada:1:600 Bea:2:360 Dee:3:240 Cal:4:0 TV:4:0
+[+196.1s] PASS distinct scores: TV leaderboard matches server — tv=Ada:1:600 Bea:2:360 Dee:3:240 Cal:4:0 TV:4:0 | server=Ada:1:600 Bea:2:360 Dee:3:240 Cal:4:0 TV:4:0
+[+196.1s] PASS distinct scores: phone rows match server — visible=Ada:1:600 Bea:2:360
+[+260.4s] PASS movement: Bea takes rank 1, Ada drops to rank 2 — Bea:1 Ada:2 Dee:3 Cal:4 TV:4
+[+260.4s] PASS movement: TV shows the movement note vs the previous Trivia game — note=1
+[+260.4s] PASS movement: TV arrows show Bea up 1, Ada down 1 — Bea=▲ 1 Ada=▼ 1 Cal= Dee=
+[+260.4s] PASS movement: phone gain chips show Bea +240, Ada −240 — Bea=+240 Ada=−240
+[+260.4s] PASS movement: TV leaderboard matches server — tv=Bea:1:600 Ada:2:360 Dee:3:240 Cal:4:0 TV:4:0 | server=Bea:1:600 Ada:2:360 Dee:3:240 Cal:4:0 TV:4:0
+[+331.6s] PASS rank changes: Ada/Bea order flips across games — Ada>Bea -> Bea>Ada (2 games)
+[+381.6s] PASS disconnected player: game finishes after Dee sat out and left
+[+381.6s] PASS disconnected player: Dee keeps a partial score in standings — Dee=120
+[+385.1s] PASS disconnected player: TV leaderboard includes Dee with server score — tv=Ada:1:240 Bea:1:240 Cal:1:240 Dee:4:120 TV:5:0 | server=Ada:1:240 Bea:1:240 Cal:1:240 Dee:4:120 TV:5:0
+[+386.1s] note: start asked first — Dee is reconnecting. Start Trivia Showdown without them?If you start now, they s
+[+400.8s] PASS away marker: Cal disconnected with a positive score — Cal=240
+[+400.8s] PASS away marker: Cal ranks 1st as the only scorer — Cal:1:240 Ada:2:0 Bea:2:0 TV:2:0
+[+401.2s] PASS away marker: host phone results mark Cal Away
+[+405.1s] PASS away marker: TV leaderboard marks Cal Away
+[+405.2s] LEADERBOARD ALL PASSED
+[+405.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 405.3s | cpu 20.1s, peak memory 275 MB

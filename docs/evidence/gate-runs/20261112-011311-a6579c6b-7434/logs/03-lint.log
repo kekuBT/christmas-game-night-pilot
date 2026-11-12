@@ -1,0 +1,11 @@
+$ node ./node_modules/eslint/bin/eslint.js .
+# timeout 300s | worker w3
+
+[+15.8s] 
+[+15.8s] /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s92-fast/tests/stage92-spectrum.test.ts
+[+15.8s]   36:7  error  The value assigned to 'now' is not used in subsequent statements  no-useless-assignment
+[+15.8s] 
+[+15.8s] ✖ 1 problem (1 error, 0 warnings)
+[+15.8s] 
+
+# FAIL (exit 1) in 15.9s | cpu 18.3s, peak memory 667 MB

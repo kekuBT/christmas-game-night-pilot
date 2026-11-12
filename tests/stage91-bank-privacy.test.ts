@@ -17,6 +17,8 @@ const FORBIDDEN = [
   /src\/games\/modules\/packs\//,
   /src\/games\/modules\/jebena(Match)?\.ts$/,
   /src\/games\/modules\/index\.ts$/,
+  // Stage 9.2: Spectrum's module (its pairs are under packs/, above).
+  /src\/games\/modules\/spectrum\.ts$/,
 ];
 
 function sourceFiles(dir: string): string[] {
