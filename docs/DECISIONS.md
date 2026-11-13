@@ -1360,3 +1360,42 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - Christmas: they keep "Christmas Memory Book" and its 🎄.
   - **The server's Markdown:** it has no look, so it says "Mchezo Memory Book".
   - **What the look changes:** only titles and decoration, never facts or content.
+
+## Stage 10.4: save a memory without leaving the result screen
+- **D-S104-01 Bind to the game on screen.**
+  - **How:** the results screen sends `fromGame` (the game it shows), and the server resolves that game's own `game-finished` event in this room. An old result can't save a newer match, even if one finished while the composer was open.
+  - **Facts and checks:** facts and refusals are exactly Stage 10.3's (`teamFactsFor` for Spectrum, score events for Jebena).
+  - **Alternatives rejected:**
+    - "the last finished game" at request time: it races a replay;
+    - the client sending the finish event id it found: it would need the ledger on the results screen, and the server can resolve it just as safely.
+- **D-S104-02 Idempotency by member and key.**
+  - **The key:** a `requestId` the screen makes once per draft, scoped to the room and the member and kept with the book. The same key and request return the same entry. The same key with a different request gets 409 `ATTEMPT_MISMATCH` and the original entry, so nothing is overwritten.
+  - **The boundary:** a new draft is a new note on purpose; no deduplication by game.
+  - **Alternatives rejected:**
+    - deduplicating by game and member: it would forbid a second, intentional note;
+    - by note text: an edited retry would duplicate;
+    - client-only "disable the button": a lost reply and a reconnect would duplicate.
+- **D-S104-03 An inline composer on the result screen.**
+  - **What:** the facts are read-only, the note is the player's, and Save and Cancel are explicit.
+  - **Where:** it sits under the result line, so What's next and its controls don't move.
+  - **Alternative rejected:** a dialog over the results, which would hide the result it describes and needs focus trapping for little gain.
+- **D-S104-04 Spectrum and Jebena Rush only.**
+  - **Why:** their facts are already trusted (Stage 10.3 team record; Jebena's score events), and the handoff names them.
+  - **Other games** keep the manual Add in the Memory Book. A later slice can extend the action.
+- **D-S104-05 The server shuts down in bounded time, whatever its clients do.**
+  - **Why:** the full gate on `c634500` failed `check-tv-outage`'s "the driver's server exits within 20 s of SIGTERM" (an earlier full gate, `20261112-064509-b668ee3c-28530`, hung at the same step). `close()` sent a close frame to each tracked socket, then waited for the WebSocket and HTTP servers to close. Those wait for every client's close handshake, and a client that never answers is only cut off by `ws`'s own 30-second close timeout. A socket refused at the door (no such room) was never tracked at all.
+  - **How:** `LocalServer.close()` sends every open socket (`wss.clients` and the tracked ones) a close frame, waits up to 1.5 s for the goodbyes, then terminates whatever is left; the HTTP server gets the same bounded wait before `closeAllConnections()`. Well-behaved clients still get a close frame first.
+  - **Tests:** `tests/stage104-shutdown.test.ts` (a deaf TV socket, a refused socket still closing, a polite close that isn't cut). Before the fix the first two waited past 5 s; after it, all three pass.
+  - **Alternatives rejected:**
+    - raising the driver's 20 s limit: it hides a shutdown that can stall a restart for 30 s;
+    - retrying the step: "flake" isn't a root cause;
+    - terminating every socket at once: it skips the polite goodbye clients rely on to show "reconnecting" rather than "lost".
+- **D-S104-06 A Memory Book change is live only once it is on disk.**
+  - **Why:** ChatGPT's review 6842636842 found that a save added its entry and its request key to the live book before writing it. When the write failed, the reply was 500, but the live book kept both: a same-key retry answered 200 from memory with nothing on disk, and the note was gone after a restart. Approvals, revocations and manual Add had the same order.
+  - **How:** `LocalServer.commitBook()` is the only way a room's book changes. It clones the live book (`MemoryBook.clone()`: entries, id counter and save keys, nothing shared), makes the change on the clone, writes it (`atomicWriteFileSync`: a failed write leaves the old file), and only then makes the clone the live book. From the clone to the swap it is synchronous, so no other request sees or changes the book in between. A save's attempt lookup reads the live book after the request body has arrived.
+  - **Result:** a failed write answers 500 ("The Memory Book couldn't be saved, so nothing changed.") and leaves the visible book, approvals, exports and save keys exactly as on disk, with no id used. A same-key retry once the disk works writes exactly one pending entry (201), which survives a restart. The composer keeps the draft and the key and offers Try again on a 5xx.
+  - **Tests:** `tests/stage104-book-durability.test.ts`: one failed write then a retry, three failed writes, a committed save with a lost reply, approval and revocation, manual Add. Four of the five failed before the fix.
+  - **Scope:** the Memory Book only. Room state keeps its Sprint 1 rule: the change happens in memory, a failed save answers 500, and the next successful save writes the whole snapshot.
+  - **Alternatives rejected:**
+    - undoing the change after a failed write: it needs an exact inverse for every operation, and an approval edits an entry in place;
+    - writing before validating: a refused change would still cost a write.

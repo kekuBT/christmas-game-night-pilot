@@ -1,0 +1,10 @@
+$ node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261113-004113-30417918-190/web-dist --emptyOutDir --logLevel warn
+# timeout 300s | worker w1
+
+[+7.9s] [33m
+[+7.9s] (!) Some chunks are larger than 500 kB after minification. Consider:
+[+7.9s] - Using dynamic import() to code-split the application
+[+7.9s] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[+7.9s] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+
+# PASS (exit 0) in 7.9s | cpu 8.7s, peak memory 537 MB

@@ -772,6 +772,36 @@ try {
     await TV.getByRole("button", { name: "Post-game review" }).click();
     await soon("F the TV's post-game review: Keku kept the jebena, with the places", async () => /Keku kept the jebena/.test(await TV.getByTestId("tv-jr-review").innerText()) && (await TV.getByTestId("tv-jr-review").locator("li").count()) === 3, 15000);
     await shot(TV, "jr-tv-review-1440");
+
+    // ---------- 10.4 S1 (Jebena). Save a memory from the main match's results (D-S104-01..04) ----------
+    {
+      const raw = fin.g.rawScores ?? {};
+      const wantLines = Object.entries(raw).map(([id, pts]) => ({ who: nameOf[id], pts })).sort((a, b) => b.pts - a.pts || a.who.localeCompare(b.who)).map((r) => `${r.who}: ${r.pts.toLocaleString("en-US")} ${r.pts === 1 ? "point" : "points"}`);
+      const finEv1 = ((await call(`/rooms/${ROOM}/ledger?watermark=1`, { token: seat.K.token })).body.events ?? []).filter((e) => e.type === "game-finished" && e.gameInstanceId === gid).at(-1);
+      check("10.4 S1 the TV's final view has no Save a memory", (await TV.getByTestId("save-memory").count()) === 0);
+      // Amina (Christmas, 320 px): the composer shows the match's final points by name; it fits; Cancel saves nothing.
+      await soon("10.4 S1 Amina's results offer Save a memory", async () => A.getByTestId("save-memory-open").isVisible(), 15000);
+      await A.getByTestId("save-memory-open").click();
+      await soon("10.4 S1 the composer shows the final points by name, highest first (the server's scores)", async () => (await A.getByTestId("save-memory-facts").locator("li").allInnerTexts()).join(" | ") === wantLines.join(" | "), 10000);
+      check("10.4 S1 the composer at 320 px: no sideways scroll", await noSideScroll(A));
+      await shot(A, "jr-save-composer-320-christmas");
+      await A.getByTestId("save-memory-note").fill("Not this one");
+      await A.getByTestId("save-memory-cancel").click();
+      // Keku (the host, Everyday, 390 px) saves; it waits for approval, which he gives in the Memory Book.
+      const NOTE = "Keku kept the jebena warm all night";
+      await K.getByTestId("save-memory-open").click();
+      await K.getByTestId("save-memory-note").fill(NOTE);
+      await K.getByTestId("save-memory-save").click();
+      await soon("10.4 S1 Keku's save: saved, to be approved in the Memory Book", async () => /Saved to the Memory Book\. Approve it there/.test(await K.getByTestId("save-memory-saved").innerText().catch(() => "")), 15000);
+      await shot(K, "jr-save-saved-390");
+      const book = (await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body ?? [];
+      const e = book.find((x) => x.text === NOTE);
+      check("10.4 S1 one entry, pending, citing this match's finish, with its score facts; the cancelled draft saved nothing", !!e && book.filter((x) => x.text === NOTE).length === 1 && e.approved === false && JSON.stringify(e.sourceEventIds) === JSON.stringify([finEv1?.eventId]) && e.addedBy === seat.K.playerId && e.derivedFacts.length === Object.keys(raw).length && e.derivedFacts.every((f) => { const m = /^(player-\d+): (\d+) points$/.exec(f); return !!m && raw[m[1]] === Number(m[2]); }) && !book.some((x) => x.text === "Not this one"), JSON.stringify(e).slice(0, 240));
+      const ok = await call(`/rooms/${ROOM}/memory/${e?.id}/approve`, { token: seat.K.token, body: {} });
+      const md = (await call(`/rooms/${ROOM}/memory/export`, { token: seat.A.token })).body.markdown ?? "";
+      check("10.4 S1 the host approves it; the export has the note and the match's facts", ok.status === 200 && md.includes(`Note: ${NOTE}\nFrom the ledger:`), md.slice(0, 200));
+      check("10.4 S1 saving changed no score: the match is as it was", JSON.stringify((await playerView(K)).g?.rawScores) === JSON.stringify(raw) && (await playerView(K)).g?.status === "finished");
+    }
   }
 
   // ---------- G. Play again: the same cups, all whole; leaving breaks nothing; back to the lobby ----------
@@ -830,6 +860,14 @@ try {
       }, 10000);
       check("R1 the entry is one entry, in this room only", !!added && (await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body.filter((x) => x.text === text).length === 1);
       await memCtx.close();
+      // 10.4 S2 (Jebena): the replay's result screen saves the replay, never the match before it.
+      await soon("10.4 S2 Keku's replay result offers Save a memory", async () => K.getByTestId("save-memory-open").isVisible(), 15000);
+      await K.getByTestId("save-memory-open").click();
+      await K.getByTestId("save-memory-note").fill("The replay nobody stayed for");
+      await K.getByTestId("save-memory-save").click();
+      await soon("10.4 S2 saved", async () => (await K.getByTestId("save-memory-saved").count()) === 1, 15000);
+      const r2 = ((await call(`/rooms/${ROOM}/memory`, { token: seat.K.token })).body ?? []).find((x) => x.text === "The replay nobody stayed for");
+      check("10.4 S2 it cites the replay's own finish, never the main match's", !!r2 && JSON.stringify(r2.sourceEventIds) === JSON.stringify([finEv?.eventId]) && finEv?.gameInstanceId === replay.g.id, JSON.stringify(r2).slice(0, 200));
     }
   }
   for (const [who, p] of [["Keku", K], ["Amina", A], ["Baraka", B]]) {

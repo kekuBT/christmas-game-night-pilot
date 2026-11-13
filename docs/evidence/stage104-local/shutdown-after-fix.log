@@ -1,0 +1,12 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt104
+
+ ✓ tests/stage104-shutdown.test.ts (3 tests) 3199ms
+   ✓ LocalServer.close(): bounded, whatever the clients do > a TV socket that never answers the close frame doesn't hold the server open 1564ms
+   ✓ LocalServer.close(): bounded, whatever the clients do > a socket refused at the door (no such room), still closing, doesn't hold it open either 1620ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  23:57:03
+   Duration  4.31s (transform 603ms, setup 0ms, collect 794ms, tests 3.20s, environment 0ms, prepare 64ms)
+

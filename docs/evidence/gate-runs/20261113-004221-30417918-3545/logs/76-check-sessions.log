@@ -1,0 +1,30 @@
+$ node scripts/check-sessions.mjs http://localhost:39389
+# timeout 600s | worker w2 | server http://localhost:39389 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s104-full2/test-results/20261113-004221-30417918-3545/server-data/w2)
+
+[+2.5s] PASS 16. default: the credential is in this tab only
+[+2.5s] PASS default: Remember is off
+[+2.9s] PASS 16. refresh keeps the seat
+[+3.2s] PASS 17. new tab without Remember shows the join screen
+[+4.0s] PASS 17. and offers no saved seat
+[+4.8s] PASS 18. Remember: credential stored once, on the device, not also in the tab
+[+5.1s] PASS 18. new tab offers "Continue as Cal"
+[+5.4s] PASS touch target: Continue is at least 44px
+[+5.5s] PASS 18. continuing restores the same seat
+[+5.5s] PASS 18. no duplicate seat was created — seats=3
+[+7.2s] PASS 19. revoking Remember erases the credential from the device
+[+7.3s] PASS 19. this tab still works after revoking
+[+7.6s] PASS sign out returns to the start screen (Home), saying so
+[+7.6s] PASS sign out leaves no credential on the device
+[+7.6s] PASS sign out keeps the seat in the room
+[+7.9s] PASS 21. an invalid saved seat is explained, not offered
+[+7.9s] PASS 21. no 'Continue as Ada' for a credential the server rejected
+[+7.9s] PASS 21. the rejected credential is removed from the device
+[+7.9s] PASS 21. nothing was created on the server
+[+8.1s] PASS 20. storage-denied browser renders the join screen
+[+8.2s] PASS 20. Remember is disabled, with a plain explanation
+[+8.8s] PASS 20. and can still join and play
+[+8.8s] PASS no horizontal overflow on the welcome screen
+[+8.9s] SESSIONS ALL PASSED
+[+8.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":7,"peakOpenPages":5}
+
+# PASS (exit 0) in 8.9s | cpu 2.2s, peak memory 279 MB

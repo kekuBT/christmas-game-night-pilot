@@ -28,6 +28,8 @@ import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulse
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
 import { JebenaCupsLabel, JebenaHeartsChoice, JebenaReview, JebenaTv, JebenaTvFinal, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
 import { newerLedger } from "./ui/mchezo/lib/memoryLink.js";
+import { SaveMemory } from "./components/mchezo/SaveMemory.js";
+import { SAVE_MEMORY_GAMES, saveMemoryFacts } from "./ui/mchezo/lib/saveMemory.js";
 import { cupContinuity } from "./components/mchezo/CiniCups.js";
 import { MchezoSpectrum, MchezoSpectrumResults, SpectrumReview, SpectrumTv, SpectrumTvFinal, TeamResultsHero } from "./components/mchezo/MchezoSpectrum.js";
 import { lineupLine, tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
@@ -1373,6 +1375,17 @@ export function App() {
   // Stage 3: the top of every results screen. Built only from the server's
   // recorded scores and this player's own participation (lib/celebrate.ts),
   // so every phone tells the same story.
+  // Stage 10.4 (D-S104-01..04): Save a memory on Spectrum and Jebena Rush results, bound to the game shown (fromGame),
+  // one request key per draft. A fresh composer per game (key); none on the TV (its own final views).
+  const saveMemoryFor = (g: PlayerGame, pub?: PublicGame) => {
+    if (!roomId || !SAVE_MEMORY_GAMES.includes(g.gameId)) return null;
+    const title = games.find((x) => x.id === g.gameId)?.title ?? g.gameId;
+    return (
+      <SaveMemory key={g.id} facts={saveMemoryFacts({ game: g, publicGame: pub, players, title })}
+        send={(b) => postBounded(`/rooms/${roomId}/memory`, { day: proj?.championshipDay ?? 1, fromGame: g.id, text: b.text, requestId: b.requestId })}
+        newKey={() => uuid()} canApprove={!!(me?.isHost || me?.isCohost)} onOpenBook={() => setView("memory")} />
+    );
+  };
   const resultsHero = (g: PlayerGame, pub?: PublicGame) => {
     const title = titleFor(g.gameId, games);
     const official = pub?.official ?? g.official ?? false;
@@ -1815,7 +1828,7 @@ export function App() {
   if (view === "lobby" && showPhase === "results" && jebenaFinished && latestFinished) {
     return (
       <MchezoProvider theme={theme} {...motion}>
-        <MchezoJebenaResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Jebena Rush"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
+        <MchezoJebenaResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Jebena Rush"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} save={saveMemoryFor(latestFinished, publicFinished)} />
       </MchezoProvider>
     );
   }
@@ -1830,7 +1843,7 @@ export function App() {
   if (view === "lobby" && showPhase === "results" && spectrumFinished && latestFinished) {
     return (
       <MchezoProvider theme={theme} {...motion}>
-        <MchezoSpectrumResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Spectrum"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
+        <MchezoSpectrumResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Spectrum"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} save={saveMemoryFor(latestFinished, publicFinished)} />
       </MchezoProvider>
     );
   }

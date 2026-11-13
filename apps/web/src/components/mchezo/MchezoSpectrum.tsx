@@ -395,7 +395,7 @@ export function TeamResultsHero({ team, gameId, title, official, roomReason }: {
 }
 
 /** Results: the one team result, how each round went, and your own part. */
-export function MchezoSpectrumResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; next?: ReactNode }) {
+export function MchezoSpectrumResults({ game, publicGame, players, playerId, title, onBackToLobby, hero, next, save }: { game: PlayerGame; publicGame?: PublicGame; players: PublicPlayer[]; playerId: string; title: string; onBackToLobby: () => void; hero?: ReactNode; next?: ReactNode; save?: ReactNode }) {
   const { casual } = useMchezo();
   const team = game.outcome?.team ?? publicGame?.outcome?.team;
   const st = (game.state ?? publicGame?.state ?? {}) as SpectrumView;
@@ -410,6 +410,8 @@ export function MchezoSpectrumResults({ game, publicGame, players, playerId, tit
           <p className="mz-sp-total" data-testid="sp-team-total" data-total={team.total} data-max={team.max}>{team.total}<span> / {team.max}</span></p>
           {/* Stage 10.2 (D-S102-03/04): a team line for a genuine moment, under the result; nothing when no fact fits. */}
           {(() => { const m = spectrumMoment(team); return m ? <p className="mz-moment" data-testid="results-moment">{m}</p> : null; })()}
+          {/* Stage 10.4: Save a memory, under the result (What's next and its controls stay above). */}
+          {save}
           <p className="mz-foot" data-testid="sp-team-note">One shared score for everyone who played. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
           <RoundList rounds={team.rounds} revealed={st.revealed ?? []} nameOf={nameOf} />
         </>

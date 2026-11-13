@@ -1,0 +1,20 @@
+$ node scripts/check-multiplayer.mjs http://localhost:43117
+# timeout 600s | worker w3 | server http://localhost:43117 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s104-full/test-results/20261112-232027-c6345008-7030/server-data/w3)
+
+[+1.7s] room code FPUVLU, roomId room-mwe789xg-269192
+[+4.1s] PASS lobby roster: 4 players joined
+[+5.4s] PASS all 4 pages show the same game panel simultaneously
+[+5.4s] PASS TV projection leak-free during math-mayhem (playing) — no forbidden keys
+[+5.4s] PASS TV projection roster is exactly 4 during math-mayhem (playing) — players=4
+[+5.6s] PASS reloaded player returns to same slot and same game
+[+5.6s] PASS reload creates no duplicate player slot — Sam entries=1
+[+5.6s] PASS roster still exactly 4 after reload — players=4
+[+45.7s] PASS math-mayhem finished on all 4 pages after simultaneous play
+[+47.8s] PASS impostor started after a finished game
+[+47.8s] PASS TV projection leak-free during impostor (playing) — no forbidden keys
+[+47.8s] PASS TV projection roster is exactly 4 during impostor (playing) — players=4
+[+47.9s] PASS TV view renders during a secret-role game
+[+48.0s] MULTIPLAYER ALL PASSED (12/12)
+[+48.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 48s | cpu 5.2s, peak memory 275 MB

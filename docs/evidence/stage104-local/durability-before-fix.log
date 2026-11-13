@@ -1,0 +1,188 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt104
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > one failed write, then a retry: nothing is visible or approvable after the failure; the retry persists exactly one pending entry that survives a restart
+[persist] could not save Memory Book for room-mweeiall-63135: simulated disk write failure
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+[persist] could not save Memory Book for room-mweeiaom-3276: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > a retry after a committed save whose reply was lost returns that same entry, before and after a restart, and adds nothing
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-OnTep1)
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+[persist] could not save Memory Book for room-mweeias3-653803: simulated disk write failure
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > manual Add shares the rule: a failed Add leaves earlier entries exactly as they were and adds nothing; the next Add is written once
+[persist] could not save Memory Book for room-mweeiasy-580938: simulated disk write failure
+
+ ❯ tests/stage104-book-durability.test.ts (5 tests | 4 failed) 334ms
+   × Stage 10.4 repair: a Memory Book change is live only once it is on disk > one failed write, then a retry: nothing is visible or approvable after the failure; the retry persists exactly one pending entry that survives a restart 138ms
+     → expected [ { id: 'book-1', day: 1, …(6) } ] to deeply equal []
+   × Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once 82ms
+     → expected [ { id: 'book-1', day: 1, …(7) } ] to deeply equal []
+   × Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart 31ms
+     → expected { id: 'book-1', day: 1, …(7) } to match object { id: 'book-1', approved: false }
+(7 matching properties omitted from actual)
+   × Stage 10.4 repair: a Memory Book change is live only once it is on disk > manual Add shares the rule: a failed Add leaves earlier entries exactly as they were and adds nothing; the next Add is written once 36ms
+     → expected [ Array(2) ] to deeply equal [ { id: 'book-1', day: 1, …(7) } ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > one failed write, then a retry: nothing is visible or approvable after the failure; the retry persists exactly one pending entry that survives a restart
+AssertionError: expected [ { id: 'book-1', day: 1, …(6) } ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   Object {
++     "addedBy": "player-2",
++     "approved": false,
++     "day": 1,
++     "derivedFacts": Array [
++       "player-1: 150 points",
++       "player-2: 0 points",
++     ],
++     "id": "book-1",
++     "sourceEventIds": Array [
++       "evt-10",
++     ],
++     "text": "Keku kept the jebena warm",
++     "type": "game-result",
++   },
++ ]
+
+ ❯ tests/stage104-book-durability.test.ts:63:34
+     61|     expect(first.status).toBe(500);
+     62|     // The failure left the live book as it is on disk: empty, nothing…
+     63|     expect(await book(h, amina)).toEqual([]);
+       |                                  ^
+     64|     expect((await approve(h, host, "book-1")).status).toBe(400);
+     65|     expect(await exported(h, host)).not.toContain("Keku kept the jeben…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+AssertionError: expected [ { id: 'book-1', day: 1, …(7) } ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   Object {
++     "addedBy": "player-2",
++     "approved": false,
++     "day": 1,
++     "derivedFacts": Array [
++       "Spectrum team result: 40 out of 40 · all 4 rounds played",
++     ],
++     "id": "book-1",
++     "sourceEventIds": Array [
++       "evt-12",
++     ],
++     "team": Object {
++       "end": "completed",
++       "finishedEventId": "evt-12",
++       "gameInstanceId": "game-1",
++       "kind": "spectrum",
++       "max": 40,
++       "roundsPlanned": 4,
++       "roundsRevealed": 4,
++       "total": 40,
++     },
++     "text": "Every round on target",
++     "type": "game-result",
++   },
++ ]
+
+ ❯ tests/stage104-book-durability.test.ts:110:36
+    108|       const r = await save(h, amina, body);
+    109|       expect(r.status).toBe(500);
+    110|       expect(await book(h, amina)).toEqual([]);
+       |                                    ^
+    111|       expect(await book(h, host)).toEqual([]);
+    112|       expect((await approve(h, host, "book-1")).status).toBe(400);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+AssertionError: expected { id: 'book-1', day: 1, …(7) } to match object { id: 'book-1', approved: false }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+-   "approved": false,
++   "approved": true,
+    "id": "book-1",
+  }
+
+ ❯ tests/stage104-book-durability.test.ts:148:38
+    146|     vi.spyOn(RoomStore.prototype, "saveBook").mockImplementationOnce(D…
+    147|     expect((await approve(h, host, id)).status).toBe(500);
+    148|     expect((await book(h, host))[0]).toMatchObject({ id, approved: fal…
+       |                                      ^
+    149|     expect(await exported(h, host)).not.toContain("Pending until Keku …
+    150|     await h.restart();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > manual Add shares the rule: a failed Add leaves earlier entries exactly as they were and adds nothing; the next Add is written once
+AssertionError: expected [ Array(2) ] to deeply equal [ { id: 'book-1', day: 1, …(7) } ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+      "addedBy": "player-1",
+      "approved": true,
+      "approvedBy": "player-1",
+      "day": 1,
+      "derivedFacts": Array [
+        "player-1: 150 points",
+        "player-2: 0 points",
+      ],
+      "id": "book-1",
+      "sourceEventIds": Array [
+        "evt-10",
+      ],
+      "text": "An earlier note",
+      "type": "game-result",
+    },
++   Object {
++     "addedBy": "player-2",
++     "approved": false,
++     "day": 1,
++     "derivedFacts": Array [
++       "player-1: 150 points",
++       "player-2: 0 points",
++     ],
++     "id": "book-2",
++     "sourceEventIds": Array [
++       "evt-10",
++     ],
++     "text": "Lost to a full disk",
++     "type": "game-result",
++   },
+  ]
+
+ ❯ tests/stage104-book-durability.test.ts:175:34
+    173|     const failed = await save(h, amina, { sourceEventIds: [fin], text:…
+    174|     expect(failed.status).toBe(500);
+    175|     expect(await book(h, amina)).toEqual(snapshot);
+       |                                  ^
+    176| 
+    177|     const added = await save(h, amina, { sourceEventIds: [fin], text: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed (5)
+   Start at  03:12:18
+   Duration  1.44s (transform 646ms, setup 0ms, collect 825ms, tests 334ms, environment 0ms, prepare 69ms)
+

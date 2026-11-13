@@ -1,0 +1,48 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt104
+
+ ❯ tests/stage104-shutdown.test.ts (3 tests | 2 failed) 10201ms
+   × LocalServer.close(): bounded, whatever the clients do > a TV socket that never answers the close frame doesn't hold the server open 5067ms
+     → expected 'still waiting' to be 'closed' // Object.is equality
+   × LocalServer.close(): bounded, whatever the clients do > a socket refused at the door (no such room), still closing, doesn't hold it open either 5117ms
+     → expected 'still waiting' to be 'closed' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage104-shutdown.test.ts > LocalServer.close(): bounded, whatever the clients do > a TV socket that never answers the close frame doesn't hold the server open
+AssertionError: expected 'still waiting' to be 'closed' // Object.is equality
+
+Expected: "closed"
+Received: "still waiting"
+
+ ❯ tests/stage104-shutdown.test.ts:41:41
+     39|     clients.push(await deafClient(`ws://localhost:${port}/?roomId=${ro…
+     40|     const t0 = Date.now();
+     41|     expect(await closesWithin(s, 5000)).toBe("closed");
+       |                                         ^
+     42|     expect(Date.now() - t0).toBeLessThan(4000);
+     43|   }, 15000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/stage104-shutdown.test.ts > LocalServer.close(): bounded, whatever the clients do > a socket refused at the door (no such room), still closing, doesn't hold it open either
+AssertionError: expected 'still waiting' to be 'closed' // Object.is equality
+
+Expected: "closed"
+Received: "still waiting"
+
+ ❯ tests/stage104-shutdown.test.ts:51:41
+     49|     await new Promise<void>((resolve) => refused.once("upgrade", (res)…
+     50|     await sleep(100);
+     51|     expect(await closesWithin(s, 5000)).toBe("closed");
+       |                                         ^
+     52|   }, 15000);
+     53| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  23:56:29
+   Duration  11.26s (transform 587ms, setup 0ms, collect 783ms, tests 10.20s, environment 0ms, prepare 59ms)
+

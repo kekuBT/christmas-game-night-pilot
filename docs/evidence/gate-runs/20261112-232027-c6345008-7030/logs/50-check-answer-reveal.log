@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:43117
+# timeout 600s | worker w3 | server http://localhost:43117 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s104-full/test-results/20261112-232027-c6345008-7030/server-data/w3)
+
+[+16.7s] PASS Geography: finished player sees no answers while Bea still plays
+[+16.7s] PASS Geography: TV shows no answers while Bea still plays
+[+16.7s] PASS Geography: Bea (mid-game) sees no answers
+[+24.3s] PASS Geography: results list every question — 8
+[+24.6s] PASS Geography: each answer matches the content pack — 8/8
+[+24.6s] PASS Geography: each explanation is shown — 8/8
+[+24.6s] PASS Geography: Bea sees her own choices marked
+[+24.6s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+24.9s] PASS Geography: TV lists the answers after the game
+[+24.9s] PASS Geography: TV shows no player's choices
+[+30.2s] PASS Closest: no answer anywhere while question 1 is open
+[+30.3s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 52 vs 52
+[+30.3s] PASS Closest: and the player's own guess
+[+30.3s] PASS Closest: Bea sees her own guess, not Ada's
+[+30.3s] PASS Closest: the explanation is shown
+[+30.3s] PASS Closest: question 2 is now open and its answer is not shown
+[+30.4s] PASS Closest: TV shows the last answer only — Last question: How many weeks are in a year (rounded to the nearest whole week)? — 52 weeks
+[+30.4s] PASS Closest: TV shows nobody's guess — Last question: How many weeks are in a year (rounded to the nearest whole week)? — 52 weeks
+[+30.7s] ANSWER REVEAL ALL PASSED
+[+30.7s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 30.7s | cpu 3.4s, peak memory 268 MB
