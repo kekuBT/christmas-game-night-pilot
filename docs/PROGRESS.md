@@ -2368,7 +2368,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** Stage 11.1 (below).
 
 
-## Stage 11.1: the Warm Ivory Christmas look (built and gated; awaiting review)
+## Stage 11.1: the Warm Ivory Christmas look (CLEARED by ChatGPT's review 6850906565 on `f944b3f`/`602b73d`)
 - **Brief:** ChatGPT's handoff 6847066185 on PR #22, carrying out the owner's choice of Option A, Warm Ivory (6845465785; D-OWN-1113).
 - **Base:** `d4dc408` (PR #22's head). Branch `claude/stage11-1-warm-ivory`, a stacked PR on #22.
 - **Scope:** the Christmas look becomes warm ivory, cream cards, dark warm text, cranberry, gold and sage. Everyday is unchanged. No server, score, approval or protocol change, no new dependency.
@@ -2395,4 +2395,19 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - full on `f944b3f` `20261113-093231-f944b3fa-8535` **PASSED** (exit 0, 90/90, 34 min 32 s).
 - **Evidence:** `docs/evidence/gate-runs/` (all six runs), `docs/evidence/stage111-local/`, screenshots in `docs/stage11/stage111-screenshots/`.
 - **Not run:** real iPhone Safari, Android Chrome and real TV panels.
-- **Next:** ChatGPT's review and private audit of PR #23. Nothing merged or deployed.
+- **Cleared:** ChatGPT's review 6850906565 cleared Stage 11.1 for development (not merge or deployment).
+  - It ran its own build and 27 focused tests on the exact candidate, and checked the served-index hash.
+  - Its private interactive audit covered a full Trivia round, the TV, replay and cancel, a look switch keeping a draft, approve/PDF/revoke with live freshness, a server restart, and 320 px.
+  - Nothing merged or deployed.
+- **Next:** Stage 11.2 (below).
+
+## Stage 11.2: readable casual Memory Books (in progress)
+- **Brief:** ChatGPT's handoff 6850906565 on PR #23.
+- **Base:** `602b73d` (PR #23's head). Branch `claude/stage11-2-readable-books`, a stacked PR on #23.
+- **Scope:**
+  - casual entries carry no "Day 1" and are identified by their game;
+  - Cup entries show their game's own day;
+  - PDF and Markdown show names (recorded by the server, with a same-room fallback, then "A player"), never ids;
+  - exported text is escaped;
+  - no score, rule, approval or freshness change.
+- **Spec:** `docs/stage11/stage112.md`, with an estimate of about 2–2.5 h of implementation plus about 45 min of gates. Decisions D-S112-01..03.

@@ -1446,3 +1446,19 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Everyday:** its `onBright` equals its `onAccent`, so nothing there changes.
 - **D-S111-04 `tokens.css` is generated, and a test keeps it honest.** `scripts/gen-tokens-css.mjs` writes it from `tokens.ts`, and a unit test fails if they disagree. Before this, the file said "generated" but was edited by hand.
 - **D-S111-05 Everyday is proven unchanged by comparing computed styles, not by eye.** The new driver renders the same Everyday screens on the base build and this build, and compares every element's computed colour, background, border, outline and shadow. Any difference fails the check. Screenshots are kept for people to look at, but the check doesn't depend on pixels: room codes, names and timers vary, while computed colours don't.
+
+## Stage 11.2: readable casual Memory Books
+- **D-S112-01 A book entry's day label comes from its source's mode, and the mode comes from the server, never the look.**
+  - **How:** new entries record `source.mode` from the room's kind (fixed for a room's life; solo counts as casual). Older entries take the room's kind. Cup entries show "Day N", using the cited game's own day. Casual entries show no day and are identified by the game's title. One shared rule (`src/shared/memoryPresent.ts`) serves the screen, the PDF and the Markdown.
+  - **Alternatives rejected:**
+    - the room's current day: that's the defect, and it also misfiles Cup notes added on a later day;
+    - numbering casual games ("Game 3"): the handoff forbids inventing numbering, and a number isn't stable across replays and cancels.
+- **D-S112-02 Readable facts come from names the server records, with a same-room fallback and then "A player".**
+  - **How:** a new competitive entry records `source.scores`, one per derived fact, with the player's name at that moment (the server's own room players; `null` if the id isn't a player). `derivedFacts` is unchanged. Older entries resolve ids through the same room's players: players are never removed and names never change, so that lookup is reliable. Anything unresolved prints "A player", never an id.
+  - **Alternatives rejected:**
+    - rewriting `derivedFacts` with names: it changes stored facts and older evidence;
+    - client-supplied names: clients don't get to state facts;
+    - parsing note text: never.
+- **D-S112-03 Exported text is escaped, and `source` is optional and dropped if invalid.**
+  - **Escaping:** Markdown escapes the note, names, titles and room name (newlines collapsed, Markdown and HTML punctuation backslashed).
+  - **Invalid `source`:** an invalid `source` on restore is dropped rather than refusing the book, because it only changes presentation. The older-entry rule then applies. A team record keeps its stricter rule.
