@@ -322,9 +322,10 @@ try {
     for (const s of out) ivory.push({ ...s, w });
   }
   const desk = await pageIn("christmas", { width: 1280, height: 800 }, { seat: room.seats[0], room });
-  await desk.goto(`${BASE}/room`, { waitUntil: "domcontentloaded" }); await settle(desk);
-  ivory.push({ name: "lobby", w: 1280, m: await desk.evaluate(measure) });
-  await desk.screenshot({ path: screenshotPath("/tmp/wi-christmas-lobby-1280.png") });
+  // The room's last game finished, so on a desktop the room opens on its results.
+  await desk.goto(`${BASE}/room`, { waitUntil: "domcontentloaded" }); await desk.getByTestId("results-hero").waitFor({ timeout: 15000 }); await settle(desk);
+  ivory.push({ name: "results", w: 1280, m: await desk.evaluate(measure) });
+  await desk.screenshot({ path: screenshotPath("/tmp/wi-christmas-results-1280.png") });
   await desk.goto(`${BASE}/room/memories`, { waitUntil: "domcontentloaded" }); await settle(desk);
   ivory.push({ name: "memory", w: 1280, m: await desk.evaluate(measure) });
   await desk.screenshot({ path: screenshotPath("/tmp/wi-christmas-memory-1280.png") });
@@ -435,5 +436,5 @@ try {
   await browser.close();
   server.child.kill("SIGTERM");
 }
-console.log(failures ? `\n${failures} check(s) FAILED` : "\nALL WARM IVORY CHECKS PASSED");
+console.log(failures ? `\n${failures} check(s) FAILED` : RECORD ? "\nRECORD MODE: the baseline was written; no checks were run" : "\nALL WARM IVORY CHECKS PASSED");
 process.exit(failures ? 1 : 0);

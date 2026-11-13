@@ -40,7 +40,7 @@
 | # | Where | Assumption | Fix |
 |---|---|---|---|
 | A1 | `tokens.ts` `onAccent` | One foreground for every coloured fill. That includes the **fixed** player colours (`.mz-token`) and the **fixed** game cover accents (`.mz-hero-card`, `.mz-solo-results__pb.is-new`). These are light pastels that need dark text in every look. | A new semantic token **`onBright`** (`--mz-on-bright`): the text on colours that never change with the look. It's `#16111D` in both looks. `onAccent` stays the text on the look's own accents and becomes cream on Warm Ivory. Everyday's `onBright` equals its `onAccent`, so nothing there changes. |
-| A2 | game accent as text: `.mz-rhero__kicker`, `.mz-upnext-card__kicker` | A bright game accent (e.g. `#FFC94A`) reads on a dark card; on cream it is about 1.3:1. | On a light look, these kickers mix the game accent into the text colour (`color-mix`, 45% accent) so the hue stays and the text passes 4.5:1. Everyday keeps the pure accent. |
+| A2 | game accent as text: `.mz-rhero__kicker`, `.mz-upnext-card__kicker` | A bright game accent (e.g. `#FFC94A`) reads on a dark card; on cream it is about 1.3:1. | On a light look, these kickers mix the game accent into the text colour (`color-mix`, 35% accent) so the hue stays and the text passes 4.5:1 on both card colours (tested for every cover accent). Everyday keeps the pure accent. |
 | A3 | Containers with no border (`.mz-card`, `.mz-standings__row`, `.mz-cup__seg`, `.mz-switch-row`, `.mz-lib-filters`, TV rows and pills, the Memory Book cards) | A lighter surface on a dark ground shows the card's edge. Cream on ivory doesn't. | On a light look, cards get a hairline (`--mz-line` at 35%) and a soft warm shadow. |
 | A4 | Heavy black shadows (`rgba(0,0,0,.35–.5)` on banners, sheets and chosen options) | Black glows suit a dark ground; on ivory they read as dirt. | On a light look, they're replaced by warm, lighter shadows. |
 | A5 | `.mz-key--neutral` edge `#9C93A8` | A lavender edge under a cream key. | On a light look the neutral key (dark-brown fill) gets a near-black edge. |
@@ -70,24 +70,24 @@
 | **On fixed bright colours (`onBright`, new)** | `#16111D` | (was `onAccent`) | `#16111D` |
 | Primary (`brand`) | `#FF6B4A` | `#F2545B` | `#A3253A` cranberry |
 | Key edge (`brandDeep`) | `#B8432A` | `#A33238` | `#6E1626` |
-| Answers A–D (`answer`) | coral, sun, mint, iris | red, gold, mint, sky | cranberry `#A3253A`, antique gold `#80600F`, pine sage `#2F6A4F`, slate `#3B5A8A` |
-| Answer edges (`answerDeep`) | … | … | `#6E1626`, `#573F07`, `#1D4634`, `#263C5E` |
+| Answers A–D (`answer`) | coral, sun, mint, iris | red, gold, mint, sky | cranberry `#A3253A`, antique gold `#8A5E12`, pine sage `#2F6A4F`, slate `#3B5A8A` |
+| Answer edges (`answerDeep`) | … | … | `#6E1626`, `#5E3F0A`, `#1D4634`, `#263C5E` |
 | Success (`success`) | `#3CCFB4` | `#7FD6A8` | `#2F6A4F` pine sage |
-| Highlight, focus ring (`highlight`) | `#FFC94A` | `#F2C14E` | `#80600F` antique gold |
+| Highlight, focus ring (`highlight`) | `#FFC94A` | `#F2C14E` | `#8A5E12` antique gold |
 | TV glow (`spotlight`) | iris 18% | gold 16% | `rgba(201,162,74,.18)` soft gold |
 | Errors (`danger`) | `#FF8A7A` | `#FF8A7A` | `#B3261E` |
 | Wreath ring (decoration only) | — | red, mint, deep green | cranberry `#A3253A`, sage `#7FA88C`, gold `#C9A24A` |
 | **Tone (new)** | `dark` | `dark` | `light` |
 
 **Contrast:** every pair below is checked by the pure test, `tests/stage111-warm-ivory.test.ts`.
-- **Text on the page and on both card colours, at least 4.5:1:** text 12.7–15.3; muted 5.7–6.9; success 5.2–6.2; highlight 4.7–5.7; danger 5.3–6.4; brand 5.9–7.1.
-- **Cream on each accent fill (answers, brand, highlight, success, danger), at least 4.5:1:** 5.7–7.2.
+- **Text on the page and on both card colours, at least 4.5:1:** text 12.7–15.3; muted 5.7–6.9; success 5.2–6.2; highlight 4.6–5.6; danger 5.3–6.4; brand 5.9–7.1.
+- **Cream on each accent fill (answers, brand, highlight, success, danger), at least 4.5:1:** 5.6–7.2.
 - **Fixed dark text on every player colour and game accent, at least 4.5:1:** 6.6–14.3.
 - **Things that mean something on the page and cards, at least 3:1:**
   - borders (`line`) 3.3–4.0;
-  - the focus ring (`highlight`) 4.7–5.7;
+  - the focus ring (`highlight`) 4.6–5.6;
   - the primary border 5.9–7.1;
-  - answer slabs against the page 4.7–6.5.
+  - answer slabs against the page 5.1–6.5.
 
 **Why accents are dark (D-S111-02):** on Warm Ivory each accent is dark enough to be both text on cream and a fill under cream text. The existing CSS uses every accent both ways (`highlight` is a kicker colour, a focus ring and a badge fill). So one colour per role keeps every existing rule correct, with no second set of text tokens.
 
