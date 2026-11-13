@@ -83,7 +83,7 @@ const noSideways = (page) => page.evaluate(() => document.scrollingElement.scrol
 const BOOK = /\/memory\?revision=1$/;
 
 /** A seated page on the Memory Book. It counts its book fetches and records every word drawn on a canvas (the share image). */
-async function seatPage(browser, room, seat, viewport, look) {
+async function seatPage(browser, room, seat, viewport, look, { noSocket = false } = {}) {
   const ctx = await browser.newContext({ viewport, acceptDownloads: true });
   await ctx.addInitScript((l) => {
     try { localStorage.setItem("mz_look", l); } catch { /* none */ }
@@ -92,6 +92,8 @@ async function seatPage(browser, room, seat, viewport, look) {
     CanvasRenderingContext2D.prototype.fillText = function (t, ...rest) { window.__drawn.push(String(t)); return fill.call(this, t, ...rest); };
   }, look);
   const page = await ctx.newPage();
+  // No socket at all: the app's socket never reaches the server, so only the 2-second poll brings revisions.
+  if (noSocket) await page.routeWebSocket(/\?roomId=/, () => { /* never connects, never says anything */ });
   page.bookFetches = { [room.roomId]: 0 };
   page.on("request", (r) => {
     const m = /\/rooms\/([^/]+)\/memory\?revision=1$/.exec(r.url());
@@ -295,9 +297,9 @@ try {
   check("B8b … and he sees who decides instead", /Waiting for the host to approve it/.test(await card(K, "Waiting after the handover").innerText()));
   const aGets = await untilFrom(t0, TARGET, async () => (await card(A, "Waiting after the handover").getByRole("button", { name: "Approve", exact: true }).count()) === 1);
   check("B8b … while Amina, now the host, has them", aGets >= 0, `${aGets} ms`);
-  let refused = "";
-  try { await decide(keku, n4.id, "approve"); refused = "accepted"; } catch (e) { refused = /: 403 /.test(String(e.message)) ? "403" : String(e.message).slice(0, 80); }
-  check("B8b the server refuses an approval from Keku now", refused === "403", refused);
+  let kekuApprove = "";
+  try { await decide(keku, n4.id, "approve"); kekuApprove = "accepted"; } catch (e) { kekuApprove = /: 403 /.test(String(e.message)) ? "403" : String(e.message).slice(0, 80); }
+  check("B8b the server refuses an approval from Keku now", kekuApprove === "403", kekuApprove);
 
   // ---------- B9. Offline and back: the page reconciles. ----------
   await A.context().setOffline(true);
@@ -342,6 +344,57 @@ try {
   await sleep(3500);
   check("B11 … and a change in the room she left fetches nothing", A2.bookFetches[room.roomId] === lastRoom && (await A2.getByTestId("memory-entry").count()) === 0);
   await A2.context().close();
+
+  // ---------- B13–B16. A failed refresh is retried, without a storm, and never after leaving (review 6845502314). ----------
+  // Polling only, so every poll reports the same revision until the book changes again: nothing else would refetch.
+  const A3 = await seatPage(browser, room, amina, { width: 390, height: 844 }, "christmas", { noSocket: true });
+  let refuseNext = 0, refuseAll = false, refused = 0;
+  await A3.route(BOOK, async (route) => {
+    if (refuseAll || refuseNext > 0) { if (refuseNext > 0) refuseNext--; refused++; await route.abort("failed"); return; }
+    await route.continue();
+  });
+  await untilFrom(Date.now(), 8000, async () => (await stateOf(A3, "A change in the room Amina left")) === "pending");
+  refuseNext = 1; refused = 0;
+  t0 = Date.now();
+  await add(baraka, "Shown after one failed refresh");
+  const recMs = await untilFrom(t0, 12000, async () => (await stateOf(A3, "Shown after one failed refresh")) === "pending");
+  check("B13 one failed refresh, then only same-revision polls: the note still appears, with no reopening and no new change", recMs >= 0 && refused === 1, `${recMs} ms; ${refused} request(s) refused`);
+
+  refuseAll = true; refused = 0;
+  const before14 = A3.bookFetches[room.roomId];
+  await add(baraka, "Shown after the network came back");
+  await sleep(12000);
+  const tries = A3.bookFetches[room.roomId] - before14;
+  check("B14 refreshes failing for 12 s: it keeps trying, backing off (no storm)", tries >= 2 && tries <= 6, `${tries} request(s) in 12 s`);
+  check("B14 … and nothing unconfirmed is shown meanwhile", (await stateOf(A3, "Shown after the network came back")) === "absent");
+  refuseAll = false;
+  const back14 = await untilFrom(Date.now(), 10000, async () => (await stateOf(A3, "Shown after the network came back")) === "pending");
+  check("B14 the network comes back: the next retry shows it (within 10 s)", back14 >= 0, `${back14} ms`);
+
+  refuseAll = true; refused = 0;
+  await add(baraka, "Added while a retry was pending");
+  await untilFrom(Date.now(), 6000, async () => refused >= 1);
+  await A3.getByTestId("memory-back").click();
+  await A3.waitForURL((u) => !/memories/.test(u.pathname), { timeout: 10000 });
+  const left15 = A3.bookFetches[room.roomId];
+  await sleep(10000);
+  check("B15 leaving the book with a retry pending cancels it: no book request in 10 s", refused >= 1 && A3.bookFetches[room.roomId] === left15, `${A3.bookFetches[room.roomId] - left15} after leaving`);
+  refuseAll = false;
+  await A3.goto(`${BASE}/room/memories`, { waitUntil: "domcontentloaded" });
+  check("B15 reopened, the book shows it", (await untilFrom(Date.now(), 8000, async () => (await stateOf(A3, "Added while a retry was pending")) === "pending")) >= 0);
+
+  refuseAll = true; refused = 0;
+  await add(baraka, "Added just before signing out");
+  await untilFrom(Date.now(), 6000, async () => refused >= 1);
+  await A3.getByTestId("room-menu").click();
+  await A3.getByTestId("mz-this-device").getByRole("button", { name: /This device/ }).click();
+  await A3.getByTestId("mz-forget-device").click();
+  await A3.getByTestId("mz-forget-device-confirm").click();
+  await A3.getByTestId("home").waitFor({ timeout: 10000 });
+  const left16 = A3.bookFetches[room.roomId];
+  await sleep(10000);
+  check("B16 signing out in the app with a retry pending: no book request for that room afterwards", refused >= 1 && A3.bookFetches[room.roomId] === left16, `${A3.bookFetches[room.roomId] - left16} after signing out`);
+  await A3.context().close();
 
   check("B12 Keku's book at 390 px: no sideways scroll", await noSideways(K));
   await K.context().close();
