@@ -1,0 +1,35 @@
+$ node scripts/check-tv-lifecycle.mjs http://localhost:34955
+# timeout 900s | worker w1 | server http://localhost:34955 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full/test-results/20261113-082053-7ce8d2d2-19001/server-data/w1)
+
+[+4.6s] PASS lobby: TV shows the dashboard
+[+4.6s] PASS trivia briefing: TV shows the rules and who is ready, no question
+[+24.9s] PASS Start now names the not-ready TV seat — TV: not ready yet
+[+24.9s] PASS trivia playing: TV auto-switches to the stage
+[+66.5s] PASS trivia finished: TV shows the leaderboard stage
+[+67.5s] PASS newer game briefing: TV leaves the Trivia stage for the new rules
+[+89.8s] PASS newer game playing: TV leaves the Trivia stage for the dashboard
+[+89.8s] PASS newer game playing: dashboard names Math Mayhem as now playing
+[+129.4s] DEBUG TV body at math finish: 
+[+129.4s] MchezoCode: T2GTUVPlaying as TV · Room: Christmas Game NightLobby & GamesChampionshipTV DashboardMemory BookReconnectSaved.Math Mayhem · OfficialEveryone tiedAAdaBBeaCCalTTVEveryone tied. A perfectly balanced family.You tied for 1st of 4120 ptsYou share the top spot. Sharing is caring.🏆 ResultsMat
+[+130.9s] PASS newer game finished: TV still on the live show for Math Mayhem, no stale Trivia stage — 
+[+130.9s] mchezoMath MayhemFinal standingsOfficialJoin T2GTUVEveryone tiedMath Mayhem · OfficialThis game's final standingsBigges
+[+167.7s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":4,"peakOpenPages":4}
+[+167.7s] node:internal/modules/run_main:123
+[+167.7s]     triggerUncaughtException(
+[+167.7s]     ^
+[+167.7s] 
+[+167.7s] locator.waitFor: Timeout 15000ms exceeded.
+[+167.7s] Call log:
+[+167.7s]   - waiting for getByTestId('room-menu').or(getByRole('button', { name: 'TV Dashboard', exact: true })).first() to be visible
+[+167.7s] 
+[+167.7s]     at roomGo (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full/scripts/lib/room-nav.mjs:49:106)
+[+167.7s]     at async file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full/scripts/check-tv-lifecycle.mjs:183:5 {
+[+167.7s]   log: [
+[+167.7s]     "  - waiting for getByTestId('room-menu').or(getByRole('button', { name: 'TV Dashboard', exact: true })).first() to be visible"
+[+167.7s]   ],
+[+167.7s]   name: 'TimeoutError'
+[+167.7s] }
+[+167.7s] 
+[+167.7s] Node.js v22.23.4
+
+# FAIL (exit 1) in 167.7s | cpu 9s, peak memory 262 MB

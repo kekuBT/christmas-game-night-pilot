@@ -178,7 +178,15 @@ try {
   await hostStartNow(host); // the TV seat isn't ready; the host confirms
   await host.locator(".mz-question").waitFor({ timeout: 30000 });
   // TV is already on TV view from the previous check; only navigate if it
-  // left (e.g. it went back to a phone view).
+  // left (e.g. it went back to a phone view). The TV hears of the new game on
+  // its own schedule (a push, or the 2-second poll), so when the host's phone
+  // already shows the question the TV can still be on the briefing, which is
+  // neither the stage nor the show and has no way back to TV view. Deciding
+  // then sent it looking for a button that isn't there (full gate
+  // 20261113-082053-7ce8d2d2-19001). Wait until it shows the stage, the show,
+  // or a phone view first.
+  await tv.getByRole("region", { name: "Mchezo big screen" }).or(tv.getByTestId("tv-show")).or(tv.getByTestId("room-menu"))
+    .or(tv.getByRole("button", { name: "TV Dashboard", exact: true })).first().waitFor({ timeout: 20000 });
   if (!(await tvIsDashboard(tv)) && !(await tvIsStage(tv))) {
     await roomGo(tv, "tv"); // the dashboard's own button, or the lobby's room menu
   }

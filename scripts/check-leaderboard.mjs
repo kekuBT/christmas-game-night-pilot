@@ -374,7 +374,11 @@ try {
     await startOfficialTrivia(host);
     await passBriefing([host, P.Bea, P.Cal, tv]); // D3 (Dee left earlier and isn't in this game)
     await host.locator(".mz-question").waitFor({ timeout: 30000 });
-    await answerOption(P.Cal, 0);
+    // Cal answers every question RIGHT (the content oracle), so he is sure to
+    // score. "Option A every time" scored 0 whenever no question dealt had A
+    // correct (options are shuffled when dealt): full gate
+    // 20261113-082053-7ce8d2d2-19001, correct answers 3,3,3,3,2,3,1,1,2,1.
+    await answerCorrect(P.Cal, 10);
     await P.Cal.close();
     await host.getByRole("button", { name: "Sit this game out" }).click();
     await P.Bea.getByRole("button", { name: "Sit this game out" }).click();

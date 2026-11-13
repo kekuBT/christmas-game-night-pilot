@@ -1,0 +1,58 @@
+$ node scripts/check-f5.mjs http://localhost:46317
+# timeout 1500s | worker w2 | server http://localhost:46317 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full/test-results/20261113-082053-7ce8d2d2-19001/server-data/w2)
+
+[+4.7s] PASS lobby roster: 4 players joined
+[+4.7s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games; casual-only, not in a Cup: jebena-rush, spectrum)
+[+6.3s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+17.8s] OK impostor: finished
+[+17.8s] PASS day playlist: impostor finished without sticking
+[+19.1s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+51.5s] OK caption-clash: finished
+[+51.5s] PASS day playlist: caption-clash finished without sticking
+[+52.7s] PASS TV projection leak-free while trivia playing — no forbidden keys
+[+95.4s] OK trivia: finished
+[+95.4s] PASS day playlist: trivia finished without sticking
+[+96.9s] PASS TV projection leak-free while word-connections playing — no forbidden keys
+[+120.5s] OK word-connections: finished
+[+120.5s] PASS day playlist: word-connections finished without sticking
+[+121.7s] PASS TV projection leak-free while who-said-that playing — no forbidden keys
+[+136.4s] OK who-said-that: finished
+[+136.4s] PASS day playlist: who-said-that finished without sticking
+[+137.6s] PASS TV projection leak-free while guess-the-year playing — no forbidden keys
+[+167.8s] OK guess-the-year: finished
+[+167.8s] PASS day playlist: guess-the-year finished without sticking
+[+169.0s] PASS TV projection leak-free while closest-wins playing — no forbidden keys
+[+192.5s] OK closest-wins: finished
+[+192.5s] PASS day playlist: closest-wins finished without sticking
+[+193.8s] PASS TV projection leak-free while category-sprint playing — no forbidden keys
+[+204.8s] OK category-sprint: finished
+[+204.8s] PASS day playlist: category-sprint finished without sticking
+[+206.1s] PASS TV projection leak-free while charades playing — no forbidden keys
+[+215.8s] OK charades: finished
+[+215.8s] PASS day playlist: charades finished without sticking
+[+217.1s] PASS TV projection leak-free while geography playing — no forbidden keys
+[+251.7s] OK geography: finished
+[+251.7s] PASS day playlist: geography finished without sticking
+[+253.5s] PASS TV projection leak-free while math-mayhem playing — no forbidden keys
+[+296.2s] OK math-mayhem: finished
+[+296.2s] PASS day playlist: math-mayhem finished without sticking
+[+297.6s] PASS TV projection leak-free while majority-rules playing — no forbidden keys
+[+360.9s] OK majority-rules: finished
+[+360.9s] PASS day playlist: majority-rules finished without sticking
+[+362.3s] PASS TV projection leak-free while pattern-pulse playing — no forbidden keys
+[+409.6s] OK pattern-pulse: finished
+[+409.6s] PASS day playlist: pattern-pulse finished without sticking
+[+411.0s] PASS TV projection leak-free while draw-guess playing — no forbidden keys
+[+453.0s] OK draw-guess: finished
+[+453.0s] PASS day playlist: draw-guess finished without sticking
+[+453.0s] PASS day playlist: all games finished in one room — 14/14 finished
+[+453.0s] PASS ledger holds one game-finished event per playlist game — 14/14 finish events
+[+453.0s] PASS TV projection marks every playlist game finished — all finished
+[+455.0s] PASS championship standings list all 4 players after full day
+[+455.0s] PASS championship per-game breakdown present after full day
+[+456.5s] PASS TV shows the 5 most recent finished games — all 5 listed
+[+458.4s] PASS Memory Book export contains the full-day entry
+[+458.5s] F5 ALL PASSED (36/36)
+[+458.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 458.5s | cpu 29s, peak memory 297 MB

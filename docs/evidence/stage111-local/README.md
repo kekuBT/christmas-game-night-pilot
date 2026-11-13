@@ -49,3 +49,32 @@ These are **local runs from development, not gate verdicts**.
   - I had run only the new and theme tests before the gate, not the whole suite. That was my mistake.
 - **Fix:** it's listed as a file generator, both in the test's list and in `docs/TESTING.md` ("Scripts that are not checks").
 - **Rerun:** `unit-after-inventory-fix.log` is the whole suite, locally, on the fix: 1,720 passed in 134 files. Typecheck and lint also exit 0.
+
+## The first full gate's two failures, and the fixes
+**Run:** full gate `20261113-082053-7ce8d2d2-19001` on `7ce8d2d`. **FAILED** (exit 1, 88 passed, 2 failed, 35 min 27 s). The raw output is in `docs/evidence/gate-runs/20261113-082053-7ce8d2d2-19001/`.
+
+Neither failure comes from the theme. Both drivers run in the Everyday look and test game rules and the TV, which this stage doesn't touch. Both are timing or chance assumptions in the drivers, found and fixed here.
+
+### `check-leaderboard`: "away marker: Cal disconnected with a positive score — Cal=0"
+- **Root cause:** the scenario has Cal answer option A on every question and expects him to score.
+  - Options are shuffled when a game is dealt, so A is right on only about one question in four. A deal can have no question with A correct.
+  - The gate's saved room (`server-data/w3`, the last Trivia game) shows exactly that. Cal answered all 10 questions with option A, all recorded, and the correct options were 3, 3, 3, 3, 2, 3, 1, 1, 2, 1. So Cal correctly scored 0. Everyone else sat out, so all four scores were 0.
+- **Reproduced:** a scratch script (not kept) started a Trivia game over HTTP. With option A every time Cal scored 0 (another deal with no A correct); with the right answers he scored 1,200.
+- **Fix:** Cal answers every question right, using the content oracle the driver already uses elsewhere (`answerCorrect`). The checks are unchanged.
+- **Rerun:** `leaderboard-after-fix.log`, the whole driver against its own server with the gate's content mode: exit 0. Cal scored 1,200, and all four away-marker checks passed.
+
+### `check-tv-lifecycle`: a timeout waiting for the room menu or the TV Dashboard button
+- **Root cause:** a race in the driver.
+  - When Trivia restarts, the driver checks the TV the moment the host's phone shows the question. If the TV is then neither on the stage nor on the show, it navigates back through the room menu.
+  - The TV hears of the new game on its own schedule (a push, or the 2-second poll). Under the gate's load it could still be on the briefing, which has neither a room menu nor a TV Dashboard button, so the navigation timed out.
+  - The first Trivia start in the same driver already waits up to 20 s for the stage; this later one didn't.
+- **Reproduced deterministically:**
+  - `tv-lifecycle-before-fix-no-lag.log`: the unchanged driver passes when nothing is slow (exit 0).
+  - `tv-lifecycle-repro-tv-lag-before-fix.log`: the unchanged driver fails with the gate's exact error (exit 1) when, from the restart on, the TV's pushes and poll replies arrive 1.5 s late. Its socket stays connected.
+  - `tv-lifecycle-repro-tv-lag-after-fix.log`: the fixed driver passes under the same 1.5 s lag (exit 0).
+  - The lag hook was a scratch copy only; it isn't in the committed driver.
+- **Fix:** before deciding, the driver waits (up to 20 s) until the TV shows the stage, the show, or a phone view. The checks are unchanged.
+- **Rerun:** `tv-lifecycle-after-fix.log`, the fixed driver: exit 0.
+
+### My own mistake while reproducing
+My first local runs of `check-tv-lifecycle` failed earlier, with a phone never reaching the third game's briefing. That happened on both this build and the base (`tv-lifecycle-local-without-content-mode-base-d4dc408.log`), because I had started the server without the gate's `MCHEZO_CONTENT_TEST_MODE=approve-provisional`, so a third official game had no approved content to deal. Those runs say nothing about the product. Every rerun above used the gate's server settings.

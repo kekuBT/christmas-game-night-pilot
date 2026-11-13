@@ -1,0 +1,59 @@
+$ node scripts/check-action-ack.mjs http://localhost:40351
+# timeout 600s | worker w3 | server http://localhost:40351 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full/test-results/20261113-082053-7ce8d2d2-19001/server-data/w3)
+
+[+4.1s] PASS Trivia (reply lost): the phone tried with one event id, three times
+[+4.1s] PASS Trivia (reply lost): all tries carried the same event id — 3 tries, 1 id(s)
+[+4.1s] PASS Trivia (reply lost): the server recorded it exactly once — count 1
+[+4.1s] PASS Trivia (reply lost): the screen shows what the server recorded
+[+4.1s] PASS Trivia (reply lost): once the server shows it, no "couldn't confirm" line remains
+[+4.1s] PASS Trivia (reply lost): instead it says it went through (from the server's list of this player's accepted actions)
+[+4.1s] PASS Trivia (reply lost): replaying the same request returns the original result — {"accepted":true,"result":{"gameStatus":"playing"}}
+[+4.1s] PASS Trivia (reply lost): a second tap for the same answer doesn't count twice — second tap → {"accepted":false,"reason":"ALREADY_ANSWERED"}; count 1
+[+6.9s] PASS Majority Rules prediction (reply lost): the phone tried with one event id, three times
+[+6.9s] PASS Majority Rules prediction (reply lost): all tries carried the same event id — 3 tries, 1 id(s)
+[+6.9s] PASS Majority Rules prediction (reply lost): the server recorded it exactly once — count 1
+[+6.9s] PASS Majority Rules prediction (reply lost): the screen shows what the server recorded
+[+6.9s] PASS Majority Rules prediction (reply lost): once the server shows it, no "couldn't confirm" line remains
+[+6.9s] PASS Majority Rules prediction (reply lost): instead it says it went through (from the server's list of this player's accepted actions)
+[+6.9s] PASS Majority Rules prediction (reply lost): replaying the same request returns the original result — {"accepted":true,"result":{"gameStatus":"playing"}}
+[+6.9s] PASS Majority Rules prediction (reply lost): a second tap for the same answer doesn't count twice — second tap → {"accepted":false,"reason":"ALREADY_ANSWERED"}; count 1
+[+14.1s] PASS Pattern Pulse answer (reply lost): the phone tried with one event id, three times
+[+14.1s] PASS Pattern Pulse answer (reply lost): all tries carried the same event id — 3 tries, 1 id(s)
+[+14.1s] PASS Pattern Pulse answer (reply lost): the server recorded it exactly once — count 1
+[+14.1s] PASS Pattern Pulse answer (reply lost): the screen shows what the server recorded
+[+14.1s] PASS Pattern Pulse answer (reply lost): once the server shows it, no "couldn't confirm" line remains
+[+14.1s] PASS Pattern Pulse answer (reply lost): instead it says it went through (from the server's list of this player's accepted actions)
+[+14.2s] PASS Pattern Pulse answer (reply lost): replaying the same request returns the original result — {"accepted":true,"result":{"round":0,"correctRun":3,"perfect":true,"points":110}}
+[+14.2s] PASS Pattern Pulse answer (reply lost): a second tap for the same answer doesn't count twice — second tap → {"accepted":false,"reason":"ALREADY_ANSWERED"}; count 1
+[+14.2s] PASS Pattern Pulse answer (reply lost): the round scored once — [110]
+[+17.3s] PASS Draw & Guess right guess (reply lost): the phone tried with one event id, three times
+[+17.3s] PASS Draw & Guess right guess (reply lost): all tries carried the same event id — 3 tries, 1 id(s)
+[+17.3s] PASS Draw & Guess right guess (reply lost): the server recorded it exactly once — count 1
+[+17.3s] PASS Draw & Guess right guess (reply lost): the screen shows what the server recorded
+[+17.3s] PASS Draw & Guess right guess (reply lost): once the server shows it, no "couldn't confirm" line remains
+[+17.3s] PASS Draw & Guess right guess (reply lost): instead it says it went through (from the server's list of this player's accepted actions)
+[+17.3s] PASS Draw & Guess right guess (reply lost): replaying the same request returns the original result — {"accepted":true,"result":{"correct":true,"order":1}}
+[+17.4s] PASS Draw & Guess right guess (reply lost): a second tap for the same answer doesn't count twice — second tap → {"accepted":false,"reason":"ALREADY_ANSWERED"}; count 1
+[+21.0s] PASS Majority Rules prediction (never arrived): says it couldn't be confirmed
+[+21.0s] PASS Majority Rules prediction (never arrived): still on the prediction step (nothing claims it's in)
+[+21.0s] PASS Majority Rules prediction (never arrived): the server has no prediction
+[+21.0s] PASS Majority Rules prediction (never arrived): both answers can still be picked
+[+21.1s] PASS Majority Rules prediction (never arrived): picking again lands it
+[+21.1s] PASS Majority Rules prediction (never arrived): the failure line is gone
+[+21.1s] PASS Majority Rules prediction (never arrived): three tries were made, all with one event id — 3 tries
+[+28.0s] PASS Pattern Pulse answer (never arrived): says it couldn't be confirmed
+[+28.1s] PASS Pattern Pulse answer (never arrived): the entry is still there, in order — {"before":[3,4,2],"now":[3,4,2]}
+[+28.1s] PASS Pattern Pulse answer (never arrived): the server has no answer
+[+28.1s] PASS Pattern Pulse answer (never arrived): nothing claims it's in
+[+28.2s] PASS Pattern Pulse answer (never arrived): locking again lands it, once
+[+28.2s] PASS Pattern Pulse answer (never arrived): the failure line is gone
+[+30.6s] PASS Draw & Guess guess (never arrived): says it couldn't be confirmed
+[+30.6s] PASS Draw & Guess guess (never arrived): the guess is still in the box
+[+30.6s] PASS Draw & Guess guess (never arrived): the server has no guess
+[+30.6s] PASS Draw & Guess guess (never arrived): nothing says "Not it"
+[+30.7s] PASS Draw & Guess guess (never arrived): sending again lands it, once
+[+30.9s] PASS Draw & Guess guess (never arrived): the failure line is gone and the server's answer shows
+[+30.9s] ACTION ACK ALL PASSED
+[+30.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":7,"pages":7,"peakOpenPages":1}
+
+# PASS (exit 0) in 30.9s | cpu 5.4s, peak memory 355 MB

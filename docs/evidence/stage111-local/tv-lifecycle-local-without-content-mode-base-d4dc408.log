@@ -1,0 +1,27 @@
+PASS lobby: TV shows the dashboard
+PASS trivia briefing: TV shows the rules and who is ready, no question
+PASS Start now names the not-ready TV seat — TV: not ready yet
+PASS trivia playing: TV auto-switches to the stage
+PASS trivia finished: TV shows the leaderboard stage
+PASS newer game briefing: TV leaves the Trivia stage for the new rules
+PASS newer game playing: TV leaves the Trivia stage for the dashboard
+PASS newer game playing: dashboard names Math Mayhem as now playing
+DEBUG TV body at math finish: 
+MchezoCode: DWCNQ4Playing as TV · Room: Christmas Game NightLobby & GamesChampionshipTV DashboardMemory BookReconnectSaved.Math Mayhem · OfficialEveryone tiedAAdaBBeaCCalTTVEveryone tied. A perfectly balanced family.You tied for 1st of 4240 ptsYou share the top spot. Sharing is caring.🏆 ResultsMat
+PASS newer game finished: TV still on the live show for Math Mayhem, no stale Trivia stage — 
+mchezoMath MayhemFinal standingsOfficialJoin DWCNQ4Everyone tiedMath Mayhem · OfficialThis game's final standingsBigges
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+locator.waitFor: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for getByTestId('briefing') to be visible[22m
+
+    at tapReady (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt105/scripts/lib/briefing.mjs:30:37)
+    at /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt105/scripts/check-tv-lifecycle.mjs:177:9 {
+  log: [ "  - waiting for getByTestId('briefing') to be visible" ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.4

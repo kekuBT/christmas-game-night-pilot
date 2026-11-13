@@ -1,0 +1,13 @@
+
+FAILED (exit 1) | full | run 20261113-082053-7ce8d2d2-19001
+  88 passed, 2 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-leaderboard (w3) [functional]: FAIL away marker: Cal disconnected with a positive score — Cal=0
+  FAIL      check-tv-lifecycle (w1) [functional]: exit 1
+  timing   wall 35m 27s · step time 1h 39m (sum) · 3 workers, 94% busy · 2.81× the same steps run one after another
+           predicted 25–59m (about 32m 53s, low-confidence) → actual 35m 27s (+8%)
+           longest  e2e-chromium 8m 19s, check-f5 7m 39s, check-leaderboard 6m 31s · the longest step is 23% of the wall time
+           machine  CPU mean 34%, peak 98% · memory available ≥ 13002 MB · load peak 5.8 · backpressure 23 wait(s), 204s
+           contention ×1.046 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full/test-results/20261113-082053-7ce8d2d2-19001/report.json

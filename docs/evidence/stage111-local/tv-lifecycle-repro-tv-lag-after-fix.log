@@ -1,0 +1,14 @@
+PASS lobby: TV shows the dashboard
+PASS trivia briefing: TV shows the rules and who is ready, no question
+PASS Start now names the not-ready TV seat — TV: not ready yet
+PASS trivia playing: TV auto-switches to the stage
+PASS trivia finished: TV shows the leaderboard stage
+PASS newer game briefing: TV leaves the Trivia stage for the new rules
+PASS newer game playing: TV leaves the Trivia stage for the dashboard
+PASS newer game playing: dashboard names Math Mayhem as now playing
+DEBUG TV body at math finish: 
+MchezoCode: X8SRJFPlaying as TV · Room: Christmas Game NightLobby & GamesChampionshipTV DashboardMemory BookReconnectSaved.Math Mayhem · OfficialEveryone tiedAAdaBBeaCCalTTVEveryone tied. A perfectly balanced family.You tied for 1st of 4360 ptsYou share the top spot. Sharing is caring.🏆 ResultsMat
+PASS newer game finished: TV still on the live show for Math Mayhem, no stale Trivia stage — 
+mchezoMath MayhemFinal standingsOfficialJoin X8SRJFEveryone tiedMath Mayhem · OfficialThis game's final standingsBigges
+PASS trivia restarts: TV returns to a fresh question stage
+TV LIFECYCLE ALL PASSED
