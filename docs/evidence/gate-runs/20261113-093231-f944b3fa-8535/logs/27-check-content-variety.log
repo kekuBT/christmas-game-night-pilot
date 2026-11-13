@@ -1,0 +1,66 @@
+$ node scripts/check-content-variety.mjs http://localhost:42269
+# timeout 600s | worker w3 | server http://localhost:42269 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full2/test-results/20261113-093231-f944b3fa-8535/server-data/w3)
+
+[+1.3s] PASS setup: the own server loaded the small pool (not the shipped library) — TEST MODE: content loaded from /tmp/mz-variety-pool-6RJqPi (29 items), not the shipped library
+[+10.7s] PASS A solo: every board dealt is a pool board, and never the rejected one — ["con-t-official-b","con-t-official-a","con-t-practice","con-t-official-b"]
+[+10.7s] PASS A solo: the first three are the three usable boards, each once (practice-only and both approved) — ["con-t-official-b","con-t-official-a","con-t-practice"]
+[+10.7s] PASS A solo: the fourth is the least recently used (the first again) — ["con-t-official-b","con-t-official-a","con-t-practice","con-t-official-b"]
+[+10.7s] PASS A solo: the server holds four finished Connections rounds in one room
+[+10.7s] PASS A solo: no item id reaches the phone
+[+11.5s] PASS A2 the server restarted on the same port with the same data
+[+11.7s] PASS A2 after the restart, Play again starts a round (no refusal)
+[+11.7s] PASS A2 …and deals the least recently used board (the usage survived the restart) — {"afterRestart":"con-t-official-a","expected":"con-t-official-a"}
+[+13.2s] PASS A3 tab 1's Start is on its way (held), made against the room's revision
+[+13.9s] PASS A3 tab 2 started Pattern Pulse first (the room moved on) — {"revision":2,"games":[["pattern-pulse","playing"]]}
+[+13.9s] PASS A3 tab 1's late press is refused: “Something changed in another tab or window…”, with Try again
+[+13.9s] PASS A3 nothing changed: tab 2's Pulse still plays, no new round, the revision unchanged
+[+14.2s] PASS A3 Try again reads the room and starts a Connections round
+[+14.2s] PASS A3 …against the current revision, with a new press id — [{"id":"ee079a1a-abf2-4b0b-9c89-4d091557895f","sessionRevision":1},{"id":"200f089c-1fa3-42c0-b2f8-ae3197bb0b48","sessionRevision":2}]
+[+14.2s] PASS A3 …and its board is a usable pool board — con-t-official-b
+[+16.3s] PASS A4 tab A is told something changed (another tab) and does not play B's round
+[+16.3s] PASS A4 tab B is undisturbed: its round is the only one playing, and B still plays it — ["game-2"]
+[+16.3s] PASS A4 tab A sent the same press again (same id and revision), never a new one — [{"id":"7a5cf5ad-60f1-4689-b0d1-462fc0ba4d00","sessionRevision":1},{"id":"7a5cf5ad-60f1-4689-b0d1-462fc0ba4d00","sessionRevision":1}]
+[+18.8s] PASS B setup: a lineup of Word Connections, then Math Mayhem — {"ok":true,"party":{"revision":1,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":17,"transitionMinutes":2,"items":[{"gameId":"word-connection
+[+19.3s] PASS B1 picked by hand: a plain Start (not the lineup's)
+[+20.0s] PASS B1 hand-picked: both phones show the same pool board — ["con-t-official-b","con-t-official-b"]
+[+22.1s] PASS B1 hand-picked: the results, with What's next
+[+22.1s] PASS B1 the lineup's Connections item is still pending (a hand pick never moves it) — [{"gameId":"word-connections","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}]
+[+22.5s] PASS B2 Play again sent a rematch with a press id — {"gameId":"word-connections","official":false,"roster":["player-1","player-2"],"rematchOf":"game-1","attempt":{"id":"9cc19113-cde2-47ff-8db2-8d5f892a6934","sessionRevision":1},"season":"everyday"}
+[+23.5s] PASS B2 the cancel confirmation names the results: “You’ll go back to the Word Connections results.” — You’ll go back to the Word Connections results.
+[+23.5s] PASS B2 …and never promises the lobby — Cancel Word Connections? You’ll go back to the Word Connections results. Nothing is scored or used up, and everyone else goes back to what they had open. Keep it Cancel the game
+[+23.7s] PASS B2 after the cancel, Ada is back on the Word Connections results (What's next)
+[+23.7s] PASS B2 …and so is Bea
+[+23.8s] PASS B2 the cancel left nothing behind: the same games, the lineup unchanged — {"games":1,"before":1,"items":[{"gameId":"word-connections","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}]}
+[+23.8s] PASS B2 the cancelled press sent again starts nothing (ATTEMPT_ENDED) — {"status":409,"code":"ATTEMPT_ENDED","games":1}
+[+25.1s] PASS B3 rematch: both phones show the same pool board — ["con-t-official-a","con-t-official-a"]
+[+27.1s] PASS B3 rematch: the results, with What's next
+[+27.1s] PASS B3 the rematch deals an unused board — ["con-t-official-b","con-t-official-a"]
+[+27.1s] PASS B3 the lineup is unchanged by the rematch — [{"gameId":"word-connections","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}]
+[+27.1s] PASS B4 the results offer the lineup's Next game: Word Connections
+[+28.0s] PASS B4 lineup Next: both phones show the same pool board — ["con-t-practice","con-t-practice"]
+[+30.1s] PASS B4 lineup Next: the results, with What's next
+[+30.1s] PASS B4 the lineup's game deals the last unused board — ["con-t-official-b","con-t-official-a","con-t-practice"]
+[+30.2s] PASS B4 the lineup moved on: Connections played, Math next — [{"gameId":"word-connections","started":true,"status":"completed","gameInstanceId":"game-4"},{"gameId":"math-mayhem","started":false,"status":"pending"}]
+[+31.6s] PASS B5 rematch after all were used: both phones show the same pool board — ["con-t-official-b","con-t-official-b"]
+[+33.6s] PASS B5 rematch after all were used: the results, with What's next
+[+33.6s] PASS B5 the least recently used board comes back (board 1) — ["con-t-official-b","con-t-official-a","con-t-practice","con-t-official-b"]
+[+33.6s] PASS B5 the lineup is unchanged (Math still next) — [{"gameId":"word-connections","started":true,"status":"completed","gameInstanceId":"game-4"},{"gameId":"math-mayhem","started":false,"status":"pending"}]
+[+33.6s] PASS B every board dealt is a usable pool board, never the rejected one — ["con-t-official-b","con-t-official-a","con-t-practice","con-t-official-b"]
+[+34.0s] PASS B6 Ada is in the lobby, the lineup's Math up next
+[+35.4s] PASS B6 the cancel confirmation names the lobby: “You’ll go back to the lobby.” — You’ll go back to the lobby.
+[+35.6s] PASS B6 after the cancel, Ada is in the lobby, Math still up next
+[+35.6s] PASS B6 Bea, who kept the results open, is back on them
+[+35.7s] PASS B6 nothing changed: the same games; Math still pending and next — {"games":4,"gamesBefore":4,"items":[{"gameId":"word-connections","started":true,"status":"completed","gameInstanceId":"game-4"},{"gameId":"math-mayhem","started":false,"status":"pending"}]}
+[+57.4s] PASS B7 the lineup's Math plays to its results
+[+57.4s] PASS B7 the lineup is complete — [{"gameId":"word-connections","started":true,"status":"completed","gameInstanceId":"game-4"},{"gameId":"math-mayhem","started":true,"status":"completed","gameInstanceId":"game-7"}]
+[+58.6s] PASS B8 at 320 px the cancel confirmation names Math's results and fits
+[+58.9s] PASS B8 back on the results
+[+67.1s] PASS C shipped library: every board dealt is a shipped, usable, year-round board (11 of them) — ["con-s4-11","con-s4-02","con-s4-04","con-s4-01","con-s4-12","con-s4-06","con-s4-10","con-s4-05","con-s4-07","con-s4-09","con-s4-08","con-s4-11"]
+[+67.1s] PASS C an Everyday solo room never deals a Christmas board — 0 dealt
+[+67.1s] PASS C all 11 shipped boards come before any repeats — 11 different in the first 11
+[+67.1s] PASS C then the least recently used (the first again) — ["con-s4-11","con-s4-11"]
+[+67.1s] 
+[+67.1s] All content-variety checks passed
+[+67.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":8,"peakOpenPages":3}
+
+# PASS (exit 0) in 67.2s | cpu 11.3s, peak memory 362 MB

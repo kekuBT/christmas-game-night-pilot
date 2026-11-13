@@ -203,3 +203,46 @@ These are the steps the independent audit used. It's for audits only; it isn't a
 6. **Keep the port PRIVATE** in the Codespace Ports panel. Never make it public.
 7. **Sign-in recovery:** if the cloud browser lands on GitHub's sign-in page, stop and ask the owner to sign in in that same browser session. Never store, paste or work around credentials.
 8. **Stop only your own server** when done (kill its PID), and leave the worktree for inspection until the stage clears.
+
+## 10. Results (built and gated)
+**Tested SHA:** `f944b3f`.
+
+**Commits:**
+- `283cfc8`: the spec.
+- `9935508`: tokens, tone, `onBright`, `stage111.css`, the Christmas PDF, and the pure tests.
+- `b7ef25a`: `check-warm-ivory` and the Everyday baseline.
+- `2cf10bb`: screenshots and local evidence.
+- `d0d9600`, `7ce8d2d` and `f944b3f`: test-script fixes found by the gates (below).
+
+**Validation:**
+- **Pure test (`tests/stage111-warm-ivory.test.ts`, 12 tests):**
+  - every §4 pair;
+  - Everyday's values and CSS variables exactly as at `d4dc408`;
+  - `onBright` on every player and cover colour;
+  - the 35% kicker mix for every cover accent;
+  - `tokens.css` equal to `tokensCss()`.
+- **`check-warm-ivory`:** 199 checks. Their measured values are in the gate logs. It covers:
+  - 29 Warm Ivory screens: 320 and 390 px, 1280 px results and Memory Book, the TV briefing, question and results;
+  - text contrast and control contrast;
+  - no dark panels;
+  - overflow, 44 px targets and clipped labels at 320 px;
+  - nothing running with Animations Off;
+  - the focus ring;
+  - a disabled key against the same key enabled;
+  - a look switch keeping a Memory Book draft and a running game;
+  - the Christmas PDF and share image, the Everyday PDF, and a revoked note left out of a fresh PDF;
+  - **W8:** the computed colours of 22 Everyday screens equal those recorded on `d4dc408`.
+- **On the base build:** the same driver fails the old green look, W0 and W3 on all 29 screens and W7, while W8 still matches. The checks catch what this stage fixes.
+
+**Gates, one after another** (raw output in `docs/evidence/gate-runs/<run>/`):
+
+| Revision | Gate | Run | Result |
+|---|---|---|---|
+| `b7ef25a` | targeted (theme, contrast, viewports, Memory Book, TV and game drivers) | `20261113-080757-b7ef25a2-4720` | **FAILED**, 15/16. `check-themes-seasonal` still expected the old green toolbar colour `#0e1a16`. Fixed in `d0d9600`. |
+| `d0d9600` | fast | `20261113-081635-d0d9600b-8918` | **FAILED**: 1 unit test of 1,720. The new `gen-tokens-css.mjs` wasn't in the script inventory. Fixed in `7ce8d2d`. |
+| `7ce8d2d` | fast | `20261113-081939-7ce8d2d2-15554` | PASSED |
+| `7ce8d2d` | full | `20261113-082053-7ce8d2d2-19001` | **FAILED**, 88/90. Two Everyday driver assumptions, unrelated to the theme: `check-leaderboard` (option A every time can score 0) and `check-tv-lifecycle` (judged the TV before it left the briefing). Both reproduced and fixed in `f944b3f`. |
+| `f944b3f` | fast | `20261113-093113-f944b3fa-5062` | PASSED (1,720 unit tests) |
+| **`f944b3f`** | **full (the checkpoint)** | `20261113-093231-f944b3fa-8535` | **PASSED** (exit 0, 90/90, 34 min 32 s) |
+
+**Root causes and reproductions:** `docs/evidence/stage111-local/README.md`.

@@ -1,0 +1,78 @@
+$ node scripts/check-quick-party.mjs http://localhost:36231
+# timeout 600s | worker w1 | server http://localhost:36231 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full2/test-results/20261113-093231-f944b3fa-8535/server-data/w1)
+
+[+4.0s] PASS A host: a Quick Party entry in the casual lobby
+[+4.1s] PASS A guests: no Quick Party controls
+[+4.1s] PASS A server: a casual room with no lineup yet — {"revision":0,"lineup":null}
+[+4.1s] PASS B the group size starts at the 3 here
+[+4.1s] PASS B it is labelled as expected, not who's here
+[+4.1s] PASS B + by keyboard: 4
+[+4.1s] PASS B 30 minutes is the default; 15, 30 and 60 are offered
+[+4.2s] PASS B a suggested lineup: 1+ games, each fitting 4, no repeats — draw-guess, charades
+[+4.2s] PASS B its estimate is within 30 minutes, and says it's an estimate — About 29 of your 30 minutes. Estimated: each game’s usual length plus 2 minutes to get going. Each game also has its own time limit.
+[+4.5s] PASS C a new time clears the lineup (never silently kept)
+[+4.5s] PASS C 60 minutes: a longer lineup — caption-clash, trivia, majority-rules, word-connections, closest-wins, category-sprint
+[+4.6s] PASS C move down: the first two swap — trivia, caption-clash, majority-rules, word-connections, closest-wins, category-sprint
+[+4.6s] PASS C remove: one fewer, the rest in order
+[+4.7s] PASS C replace offers only games that fit 4 and aren't in the lineup — impostor, who-said-that, guess-the-year, charades, geography, math-mayhem, pattern-pulse, draw-guess
+[+4.7s] PASS C replace: the first game is the chosen one
+[+4.8s] PASS C suggest again: still a valid lineup
+[+4.8s] PASS C server: still no lineup, no game, nothing used — {"revision":0,"lineup":null}
+[+5.0s] PASS C arrange: Impostor first — impostor, draw-guess
+[+5.0s] PASS I Apply with no network: 'couldn't confirm whether it saved' (P7), the planner stays open
+[+5.1s] PASS I server: nothing was saved
+[+5.3s] PASS I Apply whose reply was lost: recognised as saved, the planner closes
+[+5.3s] PASS D server: the lineup, in the planner's order, revision 1 — {"revision":1,"lineup":{"expectedPlayers":4,"budgetMinutes":30,"estimateMinutes":24,"transitionMinutes":2,"items":[{"gameId":"impostor","started":false,"status":"pending"},{"gameId":"draw-guess","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794564064111}}
+[+5.3s] PASS D host: the lineup card
+[+5.4s] PASS D guests see the same lineup
+[+5.4s] PASS D the card says planned for 4, an estimate, and who is here — Planned for 4 players · about 24 of your 30 minutes (estimated) · 3 here now
+[+5.4s] PASS D up next is the lineup's first game (Impostor needs 4: Start waits for players)
+[+5.4s] PASS D the lineup shows Impostor needs one more
+[+5.4s] PASS E guest: no Edit or Clear
+[+5.4s] PASS E guest: the server refuses an edit (403) — {"status":403,"body":{"error":"Only the host or a cohost can plan the party.","code":"NOT_HOST","party":{"revision":1,"lineup":{"expectedPlayers":4,"budgetMinutes":30,"estimateMinutes":24,"transitionMinutes":2,"items":[{"gameId":"impostor","started":false,"status":"pending"},{"gameId":"draw-guess","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794564064111}}}}
+[+5.8s] PASS F host reload: the lineup comes back from the server
+[+5.9s] PASS F and Start is still the lineup's
+[+5.9s] PASS G Impostor doesn't fit the 3 here: the card says so and offers a replan for 3
+[+5.9s] PASS G the server refuses it too (409 PARTY_DOESNT_FIT, needs 4, 3 here), nothing started — {"error":"Impostor needs at least 4 players; 3 are here.","code":"PARTY_DOESNT_FIT","readiness":{"registered":3,"connected":3,"reconnecting":0,"away":0,"wouldPl
+[+6.1s] PASS G replan: the planner opens for the 3 here
+[+6.7s] PASS G arrange: Math Mayhem first — math-mayhem, caption-clash, closest-wins
+[+6.8s] PASS G server: the replanned lineup, revision 2
+[+6.8s] PASS G Start says Math Mayhem, game 1
+[+7.0s] PASS G fewer than planned again (4 planned): asks
+[+7.1s] PASS I Start whose reply was lost: the game opens anyway (briefing)
+[+7.1s] PASS I the retry was the same press (same request id) — [{"id":"39b7dead-b29d-4c78-845e-2dcbbf87da91","sessionRevision":0},{"id":"39b7dead-b29d-4c78-845e-2dcbbf87da91","sessionRevision":0}]
+[+7.1s] PASS I exactly one game started, Math Mayhem, practice, with the 3 here — {"lost":1,"games":[["math-mayhem","briefing",3]]}
+[+7.1s] PASS H the lineup marks game 1 as started
+[+7.2s] PASS I the same start again answers with the same game (200, replay) — {"status":200,"body":{"gameId":"game-1","gameType":"math-mayhem","status":"briefing","players":["player-1","player-2","player-3"],"replay":true}}
+[+42.1s] PASS H all three reach the results
+[+42.5s] PASS H back in the lobby, the lineup is kept with game 1 played
+[+42.5s] PASS H server: one finished practice game; nothing started after it; no Cup standings — [["math-mayhem","finished"]]
+[+42.5s] PASS H no automatic next game: one game; up next is the lineup's game 2, marked next (or the lineup is complete) — 2
+[+42.5s] Caption Clash
+[+42.5s] 4–10 players · about 10 min · next up
+[+42.5s] Needs 1 more player · 3 here
+[+42.5s] PASS I TV view: the same lineup, with no tokens, seeds or answers — {"revision":2,"lineup":{"expectedPlayers":4,"budgetMinutes":30,"estimateMinutes":29,"transitionMinutes":2,"items":[{"gameId":"math-mayhem","started":true,"statu
+[+42.5s] PASS J guest at 320 px: the lineup card fits, no sideways scroll
+[+42.9s] PASS J host at 320 px: the planner opens with the saved lineup, no sideways scroll
+[+43.4s] PASS I Clear (after asking): the lineup is gone for everyone
+[+45.4s] PASS K the second player is made a cohost — 200
+[+45.4s] PASS K the cohost gets the Quick Party entry
+[+46.6s] PASS K the cohost's 30-minute lineup is saved (revision 1) — {"revision":1,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":29,"transitionMinutes":2,"items":[{"gameId":"trivia","started":false,"status":"pending"},{"gameId":"closest-wins","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794564105510}}
+[+46.6s] PASS K the host's draft says the saved lineup changed while planning
+[+46.9s] PASS K applying the stale draft shows the conflict with the latest lineup
+[+46.9s] PASS K the newer lineup is unchanged on the server (revision 1, the cohost's games) — {"revision":1,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":29,"transitionMinutes":2,"items":[{"gameId":"trivia","started":false,"status":"pending"},{"gameId":"closest-wins","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794564105510}}
+[+46.9s] PASS K the host's draft is still there to decide about
+[+46.9s] PASS K 'Edit the latest' loads the cohost's lineup into the planner
+[+47.5s] PASS K the host sees the second background change
+[+47.6s] PASS K again nothing is overwritten (revision 2, the cohost's edit) — {"revision":2,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":17,"transitionMinutes":2,"items":[{"gameId":"closest-wins","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794564106397}}
+[+47.7s] PASS K 'Replace it with mine' (an explicit choice) saves the draft as revision 3 — {"revision":3,"lineup":{"expectedPlayers":2,"budgetMinutes":30,"estimateMinutes":29,"transitionMinutes":2,"items":[{"gameId":"trivia","started":false,"status":"pending"},{"gameId":"closest-wins","started":false,"status":"pending"},{"gameId":"math-mayhem","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794564106611}}
+[+48.8s] PASS K 'Keep the latest' discards the stale draft: the cohost's 60-minute lineup stays (revision 4) — {"revision":4,"lineup":{"expectedPlayers":2,"budgetMinutes":60,"estimateMinutes":53,"transitionMinutes":2,"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"guess-the-year","started":false,"status":"pending"},{"gameId":"closest-wins","started":false,"status":"pending"},{"gameId":"word-connections","started":false,"status":"pending"},{"gameId":"pattern-pulse","started":false,"status":"pending"},{"gameId":"geography","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794564107608}}
+[+48.8s] PASS K host lobby shows the cohost's lineup
+[+49.4s] PASS K the host's open 'Clear?' notices the lineup changed and asks again
+[+49.4s] PASS K nothing was cleared (revision 5, the cohost's edit) — {"revision":5,"lineup":{"expectedPlayers":2,"budgetMinutes":60,"estimateMinutes":46,"transitionMinutes":2,"items":[{"gameId":"guess-the-year","started":false,"status":"pending"},{"gameId":"closest-wins","started":false,"status":"pending"},{"gameId":"word-connections","started":false,"status":"pending"},{"gameId":"pattern-pulse","started":false,"status":"pending"},{"gameId":"geography","started":false,"status":"pending"}],"next":0,"complete":false,"updatedAt":1794564108258}}
+[+49.4s] PASS K a clear for an older revision is refused (409), and the lineup stays — {"error":"The lineup changed somewhere else (another tab, or a cohost). Here is the latest.","code":"PLAN_CONFLICT","par
+[+50.7s] PASS A a Family Cup lobby has no Quick Party
+[+50.8s] QUICK PARTY ALL PASSED
+[+50.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":5}
+
+# PASS (exit 0) in 50.8s | cpu 6.4s, peak memory 270 MB

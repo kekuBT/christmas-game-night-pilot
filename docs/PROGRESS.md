@@ -2368,8 +2368,31 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** Stage 11.1 (below).
 
 
-## Stage 11.1: the Warm Ivory Christmas look (in progress)
+## Stage 11.1: the Warm Ivory Christmas look (built and gated; awaiting review)
 - **Brief:** ChatGPT's handoff 6847066185 on PR #22, carrying out the owner's choice of Option A, Warm Ivory (6845465785; D-OWN-1113).
 - **Base:** `d4dc408` (PR #22's head). Branch `claude/stage11-1-warm-ivory`, a stacked PR on #22.
 - **Scope:** the Christmas look becomes warm ivory, cream cards, dark warm text, cranberry, gold and sage. Everyday is unchanged. No server, score, approval or protocol change, no new dependency.
 - **Spec:** `docs/stage11/stage111.md`: the inventory of dark-look assumptions, the palette roles and contrast, the consumers, validation, the estimate (about 2.5–3 h of implementation plus about 45 min of gates), and the private preview recipe. Decisions D-OWN-1113 and D-S111-01..05.
+- **Built:**
+  - `tokens.ts`: Warm Ivory, `tone`, `onBright`, generated `tokens.css`;
+  - `stage111.css`: light-ground rules scoped by tone;
+  - the Christmas PDF;
+  - `tests/stage111-warm-ivory.test.ts` (12);
+  - `scripts/check-warm-ivory.mjs` (199 checks), with the Everyday computed-style baseline from `d4dc408`.
+  - Everyday is unchanged (W8: 22 screens).
+- **Driver fixes found by the gates:**
+  - `check-themes-seasonal`: Warm Ivory's toolbar colour.
+  - The script inventory: `gen-tokens-css.mjs`.
+  - `check-leaderboard`: Cal answers right.
+  - `check-tv-lifecycle`: wait for the TV to leave the briefing.
+  - All reproduced; see `docs/evidence/stage111-local/README.md`.
+- **Gates:**
+  - targeted on `b7ef25a` FAILED;
+  - fast on `d0d9600` FAILED;
+  - fast on `7ce8d2d` PASSED;
+  - full on `7ce8d2d` FAILED (88/90);
+  - fast on `f944b3f` `20261113-093113-f944b3fa-5062` PASSED;
+  - full on `f944b3f` `20261113-093231-f944b3fa-8535` **PASSED** (exit 0, 90/90, 34 min 32 s).
+- **Evidence:** `docs/evidence/gate-runs/` (all six runs), `docs/evidence/stage111-local/`, screenshots in `docs/stage11/stage111-screenshots/`.
+- **Not run:** real iPhone Safari, Android Chrome and real TV panels.
+- **Next:** ChatGPT's review and private audit of PR #23. Nothing merged or deployed.
