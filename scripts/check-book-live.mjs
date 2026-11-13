@@ -45,8 +45,8 @@ async function api(path, { token, body } = {}) {
   if (!r.ok) throw new Error(`${path}: ${r.status} ${JSON.stringify(j)}`);
   return j;
 }
-async function makeRoom(names, name = "Live book") {
-  const room = await api("/rooms", { body: { name } });
+async function makeRoom(names, name = "Live book", kind = undefined) {
+  const room = await api("/rooms", { body: { name, ...(kind ? { kind } : {}) } });
   const host = await api(`/rooms/${room.roomId}/join`, { body: { displayName: names[0], asHost: true, hostClaimToken: room.hostClaimToken } });
   const seats = [{ name: names[0], playerId: host.playerId, token: host.recoveryToken }];
   for (const n of names.slice(1)) {
@@ -66,7 +66,8 @@ const solve = (prompt) => {
 };
 /** A practice Math game everyone plays through, so the room has a finished game to cite. */
 async function playMath(room) {
-  const { gameId: gid } = await api(`/rooms/${room.roomId}/games`, { token: room.seats[0].token, body: { gameId: "math-mayhem", official: false } });
+  const seen = await api(`/rooms/${room.roomId}/projection?audience=player`, { token: room.seats[0].token });
+  const { gameId: gid } = await api(`/rooms/${room.roomId}/games`, { token: room.seats[0].token, body: { gameId: "math-mayhem", official: false, roster: seen.readiness?.wouldPlay } });
   for (const s of room.seats) await intent(room, s, gid, "briefing-ready", { ready: true });
   for (const s of room.seats) {
     const g = (await api(`/rooms/${room.roomId}/projection?audience=player`, { token: s.token })).myGames.find((x) => x.id === gid);
@@ -128,7 +129,8 @@ const drawn = (p) => p.evaluate(() => window.__drawn.splice(0).join(" | "));
 
 const browser = await launchChromium();
 try {
-  const room = await makeRoom(["Keku", "Amina", "Baraka"]);
+  // A casual room: the host role can be handed over there (B8b).
+  const room = await makeRoom(["Keku", "Amina", "Baraka"], "Live book", "casual");
   const [keku, amina, baraka] = room.seats;
   const fin = await playMath(room);
   await api(`/rooms/${room.roomId}/cohost`, { token: keku.token, body: { targetId: baraka.playerId } });
@@ -280,6 +282,22 @@ try {
   t0 = Date.now();
   await card(K, "Third note after the approval").getByRole("button", { name: "Approve", exact: true }).click();
   check("B8 trying again approves it; Amina's book follows within 3 s", (await untilFrom(t0, TARGET, async () => (await stateOf(A, "Third note after the approval")) === "approved")) >= 0 && (await K.getByTestId("memory-entry-error").count()) === 0);
+
+  // ---------- B8b. Losing the role: Keku hands the host role to Amina; his Approve and Revoke go away. ----------
+  const n4 = await add(baraka, "Waiting after the handover");
+  await untilFrom(Date.now(), TARGET, async () => (await stateOf(K, "Waiting after the handover")) === "pending");
+  check("B8b before: Keku, the host, has Approve on the pending note", (await card(K, "Waiting after the handover").getByRole("button", { name: "Approve", exact: true }).count()) === 1);
+  const seenByKeku = await api(`/rooms/${room.roomId}/projection?audience=player`, { token: keku.token });
+  t0 = Date.now();
+  await api(`/rooms/${room.roomId}/host`, { token: keku.token, body: { targetId: amina.playerId, attempt: { id: `book-live-handover-${Date.now()}`, sessionRevision: seenByKeku.session?.revision ?? 0 } } });
+  const goneMs = await untilFrom(t0, TARGET, async () => (await K.getByRole("button", { name: /^(Approve|Revoke)$/ }).count()) === 0);
+  check("B8b Keku hands the host role to Amina: his Approve and Revoke are gone within 3 s", goneMs >= 0, `${goneMs} ms`);
+  check("B8b … and he sees who decides instead", /Waiting for the host to approve it/.test(await card(K, "Waiting after the handover").innerText()));
+  const aGets = await untilFrom(t0, TARGET, async () => (await card(A, "Waiting after the handover").getByRole("button", { name: "Approve", exact: true }).count()) === 1);
+  check("B8b … while Amina, now the host, has them", aGets >= 0, `${aGets} ms`);
+  let refused = "";
+  try { await decide(keku, n4.id, "approve"); refused = "accepted"; } catch (e) { refused = /: 403 /.test(String(e.message)) ? "403" : String(e.message).slice(0, 80); }
+  check("B8b the server refuses an approval from Keku now", refused === "403", refused);
 
   // ---------- B9. Offline and back: the page reconciles. ----------
   await A.context().setOffline(true);
