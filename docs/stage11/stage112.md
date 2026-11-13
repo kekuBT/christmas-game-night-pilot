@@ -83,12 +83,19 @@ source?: {
 - **Markdown (server):**
   - The heading is "## Day N" for Cup entries and "## {game title}" for casual ones.
   - Facts are readable lines. The "From the ledger:" and "From the game:" labels stay.
-  - **Escaping:** the note, names, titles and the room name are escaped. Newlines are collapsed to spaces, and Markdown and HTML punctuation (``\ ` * _ [ ] < > # | ~ &``) gets a backslash. So nothing typed can make a heading, a link, an image or HTML, or break the layout.
+  - **Escaping:** the note, names, titles and the room name are escaped. Newlines are collapsed to spaces, and exactly ``\ ` * _ [ ] < > # | ~ &`` get a backslash. So nothing typed can make a heading, a Markdown link, an image or HTML, or break the layout.
+    - `(`, `)` and `!` stay as typed, since they're inert once `[` and `]` are escaped.
+    - **Limitation:** a renderer with GitHub's autolink extension may still link a bare web address typed in a note. The link text is the address itself, so nothing is hidden.
   - `Sources:` (event ids, not people) stays.
 - **PDF (web):**
   - The note is followed by "(Day N)" for Cup entries and "({game title})" for casual ones.
   - Facts are readable lines with "From the ledger:" or "From the game:".
-  - jsPDF prints text as text, so there's no injection. Long and Unicode names wrap with the existing line splitter and pagination.
+  - jsPDF prints text as text, so there's no injection. Long names wrap with the existing line splitter and pagination.
+  - **Characters the font can't print (D-S112-04, added during this stage):**
+    - The built-in font covers Windows-1252 only, and any other character used to garble its line.
+    - Every line now goes through `pdfText`: characters outside Windows-1252 print as "?".
+    - Names that print alike are told apart ("??", "?? (2)").
+    - If anything was replaced, one closing line says so and points to the Markdown export, which keeps everything.
 - **Unchanged:**
   - every export takes a fresh approval snapshot, and unapproved or revoked entries are excluded;
   - a failed check downloads nothing;
@@ -98,9 +105,13 @@ source?: {
 
 ### 3.4 Older rooms and evidence
 - **No migration and no rewrite.** Older entries keep their stored fields and gain nothing. They're shown by the older-entry rule: the room's kind and the same-room name lookup.
-- **Older books still load.** An older Cup room's entries still show their stored `day`.
-  - Their stored day may be the day they were added rather than the game's day, as today. The fix applies to new entries; the older stored values aren't changed.
-  - Where the cited game is still in the room, the screen's results line already shows the game's own day.
+- **Older Cup entries: the day comes from the room's citation (changed by ChatGPT's spec feedback 6851031292; D-S112-05).**
+  - The first version of this spec kept an older entry's stored day. That can be the day it was added (a Day 2 note about a Day 1 game).
+  - Now, at read/export time, an older entry's day comes from the same room's citation: each cited finish, its game, and that game's recorded day.
+  - If that can't be verified (a cited finish or game the room doesn't have), there's no day label, never the stored day.
+  - The same path names an older casual entry's game.
+  - It's one rule for the screen, the PDF and the Markdown. The stored entry is unchanged.
+- **Older books still load,** and presentation data can't change stored facts. A restored entry's facts, their order and their points are always its stored `derivedFacts`. A recorded name is used only when its player id and points match that fact.
 
 ## 4. Acceptance
 1. **Two casual games:** two finished casual games give correctly linked entries. There's no "Day 1" in the book, its link preview, badges, results lines, new PDF or new Markdown. Each entry is identified by its game's title.
@@ -123,9 +134,17 @@ source?: {
   - Markdown for a casual room and a Cup room;
   - unapproved and revoked entries excluded;
   - injection attempts in notes and names.
+  - **Added during the work:**
+    - the PDF's printable text, run through real jsPDF (D-S112-04);
+    - the older-entry day rule (D-S112-05);
+    - over HTTP, books rewritten on disk while the server is down and then restored: a Day 2 note about a Day 1 finish, a citation the room lacks, and forged presentation data.
 - **Browser:**
-  - `check-book-live` (a casual room) gains checks: no "Day 1" anywhere in the book; the PDF and Markdown use names, not ids, and have no "Day".
-  - `check-cup-memory` (a Cup room) gains a later-day entry showing its game's own day.
+  - `check-book-live` (a casual room) gains checks:
+    - R1–R3: no "Day 1" anywhere in the book; the PDF and Markdown use names, not ids, and have no "Day";
+    - R4: players named 李雷, 王芳 and Łukasz; the downloaded PDF has no unreadable line, and the Markdown keeps every name.
+  - `check-cup-memory` (a Cup room) gains:
+    - a later-day entry showing its game's own day;
+    - a restored older Day 2 note about a Day 1 finish, checked on screen, in the downloaded PDF and in the Markdown.
   - Both download a PDF and a Markdown file as examples.
   - Kept: `check-warm-ivory`, `check-themes-seasonal`, `check-spectrum`, `check-jebena-rush`, `check-f4`, `check-f5`, `e2e`.
 - **Gates:** focused tests and targeted drivers during work; fast once and **one** full checkpoint gate on the clean final SHA.
@@ -148,3 +167,71 @@ These are separate, because gates take wall time while the code doesn't change.
 Stage 11.1's §9 holds.
 
 **Addition from ChatGPT's 11.1 audit:** after the preview server restarts, the browser's GitHub forwarded-port session can be stale, and a change then gets 401. A normal top-level reload of the page refreshes it: it goes through `pf-signin` and back to the app automatically. That's preview access, not an app defect, and needs no credentials.
+
+## 8. Results
+**The tested candidate is `adf6e8d`.** Later commits are docs and evidence only.
+
+**Also covered:** ChatGPT's spec feedback 6851031292 on this PR (6:06 a.m. ET). I didn't read it until about 6:50 a.m. ET, after gates on `9d19970` had begun; see below.
+
+### 8.1 What was built
+- **D-S112-01 to 03 (the spec as written):**
+  - one presentation rule;
+  - new entries record their source (mode, the games' days and titles, players' names);
+  - a casual book has no "Day";
+  - a Cup note is filed under its game's day;
+  - exports print names, never ids;
+  - Markdown is escaped.
+- **Found and fixed by the gates and my own checks:**
+  - **The escaper also escaped `( ) !`** (targeted gate 1, check-spectrum M3), so a Spectrum team line "(fewer than two players were left)" exported with backslashes. It now escapes exactly the spec's characters (`6cae259`).
+  - **The badge's new `data-testid` renamed an element's key in the Everyday computed-style baseline** (targeted gate 1, check-warm-ivory W8). The colours themselves were identical. The test id was dropped and the baseline left as recorded (`6022bfa`).
+  - **check-warm-ivory W6 raced:** it used `isVisible({ timeout })`, which never waits. Reproduced deterministically with a 250 ms answer delay, and fixed (`015464c`).
+  - **D-S112-04: the PDF's built-in font prints Windows-1252 only,** and any other character garbled its whole line. A name like 李雷 or Łukasz would have printed wrongly in fact lines. Every PDF line now prints only characters the font has, with "?" otherwise. Names stay distinct, one closing line says so, and the Markdown keeps everything (`9d19970`).
+- **D-S112-05 (spec feedback 6851031292):** an older Cup entry's day comes from the room's citation at read/export time. If that day can't be verified, there's no day label. The stored entry is unchanged (`4c05450`, `adf6e8d`).
+
+### 8.2 Acceptance
+1. **Two casual games, no "Day 1":** check-book-live R1–R3, the HTTP test, and the before/after captures. Before, "Day N" appeared 7 times on screen; after, 0, in both looks at 320 and 390 px. The PDF and Markdown have no "Day" and no ids.
+2. **Cup days are right, also later:**
+   - a new note added on Day 2 about a Day 1 game is filed under Day 1 (check-cup-memory, HTTP test);
+   - a restored older one reads Day 1 on screen, in the PDF and in the Markdown, with its stored day 2 untouched (check-cup-memory, HTTP test).
+3. **Readable, unchanged facts:**
+   - names, with exactly the stored points;
+   - "A player" for an id that isn't a player;
+   - duplicates as "Ada (2)" in id order;
+   - names in other scripts: the PDF prints "?" without garbling, and the Markdown keeps them in full;
+   - older entries: same-room names;
+   - unapproved and revoked entries excluded;
+   - injection escaped;
+   - forged presentation data on disk can't change a fact or a point.
+4. **Usable:** both looks at 320 and 390 px with no sideways scrolling (captures). A look switch keeps the draft (check-warm-ivory W6). The mode comes from the server, never the look.
+5. **Nothing else moves:** older books load unchanged; `derivedFacts`, scores and Cup rules are untouched; the full gate (below).
+
+### 8.3 Gate runs (each verdict is one run on one revision)
+| Revision | Gate | Run | Verdict |
+|---|---|---|---|
+| `9e85bd5` | targeted (10 drivers) | `20261113-111520-9e85bd5f-5011` | **FAILED**: check-spectrum M3 (escaper) and check-warm-ivory W8 (baseline key) |
+| `015464c` | targeted (10 drivers) | `20261113-113634-015464ce-14630` | PASSED |
+| `9d19970` | targeted (6 drivers) | `20261113-114449-9d19970e-20895` | PASSED |
+| `9d19970` | fast | `20261113-114718-9d19970e-23097` | PASSED |
+| `9d19970` | full | `20261113-114827-9d19970e-26589` | **CANCELLED** by me after 3 steps (superseded by D-S112-05) |
+| `adf6e8d` | targeted (6 drivers) | `20261113-115657-adf6e8db-31605` | PASSED |
+| `adf6e8d` | fast | `20261113-115927-adf6e8db-1236` | PASSED |
+| **`adf6e8d`** | **full (checkpoint)** | `20261113-120037-adf6e8db-4741` | **PASSED** (90/90, exit 0, 34 min 20 s) |
+
+Raw logs are in `docs/evidence/gate-runs/<run>/`, and local runs in `docs/evidence/stage112-local/`.
+
+### 8.4 Estimate vs actual
+- **The estimate:** about 2–2.5 h of implementation plus about 45 min of gates.
+- **The actual:**
+  - the handoff came at 5:59 a.m. ET;
+  - spec and acknowledgement at 6:03;
+  - the first implementation commit at 6:13;
+  - then the gate-found fixes, the PDF fix and the D-S112-05 change, with the last code commit (`adf6e8d`) at 6:56, about an hour after the handoff;
+  - gates: about 8 + 8 + 2.5 + 1 + 3 (cancelled) + 2.5 + 1 min, plus the full run (34 min 20 s).
+- **Why it differs:** implementation took about an hour, against 2–2.5 h estimated, even with three gate-found problems and one review round. Gates took more than the 45 min estimated: one failed targeted run, one cancelled full run, and a second targeted, fast and full on the final candidate.
+
+### 8.5 Limitations
+- **The PDF can't show letters outside Windows-1252.** They print as "?", and the PDF says so. Embedding a Unicode font is a separate decision (size and assets).
+- **Bare web addresses:** a renderer with GitHub's autolink extension may link one typed in a note. The link text is the address itself, so nothing is hidden.
+- **Fact lines per event:** the PDF and Markdown list one fact line per score event (30 for a 3-player, 10-question game), as before. Totals are on the screen only.
+- **Not run on real devices:** no real iPhone Safari, Android Chrome or TV. Desktop Chromium only.
+- **A file already downloaded** keeps the honest limitation in D-S105-05.

@@ -1,0 +1,47 @@
+$ node scripts/check-cup-memory.mjs http://localhost:43231
+# timeout 600s | worker w1 | server http://localhost:43231 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-tgt3/test-results/20261113-114449-9d19970e-20895/server-data/w1)
+
+[+2.0s] PASS empty Cup: Day 1 of 7 first
+[+2.0s] PASS empty Cup: an honest empty state
+[+2.0s] PASS empty Cup: no numbers before an official game
+[+2.0s] PASS empty Cup: the rules are folded away
+[+2.0s] PASS empty Cup: a guest sees no host tools
+[+2.0s] PASS S3-CUP-01: the order is day, standings, what's next, then rules — [88,241,403,463]
+[+2.0s] PASS empty Cup: the content keeps the screen's side margin — 19px
+[+2.0s] PASS S3-CUP-01 at 390×844: the standings start on the first screen — 233px
+[+2.5s] PASS empty Cup: the host's tools are there, separate
+[+3.0s] PASS Memory Book empty: says how to start
+[+3.0s] PASS Memory Book empty: downloads are off, and it says why
+[+3.5s] PASS Cup with results at 375×667: no sideways scrolling
+[+4.6s] PASS Cup: the standings are the server's, in the server's order — player-1,player-2,player-3
+[+4.6s] PASS Cup: every total is the server's total — [100,50,0]
+[+4.6s] PASS Cup: the games played are listed by title
+[+4.6s] PASS Cup: the day winner is named
+[+4.6s] PASS Cup: a long name doesn't break the row
+[+5.0s] PASS Cup: 'How it adds up' shows the server's parts — Best three days 100 = 100, participation +0, finale +0 = 100. Day scores so far: 100. Day wins: 1.
+[+5.0s] PASS Cup: the rules open on demand
+[+5.1s] PASS Cup with results at 390×844: no sideways scrolling
+[+6.2s] PASS Cup with results at 430×932: no sideways scrolling
+[+7.2s] PASS Cup with results at 768×1024: no sideways scrolling
+[+8.3s] PASS Cup with results at 1440×900: no sideways scrolling
+[+9.9s] PASS a guest can add a highlight; it waits for the host
+[+9.9s] PASS a guest sees no approve or revoke buttons
+[+9.9s] PASS the entry shows the game's recorded scores by name — Keku went ten for ten in Math Mayhem |  | Day 1 · pending |  | Math Mayhem · Day 1: Keku 1,200 · Amina 720 · Bartholomew Otieno-Wanjiku 360 |  | From the ledger (30 score events) |  | Waiting for the host to approve it.
+[+9.9s] PASS the ledger facts are folded and use names, not ids
+[+10.7s] PASS the host approves; downloads open
+[+10.7s] PASS the Memory Book's title follows the look (everyday) — Mchezo Memory Book
+[+10.7s] PASS PDF: the file is named for the room and the date — mchezo-memory-book-F7J7RB-2026-11-13.pdf
+[+10.8s] PASS PDF: says the download started (not that it was saved), with the name — Download started: mchezo-memory-book-F7J7RB-2026-11-13.pdf. If you don’t see it, check your browser’s downloads.
+[+10.8s] PASS share image: a real download, named for the room and date — mchezo-memory-book-F7J7RB-2026-11-13.png
+[+11.4s] PASS a failed export says it couldn't be prepared, and no download happens
+[+11.5s] PASS Export approved shows the entry
+[+11.5s] PASS Memory Book at 390: no sideways scrolling
+[+11.9s] PASS Memory Book at 1440: no sideways scrolling
+[+12.0s] PASS the host ends Day 1 (the room is on Day 2) — {"ok":true,"day":2}
+[+12.0s] PASS a note added on Day 2 about a Day 1 game is filed under Day 1 (the game's own day) — {"day":1,"source":[1]}
+[+12.3s] PASS …and its badge says Day 1, not the room's Day 2 — Day 1 · approved
+[+12.3s] PASS the Cup Markdown keeps its days and prints names, never ids — # Mchezo Memory Book — Cup check ⏎  ⏎ ## Day 1 ⏎ Note: Keku went ten for ten in Math Mayhem ⏎ From the ledger: ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - K
+[+12.4s] ALL CUP/MEMORY CHECKS PASSED
+[+12.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":12,"pages":12,"peakOpenPages":1}
+
+# PASS (exit 0) in 12.4s | cpu 5.1s, peak memory 358 MB

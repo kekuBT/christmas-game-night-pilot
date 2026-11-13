@@ -1,0 +1,17 @@
+$ node scripts/check-tv-dashboard.mjs http://localhost:39903
+# timeout 600s | worker w2 | server http://localhost:39903 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-full2/test-results/20261113-120037-adf6e8db-4741/server-data/w2)
+
+[+2.3s] PASS Math TV live: the game, its mode and who's in it — NOW PLAYING | Math Mayhem |  | Practice — players: Ada, Bea |  | Questions appear one at a time on each phone, and each is timed from when the game sends it. Scores appear here when the game ends. |  | Time left in this game: 4:00 |  | 0 of 2 have started · answer on your phones
+[+2.3s] PASS Math TV live: how many have started, and how it's timed — NOW PLAYING | Math Mayhem |  | Practice — players: Ada, Bea |  | Questions appear one at a time on each phone, and each is timed from when the game sends it. Scores appear here when the game ends. |  | Time left in this game: 4:00 |  | 0 of 2 have started · answer on your phones
+[+2.7s] PASS Math TV live: counts update (2 of 2 have started) — NOW PLAYING | Math Mayhem |  | Practice — players: Ada, Bea |  | Questions appear one at a time on each phone, and each is timed from when the game sends it. Scores appear here when the game ends. |  | Time left in this game: 4:00 |  | 2 of 2 have started · answer on your phones
+[+2.7s] PASS Math TV live: no scores while it plays
+[+2.9s] PASS Math TV after the finish: ranked standings for both players — ["1\nA\nAda\n1,200","2\nB\nBea\n360"]
+[+4.3s] PASS S3-WCN-02: one left reads '1 mistake left' — 1 mistake left
+[+4.4s] PASS Word Connections: recorded scores are the audit's 420 and 400 — {"player-1":420,"player-2":400}
+[+4.9s] PASS S3-WCN-01: Ada's results explain the score and add up (420) — How the score works: 100 points for each group you find. Find all four with no mistakes: +50 bonus. With one mistake: +20. |  | You: 4 groups × 100 = 400, +20 for one mistake = 420.
+[+5.5s] PASS S3-WCN-01: Bea's results explain the score and add up (400) — How the score works: 100 points for each group you find. Find all four with no mistakes: +50 bonus. With one mistake: +20. |  | You: 4 groups × 100 = 400, no bonus (3 mistakes) = 400.
+[+5.6s] PASS S3-TV-02: the TV ends on the standings (420 above 400) as well as the solution — ["1\nA\nAda\nAway\n420","2\nB\nBea\nAway\n400"]
+[+5.8s] ALL TV DASHBOARD CHECKS PASSED
+[+5.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":2}
+
+# PASS (exit 0) in 5.8s | cpu 3.4s, peak memory 365 MB

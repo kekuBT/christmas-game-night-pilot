@@ -1460,5 +1460,33 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - client-supplied names: clients don't get to state facts;
     - parsing note text: never.
 - **D-S112-03 Exported text is escaped, and `source` is optional and dropped if invalid.**
-  - **Escaping:** Markdown escapes the note, names, titles and room name (newlines collapsed, Markdown and HTML punctuation backslashed).
+  - **Escaping:** Markdown escapes the note, names, titles and room name. Newlines are collapsed, and exactly ``\ ` * _ [ ] < > # | ~ &`` get a backslash.
+    - `(`, `)` and `!` are not escaped: once `[` and `]` are, they can't start a link or an image.
+    - The first version escaped them too. The targeted gate on `9e85bd5` caught it, because a Spectrum team line "(fewer than two players were left)" exported with backslashes. Fixed in `6cae259` with a test.
   - **Invalid `source`:** an invalid `source` on restore is dropped rather than refusing the book, because it only changes presentation. The older-entry rule then applies. A team record keeps its stricter rule.
+- **D-S112-04 The PDF prints only what its font can print; anything else becomes "?", and the PDF says so.**
+  - **The problem:** the PDF's built-in font (jsPDF Helvetica) covers Windows-1252. jsPDF writes a line containing any other character (Ł, Ş, Greek, Cyrillic, CJK, emoji) as two-byte text the font can't read.
+    - Poppler shows the ASCII parts and prints the name wrongly: 李雷 as "gN–÷", Łukasz as "Aukasz". Other viewers may garble more of the line.
+    - Notes always had this. This stage put names into the PDF, so it would have reached fact lines.
+  - **How:**
+    - every PDF line goes through `pdfText`: NFC first, then each character outside Windows-1252 becomes "?" (an emoji counts once);
+    - the duplicate-name rule runs on the printed names, so 李雷 and 王芳 print as "??" and "?? (2)", never as one player;
+    - when anything was replaced, one closing line says so and points to the Markdown export, which keeps every character;
+    - the screen and the Markdown are unchanged.
+  - **Alternatives rejected:**
+    - embedding a Unicode font: CJK coverage alone is several MB, an asset and dependency decision beyond this slice;
+    - transliterating (Ş to S): it silently changes a person's name;
+    - "A player" for such names: untrue, since the player is known;
+    - a "Player 3" label: it's derived from the internal id and invents numbering.
+- **D-S112-05 An older Cup entry's day comes from the same room's citation at read/export time, never from its stored day (ChatGPT's spec feedback 6851031292).**
+  - **The problem:** before this stage an entry stored the day it was added, so a Day 2 note about a Day 1 game was stored as day 2.
+  - **How:**
+    - with no recorded days, the label follows each cited finish to its game and uses that game's recorded day (the room's own rule, `g.day ?? 1`);
+    - if any cited finish or game can't be found in the room, there's no day label at all; the label falls back to the citation's title, then "A game";
+    - the same path names an older casual entry's game;
+    - one rule serves the screen, the PDF and the Markdown;
+    - the stored entry is never changed (no migration);
+    - the web's results line and link preview also use only the game's recorded day.
+  - **Alternatives rejected:**
+    - the stored day as a fallback: the feedback rules it out, and it's the wrong value in exactly the case at issue;
+    - rewriting stored days on restore: a migration, and it would change existing evidence.

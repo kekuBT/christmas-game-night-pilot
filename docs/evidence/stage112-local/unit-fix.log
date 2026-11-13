@@ -1,0 +1,7 @@
+tsc=0
+lint=0
+ Test Files  135 passed (135)
+      Tests  1735 passed (1735)
+   Start at  11:20:01
+   Duration  52.47s (transform 4.42s, setup 0ms, collect 24.69s, tests 96.31s, environment 60ms, prepare 10.53s)
+

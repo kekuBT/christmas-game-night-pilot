@@ -1,0 +1,1334 @@
+{
+  "runId": "20261113-114827-9d19970e-26589",
+  "level": "full",
+  "startedAt": "2026-11-13T11:48:27.743Z",
+  "finishedAt": "2026-11-13T11:48:45.877Z",
+  "exitCode": 130,
+  "verdict": "CANCELLED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-full",
+  "git": {
+    "head": "9d19970e6eaaeaf21cf99cb032a360f1ff8de21e",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "94ee8771bf165175116009dbed631fd90444fccec83e84fbee779fb58091972b",
+    "files": 528
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15364
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.0 GB available",
+  "browser": null,
+  "steps": [
+    {
+      "name": "typecheck-server",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 12.7,
+      "log": "./logs/01-typecheck-server.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 12,
+      "startOffsetSec": 0.3,
+      "endOffsetSec": 13,
+      "cpuSec": 15.3,
+      "peakRssMB": 520,
+      "machine": {
+        "memAvailMinMB": 13905,
+        "cpuSaturatedSec": 0,
+        "samples": 14
+      },
+      "failureKind": null
+    },
+    {
+      "name": "typecheck-web",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 12.1,
+      "log": "./logs/02-typecheck-web.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 12,
+      "startOffsetSec": 0.3,
+      "endOffsetSec": 12.4,
+      "cpuSec": 14.6,
+      "peakRssMB": 413,
+      "machine": {
+        "memAvailMinMB": 13905,
+        "cpuSaturatedSec": 0,
+        "samples": 13
+      },
+      "failureKind": null
+    },
+    {
+      "name": "lint",
+      "kind": "check",
+      "command": "node ./node_modules/eslint/bin/eslint.js .",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 16.8,
+      "log": "./logs/03-lint.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 18,
+      "startOffsetSec": 0.3,
+      "endOffsetSec": 17.1,
+      "cpuSec": 21.7,
+      "peakRssMB": 669,
+      "machine": {
+        "memAvailMinMB": 13905,
+        "cpuSaturatedSec": 0,
+        "samples": 19
+      },
+      "failureKind": null
+    },
+    {
+      "name": "unit-tests",
+      "kind": "check",
+      "command": "node ./node_modules/vitest/vitest.mjs run",
+      "status": "CANCELLED",
+      "exitCode": null,
+      "durationSec": 0.9,
+      "log": "./logs/04-unit-tests.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 44,
+      "startOffsetSec": 17.1,
+      "endOffsetSec": 18,
+      "cpuSec": 0.3,
+      "peakRssMB": 86,
+      "machine": {
+        "memAvailMinMB": 15273,
+        "cpuSaturatedSec": 0,
+        "samples": 2
+      },
+      "failureKind": "cancelled"
+    }
+  ],
+  "notRun": [
+    {
+      "name": "build-web",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "browser-preflight",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "e2e-chromium",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-f5",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-leaderboard",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-game-night",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-audit-fixes",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-session-flow",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-mobile-everyday",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-solo-shelf",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-pulse-timing",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-lifecycle",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-solo",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-jebena-rush",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-lifecycle",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-install",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-spectrum",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-mchezo",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-caption",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-themes-seasonal",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-briefing",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-reveal",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-content-variety",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-draw-guess",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-warm-ivory",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-book-live",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-stage2",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-pattern-pulse",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-host-handover",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-majority-rules",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-spectator",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-math",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-connections",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-casual",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-draw-sync",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-math-network",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-f4",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-results",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-input-isolation",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-reveal",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-quick-party",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-multiplayer",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-spectator",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-outage",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-caption-4p",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-install-builds",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-geography",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-answer-reveal",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-ten-players",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-action-ack",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-math-timing",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-library-nav",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-contrast",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-mobile",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-m6",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-poll-body-stall",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-entry",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-send-failures",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-answer-race",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-lobby-mode",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-abstain",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-year",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-readiness",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-stage4-details",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-lobby-fixes",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-viewports",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-cup-memory",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-show",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-recovery",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-official-practice",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-game-night-flow",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-progress",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-answer-helper",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-sessions",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-closest",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-library",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-dashboard",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-ws-reconnect",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-history-links",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-reduced-motion",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-shuffle",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-errors",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-studio",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-double-start",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-a11y-surfaces",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-restart",
+      "reason": "run cancelled"
+    }
+  ],
+  "notes": [],
+  "servers": [],
+  "timing": {
+    "wallSec": 18,
+    "sumSec": 42,
+    "utilisation": 0.78,
+    "perWorkerBusySec": {
+      "w1": 14,
+      "w2": 12,
+      "w3": 17
+    },
+    "predicted": null,
+    "contentionRatio": null,
+    "longest": [
+      {
+        "name": "lint",
+        "sec": 16.8
+      },
+      {
+        "name": "typecheck-server",
+        "sec": 12.7
+      },
+      {
+        "name": "typecheck-web",
+        "sec": 12.1
+      },
+      {
+        "name": "unit-tests",
+        "sec": 0.9
+      }
+    ],
+    "backpressure": {
+      "waits": 2,
+      "seconds": 5
+    },
+    "system": {
+      "cpuPctMean": 77,
+      "cpuPctPeak": 97,
+      "memAvailMinMB": 13905,
+      "load1Peak": 4.11,
+      "cpuPctEvery10s": [
+        94,
+        32
+      ]
+    },
+    "serverUse": [],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "typecheck-server",
+        "phase": "fast",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "typecheck-web",
+        "phase": "fast",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "lint",
+        "phase": "fast",
+        "estSec": 18,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 4,
+        "name": "unit-tests",
+        "phase": "fast",
+        "estSec": 44,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 5,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 6,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 6,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 7,
+        "name": "e2e-chromium",
+        "phase": "browser",
+        "estSec": 486,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 8,
+        "name": "check-f5",
+        "phase": "browser",
+        "estSec": 440,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 9,
+        "name": "check-leaderboard",
+        "phase": "browser",
+        "estSec": 385,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 10,
+        "name": "check-game-night",
+        "phase": "browser",
+        "estSec": 310,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 11,
+        "name": "check-audit-fixes",
+        "phase": "browser",
+        "estSec": 212,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 12,
+        "name": "check-session-flow",
+        "phase": "browser",
+        "estSec": 177,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 13,
+        "name": "check-mobile-everyday",
+        "phase": "browser",
+        "estSec": 176,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 14,
+        "name": "check-solo-shelf",
+        "phase": "browser",
+        "estSec": 166,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 15,
+        "name": "check-pulse-timing",
+        "phase": "browser",
+        "estSec": 154,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 16,
+        "name": "check-tv-lifecycle",
+        "phase": "browser",
+        "estSec": 146,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 17,
+        "name": "check-solo",
+        "phase": "browser",
+        "estSec": 146,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 18,
+        "name": "check-jebena-rush",
+        "phase": "browser",
+        "estSec": 128,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 19,
+        "name": "check-lifecycle",
+        "phase": "browser",
+        "estSec": 123,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 20,
+        "name": "check-install",
+        "phase": "browser",
+        "estSec": 121,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 21,
+        "name": "check-spectrum",
+        "phase": "browser",
+        "estSec": 114,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 22,
+        "name": "check-mchezo",
+        "phase": "browser",
+        "estSec": 107,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 23,
+        "name": "check-caption",
+        "phase": "browser",
+        "estSec": 104,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 24,
+        "name": "check-themes-seasonal",
+        "phase": "browser",
+        "estSec": 101,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 25,
+        "name": "check-briefing",
+        "phase": "browser",
+        "estSec": 90,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 26,
+        "name": "check-tv-reveal",
+        "phase": "browser",
+        "estSec": 87,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 27,
+        "name": "check-content-variety",
+        "phase": "browser",
+        "estSec": 67,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 28,
+        "name": "check-draw-guess",
+        "phase": "browser",
+        "estSec": 66,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 29,
+        "name": "check-warm-ivory",
+        "phase": "browser",
+        "estSec": 66,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 30,
+        "name": "check-book-live",
+        "phase": "browser",
+        "estSec": 64,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 31,
+        "name": "check-stage2",
+        "phase": "browser",
+        "estSec": 59,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 32,
+        "name": "check-pattern-pulse",
+        "phase": "browser",
+        "estSec": 59,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 33,
+        "name": "check-host-handover",
+        "phase": "browser",
+        "estSec": 58,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 34,
+        "name": "check-majority-rules",
+        "phase": "browser",
+        "estSec": 56,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 35,
+        "name": "check-spectator",
+        "phase": "browser",
+        "estSec": 55,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 36,
+        "name": "check-math",
+        "phase": "browser",
+        "estSec": 54,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 37,
+        "name": "check-connections",
+        "phase": "browser",
+        "estSec": 54,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 38,
+        "name": "check-casual",
+        "phase": "browser",
+        "estSec": 53,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 39,
+        "name": "check-draw-sync",
+        "phase": "browser",
+        "estSec": 52,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 40,
+        "name": "check-math-network",
+        "phase": "browser",
+        "estSec": 51,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 41,
+        "name": "check-f4",
+        "phase": "browser",
+        "estSec": 50,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 42,
+        "name": "check-results",
+        "phase": "browser",
+        "estSec": 50,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 43,
+        "name": "check-input-isolation",
+        "phase": "browser",
+        "estSec": 47,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 44,
+        "name": "check-reveal",
+        "phase": "browser",
+        "estSec": 47,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 45,
+        "name": "check-quick-party",
+        "phase": "browser",
+        "estSec": 47,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 46,
+        "name": "check-multiplayer",
+        "phase": "browser",
+        "estSec": 46,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 47,
+        "name": "check-tv-spectator",
+        "phase": "browser",
+        "estSec": 44,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 48,
+        "name": "check-tv-outage",
+        "phase": "browser",
+        "estSec": 40,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 49,
+        "name": "check-caption-4p",
+        "phase": "browser",
+        "estSec": 39,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 50,
+        "name": "check-install-builds",
+        "phase": "browser",
+        "estSec": 36,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 51,
+        "name": "check-geography",
+        "phase": "browser",
+        "estSec": 34,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 52,
+        "name": "check-answer-reveal",
+        "phase": "browser",
+        "estSec": 31,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 53,
+        "name": "check-ten-players",
+        "phase": "browser",
+        "estSec": 29,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 54,
+        "name": "check-action-ack",
+        "phase": "browser",
+        "estSec": 28,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 55,
+        "name": "check-math-timing",
+        "phase": "browser",
+        "estSec": 27,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 56,
+        "name": "check-library-nav",
+        "phase": "browser",
+        "estSec": 26,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 57,
+        "name": "check-contrast",
+        "phase": "browser",
+        "estSec": 25,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 58,
+        "name": "check-mobile",
+        "phase": "browser",
+        "estSec": 24,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 59,
+        "name": "check-m6",
+        "phase": "browser",
+        "estSec": 24,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 60,
+        "name": "check-poll-body-stall",
+        "phase": "browser",
+        "estSec": 22,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 61,
+        "name": "check-tv-entry",
+        "phase": "browser",
+        "estSec": 22,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 62,
+        "name": "check-send-failures",
+        "phase": "browser",
+        "estSec": 21,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 63,
+        "name": "check-answer-race",
+        "phase": "browser",
+        "estSec": 21,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 64,
+        "name": "check-lobby-mode",
+        "phase": "browser",
+        "estSec": 19,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 65,
+        "name": "check-abstain",
+        "phase": "browser",
+        "estSec": 17,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 66,
+        "name": "check-year",
+        "phase": "browser",
+        "estSec": 17,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 67,
+        "name": "check-readiness",
+        "phase": "browser",
+        "estSec": 17,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 68,
+        "name": "check-stage4-details",
+        "phase": "browser",
+        "estSec": 16,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 69,
+        "name": "check-lobby-fixes",
+        "phase": "browser",
+        "estSec": 15,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 70,
+        "name": "check-viewports",
+        "phase": "browser",
+        "estSec": 13,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 71,
+        "name": "check-cup-memory",
+        "phase": "browser",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 72,
+        "name": "check-tv-show",
+        "phase": "browser",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 73,
+        "name": "check-recovery",
+        "phase": "browser",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 74,
+        "name": "check-official-practice",
+        "phase": "browser",
+        "estSec": 10,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 75,
+        "name": "check-game-night-flow",
+        "phase": "browser",
+        "estSec": 10,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 76,
+        "name": "check-progress",
+        "phase": "browser",
+        "estSec": 9,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 77,
+        "name": "check-answer-helper",
+        "phase": "browser",
+        "estSec": 9,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 78,
+        "name": "check-sessions",
+        "phase": "browser",
+        "estSec": 9,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 79,
+        "name": "check-closest",
+        "phase": "browser",
+        "estSec": 7,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 80,
+        "name": "check-library",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 81,
+        "name": "check-tv-dashboard",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 82,
+        "name": "check-ws-reconnect",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 83,
+        "name": "check-history-links",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 84,
+        "name": "check-reduced-motion",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 85,
+        "name": "check-shuffle",
+        "phase": "browser",
+        "estSec": 4,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 86,
+        "name": "check-errors",
+        "phase": "browser",
+        "estSec": 4,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 87,
+        "name": "check-studio",
+        "phase": "browser",
+        "estSec": 4,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 88,
+        "name": "check-double-start",
+        "phase": "browser",
+        "estSec": 4,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 89,
+        "name": "check-a11y-surfaces",
+        "phase": "browser",
+        "estSec": 3,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 90,
+        "name": "check-restart",
+        "phase": "browser",
+        "estSec": 2,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 1529.6599549999999,
+      "mid": 1976.2655,
+      "high": 3517.9282125,
+      "sequentialSec": 5707.199999999998,
+      "confidence": "measured",
+      "contention": 1.0385,
+      "contentionSource": "measured"
+    }
+  }
+}

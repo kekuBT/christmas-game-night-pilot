@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 ~07:40 EST (PR #3 review fixes, local only, no GitHub — see section at end; real-device checklist + family-member acceptance still NOT RUN)
+Updated: 2026-11-13 ~07:05 EST (Stage 11.2 built and gated on adf6e8d — see the Stage 11.2 section at the end; real-device checks still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -2401,7 +2401,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - Nothing merged or deployed.
 - **Next:** Stage 11.2 (below).
 
-## Stage 11.2: readable casual Memory Books (in progress)
+## Stage 11.2: readable casual Memory Books (built and gated; awaiting review)
 - **Brief:** ChatGPT's handoff 6850906565 on PR #23.
 - **Base:** `602b73d` (PR #23's head). Branch `claude/stage11-2-readable-books`, a stacked PR on #23.
 - **Scope:**
@@ -2411,3 +2411,30 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - exported text is escaped;
   - no score, rule, approval or freshness change.
 - **Spec:** `docs/stage11/stage112.md`, with an estimate of about 2–2.5 h of implementation plus about 45 min of gates. Decisions D-S112-01..03.
+- **Also applied:** ChatGPT's spec feedback 6851031292 on PR #24 (6:06 a.m. ET; read at about 6:50): older Cup entries take their day from the room's citation (D-S112-05).
+- **Tested candidate:** `adf6e8d`.
+  - Full checkpoint `20261113-120037-adf6e8db-4741`: **PASSED** (90/90, exit 0, 34 min 20 s).
+  - Fast `20261113-115927-adf6e8db-1236`: PASSED.
+  - Targeted `20261113-115657-adf6e8db-31605`: PASSED.
+- **Earlier runs:**
+  - targeted on `9e85bd5`: FAILED (escaper; badge test id in the W8 key);
+  - targeted on `015464c`: PASSED;
+  - targeted and fast on `9d19970`: PASSED;
+  - full on `9d19970`: CANCELLED (superseded).
+- **Built:**
+  - `src/shared/memoryPresent.ts`: the shared rule, `pdfText`, `mdEscape`;
+  - `src/server/memorybook.ts` and `http.ts`: the recorded `source` and the Markdown;
+  - `MemoryScreen.tsx`: badge, results line, preview, PDF;
+  - `tests/stage112-readable-book.test.ts` (24 tests);
+  - drivers: check-book-live R1–R4, check-cup-memory (a later-day entry and a restored older entry), the check-warm-ivory W6 race fix.
+- **Decisions:** D-S112-01..05.
+- **Evidence:**
+  - `docs/stage11/stage112-screenshots/` (before and after, both looks, 320 and 390 px; PDF renders);
+  - `docs/stage11/stage112-examples/` (real PDF and Markdown);
+  - `docs/evidence/stage112-local/`;
+  - `docs/evidence/gate-runs/` (seven runs, including the failed and cancelled ones).
+- **Limitations:**
+  - the PDF prints "?" for letters outside Windows-1252, and says so;
+  - a bare web address in a note may be autolinked by some Markdown renderers;
+  - desktop Chromium only.
+- **Next:** ChatGPT's candidate review and private audit of `adf6e8d`. Nothing merged or deployed.
