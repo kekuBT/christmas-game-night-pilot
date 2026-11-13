@@ -1,0 +1,45 @@
+Mchezo gate fast | run 20261113-081635-d0d9600b-8918
+  revision d0d9600bdfb52aa37602861aa640d39e3a51647c (clean tree) | fingerprint d21f55c4e4f3 (526 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.2 GB available)
+  history  126 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 104 run(s))
+  estimate this run: 35–83s (measured) · the same steps one after another: about 1m 32s · longest step unit-tests ~44s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-fast/test-results/20261113-081635-d0d9600b-8918
+        start typecheck-server on w1 (usually 12s)
+        start typecheck-web on w2 (usually 12s)
+        start lint on w3 (usually 18s)
+[ 1/5] PASS        12.7s  typecheck-web  w2
+        start unit-tests on w2 (usually 44s)
+[ 2/5] PASS        13.7s  typecheck-server  w1
+        start build-web on w1 (usually 6s)
+[ 3/5] PASS          22s  lint  w3
+[ 4/5] PASS         8.5s  build-web  w1
+── progress  4/5 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   unit-tests 47s (w2)
+   remaining 15–35s · total 1–2m · done around 08:17–08:18 UTC (measured)
+[ 5/5] FAIL        50.1s  unit-tests  w2  [31m[1m[7m FAIL [27m[22m[39m tests/script-inventory.test.ts[2m > [22mscript inventory[2m > [22mevery top-level script is in the gate, a screenshot too
+      | 
+      | [36m [2m❯[22m tests/script-inventory.test.ts:[2m27:26[22m[39m
+      |     [90m 25| [39m  [34mit[39m([32m"every top-level script is in the gate, a screenshot tool, or lis[39m…
+      |     [90m 26| [39m    [35mconst[39m unclassified [33m=[39m scripts[33m.[39m[34mfilter[39m((f) [33m=>[39m [33m![39m[33mIN_GATE[39m(f) [33m&&[39m [33m![39m[34misTool[39m(…
+      |     [90m 27| [39m    [34mexpect[39m(unclassified)[33m.[39m[34mtoEqual[39m([])[33m;[39m
+      |     [90m   | [39m                         [31m^[39m
+      |     [90m 28| [39m  })[33m;[39m
+      |     [90m 29| [39m
+      | 
+      | [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+      | 
+      | [2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m133 passed[39m[22m[90m (134)[39m
+      | [2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m1719 passed[39m[22m[90m (1720)[39m
+      | [2m   Start at [22m 08:16:48
+      | [2m   Duration [22m 49.55s[2m (transform 5.13s, setup 0ms, collect 24.39s, tests 89.55s, environment 30ms, prepare 10.32s)[22m
+
+FAILED (exit 1) | fast | run 20261113-081635-d0d9600b-8918
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w2) [functional]: [31m[1m[7m FAIL [27m[22m[39m tests/script-inventory.test.ts[2m > [22mscript inventory[2m > [22mevery top-level script is in the gate, a screenshot tool, or listed as not a check | [2m Test 
+  timing   wall 1m 03s · step time 1m 47s (sum) · 3 workers, 57% busy · 1.70× the same steps run one after another
+           predicted 36–82s (about 46s, measured) → actual 1m 03s (+37%)
+           longest  unit-tests 50s, lint 22s, typecheck-server 14s · the longest step is 80% of the wall time
+           machine  CPU mean 74%, peak 98% · memory available ≥ 13935 MB · load peak 4.17
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-fast/test-results/20261113-081635-d0d9600b-8918/report.json

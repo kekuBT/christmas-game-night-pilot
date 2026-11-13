@@ -41,3 +41,11 @@ These are **local runs from development, not gate verdicts**.
   - The check itself is unchanged: the toolbar must still match the look's ground.
   - No other driver or test holds an old Christmas colour; a search of `scripts/` and `tests/` found none.
 - **Rerun:** `themes-seasonal-after-fix.log` is a local run of `check-themes-seasonal` against its own server on the fixed code: exit 0, all checks passed.
+
+## The fast gate's one failure, and the fix
+**Run:** fast gate `20261113-081635-d0d9600b-8918` on `d0d9600`. **FAILED** (exit 1, 4 passed, 1 failed).
+- **What failed:** 1 unit test of 1,720: `tests/script-inventory.test.ts`, "every top-level script is in the gate, a screenshot tool, or listed as not a check". The raw output is in `docs/evidence/gate-runs/20261113-081635-d0d9600b-8918/`.
+- **Cause:** my new `scripts/gen-tokens-css.mjs` wasn't classified. The rule is there so that no script can look like a check without being one.
+  - I had run only the new and theme tests before the gate, not the whole suite. That was my mistake.
+- **Fix:** it's listed as a file generator, both in the test's list and in `docs/TESTING.md` ("Scripts that are not checks").
+- **Rerun:** `unit-after-inventory-fix.log` is the whole suite, locally, on the fix: 1,720 passed in 134 files. Typecheck and lint also exit 0.
