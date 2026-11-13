@@ -1,0 +1,201 @@
+PASS J room B: Spectrum starts — {"gameId":"game-1","gameType":"spectrum","status":"briefing","players":["player-1","player-2"]}
+PASS J room B: playing, round 1
+PASS A the library lists Spectrum, tagged Co-op: one team score
+PASS A library at 390: no sideways scroll
+PASS A the casual picker lists Spectrum (practice only) — Spectrum 2–10 players · best with 4+ · about 8 min · Practice only
+PASS A lobby, host 390: no sideways scroll
+PASS A lobby, guest 320: no sideways scroll
+PASS B Keku: the briefing explains the team goal and "Give a clue, not the target number"
+PASS B Keku: the briefing's timing names Spectrum's own phases, never an impostor — 60 seconds for the clue. 45 seconds for everyone's guesses. 8 seconds for each reveal. The whole game ends by itself after about 10 minutes.
+PASS B Amina: the briefing explains the team goal and "Give a clue, not the target number"
+PASS B Amina: the briefing's timing names Spectrum's own phases, never an impostor — 60 seconds for the clue. 45 seconds for everyone's guesses. 8 seconds for each reveal. The whole game ends by itself after about 10 minutes.
+PASS B Baraka: the briefing explains the team goal and "Give a clue, not the target number"
+PASS B Baraka: the briefing's timing names Spectrum's own phases, never an impostor — 60 seconds for the clue. 45 seconds for everyone's guesses. 8 seconds for each reveal. The whole game ends by itself after about 10 minutes.
+PASS B the TV: the briefing explains the team goal and "Give a clue, not the target number"
+PASS B the TV: the briefing's timing names Spectrum's own phases, never an impostor — 60 seconds for the clue. 45 seconds for everyone's guesses. 8 seconds for each reveal. The whole game ends by itself after about 10 minutes.
+PASS C play: round 1, clue phase
+PASS C the server's truth is readable (driver only)
+PASS C the clue-giver (Baraka) alone sees the target, 39
+PASS C Keku waits for Baraka's clue
+PASS C Keku's phone shows no target
+PASS C Keku's projection has no target and no future pair
+PASS C Amina waits for Baraka's clue
+PASS C Amina's phone shows no target
+PASS C Amina's projection has no target and no future pair
+PASS C the TV projection has no target and no future pair
+PASS C the TV: Baraka is thinking of a clue; no target marker
+PASS C the TV shows a running clock
+PASS C clue-giver phone: no sideways scroll
+PASS C an 81-character clue can't be sent (too long)
+PASS C the clue with digits is sent with Enter: guessing starts
+PASS C Keku sees the clue as text
+PASS C Amina sees the clue as text
+PASS C the TV shows the clue and the count
+PASS C keyboard: Home moves the guess to 0
+PASS C keyboard: Page Up twice moves it to 20
+PASS C keyboard: arrows move it by 1
+PASS C keyboard: Page Down moves it by 10
+PASS C keyboard: End moves it to 100
+PASS C keyboard: the draft reads 41 and says where it sits
+PASS C the scale's accessible name names both ends — Your guess. From Forgettable (0) to Unforgettable (100)
+PASS C moving the scale sent nothing (the server has no guess yet)
+PASS C Keku's guess (41) is locked in
+PASS C touch: the nudges move Amina's draft to 35
+PASS C Amina's guess screen: no sideways scroll
+PASS C every guess in: the reveal
+PASS C the team's guess is the middle of the two guesses (half up) — {"roundNo":1,"pair":{"id":"sp-forgettable-unforgettable","left":"Forgettable","right":"Unforgettable","meaning":"How long you'd remember it."},"giver":"player-3","clue":"a 10-minute walk","reason":"scored","target":39,"aggregate":38,"distance":1,"points":10,"guesses":2}
+PASS C Keku's reveal explains it in words
+PASS C Amina's reveal explains it in words
+PASS C Baraka's reveal explains it in words
+PASS C the TV reveal: the target and the team's guess, in words and on the scale
+PASS C Amina's phone shows their own guess, never Keku's
+PASS C Baraka (the clue-giver) sees no one's individual guess
+PASS C the TV never carries an individual guess
+PASS C a stale send is refused and changes nothing — {"accepted":false,"reason":"PHASE_CLOSED"}
+PASS D round 2, clue phase
+PASS D the clue-giver role moved on
+PASS D Keku reloads and is back in round 2
+PASS D offline: the clue never reached the server
+PASS D back online: nothing was resent
+PASS D the clue phase runs out on the server clock: the round is skipped
+PASS D Keku: "No clue in time · 0 points"
+PASS D Amina: "No clue in time · 0 points"
+PASS D Baraka: "No clue in time · 0 points"
+PASS D the TV: No clue in time
+PASS E round 3, clue phase
+PASS E round 3: guessing
+PASS E round 3: Amina sees the clue exactly as typed, as text
+PASS E round 3: Amina's guess is on the target (52) — 52
+PASS E round 3: Baraka sees the clue exactly as typed, as text
+PASS E round 3: Baraka's guess is on the target (52) — 52
+PASS E round 3: the reveal
+PASS E round 4, clue phase
+PASS E round 4: guessing
+PASS E round 4: Keku sees the clue exactly as typed, as text
+PASS E round 4: Amina sees the clue exactly as typed, as text
+PASS E round 4: the reveal
+PASS F the match finishes after four rounds
+PASS F the server's one team result: four rounds, out of 40 — {"kind":"spectrum","total":24,"max":40,"roundsPlanned":4,"end":"completed","rounds":[{"roundNo":1,"pair":{"left":"Forgettable","right":"Unforgettable","meaning":"How long you'd remember it."},"clue":"
+PASS F no projection carries per-player scores
+PASS F Keku sees the team result: 24 out of 40
+PASS F Keku's results name no winner, place or credit
+PASS F Keku's results explain all four rounds
+PASS F Keku's results say "4 of 4 rounds played", not "Everyone finished"
+PASS F Keku's results: no sideways scroll
+PASS F Amina sees the team result: 24 out of 40
+PASS F Amina's results name no winner, place or credit
+PASS F Amina's results explain all four rounds
+PASS F Amina's results say "4 of 4 rounds played", not "Everyone finished"
+PASS F Amina's results: no sideways scroll
+PASS F Baraka sees the team result: 24 out of 40
+PASS F Baraka's results name no winner, place or credit
+PASS F Baraka's results explain all four rounds
+PASS F Baraka's results say "4 of 4 rounds played", not "Everyone finished"
+PASS F Baraka's results: no sideways scroll
+PASS 10.2 F round 3 landed exactly on the target, so the team line is due — Round 3 landed exactly on the target. [[1,"scored",1,10],[2,"no-clue",null,0],[3,"scored",0,10],[4,"scored",18,4]]
+PASS 10.2 F Keku: “Round 3 landed exactly on the target.”
+PASS 10.2 F Amina: “Round 3 landed exactly on the target.”
+PASS 10.2 F Baraka: “Round 3 landed exactly on the target.”
+PASS 10.2 F the line sits under the result and What's next
+PASS 10.2 F the line names nobody and no winner, place or Cup
+PASS 10.2 F after a reload, Amina's phone: the same line
+PASS F the TV's final view: the team result, no winner or standings
+PASS F the TV final names no winner and says Team result, not standings — TEAM RESULT
+PASS 10.2 F the TV's final view: “Round 3 landed exactly on the target.”
+PASS 10.2 F after a reload, the TV's final view: the same line
+PASS F the TV's post-game review: every round of the team's match
+PASS 10.4 S1 the TV's final view has no Save a memory (a spectator surface)
+PASS 10.4 S1 Amina's results offer Save a memory
+PASS 10.4 S1 it sits under the result and What's next (their controls don't move)
+PASS 10.4 S1 Enter opens the composer with focus in the note
+PASS 10.4 S1 the composer shows this match's facts, read-only, apart from the note — FROM THE GAME
+
+Spectrum team result: 24 out of 40 · all 4 rounds played
+PASS 10.4 S1 Save is off until there's a note
+PASS 10.4 S1 Escape closes it, and focus returns to Save a memory
+PASS 10.4 S1 Cancel closes it, focus back on the button
+PASS 10.4 S1 a cancelled draft saves nothing
+PASS 10.4 S1 the lost reply: it says so, keeps the draft, and offers Try again
+PASS 10.4 S1 (the first save did reach the server: one entry)
+PASS 10.4 S1 the composer at 320 px: no sideways scroll; the long note wraps
+PASS 10.4 S1 Try again: saved, waiting for the host
+PASS 10.4 S1 focus moves to the saved message, and the book link is there
+PASS 10.4 S1 the retry saved once: exactly one entry, pending, citing this match's finish, with the server's team facts — [{"id":"book-1","day":1,"type":"game-result","text":"Round three: everybody on the very same spot, and nobody believed it — a long note that has to wrap neatly on a small phone","sourceEventIds":["evt-16"],"approved":false,"derivedFacts":["Spectrum team result
+PASS 10.4 S1 Keku's save: saved; as host he approves it in the Memory Book
+PASS 10.4 S1 the double tap saved once
+PASS 10.4 S1 Play again and the What's next controls are still there, and nothing advanced
+PASS 10.3 M1 the completed match's facts call for a saved team line — Spectrum team result: 24 out of 40 · all 4 rounds played
+PASS 10.3 M1 Amina's Memory Book (Christmas look) is the Christmas Memory Book
+PASS 10.3 M1 Amina's Memory Book links the completed match and previews its team facts
+PASS 10.3 M1 it names Spectrum, and Add is on — {"state":"ready","event":"evt-16","text":"Linked to Spectrum · Day 1: the last game that finished.","addDisabled":false,"hint":"The host approves it before it goes into the exports.","facts":"Saved with: Spectrum team result: 24 out of 40 · all 4 rounds played"}
+PASS 10.3 M1 keyboard: Tab from the note reaches Add
+PASS 10.3 M1 Amina's entry is added, pending, with the server's team facts under her note
+PASS 10.3 M1 the server froze the match's own facts, citing exactly its finish — {"id":"book-3","day":1,"type":"game-result","text":"Round 3 was a bullseye","sourceEventIds":["evt-16"],"approved":false,"derivedFacts":["Spectrum team result: 24 out of 40 · all 4 rounds played"],"team":{"kind":"spectrum","gameInstanceId":
+PASS 10.3 M1 a guest can't approve: no Approve or Revoke on Amina's page, and it says the host decides
+PASS 10.3 M1 the note stays the person's words, apart from the facts
+PASS 10.3 M1 Amina's Memory Book at 320: no sideways scroll
+PASS 10.3 M1 Keku's Memory Book (Everyday look) is the Mchezo Memory Book, nothing Christmas
+PASS 10.3 M1 Keku sees Amina's pending entry with the same facts
+PASS 10.3 M1 the host approves it
+PASS 10.4 S1 the host approves Amina's results-screen save
+PASS 10.4 S1 the export has Amina's note, then the team facts
+PASS 10.3 M1 the export has it: a neutral title, the note, then the facts
+PASS 10.3 M1 the PDF downloads, named for the Everyday look — mchezo-memory-book-ETB9AC-2026-11-12.pdf
+PASS 10.3 M1 after a reload, Amina sees her entry approved, and downloads open
+PASS 10.3 M1 Amina's share image downloads, named for her Christmas look — christmas-memory-book-ETB9AC-2026-11-12.png
+PASS 10.3 M1 after a reload: still approved, the same facts
+PASS G the host has Play again
+PASS G Play again opens a fresh briefing
+PASS G the rematch is a new match, linked to the last one
+PASS G the rematch is cancelled
+PASS G Keku is back in the lobby
+PASS G Amina is back in the lobby
+PASS G Baraka is back in the lobby
+PASS G the lobby's last game: the team result, no place
+PASS G the TV's Tonight so far: Spectrum's team result, no winner
+PASS G the new match starts clean: round 1, no clue, team 0
+PASS G nothing carried over: no guess and no revealed round
+PASS 10.3 M2 while the new match plays, Keku's open Memory Book links the completed match
+PASS G Amina is asked to confirm
+PASS G Amina has left and watches
+PASS G Baraka is asked to confirm
+PASS G fewer than two left: the match ends early
+PASS G the early ending keeps what was earned and says why
+PASS G Keku's results say why it ended early
+PASS G the early ending is explained once, never 'Everyone finished'; score and rounds explicit — 1× · 0 of 4 rounds played.
+PASS 10.2 G the early ending's facts call for no line
+PASS 10.2 G the early ending: no moment line on Keku's results (none carried over)
+PASS 10.2 G the TV shows no moment line for the early ending
+PASS R1 Keku's ledger carries the room's seq as its watermark — 28 vs 28
+PASS R1 the room's newest event is hidden from Keku (someone else's sit-out), and his last finished game is this match — newest seen 27, seq 28, finished game-3
+PASS R1 no one else's sit-out reaches Keku's ledger
+PASS 10.3 M2 the early ending's facts call for an 'ended early' line — Spectrum team result: 0 out of 40 · ended early, 0 of 4 rounds played (fewer than two players were left)
+PASS 10.3 M2 Keku's open page moves to the early finish (never the completed match) and previews 'ended early'
+PASS 10.3 M2 the note he typed is still there
+PASS 10.3 M2 the entry is added with the early facts, under his note
+PASS 10.3 M2 it cites exactly the early match's finish; its facts say it ended early, with the rounds actually played — {"id":"book-4","day":1,"type":"game-result","text":"We'll get the wavelength next time","sourceEventIds":["evt-27"],"approved":false,"derivedFacts":["Spectrum team result: 0 out of 40 · ended early, 0 of 4 rounds played (fewer than two play
+PASS 10.3 M2 the completed match's entry is untouched
+PASS R1 after a reload, the page is current (not 'Checking…') and both entries keep their facts
+PASS 10.3 M2 forged facts in a request are ignored: the server's own early facts are kept — {"id":"book-5","day":1,"type":"game-result","text":"forged","sourceEventIds":["evt-27"],"approved":false,"derivedFacts":["Spectrum team result: 0 out of 40 · ended early, 0 of 4 rounds played (fewer t
+PASS 10.3 M3 the host makes Baraka a cohost — {"ok":true}
+PASS 10.3 M3 the cohost sees Revoke on the approved entry
+PASS 10.3 M3 revoked: it leaves the export
+PASS 10.3 M3 the cohost approves the early entry: the export has it, saying it ended early
+PASS 10.3 M3 Amina (a guest) opens the Memory Book again and sees both entries
+PASS 10.3 M3 Amina (a guest) still has no Approve or Revoke
+PASS 10.4 S2 Keku's replay result offers Save a memory
+PASS 10.4 S2 its facts say it ended early
+PASS 10.4 S2 saved
+PASS 10.4 S2 it cites the replay's own finish, with its early facts (never the completed match) — {"id":"book-6","day":1,"type":"game-result","text":"The replay we cut short","sourceEventIds":["evt-27"],"approved":false,"derivedFacts":["Spectrum team result: 0 out of 40 · ended early, 0 of 4 rounds played (fewer than
+PASS 10.4 S2 Open the Memory Book shows it, pending, with its facts
+PASS H Amina's phone uses the Christmas look
+PASS H Keku's phone uses the Everyday look
+PASS H Baraka's phone is in reduced motion
+PASS I the canary check finds a canary when one is there (self-test)
+PASS I no built file carries the pack (21 files)
+PASS I no public response carries the pack (15 responses)
+PASS J room B ran its own match: its own clock, no clue or guess from room A — ["no-clue"]
+PASS K a Cup's picker leaves Spectrum out — 14 games
+PASS K the server refuses Spectrum in a Cup (409 CASUAL_ONLY) — {"error":"Spectrum plays in casual rooms only.","code":"CASUAL_ONLY","readiness":{"registered":1,"connected":1,"reconnecting":0,"away":0,"wouldPlay":["player-1"
+ALL PASS
+exit 0

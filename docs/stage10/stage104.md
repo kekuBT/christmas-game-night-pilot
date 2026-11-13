@@ -63,11 +63,12 @@
   - After saving, focus moves to the saved message.
 
 ## 5. Decisions
-D-S104-01 to D-S104-04 in `docs/DECISIONS.md`:
+D-S104-01 to D-S104-05 in `docs/DECISIONS.md`:
 - bind to the game on screen;
 - idempotency by member and key;
 - a composer on the result screen, not a new screen;
-- Spectrum and Jebena only.
+- Spectrum and Jebena only;
+- a server that shuts down in bounded time (added after the first full gate failed; see §8).
 
 ## 6. Validation plan
 - **Unit and HTTP** (`tests/stage104-save-memory.test.ts`):
@@ -105,3 +106,58 @@ D-S104-01 to D-S104-04 in `docs/DECISIONS.md`:
 | **Total** | **about 5.5 h** |
 
 **Calibration:** recent slices took 35–45% of their estimates (10.3: about 1 h 10 min of work plus gates against 5–5.75 h). I expect about 2.5–3 h here and will report against the 5.5 h above.
+
+## 8. As built and tested
+| Area | Where | Tests |
+|---|---|---|
+| Bound save | `src/server/http.ts` `POST /rooms/:id/memory`: `fromGame` resolves that game's own finish; refusals `UNKNOWN_GAME`, `NOT_FINISHED`, `RESULT_NOT_SAVEABLE` (voided or not final), `ONE_SOURCE`, `NOTE_REQUIRED`, `NOTE_TOO_LONG`, `BAD_REQUEST_ID` | `tests/stage104-save-memory.test.ts` |
+| One save, once | `src/server/memorybook.ts`: `attemptFor`, `recordAttempt`, `attemptFingerprint`; attempts kept with the book (`toJSON`/`fromJSON`); `addedBy` set by the server. The same request returns 200 with the same entry; a different one gets 409 `ATTEMPT_MISMATCH` and the original entry. | the same tests: one after another, a burst of three at once, after a restart, two members with one key |
+| The preview | `apps/web/src/ui/mchezo/lib/saveMemory.ts` `saveMemoryFacts`: Spectrum's shared team line, or Jebena's points by name, or why it can't be saved | the same file (3) |
+| The composer | `apps/web/src/components/mchezo/SaveMemory.tsx`; `styles/stage104.css`; wired in `App.tsx` (`saveMemoryFor`) into `MchezoSpectrumResults` and `MchezoJebenaResults`, under the result line | the browser checks below |
+| Bounded shutdown (D-S104-05, found by the first full gate) | `src/server/http.ts` `LocalServer.close()` | `tests/stage104-shutdown.test.ts` (3) |
+
+### In real browsers
+- **`check-spectrum` S1, the completed match:**
+  - The TV final has no Save a memory.
+  - **Amina (Christmas, 320 px), by keyboard:**
+    - Enter opens the composer with focus in the note, and the facts are read-only and apart from it;
+    - Save is off with no note;
+    - Escape closes it, with focus back on the button;
+    - Cancel discards a draft, and nothing is saved.
+  - **Amina, through a lost reply** (the request reached the server; its answer was dropped):
+    - the screen says it couldn't reach the game, keeps the draft and offers Try again;
+    - Try again shows it saved and waiting for the host, with focus on the message and the book link;
+    - the server holds exactly one entry: pending, citing this match's finish, with the team facts, added by Amina;
+    - no sideways scroll at 320 px, and the long note wraps.
+  - **Keku (Everyday, 390 px):**
+    - a double tap saves once;
+    - What's next and Play again are still there, and the match is unchanged;
+    - he approves Amina's entry in the Memory Book, and the export has her note, then the team facts.
+- **`check-spectrum` S2, the early-ended replay:** its results show "ended early" facts and save that replay's finish, never the completed match. "Open the Memory Book" shows it, pending.
+- **`check-jebena-rush` S1, the main match:**
+  - The TV has no Save a memory.
+  - **Amina (320 px):** the composer lists the final points by name, highest first, matching the server's scores, with no sideways scroll; Cancel saves nothing.
+  - **Keku:** his save is one pending entry citing this match's finish, with its score facts. Approved, it's in the export; the scores are unchanged.
+- **`check-jebena-rush` S2, the replay:** its results save the replay's finish, never the main match's.
+- **Regressions:** manual Add in the Memory Book (10.3 M1–M3), the 10.2 watermark, `check-cup-memory`, `check-history-links`, `check-contrast`, `check-f4`, `check-f5`.
+
+### A failure on the way, and its fix (D-S104-05)
+- **What failed:** the first full gate, on `c634500`, failed one step: `check-tv-outage`, "the driver's server exits within 20 s of SIGTERM". 87 of 88 steps passed. An earlier full gate (`20261112-064509-b668ee3c-28530`, Stage 10.2) had hung at the same step.
+- **The cause:** `LocalServer.close()` sent each tracked socket a close frame, then waited for the WebSocket and HTTP servers to close. Those wait for every client's close handshake. A client that never answers is only cut off by `ws`'s own 30-second close timeout, and a socket refused at the door (no such room) was never tracked at all. The Save a memory code doesn't touch this path. The run's log doesn't say which socket held the server open; the test reproduces both kinds.
+- **The fix:** `close()` sends every open socket a close frame, waits up to 1.5 s, then terminates the rest. The HTTP server gets the same bounded wait before `closeAllConnections()`. Well-behaved clients still get the polite close.
+- **The test:** `tests/stage104-shutdown.test.ts`. Before the fix, 2 of its 3 tests failed: a deaf TV socket and a refused socket each kept `close()` waiting past 5 s. After it, all 3 pass. Logs are in `docs/evidence/stage104-local/`.
+- **Rejected:** raising the driver's limit, or retrying the step.
+
+### Gates
+Run one after another, each from a fresh clone of the exact commit. Raw output, including the failed run, is in `docs/evidence/gate-runs/<run>/`.
+
+| Run | Commit | Kind | Verdict | Notes |
+|---|---|---|---|---|
+| `20261112-231121-c6345008-2112` | `c634500` | targeted (spectrum, jebena-rush, cup-memory, history-links, contrast, f4, f5) | PASSED (exit 0), 461 s | spectrum 197, jebena-rush 227 checks |
+| `20261112-231913-c6345008-3663` | `c634500` | fast | PASSED (exit 0), 63 s | 1,679 unit tests |
+| `20261112-232027-c6345008-7030` | `c634500` | full | **FAILED (exit 1)**, 2017 s | 87 of 88 passed; `check-tv-outage` failed (above) |
+| `20261113-000209-30417918-28168` | `3041791` | targeted (the same, plus tv-outage) | PASSED (exit 0), 465 s | tv-outage 14, spectrum 197, jebena-rush 226 checks |
+| `20261113-004113-30417918-190` | `3041791` | fast | PASSED (exit 0), 59 s | 1,682 unit tests |
+| `20261113-004221-30417918-3545` | `3041791` | full | **PASSED (exit 0)**, 1977 s | 88 of 88, no retries |
+
+`check-jebena-rush` counts 226 or 227 checks depending on the match: the 10.2 moment line is checked on five screens when a moment happened, or its absence on two when none did. Both are expected.

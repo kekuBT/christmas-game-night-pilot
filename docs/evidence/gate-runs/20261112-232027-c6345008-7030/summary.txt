@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261112-232027-c6345008-7030
+  87 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-tv-outage (w3) [functional]: FAIL the driver's server exits within 20 s of SIGTERM — its output: "Christmas Game Night server on http://localhost:44051 (web app at / after npm run build:web)\nPhones on the same Wi-Fi: open http:/
+  timing   wall 33m 37s · step time 1h 37m (sum) · 3 workers, 96% busy · 2.89× the same steps run one after another
+           predicted 24–58m (about 32m 02s, measured) → actual 33m 37s (+5%)
+           longest  e2e-chromium 8m 31s, check-f5 7m 35s, check-leaderboard 6m 38s · the longest step is 25% of the wall time
+           machine  CPU mean 34%, peak 100% · memory available ≥ 12922 MB · load peak 6.61 · backpressure 9 wait(s), 101s
+           contention ×1.038 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s104-full/test-results/20261112-232027-c6345008-7030/report.json

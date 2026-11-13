@@ -1,0 +1,56 @@
+$ node scripts/check-caption.mjs http://localhost:39297
+# timeout 600s | worker w1 | server http://localhost:39297 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s104-full2/test-results/20261113-004221-30417918-3545/server-data/w1)
+
+[+5.1s] PASS the briefing explains the game
+[+6.0s] PASS everyone sees the same scene — A snowman learns to dance
+[+6.0s] PASS no horizontal overflow at 390px (write)
+[+6.0s] PASS no horizontal overflow at 390px (write)
+[+6.0s] PASS no horizontal overflow at 320px (write)
+[+6.0s] PASS no horizontal overflow at 360px (write)
+[+6.0s] PASS character counter counts down
+[+36.3s] PASS Bea's caption is in and shown back to her
+[+36.3s] PASS a double submit sends one caption — 1
+[+36.7s] PASS after a reload Bea still sees her caption, not an empty box
+[+37.0s] PASS keyboard: Cal submits with Tab + Enter
+[+37.1s] PASS vote cards show no names (anonymous) — “Grandpa's new ringtone” | YOURS — YOU CAN’T VOTE FOR IT | “When the robot laughs at its own joke” | “Error 404: punchline not found” | “Beep boop, that's a knock-knock joke”
+[+37.1s] PASS Bea's own caption is marked Yours and disabled
+[+37.1s] PASS Bea can vote for the other three
+[+37.2s] PASS vote cards are at least 44px tall at 320px — 69.327392578125
+[+39.3s] PASS TV shows the scene and the captions
+[+39.3s] PASS TV never shows who wrote what
+[+39.6s] PASS a vote is confirmed on the card
+[+59.9s] PASS round 2 starts on time without Dee's vote
+[+59.9s] PASS round 2 shows last round's favourite (no names)
+[+105.9s] PASS results reach every phone
+[+105.9s] PASS results credit the winning caption's author — CAPTION CLASH · OFFICIAL
+[+105.9s] Bea wins Caption Clash
+[+105.9s] B
+[+105.9s] Bea
+[+105.9s] 
+[+105.9s] Top of the table: Bea. Modesty optional.
+[+105.9s] 
+[+105.9s] You came 3rd of 4
+[+105.9s] 75 pts
+[+105.9s] Solid middle of the pack. Room to climb.
+[+105.9s] CAPTION CLASH
+[+105.9s] The room’s favourites
+[+105.9s] 
+[+105.9s] Round 1: A snowman learns to dance
+[+105.9s] 
+[+105.9s] “Grandpa's new ringtone”
+[+105.9s] by Cal
+[+105.9s] 2
+[+105.9s] VOTES
+[+105.9s] 
+[+105.9s] Round 2: The moon takes
+[+105.9s] PASS results explain points (25 per caption, 100 per vote)
+[+105.9s] PASS results show participation
+[+106.0s] PASS no horizontal overflow on results at 320px
+[+106.0s] PASS the TV results still show no author names
+[+106.4s] PASS back in the lobby
+[+106.4s] PASS another Caption Clash starts with new scenes — 201
+[+107.0s] PASS the new game's first scene differs
+[+107.1s] CAPTION ALL PASSED
+[+107.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 107.2s | cpu 6.4s, peak memory 373 MB

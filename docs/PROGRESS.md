@@ -2309,7 +2309,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Not run:** real iPhone Safari and Android Chrome.
 - **Next:** ChatGPT's independent review and private audit of PR #20. Nothing merged or deployed.
 
-## Stage 10.4: save a memory without leaving the result screen (in progress)
+## Stage 10.4: save a memory without leaving the result screen (built and gated; awaiting review)
 - **Brief:** ChatGPT's handoff 6838210827 on PR #20. It cleared Stage 10.3 for development (not merge or deployment) after its own tests, a driver run and a private audit.
 - **Base:** `7072def` (PR #20's head). Branch `claude/stage10-4-save-memory`, a stacked PR on #20.
 - **Scope:**
@@ -2318,5 +2318,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - idempotent per member and key;
   - pending until the host approves;
   - nothing on the TV.
-- **Spec:** `docs/stage10/stage104.md`, with an estimate of about 5.5 h. Decisions D-S104-01 to 04.
+- **Spec:** `docs/stage10/stage104.md`, with an estimate of about 5.5 h. Decisions D-S104-01 to 05.
+- **Built:**
+  - **Server** (`a80c8a7`): `POST /rooms/:id/memory` takes `fromGame` and resolves that game's own finish; refusals `UNKNOWN_GAME`, `NOT_FINISHED`, `RESULT_NOT_SAVEABLE`, `ONE_SOURCE`, `NOTE_REQUIRED`, `NOTE_TOO_LONG`, `BAD_REQUEST_ID`; a `requestId` per member saves once (the same request returns the same entry, a different one gets 409 `ATTEMPT_MISMATCH` and the original); attempts persist with the book; `addedBy` set by the server.
+  - **Web** (`317d0dc`): `SaveMemory.tsx` under the result line of `MchezoSpectrumResults` and `MchezoJebenaResults`; the facts preview in `ui/mchezo/lib/saveMemory.ts`; a lost reply keeps the draft and Try again reuses the key; keyboard focus and Escape; not on the TV.
+  - **Drivers** (`c634500`): `check-spectrum` S1 and S2, `check-jebena-rush` S1 and S2.
+  - **Shutdown fix** (`3041791`, D-S104-05): the first full gate on `c634500` failed `check-tv-outage` (the server didn't exit within 20 s of SIGTERM). `LocalServer.close()` now ends in bounded time: a close frame to every open socket, 1.5 s grace, then terminate. `tests/stage104-shutdown.test.ts` failed 2 of 3 before the fix and passes after.
+- **Tests:** `tests/stage104-save-memory.test.ts` (12), `tests/stage104-shutdown.test.ts` (3); the browser journeys above.
+- **Gates, one after another:**
+  - on `c634500`: targeted `20261112-231121-c6345008-2112` PASSED; fast `20261112-231913-c6345008-3663` PASSED; full `20261112-232027-c6345008-7030` **FAILED** (87/88, `check-tv-outage`);
+  - on `3041791`: targeted `20261113-000209-30417918-28168` PASSED (with tv-outage); fast `20261113-004113-30417918-190` PASSED (1,682 unit tests); full `20261113-004221-30417918-3545` **PASSED** (exit 0, 88/88, 32 min 57 s).
+- **Evidence:** `docs/evidence/gate-runs/` (all six runs, the failed one included), `docs/evidence/stage104-local/`, screenshots in `docs/stage10/stage104-screenshots/`.
+- **Not run:** real iPhone Safari and Android Chrome.
+- **Next:** ChatGPT's independent review of PR #21. Nothing merged or deployed.
 

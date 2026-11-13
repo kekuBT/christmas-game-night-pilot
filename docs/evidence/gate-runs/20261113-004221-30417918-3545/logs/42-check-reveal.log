@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:39297
+# timeout 600s | worker w1 | server http://localhost:39297 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s104-full2/test-results/20261113-004221-30417918-3545/server-data/w1)
+
+[+21.4s] PASS reveal opens on the first question phase — question:0
+[+21.4s] PASS question phase hides the correct answer — count=0
+[+21.7s] PASS Reveal answer steps into the first reveal — reveal:1
+[+21.7s] PASS reveal phase shows the correct answer — count=1
+[+21.7s] PASS reveal phase separates this question from the game total
+[+21.7s] PASS Next question steps into the second question phase — question:2
+[+21.7s] PASS second question phase hides the correct answer again — count=0
+[+21.8s] PASS Q10 jump lands on the last question phase — question:18
+[+21.8s] PASS last reveal reached — reveal:19
+[+21.9s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+21.9s] PASS finale shows the standings list
+[+21.9s] PASS auto-play starts back at the first question — question:0
+[+30.0s] PASS auto-play advances a step within 8s — reveal:1
+[+38.0s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+38.9s] PASS TV walk opens on a question — Which vitamin does the skin make in sunl
+[+43.0s] PASS TV walk advances to the reveal stage
+[+48.0s] PASS TV walk advances to the second question — Who was the first person to walk on the 
+[+48.1s] PASS TV manual jump reaches the leaderboard
+[+48.1s] REVEAL ALL PASSED
+[+48.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 48.1s | cpu 3.2s, peak memory 260 MB
