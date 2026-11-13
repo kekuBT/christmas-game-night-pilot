@@ -159,6 +159,19 @@ try {
     return s.length === 3 && s.every(([n, o]) => n === "none" && o === "1");
   });
   await sleep(3400);
+  // The podium's place numbers, measured the way check-contrast measures (the first solid background up the tree):
+  // at least 3:1 (large text) on every earned step; a step nobody earned shows no number at all.
+  const podiumContrast = await tv.evaluate(() => {
+    const rgb = (c) => (c.match(/[\d.]+/g) ?? []).slice(0, 3).map(Number);
+    const lum = ([r, g, b]) => [r, g, b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }).reduce((a, v, i) => a + v * [0.2126, 0.7152, 0.0722][i], 0);
+    return [...document.querySelectorAll(".mz-podium__block")].map((el) => {
+      let cur = el, bg = null;
+      while (cur && !bg) { const c = getComputedStyle(cur).backgroundColor; if (c && c !== "rgba(0, 0, 0, 0)" && c !== "transparent") bg = c; cur = cur.parentElement; }
+      const fg = getComputedStyle(el).color, a = lum(rgb(fg)), b = lum(rgb(bg ?? "rgb(0,0,0)"));
+      return { place: el.textContent, empty: !!el.closest(".mz-podium__step--empty"), transparent: fg === "rgba(0, 0, 0, 0)", ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) };
+    });
+  });
+  check("C podium numbers: 3:1 or better on every earned step (a solid base under each gradient)", podiumContrast.filter((x) => !x.empty).every((x) => x.ratio >= 3), JSON.stringify(podiumContrast.map((x) => [x.place, x.empty, x.ratio.toFixed(2)])));
   await shot(tv, "after-tv-final-podium-1920");
   await tv.getByTestId("tv-dir-pause").click();
   check("C Pause animations: the podium shows at once (no staged animation)", (await tv.getByTestId("tv-podium").getAttribute("class")).includes("mz-podium--animate") === false);
@@ -242,6 +255,8 @@ try {
   await soon("F Cup standings: Day 2 of 7, the Cup podium and everyone's totals", async () => (await mode()) === "cup" && (await tv.getByTestId("tv-cup-view").getAttribute("data-day")) === "2" && (await tv.getByTestId("tv-cup-standings").locator("li").count()) === champ2.length);
   const top = Math.max(...champ2.map((r) => r.total));
   const leaders = champ2.filter((r) => r.total === top && top > 0).map((r) => r.playerId).sort();
+  const empties = await tv.evaluate(() => [...document.querySelectorAll(".mz-podium__step--empty .mz-podium__block")].map((el) => getComputedStyle(el).color));
+  check("F a podium step nobody earned shows no low-contrast number", empties.every((c) => c === "rgba(0, 0, 0, 0)"), JSON.stringify(empties));
   check("F the Cup podium: everyone sharing the top total stands on gold (a shared lead is a real result)", JSON.stringify((await tv.getByTestId("tv-podium-gold").getAttribute("data-players")).split(",").sort()) === JSON.stringify(leaders), JSON.stringify(leaders));
   await sleep(3400);
   await shot(tv, "after-tv-cup-view-1920");

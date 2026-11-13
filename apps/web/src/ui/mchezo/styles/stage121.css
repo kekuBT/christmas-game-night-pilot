@@ -30,11 +30,14 @@
 .mz-podium__name { font: 800 30px/1.1 var(--mz-font-display); color: var(--mz-text); overflow-wrap: anywhere; }
 .mz-podium__score { font: 700 22px var(--mz-font-body); color: var(--mz-text-muted); font-variant-numeric: tabular-nums; }
 .mz-podium__block { width: 100%; border-radius: 18px 18px 6px 6px; display: grid; place-items: center; font: 900 56px var(--mz-font-display); color: #16111d; }
-.mz-podium__step--1 .mz-podium__block { height: 170px; background: linear-gradient(180deg, #ffd66b, #e0a12f); }
-.mz-podium__step--2 .mz-podium__block { height: 120px; background: linear-gradient(180deg, #eef2f6, #b4bfcc); }
-.mz-podium__step--3 .mz-podium__block { height: 84px; background: linear-gradient(180deg, #f3c9a1, #c4834f); }
+.mz-podium__step--1 .mz-podium__block { height: 170px; background: #e9b443 linear-gradient(180deg, #ffd66b, #e0a12f); }
+.mz-podium__step--2 .mz-podium__block { height: 120px; background: #cfd7e0 linear-gradient(180deg, #eef2f6, #b4bfcc); }
+.mz-podium__step--3 .mz-podium__block { height: 84px; background: #d9a678 linear-gradient(180deg, #f3c9a1, #c4834f); }
+/* A solid base colour under each gradient (its mid tone): the block's colour if a gradient doesn't paint, and the
+   background a contrast check reads. Dark #16111d numbers are 5.8:1 or more even on each gradient's darkest stop. */
 .mz-podium__step--empty .mz-podium__who { visibility: hidden; }
-.mz-podium__step--empty .mz-podium__block { opacity: 0.35; }
+/* A step nobody earned keeps its shape faintly, without a low-contrast number. */
+.mz-podium__step--empty .mz-podium__block { opacity: 0.35; color: transparent; }
 @keyframes mz-podium-rise { from { opacity: 0; transform: translateY(48px) scale(0.96); } to { opacity: 1; transform: none; } }
 [data-mz-motion="full"] .mz-podium--animate .mz-podium__step { animation: mz-podium-rise 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 [data-mz-motion="full"] .mz-podium--animate .mz-podium__step--3 { animation-delay: 300ms; }
