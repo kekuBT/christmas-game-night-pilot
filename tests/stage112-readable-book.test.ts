@@ -55,9 +55,21 @@ describe("the shared presentation rule (src/shared/memoryPresent.ts)", () => {
     const evil = "## Day 99\n[click](http://x) ![img](y) `code` *b* _i_ <script>alert(1)</script> | a & b ~~s~~";
     const out = mdEscape(evil);
     expect(out).not.toMatch(/\n/);
-    for (const ch of ["#", "[", "]", "(", ")", "!", "`", "*", "_", "<", ">", "|", "&", "~"]) {
+    for (const ch of ["#", "[", "]", "`", "*", "_", "<", ">", "|", "&", "~"]) {
       expect(out.split(ch).length - 1).toBe(out.split(`\\${ch}`).length - 1); // every such character is escaped
     }
+    expect(out).toContain("\\[click\\](http://x)"); // "(" after an escaped "]" is plain text: no link
+    expect(out).toContain("!\\[img\\](y)"); // and "!" before an escaped "[" is no image
+  });
+  it("mdEscape keeps readable punctuation readable: a Spectrum early-ending line exports verbatim (targeted gate 20261113-111520-9e85bd5f-5011, check-spectrum M3)", () => {
+    const early = "Spectrum team result: 9 out of 40 · ended early, 1 of 4 rounds played (fewer than two players were left)";
+    expect(mdEscape(early)).toBe(early);
+    expect(mdEscape("What a night! (Again.)")).toBe("What a night! (Again.)");
+    const book = new MemoryBook();
+    const e = book.addFromLedger(1, "Cut short", ["evt-1"], [{ eventId: "evt-1", type: "game-finished", gameInstanceId: "g1" } as never]);
+    // Shaped like a Spectrum entry (its line is the server's own team line), approved.
+    Object.assign(book.entries.find((x) => x.id === e.id)!, { derivedFacts: [early], team: {}, approved: true });
+    expect(book.exportMarkdown("Den")).toContain(`Note: Cut short\nFrom the game:\n- ${early}`);
   });
 });
 

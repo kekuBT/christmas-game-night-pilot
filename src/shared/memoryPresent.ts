@@ -109,7 +109,12 @@ export function entryFactLines(e: PresentableEntry, ctx: Pick<BookContext, "name
   });
 }
 
-/** Text for a Markdown export: one line, and nothing typed can make a heading, list, link, image, code or HTML. */
+/**
+ * Text for a Markdown export: one line, and nothing typed can make a heading, list, link, image, code or HTML.
+ * Exactly the characters in docs/stage11/stage112.md \u00a73.3 get a backslash. "(", ")" and "!" don't: with "[" and "]"
+ * escaped they can't start a link or an image, and escaping them would put backslashes into readable text such as a
+ * Spectrum team line's "(fewer than two players were left)".
+ */
 export function mdEscape(s: string): string {
-  return s.replace(/[\r\n\u2028\u2029]+/g, " ").replace(/[\\`*_[\]<>#|~&!()]/g, "\\$&");
+  return s.replace(/[\r\n\u2028\u2029]+/g, " ").replace(/[\\`*_[\]<>#|~&]/g, "\\$&");
 }
