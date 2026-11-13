@@ -116,6 +116,18 @@ export class MemoryBook {
   /** Stage 10.4: save attempts by `${memberId}|${requestId}` (room-scoped: one book per room). */
   private attempts = new Map<string, MemoryAttempt>();
 
+  /**
+   * Stage 10.4 repair (D-S104-06): an independent copy (entries, the id counter and the save keys), so a change can be
+   * made and written to disk before anyone sees it. Nothing in the copy is shared with this book.
+   */
+  clone(): MemoryBook {
+    const copy = new MemoryBook();
+    copy.entries = structuredClone(this.entries);
+    copy.next = this.next;
+    copy.attempts = new Map([...this.attempts].map(([k, v]) => [k, { ...v }]));
+    return copy;
+  }
+
   /** Stage 10.4: an earlier attempt by this member with this key, and its entry, if any. */
   attemptFor(memberId: string, requestId: string): { attempt: MemoryAttempt; entry: MemoryBookEntry | undefined } | null {
     const attempt = this.attempts.get(`${memberId}|${requestId}`);

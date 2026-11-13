@@ -1390,3 +1390,12 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - raising the driver's 20 s limit: it hides a shutdown that can stall a restart for 30 s;
     - retrying the step: "flake" isn't a root cause;
     - terminating every socket at once: it skips the polite goodbye clients rely on to show "reconnecting" rather than "lost".
+- **D-S104-06 A Memory Book change is live only once it is on disk.**
+  - **Why:** ChatGPT's review 6842636842 found that a save added its entry and its request key to the live book before writing it. When the write failed, the reply was 500, but the live book kept both: a same-key retry answered 200 from memory with nothing on disk, and the note was gone after a restart. Approvals, revocations and manual Add had the same order.
+  - **How:** `LocalServer.commitBook()` is the only way a room's book changes. It clones the live book (`MemoryBook.clone()`: entries, id counter and save keys, nothing shared), makes the change on the clone, writes it (`atomicWriteFileSync`: a failed write leaves the old file), and only then makes the clone the live book. From the clone to the swap it is synchronous, so no other request sees or changes the book in between. A save's attempt lookup reads the live book after the request body has arrived.
+  - **Result:** a failed write answers 500 ("The Memory Book couldn't be saved, so nothing changed.") and leaves the visible book, approvals, exports and save keys exactly as on disk, with no id used. A same-key retry once the disk works writes exactly one pending entry (201), which survives a restart. The composer keeps the draft and the key and offers Try again on a 5xx.
+  - **Tests:** `tests/stage104-book-durability.test.ts`: one failed write then a retry, three failed writes, a committed save with a lost reply, approval and revocation, manual Add. Four of the five failed before the fix.
+  - **Scope:** the Memory Book only. Room state keeps its Sprint 1 rule: the change happens in memory, a failed save answers 500, and the next successful save writes the whole snapshot.
+  - **Alternatives rejected:**
+    - undoing the change after a failed write: it needs an exact inverse for every operation, and an approval edits an entry in place;
+    - writing before validating: a refused change would still cost a write.

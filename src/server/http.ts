@@ -19,8 +19,8 @@ import { FailureLimiter, PendingRecoveries } from "./recovery.js";
 
 /** A change was applied in memory but could not be written to disk. */
 class PersistError extends Error {
-  constructor() {
-    super("The room could not be saved to disk, so this change may not survive a server restart. Tell the host.");
+  constructor(message = "The room could not be saved to disk, so this change may not survive a server restart. Tell the host.") {
+    super(message);
   }
 }
 
@@ -336,15 +336,24 @@ export class LocalServer {
     }
   }
 
-  private persistBook(roomId: string): void {
-    const book = this.books.get(roomId);
-    if (!book) return;
+  /**
+   * Stage 10.4 repair (review 6842636842; D-S104-06): the only way a room's Memory Book changes. The change is made on
+   * a copy of the live book and written to disk; only then does the copy become the live book. If the change is refused
+   * or the write fails, the live book (what anyone sees, approves, exports or retries against) stays exactly as it is
+   * on disk, and a failed write answers 500. It is synchronous from the copy to the swap, so no other request can see
+   * or change the book in between.
+   */
+  private commitBook<T>(roomId: string, change: (staged: MemoryBook) => T): T {
+    const staged = (this.books.get(roomId) ?? new MemoryBook()).clone();
+    const result = change(staged);
     try {
-      this.store.saveBook(roomId, book.toJSON());
+      this.store.saveBook(roomId, staged.toJSON());
     } catch (err) {
       console.error(`[persist] could not save Memory Book for ${roomId}: ${(err as Error).message}`);
-      throw new PersistError();
+      throw new PersistError("The Memory Book couldn't be saved, so nothing changed. Try again in a moment.");
     }
+    this.books.set(roomId, staged);
+    return result;
   }
 
   /**
@@ -874,8 +883,8 @@ export class LocalServer {
           return;
         }
         if (parts.length >= 3 && parts[2] === "memory") {
+          // Reads use the live book; every change goes through commitBook (D-S104-06), which replaces it.
           const book = this.books.get(room.id) ?? new MemoryBook();
-          this.books.set(room.id, book);
           if (req.method === "GET" && parts.length === 3) {
             if (!this.requireSession(room, req, res)) return;
             this.send(res, 200, book.entries);
@@ -919,14 +928,20 @@ export class LocalServer {
               if (typeof key !== "string" || !/^[A-Za-z0-9-]{8,64}$/.test(key)) { this.send(res, 400, { error: "That save had an unreadable request key.", code: "BAD_REQUEST_ID" }); return; }
               requestId = key;
               fingerprint = attemptFingerprint(sourceIds, text, day);
-              const prior = book.attemptFor(member.id, key);
+              // The live book as it is now, after this request's body arrived (only what is on disk: D-S104-06).
+              const prior = (this.books.get(room.id) ?? new MemoryBook()).attemptFor(member.id, key);
               if (prior?.entry && prior.attempt.fingerprint === fingerprint) { this.send(res, 200, prior.entry); return; }
               if (prior) { this.send(res, 409, { error: "Your earlier save already reached the Memory Book, so it was kept as it was.", code: "ATTEMPT_MISMATCH", ...(prior.entry ? { entry: prior.entry } : {}) }); return; }
             }
-            const created = (entry: MemoryBookEntry) => {
-              entry.addedBy = member.id;
-              if (requestId) book.recordAttempt(member.id, requestId, entry.id, fingerprint);
-              this.persistBook(room.id);
+            // Stage 10.4 repair (D-S104-06): the entry and its key are made on a staged copy, written together, and
+            // only then live; a failed write leaves neither behind, so a retry can't be answered from memory alone.
+            const created = (add: (staged: MemoryBook) => MemoryBookEntry) => {
+              const entry = this.commitBook(room.id, (staged) => {
+                const e = add(staged);
+                e.addedBy = member.id;
+                if (requestId) staged.recordAttempt(member.id, requestId, e.id, fingerprint);
+                return e;
+              });
               this.send(res, 201, entry);
             };
             const cites = new Set(sourceIds);
@@ -946,14 +961,14 @@ export class LocalServer {
               }
               try {
                 const facts = teamFactsFor(game, coop as never);
-                created(book.addTeamResult(day, text, facts, getGame(game.gameId).title));
+                created((staged) => staged.addTeamResult(day, text, facts, getGame(game.gameId).title));
               } catch (err) {
                 if (err instanceof MemoryRefused) { this.send(res, err.status, { error: err.message, code: err.code }); return; }
                 throw err;
               }
               return;
             }
-            created(book.addFromLedger(day, text, sourceIds, ledger as never));
+            created((staged) => staged.addFromLedger(day, text, sourceIds, ledger as never));
             return;
           }
           if (req.method === "POST" && parts.length === 5 && parts[4] === "approve") {
@@ -963,8 +978,7 @@ export class LocalServer {
               this.send(res, 403, { error: "Only host/cohost can approve Memory Book entries" });
               return;
             }
-            book.approve(String(parts[3]), player.id);
-            this.persistBook(room.id);
+            this.commitBook(room.id, (staged) => staged.approve(String(parts[3]), player.id));
             this.send(res, 200, { ok: true });
             return;
           }
@@ -975,8 +989,7 @@ export class LocalServer {
               this.send(res, 403, { error: "Only host/cohost can revoke Memory Book entries" });
               return;
             }
-            book.revoke(String(parts[3]));
-            this.persistBook(room.id);
+            this.commitBook(room.id, (staged) => staged.revoke(String(parts[3])));
             this.send(res, 200, { ok: true });
             return;
           }

@@ -64,7 +64,8 @@ export function SaveMemory({ facts, send, newKey, canApprove, onOpenBook }: {
         setState({ kind: "saved", entry: r.body["entry"] as MemoryEntry, earlier: true });
         return;
       }
-      setState({ kind: "open", error: typeof r.body["error"] === "string" ? r.body["error"] : "That didn't save. Try again." });
+      // A refusal is final for this draft; a server failure (5xx: nothing was saved, D-S104-06) is worth a retry with the same key.
+      setState({ kind: "open", error: typeof r.body["error"] === "string" ? r.body["error"] : "That didn't save. Try again.", retry: r.status >= 500 });
     } catch {
       setState({ kind: "open", error: "Couldn't reach the game. Your note is still here; try again.", retry: true });
     }
