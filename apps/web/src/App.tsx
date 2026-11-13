@@ -2194,7 +2194,7 @@ export function App() {
         <MemoryScreen roomId={roomId ?? ""} roomSeq={proj?.seq} ledgerAt={ledgerAt} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportDoc={exportDoc} setExportDoc={setExportDoc} post={post} get={get}
           bookRevision={bookRevision} heardRevision={heardRevision} heard={() => bookSync.current?.heard ?? NOTHING}
           fetchSnapshot={() => fetchBook(roomId ?? "")} refreshBook={() => syncBook(roomId ?? "", true)}
-          canApprove={!!(me?.isHost || me?.isCohost) && seatConn.state !== "replaced" && seatConn.state !== "signed-out"} onBack={toLobby} onMenu={() => openSheet("menu")} />
+          canApprove={!!(me?.isHost || me?.isCohost) && seatConn.state !== "replaced" && seatConn.state !== "signed-out"} roomKind={proj?.roomKind} onBack={toLobby} onMenu={() => openSheet("menu")} />
         {roomSheets}
       </MchezoProvider>
     );

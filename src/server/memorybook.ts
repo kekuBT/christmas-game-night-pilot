@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { LedgerEvent } from "./room.js";
 import { TeamResultSchema } from "./persistence.js";
 import { memoryTeamLine, type MemoryTeamFacts } from "../shared/memoryTeam.js";
+import { entryFactLines, entryLabel, mdEscape, type BookContext, type BookMode, type MemorySource } from "../shared/memoryPresent.js";
 
 export interface MemoryBookEntry {
   id: string;
@@ -22,7 +23,30 @@ export interface MemoryBookEntry {
   team?: MemoryTeamFacts;
   /** Stage 10.4: the member who added it (set by the server; absent on older entries). */
   addedBy?: string;
+  /**
+   * Stage 11.2 (D-S112-01, D-S112-02): what the server recorded about the source when the entry was made: the room's
+   * mode, the cited games' own days (Cup) and titles, and each competitive fact's player name. Absent on older entries.
+   */
+  source?: MemorySource;
 }
+
+/**
+ * Stage 11.2: what the server knows about a cited game when an entry is made (from its own room, never the request).
+ * `nameOf` is the room's players by id (undefined: not a player).
+ */
+export interface SourceContext {
+  mode: BookMode;
+  gameOf: (gameInstanceId: string) => { title: string; day?: number } | undefined;
+  nameOf: (playerId: string) => string | undefined;
+}
+
+/** Stage 11.2 (D-S112-03): a recorded source, checked on restore; an invalid one is dropped (presentation only). */
+export const MemorySourceSchema = z.object({
+  mode: z.enum(["cup", "casual"]),
+  days: z.array(z.number().int().min(1)).max(50).optional(),
+  titles: z.array(z.string().max(120)).max(50),
+  scores: z.array(z.object({ playerId: z.string().min(1).max(64), name: z.string().max(64).nullable(), points: z.number().int() }).strict()).max(500).optional(),
+}).strict();
 
 /**
  * Stage 10.4 (D-S104-02): one save attempt, by a member's own key. The fingerprint is of the request (the cited
@@ -150,7 +174,7 @@ export class MemoryBook {
     this.attempts.set(`${memberId}|${requestId}`, { entryId, fingerprint });
   }
 
-  addFromLedger(day: number, text: string, sourceEventIds: string[], ledger: LedgerEvent[]): MemoryBookEntry {
+  addFromLedger(day: number, text: string, sourceEventIds: string[], ledger: LedgerEvent[], ctx?: SourceContext): MemoryBookEntry {
     if (!Array.isArray(sourceEventIds) || sourceEventIds.length === 0) {
       throw new Error("At least one source event is required");
     }
@@ -161,19 +185,28 @@ export class MemoryBook {
       if (ev.type !== "game-finished") throw new Error(`Source event is not a finished game: ${id}`);
     }
     const derivedFacts: string[] = [];
+    // Stage 11.2: each fact's readable twin, from the same score events and the room's own players (D-S112-02).
+    const scores: NonNullable<MemorySource["scores"]> = [];
     for (const id of sourceEventIds) {
       const ev = byId.get(id)!;
-      const scores = ledger.filter((e) => e.type === "score-awarded" && e.gameInstanceId === ev.gameInstanceId);
-      for (const s of scores) derivedFacts.push(`${s.playerId ?? "unknown"}: ${s.points ?? 0} points`);
+      const events = ledger.filter((e) => e.type === "score-awarded" && e.gameInstanceId === ev.gameInstanceId);
+      for (const s of events) {
+        const playerId = s.playerId ?? "unknown";
+        derivedFacts.push(`${playerId}: ${s.points ?? 0} points`);
+        scores.push({ playerId, name: (s.playerId && ctx?.nameOf(s.playerId)) || null, points: s.points ?? 0 });
+      }
     }
+    const games = sourceEventIds.map((id) => byId.get(id)!.gameInstanceId).map((gid) => (gid ? ctx?.gameOf(gid) : undefined));
+    const source = ctx ? sourceFor(ctx, games, scores) : undefined;
     const entry: MemoryBookEntry = {
       id: `book-${this.next++}`,
-      day,
+      day: gameDay(games[0], day),
       type: "game-result",
       text,
       sourceEventIds,
       approved: false,
       derivedFacts,
+      ...(source ? { source } : {}),
     };
     this.entries.push(entry);
     return entry;
@@ -183,17 +216,20 @@ export class MemoryBook {
    * Stage 10.3: a pending entry for one team game's finish, with the facts
    * the server derived (`teamFactsFor`). It cites exactly that finish.
    */
-  addTeamResult(day: number, text: string, facts: MemoryTeamFacts, gameTitle: string): MemoryBookEntry {
+  addTeamResult(day: number, text: string, facts: MemoryTeamFacts, gameTitle: string, ctx?: SourceContext): MemoryBookEntry {
     const checked = MemoryTeamFactsSchema.parse(facts);
+    const game = ctx?.gameOf(checked.gameInstanceId);
+    const source = ctx ? sourceFor(ctx, [game ?? { title: gameTitle }]) : undefined;
     const entry: MemoryBookEntry = {
       id: `book-${this.next++}`,
-      day,
+      day: gameDay(game, day),
       type: "game-result",
       text,
       sourceEventIds: [checked.finishedEventId],
       approved: false,
       derivedFacts: [memoryTeamLine(checked, gameTitle)],
       team: checked,
+      ...(source ? { source } : {}),
     };
     this.entries.push(entry);
     return entry;
@@ -218,16 +254,17 @@ export class MemoryBook {
    * Stage 10.3 (D-S103-06): a neutral title (the server has no device look); a team
    * entry's facts come from its frozen team record, under "From the game".
    */
-  exportMarkdown(roomName: string): string {
+  exportMarkdown(roomName: string, ctx: BookContext = { roomKind: "cup", nameOf: () => undefined }): string {
     const approved = this.entries.filter((e) => e.approved);
-    const lines = [`# Mchezo Memory Book — ${roomName}`, ""];
+    // Stage 11.2 (D-S112-01..03): the shared presentation rule, and everything typed escaped.
+    const lines = [`# Mchezo Memory Book — ${mdEscape(roomName)}`, ""];
     if (approved.length === 0) lines.push("No approved highlights yet.");
     for (const e of approved) {
-      lines.push(`## Day ${e.day}`);
-      lines.push(`Note: ${e.text}`);
+      lines.push(`## ${mdEscape(entryLabel(e, ctx))}`);
+      lines.push(`Note: ${mdEscape(e.text)}`);
       if (e.derivedFacts.length > 0) {
         lines.push(e.team ? "From the game:" : "From the ledger:");
-        for (const f of e.derivedFacts) lines.push(`- ${f}`);
+        for (const f of entryFactLines(e, ctx)) lines.push(`- ${mdEscape(f)}`);
       }
       lines.push(`Sources: ${e.sourceEventIds.join(", ")}`);
       lines.push("");
@@ -247,7 +284,11 @@ export class MemoryBook {
   static fromJSON(data: Record<string, unknown>): MemoryBook {
     const book = new MemoryBook();
     book.entries = (data["entries"] as MemoryBookEntry[]).map((e) => {
-      const restored: MemoryBookEntry = { ...e, derivedFacts: e.derivedFacts ?? [] };
+      const { source, ...rest } = e;
+      const restored: MemoryBookEntry = { ...rest, derivedFacts: e.derivedFacts ?? [] };
+      // Stage 11.2 (D-S112-03): a recorded source only changes how the entry is shown, so an invalid one is dropped
+      // (the entry falls back to the older-entry rule) rather than refusing the book.
+      if (source !== undefined) { const s = MemorySourceSchema.safeParse(source); if (s.success) restored.source = s.data; }
       if (e.team !== undefined) {
         const t = MemoryTeamFactsSchema.safeParse(e.team);
         if (!t.success) throw new Error(`entry ${e.id} has an invalid team result`);
@@ -271,4 +312,20 @@ export class MemoryBook {
     }
     return book;
   }
+}
+
+/** Stage 11.2: the entry's day is its first cited game's own day when the room knows it, else what was asked. */
+function gameDay(game: { day?: number } | undefined, fallback: number): number {
+  return game?.day !== undefined && Number.isSafeInteger(game.day) && game.day >= 1 ? game.day : fallback;
+}
+
+/** Stage 11.2 (D-S112-01): the recorded source, from the room's own state. */
+function sourceFor(ctx: SourceContext, games: ({ title: string; day?: number } | undefined)[], scores?: NonNullable<MemorySource["scores"]>): MemorySource {
+  const days = [...new Set(games.map((g) => g?.day).filter((d): d is number => d !== undefined && Number.isSafeInteger(d) && d >= 1))].sort((a, b) => a - b);
+  return {
+    mode: ctx.mode,
+    ...(ctx.mode === "cup" && days.length ? { days } : {}),
+    titles: games.map((g) => g?.title ?? ""),
+    ...(scores ? { scores } : {}),
+  };
 }

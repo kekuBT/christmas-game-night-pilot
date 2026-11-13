@@ -11,7 +11,8 @@ import { GAME_POLICIES } from "./lifecycle.js";
 import { z } from "zod";
 import type { ContentLibrary } from "../content/registry.js";
 import { parseClientProtocol, PROTOCOL_HEADER, PROTOCOL_PARAM } from "../shared/clientProtocol.js";
-import { attemptFingerprint, MemoryBook, MemoryRefused, teamFactsFor, type MemoryBookEntry } from "./memorybook.js";
+import { attemptFingerprint, MemoryBook, MemoryRefused, teamFactsFor, type MemoryBookEntry, type SourceContext } from "./memorybook.js";
+import { bookModeOf, type BookContext } from "../shared/memoryPresent.js";
 import { hashToken } from "../shared/protocol.js";
 import { isSessionSeason, SESSION_SEASONS, type SessionSeason } from "../shared/season.js";
 import { RoomStore, type RestoreReport } from "./persistence.js";
@@ -913,6 +914,23 @@ export class LocalServer {
         if (parts.length >= 3 && parts[2] === "memory") {
           // Reads use the live book; every change goes through commitBook (D-S104-06), which replaces it.
           const book = this.books.get(room.id) ?? new MemoryBook();
+          // Stage 11.2 (D-S112-01, D-S112-02): what the book knows about the room, from its own state only.
+          const titleOf = (gameId: string): string => { try { return getGame(gameId).title; } catch { return ""; } };
+          const nameOf = (playerId: string): string | undefined => room.players.get(playerId)?.displayName;
+          const sourceCtx: SourceContext = {
+            mode: bookModeOf(room.kind),
+            gameOf: (gid) => { const g = room.games.get(gid); return g ? { title: titleOf(g.gameId), day: g.day ?? 1 } : undefined; },
+            nameOf,
+          };
+          const bookCtx: BookContext = {
+            roomKind: room.kind,
+            nameOf,
+            sourceGames: (e) => e.sourceEventIds.map((id) => {
+              const ev = room.ledger.find((x) => x.eventId === id);
+              const g = ev?.gameInstanceId ? room.games.get(ev.gameInstanceId) : undefined;
+              return g ? { title: titleOf(g.gameId), day: g.day ?? 1 } : {};
+            }),
+          };
           if (req.method === "GET" && parts.length === 3) {
             if (!this.requireSession(room, req, res)) return;
             // Stage 10.5 (D-S105-02): `?revision=1` opts into the snapshot { revision, entries }; without it the reply
@@ -923,7 +941,7 @@ export class LocalServer {
           if (req.method === "GET" && parts.length === 4 && parts[3] === "export") {
             if (!this.requireSession(room, req, res)) return;
             // Stage 10.5: the revision this export was made from, next to it (additive).
-            this.send(res, 200, { markdown: book.exportMarkdown(room.name), revision: book.revision });
+            this.send(res, 200, { markdown: book.exportMarkdown(room.name, bookCtx), revision: book.revision });
             return;
           }
           if (req.method === "POST" && parts.length === 3) {
@@ -992,14 +1010,14 @@ export class LocalServer {
               }
               try {
                 const facts = teamFactsFor(game, coop as never);
-                created((staged) => staged.addTeamResult(day, text, facts, getGame(game.gameId).title));
+                created((staged) => staged.addTeamResult(day, text, facts, getGame(game.gameId).title, sourceCtx));
               } catch (err) {
                 if (err instanceof MemoryRefused) { this.send(res, err.status, { error: err.message, code: err.code }); return; }
                 throw err;
               }
               return;
             }
-            created((staged) => staged.addFromLedger(day, text, sourceIds, ledger as never));
+            created((staged) => staged.addFromLedger(day, text, sourceIds, ledger as never, sourceCtx));
             return;
           }
           if (req.method === "POST" && parts.length === 5 && parts[4] === "approve") {
