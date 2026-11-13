@@ -39,7 +39,7 @@ class NoFreshSnapshot extends Error {}
 const CHECK_FAILED = "Couldn’t check the latest approvals, so nothing was downloaded. Try again.";
 const BOOK_MOVING = "The book is changing right now, so nothing was downloaded. Try again in a moment.";
 /** A request's failure in plain words: the server's own sentence when it sent one, else that it didn't answer. */
-const whyFailed = (e: unknown) => e instanceof Error && e.message && !/fetch|network|abort|timed? ?out|load failed/i.test(e.message) ? e.message : "The game didn’t answer.";
+const whyFailed = (e: unknown) => e instanceof Error && e.message && !/fetch|network|abort|timed? ?out|load failed/i.test(e.message) ? e.message : "The game didn’t answer. Nothing changed; try again.";
 
 export function MemoryScreen(props: {
   roomId: string;
@@ -253,7 +253,7 @@ export function MemoryScreen(props: {
       await post<Record<string, unknown>>(`/rooms/${roomId}/memory/${e.id}/${kind}`, {});
       setEntryOp(null);
     } catch (err) {
-      setEntryOp({ id: e.id, kind, state: "error", text: `Couldn’t ${kind} it. ${whyFailed(err)} Nothing changed; try again.` });
+      setEntryOp({ id: e.id, kind, state: "error", text: `Couldn’t ${kind} it. ${whyFailed(err)}` });
     }
     await refreshBook(); // what the server holds now, either way
   }
