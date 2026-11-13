@@ -119,8 +119,21 @@ export function MemoryScreen(props: {
   /** Stage 10.5: the entries an export is built from: the fresh snapshot's approved ones, never the screen's. */
   function downloadPdf(approvedNow: MemoryEntry[]): string {
     const doc = new jsPDF();
+    // Stage 11.1 (spec §3 A10): a light look's PDF takes its page, title and text colours; a dark look's PDF stays
+    // plain black on white, as before (a dark page wastes ink). Which notes and words go in is unchanged.
+    const light = theme.tone === "light";
+    const rgb = (hex: string): [number, number, number] => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) as [number, number, number];
+    const paintPage = () => {
+      if (!light) return;
+      doc.setFillColor(...rgb(look.ground));
+      doc.rect(0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight(), "F");
+      doc.setTextColor(...rgb(look.text));
+    };
+    paintPage();
     doc.setFontSize(20);
+    if (light) doc.setTextColor(...rgb(look.brand));
     doc.text(bookTitle, 14, 20);
+    if (light) doc.setTextColor(...rgb(look.text));
     doc.setFontSize(12);
     // Flatten to lines, then paginate lines (review 5769441799 P2): a single
     // oversized entry is split across pages at line boundaries.
@@ -141,7 +154,7 @@ export function MemoryScreen(props: {
         if (l.text) doc.text(l.text, 14, y);
         y += l.height;
       }
-      if (page !== pages[pages.length - 1]) doc.addPage();
+      if (page !== pages[pages.length - 1]) { doc.addPage(); paintPage(); }
     }
     const name = exportFilename("pdf", roomCode, new Date(), christmas ? "christmas" : "everyday");
     doc.save(name);
