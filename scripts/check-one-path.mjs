@@ -41,7 +41,7 @@ const seatOf = (page) => page.evaluate(() => ({ roomId: sessionStorage.getItem("
 const intent = (roomId, seat, gid, action, payload) =>
   api(`/rooms/${roomId}/intents`, { token: seat.token, body: { intent: { kind: "intent", schemaVersion: 1, clientEventId: crypto.randomUUID(), roomId, gameInstanceId: gid, action, payload } } });
 const tvProj = (roomId) => api(`/rooms/${roomId}/projection?audience=tv`);
-const shot = (page, name) => page.screenshot({ path: screenshotPath(`docs/stage12/stage121-screenshots/${name}.png`) });
+const shot = (page, name) => page.screenshot({ path: screenshotPath(`docs/stage12/stage121-screenshots/journey-${name.replace(/^after-/, "")}.png`) });
 
 /** A Math Mayhem game over the API: `right[i]` of seat i's questions answered right, the rest wrong; returns its id. */
 async function playMath(roomId, seats, right, official) {

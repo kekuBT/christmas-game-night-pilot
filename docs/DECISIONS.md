@@ -1490,3 +1490,66 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - the stored day as a fallback: the feedback rules it out, and it's the wrong value in exactly the case at issue;
     - rewriting stored days on restore: a migration, and it would change existing evidence.
+
+## Stage 12.1: one path, and the TV as the hero (owner-directed)
+**Authorization:** the owner, directly in chat on 2026-11-13 at about 4:50 p.m. ET. Quoting my two design recommendations, the owner wrote that I have their "blessing to optimize however you think is best … implement those in the way you think is best". Spec: `docs/stage12/stage121.md`. These are reversible product decisions under that blessing. Nothing is merged or deployed. ChatGPT can review them like any stage.
+
+- **D-S121-01 One path at the door: Join and Host, with Play solo as a quieter link; every hosted room starts casual.**
+  - **Home:** two dock buttons: Join a room first (an invited guest is the most common arrival), then Host a game. Play solo moves to a full-width text link under them ("Just you? Play solo"), still one tap.
+  - **Host:** asks only for a name. One line says a week-long Family Cup can come later from the room menu.
+  - **The API is unchanged:** `POST /rooms` still takes `kind`, so scripts, tests and older clients can still create a Cup directly.
+  - **Alternatives rejected:**
+    - keeping "Casual or Family Cup?" at the door: it's the decision the owner's brief asked to remove, and a first-time host can't judge it;
+    - removing Play solo from Home: solo is a real use (practice, a personal best), so it stays one tap away.
+- **D-S121-02 "Make it a Family Cup" turns a casual room into a Cup in place, one way, host only. Games played while casual stay casual. This amends D-S112-01.**
+  - **Engine:** `RoomEngine.upgradeToCup`; HTTP: `POST /rooms/:id/cup`.
+  - **Who and when:** host only; casual rooms only (solo can't); refused while a game is getting ready or playing; idempotent for a room that's already a Cup.
+  - **What it does:**
+    - the kind becomes `cup`, the day 1;
+    - a fresh Cup record (new id, created now, same timing version);
+    - `casualGameIds` keeps every game already in the room;
+    - `cupSince` records `{at, seq}`;
+    - one ledger event `cup-started`;
+    - Quick Party, What's next, breaks and host handover end with the casual room.
+  - **Persistence and visibility:** persisted and restored. `cupSince` and `casualGameIds` are in every projection (public facts).
+  - **The Memory Book:** an entry's mode is its cited game's era. A game in `casualGameIds` is casual (no "Day"), and Cup games are filed under their day. So D-S112-01's "the room's kind is fixed for a room's life" no longer holds, and the mode is per game instead. New entries record it at creation. Older entries resolve it from the citation.
+  - **The up-next plan:** after the upgrade, the stored up-next plan becomes Official for an official-eligible game. The host's phone follows, like a Cup created at the door; the host can still pick Practice.
+    - **Found by the drivers:** before this, the casual plan (always practice) carried over and the new Cup's Start defaulted to Practice. check-casual and check-f4 caught it, and it now has a unit test.
+  - **Alternatives rejected:**
+    - creating a second room and moving everyone: every phone rejoins, and the night's history splits;
+    - counting the casual games retroactively: they were never official, and rewriting them would change scores;
+    - a two-way switch: a Cup's official results can't become "just for fun" honestly.
+- **D-S121-03 What the upgrade deliberately doesn't do: content still doesn't follow the look, and Cups don't get Quick Party.** Both are written up as owner proposals in `docs/stage12/stage121-discussions.md`.
+  - **Content following the look** would reverse the reviewed Stage 8.2 rule (Everyday unless the host picks Christmas).
+  - **Quick Party in a Cup** touches the Cup's start rules.
+- **D-S121-04 The TV lobby shows a QR code of the join link.**
+  - **What it encodes:** exactly `<origin>/join?code=CODE`, the link the phone's Invite sheet shares. It's drawn on the TV with the existing `qrcode` dependency, and nothing leaves the screen.
+  - **Layout:** the QR sits beside the big code, with "Scan with a phone camera, or go to …" and the short address for people who'd rather type.
+  - **Tested:** `check-one-path` reads the drawn modules back and compares them with the encoder's matrix for the expected link.
+- **D-S121-05 A competitive game's final on the TV is a reveal: podium, standings, then the night so far. Medals are display only.**
+  - **The podium:**
+    - gold, silver and bronze by shared competition rank (10, 10, 5 gives two golds and a bronze, no silver);
+    - a medal needs a score above zero;
+    - a game where everyone tied, or with fewer than two scored players, or a cooperative game, has no podium;
+    - it rises bronze, then silver, then gold over about 3 s, only with full motion;
+    - with reduced motion (OS), Animations Off, or the director's Pause, it shows at once.
+  - **The medal table (casual rooms):** the same rule summed over every finished game. Ordered by golds, then silvers, then bronzes, then name, then id. Shown on the final and in the lobby ("N games tonight").
+  - **Not facts:** medals are never scores, Cup points or Memory Book facts. Pure functions in `apps/web/src/ui/mchezo/lib/medals.ts`, with tests.
+  - **Alternatives rejected:**
+    - dense ranks (1, 1, 2): every medal table uses shared places;
+    - medals for zero: a bronze for not scoring reads as a joke at someone's expense;
+    - putting medals in the Memory Book: they'd become a second scoring system.
+- **D-S121-06 The Cup on the TV: the server's numbers, with movement only from what this TV saw.**
+  - **Lobby card:** the top five with shared ranks, "Day N of 7", and the day's leader(s) from the server's own `ceremony()` ("X is leading Day N"; "leading on the final day" on Day 7).
+  - **After an official game:** the final shows "Family Cup · after this game" with ▲/▼ against the standings the TV held while that game was getting ready or playing. A TV that wasn't open then shows no arrows, never guessed ones.
+  - **"Cup standings" (a director button):** the Cup podium from the totals. Here a shared lead is a real result, so everyone on the top total stands on gold (`cupPodium`), and nobody without points stands on it.
+  - **Mode words:** a Cup room's games from before the upgrade are labelled Casual on the TV, never Practice.
+  - **Alternatives rejected:**
+    - a server-side "previous standings": more state for a presentation detail; the TV's own memory is honest about its limits;
+    - reusing the game podium rule for the Cup: it would hide a shared lead ("No Cup points yet" was on screen in the first local run with all three tied on 50; fixed before commit).
+- **D-S121-07 The day's trophy, and never a champion.**
+  - **When:** the TV remembers the last ceremony it saw for each day. When the host ends a day while the TV is open, it shows "Day N complete", a trophy and that day's winner(s) as the server named them ("X wins Day N", or "X, Y and Z share Day N").
+  - **No winners that day:** no trophy, and it says no official game finished.
+  - **A TV opened later** never shows it.
+  - **No champion:** the server has no end-of-Cup state, so the TV never says "champion". The Make-a-Cup sheet's "a champion at the end" was removed for the same reason.
+  - **Alternative rejected:** crowning the overall leader after Day 7. That's a Cup-rules addition (`docs/stage12/stage121-discussions.md`).

@@ -76,7 +76,8 @@ All of this is presentation from public facts only, as before: no secret, privat
   - **Beside it:** the full standings.
   - **Below it:** the night so far, as the medal table (casual) or the Cup standings (Cup).
 - **The medal table** (casual rooms, and a Cup room's casual games), a pure function with tests:
-  - every finished competitive game with at least 2 scored players awards gold, silver and bronze by shared rank;
+  - every finished competitive game with at least 2 scored players awards gold, silver and bronze by shared rank, and a medal needs a score above zero;
+  - a game where everyone tied awards none;
   - players are ordered by golds, then silvers, then bronzes, then name;
   - cooperative games (Spectrum) award none;
   - shown in the TV lobby ("Medal table · N games") and on every final screen.
@@ -85,7 +86,7 @@ All of this is presentation from public facts only, as before: no secret, privat
   - **After an official game:** the final screen shows the Cup standings "after this game", with ▲/▼ movement against the standings the TV saw before the game. If the TV opened mid-game, there are no arrows rather than guessed ones.
 - **The trophy moment:**
   - When the host ends a day while the TV is open, the TV shows "Day N complete" with a big trophy and that day's winner(s), as the server named them before the day moved on. The TV remembers the last ceremony it saw for each day.
-  - A director button, "Cup standings", shows the Cup podium whenever the host wants the moment.
+  - A director button, "Cup standings", shows the Cup podium whenever the host wants the moment. Here a shared lead is a real result: everyone on the top total stands on gold, and nobody without points stands on it.
   - With no end-of-Cup state on the server, the TV never claims a final champion. On Day 7 it says "leading on the final day".
 
 ## 4. Acceptance
@@ -130,6 +131,18 @@ All of this is presentation from public facts only, as before: no secret, privat
 - **Gates:** targeted, fast, then one full checkpoint on the clean final SHA.
 
 ## 6. Discussions for the owner (not built)
-- **Content follows the look.** A Christmas-look host would get Christmas questions by default, removing the last routine switch. It reverses the reviewed Stage 8.2 rule, so it's the owner's call.
-- **Quick Party in a Family Cup.** It would make the Cup the same path as casual, with "official" as a property of the lineup. It touches the Cup's start rules.
-- **An explicit "Finish the Family Cup" action** after Day 7, so the TV can crown a champion rather than a leader. That's a Cup-rules addition.
+These are in `docs/stage12/stage121-discussions.md`, each with what, why, risk, size and my view:
+- **One path:** undo the upgrade until the first official game ends, a nudge after a good casual night, content follows the look, Quick Party in a Cup, and a short `/tv` link.
+- **TV moments:** "Night complete" for casual rooms, Finish the Family Cup, TV sound, and phones stepping back when a TV is watching.
+- **Copy notes:** the "qualifying" label, and "Individual Family Cup".
+
+## 7. What was built, and what building it found
+- **Built as specified:** §2 and §3. Decisions D-S121-01..07 are in `docs/DECISIONS.md`.
+- **Found by the drivers, fixed before commit:**
+  - **After the upgrade, Start defaulted to Practice.** While casual, the host's phone had stored the up-next plan as practice, and the new Cup adopted it. check-casual and check-f4 caught it.
+    - **Fix:** the server sets the stored plan to Official for an official-eligible game, and the host's phone follows. There's a unit test.
+  - **The Cup view said "No Cup points yet" with three players tied on 50.** The game podium hides an all-tied result, which is right for a single game's medals but wrong for the Cup.
+    - **Fix:** a separate `cupPodium`, where a shared lead is shared gold, with tests and a driver check.
+  - **The TV's director row wrapped onto two lines** at 1920 once "Cup standings" was added. The privacy line now wraps instead.
+- **Found while reviewing copy:** the Make-a-Cup sheet promised "a champion at the end", but the server has no end-of-Cup state. The promise was removed (D-S121-07).
+- **Not changed (a test artifact):** `check-one-path` answers over the API for seats whose phones are open, so a phone may show "Your answer is already in". Real play has one client per seat.
