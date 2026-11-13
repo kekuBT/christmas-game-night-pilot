@@ -36,7 +36,8 @@ export interface MemoryBookEntry {
  */
 export interface SourceContext {
   mode: BookMode;
-  gameOf: (gameInstanceId: string) => { title: string; day?: number } | undefined;
+  /** Stage 12.1: `mode` is the game's own era (a game played while the room was casual stays casual). */
+  gameOf: (gameInstanceId: string) => { title: string; day?: number; mode?: BookMode } | undefined;
   nameOf: (playerId: string) => string | undefined;
 }
 
@@ -320,11 +321,13 @@ function gameDay(game: { day?: number } | undefined, fallback: number): number {
 }
 
 /** Stage 11.2 (D-S112-01): the recorded source, from the room's own state. */
-function sourceFor(ctx: SourceContext, games: ({ title: string; day?: number } | undefined)[], scores?: NonNullable<MemorySource["scores"]>): MemorySource {
+function sourceFor(ctx: SourceContext, games: ({ title: string; day?: number; mode?: BookMode } | undefined)[], scores?: NonNullable<MemorySource["scores"]>): MemorySource {
   const days = [...new Set(games.map((g) => g?.day).filter((d): d is number => d !== undefined && Number.isSafeInteger(d) && d >= 1))].sort((a, b) => a - b);
+  // Stage 12.1 (D-S121-02): the cited game's era decides (the first cited game's), else the room's kind.
+  const mode = games[0]?.mode ?? ctx.mode;
   return {
-    mode: ctx.mode,
-    ...(ctx.mode === "cup" && days.length ? { days } : {}),
+    mode,
+    ...(mode === "cup" && days.length ? { days } : {}),
     titles: games.map((g) => g?.title ?? ""),
     ...(scores ? { scores } : {}),
   };
