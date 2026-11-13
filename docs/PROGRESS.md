@@ -2336,7 +2336,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Cleared:** ChatGPT's review 6844074714 cleared Stage 10.4 for development (not merge or deployment). It ran 51 independent focused checks and a private audit of the exact build, including a real failed disk write in its own isolated room. Nothing merged or deployed.
 - **Next:** Stage 10.5 (below).
 
-## Stage 10.5: a Memory Book that stays current (built and gated; awaiting review)
+## Stage 10.5: a Memory Book that stays current (CLEARED by ChatGPT's review 6847066185 on `1c2447f`/`d4dc408`)
 - **Brief:** ChatGPT's handoff 6844074714 on PR #21.
 - **Base:** `24f83d1` (PR #21's head). Branch `claude/stage10-5-book-freshness`, a stacked PR on #21.
 - **Scope:**
@@ -2360,5 +2360,16 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Repair (`1c2447f`, D-S105-06):** a backoff retry (1, 2, 4, then 8 s at most) while the page is behind and the book is open, cancelled on leaving, switching rooms or signing out. The regression steps `check-book-live` B13–B16 (`754ad1a`) failed 3 checks on the unfixed code and pass after.
 - **Repair gates on `1c2447f`:** targeted `20261113-060834-1c2447f9-4076` PASSED (book-live 51, sessions 23); fast `20261113-061625-1c2447f9-5870` PASSED (1,708 unit tests). No full gate, as the review asked.
 - **Also recorded (owner decision, comment 6845465785):** Keku chose **Option A, Warm Ivory**, for the Christmas look, to replace the heavy green; Everyday stays. Implementation waits for ChatGPT's spec after Stage 10.5 clears.
-- **Next:** ChatGPT's verification of the repair and its private audit of PR #22. Nothing merged or deployed.
+- **Cleared:** ChatGPT's review 6847066185 cleared Stage 10.5 for development (not merge or deployment).
+  - It confirmed its earlier independent focused checks (13/13) and ran a private live audit of the exact build `1c2447f`, after the owner signed in to its cloud browser.
+  - The audit was in an isolated worktree, data directory and private port, with the served index hash matched.
+  - It played host and member journeys, the live add, approve and revoke, the exports, the TV, host handover, a server restart, and a 390×844 layout.
+  - Nothing merged or deployed.
+- **Next:** Stage 11.1 (below).
 
+
+## Stage 11.1: the Warm Ivory Christmas look (in progress)
+- **Brief:** ChatGPT's handoff 6847066185 on PR #22, carrying out the owner's choice of Option A, Warm Ivory (6845465785; D-OWN-1113).
+- **Base:** `d4dc408` (PR #22's head). Branch `claude/stage11-1-warm-ivory`, a stacked PR on #22.
+- **Scope:** the Christmas look becomes warm ivory, cream cards, dark warm text, cranberry, gold and sage. Everyday is unchanged. No server, score, approval or protocol change, no new dependency.
+- **Spec:** `docs/stage11/stage111.md`: the inventory of dark-look assumptions, the palette roles and contrast, the consumers, validation, the estimate (about 2.5–3 h of implementation plus about 45 min of gates), and the private preview recipe. Decisions D-OWN-1113 and D-S111-01..05.

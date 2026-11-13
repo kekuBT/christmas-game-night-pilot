@@ -1427,3 +1427,22 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - re-hearing the revision on every projection, so each poll refetches while behind: it ties retries to game-tick broadcasts, which can be frequent during a game;
     - an unbounded immediate retry: a storm when the network is down.
+
+## Stage 11.1: the Warm Ivory Christmas look
+- **D-OWN-1113 Owner decision: Warm Ivory for Christmas (Option A).** Keku chose Option A, Warm Ivory, from the Christmas theme mockups on November 13 (comment 6845465785, "A sounds good"). It replaces the heavy green Christmas look with a light, modern one: ivory page, cream cards, dark warm text, restrained cranberry, small gold and sage touches. Everyday stays as it is. This is the owner's choice; no new option round. ChatGPT's handoff 6847066185 gives the implementation spec.
+- **D-S111-01 A look declares its tone; light-only adjustments are scoped by it.**
+  - **How:** `MchezoTheme` gains `tone: 'dark' | 'light'`. The provider and `applyDocumentLook` write it as `data-mz-tone` (and `color-scheme`). The few rules a light ground needs (card hairlines, softer shadows, the neutral key's edge, accent-coloured kickers, legacy pastel text, the Jebena disc) live in one stylesheet, `stage111.css`, under `[data-mz-tone="light"]`.
+  - **Why:** every rule stays generic, so a future light look gets them too. Everyday, a dark look, matches none of them, so its appearance can't drift.
+  - **Alternatives rejected:**
+    - selectors on the theme id (`[data-mz-theme="christmas"]`): that couples CSS to one season;
+    - a token for every case (shadow strength, kicker mix, card outline): many tokens whose Everyday value would be "none", for no gain.
+- **D-S111-02 On a light look, each accent is dark enough to be both text and a fill.**
+  - **How:** cranberry, antique gold, pine sage and slate each pass 4.5:1 as text on ivory and both card colours, and under cream text as a fill.
+  - **Why:** the CSS uses each accent both ways (`highlight` is a kicker, a focus ring and a badge fill; `success` is a gain number and a badge fill). One value per role keeps every existing rule correct, and the existing pure contrast test covers it.
+  - **Alternative rejected:** bright fills plus a second set of "accent text" tokens. That doubles the palette and means editing every rule that uses an accent as text, for a look the owner wants restrained anyway.
+- **D-S111-03 A semantic foreground for colours that don't change with the look (`onBright`).**
+  - **How:** player tokens and game cover accents keep their fixed bright colours in every look, so their text is a fixed dark `onBright` (`#16111D`). `onAccent` stays the text on the look's own accents (cream on Warm Ivory).
+  - **Why:** the handoff asked for this audit: one `onAccent` can't be right for both a cranberry key and a pastel player dot.
+  - **Everyday:** its `onBright` equals its `onAccent`, so nothing there changes.
+- **D-S111-04 `tokens.css` is generated, and a test keeps it honest.** `scripts/gen-tokens-css.mjs` writes it from `tokens.ts`, and a unit test fails if they disagree. Before this, the file said "generated" but was edited by hand.
+- **D-S111-05 Everyday is proven unchanged by comparing computed styles, not by eye.** The new driver renders the same Everyday screens on the base build and this build, and compares every element's computed colour, background, border, outline and shadow. Any difference fails the check. Screenshots are kept for people to look at, but the check doesn't depend on pixels: room codes, names and timers vary, while computed colours don't.
