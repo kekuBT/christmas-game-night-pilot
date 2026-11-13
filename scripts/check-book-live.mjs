@@ -8,7 +8,7 @@
 //   the book stops book fetches; switching rooms shows only the new room's book.
 // Starts ITS OWN server. Usage: node scripts/check-book-live.mjs
 import { spawn } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
@@ -201,6 +201,18 @@ try {
   await download(K, "memory-image");
   const img = await drawn(K);
   check("B4 share image: a fresh snapshot, and both notes drawn", K.bookFetches[room.roomId] > before && img.includes("Baraka note about the tea") && img.includes("Second approved note"), img.slice(0, 160));
+  // Stage 11.2 (docs/stage11/stage112.md; D-S112-01..03): this is a casual room. Its book has no Cup days, and its
+  // exports print names, never internal ids. The files are kept as examples next to the screenshots.
+  writeFileSync(screenshotPath("/tmp/book-live-casual-example.md"), md);
+  writeFileSync(screenshotPath("/tmp/book-live-casual-example.pdf"), Buffer.from(pdf.text, "latin1"));
+  check("R1 casual Markdown: no Day, no internal id; each entry headed by its game; facts read \"Name: N points\"",
+    !/Day \d/.test(md) && !/player-\d/.test(md) && (md.match(/^## Math Mayhem$/gm) ?? []).length === 2 && /^- (Keku|Amina|Baraka): \d+ points$/m.test(md), md.slice(0, 240).replace(/\n/g, " ⏎ "));
+  check("R2 casual PDF: no Day, no internal id; notes name their game; facts name their players",
+    !/\(Day \d/.test(pdf.text) && !/player-\d/.test(pdf.text) && pdf.text.includes("Second approved note \\(Math Mayhem\\)") /* PDF strings escape parentheses */ && /From the ledger: (Keku|Amina|Baraka): \d+ points/.test(pdf.text), pdf.name);
+  const screenText = await K.getByTestId("memory-screen").innerText();
+  const badges = await K.getByTestId("memory-entry-badge").allInnerTexts();
+  check("R3 casual book on screen: no \"Day 1\" anywhere; each badge names the game",
+    !/Day \d/.test(screenText) && badges.length > 0 && badges.every((b) => /^Math Mayhem · (approved|pending)$/.test(b.trim())), badges.slice(0, 3).join(" | "));
 
   // ---------- B5. A stale page that still shows a revoked note approved exports without it. ----------
   // Keku's next background refresh is held, so his screen stays out of date; an export fetches on its own.

@@ -10,7 +10,7 @@
 //   room code and date in the name; a failed export says so and claims nothing.
 // Starts ITS OWN server. Usage: node scripts/check-cup-memory.mjs
 import { spawn } from "node:child_process";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
@@ -210,6 +210,28 @@ try {
       await host.screenshot({ path: screenshotPath(`docs/stage4/after/memory-host-${v.width}.png`), fullPage: true });
       await host.context().close();
     }
+  }
+
+  // ---- Stage 11.2 (docs/stage11/stage112.md; D-S112-01): a Cup entry shows its game's own day, also when it's added
+  // after the day moved on; the Cup Markdown keeps its days and prints names, never ids.
+  {
+    const ledger = await api(`/rooms/${played.roomId}/ledger?watermark=1`, { token: played.seats[0].token });
+    const fin = ledger.events.filter((e) => e.type === "game-finished").at(-1).eventId;
+    const moved = await api(`/rooms/${played.roomId}/day`, { token: played.seats[0].token, body: {} });
+    check("the host ends Day 1 (the room is on Day 2)", moved.day === 2, JSON.stringify(moved));
+    const late = await api(`/rooms/${played.roomId}/memory`, { token: played.seats[1].token, body: { day: 2, text: "Added on Day 2 about Day 1", sourceEventIds: [fin] } });
+    check("a note added on Day 2 about a Day 1 game is filed under Day 1 (the game's own day)",
+      late.day === 1 && late.source?.mode === "cup" && JSON.stringify(late.source?.days) === "[1]", JSON.stringify({ day: late.day, source: late.source?.days }));
+    await api(`/rooms/${played.roomId}/memory/${late.id}/approve`, { token: played.seats[0].token, body: {} });
+    const host = await seatPage(browser, played, played.seats[0], "/room/memories");
+    const e = host.getByTestId("memory-entry").filter({ hasText: "Added on Day 2 about Day 1" });
+    await e.waitFor({ timeout: 15000 });
+    const badge = (await e.getByTestId("memory-entry-badge").innerText()).trim();
+    check("…and its badge says Day 1, not the room's Day 2", badge === "Day 1 · approved", badge);
+    const md = (await api(`/rooms/${played.roomId}/memory/export`, { token: played.seats[0].token })).markdown;
+    writeFileSync(screenshotPath("/tmp/cup-memory-example.md"), md);
+    check("the Cup Markdown keeps its days and prints names, never ids", /^## Day 1$/m.test(md) && !/player-\d/.test(md) && /^- Keku: \d+ points$/m.test(md), md.slice(0, 220).replace(/\n/g, " ⏎ "));
+    await host.context().close();
   }
 } finally {
   await browser.close();
