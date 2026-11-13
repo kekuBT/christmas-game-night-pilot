@@ -1,0 +1,11 @@
+
+FAILED (exit 1) | targeted | run 20261113-080757-b7ef25a2-4720
+  15 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-themes-seasonal (w3) [functional]: FAIL D 320×640 christmas /solo/word-connections: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]} | FAIL D 320×640 christmas /library: the ch
+  timing   wall 5m 26s · step time 15m 32s (sum) · 3 workers, 95% busy · 2.86× the same steps run one after another
+           predicted 3–10m (about 4m 21s, low-confidence) → actual 5m 26s (+25%)
+           longest  check-mobile-everyday 3m 09s, check-themes-seasonal 2m 59s, check-jebena-rush 2m 19s · the longest step is 58% of the wall time
+           machine  CPU mean 33%, peak 92% · memory available ≥ 13753 MB · load peak 3.4
+           contention ×1.05 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-tgt/test-results/20261113-080757-b7ef25a2-4720/report.json

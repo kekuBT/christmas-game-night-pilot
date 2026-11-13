@@ -29,3 +29,15 @@ These are **local runs from development, not gate verdicts**.
 | `warm-ivory-run3.log` | the driver committed as `b7ef25a` | exit 0, 199 PASS, 0 FAIL. Two checks were made stricter for this run. **W2** now compares the same Add key disabled and enabled (cream inset vs cranberry). **W7** now approves one note and revokes the other; the fresh Christmas PDF has the approved note and not the revoked one. |
 
 **Screenshots:** this run's screenshots are in `docs/stage11/stage111-screenshots/` (the `after-…` files).
+
+## The targeted gate's one failure, and the fix
+**Run:** targeted gate `20261113-080757-b7ef25a2-4720` on `b7ef25a`. **FAILED** (exit 1, 15 passed, 1 failed).
+- **What failed:** `check-themes-seasonal`. The raw output is in `docs/evidence/gate-runs/20261113-080757-b7ef25a2-4720/`.
+- **Root cause:** a stale expectation in that driver, not a product defect.
+  - Its `isLook()` decided "the Christmas look" partly by the browser toolbar colour (`theme-color`).
+  - It compared that with a hard-coded `#0e1a16`, the old green ground.
+  - The pages were Christmas throughout (`{"theme":"christmas","meta":"#f7f1e6","root":"christmas"}`), with the new ivory ground, so every Christmas-look check failed.
+- **Fix:** the expected Christmas ground is now `#f7f1e6`, with a comment.
+  - The check itself is unchanged: the toolbar must still match the look's ground.
+  - No other driver or test holds an old Christmas colour; a search of `scripts/` and `tests/` found none.
+- **Rerun:** `themes-seasonal-after-fix.log` is a local run of `check-themes-seasonal` against its own server on the fixed code: exit 0, all checks passed.

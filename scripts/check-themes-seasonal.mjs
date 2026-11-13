@@ -75,7 +75,9 @@ async function layoutOk(page, where) {
   const bad = await contrastFailures(page);
   check(`${where}: no sideways overflow, choices at least 44 px, readable contrast`, m.over <= 1 && m.small.length === 0 && bad.length === 0, JSON.stringify({ ...m, contrast: bad.slice(0, 3) }));
 }
-const EVERYDAY_GROUND = "#16111d", CHRISTMAS_GROUND = "#0e1a16";
+// The browser toolbar takes the look's ground. Stage 11.1 (D-OWN-1113): Christmas is Warm Ivory, so its ground is
+// ivory #F7F1E6 (it was the dark green #0E1A16 until d4dc408). Everyday's is unchanged.
+const EVERYDAY_GROUND = "#16111d", CHRISTMAS_GROUND = "#f7f1e6";
 const look = (p) => p.evaluate(() => ({ theme: document.documentElement.dataset.mzTheme ?? null, meta: (document.querySelector('meta[name="theme-color"]')?.getAttribute("content") ?? "").toLowerCase(), root: document.querySelector(".mz-root")?.getAttribute("data-mz-theme") ?? null }));
 const isLook = async (p, id) => { const l = await look(p); return l.theme === id && l.meta === (id === "christmas" ? CHRISTMAS_GROUND : EVERYDAY_GROUND) && (l.root === null || l.root === id); };
 /** The room as this seated phone's server sees it (its own session token; the same request the app makes). */
