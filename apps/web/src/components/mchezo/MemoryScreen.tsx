@@ -28,7 +28,7 @@ import { titleFor } from "../../ui/mchezo/lib/names.js";
 import { memoryLink } from "../../ui/mchezo/lib/memoryLink.js";
 import { exportIsStale, exportStep, type BookSnapshot } from "../../ui/mchezo/lib/bookSync.js";
 import { memoryTeamLine, type MemoryTeamFacts } from "../../../../../src/shared/memoryTeam.js";
-import { bookModeOf, entryFactLines, entryLabel, type BookContext } from "../../../../../src/shared/memoryPresent.js";
+import { bookModeOf, entryFactLines, entryLabel, pdfLoses, pdfText, type BookContext } from "../../../../../src/shared/memoryPresent.js";
 import { useMchezo } from "../../ui/mchezo/MchezoProvider.js";
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
@@ -39,6 +39,8 @@ type EntryOp = { id: string; kind: "approve" | "revoke"; state: "busy" | "error"
 class NoFreshSnapshot extends Error {}
 const CHECK_FAILED = "Couldn’t check the latest approvals, so nothing was downloaded. Try again.";
 const BOOK_MOVING = "The book is changing right now, so nothing was downloaded. Try again in a moment.";
+/** Stage 11.2 (D-S112-04): said once at the end of a PDF in which a character had to print as "?". ASCII only. */
+const PDF_LOSS_NOTE = "Some letters or emoji can't be printed in this PDF and show as ?. Export approved (Markdown) keeps every name and note in full.";
 /** A request's failure in plain words: the server's own sentence when it sent one, else that it didn't answer. */
 const whyFailed = (e: unknown) => e instanceof Error && e.message && !/fetch|network|abort|timed? ?out|load failed/i.test(e.message) ? e.message : "The game didn’t answer. Nothing changed; try again.";
 
@@ -151,15 +153,20 @@ export function MemoryScreen(props: {
     // Flatten to lines, then paginate lines (review 5769441799 P2): a single
     // oversized entry is split across pages at line boundaries.
     const lines: { text: string; height: number }[] = [];
+    // Stage 11.2 (D-S112-04): every line in characters the PDF's font can print, so a name or note in another script
+    // can't garble a whole line (its points included); if anything was replaced, the PDF says so once, at the end.
+    let lost = false;
+    const printable = (s: string) => { if (pdfLoses(s)) lost = true; return pdfText(s); };
+    const push = (s: string) => { for (const l of doc.splitTextToSize(s, 180)) lines.push({ text: l, height: 7 }); };
     for (const e of approvedNow) {
       // Stage 11.2: "(Day 2)" in a Cup book, "(Trivia Showdown)" in a casual one; facts with names, never ids.
-      for (const l of doc.splitTextToSize(`${e.text} (${entryLabel(e, bookCtx)})`, 180)) lines.push({ text: l, height: 7 });
+      push(printable(`${e.text} (${entryLabel(e, bookCtx)})`));
       // Stage 10.3: a team entry's facts come from its frozen team record ("From the game"), others as before.
-      for (const f of e.team ? [teamLine(e.team)] : entryFactLines(e, bookCtx)) {
-        for (const l of doc.splitTextToSize(`${e.team ? "From the game" : "From the ledger"}: ${f}`, 180)) lines.push({ text: l, height: 7 });
-      }
+      const facts = e.team ? [printable(teamLine(e.team))] : entryFactLines(e, bookCtx, { printable });
+      for (const f of facts) push(`${e.team ? "From the game" : "From the ledger"}: ${f}`);
       lines.push({ text: "", height: 4 });
     }
+    if (lost) push(PDF_LOSS_NOTE);
     const pages = paginateLines(lines.map((l) => l.height), 280, 32);
     for (const page of pages) {
       let y = 32;

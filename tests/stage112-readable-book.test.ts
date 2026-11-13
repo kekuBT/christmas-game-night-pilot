@@ -4,7 +4,8 @@
 // request; typed text can't inject Markdown or HTML; older books load unchanged.
 import { afterEach, describe, expect, it } from "vitest";
 import { MemoryBook, MemorySourceSchema } from "../src/server/memorybook.js";
-import { bookModeOf, entryDayLabel, entryFactLines, entryLabel, entryMode, mdEscape, NO_NAME, type PresentableEntry } from "../src/shared/memoryPresent.js";
+import { jsPDF } from "jspdf";
+import { bookModeOf, entryDayLabel, entryFactLines, entryLabel, entryMode, mdEscape, NO_NAME, pdfLoses, pdfText, type PresentableEntry } from "../src/shared/memoryPresent.js";
 import { FakeClock, Harness, type Json, type Player } from "./helpers/harness.js";
 
 const entry = (over: Partial<PresentableEntry> = {}): PresentableEntry => ({ day: 1, sourceEventIds: ["evt-1"], derivedFacts: [], ...over });
@@ -70,6 +71,43 @@ describe("the shared presentation rule (src/shared/memoryPresent.ts)", () => {
     // Shaped like a Spectrum entry (its line is the server's own team line), approved.
     Object.assign(book.entries.find((x) => x.id === e.id)!, { derivedFacts: [early], team: {}, approved: true });
     expect(book.exportMarkdown("Den")).toContain(`Note: Cut short\nFrom the game:\n- ${early}`);
+  });
+});
+
+describe("PDF text: every line printable by the PDF's built-in font (D-S112-04)", () => {
+  /** The text operators jsPDF writes for `s` on one page. A NUL byte means it fell back to two-byte text. */
+  const pdfOps = (s: string) => {
+    const doc = new jsPDF();
+    doc.text(s, 10, 10);
+    return Buffer.from(doc.output("arraybuffer")).toString("latin1").split("\n").filter((l) => / Tj$/.test(l)).join("\n");
+  };
+  const hard = ["李雷: 120 points", "Łukasz: 30 points", "Şule", "Ἀθηνᾶ", "Amani 🎄", "Ёлка", "👨‍👩‍👧 night", "é (decomposed)"];
+  it("control: unmapped, any character outside Windows-1252 garbles the whole line, its points included", () => {
+    expect(pdfOps("From the ledger: 李雷: 120 points")).toContain("\u0000");
+    expect(pdfOps("From the ledger: Łukasz: 30 points")).toContain("\u0000");
+  });
+  it("mapped: no line ever falls back to two-byte text, and the rest of the line survives", () => {
+    for (const s of hard) {
+      const ops = pdfOps(`From the ledger: ${pdfText(s)}`);
+      expect(ops, s).not.toContain("\u0000");
+    }
+    expect(pdfText("李雷: 120 points")).toBe("??: 120 points");
+    expect(pdfText("Łukasz")).toBe("?ukasz");
+    expect(pdfText("Amani 🎄")).toBe("Amani ?");
+    expect(pdfText("é")).toBe("é"); // NFC first: a decomposed accent is printable
+  });
+  it("kept: Latin-1 and every Windows-1252 extra (curly quotes, dashes, €, Š, Œ, …) print as themselves", () => {
+    const kept = "Zoë ñ ß Keku’s “quoted” a—b a–b €5 Šárka Œuvre … • ™ Ÿ";
+    expect(pdfText(kept)).toBe(kept);
+    expect(pdfLoses(kept)).toBe(false);
+    expect(pdfOps(kept)).not.toContain("\u0000");
+    expect(pdfLoses("李雷")).toBe(true);
+  });
+  it("names that print alike stay apart: the duplicate rule runs on the printed names, in id order", () => {
+    const e = entry({ derivedFacts: ["player-1: 30 points", "player-2: 20 points", "player-3: 10 points"], source: { mode: "casual", titles: [], scores: [
+      { playerId: "player-1", name: "李雷", points: 30 }, { playerId: "player-2", name: "王芳", points: 20 }, { playerId: "player-3", name: "Keku", points: 10 }] } });
+    expect(entryFactLines(e, { nameOf }, { printable: pdfText })).toEqual(["??: 30 points", "?? (2): 20 points", "Keku: 10 points"]);
+    expect(entryFactLines(e, { nameOf })).toEqual(["李雷: 30 points", "王芳: 20 points", "Keku: 10 points"]); // screen and Markdown: in full
   });
 });
 

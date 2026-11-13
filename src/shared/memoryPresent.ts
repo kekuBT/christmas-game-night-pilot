@@ -84,7 +84,7 @@ const SCORE_FACT = /^(\S+): (-?\d+) points$/;
  * reads "Name: N points" with exactly the stored points; an unknown player is "A player". Two different players with
  * the same name in one entry (only possible in a corrupted or hand-edited file) become "Ada" and "Ada (2)", in id order.
  */
-export function entryFactLines(e: PresentableEntry, ctx: Pick<BookContext, "nameOf">): string[] {
+export function entryFactLines(e: PresentableEntry, ctx: Pick<BookContext, "nameOf">, opts: { printable?: (s: string) => string } = {}): string[] {
   if (e.team !== undefined) return [...e.derivedFacts];
   const rows = e.derivedFacts.map((fact, i) => {
     const rec = e.source?.scores?.[i];
@@ -93,7 +93,10 @@ export function entryFactLines(e: PresentableEntry, ctx: Pick<BookContext, "name
     const id = m[1]!;
     // The recorded score is the readable twin of this fact; it's used only when it agrees with it.
     const recorded = rec && rec.playerId === id && rec.points === Number(m[2]) ? rec.name : undefined;
-    const name = (recorded ?? (id === "unknown" ? undefined : ctx.nameOf(id))) || null;
+    const full = (recorded ?? (id === "unknown" ? undefined : ctx.nameOf(id))) || null;
+    // A medium that can't print every character (the PDF) maps the name first, so two names that print alike
+    // ("李雷" and "王芳" both print "??") are still told apart below.
+    const name = full && opts.printable ? opts.printable(full) : full;
     return { id, name, rest: `${m[2]} points` };
   });
   // Disambiguate one name shared by different ids (deterministic: by id order).
@@ -108,6 +111,25 @@ export function entryFactLines(e: PresentableEntry, ctx: Pick<BookContext, "name
     return `${k > 0 ? `${r.name} (${k + 1})` : r.name}: ${r.rest}`;
   });
 }
+
+/**
+ * The PDF's built-in font prints Windows-1252 (WinAnsi) only. jsPDF writes a line holding any other character as
+ * two-byte text that font can't read, so the WHOLE line comes out garbled, its label and points included
+ * (D-S112-04). Every PDF line goes through pdfText: it's NFC-normalised, every character the font has is kept, and
+ * each other character (an emoji counts once) becomes "?". The Markdown export keeps every character.
+ */
+const WIN_ANSI_EXTRA = new Set("€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ");
+export const PDF_MISSING = "?";
+export function pdfText(s: string): string {
+  let out = "";
+  for (const ch of s.normalize("NFC")) {
+    const c = ch.codePointAt(0)!;
+    out += c <= 0x7f || (c >= 0xa0 && c <= 0xff) || WIN_ANSI_EXTRA.has(ch) ? ch : PDF_MISSING;
+  }
+  return out;
+}
+/** Whether pdfText had to replace anything in `s`. */
+export const pdfLoses = (s: string): boolean => pdfText(s) !== s.normalize("NFC");
 
 /**
  * Text for a Markdown export: one line, and nothing typed can make a heading, list, link, image, code or HTML.
