@@ -1399,3 +1399,24 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - undoing the change after a failed write: it needs an exact inverse for every operation, and an approval edits an entry in place;
     - writing before validating: a refused change would still cost a write.
+
+## Stage 10.5: a Memory Book that stays current
+- **D-S105-01 A durable book revision, moved only by a committed change.**
+  - **How:** each room's book keeps a whole-number `revision` on disk, separate from the ledger `seq`. `commitBook` (D-S104-06) raises it by one on the staged copy, so it's written with the change and goes live only after the write succeeds. A failed write, a refused change, an idempotent repeat, a read or an export never moves it. Old books load as 0.
+  - **Alternatives rejected:**
+    - reusing the ledger `seq`: a book change isn't a game event, and bumping `seq` would make every page reload its ledger and look for new finishes;
+    - a timestamp: clocks repeat and go backwards; a counter orders changes exactly.
+- **D-S105-02 Revision-only notice; the data comes by authenticated fetch.**
+  - **How:** member projections carry `memoryRevision`, and after a commit the server sends `{ kind: "book", revision }` to this room's member sockets with a current credential. TV and spectator projections and sockets get neither. Pages fetch `GET …/memory?revision=1` to learn what changed.
+  - **Why:** a notice can be late, lost or duplicated without harm, and it carries nothing private. The fetch rechecks the session every time.
+  - **Alternatives rejected:**
+    - pushing the entries in the frame: it would put note text on the socket and trust the notice's contents;
+    - a full projection broadcast per book change: it moves `rev` for everyone, the TV included, and costs a projection per socket;
+    - faster polling of the book: a request storm for something that changes a few times a night.
+- **D-S105-03 One ordered book per page.**
+  - **How:** a page keeps the highest revision it has heard of and the book it has applied. One fetch runs at a time; a reply is applied only if it's for this room and newer than what's shown; a newer notice during a fetch triggers one more fetch. Room switch and leave reset it.
+  - **Alternative rejected:** request counters alone (the Stage 10.2 book load), which order requests but can't tell a page that what it shows is already out of date.
+- **D-S105-04 Every new export takes a fresh snapshot, fails closed, and restarts on a newer revision.**
+  - **How:** Markdown comes from the server's export; PDF and share image are built from a fresh `?revision=1` snapshot's approved entries. If the check fails, nothing downloads and the page says so; it never uses the approvals on screen. A newer revision heard during the fetch restarts it, up to three times, then the export is cancelled with a message. Markdown on screen is removed once the book moves past its revision.
+  - **Alternative rejected:** exporting from the screen's state when it looks current. "Looks current" is exactly what a missed notice gets wrong.
+- **D-S105-05 The export boundary.** A downloaded file can't be recalled. A revocation that commits after an export's final snapshot doesn't change that file; only the next export reflects it. The report, the spec and the screen's wording say so rather than imply otherwise.

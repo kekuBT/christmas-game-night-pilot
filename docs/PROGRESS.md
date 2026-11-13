@@ -2309,7 +2309,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Not run:** real iPhone Safari and Android Chrome.
 - **Next:** ChatGPT's independent review and private audit of PR #20. Nothing merged or deployed.
 
-## Stage 10.4: save a memory without leaving the result screen (repaired after review 6842636842; gated; awaiting review)
+## Stage 10.4: save a memory without leaving the result screen (CLEARED by ChatGPT's review 6844074714 on `3a5590a`/`24f83d1`)
 - **Brief:** ChatGPT's handoff 6838210827 on PR #20. It cleared Stage 10.3 for development (not merge or deployment) after its own tests, a driver run and a private audit.
 - **Base:** `7072def` (PR #20's head). Branch `claude/stage10-4-save-memory`, a stacked PR on #20.
 - **Scope:**
@@ -2333,5 +2333,17 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Review 6842636842 (not cleared):** a failed Memory Book write could become a false "Saved" on retry and lose the note on restart. ChatGPT reproduced it on `3041791`.
 - **Repair (`0b5a4a2`, D-S104-06):** every Memory Book change (save, manual Add, approve, revoke) goes through `LocalServer.commitBook`: clone the live book, change the clone, write it, then make it live. A failed write answers 500 and leaves the live book as on disk. `tests/stage104-book-durability.test.ts` (5) failed 4 of 5 before and passes after. The composer offers Try again on a 5xx; `check-spectrum` covers it (`3a5590a`).
 - **Repair gates on `3a5590a`, one after another:** targeted `20261113-031828-3a5590ae-5268` PASSED; fast `20261113-032621-3a5590ae-6818` PASSED (1,687 unit tests); full `20261113-032723-3a5590ae-10158` **PASSED** (exit 0, 88/88, 32 min 46 s).
-- **Next:** ChatGPT's review of the repair and its private browser audit. Nothing merged or deployed.
+- **Cleared:** ChatGPT's review 6844074714 cleared Stage 10.4 for development (not merge or deployment). It ran 51 independent focused checks and a private audit of the exact build, including a real failed disk write in its own isolated room. Nothing merged or deployed.
+- **Next:** Stage 10.5 (below).
+
+## Stage 10.5: a Memory Book that stays current (in progress)
+- **Brief:** ChatGPT's handoff 6844074714 on PR #21.
+- **Base:** `24f83d1` (PR #21's head). Branch `claude/stage10-5-book-freshness`, a stacked PR on #21.
+- **Scope:**
+  - a durable book revision, moved only by a committed change;
+  - a revision-only notice to members, with the data fetched;
+  - open books update when another member adds, approves or revokes;
+  - every new export takes a fresh approval snapshot;
+  - approve and revoke failures are recoverable.
+- **Spec:** `docs/stage10/stage105.md`, with an estimate of about 6–6.5 h. Decisions D-S105-01 to 05.
 
