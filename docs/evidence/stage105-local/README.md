@@ -24,3 +24,11 @@ Two runs failed because of mistakes in the new test file, not in the product cod
 - the Markdown came down 12 ms after a revoke;
 - back online, the page caught up in 51 ms;
 - with no socket at all, the poll brought a change in 1,994 ms.
+
+## The retry repair (review 6845502314; D-S105-06)
+A failed automatic refresh was never retried while the revision stayed the same. These runs reproduce it and show the repair.
+
+| Log | Code | What ran | Verdict |
+|---|---|---|---|
+| `book-live-retry-before-fix.log` | the web code of `6edb588` (unchanged in `d158aa4`) with the new driver steps B13–B16, committed as `754ad1a` | `check-book-live` | **exit 1, 48 PASS, 3 FAIL**: B13 (one refused snapshot, then only same-revision polls: the note never appeared, `-1 ms`) and both B14 recovery checks (1 request in 12 s, no retry; never recovered). B15 and B16 passed, but only because there was no retry to cancel. |
+| `book-live-retry-after-fix.log` | the fix, committed as `1c2447f` | `check-book-live` | exit 0, 51 PASS, 0 FAIL. B13: the note appeared after 2,976 ms (1 request refused). B14: 4 requests in 12 s, backing off; recovered 3,979 ms after the network came back. B15 and B16: no book request in the 10 s after leaving the book or signing out, with a retry pending. |

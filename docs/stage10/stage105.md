@@ -151,3 +151,29 @@ Run one after another, each from a fresh clone of the exact commit. Raw output, 
 | `20261113-051445-6edb5881-21197` | `6edb588` | full | **PASSED (exit 0)**, 2012 s | 89 of 89 (the new driver is the 89th), no retries; book-live 44, spectrum 199, jebena-rush 227, tv-outage 14 checks |
 
 `check-jebena-rush` counts 226 to 228 checks depending on how the match plays out (the 10.2 moment line is checked when a moment happened, and its absence when none did).
+
+## 12. Repair: a failed refresh retries itself (review 6845502314, D-S105-06)
+- **The finding:** ChatGPT's source review of `6edb588` found that a failed automatic refresh was never retried while the revision stayed the same. The projection effect only reruns when `memoryRevision` changes, and a frame only arrives on a change. So after one failed fetch the page stayed behind until the book changed again or was reopened, and the code comment saying "the next notice or poll tries again" was wrong.
+- **Reproduced first:** `check-book-live` B13–B16 (`754ad1a`) on the unfixed web code. The page had no socket, so only the poll brought the revision. Result: exit 1, 48 PASS, 3 FAIL.
+  - B13: one refused snapshot, then only same-revision polls, and the note never appeared;
+  - B14: one request in 12 s and no recovery.
+  - Log: `docs/evidence/stage105-local/book-live-retry-before-fix.log`.
+- **The repair (`1c2447f`):**
+  - A failed refresh that leaves the page behind (`heard > applied`), with the book open, schedules one retry after 1, 2, 4, then at most 8 s (`retryDelay`, `shouldRetry` in `bookSync.ts`). A success resets the count, and a newer notice fetches at once instead.
+  - Leaving the book, switching rooms (`syncFor`), signing out or unmounting cancels the retry, and the timer checks again before it fetches.
+  - Still one fetch at a time, and no request while caught up.
+- **Tests:**
+  - `check-book-live` B13–B16, all passing after the repair:
+    - B13: the note appears after one failure (about 3 s);
+    - B14: 4 requests in 12 s of failures, then recovery within 10 s;
+    - B15: leaving the book with a retry pending makes no request in 10 s;
+    - B16: signing out in the app with a retry pending does the same.
+  - `tests/stage105-book-sync.test.ts`: 3 more tests (`shouldRetry`, `retryDelay`).
+
+### Repair gates
+Run one after another on `1c2447f`, each from a fresh clone. The review asked not to rerun the unchanged full gate for this repair, so the checkpoint full gate stays `20261113-051445-6edb5881-21197` on `6edb588`; no full gate ran on `1c2447f`.
+
+| Run | Kind | Verdict | Notes |
+|---|---|---|---|
+| `20261113-060834-1c2447f9-4076` | targeted (book-live, sessions, spectrum, jebena-rush, cup-memory, history-links, contrast, f4, f5) | PASSED (exit 0), 466 s | book-live 51, sessions 23, spectrum 199, jebena-rush 228 checks |
+| `20261113-061625-1c2447f9-5870` | fast | PASSED (exit 0), 61 s | 1,708 unit tests |

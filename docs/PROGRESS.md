@@ -2356,5 +2356,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - on `6edb588`: targeted `20261113-050546-6edb5881-16110` PASSED; fast `20261113-051339-6edb5881-17762` PASSED (1,705 unit tests); full `20261113-051445-6edb5881-21197` **PASSED** (exit 0, 89/89, 33 min 32 s).
 - **Evidence:** `docs/evidence/gate-runs/` (six runs, the cancelled one included), `docs/evidence/stage105-local/`, screenshots in `docs/stage10/stage105-screenshots/`.
 - **Not run:** real iPhone Safari and Android Chrome.
-- **Next:** ChatGPT's review and private audit of PR #22. Nothing merged or deployed.
+- **Review 6845502314 (not cleared):** a failed automatic book refresh was never retried while the revision stayed the same.
+- **Repair (`1c2447f`, D-S105-06):** a backoff retry (1, 2, 4, then 8 s at most) while the page is behind and the book is open, cancelled on leaving, switching rooms or signing out. The regression steps `check-book-live` B13–B16 (`754ad1a`) failed 3 checks on the unfixed code and pass after.
+- **Repair gates on `1c2447f`:** targeted `20261113-060834-1c2447f9-4076` PASSED (book-live 51, sessions 23); fast `20261113-061625-1c2447f9-5870` PASSED (1,708 unit tests). No full gate, as the review asked.
+- **Also recorded (owner decision, comment 6845465785):** Keku chose **Option A, Warm Ivory**, for the Christmas look, to replace the heavy green; Everyday stays. Implementation waits for ChatGPT's spec after Stage 10.5 clears.
+- **Next:** ChatGPT's verification of the repair and its private audit of PR #22. Nothing merged or deployed.
 
