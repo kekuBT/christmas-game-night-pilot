@@ -451,14 +451,22 @@ try {
   await A.getByTestId("save-memory-cancel").click();
   await soon("10.4 S1 Cancel closes it, focus back on the button", async () => (await focusedId(A)) === "save-memory-open", 5000);
   check("10.4 S1 a cancelled draft saves nothing", !(await bookNow()).some((e) => e.text === "A draft I won't keep"));
-  // A lost reply: the save reaches the server, but its answer never comes back.
-  let lost = 0;
+  // First, the server can't write the book (D-S104-06): this phone gets the server's own 500 reply for that case. The
+  // reply is stubbed here (a driver can't fail the server's disk; tests/stage104-book-durability.test.ts does, for real).
+  // Then a lost reply: the save reaches the server, but its answer never comes back. Then the same key goes through.
+  let posts = 0;
   await A.route(/\/rooms\/[^/]+\/memory$/, async (route) => {
-    if (route.request().method() === "POST" && lost === 0) { lost++; await route.fetch().catch(() => null); await route.abort("connectionreset"); return; }
+    if (route.request().method() !== "POST") { await route.continue(); return; }
+    posts++;
+    if (posts === 1) { await route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ error: "The Memory Book couldn't be saved, so nothing changed. Try again in a moment." }) }); return; }
+    if (posts === 2) { await route.fetch().catch(() => null); await route.abort("connectionreset"); return; }
     await route.continue();
   });
   await A.getByTestId("save-memory-open").click();
   await A.getByTestId("save-memory-note").fill(SAVE1);
+  await A.getByTestId("save-memory-save").click();
+  await soon("10.4 S1 the book couldn't be written: the server's words, the draft kept, and Try again", async () => /couldn't be saved, so nothing changed/.test(await A.getByTestId("save-memory-error").innerText().catch(() => "")) && (await A.getByTestId("save-memory-note").inputValue()) === SAVE1 && (await A.getByTestId("save-memory-save").innerText()) === "Try again", 15000);
+  check("10.4 S1 (nothing was saved by that attempt)", !(await bookNow()).some((e) => e.text === SAVE1));
   await A.getByTestId("save-memory-save").click();
   await soon("10.4 S1 the lost reply: it says so, keeps the draft, and offers Try again", async () => /Couldn't reach the game/.test(await A.getByTestId("save-memory-error").innerText().catch(() => "")) && (await A.getByTestId("save-memory-note").inputValue()) === SAVE1 && (await A.getByTestId("save-memory-save").innerText()) === "Try again", 15000);
   check("10.4 S1 (the first save did reach the server: one entry)", (await bookNow()).filter((e) => e.text === SAVE1).length === 1);
