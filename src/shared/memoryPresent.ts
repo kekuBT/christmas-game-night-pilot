@@ -5,6 +5,9 @@
  * - A Cup entry shows its source game's day ("Day 2"); a casual entry never shows a day and is identified by its
  *   game's title. The mode is the entry's recorded source mode, or, for an entry from before this stage, the room's
  *   kind (a room's kind never changes). Never the look, the content or a later setting.
+ * - An entry from before this stage gets its day and title from the same room's citation at read/export time (its
+ *   cited finish, that finish's game, the game's recorded day and title); a day that can't be verified is left out.
+ *   The stored entry is never changed (no migration).
  * - Competitive facts read "Name: N points": the name the server recorded when the entry was made, else the same
  *   room's player by id (players are never removed and names never change), else "A player". Never an internal id.
  *
@@ -54,10 +57,27 @@ export function entryMode(e: PresentableEntry, ctx: Pick<BookContext, "roomKind"
 
 const uniqSorted = (xs: number[]) => [...new Set(xs.filter((n) => Number.isSafeInteger(n) && n > 0))].sort((a, b) => a - b);
 
-/** "Day 2" or "Days 1, 2" for a Cup entry; null for a casual one (it has no day). */
-export function entryDayLabel(e: PresentableEntry, ctx: Pick<BookContext, "roomKind">): string | null {
+/**
+ * The cited games' own days, from the same room's citation (each cited finish -> its game -> that game's recorded
+ * day), or null when any of them can't be verified there. Never the entry's stored day (D-S112-05).
+ */
+function citedDays(e: PresentableEntry, ctx: Pick<BookContext, "sourceGames">): number[] | null {
+  const games = ctx.sourceGames?.(e) ?? [];
+  if (e.sourceEventIds.length === 0 || games.length !== e.sourceEventIds.length) return null;
+  if (games.some((g) => !Number.isSafeInteger(g.day) || g.day! < 1)) return null;
+  return games.map((g) => g.day!);
+}
+
+/**
+ * "Day 2" or "Days 1, 2" for a Cup entry; null for a casual one (it has no day), and null when a Cup entry's day
+ * can't be verified.
+ * - A new entry: the days the server recorded from its cited games when it was made.
+ * - An older entry (no recorded days): the same room's citation, at read/export time (D-S112-05). Its stored `day`
+ *   is not used: it can be the day the note was added rather than its game's (a Day 2 note about a Day 1 game).
+ */
+export function entryDayLabel(e: PresentableEntry, ctx: Pick<BookContext, "roomKind" | "sourceGames">): string | null {
   if (entryMode(e, ctx) !== "cup") return null;
-  const days = uniqSorted(e.source?.days?.length ? e.source.days : [e.day]);
+  const days = uniqSorted(e.source?.days?.length ? e.source.days : citedDays(e, ctx) ?? []);
   if (days.length === 0) return null;
   return days.length === 1 ? `Day ${days[0]}` : `Days ${days.join(", ")}`;
 }

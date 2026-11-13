@@ -128,7 +128,8 @@ export function MemoryScreen(props: {
     if (!g?.rawScores) return [];
     const scores = Object.entries(g.rawScores).sort((a, b) => b[1] - a[1]).map(([pid, v]) => `${nameOf(pid) ?? "A player"} ${v.toLocaleString("en-US")}`);
     // Stage 11.2: the game and its day in a Cup book; the game alone in a casual one.
-    return [`${title(g.gameId)}${cupBook ? ` · Day ${g.day ?? e.day}` : ""}: ${scores.join(" · ")}`];
+    // Stage 11.2 (D-S112-05): the game's own recorded day, never the entry's stored day (a Day 2 note about Day 1).
+    return [`${title(g.gameId)}${cupBook && g.day !== undefined ? ` · Day ${g.day}` : ""}: ${scores.join(" · ")}`];
   });
 
   /** Stage 10.5: the entries an export is built from: the fresh snapshot's approved ones, never the screen's. */
@@ -316,7 +317,7 @@ export function MemoryScreen(props: {
             {syncing ? "Checking for the latest finished game…"
               : link.state === "unavailable" && link.why === "team-not-final" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>. It was stopped before its team result was final, so it can&rsquo;t be saved.</>
               : link.state === "unavailable" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>, a team game: team games like this one aren&rsquo;t saved to the Memory Book yet.</>
-              : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame && cupBook ? ` · Day ${targetGame.day ?? day}` : ""}: the last game that finished.</>}
+              : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame && cupBook && targetGame.day !== undefined ? ` · Day ${targetGame.day}` : ""}: the last game that finished.</>}
           </p>
         )}
         {teamPreview && <p className="mz-foot mz-memory__target" data-testid="memory-link-facts">Saved with: {teamPreview}</p>}

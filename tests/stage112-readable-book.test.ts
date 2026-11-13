@@ -4,6 +4,8 @@
 // request; typed text can't inject Markdown or HTML; older books load unchanged.
 import { afterEach, describe, expect, it } from "vitest";
 import { MemoryBook, MemorySourceSchema } from "../src/server/memorybook.js";
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { jsPDF } from "jspdf";
 import { bookModeOf, entryDayLabel, entryFactLines, entryLabel, entryMode, mdEscape, NO_NAME, pdfLoses, pdfText, type PresentableEntry } from "../src/shared/memoryPresent.js";
 import { FakeClock, Harness, type Json, type Player } from "./helpers/harness.js";
@@ -18,19 +20,34 @@ describe("the shared presentation rule (src/shared/memoryPresent.ts)", () => {
     expect(entryMode(entry(), { roomKind: "casual" })).toBe("casual");
     expect(entryMode(entry({ source: { mode: "cup", titles: [] } }), { roomKind: "casual" })).toBe("cup");
   });
-  it("day label: a Cup entry's game day(s); never one for a casual entry", () => {
-    expect(entryDayLabel(entry({ day: 3 }), { roomKind: "cup" })).toBe("Day 3");
+  it("day label: a Cup entry's game day(s) as recorded; never one for a casual entry", () => {
     expect(entryDayLabel(entry({ day: 3, source: { mode: "cup", days: [1], titles: [] } }), { roomKind: "cup" })).toBe("Day 1");
     expect(entryDayLabel(entry({ source: { mode: "cup", days: [2, 1, 2], titles: [] } }), { roomKind: "cup" })).toBe("Days 1, 2");
-    expect(entryDayLabel(entry({ day: 1 }), { roomKind: "casual" })).toBeNull();
+    expect(entryDayLabel(entry({ day: 1 }), { roomKind: "casual", sourceGames: () => [{ title: "Trivia", day: 1 }] })).toBeNull();
     expect(entryDayLabel(entry({ day: 1, source: { mode: "casual", titles: ["Trivia Showdown"] } }), { roomKind: "cup" })).toBeNull();
   });
-  it("label: Day N for Cup, the game's title for casual (recorded, else the room's game), else \"A game\"", () => {
+  it("older Cup entry (review 6851031292, D-S112-05): its day comes from the same room's citation, never its stored day", () => {
+    // Stored on Day 2 (the day it was added) about a game the room recorded on Day 1.
+    const legacy = entry({ day: 2, sourceEventIds: ["evt-7"] });
+    expect(entryDayLabel(legacy, { roomKind: "cup", sourceGames: () => [{ title: "Trivia Showdown", day: 1 }] })).toBe("Day 1");
+    // A recorded day still wins over the citation (it was verified when the entry was made).
+    expect(entryDayLabel(entry({ day: 2, source: { mode: "cup", days: [2], titles: [] } }), { roomKind: "cup", sourceGames: () => [{ day: 1 }] })).toBe("Day 2");
+    // Unverifiable: no citation context, a cited finish the room doesn't have, a game without a day, or one of two
+    // cited games missing. Then there's no day label at all, never the stored day.
+    expect(entryDayLabel(legacy, { roomKind: "cup" })).toBeNull();
+    expect(entryDayLabel(legacy, { roomKind: "cup", sourceGames: () => [{}] })).toBeNull();
+    expect(entryDayLabel(legacy, { roomKind: "cup", sourceGames: () => [{ title: "Trivia Showdown" }] })).toBeNull();
+    expect(entryDayLabel(entry({ day: 2, sourceEventIds: ["evt-7", "evt-9"] }), { roomKind: "cup", sourceGames: () => [{ day: 1 }, {}] })).toBeNull();
+    // Without a day, the label falls back to the citation's title, then "A game".
+    expect(entryLabel(legacy, { roomKind: "cup", nameOf, sourceGames: () => [{ title: "Trivia Showdown" }] })).toBe("Trivia Showdown");
+    expect(entryLabel(legacy, { roomKind: "cup", nameOf, sourceGames: () => [{}] })).toBe("A game");
+  });
+  it("label: Day N for Cup, the game's title for casual (recorded, else the room's citation), else \"A game\"", () => {
     const ctx = { roomKind: "casual", nameOf };
     expect(entryLabel(entry({ source: { mode: "casual", titles: ["Jebena Rush"] } }), ctx)).toBe("Jebena Rush");
     expect(entryLabel(entry(), { ...ctx, sourceGames: () => [{ title: "Math Mayhem", day: 1 }] })).toBe("Math Mayhem");
     expect(entryLabel(entry(), ctx)).toBe("A game");
-    expect(entryLabel(entry({ day: 2 }), { roomKind: "cup", nameOf })).toBe("Day 2");
+    expect(entryLabel(entry({ day: 2 }), { roomKind: "cup", nameOf, sourceGames: () => [{ title: "Trivia", day: 2 }] })).toBe("Day 2");
   });
   it("facts: recorded names, else the room's players, else \"A player\" — never an id; the points exactly as stored", () => {
     const facts = ["player-1: 480 points", "player-2: 360 points", "player-9: 0 points", "unknown: 5 points"];
@@ -121,6 +138,22 @@ describe("restore: an older book is unchanged; an invalid recorded source is dro
     expect(book.entries[1]!.source).toEqual(good.source);
     expect(book.entries[2]!.source).toBeUndefined();
     expect(MemorySourceSchema.safeParse(bad.source).success).toBe(false);
+  });
+  it("after restore, presentation data can't override the stored score facts (review 6851031292)", () => {
+    const facts = ["player-1: 30 points", "player-2: 20 points"];
+    const forged = {
+      id: "book-1", day: 1, type: "game-result", text: "Forged names", sourceEventIds: ["evt-1"], approved: true, derivedFacts: facts,
+      // Wrong points for player-1, a different player in player-2's slot, and an extra row with no fact.
+      source: { mode: "casual", titles: ["Trivia Showdown"], scores: [
+        { playerId: "player-1", name: "Impostor", points: 999 }, { playerId: "player-9", name: "Ghost", points: 20 }, { playerId: "player-3", name: "Extra", points: 50 }] },
+    };
+    const book = MemoryBook.fromJSON({ entries: [forged], next: 2 });
+    expect(book.entries[0]!.derivedFacts).toEqual(facts); // the stored facts, untouched
+    const md = book.exportMarkdown("Den", { roomKind: "casual", nameOf });
+    const lines = md.split("\n").filter((l) => l.startsWith("- "));
+    // Exactly one line per stored fact, in order, with the stored points; names from the room, since no record agrees.
+    expect(lines).toEqual(["- Keku: 30 points", "- Amina: 20 points"]);
+    expect(md).not.toMatch(/Impostor|Ghost|Extra|999|50 points/);
   });
 });
 
@@ -240,6 +273,60 @@ describe("over HTTP", () => {
     expect(md).toMatch(/^- \\<b\\>Host\\<\/b\\>: \d+ points$/m);
     expect(md).not.toContain("Still pending");
     expect(pending.status).toBe(201);
+  });
+
+  /** Rewrite this room's book file while the server is down, then start it again: a real restore from disk. */
+  async function restoreWith(h: Harness, edit: (entries: Json[]) => void): Promise<void> {
+    await h.stop();
+    const file = join(h.dataDir, `${h.roomId}.book.json`);
+    const data = JSON.parse(readFileSync(file, "utf8")) as { entries: Json[] };
+    edit(data.entries);
+    writeFileSync(file, JSON.stringify(data, null, 2));
+    await h.start();
+  }
+  const book = async (h: Harness, p: Player) => (await h.get(`/rooms/${h.roomId}/memory`, { "x-session-token": p.token })).body as unknown as Json[];
+
+  it("a restored older Cup entry, saved on Day 2 about a Day 1 finish, is labelled Day 1 from the room's citation; the stored entry is unchanged (review 6851031292)", async () => {
+    const { h, host, guest } = await seats();
+    const g1 = await cupTrivia(h, host, guest); // Day 1
+    expect((await h.post(`/rooms/${h.roomId}/day`, {}, host.token)).body["day"]).toBe(2);
+    const r = await save(h, guest, { fromGame: g1, text: "Saved the old way on Day 2", requestId: "s112-0009-iiii", day: 2 });
+    await approve(h, host, r.body["id"] as string);
+    // Exactly what the base build stored for it: the day it was added, and no recorded source.
+    await restoreWith(h, (entries) => { const e = entries.find((x) => x["id"] === r.body["id"])!; delete e["source"]; e["day"] = 2; });
+    const stored = (await book(h, host)).find((x) => x["id"] === r.body["id"])!;
+    expect([stored["day"], stored["source"]]).toEqual([2, undefined]); // no migration: the stored entry is as it was
+    const md = await exportMd(h, host);
+    expect(md).toMatch(/^## Day 1$/m);
+    expect(md).not.toMatch(/^## Day 2$/m);
+  });
+
+  it("a restored older Cup entry whose cited finish isn't in the room gets no day label, never its stored day", async () => {
+    const { h, host, guest } = await seats();
+    const g1 = await cupTrivia(h, host, guest);
+    const r = await save(h, guest, { fromGame: g1, text: "Cites a finish the room doesn't have", requestId: "s112-0010-jjjj" });
+    await approve(h, host, r.body["id"] as string);
+    await restoreWith(h, (entries) => { const e = entries.find((x) => x["id"] === r.body["id"])!; delete e["source"]; e["day"] = 2; e["sourceEventIds"] = ["evt-999999"]; });
+    const md = await exportMd(h, host);
+    expect(md).not.toMatch(/Day \d/);
+    expect(md).toMatch(/^## A game$/m);
+  });
+
+  it("restored with forged presentation data, an entry still exports exactly its stored facts and points", async () => {
+    const { h, host, guest } = await seats("casual");
+    const g = await jebena(h, host, guest);
+    const r = await save(h, guest, { fromGame: g, text: "Forged on disk", requestId: "s112-0011-kkkk" });
+    await approve(h, host, r.body["id"] as string);
+    const facts = r.body["derivedFacts"] as string[];
+    await restoreWith(h, (entries) => {
+      const e = entries.find((x) => x["id"] === r.body["id"])!;
+      for (const s of ((e["source"] as Json)["scores"] as Json[])) { s["name"] = "Impostor"; s["points"] = 999; }
+    });
+    const lines = (await exportMd(h, host)).split("\n").filter((l) => l.startsWith("- "));
+    expect(lines).toHaveLength(facts.length);
+    lines.forEach((l, i) => expect(l).toBe(`- ${l.slice(2).split(":")[0]}: ${/: (-?\d+) points$/.exec(facts[i]!)![1]} points`));
+    expect(lines.join("\n")).not.toMatch(/Impostor|999/);
+    expect(lines.every((l) => /^- (Keku|Amina): \d+ points$/.test(l))).toBe(true);
   });
 
   it("an older entry (no recorded source) in a casual room shows no Day and resolves names from the room", async () => {
