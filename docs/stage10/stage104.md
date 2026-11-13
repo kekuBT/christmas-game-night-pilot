@@ -153,9 +153,9 @@ Run one after another, each from a fresh clone of the exact commit. Raw output, 
 
 | Run | Commit | Kind | Verdict | Notes |
 |---|---|---|---|---|
-| `20261112-231121-c6345008-2112` | `c634500` | targeted (spectrum, jebena-rush, cup-memory, history-links, contrast, f4, f5) | PASSED (exit 0), 461 s | spectrum 197, jebena-rush 227 checks |
+| `20261112-231121-c6345008-2112` | `c634500` | targeted (spectrum, jebena-rush, cup-memory, history-links, contrast, f4, f5) | PASSED (exit 0), 461 s | spectrum 197, jebena-rush 226 checks |
 | `20261112-231913-c6345008-3663` | `c634500` | fast | PASSED (exit 0), 63 s | 1,679 unit tests |
-| `20261112-232027-c6345008-7030` | `c634500` | full | **FAILED (exit 1)**, 2017 s | 87 of 88 passed; `check-tv-outage` failed (above) |
+| `20261112-232027-c6345008-7030` | `c634500` | full | **FAILED (exit 1)**, 2017 s | 87 of 88 passed; `check-tv-outage` failed (above): 14 PASS, 1 FAIL. Spectrum 197, jebena-rush 227 checks |
 | `20261113-000209-30417918-28168` | `3041791` | targeted (the same, plus tv-outage) | PASSED (exit 0), 465 s | tv-outage 14, spectrum 197, jebena-rush 226 checks |
 | `20261113-004113-30417918-190` | `3041791` | fast | PASSED (exit 0), 59 s | 1,682 unit tests |
 | `20261113-004221-30417918-3545` | `3041791` | full | **PASSED (exit 0)**, 1977 s | 88 of 88, no retries |
