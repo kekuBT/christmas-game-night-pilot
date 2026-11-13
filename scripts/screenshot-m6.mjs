@@ -1,6 +1,7 @@
 // M6 screenshot capture (Chromium, 390x844) into docs/m6-screenshots/.
 import { chromium } from "playwright";
 import { mkdirSync } from "node:fs";
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3461";
 mkdirSync("docs/m6-screenshots", { recursive: true });
 const browser = await chromium.launch();
@@ -9,7 +10,7 @@ const host = await ctx.newPage();
 await host.goto(BASE, { waitUntil: "domcontentloaded" });
 await host.screenshot({ path: "docs/m6-screenshots/01-landing.png" });
 await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
-await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+await hostFamilyCup(host);
 const shareChip = host.getByRole("button", { name: /^Share room code / });
 await shareChip.waitFor({ timeout: 15000 });
 let code = "";

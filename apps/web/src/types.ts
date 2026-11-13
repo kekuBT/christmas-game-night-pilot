@@ -181,6 +181,9 @@ export interface Projection {
   championshipDay?: number;
   /** Stage 6.1: cup (a Family Cup), casual (no Cup at all) or solo. Missing: a Cup. */
   roomKind?: "cup" | "casual" | "solo";
+  /** Stage 12.1 (D-S121-02): when this casual room became a Family Cup, and the games it played while casual. */
+  cupSince?: { at: number; seq: number };
+  casualGameIds?: string[];
   /** Stage 7.1: casual rooms only. */
   party?: PartyView;
   /** Stage 7.2: casual rooms only. */

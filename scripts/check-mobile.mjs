@@ -23,6 +23,7 @@ import { passBriefing } from "./lib/briefing.mjs";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const args = process.argv.slice(2);
 const BASE = args.find((a) => !a.startsWith("--")) ?? "http://localhost:3457";
 const OUT = (args.find((a) => a.startsWith("--out=")) ?? `--out=${screenshotDir("docs/mobile-screenshots")}`).split("=")[1];
@@ -148,7 +149,7 @@ try {
     await tabFocus(host, `${vp.width}px host screen`);
 
     // Lobby: host creates, one joiner joins by code.
-    await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+    await hostFamilyCup(host);
     const shareChip = host.getByRole("button", { name: /^Share room code / });
     await shareChip.waitFor({ timeout: 15000 });
     let code = "";

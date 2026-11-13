@@ -13,7 +13,7 @@
 //     does not match".
 //  3. A successful reconnect afterwards clears the error and confirms.
 import { launchChromium } from "./lib/driver-env.mjs";
-import { roomGo } from "./lib/room-nav.mjs";
+import { roomGo, hostFamilyCup } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -29,7 +29,7 @@ try {
   const host = await hostCtx.newPage();
   await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
-  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(host);
   const shareChip = host.getByRole("button", { name: /^Share room code / });
   await shareChip.waitFor({ timeout: 15000 });
   let code = "";

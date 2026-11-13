@@ -35,7 +35,7 @@
 
 import { STAGE5_PRACTICE_ONLY, stage5Act, stage5Finished, stage5Screen } from "./lib/stage5-games.mjs";
 import { connectionsGroups } from "./lib/content-oracle.mjs";
-import { roomGo } from "./lib/room-nav.mjs";
+import { roomGo, hostFamilyCup } from "./lib/room-nav.mjs";
 import { diagnoseAll } from "./lib/diagnose.mjs";
 import { launchChromium } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
@@ -309,7 +309,7 @@ try {
   pages.push({ page: host, name: NAMES[0] });
   await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
-  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(host);
   const shareChip = host.getByRole("button", { name: /^Share room code / });
   await shareChip.waitFor({ timeout: 15000 });
   let code = "";

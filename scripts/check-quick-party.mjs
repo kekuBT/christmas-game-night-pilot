@@ -32,6 +32,7 @@ import { plainHttpContext } from "./lib/lan.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
@@ -46,8 +47,9 @@ async function host(page, name, kind = "casual") {
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
   await page.getByTestId("home-host").click();
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
-  if (kind === "cup") await page.getByTestId("host-kind-cup").click();
-  await page.getByRole("button", { name: "Host a game" }).click();
+  // Stage 12.1 (D-S121-01/02): no choice at the door; a Family Cup is the room menu's upgrade after hosting.
+  if (kind === "cup") await hostFamilyCup(page);
+  else await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
   await chip.waitFor({ timeout: 15000 });
   let code = "";

@@ -20,7 +20,7 @@
 // confirmation — the manual real-device checklist stays open.
 
 import { launchChromium } from "./lib/driver-env.mjs";
-import { roomGo } from "./lib/room-nav.mjs";
+import { roomGo, hostFamilyCup } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
@@ -143,7 +143,7 @@ try {
   report("home", await sampleView(host, "home"));
 
   await host.getByPlaceholder("e.g. Auntie June").fill("Alex");
-  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(host);
   const shareChip = host.getByRole("button", { name: /^Share room code / });
   await shareChip.waitFor({ timeout: 15000 });
   let code = "";

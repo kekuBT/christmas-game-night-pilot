@@ -11,6 +11,7 @@
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3461";
 let failures = 0;
 function check(name, ok, detail = "") {
@@ -31,7 +32,7 @@ async function expectSoon(label, fn, timeout = 15000) {
 async function createRoom(page, name) {
   await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
-  await page.getByTestId("host-kind-cup").click(); await page.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(page);
   const chip = page.getByRole("button", { name: /^Share room code / });
   await chip.waitFor({ timeout: 15000 });
   let code = "";

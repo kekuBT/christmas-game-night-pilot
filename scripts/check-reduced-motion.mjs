@@ -8,6 +8,7 @@
 //   node scripts/check-reduced-motion.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
@@ -20,7 +21,7 @@ async function setupRoom(ctx, hostName, guestName) {
   const host = await ctx.newPage();
   await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill(hostName);
-  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(host);
   const chip = host.getByRole("button", { name: /^Share room code / });
   await chip.waitFor({ timeout: 15000 });
   let code = "";

@@ -95,6 +95,26 @@ describe("Make it a Family Cup (POST /rooms/:id/cup)", () => {
     expect(day.body["day"]).toBe(2);
   });
 
+  it("the stored up-next plan becomes Official for an official-eligible game (a new Cup defaults to Official); practice-only stays practice", async () => {
+    const r = await casualRoom(); h = r.h;
+    expect((await h.post(`/rooms/${h.roomId}/plan`, { gameId: "trivia", official: false }, r.host.token)).status).toBe(200);
+    // A casual room can't plan an official game.
+    expect((await h.post(`/rooms/${h.roomId}/plan`, { gameId: "trivia", official: true }, r.host.token)).status).toBe(400);
+    expect((await upgrade(h, r.host)).status).toBe(200);
+    expect((await projection(h, r.guest))["upNext"]).toEqual({ gameId: "trivia", official: true });
+    // The host can still choose Practice afterwards, and asking to upgrade again doesn't flip it back.
+    expect((await h.post(`/rooms/${h.roomId}/plan`, { gameId: "trivia", official: false }, r.host.token)).status).toBe(200);
+    await upgrade(h, r.host);
+    expect((await projection(h, r.guest))["upNext"]).toEqual({ gameId: "trivia", official: false });
+    // A practice-only game planned while casual stays practice.
+    const r2 = await casualRoom();
+    try {
+      expect((await r2.h.post(`/rooms/${r2.h.roomId}/plan`, { gameId: "majority-rules", official: false }, r2.host.token)).status).toBe(200);
+      expect((await upgrade(r2.h, r2.host)).status).toBe(200);
+      expect((await projection(r2.h, r2.guest))["upNext"]).toEqual({ gameId: "majority-rules", official: false });
+    } finally { await r2.h.dispose(); }
+  });
+
   it("survives a restart: still a Cup, with when it started and its casual games", async () => {
     const r = await casualRoom(); h = r.h;
     const g = await trivia(h, r.host, r.guest, false);

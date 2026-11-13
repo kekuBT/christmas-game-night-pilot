@@ -61,3 +61,20 @@ export async function upNextTitle(page) {
   if ((await el.count()) === 0) return "";
   return ((await el.first().textContent()) ?? "").trim();
 }
+
+/**
+ * Stage 12.1 (docs/stage12/stage121.md §2; D-S121-01, -02): host a Family Cup the way a person now does. Host a game
+ * (every room starts as a game night, just for fun), then the room menu's "Make it a Family Cup" and its
+ * confirmation. Call it on the host screen with the name already typed. Resolves once this page's lobby shows the
+ * Cup (its day chip, from the server's projection).
+ */
+export async function hostFamilyCup(page, { timeout = 15000 } = {}) {
+  await page.getByRole("button", { name: "Host a game", exact: true }).click({ timeout });
+  await page.getByRole("button", { name: /^Share room code / }).waitFor({ timeout });
+  await openRoomMenu(page, { timeout });
+  await page.getByTestId("menu-make-cup").click({ timeout });
+  await page.getByTestId("make-cup-sheet").waitFor({ timeout });
+  await page.getByTestId("make-cup-confirm").click({ timeout });
+  await page.getByTestId("make-cup-sheet").waitFor({ state: "detached", timeout });
+  await page.locator(".mz-cupchip").first().waitFor({ timeout });
+}

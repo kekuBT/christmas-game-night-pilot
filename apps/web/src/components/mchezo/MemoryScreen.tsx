@@ -77,10 +77,12 @@ export function MemoryScreen(props: {
   canApprove: boolean;
   /** Stage 11.2 (D-S112-01): the room's kind (fixed for its life): a Cup book shows days, a casual one doesn't. */
   roomKind?: "cup" | "casual" | "solo";
+  /** Stage 12.1 (D-S121-02): games played while this room was casual (it has since become a Family Cup): never a Cup day. */
+  casualGameIds?: string[];
   onBack: () => void;
   onMenu: () => void;
 }) {
-  const { roomId, roomCode, day, roomSeq, ledgerAt, book, ledger, games, registry, players, bookText, setBookText, exportDoc, setExportDoc, post, get, bookRevision, heardRevision, heard, fetchSnapshot, refreshBook, canApprove, roomKind, onBack, onMenu } = props;
+  const { roomId, roomCode, day, roomSeq, ledgerAt, book, ledger, games, registry, players, bookText, setBookText, exportDoc, setExportDoc, post, get, bookRevision, heardRevision, heard, fetchSnapshot, refreshBook, canApprove, roomKind, casualGameIds, onBack, onMenu } = props;
   const textId = useId();
   const theme = useMchezo().theme;
   const look = theme.color;
@@ -98,11 +100,13 @@ export function MemoryScreen(props: {
   // Stage 11.2 (D-S112-01, D-S112-02): one presentation rule for the screen, the PDF and the server's Markdown. A Cup
   // book shows days; a casual one names the game instead. Names come from the entry, else this room's players.
   const cupBook = bookModeOf(roomKind) === "cup";
+  // Stage 12.1: a Cup's day applies only to games played since the room became a Cup.
+  const cupGame = (gameInstanceId: string) => cupBook && !(casualGameIds ?? []).includes(gameInstanceId);
   const gameOfEvent = (id: string) => { const ev = ledger.find((x) => x.eventId === id); return ev?.gameInstanceId ? games.find((x) => x.id === ev.gameInstanceId) : undefined; };
   const bookCtx: BookContext = {
     roomKind,
     nameOf,
-    sourceGames: (e) => e.sourceEventIds.map((id) => { const g = gameOfEvent(id); return g ? { title: title(g.gameId), ...(g.day !== undefined ? { day: g.day } : {}) } : {}; }),
+    sourceGames: (e) => e.sourceEventIds.map((id) => { const g = gameOfEvent(id); return g ? { title: title(g.gameId), ...(g.day !== undefined ? { day: g.day } : {}), mode: cupGame(g.id) ? "cup" as const : "casual" as const } : {}; }),
   };
   // Stage 5.1 (3E): the game a new highlight will cite, shown before adding,
   // and exactly what is sent. While the loaded ledger is behind the room's
@@ -129,7 +133,7 @@ export function MemoryScreen(props: {
     const scores = Object.entries(g.rawScores).sort((a, b) => b[1] - a[1]).map(([pid, v]) => `${nameOf(pid) ?? "A player"} ${v.toLocaleString("en-US")}`);
     // Stage 11.2: the game and its day in a Cup book; the game alone in a casual one.
     // Stage 11.2 (D-S112-05): the game's own recorded day, never the entry's stored day (a Day 2 note about Day 1).
-    return [`${title(g.gameId)}${cupBook && g.day !== undefined ? ` · Day ${g.day}` : ""}: ${scores.join(" · ")}`];
+    return [`${title(g.gameId)}${cupGame(g.id) && g.day !== undefined ? ` · Day ${g.day}` : ""}: ${scores.join(" · ")}`];
   });
 
   /** Stage 10.5: the entries an export is built from: the fresh snapshot's approved ones, never the screen's. */
@@ -317,7 +321,7 @@ export function MemoryScreen(props: {
             {syncing ? "Checking for the latest finished game…"
               : link.state === "unavailable" && link.why === "team-not-final" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>. It was stopped before its team result was final, so it can&rsquo;t be saved.</>
               : link.state === "unavailable" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>, a team game: team games like this one aren&rsquo;t saved to the Memory Book yet.</>
-              : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame && cupBook && targetGame.day !== undefined ? ` · Day ${targetGame.day}` : ""}: the last game that finished.</>}
+              : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame && cupGame(targetGame.id) && targetGame.day !== undefined ? ` · Day ${targetGame.day}` : ""}: the last game that finished.</>}
           </p>
         )}
         {teamPreview && <p className="mz-foot mz-memory__target" data-testid="memory-link-facts">Saved with: {teamPreview}</p>}

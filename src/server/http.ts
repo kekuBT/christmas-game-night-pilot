@@ -1310,7 +1310,15 @@ export class LocalServer {
           if (!player) return;
           try {
             const { changed } = room.upgradeToCup(player.id);
-            if (changed) { this.persist(room); this.broadcast(room.id); }
+            if (changed) {
+              // Stage 12.1: while casual, the host's phones published the up-next plan as practice (a casual room has no
+              // official games). A new Family Cup defaults to Official, like a Cup created at the door, so the stored plan
+              // follows for an official-eligible game; the host can still choose Practice.
+              const plan = this.lobbyPlans.get(room.id);
+              if (plan && !plan.official && GAME_POLICIES[plan.gameId as keyof typeof GAME_POLICIES]?.officialEligible !== false) this.lobbyPlans.set(room.id, { gameId: plan.gameId, official: true });
+              this.persist(room);
+              this.broadcast(room.id);
+            }
             this.send(res, 200, { ok: true, changed, roomKind: room.kind, championshipDay: room.championshipDay, ...(room.cupSince ? { cupSince: room.cupSince } : {}) });
           } catch (err) {
             if (err instanceof CupUpgradeRefused) { this.send(res, err.code === "NOT_HOST" ? 403 : 409, { error: err.message, code: err.code, roomKind: room.kind }); return; }

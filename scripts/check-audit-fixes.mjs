@@ -19,7 +19,7 @@
 //             questions, also in a tab that watched another room first.
 // Usage: node scripts/check-audit-fixes.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
-import { roomGo } from "./lib/room-nav.mjs";
+import { roomGo, hostFamilyCup } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -33,7 +33,7 @@ async function enter(page, name, code) {
   await page.goto(`${BASE}/${code ? "join" : "host"}`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
   if (!code) {
-    await page.getByTestId("host-kind-cup").click(); await page.getByRole("button", { name: "Host a game" }).click();
+    await hostFamilyCup(page);
     const chip = page.getByRole("button", { name: /^Share room code / });
     await chip.waitFor({ timeout: 15000 });
     let c = "";

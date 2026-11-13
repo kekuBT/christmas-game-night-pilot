@@ -1,0 +1,74 @@
+/* Stage 12.1 (docs/stage12/stage121.md): one path on the phone, and the TV as the hero. */
+
+/* ---- Home's dock: Join and Host side by side, Play solo as a quieter full-width link under them (D-S121-01). */
+.mz-screen.mz-home > .mz-dock--home.mz-dock--onepath { flex-wrap: wrap; row-gap: 2px; }
+.mz-dock--onepath .mz-key { flex: 1 1 calc(50% - 5px); }
+.mz-dock--onepath .mz-dock__solo { flex: 1 1 100%; text-align: center; text-decoration: none; color: var(--mz-text-muted); }
+.mz-dock--onepath .mz-dock__solo b { color: var(--mz-text); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- Host: the one line about the Family Cup (no choice at the door). */
+.mz-entry__cupnote { margin: 0; padding: 12px 14px; border-radius: 14px; background: var(--mz-surface-2); }
+
+/* ---- Make it a Family Cup: the plain list of what changes. */
+.mz-makecup { margin: 4px 0 8px; padding: 0 0 0 18px; display: grid; gap: 8px; font: 500 15px/1.45 var(--mz-font-body); color: var(--mz-text); }
+.mz-makecup b { font-weight: 800; }
+
+/* ======================================================================= the TV */
+
+/* ---- Join: the QR code beside the big code. */
+.mz-tvshow-joinrow { display: flex; align-items: center; gap: 36px; }
+.mz-tvshow-qr { width: 220px; height: 220px; border-radius: 18px; background: #fff; padding: 12px; flex: none; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18); }
+.mz-tvshow-qr img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.mz-tvshow-joincopy { display: grid; gap: 6px; min-width: 0; }
+.mz-tvshow-scan { font: 700 26px var(--mz-font-display); color: var(--mz-text-muted); }
+
+/* ---- The podium reveal: bronze, then silver, then gold. */
+.mz-podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 22px; min-height: 420px; }
+.mz-podium__step { display: grid; justify-items: center; gap: 10px; opacity: 1; transform: none; }
+.mz-podium__who { display: grid; justify-items: center; gap: 4px; text-align: center; max-width: 100%; }
+.mz-podium__medal { font-size: 64px; line-height: 1; }
+.mz-podium__name { font: 800 34px/1.1 var(--mz-font-display); color: var(--mz-text); overflow-wrap: anywhere; }
+.mz-podium__score { font: 700 26px var(--mz-font-body); color: var(--mz-text-muted); font-variant-numeric: tabular-nums; }
+.mz-podium__block { width: 100%; border-radius: 18px 18px 6px 6px; display: grid; place-items: center; font: 900 64px var(--mz-font-display); color: var(--mz-on-bright, #16111d); }
+.mz-podium__step--1 .mz-podium__block { height: 220px; background: linear-gradient(180deg, #ffd66b, #e8a93a); }
+.mz-podium__step--2 .mz-podium__block { height: 160px; background: linear-gradient(180deg, #e6ecf2, #b9c3cf); }
+.mz-podium__step--3 .mz-podium__block { height: 110px; background: linear-gradient(180deg, #f1c49b, #c98c5a); }
+.mz-podium__step--empty { visibility: hidden; }
+@keyframes mz-podium-rise { from { opacity: 0; transform: translateY(48px) scale(0.96); } to { opacity: 1; transform: none; } }
+.mz-podium--animate .mz-podium__step { animation: mz-podium-rise 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.mz-podium--animate .mz-podium__step--3 { animation-delay: 300ms; }
+.mz-podium--animate .mz-podium__step--2 { animation-delay: 1300ms; }
+.mz-podium--animate .mz-podium__step--1 { animation-delay: 2400ms; }
+.mz-tvshow--paused .mz-podium--animate .mz-podium__step { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .mz-podium--animate .mz-podium__step { animation: none; } }
+[data-mz-motion="off"] .mz-podium--animate .mz-podium__step, [data-mz-motion="reduced"] .mz-podium--animate .mz-podium__step { animation: none; }
+
+/* ---- The final screen: podium and standings side by side, the night below. */
+.mz-tvfinal { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 36px; align-items: start; }
+.mz-tvfinal__night { grid-column: 1 / -1; }
+.mz-tvlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mz-tvlist li { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 10px 16px; border-radius: 14px; background: var(--mz-surface-2); font: 700 26px var(--mz-font-body); color: var(--mz-text); }
+.mz-tvlist__rank { font: 900 28px var(--mz-font-display); color: var(--mz-text-muted); text-align: center; }
+.mz-tvlist__name { overflow-wrap: anywhere; }
+.mz-tvlist__val { font-variant-numeric: tabular-nums; color: var(--mz-text-muted); }
+.mz-tvlist__move { font-size: 20px; margin-left: 8px; }
+.mz-tvlist__move--up { color: var(--mz-success, #2f6a4f); }
+.mz-tvlist__move--down { color: var(--mz-danger, #b3261e); }
+
+/* ---- The medal table. */
+.mz-medals { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mz-medals li { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 76px); align-items: center; gap: 10px; padding: 10px 16px; border-radius: 14px; background: var(--mz-surface-2); font: 700 26px var(--mz-font-body); color: var(--mz-text); }
+.mz-medals__head { background: transparent !important; padding-top: 0 !important; padding-bottom: 0 !important; font-size: 30px !important; }
+.mz-medals__n { text-align: center; font-variant-numeric: tabular-nums; }
+.mz-medals__n--zero { color: var(--mz-text-muted); opacity: 0.6; }
+
+/* ---- The trophy moment. */
+.mz-trophy { display: grid; justify-items: center; align-content: center; gap: 18px; min-height: 640px; text-align: center; }
+.mz-trophy__cup { font-size: 180px; line-height: 1; }
+@keyframes mz-trophy-pop { 0% { transform: scale(0.6) rotate(-6deg); opacity: 0; } 60% { transform: scale(1.08) rotate(2deg); opacity: 1; } 100% { transform: none; } }
+.mz-trophy--animate .mz-trophy__cup { animation: mz-trophy-pop 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) { .mz-trophy--animate .mz-trophy__cup { animation: none; } }
+[data-mz-motion="off"] .mz-trophy--animate .mz-trophy__cup, [data-mz-motion="reduced"] .mz-trophy--animate .mz-trophy__cup { animation: none; }
+.mz-trophy__title { font: 900 72px/1.05 var(--mz-font-display); color: var(--mz-text); margin: 0; }
+.mz-trophy__who { font: 800 52px/1.1 var(--mz-font-display); color: var(--mz-brand, var(--mz-text)); margin: 0; }
+.mz-trophy__line { font: 600 28px var(--mz-font-body); color: var(--mz-text-muted); margin: 0; }

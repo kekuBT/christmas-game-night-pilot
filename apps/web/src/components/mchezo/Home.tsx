@@ -9,11 +9,8 @@
  * for a seat this browser really holds.
  */
 import { useId, type ReactNode } from "react";
-import { CodeInput, GameCover, Keycap, SegmentedChoice, Sheet, Wordmark, accentColor, playersLabel, sessionEstimate, timeLimitLabel, type CatalogGame } from "../../ui/mchezo/index.js";
+import { CodeInput, GameCover, Keycap, Sheet, Wordmark, accentColor, playersLabel, sessionEstimate, timeLimitLabel, type CatalogGame } from "../../ui/mchezo/index.js";
 import { CalmNotices, InstallCard } from "./InstallUi.js";
-
-/** Stage 6.1: what Host a game creates. Casual is the default; a Family Cup is a deliberate choice. */
-export type HostKind = "casual" | "cup";
 
 function BackButton({ onBack, label = "Back" }: { onBack: () => void; label?: string }) {
   return (
@@ -107,12 +104,12 @@ export function HomeScreen(p: {
       <button type="button" className="mz-linkbtn" data-testid="mz-lost-place" onClick={p.onLostSeat}>Lost your place? Recover your seat</button>
       {p.status}
       </div>
-      {/* Stage 6.1: the three everyday ways in. Join stays first: an invited
-          guest is the most common arrival. */}
-      <nav className="mz-dock mz-dock--home mz-dock--three" aria-label="Start playing" data-testid="home-dock">
+      {/* Stage 12.1 (D-S121-01): one path. Two ways in for the room: Join (an invited guest, the most common arrival)
+          and Host. Play solo is still one tap, but as a quieter link: it isn't a peer of hosting a game night. */}
+      <nav className="mz-dock mz-dock--home mz-dock--onepath" aria-label="Start playing" data-testid="home-dock">
         <Keycap block data-testid="home-join" onClick={p.onJoin}>Join a room</Keycap>
-        <Keycap block variant="surface" data-testid="home-solo" onClick={p.onSolo}>Play solo</Keycap>
         <Keycap block variant="surface" data-testid="home-host" onClick={p.onHost}>Host a game</Keycap>
+        <button type="button" className="mz-linkbtn mz-dock__solo" data-testid="home-solo" onClick={p.onSolo}>Just you? <b>Play solo</b></button>
       </nav>
     </main>
   );
@@ -168,9 +165,6 @@ export function JoinScreen(p: {
 export function HostScreen(p: {
   name: string;
   onNameChange: (n: string) => void;
-  /** Stage 6.1: casual (default) or a Family Cup. */
-  kind: HostKind;
-  onKindChange: (k: HostKind) => void;
   onHost: () => void;
   onBack: () => void;
   remember: ReactNode;
@@ -189,21 +183,10 @@ export function HostScreen(p: {
       {p.notice}
       <h1 className="mz-h1">Host a game</h1>
       <p className="mz-foot mz-entry__lede">Your phone runs the room. Everyone else joins with the code or the QR code you’ll see next.</p>
+      {/* Stage 12.1 (D-S121-01): no decision at the door. Every room starts as a game night for fun; a Family Cup is an
+          upgrade the host can make later from the room menu (D-S121-02). */}
       {!p.blocked && (
-        <div className="mz-entry__kind" data-testid="host-kind">
-          <SegmentedChoice
-            label="What kind of game night"
-            value={p.kind}
-            onChange={(v) => p.onKindChange(v === "cup" ? "cup" : "casual")}
-            options={[
-              { value: "casual", title: "Casual", tone: "mint", testId: "host-kind-casual", detail: "Just play. No Cup, no days, no setup." },
-              { value: "cup", title: "Family Cup", tone: "sun", testId: "host-kind-cup", detail: "Official games, Cup days and standings." },
-            ]}
-          />
-          <p className="mz-foot mz-entry__kindnote" data-testid="host-kind-note">{p.kind === "cup"
-            ? "A Family Cup is a planned event: official games count toward its standings over the Cup’s days."
-            : "Casual games are just for fun: nothing counts toward a Cup. Pick Family Cup for an official event."}</p>
-        </div>
+        <p className="mz-foot mz-entry__cupnote" data-testid="host-cup-note">Every room starts as a game night, just for fun. Want a week-long <b>Family Cup</b> with official games and standings? Turn this room into one any time from the room menu.</p>
       )}
       {!p.blocked && p.firstGame && (
         <div className="mz-entry__game" data-testid="host-first-game">
