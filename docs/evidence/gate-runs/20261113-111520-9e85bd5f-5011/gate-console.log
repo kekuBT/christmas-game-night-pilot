@@ -1,0 +1,99 @@
+Mchezo gate targeted | run 20261113-111520-9e85bd5f-5011
+  revision 9e85bd5fd0031296eb00c094b6664d4644b70465 (clean tree) | fingerprint efc920f9f635 (528 files)
+  plan     12 steps: 1 fast/build, 10 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.2 GB available)
+  history  131 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 108 run(s))
+  estimate this run: 5–14m (measured) · the same steps one after another: about 16m 55s · longest step check-f5 ~7m 21s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-tgt/test-results/20261113-111520-9e85bd5f-5011
+        start build-web on w1 (usually 7s)
+[ 1/12] PASS         5.2s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/12] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:33747 (pid 5126, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-tgt/test-results/20261113-111520-9e85bd5f-5011/server-data/w1)
+  server   w2 http://localhost:34603 (pid 5127, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-tgt/test-results/20261113-111520-9e85bd5f-5011/server-data/w2)
+  server   w3 http://localhost:34781 (pid 5128, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-tgt/test-results/20261113-111520-9e85bd5f-5011/server-data/w3)
+        start check-f5 on w1 (usually 7m 21s)
+        start check-jebena-rush on w2 (usually 2m 08s)
+        start check-spectrum on w3 (usually 1m 55s)
+── progress  2/12 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-f5 53s (w1), check-jebena-rush 53s (w2), check-spectrum 53s (w3)
+   remaining 5–13m · total 6–14m · done around 11:21–11:29 UTC (measured)
+── progress  2/12 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-f5 1m 53s (w1), check-jebena-rush 1m 53s (w2), check-spectrum 1m 53s (w3)
+   remaining 4–12m · total 6–14m · done around 11:21–11:29 UTC (measured)
+[ 3/12] FAIL       138.1s  check-spectrum  w3  FAIL 10.3 M3 the cohost approves the early entry: the export has it, saying it ended early — not within 15000ms
+      | PASS 10.4 S2 its facts say it ended early
+      | PASS 10.4 S2 saved
+      | PASS 10.4 S2 it cites the replay's own finish, with its early facts (never the completed match) — {"id":"book-6","day":1,"type":"game-result","text":"The replay we cut short","sourceEventIds":["evt-28"],"approved":false,"derivedFacts":["Spectrum team result: 0 out of 40 · ended early, 1 of 4 rounds played (fewer than
+      | PASS 10.4 S2 Open the Memory Book shows it, pending, with its facts
+      | PASS H Amina's phone uses the Christmas look
+      | PASS H Keku's phone uses the Everyday look
+      | PASS H Baraka's phone is in reduced motion
+      | PASS I the canary check finds a canary when one is there (self-test)
+      | PASS I no built file carries the pack (22 files)
+      | PASS I no public response carries the pack (15 responses)
+      | PASS J room B ran its own match: its own clock, no clue or guess from room A — ["no-clue","no-clue"]
+      | PASS K a Cup's picker leaves Spectrum out — 14 games
+      | PASS K the server refuses Spectrum in a Cup (409 CASUAL_ONLY) — {"error":"Spectrum plays in casual rooms only.","code":"CASUAL_ONLY","readiness":{"registered":1,"connected":1,"reconnecting":0,"away":0,"wouldPlay":["player-1"
+      | 1 FAILED
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":9,"pages":11,"peakOpenPages":8}
+        start check-themes-seasonal on w3 (usually 1m 42s)
+[ 4/12] PASS       138.4s  check-jebena-rush  w2
+        start check-warm-ivory on w2 (usually 1m 05s)
+── progress  4/12 done · 3 passed, 1 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-f5 2m 53s (w1), check-themes-seasonal 35s (w3), check-warm-ivory 35s (w2)
+   remaining 3–11m · total 6–14m · done around 11:21–11:29 UTC (measured)
+[ 5/12] FAIL        69.1s  check-warm-ivory  w2  FAIL W8 Everyday memory-390: every element kind's computed colours equal the base build's (d4dc408) — 42 kinds; new 2, missing 2 e.g. memory-entry-badge>span.mz
+      | PASS W1 memory at 1280 px: every text element reads (4.5:1, large 3:1) — 30 text elements, lowest 6.24:1, 1 disabled or faded (exempt)
+      | PASS W2 memory at 1280 px: every control stands out from what's behind it (3:1) — 6 controls, weakest 4.03:1
+      | PASS W3 memory at 1280 px: no dark page, card or panel
+      | PASS W5 memory at 1280 px: nothing animates with Animations Off — 0 running
+      | PASS W2 the focus ring after Tab is visible and stands out (3:1, at least 2 px) — memory-back 3px 5.06:1; room-menu 3px 5.06:1; TEXTAREA 3px 7.11:1; SUMMARY 3px 5.56:1
+      | PASS W2 a disabled key looks different from the same key enabled (its fill differs) — disabled rgb(239, 230, 214), enabled rgb(163, 37, 58)
+      | PASS W6 Memory Book: Christmas -> Everyday -> Christmas from the room menu keeps the unsent draft (no reload) — {"mid":["everyday","A draft that survives a change of look"],"end":["christmas","A draft that survives a change of look"]}
+      | PASS W7 Christmas PDF: ivory page, cranberry title, the approved note, not the pending one — christmas-memory-book-A38TPA-2026-11-13.pdf
+      | PASS W7 Christmas share image: its background is the ivory ground (247, 241, 230) — [247,241,230]
+      | PASS W7 Everyday PDF: unchanged (no page fill, no coloured title) — mchezo-memory-book-A38TPA-2026-11-13.pdf
+      | PASS W7 after a revoke, a fresh Christmas PDF leaves the revoked note out and keeps the approved one — christmas-memory-book-A38TPA-2026-11-13.pdf
+      | PASS W6 a game in progress: another tab's look change re-themes it, with no reload and the same question — {"before":["christmas","Question 2 of 10"],"after":["everyday","Question 2 of 10"]}
+      | 
+      | 2 check(s) FAILED
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":21,"pages":22,"peakOpenPages":3}
+        start check-book-live on w2 (usually 1m 05s)
+── progress  5/12 done · 3 passed, 2 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-f5 3m 53s (w1), check-themes-seasonal 1m 35s (w3), check-book-live 26s (w2)
+   remaining 2–10m · total 6–14m · done around 11:21–11:29 UTC (measured)
+[ 6/12] PASS       106.8s  check-themes-seasonal  w3
+        start check-f4 on w3 (usually 50s)
+[ 7/12] PASS        68.6s  check-book-live  w2
+        start check-contrast on w2 (usually 25s)
+── progress  7/12 done · 5 passed, 2 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-f5 4m 53s (w1), check-f4 48s (w3), check-contrast 17s (w2)
+   remaining 1–9m · total 6–14m · done around 11:21–11:29 UTC (measured)
+[ 8/12] PASS        53.6s  check-f4  w3
+        wait  check-cup-memory: load 5.0 > 4 CPUs
+[ 9/12] PASS        27.5s  check-contrast  w2
+── progress  9/12 done · 7 passed, 2 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-f5 5m 53s (w1)
+   remaining 0–8m · total 6–14m · done around 11:21–11:29 UTC (measured)
+        start check-cup-memory on w2 (usually 12s)
+        start check-history-links on w3 (usually 5s)
+[10/12] PASS         5.3s  check-history-links  w3
+[11/12] PASS        12.7s  check-cup-memory  w2
+── progress  11/12 done · 9 passed, 2 failed, 0 timed out, 0 cancelled · elapsed 7m 00s
+   running   check-f5 6m 53s (w1)
+   remaining 1–7m · total 8–14m · done around 11:23–11:29 UTC (measured)
+[12/12] PASS       458.9s  check-f5  w1
+
+FAILED (exit 1) | targeted | run 20261113-111520-9e85bd5f-5011
+  10 passed, 2 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-spectrum (w3) [functional]: FAIL 10.3 M3 the cohost approves the early entry: the export has it, saying it ended early — not within 15000ms
+  FAIL      check-warm-ivory (w2) [functional]: FAIL W8 Everyday memory-390: every element kind's computed colours equal the base build's (d4dc408) — 42 kinds; new 2, missing 2 e.g. memory-entry-badge>span.mz-badge.mz-badge--mint=>rgb(22, 17, 29)|r
+  timing   wall 7m 46s · step time 18m 05s (sum) · 3 workers, 78% busy · 2.33× the same steps run one after another
+           predicted 6–14m (about 7m 38s, measured) → actual 7m 46s (+2%)
+           longest  check-f5 7m 39s, check-jebena-rush 2m 18s, check-spectrum 2m 18s · the longest step is 98% of the wall time
+           machine  CPU mean 43%, peak 96% · memory available ≥ 13309 MB · load peak 5.64 · backpressure 1 wait(s), 55s
+           contention ×1.067 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-tgt/test-results/20261113-111520-9e85bd5f-5011/report.json

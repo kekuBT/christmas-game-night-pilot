@@ -1,0 +1,5 @@
+   × the shared presentation rule (src/shared/memoryPresent.ts) > older Cup entry (review 6851031292, D-S112-05): its day comes from the same room's citation, never its stored day 10ms
+   × over HTTP > a restored older Cup entry, saved on Day 2 about a Day 1 finish, is labelled Day 1 from the room's citation; the stored entry is unchanged (review 6851031292) 56ms
+   × over HTTP > a restored older Cup entry whose cited finish isn't in the room gets no day label, never its stored day 49ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  3 failed | 21 passed (24)

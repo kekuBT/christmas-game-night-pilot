@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | targeted | run 20261113-111520-9e85bd5f-5011
+  10 passed, 2 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-spectrum (w3) [functional]: FAIL 10.3 M3 the cohost approves the early entry: the export has it, saying it ended early — not within 15000ms
+  FAIL      check-warm-ivory (w2) [functional]: FAIL W8 Everyday memory-390: every element kind's computed colours equal the base build's (d4dc408) — 42 kinds; new 2, missing 2 e.g. memory-entry-badge>span.mz-badge.mz-badge--mint=>rgb(22, 17, 29)|r
+  timing   wall 7m 46s · step time 18m 05s (sum) · 3 workers, 78% busy · 2.33× the same steps run one after another
+           predicted 6–14m (about 7m 38s, measured) → actual 7m 46s (+2%)
+           longest  check-f5 7m 39s, check-jebena-rush 2m 18s, check-spectrum 2m 18s · the longest step is 98% of the wall time
+           machine  CPU mean 43%, peak 96% · memory available ≥ 13309 MB · load peak 5.64 · backpressure 1 wait(s), 55s
+           contention ×1.067 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-tgt/test-results/20261113-111520-9e85bd5f-5011/report.json

@@ -1,0 +1,466 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt112
+
+ ✓ tests/stage91-jebena.test.ts (47 tests) 292ms
+stdout | tests/stage74-content-variety.test.ts > over HTTP: a solo press id and a restart > the same press twice: 201 then 200 (replay), one round, one use; restored after a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-s74-http-yoysc6)
+
+stdout | tests/stage74-content-variety.test.ts > pre-existing defect (found while testing V3): a solo Start after a server restart > is no longer refused: the one pressing Start in a solo room is present (reproduced on af39c78: 400 'Need at least 1 connected players', every time)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-s74-solo-restart-PiE15o)
+
+stdout | tests/stage82-seasonal.test.ts > over HTTP (§3.4) > a host sets a casual room's content; a guest is refused; a bad value or a Cup is refused; the projection and a restart keep it
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-s82-http-BwMAGV)
+
+ ✓ tests/stage92-spectrum.test.ts (49 tests) 173ms
+ ✓ tests/stage82-seasonal.test.ts (40 tests) 748ms
+stderr | tests/stage71-quick-party.test.ts > the room's saved lineup > is saved with the room, and a damaged saved lineup is dropped whole
+[party] room room-mwevnxvc-581914: saved lineup dropped (Unknown game: chess)
+[party] room room-mwevnxvc-581914: saved lineup dropped (That lineup is about 19 minutes, more than 15.)
+[party] room room-mwevnxvc-581914: saved lineup dropped (bad revision)
+[party] room room-mwevnxvc-581914: saved lineup dropped (not an object)
+
+stdout | tests/stage71-quick-party.test.ts > over HTTP > survives a server restart: the lineup, its revision and its start mark; a retried start after the restart is the same game
+[restore] 6 room(s) restored, 0 not loaded (data: /tmp/mz-s71-IKkbKs)
+
+ ✓ tests/stage71-quick-party.test.ts (31 tests) 489ms
+stdout | tests/stage72-session-flow.test.ts > over HTTP > a Break whose reply was lost, retried after a Resume and a server restart, is answered without putting the room back on a break
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-s72-Zd7zeC)
+
+stdout | tests/stage72-session-flow.test.ts > over HTTP > Play again: 400 if malformed, official, a lineup start too, or without the roster or request id; 201, then 200 with the same game; cancelled, a retry starts nothing, also after a restart
+[restore] 3 room(s) restored, 0 not loaded (data: /tmp/mz-s72-Zd7zeC)
+
+ ✓ tests/stage72-session-flow.test.ts (27 tests) 301ms
+ ✓ tests/stage83-install.test.ts (37 tests) 346ms
+ ✓ tests/stage61-solo-client.test.ts (29 tests) 2755ms
+   ✓ the solo session under faults (review of PR #6) > a connection that fails late, then a resend that hangs: the Start still ends within the first request's allowance, not two 803ms
+ ✓ tests/test-batch-200.test.ts (43 tests) 264ms
+ ✓ tests/d3-briefing.test.ts (58 tests) 800ms
+stdout | tests/stage73-host-handover.test.ts > over HTTP and WebSocket > a server restart keeps exactly one host; the host-claim token can't seize the role back
+[restore] 5 room(s) restored, 0 not loaded (data: /tmp/mz-s73-WTV720)
+
+ ✓ tests/stage74-content-variety.test.ts (34 tests) 9604ms
+   ✓ MCHEZO_CONTENT_DIR is for tests only (§4.6) > is refused when NODE_ENV=production (the server does not start) 400ms
+   ✓ MCHEZO_CONTENT_DIR is for tests only (§4.6) > otherwise loads that directory instead of the shipped library, and says so 379ms
+   ✓ solo Start recovery is tied to its own press (review 6786060026) > A's request hangs (never arrives) while B starts the same game: A ends within one request allowance without adopting B's round; Try again sends the same press and is refused as stale; B is undisturbed 2025ms
+   ✓ solo Start recovery is tied to its own press (review 6786060026) > no network at all: the Start ends within its budget; Try again sends the same press (a replay if it had arrived), so nothing starts twice 6093ms
+ ✓ tests/stage73-host-handover.test.ts (18 tests) 783ms
+   ✓ over HTTP and WebSocket > open host, cohost and player sockets across a transfer to a cohost, then seat recovery: each loses or gains exactly the right view 522ms
+ ✓ tests/stage93-spectrum-room.test.ts (22 tests) 298ms
+ ✓ tests/sprint-e2v3.test.ts (48 tests) 1430ms
+   ✓ size policy (provisional): max(15, 4 x players), with obscure-tail and dominant rules > the rule is never looser than the simulation's minimum for famous-first recall 1283ms
+ ✓ tests/recovery.test.ts (20 tests) 835ms
+stdout | tests/stage103-memory-team.test.ts > over HTTP: saving Spectrum's team result > the same trusted facts after a restart; a competitive entry beside it keeps its own facts
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-dOC4em)
+
+ ✓ tests/stage103-memory-team.test.ts (18 tests) 1011ms
+   ✓ over HTTP: saving Spectrum's team result > the same trusted facts after a restart; a competitive entry beside it keeps its own facts 368ms
+stdout | tests/lifecycle.test.ts > restarts > a deadline that passes while the server is down is processed at startup, as of the deadline, and saved
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-qUuTHX)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-qUuTHX)
+
+stdout | tests/lifecycle.test.ts > restarts > a game still in time survives a restart with its deadline and answers unchanged
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-uZLQRo)
+
+ ✓ tests/stage61-room-kinds.test.ts (24 tests) 219ms
+ ✓ tests/lifecycle.test.ts (27 tests) 1653ms
+ ✓ tests/stage5-draw.test.ts (17 tests) 225ms
+ ✓ tests/abstention.test.ts (14 tests) 135ms
+stdout | tests/scenarios.test.ts > server restarts > REQUIREMENT: several rooms, one mid-game, all come back after a restart; players resume with their tokens
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-harness-vba4yQ)
+
+stdout | tests/scenarios.test.ts > server restarts > REQUIREMENT: one corrupt room file does not stop the family's room loading
+[restore] 1 room(s) restored, 1 not loaded (data: /tmp/mz-harness-bDLMyL)
+
+stderr | tests/scenarios.test.ts > server restarts > REQUIREMENT: one corrupt room file does not stop the family's room loading
+[restore] NOT LOADED room-0000-corrupt.json: not valid JSON (truncated or corrupt): Unterminated string in JSON at position 17 (line 1 column 18)
+
+ ✓ tests/scenarios.test.ts (14 tests) 1339ms
+stdout | tests/qualification.test.ts > persistence, migration and immutability > the Cup record survives a real server restart unchanged
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-x43Gk6)
+
+stderr | tests/qualification.test.ts > persistence, migration and immutability > an invalid saved rule (an unknown rule) pauses standings, never guesses, and is written back untouched
+[cup] room room-mwevo9vs-215273: Cup record invalid: qualificationPolicy.kind: Invalid discriminator value. Expected 'any-official-game' | 'meaningful-participation' — standings paused, record preserved
+
+stderr | tests/qualification.test.ts > persistence, migration and immutability > an invalid saved rule (a missing threshold) pauses standings, never guesses, and is written back untouched
+[cup] room room-mwevo9vy-888037: Cup record invalid: qualificationPolicy.minShare: Required — standings paused, record preserved
+
+stderr | tests/qualification.test.ts > persistence, migration and immutability > an invalid saved rule (a nonsense threshold) pauses standings, never guesses, and is written back untouched
+[cup] room room-mwevo9w1-77770: Cup record invalid: qualificationPolicy.minShare: Number must be less than or equal to 1 — standings paused, record preserved
+
+stderr | tests/qualification.test.ts > persistence, migration and immutability > an invalid saved rule (a future version) pauses standings, never guesses, and is written back untouched
+[cup] room room-mwevo9w4-598873: Cup record invalid: qualificationPolicy.version: Invalid literal value, expected 1 — standings paused, record preserved
+
+ ✓ tests/qualification.test.ts (30 tests) 191ms
+ ✓ tests/stage62-solo-shelf.test.ts (26 tests) 15917ms
+   ✓ the solo session across games, and a join whose reply was lost > a join the server accepted but whose reply was lost: Try again gives that room up and makes exactly one new one 2018ms
+   ✓ the solo session across games, and a join whose reply was lost > only a definite answer gives the room up: a timeout or 5xx on the retried join keeps it, with no new room 4020ms
+   ✓ the solo session across games, and a join whose reply was lost > the fallback itself failing: at most one new room per Start, whatever goes wrong 8063ms
+   ✓ the solo session across games, and a join whose reply was lost > the whole Start, fallback included, ends within its time budget 1402ms
+stdout | tests/persistence.test.ts > restore after restart > restores one valid room with its players, games and session tokens
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-persist-garEhL)
+
+stdout | tests/persistence.test.ts > restore after restart > restores multiple valid rooms
+[restore] 3 room(s) restored, 0 not loaded (data: /tmp/mz-persist-x0bh88)
+
+stdout | tests/persistence.test.ts > restore after restart > a corrupt JSON file among valid rooms is reported, left untouched, and does not block the others
+[restore] 2 room(s) restored, 1 not loaded (data: /tmp/mz-persist-fLhwIC)
+
+stderr | tests/persistence.test.ts > restore after restart > a corrupt JSON file among valid rooms is reported, left untouched, and does not block the others
+[restore] NOT LOADED room-aaaa-corrupt.json: not valid JSON (truncated or corrupt): Unexpected end of JSON input
+
+stdout | tests/persistence.test.ts > restore after restart > a partially written snapshot with no previous generation is reported and preserved, never overwritten
+[restore] 0 room(s) restored, 1 not loaded (data: /tmp/mz-persist-h7FoFc)
+
+stderr | tests/persistence.test.ts > restore after restart > a partially written snapshot with no previous generation is reported and preserved, never overwritten
+[restore] NOT LOADED room-mwevoaiv-966665.json: not valid JSON (truncated or corrupt): Unexpected end of JSON input
+
+stdout | tests/persistence.test.ts > restore after restart > a damaged snapshot with a valid previous generation is recovered, and the damaged file is moved aside, not deleted
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-persist-Skmlb7)
+
+stderr | tests/persistence.test.ts > restore after restart > a damaged snapshot with a valid previous generation is recovered, and the damaged file is moved aside, not deleted
+[restore] warning room-mwevoajj-64140.json: restored from room-mwevoajj-64140.json.prev; the most recent change may be missing
+[restore] moved room-mwevoajj-64140.json to /tmp/mz-persist-Skmlb7/quarantine/room-mwevoajj-64140.json.2026-11-13T11-12-52-845Z: damaged (not valid JSON (truncated or corrupt): Unexpected token 'g', "garbage" is not valid JSON); room restored from room-mwevoajj-64140.json.prev
+
+stdout | tests/persistence.test.ts > restore after restart > rejects invalid schema (players is not an array) without affecting other rooms
+[restore] 1 room(s) restored, 1 not loaded (data: /tmp/mz-persist-5mEaP4)
+
+stderr | tests/persistence.test.ts > restore after restart > rejects invalid schema (players is not an array) without affecting other rooms
+[restore] NOT LOADED room-mwevoak5-526348.json: invalid room data: players: Expected array, received string
+
+stdout | tests/persistence.test.ts > restore after restart > rejects invalid schema (unknown game type) without affecting other rooms
+[restore] 1 room(s) restored, 1 not loaded (data: /tmp/mz-persist-1i4NIu)
+
+stderr | tests/persistence.test.ts > restore after restart > rejects invalid schema (unknown game type) without affecting other rooms
+[restore] NOT LOADED room-mwevoaks-566088.json: invalid room data: games.0.gameId: unknown game type
+
+ ✓ tests/stage81-mobile-solo.test.ts (16 tests) 473ms
+   ✓ F3: the solo session uses the server's clock, as room screens do > an older read answering after a newer one changes nothing: not the round shown, not the clock 322ms
+stdout | tests/persistence.test.ts > restore after restart > rejects invalid schema (host is not a player) without affecting other rooms
+[restore] 1 room(s) restored, 1 not loaded (data: /tmp/mz-persist-daNKGh)
+
+stderr | tests/persistence.test.ts > restore after restart > rejects invalid schema (host is not a player) without affecting other rooms
+[restore] NOT LOADED room-mwevoalc-572334.json: invalid room data: (root): hostId player-99 is not a player
+
+stdout | tests/persistence.test.ts > restore after restart > rejects invalid schema (game lists an unknown player) without affecting other rooms
+[restore] 1 room(s) restored, 1 not loaded (data: /tmp/mz-persist-WCI9UC)
+
+stderr | tests/persistence.test.ts > restore after restart > rejects invalid schema (game lists an unknown player) without affecting other rooms
+[restore] NOT LOADED room-mwevoaly-190406.json: invalid room data: (root): game game-9 lists unknown player player-77
+
+stdout | tests/persistence.test.ts > restore after restart > rejects invalid schema (token hash is malformed) without affecting other rooms
+[restore] 1 room(s) restored, 1 not loaded (data: /tmp/mz-persist-p9e6gi)
+
+stderr | tests/persistence.test.ts > restore after restart > rejects invalid schema (token hash is malformed) without affecting other rooms
+[restore] NOT LOADED room-mwevoami-888932.json: invalid room data: players.0.recoveryTokenHash: Invalid
+
+stdout | tests/persistence.test.ts > restore after restart > an unreadable room file is reported and does not stop other rooms
+[restore] 1 room(s) restored, 1 not loaded (data: /tmp/mz-persist-BKpz19)
+
+stderr | tests/persistence.test.ts > restore after restart > an unreadable room file is reported and does not stop other rooms
+[restore] NOT LOADED room-unreadable.json: unreadable: EISDIR: illegal operation on a directory, read
+
+stdout | tests/persistence.test.ts > restore after restart > a temp file left by an interrupted save is quarantined, not deleted, and the room still loads
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-persist-dR81Sh)
+
+stderr | tests/persistence.test.ts > restore after restart > a temp file left by an interrupted save is quarantined, not deleted, and the room still loads
+[restore] moved room-mwevoann-129102.json.tmp-123-abcd to /tmp/mz-persist-dR81Sh/quarantine/room-mwevoann-129102.json.tmp-123-abcd.2026-11-13T11-12-52-987Z: incomplete write (temp file left by an interrupted save)
+
+stdout | tests/persistence.test.ts > restore after restart > a missing Memory Book is fine, and a corrupt one never blocks its room
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-persist-Hbxbgp)
+
+stderr | tests/persistence.test.ts > restore after restart > a missing Memory Book is fine, and a corrupt one never blocks its room
+[restore] warning room-mwevoao1-777360.book.json: Memory Book not restored (Expected property name or '}' in JSON at position 1 (line 1 column 2)); the room loaded without it and the file was left in place
+
+stdout | tests/persistence.test.ts > restore after restart > duplicate room ids load once and report the second file
+[restore] 1 room(s) restored, 1 not loaded (data: /tmp/mz-persist-FkZATm)
+
+stderr | tests/persistence.test.ts > restore after restart > duplicate room ids load once and report the second file
+[restore] NOT LOADED zz-copy.json: duplicate room id room-mwevoaol-964594 (already loaded from room-mwevoaol-964594.json)
+
+stdout | tests/persistence.test.ts > compatibility with handoff (v1) snapshots > loads v1 rooms with their finished official game, scores and sessions intact
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-persist-aLhtTN)
+
+stdout | tests/persistence.test.ts > compatibility with handoff (v1) snapshots > honours a legacy plaintext claim file (by hash) and still refuses a claim without the token
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-persist-YhcNCd)
+
+stdout | tests/persistence.test.ts > compatibility with handoff (v1) snapshots > rewrites a v1 room as v2 only when it changes, and never deletes the legacy claim file
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-persist-WJaG7w)
+
+stdout | tests/persistence.test.ts > host claim and save failures > a room with no claim on record refuses host claims (previously accepted when the token was omitted)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-persist-pkpLZZ)
+
+stderr | tests/persistence.test.ts > host claim and save failures > a change that cannot be saved answers 500, not a misleading 400
+[persist] could not save room room-mwevoaq8-19124: EISDIR: illegal operation on a directory, copyfile '/tmp/mz-persist-3XbT77/room-mwevoaq8-19124.json' -> '/tmp/mz-persist-3XbT77/room-mwevoaq8-19124.json.prev.tmp-2130-3fa3a9a0'
+
+ ✓ tests/persistence.test.ts (24 tests) 4002ms
+   ✓ atomic writes > a process killed at random moments mid-save never leaves a torn snapshot 3537ms
+stdout | tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > a retry after a restart is still recognized (keys are kept with the book)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-m2NNlM)
+
+stdout | tests/review-fixes.test.ts > PR #3 review fixes > #3: memory book requires a nonempty game-finished source, derives facts, and survives restart
+[restore] 4 room(s) restored, 0 not loaded (data: /tmp/cgn-review-5YZhAE)
+
+ ✓ tests/review-fixes.test.ts (8 tests) 654ms
+   ✓ PR #3 review fixes > #1: a WebSocket message cannot override the socket session actor 340ms
+ ✓ tests/stage104-save-memory.test.ts (12 tests) 1098ms
+stdout | tests/stage105-book-revision.test.ts > Stage 10.5: the book revision over HTTP and the socket > each committed change raises it by exactly one (save, manual Add, approve, revoke); the snapshot and export carry it; it survives a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-T1R61n)
+
+stderr | tests/stage105-book-revision.test.ts > Stage 10.5: the book revision over HTTP and the socket > never moves on a failed write, a refusal, an idempotent repeat, a read or an export
+[persist] could not save Memory Book for room-mwevoc3e-426279: simulated disk write failure
+
+stderr | tests/stage105-book-revision.test.ts > Stage 10.5: the book revision over HTTP and the socket > never moves on a failed write, a refusal, an idempotent repeat, a read or an export
+[persist] could not save Memory Book for room-mwevoc3e-426279: simulated disk write failure
+
+stdout | tests/stage105-book-revision.test.ts > Stage 10.5: the book revision over HTTP and the socket > an old book on disk (no revision) loads as 0, and its first change makes it 1
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-ideM5o)
+
+stderr | tests/stage105-book-revision.test.ts > Stage 10.5: the book revision over HTTP and the socket > the frame reaches this room's current members only, carries the revision and nothing else, and comes only after a commit
+[persist] could not save Memory Book for room-mwevoc6w-126793: simulated disk write failure
+
+ ✓ tests/stage105-book-revision.test.ts (8 tests) 697ms
+ ✓ tests/stage102-memory-freshness.test.ts (13 tests) 688ms
+   ✓ over HTTP: GET /rooms/:id/ledger?watermark=1 > after another player saves a recovery code (private to them), the host's ledger is current and cites the finished game 320ms
+stdout | tests/stage91-jebena-sockets.test.ts > Jebena Rush over real sockets: a continuous clock (review 6808081378, 3) > a real server restart mid-match after a prolonged outage: the turns that ran out meanwhile are processed at their own instants; nothing is reset or replayed
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-RJ23Bw)
+
+ ✓ tests/stage91-jebena-sockets.test.ts (8 tests) 1525ms
+   ✓ Jebena Rush over real sockets, 10 players > a whole match: hearts from the lobby, one holder at a time, timeouts on the server clock, outs, the last one keeps the jebena 770ms
+stdout | tests/phased.test.ts > Closest Wins: 40 s per question > a long outage processes each question deadline in order, each from the previous one
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-4GwXpI)
+
+ ✓ tests/stage112-readable-book.test.ts (14 tests) 520ms
+ ✓ tests/stage101-cups.test.ts (27 tests) 35ms
+ ✓ tests/phased.test.ts (14 tests) 883ms
+ ✓ tests/stage102-moments.test.ts (24 tests) 22ms
+ ✓ tests/stage5-pulse.test.ts (12 tests) 34ms
+stdout | tests/content-selection.test.ts > determinism, atomicity and persistence > usage history survives a restart: the next game after it does not repeat
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-g6KNuI)
+
+ ✓ tests/content-selection.test.ts (13 tests) 333ms
+ ✓ tests/stage82-look.test.ts (15 tests) 155ms
+ ✓ tests/tournament.test.ts (25 tests) 40ms
+ ✓ tests/stage3-qa-results.test.ts (16 tests) 7110ms
+   ✓ every line only where its condition holds > all score combinations for 1 to 5 players, official and practice, every seat 5657ms
+   ✓ every line only where its condition holds > seeded rooms of 6 to 10 players with ties 1324ms
+stdout | tests/tv-trivia-reveal.test.ts > S3-TV-05: the touchdown question on the TV (correct answer 6) > Game 4 fixture: order 3,7,6,2; host 6, guest 3 → 6 marked correct, one vote each on 6 and 3, none on 7
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-ndalp5)
+
+ ✓ tests/privacy.test.ts (14 tests) 774ms
+stdout | tests/tv-trivia-reveal.test.ts > S3-TV-05: the touchdown question on the TV (correct answer 6) > Game 5 fixture: order 2,7,3,6; host and guest 6, third sat out → 6 marked correct with 2 votes, 7 none
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-fJB4OZ)
+
+ ✓ tests/tv-trivia-reveal.test.ts (4 tests) 470ms
+ ✓ tests/gate-plan.test.ts (21 tests) 21ms
+ ✓ tests/spectator.test.ts (7 tests) 268ms
+stdout | tests/math-timing.test.ts > Math: per-question server timing > open times survive a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-OMlSLL)
+
+ ✓ tests/mchezo-integration.test.ts (9 tests) 520ms
+stdout | tests/math-timing.test.ts > outdated clients (owner decision: no recorded opening, no bonus — and tell them to refresh) > a tab from before Sprint 3 can still play, is told to refresh, and scores correctness only for that game
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-UBwy07)
+
+ ✓ tests/math-timing.test.ts (14 tests) 514ms
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > one failed write, then a retry: nothing is visible or approvable after the failure; the retry persists exactly one pending entry that survives a restart
+[persist] could not save Memory Book for room-mwevohdo-843448: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > one failed write, then a retry: nothing is visible or approvable after the failure; the retry persists exactly one pending entry that survives a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-FnbwmX)
+
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+[persist] could not save Memory Book for room-mwevohgt-337513: simulated disk write failure
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+[persist] could not save Memory Book for room-mwevohgt-337513: simulated disk write failure
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+[persist] could not save Memory Book for room-mwevohgt-337513: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-CjxHhA)
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > a retry after a committed save whose reply was lost returns that same entry, before and after a restart, and adds nothing
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-DIjaf9)
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+[persist] could not save Memory Book for room-mwevohl8-247281: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-jvCPPW)
+
+ ✓ tests/stage51-liveness.test.ts (14 tests) 1233ms
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+[persist] could not save Memory Book for room-mwevohl8-247281: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-jvCPPW)
+
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > manual Add shares the rule: a failed Add leaves earlier entries exactly as they were and adds nothing; the next Add is written once
+[persist] could not save Memory Book for room-mwevohmt-109858: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > manual Add shares the rule: a failed Add leaves earlier entries exactly as they were and adds nothing; the next Add is written once
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-o9ljwl)
+
+ ✓ tests/stage104-book-durability.test.ts (5 tests) 437ms
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+ ✓ tests/stage5-majority.test.ts (11 tests) 35ms
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+ ✓ tests/batch-a-compat.test.ts (9 tests) 33ms
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+ ✓ tests/stage93-spectrum-ui.test.ts (14 tests) 40ms
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+stdout | tests/presence.test.ts > grace period > a server restart gives every player a fresh grace window instead of showing them as away
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-sNVb0y)
+
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+stderr | tests/congo-ruling.test.ts > room: answer rules are fixed per Cup and survive save and restore > an unknown answer-rules version is never guessed: standings pause and the record is kept
+[cup] room room-mwevoirg-287989: Cup record invalid: categorySprint.answerRules: Invalid literal value, expected 2 — standings paused, record preserved
+
+ ✓ tests/congo-ruling.test.ts (29 tests) 47ms
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+ ✓ tests/shuffle.test.ts (19 tests) 20ms
+ ✓ tests/presence.test.ts (13 tests) 1161ms
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+ ✓ tests/sprint-rules.test.ts (14 tests) 100ms
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+ ✓ tests/sprint-sessions.test.ts (10 tests) 121ms
+stdout | tests/cup-integrity.test.ts > a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-wVMDif)
+
+ ✓ tests/cup-integrity.test.ts (9 tests) 3112ms
+   ✓ a seven-day Individual Cup with deadlines and restarts > results are identical before and after each restart, every game ends once, and the Cup is decided 2980ms
+ ✓ tests/numeric-input.test.ts (12 tests) 414ms
+ ✓ tests/sprint-sources.test.ts (20 tests) 51ms
+ ✓ tests/content.test.ts (14 tests) 47ms
+stdout | tests/d3-briefing-http.test.ts > D3 HTTP: a server restart keeps the briefing and its timing > restart late in the briefing: same ready map, everyone reconnecting, expiry moved to 60 s of visible warning
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-fK6Opk)
+
+ ✓ tests/d3-briefing-http.test.ts (8 tests) 477ms
+ ✓ tests/stage91-jebena-endings.test.ts (7 tests) 31ms
+ ✓ tests/reveal-e3.test.ts (6 tests) 875ms
+   ✓ independent quiz games reveal only after the game finishes > trivia: nothing while anyone is still answering; answers + explanations after 325ms
+ ✓ tests/m3.test.ts (7 tests) 112ms
+ ✓ tests/readiness.test.ts (13 tests) 619ms
+ ✓ tests/manifest.test.ts (23 tests) 20ms
+ ✓ tests/family-cup.test.ts (23 tests) 9ms
+stdout | tests/integration.test.ts > M1 HTTP + WebSocket adapter > snapshot persistence restores a room after restart, with deadlines intact
+[restore] 4 room(s) restored, 0 not loaded (data: /tmp/cgn-m1-qKWUST)
+
+ ✓ tests/integration.test.ts (4 tests) 1240ms
+   ✓ M1 HTTP + WebSocket adapter > creates a room, joins 10 players via HTTP, starts Math, and finishes via intents 528ms
+   ✓ M1 HTTP + WebSocket adapter > WebSocket open/close tracks connected: reload (close + reopen) restores startGame eligibility 451ms
+ ✓ tests/sprint-scoring.test.ts (37 tests) 19ms
+ ✓ tests/room.test.ts (16 tests) 119ms
+ ✓ tests/stage111-warm-ivory.test.ts (12 tests) 14ms
+ ✓ tests/review2-fixes.test.ts (7 tests) 278ms
+stdout | tests/review3-fixes.test.ts > review3 P1: championshipDay survives restart > HTTP restart: day 4 before restart is still day 4 after, and new games land on day 4
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/cgn-review3-5UrTua)
+
+ ✓ tests/review3-fixes.test.ts (6 tests) 190ms
+ ✓ tests/sprint-http.test.ts (12 tests) 198ms
+ ✓ tests/library.test.ts (14 tests) 18ms
+ ✓ tests/session-store.test.ts (10 tests) 10ms
+stdout | tests/correctness.test.ts > duplicate actions > dedupe survives a server restart (the retry may land on the restarted server)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-EMKNph)
+
+ ✓ tests/correctness.test.ts (11 tests) 335ms
+ ✓ tests/m6-showmode.test.ts (5 tests) 170ms
+ ✓ tests/m2.test.ts (4 tests) 167ms
+stdout | tests/host-recovery.test.ts > host recovery (HTTP restart) > restored players start disconnected and recover via reconnect, then the host can start
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/cgn-host-recovery-WawUCb)
+
+ ✓ tests/host-recovery.test.ts (4 tests) 122ms
+ ✓ tests/content-pilot.test.ts (11 tests) 12ms
+ ✓ tests/stage92-jebena-terminal.test.ts (7 tests) 28ms
+ ✓ tests/official-two-competitors.test.ts (5 tests) 88ms
+ ✓ tests/sprint-p1.test.ts (4 tests) 234ms
+ ✓ tests/audit-batch-a.test.ts (9 tests) 68ms
+ ✓ tests/quiz-format.test.ts (8 tests) 189ms
+ ✓ tests/stage51-progress.test.ts (6 tests) 182ms
+ ✓ tests/security.test.ts (5 tests) 106ms
+ ✓ tests/stage105-book-sync.test.ts (13 tests) 10ms
+ ✓ tests/stage3-results.test.ts (13 tests) 24ms
+ ✓ tests/sprint-p2.test.ts (5 tests) 152ms
+ ✓ tests/privacy-sprint3.test.ts (3 tests) 402ms
+ ✓ tests/stage2-ui.test.ts (26 tests) 19ms
+ ✓ tests/errors.test.ts (8 tests) 7ms
+ ✓ tests/variety.test.ts (10 tests) 366ms
+ ✓ tests/caption-view.test.ts (5 tests) 129ms
+ ✓ tests/d3-briefing-ui.test.ts (7 tests) 9ms
+ ✓ tests/stage72-client.test.ts (4 tests) 14ms
+ ✓ tests/deadline-timeout.test.ts (6 tests) 101ms
+ ✓ tests/stage101-break-log.test.ts (7 tests) 7ms
+ ✓ tests/lifecycle-display.test.ts (7 tests) 7ms
+ ✓ tests/standings.test.ts (8 tests) 18ms
+ ✓ tests/stage51-copy.test.ts (6 tests) 6ms
+ ✓ tests/lobby-plan.test.ts (4 tests) 305ms
+ ✓ tests/connections-view.test.ts (4 tests) 109ms
+ ✓ tests/stage91-bank-privacy.test.ts (1 test) 42ms
+ ✓ tests/m4.test.ts (3 tests) 21ms
+ ✓ tests/stage5-moments.test.ts (4 tests) 5ms
+ ✓ tests/stage4-library.test.ts (6 tests) 14ms
+ ✓ tests/lifecycle-scale.test.ts (4 tests) 760ms
+   ✓ test-only lifecycle scale > rejects nonsense values 321ms
+ ✓ tests/stage102-deadline.test.ts (5 tests) 1562ms
+   ✓ soonUntil: an observation against an absolute deadline > a probe that never settles (the reviewer's 30-second locator) fails at the deadline, not after it 405ms
+   ✓ soonUntil: an observation against an absolute deadline > an observation that only comes after the window is a FAIL, never a late pass 703ms
+ ✓ tests/stage4-http.test.ts (10 tests) 10ms
+ ✓ tests/stage51-persistence.test.ts (2 tests) 30ms
+ ✓ tests/stage51-inputs.test.ts (2 tests) 79ms
+ ✓ tests/stage51-ack.test.ts (1 test) 17ms
+ ✓ tests/stage5-tvfeed.test.ts (4 tests) 4ms
+ ✓ tests/audit-triage.test.ts (5 tests) 6ms
+ ✓ tests/stage104-shutdown.test.ts (3 tests) 3204ms
+   ✓ LocalServer.close(): bounded, whatever the clients do > a TV socket that never answers the close frame doesn't hold the server open 1563ms
+   ✓ LocalServer.close(): bounded, whatever the clients do > a socket refused at the door (no such room), still closing, doesn't hold it open either 1616ms
+ ✓ tests/scoring.test.ts (10 tests) 6ms
+ ✓ tests/championship.test.ts (2 tests) 6ms
+ ✓ tests/codespaces-preview.test.ts (4 tests) 4ms
+ ✓ tests/script-inventory.test.ts (4 tests) 60ms
+ ✓ tests/serve-device-test.test.ts (3 tests) 1602ms
+   ✓ serve:device-test > starts in test mode, uses ./data-device-test, prints the gate line and the Wi-Fi address 724ms
+   ✓ serve:device-test > in a GitHub Codespace, prints the private forwarded HTTPS address instead of the Wi-Fi hint 459ms
+   ✓ serve:device-test > is refused in production (test-mode content must never reach a real night) 414ms
+ ✓ tests/reveal.test.ts (10 tests) 7ms
+ ✓ tests/client-uuid.test.ts (4 tests) 177ms
+ ✓ tests/session-verify.test.ts (4 tests) 184ms
+ ✓ tests/stage51-a11y.test.ts (2 tests) 3ms
+ ✓ tests/stage1-ui.test.ts (9 tests) 6ms
+ ✓ tests/stage51-display.test.ts (2 tests) 3ms
+ ✓ tests/connection-store.test.ts (4 tests) 4ms
+ ✓ tests/diagnose.test.ts (1 test) 4ms
+ ✓ tests/sprint-sim.test.ts (5 tests) 757ms
+   ✓ Category Sprint set-size simulation (E2 v3) > the proposed rule of thumb (N >= 4 x players, at least 15) is suitable for famous-first recall at 4-10 players 350ms
+ ✓ tests/stage4-names.test.ts (5 tests) 5ms
+ ✓ tests/stage4-memory.test.ts (2 tests) 3ms
+ ✓ tests/ws-reconnect.test.ts (3 tests) 3ms
+ ✓ tests/motion.test.ts (4 tests) 4ms
+ ✓ tests/client-server-consistency.test.ts (2 tests) 80ms
+
+ Test Files  135 passed (135)
+      Tests  1734 passed (1734)
+   Start at  11:12:33
+   Duration  45.19s (transform 3.63s, setup 0ms, collect 20.15s, tests 83.78s, environment 42ms, prepare 9.29s)
+

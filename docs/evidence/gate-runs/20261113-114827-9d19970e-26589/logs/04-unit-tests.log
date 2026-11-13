@@ -1,0 +1,8 @@
+$ node ./node_modules/vitest/vitest.mjs run
+# timeout 900s | worker w1
+
+[+0.3s] 
+[+0.3s] [1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s112-full[39m
+[+0.3s] 
+
+# CANCELLED (exit SIGTERM) in 0.9s | cpu 0.3s, peak memory 86 MB

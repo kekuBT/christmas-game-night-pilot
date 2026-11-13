@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-04 ~07:40 EST (PR #3 review fixes, local only, no GitHub — see section at end; real-device checklist + family-member acceptance still NOT RUN)
+Updated: 2026-11-13 ~07:05 EST (Stage 11.2 built and gated on adf6e8d — see the Stage 11.2 section at the end; real-device checks still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -2368,7 +2368,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** Stage 11.1 (below).
 
 
-## Stage 11.1: the Warm Ivory Christmas look (built and gated; awaiting review)
+## Stage 11.1: the Warm Ivory Christmas look (CLEARED by ChatGPT's review 6850906565 on `f944b3f`/`602b73d`)
 - **Brief:** ChatGPT's handoff 6847066185 on PR #22, carrying out the owner's choice of Option A, Warm Ivory (6845465785; D-OWN-1113).
 - **Base:** `d4dc408` (PR #22's head). Branch `claude/stage11-1-warm-ivory`, a stacked PR on #22.
 - **Scope:** the Christmas look becomes warm ivory, cream cards, dark warm text, cranberry, gold and sage. Everyday is unchanged. No server, score, approval or protocol change, no new dependency.
@@ -2395,4 +2395,46 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - full on `f944b3f` `20261113-093231-f944b3fa-8535` **PASSED** (exit 0, 90/90, 34 min 32 s).
 - **Evidence:** `docs/evidence/gate-runs/` (all six runs), `docs/evidence/stage111-local/`, screenshots in `docs/stage11/stage111-screenshots/`.
 - **Not run:** real iPhone Safari, Android Chrome and real TV panels.
-- **Next:** ChatGPT's review and private audit of PR #23. Nothing merged or deployed.
+- **Cleared:** ChatGPT's review 6850906565 cleared Stage 11.1 for development (not merge or deployment).
+  - It ran its own build and 27 focused tests on the exact candidate, and checked the served-index hash.
+  - Its private interactive audit covered a full Trivia round, the TV, replay and cancel, a look switch keeping a draft, approve/PDF/revoke with live freshness, a server restart, and 320 px.
+  - Nothing merged or deployed.
+- **Next:** Stage 11.2 (below).
+
+## Stage 11.2: readable casual Memory Books (built and gated; awaiting review)
+- **Brief:** ChatGPT's handoff 6850906565 on PR #23.
+- **Base:** `602b73d` (PR #23's head). Branch `claude/stage11-2-readable-books`, a stacked PR on #23.
+- **Scope:**
+  - casual entries carry no "Day 1" and are identified by their game;
+  - Cup entries show their game's own day;
+  - PDF and Markdown show names (recorded by the server, with a same-room fallback, then "A player"), never ids;
+  - exported text is escaped;
+  - no score, rule, approval or freshness change.
+- **Spec:** `docs/stage11/stage112.md`, with an estimate of about 2–2.5 h of implementation plus about 45 min of gates. Decisions D-S112-01..03.
+- **Also applied:** ChatGPT's spec feedback 6851031292 on PR #24 (6:06 a.m. ET; read at about 6:50): older Cup entries take their day from the room's citation (D-S112-05).
+- **Tested candidate:** `adf6e8d`.
+  - Full checkpoint `20261113-120037-adf6e8db-4741`: **PASSED** (90/90, exit 0, 34 min 20 s).
+  - Fast `20261113-115927-adf6e8db-1236`: PASSED.
+  - Targeted `20261113-115657-adf6e8db-31605`: PASSED.
+- **Earlier runs:**
+  - targeted on `9e85bd5`: FAILED (escaper; badge test id in the W8 key);
+  - targeted on `015464c`: PASSED;
+  - targeted and fast on `9d19970`: PASSED;
+  - full on `9d19970`: CANCELLED (superseded).
+- **Built:**
+  - `src/shared/memoryPresent.ts`: the shared rule, `pdfText`, `mdEscape`;
+  - `src/server/memorybook.ts` and `http.ts`: the recorded `source` and the Markdown;
+  - `MemoryScreen.tsx`: badge, results line, preview, PDF;
+  - `tests/stage112-readable-book.test.ts` (24 tests);
+  - drivers: check-book-live R1–R4, check-cup-memory (a later-day entry and a restored older entry), the check-warm-ivory W6 race fix.
+- **Decisions:** D-S112-01..05.
+- **Evidence:**
+  - `docs/stage11/stage112-screenshots/` (before and after, both looks, 320 and 390 px; PDF renders);
+  - `docs/stage11/stage112-examples/` (real PDF and Markdown);
+  - `docs/evidence/stage112-local/`;
+  - `docs/evidence/gate-runs/` (seven runs, including the failed and cancelled ones).
+- **Limitations:**
+  - the PDF prints "?" for letters outside Windows-1252, and says so;
+  - a bare web address in a note may be autolinked by some Markdown renderers;
+  - desktop Chromium only.
+- **Next:** ChatGPT's candidate review and private audit of `adf6e8d`. Nothing merged or deployed.

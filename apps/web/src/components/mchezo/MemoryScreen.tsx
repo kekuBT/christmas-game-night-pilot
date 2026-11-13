@@ -22,12 +22,13 @@
 // revoke show their progress and failures, and never change an entry before the server has.
 import { jsPDF } from "jspdf";
 import { useId, useState } from "react";
-import { canvasNoteY, exportFilename, paginateLines, readableFact, selectShareEntries } from "../exportLayout.js";
+import { canvasNoteY, exportFilename, paginateLines, selectShareEntries } from "../exportLayout.js";
 import type { LedgerEvent, MemoryEntry, PublicGame, PublicPlayer, RegistryGame } from "../../types.js";
 import { titleFor } from "../../ui/mchezo/lib/names.js";
 import { memoryLink } from "../../ui/mchezo/lib/memoryLink.js";
 import { exportIsStale, exportStep, type BookSnapshot } from "../../ui/mchezo/lib/bookSync.js";
 import { memoryTeamLine, type MemoryTeamFacts } from "../../../../../src/shared/memoryTeam.js";
+import { bookModeOf, entryFactLines, entryLabel, pdfLoses, pdfText, type BookContext } from "../../../../../src/shared/memoryPresent.js";
 import { useMchezo } from "../../ui/mchezo/MchezoProvider.js";
 
 export type PostFn = <T>(path: string, body: Record<string, unknown>) => Promise<T>;
@@ -38,6 +39,8 @@ type EntryOp = { id: string; kind: "approve" | "revoke"; state: "busy" | "error"
 class NoFreshSnapshot extends Error {}
 const CHECK_FAILED = "Couldn’t check the latest approvals, so nothing was downloaded. Try again.";
 const BOOK_MOVING = "The book is changing right now, so nothing was downloaded. Try again in a moment.";
+/** Stage 11.2 (D-S112-04): said once at the end of a PDF in which a character had to print as "?". ASCII only. */
+const PDF_LOSS_NOTE = "Some letters or emoji can't be printed in this PDF and show as ?. Export approved (Markdown) keeps every name and note in full.";
 /** A request's failure in plain words: the server's own sentence when it sent one, else that it didn't answer. */
 const whyFailed = (e: unknown) => e instanceof Error && e.message && !/fetch|network|abort|timed? ?out|load failed/i.test(e.message) ? e.message : "The game didn’t answer. Nothing changed; try again.";
 
@@ -72,10 +75,12 @@ export function MemoryScreen(props: {
   /** Fetch the book now (after this page's own change). */
   refreshBook: () => Promise<void>;
   canApprove: boolean;
+  /** Stage 11.2 (D-S112-01): the room's kind (fixed for its life): a Cup book shows days, a casual one doesn't. */
+  roomKind?: "cup" | "casual" | "solo";
   onBack: () => void;
   onMenu: () => void;
 }) {
-  const { roomId, roomCode, day, roomSeq, ledgerAt, book, ledger, games, registry, players, bookText, setBookText, exportDoc, setExportDoc, post, get, bookRevision, heardRevision, heard, fetchSnapshot, refreshBook, canApprove, onBack, onMenu } = props;
+  const { roomId, roomCode, day, roomSeq, ledgerAt, book, ledger, games, registry, players, bookText, setBookText, exportDoc, setExportDoc, post, get, bookRevision, heardRevision, heard, fetchSnapshot, refreshBook, canApprove, roomKind, onBack, onMenu } = props;
   const textId = useId();
   const theme = useMchezo().theme;
   const look = theme.color;
@@ -90,6 +95,15 @@ export function MemoryScreen(props: {
   const mdStale = !!exportDoc && exportIsStale(exportDoc.revision, { heard: heardRevision, applied: bookRevision });
   const nameOf = (id: string) => players.find((p) => p.id === id)?.displayName;
   const title = (gameId: string) => titleFor(gameId, registry);
+  // Stage 11.2 (D-S112-01, D-S112-02): one presentation rule for the screen, the PDF and the server's Markdown. A Cup
+  // book shows days; a casual one names the game instead. Names come from the entry, else this room's players.
+  const cupBook = bookModeOf(roomKind) === "cup";
+  const gameOfEvent = (id: string) => { const ev = ledger.find((x) => x.eventId === id); return ev?.gameInstanceId ? games.find((x) => x.id === ev.gameInstanceId) : undefined; };
+  const bookCtx: BookContext = {
+    roomKind,
+    nameOf,
+    sourceGames: (e) => e.sourceEventIds.map((id) => { const g = gameOfEvent(id); return g ? { title: title(g.gameId), ...(g.day !== undefined ? { day: g.day } : {}) } : {}; }),
+  };
   // Stage 5.1 (3E): the game a new highlight will cite, shown before adding,
   // and exactly what is sent. While the loaded ledger is behind the room's
   // (a game just finished), adding waits for the reload instead of citing
@@ -113,7 +127,9 @@ export function MemoryScreen(props: {
     const g = ev?.gameInstanceId ? games.find((x) => x.id === ev.gameInstanceId) : undefined;
     if (!g?.rawScores) return [];
     const scores = Object.entries(g.rawScores).sort((a, b) => b[1] - a[1]).map(([pid, v]) => `${nameOf(pid) ?? "A player"} ${v.toLocaleString("en-US")}`);
-    return [`${title(g.gameId)} · Day ${g.day ?? e.day}: ${scores.join(" · ")}`];
+    // Stage 11.2: the game and its day in a Cup book; the game alone in a casual one.
+    // Stage 11.2 (D-S112-05): the game's own recorded day, never the entry's stored day (a Day 2 note about Day 1).
+    return [`${title(g.gameId)}${cupBook && g.day !== undefined ? ` · Day ${g.day}` : ""}: ${scores.join(" · ")}`];
   });
 
   /** Stage 10.5: the entries an export is built from: the fresh snapshot's approved ones, never the screen's. */
@@ -138,14 +154,20 @@ export function MemoryScreen(props: {
     // Flatten to lines, then paginate lines (review 5769441799 P2): a single
     // oversized entry is split across pages at line boundaries.
     const lines: { text: string; height: number }[] = [];
+    // Stage 11.2 (D-S112-04): every line in characters the PDF's font can print, so a name or note in another script
+    // can't garble a whole line (its points included); if anything was replaced, the PDF says so once, at the end.
+    let lost = false;
+    const printable = (s: string) => { if (pdfLoses(s)) lost = true; return pdfText(s); };
+    const push = (s: string) => { for (const l of doc.splitTextToSize(s, 180)) lines.push({ text: l, height: 7 }); };
     for (const e of approvedNow) {
-      for (const l of doc.splitTextToSize(`${e.text} (Day ${e.day})`, 180)) lines.push({ text: l, height: 7 });
+      // Stage 11.2: "(Day 2)" in a Cup book, "(Trivia Showdown)" in a casual one; facts with names, never ids.
+      push(printable(`${e.text} (${entryLabel(e, bookCtx)})`));
       // Stage 10.3: a team entry's facts come from its frozen team record ("From the game"), others as before.
-      for (const f of e.team ? [teamLine(e.team)] : e.derivedFacts) {
-        for (const l of doc.splitTextToSize(`${e.team ? "From the game" : "From the ledger"}: ${f}`, 180)) lines.push({ text: l, height: 7 });
-      }
+      const facts = e.team ? [printable(teamLine(e.team))] : entryFactLines(e, bookCtx, { printable });
+      for (const f of facts) push(`${e.team ? "From the game" : "From the ledger"}: ${f}`);
       lines.push({ text: "", height: 4 });
     }
+    if (lost) push(PDF_LOSS_NOTE);
     const pages = paginateLines(lines.map((l) => l.height), 280, 32);
     for (const page of pages) {
       let y = 32;
@@ -295,7 +317,7 @@ export function MemoryScreen(props: {
             {syncing ? "Checking for the latest finished game…"
               : link.state === "unavailable" && link.why === "team-not-final" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>. It was stopped before its team result was final, so it can&rsquo;t be saved.</>
               : link.state === "unavailable" ? <>The last game that finished is <b>{targetGame ? title(targetGame.gameId) : "the last game"}</b>, a team game: team games like this one aren&rsquo;t saved to the Memory Book yet.</>
-              : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame ? ` · Day ${targetGame.day ?? day}` : ""}: the last game that finished.</>}
+              : <>Linked to <b>{targetGame ? title(targetGame.gameId) : "the last finished game"}</b>{targetGame && cupBook && targetGame.day !== undefined ? ` · Day ${targetGame.day}` : ""}: the last game that finished.</>}
           </p>
         )}
         {teamPreview && <p className="mz-foot mz-memory__target" data-testid="memory-link-facts">Saved with: {teamPreview}</p>}
@@ -323,14 +345,14 @@ export function MemoryScreen(props: {
           return (
             <article key={e.id} className={`mz-card mz-memory__entry${e.approved ? " mz-memory__entry--approved" : ""}`} data-testid="memory-entry">
               <p className="mz-memory__entrytext">{e.text}</p>
-              <p className="mz-memory__status"><span className={`mz-badge ${e.approved ? "mz-badge--mint" : "mz-memory__pending"}`}>Day {e.day} · {e.approved ? "approved" : "pending"}</span></p>
+              <p className="mz-memory__status"><span className={`mz-badge ${e.approved ? "mz-badge--mint" : "mz-memory__pending"}`}>{entryLabel(e, bookCtx)} · {e.approved ? "approved" : "pending"}</span></p>
               {res.map((r) => <p key={r} className="mz-foot mz-memory__result">{r}</p>)}
               {/* Stage 10.3: the server's team facts, visibly apart from the note above. */}
               {e.team && <p className="mz-foot mz-memory__result" data-testid="memory-entry-team">From the game: {teamLine(e.team)}</p>}
               {!e.team && e.derivedFacts.length > 0 && (
                 <details className="mz-memory__facts">
                   <summary>From the ledger ({e.derivedFacts.length} score {e.derivedFacts.length === 1 ? "event" : "events"})</summary>
-                  <ul>{e.derivedFacts.map((f, i) => <li key={i}>{readableFact(f, nameOf)}</li>)}</ul>
+                  <ul>{entryFactLines(e, bookCtx).map((f, i) => <li key={i}>{f}</li>)}</ul>
                 </details>
               )}
               {canApprove ? (

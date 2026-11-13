@@ -416,9 +416,13 @@ try {
     for (const s of gr.seats) await intent(gr, s, gg, "briefing-ready", { ready: true });
     await host.locator(".mz-slab").first().waitFor({ timeout: 15000 });
     await host.locator(".mz-slab").first().click();
+    // The tap locks the answer; once the server confirms it, the locked view offers "Next question". Wait for that
+    // button, then for question 2. (This used isVisible({ timeout }), which never waits: Playwright ignores that
+    // timeout, so a slower answer reply skipped the click and W6 read the locked view, which has no question counter.)
     const next = host.getByRole("button", { name: "Next question" });
-    if (await next.isVisible({ timeout: 3000 }).catch(() => false)) await next.click();
-    await sleep(500);
+    await next.waitFor({ timeout: 10000 });
+    await next.click();
+    await host.getByText(/Question 2 of \d+/).first().waitFor({ timeout: 10000 });
     const before = await host.evaluate(() => [document.documentElement.dataset.mzTheme, document.body.innerText.match(/Question \d+ of \d+/)?.[0], window.__mark, location.pathname]);
     const other = await host.context().newPage();
     await other.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });

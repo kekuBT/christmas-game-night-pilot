@@ -1,6 +1,7 @@
 import type { SessionSeason } from "../../../src/shared/season.js";
 import type { TeamResult } from "../../../src/shared/teamResult.js";
 import type { MemoryTeamFacts } from "../../../src/shared/memoryTeam.js";
+import type { MemorySource } from "../../../src/shared/memoryPresent.js";
 // Typed server/client projection contracts for the browser app.
 // These mirror src/server/room.ts project() output. Game-specific state
 // (state, questions) stays as unknown/Record<string, unknown> and is narrowed
@@ -245,6 +246,8 @@ export interface MemoryEntry {
   derivedFacts: string[];
   /** Stage 10.3 (D-S103-01): a team game's result, derived and frozen by the server. */
   team?: MemoryTeamFacts;
+  /** Stage 11.2 (D-S112-01, D-S112-02): the source the server recorded (mode, days, titles, names); absent on older entries. */
+  source?: MemorySource;
 }
 
 export interface LedgerEvent {

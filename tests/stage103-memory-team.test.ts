@@ -44,7 +44,11 @@ describe("the saved record is checked (MemoryTeamFactsSchema)", () => {
     const old = { entries: [{ id: "book-1", day: 1, type: "game-result", text: "Ada won", sourceEventIds: ["evt-3"], approved: true, approvedBy: "player-1", derivedFacts: ["player-1: 30 points"] }], next: 2 };
     const book = MemoryBook.fromJSON(old);
     expect(book.entries).toEqual(old.entries);
-    expect(book.exportMarkdown("Den")).toContain("From the ledger:\n- player-1: 30 points");
+    // Stage 11.2 (D-S112-02): the stored fact is unchanged, but an export no longer prints the internal id. With the
+    // room's players it reads the name; with no room to ask, "A player". (This line used to expect "player-1: 30 points".)
+    expect(book.exportMarkdown("Den", { roomKind: "cup", nameOf: (id) => (id === "player-1" ? "Ada" : undefined) })).toContain("From the ledger:\n- Ada: 30 points");
+    expect(book.exportMarkdown("Den")).toContain("From the ledger:\n- A player: 30 points");
+    expect(book.exportMarkdown("Den")).not.toContain("player-1");
   });
   it("a tampered team record, or one citing another event, refuses the book on restore", () => {
     const entry = (team: unknown, src = ["evt-9"]) => ({ entries: [{ id: "book-1", day: 1, type: "game-result", text: "x", sourceEventIds: src, approved: false, derivedFacts: [], team }], next: 2 });

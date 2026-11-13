@@ -8,7 +8,7 @@
 //   the book stops book fetches; switching rooms shows only the new room's book.
 // Starts ITS OWN server. Usage: node scripts/check-book-live.mjs
 import { spawn } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
@@ -201,6 +201,42 @@ try {
   await download(K, "memory-image");
   const img = await drawn(K);
   check("B4 share image: a fresh snapshot, and both notes drawn", K.bookFetches[room.roomId] > before && img.includes("Baraka note about the tea") && img.includes("Second approved note"), img.slice(0, 160));
+  // Stage 11.2 (docs/stage11/stage112.md; D-S112-01..03): this is a casual room. Its book has no Cup days, and its
+  // exports print names, never internal ids. The files are kept as examples next to the screenshots.
+  writeFileSync(screenshotPath("/tmp/book-live-casual-example.md"), md);
+  writeFileSync(screenshotPath("/tmp/book-live-casual-example.pdf"), Buffer.from(pdf.text, "latin1"));
+  check("R1 casual Markdown: no Day, no internal id; each entry headed by its game; facts read \"Name: N points\"",
+    !/Day \d/.test(md) && !/player-\d/.test(md) && (md.match(/^## Math Mayhem$/gm) ?? []).length === 2 && /^- (Keku|Amina|Baraka): \d+ points$/m.test(md), md.slice(0, 240).replace(/\n/g, " ⏎ "));
+  check("R2 casual PDF: no Day, no internal id; notes name their game; facts name their players",
+    !/\(Day \d/.test(pdf.text) && !/player-\d/.test(pdf.text) && pdf.text.includes("Second approved note \\(Math Mayhem\\)") /* PDF strings escape parentheses */ && /From the ledger: (Keku|Amina|Baraka): \d+ points/.test(pdf.text), pdf.name);
+  const screenText = await K.getByTestId("memory-screen").innerText();
+  const badges = await K.locator("[data-testid=memory-entry] .mz-memory__status .mz-badge").allInnerTexts();
+  check("R3 casual book on screen: no \"Day 1\" anywhere; each badge names the game",
+    !/Day \d/.test(screenText) && badges.length > 0 && badges.every((b) => /^Math Mayhem · (approved|pending)$/.test(b.trim())), badges.slice(0, 3).join(" | "));
+  // R4 (D-S112-04): names in other scripts. The PDF's built-in font prints Windows-1252 only; any other character used
+  // to garble its whole line, points included. A room whose players are 李雷, 王芳 and Łukasz: no PDF line falls back to
+  // two-byte text, names that print alike stay apart, the PDF says once why, and the Markdown keeps everything.
+  {
+    const uni = await makeRoom(["李雷", "王芳", "Łukasz"], "Names 🎄", "casual");
+    const ufin = await playMath(uni);
+    const un = await api(`/rooms/${uni.roomId}/memory`, { token: uni.seats[0].token, body: { day: 1, text: "雪 night 🎄", sourceEventIds: [ufin] } });
+    await api(`/rooms/${uni.roomId}/memory/${un.id}/approve`, { token: uni.seats[0].token, body: {} }).catch(() => undefined);
+    const U = await seatPage(browser, uni, uni.seats[0], { width: 320, height: 740 }, "christmas");
+    await card(U, "雪 night").waitFor({ timeout: 15000 });
+    const updf = await download(U, "memory-pdf");
+    const ops = updf.text.split("\n").filter((l) => / Tj$/.test(l)).join("\n");
+    const umd = (await api(`/rooms/${uni.roomId}/memory/export`, { token: uni.seats[0].token })).markdown;
+    writeFileSync(screenshotPath("/tmp/book-live-unicode-example.pdf"), Buffer.from(updf.text, "latin1"));
+    writeFileSync(screenshotPath("/tmp/book-live-unicode-example.md"), umd);
+    check("R4 names in other scripts: no PDF line falls back to two-byte text (nothing garbled)", ops.length > 0 && !ops.includes("\u0000"), updf.name);
+    check("R4 …the note and facts keep their words and points; names that print alike stay apart; one line says why",
+      ops.includes("(? night ? \\(Math Mayhem\\)) Tj") && /\(From the ledger: \?\?: \d+ points\) Tj/.test(ops) && /\(From the ledger: \?\? \\\(2\\\): \d+ points\) Tj/.test(ops)
+        && /\(From the ledger: \?ukasz: \d+ points\) Tj/.test(ops) && ops.includes("can't be printed in this PDF"),
+      ops.split("\n").slice(0, 3).join(" | ").slice(0, 200));
+    check("R4 …and the Markdown keeps every name and the note in full",
+      /^- 李雷: \d+ points$/m.test(umd) && /^- 王芳: \d+ points$/m.test(umd) && /^- Łukasz: \d+ points$/m.test(umd) && umd.includes("Note: 雪 night 🎄"), umd.slice(0, 160).replace(/\n/g, " ⏎ "));
+    await U.context().close();
+  }
 
   // ---------- B5. A stale page that still shows a revoked note approved exports without it. ----------
   // Keku's next background refresh is held, so his screen stays out of date; an export fetches on its own.
