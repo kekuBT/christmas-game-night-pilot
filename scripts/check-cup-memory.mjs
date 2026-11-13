@@ -10,15 +10,15 @@
 //   room code and date in the name; a failed export says so and claims nothing.
 // Starts ITS OWN server. Usage: node scripts/check-cup-memory.mjs
 import { spawn } from "node:child_process";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const DATA_DIR = mkdtempSync(join(tmpdir(), "mchezo-cupmem-"));
-async function startServer() {
-  const env = { ...process.env, PORT: "0", MCHEZO_DATA_DIR: DATA_DIR };
+async function startServer(port = 0) {
+  const env = { ...process.env, PORT: String(port), MCHEZO_DATA_DIR: DATA_DIR };
   delete env.NODE_ENV;
   const child = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { cwd: process.cwd(), env, stdio: ["ignore", "pipe", "pipe"] });
   let out = "";
@@ -32,8 +32,8 @@ async function startServer() {
   child.kill("SIGKILL");
   throw new Error(`server did not start: ${out.slice(-400)}`);
 }
-const server = await startServer();
-const BASE = `http://localhost:${server.port}`;
+let serverProc = await startServer();
+const BASE = `http://localhost:${serverProc.port}`;
 let failures = 0;
 function check(name, ok, detail = "") {
   console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`);
@@ -232,10 +232,41 @@ try {
     writeFileSync(screenshotPath("/tmp/cup-memory-example.md"), md);
     check("the Cup Markdown keeps its days and prints names, never ids", /^## Day 1$/m.test(md) && !/player-\d/.test(md) && /^- Keku: \d+ points$/m.test(md), md.slice(0, 220).replace(/\n/g, " ⏎ "));
     await host.context().close();
+
+    // Review 6851031292 (D-S112-05): the same note restored exactly as the base build stored it: filed under the day it
+    // was added (2) with no recorded source. The server stops, the book file is rewritten, and it starts again on the
+    // same port, so this is a real restore from disk. The label comes from the room's own citation (the cited finish,
+    // its game, the game's recorded day) on the screen, in the PDF and in the Markdown; the stored entry is unchanged.
+    serverProc.child.kill("SIGTERM");
+    await new Promise((r) => (serverProc.child.exitCode !== null ? r() : serverProc.child.once("exit", r)));
+    const bookFile = join(DATA_DIR, `${played.roomId}.book.json`);
+    const data = JSON.parse(readFileSync(bookFile, "utf8"));
+    const old = data.entries.find((x) => x.id === late.id);
+    delete old.source;
+    old.day = 2;
+    writeFileSync(bookFile, JSON.stringify(data, null, 2));
+    serverProc = await startServer(serverProc.port);
+    const stored = (await api(`/rooms/${played.roomId}/memory`, { token: played.seats[0].token })).find((x) => x.id === late.id);
+    check("restored older entry: stored as the base build left it (day 2, no recorded source); nothing migrated", stored?.day === 2 && stored?.source === undefined, JSON.stringify({ day: stored?.day, source: stored?.source }));
+    const legacyHost = await seatPage(browser, played, played.seats[0], "/room/memories", { width: 390, height: 844 }, { acceptDownloads: true });
+    const le = legacyHost.getByTestId("memory-entry").filter({ hasText: "Added on Day 2 about Day 1" });
+    await le.waitFor({ timeout: 15000 });
+    await legacyHost.waitForFunction(() => /Day 1 · approved/.test(document.body.innerText), null, { timeout: 15000 }).catch(() => {});
+    const legacyBadge = (await le.locator(".mz-memory__status .mz-badge").innerText()).trim();
+    check("…its badge says Day 1 (the cited game's day), not its stored Day 2", legacyBadge === "Day 1 · approved", legacyBadge);
+    await legacyHost.screenshot({ path: screenshotPath("docs/stage11/stage112-screenshots/after-everyday-cup-legacy-restored-390.png"), fullPage: true });
+    const [dl] = await Promise.all([legacyHost.waitForEvent("download", { timeout: 15000 }), legacyHost.getByTestId("memory-pdf").click()]);
+    const pdf = readFileSync(await dl.path()).toString("latin1");
+    writeFileSync(screenshotPath("/tmp/cup-legacy-restored-example.pdf"), Buffer.from(pdf, "latin1"));
+    check("…its downloaded PDF line reads (Day 1), never (Day 2)", pdf.includes("Added on Day 2 about Day 1 \\(Day 1\\)") && !pdf.includes("\\(Day 2\\)"), dl.suggestedFilename());
+    const lmd = (await api(`/rooms/${played.roomId}/memory/export`, { token: played.seats[0].token })).markdown;
+    writeFileSync(screenshotPath("/tmp/cup-legacy-restored-example.md"), lmd);
+    check("…and its Markdown is headed Day 1, never Day 2", /^## Day 1\nNote: Added on Day 2 about Day 1$/m.test(lmd) && !/^## Day 2$/m.test(lmd), lmd.slice(0, 200).replace(/\n/g, " ⏎ "));
+    await legacyHost.context().close();
   }
 } finally {
   await browser.close();
-  server.child.kill("SIGTERM");
+  serverProc.child.kill("SIGTERM");
 }
 console.log(failures === 0 ? "ALL CUP/MEMORY CHECKS PASSED" : `${failures} CUP/MEMORY CHECK(S) FAILED`);
 process.exit(failures === 0 ? 0 : 1);
