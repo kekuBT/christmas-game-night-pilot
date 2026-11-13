@@ -226,7 +226,7 @@ try {
     const host = await seatPage(browser, played, played.seats[0], "/room/memories");
     const e = host.getByTestId("memory-entry").filter({ hasText: "Added on Day 2 about Day 1" });
     await e.waitFor({ timeout: 15000 });
-    const badge = (await e.getByTestId("memory-entry-badge").innerText()).trim();
+    const badge = (await e.locator(".mz-memory__status .mz-badge").innerText()).trim();
     check("…and its badge says Day 1, not the room's Day 2", badge === "Day 1 · approved", badge);
     const md = (await api(`/rooms/${played.roomId}/memory/export`, { token: played.seats[0].token })).markdown;
     writeFileSync(screenshotPath("/tmp/cup-memory-example.md"), md);

@@ -337,7 +337,7 @@ export function MemoryScreen(props: {
           return (
             <article key={e.id} className={`mz-card mz-memory__entry${e.approved ? " mz-memory__entry--approved" : ""}`} data-testid="memory-entry">
               <p className="mz-memory__entrytext">{e.text}</p>
-              <p className="mz-memory__status"><span className={`mz-badge ${e.approved ? "mz-badge--mint" : "mz-memory__pending"}`} data-testid="memory-entry-badge">{entryLabel(e, bookCtx)} · {e.approved ? "approved" : "pending"}</span></p>
+              <p className="mz-memory__status"><span className={`mz-badge ${e.approved ? "mz-badge--mint" : "mz-memory__pending"}`}>{entryLabel(e, bookCtx)} · {e.approved ? "approved" : "pending"}</span></p>
               {res.map((r) => <p key={r} className="mz-foot mz-memory__result">{r}</p>)}
               {/* Stage 10.3: the server's team facts, visibly apart from the note above. */}
               {e.team && <p className="mz-foot mz-memory__result" data-testid="memory-entry-team">From the game: {teamLine(e.team)}</p>}

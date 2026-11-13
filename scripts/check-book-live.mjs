@@ -210,7 +210,7 @@ try {
   check("R2 casual PDF: no Day, no internal id; notes name their game; facts name their players",
     !/\(Day \d/.test(pdf.text) && !/player-\d/.test(pdf.text) && pdf.text.includes("Second approved note \\(Math Mayhem\\)") /* PDF strings escape parentheses */ && /From the ledger: (Keku|Amina|Baraka): \d+ points/.test(pdf.text), pdf.name);
   const screenText = await K.getByTestId("memory-screen").innerText();
-  const badges = await K.getByTestId("memory-entry-badge").allInnerTexts();
+  const badges = await K.locator("[data-testid=memory-entry] .mz-memory__status .mz-badge").allInnerTexts();
   check("R3 casual book on screen: no \"Day 1\" anywhere; each badge names the game",
     !/Day \d/.test(screenText) && badges.length > 0 && badges.every((b) => /^Math Mayhem · (approved|pending)$/.test(b.trim())), badges.slice(0, 3).join(" | "));
 
