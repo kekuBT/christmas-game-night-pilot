@@ -349,7 +349,7 @@ export function MakeCupSheet({ played, busy, error, onConfirm, onClose }: {
 }) {
   return (
     <Sheet title="Make it a Family Cup" onClose={onClose} testId="make-cup-sheet" kicker="Same room, same code">
-      <p className="mz-details__pitch">Turn this game night into a Family Cup: official games count toward standings over 7 days, with a winner each day and a champion at the end.</p>
+      <p className="mz-details__pitch">Turn this game night into a Family Cup: official games count toward standings over 7 days, with a winner each day.</p>
       <ul className="mz-makecup" data-testid="make-cup-points">
         <li><b>From now on:</b> before each game you choose Official (counts) or Practice. You end each Cup day when you’re ready.</li>
         <li><b>What stays:</b> the room code, everyone’s seat and the Memory Book.{played > 0 ? ` The ${played === 1 ? "game" : `${played} games`} already played ${played === 1 ? "stays" : "stay"} casual and ${played === 1 ? "doesn’t" : "don’t"} count.` : ""}</li>

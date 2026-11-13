@@ -10,7 +10,7 @@
  * `myGames` (their private state); those never enter the feed, so a TV
  * opened on a player's phone can't show that player's secrets either.
  */
-import type { PartyView, Projection, PublicGame, PublicPlayer, SessionView } from "../../../types.js";
+import type { Ceremony, PartyView, Projection, PublicGame, PublicPlayer, SessionView } from "../../../types.js";
 
 export interface TvFeed {
   roomId: string;
@@ -28,6 +28,22 @@ export interface TvFeed {
   session?: SessionView;
   /** Stage 8.2: what this casual room deals (public; never a device's look). */
   contentSeason?: "everyday" | "christmas";
+  /** Stage 12.1: a Family Cup room (created as one, or a casual room made into one). */
+  cup?: boolean;
+  /** Stage 12.1: the server's end-of-day ceremony for the Cup's current day (public: names and day scores). */
+  ceremony?: Ceremony;
+  /** Stage 12.1 (D-S121-02): when a casual room became this Cup, and the games it played while casual (public ids). */
+  cupSince?: { at: number; seq: number };
+  casualGameIds?: string[];
+}
+
+/**
+ * A game's mode word: Official, Casual (a casual room's games, and a Cup room's games from before it was a Cup)
+ * or Practice (a Cup's practice game).
+ */
+export function gameModeWord(g: { id: string; official?: boolean }, feed: Pick<TvFeed, "casual" | "casualGameIds">): "Official" | "Casual" | "Practice" {
+  if (g.official) return "Official";
+  return feed.casual || (feed.casualGameIds ?? []).includes(g.id) ? "Casual" : "Practice";
 }
 
 /** Stage 7.2: what comes next in a casual room, in one public line (the TV, the final screen). */
@@ -53,11 +69,14 @@ export function tvFeedFrom(p: Projection): TvFeed {
     spectatorCount: p.spectatorCount,
     cupLabel: p.competition?.label,
     ...(p.roomKind === "casual" ? { casual: true, ...(p.party ? { party: p.party } : {}), ...(p.session ? { session: p.session } : {}), ...(p.contentSeason ? { contentSeason: p.contentSeason } : {}) } : {}),
+    ...(p.roomKind === "cup" ? { cup: true, ...(p.ceremony ? { ceremony: p.ceremony } : {}), ...(p.cupSince ? { cupSince: p.cupSince, casualGameIds: p.casualGameIds ?? [] } : {}) } : {}),
   };
 }
 
 /** What the TV is showing: one unmistakable label at all times. */
-export type TvMode = "lobby" | "briefing" | "live" | "final" | "review";
+export type TvMode = "lobby" | "briefing" | "live" | "final" | "review" | "cup" | "trophy";
+/** What the operator (or the TV itself, when a Cup day ends) chose to show between games. */
+export type TvChoice = "auto" | "lobby" | "final" | "review" | "cup" | "trophy";
 
 export const TV_MODE_LABEL: Record<TvMode, string> = {
   lobby: "Lobby",
@@ -65,6 +84,8 @@ export const TV_MODE_LABEL: Record<TvMode, string> = {
   live: "Live",
   final: "Final standings",
   review: "Post-game review",
+  cup: "Family Cup",
+  trophy: "Day complete",
 };
 
 /**
@@ -73,11 +94,13 @@ export const TV_MODE_LABEL: Record<TvMode, string> = {
  * offered for a finished game, so a look back can never be mistaken for
  * play. A briefing or a game in play always wins over a local choice:
  * the operator can't hide a live game behind an old screen.
+ * Stage 12.1: between games, the Cup's standings ("cup") and a day's trophy ("trophy") can be shown too.
  */
-export function tvModeFor(latest: PublicGame | undefined, choice: "auto" | "lobby" | "final" | "review"): TvMode {
+export function tvModeFor(latest: PublicGame | undefined, choice: TvChoice): TvMode {
+  if (latest?.status === "briefing") return "briefing";
+  if (latest?.status === "playing") return "live";
+  if (choice === "cup" || choice === "trophy") return choice;
   if (!latest) return "lobby";
-  if (latest.status === "briefing") return "briefing";
-  if (latest.status === "playing") return "live";
   if (latest.status === "finished") return choice === "lobby" ? "lobby" : choice === "review" ? "review" : "final";
   return "lobby";
 }
