@@ -16,6 +16,9 @@
 //      fill, stroke, opacity), element by element kind, equal those recorded on the base build d4dc408
 //      (scripts/lib/everyday-style-baseline.json). Re-record only for an intended Everyday change:
 //        MCHEZO_WEB_DIST=<base build>/apps/web/dist node scripts/check-warm-ivory.mjs --record-everyday
+//      Stage 12.1 (D-S121-01/02) added and renamed Everyday elements without changing a colour. Those exact element
+//      keys are listed in W8_INTENDED. A listed new element passes only if its style already appears on the same
+//      screen in the base build. A listed removed element passes only because it was replaced. Anything else still fails.
 // Screenshots of both looks (320/390/1280 and the TV) go to MCHEZO_SCREENSHOT_DIR when it's set.
 // Starts ITS OWN server. Chromium emulation only: no real phones or TVs. Usage: node scripts/check-warm-ivory.mjs
 import { spawn } from "node:child_process";
@@ -25,6 +28,22 @@ import { join } from "node:path";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 
 const RECORD = process.argv.includes("--record-everyday");
+/**
+ * Stage 12.1's intended Everyday element changes (no colour changes), by screen kind and exact element key
+ * (`<nearest test id>><tag>.<classes>`):
+ * - Home's dock is Join and Host, with Play solo as a link;
+ * - the casual host's room menu has "Make it a Family Cup".
+ */
+const W8_INTENDED = {
+  home: {
+    added: ["home-dock>nav.mz-dock.mz-dock--home.mz-dock--onepath", "home-solo>button.mz-dock__solo.mz-linkbtn", "home-solo>b."],
+    removed: ["home-dock>nav.mz-dock.mz-dock--home.mz-dock--three", "home-solo>button.mz-key.mz-key--block.mz-key--lg.mz-key--surface"],
+  },
+  menu: {
+    added: ["menu-make-cup>button.mz-menurow", "menu-make-cup>path.", "menu-make-cup>span.mz-menurow__chev", "menu-make-cup>span.mz-menurow__detail", "menu-make-cup>span.mz-menurow__icon", "menu-make-cup>span.mz-menurow__label", "menu-make-cup>svg."],
+    removed: [],
+  },
+};
 const BASELINE = new URL("./lib/everyday-style-baseline.json", import.meta.url);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const DATA_DIR = mkdtempSync(join(tmpdir(), "mchezo-ivory-"));
@@ -305,12 +324,21 @@ try {
     console.log(`RECORDED Everyday baseline: ${Object.keys(everydaySig).length} screens, ${Object.values(everydaySig).reduce((n, a) => n + a.length, 0)} element styles -> ${BASELINE.pathname}`);
   } else {
     const base = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, "utf8")) : {};
+    const keyOf = (x) => x.slice(0, x.indexOf("=>"));
+    const styleOf = (x) => x.slice(x.indexOf("=>") + 2);
     for (const [screen, now] of Object.entries(everydaySig)) {
       const was = new Set(base[screen] ?? []);
-      const added = now.filter((x) => !was.has(x));
-      const gone = (base[screen] ?? []).filter((x) => !now.includes(x));
+      const baseStyles = new Set((base[screen] ?? []).map(styleOf));
+      const kind = screen.replace(/-\d+$/, "");
+      const intended = W8_INTENDED[kind] ?? { added: [], removed: [] };
+      const addedAll = now.filter((x) => !was.has(x));
+      const goneAll = (base[screen] ?? []).filter((x) => !now.includes(x));
+      // An intended new element must reuse a style this screen already had: a new key, never a new colour.
+      const added = addedAll.filter((x) => !(intended.added.includes(keyOf(x)) && baseStyles.has(styleOf(x))));
+      const gone = goneAll.filter((x) => !intended.removed.includes(keyOf(x)));
+      const allowed = addedAll.length - added.length + goneAll.length - gone.length;
       check(`W8 Everyday ${screen}: every element kind's computed colours equal the base build's (d4dc408)`, was.size > 0 && added.length === 0 && gone.length === 0,
-        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
+        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended Stage 12.1 element change(s), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
     }
   }
 
