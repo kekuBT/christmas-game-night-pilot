@@ -187,7 +187,10 @@ export class LocalServer {
     const current = audience === "host" && !who?.isHost ? "player" : audience === "cohost" && !who?.isHost && !who?.isCohost ? "player" : audience;
     const engineAudience = current === "spectator" ? "tv" : current;
     const plan = this.lobbyPlans.get(room.id);
-    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), rev: this.revOf(room.id), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(plan ? { upNext: plan } : {}) };
+    // Stage 10.5 (D-S105-02): members' projections carry the book's revision (so the poll and every push deliver it);
+    // the TV's and spectators' never do.
+    const member = engineAudience !== "tv" && !!who;
+    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), rev: this.revOf(room.id), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(plan ? { upNext: plan } : {}), ...(member ? { memoryRevision: this.bookRevision(room.id) } : {}) };
     // Host-assisted recovery requests: host/cohost only. Shows the seat and
     // the match code to compare; never the requester's secret.
     const me = actorId ? room.players.get(actorId) : undefined;
@@ -346,6 +349,9 @@ export class LocalServer {
   private commitBook<T>(roomId: string, change: (staged: MemoryBook) => T): T {
     const staged = (this.books.get(roomId) ?? new MemoryBook()).clone();
     const result = change(staged);
+    // Stage 10.5 (D-S105-01): the revision moves on the staged copy, so it is written with the change and is live only
+    // once the write succeeds. A refused change has already thrown; a failed write throws below.
+    staged.bumpRevision();
     try {
       this.store.saveBook(roomId, staged.toJSON());
     } catch (err) {
@@ -353,7 +359,29 @@ export class LocalServer {
       throw new PersistError("The Memory Book couldn't be saved, so nothing changed. Try again in a moment.");
     }
     this.books.set(roomId, staged);
+    this.notifyBook(roomId, staged.revision);
     return result;
+  }
+
+  /**
+   * Stage 10.5 (D-S105-02): tell this room's members the book moved. Only the revision travels (no text, facts,
+   * approvals or keys); pages fetch the snapshot. Only sockets of current members of this room with a current
+   * credential get it: never the TV, a spectator, another room, or a replaced or departed seat.
+   */
+  private notifyBook(roomId: string, revision: number): void {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+    const frame = JSON.stringify({ kind: "book", revision });
+    for (const { ws, meta } of this.sockets) {
+      if (meta.roomId !== roomId || !meta.actorId || meta.audience === "tv" || meta.audience === "spectator") continue;
+      if (!room.players.has(meta.actorId) || !this.socketCurrent(room, meta)) continue;
+      if (ws.readyState === 1) ws.send(frame);
+    }
+  }
+
+  /** Stage 10.5: the book's revision, for member projections (D-S105-02). */
+  private bookRevision(roomId: string): number {
+    return this.books.get(roomId)?.revision ?? 0;
   }
 
   /**
@@ -887,12 +915,15 @@ export class LocalServer {
           const book = this.books.get(room.id) ?? new MemoryBook();
           if (req.method === "GET" && parts.length === 3) {
             if (!this.requireSession(room, req, res)) return;
-            this.send(res, 200, book.entries);
+            // Stage 10.5 (D-S105-02): `?revision=1` opts into the snapshot { revision, entries }; without it the reply
+            // stays the plain entry list every existing caller reads.
+            this.send(res, 200, url.searchParams.get("revision") === "1" ? { revision: book.revision, entries: book.entries } : book.entries);
             return;
           }
           if (req.method === "GET" && parts.length === 4 && parts[3] === "export") {
             if (!this.requireSession(room, req, res)) return;
-            this.send(res, 200, { markdown: book.exportMarkdown(room.name) });
+            // Stage 10.5: the revision this export was made from, next to it (additive).
+            this.send(res, 200, { markdown: book.exportMarkdown(room.name), revision: book.revision });
             return;
           }
           if (req.method === "POST" && parts.length === 3) {
