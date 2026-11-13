@@ -28,7 +28,7 @@ import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulse
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
 import { JebenaCupsLabel, JebenaHeartsChoice, JebenaReview, JebenaTv, JebenaTvFinal, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
 import { newerLedger } from "./ui/mchezo/lib/memoryLink.js";
-import { accept, freshSync, hear, isBookSnapshot, NOTHING, type BookSnapshot, type BookSync } from "./ui/mchezo/lib/bookSync.js";
+import { accept, freshSync, hear, isBookSnapshot, NOTHING, retryDelay, shouldRetry, type BookSnapshot, type BookSync } from "./ui/mchezo/lib/bookSync.js";
 import { SaveMemory } from "./components/mchezo/SaveMemory.js";
 import { SAVE_MEMORY_GAMES, saveMemoryFacts } from "./ui/mchezo/lib/saveMemory.js";
 import { cupContinuity } from "./components/mchezo/CiniCups.js";
@@ -1139,6 +1139,7 @@ export function App() {
   /** Stage 10.5: this room's book sync; a new room starts from nothing (and shows nothing of the last room's book). */
   function syncFor(rid: string): BookSync {
     if (!bookSync.current || bookSync.current.roomId !== rid) {
+      clearRetry(bookSync.current); // a retry for the room this page left never fires
       bookSync.current = freshSync(rid);
       setBook([]); setBookRevision(NOTHING); setHeardRevision(NOTHING); setExportDoc(null);
     }
@@ -1155,21 +1156,42 @@ export function App() {
     }
     return reply;
   }
+  function clearRetry(s: BookSync | null) {
+    if (s?.retry) { clearTimeout(s.retry); s.retry = null; }
+  }
   /**
    * One fetch at a time. `force` fetches even when nothing newer was heard (opening the book, after this page's own
-   * change). A failure keeps the last authoritative book on screen; the next notice or poll tries again.
+   * change). A failure keeps the last authoritative book on screen. Stage 10.5 repair (review 6845502314; D-S105-06):
+   * a poll that reports the same revision never refetches by itself, so a failed refresh schedules its own retry, with
+   * backoff (1, 2, 4, then 8 s), while the page is still behind and the book is open. Leaving the book, switching rooms
+   * or signing out cancels it; a newer notice fetches at once instead.
    */
   async function syncBook(rid: string, force = false): Promise<void> {
     const s = syncFor(rid);
     if (s.inFlight) { if (force) s.again = true; return; }
     if (!force && s.heard <= s.applied) return;
+    clearRetry(s);
     s.inFlight = true;
-    try { await fetchBook(rid); }
-    catch (e) { if (force) fail(e); else console.warn("[mchezo] Memory Book refresh failed:", e instanceof Error ? e.message : e); }
+    let failed = false;
+    try { await fetchBook(rid); s.failures = 0; }
+    catch (e) {
+      failed = true;
+      s.failures += 1;
+      if (force) fail(e); else console.warn("[mchezo] Memory Book refresh failed:", e instanceof Error ? e.message : e);
+    }
     finally {
       s.inFlight = false;
-      if (bookSync.current === s && s.again && viewRef.current === "memory") { s.again = false; void syncBook(rid, true); }
-      else s.again = false;
+      const live = bookSync.current === s && viewRef.current === "memory";
+      if (live && s.again) { s.again = false; void syncBook(rid, true); }
+      else {
+        s.again = false;
+        if (live && shouldRetry(s, failed)) {
+          s.retry = setTimeout(() => {
+            s.retry = null;
+            if (bookSync.current === s && viewRef.current === "memory") void syncBook(rid);
+          }, retryDelay(s.failures));
+        }
+      }
     }
   }
   /** A projection or a "book" frame says the book is at `revision` (no note travels with it): fetch if behind and open. */
@@ -1183,7 +1205,12 @@ export function App() {
   // events), so a Memory Book left open across a game's end cites that game.
   useEffect(() => { if (view === "memory" && roomId) void loadLedger(); }, [view, roomId, proj?.seq]);
   // Stage 10.5: the book when it opens (always fresh), and whenever a projection brings a newer revision.
-  useEffect(() => { viewRef.current = view; if (view === "memory" && roomId) void syncBook(roomId, true); }, [view, roomId]);
+  useEffect(() => {
+    viewRef.current = view;
+    if (view === "memory" && roomId) void syncBook(roomId, true);
+    else clearRetry(bookSync.current); // left the book (or the room): no retry fires
+  }, [view, roomId]);
+  useEffect(() => () => clearRetry(bookSync.current), []);
   useEffect(() => { if (roomId && proj?.roomId === roomId) hearBook(roomId, proj.memoryRevision); }, [roomId, proj?.roomId, proj?.memoryRevision]);
   useEffect(() => {
     if (!proj?.joinCode) return;

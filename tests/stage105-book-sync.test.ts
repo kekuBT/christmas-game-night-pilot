@@ -1,7 +1,7 @@
 // Stage 10.5 (D-S105-03, D-S105-04): the pure rules that keep one page's Memory Book current
 // (apps/web/src/ui/mchezo/lib/bookSync.ts): what a page does with revisions it hears and snapshots it gets back.
 import { describe, expect, it } from "vitest";
-import { accept, exportIsStale, exportStep, freshSync, hear, isBookSnapshot, NOTHING } from "../apps/web/src/ui/mchezo/lib/bookSync.js";
+import { accept, exportIsStale, exportStep, freshSync, hear, isBookSnapshot, NOTHING, retryDelay, RETRY_MAX_MS, shouldRetry } from "../apps/web/src/ui/mchezo/lib/bookSync.js";
 import type { MemoryEntry } from "../apps/web/src/types.js";
 
 const entry = (id: string, approved = false): MemoryEntry => ({ id, day: 1, text: id, sourceEventIds: ["evt-1"], approved, derivedFacts: [] });
@@ -81,5 +81,28 @@ describe("bookSync: exports", () => {
     expect(exportIsStale(3, { heard: 3, applied: 3 })).toBe(false);
     expect(exportIsStale(3, { heard: 4, applied: 3 })).toBe(true);
     expect(exportIsStale(3, { heard: 3, applied: 4 })).toBe(true);
+  });
+});
+
+describe("bookSync: retrying a failed refresh (review 6845502314; D-S105-06)", () => {
+  it("only a failed refresh that leaves the page behind is retried; a success or a page that's caught up isn't", () => {
+    const s = freshSync("room-a");
+    hear(s, 4);
+    expect(shouldRetry(s, true)).toBe(true); // failed, still behind
+    expect(shouldRetry(s, false)).toBe(false); // it worked
+    accept(s, "room-a", snap(4));
+    expect(shouldRetry(s, true)).toBe(false); // caught up (e.g. an export's snapshot landed meanwhile): nothing to retry
+  });
+  it("backs off 1, 2, 4, then 8 s, and never faster (no storm)", () => {
+    expect([1, 2, 3, 4, 5, 9, 50].map(retryDelay)).toEqual([1000, 2000, 4000, 8000, 8000, 8000, 8000]);
+    expect(retryDelay(0)).toBe(1000);
+    expect(RETRY_MAX_MS).toBe(8000);
+    // Requests in 12 s of failures: the first plus retries at 1, 3 and 7 s; the next would be at 15 s.
+    let t = 0, n = 1;
+    for (let f = 1; t + retryDelay(f) <= 12000; f++) { t += retryDelay(f); n++; }
+    expect(n).toBe(4);
+  });
+  it("a fresh sync has no failures and no retry pending", () => {
+    expect(freshSync("room-b")).toMatchObject({ failures: 0, retry: null });
   });
 });

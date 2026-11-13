@@ -17,12 +17,29 @@ export interface BookSync {
   inFlight: boolean;
   /** A newer revision was heard while a fetch was running: fetch once more when it ends. */
   again: boolean;
+  /**
+   * Stage 10.5 repair (review 6845502314; D-S105-06): failed refreshes in a row, and the pending retry. A poll that
+   * reports the same revision doesn't refetch by itself, so a failed refresh must schedule its own retry.
+   */
+  failures: number;
+  retry: ReturnType<typeof setTimeout> | null;
 }
 
 export const NOTHING = -1;
 
 export function freshSync(roomId: string): BookSync {
-  return { roomId, heard: NOTHING, applied: NOTHING, inFlight: false, again: false };
+  return { roomId, heard: NOTHING, applied: NOTHING, inFlight: false, again: false, failures: 0, retry: null };
+}
+
+/** The wait before retrying after `failures` failed refreshes in a row: 1, 2, 4, then 8 s at most (no storm). */
+export const RETRY_MAX_MS = 8000;
+export function retryDelay(failures: number): number {
+  return Math.min(RETRY_MAX_MS, 1000 * 2 ** Math.max(0, failures - 1));
+}
+
+/** Retry only a failed refresh, only while the page is still behind what it has heard of. */
+export function shouldRetry(s: Pick<BookSync, "heard" | "applied">, failed: boolean): boolean {
+  return failed && s.heard > s.applied;
 }
 
 export function isBookSnapshot(x: unknown): x is BookSnapshot {

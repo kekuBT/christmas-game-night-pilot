@@ -45,6 +45,7 @@
   - on a frame or a projection with a newer revision;
   - on reconnect and on returning to the page (the existing refresh brings a projection, and with it the revision).
 - **Room switch or leave:** the book, its revision and any pending fetch are reset for the new room. Replies for the old room are ignored, and nothing is fetched after leaving.
+- **A failed refresh** (repair, review 6845502314; D-S105-06) retries itself after 1, 2, 4, then at most 8 s, while the page is still behind and the book is open. The poll reports the same revision, which alone never refetches. Leaving, switching rooms or signing out cancels the retry.
 - **What stays put:** the highlight draft, the Save a memory draft, focus, and the ledger watermark protections (Stage 10.2), which keep guarding which finish a new note cites.
 - **No storm:** the ledger is fetched when `seq` moves, as before. The book is fetched only when its revision moves, never on a game tick.
 
