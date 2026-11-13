@@ -1,0 +1,247 @@
+$ node scripts/check-jebena-rush.mjs http://localhost:44849
+# timeout 600s | worker w3 | server http://localhost:44849 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s105-full2/test-results/20261113-051445-6edb5881-21197/server-data/w3)
+
+[+5.3s] PASS J room B: its host sets 7 cups — {"ok":true,"lobbySettings":{"jebena-rush":{"hearts":7}},"session":{"onBreak":false,"revision":1}}
+[+5.3s] PASS J room B: Jebena Rush starts with 7 cups — {"gameId":"game-1","gameType":"jebena-rush","status":"briefing","players":["player-1","player-2"]}
+[+5.3s] PASS J room B: playing
+[+5.4s] PASS A the picker lists Jebena Rush as practice-only — Jebena Rush 2–10 players · best with 3+ · about 8 min · Practice only
+[+5.9s] PASS A the host sees the cups choice (3, 5 or 7 cups), 5 preselected
+[+5.9s] PASS A guests see 5 cups each
+[+6.1s] PASS A the host chose 3 cups
+[+6.1s] PASS A guests see the host's choice: 3 cups each, drawn as three whole cups
+[+6.1s] PASS A no hearts anywhere in the lobby (host and guest)
+[+6.1s] PASS A a guest can't change the cups (403) — {"status":403,"body":{"error":"Only the host or a cohost can change a game's settings.","code":"NOT_HOST","lobbySettings":{"jebena-rush":{"hearts":3}}}}
+[+6.1s] PASS A 4 cups is refused (400), in words about cups — {"status":400,"body":{"error":"Cups must be 3, 5 or 7.","code":"INVALID_SETTINGS","lobbySettings":{"jebena-rush":{"hearts":3}}}}
+[+6.1s] PASS A lobby, host 390: no sideways scroll
+[+6.1s] PASS A lobby, guest 320: no sideways scroll
+[+6.3s] PASS B Keku's briefing says everyone starts with 3 cups, with three whole cups
+[+6.3s] PASS B Keku's briefing: a timeout breaks a cup; no hearts
+[+6.3s] PASS B Amina's briefing says everyone starts with 3 cups, with three whole cups
+[+6.4s] PASS B Amina's briefing: a timeout breaks a cup; no hearts
+[+6.4s] PASS B Baraka's briefing says everyone starts with 3 cups, with three whole cups
+[+6.4s] PASS B Baraka's briefing: a timeout breaks a cup; no hearts
+[+6.4s] PASS B the TV briefing says 3 cups
+[+6.4s] PASS B the briefing states 10 seconds a turn — 10 seconds for each turn.
+[+6.4s] The whole game ends by itself after about 12 minutes.
+[+6.9s] PASS C play: a turn is on
+[+6.9s] PASS C every player starts with 3 lives (the server's count)
+[+6.9s] PASS C Keku's own row: three whole cups, "3/3", "3 of 3 cups remaining"
+[+6.9s] PASS C Amina's own row: three whole cups, "3/3", "3 of 3 cups remaining"
+[+6.9s] PASS C Baraka's own row: three whole cups, "3/3", "3 of 3 cups remaining"
+[+6.9s] PASS C the holder's phone says Your turn! and its field has focus
+[+6.9s] PASS C Keku sees Baraka has the jebena
+[+6.9s] PASS C Amina sees Baraka has the jebena
+[+6.9s] PASS C the TV: category, holder, countdown and cups
+[+7.0s] PASS C keyboard: Tab from the field reaches Send
+[+7.1s] PASS C sent “Zzqxv Plonk”
+[+7.1s] PASS C not in the bank: explained, no pass
+[+7.1s] PASS C the phone explains it isn't on the list
+[+7.1s] PASS C a rejected try keeps the deadline
+[+7.2s] PASS C sent “Ator”
+[+7.2s] PASS C ambiguous (“Ator”): asks to check the spelling
+[+7.2s] PASS C the phone says it can't be sure
+[+7.2s] PASS C sent “job”
+[+7.2s] PASS C near miss (“job”): its reason is shown
+[+7.3s] PASS C wrong tries (not on the list, ambiguous, near miss) break no cup anywhere — [[],[],[],[]]
+[+7.3s] PASS C the holder's turn screen: no sideways scroll
+[+7.4s] PASS C sent “Actor”
+[+7.4s] PASS C “Actor” is accepted and the jebena passes
+[+7.4s] PASS C the previous holder reads “You named …”
+[+7.4s] PASS C the TV shows the last play
+[+7.5s] PASS C sent “ACTOR”
+[+7.5s] PASS C a repeat (any case) is “already named”, no pass
+[+7.5s] PASS C the phone says it was already named
+[+7.6s] PASS C sent “construction worker”
+[+7.6s] PASS C an alias (“construction worker”) counts as “Builder”
+[+7.7s] PASS C sent “Ceaner”
+[+7.7s] PASS C a typo (“Ceaner”) counts as “Cleaner”
+[+7.7s] PASS C the named list shows canonical names
+[+7.8s] PASS D an out-of-turn answer is refused — {"accepted":false,"reason":"NOT_YOUR_TURN"}
+[+7.8s] PASS D a stale turn's answer is refused — {"accepted":false,"reason":"STALE_TURN"}
+[+7.8s] PASS D neither changed the turn or the answers
+[+7.8s] PASS D a duplicate send replays its first answer, counted once — {"accepted":true,"result":{"verdict":"accepted","turn":4,"answer":"Artist","via":"exact"}} | {"accepted":true,"result":{"verdict":"accepted","turn":4,"answer":"Artist","via":"exact"}}
+[+8.6s] PASS D a late joiner is told the game started before they joined
+[+8.6s] PASS D a late joiner's answer is refused — {"accepted":false,"reason":"NOT_IN_GAME"}
+[+8.6s] PASS H full motion: steam rises on Keku's phone
+[+8.6s] PASS H reduced motion: Baraka's jebena is still
+[+8.6s] PASS H the urgency word is shown with reduced motion
+[+8.6s] PASS H Amina's phone has the Christmas look, Keku's Everyday
+[+8.7s] PASS I the TV's projection carries no unused answer and no aliases
+[+8.7s] PASS I a player's projection carries no unused answer and no aliases
+[+8.7s] PASS I nothing from the room is in the app-shell cache
+[+8.7s] PASS I2 the canary check finds a canary when one is there (self-test)
+[+8.8s] PASS I2 no built file carries the bank (22 files, 39 canaries)
+[+9.3s] PASS I2 no public response carries the bank (17 responses) —  
+[+9.3s] PASS J the rooms keep their own cups (A 3, B 7)
+[+9.3s] PASS J an answer in room B counts there and never shows in room A
+[+9.8s] PASS J room B at 320 px: seven cups in Juma's own row and the seat list
+[+9.8s] PASS J seven cups fit 320 px: every cup row, name and the countdown inside the screen; no sideways scroll — {"rows":3,"rowsInside":true,"namesInside":true,"namesWide":true,"clock":true,"scroll":true}
+[+11.4s] PASS R2 a TV watches room B: seven cups a seat
+[+23.0s] PASS R2 room D: its first turn runs out (a cup lost just now)
+[+24.1s] PASS R2 the same tab now watches room D: three cups a seat, the lost one broken
+[+25.3s] PASS R2 same tab (no reload), colliding ids (game-1, player-2/player-1), arrived 1114 ms after room D's loss: no cup broke — {"sameTab":"still here","collide":true,"sinceLoss":1114,"sLog":[]}
+[+29.0s] PASS E Amina times out (turn 6)
+[+29.0s] PASS E a timeout costs exactly one life (the server's count) — 3 → 2
+[+29.0s] PASS E a timeout starts a new category
+[+29.0s] PASS E and the jebena passes
+[+29.0s] PASS E Amina's phone: 2 whole, the lost cup broken in its slot, "2 of 3 cups remaining"
+[+29.0s] PASS E Amina's own row: exactly that cup broke, once
+[+29.0s] PASS E the TV seat shows the cup lost
+[+29.0s] PASS E the TV: that one cup broke, once, in its slot
+[+29.0s] PASS E the break plays only with full motion (Amina: full) — mz-cini-tip
+[+29.3s] PASS E after a reload, Keku is back in the game, same category
+[+29.4s] PASS E after the reload, Keku's seat list shows Amina's cups as the server has them (broken ones still broken)
+[+29.4s] PASS E the reload replayed no break — []
+[+39.4s] PASS E Baraka times out (turn 7)
+[+39.4s] PASS C sent “Archery”
+[+39.5s] PASS E Amina's turn: her field has focus
+[+39.5s] PASS E before her phone drops, it already broke one of her cups live (on her own row and the seat list) — [{"n":0,"surface":"hud","seat":"player-2","slot":2,"cups":2,"anim":"mz-cini-tip","t":1794547857174},{"n":1,"surface":"seat","seat":"player-2","slot":2,"cups":2,"anim":"mz-cini-tip","t":1794547857174}]
+[+41.2s] PASS E offline: the send says it didn't get through
+[+50.1s] PASS E the turn times out while she's away (no free life)
+[+54.6s] PASS E back online, Amina's phone catches up with one cup fewer, shown broken
+[+54.6s] PASS E the resync showed her broken cup (slot 1) without replaying the break (no new break of her seat since her phone dropped; earlier ones stay in the log) — []
+[+57.2s] PASS E reconnecting never resubmitted what she typed offline
+[+60.5s] PASS E Baraka times out (turn 10)
+[+60.6s] PASS C sent “Asparagus”
+[+71.1s] PASS E Amina times out (turn 12)
+[+71.1s] PASS F Amina is out and watches the rest
+[+71.1s] PASS F Amina's own row: every cup broken, "0 of 3 cups: out"
+[+71.1s] PASS F Amina's last cup broke on their own row
+[+71.2s] PASS F the out screen says the cups are broken
+[+71.2s] PASS F the out screen: no sideways scroll
+[+71.2s] PASS F the TV marks them out: every cup broken, and "Out"
+[+81.7s] PASS E Baraka times out (turn 13)
+[+81.7s] PASS F someone went out before the end, and their out screen was checked
+[+81.7s] PASS E Amina's offline resync ran, after a cup of hers broke live (S101-R3)
+[+81.7s] PASS E Keku's mid-game reload ran
+[+81.7s] PASS F the match finishes: one player left
+[+81.7s] PASS F Keku kept the jebena (place 1, still in)
+[+81.7s] PASS F Keku sees the results
+[+81.7s] PASS F Keku's results equal the server's scores — [{"id":"player-1","pts":220},{"id":"player-3","pts":100},{"id":"player-2","pts":0}]
+[+81.7s] PASS F Amina sees the results
+[+81.7s] PASS F Amina's results equal the server's scores — [{"id":"player-1","pts":220},{"id":"player-3","pts":100},{"id":"player-2","pts":0}]
+[+81.8s] PASS F Baraka sees the results
+[+81.8s] PASS F Baraka's results equal the server's scores — [{"id":"player-1","pts":220},{"id":"player-3","pts":100},{"id":"player-2","pts":0}]
+[+81.8s] PASS F the winner's line says they kept the jebena
+[+81.8s] PASS F the results row: the keeper's cups, whole as the server has them — 1Keku (you)Kept the jebena · 2 of 3 cups whole · 3 answers · 1 timeout220
+[+81.8s] PASS F an eliminated row says every cup broke — 3
+[+81.8s] Amina
+[+81.8s] Out: every cup broken · 1 answer · 3 timeouts
+[+81.8s] 0
+[+81.8s] PASS F the scoring is explained in cups
+[+81.8s] PASS F no hearts on any results screen
+[+81.8s] PASS F Keku: every cup that broke was a real lost life, in its slot, once — 5 breaks; {"dup":[],"stray":[]}
+[+81.8s] PASS F Amina: every cup that broke was a real lost life, in its slot, once — 7 breaks; {"dup":[],"stray":[]}
+[+81.8s] PASS F Baraka: every cup that broke was a real lost life, in its slot, once — 6 breaks; {"dup":[],"stray":[]}
+[+81.8s] PASS F the TV: every cup that broke was a real lost life, in its slot, once — 7 breaks; {"dup":[],"stray":[]}
+[+81.8s] PASS F the TV broke exactly one cup for each life lost (7), the match-deciding one included — 7 breaks for 7 lives: [["tv","-1",2],["tv","-2",2],["tv","-3",2],["tv","-2",1],["tv","-3",1],["tv","-2",0],["tv-row","-3",0]]
+[+81.8s] PASS R1 the TV's final screen breaks the deciding cup once, animated — [{"n":6,"surface":"tv-row","seat":"player-3","slot":0,"cups":0,"anim":"mz-cini-tip","t":1794547909856}]
+[+81.8s] PASS R1 the TV's final screen says who won and how the last cup went — JEBENA RUSH · 3 CUPS EACH · FINAL Keku wins Keku kept the jebena! Baraka is out: every cup is broken. 1 Keku Kept the jebena · 2 of 3 cups whole · 3 answers · 1 timeout 220 2 Baraka Out: every cup bro
+[+81.8s] PASS R1 the winner's phone (Keku) breaks the runner-up's last cup once, on the results — [{"n":4,"surface":"result-row","seat":"player-3","slot":0,"cups":0,"anim":"mz-cini-tip","t":1794547909879}]
+[+81.8s] PASS R1 the runner-up's own phone (Baraka) breaks their last cup once, still (reduced motion) — [{"n":5,"surface":"result-row","seat":"player-3","slot":0,"cups":0,"anim":"none","t":1794547909878}]
+[+81.8s] PASS R1 the results show the runner-up's cups all broken, as the server has them — {"cups":0,"of":3,"whole":0,"broken":3,"label":null,"text":"2BarakaOut: every cup broken · 2 answers · 3 timeouts100"}
+[+81.8s] PASS F reduced motion (Baraka): cups break without animating — ["none","none","none","none","none","none"]
+[+81.8s] PASS F full motion (the TV): each break animates — ["mz-cini-tip","mz-cini-tip","mz-cini-tip","mz-cini-tip","mz-cini-tip","mz-cini-tip","mz-cini-tip"]
+[+81.8s] PASS F results at 320: no sideways scroll
+[+81.8s] PASS 10.2 the main match's facts (Keku: 2 of 3 cups, last-standing) call for no line
+[+81.8s] PASS 10.2 F Keku's phone (Everyday, 390): no moment line
+[+81.8s] PASS 10.2 F Amina's phone (Christmas, 320): no moment line
+[+81.8s] PASS 10.2 F Baraka's phone (390, reduced motion): no moment line
+[+82.1s] PASS 10.2 F after a reload, Amina's phone: no moment line
+[+82.2s] PASS F the TV shows the final standings: Keku wins
+[+82.2s] PASS 10.2 F the TV's final view: no moment line
+[+82.4s] PASS F the TV's post-game review: Keku kept the jebena, with the places
+[+82.5s] PASS 10.4 S1 the TV's final view has no Save a memory
+[+82.5s] PASS 10.4 S1 Amina's results offer Save a memory
+[+82.6s] PASS 10.4 S1 the composer shows the final points by name, highest first (the server's scores)
+[+82.6s] PASS 10.4 S1 the composer at 320 px: no sideways scroll
+[+82.8s] PASS 10.4 S1 Keku's save: saved, to be approved in the Memory Book
+[+82.8s] PASS 10.4 S1 one entry, pending, citing this match's finish, with its score facts; the cancelled draft saved nothing — {"id":"book-1","day":1,"type":"game-result","text":"Keku kept the jebena warm all night","sourceEventIds":["evt-21"],"approved":false,"derivedFacts":["player-1: 220 points","player-2: 0 points","player-3: 100 points"],"addedBy":"player-1"}
+[+82.8s] PASS 10.4 S1 the host approves it; the export has the note and the match's facts — # Mchezo Memory Book — Game night
+[+82.8s] 
+[+82.8s] ## Day 1
+[+82.8s] Note: Keku kept the jebena warm all night
+[+82.8s] From the ledger:
+[+82.8s] - player-1: 220 points
+[+82.8s] - player-2: 0 points
+[+82.8s] - player-3: 100 points
+[+82.8s] Sources: evt-21
+[+82.8s] 
+[+82.9s] PASS 10.4 S1 saving changed no score: the match is as it was
+[+82.9s] PASS G the host has Play again
+[+82.9s] PASS G Play again's briefing: everyone starts with 3 cups again
+[+83.0s] PASS G the rematch carries the same settings
+[+83.6s] PASS G the replay is on
+[+83.6s] PASS G Keku starts the replay with three whole cups
+[+83.6s] PASS G Amina starts the replay with three whole cups
+[+83.6s] PASS G Baraka starts the replay with three whole cups
+[+83.6s] PASS G the TV: everyone's cups whole again
+[+83.6s] PASS G Amina leaves the replay — {"accepted":true,"result":{"gameStatus":"playing"}}
+[+83.6s] PASS G Baraka leaves the replay — {"accepted":true,"result":{"gameStatus":"finished"}}
+[+83.7s] PASS G with both of them gone, the replay ends: Keku kept the jebena
+[+83.7s] PASS G both leavers sat out; Keku kept all 3 cups
+[+85.2s] PASS G leaving broke no cup on any screen (phones or TV) — [[],[],[],[]]
+[+85.2s] PASS 10.2 G the replay's facts call for no line (both others left)
+[+85.2s] PASS 10.2 G the replay's results on Keku's phone: no moment line
+[+85.2s] PASS 10.2 G the TV shows no moment line for the replay
+[+85.2s] PASS R1 Keku's ledger carries the room's seq as its watermark — 33 vs 33
+[+85.2s] PASS R1 the room's newest event (a sit-out) is hidden from Keku; his last finished game is the replay — newest seen 32, seq 33, finished game-2
+[+85.5s] PASS R1 Keku's Memory Book finishes loading: linked to Jebena Rush, Add on
+[+85.5s] PASS R1 it links the replay's own finish (the right event), never 'Checking…' — {"state":"ready","event":"evt-32","text":"Linked to Jebena Rush · Day 1: the last game that finished.","addDisabled":false,"hint":"You can approve it straight after adding it.","facts":null}
+[+86.4s] PASS R1 the highlight is added, citing exactly the replay's finish
+[+86.4s] PASS R1 the entry is one entry, in this room only
+[+86.4s] PASS 10.4 S2 Keku's replay result offers Save a memory
+[+86.7s] PASS 10.4 S2 saved
+[+86.7s] PASS 10.4 S2 it cites the replay's own finish, never the main match's — {"id":"book-3","day":1,"type":"game-result","text":"The replay nobody stayed for","sourceEventIds":["evt-32"],"approved":false,"derivedFacts":["player-1: 230 points","player-2: 0 points","player-3: 10
+[+86.7s] PASS G Keku is back in the lobby
+[+86.7s] PASS G Amina is back in the lobby
+[+86.8s] PASS G Baraka is back in the lobby
+[+87.2s] PASS R2 room S: Pendo's phone is connected and would play
+[+87.2s] PASS R2 room S: Jebena Rush starts, three cups, Pendo and Halima — {"gameId":"game-1","gameType":"jebena-rush","status":"briefing","players":["player-1","player-2"]}
+[+87.3s] PASS R2 room S is playing: three whole cups each
+[+87.4s] PASS R2 step 1 precondition: Pendo's turn, 3 cups, Halima in (so this loss can't end the match) — {"status":"playing","pre1":{"id":"player-2","hearts":3,"out":false,"satOut":false,"answers":0,"timeouts":0}}
+[+87.4s] PASS R2 step 1: before the drop, Pendo's phone shows 3 whole cups
+[+97.8s] PASS R2 step 1: Pendo's turn runs out while the phone hears nothing
+[+97.8s] PASS R2 step 1: the loss leaves the match on: Pendo 2 cups and still in, Halima in — {"status":"playing","row1":{"id":"player-2","hearts":2,"out":false,"satOut":false,"answers":0,"timeouts":1},"loss1":{"seq":3,"turn":2,"kind":"timeout","player":"player-2","hearts":2,"categoryId":"jr-animals","at":1794547925970}}
+[+99.1s] PASS R2 step 1: Pendo's phone reconnects and resyncs within 3 s of the server's loss: 2 whole, 1 broken
+[+99.1s] PASS R2 step 1: the resync came inside the window (1387 ms after the server's loss)
+[+100.7s] PASS R2 step 1: the resync showed the lost cup broken without breaking it (no break of Pendo's seat since the drop) — []
+[+100.8s] PASS R2 step 2 precondition: Pendo's next turn, 2 cups, Halima in (so this loss can't end the match) — {"status":"playing","pre2":{"id":"player-2","hearts":2,"out":false,"satOut":false,"answers":0,"timeouts":1}}
+[+111.2s] PASS R2 step 2: Pendo's turn runs out, the phone connected
+[+111.2s] PASS R2 step 2: the loss leaves the match on: Pendo 1 cup and still in — {"status":"playing","row2":{"id":"player-2","hearts":1,"out":false,"satOut":false,"answers":0,"timeouts":2}}
+[+111.3s] PASS R2 step 2: after the short reconnect, Pendo's own row breaks the lost cup live
+[+112.3s] PASS R2 step 2: exactly that cup (slot 1) broke, once on Pendo's row, still (reduced motion); no other slot of Pendo's — [{"n":0,"surface":"hud","seat":"player-2","slot":1,"cups":1,"anim":"none","t":1794547939441},{"n":1,"surface":"seat","seat":"player-2","slot":1,"cups":1,"anim":"none","t":1794547939441}]
+[+112.4s] PASS R2 step 3 precondition: Pendo's last turn, 1 cup left, Halima in — {"status":"playing","pre3":{"id":"player-2","hearts":1,"out":false,"satOut":false,"answers":0,"timeouts":2}}
+[+122.9s] PASS R2 step 3: Pendo's last turn runs out
+[+122.9s] PASS R2 step 3: the match ends: Halima keeps the jebena, Pendo out with every cup broken — {"status":"finished","end":"last-standing","stds":[{"id":"player-1","place":1,"hearts":3,"out":false,"satOut":false,"answers":3,"timeouts":0,"points":130},{"id":"player-2","place":2,"hearts":0,"out":true,"satOut":false,"answers":0,"timeouts
+[+123.0s] PASS R2 step 3: Pendo's phone shows the results
+[+123.0s] PASS R2 step 3: Pendo's results break the last cup
+[+124.1s] PASS R2 step 3: the final loss broke Pendo's last cup exactly once, on the results, still (reduced motion) — [{"n":2,"surface":"result-row","seat":"player-2","slot":0,"cups":0,"anim":"none","t":1794547951161}]
+[+124.1s] PASS R2 the whole match on Pendo's phone: slot 2 never broke (the resync), and no cup broke twice anywhere — [["hud",1],["seat",1],["result-row",0]]
+[+124.1s] PASS 10.2 R2 room S, Pendo's results (Halima kept every cup and Pendo was knocked out): “All 3 cups still whole. Not a single crack.”
+[+126.2s] PASS K a Cup's picker leaves Jebena Rush out (and lists the others) — 14 games
+[+126.2s] PASS K the server refuses Jebena Rush in a Cup (409 CASUAL_ONLY) — {"error":"Jebena Rush plays in casual rooms only.","code":"CASUAL_ONLY","readiness":{"registered":1,"connected":1,"reconnecting":0,"away":0,"wouldPlay":["player
+[+126.2s] PASS Z room C ran to the end: the survivor tried (an action), had no answer accepted, and kept the jebena — {"status":"finished","tried":{"accepted":true,"result":{"verdict":"not-in-bank","turn":2}},"part":{"done":0,"of":2,"actions":1,"finished":true},"top":{"id":"player-1","place":1,"hearts":1,"out":false,"satOut":false,"answers":0,"timeouts":2,"points":110}}
+[+126.5s] PASS Z the survivor's results: first place, with a winner's line
+[+126.5s] PASS Z ... and never "You missed this one" — JEBENA RUSH · CASUAL Wanjiru wins Jebena Rush W Wanjiru Just for fun. Bragging rights only. You came 1st of 2 110 pts That was you. Enjoy it quietly. Or loudly.
+[+126.9s] PASS Z the player who did nothing at all is truthfully told they missed it
+[+126.9s] PASS 10.2 Z room C's facts call for the one-cup line (a sole winner with no accepted answer, one cup left, the other knocked out) — {"end":"last-standing","startHearts":3,"standings":[{"id":"player-1","place":1,"hearts":1,"out":false,"satOut":false,"answers":0,"timeouts":2,"points":110},{"id":"player-2","place":2,"hearts":0,"out":true,"satOut":false,"answers":0,"timeout
+[+126.9s] PASS 10.2 Z the survivor's phone (Everyday, 390): “One cup left. Still enough for the win.”
+[+126.9s] PASS 10.2 Z the other player's phone (Christmas, 320): “One cup left. Still enough for the win.”
+[+127.0s] PASS 10.2 Z the line sits under the result and What's next, on both
+[+127.0s] PASS 10.2 Z both phones: no sideways scroll
+[+127.8s] PASS 10.2 Z room C's TV, its final view: “One cup left. Still enough for the win.”
+[+128.1s] PASS 10.2 Z after a reload, the survivor's phone: “One cup left. Still enough for the win.”
+[+128.2s] PASS 10.2 Z after a reload, room C's TV: “One cup left. Still enough for the win.”
+[+128.2s] PASS 10.2 Z room C's host has Play again
+[+129.1s] PASS 10.2 Z room C's replay is on
+[+129.1s] PASS 10.2 Z last match's winner leaves the replay — {"accepted":true,"result":{"gameStatus":"finished"}}
+[+129.1s] PASS 10.2 Z the replay ends: the one who stayed keeps the jebena
+[+129.1s] PASS 10.2 Z the replay's facts call for no line (a win by the other leaving) — [{"id":"player-2","place":1,"hearts":3,"out":false,"satOut":false,"answers":0,"timeouts":0,"points":130},{"id":"player-1","place":2,"hearts":0,"out":true,"satOut":true,"answers":0,"timeouts":0,"points
+[+129.2s] PASS 10.2 Z the replay's results, the phone of the one who left: no moment line
+[+129.2s] PASS 10.2 Z the replay's results, the phone of the one who stayed: no moment line
+[+129.2s] PASS 10.2 Z room C's TV: the replay's final (Otieno wins), with no line carried over
+[+129.3s] ALL PASS
+[+129.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":13,"pages":13,"peakOpenPages":8}
+
+# PASS (exit 0) in 129.4s | cpu 16.9s, peak memory 400 MB

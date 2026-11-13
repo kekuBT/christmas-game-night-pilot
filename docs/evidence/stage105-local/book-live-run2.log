@@ -1,0 +1,40 @@
+PASS B0 both books are open and empty
+PASS B0 each book's title follows its look
+PASS B1 Baraka adds a note: Keku's open book shows it within 3 s — 64 ms
+PASS B1 … and Amina's, within 3 s — 72 ms
+PASS B1 Amina's unsent draft is still there, and still has focus
+PASS B1 Keku approves on his page: Amina's book shows it approved within 3 s — 79 ms
+PASS B1 Amina still sees no Approve or Revoke
+PASS B1 Amina's draft survived the approval too
+PASS B1 Amina's book at 320 px: no sideways scroll
+PASS B2 5 s with no change: neither page fetched the book — {"k":0,"a":0}
+PASS B3 Keku's Markdown export has the approved note
+PASS B3 Baraka (cohost) revokes it: the export on Keku's screen is taken down, and says why, within 3 s — 12 ms
+PASS B3 … and the note shows pending on both pages
+PASS B4 Markdown: both approved notes
+PASS B4 PDF: a fresh snapshot was fetched for it — 1 fetch(es)
+PASS B4 PDF: both approved notes are in the file — mchezo-memory-book-TWGLZU-2026-11-13.pdf
+PASS B4 share image: a fresh snapshot, and both notes drawn — Mchezo Memory Book | Baraka note about the tea | Second approved note
+PASS B5 (Keku's page is stale: it still shows the revoked note approved)
+PASS B5 the stale page's PDF leaves the revoked note out and keeps the approved one
+PASS B5 … and its share image too — Mchezo Memory Book | Baraka note about the tea
+PASS B5 the export's snapshot also brought the screen up to date
+PASS B5 the held refresh, arriving late, changed nothing
+PASS B6 the newer snapshot is on screen first — 6 ms
+PASS B6 the older reply, arriving after it, doesn't roll the screen back
+PASS B7 PDF: it says it couldn't check the approvals, so nothing was downloaded
+PASS B7 share image: the same, and no file was downloaded for either
+PASS B7 Markdown: it says the export couldn't load
+PASS B8 a failed approve: a plain message on that entry — Couldn’t approve it. The Memory Book couldn't be saved, so nothing changed. Try again in a moment.
+PASS B8 … and the entry is still pending, on both pages
+PASS B8 trying again approves it; Amina's book follows within 3 s
+PASS B9 offline, Amina's page can't know yet
+PASS B9 back online, it shows the change (within 8 s of reconnecting) — 51 ms
+PASS B9 her draft is still there
+PASS B10 with no socket, the poll brings Baraka's note within 5 s — 1994 ms
+PASS B11 in the lobby, a change to the book fetches nothing — 0
+PASS B11 opening the book again shows it
+PASS B11 switched to another room: its own (empty) book, nothing from the last room
+PASS B11 … and a change in the room she left fetches nothing
+PASS B12 Keku's book at 390 px: no sideways scroll
+ALL BOOK-LIVE CHECKS PASSED

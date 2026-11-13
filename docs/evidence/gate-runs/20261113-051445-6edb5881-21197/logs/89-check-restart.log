@@ -1,0 +1,25 @@
+$ node scripts/check-restart.mjs http://localhost:43657
+# timeout 600s | worker w2 | server http://localhost:43657 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s105-full2/test-results/20261113-051445-6edb5881-21197/server-data/w2)
+
+[+0.7s] PASS test server starts
+[+0.7s] PASS room created
+[+0.7s] PASS host joined
+[+0.8s] PASS guest joined
+[+0.9s] PASS game started (its briefing opens first)
+[+0.9s] PASS host taps I'm ready
+[+1.0s] PASS guest taps I'm ready
+[+1.0s] PASS everyone ready: the game is playing
+[+1.0s] PASS guest guess accepted before restart
+[+1.2s] PASS server stopped
+[+1.8s] PASS server restarted
+[+1.8s] PASS projection answers after restart (token still valid)
+[+1.8s] PASS game still playing after restart
+[+1.8s] PASS players marked disconnected after restart
+[+1.8s] PASS guest guess survived the restart
+[+1.8s] PASS guest reconnects with the original token
+[+1.8s] PASS credential check alone does not fake presence
+[+1.8s] PASS guest shows connected once their device reconnects
+[+1.8s] PASS bad recovery token is rejected
+[+2.1s] RESTART ALL PASSED
+
+# PASS (exit 0) in 2.1s | cpu 1.6s, peak memory 156 MB

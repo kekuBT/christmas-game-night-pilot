@@ -61,7 +61,7 @@
 - **While a request is running:** each entry's Approve or Revoke shows its busy state, with the button off.
 - **On failure** (server refusal, network, a 500 from a failed write): a message on that entry, such as "Couldn't approve it. Nothing changed; try again." The entry keeps its last authoritative state. No optimistic change, and no unhandled promise.
 - **On success:** the page fetches the snapshot, so it shows what the server committed.
-- **Losing the role:** Approve and Revoke come from the current role in the projection. When a host hands over or a cohost is removed, they disappear on the next projection, and the server refuses them anyway.
+- **Losing the role:** Approve and Revoke come from the current role in the projection. When the host hands the role over, they disappear on the next projection (pushed at once), and the server refuses them anyway.
 - **Losing the seat:** when the seat is replaced or signed out, the controls are removed, and exports fail visibly with the server's 401.
 
 ## 7. Target for healthy connected clients
@@ -111,3 +111,42 @@ D-S105-01 to D-S105-05 in `docs/DECISIONS.md`:
 | **Total** | **about 6–6.5 h** |
 
 **Calibration:** recent slices took 30–50% of their estimates. I expect about 3 h here and will report against the 6–6.5 h above.
+
+## 11. As built and tested
+| Area | Where | Tests |
+|---|---|---|
+| The book revision | `src/server/memorybook.ts`: `revision`, `bumpRevision`, carried by `clone`, `toJSON` and `fromJSON` (old or malformed books load as 0). `src/server/http.ts` `commitBook`: raised on the staged copy before the write, so only a committed change moves it. | `tests/stage105-book-revision.test.ts` (8) |
+| The snapshot and export | `GET /rooms/:id/memory?revision=1` returns `{ revision, entries }` (the plain list without it); the export adds `revision` | the same |
+| Telling members | Member projections carry `memoryRevision` (never the TV's or a spectator's). `notifyBook` sends `{ kind: "book", revision }` after each commit to this room's current member sockets only. | the same: who gets the frame, what's in it, and that a book change moves no ledger `seq` or room `rev` |
+| One ordered book per page | `apps/web/src/ui/mchezo/lib/bookSync.ts` (`hear`, `accept`, `exportStep`, `exportIsStale`); `App.tsx` (`syncFor`, `fetchBook`, `syncBook`, `hearBook`; the ledger keeps its own `loadLedger`) | `tests/stage105-book-sync.test.ts` (10) |
+| Exports and decisions | `MemoryScreen.tsx`: `latestSnapshot`, `runExport`, `exportMarkdown` (each fresh; restart, then cancel), the stale-Markdown notice, `decide` (busy, failure, no optimistic change), the export boundary sentence | `check-book-live` (39) |
+
+### In real browsers (`check-book-live`)
+- **Two open books:** Keku (host, Everyday, 390 px) and Amina (guest, Christmas, 320 px).
+  - Baraka's add (through the API) showed on both books within 3 s. Keku's approve on his page showed on Amina's. Her unsent draft and its focus were kept throughout.
+  - Five quiet seconds made no book fetch on either page.
+- **Markdown:** a revoke took Keku's Markdown down within 3 s, with the notice.
+- **Fresh exports:** Markdown, PDF and share image each held both approved notes. The PDF's bytes and the image's drawn text were read. Each export made its own snapshot fetch.
+- **A stale page:** Keku's refresh was held, so his screen still showed a revoked note approved. His PDF and share image both left the note out, and the export's snapshot updated his screen. The held refresh, arriving late, changed nothing.
+- **A reordered reply:** Amina's refresh was held while a newer change landed. Her export's newer snapshot showed first, and the older reply, arriving after it, didn't roll the screen back.
+- **The export check failing:** with the snapshot request failing on the network, PDF and share image said "Couldn't check the latest approvals, so nothing was downloaded" and no file was downloaded. Markdown said the export couldn't load.
+- **A failed approve:** a 500 showed the message on that entry, the entry stayed pending on both pages, and trying again worked.
+- **Losing the role:** Keku handed the host role to Amina with a pending note on his open book. His Approve and Revoke were gone within 3 s, he saw who decides instead, she got them, and the server refused his approval (403).
+- **Offline and back:** offline, Amina's page couldn't know of a change. Back online, it showed it, and her draft was kept.
+- **No socket at all:** with the socket blocked, the 2-second poll brought a change within 5 s.
+- **Leaving and switching:** in the lobby, a book change made no book fetch, and reopening showed it. Switched to another room, the page showed that room's empty book, and the left room's changes fetched nothing.
+- **Regressions:** `check-cup-memory`, `check-spectrum` (10.3 Memory Book and 10.4 Save a memory), `check-jebena-rush`, `check-history-links`, `check-contrast`, `check-f4`, `check-f5`.
+
+### Gates
+Run one after another, each from a fresh clone of the exact commit. Raw output, including the cancelled run, is in `docs/evidence/gate-runs/<run>/`.
+
+| Run | Commit | Kind | Verdict | Notes |
+|---|---|---|---|---|
+| `20261113-045353-963df5d0-6998` | `963df5d` | targeted (book-live, spectrum, jebena-rush, cup-memory, history-links, contrast, f4, f5) | PASSED (exit 0), 460 s | book-live 39, spectrum 199, jebena-rush 228 checks |
+| `20261113-050156-963df5d0-8721` | `963df5d` | fast | PASSED (exit 0), 61 s | 1,705 unit tests |
+| `20261113-050305-963df5d0-12145` | `963df5d` | full | **CANCELLED** (exit 130) after 71 s | I stopped it (SIGINT) four steps in, to add the role-loss check (B8b); a new commit needs its own gates anyway. 4 of 89 steps had run and passed; 0 failed. |
+| `20261113-050546-6edb5881-16110` | `6edb588` | targeted (the same) | PASSED (exit 0), 463 s | book-live 44, spectrum 199, jebena-rush 227 checks |
+| `20261113-051339-6edb5881-17762` | `6edb588` | fast | PASSED (exit 0), 57 s | 1,705 unit tests |
+| `20261113-051445-6edb5881-21197` | `6edb588` | full | **PASSED (exit 0)**, 2012 s | 89 of 89 (the new driver is the 89th), no retries; book-live 44, spectrum 199, jebena-rush 227, tv-outage 14 checks |
+
+`check-jebena-rush` counts 226 to 228 checks depending on how the match plays out (the 10.2 moment line is checked when a moment happened, and its absence when none did).

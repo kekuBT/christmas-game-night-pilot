@@ -1,0 +1,21 @@
+$ node scripts/check-a11y-surfaces.mjs http://localhost:44849
+# timeout 600s | worker w3 | server http://localhost:44849 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s105-full2/test-results/20261113-051445-6edb5881-21197/server-data/w3)
+
+[+1.9s] PASS Geography: a game with a flag question was dealt — 8 questions
+[+1.9s] PASS Geography: the server describes the flag without naming any option — {"imageAlt":"White field, red-and-blue circle, four black bar symbols.","options":["Taiwan","China","Japan","South Korea"]}
+[+2.4s] PASS Geography: the flag question is on screen
+[+2.4s] PASS Geography: the flag is exposed as a picture named 'Flag: <description>' — 1
+[+2.4s]   question in the accessibility tree: - 'heading "Which country does this flag belong to? Flag: White field, red-and-blue circle, four black bar symbols." [level=1]': |   - text: Which country does this flag belong to? |   - 'img "Flag: White field, red-and-blue circle, four black bar symbols."': 🇰🇷
+[+2.4s] PASS Geography: the question's accessible text names no option (no answer read out) — - 'heading "Which country does this flag belong to? Flag: White field, red-and-blue circle, four black bar symbols." [level=1]':
+[+2.4s]   - text: Which country does this flag belong to?
+[+2.4s]   - 'img "Flag: White field, red-and-blue circle, four black bar symbols."': 🇰🇷
+[+2.4s] PASS Geography: sighted players still see the flag emoji
+[+2.9s] PASS Who Said That: every question is its own labelled group
+[+2.9s] PASS Who Said That: the group is named by its quote and says which question it is — A roast without gravy is just a sad, dry rumour. (question 1 of 8)
+[+3.2s] PASS Who Said That: an answered question says YOUR answer
+[+3.2s] PASS Who Said That: no internal game or player ids on the screen
+[+3.2s] PASS Who Said That: no internal status word ('Status: playing')
+[+3.3s] A11Y SURFACES ALL PASSED
+[+3.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":2,"peakOpenPages":1}
+
+# PASS (exit 0) in 3.3s | cpu 2.8s, peak memory 366 MB

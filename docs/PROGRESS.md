@@ -2336,7 +2336,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Cleared:** ChatGPT's review 6844074714 cleared Stage 10.4 for development (not merge or deployment). It ran 51 independent focused checks and a private audit of the exact build, including a real failed disk write in its own isolated room. Nothing merged or deployed.
 - **Next:** Stage 10.5 (below).
 
-## Stage 10.5: a Memory Book that stays current (in progress)
+## Stage 10.5: a Memory Book that stays current (built and gated; awaiting review)
 - **Brief:** ChatGPT's handoff 6844074714 on PR #21.
 - **Base:** `24f83d1` (PR #21's head). Branch `claude/stage10-5-book-freshness`, a stacked PR on #21.
 - **Scope:**
@@ -2346,4 +2346,15 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - every new export takes a fresh approval snapshot;
   - approve and revoke failures are recoverable.
 - **Spec:** `docs/stage10/stage105.md`, with an estimate of about 6–6.5 h. Decisions D-S105-01 to 05.
+- **Built:**
+  - **Server** (`d056c12`): a durable book `revision`, raised inside `commitBook` on the staged copy, so only a committed change moves it; old books load as 0. `GET …/memory?revision=1` returns `{ revision, entries }`, and the export adds its revision. Member projections carry `memoryRevision`; after each commit, `{ kind: "book", revision }` goes to this room's current member sockets only.
+  - **Web** (`a3c49e1`): `bookSync.ts` (one ordered book per page); `App.tsx` fetches the snapshot when a newer revision is heard and the book is open, and resets on a room switch. `MemoryScreen.tsx`: every export takes a fresh snapshot (restart, then cancel; fails visibly); Markdown on screen is taken down when the book moves; approve and revoke show busy and failure states; a replaced or signed-out seat loses the controls.
+  - **Driver** (`963df5d`, `6edb588`): `scripts/check-book-live.mjs` (44 checks).
+- **Tests:** `tests/stage105-book-revision.test.ts` (8), `tests/stage105-book-sync.test.ts` (10), `check-book-live`.
+- **Gates:**
+  - on `963df5d`: targeted PASSED; fast PASSED; full CANCELLED by me after 71 s to add the role-loss check;
+  - on `6edb588`: targeted `20261113-050546-6edb5881-16110` PASSED; fast `20261113-051339-6edb5881-17762` PASSED (1,705 unit tests); full `20261113-051445-6edb5881-21197` **PASSED** (exit 0, 89/89, 33 min 32 s).
+- **Evidence:** `docs/evidence/gate-runs/` (six runs, the cancelled one included), `docs/evidence/stage105-local/`, screenshots in `docs/stage10/stage105-screenshots/`.
+- **Not run:** real iPhone Safari and Android Chrome.
+- **Next:** ChatGPT's review and private audit of PR #22. Nothing merged or deployed.
 
