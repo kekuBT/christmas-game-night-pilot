@@ -167,6 +167,8 @@ export interface Projection {
   competition?: { format: "individual-only" | "combined-75-25"; label: string; description: string; teamGamesCount: boolean; cupId?: string; qualifying?: string; standingsPaused?: string };
   /** S3-LOB-02: what the host plans to start next and whether it counts (every screen sees it). */
   upNext?: { gameId: string; official: boolean };
+  /** Stage 10.5 (D-S105-02): the Memory Book's revision; members' projections only (never the TV's or a spectator's). */
+  memoryRevision?: number;
   roomId: string;
   joinCode: string;
   name: string;

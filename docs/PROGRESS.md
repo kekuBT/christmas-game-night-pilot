@@ -2309,7 +2309,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Not run:** real iPhone Safari and Android Chrome.
 - **Next:** ChatGPT's independent review and private audit of PR #20. Nothing merged or deployed.
 
-## Stage 10.4: save a memory without leaving the result screen (repaired after review 6842636842; gated; awaiting review)
+## Stage 10.4: save a memory without leaving the result screen (CLEARED by ChatGPT's review 6844074714 on `3a5590a`/`24f83d1`)
 - **Brief:** ChatGPT's handoff 6838210827 on PR #20. It cleared Stage 10.3 for development (not merge or deployment) after its own tests, a driver run and a private audit.
 - **Base:** `7072def` (PR #20's head). Branch `claude/stage10-4-save-memory`, a stacked PR on #20.
 - **Scope:**
@@ -2333,5 +2333,32 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Review 6842636842 (not cleared):** a failed Memory Book write could become a false "Saved" on retry and lose the note on restart. ChatGPT reproduced it on `3041791`.
 - **Repair (`0b5a4a2`, D-S104-06):** every Memory Book change (save, manual Add, approve, revoke) goes through `LocalServer.commitBook`: clone the live book, change the clone, write it, then make it live. A failed write answers 500 and leaves the live book as on disk. `tests/stage104-book-durability.test.ts` (5) failed 4 of 5 before and passes after. The composer offers Try again on a 5xx; `check-spectrum` covers it (`3a5590a`).
 - **Repair gates on `3a5590a`, one after another:** targeted `20261113-031828-3a5590ae-5268` PASSED; fast `20261113-032621-3a5590ae-6818` PASSED (1,687 unit tests); full `20261113-032723-3a5590ae-10158` **PASSED** (exit 0, 88/88, 32 min 46 s).
-- **Next:** ChatGPT's review of the repair and its private browser audit. Nothing merged or deployed.
+- **Cleared:** ChatGPT's review 6844074714 cleared Stage 10.4 for development (not merge or deployment). It ran 51 independent focused checks and a private audit of the exact build, including a real failed disk write in its own isolated room. Nothing merged or deployed.
+- **Next:** Stage 10.5 (below).
+
+## Stage 10.5: a Memory Book that stays current (built and gated; awaiting review)
+- **Brief:** ChatGPT's handoff 6844074714 on PR #21.
+- **Base:** `24f83d1` (PR #21's head). Branch `claude/stage10-5-book-freshness`, a stacked PR on #21.
+- **Scope:**
+  - a durable book revision, moved only by a committed change;
+  - a revision-only notice to members, with the data fetched;
+  - open books update when another member adds, approves or revokes;
+  - every new export takes a fresh approval snapshot;
+  - approve and revoke failures are recoverable.
+- **Spec:** `docs/stage10/stage105.md`, with an estimate of about 6–6.5 h. Decisions D-S105-01 to 05.
+- **Built:**
+  - **Server** (`d056c12`): a durable book `revision`, raised inside `commitBook` on the staged copy, so only a committed change moves it; old books load as 0. `GET …/memory?revision=1` returns `{ revision, entries }`, and the export adds its revision. Member projections carry `memoryRevision`; after each commit, `{ kind: "book", revision }` goes to this room's current member sockets only.
+  - **Web** (`a3c49e1`): `bookSync.ts` (one ordered book per page); `App.tsx` fetches the snapshot when a newer revision is heard and the book is open, and resets on a room switch. `MemoryScreen.tsx`: every export takes a fresh snapshot (restart, then cancel; fails visibly); Markdown on screen is taken down when the book moves; approve and revoke show busy and failure states; a replaced or signed-out seat loses the controls.
+  - **Driver** (`963df5d`, `6edb588`): `scripts/check-book-live.mjs` (44 checks).
+- **Tests:** `tests/stage105-book-revision.test.ts` (8), `tests/stage105-book-sync.test.ts` (10), `check-book-live`.
+- **Gates:**
+  - on `963df5d`: targeted PASSED; fast PASSED; full CANCELLED by me after 71 s to add the role-loss check;
+  - on `6edb588`: targeted `20261113-050546-6edb5881-16110` PASSED; fast `20261113-051339-6edb5881-17762` PASSED (1,705 unit tests); full `20261113-051445-6edb5881-21197` **PASSED** (exit 0, 89/89, 33 min 32 s).
+- **Evidence:** `docs/evidence/gate-runs/` (six runs, the cancelled one included), `docs/evidence/stage105-local/`, screenshots in `docs/stage10/stage105-screenshots/`.
+- **Not run:** real iPhone Safari and Android Chrome.
+- **Review 6845502314 (not cleared):** a failed automatic book refresh was never retried while the revision stayed the same.
+- **Repair (`1c2447f`, D-S105-06):** a backoff retry (1, 2, 4, then 8 s at most) while the page is behind and the book is open, cancelled on leaving, switching rooms or signing out. The regression steps `check-book-live` B13–B16 (`754ad1a`) failed 3 checks on the unfixed code and pass after.
+- **Repair gates on `1c2447f`:** targeted `20261113-060834-1c2447f9-4076` PASSED (book-live 51, sessions 23); fast `20261113-061625-1c2447f9-5870` PASSED (1,708 unit tests). No full gate, as the review asked.
+- **Also recorded (owner decision, comment 6845465785):** Keku chose **Option A, Warm Ivory**, for the Christmas look, to replace the heavy green; Everyday stays. Implementation waits for ChatGPT's spec after Stage 10.5 clears.
+- **Next:** ChatGPT's verification of the repair and its private audit of PR #22. Nothing merged or deployed.
 

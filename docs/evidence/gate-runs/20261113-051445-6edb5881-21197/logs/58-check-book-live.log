@@ -1,0 +1,51 @@
+$ node scripts/check-book-live.mjs http://localhost:36349
+# timeout 600s | worker w1 | server http://localhost:36349 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s105-full2/test-results/20261113-051445-6edb5881-21197/server-data/w1)
+
+[+2.4s] PASS B0 both books are open and empty
+[+2.4s] PASS B0 each book's title follows its look
+[+2.9s] PASS B1 Baraka adds a note: Keku's open book shows it within 3 s — 60 ms
+[+2.9s] PASS B1 … and Amina's, within 3 s — 67 ms
+[+2.9s] PASS B1 Amina's unsent draft is still there, and still has focus
+[+3.0s] PASS B1 Keku approves on his page: Amina's book shows it approved within 3 s — 75 ms
+[+3.0s] PASS B1 Amina still sees no Approve or Revoke
+[+3.0s] PASS B1 Amina's draft survived the approval too
+[+3.0s] PASS B1 Amina's book at 320 px: no sideways scroll
+[+8.0s] PASS B2 5 s with no change: neither page fetched the book — {"k":0,"a":0}
+[+8.1s] PASS B3 Keku's Markdown export has the approved note
+[+8.1s] PASS B3 Baraka (cohost) revokes it: the export on Keku's screen is taken down, and says why, within 3 s — 33 ms
+[+8.1s] PASS B3 … and the note shows pending on both pages
+[+8.4s] PASS B4 Markdown: both approved notes
+[+8.5s] PASS B4 PDF: a fresh snapshot was fetched for it — 1 fetch(es)
+[+8.5s] PASS B4 PDF: both approved notes are in the file — mchezo-memory-book-FNR6TZ-2026-11-13.pdf
+[+8.7s] PASS B4 share image: a fresh snapshot, and both notes drawn — Mchezo Memory Book | Baraka note about the tea | Second approved note
+[+8.7s] PASS B5 (Keku's page is stale: it still shows the revoked note approved)
+[+8.8s] PASS B5 the stale page's PDF leaves the revoked note out and keeps the approved one
+[+8.9s] PASS B5 … and its share image too — Mchezo Memory Book | Baraka note about the tea
+[+8.9s] PASS B5 the export's snapshot also brought the screen up to date
+[+9.4s] PASS B5 the held refresh, arriving late, changed nothing
+[+10.6s] PASS B6 the newer snapshot is on screen first — 12 ms
+[+10.6s] PASS B6 the older reply, arriving after it, doesn't roll the screen back
+[+10.7s] PASS B7 PDF: it says it couldn't check the approvals, so nothing was downloaded
+[+11.8s] PASS B7 share image: the same, and no file was downloaded for either
+[+11.9s] PASS B7 Markdown: it says the export couldn't load
+[+12.0s] PASS B8 a failed approve: a plain message on that entry — Couldn’t approve it. The Memory Book couldn't be saved, so nothing changed. Try again in a moment.
+[+12.0s] PASS B8 … and the entry is still pending, on both pages
+[+12.1s] PASS B8 trying again approves it; Amina's book follows within 3 s
+[+12.2s] PASS B8b before: Keku, the host, has Approve on the pending note
+[+12.2s] PASS B8b Keku hands the host role to Amina: his Approve and Revoke are gone within 3 s — 16 ms
+[+12.2s] PASS B8b … and he sees who decides instead
+[+12.2s] PASS B8b … while Amina, now the host, has them — 30 ms
+[+12.2s] PASS B8b the server refuses an approval from Keku now — 403
+[+14.2s] PASS B9 offline, Amina's page can't know yet
+[+14.3s] PASS B9 back online, it shows the change (within 8 s of reconnecting) — 53 ms
+[+14.3s] PASS B9 her draft is still there
+[+16.4s] PASS B10 with no socket, the poll brings Baraka's note within 5 s — 1969 ms
+[+20.7s] PASS B11 in the lobby, a change to the book fetches nothing — 0
+[+20.9s] PASS B11 opening the book again shows it
+[+21.1s] PASS B11 switched to another room: its own (empty) book, nothing from the last room
+[+24.6s] PASS B11 … and a change in the room she left fetches nothing
+[+24.6s] PASS B12 Keku's book at 390 px: no sideways scroll
+[+24.6s] ALL BOOK-LIVE CHECKS PASSED
+[+24.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":2}
+
+# PASS (exit 0) in 24.7s | cpu 4.3s, peak memory 353 MB

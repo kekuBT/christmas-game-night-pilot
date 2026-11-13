@@ -28,6 +28,7 @@ import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulse
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
 import { JebenaCupsLabel, JebenaHeartsChoice, JebenaReview, JebenaTv, JebenaTvFinal, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
 import { newerLedger } from "./ui/mchezo/lib/memoryLink.js";
+import { accept, freshSync, hear, isBookSnapshot, NOTHING, retryDelay, shouldRetry, type BookSnapshot, type BookSync } from "./ui/mchezo/lib/bookSync.js";
 import { SaveMemory } from "./components/mchezo/SaveMemory.js";
 import { SAVE_MEMORY_GAMES, saveMemoryFacts } from "./ui/mchezo/lib/saveMemory.js";
 import { cupContinuity } from "./components/mchezo/CiniCups.js";
@@ -180,6 +181,10 @@ export function App() {
   // The room's screens are addresses now (/room, /room/cup, …), so browser
   // Back, in-app Back and iOS swipe-back agree. `view` is read from the route.
   const view: View = route.name === "room" ? SUB_TO_VIEW[route.sub] : "lobby";
+  /** Stage 10.5: the view, for socket handlers set up once per room (they must not read a stale `view`). */
+  const viewRef = useRef<View>(view);
+  /** Stage 10.5: a replaced or signed-out seat keeps no usable approval controls. */
+  const seatConn = useConnection();
   // Stage 5.1 (3E): "Back to lobby" always reaches the lobby (backTo checks
   // what is beneath; a tab opened straight onto a room screen has Home there).
   const toLobby = () => backTo(LOBBY);
@@ -212,10 +217,17 @@ export function App() {
   // (the room's seq when it was read), and which room it belongs to. Loads overlap; an older
   // response never replaces a newer one, and nothing from another room is applied.
   const [ledgerAt, setLedgerAt] = useState<number | undefined>(undefined);
-  const memLoad = useRef<{ roomId: string | null; at: number | undefined; issued: number; bookApplied: number }>({ roomId: null, at: undefined, issued: 0, bookApplied: 0 });
+  const memLoad = useRef<{ roomId: string | null; at: number | undefined; issued: number }>({ roomId: null, at: undefined, issued: 0 });
+  // Stage 10.5 (D-S105-03): this page's book sync. `heard` is the highest book revision any projection or "book" frame
+  // has told this page about; `bookRevision` is the revision on screen. Replies are applied only when newer and for this
+  // room; a newer notice during a fetch triggers one more.
+  const bookSync = useRef<BookSync | null>(null);
+  const [bookRevision, setBookRevision] = useState(NOTHING);
+  const [heardRevision, setHeardRevision] = useState(NOTHING);
   const [qrUrl, setQrUrl] = useState("");
   const [bookText, setBookText] = useState("");
-  const [exportText, setExportText] = useState("");
+  /** The Markdown export on screen and the book revision it was made from (Stage 10.5: removed once the book moves on). */
+  const [exportDoc, setExportDoc] = useState<{ markdown: string; revision: number } | null>(null);
   const [introDismissed, setIntroDismissed] = useState<string | null>(tabGet("cgn_intro_dismissed"));
   const [resultsDismissed, setResultsDismissed] = useState<string | null>(tabGet("cgn_results_dismissed"));
   const settings = useExperienceSettings();
@@ -442,6 +454,8 @@ export function App() {
               attempt = 0;
               connection.confirmed();
             }
+            // Stage 10.5 (D-S105-02): the Memory Book moved. Only its revision travels; the book is fetched.
+            if (m.kind === "book") hearBook(roomId, m.revision);
           } catch { /* ignore malformed WS frame; polling continues */ }
         };
         next.onclose = (e) => {
@@ -1106,25 +1120,98 @@ export function App() {
       </MchezoProvider>
     );
   }
-  async function loadMemory() {
+  /** The ledger the Memory Book links new highlights to (Stage 10.2 watermark: an older reply never replaces a newer one). */
+  async function loadLedger() {
     const rid = roomId;
     if (!rid) return;
     const m = memLoad.current;
     if (m.roomId !== rid) {
-      Object.assign(m, { roomId: rid, at: undefined, bookApplied: 0 });
-      setBook([]); setLedger([]); setLedgerAt(undefined);
+      Object.assign(m, { roomId: rid, at: undefined });
+      setLedger([]); setLedgerAt(undefined);
     }
-    const n = ++m.issued;
+    ++m.issued;
     try {
-      const [b, view] = await Promise.all([get<MemoryEntry[]>(`/rooms/${rid}/memory`), get<LedgerView>(`/rooms/${rid}/ledger?watermark=1`)]);
+      const v = await get<LedgerView>(`/rooms/${rid}/ledger?watermark=1`);
       if (memLoad.current.roomId !== rid) return; // the room changed while this was in flight
-      if (n > m.bookApplied) { m.bookApplied = n; setBook(b); }
-      if (newerLedger(m.at, view)) { m.at = view.seq; setLedger(view.events); setLedgerAt(view.seq); }
+      if (newerLedger(m.at, v)) { m.at = v.seq; setLedger(v.events); setLedgerAt(v.seq); }
     } catch (e) { fail(e); }
   }
-  // Stage 5.1 (3E): also whenever the room's ledger moves on (seq counts its
+  /** Stage 10.5: this room's book sync; a new room starts from nothing (and shows nothing of the last room's book). */
+  function syncFor(rid: string): BookSync {
+    if (!bookSync.current || bookSync.current.roomId !== rid) {
+      clearRetry(bookSync.current); // a retry for the room this page left never fires
+      bookSync.current = freshSync(rid);
+      setBook([]); setBookRevision(NOTHING); setHeardRevision(NOTHING); setExportDoc(null);
+    }
+    return bookSync.current;
+  }
+  /** Fetch the authoritative snapshot and show it if it's newer. Resolves with it (exports build from it); throws if none came. */
+  async function fetchBook(rid: string): Promise<BookSnapshot> {
+    const s = syncFor(rid);
+    const reply = await get<unknown>(`/rooms/${rid}/memory?revision=1`);
+    if (!isBookSnapshot(reply)) throw new Error("The game server sent an unexpected reply.");
+    if (bookSync.current === s) { // still this room
+      if (accept(s, rid, reply)) { setBook(reply.entries); setBookRevision(reply.revision); }
+      setHeardRevision(s.heard);
+    }
+    return reply;
+  }
+  function clearRetry(s: BookSync | null) {
+    if (s?.retry) { clearTimeout(s.retry); s.retry = null; }
+  }
+  /**
+   * One fetch at a time. `force` fetches even when nothing newer was heard (opening the book, after this page's own
+   * change). A failure keeps the last authoritative book on screen. Stage 10.5 repair (review 6845502314; D-S105-06):
+   * a poll that reports the same revision never refetches by itself, so a failed refresh schedules its own retry, with
+   * backoff (1, 2, 4, then 8 s), while the page is still behind and the book is open. Leaving the book, switching rooms
+   * or signing out cancels it; a newer notice fetches at once instead.
+   */
+  async function syncBook(rid: string, force = false): Promise<void> {
+    const s = syncFor(rid);
+    if (s.inFlight) { if (force) s.again = true; return; }
+    if (!force && s.heard <= s.applied) return;
+    clearRetry(s);
+    s.inFlight = true;
+    let failed = false;
+    try { await fetchBook(rid); s.failures = 0; }
+    catch (e) {
+      failed = true;
+      s.failures += 1;
+      if (force) fail(e); else console.warn("[mchezo] Memory Book refresh failed:", e instanceof Error ? e.message : e);
+    }
+    finally {
+      s.inFlight = false;
+      const live = bookSync.current === s && viewRef.current === "memory";
+      if (live && s.again) { s.again = false; void syncBook(rid, true); }
+      else {
+        s.again = false;
+        if (live && shouldRetry(s, failed)) {
+          s.retry = setTimeout(() => {
+            s.retry = null;
+            if (bookSync.current === s && viewRef.current === "memory") void syncBook(rid);
+          }, retryDelay(s.failures));
+        }
+      }
+    }
+  }
+  /** A projection or a "book" frame says the book is at `revision` (no note travels with it): fetch if behind and open. */
+  function hearBook(rid: string, revision: unknown) {
+    const s = syncFor(rid);
+    const behind = hear(s, revision);
+    setHeardRevision(s.heard);
+    if (behind && viewRef.current === "memory") void syncBook(rid);
+  }
+  // Stage 5.1 (3E): the ledger whenever the room's ledger moves on (seq counts its
   // events), so a Memory Book left open across a game's end cites that game.
-  useEffect(() => { if (view === "memory" && roomId) loadMemory(); }, [view, roomId, proj?.seq]);
+  useEffect(() => { if (view === "memory" && roomId) void loadLedger(); }, [view, roomId, proj?.seq]);
+  // Stage 10.5: the book when it opens (always fresh), and whenever a projection brings a newer revision.
+  useEffect(() => {
+    viewRef.current = view;
+    if (view === "memory" && roomId) void syncBook(roomId, true);
+    else clearRetry(bookSync.current); // left the book (or the room): no retry fires
+  }, [view, roomId]);
+  useEffect(() => () => clearRetry(bookSync.current), []);
+  useEffect(() => { if (roomId && proj?.roomId === roomId) hearBook(roomId, proj.memoryRevision); }, [roomId, proj?.roomId, proj?.memoryRevision]);
   useEffect(() => {
     if (!proj?.joinCode) return;
     const url = `${location.origin}/join?code=${proj.joinCode}`;
@@ -2104,7 +2191,10 @@ export function App() {
     // Stage 4 (S3-MEM-01): the Memory Book as a Night Circle screen with honest export feedback.
     return (
       <MchezoProvider theme={theme} {...motion}>
-        <MemoryScreen roomId={roomId ?? ""} roomSeq={proj?.seq} ledgerAt={ledgerAt} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportText={exportText} setExportText={setExportText} post={post} get={get} loadMemory={loadMemory} canApprove={!!(me?.isHost || me?.isCohost)} onBack={toLobby} onMenu={() => openSheet("menu")} />
+        <MemoryScreen roomId={roomId ?? ""} roomSeq={proj?.seq} ledgerAt={ledgerAt} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportDoc={exportDoc} setExportDoc={setExportDoc} post={post} get={get}
+          bookRevision={bookRevision} heardRevision={heardRevision} heard={() => bookSync.current?.heard ?? NOTHING}
+          fetchSnapshot={() => fetchBook(roomId ?? "")} refreshBook={() => syncBook(roomId ?? "", true)}
+          canApprove={!!(me?.isHost || me?.isCohost) && seatConn.state !== "replaced" && seatConn.state !== "signed-out"} onBack={toLobby} onMenu={() => openSheet("menu")} />
         {roomSheets}
       </MchezoProvider>
     );

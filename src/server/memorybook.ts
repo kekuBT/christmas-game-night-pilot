@@ -115,6 +115,16 @@ export class MemoryBook {
   private next = 1;
   /** Stage 10.4: save attempts by `${memberId}|${requestId}` (room-scoped: one book per room). */
   private attempts = new Map<string, MemoryAttempt>();
+  /**
+   * Stage 10.5 (D-S105-01): this book's revision, kept with it on disk and separate from the ledger's seq. Only a
+   * committed change moves it (LocalServer.commitBook raises it on the staged copy before writing). Old books: 0.
+   */
+  private rev = 0;
+
+  get revision(): number { return this.rev; }
+
+  /** Stage 10.5: the next revision, on a staged copy that is about to be written (D-S105-01). */
+  bumpRevision(): void { this.rev += 1; }
 
   /**
    * Stage 10.4 repair (D-S104-06): an independent copy (entries, the id counter and the save keys), so a change can be
@@ -125,6 +135,7 @@ export class MemoryBook {
     copy.entries = structuredClone(this.entries);
     copy.next = this.next;
     copy.attempts = new Map([...this.attempts].map(([k, v]) => [k, { ...v }]));
+    copy.rev = this.rev;
     return copy;
   }
 
@@ -225,7 +236,7 @@ export class MemoryBook {
   }
 
   toJSON(): Record<string, unknown> {
-    return { entries: this.entries, next: this.next, attempts: Object.fromEntries(this.attempts) };
+    return { entries: this.entries, next: this.next, attempts: Object.fromEntries(this.attempts), revision: this.rev };
   }
 
   /**
@@ -246,6 +257,9 @@ export class MemoryBook {
       return restored;
     });
     book.next = typeof data["next"] === "number" ? data["next"] : book.entries.length + 1;
+    // Stage 10.5 (D-S105-01): a book from before this stage has no revision and starts at 0; so does a malformed one.
+    const rev = data["revision"];
+    book.rev = typeof rev === "number" && Number.isSafeInteger(rev) && rev >= 0 ? rev : 0;
     // Stage 10.4: save attempts (absent in older books). A malformed one is dropped: losing it can only let a
     // retry create a second pending entry, never change or approve one.
     const attempts = data["attempts"];

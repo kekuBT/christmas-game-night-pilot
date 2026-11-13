@@ -1,0 +1,37 @@
+PASS empty Cup: Day 1 of 7 first
+PASS empty Cup: an honest empty state
+PASS empty Cup: no numbers before an official game
+PASS empty Cup: the rules are folded away
+PASS empty Cup: a guest sees no host tools
+PASS S3-CUP-01: the order is day, standings, what's next, then rules — [85,238,401,461]
+PASS empty Cup: the content keeps the screen's side margin — 19px
+PASS S3-CUP-01 at 390×844: the standings start on the first screen — 232px
+PASS empty Cup: the host's tools are there, separate
+PASS Memory Book empty: says how to start
+PASS Memory Book empty: downloads are off, and it says why
+PASS Cup with results at 375×667: no sideways scrolling
+PASS Cup: the standings are the server's, in the server's order — player-1,player-2,player-3
+PASS Cup: every total is the server's total — [100,50,0]
+PASS Cup: the games played are listed by title
+PASS Cup: the day winner is named
+PASS Cup: a long name doesn't break the row
+PASS Cup: 'How it adds up' shows the server's parts — Best three days 100 = 100, participation +0, finale +0 = 100. Day scores so far: 100. Day wins: 1.
+PASS Cup: the rules open on demand
+PASS Cup with results at 390×844: no sideways scrolling
+PASS Cup with results at 430×932: no sideways scrolling
+PASS Cup with results at 768×1024: no sideways scrolling
+PASS Cup with results at 1440×900: no sideways scrolling
+PASS a guest can add a highlight; it waits for the host
+PASS a guest sees no approve or revoke buttons
+PASS the entry shows the game's recorded scores by name — Keku went ten for ten in Math Mayhem |  | Day 1 · pending |  | Math Mayhem · Day 1: Keku 1,200 · Amina 720 · Bartholomew Otieno-Wanjiku 360 |  | From the ledger (30 score events) |  | Waiting for the host to approve it.
+PASS the ledger facts are folded and use names, not ids
+PASS the host approves; downloads open
+PASS the Memory Book's title follows the look (everyday) — Mchezo Memory Book
+PASS PDF: the file is named for the room and the date — mchezo-memory-book-FGBZ77-2026-11-13.pdf
+PASS PDF: says the download started (not that it was saved), with the name — Download started: mchezo-memory-book-FGBZ77-2026-11-13.pdf. If you don’t see it, check your browser’s downloads.
+PASS share image: a real download, named for the room and date — mchezo-memory-book-FGBZ77-2026-11-13.png
+PASS a failed export says it couldn't be prepared, and no download happens
+PASS Export approved shows the entry
+PASS Memory Book at 390: no sideways scrolling
+PASS Memory Book at 1440: no sideways scrolling
+ALL CUP/MEMORY CHECKS PASSED

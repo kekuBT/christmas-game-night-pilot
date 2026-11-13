@@ -1,0 +1,63 @@
+Mchezo gate targeted | run 20261113-050546-6edb5881-16110
+  revision 6edb5881cf9795702b1a7f40d6356244594383eb (clean tree) | fingerprint 88d08b0faef7 (521 files)
+  plan     10 steps: 1 fast/build, 8 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  120 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 98 run(s))
+  estimate this run: 6–14m (low-confidence) · the same steps one after another: about 13m 20s · longest step check-f5 ~7m 22s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-book-live
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s105-tgt2/test-results/20261113-050546-6edb5881-16110
+        start build-web on w1 (usually 6s)
+[ 1/10] PASS         4.8s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/10] PASS         0.5s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:35935 (pid 16223, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s105-tgt2/test-results/20261113-050546-6edb5881-16110/server-data/w1)
+  server   w2 http://localhost:43705 (pid 16224, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s105-tgt2/test-results/20261113-050546-6edb5881-16110/server-data/w2)
+  server   w3 http://localhost:37393 (pid 16225, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s105-tgt2/test-results/20261113-050546-6edb5881-16110/server-data/w3)
+        start check-f5 on w1 (usually 7m 22s)
+        start check-jebena-rush on w2 (usually 2m 07s)
+        start check-spectrum on w3 (usually 1m 50s)
+── progress  2/10 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-f5 54s (w1), check-jebena-rush 54s (w2), check-spectrum 54s (w3)
+   remaining 5–13m · total 6–14m · done around 05:11–05:19 UTC (low-confidence)
+── progress  2/10 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-f5 1m 54s (w1), check-jebena-rush 1m 54s (w2), check-spectrum 1m 54s (w3)
+   remaining 4–12m · total 6–14m · done around 05:11–05:19 UTC (low-confidence)
+[ 3/10] PASS       121.6s  check-spectrum  w3
+        start check-f4 on w3 (usually 50s)
+[ 4/10] PASS       127.2s  check-jebena-rush  w2
+        start check-contrast on w2 (usually 25s)
+[ 5/10] PASS        25.9s  check-contrast  w2
+        start check-book-live on w2 (usually 24s)
+── progress  5/10 done · 5 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-f5 2m 54s (w1), check-f4 52s (w3), check-book-live 20s (w2)
+   remaining 3–11m · total 6–14m · done around 05:11–05:19 UTC (low-confidence)
+[ 6/10] PASS        52.4s  check-f4  w3
+        start check-cup-memory on w3 (usually 12s)
+[ 7/10] PASS        24.7s  check-book-live  w2
+        start check-history-links on w2 (usually 5s)
+[ 8/10] PASS           5s  check-history-links  w2
+[ 9/10] PASS        12.1s  check-cup-memory  w3
+── progress  9/10 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-f5 3m 54s (w1)
+   remaining 2–10m · total 6–14m · done around 05:11–05:19 UTC (low-confidence)
+── progress  9/10 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-f5 4m 54s (w1)
+   remaining 1–9m · total 6–14m · done around 05:11–05:19 UTC (low-confidence)
+── progress  9/10 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-f5 5m 54s (w1)
+   remaining 0–8m · total 6–14m · done around 05:11–05:19 UTC (low-confidence)
+── progress  9/10 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 7m 00s
+   running   check-f5 6m 54s (w1)
+   remaining 1–7m · total 8–14m · done around 05:13–05:19 UTC (low-confidence)
+[10/10] PASS       456.4s  check-f5  w1
+
+PASSED (exit 0) | targeted | run 20261113-050546-6edb5881-16110
+  10 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 7m 43s · step time 13m 51s (sum) · 3 workers, 60% busy · 1.79× the same steps run one after another
+           predicted 6–14m (about 7m 38s, low-confidence) → actual 7m 43s (+1%)
+           longest  check-f5 7m 36s, check-jebena-rush 2m 07s, check-spectrum 2m 02s · the longest step is 99% of the wall time
+           machine  CPU mean 22%, peak 90% · memory available ≥ 13725 MB · load peak 3.49
+           contention ×1.036 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s105-tgt2/test-results/20261113-050546-6edb5881-16110/report.json
