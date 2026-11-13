@@ -42,6 +42,11 @@ export type Quad<T> = readonly [T, T, T, T];
 export interface MchezoTheme {
   id: string;
   name: string;
+  /**
+   * Stage 11.1 (D-S111-01): whether the ground is dark or light. Written as `data-mz-tone` and `color-scheme`; the
+   * few rules a light ground needs are scoped by it (styles/stage111.css), so a dark look matches none of them.
+   */
+  tone: 'dark' | 'light';
   color: {
     ground: string;
     surface1: string;
@@ -49,8 +54,13 @@ export interface MchezoTheme {
     line: string;
     text: string;
     textMuted: string;
-    /** Text drawn on any accent / answer colour. */
+    /** Text drawn on this look's accent / answer colours (brand, answers, success, highlight, danger). */
     onAccent: string;
+    /**
+     * Stage 11.1 (D-S111-03): text drawn on colours that never change with the look: the fixed player palette and the
+     * game cover accents. They are light pastels in every look, so this is dark in every look.
+     */
+    onBright: string;
     brand: string;
     brandDeep: string;
     /** Answer A–D. Each answer also has a fixed shape, so colour is never the only cue. */
@@ -73,6 +83,7 @@ export type ReactionId = 'love' | 'bravo' | 'ha' | 'wow' | 'brr';
 export const everyday: MchezoTheme = {
   id: 'everyday',
   name: 'Mchezo',
+  tone: 'dark',
   color: {
     ground: '#16111D',
     surface1: '#211A2B',
@@ -81,6 +92,7 @@ export const everyday: MchezoTheme = {
     text: '#F7F1E8',
     textMuted: '#C7BED2',
     onAccent: '#16111D',
+    onBright: '#16111D',
     brand: '#FF6B4A',
     brandDeep: '#B8432A',
     answer: ['#FF6B4A', '#FFC94A', '#3CCFB4', '#9AA5FF'],
@@ -94,27 +106,34 @@ export const everyday: MchezoTheme = {
   reactions: ['love', 'bravo', 'ha', 'wow'],
 };
 
+/**
+ * Stage 11.1: Warm Ivory (owner decision D-OWN-1113; docs/stage11/stage111.md §4). A light Christmas: ivory page,
+ * cream cards, dark warm text, restrained cranberry, small gold and sage touches; green only as an accent. Each
+ * accent is dark enough to be both text on cream and a fill under cream text (D-S111-02).
+ */
 export const christmasFamilyCup: MchezoTheme = {
   id: 'christmas',
   name: 'Christmas',
+  tone: 'light',
   color: {
-    ground: '#0E1A16',
-    surface1: '#16261F',
-    surface2: '#20352B',
-    line: '#5E8A74',
-    text: '#F7F1E8',
-    textMuted: '#BFD0C5',
-    onAccent: '#16111D',
-    brand: '#F2545B',
-    brandDeep: '#A33238',
-    answer: ['#F2545B', '#F2C14E', '#7FD6A8', '#A9D8F0'],
-    answerDeep: ['#A33238', '#A8822A', '#3E8F66', '#5E93B0'],
-    success: '#7FD6A8',
-    highlight: '#F2C14E',
-    spotlight: 'rgba(242,193,78,.16)',
-    danger: '#FF8A7A',
+    ground: '#F7F1E6',
+    surface1: '#FFFCF6',
+    surface2: '#EFE6D6',
+    line: '#8C7A66',
+    text: '#2B211C',
+    textMuted: '#66564A',
+    onAccent: '#FFFDF8',
+    onBright: '#16111D',
+    brand: '#A3253A',
+    brandDeep: '#6E1626',
+    answer: ['#A3253A', '#8A5E12', '#2F6A4F', '#3B5A8A'],
+    answerDeep: ['#6E1626', '#5E3F0A', '#1D4634', '#263C5E'],
+    success: '#2F6A4F',
+    highlight: '#8A5E12',
+    spotlight: 'rgba(201,162,74,.18)',
+    danger: '#B3261E',
   },
-  ring: { style: 'wreath', colors: ['#F2545B', '#7FD6A8', '#4E7A62'] },
+  ring: { style: 'wreath', colors: ['#A3253A', '#7FA88C', '#C9A24A'] },
   reactions: ['love', 'bravo', 'ha', 'brr'],
 };
 
@@ -152,6 +171,7 @@ export function themeToCssVars(t: MchezoTheme): Record<string, string> {
     '--mz-text': c.text,
     '--mz-text-muted': c.textMuted,
     '--mz-on-accent': c.onAccent,
+    '--mz-on-bright': c.onBright,
     '--mz-brand': c.brand,
     '--mz-brand-deep': c.brandDeep,
     '--mz-success': c.success,
@@ -167,4 +187,19 @@ export function themeToCssVars(t: MchezoTheme): Record<string, string> {
   };
   c.answer.forEach((a, i) => { v[`--mz-answer-${i}`] = a; v[`--mz-answer-${i}-deep`] = c.answerDeep[i] ?? a; });
   return v;
+}
+
+/**
+ * Stage 11.1 (D-S111-04): the text of tokens.css, for surfaces outside React. scripts/gen-tokens-css.mjs writes it,
+ * and tests/stage111-warm-ivory.test.ts fails if the file on disk differs, so the copy can't drift from this source.
+ */
+export function tokensCss(): string {
+  const block = (selector: string, t: MchezoTheme) =>
+    `${selector} {\n${Object.entries(themeToCssVars(t)).map(([k, v]) => `  ${k}: ${v};`).join('\n')}\n}\n`;
+  return [
+    '/* GENERATED from apps/web/src/ui/mchezo/tokens/tokens.ts by scripts/gen-tokens-css.mjs — do not edit by hand.\n   For non-React surfaces. React apps get these via <MchezoProvider>. */\n',
+    block(':root, [data-mz-theme="everyday"]', everyday),
+    '\n',
+    block('[data-mz-theme="christmas"]', christmasFamilyCup),
+  ].join('');
 }

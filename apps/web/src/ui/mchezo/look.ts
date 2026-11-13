@@ -74,6 +74,9 @@ export function applyDocumentLook(theme: MchezoTheme): void {
   for (const [k, v] of Object.entries(themeToCssVars(theme))) root.style.setProperty(k, v);
   for (const [k, token] of Object.entries(LEGACY_VARS)) root.style.setProperty(k, String(theme.color[token]));
   root.dataset['mzTheme'] = theme.id;
+  // Stage 11.1 (D-S111-01): the look's tone scopes the light-ground rules, and form controls and scrollbars follow it.
+  root.dataset['mzTone'] = theme.tone;
+  root.style.colorScheme = theme.tone;
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', theme.color.ground);
 }

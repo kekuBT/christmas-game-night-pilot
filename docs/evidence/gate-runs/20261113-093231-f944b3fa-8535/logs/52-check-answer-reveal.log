@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:42269
+# timeout 600s | worker w3 | server http://localhost:42269 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full2/test-results/20261113-093231-f944b3fa-8535/server-data/w3)
+
+[+17.5s] PASS Geography: finished player sees no answers while Bea still plays
+[+17.5s] PASS Geography: TV shows no answers while Bea still plays
+[+17.5s] PASS Geography: Bea (mid-game) sees no answers
+[+24.9s] PASS Geography: results list every question — 8
+[+24.9s] PASS Geography: each answer matches the content pack — 8/8
+[+24.9s] PASS Geography: each explanation is shown — 8/8
+[+24.9s] PASS Geography: Bea sees her own choices marked
+[+24.9s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+25.2s] PASS Geography: TV lists the answers after the game
+[+25.2s] PASS Geography: TV shows no player's choices
+[+30.6s] PASS Closest: no answer anywhere while question 1 is open
+[+30.7s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 168 vs 168
+[+30.7s] PASS Closest: and the player's own guess
+[+30.7s] PASS Closest: Bea sees her own guess, not Ada's
+[+30.7s] PASS Closest: the explanation is shown
+[+30.7s] PASS Closest: question 2 is now open and its answer is not shown
+[+30.7s] PASS Closest: TV shows the last answer only — Last question: How many hours are in one week? — 168 hours
+[+30.7s] PASS Closest: TV shows nobody's guess — Last question: How many hours are in one week? — 168 hours
+[+30.9s] ANSWER REVEAL ALL PASSED
+[+30.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 30.9s | cpu 3.5s, peak memory 268 MB

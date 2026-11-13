@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | fast | run 20261113-081635-d0d9600b-8918
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w2) [functional]: [31m[1m[7m FAIL [27m[22m[39m tests/script-inventory.test.ts[2m > [22mscript inventory[2m > [22mevery top-level script is in the gate, a screenshot tool, or listed as not a check | [2m Test 
+  timing   wall 1m 03s · step time 1m 47s (sum) · 3 workers, 57% busy · 1.70× the same steps run one after another
+           predicted 36–82s (about 46s, measured) → actual 1m 03s (+37%)
+           longest  unit-tests 50s, lint 22s, typecheck-server 14s · the longest step is 80% of the wall time
+           machine  CPU mean 74%, peak 98% · memory available ≥ 13935 MB · load peak 4.17
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-fast/test-results/20261113-081635-d0d9600b-8918/report.json

@@ -1,0 +1,56 @@
+$ node scripts/check-majority-rules.mjs http://localhost:34955
+# timeout 600s | worker w1 | server http://localhost:34955 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full/test-results/20261113-082053-7ce8d2d2-19001/server-data/w1)
+
+[+4.0s] PASS lobby: Majority Rules is Practice only, and says why
+[+4.0s] PASS server: an official start is refused — 400 Majority Rules is new: practice-only until its Cup scoring is approved.
+[+4.1s] PASS briefing: every phone explains the game
+[+5.0s] PASS round 1: every phone is on step 1 (predict)
+[+5.0s] PASS round 1: the same question on every phone and the TV — Movie night pick:
+[+7.1s] PASS a failed prediction says it couldn't be confirmed, and stays on step 1
+[+7.1s] PASS a failed prediction: the server has none from Amina
+[+7.2s] PASS contrast (AA): the vote step
+[+7.2s] PASS TV during a round: a count, never a vote or a total — 0 of 4 locked in
+[+7.2s] PASS public projection during a round: no predictions or votes
+[+7.8s] PASS round 1: the reveal reaches every phone and the TV
+[+7.8s] PASS round 1: the server's totals are the votes cast (3–1) — {"prompt":"Movie night pick:","a":"Something funny","b":"Something scary","votesA":3,"votesB":1,"majority":"a","spotOn":[{"playerId":"player-1","points":100},{"playerId":"player-2","points":100},{"playerId":"player-4","points":100}]}
+[+7.8s] PASS round 1: a clear majority, and the line says so
+[+7.8s] PASS round 1: Keku called it (+100)
+[+7.8s] PASS round 1: Bartholomew didn't
+[+7.9s] PASS contrast (AA): the reveal
+[+12.9s] PASS round 2: every phone is on step 1 (predict)
+[+13.0s] PASS round 2: the same question on every phone and the TV — Which would this room give up for a month?
+[+13.5s] PASS round 2: the reveal reaches every phone and the TV
+[+13.5s] PASS round 2: the server's totals are the votes cast (2–2) — {"prompt":"Which would this room give up for a month?","a":"Dessert","b":"Their phone's camera","votesA":2,"votesB":2,"majority":"tie","spotOn":[]}
+[+13.5s] PASS round 2: a tie — 'A split room', every prediction scores 50
+[+13.5s] PASS round 2: a split room names nobody publicly (who skipped stays private) — []
+[+13.5s] PASS round 2: each phone says its own prediction scored +50
+[+18.7s] PASS round 3: every phone is on step 1 (predict)
+[+18.7s] PASS round 3: the same question on every phone and the TV — A robot helper that…
+[+19.2s] PASS round 3: the reveal reaches every phone and the TV
+[+19.3s] PASS round 3: the server's totals are the votes cast (0–3) — {"prompt":"A robot helper that…","a":"Does the washing-up","b":"Tells brilliant bedtime stories","votesA":0,"votesB":3,"majority":"b","spotOn":[{"playerId":"player-1","points":100},{"playerId":"player-2","points":100}]}
+[+19.3s] PASS round 3: a skip scores 0 and isn't counted
+[+24.2s] PASS round 4: every phone is on step 1 (predict)
+[+24.2s] PASS round 4: the same question on every phone and the TV — Which would this room rather master overnight?
+[+24.7s] PASS reload between the steps: Amina is back on step 2 with her prediction kept
+[+25.4s] PASS round 4: the reveal reaches every phone and the TV
+[+25.4s] PASS round 4: the server's totals are the votes cast (3–1) — {"prompt":"Which would this room rather master overnight?","a":"Every language","b":"Every instrument","votesA":3,"votesB":1,"majority":"a","spotOn":[{"playerId":"player-1","points":100},{"playerId":"player-2","points":100},{"playerId":"player-3","points":100},{"playerId":"player-4","points":100}]}
+[+30.5s] PASS round 5: every phone is on step 1 (predict)
+[+52.9s] PASS round 5: nobody plays, the deadline reveals 'nobody voted'
+[+58.0s] PASS results on every phone
+[+58.0s] PASS results: the server's scores are the plan's (350, 350, 150, 250) — {"player-1":350,"player-2":350,"player-3":150,"player-4":250}
+[+58.0s] PASS results: practice, not counted
+[+58.0s] PASS results 390px: five rounds recapped, how scoring works, no sideways scrolling
+[+58.0s] PASS results 375px: five rounds recapped, how scoring works, no sideways scrolling
+[+58.0s] PASS results 430px: five rounds recapped, how scoring works, no sideways scrolling
+[+58.0s] PASS results 320px: five rounds recapped, how scoring works, no sideways scrolling
+[+58.0s] PASS results: a tie for first, said as a tie
+[+58.0s] PASS results: the moment line comes from a recorded round (round 2's 2–2 split)
+[+58.0s] PASS contrast (AA): results
+[+58.2s] PASS TV: final standings, then the post-game review with every round
+[+58.3s] PASS TV review: five rounds, totals only
+[+58.5s] PASS votes stay anonymous even after the game: no player's vote in the public projection
+[+58.5s] PASS …and no per-player vote count (participation counts predictions only) — {"player-1":{"done":4,"of":5,"actions":4},"player-2":{"done":4,"of":5,"actions":4},"player-3":{"done":4,"of":5,"actions":4},"player-4":{"done":3,"of":5,"actions":3}}
+[+58.6s] MAJORITY RULES ALL PASSED
+[+58.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 58.6s | cpu 6.3s, peak memory 388 MB

@@ -1,0 +1,85 @@
+Mchezo gate targeted | run 20261113-080757-b7ef25a2-4720
+  revision b7ef25a2eb99cccc6291dafbe205f4165677b7a6 (clean tree) | fingerprint 6533546b6981 (526 files)
+  plan     16 steps: 1 fast/build, 14 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  125 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 103 run(s))
+  estimate this run: 3–10m (low-confidence) · the same steps one after another: about 12m 36s · longest step check-mobile-everyday ~2m 54s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-warm-ivory
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-tgt/test-results/20261113-080757-b7ef25a2-4720
+        start build-web on w1 (usually 7s)
+[ 1/16] PASS         5.5s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/16] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:46505 (pid 4841, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-tgt/test-results/20261113-080757-b7ef25a2-4720/server-data/w1)
+  server   w2 http://localhost:38525 (pid 4842, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-tgt/test-results/20261113-080757-b7ef25a2-4720/server-data/w2)
+  server   w3 http://localhost:42249 (pid 4844, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-tgt/test-results/20261113-080757-b7ef25a2-4720/server-data/w3)
+        start check-mobile-everyday on w1 (usually 2m 54s)
+        start check-jebena-rush on w2 (usually 2m 06s)
+        start check-spectrum on w3 (usually 1m 51s)
+── progress  2/16 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-mobile-everyday 53s (w1), check-jebena-rush 53s (w2), check-spectrum 53s (w3)
+   remaining 2–9m · total 3–10m · done around 08:11–08:17 UTC (low-confidence)
+── progress  2/16 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-mobile-everyday 1m 53s (w1), check-jebena-rush 1m 53s (w2), check-spectrum 1m 53s (w3)
+   remaining 1–8m · total 3–10m · done around 08:11–08:17 UTC (low-confidence)
+[ 3/16] PASS       123.3s  check-spectrum  w3
+        start check-themes-seasonal on w3 (usually 1m 42s)
+[ 4/16] PASS       139.2s  check-jebena-rush  w2
+        start check-warm-ivory on w2 (no timing history)
+── progress  4/16 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-mobile-everyday 2m 53s (w1), check-themes-seasonal 49s (w3), check-warm-ivory 33s (w2)
+   remaining 1–6m · total 4–9m · done around 08:12–08:16 UTC (low-confidence)
+[ 5/16] PASS       189.2s  check-mobile-everyday  w1
+        start check-pattern-pulse on w1 (usually 59s)
+[ 6/16] PASS        69.5s  check-warm-ivory  w2
+        start check-contrast on w2 (usually 25s)
+── progress  6/16 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-themes-seasonal 1m 49s (w3), check-pattern-pulse 43s (w1), check-contrast 24s (w2)
+   remaining 0–3m · total 4–7m · done around 08:12–08:14 UTC (low-confidence)
+[ 7/16] PASS        25.8s  check-contrast  w2
+        start check-mobile on w2 (usually 24s)
+[ 8/16] PASS        61.3s  check-pattern-pulse  w1
+        start check-book-live on w1 (usually 24s)
+[ 9/16] PASS        25.6s  check-mobile  w2
+        start check-viewports on w2 (usually 12s)
+[10/16] PASS        12.9s  check-viewports  w2
+        start check-cup-memory on w2 (usually 12s)
+[11/16] PASS        12.5s  check-cup-memory  w2
+        start check-tv-show on w2 (usually 12s)
+── progress  11/16 done · 11 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-themes-seasonal 2m 49s (w3), check-book-live 42s (w1), check-tv-show 7s (w2)
+   remaining 25–52s · total 5–6m · done around 08:13–08:13 UTC (low-confidence)
+[12/16] PASS        12.3s  check-tv-show  w2
+        start check-reduced-motion on w2 (usually 5s)
+[13/16] PASS         4.6s  check-reduced-motion  w2
+        start check-a11y-surfaces on w2 (usually 3s)
+[14/16] FAIL       179.1s  check-themes-seasonal  w3  FAIL D 320×640 christmas /solo/word-connections: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]} | F
+      | PASS G 1440×900, Liberation Sans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+      | PASS G 1440×900, Liberation Sans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+      | PASS G 1440×900, Liberation Sans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+      | PASS G 1440×900, Liberation Sans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+      | PASS G 1440×900, Liberation Sans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+      | PASS G 1440×900, FreeSans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+      | PASS G 1440×900, FreeSans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+      | PASS G 1440×900, FreeSans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+      | PASS G 1440×900, FreeSans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+      | PASS G 1440×900, FreeSans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+      | PASS G 1440×900, FreeSans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+      | PASS G 1440×900, FreeSans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+      | 
+      | 36 themes-seasonal check(s) FAILED
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":30,"pages":31,"peakOpenPages":3}
+[15/16] PASS         2.7s  check-a11y-surfaces  w2
+[16/16] PASS        67.9s  check-book-live  w1
+
+FAILED (exit 1) | targeted | run 20261113-080757-b7ef25a2-4720
+  15 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-themes-seasonal (w3) [functional]: FAIL D 320×640 christmas /solo/word-connections: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]} | FAIL D 320×640 christmas /library: the ch
+  timing   wall 5m 26s · step time 15m 32s (sum) · 3 workers, 95% busy · 2.86× the same steps run one after another
+           predicted 3–10m (about 4m 21s, low-confidence) → actual 5m 26s (+25%)
+           longest  check-mobile-everyday 3m 09s, check-themes-seasonal 2m 59s, check-jebena-rush 2m 19s · the longest step is 58% of the wall time
+           machine  CPU mean 33%, peak 92% · memory available ≥ 13753 MB · load peak 3.4
+           contention ×1.05 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-tgt/test-results/20261113-080757-b7ef25a2-4720/report.json

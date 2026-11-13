@@ -1,0 +1,61 @@
+$ node scripts/check-pattern-pulse.mjs http://localhost:40841
+# timeout 600s | worker w2 | server http://localhost:40841 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full2/test-results/20261113-093231-f944b3fa-8535/server-data/w2)
+
+[+3.5s] PASS lobby: Pattern Pulse is Practice only, and says why
+[+3.5s] PASS server: an official start is refused — 400 Pattern Pulse is new: practice-only until its Cup scoring is approved.
+[+3.7s] PASS briefing: every phone explains the game
+[+4.3s] PASS every phone: round 1 of 6, 3 shapes, ready when you are
+[+4.3s] PASS TV: Pattern Pulse live, counts only
+[+4.7s] PASS memorise: the phone shows exactly the server's pattern for Keku (3 shapes) — 3,1,4 vs {"round":0,"length":3,"showUntil":1794563826219,"inputUntil":1794563834469,"pattern":[3,1,4]}
+[+4.7s] PASS memorise: each shape is named (shape + colour, not colour alone)
+[+4.7s] PASS memorise (full motion): the highlight sweep is on
+[+4.7s] PASS contrast (AA): memorise
+[+4.7s] PASS privacy: the TV projection never has a pattern
+[+4.7s] PASS privacy: another player's projection never has Keku's pattern
+[+4.7s] PASS privacy: the TV screen shows no sequence
+[+6.5s] PASS hidden: once the window passes the pattern is gone from the screen
+[+6.5s] PASS hidden: …and from Keku's own projection
+[+6.6s] PASS undo removes the last shape
+[+6.7s] PASS clear empties the entry
+[+6.9s] PASS a full entry: 'Lock it in', and every shape key is done
+[+6.9s] PASS contrast (AA): tap it back
+[+7.0s] PASS round 1 (Keku): all three right, +110, from the server
+[+7.0s] PASS server: Keku's round 1 scored 110
+[+7.0s] PASS reduced motion: a still, numbered row (no animation), same window
+[+9.0s] PASS round 1 (Amina): 2 of 3 before the first slip, +40
+[+12.8s] PASS a failed send says it couldn't be confirmed, and keeps the entry
+[+12.8s] PASS a failed send: the server has no answer from Bartholomew
+[+12.9s] PASS the retry counts: All 3 right, +110
+[+14.7s] PASS a late joiner: no Pattern Pulse play screen
+[+14.7s] PASS a late joiner's projection has no pattern
+[+14.9s] PASS sitting out: 'Sitting the rest out', with his total
+[+14.9s] PASS sitting out: further opens are refused by the server
+[+17.4s] PASS reload mid-round: back on the answer screen, round 2, no pattern
+[+18.0s] PASS round 2 (Keku): all 4 right after the reload, +130
+[+30.9s] PASS a window nobody answers: the server closes it as missed, with nobody acting
+[+30.9s] PASS …after the answer window (≈ 9 s at this scale), not before — 10573ms
+[+31.0s] PASS round 3: 5 shapes for Keku
+[+37.2s] PASS round 4: 6 shapes for Keku
+[+43.5s] PASS round 5: 7 shapes for Keku
+[+50.8s] PASS round 6: 8 shapes for Keku
+[+59.3s] PASS results on every phone
+[+59.3s] PASS results: the server's scores are the plan's (960, 550, 110) — {"player-1":960,"player-2":550,"player-3":110}
+[+59.3s] PASS results: ended because everyone finished (or sat out); practice, not counted — {"reason":"completed","endedAt":1794563879249,"countsOfficially":false,"participation":{"player-1":{"done":6,"of":6,"actions":6,"finished":true},"player-2":{"done":5,"of":6,"actions":5,"finished":true},"player-3":{"done":1,"of":6,"actions":1,"finished":false}}}
+[+59.3s] PASS results 390px: how scoring works, no sideways scrolling
+[+59.3s] PASS results 375px: how scoring works, no sideways scrolling
+[+59.3s] PASS results 320px: how scoring works, no sideways scrolling
+[+59.3s] PASS results: Keku's six rounds recapped (his own patterns, now it's over)
+[+59.4s] PASS results: Amina's slipped last round says so
+[+59.5s] PASS contrast (AA): results
+[+59.5s] PASS results: Keku's moment is his own recorded rounds
+[+59.5s] PASS results: Amina's moment is her own longest perfect sequence (7)
+[+59.5s] PASS celebration with full motion: the short burst, no ribbon
+[+59.7s] PASS celebration with reduced motion: a still ribbon, no confetti
+[+59.7s] PASS celebration: only the winner's phone celebrates
+[+59.7s] PASS TV: final standings, then the review
+[+59.9s] PASS TV review: the room's totals only
+[+59.9s] PASS privacy after the game: no pattern in the public projection
+[+60.0s] PATTERN PULSE ALL PASSED
+[+60.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 60s | cpu 6s, peak memory 375 MB

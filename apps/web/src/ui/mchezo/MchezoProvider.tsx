@@ -52,9 +52,10 @@ export function MchezoProvider({ theme = everyday, reducedMotion, haptics = true
       <div
         className={['mz-root', as === 'surface' ? 'mz-surface' : '', className].filter(Boolean).join(' ')}
         data-mz-theme={theme.id}
+        data-mz-tone={theme.tone}
         data-mz-motion={rm ? 'reduced' : 'full'}
         data-mz-still={still ? '' : undefined}
-        style={{ ...vars, ...style }}
+        style={{ ...vars, colorScheme: theme.tone, ...style }}
       >
         {children}
       </div>

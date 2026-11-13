@@ -1,0 +1,67 @@
+/* =====================================================================
+   Stage 11.1 (docs/stage11/stage111.md §3; D-S111-01): what a LIGHT look
+   needs that a dark look doesn't. Every rule is scoped by the look's tone
+   ([data-mz-tone="light"], set by <MchezoProvider> and on <html>), so the
+   dark Everyday look matches none of them and can't change.
+   Colours come from the look's tokens; the few literal values here are
+   warm shadows and hairlines, which only make sense on a light ground.
+   ===================================================================== */
+
+/* A3: cream cards on an ivory page need an edge: a hairline and a soft warm shadow. */
+[data-mz-tone="light"] :is(.mz-card, .mz-switch-row, .mz-upnext-card, .mz-lib-filters, .mz-entry__game, .mz-cup-game,
+  .mz-scores__row, .mz-cap-mine, .mz-cap-result, .mz-party__num, .mz-tv-climb, .mz-standings__row:not(.mz-standings__row--you),
+  .mz-cup__seg:not(.mz-cup__seg--now)) {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--mz-line) 35%, transparent), 0 1px 3px rgba(43, 33, 28, .07);
+}
+[data-mz-tone="light"] .mz-tv-row__fill { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--mz-line) 35%, transparent), 0 2px 6px rgba(43, 33, 28, .07); }
+[data-mz-tone="light"] .mz-tv-row--lead .mz-tv-row__fill { box-shadow: none; }
+[data-mz-tone="light"] .mz-director__stage:not(.mz-director__stage--on) { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--mz-line) 45%, transparent); }
+
+/* A4: black glows read as dirt on ivory; warm, lighter shadows instead. */
+[data-mz-tone="light"] :is(.mz-conn, .mz-notice) { box-shadow: 0 8px 24px rgba(43, 33, 28, .14); }
+[data-mz-tone="light"] .mz-sheet { box-shadow: 0 -12px 40px rgba(43, 33, 28, .18); }
+[data-mz-tone="light"] .mz-sheet-backdrop { background: rgba(43, 33, 28, .45); }
+[data-mz-tone="light"] .mz-choice__opt.is-on { box-shadow: 0 3px 0 rgba(43, 33, 28, .28); }
+[data-mz-tone="light"] .mz-tv-conn { box-shadow: 0 6px 24px rgba(43, 33, 28, .18); }
+
+/* A5: the neutral key is a dark-brown fill on a light look; its edge goes darker, not lavender. */
+[data-mz-tone="light"] .mz-key--neutral { --mz-key-edge: #0E0A08; }
+/* A disabled key keeps a visible edge on a light ground (its fill is the inset cream), so it still reads as a key. */
+[data-mz-tone="light"] .mz-key:disabled { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--mz-line) 55%, transparent); }
+
+/* A2: a game's bright accent can't be text on cream (the iris kicker was 1.6:1). Mixed 35% into the text colour, its
+   hue stays and the text reads (at least 4.5:1 for every accent in covers.ts; tests/stage111-warm-ivory.test.ts). */
+[data-mz-tone="light"] :is(.mz-rhero__kicker, .mz-upnext-card__kicker) { color: color-mix(in srgb, var(--mz-accent, var(--mz-text-muted)) 35%, var(--mz-text)); }
+/* The same accent as an indicator (the next Quick Party row) or a focus ring needs 3:1: mixed the same way. */
+[data-mz-tone="light"] .mz-party__row.is-next { outline-color: color-mix(in srgb, var(--mz-accent, var(--mz-line)) 35%, var(--mz-text)); }
+[data-mz-tone="light"] .mz-save__done:focus { outline-color: var(--mz-highlight); }
+[data-mz-tone="light"] .mz-rhero { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--mz-accent, var(--mz-line)) 45%, var(--mz-line)); }
+[data-mz-tone="light"] :is(.mz-rhero--win, .mz-rhero--tie) { box-shadow: inset 0 0 0 2px var(--mz-highlight); }
+
+/* Answers that weren't chosen, in a review: on a dark look they fade into the dark; on a light one a faded cranberry
+   or gold turns pastel under cream text. They become plain inset cards with dark muted text and a line, so the
+   chosen and correct answers stand out and the others stay readable. Shapes and letters are unchanged. */
+[data-mz-tone="light"] :is(.mz-slab--dim, .mz-slab--dim:disabled) {
+  background: var(--mz-surface-2); color: var(--mz-text-muted); opacity: 1;
+  box-shadow: 0 var(--mz-depth-slab) 0 color-mix(in srgb, var(--mz-line) 45%, transparent);
+}
+[data-mz-tone="light"] .mz-slab--dim .mz-slab__shape { fill: var(--mz-text-muted); }
+/* The answer colours are set inline (AnswerGrid, tv.tsx), so the background is overridden directly, not its variable. */
+[data-mz-tone="light"] .mz-tv-slab--dim { background: var(--mz-surface-2); color: var(--mz-text-muted); opacity: 1; box-shadow: 0 9px 0 color-mix(in srgb, var(--mz-line) 45%, transparent); }
+[data-mz-tone="light"] .mz-tv-slab--dim svg { fill: var(--mz-text-muted); }
+
+/* A7: the older panels' pastel status text was for a dark ground. */
+[data-mz-tone="light"] .err { color: var(--mz-danger); }
+[data-mz-tone="light"] .ok, [data-mz-tone="light"] .dot.on { color: var(--mz-success); }
+
+/* A8: the jebena's cream disc disappears on ivory; it takes the card colour with a visible ring. */
+[data-mz-tone="light"] .mz-jr-art > circle:first-of-type { fill: var(--mz-surface-1); }
+[data-mz-tone="light"] .mz-jr-art > circle:nth-of-type(2) { stroke: var(--mz-line); stroke-opacity: .7; }
+
+/* A9: the "connection restored" dot follows the look's success colour. */
+[data-mz-tone="light"] .mz-conn--restored .mz-conn__dot { background: var(--mz-success); }
+
+/* TV reveal bars: the losing bars fade, but their counts stay readable (a faded number on ivory is about 2:1). */
+[data-mz-tone="light"] .mz-tv-bar--dim { opacity: 1; }
+[data-mz-tone="light"] .mz-tv-bar--dim .mz-tv-bar__fill { opacity: .3; }
+[data-mz-tone="light"] .mz-tv-bar--dim .mz-tv-bar__n { color: var(--mz-text-muted); }

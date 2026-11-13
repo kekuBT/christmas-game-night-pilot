@@ -111,7 +111,7 @@
 .mz-code__input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .01; border: 0; font-size: 16px; color: transparent; caret-color: transparent; cursor: text; }
 
 /* ---------------------------------------------------------------- player token */
-.mz-token { position: relative; flex: none; border-radius: 50%; background: var(--mz-token); color: var(--mz-on-accent); display: inline-grid; place-items: center; font-family: var(--mz-font-display); font-weight: 700; letter-spacing: -0.02em; box-shadow: 0 0 0 3px var(--mz-ground); transition: background-color .25s ease, opacity .25s ease, transform .4s var(--mz-ease-spring); }
+.mz-token { position: relative; flex: none; border-radius: 50%; background: var(--mz-token); color: var(--mz-on-bright, var(--mz-on-accent)); display: inline-grid; place-items: center; font-family: var(--mz-font-display); font-weight: 700; letter-spacing: -0.02em; box-shadow: 0 0 0 3px var(--mz-ground); transition: background-color .25s ease, opacity .25s ease, transform .4s var(--mz-ease-spring); }
 .mz-token--you { box-shadow: 0 0 0 3px var(--mz-ground), 0 0 0 6px var(--mz-brand); }
 .mz-token--dim { background: var(--mz-ground); color: var(--mz-text-muted); box-shadow: inset 0 0 0 2px var(--mz-line); }
 .mz-token--offline { background: var(--mz-surface-2); color: var(--mz-text-muted); box-shadow: 0 0 0 3px var(--mz-ground), inset 0 0 0 2px var(--mz-line); }

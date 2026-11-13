@@ -39,6 +39,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit && tsc -p apps/web/tsconfig.json --noEmit",
     "build:web": "vite build --config apps/web/vite.config.ts",
+    "gen:tokens": "tsx scripts/gen-tokens-css.mjs",
     "e2e": "node scripts/e2e-browser.mjs",
     "check-mobile": "node scripts/check-mobile.mjs",
     "check-ws-reconnect": "node scripts/check-ws-reconnect.mjs",

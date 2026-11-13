@@ -18,6 +18,7 @@ const NOT_CHECKS: Record<string, string> = {
   "clickthrough-api.mjs": "retired tombstone",
   "measure-persistence.mjs": "a measurement tool (Stage 5.1, Phase 4)",
   "make-icons.mjs": "an asset generator (Stage 8.3: the install icons)",
+  "gen-tokens-css.mjs": "a file generator (Stage 11.1: tokens.css from tokens.ts)",
 };
 const isTool = (f: string) => /^screenshot-.+\.mjs$/.test(f);
 

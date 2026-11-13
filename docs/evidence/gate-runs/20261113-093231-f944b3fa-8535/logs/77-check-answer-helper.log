@@ -1,0 +1,15 @@
+$ node scripts/check-answer-helper.mjs http://localhost:42269
+# timeout 600s | worker w3 | server http://localhost:42269 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s111-full2/test-results/20261113-093231-f944b3fa-8535/server-data/w3)
+
+[+3.2s] PASS old helper on a slow app returns silently with questions unanswered — answered 0 of 3, no error raised
+[+7.3s] PASS new helper on the same slow app answers every question — answered 3
+[+9.0s] PASS an answer that is never confirmed fails loudly — Cal: after answering question 1 of 3 (option 0); the answer was not confirmed — still {"kind":"question","n":1,"of":3} after 1500ms
+[+9.0s]   DIAG player=Cal server=unavailable(page.evaluate: SecurityError: Failed to read the 'sessionStorage' property from 'Window': Access is denied for this document.) | screen="Question 1 of 3" clock="" | type=server-unreachable
+[+9.0s] PASS the failure names the player, the question and the stuck state
+[+9.0s] PASS the failure carries a lifecycle diagnosis line —   DIAG player=Cal server=unavailable(page.evaluate: SecurityError: Failed to read the 'sessionStorage' property from 'Window': Access is denied for this document.) | screen="Question 1 of 3" clock="" | type=server-unreachable
+[+9.8s] PASS a normal flow answers all questions and ends on the waiting ring
+[+10.3s] PASS limit stops after exactly n answers ("answer 2, then the phone dies")
+[+10.3s] ANSWER HELPER ALL PASSED
+[+10.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":1}
+
+# PASS (exit 0) in 10.4s | cpu 1.9s, peak memory 237 MB
