@@ -161,3 +161,35 @@ Run one after another, each from a fresh clone of the exact commit. Raw output, 
 | `20261113-004221-30417918-3545` | `3041791` | full | **PASSED (exit 0)**, 1977 s | 88 of 88, no retries |
 
 `check-jebena-rush` counts 226 or 227 checks depending on the match: the 10.2 moment line is checked on five screens when a moment happened, or its absence on two when none did. Both are expected.
+
+## 9. Repair: a Memory Book change is live only once it is on disk (review 6842636842, D-S104-06)
+- **The finding:** ChatGPT's review of `3041791` found that a failed disk write could turn into a false "Saved" and then lose the note.
+  - `POST /rooms/:id/memory` added the new entry and its request key to the live book before writing it.
+  - When the write failed, the reply was 500, but the live book kept both. A same-key retry answered 200 from memory, with nothing on disk, and the note was gone after a restart.
+  - Manual Add, approval and revocation changed the live book in the same order.
+- **Reproduced first:** `tests/stage104-book-durability.test.ts` on the reviewed code failed 4 of its 5 tests. A save's entry stayed listed after one failed write and after repeated ones; a failed manual Add still added its entry; a failed approval still showed the entry approved. Log: `docs/evidence/stage104-local/durability-before-fix.log`.
+- **The repair (`0b5a4a2`):**
+  - `LocalServer.commitBook()` is the only way a room's book changes. It clones the live book (`MemoryBook.clone()`: entries, the id counter and the save keys, nothing shared), makes the change on the clone, writes it, and only then makes the clone the live book.
+  - The write is `atomicWriteFileSync`, which leaves the old file when it fails, so after a failure the live book and the disk agree.
+  - From the clone to the swap it runs without a pause, so no other request sees or changes the book in between. A save's key lookup reads the live book after the request's body has arrived.
+  - A failed write answers 500: "The Memory Book couldn't be saved, so nothing changed. Try again in a moment." No entry, approval, key or id is used.
+- **What a player sees:** the composer shows those words, keeps the draft and the key, and offers Try again. The retry, once the disk works, writes exactly one pending entry.
+- **Tests (all pass after the repair):**
+  - one failed write, then a same-key retry: nothing listed, approvable or exported after the failure; the retry returns 201 with `book-1`, which survives a restart, and the same request after the restart returns 200 and that entry;
+  - three failed writes in a row (a Spectrum team result): each 500, nothing listed for guest or host, nothing to approve, an empty export; then one write that works saves it once;
+  - a committed save whose reply was lost: the retry returns the same entry, before and after a restart;
+  - approval and revocation: a failed write changes neither the entry nor the export, before or after a restart;
+  - manual Add: a failed Add leaves earlier entries exactly as they were, and the next Add is `book-2`;
+  - scores and the ledger are unchanged throughout.
+  - The existing burst, restart, mismatch and two-member tests are unchanged and pass.
+- **Browser (`3a5590a`):** in `check-spectrum` S1, Amina's first save gets the server's own 500 reply for this case (stubbed in the browser; the disk failure itself is in the test above). The composer shows the server's words, keeps the draft, offers Try again, and saves nothing; the same key then goes through the lost reply and saves once, as before.
+- **Not changed:** room state keeps its Sprint 1 rule (the change happens in memory, a failed save answers 500, the next successful save writes the whole snapshot). This repair covers the Memory Book.
+
+### Repair gates
+Run one after another on `3a5590a`, each from a fresh clone. Raw output is in `docs/evidence/gate-runs/<run>/`.
+
+| Run | Kind | Verdict | Notes |
+|---|---|---|---|
+| `20261113-031828-3a5590ae-5268` | targeted (spectrum, jebena-rush, cup-memory, history-links, contrast, f4, f5) | PASSED (exit 0), 464 s | spectrum 199, jebena-rush 226 checks |
+| `20261113-032621-3a5590ae-6818` | fast | PASSED (exit 0), 54 s | 1,687 unit tests in 131 files |
+| `20261113-032723-3a5590ae-10158` | **full (the checkpoint)** | **PASSED (exit 0)**, 1966 s | 88 of 88, no retries; spectrum 199, jebena-rush 226, tv-outage 14 checks |

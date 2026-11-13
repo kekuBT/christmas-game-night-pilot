@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:38943
+# timeout 600s | worker w3 | server http://localhost:38943 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s104r-full/test-results/20261113-032723-3a5590ae-10158/server-data/w3)
+
+[+22.7s] PASS reveal opens on the first question phase — question:0
+[+22.7s] PASS question phase hides the correct answer — count=0
+[+22.9s] PASS Reveal answer steps into the first reveal — reveal:1
+[+22.9s] PASS reveal phase shows the correct answer — count=1
+[+22.9s] PASS reveal phase separates this question from the game total
+[+23.0s] PASS Next question steps into the second question phase — question:2
+[+23.0s] PASS second question phase hides the correct answer again — count=0
+[+23.0s] PASS Q10 jump lands on the last question phase — question:18
+[+23.1s] PASS last reveal reached — reveal:19
+[+23.1s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+23.1s] PASS finale shows the standings list
+[+23.2s] PASS auto-play starts back at the first question — question:0
+[+31.2s] PASS auto-play advances a step within 8s — reveal:1
+[+39.3s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+40.2s] PASS TV walk opens on a question — Which queen ruled England during the def
+[+44.2s] PASS TV walk advances to the reveal stage
+[+49.2s] PASS TV walk advances to the second question — How many hours are in a day?
+[+49.3s] PASS TV manual jump reaches the leaderboard
+[+49.4s] REVEAL ALL PASSED
+[+49.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 49.4s | cpu 3.1s, peak memory 262 MB

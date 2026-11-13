@@ -1,0 +1,74 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt104
+
+stdout | tests/stage104-save-memory.test.ts > Stage 10.4: Save a memory from a result screen (over HTTP) > a retry after a restart is still recognized (keys are kept with the book)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-EQigjo)
+
+ ✓ tests/stage102-memory-freshness.test.ts (13 tests) 2150ms
+   ✓ over HTTP: GET /rooms/:id/ledger?watermark=1 > after another player saves a recovery code (private to them), the host's ledger is current and cites the finished game 754ms
+   ✓ over HTTP: GET /rooms/:id/ledger?watermark=1 > after another player sits out a game (private to them), the host's ledger is current and still cites the last finished game 690ms
+   ✓ over HTTP: GET /rooms/:id/ledger?watermark=1 > without the opt-in, the ledger is still the plain array every existing consumer reads 532ms
+stdout | tests/stage103-memory-team.test.ts > over HTTP: saving Spectrum's team result > the same trusted facts after a restart; a competitive entry beside it keeps its own facts
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-8NRjaZ)
+
+ ✓ tests/stage103-memory-team.test.ts (18 tests) 2802ms
+   ✓ over HTTP: saving Spectrum's team result > a completed match saves with the server's frozen facts; forged facts in the request are ignored 665ms
+   ✓ over HTTP: saving Spectrum's team result > fails closed: a room-ended match (end null), a voided game, a missing or corrupted team result, two citations 625ms
+   ✓ over HTTP: saving Spectrum's team result > the same trusted facts after a restart; a competitive entry beside it keeps its own facts 834ms
+   ✓ over HTTP: saving Spectrum's team result > other rooms: a foreign token is refused, and a foreign event id never yields another room's facts 498ms
+ ✓ tests/stage104-save-memory.test.ts (12 tests) 2867ms
+   ✓ Stage 10.4: Save a memory from a result screen (over HTTP) > binds to the game on screen: an old result saved after a newer match finished still cites the old one (the replay race) 468ms
+   ✓ Stage 10.4: Save a memory from a result screen (over HTTP) > a different request under the same key is refused with the original entry, never overwriting it 599ms
+   ✓ Stage 10.4: Save a memory from a result screen (over HTTP) > a retry after a restart is still recognized (keys are kept with the book) 560ms
+   ✓ Stage 10.4: Save a memory from a result screen (over HTTP) > saving changes no score, outcome or ledger event, and advances nothing 322ms
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > one failed write, then a retry: nothing is visible or approvable after the failure; the retry persists exactly one pending entry that survives a restart
+[persist] could not save Memory Book for room-mweekq0h-96980: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > one failed write, then a retry: nothing is visible or approvable after the failure; the retry persists exactly one pending entry that survives a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-h3n8uB)
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+[persist] could not save Memory Book for room-mweekq3s-516257: simulated disk write failure
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+[persist] could not save Memory Book for room-mweekq3s-516257: simulated disk write failure
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+[persist] could not save Memory Book for room-mweekq3s-516257: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > repeated failed writes keep answering an error and never make the note visible, approvable or exported; the first write that works saves it once
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-6Gel07)
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > a retry after a committed save whose reply was lost returns that same entry, before and after a restart, and adds nothing
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-0gw3qW)
+
+ ✓ tests/stage4-memory.test.ts (2 tests) 3ms
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+[persist] could not save Memory Book for room-mweekq9c-458475: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-7Me6gh)
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+[persist] could not save Memory Book for room-mweekq9c-458475: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > approval and revocation follow the same rule: a failed write changes neither what's shown nor what's exported, before or after a restart
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-7Me6gh)
+
+stderr | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > manual Add shares the rule: a failed Add leaves earlier entries exactly as they were and adds nothing; the next Add is written once
+[persist] could not save Memory Book for room-mweekqb2-771017: simulated disk write failure
+
+stdout | tests/stage104-book-durability.test.ts > Stage 10.4 repair: a Memory Book change is live only once it is on disk > manual Add shares the rule: a failed Add leaves earlier entries exactly as they were and adds nothing; the next Add is written once
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-XmyCp8)
+
+ ✓ tests/stage104-book-durability.test.ts (5 tests) 735ms
+   ✓ Stage 10.4 repair: a Memory Book change is live only once it is on disk > one failed write, then a retry: nothing is visible or approvable after the failure; the retry persists exactly one pending entry that survives a restart 397ms
+ ✓ tests/stage104-shutdown.test.ts (3 tests) 3204ms
+   ✓ LocalServer.close(): bounded, whatever the clients do > a TV socket that never answers the close frame doesn't hold the server open 1575ms
+   ✓ LocalServer.close(): bounded, whatever the clients do > a socket refused at the door (no such room), still closing, doesn't hold it open either 1615ms
+
+ Test Files  6 passed (6)
+      Tests  53 passed (53)
+   Start at  03:14:08
+   Duration  7.36s (transform 828ms, setup 0ms, collect 2.42s, tests 11.76s, environment 1ms, prepare 411ms)
+
