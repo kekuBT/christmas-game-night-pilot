@@ -507,6 +507,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: true },
     details: "3 to 5 rounds (the biggest team's size), 75 seconds each; every team draws the same word, one drawer per team in turn. Teammates guess from their own team's drawing only; wrong guesses stay in the team, at most 15 a round, and each pauses the team's guessing for 2 s. A drawer can pass the pen once before drawing; after 20 s without drawing a teammate may take it. 100/75/55/40 by solve order, +25 catch-up for a team alone in last place and 100+ behind. The reveal shows every team's drawing. Uses the night's teams (a team needs at least 2), or deals two. Casual rooms only; practice-only (Stage 12.11).",
   },
+  {
+    id: "territory",
+    title: "Territory",
+    description: "A team quiz on a board of 19 cells. Get the answer right and claim a cell next to your land, or steal one from another team. The biggest joined land wins.",
+    categories: ["knowledge", "quiz", "team"],
+    minPlayers: 4,
+    recommendedPlayers: 6,
+    maxPlayers: 10,
+    playStyle: "team",
+    competition: "competitive",
+    duration: { minutes: 6, source: "design-default", measured: false },
+    inputs: ["choice"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: true },
+    features: { practice: true, official: false, abstention: "none" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: true },
+    details: "8 Trivia-pool questions of 20 seconds; one tap answers for the whole team, and other teams only see that you answered. Teams that got it right claim a cell next to their land (an empty one, or a steal; homes can't be taken) during a 10-second claim; contested cells go to the team that answered first, and the slower team gets the nearest free cell. A team alone in last place and 30+ behind gets an extra cell when right. Score: 10 per cell plus 5 per cell in your biggest joined region. Uses the night's teams (a team needs at least 2), or deals two. Casual rooms only; practice-only (Stage 12.12).",
+  },
 ];
 
 /**

@@ -41,7 +41,7 @@ describe("the shipped manifests", () => {
     // Stage 5: new games launch practice-only until the owner approves their
     // Cup scoring; the manifest and the server's policy must agree. Stage 9.1:
     // Jebena Rush too (casual rooms only).
-    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush", "spectrum", "family-questions", "team-huddle", "relay", "split-clues", "team-draw"];
+    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush", "spectrum", "family-questions", "team-huddle", "relay", "split-clues", "team-draw", "territory"];
     for (const m of GAME_MANIFESTS) {
       expect(m.features.practice).toBe(true);
       expect(m.features.official).toBe(!STAGE5_PRACTICE_ONLY.includes(m.id));
@@ -86,6 +86,8 @@ describe("the shipped manifests", () => {
       "split-clues": "none",
       // Stage 12.11: no sitting out; a drawer can pass the pen and a teammate can take it from an idle drawer.
       "team-draw": "none",
+      // Stage 12.12: no sitting out; one tap answers for the team, and a team that doesn't answer claims nothing.
+      territory: "none",
     };
     for (const m of GAME_MANIFESTS) {
       expect(m.features.abstention).toBe(expected[m.id]);

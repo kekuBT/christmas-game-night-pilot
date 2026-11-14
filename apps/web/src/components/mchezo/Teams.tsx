@@ -15,7 +15,8 @@ import { TEAM_LIMITS, TEAM_NATIVE_GAMES, TEAM_PLAY_GAMES, teamWinnerLine, teamWi
 import type { PublicGame, PublicPlayer } from "../../types.js";
 
 /** Each team's mark: a shape as well as a colour (never colour alone). */
-const SHAPE: Record<TeamColor, string> = { coral: "▲", sun: "●", mint: "■", iris: "◆" };
+export const TEAM_SHAPE: Record<TeamColor, string> = { coral: "▲", sun: "●", mint: "■", iris: "◆" };
+const SHAPE = TEAM_SHAPE;
 
 export function TeamMark({ color }: { color: TeamColor }) {
   return <span className={`mz-team-mark mz-team-mark--${color}`} aria-hidden="true">{SHAPE[color]}</span>;

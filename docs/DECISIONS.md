@@ -1887,3 +1887,24 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **Showing the teams' drawings live on the TV:** every team draws the same word, so another team's drawing is a free hint.
     - **A new word when the pen moves:** that would break "same word for everyone".
     - **Letting the drawer who passed still guess:** they have seen the word.
+- **D-S1212-01 Territory's board: 19 hex cells, homes on spread-out corners.**
+  - A hexagon of radius 2 (19 cells) named by row and place (A1–E3, C3 the centre). It's small enough for a phone and gives 2–4 teams room to meet in 8 questions.
+  - **Homes:** opposite corners for 2 teams, alternate corners for 3, and two top and two bottom corners for 4. Every home is 2 cells from the centre.
+  - **Shared code:** the geometry lives in `src/shared/` so the screens draw exactly the server's board. Each team's cells carry its shape as well as its colour.
+  - **Alternatives rejected:**
+    - **A square grid:** cells would have unequal neighbours (4 or 8), and teams in corners would be further apart on the diagonals.
+    - **A bigger board:** 8 questions couldn't make the teams meet, so steals would never happen.
+- **D-S1212-02 Territory: a team quiz that claims a board.**
+  - **Questions:** 8 from the Trivia pool. One tap answers for the team; the question closes at 20 s or once every team has answered. Answers are hidden from other teams and the TV until it closes.
+  - **Claims:**
+    - teams that got it right pick one cell next to their land (an empty one, or a steal; never a home) during a 10 s claim;
+    - picks stay hidden until the round ends, then resolve in answer order: a faster team wins a contested cell, and the slower team gets the best free cell next to its land;
+    - a right team that doesn't pick gets that cell too.
+  - **Catch-up:** one extra cell for a team alone in last place and 30+ behind, when it's right.
+  - **Score:** 10 per cell, plus 5 per cell in the biggest joined land. Team-derived. No sitting out.
+  - **Where:** casual rooms only and practice-only, for 4–10 players. Never in Quick Party or Home's featured rotation.
+  - **Alternatives rejected:**
+    - **A majority vote within each team (as in Team Huddle):** it can't give a clean "who answered first" for contested cells.
+    - **Resolving claims in the order they were tapped:** that rewards fast fingers over right answers.
+    - **Showing picks live:** a slower team could change its plan to block a faster one.
+    - **Points for right answers as well as cells:** the board would stop mattering.

@@ -23,6 +23,7 @@ export const TV_HINT: Record<string, string> = {
   // Stage 12.10: every teammate holds different clues; the TV shows only each team's status until the answer.
   "split-clues": "Every teammate's phone holds different clues to the same answer: talk it out! The TV never shows a clue before the answer.",
   "team-draw": "Every team draws the same word at once: guess your own team's drawing. The TV shows every drawing at the reveal.",
+  "territory": "Answer as a team, then claim a cell next to your land. The biggest joined land scores most.",
   "relay": "A team race: only the runner's phone can answer, and a right answer passes the baton. First team home wins.",
   "team-huddle": "Teams answer together: teammates see each other's picks, and each team's answer is what most of it picks. Nobody else sees a team's pick until the answer.",
 };

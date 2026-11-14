@@ -23,6 +23,7 @@
 import { SPECTRUM_PHASE_MS } from "../games/modules/spectrum-timing.js";
 import { SPLIT_REVEAL_MS, SPLIT_SOLVE_MS } from "../games/modules/split-clues-timing.js";
 import { TEAM_DRAW_MS, TEAM_DRAW_REVEAL_MS } from "../games/modules/team-draw-timing.js";
+import { TERRITORY_CLAIM_MS, TERRITORY_QUESTION_MS } from "../games/modules/territory-timing.js";
 import type { TeamResult } from "../shared/teamResult.js";
 
 export type TimingModel = "game-deadline" | "phased" | "turns";
@@ -119,6 +120,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
   "team-draw": {
     model: "phased", gameWindowMs: 8 * MIN, phaseMs: { draw: TEAM_DRAW_MS, reveal: TEAM_DRAW_REVEAL_MS },
     officialEligible: false, practiceOnlyReason: "Team Draw is practice-only: a team game in casual rooms.", unit: "rounds",
+  },
+  // Stage 12.12: Territory, 8 questions of up to 20 s (closing early once every team has answered) + a 10 s claim;
+  // 6 minutes is a backstop (8 rounds ≤ 240 s).
+  "territory": {
+    model: "phased", gameWindowMs: 6 * MIN, phaseMs: { question: TERRITORY_QUESTION_MS, reveal: TERRITORY_CLAIM_MS },
+    officialEligible: false, practiceOnlyReason: "Territory is practice-only: a team game in casual rooms.", unit: "questions",
   },
   // Stage 12.8: Team Huddle, eight questions of 25 s + 6 s (a question closes early once every team agrees); 8 minutes
   // is a backstop.

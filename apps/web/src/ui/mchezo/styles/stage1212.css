@@ -1,0 +1,47 @@
+/* Stage 12.12 (docs/stage12/stage1212.md): Territory. Each team's cells are its colour AND its shape (and a home has a
+   ring), so colour is never the only cue; a claimable cell is a dashed, focusable button. */
+
+.mz-tt-board { display: block; width: 100%; max-width: 420px; margin: 12px auto 0; overflow: visible; }
+.mz-tt-cell polygon:first-of-type { fill: var(--mz-surface-2); stroke: var(--mz-line); stroke-width: 2; }
+.mz-tt-cell.is-owned polygon:first-of-type { fill: var(--mz-team); stroke: var(--mz-ground); }
+.mz-tt-cell__home { fill: none; stroke: #16111D; stroke-width: 3; opacity: .6; }
+.mz-tt-cell__mark { font: 800 26px/1 var(--mz-font-body); text-anchor: middle; dominant-baseline: central; fill: #16111D; }
+.mz-tt-cell__name { font: 700 13px/1 var(--mz-font-body); text-anchor: middle; dominant-baseline: central; fill: var(--mz-text-muted); }
+.mz-tt-cell.is-owned .mz-tt-cell__name { fill: #16111D; opacity: .8; }
+.mz-tt-cell.is-claimable { cursor: pointer; outline: none; }
+.mz-tt-cell.is-claimable polygon:first-of-type { stroke: var(--mz-text); stroke-width: 4; stroke-dasharray: 9 6; }
+.mz-tt-cell.is-claimable:hover polygon:first-of-type, .mz-tt-cell.is-claimable:focus-visible polygon:first-of-type { stroke-width: 7; stroke-dasharray: none; }
+.mz-tt-cell.is-picked polygon:first-of-type, .mz-tt-cell.is-fresh polygon:first-of-type { stroke: var(--mz-text); stroke-width: 6; stroke-dasharray: none; }
+
+.mz-tt-prompt { font-size: clamp(20px, 5.4vw, 26px); overflow-wrap: anywhere; }
+.mz-tt-opts { display: grid; gap: 8px; margin-top: 12px; }
+.mz-tt-opt { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; min-height: 52px; padding: 8px 14px; border-radius: 14px; border: 2px solid var(--mz-line); background: var(--mz-surface-1); color: var(--mz-text); font: 600 17px/1.3 var(--mz-font-body); text-align: left; overflow-wrap: anywhere; cursor: pointer; }
+.mz-tt-opt:disabled { cursor: default; opacity: .5; }
+/* Once the team has answered, its answer stays at full strength; the others fade. */
+.mz-tt-opt.is-chosen:disabled { opacity: 1; }
+.mz-tt-opt.is-chosen { border-color: var(--mz-team, var(--mz-text)); border-width: 3px; }
+.mz-tt-opt:focus-visible { outline: 3px solid var(--mz-text); outline-offset: 2px; }
+.mz-tt-opt__letter { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--mz-surface-2); font: 800 15px/1 var(--mz-font-body); }
+.mz-tt-opt.is-chosen .mz-tt-opt__letter { background: var(--mz-team, var(--mz-surface-2)); color: #16111D; }
+.mz-tt-answer { margin: 10px 0 0; text-align: center; font: 600 18px/1.35 var(--mz-font-body); overflow-wrap: anywhere; }
+.mz-tt-answer b { font-weight: 800; }
+.mz-tt-catchup { margin: 6px 0 0; text-align: center; font: 800 15px/1.35 var(--mz-font-body); }
+.mz-tt-last { margin: 8px 0 0; text-align: center; font: 500 14px/1.4 var(--mz-font-body); color: var(--mz-text-muted); overflow-wrap: anywhere; }
+
+/* The TV (not zoomed, like Draw & Guess: sized in the 1920 x 1080 canvas's pixels). */
+.mz-tvshow-tt { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 56px; align-items: start; }
+.mz-tt-board--tv { width: 600px; max-width: none; margin: 0; }
+.mz-tt-board--tv .mz-tt-cell__mark { font-size: 30px; }
+.mz-tt-board--tv .mz-tt-cell__name { font-size: 14px; }
+.mz-tvshow-tt__side { min-width: 0; }
+.mz-tvshow-tt .mz-tt-tvq { font-size: 46px; line-height: 1.12; margin: 8px 0 0; overflow-wrap: break-word; }
+.mz-tt-tvopts { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; font: 600 26px/1.25 var(--mz-font-body); }
+.mz-tt-tvopts li { padding: 12px 18px; border-radius: 18px; background: var(--mz-surface-2); overflow-wrap: anywhere; }
+.mz-tt-tvopts li b { margin-right: 10px; }
+.mz-tt-tvopts li.is-right { outline: 4px solid var(--mz-text); }
+.mz-tt-tvopts li.is-dim { opacity: .45; }
+.mz-tvshow-tt .mz-tvshow-line { font-size: 26px; margin-top: 16px; }
+.mz-tvshow-tt .mz-tsb--tv { margin-top: 18px; }
+.mz-tvshow-tt .mz-tsb--tv .mz-tsb__text { font-size: 20px; }
+.mz-tvshow-tt .mz-tsb--tv .mz-tsb__score { font-size: 36px; }
+.mz-tvshow-tt--review { grid-template-columns: auto minmax(0, 1fr); }
