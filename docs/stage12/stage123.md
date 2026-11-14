@@ -74,10 +74,11 @@
 5. **Nothing else moves.** Casual Quick Party, Cup results without a lineup, and every journey are unchanged. The full gate passes.
 
 ## 6. Validation
-- **Unit and HTTP tests:** `tests/stage123-cup-party.test.ts`. Six older assertions of "Quick Party is casual-only" are updated to the new rule, each with a Stage 12.3 note:
+- **Unit and HTTP tests:** `tests/stage123-cup-party.test.ts`. Seven older assertions of "Quick Party is casual-only" are updated to the new rule, each with a Stage 12.3 note:
   - `stage71-quick-party` (three);
   - `stage121-cup-upgrade`;
   - `stage122-one-path`;
-  - `stage72-session-flow` (a Cup's session is shown, never a break).
+  - `stage72-session-flow` (a Cup's session is shown, never a break);
+  - `stage72-client` (a Cup's TV feed carries its lineup, never a break).
 - **Browser:** the new `scripts/check-cup-party.mjs` (host, guest, TV) covers the planner, the lobby, the TV, an official game through the briefing to results, What's next, the next game as Practice, and the carry-over. `check-quick-party`'s Cup check now expects the Cup's own entry.
 - **Gates:** targeted, fast, then one full checkpoint.

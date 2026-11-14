@@ -1,0 +1,23 @@
+PASS A Cup host: a Quick Party entry that plans today's games
+PASS A guest: no Quick Party controls
+PASS A server: a Family Cup with an empty lineup — {"revision":0,"lineup":null}
+PASS B the planner is the Cup's: Official or Practice
+PASS B group size starts at who is here (2)
+PASS B a lineup for one is all Practice (an official game needs two), with no Official switch — Official games need at least 2 players, so a lineup for 1 is all Practice.
+PASS B Math Mayhem is first in the lineup
+PASS B every game that can count starts Official; a practice-only game says Practice only — [{"id":"math-mayhem","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"guess-the-year","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"geography","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"word-connections","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"pattern-pulse","tag":"SPAN","pressed":null,"text":"Practice only"},{"id":"trivia","tag":"BUTTON","pressed":"true","text":"Official"}]
+PASS B the lineup has a second game that can count — ["math-mayhem","guess-the-year","geography","word-connections","pattern-pulse","trivia"]
+PASS B the host switched it to Practice
+PASS B no sideways scroll at 320 px with the mode switches
+PASS C server: the saved lineup's modes are the planner's — [{"gameId":"math-mayhem","official":true,"started":false,"status":"pending"},{"gameId":"guess-the-year","official":false,"started":false,"status":"pending"},{"gameId":"geography","official":true,"started":false,"status":"pending"},{"gameId":"word-connections","official":true,"started":false,"status":"pending"},{"gameId":"pattern-pulse","official":false,"started":false,"status":"pending"},{"gameId":"trivia","official":true,"started":false,"status":"pending"}]
+PASS C host lobby: each row says its mode
+PASS C guest lobby: the same modes
+PASS C Start says the mode and the place in the lineup — Start Math Mayhem · Official · game 1 of 6
+PASS C TV: the lineup with each game's mode
+PASS D the lineup's first game started as an official game — [["math-mayhem",true,"playing"]]
+FAIL D host results: What's next names the next game and its mode — not within 30000ms (locator.innerText: Timeout 30000ms exceeded.)
+PASS D a Cup's What's next has no Play again and no break
+FAIL D guest results: up next with its mode — not within 20000ms (locator.innerText: Timeout 30000ms exceeded.)
+PASS D server: the official game finished and counted toward the Cup — {"champ":[{"playerId":"player-2","dayScores":[100],"counted":[100],"qualifyingDays":1,"base":100,"participationBonus":0,"finaleBonus":0,"total":100,"eligible":false,"countedDailyWins":1,"countedMedian":100},{"playerId":"player-1","dayScores":[0],"counted":[0],"qualifyingDays":1,"base":0,"participationBonus":0,"finaleBonus":0,"total":0,"eligible":false,"countedDailyWins":0,"countedMedian":0}],"next":1}
+FAIL driver ran to the end — locator.click: Timeout 30000ms exceeded. | Call log: | [2m  - waiting for getByTestId('next-game')[22m
+CUP PARTY: 3 FAILED
