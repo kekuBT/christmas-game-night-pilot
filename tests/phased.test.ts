@@ -18,7 +18,7 @@ import { GAME_POLICIES } from "../src/server/lifecycle.js";
 import type { ClosestState } from "../src/games/closest.js";
 import type { CaptionState } from "../src/games/caption.js";
 import type { ImpostorState } from "../src/games/impostor.js";
-import type { CharadesState } from "../src/games/charades.js";
+import { currentActor, type CharadesState } from "../src/games/charades.js";
 
 let h: Harness;
 let clock: FakeClock;
@@ -225,13 +225,14 @@ describe("Charades (practice-only): an absent actor cannot stall the game", () =
     const ps = await players(4);
     const gid = await start(ps[0]!, "charades");
     const st = h.game(gid).extra as CharadesState;
-    const actor0 = [...st.teams[0]!, ...st.teams[1]!][0]!;
+    // Stage 12.8 (D-S128-03): teams take turns, so the acting player comes from the game's own turn order.
+    const actor0 = currentActor(st);
     await h.disconnect(ps.find((p) => p.playerId === actor0)!); // the first actor's phone dies
     expire(gid);
     expect(st.turnIndex).toBe(1);
     expect(st.teamScores).toEqual([0, 0]);
     // The second actor plays normally and scores.
-    const actor1 = [...st.teams[0]!, ...st.teams[1]!][1]!;
+    const actor1 = currentActor(st);
     expect(await h.intent(ps.find((p) => p.playerId === actor1)!, gid, "charades-turn", { outcome: "correct" })).toMatchObject({ accepted: true });
     expire(gid);
     expire(gid);

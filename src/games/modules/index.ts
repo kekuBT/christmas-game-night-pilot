@@ -11,6 +11,7 @@ import { drawModule } from "./draw.js";
 import { jebenaModule } from "./jebena.js";
 import { spectrumModule } from "./spectrum.js";
 import { familyModule } from "./family.js";
+import { teamHuddleModule } from "./teamHuddle.js";
 
 export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Object.freeze({
   [majorityModule.id]: majorityModule as GameModule<unknown>,
@@ -21,6 +22,8 @@ export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Objec
   [spectrumModule.id]: spectrumModule as GameModule<unknown>,
   // Stage 12.5: Family Questions (casual rooms only, practice only; the room hands it the family's questions).
   [familyModule.id]: familyModule as GameModule<unknown>,
+  // Stage 12.8: Team Huddle, a quiz a team answers together (casual rooms only, practice only; the room hands it its teams).
+  [teamHuddleModule.id]: teamHuddleModule as GameModule<unknown>,
 });
 
 export function moduleFor(gameId: string): GameModule<unknown> | undefined {

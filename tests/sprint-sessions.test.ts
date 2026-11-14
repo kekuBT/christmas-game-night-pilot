@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { RoomEngine } from "../src/server/room.js";
+import { currentActor, type CharadesState } from "../src/games/charades.js";
 
 // Completion-sprint P4: complete multiplayer sessions through the engine,
 // projection secrecy, and championship mathematics end to end.
@@ -165,8 +166,9 @@ describe("championship mathematics end to end", () => {
     const game = engine.startGame(host, "charades", { official: false });
     const st = game.extra as { teams: string[][] };
     // Actor correct on every turn: both teams score equally.
+    // Stage 12.8 (D-S128-03): teams take turns; the game's own turn order names each actor.
     for (let i = 0; i < 4; i++) {
-      const actor = [...st.teams[0]!, ...st.teams[1]!][i]!;
+      const actor = currentActor(st as CharadesState);
       engine.submitIntent(intent(game.id, "charades-turn", { outcome: "correct" }, engine.id), actor);
     }
     expect(game.status).toBe("finished");
