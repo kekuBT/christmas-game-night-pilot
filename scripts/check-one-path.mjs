@@ -16,7 +16,7 @@
 // Usage: node scripts/check-one-path.mjs <baseUrl>   (the gate passes its server)
 import QRCode from "qrcode";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
-import { openRoomMenu } from "./lib/room-nav.mjs";
+import { closeRoomMenu, openRoomMenu } from "./lib/room-nav.mjs";
 import { solveMath } from "./lib/math-solve.mjs";
 import { PROTOCOL_HEADERS } from "./lib/protocol.mjs";
 
@@ -87,6 +87,13 @@ try {
   await chip.waitFor({ timeout: 15000 });
   const code = await soon("A the room has a code", async () => { const c = ((await chip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim(); return /^[A-Z0-9]{6}$/.test(c) ? c : null; });
   const hostSeat = await seatOf(host);
+  // Stage 12.2 (D-S122-03): the Invite sheet tells a TV where to go (it can't scan the QR code).
+  await host.getByRole("button", { name: /^Share room code / }).click();
+  await host.getByTestId("invite-sheet").waitFor({ timeout: 15000 });
+  const tvLine = await host.getByTestId("invite-tv").innerText();
+  check("A Invite: 'On the TV: open <host>/tv and type the code'", tvLine.includes(`${new URL(BASE).host}/tv`) && /type the code/.test(tvLine), tvLine);
+  await host.getByTestId("invite-close").click();
+  await host.getByTestId("invite-sheet").waitFor({ state: "detached", timeout: 15000 });
   const roomId = hostSeat.roomId;
   check("A the hosted room is casual", (await tvProj(roomId)).roomKind === "casual");
 
@@ -198,11 +205,26 @@ try {
     if (await back.count()) await back.first().click();
   }
   await host.getByRole("button", { name: /^Share room code / }).waitFor({ timeout: 15000 });
+  // Stage 12.2 (D-S122-02): after two finished games, the host (never a guest) gets a gentle nudge.
+  await soon("D host: after two finished games, a gentle 'Make it a Family Cup' nudge", async () => (await host.getByTestId("cup-nudge").count()) === 1);
+  check("D guest: no nudge", (await guest.getByTestId("cup-nudge").count()) === 0);
+  await shot(host, "after-host-nudge-390");
+  await host.getByTestId("cup-nudge-open").click();
+  await host.getByTestId("make-cup-sheet").waitFor({ timeout: 15000 });
+  check("D the nudge opens the Make-a-Cup sheet", true);
+  await host.getByTestId("make-cup-cancel").click();
+  await host.getByTestId("make-cup-sheet").waitFor({ state: "detached", timeout: 15000 });
+  await host.getByTestId("cup-nudge-dismiss").click();
+  await soon("D 'Not now' hides the nudge", async () => (await host.getByTestId("cup-nudge").count()) === 0);
+  await host.reload({ waitUntil: "domcontentloaded" });
+  await host.getByRole("button", { name: /^Share room code / }).waitFor({ timeout: 15000 });
+  await sleep(800);
+  check("D …and it stays hidden after a reload (this device remembers)", (await host.getByTestId("cup-nudge").count()) === 0);
   await openRoomMenu(host);
   await host.getByTestId("menu-make-cup").click();
   await host.getByTestId("make-cup-sheet").waitFor({ timeout: 15000 });
   const sheet = await host.getByTestId("make-cup-points").innerText();
-  check("D the sheet says what changes, what stays (the 2 games stay casual) and that it can't be undone", /2 games already played stay casual/.test(sheet) && /can’t be undone/.test(sheet), sheet);
+  check("D the sheet says what changes, what stays (the 2 games stay casual) and how to go back", /2 games already played stay casual/.test(sheet) && /Changed your mind\?/.test(sheet) && /go back to a casual game night/.test(sheet), sheet);
   await sleep(800); // the sheet's opening transition
   await shot(host, "after-make-cup-sheet-390");
   await host.getByTestId("make-cup-confirm").click();
@@ -218,10 +240,43 @@ try {
   check("D TV: the games before the Cup are still called Casual, never Practice", (recent.match(/Casual/g) ?? []).length === 2 && !/Practice/.test(recent), recent);
   await shot(tv, "after-tv-lobby-cup-1920");
 
+  // ---- D2. Back to a casual game night, then a Family Cup again (Stage 12.2, D-S122-01) ----
+  await openRoomMenu(host);
+  await host.getByTestId("menu-undo-cup").click();
+  await host.getByTestId("undo-cup-sheet").waitFor({ timeout: 15000 });
+  const undoText = await host.getByTestId("undo-cup-points").innerText();
+  check("D2 the undo sheet says what comes back and what stays", /Quick Party/.test(undoText) && /Memory Book/.test(undoText) && /Family Cup again/.test(undoText), undoText);
+  await sleep(800);
+  await shot(host, "after-undo-cup-sheet-390");
+  await host.getByTestId("undo-cup-confirm").click();
+  await host.getByTestId("undo-cup-sheet").waitFor({ state: "detached", timeout: 15000 });
+  await soon("D2 host: a casual game night again (no Cup chip)", async () => (await host.locator(".mz-cupchip").count()) === 0);
+  const undone = await tvProj(roomId);
+  check("D2 server: casual, same code and players, cupSince gone, the undo recorded", undone.roomKind === "casual" && undone.joinCode === code && undone.players.length === 3 && !undone.cupSince && undone.cupUndone?.games === 2);
+  await soon("D2 guest: told the room is a casual game night again", async () => /casual game night again/i.test(await guest.getByTestId("cup-undone-notice").innerText()), 20000);
+  await shot(guest, "after-guest-undone-notice-390");
+  await soon("D2 TV follows: the medal table is back and the Cup card is gone", async () => (await tv.getByTestId("tv-medals").count()) === 1 && (await tv.getByTestId("tv-cup").count()) === 0);
+  check("D2 no nudge in a room that has been a Cup", (await host.getByTestId("cup-nudge").count()) === 0);
+  await openRoomMenu(host);
+  await host.getByTestId("menu-make-cup").click();
+  await host.getByTestId("make-cup-sheet").waitFor({ timeout: 15000 });
+  await host.getByTestId("make-cup-confirm").click();
+  await host.getByTestId("make-cup-sheet").waitFor({ state: "detached", timeout: 15000 });
+  await soon("D2 …and a Family Cup again from the room menu", async () => (await host.locator(".mz-cupchip").count()) > 0 && (await tvProj(roomId)).roomKind === "cup");
+
   // ---- E. Official games: Cup standings with movement ----
   await playMath(roomId, seats, [10, 5, 1], true);
   await soon("E official game 1: the final shows the Cup standings after this game", async () => (await mode()) === "final" && /Family Cup · after this game/i.test(await tv.getByTestId("tv-final-cup").innerText()), 30000);
   const champ1 = (await tvProj(roomId)).championship;
+  // Stage 12.2 (D-S122-05): one footnote for not-yet-eligible players, never "qualifying" on every row.
+  check("E TV: the not-yet-eligible mark has one footnote; no 'qualifying' on the rows", (await tv.getByTestId("tv-cup-footnote").count()) === 1 && !/qualifying/i.test(await tv.getByTestId("tv-final-cup").innerText()));
+  // Stage 12.2 (D-S122-01): an official game has finished, so the Cup can't go back any more.
+  const refused = await fetch(`${BASE}/rooms/${roomId}/casual`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": hostSeat.token, ...PROTOCOL_HEADERS }, body: "{}" });
+  check("E once an official game has finished, going back is refused (409 OFFICIAL_GAME_PLAYED)", refused.status === 409 && (await refused.json()).code === "OFFICIAL_GAME_PLAYED");
+  for (const p of [host]) { const back = p.getByRole("button", { name: "Back to lobby" }); await back.first().waitFor({ timeout: 15000 }).catch(() => {}); if (await back.count()) await back.first().click(); }
+  await openRoomMenu(host);
+  check("E …and the room menu no longer offers it", (await host.getByTestId("menu-undo-cup").count()) === 0);
+  await closeRoomMenu(host);
   const moves1 = await tv.getByTestId("tv-final-cup").locator("li").evaluateAll((els) => els.map((e) => e.getAttribute("data-move")));
   check("E the first official game: no arrows (nobody had Cup standings before)", moves1.every((m) => m === ""), JSON.stringify(moves1));
   const g4 = await playMath(roomId, seats, [1, 5, 10], true);
@@ -236,9 +291,8 @@ try {
   await sleep(3400);
   await shot(tv, "after-tv-final-cup-1920");
   const late = await (await browser.newContext({ viewport: { width: 1920, height: 1080 } })).newPage();
-  await late.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
-  await late.locator(".mz-code__input").fill(code);
-  await late.getByTestId("watch-spectator").click();
+  // Stage 12.2 (D-S122-03): the short TV address with the code in it starts watching at once.
+  await late.goto(`${BASE}/tv?code=${code}`, { waitUntil: "domcontentloaded" });
   await soon("E a TV opened afterwards shows the final without arrows (no guessed movement)", async () => (await late.getByTestId("tv-final-cup").count()) === 1 && (await late.getByTestId("tv-final-cup").locator("li").evaluateAll((els) => els.every((e) => e.getAttribute("data-move") === ""))));
   check("E the server's game is the one on screen", (await late.getByTestId("tv-show").getAttribute("data-game")) === "math-mayhem" && !!g4);
 
@@ -264,9 +318,13 @@ try {
   await soon("F TV lobby: Day 2 of 7", async () => /Day 2 of 7/i.test(await tv.getByTestId("tv-cup").innerText()));
   await soon("F the other TV, open when the day ended, shows the trophy too", async () => (await late.getByTestId("tv-trophy").count()) === 1);
   const fresh = await (await browser.newContext({ viewport: { width: 1920, height: 1080 } })).newPage();
-  await fresh.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
+  // Stage 12.2 (D-S122-03): the short TV address, typed: one code box, one button.
+  await fresh.goto(`${BASE}/tv`, { waitUntil: "domcontentloaded" });
+  await fresh.getByTestId("tv-entry").waitFor({ timeout: 15000 });
+  check("F /tv: one code box and 'Show on this TV' (disabled until the code is complete)", (await fresh.getByTestId("tv-entry-go").isDisabled()) && (await fresh.locator(".mz-code__input").count()) === 1);
+  await fresh.screenshot({ path: screenshotPath("docs/stage12/stage122-screenshots/tv-entry-1920.png") });
   await fresh.locator(".mz-code__input").fill(code);
-  await fresh.getByTestId("watch-spectator").click();
+  await fresh.getByTestId("tv-entry-go").click();
   await fresh.getByTestId("tv-show").waitFor({ timeout: 15000 });
   await sleep(1500);
   check("F a TV opened after the day ended shows no trophy (it never saw Day 1 end)", (await fresh.getByTestId("tv-trophy").count()) === 0 && (await fresh.getByTestId("tv-mode").getAttribute("data-mode")) !== "trophy");

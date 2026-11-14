@@ -26,7 +26,7 @@
   - Quick Party, What's next, Play again, breaks and host handover return;
   - practice games played since stay, as casual games;
   - the code, players and Memory Book stay.
-  - Guests see a lobby notice until the next game finishes: "This room is a casual game night again."
+  - Everyone in the lobby sees a notice, "A casual game night again", until the next game starts.
 - **The Make-a-Cup sheet:** "It can't be undone" becomes "Changed your mind? Until the first official game finishes, you can go back to a casual game night from the room menu."
 
 ## 2. A gentle nudge (A2; D-S122-02)

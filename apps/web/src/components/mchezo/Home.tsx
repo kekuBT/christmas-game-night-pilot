@@ -162,6 +162,40 @@ export function JoinScreen(p: {
   );
 }
 
+/**
+ * Stage 12.2 (docs/stage12/stage122.md §3; D-S122-03): the short TV address, /tv. A TV browser can't scan a QR code,
+ * so it gets one big code box and one button. It only watches: no seat, no name, no scores (the spectator flow).
+ */
+export function TvEntryScreen(p: {
+  code: string;
+  onCodeChange: (c: string) => void;
+  onShow: () => void;
+  onBack: () => void;
+  notice?: ReactNode;
+  status?: ReactNode;
+  /** This device already holds a seat: explain instead of watching from it. */
+  blocked?: boolean;
+}) {
+  const ok = p.code.length === 6;
+  return (
+    <main className="mz-screen mz-entry mz-tventry" aria-label="Show the game on this TV" data-testid="tv-entry">
+      <header className="mz-appbar"><BackButton onBack={p.onBack} /><Wordmark size={20} /><span className="mz-appbar__spacer" /></header>
+      <CalmNotices />
+      {p.notice}
+      <h1 className="mz-h1">Show the game on this TV</h1>
+      <p className="mz-foot mz-entry__lede">Type the 6-character room code from the host’s phone. This screen only watches: no seat, no name, no scores.</p>
+      {!p.blocked && (
+        <form className="mz-form" onSubmit={(e) => { e.preventDefault(); if (ok) p.onShow(); }}>
+          <CodeInput value={p.code} onChange={p.onCodeChange} length={6} pattern={/[^A-Z0-9]/g} hint="" />
+          <Keycap type="submit" block disabled={!ok} data-testid="tv-entry-go">Show on this TV</Keycap>
+          {!ok && <p className="mz-foot mz-entry__reason" data-testid="tv-entry-reason">Enter the 6-character room code.</p>}
+        </form>
+      )}
+      {p.status}
+    </main>
+  );
+}
+
 export function HostScreen(p: {
   name: string;
   onNameChange: (n: string) => void;
@@ -169,6 +203,8 @@ export function HostScreen(p: {
   onBack: () => void;
   remember: ReactNode;
   firstGame?: CatalogGame;
+  /** Stage 12.2 (D-S122-04): this phone is set to the Christmas look, so the new room starts with Christmas content. */
+  christmasContent?: boolean;
   notice?: ReactNode;
   status?: ReactNode;
   /** This tab already holds a seat. */
@@ -186,7 +222,10 @@ export function HostScreen(p: {
       {/* Stage 12.1 (D-S121-01): no decision at the door. Every room starts as a game night for fun; a Family Cup is an
           upgrade the host can make later from the room menu (D-S121-02). */}
       {!p.blocked && (
+        <>
         <p className="mz-foot mz-entry__cupnote" data-testid="host-cup-note">Every room starts as a game night, just for fun. Want a week-long <b>Family Cup</b> with official games and standings? Turn this room into one any time from the room menu.</p>
+        {p.christmasContent && <p className="mz-foot mz-entry__cupnote" data-testid="host-content-note">🎄 Your phone shows the Christmas look, so tonight’s questions start as Christmas ones. You can switch to Everyday in the lobby.</p>}
+        </>
       )}
       {!p.blocked && p.firstGame && (
         <div className="mz-entry__game" data-testid="host-first-game">
