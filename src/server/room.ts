@@ -2588,10 +2588,14 @@ export class RoomEngine {
   private playedContentIds(gameId: string): string[] {
     const mod = moduleFor(gameId);
     if (!mod?.contentIds) return [];
+    // Stage 12.11 (D-S1211-01): games dealing from the same pack (contentPool) share one history.
+    const pool = mod.contentPool ?? gameId;
     const ids: string[] = [];
     for (const g of this.games.values()) {
-      if (g.gameId !== gameId || g.status === "briefing") continue;
-      try { ids.push(...mod.contentIds(g.extra)); } catch { /* a game saved before its module listed content: nothing to avoid */ }
+      if (g.status === "briefing") continue;
+      const other = g.gameId === gameId ? mod : moduleFor(g.gameId);
+      if (!other?.contentIds || (other.contentPool ?? g.gameId) !== pool) continue;
+      try { ids.push(...other.contentIds(g.extra)); } catch { /* a game saved before its module listed content: nothing to avoid */ }
     }
     return ids;
   }

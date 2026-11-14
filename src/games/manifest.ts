@@ -486,6 +486,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: true },
     details: "Six puzzles, one answer and six clues each; every teammate holds different clues, so the team has to talk. Help for every team at 30 s (the answer's shape), 45 s (all clues pooled) and 60 s (the first letter); a round ends at 75 s or when every team has solved it. A wrong try locks the team's answer box for 4 s. 100/75/55/40 by solve order, +25 catch-up for a team alone in last place and 100+ behind. Uses the night's teams (a team needs at least 2), or deals two. Casual rooms only; practice-only (Stage 12.10).",
   },
+  {
+    id: "team-draw",
+    title: "Team Draw",
+    description: "Every team draws the same word at once: one teammate draws, the rest guess from their own team's drawing. The faster team scores more.",
+    categories: ["creativity", "party", "team"],
+    minPlayers: 4,
+    recommendedPlayers: 6,
+    maxPlayers: 10,
+    playStyle: "team",
+    competition: "competitive",
+    duration: { minutes: 7, source: "design-default", measured: false },
+    inputs: ["performance", "text"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: true },
+    features: { practice: true, official: false, abstention: "none" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: true },
+    details: "3 to 5 rounds (the biggest team's size), 75 seconds each; every team draws the same word, one drawer per team in turn. Teammates guess from their own team's drawing only; wrong guesses stay in the team, at most 15 a round, and each pauses the team's guessing for 2 s. A drawer can pass the pen once before drawing; after 20 s without drawing a teammate may take it. 100/75/55/40 by solve order, +25 catch-up for a team alone in last place and 100+ behind. The reveal shows every team's drawing. Uses the night's teams (a team needs at least 2), or deals two. Casual rooms only; practice-only (Stage 12.11).",
+  },
 ];
 
 /**

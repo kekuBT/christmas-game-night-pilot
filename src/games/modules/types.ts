@@ -90,6 +90,11 @@ export interface GameModule<S = unknown> {
   /** Stage 12.10 (D-S1210-01): the content ids this game deals (puzzles, words), so the room's later games can avoid them. */
   contentIds?(s: S): string[];
   /**
+   * Stage 12.11 (D-S1211-01): games that deal from the same pack share one no-repeat history (Draw & Guess and Team
+   * Draw: "draw-prompts"). Absent: the game's own id.
+   */
+  contentPool?: string;
+  /**
    * Stage 9.3: a cooperative game's one shared result (registry
    * `cooperative: true`). The room records it as `outcome.team` at finalize
    * and projects it instead of per-player scores; `scores()` then stays an
@@ -121,4 +126,17 @@ export function seededShuffle<T>(items: readonly T[], rng: () => number): T[] {
   const a = [...items];
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j]!, a[i]!]; }
   return a;
+}
+
+/**
+ * No repeats in a night (Stage 12.10, D-S1210-01; moved here in 12.11 so draw.ts can use it): `avoid` lists the ids
+ * this room has played, oldest first. Items not in it come first (shuffled), then the played ones in the order they
+ * were played, so the longest-ago come back first.
+ */
+export function dealAvoiding<T extends { id: string }>(items: readonly T[], rng: () => number, avoid: readonly string[] = []): T[] {
+  const lastUse = new Map<string, number>();
+  avoid.forEach((id, i) => lastUse.set(id, i));
+  const fresh = seededShuffle(items.filter((x) => !lastUse.has(x.id)), rng);
+  const played = items.filter((x) => lastUse.has(x.id)).sort((a, b) => lastUse.get(a.id)! - lastUse.get(b.id)!);
+  return [...fresh, ...played];
 }

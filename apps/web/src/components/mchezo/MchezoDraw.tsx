@@ -93,8 +93,21 @@ export interface MchezoDrawDeps {
   landed?: boolean;
 }
 
-/** The drawer's canvas: local strokes are queued and sent in batches; the server's copy is the truth. */
-function DrawerPad({ game, st, intent, title, round, of }: { game: PlayerGame; st: DrawView; intent: MchezoDrawDeps["intent"]; title: string; round: number; of: number }) {
+/** The actions a drawing pad sends (Draw & Guess's by default; Stage 12.11 Team Draw has its own). */
+export interface DrawPadActions { strokes: string; undo: string; clear: string }
+export const DRAW_GUESS_ACTIONS: DrawPadActions = { strokes: "draw-strokes", undo: "draw-undo", clear: "draw-clear" };
+
+/**
+ * The drawer's canvas, palette and tools (Stage 5; shared with Stage 12.11's Team Draw). Local strokes are queued and
+ * sent in batches; the server's copy is the truth. `footer` renders below the tools, with whether anything is still
+ * unsent, whether a tool is busy, and `run` (finish sending, then send one action: Draw & Guess's "New word" and
+ * "Give up"). `extra` is added to every message (Team Draw sends its round, so a late message can't land on the next).
+ */
+export function DrawPad({ gameId, pieces, turnKey, intent, actions = DRAW_GUESS_ACTIONS, label = "Your drawing", extra, footer }: {
+  gameId: string; pieces: DrawPiece[]; turnKey: string; intent: MchezoDrawDeps["intent"]; actions?: DrawPadActions; label?: string;
+  extra?: Record<string, unknown>;
+  footer?: (state: { unsent: boolean; busy: boolean; run: (action: string, tag: string) => void }) => ReactNode;
+}) {
   const [color, setColor] = useState(0);
   const [width, setWidth] = useState(1);
   const [local, setLocal] = useState<DrawPiece[]>([]);
@@ -104,9 +117,10 @@ function DrawerPad({ game, st, intent, title, round, of }: { game: PlayerGame; s
   const active = useRef<{ piece: DrawPiece; sent: number } | null>(null);
   const queue = useRef<DrawPiece[]>([]);
   const inflight = useRef<DrawPiece[] | null>(null);
-  const server = st.pieces ?? [];
+  const server = pieces;
   const nextStroke = useRef(0);
-  const turnKey = `${st.turn}`;
+  const extraRef = useRef(extra);
+  extraRef.current = extra;
   useEffect(() => { queue.current = []; active.current = null; inflight.current = null; setLocal([]); nextStroke.current = 0; }, [turnKey]);
   const show = useCallback(() => {
     const a = active.current ? [active.current.piece] : [];
@@ -144,13 +158,13 @@ function DrawerPad({ game, st, intent, title, round, of }: { game: PlayerGame; s
     inflight.current = batch;
     show();
     let ok: boolean;
-    try { ok = (await intent(game.id, "draw-strokes", { pieces: batch })) !== false; } catch { ok = false; }
+    try { ok = (await intent(gameId, actions.strokes, { ...extraRef.current, pieces: batch })) !== false; } catch { ok = false; }
     if (!ok) queue.current = [...batch, ...queue.current]; // kept, retried on the next tick
     inflight.current = null;
     setFailed(!ok);
     show();
     return ok;
-  }, [game.id, intent, show]);
+  }, [gameId, intent, show, actions.strokes]);
   useEffect(() => {
     const t = setInterval(() => { void flush(); }, SEND_EVERY_MS);
     return () => clearInterval(t);
@@ -186,22 +200,19 @@ function DrawerPad({ game, st, intent, title, round, of }: { game: PlayerGame; s
     setBusy(tag);
     try {
       active.current = null;
-      if (action === "draw-clear") queue.current = [];
+      if (action === actions.clear) queue.current = [];
       for (let i = 0; i < 20 && (inflight.current || queue.current.length); i++) {
         if (inflight.current) { await new Promise((r) => setTimeout(r, 60)); continue; }
         if (!(await flush())) break;
       }
-      const ok = (await intent(game.id, action, {})) !== false;
+      const ok = (await intent(gameId, action, { ...extraRef.current })) !== false;
       setFailed(!ok);
     } finally { setBusy(null); show(); }
   };
   const unsent = queue.current.length > 0 || !!inflight.current;
   return (
-    <main className="mz-screen" aria-label={`${title}: your turn to draw, turn ${round} of ${of}`} data-testid="mz-dg-draw">
-      <GameHeader title={title} objective="Your turn to draw" accent={5} />
-      <p className="mz-mr-round">Turn {round} of {of} · only you can see the word</p>
-      <p className="mz-dg-secret" data-testid="mz-dg-word">Draw: <b>{st.myWord}</b></p>
-      <DrawBoard pieces={server} extra={local} label="Your drawing" testId="mz-dg-board" svgRef={svg} onPointerDown={down} onPointerMove={move} onPointerUp={up} />
+    <>
+      <DrawBoard pieces={server} extra={local} label={label} testId="mz-dg-board" svgRef={svg} onPointerDown={down} onPointerMove={move} onPointerUp={up} />
       <div className="mz-dg-palette" role="group" aria-label="Colour">
         {DRAW_COLORS.map((c, i) => (
           <button key={c.name} type="button" className={`mz-dg-swatch${i === color ? " mz-dg-swatch--on" : ""}`} aria-pressed={i === color} aria-label={c.name} title={c.name} data-testid={`mz-dg-color-${i}`} onClick={() => setColor(i)}>
@@ -215,15 +226,31 @@ function DrawerPad({ game, st, intent, title, round, of }: { game: PlayerGame; s
             <button key={w.name} type="button" className={`mz-chip-btn${i === width ? " mz-dg-on" : ""}`} aria-pressed={i === width} data-testid={`mz-dg-width-${i}`} onClick={() => setWidth(i)}>{w.name}</button>
           ))}
         </div>
-        <button type="button" className="mz-chip-btn" data-testid="mz-dg-undo" disabled={!!busy || (server.length === 0 && local.length === 0)} onClick={() => void settleThen("draw-undo", "undo")}>Undo</button>
-        <button type="button" className="mz-chip-btn" data-testid="mz-dg-clear" disabled={!!busy || (server.length === 0 && local.length === 0)} onClick={() => void settleThen("draw-clear", "clear")}>Clear</button>
+        <button type="button" className="mz-chip-btn" data-testid="mz-dg-undo" disabled={!!busy || (server.length === 0 && local.length === 0)} onClick={() => void settleThen(actions.undo, "undo")}>Undo</button>
+        <button type="button" className="mz-chip-btn" data-testid="mz-dg-clear" disabled={!!busy || (server.length === 0 && local.length === 0)} onClick={() => void settleThen(actions.clear, "clear")}>Clear</button>
       </div>
       {failed && <p className="err" role="alert" data-testid="mz-dg-error" style={{ textAlign: "center" }}>{NOT_DELIVERED} {unsent ? "Your drawing is kept here and will be sent again." : ""}</p>}
-      <FeedbackLine testId="mz-dg-progress">{(st.correct ?? []).length} of {st.guessers ?? 0} got it{unsent ? " · sending…" : ""}</FeedbackLine>
-      <div className="mz-dg-row">
-        {st.canSwap && <button type="button" className="mz-chip-btn" data-testid="mz-dg-swap" disabled={!!busy} onClick={() => void settleThen("draw-swap", "swap")}>New word</button>}
-        <button type="button" className="mz-chip-btn" data-testid="mz-dg-giveup" disabled={!!busy} onClick={() => void settleThen("abstain", "giveup")}>Give up this turn</button>
-      </div>
+      {footer?.({ unsent, busy: !!busy, run: (action, tag) => void settleThen(action, tag) })}
+    </>
+  );
+}
+
+/** Draw & Guess's drawer: the secret word, the pad, progress, "New word" and "Give up". */
+function DrawerPad({ game, st, intent, title, round, of }: { game: PlayerGame; st: DrawView; intent: MchezoDrawDeps["intent"]; title: string; round: number; of: number }) {
+  return (
+    <main className="mz-screen" aria-label={`${title}: your turn to draw, turn ${round} of ${of}`} data-testid="mz-dg-draw">
+      <GameHeader title={title} objective="Your turn to draw" accent={5} />
+      <p className="mz-mr-round">Turn {round} of {of} · only you can see the word</p>
+      <p className="mz-dg-secret" data-testid="mz-dg-word">Draw: <b>{st.myWord}</b></p>
+      <DrawPad gameId={game.id} pieces={st.pieces ?? []} turnKey={`${st.turn}`} intent={intent} footer={({ unsent, busy, run }) => (
+        <>
+          <FeedbackLine testId="mz-dg-progress">{(st.correct ?? []).length} of {st.guessers ?? 0} got it{unsent ? " · sending…" : ""}</FeedbackLine>
+          <div className="mz-dg-row">
+            {st.canSwap && <button type="button" className="mz-chip-btn" data-testid="mz-dg-swap" disabled={busy} onClick={() => run("draw-swap", "swap")}>New word</button>}
+            <button type="button" className="mz-chip-btn" data-testid="mz-dg-giveup" disabled={busy} onClick={() => run("abstain", "giveup")}>Give up this turn</button>
+          </div>
+        </>
+      )} />
     </main>
   );
 }

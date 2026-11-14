@@ -26,7 +26,7 @@
  */
 import { DRAW_PROMPTS, type DrawPrompt } from "./packs/draw-prompts.js";
 import { seasonAllows, type SessionSeason } from "../../shared/season.js";
-import { moduleRng, seededShuffle, type GameModule, type ModuleContext } from "./types.js";
+import { dealAvoiding, moduleRng, seededShuffle, type GameModule, type ModuleContext } from "./types.js";
 
 export const DRAW_MAX_TURNS = 6;
 export const DRAW_GUESS_POINTS = [100, 80, 60] as const;
@@ -125,7 +125,8 @@ function settle(s: DrawState, ctx: ModuleContext): void {
   if (s.phase === "draw" && t && (t.gaveUp || guessersDone(s, t, ctx))) s.phase = "reveal";
 }
 
-function validPiece(x: unknown): x is DrawPiece {
+/** A well-formed piece of drawing (shared with Stage 12.11's Team Draw). */
+export function validPiece(x: unknown): x is DrawPiece {
   if (!x || typeof x !== "object") return false;
   const o = x as Record<string, unknown>;
   const okInt = (v: unknown, lo: number, hi: number) => Number.isInteger(v) && (v as number) >= lo && (v as number) <= hi;
@@ -144,22 +145,30 @@ function closedTurns(s: DrawState): number[] {
  * (no season) keeps the whole list, shuffled exactly as before. Everyday:
  * year-round prompts only. Christmas: its Christmas prompts first, then the
  * rest (each part shuffled). Read from each prompt's season tag only.
+ *
+ * Stage 12.11 (D-S1211-01): `avoid` (the words this room's Draw & Guess and Team Draw games already dealt, oldest
+ * first) puts unplayed words first in each part; with nothing to avoid the deal is exactly as before.
  */
-export function drawPromptsFor(season: SessionSeason | undefined, rng: () => number): DrawPrompt[] {
-  if (season === undefined) return seededShuffle(DRAW_PROMPTS, rng);
+export function drawPromptsFor(season: SessionSeason | undefined, rng: () => number, avoid: readonly string[] = []): DrawPrompt[] {
+  const deal = (xs: readonly DrawPrompt[]) => (avoid.length ? dealAvoiding(xs, rng, avoid) : seededShuffle(xs, rng));
+  if (season === undefined) return deal(DRAW_PROMPTS);
   const allowed = DRAW_PROMPTS.filter((p) => seasonAllows(season, p.season));
-  if (season === "everyday") return seededShuffle(allowed, rng);
-  return [...seededShuffle(allowed.filter((p) => p.season !== undefined), rng), ...seededShuffle(allowed.filter((p) => p.season === undefined), rng)];
+  if (season === "everyday") return deal(allowed);
+  return [...deal(allowed.filter((p) => p.season !== undefined)), ...deal(allowed.filter((p) => p.season === undefined))];
 }
 
-export const drawModule: GameModule<DrawState> = {
+export const drawModule: GameModule<DrawState> & { contentIds(s: DrawState): string[] } = {
   id: "draw-guess",
   actions: ["draw-strokes", "draw-undo", "draw-clear", "draw-swap", "draw-guess"],
-  init({ players, seed, season }) {
+  // Stage 12.11 (D-S1211-01): Draw & Guess and Team Draw share one no-repeat history (the same word pack).
+  contentPool: "draw-prompts",
+  /** The words dealt: every turn's, and any swapped in (a drawer saw the one swapped out too). */
+  contentIds: (s) => s.prompts.slice(0, Math.min(s.reserve, s.prompts.length)).map((p) => p.id),
+  init({ players, seed, season, avoid }) {
     const rng = moduleRng(seed);
     const order = seededShuffle(players, rng);
     const turnCount = Math.min(order.length, DRAW_MAX_TURNS);
-    const prompts = drawPromptsFor(season, rng).slice(0, turnCount * (1 + DRAW_LIMITS.swapsPerTurn));
+    const prompts = drawPromptsFor(season, rng, avoid).slice(0, turnCount * (1 + DRAW_LIMITS.swapsPerTurn));
     const turns: DrawTurn[] = Array.from({ length: turnCount }, (_, i) => ({
       drawer: order[i]!, promptIdx: i, swaps: 0, pieces: [], points: 0, correct: [], guessCounts: {}, skipped: [], recent: [],
     }));

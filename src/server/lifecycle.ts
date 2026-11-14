@@ -22,6 +22,7 @@
 
 import { SPECTRUM_PHASE_MS } from "../games/modules/spectrum-timing.js";
 import { SPLIT_REVEAL_MS, SPLIT_SOLVE_MS } from "../games/modules/split-clues-timing.js";
+import { TEAM_DRAW_MS, TEAM_DRAW_REVEAL_MS } from "../games/modules/team-draw-timing.js";
 import type { TeamResult } from "../shared/teamResult.js";
 
 export type TimingModel = "game-deadline" | "phased" | "turns";
@@ -112,6 +113,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
   "split-clues": {
     model: "phased", gameWindowMs: 9 * MIN, phaseMs: { question: SPLIT_SOLVE_MS, reveal: SPLIT_REVEAL_MS },
     officialEligible: false, practiceOnlyReason: "Split Clues is practice-only: a team game in casual rooms.", unit: "puzzles",
+  },
+  // Stage 12.11: Team Draw, 3–5 rounds of up to 75 s + a 9 s reveal (a round ends early once every team has solved it);
+  // the takeover window is the module's own (dueAt/advance). 8 minutes is a backstop (5 rounds ≤ 420 s).
+  "team-draw": {
+    model: "phased", gameWindowMs: 8 * MIN, phaseMs: { draw: TEAM_DRAW_MS, reveal: TEAM_DRAW_REVEAL_MS },
+    officialEligible: false, practiceOnlyReason: "Team Draw is practice-only: a team game in casual rooms.", unit: "rounds",
   },
   // Stage 12.8: Team Huddle, eight questions of 25 s + 6 s (a question closes early once every team agrees); 8 minutes
   // is a backstop.

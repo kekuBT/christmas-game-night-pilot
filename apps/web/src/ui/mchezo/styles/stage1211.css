@@ -1,0 +1,29 @@
+/* Stage 12.11 (docs/stage12/stage1211.md): Team Draw. The drawing pad and board are Draw & Guess's (stage5.css); this
+   adds the reveal's gallery (every team's drawing side by side), the team's wrong guesses and the pen handoff line. */
+
+.mz-td-answer { text-align: center; font-size: clamp(28px, 7.5vw, 42px); overflow-wrap: anywhere; }
+.mz-td-handoff { margin: 8px 0 0; text-align: center; font: 700 15px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-td-guesses { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; font: 500 14px/1.35 var(--mz-font-body); color: var(--mz-text-muted); overflow-wrap: anywhere; }
+.mz-td-takeover { align-self: center; margin-top: 10px; }
+
+/* The gallery: two columns on phones (2–4 teams); one row on the TV. */
+.mz-td-gallery { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mz-td-gallery__team { display: grid; gap: 6px; align-content: start; padding: 8px; border-radius: 16px; border-top: 6px solid var(--mz-team); background: var(--mz-surface-2); min-width: 0; }
+.mz-td-gallery__team.is-mine { outline: 2px solid var(--mz-text); outline-offset: 1px; }
+.mz-td-gallery__team .mz-dg-board { margin: 0; max-width: none; border-radius: 12px; }
+.mz-td-gallery__text { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: start; font: 500 13px/1.35 var(--mz-font-body); overflow-wrap: anywhere; }
+.mz-td-gallery__text > span { display: grid; gap: 2px; min-width: 0; }
+.mz-td-gallery__text b { font-weight: 800; }
+
+/* The TV: like every game's TV panel, this sits in .mz-tvshow-game (zoom 1.6 in a 1100 px layout; stage5.css), so these
+   sizes are layout pixels (x 1.6 on screen). The boards are capped so each team's name and result stay above the TV's
+   footer even with 4 teams in a row (scripts/check-team-draw.mjs measures it). */
+.mz-tvshow-td .mz-td-gallery--tv { grid-template-columns: repeat(var(--mz-td-cols, 2), minmax(0, 1fr)); gap: 14px; margin-top: 12px; }
+.mz-td-gallery--tv[data-teams="3"] { --mz-td-cols: 3; }
+.mz-td-gallery--tv[data-teams="4"] { --mz-td-cols: 4; }
+.mz-td-gallery--tv .mz-td-gallery__team { padding: 10px; border-top-width: 6px; border-radius: 16px; justify-items: center; }
+.mz-td-gallery--tv .mz-dg-board { width: 100%; max-width: 240px; border-radius: 12px; border-width: 2px; }
+.mz-td-gallery--tv[data-teams="4"] .mz-dg-board { max-width: 196px; }
+.mz-td-gallery--tv .mz-td-gallery__text { width: 100%; font-size: 14px; gap: 8px; }
+.mz-td-gallery--tv .mz-team-mark { width: 26px; height: 26px; font-size: 13px; }
+.mz-tvshow-td .mz-dg-letters--tv { margin: 12px 0 4px; }

@@ -89,6 +89,7 @@ const GAME_PHASE_WORDS: Record<string, Record<string, string>> = {
   "family-questions": { question: "each question", reveal: "each answer" },
   "team-huddle": { question: "each question", reveal: "each answer" },
   "split-clues": { question: "each puzzle", reveal: "each answer" },
+  "team-draw": { draw: "each drawing", reveal: "each reveal" },
 };
 
 /** The real time limits, from the lifecycle policy the server enforces, in this game's own words. */
@@ -167,6 +168,16 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
       "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena.",
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
+    ],
+  },
+  // Stage 12.11 (docs/stage12/stage1211.md §2).
+  "team-draw": {
+    objective: "Draw it for your team, or guess your team's drawing.",
+    steps: [
+      "Every team draws the same word at once. One of you draws; only the drawer's phone shows the word. Your team takes turns drawing.",
+      "Your teammates guess from your own team's drawing; the other teams never see it until the reveal. A wrong guess pauses your team's guessing for 2 seconds.",
+      "Stuck? The drawer can pass the pen once before drawing. If the drawer stops drawing for 20 seconds, a teammate can take the pen. Once you've seen the word, you can't guess it.",
+      "100, 75, 55 or 40 by the order teams get it, and a +25 catch-up for a team far behind. Everyone scores their team's points.",
     ],
   },
   // Stage 12.10 (docs/stage12/stage1210.md §2).
