@@ -85,3 +85,13 @@
 ## 5. Estimate
 
 About 4 hours (the team kit, the scoreboard and the Trivia-pool path already exist; the board and its screens are new).
+
+**Actual:** about 1 h 40 min of wall-clock time, from the first board code (about 2:38 p.m. ET) to the full gate's verdict (4:19 p.m. ET). The tested commit `e92dae9` was made at 3:06 p.m. About 7 minutes of that went on a full gate that failed for lack of disk space (below), and its re-run.
+
+## 6. Gates (one run on one revision each)
+
+All on `e92dae9`; evidence in `docs/evidence/gate-runs/`:
+- **targeted** (territory, team-huddle, answer-reveal, content-variety, content-look and 15 drivers) `20261114-202618-e92dae9c-23806`: PASSED, 22/22, 5 min 49 s;
+- **fast** `20261114-203212-e92dae9c-27750`: PASSED, 5/5 (unit tests 1889/1889), 1 min 06 s;
+- **full** `20261114-203324-e92dae9c-31480`: **FAILED** (exit 1, an infrastructure failure, not a test). The machine's disk was full: step 3 (`build-web`) failed with `ENOSPC`, and the gate itself then crashed writing its log, so it wrote no summary. Steps 1–2 passed and the unit tests were still running. I cleared earlier gate clones, which now go after each run's evidence is copied, and ran the full gate again;
+- **full (checkpoint)** `20261114-204033-e92dae9c-638`: **PASSED** (exit 0, 103/103, 38 min 31 s, no retries).

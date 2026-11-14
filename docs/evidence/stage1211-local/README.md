@@ -22,3 +22,13 @@
 | `check-team-huddle-n1211.log` | same | 28/0 | |
 | `check-library-n1211.log` | same | 22/0 | |
 | `check-team-draw-t7.log` | same | 44/0 | **The committed screenshots come from this run alone.** The local screenshot folder is flat, so other runs overwrite each other's files. |
+
+## Gates (after the local runs; one run on one revision each)
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261114-193826-9806d1dd-16124` | `9806d1d` | targeted (team-draw, draw-guess, draw-sync, split-clues, team-huddle, relay, teams, warm-ivory, briefing, official-practice, library, library-nav, tv-show, results, quick-party, one-path, session-flow, a11y-surfaces) | **PASSED** (exit 0) | 20/20 | 5 min 29 s |
+| `20261114-194400-9806d1dd-19710` | `9806d1d` | fast | **PASSED** (exit 0) | 5/5 (unit 1878/1878) | 1 min 16 s |
+| `20261114-194522-9806d1dd-23467` | `9806d1d` | full (checkpoint) | **PASSED** (exit 0) | 102/102 | 39 min 25 s |
+
+No other gate ran on this stage. Every step log is in `docs/evidence/gate-runs/<run>/logs/`. The full gate ran while I worked on Stage 12.12 in another worktree (local drivers on their own servers and ports), so its wall time includes that load.

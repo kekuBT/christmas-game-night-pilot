@@ -1,0 +1,14 @@
+$ node scripts/check-start-helper.mjs http://localhost:45181
+# timeout 600s | worker w2 | server http://localhost:45181 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1210full/test-results/20261114-185939-675a41d1-18106/server-data/w2)
+
+[+5.1s] PASS old helper: the question closes before the click lands, and the click times out — TimeoutError: locator.click: Timeout 4000ms exceeded.
+[+12.8s] PASS new helper: presses Start again after the question closes by itself, and the game starts — {"without":false,"presses":2}
+[+12.8s] PASS new helper: returns the question that was asked — Dee is reconnecting. Start Trivia without them?Wait for DeeStart without Dee
+[+12.8s] PASS new helper: says the question closed by itself — note: start asked first — Dee is reconnecting. Start Trivia without them?Wait for DeeStart without Dee | note: the question closed by itself (nobody it named is reconnecting any more); pressing Start again
+[+12.9s] PASS asked and answered: the game starts without them — {"without":true,"presses":1}
+[+15.6s] PASS nobody reconnecting: Start starts at once and nothing is asked — {"without":false,"presses":1}
+[+20.7s] PASS an open question that can't be answered throws, and Start is not pressed again — Error: start-official-trivia: "Start without" couldn't be pressed although the question is still open: Dee is reconnecting. Start Trivia without them?Wait for DeeStart without Dee
+[+20.7s] START HELPER PASSED
+[+20.7s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":1}
+
+# PASS (exit 0) in 20.8s | cpu 1.5s, peak memory 239 MB
