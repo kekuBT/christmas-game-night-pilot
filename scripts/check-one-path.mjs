@@ -42,6 +42,8 @@ const intent = (roomId, seat, gid, action, payload) =>
   api(`/rooms/${roomId}/intents`, { token: seat.token, body: { intent: { kind: "intent", schemaVersion: 1, clientEventId: crypto.randomUUID(), roomId, gameInstanceId: gid, action, payload } } });
 const tvProj = (roomId) => api(`/rooms/${roomId}/projection?audience=tv`);
 const shot = (page, name) => page.screenshot({ path: screenshotPath(`docs/stage12/stage121-screenshots/journey-${name.replace(/^after-/, "")}.png`) });
+/** Stage 12.2's own screens go to its folder. */
+const shot122 = (page, name) => page.screenshot({ path: screenshotPath(`docs/stage12/stage122-screenshots/${name}.png`) });
 
 /** A Math Mayhem game over the API: `right[i]` of seat i's questions answered right, the rest wrong; returns its id. */
 async function playMath(roomId, seats, right, official) {
@@ -92,6 +94,8 @@ try {
   await host.getByTestId("invite-sheet").waitFor({ timeout: 15000 });
   const tvLine = await host.getByTestId("invite-tv").innerText();
   check("A Invite: 'On the TV: open <host>/tv and type the code'", tvLine.includes(`${new URL(BASE).host}/tv`) && /type the code/.test(tvLine), tvLine);
+  await sleep(600);
+  await shot122(host, "invite-tv-line-390");
   await host.getByTestId("invite-close").click();
   await host.getByTestId("invite-sheet").waitFor({ state: "detached", timeout: 15000 });
   const roomId = hostSeat.roomId;
@@ -208,7 +212,7 @@ try {
   // Stage 12.2 (D-S122-02): after two finished games, the host (never a guest) gets a gentle nudge.
   await soon("D host: after two finished games, a gentle 'Make it a Family Cup' nudge", async () => (await host.getByTestId("cup-nudge").count()) === 1);
   check("D guest: no nudge", (await guest.getByTestId("cup-nudge").count()) === 0);
-  await shot(host, "after-host-nudge-390");
+  await shot122(host, "host-nudge-390");
   await host.getByTestId("cup-nudge-open").click();
   await host.getByTestId("make-cup-sheet").waitFor({ timeout: 15000 });
   check("D the nudge opens the Make-a-Cup sheet", true);
@@ -247,14 +251,14 @@ try {
   const undoText = await host.getByTestId("undo-cup-points").innerText();
   check("D2 the undo sheet says what comes back and what stays", /Quick Party/.test(undoText) && /Memory Book/.test(undoText) && /Family Cup again/.test(undoText), undoText);
   await sleep(800);
-  await shot(host, "after-undo-cup-sheet-390");
+  await shot122(host, "undo-cup-sheet-390");
   await host.getByTestId("undo-cup-confirm").click();
   await host.getByTestId("undo-cup-sheet").waitFor({ state: "detached", timeout: 15000 });
   await soon("D2 host: a casual game night again (no Cup chip)", async () => (await host.locator(".mz-cupchip").count()) === 0);
   const undone = await tvProj(roomId);
   check("D2 server: casual, same code and players, cupSince gone, the undo recorded", undone.roomKind === "casual" && undone.joinCode === code && undone.players.length === 3 && !undone.cupSince && undone.cupUndone?.games === 2);
   await soon("D2 guest: told the room is a casual game night again", async () => /casual game night again/i.test(await guest.getByTestId("cup-undone-notice").innerText()), 20000);
-  await shot(guest, "after-guest-undone-notice-390");
+  await shot122(guest, "guest-undone-notice-390");
   await soon("D2 TV follows: the medal table is back and the Cup card is gone", async () => (await tv.getByTestId("tv-medals").count()) === 1 && (await tv.getByTestId("tv-cup").count()) === 0);
   check("D2 no nudge in a room that has been a Cup", (await host.getByTestId("cup-nudge").count()) === 0);
   await openRoomMenu(host);
@@ -322,7 +326,7 @@ try {
   await fresh.goto(`${BASE}/tv`, { waitUntil: "domcontentloaded" });
   await fresh.getByTestId("tv-entry").waitFor({ timeout: 15000 });
   check("F /tv: one code box and 'Show on this TV' (disabled until the code is complete)", (await fresh.getByTestId("tv-entry-go").isDisabled()) && (await fresh.locator(".mz-code__input").count()) === 1);
-  await fresh.screenshot({ path: screenshotPath("docs/stage12/stage122-screenshots/tv-entry-1920.png") });
+  await shot122(fresh, "tv-entry-1920");
   await fresh.locator(".mz-code__input").fill(code);
   await fresh.getByTestId("tv-entry-go").click();
   await fresh.getByTestId("tv-show").waitFor({ timeout: 15000 });
