@@ -2574,3 +2574,44 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/stage12/stage124-screenshots/`, `docs/evidence/stage124-local/`, `docs/evidence/gate-runs/`.
 - **Owner decisions open:** the Cup's finish rules (Day 7 ended first? tie-break? minimum total? undo? the Memory Book's record).
 - **Next:** owner review of PRs #25–#28; real-device checks.
+
+## Stage 12.5: Family Questions (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner, 2026-11-14: "Definitely add 5 make improvements on it too" (suggestion 5, family-made questions).
+- **Later the same night** (about 3:25 a.m. ET): "Don't add item 6" (Little-ones mode dropped); "The rest that I mentioned can be added. But we definitely need more games that can be played with teams". Teams are planned as Stages 12.7 and 12.8.
+- **Base:** `c057505` (Stage 12.4's head, PR #28). Branch `claude/stage12-5-family-questions`, draft PR #29 stacked on #28.
+- **Spec:** `docs/stage12/stage125.md`. Decisions D-S125-01..04.
+- **Built:**
+  - **Writing (D-S125-01):** any player of a casual room writes questions on their phone, multiple choice or "Who in the family?":
+    - secret until played: each phone gets only its own, and everyone gets counts per writer;
+    - limits and the shared check in `src/shared/familyPack.ts`;
+    - writers can take back their own; questions are saved with the room.
+  - **Playing (D-S125-02):** 3 to 10 questions, picked in turns between writers.
+    - The writer sits out their own question.
+    - 100 for a right answer; 50 to the writer for a great question (some but not all right).
+    - Who asked is revealed with the answer.
+    - Casual-only and practice-only; never in Quick Party, never Home's "featured today".
+  - **Moderation without reading (D-S125-03):** the host or a cohost skips the open question for everyone (never revealed or scored), and removes a writer's unplayed questions seeing only a name and a count.
+  - **Phones and the TV:**
+    - the lobby card, "Play it next", and a Start that waits with a reason;
+    - the write sheet;
+    - the game, results, TV question, reveal and review;
+    - the TV fits a 140-character question with four answers at 1080p.
+- **Tests:**
+  - `tests/stage125-family.test.ts` (13);
+  - catalogue tests for the 17th game;
+  - d3-briefing writes questions first;
+  - the new `scripts/check-family-questions.mjs` (90 checks).
+- **Drivers repaired:**
+  - check-warm-ivory W8: cover gradients compared without React's generated id, new components allowed by test id (each must reuse a base style), every difference printed on failure;
+  - check-cup-party (Stage 12.3): a latent bug with random lineups whose second game was practice-only.
+- **Unit suite:** 1806/1806 (the fast gate's unit-tests step on `8b59271`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `cbf8652` targeted (13 drivers) `20261114-074736-cbf86523-12708`: **FAILED** (exit 1), 14/15. check-warm-ivory W8, with no colour changed;
+  - `cceb707` targeted (13 drivers) `20261114-080049-cceb707a-20481`: **FAILED** (exit 1), 14/15. check-cup-party E, the driver bug above;
+  - `8b59271` targeted (13 drivers) `20261114-081403-8b592710-28298`: PASSED;
+  - `8b59271` fast `20261114-081953-8b592710-31110`: PASSED;
+  - **`8b59271` full (checkpoint) `20261114-082119-8b592710-2228`: PASSED** (exit 0, 95/95, 35 min 31 s, no retries).
+- **Tested SHA:** `8b59271`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage125-screenshots/`, `docs/evidence/stage125-local/`, `docs/evidence/gate-runs/`.
+- **Owner decisions open:** none new (the Cup's finish rules from 12.4 are still open).
+- **Next:** Stage 12.6 (the night card), then Teams (12.7, 12.8).

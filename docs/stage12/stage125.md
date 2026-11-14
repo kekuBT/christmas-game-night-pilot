@@ -102,4 +102,6 @@
 
 ## 7. Estimate vs actual
 - **Estimate:** about 6 hours (server, phone, TV, tests, driver).
-- **Actual:** about 5½ hours to the first green targeted gate, including two layout passes on the TV after screenshots showed answers cut off at 1080p.
+- **Actual:** about 2½ hours, from about 1:30 a.m. ET to the full gate's pass at 3:56 a.m. ET on Nov 14. That included:
+  - two layout passes on the TV after screenshots showed answers cut off at 1080p;
+  - two failed targeted gates and their fixes (check-warm-ivory W8, and a latent check-cup-party driver bug).

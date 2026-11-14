@@ -1,0 +1,21 @@
+$ node scripts/check-game-night-flow.mjs http://localhost:43591
+# timeout 600s | worker w1 | server http://localhost:43591 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125full/test-results/20261114-082119-8b592710-2228/server-data/w1)
+
+[+2.8s] PASS first time: a guest gets one line on how the night works
+[+2.8s] PASS first time: the host doesn't (they're the one picking)
+[+3.3s] PASS fit: everyone sees that Caption Clash needs 1 more player
+[+3.3s] PASS guest dock: says the game needs 1 more player before Keku can start it, with the code
+[+3.9s] PASS fit: Math Mayhem fits the 3 here, on a guest's phone
+[+3.9s] PASS guest dock: waiting for Keku to start Math Mayhem, Practice
+[+5.3s] PASS after: the last game's card, with the winner, on every phone
+[+5.3s] PASS after: Amina's own place and points, from the recorded scores — You came 2nd of 3 · 720 points.
+[+5.3s] PASS after: Baraka's own place
+[+5.3s] PASS after: the first-time line is gone once a game has finished
+[+5.9s] PASS next: guests see the host's next pick
+[+9.9s] PASS next: no game starts by itself — 1 games
+[+10.1s] PASS reload: Amina's lobby still has the last game and the next pick
+[+10.4s] PASS start: every phone moves to the next briefing
+[+10.4s] GAME NIGHT FLOW ALL PASSED
+[+10.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 10.4s | cpu 3.8s, peak memory 462 MB
