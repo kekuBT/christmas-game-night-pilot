@@ -47,6 +47,11 @@ export interface WhatsNextProps {
   onChoose: () => void;
   /** Stage 8.2 (§3.7): what the next game will deal (the room's content now; changed in the lobby). */
   content?: SessionSeason;
+  /**
+   * Stage 12.3 (D-S123-02): a Family Cup's lineup. Each game says Official or Practice; there's no Play again and no
+   * break in a Cup (the host ends the Cup day instead).
+   */
+  cup?: boolean;
 }
 
 export function WhatsNext(p: WhatsNextProps) {
@@ -54,7 +59,8 @@ export function WhatsNext(p: WhatsNextProps) {
   const host = p.hostName ?? "The host";
   const total = p.lineup?.items.length ?? 0;
   const nextItem = index !== undefined ? p.lineup?.items[index] : undefined;
-  const nextTitle = nextItem ? p.titleOf(nextItem.gameId) : "";
+  // Stage 12.3: in a Family Cup, the next game's mode is part of its name everywhere it's offered.
+  const nextTitle = nextItem ? `${p.titleOf(nextItem.gameId)}${p.cup ? ` · ${nextItem.official ? "Official" : "Practice"}` : ""}` : "";
   return (
     <section className="mz-card mz-next" aria-labelledby="mz-next-title" data-testid="whats-next" data-state={state} style={{ margin: "8px 16px" }}>
       <span className="mz-kicker" id="mz-next-title">What’s next</span>
@@ -73,7 +79,7 @@ export function WhatsNext(p: WhatsNextProps) {
       {state === "complete" && (
         <>
           <h2 className="mz-next__title" data-testid="next-status">That was the whole lineup</h2>
-          <p className="mz-foot mz-next__line">{p.isHost ? "Play one again, plan another lineup, or pick any game." : `${host} picks what’s next.`}</p>
+          <p className="mz-foot mz-next__line">{p.isHost ? (p.cup ? "Plan another lineup, or pick any game." : "Play one again, plan another lineup, or pick any game.") : `${host} picks what’s next.`}</p>
         </>
       )}
       {state === "free" && !p.isHost && <p className="mz-foot mz-next__line" data-testid="next-status">{host} picks what’s next.</p>}
@@ -87,7 +93,7 @@ export function WhatsNext(p: WhatsNextProps) {
           {state === "next" && nextItem && (
             <Keycap block data-testid="next-game" disabled={p.busy} onClick={() => p.onNext(index!, nextItem.gameId)}>Next game: {nextTitle}</Keycap>
           )}
-          {state !== "break" && p.canPlayAgain && (
+          {state !== "break" && p.canPlayAgain && !p.cup && (
             <Keycap block variant={state === "next" ? "surface" : "brand"} size="md" data-testid="next-play-again" disabled={p.busy} onClick={p.onPlayAgain}>Play again: {p.game.title}</Keycap>
           )}
           {state === "complete" && p.onPlan && (
@@ -96,7 +102,7 @@ export function WhatsNext(p: WhatsNextProps) {
           {state !== "break" && (
             <div className="mz-next__more">
               <button type="button" className="mz-chip-btn" data-testid="next-choose" disabled={p.busy} onClick={p.onChoose}>{state === "next" ? "Pick a different game" : "Pick another game"}</button>
-              <button type="button" className="mz-chip-btn" data-testid="next-break" disabled={p.busy} onClick={() => p.onBreakChange(true)}>Take a break</button>
+              {!p.cup && <button type="button" className="mz-chip-btn" data-testid="next-break" disabled={p.busy} onClick={() => p.onBreakChange(true)}>Take a break</button>}
             </div>
           )}
         </div>

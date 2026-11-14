@@ -26,8 +26,17 @@ const titleOf = (id: string) => GAME_MANIFESTS.find((m) => m.id === id)?.title ?
 const playersText = (it: Pick<PartyItem, "minPlayers" | "maxPlayers">) => `${it.minPlayers === it.maxPlayers ? it.minPlayers : `${it.minPlayers}–${it.maxPlayers}`} players`;
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
-/** What the planner sends on Apply. */
-export interface PartyPlanInput { expectedPlayers: number; budgetMinutes: number; items: { gameId: string }[] }
+/** What the planner sends on Apply. Stage 12.3: `official` marks a game Official in a Family Cup's lineup. */
+export interface PartyPlanInput { expectedPlayers: number; budgetMinutes: number; items: { gameId: string; official?: boolean }[] }
+
+/**
+ * Stage 12.3 (D-S123-01): a Family Cup's planner. `canCount` says whether a game can be Official (the server checks
+ * again); an official game needs two players, so a lineup planned for one is all Practice.
+ */
+export interface CupPartyRules { canCount: (gameId: string) => boolean }
+const MIN_OFFICIAL = 2;
+/** A Cup lineup item's mode, in words. */
+export const modeWord = (official: boolean | undefined) => (official ? "Official" : "Practice");
 
 /**
  * What came of an Apply. `conflict`: the saved lineup changed after the draft
@@ -44,8 +53,10 @@ function lineupLine(p: PartyView): string {
 }
 
 /** The lineup in the lobby: the host's entry when there is none, the list for everyone when there is. */
-export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onEdit, onClear, onUseLineup, onReplan, busy }: {
+export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onEdit, onClear, onUseLineup, onReplan, busy, cup }: {
   party: PartyView | undefined;
+  /** Stage 12.3: a Family Cup's lineup (each game Official or Practice; no Play again). */
+  cup?: boolean;
   connected: number;
   isHost: boolean;
   upNextId?: string;
@@ -66,7 +77,9 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
     return (
       <section className="mz-party mz-party--entry" aria-label="Quick Party" data-testid="party-card">
         <span className="mz-kicker">Quick Party</span>
-        <p className="mz-party__lede">Not sure what to play? Say how many are coming and how long you have, and get a short lineup.</p>
+        <p className="mz-party__lede">{cup
+          ? "Plan today’s games in one go: say how many are playing and how long you have, and get a lineup of Official and Practice games."
+          : "Not sure what to play? Say how many are coming and how long you have, and get a short lineup."}</p>
         <Keycap variant="surface" size="md" data-testid="party-entry" onClick={onPlan}>Plan a Quick Party</Keycap>
       </section>
     );
@@ -81,7 +94,7 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
   return (
     <section className="mz-party" aria-label="Quick Party lineup" data-testid="party-lineup">
       <span className="mz-kicker">Quick Party</span>
-      <h2 className="mz-party__title">Tonight’s lineup</h2>
+      <h2 className="mz-party__title">{cup ? "Today’s lineup" : "Tonight’s lineup"}</h2>
       <p className="mz-party__meta" data-testid="party-meta">
         Planned for {plural(lineup.expectedPlayers, "player")} · about {lineup.estimateMinutes} of your {lineup.budgetMinutes} minutes (estimated) · {connected} here now
       </p>
@@ -90,11 +103,12 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
           const m = GAME_MANIFESTS.find((x) => x.id === it.gameId);
           const short = m && connected < m.minPlayers ? m.minPlayers - connected : 0;
           return (
-            <li key={`${it.gameId}-${i}`} className={`mz-party__row${it.started ? " is-started" : ""}${i === next ? " is-next" : ""}`} data-testid={`party-row-${i}`} data-status={it.status ?? (it.started ? "started" : "pending")}>
+            <li key={`${it.gameId}-${i}`} className={`mz-party__row${it.started ? " is-started" : ""}${i === next ? " is-next" : ""}`} data-testid={`party-row-${i}`} data-status={it.status ?? (it.started ? "started" : "pending")} {...(it.official !== undefined ? { "data-mode": it.official ? "official" : "practice" } : {})}>
               <span className="mz-party__num" aria-hidden="true">{i + 1}</span>
               <span className="mz-party__text">
                 <span className="mz-party__name">{titleOf(it.gameId)}</span>
                 <span className="mz-party__sub">
+                  {it.official !== undefined && <b className={`mz-party__mode${it.official ? " is-official" : ""}`}>{modeWord(it.official)} · </b>}
                   {m ? `${playersText(m)} · about ${m.duration.minutes} min` : ""}
                   {it.status === "completed" ? " · played ✓" : it.status === "briefing" || it.status === "playing" ? " · on now" : it.started ? " · started" : i === next ? (anyPlayed ? " · next up" : " · first up") : ""}
                 </span>
@@ -105,7 +119,7 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
         })}
       </ol>
       {lineup.complete && (
-        <p className="mz-foot mz-party__aside" data-testid="party-complete">That was the whole lineup. {isHost ? "Play one again, plan another lineup, or pick any game." : "The host picks what’s next."}</p>
+        <p className="mz-foot mz-party__aside" data-testid="party-complete">That was the whole lineup. {isHost ? (cup ? "Plan another lineup, or pick any game." : "Play one again, plan another lineup, or pick any game.") : "The host picks what’s next."}</p>
       )}
       {isHost && misfit && (
         <p className="mz-foot mz-party__aside" data-testid="party-misfit">
@@ -143,13 +157,15 @@ export function QuickPartyCard({ party, connected, isHost, upNextId, onPlan, onE
 }
 
 /** The planner: settings, a suggested lineup to edit, and Apply. Client-only until Apply. */
-export function QuickPartySheet({ connected, recentIds, saved, initialSize, currentRevision, onApply, onPickManually, onClose }: {
+export function QuickPartySheet({ connected, recentIds, saved, initialSize, currentRevision, onApply, onPickManually, onClose, cup }: {
+  /** Stage 12.3: a Family Cup's planner (each game Official or Practice). */
+  cup?: CupPartyRules;
   /** Connected players now: the starting suggestion for the group size. */
   connected: number;
   /** The room's finished games, most recent first (a preference only). */
   recentIds: readonly string[];
   /** The applied lineup, when editing it. */
-  saved?: { expectedPlayers: number; budgetMinutes: number; gameIds: string[] };
+  saved?: { expectedPlayers: number; budgetMinutes: number; gameIds: string[]; /** Stage 12.3: each game's mode (a Cup). */ official?: boolean[] };
   /** A replan for a known head count (overrides `saved` and `connected`). */
   initialSize?: number;
   /** The saved lineup's revision now (live). The draft is bound to the one it started from. */
@@ -173,6 +189,11 @@ export function QuickPartySheet({ connected, recentIds, saved, initialSize, curr
     return describeLineup(saved.expectedPlayers, saved.budgetMinutes, items);
   });
   const [replacing, setReplacing] = useState<number | null>(null);
+  // Stage 12.3: the games the host made Practice in a Cup's lineup (every game that can count starts Official).
+  const [practice, setPractice] = useState<ReadonlySet<string>>(() => new Set(saved && saved.official && initialSize === undefined ? saved.gameIds.filter((_, i) => !saved.official![i]) : []));
+  const canBeOfficial = (gameId: string) => !!cup && size >= MIN_OFFICIAL && cup.canCount(gameId);
+  const officialOf = (gameId: string) => canBeOfficial(gameId) && !practice.has(gameId);
+  const toggleMode = (gameId: string) => setPractice((s) => { const n = new Set(s); if (n.has(gameId)) n.delete(gameId); else n.add(gameId); return n; });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   // Review 6775606005: the draft is bound to the saved lineup it started from.
@@ -197,7 +218,7 @@ export function QuickPartySheet({ connected, recentIds, saved, initialSize, curr
     if (!lineup || lineup.items.length === 0) return;
     setBusy(true);
     setError("");
-    const r = await onApply({ expectedPlayers: size, budgetMinutes: budget, items: lineup.items.map((i) => ({ gameId: i.gameId })) }, against);
+    const r = await onApply({ expectedPlayers: size, budgetMinutes: budget, items: lineup.items.map((i) => ({ gameId: i.gameId, ...(officialOf(i.gameId) ? { official: true } : {}) })) }, against);
     setBusy(false);
     if ("conflict" in r) setConflict(r.conflict);
     else if (!r.ok) setError(r.error);
@@ -212,11 +233,12 @@ export function QuickPartySheet({ connected, recentIds, saved, initialSize, curr
     setError("");
     if (!l) { setLineup(null); return; }
     setSize(clampSize(l.expectedPlayers));
+    setPractice(new Set(l.items.filter((i) => i.official === false).map((i) => i.gameId)));
     if ((PARTY_BUDGETS as readonly number[]).includes(l.budgetMinutes)) setBudget(l.budgetMinutes as PartyBudget);
     setLineup(describeLineup(l.expectedPlayers, l.budgetMinutes, partyItemsFor(l.items.map((i) => i.gameId)).filter((x): x is PartyItem => !!x)));
   };
   return (
-    <Sheet title="Plan a Quick Party" onClose={onClose} testId="party-sheet" kicker="Casual · just for fun">
+    <Sheet title="Plan a Quick Party" onClose={onClose} testId="party-sheet" kicker={cup ? "Family Cup · Official or Practice" : "Casual · just for fun"}>
       {stale && !conflict && (
         <p className="mz-foot mz-party__aside mz-party__stale" role="status" data-testid="party-stale-note">
           The saved lineup was changed (another tab, or a cohost) while you were planning. Using yours will ask you first.
@@ -262,6 +284,9 @@ export function QuickPartySheet({ connected, recentIds, saved, initialSize, curr
                   <span className="mz-party__name">{it.title}</span>
                   <span className="mz-party__sub">{playersText(it)} · about {it.minutes} min</span>
                 </span>
+                {cup && (canBeOfficial(it.gameId)
+                  ? <button type="button" className={`mz-pill mz-party__modebtn${officialOf(it.gameId) ? " is-official" : ""}`} data-testid={`party-mode-${i}`} aria-pressed={officialOf(it.gameId)} aria-label={`${it.title}: ${modeWord(officialOf(it.gameId))}. Switch to ${modeWord(!officialOf(it.gameId))}`} onClick={() => toggleMode(it.gameId)}>{modeWord(officialOf(it.gameId))}</button>
+                  : <span className="mz-party__modefix" data-testid={`party-mode-${i}`} data-mode="practice">{cup.canCount(it.gameId) ? "Practice" : "Practice only"}</span>)}
                 <span className="mz-party__tools">
                   <button type="button" className="mz-iconbtn mz-iconbtn--sm" data-testid={`party-up-${i}`} aria-label={`Move ${it.title} up`} disabled={i === 0} onClick={() => edit(moveItem(lineup.items, i, -1))}>↑</button>
                   <button type="button" className="mz-iconbtn mz-iconbtn--sm" data-testid={`party-down-${i}`} aria-label={`Move ${it.title} down`} disabled={i === lineup.items.length - 1} onClick={() => edit(moveItem(lineup.items, i, 1))}>↓</button>
@@ -280,6 +305,13 @@ export function QuickPartySheet({ connected, recentIds, saved, initialSize, curr
               </li>
             ))}
           </ol>
+          {cup && (
+            <p className="mz-foot mz-party__aside" data-testid="party-cup-note">
+              {size < MIN_OFFICIAL
+                ? `Official games need at least ${MIN_OFFICIAL} players, so a lineup for ${size} is all Practice.`
+                : "Official games count toward today’s standings; Practice games don’t. Tap a game’s mode to switch it."}
+            </p>
+          )}
           <p className="mz-party__estimate" data-testid="party-estimate" role="status">
             {lineup.status === "short"
               ? <>Only {plural(lineup.poolSize, "game")} {lineup.poolSize === 1 ? "fits" : "fit"} {plural(size, "player")}, so this lineup is about <b>{lineup.estimateMinutes}</b> of your {budget} minutes.</>

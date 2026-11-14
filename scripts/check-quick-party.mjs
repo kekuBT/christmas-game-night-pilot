@@ -1,6 +1,6 @@
 // Stage 7.1: Quick Party in a casual room, end to end in the browser
 // (docs/stage7/stage71.md).
-//   A  entry: the host (and only the host) sees Quick Party; a Cup room has none
+//   A  entry: the host (and only the host) sees Quick Party; a Family Cup has its own (Stage 12.3, check-cup-party)
 //   B  the planner by keyboard: group size starts at who is here and is labelled
 //      as expected; 15/30/60; a suggested lineup within budget, every game fitting
 //   C  editing: move, remove, replace (only fitting games), suggest again; none
@@ -387,12 +387,12 @@ try {
   check("K a clear for an older revision is refused (409), and the lineup stays", staleClear.status === 409 && staleClear.body.code === "PLAN_CONFLICT" && (await myRoom(kh)).party?.lineup !== null, JSON.stringify(staleClear.body).slice(0, 120));
   await kh.context().close(); await kc.context().close();
 
-  // ---- A (Cup). A Family Cup has no Quick Party ----
+  // ---- A (Cup). Stage 12.3 (D-S123-01): a Family Cup has Quick Party too, planning Official and Practice games ----
   const cctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const c = await cctx.newPage();
   await host(c, "Cup host", "cup");
   await c.getByTestId("lobby-dock").waitFor({ timeout: 10000 });
-  check("A a Family Cup lobby has no Quick Party", (await c.getByTestId("party-card").count()) === 0 && (await myRoom(c)).party === undefined);
+  check("A a Family Cup lobby has its own Quick Party entry (planned in check-cup-party)", (await c.getByTestId("party-entry").count()) === 1 && (await myRoom(c)).party?.lineup === null);
   await cctx.close();
 } finally {
   await browser.close();

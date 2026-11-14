@@ -67,7 +67,7 @@ describe("Make it a Family Cup (POST /rooms/:id/cup)", () => {
     expect((after["players"] as Json[]).map((p) => p["displayName"]).sort()).toEqual(["Amina", "Keku"]);
     expect(after["casualGameIds"]).toEqual([casualGame]);
     expect(after["cupSince"]).toMatchObject({ seq: expect.any(Number), at: expect.any(Number) });
-    expect(after["party"]).toBeUndefined(); // Quick Party is a casual-room feature
+    expect(after["party"]).toEqual({ revision: 0, lineup: null }); // Stage 12.3: a Family Cup has Quick Party too (no lineup here)
     expect(after["championship"]).toEqual([]); // the casual game was never official: no standings
     const started = h.engine().ledger.filter((e) => e.type === "cup-started");
     expect(started).toHaveLength(1);
