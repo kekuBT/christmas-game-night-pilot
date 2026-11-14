@@ -41,7 +41,7 @@ describe("the shipped manifests", () => {
     // Stage 5: new games launch practice-only until the owner approves their
     // Cup scoring; the manifest and the server's policy must agree. Stage 9.1:
     // Jebena Rush too (casual rooms only).
-    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush", "spectrum", "family-questions", "team-huddle", "relay", "split-clues", "team-draw", "territory", "tug-of-war"];
+    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush", "spectrum", "family-questions", "team-huddle", "relay", "split-clues", "team-draw", "territory", "tug-of-war", "know-your-rivals"];
     for (const m of GAME_MANIFESTS) {
       expect(m.features.practice).toBe(true);
       expect(m.features.official).toBe(!STAGE5_PRACTICE_ONLY.includes(m.id));
@@ -90,6 +90,8 @@ describe("the shipped manifests", () => {
       territory: "none",
       // Stage 12.13: no sitting out; your team's pull is per player, so every teammate counts.
       "tug-of-war": "none",
+      // Stage 12.14: no sitting out; "Rather not say" is an answer of its own.
+      "know-your-rivals": "none",
     };
     for (const m of GAME_MANIFESTS) {
       expect(m.features.abstention).toBe(expected[m.id]);

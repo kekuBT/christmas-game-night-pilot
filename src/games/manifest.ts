@@ -549,6 +549,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: true },
     details: "Three bouts of 40 seconds. Every player answers quick sums on their own phone (everyone gets the same sums in the same order); a right answer is one pull, a wrong one freezes you for 2 s. A team's pull is its right answers per player. Two teams pull a rope; three or four pull a knot in a star. Each bout: 100/75/55/40 by pull; a team alone in last place and 40+ behind pulls ×1.2 in the next bout. Uses the night's teams (a team needs at least 2), or deals two. Casual rooms only; practice-only (Stage 12.13).",
   },
+  {
+    id: "know-your-rivals",
+    title: "Know Your Rivals",
+    description: "Answer \"this or that\" questions about yourself, privately; then your team guesses how the other teams answered. Only each team's totals are ever shown.",
+    categories: ["social", "party", "team"],
+    minPlayers: 4,
+    recommendedPlayers: 6,
+    maxPlayers: 10,
+    playStyle: "team",
+    competition: "competitive",
+    duration: { minutes: 6, source: "design-default", measured: false },
+    inputs: ["choice", "numeric"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: true },
+    features: { practice: true, official: false, abstention: "none" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: true },
+    details: "Six questions (\"Tea or coffee?\"). Everyone answers privately for 20 seconds (or says \"Rather not say\"); then for 25 seconds each team guesses, for every other team, how many of its players picked the first option. The reveal shows each team's totals, never who picked what. Up to 30 points per rival guessed (exact), less the further off. A team alone in last place and 60+ behind gets +15 in a round it scores. Uses the night's teams (a team needs at least 2), or deals two. Casual rooms only; practice-only (Stage 12.14).",
+  },
 ];
 
 /**

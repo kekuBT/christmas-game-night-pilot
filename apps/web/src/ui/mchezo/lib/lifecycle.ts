@@ -67,6 +67,7 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   "team-draw": { verb: "Played", noun: ["round", "rounds"] },
   "territory": { verb: "Played", noun: ["question", "questions"] },
   "tug-of-war": { verb: "Pulled in", noun: ["bout", "bouts"] },
+  "know-your-rivals": { verb: "Played", noun: ["question", "questions"] },
 };
 
 /**

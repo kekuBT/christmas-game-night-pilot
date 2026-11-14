@@ -40,13 +40,13 @@ export const TEAM_PLAY_GAMES: ReadonlySet<string> = new Set([
  * Stage 12.8 (D-S128-01): games built for teams. They always play as teams: the night's teams when at least two of
  * them have players in the game, otherwise two teams dealt for that game. Every player scores their team's points.
  */
-export const TEAM_NATIVE_GAMES: ReadonlySet<string> = new Set(["team-huddle", "relay", "charades", "split-clues", "team-draw", "territory", "tug-of-war"]);
+export const TEAM_NATIVE_GAMES: ReadonlySet<string> = new Set(["team-huddle", "relay", "charades", "split-clues", "team-draw", "territory", "tug-of-war", "know-your-rivals"]);
 
 /**
  * Stage 12.10 (D-S1210-01): the fewest players a team may have in a game built for teams. The five games of Stages
  * 12.10–12.14 need 2 (a teammate to talk to, a drawer and a guesser); 12.8–12.9's games work with 1 and keep that.
  */
-export const TEAM_GAME_MIN_SIZE: Readonly<Record<string, number>> = { "split-clues": 2, "team-draw": 2, "territory": 2, "tug-of-war": 2 };
+export const TEAM_GAME_MIN_SIZE: Readonly<Record<string, number>> = { "split-clues": 2, "team-draw": 2, "territory": 2, "tug-of-war": 2, "know-your-rivals": 2 };
 
 /**
  * Stage 12.10 (D-S1210-01): fit the night's teams to one game. A team with fewer than `minSize` of this game's players

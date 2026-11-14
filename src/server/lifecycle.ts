@@ -25,6 +25,7 @@ import { SPLIT_REVEAL_MS, SPLIT_SOLVE_MS } from "../games/modules/split-clues-ti
 import { TEAM_DRAW_MS, TEAM_DRAW_REVEAL_MS } from "../games/modules/team-draw-timing.js";
 import { TERRITORY_CLAIM_MS, TERRITORY_QUESTION_MS } from "../games/modules/territory-timing.js";
 import { TUG_BOUT_MS, TUG_RESULT_MS } from "../games/modules/tug-of-war-timing.js";
+import { RIVALS_ANSWER_MS, RIVALS_GUESS_MS, RIVALS_REVEAL_MS } from "../games/modules/know-your-rivals-timing.js";
 import type { TeamResult } from "../shared/teamResult.js";
 
 export type TimingModel = "game-deadline" | "phased" | "turns";
@@ -133,6 +134,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
   "tug-of-war": {
     model: "phased", gameWindowMs: 4 * MIN, phaseMs: { round: TUG_BOUT_MS, reveal: TUG_RESULT_MS },
     officialEligible: false, practiceOnlyReason: "Tug of War is practice-only: a team game in casual rooms.", unit: "rounds",
+  },
+  // Stage 12.14: Know Your Rivals, 6 rounds of answer (20 s, closing early once everyone has answered), guess (25 s,
+  // closing early once every team has locked) and reveal (8 s). 7 minutes is a backstop (6 rounds ≤ 318 s).
+  "know-your-rivals": {
+    model: "phased", gameWindowMs: 7 * MIN, phaseMs: { question: RIVALS_ANSWER_MS, guess: RIVALS_GUESS_MS, reveal: RIVALS_REVEAL_MS },
+    officialEligible: false, practiceOnlyReason: "Know Your Rivals is practice-only: a team game in casual rooms.", unit: "questions",
   },
   // Stage 12.8: Team Huddle, eight questions of 25 s + 6 s (a question closes early once every team agrees); 8 minutes
   // is a backstop.

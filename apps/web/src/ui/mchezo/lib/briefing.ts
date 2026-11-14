@@ -92,6 +92,7 @@ const GAME_PHASE_WORDS: Record<string, Record<string, string>> = {
   "team-draw": { draw: "each drawing", reveal: "each reveal" },
   "territory": { question: "each question", reveal: "each claim" },
   "tug-of-war": { round: "each bout", reveal: "each result" },
+  "know-your-rivals": { question: "each answer", guess: "each guess", reveal: "each reveal" },
 };
 
 /** The real time limits, from the lifecycle policy the server enforces, in this game's own words. */
@@ -170,6 +171,16 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
       "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena.",
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
+    ],
+  },
+  // Stage 12.14 (docs/stage12/stage1214.md §1).
+  "know-your-rivals": {
+    objective: "How well does your team know the others?",
+    steps: [
+      "Six light \"this or that\" questions about yourself, like \"Tea or coffee?\". Pick one on your own phone, or \"Rather not say\".",
+      "Nobody sees your answer, not even your team: only each team's totals are ever shown.",
+      "Then, together, your team guesses how many of each other team picked the first option. Any teammate can set it; one locks it in.",
+      "Up to 30 points for each team you guess: exact scores 30, less the further off. Everyone scores their team's points.",
     ],
   },
   // Stage 12.13 (docs/stage12/stage1213.md §2).

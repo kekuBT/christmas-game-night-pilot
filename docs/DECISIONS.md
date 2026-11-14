@@ -1921,3 +1921,18 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **Counting only the players who answered:** a team could leave its slowest player out to raise its average.
     - **A penalty pull for wrong answers:** the 2 s freeze already costs time, and negative pulls confuse the rope.
     - **Showing each player's sum on the TV:** it would be unreadable with up to 10 players.
+- **D-S1214-01 Know Your Rivals: private answers, team totals, and team guesses about the other teams.**
+  - **Rounds:** six light "this or that" questions about yourself (54 original ones, 12 of them for Christmas).
+  - **Answer (20 s):** each player answers privately, or says "Rather not say". It closes early once everyone has answered.
+  - **Guess (25 s):** each team guesses, for every other team, how many of those who answered picked the first option. Any teammate sets or locks; the phase closes early once every team has locked.
+  - **Reveal (8 s):** each team's totals, never who picked what, and every team's guesses and points.
+  - **Points:** 30 per rival for the exact number, less the further off, never below 0. Every team guesses every other team, so all have the same number of guesses. Team-derived. No sitting out.
+  - **Catch-up:** +15 in a round where it scores, for a team alone in last place and 60+ behind (the game's own gap: a round is worth at most 30 per rival).
+  - **Privacy:** your answer is never shown to anyone, not even your team; a team's guesses stay with it until the reveal. In a team of two, a teammate can work out your answer from the total. That limit is why the questions are light and "Rather not say" is always offered, and the briefing promises only that "only each team's totals are ever shown".
+  - **Where:** casual rooms only and practice-only, for 4–10 players. Never in Quick Party or Home's featured rotation.
+  - **Alternatives rejected:**
+    - **Guessing who picked what:** it would make players' answers the point of the game, and no answer would be private.
+    - **Guessing only each team's majority:** too coarse, and a tie has no answer.
+    - **Guessing your own team too:** you already know part of the answer.
+    - **Showing answers as they come in:** later players would feel watched and could follow the crowd.
+    - **Requiring three per team for privacy:** the night's teams of two couldn't play it. Light questions, "Rather not say" and an honest briefing are the safeguard instead.
