@@ -122,6 +122,10 @@ try {
     check(`A ${who}: one result heading, Casual (not Practice)`, (await p.getByTestId("results-hero").count()) === 1 && /casual/i.test(kicker) && !/practice/i.test(kicker), kicker);
     const body = await p.evaluate(() => document.body.innerText);
     check(`A ${who}: no old shell (no 🎄 header, Championship, Practice, second winner line)`, (await p.getByTestId("show-results").count()) === 0 && !/Christmas Game Night|Championship|practice/i.test(body) && (await p.locator(".reveal-winner").count()) === 0);
+    // Stage 12.4 (D-S124-04): a TV is watching this room, so on Math Mayhem the phone steps back: its own result and
+    // What's next stay, and the standings and answers are one tap away. Check that, take the tap, then check them as before.
+    check(`A ${who}: with the TV watching, the phone steps back (the standings one tap away)`, (await p.getByTestId("phone-tv-note").count()) === 1 && (await p.locator('[data-testid="mz-scores"] li').count()) === 0);
+    await p.getByTestId("phone-full-results").click();
     const rows = await p.locator('[data-testid="mz-scores"] li').count();
     check(`A ${who}: standings with both players`, rows === 2, String(rows));
     check(`A ${who}: their own answers to review`, (await p.getByTestId("mz-answer-review").count()) === 1);
