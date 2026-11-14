@@ -1,0 +1,100 @@
+$ node scripts/check-family-questions.mjs http://localhost:41555
+# timeout 600s | worker w1 | server http://localhost:41555 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full/test-results/20261114-110804-717b16f7-4230/server-data/w1)
+
+[+4.7s] PASS A host: the lobby has the Family Questions card
+[+4.7s] PASS A guest: the lobby has the Family Questions card
+[+5.3s] PASS A an empty answer is refused, and says why
+[+5.3s] PASS A …and nothing reached the room
+[+5.3s] PASS B the worst case for the TV is the longest question a writer can send — 140
+[+5.7s] PASS A Amina's multiple-choice question is added
+[+6.1s] PASS A …and her 'Who in the family?' question
+[+6.2s] PASS A Amina sees her own two questions, with their answers
+[+6.6s] PASS E the write sheet fits 320 px (no sideways scroll)
+[+6.7s] PASS A the counts are public: Baraka's card says 2 questions from 1 writer
+[+6.7s] PASS A host's screen has no word of Amina's questions
+[+6.7s] PASS A host's projection has no word of them
+[+6.7s] PASS A Baraka's screen has no word of Amina's questions
+[+6.7s] PASS A Baraka's projection has no word of them
+[+6.7s] PASS A the TV has none, on screen or in its feed
+[+6.7s] PASS B with 2 questions, the server refuses to start (FAMILY_TOO_FEW) — {"error":"Family Questions needs at least 3 questions ready to play; 2 are. Everyone can write some in the lobby.","code":"FAMILY_TOO_FEW","readiness":{"registered":3,"connected":3,"reconnecting":0,"away":0,"wouldPlay":["player-1","player-2","player-3"],"wouldMiss":[]},"ready":2,"needed":3}
+[+6.7s] PASS B …and the host isn't offered 'Play it next'
+[+6.7s] PASS B with 3 ready, the host can make it the next game
+[+6.8s] PASS B Family Questions is up next
+[+6.8s] PASS B Start is ready
+[+7.4s] PASS B Baraka took his question back; the host's Start waits for one more
+[+7.5s] PASS B 4 ready from 3 writers; Start is back
+[+7.6s] PASS C the game is in its briefing
+[+7.6s] PASS C …and playing
+[+7.6s] PASS C question 1 is open
+[+7.9s] PASS C q1: Baraka's phone says it's theirs
+[+7.9s] PASS C q1: Keku sees the question to answer
+[+7.9s] PASS C q1: Amina sees the question to answer
+[+7.9s] PASS C q1: the TV shows the question, not who asked
+[+7.9s] PASS C q1: the TV question fits the screen (2 answers, 37 characters) — {"ok":true,"bottom":769,"limit":956}
+[+7.9s] PASS C q1: the open question's feed has no answer and no writer
+[+8.5s] PASS C q1: Keku's pick is locked in
+[+8.5s] PASS C q1: the reveal
+[+8.5s] PASS C q1: the right answer and who asked — {"prompt":"What was Babu CANARY-THREE first car?","kind":"choice","options":["A VW Beetle","A Peugeot 404"],"correctIndex":1,"counts":[1,1],"right":["player-1"],"askedBy":"player-3","askedByName":"Baraka","greatQuestion":true}
+[+8.5s] PASS C q1: a great question (one of two got it)
+[+8.5s] PASS C q1: phones say who asked, and the great question
+[+8.5s] PASS C q1: the writer's phone says it was theirs, +50
+[+8.6s] PASS C q1: the TV reveals the answer and who asked
+[+8.6s] PASS C q1: the TV reveal fits the screen — {"ok":true,"bottom":639,"limit":956}
+[+16.6s] PASS C question 2 is open
+[+16.6s] PASS C q2: Amina's phone says it's theirs
+[+16.6s] PASS C q2: Keku sees the question to answer
+[+16.6s] PASS C q2: Baraka sees the question to answer
+[+16.6s] PASS C q2: the TV shows the question, not who asked
+[+16.6s] PASS C q2: the TV question fits the screen (3 answers, 34 characters) — {"ok":true,"bottom":769,"limit":956}
+[+16.6s] PASS C q2: the open question's feed has no answer and no writer
+[+16.7s] PASS C q2: the host's skip moves everyone on, with no reveal
+[+16.7s] PASS C question 3 is open
+[+16.9s] PASS C q3: Keku's phone says it's theirs
+[+16.9s] PASS C q3: Amina sees the question to answer
+[+16.9s] PASS C q3: Baraka sees the question to answer
+[+16.9s] PASS C q3: the TV shows the question, not who asked
+[+16.9s] PASS C q3: the TV question fits the screen (4 answers, 140 characters) — {"ok":true,"bottom":826,"limit":956}
+[+16.9s] PASS C q3: the open question's feed has no answer and no writer
+[+17.4s] PASS C q3: Amina's pick is locked in
+[+17.4s] PASS C q3: the reveal
+[+17.4s] PASS C q3: the right answer and who asked — {"prompt":"Which month is Shosho CANARY-FOUR birthday, the one we always celebrate with far too much pilau and the big cake from town, every single yea","kind":"choice","options":["March","October","December","July"],"correctIndex":2,"counts":[0,0,1,1],"right":["player-2"],"askedBy":"player-1","askedByName":"Keku","greatQuestion":true}
+[+17.4s] PASS C q3: a great question (one of two got it)
+[+17.4s] PASS C q3: phones say who asked, and the great question
+[+17.4s] PASS C q3: the writer's phone says it was theirs, +50
+[+17.4s] PASS C q3: the TV reveals the answer and who asked
+[+17.4s] PASS C q3: the TV reveal fits the screen — {"ok":true,"bottom":911,"limit":956}
+[+25.5s] PASS C question 4 is open
+[+25.5s] PASS C q4: Amina's phone says it's theirs
+[+25.5s] PASS C q4: Keku sees the question to answer
+[+25.5s] PASS C q4: Baraka sees the question to answer
+[+25.5s] PASS C q4: the TV shows the question, not who asked
+[+25.5s] PASS C q4: the TV question fits the screen (3 answers, 40 characters) — {"ok":true,"bottom":866,"limit":956}
+[+25.5s] PASS C q4: the open question's feed has no answer and no writer
+[+25.8s] PASS C q4: Keku's pick is locked in
+[+25.8s] PASS C q4: the reveal
+[+25.8s] PASS C q4: the right answer and who asked — {"prompt":"Who CANARY-TWO always burns the chapati?","kind":"who","options":["Keku","Amina","Baraka"],"correctIndex":2,"counts":[1,0,1],"right":["player-1"],"askedBy":"player-2","askedByName":"Amina","greatQuestion":true}
+[+25.8s] PASS C q4: a great question (one of two got it)
+[+25.8s] PASS C q4: phones say who asked, and the great question
+[+25.8s] PASS C q4: the writer's phone says it was theirs, +50
+[+25.8s] PASS C q4: the TV reveals the answer and who asked
+[+25.8s] PASS C q4: the TV reveal fits the screen — {"ok":true,"bottom":876,"limit":956}
+[+33.9s] PASS C the game finishes
+[+33.9s] PASS C 4 rounds: one skipped by the host, three played — ["Baraka",true,"Keku","Amina"]
+[+33.9s] PASS C the skipped question's answer and writer were never revealed
+[+33.9s] PASS C scores: 3 played rounds × (100 right + 50 great question) = 450 in all — {"player-1":250,"player-2":150,"player-3":50}
+[+34.0s] PASS C phone results: every question with its answer and who asked
+[+34.0s] PASS C results: the great questions are celebrated
+[+34.0s] PASS C results: the skipped question's prompt isn't in the recap
+[+35.8s] PASS C played questions are used up (0 ready)
+[+36.2s] PASS D the host's card counts Baraka's 2 new questions
+[+36.3s] PASS D the host's tool lists Baraka with a count, and no word of his questions — HOST · REMOVE SOMEONE’S QUESTIONS WITHOUT READING THEM
+[+36.3s] Baraka
+[+36.3s] 2 questions waiting
+[+36.3s] Remove
+[+36.7s] PASS D Baraka's unplayed questions are removed
+[+36.7s] PASS D Baraka keeps only his played question (marked played) — [true]
+[+36.7s] PASS D a player who isn't the host can't remove anyone's questions (403)
+[+36.8s] check-family-questions: all checks passed
+[+36.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 36.8s | cpu 4.8s, peak memory 276 MB

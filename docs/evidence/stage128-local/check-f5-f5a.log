@@ -1,0 +1,52 @@
+PASS lobby roster: 4 players joined
+day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games; casual-only, not in a Cup: jebena-rush, spectrum, family-questions, team-huddle)
+PASS TV projection leak-free while impostor playing — no forbidden keys
+OK impostor: finished
+PASS day playlist: impostor finished without sticking
+PASS TV projection leak-free while caption-clash playing — no forbidden keys
+OK caption-clash: finished
+PASS day playlist: caption-clash finished without sticking
+PASS TV projection leak-free while trivia playing — no forbidden keys
+OK trivia: finished
+PASS day playlist: trivia finished without sticking
+PASS TV projection leak-free while word-connections playing — no forbidden keys
+OK word-connections: finished
+PASS day playlist: word-connections finished without sticking
+PASS TV projection leak-free while who-said-that playing — no forbidden keys
+OK who-said-that: finished
+PASS day playlist: who-said-that finished without sticking
+PASS TV projection leak-free while guess-the-year playing — no forbidden keys
+OK guess-the-year: finished
+PASS day playlist: guess-the-year finished without sticking
+PASS TV projection leak-free while closest-wins playing — no forbidden keys
+OK closest-wins: finished
+PASS day playlist: closest-wins finished without sticking
+PASS TV projection leak-free while category-sprint playing — no forbidden keys
+OK category-sprint: finished
+PASS day playlist: category-sprint finished without sticking
+PASS TV projection leak-free while charades playing — no forbidden keys
+OK charades: finished
+PASS day playlist: charades finished without sticking
+PASS TV projection leak-free while geography playing — no forbidden keys
+OK geography: finished
+PASS day playlist: geography finished without sticking
+PASS TV projection leak-free while math-mayhem playing — no forbidden keys
+OK math-mayhem: finished
+PASS day playlist: math-mayhem finished without sticking
+PASS TV projection leak-free while majority-rules playing — no forbidden keys
+OK majority-rules: finished
+PASS day playlist: majority-rules finished without sticking
+PASS TV projection leak-free while pattern-pulse playing — no forbidden keys
+OK pattern-pulse: finished
+PASS day playlist: pattern-pulse finished without sticking
+PASS TV projection leak-free while draw-guess playing — no forbidden keys
+OK draw-guess: finished
+PASS day playlist: draw-guess finished without sticking
+PASS day playlist: all games finished in one room — 14/14 finished
+PASS ledger holds one game-finished event per playlist game — 14/14 finish events
+PASS TV projection marks every playlist game finished — all finished
+PASS championship standings list all 4 players after full day
+PASS championship per-game breakdown present after full day
+PASS TV shows the 5 most recent finished games — all 5 listed
+PASS Memory Book export contains the full-day entry
+F5 ALL PASSED (36/36)

@@ -1,0 +1,39 @@
+$ node scripts/check-tv-moments.mjs http://localhost:41793
+# timeout 600s | worker w2 | server http://localhost:41793 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full/test-results/20261114-110804-717b16f7-4230/server-data/w2)
+
+[+4.7s] PASS A TV sound is off by default
+[+6.4s] PASS A Day 1: the room menu doesn't offer Finish before Day 7
+[+7.7s] PASS A Day 2: the room menu doesn't offer Finish before Day 7
+[+9.1s] PASS A Day 3: the room menu doesn't offer Finish before Day 7
+[+9.2s] PASS A the Cup is on Day 7, both players eligible — [{"playerId":"player-1","dayScores":[100,100,100],"counted":[100,100,100],"qualifyingDays":3,"base":300,"participationBonus":0,"finaleBonus":0,"total":300,"eligible":true,"countedDailyWins":3,"countedMedian":100},{"playerId":"player-2","dayScores":[0,0,0],"counted":[0,0,0],"qualifyingDays":3,"base":0,"participationBonus":0,"finaleBonus":0,"total":0,"eligible":true,"countedDailyWins":0,"countedMedian":0}]
+[+10.4s] PASS A the sheet previews the champion and says the rules are a try-out — Keku is on top right now, so would be the champion. | The champion: the highest Cup total among players who played on enough Cup days. Equal totals share the title.
+[+10.4s] After: the standings are kept as they are now, and no more official games start. Practice games still work.
+[+10.4s] Try-out rules: these are provisional and haven’t been confirmed for an official championship yet.
+[+11.0s] PASS B the director turns the TV sound on (a confirming chime)
+[+11.3s] PASS B the director's press played a confirming chime — 1
+[+11.4s] PASS B guest lobby: the Family Cup is complete, with its champion
+[+11.4s] PASS B TV: the champion moment
+[+11.4s] PASS B TV sound: one fanfare for the moment
+[+12.9s] PASS B …and only one — {"playsBefore":1,"now":2,"mode":"champion"}
+[+13.0s] PASS B TV: under the moment, only the moment's button is pressed, and the director's row is one line
+[+13.6s] PASS B a TV opened later shows the champion too (it's the server's record)
+[+13.7s] PASS B a TV opened later has its sound off (remembered per TV, and this one never chose)
+[+13.7s] PASS B after finishing, an official game is refused (CUP_FINISHED) — {"error":"The Family Cup is finished, so its results stand and no official game starts. Practice games still work.","code":"CUP_FINISHED","readiness":{"registered":2,"connected":2,"reconnecting":0,"away":0,"wouldPlay":["player-1","player-2"],"wouldMiss":[]}}
+[+13.7s] PASS B the server: one cup-finished record with the try-out rules
+[+16.6s] PASS C no TV: the phone shows the full standings
+[+17.5s] PASS C the room sees the TV
+[+18.2s] PASS C the second TV's director turns sound on (one confirming chime) — 1
+[+18.3s] PASS C the TV shows the game live
+[+18.9s] PASS C with a TV watching, the phone steps back on Math Mayhem
+[+18.9s] PASS C …and still says what's next
+[+19.7s] PASS C TV sound: the game this TV watched chimes once when its standings appear
+[+19.8s] PASS C one tap brings the standings back
+[+21.1s] PASS C TV: that's the night, with 2 games and the medals
+[+21.1s] PASS C guest lobby: that's the night
+[+21.1s] PASS C TV sound: one fanfare for the night's recap
+[+22.4s] PASS C …and nothing more — 3
+[+22.6s] PASS C the next game carries the night on: the recap and the notice are gone
+[+22.6s] TV MOMENTS ALL PASSED
+[+22.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":7,"pages":7,"peakOpenPages":4}
+
+# PASS (exit 0) in 22.7s | cpu 5.3s, peak memory 276 MB
