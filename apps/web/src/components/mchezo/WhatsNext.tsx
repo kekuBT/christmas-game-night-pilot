@@ -12,7 +12,7 @@
  * the break, the real roster). A refused press is answered here (`ask`,
  * `error`), with the same choices as the lobby.
  */
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { PartyView, PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 import { Keycap, OutcomeSummary } from "../../ui/mchezo/index.js";
 import { GameHeader, ScoreList } from "../../ui/mchezo/components/GameKit.js";
@@ -118,7 +118,12 @@ export function WhatsNext(p: WhatsNextProps) {
  * under it, the standings from the server's recorded scores, how the game
  * ended, and this player's own answers where the game has them.
  */
-export function CasualResults({ game, publicGame, players, playerId, title, hero, review, next, onBackToLobby }: {
+export function CasualResults({ game, publicGame, players, playerId, title, hero, review, next, onBackToLobby, tvWatching }: {
+  /**
+   * Stage 12.4 (docs/stage12/stage124.md §4; D-S124-04): a TV is watching this room. On Math Mayhem, the phone steps
+   * back: its own result and What's next stay, the full standings are one tap away, and the room looks at the TV.
+   */
+  tvWatching?: boolean;
   game: PlayerGame;
   publicGame?: PublicGame;
   players: PublicPlayer[];
@@ -130,6 +135,8 @@ export function CasualResults({ game, publicGame, players, playerId, title, hero
   onBackToLobby: () => void;
 }) {
   const nameOf = (id: string) => players.find((p) => p.id === id)?.displayName ?? "A player";
+  const [showAll, setShowAll] = useState(false);
+  const stepBack = !!tvWatching && game.gameId === "math-mayhem" && !showAll;
   const scores = publicGame?.rawScores ?? game.rawScores ?? {};
   const rows = Object.entries(scores).map(([id, score]) => ({
     id, name: nameOf(id), score: score as number, you: id === playerId,
@@ -139,8 +146,14 @@ export function CasualResults({ game, publicGame, players, playerId, title, hero
     <main className="mz-screen" aria-label={`${title} results`} data-testid="casual-results" data-game-id={game.id}>
       {hero}
       {next /* right under the result heading, before the standings and the answers (review 6778921208) */}
+      {stepBack ? (
+        <section className="mz-card mz-phone-tvnote" data-testid="phone-tv-note" aria-label="The results are on the TV">
+          <p className="mz-foot">📺 The full standings are on the TV. Look up!</p>
+          <button type="button" className="mz-chip-btn" data-testid="phone-full-results" onClick={() => setShowAll(true)}>Show them here too</button>
+        </section>
+      ) : null}
       {/* Stage 9.3: a cooperative game has one team result, never standings. */}
-      {game.outcome?.team ? (
+      {stepBack ? null : game.outcome?.team ? (
         <>
           <GameHeader title={title} objective="Team result" accent={3} />
           <p className="mz-foot" data-testid="casual-team-result">Team result: {game.outcome.team.total} out of {game.outcome.team.max} · one shared score for everyone who played.</p>
@@ -151,8 +164,8 @@ export function CasualResults({ game, publicGame, players, playerId, title, hero
           {rows.length > 0 ? <ScoreList rows={rows} /> : <p className="mz-foot">No scores were recorded for this game.</p>}
         </>
       )}
-      <OutcomeSummary gameId={game.gameId} outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} youChoseSatOut={game.abstained === true} />
-      {review && review.length > 0 && <AnswerReview rows={review} title="Your answers" />}
+      {!stepBack && <OutcomeSummary gameId={game.gameId} outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} youChoseSatOut={game.abstained === true} />}
+      {!stepBack && review && review.length > 0 && <AnswerReview rows={review} title="Your answers" />}
       <div className="mz-grow" />
       <Keycap block variant="surface" onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>
     </main>

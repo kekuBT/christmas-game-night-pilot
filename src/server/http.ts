@@ -4,7 +4,7 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { BriefingRefused, ContentShortage, CupUpgradeRefused, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
+import { BriefingRefused, ContentShortage, CupUpgradeRefused, FinishRefused, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY, getGame, isCooperative, isMemoryBookTeam } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
@@ -1233,6 +1233,23 @@ export class LocalServer {
           if (!done.replay) { this.persist(room); this.broadcast(room.id); }
           // The press's own outcome (who it handed over to) and the room's current host; never a saved projection or a past host state.
           this.send(res, 200, { ok: true, outcome: { from: done.from, to: done.to }, hostId: done.hostId, hostName: done.hostId ? room.players.get(done.hostId)?.displayName ?? null : null, ...(done.replay ? { replay: true } : {}) });
+          return;
+        }
+        // Stage 12.4 (D-S124-01, provisional rules): the host finishes the Family Cup on its final day.
+        // Stage 12.4 (D-S124-02): the host or a cohost ends a casual night (the TV shows the recap).
+        if (req.method === "POST" && ((parts.length === 4 && parts[2] === "cup" && parts[3] === "finish") || (parts.length === 3 && parts[2] === "night"))) {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const finishing = parts[2] === "cup";
+          let changed: boolean;
+          try {
+            ({ changed } = finishing ? room.finishCup(player.id) : room.endNight(player.id));
+          } catch (err) {
+            if (err instanceof FinishRefused) { this.send(res, err.code === "NOT_HOST" ? 403 : 409, { error: err.message, code: err.code }); return; }
+            throw err;
+          }
+          if (changed) { this.persist(room); this.broadcast(room.id); }
+          this.send(res, 200, { ok: true, changed, ...(finishing ? { cupFinished: room.cupFinished } : { nightComplete: room.nightComplete }) });
           return;
         }
         // Stage 7.1: save or clear the room's Quick Party lineup (host/cohost, casual rooms).

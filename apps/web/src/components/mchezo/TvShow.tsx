@@ -28,6 +28,7 @@ import type { Ceremony, PublicGame, RegistryGame } from "../../types.js";
 
 /** One public sentence per game: how it works, never what the answers are. */
 import { TV_HINT } from "../../ui/mchezo/lib/tvHints.js";
+import { chime, chimesPlayed, rememberSound, soundPreference } from "../../ui/mchezo/lib/tvSound.js";
 import { titleFor } from "../../ui/mchezo/lib/names.js";
 export { TV_HINT };
 
@@ -50,6 +51,14 @@ export interface TvShowProps {
   backLabel: string;
 }
 
+/**
+ * Stage 12.4: what this TV page has already rung, and the games it watched being played. Kept for the page, not the
+ * component: a spectator TV shows other screens during a briefing or a Trivia game, which remounts the show, and a
+ * remount must neither forget a watched game nor ring the same moment twice.
+ */
+const rungOnThisPage = new Set<string>();
+const watchedOnThisPage = new Set<string>();
+
 export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, onBack, backLabel }: TvShowProps) {
   const latest = feed.games.at(-1);
   const [choice, setChoice] = useState<TvChoice>("auto");
@@ -64,8 +73,9 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
   const ceremonies = useRef(new Map<number, Ceremony>());
   const lastDay = useRef<number | undefined>(undefined);
   const [trophy, setTrophy] = useState<{ day: number; winners: string[] } | null>(null);
+  // Stage 12.4: the games this TV watched being played (only their final standings chime, once, when they end).
   useEffect(() => {
-    if (latest && (latest.status === "briefing" || latest.status === "playing")) cupBefore.current.set(latest.id, feed.championship);
+    if (latest && (latest.status === "briefing" || latest.status === "playing")) { cupBefore.current.set(latest.id, feed.championship); watchedOnThisPage.add(latest.id); }
   }, [latest?.id, latest?.status, feed.championship]);
   useEffect(() => {
     if (!feed.cup) return;
@@ -79,23 +89,45 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
       setChoice("trophy");
     }
   }, [feed.cup, feed.championshipDay, feed.ceremony]);
-  const mode: TvMode = tvModeFor(latest, choice === "trophy" && !trophy ? "auto" : choice);
+  // Stage 12.4 (D-S124-01/02): a finished Cup's champion and a completed night's recap are the TV's moment. They come
+  // from the server's record, so a TV opened later shows them too. Shown by default until a new game starts; the
+  // director can pick any other view and come back.
+  const moment = feed.cupFinished ? "champion" as const : feed.nightComplete ? "night" as const : null;
+  const momentKey = feed.cupFinished ? `cup:${feed.cupFinished.seq}` : feed.nightComplete ? `night:${feed.nightComplete.seq}` : "";
+  const [momentAt, setMomentAt] = useState<{ key: string; game?: string } | null>(null);
+  useEffect(() => { setMomentAt(momentKey ? { key: momentKey, game: latest?.id } : null); if (momentKey) setChoice("auto"); }, [momentKey]);
+  const momentFresh = !!moment && momentAt?.key === momentKey && momentAt.game === latest?.id;
+  const active = latest?.status === "briefing" || latest?.status === "playing";
+  const showMoment = !!moment && !active && (choice === "moment" || (choice === "auto" && momentFresh));
+  // Stage 12.4 (D-S124-03): optional sound, off by default, remembered on this TV; silent while animations are paused.
+  const [soundOn, setSoundOn] = useState(soundPreference);
+  const [, setPlays] = useState(0);
+  const ring = (key: string, kind: "fanfare" | "soft") => {
+    if (!soundOn || paused || rungOnThisPage.has(key)) return;
+    rungOnThisPage.add(key);
+    if (chime(kind)) setPlays((n) => n + 1);
+  };
+  const mode: TvMode = tvModeFor(latest, choice === "trophy" && !trophy ? "auto" : choice === "moment" ? "lobby" : choice);
+  useEffect(() => { if (showMoment) ring(momentKey, "fanfare"); }, [showMoment, momentKey]);
+  // One sound per moment, for what is on screen: never a game's chime under the Cup's champion or the night's recap.
+  useEffect(() => { if (!showMoment && trophy && mode === "trophy") ring(`trophy:${trophy.day}`, "fanfare"); }, [trophy, mode, showMoment]);
+  useEffect(() => { if (!showMoment && mode === "final" && latest?.status === "finished" && watchedOnThisPage.has(latest.id)) ring(`final:${latest.id}`, "soft"); }, [mode, latest?.id, latest?.status, showMoment]);
   const titleOf = (id: string) => titleFor(id, registry);
   const nameOf = (id: string) => feed.players.find((p) => p.id === id)?.displayName ?? "A player";
   const review = latest && mode !== "live" && latest.status === "finished" ? renderReview?.(latest) ?? null : null;
-  const game = mode === "lobby" || mode === "cup" || mode === "trophy" ? undefined : latest;
+  const game = showMoment || mode === "lobby" || mode === "cup" || mode === "trophy" ? undefined : latest;
   // Stage 9.3: a cooperative game's final view is its team result, never "standings".
   const finalLabel = latest?.outcome?.team ? "Team result" : TV_MODE_LABEL.final;
-  const modeLabel = mode === "final" ? finalLabel : mode === "trophy" && trophy ? `Day ${trophy.day} complete` : TV_MODE_LABEL[mode];
+  const modeLabel = showMoment ? (moment === "champion" ? "Family Cup complete" : "Night complete") : mode === "final" ? finalLabel : mode === "trophy" && trophy ? `Day ${trophy.day} complete` : TV_MODE_LABEL[mode];
   const before = latest ? cupBefore.current.get(latest.id) : undefined;
 
   return (
-    <div className={`mz-tvshow${paused ? " mz-tvshow--paused" : ""}`} data-testid="tv-show" data-mode={mode} data-game={game?.gameId ?? ""}>
+    <div className={`mz-tvshow${paused ? " mz-tvshow--paused" : ""}`} data-testid="tv-show" data-mode={showMoment ? moment : mode} data-game={game?.gameId ?? ""}>
       <TVStage label="Game night TV">
         <header className="mz-tvshow-top">
           <div className="mz-tvshow-top__left"><Wordmark size={34} />{game && <span className="mz-tvshow-title">{titleOf(game.gameId)}</span>}</div>
           <div className="mz-tvshow-top__mid">
-            <span className={`mz-tvshow-mode mz-tvshow-mode--${mode}`} data-testid="tv-mode" data-mode={mode}>{mode === "live" && <i aria-hidden="true" />}{modeLabel}</span>
+            <span className={`mz-tvshow-mode mz-tvshow-mode--${showMoment ? "trophy" : mode}`} data-testid="tv-mode" data-mode={showMoment ? moment : mode}>{mode === "live" && <i aria-hidden="true" />}{modeLabel}</span>
             {game && <span className={`mz-tvshow-chip mz-tvshow-chip--${game.official ? "official" : "practice"}`}>{gameModeWord(game, feed)}</span>}
           </div>
           <div className="mz-tvshow-top__right">
@@ -104,12 +136,14 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
           </div>
         </header>
         <main className="mz-tvshow-main" key={replay} aria-live="polite">
-          {mode === "lobby" && <TvLobby feed={feed} titleOf={titleOf} nameOf={nameOf} registry={registry} />}
-          {mode === "live" && latest && (renderLive?.(latest) ?? <TvLive game={latest} title={titleOf(latest.gameId)} nameOf={nameOf} casual={feed.casual} />)}
-          {mode === "final" && latest && (renderFinal?.(latest) ?? <TvFinal game={latest} title={titleOf(latest.gameId)} feed={feed} nameOf={nameOf} titleOf={titleOf} cupBefore={before} paused={paused} />)}
-          {mode === "cup" && <TvCupView feed={feed} nameOf={nameOf} paused={paused} />}
-          {mode === "trophy" && trophy && <TvTrophy trophy={trophy} feed={feed} paused={paused} />}
-          {mode === "review" && latest && (
+          {showMoment && moment === "champion" && <TvChampion feed={feed} nameOf={nameOf} paused={paused} />}
+          {showMoment && moment === "night" && <TvNightRecap feed={feed} nameOf={nameOf} titleOf={titleOf} paused={paused} />}
+          {!showMoment && mode === "lobby" && <TvLobby feed={feed} titleOf={titleOf} nameOf={nameOf} registry={registry} />}
+          {!showMoment && mode === "live" && latest && (renderLive?.(latest) ?? <TvLive game={latest} title={titleOf(latest.gameId)} nameOf={nameOf} casual={feed.casual} />)}
+          {!showMoment && mode === "final" && latest && (renderFinal?.(latest) ?? <TvFinal game={latest} title={titleOf(latest.gameId)} feed={feed} nameOf={nameOf} titleOf={titleOf} cupBefore={before} paused={paused} />)}
+          {!showMoment && mode === "cup" && <TvCupView feed={feed} nameOf={nameOf} paused={paused} />}
+          {!showMoment && mode === "trophy" && trophy && <TvTrophy trophy={trophy} feed={feed} paused={paused} />}
+          {!showMoment && mode === "review" && latest && (
             <section className="mz-tvshow-review" data-testid="tv-review">
               <p className="mz-tvshow-review__note">This game is over. This is a look back: nothing here can still be answered.</p>
               {review ?? <p className="mz-tvshow-empty">Nothing to review for this game.</p>}
@@ -119,12 +153,16 @@ export function TvShow({ feed, registry, renderLive, renderFinal, renderReview, 
         <footer className="mz-tvshow-foot">
           <span className="mz-tvshow-privacy">Public view: no secret words, private answers, or answers that can still be played.</span>
           <nav className="mz-tvshow-director" aria-label="TV controls">
-            {latest?.status === "finished" && <button type="button" className="mz-chip-btn" aria-pressed={mode === "final"} data-testid="tv-dir-final" onClick={() => setChoice("final")}>{finalLabel}</button>}
-            {latest?.status === "finished" && review && <button type="button" className="mz-chip-btn" aria-pressed={mode === "review"} data-testid="tv-dir-review" onClick={() => setChoice("review")}>Post-game review</button>}
-            {(latest?.status === "finished" || mode === "cup" || mode === "trophy") && <button type="button" className="mz-chip-btn" aria-pressed={mode === "lobby"} data-testid="tv-dir-lobby" onClick={() => setChoice("lobby")}>Lobby view</button>}
+            {latest?.status === "finished" && <button type="button" className="mz-chip-btn" aria-pressed={!showMoment && mode === "final"} data-testid="tv-dir-final" onClick={() => setChoice("final")}>{finalLabel}</button>}
+            {/* Stage 12.4: under a moment the review is one step away (Final standings, then review), so the row stays on one line. */}
+            {latest?.status === "finished" && review && !showMoment && <button type="button" className="mz-chip-btn" aria-pressed={mode === "review"} data-testid="tv-dir-review" onClick={() => setChoice("review")}>Post-game review</button>}
+            {(latest?.status === "finished" || mode === "cup" || mode === "trophy" || showMoment) && <button type="button" className="mz-chip-btn" aria-pressed={!showMoment && mode === "lobby"} data-testid="tv-dir-lobby" onClick={() => setChoice("lobby")}>Lobby view</button>}
+            {moment && <button type="button" className="mz-chip-btn" aria-pressed={showMoment} data-testid="tv-dir-moment" onClick={() => setChoice("moment")}>{moment === "champion" ? "Champion" : "Night recap"}</button>}
             {feed.cup && mode !== "live" && mode !== "briefing" && <button type="button" className="mz-chip-btn" aria-pressed={mode === "cup"} data-testid="tv-dir-cup" onClick={() => setChoice("cup")}>Cup standings</button>}
             <button type="button" className="mz-chip-btn" aria-pressed={paused} data-testid="tv-dir-pause" onClick={() => setPaused((p) => !p)}>{paused ? "Resume animations" : "Pause animations"}</button>
             <button type="button" className="mz-chip-btn" data-testid="tv-dir-replay" onClick={() => { setPaused(false); setReplay((n) => n + 1); }}>Replay</button>
+            <button type="button" className="mz-chip-btn" aria-pressed={soundOn} aria-label={soundOn ? "TV sound is on. Turn it off" : "TV sound is off. Turn it on"} data-testid="tv-dir-sound" data-plays={chimesPlayed()}
+              onClick={() => { const on = !soundOn; setSoundOn(on); rememberSound(on); if (on && chime("soft")) setPlays((n) => n + 1); }}>{soundOn ? "🔊 Sound" : "🔇 Sound"}</button>
             <button type="button" className="mz-chip-btn" data-testid="tv-back" onClick={onBack}>{backLabel}</button>
           </nav>
         </footer>
@@ -433,6 +471,49 @@ function TvCupView({ feed, nameOf, paused }: { feed: TvFeed; nameOf: (id: string
         {rows.length > 0 && <div className="mz-tvfinal__right"><TvCupList rows={rows} nameOf={nameOf} limit={10} kicker="Cup standings · totals so far" testId="tv-cup-standings" /></div>}
       </div>
       <p className="mz-tvshow-next">{day >= CUP_DAYS ? `Day ${CUP_DAYS} of ${CUP_DAYS}: the final day. Totals so far.` : "Totals so far. They can change every day until the Cup ends."}</p>
+    </section>
+  );
+}
+
+const joinNames = (names: readonly string[]) => names.length === 0 ? "" : names.length === 1 ? names[0]! : names.length === 2 ? `${names[0]} and ${names[1]}` : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
+
+/**
+ * Stage 12.4 (D-S124-01, provisional rules): the finished Family Cup. The champion(s) and the final standings exactly as
+ * the server recorded them when the host finished the Cup; nobody eligible means no champion, said plainly.
+ */
+function TvChampion({ feed, nameOf, paused }: { feed: TvFeed; nameOf: (id: string) => string; paused: boolean }) {
+  const f = feed.cupFinished!;
+  const nameIn = (id: string) => f.standings.find((x) => x.playerId === id)?.displayName ?? nameOf(id);
+  const names = f.champions.map(nameIn);
+  const who = joinNames(names);
+  const rows = cupRows(f.standings.map((x) => ({ playerId: x.playerId, total: x.total, eligible: x.eligible })));
+  return (
+    <section className={`mz-trophy mz-champion${paused ? "" : " mz-trophy--animate"}`} data-testid="tv-champion" data-champions={names.join("|")}>
+      {who && <span className="mz-trophy__cup" aria-hidden="true">🏆</span>}
+      <h1 className="mz-trophy__title">The Family Cup is complete</h1>
+      {who ? <p className="mz-trophy__who" data-testid="tv-champion-who">{names.length === 1 ? `${who} is the Family Cup champion` : `${who} share the Family Cup`}</p>
+        : <p className="mz-trophy__line" data-testid="tv-champion-who">No champion this time: nobody played on enough Cup days to be eligible.</p>}
+      {rows.length > 0 && <div className="mz-champion__list"><TvCupList rows={rows} nameOf={nameIn} limit={6} kicker={`Final standings · Day ${f.day}`} testId="tv-champion-standings" /></div>}
+      <p className="mz-trophy__line mz-champion__rules">Try-out rules: the highest total among eligible players wins; equal totals share the title.</p>
+    </section>
+  );
+}
+
+/** Stage 12.4 (D-S124-02): a casual night's recap after the host ends it: the medals and the games, public facts only. */
+function TvNightRecap({ feed, nameOf, titleOf, paused }: { feed: TvFeed; nameOf: (id: string) => string; titleOf: (id: string) => string; paused: boolean }) {
+  const table = medalTable(feed.games, nameOf);
+  const finished = feed.games.filter((g) => g.status === "finished");
+  return (
+    <section className={`mz-trophy mz-night${paused ? "" : " mz-trophy--animate"}`} data-testid="tv-night" data-games={finished.length}>
+      <h1 className="mz-trophy__title">That’s the night!</h1>
+      <p className="mz-trophy__line" data-testid="tv-night-count">{finished.length} {finished.length === 1 ? "game" : "games"} played. Thanks for playing.</p>
+      <div className="mz-night__grid">
+        {table.games > 0 && <TvMedalCard table={table} nameOf={nameOf} limit={5} />}
+        <section className="mz-tvshow-card" data-testid="tv-night-games">
+          <span className="mz-tv-kicker">Tonight’s games</span>
+          <ol className="mz-tvshow-recent">{finished.slice(-6).map((g) => <li key={g.id}><b>{titleOf(g.gameId)}</b> · {resultLine(g, nameOf)}</li>)}</ol>
+        </section>
+      </div>
     </section>
   );
 }

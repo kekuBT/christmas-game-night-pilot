@@ -12,7 +12,7 @@ import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, type Route, type RoomSub } from "./ui/mchezo/index.js";
 import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen, TvEntryScreen } from "./components/mchezo/Home.js";
 import { SoloHome, SoloRound, soloShelf } from "./components/mchezo/Solo.js";
-import { ChooseGameSheet, MakeCupSheet, RoomLobby, RoomMenuSheet, UndoCupSheet } from "./components/mchezo/Lobby.js";
+import { ChooseGameSheet, MakeCupSheet, RoomLobby, RoomMenuSheet, UndoCupSheet, FinishCupSheet, EndNightSheet } from "./components/mchezo/Lobby.js";
 import { PartyStartAsk, QuickPartyCard, QuickPartySheet, type PartyApplyResult, type PartyAsk, type PartyPlanInput } from "./components/mchezo/QuickParty.js";
 import { anchorHomeBelow, stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
@@ -68,6 +68,7 @@ import { uuidV4 } from "./uuid.js";
 import { lookTheme, resolveLook, useDocumentLook, useLookPref, useLookSaved, useShownSeason, type LookContext } from "./ui/mchezo/look.js";
 import { useSoloSeason } from "./solo/soloSeason.js";
 import type { SessionSeason } from "../../../src/shared/season.js";
+import { cupChampions } from "../../../src/shared/cupFinish.js";
 
 /** Per-tab UI state (spectator seat, dismissed screens). Never throws: a
     browser that blocks site data must still be able to play. */
@@ -1053,7 +1054,7 @@ export function App() {
   const serverPlan = proj?.upNext;
   const localPlan = (() => {
     const g = games.find((x) => x.id === upNextId) ?? games[0];
-    return g ? { gameId: g.id, official: proj?.roomKind !== "casual" && proj?.roomKind !== "solo" && g.lifecycle?.officialEligible !== false && gameMode === "official" } : undefined;
+    return g ? { gameId: g.id, official: proj?.roomKind !== "casual" && proj?.roomKind !== "solo" && !proj?.cupFinished && g.lifecycle?.officialEligible !== false && gameMode === "official" } : undefined;
   })();
   const publishPlan = (plan: { gameId: string; official: boolean } | undefined) => {
     if (!roomId || !plan) return;
@@ -1560,7 +1561,8 @@ export function App() {
       return next;
     });
   };
-  const startMode: "official" | "practice" = casualRoom || upNextPracticeOnly ? "practice" : planner ? gameMode : serverPlan?.official ? "official" : "practice";
+  // Stage 12.4 (D-S124-01): a finished Family Cup starts practice games only.
+  const startMode: "official" | "practice" = casualRoom || upNextPracticeOnly || !!proj?.cupFinished ? "practice" : planner ? gameMode : serverPlan?.official ? "official" : "practice";
 
   // D1: the server refuses official starts with fewer than 2 competitors. Say so
   // before Start, with an explicit switch — the mode is never changed silently.
@@ -1752,6 +1754,50 @@ export function App() {
           }}
         />
       )}
+      {/* Stage 12.4 (D-S124-01, provisional rules): Finish the Family Cup. */}
+      {sheet === "finishcup" && me?.isHost && proj?.roomKind === "cup" && (
+        <FinishCupSheet
+          preview={cupChampions(proj.championship ?? []).map(nameOf)}
+          busy={cupBusy}
+          error={cupErr || undefined}
+          onClose={closeSheet}
+          onConfirm={async () => {
+            setCupBusy(true); setCupErr("");
+            try {
+              await post<Record<string, unknown>>(`/rooms/${roomId}/cup/finish`, {});
+              setMsg("The Family Cup is complete.");
+              closeSheet();
+            } catch (e) {
+              setCupErr(e instanceof Error && e.message ? e.message : "The game didn’t answer. Nothing changed; try again.");
+            } finally {
+              setCupBusy(false);
+              void refresh();
+            }
+          }}
+        />
+      )}
+      {/* Stage 12.4 (D-S124-02): End the night (a casual room). */}
+      {sheet === "endnight" && isHostish && proj?.roomKind === "casual" && (
+        <EndNightSheet
+          games={(proj.games ?? []).filter((g) => g.status === "finished").length}
+          busy={cupBusy}
+          error={cupErr || undefined}
+          onClose={closeSheet}
+          onConfirm={async () => {
+            setCupBusy(true); setCupErr("");
+            try {
+              await post<Record<string, unknown>>(`/rooms/${roomId}/night`, {});
+              setMsg("That’s the night! The TV shows the recap.");
+              closeSheet();
+            } catch (e) {
+              setCupErr(e instanceof Error && e.message ? e.message : "The game didn’t answer. Nothing changed; try again.");
+            } finally {
+              setCupBusy(false);
+              void refresh();
+            }
+          }}
+        />
+      )}
       {sheet === "menu" && (
         <RoomMenuSheet
           cupLabel={casualRoom ? undefined : cupLabel}
@@ -1766,6 +1812,8 @@ export function App() {
           onReconnect={() => { void reconnect(); }}
           onMakeCup={me?.isHost && proj?.roomKind === "casual" ? () => { setCupErr(""); openSheet("cup"); } : undefined}
           onUndoCup={me?.isHost && proj?.roomKind === "cup" && proj.cupSince && !(proj.games ?? []).some((g) => g.official && g.status === "finished") ? () => { setCupErr(""); openSheet("uncup"); } : undefined}
+          onFinishCup={me?.isHost && proj?.roomKind === "cup" && !proj.cupFinished && (proj.championshipDay ?? 1) >= 7 && !(proj.games ?? []).some((g) => g.status === "briefing" || g.status === "playing") ? () => { setCupErr(""); openSheet("finishcup"); } : undefined}
+          onEndNight={isHostish && proj?.roomKind === "casual" && !proj.nightComplete && (proj.games ?? []).some((g) => g.status === "finished") && !(proj.games ?? []).some((g) => g.status === "briefing" || g.status === "playing") ? () => { setCupErr(""); openSheet("endnight"); } : undefined}
           // While the menu is open its messages show here (and not in the dock).
           message={err || msg ? <div className="mz-menu__msg">{err && <p className="err">{err}</p>}{msg && <p className="ok" role="status">{msg}</p>}</div> : undefined}
           phone={<SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} lookSaved={lookSaved} />}
@@ -1911,6 +1959,9 @@ export function App() {
             : watchingGame ? <NoticeCard tone="info" title={`${games.find((x) => x.id === watchingGame.gameId)?.title ?? "A game"} is being played`} testId="not-in-game-note">It started before you joined, so you’ll play the next one.</NoticeCard>
             // Stage 12.1 (D-S121-02): everyone hears the room became a Family Cup, until its first official game finishes.
             : proj?.cupSince && !(proj.games ?? []).some((g) => g.official && g.status === "finished") ? <NoticeCard tone="info" title="This room is now a Family Cup" testId="cup-started-notice">Day {proj.championshipDay ?? 1} of 7. Official games count toward the standings; the games played before stay casual.</NoticeCard>
+            // Stage 12.4 (D-S124-01/02): a finished Family Cup, and a completed night, for everyone in the lobby.
+            : proj?.cupFinished ? <NoticeCard tone="info" title="The Family Cup is complete" testId="cup-finished-notice">{proj.cupFinished.champions.length === 0 ? "No champion this time: nobody played on enough Cup days." : `${proj.cupFinished.champions.length === 1 ? "Champion" : "Champions"}: ${proj.cupFinished.champions.map((id) => proj.cupFinished!.standings.find((x) => x.playerId === id)?.displayName ?? nameOf(id)).join(" and ")}.`} No more official games; practice games still work. Try-out rules, not yet confirmed for an official championship.</NoticeCard>
+            : proj?.nightComplete ? <NoticeCard tone="info" title="That’s the night!" testId="night-complete-notice">The TV is showing tonight’s recap. Start any game to keep playing.</NoticeCard>
             // Stage 12.2 (D-S122-01): everyone hears the room went back to a casual game night, until the next game starts.
             : proj?.roomKind === "casual" && proj.cupUndone && (proj.games ?? []).length <= proj.cupUndone.games ? <NoticeCard tone="info" title="A casual game night again" testId="cup-undone-notice">The host went back from the Family Cup before any official game finished. Quick Party and What’s next are back; nothing counted.</NoticeCard>
             // Stage 12.2 (D-S122-02): the host's gentle nudge after two finished games (never once the room has been a Cup).
@@ -2364,6 +2415,7 @@ export function App() {
           review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined}
           next={nextPanel(latestFinished)}
           onBackToLobby={() => dismissResults(latestFinished.id)}
+          tvWatching={(proj?.spectatorCount ?? 0) > 0}
         />
       </MchezoProvider>
     );
