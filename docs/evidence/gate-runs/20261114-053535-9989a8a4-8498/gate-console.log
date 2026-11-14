@@ -1,0 +1,110 @@
+Mchezo gate targeted | run 20261114-053535-9989a8a4-8498
+  revision 9989a8a4761926ee7ebc21ea235e782303fd58e1 (clean tree) | fingerprint 3c958b13aee3 (541 files)
+  plan     20 steps: 1 fast/build, 18 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  152 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 128 run(s))
+  estimate this run: 4–12m (low-confidence) · the same steps one after another: about 16m 14s · longest step check-session-flow ~2m 55s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-tv-moments
+  thin     only 1–2 samples for: check-cup-party
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt-9989a8a/test-results/20261114-053535-9989a8a4-8498
+        start build-web on w1 (usually 6s)
+[ 1/20] PASS         5.2s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/20] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:43401 (pid 8610, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt-9989a8a/test-results/20261114-053535-9989a8a4-8498/server-data/w1)
+  server   w2 http://localhost:40111 (pid 8611, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt-9989a8a/test-results/20261114-053535-9989a8a4-8498/server-data/w2)
+  server   w3 http://localhost:37553 (pid 8612, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt-9989a8a/test-results/20261114-053535-9989a8a4-8498/server-data/w3)
+        start check-session-flow on w1 (usually 2m 55s)
+        start check-tv-lifecycle on w2 (usually 2m 26s)
+        start check-tv-reveal on w3 (usually 1m 22s)
+── progress  2/20 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-session-flow 53s (w1), check-tv-lifecycle 53s (w2), check-tv-reveal 53s (w3)
+   remaining 3–11m · total 4–12m · done around 05:39–05:46 UTC (low-confidence)
+[ 3/20] PASS        89.6s  check-tv-reveal  w3
+        start check-warm-ivory on w3 (usually 1m 04s)
+── progress  3/20 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-session-flow 1m 53s (w1), check-tv-lifecycle 1m 53s (w2), check-warm-ivory 23s (w3)
+   remaining 2–10m · total 4–12m · done around 05:40–05:46 UTC (low-confidence)
+[ 4/20] PASS       153.1s  check-tv-lifecycle  w2
+        start check-tv-moments on w2 (no timing history)
+[ 5/20] FAIL        67.3s  check-warm-ivory  w3  FAIL W8 Everyday menu-390: every element kind's computed colours equal the base build's (d4dc408) — 192 kinds; new 6, missing 0; 7 intended Stage 12.1 element c
+      | PASS W1 memory at 1280 px: every text element reads (4.5:1, large 3:1) — 30 text elements, lowest 6.24:1, 1 disabled or faded (exempt)
+      | PASS W2 memory at 1280 px: every control stands out from what's behind it (3:1) — 6 controls, weakest 4.03:1
+      | PASS W3 memory at 1280 px: no dark page, card or panel
+      | PASS W5 memory at 1280 px: nothing animates with Animations Off — 0 running
+      | PASS W2 the focus ring after Tab is visible and stands out (3:1, at least 2 px) — memory-back 3px 5.06:1; room-menu 3px 5.06:1; TEXTAREA 3px 7.11:1; SUMMARY 3px 5.56:1
+      | PASS W2 a disabled key looks different from the same key enabled (its fill differs) — disabled rgb(239, 230, 214), enabled rgb(163, 37, 58)
+      | PASS W6 Memory Book: Christmas -> Everyday -> Christmas from the room menu keeps the unsent draft (no reload) — {"mid":["everyday","A draft that survives a change of look"],"end":["christmas","A draft that survives a change of look"]}
+      | PASS W7 Christmas PDF: ivory page, cranberry title, the approved note, not the pending one — christmas-memory-book-MZA8T2-2026-11-14.pdf
+      | PASS W7 Christmas share image: its background is the ivory ground (247, 241, 230) — [247,241,230]
+      | PASS W7 Everyday PDF: unchanged (no page fill, no coloured title) — mchezo-memory-book-MZA8T2-2026-11-14.pdf
+      | PASS W7 after a revoke, a fresh Christmas PDF leaves the revoked note out and keeps the approved one — christmas-memory-book-MZA8T2-2026-11-14.pdf
+      | PASS W6 a game in progress: another tab's look change re-themes it, with no reload and the same question — {"before":["christmas","Question 2 of 10"],"after":["everyday","Question 2 of 10"]}
+      | 
+      | 2 check(s) FAILED
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":21,"pages":22,"peakOpenPages":3}
+        start check-spectator on w3 (usually 56s)
+── progress  5/20 done · 4 passed, 1 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-session-flow 2m 53s (w1), check-tv-moments 20s (w2), check-spectator 16s (w3)
+   remaining 2–8m · total 5–11m · done around 05:40–05:45 UTC (low-confidence)
+[ 6/20] PASS        21.5s  check-tv-moments  w2
+        start check-casual on w2 (usually 52s)
+[ 7/20] FAIL       184.3s  check-session-flow  w1  FAIL A host: standings with both players — 0 | FAIL A host: their own answers to review | FAIL A guest: standings with both players — 0 | FAIL A guest: their ow
+      | PASS J picked by hand: a plain Start (not the lineup's), and the lineup says it is waiting
+      | PASS J the hand-picked start sent no lineup selector — [{"gameId":"math-mayhem","official":false,"roster":["player-1","player-2"],"attempt":{"id":"bafdde04-9d9c-413f-b1e3-770c39669e8c","sessionRevision":0},"season":"everyday"}]
+      | PASS J the hand-picked Math game ends on its results
+      | PASS J it completed, and the lineup's Math item is still pending: nothing was consumed — {"games":[["math-mayhem","finished"]],"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"guess-the-year","started":false,"status":"pending"}],"next":0}
+      | PASS J Play again: a rematch of Math, and the lineup is unchanged (Math still pending, still next) — {"games":[["math-mayhem","finished"],["math-mayhem","briefing"]],"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"guess-the-year","started":false,"status":"pending"}]}
+      | PASS J the rematch is cancelled before play: back on the results, one game
+      | PASS J the results' What's next is back
+      | PASS J Trivia picked by hand: a plain Start
+      | PASS J the hand-picked Trivia ends on its results, with the panel
+      | PASS J after the hand-picked Trivia: the lineup is still at Math, pending — {"games":[["math-mayhem","finished"],["trivia","finished"]],"items":[{"gameId":"math-mayhem","started":false,"status":"pending"},{"gameId":"guess-the-year","started":false,"status":"pending"}]}
+      | PASS J the results offer the lineup's Next game: Math Mayhem
+      | PASS J Next starts the pending Math item: that item now has this game — {"games":[["game-1","math-mayhem","finished"],["game-3","trivia","finished"],["game-4","math-mayhem","briefing"]],"items":[{"gameId":"math-mayhem","started":true,"status":"briefing","gameInstanceId":"game-4"},{"gameId":"guess-the-year","started":false,"status":"pending"}]}
+      | 
+      | 4 check(s) FAILED
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+        start check-f4 on w1 (usually 50s)
+[ 8/20] PASS          59s  check-spectator  w3
+        start check-results on w3 (usually 49s)
+[ 9/20] PASS        53.6s  check-casual  w2
+        start check-quick-party on w2 (usually 46s)
+── progress  9/20 done · 7 passed, 2 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-f4 49s (w1), check-results 17s (w3), check-quick-party 5s (w2)
+   remaining 1–4m · total 5–8m · done around 05:40–05:42 UTC (low-confidence)
+[10/20] PASS        52.8s  check-f4  w1
+        start check-tv-spectator on w1 (usually 44s)
+[11/20] PASS        49.5s  check-results  w3
+        start check-cup-party on w3 (usually 31s)
+[12/20] PASS        49.4s  check-quick-party  w2
+        start check-one-path on w2 (usually 30s)
+[13/20] PASS        46.8s  check-tv-spectator  w1
+        start check-contrast on w1 (usually 26s)
+── progress  13/20 done · 11 passed, 2 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-cup-party 27s (w3), check-one-path 15s (w2), check-contrast 9s (w1)
+   remaining 28–80s · total 5–7m · done around 05:41–05:41 UTC (low-confidence)
+[14/20] PASS        33.8s  check-cup-party  w3
+        start check-tv-entry on w3 (usually 22s)
+[15/20] PASS        27.5s  check-contrast  w1
+        start check-lobby-mode on w1 (usually 19s)
+[16/20] PASS        34.3s  check-one-path  w2
+        start check-tv-show on w2 (usually 11s)
+[17/20] PASS        24.5s  check-tv-entry  w3
+        start check-tv-dashboard on w3 (usually 5s)
+[18/20] PASS        12.7s  check-tv-show  w2
+[19/20] PASS         5.3s  check-tv-dashboard  w3
+[20/20] PASS        20.2s  check-lobby-mode  w1
+
+FAILED (exit 1) | targeted | run 20261114-053535-9989a8a4-8498
+  18 passed, 2 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-session-flow (w1) [functional]: FAIL A host: standings with both players — 0 | FAIL A host: their own answers to review | FAIL A guest: standings with both players — 0 | FAIL A guest: their own answers to review
+  FAIL      check-warm-ivory (w3) [functional]: FAIL W8 Everyday menu-390: every element kind's computed colours equal the base build's (d4dc408) — 192 kinds; new 6, missing 0; 7 intended Stage 12.1 element change(s), each reusing a base style e.g.
+  timing   wall 5m 39s · step time 16m 31s (sum) · 3 workers, 97% busy · 2.92× the same steps run one after another
+           predicted 4–12m (about 5m 40s, low-confidence) → actual 5m 39s (0%)
+           longest  check-session-flow 3m 04s, check-tv-lifecycle 2m 33s, check-tv-reveal 1m 30s · the longest step is 54% of the wall time
+           machine  CPU mean 36%, peak 89% · memory available ≥ 13707 MB · load peak 3.56
+           contention ×1.058 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt-9989a8a/test-results/20261114-053535-9989a8a4-8498/report.json

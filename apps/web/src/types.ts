@@ -139,6 +139,16 @@ export interface Ceremony {
 }
 
 /** Stage 7.1: the room's Quick Party lineup (casual rooms), as the server projects it to everyone. */
+/** Stage 12.4: what a finished Family Cup recorded: its standings then, and the champion(s). */
+export interface CupFinishedView {
+  at: number;
+  seq: number;
+  day: number;
+  rules: string;
+  champions: string[];
+  standings: { playerId: string; displayName: string; total: number; eligible: boolean; rank: number }[];
+}
+
 export interface PartyView {
   revision: number;
   lineup: null | {
@@ -187,6 +197,10 @@ export interface Projection {
   casualGameIds?: string[];
   /** Stage 12.2 (D-S122-01): when this room went back from a Family Cup to a casual game night, and its game count then. */
   cupUndone?: { at: number; seq: number; games: number };
+  /** Stage 12.4 (D-S124-01, provisional rules): a finished Family Cup's record (public). */
+  cupFinished?: CupFinishedView;
+  /** Stage 12.4 (D-S124-02): the host ended a casual night (public; a new game clears it). */
+  nightComplete?: { at: number; seq: number; games: number };
   /** Stage 7.1: casual rooms only. */
   party?: PartyView;
   /** Stage 7.2: casual rooms only. */

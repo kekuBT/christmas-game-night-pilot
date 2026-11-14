@@ -100,3 +100,9 @@
 .mz-party__modebtn { flex: none; min-height: 44px; }
 .mz-party__modefix { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 22px; border: 1.5px dashed var(--mz-line); color: var(--mz-text); font: 700 14px var(--mz-font-body); }
 .mz-party__mode { font-weight: 800; color: var(--mz-text); }
+
+/* ---- Stage 12.4: the TV's moments (a finished Family Cup, a completed night) ---- */
+.mz-champion__list { width: min(960px, 100%); margin: 12px auto 0; text-align: left; }
+.mz-champion__rules { font-size: 18px; }
+.mz-night__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: min(1400px, 100%); margin: 16px auto 0; text-align: left; align-items: start; }
+.mz-phone-tvnote { margin: 8px 16px; }

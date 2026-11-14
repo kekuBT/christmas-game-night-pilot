@@ -2,6 +2,7 @@ import { createHash, randomInt } from "node:crypto";
 import { moduleFor, moduleForAction } from "../games/modules/index.js";
 import type { ModuleContext } from "../games/modules/types.js";
 import { GAME_REGISTRY, getGame, isCooperative } from "../games/registry.js";
+import { CUP_FINISH_RULES, cupChampions, sharedRanks } from "../shared/cupFinish.js";
 import type { TeamResult } from "../shared/teamResult.js";
 import { sameSettings, validateGameSettings, type GameSettings } from "../games/settings.js";
 import { PARTY_TRANSITION_MINUTES, validatePartyPlan } from "../games/party.js";
@@ -219,6 +220,8 @@ export interface Readiness {
 export type StartRefusedCode =
   | "ROSTER_CHANGED" | "PLAYERS_RECONNECTING" | "OFFICIAL_NEEDS_TWO" | "NOT_A_CUP_ROOM" | "NOT_A_SOLO_GAME"
   | "NOT_A_CASUAL_ROOM" | "PLAN_CONFLICT" | "PARTY_FEWER_THAN_PLANNED" | "PARTY_DOESNT_FIT"
+  // Stage 12.4 (D-S124-01): a finished Family Cup starts no official game.
+  | "CUP_FINISHED"
   // Stage 7.2 (docs/stage7/stage72.md §3.2–3.4): the room is on a break
   // (resume first); the request was made against an older session state
   // (SESSION_CONFLICT); a repeat of a start whose briefing was cancelled
@@ -330,6 +333,25 @@ export class SessionRefused extends Error {
 }
 
 /** Stage 12.1 (D-S121-02): a "Make it a Family Cup" the server refused (HTTP 403/409). Nothing changed. */
+// Stage 12.4: the finish rules and the champion rule are shared with the phones (src/shared/cupFinish.ts).
+export { CUP_FINISH_RULES, cupChampions, sharedRanks } from "../shared/cupFinish.js";
+/** Stage 12.4: what a finished Family Cup recorded (public facts: the Cup's own standings at that moment). */
+export interface CupFinished {
+  at: number;
+  seq: number;
+  day: number;
+  rules: typeof CUP_FINISH_RULES.version;
+  champions: string[];
+  standings: { playerId: string; displayName: string; total: number; eligible: boolean; rank: number }[];
+}
+
+/** Stage 12.4: a request to finish the Family Cup or end the night, refused (HTTP 403/409). Nothing changed. */
+export class FinishRefused extends Error {
+  constructor(readonly code: "NOT_HOST" | "NOT_A_CUP" | "NOT_A_CASUAL_ROOM" | "NOT_FINAL_DAY" | "GAME_IN_PROGRESS" | "CUP_RECORD_UNREADABLE" | "NO_GAMES_YET", message: string) {
+    super(message);
+  }
+}
+
 export class CupUpgradeRefused extends Error {
   constructor(readonly code: "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "GAME_IN_PROGRESS" | "CUP_RECORD_UNREADABLE" | "NOT_A_CUP" | "NOT_UPGRADED" | "OFFICIAL_GAME_PLAYED", message: string) {
     super(message);
@@ -500,6 +522,10 @@ export class RoomEngine {
   cupSince: { at: number; seq: number } | null = null;
   /** Stage 12.2 (D-S122-01): when this room last went back from a Family Cup to a casual game night, and how many games it had then. */
   cupUndone: { at: number; seq: number; games: number } | null = null;
+  /** Stage 12.4 (D-S124-01): the finished Family Cup's record, or null while it runs. */
+  cupFinished: CupFinished | null = null;
+  /** Stage 12.4 (D-S124-02): the host ended a casual night (the TV shows its recap); a new game clears it. */
+  nightComplete: { at: number; seq: number; games: number } | null = null;
   private cupError: string | null = null;
   private cupRaw: unknown = undefined;
   get cup(): CupRecord {
@@ -873,6 +899,10 @@ export class RoomEngine {
     if ((opts.official ?? false) && this.kind !== "cup") {
       throw new StartRefused("NOT_A_CUP_ROOM", "This room is a casual game, not a Family Cup: its games never count toward a Cup.", this.readiness());
     }
+    // Stage 12.4 (D-S124-01): a finished Family Cup's results stand; practice games still start.
+    if ((opts.official ?? false) && this.cupFinished) {
+      throw new StartRefused("CUP_FINISHED", "The Family Cup is finished, so its results stand and no official game starts. Practice games still work.", this.readiness());
+    }
     // Stage 6.2: a solo room plays only the games made for one player (the
     // registry's soloPlay allowlist), whatever a request asks for. Checked
     // before player minimums so the reason is this, not a head count.
@@ -1016,6 +1046,8 @@ export class RoomEngine {
       this.session.revision += 1;
       if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(this.kind === "solo" ? { actor: hostId, base: attempt.sessionRevision } : {}) });
     }
+    // Stage 12.4 (D-S124-02): a new game after "End the night" means the night goes on.
+    if (this.nightComplete) this.nightComplete = null;
     // Stage 8.2: a solo Start's content is the solo player's choice; the room keeps it (reload, Play again).
     if (this.kind === "solo" && season) this.contentSeason = season;
     // Audit who was left out and whether the host chose that explicitly.
@@ -2834,6 +2866,45 @@ export class RoomEngine {
   }
 
   /**
+   * Stage 12.4 (docs/stage12/stage124.md §1; D-S124-01, PROVISIONAL rules in CUP_FINISH_RULES): "Finish the Family
+   * Cup". Host only; a Family Cup on its final day, between games. It records the standings as they are now and the
+   * champion(s), logs one `cup-finished` event, and from then on no official game starts. Asking again changes nothing.
+   * The lineup's games still to play become Practice (they could no longer start as Official).
+   */
+  finishCup(actorId: string): { changed: boolean } {
+    if (this.hostId !== actorId) throw new FinishRefused("NOT_HOST", "Only the host can finish the Family Cup.");
+    if (this.kind !== "cup") throw new FinishRefused("NOT_A_CUP", "Only a Family Cup can be finished.");
+    if (this.cupFinished) return { changed: false };
+    if (this.cupError) throw new FinishRefused("CUP_RECORD_UNREADABLE", "This room's saved Cup record could not be read, so its standings can't be finished.");
+    if (this.championshipDay < CUP_FINISH_RULES.finalDay) throw new FinishRefused("NOT_FINAL_DAY", `The Family Cup finishes on Day ${CUP_FINISH_RULES.finalDay}. It's Day ${this.championshipDay}: end the days in the room menu first.`);
+    if ([...this.games.values()].some(isActiveGame)) throw new FinishRefused("GAME_IN_PROGRESS", "A game is in progress. Finish the Cup once it has finished.");
+    const rows = this.championshipResults().map((r) => ({ playerId: r.playerId, displayName: this.players.get(r.playerId)?.displayName ?? r.playerId, total: r.total, eligible: r.eligible }));
+    const standings = sharedRanks(rows);
+    const champions = cupChampions(standings);
+    this.relabelLineup(() => false);
+    const ev = this.log("cup-finished", { actor: actorId, detail: { day: this.championshipDay, champions, rules: CUP_FINISH_RULES.version } });
+    this.cupFinished = { at: ev.createdAt, seq: ev.seq, day: this.championshipDay, rules: CUP_FINISH_RULES.version, champions, standings };
+    return { changed: true };
+  }
+
+  /**
+   * Stage 12.4 (docs/stage12/stage124.md §2; D-S124-02): "End the night" in a casual room. Host or cohost, between
+   * games, once a game has finished. The TV shows the night's recap; a new game clears it (the night goes on). Asking
+   * again changes nothing. Nothing is scored or removed.
+   */
+  endNight(actorId: string): { changed: boolean } {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new FinishRefused("NOT_HOST", "Only the host or a cohost can end the night.");
+    if (this.kind !== "casual") throw new FinishRefused("NOT_A_CASUAL_ROOM", "Ending the night is for a casual game night. A Family Cup ends its days instead.");
+    if (this.nightComplete) return { changed: false };
+    if ([...this.games.values()].some(isActiveGame)) throw new FinishRefused("GAME_IN_PROGRESS", "A game is in progress. End the night once it has finished.");
+    const finished = [...this.games.values()].filter((g) => g.status === "finished").length;
+    if (finished === 0) throw new FinishRefused("NO_GAMES_YET", "No game has finished yet, so there's no night to recap.");
+    const ev = this.log("night-complete", { actor: actorId, detail: { games: finished } });
+    this.nightComplete = { at: ev.createdAt, seq: ev.seq, games: finished };
+    return { changed: true };
+  }
+
+  /**
    * Stage 12.3 (D-S123-04): set each lineup item's mode (`official(item)`), keeping its order and starts. A lineup
    * whose modes change is a new lineup revision, so a draft or a Next press made against the old one is stale.
    */
@@ -3442,6 +3513,9 @@ export class RoomEngine {
       // Stage 12.1 (D-S121-02): a casual room that became a Family Cup, and the games it played while casual (public ids).
       ...(this.cupSince ? { cupSince: this.cupSince, casualGameIds: this.casualGameIds } : {}),
       ...(this.cupUndone ? { cupUndone: this.cupUndone } : {}),
+      // Stage 12.4: a finished Family Cup and a completed night (public facts).
+      ...(this.cupFinished ? { cupFinished: this.cupFinished } : {}),
+      ...(this.nightComplete ? { nightComplete: this.nightComplete } : {}),
       // Stage 7.1: the Quick Party lineup (casual rooms): public planning facts only.
       // Stage 12.3 (D-S123-01): a Family Cup's lineup and session too.
       ...(this.kind === "casual" || this.kind === "cup" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
@@ -3548,6 +3622,9 @@ export class RoomEngine {
       // Stage 12.1: a room that became a Family Cup remembers when, and which games were played while it was casual.
       ...(this.cupSince ? { cupSince: this.cupSince, casualGameIds: this.casualGameIds } : {}),
       ...(this.cupUndone ? { cupUndone: this.cupUndone } : {}),
+      // Stage 12.4: a finished Family Cup and a completed night (public facts).
+      ...(this.cupFinished ? { cupFinished: this.cupFinished } : {}),
+      ...(this.nightComplete ? { nightComplete: this.nightComplete } : {}),
       // Kept for older readers; the Cup record is authoritative. An unreadable
       // record is written back exactly as it was found, never overwritten.
       competitionFormat: this._cup.format,
@@ -3594,6 +3671,12 @@ export class RoomEngine {
     const undone = data["cupUndone"] as { at?: unknown; seq?: unknown; games?: unknown } | undefined;
     if (undone && typeof undone === "object" && Number.isFinite(undone.at) && Number.isSafeInteger(undone.seq) && Number.isSafeInteger(undone.games)) {
       engine.cupUndone = { at: undone.at as number, seq: undone.seq as number, games: undone.games as number };
+    }
+    // Stage 12.4: a finished Cup (its record is whole or it's left out: then the Cup is simply not finished) and a completed night.
+    engine.cupFinished = restoreCupFinished(data["cupFinished"]);
+    const night = data["nightComplete"] as { at?: unknown; seq?: unknown; games?: unknown } | undefined;
+    if (night && typeof night === "object" && Number.isFinite(night.at) && Number.isSafeInteger(night.seq) && Number.isSafeInteger(night.games)) {
+      engine.nightComplete = { at: night.at as number, seq: night.seq as number, games: night.games as number };
     }
     engine.contentUsage = (data["contentUsage"] as UsageHistory | undefined) ?? {};
     engine.contentSeq = typeof data["contentSeq"] === "number" ? data["contentSeq"] : 0;
@@ -3712,6 +3795,17 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
   return r.onBreak === true
     ? { onBreak: true, ...(typeof r.breakSince === "number" ? { breakSince: r.breakSince } : {}), revision, ops }
     : { onBreak: false, revision, ops };
+}
+
+/** Stage 12.4: a saved finished-Cup record, if it is whole; otherwise none (logged). */
+function restoreCupFinished(raw: unknown): CupFinished | null {
+  if (raw == null) return null;
+  const r = raw as Partial<CupFinished>;
+  const ok = typeof r === "object" && Number.isFinite(r.at) && Number.isSafeInteger(r.seq) && Number.isSafeInteger(r.day) && r.rules === CUP_FINISH_RULES.version
+    && Array.isArray(r.champions) && r.champions.every((x) => typeof x === "string")
+    && Array.isArray(r.standings) && r.standings.every((x) => x && typeof x.playerId === "string" && typeof x.displayName === "string" && Number.isFinite(x.total) && typeof x.eligible === "boolean" && Number.isSafeInteger(x.rank));
+  if (!ok) { console.error("[cup] saved finished-Cup record dropped (unreadable)"); return null; }
+  return { at: r.at!, seq: r.seq!, day: r.day!, rules: r.rules!, champions: [...r.champions!], standings: r.standings!.map((x) => ({ playerId: x.playerId, displayName: x.displayName, total: x.total, eligible: x.eligible, rank: x.rank })) };
 }
 
 function restoreParty(raw: unknown, engine: RoomEngine): PartyPlanRecord | null {

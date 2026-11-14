@@ -40,7 +40,9 @@ const W8_INTENDED = {
     removed: ["home-dock>nav.mz-dock.mz-dock--home.mz-dock--three", "home-solo>button.mz-key.mz-key--block.mz-key--lg.mz-key--surface"],
   },
   menu: {
-    added: ["menu-make-cup>button.mz-menurow", "menu-make-cup>path.", "menu-make-cup>span.mz-menurow__chev", "menu-make-cup>span.mz-menurow__detail", "menu-make-cup>span.mz-menurow__icon", "menu-make-cup>span.mz-menurow__label", "menu-make-cup>svg."],
+    added: ["menu-make-cup>button.mz-menurow", "menu-make-cup>path.", "menu-make-cup>span.mz-menurow__chev", "menu-make-cup>span.mz-menurow__detail", "menu-make-cup>span.mz-menurow__icon", "menu-make-cup>span.mz-menurow__label", "menu-make-cup>svg.",
+      // Stage 12.4 (D-S124-02): "End the night" in a casual room's menu, the same row style as every menu row.
+      "menu-end-night>button.mz-menurow", "menu-end-night>path.", "menu-end-night>span.mz-menurow__chev", "menu-end-night>span.mz-menurow__detail", "menu-end-night>span.mz-menurow__icon", "menu-end-night>span.mz-menurow__label", "menu-end-night>svg.", "menu-end-night>span."],
     removed: [],
   },
 };
@@ -338,7 +340,7 @@ try {
       const gone = goneAll.filter((x) => !intended.removed.includes(keyOf(x)));
       const allowed = addedAll.length - added.length + goneAll.length - gone.length;
       check(`W8 Everyday ${screen}: every element kind's computed colours equal the base build's (d4dc408)`, was.size > 0 && added.length === 0 && gone.length === 0,
-        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended Stage 12.1 element change(s), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
+        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
     }
   }
 

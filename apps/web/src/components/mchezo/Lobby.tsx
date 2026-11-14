@@ -298,6 +298,10 @@ export function RoomMenuSheet(p: {
   onMakeCup?: () => void;
   /** Stage 12.2 (D-S122-01): the host of an upgraded Cup with no official game finished can go back to a casual game night. */
   onUndoCup?: () => void;
+  /** Stage 12.4 (D-S124-01): finish the Family Cup (the host, on Day 7, between games). */
+  onFinishCup?: () => void;
+  /** Stage 12.4 (D-S124-02): end a casual night (the host or a cohost, between games, after a game). */
+  onEndNight?: () => void;
   /** Motion setting (SettingsBar). */
   phone: ReactNode;
   /** This device: remember, seat backup (recovery code), sign out. */
@@ -316,6 +320,8 @@ export function RoomMenuSheet(p: {
         {p.cupLabel && <MenuRow icon={<Icon d={ICON.trophy} size={20} />} label={p.cupLabel} detail={p.dayLabel} testId="menu-cup" onClick={p.onCup} />}
         {p.onMakeCup && <MenuRow icon={<Icon d={ICON.trophy} size={20} />} label="Make it a Family Cup" detail="official games · 7 days · standings" testId="menu-make-cup" onClick={p.onMakeCup} />}
         {p.onUndoCup && <MenuRow icon={<span>↩︎</span>} label="Back to a casual game night" detail="until the first official game finishes" testId="menu-undo-cup" onClick={p.onUndoCup} />}
+        {p.onFinishCup && <MenuRow icon={<span>🏆</span>} label="Finish the Family Cup" detail="crown the champion · Day 7" testId="menu-finish-cup" onClick={p.onFinishCup} />}
+        {p.onEndNight && <MenuRow icon={<span>🌙</span>} label="End the night" detail="the TV shows tonight’s recap" testId="menu-end-night" onClick={p.onEndNight} />}
         <MenuRow icon={<span>📖</span>} label="Memory Book" testId="menu-memory" onClick={p.onMemory} />
         <MenuRow icon={<span>🎲</span>} label="All games" testId="browse-games" onClick={p.onLibrary} />
       </div>
@@ -392,6 +398,50 @@ export function UndoCupSheet({ practiced, busy, error, onConfirm, onClose }: {
       <div className="mz-sheet__actions">
         <Keycap block disabled={busy} onClick={onConfirm} data-testid="undo-cup-confirm">{busy ? "Going back…" : "Back to a casual game night"}</Keycap>
         <button type="button" className="mz-chip-btn" data-testid="undo-cup-cancel" onClick={onClose}>Keep the Family Cup</button>
+      </div>
+    </Sheet>
+  );
+}
+
+/**
+ * Stage 12.4 (docs/stage12/stage124.md §1; D-S124-01): "Finish the Family Cup". PROVISIONAL rules, said on the sheet:
+ * the highest Cup total among eligible players wins, equal totals share, and afterwards no official game starts.
+ */
+export function FinishCupSheet({ preview, busy, error, onConfirm, onClose }: {
+  /** Who would be champion if the Cup finished now (the same rule the server uses), or none. */
+  preview: string[];
+  busy: boolean;
+  error?: string;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  const who = preview.length === 0 ? null : preview.length === 1 ? preview[0] : `${preview.slice(0, -1).join(", ")} and ${preview.at(-1)}`;
+  return (
+    <Sheet title="Finish the Family Cup" onClose={onClose} testId="finish-cup-sheet" kicker="Day 7 · try-out rules">
+      <p className="mz-details__pitch" data-testid="finish-cup-preview">{who ? `${who} ${preview.length === 1 ? "is" : "are"} on top right now, so ${preview.length === 1 ? "would be the champion" : "would share the title"}.` : "Right now nobody would be champion: nobody has played on enough Cup days to be eligible."}</p>
+      <ul className="mz-makecup" data-testid="finish-cup-points">
+        <li><b>The champion:</b> the highest Cup total among players who played on enough Cup days. Equal totals share the title.</li>
+        <li><b>After:</b> the standings are kept as they are now, and no more official games start. Practice games still work.</li>
+        <li><b>Try-out rules:</b> these are provisional and haven’t been confirmed for an official championship yet.</li>
+      </ul>
+      {error ? <p className="err" role="alert" data-testid="finish-cup-error">{error}</p> : null}
+      <div className="mz-sheet__actions">
+        <Keycap block disabled={busy} onClick={onConfirm} data-testid="finish-cup-confirm">{busy ? "Finishing…" : "Finish and crown the champion"}</Keycap>
+        <button type="button" className="mz-chip-btn" data-testid="finish-cup-cancel" onClick={onClose}>Not yet</button>
+      </div>
+    </Sheet>
+  );
+}
+
+/** Stage 12.4 (docs/stage12/stage124.md §2; D-S124-02): "End the night" in a casual room. Nothing is deleted. */
+export function EndNightSheet({ games, busy, error, onConfirm, onClose }: { games: number; busy: boolean; error?: string; onConfirm: () => void; onClose: () => void }) {
+  return (
+    <Sheet title="End the night?" onClose={onClose} testId="end-night-sheet" kicker={`${games} ${games === 1 ? "game" : "games"} played`}>
+      <p className="mz-details__pitch">The TV shows tonight’s recap: the medals and the games you played. Nothing is deleted, and you can keep playing any time: starting a game carries the night on.</p>
+      {error ? <p className="err" role="alert" data-testid="end-night-error">{error}</p> : null}
+      <div className="mz-sheet__actions">
+        <Keycap block disabled={busy} onClick={onConfirm} data-testid="end-night-confirm">{busy ? "Ending…" : "End the night"}</Keycap>
+        <button type="button" className="mz-chip-btn" data-testid="end-night-cancel" onClick={onClose}>Keep playing</button>
       </div>
     </Sheet>
   );

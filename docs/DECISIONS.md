@@ -1652,3 +1652,38 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Undo:** every mode is removed.
   - **A relabel is a new lineup revision,** so stale drafts and presses are refused rather than misapplied.
   - **The Make-a-Cup and undo sheets** now say the lineup carries over.
+
+## Stage 12.4: the TV's big moments (finish the Cup, end the night, sound, phones step back)
+**Authorization:** the owner, directly in chat on 2026-11-13 at about 10:40 p.m. ET: "I agree with the suggestions as well please implement, self direct your self do the best you can with good quality". That covers B1–B4 in `docs/stage12/stage121-discussions.md`. Spec: `docs/stage12/stage124.md`. Branch `claude/stage12-4-tv-moments`, stacked on Stage 12.3. Nothing is merged or deployed.
+
+- **D-S124-01 Finish the Family Cup, with PROVISIONAL rules. Owner sign-off is needed before an official championship uses them (AGENTS.md).**
+  - **The rules,** in one constant `CUP_FINISH_RULES` (`provisional-1`) that's recorded with the result:
+    - the host finishes the Cup on Day 7, between games;
+    - the champion is the eligible player (the server's existing `eligible`: enough counted Cup days) with the highest Cup total above zero;
+    - equal top totals share the title; nobody eligible means no champion;
+    - afterwards no official game starts (CUP_FINISHED), practice games do, and a lineup's games still to play become Practice.
+  - **The record:** `cupFinished` (standings at that moment, champion(s), day, rules version), persisted and public, with one `cup-finished` ledger event. Idempotent.
+  - **Where it's said:** the rule is shared code (`src/shared/cupFinish.ts`), so the phone's sheet previews exactly what the server will decide. The sheet, the lobby notice and the TV call the rules a try-out.
+  - **Questions for the owner:**
+    - must Day 7 have ended first;
+    - a tie-break instead of a shared title;
+    - a minimum total;
+    - can finishing be undone;
+    - what the Memory Book records.
+  - **Alternatives rejected:**
+    - finishing automatically after Day 7: the server has no clock-based day end, and a family should choose the moment;
+    - crowning the overall leader regardless of eligibility: that would contradict the Cup's own qualification rule shown all week.
+- **D-S124-02 "End the night" for a casual room.**
+  - **Who and when:** the host or a cohost, between games, after at least one finished game.
+  - **What it does:** records `nightComplete` (persisted, public) and one `night-complete` ledger event. Nothing is scored, deleted or locked. The next game clears it, and the night goes on.
+  - **The TV recap:** game count, medal table and games with results. Public facts only, with no Memory Book text: the TV is a public screen and book entries are members-only.
+  - **Alternative rejected:** a hard "closed" state that refuses new games. Families keep playing after saying goodnight, and a lock would need an undo.
+- **D-S124-03 TV sound, off by default.**
+  - **How it plays:** WebAudio chimes, with no files, no downloads and $0. The director's button turns it on, and that press satisfies the browsers' autoplay rule.
+  - **Remembered per TV.** Silent while animations are paused. Never on phones.
+  - **When:** one fanfare for the day trophy, the champion and the night recap; two soft notes for the final standings of a game this TV watched being played. Once per moment, kept per page so a remount never repeats one, and never a game's chime under a moment.
+  - **Alternative rejected:** sound on by default. A TV in a living room shouldn't make noise nobody asked for.
+- **D-S124-04 Phones step back when a TV is watching: Math Mayhem in casual rooms only, as a first try.**
+  - **On the phone:** with a spectator in the room, the results keep the player's own heading and What's next. The standings, outcome and answers are behind "Show them here too".
+  - **Why only Math Mayhem:** the discussion advised trying one game first. A spectator count isn't proof the TV is on screen, so the full result is always one tap away.
+  - **Alternative rejected:** hiding the results entirely. A player whose TV is off would be stuck.

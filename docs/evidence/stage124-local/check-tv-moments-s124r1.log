@@ -1,0 +1,26 @@
+PASS A TV sound is off by default
+PASS A Day 1: the room menu doesn't offer Finish before Day 7
+PASS A Day 2: the room menu doesn't offer Finish before Day 7
+PASS A Day 3: the room menu doesn't offer Finish before Day 7
+PASS A the Cup is on Day 7, both players eligible — [{"playerId":"player-1","dayScores":[100,100,100],"counted":[100,100,100],"qualifyingDays":3,"base":300,"participationBonus":0,"finaleBonus":0,"total":300,"eligible":true,"countedDailyWins":3,"countedMedian":100},{"playerId":"player-2","dayScores":[0,0,0],"counted":[0,0,0],"qualifyingDays":3,"base":0,"participationBonus":0,"finaleBonus":0,"total":0,"eligible":true,"countedDailyWins":0,"countedMedian":0}]
+PASS A the sheet previews the champion and says the rules are a try-out — Keku is on top right now, so would be the champion. | The champion: the highest Cup total among players who played on enough Cup days. Equal totals share the title.
+After: the standings are kept as they are now, and no more official games start. Practice games still work.
+Try-out rules: these are provisional and haven’t been confirmed for an official championship yet.
+PASS B the director turns the TV sound on (a confirming chime)
+PASS B guest lobby: the Family Cup is complete, with its champion
+PASS B TV: the champion moment
+FAIL B TV sound: one fanfare for the moment — not within 15000ms
+FAIL B …and only one
+PASS B a TV opened later shows the champion too (it's the server's record)
+PASS B a TV opened later has its sound off (remembered per TV, and this one never chose)
+PASS B after finishing, an official game is refused (CUP_FINISHED) — {"error":"The Family Cup is finished, so its results stand and no official game starts. Practice games still work.","code":"CUP_FINISHED","readiness":{"registered":2,"connected":2,"reconnecting":0,"away":0,"wouldPlay":["player-1","player-2"],"wouldMiss":[]}}
+PASS B the server: one cup-finished record with the try-out rules
+PASS C no TV: the phone shows the full standings
+PASS C the room sees the TV
+PASS C with a TV watching, the phone steps back on Math Mayhem
+PASS C …and still says what's next
+PASS C one tap brings the standings back
+PASS C TV: that's the night, with 2 games and the medals
+PASS C guest lobby: that's the night
+PASS C the next game carries the night on: the recap and the notice are gone
+TV MOMENTS: 2 FAILED

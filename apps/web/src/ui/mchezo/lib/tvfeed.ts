@@ -10,10 +10,13 @@
  * `myGames` (their private state); those never enter the feed, so a TV
  * opened on a player's phone can't show that player's secrets either.
  */
-import type { Ceremony, PartyView, Projection, PublicGame, PublicPlayer, SessionView } from "../../../types.js";
+import type { Ceremony, CupFinishedView, PartyView, Projection, PublicGame, PublicPlayer, SessionView } from "../../../types.js";
 
 export interface TvFeed {
   roomId: string;
+  /** Stage 12.4: a finished Family Cup (its champion) and a completed casual night (its recap). */
+  cupFinished?: CupFinishedView;
+  nightComplete?: { at: number; seq: number; games: number };
   joinCode?: string;
   players: PublicPlayer[];
   games: PublicGame[];
@@ -71,6 +74,8 @@ export function tvFeedFrom(p: Projection): TvFeed {
     spectatorCount: p.spectatorCount,
     cupLabel: p.competition?.label,
     ...(p.roomKind === "casual" ? { casual: true, ...(p.party ? { party: p.party } : {}), ...(p.session ? { session: p.session } : {}), ...(p.contentSeason ? { contentSeason: p.contentSeason } : {}) } : {}),
+    ...(p.cupFinished ? { cupFinished: p.cupFinished } : {}),
+    ...(p.nightComplete ? { nightComplete: p.nightComplete } : {}),
     ...(p.roomKind === "cup" ? { cup: true, ...(p.ceremony ? { ceremony: p.ceremony } : {}), ...(p.cupSince ? { cupSince: p.cupSince, casualGameIds: p.casualGameIds ?? [] } : {}), ...(p.party?.lineup ? { party: p.party } : {}) } : {}),
   };
 }
@@ -78,7 +83,8 @@ export function tvFeedFrom(p: Projection): TvFeed {
 /** What the TV is showing: one unmistakable label at all times. */
 export type TvMode = "lobby" | "briefing" | "live" | "final" | "review" | "cup" | "trophy";
 /** What the operator (or the TV itself, when a Cup day ends) chose to show between games. */
-export type TvChoice = "auto" | "lobby" | "final" | "review" | "cup" | "trophy";
+/** Stage 12.4: "moment" is a finished Cup's champion or a completed night's recap (shown by the TV itself, see TvShow). */
+export type TvChoice = "auto" | "lobby" | "final" | "review" | "cup" | "trophy" | "moment";
 
 export const TV_MODE_LABEL: Record<TvMode, string> = {
   lobby: "Lobby",

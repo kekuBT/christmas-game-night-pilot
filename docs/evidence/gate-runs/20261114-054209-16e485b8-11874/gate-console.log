@@ -1,0 +1,54 @@
+Mchezo gate targeted | run 20261114-054209-16e485b8-11874
+  revision 16e485b8eb8db6c810f485ca6cc1e4bf83af1d1c (clean tree) | fingerprint dd8c8ce53b05 (541 files)
+  plan     10 steps: 1 fast/build, 8 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  153 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 129 run(s))
+  estimate this run: 3–7m (low-confidence) · the same steps one after another: about 10m 21s · longest step check-mobile-everyday ~2m 59s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-tv-moments
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt2-16e485b/test-results/20261114-054209-16e485b8-11874
+        start build-web on w1 (usually 6s)
+[ 1/10] PASS         5.4s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/10] PASS         0.8s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:39597 (pid 11987, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt2-16e485b/test-results/20261114-054209-16e485b8-11874/server-data/w1)
+  server   w2 http://localhost:41873 (pid 11988, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt2-16e485b/test-results/20261114-054209-16e485b8-11874/server-data/w2)
+  server   w3 http://localhost:40633 (pid 11989, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt2-16e485b/test-results/20261114-054209-16e485b8-11874/server-data/w3)
+        start check-mobile-everyday on w1 (usually 2m 59s)
+        start check-session-flow on w2 (usually 2m 55s)
+        start check-content-variety on w3 (usually 1m 06s)
+── progress  2/10 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-mobile-everyday 53s (w1), check-session-flow 53s (w2), check-content-variety 53s (w3)
+   remaining 2–6m · total 3–7m · done around 05:45–05:49 UTC (low-confidence)
+[ 3/10] PASS        67.7s  check-content-variety  w3
+        start check-warm-ivory on w3 (usually 1m 04s)
+── progress  3/10 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-mobile-everyday 1m 53s (w1), check-session-flow 1m 53s (w2), check-warm-ivory 45s (w3)
+   remaining 1–5m · total 3–7m · done around 05:45–05:48 UTC (low-confidence)
+[ 4/10] PASS        67.4s  check-warm-ivory  w3
+        start check-casual on w3 (usually 52s)
+── progress  4/10 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-mobile-everyday 2m 53s (w1), check-session-flow 2m 53s (w2), check-casual 38s (w3)
+   remaining 0–4m · total 3–7m · done around 05:45–05:48 UTC (low-confidence)
+[ 5/10] PASS       184.4s  check-session-flow  w2
+        start check-results on w2 (usually 49s)
+[ 6/10] PASS       185.7s  check-mobile-everyday  w1
+        start check-tv-moments on w1 (usually 20s)
+[ 7/10] PASS        55.6s  check-casual  w3
+        start check-game-night-flow on w3 (usually 10s)
+[ 8/10] PASS        10.4s  check-game-night-flow  w3
+[ 9/10] PASS        21.1s  check-tv-moments  w1
+── progress  9/10 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-results 48s (w2)
+   remaining 15–42s · total 4–5m · done around 05:46–05:46 UTC (low-confidence)
+[10/10] PASS        50.7s  check-results  w2
+
+PASSED (exit 0) | targeted | run 20261114-054209-16e485b8-11874
+  10 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 4m 03s · step time 10m 49s (sum) · 3 workers, 89% busy · 2.67× the same steps run one after another
+           predicted 3–7m (about 3m 53s, low-confidence) → actual 4m 03s (+4%)
+           longest  check-mobile-everyday 3m 06s, check-session-flow 3m 04s, check-content-variety 1m 08s · the longest step is 76% of the wall time
+           machine  CPU mean 29%, peak 91% · memory available ≥ 14067 MB · load peak 2.63
+           contention ×1.039 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt2-16e485b/test-results/20261114-054209-16e485b8-11874/report.json

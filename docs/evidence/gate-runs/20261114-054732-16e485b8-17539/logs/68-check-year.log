@@ -1,0 +1,57 @@
+$ node scripts/check-year.mjs http://localhost:37111
+# timeout 600s | worker w3 | server http://localhost:37111 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-full-16e485b/test-results/20261114-054732-16e485b8-17539/server-data/w3)
+
+[+3.6s] PASS guest sees no game setup (host-only)
+[+3.6s] PASS guest sees no year start control
+[+5.2s] PASS host sees the kit year panel
+[+5.2s] PASS Bea sees the kit year panel
+[+5.2s] PASS progress line reads Event 1 of 8
+[+6.0s] PASS every event comes from the content (oracle knows all 8 years) — 1928,1903,1961,1877,1927,1859,1452,1879
+[+6.0s] PASS eight jump chips
+[+6.4s] PASS no horizontal overflow at 320px
+[+6.7s] PASS no horizontal overflow at 360px
+[+7.0s] PASS no horizontal overflow at 390px
+[+7.0s] PASS phone gets a numeric keypad (inputmode=numeric)
+[+7.2s] PASS 1066 is accepted as typed (old input clamped it to 1896)
+[+7.2s] PASS 999 shows a message and disables Submit (no silent clamp)
+[+7.5s] PASS nudges reach 1896
+[+7.5s] PASS Submit is labelled with 1896
+[+7.6s] PASS 1896 guess confirmed
+[+7.7s] PASS dial start is 1000
+[+7.7s] PASS dial end is 2100
+[+8.0s] PASS 2025 guess confirmed
+[+8.1s] PASS 1800 is kept as typed
+[+8.1s] PASS Submit shows 1800
+[+8.1s] PASS 1800 guess confirmed
+[+8.2s] PASS guessed event shows its confirmation, not the controls
+[+8.2s] PASS guessed chips carry a check mark
+[+10.7s] PASS Bea sees the waiting ring after all 8 guesses
+[+10.7s] PASS Bea's done state says all guesses are in
+[+13.1s] PASS game finishes and shows results
+[+13.1s] PASS host's results show his exact score (0, from the oracle's years) — Mchezo
+[+13.1s] Code: AZ8NPZ
+[+13.1s] 
+[+13.1s] Playing as Ada (host) · Room: Game night
+[+13.1s] 
+[+13.1s] Lobby & Games
+[+13.1s] Championship
+[+13.1s] TV Dashboard
+[+13.1s] Memory Book
+[+13.1s] Reconnect
+[+13.1s] 
+[+13.1s] Saved.
+[+13.1s] 
+[+13.1s] GUESS THE YEAR · OFFICIAL
+[+13.1s] Nobody scored this time
+[+13.1s] 
+[+13.1s] Nobody scored. 
+[+13.1s] PASS Bea's exact score (0)
+[+17.9s] PASS abstention shows the sat-out note
+[+17.9s] PASS no skip button before the deadline (host only, stalled only)
+[+18.0s] PASS reloaded player is still sat out (abstention survived)
+[+20.6s] PASS game finishes without the abstained player
+[+20.6s] PASS abstained player scores 0
+[+20.6s] YEAR ALL PASSED
+[+20.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 20.6s | cpu 3.9s, peak memory 272 MB
