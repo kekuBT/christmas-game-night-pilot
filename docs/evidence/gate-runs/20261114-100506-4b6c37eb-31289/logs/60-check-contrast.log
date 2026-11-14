@@ -1,0 +1,115 @@
+$ node scripts/check-contrast.mjs http://localhost:39757
+# timeout 600s | worker w1 | server http://localhost:39757 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s127full/test-results/20261114-100506-4b6c37eb-31289/server-data/w1)
+
+[+1.3s] 
+[+1.3s] == home ==
+[+1.3s]   PASS home: rgb(247, 241, 232) on rgb(22, 17, 29) (large, need 3:1) (ratio 16.52:1 e.g. "mchezo")
+[+1.3s]   PASS home: rgb(199, 190, 210) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 10.36:1 e.g. "Your phone runs the room. Everyone else joins with the code ")
+[+1.3s]   PASS home: rgb(199, 190, 210) on rgb(45, 37, 57) (normal, need 4.5:1) (ratio 8.17:1 e.g. "Every room starts as a game night, just for fun. Want a week")
+[+1.3s]   PASS home: rgb(247, 241, 232) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 16.52:1 e.g. "Remember this device")
+[+1.3s]   (home: 11 text elements, 4 unique colour pairs)
+[+4.2s] 
+[+4.2s] == lobby ==
+[+4.2s]   PASS lobby: rgb(247, 241, 232) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 14.99:1 e.g. "6436AK")
+[+4.2s]   PASS lobby: rgb(255, 201, 74) on color(srgb 0.268706 0.211765 0.188078) (normal, need 4.5:1) (ratio 7.52:1 e.g. "Day")
+[+4.2s]   PASS lobby: rgb(247, 241, 232) on rgb(22, 17, 29) (large, need 3:1) (ratio 16.52:1 e.g. "You’re in, Alex.")
+[+4.2s]   PASS lobby: rgb(247, 241, 232) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 16.52:1 e.g. "Everyone’s here")
+[+4.2s]   PASS lobby: rgb(255, 201, 74) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 12.11:1 e.g. "Sam")
+[+4.2s]   PASS lobby: rgb(60, 207, 180) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 9.52:1 e.g. "2")
+[+4.2s]   PASS lobby: rgb(247, 241, 232) on rgb(33, 26, 43) (large, need 3:1) (ratio 14.99:1 e.g. "2")
+[+4.2s]   PASS lobby: rgb(199, 190, 210) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 9.40:1 e.g. "in the room")
+[+4.2s]   INFO (disabled, exempt) lobby: rgb(22, 17, 29) on rgb(255, 138, 107) (normal, need 4.5:1) (ratio 8.04:1 e.g. "A")
+[+4.2s]   PASS lobby: rgb(247, 241, 232) on color(srgb 0.0862745 0.0666667 0.113725 / 0.78) (normal, need 4.5:1) (ratio 16.52:1 e.g. "You")
+[+4.2s]   PASS lobby: rgb(22, 17, 29) on rgb(127, 224, 200) (normal, need 4.5:1) (ratio 11.84:1 e.g. "S")
+[+4.2s]   PASS lobby: rgb(247, 241, 232) on rgb(45, 37, 57) (normal, need 4.5:1) (ratio 13.03:1 e.g. "Plan a Quick Party")
+[+4.2s]   PASS lobby: rgb(154, 165, 255) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 7.38:1 e.g. "Up next")
+[+4.2s]   PASS lobby: rgb(22, 17, 29) on rgb(154, 165, 255) (normal, need 4.5:1) (ratio 8.13:1 e.g. "Official · counts toward the Individual Family Cup")
+[+4.2s]   PASS lobby: rgb(60, 207, 180) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 8.64:1 e.g. "Fits the 2 here")
+[+4.2s]   PASS lobby: rgb(199, 190, 210) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 10.36:1 e.g. "How should")
+[+4.2s]   PASS lobby: rgb(22, 17, 29) on rgb(255, 201, 74) (normal, need 4.5:1) (ratio 12.11:1 e.g. "Official")
+[+4.2s]   PASS lobby: color(srgb 0.0862745 0.0666667 0.113725 / 0.78) on rgb(255, 201, 74) (normal, need 4.5:1) (ratio 12.11:1 e.g. "Counts toward the Individual Family Cup")
+[+4.2s]   PASS lobby: rgb(168, 230, 197) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 13.06:1 e.g. "This room is now a Family Cup · Day 1 of 7.")
+[+4.2s]   PASS lobby: rgb(22, 17, 29) on rgb(255, 107, 74) (normal, need 4.5:1) (ratio 6.58:1 e.g. "Start Trivia Showdown · Official")
+[+4.2s]   (lobby: 37 text elements, 20 unique colour pairs)
+[+4.8s] 
+[+4.8s] == briefing ==
+[+4.8s]   PASS briefing: rgb(22, 17, 29) on rgb(255, 201, 74) (normal, need 4.5:1) (ratio 12.11:1 e.g. "Official · counts toward the Cup")
+[+4.8s]   PASS briefing: rgb(247, 241, 232) on rgb(22, 17, 29) (large, need 3:1) (ratio 16.52:1 e.g. "Math Mayhem")
+[+4.8s]   PASS briefing: rgb(247, 241, 232) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 14.99:1 e.g. "How to play")
+[+4.8s]   PASS briefing: rgb(199, 190, 210) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 9.40:1 e.g. "Nobody’s clock is running yet. It starts at the same moment ")
+[+4.8s]   PASS briefing: rgb(199, 190, 210) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 10.36:1 e.g. "A")
+[+4.8s]   PASS briefing: rgb(22, 17, 29) on rgb(255, 107, 74) (normal, need 4.5:1) (ratio 6.58:1 e.g. "I’m ready")
+[+4.8s]   INFO (disabled, exempt) briefing: rgb(199, 190, 210) on rgb(45, 37, 57) (normal, need 4.5:1) (ratio 8.17:1 e.g. "Start now (20 s)")
+[+4.8s]   (briefing: 19 text elements, 7 unique colour pairs)
+[+5.3s] 
+[+5.3s] == game playing ==
+[+5.3s]   PASS game-playing: rgb(247, 241, 232) on rgb(22, 17, 29) (large, need 3:1) (ratio 16.52:1 e.g. "240")
+[+5.3s]   PASS game-playing: rgb(60, 207, 180) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 9.52:1 e.g. "Math Mayhem")
+[+5.3s]   PASS game-playing: rgb(199, 190, 210) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 10.36:1 e.g. "Question")
+[+5.3s]   PASS game-playing: rgb(22, 17, 29) on rgb(255, 107, 74) (large, need 3:1) (ratio 6.58:1 e.g. "122")
+[+5.3s]   PASS game-playing: rgb(22, 17, 29) on rgb(255, 201, 74) (large, need 3:1) (ratio 12.11:1 e.g. "112")
+[+5.3s]   PASS game-playing: rgb(22, 17, 29) on rgb(60, 207, 180) (large, need 3:1) (ratio 9.52:1 e.g. "113")
+[+5.3s]   PASS game-playing: rgb(22, 17, 29) on rgb(154, 165, 255) (large, need 3:1) (ratio 8.13:1 e.g. "132")
+[+5.3s]   PASS game-playing: rgb(247, 241, 232) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 14.99:1 e.g. "Sit this game out")
+[+5.3s]   (game-playing: 10 text elements, 8 unique colour pairs)
+[+26.7s] 
+[+26.7s] == game finished ==
+[+26.7s]   PASS game-finished: rgb(247, 241, 232) on rgb(22, 17, 29) (large, need 3:1) (ratio 16.52:1 e.g. "Mchezo")
+[+26.7s]   PASS game-finished: rgb(247, 241, 232) on rgb(45, 37, 57) (normal, need 4.5:1) (ratio 13.03:1 e.g. "Code:")
+[+26.7s]   PASS game-finished: rgb(199, 190, 210) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 10.36:1 e.g. "Playing as")
+[+26.7s]   PASS game-finished: rgb(247, 241, 232) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 16.52:1 e.g. "Lobby & Games")
+[+26.7s]   PASS game-finished: rgb(168, 230, 197) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 13.06:1 e.g. "Saved.")
+[+26.7s]   PASS game-finished: rgb(255, 201, 74) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 10.99:1 e.g. "Math Mayhem")
+[+26.7s]   PASS game-finished: rgb(247, 241, 232) on rgb(33, 26, 43) (large, need 3:1) (ratio 14.99:1 e.g. "Everyone tied")
+[+26.7s]   PASS game-finished: rgb(22, 17, 29) on rgb(255, 138, 107) (normal, need 4.5:1) (ratio 8.04:1 e.g. "A")
+[+26.7s]   PASS game-finished: rgb(247, 241, 232) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 14.99:1 e.g. "Alex")
+[+26.7s]   PASS game-finished: rgb(22, 17, 29) on rgb(127, 224, 200) (normal, need 4.5:1) (ratio 11.84:1 e.g. "S")
+[+26.7s]   PASS game-finished: rgb(199, 190, 210) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 9.40:1 e.g. "Everyone tied. A perfectly balanced family.")
+[+26.7s]   PASS game-finished: rgb(255, 201, 74) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 12.11:1 e.g. "480")
+[+26.7s]   PASS game-finished: rgb(255, 201, 74) on rgb(33, 26, 43) (large, need 3:1) (ratio 10.99:1 e.g. "It's a tie! Alex & Sam")
+[+26.7s]   PASS game-finished: rgb(22, 17, 29) on rgb(255, 201, 74) (normal, need 4.5:1) (ratio 12.11:1 e.g. "Back to lobby")
+[+26.7s]   PASS game-finished: rgb(22, 17, 29) on rgb(255, 201, 74) (large, need 3:1) (ratio 12.11:1 e.g. "🎄")
+[+26.7s]   (game-finished: 81 text elements, 15 unique colour pairs)
+[+26.8s] 
+[+26.8s] == championship ==
+[+26.8s]   PASS championship: rgb(247, 241, 232) on rgb(22, 17, 29) (large, need 3:1) (ratio 16.52:1 e.g. "Family Cup")
+[+26.8s]   PASS championship: rgb(247, 241, 232) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 14.99:1 e.g. "Individual Family Cup")
+[+26.8s]   PASS championship: rgb(247, 241, 232) on rgb(33, 26, 43) (large, need 3:1) (ratio 14.99:1 e.g. "Day")
+[+26.8s]   PASS championship: rgb(199, 190, 210) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 9.40:1 e.g. "1 official game so far · 1 today")
+[+26.8s]   PASS championship: rgb(22, 17, 29) on rgb(255, 138, 107) (normal, need 4.5:1) (ratio 8.04:1 e.g. "A")
+[+26.8s]   PASS championship: rgb(22, 17, 29) on rgb(127, 224, 200) (normal, need 4.5:1) (ratio 11.84:1 e.g. "S")
+[+26.8s]   PASS championship: rgb(199, 190, 210) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 10.36:1 e.g. "A player needs")
+[+26.8s]   PASS championship: rgb(247, 241, 232) on rgb(45, 37, 57) (normal, need 4.5:1) (ratio 13.03:1 e.g. "⭐")
+[+26.8s]   (championship: 52 text elements, 8 unique colour pairs)
+[+27.6s] 
+[+27.6s] == TV (live show) ==
+[+27.6s]   PASS tv: rgb(247, 241, 232) on rgb(22, 17, 29) (large, need 3:1) (ratio 16.52:1 e.g. "mchezo")
+[+27.6s]   PASS tv: rgb(255, 201, 74) on rgb(45, 37, 57) (large, need 3:1) (ratio 9.55:1 e.g. "Final standings")
+[+27.6s]   PASS tv: rgb(255, 201, 74) on color(srgb 0.286118 0.22549 0.19051) (large, need 3:1) (ratio 7.16:1 e.g. "Official")
+[+27.6s]   PASS tv: rgb(199, 190, 210) on rgb(33, 26, 43) (large, need 3:1) (ratio 9.40:1 e.g. "Join")
+[+27.6s]   PASS tv: rgb(247, 241, 232) on rgb(33, 26, 43) (large, need 3:1) (ratio 14.99:1 e.g. "6436AK")
+[+27.6s]   PASS tv: rgb(255, 201, 74) on rgb(22, 17, 29) (large, need 3:1) (ratio 12.11:1 e.g. "Everyone tied")
+[+27.6s]   PASS tv: rgb(199, 190, 210) on rgb(45, 37, 57) (large, need 3:1) (ratio 8.17:1 e.g. "1")
+[+27.6s]   PASS tv: rgb(247, 241, 232) on rgb(45, 37, 57) (large, need 3:1) (ratio 13.03:1 e.g. "Alex")
+[+27.6s]   PASS tv: rgb(199, 190, 210) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 9.40:1 e.g. "† Not eligible to win yet: too few counted Cup days.")
+[+27.6s]   PASS tv: rgb(199, 190, 210) on color(srgb 0.357647 0.286588 0.238196) (large, need 3:1) (ratio 4.76:1 e.g. "1")
+[+27.6s]   PASS tv: rgb(247, 241, 232) on color(srgb 0.357647 0.286588 0.238196) (large, need 3:1) (ratio 7.59:1 e.g. "Alex")
+[+27.6s]   PASS tv: rgb(199, 190, 210) on rgb(22, 17, 29) (large, need 3:1) (ratio 10.36:1 e.g. "Next up: Math Mayhem · Official. The host starts it from the")
+[+27.6s]   PASS tv: rgb(199, 190, 210) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 10.36:1 e.g. "Public view: no secret words, private answers, or answers th")
+[+27.6s]   PASS tv: rgb(255, 201, 74) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 10.99:1 e.g. "Final standings")
+[+27.6s]   PASS tv: rgb(247, 241, 232) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 14.99:1 e.g. "Post-game review")
+[+27.6s]   (tv: 34 text elements, 15 unique colour pairs)
+[+28.1s] 
+[+28.1s] == memory book ==
+[+28.1s]   PASS memory-book: rgb(247, 241, 232) on rgb(22, 17, 29) (large, need 3:1) (ratio 16.52:1 e.g. "Memory Book")
+[+28.1s]   PASS memory-book: rgb(199, 190, 210) on rgb(22, 17, 29) (normal, need 4.5:1) (ratio 10.36:1 e.g. "Highlights from real games in this room. Only entries the ho")
+[+28.1s]   PASS memory-book: rgb(199, 190, 210) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 9.40:1 e.g. "Highlight text")
+[+28.1s]   PASS memory-book: rgb(247, 241, 232) on rgb(33, 26, 43) (normal, need 4.5:1) (ratio 14.99:1 e.g. "Contrast test highlight: a close Math Mayhem finish")
+[+28.1s]   PASS memory-book: rgb(22, 17, 29) on rgb(255, 107, 74) (normal, need 4.5:1) (ratio 6.58:1 e.g. "Add from last finished game")
+[+28.1s]   (memory-book: 16 text elements, 5 unique colour pairs)
+[+28.2s] 
+[+28.2s] 80 unique pairs passed, 0 failed, 2 disabled-info
+[+28.2s] CONTRAST CHECK OK
+[+28.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 28.5s | cpu 3s, peak memory 261 MB

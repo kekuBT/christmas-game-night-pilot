@@ -1,0 +1,36 @@
+$ node scripts/check-tv-show.mjs http://localhost:35043
+# timeout 600s | worker w3 | server http://localhost:35043 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s127t1/test-results/20261114-095929-4b6c37eb-24797/server-data/w3)
+
+[+2.5s] PASS lobby: the TV says LOBBY
+[+2.5s] PASS lobby: the join code, big
+[+2.5s] PASS lobby: everyone's name
+[+2.5s] PASS lobby: up next is the host's pick, with its mode
+[+4.4s] PASS lobby at 1440×900: no sideways scrolling
+[+5.4s] PASS lobby at 1280×720: no sideways scrolling
+[+6.6s] PASS lobby at 768×1024: no sideways scrolling
+[+6.8s] PASS Impostor: the TV goes LIVE
+[+6.8s] PASS Impostor: the honest players have a secret word (the test has something to look for) — Farm
+[+6.8s] PASS Impostor live: no secret word on the TV
+[+7.1s] PASS Impostor: the TV follows the game to the vote
+[+7.1s] PASS Impostor vote: no clue text on the TV (read them on your phones)
+[+7.2s] PASS Impostor: when it ends the TV shows FINAL STANDINGS
+[+7.2s] PASS Impostor final: still no secret word on the TV
+[+8.5s] PASS Math: LIVE with how many have started
+[+8.6s] PASS director: Pause animations pauses this screen's animations
+[+11.2s] PASS director: pausing leaves the server's deadline exactly where it was — 1794650824993
+[+11.2s] PASS director: the game clock keeps counting while animations are paused — Time left in this game: 4:00
+[+11.3s] PASS director: Replay redraws the screen and unpauses it, still LIVE
+[+11.3s] PASS Math: the count moves (1 of 2 have started)
+[+11.3s] PASS Math live: no question or answer text on the TV
+[+11.7s] PASS Math: when it ends the TV shows FINAL STANDINGS with a winner line
+[+11.7s] PASS final: ranked standings for both players
+[+13.1s] PASS review: labelled POST-GAME REVIEW and says the game is over
+[+13.3s] PASS director: Lobby view shows tonight so far, with Math Mayhem
+[+13.3s] PASS a new game's briefing takes over the TV from the lobby view
+[+15.0s] PASS Closest Wins: LIVE with the question everyone is answering
+[+15.1s] PASS Closest Wins: the count moves (1 of 2 have guessed)
+[+15.1s] PASS Closest Wins: nobody's guess is on the TV
+[+15.4s] TV SHOW ALL PASSED
+[+15.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":3}
+
+# PASS (exit 0) in 15.4s | cpu 4.8s, peak memory 378 MB

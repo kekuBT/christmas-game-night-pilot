@@ -52,12 +52,16 @@ const W8_INTENDED = {
     // Stage 12.5 (D-S125-01): the casual lobby (seen behind the menu) has the Family Questions card.
     addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>",
       // Stage 12.6 (D-S126-01): "Share the night" once a game has finished, the same row style as every menu row.
-      "menu-night-card>"],
+      "menu-night-card>",
+      // Stage 12.7 (D-S127-01): the host's lobby (behind the menu) offers "Make teams".
+      "teams-card>", "teams-make>"],
   },
   // Stage 12.5: a 17th game. Its card on home and in the library, and the lobby's Family Questions card: whole new
   // components, allowed by their test id, and still only when every element reuses a style the base screen had.
   library: { added: [], removed: [], addedPrefixes: ["mz-lib-card-family-questions>", "mz-lib-practice-family-questions>"] },
-  lobby: { added: [], removed: [], addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>"] },
+  lobby: { added: [], removed: [], addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>",
+    // Stage 12.7 (D-S127-01): the host's Teams card ("Make teams"); a guest sees none until there are teams.
+    "teams-card>", "teams-make>"] },
   "lobby-guest": { added: [], removed: [], addedPrefixes: ["family-card>", "family-write>", "family-card-mine>"] },
 };
 /**

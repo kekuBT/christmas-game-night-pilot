@@ -1,3 +1,4 @@
+import type { RoomTeams } from "../../../../../../src/shared/teams.js";
 /**
  * Stage 5 (S5-A): what the TV may know.
  *
@@ -38,6 +39,8 @@ export interface TvFeed {
   /** Stage 12.1 (D-S121-02): when a casual room became this Cup, and the games it played while casual (public ids). */
   cupSince?: { at: number; seq: number };
   casualGameIds?: string[];
+  /** Stage 12.7: the night's teams (public). */
+  teams?: RoomTeams;
 }
 
 /**
@@ -76,6 +79,7 @@ export function tvFeedFrom(p: Projection): TvFeed {
     ...(p.roomKind === "casual" ? { casual: true, ...(p.party ? { party: p.party } : {}), ...(p.session ? { session: p.session } : {}), ...(p.contentSeason ? { contentSeason: p.contentSeason } : {}) } : {}),
     ...(p.cupFinished ? { cupFinished: p.cupFinished } : {}),
     ...(p.nightComplete ? { nightComplete: p.nightComplete } : {}),
+    ...(p.teams ? { teams: p.teams } : {}),
     ...(p.roomKind === "cup" ? { cup: true, ...(p.ceremony ? { ceremony: p.ceremony } : {}), ...(p.cupSince ? { cupSince: p.cupSince, casualGameIds: p.casualGameIds ?? [] } : {}), ...(p.party?.lineup ? { party: p.party } : {}) } : {}),
   };
 }

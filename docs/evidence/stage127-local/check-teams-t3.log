@@ -1,0 +1,26 @@
+PASS A host: a Teams card offering Make teams
+PASS A a guest has no Teams card before there are teams
+PASS B two teams of two
+PASS B the sheet shows Amina with a move button
+PASS B the teams: Keku and Amina on Coral, Baraka and Wanjiru on Sun
+PASS B renamed: The Lions
+PASS C Amina's lobby: "You're on The Lions"
+PASS C Baraka's lobby: "You're on Team Sun"
+PASS C the TV lists the teams and their players
+PASS D the game copied the teams at its start — {"list":[{"id":"team-coral","name":"The Lions","color":"coral"},{"id":"team-sun","name":"Team Sun","color":"sun"}],"members":{"player-1":"team-coral","player-2":"team-coral","player-3":"team-sun","player-4":"team-sun"}}
+PASS D each team's score is its players' average — [["The Lions",720,1],["Team Sun",600,2]]
+PASS D phone results: the team results under the heading, with the winner
+PASS D your own team is marked on your phone
+PASS D the TV leads with the winning team
+PASS E the host's card offers playing individually
+PASS E paused for everyone
+PASS E the paused game has no teams and no team results
+PASS E its phone results are up, with no team card
+PASS E back to teams
+PASS F the newcomer joins a team
+PASS F the TV counts tonight's team wins
+PASS G the lobby with the Teams card fits 320 px
+PASS G the teams sheet fits 320 px
+PASS H no teams for everyone
+PASS H a finished team game keeps its team results
+check-teams: all checks passed

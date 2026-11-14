@@ -26,6 +26,7 @@ import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { FamilyCard, FamilyReview, FamilySheet, FamilyTv, MchezoFamily, MchezoFamilyResults } from "./components/mchezo/MchezoFamily.js";
 import { NightCardSheet } from "./components/mchezo/NightCard.js";
+import { TeamResultsCard, TeamsCard, TeamsSheet } from "./components/mchezo/Teams.js";
 import { nightCardFacts } from "./ui/mchezo/lib/nightCard.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
@@ -695,6 +696,8 @@ export function App() {
     } catch (e) { fail(e); }
   }
   const startingRef = useRef(false);
+  const [teamsBusy, setTeamsBusy] = useState(false);
+  const [teamsErr, setTeamsErr] = useState("");
   const [startDecision, setStartDecision] = useState<(StartDecision & { gameId: string; official: boolean; how: StartHow }) | null>(null);
   // Stage 7.2: a start, Next, Play again or break request is on its way (the continuation panel waits).
   const [startBusy, setStartBusy] = useState(false);
@@ -1536,7 +1539,10 @@ export function App() {
       yourParticipation: playerId ? g.outcome?.participation[playerId] : undefined,
       youSatOut: g.abstained === true,
     });
-    return <ResultsHero story={story} gameId={g.gameId} title={title} official={official} players={mzPlayers} points={playerId && playerId in scores ? scores[playerId] : undefined} />;
+    const hero = <ResultsHero story={story} gameId={g.gameId} title={title} official={official} players={mzPlayers} points={playerId && playerId in scores ? scores[playerId] : undefined} />;
+    // Stage 12.7: a game played as teams shows the team results right under the heading.
+    const teamRows = pub?.teamResults ?? g.teamResults;
+    return teamRows ? <>{hero}<TeamResultsCard rows={teamRows} youId={playerId ?? undefined} nameOf={nameOf} /></> : hero;
   };
   const mzReactions = toMzReactions(proj?.reactions, players);
   const mzReact = async (r: ReactionId) => {
@@ -1620,6 +1626,13 @@ export function App() {
   const triviaFinished = latestFinished?.gameId === "trivia";
   // ---- Stage 2: Lobby A and its sheets (Invite, Choose game, Room menu, game details) ----
   const isHostish = !!(me?.isHost || me?.isCohost);
+  // Stage 12.7 (D-S127-01): the night's teams: every change goes to the server, and the sheet shows what it says back.
+  const teamsPost = async (body: Record<string, unknown>) => {
+    setTeamsBusy(true); setTeamsErr("");
+    try { await post<Record<string, unknown>>(`/rooms/${roomId}/teams`, body); }
+    catch (e) { setTeamsErr(e instanceof Error && e.message ? e.message : "The game didn’t answer. Nothing changed; try again."); }
+    finally { setTeamsBusy(false); void refresh(); }
+  };
   // Stage 12.6 (D-S126-01): the night card's facts, from this room's public results (none until a game has finished).
   const nightFacts = proj && roomId && proj.roomKind !== "solo" ? nightCardFacts({
     games: proj.games ?? [], nameOf, titleOf: (id) => titleFor(id, games), christmas: theme.id === "christmas", now: new Date(),
@@ -1814,6 +1827,14 @@ export function App() {
             finally { void refresh(); }
           }}
         />
+      )}
+      {/* Stage 12.7 (D-S127-01): the host's teams sheet. */}
+      {sheet === "teams" && isHostish && proj?.roomKind === "casual" && (
+        <TeamsSheet teams={proj.teams} players={players} busy={teamsBusy} error={teamsErr || undefined} onClose={closeSheet}
+          onMake={(count) => void teamsPost({ action: "make", count })}
+          onMove={(playerId, teamId) => void teamsPost({ action: "move", playerId, teamId, ...(proj.teams ? { baseRevision: proj.teams.revision } : {}) })}
+          onRename={(teamId, name) => void teamsPost({ action: "rename", teamId, name })}
+          onClear={() => void teamsPost({ action: "clear" })} />
       )}
       {/* Stage 12.6 (D-S126-01): a picture of the night, made on this phone. */}
       {sheet === "nightcard" && nightFacts && <NightCardSheet facts={nightFacts} cup={proj?.roomKind === "cup"} onClose={closeSheet} />}
@@ -2035,6 +2056,10 @@ export function App() {
               onReplan={(n) => { setPartyAsk(null); setPartyReplan(n); openSheet("party"); }}
             />
           </>) : undefined}
+          teams={proj?.roomKind === "casual" ? (
+            <TeamsCard teams={proj.teams} players={players} youId={playerId ?? ""} isHost={isHostish} upNextId={upNext?.id} busy={teamsBusy}
+              onEdit={() => { setTeamsErr(""); openSheet("teams"); }} onPlay={(on) => void teamsPost({ action: "play", on })} />
+          ) : undefined}
           family={proj?.roomKind === "casual" ? (
             <FamilyCard family={proj.family} isHost={isHostish} upNextIsFamily={upNext?.id === "family-questions"}
               onWrite={() => openSheet("family")}

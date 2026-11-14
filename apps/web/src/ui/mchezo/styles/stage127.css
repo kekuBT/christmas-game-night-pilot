@@ -1,0 +1,46 @@
+/* Stage 12.7 (docs/stage12/stage127.md): teams. Each team has a colour AND a shape AND a name; the colour is a fill
+   under dark text (the same dark in every look), never text itself. */
+.mz-team--coral { --mz-team: #FF6B4A; }
+.mz-team--sun { --mz-team: #FFC94A; }
+.mz-team--mint { --mz-team: #3CCFB4; }
+.mz-team--iris { --mz-team: #9AA5FF; }
+.mz-team-mark { display: inline-grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--mz-team, var(--mz-surface-2)); color: #16111D; font: 800 15px/1 var(--mz-font-body); }
+.mz-team-mark--coral { --mz-team: #FF6B4A; } .mz-team-mark--sun { --mz-team: #FFC94A; } .mz-team-mark--mint { --mz-team: #3CCFB4; } .mz-team-mark--iris { --mz-team: #9AA5FF; }
+
+.mz-teams-card { margin: 14px 0 0; padding: 14px 16px; border-radius: 20px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); display: grid; gap: 10px; }
+.mz-teams-card__lede, .mz-teams-card__you { margin: 0; font: 600 15px/1.4 var(--mz-font-body); }
+.mz-teams-card__next { margin: 0; text-align: left; }
+.mz-teams-card__actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.mz-teams-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mz-teams-list__row { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; border-left: 6px solid var(--mz-team); background: var(--mz-surface-2); }
+.mz-teams-list__row.is-mine { outline: 2px solid var(--mz-text); outline-offset: 1px; }
+.mz-teams-list__text { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+
+.mz-teams-edit { display: grid; gap: 12px; margin: 14px 0 0; }
+.mz-teams-edit__team { padding: 10px 12px; border-radius: 16px; border-left: 6px solid var(--mz-team); background: var(--mz-surface-1); border-top: 1.5px solid var(--mz-line); border-right: 1.5px solid var(--mz-line); border-bottom: 1.5px solid var(--mz-line); display: grid; gap: 8px; }
+.mz-teams-edit__name { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; }
+.mz-teams-edit__members { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.mz-teams-edit__members li { display: flex; gap: 8px; align-items: center; justify-content: space-between; min-height: 44px; }
+.mz-teams-edit__who { font: 700 15px/1.3 var(--mz-font-body); overflow-wrap: anywhere; min-width: 0; }
+.mz-teams-edit__move { display: flex; gap: 6px; flex: none; align-items: center; }
+.mz-teams-edit__to { font-size: 12px; color: var(--mz-text-muted); white-space: nowrap; }
+.mz-team-move { min-width: 44px; min-height: 44px; padding: 4px; display: inline-grid; place-items: center; }
+
+.mz-teams-results { margin: 12px 0 0; padding: 14px 16px; border-radius: 20px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); display: grid; gap: 8px; }
+.mz-teams-results__winner { margin: 0; font: 800 22px/1.25 var(--mz-font-display); }
+.mz-teams-results__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mz-teams-results__list li { display: grid; grid-template-columns: 22px auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; border-left: 6px solid var(--mz-team); background: var(--mz-surface-2); }
+.mz-teams-results__list li.is-mine { outline: 2px solid var(--mz-text); outline-offset: 1px; }
+.mz-teams-results__rank { font: 800 18px/1 var(--mz-font-display); text-align: center; }
+.mz-teams-results__text { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.mz-teams-results__score { font: 800 18px/1.1 var(--mz-font-display); text-align: right; }
+.mz-teams-results__score small { display: block; font: 600 11px/1.2 var(--mz-font-body); color: var(--mz-text-muted); }
+
+/* TV */
+.mz-tvteams__list { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.mz-tvteams__list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 10px 16px; border-radius: 18px; border-left: 10px solid var(--mz-team); background: var(--mz-surface-2); }
+.mz-tvteams__list .mz-team-mark { width: 44px; height: 44px; font-size: 22px; }
+.mz-tvteams__text { display: grid; gap: 2px; min-width: 0; }
+.mz-tvteams__text b { font: 800 28px/1.15 var(--mz-font-display); overflow-wrap: anywhere; }
+.mz-tvteams__text small { font: 600 18px/1.3 var(--mz-font-body); color: var(--mz-text-muted); overflow-wrap: anywhere; }
+.mz-tvteams__wins { font: 800 30px/1 var(--mz-font-display); }

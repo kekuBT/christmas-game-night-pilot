@@ -1738,3 +1738,26 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - Medals are a casual night's story (D-S121-05); the Cup's standings are the real result.
   - The date is the phone's own day.
   - The look changes the title and colours, never a fact.
+
+## Stage 12.7: teams for the night
+**Authorization:** the owner, directly in chat on 2026-11-14, about 3:25 a.m. ET: "The rest that I mentioned can be added. But we definitely need more games that can be played with teams" (suggestion 7). Spec: `docs/stage12/stage127.md`. Branch `claude/stage12-7-teams`, stacked on Stage 12.6. Nothing is merged or deployed.
+
+- **D-S127-01 Teams belong to the night, not to a game.**
+  - **Who and what:** the host or a cohost of a casual room makes 2–4 teams, balanced in a seeded order. Each has a default name and a colour *and* a shape.
+  - **Changing them:** names can be changed; players can be moved (a move against an older view is refused).
+  - **Newcomers** join the smallest team.
+  - **Public, saved, cleared on request.**
+  - **Alternatives rejected:**
+    - picking teams per game: slow between games, and families keep the same sides all night;
+    - players choosing their own team: uneven teams and arguments; the host can still move anyone.
+- **D-S127-02 Team play is the average of the players who took part.**
+  - **Which games:** every competitive per-player game, 14 of 17. Not Impostor (side scores), Charades (own teams) or Spectrum (cooperative).
+  - **The copy:** a team game copies its teams at its start (only its players), so later moves never change it.
+  - **Scoring:** a team's score is the average of its members who took part; ties share a place; everyone keeps their own score.
+  - **Pausing:** the host can play individually for a while without losing the teams.
+  - **Alternatives rejected:**
+    - the sum of scores: the bigger team would always win;
+    - counting a player who sat out as 0: one person stepping away would sink their team.
+- **D-S127-03 A Family Cup stays individual (a provisional default).**
+  - Teams can't be made in a Cup room, and Cup scoring is untouched.
+  - Team scoring in a Cup is an owner decision (AGENTS.md: material product choices get provisional defaults; owner sign-off before official championship use).

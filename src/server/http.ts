@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
 import type { FamilyQuestionInput } from "../shared/familyPack.js";
-import { BriefingRefused, ContentShortage, CupUpgradeRefused, FamilyRefused, FinishRefused, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
+import { BriefingRefused, ContentShortage, CupUpgradeRefused, FamilyRefused, FinishRefused, TeamsRefused, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY, getGame, isCooperative, isMemoryBookTeam } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
@@ -132,6 +132,14 @@ export class LocalServer {
    */
   private lobbyPlans = new Map<string, { gameId: string; official: boolean }>();
   static readonly PlanSchema = z.object({ gameId: z.string().min(1).max(64), official: z.boolean() }).strict();
+  /** Stage 12.7: a change to the night's teams. */
+  static readonly TeamsSchema = z.discriminatedUnion("action", [
+    z.object({ action: z.literal("make"), count: z.number().int().min(2).max(4) }).strict(),
+    z.object({ action: z.literal("move"), playerId: z.string().min(1).max(128), teamId: z.string().min(1).max(64), baseRevision: z.number().int().min(0).optional() }).strict(),
+    z.object({ action: z.literal("rename"), teamId: z.string().min(1).max(64), name: z.string().max(200) }).strict(),
+    z.object({ action: z.literal("play"), on: z.boolean() }).strict(),
+    z.object({ action: z.literal("clear") }).strict(),
+  ]);
   /** Stage 12.5: a new Family Question (the room checks it with src/shared/familyPack.ts; this only bounds the shape). */
   static readonly FamilyQuestionSchema = z.object({
     kind: z.enum(["choice", "who"]),
@@ -1259,6 +1267,29 @@ export class LocalServer {
           }
           if (changed) { this.persist(room); this.broadcast(room.id); }
           this.send(res, 200, { ok: true, changed, ...(finishing ? { cupFinished: room.cupFinished } : { nightComplete: room.nightComplete }) });
+          return;
+        }
+        // Stage 12.7 (D-S127-01): the night's teams (the host or a cohost of a casual room).
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "teams") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const parsed = LocalServer.TeamsSchema.safeParse(await this.readBody(req));
+          if (!parsed.success) { this.send(res, 400, { error: "That teams change couldn't be read.", code: "INVALID" }); return; }
+          const b = parsed.data;
+          try {
+            if (b.action === "make") room.makeTeams(player.id, b.count);
+            else if (b.action === "move") room.moveToTeam(player.id, b.playerId, b.teamId, b.baseRevision);
+            else if (b.action === "rename") room.renameTeam(player.id, b.teamId, b.name);
+            else if (b.action === "play") room.setTeamPlay(player.id, b.on);
+            else room.clearTeams(player.id);
+          } catch (err) {
+            if (!(err instanceof TeamsRefused)) throw err;
+            const status = err.code === "NOT_ALLOWED" ? 403 : err.code === "NOT_FOUND" ? 404 : err.code === "INVALID" ? 400 : 409;
+            this.send(res, status, { error: err.message, code: err.code, teams: room.teams });
+            return;
+          }
+          this.persist(room); this.broadcast(room.id);
+          this.send(res, 200, { ok: true, teams: room.teams });
           return;
         }
         // Stage 12.5 (D-S125-01, D-S125-03): Family Questions. Add one; take back one of yours; the host or a cohost

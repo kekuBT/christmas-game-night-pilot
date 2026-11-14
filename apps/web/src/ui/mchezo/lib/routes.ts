@@ -28,7 +28,7 @@
  */
 
 export type RoomSub = "lobby" | "cup" | "tv" | "memories" | "library" | "studio";
-export type Sheet = "invite" | "choose" | "menu" | "settings" | "details" | "party" | "cup" | "uncup" | "finishcup" | "endnight" | "family" | "nightcard";
+export type Sheet = "invite" | "choose" | "menu" | "settings" | "details" | "party" | "cup" | "uncup" | "finishcup" | "endnight" | "family" | "nightcard" | "teams";
 export type Route =
   | { name: "home" }
   | { name: "join"; code?: string }
@@ -50,7 +50,7 @@ function libQuery(params: URLSearchParams): string | undefined {
   return s ? s : undefined;
 }
 
-const SHEETS: readonly Sheet[] = ["invite", "choose", "menu", "settings", "details", "party", "cup", "uncup", "finishcup", "endnight", "family", "nightcard"];
+const SHEETS: readonly Sheet[] = ["invite", "choose", "menu", "settings", "details", "party", "cup", "uncup", "finishcup", "endnight", "family", "nightcard", "teams"];
 const GAME_ID = /^[a-z0-9-]{1,40}$/;
 const SUBS: Readonly<Record<string, RoomSub>> = { "": "lobby", cup: "cup", tv: "tv", memories: "memories", library: "library", studio: "studio" };
 const CODE = /^[A-Z0-9]{6}$/;
