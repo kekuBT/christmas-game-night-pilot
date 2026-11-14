@@ -3,6 +3,8 @@ import { moduleFor, moduleForAction } from "../games/modules/index.js";
 import type { ModuleContext } from "../games/modules/types.js";
 import { GAME_REGISTRY, getGame, isCooperative } from "../games/registry.js";
 import { CUP_FINISH_RULES, cupChampions, sharedRanks } from "../shared/cupFinish.js";
+import { FAMILY_LIMITS, checkFamilyQuestion, type FamilyQuestion, type FamilyQuestionInput } from "../shared/familyPack.js";
+import { FAMILY_ROUNDS_MIN, pickFamilyQuestions, type FamilyGameQuestion } from "../games/modules/family.js";
 import type { TeamResult } from "../shared/teamResult.js";
 import { sameSettings, validateGameSettings, type GameSettings } from "../games/settings.js";
 import { PARTY_TRANSITION_MINUTES, validatePartyPlan } from "../games/party.js";
@@ -222,6 +224,8 @@ export type StartRefusedCode =
   | "NOT_A_CASUAL_ROOM" | "PLAN_CONFLICT" | "PARTY_FEWER_THAN_PLANNED" | "PARTY_DOESNT_FIT"
   // Stage 12.4 (D-S124-01): a finished Family Cup starts no official game.
   | "CUP_FINISHED"
+  // Stage 12.5: Family Questions needs enough questions ready to play.
+  | "FAMILY_TOO_FEW"
   // Stage 7.2 (docs/stage7/stage72.md §3.2–3.4): the room is on a break
   // (resume first); the request was made against an older session state
   // (SESSION_CONFLICT); a repeat of a start whose briefing was cancelled
@@ -343,6 +347,13 @@ export interface CupFinished {
   rules: typeof CUP_FINISH_RULES.version;
   champions: string[];
   standings: { playerId: string; displayName: string; total: number; eligible: boolean; rank: number }[];
+}
+
+/** Stage 12.5: a Family Questions change, refused (HTTP 400/403/404/409). Nothing changed. */
+export class FamilyRefused extends Error {
+  constructor(readonly code: "NOT_A_CASUAL_ROOM" | "NOT_ALLOWED" | "INVALID_QUESTION" | "TOO_MANY" | "NOT_FOUND" | "ALREADY_PLAYED", message: string) {
+    super(message);
+  }
 }
 
 /** Stage 12.4: a request to finish the Family Cup or end the night, refused (HTTP 403/409). Nothing changed. */
@@ -526,6 +537,11 @@ export class RoomEngine {
   cupFinished: CupFinished | null = null;
   /** Stage 12.4 (D-S124-02): the host ended a casual night (the TV shows its recap); a new game clears it. */
   nightComplete: { at: number; seq: number; games: number } | null = null;
+  /**
+   * Stage 12.5 (D-S125-01): the questions the players wrote about the family. Secret: each player's projection holds
+   * only their own; everyone (and the TV) sees counts per writer. Persisted with the room.
+   */
+  familyQuestions: FamilyQuestion[] = [];
   private cupError: string | null = null;
   private cupRaw: unknown = undefined;
   get cup(): CupRecord {
@@ -956,6 +972,12 @@ export class RoomEngine {
       throw new StartRefused("OFFICIAL_NEEDS_TWO", "Official games need at least 2 players to count toward the Cup. Play it as practice, or wait for someone to join.", readiness);
     }
     if (playerIds.length > game.maxPlayers) throw new Error(`Too many players for ${gameId}`);
+    // Stage 12.5 (D-S125-02): Family Questions plays questions the family wrote, picked now from those ready: taking
+    // turns between writers, and only "who" questions whose answer is in this game. Too few: nothing starts.
+    const familyPick = gameId === "family-questions" ? this.pickFamilyForGame(playerIds, opts.seed ?? randomInt(0, 2147483647)) : undefined;
+    if (familyPick && familyPick.length < FAMILY_ROUNDS_MIN) {
+      throw new StartRefused("FAMILY_TOO_FEW", `Family Questions needs at least ${FAMILY_ROUNDS_MIN} questions ready to play; ${familyPick.length === 0 ? "none are" : familyPick.length === 1 ? "1 is" : `${familyPick.length} are`}. Everyone can write some in the lobby.`, readiness, { ready: familyPick.length, needed: FAMILY_ROUNDS_MIN });
+    }
     const id = `game-${this.nextGame++}`;
     // Secure per-session seed by default. Explicit seeds are for controlled
     // tests only; the old default of 42 made hidden-role assignment predictable.
@@ -1034,9 +1056,11 @@ export class RoomEngine {
                           ? { roundIndex: 0, submissions: {} }
                           : gameId === "charades"
                             ? initCharades(playerIds)
-                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}) }),
+                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}) }),
     };
     this.games.set(id, instance);
+    // Stage 12.5: the questions this game plays are used (a cancelled briefing leaves no game: they are ready again).
+    if (familyPick) for (const fq of familyPick) { const q = this.familyQuestions.find((x) => x.id === fq.id); if (q) q.playedIn = id; }
     // Stage 7.2: every new game in a casual room is a new session state, so
     // a continuation request made before it is stale (§3.8). Stage 7.4: every
     // new solo round too, so a solo press made before it is stale (persisted,
@@ -1879,9 +1903,10 @@ export class RoomEngine {
     }
     // Stage 5 modules publish their own counts: Majority Rules "done" this
     // round (predicted and voted, or skipped); Pattern Pulse "finished".
-    if (g.gameId === "majority-rules" || g.gameId === "pattern-pulse") {
+    if (g.gameId === "majority-rules" || g.gameId === "pattern-pulse" || g.gameId === "family-questions") {
       const v = this.publicGameState(g) as { done?: unknown; finished?: unknown } | undefined;
-      if (typeof v?.done === "number") return { ...base, answeredNow: v.done };
+      // Family Questions: whoever wrote the question doesn't answer it, so it's out of the count too.
+      if (typeof v?.done === "number") return { ...base, answeredNow: v.done, ...(g.gameId === "family-questions" && typeof (v as { total?: unknown }).total === "number" ? { total: (v as { total: number }).total } : {}) };
       if (typeof v?.finished === "number") return { ...base, finished: v.finished };
     }
     return base;
@@ -2001,7 +2026,8 @@ export class RoomEngine {
     if (game.deadlineAt && now > game.deadlineAt) return { accepted: false, reason: "PHASE_CLOSED" };
     if (!game.players.includes(actorId)) return { accepted: false, reason: "NOT_IN_GAME" };
     if ((game.abstained ?? []).includes(actorId)) return { accepted: false, reason: "ALREADY_ABSTAINED" };
-    const ctx = this.moduleCtx(game, now);
+    // Stage 12.5: a module's director actions (Family Questions' skip) are for the host or a cohost.
+    const ctx = { ...this.moduleCtx(game, now), canDirect: this.hostId === actorId || this.cohosts.has(actorId) };
     let r: ReturnType<typeof mod.intent>;
     try {
       r = mod.intent(game.extra, actorId, intent.action, intent.payload, ctx);
@@ -2865,6 +2891,84 @@ export class RoomEngine {
     return { changed: true };
   }
 
+  /** Stage 12.5: a question is ready while it hasn't been played (a game that was cancelled in its briefing doesn't count). */
+  private familyReady(q: FamilyQuestion): boolean {
+    return !q.playedIn || !this.games.has(q.playedIn);
+  }
+
+  /**
+   * Stage 12.5 (docs/stage12/stage125.md §1; D-S125-01): a player adds a question about the family. Any player of a
+   * casual room; checked (src/shared/familyPack.ts) and limited per writer and per room. Only its writer ever sees it
+   * before it's played.
+   */
+  addFamilyQuestion(actorId: string, input: FamilyQuestionInput, now = this.clock()): FamilyQuestion {
+    if (this.kind !== "casual") throw new FamilyRefused("NOT_A_CASUAL_ROOM", "Family Questions is for a casual game night.");
+    if (!this.players.has(actorId)) throw new FamilyRefused("NOT_ALLOWED", "Only players in this room can add questions.");
+    const ready = this.familyQuestions.filter((q) => this.familyReady(q));
+    if (ready.filter((q) => q.authorId === actorId).length >= FAMILY_LIMITS.perAuthor) throw new FamilyRefused("TOO_MANY", `You have ${FAMILY_LIMITS.perAuthor} questions waiting. Play some first.`);
+    if (ready.length >= FAMILY_LIMITS.perRoom) throw new FamilyRefused("TOO_MANY", `The room has ${FAMILY_LIMITS.perRoom} questions waiting. Play some first.`);
+    const c = checkFamilyQuestion(input, [...this.players.keys()]);
+    if (!c.ok) throw new FamilyRefused("INVALID_QUESTION", c.error);
+    const q: FamilyQuestion = { id: `fq-${now.toString(36)}-${randomInt(0, 2 ** 31).toString(36)}`, authorId: actorId, ...c.question, createdAt: now };
+    this.familyQuestions.push(q);
+    this.log("family-question-added", { actor: actorId, detail: { kind: q.kind } });
+    return q;
+  }
+
+  /** Stage 12.5: a writer takes back one of their questions that hasn't been played. */
+  deleteFamilyQuestion(actorId: string, questionId: string): void {
+    const q = this.familyQuestions.find((x) => x.id === questionId);
+    if (!q || q.authorId !== actorId) throw new FamilyRefused("NOT_FOUND", "That question isn't one of yours.");
+    if (!this.familyReady(q)) throw new FamilyRefused("ALREADY_PLAYED", "That question has been played already.");
+    this.familyQuestions = this.familyQuestions.filter((x) => x.id !== questionId);
+  }
+
+  /**
+   * Stage 12.5 (D-S125-03): the host or a cohost removes every question a player wrote that hasn't been played,
+   * without reading them (nobody reads another player's questions before they're played).
+   */
+  removeFamilyAuthor(actorId: string, authorId: string): number {
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new FamilyRefused("NOT_ALLOWED", "Only the host or a cohost can remove someone's questions.");
+    const before = this.familyQuestions.length;
+    this.familyQuestions = this.familyQuestions.filter((q) => q.authorId !== authorId || !this.familyReady(q));
+    const removed = before - this.familyQuestions.length;
+    if (removed > 0) this.log("family-questions-removed", { actor: actorId, playerId: authorId, detail: { count: removed } });
+    return removed;
+  }
+
+  /** Stage 12.5: the questions one game plays, as snapshots (names now; "who" options are this game's players). */
+  private pickFamilyForGame(playerIds: readonly string[], seed: number): FamilyGameQuestion[] {
+    const nameOf = (id: string) => this.players.get(id)?.displayName ?? "A player";
+    const usable = this.familyQuestions.filter((q) => this.familyReady(q) && (q.kind !== "who" || (q.answerPlayerId !== undefined && playerIds.includes(q.answerPlayerId))));
+    const rng = (() => { let a = (seed ^ 0x5bd1e995) >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; })();
+    return pickFamilyQuestions(usable, seed).map((q) => {
+      if (q.kind === "who") {
+        const options = playerIds.map(nameOf);
+        return { id: q.id, authorId: q.authorId, authorName: nameOf(q.authorId), kind: "who", prompt: q.prompt, options, correctIndex: playerIds.indexOf(q.answerPlayerId!) };
+      }
+      // The writer's answers in a seeded order, so the right one isn't always where they typed it.
+      const order = (q.options ?? []).map((_, i) => i);
+      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [order[i], order[j]] = [order[j]!, order[i]!]; }
+      return { id: q.id, authorId: q.authorId, authorName: nameOf(q.authorId), kind: "choice", prompt: q.prompt, options: order.map((i) => q.options![i]!), correctIndex: order.indexOf(q.correctIndex!) };
+    });
+  }
+
+  /**
+   * Stage 12.5: Family Questions as the room shows it. Everyone (and the TV): how many questions are ready, and how
+   * many each player wrote. A player also gets their own questions, in full. Never anyone else's question.
+   */
+  familyView(viewerId?: string): Record<string, unknown> | undefined {
+    if (this.kind !== "casual") return undefined;
+    const ready = this.familyQuestions.filter((q) => this.familyReady(q));
+    const writers = new Map<string, number>();
+    for (const q of ready) writers.set(q.authorId, (writers.get(q.authorId) ?? 0) + 1);
+    const view: Record<string, unknown> = { ready: ready.length, needed: FAMILY_ROUNDS_MIN, writers: [...writers.entries()].map(([playerId, count]) => ({ playerId, count })) };
+    if (viewerId && this.players.has(viewerId)) {
+      view["mine"] = this.familyQuestions.filter((q) => q.authorId === viewerId).map((q) => ({ id: q.id, kind: q.kind, prompt: q.prompt, ...(q.options ? { options: q.options, correctIndex: q.correctIndex } : {}), ...(q.answerPlayerId ? { answerPlayerId: q.answerPlayerId } : {}), played: !this.familyReady(q) }));
+    }
+    return view;
+  }
+
   /**
    * Stage 12.4 (docs/stage12/stage124.md §1; D-S124-01, PROVISIONAL rules in CUP_FINISH_RULES): "Finish the Family
    * Cup". Host only; a Family Cup on its final day, between games. It records the standings as they are now and the
@@ -3516,6 +3620,8 @@ export class RoomEngine {
       // Stage 12.4: a finished Family Cup and a completed night (public facts).
       ...(this.cupFinished ? { cupFinished: this.cupFinished } : {}),
       ...(this.nightComplete ? { nightComplete: this.nightComplete } : {}),
+      // Stage 12.5: Family Questions' counts (public); a player's own questions are added in the player branch.
+      ...(this.kind === "casual" ? { family: this.familyView() } : {}),
       // Stage 7.1: the Quick Party lineup (casual rooms): public planning facts only.
       // Stage 12.3 (D-S123-01): a Family Cup's lineup and session too.
       ...(this.kind === "casual" || this.kind === "cup" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
@@ -3600,7 +3706,7 @@ export class RoomEngine {
           ...this.timingFacts(g),
         };
       });
-      return { ...base, me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash, acceptedEventIds: [...(this.recentAccepted.get(me.id) ?? [])] }, myGames };
+      return { ...base, ...(this.kind === "casual" ? { family: this.familyView(me.id) } : {}), me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash, acceptedEventIds: [...(this.recentAccepted.get(me.id) ?? [])] }, myGames };
     }
     if (audience === "host" || audience === "cohost") {
       // Host/cohost do NOT get answer keys or recovery tokens pre-reveal in this engine.
@@ -3625,6 +3731,8 @@ export class RoomEngine {
       // Stage 12.4: a finished Family Cup and a completed night (public facts).
       ...(this.cupFinished ? { cupFinished: this.cupFinished } : {}),
       ...(this.nightComplete ? { nightComplete: this.nightComplete } : {}),
+      // Stage 12.5: the family's questions (the saved room only; projections show counts and each player's own).
+      ...(this.familyQuestions.length > 0 ? { familyQuestions: this.familyQuestions } : {}),
       // Kept for older readers; the Cup record is authoritative. An unreadable
       // record is written back exactly as it was found, never overwritten.
       competitionFormat: this._cup.format,
@@ -3678,6 +3786,8 @@ export class RoomEngine {
     if (night && typeof night === "object" && Number.isFinite(night.at) && Number.isSafeInteger(night.seq) && Number.isSafeInteger(night.games)) {
       engine.nightComplete = { at: night.at as number, seq: night.seq as number, games: night.games as number };
     }
+    // Stage 12.5: the family's questions; one that can't be read whole is left out (never half a question).
+    engine.familyQuestions = restoreFamilyQuestions(data["familyQuestions"]);
     engine.contentUsage = (data["contentUsage"] as UsageHistory | undefined) ?? {};
     engine.contentSeq = typeof data["contentSeq"] === "number" ? data["contentSeq"] : 0;
     // Stage 8.2 (§3.5): a room saved before content seasons (or with an
@@ -3795,6 +3905,20 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
   return r.onBreak === true
     ? { onBreak: true, ...(typeof r.breakSince === "number" ? { breakSince: r.breakSince } : {}), revision, ops }
     : { onBreak: false, revision, ops };
+}
+
+/** Stage 12.5: saved Family Questions, each checked again by the same rule as when it was added. */
+function restoreFamilyQuestions(raw: unknown): FamilyQuestion[] {
+  if (!Array.isArray(raw)) return [];
+  const out: FamilyQuestion[] = [];
+  for (const x of raw as Array<Record<string, unknown>>) {
+    if (!x || typeof x !== "object" || typeof x["id"] !== "string" || typeof x["authorId"] !== "string" || !Number.isFinite(x["createdAt"])) continue;
+    const answer = typeof x["answerPlayerId"] === "string" ? x["answerPlayerId"] : undefined;
+    const c = checkFamilyQuestion({ kind: x["kind"] as FamilyQuestionInput["kind"], prompt: x["prompt"] as string, options: Array.isArray(x["options"]) ? (x["options"] as string[]) : undefined, correctIndex: x["correctIndex"] as number | undefined, answerPlayerId: answer } as FamilyQuestionInput, answer ? [answer] : []);
+    if (!c.ok) continue;
+    out.push({ id: x["id"], authorId: x["authorId"], ...c.question, createdAt: x["createdAt"] as number, ...(typeof x["playedIn"] === "string" ? { playedIn: x["playedIn"] } : {}) });
+  }
+  return out;
 }
 
 /** Stage 12.4: a saved finished-Cup record, if it is whole; otherwise none (logged). */

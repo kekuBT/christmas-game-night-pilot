@@ -41,7 +41,7 @@ describe("the shipped manifests", () => {
     // Stage 5: new games launch practice-only until the owner approves their
     // Cup scoring; the manifest and the server's policy must agree. Stage 9.1:
     // Jebena Rush too (casual rooms only).
-    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush", "spectrum"];
+    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush", "spectrum", "family-questions"];
     for (const m of GAME_MANIFESTS) {
       expect(m.features.practice).toBe(true);
       expect(m.features.official).toBe(!STAGE5_PRACTICE_ONLY.includes(m.id));
@@ -76,6 +76,8 @@ describe("the shipped manifests", () => {
       "jebena-rush": "whole-game",
       // Stage 9.3: sitting out leaves the match (no future role; a guess already sent stays).
       spectrum: "whole-game",
+      // Stage 12.5: sitting out skips one question (the next one can still be answered).
+      "family-questions": "per-question",
     };
     for (const m of GAME_MANIFESTS) {
       expect(m.features.abstention).toBe(expected[m.id]);

@@ -1,0 +1,93 @@
+PASS A host: the lobby has the Family Questions card
+PASS A guest: the lobby has the Family Questions card
+PASS A an empty answer is refused, and says why
+PASS A …and nothing reached the room
+PASS A Amina's multiple-choice question is added
+PASS A …and her 'Who in the family?' question
+PASS A Amina sees her own two questions, with their answers
+PASS E the write sheet fits 320 px (no sideways scroll)
+PASS A the counts are public: Baraka's card says 2 questions from 1 writer
+PASS A host's screen has no word of Amina's questions
+PASS A host's projection has no word of them
+PASS A Baraka's screen has no word of Amina's questions
+PASS A Baraka's projection has no word of them
+PASS A the TV has none, on screen or in its feed
+PASS B with 2 questions, the server refuses to start (FAMILY_TOO_FEW) — {"error":"Family Questions needs at least 3 questions ready to play; 2 are. Everyone can write some in the lobby.","code":"FAMILY_TOO_FEW","readiness":{"registered":3,"connected":3,"reconnecting":0,"away":0,"wouldPlay":["player-1","player-2","player-3"],"wouldMiss":[]},"ready":2,"needed":3}
+PASS B …and the host isn't offered 'Play it next'
+PASS B with 3 ready, the host can make it the next game
+PASS B Family Questions is up next
+PASS B Start is ready
+PASS B Baraka took his question back; the host's Start waits for one more
+PASS B 4 ready from 3 writers; Start is back
+PASS C the game is in its briefing
+PASS C …and playing
+PASS C question 1 is open
+PASS C q1: Baraka's phone says it's theirs
+PASS C q1: Keku sees the question to answer
+PASS C q1: Amina sees the question to answer
+PASS C q1: the TV shows the question, not who asked
+PASS C q1: the TV question fits the screen (2 answers, 37 characters) — {"ok":true,"bottom":769,"limit":956}
+PASS C q1: the open question's feed has no answer and no writer
+PASS C q1: Keku's pick is locked in
+PASS C q1: the reveal
+PASS C q1: the right answer and who asked — {"prompt":"What was Babu CANARY-THREE first car?","kind":"choice","options":["A VW Beetle","A Peugeot 404"],"correctIndex":1,"counts":[1,1],"right":["player-1"],"askedBy":"player-3","askedByName":"Baraka","greatQuestion":true}
+PASS C q1: a great question (one of two got it)
+PASS C q1: phones say who asked, and the great question
+PASS C q1: the writer's phone says it was theirs, +50
+PASS C q1: the TV reveals the answer and who asked
+PASS C q1: the TV reveal fits the screen — {"ok":true,"bottom":639,"limit":956}
+PASS C question 2 is open
+PASS C q2: Amina's phone says it's theirs
+PASS C q2: Keku sees the question to answer
+PASS C q2: Baraka sees the question to answer
+PASS C q2: the TV shows the question, not who asked
+PASS C q2: the TV question fits the screen (3 answers, 34 characters) — {"ok":true,"bottom":769,"limit":956}
+PASS C q2: the open question's feed has no answer and no writer
+PASS C q2: the host's skip moves everyone on, with no reveal
+PASS C question 3 is open
+PASS C q3: Keku's phone says it's theirs
+PASS C q3: Amina sees the question to answer
+PASS C q3: Baraka sees the question to answer
+PASS C q3: the TV shows the question, not who asked
+PASS C q3: the TV question fits the screen (4 answers, 123 characters) — {"ok":true,"bottom":826,"limit":956}
+PASS C q3: the open question's feed has no answer and no writer
+PASS C q3: Amina's pick is locked in
+PASS C q3: the reveal
+PASS C q3: the right answer and who asked — {"prompt":"Which month is Shosho CANARY-FOUR birthday, the one we always celebrate with far too much pilau and the big cake from town?","kind":"choice","options":["October","July","December","March"],"correctIndex":2,"counts":[0,0,1,1],"right":["player-2"],"askedBy":"player-1","askedByName":"Keku","greatQuestion":true}
+PASS C q3: a great question (one of two got it)
+PASS C q3: phones say who asked, and the great question
+PASS C q3: the writer's phone says it was theirs, +50
+PASS C q3: the TV reveals the answer and who asked
+PASS C q3: the TV reveal fits the screen — {"ok":true,"bottom":911,"limit":956}
+PASS C question 4 is open
+PASS C q4: Amina's phone says it's theirs
+PASS C q4: Keku sees the question to answer
+PASS C q4: Baraka sees the question to answer
+PASS C q4: the TV shows the question, not who asked
+PASS C q4: the TV question fits the screen (3 answers, 40 characters) — {"ok":true,"bottom":866,"limit":956}
+PASS C q4: the open question's feed has no answer and no writer
+PASS C q4: Keku's pick is locked in
+PASS C q4: the reveal
+PASS C q4: the right answer and who asked — {"prompt":"Who CANARY-TWO always burns the chapati?","kind":"who","options":["Keku","Amina","Baraka"],"correctIndex":2,"counts":[1,0,1],"right":["player-1"],"askedBy":"player-2","askedByName":"Amina","greatQuestion":true}
+PASS C q4: a great question (one of two got it)
+PASS C q4: phones say who asked, and the great question
+PASS C q4: the writer's phone says it was theirs, +50
+PASS C q4: the TV reveals the answer and who asked
+PASS C q4: the TV reveal fits the screen — {"ok":true,"bottom":876,"limit":956}
+PASS C the game finishes
+PASS C 4 rounds: one skipped by the host, three played — ["Baraka",true,"Keku","Amina"]
+PASS C the skipped question's answer and writer were never revealed
+PASS C scores: 3 played rounds × (100 right + 50 great question) = 450 in all — {"player-1":250,"player-2":150,"player-3":50}
+PASS C phone results: every question with its answer and who asked
+PASS C results: the great questions are celebrated
+PASS C results: the skipped question's prompt isn't in the recap
+PASS C played questions are used up (0 ready)
+PASS D the host's card counts Baraka's 2 new questions
+PASS D the host's tool lists Baraka with a count, and no word of his questions — HOST · REMOVE SOMEONE’S QUESTIONS WITHOUT READING THEM
+Baraka
+2 questions waiting
+Remove
+PASS D Baraka's unplayed questions are removed
+PASS D Baraka keeps only his played question (marked played) — [true]
+PASS D a player who isn't the host can't remove anyone's questions (403)
+check-family-questions: all checks passed

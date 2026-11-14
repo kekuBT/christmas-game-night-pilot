@@ -94,6 +94,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
     model: "phased", gameWindowMs: 10 * MIN, phaseMs: { ...SPECTRUM_PHASE_MS },
     officialEligible: false, practiceOnlyReason: "Spectrum is cooperative and practice-only: one team score, in casual rooms.", unit: "rounds",
   },
+  // Stage 12.5: the family's own questions, written by the players: casual rooms only, practice-only. Up to 10
+  // questions of 30 s + 8 s; 10 minutes is a backstop.
+  "family-questions": {
+    model: "phased", gameWindowMs: 10 * MIN, phaseMs: { question: 30 * SEC, reveal: 8 * SEC },
+    officialEligible: false, practiceOnlyReason: "Family Questions is practice-only: the family writes its own questions, so it is just for fun in casual rooms.", unit: "questions",
+  },
 });
 
 export function policyFor(gameId: string): GamePolicy {

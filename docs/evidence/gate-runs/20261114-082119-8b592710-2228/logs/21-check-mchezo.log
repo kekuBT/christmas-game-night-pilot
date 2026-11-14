@@ -1,0 +1,54 @@
+$ node scripts/check-mchezo.mjs http://localhost:43591
+# timeout 900s | worker w1 | server http://localhost:43591 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125full/test-results/20261114-082119-8b592710-2228/server-data/w1)
+
+[+1.7s] PASS Home shows the Mchezo wordmark with Join and Host in the dock
+[+2.2s] PASS Join has a 6-character code input
+[+3.6s] PASS Host asks for the host's name before the room exists
+[+5.5s] PASS room code is 6 alphanumeric — J69DGW
+[+7.8s] PASS 4-player lobby: host sees all seats
+[+7.8s] PASS 4-player lobby: up next is Trivia Showdown
+[+7.8s] PASS 4-player lobby: no horizontal overflow
+[+10.9s] PASS 8-player lobby: seats render
+[+10.9s] PASS 8-player lobby: no horizontal overflow
+[+12.6s] PASS 10-player lobby: room is full
+[+12.6s] PASS 10-player lobby: no horizontal overflow
+[+13.2s] PASS disconnection: host sees reconnecting
+[+13.2s] PASS disconnection: seat shows Away
+[+18.0s] PASS guest sees no game-setup controls
+[+18.0s] PASS host sees chooser and mode controls
+[+18.1s] PASS chooser lists all 14 games a Cup can play
+[+18.5s] PASS chooser sets up next to Math Mayhem
+[+18.6s] PASS practice mode moves the Start testid
+[+19.1s] PASS chooser returns up next to Trivia Showdown
+[+19.8s] PASS everyone ready opens the question screen (no intro countdown)
+[+19.8s] PASS trivia question: no horizontal overflow
+[+20.2s] PASS answer selection locks (LOCKED IN stamp)
+[+21.1s] PASS second question presented after Next
+[+29.8s] PASS waiting shows counts only (1/4 finished, and 1 of 4 started; Stage 5.1 wording) — 
+[+29.8s] All your answers are inAYouBBeaCCalDDee1/4have finishedEveryone goes at their own pace. 1 of 4 has finished; 1 of 4 has started.The reveal plays right here when the game finishes.TV stageEnds automatically in: 5:51If someone doesn’t finish, the game ends by itself when time runs out.
+[+29.8s] 
+[+29.8s] 
+[+29.8s] 
+[+55.5s] PASS results screen after all players finish
+[+55.5s] PASS results separate this question from the game total and rank
+[+55.7s] PASS results show standings list
+[+55.7s] PASS results show question picker
+[+56.2s] PASS question picker switches the inspected question
+[+61.3s] PASS TV shows the rules briefing, not a question
+[+81.8s] PASS TV stage auto-switches to Mchezo stage on start
+[+109.3s] PASS TV stage shows leaderboard after finish
+[+109.4s] PASS TV stage returns to phone view
+[+112.3s] PASS mobile 320px: lobby no overflow
+[+112.3s] PASS mobile 320px: briefing no overflow
+[+112.9s] PASS mobile 320px: question no overflow
+[+115.8s] PASS mobile 360px: lobby no overflow
+[+115.9s] PASS mobile 360px: briefing no overflow
+[+116.5s] PASS mobile 360px: question no overflow
+[+120.0s] PASS mobile 390px: lobby no overflow
+[+120.1s] PASS mobile 390px: briefing no overflow
+[+120.6s] PASS mobile 390px: question no overflow
+[+121.1s] PASS reduced motion: provider root reports reduced
+[+121.2s] MCHEZO ALL PASSED
+[+121.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":7,"pages":24,"peakOpenPages":10}
+
+# PASS (exit 0) in 121.2s | cpu 13s, peak memory 267 MB

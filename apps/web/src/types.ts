@@ -149,6 +149,10 @@ export interface CupFinishedView {
   standings: { playerId: string; displayName: string; total: number; eligible: boolean; rank: number }[];
 }
 
+/** Stage 12.5 (D-S125-01): Family Questions as a room shows it. Counts for everyone; `mine` is this player's own, only. */
+export interface FamilyMine { id: string; kind: "choice" | "who"; prompt: string; options?: string[]; correctIndex?: number; answerPlayerId?: string; played: boolean }
+export interface FamilyView { ready: number; needed: number; writers: { playerId: string; count: number }[]; mine?: FamilyMine[] }
+
 export interface PartyView {
   revision: number;
   lineup: null | {
@@ -203,6 +207,8 @@ export interface Projection {
   nightComplete?: { at: number; seq: number; games: number };
   /** Stage 7.1: casual rooms only. */
   party?: PartyView;
+  /** Stage 12.5: casual rooms only. */
+  family?: FamilyView;
   /** Stage 7.2: casual rooms only. */
   session?: SessionView;
   /** Stage 8.2: what this solo or casual session deals (absent in a Cup). Never a device's look. */

@@ -1,0 +1,83 @@
+Mchezo gate targeted | run 20261114-080049-cceb707a-20481
+  revision cceb707a4ab7509d9d6e8dd5bf692a1b55cea0b4 (clean tree) | fingerprint a4068c9500a2 (547 files)
+  plan     15 steps: 1 fast/build, 13 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  157 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 133 run(s))
+  estimate this run: 4–10m (low-confidence) · the same steps one after another: about 15m 02s · longest step check-session-flow ~2m 54s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-family-questions
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125t2/test-results/20261114-080049-cceb707a-20481
+        start build-web on w1 (usually 6s)
+[ 1/15] PASS           5s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/15] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:35037 (pid 20594, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125t2/test-results/20261114-080049-cceb707a-20481/server-data/w1)
+  server   w2 http://localhost:40711 (pid 20595, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125t2/test-results/20261114-080049-cceb707a-20481/server-data/w2)
+  server   w3 http://localhost:41359 (pid 20596, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125t2/test-results/20261114-080049-cceb707a-20481/server-data/w3)
+        start check-session-flow on w1 (usually 2m 54s)
+        start check-solo-shelf on w2 (usually 2m 43s)
+        start check-spectrum on w3 (usually 1m 49s)
+── progress  2/15 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-session-flow 53s (w1), check-solo-shelf 53s (w2), check-spectrum 53s (w3)
+   remaining 3–9m · total 4–10m · done around 08:05–08:10 UTC (low-confidence)
+── progress  2/15 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-session-flow 1m 53s (w1), check-solo-shelf 1m 53s (w2), check-spectrum 1m 53s (w3)
+   remaining 2–8m · total 4–10m · done around 08:05–08:10 UTC (low-confidence)
+[ 3/15] PASS       114.6s  check-spectrum  w3
+        start check-themes-seasonal on w3 (usually 1m 40s)
+[ 4/15] PASS         171s  check-solo-shelf  w2
+        start check-briefing on w2 (usually 1m 30s)
+── progress  4/15 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-session-flow 2m 53s (w1), check-themes-seasonal 59s (w3), check-briefing 2s (w2)
+   remaining 1–6m · total 4–9m · done around 08:05–08:09 UTC (low-confidence)
+[ 5/15] PASS       185.1s  check-session-flow  w1
+        start check-warm-ivory on w1 (usually 1m 04s)
+[ 6/15] PASS       104.2s  check-themes-seasonal  w3
+        start check-quick-party on w3 (usually 47s)
+── progress  6/15 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-briefing 1m 02s (w2), check-warm-ivory 48s (w1), check-quick-party 14s (w3)
+   remaining 0–4m · total 4–8m · done around 08:05–08:07 UTC (low-confidence)
+[ 7/15] PASS          68s  check-warm-ivory  w1
+        start check-family-questions on w1 (usually 33s)
+[ 8/15] PASS        94.9s  check-briefing  w2
+        start check-one-path on w2 (usually 32s)
+[ 9/15] PASS        50.2s  check-quick-party  w3
+        start check-cup-party on w3 (usually 31s)
+[10/15] PASS        35.2s  check-family-questions  w1
+        start check-library-nav on w1 (usually 25s)
+── progress  10/15 done · 10 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-one-path 27s (w2), check-cup-party 24s (w3), check-library-nav 5s (w1)
+   remaining 19–69s · total 5–7m · done around 08:06–08:06 UTC (low-confidence)
+[11/15] PASS        34.4s  check-one-path  w2
+        start check-tv-moments on w2 (usually 20s)
+[12/15] PASS        26.4s  check-library-nav  w1
+        start check-library on w1 (usually 6s)
+[13/15] PASS          20s  check-tv-moments  w2
+[14/15] PASS         6.2s  check-library  w1
+[15/15] FAIL        56.9s  check-cup-party  w3  FAIL E the second game started as Practice — not within 20000ms
+      | PASS C TV: the lineup with each game's mode
+      | PASS C TV: a long lineup shows three games and says how many more
+      | PASS C TV: the Family Cup card is whole, above the director's buttons — {"cupCard":{"x":999.21875,"y":726.71875,"width":848.78125,"height":179.484375},"director":{"x":1687.765625,"y":989,"width":160.234375,"height":52}}
+      | PASS D the lineup's first game started as an official game — [["math-mayhem",true,"playing"]]
+      | PASS D host results: What's next names the next game and its mode
+      | PASS D a Cup's What's next has no Play again and no break
+      | PASS D guest results: up next with its mode
+      | PASS D server: the official game finished and counted toward the Cup — {"champ":[{"playerId":"player-1","dayScores":[50],"counted":[50],"qualifyingDays":1,"base":50,"participationBonus":0,"finaleBonus":0,"total":50,"eligible":false,"countedDailyWins":1,"countedMedian":50},{"playerId":"player-2","dayScores":[50],"counted":[50],"qualifyingDays":1,"base":50,"participationBonus":0,"finaleBonus":0,"total":50,"eligible":false,"countedDailyWins":1,"countedMedian":50}],"next":1}
+      | FAIL E the second game started as Practice — not within 20000ms
+      | PASS E nothing counted from it: the Cup standings are unchanged
+      | PASS F the casual planner has no mode switches
+      | PASS F after the upgrade, the lineup's games that can count are Official
+      | PASS F Start follows: Official · game 1
+      | CUP PARTY: 1 FAILED
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":3}
+
+FAILED (exit 1) | targeted | run 20261114-080049-cceb707a-20481
+  14 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-cup-party (w3) [functional]: FAIL E the second game started as Practice — not within 20000ms
+  timing   wall 5m 33s · step time 16m 13s (sum) · 3 workers, 97% busy · 2.92× the same steps run one after another
+           predicted 4–10m (about 5m 18s, low-confidence) → actual 5m 33s (+5%)
+           longest  check-session-flow 3m 05s, check-solo-shelf 2m 51s, check-spectrum 1m 55s · the longest step is 56% of the wall time
+           machine  CPU mean 32%, peak 88% · memory available ≥ 13969 MB · load peak 2.72
+           contention ×1.052 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125t2/test-results/20261114-080049-cceb707a-20481/report.json

@@ -1687,3 +1687,32 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **On the phone:** with a spectator in the room, the results keep the player's own heading and What's next. The standings, outcome and answers are behind "Show them here too".
   - **Why only Math Mayhem:** the discussion advised trying one game first. A spectator count isn't proof the TV is on screen, so the full result is always one tap away.
   - **Alternative rejected:** hiding the results entirely. A player whose TV is off would be stuck.
+
+## Stage 12.5: Family Questions
+**Authorization:** the owner, directly in chat on 2026-11-14: "Definitely add 5 make improvements on it too" (suggestion 5, family-made questions). Spec: `docs/stage12/stage125.md`. Branch `claude/stage12-5-family-questions`, stacked on Stage 12.4. Nothing is merged or deployed.
+
+- **D-S125-01 Family Questions are secret until played.**
+  - **What each audience gets:** each player's projection holds only their own questions. Everyone, the TV included, gets counts per writer. The host can't read them either.
+  - **The ledger** records a question's kind when it's added and a count when questions are removed, never the words.
+  - **Saved with the room** (server-side), and re-checked on load.
+  - **Alternative rejected:** a host review queue. It would spoil the host's own game, and the family asked for something everyone plays.
+- **D-S125-02 How a game is made and scored.**
+  - **Casual only, practice-only, never in Quick Party, never Home's "featured today"** (a newcomer can't play it without written questions; the other games' daily rotation is kept as it was).
+  - **Picking:** at least 3 ready questions, at most 10 per game, taking turns between writers in a seeded order.
+  - **"Who in the family?"** is used only when its answer is playing, and its choices are this game's players by name.
+  - **Answers:** a multiple-choice question's answers are shuffled.
+  - **Used up:** played questions are used up; a cancelled briefing frees them.
+  - **Scoring:** 100 for a right answer. The writer doesn't answer their own question; they earn 50 when some, but not all, of the others get it right.
+  - **Alternatives rejected:**
+    - letting writers answer their own question: they know it;
+    - a flat bonus per question written: it rewards quantity over a good question;
+    - official Cup play: family-written content can't be checked, and Cup scoring changes need the owner.
+- **D-S125-03 Moderation without reading.**
+  - **Live skip:** the host or a cohost can skip the open question for everyone, with two taps. It's never revealed or scored.
+  - **Remove unread:** the host or a cohost can remove every unplayed question one writer wrote, seeing only a name and a count.
+  - **Take back:** writers can take back their own unplayed questions.
+  - **Alternative rejected:** letting the host read questions to approve them, which breaks D-S125-01.
+- **D-S125-04 Limits.**
+  - **Sizes:** a question of up to 140 characters; 2 to 4 answers of up to 60, all different.
+  - **Volume:** 15 waiting per writer and 60 per room.
+  - **Shared check:** the check is one shared function (`src/shared/familyPack.ts`), so the phone says why before sending. The TV layout is checked against the longest question with four answers.

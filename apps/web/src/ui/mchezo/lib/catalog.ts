@@ -83,13 +83,20 @@ export function fitNote(g: Pick<CatalogGame, "minPlayers" | "maxPlayers">, playe
 }
 
 /**
+ * Stage 12.5: games Home never features. Family Questions can't be played until the family has written questions in a
+ * room, so it's a poor first thing to show a newcomer (and leaving it out keeps the rotation the other games had).
+ */
+export const NOT_FEATURED: ReadonlySet<string> = new Set(["family-questions"]);
+
+/**
  * The game featured on Home today: a plain rotation through the catalog by
  * calendar day, so it changes daily and is the same for everyone. It is not a
  * recommendation and says nothing about anyone's history.
  */
 export function featuredOfTheDay(catalog: readonly CatalogGame[], day: Date): CatalogGame | undefined {
-  if (catalog.length === 0) return undefined;
-  const sorted = [...catalog].sort((a, b) => a.id.localeCompare(b.id));
+  const pool = catalog.filter((g) => !NOT_FEATURED.has(g.id));
+  if (pool.length === 0) return undefined;
+  const sorted = [...pool].sort((a, b) => a.id.localeCompare(b.id));
   const dayNumber = Math.floor(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()) / 86_400_000);
   return sorted[dayNumber % sorted.length];
 }

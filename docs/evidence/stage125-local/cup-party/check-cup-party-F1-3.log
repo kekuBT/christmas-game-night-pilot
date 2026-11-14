@@ -1,0 +1,29 @@
+PASS A Cup host: a Quick Party entry that plans today's games
+PASS A guest: no Quick Party controls
+PASS A server: a Family Cup with an empty lineup — {"revision":0,"lineup":null}
+PASS B the planner is the Cup's: Official or Practice
+PASS B group size starts at who is here (2)
+PASS B a lineup for one is all Practice (an official game needs two), with no Official switch — Official games need at least 2 players, so a lineup for 1 is all Practice.
+PASS B Math Mayhem is first in the lineup
+PASS B every game that can count starts Official; a practice-only game says Practice only — [{"id":"math-mayhem","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"word-connections","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"guess-the-year","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"pattern-pulse","tag":"SPAN","pressed":null,"text":"Practice only"},{"id":"geography","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"trivia","tag":"BUTTON","pressed":"true","text":"Official"}]
+PASS B the lineup's second game can count — ["math-mayhem","word-connections","guess-the-year","pattern-pulse","geography","trivia"]
+PASS B the host switched it to Practice
+PASS B no sideways scroll at 320 px with the mode switches
+PASS C server: the saved lineup's modes are the planner's — [{"gameId":"math-mayhem","official":true,"started":false,"status":"pending"},{"gameId":"word-connections","official":false,"started":false,"status":"pending"},{"gameId":"guess-the-year","official":true,"started":false,"status":"pending"},{"gameId":"pattern-pulse","official":false,"started":false,"status":"pending"},{"gameId":"geography","official":true,"started":false,"status":"pending"},{"gameId":"trivia","official":true,"started":false,"status":"pending"}]
+PASS C host lobby: each row says its mode
+PASS C guest lobby: the same modes
+PASS C Start says the mode and the place in the lineup — Start Math Mayhem · Official · game 1 of 6
+PASS C TV: the lineup with each game's mode
+PASS C TV: a long lineup shows three games and says how many more
+PASS C TV: the Family Cup card is whole, above the director's buttons — {"cupCard":{"x":999.21875,"y":726.71875,"width":848.78125,"height":179.484375},"director":{"x":1687.765625,"y":989,"width":160.234375,"height":52}}
+PASS D the lineup's first game started as an official game — [["math-mayhem",true,"playing"]]
+PASS D host results: What's next names the next game and its mode
+PASS D a Cup's What's next has no Play again and no break
+PASS D guest results: up next with its mode
+PASS D server: the official game finished and counted toward the Cup — {"champ":[{"playerId":"player-1","dayScores":[100],"counted":[100],"qualifyingDays":1,"base":100,"participationBonus":0,"finaleBonus":0,"total":100,"eligible":false,"countedDailyWins":1,"countedMedian":100},{"playerId":"player-2","dayScores":[0],"counted":[0],"qualifyingDays":1,"base":0,"participationBonus":0,"finaleBonus":0,"total":0,"eligible":false,"countedDailyWins":0,"countedMedian":0}],"next":1}
+PASS E the second game started as Practice
+PASS E nothing counted from it: the Cup standings are unchanged
+PASS F the casual planner has no mode switches
+PASS F after the upgrade, the lineup's games that can count are Official
+PASS F Start follows: Official · game 1
+CUP PARTY ALL PASSED

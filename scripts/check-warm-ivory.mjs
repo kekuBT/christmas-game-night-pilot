@@ -19,6 +19,9 @@
 //      Stage 12.1 (D-S121-01/02) added and renamed Everyday elements without changing a colour. Those exact element
 //      keys are listed in W8_INTENDED. A listed new element passes only if its style already appears on the same
 //      screen in the base build. A listed removed element passes only because it was replaced. Anything else still fails.
+//      Stage 12.5 added a 17th game: its cards (home, library) and the lobby's Family Questions card are listed by test-id
+//      prefix, under the same rule (every element reuses a base style). Cover gradients are compared without React's
+//      generated id number, which a new cover shifts.
 // Screenshots of both looks (320/390/1280 and the TV) go to MCHEZO_SCREENSHOT_DIR when it's set.
 // Starts ITS OWN server. Chromium emulation only: no real phones or TVs. Usage: node scripts/check-warm-ivory.mjs
 import { spawn } from "node:child_process";
@@ -38,14 +41,29 @@ const W8_INTENDED = {
   home: {
     added: ["home-dock>nav.mz-dock.mz-dock--home.mz-dock--onepath", "home-solo>button.mz-dock__solo.mz-linkbtn", "home-solo>b."],
     removed: ["home-dock>nav.mz-dock.mz-dock--home.mz-dock--three", "home-solo>button.mz-key.mz-key--block.mz-key--lg.mz-key--surface"],
+    // Stage 12.5: a 17th game's card in the home shelf (Home never features it, so the featured game is unchanged).
+    addedPrefixes: ["game-card-family-questions>"],
   },
   menu: {
     added: ["menu-make-cup>button.mz-menurow", "menu-make-cup>path.", "menu-make-cup>span.mz-menurow__chev", "menu-make-cup>span.mz-menurow__detail", "menu-make-cup>span.mz-menurow__icon", "menu-make-cup>span.mz-menurow__label", "menu-make-cup>svg.",
       // Stage 12.4 (D-S124-02): "End the night" in a casual room's menu, the same row style as every menu row.
       "menu-end-night>button.mz-menurow", "menu-end-night>path.", "menu-end-night>span.mz-menurow__chev", "menu-end-night>span.mz-menurow__detail", "menu-end-night>span.mz-menurow__icon", "menu-end-night>span.mz-menurow__label", "menu-end-night>svg.", "menu-end-night>span."],
     removed: [],
+    // Stage 12.5 (D-S125-01): the casual lobby (seen behind the menu) has the Family Questions card.
+    addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>"],
   },
+  // Stage 12.5: a 17th game. Its card on home and in the library, and the lobby's Family Questions card: whole new
+  // components, allowed by their test id, and still only when every element reuses a style the base screen had.
+  library: { added: [], removed: [], addedPrefixes: ["mz-lib-card-family-questions>", "mz-lib-practice-family-questions>"] },
+  lobby: { added: [], removed: [], addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>"] },
+  "lobby-guest": { added: [], removed: [], addedPrefixes: ["family-card>", "family-write>", "family-card-mine>"] },
 };
+/**
+ * A cover's gradient is referenced by an id React generates in render order (`url("#mzcov-_r_2_")`). A new game's cover
+ * shifts every later id without changing a colour, so W8 compares the reference without its generated number. The
+ * gradient's own colours were never part of the signature (its stops aren't laid out), so nothing is lost.
+ */
+const normSig = (x) => x.replace(/url\("#mzcov-[^"]*"\)/g, 'url("#mzcov")');
 const BASELINE = new URL("./lib/everyday-style-baseline.json", import.meta.url);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const DATA_DIR = mkdtempSync(join(tmpdir(), "mchezo-ivory-"));
@@ -328,19 +346,24 @@ try {
     const base = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, "utf8")) : {};
     const keyOf = (x) => x.slice(0, x.indexOf("=>"));
     const styleOf = (x) => x.slice(x.indexOf("=>") + 2);
-    for (const [screen, now] of Object.entries(everydaySig)) {
-      const was = new Set(base[screen] ?? []);
-      const baseStyles = new Set((base[screen] ?? []).map(styleOf));
+    for (const [screen, nowRaw] of Object.entries(everydaySig)) {
+      const now = [...new Set(nowRaw.map(normSig))];
+      const baseList = [...new Set((base[screen] ?? []).map(normSig))];
+      const was = new Set(baseList);
+      const baseStyles = new Set(baseList.map(styleOf));
       const kind = screen.replace(/-\d+$/, "");
       const intended = W8_INTENDED[kind] ?? { added: [], removed: [] };
       const addedAll = now.filter((x) => !was.has(x));
-      const goneAll = (base[screen] ?? []).filter((x) => !now.includes(x));
+      const goneAll = baseList.filter((x) => !now.includes(x));
       // An intended new element must reuse a style this screen already had: a new key, never a new colour.
-      const added = addedAll.filter((x) => !(intended.added.includes(keyOf(x)) && baseStyles.has(styleOf(x))));
+      const listed = (k) => intended.added.includes(k) || (intended.addedPrefixes ?? []).some((p) => k.startsWith(p));
+      const added = addedAll.filter((x) => !(listed(keyOf(x)) && baseStyles.has(styleOf(x))));
       const gone = goneAll.filter((x) => !intended.removed.includes(keyOf(x)));
       const allowed = addedAll.length - added.length + goneAll.length - gone.length;
+      // On a failure, every difference (up to 40 each way), so the log alone says what changed.
+      if (added.length || gone.length) for (const [sign, xs] of [["+", added], ["-", gone]]) for (const x of xs.slice(0, 40)) console.log(`  W8 ${screen} ${sign} ${x.slice(0, 400)}`);
       check(`W8 Everyday ${screen}: every element kind's computed colours equal the base build's (d4dc408)`, was.size > 0 && added.length === 0 && gone.length === 0,
-        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
+        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
     }
   }
 

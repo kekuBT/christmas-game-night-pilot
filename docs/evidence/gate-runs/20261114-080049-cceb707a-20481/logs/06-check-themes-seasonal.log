@@ -1,0 +1,259 @@
+$ node scripts/check-themes-seasonal.mjs http://localhost:41359
+# timeout 600s | worker w3 | server http://localhost:41359 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125t2/test-results/20261114-080049-cceb707a-20481/server-data/w3)
+
+[+0.5s] PASS setup: the shipped library has 2 Christmas Connections boards (con-legacy-1, con-s4-03) among 13
+[+0.9s] PASS A a new device: the shelf's content is Everyday
+[+0.9s] PASS A a new device: the Everyday look (page, Mchezo screens, browser toolbar) — {"theme":"everyday","meta":"#16111d","root":"everyday"}
+[+1.3s] PASS A Christmas chosen: the look follows it (Match the game), the toolbar colour too
+[+1.3s] PASS A the note says what Christmas changes, honestly (Word Connections only)
+[+1.4s] PASS A after a reload: still Christmas, and the Christmas look
+[+2.1s] PASS A Christmas, first round: a Christmas board (unused Christmas first) — con-s4-03
+[+2.1s] PASS A the round says it deals Christmas content
+[+2.2s] PASS A the round's start screen shows the content chosen (Christmas)
+[+2.6s] PASS A Christmas, second round: the other Christmas board — con-s4-03 then con-legacy-1
+[+3.1s] PASS A back to Everyday on the start screen: the Everyday look
+[+4.5s] PASS A Everyday, three rounds: year-round boards only, never a Christmas one — ["con-s4-10","con-s4-08","con-s4-11"]
+[+4.5s] PASS A no request from this device ever carried its look — 7 request bodies
+[+4.5s] PASS A every solo Start carried the content chosen
+[+5.9s] PASS B before the restart: a Christmas board — con-legacy-1
+[+6.7s] PASS B after the restart and a reload: still Christmas, in the Christmas look
+[+7.2s] PASS B after the restart: the other Christmas board (the room's history and content survived) — con-legacy-1 then con-s4-03
+[+10.1s] PASS C the room is Everyday at first: the up-next card says so on both phones
+[+10.1s] PASS C only the host has the content choice; the guest sees it, can't change it
+[+10.5s] PASS C the guest's phone takes the Christmas look
+[+12.0s] PASS C …the host's phone stays Everyday, and the room's content is still Everyday
+[+12.8s] PASS C the TV says Everyday content, in the Everyday look
+[+13.0s] PASS C the host's Christmas reaches the guest's phone and dock
+[+13.0s] PASS C …and the TV, which takes the Christmas look (Match the game)
+[+13.0s] PASS C the host's phone takes the Christmas look (Match the game)
+[+13.0s] PASS C 390×844 host lobby, Christmas look: no sideways overflow, choices at least 44 px, readable contrast — {"over":0,"small":[],"contrast":[]}
+[+13.0s] PASS C 320×640 guest lobby, Christmas look (pinned): no sideways overflow, choices at least 44 px, readable contrast — {"over":0,"small":[],"contrast":[]}
+[+13.0s] PASS C 1280×720 TV, Christmas look: no sideways overflow, choices at least 44 px, readable contrast — {"over":0,"small":[],"contrast":[]}
+[+13.5s] PASS C the guest pins Everyday: their phone changes
+[+15.0s] PASS C …and nothing else does: the room still deals Christmas on every screen
+[+15.0s] PASS C no request from either phone ever carried a look
+[+15.4s] PASS C the guest back on Match the game: the room's Christmas look
+[+15.5s] PASS C the lost reply: the same press sent again (same id, same content), and it carried Christmas — [["1f9a1930-a029-4181-b481-ea31f9a6c0a3","christmas"],["1f9a1930-a029-4181-b481-ea31f9a6c0a3","christmas"]]
+[+15.8s] PASS C 390×844 host briefing, Christmas look: no sideways overflow, choices at least 44 px, readable contrast — {"over":0,"small":[],"contrast":[]}
+[+15.9s] PASS C 320×640 guest briefing, Christmas look: no sideways overflow, choices at least 44 px, readable contrast — {"over":0,"small":[],"contrast":[]}
+[+15.9s] PASS C both briefings name the content this game was frozen with, as this game's
+[+16.0s] PASS C the game deals a Christmas board — con-s4-03
+[+16.0s] PASS C exactly one game started from the two sends, bound to Christmas — [["game-1","playing","christmas"]]
+[+16.5s] PASS C results: What's next says the next game deals Christmas content
+[+17.0s] PASS C 390×844 host results with What's next, Christmas look: no sideways overflow, choices at least 44 px, readable contrast — {"over":0,"small":[],"contrast":[]}
+[+17.1s] PASS C Play again keeps the content: its briefing says Christmas
+[+17.6s] PASS C Play again deals the other Christmas board — con-s4-03 then con-legacy-1
+[+20.1s] PASS C the host's lobby: the Everyday look, and the next game says Everyday
+[+20.1s] PASS C the guest's results: What's next now says the NEXT game is Everyday
+[+20.1s] PASS C …while the Christmas game on the guest's screen keeps its Christmas look (a setting for the next game never recolours a game shown) — {"theme":"christmas","meta":"#f7f1e6","root":"christmas"}
+[+20.1s] PASS C the TV still shows the last game (Christmas), so it keeps that game's look until the next one starts — {"theme":"christmas","meta":"#f7f1e6","root":"christmas"}
+[+20.1s] PASS C the guest in the lobby: the Everyday look (Match the game, the next game)
+[+20.3s] PASS C the guest reloads: the room's content (Everyday) and their own look choice (Match the game) are kept
+[+20.3s] PASS C the Everyday game's briefing says Everyday (this game)
+[+20.3s] PASS C the TV shows the new (Everyday) game, in the Everyday look
+[+20.9s] PASS C an Everyday game deals a year-round board — con-s4-08
+[+22.3s] PASS E tab B sees the device's remembered choice (Christmas)
+[+22.7s] PASS E tab B changes it to Everyday; tab B's shelf turns Everyday
+[+22.8s] PASS E tab A's held Start went out with the content it was pressed with (Christmas), and dealt a Christmas board — ["christmas"] con-legacy-1
+[+22.8s] PASS E tab A's round keeps its own Christmas look while the device's choice is now Everyday
+[+25.5s] PASS E tab A's results say this round's content, and keep its look
+[+25.6s] PASS E tab A's Play again repeats the finished round's content (Christmas), not the device's changed choice — ["christmas"] con-s4-03
+[+25.7s] PASS E tab B's own Start uses its choice (Everyday): a year-round board — con-s4-12
+[+25.7s] PASS E tab B's round is in the Everyday look
+[+27.2s] PASS F writes throw, nothing stored: Settings → Look → Christmas stays chosen and the page turns Christmas — {"theme":"christmas","meta":"#f7f1e6","root":"christmas"}
+[+27.2s] PASS F writes throw, nothing stored: Settings says the look lasts until reload (never promises it is kept)
+[+27.5s] PASS F writes throw, nothing stored: back to Match the game, still unsaved, the page follows it (Everyday at home)
+[+28.8s] PASS F writes throw, nothing stored: the shelf's Christmas stays chosen, with the Christmas look (Match the game) — christmas {"theme":"christmas","meta":"#f7f1e6","root":"christmas"}
+[+28.8s] PASS F writes throw, nothing stored: the shelf says the choice lasts until reload
+[+29.0s] PASS F writes throw, nothing stored: shelf → Word Connections: the Start reached the server as Christmas and dealt a Christmas board — ["christmas"] con-s4-03
+[+29.0s] PASS F writes throw, nothing stored: the round keeps the Christmas look and label
+[+29.1s] PASS F writes throw, nothing stored: after a reload the unsaved choice falls back (everyday), never a broken page
+[+29.1s] PASS F writes throw, nothing stored: no page errors
+[+30.5s] PASS F writes throw, an older Everyday choice stored: Settings → Look → Christmas stays chosen and the page turns Christmas — {"theme":"christmas","meta":"#f7f1e6","root":"christmas"}
+[+30.5s] PASS F writes throw, an older Everyday choice stored: Settings says the look lasts until reload (never promises it is kept)
+[+30.7s] PASS F writes throw, an older Everyday choice stored: back to Match the game, still unsaved, the page follows it (Everyday at home)
+[+31.6s] PASS F writes throw, an older Everyday choice stored: the shelf's Christmas stays chosen, with the Christmas look (Match the game) — christmas {"theme":"christmas","meta":"#f7f1e6","root":"christmas"}
+[+31.6s] PASS F writes throw, an older Everyday choice stored: the shelf says the choice lasts until reload
+[+31.7s] PASS F writes throw, an older Everyday choice stored: shelf → Word Connections: the Start reached the server as Christmas and dealt a Christmas board — ["christmas"] con-s4-03
+[+31.7s] PASS F writes throw, an older Everyday choice stored: the round keeps the Christmas look and label
+[+31.9s] PASS F writes throw, an older Everyday choice stored: after a reload the unsaved choice falls back (everyday), never a broken page
+[+31.9s] PASS F writes throw, an older Everyday choice stored: no page errors
+[+33.3s] PASS F every localStorage access throws: Settings → Look → Christmas stays chosen and the page turns Christmas — {"theme":"christmas","meta":"#f7f1e6","root":"christmas"}
+[+33.3s] PASS F every localStorage access throws: Settings says the look lasts until reload (never promises it is kept)
+[+33.6s] PASS F every localStorage access throws: back to Match the game, still unsaved, the page follows it (Everyday at home)
+[+34.9s] PASS F every localStorage access throws: the shelf's Christmas stays chosen, with the Christmas look (Match the game) — christmas {"theme":"christmas","meta":"#f7f1e6","root":"christmas"}
+[+34.9s] PASS F every localStorage access throws: the shelf says the choice lasts until reload
+[+35.0s] PASS F every localStorage access throws: shelf → Word Connections: the Start reached the server as Christmas and dealt a Christmas board — ["christmas"] con-s4-03
+[+35.0s] PASS F every localStorage access throws: the round keeps the Christmas look and label
+[+35.1s] PASS F every localStorage access throws: after a reload the unsaved choice falls back (everyday), never a broken page
+[+35.1s] PASS F every localStorage access throws: no page errors
+[+36.2s] PASS D 320×640 everyday /: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+36.2s] PASS D 320×640 everyday /: readable contrast (WCAG AA)
+[+36.7s] PASS D 320×640 everyday /solo: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+36.7s] PASS D 320×640 everyday /solo: readable contrast (WCAG AA)
+[+37.2s] PASS D 320×640 everyday /solo/word-connections: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+37.2s] PASS D 320×640 everyday /solo/word-connections: readable contrast (WCAG AA)
+[+38.2s] PASS D 320×640 everyday /library: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+38.2s] PASS D 320×640 everyday /library: readable contrast (WCAG AA)
+[+39.3s] PASS D 320×640 christmas /: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+39.3s] PASS D 320×640 christmas /: reduced motion honoured — reduced
+[+39.3s] PASS D 320×640 christmas /: readable contrast (WCAG AA)
+[+39.4s] PASS D 320×640 christmas /solo: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+39.4s] PASS D 320×640 christmas /solo: reduced motion honoured — reduced
+[+39.4s] PASS D 320×640 christmas /solo: readable contrast (WCAG AA)
+[+39.6s] PASS D 320×640 christmas /solo/word-connections: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+39.6s] PASS D 320×640 christmas /solo/word-connections: reduced motion honoured — reduced
+[+39.6s] PASS D 320×640 christmas /solo/word-connections: readable contrast (WCAG AA)
+[+40.6s] PASS D 320×640 christmas /library: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+40.6s] PASS D 320×640 christmas /library: reduced motion honoured — reduced
+[+40.6s] PASS D 320×640 christmas /library: readable contrast (WCAG AA)
+[+41.7s] PASS D 390×844 everyday /: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+41.7s] PASS D 390×844 everyday /: readable contrast (WCAG AA)
+[+42.2s] PASS D 390×844 everyday /solo: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+42.2s] PASS D 390×844 everyday /solo: readable contrast (WCAG AA)
+[+42.6s] PASS D 390×844 everyday /solo/word-connections: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+42.6s] PASS D 390×844 everyday /solo/word-connections: readable contrast (WCAG AA)
+[+43.6s] PASS D 390×844 everyday /library: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+43.6s] PASS D 390×844 everyday /library: readable contrast (WCAG AA)
+[+44.7s] PASS D 390×844 christmas /: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+44.7s] PASS D 390×844 christmas /: reduced motion honoured — reduced
+[+44.7s] PASS D 390×844 christmas /: readable contrast (WCAG AA)
+[+44.9s] PASS D 390×844 christmas /solo: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+44.9s] PASS D 390×844 christmas /solo: reduced motion honoured — reduced
+[+44.9s] PASS D 390×844 christmas /solo: readable contrast (WCAG AA)
+[+45.0s] PASS D 390×844 christmas /solo/word-connections: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+45.0s] PASS D 390×844 christmas /solo/word-connections: reduced motion honoured — reduced
+[+45.0s] PASS D 390×844 christmas /solo/word-connections: readable contrast (WCAG AA)
+[+46.0s] PASS D 390×844 christmas /library: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+46.0s] PASS D 390×844 christmas /library: reduced motion honoured — reduced
+[+46.0s] PASS D 390×844 christmas /library: readable contrast (WCAG AA)
+[+47.0s] PASS D 844×390 everyday /: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+47.0s] PASS D 844×390 everyday /: readable contrast (WCAG AA)
+[+47.5s] PASS D 844×390 everyday /solo: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+47.5s] PASS D 844×390 everyday /solo: readable contrast (WCAG AA)
+[+48.0s] PASS D 844×390 everyday /solo/word-connections: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+48.0s] PASS D 844×390 everyday /solo/word-connections: readable contrast (WCAG AA)
+[+49.0s] PASS D 844×390 everyday /library: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+49.0s] PASS D 844×390 everyday /library: readable contrast (WCAG AA)
+[+50.1s] PASS D 844×390 christmas /: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+50.1s] PASS D 844×390 christmas /: reduced motion honoured — reduced
+[+50.1s] PASS D 844×390 christmas /: readable contrast (WCAG AA)
+[+50.3s] PASS D 844×390 christmas /solo: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+50.3s] PASS D 844×390 christmas /solo: reduced motion honoured — reduced
+[+50.3s] PASS D 844×390 christmas /solo: readable contrast (WCAG AA)
+[+50.4s] PASS D 844×390 christmas /solo/word-connections: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+50.4s] PASS D 844×390 christmas /solo/word-connections: reduced motion honoured — reduced
+[+50.4s] PASS D 844×390 christmas /solo/word-connections: readable contrast (WCAG AA)
+[+51.4s] PASS D 844×390 christmas /library: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+51.4s] PASS D 844×390 christmas /library: reduced motion honoured — reduced
+[+51.4s] PASS D 844×390 christmas /library: readable contrast (WCAG AA)
+[+52.5s] PASS D 1440×900 everyday /: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+52.5s] PASS D 1440×900 everyday /: readable contrast (WCAG AA)
+[+53.0s] PASS D 1440×900 everyday /solo: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+53.0s] PASS D 1440×900 everyday /solo: readable contrast (WCAG AA)
+[+53.5s] PASS D 1440×900 everyday /solo/word-connections: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+53.5s] PASS D 1440×900 everyday /solo/word-connections: readable contrast (WCAG AA)
+[+54.4s] PASS D 1440×900 everyday /library: the everyday look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"full","small":[]}
+[+54.4s] PASS D 1440×900 everyday /library: readable contrast (WCAG AA)
+[+55.5s] PASS D 1440×900 christmas /: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+55.5s] PASS D 1440×900 christmas /: reduced motion honoured — reduced
+[+55.5s] PASS D 1440×900 christmas /: readable contrast (WCAG AA)
+[+55.7s] PASS D 1440×900 christmas /solo: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+55.7s] PASS D 1440×900 christmas /solo: reduced motion honoured — reduced
+[+55.7s] PASS D 1440×900 christmas /solo: readable contrast (WCAG AA)
+[+55.8s] PASS D 1440×900 christmas /solo/word-connections: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+55.8s] PASS D 1440×900 christmas /solo/word-connections: reduced motion honoured — reduced
+[+55.8s] PASS D 1440×900 christmas /solo/word-connections: readable contrast (WCAG AA)
+[+56.8s] PASS D 1440×900 christmas /library: the christmas look, no sideways overflow, choices at least 44 px — {"over":0,"motion":"reduced","small":[]}
+[+56.8s] PASS D 1440×900 christmas /library: reduced motion honoured — reduced
+[+56.8s] PASS D 1440×900 christmas /library: readable contrast (WCAG AA)
+[+56.9s] PASS G fonts measured: the page's own font stack, DejaVu Sans, Liberation Sans, FreeSans
+[+58.2s] PASS G 320×640, the page's own font: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+58.4s] PASS G 320×640, the page's own font: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+58.6s] PASS G 320×640, the page's own font: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+59.4s] PASS G 320×640, the page's own font: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+59.6s] PASS G 320×640, the page's own font: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+60.3s] PASS G 320×640, the page's own font: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+60.6s] PASS G 320×640, the page's own font: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+61.9s] PASS G 320×640, DejaVu Sans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+62.1s] PASS G 320×640, DejaVu Sans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+62.4s] PASS G 320×640, DejaVu Sans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+63.1s] PASS G 320×640, DejaVu Sans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+63.4s] PASS G 320×640, DejaVu Sans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+64.1s] PASS G 320×640, DejaVu Sans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+64.3s] PASS G 320×640, DejaVu Sans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+66.0s] PASS G 320×640, Liberation Sans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+66.3s] PASS G 320×640, Liberation Sans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+66.5s] PASS G 320×640, Liberation Sans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+67.2s] PASS G 320×640, Liberation Sans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+67.5s] PASS G 320×640, Liberation Sans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+68.2s] PASS G 320×640, Liberation Sans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+68.4s] PASS G 320×640, Liberation Sans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+69.7s] PASS G 320×640, FreeSans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+69.9s] PASS G 320×640, FreeSans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+70.1s] PASS G 320×640, FreeSans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+70.9s] PASS G 320×640, FreeSans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+71.1s] PASS G 320×640, FreeSans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+71.8s] PASS G 320×640, FreeSans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+72.0s] PASS G 320×640, FreeSans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+73.3s] PASS G 390×844, the page's own font: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+73.6s] PASS G 390×844, the page's own font: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+73.8s] PASS G 390×844, the page's own font: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+74.5s] PASS G 390×844, the page's own font: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+74.7s] PASS G 390×844, the page's own font: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+75.4s] PASS G 390×844, the page's own font: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+75.7s] PASS G 390×844, the page's own font: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+77.5s] PASS G 390×844, DejaVu Sans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+77.7s] PASS G 390×844, DejaVu Sans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+77.9s] PASS G 390×844, DejaVu Sans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+78.6s] PASS G 390×844, DejaVu Sans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+78.9s] PASS G 390×844, DejaVu Sans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+79.6s] PASS G 390×844, DejaVu Sans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+79.9s] PASS G 390×844, DejaVu Sans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+81.2s] PASS G 390×844, Liberation Sans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+81.4s] PASS G 390×844, Liberation Sans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+81.6s] PASS G 390×844, Liberation Sans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+82.4s] PASS G 390×844, Liberation Sans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+82.6s] PASS G 390×844, Liberation Sans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+83.3s] PASS G 390×844, Liberation Sans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+83.6s] PASS G 390×844, Liberation Sans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+85.3s] PASS G 390×844, FreeSans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+85.5s] PASS G 390×844, FreeSans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+85.7s] PASS G 390×844, FreeSans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+86.5s] PASS G 390×844, FreeSans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+86.7s] PASS G 390×844, FreeSans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+87.4s] PASS G 390×844, FreeSans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+87.7s] PASS G 390×844, FreeSans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+88.9s] PASS G 1440×900, the page's own font: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+89.1s] PASS G 1440×900, the page's own font: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+89.3s] PASS G 1440×900, the page's own font: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+90.1s] PASS G 1440×900, the page's own font: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+90.3s] PASS G 1440×900, the page's own font: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+91.0s] PASS G 1440×900, the page's own font: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+91.2s] PASS G 1440×900, the page's own font: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+92.9s] PASS G 1440×900, DejaVu Sans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+93.2s] PASS G 1440×900, DejaVu Sans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+93.4s] PASS G 1440×900, DejaVu Sans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+94.2s] PASS G 1440×900, DejaVu Sans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+94.4s] PASS G 1440×900, DejaVu Sans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+95.1s] PASS G 1440×900, DejaVu Sans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+95.3s] PASS G 1440×900, DejaVu Sans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+96.7s] PASS G 1440×900, Liberation Sans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+96.9s] PASS G 1440×900, Liberation Sans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+97.1s] PASS G 1440×900, Liberation Sans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+98.4s] PASS G 1440×900, Liberation Sans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+98.6s] PASS G 1440×900, Liberation Sans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+99.3s] PASS G 1440×900, Liberation Sans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+99.5s] PASS G 1440×900, Liberation Sans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+101.3s] PASS G 1440×900, FreeSans: Settings → Look, look-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+101.5s] PASS G 1440×900, FreeSans: Settings → Look, look-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+101.8s] PASS G 1440×900, FreeSans: Settings → Look, look-auto chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+102.5s] PASS G 1440×900, FreeSans: the shelf's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+102.7s] PASS G 1440×900, FreeSans: the shelf's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+103.9s] PASS G 1440×900, FreeSans: the Word Connections start screen's content choice, solo-content-christmas chosen: every label whole, the ✓ clear of it, options at least 44 px
+[+104.2s] PASS G 1440×900, FreeSans: the Word Connections start screen's content choice, solo-content-everyday chosen: every label whole, the ✓ clear of it, options at least 44 px, nothing moved
+[+104.2s] 
+[+104.2s] All themes-seasonal checks passed
+[+104.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":30,"pages":31,"peakOpenPages":3}
+
+# PASS (exit 0) in 104.2s | cpu 14.6s, peak memory 348 MB

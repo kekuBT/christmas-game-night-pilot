@@ -1,0 +1,207 @@
+$ node scripts/check-warm-ivory.mjs http://localhost:35037
+# timeout 600s | worker w1 | server http://localhost:35037 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125t2/test-results/20261114-080049-cceb707a-20481/server-data/w1)
+
+[+28.5s] PASS W8 Everyday home-390: every element kind's computed colours equal the base build's (d4dc408) — 261 kinds; new 0, missing 0; 18 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday solo-390: every element kind's computed colours equal the base build's (d4dc408) — 73 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday library-390: every element kind's computed colours equal the base build's (d4dc408) — 327 kinds; new 0, missing 0; 18 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday lobby-390: every element kind's computed colours equal the base build's (d4dc408) — 105 kinds; new 0, missing 0; 5 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday menu-390: every element kind's computed colours equal the base build's (d4dc408) — 197 kinds; new 0, missing 0; 18 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday lobby-guest-390: every element kind's computed colours equal the base build's (d4dc408) — 86 kinds; new 0, missing 0; 5 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday memory-390: every element kind's computed colours equal the base build's (d4dc408) — 42 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday briefing-390: every element kind's computed colours equal the base build's (d4dc408) — 30 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday tv-briefing-390: every element kind's computed colours equal the base build's (d4dc408) — 20 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday question-390: every element kind's computed colours equal the base build's (d4dc408) — 25 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday tv-question-390: every element kind's computed colours equal the base build's (d4dc408) — 44 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday locked-390: every element kind's computed colours equal the base build's (d4dc408) — 28 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday home-320: every element kind's computed colours equal the base build's (d4dc408) — 261 kinds; new 0, missing 0; 18 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday solo-320: every element kind's computed colours equal the base build's (d4dc408) — 73 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday library-320: every element kind's computed colours equal the base build's (d4dc408) — 327 kinds; new 0, missing 0; 18 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday lobby-320: every element kind's computed colours equal the base build's (d4dc408) — 111 kinds; new 0, missing 0; 5 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday menu-320: every element kind's computed colours equal the base build's (d4dc408) — 204 kinds; new 0, missing 0; 18 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday lobby-guest-320: every element kind's computed colours equal the base build's (d4dc408) — 86 kinds; new 0, missing 0; 5 intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style
+[+28.5s] PASS W8 Everyday memory-320: every element kind's computed colours equal the base build's (d4dc408) — 42 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday briefing-320: every element kind's computed colours equal the base build's (d4dc408) — 30 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday question-320: every element kind's computed colours equal the base build's (d4dc408) — 25 kinds; new 0, missing 0
+[+28.5s] PASS W8 Everyday locked-320: every element kind's computed colours equal the base build's (d4dc408) — 28 kinds; new 0, missing 0
+[+62.2s] PASS W0 home at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 home at 390 px: every text element reads (4.5:1, large 3:1) — 44 text elements, lowest 6.24:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 home at 390 px: every control stands out from what's behind it (3:1) — 2 controls, weakest 3.67:1
+[+62.3s] PASS W3 home at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 home at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 solo at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 solo at 390 px: every text element reads (4.5:1, large 3:1) — 24 text elements, lowest 6.24:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 solo at 390 px: every control stands out from what's behind it (3:1) — 4 controls, weakest 3.67:1
+[+62.3s] PASS W3 solo at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 solo at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 library at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 library at 390 px: every text element reads (4.5:1, large 3:1) — 85 text elements, lowest 6.24:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 library at 390 px: every control stands out from what's behind it (3:1) — 3 controls, weakest 3.67:1
+[+62.3s] PASS W3 library at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 library at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 results at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 results at 390 px: every text element reads (4.5:1, large 3:1) — 50 text elements, lowest 5.06:1, 6 disabled or faded (exempt)
+[+62.3s] PASS W2 results at 390 px: every control stands out from what's behind it (3:1) — 18 controls, weakest 3.67:1
+[+62.3s] PASS W3 results at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 results at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 lobby at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 lobby at 390 px: every text element reads (4.5:1, large 3:1) — 42 text elements, lowest 5.67:1, 2 disabled or faded (exempt)
+[+62.3s] PASS W2 lobby at 390 px: every control stands out from what's behind it (3:1) — 10 controls, weakest 3.67:1
+[+62.3s] PASS W3 lobby at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 lobby at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 menu at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 menu at 390 px: every text element reads (4.5:1, large 3:1) — 81 text elements, lowest 5.67:1, 3 disabled or faded (exempt)
+[+62.3s] PASS W2 menu at 390 px: every control stands out from what's behind it (3:1) — 15 controls, weakest 3.67:1
+[+62.3s] PASS W3 menu at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 menu at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 lobby-guest at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 lobby-guest at 390 px: every text element reads (4.5:1, large 3:1) — 29 text elements, lowest 5.67:1, 1 disabled or faded (exempt)
+[+62.3s] PASS W2 lobby-guest at 390 px: every control stands out from what's behind it (3:1) — 5 controls, weakest 3.67:1
+[+62.3s] PASS W3 lobby-guest at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 lobby-guest at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 memory at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 memory at 390 px: every text element reads (4.5:1, large 3:1) — 30 text elements, lowest 6.24:1, 1 disabled or faded (exempt)
+[+62.3s] PASS W2 memory at 390 px: every control stands out from what's behind it (3:1) — 6 controls, weakest 4.03:1
+[+62.3s] PASS W3 memory at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 memory at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 briefing at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 briefing at 390 px: every text element reads (4.5:1, large 3:1) — 23 text elements, lowest 6.24:1, 1 disabled or faded (exempt)
+[+62.3s] PASS W2 briefing at 390 px: every control stands out from what's behind it (3:1) — 2 controls, weakest 4.03:1
+[+62.3s] PASS W3 briefing at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 briefing at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 tv-briefing at 1920×1080: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 tv-briefing at 1920×1080: every text element reads (4.5:1, large 3:1) — 17 text elements, lowest 6.24:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 tv-briefing at 1920×1080: every control stands out from what's behind it (3:1) — 1 controls, weakest 3.67:1
+[+62.3s] PASS W3 tv-briefing at 1920×1080: no dark page, card or panel
+[+62.3s] PASS W5 tv-briefing at 1920×1080: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 question at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 question at 390 px: every text element reads (4.5:1, large 3:1) — 11 text elements, lowest 5.60:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 question at 390 px: every control stands out from what's behind it (3:1) — 2 controls, weakest 3.67:1
+[+62.3s] PASS W3 question at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 question at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 tv-question at 1920×1080: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 tv-question at 1920×1080: every text element reads (4.5:1, large 3:1) — 17 text elements, lowest 5.60:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 tv-question at 1920×1080: every control stands out from what's behind it (3:1) — 4 controls, weakest 3.67:1
+[+62.3s] PASS W3 tv-question at 1920×1080: no dark page, card or panel
+[+62.3s] PASS W5 tv-question at 1920×1080: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 locked at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 locked at 390 px: every text element reads (4.5:1, large 3:1) — 20 text elements, lowest 6.24:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 locked at 390 px: every control stands out from what's behind it (3:1) — 2 controls, weakest 3.67:1
+[+62.3s] PASS W3 locked at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 locked at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 results at 390 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 results at 390 px: every text element reads (4.5:1, large 3:1) — 50 text elements, lowest 5.06:1, 6 disabled or faded (exempt)
+[+62.3s] PASS W2 results at 390 px: every control stands out from what's behind it (3:1) — 18 controls, weakest 3.67:1
+[+62.3s] PASS W3 results at 390 px: no dark page, card or panel
+[+62.3s] PASS W5 results at 390 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 tv-results at 1920×1080: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 tv-results at 1920×1080: every text element reads (4.5:1, large 3:1) — 27 text elements, lowest 5.60:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 tv-results at 1920×1080: every control stands out from what's behind it (3:1) — 14 controls, weakest 3.67:1
+[+62.3s] PASS W3 tv-results at 1920×1080: no dark page, card or panel
+[+62.3s] PASS W5 tv-results at 1920×1080: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 home at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 home at 320 px: every text element reads (4.5:1, large 3:1) — 44 text elements, lowest 6.24:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 home at 320 px: every control stands out from what's behind it (3:1) — 2 controls, weakest 3.67:1
+[+62.3s] PASS W3 home at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 home at 320 px: no sideways scroll
+[+62.3s] PASS W4 home at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 home at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 solo at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 solo at 320 px: every text element reads (4.5:1, large 3:1) — 24 text elements, lowest 6.24:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 solo at 320 px: every control stands out from what's behind it (3:1) — 4 controls, weakest 3.67:1
+[+62.3s] PASS W3 solo at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 solo at 320 px: no sideways scroll
+[+62.3s] PASS W4 solo at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 solo at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 library at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 library at 320 px: every text element reads (4.5:1, large 3:1) — 85 text elements, lowest 6.24:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 library at 320 px: every control stands out from what's behind it (3:1) — 3 controls, weakest 3.67:1
+[+62.3s] PASS W3 library at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 library at 320 px: no sideways scroll
+[+62.3s] PASS W4 library at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 library at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 results at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 results at 320 px: every text element reads (4.5:1, large 3:1) — 50 text elements, lowest 5.06:1, 6 disabled or faded (exempt)
+[+62.3s] PASS W2 results at 320 px: every control stands out from what's behind it (3:1) — 18 controls, weakest 3.67:1
+[+62.3s] PASS W3 results at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 results at 320 px: no sideways scroll
+[+62.3s] PASS W4 results at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 results at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 lobby at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 lobby at 320 px: every text element reads (4.5:1, large 3:1) — 42 text elements, lowest 5.67:1, 2 disabled or faded (exempt)
+[+62.3s] PASS W2 lobby at 320 px: every control stands out from what's behind it (3:1) — 10 controls, weakest 3.67:1
+[+62.3s] PASS W3 lobby at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 lobby at 320 px: no sideways scroll
+[+62.3s] PASS W4 lobby at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 lobby at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 menu at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 menu at 320 px: every text element reads (4.5:1, large 3:1) — 81 text elements, lowest 5.67:1, 3 disabled or faded (exempt)
+[+62.3s] PASS W2 menu at 320 px: every control stands out from what's behind it (3:1) — 15 controls, weakest 3.67:1
+[+62.3s] PASS W3 menu at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 menu at 320 px: no sideways scroll
+[+62.3s] PASS W4 menu at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 menu at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 lobby-guest at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 lobby-guest at 320 px: every text element reads (4.5:1, large 3:1) — 29 text elements, lowest 5.67:1, 1 disabled or faded (exempt)
+[+62.3s] PASS W2 lobby-guest at 320 px: every control stands out from what's behind it (3:1) — 5 controls, weakest 3.67:1
+[+62.3s] PASS W3 lobby-guest at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 lobby-guest at 320 px: no sideways scroll
+[+62.3s] PASS W4 lobby-guest at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 lobby-guest at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 memory at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 memory at 320 px: every text element reads (4.5:1, large 3:1) — 30 text elements, lowest 6.24:1, 1 disabled or faded (exempt)
+[+62.3s] PASS W2 memory at 320 px: every control stands out from what's behind it (3:1) — 6 controls, weakest 4.03:1
+[+62.3s] PASS W3 memory at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 memory at 320 px: no sideways scroll
+[+62.3s] PASS W4 memory at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 memory at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 briefing at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 briefing at 320 px: every text element reads (4.5:1, large 3:1) — 23 text elements, lowest 6.24:1, 1 disabled or faded (exempt)
+[+62.3s] PASS W2 briefing at 320 px: every control stands out from what's behind it (3:1) — 2 controls, weakest 4.03:1
+[+62.3s] PASS W3 briefing at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 briefing at 320 px: no sideways scroll
+[+62.3s] PASS W4 briefing at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 briefing at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 question at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 question at 320 px: every text element reads (4.5:1, large 3:1) — 11 text elements, lowest 5.60:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 question at 320 px: every control stands out from what's behind it (3:1) — 2 controls, weakest 3.67:1
+[+62.3s] PASS W3 question at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 question at 320 px: no sideways scroll
+[+62.3s] PASS W4 question at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 question at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 locked at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 locked at 320 px: every text element reads (4.5:1, large 3:1) — 20 text elements, lowest 6.24:1, 0 disabled or faded (exempt)
+[+62.3s] PASS W2 locked at 320 px: every control stands out from what's behind it (3:1) — 2 controls, weakest 3.67:1
+[+62.3s] PASS W3 locked at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 locked at 320 px: no sideways scroll
+[+62.3s] PASS W4 locked at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 locked at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 results at 320 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 results at 320 px: every text element reads (4.5:1, large 3:1) — 50 text elements, lowest 5.06:1, 6 disabled or faded (exempt)
+[+62.3s] PASS W2 results at 320 px: every control stands out from what's behind it (3:1) — 18 controls, weakest 3.67:1
+[+62.3s] PASS W3 results at 320 px: no dark page, card or panel
+[+62.3s] PASS W4 results at 320 px: no sideways scroll
+[+62.3s] PASS W4 results at 320 px: keys, chips and choices at least 44 px, none clipped
+[+62.3s] PASS W5 results at 320 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 results at 1280 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 results at 1280 px: every text element reads (4.5:1, large 3:1) — 50 text elements, lowest 5.06:1, 6 disabled or faded (exempt)
+[+62.3s] PASS W2 results at 1280 px: every control stands out from what's behind it (3:1) — 18 controls, weakest 3.67:1
+[+62.3s] PASS W3 results at 1280 px: no dark page, card or panel
+[+62.3s] PASS W5 results at 1280 px: nothing animates with Animations Off — 0 running
+[+62.3s] PASS W0 memory at 1280 px: the page is the light Christmas look — christmas/light
+[+62.3s] PASS W1 memory at 1280 px: every text element reads (4.5:1, large 3:1) — 30 text elements, lowest 6.24:1, 1 disabled or faded (exempt)
+[+62.3s] PASS W2 memory at 1280 px: every control stands out from what's behind it (3:1) — 6 controls, weakest 4.03:1
+[+62.3s] PASS W3 memory at 1280 px: no dark page, card or panel
+[+62.3s] PASS W5 memory at 1280 px: nothing animates with Animations Off — 0 running
+[+63.6s] PASS W2 the focus ring after Tab is visible and stands out (3:1, at least 2 px) — memory-back 3px 5.06:1; room-menu 3px 5.06:1; TEXTAREA 3px 7.11:1; SUMMARY 3px 5.56:1
+[+63.6s] PASS W2 a disabled key looks different from the same key enabled (its fill differs) — disabled rgb(239, 230, 214), enabled rgb(163, 37, 58)
+[+64.4s] PASS W6 Memory Book: Christmas -> Everyday -> Christmas from the room menu keeps the unsent draft (no reload) — {"mid":["everyday","A draft that survives a change of look"],"end":["christmas","A draft that survives a change of look"]}
+[+64.5s] PASS W7 Christmas PDF: ivory page, cranberry title, the approved note, not the pending one — christmas-memory-book-NTM378-2026-11-14.pdf
+[+64.6s] PASS W7 Christmas share image: its background is the ivory ground (247, 241, 230) — [247,241,230]
+[+65.1s] PASS W7 Everyday PDF: unchanged (no page fill, no coloured title) — mchezo-memory-book-NTM378-2026-11-14.pdf
+[+67.1s] PASS W7 after a revoke, a fresh Christmas PDF leaves the revoked note out and keeps the approved one — christmas-memory-book-NTM378-2026-11-14.pdf
+[+67.9s] PASS W6 a game in progress: another tab's look change re-themes it, with no reload and the same question — {"before":["christmas","Question 2 of 10"],"after":["everyday","Question 2 of 10"]}
+[+67.9s] 
+[+67.9s] ALL WARM IVORY CHECKS PASSED
+[+67.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":21,"pages":22,"peakOpenPages":3}
+
+# PASS (exit 0) in 68s | cpu 11.1s, peak memory 382 MB

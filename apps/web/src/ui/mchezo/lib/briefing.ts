@@ -86,6 +86,7 @@ const PHASE_WORDS: Record<string, string> = {
 const GAME_PHASE_WORDS: Record<string, Record<string, string>> = {
   "impostor": { guess: "the impostor's guess" },
   "spectrum": { clue: "the clue", guess: "everyone's guesses", reveal: "each reveal" },
+  "family-questions": { question: "each question", reveal: "each answer" },
 };
 
 /** The real time limits, from the lifecycle policy the server enforces, in this game's own words. */
@@ -164,6 +165,16 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
       "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena.",
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
+    ],
+  },
+  // Stage 12.5 (docs/stage12/stage125.md §2).
+  "family-questions": {
+    objective: "Questions the family wrote. How well do you know each other?",
+    steps: [
+      "Up to ten questions, written in the lobby by the people playing. Nobody has seen them yet.",
+      "Pick your answer on your phone. You don't answer your own question: sit back and keep a straight face.",
+      "100 points for a right answer. When some, but not all, get a question right, whoever wrote it scores 50 for a great question.",
+      "Who asked each question is revealed with its answer. The host can skip a question; it's never shown again.",
     ],
   },
   // Stage 9.3 (docs/stage9/stage93.md §4): one team, one score.

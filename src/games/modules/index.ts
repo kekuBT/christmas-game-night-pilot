@@ -10,6 +10,7 @@ import { pulseModule } from "./pulse.js";
 import { drawModule } from "./draw.js";
 import { jebenaModule } from "./jebena.js";
 import { spectrumModule } from "./spectrum.js";
+import { familyModule } from "./family.js";
 
 export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Object.freeze({
   [majorityModule.id]: majorityModule as GameModule<unknown>,
@@ -18,6 +19,8 @@ export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Objec
   [jebenaModule.id]: jebenaModule as GameModule<unknown>,
   // Stage 9.3: cooperative; registered together with the room's team-result branch.
   [spectrumModule.id]: spectrumModule as GameModule<unknown>,
+  // Stage 12.5: Family Questions (casual rooms only, practice only; the room hands it the family's questions).
+  [familyModule.id]: familyModule as GameModule<unknown>,
 });
 
 export function moduleFor(gameId: string): GameModule<unknown> | undefined {

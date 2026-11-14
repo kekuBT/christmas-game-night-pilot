@@ -112,6 +112,8 @@ describe("D3 S5: nothing secret is disclosed during the briefing (every game × 
       const n = Math.max(desc.minPlayers, 4);
       const { engine, host, ids } = setup(n, { names: ["Keku", "Amina", "Baraka", "Chausiku", "Dalila", "Eshe"], casual: desc.casualOnly === true });
       const official = policyFor(desc.id).officialEligible;
+      // Stage 12.5: Family Questions plays questions the players wrote (each writer sees their own, so they're in the baseline).
+      if (desc.id === "family-questions") for (const [i, pid] of ids.slice(1).entries()) engine.addFamilyQuestion(pid, { kind: "choice", prompt: `Question ${i} from the family`, options: [`Yes ${i}`, `No ${i}`], correctIndex: 0 });
       const spectatorView = () => engine.project("tv");
       const baseline = new Set<string>();
       for (const pid of ids) strings(engine.project("player", pid), baseline);

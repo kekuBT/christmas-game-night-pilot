@@ -1,0 +1,64 @@
+/* Stage 12.5 (docs/stage12/stage125.md): Family Questions. Lobby card, write sheet, phone game, TV. */
+.mz-fq-card { margin: 14px 0 0; padding: 14px 16px; border-radius: 20px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); display: grid; gap: 8px; }
+.mz-fq-card__lede { margin: 0; font: 600 15px/1.4 var(--mz-font-body); }
+.mz-fq-card__mine { margin: 0; text-align: left; }
+.mz-fq-card__actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+.mz-fq-field { display: grid; gap: 6px; margin: 14px 0 0; border: 0; padding: 0; min-width: 0; position: relative; }
+.mz-fq-field > legend { padding: 0; margin-bottom: 6px; }
+.mz-fq-prompt { min-height: 84px; padding: 12px 16px; resize: vertical; line-height: 1.35; }
+.mz-fq-count { justify-self: end; font: 600 12px/1 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-fq-options { gap: 10px; }
+.mz-fq-optrow { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.mz-fq-right { appearance: none; width: 48px; height: 48px; border-radius: 50%; border: 2.5px dashed var(--mz-text-muted); background: transparent; color: var(--mz-text-muted); font: 800 22px/1 var(--mz-font-body); cursor: pointer; }
+.mz-fq-right.is-on { background: var(--mz-success); border: 2.5px solid var(--mz-success); color: var(--mz-on-accent); }
+.mz-fq-right:focus-visible { outline: 3px solid var(--mz-brand); outline-offset: 2px; }
+.mz-fq-remove { min-width: 44px; }
+.mz-fq-who { display: flex; flex-wrap: wrap; gap: 8px; }
+.mz-fq-whobtn.is-on { background: var(--mz-text); color: var(--mz-bg); border-color: var(--mz-text); }
+.mz-fq-mine { margin: 18px 0 0; display: grid; gap: 8px; }
+.mz-fq-mine ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mz-fq-mine li { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 14px; background: var(--mz-surface-1); border: 1.5px solid var(--mz-line); }
+.mz-fq-mine li[data-played="yes"] { opacity: .7; }
+.mz-fq-mine__text { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.mz-chip-btn--danger { border-color: var(--mz-answer-0); border-width: 2px; font-weight: 800; }
+
+/* The game: options are colour AND shape AND letter, never colour alone. */
+.mz-fq-opts { display: grid; gap: 12px; margin: 14px 0 6px; }
+.mz-fq-opt { appearance: none; border: 0; font: inherit; text-align: left; display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 10px; align-items: center; min-height: 64px; padding: 14px 16px; border-radius: 18px; background: var(--mz-slab); color: var(--mz-on-accent); box-shadow: 0 5px 0 var(--mz-slab-deep); cursor: pointer; position: relative; }
+.mz-fq-opt:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 var(--mz-slab-deep); }
+.mz-fq-opt:disabled { cursor: default; }
+.mz-fq-opt__shape { fill: currentColor; }
+.mz-fq-opt__letter { font: 800 14px/1 var(--mz-font-body); letter-spacing: .08em; }
+.mz-fq-opt__text { font: 800 19px/1.25 var(--mz-font-display); overflow-wrap: anywhere; }
+.mz-fq-opt__tag { grid-column: 1 / -1; font: 800 12px/1.2 var(--mz-font-body); letter-spacing: .06em; text-transform: uppercase; }
+.mz-fq-opt--chosen { outline: 4px solid var(--mz-text); outline-offset: 3px; }
+.mz-fq-opt--right { outline: 4px solid var(--mz-text); outline-offset: 3px; }
+.mz-fq-opt--wrong, .mz-fq-opt--dim { opacity: .55; box-shadow: none; }
+.mz-fq-opt--wrong { opacity: .75; text-decoration: line-through; text-decoration-thickness: 2px; }
+.mz-fq-asked { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; font: 600 17px/1.35 var(--mz-font-body); }
+.mz-fq-great { font-weight: 800; color: var(--mz-highlight); }
+.mz-fq-hostskip { margin: 14px 0 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+
+/* TV */
+/* Up to four options and a long question fit one 1080p screen: the question is smaller than other games' headlines,
+   and smaller again for a long one; at the reveal each option's count sits on its own line's end, not a second line. */
+.mz-tvshow-fq .mz-tvshow-h1 { font-size: clamp(36px, 3vw, 56px); line-height: 1.08; margin: 6px 0 0; }
+.mz-tvshow-fq--long .mz-tvshow-h1 { font-size: clamp(30px, 2.4vw, 44px); }
+.mz-tvshow-fq__row { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 36px; align-items: center; margin: 14px 0; }
+.mz-tvshow-fq .mz-tv-ring { width: 200px; height: 200px; }
+.mz-tvshow-fq .mz-tv-ring svg { width: 200px; height: 200px; }
+.mz-tvshow-fq .mz-tvshow-ring { font-size: 20px; max-width: 160px; }
+.mz-tvshow-fq .mz-tvshow-ring b { font-size: 40px; }
+.mz-tvshow-fq .mz-fq-opts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 14px 0; }
+.mz-tvshow-fq__row .mz-fq-opts { margin: 0; }
+.mz-tvshow-fq .mz-fq-opt { min-height: 72px; padding: 12px 22px; border-radius: 24px; grid-template-columns: auto auto minmax(0, 1fr) auto; }
+.mz-tvshow-fq .mz-fq-opt__text { font-size: 28px; }
+.mz-tvshow-fq .mz-fq-opt__letter { font-size: 18px; }
+.mz-tvshow-fq .mz-fq-opt__shape { width: 26px; height: 26px; }
+.mz-tvshow-fq .mz-fq-opt__tag { grid-column: auto; font-size: 16px; text-align: right; }
+.mz-tvshow-fq .mz-fq-asked { font-size: 26px; margin: 6px 0 0; }
+.mz-tvshow-fq .mz-tvshow-line { margin-top: 4px; }
+.mz-tvshow-fq__hint { font-size: 24px; }
+/* A long question needs the room; the hint is the first thing to go. */
+.mz-tvshow-fq--long .mz-tvshow-fq__hint { display: none; }

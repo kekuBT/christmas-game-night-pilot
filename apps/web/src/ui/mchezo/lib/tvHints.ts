@@ -16,4 +16,6 @@ export const TV_HINT: Record<string, string> = {
   "caption-clash": "Everyone writes a caption, then votes for the funniest. Authors stay hidden until the end.",
   // Stage 9.3: cooperative. The target stays on the clue-giver's phone; guesses stay on each phone.
   "spectrum": "One team: the clue-giver sees a secret spot on the scale and gives a clue; everyone else guesses on their phone. One shared score.",
+  // Stage 12.5: the family wrote the questions; who asked each one comes with its answer.
+  "family-questions": "Questions the family wrote about itself. Everyone answers on their phone, except whoever wrote it; who asked comes with the answer.",
 };
