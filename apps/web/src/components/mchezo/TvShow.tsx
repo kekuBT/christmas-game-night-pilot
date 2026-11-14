@@ -19,7 +19,7 @@
  * paused, moved or changed from here.
  */
 import { TvTeamResults, TvTeamsCard } from "./Teams.js";
-import { teamWinnerLine } from "../../../../../src/shared/teams.js";
+import { TEAM_NATIVE_GAMES, teamWinnerLine } from "../../../../../src/shared/teams.js";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import QRCode from "qrcode";
 import { GameClock, PlayerToken, TVRing, TVStage, Wordmark, rankStandings } from "../../ui/mchezo/index.js";
@@ -331,7 +331,7 @@ function TvCompetitiveFinal({ game, title, feed, nameOf, titleOf, cupBefore, pau
       {ranked.length > 0 ? (
         <div className="mz-tvfinal" data-players={ranked.length}>
           <div className="mz-tvfinal__left">
-            {game.teamResults ? <TvTeamResults rows={game.teamResults} nameOf={nameOf} /> : podium && <TvPodium steps={podium} nameOf={nameOf} paused={paused} />}
+            {game.teamResults ? <TvTeamResults rows={game.teamResults} nameOf={nameOf} together={TEAM_NATIVE_GAMES.has(game.gameId)} /> : podium && <TvPodium steps={podium} nameOf={nameOf} paused={paused} />}
             {medals && medals.games > 0 && !game.teamResults && <TvMedalCard table={medals} nameOf={nameOf} limit={podium ? 4 : 6} />}
             {cup && <TvCupList rows={cup} nameOf={nameOf} limit={podium ? 4 : 6} kicker={game.official ? "Family Cup · after this game" : "Family Cup · unchanged (a practice game)"} testId="tv-final-cup" />}
           </div>

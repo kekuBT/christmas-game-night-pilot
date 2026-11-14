@@ -61,6 +61,7 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   // Stage 12.5: questions answered (never your own: it isn't yours to answer).
   "family-questions": { verb: "Answered", noun: ["question", "questions"] },
   "team-huddle": { verb: "Answered", noun: ["question", "questions"] },
+  "relay": { verb: "Ran", noun: ["leg", "legs"] },
 };
 
 /**

@@ -444,6 +444,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: true },
     details: "Eight questions from the Trivia pool. Teammates see each other's picks live; other teams and the TV never see a team's option before the reveal. A team's answer is its members' most-picked option (a tie goes to the option picked first). 100 for a right answer, 25 more when the whole team picked it. A question closes early once every team agrees. Uses the night's teams, or deals two for the game. Casual rooms only; practice-only (Stage 12.8).",
   },
+  {
+    id: "relay",
+    title: "Relay",
+    description: "A team race of 12 quick sums. Only the runner can answer; a right answer passes the baton. First team home wins.",
+    categories: ["math", "speed", "team"],
+    minPlayers: 4,
+    recommendedPlayers: 6,
+    maxPlayers: 10,
+    playStyle: "team",
+    competition: "competitive",
+    duration: { minutes: 4, source: "design-default", measured: false },
+    inputs: ["choice"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: true },
+    features: { practice: true, official: false, abstention: "none" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: true },
+    details: "Every team runs the same 12 sums in the same order; a team only sees its own current sum. Runners take turns within a team. A wrong answer freezes the runner for 3 s; 20 s without an answer passes the baton to the next teammate on the same sum. 10 per leg, plus 30/20/10 for the first three teams home. Uses the night's teams, or deals two. Casual rooms only; practice-only (Stage 12.9).",
+  },
 ];
 
 /**

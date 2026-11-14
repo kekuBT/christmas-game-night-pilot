@@ -39,7 +39,7 @@ export interface GamePolicy {
   /** Plain reason shown when a game is practice-only. */
   practiceOnlyReason?: string;
   /** What one unit of participation is called ("questions", "rounds"...). */
-  unit: "questions" | "events" | "groups" | "rounds" | "phases" | "turns";
+  unit: "questions" | "events" | "groups" | "rounds" | "phases" | "turns" | "legs";
 }
 
 const MIN = 60_000;
@@ -99,6 +99,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
   "family-questions": {
     model: "phased", gameWindowMs: 10 * MIN, phaseMs: { question: 30 * SEC, reveal: 8 * SEC },
     officialEligible: false, practiceOnlyReason: "Family Questions is practice-only: the family writes its own questions, so it is just for fun in casual rooms.", unit: "questions",
+  },
+  // Stage 12.9: Relay, a race: it ends when every team has finished, or at the 4-minute limit (most legs, then the
+  // earliest finish). Turns and freezes are the module's own self-paced windows (dueAt/advance).
+  "relay": {
+    model: "game-deadline", gameWindowMs: 4 * MIN,
+    officialEligible: false, practiceOnlyReason: "Relay is practice-only: a team race in casual rooms.", unit: "legs",
   },
   // Stage 12.8: Team Huddle, eight questions of 25 s + 6 s (a question closes early once every team agrees); 8 minutes
   // is a backstop.

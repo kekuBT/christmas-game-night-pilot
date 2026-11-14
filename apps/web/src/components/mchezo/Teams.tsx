@@ -148,12 +148,16 @@ export function TeamsSheet({ teams, players, onMake, onMove, onRename, onClear, 
   );
 }
 
-/** A team game's results, for a phone's results screen. */
-export function TeamResultsCard({ rows, youId, nameOf }: { rows: readonly TeamResultRow[]; youId?: string; nameOf: (id: string) => string }) {
+/**
+ * A team game's results, for a phone's results screen.
+ * `together`: a game built for teams (Stage 12.8/12.9: Team Huddle, Charades, Relay). Everyone on a team scores the
+ * team's points there, so the card shows points, not an average.
+ */
+export function TeamResultsCard({ rows, youId, nameOf, together }: { rows: readonly TeamResultRow[]; youId?: string; nameOf: (id: string) => string; together?: boolean }) {
   const winner = teamWinnerLine(rows);
   return (
     <section className="mz-teams-results" aria-label="Team results" data-testid="team-results">
-      <span className="mz-kicker">👥 Played as teams</span>
+      <span className="mz-kicker">👥 {together ? "A team game" : "Played as teams"}</span>
       {winner && <p className="mz-teams-results__winner" data-testid="team-winner">{winner === "Every team tied" ? "Every team tied!" : `🏆 ${winner}!`}</p>}
       <ol className="mz-teams-results__list">
         {rows.map((r) => (
@@ -161,11 +165,11 @@ export function TeamResultsCard({ rows, youId, nameOf }: { rows: readonly TeamRe
             <span className="mz-teams-results__rank">{r.rank ?? "–"}</span>
             <TeamMark color={r.color} />
             <span className="mz-teams-results__text"><b>{r.name}</b><span className="mz-foot" style={{ textAlign: "left" }}>{list(r.members.map((id) => (id === youId ? "you" : nameOf(id))))}</span></span>
-            <span className="mz-teams-results__score">{r.score === null ? "didn’t play" : <>{r.score.toLocaleString("en-US")}<small> average</small></>}</span>
+            <span className="mz-teams-results__score">{r.score === null ? "didn’t play" : <>{r.score.toLocaleString("en-US")}<small>{together ? " pts" : " average"}</small></>}</span>
           </li>
         ))}
       </ol>
-      <p className="mz-foot">A team’s score is the average of its players who took part, so a small team can win.</p>
+      <p className="mz-foot">{together ? "Everyone on a team scores the team’s points." : "A team’s score is the average of its players who took part, so a small team can win."}</p>
     </section>
   );
 }
@@ -195,11 +199,11 @@ export function TvTeamsCard({ teams, games, players }: { teams: RoomTeams; games
   );
 }
 
-/** A team game's final on the TV: each team's average (the headline above already names the winning team). */
-export function TvTeamResults({ rows, nameOf }: { rows: readonly TeamResultRow[]; nameOf: (id: string) => string }) {
+/** A team game's final on the TV: each team's average, or its points in a game built for teams (`together`). The headline above already names the winning team. */
+export function TvTeamResults({ rows, nameOf, together }: { rows: readonly TeamResultRow[]; nameOf: (id: string) => string; together?: boolean }) {
   return (
     <section className="mz-tvshow-card mz-tvteams" data-testid="tv-team-results">
-      <span className="mz-tv-kicker">Played as teams · each team’s average</span>
+      <span className="mz-tv-kicker">{together ? "A team game · each team’s points" : "Played as teams · each team’s average"}</span>
       <ol className="mz-tvteams__list">
         {rows.map((r) => (
           <li key={r.teamId} className={`mz-team--${r.color}`} data-rank={r.rank ?? ""}>

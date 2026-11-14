@@ -26,6 +26,7 @@ import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { FamilyCard, FamilyReview, FamilySheet, FamilyTv, MchezoFamily, MchezoFamilyResults } from "./components/mchezo/MchezoFamily.js";
 import { HuddleReview, HuddleTv, MchezoHuddle, MchezoHuddleResults } from "./components/mchezo/MchezoHuddle.js";
+import { MchezoRelay, MchezoRelayResults, RelayReview, RelayTv } from "./components/mchezo/MchezoRelay.js";
 import { NightCardSheet } from "./components/mchezo/NightCard.js";
 import { TeamResultsCard, TeamsCard, TeamsSheet } from "./components/mchezo/Teams.js";
 import { TEAM_NATIVE_GAMES, teamWinnerLine } from "../../../src/shared/teams.js";
@@ -1145,6 +1146,8 @@ export function App() {
               : g.gameId === "family-questions" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><FamilyTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               // Stage 12.8: Team Huddle: per team, how many picked and whether it agrees (never the option) until the reveal.
               : g.gameId === "team-huddle" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><HuddleTv game={g} title={titleOf(g.gameId)} /></div>
+              // Stage 12.9: Relay: one lane per team, never a sum.
+              : g.gameId === "relay" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><RelayTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><PulseTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "draw-guess" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><DrawTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               // Stage 9.1: Jebena Rush draws its own turn clock (the turn, not the match).
@@ -1164,6 +1167,7 @@ export function App() {
             : g.gameId === "majority-rules" ? <div className="mz-tvshow-game"><MajorityReview game={g} /></div>
             : g.gameId === "family-questions" ? <div className="mz-tvshow-game"><FamilyReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "team-huddle" ? <div className="mz-tvshow-game"><HuddleReview game={g} /></div>
+            : g.gameId === "relay" ? <div className="mz-tvshow-game"><RelayReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><PulseReview game={g} /></div>
             : g.gameId === "draw-guess" ? <div className="mz-tvshow-game"><DrawReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "jebena-rush" ? <div className="mz-tvshow-game"><JebenaReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
@@ -1564,7 +1568,7 @@ export function App() {
     }
     const hero = <ResultsHero story={story} gameId={g.gameId} title={title} official={official} players={mzPlayers} points={playerId && playerId in scores ? scores[playerId] : undefined} />;
     // Stage 12.7: a game played as teams shows the team results right under the heading.
-    return teamRows ? <>{hero}<TeamResultsCard rows={teamRows} youId={playerId ?? undefined} nameOf={nameOf} /></> : hero;
+    return teamRows ? <>{hero}<TeamResultsCard rows={teamRows} youId={playerId ?? undefined} nameOf={nameOf} together={TEAM_NATIVE_GAMES.has(g.gameId)} /></> : hero;
   };
   const mzReactions = toMzReactions(proj?.reactions, players);
   const mzReact = async (r: ReactionId) => {
@@ -1645,6 +1649,9 @@ export function App() {
   // Stage 12.8 (casual rooms, practice-only, always as teams).
   const huddlePlaying = playingGame?.gameId === "team-huddle";
   const huddleFinished = latestFinished?.gameId === "team-huddle";
+  // Stage 12.9 (casual rooms, practice-only, always as teams).
+  const relayPlaying = playingGame?.gameId === "relay";
+  const relayFinished = latestFinished?.gameId === "relay";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -2216,6 +2223,21 @@ export function App() {
     return (
       <MchezoProvider theme={theme} {...motion}>
         <MchezoFamilyResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Family Questions"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && relayPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <GameClock game={playingGame} />
+        <MchezoRelay game={playingGame} players={players} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Relay"} intent={sendAction} error={err || undefined} landed={sendLanded} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && relayFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <MchezoRelayResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Relay"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }

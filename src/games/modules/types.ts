@@ -16,6 +16,7 @@ import type { GameSettings } from "../settings.js";
 import type { TeamResult } from "../../shared/teamResult.js";
 import type { FamilyGameQuestion } from "./family.js";
 import type { HuddleQuestion } from "./teamHuddle.js";
+import type { RelayQuestion } from "./relay.js";
 import type { GameTeams } from "../../shared/teams.js";
 
 export interface ModuleContext {
@@ -51,7 +52,8 @@ export interface GameModule<S = unknown> {
    * Modules without seasonal content ignore it.
    */
   init(args: { players: readonly string[]; seed: number; season?: SessionSeason; settings?: GameSettings; /** Stage 12.5: Family Questions' questions, picked by the room at start. */ family?: readonly FamilyGameQuestion[];
-    /** Stage 12.8: a game built for teams gets its teams (the night's, or two dealt for it) and, for Team Huddle, its questions. */ teams?: GameTeams; huddle?: readonly HuddleQuestion[] }): S;
+    /** Stage 12.8: a game built for teams gets its teams (the night's, or two dealt for it) and, for Team Huddle, its questions. */ teams?: GameTeams; huddle?: readonly HuddleQuestion[];
+    /** Stage 12.9: Relay's sums (the same for every team). */ relay?: readonly RelayQuestion[] }): S;
   intent(s: S, actorId: string, action: string, payload: Record<string, unknown>, ctx: ModuleContext): ModuleResult;
   /** "Sit this one out": a round, or (wholeGameAbstain) the rest of the game. */
   abstain(s: S, actorId: string, ctx: ModuleContext): ModuleResult;
@@ -75,6 +77,11 @@ export interface GameModule<S = unknown> {
    * Called once, before the result is recorded; never changes scores.
    */
   onFinish?(s: S, ctx: ModuleContext): void;
+  /**
+   * Stage 12.9: play has begun (after the briefing, or at once without one). A module whose clocks run from the start
+   * of play (Relay's turns) starts them here, from the server clock; init() never knows when play begins.
+   */
+  onPlayStart?(s: S, ctx: ModuleContext): void;
   /**
    * Stage 9.3: a cooperative game's one shared result (registry
    * `cooperative: true`). The room records it as `outcome.team` at finalize

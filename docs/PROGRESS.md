@@ -2716,3 +2716,44 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Owner decisions open:** team scoring in a Family Cup (D-S127-03, provisional "no").
 - **Estimate vs actual:** about 5 hours estimated; about 3 h 30 min actual (5:03 to 8:35 a.m. ET), three full gates included.
 - **Next:** Stage 12.9 (Relay).
+
+## Stage 12.9: Relay (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner, 2026-11-14 about 3:25 a.m. ET: "we definitely need more games that can be played with teams". Split out of Stage 12.8 so each PR stays reviewable.
+- **Base:** `4d2dfb3` (Stage 12.8's head, PR #32). Branch `claude/stage12-9-relay`, draft PR #33 stacked on #32.
+- **Spec:** `docs/stage12/stage129.md`. Decision D-S129-01.
+- **Built:**
+  - **Relay (`src/games/modules/relay.ts`, pure), new:**
+    - each team runs the same 12 seeded sums; only the runner's phone answers;
+    - a right answer passes the baton; a wrong one freezes the runner for 3 s (the option greyed out);
+    - 20 s without an answer passes the baton on the same sum, so a dropped phone never stalls a team;
+    - places go by most legs, then the earlier finish; 10 per leg, plus 30/20/10 for the first three teams home; every player scores the team's points;
+    - a phone sees only its own team's current sum; the TV and other teams see lanes;
+    - the race starts on the server's clock when the briefing ends (a new optional module hook, `onPlayStart`) and ends when every team is home, or at 4 minutes;
+    - casual and practice only, 4–10 players; never in Quick Party or Home's "featured today".
+  - **Screens:**
+    - the runner, teammates ("Help Keku out loud!") and lanes on every phone;
+    - the TV's lanes, team-led results, and "Time ran out: n of 12 legs" for a team still out;
+    - countdowns never show more than the whole freeze or turn.
+  - **Team results for every game built for teams (Team Huddle, Charades, Relay):** they show each team's points, not an average ("A team game", "pts", "Everyone on a team scores the team's points"). 12.7's played-as-teams games keep "average".
+- **Tests:**
+  - `tests/stage129-relay.test.ts` (8, including time running out mid-race);
+  - catalogue counts (19 games);
+  - new `scripts/check-relay.mjs` (22 checks: four phones and a TV, the freeze and turn countdowns, the 20 s pass, the game clock, results on phones and TV, 320 px);
+  - check-warm-ivory W8 allows Relay's cards.
+- **Found from screenshots before the gates:** "Frozen: 4" for a 3 s freeze, a wrapped leg line, and "average" wording for team games. Each is fixed and now checked by the driver.
+- **Unit suite:** 1846/1846 (the fast gate's unit-tests step on `7144b05`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `7144b05` targeted (relay + 14 drivers) `20261114-135330-7144b05e-17480`: PASSED, 16/16;
+  - `7144b05` fast `20261114-135731-7144b05e-20089`: PASSED, 5/5;
+  - **`7144b05` full (checkpoint) `20261114-135855-7144b05e-23804`: PASSED** (exit 0, 100/100, 36 min 47 s, no retries).
+- **Tested SHA:** `7144b05`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage129-screenshots/`, `docs/evidence/stage129-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** about 4 hours estimated. About 3 h 30 min of wall-clock time (6:07 to 9:35 a.m. ET), overlapping with finishing Stage 12.8.
+- **Owner decisions open:** team scoring in a Family Cup (D-S127-03, provisional "no").
+- **Next:** nothing queued. The owner's list from 2026-11-14 is done:
+  - suggestion 5 (Family Questions, 12.5);
+  - suggestion 7 (Teams and team games, 12.7–12.9);
+  - suggestion 8 (night card, 12.6);
+  - suggestion 6 was dropped;
+  - video calls (suggestion 11) wait until after deployment, as directed.
+  - Waiting on the owner's review of #25–#33.
