@@ -10,6 +10,7 @@
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { closeRoomMenu, openRoomMenu, roomGo, hostFamilyCup } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
+import { startOfficial } from "./lib/start.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -99,14 +100,9 @@ async function spectate(page, code) {
 async function startGame(page, gameId, { expectLeftOut, players } = {}) {
   await page.getByTestId("choose-game").click();
   await page.getByTestId(`select-game-${gameId}`).click();
-  await page.getByTestId(`start-official-${gameId}`).click();
-  const decision = page.getByTestId("mz-start-decision");
-  const asked = await decision.waitFor({ timeout: 2500 }).then(() => true, () => false);
-  if (asked) {
-    const q = ((await decision.textContent()) ?? "").replace(/\s+/g, " ");
-    check(`start asks before leaving out a reconnecting player${expectLeftOut ? ` (${expectLeftOut})` : ""}`, !expectLeftOut || q.includes(expectLeftOut), q);
-    await page.getByTestId("mz-start-without").click();
-  }
+  // scripts/lib/start.mjs answers the question, and presses Start again if it closes by itself.
+  const q = await startOfficial(page, `start-official-${gameId}`);
+  if (q !== null) check(`start asks before leaving out a reconnecting player${expectLeftOut ? ` (${expectLeftOut})` : ""}`, !expectLeftOut || q.includes(expectLeftOut), q);
   // D3: every player in this game reads the rules and taps I'm ready.
   await passBriefing(players);
 }

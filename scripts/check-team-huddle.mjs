@@ -133,12 +133,22 @@ try {
   const coral = fin?.teamResults?.find((r) => r.teamId === "team-coral"), sun = fin?.teamResults?.find((r) => r.teamId === "team-sun");
   check("D every player scored their team's points", !!fin && fin.rawScores[k.playerId] === fin.rawScores[a.playerId] && fin.rawScores[b.playerId] === fin.rawScores[w.playerId] && coral.score === fin.rawScores[k.playerId] && sun.score === fin.rawScores[b.playerId], JSON.stringify(fin?.rawScores));
   await soon("D phones: the results with the team results card", async () => (await amina.getByTestId("mz-hd-results").count()) === 1 && (await amina.getByTestId("team-results").count()) === 1);
-  const winTeam = fin?.teamResults?.find((r) => r.rank === 1);
-  await soon("D the phone's heading names the winning team, and your place is your team's", async () => {
+  // The headline the server's team results call for (src/shared/teams.ts teamWinnerLine): one winner, some teams
+  // sharing first, or every team tied. Gate 20261114-115454-5f6cfef0-22728 dealt an all-tie (250 each), which the
+  // old check (it always looked for a winner's name) failed although the page was right.
+  const top = (fin?.teamResults ?? []).filter((r) => r.rank === 1);
+  const scored = (fin?.teamResults ?? []).filter((r) => r.score !== null);
+  const expectHead = scored.length > 1 && top.length === scored.length ? "Every team tied in Team Huddle"
+    : top.length === 1 ? `${top[0].name} wins Team Huddle`
+    : `${top.slice(0, -1).map((r) => r.name).join(", ")} and ${top.at(-1)?.name} tie for first in Team Huddle`;
+  let seen = "";
+  const headOk = await soon(`D the phone's heading gives the team result ("${expectHead}"), and your place is your team's`, async () => {
     const head = await amina.getByTestId("results-headline").innerText();
     const you = await amina.getByTestId("results-you").innerText();
-    return /Team (Coral|Sun) wins Team Huddle|tie for first in Team Huddle|Every team tied in Team Huddle/.test(head) && /Your team/.test(you) && (winTeam ? head.includes(winTeam.name) : true);
+    seen = `${head} | ${you}`;
+    return head.includes(expectHead) && /Your team/.test(you);
   });
+  if (!headOk) console.log(`  the phone showed: ${seen}`);
   await soon("D the TV leads with the team result", async () => (await tv.getByTestId("tv-team-results").count()) === 1 && /wins|tied|tie for first/.test(await tv.getByTestId("tv-winner").innerText()));
   await sleep(600);
   await shot(amina, "results-390");
