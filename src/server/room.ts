@@ -5,6 +5,7 @@ import { GAME_REGISTRY, getGame, isCooperative } from "../games/registry.js";
 import { CUP_FINISH_RULES, cupChampions, sharedRanks } from "../shared/cupFinish.js";
 import { FAMILY_LIMITS, checkFamilyQuestion, type FamilyQuestion, type FamilyQuestionInput } from "../shared/familyPack.js";
 import { FAMILY_ROUNDS_MIN, pickFamilyQuestions, type FamilyGameQuestion } from "../games/modules/family.js";
+import { TEAM_COLORS, TEAM_LIMITS, TEAM_PLAY_GAMES, balanceTeams, checkTeamName, newTeamList, smallestTeam, teamResults, type GameTeams, type RoomTeams } from "../shared/teams.js";
 import type { TeamResult } from "../shared/teamResult.js";
 import { sameSettings, validateGameSettings, type GameSettings } from "../games/settings.js";
 import { PARTY_TRANSITION_MINUTES, validatePartyPlan } from "../games/party.js";
@@ -349,6 +350,13 @@ export interface CupFinished {
   standings: { playerId: string; displayName: string; total: number; eligible: boolean; rank: number }[];
 }
 
+/** Stage 12.7: a teams change, refused (HTTP 400/403/404/409). Nothing changed. */
+export class TeamsRefused extends Error {
+  constructor(readonly code: "NOT_A_CASUAL_ROOM" | "NOT_ALLOWED" | "INVALID" | "NO_TEAMS" | "NOT_FOUND" | "STALE", message: string) {
+    super(message);
+  }
+}
+
 /** Stage 12.5: a Family Questions change, refused (HTTP 400/403/404/409). Nothing changed. */
 export class FamilyRefused extends Error {
   constructor(readonly code: "NOT_A_CASUAL_ROOM" | "NOT_ALLOWED" | "INVALID_QUESTION" | "TOO_MANY" | "NOT_FOUND" | "ALREADY_PLAYED", message: string) {
@@ -434,6 +442,8 @@ export interface GameInstance {
   /** Stage 7.2: a "Play again" of this finished game (casual rooms); its repeat returns this game. */
   rematchOf?: string;
   official: boolean;
+  /** Stage 12.7 (D-S127-02): played as teams: the teams at its start (only its players). Absent: played individually. */
+  teams?: GameTeams;
   /** "briefing" exists only for timing-v2 Cups (D3): rules and Ready, no game clock. */
   status: "briefing" | "playing" | "finished";
   players: string[]; // player ids
@@ -542,6 +552,13 @@ export class RoomEngine {
    * only their own; everyone (and the TV) sees counts per writer. Persisted with the room.
    */
   familyQuestions: FamilyQuestion[] = [];
+  /**
+   * Stage 12.7 (D-S127-01): the night's teams in a casual room, or none. Public. A game played as teams keeps its
+   * own copy from its start (GameInstance.teams), so moving someone later never changes a finished game.
+   */
+  teams: RoomTeams | null = null;
+  /** Stage 12.7: the highest teams revision ever given out, kept across "No teams tonight", so an old view never matches new teams. */
+  private teamsSeq = 0;
   private cupError: string | null = null;
   private cupRaw: unknown = undefined;
   get cup(): CupRecord {
@@ -699,6 +716,8 @@ export class RoomEngine {
     };
     this.players.set(id, player);
     if (isHost) this.hostId = id;
+    // Stage 12.7: a newcomer joins the smallest team (the host can move them).
+    if (this.teams) { this.teams.members[id] = smallestTeam(this.teams, [...this.players.keys()].filter((p) => p !== id)); this.bumpTeams(); }
     this.log("player-joined", { playerId: id });
     // Event attribution (Milestone K): becoming the host is a privileged
     // role acquisition, so it gets its own audit event — the player-joined
@@ -894,7 +913,7 @@ export class RoomEngine {
    *   in `proceedWithout`. Practice games do not ask.
    * Nobody is ever added to a game after it starts.
    */
-  startGame(hostId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt; season?: SessionSeason; settings?: unknown; /** Play again: the settings are the finished game's, not the lobby's. */ settingsFromSource?: boolean } = {}): GameInstance {
+  startGame(hostId: string, gameId: string, opts: { official?: boolean; seed?: number; roster?: string[]; proceedWithout?: string[]; attempt?: SessionAttempt; season?: SessionSeason; settings?: unknown; /** Play again: the settings are the finished game's, not the lobby's. */ settingsFromSource?: boolean} = {}): GameInstance {
     if (this.hostId !== hostId && !this.cohosts.has(hostId)) throw new Error("Only host/cohost can start a game");
     // Stage 7.2: a casual room's own Start may carry an attempt (§3.8): it
     // must be made against the current session state, and is remembered.
@@ -1058,6 +1077,10 @@ export class RoomEngine {
                             ? initCharades(playerIds)
                             : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}) }),
     };
+    // Stage 12.7 (D-S127-02): played as teams when the room has teams, the game can be, and at least two teams have
+    // players in it; the teams are copied now (only this game's players), never read back from the room later.
+    const teamSnap = this.teamsForGame(gameId, playerIds);
+    if (teamSnap) instance.teams = teamSnap;
     this.games.set(id, instance);
     // Stage 12.5: the questions this game plays are used (a cancelled briefing leaves no game: they are ready again).
     if (familyPick) for (const fq of familyPick) { const q = this.familyQuestions.find((x) => x.id === fq.id); if (q) q.playedIn = id; }
@@ -2891,6 +2914,99 @@ export class RoomEngine {
     return { changed: true };
   }
 
+  /** Stage 12.7: a game's teams, or none (not a casual room, no teams, paused, not a team game, or one team only). */
+  private teamsForGame(gameId: string, playerIds: readonly string[]): GameTeams | undefined {
+    if (this.kind !== "casual" || !this.teams || this.teams.paused || !TEAM_PLAY_GAMES.has(gameId)) return undefined;
+    const members: Record<string, string> = {};
+    for (const p of playerIds) { const t = this.teams.members[p]; if (t) members[p] = t; }
+    const used = new Set(Object.values(members));
+    if (used.size < 2) return undefined;
+    return { list: this.teams.list.map((t) => ({ ...t })), members };
+  }
+
+  /** Stage 12.7: the next teams revision (never reused, even after the teams were cleared). */
+  private nextTeamsRevision(): number {
+    this.teamsSeq = Math.max(this.teamsSeq, this.teams?.revision ?? 0) + 1;
+    return this.teamsSeq;
+  }
+
+  private bumpTeams(): void {
+    if (this.teams) this.teams.revision = this.nextTeamsRevision();
+  }
+
+  private assertTeamsHost(actorId: string): void {
+    if (this.kind !== "casual") throw new TeamsRefused("NOT_A_CASUAL_ROOM", "Teams are for a casual game night. A Family Cup stays individual.");
+    if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new TeamsRefused("NOT_ALLOWED", "Only the host or a cohost can change the teams.");
+  }
+
+  /**
+   * Stage 12.7 (D-S127-01): split everyone in the room into `count` teams (2–4), balanced, in a seeded order. Making
+   * teams again reshuffles everyone; a team that's kept keeps its name.
+   */
+  makeTeams(actorId: string, count: number, seed = randomInt(0, 2147483647)): RoomTeams {
+    this.assertTeamsHost(actorId);
+    if (!Number.isInteger(count) || count < TEAM_LIMITS.min || count > TEAM_LIMITS.max) throw new TeamsRefused("INVALID", `Choose ${TEAM_LIMITS.min} to ${TEAM_LIMITS.max} teams.`);
+    if (this.players.size < count) throw new TeamsRefused("INVALID", `${count} teams need at least ${count} players in the room.`);
+    const list = newTeamList(count);
+    const kept = new Map((this.teams?.list ?? []).map((t) => [t.id, t.name] as const));
+    for (const t of list) { const name = kept.get(t.id); if (name) t.name = name; }
+    // A new team's default name can't repeat a kept team's own name ("Team Mint" renamed onto Coral, then a 3rd team).
+    for (const t of list) if (!kept.has(t.id) && list.some((o) => o !== t && o.name.toLowerCase() === t.name.toLowerCase())) t.name = `${t.name} 2`;
+    const paused = this.teams?.paused === true;
+    this.teams = { revision: this.nextTeamsRevision(), list, members: balanceTeams([...this.players.keys()], list, seed), ...(paused ? { paused: true as const } : {}) };
+    this.log("teams-made", { actor: actorId, detail: { count } });
+    return this.teams;
+  }
+
+  /** Stage 12.7: move a player to another team (the host or a cohost). `baseRevision`, when sent, must be current. */
+  moveToTeam(actorId: string, playerId: string, teamId: string, baseRevision?: number): RoomTeams {
+    this.assertTeamsHost(actorId);
+    if (!this.teams) throw new TeamsRefused("NO_TEAMS", "There are no teams yet.");
+    if (baseRevision !== undefined && baseRevision !== this.teams.revision) throw new TeamsRefused("STALE", "The teams changed since you looked. Here they are now.");
+    if (!this.players.has(playerId)) throw new TeamsRefused("NOT_FOUND", "That player isn't in the room.");
+    if (!this.teams.list.some((t) => t.id === teamId)) throw new TeamsRefused("NOT_FOUND", "That team doesn't exist.");
+    if (this.teams.members[playerId] !== teamId) { this.teams.members[playerId] = teamId; this.bumpTeams(); }
+    return this.teams;
+  }
+
+  /** Stage 12.7: rename a team (the host or a cohost). */
+  renameTeam(actorId: string, teamId: string, name: unknown): RoomTeams {
+    this.assertTeamsHost(actorId);
+    if (!this.teams) throw new TeamsRefused("NO_TEAMS", "There are no teams yet.");
+    const team = this.teams.list.find((t) => t.id === teamId);
+    if (!team) throw new TeamsRefused("NOT_FOUND", "That team doesn't exist.");
+    const c = checkTeamName(name);
+    if (!c.ok) throw new TeamsRefused("INVALID", c.error);
+    if (this.teams.list.some((t) => t.id !== teamId && t.name.toLowerCase() === c.name.toLowerCase())) throw new TeamsRefused("INVALID", "Another team has that name.");
+    if (team.name !== c.name) { team.name = c.name; this.bumpTeams(); }
+    return this.teams;
+  }
+
+  /** Stage 12.7: play the next games as teams, or individually for a while (the teams are kept). */
+  setTeamPlay(actorId: string, on: boolean): RoomTeams {
+    this.assertTeamsHost(actorId);
+    if (!this.teams) throw new TeamsRefused("NO_TEAMS", "There are no teams yet.");
+    const paused = !on;
+    if ((this.teams.paused ?? false) !== paused) { if (paused) this.teams.paused = true; else delete this.teams.paused; this.bumpTeams(); }
+    return this.teams;
+  }
+
+  /** Stage 12.7: back to playing individually (games already played keep their team results). */
+  clearTeams(actorId: string): void {
+    this.assertTeamsHost(actorId);
+    if (!this.teams) return;
+    this.nextTeamsRevision();
+    this.teams = null;
+    this.log("teams-cleared", { actor: actorId });
+  }
+
+  /** Stage 12.7: a game's teams and, once it's finished, its team results (public facts). */
+  private teamFacts(g: GameInstance): Record<string, unknown> {
+    if (!g.teams) return {};
+    const done = (p: string) => (g.outcome?.participation?.[p]?.done ?? 0) > 0 || (g.rawScores?.[p] ?? 0) > 0;
+    return { teams: g.teams, ...(g.status === "finished" ? { teamResults: teamResults(g.teams, g.rawScores, done) } : {}) };
+  }
+
   /** Stage 12.5: a question is ready while it hasn't been played (a game that was cancelled in its briefing doesn't count). */
   private familyReady(q: FamilyQuestion): boolean {
     return !q.playedIn || !this.games.has(q.playedIn);
@@ -3604,6 +3720,7 @@ export class RoomEngine {
       // Stage 9.3: a cooperative game's per-player copies stay internal; its result is outcome.team.
       rawScores: g.status === "finished" && !isCooperative(g.gameId) ? g.rawScores : undefined,
       ...this.timingFacts(g),
+      ...this.teamFacts(g),
     }));
     const base: Record<string, unknown> = {
       /** The server's clock when this projection was made (deadline countdowns). */
@@ -3620,6 +3737,8 @@ export class RoomEngine {
       // Stage 12.4: a finished Family Cup and a completed night (public facts).
       ...(this.cupFinished ? { cupFinished: this.cupFinished } : {}),
       ...(this.nightComplete ? { nightComplete: this.nightComplete } : {}),
+      // Stage 12.7: the night's teams (public).
+      ...(this.teams ? { teams: this.teams } : {}),
       // Stage 12.5: Family Questions' counts (public); a player's own questions are added in the player branch.
       ...(this.kind === "casual" ? { family: this.familyView() } : {}),
       // Stage 7.1: the Quick Party lineup (casual rooms): public planning facts only.
@@ -3704,6 +3823,7 @@ export class RoomEngine {
           // Stage 9.3: a cooperative game's per-player copies stay internal; its result is outcome.team.
           rawScores: g.status === "finished" && !isCooperative(g.gameId) ? g.rawScores : undefined,
           ...this.timingFacts(g),
+          ...this.teamFacts(g),
         };
       });
       return { ...base, ...(this.kind === "casual" ? { family: this.familyView(me.id) } : {}), me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash, acceptedEventIds: [...(this.recentAccepted.get(me.id) ?? [])] }, myGames };
@@ -3731,6 +3851,9 @@ export class RoomEngine {
       // Stage 12.4: a finished Family Cup and a completed night (public facts).
       ...(this.cupFinished ? { cupFinished: this.cupFinished } : {}),
       ...(this.nightComplete ? { nightComplete: this.nightComplete } : {}),
+      // Stage 12.7: the night's teams, and the last revision given out.
+      ...(this.teams ? { teams: this.teams } : {}),
+      ...(this.teamsSeq > 0 ? { teamsSeq: this.teamsSeq } : {}),
       // Stage 12.5: the family's questions (the saved room only; projections show counts and each player's own).
       ...(this.familyQuestions.length > 0 ? { familyQuestions: this.familyQuestions } : {}),
       // Kept for older readers; the Cup record is authoritative. An unreadable
@@ -3788,6 +3911,10 @@ export class RoomEngine {
     }
     // Stage 12.5: the family's questions; one that can't be read whole is left out (never half a question).
     engine.familyQuestions = restoreFamilyQuestions(data["familyQuestions"]);
+    // Stage 12.7: the night's teams; anything unreadable means no teams (never half a team).
+    // (The players are read further down, so their ids come from the saved room itself.)
+    engine.teams = restoreTeams(data["teams"], new Set(((data["players"] as RoomPlayer[] | undefined) ?? []).map((p) => p.id)));
+    engine.teamsSeq = Math.max(Number.isSafeInteger(data["teamsSeq"]) ? (data["teamsSeq"] as number) : 0, engine.teams?.revision ?? 0);
     engine.contentUsage = (data["contentUsage"] as UsageHistory | undefined) ?? {};
     engine.contentSeq = typeof data["contentSeq"] === "number" ? data["contentSeq"] : 0;
     // Stage 8.2 (§3.5): a room saved before content seasons (or with an
@@ -3905,6 +4032,25 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
   return r.onBreak === true
     ? { onBreak: true, ...(typeof r.breakSince === "number" ? { breakSince: r.breakSince } : {}), revision, ops }
     : { onBreak: false, revision, ops };
+}
+
+/** Stage 12.7: saved teams, checked: 2–4 known colours, names that pass the check, members only of those teams. */
+function restoreTeams(raw: unknown, players: ReadonlySet<string>): RoomTeams | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as { revision?: unknown; list?: unknown; members?: unknown };
+  if (!Number.isSafeInteger(r.revision) || !Array.isArray(r.list) || !r.members || typeof r.members !== "object") return null;
+  if (r.list.length < TEAM_LIMITS.min || r.list.length > TEAM_LIMITS.max) return null;
+  const list = [];
+  for (const t of r.list as Array<Record<string, unknown>>) {
+    const c = checkTeamName(t?.["name"]);
+    if (!t || typeof t["id"] !== "string" || !c.ok || !(TEAM_COLORS as readonly unknown[]).includes(t["color"])) return null;
+    list.push({ id: t["id"], name: c.name, color: t["color"] as RoomTeams["list"][number]["color"] });
+  }
+  const ids = new Set(list.map((t) => t.id));
+  if (ids.size !== list.length || new Set(list.map((t) => t.color)).size !== list.length || new Set(list.map((t) => t.name.toLowerCase())).size !== list.length) return null;
+  const members: Record<string, string> = {};
+  for (const [pid, tid] of Object.entries(r.members as Record<string, unknown>)) if (players.has(pid) && typeof tid === "string" && ids.has(tid)) members[pid] = tid;
+  return { revision: r.revision as number, list, members, ...((raw as { paused?: unknown }).paused === true ? { paused: true } : {}) };
 }
 
 /** Stage 12.5: saved Family Questions, each checked again by the same rule as when it was added. */

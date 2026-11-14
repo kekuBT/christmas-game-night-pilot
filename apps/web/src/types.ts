@@ -1,3 +1,4 @@
+import type { GameTeams, RoomTeams, TeamResultRow } from "../../../src/shared/teams.js";
 import type { SessionSeason } from "../../../src/shared/season.js";
 import type { TeamResult } from "../../../src/shared/teamResult.js";
 import type { MemoryTeamFacts } from "../../../src/shared/memoryTeam.js";
@@ -83,6 +84,9 @@ export interface PublicGame extends LifecycleFields {
   state?: unknown;
   questions?: { id: string; prompt: string; options: string[]; correctAnswer?: number }[];
   rawScores?: Record<string, number>;
+  /** Stage 12.7: played as teams (its teams from its start), and once finished its team results. */
+  teams?: GameTeams;
+  teamResults?: TeamResultRow[];
   /** Post-finish aggregate only (trivia): per-question counts per option index. No identities. */
   answerCounts?: Record<string, number[]>;
   /** Post-finish only (trivia): points a correct answer to each question is worth. Per-question values, not scores. */
@@ -104,6 +108,9 @@ export interface PlayerGame extends LifecycleFields {
   /** Math (Sprint 3): prompt/options arrive only once the question is opened. */
   questions?: { id: string; prompt?: string; options?: string[] }[];
   rawScores?: Record<string, number>;
+  /** Stage 12.7: played as teams (its teams from its start), and once finished its team results. */
+  teams?: GameTeams;
+  teamResults?: TeamResultRow[];
   /** Math: this tab is treated as outdated (it was sent every prompt); refresh to get timed questions. */
   refreshNeeded?: boolean;
   /** Math: own server-measured answer times (ms from reveal to answer). */
@@ -209,6 +216,8 @@ export interface Projection {
   party?: PartyView;
   /** Stage 12.5: casual rooms only. */
   family?: FamilyView;
+  /** Stage 12.7: the night's teams (casual rooms). */
+  teams?: RoomTeams;
   /** Stage 7.2: casual rooms only. */
   session?: SessionView;
   /** Stage 8.2: what this solo or casual session deals (absent in a Cup). Never a device's look. */

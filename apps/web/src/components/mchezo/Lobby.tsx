@@ -65,6 +65,8 @@ export interface RoomLobbyProps {
   party?: ReactNode;
   /** Stage 12.5: the Family Questions card (casual rooms). */
   family?: ReactNode;
+  /** Stage 12.7: the Teams card (casual rooms). */
+  teams?: ReactNode;
   error?: string;
   /** A short confirmation ("Reconnected to your player slot."). */
   message?: string;
@@ -178,6 +180,7 @@ export function RoomLobby(p: RoomLobbyProps) {
           note="What the next game deals. Each phone still picks its own look in Settings." />
       )}
       {p.gameSettings}
+      {p.teams}
       {p.family}
       {p.shuffleNote && <p className="mz-foot mz-lobby__shuffle" data-testid="shuffle-result">{p.shuffleNote}</p>}
       {p.lastGame && (

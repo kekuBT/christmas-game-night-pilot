@@ -18,6 +18,8 @@
  * screen's animations. They never call the server, so no game clock can be
  * paused, moved or changed from here.
  */
+import { TvTeamResults, TvTeamsCard } from "./Teams.js";
+import { teamWinnerLine } from "../../../../../src/shared/teams.js";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import QRCode from "qrcode";
 import { GameClock, PlayerToken, TVRing, TVStage, Wordmark, rankStandings } from "../../ui/mchezo/index.js";
@@ -217,6 +219,7 @@ function TvLobby({ feed, titleOf, nameOf, registry }: { feed: TvFeed; titleOf: (
         </ul>
       </section>
       <div className="mz-tvshow-side">
+        {feed.teams && <TvTeamsCard teams={feed.teams} games={feed.games} players={feed.players} />}
         {feed.session?.onBreak && (
           <section className="mz-tvshow-card mz-tvshow-break" data-testid="tv-break">
             <span className="mz-tv-kicker">On a break</span>
@@ -323,12 +326,13 @@ function TvCompetitiveFinal({ game, title, feed, nameOf, titleOf, cupBefore, pau
   const cup = feed.cup && feed.championship.length > 0 ? cupRows(feed.championship, game.official ? cupBefore : undefined) : null;
   return (
     <section className="mz-tvshow-final mz-tvfinal-hero">
-      <p className="mz-tvshow-winner" data-testid="tv-winner">{winnerLine(game.rawScores, nameOf)}</p>
+      {/* Stage 12.7: a game played as teams leads with the team that won; everyone's own scores stay below. */}
+      <p className="mz-tvshow-winner" data-testid="tv-winner">{(game.teamResults && teamWinnerLine(game.teamResults)) ?? winnerLine(game.rawScores, nameOf)}</p>
       {ranked.length > 0 ? (
         <div className="mz-tvfinal" data-players={ranked.length}>
           <div className="mz-tvfinal__left">
-            {podium && <TvPodium steps={podium} nameOf={nameOf} paused={paused} />}
-            {medals && medals.games > 0 && <TvMedalCard table={medals} nameOf={nameOf} limit={podium ? 4 : 6} />}
+            {game.teamResults ? <TvTeamResults rows={game.teamResults} nameOf={nameOf} /> : podium && <TvPodium steps={podium} nameOf={nameOf} paused={paused} />}
+            {medals && medals.games > 0 && !game.teamResults && <TvMedalCard table={medals} nameOf={nameOf} limit={podium ? 4 : 6} />}
             {cup && <TvCupList rows={cup} nameOf={nameOf} limit={podium ? 4 : 6} kicker={game.official ? "Family Cup · after this game" : "Family Cup · unchanged (a practice game)"} testId="tv-final-cup" />}
           </div>
           <section className="mz-tvfinal__right" data-testid="tv-last-standings" aria-label={`${title} standings`}>
