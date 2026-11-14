@@ -1,0 +1,44 @@
+PASS A the game plays with the night's three teams
+PASS A the briefing explains Team Draw
+PASS A the TV shows a three-team scoreboard
+PASS A three rounds: the biggest team's size — 3
+PASS B every team has a drawer with the same word — {"team-coral":"igloo","team-sun":"igloo","team-mint":"igloo"}
+PASS B only the drawers' phones show the word
+PASS B the TV shows no word and its data has neither the word nor any drawing
+PASS C Coral's drawer is offered to pass the pen
+PASS C a team of 2 is not offered a pass
+PASS C the pen moved to a Coral teammate — Amina
+PASS C the new drawer's phone shows the word
+PASS C the passer can't guess: they've seen the word
+PASS C the team hears who has the pen
+PASS D a team can't guess before its drawer draws
+PASS D the mouse strokes reached the server
+PASS D Coral's guesser sees exactly the server's drawing
+PASS D another team's guesser sees an empty page (its own team's)
+PASS D the TV shows Coral's strokes as a count only
+PASS E the guess box opens once there's a drawing
+PASS E the team's box pauses
+PASS E the drawer and the passer see the wrong guess
+PASS E no other team's phone and not the TV shows it
+PASS E the pause ends by itself
+PASS F Coral got it 2nd, on the phone
+PASS F places 1, 2, 3 by solve order, 100 / 75 / 55 — {"team-coral":[2,75],"team-sun":[3,55],"team-mint":[1,100]}
+PASS F the reveal on a phone: the word and every team's drawing
+PASS F Coral's drawing in the gallery is the drawing its guessers saw
+PASS F the reveal on the TV: the word, three drawings, each team's result
+PASS G round 2 began
+PASS G no take-over before 20 s
+PASS G after 20 s without drawing, a teammate is offered the pen
+PASS G a team of 2 is never offered it
+PASS G the taker's phone now draws, with the word
+PASS G the idle drawer hears it and can't guess
+PASS G the taker's drawing reaches the server
+PASS H round 3 began
+PASS H the game finished with team results for three teams — [["team-coral",1,275],["team-mint",2,210],["team-sun",3,205]]
+PASS H every player scored their team's points
+PASS H no drawing and no wrong guess is kept once the game is over
+PASS H phones: the results, a team-led heading, the team results card and three rounds
+PASS H the TV leads with the team result
+PASS H 320 px: the results have no sideways scroll
+note: words igloo / rainbow; teams team-coral=Keku+Amina+Zawadi team-sun=Baraka+Wanjiru team-mint=Juma+Neema
+TEAM DRAW PASSED

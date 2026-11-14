@@ -61,6 +61,7 @@ export const GAME_REGISTRY: GameDescriptor[] = [
   { id: "relay", title: "Relay", minPlayers: 4, recommendedPlayers: 6, maxPlayers: 10, casualOnly: true, modes: ["team"], status: "implemented", defaultDurationMinutes: 4, tutorial: "A team race of 12 quick sums. Only the runner answers; a right answer passes the baton to the next teammate. First team home wins." },
   // Stage 12.10: built for teams (casual rooms only, practice-only): each teammate holds different clues.
   { id: "split-clues", title: "Split Clues", minPlayers: 4, recommendedPlayers: 6, maxPlayers: 10, casualOnly: true, modes: ["team"], status: "implemented", defaultDurationMinutes: 8, tutorial: "Six puzzles. Each teammate's phone shows different clues to the same answer: put them together and type it. The faster your team, the more points." },
+  { id: "team-draw", title: "Team Draw", minPlayers: 4, recommendedPlayers: 6, maxPlayers: 10, casualOnly: true, modes: ["team"], status: "implemented", defaultDurationMinutes: 7, tutorial: "Every team draws the same word at once. One teammate draws, the rest guess from your own team's drawing. The faster your team, the more points." },
   { id: "draw-guess", title: "Draw & Guess", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 10, tutorial: "One player draws a secret word; everyone else races to guess it." },
 ];
 

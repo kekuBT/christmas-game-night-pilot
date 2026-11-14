@@ -6,11 +6,12 @@
  *  - Catch-up: a team alone in last place and far enough behind gets a small bonus on its next success.
  *  - Free-text answers: one forgiving matcher (case, accents, punctuation, a leading article, a plural, one typo in a
  *    long answer).
- *  - No repeats in a night: deal what this room hasn't played yet first, then what it played longest ago.
+ *  - No repeats in a night: deal what this room hasn't played yet first, then what it played longest ago
+ *    (dealAvoiding, defined in types.ts since Stage 12.11 and re-exported here).
  */
 import type { GameTeams } from "../../shared/teams.js";
 import { normalizeGuess } from "./draw.js";
-import { seededShuffle } from "./types.js";
+export { dealAvoiding } from "./types.js";
 
 /** Catch-up (D-S1210-01): how far behind the leader a team must be, alone in last place, to earn the bonus. */
 export const TEAM_CATCH_UP_GAP = 100;
@@ -78,16 +79,4 @@ export function answerMatches(accepted: readonly string[], text: string): boolea
     if (forms(want).some((f) => mine.includes(f))) return true;
     return want.length >= TYPO_FROM_LENGTH && mine.some((f) => editDistance(f, want) <= 1);
   });
-}
-
-/**
- * No repeats in a night (D-S1210-01): `avoid` lists the ids this room has played, oldest first. Items not in it come
- * first (shuffled), then the played ones in the order they were played, so the longest-ago come back first.
- */
-export function dealAvoiding<T extends { id: string }>(items: readonly T[], rng: () => number, avoid: readonly string[] = []): T[] {
-  const lastUse = new Map<string, number>();
-  avoid.forEach((id, i) => lastUse.set(id, i));
-  const fresh = seededShuffle(items.filter((x) => !lastUse.has(x.id)), rng);
-  const played = items.filter((x) => lastUse.has(x.id)).sort((a, b) => lastUse.get(a.id)! - lastUse.get(b.id)!);
-  return [...fresh, ...played];
 }

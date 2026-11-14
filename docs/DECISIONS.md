@@ -1854,3 +1854,36 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **Multiple-choice answers:** a team could guess without putting the clues together.
     - **Hiding everyone's clues all round:** a dropped phone would sink its team.
     - **Showing wrong tries to everyone:** other teams could rule answers out for free.
+- **D-S1211-01 The drawing games share one pad and one word history.**
+  - **The pad:** Draw & Guess's drawing pad (palette, widths, Undo, Clear, batched sending that keeps and resends what didn't arrive) becomes one component, `DrawPad`, with the actions it sends as a parameter. Draw & Guess keeps its actions and test ids.
+  - **The history:**
+    - Draw & Guess and Team Draw deal from the same word pack, so they share a room's no-repeat history;
+    - a module names its pack (`contentPool`), and the room counts every earlier game in the same pool;
+    - Draw & Guess lists the words it dealt (swaps included) and deals unplayed words first. With nothing to avoid, its deal is exactly as before.
+  - **Alternatives rejected:**
+    - **A second copy of the pad in Team Draw:** two copies of the batching and retry logic would drift apart.
+    - **A history per game only:** a family could draw "snowman" in Team Draw right after drawing it in Draw & Guess.
+- **D-S1211-02 Team Draw: every team draws the same word at once.**
+  - **Rounds:** 3–5 (the biggest team's size); each team's drawing order is shuffled once and goes round the team; 75 s each, then a 9 s reveal.
+  - **Guessing:**
+    - teammates guess from their own team's drawing, once something is drawn;
+    - the team kit's forgiving match; the first right guess solves it for the team;
+    - a wrong guess shows to the team and pauses the team's guessing for 2 s;
+    - at most 15 wrong guesses per team per round. The pause and the limit count per team, so a bigger team can't out-type a smaller one.
+  - **The pen:**
+    - the drawer may pass it once a round before drawing anything;
+    - after 20 s with nothing drawn (since getting the pen or the last stroke), a teammate may take it and carry on the drawing;
+    - the pen moves only while someone who hasn't seen the word is left to guess;
+    - whoever has held the pen this round can't guess.
+  - **Points:** 100, 75, 55 and 40 by the order teams get it, and +25 catch-up. No sitting out.
+  - **Secrecy:**
+    - the word is on the current drawer's phone only until the reveal;
+    - each phone gets its own team's drawing and wrong guesses only;
+    - the TV and other teams see each team's status (drawer, strokes, solved and place) until the reveal's gallery;
+    - drawings are dropped after their reveal, wrong guesses at the end; future words never leave the server.
+  - **Where:** casual rooms only and practice-only, for 4–10 players. Never in Quick Party or Home's featured rotation.
+  - **Alternatives rejected:**
+    - **A different word for each team:** some words are easier to draw, so the race wouldn't be fair.
+    - **Showing the teams' drawings live on the TV:** every team draws the same word, so another team's drawing is a free hint.
+    - **A new word when the pen moves:** that would break "same word for everyone".
+    - **Letting the drawer who passed still guess:** they have seen the word.
