@@ -74,3 +74,7 @@ Relay is the second game built for teams. It was split out of Stage 12.8 so each
 
 ## 5. Estimate
 About 4 hours.
+
+**Actual:** about 3 h 30 min of wall-clock time, from 6:07 a.m. ET (11:07 UTC, the spec draft) to 9:35 a.m. ET (14:35 UTC), when the full gate passed on `7144b05`.
+- That span overlapped with finishing Stage 12.8: its driver fixes, three of its gates and its report.
+- So the time spent on Relay itself was less than the span.

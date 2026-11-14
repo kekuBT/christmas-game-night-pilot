@@ -17,3 +17,6 @@
 | `check-teams-n129t1.log` | same | 24/0 | 12.7's played-as-teams results keep "average". One check ("the sheet shows Amina with a move button") runs only when the seeded shuffle didn't already put Amina on Coral, so 24 or 25 checks both mean every check passed. |
 | `check-relay-r4.log` | + a briefing screenshot | 22/0 | **The committed screenshots come from this run alone.** The local screenshot folder is flat, so the Team Huddle run (`n129h1`) had overwritten Relay's `tv-final-1920`. |
 | `unit-suite-3.log` with both typechecks and lint | the commit candidate | clean; 1846/1846 | |
+| (gate) targeted on `7144b05`, run `20261114-135330-7144b05e-17480` | the commit | **PASSED** (exit 0), 16/16 | relay, team-huddle, teams, warm-ivory, briefing, official-practice, library, library-nav, tv-show, results, quick-party, one-path, session-flow, a11y-surfaces. |
+| (gate) fast on `7144b05`, run `20261114-135731-7144b05e-20089` | same | **PASSED** (exit 0), 5/5 | Unit tests 1846/1846. |
+| (gate) **full** on `7144b05`, run `20261114-135855-7144b05e-23804` | same | **PASSED** (exit 0), 100/100 | 36 min 47 s, no retries. 100 steps: check-relay is the 100th. |
