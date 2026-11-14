@@ -120,6 +120,10 @@ function Teams({ game, players, meId, tv }: { game: PublicGame; players: PublicP
           </li>
         ))}
       </ul>
+      {/* Stage 12.10 (D-S1210-01): a night's team with too few players in this game plays with another team. */}
+      {(teams.moved ?? []).map((mv) => (
+        <p key={mv.playerId} className="mz-foot" data-testid={`briefing-moved-${mv.playerId}`}>{nameOf(mv.playerId) === "you" ? "You play" : `${nameOf(mv.playerId)} plays`} with {teams.list.find((t) => t.id === mv.to)?.name ?? "another team"} this game: a team needs at least 2 players.</p>
+      ))}
     </section>
   );
 }

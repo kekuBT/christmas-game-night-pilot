@@ -20,6 +20,7 @@ import './styles/stage125.css';
 import './styles/stage126.css';
 import './styles/stage127.css';
 import './styles/stage128.css';
+import './styles/stage1210.css';
 
 export * from './tokens/tokens.js';
 export * from './types.js';

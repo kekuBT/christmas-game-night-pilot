@@ -53,7 +53,12 @@ export interface GameModule<S = unknown> {
    */
   init(args: { players: readonly string[]; seed: number; season?: SessionSeason; settings?: GameSettings; /** Stage 12.5: Family Questions' questions, picked by the room at start. */ family?: readonly FamilyGameQuestion[];
     /** Stage 12.8: a game built for teams gets its teams (the night's, or two dealt for it) and, for Team Huddle, its questions. */ teams?: GameTeams; huddle?: readonly HuddleQuestion[];
-    /** Stage 12.9: Relay's sums (the same for every team). */ relay?: readonly RelayQuestion[] }): S;
+    /** Stage 12.9: Relay's sums (the same for every team). */ relay?: readonly RelayQuestion[];
+    /**
+     * Stage 12.10 (D-S1210-01): content ids this room has already played in this game, oldest first (from contentIds()
+     * of its earlier games), so a module can deal unplayed content first. Absent: nothing played yet.
+     */
+    avoid?: readonly string[] }): S;
   intent(s: S, actorId: string, action: string, payload: Record<string, unknown>, ctx: ModuleContext): ModuleResult;
   /** "Sit this one out": a round, or (wholeGameAbstain) the rest of the game. */
   abstain(s: S, actorId: string, ctx: ModuleContext): ModuleResult;
@@ -82,6 +87,8 @@ export interface GameModule<S = unknown> {
    * of play (Relay's turns) starts them here, from the server clock; init() never knows when play begins.
    */
   onPlayStart?(s: S, ctx: ModuleContext): void;
+  /** Stage 12.10 (D-S1210-01): the content ids this game deals (puzzles, words), so the room's later games can avoid them. */
+  contentIds?(s: S): string[];
   /**
    * Stage 9.3: a cooperative game's one shared result (registry
    * `cooperative: true`). The room records it as `outcome.team` at finalize

@@ -21,6 +21,7 @@
  */
 
 import { SPECTRUM_PHASE_MS } from "../games/modules/spectrum-timing.js";
+import { SPLIT_REVEAL_MS, SPLIT_SOLVE_MS } from "../games/modules/split-clues-timing.js";
 import type { TeamResult } from "../shared/teamResult.js";
 
 export type TimingModel = "game-deadline" | "phased" | "turns";
@@ -39,7 +40,7 @@ export interface GamePolicy {
   /** Plain reason shown when a game is practice-only. */
   practiceOnlyReason?: string;
   /** What one unit of participation is called ("questions", "rounds"...). */
-  unit: "questions" | "events" | "groups" | "rounds" | "phases" | "turns" | "legs";
+  unit: "questions" | "events" | "groups" | "rounds" | "phases" | "turns" | "legs" | "puzzles";
 }
 
 const MIN = 60_000;
@@ -105,6 +106,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
   "relay": {
     model: "game-deadline", gameWindowMs: 4 * MIN,
     officialEligible: false, practiceOnlyReason: "Relay is practice-only: a team race in casual rooms.", unit: "legs",
+  },
+  // Stage 12.10: Split Clues, six puzzles of up to 75 s + a 7 s reveal (a round ends early once every team has solved
+  // it); its help steps are the module's own windows (dueAt/advance). 9 minutes is a backstop.
+  "split-clues": {
+    model: "phased", gameWindowMs: 9 * MIN, phaseMs: { question: SPLIT_SOLVE_MS, reveal: SPLIT_REVEAL_MS },
+    officialEligible: false, practiceOnlyReason: "Split Clues is practice-only: a team game in casual rooms.", unit: "puzzles",
   },
   // Stage 12.8: Team Huddle, eight questions of 25 s + 6 s (a question closes early once every team agrees); 8 minutes
   // is a backstop.

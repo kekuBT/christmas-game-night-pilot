@@ -5,7 +5,7 @@ import { GAME_REGISTRY, getGame, isCooperative } from "../games/registry.js";
 import { CUP_FINISH_RULES, cupChampions, sharedRanks } from "../shared/cupFinish.js";
 import { FAMILY_LIMITS, checkFamilyQuestion, type FamilyQuestion, type FamilyQuestionInput } from "../shared/familyPack.js";
 import { FAMILY_ROUNDS_MIN, pickFamilyQuestions, type FamilyGameQuestion } from "../games/modules/family.js";
-import { TEAM_COLORS, TEAM_LIMITS, TEAM_NATIVE_GAMES, TEAM_PLAY_GAMES, balanceTeams, checkTeamName, newTeamList, smallestTeam, teamResults, type GameTeams, type RoomTeams } from "../shared/teams.js";
+import { TEAM_COLORS, TEAM_GAME_MIN_SIZE, TEAM_LIMITS, TEAM_NATIVE_GAMES, TEAM_PLAY_GAMES, balanceTeams, checkTeamName, fitTeamsForGame, newTeamList, smallestTeam, teamResults, type GameTeams, type RoomTeams } from "../shared/teams.js";
 import { HUDDLE_ROUNDS, type HuddleQuestion } from "../games/modules/teamHuddle.js";
 import { RELAY_LEGS, type RelayQuestion } from "../games/modules/relay.js";
 import type { TeamResult } from "../shared/teamResult.js";
@@ -1010,7 +1010,9 @@ export class RoomEngine {
     // step, so it is atomic with game creation.
     let selected: { extra: unknown; record: () => void; pending: PendingContent } | null = null;
     // Stage 12.8 (D-S128-01): a game built for teams plays with the night's teams, or two dealt for it now (seeded).
-    const nativeTeams = TEAM_NATIVE_GAMES.has(gameId) ? this.teamsForTeamGame(playerIds, seed) : undefined;
+    const nativeTeams = TEAM_NATIVE_GAMES.has(gameId) ? this.teamsForTeamGame(gameId, playerIds, seed) : undefined;
+    // Stage 12.10 (D-S1210-01): no repeats in a night: what this room's earlier games of this kind dealt, oldest first.
+    const avoid = moduleFor(gameId)?.contentIds ? this.playedContentIds(gameId) : undefined;
     // Stage 12.8 (D-S128-02): Team Huddle's questions come from the Trivia pool, used up the same way.
     const contentGameId = gameId === "team-huddle" ? "trivia" : gameId;
     if (this._cup.origin === "created" && (CONTENT_GAMES as string[]).includes(contentGameId)) {
@@ -1082,7 +1084,7 @@ export class RoomEngine {
                           ? { roundIndex: 0, submissions: {} }
                           : gameId === "charades"
                             ? initCharades(playerIds, undefined, nativeTeams)
-                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}), ...(gameId === "relay" ? { relay: relayQuestions(seed) } : {}) }),
+                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}), ...(gameId === "relay" ? { relay: relayQuestions(seed) } : {}), ...(avoid && avoid.length ? { avoid } : {}) }),
     };
     // Stage 12.7 (D-S127-02): played as teams when the room has teams, the game can be, and at least two teams have
     // players in it; the teams are copied now (only this game's players), never read back from the room later.
@@ -2578,6 +2580,22 @@ export class RoomEngine {
     this.log("phase-closed", { gameInstanceId: game.id, detail: { phase: before, at } });
   }
 
+  /**
+   * Stage 12.10 (D-S1210-01): the content ids this room's games of `gameId` have dealt (their module's contentIds),
+   * oldest game first, so a new game can deal what the room hasn't played yet. Games still in their briefing aren't
+   * counted (a cancelled briefing leaves no game).
+   */
+  private playedContentIds(gameId: string): string[] {
+    const mod = moduleFor(gameId);
+    if (!mod?.contentIds) return [];
+    const ids: string[] = [];
+    for (const g of this.games.values()) {
+      if (g.gameId !== gameId || g.status === "briefing") continue;
+      try { ids.push(...mod.contentIds(g.extra)); } catch { /* a game saved before its module listed content: nothing to avoid */ }
+    }
+    return ids;
+  }
+
   /** Stage 12.9: tell a module that play has begun, so its own clocks run from this instant (never from init). */
   private startModulePlay(game: GameInstance, at: number): void {
     const mod = moduleFor(game.gameId);
@@ -2955,15 +2973,20 @@ export class RoomEngine {
    * Stage 12.8 (D-S128-01): the teams of a game built for teams. The night's teams when at least two of them have
    * players in this game (a player on no team joins the smallest of those); otherwise two teams dealt for this game
    * only (seeded). Pausing doesn't apply: these games are always team games.
+   * Stage 12.10 (D-S1210-01): a game that needs at least 2 per team (TEAM_GAME_MIN_SIZE) moves the players of a
+   * smaller team to the smallest other teams; when fewer than two teams would remain, it deals two of its own.
    */
-  private teamsForTeamGame(playerIds: readonly string[], seed: number): GameTeams {
+  private teamsForTeamGame(gameId: string, playerIds: readonly string[], seed: number): GameTeams {
+    const minSize = TEAM_GAME_MIN_SIZE[gameId] ?? 1;
     if (this.kind === "casual" && this.teams) {
       const members: Record<string, string> = {};
       for (const p of playerIds) { const t = this.teams.members[p]; if (t) members[p] = t; }
       if (new Set(Object.values(members)).size >= 2) {
         const list = this.teams.list.filter((t) => Object.values(members).includes(t.id)).map((t) => ({ ...t }));
         for (const p of playerIds) if (!members[p]) members[p] = smallestTeam({ list, members }, playerIds.filter((x) => members[x]));
-        return { list, members };
+        if (minSize <= 1) return { list, members };
+        const fit = fitTeamsForGame(list, members, playerIds, minSize);
+        if (fit) return fit;
       }
     }
     const list = newTeamList(2);

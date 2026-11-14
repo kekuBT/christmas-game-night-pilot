@@ -88,6 +88,7 @@ const GAME_PHASE_WORDS: Record<string, Record<string, string>> = {
   "spectrum": { clue: "the clue", guess: "everyone's guesses", reveal: "each reveal" },
   "family-questions": { question: "each question", reveal: "each answer" },
   "team-huddle": { question: "each question", reveal: "each answer" },
+  "split-clues": { question: "each puzzle", reveal: "each answer" },
 };
 
 /** The real time limits, from the lifecycle policy the server enforces, in this game's own words. */
@@ -166,6 +167,16 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
       "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena.",
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
+    ],
+  },
+  // Stage 12.10 (docs/stage12/stage1210.md §2).
+  "split-clues": {
+    objective: "Put your team's clues together.",
+    steps: [
+      "Six puzzles. Every teammate's phone shows different clues to the same answer, so read yours out and put them together.",
+      "Anyone on your team can type the answer. A wrong try pauses your team's answer box for 4 seconds.",
+      "Help comes for every team: the answer's shape at 30 seconds, everyone's clues on every phone at 45, the first letter at 60.",
+      "100, 75, 55 or 40 by the order teams solve it, and a +25 catch-up for a team far behind. Everyone scores their team's points.",
     ],
   },
   // Stage 12.9 (docs/stage12/stage129.md §1).
