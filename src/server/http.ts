@@ -156,7 +156,12 @@ export class LocalServer {
   /** Stage 7.1: the `party` marker on a game start: which lineup item this start is. */
   static readonly PartyStartSchema = z.object({ revision: z.number().int().min(0), index: z.number().int().min(0).max(7) }).strict();
   /** Stage 6.1: POST /rooms. A missing kind means a Family Cup, as before room kinds. */
-  static readonly CreateRoomSchema = z.object({ name: z.string().max(80).optional(), kind: z.enum(ROOM_KINDS).optional() }).passthrough();
+  static readonly CreateRoomSchema = z.object({
+    name: z.string().max(80).optional(),
+    kind: z.enum(ROOM_KINDS).optional(),
+    // Stage 12.2 (D-S122-04): a casual room's starting content, from the host's pinned look (casual rooms only).
+    contentSeason: z.enum(["everyday", "christmas"]).optional(),
+  }).passthrough();
   /** Ephemeral nudges (see the /nudge endpoint): never persisted, never ledger. */
   private nudges = new Map<string, { fromId: string; targetId: string; ts: number }[]>();
   private nudgeStamps = new Map<string, number[]>();
@@ -786,6 +791,9 @@ export class LocalServer {
         room.clock = this.clock;
         room.lifecycleScale = this.lifecycleScale;
       if (this.contentLib) room.content = this.contentLib;
+        // Stage 12.2 (D-S122-04): a host whose look is Christmas starts a casual room dealing Christmas content (a
+        // one-time default; the host can switch in the lobby). Cups and solo rooms don't take it here.
+        if (kind === "casual" && parsed.data.contentSeason) room.contentSeason = parsed.data.contentSeason;
         const hostClaimToken = randomUUID();
         this.rooms.set(room.id, room);
         this.hostClaimHashes.set(room.id, hashToken(hostClaimToken));
@@ -1320,6 +1328,26 @@ export class LocalServer {
               this.broadcast(room.id);
             }
             this.send(res, 200, { ok: true, changed, roomKind: room.kind, championshipDay: room.championshipDay, ...(room.cupSince ? { cupSince: room.cupSince } : {}) });
+          } catch (err) {
+            if (err instanceof CupUpgradeRefused) { this.send(res, err.code === "NOT_HOST" ? 403 : 409, { error: err.message, code: err.code, roomKind: room.kind }); return; }
+            throw err;
+          }
+          return;
+        }
+        // Stage 12.2 (D-S122-01): "Back to a casual game night", until the Cup's first official game finishes.
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "casual") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          try {
+            const { changed } = room.undoCupUpgrade(player.id);
+            if (changed) {
+              // A casual room has no official games: the stored up-next plan follows (the host can't plan official here).
+              const plan = this.lobbyPlans.get(room.id);
+              if (plan?.official) this.lobbyPlans.set(room.id, { gameId: plan.gameId, official: false });
+              this.persist(room);
+              this.broadcast(room.id);
+            }
+            this.send(res, 200, { ok: true, changed, roomKind: room.kind, ...(room.cupUndone ? { cupUndone: room.cupUndone } : {}) });
           } catch (err) {
             if (err instanceof CupUpgradeRefused) { this.send(res, err.code === "NOT_HOST" ? 403 : 409, { error: err.message, code: err.code, roomKind: room.kind }); return; }
             throw err;
