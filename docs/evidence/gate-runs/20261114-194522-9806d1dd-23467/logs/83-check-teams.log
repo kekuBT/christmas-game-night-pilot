@@ -1,0 +1,31 @@
+$ node scripts/check-teams.mjs http://localhost:36725
+# timeout 600s | worker w2 | server http://localhost:36725 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1211full/test-results/20261114-194522-9806d1dd-23467/server-data/w2)
+
+[+3.5s] PASS A host: a Teams card offering Make teams
+[+3.5s] PASS A a guest has no Teams card before there are teams
+[+3.8s] PASS B two teams of two
+[+3.8s] PASS B the teams: Keku and Amina on Coral, Baraka and Wanjiru on Sun
+[+4.0s] PASS B renamed: The Lions
+[+4.1s] PASS C Amina's lobby: "You're on The Lions"
+[+4.1s] PASS C Baraka's lobby: "You're on Team Sun"
+[+4.2s] PASS C the TV lists the teams and their players
+[+6.9s] PASS D the game copied the teams at its start — {"list":[{"id":"team-coral","name":"The Lions","color":"coral"},{"id":"team-sun","name":"Team Sun","color":"sun"}],"members":{"player-1":"team-coral","player-2":"team-coral","player-3":"team-sun","player-4":"team-sun"}}
+[+6.9s] PASS D each team's score is its players' average — [["The Lions",720,1],["Team Sun",600,2]]
+[+7.0s] PASS D phone results: the team results under the heading, with the winner
+[+7.1s] PASS D your own team is marked on your phone
+[+7.1s] PASS D the TV leads with the winning team
+[+8.4s] PASS E the host's card offers playing individually
+[+8.7s] PASS E paused for everyone
+[+11.0s] PASS E the paused game has no teams and no team results
+[+11.1s] PASS E its phone results are up, with no team card
+[+11.4s] PASS E back to teams
+[+11.9s] PASS F the newcomer joins a team
+[+12.0s] PASS F the TV counts tonight's team wins
+[+12.5s] PASS G the lobby with the Teams card fits 320 px
+[+12.8s] PASS G the teams sheet fits 320 px
+[+13.0s] PASS H no teams for everyone
+[+13.0s] PASS H a finished team game keeps its team results
+[+13.1s] check-teams: all checks passed
+[+13.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":6}
+
+# PASS (exit 0) in 13.1s | cpu 3.9s, peak memory 304 MB

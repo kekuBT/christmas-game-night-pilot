@@ -1,0 +1,29 @@
+$ node scripts/check-relay.mjs http://localhost:37651
+# timeout 600s | worker w3 | server http://localhost:37651 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1211t1/test-results/20261114-193826-9806d1dd-16124/server-data/w3)
+
+[+5.4s] PASS A the briefing names the teams
+[+6.0s] PASS A the TV shows a lane per team
+[+6.0s] PASS B the runner's phone says it's their leg
+[+6.0s] PASS B the teammate sees the same sum and is told to help
+[+6.2s] PASS B the runner's leg line: leg 1 of 12, the baton passes in at most 20 s
+[+6.3s] PASS B a right answer passes the baton (Coral leg 1, the other runner)
+[+6.3s] PASS C Sun is still on leg 0
+[+6.3s] PASS C Baraka's phone never shows Coral's next sum — 90 ÷ 9 = ?
+[+6.3s] PASS C Wanjiru's phone never shows Coral's next sum — 90 ÷ 9 = ?
+[+6.3s] PASS C the TV's data has no sum, option or answer
+[+6.4s] PASS D a wrong answer freezes the runner, counting down from at most 3
+[+6.4s] PASS D the wrong option is greyed out
+[+9.5s] PASS D the freeze ends
+[+9.6s] PASS D after the freeze, the right answer passes the baton
+[+26.0s] PASS E a Sun runner who doesn't answer in 20 s is passed over on the same sum
+[+26.0s] PASS E the game clock counts down: under 3:45 left after the pass
+[+26.4s] PASS F the race finished with Coral home first — ["team-coral","team-sun"]
+[+26.4s] PASS F every player scored their team's points — {"player-1":150,"player-2":150,"player-3":140,"player-4":140}
+[+26.4s] PASS F phones: the results with the team results card and a team-led heading
+[+26.5s] PASS F the TV leads with the winning team
+[+26.5s] PASS F the team results show points, not an average (phone and TV)
+[+27.3s] PASS F 320 px: the results have no sideways scroll
+[+27.4s] check-relay: all passed
+[+27.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 27.4s | cpu 3.8s, peak memory 289 MB
