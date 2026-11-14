@@ -1,0 +1,63 @@
+$ node scripts/check-connections.mjs http://localhost:33769
+# timeout 600s | worker w3 | server http://localhost:33769 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full2/test-results/20261114-120354-5f6cfef0-27338/server-data/w3)
+
+[+7.3s] PASS the briefing explains the objective
+[+7.5s] PASS 16 tiles — DANUBE,NILE,OSLO,ROME,ROCKIES,AMAZON,PARIS,LIMA,KENYA,CUBA,ANDES,PERU,HIMALAYAS,THAMES,CHILE,ALPS
+[+7.5s] PASS tiles are shuffled (the first four are not one group)
+[+7.8s] PASS no horizontal overflow at 320px
+[+7.8s] PASS tiles are at least 44px at 320px — 63.99873352050781
+[+8.1s] PASS no horizontal overflow at 360px
+[+8.1s] PASS tiles are at least 44px at 360px — 64
+[+8.3s] PASS no horizontal overflow at 390px
+[+8.3s] PASS tiles are at least 44px at 390px — 64
+[+8.4s] PASS a tapped tile is marked selected (aria-pressed)
+[+8.5s] PASS tapping again deselects
+[+8.5s] PASS Submit is disabled until four are picked
+[+9.1s] PASS one-away feedback after a near miss
+[+9.1s] PASS a double tap sends one guess — 1
+[+9.1s] PASS mistake dots show 3 left
+[+9.7s] PASS re-trying the same group is refused locally
+[+10.1s] PASS group 1 found shows a band
+[+10.6s] PASS Ada sees the name of the group she found, not the others
+[+11.0s] PASS group 2 found shows a band
+[+11.4s] PASS group 3 found shows a band
+[+11.8s] PASS group 4 found shows a band
+[+11.8s] PASS Ada's puzzle is solved
+[+15.5s] PASS four mistakes end Bea's puzzle
+[+15.5s] PASS unsolved group names stay hidden until the game ends
+[+15.9s] PASS Cal finds a group
+[+17.7s] PASS after reconnecting Cal still has his group and 12 tiles
+[+17.7s] PASS keyboard: Space toggles a focused tile
+[+17.8s] PASS keyboard focus is visible
+[+18.6s] PASS the TV shows the board's 16 words
+[+18.6s] PASS the TV never shows group names while the game is on
+[+19.4s] DIAG player=Cal game=word-connections(game-1) server=playing phase=- deadlineIn=36s phaseIn=- submitted=3/3 outcome=- | screen="Word Connections: find four groups of four" clock="Time left in this game: 0:37" | type=waiting-on-players
+[+55.6s] PASS the deadline brings everyone to the results
+[+55.6s] PASS results show all four groups
+[+55.6s] PASS results mark groups Cal missed (dashed)
+[+55.6s] PASS results explain the deadline ending
+[+55.6s] PASS results show Cal's participation — WORD CONNECTIONS · OFFICIAL
+[+55.6s] Ada wins Word Connections
+[+55.6s] A
+[+55.6s] Ada
+[+55.6s] 
+[+55.6s] Ada won by a comfortable margin. Very comfortable.
+[+55.6s] 
+[+55.6s] You came 2nd of 3
+[+55.6s] 100 pts
+[+55.6s] Solid middle of the pack. Room to climb.
+[+55.6s] WORD CONNECTIONS
+[+55.6s] The groups were…
+[+55.6s] COUNTRIES
+[+55.6s] Chile · Peru · Cuba · Kenya
+[+55.6s] CAPITAL CITIES
+[+55.6s] Paris · Rome · Lima · Oslo
+[+55.6s] RIVERS
+[+55.7s] PASS no horizontal overflow on results at 320px
+[+56.2s] PASS everyone is back in the lobby
+[+56.2s] PASS a second official Connections game starts (a different board) — 201
+[+56.9s] PASS the second board is different
+[+56.9s] CONNECTIONS ALL PASSED
+[+56.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 57s | cpu 5.5s, peak memory 375 MB

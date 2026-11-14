@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | targeted | run 20261114-115454-5f6cfef0-22728
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-team-huddle (w2) [functional]: FAIL D the phone's heading names the winning team, and your place is your team's — not within 15000ms
+  timing   wall 7m 39s · step time 9m 04s (sum) · 3 workers, 39% busy · 1.19× the same steps run one after another
+           predicted 5–14m (about 7m 33s, low-confidence) → actual 7m 39s (+1%)
+           longest  check-f5 7m 32s, check-team-huddle 1m 13s, check-official-practice 12s · the longest step is 98% of the wall time
+           machine  CPU mean 16%, peak 94% · memory available ≥ 13479 MB · load peak 2.76
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t2/test-results/20261114-115454-5f6cfef0-22728/report.json

@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261114-120354-5f6cfef0-27338
+  97 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-leaderboard (w3) [functional]: exit 1
+  timing   wall 36m 10s · step time 1h 44m (sum) · 3 workers, 97% busy · 2.90× the same steps run one after another
+           predicted 26–61m (about 34m 01s, low-confidence) → actual 36m 10s (+6%)
+           longest  e2e-chromium 8m 20s, check-f5 7m 44s, check-leaderboard 6m 38s · the longest step is 23% of the wall time
+           machine  CPU mean 35%, peak 100% · memory available ≥ 12922 MB · load peak 7.58 · backpressure 7 wait(s), 58s
+           contention ×1.069 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full2/test-results/20261114-120354-5f6cfef0-27338/report.json

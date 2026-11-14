@@ -74,3 +74,5 @@
 
 ## 6. Estimate
 About 5 hours.
+
+**Actual:** about 3 h 30 min. Work started at 5:03 a.m. ET (10:03 UTC) and the full gate passed on `7f1ae42` at 8:35 a.m. ET (13:35 UTC). That includes three full gates of about 36 minutes each: two failed on driver bugs, and the third passed.

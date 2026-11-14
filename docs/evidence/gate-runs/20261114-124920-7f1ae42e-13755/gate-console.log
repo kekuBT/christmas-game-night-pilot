@@ -1,0 +1,56 @@
+Mchezo gate targeted | run 20261114-124920-7f1ae42e-13755
+  revision 7f1ae42ea0a2a369f8681008a8d4f3af15d879de (clean tree) | fingerprint cd4690bdc968 (565 files)
+  plan     7 steps: 1 fast/build, 5 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  173 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.05 for 3 worker(s) (measured, 148 run(s))
+  estimate this run: 5–15m (low-confidence) · the same steps one after another: about 20m 35s · longest step check-f5 ~7m 12s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.05 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-start-helper
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t3/test-results/20261114-124920-7f1ae42e-13755
+        start build-web on w1 (usually 6s)
+[ 1/7] PASS         4.9s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/7] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:43517 (pid 13917, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t3/test-results/20261114-124920-7f1ae42e-13755/server-data/w1)
+  server   w2 http://localhost:44665 (pid 13918, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t3/test-results/20261114-124920-7f1ae42e-13755/server-data/w2)
+  server   w3 http://localhost:38965 (pid 13919, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t3/test-results/20261114-124920-7f1ae42e-13755/server-data/w3)
+        start check-f5 on w1 (usually 7m 12s)
+        start check-leaderboard on w2 (usually 6m 18s)
+        start check-game-night on w3 (usually 5m 07s)
+── progress  2/7 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-f5 53s (w1), check-leaderboard 53s (w2), check-game-night 53s (w3)
+   remaining 4–14m · total 5–15m · done around 12:55–13:04 UTC (low-confidence)
+── progress  2/7 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-f5 1m 53s (w1), check-leaderboard 1m 53s (w2), check-game-night 1m 53s (w3)
+   remaining 3–13m · total 5–15m · done around 12:55–13:04 UTC (low-confidence)
+── progress  2/7 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-f5 2m 53s (w1), check-leaderboard 2m 53s (w2), check-game-night 2m 53s (w3)
+   remaining 2–12m · total 5–15m · done around 12:55–13:04 UTC (low-confidence)
+── progress  2/7 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-f5 3m 53s (w1), check-leaderboard 3m 53s (w2), check-game-night 3m 53s (w3)
+   remaining 1–11m · total 5–15m · done around 12:55–13:04 UTC (low-confidence)
+── progress  2/7 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-f5 4m 53s (w1), check-leaderboard 4m 53s (w2), check-game-night 4m 53s (w3)
+   remaining 1–10m · total 6–15m · done around 12:55–13:04 UTC (low-confidence)
+[ 3/7] PASS       329.2s  check-game-night  w3
+        start check-start-helper on w3 (no timing history)
+[ 4/7] PASS        20.5s  check-start-helper  w3
+        start check-team-huddle on w3 (usually 52s)
+── progress  4/7 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-f5 5m 53s (w1), check-leaderboard 5m 53s (w2), check-team-huddle 4s (w3)
+   remaining 0–8m · total 6–14m · done around 12:56–13:02 UTC (low-confidence)
+[ 5/7] PASS       395.6s  check-leaderboard  w2
+[ 6/7] PASS        56.3s  check-team-huddle  w3
+── progress  6/7 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 7m 00s
+   running   check-f5 6m 53s (w1)
+   remaining 1–7m · total 8–14m · done around 12:57–13:02 UTC (low-confidence)
+[ 7/7] PASS       460.3s  check-f5  w1
+
+PASSED (exit 0) | targeted | run 20261114-124920-7f1ae42e-13755
+  7 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 7m 47s · step time 21m 07s (sum) · 3 workers, 90% busy · 2.71× the same steps run one after another
+           predicted 5–15m (about 7m 32s, low-confidence) → actual 7m 47s (+3%)
+           longest  check-f5 7m 40s, check-leaderboard 6m 36s, check-game-night 5m 29s · the longest step is 99% of the wall time
+           machine  CPU mean 32%, peak 88% · memory available ≥ 13489 MB · load peak 4.39
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t3/test-results/20261114-124920-7f1ae42e-13755/report.json

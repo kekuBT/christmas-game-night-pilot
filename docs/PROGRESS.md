@@ -2676,3 +2676,43 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/stage12/stage127-screenshots/`, `docs/evidence/stage127-local/`, `docs/evidence/gate-runs/`.
 - **Owner decisions open:** team scoring in a Family Cup (D-S127-03, provisional "no").
 - **Next:** Stage 12.8 (games built for teams: Team Huddle, Charades with the night's teams), then 12.9 (Relay).
+
+## Stage 12.8: games built for teams (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner, 2026-11-14 about 3:25 a.m. ET: "we definitely need more games that can be played with teams". Relay was split out to Stage 12.9 so each PR stays reviewable.
+- **Base:** `8a0d8f1` (Stage 12.7's head, PR #31). Branch `claude/stage12-8-team-games`, draft PR #32 stacked on #31.
+- **Spec:** `docs/stage12/stage128.md`. Decisions D-S128-01..03.
+- **Built:**
+  - **Which teams a team game uses (D-S128-01):**
+    - the night's teams when at least two of them have players in the game, or else two balanced teams dealt for this game (seeded);
+    - the game keeps its own copy;
+    - the briefing names the teams on every phone and the TV, and says "You're on …" (for 12.7's team games too);
+    - results lead with the team ("Team Sun wins Team Huddle", "Every team tied in Charades", "Your team came 2nd of 2").
+  - **Team Huddle (D-S128-02, `src/games/modules/teamHuddle.ts`), new:**
+    - 8 Trivia-pool questions a team answers together;
+    - teammates see each other's picks live, and no other team or the TV does;
+    - a question closes at 25 s, or early once every team agrees;
+    - the team's answer is the majority (a tie goes to the option picked first);
+    - 100 for right, plus 25 when the whole team chose it;
+    - casual and practice only, 4–10 players; never in Quick Party or Home's "featured today".
+  - **Charades with the night's teams (D-S128-03):** 2–4 named teams with equal turns (a smaller team's players act more often). This replaces the join-order split.
+- **Tests:**
+  - `tests/stage128-huddle.test.ts` (11);
+  - catalogue counts (18 games) and two Charades tests updated for the new turn order;
+  - the briefing secrecy test counts a game's teams as public;
+  - new `scripts/check-team-huddle.mjs` (28 checks: four phones and a TV, Charades with three teams, 320 px).
+- **Drivers fixed after gate failures (each a driver bug, not the app):**
+  - check-f5 and e2e-browser waited for Charades' old "Team A/B" button;
+  - check-team-huddle couldn't accept an all-tie heading;
+  - check-leaderboard raced the reconnect grace period on "Start without Dee". Now the shared `scripts/lib/start.mjs`, used by check-game-night too and proven by the new `scripts/check-start-helper.mjs`.
+- **Unit suite:** 1837/1837 (the fast gate's unit-tests step on `7f1ae42`).
+- **Gates (one run on one revision each; every run in `docs/evidence/stage128-local/README.md`, evidence in `docs/evidence/gate-runs/`):**
+  - `717b16f`: targeted PASSED, fast PASSED, full **FAILED** (Charades driver regex);
+  - `5f6cfef`: targeted **FAILED** (tie heading check), fast PASSED, full **FAILED** (Start-without race);
+  - `7f1ae42` targeted (start-helper, leaderboard, game-night, team-huddle, f5) `20261114-124920-7f1ae42e-13755`: PASSED, 7/7;
+  - `7f1ae42` fast `20261114-125720-7f1ae42e-15145`: PASSED, 5/5;
+  - **`7f1ae42` full (checkpoint) `20261114-125837-7f1ae42e-18879`: PASSED** (exit 0, 99/99, 36 min 29 s, no retries).
+- **Tested SHA:** `7f1ae42`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage128-screenshots/`, `docs/evidence/stage128-local/`, `docs/evidence/gate-runs/`.
+- **Owner decisions open:** team scoring in a Family Cup (D-S127-03, provisional "no").
+- **Estimate vs actual:** about 5 hours estimated; about 3 h 30 min actual (5:03 to 8:35 a.m. ET), three full gates included.
+- **Next:** Stage 12.9 (Relay).
