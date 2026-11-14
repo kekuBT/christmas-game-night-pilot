@@ -1,0 +1,33 @@
+PASS A the briefing explains Territory
+PASS A the TV shows a four-team scoreboard
+PASS A each team starts on its home corner (A1, A3, E3, E1)
+PASS B question 1 is on the TV
+PASS B every phone shows the same question
+PASS B a teammate sees who answered for the team, and can't answer again
+PASS B another team's phone doesn't show it
+PASS B the TV shows Coral has answered, not what
+PASS B no right answer and no team's choice in the TV's data or another team's
+PASS B the TV fits above its footer (question) — {"ok":true,"bottom":734,"foot":980,"right":1772}
+PASS C the question closed early once every team answered — ["team-coral","team-sun"]
+PASS C Coral's phone offers the three cells next to its home
+PASS C a wrong team's phone says so
+PASS C Coral's pick shows on its phones
+PASS C picks stay hidden: other teams' phones and the TV don't show Coral's
+PASS C Sun's phones show Sun's own pick
+PASS C the TV shows the answer and who's picking
+PASS C the TV fits above its footer (claim) — {"ok":true,"bottom":734,"foot":980,"right":1772}
+PASS C A2 went to Coral (answered first); Sun's claim moved to B3, the nearest free cell — [{"teamId":"team-coral","cell":1,"from":null,"auto":false,"extra":false},{"teamId":"team-sun","cell":5,"from":null,"auto":true,"extra":false,"wanted":1}]
+PASS C the board and the last-round line on the TV and phones
+PASS D Coral may steal Sun's B3
+PASS D the steal is picked
+PASS D Coral took B3 from Sun — [{"teamId":"team-coral","cell":5,"from":"team-sun","auto":false,"extra":false}]
+PASS D the TV says so
+PASS E Iris is the catch-up team — [{"teamId":"team-coral","score":45},{"teamId":"team-sun","score":30},{"teamId":"team-mint","score":30},{"teamId":"team-iris","score":15}]
+PASS E Iris's phone says it gets an extra cell
+PASS E Iris got two cells, one the catch-up extra — [{"teamId":"team-iris","cell":13,"from":null,"auto":true,"extra":false},{"teamId":"team-iris","cell":9,"from":null,"auto":true,"extra":true}]
+PASS F the game finished with team results for four teams — [["team-coral",1,105],["team-sun",2,60],["team-iris",3,45],["team-mint",4,30]]
+PASS F every player scored their team's points
+PASS F phones: the results, the final board, eight rounds and the team results card
+PASS F the TV leads with the team result
+PASS F 320 px: the results have no sideways scroll
+TERRITORY PASSED

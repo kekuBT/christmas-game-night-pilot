@@ -15,6 +15,7 @@ import { teamHuddleModule } from "./teamHuddle.js";
 import { relayModule } from "./relay.js";
 import { splitCluesModule } from "./splitClues.js";
 import { teamDrawModule } from "./teamDraw.js";
+import { territoryModule } from "./territory.js";
 
 export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Object.freeze({
   [majorityModule.id]: majorityModule as GameModule<unknown>,
@@ -32,6 +33,7 @@ export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Objec
   // Stage 12.10: Split Clues, each teammate holds different clues (casual rooms only, practice only; the room hands it its teams).
   [splitCluesModule.id]: splitCluesModule as GameModule<unknown>,
   [teamDrawModule.id]: teamDrawModule as GameModule<unknown>,
+  [territoryModule.id]: territoryModule as GameModule<unknown>,
 });
 
 export function moduleFor(gameId: string): GameModule<unknown> | undefined {

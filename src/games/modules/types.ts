@@ -53,6 +53,7 @@ export interface GameModule<S = unknown> {
    */
   init(args: { players: readonly string[]; seed: number; season?: SessionSeason; settings?: GameSettings; /** Stage 12.5: Family Questions' questions, picked by the room at start. */ family?: readonly FamilyGameQuestion[];
     /** Stage 12.8: a game built for teams gets its teams (the night's, or two dealt for it) and, for Team Huddle, its questions. */ teams?: GameTeams; huddle?: readonly HuddleQuestion[];
+    /** Stage 12.12: Territory's questions (from the Trivia pool, like Team Huddle's). */ quiz?: readonly HuddleQuestion[];
     /** Stage 12.9: Relay's sums (the same for every team). */ relay?: readonly RelayQuestion[];
     /**
      * Stage 12.10 (D-S1210-01): content ids this room has already played in this game, oldest first (from contentIds()

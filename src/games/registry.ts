@@ -62,6 +62,7 @@ export const GAME_REGISTRY: GameDescriptor[] = [
   // Stage 12.10: built for teams (casual rooms only, practice-only): each teammate holds different clues.
   { id: "split-clues", title: "Split Clues", minPlayers: 4, recommendedPlayers: 6, maxPlayers: 10, casualOnly: true, modes: ["team"], status: "implemented", defaultDurationMinutes: 8, tutorial: "Six puzzles. Each teammate's phone shows different clues to the same answer: put them together and type it. The faster your team, the more points." },
   { id: "team-draw", title: "Team Draw", minPlayers: 4, recommendedPlayers: 6, maxPlayers: 10, casualOnly: true, modes: ["team"], status: "implemented", defaultDurationMinutes: 7, tutorial: "Every team draws the same word at once. One teammate draws, the rest guess from your own team's drawing. The faster your team, the more points." },
+  { id: "territory", title: "Territory", minPlayers: 4, recommendedPlayers: 6, maxPlayers: 10, casualOnly: true, modes: ["team"], status: "implemented", defaultDurationMinutes: 6, tutorial: "A quiz on a board of 19 cells. Answer right as a team and claim a cell next to your land, or steal one. The biggest joined land wins." },
   { id: "draw-guess", title: "Draw & Guess", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 10, tutorial: "One player draws a secret word; everyone else races to guess it." },
 ];
 

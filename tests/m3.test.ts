@@ -30,8 +30,8 @@ function intent(engine: RoomEngine, gameId: string, action: string, payload: Rec
 }
 
 describe("M3 registry", () => {
-  it("all 21 games are implemented (the 11 originals + Stage 5's Majority Rules, Pattern Pulse and Draw & Guess + Stage 9.1's Jebena Rush + Stage 9.3's Spectrum + Stage 12.5's Family Questions + Stage 12.8's Team Huddle + Stage 12.9's Relay + Stage 12.10's Split Clues + Stage 12.11's Team Draw)", () => {
-    expect(GAME_REGISTRY.map((g) => g.id)).toEqual(["impostor", "caption-clash", "trivia", "word-connections", "who-said-that", "guess-the-year", "closest-wins", "category-sprint", "charades", "geography", "math-mayhem", "majority-rules", "pattern-pulse", "jebena-rush", "spectrum", "family-questions", "team-huddle", "relay", "split-clues", "team-draw", "draw-guess"]);
+  it("all 22 games are implemented (the 11 originals + Stage 5's Majority Rules, Pattern Pulse and Draw & Guess + Stage 9.1's Jebena Rush + Stage 9.3's Spectrum + Stage 12.5's Family Questions + Stage 12.8's Team Huddle + Stage 12.9's Relay + Stage 12.10's Split Clues + Stage 12.11's Team Draw + Stage 12.12's Territory)", () => {
+    expect(GAME_REGISTRY.map((g) => g.id)).toEqual(["impostor", "caption-clash", "trivia", "word-connections", "who-said-that", "guess-the-year", "closest-wins", "category-sprint", "charades", "geography", "math-mayhem", "majority-rules", "pattern-pulse", "jebena-rush", "spectrum", "family-questions", "team-huddle", "relay", "split-clues", "team-draw", "territory", "draw-guess"]);
     expect(GAME_REGISTRY.every((g) => g.status === "implemented")).toBe(true);
   });
 });

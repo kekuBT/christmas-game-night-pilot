@@ -90,6 +90,7 @@ const GAME_PHASE_WORDS: Record<string, Record<string, string>> = {
   "team-huddle": { question: "each question", reveal: "each answer" },
   "split-clues": { question: "each puzzle", reveal: "each answer" },
   "team-draw": { draw: "each drawing", reveal: "each reveal" },
+  "territory": { question: "each question", reveal: "each claim" },
 };
 
 /** The real time limits, from the lifecycle policy the server enforces, in this game's own words. */
@@ -168,6 +169,16 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
       "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena.",
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
+    ],
+  },
+  // Stage 12.12 (docs/stage12/stage1212.md §2).
+  "territory": {
+    objective: "Answer as a team, then claim the board.",
+    steps: [
+      "Eight quiz questions. One tap answers for your whole team, so agree first! Other teams only see that you've answered.",
+      "Got it right? Pick a cell next to your land: an empty one, or steal one from another team. Homes can't be taken.",
+      "If two teams pick the same cell, the team that answered first gets it; the other gets the nearest free cell.",
+      "10 points per cell, plus 5 per cell in your biggest joined land. A team far behind gets an extra cell when it's right.",
     ],
   },
   // Stage 12.11 (docs/stage12/stage1211.md §2).

@@ -8,6 +8,7 @@ import { FAMILY_ROUNDS_MIN, pickFamilyQuestions, type FamilyGameQuestion } from 
 import { TEAM_COLORS, TEAM_GAME_MIN_SIZE, TEAM_LIMITS, TEAM_NATIVE_GAMES, TEAM_PLAY_GAMES, balanceTeams, checkTeamName, fitTeamsForGame, newTeamList, smallestTeam, teamResults, type GameTeams, type RoomTeams } from "../shared/teams.js";
 import { HUDDLE_ROUNDS, type HuddleQuestion } from "../games/modules/teamHuddle.js";
 import { RELAY_LEGS, type RelayQuestion } from "../games/modules/relay.js";
+import { TERRITORY_ROUNDS } from "../games/modules/territory.js";
 import type { TeamResult } from "../shared/teamResult.js";
 import { sameSettings, validateGameSettings, type GameSettings } from "../games/settings.js";
 import { PARTY_TRANSITION_MINUTES, validatePartyPlan } from "../games/party.js";
@@ -1013,12 +1014,14 @@ export class RoomEngine {
     const nativeTeams = TEAM_NATIVE_GAMES.has(gameId) ? this.teamsForTeamGame(gameId, playerIds, seed) : undefined;
     // Stage 12.10 (D-S1210-01): no repeats in a night: what this room's earlier games of this kind dealt, oldest first.
     const avoid = moduleFor(gameId)?.contentIds ? this.playedContentIds(gameId) : undefined;
-    // Stage 12.8 (D-S128-02): Team Huddle's questions come from the Trivia pool, used up the same way.
-    const contentGameId = gameId === "team-huddle" ? "trivia" : gameId;
+    // Stage 12.8 (D-S128-02): Team Huddle's questions come from the Trivia pool, used up the same way; Stage 12.12:
+    // Territory's too (TRIVIA_TEAM_GAMES: how many questions each takes).
+    const quizRounds = TRIVIA_TEAM_GAMES[gameId];
+    const contentGameId = quizRounds !== undefined ? "trivia" : gameId;
     if (this._cup.origin === "created" && (CONTENT_GAMES as string[]).includes(contentGameId)) {
       const cg = contentGameId as ContentGameId;
       const mode = (opts.official ?? false) ? "official" : "practice";
-      const need = gameId === "team-huddle" ? HUDDLE_ROUNDS : cg === "charades" ? Math.max(ITEMS_PER_GAME.charades, playerIds.length * 4) : ITEMS_PER_GAME[cg];
+      const need = quizRounds !== undefined ? quizRounds : cg === "charades" ? Math.max(ITEMS_PER_GAME.charades, playerIds.length * 4) : ITEMS_PER_GAME[cg];
       // E2 v3: Category Sprint eligibility and matcher are frozen here, at
       // game start, from the Cup's own rules (absent on older Cups = v1).
       const sprintRules = cg === "category-sprint" ? this._cup.categorySprint : undefined;
@@ -1063,7 +1066,7 @@ export class RoomEngine {
       lifecycleVersion: 1,
       day: this.championshipDay,
       seed,
-      extra: selected && gameId !== "team-huddle" ? selected.extra
+      extra: selected && quizRounds === undefined ? selected.extra
         : gameId === "impostor"
           ? initImpostor(playerIds, seed)
           : gameId === "caption-clash"
@@ -1084,7 +1087,7 @@ export class RoomEngine {
                           ? { roundIndex: 0, submissions: {} }
                           : gameId === "charades"
                             ? initCharades(playerIds, undefined, nativeTeams)
-                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}), ...(gameId === "relay" ? { relay: relayQuestions(seed) } : {}), ...(avoid && avoid.length ? { avoid } : {}) }),
+                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}), ...(gameId === "territory" ? { quiz: triviaQuiz(selected?.extra, seed, TERRITORY_ROUNDS) } : {}), ...(gameId === "relay" ? { relay: relayQuestions(seed) } : {}), ...(avoid && avoid.length ? { avoid } : {}) }),
     };
     // Stage 12.7 (D-S127-02): played as teams when the room has teams, the game can be, and at least two teams have
     // players in it; the teams are copied now (only this game's players), never read back from the room later.
@@ -4097,11 +4100,19 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
     : { onBreak: false, revision, ops };
 }
 
-/** Stage 12.8: Team Huddle's questions: the Trivia pool's (chosen and materialised like Trivia's), or the built-in set. */
-function huddleQuestions(extra: unknown, seed: number): HuddleQuestion[] {
+/** Stage 12.8/12.12: the games built for teams that play Trivia-pool questions, and how many each takes. */
+const TRIVIA_TEAM_GAMES: Readonly<Record<string, number>> = { "team-huddle": HUDDLE_ROUNDS, "territory": TERRITORY_ROUNDS };
+
+/** Questions from the Trivia pool (chosen and materialised like Trivia's), or the built-in set. */
+function triviaQuiz(extra: unknown, seed: number, count: number): HuddleQuestion[] {
   const fromPool = (extra as { questions?: TriviaQuestion[] } | undefined)?.questions;
-  const qs = fromPool && fromPool.length > 0 ? fromPool : generateTrivia(seed, HUDDLE_ROUNDS);
-  return qs.slice(0, HUDDLE_ROUNDS).map((q) => ({ id: q.id, prompt: q.prompt, options: [...q.options], correctIndex: q.correctIndex, ...(q.explanation ? { explanation: q.explanation } : {}) }));
+  const qs = fromPool && fromPool.length > 0 ? fromPool : generateTrivia(seed, count);
+  return qs.slice(0, count).map((q) => ({ id: q.id, prompt: q.prompt, options: [...q.options], correctIndex: q.correctIndex, ...(q.explanation ? { explanation: q.explanation } : {}) }));
+}
+
+/** Stage 12.8: Team Huddle's questions. */
+function huddleQuestions(extra: unknown, seed: number): HuddleQuestion[] {
+  return triviaQuiz(extra, seed, HUDDLE_ROUNDS);
 }
 
 /** Stage 12.9: Relay's sums: the same for every team (seeded), from Math Mayhem's generator. */
