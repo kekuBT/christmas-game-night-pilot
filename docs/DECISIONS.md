@@ -1613,3 +1613,42 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
 - **D-S122-05 TV copy: "Family Cup", and a † instead of "qualifying" on every row.**
   - **Name:** the TV calls the Cup "Family Cup" everywhere. The format's long name ("Individual Family Cup") stays on the phone's Cup screen.
   - **Eligibility:** a not-yet-eligible player's total carries "†" (read aloud as "not eligible to win yet"). One footnote under the list says "† Not eligible to win yet: too few counted Cup days."
+
+## Stage 12.3: Quick Party inside a Family Cup
+**Authorization:** the owner, directly in chat on 2026-11-13 at about 10:40 p.m. ET: "I agree with the suggestions as well please implement, self direct your self do the best you can with good quality". That covers A4 in `docs/stage12/stage121-discussions.md`. Spec: `docs/stage12/stage123.md`. Branch `claude/stage12-3-cup-quick-party`, stacked on Stage 12.2. Nothing is merged or deployed.
+
+- **D-S123-01 A Family Cup has Quick Party, with each lineup game Official or Practice. This amends D-S121-03 ("Cups don't get Quick Party") and Stage 7.1's "casual rooms only".**
+  - **The model:** a Cup lineup item may carry `official: true`; absent means Practice. A casual lineup never has it.
+  - **The server checks modes on every save and every restore (`partyModesError`):**
+    - a casual room can't have an Official item;
+    - an Official item must be a game that can count;
+    - an Official item needs a planned group of two or more (D1);
+    - a casual-only game can't be in a Cup lineup.
+  - **On refusal and restore:** a refusal changes nothing; a saved lineup that fails the check is dropped on restore, never half-loaded.
+  - **The projection** gives each Cup lineup item `official: true | false`. The casual projection is unchanged.
+  - **Phones:**
+    - the planner shows an Official/Practice switch per game ("Practice only" for a practice-only game; all Practice for a group of one);
+    - the lobby card shows "Today's lineup" with each mode.
+  - **The TV:** each mode, and a Cup lobby shows three lineup games and says how many more, so the Cup card isn't cut off. The first local run's screenshot showed the cut-off with six games.
+  - **Alternatives rejected:**
+    - one switch for the whole lineup: a Cup night mixes counted games with a practice-only favourite;
+    - Official decided at start: the family should see before the game whether it counts, which is the reason for the lineup.
+- **D-S123-02 The lineup decides a game's mode, and every Cup start rule still applies.**
+  - **A press for the other mode starts nothing.** A lineup start carries the mode the host saw; if it isn't the item's, PLAN_CONFLICT, and nothing starts or is marked.
+  - **Over HTTP:** `official: true` on a lineup start is accepted only in a Cup.
+  - **One path for the rules:** the start goes through `startGame`, so official needs two players, reconnecting players must be named, practice-only games never count, and the Cup's content and briefing apply.
+  - **The host's own pick:** switching the up-next mode by hand in the lobby makes Start the host's own pick, which doesn't move the lineup on (Stage 7.2's rule for hand picks).
+  - **What's next in a Cup** names the next game and its mode, with no Play again and no break. A Cup without a lineup keeps its results exactly as before.
+  - **Alternative rejected:** letting the press choose the mode. It would make the lineup's labels untrustworthy for everyone else.
+- **D-S123-03 Cup lineup starts are repeat-safe like a casual room's.**
+  - **Each press** carries its own request id and the session revision it was made against: a repeat returns its game, and a press whose briefing was cancelled starts nothing (ATTEMPT_ENDED).
+  - **To support this:**
+    - a Cup's session revision now moves on with each new game and each cancelled briefing;
+    - its remembered presses survive a restart (they were dropped for Cups);
+    - the projection shows a Cup's `session`, never with a break.
+  - **The Cup's own Start** (not a lineup start) is unchanged and sends no attempt.
+- **D-S123-04 A lineup carries across "Make it a Family Cup" and back.**
+  - **Upgrade:** games still to play become Official where they can count and the lineup was planned for two or more, matching the up-next rule (D-S121-02). Games already played stay as they were.
+  - **Undo:** every mode is removed.
+  - **A relabel is a new lineup revision,** so stale drafts and presses are refused rather than misapplied.
+  - **The Make-a-Cup and undo sheets** now say the lineup carries over.

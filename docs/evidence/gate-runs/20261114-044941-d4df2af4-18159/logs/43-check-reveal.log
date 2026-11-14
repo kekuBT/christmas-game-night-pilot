@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:40057
+# timeout 600s | worker w3 | server http://localhost:40057 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s123-full-d4df2af/test-results/20261114-044941-d4df2af4-18159/server-data/w3)
+
+[+23.2s] PASS reveal opens on the first question phase — question:0
+[+23.2s] PASS question phase hides the correct answer — count=0
+[+23.4s] PASS Reveal answer steps into the first reveal — reveal:1
+[+23.4s] PASS reveal phase shows the correct answer — count=1
+[+23.4s] PASS reveal phase separates this question from the game total
+[+23.5s] PASS Next question steps into the second question phase — question:2
+[+23.5s] PASS second question phase hides the correct answer again — count=0
+[+23.5s] PASS Q10 jump lands on the last question phase — question:18
+[+23.6s] PASS last reveal reached — reveal:19
+[+23.7s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+23.7s] PASS finale shows the standings list
+[+23.7s] PASS auto-play starts back at the first question — question:0
+[+31.8s] PASS auto-play advances a step within 8s — reveal:1
+[+39.8s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+41.2s] PASS TV walk opens on a question — Who wrote 'A Christmas Carol'?
+[+45.2s] PASS TV walk advances to the reveal stage
+[+50.2s] PASS TV walk advances to the second question — What colour do you get by mixing blue an
+[+50.3s] PASS TV manual jump reaches the leaderboard
+[+50.4s] REVEAL ALL PASSED
+[+50.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 50.4s | cpu 3.4s, peak memory 264 MB

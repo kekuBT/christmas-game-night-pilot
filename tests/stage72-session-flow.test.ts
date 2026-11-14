@@ -341,7 +341,8 @@ describe("Take a break / Resume", () => {
     const cup = new RoomEngine("Cup", { kind: "cup" });
     const h = cup.join("H", { asHost: true }).player.id;
     expect(codeOf(() => cup.setBreak(h, true, press(cup)))).toBe("NOT_A_CASUAL_ROOM");
-    expect(cup.project("player", h)["session"]).toBeUndefined();
+    // Stage 12.3 (D-S123-03): a Family Cup's session is shown (its lineup starts are repeat-safe), but it never has a break.
+    expect(cup.project("player", h)["session"]).toEqual({ onBreak: false, revision: 0 });
   });
 
   it("a damaged saved session restores as no break and nothing remembered; the revision is kept when it is sound", () => {

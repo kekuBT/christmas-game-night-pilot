@@ -95,3 +95,8 @@
 .mz-tventry { max-width: 720px; margin: 0 auto; }
 .mz-tventry .mz-h1 { font-size: clamp(28px, 4vw, 48px); }
 .mz-tventry .mz-code__input { font-size: clamp(28px, 4vw, 44px); }
+
+/* ---- Stage 12.3 (D-S123-01): a Family Cup's lineup says each game's mode ---- */
+.mz-party__modebtn { flex: none; min-height: 44px; }
+.mz-party__modefix { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 22px; border: 1.5px dashed var(--mz-line); color: var(--mz-text); font: 700 14px var(--mz-font-body); }
+.mz-party__mode { font-weight: 800; color: var(--mz-text); }

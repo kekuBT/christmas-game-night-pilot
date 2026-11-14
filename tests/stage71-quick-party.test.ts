@@ -165,12 +165,11 @@ describe("the room's saved lineup", () => {
     expect(engine.partyView()).toMatchObject({ revision: 2, lineup: { expectedPlayers: 4, budgetMinutes: 30, estimateMinutes: 12, transitionMinutes: 2, items: [{ gameId: "impostor", started: false }] } });
     engine.savePartyPlan(host, 2, null);
     expect(engine.partyView()).toEqual({ revision: 3, lineup: null });
-    for (const kind of ["cup", "solo"] as const) {
-      const other = new RoomEngine("x", { kind });
-      const h = other.join("H", { asHost: true }).player.id;
-      expect((refusal(() => other.savePartyPlan(h, 0, plan(1, ["math-mayhem"]))) as PartyRefused).code, kind).toBe("NOT_A_CASUAL_ROOM");
-      expect(other.project("player", h)["party"], kind).toBeUndefined();
-    }
+    // Stage 12.3 (D-S123-01): a Family Cup has Quick Party too (tests/stage123-cup-party.test.ts); solo play doesn't.
+    const solo = new RoomEngine("x", { kind: "solo" });
+    const sh = solo.join("H", { asHost: true }).player.id;
+    expect((refusal(() => solo.savePartyPlan(sh, 0, plan(1, ["math-mayhem"]))) as PartyRefused).code).toBe("NOT_A_CASUAL_ROOM");
+    expect(solo.project("player", sh)["party"]).toBeUndefined();
   });
 
   it("a stale revision (another tab, a cohost) is refused and changes nothing", () => {
@@ -363,13 +362,17 @@ describe("starting the lineup's first game", () => {
     expect(engine.partyView().lineup?.items.every((i) => !i.started)).toBe(true);
   });
 
-  it("only in casual rooms, and only by the host or a cohost", () => {
+  it("only in casual rooms and Family Cups, and only by the host or a cohost", () => {
     const { engine, others } = planned(3, 4, ["trivia"]);
     expect(() => engine.startPartyGame(others[0]!, "trivia", { revision: 1, index: 0 })).toThrow(/host/);
+    // Stage 12.3: a Cup with no lineup has nothing to start (PLAN_CONFLICT), like a casual room with none.
     const cup = new RoomEngine("Cup", { kind: "cup" });
     const h = cup.join("H", { asHost: true }).player.id;
     cup.join("G");
-    expect((refusal(() => cup.startPartyGame(h, "trivia", { revision: 0, index: 0 })) as StartRefused).code).toBe("NOT_A_CASUAL_ROOM");
+    expect((refusal(() => cup.startPartyGame(h, "trivia", { revision: 0, index: 0 })) as StartRefused).code).toBe("PLAN_CONFLICT");
+    const solo = new RoomEngine("Solo", { kind: "solo" });
+    const sh = solo.join("H", { asHost: true }).player.id;
+    expect((refusal(() => solo.startPartyGame(sh, "math-mayhem", { revision: 0, index: 0 })) as StartRefused).code).toBe("NOT_A_CASUAL_ROOM");
   });
 });
 
@@ -425,9 +428,10 @@ describe("over HTTP", () => {
     const stale = await call("POST", `/rooms/${r.id}/party`, { baseRevision: 0, clear: true }, r.host);
     expect([stale.status, stale.body["code"]]).toEqual([409, "PLAN_CONFLICT"]);
     expect((stale.body["party"] as { revision: number }).revision).toBe(1);
+    // Stage 12.3 (D-S123-01): a Family Cup saves a lineup too (its games Practice unless marked Official).
     const cup = await room("cup", 1);
     const c = await call("POST", `/rooms/${cup.id}/party`, { baseRevision: 0, plan: lineup }, cup.host);
-    expect([c.status, c.body["code"]]).toEqual([409, "NOT_A_CASUAL_ROOM"]);
+    expect([c.status, c.body["code"]]).toEqual([200, undefined]);
   });
 
   it("a lineup start: 400 if malformed, official, or without the roster shown or the request id (Stage 7.2); 409 with the numbers when fewer are here; then 201, and a replay is 200 with the same game (not for a guest)", async () => {

@@ -250,8 +250,28 @@ export interface PartyPlanRecord {
   revision: number;
   expectedPlayers: number;
   budgetMinutes: number;
-  items: { gameId: string; gameInstanceId?: string }[];
+  /** Stage 12.3: `official` only in a Family Cup's lineup (D-S123-01); a casual lineup never has it. */
+  items: { gameId: string; official?: true; gameInstanceId?: string }[];
   updatedAt: number;
+}
+
+/**
+ * Stage 12.3 (docs/stage12/stage123.md §1; D-S123-01): a lineup's modes, checked for the room they are in. A casual
+ * room's games never count, so its lineup has no official item. A Family Cup's lineup may mark items Official: only a
+ * game that can be official, only for a planned group of two or more (an official game needs two players), and never
+ * a casual-only game (it can't start in a Cup). Returns why the lineup can't be saved there, or null.
+ */
+export function partyModesError(kind: RoomKind, expectedPlayers: number, items: readonly { gameId: string; official?: boolean }[]): string | null {
+  for (const it of items) {
+    const reg = GAME_REGISTRY.find((g) => g.id === it.gameId);
+    const title = reg?.title ?? it.gameId;
+    if (kind === "cup" && reg?.casualOnly) return `${title} plays in casual rooms only, so it can't be in a Family Cup's lineup.`;
+    if (it.official !== true) continue;
+    if (kind !== "cup") return "A casual game night's games never count, so its lineup has no Official games.";
+    if (!policyFor(it.gameId).officialEligible) return `${title} is practice only, so it can't be Official.`;
+    if (expectedPlayers < MIN_OFFICIAL_COMPETITORS) return `Official games need at least ${MIN_OFFICIAL_COMPETITORS} players. Plan for ${MIN_OFFICIAL_COMPETITORS} or more, or make them Practice.`;
+  }
+  return null;
 }
 
 /** Stage 7.2: a lineup item's state, derived from its game (docs/stage7/stage72.md §3.1). */
@@ -991,7 +1011,8 @@ export class RoomEngine {
     // a continuation request made before it is stale (§3.8). Stage 7.4: every
     // new solo round too, so a solo press made before it is stale (persisted,
     // monotonic: a forgotten old press can never start anything).
-    if (this.kind === "casual" || this.kind === "solo") {
+    // Stage 12.3 (D-S123-03): a Family Cup's lineup starts are repeat-safe the same way, so its session moves on too.
+    if (this.kind === "casual" || this.kind === "solo" || this.kind === "cup") {
       this.session.revision += 1;
       if (attempt) this.rememberOp({ id: attempt.id, key: startKey, revision: this.session.revision, gameInstanceId: id, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(this.kind === "solo" ? { actor: hostId, base: attempt.sessionRevision } : {}) });
     }
@@ -1166,7 +1187,7 @@ export class RoomEngine {
     // Stage 7.2: the attempt that started it stays remembered (a retry of it
     // starts nothing), and the session moves on, so a request made before
     // the cancel is stale; a fresh press can start the same thing again.
-    if (this.kind === "casual") this.session.revision += 1;
+    if (this.kind === "casual" || this.kind === "cup") this.session.revision += 1;
     // A count only: the items stay available, so their ids must not reach the player-visible ledger.
     this.log("briefing-cancelled", {
       gameInstanceId: game.id,
@@ -1245,17 +1266,20 @@ export class RoomEngine {
    * size, budget, 1–8 known games that fit the group, no duplicates, within
    * the time budget. No content is selected and no game starts.
    */
-  savePartyPlan(actorId: string, baseRevision: number, plan: { expectedPlayers: number; budgetMinutes: number; items: { gameId: string }[] } | null, now = this.clock()): PartyPlanRecord | null {
+  savePartyPlan(actorId: string, baseRevision: number, plan: { expectedPlayers: number; budgetMinutes: number; items: { gameId: string; official?: boolean }[] } | null, now = this.clock()): PartyPlanRecord | null {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new PartyRefused("NOT_HOST", "Only the host or a cohost can plan the party.");
-    if (this.kind !== "casual") throw new PartyRefused("NOT_A_CASUAL_ROOM", "Quick Party is for casual rooms.");
+    // Stage 12.3 (D-S123-01): a Family Cup has Quick Party too; solo play doesn't.
+    if (this.kind !== "casual" && this.kind !== "cup") throw new PartyRefused("NOT_A_CASUAL_ROOM", "Quick Party is for game nights and Family Cups.");
     if (baseRevision !== this.partyRevision) throw new PartyRefused("PLAN_CONFLICT", "The lineup changed somewhere else (another tab, or a cohost). Here is the latest.");
     if (plan) {
       const v = validatePartyPlan(plan);
       if (!v.ok) throw new PartyRefused("INVALID_PLAN", v.error);
+      const modes = partyModesError(this.kind, plan.expectedPlayers, plan.items);
+      if (modes) throw new PartyRefused("INVALID_PLAN", modes);
     }
     this.partyRevision += 1;
     this.party = plan
-      ? { revision: this.partyRevision, expectedPlayers: plan.expectedPlayers, budgetMinutes: plan.budgetMinutes, items: plan.items.map((i) => ({ gameId: i.gameId })), updatedAt: now }
+      ? { revision: this.partyRevision, expectedPlayers: plan.expectedPlayers, budgetMinutes: plan.budgetMinutes, items: plan.items.map((i) => ({ gameId: i.gameId, ...(i.official === true ? { official: true as const } : {}) })), updatedAt: now }
       : null;
     return this.party;
   }
@@ -1289,13 +1313,14 @@ export class RoomEngine {
   }
 
   /** The lineup as every member (and the TV) sees it: public planning facts only. */
-  partyView(): { revision: number; lineup: null | { expectedPlayers: number; budgetMinutes: number; estimateMinutes: number; transitionMinutes: number; items: { gameId: string; started: boolean; status: PartyItemStatus; gameInstanceId?: string }[]; next: number | null; complete: boolean; updatedAt: number } } {
+  partyView(): { revision: number; lineup: null | { expectedPlayers: number; budgetMinutes: number; estimateMinutes: number; transitionMinutes: number; items: { gameId: string; official?: boolean; started: boolean; status: PartyItemStatus; gameInstanceId?: string }[]; next: number | null; complete: boolean; updatedAt: number } } {
     const p = this.party;
     if (!p) return { revision: this.partyRevision, lineup: null };
     const v = validatePartyPlan(p);
     const items = p.items.map((i) => {
       const status = this.partyItemStatus(i);
-      return { gameId: i.gameId, started: status !== "pending", status, ...(status !== "pending" && i.gameInstanceId ? { gameInstanceId: i.gameInstanceId } : {}) };
+      // Stage 12.3: a Family Cup's lineup says each game's mode (Official or Practice); a casual one has none.
+      return { gameId: i.gameId, ...(this.kind === "cup" ? { official: i.official === true } : {}), started: status !== "pending", status, ...(status !== "pending" && i.gameInstanceId ? { gameInstanceId: i.gameInstanceId } : {}) };
     });
     const next = items.findIndex((i) => i.status === "pending");
     return {
@@ -1663,11 +1688,11 @@ export class RoomEngine {
    * Then startGame (its roster check, one active game, the briefing), and
    * only then is the item marked, in the same step. A refusal changes nothing.
    */
-  startPartyGame(actorId: string, gameId: string, opts: { revision: number; index: number; roster?: string[]; proceedWithout?: string[]; fewerThanPlanned?: boolean; seed?: number; attempt?: SessionAttempt; season?: SessionSeason }): { game: GameInstance; replay: boolean } {
+  startPartyGame(actorId: string, gameId: string, opts: { revision: number; index: number; roster?: string[]; proceedWithout?: string[]; fewerThanPlanned?: boolean; seed?: number; attempt?: SessionAttempt; season?: SessionSeason; /** Stage 12.3: the mode the host saw for this item (a Family Cup). */ official?: boolean }): { game: GameInstance; replay: boolean } {
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new Error("Only host/cohost can start a game");
     this.tick();
     const readiness = this.readiness();
-    if (this.kind !== "casual") throw new StartRefused("NOT_A_CASUAL_ROOM", "Quick Party is for casual rooms.", readiness);
+    if (this.kind !== "casual" && this.kind !== "cup") throw new StartRefused("NOT_A_CASUAL_ROOM", "Quick Party is for game nights and Family Cups.", readiness);
     const key = `next:${opts.revision}:${opts.index}:${gameId}`;
     if (opts.attempt) {
       const seen = this.resolveAttempt(opts.attempt, key, "start", opts.season);
@@ -1678,6 +1703,11 @@ export class RoomEngine {
     if (!p || p.revision !== opts.revision) throw conflict("The lineup changed somewhere else. Here is the latest.");
     const item = p.items[opts.index];
     if (!item || item.gameId !== gameId) throw conflict("That isn't a game in this lineup.");
+    // Stage 12.3 (D-S123-02): the item's mode is the lineup's, and the press must be for the mode the host saw. The
+    // lineup decides; a press never turns a Practice item Official or the other way round.
+    if ((opts.official === true) !== (item.official === true)) {
+      throw conflict(`${getGame(gameId).title} is ${item.official ? "Official" : "Practice"} in the lineup, not what this press asked for, so nothing started. Check, then start again.`);
+    }
     if (this.partyItemStarted(item)) {
       // Another press for an item already started returns it only if it asked for the same content.
       const game = this.games.get(item.gameInstanceId!)!;
@@ -1702,7 +1732,9 @@ export class RoomEngine {
     if (here < game.minPlayers || here > game.maxPlayers) {
       throw new StartRefused("PARTY_DOESNT_FIT", here < game.minPlayers ? `${game.title} needs at least ${game.minPlayers} players; ${here} ${here === 1 ? "is" : "are"} here.` : `${game.title} is for up to ${game.maxPlayers} players; ${here} are here.`, readiness, { gameId, minPlayers: game.minPlayers, maxPlayers: game.maxPlayers, here });
     }
-    const started = this.startGame(actorId, gameId, { official: false, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}), ...(opts.season ? { season: opts.season } : {}) });
+    // Stage 12.3: in a Family Cup an Official item starts as an official game, through every Cup start rule (two
+    // players, anyone reconnecting named, practice-only games refused, the Cup's content and briefing).
+    const started = this.startGame(actorId, gameId, { official: this.kind === "cup" && item.official === true, ...(opts.seed !== undefined ? { seed: opts.seed } : {}), ...(opts.roster ? { roster: opts.roster } : {}), ...(opts.proceedWithout ? { proceedWithout: opts.proceedWithout } : {}), ...(opts.season ? { season: opts.season } : {}) });
     item.gameInstanceId = started.id;
     if (opts.attempt) this.rememberOp({ id: opts.attempt.id, key, revision: this.session.revision, gameInstanceId: started.id, ...(started.season ? { season: started.season } : {}), ...(started.settings ? { settings: started.settings } : {}) });
     return { game: started, replay: false };
@@ -2792,10 +2824,29 @@ export class RoomEngine {
     this.championshipDay = 1;
     this._cup = newCupRecord(`cup-${Date.now().toString(36)}-${randomInt(0, 2 ** 31).toString(36)}`, this.clock(), { timing });
     this.session = { onBreak: false, revision: this.session.revision, ops: this.session.ops };
+    // Stage 12.3 (D-S123-04): a lineup carries over. Its games still to play become Official where they can count
+    // (like the up-next plan, D-S121-02); games already played stay as they were (casual).
+    this.relabelLineup((it) => this.partyItemStatus(it) === "pending" && policyFor(it.gameId).officialEligible && !getGame(it.gameId).casualOnly && (this.party?.expectedPlayers ?? 0) >= MIN_OFFICIAL_COMPETITORS);
     const ev = this.log("cup-started", { actor: actorId, detail: { from: "casual", casualGames: this.casualGameIds.length } });
     this.cupSince = { at: ev.createdAt, seq: ev.seq };
     this.cupUndone = null;
     return { changed: true };
+  }
+
+  /**
+   * Stage 12.3 (D-S123-04): set each lineup item's mode (`official(item)`), keeping its order and starts. A lineup
+   * whose modes change is a new lineup revision, so a draft or a Next press made against the old one is stale.
+   */
+  private relabelLineup(official: (item: PartyPlanRecord["items"][number]) => boolean): void {
+    const p = this.party;
+    if (!p) return;
+    const items: PartyPlanRecord["items"] = p.items.map((it) => {
+      const { official: _was, ...rest } = it;
+      return official(it) ? { ...rest, official: true as const } : rest;
+    });
+    if (items.every((it, i) => (it.official === true) === (p.items[i]!.official === true))) return;
+    this.partyRevision += 1;
+    this.party = { ...p, revision: this.partyRevision, items };
   }
 
   /**
@@ -2817,6 +2868,8 @@ export class RoomEngine {
     this.kind = "casual";
     this.championshipDay = 1;
     this.session = { onBreak: false, revision: this.session.revision + 1, ops: this.session.ops };
+    // Stage 12.3 (D-S123-04): the lineup goes back with the room: a casual lineup has no Official games.
+    this.relabelLineup(() => false);
     const ev = this.log("cup-undone", { actor: actorId, detail: { cupGames } });
     this.cupSince = null;
     this.cupUndone = { at: ev.createdAt, seq: ev.seq, games: this.games.size };
@@ -3390,7 +3443,8 @@ export class RoomEngine {
       ...(this.cupSince ? { cupSince: this.cupSince, casualGameIds: this.casualGameIds } : {}),
       ...(this.cupUndone ? { cupUndone: this.cupUndone } : {}),
       // Stage 7.1: the Quick Party lineup (casual rooms): public planning facts only.
-      ...(this.kind === "casual" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
+      // Stage 12.3 (D-S123-01): a Family Cup's lineup and session too.
+      ...(this.kind === "casual" || this.kind === "cup" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
       // Stage 8.2: what this solo or casual session deals (public; never a device's look).
       ...(this.kind !== "cup" ? { contentSeason: this.contentSeason } : {}),
       // Stage 9.1 (§8): each settings game's lobby choice (Jebena Rush's hearts), shown to everyone.
@@ -3652,7 +3706,8 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
     return !!x && typeof x.id === "string" && typeof x.key === "string" && typeof x.revision === "number" && (x.gameInstanceId === undefined || typeof x.gameInstanceId === "string") && (x.actor === undefined || typeof x.actor === "string") && (x.base === undefined || typeof x.base === "number") && (x.season === undefined || isSessionSeason(x.season));
   }).slice(-SESSION_OPS_LIMIT).map((o) => ({ id: o.id, key: o.key, revision: o.revision, ...(o.gameInstanceId !== undefined ? { gameInstanceId: o.gameInstanceId } : {}), ...(o.actor !== undefined ? { actor: o.actor } : {}), ...(o.base !== undefined ? { base: o.base } : {}), ...(o.season !== undefined ? { season: o.season } : {}) }));
   // Stage 7.4: a solo room keeps its remembered Start presses (§4.4); a Cup room has none.
-  if (kind === "solo") return { onBreak: false, revision, ops };
+  // Stage 12.3: a Family Cup keeps its lineup starts' presses too (never a break).
+  if (kind === "solo" || kind === "cup") return { onBreak: false, revision, ops };
   if (kind !== "casual") return { onBreak: false, revision, ops: [] };
   return r.onBreak === true
     ? { onBreak: true, ...(typeof r.breakSince === "number" ? { breakSince: r.breakSince } : {}), revision, ops }
@@ -3662,15 +3717,17 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
 function restoreParty(raw: unknown, engine: RoomEngine): PartyPlanRecord | null {
   if (raw == null) return null;
   const bad = (why: string) => { console.error(`[party] room ${engine.id}: saved lineup dropped (${why})`); return null; };
-  if (engine.kind !== "casual") return bad("not a casual room");
+  if (engine.kind !== "casual" && engine.kind !== "cup") return bad("not a game night or a Family Cup");
   if (typeof raw !== "object") return bad("not an object");
   const r = raw as Record<string, unknown>;
   const items = r["items"];
-  if (!Array.isArray(items) || !items.every((i) => i && typeof i === "object" && typeof (i as Record<string, unknown>)["gameId"] === "string" && ((i as Record<string, unknown>)["gameInstanceId"] === undefined || typeof (i as Record<string, unknown>)["gameInstanceId"] === "string"))) return bad("bad items");
+  if (!Array.isArray(items) || !items.every((i) => i && typeof i === "object" && typeof (i as Record<string, unknown>)["gameId"] === "string" && ((i as Record<string, unknown>)["gameInstanceId"] === undefined || typeof (i as Record<string, unknown>)["gameInstanceId"] === "string") && ((i as Record<string, unknown>)["official"] === undefined || (i as Record<string, unknown>)["official"] === true))) return bad("bad items");
   if (typeof r["revision"] !== "number" || r["revision"] > engine.partyRevision) return bad("bad revision");
   if (typeof r["updatedAt"] !== "number") return bad("bad time");
-  const plan = { expectedPlayers: r["expectedPlayers"], budgetMinutes: r["budgetMinutes"], items: items as { gameId: string; gameInstanceId?: string }[] };
+  const plan = { expectedPlayers: r["expectedPlayers"], budgetMinutes: r["budgetMinutes"], items: items as { gameId: string; official?: true; gameInstanceId?: string }[] };
   const v = validatePartyPlan(plan);
   if (!v.ok) return bad(v.error);
-  return { revision: r["revision"] as number, expectedPlayers: plan.expectedPlayers as number, budgetMinutes: plan.budgetMinutes as number, items: plan.items.map((i) => ({ gameId: i.gameId, ...(i.gameInstanceId ? { gameInstanceId: i.gameInstanceId } : {}) })), updatedAt: r["updatedAt"] as number };
+  const modes = partyModesError(engine.kind, plan.expectedPlayers as number, plan.items);
+  if (modes) return bad(modes);
+  return { revision: r["revision"] as number, expectedPlayers: plan.expectedPlayers as number, budgetMinutes: plan.budgetMinutes as number, items: plan.items.map((i) => ({ gameId: i.gameId, ...(i.official === true ? { official: true as const } : {}), ...(i.gameInstanceId ? { gameInstanceId: i.gameInstanceId } : {}) })), updatedAt: r["updatedAt"] as number };
 }

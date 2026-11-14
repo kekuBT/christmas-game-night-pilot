@@ -138,7 +138,8 @@ export class LocalServer {
       plan: z.object({
         expectedPlayers: z.number().int().min(1).max(10),
         budgetMinutes: z.union([z.literal(15), z.literal(30), z.literal(60)]),
-        items: z.array(z.object({ gameId: z.string().min(1).max(64) }).strict()).min(1).max(8),
+        // Stage 12.3 (D-S123-01): `official` marks an item Official in a Family Cup's lineup (the room checks it).
+        items: z.array(z.object({ gameId: z.string().min(1).max(64), official: z.boolean().optional() }).strict()).min(1).max(8),
       }).strict(),
     }).strict(),
     z.object({ baseRevision: z.number().int().min(0), clear: z.literal(true) }).strict(),
@@ -1104,7 +1105,8 @@ export class LocalServer {
             const parsed = LocalServer.PartyStartSchema.safeParse(body["party"]);
             // The roster the host was shown is required: who plays (and any
             // "start without them") is tied to the room as it is now.
-            if (!parsed.success || body["official"] === true || !Array.isArray(body["roster"])) { this.send(res, 400, { error: "A Quick Party start needs the lineup's revision and item and the roster you were shown, and is never official" }); return; }
+            // Stage 12.3 (D-S123-02): only a Family Cup's lineup has Official games; the room checks the press against the item.
+            if (!parsed.success || (body["official"] === true && room.kind !== "cup") || !Array.isArray(body["roster"])) { this.send(res, 400, { error: "A Quick Party start needs the lineup's revision and item and the roster you were shown, and is official only in a Family Cup" }); return; }
             party = parsed.data;
           }
           // Stage 7.2: Play again (a rematch of a finished game), repeat-safe; also tied to the roster shown.
@@ -1133,7 +1135,7 @@ export class LocalServer {
               ...(season ? { season } : {}),
             };
             if (party) {
-              ({ game, replay } = room.startPartyGame(player.id, String(body["gameId"] ?? ""), { ...party, ...common, fewerThanPlanned: body["fewerThanPlanned"] === true, attempt }));
+              ({ game, replay } = room.startPartyGame(player.id, String(body["gameId"] ?? ""), { ...party, ...common, fewerThanPlanned: body["fewerThanPlanned"] === true, attempt, official: body["official"] === true }));
             } else if (rematchOf) {
               ({ game, replay } = room.startRematch(player.id, rematchOf, { ...common, attempt }));
             } else {
@@ -1245,7 +1247,7 @@ export class LocalServer {
           } catch (err) {
             if (err instanceof PartyRefused) {
               const status = err.code === "NOT_HOST" ? 403 : err.code === "INVALID_PLAN" ? 400 : 409;
-              this.send(res, status, { error: err.message, code: err.code, party: room.kind === "casual" ? room.partyView() : undefined });
+              this.send(res, status, { error: err.message, code: err.code, party: room.kind === "casual" || room.kind === "cup" ? room.partyView() : undefined });
               return;
             }
             throw err;

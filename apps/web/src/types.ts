@@ -147,7 +147,8 @@ export interface PartyView {
     estimateMinutes: number;
     transitionMinutes: number;
     /** Stage 7.2: each item's state (derived from its game on the server). */
-    items: { gameId: string; started: boolean; status?: "pending" | "briefing" | "playing" | "completed"; gameInstanceId?: string }[];
+    /** Stage 12.3: `official` is present in a Family Cup's lineup only (each game's mode); a casual lineup has none. */
+    items: { gameId: string; official?: boolean; started: boolean; status?: "pending" | "briefing" | "playing" | "completed"; gameInstanceId?: string }[];
     /** Stage 7.2: the next pending item's index, or null. */
     next?: number | null;
     /** Stage 7.2: every item completed. */

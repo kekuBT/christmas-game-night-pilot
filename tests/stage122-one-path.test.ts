@@ -42,7 +42,7 @@ describe("Back to a casual game night (POST /rooms/:id/casual)", () => {
     await trivia(h, r.host, r.guest, false);
     expect((await upgrade(h, r.host)).status).toBe(200);
     const before = await projection(h, r.host);
-    expect([before["roomKind"], before["party"]]).toEqual(["cup", undefined]);
+    expect([before["roomKind"], before["party"]]).toEqual(["cup", { revision: 0, lineup: null }]); // Stage 12.3: a Cup has Quick Party too
     const res = await undo(h, r.host);
     expect([res.status, res.body["changed"], res.body["roomKind"]]).toEqual([200, true, "casual"]);
     const after = await projection(h, r.host);

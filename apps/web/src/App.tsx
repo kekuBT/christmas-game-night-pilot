@@ -329,6 +329,11 @@ export function App() {
   // and one compact chooser instead of per-game official/practice buttons.
   const [gameMode, setGameModeRaw] = useState<"official" | "practice">("official");
   const setGameMode = (m: "official" | "practice") => { setGameModeRaw(m); setPlanChosen((n) => n + 1); };
+  /**
+   * Stage 12.3 (D-S123-02): up next follows a lineup item. In a Family Cup the mode follows the item's too (Official or
+   * Practice); `official` is undefined in a casual room, whose lineup games are never official.
+   */
+  const followLineup = (gameId: string, official: boolean | undefined) => { if (official !== undefined) setGameModeRaw(official ? "official" : "practice"); setUpNextId(gameId, "lineup"); };
   // "Remember this device": default OFF, explicit per join (Sprint 2).
   const [rememberOnJoin, setRememberOnJoin] = useState(false);
   const [seatRemembered, setSeatRemembered] = useState(() => seats.current()?.remembered ?? false);
@@ -705,13 +710,19 @@ export function App() {
    * A game the host picked by hand never moves the lineup on.
    */
   function partyStartFor(gameId: string, official: boolean): { revision: number; index: number } | undefined {
-    const party = proj?.roomKind === "casual" ? proj.party : undefined;
+    // Stage 12.3: a Family Cup's lineup too.
+    const party = proj?.roomKind === "casual" || proj?.roomKind === "cup" ? proj.party : undefined;
     const l = party?.lineup;
-    if (official || !party || !l) return undefined;
+    if (!party || !l) return undefined;
     const n = l.next !== undefined ? l.next : l.items[0] && !l.items[0].started ? 0 : null;
-    if (n === null || l.items[n]?.gameId !== gameId) return undefined;
+    const item = n !== null ? l.items[n] : undefined;
+    if (n === null || item?.gameId !== gameId) return undefined;
+    // A casual lineup start is never official; a Cup's is in the item's own mode. Another mode is the host's own pick.
+    if (official !== (proj?.roomKind === "cup" && item.official === true)) return undefined;
     return { revision: party.revision, index: n };
   }
+  /** Stage 12.3: a Family Cup lineup item's mode (false in a casual room: its lineup games never count). */
+  const lineupOfficial = (index: number) => proj?.roomKind === "cup" && proj.party?.lineup?.items[index]?.official === true;
   /** Did the room's lineup become exactly this plan (an Apply whose reply was lost)? */
   const lineupIs = (p: PartyView | undefined, plan: PartyPlanInput, revision: number) =>
     !!p?.lineup && p.revision === revision && p.lineup.expectedPlayers === plan.expectedPlayers && p.lineup.budgetMinutes === plan.budgetMinutes &&
@@ -729,7 +740,7 @@ export function App() {
       pendingApply.current = null;
       partyFewerOk.current = null;
       setPartyAsk(null);
-      setUpNextId(plan.items[0]!.gameId, "lineup");
+      followLineup(plan.items[0]!.gameId, proj?.roomKind === "cup" ? plan.items[0]!.official === true : undefined);
       setShuffleResult(null);
       await refresh();
       closeSheet();
@@ -848,7 +859,8 @@ export function App() {
     const fewerOk = route.kind === "next" && partyFewerOk.current?.revision === route.revision && partyFewerOk.current.gameId === gameId;
     // Stage 7.2 (§3.8): in a casual room every press carries its own id and the session revision it
     // was made against. Its retry is the same press: the server answers it, never twice.
-    const attempt = proj?.roomKind === "casual" ? { id: uuidV4(), sessionRevision: proj.session?.revision ?? 0 } : undefined;
+    // Stage 12.3 (D-S123-03): a Family Cup's lineup starts carry one too.
+    const attempt = proj?.roomKind === "casual" || (proj?.roomKind === "cup" && route.kind === "next") ? { id: uuidV4(), sessionRevision: proj.session?.revision ?? 0 } : undefined;
     const body = {
       gameId, official: route.kind === "rematch" ? false : official, roster: r?.wouldPlay, proceedWithout,
       ...(route.kind === "next" ? { party: { revision: route.revision, index: route.index }, ...(fewerOk ? { fewerThanPlanned: true } : {}) } : {}),
@@ -1063,7 +1075,7 @@ export function App() {
   // seen while this page is open: a page's first look at the room (a load or a
   // reload) never turns a game the host picked by hand into the lineup's
   // (review 6778921208). A hand pick also never moves the lineup on.
-  const lineupNow = proj?.roomKind === "casual" ? proj.party?.lineup : undefined;
+  const lineupNow = proj?.roomKind === "casual" || proj?.roomKind === "cup" ? proj.party?.lineup : undefined;
   const lineupNextKey = lineupNow && lineupNow.next !== undefined && lineupNow.next !== null ? `${proj?.party?.revision}:${lineupNow.next}` : "";
   const seenLineupKey = useRef<string | null>(null);
   useEffect(() => {
@@ -1071,8 +1083,8 @@ export function App() {
     const before = seenLineupKey.current;
     seenLineupKey.current = lineupNextKey;
     if (before === null || before === lineupNextKey || !planner || !lineupNextKey || !lineupNow) return;
-    const id = lineupNow.items[lineupNow.next!]?.gameId;
-    if (id) setUpNextId(id, "lineup");
+    const item = lineupNow.items[lineupNow.next!];
+    if (item) followLineup(item.gameId, proj.roomKind === "cup" ? item.official === true : undefined);
   }, [!!proj, planner, lineupNextKey]);
   // Stage 7.2 (P7): an Apply with no reply is recognised once the room shows exactly that
   // draft, one revision on from its base (this host's own save). Nothing else counts.
@@ -1598,22 +1610,25 @@ export function App() {
   // ---- Stage 2: Lobby A and its sheets (Invite, Choose game, Room menu, game details) ----
   const isHostish = !!(me?.isHost || me?.isCohost);
   const upNextGame = catalog.find((g) => g.id === upNext?.id);
-  // Stage 7.1: Quick Party is for casual rooms only (not Cups, not solo).
-  const partyRoom = proj?.roomKind === "casual";
+  // Stage 7.1: Quick Party is for casual rooms (not solo). Stage 12.3 (D-S123-01): and Family Cups.
+  const partyRoom = proj?.roomKind === "casual" || proj?.roomKind === "cup";
+  const cupParty = proj?.roomKind === "cup";
   // Stage 7.2 (review 6778921208): Start is the lineup's only when up next came from a lineup action.
-  const upNextParty = upNext && partyRoom && upNextSource === "lineup" ? partyStartFor(upNext.id, false) : undefined;
+  const upNextParty = upNext && partyRoom && upNextSource === "lineup" ? partyStartFor(upNext.id, cupParty && startMode === "official") : undefined;
   const hostName = players.find((p) => p.isHost)?.displayName;
   const connectedNow = players.filter((p) => p.connected).length;
   const cupLabel = proj?.competition?.label ?? "Family Cup";
   const inviteUrl = proj?.joinCode ? `${location.origin}/join?code=${proj.joinCode}` : "";
   const roomDetails = sheet === "details" && sheetGame ? catalog.find((g) => g.id === sheetGame) : undefined;
   // ---- Stage 7.2: what's next after a casual game, and the break ----
-  const onBreak = partyRoom && !!proj?.session?.onBreak;
+  const onBreak = proj?.roomKind === "casual" && !!proj?.session?.onBreak;
   const roomLatest = (proj?.games ?? []).at(-1);
   /** The "What's next" panel under a finished casual game's results (casual rooms only). */
   const nextPanel = (g: PlayerGame): ReactNode => {
     if (!partyRoom) return undefined;
     const party = proj?.party;
+    // Stage 12.3: a Family Cup's results keep their own shape unless the Cup is running a lineup.
+    if (cupParty && !party?.lineup) return undefined;
     const nextIdx = party?.lineup?.next ?? null;
     const nextGameId = nextIdx !== null ? party?.lineup?.items[nextIdx]?.gameId : undefined;
     const d = startDecision;
@@ -1629,7 +1644,7 @@ export function App() {
       <PartyStartAsk
         ask={partyAsk}
         busy={startBusy}
-        onStartAnyway={() => { const a = partyAsk; if (a.how.kind === "next") partyFewerOk.current = { revision: a.how.revision, gameId: a.gameId }; setPartyAsk(null); void startGame(a.gameId, false, a.how); }}
+        onStartAnyway={() => { const a = partyAsk; if (a.how.kind === "next") partyFewerOk.current = { revision: a.how.revision, gameId: a.gameId }; setPartyAsk(null); void startGame(a.gameId, a.how.kind === "next" && lineupOfficial(a.how.index), a.how); }}
         onReplan={(n) => { setPartyAsk(null); dismissResults(g.id); setPartyReplan(n); openSheet("party"); }}
         onWait={() => setPartyAsk(null)}
       />
@@ -1639,14 +1654,15 @@ export function App() {
         isHost={isHostish}
         hostName={hostName}
         game={{ id: g.id, gameId: g.gameId, title: titleFor(g.gameId, games) }}
-        canPlayAgain={roomLatest?.id === g.id && roomLatest.status === "finished"}
+        canPlayAgain={!cupParty && roomLatest?.id === g.id && roomLatest.status === "finished"}
+        cup={cupParty}
         lineup={party?.lineup}
         onBreak={onBreak}
         titleOf={(id) => titleFor(id, games)}
         busy={startBusy || sessionBusy}
         ask={ask}
         error={err || undefined}
-        onNext={(index, gameId) => { if (party) void startGame(gameId, false, { kind: "next", revision: party.revision, index }); }}
+        onNext={(index, gameId) => { if (party) void startGame(gameId, lineupOfficial(index), { kind: "next", revision: party.revision, index }); }}
         onPlayAgain={() => void startGame(g.gameId, false, { kind: "rematch", source: g.id })}
         {...(proj?.roomKind === "casual" && proj.contentSeason ? { content: proj.contentSeason } : {})}
         onBreakChange={(on) => void changeBreak(on)}
@@ -1661,7 +1677,7 @@ export function App() {
       {isHostish ? "Nothing starts until you resume. Everyone sees this too." : `Nothing starts until ${hostName ?? "the host"} resumes.`}
     </NoticeCard>
   ) : undefined;
-  const breakButton = partyRoom && isHostish && !onBreak ? (
+  const breakButton = proj?.roomKind === "casual" && isHostish && !onBreak ? (
     <div className="mz-lobby__break"><button type="button" className="mz-chip-btn" data-testid="break-take" disabled={sessionBusy} onClick={() => void changeBreak(true)}>Take a break</button></div>
   ) : undefined;
   const roomSheets = (
@@ -1673,7 +1689,8 @@ export function App() {
         <QuickPartySheet
           connected={connectedNow}
           recentIds={(proj?.games ?? []).filter((g) => g.status === "finished").map((g) => g.gameId).reverse()}
-          saved={proj?.party?.lineup ? { expectedPlayers: proj.party.lineup.expectedPlayers, budgetMinutes: proj.party.lineup.budgetMinutes, gameIds: proj.party.lineup.items.map((i) => i.gameId) } : undefined}
+          saved={proj?.party?.lineup ? { expectedPlayers: proj.party.lineup.expectedPlayers, budgetMinutes: proj.party.lineup.budgetMinutes, gameIds: proj.party.lineup.items.map((i) => i.gameId), ...(cupParty ? { official: proj.party.lineup.items.map((i) => i.official === true) } : {}) } : undefined}
+          {...(cupParty ? { cup: { canCount: (id: string) => games.find((x) => x.id === id)?.lifecycle?.officialEligible !== false && !games.find((x) => x.id === id)?.casualOnly } } : {})}
           initialSize={partyReplan}
           currentRevision={proj?.party?.revision ?? 0}
           onApply={applyParty}
@@ -1903,7 +1920,7 @@ export function App() {
           message={sheet === "menu" ? undefined : msg || undefined}
           onStart={upNext ? () => startGame(upNext.id, startMode === "official", upNextParty ? { kind: "next", ...upNextParty } : CHOSEN) : undefined}
           startTestId={upNext ? (upNextParty ? "party-start" : `start-${startMode}-${upNext.id}`) : undefined}
-          startLabel={upNext && upNextParty && proj?.party?.lineup ? `Start ${upNext.title} · game ${upNextParty.index + 1} of ${proj.party.lineup.items.length}` : undefined}
+          startLabel={upNext && upNextParty && proj?.party?.lineup ? `Start ${upNext.title} · ${cupParty ? `${lineupOfficial(upNextParty.index) ? "Official" : "Practice"} · ` : ""}game ${upNextParty.index + 1} of ${proj.party.lineup.items.length}` : undefined}
           startBlocked={onBreak ? "On a break · Resume first" : undefined}
           guestNote={onBreak ? <>On a break · {hostName ?? "the host"} resumes when everyone’s back</> : undefined}
           party={partyRoom ? (<>
@@ -1913,11 +1930,12 @@ export function App() {
               connected={connectedNow}
               isHost={isHostish}
               upNextId={upNextParty ? upNext?.id : undefined}
+              cup={cupParty}
               busy={partyBusy}
               onPlan={() => { setPartyReplan(undefined); openSheet("party"); }}
               onEdit={() => { setPartyReplan(undefined); openSheet("party"); }}
               onClear={clearParty}
-              onUseLineup={(id) => { setUpNextId(id, "lineup"); setShuffleResult(null); }}
+              onUseLineup={(id) => { const l = proj?.party?.lineup; const n = l?.next ?? null; followLineup(id, cupParty ? (n !== null && l?.items[n]?.official === true) : undefined); setShuffleResult(null); }}
               onReplan={(n) => { setPartyAsk(null); setPartyReplan(n); openSheet("party"); }}
             />
           </>) : undefined}
@@ -1945,7 +1963,7 @@ export function App() {
             <PartyStartAsk
               ask={partyAsk}
               busy={startingRef.current}
-              onStartAnyway={() => { const a = partyAsk; if (a.how.kind === "next") partyFewerOk.current = { revision: a.how.revision, gameId: a.gameId }; setPartyAsk(null); void startGame(a.gameId, false, a.how); }}
+              onStartAnyway={() => { const a = partyAsk; if (a.how.kind === "next") partyFewerOk.current = { revision: a.how.revision, gameId: a.gameId }; setPartyAsk(null); void startGame(a.gameId, a.how.kind === "next" && lineupOfficial(a.how.index), a.how); }}
               onReplan={(n) => { setPartyAsk(null); setPartyReplan(n); openSheet("party"); }}
               onWait={() => setPartyAsk(null)}
             />
@@ -2333,7 +2351,7 @@ export function App() {
   }
 
   // Stage 7.2: a casual room's game without its own results screen gets the casual one (never the old shell).
-  if (view === "lobby" && showPhase === "results" && latestFinished && partyRoom) {
+  if (view === "lobby" && showPhase === "results" && latestFinished && proj?.roomKind === "casual") {
     return (
       <MchezoProvider theme={theme} {...motion}>
         <CasualResults
@@ -2368,7 +2386,7 @@ export function App() {
       <ShowWaiting game={publicPlaying} title={titleFor(playingGame.gameId, games)} />
       <p className="muted">The game stays visible below — when the next phase starts, this banner goes away on its own.</p>
     </>}
-    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={titleFor(latestFinished.gameId, games)} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={theme} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
+    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={titleFor(latestFinished.gameId, games)} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={theme} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}{/* Stage 12.3: a Family Cup running a lineup says what's next here too (nothing otherwise). */}{nextPanel(latestFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
       {showGamePanel && playingGame && <GamePanel key={draftKey(playingGame)} game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "This game"} players={players} nameOf={nameOf} intent={intent} />}
       {/* S5-F: the older panel (Category Sprint, Who Said That?, Impostor, Charades) says so beside the game when a send fails; typed text stays in its box. */}

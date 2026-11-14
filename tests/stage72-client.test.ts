@@ -35,13 +35,15 @@ describe("what's next", () => {
     expect(lineupLine({}, titleOf)).toBeNull();
   });
 
-  it("the TV feed carries a casual room's lineup and break, never a Cup's or a player's own state", () => {
+  it("the TV feed carries a casual room's lineup and break; a Cup's lineup only (Stage 12.3), never a break or a player's own state", () => {
     const base = { roomId: "r", joinCode: "ABC123", players: [], games: [], party: { revision: 1, lineup: lineup(["pending"], 0) }, session: { onBreak: true, revision: 4 }, me: { id: "a" }, myGames: [{ id: "g" }] };
     const casual = tvFeedFrom({ ...base, roomKind: "casual" } as unknown as Projection);
     expect([casual.casual, casual.party?.revision, casual.session?.onBreak]).toEqual([true, 1, true]);
     expect(Object.keys(casual)).not.toContain("me");
     const cup = tvFeedFrom({ ...base, roomKind: "cup" } as unknown as Projection);
-    expect([cup.casual, cup.party, cup.session]).toEqual([undefined, undefined, undefined]);
+    // Stage 12.3 (D-S123-01): a Family Cup's lineup is on the TV too; a Cup never has a break, and it isn't casual.
+    expect([cup.casual, cup.party?.revision, cup.session]).toEqual([undefined, 1, undefined]);
+    expect(Object.keys(cup)).not.toContain("me");
   });
 });
 

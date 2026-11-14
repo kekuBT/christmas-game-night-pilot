@@ -54,7 +54,9 @@ export function lineupLine(feed: Pick<TvFeed, "party" | "session">, titleOf: (id
   if (l.complete) return { kind: "complete", text: "That was the whole lineup. The host picks what’s next." };
   const n = l.next ?? null;
   if (n === null) return null; // an item is on now
-  return { kind: "next", text: `Next up: ${titleOf(l.items[n]!.gameId)} · game ${n + 1} of ${l.items.length}. The host starts it.` };
+  // Stage 12.3: a Family Cup's lineup says each game's mode.
+  const mode = l.items[n]!.official === undefined ? "" : ` · ${l.items[n]!.official ? "Official" : "Practice"}`;
+  return { kind: "next", text: `Next up: ${titleOf(l.items[n]!.gameId)}${mode} · game ${n + 1} of ${l.items.length}. The host starts it.` };
 }
 
 export function tvFeedFrom(p: Projection): TvFeed {
@@ -69,7 +71,7 @@ export function tvFeedFrom(p: Projection): TvFeed {
     spectatorCount: p.spectatorCount,
     cupLabel: p.competition?.label,
     ...(p.roomKind === "casual" ? { casual: true, ...(p.party ? { party: p.party } : {}), ...(p.session ? { session: p.session } : {}), ...(p.contentSeason ? { contentSeason: p.contentSeason } : {}) } : {}),
-    ...(p.roomKind === "cup" ? { cup: true, ...(p.ceremony ? { ceremony: p.ceremony } : {}), ...(p.cupSince ? { cupSince: p.cupSince, casualGameIds: p.casualGameIds ?? [] } : {}) } : {}),
+    ...(p.roomKind === "cup" ? { cup: true, ...(p.ceremony ? { ceremony: p.ceremony } : {}), ...(p.cupSince ? { cupSince: p.cupSince, casualGameIds: p.casualGameIds ?? [] } : {}), ...(p.party?.lineup ? { party: p.party } : {}) } : {}),
   };
 }
 

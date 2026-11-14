@@ -147,6 +147,10 @@ function TvLobby({ feed, titleOf, nameOf, registry }: { feed: TvFeed; titleOf: (
   const hostName = feed.players.find((p) => p.isHost)?.displayName;
   // Stage 7.2: a casual room's lineup and break (public planning facts).
   const lineup = feed.party?.lineup;
+  // Stage 12.3: a Family Cup's lobby also holds the Cup card, so its lineup shows three games around the next one
+  // (the one just played, the next, the one after) and says how many more; a casual lobby shows the whole lineup.
+  const lineupRows = lineup ? (feed.cup ? Math.min(3, lineup.items.length) : lineup.items.length) : 0;
+  const lineupFrom = lineup && feed.cup ? Math.max(0, Math.min((lineup.next ?? lineup.items.length) - 1, lineup.items.length - lineupRows)) : 0;
   const flow = lineupLine(feed, titleOf);
   const joinUrl = typeof location !== "undefined" ? `${location.host}/join` : "/join";
   // Stage 12.1 (D-S121-04): the join link as a QR code, the same /join?code=… link the phone's Invite sheet shares.
@@ -185,13 +189,14 @@ function TvLobby({ feed, titleOf, nameOf, registry }: { feed: TvFeed; titleOf: (
         {lineup && lineup.items.length > 0 && (
           <section className="mz-tvshow-card" data-testid="tv-lineup" data-next={lineup.next ?? ""} data-complete={String(!!lineup.complete)}>
             <span className="mz-tv-kicker">Quick Party · {lineup.complete ? "complete" : `game ${(lineup.next ?? lineup.items.findIndex((i) => i.status !== "completed")) + 1} of ${lineup.items.length}`}</span>
-            <ol className="mz-tvshow-recent">
-              {lineup.items.map((it, i) => (
+            <ol className="mz-tvshow-recent" start={lineupFrom + 1}>
+              {lineup.items.slice(lineupFrom, lineupFrom + lineupRows).map((it, k) => { const i = lineupFrom + k; return (
                 <li key={i} data-status={it.status ?? (it.started ? "started" : "pending")}>
-                  <b>{titleOf(it.gameId)}</b>{it.status === "completed" ? " · played ✓" : it.status === "briefing" || it.status === "playing" ? " · on now" : i === lineup.next ? " · next" : ""}
+                  <b>{titleOf(it.gameId)}</b>{it.official !== undefined ? ` · ${it.official ? "Official" : "Practice"}` : ""}{it.status === "completed" ? " · played ✓" : it.status === "briefing" || it.status === "playing" ? " · on now" : i === lineup.next ? " · next" : ""}
                 </li>
-              ))}
+              ); })}
             </ol>
+            {lineupRows < lineup.items.length && <p className="mz-tvshow-line" data-testid="tv-lineup-more">{lineupFrom > 0 ? `${lineupFrom} played · ` : ""}{lineup.items.length - lineupFrom - lineupRows > 0 ? `${lineup.items.length - lineupFrom - lineupRows} more after these` : "the last games of the lineup"}</p>}
             {flow?.kind === "complete" && <p className="mz-tvshow-line">{flow.text}</p>}
           </section>
         )}
