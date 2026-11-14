@@ -76,6 +76,6 @@ About 3 hours (the sum generator, the kit and the scoreboard exist; the rope is 
 ## 5. Gates (one run on one revision each)
 
 All three on `945cc01`; evidence in `docs/evidence/gate-runs/`:
-- **targeted** (tug-of-war, relay, math, math-timing, math-network and 17 drivers) `20261114-211911-945cc01a-24896`: PASSED, 23/23, 6 min 49 s;
+- **targeted** (tug-of-war, relay, math, math-timing, math-network and 16 more drivers) `20261114-211911-945cc01a-24896`: PASSED, 23/23, 6 min 49 s;
 - **fast** `20261114-212608-945cc01a-28684`: PASSED, 5/5 (unit tests 1898/1898), 1 min 10 s;
 - **full (checkpoint)** `20261114-212727-945cc01a-32475`: **PASSED** (exit 0, 104/104, 39 min 10 s, no retries).
