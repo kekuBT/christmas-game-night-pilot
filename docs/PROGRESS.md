@@ -2823,3 +2823,30 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Estimate vs actual:** about 4 hours estimated; about 1 h 30 min actual (about 1:55 to 3:25 p.m. ET), gates included.
 - **Owner decisions open:** team scoring in a Family Cup (D-S127-03, provisional "no").
 - **Next:** Stage 12.12 (Territory).
+
+## Stage 12.12: Territory (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner's direction of 2026-11-14 at 1:20 p.m. ET (see Stage 12.10): five games built for teams. This is the third.
+- **Base:** `9806d1d` (Stage 12.11's tested commit). Branch `claude/stage12-12-territory`, draft PR #36 stacked on #35. 12.11's docs head `290e814` is merged in (docs only).
+- **Spec:** `docs/stage12/stage1212.md`. Decisions D-S1212-01 (the board) and D-S1212-02 (Territory).
+- **Built:**
+  - **The board (D-S1212-01, `src/shared/territoryBoard.ts`):** 19 hex cells named A1–E3, homes spread evenly for 2–4 teams, neighbours and joined regions, shared by the server and the screens.
+  - **Territory (D-S1212-02, `src/games/modules/territory.ts`), new:**
+    - 8 questions from the Trivia pool; one tap answers for the team; the question closes early once every team has answered;
+    - right teams claim a cell next to their land, or steal one; picks stay hidden and resolve in answer order;
+    - 10 per cell plus 5 per cell in the biggest joined land; catch-up gives one extra cell (30+ behind).
+  - **Shared:** Team Huddle's Trivia-pool path is now `triviaQuiz` in `room.ts`, used by both.
+- **Tests:**
+  - `tests/stage1212-territory.test.ts` (10);
+  - catalogue counts (22 games);
+  - new `scripts/check-territory.mjs` (32 checks: eight phones in four teams and a TV, including a TV fit check).
+- **Unit suite:** 1889/1889 (the fast gate's unit-tests step on `e92dae9`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `e92dae9` targeted `20261114-202618-e92dae9c-23806`: PASSED, 22/22;
+  - `e92dae9` fast `20261114-203212-e92dae9c-27750`: PASSED, 5/5;
+  - `e92dae9` full `20261114-203324-e92dae9c-31480`: **FAILED** (exit 1): the disk was full (`ENOSPC` in `build-web`), an infrastructure failure. Old gate clones now get deleted after each run;
+  - **`e92dae9` full (checkpoint) `20261114-204033-e92dae9c-638`: PASSED** (exit 0, 103/103, 38 min 31 s, no retries).
+- **Tested SHA:** `e92dae9`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage1212-screenshots/`, `docs/evidence/stage1212-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** about 4 hours estimated; about 1 h 40 min actual (about 2:38 to 4:19 p.m. ET), gates included.
+- **Owner decisions:** team scoring in a Family Cup (D-S127-03) was answered by the owner later the same day; see Stage 12.15.
+- **Next:** Stage 12.13 (Tug of War).
