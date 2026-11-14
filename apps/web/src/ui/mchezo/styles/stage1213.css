@@ -1,0 +1,35 @@
+/* Stage 12.13 (docs/stage12/stage1213.md): Tug of War. Each rope end carries its team's mark (colour AND shape); the
+   knot leans toward the team pulling hardest, and a line under the rope says so in words. */
+
+.mz-tug-rope { margin: 12px auto 0; max-width: 300px; }
+.mz-tug-rope svg { display: block; width: 100%; height: auto; overflow: visible; }
+.mz-tug-rope__line { stroke: var(--mz-team); stroke-width: 6; stroke-linecap: round; }
+.mz-tug-rope__end { fill: var(--mz-team); stroke: var(--mz-ground); stroke-width: 3; }
+.is-mine .mz-tug-rope__end { stroke: var(--mz-text); stroke-width: 4; }
+.mz-tug-rope__mark { font: 800 18px/1 var(--mz-font-body); text-anchor: middle; dominant-baseline: central; fill: #16111D; }
+.mz-tug-rope__knot { fill: var(--mz-text); stroke: var(--mz-ground); stroke-width: 3; }
+.mz-tug-rope__mid { stroke: var(--mz-line); stroke-width: 2; stroke-dasharray: 4 4; }
+.mz-tug-rope__lean { margin: 4px 0 0; text-align: center; font: 700 14px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+
+.mz-tug-sum { margin-top: 12px; padding: 14px; border-radius: 18px; background: var(--mz-surface-1); border: 2px solid var(--mz-line); }
+.mz-tug-sum.is-frozen { opacity: .75; }
+.mz-tug-sum__prompt { margin: 0 0 12px; text-align: center; font: 800 clamp(32px, 9vw, 44px)/1.1 var(--mz-font-display); font-variant-numeric: tabular-nums; }
+.mz-tug-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mz-tug-opt { min-height: 64px; border-radius: 16px; border: 2px solid var(--mz-line); background: var(--mz-surface-2); color: var(--mz-text); font: 800 26px/1 var(--mz-font-display); font-variant-numeric: tabular-nums; cursor: pointer; }
+.mz-tug-opt:disabled { cursor: default; }
+.mz-tug-opt.is-wrong { text-decoration: line-through; opacity: .35; }
+.mz-tug-opt:focus-visible { outline: 3px solid var(--mz-text); outline-offset: 2px; }
+.mz-tug-frozen { margin: 10px 0 0; text-align: center; font: 800 16px/1.3 var(--mz-font-body); }
+.mz-tug-me { margin: 10px 0 0; text-align: center; font: 600 15px/1.35 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-tug-catchup { margin: 8px 0 0; text-align: center; font: 800 15px/1.35 var(--mz-font-body); }
+.mz-tug-headline { text-align: center; }
+
+/* The TV (not zoomed, like Draw & Guess: sized in the 1920 x 1080 canvas's pixels). */
+.mz-tvshow-tug .mz-tvshow-h1 { font-size: 56px; line-height: 1.1; margin: 6px 0 0; }
+.mz-tvshow-tug__row { display: grid; grid-template-columns: 540px minmax(0, 1fr); gap: 56px; align-items: center; margin-top: 24px; }
+.mz-tug-rope--tv { width: 540px; max-width: none; margin: 0; }
+.mz-tug-rope--tv .mz-tug-rope__lean { font-size: 26px; margin-top: 10px; }
+.mz-tvshow-tug .mz-tsb--tv { margin-top: 0; }
+.mz-tvshow-tug .mz-tsb--tv .mz-tsb__list, .mz-tvshow-tug .mz-tsb--tv[data-teams="4"] .mz-tsb__list { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.mz-tvshow-tug .mz-tsb--tv .mz-tsb__text { font-size: 22px; }
+.mz-tvshow-tug .mz-tsb--tv .mz-tsb__score { font-size: 40px; }

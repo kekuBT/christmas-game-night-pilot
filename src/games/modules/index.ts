@@ -16,6 +16,7 @@ import { relayModule } from "./relay.js";
 import { splitCluesModule } from "./splitClues.js";
 import { teamDrawModule } from "./teamDraw.js";
 import { territoryModule } from "./territory.js";
+import { tugOfWarModule } from "./tugOfWar.js";
 
 export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Object.freeze({
   [majorityModule.id]: majorityModule as GameModule<unknown>,
@@ -34,6 +35,7 @@ export const GAME_MODULES: Readonly<Record<string, GameModule<unknown>>> = Objec
   [splitCluesModule.id]: splitCluesModule as GameModule<unknown>,
   [teamDrawModule.id]: teamDrawModule as GameModule<unknown>,
   [territoryModule.id]: territoryModule as GameModule<unknown>,
+  [tugOfWarModule.id]: tugOfWarModule as GameModule<unknown>,
 });
 
 export function moduleFor(gameId: string): GameModule<unknown> | undefined {

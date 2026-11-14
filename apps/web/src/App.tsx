@@ -30,6 +30,7 @@ import { MchezoRelay, MchezoRelayResults, RelayReview, RelayTv } from "./compone
 import { MchezoSplitClues, MchezoSplitCluesResults, SplitCluesReview, SplitCluesTv } from "./components/mchezo/MchezoSplitClues.js";
 import { MchezoTeamDraw, MchezoTeamDrawResults, TeamDrawReview, TeamDrawTv } from "./components/mchezo/MchezoTeamDraw.js";
 import { MchezoTerritory, MchezoTerritoryResults, TerritoryReview, TerritoryTv } from "./components/mchezo/MchezoTerritory.js";
+import { MchezoTugOfWar, MchezoTugOfWarResults, TugOfWarReview, TugOfWarTv } from "./components/mchezo/MchezoTugOfWar.js";
 import { NightCardSheet } from "./components/mchezo/NightCard.js";
 import { TeamResultsCard, TeamsCard, TeamsSheet } from "./components/mchezo/Teams.js";
 import { TEAM_NATIVE_GAMES, teamWinnerLine } from "../../../src/shared/teams.js";
@@ -1154,6 +1155,8 @@ export function App() {
               : g.gameId === "split-clues" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><SplitCluesTv game={g} title={titleOf(g.gameId)} /></div>
               // Stage 12.11: Team Draw: each team's status (never a drawing or the word) until the reveal's gallery.
               // Stage 12.12: Territory: the board, the question (never a team's answer before it closes), the claims.
+              // Stage 12.13: Tug of War: the rope or star and each team's pull per player, never a sum.
+              : g.gameId === "tug-of-war" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><TugOfWarTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "territory" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><TerritoryTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "team-draw" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><TeamDrawTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><PulseTv game={g} title={titleOf(g.gameId)} /></div>
@@ -1178,6 +1181,7 @@ export function App() {
             : g.gameId === "relay" ? <div className="mz-tvshow-game"><RelayReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "split-clues" ? <div className="mz-tvshow-game"><SplitCluesReview game={g} /></div>
             : g.gameId === "territory" ? <div className="mz-tvshow-dgwrap"><TerritoryReview game={g} /></div>
+            : g.gameId === "tug-of-war" ? <div className="mz-tvshow-game"><TugOfWarReview game={g} /></div>
             : g.gameId === "team-draw" ? <div className="mz-tvshow-game"><TeamDrawReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><PulseReview game={g} /></div>
             : g.gameId === "draw-guess" ? <div className="mz-tvshow-game"><DrawReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
@@ -1671,6 +1675,9 @@ export function App() {
   // Stage 12.12 (casual rooms, practice-only, always as teams).
   const territoryPlaying = playingGame?.gameId === "territory";
   const territoryFinished = latestFinished?.gameId === "territory";
+  // Stage 12.13 (casual rooms, practice-only, always as teams).
+  const tugPlaying = playingGame?.gameId === "tug-of-war";
+  const tugFinished = latestFinished?.gameId === "tug-of-war";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -2242,6 +2249,21 @@ export function App() {
     return (
       <MchezoProvider theme={theme} {...motion}>
         <MchezoFamilyResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Family Questions"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && tugPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <GameClock game={playingGame} />
+        <MchezoTugOfWar game={playingGame} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Tug of War"} intent={sendAction} error={err || undefined} landed={sendLanded} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && tugFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <MchezoTugOfWarResults game={latestFinished} publicGame={publicFinished} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Tug of War"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }

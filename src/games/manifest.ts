@@ -528,6 +528,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: true },
     details: "8 Trivia-pool questions of 20 seconds; one tap answers for the whole team, and other teams only see that you answered. Teams that got it right claim a cell next to their land (an empty one, or a steal; homes can't be taken) during a 10-second claim; contested cells go to the team that answered first, and the slower team gets the nearest free cell. A team alone in last place and 30+ behind gets an extra cell when right. Score: 10 per cell plus 5 per cell in your biggest joined region. Uses the night's teams (a team needs at least 2), or deals two. Casual rooms only; practice-only (Stage 12.12).",
   },
+  {
+    id: "tug-of-war",
+    title: "Tug of War",
+    description: "Everyone answers quick sums at once, and every right answer pulls the rope for your team. Your team's pull is per player, so a bigger team doesn't win by being bigger.",
+    categories: ["math", "speed", "team"],
+    minPlayers: 4,
+    recommendedPlayers: 6,
+    maxPlayers: 10,
+    playStyle: "team",
+    competition: "competitive",
+    duration: { minutes: 4, source: "design-default", measured: false },
+    inputs: ["choice"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: true },
+    features: { practice: true, official: false, abstention: "none" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: true },
+    details: "Three bouts of 40 seconds. Every player answers quick sums on their own phone (everyone gets the same sums in the same order); a right answer is one pull, a wrong one freezes you for 2 s. A team's pull is its right answers per player. Two teams pull a rope; three or four pull a knot in a star. Each bout: 100/75/55/40 by pull; a team alone in last place and 40+ behind pulls ×1.2 in the next bout. Uses the night's teams (a team needs at least 2), or deals two. Casual rooms only; practice-only (Stage 12.13).",
+  },
 ];
 
 /**

@@ -2850,3 +2850,28 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Estimate vs actual:** about 4 hours estimated; about 1 h 40 min actual (about 2:38 to 4:19 p.m. ET), gates included.
 - **Owner decisions:** team scoring in a Family Cup (D-S127-03) was answered by the owner later the same day; see Stage 12.15.
 - **Next:** Stage 12.13 (Tug of War).
+
+## Stage 12.13: Tug of War (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner's direction of 2026-11-14 at 1:20 p.m. ET (see Stage 12.10): five games built for teams. This is the fourth.
+- **Base:** `e92dae9` (Stage 12.12's tested commit). Branch `claude/stage12-13-tug-of-war`, draft PR #37 stacked on #36. 12.12's docs head `6c67aa1` is merged in (docs only).
+- **Spec:** `docs/stage12/stage1213.md`. Decision D-S1213-01.
+- **Built:** Tug of War (`src/games/modules/tugOfWar.ts`), new:
+  - three 40 s bouts; every player answers the same seeded sums on their own phone;
+  - a right answer is one pull; a wrong one freezes you for 2 s;
+  - a team's pull is its right answers per player, so team size doesn't decide it;
+  - a rope for two teams, a knot in a star for three or four, with the lean in words;
+  - 100/75/55/40 per bout; catch-up ×1.2 for a team alone in last place and 40+ behind (the game's own gap).
+- **Tests:**
+  - `tests/stage1213-tug-of-war.test.ts` (8);
+  - catalogue counts (23 games);
+  - new `scripts/check-tug-of-war.mjs` (24 checks: seven phones in three uneven teams and a TV, including a TV fit check).
+- **Unit suite:** 1898/1898 (the fast gate's unit-tests step on `945cc01`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `945cc01` targeted `20261114-211911-945cc01a-24896`: PASSED, 23/23;
+  - `945cc01` fast `20261114-212608-945cc01a-28684`: PASSED, 5/5;
+  - **`945cc01` full (checkpoint) `20261114-212727-945cc01a-32475`: PASSED** (exit 0, 104/104, 39 min 10 s, no retries).
+- **Tested SHA:** `945cc01`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage1213-screenshots/`, `docs/evidence/stage1213-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** about 3 hours estimated; about 25 minutes of building (about 3:07 to 3:28 p.m. ET), then the gates, which waited behind Territory's and gave their verdict at 5:07 p.m.
+- **Owner decisions:** team scoring in a Family Cup (D-S127-03) was answered by the owner later the same day; see Stage 12.15.
+- **Next:** Stage 12.14 (Know Your Rivals).

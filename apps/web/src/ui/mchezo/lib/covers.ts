@@ -11,7 +11,7 @@
  */
 
 export type CoverAccent = "coral" | "sun" | "mint" | "iris" | "pink" | "lime";
-export type CoverGlyph = "quiz" | "grid" | "math" | "year" | "target" | "globe" | "sprint" | "bubbles" | "quote" | "odd" | "act" | "ring" | "split" | "pulse" | "brush" | "jebena" | "dial" | "family" | "huddle" | "relay" | "clues" | "easels" | "hexes";
+export type CoverGlyph = "quiz" | "grid" | "math" | "year" | "target" | "globe" | "sprint" | "bubbles" | "quote" | "odd" | "act" | "ring" | "split" | "pulse" | "brush" | "jebena" | "dial" | "family" | "huddle" | "relay" | "clues" | "easels" | "hexes" | "rope";
 
 export const ACCENTS: Readonly<Record<CoverAccent, readonly [string, string]>> = {
   coral: ["#FF6B4A", "#B8432A"],
@@ -53,6 +53,7 @@ export const COVERS: Readonly<Record<string, { accent: CoverAccent; glyph: Cover
   "split-clues": { accent: "sun", glyph: "clues" },
   "team-draw": { accent: "mint", glyph: "easels" },
   "territory": { accent: "lime", glyph: "hexes" },
+  "tug-of-war": { accent: "pink", glyph: "rope" },
 };
 
 export function coverOf(gameId: string): { accent: CoverAccent; glyph: CoverGlyph } {
@@ -95,6 +96,8 @@ export function glyphSvg(kind: CoverGlyph): string {
     case "easels": return `<rect x="12" y="24" width="44" height="40" rx="5" fill="${ink}"/><rect x="64" y="24" width="44" height="40" rx="5" fill="${ink}"/><path d="M20 52 C28 36 36 56 48 38" fill="none" stroke="${cream}" stroke-width="5" stroke-linecap="round"/><path d="M72 52 C80 36 88 56 100 38" fill="none" stroke="${cream}" stroke-width="5" stroke-linecap="round"/><path d="M24 64 L18 96 M44 64 L50 96 M76 64 L70 96 M96 64 L102 96" stroke="${ink}" stroke-width="5" stroke-linecap="round"/><circle cx="60" cy="94" r="8" fill="${cream}"/>`;
     // Stage 12.12: a patch of hex cells, some claimed (ink) and some not.
     case "hexes": return `<polygon points="56.7,31.5 56.7,48.5 42.0,57.0 27.3,48.5 27.3,31.5 42.0,23.0" fill="${ink}"/><polygon points="92.7,31.5 92.7,48.5 78.0,57.0 63.3,48.5 63.3,31.5 78.0,23.0" fill="${cream}"/><polygon points="38.7,62.5 38.7,79.5 24.0,88.0 9.3,79.5 9.3,62.5 24.0,54.0" fill="${cream}"/><polygon points="74.7,62.5 74.7,79.5 60.0,88.0 45.3,79.5 45.3,62.5 60.0,54.0" fill="${ink}"/><polygon points="110.7,62.5 110.7,79.5 96.0,88.0 81.3,79.5 81.3,62.5 96.0,54.0" fill="${ink}"/><polygon points="56.7,93.5 56.7,110.5 42.0,119.0 27.3,110.5 27.3,93.5 42.0,85.0" fill="${ink}"/><polygon points="92.7,93.5 92.7,110.5 78.0,119.0 63.3,110.5 63.3,93.5 78.0,85.0" fill="${cream}"/>`;
+    // Stage 12.13: a rope pulled from both ends, its knot leaning to one side.
+    case "rope": return `<path d="M10 64 C30 58 44 70 60 62 S92 56 110 62" fill="none" stroke="${ink}" stroke-width="8" stroke-linecap="round"/><circle cx="18" cy="63" r="11" fill="${cream}"/><circle cx="102" cy="61" r="11" fill="${ink}"/><circle cx="52" cy="64" r="8" fill="${cream}" stroke="${ink}" stroke-width="4"/><path d="M60 82 L60 98 M52 92 L60 100 L68 92" stroke="${cream}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" transform="rotate(90 60 90)"/>`;
     case "huddle": return `<path d="M30 20 L90 20 Q98 20 98 28 L98 42 Q98 50 90 50 L66 50 L58 58 L56 50 L30 50 Q22 50 22 42 L22 28 Q22 20 30 20 Z" fill="${cream}"/><circle cx="44" cy="35" r="4" fill="${ink}"/><circle cx="60" cy="35" r="4" fill="${ink}"/><circle cx="76" cy="35" r="4" fill="${ink}"/><circle cx="36" cy="76" r="12" fill="${ink}"/><circle cx="60" cy="72" r="13" fill="${ink}"/><circle cx="84" cy="76" r="12" fill="${ink}"/><path d="M16 108 Q36 88 56 108 M40 108 Q60 86 80 108 M64 108 Q84 88 104 108" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/>`;
     case "family": return `<path d="M60 42 L60 54 M34 54 L86 54 M34 54 L34 60 M86 54 L86 60" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="60" cy="30" r="13" fill="${ink}"/><circle cx="34" cy="74" r="13" fill="${ink}"/><circle cx="86" cy="74" r="13" fill="${cream}"/><path d="M81 70 Q81 64 86 64 Q91 64 91 69 Q91 73 86 75 L86 78" stroke="${ink}" stroke-width="3.5" stroke-linecap="round" fill="none"/><circle cx="86" cy="83" r="2.2" fill="${ink}"/><path d="M18 106 Q34 90 50 106 M70 106 Q86 90 102 106" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/>`;
     case "dial": return `<path d="M20 84 A40 40 0 0 1 100 84" fill="none" stroke="${ink}" stroke-width="10" stroke-linecap="round"/><path d="M60 84 L85.7 53.4 A40 40 0 0 0 73.7 46.4 Z" fill="${cream}"/><path d="M60 84 L42 52" stroke="${cream}" stroke-width="6" stroke-linecap="round"/><circle cx="60" cy="84" r="9" fill="${ink}"/><circle cx="20" cy="98" r="5" fill="${ink}"/><circle cx="100" cy="98" r="5" fill="${cream}"/>`;
