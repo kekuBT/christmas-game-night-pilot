@@ -1,0 +1,6 @@
+/* Stage 12.6 (docs/stage12/stage126.md): the night card sheet. */
+.mz-nightcard__frame { margin: 12px 0 0; display: grid; place-items: center; }
+.mz-nightcard__img { width: 100%; max-width: 360px; height: auto; border-radius: 18px; border: 1.5px solid var(--mz-line); box-shadow: 0 10px 30px rgba(0, 0, 0, .25); }
+.mz-nightcard__facts { margin: 14px 0 0; }
+.mz-nightcard__facts summary { cursor: pointer; font: 700 15px/1.3 var(--mz-font-body); color: var(--mz-text-muted); }
+.mz-nightcard__facts pre { margin: 8px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 500 14px/1.45 var(--mz-font-body); color: var(--mz-text); }

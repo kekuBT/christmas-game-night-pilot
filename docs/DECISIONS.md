@@ -1716,3 +1716,25 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Sizes:** a question of up to 140 characters; 2 to 4 answers of up to 60, all different.
   - **Volume:** 15 waiting per writer and 60 per room.
   - **Shared check:** the check is one shared function (`src/shared/familyPack.ts`), so the phone says why before sending. The TV layout is checked against the longest question with four answers.
+
+## Stage 12.6: the night card
+**Authorization:** the owner, directly in chat on 2026-11-14: "Implement 8 as well" (suggestion 8, a shareable night card). Spec: `docs/stage12/stage126.md`. Branch `claude/stage12-6-night-card`, stacked on Stage 12.5. Nothing is merged or deployed.
+
+**Owner direction recorded at the same time (2026-11-14, about 3:25 a.m. ET):**
+- "Don't add item 6": Little-ones mode is dropped.
+- "The rest that I mentioned can be added. But we definitely need more games that can be played with teams": Teams (suggestion 7) goes ahead, with more games playable as teams. Planned as Stage 12.7 (night-long teams, and "play as teams" for games with per-player scores) and Stage 12.8 (new games built for teams).
+
+- **D-S126-01 The card is made on the phone from public facts only.**
+  - **What it holds:** games, results, the night's medal table, and for a Family Cup its day, standings and champion.
+  - **What it never holds:** Memory Book notes, answers, Family Questions, the room code or anything private to one phone.
+  - **Why:** the card leaves the room, so it holds only what everyone in it already saw.
+  - **Alternatives rejected:**
+    - a server-rendered image or hosted share page: it needs hosting, public links and money;
+    - including approved Memory Book notes: they're members-only and need their writers' approval to leave the book.
+- **D-S126-02 Share where the phone can; Save always.**
+  - **Share** uses the Web Share API with the PNG file, so the phone's own sheet is used (WhatsApp, Messages and so on). A closed sheet isn't an error, and a failure points to Save.
+  - **Nothing is uploaded.**
+- **D-S126-03 A Family Cup's card shows standings, not medals.**
+  - Medals are a casual night's story (D-S121-05); the Cup's standings are the real result.
+  - The date is the phone's own day.
+  - The look changes the title and colours, never a fact.
