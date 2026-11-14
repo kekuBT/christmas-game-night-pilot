@@ -50,8 +50,8 @@
 - **Off by default.** The director's "🔇 Sound" button turns it on, and that press is the gesture browsers require before audio. It's remembered on that TV only (browser storage, with the page's own memory if storage fails).
 - **What plays:** a short chime made with WebAudio, so there are no audio files, nothing is downloaded, and it costs $0. Phones never play it.
   - a rising fanfare for the day trophy, the Cup champion and the night recap;
-  - two soft notes when a game's final standings first appear.
-- **Never more than once a moment.** Silent while the director has paused animations.
+  - two soft notes when the final standings appear for a game this TV watched being played.
+- **Never more than once a moment, and one sound for what's on screen:** no game chime under the champion or the night recap. The memory of what has rung is kept for the page, so a remount (a spectator TV shows other screens during a briefing) never rings a moment twice. Silent while the director has paused animations.
 
 ## 4. Phones step back when a TV is watching (B4; D-S124-04)
 - **Where:** casual Math Mayhem results only, as a first try. The discussion said to try one game and see how it feels on a real night.

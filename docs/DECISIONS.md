@@ -1681,7 +1681,7 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
 - **D-S124-03 TV sound, off by default.**
   - **How it plays:** WebAudio chimes, with no files, no downloads and $0. The director's button turns it on, and that press satisfies the browsers' autoplay rule.
   - **Remembered per TV.** Silent while animations are paused. Never on phones.
-  - **When:** one fanfare for the day trophy, the champion and the night recap; two soft notes for a game's final standings. Once per moment.
+  - **When:** one fanfare for the day trophy, the champion and the night recap; two soft notes for the final standings of a game this TV watched being played. Once per moment, kept per page so a remount never repeats one, and never a game's chime under a moment.
   - **Alternative rejected:** sound on by default. A TV in a living room shouldn't make noise nobody asked for.
 - **D-S124-04 Phones step back when a TV is watching: Math Mayhem in casual rooms only, as a first try.**
   - **On the phone:** with a spectator in the room, the results keep the player's own heading and What's next. The standings, outcome and answers are behind "Show them here too".
