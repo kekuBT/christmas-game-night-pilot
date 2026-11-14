@@ -29,9 +29,9 @@ describe("filterGames search", () => {
 
   it("empty query matches everything, sorted by name", () => {
     const got = filterGames(GAME_MANIFESTS, DEFAULT_FILTERS);
-    expect(got).toHaveLength(16);
+    expect(got).toHaveLength(17);
     expect(titles(got)[0]).toBe("Caption Clash");
-    expect(titles(got)[15]).toBe("Word Connections");
+    expect(titles(got)[16]).toBe("Word Connections");
   });
 
   it("a query with no match gives an empty list", () => {
@@ -42,12 +42,14 @@ describe("filterGames search", () => {
 describe("filterGames facets", () => {
   it("category filter is OR: any selected category matches", () => {
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, categories: ["knowledge"] }))).toEqual([
+      "Family Questions",
       "Geography Challenge",
       "Guess the Year",
       "Trivia Showdown",
       "Who Said That?",
     ]);
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, categories: ["knowledge", "math"] }))).toEqual([
+      "Family Questions",
       "Geography Challenge",
       "Guess the Year",
       "Math Mayhem",
@@ -62,6 +64,7 @@ describe("filterGames facets", () => {
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 1 }))).toEqual(["Math Mayhem", "Pattern Pulse", "Word Connections"]);
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 2 }))).toEqual([
       "Closest Wins",
+      "Family Questions",
       "Geography Challenge",
       "Guess the Year",
       "Jebena Rush",
@@ -71,7 +74,7 @@ describe("filterGames facets", () => {
       "Trivia Showdown",
       "Word Connections",
     ]);
-    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 4 })).toHaveLength(16);
+    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 4 })).toHaveLength(17);
     // Majority Rules (Stage 5) starts at 3: in at 3, out at 2.
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 3 }))).toContain("Majority Rules");
   });
@@ -89,6 +92,7 @@ describe("filterGames facets", () => {
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, maxDuration: 8 }))).toEqual([
       "Category Sprint",
       "Closest Wins",
+      "Family Questions",
       "Geography Challenge",
       "Guess the Year",
       "Jebena Rush",
@@ -102,7 +106,7 @@ describe("filterGames facets", () => {
 
   it("play style filters solo vs team; a cooperative game (one team) is a team game, never an individual one", () => {
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "team" }))).toEqual(["Charades", "Spectrum"]);
-    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" })).toHaveLength(14);
+    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" })).toHaveLength(15);
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" }))).not.toContain("Spectrum");
   });
 
@@ -110,6 +114,7 @@ describe("filterGames facets", () => {
     const filters: LibraryFilters = { ...DEFAULT_FILTERS, categories: ["knowledge"], playerCount: 2 };
     // Who Said That? needs 4 players, so it drops out.
     expect(titles(filterGames(GAME_MANIFESTS, filters))).toEqual([
+      "Family Questions",
       "Geography Challenge",
       "Guess the Year",
       "Trivia Showdown",
@@ -122,7 +127,7 @@ describe("filterGames sorting", () => {
     const got = filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, sort: "duration" });
     // 5 min (Category Sprint, Math Mayhem, Pattern Pulse), 6, 7 (Geography), then 8.
     expect(titles(got).slice(0, 6)).toEqual(["Category Sprint", "Math Mayhem", "Pattern Pulse", "Majority Rules", "Geography Challenge", "Closest Wins"]);
-    expect(titles(got)[15]).toBe("Charades");
+    expect(titles(got)[16]).toBe("Charades");
   });
 });
 

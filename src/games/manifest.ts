@@ -402,6 +402,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: false, supportsTeams: false },
     details: "Four rounds. Each round, one player sees a secret target on a scale (for example Cold to Hot) and gives a clue; everyone else places a guess from 0 to 100. The team's guess is the middle of the guesses: within 5 of the target scores 10, within 10 scores 7, within 20 scores 4. One shared team score out of 40. Casual rooms only; practice-only (Stage 9.3).",
   },
+  {
+    id: "family-questions",
+    title: "Family Questions",
+    description: "Questions the family wrote about itself, like \"Who was born in Nairobi?\". Everyone writes a few in the lobby; nobody sees them until the game.",
+    categories: ["knowledge", "quiz", "party"],
+    minPlayers: 2,
+    recommendedPlayers: 4,
+    maxPlayers: 10,
+    playStyle: "solo",
+    competition: "competitive",
+    duration: { minutes: 8, source: "design-default", measured: false },
+    inputs: ["choice"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: false },
+    features: { practice: true, official: false, abstention: "per-question" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: false },
+    details: "Up to ten questions the players wrote (at least three). 100 for a right answer. Nobody answers their own question; when some but not all of the others get it right, its writer earns 50 for a great question. Casual rooms only; practice-only (Stage 12.5).",
+  },
 ];
 
 /**

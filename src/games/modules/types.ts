@@ -14,10 +14,13 @@ import type { SessionSeason } from "../../shared/season.js";
 import type { Participation, PhaseKind } from "../../server/lifecycle.js";
 import type { GameSettings } from "../settings.js";
 import type { TeamResult } from "../../shared/teamResult.js";
+import type { FamilyGameQuestion } from "./family.js";
 
 export interface ModuleContext {
   /** Server time of this event (a deadline instant when a deadline is processed). */
   now: number;
+  /** Stage 12.5: the acting player is the host or a cohost (for a module's director actions, e.g. skipping a question). */
+  canDirect?: boolean;
   /** The game's roster. */
   players: readonly string[];
   /** Roster players still expected to act (everyone today). */
@@ -45,7 +48,7 @@ export interface GameModule<S = unknown> {
    * at its start; absent in a Cup, whose games keep their full content.
    * Modules without seasonal content ignore it.
    */
-  init(args: { players: readonly string[]; seed: number; season?: SessionSeason; settings?: GameSettings }): S;
+  init(args: { players: readonly string[]; seed: number; season?: SessionSeason; settings?: GameSettings; /** Stage 12.5: Family Questions' questions, picked by the room at start. */ family?: readonly FamilyGameQuestion[] }): S;
   intent(s: S, actorId: string, action: string, payload: Record<string, unknown>, ctx: ModuleContext): ModuleResult;
   /** "Sit this one out": a round, or (wholeGameAbstain) the rest of the game. */
   abstain(s: S, actorId: string, ctx: ModuleContext): ModuleResult;

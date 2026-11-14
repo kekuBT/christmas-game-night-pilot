@@ -4,7 +4,8 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { BriefingRefused, ContentShortage, CupUpgradeRefused, FinishRefused, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
+import type { FamilyQuestionInput } from "../shared/familyPack.js";
+import { BriefingRefused, ContentShortage, CupUpgradeRefused, FamilyRefused, FinishRefused, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY, getGame, isCooperative, isMemoryBookTeam } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
@@ -131,6 +132,14 @@ export class LocalServer {
    */
   private lobbyPlans = new Map<string, { gameId: string; official: boolean }>();
   static readonly PlanSchema = z.object({ gameId: z.string().min(1).max(64), official: z.boolean() }).strict();
+  /** Stage 12.5: a new Family Question (the room checks it with src/shared/familyPack.ts; this only bounds the shape). */
+  static readonly FamilyQuestionSchema = z.object({
+    kind: z.enum(["choice", "who"]),
+    prompt: z.string().max(1000),
+    options: z.array(z.string().max(500)).max(8).optional(),
+    correctIndex: z.number().int().min(0).max(7).optional(),
+    answerPlayerId: z.string().min(1).max(128).optional(),
+  }).strict();
   /** Stage 7.1: save or clear the room's Quick Party lineup (RoomEngine.savePartyPlan checks the rest). */
   static readonly PartyBodySchema = z.union([
     z.object({
@@ -1250,6 +1259,37 @@ export class LocalServer {
           }
           if (changed) { this.persist(room); this.broadcast(room.id); }
           this.send(res, 200, { ok: true, changed, ...(finishing ? { cupFinished: room.cupFinished } : { nightComplete: room.nightComplete }) });
+          return;
+        }
+        // Stage 12.5 (D-S125-01, D-S125-03): Family Questions. Add one; take back one of yours; the host or a cohost
+        // removes every unplayed question one player wrote (without reading them). Never echoes anyone else's question.
+        if (req.method === "POST" && parts[2] === "family" && (parts.length === 3 || (parts.length === 5 && parts[4] === "delete") || (parts.length === 6 && parts[3] === "author" && parts[5] === "remove"))) {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          const refused = (err: unknown) => {
+            if (!(err instanceof FamilyRefused)) throw err;
+            const status = err.code === "NOT_ALLOWED" ? 403 : err.code === "NOT_FOUND" ? 404 : err.code === "INVALID_QUESTION" ? 400 : 409;
+            this.send(res, status, { error: err.message, code: err.code });
+          };
+          if (parts.length === 3) {
+            const parsed = LocalServer.FamilyQuestionSchema.safeParse(await this.readBody(req));
+            if (!parsed.success) { this.send(res, 400, { error: "That question couldn't be read. Try writing it again.", code: "INVALID_QUESTION" }); return; }
+            let q;
+            try { q = room.addFamilyQuestion(player.id, parsed.data as FamilyQuestionInput); } catch (err) { refused(err); return; }
+            this.persist(room); this.broadcast(room.id);
+            this.send(res, 200, { ok: true, question: { id: q.id }, family: room.familyView(player.id) });
+            return;
+          }
+          if (parts.length === 5) {
+            try { room.deleteFamilyQuestion(player.id, decodeURIComponent(parts[3]!)); } catch (err) { refused(err); return; }
+            this.persist(room); this.broadcast(room.id);
+            this.send(res, 200, { ok: true, family: room.familyView(player.id) });
+            return;
+          }
+          let removed: number;
+          try { removed = room.removeFamilyAuthor(player.id, decodeURIComponent(parts[4]!)); } catch (err) { refused(err); return; }
+          if (removed > 0) { this.persist(room); this.broadcast(room.id); }
+          this.send(res, 200, { ok: true, removed, family: room.familyView(player.id) });
           return;
         }
         // Stage 7.1: save or clear the room's Quick Party lineup (host/cohost, casual rooms).

@@ -53,6 +53,8 @@ export const GAME_REGISTRY: GameDescriptor[] = [
   { id: "jebena-rush", title: "Jebena Rush", minPlayers: 2, recommendedPlayers: 3, maxPlayers: 10, casualOnly: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "Name something in the category before the steam boils over, then pass the jebena. Run out of time and one of your cups breaks." },
   // Stage 9.3: cooperative (one team result), casual rooms only, practice-only.
   { id: "spectrum", title: "Spectrum", minPlayers: 2, recommendedPlayers: 4, maxPlayers: 10, casualOnly: true, cooperative: true, memoryBookTeam: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "One team, four rounds. One player gives a clue for a secret spot on a scale; everyone else guesses where it sits. The closer the team, the more points." },
+  // Stage 12.5: the family's own questions (casual rooms only, practice-only).
+  { id: "family-questions", title: "Family Questions", minPlayers: 2, recommendedPlayers: 4, maxPlayers: 10, casualOnly: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "Questions the family wrote about itself. Pick the right answer; nobody answers their own question, and a question only some of you get right earns its writer a bonus." },
   { id: "draw-guess", title: "Draw & Guess", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 10, tutorial: "One player draws a secret word; everyone else races to guess it." },
 ];
 
