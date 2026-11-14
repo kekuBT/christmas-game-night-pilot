@@ -29,9 +29,9 @@ describe("filterGames search", () => {
 
   it("empty query matches everything, sorted by name", () => {
     const got = filterGames(GAME_MANIFESTS, DEFAULT_FILTERS);
-    expect(got).toHaveLength(17);
+    expect(got).toHaveLength(18);
     expect(titles(got)[0]).toBe("Caption Clash");
-    expect(titles(got)[16]).toBe("Word Connections");
+    expect(titles(got)[17]).toBe("Word Connections");
   });
 
   it("a query with no match gives an empty list", () => {
@@ -45,6 +45,7 @@ describe("filterGames facets", () => {
       "Family Questions",
       "Geography Challenge",
       "Guess the Year",
+      "Team Huddle",
       "Trivia Showdown",
       "Who Said That?",
     ]);
@@ -53,6 +54,7 @@ describe("filterGames facets", () => {
       "Geography Challenge",
       "Guess the Year",
       "Math Mayhem",
+      "Team Huddle",
       "Trivia Showdown",
       "Who Said That?",
     ]);
@@ -74,7 +76,7 @@ describe("filterGames facets", () => {
       "Trivia Showdown",
       "Word Connections",
     ]);
-    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 4 })).toHaveLength(17);
+    expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 4 })).toHaveLength(18);
     // Majority Rules (Stage 5) starts at 3: in at 3, out at 2.
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playerCount: 3 }))).toContain("Majority Rules");
   });
@@ -100,12 +102,13 @@ describe("filterGames facets", () => {
       "Math Mayhem",
       "Pattern Pulse",
       "Spectrum",
+      "Team Huddle",
       "Word Connections",
     ]);
   });
 
   it("play style filters solo vs team; a cooperative game (one team) is a team game, never an individual one", () => {
-    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "team" }))).toEqual(["Charades", "Spectrum"]);
+    expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "team" }))).toEqual(["Charades", "Spectrum", "Team Huddle"]);
     expect(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" })).toHaveLength(15);
     expect(titles(filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, playStyle: "solo" }))).not.toContain("Spectrum");
   });
@@ -125,9 +128,9 @@ describe("filterGames facets", () => {
 describe("filterGames sorting", () => {
   it("duration sort is minutes ascending with title tie-break", () => {
     const got = filterGames(GAME_MANIFESTS, { ...DEFAULT_FILTERS, sort: "duration" });
-    // 5 min (Category Sprint, Math Mayhem, Pattern Pulse), 6, 7 (Geography), then 8.
-    expect(titles(got).slice(0, 6)).toEqual(["Category Sprint", "Math Mayhem", "Pattern Pulse", "Majority Rules", "Geography Challenge", "Closest Wins"]);
-    expect(titles(got)[16]).toBe("Charades");
+    // 5 min (Category Sprint, Math Mayhem, Pattern Pulse), 6 (Majority Rules, Team Huddle), 7 (Geography), then 8.
+    expect(titles(got).slice(0, 6)).toEqual(["Category Sprint", "Math Mayhem", "Pattern Pulse", "Majority Rules", "Team Huddle", "Geography Challenge"]);
+    expect(titles(got)[17]).toBe("Charades");
   });
 });
 

@@ -423,6 +423,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: false },
     details: "Up to ten questions the players wrote (at least three). 100 for a right answer. Nobody answers their own question; when some but not all of the others get it right, its writer earns 50 for a great question. Casual rooms only; practice-only (Stage 12.5).",
   },
+  {
+    id: "team-huddle",
+    title: "Team Huddle",
+    description: "A quiz you answer as a team. Teammates see each other's picks; the team's answer is what most of you pick.",
+    categories: ["knowledge", "quiz", "team"],
+    minPlayers: 4,
+    recommendedPlayers: 6,
+    maxPlayers: 10,
+    playStyle: "team",
+    competition: "competitive",
+    duration: { minutes: 6, source: "design-default", measured: false },
+    inputs: ["choice"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: true },
+    features: { practice: true, official: false, abstention: "per-question" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: true },
+    details: "Eight questions from the Trivia pool. Teammates see each other's picks live; other teams and the TV never see a team's option before the reveal. A team's answer is its members' most-picked option (a tie goes to the option picked first). 100 for a right answer, 25 more when the whole team picked it. A question closes early once every team agrees. Uses the night's teams, or deals two for the game. Casual rooms only; practice-only (Stage 12.8).",
+  },
 ];
 
 /**

@@ -371,6 +371,10 @@ export interface GameState {
   /** Charades (Stage 5.1): player ids per team (team A = 0, team B = 1), and the acting team. */
   teams?: string[][];
   actorTeam?: number;
+  /** Charades (Stage 12.8): the teams' names (the night's teams, or two dealt for the game), and how many turns it has. */
+  teamNames?: string[];
+  teamIds?: string[];
+  totalTurns?: number;
   passesThisTurn?: number;
   myGuess?: number;
   unit?: string;

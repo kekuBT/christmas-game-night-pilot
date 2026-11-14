@@ -268,14 +268,15 @@ describe("playing (D-S125-02)", () => {
 });
 
 describe("Home's featured game", () => {
-  it("never Family Questions (it needs written questions first), and the other games' rotation is unchanged", () => {
+  it("never Family Questions (it needs written questions first) or Team Huddle (Stage 12.8); the others' rotation is unchanged", () => {
     const catalog = GAME_MANIFESTS.map((m) => ({ id: m.id })) as unknown as Parameters<typeof featuredOfTheDay>[0];
     const others = [...catalog].filter((g) => !NOT_FEATURED.has(g.id)).sort((a, b) => a.id.localeCompare(b.id));
+    // Stage 12.8: Team Huddle stays out too, so the 16 others keep their days.
     expect(others).toHaveLength(16);
     for (let d = 0; d < 40; d++) {
       const day = new Date(2026, 10, 1 + d);
       const dayNumber = Math.floor(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()) / 86_400_000);
-      expect(featuredOfTheDay(catalog, day)?.id).toBe(others[dayNumber % 16]!.id);
+      expect(featuredOfTheDay(catalog, day)?.id).toBe(others[dayNumber % others.length]!.id);
     }
   });
 });

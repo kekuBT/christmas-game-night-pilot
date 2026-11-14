@@ -17,6 +17,7 @@ import type { SprintCategory, SprintMatcherVersion } from "../games/sprint.js";
 import type { ConnectionsBoard } from "../games/connections.js";
 import { initImpostor } from "../games/impostor.js";
 import { initCharades } from "../games/charades.js";
+import type { GameTeams } from "../shared/teams.js";
 
 /** How many items one game uses. Charades uses one prompt per player turn (plus passes). */
 export const ITEMS_PER_GAME: Record<ContentGameId, number> = {
@@ -58,7 +59,7 @@ export interface SprintRulesSnapshot {
 /** Closed-category answer rules; see CupRecord `categorySprint.answerRules`. */
 export type SprintAnswerRules = 1 | 2;
 
-export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { seed: number; playerIds: string[]; sprint?: SprintRulesSnapshot; sprintAnswerRules?: SprintAnswerRules }): unknown {
+export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { seed: number; playerIds: string[]; sprint?: SprintRulesSnapshot; sprintAnswerRules?: SprintAnswerRules; /** Stage 12.8: Charades' teams. */ teams?: GameTeams }): unknown {
   const rng = seededRng(ctx.seed);
   switch (gameId) {
     case "trivia":
@@ -120,6 +121,6 @@ export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { s
       return initImpostor(ctx.playerIds, ctx.seed, { word: it.word, category: it.hintCategory });
     }
     case "charades":
-      return initCharades(ctx.playerIds, items.map((li) => as<"charades">(li).prompt));
+      return initCharades(ctx.playerIds, items.map((li) => as<"charades">(li).prompt), ctx.teams);
   }
 }

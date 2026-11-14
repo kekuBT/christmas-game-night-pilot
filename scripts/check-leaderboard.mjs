@@ -6,6 +6,7 @@
 import { launchChromium } from "./lib/driver-env.mjs";
 import { roomGo, hostFamilyCup } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
+import { startOfficial } from "./lib/start.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 import { optionIndex } from "./lib/content-oracle.mjs";
 
@@ -69,14 +70,11 @@ async function answerFirstN(page, n, optionIndex = 0) {
 }
 // Sprint 2: an official start asks before leaving out a player who is
 // still reconnecting. These scenarios continue without the player who
-// closed their page, so answer the question explicitly when it appears.
+// closed their page, so answer the question explicitly when it appears
+// (scripts/lib/start.mjs: it also presses Start again if the question
+// closes by itself as the reconnect grace period ends).
 async function startOfficialTrivia(page) {
-  await page.getByTestId("start-official-trivia").click();
-  const decision = page.getByTestId("mz-start-decision");
-  if (await decision.waitFor({ timeout: 2500 }).then(() => true, () => false)) {
-    console.log(`note: start asked first — ${((await decision.textContent()) ?? "").replace(/\s+/g, " ").slice(0, 80)}`);
-    await page.getByTestId("mz-start-without").click();
-  }
+  await startOfficial(page, "start-official-trivia");
 }
 async function tvProj(roomId) {
   return (await fetch(`${BASE}/rooms/${roomId}/projection?audience=tv`)).json();

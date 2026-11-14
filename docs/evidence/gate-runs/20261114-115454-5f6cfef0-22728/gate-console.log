@@ -1,0 +1,68 @@
+Mchezo gate targeted | run 20261114-115454-5f6cfef0-22728
+  revision 5f6cfef0074682e9b5710a1ed8e726bc29fd7585 (clean tree) | fingerprint 7a9114bfbf1b (563 files)
+  plan     5 steps: 1 fast/build, 3 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 14.9 GB available)
+  history  170 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.05 for 3 worker(s) (measured, 146 run(s))
+  estimate this run: 5–14m (low-confidence) · the same steps one after another: about 8m 21s · longest step check-f5 ~7m 13s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.05 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-team-huddle
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t2/test-results/20261114-115454-5f6cfef0-22728
+        start build-web on w1 (usually 6s)
+[ 1/5] PASS         5.7s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/5] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:42789 (pid 22849, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t2/test-results/20261114-115454-5f6cfef0-22728/server-data/w1)
+  server   w2 http://localhost:41053 (pid 22850, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t2/test-results/20261114-115454-5f6cfef0-22728/server-data/w2)
+  server   w3 http://localhost:43817 (pid 22851, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t2/test-results/20261114-115454-5f6cfef0-22728/server-data/w3)
+        start check-f5 on w1 (usually 7m 13s)
+        start check-team-huddle on w2 (usually 52s)
+        start check-official-practice on w3 (usually 10s)
+[ 3/5] PASS        12.4s  check-official-practice  w3
+── progress  3/5 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-f5 52s (w1), check-team-huddle 52s (w2)
+   remaining 5–13m · total 6–14m · done around 12:00–12:08 UTC (low-confidence)
+[ 4/5] FAIL        73.1s  check-team-huddle  w2  FAIL D the phone's heading names the winning team, and your place is your team's — not within 15000ms
+      | PASS D seven more questions played — 7
+      | PASS D the game finished with team results
+      | PASS D every player scored their team's points — {"player-1":250,"player-2":250,"player-3":250,"player-4":250}
+      | PASS D phones: the results with the team results card
+      | FAIL D the phone's heading names the winning team, and your place is your team's — not within 15000ms
+      | PASS D the TV leads with the team result
+      | PASS E 320 px: the results have no sideways scroll
+      | PASS F Charades plays with the night's three teams — ["Team Coral","Team Sun","Team Mint"]
+      | PASS F equal turns: 3 teams × the largest team — 6
+      | PASS F the TV names the acting team by its name
+      | PASS F the teams took turns — [0,1,2,0,1,2]
+      | PASS F Charades finished with team results (every team tied: equal turns, all correct)
+      | PASS F the TV final shows the team results
+      | check-team-huddle: 1 failed
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+── progress  4/5 done · 3 passed, 1 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-f5 1m 52s (w1)
+   remaining 4–12m · total 6–14m · done around 12:00–12:08 UTC (low-confidence)
+── progress  4/5 done · 3 passed, 1 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-f5 2m 52s (w1)
+   remaining 3–11m · total 6–14m · done around 12:00–12:08 UTC (low-confidence)
+── progress  4/5 done · 3 passed, 1 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-f5 3m 52s (w1)
+   remaining 2–10m · total 6–14m · done around 12:00–12:08 UTC (low-confidence)
+── progress  4/5 done · 3 passed, 1 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-f5 4m 52s (w1)
+   remaining 1–9m · total 6–14m · done around 12:00–12:08 UTC (low-confidence)
+── progress  4/5 done · 3 passed, 1 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-f5 5m 52s (w1)
+   remaining 0–8m · total 6–14m · done around 12:00–12:08 UTC (low-confidence)
+── progress  4/5 done · 3 passed, 1 failed, 0 timed out, 0 cancelled · elapsed 7m 00s
+   running   check-f5 6m 52s (w1)
+   remaining 1–7m · total 8–14m · done around 12:02–12:08 UTC (low-confidence)
+[ 5/5] PASS       451.6s  check-f5  w1
+
+FAILED (exit 1) | targeted | run 20261114-115454-5f6cfef0-22728
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-team-huddle (w2) [functional]: FAIL D the phone's heading names the winning team, and your place is your team's — not within 15000ms
+  timing   wall 7m 39s · step time 9m 04s (sum) · 3 workers, 39% busy · 1.19× the same steps run one after another
+           predicted 5–14m (about 7m 33s, low-confidence) → actual 7m 39s (+1%)
+           longest  check-f5 7m 32s, check-team-huddle 1m 13s, check-official-practice 12s · the longest step is 98% of the wall time
+           machine  CPU mean 16%, peak 94% · memory available ≥ 13479 MB · load peak 2.76
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t2/test-results/20261114-115454-5f6cfef0-22728/report.json

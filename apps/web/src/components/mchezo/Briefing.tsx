@@ -30,6 +30,7 @@ import {
 import { toMzPlayers } from "./adapters.js";
 import { titleFor } from "../../ui/mchezo/lib/names.js";
 import { ContentSeasonLabel } from "./ContentChoice.js";
+import { TeamMark } from "./Teams.js";
 
 /** Server time, re-read every second (countdowns only; the server decides). */
 function useServerNow(): number {
@@ -92,6 +93,32 @@ function People({ people, allPlayers, tv }: { people: BriefingPerson[]; allPlaye
             </li>
           );
         })}
+      </ul>
+    </section>
+  );
+}
+
+/**
+ * Stage 12.8: a game played as teams (12.7) or built for teams (12.8) names its teams before play, and each phone
+ * says which team it's on. Public facts: the teams are announced at the table anyway.
+ */
+function Teams({ game, players, meId, tv }: { game: PublicGame; players: PublicPlayer[]; meId?: string; tv?: boolean }) {
+  const teams = game.teams;
+  if (!teams) return null;
+  const nameOf = (id: string) => (id === meId ? "you" : players.find((p) => p.id === id)?.displayName ?? "A player");
+  const mine = meId ? teams.members[meId] : undefined;
+  const used = teams.list.filter((t) => game.players.some((p) => teams.members[p] === t.id));
+  return (
+    <section className={`mz-card${tv ? " mz-tvshow-hd" : ""}`} aria-labelledby="mz-brief-teams" data-testid="briefing-teams">
+      <span className="mz-kicker" id="mz-brief-teams">👥 Played as teams</span>
+      {mine && <p className="mz-brief__objective" data-testid="briefing-my-team">You’re on <b>{teams.list.find((t) => t.id === mine)?.name}</b>.</p>}
+      <ul className="mz-hd-teams">
+        {used.map((t) => (
+          <li key={t.id} className={`mz-hd-team mz-team--${t.color}${t.id === mine ? " is-mine" : ""}`} data-testid={`briefing-team-${t.id}`}>
+            <TeamMark color={t.color} />
+            <span className="mz-hd-team__text"><b>{t.name}</b><span>{game.players.filter((p) => teams.members[p] === t.id).map(nameOf).join(", ")}</span></span>
+          </li>
+        ))}
       </ul>
     </section>
   );
@@ -176,6 +203,7 @@ export function BriefingScreen(props: CommonProps & {
       <h1 className="mz-h1">{title}</h1>
       {clock.warning && <Warning cancelInMs={clock.cancelInMs} />}
       <Rules gameId={game.gameId} registry={registry} hearts={game.settings?.hearts} />
+      <Teams game={game} players={players} meId={meId} />
       <People people={people} allPlayers={players} />
       {participant ? (
         <div className="mz-brief__me">
@@ -267,6 +295,7 @@ export function BriefingTv(props: CommonProps & { joinCode?: string; onBack: () 
       <div className="mz-brief__tvgrid">
         <Rules gameId={game.gameId} registry={registry} tv hearts={game.settings?.hearts} />
         <People people={people} allPlayers={players} tv />
+        <Teams game={game} players={players} tv />
       </div>
     </main>
   );

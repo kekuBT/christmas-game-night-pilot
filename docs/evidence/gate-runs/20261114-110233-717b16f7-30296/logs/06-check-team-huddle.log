@@ -1,0 +1,35 @@
+$ node scripts/check-team-huddle.mjs http://localhost:38011
+# timeout 600s | worker w3 | server http://localhost:38011 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128t1/test-results/20261114-110233-717b16f7-30296/server-data/w3)
+
+[+3.1s] PASS A the briefing names the teams and says which one you're on
+[+3.1s] PASS A the TV briefing lists the teams
+[+3.3s] PASS A Team Huddle is on every phone, with your team named
+[+3.3s] PASS A the game copied the night's teams — {"player-1":"team-coral","player-2":"team-coral","player-3":"team-sun","player-4":"team-sun"}
+[+3.3s] PASS A the TV shows the question and each team's progress
+[+3.3s] PASS B Keku's pick shows on Amina's phone (same team)
+[+3.3s] PASS B Amina is told she's waiting on herself: pick an answer
+[+3.3s] PASS B Baraka's phone (the other team) never names Keku's pick
+[+3.3s] PASS B the TV says 1 of 2 picked for Team Coral, and no names — TEAM HUDDLE · QUESTION 1 OF 8 | Which gas do plants absorb from the air? | A | Nitrogen | B | Oxygen | C | Carbon dioxide | D | Hydrogen | ▲ | Team Coral | 1 of 2 picked | ● | Team Sun | 0 of 2 picked
+[+3.3s] PASS B the TV's data has no picks at all
+[+3.7s] PASS C Coral disagrees: told to talk it over
+[+3.8s] PASS C the TV says Coral hasn't agreed yet
+[+4.0s] PASS C Coral agrees now
+[+4.0s] PASS C every team agrees: the answer comes early on phones
+[+4.0s] PASS C the TV shows each team's answer
+[+46.8s] PASS D seven more questions played — 7
+[+52.9s] PASS D the game finished with team results
+[+52.9s] PASS D every player scored their team's points — {"player-1":750,"player-2":750,"player-3":125,"player-4":125}
+[+53.0s] PASS D phones: the results with the team results card
+[+53.0s] PASS D the phone's heading names the winning team, and your place is your team's
+[+53.0s] PASS D the TV leads with the team result
+[+53.7s] PASS E 320 px: the results have no sideways scroll
+[+54.0s] PASS F Charades plays with the night's three teams — ["Team Coral","Team Sun","Team Mint"]
+[+54.0s] PASS F equal turns: 3 teams × the largest team — 6
+[+54.1s] PASS F the TV names the acting team by its name
+[+54.8s] PASS F the teams took turns — [0,1,2,0,1,2]
+[+54.8s] PASS F Charades finished with team results (every team tied: equal turns, all correct)
+[+54.8s] PASS F the TV final shows the team results
+[+55.5s] check-team-huddle: all passed
+[+55.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 55.6s | cpu 4.6s, peak memory 292 MB

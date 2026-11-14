@@ -62,7 +62,8 @@ export function ImpostorTv({ game, title }: { game: PublicGame; title: string })
 
 /** Stage 5.1 (O-06): Charades on the TV: who is acting for which team, both teams, and the team scores. Never the prompt. */
 export function CharadesTv({ game, title, nameOf }: { game: PublicGame; title: string; nameOf: (id: string) => string }) {
-  const st = (game.state ?? {}) as { actor?: string; actorTeam?: number; teams?: string[][]; teamScores?: number[]; passesThisTurn?: number };
+  const st = (game.state ?? {}) as { actor?: string; actorTeam?: number; teams?: string[][]; teamScores?: number[]; passesThisTurn?: number; teamNames?: string[] };
+  const names = st.teamNames;
   const teams = st.teams ?? [];
   const acting = st.actorTeam ?? 0;
   return (
@@ -70,11 +71,11 @@ export function CharadesTv({ game, title, nameOf }: { game: PublicGame; title: s
       <div className="mz-tvshow-live__left">
         <span className="mz-tv-kicker">Now playing</span>
         <h1 className="mz-tvshow-h1">{title}</h1>
-        <p className="mz-tvshow-line" data-testid="tv-charades-actor"><b>{nameOf(st.actor ?? "")}</b> is acting for <b>{teamName(acting)}</b>. {teamName(acting)} guesses out loud.</p>
+        <p className="mz-tvshow-line" data-testid="tv-charades-actor"><b>{nameOf(st.actor ?? "")}</b> is acting for <b>{teamName(acting, names)}</b>. {teamName(acting, names)} guesses out loud.</p>
         <ul className="mz-tvshow-teams" data-testid="tv-charades-teams">
           {teams.map((t, i) => (
             <li key={i} className={i === acting ? "mz-tvshow-team mz-tvshow-team--on" : "mz-tvshow-team"}>
-              <b>{teamName(i)}: {st.teamScores?.[i] ?? 0}</b>
+              <b>{teamName(i, names)}: {st.teamScores?.[i] ?? 0}</b>
               <span>{t.map(nameOf).join(", ")}</span>
             </li>
           ))}

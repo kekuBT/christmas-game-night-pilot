@@ -55,6 +55,8 @@ export const GAME_REGISTRY: GameDescriptor[] = [
   { id: "spectrum", title: "Spectrum", minPlayers: 2, recommendedPlayers: 4, maxPlayers: 10, casualOnly: true, cooperative: true, memoryBookTeam: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "One team, four rounds. One player gives a clue for a secret spot on a scale; everyone else guesses where it sits. The closer the team, the more points." },
   // Stage 12.5: the family's own questions (casual rooms only, practice-only).
   { id: "family-questions", title: "Family Questions", minPlayers: 2, recommendedPlayers: 4, maxPlayers: 10, casualOnly: true, modes: ["solo"], status: "implemented", defaultDurationMinutes: 8, tutorial: "Questions the family wrote about itself. Pick the right answer; nobody answers their own question, and a question only some of you get right earns its writer a bonus." },
+  // Stage 12.8: built for teams (casual rooms only, practice-only): the night's teams, or two dealt for the game.
+  { id: "team-huddle", title: "Team Huddle", minPlayers: 4, recommendedPlayers: 6, maxPlayers: 10, casualOnly: true, modes: ["team"], status: "implemented", defaultDurationMinutes: 6, tutorial: "A quiz you answer as a team. You see your teammates' picks; the team's answer is what most of you pick. Agree as a team to move on early." },
   { id: "draw-guess", title: "Draw & Guess", minPlayers: 3, maxPlayers: 10, modes: ["solo"], status: "implemented", defaultDurationMinutes: 10, tutorial: "One player draws a secret word; everyone else races to guess it." },
 ];
 

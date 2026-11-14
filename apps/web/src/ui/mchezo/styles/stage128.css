@@ -1,0 +1,18 @@
+/* Stage 12.8 (docs/stage12/stage128.md): Team Huddle. A team is its mark (colour AND shape) and its name; the colour is
+   a stripe and a fill under dark text, never text itself. */
+.mz-hd-you { display: inline-flex; gap: 8px; align-items: center; margin: 4px 0 0; font: 600 15px/1.3 var(--mz-font-body); }
+.mz-hd-you .mz-team-mark { width: 24px; height: 24px; font-size: 12px; }
+.mz-hd-teams { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.mz-hd-team { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; border-left: 6px solid var(--mz-team); background: var(--mz-surface-2); }
+.mz-hd-team.is-mine { outline: 2px solid var(--mz-text); outline-offset: 1px; }
+.mz-hd-team__text { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; font: 500 14px/1.35 var(--mz-font-body); }
+.mz-hd-team__text b { font-weight: 800; }
+/* TV: the team list sits beside the options, bigger, in a column of its own (never clipped). */
+.mz-tvshow-hd .mz-tvshow-fq__row { grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); align-items: start; }
+/* The options share the row with the teams, so an option's tag ("✓ Right answer") goes under its text, never squeezing it. */
+.mz-tvshow-hd .mz-fq-opt { grid-template-columns: auto auto minmax(0, 1fr); }
+.mz-tvshow-hd .mz-fq-opt__tag { grid-column: 3; justify-self: start; }
+.mz-tvshow-hd .mz-hd-teams { margin: 0; gap: 12px; min-width: 0; }
+.mz-tvshow-hd .mz-hd-team { padding: 12px 16px; border-left-width: 10px; border-radius: 18px; }
+.mz-tvshow-hd .mz-hd-team__text { font-size: 24px; }
+.mz-tvshow-hd .mz-team-mark { width: 44px; height: 44px; font-size: 22px; }

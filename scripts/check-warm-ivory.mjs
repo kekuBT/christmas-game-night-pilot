@@ -42,7 +42,8 @@ const W8_INTENDED = {
     added: ["home-dock>nav.mz-dock.mz-dock--home.mz-dock--onepath", "home-solo>button.mz-dock__solo.mz-linkbtn", "home-solo>b."],
     removed: ["home-dock>nav.mz-dock.mz-dock--home.mz-dock--three", "home-solo>button.mz-key.mz-key--block.mz-key--lg.mz-key--surface"],
     // Stage 12.5: a 17th game's card in the home shelf (Home never features it, so the featured game is unchanged).
-    addedPrefixes: ["game-card-family-questions>"],
+    // Stage 12.8: an 18th, Team Huddle, the same way.
+    addedPrefixes: ["game-card-family-questions>", "game-card-team-huddle>"],
   },
   menu: {
     added: ["menu-make-cup>button.mz-menurow", "menu-make-cup>path.", "menu-make-cup>span.mz-menurow__chev", "menu-make-cup>span.mz-menurow__detail", "menu-make-cup>span.mz-menurow__icon", "menu-make-cup>span.mz-menurow__label", "menu-make-cup>svg.",
@@ -58,7 +59,9 @@ const W8_INTENDED = {
   },
   // Stage 12.5: a 17th game. Its card on home and in the library, and the lobby's Family Questions card: whole new
   // components, allowed by their test id, and still only when every element reuses a style the base screen had.
-  library: { added: [], removed: [], addedPrefixes: ["mz-lib-card-family-questions>", "mz-lib-practice-family-questions>"] },
+  library: { added: [], removed: [], addedPrefixes: ["mz-lib-card-family-questions>", "mz-lib-practice-family-questions>",
+    // Stage 12.8: Team Huddle's library card.
+    "mz-lib-card-team-huddle>", "mz-lib-practice-team-huddle>"] },
   lobby: { added: [], removed: [], addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>",
     // Stage 12.7 (D-S127-01): the host's Teams card ("Make teams"); a guest sees none until there are teams.
     "teams-card>", "teams-make>"] },
@@ -369,7 +372,7 @@ try {
       // On a failure, every difference (up to 40 each way), so the log alone says what changed.
       if (added.length || gone.length) for (const [sign, xs] of [["+", added], ["-", gone]]) for (const x of xs.slice(0, 40)) console.log(`  W8 ${screen} ${sign} ${x.slice(0, 400)}`);
       check(`W8 Everyday ${screen}: every element kind's computed colours equal the base build's (d4dc408)`, was.size > 0 && added.length === 0 && gone.length === 0,
-        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4, 12.5, 12.6), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
+        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4–12.8), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
     }
   }
 

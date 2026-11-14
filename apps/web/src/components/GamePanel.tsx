@@ -44,7 +44,7 @@ export function GamePanel(props: { game: PlayerGame; title: string; players: Pub
   const quiz = ["math-mayhem", "trivia", "who-said-that", "geography"].includes(game.gameId);
   const questions = game.questions ?? st.questions ?? [];
   return <div className="card" data-testid="game-panel"><h2>Now playing: {title}</h2><p className="muted">{statusWords(game.status)}{game.status === "finished" ? ` · Your score: ${game.myScore ?? ""}` : ""}</p>
-    {game.status === "finished" && game.gameId === "charades" && (st.teams ?? []).length > 0 && <p data-testid="charades-result"><b>{teamResult(st.teamScores ?? [])}</b> {teamLine(st.teams ?? [], st.teamScores ?? [], nameOf)}. Each player gets their team's points.</p>}
+    {game.status === "finished" && game.gameId === "charades" && (st.teams ?? []).length > 0 && <p data-testid="charades-result"><b>{teamResult(st.teamScores ?? [], st.teamNames)}</b> {teamLine(st.teams ?? [], st.teamScores ?? [], nameOf, st.teamNames)}. Each player gets their team's points.</p>}
     {game.status === "finished" && game.rawScores && <p>{Object.entries(game.rawScores).map(([pid, v]) => `${nameOf(pid)}: ${v}`).join(" · ")}</p>}
     {game.status === "finished" && game.gameId === "category-sprint" && (st.results ?? []).length > 0 && <SprintResults results={st.results!} />}
     {game.status === "playing" && <>
@@ -94,9 +94,9 @@ export function GamePanel(props: { game: PlayerGame; title: string; players: Pub
         const me = seats.current()?.playerId ?? "";
         const acting = st.actorTeam ?? teams.findIndex((t) => t.includes(st.actor ?? ""));
         const mine = teams.findIndex((t) => t.includes(me));
-        const actingName = acting >= 0 ? teamName(acting) : "the actor's team";
+        const actingName = acting >= 0 ? teamName(acting, st.teamNames) : "the actor's team";
         return <div className="card" data-testid="charades-panel">
-          <p data-testid="charades-teams">{teams.length ? teamLine(teams, st.teamScores ?? [], nameOf) : ""}</p>
+          <p data-testid="charades-teams">{teams.length ? teamLine(teams, st.teamScores ?? [], nameOf, st.teamNames) : ""}</p>
           <p data-testid="charades-actor">{st.actor === me ? <>You're acting for <b>{actingName}</b>.</> : <><b>{nameOf(st.actor ?? "")}</b> is acting for <b>{actingName}</b>.</>} Passes used: {st.passesThisTurn ?? 0} / 3.</p>
           {st.prompt
             ? <><p>Your prompt (act it out, don't say it): <b>{st.prompt}</b></p><p className="muted">Your team guesses out loud. When they get it, tap Correct: +100 to {actingName}.</p><div className="row"><button onClick={() => intent(gid, "charades-turn", { outcome: "correct" })}>Correct (+100 to {actingName})</button><button className="secondary" onClick={() => intent(gid, "charades-turn", { outcome: "pass" })}>Pass</button></div></>

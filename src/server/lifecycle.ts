@@ -100,6 +100,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
     model: "phased", gameWindowMs: 10 * MIN, phaseMs: { question: 30 * SEC, reveal: 8 * SEC },
     officialEligible: false, practiceOnlyReason: "Family Questions is practice-only: the family writes its own questions, so it is just for fun in casual rooms.", unit: "questions",
   },
+  // Stage 12.8: Team Huddle, eight questions of 25 s + 6 s (a question closes early once every team agrees); 8 minutes
+  // is a backstop.
+  "team-huddle": {
+    model: "phased", gameWindowMs: 8 * MIN, phaseMs: { question: 25 * SEC, reveal: 6 * SEC },
+    officialEligible: false, practiceOnlyReason: "Team Huddle is practice-only: a team game in casual rooms.", unit: "questions",
+  },
 });
 
 export function policyFor(gameId: string): GamePolicy {

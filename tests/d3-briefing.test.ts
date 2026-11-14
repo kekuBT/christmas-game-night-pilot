@@ -121,6 +121,9 @@ describe("D3 S5: nothing secret is disclosed during the briefing (every game × 
       strings(spectatorView(), baseline);
       const g = engine.startGame(host, desc.id, { official });
       expect(g.status).toBe("briefing");
+      // Stage 12.8 (D-S128-01): a team game's teams (names and who's on which) are announced before play, so they're
+      // public from its start. Only the teams: every other string in the game's state stays a secret below.
+      if (g.teams) strings(g.teams, baseline);
       // Every string the server holds for this game that wasn't already public.
       const secrets = [...strings({ extra: g.extra, questions: g.questions }, new Set())]
         .filter((s) => s.length >= 4 && !baseline.has(s) && !ids.includes(s) && s !== desc.id && s !== desc.title && !/^[a-z]+(-[a-z]+)*$/.test(s));

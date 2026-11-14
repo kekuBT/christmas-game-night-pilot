@@ -60,6 +60,7 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   "spectrum": { verb: "Took part in", noun: ["round", "rounds"] },
   // Stage 12.5: questions answered (never your own: it isn't yours to answer).
   "family-questions": { verb: "Answered", noun: ["question", "questions"] },
+  "team-huddle": { verb: "Answered", noun: ["question", "questions"] },
 };
 
 /**

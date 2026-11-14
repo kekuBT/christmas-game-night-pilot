@@ -18,4 +18,6 @@ export const TV_HINT: Record<string, string> = {
   "spectrum": "One team: the clue-giver sees a secret spot on the scale and gives a clue; everyone else guesses on their phone. One shared score.",
   // Stage 12.5: the family wrote the questions; who asked each one comes with its answer.
   "family-questions": "Questions the family wrote about itself. Everyone answers on their phone, except whoever wrote it; who asked comes with the answer.",
+  // Stage 12.8: teams answer together; nobody else sees a team's pick before the reveal.
+  "team-huddle": "Teams answer together: teammates see each other's picks, and each team's answer is what most of it picks. Nobody else sees a team's pick until the answer.",
 };

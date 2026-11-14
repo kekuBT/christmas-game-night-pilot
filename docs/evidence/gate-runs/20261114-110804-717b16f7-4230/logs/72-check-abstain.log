@@ -1,0 +1,12 @@
+$ node scripts/check-abstain.mjs http://localhost:44955
+# timeout 600s | worker w3 | server http://localhost:44955 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full/test-results/20261114-110804-717b16f7-4230/server-data/w3)
+
+[+5.0s] PASS abstain button offered during a playing game
+[+5.9s] PASS guest sees sat-out note after abstaining
+[+5.9s] PASS abstain button hidden after abstaining
+[+19.0s] PASS game finishes on the host's answers alone after an abstention
+[+19.1s] PASS abstainer scores 0 in the finished view
+[+19.1s] ABSTAIN ALL PASSED
+[+19.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 19.1s | cpu 2.2s, peak memory 255 MB

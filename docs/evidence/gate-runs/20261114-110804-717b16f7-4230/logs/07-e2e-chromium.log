@@ -1,0 +1,66 @@
+$ node scripts/e2e-browser.mjs http://localhost:41555 --browser=chromium --games=all
+# timeout 1800s | worker w1 | server http://localhost:41555 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full/test-results/20261114-110804-717b16f7-4230/server-data/w1)
+
+[+0.9s] casual-only, not played here: jebena-rush, spectrum, family-questions, team-huddle
+[+0.9s] games: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (registry order, 14 total)
+[+2.9s] [chromium] room code 4PS9DD
+[+6.2s] [chromium] lobby roster: 4 players joined
+[+23.3s] [chromium] OK impostor: finished
+[+54.4s] [chromium] OK caption-clash: finished
+[+112.9s] [chromium] OK trivia: finished
+[+135.9s] [chromium] OK word-connections: finished
+[+153.6s] [chromium] OK who-said-that: finished
+[+183.0s] [chromium] OK guess-the-year: finished
+[+205.9s] [chromium] OK closest-wins: finished
+[+224.7s] [chromium] OK category-sprint: finished
+[+407.9s] [chromium] FAIL charades: did not reach Status: finished in 180s
+[+408.1s] [chromium]   DIAG player=Alex game=charades(game-9) server=playing phase=turn:2 deadlineIn=1019s phaseIn=89s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Alex (host) · Room: Game night Lobby & Games Cham" clock="Time left for this round: 1:29" | type=client-not-on-game
+[+408.1s] [chromium]   DIAG player=Sam game=charades(game-9) server=playing phase=turn:2 deadlineIn=1019s phaseIn=89s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Sam · Room: Game night Lobby & Games Championship" clock="Time left for this round: 1:29" | type=client-not-on-game
+[+408.1s] [chromium]   DIAG player=Jo game=charades(game-9) server=playing phase=turn:2 deadlineIn=1019s phaseIn=89s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Jo · Room: Game night Lobby & Games Championship " clock="Time left for this round: 1:29" | type=client-not-on-game
+[+408.1s] [chromium]   DIAG player=Kim game=charades(game-9) server=playing phase=turn:2 deadlineIn=1019s phaseIn=89s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Kim · Room: Game night Lobby & Games Championship" clock="Time left for this round: 1:29" | type=client-not-on-game
+[+438.1s] [chromium] FAIL geography: locator.click: Timeout 30000ms exceeded.
+[+438.1s] Call log:
+[+438.1s]   - waiting for getByTestId('choose-game')
+[+438.1s] 
+[+438.2s] [chromium]   DIAG player=Alex game=charades(game-9) server=playing phase=turn:2 deadlineIn=989s phaseIn=59s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Alex (host) · Room: Game night Lobby & Games Cham" clock="Time left for this round: 0:59" | type=client-not-on-game
+[+438.2s] [chromium]   DIAG player=Sam game=charades(game-9) server=playing phase=turn:2 deadlineIn=989s phaseIn=59s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Sam · Room: Game night Lobby & Games Championship" clock="Time left for this round: 0:59" | type=client-not-on-game
+[+438.2s] [chromium]   DIAG player=Jo game=charades(game-9) server=playing phase=turn:2 deadlineIn=989s phaseIn=59s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Jo · Room: Game night Lobby & Games Championship " clock="Time left for this round: 0:59" | type=client-not-on-game
+[+438.2s] [chromium]   DIAG player=Kim game=charades(game-9) server=playing phase=turn:2 deadlineIn=989s phaseIn=59s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Kim · Room: Game night Lobby & Games Championship" clock="Time left for this round: 0:59" | type=client-not-on-game
+[+468.2s] [chromium] FAIL math-mayhem: locator.click: Timeout 30000ms exceeded.
+[+468.2s] Call log:
+[+468.2s]   - waiting for getByTestId('choose-game')
+[+468.2s] 
+[+468.3s] [chromium]   DIAG player=Alex game=charades(game-9) server=playing phase=turn:2 deadlineIn=959s phaseIn=29s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Alex (host) · Room: Game night Lobby & Games Cham" clock="Time left for this round: 0:29" | type=client-not-on-game
+[+468.3s] [chromium]   DIAG player=Sam game=charades(game-9) server=playing phase=turn:2 deadlineIn=959s phaseIn=29s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Sam · Room: Game night Lobby & Games Championship" clock="Time left for this round: 0:29" | type=client-not-on-game
+[+468.3s] [chromium]   DIAG player=Jo game=charades(game-9) server=playing phase=turn:2 deadlineIn=959s phaseIn=29s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Jo · Room: Game night Lobby & Games Championship " clock="Time left for this round: 0:29" | type=client-not-on-game
+[+468.3s] [chromium]   DIAG player=Kim game=charades(game-9) server=playing phase=turn:2 deadlineIn=959s phaseIn=29s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Kim · Room: Game night Lobby & Games Championship" clock="Time left for this round: 0:29" | type=client-not-on-game
+[+498.3s] [chromium] FAIL majority-rules: locator.click: Timeout 30000ms exceeded.
+[+498.3s] Call log:
+[+498.3s]   - waiting for getByTestId('choose-game')
+[+498.3s] 
+[+498.4s] [chromium]   DIAG player=Alex game=charades(game-9) server=playing phase=turn:3 deadlineIn=928s phaseIn=88s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Alex (host) · Room: Game night Lobby & Games Cham" clock="Time left for this round: 1:29" | type=client-not-on-game
+[+498.4s] [chromium]   DIAG player=Sam game=charades(game-9) server=playing phase=turn:3 deadlineIn=928s phaseIn=88s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Sam · Room: Game night Lobby & Games Championship" clock="Time left for this round: 1:29" | type=client-not-on-game
+[+498.4s] [chromium]   DIAG player=Jo game=charades(game-9) server=playing phase=turn:3 deadlineIn=928s phaseIn=88s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Jo · Room: Game night Lobby & Games Championship " clock="Time left for this round: 1:29" | type=client-not-on-game
+[+498.4s] [chromium]   DIAG player=Kim game=charades(game-9) server=playing phase=turn:3 deadlineIn=928s phaseIn=88s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Kim · Room: Game night Lobby & Games Championship" clock="Time left for this round: 1:29" | type=client-not-on-game
+[+528.4s] [chromium] FAIL pattern-pulse: locator.click: Timeout 30000ms exceeded.
+[+528.4s] Call log:
+[+528.4s]   - waiting for getByTestId('choose-game')
+[+528.4s] 
+[+528.5s] [chromium]   DIAG player=Alex game=charades(game-9) server=playing phase=turn:3 deadlineIn=898s phaseIn=58s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Alex (host) · Room: Game night Lobby & Games Cham" clock="Time left for this round: 0:59" | type=client-not-on-game
+[+528.5s] [chromium]   DIAG player=Sam game=charades(game-9) server=playing phase=turn:3 deadlineIn=898s phaseIn=58s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Sam · Room: Game night Lobby & Games Championship" clock="Time left for this round: 0:59" | type=client-not-on-game
+[+528.5s] [chromium]   DIAG player=Jo game=charades(game-9) server=playing phase=turn:3 deadlineIn=898s phaseIn=58s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Jo · Room: Game night Lobby & Games Championship " clock="Time left for this round: 0:59" | type=client-not-on-game
+[+528.5s] [chromium]   DIAG player=Kim game=charades(game-9) server=playing phase=turn:3 deadlineIn=898s phaseIn=58s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Kim · Room: Game night Lobby & Games Championship" clock="Time left for this round: 0:59" | type=client-not-on-game
+[+558.5s] [chromium] FAIL draw-guess: locator.click: Timeout 30000ms exceeded.
+[+558.5s] Call log:
+[+558.5s]   - waiting for getByTestId('choose-game')
+[+558.5s] 
+[+558.7s] [chromium]   DIAG player=Alex game=charades(game-9) server=playing phase=turn:3 deadlineIn=868s phaseIn=28s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Alex (host) · Room: Game night Lobby & Games Cham" clock="Time left for this round: 0:29" | type=client-not-on-game
+[+558.7s] [chromium]   DIAG player=Sam game=charades(game-9) server=playing phase=turn:3 deadlineIn=868s phaseIn=28s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Sam · Room: Game night Lobby & Games Championship" clock="Time left for this round: 0:29" | type=client-not-on-game
+[+558.7s] [chromium]   DIAG player=Jo game=charades(game-9) server=playing phase=turn:3 deadlineIn=868s phaseIn=28s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Jo · Room: Game night Lobby & Games Championship " clock="Time left for this round: 0:29" | type=client-not-on-game
+[+558.7s] [chromium]   DIAG player=Kim game=charades(game-9) server=playing phase=turn:3 deadlineIn=868s phaseIn=28s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Kim · Room: Game night Lobby & Games Championship" clock="Time left for this round: 0:29" | type=client-not-on-game
+[+575.5s] [chromium] OK views: championship, TV, memory book, reconnect
+[+575.6s] [chromium] 9/15 passed
+[+575.6s] E2E FAILED: 6 item(s)
+[+575.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# FAIL (exit 1) in 575.6s | cpu 25.1s, peak memory 284 MB

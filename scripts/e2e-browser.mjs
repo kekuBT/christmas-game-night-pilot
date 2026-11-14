@@ -268,7 +268,7 @@ async function act(page, gameId, name) {
   }
   if (gameId === "charades") {
     // Stage 5.1 (O-06): the button names the acting team.
-    const correct = panel.getByRole("button", { name: /^Correct \(\+100 to Team [AB]\)$/ });
+    const correct = panel.getByRole("button", { name: /^Correct \(\+100 to .+\)$/ }); // Stage 12.8: the team's name ("Team Coral"), no longer A/B
     if (await isVisible(correct, 800)) {
       await correct.click();
       await sleep(400);

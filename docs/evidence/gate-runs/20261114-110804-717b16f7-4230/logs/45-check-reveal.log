@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:44955
+# timeout 600s | worker w3 | server http://localhost:44955 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full/test-results/20261114-110804-717b16f7-4230/server-data/w3)
+
+[+23.2s] PASS reveal opens on the first question phase — question:0
+[+23.2s] PASS question phase hides the correct answer — count=0
+[+23.5s] PASS Reveal answer steps into the first reveal — reveal:1
+[+23.5s] PASS reveal phase shows the correct answer — count=1
+[+23.5s] PASS reveal phase separates this question from the game total
+[+23.6s] PASS Next question steps into the second question phase — question:2
+[+23.6s] PASS second question phase hides the correct answer again — count=0
+[+23.6s] PASS Q10 jump lands on the last question phase — question:18
+[+23.7s] PASS last reveal reached — reveal:19
+[+23.7s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+23.7s] PASS finale shows the standings list
+[+23.8s] PASS auto-play starts back at the first question — question:0
+[+31.8s] PASS auto-play advances a step within 8s — reveal:1
+[+39.9s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+40.7s] PASS TV walk opens on a question — Which bird is a symbol of peace?
+[+44.8s] PASS TV walk advances to the reveal stage
+[+49.8s] PASS TV walk advances to the second question — Which vitamin does the skin make in sunl
+[+49.9s] PASS TV manual jump reaches the leaderboard
+[+50.0s] REVEAL ALL PASSED
+[+50.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 50s | cpu 3.5s, peak memory 260 MB

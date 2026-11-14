@@ -37,7 +37,7 @@ const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? o
 const kindWord = (k?: "choice" | "who") => (k === "who" ? "Who in the family?" : "Family question");
 
 /** One option, as a key: colour AND shape AND letter, never colour alone. */
-function Option({ i, text, onPick, disabled, state, note, testId }: { i: number; text: string; onPick?: () => void; disabled?: boolean; state?: "chosen" | "right" | "wrong" | "dim"; note?: ReactNode; testId: string }) {
+export function Option({ i, text, onPick, disabled, state, note, testId }: { i: number; text: string; onPick?: () => void; disabled?: boolean; state?: "chosen" | "right" | "wrong" | "dim"; note?: ReactNode; testId: string }) {
   return (
     <button type="button" className={`mz-fq-opt${state ? ` mz-fq-opt--${state}` : ""}`} style={{ ["--mz-slab" as string]: `var(--mz-answer-${i % 4})`, ["--mz-slab-deep" as string]: `var(--mz-answer-${i % 4}-deep)` }}
       onClick={onPick} disabled={disabled} aria-pressed={state === "chosen"} data-testid={testId}>

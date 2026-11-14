@@ -1,0 +1,28 @@
+PASS A the briefing names the teams and says which one you're on
+PASS A the TV briefing lists the teams
+PASS A Team Huddle is on every phone, with your team named
+PASS A the game copied the night's teams — {"player-1":"team-coral","player-2":"team-coral","player-3":"team-sun","player-4":"team-sun"}
+PASS A the TV shows the question and each team's progress
+PASS B Keku's pick shows on Amina's phone (same team)
+PASS B Amina is told she's waiting on herself: pick an answer
+PASS B Baraka's phone (the other team) never names Keku's pick
+PASS B the TV says 1 of 2 picked for Team Coral, and no names — TEAM HUDDLE · QUESTION 1 OF 8 | What is the largest planet in our Solar System? | A | Jupiter | B | Neptune | C | Earth | D | Saturn | ▲ | Team Coral | 1 of 2 picked | ● | Team Sun | 0 of 2 picked |  
+PASS B the TV's data has no picks at all
+PASS C Coral disagrees: told to talk it over
+PASS C the TV says Coral hasn't agreed yet
+PASS C Coral agrees now
+PASS C every team agrees: the answer comes early on phones
+PASS C the TV shows each team's answer
+PASS D seven more questions played — 7
+PASS D the game finished with team results
+PASS D every player scored their team's points — {"player-1":125,"player-2":125,"player-3":375,"player-4":375}
+PASS D phones: the results with the team results card
+PASS D the TV leads with the team result
+PASS E 320 px: the results have no sideways scroll
+PASS F Charades plays with the night's three teams — ["Team Coral","Team Sun","Team Mint"]
+PASS F equal turns: 3 teams × the largest team — 6
+PASS F the TV names the acting team by its name
+PASS F the teams took turns — [0,1,2,0,1,2]
+PASS F Charades finished with team results (every team tied: equal turns, all correct)
+PASS F the TV final shows the team results
+check-team-huddle: all passed

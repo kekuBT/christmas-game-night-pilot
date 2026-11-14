@@ -1,0 +1,49 @@
+$ node scripts/check-f5.mjs http://localhost:41793
+# timeout 1500s | worker w2 | server http://localhost:41793 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full/test-results/20261114-110804-717b16f7-4230/server-data/w2)
+
+[+6.3s] PASS lobby roster: 4 players joined
+[+6.3s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games; casual-only, not in a Cup: jebena-rush, spectrum, family-questions, team-huddle)
+[+8.1s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+19.6s] OK impostor: finished
+[+19.6s] PASS day playlist: impostor finished without sticking
+[+20.9s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+53.3s] OK caption-clash: finished
+[+53.3s] PASS day playlist: caption-clash finished without sticking
+[+55.0s] PASS TV projection leak-free while trivia playing — no forbidden keys
+[+98.6s] OK trivia: finished
+[+98.6s] PASS day playlist: trivia finished without sticking
+[+100.0s] PASS TV projection leak-free while word-connections playing — no forbidden keys
+[+124.0s] OK word-connections: finished
+[+124.0s] PASS day playlist: word-connections finished without sticking
+[+125.3s] PASS TV projection leak-free while who-said-that playing — no forbidden keys
+[+140.0s] OK who-said-that: finished
+[+140.0s] PASS day playlist: who-said-that finished without sticking
+[+141.2s] PASS TV projection leak-free while guess-the-year playing — no forbidden keys
+[+171.6s] OK guess-the-year: finished
+[+171.6s] PASS day playlist: guess-the-year finished without sticking
+[+172.8s] PASS TV projection leak-free while closest-wins playing — no forbidden keys
+[+196.5s] OK closest-wins: finished
+[+196.5s] PASS day playlist: closest-wins finished without sticking
+[+197.8s] PASS TV projection leak-free while category-sprint playing — no forbidden keys
+[+208.7s] OK category-sprint: finished
+[+208.7s] PASS day playlist: category-sprint finished without sticking
+[+210.7s] PASS TV projection leak-free while charades playing — no forbidden keys
+[+392.2s] FAIL charades: did not reach Status: finished in 180s
+[+392.3s]   DIAG player=Alex game=charades(game-9) server=playing phase=turn:2 deadlineIn=1018s phaseIn=88s submitted=0/4 outcome=- | screen="Mchezo Code: KG34DK Playing as Alex (host) · Room: Game night Lobby & Games Cham" clock="Time left for this round: 1:28" | type=client-not-on-game
+[+392.3s]   DIAG player=Sam game=charades(game-9) server=playing phase=turn:2 deadlineIn=1018s phaseIn=88s submitted=0/4 outcome=- | screen="Mchezo Code: KG34DK Playing as Sam · Room: Game night Lobby & Games Championship" clock="Time left for this round: 1:28" | type=client-not-on-game
+[+392.3s]   DIAG player=Jo game=charades(game-9) server=playing phase=turn:2 deadlineIn=1018s phaseIn=88s submitted=0/4 outcome=- | screen="Mchezo Code: KG34DK Playing as Jo · Room: Game night Lobby & Games Championship " clock="Time left for this round: 1:28" | type=client-not-on-game
+[+392.3s]   DIAG player=Kim game=charades(game-9) server=playing phase=turn:2 deadlineIn=1018s phaseIn=88s submitted=0/4 outcome=- | screen="Mchezo Code: KG34DK Playing as Kim · Room: Game night Lobby & Games Championship" clock="Time left for this round: 1:28" | type=client-not-on-game
+[+392.3s] FAIL day playlist: charades finished without sticking — did not reach Status: finished in 180s
+[+392.3s] FAIL day playlist: all games finished in one room — 8/14 finished
+[+392.4s] FAIL ledger holds one game-finished event per playlist game — 8/14 finish events
+[+392.4s] FAIL TV projection marks every playlist game finished — charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess
+[+393.9s] PASS championship standings list all 4 players after full day
+[+393.9s] PASS championship per-game breakdown present after full day
+[+424.4s] FATAL: locator.click: Timeout 30000ms exceeded.
+[+424.4s] Call log:
+[+424.4s]   - waiting for getByTestId('tv-dir-lobby')
+[+424.4s] 
+[+424.5s] F5 FAILED: 5/25 failed
+[+424.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# FAIL (exit 1) in 424.5s | cpu 22.6s, peak memory 289 MB

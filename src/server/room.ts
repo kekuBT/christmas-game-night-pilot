@@ -5,7 +5,8 @@ import { GAME_REGISTRY, getGame, isCooperative } from "../games/registry.js";
 import { CUP_FINISH_RULES, cupChampions, sharedRanks } from "../shared/cupFinish.js";
 import { FAMILY_LIMITS, checkFamilyQuestion, type FamilyQuestion, type FamilyQuestionInput } from "../shared/familyPack.js";
 import { FAMILY_ROUNDS_MIN, pickFamilyQuestions, type FamilyGameQuestion } from "../games/modules/family.js";
-import { TEAM_COLORS, TEAM_LIMITS, TEAM_PLAY_GAMES, balanceTeams, checkTeamName, newTeamList, smallestTeam, teamResults, type GameTeams, type RoomTeams } from "../shared/teams.js";
+import { TEAM_COLORS, TEAM_LIMITS, TEAM_NATIVE_GAMES, TEAM_PLAY_GAMES, balanceTeams, checkTeamName, newTeamList, smallestTeam, teamResults, type GameTeams, type RoomTeams } from "../shared/teams.js";
+import { HUDDLE_ROUNDS, type HuddleQuestion } from "../games/modules/teamHuddle.js";
 import type { TeamResult } from "../shared/teamResult.js";
 import { sameSettings, validateGameSettings, type GameSettings } from "../games/settings.js";
 import { PARTY_TRANSITION_MINUTES, validatePartyPlan } from "../games/party.js";
@@ -78,6 +79,7 @@ import {
 import { reviewSprintRound, scoreSprintRound, SPRINT_CATEGORIES, type SprintMatcherVersion } from "../games/sprint.js";
 import {
   charadesPlayerScores,
+  charadesTotalTurns,
   charadesTurn,
   initCharades,
   projectCharades,
@@ -1006,10 +1008,14 @@ export class RoomEngine {
     // service and recorded in the Cup's history in this same synchronous
     // step, so it is atomic with game creation.
     let selected: { extra: unknown; record: () => void; pending: PendingContent } | null = null;
-    if (this._cup.origin === "created" && (CONTENT_GAMES as string[]).includes(gameId)) {
-      const cg = gameId as ContentGameId;
+    // Stage 12.8 (D-S128-01): a game built for teams plays with the night's teams, or two dealt for it now (seeded).
+    const nativeTeams = TEAM_NATIVE_GAMES.has(gameId) ? this.teamsForTeamGame(playerIds, seed) : undefined;
+    // Stage 12.8 (D-S128-02): Team Huddle's questions come from the Trivia pool, used up the same way.
+    const contentGameId = gameId === "team-huddle" ? "trivia" : gameId;
+    if (this._cup.origin === "created" && (CONTENT_GAMES as string[]).includes(contentGameId)) {
+      const cg = contentGameId as ContentGameId;
       const mode = (opts.official ?? false) ? "official" : "practice";
-      const need = cg === "charades" ? Math.max(ITEMS_PER_GAME.charades, playerIds.length * 4) : ITEMS_PER_GAME[cg];
+      const need = gameId === "team-huddle" ? HUDDLE_ROUNDS : cg === "charades" ? Math.max(ITEMS_PER_GAME.charades, playerIds.length * 4) : ITEMS_PER_GAME[cg];
       // E2 v3: Category Sprint eligibility and matcher are frozen here, at
       // game start, from the Cup's own rules (absent on older Cups = v1).
       const sprintRules = cg === "category-sprint" ? this._cup.categorySprint : undefined;
@@ -1019,7 +1025,7 @@ export class RoomEngine {
       const pick = selectContent({ lib: this.content, gameId: cg, count: need, mode, roomKind: this.kind, cupId: this._cup.cupId, usage: this.contentUsage, seq: this.contentSeq, today: new Date(startedAt).toISOString().slice(0, 10), ...(sprintSel ? { sprint: sprintSel } : {}), ...(season ? { season } : {}) });
       if (!pick.ok) throw new ContentShortage(pick.message, pick.available, pick.needed, pick.reason === "no-suitable-category" ? "NO_SUITABLE_CATEGORY" : "CONTENT_EXHAUSTED");
       selected = {
-        extra: materialize(cg, pick.items, { seed, playerIds, sprintAnswerRules: this._cup.categorySprint?.answerRules ?? 1, ...(sprintRules ? { sprint: { matcherVersion: sprintRules.matcher, ...(sprintSel ? { eligibility: sprintSel } : {}) } } : {}) }),
+        extra: materialize(cg, pick.items, { seed, playerIds, sprintAnswerRules: this._cup.categorySprint?.answerRules ?? 1, ...(sprintRules ? { sprint: { matcherVersion: sprintRules.matcher, ...(sprintSel ? { eligibility: sprintSel } : {}) } } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}) }),
         record: () => {
           recordUsage(this.contentUsage, pick.items, { gameInstanceId: id, day: this.championshipDay, mode, seq: this.contentSeq });
           this.contentSeq += 1;
@@ -1054,7 +1060,7 @@ export class RoomEngine {
       lifecycleVersion: 1,
       day: this.championshipDay,
       seed,
-      extra: selected ? selected.extra
+      extra: selected && gameId !== "team-huddle" ? selected.extra
         : gameId === "impostor"
           ? initImpostor(playerIds, seed)
           : gameId === "caption-clash"
@@ -1074,12 +1080,12 @@ export class RoomEngine {
                         : gameId === "category-sprint"
                           ? { roundIndex: 0, submissions: {} }
                           : gameId === "charades"
-                            ? initCharades(playerIds)
-                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}) }),
+                            ? initCharades(playerIds, undefined, nativeTeams)
+                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}) }),
     };
     // Stage 12.7 (D-S127-02): played as teams when the room has teams, the game can be, and at least two teams have
     // players in it; the teams are copied now (only this game's players), never read back from the room later.
-    const teamSnap = this.teamsForGame(gameId, playerIds);
+    const teamSnap = nativeTeams ?? this.teamsForGame(gameId, playerIds);
     if (teamSnap) instance.teams = teamSnap;
     this.games.set(id, instance);
     // Stage 12.5: the questions this game plays are used (a cancelled briefing leaves no game: they are ready again).
@@ -2542,7 +2548,7 @@ export class RoomEngine {
           st.promptIndex = (st.promptIndex ?? st.turnIndex) + 1;
           st.turnIndex += 1;
           st.passesThisTurn = 0;
-          if (st.turnIndex >= st.teams[0]!.length + st.teams[1]!.length) {
+          if (st.turnIndex >= charadesTotalTurns(st)) {
             st.phase = "finished";
             this.finishGame(game, charadesPlayerScores(st));
           }
@@ -2806,6 +2812,8 @@ export class RoomEngine {
       ...(g.season ? { season: g.season } : {}),
       // Stage 9.1: a game's start settings (Jebena Rush's hearts) are public rules, not secrets.
       ...(g.settings ? { settings: g.settings } : {}),
+      // Stage 12.8: a team game's teams are announced before play (public: the names on every screen anyway).
+      ...(g.teams ? { teams: g.teams } : {}),
       timedOut: false,
       day: g.day ?? 1,
       players: g.players,
@@ -2932,6 +2940,25 @@ export class RoomEngine {
 
   private bumpTeams(): void {
     if (this.teams) this.teams.revision = this.nextTeamsRevision();
+  }
+
+  /**
+   * Stage 12.8 (D-S128-01): the teams of a game built for teams. The night's teams when at least two of them have
+   * players in this game (a player on no team joins the smallest of those); otherwise two teams dealt for this game
+   * only (seeded). Pausing doesn't apply: these games are always team games.
+   */
+  private teamsForTeamGame(playerIds: readonly string[], seed: number): GameTeams {
+    if (this.kind === "casual" && this.teams) {
+      const members: Record<string, string> = {};
+      for (const p of playerIds) { const t = this.teams.members[p]; if (t) members[p] = t; }
+      if (new Set(Object.values(members)).size >= 2) {
+        const list = this.teams.list.filter((t) => Object.values(members).includes(t.id)).map((t) => ({ ...t }));
+        for (const p of playerIds) if (!members[p]) members[p] = smallestTeam({ list, members }, playerIds.filter((x) => members[x]));
+        return { list, members };
+      }
+    }
+    const list = newTeamList(2);
+    return { list, members: balanceTeams(playerIds, list, seed) };
   }
 
   private assertTeamsHost(actorId: string): void {
@@ -4032,6 +4059,13 @@ function restoreSession(raw: unknown, kind: RoomKind): SessionState {
   return r.onBreak === true
     ? { onBreak: true, ...(typeof r.breakSince === "number" ? { breakSince: r.breakSince } : {}), revision, ops }
     : { onBreak: false, revision, ops };
+}
+
+/** Stage 12.8: Team Huddle's questions: the Trivia pool's (chosen and materialised like Trivia's), or the built-in set. */
+function huddleQuestions(extra: unknown, seed: number): HuddleQuestion[] {
+  const fromPool = (extra as { questions?: TriviaQuestion[] } | undefined)?.questions;
+  const qs = fromPool && fromPool.length > 0 ? fromPool : generateTrivia(seed, HUDDLE_ROUNDS);
+  return qs.slice(0, HUDDLE_ROUNDS).map((q) => ({ id: q.id, prompt: q.prompt, options: [...q.options], correctIndex: q.correctIndex, ...(q.explanation ? { explanation: q.explanation } : {}) }));
 }
 
 /** Stage 12.7: saved teams, checked: 2–4 known colours, names that pass the check, members only of those teams. */
