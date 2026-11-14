@@ -10,9 +10,9 @@ import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
 import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, type Route, type RoomSub } from "./ui/mchezo/index.js";
-import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen } from "./components/mchezo/Home.js";
+import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen, TvEntryScreen } from "./components/mchezo/Home.js";
 import { SoloHome, SoloRound, soloShelf } from "./components/mchezo/Solo.js";
-import { ChooseGameSheet, MakeCupSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
+import { ChooseGameSheet, MakeCupSheet, RoomLobby, RoomMenuSheet, UndoCupSheet } from "./components/mchezo/Lobby.js";
 import { PartyStartAsk, QuickPartyCard, QuickPartySheet, type PartyApplyResult, type PartyAsk, type PartyPlanInput } from "./components/mchezo/QuickParty.js";
 import { anchorHomeBelow, stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
@@ -317,6 +317,11 @@ export function App() {
   // Stage 6.1: Host a game makes a casual room unless the host picks a Family Cup.
   // Stage 12.1 (D-S121-02): the host's "Make it a Family Cup" request in flight, and why it was refused.
   const [cupBusy, setCupBusy] = useState(false);
+  // Stage 12.2 (D-S122-02): rooms where this device's host said "Not now" to the Family Cup nudge. The page's own
+  // memory is the source of truth; browser storage only carries it to the next visit (a failed write changes nothing).
+  const [nudgeHidden, setNudgeHidden] = useState<ReadonlySet<string>>(() => {
+    try { const v = JSON.parse(localStorage.getItem("mz_cup_nudge_hidden") ?? "[]"); return new Set(Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []); } catch { return new Set(); }
+  });
   const [cupErr, setCupErr] = useState("");
   // Stage 6.1: Start on the Play solo list starts the round on arrival; a reload does not.
   const [soloAutostart, setSoloAutostart] = useState<string | null>(null);
@@ -404,8 +409,16 @@ export function App() {
 
   useEffect(() => { get<RegistryGame[]>("/games").then(setGames).catch(() => {}); }, []);
   // A QR or invite link (/join?code=…) fills in the code.
-  const routeCode = route.name === "join" || route.name === "watch" ? route.code : undefined;
+  const routeCode = route.name === "join" || route.name === "watch" || route.name === "tv" ? route.code : undefined;
   useEffect(() => { if (routeCode) setCode(routeCode); }, [routeCode]);
+  // Stage 12.2 (D-S122-03): /tv?code=ABC123 starts watching at once: once per code, never from a tab that holds a seat.
+  const tvAutoStarted = useRef<string | null>(null);
+  useEffect(() => {
+    if (route.name !== "tv" || !routeCode || routeCode.length !== 6 || code !== routeCode) return;
+    if (playerId || specToken || tvAutoStarted.current === routeCode) return;
+    tvAutoStarted.current = routeCode;
+    void spectate();
+  }, [route.name, routeCode, code, playerId, specToken]);
   // An invite link to the room this tab already sits in just opens the room.
   useEffect(() => {
     if (route.name === "join" && routeCode && roomId && playerId && proj?.joinCode === routeCode) navigate(LOBBY, { replace: true });
@@ -568,7 +581,8 @@ export function App() {
     setErr(""); try {
       // Stage 6.1: casual by default; a Family Cup only when the host chose it.
       // Stage 12.1 (D-S121-01): every hosted room starts as a game night for fun; a Family Cup is a later upgrade.
-      const r = await post<JoinResponse>("/rooms", { name: "Game night", kind: "casual" });
+      // Stage 12.2 (D-S122-04): a host whose phone is set to the Christmas look starts with Christmas content.
+      const r = await post<JoinResponse>("/rooms", { name: "Game night", kind: "casual", ...(lookPref === "christmas" ? { contentSeason: "christmas" } : {}) });
       const j = await post<JoinResponse>(`/rooms/${r.roomId}/join`, { displayName: name.trim(), asHost: true, hostClaimToken: r.hostClaimToken });
       // The lobby itself shows the new room and its code; no extra message.
       await saveSession({ ...j, roomId: r.roomId }); setMsg("");
@@ -1295,12 +1309,19 @@ export function App() {
           status={status}
         />
       );
+    } else if (route.name === "tv") {
+      // Stage 12.2 (D-S122-03): the short TV address. Watching only; a device that holds a seat is told so instead.
+      screen = (
+        <TvEntryScreen code={code} onCodeChange={setCode} onShow={() => void spectate()} onBack={() => back(HOME)}
+          blocked={seated} notice={seated ? seatedNotice : undefined} status={status} />
+      );
     } else if (route.name === "host") {
       screen = (
         <HostScreen
           name={name} onNameChange={setName} onHost={createRoom} onBack={() => back(HOME)}
           remember={remember} blocked={seated} notice={seatedNotice}
           firstGame={hostPick ? catalog.find((g) => g.id === hostPick) : undefined}
+          christmasContent={lookPref === "christmas"}
           status={status}
         />
       );
@@ -1516,6 +1537,17 @@ export function App() {
   // Stage 6.1: a casual room has no Cup, so every game in it is just for fun
   // (the server refuses official starts there). Rooms without a kind are Cups.
   const casualRoom = proj?.roomKind === "casual" || proj?.roomKind === "solo";
+  // Stage 12.2 (D-S122-02): after two finished games, the host of a casual room that has never been a Cup sees a nudge.
+  const cupNudge = !!(roomId && me?.isHost && proj?.roomKind === "casual" && !proj.cupUndone && !nudgeHidden.has(roomId)
+    && (proj.games ?? []).filter((g) => g.status === "finished").length >= 2 && !(proj.games ?? []).some((g) => g.status === "briefing" || g.status === "playing"));
+  const hideCupNudge = () => {
+    if (!roomId) return;
+    setNudgeHidden((prev) => {
+      const next = new Set(prev); next.add(roomId);
+      try { localStorage.setItem("mz_cup_nudge_hidden", JSON.stringify([...next].slice(-20))); } catch { /* this page still remembers */ }
+      return next;
+    });
+  };
   const startMode: "official" | "practice" = casualRoom || upNextPracticeOnly ? "practice" : planner ? gameMode : serverPlan?.official ? "official" : "practice";
 
   // D1: the server refuses official starts with fewer than 2 competitors. Say so
@@ -1682,6 +1714,27 @@ export function App() {
           }}
         />
       )}
+      {sheet === "uncup" && me?.isHost && proj?.roomKind === "cup" && proj.cupSince && (
+        <UndoCupSheet
+          practiced={(proj.games ?? []).filter((g) => !(proj.casualGameIds ?? []).includes(g.id)).length}
+          busy={cupBusy}
+          error={cupErr || undefined}
+          onClose={closeSheet}
+          onConfirm={async () => {
+            setCupBusy(true); setCupErr("");
+            try {
+              await post<Record<string, unknown>>(`/rooms/${roomId}/casual`, {});
+              setMsg("This room is a casual game night again.");
+              closeSheet();
+            } catch (e) {
+              setCupErr(e instanceof Error && e.message ? e.message : "The game didn’t answer. Nothing changed; try again.");
+            } finally {
+              setCupBusy(false);
+              void refresh();
+            }
+          }}
+        />
+      )}
       {sheet === "menu" && (
         <RoomMenuSheet
           cupLabel={casualRoom ? undefined : cupLabel}
@@ -1695,6 +1748,7 @@ export function App() {
           onHome={() => navigate(HOME)}
           onReconnect={() => { void reconnect(); }}
           onMakeCup={me?.isHost && proj?.roomKind === "casual" ? () => { setCupErr(""); openSheet("cup"); } : undefined}
+          onUndoCup={me?.isHost && proj?.roomKind === "cup" && proj.cupSince && !(proj.games ?? []).some((g) => g.official && g.status === "finished") ? () => { setCupErr(""); openSheet("uncup"); } : undefined}
           // While the menu is open its messages show here (and not in the dock).
           message={err || msg ? <div className="mz-menu__msg">{err && <p className="err">{err}</p>}{msg && <p className="ok" role="status">{msg}</p>}</div> : undefined}
           phone={<SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} lookSaved={lookSaved} />}
@@ -1840,6 +1894,10 @@ export function App() {
             : watchingGame ? <NoticeCard tone="info" title={`${games.find((x) => x.id === watchingGame.gameId)?.title ?? "A game"} is being played`} testId="not-in-game-note">It started before you joined, so you’ll play the next one.</NoticeCard>
             // Stage 12.1 (D-S121-02): everyone hears the room became a Family Cup, until its first official game finishes.
             : proj?.cupSince && !(proj.games ?? []).some((g) => g.official && g.status === "finished") ? <NoticeCard tone="info" title="This room is now a Family Cup" testId="cup-started-notice">Day {proj.championshipDay ?? 1} of 7. Official games count toward the standings; the games played before stay casual.</NoticeCard>
+            // Stage 12.2 (D-S122-01): everyone hears the room went back to a casual game night, until the next game starts.
+            : proj?.roomKind === "casual" && proj.cupUndone && (proj.games ?? []).length <= proj.cupUndone.games ? <NoticeCard tone="info" title="A casual game night again" testId="cup-undone-notice">The host went back from the Family Cup before any official game finished. Quick Party and What’s next are back; nothing counted.</NoticeCard>
+            // Stage 12.2 (D-S122-02): the host's gentle nudge after two finished games (never once the room has been a Cup).
+            : cupNudge ? <NoticeCard tone="info" title="Enjoying tonight?" testId="cup-nudge" action={<><button type="button" className="mz-chip-btn" data-testid="cup-nudge-open" onClick={() => { setCupErr(""); openSheet("cup"); }}>Make it a Family Cup</button><button type="button" className="mz-chip-btn" data-testid="cup-nudge-dismiss" onClick={hideCupNudge}>Not now</button></>}>Make it a Family Cup: same room and code, official games over 7 days, with a winner each day.</NoticeCard>
             : undefined}
           error={err || undefined}
           message={sheet === "menu" ? undefined : msg || undefined}

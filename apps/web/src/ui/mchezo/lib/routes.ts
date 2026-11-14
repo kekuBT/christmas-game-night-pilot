@@ -28,7 +28,7 @@
  */
 
 export type RoomSub = "lobby" | "cup" | "tv" | "memories" | "library" | "studio";
-export type Sheet = "invite" | "choose" | "menu" | "settings" | "details" | "party" | "cup";
+export type Sheet = "invite" | "choose" | "menu" | "settings" | "details" | "party" | "cup" | "uncup";
 export type Route =
   | { name: "home" }
   | { name: "join"; code?: string }
@@ -37,6 +37,8 @@ export type Route =
   | { name: "solo"; gameId?: string }
   | { name: "library"; gameId?: string; lib?: string }
   | { name: "watch"; code?: string }
+  /** Stage 12.2 (D-S122-03): the short TV address, /tv (one code box; watching, no seat). */
+  | { name: "tv"; code?: string }
   | { name: "room"; sub: RoomSub; gameId?: string; lib?: string };
 
 /** The library view keys an address may carry (see lib/library.ts). */
@@ -48,7 +50,7 @@ function libQuery(params: URLSearchParams): string | undefined {
   return s ? s : undefined;
 }
 
-const SHEETS: readonly Sheet[] = ["invite", "choose", "menu", "settings", "details", "party", "cup"];
+const SHEETS: readonly Sheet[] = ["invite", "choose", "menu", "settings", "details", "party", "cup", "uncup"];
 const GAME_ID = /^[a-z0-9-]{1,40}$/;
 const SUBS: Readonly<Record<string, RoomSub>> = { "": "lobby", cup: "cup", tv: "tv", memories: "memories", library: "library", studio: "studio" };
 const CODE = /^[A-Z0-9]{6}$/;
@@ -74,6 +76,7 @@ export function parseRoute(pathname: string, search = ""): { route: Route; sheet
   else if (parts[0] === "host" && parts.length === 1) route = { name: "host" };
   else if (parts[0] === "solo" && parts.length <= 2) route = parts[1] && GAME_ID.test(parts[1]) ? { name: "solo", gameId: parts[1] } : { name: "solo" };
   else if (parts[0] === "watch" && parts.length === 1) route = code ? { name: "watch", code } : { name: "watch" };
+  else if (parts[0] === "tv" && parts.length === 1) route = code ? { name: "tv", code } : { name: "tv" };
   else if (parts[0] === "library") {
     const lib = libQuery(params);
     route = { name: "library", ...(parts[1] ? { gameId: decodeURIComponent(parts[1]) } : {}), ...(lib ? { lib } : {}) };
@@ -97,6 +100,7 @@ export function routeUrl(route: Route, sheet: Sheet | null = null, game: string 
     case "solo": path = route.gameId ? `/solo/${encodeURIComponent(route.gameId)}` : "/solo"; break;
     case "library": path = route.gameId ? `/library/${encodeURIComponent(route.gameId)}` : "/library"; break;
     case "watch": path = "/watch"; if (route.code) q.set("code", route.code); break;
+    case "tv": path = "/tv"; if (route.code) q.set("code", route.code); break;
     case "room": {
       const seg = route.sub === "lobby" ? "" : `/${route.sub}`;
       path = `/room${seg}${route.sub === "library" && route.gameId ? `/${encodeURIComponent(route.gameId)}` : ""}`;

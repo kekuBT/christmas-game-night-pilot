@@ -296,6 +296,8 @@ export function RoomMenuSheet(p: {
   onReconnect: () => void;
   /** Stage 12.1 (D-S121-02): the host of a casual room can make it a Family Cup (opens the confirmation sheet). */
   onMakeCup?: () => void;
+  /** Stage 12.2 (D-S122-01): the host of an upgraded Cup with no official game finished can go back to a casual game night. */
+  onUndoCup?: () => void;
   /** Motion setting (SettingsBar). */
   phone: ReactNode;
   /** This device: remember, seat backup (recovery code), sign out. */
@@ -313,6 +315,7 @@ export function RoomMenuSheet(p: {
         <MenuRow icon={<Icon d={ICON.tv} size={20} />} label="Show on a TV" testId="menu-tv" onClick={p.onTv} />
         {p.cupLabel && <MenuRow icon={<Icon d={ICON.trophy} size={20} />} label={p.cupLabel} detail={p.dayLabel} testId="menu-cup" onClick={p.onCup} />}
         {p.onMakeCup && <MenuRow icon={<Icon d={ICON.trophy} size={20} />} label="Make it a Family Cup" detail="official games · 7 days · standings" testId="menu-make-cup" onClick={p.onMakeCup} />}
+        {p.onUndoCup && <MenuRow icon={<span>↩︎</span>} label="Back to a casual game night" detail="until the first official game finishes" testId="menu-undo-cup" onClick={p.onUndoCup} />}
         <MenuRow icon={<span>📖</span>} label="Memory Book" testId="menu-memory" onClick={p.onMemory} />
         <MenuRow icon={<span>🎲</span>} label="All games" testId="browse-games" onClick={p.onLibrary} />
       </div>
@@ -354,12 +357,41 @@ export function MakeCupSheet({ played, busy, error, onConfirm, onClose }: {
         <li><b>From now on:</b> before each game you choose Official (counts) or Practice. You end each Cup day when you’re ready.</li>
         <li><b>What stays:</b> the room code, everyone’s seat and the Memory Book.{played > 0 ? ` The ${played === 1 ? "game" : `${played} games`} already played ${played === 1 ? "stays" : "stay"} casual and ${played === 1 ? "doesn’t" : "don’t"} count.` : ""}</li>
         <li><b>Casual-only extras end:</b> Quick Party, What’s next, Play again, breaks and handing over the host role are for casual rooms.</li>
-        <li><b>It can’t be undone.</b></li>
+        <li><b>Changed your mind?</b> Until the first official game finishes, you can go back to a casual game night from the room menu.</li>
       </ul>
       {error ? <p className="err" role="alert" data-testid="make-cup-error">{error}</p> : null}
       <div className="mz-sheet__actions">
         <Keycap block disabled={busy} onClick={onConfirm} data-testid="make-cup-confirm">{busy ? "Starting the Family Cup…" : "Make it a Family Cup"}</Keycap>
         <button type="button" className="mz-chip-btn" data-testid="make-cup-cancel" onClick={onClose}>Not now</button>
+      </div>
+    </Sheet>
+  );
+}
+
+/**
+ * Stage 12.2 (docs/stage12/stage122.md §1; D-S122-01): "Back to a casual game night", while no official game has
+ * finished. The server decides (host only, upgraded Cups only, not mid-game); a refusal is shown here, nothing changes.
+ */
+export function UndoCupSheet({ practiced, busy, error, onConfirm, onClose }: {
+  /** Practice games played since this room became a Family Cup (they stay, as casual games). */
+  practiced: number;
+  busy: boolean;
+  error?: string;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <Sheet title="Back to a casual game night" onClose={onClose} testId="undo-cup-sheet" kicker="No official game has finished yet">
+      <p className="mz-details__pitch">This room goes back to a game night just for fun. No Cup results are lost: nothing official has finished.</p>
+      <ul className="mz-makecup" data-testid="undo-cup-points">
+        <li><b>Back:</b> Quick Party, What’s next, Play again, breaks and handing over the host role.</li>
+        <li><b>What stays:</b> the room code, everyone’s seat and the Memory Book.{practiced > 0 ? ` The ${practiced === 1 ? "practice game" : `${practiced} practice games`} played since ${practiced === 1 ? "stays" : "stay"}, as casual.` : ""}</li>
+        <li><b>Later:</b> you can make it a Family Cup again from the room menu.</li>
+      </ul>
+      {error ? <p className="err" role="alert" data-testid="undo-cup-error">{error}</p> : null}
+      <div className="mz-sheet__actions">
+        <Keycap block disabled={busy} onClick={onConfirm} data-testid="undo-cup-confirm">{busy ? "Going back…" : "Back to a casual game night"}</Keycap>
+        <button type="button" className="mz-chip-btn" data-testid="undo-cup-cancel" onClick={onClose}>Keep the Family Cup</button>
       </div>
     </Sheet>
   );

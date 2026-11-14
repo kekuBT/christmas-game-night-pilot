@@ -1555,3 +1555,61 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **A TV opened later** never shows it.
   - **No champion:** the server has no end-of-Cup state, so the TV never says "champion". The Make-a-Cup sheet's "a champion at the end" was removed for the same reason.
   - **Alternative rejected:** crowning the overall leader after Day 7. That's a Cup-rules addition (`docs/stage12/stage121-discussions.md`).
+
+## Stage 12.2: finishing the one path (undo, nudge, /tv, content follows the look, TV copy)
+**Authorization:** the owner, directly in chat on 2026-11-13 at about 10:40 p.m. ET, replying to the Stage 12.1 report's discussion list: "I agree with the suggestions as well please implement, self direct your self do the best you can with good quality". Spec: `docs/stage12/stage122.md`. Branch `claude/stage12-2-one-path-follow-ups`, stacked on Stage 12.1 (`d80dfb7`). Nothing is merged or deployed. ChatGPT can review these like any stage.
+
+- **D-S122-01 "Back to a casual game night": the Family Cup upgrade can be undone until the first official game finishes. This amends D-S121-02's "one way".**
+  - **Engine:** `RoomEngine.undoCupUpgrade`; HTTP: `POST /rooms/:id/casual`.
+  - **Who and when:**
+    - host only (403 `NOT_HOST`);
+    - only a room that became a Cup through the upgrade. A Cup created as one has no game night to go back to (409 `NOT_UPGRADED`), and a solo room isn't a Cup (409 `NOT_A_CUP`);
+    - refused while a game is getting ready or playing (409 `GAME_IN_PROGRESS`);
+    - refused once any official game has finished (409 `OFFICIAL_GAME_PLAYED`);
+    - a room that's already casual changes nothing (200, `changed: false`).
+  - **What it does:**
+    - the kind becomes `casual` and the day 1;
+    - every game in the room joins `casualGameIds`, including practice games played during the short Cup;
+    - `cupSince` is cleared; the session is reset with no break;
+    - one ledger event, `cup-undone`, with the actor and the number of Cup-era games;
+    - `cupUndone {at, seq, games}` is recorded (persisted, in every projection) so the lobby can say so;
+    - the stored up-next plan becomes non-official.
+  - **The Cup record** is kept but unused; a later upgrade starts a fresh one, as before, and clears `cupUndone`.
+  - **The Memory Book (amends D-S121-02's era rule):** when the server says a cited game is casual now, that wins over the "cup" mode an entry recorded when it was saved. This can only happen to a practice game played during an undone Cup, because a Cup with a finished official game can't be undone. So no "Day 1" is left behind by a Cup that never happened.
+  - **Phones:**
+    - the host's room menu offers "Back to a casual game night", with a sheet: what comes back, what stays, and that it can be a Family Cup again later;
+    - everyone's lobby says "A casual game night again" until the next game starts;
+    - the Make-a-Cup sheet's "It can't be undone" became "Changed your mind? Until the first official game finishes, you can go back to a casual game night from the room menu."
+  - **Why this line:** until an official game has finished, nothing official exists, so going back loses nothing. After it, going back would turn real Cup results into "just for fun", which D-S121-02 rejected for honesty.
+  - **Alternatives rejected:**
+    - a time window (say 10 minutes): the honest boundary is "nothing official has happened", not a clock;
+    - allowing the undo after official games and discarding their points: that's a score-integrity change and needs the owner's Cup rules.
+- **D-S122-02 A gentle Family Cup nudge for the host, after two finished games.**
+  - **Who and when:** the host of a casual room, once two games have finished, never while a game is getting ready or playing, and never in a room that has been a Cup (upgraded or undone). Guests never see it.
+  - **The card:** "Enjoying tonight? Make it a Family Cup: same room and code, official games over 7 days, with a winner each day." "Make it a Family Cup" opens the existing sheet; "Not now" hides it.
+  - **Not now** is remembered per room on this device (the last 20 rooms, in browser storage). If storage fails, the page itself still remembers.
+  - **Presentation only:** no server change.
+  - **Alternatives rejected:**
+    - a nudge after the first game: too early; one game doesn't tell a host the night is going well;
+    - showing it to guests: the decision is the host's, and a guest can't act on it.
+- **D-S122-03 A short TV address: `/tv`.**
+  - **`/tv`:** one big code box and "Show on this TV". It uses the existing spectator flow (no seat, no name, no scores, public feed only).
+  - **`/tv?code=ABC123`:** starts watching at once, once per code. Never when this page already has a seat or a spectator token.
+  - **Served as an app path**, so a reload or a typed address works. `/tv/x` is not one.
+  - **The phone's Invite sheet** adds "On the TV: open <host>/tv and type the code." The TV lobby keeps its QR code for phones.
+  - **Alternative rejected:** a separate TV pairing code. It's more state for a step the room code already covers.
+- **D-S122-04 A host whose phone is pinned to the Christmas look starts the room with Christmas content. This reverses the reviewed Stage 8.2 rule for that one case, with the owner's agreement.**
+  - **The rule:** `POST /rooms` accepts an optional `contentSeason` (`everyday` | `christmas`) for casual rooms. The web app sends `christmas` only when the host's look is pinned to Christmas, not "Match the game".
+  - **One time, at creation:** never live. The host can switch to Everyday in the lobby as before. Content is still bound per game at start.
+  - **Said on screen:** the Host screen shows "🎄 Your phone shows the Christmas look, so tonight's questions start as Christmas ones. You can switch to Everyday in the lobby."
+  - **Unchanged:**
+    - a guest's look never changes a room;
+    - "Match the game" and Everyday hosts get Everyday;
+    - a Cup ignores `contentSeason`;
+    - an unknown value is refused (400).
+  - **Alternatives rejected:**
+    - following the look live: a host changing their phone's look mid-night would change the room's questions without a word;
+    - following "Match the game" too: that look follows the room, so it would be circular.
+- **D-S122-05 TV copy: "Family Cup", and a † instead of "qualifying" on every row.**
+  - **Name:** the TV calls the Cup "Family Cup" everywhere. The format's long name ("Individual Family Cup") stays on the phone's Cup screen.
+  - **Eligibility:** a not-yet-eligible player's total carries "†" (read aloud as "not eligible to win yet"). One footnote under the list says "† Not eligible to win yet: too few counted Cup days."

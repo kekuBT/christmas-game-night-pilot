@@ -5,5 +5,5 @@
  * (`/rooms/...`, `/games`) are never client routes.
  */
 export function isClientPath(pathname: string): boolean {
-  return /^\/(?:join|host|watch|solo(?:\/[a-z0-9-]+)?|library(?:\/[^/]+)?|room(?:\/(?:cup|tv|memories|studio|library(?:\/[^/]+)?))?)\/?$/.test(pathname);
+  return /^\/(?:join|host|watch|tv|solo(?:\/[a-z0-9-]+)?|library(?:\/[^/]+)?|room(?:\/(?:cup|tv|memories|studio|library(?:\/[^/]+)?))?)\/?$/.test(pathname);
 }

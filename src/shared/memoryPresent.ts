@@ -55,7 +55,12 @@ export interface BookContext {
 export const NO_NAME = "A player";
 
 export function entryMode(e: PresentableEntry, ctx: Pick<BookContext, "roomKind" | "sourceGames">): BookMode {
-  return e.source?.mode ?? ctx.sourceGames?.(e)?.[0]?.mode ?? bookModeOf(ctx.roomKind);
+  const now = ctx.sourceGames?.(e)?.[0]?.mode;
+  // Stage 12.2 (D-S122-01): when the room now treats the cited game as casual, it's casual, even if the entry recorded
+  // "cup" when it was saved. That only happens to a practice game played during a Family Cup that went back to a casual
+  // game night before any official game finished, so no "Day 1" is left behind by a Cup that never counted.
+  if (now === "casual") return "casual";
+  return e.source?.mode ?? now ?? bookModeOf(ctx.roomKind);
 }
 
 const uniqSorted = (xs: number[]) => [...new Set(xs.filter((n) => Number.isSafeInteger(n) && n > 0))].sort((a, b) => a - b);

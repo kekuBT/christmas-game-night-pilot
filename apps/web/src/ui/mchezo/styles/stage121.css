@@ -84,3 +84,14 @@
 .mz-tvshow-foot .mz-tvshow-privacy { max-width: 360px; flex: 0 1 360px; }
 .mz-tvshow-foot .mz-tvshow-director { flex: 1 1 auto; gap: 10px; }
 .mz-tvshow-foot .mz-tvshow-director .mz-chip-btn { padding: 0 16px; }
+
+/* ======================================================================= Stage 12.2 */
+/* The Cup's "not eligible yet" mark and its one footnote (D-S122-05). */
+.mz-tvfoot__mark { margin-left: 4px; color: var(--mz-text-muted); }
+.mz-tvfoot { margin: 8px 0 0; font-size: 20px; }
+/* The TV address on the Invite sheet (D-S122-03). */
+.mz-invite__tv { margin: 4px 0 0; text-align: center; }
+/* /tv: one big code box and one button, readable across a room (D-S122-03). */
+.mz-tventry { max-width: 720px; margin: 0 auto; }
+.mz-tventry .mz-h1 { font-size: clamp(28px, 4vw, 48px); }
+.mz-tventry .mz-code__input { font-size: clamp(28px, 4vw, 44px); }

@@ -32,6 +32,8 @@ export function InviteSheet({ code, url, qrDataUrl, reach, onClose }: {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
   const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
+  // Stage 12.2 (D-S122-03): the short TV address. A TV can't scan the QR code, so it types this instead.
+  const tvAddress = (() => { try { return `${new URL(url).host}/tv`; } catch { return null; } })();
   const shareText = `Join my Mchezo room with code ${code}.`;
 
   async function copy() {
@@ -71,6 +73,7 @@ export function InviteSheet({ code, url, qrDataUrl, reach, onClose }: {
         {qrDataUrl && <img className="mz-invite__qr" src={qrDataUrl} alt={`QR code to join room ${code}`} width={176} height={176} />}
         <p className="mz-invite__code" aria-label={`Room code ${code.split("").join(" ")}`}>{code}</p>
         <p className="mz-foot" style={{ marginTop: 2 }}>Scan the code, or open Mchezo and type the code.</p>
+        {tvAddress && <p className="mz-foot mz-invite__tv" data-testid="invite-tv">On the TV: open <b>{tvAddress}</b> and type the code.</p>}
         {showLink && <p className="mz-invite__link" data-testid="invite-link">{url}</p>}
         <div className="mz-sheet__actions">
           {canShare && <button type="button" className="mz-key mz-key--brand mz-key--md" data-testid="invite-share" onClick={() => void share()}>Share…</button>}

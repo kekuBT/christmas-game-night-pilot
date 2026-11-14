@@ -311,7 +311,7 @@ export class SessionRefused extends Error {
 
 /** Stage 12.1 (D-S121-02): a "Make it a Family Cup" the server refused (HTTP 403/409). Nothing changed. */
 export class CupUpgradeRefused extends Error {
-  constructor(readonly code: "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "GAME_IN_PROGRESS" | "CUP_RECORD_UNREADABLE", message: string) {
+  constructor(readonly code: "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "GAME_IN_PROGRESS" | "CUP_RECORD_UNREADABLE" | "NOT_A_CUP" | "NOT_UPGRADED" | "OFFICIAL_GAME_PLAYED", message: string) {
     super(message);
   }
 }
@@ -478,6 +478,8 @@ export class RoomEngine {
   casualGameIds: string[] = [];
   /** Stage 12.1: when this casual room became a Family Cup (null for a room created as a Cup, or still casual). */
   cupSince: { at: number; seq: number } | null = null;
+  /** Stage 12.2 (D-S122-01): when this room last went back from a Family Cup to a casual game night, and how many games it had then. */
+  cupUndone: { at: number; seq: number; games: number } | null = null;
   private cupError: string | null = null;
   private cupRaw: unknown = undefined;
   get cup(): CupRecord {
@@ -2792,6 +2794,32 @@ export class RoomEngine {
     this.session = { onBreak: false, revision: this.session.revision, ops: this.session.ops };
     const ev = this.log("cup-started", { actor: actorId, detail: { from: "casual", casualGames: this.casualGameIds.length } });
     this.cupSince = { at: ev.createdAt, seq: ev.seq };
+    this.cupUndone = null;
+    return { changed: true };
+  }
+
+  /**
+   * Stage 12.2 (docs/stage12/stage122.md §1; D-S122-01): "Back to a casual game night", the undo of upgradeToCup.
+   * Host only; only a room that became a Cup through the upgrade (a Cup created as one has no game night to go back to);
+   * refused while a game is getting ready or playing, and once any official game has finished (its results stand).
+   * Asking in a room that's already casual changes nothing. Every game in the room joins the casual games (a practice
+   * game played during the short Cup included), so the Memory Book never files one under a Cup day that didn't happen.
+   */
+  undoCupUpgrade(actorId: string): { changed: boolean } {
+    if (this.hostId !== actorId) throw new CupUpgradeRefused("NOT_HOST", "Only the host can take this room back to a casual game night.");
+    if (this.kind === "casual") return { changed: false };
+    if (this.kind !== "cup") throw new CupUpgradeRefused("NOT_A_CUP", "Only a Family Cup can go back to a casual game night.");
+    if (!this.cupSince) throw new CupUpgradeRefused("NOT_UPGRADED", "This room was created as a Family Cup, so there's no casual game night to go back to.");
+    if ([...this.games.values()].some(isActiveGame)) throw new CupUpgradeRefused("GAME_IN_PROGRESS", "A game is in progress. Go back to a casual game night once it has finished.");
+    if ([...this.games.values()].some((g) => g.official && g.status === "finished")) throw new CupUpgradeRefused("OFFICIAL_GAME_PLAYED", "An official game has finished, so this Family Cup's results stand. It can't go back to a casual game night.");
+    const cupGames = [...this.games.keys()].filter((id) => !this.casualGameIds.includes(id)).length;
+    this.casualGameIds = [...this.games.keys()];
+    this.kind = "casual";
+    this.championshipDay = 1;
+    this.session = { onBreak: false, revision: this.session.revision + 1, ops: this.session.ops };
+    const ev = this.log("cup-undone", { actor: actorId, detail: { cupGames } });
+    this.cupSince = null;
+    this.cupUndone = { at: ev.createdAt, seq: ev.seq, games: this.games.size };
     return { changed: true };
   }
 
@@ -3360,6 +3388,7 @@ export class RoomEngine {
       roomKind: this.kind,
       // Stage 12.1 (D-S121-02): a casual room that became a Family Cup, and the games it played while casual (public ids).
       ...(this.cupSince ? { cupSince: this.cupSince, casualGameIds: this.casualGameIds } : {}),
+      ...(this.cupUndone ? { cupUndone: this.cupUndone } : {}),
       // Stage 7.1: the Quick Party lineup (casual rooms): public planning facts only.
       ...(this.kind === "casual" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
       // Stage 8.2: what this solo or casual session deals (public; never a device's look).
@@ -3464,6 +3493,7 @@ export class RoomEngine {
       kind: this.kind,
       // Stage 12.1: a room that became a Family Cup remembers when, and which games were played while it was casual.
       ...(this.cupSince ? { cupSince: this.cupSince, casualGameIds: this.casualGameIds } : {}),
+      ...(this.cupUndone ? { cupUndone: this.cupUndone } : {}),
       // Kept for older readers; the Cup record is authoritative. An unreadable
       // record is written back exactly as it was found, never overwritten.
       competitionFormat: this._cup.format,
@@ -3505,6 +3535,11 @@ export class RoomEngine {
       engine.cupSince = { at: since.at as number, seq: since.seq as number };
       const ids = data["casualGameIds"];
       engine.casualGameIds = Array.isArray(ids) ? ids.filter((x): x is string => typeof x === "string") : [];
+    }
+    // Stage 12.2: a room that went back from a Cup to a casual game night (informational; anything unreadable is left out).
+    const undone = data["cupUndone"] as { at?: unknown; seq?: unknown; games?: unknown } | undefined;
+    if (undone && typeof undone === "object" && Number.isFinite(undone.at) && Number.isSafeInteger(undone.seq) && Number.isSafeInteger(undone.games)) {
+      engine.cupUndone = { at: undone.at as number, seq: undone.seq as number, games: undone.games as number };
     }
     engine.contentUsage = (data["contentUsage"] as UsageHistory | undefined) ?? {};
     engine.contentSeq = typeof data["contentSeq"] === "number" ? data["contentSeq"] : 0;

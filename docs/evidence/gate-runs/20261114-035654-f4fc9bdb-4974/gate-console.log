@@ -1,0 +1,59 @@
+Mchezo gate targeted | run 20261114-035654-f4fc9bdb-4974
+  revision f4fc9bdb8ad350e29cf221094b3da0ec30439e6a (clean tree) | fingerprint a9501f53ff08 (535 files)
+  plan     14 steps: 1 fast/build, 12 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.2 GB available)
+  history  146 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 122 run(s))
+  estimate this run: 2–9m (low-confidence) · the same steps one after another: about 11m 36s · longest step check-mobile-everyday ~2m 58s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-content-look
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s122-tgt-f4fc9bd/test-results/20261114-035654-f4fc9bdb-4974
+        start build-web on w1 (usually 6s)
+[ 1/14] PASS         4.7s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/14] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:34237 (pid 5090, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s122-tgt-f4fc9bd/test-results/20261114-035654-f4fc9bdb-4974/server-data/w1)
+  server   w2 http://localhost:41891 (pid 5091, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s122-tgt-f4fc9bd/test-results/20261114-035654-f4fc9bdb-4974/server-data/w2)
+  server   w3 http://localhost:35175 (pid 5092, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s122-tgt-f4fc9bd/test-results/20261114-035654-f4fc9bdb-4974/server-data/w3)
+        start check-mobile-everyday on w1 (usually 2m 58s)
+        start check-themes-seasonal on w2 (usually 1m 41s)
+        start check-warm-ivory on w3 (usually 1m 05s)
+── progress  2/14 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-mobile-everyday 54s (w1), check-themes-seasonal 54s (w2), check-warm-ivory 54s (w3)
+   remaining 2–8m · total 3–9m · done around 04:00–04:05 UTC (low-confidence)
+[ 3/14] PASS        66.6s  check-warm-ivory  w3
+        start check-content-look on w3 (no timing history)
+[ 4/14] PASS           6s  check-content-look  w3
+        start check-spectator on w3 (usually 56s)
+[ 5/14] PASS       103.9s  check-themes-seasonal  w2
+        start check-casual on w2 (usually 53s)
+── progress  5/14 done · 5 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-mobile-everyday 1m 54s (w1), check-spectator 41s (w3), check-casual 10s (w2)
+   remaining 1–5m · total 3–7m · done around 04:00–04:02 UTC (low-confidence)
+[ 6/14] PASS        57.9s  check-spectator  w3
+        start check-quick-party on w3 (usually 46s)
+[ 7/14] PASS        54.4s  check-casual  w2
+        start check-tv-spectator on w2 (usually 44s)
+── progress  7/14 done · 7 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-mobile-everyday 2m 54s (w1), check-quick-party 43s (w3), check-tv-spectator 15s (w2)
+   remaining 0–3m · total 3–6m · done around 04:00–04:02 UTC (low-confidence)
+[ 8/14] PASS        48.5s  check-quick-party  w3
+        start check-one-path on w3 (usually 27s)
+[ 9/14] PASS       187.2s  check-mobile-everyday  w1
+        start check-contrast on w1 (usually 25s)
+[10/14] PASS        46.7s  check-tv-spectator  w2
+        start check-tv-entry on w2 (usually 22s)
+[11/14] PASS        33.4s  check-one-path  w3
+        start check-tv-show on w3 (usually 12s)
+[12/14] PASS        26.9s  check-contrast  w1
+[13/14] PASS        11.5s  check-tv-show  w3
+[14/14] PASS        23.6s  check-tv-entry  w2
+
+PASSED (exit 0) | targeted | run 20261114-035654-f4fc9bdb-4974
+  14 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 3m 55s · step time 11m 12s (sum) · 3 workers, 95% busy · 2.86× the same steps run one after another
+           predicted 2–9m (about 4m 03s, low-confidence) → actual 3m 55s (-3%)
+           longest  check-mobile-everyday 3m 07s, check-themes-seasonal 1m 44s, check-warm-ivory 1m 07s · the longest step is 80% of the wall time
+           machine  CPU mean 33%, peak 87% · memory available ≥ 14014 MB · load peak 2.89
+           contention ×1.044 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s122-tgt-f4fc9bd/test-results/20261114-035654-f4fc9bdb-4974/report.json

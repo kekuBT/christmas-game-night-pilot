@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-13 ~7:05 p.m. EST (Stage 12.1 built and gated: full checkpoint PASSED on aebbb29, 91/91 — see the Stage 12.1 section at the end; real-device checks still NOT RUN)
+Updated: 2026-11-13 ~11:40 p.m. EST (Stage 12.2 built and gated: full checkpoint PASSED on f4fc9bd, 92/92 — see the Stage 12.2 section at the end; Stages 12.3 and 12.4 in progress on their own branches; real-device checks still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -2479,3 +2479,27 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the upgrade is one way;
   - desktop Chromium only.
 - **Next:** owner and ChatGPT review of PR #25, and the owner's picks from the discussions. Nothing merged or deployed.
+
+## Stage 12.2: finishing the one path (owner-directed; built and gated; awaiting review)
+- **Brief:** directly from the owner in chat (2026-11-13, about 10:40 p.m. ET), replying to the Stage 12.1 discussion list: "I agree with the suggestions as well please implement, self direct your self do the best you can with good quality". Stage 12.2 takes A1, A2, A3, A5 and the copy notes C. Stage 12.3 takes A4; Stage 12.4 takes B1–B4.
+- **Base:** `d80dfb7` (PR #25's head). Branch `claude/stage12-2-one-path-follow-ups`, a draft PR stacked on #25.
+- **Spec:** `docs/stage12/stage122.md`. Decisions D-S122-01..05.
+- **Built:**
+  - **Undo (D-S122-01):** `RoomEngine.undoCupUpgrade` and `POST /rooms/:id/casual`.
+    - **Rules:** host only, upgraded Cups only, refused mid-game and once an official game has finished. Idempotent, persisted, and logged as `cup-undone`.
+    - **Effects:** Cup-era practice games become casual (the Memory Book's current casual era wins), and the stored plan stops being official.
+    - **Phones:** a menu row and a sheet, a lobby notice for everyone, and the Make-a-Cup sheet's "Changed your mind?".
+  - **Nudge (D-S122-02):** the host of a casual room sees it after two finished games; "Not now" is remembered per room on the device.
+  - **`/tv` (D-S122-03):** one code box and "Show on this TV"; `/tv?code=` starts watching at once; the Invite sheet names the address.
+  - **Content follows the look (D-S122-04):** a host pinned to the Christmas look starts a casual room with Christmas content, once, at creation, with a note on the Host screen. `POST /rooms` takes `contentSeason`.
+  - **TV copy (D-S122-05):** "Family Cup" everywhere on the TV, and a † with one footnote instead of "qualifying" on every row.
+- **Tests:** `tests/stage122-one-path.test.ts` (8). The unit suite is 1778/1778.
+- **Drivers:** `scripts/check-one-path.mjs` is extended (67 checks) and `scripts/check-content-look.mjs` is new (7 checks).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `f4fc9bd` targeted (14 drivers) `20261114-035654-f4fc9bdb-4974`: PASSED;
+  - `f4fc9bd` fast `20261114-040059-f4fc9bdb-7677`: PASSED;
+  - **`f4fc9bd` full (checkpoint) `20261114-040206-f4fc9bdb-11215`: PASSED** (exit 0, 92/92, 35 min 08 s, no retries).
+- **Tested SHA:** `f4fc9bd`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage122-screenshots/` (README inside), `docs/evidence/stage122-local/` (every local run), `docs/evidence/gate-runs/`.
+- **Not done:** real phones and a real TV browser (desktop Chromium only).
+- **Next:** Stage 12.3 (Quick Party inside a Family Cup), then Stage 12.4 (the TV's big moments), each on its own stacked branch.

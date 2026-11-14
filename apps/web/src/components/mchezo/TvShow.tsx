@@ -378,13 +378,19 @@ function TvCupList({ rows, nameOf, limit, kicker, testId }: { rows: CupRow[]; na
           <li key={r.playerId} data-player={r.playerId} data-move={r.move ?? ""}>
             <span className="mz-tvlist__rank">{r.rank}</span>
             <span className="mz-tvlist__name">{nameOf(r.playerId)}{r.move !== null && r.move !== 0 && <span className={`mz-tvlist__move mz-tvlist__move--${r.move > 0 ? "up" : "down"}`} aria-label={r.move > 0 ? `up ${r.move}` : `down ${-r.move}`}>{r.move > 0 ? `▲${r.move}` : `▼${-r.move}`}</span>}</span>
-            <span className="mz-tvlist__val">{r.total} pts{r.eligible ? "" : " · qualifying"}</span>
+            <span className="mz-tvlist__val">{r.total} pts{r.eligible ? "" : <span className="mz-tvfoot__mark" aria-label=" (not eligible to win yet)">†</span>}</span>
           </li>
         ))}
       </ol>
       {more > 0 && <p className="mz-tvshow-line mz-tvshow-line--muted">and {more} more</p>}
+      {shown.some((r) => !r.eligible) && <CupFootnote />}
     </section>
   );
+}
+
+/** Stage 12.2 (D-S122-05): one footnote for the Cup's not-yet-eligible players, instead of "qualifying" on every row. */
+function CupFootnote() {
+  return <p className="mz-tvshow-line mz-tvshow-line--muted mz-tvfoot" data-testid="tv-cup-footnote">† Not eligible to win yet: too few counted Cup days.</p>;
 }
 
 /** The lobby's Cup card: the day, the top five and the day's leader (from the server's own ceremony). */
@@ -394,11 +400,12 @@ function TvCupCard({ feed, nameOf }: { feed: TvFeed; nameOf: (id: string) => str
   const leader = feed.ceremony?.day === day ? dayLeaderLine(feed.ceremony, CUP_DAYS) : null;
   return (
     <section className="mz-tvshow-card" data-testid="tv-cup" data-day={day}>
-      <span className="mz-tv-kicker">{feed.cupLabel ?? "Family Cup"} · Day {day} of {CUP_DAYS}</span>
+      <span className="mz-tv-kicker">Family Cup · Day {day} of {CUP_DAYS}</span>
       {leader && <p className="mz-tvshow-line" data-testid="tv-cup-leader">🏆 {leader}</p>}
       {rows.length > 0 ? (
-        <ol className="mz-tvshow-cup">{rows.slice(0, 5).map((r) => <li key={r.playerId}><b>{r.rank}</b> {nameOf(r.playerId)} <span>{r.total} pts{r.eligible ? "" : " · qualifying"}</span></li>)}</ol>
+        <ol className="mz-tvshow-cup">{rows.slice(0, 5).map((r) => <li key={r.playerId}><b>{r.rank}</b> {nameOf(r.playerId)} <span>{r.total} pts{r.eligible ? "" : <span className="mz-tvfoot__mark" aria-label=" (not eligible to win yet)">†</span>}</span></li>)}</ol>
       ) : <p className="mz-tvshow-line mz-tvshow-line--muted">No official games yet. Official games count toward the Cup.</p>}
+      {rows.slice(0, 5).some((r) => !r.eligible) && <CupFootnote />}
     </section>
   );
 }
@@ -412,7 +419,7 @@ function TvCupView({ feed, nameOf, paused }: { feed: TvFeed; nameOf: (id: string
   const podium = cupPodium(rows);
   return (
     <section className="mz-tvshow-final mz-tvfinal-hero" data-testid="tv-cup-view" data-day={day}>
-      <p className="mz-tvshow-winner">{feed.cupLabel ?? "Family Cup"} · Day {day} of {CUP_DAYS}</p>
+      <p className="mz-tvshow-winner">Family Cup · Day {day} of {CUP_DAYS}</p>
       <div className="mz-tvfinal">
         <div className="mz-tvfinal__left">
           {podium ? <TvPodium steps={podium} nameOf={nameOf} paused={paused} /> : <p className="mz-tvshow-line">No Cup points yet. Official games count toward the Cup.</p>}
