@@ -1,0 +1,40 @@
+$ node scripts/check-host-handover.mjs http://localhost:37111
+# timeout 600s | worker w3 | server http://localhost:37111 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-full-16e485b/test-results/20261114-054732-16e485b8-17539/server-data/w3)
+
+[+3.9s] PASS setup: the TV marks Ada as host
+[+4.0s] PASS A a guest's menu has no players-and-roles tools
+[+4.0s] PASS A the host's menu: Make host for Bea and Cal
+[+4.4s] PASS B it names Bea and says Ada becomes a regular player — Make Bea the host? |  | Bea will run the room: starting games, the lineup and breaks. You’ll be a regular player. Your seat and scores stay as they are. |  | Cancel | Make Bea the host
+[+4.4s] PASS B focus moves to the question
+[+4.4s] PASS B Escape closes it
+[+4.5s] PASS B Cancel closes it; Ada is still the host
+[+4.8s] PASS C the menu closes once the handover is confirmed
+[+4.8s] PASS C exactly one handover: Bea is the only host, Ada isn't a cohost
+[+4.8s] PASS C the retry was the same press (same request id), to Bea — [{"targetId":"player-2","attempt":{"id":"cdf817c5-6114-4a63-95ed-732645702db8","sessionRevision":0}},{"targetId":"player-2","attempt":{"id":"cdf817c5-6114-4a63-95ed-732645702db8","sessionRevision":0}}]
+[+4.8s] PASS D Bea: 'Ada made you the host'
+[+4.8s] PASS D Ada: 'Bea is the host now. You're a player.'
+[+4.8s] PASS D Cal: 'Ada handed the host role to Bea'
+[+4.8s] PASS D Ada's Start is gone; she waits for Bea
+[+4.8s] PASS D Bea has the Start
+[+4.8s] PASS D Cal waits for Bea
+[+4.8s] PASS D the TV marks Bea as host and names her
+[+4.8s] PASS D Ada's menu has no host tools now
+[+4.9s] PASS E Ada's break, start and hand-back are refused; nothing changed — [403,400,403]
+[+4.9s] PASS F Bea's Start is a plain Start for the room's up next
+[+54.9s] PASS F the results: Bea has What's next; Ada and Cal are told Bea picks
+[+55.0s] PASS F Ada has no continuation controls
+[+55.0s] PASS G on a break
+[+56.2s] PASS G during the break, Ada is the host again (the break is kept)
+[+56.2s] PASS G Ada has Resume; Bea doesn't
+[+56.3s] PASS G Ada resumed: no break for anyone
+[+56.3s] PASS H Cal isn't connected: Make host is not offered for Cal
+[+56.6s] PASS H after reloading both: Ada has the host controls, Bea waits for Ada
+[+56.6s] PASS H exactly one host after the reloads — ["Ada"]
+[+57.3s] PASS I 320 px: the menu and the confirmation fit, no sideways scroll
+[+57.8s] PASS I 1440 px: the menu and the confirmation fit, no sideways scroll
+[+57.9s] PASS I nothing changed by the layout checks
+[+57.9s] 
+[+57.9s] All host-handover checks passed
+[+57.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 58s | cpu 4.8s, peak memory 274 MB

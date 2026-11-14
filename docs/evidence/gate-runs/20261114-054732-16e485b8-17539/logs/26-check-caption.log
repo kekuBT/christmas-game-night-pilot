@@ -1,0 +1,56 @@
+$ node scripts/check-caption.mjs http://localhost:37111
+# timeout 600s | worker w3 | server http://localhost:37111 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-full-16e485b/test-results/20261114-054732-16e485b8-17539/server-data/w3)
+
+[+6.4s] PASS the briefing explains the game
+[+7.0s] PASS everyone sees the same scene — A robot tries to tell a joke
+[+7.0s] PASS no horizontal overflow at 390px (write)
+[+7.0s] PASS no horizontal overflow at 390px (write)
+[+7.0s] PASS no horizontal overflow at 320px (write)
+[+7.0s] PASS no horizontal overflow at 360px (write)
+[+7.0s] PASS character counter counts down
+[+37.4s] PASS Bea's caption is in and shown back to her
+[+37.4s] PASS a double submit sends one caption — 1
+[+37.7s] PASS after a reload Bea still sees her caption, not an empty box
+[+38.1s] PASS keyboard: Cal submits with Tab + Enter
+[+38.3s] PASS vote cards show no names (anonymous) — “Error 404: punchline not found” | “Grandpa's new ringtone” | “Beep boop, that's a knock-knock joke” | YOURS — YOU CAN’T VOTE FOR IT | “When the robot laughs at its own joke”
+[+38.3s] PASS Bea's own caption is marked Yours and disabled
+[+38.3s] PASS Bea can vote for the other three
+[+38.3s] PASS vote cards are at least 44px tall at 320px — 68.39727783203125
+[+40.6s] PASS TV shows the scene and the captions
+[+40.6s] PASS TV never shows who wrote what
+[+40.8s] PASS a vote is confirmed on the card
+[+61.0s] PASS round 2 starts on time without Dee's vote
+[+61.0s] PASS round 2 shows last round's favourite (no names)
+[+106.9s] PASS results reach every phone
+[+106.9s] PASS results credit the winning caption's author — CAPTION CLASH · OFFICIAL
+[+106.9s] Bea wins Caption Clash
+[+106.9s] B
+[+106.9s] Bea
+[+106.9s] 
+[+106.9s] Top of the table: Bea. Modesty optional.
+[+106.9s] 
+[+106.9s] You came 3rd of 4
+[+106.9s] 175 pts
+[+106.9s] Solid middle of the pack. Room to climb.
+[+106.9s] CAPTION CLASH
+[+106.9s] The room’s favourites
+[+106.9s] 
+[+106.9s] Round 1: A robot tries to tell a joke
+[+106.9s] 
+[+106.9s] “Grandpa's new ringtone”
+[+106.9s] by Cal
+[+106.9s] 2
+[+106.9s] VOTES
+[+106.9s] 
+[+106.9s] Round 2: A fireplac
+[+106.9s] PASS results explain points (25 per caption, 100 per vote)
+[+106.9s] PASS results show participation
+[+107.0s] PASS no horizontal overflow on results at 320px
+[+107.0s] PASS the TV results still show no author names
+[+107.6s] PASS back in the lobby
+[+107.7s] PASS another Caption Clash starts with new scenes — 201
+[+108.4s] PASS the new game's first scene differs
+[+108.5s] CAPTION ALL PASSED
+[+108.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 108.5s | cpu 7.9s, peak memory 376 MB

@@ -1,0 +1,37 @@
+$ node scripts/check-casual.mjs http://localhost:40111
+# timeout 600s | worker w2 | server http://localhost:40111 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-tgt-9989a8a/test-results/20261114-053535-9989a8a4-8498/server-data/w2)
+
+[+0.9s] PASS Home is honest about Math Mayhem: 1–10 players, best with 2+ — Math Mayhem 1–10 players · best with 2+ · about 5 min
+[+1.3s] PASS Host a game: no casual/Cup choice at the door
+[+1.3s] PASS Host a game: one line says a Family Cup is a later upgrade from the room menu — Every room starts as a game night, just for fun. Want a week-long Family Cup with official games and standings? Turn this room into one any time from the room menu.
+[+2.3s] PASS a casual room is made and shows its room code — TXPML5
+[+2.3s] PASS casual lobby: no Cup chip
+[+3.2s] PASS casual lobby: Math Mayhem is up next
+[+3.2s] PASS casual lobby: no Official/Practice choice
+[+3.2s] PASS casual lobby: up next says Casual · just for fun
+[+3.2s] PASS casual lobby: the dock says just for fun, no Cup
+[+3.3s] PASS casual room menu: no Family Cup row
+[+4.0s] PASS guest on plain http (real insecure context at 192.0.2.2) — {"secure":false,"randomUUID":"undefined"}
+[+4.0s] PASS guest: waits for the host's game, marked Casual, just for fun
+[+4.0s] PASS guest: no Cup chip either
+[+4.0s] PASS host: Start names the game, with no Official/Practice suffix
+[+4.0s] PASS server: the room is casual — casual
+[+4.0s] PASS server: an official start sent straight to the API is refused — {"status":409,"body":{"error":"This room is a casual game, not a Family Cup: its games never count toward a Cup.","code":"NOT_A_CUP_ROOM","readiness":{"registered":2,"connected":2,"reconnecting":0,"away":0,"wouldPlay":["player-1","player-2"],"wouldMiss":[]}}}
+[+26.5s] PASS both players reach the results
+[+26.9s] PASS back in the lobby: Last game · Math Mayhem · Casual
+[+26.9s] PASS server: the game finished, unofficial, with both players scored — [{"s":"finished","o":false,"r":{"player-1":720,"player-2":700}}]
+[+26.9s] PASS server: the casual room has empty Cup standings — {}
+[+29.3s] PASS Family Cup lobby: the Cup chip is shown
+[+29.8s] PASS Family Cup lobby: the Official/Practice choice is there
+[+29.8s] PASS Family Cup room menu: the Cup row is there
+[+29.9s] PASS the theme is the same in a casual room and a Family Cup — {"attr":"everyday","ground":"#16111D","body":"rgb(22, 17, 29)","meta":"#16111D"} vs {"attr":"everyday","ground":"#16111D","body":"rgb(22, 17, 29)","meta":"#16111D"}
+[+30.6s] PASS Family Cup: Start is Official by default
+[+51.8s] PASS Family Cup: the official game produces Cup standings for both players
+[+51.8s] PASS server: the Cup room is a Cup and its game was official
+[+51.8s] PASS isolation: the casual room's standings are still empty after the Cup's game — {}
+[+53.5s] PASS a solo room's code joins nothing: Room not found
+[+53.5s] PASS the solo round is untouched by the attempt
+[+53.5s] CASUAL ALL PASSED
+[+53.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":6}
+
+# PASS (exit 0) in 53.6s | cpu 5.8s, peak memory 347 MB

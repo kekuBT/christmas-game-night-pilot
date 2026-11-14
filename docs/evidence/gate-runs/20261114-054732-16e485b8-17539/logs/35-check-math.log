@@ -1,0 +1,59 @@
+$ node scripts/check-math.mjs http://localhost:36441
+# timeout 600s | worker w1 | server http://localhost:36441 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s124-full-16e485b/test-results/20261114-054732-16e485b8-17539/server-data/w1)
+
+[+3.5s] PASS guest sees no game setup (host-only)
+[+3.5s] PASS guest sees no math start control
+[+4.1s] PASS host sees the kit math panel
+[+4.1s] PASS Bea sees the kit math panel
+[+4.1s] PASS first question is 16 ÷ 2
+[+4.1s] PASS question counter reads 1 of 10
+[+4.1s] PASS four answer options
+[+4.1s] PASS no TV stage chip (Math has no TV stage)
+[+4.5s] PASS no horizontal overflow at 320px
+[+4.8s] PASS no horizontal overflow at 360px
+[+5.1s] PASS no horizontal overflow at 390px
+[+16.7s] PASS locked view shows the chosen answer (8)
+[+16.7s] PASS locked view shows the server-measured time for this question (>= 10 s, past the bonus) — Answered in 12.6 s — timed by the game from when it sent this question to your phone (+20 within 5 s, +10 within 10 s, if correct).
+[+20.2s] PASS next question is 7 × 4
+[+34.7s] PASS Bea sees the waiting ring after all 10 answers
+[+34.7s] PASS Bea's done state says all answers are in
+[+43.9s] PASS game finishes and shows results
+[+43.9s] PASS server measured a time for each of the host's 10 answers — {"math-1":12561,"math-2":528,"math-3":13511,"math-4":430,"math-5":432,"math-6":426,"math-7":435,"math-8":430,"math-9":439,"math-10":532}
+[+43.9s] PASS question 1 (answered after 12 s) earned no speed bonus — {"math-1":12561,"math-2":528,"math-3":13511,"math-4":430,"math-5":432,"math-6":426,"math-7":435,"math-8":430,"math-9":439,"math-10":532}
+[+43.9s] PASS question 2's clock started when it was shown, not while the locked view of question 1 was up (< 3 s) — {"math-1":12561,"math-2":528,"math-3":13511,"math-4":430,"math-5":432,"math-6":426,"math-7":435,"math-8":430,"math-9":439,"math-10":532}
+[+43.9s] PASS host scores 1160 (all ten correct + per-question speed bonuses from server times) — Mchezo
+[+43.9s] Code: 7SYGQW
+[+43.9s] 
+[+43.9s] Playing as Ada (host) · Room: Game night
+[+43.9s] 
+[+43.9s] Lobby & Games
+[+43.9s] Championship
+[+43.9s] TV Dashboard
+[+43.9s] Memory Book
+[+43.9s] Reconnect
+[+43.9s] 
+[+43.9s] Saved.
+[+43.9s] 
+[+43.9s] MATH MAYHEM · OFFICIAL
+[+43.9s] Ada wins Math Mayhem
+[+43.9s] A
+[+43.9s] Ada
+[+43.9s] 
+[+43.9s] Ada was the only one on the scoreboard.
+[+43.9s] 
+[+43.9s] You came 1st of 2
+[+43.9s] 1160 pts
+[+43.9s] That was you. Enjoy it quietly. Or loudly.
+[+43.9s] 
+[+43.9s] 🏆 
+[+43.9s] PASS Bea scores 0 (all ten wrong)
+[+43.9s] PASS host wins the game
+[+48.1s] PASS abstention shows the sat-out waiting ring
+[+48.1s] PASS no skip button before the deadline (host only, stalled only)
+[+48.2s] PASS reloaded player is still sat out (abstention survived)
+[+60.8s] PASS game finishes without the abstained player
+[+60.8s] PASS abstained player scores 0
+[+60.9s] MATH ALL PASSED
+[+60.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 60.9s | cpu 5.1s, peak memory 258 MB

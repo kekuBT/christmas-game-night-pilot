@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-14 ~12:30 a.m. EST (Stage 12.3 built and gated: full checkpoint PASSED on d4df2af, 93/93 — see the Stage 12.3 section at the end; Stage 12.4 in progress; real-device checks still NOT RUN)
+Updated: 2026-11-14 ~1:25 a.m. EST (Stage 12.4 built and gated: full checkpoint PASSED on 16e485b, 94/94 — see the Stage 12.4 section at the end; Stages 12.2–12.4 are draft PRs #26–#28, unmerged; real-device checks still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -2536,3 +2536,41 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Tested SHA:** `d4df2af`. The head after it is docs and evidence only.
 - **Evidence:** `docs/stage12/stage123-screenshots/`, `docs/evidence/stage123-local/`, `docs/evidence/gate-runs/`.
 - **Next:** Stage 12.4 (the TV's big moments).
+
+## Stage 12.4: the TV's big moments (owner-directed; built and gated; awaiting review)
+- **Brief:** the same owner message as Stage 12.2 (2026-11-13, about 10:40 p.m. ET), items B1–B4.
+- **Base:** `4429587` (Stage 12.3's head, PR #27). Branch `claude/stage12-4-tv-moments`, a draft PR stacked on #27.
+- **Spec:** `docs/stage12/stage124.md`. Decisions D-S124-01..04.
+- **Built:**
+  - **Finish the Family Cup (D-S124-01, PROVISIONAL rules in `CUP_FINISH_RULES` `provisional-1`; owner sign-off needed before official championship use):**
+    - host, Day 7, between games;
+    - champion = top eligible total above zero; ties share; nobody eligible means no champion;
+    - persisted public `cupFinished` and one `cup-finished` event;
+    - after it, official starts are refused (CUP_FINISHED) and the lineup turns Practice;
+    - the rule is shared with the phone (`src/shared/cupFinish.ts`) for the sheet's preview.
+  - **End the night (D-S124-02):** host or cohost of a casual room after a game; persisted public `nightComplete`; a new game clears it.
+  - **TV:**
+    - the champion and the night recap are the TV's moment (a TV opened later shows them too), with the director's Champion / Night recap button;
+    - optional WebAudio sound (D-S124-03): off by default, once per moment, remembered per TV and kept per page across remounts.
+  - **Phones:**
+    - room menu rows and sheets, and lobby notices;
+    - casual Math Mayhem results step back with a TV watching (D-S124-04), with everything one tap away.
+- **Tests:**
+  - `tests/stage124-finish.test.ts` (5);
+  - the new `scripts/check-tv-moments.mjs` (30 checks);
+  - check-warm-ivory W8 lists the End-the-night row's keys (a base style is still required);
+  - check-session-flow takes the step-back's tap.
+- **Unit suite:** 1792/1792.
+- **Found and fixed while building:**
+  - a double chime under the champion;
+  - a spectator TV remount forgetting watched games;
+  - the director's row wrapping, and "Final standings" lit under a moment.
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `9989a8a` targeted (20 drivers) `20261114-053535-9989a8a4-8498`: **FAILED** (exit 1), 18/20. check-warm-ivory W8 (the new menu row) and check-session-flow (the intended step-back); both drivers were updated in `16e485b`;
+  - `16e485b` targeted (10 drivers) `20261114-054209-16e485b8-11874`: PASSED;
+  - `16e485b` fast `20261114-054622-16e485b8-13935`: PASSED;
+  - **`16e485b` full (checkpoint) `20261114-054732-16e485b8-17539`: PASSED** (exit 0, 94/94, 35 min 23 s, no retries).
+- **Tested SHA:** `16e485b`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage124-screenshots/`, `docs/evidence/stage124-local/`, `docs/evidence/gate-runs/`.
+- **Owner decisions open:** the Cup's finish rules (Day 7 ended first? tie-break? minimum total? undo? the Memory Book's record).
+- **Next:** owner review of PRs #25–#28; real-device checks.
