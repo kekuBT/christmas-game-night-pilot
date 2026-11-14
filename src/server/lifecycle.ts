@@ -24,6 +24,7 @@ import { SPECTRUM_PHASE_MS } from "../games/modules/spectrum-timing.js";
 import { SPLIT_REVEAL_MS, SPLIT_SOLVE_MS } from "../games/modules/split-clues-timing.js";
 import { TEAM_DRAW_MS, TEAM_DRAW_REVEAL_MS } from "../games/modules/team-draw-timing.js";
 import { TERRITORY_CLAIM_MS, TERRITORY_QUESTION_MS } from "../games/modules/territory-timing.js";
+import { TUG_BOUT_MS, TUG_RESULT_MS } from "../games/modules/tug-of-war-timing.js";
 import type { TeamResult } from "../shared/teamResult.js";
 
 export type TimingModel = "game-deadline" | "phased" | "turns";
@@ -126,6 +127,12 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
   "territory": {
     model: "phased", gameWindowMs: 6 * MIN, phaseMs: { question: TERRITORY_QUESTION_MS, reveal: TERRITORY_CLAIM_MS },
     officialEligible: false, practiceOnlyReason: "Territory is practice-only: a team game in casual rooms.", unit: "questions",
+  },
+  // Stage 12.13: Tug of War, 3 bouts of 40 s + a 6 s result; every player's answers are their own (self-paced within a
+  // bout), frozen windows close on the next answer. 4 minutes is a backstop (3 bouts = 138 s).
+  "tug-of-war": {
+    model: "phased", gameWindowMs: 4 * MIN, phaseMs: { round: TUG_BOUT_MS, reveal: TUG_RESULT_MS },
+    officialEligible: false, practiceOnlyReason: "Tug of War is practice-only: a team game in casual rooms.", unit: "rounds",
   },
   // Stage 12.8: Team Huddle, eight questions of 25 s + 6 s (a question closes early once every team agrees); 8 minutes
   // is a backstop.

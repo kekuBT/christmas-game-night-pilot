@@ -91,6 +91,7 @@ const GAME_PHASE_WORDS: Record<string, Record<string, string>> = {
   "split-clues": { question: "each puzzle", reveal: "each answer" },
   "team-draw": { draw: "each drawing", reveal: "each reveal" },
   "territory": { question: "each question", reveal: "each claim" },
+  "tug-of-war": { round: "each bout", reveal: "each result" },
 };
 
 /** The real time limits, from the lifecycle policy the server enforces, in this game's own words. */
@@ -169,6 +170,16 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
       "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena.",
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
+    ],
+  },
+  // Stage 12.13 (docs/stage12/stage1213.md §2).
+  "tug-of-war": {
+    objective: "Pull the rope for your team!",
+    steps: [
+      "Three bouts. Answer quick sums on your own phone as fast as you can: every right answer pulls the rope for your team.",
+      "Everyone gets the same sums in the same order. A wrong answer freezes you for 2 seconds.",
+      "Your team's pull is its right answers per player, so a smaller team can win. With three or four teams, everyone pulls a knot in the middle.",
+      "Each bout: 100, 75, 55 or 40 by pull. A team far behind pulls ×1.2 in the next bout. Everyone scores their team's points.",
     ],
   },
   // Stage 12.12 (docs/stage12/stage1212.md §2).

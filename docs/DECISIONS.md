@@ -1908,3 +1908,16 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **Resolving claims in the order they were tapped:** that rewards fast fingers over right answers.
     - **Showing picks live:** a slower team could change its plan to block a faster one.
     - **Points for right answers as well as cells:** the board would stop mattering.
+- **D-S1213-01 Tug of War: everyone pulls at once; a team's pull is per player.**
+  - **Bouts:** three of 40 s. Every player answers quick sums on their own phone (the same seeded sums for everyone, a new set each bout).
+  - **Answering:** a right answer is one pull; a wrong one freezes you for 2 s and greys that option.
+  - **Pull per player:** a team's pull is its right answers ÷ its players in this game, so a bigger team doesn't win by being bigger.
+  - **The rope:** a rope for two teams; a knot in a star for three or four. The knot leans toward the strongest pull, and the screen says so in words.
+  - **Points:** 100/75/55/40 per bout by pull, with ties sharing the place. Team-derived. No sitting out.
+  - **Catch-up:** ×1.2 pull in the next bout for a team alone in last place and 40+ behind. This is the game's own gap: the kit's 100 is out of reach with 2–3 teams, because last place still scores.
+  - **Where:** casual rooms only and practice-only, for 4–10 players. Never in Quick Party or Home's featured rotation.
+  - **Alternatives rejected:**
+    - **Total right answers:** the bigger team would almost always win.
+    - **Counting only the players who answered:** a team could leave its slowest player out to raise its average.
+    - **A penalty pull for wrong answers:** the 2 s freeze already costs time, and negative pulls confuse the rope.
+    - **Showing each player's sum on the TV:** it would be unreadable with up to 10 players.
