@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:40057
+# timeout 600s | worker w3 | server http://localhost:40057 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s123-full-d4df2af/test-results/20261114-044941-d4df2af4-18159/server-data/w3)
+
+[+20.2s] PASS Geography: finished player sees no answers while Bea still plays
+[+20.2s] PASS Geography: TV shows no answers while Bea still plays
+[+20.3s] PASS Geography: Bea (mid-game) sees no answers
+[+30.4s] PASS Geography: results list every question — 8
+[+30.5s] PASS Geography: each answer matches the content pack — 8/8
+[+30.5s] PASS Geography: each explanation is shown — 8/8
+[+30.5s] PASS Geography: Bea sees her own choices marked
+[+30.5s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+30.7s] PASS Geography: TV lists the answers after the game
+[+30.7s] PASS Geography: TV shows no player's choices
+[+36.0s] PASS Closest: no answer anywhere while question 1 is open
+[+36.1s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 147 vs 147
+[+36.1s] PASS Closest: and the player's own guess
+[+36.1s] PASS Closest: Bea sees her own guess, not Ada's
+[+36.1s] PASS Closest: the explanation is shown
+[+36.1s] PASS Closest: question 2 is now open and its answer is not shown
+[+36.2s] PASS Closest: TV shows the last answer only — Last question: What is the maximum break in snooker (standard rules)? — 147 points
+[+36.2s] PASS Closest: TV shows nobody's guess — Last question: What is the maximum break in snooker (standard rules)? — 147 points
+[+36.5s] ANSWER REVEAL ALL PASSED
+[+36.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 36.5s | cpu 3.4s, peak memory 269 MB

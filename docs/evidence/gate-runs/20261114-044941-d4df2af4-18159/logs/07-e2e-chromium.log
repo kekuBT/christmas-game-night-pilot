@@ -1,0 +1,27 @@
+$ node scripts/e2e-browser.mjs http://localhost:35697 --browser=chromium --games=all
+# timeout 1800s | worker w1 | server http://localhost:35697 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s123-full-d4df2af/test-results/20261114-044941-d4df2af4-18159/server-data/w1)
+
+[+0.5s] casual-only, not played here: jebena-rush, spectrum
+[+0.5s] games: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (registry order, 14 total)
+[+3.0s] [chromium] room code DDVTD9
+[+5.1s] [chromium] lobby roster: 4 players joined
+[+31.1s] [chromium] OK impostor: finished
+[+62.3s] [chromium] OK caption-clash: finished
+[+123.9s] [chromium] OK trivia: finished
+[+146.7s] [chromium] OK word-connections: finished
+[+165.1s] [chromium] OK who-said-that: finished
+[+194.8s] [chromium] OK guess-the-year: finished
+[+217.4s] [chromium] OK closest-wins: finished
+[+236.8s] [chromium] OK category-sprint: finished
+[+252.4s] [chromium] OK charades: finished
+[+298.5s] [chromium] OK geography: finished
+[+343.0s] [chromium] OK math-mayhem: finished
+[+404.8s] [chromium] OK majority-rules: finished
+[+451.4s] [chromium] OK pattern-pulse: finished
+[+492.1s] [chromium] OK draw-guess: finished
+[+512.2s] [chromium] OK views: championship, TV, memory book, reconnect
+[+512.3s] [chromium] 15/15 passed
+[+512.3s] E2E ALL PASSED
+[+512.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 512.3s | cpu 28.8s, peak memory 288 MB

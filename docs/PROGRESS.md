@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-13 ~11:40 p.m. EST (Stage 12.2 built and gated: full checkpoint PASSED on f4fc9bd, 92/92 — see the Stage 12.2 section at the end; Stages 12.3 and 12.4 in progress on their own branches; real-device checks still NOT RUN)
+Updated: 2026-11-14 ~12:30 a.m. EST (Stage 12.3 built and gated: full checkpoint PASSED on d4df2af, 93/93 — see the Stage 12.3 section at the end; Stage 12.4 in progress; real-device checks still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -2503,3 +2503,36 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/stage12/stage122-screenshots/` (README inside), `docs/evidence/stage122-local/` (every local run), `docs/evidence/gate-runs/`.
 - **Not done:** real phones and a real TV browser (desktop Chromium only).
 - **Next:** Stage 12.3 (Quick Party inside a Family Cup), then Stage 12.4 (the TV's big moments), each on its own stacked branch.
+
+## Stage 12.3: Quick Party inside a Family Cup (owner-directed; built and gated; awaiting review)
+- **Brief:** the same owner message as Stage 12.2 (2026-11-13, about 10:40 p.m. ET), item A4.
+- **Base:** `972c66e` (Stage 12.2's head, PR #26). Branch `claude/stage12-3-cup-quick-party`, a draft PR stacked on #26.
+- **Spec:** `docs/stage12/stage123.md`. Decisions D-S123-01..04.
+- **Built:**
+  - **Server:**
+    - a Cup's lineup items carry `official`, checked on every save and restore by `partyModesError`;
+    - `startPartyGame` runs in a Cup with the item's own mode (a press for the other mode is PLAN_CONFLICT) through `startGame`'s Cup rules;
+    - a Cup's session revision moves on and its presses survive a restart;
+    - the lineup carries over the upgrade (Official where it can count) and the undo (no modes).
+  - **Phones:**
+    - the planner's Official/Practice switch ("Practice only"; all Practice for one);
+    - "Today's lineup" with modes;
+    - Start and What's next name the mode, with no Play again or break in a Cup;
+    - Cup results show What's next only while a lineup runs.
+  - **TV:** the lineup with modes; a Cup lobby shows three games and how many more.
+- **Tests:**
+  - `tests/stage123-cup-party.test.ts` (9).
+  - Seven older casual-only assertions updated to the new rule: stage71 ×3, stage121, stage122, stage72-session-flow, stage72-client.
+  - The unit suite is 1787/1787.
+- **Drivers:** the new `scripts/check-cup-party.mjs` (28 checks). check-quick-party's Cup check now expects the Cup's own entry.
+- **Found and fixed while building:**
+  - a Cup's Math Mayhem results had no What's next;
+  - a six-game lineup cut off the TV's Cup card;
+  - my driver's case-sensitive kicker match.
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `d4df2af` targeted (16 drivers) `20261114-044453-d4df2af4-12095`: PASSED;
+  - `d4df2af` fast `20261114-044835-d4df2af4-14589`: PASSED;
+  - **`d4df2af` full (checkpoint) `20261114-044941-d4df2af4-18159`: PASSED** (exit 0, 93/93, 35 min 23 s, no retries).
+- **Tested SHA:** `d4df2af`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage123-screenshots/`, `docs/evidence/stage123-local/`, `docs/evidence/gate-runs/`.
+- **Next:** Stage 12.4 (the TV's big moments).
