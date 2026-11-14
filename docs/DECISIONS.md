@@ -1761,3 +1761,35 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
 - **D-S127-03 A Family Cup stays individual (a provisional default).**
   - Teams can't be made in a Cup room, and Cup scoring is untouched.
   - Team scoring in a Cup is an owner decision (AGENTS.md: material product choices get provisional defaults; owner sign-off before official championship use).
+
+## Stage 12.8: games built for teams
+**Authorization:** the owner, directly in chat on 2026-11-14, about 3:25 a.m. ET: "But we definitely need more games that can be played with teams". Spec: `docs/stage12/stage128.md`. Branch `claude/stage12-8-team-games`, stacked on Stage 12.7. Nothing is merged or deployed.
+
+- **D-S128-01 A game built for teams always plays as teams.**
+  - **Which teams:** the night's teams when at least two of them have players in the game; otherwise two balanced teams dealt for that game only (seeded). A player not on a team joins the smallest.
+  - **Pausing doesn't apply:** "Play the next games individually" is for games that can be played either way.
+  - **The copy:** as in 12.7, the game keeps its teams from its start.
+  - **Alternatives rejected:**
+    - refusing to start without the night's teams: an extra step for a quick game;
+    - asking each time which teams to use: one more question between games.
+- **D-S128-02 Team Huddle: the team answers together.**
+  - **What the phones show:** each player picks, and teammates see each other's picks live. Other teams and the TV only see how many have picked and whether a team agrees, never the option, until the reveal.
+  - **The team's answer:** its majority. On a tie, the tied option picked first.
+  - **Closing early:** once every player has picked and every team agrees.
+  - **Scoring:** 100 for a right answer, plus 25 when the whole team picked it. Every player gets their team's points (team-derived, like Charades).
+  - **Questions:** from the Trivia pool, used up the same way.
+  - **Where:** casual rooms only and practice-only.
+    - Never in Quick Party: it's casual-only, like Jebena Rush and Spectrum.
+    - Never Home's "featured today": the daily rotation stays as it was, the same as Family Questions in 12.5.
+  - **Agreeing:** a team agrees only when everyone on it has picked (or sat out) the same option.
+  - **Alternatives rejected:**
+    - a captain who locks the answer: one person decides, and the others watch;
+    - the first pick counts: no reason to talk;
+    - points per player: back to playing alone.
+- **D-S128-03 Charades plays with the teams, with equal turns.**
+  - **Teams:** 2–4 (the night's teams, or two dealt). Each team acts as often as the largest team has players, so a smaller team's players act more than once.
+  - **Names:** the teams' names on the phones and the TV.
+  - **Older games keep working:** a game saved before 12.8 keeps its old turn order and Team A/B.
+  - **Alternatives rejected:**
+    - one turn per player: a bigger team would get more turns;
+    - keeping two teams by join order: it ignores the night's teams.

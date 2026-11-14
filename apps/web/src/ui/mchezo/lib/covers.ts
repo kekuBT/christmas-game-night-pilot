@@ -11,7 +11,7 @@
  */
 
 export type CoverAccent = "coral" | "sun" | "mint" | "iris" | "pink" | "lime";
-export type CoverGlyph = "quiz" | "grid" | "math" | "year" | "target" | "globe" | "sprint" | "bubbles" | "quote" | "odd" | "act" | "ring" | "split" | "pulse" | "brush" | "jebena" | "dial" | "family";
+export type CoverGlyph = "quiz" | "grid" | "math" | "year" | "target" | "globe" | "sprint" | "bubbles" | "quote" | "odd" | "act" | "ring" | "split" | "pulse" | "brush" | "jebena" | "dial" | "family" | "huddle";
 
 export const ACCENTS: Readonly<Record<CoverAccent, readonly [string, string]>> = {
   coral: ["#FF6B4A", "#B8432A"],
@@ -45,6 +45,8 @@ export const COVERS: Readonly<Record<string, { accent: CoverAccent; glyph: Cover
   "spectrum": { accent: "mint", glyph: "dial" },
   // Stage 12.5: an original little family tree: one above, two below, and a question mark on one of them.
   "family-questions": { accent: "sun", glyph: "family" },
+  // Stage 12.8: an original huddle: three heads close together under one shared speech bubble.
+  "team-huddle": { accent: "mint", glyph: "huddle" },
 };
 
 export function coverOf(gameId: string): { accent: CoverAccent; glyph: CoverGlyph } {
@@ -81,6 +83,7 @@ export function glyphSvg(kind: CoverGlyph): string {
     // a spout, a handle from neck to body, and two curls of steam rising from the spout.
     case "jebena": return `<ellipse cx="56" cy="104" rx="18" ry="4" fill="${ink}"/><circle cx="56" cy="78" r="25" fill="${ink}"/><path d="M48,56 L50,30 Q56,24 62,30 L64,56 Z" fill="${ink}"/><path d="M62,44 L84,30" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M50,36 C30,34 24,60 36,72" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M36,80 Q56,94 76,80" stroke="${cream}" stroke-width="4" stroke-linecap="round" fill="none"/><circle cx="56" cy="70" r="4" fill="${cream}"/><path d="M90,24 C84,17 96,12 90,4" stroke="${cream}" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M101,30 C95,23 107,18 101,10" stroke="${cream}" stroke-width="4" stroke-linecap="round" fill="none"/>`;
     // Stage 9.3: a half-circle scale with its two ends, a cream target band and a needle from the hub.
+    case "huddle": return `<path d="M30 20 L90 20 Q98 20 98 28 L98 42 Q98 50 90 50 L66 50 L58 58 L56 50 L30 50 Q22 50 22 42 L22 28 Q22 20 30 20 Z" fill="${cream}"/><circle cx="44" cy="35" r="4" fill="${ink}"/><circle cx="60" cy="35" r="4" fill="${ink}"/><circle cx="76" cy="35" r="4" fill="${ink}"/><circle cx="36" cy="76" r="12" fill="${ink}"/><circle cx="60" cy="72" r="13" fill="${ink}"/><circle cx="84" cy="76" r="12" fill="${ink}"/><path d="M16 108 Q36 88 56 108 M40 108 Q60 86 80 108 M64 108 Q84 88 104 108" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/>`;
     case "family": return `<path d="M60 42 L60 54 M34 54 L86 54 M34 54 L34 60 M86 54 L86 60" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="60" cy="30" r="13" fill="${ink}"/><circle cx="34" cy="74" r="13" fill="${ink}"/><circle cx="86" cy="74" r="13" fill="${cream}"/><path d="M81 70 Q81 64 86 64 Q91 64 91 69 Q91 73 86 75 L86 78" stroke="${ink}" stroke-width="3.5" stroke-linecap="round" fill="none"/><circle cx="86" cy="83" r="2.2" fill="${ink}"/><path d="M18 106 Q34 90 50 106 M70 106 Q86 90 102 106" stroke="${ink}" stroke-width="6" stroke-linecap="round" fill="none"/>`;
     case "dial": return `<path d="M20 84 A40 40 0 0 1 100 84" fill="none" stroke="${ink}" stroke-width="10" stroke-linecap="round"/><path d="M60 84 L85.7 53.4 A40 40 0 0 0 73.7 46.4 Z" fill="${cream}"/><path d="M60 84 L42 52" stroke="${cream}" stroke-width="6" stroke-linecap="round"/><circle cx="60" cy="84" r="9" fill="${ink}"/><circle cx="20" cy="98" r="5" fill="${ink}"/><circle cx="100" cy="98" r="5" fill="${cream}"/>`;
     case "pulse": return `<polyline points="12,66 32,66 40,46 50,86 60,38 70,74 78,66 108,66" fill="none" stroke="${ink}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/><circle cx="28" cy="34" r="8" fill="${cream}"/><rect x="52" y="90" width="14" height="14" rx="3" fill="${cream}"/><polygon points="90,26 100,42 80,42" fill="${cream}"/>`;

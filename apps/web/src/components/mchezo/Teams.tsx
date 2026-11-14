@@ -11,7 +11,7 @@
  */
 import { useState } from "react";
 import { Keycap, Sheet, SegmentedChoice } from "../../ui/mchezo/index.js";
-import { TEAM_LIMITS, TEAM_PLAY_GAMES, teamWinnerLine, teamWins, type RoomTeams, type TeamColor, type TeamDef, type TeamResultRow } from "../../../../../src/shared/teams.js";
+import { TEAM_LIMITS, TEAM_NATIVE_GAMES, TEAM_PLAY_GAMES, teamWinnerLine, teamWins, type RoomTeams, type TeamColor, type TeamDef, type TeamResultRow } from "../../../../../src/shared/teams.js";
 import type { PublicGame, PublicPlayer } from "../../types.js";
 
 /** Each team's mark: a shape as well as a colour (never colour alone). */
@@ -52,7 +52,9 @@ export function TeamsCard({ teams, players, youId, isHost, upNextId, onEdit, onP
   const nameOf = (id: string) => (id === youId ? "You" : players.find((p) => p.id === id)?.displayName ?? "A player");
   const mine = teams.members[youId];
   const paused = teams.paused === true;
-  const nextIsTeam = upNextId ? TEAM_PLAY_GAMES.has(upNextId) : undefined;
+  // Stage 12.8: a game built for teams is always played as teams, even while the others are played individually.
+  const nextIsNative = upNextId ? TEAM_NATIVE_GAMES.has(upNextId) : false;
+  const nextIsTeam = upNextId ? TEAM_PLAY_GAMES.has(upNextId) || nextIsNative : undefined;
   return (
     <section className="mz-teams-card" aria-label="Teams" data-testid="teams-card" data-state={paused ? "paused" : "on"}>
       <span className="mz-kicker">👥 Teams{paused ? " · playing individually for now" : ""}</span>
@@ -65,8 +67,8 @@ export function TeamsCard({ teams, players, youId, isHost, upNextId, onEdit, onP
           </li>
         ))}
       </ul>
-      {nextIsTeam !== undefined && !paused && (
-        <p className="mz-foot mz-teams-card__next" data-testid="teams-next">{nextIsTeam ? "The next game is played as teams." : "The next game can’t be played as teams, so everyone plays for themselves."}</p>
+      {nextIsTeam !== undefined && (!paused || nextIsNative) && (
+        <p className="mz-foot mz-teams-card__next" data-testid="teams-next">{nextIsNative ? "The next game is built for teams: you play it with your team." : nextIsTeam ? "The next game is played as teams." : "The next game can’t be played as teams, so everyone plays for themselves."}</p>
       )}
       {isHost && (
         <div className="mz-teams-card__actions">

@@ -25,8 +25,11 @@ import { SendNote } from "./components/mchezo/SendNote.js";
 import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { FamilyCard, FamilyReview, FamilySheet, FamilyTv, MchezoFamily, MchezoFamilyResults } from "./components/mchezo/MchezoFamily.js";
+import { HuddleReview, HuddleTv, MchezoHuddle, MchezoHuddleResults } from "./components/mchezo/MchezoHuddle.js";
 import { NightCardSheet } from "./components/mchezo/NightCard.js";
 import { TeamResultsCard, TeamsCard, TeamsSheet } from "./components/mchezo/Teams.js";
+import { TEAM_NATIVE_GAMES, teamWinnerLine } from "../../../src/shared/teams.js";
+import { ordinalWord } from "./ui/mchezo/lib/celebrate.js";
 import { nightCardFacts } from "./ui/mchezo/lib/nightCard.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
@@ -1140,6 +1143,8 @@ export function App() {
               : g.gameId === "majority-rules" ? <MajorityTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} />
               // Stage 12.5: the family's own questions; who asked comes with the answer.
               : g.gameId === "family-questions" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><FamilyTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
+              // Stage 12.8: Team Huddle: per team, how many picked and whether it agrees (never the option) until the reveal.
+              : g.gameId === "team-huddle" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><HuddleTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><PulseTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "draw-guess" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><DrawTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               // Stage 9.1: Jebena Rush draws its own turn clock (the turn, not the match).
@@ -1158,6 +1163,7 @@ export function App() {
             ? <div className="mz-tvshow-game" data-testid="mz-cap-tv"><CaptionTv game={g} /></div>
             : g.gameId === "majority-rules" ? <div className="mz-tvshow-game"><MajorityReview game={g} /></div>
             : g.gameId === "family-questions" ? <div className="mz-tvshow-game"><FamilyReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
+            : g.gameId === "team-huddle" ? <div className="mz-tvshow-game"><HuddleReview game={g} /></div>
             : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><PulseReview game={g} /></div>
             : g.gameId === "draw-guess" ? <div className="mz-tvshow-game"><DrawReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "jebena-rush" ? <div className="mz-tvshow-game"><JebenaReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
@@ -1533,15 +1539,31 @@ export function App() {
     const team = g.outcome?.team ?? pub?.outcome?.team;
     if (team) return <TeamResultsHero team={team} gameId={g.gameId} title={title} official={official} roomReason={g.outcome?.reason ?? pub?.outcome?.reason} />;
     const scores = pub?.rawScores ?? g.rawScores ?? {};
-    const story = resultsStory({
+    const teamRows = pub?.teamResults ?? g.teamResults;
+    let story = resultsStory({
       gameInstanceId: g.id, title, official, casual: proj?.roomKind === "casual", scores, nameOf,
       youId: playerId ?? undefined,
       yourParticipation: playerId ? g.outcome?.participation[playerId] : undefined,
       youSatOut: g.abstained === true,
     });
+    // Stage 12.8: a game built for teams is won by a team, so its heading names the team, and "you" is your team's
+    // place (everyone on a team has the same score, so a player's own place would only repeat the team's).
+    if (TEAM_NATIVE_GAMES.has(g.gameId) && teamRows) {
+      const line = teamWinnerLine(teamRows);
+      const top = teamRows.filter((r) => r.rank === 1);
+      const counted = teamRows.filter((r) => r.score !== null).length;
+      const mine = playerId ? teamRows.find((r) => r.members.includes(playerId)) : undefined;
+      story = {
+        ...story,
+        // "Team Sun wins Team Huddle", "Team Coral and Team Sun tie for first in Charades", "Every team tied in Charades".
+        headline: !line ? story.headline : line.endsWith(" wins") ? `${line} ${title}` : `${line} in ${title}`,
+        winners: top.flatMap((r) => r.members),
+        celebrate: !!mine && mine.rank === 1,
+        ...(mine && story.you ? { you: { ...story.you, rank: mine.rank ?? story.you.rank, of: counted, tied: top.length > 1, label: mine.rank === 1 ? (top.length > 1 ? "Your team shares the win" : "Your team won!") : mine.rank ? `Your team came ${ordinalWord(mine.rank)} of ${counted}` : "Your team didn’t answer", line: mine.name } } : {}),
+      };
+    }
     const hero = <ResultsHero story={story} gameId={g.gameId} title={title} official={official} players={mzPlayers} points={playerId && playerId in scores ? scores[playerId] : undefined} />;
     // Stage 12.7: a game played as teams shows the team results right under the heading.
-    const teamRows = pub?.teamResults ?? g.teamResults;
     return teamRows ? <>{hero}<TeamResultsCard rows={teamRows} youId={playerId ?? undefined} nameOf={nameOf} /></> : hero;
   };
   const mzReactions = toMzReactions(proj?.reactions, players);
@@ -1620,6 +1642,9 @@ export function App() {
   // Stage 12.5 (casual rooms, practice-only).
   const familyPlaying = playingGame?.gameId === "family-questions";
   const familyFinished = latestFinished?.gameId === "family-questions";
+  // Stage 12.8 (casual rooms, practice-only, always as teams).
+  const huddlePlaying = playingGame?.gameId === "team-huddle";
+  const huddleFinished = latestFinished?.gameId === "team-huddle";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -2191,6 +2216,21 @@ export function App() {
     return (
       <MchezoProvider theme={theme} {...motion}>
         <MchezoFamilyResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Family Questions"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && huddlePlaying && playingGame) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <GameClock game={playingGame} />
+        <MchezoHuddle game={playingGame} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Team Huddle"} intent={sendAction} error={err || undefined} landed={sendLanded} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && huddleFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <MchezoHuddleResults game={latestFinished} publicGame={publicFinished} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Team Huddle"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }

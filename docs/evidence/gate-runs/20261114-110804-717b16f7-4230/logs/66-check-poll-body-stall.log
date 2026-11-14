@@ -1,0 +1,20 @@
+$ node scripts/check-poll-body-stall.mjs http://localhost:41793
+# timeout 600s | worker w2 | server http://localhost:41793 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full/test-results/20261114-110804-717b16f7-4230/server-data/w2)
+
+[+3.8s] PASS polling only: a new player (Amina) reaches the phone
+[+4.8s] PASS polling only: a new player (Amina) reaches the TV
+[+5.8s] PASS the phone's next poll is stalled after its headers and "{"
+[+6.8s] PASS the TV's next poll is stalled after its headers and "{"
+[+13.8s] PASS after a stalled poll, a new player (Bea) still reaches the phone (within 15 s)
+[+14.8s] PASS after a stalled poll, a new player (Bea) still reaches the TV (within 15 s)
+[+14.8s] PASS phone: the stalled request was cancelled by the page at its 6 s timeout — cancelled after 6.0 s
+[+14.8s] PASS TV: the stalled request was cancelled by the page at its 6 s timeout — cancelled after 6.0 s
+[+14.8s] (Bea joined 8.1 s ago; 2 poll(s) stalled in all)
+[+20.8s] PASS the TV's next three polls get a 500 whose body stalls
+[+20.8s] PASS TV: each skipped 500 reply is closed by the page at once (none left open)
+[+20.8s] PASS TV: each 500 reply was closed within 2 s, not at the 6 s timeout — slowest 0.0 s
+[+22.7s] PASS after the stalled 500 replies, a new player (Cai) still reaches the TV
+[+22.8s] POLL BODY STALL ALL PASSED
+[+22.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 22.8s | cpu 2.8s, peak memory 356 MB

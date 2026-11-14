@@ -87,6 +87,7 @@ const GAME_PHASE_WORDS: Record<string, Record<string, string>> = {
   "impostor": { guess: "the impostor's guess" },
   "spectrum": { clue: "the clue", guess: "everyone's guesses", reveal: "each reveal" },
   "family-questions": { question: "each question", reveal: "each answer" },
+  "team-huddle": { question: "each question", reveal: "each answer" },
 };
 
 /** The real time limits, from the lifecycle policy the server enforces, in this game's own words. */
@@ -165,6 +166,16 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Each answer counts once. Time runs out: one of your cups breaks, and a new category starts.",
       "When all your cups are broken, you're out. The last player with a whole cup keeps the jebena.",
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
+    ],
+  },
+  // Stage 12.8 (docs/stage12/stage128.md §2).
+  "team-huddle": {
+    objective: "A quiz you answer as a team. Huddle up!",
+    steps: [
+      "Eight questions. You play with your team: the night's teams, or two the game makes. Your phone says which team you're on.",
+      "Tap an answer. Your teammates see your pick and you see theirs; you can change it until time runs out. The other teams can't see what you picked.",
+      "Your team's answer is what most of you picked. When every team agrees, the answer comes early.",
+      "100 to your team for a right answer, and 25 more when the whole team picked it. Everyone scores their team's points.",
     ],
   },
   // Stage 12.5 (docs/stage12/stage125.md §2).

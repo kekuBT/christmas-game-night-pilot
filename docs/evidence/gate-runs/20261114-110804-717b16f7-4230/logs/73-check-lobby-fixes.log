@@ -1,0 +1,35 @@
+$ node scripts/check-lobby-fixes.mjs http://localhost:41555
+# timeout 600s | worker w1 | server http://localhost:41555 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full/test-results/20261114-110804-717b16f7-4230/server-data/w1)
+
+[+0.9s] PASS theme-color is the Mchezo ground — #16111D
+[+0.9s] PASS document background is the Mchezo ground, not green — rgb(22, 17, 29) / rgb(22, 17, 29)
+[+0.9s] PASS page title is Mchezo — Mchezo
+[+1.2s] PASS Animations Off applies on the start screen (Home) — {"still":true,"motion":"reduced","anim":"none"}
+[+4.5s] PASS D1: a lone host choosing Official is told why it can't count
+[+4.5s] PASS D1: Start is not offered as an official start for one player
+[+4.5s] PASS F3: selected Official is filled and checked, Practice is not — [{"pressed":"true","bg":"rgb(255, 201, 74)","text":"Official✓Counts toward the Individual Family Cup"},{"pressed":"false","bg":"rgba(0, 0, 0, 0)","text":"PracticeJust for fun · no Cup points"}]
+[+4.5s] PASS D1: the switch to practice is explicit and visible — [{"pressed":"false","bg":"rgb(255, 201, 74)","text":"OfficialCounts toward the Individual Family Cup"},{"pressed":"true","bg":"rgba(0, 0, 0, 0)","text":"Practice✓Just for fun · no Cup points"}]
+[+4.5s] PASS D1: practice Start is available for one player
+[+4.5s] PASS D1: the notice goes away in practice
+[+4.5s] PASS D1: the server refuses an official one-player start (409 OFFICIAL_NEEDS_TWO) — {"status":409,"body":{"error":"Official games need at least 2 players to count toward the Cup. Play it as practice, or wait for someone to join.","code":"OFFICIAL_NEEDS_TWO","readiness":{"registered":1,"connected":1,"reconnecting":0,"away":0,"wouldPlay":["player-1"],"wouldMiss":[]}}}
+[+4.6s] PASS F2: Share opens the invite sheet
+[+4.6s] PASS F2: the sheet shows the room code and QR
+[+4.6s] PASS F2: the sheet has an accessible dialog name
+[+5.3s] PASS F2: Copy link copies the join link and says so — Link copied. Paste it in your group chat. | http://localhost:41555/join?code=QP98VA
+[+5.3s] PASS F2: Done closes the sheet
+[+6.0s] PASS F2: without clipboard access the link is shown instead, with an explanation
+[+6.0s] PASS F7: no Sound switch that does nothing
+[+6.4s] PASS F8: Animations Off applies to the lobby at once
+[+8.2s] PASS F5: advancing the day asks first
+[+8.7s] PASS F5: 'Not yet' leaves the day unchanged
+[+10.0s] PASS F5: confirming advances to day 2
+[+13.1s] PASS V1/V6 390x664, 10 players, "Geography Challenge": no overlaps in the lobby
+[+13.6s] PASS V1/V6 393x659, 10 players, "Geography Challenge": no overlaps in the lobby
+[+14.1s] PASS V1/V6 375x553, 10 players, "Geography Challenge": no overlaps in the lobby
+[+14.6s] PASS V1/V6 412x780, 10 players, "Geography Challenge": no overlaps in the lobby
+[+15.2s] PASS V1/V6 360x640, 10 players, "Geography Challenge": no overlaps in the lobby
+[+18.0s] PASS V1/V6 375x553, 1 player with a long name: no overlaps
+[+18.1s] LOBBY FIXES ALL PASSED
+[+18.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":2}
+
+# PASS (exit 0) in 18.1s | cpu 2.7s, peak memory 256 MB

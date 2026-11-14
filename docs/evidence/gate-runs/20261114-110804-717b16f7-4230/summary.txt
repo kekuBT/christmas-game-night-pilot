@@ -1,0 +1,15 @@
+
+FAILED (exit 1) | full | run 20261114-110804-717b16f7-4230
+  96 passed, 2 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      e2e-chromium (w1) [functional]: [chromium] FAIL charades: did not reach Status: finished in 180s | [chromium] FAIL geography: locator.click: Timeout 30000ms exceeded. | [chromium] FAIL math-mayhem: locator.click: Timeout 30000ms exc
+            [chromium]   DIAG player=Alex game=charades(game-9) server=playing phase=turn:2 deadlineIn=1019s phaseIn=89s submitted=0/4 outcome=- | screen="Mchezo Code: 4PS9DD Playing as Alex (host) · Room: Game n
+  FAIL      check-f5 (w2) [functional]: FAIL charades: did not reach Status: finished in 180s | FAIL day playlist: charades finished without sticking — did not reach Status: finished in 180s | FAIL day playlist: all games finished in one ro
+            DIAG player=Alex game=charades(game-9) server=playing phase=turn:2 deadlineIn=1018s phaseIn=88s submitted=0/4 outcome=- | screen="Mchezo Code: KG34DK Playing as Alex (host) · Room: Game night Lobby & 
+  timing   wall 36m 41s · step time 1h 44m (sum) · 3 workers, 95% busy · 2.85× the same steps run one after another
+           predicted 26–61m (about 33m 59s, low-confidence) → actual 36m 41s (+8%)
+           longest  e2e-chromium 9m 36s, check-f5 7m 05s, check-leaderboard 6m 35s · the longest step is 26% of the wall time
+           machine  CPU mean 35%, peak 100% · memory available ≥ 13029 MB · load peak 6.34 · backpressure 21 wait(s), 137s
+           contention ×1.071 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s128full/test-results/20261114-110804-717b16f7-4230/report.json

@@ -86,7 +86,9 @@ export function fitNote(g: Pick<CatalogGame, "minPlayers" | "maxPlayers">, playe
  * Stage 12.5: games Home never features. Family Questions can't be played until the family has written questions in a
  * room, so it's a poor first thing to show a newcomer (and leaving it out keeps the rotation the other games had).
  */
-export const NOT_FEATURED: ReadonlySet<string> = new Set(["family-questions"]);
+// Stage 12.8: Team Huddle stays out too, so the daily rotation (keyed to the pool's size) doesn't reshuffle every
+// day's pick; it's in the shelf and the library like every game.
+export const NOT_FEATURED: ReadonlySet<string> = new Set(["family-questions", "team-huddle"]);
 
 /**
  * The game featured on Home today: a plain rotation through the catalog by
