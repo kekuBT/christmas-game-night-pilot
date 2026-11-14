@@ -2757,3 +2757,37 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - suggestion 6 was dropped;
   - video calls (suggestion 11) wait until after deployment, as directed.
   - Waiting on the owner's review of #25–#33.
+
+## Stage 12.10: the team kit, and Split Clues (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner, 2026-11-14 at 1:20 p.m. ET: "I like all of them add all of them … Do all of it in one go don't wait for me unless it's genuine blocker". Five games built for teams, one stage and one stacked draft PR each: 12.10 Split Clues, 12.11 Team Draw, 12.12 Territory, 12.13 Tug of War, 12.14 Know Your Rivals.
+- **Base:** `548c763` (Stage 12.9's head, PR #33). Branch `claude/stage12-10-split-clues`, draft PR #34 stacked on #33.
+- **Spec:** `docs/stage12/stage1210.md`. Decisions D-S1210-01 (the team kit) and D-S1210-02 (Split Clues).
+- **Built:**
+  - **The team kit (D-S1210-01), shared by the five games:**
+    - every team plays at once;
+    - a team needs at least 2 players: a night's team with only 1 player in the game joins the smallest other team (`fitTeamsForGame`), and the briefing says so on every phone;
+    - fair scoring for uneven teams (each game says how) and a +25 catch-up for a team alone in last place and 100+ behind;
+    - a 2–4-team scoreboard on phones and the TV (2 × 2 for 4 teams);
+    - no repeats in a night (`contentIds()` / `avoid`);
+    - a forgiving answer matcher (case, accents, an article, a plural, one typo in a long answer).
+  - **Split Clues (D-S1210-02, `src/games/modules/splitClues.ts`), new:**
+    - six puzzles, each with six clues dealt round each team (rotating);
+    - help at 30/45/60 s (the shape, all clues pooled, the first letter);
+    - any teammate types the team's answer; a wrong try is team-private and pauses the team 4 s; at most 15 tries;
+    - 100/75/55/40 by solve order; 38 Everyday and 13 Christmas puzzles;
+    - casual and practice only, 4–10 players.
+- **Tests:**
+  - `tests/stage1210-split-clues.test.ts` (16, checked on seeds 1–12);
+  - catalogue counts (20 games);
+  - new `scripts/check-split-clues.mjs` (26 checks: seven phones in four night's teams, one of them alone, and a TV).
+- **Found from screenshots before the gates:** the TV reveal's clue numbers were cut off, and its scoreboard ran under the footer. Both fixed.
+- **Unit suite:** 1863/1863 (the fast gate's unit-tests step on `675a41d`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `675a41d` targeted (split-clues + 14 drivers) `20261114-185257-675a41d1-11475`: PASSED, 17/17;
+  - `675a41d` fast `20261114-185824-675a41d1-14379`: PASSED, 5/5;
+  - **`675a41d` full (checkpoint) `20261114-185939-675a41d1-18106`: PASSED** (exit 0, 101/101, 38 min 28 s, no retries).
+- **Tested SHA:** `675a41d`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage1210-screenshots/`, `docs/evidence/stage1210-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** about 5 hours estimated; about 1 h 20 min actual (1:20 to 2:38 p.m. ET), gates included.
+- **Owner decisions open:** team scoring in a Family Cup (D-S127-03, provisional "no").
+- **Next:** Stage 12.11 (Team Draw).
