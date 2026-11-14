@@ -1,0 +1,12 @@
+$ node scripts/check-errors.mjs http://localhost:39757
+# timeout 600s | worker w1 | server http://localhost:39757 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s127full/test-results/20261114-100506-4b6c37eb-31289/server-data/w1)
+
+[+4.0s] PASS duplicate name shows the human sentence on the landing
+[+4.0s] PASS duplicate name shows no raw server sentence
+[+4.9s] PASS bad-token reconnect shows the human seat sentence in the lobby
+[+4.9s] PASS bad-token reconnect shows no raw server reason
+[+6.0s] PASS successful reconnect clears the lobby error
+[+6.0s] ERRORS ALL PASSED
+[+6.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 6s | cpu 1.9s, peak memory 255 MB

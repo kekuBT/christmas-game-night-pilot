@@ -1,0 +1,5 @@
+$ node ./node_modules/eslint/bin/eslint.js .
+# timeout 300s | worker w3
+
+
+# PASS (exit 0) in 25.8s | cpu 32.4s, peak memory 660 MB

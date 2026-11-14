@@ -2644,3 +2644,35 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/stage12/stage126-screenshots/`, `docs/evidence/stage126-local/`, `docs/evidence/gate-runs/`.
 - **Owner decisions open:** none new.
 - **Next:** Stage 12.7 (Teams for the night), then 12.8 (games built for teams).
+
+## Stage 12.7: teams for the night (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner, 2026-11-14 about 3:25 a.m. ET: "Don't add item 6. The rest that I mentioned can be added. But we definitely need more games that can be played with teams" (suggestion 7, Teams; Little-ones mode dropped).
+- **Base:** `cd621f2` (Stage 12.6's head, PR #30). Branch `claude/stage12-7-teams`, draft PR #31 stacked on #30.
+- **Spec:** `docs/stage12/stage127.md`. Decisions D-S127-01..03.
+- **Built:**
+  - **The night's teams (D-S127-01, `src/shared/teams.ts`, `src/server/room.ts`, `POST /rooms/:id/teams`):**
+    - the host or a cohost of a casual room makes 2–4 balanced teams (seeded), each with a name, a colour and a shape;
+    - rename, move ("Move to"), shuffle again (names kept), play individually for a while, "No teams tonight";
+    - a move against an older view is refused, and a teams revision is never given out twice (cleared teams and restarts included);
+    - newcomers join the smallest team; public and saved; half-readable saved teams are dropped.
+  - **Playing as teams (D-S127-02):** 14 of 17 games. A game copies its teams at its start. A team's score is the average of its players who took part; everyone keeps their own score.
+  - **Screens:**
+    - the lobby's Teams card ("You're on …") and the host's sheet;
+    - "👥 Played as teams" on phone results;
+    - the TV final leads with the winning team;
+    - the TV lobby counts tonight's team wins.
+  - **A Family Cup stays individual (D-S127-03, provisional).**
+- **Tests:**
+  - `tests/stage127-teams.test.ts` (10);
+  - the new `scripts/check-teams.mjs` (25 checks: four phones and a TV);
+  - check-warm-ivory W8 allows the host's Teams card (each element must reuse a base style).
+- **Found and fixed before the gates:** after a restart the teams came back with nobody on them (`fromJSON` read the teams before the players). A unit test caught it.
+- **Unit suite:** 1825/1825 (the fast gate's unit-tests step on `4b6c37e`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `4b6c37e` targeted (15 drivers) `20261114-095929-4b6c37eb-24797`: PASSED, 17/17;
+  - `4b6c37e` fast `20261114-100337-4b6c37eb-27622`: PASSED, 5/5;
+  - **`4b6c37e` full (checkpoint) `20261114-100506-4b6c37eb-31289`: PASSED** (exit 0, 97/97, 36 min 5 s, no retries).
+- **Tested SHA:** `4b6c37e`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage127-screenshots/`, `docs/evidence/stage127-local/`, `docs/evidence/gate-runs/`.
+- **Owner decisions open:** team scoring in a Family Cup (D-S127-03, provisional "no").
+- **Next:** Stage 12.8 (games built for teams: Team Huddle, Charades with the night's teams), then 12.9 (Relay).

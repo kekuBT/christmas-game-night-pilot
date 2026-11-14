@@ -13,3 +13,6 @@
 | `check-teams-t3.log` | + the TV card leaves the winner to the headline; "Move to" next to the buttons | 25/0 | The committed screenshots come from this run. |
 | `check-warm-ivory-n127w1.log` | same | **195 pass, 4 FAIL** | W8 flagged the host's new Teams card in the lobby (lobby and menu, 390 and 320), as expected. |
 | `check-warm-ivory-n127w2.log` | + W8 allows `teams-card>` and `teams-make>` (each element must still reuse a base style) | 199/0 | |
+| (gate) targeted on `4b6c37e`, label `s127t1`, run `20261114-095929-4b6c37eb-24797` | the commit | **PASSED** (exit 0), 17/17 | teams, warm-ivory, family-questions, night-card, session-flow, quick-party, cup-party, one-path, tv-moments, tv-show, math, lobby-mode, results, restart, a11y-surfaces. |
+| (gate) fast on `4b6c37e`, run `20261114-100337-4b6c37eb-27622` | same | **PASSED** (exit 0), 5/5 | Unit suite 1825/1825. |
+| (gate) **full (checkpoint)** on `4b6c37e`, run `20261114-100506-4b6c37eb-31289` | same | **PASSED** (exit 0), 97/97 | 36 min 5 s, no retries. |

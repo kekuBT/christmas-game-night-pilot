@@ -75,5 +75,6 @@ That covers suggestion 7 (Teams) and asks for more team games. Little-ones mode 
   - clear.
 - **Gates:** targeted, fast, then one full checkpoint.
 
-## 6. Estimate
-About 4 hours.
+## 6. Estimate vs actual
+- **Estimate:** about 4 hours.
+- **Actual:** about 1½ hours: 45 min from the first file to the commit (4:14 to 4:59 a.m. ET, while Stage 12.6's full gate ran), then 42 min of gates (the full gate alone 36 min). The design was simpler than estimated because the results screens and the TV reuse 12.6/12.4 parts.
