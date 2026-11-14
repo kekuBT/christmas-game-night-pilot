@@ -27,6 +27,7 @@ import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } fro
 import { FamilyCard, FamilyReview, FamilySheet, FamilyTv, MchezoFamily, MchezoFamilyResults } from "./components/mchezo/MchezoFamily.js";
 import { HuddleReview, HuddleTv, MchezoHuddle, MchezoHuddleResults } from "./components/mchezo/MchezoHuddle.js";
 import { MchezoRelay, MchezoRelayResults, RelayReview, RelayTv } from "./components/mchezo/MchezoRelay.js";
+import { MchezoSplitClues, MchezoSplitCluesResults, SplitCluesReview, SplitCluesTv } from "./components/mchezo/MchezoSplitClues.js";
 import { NightCardSheet } from "./components/mchezo/NightCard.js";
 import { TeamResultsCard, TeamsCard, TeamsSheet } from "./components/mchezo/Teams.js";
 import { TEAM_NATIVE_GAMES, teamWinnerLine } from "../../../src/shared/teams.js";
@@ -1148,6 +1149,7 @@ export function App() {
               : g.gameId === "team-huddle" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><HuddleTv game={g} title={titleOf(g.gameId)} /></div>
               // Stage 12.9: Relay: one lane per team, never a sum.
               : g.gameId === "relay" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><RelayTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
+              : g.gameId === "split-clues" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><SplitCluesTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><PulseTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "draw-guess" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><DrawTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               // Stage 9.1: Jebena Rush draws its own turn clock (the turn, not the match).
@@ -1168,6 +1170,7 @@ export function App() {
             : g.gameId === "family-questions" ? <div className="mz-tvshow-game"><FamilyReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "team-huddle" ? <div className="mz-tvshow-game"><HuddleReview game={g} /></div>
             : g.gameId === "relay" ? <div className="mz-tvshow-game"><RelayReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
+            : g.gameId === "split-clues" ? <div className="mz-tvshow-game"><SplitCluesReview game={g} /></div>
             : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><PulseReview game={g} /></div>
             : g.gameId === "draw-guess" ? <div className="mz-tvshow-game"><DrawReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "jebena-rush" ? <div className="mz-tvshow-game"><JebenaReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
@@ -1652,6 +1655,8 @@ export function App() {
   // Stage 12.9 (casual rooms, practice-only, always as teams).
   const relayPlaying = playingGame?.gameId === "relay";
   const relayFinished = latestFinished?.gameId === "relay";
+  const splitPlaying = playingGame?.gameId === "split-clues";
+  const splitFinished = latestFinished?.gameId === "split-clues";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -2223,6 +2228,21 @@ export function App() {
     return (
       <MchezoProvider theme={theme} {...motion}>
         <MchezoFamilyResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Family Questions"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && splitPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <GameClock game={playingGame} />
+        <MchezoSplitClues game={playingGame} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Split Clues"} intent={sendAction} error={err || undefined} landed={sendLanded} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && splitFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <MchezoSplitCluesResults game={latestFinished} publicGame={publicFinished} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Split Clues"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }

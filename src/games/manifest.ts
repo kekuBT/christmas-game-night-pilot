@@ -465,6 +465,27 @@ export const GAME_MANIFESTS: GameManifest[] = [
     tournament: { usesPerPlayerScores: true, supportsTeams: true },
     details: "Every team runs the same 12 sums in the same order; a team only sees its own current sum. Runners take turns within a team. A wrong answer freezes the runner for 3 s; 20 s without an answer passes the baton to the next teammate on the same sum. 10 per leg, plus 30/20/10 for the first three teams home. Uses the night's teams, or deals two. Casual rooms only; practice-only (Stage 12.9).",
   },
+  {
+    id: "split-clues",
+    title: "Split Clues",
+    description: "Each teammate's phone shows different clues to the same answer. Put them together and type it: the faster team scores more.",
+    categories: ["word", "puzzle", "team"],
+    minPlayers: 4,
+    recommendedPlayers: 6,
+    maxPlayers: 10,
+    playStyle: "team",
+    competition: "competitive",
+    duration: { minutes: 8, source: "design-default", measured: false },
+    inputs: ["text"],
+    devices: ["phone"],
+    tv: "dashboard",
+    intensity: "unknown",
+    intensityNote: UNKNOWN_INTENSITY,
+    scoring: { type: "per-player-points", teamDerived: true },
+    features: { practice: true, official: false, abstention: "none" },
+    tournament: { usesPerPlayerScores: true, supportsTeams: true },
+    details: "Six puzzles, one answer and six clues each; every teammate holds different clues, so the team has to talk. Help for every team at 30 s (the answer's shape), 45 s (all clues pooled) and 60 s (the first letter); a round ends at 75 s or when every team has solved it. A wrong try locks the team's answer box for 4 s. 100/75/55/40 by solve order, +25 catch-up for a team alone in last place and 100+ behind. Uses the night's teams (a team needs at least 2), or deals two. Casual rooms only; practice-only (Stage 12.10).",
+  },
 ];
 
 /**

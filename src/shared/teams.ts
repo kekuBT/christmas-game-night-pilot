@@ -19,8 +19,12 @@ export interface RoomTeams {
   /** The host is playing the next games individually for a while (the teams are kept). */
   paused?: true;
 }
-/** The teams one game was played with, fixed at its start (only that game's players). */
-export interface GameTeams { list: TeamDef[]; members: Record<string, string> }
+/**
+ * The teams one game was played with, fixed at its start (only that game's players). `moved` (Stage 12.10, D-S1210-01):
+ * players whose night's team had too few players in this game, and the team they play with instead (shown in the briefing).
+ */
+export interface GameTeams { list: TeamDef[]; members: Record<string, string>; moved?: TeamMove[] }
+export interface TeamMove { playerId: string; from: string; to: string }
 
 /**
  * The games that can be played as teams: every competitive game scored per player. Not Impostor (its scores are a
@@ -36,7 +40,40 @@ export const TEAM_PLAY_GAMES: ReadonlySet<string> = new Set([
  * Stage 12.8 (D-S128-01): games built for teams. They always play as teams: the night's teams when at least two of
  * them have players in the game, otherwise two teams dealt for that game. Every player scores their team's points.
  */
-export const TEAM_NATIVE_GAMES: ReadonlySet<string> = new Set(["team-huddle", "relay", "charades"]);
+export const TEAM_NATIVE_GAMES: ReadonlySet<string> = new Set(["team-huddle", "relay", "charades", "split-clues"]);
+
+/**
+ * Stage 12.10 (D-S1210-01): the fewest players a team may have in a game built for teams. The five games of Stages
+ * 12.10–12.14 need 2 (a teammate to talk to, a drawer and a guesser); 12.8–12.9's games work with 1 and keep that.
+ */
+export const TEAM_GAME_MIN_SIZE: Readonly<Record<string, number>> = { "split-clues": 2 };
+
+/**
+ * Stage 12.10 (D-S1210-01): fit the night's teams to one game. A team with fewer than `minSize` of this game's players
+ * joins the others: each of its players plays with the smallest remaining team (first in order on a tie), and is
+ * listed in `moved`. Returns null when fewer than two teams would remain (the game then deals its own). Pure.
+ */
+export function fitTeamsForGame(list: readonly TeamDef[], members: Readonly<Record<string, string>>, playerIds: readonly string[], minSize: number): GameTeams | null {
+  const size = (id: string, m: Readonly<Record<string, string>>) => playerIds.filter((p) => m[p] === id).length;
+  const out: Record<string, string> = {};
+  for (const p of playerIds) if (members[p]) out[p] = members[p]!;
+  let used = list.filter((t) => size(t.id, out) > 0);
+  const moved: TeamMove[] = [];
+  // Drop the smallest short team first, re-checking after each move (a merge can't make another team short).
+  for (;;) {
+    const short = used.filter((t) => size(t.id, out) < minSize).sort((a, b) => size(a.id, out) - size(b.id, out) || list.indexOf(a) - list.indexOf(b))[0];
+    if (!short) break;
+    used = used.filter((t) => t.id !== short.id);
+    if (used.length < 2) return null;
+    for (const p of playerIds.filter((x) => out[x] === short.id)) {
+      const to = [...used].sort((a, b) => size(a.id, out) - size(b.id, out) || list.indexOf(a) - list.indexOf(b))[0]!.id;
+      out[p] = to;
+      moved.push({ playerId: p, from: short.id, to });
+    }
+  }
+  if (used.length < 2) return null;
+  return { list: used.map((t) => ({ ...t })), members: out, ...(moved.length ? { moved } : {}) };
+}
 
 /** A small seeded generator (mulberry32), so a balance is the same on every replay of the same seed. */
 function rng(seed: number): () => number {

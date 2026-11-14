@@ -16,8 +16,8 @@ describe("protocol", () => {
     expect(sanitizeText("  hello   world  ")).toBe("hello world");
     expect(sanitizeText("   ")).toBeNull();
   });
-  it("registry lists all 19 games (Stage 5 adds Majority Rules, Pattern Pulse and Draw & Guess; Stage 9.1 Jebena Rush; Stage 9.3 Spectrum; Stage 12.5 Family Questions; Stage 12.8 Team Huddle; Stage 12.9 Relay), Math implemented", () => {
-    expect(GAME_REGISTRY).toHaveLength(19);
+  it("registry lists all 20 games (Stage 5 adds Majority Rules, Pattern Pulse and Draw & Guess; Stage 9.1 Jebena Rush; Stage 9.3 Spectrum; Stage 12.5 Family Questions; Stage 12.8 Team Huddle; Stage 12.9 Relay; Stage 12.10 Split Clues), Math implemented", () => {
+    expect(GAME_REGISTRY).toHaveLength(20);
     expect(getGame("math-mayhem").status).toBe("implemented");
   });
 });

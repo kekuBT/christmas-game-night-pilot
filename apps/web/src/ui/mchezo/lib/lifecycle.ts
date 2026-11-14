@@ -62,6 +62,8 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   "family-questions": { verb: "Answered", noun: ["question", "questions"] },
   "team-huddle": { verb: "Answered", noun: ["question", "questions"] },
   "relay": { verb: "Ran", noun: ["leg", "legs"] },
+  // Stage 12.10: every puzzle the team played (each player holds clues in every one).
+  "split-clues": { verb: "Played", noun: ["puzzle", "puzzles"] },
 };
 
 /**

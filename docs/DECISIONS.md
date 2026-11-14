@@ -1816,3 +1816,41 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - each team its own random sums: one team could get easier legs;
     - showing every team's sum on the TV: a team behind could read ahead;
     - waiting for an absent runner: one dropped phone would stop a team.
+- **D-S1210-01 The team kit: one set of rules for the five games built for teams (Stages 12.10–12.14).**
+  - **Every team plays at once:** no team waits for another's turn, so a round lasts as long with 4 teams as with 2.
+  - **At least 2 players per team:**
+    - a night's team with only 1 player in the game joins the game's other teams: that player plays with the smallest one, and the briefing says so;
+    - if fewer than two teams of 2 would remain, the game deals two balanced teams for itself;
+    - Team Huddle, Charades and Relay (12.8–12.9) keep their rule, because a team of 1 works there.
+  - **Fair scoring:** a bigger team never wins just by being bigger. Each game says how: one answer per team per round, or a per-player rate. Everyone scores their team's points.
+  - **Catch-up:** a team alone in last place and at least 100 behind the leader gets a small bonus on its next success, never enough to pass a team that keeps scoring.
+  - **A scoreboard for 2–4 teams** on every phone and the TV (a row, or a 2 × 2 grid for 4). Each team shows its mark and name, so colour is never the only cue.
+  - **No repeats in a night:** a game deals content this room hasn't played yet, then what it played longest ago (`contentIds()` and `avoid`).
+  - **Alternatives rejected:**
+    - **Turns between teams:** with 4 teams, three wait at a time.
+    - **Letting a team of 1 play:** Team Draw would have nobody to guess, and Split Clues nobody to talk to.
+    - **Dealing new teams whenever one is short:** that would throw away the night's teams for everyone.
+- **D-S1210-02 Split Clues: each teammate holds different clues to one answer.**
+  - **Puzzles and clues:**
+    - 6 puzzles, each with one answer and six clues; all teams play the same puzzle at once;
+    - the clues are dealt round each team, and who holds what rotates every round. In a team of more than 6, some clues are held twice.
+  - **Help for every team, from the server's clock:**
+    - the answer's shape at 30 s;
+    - every clue on every phone at 45 s (this also covers a teammate whose phone dropped);
+    - the first letter at 60 s;
+    - the round ends at 75 s, or once every team has solved it.
+  - **Answering:**
+    - anyone on a team may type the team's answer; the matching forgives case, accents, punctuation, an article, a plural and one typo in a long answer;
+    - a wrong try shows to the teammates and pauses the team's answer box for 4 s;
+    - at most 15 tries per team per round, so a bigger team can't guess its way through.
+  - **Points:** 100, 75, 55 and 40 by solve order, and +25 catch-up. No sitting out.
+  - **Secrecy:**
+    - a phone gets only its own clues until the pooling, then its team's six;
+    - a team's wrong tries stay within the team;
+    - the TV and other teams see only status until the reveal; future puzzles never leave the server.
+  - **Content:** 38 Everyday and 13 Christmas puzzles, original. Christmas puzzles are dealt only in Christmas sessions.
+  - **Where:** casual rooms only and practice-only, for 4–10 players. Never in Quick Party or Home's featured rotation.
+  - **Alternatives rejected:**
+    - **Multiple-choice answers:** a team could guess without putting the clues together.
+    - **Hiding everyone's clues all round:** a dropped phone would sink its team.
+    - **Showing wrong tries to everyone:** other teams could rule answers out for free.

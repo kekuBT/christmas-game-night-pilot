@@ -20,6 +20,8 @@ export const TV_HINT: Record<string, string> = {
   "family-questions": "Questions the family wrote about itself. Everyone answers on their phone, except whoever wrote it; who asked comes with the answer.",
   // Stage 12.8: teams answer together; nobody else sees a team's pick before the reveal.
   // Stage 12.9: a relay: only the runner's phone answers; the TV never shows a sum.
+  // Stage 12.10: every teammate holds different clues; the TV shows only each team's status until the answer.
+  "split-clues": "Every teammate's phone holds different clues to the same answer: talk it out! The TV never shows a clue before the answer.",
   "relay": "A team race: only the runner's phone can answer, and a right answer passes the baton. First team home wins.",
   "team-huddle": "Teams answer together: teammates see each other's picks, and each team's answer is what most of it picks. Nobody else sees a team's pick until the answer.",
 };

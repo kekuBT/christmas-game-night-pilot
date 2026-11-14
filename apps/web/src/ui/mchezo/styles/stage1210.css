@@ -1,0 +1,37 @@
+/* Stage 12.10 (docs/stage12/stage1210.md): the team kit's scoreboard, and Split Clues. A team is its mark (colour AND
+   shape) and its name; the colour is a stripe and a fill, never text itself. */
+
+/* The scoreboard: a list on phones; on the TV a row of 2–3 teams, or a 2 x 2 grid of 4. */
+.mz-tsb { margin: 12px 0 0; }
+.mz-tsb__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mz-tsb__team { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 12px; border-radius: 14px; border-left: 6px solid var(--mz-team); background: var(--mz-surface-2); }
+.mz-tsb__team.is-mine { outline: 2px solid var(--mz-text); outline-offset: 1px; }
+.mz-tsb__text { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; font: 500 14px/1.35 var(--mz-font-body); }
+.mz-tsb__text b { font-weight: 800; }
+.mz-tsb__you { font-weight: 600; color: var(--mz-text-muted); }
+.mz-tsb__score { font: 800 20px/1 var(--mz-font-display); font-variant-numeric: tabular-nums; }
+.mz-tsb--tv { margin-top: 24px; }
+.mz-tsb--tv .mz-tsb__list { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.mz-tsb--tv[data-teams="4"] .mz-tsb__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mz-tsb--tv .mz-tsb__team { padding: 16px 20px; border-left-width: 10px; border-radius: 20px; }
+.mz-tsb--tv .mz-tsb__text { font-size: 24px; }
+.mz-tsb--tv .mz-tsb__score { font-size: 44px; }
+.mz-tsb--tv .mz-team-mark { width: 44px; height: 44px; font-size: 22px; }
+
+/* Split Clues: your clues on a card, the help line, the answer box, your team's tries. */
+.mz-sc-clues { margin-top: 12px; padding: 14px 16px; }
+.mz-sc-clues__list { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 8px; font: 600 17px/1.4 var(--mz-font-body); overflow-wrap: anywhere; }
+.mz-sc-help { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; margin: 10px 0 0; font: 500 15px/1.4 var(--mz-font-body); text-align: center; }
+.mz-sc-help b { font-weight: 800; }
+.mz-sc-help span { color: var(--mz-text-muted); }
+.mz-sc-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-top: 12px; align-items: stretch; }
+.mz-sc-input { min-width: 0; }
+.mz-sc-locked { margin: 6px 0 0; text-align: center; font: 800 16px/1.3 var(--mz-font-body); }
+.mz-sc-tries { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; font: 500 14px/1.35 var(--mz-font-body); color: var(--mz-text-muted); overflow-wrap: anywhere; }
+.mz-sc-answer { text-align: center; font-size: clamp(30px, 8vw, 44px); overflow-wrap: anywhere; }
+.mz-tvshow-sc .mz-tvshow-fq__row { grid-template-columns: minmax(0, 1fr) minmax(300px, 420px); align-items: start; }
+.mz-sc-clues__list--tv { font-size: 26px; gap: 10px; margin: 0; padding-left: 48px; }
+.mz-tvshow-sc .mz-hd-teams { margin: 0; gap: 12px; }
+.mz-tvshow-sc .mz-hd-team { padding: 12px 16px; border-left-width: 10px; border-radius: 18px; }
+.mz-tvshow-sc .mz-hd-team__text { font-size: 22px; }
+.mz-tvshow-sc .mz-team-mark { width: 40px; height: 40px; font-size: 20px; }
