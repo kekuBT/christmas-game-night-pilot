@@ -1,0 +1,11 @@
+$ node scripts/check-ws-reconnect.mjs http://localhost:38645
+# timeout 600s | worker w2 | server http://localhost:38645 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-aebbb29/test-results/20261113-232551-aebbb296-26126/server-data/w2)
+
+[+3.5s] PASS both players connected before drop
+[+4.5s] PASS guest marked away after socket drop
+[+5.5s] PASS guest auto-reconnected, away cleared, no manual click
+[+6.5s] PASS host can start Trivia after reconnect (2 connected players)
+[+6.6s] WS-RECONNECT ALL PASSED
+[+6.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 6.6s | cpu 1.3s, peak memory 323 MB

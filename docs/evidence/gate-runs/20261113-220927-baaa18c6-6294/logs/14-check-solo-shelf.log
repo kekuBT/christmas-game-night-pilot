@@ -1,0 +1,65 @@
+$ node scripts/check-solo-shelf.mjs http://localhost:40745
+# timeout 600s | worker w1 | server http://localhost:40745 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-baaa18c/test-results/20261113-220927-baaa18c6-6294/server-data/w1)
+
+[+1.2s] PASS A the shelf lists exactly Math Mayhem, Pattern Pulse and Word Connections — math-mayhem, pattern-pulse, word-connections
+[+1.2s] PASS A math-mayhem: no personal best yet, and a Start
+[+1.3s] PASS A pattern-pulse: no personal best yet, and a Start
+[+1.3s] PASS A word-connections: no personal best yet, and a Start
+[+1.6s] PASS B Pulse: no name, code or lobby, and no Sit the rest out
+[+36.3s] PASS B Pulse perfect: 960 points, 6 of 6 rounds perfect (round 1 by keyboard) — {"score":960,"headline":"6 of 6 rounds perfect","pb":"Your first personal best on this device!"}
+[+36.3s] PASS B Pulse: its first personal best — Your first personal best on this device!
+[+36.3s] PASS B Pulse results: its own six-round recap and scoring, no Math copy, no lobby or standings
+[+36.3s] PASS B results move focus to the score
+[+71.3s] PASS C Pulse replay with a slip each round: 0 points, 0 of 6 perfect — {"score":0,"headline":"0 of 6 rounds perfect","pb":"Your personal best on this device is still 960."}
+[+71.3s] PASS C Pulse: a lower score keeps the best (960) — Your personal best on this device is still 960.
+[+73.1s] PASS D Connections: no Sit this game out in solo
+[+74.2s] PASS D Connections solved with no mistakes: 450, the first group by keyboard — {"score":450,"headline":"All four groups, no mistakes","pb":"Your first personal best on this device!"}
+[+74.2s] PASS D Connections: its own first best (not compared with Pulse's 960) — Your first personal best on this device!
+[+74.2s] PASS D Connections results: the solution with all four groups found
+[+75.1s] PASS E Play again: no tile selected from the last round
+[+75.1s] PASS E Play again: a fresh round with nothing found yet (16 tiles, no group bands)
+[+75.1s] PASS E Play again deals a board this room hasn't used (Stage 7.4: also with all content approved)
+[+77.3s] PASS E four wrong guesses: 0 points, out of guesses — {"score":0,"headline":"Found 0 of 4 groups · out of guesses","pb":"Your personal best on this device is still 450."}
+[+77.4s] PASS E every group shown, all as missed
+[+77.4s] PASS E the best stays 450 — Your personal best on this device is still 450.
+[+81.4s] PASS F two groups then four wrong: 200 points, 2 of 4 — {"score":200,"headline":"Found 2 of 4 groups · out of guesses","pb":"Your personal best on this device is still 450."}
+[+81.4s] PASS F found and missed told apart: 2 solid, 2 dashed
+[+83.3s] PASS G Math starts fresh at question 1 after the other games
+[+100.6s] PASS G Math: 10 of 10, with the Math headline and its own first best — {"score":1200,"headline":"10 of 10 correct","pb":"Your first personal best on this device!"}
+[+100.6s] PASS G one solo room for every round and every switch — 1 rooms
+[+100.6s] PASS G the server holds each round in that one room (2 Pulse, 3 Connections, 1 Math) — {"pp":2,"cx":3,"mm":1}
+[+100.6s] PASS G solo rounds are never official
+[+100.6s] PASS H one best per game and rules version — {"pattern-pulse@1":{"score":960,"at":1794608561322,"rulesVersion":1},"word-connections@1":{"score":450,"at":1794608599226,"rulesVersion":1},"math-mayhem@1":{"score":1200,"at":1794608625608,"rulesVersion":1}}
+[+101.1s] PASS H the shelf shows each game's own best
+[+101.3s] PASS H a best under other rules is never shown (Pulse v0; a v2 record in Connections' v1 slot)
+[+101.6s] PASS H blocked storage: every game says bests can't be kept
+[+104.4s] PASS H blocked storage: Connections plays to its result and says the best couldn't be saved — {"score":0,"headline":"Found 0 of 4 groups · out of guesses","pb":"Your score couldn’t be saved as a personal best: this device’s storage is unavailable."}
+[+108.9s] PASS I Leave mid-Pulse: the round is removed on the server
+[+109.5s] PASS I reload mid-Connections: the round's start screen
+[+110.0s] PASS I Start after the reload replaces the interrupted round, and says so
+[+111.0s] PASS I a second tab's Pulse replaces this tab's Connections round: it returns to its Start screen
+[+111.1s] PASS I exactly one round plays, the second tab's Pulse
+[+111.2s] PASS I still one solo room — 1 rooms
+[+118.2s] PASS J a guess with no reply ends within the request allowance, the four tiles still selected
+[+118.2s] PASS J it ended in about 6 s, not stuck on Checking… — 6196 ms
+[+118.4s] PASS J sending again works: the group is found
+[+119.6s] PASS I Home from the results: Home, with no phantom Rejoin
+[+120.0s] PASS L the shelf says Connections' best spans boards (and only Connections)
+[+120.1s] PASS L Connections' start screen: the device best (50) and the note
+[+121.3s] PASS L Connections: one group found (100 so far)
+[+121.3s] PASS L the server takes the forged abstain (it is the seat's own token) — {"status":200,"body":{"accepted":true,"result":{"gameStatus":"finished"}}}
+[+121.6s] PASS L Connections results: the server's 100 and 1 of 4, and why it sets no best — {"score":100,"headline":"Found 1 of 4 groups","pb":"You sat this round out, so it doesn’t count toward a personal best."}
+[+121.6s] PASS L Connections results: the note next to the best
+[+121.6s] PASS L the stored Connections best is still 50 — {"word-connections@1":{"score":50,"at":1,"rulesVersion":1},"pattern-pulse@1":{"score":20,"at":1,"rulesVersion":1}}
+[+124.1s] PASS L the same request replayed: the original answer, and still 50 — {"status":200,"body":{"accepted":true,"result":{"gameStatus":"finished"}}}
+[+124.3s] PASS L after a reload: the start screen, still 50 on screen and in storage
+[+129.8s] PASS L Pulse: a forged abstain after a perfect first round ends it: 110, and it sets no best — {"a3":{"status":200,"body":{"accepted":true,"result":{"gameStatus":"finished"}}},"lq":{"score":110,"headline":"1 of 6 rounds perfect","pb":"You sat this round out, so it doesn’t count toward a personal best."}}
+[+129.8s] PASS L Pulse: the stored best is still 20 (110 would have beaten it); no Connections note here — {"word-connections@1":{"score":50,"at":1,"rulesVersion":1},"pattern-pulse@1":{"score":20,"at":1,"rulesVersion":1}}
+[+134.5s] PASS K Pulse: a round left unanswered runs out (Time ran out)
+[+146.4s] PASS K Pulse at its game deadline: a finished server result, 0 points, the timed-out round in the recap — {"score":0,"headline":"0 of 6 rounds perfect · 1 ran out of time","pb":"Your first personal best on this device!"}
+[+171.5s] PASS K Connections at its deadline with one group found: 100, 1 of 4, one solid band — {"score":100,"headline":"Found 1 of 4 groups","pb":"Your first personal best on this device!"}
+[+172.4s] PASS K shipped library: Play again, then a Start after leaving, each deal a board not yet used in this room
+[+172.5s] SOLO SHELF ALL PASSED
+[+172.5s] MCHEZO_DRIVER_STATS {"browsers":2,"contexts":4,"pages":5,"peakOpenPages":2}
+
+# PASS (exit 0) in 172.5s | cpu 8.2s, peak memory 353 MB

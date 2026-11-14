@@ -9,6 +9,7 @@ import { mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "docs", "mchezo-screenshots");
 mkdirSync(OUT, { recursive: true });
@@ -17,7 +18,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function createRoom(page, name) {
   await page.goto(BASE, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
-  await page.getByTestId("host-kind-cup").click(); await page.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(page);
   const chip = page.getByRole("button", { name: /^Share room code / });
   await chip.waitFor({ timeout: 15000 });
   let code = "";

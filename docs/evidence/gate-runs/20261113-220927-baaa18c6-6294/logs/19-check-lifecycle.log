@@ -1,0 +1,44 @@
+$ node scripts/check-lifecycle.mjs http://localhost:40745
+# timeout 600s | worker w1 | server http://localhost:40745 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-baaa18c/test-results/20261113-220927-baaa18c6-6294/server-data/w1)
+
+[+5.0s] PASS C. the lobby names the Individual Family Cup
+[+5.0s] PASS C. the game list marks Impostor practice only
+[+5.5s] PASS C. the practice-only reason is shown
+[+5.5s] PASS C. the Official mode is disabled for Impostor
+[+5.5s] PASS C. Start starts practice
+[+23.2s] PASS A. Bea answered 3
+[+23.2s] PASS A. the waiting screen shows a countdown
+[+23.2s] PASS A. the countdown uses server time, not the phone's wrong clock — shown 20s, server says 20s
+[+23.2s] PASS A. no Skip button for the host
+[+23.2s] PASS H. diagnosis while waiting: server playing, deadline ahead, type waiting-on-players — DIAG player=Ada game=trivia(game-1) server=playing phase=- deadlineIn=20s phaseIn=- submitted=2/3 outcome=- | screen="ALL YOUR ANSWERS ARE IN A You B Reconnecting C Cal 1/3 have finished Everyone go" clock="Ends automatically in: 0:20" | type=waiting-on-players
+[+23.2s] PASS H. diagnosis for an offline phone says the server is unreachable — DIAG player=Bea server=unavailable(page.evaluate: TypeError: Failed to fetch) | screen="Answer locked in" clock="Ends automatically in: 0:20" | type=server-unreachable
+[+23.2s] PASS A. the waiting screen says the game ends by itself
+[+43.0s] PASS A. Ada's phone reaches the results with no host action
+[+43.0s] PASS A. Cal's phone reaches the results too
+[+43.0s] PASS A. results say time ran out
+[+43.0s] PASS A. results say it counts toward the Family Cup
+[+43.0s] PASS A. Ada: Answered 10 of 10
+[+43.0s] PASS A. Ada sees Bea: Answered 3 of 10 — Bea: Answered 3 of 10 questionsCal: Did not answer (0 of 10)
+[+43.0s] PASS A. Ada sees Cal: Did not answer (never 'abstained') — Bea: Answered 3 of 10 questionsCal: Did not answer (0 of 10)
+[+43.0s] PASS A. Cal's own line: Did not answer
+[+43.0s] PASS H. diagnosis after the end: server finished with outcome deadline, Cal 0/10 — DIAG player=Cal game=trivia(game-1) server=finished phase=- deadlineIn=0s phaseIn=- submitted=2/3 outcome=deadline mine=0/10 | screen="Question 1 of 10" clock="" shownOutcome=deadline | type=finished-and-shown
+[+43.4s] PASS A. Bea, back online, sees the results
+[+43.4s] PASS A. Bea: Answered 3 of 10
+[+43.4s] PASS A. server: Bea scored only her 3 answers (0-360, a multiple of 120) — 0
+[+43.4s] PASS A. server: Cal scored 0 and is still ranked (not dropped) — {"player-1":600,"player-2":0,"player-3":0}
+[+43.4s] PASS A. server: outcome is deadline and counts
+[+44.6s] PASS B. a per-question countdown is shown
+[+48.7s] PASS B. the question moves on for everyone without waiting for silent players
+[+48.7s] PASS B. Cal's screen shows the next question
+[+48.7s] PASS no horizontal overflow on results/countdown screens
+[+76.9s] PASS D. Closest has ended (its questions time out)
+[+128.2s] PASS D. the outdated tab shows the refresh banner
+[+128.2s] PASS D. the outdated tab can still play (the question is shown, not blank)
+[+128.2s] PASS D. an up-to-date phone shows no refresh banner
+[+128.2s] PASS D. the server marked only Dee as untimed for this game — ["player-4"]
+[+128.3s] PASS D. 'Later' hides the banner so it never blocks answering
+[+128.9s] PASS D. the outdated tab can answer (even the bottom option)
+[+129.3s] LIFECYCLE ALL PASSED
+[+129.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 129.4s | cpu 6.7s, peak memory 364 MB

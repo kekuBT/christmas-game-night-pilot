@@ -309,6 +309,13 @@ export class SessionRefused extends Error {
   }
 }
 
+/** Stage 12.1 (D-S121-02): a "Make it a Family Cup" the server refused (HTTP 403/409). Nothing changed. */
+export class CupUpgradeRefused extends Error {
+  constructor(readonly code: "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "GAME_IN_PROGRESS" | "CUP_RECORD_UNREADABLE", message: string) {
+    super(message);
+  }
+}
+
 /** A lineup the server refused to save (HTTP 403/409/400). Nothing changed. */
 export class PartyRefused extends Error {
   constructor(readonly code: "NOT_HOST" | "NOT_A_CASUAL_ROOM" | "PLAN_CONFLICT" | "INVALID_PLAN", message: string) {
@@ -462,8 +469,15 @@ export class RoomEngine {
    * standings instead of being replaced by a guess.
    */
   private _cup: CupRecord;
-  /** Stage 6.1: cup, casual or solo (see ROOM_KINDS). Fixed for the room's life. */
-  readonly kind: RoomKind;
+  /**
+   * Stage 6.1: cup, casual or solo (see ROOM_KINDS). Stage 12.1 (D-S121-02): fixed for the room's life except for one
+   * one-way change, a casual room becoming a Family Cup (upgradeToCup).
+   */
+  kind: RoomKind;
+  /** Stage 12.1: the games this room played while it was casual, kept when it became a Family Cup (empty otherwise). */
+  casualGameIds: string[] = [];
+  /** Stage 12.1: when this casual room became a Family Cup (null for a room created as a Cup, or still casual). */
+  cupSince: { at: number; seq: number } | null = null;
   private cupError: string | null = null;
   private cupRaw: unknown = undefined;
   get cup(): CupRecord {
@@ -485,7 +499,8 @@ export class RoomEngine {
    */
   configureCup(opts: { qualificationPolicy?: unknown; format?: CompetitionFormat }): void {
     if (this.cupError) throw new Error("This Cup's saved rules could not be read; they must be repaired, not replaced");
-    if (this.games.size > 0) throw new Error("A Cup's rules are fixed once its first game has started");
+    // Stage 12.1: a room that became a Family Cup counts only the games played since (its casual games aren't Cup games).
+    if ([...this.games.keys()].some((id) => !this.casualGameIds.includes(id))) throw new Error("A Cup's rules are fixed once its first game has started");
     const next = CupRecordSchema.parse({
       ...this._cup,
       ...(opts.format ? { format: opts.format } : {}),
@@ -2757,6 +2772,30 @@ export class RoomEngine {
   }
 
   /**
+   * Stage 12.1 (docs/stage12/stage121.md §2.2; D-S121-02): "Make it a Family Cup". A casual room becomes a Family Cup in
+   * place: same code, players and Memory Book. Host only; refused while a game is getting ready or playing. Asking again
+   * in a room that is already a Cup changes nothing (idempotent). It starts a fresh Cup record (day 1, the same timing
+   * version) and keeps the ids of the games played while casual: they were never official, so no standings change, and
+   * the Memory Book keeps them casual. One-way.
+   */
+  upgradeToCup(actorId: string): { changed: boolean } {
+    if (this.hostId !== actorId) throw new CupUpgradeRefused("NOT_HOST", "Only the host can make this room a Family Cup.");
+    if (this.kind === "cup") return { changed: false };
+    if (this.kind !== "casual") throw new CupUpgradeRefused("NOT_A_CASUAL_ROOM", "Only a casual room can become a Family Cup.");
+    if ([...this.games.values()].some(isActiveGame)) throw new CupUpgradeRefused("GAME_IN_PROGRESS", "A game is in progress. Make it a Family Cup once it has finished.");
+    if (this.cupError) throw new CupUpgradeRefused("CUP_RECORD_UNREADABLE", "This room's saved Cup record could not be read, so it can't start a Family Cup.");
+    const timing = this._cup.timing ? 2 : undefined;
+    this.casualGameIds = [...this.games.keys()];
+    this.kind = "cup";
+    this.championshipDay = 1;
+    this._cup = newCupRecord(`cup-${Date.now().toString(36)}-${randomInt(0, 2 ** 31).toString(36)}`, this.clock(), { timing });
+    this.session = { onBreak: false, revision: this.session.revision, ops: this.session.ops };
+    const ev = this.log("cup-started", { actor: actorId, detail: { from: "casual", casualGames: this.casualGameIds.length } });
+    this.cupSince = { at: ev.createdAt, seq: ev.seq };
+    return { changed: true };
+  }
+
+  /**
    * Advance the championship day (host/cohost only).
    * Day-close semantics: a day is closed by advancing, not by the clock.
    * Games started after the advance count toward the new day; finished
@@ -3319,6 +3358,8 @@ export class RoomEngine {
       joinCode: this.joinCode,
       name: this.name,
       roomKind: this.kind,
+      // Stage 12.1 (D-S121-02): a casual room that became a Family Cup, and the games it played while casual (public ids).
+      ...(this.cupSince ? { cupSince: this.cupSince, casualGameIds: this.casualGameIds } : {}),
       // Stage 7.1: the Quick Party lineup (casual rooms): public planning facts only.
       ...(this.kind === "casual" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
       // Stage 8.2: what this solo or casual session deals (public; never a device's look).
@@ -3421,6 +3462,8 @@ export class RoomEngine {
       cohosts: [...this.cohosts],
       championshipDay: this.championshipDay,
       kind: this.kind,
+      // Stage 12.1: a room that became a Family Cup remembers when, and which games were played while it was casual.
+      ...(this.cupSince ? { cupSince: this.cupSince, casualGameIds: this.casualGameIds } : {}),
       // Kept for older readers; the Cup record is authoritative. An unreadable
       // record is written back exactly as it was found, never overwritten.
       competitionFormat: this._cup.format,
@@ -3456,6 +3499,13 @@ export class RoomEngine {
     // Migration default: snapshots written before championshipDay was
     // serialized (review 5769441799) have no field and resume at day 1.
     engine.championshipDay = typeof data["championshipDay"] === "number" ? data["championshipDay"] : 1;
+    // Stage 12.1: older rooms have neither field (never upgraded); anything unreadable is left out.
+    const since = data["cupSince"] as { at?: unknown; seq?: unknown } | undefined;
+    if (engine.kind === "cup" && since && typeof since === "object" && Number.isFinite(since.at) && Number.isSafeInteger(since.seq)) {
+      engine.cupSince = { at: since.at as number, seq: since.seq as number };
+      const ids = data["casualGameIds"];
+      engine.casualGameIds = Array.isArray(ids) ? ids.filter((x): x is string => typeof x === "string") : [];
+    }
     engine.contentUsage = (data["contentUsage"] as UsageHistory | undefined) ?? {};
     engine.contentSeq = typeof data["contentSeq"] === "number" ? data["contentSeq"] : 0;
     // Stage 8.2 (§3.5): a room saved before content seasons (or with an

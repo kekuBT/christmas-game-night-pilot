@@ -1,0 +1,30 @@
+$ node scripts/check-progress.mjs http://localhost:32891
+# timeout 600s | worker w3 | server http://localhost:32891 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-ce3e0a8/test-results/20261113-224727-ce3e0a83-2768/server-data/w3)
+
+[+2.4s] PASS Closest: the TV shows the live question
+[+2.4s] PASS Closest question 1: nobody has answered yet → 0 of 3
+[+2.4s] PASS Closest question 1: one answer in → 1 of 3
+[+2.5s] PASS Closest: everyone answered, question 2 opens
+[+2.6s] PASS Closest question 2: the TV says 0 of 3 have answered THIS question (not 3 of 3)
+[+2.6s]   TV ring on question 2: "0 of 3 have answered question 2"
+[+2.9s] PASS Who Said That: the game has questions — 8
+[+4.0s] PASS Who Said That: Amina's answer 1 is in
+[+4.2s] PASS Who Said That: Amina's answer 2 is in
+[+4.4s] PASS Who Said That: Amina's answer 3 is in
+[+4.6s] PASS Who Said That: Amina's answer 4 is in
+[+4.8s] PASS Who Said That: Amina's answer 5 is in
+[+5.0s] PASS Who Said That: Amina's answer 6 is in
+[+5.1s] PASS Who Said That: Amina's answer 7 is in
+[+5.3s] PASS Who Said That: Amina's answer 8 is in
+[+5.3s]   waiting card: "⏳ WAITING FOR OTHERS Who Said That? You’re done — nice work. 2 of 4 have finished; 3 of 4 have started. Counts only — nobody can see who submitted or what they answered. When everyone is done, results appear automatically. If someone doesn’t finish, the game ends by itself when time runs out."
+[+5.3s] PASS Who Said That: the waiting card says 2 of 4 have finished (Keku and Amina; Bartholomew and Wanjiru still have questions) — ⏳ WAITING FOR OTHERS Who Said That? You’re done — nice work. 2 of 4 have finished; 3 of 4 have started. Counts only — nobody can see who submitted or what they answered. When everyone is done, results appear automatically. If someone doesn’t finish, the game ends by itself when time runs out.
+[+5.3s] PASS Who Said That: it doesn't present the started count as if everyone were done — ⏳ WAITING FOR OTHERS Who Said That? You’re done — nice work. 2 of 4 have finished; 3 of 4 have started. Counts only — nobody can see who submitted or what they answered. When everyone is done, results appear automatically. If someone doesn’t finish, the game ends by itself when time runs out.
+[+5.3s] PASS Who Said That: no names on the waiting card
+[+7.7s] PASS Majority: a poll is in flight and holding the older state
+[+7.7s] PASS Majority: the held reply is the older state (still voting)
+[+7.7s] PASS Majority: the push shows the reveal
+[+10.2s] PASS Majority: after the older reply lands, the screen stays on the reveal (no roll-back to the earlier step)
+[+10.3s] PROGRESS ALL PASSED
+[+10.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":1}
+
+# PASS (exit 0) in 10.3s | cpu 3s, peak memory 361 MB

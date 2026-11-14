@@ -9,6 +9,7 @@
 import { launchChromium } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const results = [];
 function pass(name) { results.push([name, true]); console.log("PASS", name); }
@@ -32,7 +33,7 @@ try {
   const host = await ctx.newPage();
   await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
-  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(host);
   const shareChip = host.getByRole("button", { name: /^Share room code / });
   await shareChip.waitFor({ timeout: 15000 });
   let code = "";

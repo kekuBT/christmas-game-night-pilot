@@ -73,9 +73,9 @@ try {
     await shot(p, "05-solo-list-best", view, "Play solo after a round: the personal best on this device");
     await p.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
     await p.getByTestId("home-host").click();
-    await p.getByTestId("host-kind").waitFor({ timeout: 10000 });
+    await p.getByTestId("host-cup-note").waitFor({ timeout: 10000 });
     await p.getByPlaceholder("e.g. Auntie June").fill("Keku");
-    await shot(p, "06-host-casual", view, "Host a game: Casual by default, Family Cup a deliberate choice");
+    await shot(p, "06-host-casual", view, "Host a game: just a name; a Family Cup is a later upgrade from the room menu (Stage 12.1)");
     await p.getByRole("button", { name: "Host a game" }).click();
     await p.getByRole("button", { name: /^Share room code / }).waitFor({ timeout: 15000 });
     await p.getByTestId("choose-game").click();

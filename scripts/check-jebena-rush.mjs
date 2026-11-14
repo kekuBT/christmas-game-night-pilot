@@ -69,6 +69,7 @@ import { passBriefing } from "./lib/briefing.mjs";
 import { bankCanaries, freshAnswer, jebenaOracle } from "./lib/jebena-oracle.mjs";
 import { memoryLinkOf, openMemoryBook } from "./lib/memory-book.mjs";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
 function check(name, ok, detail = "") { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; }
@@ -1014,8 +1015,7 @@ try {
     await C.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
     await C.getByTestId("home-host").click();
     await C.getByPlaceholder("e.g. Auntie June").fill("Cupholder");
-    await C.getByTestId("host-kind-cup").click();
-    await C.getByRole("button", { name: "Host a game" }).click();
+    await hostFamilyCup(C); // Stage 12.1: host, then the room menu's "Make it a Family Cup"
     await C.getByTestId("choose-game").waitFor({ timeout: 15000 });
     await C.getByTestId("choose-game").click();
     await C.getByTestId("choose-sheet").waitFor({ timeout: 5000 });

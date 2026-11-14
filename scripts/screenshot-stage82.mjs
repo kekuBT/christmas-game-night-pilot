@@ -18,6 +18,7 @@ import { join } from "node:path";
 import { launchChromium } from "./lib/driver-env.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const OUT = arg("--out", join("docs", "stage8", "screenshots-82", "after"));
 mkdirSync(OUT, { recursive: true });
@@ -151,10 +152,7 @@ try {
       const p = await ctx.newPage();
       await p.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
       await p.getByPlaceholder("e.g. Auntie June").fill("Ada");
-      const cup = p.getByTestId("host-kind-cup");
-      if (await cup.count()) await cup.click();
-      await p.getByRole("button", { name: /Host (a game|the Cup)/ }).click();
-      await p.getByRole("button", { name: /^Share room code / }).waitFor({ timeout: 15000 });
+      await hostFamilyCup(p); // Stage 12.1: host, then the room menu's "Make it a Family Cup"
       await sleep(800);
       await shot(p, "14-cup-lobby", "Family Cup lobby (one player)", lookId);
       await ctx.close();

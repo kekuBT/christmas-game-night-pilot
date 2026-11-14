@@ -45,14 +45,17 @@ export interface PresentableEntry {
 export interface BookContext {
   roomKind: string | undefined;
   nameOf: (playerId: string) => string | undefined;
-  /** The cited games, in citation order, when the room still has them (older entries without a recorded source). */
-  sourceGames?: (e: PresentableEntry) => { title?: string; day?: number }[];
+  /**
+   * The cited games, in citation order, when the room still has them (older entries without a recorded source).
+   * Stage 12.1: `mode` is a game's own era: a game played while the room was casual stays casual after it becomes a Cup.
+   */
+  sourceGames?: (e: PresentableEntry) => { title?: string; day?: number; mode?: BookMode }[];
 }
 
 export const NO_NAME = "A player";
 
-export function entryMode(e: PresentableEntry, ctx: Pick<BookContext, "roomKind">): BookMode {
-  return e.source?.mode ?? bookModeOf(ctx.roomKind);
+export function entryMode(e: PresentableEntry, ctx: Pick<BookContext, "roomKind" | "sourceGames">): BookMode {
+  return e.source?.mode ?? ctx.sourceGames?.(e)?.[0]?.mode ?? bookModeOf(ctx.roomKind);
 }
 
 const uniqSorted = (xs: number[]) => [...new Set(xs.filter((n) => Number.isSafeInteger(n) && n > 0))].sort((a, b) => a - b);

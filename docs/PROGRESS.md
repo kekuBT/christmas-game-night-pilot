@@ -1,5 +1,5 @@
 # Muse local progress and resume checkpoint
-Updated: 2026-11-13 ~07:05 EST (Stage 11.2 built and gated on adf6e8d — see the Stage 11.2 section at the end; real-device checks still NOT RUN)
+Updated: 2026-11-13 ~7:05 p.m. EST (Stage 12.1 built and gated: full checkpoint PASSED on aebbb29, 91/91 — see the Stage 12.1 section at the end; real-device checks still NOT RUN)
 
 ## Current milestone
 M0–M5: COMPLETED as backend/engine checkpoints ONLY — see docs/FRONTEND_MILESTONES.md. They are NOT evidence the full product is finished.
@@ -2438,3 +2438,44 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - a bare web address in a note may be autolinked by some Markdown renderers;
   - desktop Chromium only.
 - **Next:** ChatGPT's candidate review and private audit of `adf6e8d`. Nothing merged or deployed.
+
+## Stage 12.1: one path, and the TV as the hero (owner-directed; built and gated; awaiting review)
+- **Brief:** directly from the owner in chat (2026-11-13, about 4:50 p.m. ET). The owner quoted my two design recommendations, one path and the TV as the hero, and wrote "you have my blessing to optimize however you think is best … if you have more discussions go for it just document it". It didn't come through a ChatGPT handoff (ChatGPT's usage limit had been reached).
+- **Base:** `c2767fb` (PR #24's head). Branch `claude/stage12-1-one-path-tv`, draft PR #25 stacked on #24.
+- **Spec:** `docs/stage12/stage121.md`. Decisions D-S121-01..07. Owner discussions: `docs/stage12/stage121-discussions.md`.
+- **Built:**
+  - **Server:** `RoomEngine.upgradeToCup` and `POST /rooms/:id/cup`: a casual room becomes a Cup in place, one way, host only, persisted. It keeps `casualGameIds` and `cupSince` and logs a `cup-started` ledger event. The stored up-next plan becomes Official. The Memory Book's mode is per game era.
+  - **Web:**
+    - Home is Join plus Host, with a "Play solo" link;
+    - Host asks only for a name;
+    - the room menu has "Make it a Family Cup" (a sheet), and a lobby notice shows after the upgrade;
+    - the Memory Book keeps casual-era games casual.
+  - **TV:** the QR join code, the podium reveal, the medal table (`lib/medals.ts`), the Cup lobby card with the day's leader, Cup standings after official games with ▲/▼ from the TV's own memory, the director's "Cup standings" (`cupPodium`), and the day trophy. It never says "champion".
+  - **Drivers:** a `hostFamilyCup` helper used by about 50 drivers, and the new `scripts/check-one-path.mjs` (48 checks). check-warm-ivory W8 accepts only the 12 listed Stage 12.1 element keys, and only when they reuse a base style (the baseline isn't re-recorded; a negative test proves it still fails on a recolour).
+  - **Tests:** `tests/stage121-cup-upgrade.test.ts` (9) and `tests/stage121-tv-medals.test.ts` (17). The full unit suite was 1770/1770 on the TV work.
+- **Found and fixed while building:**
+  - the new Cup's Start defaulted to Practice (check-casual and check-f4);
+  - the Cup view said "No Cup points yet" with a three-way tie;
+  - the director row wrapped;
+  - the sheet promised "a champion at the end";
+  - check-warm-ivory W8 failed in the early full run on `baaa18c`;
+  - check-contrast failed on the podium in the full run on `ce3e0a8`.
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `baaa18c` full `20261113-220927-baaa18c6-6294`: **FAILED** (exit 1), 89/90: check-warm-ivory W8, fixed in `ce3e0a8`;
+  - `ce3e0a8` targeted (8 drivers) `20261113-224356-ce3e0a83-29764`: PASSED;
+  - `ce3e0a8` fast `20261113-224623-ce3e0a83-31608`: PASSED;
+  - `ce3e0a8` full `20261113-224727-ce3e0a83-2768`: **FAILED** (exit 1), 90/91: check-contrast, a podium number at 1.00:1 (gradient-only blocks). Fixed in `aebbb29`;
+  - `aebbb29` targeted (6 drivers) `20261113-232328-aebbb296-20873`: PASSED;
+  - `aebbb29` fast `20261113-232446-aebbb296-22496`: PASSED;
+  - **`aebbb29` full (checkpoint) `20261113-232551-aebbb296-26126`: PASSED** (exit 0, 91/91, 34 min 27 s, no retries).
+- **Tested SHA:** `aebbb29`. The head after it is docs and evidence only.
+- **Evidence:**
+  - `docs/stage12/stage121-screenshots/`: before (`c2767fb`) and after pairs, and the journey;
+  - `docs/evidence/stage121-local/`: every local run, failures included;
+  - `docs/evidence/gate-runs/`.
+- **Limitations:**
+  - the TV's movement and trophy memory is per screen;
+  - medals are presentation only;
+  - the upgrade is one way;
+  - desktop Chromium only.
+- **Next:** owner and ChatGPT review of PR #25, and the owner's picks from the discussions. Nothing merged or deployed.

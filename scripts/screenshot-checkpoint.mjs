@@ -8,6 +8,7 @@
 import { chromium } from "playwright";
 import fs from "node:fs";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3457";
 const OUT = process.argv[3] ?? "docs/checkpoint-screenshots";
 const NAMES = ["Alex", "Sam", "Jo", "Kim"];
@@ -21,7 +22,7 @@ try {
   await host.goto(BASE, { waitUntil: "domcontentloaded" });
   await host.screenshot({ path: `${OUT}/01-home.png` });
   await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
-  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(host);
   const shareChip = host.getByRole("button", { name: /^Share room code / });
     await shareChip.waitFor({ timeout: 15000 });
     let code = "";

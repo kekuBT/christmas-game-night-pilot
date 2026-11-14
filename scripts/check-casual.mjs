@@ -20,7 +20,7 @@ import { launchChromium } from "./lib/driver-env.mjs";
 import { plainHttpContext } from "./lib/lan.mjs";
 import { answerKitQuestions } from "./lib/answer.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
-import { openRoomMenu, closeRoomMenu, upNextTitle } from "./lib/room-nav.mjs";
+import { openRoomMenu, closeRoomMenu, upNextTitle, hostFamilyCup } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -37,8 +37,9 @@ async function host(page, name, kind) {
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
   await page.getByTestId("home-host").click();
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
-  if (kind === "cup") await page.getByTestId("host-kind-cup").click();
-  await page.getByRole("button", { name: "Host a game" }).click();
+  // Stage 12.1 (D-S121-01/02): no choice at the door; a Family Cup is the room menu's upgrade after hosting.
+  if (kind === "cup") await hostFamilyCup(page);
+  else await page.getByRole("button", { name: "Host a game" }).click();
   const chip = page.getByRole("button", { name: /^Share room code / });
   await chip.waitFor({ timeout: 15000 });
   let code = "";
@@ -83,9 +84,11 @@ try {
   const mathMeta = await h.locator(".mz-gamecard, .mz-hero-card").filter({ hasText: "Math Mayhem" }).first().innerText().catch(() => "");
   check("Home is honest about Math Mayhem: 1–10 players, best with 2+", /1–10 players · best with 2\+/.test(mathMeta), mathMeta.replace(/\s+/g, " ").slice(0, 80));
   await h.getByTestId("home-host").click();
-  await h.getByTestId("host-kind").waitFor({ timeout: 10000 });
-  check("Host a game: Casual is chosen by default", (await h.getByTestId("host-kind-casual").getAttribute("aria-pressed")) === "true" && (await h.getByTestId("host-kind-cup").getAttribute("aria-pressed")) === "false");
-  check("Host a game: the note says casual games count toward no Cup", /nothing counts toward a Cup/.test(await h.getByTestId("host-kind-note").innerText()));
+  // Stage 12.1 (D-S121-01): Host asks only for a name; the Family Cup is a later upgrade from the room menu.
+  await h.getByTestId("host-cup-note").waitFor({ timeout: 10000 });
+  check("Host a game: no casual/Cup choice at the door", (await h.locator('[data-testid^="host-kind"]').count()) === 0);
+  const cupNote = await h.getByTestId("host-cup-note").innerText();
+  check("Host a game: one line says a Family Cup is a later upgrade from the room menu", /Family Cup/.test(cupNote) && /room menu/.test(cupNote), cupNote);
   const code = await host(h, "Keku", "casual");
   check("a casual room is made and shows its room code", /^[A-Z0-9]{6}$/.test(code), code);
   check("casual lobby: no Cup chip", (await h.locator(".mz-cupchip").count()) === 0);

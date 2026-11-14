@@ -1,0 +1,253 @@
+$ node scripts/check-ten-players.mjs http://localhost:46083
+# timeout 600s | worker w3 | server http://localhost:46083 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-baaa18c/test-results/20261113-220927-baaa18c6-6294/server-data/w3)
+
+[+1.0s] PASS the server runs without the content test mode
+[+4.9s] PASS identity: every phone greets its own player by full name
+[+6.4s] PASS lobby 390×844 (Keku): ten seats, "You" once, nine other labels all different — ["Cousin Amani","Cousin Amina","Cousin W.","Auntie June","Auntie Joan","Grandpa","Grandma","Bartholomew","Wanjiru"]
+[+6.4s] PASS lobby 390×844: each label is that player's own name (full name as tooltip)
+[+6.4s] PASS lobby 390×844: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.4s] PASS lobby 390×844: "10 here · room is full"
+[+6.4s] PASS lobby 390×844: no sideways scrolling
+[+6.4s] PASS lobby 375×667 (Cousin Amani): ten seats, "You" once, nine other labels all different — ["Keku","Cousin Amina","Cousin W.","Auntie June","Auntie Joan","Grandpa","Grandma","Bartholomew","Wanjiru"]
+[+6.4s] PASS lobby 375×667: each label is that player's own name (full name as tooltip)
+[+6.4s] PASS lobby 375×667: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.4s] PASS lobby 375×667: "10 here · room is full"
+[+6.4s] PASS lobby 375×667: no sideways scrolling
+[+6.4s] PASS lobby 430×932 (Cousin Amina): ten seats, "You" once, nine other labels all different — ["Keku","Cousin Amani","Cousin W.","Auntie June","Auntie Joan","Grandpa","Grandma","Bartholomew","Wanjiru"]
+[+6.4s] PASS lobby 430×932: each label is that player's own name (full name as tooltip)
+[+6.4s] PASS lobby 430×932: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.4s] PASS lobby 430×932: "10 here · room is full"
+[+6.4s] PASS lobby 430×932: no sideways scrolling
+[+6.4s] PASS lobby 768×1024 (Cousin Amani Wanjiru): ten seats, "You" once, nine other labels all different — ["Keku","Cousin Amani","Cousin Amina","Auntie June","Auntie Joan","Grandpa","Grandma","Bartholomew","Wanjiru"]
+[+6.4s] PASS lobby 768×1024: each label is that player's own name (full name as tooltip)
+[+6.4s] PASS lobby 768×1024: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.4s] PASS lobby 768×1024: "10 here · room is full"
+[+6.4s] PASS lobby 768×1024: no sideways scrolling
+[+6.4s] PASS lobby 1440×900 (Auntie June): ten seats, "You" once, nine other labels all different — ["Keku","Cousin Amani","Cousin Amina","Cousin W.","Auntie Joan","Grandpa","Grandma","Bartholomew","Wanjiru"]
+[+6.4s] PASS lobby 1440×900: each label is that player's own name (full name as tooltip)
+[+6.4s] PASS lobby 1440×900: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.5s] PASS lobby 1440×900: "10 here · room is full"
+[+6.5s] PASS lobby 1440×900: no sideways scrolling
+[+6.5s] PASS lobby 375×667 (Auntie Joan): ten seats, "You" once, nine other labels all different — ["Keku","Cousin Amani","Cousin Amina","Cousin W.","Auntie June","Grandpa","Grandma","Bartholomew","Wanjiru"]
+[+6.5s] PASS lobby 375×667: each label is that player's own name (full name as tooltip)
+[+6.5s] PASS lobby 375×667: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.5s] PASS lobby 375×667: "10 here · room is full"
+[+6.5s] PASS lobby 375×667: no sideways scrolling
+[+6.5s] PASS lobby 390×844 (Grandpa Joseph Otieno-Wanjiku): ten seats, "You" once, nine other labels all different — ["Keku","Cousin Amani","Cousin Amina","Cousin W.","Auntie June","Auntie Joan","Grandma","Bartholomew","Wanjiru"]
+[+6.5s] PASS lobby 390×844: each label is that player's own name (full name as tooltip)
+[+6.5s] PASS lobby 390×844: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.5s] PASS lobby 390×844: "10 here · room is full"
+[+6.5s] PASS lobby 390×844: no sideways scrolling
+[+6.5s] PASS lobby 430×932 (Grandma Josephine): ten seats, "You" once, nine other labels all different — ["Keku","Cousin Amani","Cousin Amina","Cousin W.","Auntie June","Auntie Joan","Grandpa","Bartholomew","Wanjiru"]
+[+6.5s] PASS lobby 430×932: each label is that player's own name (full name as tooltip)
+[+6.5s] PASS lobby 430×932: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.5s] PASS lobby 430×932: "10 here · room is full"
+[+6.5s] PASS lobby 430×932: no sideways scrolling
+[+6.5s] PASS lobby 375×667 (Bartholomew Otieno-Wanjiku): ten seats, "You" once, nine other labels all different — ["Keku","Cousin Amani","Cousin Amina","Cousin W.","Auntie June","Auntie Joan","Grandpa","Grandma","Wanjiru"]
+[+6.5s] PASS lobby 375×667: each label is that player's own name (full name as tooltip)
+[+6.5s] PASS lobby 375×667: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.5s] PASS lobby 375×667: "10 here · room is full"
+[+6.5s] PASS lobby 375×667: no sideways scrolling
+[+6.5s] PASS lobby 390×844 (Wanjiru Kamau-Njoroge the Third): ten seats, "You" once, nine other labels all different — ["Keku","Cousin Amani","Cousin Amina","Cousin W.","Auntie June","Auntie Joan","Grandpa","Grandma","Bartholomew"]
+[+6.5s] PASS lobby 390×844: each label is that player's own name (full name as tooltip)
+[+6.5s] PASS lobby 390×844: no name cut, split mid-word, off-screen or touching another — {"cut":[],"split":[],"off":[],"clashes":[]}
+[+6.5s] PASS lobby 390×844: "10 here · room is full"
+[+6.5s] PASS lobby 390×844: no sideways scrolling
+[+8.8s] PASS viewport stability: the 375×667 lobby circle doesn't move while idle — 48,122,280,280
+[+9.5s] PASS limit: the eleventh person is told the room is full (10 players)
+[+9.5s] PASS limit: the server still has ten players
+[+10.5s] PASS spectator: a full room can still be watched, with all ten names
+[+10.5s] PASS spectator: watching doesn't take a seat
+[+10.7s] PASS eligibility: the Library marks exactly the games that take 10 as fitting — ["caption-clash:fits","category-sprint:fits","charades:fits","closest-wins:fits","draw-guess:fits","geography:fits","guess-the-year:fits","impostor:fits","jebena-rush:fits","majority-rules:fits","math-mayhem:fits","pattern-pulse:fits","spectrum:fits","trivia:fits","who-said-that:fits","word-connections:fits"]
+[+10.7s] PASS eligibility: the fit line names the room's size
+[+11.7s] PASS briefing 390×844: "Ready · 0 of 10" and ten people listed
+[+11.7s] PASS briefing 375×667: "Ready · 0 of 10" and ten people listed
+[+11.7s] PASS briefing 430×932: "Ready · 0 of 10" and ten people listed
+[+11.7s] PASS briefing 768×1024: "Ready · 0 of 10" and ten people listed
+[+11.7s] PASS briefing 1440×900: "Ready · 0 of 10" and ten people listed
+[+11.7s] PASS briefing 375×667: "Ready · 0 of 10" and ten people listed
+[+11.7s] PASS briefing 390×844: "Ready · 0 of 10" and ten people listed
+[+11.7s] PASS briefing 430×932: "Ready · 0 of 10" and ten people listed
+[+11.7s] PASS briefing 375×667: "Ready · 0 of 10" and ten people listed
+[+11.8s] PASS briefing 390×844: "Ready · 0 of 10" and ten people listed
+[+11.8s] PASS briefing: every full name is listed, and yours says (you)
+[+11.8s] PASS briefing: the list doesn't scroll sideways at 375
+[+12.2s] PASS ready: 1 of 10 on the host's phone
+[+12.2s] PASS ready: 2 of 10 on the host's phone
+[+12.3s] PASS ready: 3 of 10 on the host's phone
+[+12.4s] PASS ready: 4 of 10 on the host's phone
+[+12.5s] PASS ready: 5 of 10 on the host's phone
+[+12.6s] PASS ready: 6 of 10 on the host's phone
+[+12.7s] PASS ready: 7 of 10 on the host's phone
+[+12.8s] PASS ready: 8 of 10 on the host's phone
+[+12.9s] PASS ready: 9 of 10 on the host's phone
+[+13.2s] PASS ready: every phone agrees, 9 of 10
+[+13.6s] PASS ready: the tenth tap starts play on every phone
+[+16.1s] PASS server: the game finished and counts officially — finished
+[+16.1s] PASS server: scores are 120 per right answer — [1200,960,960,720,600,600,600,360,120,0]
+[+16.3s] PASS Math results 390×844 (Keku): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+16.3s] PASS Math results 390×844: every name and score is the server's
+[+16.3s] PASS Math results 390×844: "You came … of 10" for this player — You came 1st of 10
+[+16.3s] PASS Math results 390×844: no sideways scrolling
+[+16.5s] PASS Math results 390×844: the tenth player scrolls into view, not hidden
+[+16.6s] PASS Math results 390×844: Back to lobby is reachable
+[+16.7s] PASS Math results 375×667 (Cousin Amani): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+16.7s] PASS Math results 375×667: every name and score is the server's
+[+16.7s] PASS Math results 375×667: "You tied for … of 10" for this player — You tied for 2nd of 10
+[+16.7s] PASS Math results 375×667: no sideways scrolling
+[+16.8s] PASS Math results 375×667: the tenth player scrolls into view, not hidden
+[+16.8s] PASS Math results 375×667: Back to lobby is reachable
+[+17.0s] PASS Math results 430×932 (Cousin Amina): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+17.0s] PASS Math results 430×932: every name and score is the server's
+[+17.0s] PASS Math results 430×932: "You tied for … of 10" for this player — You tied for 2nd of 10
+[+17.0s] PASS Math results 430×932: no sideways scrolling
+[+17.0s] PASS Math results 430×932: the tenth player scrolls into view, not hidden
+[+17.1s] PASS Math results 430×932: Back to lobby is reachable
+[+17.2s] PASS Math results 768×1024 (Cousin Amani Wanjiru): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+17.2s] PASS Math results 768×1024: every name and score is the server's
+[+17.2s] PASS Math results 768×1024: "You came … of 10" for this player — You came 4th of 10
+[+17.2s] PASS Math results 768×1024: no sideways scrolling
+[+17.3s] PASS Math results 768×1024: the tenth player scrolls into view, not hidden
+[+17.3s] PASS Math results 768×1024: Back to lobby is reachable
+[+17.5s] PASS Math results 1440×900 (Auntie June): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+17.5s] PASS Math results 1440×900: every name and score is the server's
+[+17.5s] PASS Math results 1440×900: "You tied for … of 10" for this player — You tied for 5th of 10
+[+17.5s] PASS Math results 1440×900: no sideways scrolling
+[+17.8s] PASS Math results 1440×900: the tenth player scrolls into view, not hidden
+[+17.8s] PASS Math results 1440×900: Back to lobby is reachable
+[+18.0s] PASS Math results 375×667 (Auntie Joan): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+18.0s] PASS Math results 375×667: every name and score is the server's
+[+18.0s] PASS Math results 375×667: "You tied for … of 10" for this player — You tied for 5th of 10
+[+18.0s] PASS Math results 375×667: no sideways scrolling
+[+18.0s] PASS Math results 375×667: the tenth player scrolls into view, not hidden
+[+18.0s] PASS Math results 375×667: Back to lobby is reachable
+[+18.1s] PASS Math results 390×844 (Grandpa Joseph Otieno-Wanjiku): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+18.1s] PASS Math results 390×844: every name and score is the server's
+[+18.1s] PASS Math results 390×844: "You tied for … of 10" for this player — You tied for 5th of 10
+[+18.1s] PASS Math results 390×844: no sideways scrolling
+[+18.1s] PASS Math results 390×844: the tenth player scrolls into view, not hidden
+[+18.1s] PASS Math results 390×844: Back to lobby is reachable
+[+18.1s] PASS Math results 430×932 (Grandma Josephine): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+18.1s] PASS Math results 430×932: every name and score is the server's
+[+18.1s] PASS Math results 430×932: "You came … of 10" for this player — You came 8th of 10
+[+18.1s] PASS Math results 430×932: no sideways scrolling
+[+18.2s] PASS Math results 430×932: the tenth player scrolls into view, not hidden
+[+18.2s] PASS Math results 430×932: Back to lobby is reachable
+[+18.2s] PASS Math results 375×667 (Bartholomew Otieno-Wanjiku): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+18.2s] PASS Math results 375×667: every name and score is the server's
+[+18.2s] PASS Math results 375×667: "You came … of 10" for this player — You came 9th of 10
+[+18.2s] PASS Math results 375×667: no sideways scrolling
+[+18.3s] PASS Math results 375×667: the tenth player scrolls into view, not hidden
+[+18.3s] PASS Math results 375×667: Back to lobby is reachable
+[+18.3s] PASS Math results 390×844 (Wanjiru Kamau-Njoroge the Third): all ten players listed, highest first — ["Keku: 1200 points — Answered 10 of 10 questions","Cousin Amani: 960 points — Answered 10 of 10 questions","Cousin Amina: 960 points — Answered 10 of 10 questions"]
+[+18.3s] PASS Math results 390×844: every name and score is the server's
+[+18.3s] PASS Math results 390×844: "You came … of 10" for this player — You came 10th of 10
+[+18.3s] PASS Math results 390×844: no sideways scrolling
+[+18.4s] PASS Math results 390×844: the tenth player scrolls into view, not hidden
+[+18.4s] PASS Math results 390×844: Back to lobby is reachable
+[+18.4s] PASS Cup (server): all ten players have standings
+[+18.4s] PASS Cup (server): tied players have equal official standings — [100,83.33,83.33,66.67,44.44,44.44,44.44,22.22,11.11,0]
+[+18.6s] PASS Cup (375): all ten rows, in the server's order — 10 rows
+[+18.6s] PASS Cup (375): no sideways scrolling
+[+18.7s] PASS TV: the finished game shows all ten players
+[+18.7s] PASS TV: no sideways scrolling at 1440
+[+19.7s] PASS practice briefing: says Practice, no Cup points
+[+20.9s] PASS practice: the tenth ready starts Trivia
+[+22.2s] PASS practice: Trivia finished and does not count officially
+[+22.2s] PASS practice: the Family Cup standings did not move
+[+22.2s]   (practice Trivia scores: 480, 480, 480, 0, 0, 0, 240, 240, 480, 480)
+[+22.7s] PASS Trivia standings 390×844 (Keku): the preview never splits a tie at the cut — ["1:Bartholomew Otieno-Wanjiku","1:Cousin Amani","1:Cousin Amina","1:You","1:Wanjiru Kamau-Njoroge the Third"]
+[+22.7s] PASS Trivia standings 390×844: your own row is in the preview with your score and rank
+[+22.7s] PASS Trivia standings 390×844: "Show all 10 players" is offered
+[+22.8s] PASS Trivia standings 390×844: all ten with the server's scores, highest first — ["1:Bartholomew Otieno-Wanjiku:480","1:Cousin Amani:480","1:Cousin Amina:480","1:You:480","1:Wanjiru Kamau-Njoroge the Third:480","6:Grandma Josephine:240","6:Grandpa Joseph Otieno-Wanjiku:240","8:Auntie Joan:0","8:Auntie June:0","8:Cousin Amani Wanjiru:0"]
+[+22.8s] PASS Trivia standings 390×844: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+22.8s] PASS Trivia standings 390×844: no name cut off — []
+[+22.8s] PASS Trivia standings 390×844: no row and no page scrolls sideways
+[+22.8s] PASS Trivia standings 390×844: the tenth row scrolls into view, not hidden
+[+23.0s] PASS Trivia standings 390×844: Show fewer goes back to the preview
+[+23.0s] PASS Trivia standings 375×667 (Cousin Amani): the preview never splits a tie at the cut — ["1:Bartholomew Otieno-Wanjiku","1:You","1:Cousin Amina","1:Keku","1:Wanjiru Kamau-Njoroge the Third"]
+[+23.0s] PASS Trivia standings 375×667: your own row is in the preview with your score and rank
+[+23.0s] PASS Trivia standings 375×667: "Show all 10 players" is offered
+[+23.1s] PASS Trivia standings 375×667: all ten with the server's scores, highest first — ["1:Bartholomew Otieno-Wanjiku:480","1:You:480","1:Cousin Amina:480","1:Keku:480","1:Wanjiru Kamau-Njoroge the Third:480","6:Grandma Josephine:240","6:Grandpa Joseph Otieno-Wanjiku:240","8:Auntie Joan:0","8:Auntie June:0","8:Cousin Amani Wanjiru:0"]
+[+23.1s] PASS Trivia standings 375×667: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+23.1s] PASS Trivia standings 375×667: no name cut off — []
+[+23.1s] PASS Trivia standings 375×667: no row and no page scrolls sideways
+[+23.1s] PASS Trivia standings 375×667: the tenth row scrolls into view, not hidden
+[+23.2s] PASS Trivia standings 375×667: Show fewer goes back to the preview
+[+23.3s] PASS Trivia standings 430×932 (Cousin Amina): the preview never splits a tie at the cut — ["1:Bartholomew Otieno-Wanjiku","1:Cousin Amani","1:You","1:Keku","1:Wanjiru Kamau-Njoroge the Third"]
+[+23.3s] PASS Trivia standings 430×932: your own row is in the preview with your score and rank
+[+23.3s] PASS Trivia standings 430×932: "Show all 10 players" is offered
+[+23.4s] PASS Trivia standings 430×932: all ten with the server's scores, highest first — ["1:Bartholomew Otieno-Wanjiku:480","1:Cousin Amani:480","1:You:480","1:Keku:480","1:Wanjiru Kamau-Njoroge the Third:480","6:Grandma Josephine:240","6:Grandpa Joseph Otieno-Wanjiku:240","8:Auntie Joan:0","8:Auntie June:0","8:Cousin Amani Wanjiru:0"]
+[+23.4s] PASS Trivia standings 430×932: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+23.4s] PASS Trivia standings 430×932: no name cut off — []
+[+23.4s] PASS Trivia standings 430×932: no row and no page scrolls sideways
+[+23.4s] PASS Trivia standings 430×932: the tenth row scrolls into view, not hidden
+[+23.5s] PASS Trivia standings 430×932: Show fewer goes back to the preview
+[+23.6s] PASS Trivia standings 768×1024 (Cousin Amani Wanjiru): the preview never splits a tie at the cut — ["1:Bartholomew Otieno-Wanjiku","1:Cousin Amani","1:Cousin Amina","1:Keku","1:Wanjiru Kamau-Njoroge the Third","8:You"]
+[+23.6s] PASS Trivia standings 768×1024: your own row is in the preview with your score and rank
+[+23.6s] PASS Trivia standings 768×1024: "Show all 10 players" is offered
+[+23.6s] PASS Trivia standings 768×1024: all ten with the server's scores, highest first — ["1:Bartholomew Otieno-Wanjiku:480","1:Cousin Amani:480","1:Cousin Amina:480","1:Keku:480","1:Wanjiru Kamau-Njoroge the Third:480","6:Grandma Josephine:240","6:Grandpa Joseph Otieno-Wanjiku:240","8:Auntie Joan:0","8:Auntie June:0","8:You:0"]
+[+23.6s] PASS Trivia standings 768×1024: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+23.6s] PASS Trivia standings 768×1024: no name cut off — []
+[+23.6s] PASS Trivia standings 768×1024: no row and no page scrolls sideways
+[+23.7s] PASS Trivia standings 768×1024: the tenth row scrolls into view, not hidden
+[+23.8s] PASS Trivia standings 768×1024: Show fewer goes back to the preview
+[+23.9s] PASS Trivia standings 1440×900 (Auntie June): the preview never splits a tie at the cut — ["1:Bartholomew Otieno-Wanjiku","1:Cousin Amani","1:Cousin Amina","1:Keku","1:Wanjiru Kamau-Njoroge the Third","8:You"]
+[+23.9s] PASS Trivia standings 1440×900: your own row is in the preview with your score and rank
+[+23.9s] PASS Trivia standings 1440×900: "Show all 10 players" is offered
+[+23.9s] PASS Trivia standings 1440×900: all ten with the server's scores, highest first — ["1:Bartholomew Otieno-Wanjiku:480","1:Cousin Amani:480","1:Cousin Amina:480","1:Keku:480","1:Wanjiru Kamau-Njoroge the Third:480","6:Grandma Josephine:240","6:Grandpa Joseph Otieno-Wanjiku:240","8:Auntie Joan:0","8:You:0","8:Cousin Amani Wanjiru:0"]
+[+23.9s] PASS Trivia standings 1440×900: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+23.9s] PASS Trivia standings 1440×900: no name cut off — []
+[+23.9s] PASS Trivia standings 1440×900: no row and no page scrolls sideways
+[+23.9s] PASS Trivia standings 1440×900: the tenth row scrolls into view, not hidden
+[+24.1s] PASS Trivia standings 1440×900: Show fewer goes back to the preview
+[+24.1s] PASS Trivia standings 375×667 (Auntie Joan): the preview never splits a tie at the cut — ["1:Bartholomew Otieno-Wanjiku","1:Cousin Amani","1:Cousin Amina","1:Keku","1:Wanjiru Kamau-Njoroge the Third","8:You"]
+[+24.1s] PASS Trivia standings 375×667: your own row is in the preview with your score and rank
+[+24.1s] PASS Trivia standings 375×667: "Show all 10 players" is offered
+[+24.2s] PASS Trivia standings 375×667: all ten with the server's scores, highest first — ["1:Bartholomew Otieno-Wanjiku:480","1:Cousin Amani:480","1:Cousin Amina:480","1:Keku:480","1:Wanjiru Kamau-Njoroge the Third:480","6:Grandma Josephine:240","6:Grandpa Joseph Otieno-Wanjiku:240","8:You:0","8:Auntie June:0","8:Cousin Amani Wanjiru:0"]
+[+24.2s] PASS Trivia standings 375×667: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+24.2s] PASS Trivia standings 375×667: no name cut off — []
+[+24.2s] PASS Trivia standings 375×667: no row and no page scrolls sideways
+[+24.2s] PASS Trivia standings 375×667: the tenth row scrolls into view, not hidden
+[+24.3s] PASS Trivia standings 375×667: Show fewer goes back to the preview
+[+24.3s] PASS Trivia standings 390×844 (Grandpa Joseph Otieno-Wanjiku): the preview never splits a tie at the cut — ["1:Bartholomew Otieno-Wanjiku","1:Cousin Amani","1:Cousin Amina","1:Keku","1:Wanjiru Kamau-Njoroge the Third","6:You"]
+[+24.3s] PASS Trivia standings 390×844: your own row is in the preview with your score and rank
+[+24.3s] PASS Trivia standings 390×844: "Show all 10 players" is offered
+[+24.3s] PASS Trivia standings 390×844: all ten with the server's scores, highest first — ["1:Bartholomew Otieno-Wanjiku:480","1:Cousin Amani:480","1:Cousin Amina:480","1:Keku:480","1:Wanjiru Kamau-Njoroge the Third:480","6:Grandma Josephine:240","6:You:240","8:Auntie Joan:0","8:Auntie June:0","8:Cousin Amani Wanjiru:0"]
+[+24.3s] PASS Trivia standings 390×844: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+24.3s] PASS Trivia standings 390×844: no name cut off — []
+[+24.3s] PASS Trivia standings 390×844: no row and no page scrolls sideways
+[+24.4s] PASS Trivia standings 390×844: the tenth row scrolls into view, not hidden
+[+24.4s] PASS Trivia standings 390×844: Show fewer goes back to the preview
+[+24.5s] PASS Trivia standings 430×932 (Grandma Josephine): the preview never splits a tie at the cut — ["1:Bartholomew Otieno-Wanjiku","1:Cousin Amani","1:Cousin Amina","1:Keku","1:Wanjiru Kamau-Njoroge the Third","6:You"]
+[+24.5s] PASS Trivia standings 430×932: your own row is in the preview with your score and rank
+[+24.5s] PASS Trivia standings 430×932: "Show all 10 players" is offered
+[+24.5s] PASS Trivia standings 430×932: all ten with the server's scores, highest first — ["1:Bartholomew Otieno-Wanjiku:480","1:Cousin Amani:480","1:Cousin Amina:480","1:Keku:480","1:Wanjiru Kamau-Njoroge the Third:480","6:You:240","6:Grandpa Joseph Otieno-Wanjiku:240","8:Auntie Joan:0","8:Auntie June:0","8:Cousin Amani Wanjiru:0"]
+[+24.5s] PASS Trivia standings 430×932: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+24.5s] PASS Trivia standings 430×932: no name cut off — []
+[+24.5s] PASS Trivia standings 430×932: no row and no page scrolls sideways
+[+24.5s] PASS Trivia standings 430×932: the tenth row scrolls into view, not hidden
+[+24.6s] PASS Trivia standings 430×932: Show fewer goes back to the preview
+[+24.7s] PASS Trivia standings 375×667 (Bartholomew Otieno-Wanjiku): the preview never splits a tie at the cut — ["1:You","1:Cousin Amani","1:Cousin Amina","1:Keku","1:Wanjiru Kamau-Njoroge the Third"]
+[+24.7s] PASS Trivia standings 375×667: your own row is in the preview with your score and rank
+[+24.7s] PASS Trivia standings 375×667: "Show all 10 players" is offered
+[+24.7s] PASS Trivia standings 375×667: all ten with the server's scores, highest first — ["1:You:480","1:Cousin Amani:480","1:Cousin Amina:480","1:Keku:480","1:Wanjiru Kamau-Njoroge the Third:480","6:Grandma Josephine:240","6:Grandpa Joseph Otieno-Wanjiku:240","8:Auntie Joan:0","8:Auntie June:0","8:Cousin Amani Wanjiru:0"]
+[+24.7s] PASS Trivia standings 375×667: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+24.7s] PASS Trivia standings 375×667: no name cut off — []
+[+24.7s] PASS Trivia standings 375×667: no row and no page scrolls sideways
+[+24.7s] PASS Trivia standings 375×667: the tenth row scrolls into view, not hidden
+[+24.8s] PASS Trivia standings 375×667: Show fewer goes back to the preview
+[+24.8s] PASS Trivia standings 390×844 (Wanjiru Kamau-Njoroge the Third): the preview never splits a tie at the cut — ["1:Bartholomew Otieno-Wanjiku","1:Cousin Amani","1:Cousin Amina","1:Keku","1:You"]
+[+24.8s] PASS Trivia standings 390×844: your own row is in the preview with your score and rank
+[+24.9s] PASS Trivia standings 390×844: "Show all 10 players" is offered
+[+24.9s] PASS Trivia standings 390×844: all ten with the server's scores, highest first — ["1:Bartholomew Otieno-Wanjiku:480","1:Cousin Amani:480","1:Cousin Amina:480","1:Keku:480","1:You:480","6:Grandma Josephine:240","6:Grandpa Joseph Otieno-Wanjiku:240","8:Auntie Joan:0","8:Auntie June:0","8:Cousin Amani Wanjiru:0"]
+[+24.9s] PASS Trivia standings 390×844: ties share a rank (competition ranking) — 1,1,1,1,1,6,6,8,8,8 vs 1,1,1,1,1,6,6,8,8,8
+[+24.9s] PASS Trivia standings 390×844: no name cut off — []
+[+24.9s] PASS Trivia standings 390×844: no row and no page scrolls sideways
+[+24.9s] PASS Trivia standings 390×844: the tenth row scrolls into view, not hidden
+[+25.0s] PASS Trivia standings 390×844: Show fewer goes back to the preview
+[+26.2s] PASS viewport stability: after a whole game the 375×667 lobby circle is where it was — 48,122,280,280 → 48,122,280,280
+[+26.4s] TEN PLAYERS ALL PASSED
+[+26.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":12,"pages":12,"peakOpenPages":12}
+
+# PASS (exit 0) in 26.4s | cpu 11.7s, peak memory 446 MB

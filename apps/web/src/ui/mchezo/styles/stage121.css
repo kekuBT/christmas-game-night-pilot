@@ -1,0 +1,86 @@
+/* Stage 12.1 (docs/stage12/stage121.md): one path on the phone, and the TV as the hero. */
+
+/* ---- Home's dock: Join and Host side by side, Play solo as a quieter full-width link under them (D-S121-01). */
+.mz-screen.mz-home > .mz-dock--home.mz-dock--onepath { flex-wrap: wrap; row-gap: 2px; }
+.mz-dock--onepath .mz-key { flex: 1 1 calc(50% - 5px); }
+.mz-dock--onepath .mz-dock__solo { flex: 1 1 100%; text-align: center; text-decoration: none; color: var(--mz-text-muted); }
+.mz-dock--onepath .mz-dock__solo b { color: var(--mz-text); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- Host: the one line about the Family Cup (no choice at the door). */
+.mz-entry__cupnote { margin: 0; padding: 12px 14px; border-radius: 14px; background: var(--mz-surface-2); }
+
+/* ---- Make it a Family Cup: the plain list of what changes. */
+.mz-makecup { margin: 4px 0 8px; padding: 0 0 0 18px; display: grid; gap: 8px; font: 500 15px/1.45 var(--mz-font-body); color: var(--mz-text); }
+.mz-makecup b { font-weight: 800; }
+
+/* ======================================================================= the TV */
+
+/* ---- Join: the QR code beside the big code. */
+.mz-tvshow-joinrow { display: flex; align-items: center; gap: 36px; }
+.mz-tvshow-qr { width: 220px; height: 220px; border-radius: 18px; background: #fff; padding: 12px; flex: none; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18); }
+.mz-tvshow-qr img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.mz-tvshow-joincopy { display: grid; gap: 6px; min-width: 0; }
+.mz-tvshow-scan { font: 700 26px var(--mz-font-display); color: var(--mz-text-muted); }
+
+/* ---- The podium reveal: bronze, then silver, then gold (D-S121-05). Sized for the TV stage's ~806 px main area. */
+.mz-podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 18px; }
+.mz-podium__step { display: grid; justify-items: center; gap: 8px; min-width: 0; }
+.mz-podium__who { display: grid; justify-items: center; gap: 2px; text-align: center; max-width: 100%; }
+.mz-podium__medal { font-size: 52px; line-height: 1; }
+.mz-podium__name { font: 800 30px/1.1 var(--mz-font-display); color: var(--mz-text); overflow-wrap: anywhere; }
+.mz-podium__score { font: 700 22px var(--mz-font-body); color: var(--mz-text-muted); font-variant-numeric: tabular-nums; }
+.mz-podium__block { width: 100%; border-radius: 18px 18px 6px 6px; display: grid; place-items: center; font: 900 56px var(--mz-font-display); color: #16111d; }
+.mz-podium__step--1 .mz-podium__block { height: 170px; background: #e9b443 linear-gradient(180deg, #ffd66b, #e0a12f); }
+.mz-podium__step--2 .mz-podium__block { height: 120px; background: #cfd7e0 linear-gradient(180deg, #eef2f6, #b4bfcc); }
+.mz-podium__step--3 .mz-podium__block { height: 84px; background: #d9a678 linear-gradient(180deg, #f3c9a1, #c4834f); }
+/* A solid base colour under each gradient (its mid tone): the block's colour if a gradient doesn't paint, and the
+   background a contrast check reads. Dark #16111d numbers are 5.8:1 or more even on each gradient's darkest stop. */
+.mz-podium__step--empty .mz-podium__who { visibility: hidden; }
+/* A step nobody earned keeps its shape faintly, without a low-contrast number. */
+.mz-podium__step--empty .mz-podium__block { opacity: 0.35; color: transparent; }
+@keyframes mz-podium-rise { from { opacity: 0; transform: translateY(48px) scale(0.96); } to { opacity: 1; transform: none; } }
+[data-mz-motion="full"] .mz-podium--animate .mz-podium__step { animation: mz-podium-rise 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+[data-mz-motion="full"] .mz-podium--animate .mz-podium__step--3 { animation-delay: 300ms; }
+[data-mz-motion="full"] .mz-podium--animate .mz-podium__step--2 { animation-delay: 1300ms; }
+[data-mz-motion="full"] .mz-podium--animate .mz-podium__step--1 { animation-delay: 2400ms; }
+@media (prefers-reduced-motion: reduce) { .mz-podium--animate .mz-podium__step { animation: none !important; } }
+
+/* ---- The final screen: podium and the night on the left, everyone's standings on the right. */
+.mz-tvfinal-hero { gap: 18px; }
+.mz-tvfinal { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.mz-tvfinal__left, .mz-tvfinal__right { display: grid; gap: 18px; align-content: start; min-width: 0; }
+.mz-tvfinal .mz-tvshow-card { padding: 18px 24px; border-radius: 22px; }
+.mz-tvlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mz-tvlist li { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 10px 18px; border-radius: 14px; background: var(--mz-surface-2); font: 700 28px/1.15 var(--mz-font-body); color: var(--mz-text); }
+.mz-tvlist li[data-rank="1"] { background: color-mix(in srgb, var(--mz-highlight) 22%, var(--mz-surface-2)); }
+.mz-tvlist--dense { gap: 6px; }
+.mz-tvlist--dense li { padding: 6px 16px; font-size: 24px; }
+.mz-tvlist__rank { font: 900 28px var(--mz-font-display); color: var(--mz-text-muted); text-align: center; }
+.mz-tvlist__name { overflow-wrap: anywhere; min-width: 0; }
+.mz-tvlist__val { font-variant-numeric: tabular-nums; color: var(--mz-text-muted); white-space: nowrap; }
+.mz-tvlist__move { font-size: 20px; margin-left: 10px; font-weight: 800; }
+.mz-tvlist__move--up { color: var(--mz-success, #2f6a4f); }
+.mz-tvlist__move--down { color: var(--mz-danger, #b3261e); }
+
+/* ---- The medal table. */
+.mz-medals { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px; }
+.mz-medals li { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 64px); align-items: center; gap: 8px; padding: 6px 16px; border-radius: 14px; background: var(--mz-surface-2); font: 700 24px/1.15 var(--mz-font-body); color: var(--mz-text); }
+.mz-medals li.mz-medals__head { background: transparent; padding-top: 0; padding-bottom: 0; font-size: 26px; }
+.mz-medals__n { text-align: center; font-variant-numeric: tabular-nums; }
+.mz-medals__n--zero { color: var(--mz-text-muted); opacity: 0.55; }
+
+/* ---- The trophy moment. */
+.mz-trophy { display: grid; justify-items: center; align-content: center; gap: 18px; min-height: 100%; text-align: center; }
+.mz-trophy__cup { font-size: 180px; line-height: 1; }
+@keyframes mz-trophy-pop { 0% { transform: scale(0.6) rotate(-6deg); opacity: 0; } 60% { transform: scale(1.08) rotate(2deg); opacity: 1; } 100% { transform: none; } }
+[data-mz-motion="full"] .mz-trophy--animate .mz-trophy__cup { animation: mz-trophy-pop 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) { .mz-trophy--animate .mz-trophy__cup { animation: none !important; } }
+.mz-trophy__title { font: 900 72px/1.05 var(--mz-font-display); color: var(--mz-text); margin: 0; }
+.mz-trophy__who { font: 800 52px/1.1 var(--mz-font-display); color: var(--mz-brand, var(--mz-text)); margin: 0; }
+.mz-trophy__line { font: 600 28px var(--mz-font-body); color: var(--mz-text-muted); margin: 0; }
+.mz-tvshow-joinrow .mz-tvshow-code { font-size: 112px; letter-spacing: 0.1em; }
+
+/* ---- The director row gained "Cup standings": keep it on one row at 1920 (the privacy line wraps instead). */
+.mz-tvshow-foot .mz-tvshow-privacy { max-width: 360px; flex: 0 1 360px; }
+.mz-tvshow-foot .mz-tvshow-director { flex: 1 1 auto; gap: 10px; }
+.mz-tvshow-foot .mz-tvshow-director .mz-chip-btn { padding: 0 16px; }

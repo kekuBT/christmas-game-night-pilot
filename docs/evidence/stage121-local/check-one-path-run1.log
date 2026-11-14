@@ -1,0 +1,30 @@
+PASS A Home: two dock buttons, Join and Host, and a quieter Play solo link — "Join a room\nHost a game\nJust you? Play solo"
+PASS A Host: no casual/Cup choice at the door
+PASS A Host: one line says a Family Cup can come later, from the room menu
+PASS A the room has a code
+PASS A the hosted room is casual
+PASS B TV lobby: the code, big
+PASS B TV lobby: a QR code
+PASS B the QR code encodes exactly <origin>/join?code=CODE (the Invite sheet's link) — 29×29
+PASS B TV lobby: 'Scan with a phone camera', and everyone who's here — K
+KekuHOST
+A
+Amina
+B
+Baraka
+PASS B no medal table before any game
+PASS B no Cup card in a casual room
+PASS C game 1: the TV shows the final with a podium
+PASS C game 1: three different scores (Keku > Amina > Baraka > 0) — {"player-1":1200,"player-2":600,"player-3":120}
+PASS C podium: gold, silver and bronze go to the server's first, second and third
+PASS C full motion: the podium rises bronze, then silver, then gold — [{"name":"mz-podium-rise","delay":0.3},{"name":"mz-podium-rise","delay":1.3},{"name":"mz-podium-rise","delay":2.4}]
+PASS C the final still shows everyone's standings (3 rows) and the winner line
+PASS C reduced motion: the podium is there at once (no animation, fully shown)
+PASS C Pause animations: the podium shows at once (no staged animation)
+PASS C the medal table counts game 1
+PASS C game 2: a new final
+PASS C the medal table accumulates: 2 games
+PASS C medal table: ordered by golds, silvers, bronzes, then name — [["player-2",1,1,0],["player-1",1,1,0],["player-3",0,0,2]]
+FAIL C TV lobby: the medal table, 2 games tonight — not within 15000ms
+FAIL driver ran to the end — locator.waitFor: Timeout 15000ms exceeded. | Call log: | [2m  - waiting for getByRole('button', { name: /^Share room code / }) to be visible[22m
+ONE PATH: 2 FAILED

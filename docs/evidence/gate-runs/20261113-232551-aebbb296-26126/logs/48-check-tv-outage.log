@@ -1,0 +1,28 @@
+$ node scripts/check-tv-outage.mjs http://localhost:34577
+# timeout 600s | worker w3 | server http://localhost:34577 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-aebbb29/test-results/20261113-232551-aebbb296-26126/server-data/w3)
+
+[+2.3s] PASS TV live: no connection note
+[+14.5s] PASS socket silent, polling works: the TV raises no false alarm (12 s)
+[+26.6s] PASS polling fails, socket works: the TV raises no false alarm (12 s)
+[+33.3s] PASS server down: the TV says the connection is lost
+[+33.3s] PASS server down: the last known display stays on screen — mchezo
+[+33.3s] LOBBY
+[+33.3s] 👁 1 watching
+[+33.3s] Join
+[+33.3s] L86CQB
+[+33.3s] JOIN THE GAME
+[+33.3s] L86CQB
+[+33.3s] 
+[+33.3s] PASS server down: the note is announced politely (role=status)
+[+33.3s] PASS server down: the note shows nothing private (no tokens, codes or host tools) — Connection to the game lost. This screen may be out of date. Reconnecting…
+[+33.3s] PASS server down: the phone shows its connection banner
+[+35.4s] PASS server back: the TV says it reconnected
+[+39.3s] PASS server back: the note goes away and the room is shown
+[+40.3s] PASS server back: a new player shows on the TV
+[+40.3s] PASS server back: the phone is back too
+[+40.7s] PASS invalid spectator session: told plainly to enter the code again
+[+40.7s] PASS invalid spectator session: no room details shown
+[+40.8s] TV OUTAGE ALL PASSED
+[+40.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 40.8s | cpu 3.4s, peak memory 347 MB

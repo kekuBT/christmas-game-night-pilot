@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261113-220927-baaa18c6-6294
+  89 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-warm-ivory (w1) [functional]: FAIL W8 Everyday menu-390: every element kind's computed colours equal the base build's (d4dc408) — 186 kinds; new 7, missing 0 e.g. menu-make-cup>button.mz-menurow=>rgb(247, 241, 232)|rgba(0, 0, 0, 0
+  timing   wall 34m 08s · step time 1h 40m (sum) · 3 workers, 98% busy · 2.94× the same steps run one after another
+           predicted 25–59m (about 32m 56s, measured) → actual 34m 08s (+4%)
+           longest  e2e-chromium 8m 30s, check-f5 7m 38s, check-leaderboard 6m 44s · the longest step is 25% of the wall time
+           machine  CPU mean 38%, peak 99% · memory available ≥ 13072 MB · load peak 4.52 · backpressure 5 wait(s), 18s
+           contention ×1.054 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-baaa18c/test-results/20261113-220927-baaa18c6-6294/report.json

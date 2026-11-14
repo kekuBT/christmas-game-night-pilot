@@ -10,9 +10,9 @@ import { deriveShowPhase } from "./components/showPhase.js";
 import { wsReconnectDelayMs } from "./components/wsBackoff.js";
 // Mchezo "The Circle" integrated views (Phase 2: landing, lobby, Trivia, TV).
 import { buildCatalog, featuredOfTheDay, filtersFromQuery, filtersToQuery, GameClock, ResultsHero, resultsStory, GameIntro, InviteSheet, linkReach, MchezoProvider, NoticeCard, noteServerTime, OutcomeSummary, parseRoute, routeUrl, SegmentedChoice, Sheet, type Route, type RoomSub } from "./ui/mchezo/index.js";
-import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen, type HostKind } from "./components/mchezo/Home.js";
+import { GameDetailsSheet, HomeScreen, HostScreen, JoinScreen } from "./components/mchezo/Home.js";
 import { SoloHome, SoloRound, soloShelf } from "./components/mchezo/Solo.js";
-import { ChooseGameSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
+import { ChooseGameSheet, MakeCupSheet, RoomLobby, RoomMenuSheet } from "./components/mchezo/Lobby.js";
 import { PartyStartAsk, QuickPartyCard, QuickPartySheet, type PartyApplyResult, type PartyAsk, type PartyPlanInput } from "./components/mchezo/QuickParty.js";
 import { anchorHomeBelow, stampEntry, useRoute } from "./nav.js";
 import type { ReactionId } from "./ui/mchezo/index.js";
@@ -315,7 +315,9 @@ export function App() {
   // A game picked from Home's details sheet before the room exists.
   const [hostPick, setHostPick] = useState<string | null>(null);
   // Stage 6.1: Host a game makes a casual room unless the host picks a Family Cup.
-  const [hostKind, setHostKind] = useState<HostKind>("casual");
+  // Stage 12.1 (D-S121-02): the host's "Make it a Family Cup" request in flight, and why it was refused.
+  const [cupBusy, setCupBusy] = useState(false);
+  const [cupErr, setCupErr] = useState("");
   // Stage 6.1: Start on the Play solo list starts the round on arrival; a reload does not.
   const [soloAutostart, setSoloAutostart] = useState<string | null>(null);
   // Phase 2.1 lobby simplification: one mode for the single Start action,
@@ -565,7 +567,8 @@ export function App() {
     if (!name.trim()) { setErr("Type your name first, so your players know whose party it is."); return; }
     setErr(""); try {
       // Stage 6.1: casual by default; a Family Cup only when the host chose it.
-      const r = await post<JoinResponse>("/rooms", hostKind === "cup" ? { name: "Christmas Game Night", kind: "cup" } : { name: "Game night", kind: "casual" });
+      // Stage 12.1 (D-S121-01): every hosted room starts as a game night for fun; a Family Cup is a later upgrade.
+      const r = await post<JoinResponse>("/rooms", { name: "Game night", kind: "casual" });
       const j = await post<JoinResponse>(`/rooms/${r.roomId}/join`, { displayName: name.trim(), asHost: true, hostClaimToken: r.hostClaimToken });
       // The lobby itself shows the new room and its code; no extra message.
       await saveSession({ ...j, roomId: r.roomId }); setMsg("");
@@ -1032,6 +1035,14 @@ export function App() {
   };
   useEffect(() => { if (planner && planChosen > 0) publishPlan(localPlan); }, [planChosen]);
   useEffect(() => { if (planner && proj && !serverPlan) publishPlan(localPlan); }, [planner, !!proj, !!serverPlan, games.length > 0]);
+  // Stage 12.1: when this room becomes a Family Cup ("Make it a Family Cup"), this phone's mode starts at Official,
+  // like a Cup created at the door; the casual room only ever had practice games. The server's stored plan follows too.
+  const kindSeen = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const k = proj?.roomKind;
+    if (kindSeen.current === "casual" && k === "cup") setGameModeRaw("official");
+    kindSeen.current = k;
+  }, [proj?.roomKind]);
   // Stage 7.2: when the lineup moves on (one of its items started, completed or
   // was cancelled, or a new lineup was saved), up next becomes its next pending
   // game, as the lineup's (never the game just played). Only on such a change,
@@ -1288,7 +1299,6 @@ export function App() {
       screen = (
         <HostScreen
           name={name} onNameChange={setName} onHost={createRoom} onBack={() => back(HOME)}
-          kind={hostKind} onKindChange={setHostKind}
           remember={remember} blocked={seated} notice={seatedNotice}
           firstGame={hostPick ? catalog.find((g) => g.id === hostPick) : undefined}
           status={status}
@@ -1651,6 +1661,27 @@ export function App() {
           onClose={closeSheet}
         />
       )}
+      {sheet === "cup" && me?.isHost && proj?.roomKind === "casual" && (
+        <MakeCupSheet
+          played={(proj?.games ?? []).filter((g) => g.status === "finished").length}
+          busy={cupBusy}
+          error={cupErr || undefined}
+          onClose={closeSheet}
+          onConfirm={async () => {
+            setCupBusy(true); setCupErr("");
+            try {
+              await post<Record<string, unknown>>(`/rooms/${roomId}/cup`, {});
+              setMsg("This room is now a Family Cup · Day 1 of 7.");
+              closeSheet();
+            } catch (e) {
+              setCupErr(e instanceof Error && e.message ? e.message : "The game didn’t answer. Nothing changed; try again.");
+            } finally {
+              setCupBusy(false);
+              void refresh();
+            }
+          }}
+        />
+      )}
       {sheet === "menu" && (
         <RoomMenuSheet
           cupLabel={casualRoom ? undefined : cupLabel}
@@ -1663,6 +1694,7 @@ export function App() {
           onStudio={isHostish ? () => setView("studio") : undefined}
           onHome={() => navigate(HOME)}
           onReconnect={() => { void reconnect(); }}
+          onMakeCup={me?.isHost && proj?.roomKind === "casual" ? () => { setCupErr(""); openSheet("cup"); } : undefined}
           // While the menu is open its messages show here (and not in the dock).
           message={err || msg ? <div className="mz-menu__msg">{err && <p className="err">{err}</p>}{msg && <p className="ok" role="status">{msg}</p>}</div> : undefined}
           phone={<SettingsBar anim={settings.anim} onSetAnim={settings.setAnimSetting} osReducedMotion={osReducedMotion} look={lookPref} onSetLook={setLookPref} lookSaved={lookSaved} />}
@@ -1806,6 +1838,8 @@ export function App() {
           ) : undefined}
           notice={breakNotice ? breakNotice : briefingNote ? <NoticeCard tone="info" title="Game cancelled" testId="briefing-cancelled-note" action={<button type="button" className="mz-chip-btn" onClick={() => setBriefingNote("")}>OK</button>}>{briefingNote}</NoticeCard>
             : watchingGame ? <NoticeCard tone="info" title={`${games.find((x) => x.id === watchingGame.gameId)?.title ?? "A game"} is being played`} testId="not-in-game-note">It started before you joined, so you’ll play the next one.</NoticeCard>
+            // Stage 12.1 (D-S121-02): everyone hears the room became a Family Cup, until its first official game finishes.
+            : proj?.cupSince && !(proj.games ?? []).some((g) => g.official && g.status === "finished") ? <NoticeCard tone="info" title="This room is now a Family Cup" testId="cup-started-notice">Day {proj.championshipDay ?? 1} of 7. Official games count toward the standings; the games played before stay casual.</NoticeCard>
             : undefined}
           error={err || undefined}
           message={sheet === "menu" ? undefined : msg || undefined}
@@ -2194,7 +2228,7 @@ export function App() {
         <MemoryScreen roomId={roomId ?? ""} roomSeq={proj?.seq} ledgerAt={ledgerAt} roomCode={proj?.joinCode} day={proj?.championshipDay ?? 1} book={book} ledger={ledger} games={proj?.games ?? []} registry={games} players={players} bookText={bookText} setBookText={setBookText} exportDoc={exportDoc} setExportDoc={setExportDoc} post={post} get={get}
           bookRevision={bookRevision} heardRevision={heardRevision} heard={() => bookSync.current?.heard ?? NOTHING}
           fetchSnapshot={() => fetchBook(roomId ?? "")} refreshBook={() => syncBook(roomId ?? "", true)}
-          canApprove={!!(me?.isHost || me?.isCohost) && seatConn.state !== "replaced" && seatConn.state !== "signed-out"} roomKind={proj?.roomKind} onBack={toLobby} onMenu={() => openSheet("menu")} />
+          canApprove={!!(me?.isHost || me?.isCohost) && seatConn.state !== "replaced" && seatConn.state !== "signed-out"} roomKind={proj?.roomKind} casualGameIds={proj?.casualGameIds} onBack={toLobby} onMenu={() => openSheet("menu")} />
         {roomSheets}
       </MchezoProvider>
     );

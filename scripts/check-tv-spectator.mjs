@@ -5,7 +5,7 @@
 // Usage: build:web, serve on a port, then:
 //   node scripts/check-tv-spectator.mjs <baseUrl>
 import { launchChromium } from "./lib/driver-env.mjs";
-import { roomGo } from "./lib/room-nav.mjs";
+import { roomGo, hostFamilyCup } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
@@ -19,7 +19,7 @@ function check(name, ok, detail = "") {
 async function createRoom(page, name) {
   await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
-  await page.getByTestId("host-kind-cup").click(); await page.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(page);
   const chip = page.getByRole("button", { name: /^Share room code / });
   await chip.waitFor({ timeout: 15000 });
   let code = "";

@@ -1,0 +1,43 @@
+$ node scripts/check-install-builds.mjs http://localhost:36061
+# timeout 600s | worker w1 | server http://localhost:36061 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-ce3e0a8/test-results/20261113-224727-ce3e0a83-2768/server-data/w1)
+
+[+19.5s]   (four real builds in 19 s: A 20669208414bf2ce, W 74835706a6c4ce4a, P 2b084375296a8faf)
+[+19.5s] PASS B setup: build A names its version in its page and its worker
+[+19.5s] PASS B setup: build A2 names its version in its page and its worker
+[+19.5s] PASS B setup: build W names its version in its page and its worker
+[+19.5s] PASS B setup: build P names its version in its page and its worker
+[+19.5s] PASS B the same source built twice gives the same version, the same worker byte for byte, the same page and the same files
+[+19.5s] PASS B and the same as the build under test (built separately, elsewhere) — 20669208414bf2ce vs 20669208414bf2ce
+[+19.5s] PASS B a worker-only change (sw.ts) is a new version and a new worker
+[+19.5s] PASS B a worker-policy change (swPolicy.ts, a dependency of the worker only) is a new version too
+[+19.5s] PASS B neither change touches the app: the same files, byte for byte, and the same page apart from its build marker
+[+20.7s] PASS E setup: A's worker is active and controls the page
+[+22.1s] PASS E setup: A's live cache holds every file it precaches (14 entries)
+[+22.3s] PASS E1 W deployed with a listed file missing: W's install runs and fails — redundant
+[+22.4s] PASS E1 A's live cache is exactly as it was: every entry, the same bytes, the same order
+[+22.4s] PASS E1 no candidate is left, nothing else is touched — ["mchezo-shell-20669208414bf2ce","not-mchezo"]
+[+22.6s] PASS E1 the round in the other tab plays on (a guess answered, the same page)
+[+23.7s] PASS E1 offline, A's shell is whole: A's page, scripts, styles and assets, saying it can't reach Mchezo — {"notice":true,"build":"20669208414bf2ce","files":2,"foreign":[]}
+[+23.8s] PASS E2 W with storage full (Chromium's quota override): W's install runs and fails — redundant
+[+23.9s] PASS E2 A's live cache is exactly as it was
+[+23.9s] PASS E2 no candidate is left — ["mchezo-shell-20669208414bf2ce","not-mchezo"]
+[+24.1s] PASS E2 the round plays on
+[+24.3s] PASS E3 W complete: it installs and waits; A stays in charge — installed
+[+24.3s] PASS E3 while W waits, A's live cache is untouched, and W's files are only in W's own candidate
+[+24.7s] PASS E3 the round plays on while W waits
+[+26.0s] PASS E3 every A page closed and one reopened: W is activated and controls it
+[+26.0s] PASS E3 scoped cleanup: W's live cache and someone else's remain; A's cache and every candidate are gone — ["mchezo-shell-74835706a6c4ce4a","not-mchezo"]
+[+26.0s] PASS E3 W's live cache holds every file it precaches, and nothing of A's that W doesn't list
+[+27.1s] PASS E3 offline, W's shell is whole — {"notice":true,"build":"74835706a6c4ce4a","files":2,"foreign":[]}
+[+27.3s] PASS E4 P (a policy change) deployed with a listed file missing: its install fails; W's cache exactly as it was; no candidate left — redundant
+[+27.4s] PASS E4 P complete: it installs and waits; W's cache untouched — installed
+[+28.7s] PASS E4 P activates; only P's live cache and someone else's remain — ["mchezo-shell-2b084375296a8faf","not-mchezo"]
+[+28.9s] PASS E5 a worker with P's version but different bytes, a listed file missing: its install fails; P's cache exactly as it was; no candidate left — redundant
+[+29.2s] PASS E5 complete, it installs and waits without touching P's live cache (only its own candidate) — installed
+[+30.4s] PASS E5 on activation: one complete live cache, no candidate left — ["mchezo-shell-2b084375296a8faf","not-mchezo"]
+[+31.5s] PASS E5 offline, the shell is whole — {"notice":true,"build":"2b084375296a8faf","files":2,"foreign":[]}
+[+31.9s] 
+[+31.9s] All build-update checks passed
+[+31.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":5,"peakOpenPages":2}
+
+# PASS (exit 0) in 31.9s | cpu 34.7s, peak memory 747 MB

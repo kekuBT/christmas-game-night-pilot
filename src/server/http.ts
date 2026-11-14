@@ -4,7 +4,7 @@ import { join, dirname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { WebSocketServer, type WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
-import { BriefingRefused, ContentShortage, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
+import { BriefingRefused, ContentShortage, CupUpgradeRefused, HostRefused, PartyRefused, ROOM_KINDS, RoomEngine, SessionRefused, StartRefused, type RoomPlayer } from "./room.js";
 import { isClientPath } from "../shared/clientRoutes.js";
 import { GAME_REGISTRY, getGame, isCooperative, isMemoryBookTeam } from "../games/registry.js";
 import { GAME_POLICIES } from "./lifecycle.js";
@@ -12,7 +12,7 @@ import { z } from "zod";
 import type { ContentLibrary } from "../content/registry.js";
 import { parseClientProtocol, PROTOCOL_HEADER, PROTOCOL_PARAM } from "../shared/clientProtocol.js";
 import { attemptFingerprint, MemoryBook, MemoryRefused, teamFactsFor, type MemoryBookEntry, type SourceContext } from "./memorybook.js";
-import { bookModeOf, type BookContext } from "../shared/memoryPresent.js";
+import { bookModeOf, type BookContext, type BookMode } from "../shared/memoryPresent.js";
 import { hashToken } from "../shared/protocol.js";
 import { isSessionSeason, SESSION_SEASONS, type SessionSeason } from "../shared/season.js";
 import { RoomStore, type RestoreReport } from "./persistence.js";
@@ -917,9 +917,11 @@ export class LocalServer {
           // Stage 11.2 (D-S112-01, D-S112-02): what the book knows about the room, from its own state only.
           const titleOf = (gameId: string): string => { try { return getGame(gameId).title; } catch { return ""; } };
           const nameOf = (playerId: string): string | undefined => room.players.get(playerId)?.displayName;
+          const eraOf = (gid: string): BookMode => (room.casualGameIds.includes(gid) ? "casual" : bookModeOf(room.kind));
           const sourceCtx: SourceContext = {
             mode: bookModeOf(room.kind),
-            gameOf: (gid) => { const g = room.games.get(gid); return g ? { title: titleOf(g.gameId), day: g.day ?? 1 } : undefined; },
+            // Stage 12.1: a game played while the room was casual stays casual, also after it became a Family Cup.
+            gameOf: (gid) => { const g = room.games.get(gid); return g ? { title: titleOf(g.gameId), day: g.day ?? 1, mode: eraOf(gid) } : undefined; },
             nameOf,
           };
           const bookCtx: BookContext = {
@@ -928,7 +930,7 @@ export class LocalServer {
             sourceGames: (e) => e.sourceEventIds.map((id) => {
               const ev = room.ledger.find((x) => x.eventId === id);
               const g = ev?.gameInstanceId ? room.games.get(ev.gameInstanceId) : undefined;
-              return g ? { title: titleOf(g.gameId), day: g.day ?? 1 } : {};
+              return g ? { title: titleOf(g.gameId), day: g.day ?? 1, mode: eraOf(g.id) } : {};
             }),
           };
           if (req.method === "GET" && parts.length === 3) {
@@ -1300,6 +1302,28 @@ export class LocalServer {
           this.persist(room);
           this.broadcast(room.id);
           this.send(res, 200, { ok: true });
+          return;
+        }
+        // Stage 12.1 (D-S121-02): "Make it a Family Cup", the host's one-way, idempotent upgrade of a casual room.
+        if (req.method === "POST" && parts.length === 3 && parts[2] === "cup") {
+          const player = this.requireSession(room, req, res);
+          if (!player) return;
+          try {
+            const { changed } = room.upgradeToCup(player.id);
+            if (changed) {
+              // Stage 12.1: while casual, the host's phones published the up-next plan as practice (a casual room has no
+              // official games). A new Family Cup defaults to Official, like a Cup created at the door, so the stored plan
+              // follows for an official-eligible game; the host can still choose Practice.
+              const plan = this.lobbyPlans.get(room.id);
+              if (plan && !plan.official && GAME_POLICIES[plan.gameId as keyof typeof GAME_POLICIES]?.officialEligible !== false) this.lobbyPlans.set(room.id, { gameId: plan.gameId, official: true });
+              this.persist(room);
+              this.broadcast(room.id);
+            }
+            this.send(res, 200, { ok: true, changed, roomKind: room.kind, championshipDay: room.championshipDay, ...(room.cupSince ? { cupSince: room.cupSince } : {}) });
+          } catch (err) {
+            if (err instanceof CupUpgradeRefused) { this.send(res, err.code === "NOT_HOST" ? 403 : 409, { error: err.message, code: err.code, roomKind: room.kind }); return; }
+            throw err;
+          }
           return;
         }
         if (req.method === "POST" && parts.length === 3 && parts[2] === "day") {

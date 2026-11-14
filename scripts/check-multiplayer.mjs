@@ -22,7 +22,7 @@
 // A failed check is recorded and the process exits non-zero.
 
 import { launchChromium } from "./lib/driver-env.mjs";
-import { roomGo } from "./lib/room-nav.mjs";
+import { roomGo, hostFamilyCup } from "./lib/room-nav.mjs";
 import { passBriefing } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
@@ -75,7 +75,7 @@ try {
   pages.push({ page: host, name: NAMES[0] });
   await host.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill(NAMES[0]);
-  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(host);
   const shareChip = host.getByRole("button", { name: /^Share room code / });
   await shareChip.waitFor({ timeout: 15000 });
   let code = "";

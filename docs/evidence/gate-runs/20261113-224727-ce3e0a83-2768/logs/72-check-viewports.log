@@ -1,0 +1,23 @@
+$ node scripts/check-viewports.mjs http://localhost:36061
+# timeout 600s | worker w1 | server http://localhost:36061 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-ce3e0a8/test-results/20261113-224727-ce3e0a83-2768/server-data/w1)
+
+[+3.7s] PASS no horizontal overflow at lobby 320px
+[+4.0s] PASS no horizontal overflow at lobby 360px
+[+4.3s] PASS no horizontal overflow at lobby 390px
+[+4.6s] PASS no horizontal overflow at lobby 768px
+[+5.0s] PASS no horizontal overflow at lobby 1024px
+[+6.3s] PASS no horizontal overflow at trivia play 320px
+[+6.6s] PASS no horizontal overflow at trivia play 390px
+[+6.9s] PASS no horizontal overflow at trivia play 768px
+[+7.2s] PASS no horizontal overflow at trivia play 1024px
+[+8.2s] PASS no horizontal overflow at TV stage 1280x720
+[+8.5s] PASS no horizontal overflow at TV stage 1920x1080
+[+12.9s] PASS no horizontal overflow at closest play 320px
+[+13.2s] PASS no horizontal overflow at closest play 390px
+[+13.5s] PASS no horizontal overflow at closest play 768px
+[+13.9s] PASS no horizontal overflow at closest play 1024px
+[+15.0s] PASS no horizontal overflow at TV dashboard 1920x1080
+[+15.1s] VIEWPORTS ALL PASSED
+[+15.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":6,"peakOpenPages":3}
+
+# PASS (exit 0) in 15.1s | cpu 2.2s, peak memory 260 MB

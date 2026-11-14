@@ -294,6 +294,8 @@ export function RoomMenuSheet(p: {
   onStudio?: () => void;
   onHome: () => void;
   onReconnect: () => void;
+  /** Stage 12.1 (D-S121-02): the host of a casual room can make it a Family Cup (opens the confirmation sheet). */
+  onMakeCup?: () => void;
   /** Motion setting (SettingsBar). */
   phone: ReactNode;
   /** This device: remember, seat backup (recovery code), sign out. */
@@ -310,6 +312,7 @@ export function RoomMenuSheet(p: {
       <div className="mz-menu__group">
         <MenuRow icon={<Icon d={ICON.tv} size={20} />} label="Show on a TV" testId="menu-tv" onClick={p.onTv} />
         {p.cupLabel && <MenuRow icon={<Icon d={ICON.trophy} size={20} />} label={p.cupLabel} detail={p.dayLabel} testId="menu-cup" onClick={p.onCup} />}
+        {p.onMakeCup && <MenuRow icon={<Icon d={ICON.trophy} size={20} />} label="Make it a Family Cup" detail="official games · 7 days · standings" testId="menu-make-cup" onClick={p.onMakeCup} />}
         <MenuRow icon={<span>📖</span>} label="Memory Book" testId="menu-memory" onClick={p.onMemory} />
         <MenuRow icon={<span>🎲</span>} label="All games" testId="browse-games" onClick={p.onLibrary} />
       </div>
@@ -327,6 +330,37 @@ export function RoomMenuSheet(p: {
           {p.cupLabel && <p className="mz-foot mz-menu__note">Advancing the Cup day and score corrections are under {p.cupLabel}, and always ask first.</p>}
         </>
       )}
+    </Sheet>
+  );
+}
+
+/**
+ * Stage 12.1 (docs/stage12/stage121.md §2.2; D-S121-02): "Make it a Family Cup". The host's one-way upgrade of a casual
+ * room, said plainly before it happens: what changes, what stays, what a Cup doesn't have, and that it can't be undone.
+ * The server decides (host only, not mid-game); a refusal is shown here and nothing changes.
+ */
+export function MakeCupSheet({ played, busy, error, onConfirm, onClose }: {
+  /** Games already finished in this room (they stay casual). */
+  played: number;
+  busy: boolean;
+  error?: string;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <Sheet title="Make it a Family Cup" onClose={onClose} testId="make-cup-sheet" kicker="Same room, same code">
+      <p className="mz-details__pitch">Turn this game night into a Family Cup: official games count toward standings over 7 days, with a winner each day.</p>
+      <ul className="mz-makecup" data-testid="make-cup-points">
+        <li><b>From now on:</b> before each game you choose Official (counts) or Practice. You end each Cup day when you’re ready.</li>
+        <li><b>What stays:</b> the room code, everyone’s seat and the Memory Book.{played > 0 ? ` The ${played === 1 ? "game" : `${played} games`} already played ${played === 1 ? "stays" : "stay"} casual and ${played === 1 ? "doesn’t" : "don’t"} count.` : ""}</li>
+        <li><b>Casual-only extras end:</b> Quick Party, What’s next, Play again, breaks and handing over the host role are for casual rooms.</li>
+        <li><b>It can’t be undone.</b></li>
+      </ul>
+      {error ? <p className="err" role="alert" data-testid="make-cup-error">{error}</p> : null}
+      <div className="mz-sheet__actions">
+        <Keycap block disabled={busy} onClick={onConfirm} data-testid="make-cup-confirm">{busy ? "Starting the Family Cup…" : "Make it a Family Cup"}</Keycap>
+        <button type="button" className="mz-chip-btn" data-testid="make-cup-cancel" onClick={onClose}>Not now</button>
+      </div>
     </Sheet>
   );
 }

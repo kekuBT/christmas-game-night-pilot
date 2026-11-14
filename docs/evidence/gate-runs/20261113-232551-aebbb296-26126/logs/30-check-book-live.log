@@ -1,0 +1,64 @@
+$ node scripts/check-book-live.mjs http://localhost:34577
+# timeout 600s | worker w3 | server http://localhost:34577 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-aebbb29/test-results/20261113-232551-aebbb296-26126/server-data/w3)
+
+[+1.9s] PASS B0 both books are open and empty
+[+1.9s] PASS B0 each book's title follows its look
+[+2.4s] PASS B1 Baraka adds a note: Keku's open book shows it within 3 s — 59 ms
+[+2.4s] PASS B1 … and Amina's, within 3 s — 63 ms
+[+2.4s] PASS B1 Amina's unsent draft is still there, and still has focus
+[+2.5s] PASS B1 Keku approves on his page: Amina's book shows it approved within 3 s — 45 ms
+[+2.5s] PASS B1 Amina still sees no Approve or Revoke
+[+2.5s] PASS B1 Amina's draft survived the approval too
+[+2.5s] PASS B1 Amina's book at 320 px: no sideways scroll
+[+7.5s] PASS B2 5 s with no change: neither page fetched the book — {"k":0,"a":0}
+[+7.6s] PASS B3 Keku's Markdown export has the approved note
+[+7.6s] PASS B3 Baraka (cohost) revokes it: the export on Keku's screen is taken down, and says why, within 3 s — 15 ms
+[+7.6s] PASS B3 … and the note shows pending on both pages
+[+7.8s] PASS B4 Markdown: both approved notes
+[+7.9s] PASS B4 PDF: a fresh snapshot was fetched for it — 1 fetch(es)
+[+7.9s] PASS B4 PDF: both approved notes are in the file — mchezo-memory-book-VYJGAM-2026-11-13.pdf
+[+8.0s] PASS B4 share image: a fresh snapshot, and both notes drawn — Mchezo Memory Book | Baraka note about the tea | Second approved note
+[+8.0s] PASS R1 casual Markdown: no Day, no internal id; each entry headed by its game; facts read "Name: N points" — # Mchezo Memory Book — Live book ⏎  ⏎ ## Math Mayhem ⏎ Note: Baraka note about the tea ⏎ From the ledger: ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 120 points ⏎ - Keku: 1
+[+8.0s] PASS R2 casual PDF: no Day, no internal id; notes name their game; facts name their players — mchezo-memory-book-VYJGAM-2026-11-13.pdf
+[+8.0s] PASS R3 casual book on screen: no "Day 1" anywhere; each badge names the game — Math Mayhem · approved | Math Mayhem · approved
+[+9.4s] PASS R4 names in other scripts: no PDF line falls back to two-byte text (nothing garbled) — christmas-memory-book-364YZK-2026-11-13.pdf
+[+9.4s] PASS R4 …the note and facts keep their words and points; names that print alike stay apart; one line says why — (Christmas Memory Book) Tj | (? night ? \(Math Mayhem\)) Tj | (From the ledger: ??: 120 points) Tj
+[+9.4s] PASS R4 …and the Markdown keeps every name and the note in full — # Mchezo Memory Book — Names 🎄 ⏎  ⏎ ## Math Mayhem ⏎ Note: 雪 night 🎄 ⏎ From the ledger: ⏎ - 李雷: 120 points ⏎ - 李雷: 120 points ⏎ - 李雷: 120 points ⏎ - 李雷: 120 points ⏎ - 李雷: 120 
+[+9.5s] PASS B5 (Keku's page is stale: it still shows the revoked note approved)
+[+9.5s] PASS B5 the stale page's PDF leaves the revoked note out and keeps the approved one
+[+9.6s] PASS B5 … and its share image too — Mchezo Memory Book | Baraka note about the tea
+[+9.6s] PASS B5 the export's snapshot also brought the screen up to date
+[+10.0s] PASS B5 the held refresh, arriving late, changed nothing
+[+11.1s] PASS B6 the newer snapshot is on screen first — 5 ms
+[+11.1s] PASS B6 the older reply, arriving after it, doesn't roll the screen back
+[+11.2s] PASS B7 PDF: it says it couldn't check the approvals, so nothing was downloaded
+[+12.4s] PASS B7 share image: the same, and no file was downloaded for either
+[+12.5s] PASS B7 Markdown: it says the export couldn't load
+[+12.5s] PASS B8 a failed approve: a plain message on that entry — Couldn’t approve it. The Memory Book couldn't be saved, so nothing changed. Try again in a moment.
+[+12.5s] PASS B8 … and the entry is still pending, on both pages
+[+12.7s] PASS B8 trying again approves it; Amina's book follows within 3 s
+[+12.7s] PASS B8b before: Keku, the host, has Approve on the pending note
+[+12.8s] PASS B8b Keku hands the host role to Amina: his Approve and Revoke are gone within 3 s — 9 ms
+[+12.8s] PASS B8b … and he sees who decides instead
+[+12.8s] PASS B8b … while Amina, now the host, has them — 22 ms
+[+12.8s] PASS B8b the server refuses an approval from Keku now — 403
+[+14.8s] PASS B9 offline, Amina's page can't know yet
+[+14.8s] PASS B9 back online, it shows the change (within 8 s of reconnecting) — 50 ms
+[+14.8s] PASS B9 her draft is still there
+[+17.0s] PASS B10 with no socket, the poll brings Baraka's note within 5 s — 2003 ms
+[+21.2s] PASS B11 in the lobby, a change to the book fetches nothing — 0
+[+21.4s] PASS B11 opening the book again shows it
+[+21.5s] PASS B11 switched to another room: its own (empty) book, nothing from the last room
+[+25.0s] PASS B11 … and a change in the room she left fetches nothing
+[+28.3s] PASS B13 one failed refresh, then only same-revision polls: the note still appears, with no reopening and no new change — 2981 ms; 1 request(s) refused
+[+40.3s] PASS B14 refreshes failing for 12 s: it keeps trying, backing off (no storm) — 4 request(s) in 12 s
+[+40.3s] PASS B14 … and nothing unconfirmed is shown meanwhile
+[+44.3s] PASS B14 the network comes back: the next retry shows it (within 10 s) — 3998 ms
+[+55.4s] PASS B15 leaving the book with a retry pending cancels it: no book request in 10 s — 0 after leaving
+[+55.6s] PASS B15 reopened, the book shows it
+[+68.0s] PASS B16 signing out in the app with a retry pending: no book request for that room afterwards — 0 after signing out
+[+68.1s] PASS B12 Keku's book at 390 px: no sideways scroll
+[+68.1s] ALL BOOK-LIVE CHECKS PASSED
+[+68.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":3}
+
+# PASS (exit 0) in 68.1s | cpu 5.2s, peak memory 359 MB

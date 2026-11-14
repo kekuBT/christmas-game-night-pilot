@@ -7,6 +7,7 @@ import { chromium } from "playwright";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { hostFamilyCup } from "./lib/room-nav.mjs";
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const outDir = join(dirname(fileURLToPath(import.meta.url)), "..", "docs", "mchezo-screenshots");
@@ -17,7 +18,7 @@ try {
   const host = await ctx.newPage();
   await host.goto(BASE, { waitUntil: "domcontentloaded" });
   await host.getByPlaceholder("e.g. Auntie June").fill("Ada");
-  await host.getByTestId("host-kind-cup").click(); await host.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(host);
   const chip = host.getByRole("button", { name: /^Share room code / });
   await chip.waitFor({ timeout: 15000 });
   let code = "";

@@ -1,0 +1,42 @@
+Mchezo gate targeted | run 20261113-232328-aebbb296-20873
+  revision aebbb296e200c8d81af3abcefe5774268fa074cc (clean tree) | fingerprint 9f3c96cb17e3 (533 files)
+  plan     8 steps: 1 fast/build, 6 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  143 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 119 run(s))
+  estimate this run: 0–3m (low-confidence) · the same steps one after another: about 3m 15s · longest step check-warm-ivory ~1m 05s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: build-web, check-one-path
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-aebbb29/test-results/20261113-232328-aebbb296-20873
+        start build-web on w1 (usually 7s)
+[ 1/8] PASS         4.6s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/8] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:42919 (pid 20993, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-aebbb29/test-results/20261113-232328-aebbb296-20873/server-data/w1)
+  server   w2 http://localhost:43667 (pid 20994, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-aebbb29/test-results/20261113-232328-aebbb296-20873/server-data/w2)
+  server   w3 http://localhost:40119 (pid 21000, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-aebbb29/test-results/20261113-232328-aebbb296-20873/server-data/w3)
+        start check-warm-ivory on w1 (usually 1m 05s)
+        start check-casual on w2 (usually 53s)
+        start check-one-path on w3 (usually 27s)
+[ 3/8] PASS        28.3s  check-one-path  w3
+        start check-contrast on w3 (usually 25s)
+── progress  3/8 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-warm-ivory 54s (w1), check-casual 54s (w2), check-contrast 25s (w3)
+   remaining 24–67s · total 1–3m · done around 23:24–23:25 UTC (low-confidence)
+[ 4/8] PASS        53.7s  check-casual  w2
+        wait  check-tv-show: load 4.2 > 4 CPUs
+        start check-tv-show on w2 (usually 12s)
+[ 5/8] PASS        27.5s  check-contrast  w3
+        start check-tv-dashboard on w3 (usually 5s)
+[ 6/8] PASS         4.9s  check-tv-dashboard  w3
+[ 7/8] PASS        67.3s  check-warm-ivory  w1
+[ 8/8] PASS        11.5s  check-tv-show  w2
+
+PASSED (exit 0) | targeted | run 20261113-232328-aebbb296-20873
+  8 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 14s · step time 3m 18s (sum) · 3 workers, 90% busy · 2.68× the same steps run one after another
+           predicted 0–3m (about 1m 08s, low-confidence) → actual 1m 14s (+9%)
+           longest  check-warm-ivory 1m 07s, check-casual 54s, check-one-path 28s · the longest step is 91% of the wall time
+           machine  CPU mean 45%, peak 91% · memory available ≥ 13477 MB · load peak 4.88 · backpressure 1 wait(s), 2s
+           contention ×1.031 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-aebbb29/test-results/20261113-232328-aebbb296-20873/report.json

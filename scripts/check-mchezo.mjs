@@ -7,7 +7,7 @@
 //   playing and after finish, mobile widths 320/360/390, reduced motion.
 // Fictional test players only; run against a local server only.
 import { launchChromium } from "./lib/driver-env.mjs";
-import { roomGo } from "./lib/room-nav.mjs";
+import { roomGo, hostFamilyCup } from "./lib/room-nav.mjs";
 import { hostStartNow, passBriefing, tapReady } from "./lib/briefing.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3457";
@@ -29,7 +29,7 @@ async function noOverflow(page) {
 async function createRoom(page, name) {
   await page.goto(`${BASE}/host`, { waitUntil: "domcontentloaded" });
   await page.getByPlaceholder("e.g. Auntie June").fill(name);
-  await page.getByTestId("host-kind-cup").click(); await page.getByRole("button", { name: "Host a game" }).click();
+  await hostFamilyCup(page);
   const chip = page.getByRole("button", { name: /^Share room code / });
   await chip.waitFor({ timeout: 15000 });
   let code = "";

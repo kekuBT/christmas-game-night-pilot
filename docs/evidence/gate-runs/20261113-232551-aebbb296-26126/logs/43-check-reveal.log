@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:38645
+# timeout 600s | worker w2 | server http://localhost:38645 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-aebbb29/test-results/20261113-232551-aebbb296-26126/server-data/w2)
+
+[+23.5s] PASS reveal opens on the first question phase — question:0
+[+23.5s] PASS question phase hides the correct answer — count=0
+[+23.8s] PASS Reveal answer steps into the first reveal — reveal:1
+[+23.8s] PASS reveal phase shows the correct answer — count=1
+[+23.8s] PASS reveal phase separates this question from the game total
+[+23.8s] PASS Next question steps into the second question phase — question:2
+[+23.8s] PASS second question phase hides the correct answer again — count=0
+[+23.9s] PASS Q10 jump lands on the last question phase — question:18
+[+23.9s] PASS last reveal reached — reveal:19
+[+24.0s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+24.0s] PASS finale shows the standings list
+[+24.0s] PASS auto-play starts back at the first question — question:0
+[+32.1s] PASS auto-play advances a step within 8s — reveal:1
+[+40.1s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+41.0s] PASS TV walk opens on a question — What is a group of crows called?
+[+45.0s] PASS TV walk advances to the reveal stage
+[+50.1s] PASS TV walk advances to the second question — Who painted the ceiling of the Sistine C
+[+50.1s] PASS TV manual jump reaches the leaderboard
+[+50.2s] REVEAL ALL PASSED
+[+50.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 50.2s | cpu 3.1s, peak memory 261 MB
