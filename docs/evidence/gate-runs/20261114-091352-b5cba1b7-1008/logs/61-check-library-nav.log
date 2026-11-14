@@ -1,0 +1,48 @@
+$ node scripts/check-library-nav.mjs http://localhost:40079
+# timeout 600s | worker w1 | server http://localhost:40079 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126full/test-results/20261114-091352-b5cba1b7-1008/server-data/w1)
+
+[+2.4s] PASS visitor: no room-fit claims outside a room
+[+2.4s] PASS S3-LIB-02: a legend says Practice only never counts toward the Cup
+[+2.8s] PASS S3-LIB-02: the Practice only tag says what it means and why — Fun to play any time, but it never counts toward the Family Cup. Why: Charades is practice-only until its team scoring is redesigned.
+[+2.8s] PASS S3-LIB-02: the tag is a toggle that says it's expanded
+[+2.8s] PASS search narrows to Trivia
+[+2.8s] PASS S3-NAV-01: the search is in the address — /library?q=trivia
+[+2.9s] PASS Back from the Library is Home
+[+2.9s] PASS S3-NAV-01: Forward brings the Library back with the search applied
+[+3.0s] PASS S3-NAV-01: a refresh keeps the search
+[+3.4s] PASS S3-NAV-01: the details sheet keeps the view in its address — /library?q=trivia&sheet=details&game=trivia
+[+3.4s] PASS S3-NAV-01: Back closes the details and keeps the search
+[+3.5s] PASS S3-LIB-04: sorting is not counted as a filter (no chip, no count) — Filters
+[+3.5s] ▾
+[+3.5s] PASS S3-LIB-03: the size filter is 'Group size', not 'Players in the room'
+[+3.6s] PASS a filter applies while the panel stays open to add more
+[+3.6s] PASS S3-LIB-04: Done folds the filters away
+[+3.6s] PASS the address has the filter and the sort — /library?type=team&sort=duration
+[+3.7s] PASS Clear filters clears filters but keeps the sort
+[+4.6s] PASS library in a room at 375×667: no sideways scrolling
+[+5.1s] PASS S3-LIB-01: a 4–10 player game says it needs 2 more players in a room of 2 — Needs 2 more players (4–10 players)
+[+5.2s] PASS S3-LIB-01: a 2-player game says it fits
+[+5.2s] PASS S3-LIB-01: nothing claims to be 'playable now'
+[+5.2s] PASS S3-LIB-01: games that fit come first, then those needing more players — mz-lib-group-fits,mz-lib-group-needs-more
+[+5.2s] PASS S3-LIB-01: games needing more players are drawn as not fitting
+[+5.5s] PASS S3-LIB-03: 'Your room (2)' shows only games for 2
+[+5.5s] PASS the room's library keeps its view in the address — /room/library?players=room
+[+5.6s] PASS S3-NAV-01 in a room: a refresh keeps 'Your room'
+[+6.6s] PASS library in a room at 390×844: no sideways scrolling
+[+7.4s] PASS library in a room at 430×932: no sideways scrolling
+[+8.1s] PASS library in a room at 768×1024: no sideways scrolling
+[+8.8s] PASS library in a room at 1440×900: no sideways scrolling
+[+13.9s] PASS S3-NAV-02: Back mid-game lands on this app's Home, not the Library — /
+[+13.9s] PASS S3-NAV-02: Home offers Rejoin and says the game is still running — Rejoin room H2WCX4 | A game is in progress. Its clock keeps running. | Rejoin
+[+13.9s] PASS S3-NAV-02: the game kept running on the server (not paused), seat and answers intact
+[+13.9s] PASS S3-NAV-02: Forward returns to the same game
+[+14.1s] PASS S3-NAV-02: a refresh returns to the same game
+[+15.0s] PASS S3-NAV-02: Rejoin returns to the same game, progress kept
+[+24.3s] PASS S3-LOB-03: the room never goes blank on a proxy page
+[+24.3s] PASS S3-LOB-03: the lobby keeps its people (no 'friend', no '0 here') — 7868Q6 | Invite | Day 1/7 | You’re in, Keku. | Everyone’s here | 2 here | 2 | in the room | K | You | A | Amina | QUICK PARTY | Plan today’s games in one go: say how many are playing and how long you 
+[+24.3s] PASS S3-LOB-03: and says the server can't be reached
+[+27.4s] PASS S3-LOB-03: when the server answers again, the room carries on
+[+27.4s] ALL LIBRARY/NAV CHECKS PASSED
+[+27.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":9,"pages":9,"peakOpenPages":2}
+
+# PASS (exit 0) in 27.4s | cpu 5s, peak memory 367 MB

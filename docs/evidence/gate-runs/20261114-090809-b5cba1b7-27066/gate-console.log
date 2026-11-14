@@ -1,0 +1,63 @@
+Mchezo gate targeted | run 20261114-090809-b5cba1b7-27066
+  revision b5cba1b7e1dddb9d87f8fb3533985330ea745181 (clean tree) | fingerprint 17704b7e443e (553 files)
+  plan     14 steps: 1 fast/build, 12 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  161 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 137 run(s))
+  estimate this run: 3–11m (low-confidence) · the same steps one after another: about 12m 18s · longest step check-session-flow ~2m 54s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-night-card
+  thin     only 1–2 samples for: build-web
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066
+        start build-web on w1 (usually 7s)
+[ 1/14] PASS         5.2s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/14] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:45233 (pid 27183, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066/server-data/w1)
+  server   w2 http://localhost:41563 (pid 27184, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066/server-data/w2)
+  server   w3 http://localhost:45455 (pid 27185, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066/server-data/w3)
+        start check-session-flow on w1 (usually 2m 54s)
+        start check-themes-seasonal on w2 (usually 1m 39s)
+        start check-briefing on w3 (usually 1m 30s)
+── progress  2/14 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-session-flow 53s (w1), check-themes-seasonal 53s (w2), check-briefing 53s (w3)
+   remaining 2–10m · total 3–11m · done around 09:11–09:18 UTC (low-confidence)
+[ 3/14] PASS        95.3s  check-briefing  w3
+        start check-book-live on w3 (usually 1m 05s)
+[ 4/14] PASS       107.8s  check-themes-seasonal  w2
+        start check-warm-ivory on w2 (usually 1m 04s)
+── progress  4/14 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-session-flow 1m 53s (w1), check-book-live 17s (w3), check-warm-ivory 5s (w2)
+   remaining 1–7m · total 3–9m · done around 09:11–09:17 UTC (low-confidence)
+[ 5/14] PASS        68.3s  check-book-live  w3
+        start check-night-card on w3 (no timing history)
+[ 6/14] PASS         8.5s  check-night-card  w3
+        start check-quick-party on w3 (usually 47s)
+── progress  6/14 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-session-flow 2m 53s (w1), check-warm-ivory 1m 05s (w2), check-quick-party 1s (w3)
+   remaining 1–4m · total 4–7m · done around 09:12–09:14 UTC (low-confidence)
+[ 7/14] PASS          68s  check-warm-ivory  w2
+        start check-family-questions on w2 (usually 33s)
+[ 8/14] PASS         183s  check-session-flow  w1
+        start check-one-path on w1 (usually 32s)
+[ 9/14] PASS        35.4s  check-family-questions  w2
+        start check-cup-party on w2 (usually 31s)
+[10/14] PASS        33.6s  check-one-path  w1
+        start check-tv-moments on w1 (usually 20s)
+[11/14] PASS        50.3s  check-quick-party  w3
+        start check-cup-memory on w3 (usually 13s)
+── progress  11/14 done · 11 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-cup-party 22s (w2), check-tv-moments 16s (w1), check-cup-memory 10s (w3)
+   remaining 3–37s · total 4–5m · done around 09:12–09:12 UTC (low-confidence)
+[12/14] PASS        14.5s  check-cup-memory  w3
+[13/14] PASS        20.9s  check-tv-moments  w1
+[14/14] PASS        34.6s  check-cup-party  w2
+
+PASSED (exit 0) | targeted | run 20261114-090809-b5cba1b7-27066
+  14 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 4m 14s · step time 12m 06s (sum) · 3 workers, 95% busy · 2.86× the same steps run one after another
+           predicted 3–11m (about 4m 19s, low-confidence) → actual 4m 14s (-2%)
+           longest  check-session-flow 3m 03s, check-themes-seasonal 1m 48s, check-briefing 1m 35s · the longest step is 72% of the wall time
+           machine  CPU mean 36%, peak 100% · memory available ≥ 13822 MB · load peak 3.42
+           contention ×1.059 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066/report.json

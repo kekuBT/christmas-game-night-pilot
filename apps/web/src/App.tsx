@@ -25,6 +25,8 @@ import { SendNote } from "./components/mchezo/SendNote.js";
 import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
 import { FamilyCard, FamilyReview, FamilySheet, FamilyTv, MchezoFamily, MchezoFamilyResults } from "./components/mchezo/MchezoFamily.js";
+import { NightCardSheet } from "./components/mchezo/NightCard.js";
+import { nightCardFacts } from "./ui/mchezo/lib/nightCard.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
 import { JebenaCupsLabel, JebenaHeartsChoice, JebenaReview, JebenaTv, JebenaTvFinal, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
@@ -1618,6 +1620,11 @@ export function App() {
   const triviaFinished = latestFinished?.gameId === "trivia";
   // ---- Stage 2: Lobby A and its sheets (Invite, Choose game, Room menu, game details) ----
   const isHostish = !!(me?.isHost || me?.isCohost);
+  // Stage 12.6 (D-S126-01): the night card's facts, from this room's public results (none until a game has finished).
+  const nightFacts = proj && roomId && proj.roomKind !== "solo" ? nightCardFacts({
+    games: proj.games ?? [], nameOf, titleOf: (id) => titleFor(id, games), christmas: theme.id === "christmas", now: new Date(),
+    ...(proj.roomKind === "cup" ? { cup: { day: proj.championshipDay ?? 1, standings: proj.cupFinished?.standings ?? proj.championship ?? [], champions: proj.cupFinished?.champions } } : {}),
+  }) : null;
   const upNextGame = catalog.find((g) => g.id === upNext?.id);
   // Stage 7.1: Quick Party is for casual rooms (not solo). Stage 12.3 (D-S123-01): and Family Cups.
   const partyRoom = proj?.roomKind === "casual" || proj?.roomKind === "cup";
@@ -1808,6 +1815,8 @@ export function App() {
           }}
         />
       )}
+      {/* Stage 12.6 (D-S126-01): a picture of the night, made on this phone. */}
+      {sheet === "nightcard" && nightFacts && <NightCardSheet facts={nightFacts} cup={proj?.roomKind === "cup"} onClose={closeSheet} />}
       {/* Stage 12.4 (D-S124-02): End the night (a casual room). */}
       {sheet === "endnight" && isHostish && proj?.roomKind === "casual" && (
         <EndNightSheet
@@ -1845,6 +1854,7 @@ export function App() {
           onMakeCup={me?.isHost && proj?.roomKind === "casual" ? () => { setCupErr(""); openSheet("cup"); } : undefined}
           onUndoCup={me?.isHost && proj?.roomKind === "cup" && proj.cupSince && !(proj.games ?? []).some((g) => g.official && g.status === "finished") ? () => { setCupErr(""); openSheet("uncup"); } : undefined}
           onFinishCup={me?.isHost && proj?.roomKind === "cup" && !proj.cupFinished && (proj.championshipDay ?? 1) >= 7 && !(proj.games ?? []).some((g) => g.status === "briefing" || g.status === "playing") ? () => { setCupErr(""); openSheet("finishcup"); } : undefined}
+          onNightCard={nightFacts ? () => openSheet("nightcard") : undefined}
           onEndNight={isHostish && proj?.roomKind === "casual" && !proj.nightComplete && (proj.games ?? []).some((g) => g.status === "finished") && !(proj.games ?? []).some((g) => g.status === "briefing" || g.status === "playing") ? () => { setCupErr(""); openSheet("endnight"); } : undefined}
           // While the menu is open its messages show here (and not in the dock).
           message={err || msg ? <div className="mz-menu__msg">{err && <p className="err">{err}</p>}{msg && <p className="ok" role="status">{msg}</p>}</div> : undefined}
@@ -1992,8 +2002,8 @@ export function App() {
             // Stage 12.1 (D-S121-02): everyone hears the room became a Family Cup, until its first official game finishes.
             : proj?.cupSince && !(proj.games ?? []).some((g) => g.official && g.status === "finished") ? <NoticeCard tone="info" title="This room is now a Family Cup" testId="cup-started-notice">Day {proj.championshipDay ?? 1} of 7. Official games count toward the standings; the games played before stay casual.</NoticeCard>
             // Stage 12.4 (D-S124-01/02): a finished Family Cup, and a completed night, for everyone in the lobby.
-            : proj?.cupFinished ? <NoticeCard tone="info" title="The Family Cup is complete" testId="cup-finished-notice">{proj.cupFinished.champions.length === 0 ? "No champion this time: nobody played on enough Cup days." : `${proj.cupFinished.champions.length === 1 ? "Champion" : "Champions"}: ${proj.cupFinished.champions.map((id) => proj.cupFinished!.standings.find((x) => x.playerId === id)?.displayName ?? nameOf(id)).join(" and ")}.`} No more official games; practice games still work. Try-out rules, not yet confirmed for an official championship.</NoticeCard>
-            : proj?.nightComplete ? <NoticeCard tone="info" title="That’s the night!" testId="night-complete-notice">The TV is showing tonight’s recap. Start any game to keep playing.</NoticeCard>
+            : proj?.cupFinished ? <NoticeCard tone="info" title="The Family Cup is complete" testId="cup-finished-notice" action={nightFacts ? <button type="button" className="mz-chip-btn" data-testid="night-card-open" onClick={() => openSheet("nightcard")}>Share the Cup card</button> : undefined}>{proj.cupFinished.champions.length === 0 ? "No champion this time: nobody played on enough Cup days." : `${proj.cupFinished.champions.length === 1 ? "Champion" : "Champions"}: ${proj.cupFinished.champions.map((id) => proj.cupFinished!.standings.find((x) => x.playerId === id)?.displayName ?? nameOf(id)).join(" and ")}.`} No more official games; practice games still work. Try-out rules, not yet confirmed for an official championship.</NoticeCard>
+            : proj?.nightComplete ? <NoticeCard tone="info" title="That’s the night!" testId="night-complete-notice" action={nightFacts ? <button type="button" className="mz-chip-btn" data-testid="night-card-open" onClick={() => openSheet("nightcard")}>Share the night card</button> : undefined}>The TV is showing tonight’s recap. Start any game to keep playing.</NoticeCard>
             // Stage 12.2 (D-S122-01): everyone hears the room went back to a casual game night, until the next game starts.
             : proj?.roomKind === "casual" && proj.cupUndone && (proj.games ?? []).length <= proj.cupUndone.games ? <NoticeCard tone="info" title="A casual game night again" testId="cup-undone-notice">The host went back from the Family Cup before any official game finished. Quick Party and What’s next are back; nothing counted.</NoticeCard>
             // Stage 12.2 (D-S122-02): the host's gentle nudge after two finished games (never once the room has been a Cup).

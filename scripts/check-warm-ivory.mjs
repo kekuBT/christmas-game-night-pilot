@@ -50,7 +50,9 @@ const W8_INTENDED = {
       "menu-end-night>button.mz-menurow", "menu-end-night>path.", "menu-end-night>span.mz-menurow__chev", "menu-end-night>span.mz-menurow__detail", "menu-end-night>span.mz-menurow__icon", "menu-end-night>span.mz-menurow__label", "menu-end-night>svg.", "menu-end-night>span."],
     removed: [],
     // Stage 12.5 (D-S125-01): the casual lobby (seen behind the menu) has the Family Questions card.
-    addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>"],
+    addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>",
+      // Stage 12.6 (D-S126-01): "Share the night" once a game has finished, the same row style as every menu row.
+      "menu-night-card>"],
   },
   // Stage 12.5: a 17th game. Its card on home and in the library, and the lobby's Family Questions card: whole new
   // components, allowed by their test id, and still only when every element reuses a style the base screen had.
@@ -363,7 +365,7 @@ try {
       // On a failure, every difference (up to 40 each way), so the log alone says what changed.
       if (added.length || gone.length) for (const [sign, xs] of [["+", added], ["-", gone]]) for (const x of xs.slice(0, 40)) console.log(`  W8 ${screen} ${sign} ${x.slice(0, 400)}`);
       check(`W8 Everyday ${screen}: every element kind's computed colours equal the base build's (d4dc408)`, was.size > 0 && added.length === 0 && gone.length === 0,
-        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4, 12.5), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
+        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4, 12.5, 12.6), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
     }
   }
 

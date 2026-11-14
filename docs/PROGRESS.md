@@ -2615,3 +2615,32 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/stage12/stage125-screenshots/`, `docs/evidence/stage125-local/`, `docs/evidence/gate-runs/`.
 - **Owner decisions open:** none new (the Cup's finish rules from 12.4 are still open).
 - **Next:** Stage 12.6 (the night card), then Teams (12.7, 12.8).
+
+## Stage 12.6: the night card (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner, 2026-11-14, quoting suggestion 8 (a shareable night card): "Implement 8 as well".
+- **Base:** `193fcd9` (Stage 12.5's head, PR #29). Branch `claude/stage12-6-night-card`, draft PR #30 stacked on #29.
+- **Spec:** `docs/stage12/stage126.md`. Decisions D-S126-01..03, plus a note recording the owner's later direction (no item 6; Teams and more team games).
+- **Built:**
+  - **The facts (D-S126-01, `apps/web/src/ui/mchezo/lib/nightCard.ts`):**
+    - a casual night: title, date, games and players, the medal table (top 5) and the last 6 games' result lines, with "more" counted;
+    - a Family Cup: its day, the standings (everyone, zero points included; frozen once finished) and the champion;
+    - public facts only: never notes, answers, Family Questions or the room code.
+  - **The picture (`nightCardDraw.ts`):** 1080×1350 on a canvas, system fonts, the phone's look. Long text is cut to fit; a short night is centred, not left with an empty half. The same facts are given in words (`alt` and "What's on the card").
+  - **Sharing (`components/mchezo/NightCard.tsx`):**
+    - Share… through the phone's share sheet where it can share files (a closed sheet isn't an error; a failure says so and points to Save);
+    - Save the picture always works (`mchezo-game-night-YYYY-MM-DD.png`);
+    - reached from the room menu, the "That's the night!" notice and "The Family Cup is complete". Never on the TV.
+- **Tests:**
+  - `tests/stage126-night-card.test.ts` (9, including a recording canvas: every fact drawn, nothing off the edges);
+  - the new `scripts/check-night-card.mjs` (24 checks);
+  - check-warm-ivory W8 allows the new menu row (`menu-night-card>`, reusing a base style).
+- **Unit suite:** 1815/1815 (the fast gate's unit-tests step on `b5cba1b`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `b5cba1b` targeted, label `s126t1`: **did not run** (exit 2, usage error: I named a driver that doesn't exist; refused before building);
+  - `b5cba1b` targeted (12 drivers) `20261114-090809-b5cba1b7-27066`: PASSED, 14/14;
+  - `b5cba1b` fast `20261114-091244-b5cba1b7-29768`: PASSED, 5/5;
+  - **`b5cba1b` full (checkpoint) `20261114-091352-b5cba1b7-1008`: PASSED** (exit 0, 96/96, 35 min 24 s, no retries).
+- **Tested SHA:** `b5cba1b`. The head after it is docs, screenshots and evidence only.
+- **Evidence:** `docs/stage12/stage126-screenshots/`, `docs/evidence/stage126-local/`, `docs/evidence/gate-runs/`.
+- **Owner decisions open:** none new.
+- **Next:** Stage 12.7 (Teams for the night), then 12.8 (games built for teams).

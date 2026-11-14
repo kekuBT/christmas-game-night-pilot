@@ -305,6 +305,8 @@ export function RoomMenuSheet(p: {
   onFinishCup?: () => void;
   /** Stage 12.4 (D-S124-02): end a casual night (the host or a cohost, between games, after a game). */
   onEndNight?: () => void;
+  /** Stage 12.6 (D-S126-01): anyone in the room, once a game has finished: a picture of the night to share. */
+  onNightCard?: () => void;
   /** Motion setting (SettingsBar). */
   phone: ReactNode;
   /** This device: remember, seat backup (recovery code), sign out. */
@@ -325,6 +327,7 @@ export function RoomMenuSheet(p: {
         {p.onUndoCup && <MenuRow icon={<span>↩︎</span>} label="Back to a casual game night" detail="until the first official game finishes" testId="menu-undo-cup" onClick={p.onUndoCup} />}
         {p.onFinishCup && <MenuRow icon={<span>🏆</span>} label="Finish the Family Cup" detail="crown the champion · Day 7" testId="menu-finish-cup" onClick={p.onFinishCup} />}
         {p.onEndNight && <MenuRow icon={<span>🌙</span>} label="End the night" detail="the TV shows tonight’s recap" testId="menu-end-night" onClick={p.onEndNight} />}
+        {p.onNightCard && <MenuRow icon={<span>🖼️</span>} label="Share the night" detail="a picture of tonight’s games" testId="menu-night-card" onClick={p.onNightCard} />}
         <MenuRow icon={<span>📖</span>} label="Memory Book" testId="menu-memory" onClick={p.onMemory} />
         <MenuRow icon={<span>🎲</span>} label="All games" testId="browse-games" onClick={p.onLibrary} />
       </div>

@@ -17,6 +17,7 @@ import './styles/stage104.css';
 import './styles/stage111.css';
 import './styles/stage121.css';
 import './styles/stage125.css';
+import './styles/stage126.css';
 
 export * from './tokens/tokens.js';
 export * from './types.js';

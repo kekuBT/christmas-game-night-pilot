@@ -1,0 +1,43 @@
+PASS A before any game, the menu has no night card
+PASS B the card's title, and its games and players — Our game night
+Saturday, November 14, 2026
+2 games · 3 players
+Medals: Amina 🥇🥈, Keku 🥇🥈, Baraka 🥉🥉
+Math Mayhem: Keku wins
+Math Mayhem: Amina wins
+PASS B the date the card was made — Saturday, November 14, 2026
+PASS B the medal table: Keku and Amina a gold and a silver each, Baraka two bronzes — Our game night
+Saturday, November 14, 2026
+2 games · 3 players
+Medals: Amina 🥇🥈, Keku 🥇🥈, Baraka 🥉🥉
+Math Mayhem: Keku wins
+Math Mayhem: Amina wins
+PASS B each game's result, oldest first — Our game night
+Saturday, November 14, 2026
+2 games · 3 players
+Medals: Amina 🥇🥈, Keku 🥇🥈, Baraka 🥉🥉
+Math Mayhem: Keku wins
+Math Mayhem: Amina wins
+PASS B never the room code
+PASS B the picture is 1080×1350, and its description is the same facts — {"w":1080,"h":1350}
+PASS C the Everyday picture: the Everyday ground and the coral band — #16111D #FF6B4A
+PASS C without Web Share, there's no Share button, only Save
+PASS C the file is named for the night and the date, never the room code — mchezo-game-night-2026-11-14.png
+PASS C it's a PNG of 1080×1350 — 126890 bytes
+PASS C the sheet says where it went
+PASS D a phone that can share pictures gets Share…
+PASS D the share sheet got the picture: one PNG with the night's name
+PASS D …and the sheet says so
+PASS E the Christmas look's title; every other fact is the same — Our Christmas game night
+Saturday, November 14, 2026
+2 games · 3 players
+Medals: Amina 🥇🥈, Keku 🥇🥈, Baraka 🥉🥉
+Math Mayhem: Keku wins
+Math Mayhem: Amina wins
+PASS E the Christmas picture: the ivory ground and the cranberry band — #F7F1E6 #A3253A
+PASS E closing the share sheet isn't an error
+PASS H the sheet fits 320 px (no sideways scroll)
+PASS D a share that fails says so, and points to Save
+PASS F the lobby's 'That's the night!' offers the card
+FAIL driver ran to the end — locator.click: Timeout 30000ms exceeded. | Call log: | [2m  - waiting for getByTestId('night-card-open')[22m
+check-night-card: 1 failed
