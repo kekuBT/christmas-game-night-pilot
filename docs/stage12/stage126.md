@@ -65,4 +65,4 @@
 
 ## 6. Estimate vs actual
 - **Estimate:** about 3 hours.
-- **Actual:** see the completed report.
+- **Actual:** about 2 hours: 1 h 17 min from the spec to the commit (2:50 to 4:07 a.m. ET, partly while Stage 12.5's gates ran), then 41 min of gates (the full gate alone 35 min).

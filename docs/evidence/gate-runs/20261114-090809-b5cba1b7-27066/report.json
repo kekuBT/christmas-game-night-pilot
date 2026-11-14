@@ -1,0 +1,695 @@
+{
+  "runId": "20261114-090809-b5cba1b7-27066",
+  "level": "targeted",
+  "startedAt": "2026-11-14T09:08:09.874Z",
+  "finishedAt": "2026-11-14T09:12:23.443Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2",
+  "git": {
+    "head": "b5cba1b7e1dddb9d87f8fb3533985330ea745181",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "17704b7e443e650fe53c149f15c5a44ddcc318a1a81b18a950bd6251f626292f",
+    "files": 553
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15338
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.0 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261114-090809-b5cba1b7-27066/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.2,
+      "log": "./logs/01-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 7,
+      "startOffsetSec": 0.5,
+      "endOffsetSec": 5.7,
+      "cpuSec": 9.4,
+      "peakRssMB": 553,
+      "machine": {
+        "memAvailMinMB": 14834,
+        "cpuSaturatedSec": 0,
+        "samples": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.7,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 5.7,
+      "endOffsetSec": 6.4,
+      "machine": {
+        "memAvailMinMB": 15143,
+        "cpuSaturatedSec": 0,
+        "samples": 1
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-session-flow",
+      "kind": "browser",
+      "command": "node scripts/check-session-flow.mjs http://localhost:45233",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 183,
+      "log": "./logs/03-check-session-flow.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 174,
+      "startOffsetSec": 7.7,
+      "endOffsetSec": 190.6,
+      "cpuSec": 10.4,
+      "peakRssMB": 279,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13822,
+        "cpuSaturatedSec": 1,
+        "samples": 189
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 5,
+        "pages": 5,
+        "peakOpenPages": 5
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-themes-seasonal",
+      "kind": "browser",
+      "command": "node scripts/check-themes-seasonal.mjs http://localhost:41563",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 107.8,
+      "log": "./logs/04-check-themes-seasonal.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 99,
+      "startOffsetSec": 7.7,
+      "endOffsetSec": 115.5,
+      "cpuSec": 15.1,
+      "peakRssMB": 347,
+      "roomsOnGateServer": 6,
+      "machine": {
+        "memAvailMinMB": 13840,
+        "cpuSaturatedSec": 0,
+        "samples": 109
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 30,
+        "pages": 31,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-briefing",
+      "kind": "browser",
+      "command": "node scripts/check-briefing.mjs http://localhost:45455",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 95.3,
+      "log": "./logs/05-check-briefing.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 90,
+      "startOffsetSec": 7.7,
+      "endOffsetSec": 103.1,
+      "cpuSec": 5.8,
+      "peakRssMB": 383,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13840,
+        "cpuSaturatedSec": 0,
+        "samples": 96
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 4,
+        "pages": 4,
+        "peakOpenPages": 4
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-book-live",
+      "kind": "browser",
+      "command": "node scripts/check-book-live.mjs http://localhost:45455",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 68.3,
+      "log": "./logs/06-check-book-live.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 65,
+      "startOffsetSec": 103.1,
+      "endOffsetSec": 171.4,
+      "cpuSec": 5.9,
+      "peakRssMB": 355,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13988,
+        "cpuSaturatedSec": 0,
+        "samples": 70
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 5,
+        "pages": 5,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-warm-ivory",
+      "kind": "browser",
+      "command": "node scripts/check-warm-ivory.mjs http://localhost:41563",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 68,
+      "log": "./logs/07-check-warm-ivory.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 64,
+      "startOffsetSec": 115.5,
+      "endOffsetSec": 183.5,
+      "cpuSec": 11.6,
+      "peakRssMB": 371,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13822,
+        "cpuSaturatedSec": 0,
+        "samples": 71
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 21,
+        "pages": 22,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-night-card",
+      "kind": "browser",
+      "command": "node scripts/check-night-card.mjs http://localhost:45455",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 8.5,
+      "log": "./logs/08-check-night-card.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 60,
+      "startOffsetSec": 171.4,
+      "endOffsetSec": 179.9,
+      "cpuSec": 3.8,
+      "peakRssMB": 302,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13822,
+        "cpuSaturatedSec": 0,
+        "samples": 10
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-quick-party",
+      "kind": "browser",
+      "command": "node scripts/check-quick-party.mjs http://localhost:45455",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 50.3,
+      "log": "./logs/09-check-quick-party.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 47,
+      "startOffsetSec": 179.9,
+      "endOffsetSec": 230.2,
+      "cpuSec": 6,
+      "peakRssMB": 267,
+      "roomsOnGateServer": 3,
+      "machine": {
+        "memAvailMinMB": 13844,
+        "cpuSaturatedSec": 1,
+        "samples": 55
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 5
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-family-questions",
+      "kind": "browser",
+      "command": "node scripts/check-family-questions.mjs http://localhost:41563",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 35.4,
+      "log": "./logs/10-check-family-questions.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 33,
+      "startOffsetSec": 183.5,
+      "endOffsetSec": 218.9,
+      "cpuSec": 4.2,
+      "peakRssMB": 285,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13915,
+        "cpuSaturatedSec": 1,
+        "samples": 38
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 4,
+        "pages": 4,
+        "peakOpenPages": 4
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-one-path",
+      "kind": "browser",
+      "command": "node scripts/check-one-path.mjs http://localhost:45233",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 33.6,
+      "log": "./logs/11-check-one-path.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 32,
+      "startOffsetSec": 190.7,
+      "endOffsetSec": 224.3,
+      "cpuSec": 5.7,
+      "peakRssMB": 303,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13844,
+        "cpuSaturatedSec": 0,
+        "samples": 35
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-cup-party",
+      "kind": "browser",
+      "command": "node scripts/check-cup-party.mjs http://localhost:41563",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 34.6,
+      "log": "./logs/12-check-cup-party.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 31,
+      "startOffsetSec": 218.9,
+      "endOffsetSec": 253.5,
+      "cpuSec": 4.7,
+      "peakRssMB": 267,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13844,
+        "cpuSaturatedSec": 0,
+        "samples": 39
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 5,
+        "pages": 5,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-tv-moments",
+      "kind": "browser",
+      "command": "node scripts/check-tv-moments.mjs http://localhost:45233",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 20.9,
+      "log": "./logs/13-check-tv-moments.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 20,
+      "startOffsetSec": 224.3,
+      "endOffsetSec": 245.2,
+      "cpuSec": 4.6,
+      "peakRssMB": 280,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 14112,
+        "cpuSaturatedSec": 0,
+        "samples": 24
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 7,
+        "pages": 7,
+        "peakOpenPages": 4
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-cup-memory",
+      "kind": "browser",
+      "command": "node scripts/check-cup-memory.mjs http://localhost:45455",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 14.5,
+      "log": "./logs/14-check-cup-memory.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 13,
+      "startOffsetSec": 230.2,
+      "endOffsetSec": 244.7,
+      "cpuSec": 5.9,
+      "peakRssMB": 350,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14114,
+        "cpuSaturatedSec": 0,
+        "samples": 16
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 13,
+        "pages": 13,
+        "peakOpenPages": 1
+      },
+      "failureKind": null
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 45233,
+      "pid": 27183,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066/server-data/w1",
+      "log": "./logs/server-w1.log"
+    },
+    {
+      "worker": "w2",
+      "port": 41563,
+      "pid": 27184,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066/server-data/w2",
+      "log": "./logs/server-w2.log"
+    },
+    {
+      "worker": "w3",
+      "port": 45455,
+      "pid": 27185,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066/server-data/w3",
+      "log": "./logs/server-w3.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 254,
+    "sumSec": 726,
+    "utilisation": 0.95,
+    "perWorkerBusySec": {
+      "w1": 243,
+      "w2": 246,
+      "w3": 237
+    },
+    "predicted": {
+      "low": 192,
+      "mid": 259,
+      "high": 602,
+      "confidence": "low-confidence"
+    },
+    "contentionRatio": 1.059,
+    "longest": [
+      {
+        "name": "check-session-flow",
+        "sec": 183
+      },
+      {
+        "name": "check-themes-seasonal",
+        "sec": 107.8
+      },
+      {
+        "name": "check-briefing",
+        "sec": 95.3
+      },
+      {
+        "name": "check-book-live",
+        "sec": 68.3
+      },
+      {
+        "name": "check-warm-ivory",
+        "sec": 68
+      }
+    ],
+    "backpressure": {
+      "waits": 0,
+      "seconds": 0
+    },
+    "system": {
+      "cpuPctMean": 36,
+      "cpuPctPeak": 100,
+      "memAvailMinMB": 13822,
+      "load1Peak": 3.42,
+      "cpuPctEvery10s": [
+        74,
+        35,
+        38,
+        41,
+        25,
+        17,
+        23,
+        28,
+        18,
+        29,
+        26,
+        50,
+        36,
+        39,
+        26,
+        17,
+        29,
+        44,
+        66,
+        31,
+        17,
+        57,
+        45,
+        48,
+        63,
+        14
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 5.5,
+        "peakRssMB": 149
+      },
+      {
+        "worker": "w2",
+        "cpuSec": 3.3,
+        "peakRssMB": 151
+      },
+      {
+        "worker": "w3",
+        "cpuSec": 2.9,
+        "peakRssMB": 138
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 7,
+        "estSource": "few",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "check-session-flow",
+        "phase": "browser",
+        "estSec": 174,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 4,
+        "name": "check-themes-seasonal",
+        "phase": "browser",
+        "estSec": 99,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 5,
+        "name": "check-briefing",
+        "phase": "browser",
+        "estSec": 90,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 6,
+        "name": "check-book-live",
+        "phase": "browser",
+        "estSec": 65,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 7,
+        "name": "check-warm-ivory",
+        "phase": "browser",
+        "estSec": 64,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 8,
+        "name": "check-night-card",
+        "phase": "browser",
+        "estSec": 60,
+        "estSource": "none",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 9,
+        "name": "check-quick-party",
+        "phase": "browser",
+        "estSec": 47,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 10,
+        "name": "check-family-questions",
+        "phase": "browser",
+        "estSec": 33,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 11,
+        "name": "check-one-path",
+        "phase": "browser",
+        "estSec": 32,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 12,
+        "name": "check-cup-party",
+        "phase": "browser",
+        "estSec": 31,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 13,
+        "name": "check-tv-moments",
+        "phase": "browser",
+        "estSec": 20,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 14,
+        "name": "check-cup-memory",
+        "phase": "browser",
+        "estSec": 13,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 192.334395,
+      "mid": 259.3818,
+      "high": 601.8026625,
+      "sequentialSec": 738.2499999999999,
+      "confidence": "low-confidence",
+      "contention": 1.044,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 45233,
+    "pid": 27183,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126t2/test-results/20261114-090809-b5cba1b7-27066/web-dist"
+  }
+}

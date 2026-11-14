@@ -1,0 +1,25 @@
+$ node scripts/check-reveal.mjs http://localhost:33425
+# timeout 600s | worker w3 | server http://localhost:33425 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s126full/test-results/20261114-091352-b5cba1b7-1008/server-data/w3)
+
+[+23.4s] PASS reveal opens on the first question phase — question:0
+[+23.4s] PASS question phase hides the correct answer — count=0
+[+23.7s] PASS Reveal answer steps into the first reveal — reveal:1
+[+23.7s] PASS reveal phase shows the correct answer — count=1
+[+23.7s] PASS reveal phase separates this question from the game total
+[+23.7s] PASS Next question steps into the second question phase — question:2
+[+23.7s] PASS second question phase hides the correct answer again — count=0
+[+23.8s] PASS Q10 jump lands on the last question phase — question:18
+[+23.8s] PASS last reveal reached — reveal:19
+[+23.9s] PASS See standings lands on the finale (step 20 of 21) — standings:20
+[+23.9s] PASS finale shows the standings list
+[+23.9s] PASS auto-play starts back at the first question — question:0
+[+32.0s] PASS auto-play advances a step within 8s — reveal:1
+[+40.0s] PASS pausing stops auto-play — was reveal:1, now reveal:1
+[+40.9s] PASS TV walk opens on a question — Which month comes after November?
+[+44.9s] PASS TV walk advances to the reveal stage
+[+50.0s] PASS TV walk advances to the second question — In which month is the summer solstice in
+[+50.0s] PASS TV manual jump reaches the leaderboard
+[+50.1s] REVEAL ALL PASSED
+[+50.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 50.1s | cpu 3.5s, peak memory 262 MB
