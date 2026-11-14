@@ -97,6 +97,7 @@
   - TV fit checks on every question and reveal, including the 140-character worst case;
   - results, remove-unread, and the write sheet at 320 px.
 - **check-warm-ivory W8:** cover gradients are compared without React's generated id number, which a new cover shifts. The new game's cards and the lobby card are allowed by test-id prefix, and each element must still reuse a base style. On a failure, W8 prints every difference.
+- **check-cup-party (Stage 12.3) fix:** the host now switches the lineup's *second* game to Practice, replacing it first when it's practice-only. Step E starts the second game. Before this, a random lineup with a practice-only second game made E expect the wrong game. Found in a gate run; see `docs/evidence/stage125-local/README.md`.
 - **Gates:** targeted, fast, then one full checkpoint.
 
 ## 7. Estimate vs actual

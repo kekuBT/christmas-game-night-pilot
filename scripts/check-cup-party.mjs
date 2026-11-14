@@ -111,17 +111,22 @@ try {
     modes.push({ id: ids[i], tag: await m.evaluate((e) => e.tagName), pressed: await m.getAttribute("aria-pressed"), text: (await m.innerText()).trim() });
   }
   check("B every game that can count starts Official; a practice-only game says Practice only", modes.every((m) => (COUNTABLE.has(m.id) ? m.tag === "BUTTON" && m.pressed === "true" && m.text === "Official" : m.tag === "SPAN" && m.text === "Practice only")), JSON.stringify(modes));
-  // Make one countable game after the first Practice (the host's choice).
-  let practiceAt = modes.findIndex((m, i) => i > 0 && m.tag === "BUTTON");
-  if (practiceAt < 0) {
-    // No second countable game in this suggestion: put Trivia second.
+  // The host makes the lineup's SECOND game Practice (step E starts it next). The planner orders games at random, so
+  // the second can be practice-only (Pattern Pulse): then the host replaces it with a game that can count first.
+  // (Until Stage 12.5 this switched the first countable game after the first, wherever it was, while E always starts
+  // the second game: whenever the second was practice-only, E expected the wrong game. Found in gate run
+  // 20261114-080049-cceb707a-20481.)
+  let practiceAt = modes[1]?.tag === "BUTTON" ? 1 : -1;
+  if (practiceAt < 0 && ids.length >= 2) {
     await h.getByTestId("party-replace-1").click();
-    const opt = h.getByTestId("party-option-trivia");
-    if (await opt.count()) await opt.click(); else await h.getByTestId("party-replace-1").click();
+    const options = await h.locator('[data-testid^="party-option-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid").replace("party-option-", "")));
+    const pick = options.find((id) => COUNTABLE.has(id));
+    console.log(`  B the planner put ${ids[1]} (practice-only) second; the host replaces it with ${pick ?? "nothing (no option that can count)"}`);
+    if (pick) await h.getByTestId(`party-option-${pick}`).click(); else await h.getByTestId("party-replace-1").click();
     ids = await preview(h);
-    practiceAt = ids.findIndex((id, i) => i > 0 && COUNTABLE.has(id));
+    practiceAt = COUNTABLE.has(ids[1]) ? 1 : -1;
   }
-  check("B the lineup has a second game that can count", practiceAt > 0, JSON.stringify(ids));
+  check("B the lineup's second game can count", practiceAt === 1, JSON.stringify(ids));
   await h.getByTestId(`party-mode-${practiceAt}`).click();
   check("B the host switched it to Practice", (await h.getByTestId(`party-mode-${practiceAt}`).getAttribute("aria-pressed")) === "false" && (await h.getByTestId(`party-mode-${practiceAt}`).innerText()).trim() === "Practice");
   const practiceGame = ids[practiceAt];
@@ -169,8 +174,17 @@ try {
 
   // ---- E. Next game: the second in its own mode (Practice) ----
   const champBefore = JSON.stringify(room.championship);
+  // The press's own answer, recorded where the page sends it (a failure below says what the server said).
+  const startReply = h.waitForResponse((r) => r.url().endsWith("/games") && r.request().method() === "POST", { timeout: 20000 }).then(async (r) => ({ status: r.status(), body: await r.json().catch(() => null) })).catch((e) => ({ error: String(e.message ?? e).split("\n")[0] }));
   await h.getByTestId("next-game").click();
-  await soon("E the second game started as Practice", async () => { const r = await myRoom(h); return r.games.length === 2 && r.games[1].gameId === practiceGame && r.games[1].official === false && r.party.lineup.items[1].started === true; }, 20000);
+  const started = await soon("E the second game started as Practice", async () => { const r = await myRoom(h); return r.games.length === 2 && r.games[1].gameId === practiceGame && r.games[1].official === false && r.party.lineup.items[1].started === true; }, 20000);
+  if (!started) {
+    // Diagnostics: what the Start press got back, what the host's screen says, and who the room thinks is here.
+    const r = await myRoom(h);
+    console.log(`  E diagnostics: start reply ${JSON.stringify(await startReply).slice(0, 600)}`);
+    console.log(`  E diagnostics: host screen ${JSON.stringify((await h.evaluate(() => document.body.innerText)).slice(0, 700))}`);
+    console.log(`  E diagnostics: room ${JSON.stringify({ games: r.games.map((x) => [x.gameId, x.official, x.status]), next: r.party?.lineup?.next, readiness: r.readiness })}`);
+  }
   room = await myRoom(h);
   check("E nothing counted from it: the Cup standings are unchanged", JSON.stringify(room.championship) === champBefore);
   await hctx.close(); await gctx.close(); await tctx.close();

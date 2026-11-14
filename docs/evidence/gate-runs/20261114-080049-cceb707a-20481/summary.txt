@@ -1,0 +1,11 @@
+
+FAILED (exit 1) | targeted | run 20261114-080049-cceb707a-20481
+  14 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-cup-party (w3) [functional]: FAIL E the second game started as Practice — not within 20000ms
+  timing   wall 5m 33s · step time 16m 13s (sum) · 3 workers, 97% busy · 2.92× the same steps run one after another
+           predicted 4–10m (about 5m 18s, low-confidence) → actual 5m 33s (+5%)
+           longest  check-session-flow 3m 05s, check-solo-shelf 2m 51s, check-spectrum 1m 55s · the longest step is 56% of the wall time
+           machine  CPU mean 32%, peak 88% · memory available ≥ 13969 MB · load peak 2.72
+           contention ×1.052 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125t2/test-results/20261114-080049-cceb707a-20481/report.json
