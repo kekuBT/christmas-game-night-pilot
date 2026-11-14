@@ -1,0 +1,11 @@
+
+FAILED (exit 1) | targeted | run 20261114-074736-cbf86523-12708
+  14 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-warm-ivory (w1) [functional]: FAIL W8 Everyday lobby-guest-390: every element kind's computed colours equal the base build's (d4dc408) — 86 kinds; new 5, missing 0 e.g. family-card>div.mz-fq-card__actions=>rgb(247, 241, 232)|rgba(
+  timing   wall 5m 29s · step time 15m 47s (sum) · 3 workers, 96% busy · 2.88× the same steps run one after another
+           predicted 4–12m (about 5m 24s, low-confidence) → actual 5m 29s (+2%)
+           longest  check-session-flow 3m 04s, check-solo-shelf 2m 52s, check-spectrum 1m 54s · the longest step is 56% of the wall time
+           machine  CPU mean 32%, peak 90% · memory available ≥ 13884 MB · load peak 3.81
+           contention ×1.052 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s125t1/test-results/20261114-074736-cbf86523-12708/report.json

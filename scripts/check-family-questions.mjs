@@ -70,7 +70,7 @@ const AMINA_CHOICE = { prompt: "Where did Bibi CANARY-ONE grow up?", options: ["
 const AMINA_WHO = { prompt: "Who CANARY-TWO always burns the chapati?" };
 const BARAKA_Q = { kind: "choice", prompt: "What was Babu CANARY-THREE first car?", options: ["A Peugeot 404", "A VW Beetle"], correctIndex: 0 };
 // The longest question a writer can send (140 characters) with four answers: the TV's worst case.
-const KEKU_Q = { kind: "choice", prompt: "Which month is Shosho CANARY-FOUR birthday, the one we always celebrate with far too much pilau and the big cake from town?".slice(0, 140), options: ["March", "July", "October", "December"], correctIndex: 3 };
+const KEKU_Q = { kind: "choice", prompt: "Which month is Shosho CANARY-FOUR birthday, the one we always celebrate with far too much pilau and the big cake from town, every single year?".slice(0, 140), options: ["March", "July", "October", "December"], correctIndex: 3 };
 const CANARY = /CANARY-(ONE|TWO|THREE|FOUR|OPT)/;
 
 const browser = await launchChromium();
@@ -96,6 +96,7 @@ try {
   await amina.getByTestId("family-add").click();
   check("A an empty answer is refused, and says why", /Fill in every answer/.test(await amina.getByTestId("family-error").innerText()));
   check("A …and nothing reached the room", (await tvProj(roomId)).family.ready === 0);
+  check("B the worst case for the TV is the longest question a writer can send", KEKU_Q.prompt.length === 140, String(KEKU_Q.prompt.length));
   for (const [i, o] of AMINA_CHOICE.options.entries()) {
     if (i >= 2) await amina.getByTestId("family-option-add").click();
     await amina.getByTestId(`family-option-${i}`).fill(o);
