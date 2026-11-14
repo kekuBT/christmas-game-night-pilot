@@ -58,6 +58,8 @@ const UNIT_WORDS: Record<string, { verb: string; noun: [string, string] }> = {
   "jebena-rush": { verb: "Answered in time on", noun: ["turn", "turns"] },
   // Stage 9.3: a round you gave the clue in, or sent a guess in (src/games/modules/spectrum.ts participation).
   "spectrum": { verb: "Took part in", noun: ["round", "rounds"] },
+  // Stage 12.5: questions answered (never your own: it isn't yours to answer).
+  "family-questions": { verb: "Answered", noun: ["question", "questions"] },
 };
 
 /**

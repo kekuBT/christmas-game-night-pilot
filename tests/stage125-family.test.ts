@@ -176,6 +176,8 @@ describe("playing (D-S125-02)", () => {
           expect(JSON.stringify(s)).not.toMatch(/askedBy|correctIndex|authorId/);
         }
       }
+      // Progress counts only those who can answer (the writer can't): "0 of 2", never "0 of 3".
+      expect(views(env.engine.project("tv"), m.gid)[0]!["progress"]).toMatchObject({ answeredNow: 0, total: 2 });
       const authorView = views(env.engine.project("player", q.authorId), m.gid).find((v) => (v["state"] as Json)["myQuestion"] !== undefined)!;
       expect((authorView["state"] as Json)["myQuestion"]).toBe(true);
       expect(env.send(q.authorId, m.gid, "family-answer", { round: r, choice: 0 })).toMatchObject({ accepted: false, reason: "YOUR_QUESTION" });

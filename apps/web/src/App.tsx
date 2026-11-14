@@ -24,6 +24,7 @@ import { CharadesTv, ClosestTv, ImpostorTv } from "./components/mchezo/TvGames.j
 import { SendNote } from "./components/mchezo/SendNote.js";
 import { playerName, titleFor } from "./ui/mchezo/lib/names.js";
 import { MajorityReview, MajorityTv, MchezoMajority, MchezoMajorityResults } from "./components/mchezo/MchezoMajority.js";
+import { FamilyCard, FamilyReview, FamilySheet, FamilyTv, MchezoFamily, MchezoFamilyResults } from "./components/mchezo/MchezoFamily.js";
 import { MchezoPulse, MchezoPulseResults, PulseReview, PulseTv, type MchezoPulseDeps } from "./components/mchezo/MchezoPulse.js";
 import { DrawReview, DrawTv, MchezoDraw, MchezoDrawResults } from "./components/mchezo/MchezoDraw.js";
 import { JebenaCupsLabel, JebenaHeartsChoice, JebenaReview, JebenaTv, JebenaTvFinal, MchezoJebena, MchezoJebenaResults } from "./components/mchezo/MchezoJebena.js";
@@ -1132,6 +1133,8 @@ export function App() {
               : g.gameId === "impostor" ? <ImpostorTv game={g} title={titleOf(g.gameId)} />
               : g.gameId === "charades" ? <CharadesTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} />
               : g.gameId === "majority-rules" ? <MajorityTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} />
+              // Stage 12.5: the family's own questions; who asked comes with the answer.
+              : g.gameId === "family-questions" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><FamilyTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><GameClock game={g} tv /><PulseTv game={g} title={titleOf(g.gameId)} /></div>
               : g.gameId === "draw-guess" ? <div className="mz-tvshow-dgwrap"><GameClock game={g} tv /><DrawTv game={g} title={titleOf(g.gameId)} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
               // Stage 9.1: Jebena Rush draws its own turn clock (the turn, not the match).
@@ -1149,6 +1152,7 @@ export function App() {
           renderReview={(g) => g.gameId === "caption-clash"
             ? <div className="mz-tvshow-game" data-testid="mz-cap-tv"><CaptionTv game={g} /></div>
             : g.gameId === "majority-rules" ? <div className="mz-tvshow-game"><MajorityReview game={g} /></div>
+            : g.gameId === "family-questions" ? <div className="mz-tvshow-game"><FamilyReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "pattern-pulse" ? <div className="mz-tvshow-game"><PulseReview game={g} /></div>
             : g.gameId === "draw-guess" ? <div className="mz-tvshow-game"><DrawReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
             : g.gameId === "jebena-rush" ? <div className="mz-tvshow-game"><JebenaReview game={g} nameOf={(id) => feed.players.find((p) => p.id === id)?.displayName ?? "A player"} /></div>
@@ -1605,6 +1609,9 @@ export function App() {
   // Stage 9.3 (cooperative, casual rooms).
   const spectrumPlaying = playingGame?.gameId === "spectrum";
   const spectrumFinished = latestFinished?.gameId === "spectrum";
+  // Stage 12.5 (casual rooms, practice-only).
+  const familyPlaying = playingGame?.gameId === "family-questions";
+  const familyFinished = latestFinished?.gameId === "family-questions";
   const yearPlaying = playingGame?.gameId === "guess-the-year";
   const geographyPlaying = playingGame?.gameId === "geography";
   const mathPlaying = playingGame?.gameId === "math-mayhem";
@@ -1773,6 +1780,31 @@ export function App() {
               setCupBusy(false);
               void refresh();
             }
+          }}
+        />
+      )}
+      {/* Stage 12.5 (D-S125-01/03): write Family Questions; take back your own; the host removes someone's, unread. */}
+      {sheet === "family" && proj?.roomKind === "casual" && (
+        <FamilySheet
+          family={proj.family}
+          players={players}
+          youId={playerId ?? ""}
+          isHostish={isHostish}
+          onClose={closeSheet}
+          onAdd={async (q) => {
+            try { await post<Record<string, unknown>>(`/rooms/${roomId}/family`, { ...q }); return null; }
+            catch (e) { return e instanceof Error && e.message ? e.message : "The question didn’t reach the game. Try again."; }
+            finally { void refresh(); }
+          }}
+          onDelete={async (id) => {
+            try { await post<Record<string, unknown>>(`/rooms/${roomId}/family/${encodeURIComponent(id)}/delete`, {}); return null; }
+            catch (e) { return e instanceof Error && e.message ? e.message : "The game didn’t answer. Nothing changed; try again."; }
+            finally { void refresh(); }
+          }}
+          onRemoveAuthor={async (pid) => {
+            try { await post<Record<string, unknown>>(`/rooms/${roomId}/family/author/${encodeURIComponent(pid)}/remove`, {}); return null; }
+            catch (e) { return e instanceof Error && e.message ? e.message : "The game didn’t answer. Nothing changed; try again."; }
+            finally { void refresh(); }
           }}
         />
       )}
@@ -1972,7 +2004,10 @@ export function App() {
           onStart={upNext ? () => startGame(upNext.id, startMode === "official", upNextParty ? { kind: "next", ...upNextParty } : CHOSEN) : undefined}
           startTestId={upNext ? (upNextParty ? "party-start" : `start-${startMode}-${upNext.id}`) : undefined}
           startLabel={upNext && upNextParty && proj?.party?.lineup ? `Start ${upNext.title} · ${cupParty ? `${lineupOfficial(upNextParty.index) ? "Official" : "Practice"} · ` : ""}game ${upNextParty.index + 1} of ${proj.party.lineup.items.length}` : undefined}
-          startBlocked={onBreak ? "On a break · Resume first" : undefined}
+          startBlocked={onBreak ? "On a break · Resume first"
+            // Stage 12.5: Family Questions waits for enough questions (the server refuses with FAMILY_TOO_FEW anyway).
+            : upNext?.id === "family-questions" && proj?.family && proj.family.ready < proj.family.needed ? `Needs ${proj.family.needed - proj.family.ready} more family ${proj.family.needed - proj.family.ready === 1 ? "question" : "questions"}`
+            : undefined}
           guestNote={onBreak ? <>On a break · {hostName ?? "the host"} resumes when everyone’s back</> : undefined}
           party={partyRoom ? (<>
             {breakButton}
@@ -1990,6 +2025,11 @@ export function App() {
               onReplan={(n) => { setPartyAsk(null); setPartyReplan(n); openSheet("party"); }}
             />
           </>) : undefined}
+          family={proj?.roomKind === "casual" ? (
+            <FamilyCard family={proj.family} isHost={isHostish} upNextIsFamily={upNext?.id === "family-questions"}
+              onWrite={() => openSheet("family")}
+              onPlayNext={isHostish ? () => { setUpNextId("family-questions", "manual"); setShuffleResult(null); } : undefined} />
+          ) : undefined}
           setup={upNext && (<>
           {!casualRoom && <div className="mz-mode" data-testid="mode-choice">
             <span className="mz-kicker mz-kicker--muted">How should {upNext.title} count?</span>
@@ -2101,6 +2141,21 @@ export function App() {
       <MchezoProvider theme={theme} {...motion}>
         <GameClock game={playingGame} />
         <MchezoMajority game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Majority Rules"} intent={sendAction} error={err || undefined} landed={sendLanded} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && (showPhase === "gameplay" || showPhase === "waiting") && familyPlaying && playingGame) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <GameClock game={playingGame} />
+        <MchezoFamily game={playingGame} publicGame={publicPlaying} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "Family Questions"} canDirect={isHostish} intent={sendAction} error={err || undefined} landed={sendLanded} />
+      </MchezoProvider>
+    );
+  }
+  if (view === "lobby" && showPhase === "results" && familyFinished && latestFinished) {
+    return (
+      <MchezoProvider theme={theme} {...motion}>
+        <MchezoFamilyResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Family Questions"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }

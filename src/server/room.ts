@@ -1905,7 +1905,8 @@ export class RoomEngine {
     // round (predicted and voted, or skipped); Pattern Pulse "finished".
     if (g.gameId === "majority-rules" || g.gameId === "pattern-pulse" || g.gameId === "family-questions") {
       const v = this.publicGameState(g) as { done?: unknown; finished?: unknown } | undefined;
-      if (typeof v?.done === "number") return { ...base, answeredNow: v.done };
+      // Family Questions: whoever wrote the question doesn't answer it, so it's out of the count too.
+      if (typeof v?.done === "number") return { ...base, answeredNow: v.done, ...(g.gameId === "family-questions" && typeof (v as { total?: unknown }).total === "number" ? { total: (v as { total: number }).total } : {}) };
       if (typeof v?.finished === "number") return { ...base, finished: v.finished };
     }
     return base;
