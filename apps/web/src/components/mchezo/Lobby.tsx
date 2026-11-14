@@ -356,7 +356,7 @@ export function MakeCupSheet({ played, busy, error, onConfirm, onClose }: {
       <ul className="mz-makecup" data-testid="make-cup-points">
         <li><b>From now on:</b> before each game you choose Official (counts) or Practice. You end each Cup day when you’re ready.</li>
         <li><b>What stays:</b> the room code, everyone’s seat and the Memory Book.{played > 0 ? ` The ${played === 1 ? "game" : `${played} games`} already played ${played === 1 ? "stays" : "stay"} casual and ${played === 1 ? "doesn’t" : "don’t"} count.` : ""}</li>
-        <li><b>Casual-only extras end:</b> Quick Party, What’s next, Play again, breaks and handing over the host role are for casual rooms.</li>
+        <li><b>Quick Party stays:</b> games still to play in a lineup become Official where they can count. Play again, breaks and handing over the host role are for casual rooms.</li>
         <li><b>Changed your mind?</b> Until the first official game finishes, you can go back to a casual game night from the room menu.</li>
       </ul>
       {error ? <p className="err" role="alert" data-testid="make-cup-error">{error}</p> : null}
@@ -384,7 +384,7 @@ export function UndoCupSheet({ practiced, busy, error, onConfirm, onClose }: {
     <Sheet title="Back to a casual game night" onClose={onClose} testId="undo-cup-sheet" kicker="No official game has finished yet">
       <p className="mz-details__pitch">This room goes back to a game night just for fun. No Cup results are lost: nothing official has finished.</p>
       <ul className="mz-makecup" data-testid="undo-cup-points">
-        <li><b>Back:</b> Quick Party, What’s next, Play again, breaks and handing over the host role.</li>
+        <li><b>Back:</b> Play again, breaks and handing over the host role. A Quick Party lineup stays, with its games just for fun.</li>
         <li><b>What stays:</b> the room code, everyone’s seat and the Memory Book.{practiced > 0 ? ` The ${practiced === 1 ? "practice game" : `${practiced} practice games`} played since ${practiced === 1 ? "stays" : "stay"}, as casual.` : ""}</li>
         <li><b>Later:</b> you can make it a Family Cup again from the room menu.</li>
       </ul>
