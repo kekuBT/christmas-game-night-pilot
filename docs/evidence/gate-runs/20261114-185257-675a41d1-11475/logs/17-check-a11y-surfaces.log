@@ -1,0 +1,21 @@
+$ node scripts/check-a11y-surfaces.mjs http://localhost:36455
+# timeout 600s | worker w3 | server http://localhost:36455 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1210t1/test-results/20261114-185257-675a41d1-11475/server-data/w3)
+
+[+1.8s] PASS Geography: a game with a flag question was dealt — 8 questions
+[+1.8s] PASS Geography: the server describes the flag without naming any option — {"imageAlt":"Green field, yellow diamond, blue globe with stars.","options":["Argentina","Colombia","Brazil","Portugal"]}
+[+2.5s] PASS Geography: the flag question is on screen
+[+2.5s] PASS Geography: the flag is exposed as a picture named 'Flag: <description>' — 1
+[+2.6s]   question in the accessibility tree: - 'heading "Which country does this flag belong to? Flag: Green field, yellow diamond, blue globe with stars." [level=1]': |   - text: Which country does this flag belong to? |   - 'img "Flag: Green field, yellow diamond, blue globe with stars."': 🇧🇷
+[+2.6s] PASS Geography: the question's accessible text names no option (no answer read out) — - 'heading "Which country does this flag belong to? Flag: Green field, yellow diamond, blue globe with stars." [level=1]':
+[+2.6s]   - text: Which country does this flag belong to?
+[+2.6s]   - 'img "Flag: Green field, yellow diamond, blue globe with stars."': 🇧🇷
+[+2.6s] PASS Geography: sighted players still see the flag emoji
+[+3.5s] PASS Who Said That: every question is its own labelled group
+[+3.6s] PASS Who Said That: the group is named by its quote and says which question it is — I would rather count constellations than sheep. (question 1 of 8)
+[+3.7s] PASS Who Said That: an answered question says YOUR answer
+[+3.7s] PASS Who Said That: no internal game or player ids on the screen
+[+3.7s] PASS Who Said That: no internal status word ('Status: playing')
+[+3.8s] A11Y SURFACES ALL PASSED
+[+3.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":2,"peakOpenPages":1}
+
+# PASS (exit 0) in 3.8s | cpu 2.2s, peak memory 355 MB
