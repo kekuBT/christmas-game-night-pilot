@@ -1,0 +1,16 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3461/
+Call log:
+[2m  - navigating to "http://localhost:3461/", waiting until "domcontentloaded"[22m
+
+    at $SP/wt121/scripts/check-casual.mjs:83:11 {
+  log: [
+    '  - navigating to "http://localhost:3461/", waiting until "domcontentloaded"'
+  ],
+  name: 'Error'
+}
+
+Node.js v22.23.4

@@ -1,0 +1,30 @@
+PASS lobby: the TV says LOBBY
+PASS lobby: the join code, big
+PASS lobby: everyone's name
+PASS lobby: up next is the host's pick, with its mode
+PASS lobby at 1440×900: no sideways scrolling
+PASS lobby at 1280×720: no sideways scrolling
+PASS lobby at 768×1024: no sideways scrolling
+PASS Impostor: the TV goes LIVE
+PASS Impostor: the honest players have a secret word (the test has something to look for) — Igloo
+PASS Impostor live: no secret word on the TV
+PASS Impostor: the TV follows the game to the vote
+PASS Impostor vote: no clue text on the TV (read them on your phones)
+PASS Impostor: when it ends the TV shows FINAL STANDINGS
+PASS Impostor final: still no secret word on the TV
+PASS Math: LIVE with how many have started
+PASS director: Pause animations pauses this screen's animations
+PASS director: pausing leaves the server's deadline exactly where it was — 1794608954712
+PASS director: the game clock keeps counting while animations are paused — Time left in this game: 4:00
+PASS director: Replay redraws the screen and unpauses it, still LIVE
+PASS Math: the count moves (1 of 2 have started)
+PASS Math live: no question or answer text on the TV
+PASS Math: when it ends the TV shows FINAL STANDINGS with a winner line
+PASS final: ranked standings for both players
+PASS review: labelled POST-GAME REVIEW and says the game is over
+PASS director: Lobby view shows tonight so far, with Math Mayhem
+PASS a new game's briefing takes over the TV from the lobby view
+PASS Closest Wins: LIVE with the question everyone is answering
+PASS Closest Wins: the count moves (1 of 2 have guessed)
+PASS Closest Wins: nobody's guess is on the TV
+TV SHOW ALL PASSED

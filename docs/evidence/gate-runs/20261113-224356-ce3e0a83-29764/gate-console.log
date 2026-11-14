@@ -1,0 +1,48 @@
+Mchezo gate targeted | run 20261113-224356-ce3e0a83-29764
+  revision ce3e0a8313693acda97a4250aafefdb0f577d588 (clean tree) | fingerprint 9dea5e98fe27 (533 files)
+  plan     10 steps: 1 fast/build, 8 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  140 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.04 for 3 worker(s) (measured, 116 run(s))
+  estimate this run: 1–6m (low-confidence) · the same steps one after another: about 5m 11s · longest step check-warm-ivory ~1m 06s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.04 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-one-path
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-ce3e0a8/test-results/20261113-224356-ce3e0a83-29764
+        start build-web on w1 (usually 6s)
+[ 1/10] PASS         5.3s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/10] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:34449 (pid 29895, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-ce3e0a8/test-results/20261113-224356-ce3e0a83-29764/server-data/w1)
+  server   w2 http://localhost:35927 (pid 29896, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-ce3e0a8/test-results/20261113-224356-ce3e0a83-29764/server-data/w2)
+  server   w3 http://localhost:43083 (pid 29897, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-ce3e0a8/test-results/20261113-224356-ce3e0a83-29764/server-data/w3)
+        start check-warm-ivory on w1 (usually 1m 06s)
+        start check-one-path on w2 (no timing history)
+        start check-casual on w3 (usually 53s)
+[ 3/10] PASS        28.5s  check-one-path  w2
+        start check-f4 on w2 (usually 50s)
+── progress  3/10 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-warm-ivory 53s (w1), check-casual 53s (w3), check-f4 24s (w2)
+   remaining 0–3m · total 1–4m · done around 22:45–22:47 UTC (low-confidence)
+[ 4/10] PASS        55.2s  check-casual  w3
+        start check-quick-party on w3 (usually 46s)
+[ 5/10] PASS        68.4s  check-warm-ivory  w1
+        start check-cup-memory on w1 (usually 12s)
+[ 6/10] PASS        52.6s  check-f4  w2
+        start check-tv-show on w2 (usually 12s)
+[ 7/10] PASS        13.8s  check-cup-memory  w1
+        start check-tv-dashboard on w1 (usually 5s)
+[ 8/10] PASS         5.3s  check-tv-dashboard  w1
+[ 9/10] PASS        12.1s  check-tv-show  w2
+── progress  9/10 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-quick-party 58s (w3)
+   remaining 15–34s · total 2–3m · done around 22:46–22:46 UTC (low-confidence)
+[10/10] PASS        79.6s  check-quick-party  w3
+
+PASSED (exit 0) | targeted | run 20261113-224356-ce3e0a83-29764
+  10 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 2m 22s · step time 5m 22s (sum) · 3 workers, 75% busy · 2.27× the same steps run one after another
+           predicted 1–6m (about 1m 51s, low-confidence) → actual 2m 22s (+28%)
+           longest  check-quick-party 1m 20s, check-warm-ivory 1m 08s, check-casual 55s · the longest step is 56% of the wall time
+           machine  CPU mean 33%, peak 88% · memory available ≥ 13818 MB · load peak 3.88
+           contention ×1.048 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-tgt-ce3e0a8/test-results/20261113-224356-ce3e0a83-29764/report.json

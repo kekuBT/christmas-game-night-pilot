@@ -144,5 +144,11 @@ These are in `docs/stage12/stage121-discussions.md`, each with what, why, risk, 
   - **The Cup view said "No Cup points yet" with three players tied on 50.** The game podium hides an all-tied result, which is right for a single game's medals but wrong for the Cup.
     - **Fix:** a separate `cupPodium`, where a shared lead is shared gold, with tests and a driver check.
   - **The TV's director row wrapped onto two lines** at 1920 once "Cup standings" was added. The privacy line now wraps instead.
+- **Found by the gates:**
+  - **The early full run on `baaa18c`:** check-warm-ivory W8 flagged the new Everyday elements (the dock class rename, the Play solo link, the new menu row). Each reused a base style, so no Everyday colour changed.
+    - **Fix:** W8 now lists those exact element keys and accepts each only if its style already appeared on that screen. A recolour still fails it (negative test).
+  - **The full run on `ce3e0a8`:** check-contrast measured a podium number at 1.00:1, because the gradient-only blocks left the dark page as the first solid background.
+    - **Fix:** a solid base colour under each gradient (5.9:1 or better against every stop), and no number on an empty step.
+    - **Test:** check-one-path now measures this deterministically. It fails on the old stylesheet.
 - **Found while reviewing copy:** the Make-a-Cup sheet promised "a champion at the end", but the server has no end-of-Cup state. The promise was removed (D-S121-07).
 - **Not changed (a test artifact):** `check-one-path` answers over the API for seats whose phones are open, so a phone may show "Your answer is already in". Real play has one client per seat.

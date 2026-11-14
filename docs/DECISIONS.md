@@ -1535,6 +1535,8 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - with reduced motion (OS), Animations Off, or the director's Pause, it shows at once.
   - **The medal table (casual rooms):** the same rule summed over every finished game. Ordered by golds, then silvers, then bronzes, then name, then id. Shown on the final and in the lobby ("N games tonight").
   - **Not facts:** medals are never scores, Cup points or Memory Book facts. Pure functions in `apps/web/src/ui/mchezo/lib/medals.ts`, with tests.
+  - **Contrast:** each block has a solid base colour under its gradient, so its dark number reads 5.9:1 or better against every stop, and a contrast check that reads solid backgrounds sees the true one. An empty step shows no number.
+    - **Found by the full gate on `ce3e0a8`:** check-contrast measured the "2" at 1.00:1 against the page behind a gradient-only block.
   - **Alternatives rejected:**
     - dense ranks (1, 1, 2): every medal table uses shared places;
     - medals for zero: a bronze for not scoring reads as a joke at someone's expense;

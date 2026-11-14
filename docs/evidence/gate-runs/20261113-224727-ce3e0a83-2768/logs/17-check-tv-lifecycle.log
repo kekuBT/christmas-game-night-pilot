@@ -1,0 +1,20 @@
+$ node scripts/check-tv-lifecycle.mjs http://localhost:37321
+# timeout 900s | worker w2 | server http://localhost:37321 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-ce3e0a8/test-results/20261113-224727-ce3e0a83-2768/server-data/w2)
+
+[+5.8s] PASS lobby: TV shows the dashboard
+[+5.9s] PASS trivia briefing: TV shows the rules and who is ready, no question
+[+26.1s] PASS Start now names the not-ready TV seat — TV: not ready yet
+[+26.1s] PASS trivia playing: TV auto-switches to the stage
+[+67.1s] PASS trivia finished: TV shows the leaderboard stage
+[+68.1s] PASS newer game briefing: TV leaves the Trivia stage for the new rules
+[+90.3s] PASS newer game playing: TV leaves the Trivia stage for the dashboard
+[+90.3s] PASS newer game playing: dashboard names Math Mayhem as now playing
+[+129.7s] DEBUG TV body at math finish: 
+[+129.7s] MchezoCode: 5XF3THPlaying as TV · Room: Game nightLobby & GamesChampionshipTV DashboardMemory BookReconnectSaved.Math Mayhem · OfficialBea and TV tie for firstBBeaTTVDead heat at the top. Nobody blinked.You tied for 1st of 4240 ptsYou share the top spot. Sharing is caring.🏆 ResultsMath MayhemIt's 
+[+131.3s] PASS newer game finished: TV still on the live show for Math Mayhem, no stale Trivia stage — 
+[+131.3s] mchezoMath MayhemFinal standingsOfficialJoin 5XF3THBea and TV tie for first🥈  2🥇Bea & TV240 · Gold1🥉Ada & Cal220 · B
+[+152.9s] PASS trivia restarts: TV returns to a fresh question stage
+[+152.9s] TV LIFECYCLE ALL PASSED
+[+152.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 152.9s | cpu 8.8s, peak memory 264 MB

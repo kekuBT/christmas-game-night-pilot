@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:45509
+# timeout 600s | worker w2 | server http://localhost:45509 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-baaa18c/test-results/20261113-220927-baaa18c6-6294/server-data/w2)
+
+[+19.9s] PASS Geography: finished player sees no answers while Bea still plays
+[+20.0s] PASS Geography: TV shows no answers while Bea still plays
+[+20.0s] PASS Geography: Bea (mid-game) sees no answers
+[+29.2s] PASS Geography: results list every question — 8
+[+29.2s] PASS Geography: each answer matches the content pack — 8/8
+[+29.2s] PASS Geography: each explanation is shown — 8/8
+[+29.2s] PASS Geography: Bea sees her own choices marked
+[+29.2s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+29.4s] PASS Geography: TV lists the answers after the game
+[+29.4s] PASS Geography: TV shows no player's choices
+[+34.6s] PASS Closest: no answer anywhere while question 1 is open
+[+34.7s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 330 vs 330
+[+34.7s] PASS Closest: and the player's own guess
+[+34.7s] PASS Closest: Bea sees her own guess, not Ada's
+[+34.7s] PASS Closest: the explanation is shown
+[+34.8s] PASS Closest: question 2 is now open and its answer is not shown
+[+34.9s] PASS Closest: TV shows the last answer only — Last question: How tall is the Eiffel Tower, in metres? — 330 m
+[+34.9s] PASS Closest: TV shows nobody's guess — Last question: How tall is the Eiffel Tower, in metres? — 330 m
+[+35.2s] ANSWER REVEAL ALL PASSED
+[+35.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 35.2s | cpu 3.4s, peak memory 267 MB

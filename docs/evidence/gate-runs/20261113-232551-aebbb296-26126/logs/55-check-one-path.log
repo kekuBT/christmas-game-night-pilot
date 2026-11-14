@@ -1,0 +1,67 @@
+$ node scripts/check-one-path.mjs http://localhost:34483
+# timeout 600s | worker w1 | server http://localhost:34483 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s121-full-aebbb29/test-results/20261113-232551-aebbb296-26126/server-data/w1)
+
+[+0.8s] PASS A Home: two dock buttons, Join and Host, and a quieter Play solo link — "Join a room\nHost a game\nJust you? Play solo"
+[+1.3s] PASS A Host: no casual/Cup choice at the door
+[+1.3s] PASS A Host: one line says a Family Cup can come later, from the room menu
+[+1.8s] PASS A the room has a code
+[+1.8s] PASS A the hosted room is casual
+[+3.2s] PASS B TV lobby: the code, big
+[+3.2s] PASS B TV lobby: a QR code
+[+3.3s] PASS B the QR code encodes exactly <origin>/join?code=CODE (the Invite sheet's link) — 29×29
+[+3.3s] PASS B TV lobby: 'Scan with a phone camera', and everyone who's here — K
+[+3.3s] KekuHOST
+[+3.3s] A
+[+3.3s] Amina
+[+3.3s] B
+[+3.3s] Baraka
+[+3.3s] PASS B no medal table before any game
+[+3.3s] PASS B no Cup card in a casual room
+[+4.0s] PASS C game 1: the TV shows the final with a podium
+[+4.0s] PASS C game 1: three different scores (Keku > Amina > Baraka > 0) — {"player-1":1200,"player-2":600,"player-3":120}
+[+4.1s] PASS C podium: gold, silver and bronze go to the server's first, second and third
+[+4.1s] PASS C full motion: the podium rises bronze, then silver, then gold — [{"name":"mz-podium-rise","delay":0.3},{"name":"mz-podium-rise","delay":1.3},{"name":"mz-podium-rise","delay":2.4}]
+[+4.1s] PASS C the final still shows everyone's standings (3 rows) and the winner line
+[+4.1s] PASS C reduced motion: the podium is there at once (no animation, fully shown)
+[+7.5s] PASS C podium numbers: 3:1 or better on every earned step (a solid base under each gradient) — [["2",false,"12.76"],["1",false,"9.78"],["3",false,"8.55"]]
+[+7.7s] PASS C Pause animations: the podium shows at once (no staged animation)
+[+7.7s] PASS C the medal table counts game 1
+[+8.1s] PASS C game 2: a new final
+[+8.1s] PASS C the medal table accumulates: 2 games
+[+8.1s] PASS C medal table: ordered by golds, silvers, bronzes, then name — [["player-2",1,1,0],["player-1",1,1,0],["player-3",0,0,2]]
+[+11.6s] PASS C TV lobby: the medal table, 2 games tonight
+[+12.6s] PASS D the sheet says what changes, what stays (the 2 games stay casual) and that it can't be undone — From now on: before each game you choose Official (counts) or Practice. You end each Cup day when you’re ready.
+[+12.6s] What stays: the room code, everyone’s seat and the Memory Book. The 2 games already played stay casual and don’t count.
+[+12.6s] Casual-only extras end: Quick Party, What’s next, Play again, breaks and handing over the host role are for casual rooms.
+[+12.6s] It can’t be undone.
+[+13.5s] PASS D host: the room is a Family Cup (Cup chip)
+[+13.5s] PASS D server: a Cup, same code and players, the 2 games kept casual
+[+13.5s] PASS D guest: the lobby says the room is now a Family Cup
+[+13.6s] PASS D TV follows without reloading: the Cup card, Day 1 of 7, and no medal table
+[+13.6s] PASS D TV: the games before the Cup are still called Casual, never Practice — TONIGHT SO FAR
+[+13.6s] Math Mayhem · Casual · finished — Amina wins
+[+13.6s] Math Mayhem · Casual · finished — Keku wins
+[+14.1s] PASS E official game 1: the final shows the Cup standings after this game
+[+14.1s] PASS E the first official game: no arrows (nobody had Cup standings before) — ["","",""]
+[+14.5s] PASS E official game 2: a new final
+[+14.5s] PASS E ▲/▼ match the server's standings before and after this game — want {"player-1":"0","player-2":"1","player-3":"2"} shown {"player-1":"0","player-2":"1","player-3":"2"} before [["player-1",100],["player-2",50],["player-3",0]] after [["player-1",50],["player-2",50],["player-3",50]]
+[+14.5s] PASS E an arrow is drawn where a rank changed
+[+18.9s] PASS E a TV opened afterwards shows the final without arrows (no guessed movement)
+[+18.9s] PASS E the server's game is the one on screen
+[+18.9s] PASS F the server names a Day 1 winner — {"day":1,"winner":"Keku","winners":["Keku","Amina","Baraka"],"standings":[{"playerId":"player-1","displayName":"Keku","base":50},{"playerId":"player-2","displayName":"Amina","base":50},{"playerId":"player-3","displayName":"Baraka","base":50}]}
+[+18.9s] PASS F the host ends Day 1
+[+19.1s] PASS F TV: 'Day 1 complete' with the server's Day 1 winner(s)
+[+19.1s] PASS F the trophy never crowns a Cup champion
+[+20.5s] PASS F Cup standings: Day 2 of 7, the Cup podium and everyone's totals
+[+20.5s] PASS F a podium step nobody earned shows no low-contrast number — ["rgba(0, 0, 0, 0)","rgba(0, 0, 0, 0)"]
+[+20.5s] PASS F the Cup podium: everyone sharing the top total stands on gold (a shared lead is a real result) — ["player-1","player-2","player-3"]
+[+24.0s] PASS F TV lobby: Day 2 of 7
+[+24.0s] PASS F the other TV, open when the day ended, shows the trophy too
+[+26.2s] PASS F a TV opened after the day ended shows no trophy (it never saw Day 1 end)
+[+26.2s] PASS F nothing private on the TV: no player's seat token in its page
+[+26.2s] PASS F TV at 1280px: no sideways scrolling
+[+26.2s] PASS F TV at 768px: no sideways scrolling
+[+26.3s] ONE PATH ALL PASSED
+[+26.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":6}
+
+# PASS (exit 0) in 26.4s | cpu 4.5s, peak memory 301 MB
