@@ -100,7 +100,7 @@ export function lineupMinutes(items: readonly Pick<PartyItem, "minutes">[]): num
  */
 // Stage 12.5: Family Questions needs questions the family wrote first, so a planner never puts it in a lineup.
 // Stage 12.8: Team Huddle is casual-only, like Jebena Rush and Spectrum (a lineup can also run in a Family Cup).
-export const NOT_IN_QUICK_PARTY: ReadonlySet<string> = new Set(["jebena-rush", "spectrum", "family-questions", "team-huddle"]);
+export const NOT_IN_QUICK_PARTY: ReadonlySet<string> = new Set(["jebena-rush", "spectrum", "family-questions", "team-huddle", "relay"]);
 
 export function partyPool(expectedPlayers: number, opts: { excludeIds?: readonly string[]; manifests?: readonly GameManifest[] } = {}): PartyItem[] {
   if (!isPartyGroupSize(expectedPlayers)) throw new Error(`party: group size must be a whole number from ${PARTY_MIN_PLAYERS} to ${PARTY_MAX_PLAYERS}`);

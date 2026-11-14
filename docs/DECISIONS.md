@@ -1793,3 +1793,26 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - one turn per player: a bigger team would get more turns;
     - keeping two teams by join order: it ignores the night's teams.
+
+## Stage 12.9: Relay, a race for teams
+**Authorization:** the owner, directly in chat on 2026-11-14, about 3:25 a.m. ET: "we definitely need more games that can be played with teams". Spec: `docs/stage12/stage129.md`. Branch `claude/stage12-9-relay`, stacked on Stage 12.8. Nothing is merged or deployed.
+
+- **D-S129-01 Relay: one runner at a time, the same sums for every team, nobody can stall a team.**
+  - **The race:**
+    - every team runs the same 12 sums in the same order (seeded, from Math Mayhem's generator);
+    - only the runner's phone can answer, and a right answer passes the baton to the next teammate;
+    - a team sees only its own current sum; the TV and the other teams see lanes.
+  - **Mistakes and absences:**
+    - a wrong answer freezes the runner for 3 s (the option is greyed out);
+    - 20 s without an answer passes the baton to the next teammate on the same sum.
+  - **Places and scoring:**
+    - places go by most legs, then the earlier finish;
+    - 10 per leg, plus 30, 20 or 10 for the first three teams home;
+    - every player scores their team's points;
+    - the race ends when every team has finished, or at 4 minutes.
+  - **Where:** casual rooms only and practice-only. Never in Quick Party or Home's featured rotation (as Team Huddle).
+  - **A module's clocks start with play:** a new optional hook, `onPlayStart`, is called when play begins (after the briefing, or at once). init() never knows when play starts.
+  - **Alternatives rejected:**
+    - each team its own random sums: one team could get easier legs;
+    - showing every team's sum on the TV: a team behind could read ahead;
+    - waiting for an absent runner: one dropped phone would stop a team.

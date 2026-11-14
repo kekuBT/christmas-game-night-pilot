@@ -36,7 +36,7 @@ export const TEAM_PLAY_GAMES: ReadonlySet<string> = new Set([
  * Stage 12.8 (D-S128-01): games built for teams. They always play as teams: the night's teams when at least two of
  * them have players in the game, otherwise two teams dealt for that game. Every player scores their team's points.
  */
-export const TEAM_NATIVE_GAMES: ReadonlySet<string> = new Set(["team-huddle", "charades"]);
+export const TEAM_NATIVE_GAMES: ReadonlySet<string> = new Set(["team-huddle", "relay", "charades"]);
 
 /** A small seeded generator (mulberry32), so a balance is the same on every replay of the same seed. */
 function rng(seed: number): () => number {

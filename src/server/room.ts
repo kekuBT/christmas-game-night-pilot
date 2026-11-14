@@ -7,6 +7,7 @@ import { FAMILY_LIMITS, checkFamilyQuestion, type FamilyQuestion, type FamilyQue
 import { FAMILY_ROUNDS_MIN, pickFamilyQuestions, type FamilyGameQuestion } from "../games/modules/family.js";
 import { TEAM_COLORS, TEAM_LIMITS, TEAM_NATIVE_GAMES, TEAM_PLAY_GAMES, balanceTeams, checkTeamName, newTeamList, smallestTeam, teamResults, type GameTeams, type RoomTeams } from "../shared/teams.js";
 import { HUDDLE_ROUNDS, type HuddleQuestion } from "../games/modules/teamHuddle.js";
+import { RELAY_LEGS, type RelayQuestion } from "../games/modules/relay.js";
 import type { TeamResult } from "../shared/teamResult.js";
 import { sameSettings, validateGameSettings, type GameSettings } from "../games/settings.js";
 import { PARTY_TRANSITION_MINUTES, validatePartyPlan } from "../games/party.js";
@@ -1081,7 +1082,7 @@ export class RoomEngine {
                           ? { roundIndex: 0, submissions: {} }
                           : gameId === "charades"
                             ? initCharades(playerIds, undefined, nativeTeams)
-                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}) }),
+                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}), ...(gameId === "relay" ? { relay: relayQuestions(seed) } : {}) }),
     };
     // Stage 12.7 (D-S127-02): played as teams when the room has teams, the game can be, and at least two teams have
     // players in it; the teams are copied now (only this game's players), never read back from the room later.
@@ -1112,6 +1113,7 @@ export class RoomEngine {
     }
     selected?.record();
     this.syncPhase(instance, startedAt); // phased games: start the first phase's clock
+    this.startModulePlay(instance, startedAt); // Stage 12.9: a module's own clocks (Relay's turns) start now too
     this.log("game-started", { gameInstanceId: id, actor: hostId, ...(leftOut.length || season ? { detail: { ...(season ? { season } : {}), ...leftOutDetail } } : {}) });
     return instance;
   }
@@ -1252,6 +1254,7 @@ export class RoomEngine {
       delete game.pendingContent;
     }
     this.syncPhase(game, now); // phased games: the first phase's clock starts now too
+    this.startModulePlay(game, now); // Stage 12.9: a module's own clocks (Relay's turns) start now too
     this.log("game-started", {
       gameInstanceId: game.id,
       ...(actor ? { actor } : {}),
@@ -2573,6 +2576,12 @@ export class RoomEngine {
       if (game.phaseKey === before) game.phaseDeadlineAt = undefined;
     }
     this.log("phase-closed", { gameInstanceId: game.id, detail: { phase: before, at } });
+  }
+
+  /** Stage 12.9: tell a module that play has begun, so its own clocks run from this instant (never from init). */
+  private startModulePlay(game: GameInstance, at: number): void {
+    const mod = moduleFor(game.gameId);
+    if (mod?.onPlayStart) mod.onPlayStart(game.extra, this.moduleCtx(game, at));
   }
 
   /** Stage 5: a self-paced module's player window closed (at `at`); the game ends if that was the last one. */
@@ -4066,6 +4075,11 @@ function huddleQuestions(extra: unknown, seed: number): HuddleQuestion[] {
   const fromPool = (extra as { questions?: TriviaQuestion[] } | undefined)?.questions;
   const qs = fromPool && fromPool.length > 0 ? fromPool : generateTrivia(seed, HUDDLE_ROUNDS);
   return qs.slice(0, HUDDLE_ROUNDS).map((q) => ({ id: q.id, prompt: q.prompt, options: [...q.options], correctIndex: q.correctIndex, ...(q.explanation ? { explanation: q.explanation } : {}) }));
+}
+
+/** Stage 12.9: Relay's sums: the same for every team (seeded), from Math Mayhem's generator. */
+function relayQuestions(seed: number): RelayQuestion[] {
+  return generateMathQuestions(seed, RELAY_LEGS).map((q) => ({ id: q.id, prompt: q.prompt, options: [...q.options], correctIndex: q.correctIndex }));
 }
 
 /** Stage 12.7: saved teams, checked: 2–4 known colours, names that pass the check, members only of those teams. */

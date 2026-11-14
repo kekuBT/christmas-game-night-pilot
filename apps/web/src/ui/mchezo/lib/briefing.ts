@@ -168,6 +168,16 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "The clock never stops for anyone: if your phone drops off, your turns still run out, and coming back gives no time or cups back.",
     ],
   },
+  // Stage 12.9 (docs/stage12/stage129.md §1).
+  "relay": {
+    objective: "A team race: first team home wins.",
+    steps: [
+      "Your team runs 12 quick sums, one leg each in turn. Every team gets the same sums.",
+      "Only the runner's phone can answer. Your team sees the sum too: shout help!",
+      "A right answer passes the baton. A wrong one freezes you for 3 seconds. No answer in 20 seconds and the baton passes to the next teammate.",
+      "10 points per leg, plus 30, 20 or 10 for the first three teams home. Everyone scores their team's points.",
+    ],
+  },
   // Stage 12.8 (docs/stage12/stage128.md §2).
   "team-huddle": {
     objective: "A quiz you answer as a team. Huddle up!",

@@ -530,12 +530,12 @@ describe("HTTP projection and rate-limit matrix", () => {
     return { roomId, players };
   }
 
-  it("GET /games lists all 18 implemented games (Stage 5 adds Majority Rules, Pattern Pulse and Draw & Guess; Stage 9.1 Jebena Rush; Stage 9.3 Spectrum; Stage 12.5 Family Questions; Stage 12.8 Team Huddle)", async () => {
+  it("GET /games lists all 19 implemented games (Stage 5 adds Majority Rules, Pattern Pulse and Draw & Guess; Stage 9.1 Jebena Rush; Stage 9.3 Spectrum; Stage 12.5 Family Questions; Stage 12.8 Team Huddle; Stage 12.9 Relay)", async () => {
     const res = await get("/games");
     expect(res.status).toBe(200);
     const games = res.json as unknown as { id: string; status: string }[];
     expect(Array.isArray(games)).toBe(true);
-    expect(games).toHaveLength(18);
+    expect(games).toHaveLength(19);
     expect(games.every((g) => g.status === "implemented")).toBe(true);
   });
   it("TV projection is public, player projection and ledger require a session", async () => {
