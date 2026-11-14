@@ -1,0 +1,8 @@
+ ✓ tests/motion.test.ts (4 tests) 3ms
+ ✓ tests/client-server-consistency.test.ts (2 tests) 67ms
+
+ Test Files  138 passed (138)
+      Tests  1778 passed (1778)
+   Start at  03:53:29
+   Duration  42.64s (transform 3.25s, setup 0ms, collect 18.00s, tests 82.20s, environment 37ms, prepare 8.15s)
+

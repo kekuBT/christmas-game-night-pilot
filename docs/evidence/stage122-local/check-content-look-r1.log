@@ -1,0 +1,8 @@
+PASS A Christmas host: the Host screen says the questions start as Christmas ones
+PASS A the room deals Christmas content from the start
+PASS A the host can still switch it to Everyday
+PASS B auto host: no line, and the room deals Everyday content
+PASS C a guest with the Christmas look joining an Everyday room changes nothing
+PASS B Everyday host: no line, and the room deals Everyday content
+PASS A the Christmas host's room code is real
+CONTENT LOOK ALL PASSED
