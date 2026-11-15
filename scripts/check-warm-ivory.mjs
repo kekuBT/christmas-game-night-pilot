@@ -48,8 +48,12 @@ const W8_INTENDED = {
   menu: {
     added: ["menu-make-cup>button.mz-menurow", "menu-make-cup>path.", "menu-make-cup>span.mz-menurow__chev", "menu-make-cup>span.mz-menurow__detail", "menu-make-cup>span.mz-menurow__icon", "menu-make-cup>span.mz-menurow__label", "menu-make-cup>svg.",
       // Stage 12.4 (D-S124-02): "End the night" in a casual room's menu, the same row style as every menu row.
-      "menu-end-night>button.mz-menurow", "menu-end-night>path.", "menu-end-night>span.mz-menurow__chev", "menu-end-night>span.mz-menurow__detail", "menu-end-night>span.mz-menurow__icon", "menu-end-night>span.mz-menurow__label", "menu-end-night>svg.", "menu-end-night>span."],
-    removed: [],
+      "menu-end-night>button.mz-menurow", "menu-end-night>path.", "menu-end-night>span.mz-menurow__chev", "menu-end-night>span.mz-menurow__detail", "menu-end-night>span.mz-menurow__icon", "menu-end-night>span.mz-menurow__label", "menu-end-night>svg.", "menu-end-night>span.",
+      // Stage 12.15-R (de26509): the "Last game" kicker's own test id (see `removed`).
+      "last-game-kicker>span.mz-kicker"],
+    // Stage 12.15-R (D-S1215R-06, de26509): the lobby's "Last game" kicker got its own test id (its label follows the
+    // game's own mode), so the same span's key moved from the card to the kicker. Same element, same style.
+    removed: ["last-game-card>span.mz-kicker"],
     // Stage 12.5 (D-S125-01): the casual lobby (seen behind the menu) has the Family Questions card.
     addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>",
       // Stage 12.6 (D-S126-01): "Share the night" once a game has finished, the same row style as every menu row.
@@ -62,10 +66,11 @@ const W8_INTENDED = {
   library: { added: [], removed: [], addedPrefixes: ["mz-lib-card-family-questions>", "mz-lib-practice-family-questions>",
     // Stage 12.8: Team Huddle's library card. Stage 12.9: Relay's. Stage 12.10: Split Clues'.
     "mz-lib-card-team-huddle>", "mz-lib-practice-team-huddle>", "mz-lib-card-relay>", "mz-lib-practice-relay>", "mz-lib-card-split-clues>", "mz-lib-practice-split-clues>", "mz-lib-card-team-draw>", "mz-lib-practice-team-draw>", "mz-lib-card-territory>", "mz-lib-practice-territory>", "mz-lib-card-tug-of-war>", "mz-lib-practice-tug-of-war>", "mz-lib-card-know-your-rivals>", "mz-lib-practice-know-your-rivals>"] },
-  lobby: { added: [], removed: [], addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>",
+  // Stage 12.15-R (de26509): the "Last game" kicker's own test id; the same span, the same style (see menu).
+  lobby: { added: ["last-game-kicker>span.mz-kicker"], removed: ["last-game-card>span.mz-kicker"], addedPrefixes: ["family-card>", "family-write>", "family-play-next>", "family-card-mine>",
     // Stage 12.7 (D-S127-01): the host's Teams card ("Make teams"); a guest sees none until there are teams.
     "teams-card>", "teams-make>"] },
-  "lobby-guest": { added: [], removed: [], addedPrefixes: ["family-card>", "family-write>", "family-card-mine>"] },
+  "lobby-guest": { added: ["last-game-kicker>span.mz-kicker"], removed: ["last-game-card>span.mz-kicker"], addedPrefixes: ["family-card>", "family-write>", "family-card-mine>"] },
 };
 /**
  * A cover's gradient is referenced by an id React generates in render order (`url("#mzcov-_r_2_")`). A new game's cover
