@@ -1,0 +1,44 @@
+$ node scripts/check-know-your-rivals.mjs http://localhost:39211
+# timeout 600s | worker w2 | server http://localhost:39211 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1214t1/test-results/20261114-231635-d1c72173-363/server-data/w2)
+
+[+4.4s] PASS A the briefing explains Know Your Rivals (private answers, team totals only)
+[+4.5s] PASS A the game is on question 1 with a two-choice question — {"prompt":"Window seat or aisle seat?","a":"Window","b":"Aisle"}
+[+4.9s] PASS A every phone and the TV show the same question
+[+4.9s] PASS A the TV counts the answers: 0 of 7
+[+5.0s] PASS B Keku's phone shows his own answer
+[+5.2s] PASS B Keku can change it before everyone has answered
+[+5.3s] PASS B Neema (320 px) says "Rather not say"
+[+5.3s] PASS B the TV counts 2 of 7, and its data has no player and no answer
+[+5.3s] PASS B a teammate's phone (Amina, Zawadi) and a rival's (Baraka) never get Keku's answer
+[+5.3s] PASS B Keku's own phone has his answer
+[+5.4s] PASS B with one still to answer, still answering
+[+5.4s] PASS B everyone has answered: on to the guesses, early
+[+5.4s] PASS C Keku's phone shows a row for each rival (Sun 0–2, Mint 0–1: only who answered)
+[+5.5s] PASS C Amina's phone shows Coral's guess for Sun and who set it
+[+5.5s] PASS C Amina's phone says Mint is still to guess
+[+5.6s] PASS C Keku sees Amina's guess for Mint
+[+5.6s] PASS C Sun's phones never get Coral's guesses; the TV's data has no guesses — {}
+[+5.6s] PASS C Zawadi locked Coral's guesses: Keku's chips are locked and say who
+[+5.6s] PASS C the TV shows Coral's guesses locked, and the others still guessing
+[+5.9s] PASS C with one team still guessing, still guessing
+[+5.9s] PASS C every team has locked: the reveal, early
+[+5.9s] PASS D the points: Coral 60, Sun 30, Mint 50 — [{"teamId":"team-coral","points":60,"bonus":0},{"teamId":"team-sun","points":30,"bonus":0},{"teamId":"team-mint","points":50,"bonus":0}]
+[+5.9s] PASS D the totals are per team, never per player — [{"teamId":"team-coral","answered":3,"a":2,"b":1,"passed":0},{"teamId":"team-sun","answered":2,"a":1,"b":1,"passed":0},{"teamId":"team-mint","answered":1,"a":1,"b":0,"passed":1}]
+[+5.9s] PASS D the TV shows each team's totals in words
+[+6.0s] PASS D Keku's phone shows Coral's guesses and +60
+[+6.0s] PASS D the scores: Coral 60, Sun 30, Mint 50 on the TV
+[+6.2s] PASS D the TV fits above its footer (the reveal, three teams) — {"ok":true,"bottom":730,"foot":980}
+[+22.3s] PASS E Sun (alone in last place, 90 behind) is round 3's catch-up team — [{"teamId":"team-coral","score":120},{"teamId":"team-sun","score":30},{"teamId":"team-mint","score":110}]
+[+22.3s] PASS E Sun's phones say so
+[+22.5s] PASS E round 3: Sun scores 60 and gets the +15 catch-up — [{"teamId":"team-coral","points":0,"bonus":0},{"teamId":"team-sun","points":60,"bonus":15},{"teamId":"team-mint","points":0,"bonus":0}]
+[+22.6s] PASS E Sun's phones show the catch-up in the round's points
+[+55.3s] PASS F the game finished: Coral 300, Mint 290, Sun 285 — [["team-coral",1,300],["team-mint",2,290],["team-sun",3,285]]
+[+55.3s] PASS F every player scored their team's points
+[+55.3s] PASS F nobody's own answer is left in any view at the end
+[+55.4s] PASS F phones: the results, six questions and the team results card
+[+55.4s] PASS F the TV leads with the team result
+[+56.1s] PASS F 320 px: the results have no sideways scroll
+[+56.3s] KNOW YOUR RIVALS PASSED
+[+56.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":8,"pages":8,"peakOpenPages":8}
+
+# PASS (exit 0) in 56.3s | cpu 4.9s, peak memory 310 MB
