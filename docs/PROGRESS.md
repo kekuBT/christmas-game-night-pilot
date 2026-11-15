@@ -3038,11 +3038,23 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** the owner's review on #42. Then, by the owner's priority update 6896572377 (#42), Beta R1 readiness, stacked on #41's head `1955c28`, ahead of further content work.
 - **Risk:** Team Draw can't be Official in any real Cup until prompts are approved; difficulty is a placeholder.
 
-## Stage 12.17-R: repair from review 6898755998 (in progress)
+## Stage 12.17-R: repair from review 6898755998 (completed)
 - **Brief:** finding R1 of review 6898755998 on #42. A sparse, season-filtered drawing pool could start an unplayable Draw & Guess turn, and a short Practice or casual Team Draw. Queued behind Beta R1 (#43), as the review asked; nothing from #42 enters the beta candidate.
-- **Spec and estimate:** `docs/stage12/stage1217r.md` (about 2 h 45 min, written at 1:31 p.m. ET).
-- **Done so far:** the room's supply check, the module backstops, `tests/stage1217r-drawing-supply.test.ts` (11) and `scripts/check-draw-shortage.mjs` (the browser refusal and retry), with D-S1217R-01.
-  - **The reviewer's reproduction:** on `68ac61a`, turn 2's view threw `TypeError … reading 'word'`. On the repaired tree the start is refused.
-  - **The new tests:** 10 of 11 fail on `68ac61a`; the one that passes is the exactly-enough positive case.
-- **Next:** run the browser check, the targeted gate (the drawing drivers) and a fast gate on the repair's SHA, then a new repair report on #42. Beta R1's B-09 lobby race is also in this base. It is fixed on #43 in code this branch doesn't touch, so it isn't ported here, which keeps the repair to drawing as the review asked.
-
+- **Spec and estimate:** `docs/stage12/stage1217r.md` (about 2 h 45 min, written at 1:31 p.m. ET; actual about 1 h 40 min of wall clock, interleaved with Beta R1).
+- **Done:**
+  - **Before anything is created:** the room counts the prompts this start may deal (non-rejected, allowed by the content mode). With fewer than one per turn or round, the start is refused with HTTP 409 `CONTENT_EXHAUSTED` and a plain reason.
+    - Draw & Guess needs `min(players, 6)` prompts; a Practice or casual Team Draw needs its round count. An Official Team Draw keeps its exact-record check, unchanged.
+    - A refusal leaves no game, history or score, and the lobby stays usable.
+  - **Module backstops** in both `init`s. Swaps stay optional.
+  - **Files:** `src/server/room.ts`, `src/games/modules/draw.ts`, `src/games/modules/teamDraw.ts`, `tests/stage1217r-drawing-supply.test.ts` (11) and `scripts/check-draw-shortage.mjs` (the gate picks it up, as it does every `scripts/check-*.mjs`). Decision D-S1217R-01.
+- **Tested code:** `6944ea7`.
+  - **Targeted:** `20261115-194623-6944ea73-5155` PASSED (exit 0), 8/8: the new check and the drawing drivers.
+  - **Fast:** `20261115-194908-6944ea73-6706` PASSED (exit 0), unit 2044/2044.
+  - **The reviewer's reproduction:** on `68ac61a`, turn 2's view threw `TypeError … reading 'word'`; on the repaired tree the start is refused.
+  - **The new tests:** 10 of 11 fail on `68ac61a`.
+  - **Evidence:** `docs/evidence/stage1217r-local/README.md`, including a process note on two overlaps with Beta R1's gates. Screenshots: `docs/stage12/stage1217r-screenshots/`.
+- **Not ported:** Beta R1's B-09 lobby race is also in this base. It is fixed on #43 in code this branch doesn't touch, which keeps this repair to drawing, as the review asked.
+- **Failures:** none in 12.17-R's own runs, apart from the intended failing tests on `68ac61a`.
+- **External blockers:** none. Prompt approvals and D-S1217-03 are still the owner's.
+- **Next:** the owner's review of the repair report on #42.
+- **Risk:** low. The check only refuses starts that could not be played; every shipped pack is far above the minimum.

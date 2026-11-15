@@ -1,0 +1,457 @@
+{
+  "runId": "20261115-194623-6944ea73-5155",
+  "level": "targeted",
+  "startedAt": "2026-11-15T19:46:23.219Z",
+  "finishedAt": "2026-11-15T19:48:59.935Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217rt1",
+  "git": {
+    "head": "6944ea73322579619df71dea8c6cf93643db1d93",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "71ca8020b74afd6434f448d5f312689e4bd230db0eefd055624a573edaab787c",
+    "files": 618
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15320
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.0 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261115-194623-6944ea73-5155/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.3,
+      "log": "./logs/01-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 7,
+      "startOffsetSec": 0.1,
+      "endOffsetSec": 5.4,
+      "cpuSec": 9.7,
+      "peakRssMB": 538,
+      "machine": {
+        "memAvailMinMB": 14778,
+        "cpuSaturatedSec": 0,
+        "samples": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.6,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 5.4,
+      "endOffsetSec": 6,
+      "machine": {
+        "memAvailMinMB": 14984,
+        "cpuSaturatedSec": 0,
+        "samples": 1
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-cup-team-games",
+      "kind": "browser",
+      "command": "node scripts/check-cup-team-games.mjs http://localhost:41335",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 149.2,
+      "log": "./logs/03-check-cup-team-games.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 138,
+      "startOffsetSec": 7.3,
+      "endOffsetSec": 156.6,
+      "cpuSec": 7.5,
+      "peakRssMB": 298,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13248,
+        "cpuSaturatedSec": 0,
+        "samples": 155
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 9,
+        "pages": 9,
+        "peakOpenPages": 9
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-team-draw-content",
+      "kind": "browser",
+      "command": "node scripts/check-team-draw-content.mjs http://localhost:41037",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 93.4,
+      "log": "./logs/04-check-team-draw-content.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 86,
+      "startOffsetSec": 7.4,
+      "endOffsetSec": 100.8,
+      "cpuSec": 10.9,
+      "peakRssMB": 443,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13248,
+        "cpuSaturatedSec": 0,
+        "samples": 96
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 14,
+        "pages": 14,
+        "peakOpenPages": 7
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-draw-guess",
+      "kind": "browser",
+      "command": "node scripts/check-draw-guess.mjs http://localhost:34081",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 70.4,
+      "log": "./logs/05-check-draw-guess.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 65,
+      "startOffsetSec": 7.4,
+      "endOffsetSec": 77.8,
+      "cpuSec": 7.2,
+      "peakRssMB": 410,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13248,
+        "cpuSaturatedSec": 0,
+        "samples": 71
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 7,
+        "pages": 7,
+        "peakOpenPages": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-draw-shortage",
+      "kind": "browser",
+      "command": "node scripts/check-draw-shortage.mjs http://localhost:34081",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 4,
+      "log": "./logs/06-check-draw-shortage.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 60,
+      "startOffsetSec": 77.8,
+      "endOffsetSec": 81.8,
+      "cpuSec": 3,
+      "peakRssMB": 372,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13806,
+        "cpuSaturatedSec": 0,
+        "samples": 5
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 4,
+        "pages": 4,
+        "peakOpenPages": 4
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-team-draw",
+      "kind": "browser",
+      "command": "node scripts/check-team-draw.mjs http://localhost:34081",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 58.3,
+      "log": "./logs/07-check-team-draw.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 56,
+      "startOffsetSec": 81.9,
+      "endOffsetSec": 140.2,
+      "cpuSec": 6.4,
+      "peakRssMB": 324,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13353,
+        "cpuSaturatedSec": 0,
+        "samples": 60
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 10,
+        "pages": 10,
+        "peakOpenPages": 10
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-draw-sync",
+      "kind": "browser",
+      "command": "node scripts/check-draw-sync.mjs http://localhost:41037",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 54.9,
+      "log": "./logs/08-check-draw-sync.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 51,
+      "startOffsetSec": 100.8,
+      "endOffsetSec": 155.8,
+      "cpuSec": 10.2,
+      "peakRssMB": 406,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13353,
+        "cpuSaturatedSec": 0,
+        "samples": 57
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 6
+      },
+      "failureKind": null
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 41335,
+      "pid": 5280,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217rt1/test-results/20261115-194623-6944ea73-5155/server-data/w1",
+      "log": "./logs/server-w1.log"
+    },
+    {
+      "worker": "w2",
+      "port": 41037,
+      "pid": 5281,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217rt1/test-results/20261115-194623-6944ea73-5155/server-data/w2",
+      "log": "./logs/server-w2.log"
+    },
+    {
+      "worker": "w3",
+      "port": 34081,
+      "pid": 5287,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217rt1/test-results/20261115-194623-6944ea73-5155/server-data/w3",
+      "log": "./logs/server-w3.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 157,
+    "sumSec": 436,
+    "utilisation": 0.93,
+    "perWorkerBusySec": {
+      "w1": 155,
+      "w2": 148,
+      "w3": 133
+    },
+    "predicted": {
+      "low": 116,
+      "mid": 186,
+      "high": 436,
+      "confidence": "low-confidence"
+    },
+    "contentionRatio": 1.082,
+    "longest": [
+      {
+        "name": "check-cup-team-games",
+        "sec": 149.2
+      },
+      {
+        "name": "check-team-draw-content",
+        "sec": 93.4
+      },
+      {
+        "name": "check-draw-guess",
+        "sec": 70.4
+      },
+      {
+        "name": "check-team-draw",
+        "sec": 58.3
+      },
+      {
+        "name": "check-draw-sync",
+        "sec": 54.9
+      }
+    ],
+    "backpressure": {
+      "waits": 0,
+      "seconds": 0
+    },
+    "system": {
+      "cpuPctMean": 28,
+      "cpuPctPeak": 93,
+      "memAvailMinMB": 13248,
+      "load1Peak": 2.09,
+      "cpuPctEvery10s": [
+        75,
+        10,
+        8,
+        10,
+        27,
+        10,
+        9,
+        50,
+        59,
+        9,
+        36,
+        25,
+        32,
+        18,
+        13,
+        36
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 3.9,
+        "peakRssMB": 151
+      },
+      {
+        "worker": "w2",
+        "cpuSec": 1.6,
+        "peakRssMB": 144
+      },
+      {
+        "worker": "w3",
+        "cpuSec": 2.7,
+        "peakRssMB": 143
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 7,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "check-cup-team-games",
+        "phase": "browser",
+        "estSec": 138,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 4,
+        "name": "check-team-draw-content",
+        "phase": "browser",
+        "estSec": 86,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 5,
+        "name": "check-draw-guess",
+        "phase": "browser",
+        "estSec": 65,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 6,
+        "name": "check-draw-shortage",
+        "phase": "browser",
+        "estSec": 60,
+        "estSource": "none",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 7,
+        "name": "check-team-draw",
+        "phase": "browser",
+        "estSec": 56,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 8,
+        "name": "check-draw-sync",
+        "phase": "browser",
+        "estSec": 51,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 115.5290575,
+      "mid": 186.41770000000002,
+      "high": 435.5866125,
+      "sequentialSec": 462.40000000000003,
+      "confidence": "low-confidence",
+      "contention": 1.061,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 41335,
+    "pid": 5280,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217rt1/test-results/20261115-194623-6944ea73-5155/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217rt1/test-results/20261115-194623-6944ea73-5155/web-dist"
+  }
+}
