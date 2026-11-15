@@ -2931,7 +2931,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Owner decisions open:** the content of the seven games' own packs (Split Clues, Team Draw, Know Your Rivals) has no official review step; Trivia's pool has one.
 - **Next:** owner review of the stack (#25 onward). Nothing is merged or deployed.
 
-## Stage 12.15-R: repairs from review 6888718011 and two follow-up reviews (built and gated; awaiting re-review)
+## Stage 12.15-R: repairs from review 6888718011 and the follow-up reviews (cleared 2026-11-15, review 6892660460)
 - **Brief:** the owner's review and handoff on #39 (comment 6888718011, about 10:43 p.m. ET on 2026-11-14) gave a changes-required verdict with six findings and asked for a bounded, stacked repair PR. I acknowledged it with an estimate on #39 (6888781319).
 - **Base:** #39's head `1eafe41` (tested source `bcf1406`). Branch `claude/stage12-15r-team-game-repairs`, draft PR #40 stacked on #39.
 - **Spec:** `docs/stage12/stage1215r.md`. Decisions D-S1215R-01 to 04.
@@ -2981,3 +2981,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Gates on `5698e02` (tested SHA):** targeted `20261115-091040-5698e029-4911` PASSED 18/18; fast `20261115-091647-5698e029-7809` PASSED 5/5 (unit 1966/1966). No full gate ran.
   - **Time:** estimate about 1 h 30 min (committed first, `f924da1`); actual about 20 minutes.
   - **Next:** the reviewer's confirmation, the normal-clock Official Relay/TV journey and the phone-layout audit. Nothing is merged or deployed.
+- **Cleared (review 6892660460, 4:58 a.m. ET on 2026-11-15):** the repair checkpoint at `5698e02`, head `8798e38`. That is engineering and audit clearance, not a merge, a deployment, content approval or real-device certification.
+  - **The reviewer's independent checks:** the Cup team setup (fresh and carried over), and a normal-clock Official Relay (Coral 150 first; Sun and Mint 50, Sun second). The TV read 1, 1, 2, 3 with the teams named.
+  - **Historical results and narrow widths:** results kept after reloads and renames, and 340 px (browser zoom, not a phone).
+  - **Kept as follow-ups:** real devices, dependency advisories, Relay teams of 7 or more, and unreviewed team-game content.
+  - **Product note:** the team sheet's "players' average" sentence should say how a game built for teams in a Cup scores, the next time that screen changes.
+
+## Stage 12.16: Split Clues content readiness (in progress)
+- **Brief:** the owner's handoff 6892660460 on #40. Bring Split Clues into the content review and eligibility machinery, gate Official on approved puzzles, freeze content at the briefing, and inventory all 51 puzzles. Bounded: no other packs, no new game.
+- **Branch:** `claude/stage12-16-split-clues-content`, from #40's head `8798e38`.
+- **Spec and estimate:** `docs/stage12/stage1216.md`, about 8 h 30 min, written before the work.
