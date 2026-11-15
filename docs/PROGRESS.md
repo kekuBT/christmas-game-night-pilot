@@ -3007,7 +3007,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** the owner's review on #41. Puzzle approvals are the owner's (or an editor's) to make.
 - **Risk:** Split Clues can't be Official in any real Cup until six year-round puzzles are approved. Difficulty is a placeholder, so official difficulty balancing does nothing for Split Clues yet.
 
-## Stage 12.16-R: repairs from review 6895557386 (completed; awaiting review)
+## Stage 12.16-R: repairs from review 6895557386 (cleared: review 6896200767)
 - **Brief:** R1, raw pack labels and stale hashes must not approve Split Clues puzzles; R2, temporary trees and servers cleaned up in the unit tests and the driver; the inventory's "not used officially" wording. Plan and estimate (about 3 h, written at 9:05 a.m. ET): `docs/stage12/stage1216r.md`.
 - **Done (`06bebdc`):**
   - **R1:** `RECORD_ONLY_APPROVAL` and the loader and eligibility checks in `src/content/registry.ts` (D-S1216R-01). Six new tests in `tests/stage1216-split-clues-content.test.ts` failed before the fix and pass after it; two more pinned behaviour that was already right.
@@ -3017,3 +3017,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/evidence/stage1216r-local/README.md`.
 - **Next:** the owner's confirmation of the repairs on #41. Puzzle approvals remain the owner's (or an editor's).
 - **Risk:** none known beyond Stage 12.16's: no puzzle is approved, and difficulty is a placeholder.
+- **Cleared:** the owner's review 6896200767 (2026-11-15, 9:36 a.m. ET) passed Stage 12.16-R on `06bebdc` (head `1955c28`) after its own focused tests and private browser audit. That is engineering clearance only: no merge, deployment or editorial approval.
+
+## Stage 12.17: Team Draw content readiness (in progress)
+- **Brief:** the owner's handoff in 6896200767 on #41. The drawing prompts move into the content library, and Official Team Draw deals only exact-hash-approved prompts. Draw & Guess stays Practice-only; Know Your Rivals and other content are deferred.
+- **Branch:** `claude/stage12-17-team-draw-content`, from #41's head `1955c28`.
+- **Spec and estimate:** `docs/stage12/stage1217.md`, written before the work.
