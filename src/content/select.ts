@@ -180,7 +180,7 @@ export function selectContent(req: SelectionRequest): SelectionResult {
         ok: false, reason: "insufficient-content", available: fresh.length, needed: req.count,
         // Stage 12.16 (D-S1216-04): Split Clues says what counts there, in the host's words.
         message: req.gameId === "split-clues"
-          ? `Split Clues counts only with puzzles a person has approved, and this Cup has ${fresh.length} unused approved puzzle${fresh.length === 1 ? "" : "s"} (an official game needs ${req.count}). Play it as Practice instead: practice uses every puzzle.`
+          ? `Split Clues counts only with puzzles a person has approved, and this Cup has ${fresh.length} unused approved puzzle${fresh.length === 1 ? "" : "s"} (an official game needs ${req.count}). Play it as Practice instead: Practice also uses puzzles that are not approved yet.`
           : `Not enough unused approved content left in this Cup for an official game (${fresh.length} left, ${req.count} needed). Play it as practice, or approve more content.`,
       };
     }

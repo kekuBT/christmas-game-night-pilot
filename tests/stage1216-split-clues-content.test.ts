@@ -131,6 +131,8 @@ describe("selection: the Official gate and the pools (D-S1216-02, D-S1216-04)", 
     if (!r.ok) {
       expect([r.reason, r.available, r.needed]).toEqual(["insufficient-content", 0, 6]);
       expect(r.message).toMatch(/Split Clues counts only with puzzles a person has approved.*0 unused approved puzzles.*needs 6.*Play it as Practice/);
+      // A Cup's Practice deals year-round puzzles only (D-S1216-02), so the reason never promises "every puzzle".
+      expect(r.message).toMatch(/Practice also uses puzzles that are not approved yet\.$/);
     }
   });
 
