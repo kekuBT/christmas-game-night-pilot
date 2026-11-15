@@ -35,7 +35,8 @@ Every finding below was checked against the source at `1eafe41` before writing t
 **The rule (D-S1215R-02):** guessing is mutual.
 - **Who guesses:** in a round, a team takes part in the guessing when at least one of its players answered (picked one of the two). Teams that take part guess each other; a team that doesn't neither guesses nor is guessed.
 - **Equal chances:** every team taking part has the same number of rivals to guess, so equal accuracy gives equal points.
-- **The opt-out stays unconditional.** "Rather not say" is always offered, never pressed for and never penalised: a team that opts out only sits out that round's guessing, and nobody scores on it.
+- **The opt-out stays unconditional.** "Rather not say" is always offered and never pressed for.
+  - Its one consequence is the symmetric one the review proposed: that round, the team neither guesses nor is guessed, so it can't score in it, and nobody scores on it.
   - Choosing it still counts as an action for qualification, as before, so opting out never costs a player their Cup day.
   - No answer is ever made up.
 - **Feedback:**
@@ -43,7 +44,10 @@ Every finding below was checked against the source at `1eafe41` before writing t
   - **Reveal:** it says no guesses were made about or by that team this round.
 - **No guessing at all:** when fewer than two teams take part, there's nothing to guess, and the round goes straight to its reveal. This was already the case when nobody answered.
 - **Locking:** the guess phase closes early once every team taking part has locked.
-- **What follows:** a team that opts out of every round denies points to both sides. In a two-team game, that makes the game 0–0, a tie. A team can't gain from it, only stop points it would also not earn. This is stated in the briefing's privacy promise rather than prevented, because the opt-out must stay unconditional.
+- **What follows:**
+  - **Two teams:** a team that opts out denies points to both sides that round. If it opts out of every round, the game is 0–0, a tie. It can't gain from opting out, only stop points it would not earn either.
+  - **Three or more teams:** the others still score on each other, so the team that opts out falls behind in that round. That follows from the symmetric rule, not from a penalty.
+  - **The briefing:** it now says it in one neutral line ("If everyone on a team says "Rather not say", that team sits the round's guessing out: nobody guesses it, and it guesses nobody."). The answer screen adds nothing, so it never nudges anyone to disclose.
 
 ## R3 (P2): a skipped final Family Question in finished projections
 
@@ -75,6 +79,7 @@ Every finding below was checked against the source at `1eafe41` before writing t
   - This adds no bonus; it applies the ranking Stage 12.9 already specified. Points and places can only differ in that one case, because a finished team always outscores an unfinished one, and finishing bonuses differ.
 - **Other team games:** they have no tiebreak of their own, so their places still come from their scores.
 - **Saved games:** a finished game without recorded places uses scores, as before.
+- **Found while doing it (in an Official game's one-line comment):** with equal points but different places, the comment was picked from the equal points and could read "tied" under "Team Sun wins". When teams are level on points but placed apart, an Official game's comment now says "Level on points; Team Sun got there first." (seen in the local screenshot run below).
 
 ## R6 (P2): team identity in the lobby, TV recaps and the night card
 
@@ -126,3 +131,17 @@ About 5 hours of wall-clock time, written before implementation:
 - gates (targeted, fast, then one full of about 40 min) and the report, about 1 h 10 min.
 
 A failed gate would add a round.
+
+**Actual:** about 1 h 30 min of wall-clock time, from the review's arrival (about 10:43 p.m. ET) to the full gate's verdict (12:13 a.m. ET). Every gate passed the first time. The estimate allowed for failed gate rounds and slower driver work, and neither happened.
+
+## Gates (one run on one revision each)
+
+Evidence for every run is in `docs/evidence/gate-runs/`; local runs, failures included, are in `docs/evidence/stage1215r-local/README.md`.
+
+| Revision | Gate | Run | Verdict |
+|---|---|---|---|
+| `c27e242` | targeted (relay, know-your-rivals, family-questions, cup-team-games, night-card, teams, game-night-flow, game-night, tv-show, results, team-huddle, split-clues, team-draw, territory, tug-of-war, lifecycle, one-path, official-practice, cup-party, briefing, session-flow, library) | `20261115-042304-c27e2420-14931` | PASSED (exit 0), 24/24, 9 min 18 s |
+| `c27e242` | fast | `20261115-043238-c27e2420-18729` | PASSED (exit 0), 5/5; unit 1956/1956 |
+| **`c27e242`** | **full (checkpoint)** | `20261115-043355-c27e2420-22664` | **PASSED** (exit 0, 106/106, 39 min 37 s, no retries) |
+
+**Tested SHA: `c27e242`.** No other gate ran on this stage.

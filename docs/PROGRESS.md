@@ -2930,3 +2930,28 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Estimate vs actual:** about 3 hours estimated; about 3 h 40 min actual (6:19 to 10:00 p.m. ET). That was 41 minutes of building, then three rounds of gates.
 - **Owner decisions open:** the content of the seven games' own packs (Split Clues, Team Draw, Know Your Rivals) has no official review step; Trivia's pool has one.
 - **Next:** owner review of the stack (#25 onward). Nothing is merged or deployed.
+
+## Stage 12.15-R: repairs from review 6888718011 (built and gated; awaiting re-review)
+- **Brief:** the owner's review and handoff on #39 (comment 6888718011, about 10:43 p.m. ET on 2026-11-14) gave a changes-required verdict with six findings and asked for a bounded, stacked repair PR. I acknowledged it with an estimate on #39 (6888781319).
+- **Base:** #39's head `1eafe41` (tested source `bcf1406`). Branch `claude/stage12-15r-team-game-repairs`, draft PR #40 stacked on #39.
+- **Spec:** `docs/stage12/stage1215r.md`. Decisions D-S1215R-01 to 04.
+- **Repaired:**
+  - **R1, Relay participation (P1):** a runner's chances are their own turns; wrong answers count as actions. A fully active team of 2–5 qualifies; an idle runner doesn't.
+  - **R2, Know Your Rivals (P2):** guessing is mutual; a team where everyone opted out sits that round's guessing out.
+  - **R3, Family Questions (P2):** a skipped question is never described in any view after the skip.
+  - **R4, Relay's TV freeze (P2):** one clock predicate, plus a room tick at the freeze's end.
+  - **R5, Relay's tiebreak (P2):** each lane records its last leg's time. Relay's places are recorded at the finish and drive team results, medals, the heading and comment, and the Cup placement.
+  - **R6, recaps (P2):** the lobby, the TV's recaps and the night card name the team.
+  - **Found on the way:** an Official game's comment could say "tied" for teams level on points but placed apart.
+- **Tests:**
+  - new: `tests/stage1215r-relay.test.ts` (12), `stage1215r-repairs.test.ts` (9) and `stage1215r-recaps.test.ts` (6). On #39's source, 20 of the 27 fail; the rest are compatibility guards and coverage;
+  - updated: `stage1214-know-your-rivals` (3 tests asserted the old rule);
+  - drivers `check-relay`, `check-know-your-rivals`, `check-family-questions` and `check-cup-team-games` extended.
+- **Gates:** targeted `20261115-042304-c27e2420-14931` PASSED 24/24; fast `20261115-043238-c27e2420-18729` PASSED 5/5 (unit 1956/1956); **full (checkpoint) `20261115-043355-c27e2420-22664` PASSED** (exit 0, 106/106, 39 min 37 s, no retries).
+- **Tested SHA:** `c27e242`. The head after it is docs and evidence only.
+- **Estimate vs actual:** about 5 h estimated; about 1 h 30 min actual (10:43 p.m. to 12:13 a.m. ET).
+- **Limits:**
+  - in a Relay team of 7 or more, a runner can get a single turn, below the Cup's 2-action minimum;
+  - R5's equal-legs results screen isn't a gate driver: it needs the 4-minute limit, so it was shown in a local run with the testing-only time scale;
+  - real phones not tried.
+- **Next:** re-review and the reviewer's independent private-site audit (blocked on the reviewer's own sign-in). Nothing is merged or deployed.
