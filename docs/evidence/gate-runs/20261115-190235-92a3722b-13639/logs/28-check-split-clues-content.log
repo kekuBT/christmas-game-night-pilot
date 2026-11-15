@@ -1,0 +1,39 @@
+$ node scripts/check-split-clues-content.mjs http://localhost:41279
+# timeout 600s | worker w1 | server http://localhost:41279 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full4/test-results/20261115-190235-92a3722b-13639/server-data/w1)
+
+[+1.4s] PASS A: the server runs without the content test mode
+[+4.3s] PASS A the Cup lobby says Split Clues is Practice only, and why (no approved puzzles)
+[+4.3s]   (the note: Practice only: Split Clues counts only with puzzles a person has approved, and this Cup has 0 unused approved puzzles (an official game needs 6). Play it as Practice instead: Practice also uses puzzles that are not approved yet.)
+[+4.3s] PASS A Official is disabled; Practice is the start
+[+4.3s] PASS A the server's lobby view: 0 of 6, with the reason (counts only) — {"available":0,"needed":6,"message":"Split Clues counts only with puzzles a person has approved, and this Cup has 0 unused approved puzzles (an official game needs 6). Play it as Practice instead: Practice also uses puzzles that are not approved yet."}
+[+4.4s] PASS A a forged Official start by the host is refused (409, the same reason), and nothing starts — {"status":409,"body":{"error":"Split Clues counts only with puzzles a person has approved, and this Cup has 0 unused approved puzzles (an official game needs 6). Play it as Practice instead: Practice also uses puzzles that are not approved yet.","code":"CONTENT_EXHAUSTED","available":0,"needed":6}}
+[+4.4s] PASS A a guest's Official start is refused — 400 {"error":"Only host/cohost can start a game"}
+[+5.1s] PASS A at 320 px the host's lobby says the same, with Official disabled
+[+5.2s] PASS A 320 px: no sideways scroll
+[+5.8s] PASS A at 1440 px the host's lobby says the same, with Official disabled
+[+5.9s] PASS A 1440 px: no sideways scroll
+[+6.0s] PASS A Practice from the lobby starts, as Practice — {"official":false,"status":"briefing"}
+[+48.9s] PASS A the practice game played all six puzzles to the end, year-round ones only (a Cup) — ["sc-019","sc-037","sc-004","sc-002","sc-013","sc-016"]
+[+48.9s] PASS A nothing counted: the Cup standings are as before
+[+48.9s] PASS A the host's phone shows the practice game's results, as Practice
+[+49.3s] PASS B the fixture is a temporary copy outside the repository, approving exactly the six at their hashes; the shipped content has no Split Clues approval — shipped approvals file: none
+[+49.8s] PASS B: the server runs without the content test mode
+[+52.0s] PASS B with six approved puzzles, Official is offered: enabled, no practice-only note
+[+52.1s] PASS B the host's start is Official and says it counts toward the Family Cup
+[+52.2s] PASS B the game started as Official — {"official":true,"status":"briefing"}
+[+52.3s] PASS B the TV's briefing says Official
+[+52.5s] PASS B a guest's reload mid-round gives back exactly their own clues — 3 clue(s)
+[+52.5s] PASS B …on the reloaded phone, too
+[+52.6s] PASS B while solving, the TV (screen and data) shows no clue and no answer of any approved puzzle
+[+95.6s] PASS B the Official game dealt exactly the six approved puzzles — ["sc-002","sc-005","sc-001","sc-003","sc-004","sc-006"]
+[+95.6s] PASS B it finished Official, with team results and Cup placements — {"status":"finished","official":true,"teams":[["team-sun",1],["team-coral",2]]}
+[+95.6s] PASS B afterwards the lobby view says the approved puzzles are used up (0 of 6), never reusing them — {"available":0,"needed":6,"message":"Split Clues counts only with puzzles a person has approved, and this Cup has 0 unused approved puzzles (an official game needs 6). Play it as Practice instead: Practice also uses puzzles that are not approved yet."}
+[+95.6s] PASS B the shared plan now says Split Clues · Practice (it can no longer be Official here) — {"gameId":"split-clues","official":false}
+[+95.7s] PASS B the TV's Next up line says Practice, not Official
+[+96.4s] PASS B the host's phone shows the results, as Official
+[+96.5s] PASS B the shipped approvals are unchanged after the fixture run
+[+96.6s] cleanup: 2 server(s) stopped, 3 temporary dir(s) removed; still running: none; left on disk: none
+[+96.6s] SPLIT CLUES CONTENT PASSED
+[+96.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":11,"pages":11,"peakOpenPages":5}
+
+# PASS (exit 0) in 96.6s | cpu 10s, peak memory 383 MB

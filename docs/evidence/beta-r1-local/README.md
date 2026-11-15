@@ -83,6 +83,10 @@
 | `20261115-183219-83058786-27966` | `8305878` | fast | PASSED (exit 0) | |
 | `20261115-183350-83058786-32167` | `8305878` | full | **CANCELLED (exit 130), with 1 FAIL** | **`check-f5` failed:** after Impostor (practice-only), Caption Clash was offered as Practice. **Root cause:** my first B-09 fix. I stopped the run there; 6 steps passed, 3 were cancelled and 99 didn't run. Corrected next. |
 
-The gates on the final code revision are listed in the completed report on #43, and added here after they ran.
+| `20261115-185319-92a3722b-7063` | `92a3722` | targeted (lobby-mode, f5, lobby-fixes, one-path, official-practice, quick-party, cup-party, readiness, beta-gate, release-package) | PASSED (exit 0) | |
+| `20261115-190112-92a3722b-9509` | `92a3722` | fast | PASSED (exit 0) | 5/5; unit 2021/2021 (158 files) |
+| `20261115-190235-92a3722b-13639` | `92a3722` | **full** | **PASSED (exit 0)** | **109/109.** Among them: release-package 36/36, beta-gate 14/14, lobby-mode (all), f5 36/36 and unit 2021/2021. |
+
+**The tested code is `92a3722`;** the commits after it are docs and evidence only.
 
 `529a966`'s commit message says this README already listed these runs. It didn't: that edit failed its anchor check and landed in the next, docs-only commit.

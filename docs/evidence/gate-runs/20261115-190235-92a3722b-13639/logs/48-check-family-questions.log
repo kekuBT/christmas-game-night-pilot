@@ -1,0 +1,113 @@
+$ node scripts/check-family-questions.mjs http://localhost:42773
+# timeout 600s | worker w3 | server http://localhost:42773 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full4/test-results/20261115-190235-92a3722b-13639/server-data/w3)
+
+[+4.5s] PASS A host: the lobby has the Family Questions card
+[+4.5s] PASS A guest: the lobby has the Family Questions card
+[+5.0s] PASS A an empty answer is refused, and says why
+[+5.0s] PASS A …and nothing reached the room
+[+5.0s] PASS B the worst case for the TV is the longest question a writer can send — 140
+[+5.3s] PASS A Amina's multiple-choice question is added
+[+5.6s] PASS A …and her 'Who in the family?' question
+[+5.6s] PASS A Amina sees her own two questions, with their answers
+[+6.0s] PASS E the write sheet fits 320 px (no sideways scroll)
+[+6.1s] PASS A the counts are public: Baraka's card says 2 questions from 1 writer
+[+6.1s] PASS A host's screen has no word of Amina's questions
+[+6.1s] PASS A host's projection has no word of them
+[+6.1s] PASS A Baraka's screen has no word of Amina's questions
+[+6.1s] PASS A Baraka's projection has no word of them
+[+6.1s] PASS A the TV has none, on screen or in its feed
+[+6.1s] PASS B with 2 questions, the server refuses to start (FAMILY_TOO_FEW) — {"error":"Family Questions needs at least 3 questions ready to play; 2 are. Everyone can write some in the lobby.","code":"FAMILY_TOO_FEW","readiness":{"registered":3,"connected":3,"reconnecting":0,"away":0,"wouldPlay":["player-1","player-2","player-3"],"wouldMiss":[]},"ready":2,"needed":3}
+[+6.1s] PASS B …and the host isn't offered 'Play it next'
+[+6.1s] PASS B with 3 ready, the host can make it the next game
+[+6.2s] PASS B Family Questions is up next
+[+6.2s] PASS B Start is ready
+[+6.7s] PASS B Baraka took his question back; the host's Start waits for one more
+[+7.0s] PASS B 4 ready from 3 writers; Start is back
+[+7.0s] PASS C the game is in its briefing
+[+7.0s] PASS C …and playing
+[+7.1s] PASS C question 1 is open
+[+7.3s] PASS C q1: Baraka's phone says it's theirs
+[+7.3s] PASS C q1: Keku sees the question to answer
+[+7.3s] PASS C q1: Amina sees the question to answer
+[+7.3s] PASS C q1: the TV shows the question, not who asked
+[+7.3s] PASS C q1: the TV question fits the screen (2 answers, 37 characters) — {"ok":true,"bottom":769,"limit":956}
+[+7.3s] PASS C q1: the open question's feed has no answer and no writer
+[+7.8s] PASS C q1: Keku's pick is locked in
+[+7.8s] PASS C q1: the reveal
+[+7.8s] PASS C q1: the right answer and who asked — {"prompt":"What was Babu CANARY-THREE first car?","kind":"choice","options":["A Peugeot 404","A VW Beetle"],"correctIndex":0,"counts":[1,1],"right":["player-1"],"askedBy":"player-3","askedByName":"Baraka","greatQuestion":true}
+[+7.8s] PASS C q1: a great question (one of two got it)
+[+7.9s] PASS C q1: phones say who asked, and the great question
+[+7.9s] PASS C q1: the writer's phone says it was theirs, +50
+[+7.9s] PASS C q1: the TV reveals the answer and who asked
+[+7.9s] PASS C q1: the TV reveal fits the screen — {"ok":true,"bottom":639,"limit":956}
+[+16.0s] PASS C question 2 is open
+[+16.0s] PASS C q2: Keku's phone says it's theirs
+[+16.0s] PASS C q2: Amina sees the question to answer
+[+16.0s] PASS C q2: Baraka sees the question to answer
+[+16.0s] PASS C q2: the TV shows the question, not who asked
+[+16.0s] PASS C q2: the TV question fits the screen (4 answers, 140 characters) — {"ok":true,"bottom":826,"limit":956}
+[+16.0s] PASS C q2: the open question's feed has no answer and no writer
+[+16.3s] PASS C q2: the host's skip moves everyone on, with no reveal
+[+16.3s] PASS C question 3 is open
+[+16.3s] PASS C q3: Amina's phone says it's theirs
+[+16.3s] PASS C q3: Keku sees the question to answer
+[+16.3s] PASS C q3: Baraka sees the question to answer
+[+16.3s] PASS C q3: the TV shows the question, not who asked
+[+16.3s] PASS C q3: the TV question fits the screen (3 answers, 40 characters) — {"ok":true,"bottom":866,"limit":956}
+[+16.3s] PASS C q3: the open question's feed has no answer and no writer
+[+16.6s] PASS C q3: Keku's pick is locked in
+[+16.6s] PASS C q3: the reveal
+[+16.6s] PASS C q3: the right answer and who asked — {"prompt":"Who CANARY-TWO always burns the chapati?","kind":"who","options":["Keku","Amina","Baraka"],"correctIndex":2,"counts":[1,0,1],"right":["player-1"],"askedBy":"player-2","askedByName":"Amina","greatQuestion":true}
+[+16.6s] PASS C q3: a great question (one of two got it)
+[+16.6s] PASS C q3: phones say who asked, and the great question
+[+16.6s] PASS C q3: the writer's phone says it was theirs, +50
+[+16.6s] PASS C q3: the TV reveals the answer and who asked
+[+16.6s] PASS C q3: the TV reveal fits the screen — {"ok":true,"bottom":876,"limit":956}
+[+24.7s] PASS C question 4 is open
+[+24.7s] PASS C q4: Amina's phone says it's theirs
+[+24.7s] PASS C q4: Keku sees the question to answer
+[+24.7s] PASS C q4: Baraka sees the question to answer
+[+24.7s] PASS C q4: the TV shows the question, not who asked
+[+24.7s] PASS C q4: the TV question fits the screen (3 answers, 34 characters) — {"ok":true,"bottom":769,"limit":956}
+[+24.7s] PASS C q4: the open question's feed has no answer and no writer
+[+25.0s] PASS C q4: Keku's pick is locked in
+[+25.1s] PASS C q4: the reveal
+[+25.1s] PASS C q4: the right answer and who asked — {"prompt":"Where did Bibi CANARY-ONE grow up?","kind":"choice","options":["Nyeri CANARY-OPT","Mombasa","Kisumu"],"correctIndex":2,"counts":[1,0,1],"right":["player-1"],"askedBy":"player-2","askedByName":"Amina","greatQuestion":true}
+[+25.1s] PASS C q4: a great question (one of two got it)
+[+25.1s] PASS C q4: phones say who asked, and the great question
+[+25.1s] PASS C q4: the writer's phone says it was theirs, +50
+[+25.1s] PASS C q4: the TV reveals the answer and who asked
+[+25.1s] PASS C q4: the TV reveal fits the screen — {"ok":true,"bottom":780,"limit":956}
+[+33.2s] PASS C the game finishes
+[+33.2s] PASS C 4 rounds: one skipped by the host, three played — ["Baraka",true,"Amina","Amina"]
+[+33.2s] PASS C the skipped question's answer and writer were never revealed
+[+33.2s] PASS C scores: 3 played rounds × (100 right + 50 great question) = 450 in all — {"player-1":300,"player-2":100,"player-3":50}
+[+33.2s] PASS C phone results: every question with its answer and who asked
+[+33.2s] PASS C results: the great questions are celebrated
+[+33.2s] PASS C results: the skipped question's prompt isn't in the recap
+[+35.0s] PASS C played questions are used up (0 ready)
+[+35.2s] PASS D the host's card counts Baraka's 2 new questions
+[+35.4s] PASS D the host's tool lists Baraka with a count, and no word of his questions — HOST · REMOVE SOMEONE’S QUESTIONS WITHOUT READING THEM
+[+35.4s] Baraka
+[+35.4s] 2 questions waiting
+[+35.4s] Remove
+[+35.9s] PASS D Baraka's unplayed questions are removed
+[+35.9s] PASS D Baraka keeps only his played question (marked played) — [true]
+[+35.9s] PASS D a player who isn't the host can't remove anyone's questions (403)
+[+36.0s] PASS F question 1 is open
+[+44.1s] PASS F question 2 is open
+[+52.3s] PASS F question 3 is open
+[+52.3s] PASS F the host skipped the last question: the game finishes at once
+[+52.3s] PASS F the skipped question was the last one, and had a canary — Which town CANARY-L2 did Shosho visit?
+[+52.3s] PASS F the finished game's top level has no prompt, answers or kind, and says skipped — {"skipped":true}
+[+52.3s] PASS F its rounds: two played (with their questions), the last {skipped: true}
+[+52.3s] PASS F the TV's whole room data has nothing of the skipped question
+[+52.3s] PASS F Keku's phone: the game's data has nothing of it, nor anything else
+[+52.3s] PASS F Amina's phone: the game's data has nothing of it, nor anything else
+[+52.3s] PASS F Baraka's phone: the game's data has nothing of it (their own list keeps their question)
+[+52.3s] PASS F the phones' results show the skip and nothing of the question
+[+53.5s] PASS F the TV's screen has nothing of it
+[+53.6s] check-family-questions: all checks passed
+[+53.6s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 53.6s | cpu 4.7s, peak memory 284 MB

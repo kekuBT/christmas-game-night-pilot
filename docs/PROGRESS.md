@@ -3018,7 +3018,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** the owner's confirmation of the repairs on #41. Puzzle approvals remain the owner's (or an editor's).
 - **Risk:** none known beyond Stage 12.16's: no puzzle is approved, and difficulty is a placeholder.
 
-## Beta R1: readiness and a portable production package (built and tested locally; gates and report below)
+## Beta R1: readiness and a portable production package (completed: full gate PASSED on 92a3722; report on #43)
 - **Brief:** the owner's priority update 6896572377 on #42 (2026-11-15, 10:05 a.m. ET). It allows deployment conditionally, after readiness clearance, at $0; it allows no spending, stack merge, disabled games or weakened checks. This slice is the readiness work; ChatGPT owns host selection.
 - **Base:** #41's head `1955c28` (the latest cleared candidate). Stage 12.17 (#42, not yet cleared) is not in this base.
 - **Branch:** `claude/beta-r1-readiness`. **Spec and estimate:** `docs/beta/beta-r1.md` (about 9 h, written at 11:50 a.m. ET).
@@ -3048,6 +3048,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Every run is listed** in `docs/evidence/beta-r1-local/README.md`.
 - **The full gate on `529a966` FAILED (108/109) in `check-lobby-mode`:** B-09, a host-reload race that was already in the base, reproduced on `1955c28`. Fixed in the web app's plan-restore effect, with a slow-list reload check that failed first.
 - **The first B-09 fix (`8305878`) was wrong:** it applied Practice at once even for a practice-only game. `check-f5` caught it in the full gate on `8305878`, which I stopped. Corrected: the plan's mode applies only for a game that can count, and the effect runs again when the list arrives. A new lobby-mode guard failed on `8305878` and passes now; `check-f5` passes 36/36 locally with the gate's server settings.
-- **Next:** targeted, fast and one full gate on the correction's SHA, then the completed report on #43. The same race is in #42's base: port the corrected fix into the 12.17 repair.
+- **The gates on `92a3722` (the tested code):**
+  - targeted `20261115-185319-92a3722b-7063`: PASSED;
+  - fast `20261115-190112-92a3722b-9509`: PASSED (unit 2021/2021);
+  - **full `20261115-190235-92a3722b-13639`: PASSED (exit 0), 109/109.**
+- **The completed report** is on #43.
+- **Still open:** a host (ChatGPT's choice), the owner's Codespace audit, real phones, and running the release steps on the real host.
+- **The same B-09 race is in #42's base.** It is fixed on #43 in code #42 doesn't touch, so the two combine without a conflict.
+- **Next:** the Stage 12.17-R repair on #42 (review 6898755998), queued behind this checkpoint.
 - **Risk:** the beta gate is new code on every request. It is off by default, so every existing driver runs as before; the full gate is the proof.
 

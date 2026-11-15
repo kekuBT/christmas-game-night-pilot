@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:42773
+# timeout 600s | worker w3 | server http://localhost:42773 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full4/test-results/20261115-190235-92a3722b-13639/server-data/w3)
+
+[+18.7s] PASS Geography: finished player sees no answers while Bea still plays
+[+18.7s] PASS Geography: TV shows no answers while Bea still plays
+[+18.7s] PASS Geography: Bea (mid-game) sees no answers
+[+29.0s] PASS Geography: results list every question — 8
+[+29.1s] PASS Geography: each answer matches the content pack — 8/8
+[+29.1s] PASS Geography: each explanation is shown — 8/8
+[+29.1s] PASS Geography: Bea sees her own choices marked
+[+29.1s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+29.3s] PASS Geography: TV lists the answers after the game
+[+29.3s] PASS Geography: TV shows no player's choices
+[+35.0s] PASS Closest: no answer anywhere while question 1 is open
+[+35.1s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 105 vs 105
+[+35.1s] PASS Closest: and the player's own guess
+[+35.1s] PASS Closest: Bea sees her own guess, not Ada's
+[+35.1s] PASS Closest: the explanation is shown
+[+35.1s] PASS Closest: question 2 is now open and its answer is not shown
+[+35.2s] PASS Closest: TV shows the last answer only — Last question: How many minutes are there in a full 90-minute football match plus 15 minutes of half-time? — 105 minutes
+[+35.2s] PASS Closest: TV shows nobody's guess — Last question: How many minutes are there in a full 90-minute football match plus 15 minutes of half-time? — 105 minutes
+[+35.4s] ANSWER REVEAL ALL PASSED
+[+35.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 35.4s | cpu 3.4s, peak memory 275 MB
