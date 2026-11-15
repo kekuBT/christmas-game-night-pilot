@@ -91,7 +91,7 @@ About **7 h 30 min**.
 
 ## Estimate vs actual
 - **Estimate:** about 7 h 30 min, written at 3:05 p.m. ET.
-- **Actual:** about 1 h 20 min of wall clock, from the review at about 3:01 p.m. ET to the report at about 4:20 p.m. ET.
+- **Actual:** about 1 h 15 min of wall clock, from the review at about 3:01 p.m. ET to the report at about 4:16 p.m. ET.
   - **The repair and its evidence:** 3:05 to 3:30 p.m. That was the reproductions, the lock, the tools, the tests, step U, the docs, the commit and the packaged drill.
   - **The gates, one after another:** 3:29 to 4:12 p.m., 41 minutes of it the full gate.
 - **Why it was so much faster:** both repairs were small in code. The kernel exclusion removed the recovery protocol the estimate allowed for. Step U reused the release check's existing structure, and the gates passed first time.

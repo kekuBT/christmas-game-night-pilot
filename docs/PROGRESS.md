@@ -3075,7 +3075,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Fast:** `20261115-202956-23abfbc4-30041` PASSED, unit 2037/2037.
   - **Full:** `20261115-203120-23abfbc4-2269` PASSED, 109/109.
 - **The packaged release drill:** run 5, `92a3722` to `23abfbc`, PASSED.
-- **Evidence:** `docs/evidence/beta-r1-repair-local/README.md` (every run, failures included). Estimate about 7 h 30 min; actual about 1 h 20 min.
+- **Evidence:** `docs/evidence/beta-r1-repair-local/README.md` (every run, failures included). Estimate about 7 h 30 min; actual about 1 h 15 min.
 - **Failures:** none in the gates. Locally, release check runs 1–3 failed while step U was being built: a drill mistake, then B-12.
 - **External blockers:** ChatGPT's private browser audit (preview access), the host, real phones, the owner's sign-off.
 - **Next:** the owner's or ChatGPT's review of the repair report on #43. The beta stays held.
