@@ -39,7 +39,7 @@ About **2 h 45 min**.
 
 ## Estimate vs actual
 - **Estimate:** about 2 h 45 min, written at 1:31 p.m. ET.
-- **Actual:** about 1 h 40 min of wall clock, from 1:31 p.m. ET to the report at about 3:10 p.m. ET. The time was interleaved with Beta R1's last correction, gates and report (#43), so the split between the two isn't measured.
+- **Actual:** about 1 h 25 min of wall clock, from 1:31 p.m. ET to the report at about 2:55 p.m. ET. The time was interleaved with Beta R1's last correction, gates and report (#43), so the split between the two isn't measured.
 - **The parts:**
   - **The repair and its unit tests:** they went faster than estimated, because the existing content-shortage result, the 409 response and the lobby's error display already covered the refusal path.
   - **The browser check:** it passed on its first run.

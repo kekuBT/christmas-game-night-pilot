@@ -3040,7 +3040,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 
 ## Stage 12.17-R: repair from review 6898755998 (completed)
 - **Brief:** finding R1 of review 6898755998 on #42. A sparse, season-filtered drawing pool could start an unplayable Draw & Guess turn, and a short Practice or casual Team Draw. Queued behind Beta R1 (#43), as the review asked; nothing from #42 enters the beta candidate.
-- **Spec and estimate:** `docs/stage12/stage1217r.md` (about 2 h 45 min, written at 1:31 p.m. ET; actual about 1 h 40 min of wall clock, interleaved with Beta R1).
+- **Spec and estimate:** `docs/stage12/stage1217r.md` (about 2 h 45 min, written at 1:31 p.m. ET; actual about 1 h 25 min of wall clock, interleaved with Beta R1).
 - **Done:**
   - **Before anything is created:** the room counts the prompts this start may deal (non-rejected, allowed by the content mode). With fewer than one per turn or round, the start is refused with HTTP 409 `CONTENT_EXHAUSTED` and a plain reason.
     - Draw & Guess needs `min(players, 6)` prompts; a Practice or casual Team Draw needs its round count. An Official Team Draw keeps its exact-record check, unchanged.
