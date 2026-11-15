@@ -1,0 +1,93 @@
+$ node scripts/e2e-browser.mjs http://localhost:44731 --browser=chromium --games=all
+# timeout 1800s | worker w1 | server http://localhost:44731 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215full/test-results/20261115-001634-f52309c4-21676/server-data/w1)
+
+[+0.6s] casual-only, not played here: jebena-rush, spectrum, family-questions
+[+0.6s] games: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, team-huddle, relay, split-clues, team-draw, territory, tug-of-war, know-your-rivals, draw-guess (registry order, 21 total)
+[+3.1s] [chromium] room code J5ETW7
+[+5.5s] [chromium] lobby roster: 4 players joined
+[+21.9s] [chromium] OK impostor: finished
+[+53.8s] [chromium] OK caption-clash: finished
+[+115.3s] [chromium] OK trivia: finished
+[+137.4s] [chromium] OK word-connections: finished
+[+155.3s] [chromium] OK who-said-that: finished
+[+184.4s] [chromium] OK guess-the-year: finished
+[+206.9s] [chromium] OK closest-wins: finished
+[+226.0s] [chromium] OK category-sprint: finished
+[+249.5s] [chromium] OK charades: finished
+[+296.3s] [chromium] OK geography: finished
+[+341.0s] [chromium] OK math-mayhem: finished
+[+402.7s] [chromium] OK majority-rules: finished
+[+447.2s] [chromium] OK pattern-pulse: finished
+[+469.5s] [chromium] FAIL team-huddle: locator.waitFor: Timeout 20000ms exceeded.
+[+469.5s] Call log:
+[+469.5s]   - waiting for getByRole('heading', { name: 'Now playing: Team Huddle' }) to be visible
+[+469.5s] 
+[+469.6s] [chromium]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this round: 0:05" | type=waiting-on-players
+[+469.6s] [chromium]   DIAG player=Sam game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this round: 0:05" | type=waiting-on-players
+[+469.6s] [chromium]   DIAG player=Jo game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this round: 0:05" | type=waiting-on-players
+[+469.6s] [chromium]   DIAG player=Kim game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this round: 0:05" | type=waiting-on-players
+[+499.6s] [chromium] FAIL relay: locator.click: Timeout 30000ms exceeded.
+[+499.6s] Call log:
+[+499.6s]   - waiting for getByTestId('choose-game')
+[+499.6s] 
+[+499.7s] [chromium]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=1:pick deadlineIn=430s phaseIn=6s submitted=0/4 outcome=- | screen="Team Huddle: question 2 of 8" clock="Time left for this round: 0:06" | type=waiting-on-players
+[+499.7s] [chromium]   DIAG player=Sam game=team-huddle(game-14) server=playing phase=1:pick deadlineIn=430s phaseIn=6s submitted=0/4 outcome=- | screen="Team Huddle: question 2 of 8" clock="Time left for this round: 0:06" | type=waiting-on-players
+[+499.7s] [chromium]   DIAG player=Jo game=team-huddle(game-14) server=playing phase=1:pick deadlineIn=430s phaseIn=6s submitted=0/4 outcome=- | screen="Team Huddle: question 2 of 8" clock="Time left for this round: 0:06" | type=waiting-on-players
+[+499.7s] [chromium]   DIAG player=Kim game=team-huddle(game-14) server=playing phase=1:pick deadlineIn=430s phaseIn=6s submitted=0/4 outcome=- | screen="Team Huddle: question 2 of 8" clock="Time left for this round: 0:06" | type=waiting-on-players
+[+529.7s] [chromium] FAIL split-clues: locator.click: Timeout 30000ms exceeded.
+[+529.7s] Call log:
+[+529.7s]   - waiting for getByTestId('choose-game')
+[+529.7s] 
+[+529.8s] [chromium]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=2:pick deadlineIn=400s phaseIn=7s submitted=0/4 outcome=- | screen="Team Huddle: question 3 of 8" clock="Time left for this round: 0:07" | type=waiting-on-players
+[+529.8s] [chromium]   DIAG player=Sam game=team-huddle(game-14) server=playing phase=2:pick deadlineIn=400s phaseIn=7s submitted=0/4 outcome=- | screen="Team Huddle: question 3 of 8" clock="Time left for this round: 0:07" | type=waiting-on-players
+[+529.8s] [chromium]   DIAG player=Jo game=team-huddle(game-14) server=playing phase=2:pick deadlineIn=400s phaseIn=7s submitted=0/4 outcome=- | screen="Team Huddle: question 3 of 8" clock="Time left for this round: 0:07" | type=waiting-on-players
+[+529.8s] [chromium]   DIAG player=Kim game=team-huddle(game-14) server=playing phase=2:pick deadlineIn=400s phaseIn=7s submitted=0/4 outcome=- | screen="Team Huddle: question 3 of 8" clock="Time left for this round: 0:07" | type=waiting-on-players
+[+559.8s] [chromium] FAIL team-draw: locator.click: Timeout 30000ms exceeded.
+[+559.8s] Call log:
+[+559.8s]   - waiting for getByTestId('choose-game')
+[+559.8s] 
+[+559.9s] [chromium]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=3:pick deadlineIn=370s phaseIn=8s submitted=0/4 outcome=- | screen="Team Huddle: question 4 of 8" clock="Time left for this round: 0:08" | type=waiting-on-players
+[+559.9s] [chromium]   DIAG player=Sam game=team-huddle(game-14) server=playing phase=3:pick deadlineIn=370s phaseIn=8s submitted=0/4 outcome=- | screen="Team Huddle: question 4 of 8" clock="Time left for this round: 0:08" | type=waiting-on-players
+[+559.9s] [chromium]   DIAG player=Jo game=team-huddle(game-14) server=playing phase=3:pick deadlineIn=370s phaseIn=8s submitted=0/4 outcome=- | screen="Team Huddle: question 4 of 8" clock="Time left for this round: 0:08" | type=waiting-on-players
+[+559.9s] [chromium]   DIAG player=Kim game=team-huddle(game-14) server=playing phase=3:pick deadlineIn=370s phaseIn=8s submitted=0/4 outcome=- | screen="Team Huddle: question 4 of 8" clock="Time left for this round: 0:08" | type=waiting-on-players
+[+589.9s] [chromium] FAIL territory: locator.click: Timeout 30000ms exceeded.
+[+589.9s] Call log:
+[+589.9s]   - waiting for getByTestId('choose-game')
+[+589.9s] 
+[+590.0s] [chromium]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=4:pick deadlineIn=339s phaseIn=8s submitted=0/4 outcome=- | screen="Team Huddle: question 5 of 8" clock="Time left for this round: 0:09" | type=waiting-on-players
+[+590.0s] [chromium]   DIAG player=Sam game=team-huddle(game-14) server=playing phase=4:pick deadlineIn=339s phaseIn=8s submitted=0/4 outcome=- | screen="Team Huddle: question 5 of 8" clock="Time left for this round: 0:09" | type=waiting-on-players
+[+590.0s] [chromium]   DIAG player=Jo game=team-huddle(game-14) server=playing phase=4:pick deadlineIn=339s phaseIn=8s submitted=0/4 outcome=- | screen="Team Huddle: question 5 of 8" clock="Time left for this round: 0:09" | type=waiting-on-players
+[+590.0s] [chromium]   DIAG player=Kim game=team-huddle(game-14) server=playing phase=4:pick deadlineIn=339s phaseIn=8s submitted=0/4 outcome=- | screen="Team Huddle: question 5 of 8" clock="Time left for this round: 0:09" | type=waiting-on-players
+[+620.0s] [chromium] FAIL tug-of-war: locator.click: Timeout 30000ms exceeded.
+[+620.0s] Call log:
+[+620.0s]   - waiting for getByTestId('choose-game')
+[+620.0s] 
+[+620.1s] [chromium]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=5:pick deadlineIn=309s phaseIn=9s submitted=0/4 outcome=- | screen="Team Huddle: question 6 of 8" clock="Time left for this round: 0:10" | type=waiting-on-players
+[+620.1s] [chromium]   DIAG player=Sam game=team-huddle(game-14) server=playing phase=5:pick deadlineIn=309s phaseIn=9s submitted=0/4 outcome=- | screen="Team Huddle: question 6 of 8" clock="Time left for this round: 0:10" | type=waiting-on-players
+[+620.1s] [chromium]   DIAG player=Jo game=team-huddle(game-14) server=playing phase=5:pick deadlineIn=309s phaseIn=9s submitted=0/4 outcome=- | screen="Team Huddle: question 6 of 8" clock="Time left for this round: 0:10" | type=waiting-on-players
+[+620.1s] [chromium]   DIAG player=Kim game=team-huddle(game-14) server=playing phase=5:pick deadlineIn=309s phaseIn=9s submitted=0/4 outcome=- | screen="Team Huddle: question 6 of 8" clock="Time left for this round: 0:10" | type=waiting-on-players
+[+650.1s] [chromium] FAIL know-your-rivals: locator.click: Timeout 30000ms exceeded.
+[+650.1s] Call log:
+[+650.1s]   - waiting for getByTestId('choose-game')
+[+650.1s] 
+[+650.2s] [chromium]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=6:pick deadlineIn=279s phaseIn=10s submitted=0/4 outcome=- | screen="Team Huddle: question 7 of 8" clock="Time left for this round: 0:11" | type=waiting-on-players
+[+650.2s] [chromium]   DIAG player=Sam game=team-huddle(game-14) server=playing phase=6:pick deadlineIn=279s phaseIn=10s submitted=0/4 outcome=- | screen="Team Huddle: question 7 of 8" clock="Time left for this round: 0:11" | type=waiting-on-players
+[+650.2s] [chromium]   DIAG player=Jo game=team-huddle(game-14) server=playing phase=6:pick deadlineIn=279s phaseIn=10s submitted=0/4 outcome=- | screen="Team Huddle: question 7 of 8" clock="Time left for this round: 0:11" | type=waiting-on-players
+[+650.2s] [chromium]   DIAG player=Kim game=team-huddle(game-14) server=playing phase=6:pick deadlineIn=279s phaseIn=10s submitted=0/4 outcome=- | screen="Team Huddle: question 7 of 8" clock="Time left for this round: 0:11" | type=waiting-on-players
+[+680.2s] [chromium] FAIL draw-guess: locator.click: Timeout 30000ms exceeded.
+[+680.2s] Call log:
+[+680.2s]   - waiting for getByTestId('choose-game')
+[+680.2s] 
+[+680.3s] [chromium]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=7:pick deadlineIn=249s phaseIn=11s submitted=0/4 outcome=- | screen="Team Huddle: question 8 of 8" clock="Time left for this round: 0:12" | type=waiting-on-players
+[+680.3s] [chromium]   DIAG player=Sam game=team-huddle(game-14) server=playing phase=7:pick deadlineIn=249s phaseIn=11s submitted=0/4 outcome=- | screen="Team Huddle: question 8 of 8" clock="Time left for this round: 0:12" | type=waiting-on-players
+[+680.3s] [chromium]   DIAG player=Jo game=team-huddle(game-14) server=playing phase=7:pick deadlineIn=249s phaseIn=11s submitted=0/4 outcome=- | screen="Team Huddle: question 8 of 8" clock="Time left for this round: 0:12" | type=waiting-on-players
+[+680.3s] [chromium]   DIAG player=Kim game=team-huddle(game-14) server=playing phase=7:pick deadlineIn=249s phaseIn=11s submitted=0/4 outcome=- | screen="Team Huddle: question 8 of 8" clock="Time left for this round: 0:12" | type=waiting-on-players
+[+695.3s] [chromium] FAIL views: locator.waitFor: Timeout 15000ms exceeded.
+[+695.3s] Call log:
+[+695.3s]   - waiting for getByTestId('room-menu').or(getByRole('button', { name: 'Championship', exact: true })).first() to be visible
+[+695.3s] 
+[+695.3s] [chromium] 13/22 passed
+[+695.3s] E2E FAILED: 9 item(s)
+[+695.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# FAIL (exit 1) in 695.4s | cpu 28.5s, peak memory 281 MB

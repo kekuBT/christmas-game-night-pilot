@@ -75,6 +75,10 @@ The owner already approved how team games count, in the Cup rules of 2026-11-04 
   - the results' wording and comment.
   - **Not in the driver:** an Individual Cup's refusal. Every new Cup is a Family Cup now, so a browser can't reach one; the unit tests build one the way it is saved.
   - **Re-run:** `check-lifecycle` (its Cup label check follows the format), `check-teams`, `check-one-path`, `check-cup-party`, `check-tv-show` and `check-official-practice`.
+- **The generic all-games drivers (`check-f5`, `e2e-browser`):** they play every game a Cup can start with a generic player that doesn't know the seven team games, so they name the seven as played by their own drivers.
+  - Their coverage of every other game is unchanged.
+  - For the seven, the Cup start is a unit test (each starts as Official with teams and content), and the Cup path end to end is `check-cup-team-games`.
+  - The first full gate on `f52309c` found this; see `docs/evidence/stage1215-local/README.md`.
 - **Gates:** targeted, fast, then one full checkpoint.
 
 ## 6. Estimate

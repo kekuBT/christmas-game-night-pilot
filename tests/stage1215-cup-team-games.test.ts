@@ -65,6 +65,19 @@ describe("which games, and which Cups", () => {
     expect(picked).toContain("charades"); // unchanged: Charades was always pickable
   });
 
+  it("each of the seven starts as Official in a Family Cup, with two or more teams and its content dealt", () => {
+    // The generic all-games drivers (check-f5, e2e-browser) can't play these; each has its own driver, and this is the
+    // Cup start for every one of them (briefing, content, teams), on the room's real start path.
+    for (const id of TEAM_GAMES) {
+      const { engine, host } = cupRoom(["Keku", "Amina", "Baraka", "Wanjiru"], { timing: 2 });
+      const g = engine.startGame(host, id, { official: true, seed: 11 });
+      expect([id, g.official, g.status]).toEqual([id, true, "briefing"]);
+      expect(new Set(Object.values(g.teams!.members)).size).toBeGreaterThanOrEqual(2);
+      expect(Object.keys(g.teams!.members)).toHaveLength(4);
+      expect(g.extra).toBeTruthy();
+    }
+  });
+
   it("an Individual Family Cup (made before Stage 12.15) keeps its format: a team game is practice there, with the reason", () => {
     const { engine, host } = cupRoom(["Keku", "Amina", "Baraka", "Wanjiru"], { individual: true });
     expect(engine.competitionFormat).toBe("individual-only");

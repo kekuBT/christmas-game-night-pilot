@@ -1,0 +1,33 @@
+Mchezo gate fast | run 20261115-001513-f52309c4-17835
+  revision f52309c45c5515d629647c1c75c4d3f7ab55ee6a (clean tree) | fingerprint 2d0bb1f40abb (606 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  195 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.05 for 3 worker(s) (measured, 169 run(s))
+  estimate this run: 0–2m (measured) · the same steps one after another: about 1m 39s · longest step unit-tests ~49s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.05 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215f1/test-results/20261115-001513-f52309c4-17835
+        start typecheck-server on w1 (usually 12s)
+        wait  typecheck-web: load 4.7 > 4 CPUs
+[ 1/5] PASS         8.2s  typecheck-server  w1
+        start typecheck-web on w1 (usually 13s)
+        wait  lint: load 4.4 > 4 CPUs
+[ 2/5] PASS         9.3s  typecheck-web  w1
+        start lint on w1 (usually 19s)
+        wait  unit-tests: load 4.0 > 4 CPUs
+        start unit-tests on w2 (usually 49s)
+        start build-web on w3 (usually 6s)
+[ 3/5] PASS         8.2s  build-web  w3
+[ 4/5] PASS        16.5s  lint  w1
+── progress  4/5 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   unit-tests 39s (w2)
+   remaining 1–59s · total 1–2m · done around 00:16–00:17 UTC (measured)
+[ 5/5] PASS          52s  unit-tests  w2
+
+PASSED (exit 0) | fast | run 20261115-001513-f52309c4-17835
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 14s · step time 1m 34s (sum) · 3 workers, 43% busy · 1.27× the same steps run one after another
+           predicted 0–2m (about 51s, measured) → actual 1m 14s (+45%)
+           longest  unit-tests 52s, lint 17s, typecheck-web 9s · the longest step is 70% of the wall time
+           machine  CPU mean 66%, peak 97% · memory available ≥ 13761 MB · load peak 4.74 · backpressure 3 wait(s), 21s
+           contention ×0.871 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215f1/test-results/20261115-001513-f52309c4-17835/report.json

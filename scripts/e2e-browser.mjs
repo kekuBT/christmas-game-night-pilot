@@ -425,8 +425,13 @@ async function runBrowser(browserName, games) {
 const registry = await (await fetch(`${BASE}/games`)).json();
 // Stage 9.1: every game here plays in a Family Cup room; casual-only games (Jebena Rush) can't start
 // in one and are played end to end by their own driver (check-jebena-rush).
-const allIds = registry.filter((g) => !g.casualOnly).map((g) => g.id);
+// Stage 12.15 (D-S1215-01): the seven games built for teams can play in a Cup too. This generic player doesn't know
+// them; each is played end to end by its own driver, the Cup path by check-cup-team-games, and every one of them starting
+// as Official in a Cup by tests/stage1215-cup-team-games.test.ts.
+const OWN_DRIVERS = ["team-huddle", "relay", "split-clues", "team-draw", "territory", "tug-of-war", "know-your-rivals"];
+const allIds = registry.filter((g) => !g.casualOnly && !OWN_DRIVERS.includes(g.id)).map((g) => g.id);
 console.log(`casual-only, not played here: ${registry.filter((g) => g.casualOnly).map((g) => g.id).join(", ") || "none"}`);
+console.log(`built for teams, played by their own drivers: ${OWN_DRIVERS.filter((id) => registry.some((g) => g.id === id)).join(", ")}`);
 const wanted = gamesArg === "smoke" ? allIds.filter((id) => SMOKE_GAMES.includes(id)) : allIds;
 console.log(`games: ${wanted.join(", ")} (registry order, ${allIds.length} total)`);
 const browserNames = browserArg === "all" ? ["chromium", "firefox"] : [browserArg];

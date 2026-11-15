@@ -338,9 +338,14 @@ try {
   const registry = await (await fetch(`${BASE}/games`)).json();
   // Stage 9.1: this day is a Family Cup; casual-only games (Jebena Rush) can't start in a Cup and
   // are played end to end by their own driver (check-jebena-rush).
+  // Stage 12.15 (D-S1215-01): the seven games built for teams can play in a Cup too. This generic player doesn't know
+  // them; each is played end to end by its own driver (check-team-huddle, check-relay, check-split-clues,
+  // check-team-draw, check-territory, check-tug-of-war, check-know-your-rivals), the Cup path by check-cup-team-games,
+  // and every one of them starting as Official in a Cup by tests/stage1215-cup-team-games.test.ts.
+  const OWN_DRIVERS = ["team-huddle", "relay", "split-clues", "team-draw", "territory", "tug-of-war", "know-your-rivals"];
   const casualOnly = registry.filter((g) => g.casualOnly).map((g) => g.id);
-  const gameIds = registry.filter((g) => !g.casualOnly).map((g) => g.id);
-  console.log(`day playlist: ${gameIds.join(", ")} (${gameIds.length} games; casual-only, not in a Cup: ${casualOnly.join(", ") || "none"})`);
+  const gameIds = registry.filter((g) => !g.casualOnly && !OWN_DRIVERS.includes(g.id)).map((g) => g.id);
+  console.log(`day playlist: ${gameIds.join(", ")} (${gameIds.length} games; casual-only, not in a Cup: ${casualOnly.join(", ") || "none"}; built for teams, played by their own drivers: ${OWN_DRIVERS.filter((id) => registry.some((g) => g.id === id)).join(", ")})`);
 
   const finishedGames = [];
   for (const gameId of gameIds) {

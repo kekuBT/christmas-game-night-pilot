@@ -117,17 +117,27 @@ try {
   const word0 = d0["team-coral"]?.word;
   check("B every team has a drawer with the same word", TEAMS.every((t) => d0[t]?.word && d0[t].word === word0), JSON.stringify(Object.fromEntries(TEAMS.map((t) => [t, d0[t]?.word]))));
   const wordRe = new RegExp(`\\b${(word0 ?? "?").replace(/[^a-z ]/gi, "").replace(/ /g, "\\s+")}\\b`, "i");
+  // Stage 12.15 (a false positive in the full gate 20261115-001634-f52309c4-21676): the word can be a team's name or
+  // colour ("sun" and Team Sun). Every phone and the TV name the teams, and the TV's data has each team's colour, so
+  // both are scrubbed before looking for the word. The self-check below is that run's case.
+  const scrubText = (t) => t.replace(/\bTeam (Coral|Sun|Mint|Iris)\b/gi, "Team ·");
+  const scrubData = (j) => j.replace(/"color":"(coral|sun|mint|iris)"/gi, '"color":"·"');
+  {
+    const sunRe = /\bsun\b/i;
+    check("B self-check: a team's name or colour is not the word", sunRe.test("Team Sun · 0") && !sunRe.test(scrubText("Team Sun · 0")) && sunRe.test("Draw: sun") && sunRe.test(scrubText("Draw: sun"))
+      && JSON.stringify({ color: "sun" }).toLowerCase().includes('"sun"') && !scrubData(JSON.stringify({ color: "sun" })).toLowerCase().includes('"sun"'));
+  }
   let phonesRight = true;
   for (const s of seats) {
     const p = pageOf[s.playerId];
     const isDrawer = TEAMS.some((t) => d0[t]?.seat.playerId === s.playerId);
     await until(async () => (await p.getByTestId(isDrawer ? "mz-td-draw" : "mz-td-guess").count()) === 1, 10000);
-    const shown = await p.locator("main").innerText();
+    const shown = scrubText(await p.locator("main").innerText());
     if (isDrawer !== wordRe.test(shown)) { phonesRight = false; console.log(`  ${nameOf[s.playerId]} drawer=${isDrawer} shows word=${wordRe.test(shown)}`); }
   }
   check("B only the drawers' phones show the word", phonesRight);
-  const tvData0 = JSON.stringify((await tvProj(roomId)).games.find((g) => g.id === gid).state);
-  check("B the TV shows no word and its data has neither the word nor any drawing", !wordRe.test(await tv.locator("body").innerText()) && !tvData0.toLowerCase().includes(`"${(word0 ?? "?").toLowerCase()}"`) && !tvData0.includes("\"pieces\""));
+  const tvData0 = scrubData(JSON.stringify((await tvProj(roomId)).games.find((g) => g.id === gid).state));
+  check("B the TV shows no word and its data has neither the word nor any drawing", !wordRe.test(scrubText(await tv.locator("body").innerText())) && !tvData0.toLowerCase().includes(`"${(word0 ?? "?").toLowerCase()}"`) && !tvData0.includes("\"pieces\""));
   await shot(tv, "tv-draw-1920");
 
   // ---- C ----

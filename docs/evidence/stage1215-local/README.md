@@ -20,9 +20,29 @@
 | `check-one-path-n1215.log` | same | 67/0 | Casual room into a Cup. |
 | `check-cup-party-n1215.log` | same | 28/0 | Quick Party inside a Cup. |
 | `check-tv-show-n1215.log` | same | 29/0 | |
-| `check-tug-of-war-n1215.log` | same | 24/0 | Casual Tug of War: its results still say "Casual game". |
+| `check-tug-of-war-n1215.log` | same | 24/0 | Casual Tug of War. |
 | `check-team-huddle-n1215.log` | same | 28/0 | |
 | `check-results-n1215.log` | same | 32/0 | |
 | `check-warm-ivory-n1215.log` | same | 199/0 | |
 | `check-library-n1215.log` | same | 22/0 | |
 | `unit-suite-2.log` | same, the tree committed | 1928/1928 | Both typechecks and lint clean. |
+
+## The first full gate on `f52309c` failed, and what changed
+
+The targeted (26/26) and fast gates passed on `f52309c`; the full gate `20261115-001634-f52309c4-21676` **FAILED** (exit 1, 103 passed, 3 failed). Two causes:
+
+- **`check-f5` and `e2e-chromium` (this stage's change):** both play "every game a Cup can start" with a generic UI player. The seven games built for teams are in that set now, and the generic player doesn't know how to play them, so the first one (Team Huddle) waited out its time and the rest of the playlist stalled behind it.
+  - **The fix:** both drivers now name the seven as played by their own drivers, and log that list every run. Nothing they covered before is dropped: Charades, the one team game they already played, stays.
+  - **Cup coverage for all seven:** a unit test now starts each of them as Official in a Family Cup (briefing, content and teams on the room's real start path). `check-cup-team-games` plays Tug of War through, and each game's own driver plays it end to end.
+- **`check-team-draw` (a false positive in my Stage 12.11 driver):** that run dealt the word "sun". Every phone and the TV show the team name "Team Sun", and the TV's data has the colour `"sun"`, so "only the drawers see the word" failed on every phone and the TV. The targeted run had dealt another word.
+  - **The fix:** team names and colours are scrubbed before looking for the word.
+  - **Self-check:** a check reproduces this run's case. The old match finds "sun" in "Team Sun", and the scrubbed one doesn't.
+  - **Not a leak:** the failing lines show the guessers' screens matched only because of the team name.
+
+| Log | Revision (worktree state) | Result | What it showed |
+|---|---|---|---|
+| (no log) `tests/stage1215-cup-team-games.test.ts` | + the Cup-start test for all seven | 13/13 | |
+| `unit-suite-3.log` | + the driver fixes | 1929/1929 | Lint and both typechecks clean. |
+| `check-team-draw-r1.log` | same | 45/0 | With the self-check. |
+| `check-f5-r1.log` | same | 36/0 | The day playlist without the seven, which it logs. |
+| `e2e-chromium-r1.log` | same | 15/15 ("E2E ALL PASSED") | The e2e player prints `OK`, not `PASS`, lines. It logs the seven as played by their own drivers. |

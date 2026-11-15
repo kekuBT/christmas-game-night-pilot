@@ -1,0 +1,16 @@
+
+FAILED (exit 1) | full | run 20261115-001634-f52309c4-21676
+  103 passed, 3 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      e2e-chromium (w1) [functional]: [chromium] FAIL team-huddle: locator.waitFor: Timeout 20000ms exceeded. | [chromium] FAIL relay: locator.click: Timeout 30000ms exceeded. | [chromium] FAIL split-clues: locator.click: Timeout 30000ms 
+            [chromium]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this
+  FAIL      check-f5 (w2) [functional]: FAIL team-huddle: locator.waitFor: Timeout 20000ms exceeded. | FAIL day playlist: team-huddle finished without sticking — locator.waitFor: Timeout 20000ms exceeded. | FAIL day playlist: all games fini
+            DIAG player=Alex game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this round: 0:05"
+  FAIL      check-team-draw (w3) [functional]: FAIL B only the drawers' phones show the word | FAIL B the TV shows no word and its data has neither the word nor any drawing
+  timing   wall 40m 13s · step time 1h 57m (sum) · 3 workers, 97% busy · 2.91× the same steps run one after another
+           predicted 29–67m (about 37m 47s, low-confidence) → actual 40m 13s (+6%)
+           longest  e2e-chromium 11m 35s, check-f5 7m 25s, check-leaderboard 6m 36s · the longest step is 29% of the wall time
+           machine  CPU mean 31%, peak 98% · memory available ≥ 12745 MB · load peak 6.33 · backpressure 11 wait(s), 70s
+           contention ×1.067 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215full/test-results/20261115-001634-f52309c4-21676/report.json
