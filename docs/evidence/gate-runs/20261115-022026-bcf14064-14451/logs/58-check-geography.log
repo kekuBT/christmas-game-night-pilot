@@ -1,0 +1,31 @@
+$ node scripts/check-geography.mjs http://localhost:44173
+# timeout 600s | worker w1 | server http://localhost:44173 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215full3/test-results/20261115-022026-bcf14064-14451/server-data/w1)
+
+[+3.6s] PASS guest sees no game setup (host-only)
+[+3.6s] PASS guest sees no geography start control
+[+4.9s] PASS host sees the kit geography panel
+[+4.9s] PASS Bea sees the kit geography panel
+[+4.9s] PASS the first question comes from the geography content (oracle knows its answer)
+[+4.9s] PASS question counter reads 1 of 8
+[+4.9s] PASS four answer options
+[+4.9s] PASS no TV stage chip (Geography has no TV stage)
+[+5.3s] PASS no horizontal overflow at 320px
+[+5.6s] PASS no horizontal overflow at 360px
+[+5.9s] PASS no horizontal overflow at 390px
+[+6.1s] PASS locked view shows the chosen answer (Jordan)
+[+7.5s] PASS the next question is a different one
+[+15.7s] PASS Bea sees the waiting ring after all 8 answers
+[+15.7s] PASS Bea's done state says all answers are in
+[+24.0s] PASS game finishes and shows results
+[+24.0s] PASS host scores 800 (all eight correct)
+[+24.0s] PASS Bea scores 0 (all eight wrong)
+[+24.0s] PASS host wins the game
+[+28.7s] PASS abstention shows the sat-out waiting ring
+[+28.7s] PASS no skip button before the deadline (host only, stalled only)
+[+28.8s] PASS reloaded player is still sat out (abstention survived)
+[+38.0s] PASS game finishes without the abstained player
+[+38.0s] PASS abstained player scores 0
+[+38.1s] GEOGRAPHY ALL PASSED
+[+38.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 38.1s | cpu 4.3s, peak memory 261 MB

@@ -26,6 +26,7 @@
 import { GAME_MANIFESTS, type GameManifest } from "./manifest.js";
 import { GAME_REGISTRY } from "./registry.js";
 import { seededRng } from "../shared/rng.js";
+import { TEAM_RANKED_GAMES } from "../shared/teams.js";
 
 export type ShuffleMode = "random" | "smart" | "tournament";
 export type ShuffleReason =
@@ -112,7 +113,9 @@ function validateRequest(r: ShuffleRequest): { count: number; exclude: Set<strin
  * schedules all draw from here and serve Cups too, where such a game can't
  * play; a host starts it from the library.
  */
-const NEVER_AUTO_PICKED: ReadonlySet<string> = new Set(GAME_REGISTRY.filter((g) => g.casualOnly).map((g) => g.id));
+// Stage 12.15 (D-S1215-01): the games built for teams play in Cups now, but are still never picked automatically: they
+// need teams and four players, and the host chooses them.
+const NEVER_AUTO_PICKED: ReadonlySet<string> = new Set([...GAME_REGISTRY.filter((g) => g.casualOnly).map((g) => g.id), ...TEAM_RANKED_GAMES]);
 
 /** The hard-constraint filter. Exported so callers (and the UI) can show how many games fit before picking. */
 export function eligibleGames(manifests: readonly GameManifest[], req: ShuffleRequest): GameManifest[] {

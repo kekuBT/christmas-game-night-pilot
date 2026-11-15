@@ -1,0 +1,29 @@
+PASS A Iris had 1 player, so Neema plays with another team (and the game has three teams) — [{"playerId":"player-7","from":"team-iris","to":"team-coral"}]
+PASS A Neema's briefing says she plays with another team this game
+PASS A everyone else's briefing says so too
+PASS A the TV shows a three-team scoreboard
+PASS B every phone shows exactly the clues the server dealt it
+PASS B each team's phones hold all six clues between them
+PASS B the puzzle is known to the driver from its clues — sc-012
+PASS B self-check: a team's name doesn't count as the answer
+PASS B the TV shows the puzzle's kind but no clue and not the answer
+PASS B the TV's data has no clue and not the answer
+PASS C a teammate sees the wrong try
+PASS C the team's answer box pauses
+PASS C another team's phone never shows the try
+PASS C the TV never shows the try
+PASS C the pause ends by itself
+PASS D at 30 s every phone and the TV show the answer's shape
+PASS D at 45 s every phone shows its team's six clues
+PASS D at 60 s the first letter
+PASS E the team that solved it second sees its place
+PASS E places 1, 2, 3 by solve order, 100 / 75 / 55 — {"team-coral":[2,75],"team-sun":[1,100],"team-mint":[3,55]}
+PASS E the reveal on a phone: the answer, all six clues and each team's result
+PASS E the reveal on the TV
+PASS F the game finished with team results for three teams — [["team-coral",1,575],["team-sun",2,475],["team-mint",3,405]]
+PASS F every player scored their team's points
+PASS F phones: the results, a team-led heading and the team results card
+PASS F the TV leads with the team result
+PASS F 320 px: the results have no sideways scroll
+note: teams team-coral=Keku+Amina+Neema team-sun=Baraka+Wanjiru team-mint=Zawadi+Juma
+SPLIT CLUES PASSED

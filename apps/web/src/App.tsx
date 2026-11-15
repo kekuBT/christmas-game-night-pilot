@@ -1066,10 +1066,14 @@ export function App() {
   useEffect(() => { if (roomId && playerId && route.name === "room") anchorHomeBelow(); }, [roomId, playerId, route.name]);
   const planMe = proj?.players.find((p) => p.id === playerId);
   const planner = !!(planMe?.isHost || planMe?.isCohost);
+  // Stage 12.15 (D-S1215-01): a team game counts in a Family Cup, but not in an Individual Family Cup (made before
+  // Stage 12.15, whose rules never change): the server refuses it as official there, so the lobby offers Practice.
+  const teamGamesDontCount = proj?.competition?.teamGamesCount === false;
+  const canCountHere = (g: RegistryGame | undefined): boolean => !!g && g.lifecycle?.officialEligible !== false && !(teamGamesDontCount && TEAM_NATIVE_GAMES.has(g.id));
   const serverPlan = proj?.upNext;
   const localPlan = (() => {
     const g = games.find((x) => x.id === upNextId) ?? games[0];
-    return g ? { gameId: g.id, official: proj?.roomKind !== "casual" && proj?.roomKind !== "solo" && !proj?.cupFinished && g.lifecycle?.officialEligible !== false && gameMode === "official" } : undefined;
+    return g ? { gameId: g.id, official: proj?.roomKind !== "casual" && proj?.roomKind !== "solo" && !proj?.cupFinished && canCountHere(g) && gameMode === "official" } : undefined;
   })();
   const publishPlan = (plan: { gameId: string; official: boolean } | undefined) => {
     if (!roomId || !plan) return;
@@ -1120,7 +1124,7 @@ export function App() {
     // Adopted from another host tab or the cohost: this tab didn't press a lineup control, so it is a plain pick here.
     if (serverPlan.gameId !== upNextId) { tabSet("mz_upnext", serverPlan.gameId); setUpNextIdRaw(serverPlan.gameId); tabSet("mz_upnext_src", "manual"); setUpNextSourceRaw("manual"); }
     const m = serverPlan.official ? "official" : "practice";
-    if (m !== gameMode && games.find((g) => g.id === serverPlan.gameId)?.lifecycle?.officialEligible !== false) setGameModeRaw(m);
+    if (m !== gameMode && canCountHere(games.find((g) => g.id === serverPlan.gameId))) setGameModeRaw(m);
   }, [planner, serverPlan?.gameId, serverPlan?.official]);
   /** TV / spectator screen for the Sprint 4 games (never answers or authors while playing). */
   /**
@@ -1576,8 +1580,14 @@ export function App() {
       const top = teamRows.filter((r) => r.rank === 1);
       const counted = teamRows.filter((r) => r.score !== null).length;
       const mine = playerId ? teamRows.find((r) => r.members.includes(playerId)) : undefined;
+      // Stage 12.15 (D-S1215-01): the one-line comment is about the teams too. Picked from the players' scores, a team
+      // game's teammates look "tied for first" ("Tied for first. Diplomacy wins."); only an Official game (a Cup's team
+      // game) picks from these lines, Casual and Practice have their own.
+      const teamScores = Object.fromEntries(teamRows.filter((r) => r.score !== null).map((r) => [r.teamId, r.score!] as const));
+      const teamQuip = resultsStory({ gameInstanceId: g.id, title, official, casual: proj?.roomKind === "casual", scores: teamScores, nameOf: (id) => teamRows.find((r) => r.teamId === id)?.name ?? "A team" }).quip;
       story = {
         ...story,
+        quip: teamQuip,
         // "Team Sun wins Team Huddle", "Team Coral and Team Sun tie for first in Charades", "Every team tied in Charades".
         headline: !line ? story.headline : line.endsWith(" wins") ? `${line} ${title}` : `${line} in ${title}`,
         winners: top.flatMap((r) => r.members),
@@ -1603,7 +1613,8 @@ export function App() {
   const upNext = planner ? (games.find((g) => g.id === upNextId) ?? games[0]) : games.find((g) => g.id === serverPlan?.gameId);
   // Practice-only games (Impostor, Charades) can't count: the server refuses
   // them as official, so the lobby starts them as practice and says why.
-  const upNextPracticeOnly = upNext?.lifecycle?.officialEligible === false;
+  const upNextPracticeOnly = !!upNext && !canCountHere(upNext);
+  const upNextPracticeReason = upNext?.lifecycle?.officialEligible === false ? upNext.lifecycle?.practiceOnlyReason : "This Family Cup counts individual games only, so team games are practice here.";
   // Stage 6.1: a casual room has no Cup, so every game in it is just for fun
   // (the server refuses official starts there). Rooms without a kind are Cups.
   const casualRoom = proj?.roomKind === "casual" || proj?.roomKind === "solo";
@@ -1784,7 +1795,7 @@ export function App() {
           connected={connectedNow}
           recentIds={(proj?.games ?? []).filter((g) => g.status === "finished").map((g) => g.gameId).reverse()}
           saved={proj?.party?.lineup ? { expectedPlayers: proj.party.lineup.expectedPlayers, budgetMinutes: proj.party.lineup.budgetMinutes, gameIds: proj.party.lineup.items.map((i) => i.gameId), ...(cupParty ? { official: proj.party.lineup.items.map((i) => i.official === true) } : {}) } : undefined}
-          {...(cupParty ? { cup: { canCount: (id: string) => games.find((x) => x.id === id)?.lifecycle?.officialEligible !== false && !games.find((x) => x.id === id)?.casualOnly } } : {})}
+          {...(cupParty ? { cup: { canCount: (id: string) => canCountHere(games.find((x) => x.id === id)) && !games.find((x) => x.id === id)?.casualOnly } } : {})}
           initialSize={partyReplan}
           currentRevision={proj?.party?.revision ?? 0}
           onApply={applyParty}
@@ -2121,8 +2132,8 @@ export function App() {
               onReplan={(n) => { setPartyAsk(null); setPartyReplan(n); openSheet("party"); }}
             />
           </>) : undefined}
-          teams={proj?.roomKind === "casual" ? (
-            <TeamsCard teams={proj.teams} players={players} youId={playerId ?? ""} isHost={isHostish} upNextId={upNext?.id} busy={teamsBusy}
+          teams={proj?.roomKind === "casual" || proj?.roomKind === "cup" ? (
+            <TeamsCard teams={proj.teams} players={players} youId={playerId ?? ""} isHost={isHostish} upNextId={upNext?.id} busy={teamsBusy} cup={proj.roomKind === "cup"}
               onEdit={() => { setTeamsErr(""); openSheet("teams"); }} onPlay={(on) => void teamsPost({ action: "play", on })} />
           ) : undefined}
           family={proj?.roomKind === "casual" ? (
@@ -2142,7 +2153,7 @@ export function App() {
                 { value: "practice", title: "Practice", tone: "mint", testId: "mode-practice", detail: "Just for fun · no Cup points" },
               ]}
             />
-            {upNextPracticeOnly && <p className="mz-foot" style={{ margin: "8px 0 0", fontWeight: 600 }} data-testid="practice-only-note">Practice only: {upNext.lifecycle?.practiceOnlyReason}</p>}
+            {upNextPracticeOnly && <p className="mz-foot" style={{ margin: "8px 0 0", fontWeight: 600 }} data-testid="practice-only-note">Practice only: {upNextPracticeReason}</p>}
             {startMode === "official" && officialShort && (
               <NoticeCard testId="official-needs-two" title="Official games need at least 2 players"
                 action={<button type="button" className="mz-key mz-key--surface mz-key--md" data-testid="switch-to-practice" onClick={() => setGameMode("practice")}>Play it as practice instead</button>}>

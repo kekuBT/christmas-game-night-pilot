@@ -74,7 +74,8 @@ const qualified = (r: R) => r.engine.championshipResults().map((x) => x.playerId
 describe("new Cups: who qualifies, game by game", () => {
   it("new rooms carry the approved rule in a saved Cup record", () => {
     const { engine } = room();
-    expect(engine.cup).toMatchObject({ schemaVersion: 1, origin: "created", format: "individual-only", qualificationPolicy: NEW_CUP_QUALIFICATION_POLICY });
+    // Stage 12.15 (D-S1215-01): new Cups use the owner-approved Family Cup format (75% individual, 25% team).
+    expect(engine.cup).toMatchObject({ schemaVersion: 1, origin: "created", format: "combined-75-25", qualificationPolicy: NEW_CUP_QUALIFICATION_POLICY });
     expect((engine.toJSON()["cup"] as Json)["qualificationPolicy"]).toEqual(NEW_CUP_QUALIFICATION_POLICY);
   });
 

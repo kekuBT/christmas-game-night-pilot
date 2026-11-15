@@ -85,8 +85,9 @@ describe("teams in the room (D-S127-01)", () => {
     expect(engine.teams!.paused).toBeUndefined();
     engine.clearTeams(host);
     expect(engine.teams).toBeNull();
+    // Stage 12.15 (D-S1215-01): a Family Cup has teams too, for its games built for teams.
     const cup = room(3, "cup");
-    try { cup.engine.makeTeams(cup.ids[0]!, 2); expect.unreachable(); } catch (e) { expect((e as TeamsRefused).code).toBe("NOT_A_CASUAL_ROOM"); }
+    expect(cup.engine.makeTeams(cup.ids[0]!, 2).list).toHaveLength(2);
   });
 
   it("a newcomer joins the smallest team; the teams are public on every screen and saved with the room", () => {

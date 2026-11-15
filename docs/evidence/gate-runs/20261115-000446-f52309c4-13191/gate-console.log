@@ -1,0 +1,106 @@
+Mchezo gate targeted | run 20261115-000446-f52309c4-13191
+  revision f52309c45c5515d629647c1c75c4d3f7ab55ee6a (clean tree) | fingerprint 2d0bb1f40abb (606 files)
+  plan     26 steps: 1 fast/build, 24 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  194 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.05 for 3 worker(s) (measured, 168 run(s))
+  estimate this run: 7–19m (low-confidence) · the same steps one after another: about 27m 15s · longest step check-leaderboard ~6m 09s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.05 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-cup-team-games
+  thin     only 1–2 samples for: browser-preflight, check-know-your-rivals
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215t1/test-results/20261115-000446-f52309c4-13191
+        start build-web on w1 (usually 7s)
+[ 1/26] PASS         5.9s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/26] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:41523 (pid 13310, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215t1/test-results/20261115-000446-f52309c4-13191/server-data/w1)
+  server   w2 http://localhost:44731 (pid 13311, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215t1/test-results/20261115-000446-f52309c4-13191/server-data/w2)
+  server   w3 http://localhost:45249 (pid 13316, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215t1/test-results/20261115-000446-f52309c4-13191/server-data/w3)
+        start check-leaderboard on w1 (usually 6m 09s)
+        start check-session-flow on w2 (usually 2m 52s)
+        start check-tug-of-war on w3 (usually 2m 16s)
+── progress  2/26 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-leaderboard 52s (w1), check-session-flow 52s (w2), check-tug-of-war 52s (w3)
+   remaining 6–18m · total 7–19m · done around 00:12–00:22 UTC (low-confidence)
+── progress  2/26 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-leaderboard 1m 52s (w1), check-session-flow 1m 52s (w2), check-tug-of-war 1m 52s (w3)
+   remaining 5–17m · total 7–19m · done around 00:12–00:22 UTC (low-confidence)
+[ 3/26] PASS       144.8s  check-tug-of-war  w3
+        start check-lifecycle on w3 (usually 2m 02s)
+── progress  3/26 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-leaderboard 2m 52s (w1), check-session-flow 2m 52s (w2), check-lifecycle 27s (w3)
+   remaining 4–15m · total 7–18m · done around 00:12–00:22 UTC (low-confidence)
+[ 4/26] PASS         183s  check-session-flow  w2
+        start check-split-clues on w2 (usually 1m 44s)
+── progress  4/26 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-leaderboard 3m 52s (w1), check-lifecycle 1m 27s (w3), check-split-clues 49s (w2)
+   remaining 3–13m · total 7–17m · done around 00:12–00:21 UTC (low-confidence)
+[ 5/26] PASS       129.3s  check-lifecycle  w3
+        start check-briefing on w3 (usually 1m 28s)
+── progress  5/26 done · 5 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-leaderboard 4m 52s (w1), check-split-clues 1m 49s (w2), check-briefing 18s (w3)
+   remaining 3–12m · total 8–17m · done around 00:12–00:21 UTC (low-confidence)
+[ 6/26] PASS       109.4s  check-split-clues  w2
+        start check-territory on w2 (usually 1m 24s)
+── progress  6/26 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-leaderboard 5m 52s (w1), check-briefing 1m 18s (w3), check-territory 1m 00s (w2)
+   remaining 2–10m · total 8–16m · done around 00:13–00:20 UTC (low-confidence)
+[ 7/26] PASS        94.8s  check-briefing  w3
+        start check-warm-ivory on w3 (usually 1m 04s)
+[ 8/26] PASS        89.1s  check-territory  w2
+        start check-cup-team-games on w2 (no timing history)
+[ 9/26] PASS       405.9s  check-leaderboard  w1
+        start check-team-draw on w1 (usually 56s)
+── progress  9/26 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 7m 00s
+   running   check-warm-ivory 43s (w3), check-cup-team-games 30s (w2), check-team-draw 6s (w1)
+   remaining 2–7m · total 9–14m · done around 00:13–00:18 UTC (low-confidence)
+[10/26] PASS        67.7s  check-warm-ivory  w3
+        start check-know-your-rivals on w3 (usually 54s)
+[11/26] PASS        58.4s  check-team-draw  w1
+        start check-team-huddle on w1 (usually 52s)
+── progress  11/26 done · 11 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 8m 00s
+   running   check-cup-team-games 1m 30s (w2), check-know-your-rivals 35s (w3), check-team-huddle 8s (w1)
+   remaining 1–6m · total 9–14m · done around 00:14–00:17 UTC (low-confidence)
+[12/26] PASS        55.8s  check-know-your-rivals  w3
+        start check-results on w3 (usually 48s)
+[13/26] PASS        55.7s  check-team-huddle  w1
+        start check-quick-party on w1 (usually 48s)
+[14/26] PASS         143s  check-cup-team-games  w2
+        start check-one-path on w2 (usually 33s)
+── progress  14/26 done · 14 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 9m 00s
+   running   check-results 39s (w3), check-quick-party 12s (w1), check-one-path 7s (w2)
+   remaining 0–3m · total 9–12m · done around 00:14–00:16 UTC (low-confidence)
+[15/26] PASS        50.6s  check-results  w3
+        start check-cup-party on w3 (usually 32s)
+[16/26] PASS        33.4s  check-one-path  w2
+        start check-library-nav on w2 (usually 25s)
+[17/26] PASS        50.6s  check-quick-party  w1
+        start check-relay on w1 (usually 24s)
+[18/26] PASS        32.9s  check-cup-party  w3
+        start check-cup-memory on w3 (usually 15s)
+[19/26] PASS        27.3s  check-library-nav  w2
+        start check-teams on w2 (usually 12s)
+[20/26] PASS        13.8s  check-cup-memory  w3
+        start check-tv-show on w3 (usually 12s)
+── progress  20/26 done · 20 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 10m 00s
+   running   check-relay 21s (w1), check-teams 7s (w2), check-tv-show 2s (w3)
+   remaining 15–36s · total 10–11m · done around 00:15–00:15 UTC (low-confidence)
+[21/26] PASS        25.5s  check-relay  w1
+        wait  check-official-practice: load 4.0 > 4 CPUs
+[22/26] PASS        11.9s  check-teams  w2
+        start check-official-practice on w1 (usually 10s)
+        start check-library on w2 (usually 6s)
+[23/26] PASS          13s  check-tv-show  w3
+        start check-a11y-surfaces on w3 (usually 3s)
+[24/26] PASS         3.3s  check-a11y-surfaces  w3
+[25/26] PASS         6.6s  check-library  w2
+[26/26] PASS          10s  check-official-practice  w1
+
+PASSED (exit 0) | targeted | run 20261115-000446-f52309c4-13191
+  26 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 10m 20s · step time 30m 22s (sum) · 3 workers, 98% busy · 2.94× the same steps run one after another
+           predicted 7–19m (about 9m 35s, low-confidence) → actual 10m 20s (+8%)
+           longest  check-leaderboard 6m 46s, check-session-flow 3m 03s, check-tug-of-war 2m 25s · the longest step is 65% of the wall time
+           machine  CPU mean 28%, peak 90% · memory available ≥ 13492 MB · load peak 5.06 · backpressure 1 wait(s), 5s
+           contention ×1.055 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215t1/test-results/20261115-000446-f52309c4-13191/report.json

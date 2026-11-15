@@ -6,12 +6,16 @@
  * the only authority. A medal is a way of telling the night's story on the TV, nothing more.
  */
 
+import { TEAM_NATIVE_GAMES } from "../../../../../../src/shared/teams.js";
+
 /** The public facts a finished game needs for medals. */
 export interface MedalGame {
   id: string;
   gameId: string;
   status: string;
   rawScores?: Record<string, number>;
+  /** Stage 12.15: a game built for teams' finished team results (members, score, shared rank). */
+  teamResults?: readonly { members: readonly string[]; score: number | null; rank: number | null }[];
   /** A cooperative game has one team result and never a winner (Stage 9.3). */
   outcome?: { team?: unknown } | null;
 }
@@ -44,10 +48,28 @@ export function placesOf(rawScores: Record<string, number> | undefined): PlacedS
   return rows;
 }
 
-/** Whether a finished game awards medals at all (competitive, two or more scored players, not all tied). */
+/**
+ * Stage 12.15 (D-S1215-01): one finished game's places. A game built for teams places its teams: every member of the
+ * winning team gets gold, the next team silver, then bronze (shared team ranks, as in placesOf; a medal needs a team
+ * score above zero; no medals when every team tied). Ranking a team game's players instead would leave the second team
+ * without a medal whenever the first had two or more players. Any other game: placesOf.
+ */
+export function placesOfGame(g: MedalGame): PlacedScore[] {
+  const teams = TEAM_NATIVE_GAMES.has(g.gameId) ? (g.teamResults ?? []).filter((t) => t.score !== null && t.rank !== null) : [];
+  if (teams.length < 2) return placesOf(g.rawScores);
+  const allTied = teams.every((t) => t.score === teams[0]!.score);
+  const rows: PlacedScore[] = [];
+  for (const t of [...teams].sort((a, b) => a.rank! - b.rank!)) {
+    const medal: Medal | null = allTied || t.score! <= 0 ? null : t.rank === 1 ? "gold" : t.rank === 2 ? "silver" : t.rank === 3 ? "bronze" : null;
+    for (const playerId of [...t.members].sort()) rows.push({ playerId, score: g.rawScores?.[playerId] ?? t.score!, rank: t.rank!, medal });
+  }
+  return rows;
+}
+
+/** Whether a finished game awards medals at all (competitive, two or more scored players or teams, not all tied). */
 export function awardsMedals(g: MedalGame): boolean {
   if (g.status !== "finished" || g.outcome?.team) return false;
-  return placesOf(g.rawScores).some((p) => p.medal !== null);
+  return placesOfGame(g).some((p) => p.medal !== null);
 }
 
 export interface MedalRow { playerId: string; gold: number; silver: number; bronze: number }
@@ -64,7 +86,7 @@ export function medalTable(games: readonly MedalGame[], nameOf: (playerId: strin
   for (const g of games) {
     if (!include(g) || !awardsMedals(g)) continue;
     counted += 1;
-    for (const p of placesOf(g.rawScores)) {
+    for (const p of placesOfGame(g)) {
       if (!p.medal) continue;
       const row = byPlayer.get(p.playerId) ?? { playerId: p.playerId, gold: 0, silver: 0, bronze: 0 };
       row[p.medal] += 1;
@@ -86,7 +108,7 @@ export interface PodiumStep { place: 1 | 2 | 3; medal: Medal; players: { playerI
  */
 export function podiumOf(g: MedalGame): PodiumStep[] | null {
   if (!awardsMedals(g)) return null;
-  const places = placesOf(g.rawScores);
+  const places = placesOfGame(g);
   const step = (place: 1 | 2 | 3, medal: Medal): PodiumStep => ({ place, medal, players: places.filter((p) => p.medal === medal).map(({ playerId, score }) => ({ playerId, score })) });
   return [step(1, "gold"), step(2, "silver"), step(3, "bronze")];
 }

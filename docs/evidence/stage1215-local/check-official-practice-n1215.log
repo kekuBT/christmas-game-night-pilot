@@ -1,0 +1,30 @@
+PASS the server runs without the content test mode
+PASS start: the Cup is empty on the server
+PASS default: the host's lobby starts an eligible game as Official — start-official-trivia
+PASS practice-only: Charades offers Practice only, and says why
+PASS refused: an official start of a practice-only game (Charades) — 400 {"error":"Charades is practice-only until its team scoring is redesigned."}
+PASS refused: an official start of a practice-only game (Charades) — standings and games unchanged — {"standings":{},"championship":[],"games":0}
+PASS refused: an official start by a guest — 400 {"error":"Only host/cohost can start a game"}
+PASS refused: an official start by a guest — standings and games unchanged — {"standings":{},"championship":[],"games":0}
+PASS refused: an official Category Sprint with no approved content — 409 {"error":"No suitable official Category Sprint categories are left for 4 players in this Cup (0 suitable, 3 needed). Official categories must be closed lists la
+PASS refused: an official Category Sprint with no approved content — standings and games unchanged — {"standings":{},"championship":[],"games":0}
+PASS practice: the game finished as practice and does not count
+PASS practice: the official standings did not move
+PASS practice: Amina's results say it doesn't count
+PASS practice: the Cup screen is still empty
+PASS official: the official standings now have all four players — {"player-1":100,"player-2":66.67,"player-3":33.33,"player-4":0}
+PASS official: the order follows the game (Keku > Amina > Baraka > Dee)
+PASS official: Amina's results say it counts
+PASS official: the Cup screen shows the server's order
+PASS official: the Cup lists the official game, not the practice one — Official games so far Math Mayhem · Day 1 Keku 100 · Amina 66.7 · Baraka 33.3 · Dee 0 Placement points: 100 for the top, 0 for the bottom, shared on ties. In a team game the teams are placed, and everyone gets their team's placement. A day's score is 75% the average of individual games and 25% the average of team games (a day with only one kind uses that kind).
+PASS practice again (reversed scores): the official standings did not move
+PASS override: a guest is refused — 400 Only host/cohost can override a score
+PASS override: the host without a reason is refused — 400 Override reason is required
+PASS override: after both refusals the standings did not move
+PASS override: the host may correct a practice score… — 200 {"ok":true}
+PASS override: …and the official standings still did not move
+PASS the Cup screen reads exactly as before the practice game and the overrides
+PASS one player: the lobby explains Official needs 2 and offers Practice
+PASS one player: the server refuses an official Word Connections (OFFICIAL_NEEDS_TWO) — 409 OFFICIAL_NEEDS_TWO
+PASS one player: nothing was created and the Cup is empty
+OFFICIAL VS PRACTICE ALL PASSED

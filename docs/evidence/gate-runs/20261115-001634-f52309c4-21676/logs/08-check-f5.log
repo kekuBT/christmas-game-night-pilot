@@ -1,0 +1,67 @@
+$ node scripts/check-f5.mjs http://localhost:42855
+# timeout 1500s | worker w2 | server http://localhost:42855 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215full/test-results/20261115-001634-f52309c4-21676/server-data/w2)
+
+[+5.5s] PASS lobby roster: 4 players joined
+[+5.5s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, team-huddle, relay, split-clues, team-draw, territory, tug-of-war, know-your-rivals, draw-guess (21 games; casual-only, not in a Cup: jebena-rush, spectrum, family-questions)
+[+6.9s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+20.4s] OK impostor: finished
+[+20.4s] PASS day playlist: impostor finished without sticking
+[+21.5s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+53.8s] OK caption-clash: finished
+[+53.8s] PASS day playlist: caption-clash finished without sticking
+[+55.0s] PASS TV projection leak-free while trivia playing — no forbidden keys
+[+97.5s] OK trivia: finished
+[+97.5s] PASS day playlist: trivia finished without sticking
+[+98.6s] PASS TV projection leak-free while word-connections playing — no forbidden keys
+[+121.8s] OK word-connections: finished
+[+121.8s] PASS day playlist: word-connections finished without sticking
+[+122.9s] PASS TV projection leak-free while who-said-that playing — no forbidden keys
+[+137.5s] OK who-said-that: finished
+[+137.5s] PASS day playlist: who-said-that finished without sticking
+[+138.6s] PASS TV projection leak-free while guess-the-year playing — no forbidden keys
+[+168.6s] OK guess-the-year: finished
+[+168.6s] PASS day playlist: guess-the-year finished without sticking
+[+169.7s] PASS TV projection leak-free while closest-wins playing — no forbidden keys
+[+193.2s] OK closest-wins: finished
+[+193.2s] PASS day playlist: closest-wins finished without sticking
+[+194.4s] PASS TV projection leak-free while category-sprint playing — no forbidden keys
+[+205.2s] OK category-sprint: finished
+[+205.2s] PASS day playlist: category-sprint finished without sticking
+[+206.4s] PASS TV projection leak-free while charades playing — no forbidden keys
+[+216.1s] OK charades: finished
+[+216.1s] PASS day playlist: charades finished without sticking
+[+217.3s] PASS TV projection leak-free while geography playing — no forbidden keys
+[+251.5s] OK geography: finished
+[+251.5s] PASS day playlist: geography finished without sticking
+[+252.9s] PASS TV projection leak-free while math-mayhem playing — no forbidden keys
+[+295.1s] OK math-mayhem: finished
+[+295.1s] PASS day playlist: math-mayhem finished without sticking
+[+296.6s] PASS TV projection leak-free while majority-rules playing — no forbidden keys
+[+359.2s] OK majority-rules: finished
+[+359.2s] PASS day playlist: majority-rules finished without sticking
+[+360.6s] PASS TV projection leak-free while pattern-pulse playing — no forbidden keys
+[+408.8s] OK pattern-pulse: finished
+[+408.8s] PASS day playlist: pattern-pulse finished without sticking
+[+430.1s] FAIL team-huddle: locator.waitFor: Timeout 20000ms exceeded.
+[+430.1s] Call log:
+[+430.1s]   - waiting for getByRole('heading', { name: 'Now playing: Team Huddle' }) to be visible
+[+430.1s] 
+[+430.2s]   DIAG player=Alex game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this round: 0:05" | type=waiting-on-players
+[+430.2s]   DIAG player=Sam game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this round: 0:05" | type=waiting-on-players
+[+430.2s]   DIAG player=Jo game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this round: 0:05" | type=waiting-on-players
+[+430.2s]   DIAG player=Kim game=team-huddle(game-14) server=playing phase=0:pick deadlineIn=460s phaseIn=5s submitted=0/4 outcome=- | screen="Team Huddle: question 1 of 8" clock="Time left for this round: 0:05" | type=waiting-on-players
+[+430.2s] FAIL day playlist: team-huddle finished without sticking — locator.waitFor: Timeout 20000ms exceeded.
+[+430.2s] Call log:
+[+430.2s]   - waiting for getByRole('heading', { name: 'Now playing: Team Huddle' }) to be visible
+[+430.2s] 
+[+430.2s] FAIL day playlist: all games finished in one room — 13/21 finished
+[+430.2s] FAIL ledger holds one game-finished event per playlist game — 13/21 finish events
+[+430.2s] FAIL TV projection marks every playlist game finished — team-huddle, relay, split-clues, team-draw, territory, tug-of-war, know-your-rivals, draw-guess
+[+445.2s] FATAL: locator.waitFor: Timeout 15000ms exceeded.
+[+445.2s] Call log:
+[+445.2s]   - waiting for getByTestId('room-menu').or(getByRole('button', { name: 'Championship', exact: true })).first() to be visible
+[+445.2s] 
+[+445.3s] F5 FAILED: 5/32 failed
+[+445.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# FAIL (exit 1) in 445.3s | cpu 24.7s, peak memory 278 MB

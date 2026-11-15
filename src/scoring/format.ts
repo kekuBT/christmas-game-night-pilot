@@ -7,14 +7,16 @@
  * they belong to.
  *
  * - "individual-only" (the TEMPORARY Individual Family Cup, every room
- *   created from Sprint 3 on): only individual games count. Team games
+ *   created from Sprint 3 until Stage 12.15): only individual games count. Team games
  *   contribute nothing (there is no fake team share), so a day's score is
  *   the mean of that day's individual placement scores. Everything else is
  *   unchanged: best three days, the attendance (participation) bonus, the
  *   0-100 midrank normalisation, the qualifying-day minimum.
  * - "combined-75-25" (the original owner-approved formula, 2026-11-04):
  *   75% individual + 25% team. Rooms created before Sprint 3 keep it, so
- *   their historical results are computed exactly as before.
+ *   their historical results are computed exactly as before; rooms created
+ *   from Stage 12.15 on use it again (the owner's answer of 2026-11-14:
+ *   team games count in a Family Cup).
  *
  * Team capability is kept: the combined format and the team channel in
  * src/scoring/championship.ts are unchanged and still tested, ready for a
@@ -54,8 +56,12 @@ export const COMPETITION_FORMATS: Readonly<Record<CompetitionFormat, FormatInfo>
   },
 });
 
-/** The format for rooms created now. */
-export const NEW_ROOM_FORMAT: CompetitionFormat = "individual-only";
+/**
+ * The format for rooms created now. Stage 12.15 (D-S1215-01): the owner-approved Family Cup (75% individual, 25% team),
+ * now that the games built for teams give checked, team-ranked results. Rooms created as Individual Family Cups keep
+ * their format (D-S3-07).
+ */
+export const NEW_ROOM_FORMAT: CompetitionFormat = "combined-75-25";
 /** The format a snapshot written before formats existed was played under. */
 export const LEGACY_ROOM_FORMAT: CompetitionFormat = "combined-75-25";
 

@@ -13,6 +13,7 @@ import { Keycap, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
 import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { Option } from "./MchezoFamily.js";
 import { TeamMark } from "./Teams.js";
+import { teamGameModeLine } from "./TeamGameKit.js";
 import { SendNote } from "./SendNote.js";
 import type { TeamDef } from "../../../../../src/shared/teams.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
@@ -151,7 +152,7 @@ export function MchezoRelayResults({ game, publicGame, players, playerId, title,
       {next}
       <GameHeader title={title} objective="Who got home first?" accent={3} />
       <RelayLanes game={game} view={st} nameOf={nameOf} mine={st.myTeamId} testId="mz-rl-final-lanes" over />
-      <p className="mz-foot" data-testid="mz-rl-howscore">10 points per leg, and 30, 20 or 10 for the first three teams home. Every player scores their team’s points. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
+      <p className="mz-foot" data-testid="mz-rl-howscore">10 points per leg, and 30, 20 or 10 for the first three teams home. Every player scores their team’s points. {teamGameModeLine(casual, game.official ?? publicGame?.official)}</p>
       <OutcomeSummary gameId="relay" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>

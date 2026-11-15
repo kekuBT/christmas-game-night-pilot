@@ -6,9 +6,11 @@
  *    Charades through the 75/25 team channel, a host-skipped game and a
  *    score override) restores on Sprint 3 with IDENTICAL standings,
  *    championship and ceremony.
- * 2. New rooms run the Individual Family Cup: team games add nothing, a
- *    day is the mean of its individual placement scores, best three days +
- *    attendance bonus + midrank normalisation unchanged.
+ * 2. An Individual Family Cup (every room made from Sprint 3 until Stage
+ *    12.15): team games add nothing, a day is the mean of its individual
+ *    placement scores, best three days + attendance bonus + midrank
+ *    normalisation unchanged. Rooms made from Stage 12.15 on are Family Cups
+ *    (75/25) again (D-S1215-01; tests/stage1215-cup-team-games.test.ts).
  * 3. A Cup's format cannot change after the room exists.
  * 4. Qualification options exist but the active rule is the existing one.
  * 5. A seven-day Individual Cup with deadline endings and restarts.
@@ -58,14 +60,21 @@ describe("historical Cups keep their rules (before/after)", () => {
   });
 });
 
-describe("the Individual Family Cup (new rooms)", () => {
+describe("the Individual Family Cup (rooms created from Sprint 3 until Stage 12.15)", () => {
+  // Stage 12.15 (D-S1215-01): new rooms are Family Cups (75/25) again. An Individual Family Cup made before then keeps
+  // its format, so these tests build one the way it is saved.
   function room(n: number) {
     let t = 1_800_000_000_000;
-    const engine = new RoomEngine("Individual Cup");
-    engine.clock = () => t;
-    const host = engine.join("Ada", { asHost: true }).player.id;
+    const made = new RoomEngine("Individual Cup");
+    made.clock = () => t;
+    const host = made.join("Ada", { asHost: true }).player.id;
     const ids = [host];
-    for (let i = 1; i < n; i++) ids.push(engine.join(`P${i}`).player.id);
+    for (let i = 1; i < n; i++) ids.push(made.join(`P${i}`).player.id);
+    const snap = JSON.parse(JSON.stringify(made.toJSON())) as Json;
+    snap["cup"] = { ...(snap["cup"] as Json), format: "individual-only" };
+    const engine = RoomEngine.fromJSON(snap);
+    engine.clock = () => t;
+    for (const pid of ids) engine.markConnected(pid);
     const tick = (ms: number) => { t += ms; };
     return { engine, host, ids, tick };
   }
@@ -77,7 +86,7 @@ describe("the Individual Family Cup (new rooms)", () => {
     return g;
   }
 
-  it("new rooms are individual-only and say so in every projection", () => {
+  it("an Individual Cup is individual-only and says so in every projection", () => {
     const { engine } = room(2);
     expect(engine.competitionFormat).toBe("individual-only");
     const tv = engine.project("tv") as Json;
@@ -129,6 +138,11 @@ describe("the Individual Family Cup (new rooms)", () => {
     expect(() => { (engine as unknown as { competitionFormat: string }).competitionFormat = "combined-75-25"; }).toThrow(TypeError);
     const restored = RoomEngine.fromJSON(JSON.parse(JSON.stringify(engine.toJSON())) as Json);
     expect(restored.competitionFormat).toBe("individual-only");
+    // And a room made now (Stage 12.15) is a Family Cup, and stays one.
+    const fresh = new RoomEngine("Family Cup");
+    expect(fresh.competitionFormat).toBe("combined-75-25");
+    expect(() => { (fresh as unknown as { competitionFormat: string }).competitionFormat = "individual-only"; }).toThrow(TypeError);
+    expect(RoomEngine.fromJSON(JSON.parse(JSON.stringify(fresh.toJSON())) as Json).competitionFormat).toBe("combined-75-25");
   });
 });
 

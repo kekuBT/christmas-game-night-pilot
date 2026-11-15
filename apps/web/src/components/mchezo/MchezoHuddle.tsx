@@ -13,6 +13,7 @@ import { FeedbackLine, GameHeader } from "../../ui/mchezo/components/GameKit.js"
 import { Keycap, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
 import { Option } from "./MchezoFamily.js";
 import { TeamMark } from "./Teams.js";
+import { teamGameModeLine } from "./TeamGameKit.js";
 import { SendNote } from "./SendNote.js";
 import type { TeamDef } from "../../../../../src/shared/teams.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
@@ -189,7 +190,7 @@ export function MchezoHuddleResults({ game, publicGame, playerId, title, onBackT
           </li>
         ))}
       </ol>
-      <p className="mz-foot" data-testid="mz-hd-howscore">A team’s answer is what most of it picked. 100 for a right answer, and 25 more when the whole team picked it. Everyone scores their team’s points. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
+      <p className="mz-foot" data-testid="mz-hd-howscore">A team’s answer is what most of it picked. 100 for a right answer, and 25 more when the whole team picked it. Everyone scores their team’s points. {teamGameModeLine(casual, game.official ?? publicGame?.official)}</p>
       <OutcomeSummary gameId="team-huddle" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>

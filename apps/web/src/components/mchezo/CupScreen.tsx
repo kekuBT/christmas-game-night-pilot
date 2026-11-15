@@ -157,7 +157,9 @@ export function CupScreen(props: {
           <h2 className="mz-cup-section__title" id="cup-games-title">Official games so far</h2>
           <ul className="mz-cup-games">
             {officialFinished.map((g) => {
-              const places = Object.entries(midrank(g.rawScores ?? {})).sort((a, b) => b[1] - a[1]);
+              // Stage 12.15 (D-S1215-01): the server's placements (a team game ranks its teams); the local midrank is only
+              // for a server that doesn't send them.
+              const places = Object.entries(g.cupPlacement ?? midrank(g.rawScores ?? {})).sort((a, b) => b[1] - a[1]);
               return (
                 <li key={g.id} className="mz-cup-game">
                   <span className="mz-cup-game__title">{title(g.gameId)} <span className="mz-muted">· Day {g.day ?? 1}</span></span>
@@ -166,7 +168,9 @@ export function CupScreen(props: {
               );
             })}
           </ul>
-          <p className="mz-foot mz-cup-note">Placement points: 100 for the top, 0 for the bottom, shared on ties. A day's score is the average of that day's placements.</p>
+          <p className="mz-foot mz-cup-note" data-testid="cup-placement-note">Placement points: 100 for the top, 0 for the bottom, shared on ties. {proj?.competition?.format === "individual-only"
+            ? "A day's score is the average of that day's placements."
+            : "In a team game the teams are placed, and everyone gets their team's placement. A day's score is 75% the average of individual games and 25% the average of team games (a day with only one kind uses that kind)."}</p>
         </section>
       )}
 
@@ -190,7 +194,7 @@ export function CupScreen(props: {
         {proj?.competition && <p data-testid="competition-format"><b>{proj.competition.label}:</b> {proj.competition.description} The rules of a Cup never change once it has started.</p>}
         {proj?.competition?.qualifying && <p data-testid="competition-qualifying"><b>Qualifying days:</b> {proj.competition.qualifying}</p>}
         <p>Seven scheduled days. At least three qualifying days to be eligible. The total is <b>the best three daily scores + a participation bonus + a finale bonus</b>.</p>
-        <p>{proj?.competition?.format === "individual-only" ? "Each day is the average of your individual game placements (team games don’t count)." : "Each day is 75% individual + 25% team."} Individual games are scored 0–100 by placement; ties share the average place.</p>
+        <p>{proj?.competition?.format === "individual-only" ? "Each day is the average of your individual game placements (team games don’t count)." : "Each day is 75% individual + 25% team."} Individual games are scored 0–100 by placement; ties share the average place.{proj?.competition?.format === "individual-only" ? "" : " A team game (one of the seven built for teams) places the teams the same way, and every member gets the team’s placement, whatever the team’s size."}</p>
         <p>Participation: +5 for each qualifying day beyond the first three, up to +20. The Grand Finale can add up to 50. Practice games never count toward scores or attendance, and a missed day adds nothing without lowering the best three.</p>
         <p className="mz-foot">Family Cup rules, owner-approved 2026-11-04. Still to be approved in detail: how days without team games are handled in combined Cups, and the Grand Finale placement ladder.</p>
       </details>

@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261115-012817-fda15ec8-20702
+  105 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-split-clues (w1) [functional]: FAIL B the TV shows the puzzle's kind but no clue and not the answer
+  timing   wall 39m 46s · step time 1h 55m (sum) · 3 workers, 96% busy · 2.89× the same steps run one after another
+           predicted 29–67m (about 37m 47s, measured) → actual 39m 46s (+5%)
+           longest  e2e-chromium 8m 19s, check-f5 7m 36s, check-leaderboard 6m 44s · the longest step is 21% of the wall time
+           machine  CPU mean 32%, peak 97% · memory available ≥ 12799 MB · load peak 7.69 · backpressure 12 wait(s), 122s
+           contention ×1.067 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215full2/test-results/20261115-012817-fda15ec8-20702/report.json

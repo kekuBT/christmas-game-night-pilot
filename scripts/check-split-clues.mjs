@@ -120,8 +120,14 @@ try {
   check("B each team's phones hold all six clues between them", unionRight);
   const puzzle0 = puzzleFrom([...allClues]);
   check("B the puzzle is known to the driver from its clues", !!puzzle0, puzzle0?.id);
+  // Stage 12.15 (a false positive in the full gate 20261115-012817-fda15ec8-20702): the answer was "Tea", and "Team
+  // Coral" contains "Tea". The answer is now looked for as a whole word, with the teams' names taken out first; the
+  // self-check is that run's case.
+  const scrubTeams = (t) => t.replace(/\bTeam (Coral|Sun|Mint|Iris)\b/gi, "Team ·");
+  const wholeWord = (w) => new RegExp(`(^|[^\\p{L}])${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^\\p{L}])`, "iu");
+  check("B self-check: a team's name doesn't count as the answer", /Tea/.test("Team Coral · 0") && !wholeWord("Tea").test(scrubTeams("Team Coral · 0")) && wholeWord("Tea").test(scrubTeams("Answer: Tea")));
   const tvText = await tv.getByTestId("tv-live-split-clues").innerText();
-  check("B the TV shows the puzzle's kind but no clue and not the answer", tvText.includes(puzzle0?.kind ?? "?") && [...allClues].every((c) => !tvText.includes(c)) && !tvText.includes(puzzle0?.answer ?? "?"));
+  check("B the TV shows the puzzle's kind but no clue and not the answer", tvText.includes(puzzle0?.kind ?? "?") && [...allClues].every((c) => !tvText.includes(c)) && !wholeWord(puzzle0?.answer ?? "?").test(scrubTeams(tvText)));
   const tvData = JSON.stringify((await tvProj(roomId)).games.find((g) => g.id === gid).state);
   check("B the TV's data has no clue and not the answer", [...allClues].every((c) => !tvData.includes(c)) && !tvData.toLowerCase().includes(`"${(puzzle0?.answer ?? "?").toLowerCase()}"`));
   await shot(host, "clues-390");

@@ -28,8 +28,11 @@ function membersOf(teams: Pick<RoomTeams, "members">, teamId: string, order: rea
   return order.filter((id) => teams.members[id] === teamId);
 }
 
-/** The lobby's Teams card (casual rooms). */
-export function TeamsCard({ teams, players, youId, isHost, upNextId, onEdit, onPlay, busy }: {
+/**
+ * The lobby's Teams card (casual rooms, and Family Cups since Stage 12.15). In a Cup the teams play only the games built
+ * for teams (D-S1215-01); every other game stays individual there, so there's no "Play as teams" switch.
+ */
+export function TeamsCard({ teams, players, youId, isHost, upNextId, onEdit, onPlay, busy, cup }: {
   teams: RoomTeams | undefined;
   players: readonly PublicPlayer[];
   youId: string;
@@ -38,13 +41,16 @@ export function TeamsCard({ teams, players, youId, isHost, upNextId, onEdit, onP
   onEdit: () => void;
   onPlay: (on: boolean) => void;
   busy?: boolean;
+  cup?: boolean;
 }) {
   if (!teams) {
     if (!isHost) return null;
     return (
       <section className="mz-teams-card" aria-label="Teams" data-testid="teams-card" data-state="none">
         <span className="mz-kicker">👥 Teams</span>
-        <p className="mz-teams-card__lede">Split the room into teams for the night. {TEAM_PLAY_GAMES.size} games can be played as teams: each team scores its players’ average, so a small team can win.</p>
+        <p className="mz-teams-card__lede">{cup
+          ? <>Split the room into teams for the games built for teams. In a Family Cup they count as team games, where every member gets the team’s place; every other game stays individual.</>
+          : <>Split the room into teams for the night. {TEAM_PLAY_GAMES.size} games can be played as teams: each team scores its players’ average, so a small team can win.</>}</p>
         <Keycap variant="surface" size="md" data-testid="teams-make" onClick={onEdit}>Make teams</Keycap>
       </section>
     );
@@ -52,10 +58,11 @@ export function TeamsCard({ teams, players, youId, isHost, upNextId, onEdit, onP
   const order = players.map((p) => p.id);
   const nameOf = (id: string) => (id === youId ? "You" : players.find((p) => p.id === id)?.displayName ?? "A player");
   const mine = teams.members[youId];
-  const paused = teams.paused === true;
+  // In a Cup, pausing does nothing (only the games built for teams use teams there), so it is never shown as paused.
+  const paused = !cup && teams.paused === true;
   // Stage 12.8: a game built for teams is always played as teams, even while the others are played individually.
   const nextIsNative = upNextId ? TEAM_NATIVE_GAMES.has(upNextId) : false;
-  const nextIsTeam = upNextId ? TEAM_PLAY_GAMES.has(upNextId) || nextIsNative : undefined;
+  const nextIsTeam = upNextId ? (!cup && TEAM_PLAY_GAMES.has(upNextId)) || nextIsNative : undefined;
   return (
     <section className="mz-teams-card" aria-label="Teams" data-testid="teams-card" data-state={paused ? "paused" : "on"}>
       <span className="mz-kicker">👥 Teams{paused ? " · playing individually for now" : ""}</span>
@@ -74,7 +81,7 @@ export function TeamsCard({ teams, players, youId, isHost, upNextId, onEdit, onP
       {isHost && (
         <div className="mz-teams-card__actions">
           <Keycap variant="surface" size="md" data-testid="teams-edit" onClick={onEdit}>Edit teams</Keycap>
-          <button type="button" className="mz-chip-btn" data-testid="teams-play-toggle" disabled={busy} aria-pressed={!paused} onClick={() => onPlay(paused)}>{paused ? "Play as teams again" : "Play the next games individually"}</button>
+          {!cup && <button type="button" className="mz-chip-btn" data-testid="teams-play-toggle" disabled={busy} aria-pressed={!paused} onClick={() => onPlay(paused)}>{paused ? "Play as teams again" : "Play the next games individually"}</button>}
         </div>
       )}
     </section>
@@ -100,7 +107,7 @@ export function TeamsSheet({ teams, players, onMake, onMove, onRename, onClear, 
   const nameOf = (id: string) => players.find((p) => p.id === id)?.displayName ?? "A player";
   return (
     <Sheet title="Teams" onClose={onClose} testId="teams-sheet" kicker="For the whole night">
-      <p className="mz-details__pitch">Teams play the games that can be played as teams. Each team scores its players’ average. A Family Cup stays individual.</p>
+      <p className="mz-details__pitch">Teams play the games that can be played as teams. Each team scores its players’ average. In a Family Cup, only the games built for teams use them.</p>
       <SegmentedChoice label="How many teams" value={String(count)} onChange={(v) => setCount(Number(v))} testId="teams-count" compact
         options={[2, 3, 4].map((n) => ({ value: String(n), title: `${n} teams`, testId: `teams-count-${n}`, disabled: n > max }))} />
       <div className="mz-sheet__actions">

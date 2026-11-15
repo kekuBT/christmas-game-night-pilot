@@ -1,0 +1,29 @@
+$ node scripts/check-cup-team-games.mjs http://localhost:42855
+# timeout 600s | worker w2 | server http://localhost:42855 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215full/test-results/20261115-001634-f52309c4-21676/server-data/w2)
+
+[+3.6s] PASS A the room is now a Family Cup: 75% individual, 25% team — {"format":"combined-75-25","label":"Family Cup","description":"Daily score: 75% individual games, 25% team games.","teamGamesCount":true,"cupId":"cup-mwh3rm9k-gs4gy","qualifying":"A day counts if you really played at least one official game that day: at least 50% of it and at least 2 answers or moves (wrong answers count; sitting out doesn't)."}
+[+3.6s] PASS A the host's Teams card is in the Cup lobby, with the Cup's wording
+[+3.7s] PASS A Wanjiru's phone (320 px) shows she's on Team Sun
+[+3.7s] PASS A in a Cup there is no "play the next games individually" switch
+[+3.9s] PASS B Tug of War can be Official in the Cup: Official is enabled, no practice-only note
+[+3.9s] PASS B the host's start is Official, and says it counts toward the Family Cup
+[+3.9s] PASS B a guest's lobby says Tug of War will be Official
+[+4.0s] PASS B the game started as Official — {"official":true,"status":"briefing"}
+[+4.0s] PASS B it plays with the Cup's teams — {"player-1":"team-coral","player-2":"team-coral","player-3":"team-coral","player-4":"team-sun","player-5":"team-sun"}
+[+44.1s] PASS C bout 1: Sun wins (2.0 per player against 1.0) — [{"teamId":"team-coral","right":3,"size":3,"mult":1,"pull":1,"place":2,"points":75},{"teamId":"team-sun","right":4,"size":2,"mult":1,"pull":2,"place":1,"points":100}]
+[+90.1s] PASS C bout 2: Sun wins (2.0 per player against 1.0) — [{"teamId":"team-coral","right":3,"size":3,"mult":1,"pull":1,"place":2,"points":75},{"teamId":"team-sun","right":4,"size":2,"mult":1,"pull":2,"place":1,"points":100}]
+[+136.1s] PASS C bout 3: Sun wins (2.0 per player against 1.0) — [{"teamId":"team-coral","right":3,"size":3,"mult":1.2,"pull":1.2,"place":2,"points":75},{"teamId":"team-sun","right":4,"size":2,"mult":1,"pull":2,"place":1,"points":100}]
+[+142.2s] PASS D the game finished and counts officially — {"status":"finished","counts":true}
+[+142.2s] PASS D placed by team: Sun's players 100, Coral's 0 — {"player-1":0,"player-2":0,"player-3":0,"player-4":100,"player-5":100}
+[+142.2s] PASS D the standings are the team placements — {"player-1":0,"player-2":0,"player-3":0,"player-4":100,"player-5":100}
+[+142.2s] PASS D Baraka's day score is 100 (a day with only a team game uses the team average) — {"playerId":"player-4","dayScores":[100],"counted":[100],"qualifyingDays":1,"base":100,"participationBonus":0,"finaleBonus":0,"total":100,"eligible":false,"countedDailyWins":1,"countedMedian":100}
+[+142.2s] PASS D Keku's results say it was Official, as a team game
+[+142.2s] PASS D the results' comment is about the teams, not teammates "tied for first"
+[+142.2s] PASS D the TV's final shows the Family Cup after this game, Sun first
+[+143.1s] PASS E the Cup screen lists Tug of War with the server's team placements
+[+143.2s] PASS E the note explains team placement and the 75/25 day
+[+143.3s] PASS E 320 px: the Cup screen has no sideways scroll
+[+143.3s] CUP TEAM GAMES PASSED
+[+143.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":6}
+
+# PASS (exit 0) in 143.4s | cpu 6.4s, peak memory 373 MB

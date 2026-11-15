@@ -109,43 +109,43 @@ export const GAME_POLICIES: Readonly<Record<string, GamePolicy>> = Object.freeze
   // earliest finish). Turns and freezes are the module's own self-paced windows (dueAt/advance).
   "relay": {
     model: "game-deadline", gameWindowMs: 4 * MIN,
-    officialEligible: false, practiceOnlyReason: "Relay is practice-only: a team race in casual rooms.", unit: "legs",
+    officialEligible: true, unit: "legs",
   },
   // Stage 12.10: Split Clues, six puzzles of up to 75 s + a 7 s reveal (a round ends early once every team has solved
   // it); its help steps are the module's own windows (dueAt/advance). 9 minutes is a backstop.
   "split-clues": {
     model: "phased", gameWindowMs: 9 * MIN, phaseMs: { question: SPLIT_SOLVE_MS, reveal: SPLIT_REVEAL_MS },
-    officialEligible: false, practiceOnlyReason: "Split Clues is practice-only: a team game in casual rooms.", unit: "puzzles",
+    officialEligible: true, unit: "puzzles",
   },
   // Stage 12.11: Team Draw, 3–5 rounds of up to 75 s + a 9 s reveal (a round ends early once every team has solved it);
   // the takeover window is the module's own (dueAt/advance). 8 minutes is a backstop (5 rounds ≤ 420 s).
   "team-draw": {
     model: "phased", gameWindowMs: 8 * MIN, phaseMs: { draw: TEAM_DRAW_MS, reveal: TEAM_DRAW_REVEAL_MS },
-    officialEligible: false, practiceOnlyReason: "Team Draw is practice-only: a team game in casual rooms.", unit: "rounds",
+    officialEligible: true, unit: "rounds",
   },
   // Stage 12.12: Territory, 8 questions of up to 20 s (closing early once every team has answered) + a 10 s claim;
   // 6 minutes is a backstop (8 rounds ≤ 240 s).
   "territory": {
     model: "phased", gameWindowMs: 6 * MIN, phaseMs: { question: TERRITORY_QUESTION_MS, reveal: TERRITORY_CLAIM_MS },
-    officialEligible: false, practiceOnlyReason: "Territory is practice-only: a team game in casual rooms.", unit: "questions",
+    officialEligible: true, unit: "questions",
   },
   // Stage 12.13: Tug of War, 3 bouts of 40 s + a 6 s result; every player's answers are their own (self-paced within a
   // bout), frozen windows close on the next answer. 4 minutes is a backstop (3 bouts = 138 s).
   "tug-of-war": {
     model: "phased", gameWindowMs: 4 * MIN, phaseMs: { round: TUG_BOUT_MS, reveal: TUG_RESULT_MS },
-    officialEligible: false, practiceOnlyReason: "Tug of War is practice-only: a team game in casual rooms.", unit: "rounds",
+    officialEligible: true, unit: "rounds",
   },
   // Stage 12.14: Know Your Rivals, 6 rounds of answer (20 s, closing early once everyone has answered), guess (25 s,
   // closing early once every team has locked) and reveal (8 s). 7 minutes is a backstop (6 rounds ≤ 318 s).
   "know-your-rivals": {
     model: "phased", gameWindowMs: 7 * MIN, phaseMs: { question: RIVALS_ANSWER_MS, guess: RIVALS_GUESS_MS, reveal: RIVALS_REVEAL_MS },
-    officialEligible: false, practiceOnlyReason: "Know Your Rivals is practice-only: a team game in casual rooms.", unit: "questions",
+    officialEligible: true, unit: "questions",
   },
   // Stage 12.8: Team Huddle, eight questions of 25 s + 6 s (a question closes early once every team agrees); 8 minutes
   // is a backstop.
   "team-huddle": {
     model: "phased", gameWindowMs: 8 * MIN, phaseMs: { question: 25 * SEC, reveal: 6 * SEC },
-    officialEligible: false, practiceOnlyReason: "Team Huddle is practice-only: a team game in casual rooms.", unit: "questions",
+    officialEligible: true, unit: "questions",
   },
 });
 

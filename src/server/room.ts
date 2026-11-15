@@ -5,7 +5,7 @@ import { GAME_REGISTRY, getGame, isCooperative } from "../games/registry.js";
 import { CUP_FINISH_RULES, cupChampions, sharedRanks } from "../shared/cupFinish.js";
 import { FAMILY_LIMITS, checkFamilyQuestion, type FamilyQuestion, type FamilyQuestionInput } from "../shared/familyPack.js";
 import { FAMILY_ROUNDS_MIN, pickFamilyQuestions, type FamilyGameQuestion } from "../games/modules/family.js";
-import { TEAM_COLORS, TEAM_GAME_MIN_SIZE, TEAM_LIMITS, TEAM_NATIVE_GAMES, TEAM_PLAY_GAMES, balanceTeams, checkTeamName, fitTeamsForGame, newTeamList, smallestTeam, teamResults, type GameTeams, type RoomTeams } from "../shared/teams.js";
+import { TEAM_COLORS, TEAM_GAME_MIN_SIZE, TEAM_LIMITS, TEAM_NATIVE_GAMES, TEAM_PLAY_GAMES, TEAM_RANKED_GAMES, balanceTeams, checkTeamName, fitTeamsForGame, newTeamList, smallestTeam, teamResults, type GameTeams, type RoomTeams } from "../shared/teams.js";
 import { HUDDLE_ROUNDS, type HuddleQuestion } from "../games/modules/teamHuddle.js";
 import { RELAY_LEGS, type RelayQuestion } from "../games/modules/relay.js";
 import { TERRITORY_ROUNDS } from "../games/modules/territory.js";
@@ -246,7 +246,9 @@ export type StartRefusedCode =
   | "INVALID_SETTINGS" | "CASUAL_ONLY"
   // Stage 9.1 (§8): the host changed the game's settings (Jebena Rush's
   // hearts) since this Start was pressed (nothing started; press again).
-  | "SETTINGS_CHANGED";
+  | "SETTINGS_CHANGED"
+  // Stage 12.15 (D-S1215-01): an Individual Family Cup counts individual games only, so a team game plays as practice.
+  | "TEAM_GAMES_DONT_COUNT";
 export class StartRefused extends Error {
   constructor(readonly code: StartRefusedCode, message: string, readonly readiness: Readiness, readonly detail?: Record<string, unknown>) {
     super(message);
@@ -273,7 +275,7 @@ export interface PartyPlanRecord {
  * game that can be official, only for a planned group of two or more (an official game needs two players), and never
  * a casual-only game (it can't start in a Cup). Returns why the lineup can't be saved there, or null.
  */
-export function partyModesError(kind: RoomKind, expectedPlayers: number, items: readonly { gameId: string; official?: boolean }[]): string | null {
+export function partyModesError(kind: RoomKind, expectedPlayers: number, items: readonly { gameId: string; official?: boolean }[], teamGamesCount = true): string | null {
   for (const it of items) {
     const reg = GAME_REGISTRY.find((g) => g.id === it.gameId);
     const title = reg?.title ?? it.gameId;
@@ -281,10 +283,15 @@ export function partyModesError(kind: RoomKind, expectedPlayers: number, items: 
     if (it.official !== true) continue;
     if (kind !== "cup") return "A casual game night's games never count, so its lineup has no Official games.";
     if (!policyFor(it.gameId).officialEligible) return `${title} is practice only, so it can't be Official.`;
+    // Stage 12.15 (D-S1215-01): an Individual Family Cup (created before Stage 12.15) counts individual games only.
+    if (!teamGamesCount && reg?.modes.includes("team")) return `${INDIVIDUAL_CUP_TEAM_GAME_NOTE} Make ${title} Practice.`;
     if (expectedPlayers < MIN_OFFICIAL_COMPETITORS) return `Official games need at least ${MIN_OFFICIAL_COMPETITORS} players. Plan for ${MIN_OFFICIAL_COMPETITORS} or more, or make them Practice.`;
   }
   return null;
 }
+
+/** Stage 12.15 (D-S1215-01): why a team game can't be Official in an Individual Family Cup. */
+export const INDIVIDUAL_CUP_TEAM_GAME_NOTE = "This Family Cup counts individual games only, so team games are practice here.";
 
 /** Stage 7.2: a lineup item's state, derived from its game (docs/stage7/stage72.md §3.1). */
 export type PartyItemStatus = "pending" | "briefing" | "playing" | "completed";
@@ -938,6 +945,11 @@ export class RoomEngine {
     if ((opts.official ?? false) && this.kind !== "cup") {
       throw new StartRefused("NOT_A_CUP_ROOM", "This room is a casual game, not a Family Cup: its games never count toward a Cup.", this.readiness());
     }
+    // Stage 12.15 (D-S1215-01): a team game counts in a Family Cup, but not in an Individual Family Cup (created before
+    // Stage 12.15; its rules never change, D-S3-07). There it plays as practice.
+    if ((opts.official ?? false) && game.modes.includes("team") && !formatInfo(this._cup.format).teamGamesCount) {
+      throw new StartRefused("TEAM_GAMES_DONT_COUNT", INDIVIDUAL_CUP_TEAM_GAME_NOTE, this.readiness());
+    }
     // Stage 12.4 (D-S124-01): a finished Family Cup's results stand; practice games still start.
     if ((opts.official ?? false) && this.cupFinished) {
       throw new StartRefused("CUP_FINISHED", "The Family Cup is finished, so its results stand and no official game starts. Practice games still work.", this.readiness());
@@ -1367,7 +1379,7 @@ export class RoomEngine {
     if (plan) {
       const v = validatePartyPlan(plan);
       if (!v.ok) throw new PartyRefused("INVALID_PLAN", v.error);
-      const modes = partyModesError(this.kind, plan.expectedPlayers, plan.items);
+      const modes = partyModesError(this.kind, plan.expectedPlayers, plan.items, formatInfo(this._cup.format).teamGamesCount);
       if (modes) throw new PartyRefused("INVALID_PLAN", modes);
     }
     this.partyRevision += 1;
@@ -2919,10 +2931,10 @@ export class RoomEngine {
   officialStandings(): Record<string, number> {
     const out: Record<string, number> = {};
     for (const g of this.cupGames()) {
-      const all = Object.values(g.rawScores);
-      if (all.length < 2) continue;
-      for (const [pid, pts] of Object.entries(g.rawScores)) {
-        out[pid] = Math.round(((out[pid] ?? 0) + midrankScore(pts, all)) * 100) / 100;
+      const placed = this.cupPlacements(g);
+      if (!placed) continue;
+      for (const [pid, score] of Object.entries(placed)) {
+        out[pid] = Math.round(((out[pid] ?? 0) + score) * 100) / 100;
       }
     }
     return out;
@@ -2949,7 +2961,7 @@ export class RoomEngine {
     this.session = { onBreak: false, revision: this.session.revision, ops: this.session.ops };
     // Stage 12.3 (D-S123-04): a lineup carries over. Its games still to play become Official where they can count
     // (like the up-next plan, D-S121-02); games already played stay as they were (casual).
-    this.relabelLineup((it) => this.partyItemStatus(it) === "pending" && policyFor(it.gameId).officialEligible && !getGame(it.gameId).casualOnly && (this.party?.expectedPlayers ?? 0) >= MIN_OFFICIAL_COMPETITORS);
+    this.relabelLineup((it) => this.partyItemStatus(it) === "pending" && policyFor(it.gameId).officialEligible && !getGame(it.gameId).casualOnly && (formatInfo(this._cup.format).teamGamesCount || !getGame(it.gameId).modes.includes("team")) && (this.party?.expectedPlayers ?? 0) >= MIN_OFFICIAL_COMPETITORS);
     const ev = this.log("cup-started", { actor: actorId, detail: { from: "casual", casualGames: this.casualGameIds.length } });
     this.cupSince = { at: ev.createdAt, seq: ev.seq };
     this.cupUndone = null;
@@ -2985,7 +2997,8 @@ export class RoomEngine {
    */
   private teamsForTeamGame(gameId: string, playerIds: readonly string[], seed: number): GameTeams {
     const minSize = TEAM_GAME_MIN_SIZE[gameId] ?? 1;
-    if (this.kind === "casual" && this.teams) {
+    // Stage 12.15 (D-S1215-01): a Family Cup's teams play its team games too.
+    if ((this.kind === "casual" || this.kind === "cup") && this.teams) {
       const members: Record<string, string> = {};
       for (const p of playerIds) { const t = this.teams.members[p]; if (t) members[p] = t; }
       if (new Set(Object.values(members)).size >= 2) {
@@ -3001,7 +3014,9 @@ export class RoomEngine {
   }
 
   private assertTeamsHost(actorId: string): void {
-    if (this.kind !== "casual") throw new TeamsRefused("NOT_A_CASUAL_ROOM", "Teams are for a casual game night. A Family Cup stays individual.");
+    // Stage 12.15 (D-S1215-01): a Family Cup has teams too, for its games built for teams (every other game stays
+    // individual there: teamsForGame is casual-only).
+    if (this.kind !== "casual" && this.kind !== "cup") throw new TeamsRefused("NOT_A_CASUAL_ROOM", "Teams are for game nights and Family Cups.");
     if (this.hostId !== actorId && !this.cohosts.has(actorId)) throw new TeamsRefused("NOT_ALLOWED", "Only the host or a cohost can change the teams.");
   }
 
@@ -3071,6 +3086,16 @@ export class RoomEngine {
     if (!g.teams) return {};
     const done = (p: string) => (g.outcome?.participation?.[p]?.done ?? 0) > 0 || (g.rawScores?.[p] ?? 0) > 0;
     return { teams: g.teams, ...(g.status === "finished" ? { teamResults: teamResults(g.teams, g.rawScores, done) } : {}) };
+  }
+
+  /**
+   * Stage 12.15 (D-S1215-01): a finished game's Cup placement points (0–100 per player), when it feeds the Cup: the
+   * server's own numbers, so a screen never works them out differently (a team game ranks teams, not players).
+   */
+  private cupPlacementFacts(g: GameInstance): Record<string, unknown> {
+    if (this.kind !== "cup" || !this.feedsCup(g)) return {};
+    const placed = this.cupPlacements(g);
+    return placed ? { cupPlacement: placed } : {};
   }
 
   /** Stage 12.5: a question is ready while it hasn't been played (a game that was cancelled in its briefing doesn't count). */
@@ -3287,9 +3312,47 @@ export class RoomEngine {
   /** Finished games that feed this room's Cup, under its format. */
   private cupGames(): GameInstance[] {
     if (this.cupError) return [];
-    const teamGamesCount = formatInfo(this._cup.format).teamGamesCount;
+    return [...this.games.values()].filter((g) => this.feedsCup(g));
+  }
+
+  /** Does this finished game feed the Cup, under its format? (See cupGames.) */
+  private feedsCup(g: GameInstance): boolean {
+    if (this.cupError) return false;
     // Stage 9.3: a cooperative game can never count (casual-only, practice-only); excluded here as well, by kind.
-    return [...this.games.values()].filter((g) => !isCooperative(g.gameId) && this.countsOfficially(g) && (teamGamesCount || !getGame(g.gameId).modes.includes("team")));
+    return !isCooperative(g.gameId) && this.countsOfficially(g) && (formatInfo(this._cup.format).teamGamesCount || !getGame(g.gameId).modes.includes("team"));
+  }
+
+  /**
+   * One Cup game's 0–100 placement per player (docs/CHAMPIONSHIP_RULES.md: midrank, ties share the average place), or
+   * null when it can't count (fewer than two competitors). Stage 12.15 (D-S1215-01): in a game built for teams the
+   * competitors are the teams: they are ranked by the team's result, and every member gets the team's placement,
+   * whatever the team's size. Every other game ranks its players. (A Charades result recorded before Sprint 3 keeps
+   * the player ranking it was computed with: D-S3-07, tests/cup-integrity.test.ts.)
+   */
+  private cupPlacements(g: GameInstance): Record<string, number> | null {
+    const out: Record<string, number> = {};
+    if (TEAM_RANKED_GAMES.has(g.gameId) && g.teams) {
+      const sums = new Map<string, { total: number; n: number }>();
+      for (const [pid, pts] of Object.entries(g.rawScores)) {
+        const t = g.teams.members[pid];
+        if (t === undefined) continue;
+        const s = sums.get(t) ?? { total: 0, n: 0 };
+        s.total += pts; s.n += 1;
+        sums.set(t, s);
+      }
+      const teamScore = new Map([...sums].map(([t, s]) => [t, s.total / s.n] as const));
+      const all = [...teamScore.values()];
+      if (all.length < 2) return null;
+      for (const pid of Object.keys(g.rawScores)) {
+        const t = g.teams.members[pid];
+        if (t !== undefined && teamScore.has(t)) out[pid] = midrankScore(teamScore.get(t)!, all);
+      }
+      return out;
+    }
+    const all = Object.values(g.rawScores);
+    if (all.length < 2) return null;
+    for (const [pid, pts] of Object.entries(g.rawScores)) out[pid] = midrankScore(pts, all);
+    return out;
   }
 
   /**
@@ -3304,13 +3367,12 @@ export class RoomEngine {
     for (const g of this.cupGames()) {
       const day = g.day ?? 1;
       if (onlyDay !== undefined && day !== onlyDay) continue;
-      const all = Object.values(g.rawScores);
-      if (all.length < 2) continue;
+      const placed = this.cupPlacements(g);
+      if (!placed) continue;
       const isTeam = getGame(g.gameId).modes.includes("team");
-      for (const [pid, pts] of Object.entries(g.rawScores)) {
+      for (const [pid, score] of Object.entries(placed)) {
         const key = `${pid}:${day}`;
         const entry = days.get(key) ?? { playerId: pid, day, soloScores: [], teamScores: [], games: 0, participations: [] };
-        const score = midrankScore(pts, all);
         if (isTeam) entry.teamScores.push(score); else entry.soloScores.push(score);
         entry.games += 1;
         entry.participations.push(g.outcome?.participation[pid] ?? null);
@@ -3787,6 +3849,7 @@ export class RoomEngine {
       rawScores: g.status === "finished" && !isCooperative(g.gameId) ? g.rawScores : undefined,
       ...this.timingFacts(g),
       ...this.teamFacts(g),
+      ...this.cupPlacementFacts(g),
     }));
     const base: Record<string, unknown> = {
       /** The server's clock when this projection was made (deadline countdowns). */
@@ -3890,6 +3953,7 @@ export class RoomEngine {
           rawScores: g.status === "finished" && !isCooperative(g.gameId) ? g.rawScores : undefined,
           ...this.timingFacts(g),
           ...this.teamFacts(g),
+          ...this.cupPlacementFacts(g),
         };
       });
       return { ...base, ...(this.kind === "casual" ? { family: this.familyView(me.id) } : {}), me: { id: me.id, displayName: me.displayName, isHost: me.isHost, isCohost: me.isCohost, hasRecoveryCode: !!me.recoveryCodeHash, acceptedEventIds: [...(this.recentAccepted.get(me.id) ?? [])] }, myGames };
@@ -4177,7 +4241,7 @@ function restoreParty(raw: unknown, engine: RoomEngine): PartyPlanRecord | null 
   const plan = { expectedPlayers: r["expectedPlayers"], budgetMinutes: r["budgetMinutes"], items: items as { gameId: string; official?: true; gameInstanceId?: string }[] };
   const v = validatePartyPlan(plan);
   if (!v.ok) return bad(v.error);
-  const modes = partyModesError(engine.kind, plan.expectedPlayers as number, plan.items);
+  const modes = partyModesError(engine.kind, plan.expectedPlayers as number, plan.items, formatInfo(engine.cup.format).teamGamesCount);
   if (modes) return bad(modes);
   return { revision: r["revision"] as number, expectedPlayers: plan.expectedPlayers as number, budgetMinutes: plan.budgetMinutes as number, items: plan.items.map((i) => ({ gameId: i.gameId, ...(i.official === true ? { official: true as const } : {}), ...(i.gameInstanceId ? { gameInstanceId: i.gameInstanceId } : {}) })), updatedAt: r["updatedAt"] as number };
 }
