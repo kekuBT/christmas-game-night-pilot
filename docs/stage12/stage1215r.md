@@ -236,3 +236,25 @@ On `cfaf412` the same test renders 1, 1, 3, 3 (the reviewer's screen) and fails 
   - **The first repair:** its gates had passed by 2:18.
   - **The rest:** the rendered coverage the review asked for, and the consumer check that found the results screen.
 - **Also corrected:** the link repair itself happened at about 2:15 a.m. ET, not 2:25 as I first wrote in the three edit notes; those notes now say 2:15.
+
+## Fourth round: review 6892025042 (the reviewer's recovery review)
+
+**Authorization:** the owner's review and handoff on #40, comment 6892025042 (2026-11-15, 3:59 a.m. ET; D-WF-01).
+- **Confirmed by the review:** the casual-label repair, in an independent journey. The TV rank repair was confirmed by its rendered tests; the live Relay journey is still to come.
+- **Finding (P2):** in a Family Cup lobby, the host's **Make teams** button does nothing. `App.tsx` renders `TeamsSheet` only when `roomKind === "casual"`, while the Teams card, its buttons and the server (D-S1215-01) all allow Cups. `check-cup-team-games` missed it because it makes and moves the teams over the API.
+
+**Plan:**
+1. The repair: the teams sheet opens for the host or a cohost in a casual room and in a Family Cup. Authorization, the server's checks, scoring and Cup participation are unchanged.
+2. The drivers use the rendered controls, and are run on the current build first, to show the fault:
+   - **in a Cup lobby:** Make teams → make → move → rename → Done → Edit teams again → reload;
+   - **after the change:** a casual room with teams becomes a Cup, then Edit teams;
+   - **guests:** no management controls.
+3. Focused tests, both typechecks, lint, the affected team and Cup drivers, then the targeted and fast gates. No full gate, as the review asks.
+4. Evidence, docs, and a new completed report.
+
+**Estimate (written before the work, at about 4:05 a.m. ET):** about 1 h 30 min.
+- **The repair:** a few minutes.
+- **The drivers:** about 45 minutes, most of the work.
+- **A before-run and the after-runs:** about 15 minutes.
+- **The gates:** about 10 minutes.
+- **Docs and the report:** about 20 minutes.
