@@ -1,0 +1,5 @@
+approvals.json present: false
+sc-001 approved officialEligible = true approval record: none
+sc-002 legacy officialEligible = true approval record: none
+sc-003 verified-computed officialEligible = true approval record: none
+sc-004 provisional officialEligible = false approval record: none

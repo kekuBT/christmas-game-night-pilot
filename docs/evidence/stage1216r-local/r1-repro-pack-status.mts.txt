@@ -1,0 +1,13 @@
+import { cpSync, mkdtempSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { loadContent, officialEligible } from "../wt1216/src/content/registry.ts";
+const dir = mkdtempSync(join(tmpdir(), "mz-repro-"));
+cpSync(join(process.cwd(), "content"), dir, { recursive: true });
+const f = join(dir, "packs", "split-clues-everyday.json");
+const pack = JSON.parse(readFileSync(f, "utf8"));
+for (const [i, s] of [[0, "approved"], [1, "legacy"], [2, "verified-computed"]] as const) pack.items[i].review.status = s;
+writeFileSync(f, JSON.stringify(pack));
+const lib = loadContent(dir);
+console.log("approvals.json present:", existsSync(join(dir, "approvals.json")));
+for (const li of (lib.byGame.get("split-clues") ?? []).filter((li) => ["sc-001","sc-002","sc-003","sc-004"].includes(li.item.id))) console.log(li.item.id, li.status, "officialEligible =", officialEligible(li, "2026-11-15"), "approval record:", li.approval ? "yes" : "none");

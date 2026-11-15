@@ -1,0 +1,8 @@
+PASS A: the server runs without the content test mode
+FAIL the driver ran to the end — Error: injected failure (MCHEZO_S1216_INJECT_FAIL=after-A-start) |     at file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1216/scripts/check-split-clues-content.mjs:163:41 |     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+--- server A output (last 2000 characters) ---
+Christmas Game Night server on http://localhost:33465 (web app at / after npm run build:web)
+Phones on the same Wi-Fi: open http://192.0.2.2:33465 on the host device (not localhost), so the QR code works.
+
+cleanup: 1 server(s) stopped, 1 temporary dir(s) removed; still running: none; left on disk: none
+SPLIT CLUES CONTENT FAILED: 1 failed

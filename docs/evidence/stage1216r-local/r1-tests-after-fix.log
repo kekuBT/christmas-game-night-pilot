@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1216
+
+ ✓ tests/stage1216-split-clues-content.test.ts (32 tests) 1933ms
+   ✓ the shared plan (Up next) follows the Official gate (D-S1216-04) > a plan for Official Split Clues shows as Practice on every screen while the Cup has too few approved puzzles 344ms
+
+ Test Files  1 passed (1)
+      Tests  32 passed (32)
+   Start at  14:14:22
+   Duration  3.24s (transform 865ms, setup 0ms, collect 966ms, tests 1.93s, environment 0ms, prepare 60ms)
+

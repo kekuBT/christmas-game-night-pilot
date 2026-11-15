@@ -57,9 +57,19 @@ export function itemHash(gameId: string, item: AnyItem | Record<string, unknown>
 }
 
 /** May this item be used in an official game on `today` (YYYY-MM-DD)? */
+/**
+ * Stage 12.16-R (review 6895557386): games whose items are approved only by a record in approvals.json at the item's
+ * exact content hash (a person's, or the test mode's truthfully labelled one). A raw official-capable label in a pack
+ * (`approved`, `legacy`, `verified-computed`) approves nothing for them: the loader reports it and treats the item as
+ * provisional. Other games keep their established label rules (legacy items, computed answers).
+ */
+export const RECORD_ONLY_APPROVAL: ReadonlySet<string> = new Set(["split-clues"]);
+
 export function officialEligible(li: LoadedItem, today: string): boolean {
   if (li.item.eligibility !== "official") return false;
   if (!OFFICIAL_STATUSES.includes(li.status)) return false;
+  // Provenance, not just the status: only an exact-hash record makes a record-only item official.
+  if (RECORD_ONLY_APPROVAL.has(li.gameId) && (li.status !== "approved" || !li.approval)) return false;
   const ts = li.item.timeSensitive;
   if (ts && ts.reviewBy < today) return false; // stale facts stop being official
   return true;
@@ -124,8 +134,13 @@ export function loadContent(dir: string = DEFAULT_CONTENT_DIR, opts: { testAppro
       }
       if (lib.items.has(item.id)) { lib.problems.push({ file, itemId: item.id, message: `duplicate id (also in ${lib.items.get(item.id)!.packId})` }); continue; }
       const hash = itemHash(gameId, item);
-      const appr = approvals.get(item.id) ?? (opts.testApproveProvisional && item.review.status === "provisional" ? { hash, reviewer: "TEST MODE (not a human review)", date: "1970-01-01" } : undefined);
-      let status: ReviewStatus = item.review.status;
+      let rawStatus: ReviewStatus = item.review.status;
+      if (RECORD_ONLY_APPROVAL.has(gameId) && rawStatus !== "provisional" && rawStatus !== "rejected") {
+        lib.problems.push({ file, itemId: item.id, message: `review.status "${rawStatus}" does not approve a ${gameId} item: only a record in approvals.json at its exact content hash does (treated as provisional)` });
+        rawStatus = "provisional";
+      }
+      const appr = approvals.get(item.id) ?? (opts.testApproveProvisional && rawStatus === "provisional" ? { hash, reviewer: "TEST MODE (not a human review)", date: "1970-01-01" } : undefined);
+      let status: ReviewStatus = rawStatus;
       let approval: LoadedItem["approval"];
       const realApproval = approvals.get(item.id);
       const sp = gameId === "category-sprint" ? (item as ItemOf<"category-sprint">) : undefined;

@@ -1,0 +1,110 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1216
+
+ ❯ tests/stage1216-split-clues-content.test.ts (32 tests | 6 failed) 1918ms
+   ✓ the shared plan (Up next) follows the Official gate (D-S1216-04) > a plan for Official Split Clues shows as Practice on every screen while the Cup has too few approved puzzles 374ms
+   × R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > a raw "approved" label approves nothing: no approvals file, no record, or a stale record 134ms
+     → expected [ 'no approvals file', 'sc-001', …(3) ] to deeply equal [ 'no approvals file', 'sc-001', …(3) ]
+   × R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > a raw "legacy" label approves nothing: no approvals file, no record, or a stale record 86ms
+     → expected [ 'no approvals file', 'sc-001', …(3) ] to deeply equal [ 'no approvals file', 'sc-001', …(3) ]
+   × R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > a raw "verified-computed" label approves nothing: no approvals file, no record, or a stale record 89ms
+     → expected [ 'no approvals file', 'sc-001', …(3) ] to deeply equal [ 'no approvals file', 'sc-001', …(3) ]
+   × R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > six exact records enable Official; one invalidated leaves five and a truthful refusal (with a raw label too) 86ms
+     → expected [ 'approved', true ] to deeply equal [ 'provisional', false ]
+   × R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > a revoked approval between the briefing and play stops play, even with a raw approved label left in the pack 53ms
+     → expected 'playing' not to be 'playing' // Object.is equality
+   × R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > the test mode keeps its truthful label for provisional puzzles, and a raw label still approves nothing by itself 34ms
+     → expected [ 'approved', undefined ] to deeply equal [ 'approved', …(1) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage1216-split-clues-content.test.ts > R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > a raw "approved" label approves nothing: no approvals file, no record, or a stale record
+ FAIL  tests/stage1216-split-clues-content.test.ts > R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > a raw "legacy" label approves nothing: no approvals file, no record, or a stale record
+ FAIL  tests/stage1216-split-clues-content.test.ts > R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > a raw "verified-computed" label approves nothing: no approvals file, no record, or a stale record
+AssertionError: expected [ 'no approvals file', 'sc-001', …(3) ] to deeply equal [ 'no approvals file', 'sc-001', …(3) ]
+
+- Expected
++ Received
+
+  Array [
+    "no approvals file",
+    "sc-001",
+-   "provisional",
+-   false,
++   "approved",
+    false,
++   true,
+  ]
+
+ ❯ tests/stage1216-split-clues-content.test.ts:349:111
+    347|       for (const [why, lib] of cases) {
+    348|         for (const id of SIX) {
+    349|           expect([why, id, li(lib, id).status, !!li(lib, id).approval,…
+       |                                                                                                               ^
+    350|           expect(practiceUsable(li(lib, id))).toBe(true);
+    351|         }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/stage1216-split-clues-content.test.ts > R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > six exact records enable Official; one invalidated leaves five and a truthful refusal (with a raw label too)
+AssertionError: expected [ 'approved', true ] to deeply equal [ 'provisional', false ]
+
+- Expected
++ Received
+
+  Array [
+-   "provisional",
+-   false,
++   "approved",
++   true,
+  ]
+
+ ❯ tests/stage1216-split-clues-content.test.ts:368:82
+    366|     // The review's case: raw "approved" on all six, records at the sh…
+    367|     const lib = fixture({ approve: SIX, edit: stale, raw: rawAll("appr…
+    368|     expect([li(lib, SIX[0]!).status, officialEligible(li(lib, SIX[0]!)…
+       |                                                                                  ^
+    369|     expect(SIX.slice(1).every((id) => li(lib, id).status === "approved…
+    370|     expectRefused(lib, 5);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/stage1216-split-clues-content.test.ts > R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > a revoked approval between the briefing and play stops play, even with a raw approved label left in the pack
+AssertionError: expected 'playing' not to be 'playing' // Object.is equality
+ ❯ tests/stage1216-split-clues-content.test.ts:380:60
+    378|     r.engine.content = fixture({ raw: rawAll("approved"), noApprovalsF…
+    379|     for (const p of r.ids) r.send(p, g.id, "briefing-ready", { ready: …
+    380|     expect(r.engine.games.get(g.id)?.status ?? "gone").not.toBe("playi…
+       |                                                            ^
+    381|     expect(Object.keys(r.engine.contentUsage)).toEqual([]);
+    382|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/stage1216-split-clues-content.test.ts > R1 (review 6895557386): only an exact-hash approval record approves a Split Clues puzzle > the test mode keeps its truthful label for provisional puzzles, and a raw label still approves nothing by itself
+AssertionError: expected [ 'approved', undefined ] to deeply equal [ 'approved', …(1) ]
+
+- Expected
++ Received
+
+  Array [
+    "approved",
+-   "TEST MODE (not a human review)",
++   undefined,
+  ]
+
+ ❯ tests/stage1216-split-clues-content.test.ts:405:76
+    403|     expect([li(lib, SIX[1]!).status, li(lib, SIX[1]!).approval?.review…
+    404|     // Demoted to provisional first, it is then treated like any provi…
+    405|     expect([li(lib, SIX[0]!).status, li(lib, SIX[0]!).approval?.review…
+       |                                                                            ^
+    406|   });
+    407| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 26 passed (32)
+   Start at  14:07:01
+   Duration  3.20s (transform 823ms, setup 0ms, collect 920ms, tests 1.92s, environment 0ms, prepare 75ms)
+

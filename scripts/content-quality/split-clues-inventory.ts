@@ -88,7 +88,7 @@ for (const li of items) (li.item as ItemOf<"split-clues">).clues.forEach((c, i) 
 const repeats = [...where.entries()].filter(([, w]) => w.length > 1);
 
 const flagCount = (f: Flag) => items.filter((li) => NOTES[li.item.id]!.flags.some(([x]) => x === f)).length;
-const approvedCount = items.filter((li) => li.status === "approved").length;
+const approvedCount = items.filter((li) => li.status === "approved" && !!li.approval).length;
 const out: string[] = [];
 const p = (s = "") => out.push(s);
 p("# Stage 12.16: Split Clues puzzle inventory (for review)");
@@ -100,9 +100,9 @@ p();
 p("## How a puzzle becomes Official");
 p();
 p("1. A person checks every clue and the accepted answers (and fixes any in the pack first: an edit changes the hash).");
-p("2. They approve it: `npm run content:approve -- --reviewer \"Name\" <id>` writes `content/approvals.json` with the item's current hash. (That file does not exist yet: nothing in the library has been approved through it.)");
+p("2. They approve it: `npm run content:approve -- --reviewer \"Name\" <id>` writes `content/approvals.json` with the item's current hash. (That file does not exist yet: nothing in the library has been approved through it.) Only that record approves a Split Clues puzzle: a `review.status` label in the pack (`approved`, `legacy`, `verified-computed`) approves nothing, is reported by `npm run content:check`, and leaves the puzzle provisional (review 6895557386).");
 p("3. `npm run content:check` shows the counts. An approval whose hash no longer matches (the puzzle was edited) is reported and ignored: the puzzle is not Official until approved again. A `rejected` status is never Official and never played.");
-p("4. An Official Split Clues game needs 6 approved puzzles this Cup has not used officially. In a Family Cup only year-round puzzles are dealt (D-S1216-02), so the 13 Christmas puzzles never count toward that six.");
+p("4. An Official Split Clues game needs 6 approved puzzles this Cup has not used yet, Practice included (a Practice game in the Cup uses its puzzles up too). In a Family Cup only year-round puzzles are dealt (D-S1216-02), so the 13 Christmas puzzles never count toward that six.");
 p();
 p("## Summary");
 p();
@@ -144,7 +144,7 @@ const section = (title: string, list: typeof items) => {
     p();
     p(`- **Kind** ${it.kind} · **season** ${it.season ?? "year-round"} · **status** ${li.status} · **difficulty** ${it.difficulty} (placeholder) · **category** ${it.category}`);
     p(`- **Accepted** ${[it.answer, ...(it.alts ?? [])].map((a) => `"${a}"`).join(", ")}`);
-    p(`- **Approval hash** \`${li.hash}\` (pack \`${li.packId}\` ${li.packVersion})`);
+    p(`- **Approval hash** \`${li.hash}\` (pack \`${li.packId}\` ${li.packVersion}) · **approval record** ${li.approval ? `${li.approval.reviewer}, ${li.approval.date}` : "none"}`);
     p(`- **Clues** ${it.clues.map((c, i) => `(${i + 1}) ${c}`).join(" ")}`);
     const lint = issues.filter((i) => i.itemId === it.id);
     if (lint.length) p(`- **Lint** ${lint.map((i) => `${i.code}: ${i.message}`).join("; ")}`);

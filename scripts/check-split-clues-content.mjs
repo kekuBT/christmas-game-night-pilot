@@ -37,18 +37,42 @@ const PUZZLES = PACKS.flatMap((f) => JSON.parse(readFileSync(join(ROOT, "content
 const EVERYDAY = new Set(PUZZLES.filter((p) => !p.season).map((p) => p.id));
 const puzzleFrom = (clues) => { const found = PUZZLES.filter((p) => clues.every((c) => p.clues.includes(c))); return found.length === 1 ? found[0] : null; };
 
+/**
+ * Stage 12.16-R (review 6895557386, R2): everything this driver starts or creates is tracked here and released in the
+ * final `finally`, whatever happened: each server is stopped and its exit awaited before its data directory is deleted,
+ * and each fixture copy is deleted. When the run failed, each server's output is printed first, so the log keeps it.
+ * TEST ONLY: MCHEZO_S1216_INJECT_FAIL=server-start (server A is given a setting serve.ts refuses, so it exits before
+ * listening) or =after-A-start (a thrown error while A's room is open) exercises that cleanup.
+ */
+const owned = { servers: [], dirs: [] };
+const INJECT = process.env.MCHEZO_S1216_INJECT_FAIL ?? "";
+
+async function stopServer(s) {
+  if (s.child.exitCode === null && s.child.signalCode === null) {
+    const exited = new Promise((r) => s.child.once("exit", r));
+    s.child.kill("SIGTERM");
+    const hard = setTimeout(() => s.child.kill("SIGKILL"), 5000);
+    await exited;
+    clearTimeout(hard);
+  }
+  rmSync(s.data, { recursive: true, force: true });
+}
+
 /** A server of this driver's own: fresh data, no content test mode, optionally another content directory. */
 async function startServer(label, extraEnv = {}) {
   const data = mkdtempSync(join(tmpdir(), `mz-s1216-${label}-`));
   const env = { ...process.env, PORT: "0", MCHEZO_DATA_DIR: data, ...extraEnv };
   delete env.NODE_ENV; delete env.MCHEZO_CONTENT_TEST_MODE;
-  const srv = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { env, stdio: ["ignore", "pipe", "pipe"], cwd: ROOT });
-  let out = ""; srv.stdout.on("data", (d) => { out += d; }); srv.stderr.on("data", (d) => { out += d; });
+  if (INJECT === "server-start" && label === "A") env.MCHEZO_LIFECYCLE_SCALE = "not-a-number";
+  const child = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { env, stdio: ["ignore", "pipe", "pipe"], cwd: ROOT });
+  const s = { label, data, child, out: "" };
+  owned.servers.push(s);
+  child.stdout.on("data", (d) => { s.out += d; }); child.stderr.on("data", (d) => { s.out += d; });
   let port = null;
-  for (let i = 0; i < 160 && !port; i++) { const m = /on http:\/\/localhost:(\d+)/.exec(out); if (m) port = Number(m[1]); else await sleep(250); }
-  if (!port) { console.log(`FAIL ${label}: the server did not start: ${out.slice(-400)}`); process.exit(1); }
-  check(`${label}: the server runs without the content test mode`, !/provisional content treated as approved/.test(out));
-  return { base: `http://localhost:${port}`, out: () => out, stop: () => { srv.kill(); rmSync(data, { recursive: true, force: true }); } };
+  for (let i = 0; i < 160 && !port && child.exitCode === null; i++) { const m = /on http:\/\/localhost:(\d+)/.exec(s.out); if (m) port = Number(m[1]); else await sleep(250); }
+  if (!port) throw new Error(`${label}: the server did not start (exit code ${child.exitCode}): ${s.out.slice(-300).replace(/\s+/g, " ")}`);
+  check(`${label}: the server runs without the content test mode`, !/provisional content treated as approved/.test(s.out));
+  return { base: `http://localhost:${port}`, out: () => s.out, stop: () => stopServer(s) };
 }
 
 /**
@@ -57,6 +81,7 @@ async function startServer(label, extraEnv = {}) {
  */
 function fixtureContent(ids) {
   const dir = mkdtempSync(join(tmpdir(), "mz-s1216-fixture-"));
+  owned.dirs.push(dir);
   cpSync(join(ROOT, "content"), dir, { recursive: true });
   const hashes = JSON.parse(execFileSync(process.execPath, ["--import", "tsx", "-e", "import('./src/content/registry.ts').then((m) => { const lib = m.loadContent(process.env.FIXTURE_DIR); process.stdout.write(JSON.stringify(Object.fromEntries((lib.byGame.get('split-clues') ?? []).map((li) => [li.item.id, li.hash])))); })"], { cwd: ROOT, env: { ...process.env, FIXTURE_DIR: dir, MCHEZO_CONTENT_TEST_MODE: "" }, encoding: "utf8" }));
   const file = join(dir, "approvals.json");
@@ -66,7 +91,7 @@ function fixtureContent(ids) {
   return { dir, hashes };
 }
 
-const browser = await launchChromium();
+let browser;
 const phone = (width = 390) => browser.newContext({ viewport: { width, height: 844 }, reducedMotion: "reduce" }).then((c) => c.newPage());
 const shot = async (page, name) => { await page.mouse.move(1, 1); await page.screenshot({ path: screenshotPath(`docs/stage12/stage1216-screenshots/${name}.png`) }); };
 const text = async (loc) => ((await loc.count()) ? await loc.first().innerText() : "");
@@ -131,9 +156,11 @@ async function playToTheEnd(r, gid) {
 }
 
 try {
+  browser = await launchChromium();
   // ---- A: shipped content, nothing approved ----
   const A = await startServer("A");
   const ra = await cupRoom(A.base);
+  if (INJECT === "after-A-start") throw new Error("injected failure (MCHEZO_S1216_INJECT_FAIL=after-A-start)");
   const [k, a] = ra.seats;
   await ra.host.getByTestId("choose-game").click();
   await ra.host.getByTestId("select-game-split-clues").click();
@@ -175,7 +202,7 @@ try {
   await soon("A the host's phone shows the practice game's results, as Practice", async () => /practice/i.test(await text(ra.host.locator("main"))) && !/counts toward the Family Cup/i.test(await text(ra.host.locator("main"))));
   await shot(ra.host, "practice-results-390");
   for (const p of ra.pages) await p.context().close();
-  A.stop();
+  await A.stop();
 
   // ---- B: an isolated fixture with six approved puzzles ----
   const approved = [...EVERYDAY].slice(0, 6);
@@ -227,13 +254,20 @@ try {
   await soon("B the host's phone shows the results, as Official", async () => /official/i.test(await text(rb.host.locator("main"))));
   await shot(rb.host, "official-results-390");
   for (const p of rb.pages) await p.context().close();
-  B.stop();
+  await B.stop();
   rmSync(fx.dir, { recursive: true, force: true });
   check("B the shipped approvals are unchanged after the fixture run", shippedApprovals() === shippedBefore);
 } catch (e) {
   check("the driver ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
 } finally {
-  await browser.close();
+  if (failures) for (const s of owned.servers) console.log(`--- server ${s.label} output (last 2000 characters) ---\n${s.out.slice(-2000)}`);
+  await browser?.close().catch((e) => console.log(`cleanup: closing the browser failed: ${e}`));
+  for (const s of owned.servers) await stopServer(s).catch((e) => console.log(`cleanup: stopping server ${s.label} failed: ${e}`));
+  for (const d of owned.dirs) rmSync(d, { recursive: true, force: true });
+  const running = owned.servers.filter((s) => s.child.exitCode === null && s.child.signalCode === null).map((s) => s.label);
+  const left = [...owned.servers.map((s) => s.data), ...owned.dirs].filter((d) => existsSync(d));
+  console.log(`cleanup: ${owned.servers.length} server(s) stopped, ${owned.servers.length + owned.dirs.length} temporary dir(s) removed; still running: ${running.length ? running.join(", ") : "none"}; left on disk: ${left.length ? left.join(", ") : "none"}`);
+  if (running.length || left.length) failures++;
 }
 console.log(failures === 0 ? "SPLIT CLUES CONTENT PASSED" : `SPLIT CLUES CONTENT FAILED: ${failures} failed`);
 process.exit(failures === 0 ? 0 : 1);
