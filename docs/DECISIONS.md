@@ -2094,6 +2094,7 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **The bound:** with every body and message capped at 64 KiB, the measured worst case is +10 to 12 MB of heap and about 50 to 60 ms per request.
   - **To remove it:** a separate zod 4 migration with its own full gate.
   - **Alternative rejected:** migrating here. It touches every schema, in a readiness slice whose point is a small, reviewable change.
+  - **Revised by D-BR1R-07 (review 6903002137):** this measured a schema no route uses. The real exposure was reachable by any seat holder, and is now mitigated; the migration is still the way to remove the advisory.
 - **D-BR1-06 The family's data is kept safe by hand, and nothing deletes it.**
   - **The tool:** `datatool` (compiled into the package) has backup, verify, restore and prune.
   - **Backup:** made into a new private folder with a SHA-256 manifest; refused while a server runs, unless asked.
@@ -2137,4 +2138,18 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
 - **D-BR1R-06 The lock race test speaks an explicit protocol.**
   - **Holders only:** END goes only to a confirmed, live holder.
   - **Explicit failures:** an unexpected exit, a missing READY or answer, an ERROR, a non-zero exit, a timeout or any pipe error fails the test with what each contender printed. Nothing counts as a refusal unless the contender said REFUSED.
-
+- **D-BR1R-07 A network-facing array checks its length before zod reads any element** (B-14, D-2, review 6903002137).
+  - **What:** `boundedArray(element, max, min?)` (`src/server/boundedArray.ts`) is `z.unknown()` with a fatal `too_big` check on an over-long array, piped into the same `z.array(element).min(min).max(max)` as before. zod 3's pipeline doesn't run the second step when the first fails, so no element is read. Family Questions `options` and the lineup's `items` use it.
+  - **Why:** zod 3 walks every element and records an issue for each bad one before `.max()` applies, and it has no fix. At the 64 KiB cap that was about 32,700 issues, about 14 MB of live heap and 50–90 ms per request, from any seat holder.
+  - **Unchanged:** what passes, what it parses to, which requests are refused and the 400 they get (8,000 generated bodies against the previous schemas; the routes through the server).
+  - **Alternatives rejected:**
+    - **zod 4 now:** the supported fix, but a major migration across every schema. The review asked for no unrelated migration, so it stays a separate slice.
+    - **A length check in each route before `safeParse`:** it does the same, but it lives outside the schema, where a new route could forget it.
+    - **A smaller body cap:** it bounds the cost but doesn't remove the mechanism, and at 64 KiB the cap alone allowed the crash above.
+- **D-BR1R-08 A test fails if a network-facing schema gains a collection zod would walk in full.**
+  - **What:** `tests/beta-r1r-zod.test.ts` walks every static schema on `LocalServer` and `IntentSchema`, and fails on:
+    - a plain `z.array`;
+    - a set, map, tuple, intersection or recursive schema;
+    - a record whose keys or values can fail.
+  - **The inventory:** it also pins the current list of collections, so a new one has to be reviewed.
+  - **Why:** the exposure came from two ordinary-looking schemas, and the next one would look ordinary too.

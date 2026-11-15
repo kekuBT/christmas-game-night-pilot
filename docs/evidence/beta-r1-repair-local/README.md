@@ -78,3 +78,6 @@
 - **One after another,** with no other test or driver running during them.
 - **No full gate:** production code changed in one place only, a response header on the gate's own pages. Those pages are served only with an access code configured, which no other driver configures. They are covered by both gate checks and the B-13 tests. The release check, the app smoke drivers and every unit test ran too.
 
+## Third round: zod's advisory where network input reaches it (review 6903002137), in `round3/`
+Every run, before and after the fix, is listed with its result in `round3/README.md`: the map of what network input reaches, the capped isolated and server measurements, the failed runs (the server's two deaths at a 24 MB old space and the driver's own errors), the new tests before and after, and both gates on `456cb0d`.
+

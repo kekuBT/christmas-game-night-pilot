@@ -1,0 +1,42 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+stdout | tests/stage125-family.test.ts > over HTTP > add, take back and remove; statuses; a reply never carries anyone else's question
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-tzKNhg)
+
+ ✓ tests/stage125-family.test.ts (13 tests) 172ms
+stderr | tests/stage71-quick-party.test.ts > the room's saved lineup > is saved with the room, and a damaged saved lineup is dropped whole
+[party] room room-mwigz83c-43587: saved lineup dropped (Unknown game: chess)
+[party] room room-mwigz83c-43587: saved lineup dropped (That lineup is about 19 minutes, more than 15.)
+[party] room room-mwigz83c-43587: saved lineup dropped (bad revision)
+[party] room room-mwigz83c-43587: saved lineup dropped (not an object)
+
+stdout | tests/stage71-quick-party.test.ts > over HTTP > survives a server restart: the lineup, its revision and its start mark; a retried start after the restart is the same game
+[restore] 6 room(s) restored, 0 not loaded (data: /tmp/mz-s71-HDbkOz)
+
+ ✓ tests/stage71-quick-party.test.ts (31 tests) 408ms
+ ✓ tests/beta-r1.test.ts (23 tests) 794ms
+   ✓ one writer per data directory (DataDirLock) > the review's interleaving: a holder whose record is still empty (or garbage) is still the holder 426ms
+stdout | tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > saves a lineup with Official and Practice games; everyone sees each game's mode; a restart keeps it
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-kVKsD6)
+
+stdout | tests/stage123-cup-party.test.ts > a Family Cup's Quick Party (HTTP) > repeat-safe: the same press returns the same game; after a cancelled briefing it starts nothing (ATTEMPT_ENDED)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-JMkpbt)
+
+ ✓ tests/beta-r1r-zod.test.ts (7 tests) 838ms
+   ✓ compatibility: the same answers as before on everything else > Quick Party: 4,000 generated bodies around the limits get the same verdict and the same parsed value 511ms
+stderr | tests/stage123-cup-party.test.ts > a lineup across Make it a Family Cup and back (D-S123-04) > a saved Cup lineup whose modes are no longer valid is dropped on restore, never half-loaded
+[party] room room-mwigz96p-214499: saved lineup dropped (Impostor is for 4–10 players, not 2.)
+
+ ✓ tests/stage123-cup-party.test.ts (9 tests) 694ms
+stdout | tests/stage124-finish.test.ts > Finish the Family Cup (POST /rooms/:id/cup/finish) > on Day 7, between games: records standings and the champion, once; then no official game starts; a restart keeps it
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-harness-Re4rpO)
+
+ ✓ tests/stage124-finish.test.ts (5 tests) 820ms
+   ✓ Finish the Family Cup (POST /rooms/:id/cup/finish) > on Day 7, between games: records standings and the champion, once; then no official game starts; a restart keeps it 608ms
+
+ Test Files  6 passed (6)
+      Tests  88 passed (88)
+   Start at  23:32:32
+   Duration  3.30s (transform 1.12s, setup 0ms, collect 3.29s, tests 3.73s, environment 1ms, prepare 374ms)
+

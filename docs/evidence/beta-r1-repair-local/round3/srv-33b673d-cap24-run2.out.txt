@@ -1,0 +1,25 @@
+zod exposure through the server on 33b673d (unmitigated); old space capped at 24 MB; node v22.23.4; server pid 2510; 2026-11-15T23:28:28.640Z
+  [after start and setup] heapUsed now 12134 kB, peak sampled 13775 kB; heapTotal peak 21312 kB; RSS now 82476 kB, peak (VmHWM) 82476 kB
+valid questions (10): 10 requests, statuses {"200":10}, latency p50 4.2 ms, p95 6.3 ms, max 6.3 ms, response 1249 bytes at most
+  [valid use] heapUsed now 13134 kB, peak sampled 13134 kB; heapTotal peak 21568 kB; RSS now 82936 kB, peak (VmHWM) 82936 kB
+sequential fq-flat-invalid x100: 100 requests, statuses {"400":100}, latency p50 80.4 ms, p95 103.7 ms, max 126.8 ms, response 91 bytes at most
+  [sequential fq-flat-invalid] heapUsed now 27607 kB, peak sampled 33767 kB; heapTotal peak 57632 kB; RSS now 117768 kB, peak (VmHWM) 127404 kB
+request 115 (POST /rooms/<id>/family) failed: UND_ERR_SOCKET
+server exit: {"code":null,"signal":"SIGABRT"}; its last GCs:
+[2510:0x336bf000]     8766 ms: Mark-Compact 33.6 (51.0) -> 21.2 (54.6) MB, pooled: 0 MB, 16.36 / 0.00 ms  (+ 7.2 ms in 0 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 35 ms) (average mu = 0.373, current mu = 0.377) allocation failure; scavenge might not succeed
+[2510:0x336bf000]     8786 ms: Mark-Compact 37.1 (54.8) -> 17.2 (55.0) MB, pooled: 0 MB, 15.80 / 0.01 ms  (average mu = 0.305, current mu = 0.203) allocation failure; scavenge might not succeed
+[2510:0x336bf000]     8837 ms: Mark-Compact (reduce) 33.5 (55.8) -> 27.0 (29.4) MB, pooled: 0 MB, 25.04 / 0.00 ms  (+ 14.5 ms in 0 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 50 ms) (average mu = 0.268, current mu = 0.250) allocation failure; scavenge might not succeed
+its last other output:
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+ 1: 0xe48bbe node::OOMErrorHandler(char const*, v8::OOMDetails const&) [/opt/node22/bin/node]
+ 2: 0x1248d00 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/opt/node22/bin/node]
+ 3: 0x1248fd7 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/opt/node22/bin/node]
+ 4: 0x1477ee5  [/opt/node22/bin/node]
+ 5: 0x1491779 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/opt/node22/bin/node]
+ 6: 0x1465e78 v8::internal::HeapAllocator::AllocateRawWithLightRetrySlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/opt/node22/bin/node]
+ 7: 0x1466da5 v8::internal::HeapAllocator::AllocateRawWithRetryOrFailSlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/opt/node22/bin/node]
+ 8: 0x143f9ae v8::internal::Factory::NewFillerObject(int, v8::internal::AllocationAlignment, v8::internal::AllocationType, v8::internal::AllocationOrigin) [/opt/node22/bin/node]
+ 9: 0x18a22bc v8::internal::Runtime_AllocateInYoungGeneration(int, unsigned long*, v8::internal::Isolate*) [/opt/node22/bin/node]
+10: 0x1e01af6  [/opt/node22/bin/node]
+SERVER EXPOSURE RUN FAILED: the server died under a 24 MB old space

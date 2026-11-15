@@ -1,0 +1,32 @@
+// One isolated validation in a capped child process. Usage:
+//   node --expose-gc --max-old-space-size=<MB> --max-semi-space-size=1 iso-child.mjs <repo> <variant> [repeat]
+// Prints one JSON line. With a small old-space cap the process dies (V8 "heap limit") if the validation needs more.
+import { pathToFileURL } from "node:url";
+import { join } from "node:path";
+import { VARIANTS, buildBody } from "./variants.mjs";
+
+const [repo, id, repeatArg] = process.argv.slice(2);
+const repeat = Number(repeatArg ?? 1);
+const v = VARIANTS[id];
+const { LocalServer } = await import(pathToFileURL(join(repo, "dist/server/http.js")).href);
+const { IntentSchema } = await import(pathToFileURL(join(repo, "dist/shared/protocol.js")).href);
+const { z } = await import(pathToFileURL(join(repo, "node_modules/zod/index.js")).href);
+const schema = v.schema === "synthetic" ? z.array(z.string()).max(8) : v.schema === "IntentSchema" ? IntentSchema : LocalServer[v.schema];
+
+const { body, elements, depth } = buildBody(id);
+const bytes = Buffer.byteLength(body);
+let input;
+try { input = JSON.parse(body); } catch (e) { console.log(JSON.stringify({ id, bytes, jsonError: e.message })); process.exit(0); }
+if (v.unwrap) input = input[v.unwrap];
+const mb = (x) => +(x / 1048576).toFixed(2);
+gc(); gc();
+const base = process.memoryUsage().heapUsed;
+let r, ms = 0;
+for (let i = 0; i < repeat; i++) { r = undefined; const t0 = performance.now(); r = schema.safeParse(input); ms = performance.now() - t0; }
+const withGarbage = process.memoryUsage().heapUsed;
+gc(); gc();
+const retained = process.memoryUsage().heapUsed; // the result (and its issues) still referenced by r
+const issues = r.success ? 0 : r.error.issues.length;
+const nestedIssues = r.success ? 0 : r.error.issues.reduce((n, i) => n + (i.unionErrors ? i.unionErrors.reduce((m, e) => m + e.issues.length, 0) : 0), 0);
+const codes = r.success ? {} : r.error.issues.reduce((m, i) => ((m[i.code] = (m[i.code] ?? 0) + 1), m), {});
+console.log(JSON.stringify({ id, bytes, elements, ...(depth ? { depth } : {}), success: r.success, issues, nestedIssues, codes, ms: +ms.toFixed(1), heapAfterMB: mb(withGarbage - base), retainedMB: mb(retained - base), rssMB: mb(process.memoryUsage().rss) }));

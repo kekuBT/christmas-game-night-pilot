@@ -1,0 +1,128 @@
+// Through the real server: the built server (dist/server/serve.js) in its own child, old space capped, its own
+// port (127.0.0.1, chosen by the OS) and its own throwaway data folder, the private-beta gate on. One client enters
+// the gate, makes a casual room, takes its seat (a session), then posts the worst bodies at the 64 KiB cap to the
+// two routes whose schemas have a length-limited array. Nothing else runs meanwhile. Usage:
+//   node srv.mjs <repo> <old space MB> <label> [sequential per route] [concurrent clients] [requests per client]
+import { spawn } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { buildBody } from "./variants.mjs";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const [repo, capArg, label, seqArg = "100", cliArg = "16", perArg = "25"] = process.argv.slice(2);
+const CAP_MB = Number(capArg), SEQ = Number(seqArg), CLIENTS = Number(cliArg), PER = Number(perArg);
+const data = mkdtempSync(join(here, "tmp-data-"));
+const watch = join(data, "..", `heapwatch-${process.pid}.jsonl`);
+const CODE = "zx-local-code-7731";
+const args = [`--max-old-space-size=${CAP_MB}`, "--trace-gc", "--import", join(here, "heapwatch.mjs"), join(repo, "dist/server/serve.js")];
+const server = spawn(process.execPath, args, { cwd: repo, stdio: ["ignore", "pipe", "pipe"], env: { PATH: process.env.PATH, PORT: "0", MCHEZO_LISTEN_HOST: "127.0.0.1", MCHEZO_DATA_DIR: data, MCHEZO_BETA_ACCESS_CODE: CODE, ZX_HEAPWATCH_FILE: watch } });
+let out = "", err = "", exited = null;
+server.stdout.on("data", (d) => { out += d; });
+server.stderr.on("data", (d) => { err += d; });
+server.on("exit", (code, signal) => { exited = { code, signal }; });
+const port = await new Promise((res, rej) => {
+  const t = setTimeout(() => rej(new Error(`server did not start: ${err.slice(-500)}`)), 20_000);
+  const iv = setInterval(() => { const m = /localhost:(\d+)/.exec(out); if (m) { clearInterval(iv); clearTimeout(t); res(Number(m[1])); } if (exited) { clearInterval(iv); clearTimeout(t); rej(new Error(`server exited ${JSON.stringify(exited)}: ${err.slice(-500)}`)); } }, 20);
+});
+const base = `http://127.0.0.1:${port}`;
+const kB = (x) => Math.round(x / 1024);
+const proc = () => { const s = readFileSync(`/proc/${server.pid}/status`, "utf8"); const g = (k) => Number(new RegExp(`${k}:\\s+(\\d+)`).exec(s)?.[1] ?? NaN); return { VmRSSkB: g("VmRSS"), VmHWMkB: g("VmHWM") }; };
+const marks = [];
+const mark = async (phase) => {
+  server.kill("SIGUSR2");
+  for (let i = 0; i < 100 && (!existsSync(watch) || readFileSync(watch, "utf8").trim().split("\n").length < marks.length + 1); i++) await new Promise((r) => setTimeout(r, 10));
+  const line = JSON.parse(readFileSync(watch, "utf8").trim().split("\n")[marks.length]);
+  marks.push({ phase, ...line, ...proc() });
+  const m = marks.at(-1);
+  console.log(`  [${phase}] heapUsed now ${kB(m.now.heapUsed)} kB, peak sampled ${kB(m.peak.heapUsed)} kB; heapTotal peak ${kB(m.peak.heapTotal)} kB; RSS now ${m.VmRSSkB} kB, peak (VmHWM) ${m.VmHWMkB} kB`);
+};
+
+// Enter the beta gate, make a room, take its seat.
+const enter = await fetch(`${base}/beta/enter`, { method: "POST", redirect: "manual", headers: { "content-type": "application/x-www-form-urlencoded" }, body: `code=${CODE}&next=/` });
+const cookie = (enter.headers.get("set-cookie") ?? "").split(";")[0];
+if (enter.status !== 303 || !cookie) throw new Error(`gate: ${enter.status}`);
+const H = (token) => ({ "content-type": "application/json", cookie, ...(token ? { "x-session-token": token } : {}) });
+let sent = 0;
+const died = async (e, path) => {
+  for (let i = 0; i < 200 && !exited; i++) await new Promise((r) => setTimeout(r, 10));
+  const lines = (out + err).split("\n").filter((l) => l.trim() && !/Scavenge|Mark-Compact|Mark-sweep/i.test(l));
+  console.log(`request ${sent} (POST ${path.replace(/rooms\/[^/]+/, "rooms/<id>")}) failed: ${e.cause?.code ?? e.message}`);
+  console.log(`server exit: ${JSON.stringify(exited)}; its last GCs:\n${out.split("\n").filter((l) => /Scavenge|Mark-Compact|Mark-sweep/i.test(l)).slice(-3).join("\n")}\nits last other output:\n${lines.slice(-12).join("\n")}`);
+  console.log(`SERVER EXPOSURE RUN FAILED: the server died under a ${CAP_MB} MB old space`);
+  rmSync(data, { recursive: true, force: true }); rmSync(watch, { force: true });
+  process.exit(1);
+};
+const post = async (path, body, token) => { sent++; const t0 = performance.now(); try { const r = await fetch(`${base}${path}`, { method: "POST", headers: H(token), body }); const text = await r.text(); return { status: r.status, ms: performance.now() - t0, bytes: text.length, text }; } catch (e) { return died(e, path); } };
+const mkRoom = async () => {
+  const room = JSON.parse((await post("/rooms", JSON.stringify({ kind: "casual" }))).text);
+  const seat = JSON.parse((await post(`/rooms/${room.roomId}/join`, JSON.stringify({ displayName: "Zed", asHost: true, hostClaimToken: room.hostClaimToken }))).text);
+  if (!seat.sessionToken) throw new Error("no session");
+  return { id: room.roomId, token: seat.sessionToken };
+};
+const room = await mkRoom();
+const validFamily = JSON.stringify({ kind: "choice", prompt: "Where was Bibi born?", options: ["Nairobi", "Mombasa", "Kisumu"], correctIndex: 0 });
+const validParty = (rev) => JSON.stringify({ baseRevision: rev, plan: { expectedPlayers: 2, budgetMinutes: 30, items: [{ gameId: "trivia" }] } });
+const pct = (xs, p) => { const s = [...xs].sort((a, b) => a - b); return +s[Math.min(s.length - 1, Math.floor(p * s.length))].toFixed(1); };
+const summary = (name, rs) => { const st = rs.reduce((m, r) => ((m[r.status] = (m[r.status] ?? 0) + 1), m), {}); const line = `${name}: ${rs.length} requests, statuses ${JSON.stringify(st)}, latency p50 ${pct(rs.map((r) => r.ms), 0.5)} ms, p95 ${pct(rs.map((r) => r.ms), 0.95)} ms, max ${pct(rs.map((r) => r.ms), 1)} ms, response ${Math.max(...rs.map((r) => r.bytes))} bytes at most`; console.log(line); return { name, n: rs.length, statuses: st }; };
+
+console.log(`zod exposure through the server ${label}; old space capped at ${CAP_MB} MB; node ${process.version}; server pid ${server.pid}; ${new Date().toISOString()}`);
+const results = [];
+await new Promise((r) => setTimeout(r, 300));
+await mark("after start and setup");
+
+// Ordinary use first: valid questions and lineups.
+const warm = [];
+for (let i = 0; i < 10; i++) warm.push(await post(`/rooms/${room.id}/family`, JSON.stringify({ kind: "choice", prompt: `Q${i}?`, options: ["a", "b"], correctIndex: 0 }), room.token));
+results.push(summary("valid questions (10)", warm));
+await mark("valid use");
+
+const worst = { family: ["fq-flat-invalid", "fq-nested-empty"], party: ["pb-flat-invalid", "pb-nested-empty", "pb-empty-objects"] };
+const bodies = Object.fromEntries(Object.values(worst).flat().map((id) => [id, buildBody(id).body]));
+for (const [id, b] of Object.entries(bodies)) if (Buffer.byteLength(b) > 65536) throw new Error(`${id} over the cap`);
+
+// Sequential: one client, one request at a time.
+for (const [route, ids] of Object.entries(worst)) for (const id of ids) {
+  const rs = [];
+  for (let i = 0; i < SEQ; i++) rs.push(await post(`/rooms/${room.id}/${route}`, bodies[id], room.token));
+  results.push(summary(`sequential ${id} x${SEQ}`, rs));
+  await mark(`sequential ${id}`);
+}
+
+// Concurrent: CLIENTS clients at once, each PER requests back to back, alternating the two worst bodies; meanwhile a
+// bystander asks /health every 50 ms (how long another family member waits while this runs).
+const bystander = [];
+let stop = false;
+const by = (async () => { while (!stop) { const t0 = performance.now(); const r = await fetch(`${base}/health`); await r.text(); bystander.push({ status: r.status, ms: performance.now() - t0, bytes: 0 }); await new Promise((x) => setTimeout(x, 50)); } })();
+const t0 = performance.now();
+const conc = (await Promise.all(Array.from({ length: CLIENTS }, async (_, c) => { const rs = []; for (let i = 0; i < PER; i++) { const flip = (c + i) % 2 === 0; rs.push(await post(`/rooms/${room.id}/${flip ? "family" : "party"}`, bodies[flip ? "fq-flat-invalid" : "pb-flat-invalid"], room.token)); } return rs; }))).flat();
+const wall = performance.now() - t0;
+stop = true; await by;
+results.push(summary(`concurrent ${CLIENTS} clients x ${PER} (wall ${Math.round(wall)} ms, ${(conc.length / (wall / 1000)).toFixed(1)} requests/s)`, conc));
+summary("  bystander GET /health during it", bystander);
+await mark("concurrent");
+
+// Afterwards: the server still serves valid requests, with nothing lost.
+const room2 = await mkRoom();
+const after = [await post(`/rooms/${room.id}/family`, validFamily, room.token), await post(`/rooms/${room2.id}/party`, validParty(0), room2.token)];
+const health = await fetch(`${base}/health`);
+console.log(`after: valid question ${after[0].status}, valid lineup ${after[1].status} (${after[1].text.slice(0, 80)}...), /health ${health.status}`);
+const fam = await fetch(`${base}/rooms/${room.id}/projection?audience=host`, { headers: H(room.token) });
+const famJson = await fam.json();
+const added = famJson.family?.mine?.length ?? famJson.family?.count ?? JSON.stringify(famJson.family ?? {}).length;
+console.log(`after: the room's Family Questions view (host projection ${fam.status}): ${JSON.stringify(famJson.family ?? null).slice(0, 160)}`);
+await new Promise((r) => setTimeout(r, 200));
+await mark("after");
+
+const allWorst = results.filter((r) => /sequential|concurrent/.test(r.name));
+const non400 = allWorst.filter((r) => Object.keys(r.statuses).some((s) => s !== "400"));
+server.kill("SIGTERM");
+await new Promise((r) => { if (exited) r(); else server.on("exit", r); });
+const gcLines = out.split("\n").filter((l) => /Scavenge|Mark-Compact|Mark-sweep/i.test(l));
+const before = gcLines.map((l) => Number(/: (?:Scavenge|Mark-Compact|Mark-sweep)[^0-9]*([0-9.]+) \(/i.exec(l)?.[1] ?? NaN)).filter(Number.isFinite);
+console.log(`GC: ${gcLines.length} collections traced; the largest heap V8 saw when it started one: ${Math.max(...before)} MB (old space cap ${CAP_MB} MB)`);
+console.log(`server exit: ${JSON.stringify(exited)}; OOM in its output: ${/heap limit|out of memory/i.test(out + err)}`);
+const ok = exited && exited.code === 0 && non400.length === 0 && after.every((r) => r.status === 200) && health.status === 200;
+console.log(ok ? `SERVER EXPOSURE RUN PASSED: every worst-case body refused with 400, the server stayed up under a ${CAP_MB} MB old space, valid requests worked afterwards` : `SERVER EXPOSURE RUN FAILED: ${JSON.stringify({ exited, non400: non400.map((r) => r.name), after: after.map((r) => r.status), health: health.status })}`);
+rmSync(data, { recursive: true, force: true }); rmSync(watch, { force: true });
+process.exit(ok ? 0 : 1);

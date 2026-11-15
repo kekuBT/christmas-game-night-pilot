@@ -3102,3 +3102,22 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **External blockers:** ChatGPT's private browser audit (preview access), the host, real phones, the owner's sign-off.
 - **Next:** the review of the second-round report on #43. The beta stays held.
 
+
+## Beta R1-R, third round: zod's advisory where network input reaches it, review 6903002137 (completed)
+- **Brief:** the owner's ChatGPT review confirmed R3 and R4/B-13. It asked for a bounded, reproducible exposure assessment of zod 3.25.76's GHSA-mrhx-c7xc-m3w5, and a mitigation if the exposure is reachable. Acknowledged in 6903020160. #42 stays separate; the beta is held.
+- **Estimate:** about 2 h 30 min, plus 1 h 30 min if a mitigation is needed. It was written at 6:15 p.m. ET (`docs/beta/beta-r1-repair.md`, "Third round").
+- **Found:** two arrays any seat holder reaches, Family Questions `options` and the lineup's `items`. At the 64 KiB cap, zod 3 built about 32,700 issues per request: about 14 MB of live heap and 50–90 ms. A server with a 24 MB old space died on one request, and a flood stalled everyone (**B-14**).
+- **Fixed:** `src/server/boundedArray.ts` checks the length before any element (D-BR1R-07), and is used by both schemas in `src/server/http.ts`. `tests/beta-r1r-zod.test.ts` adds the guard (D-BR1R-08), the element-read counts, 8,000 generated compatibility bodies and the routes.
+- **Evidence:** `docs/evidence/beta-r1-repair-local/round3/README.md`, with every run, failures included.
+- **Tested code:** `456cb0d`.
+  - **Targeted:** `20261115-233420-456cb0de-5276` PASSED, 8/8.
+  - **Fast:** `20261115-233744-456cb0de-6799` PASSED, unit 2046/2046.
+  - **No full gate,** with the reason in the evidence README.
+- **Failures:**
+  - **The unmitigated server at 24 MB died twice,** as found.
+  - **The driver's own errors:** its first trial was wrong (20 questions against a limit of 15), and the first 24 MB run's driver crashed on the dead server before printing the server's output.
+  - **The new tests' first run had two test bugs,** fixed before run 2.
+  - **Gates:** no failures.
+- **Residual risk:** zod 3 itself is unchanged and `npm audit` still lists the advisory. The records are walked in full (about 10 ms, no issues). The zod 4 migration remains a separate slice.
+- **External blockers:** ChatGPT's private browser audit (Codespaces' forwarded origin), the host, real phones, the owner's sign-off.
+- **Next:** the review of the third-round report on #43. The beta stays held.

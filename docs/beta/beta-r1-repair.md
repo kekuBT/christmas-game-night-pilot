@@ -175,3 +175,55 @@ About **7 h 30 min**.
 | The capped measurements (isolated and through the server) | 50 min |
 | Verdict, docs, report | 1 h |
 | A mitigation, if one is needed, with its tests and gates | 1 h 30 min |
+
+### What the assessment found
+Evidence: `docs/evidence/beta-r1-repair-local/round3/README.md`.
+
+**1. The map.**
+- **What network input reaches:** 12 zod schemas, LocalServer's 11 for HTTP and `IntentSchema` for intents over HTTP and WebSocket.
+- **The two arrays:**
+  - **Family Questions `options`:** max 8 strings.
+  - **The Quick Party lineup's `items`:** 1–8 objects, inside a union.
+- **Who can reach them:** any seat holder, and anyone with the beta code can make a room and take its seat. The host check comes after the parse, and these routes have no rate limit.
+- **The two records:** settings and the intent payload. Their entries can't fail, so they cost time but build no issues.
+- **What a failed parse returns:** a fixed message of at most 106 bytes, never the issues.
+- **Nothing else** zod validates comes from the network: room snapshots, Cup rules, Memory Book facts and content.
+
+**2. The cost, measured in capped children.** At the 64 KiB cap, both arrays walked every element: about 32,700 issues, 44–50 ms, +13–16 MB of heap. The smallest old space that finished was 24 MB, against 12 MB for a valid question.
+- **Nested and deep arrays are never worse:** zod stops at each element's first type mismatch.
+- **Through the real server:**
+  - **32 MB old space:** it survived 900 worst-case requests, 500 sequential and 400 from 16 clients at once. The heap went back to its resting size.
+  - **24 MB:** it **died** in both runs, with "Reached heap limit"; 27 MB was live during a validation, against 13 MB at rest.
+  - **A bystander** waited p50 553 ms and up to 1 s per request while 16 clients sent.
+
+**3. The verdict: reachable, and bounded per request.**
+- **What the cap bounds:** one request's peak, about 14 MB above a resting server, and its time, 50–90 ms. Because validation is synchronous and nothing keeps the issues, it doesn't add up across requests or clients.
+- **What that means:** a server whose heap limit leaves less room than that dies on one request. For scale, this container's default limit is 2,096 MB; the host's is unknown. Any seat holder could also stall everyone's game for as long as they kept sending.
+- **So the mitigation was needed.**
+
+### The mitigation (B-14, D-BR1R-07, D-BR1R-08)
+- **`boundedArray()`:** a length check before any element is read, as zod 4.6.6 does. Over the limit it records one `too_big` issue; anything else is parsed by the same `z.array(...).min().max()` as before. Both arrays use it. The production change is `src/server/boundedArray.ts` plus three lines in `src/server/http.ts`.
+- **After the fix:** 1 issue (the union adds 3), 2–4 ms, no extra heap. The server at 24 MB took all 900 worst-case requests, and the bystander waited p50 21 ms.
+- **Compatibility:** 8,000 generated bodies around the limits get the same verdict and the same parsed value as the previous schemas. Through the server, the same 400s are sent, the room is unchanged, and valid questions and lineups save.
+- **Not done:** no zod upgrade, no `npm audit fix`, no other schema changed.
+
+### Checks
+- **Before the fix,** the new tests showed the walk.
+  - **Run 1:** 6 failed. Two of the failures were bugs in my tests: the generator was too strict, and I used 8 options where the room allows 4.
+  - **Run 2:** with those fixed, exactly the four that show the walk failed.
+- **After the fix:** the new tests passed 7/7, and the six focused files 88/88.
+- **Gates on `456cb0d`:**
+  - **Targeted** `20261115-233420-456cb0de-5276`: PASSED (exit 0), 8/8. It ran Family Questions, Quick Party, the session flow, the release package and both beta-gate checks.
+  - **Fast** `20261115-233744-456cb0de-6799`: PASSED (exit 0), unit 2046/2046.
+- **No full gate:** the change is two request schemas, proven equivalent, and every driver that posts to them ran.
+
+### Estimate vs actual (third round)
+| Part | Estimate | Actual |
+|---|---|---|
+| The map | 40 min | about 7 min (6:16 to 6:23) |
+| The capped measurements | 50 min | about 6 min before the fix (6:23 to 6:29); the after-fix runs are in the next row |
+| The mitigation, its tests and gates | 1 h 30 min (if needed) | about 10 min: code, tests and after-fix runs to the 6:34 commit, then both gates to 6:39 |
+| Verdict, docs, report | 1 h | about 4 min to the docs commit (6:39 to 6:43); the report followed |
+| **Total** | about 2 h 30 min, plus 1 h 30 min for a mitigation | **about 28 min** (6:15 p.m. to 6:43 p.m. ET, the docs commit) |
+
+The times come from the runs' own timestamps (the isolated sweep started at 6:23, the first test run at 6:30, the fix was committed at 6:34, the gates ran 6:34 to 6:39). The estimate assumed the map and the measurements would be slower than they were: the schemas are few and live in one file, and the earlier rounds' harness patterns carried over.

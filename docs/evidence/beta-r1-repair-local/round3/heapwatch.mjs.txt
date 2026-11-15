@@ -1,0 +1,15 @@
+// Preloaded into the server under test (node --import): samples its memory every 10 ms and, on SIGUSR2, writes the
+// peaks since the last mark to a side file, then resets them. It changes nothing in the server. The samples run
+// between requests (a validation is synchronous), so they see garbage left by earlier validations, not the
+// instant inside one; V8's heap limit (--max-old-space-size) is what bounds that instant.
+import { appendFileSync } from "node:fs";
+const out = process.env.ZX_HEAPWATCH_FILE;
+let peak = { heapUsed: 0, heapTotal: 0, rss: 0, external: 0, arrayBuffers: 0 };
+const sample = () => { const m = process.memoryUsage(); for (const k of Object.keys(peak)) if (m[k] > peak[k]) peak[k] = m[k]; };
+setInterval(sample, 10).unref();
+process.on("SIGUSR2", () => {
+  sample();
+  const now = process.memoryUsage();
+  appendFileSync(out, JSON.stringify({ t: Math.round(performance.now()), peak, now, maxRSSkB: process.resourceUsage().maxRSS }) + "\n");
+  peak = { heapUsed: 0, heapTotal: 0, rss: 0, external: 0, arrayBuffers: 0 };
+});

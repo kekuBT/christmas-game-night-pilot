@@ -1,0 +1,67 @@
+// The inputs for the zod exposure assessment: for each network-facing schema with a collection, the worst bodies
+// that fit the server's 64 KiB cap (MAX_MESSAGE_BYTES; a body of exactly 65,536 bytes is accepted, one more is refused).
+export const CAP = 64 * 1024;
+
+/** `prefix` + as many `unit`s as fit, comma-separated + `suffix`, at most CAP bytes. */
+export function fill(prefix, unit, suffix, cap = CAP) {
+  const room = cap - Buffer.byteLength(prefix) - Buffer.byteLength(suffix);
+  const per = Buffer.byteLength(unit) + 1;
+  const n = Math.max(0, Math.floor((room + 1) / per));
+  const body = prefix + Array(n).fill(unit).join(",") + suffix;
+  if (Buffer.byteLength(body) > cap) throw new Error("over the cap");
+  return { body, elements: n };
+}
+const deep = (prefix, suffix, cap = CAP) => {
+  const d = Math.floor((cap - Buffer.byteLength(prefix) - Buffer.byteLength(suffix)) / 2);
+  return { body: prefix + "[".repeat(d) + "]".repeat(d) + suffix, elements: 1, depth: d };
+};
+
+const FQ = ['{"kind":"choice","prompt":"q","options":[', "]}"];
+const PB = ['{"baseRevision":0,"plan":{"expectedPlayers":2,"budgetMinutes":15,"items":[', "]}}"];
+const s501 = JSON.stringify("x".repeat(501));
+
+/** route: the HTTP route the body is posted to (or "ws" for a WebSocket message); schema: LocalServer static or IntentSchema. */
+export const VARIANTS = {
+  // A valid question: the same process and schema doing ordinary work, for the heap-limit sweep's baseline
+  "control-valid": { schema: "FamilyQuestionSchema", route: "family", build: () => ({ body: '{"kind":"choice","prompt":"Which is ours?","options":["a","b"],"correctIndex":0}', elements: 2 }), what: "a valid question (control)" },
+  // Family Questions: options is z.array(z.string().max(500)).max(8)
+  "fq-flat-invalid": { schema: "FamilyQuestionSchema", route: "family", build: () => fill(FQ[0], "0", FQ[1]), what: "options: [0,0,0,...], every element the wrong type" },
+  "fq-nested-empty": { schema: "FamilyQuestionSchema", route: "family", build: () => fill(FQ[0], "[]", FQ[1]), what: "options: [[],[],...], nested empty arrays" },
+  "fq-nested-one": { schema: "FamilyQuestionSchema", route: "family", build: () => fill(FQ[0], "[0]", FQ[1]), what: "options: [[0],[0],...], nested arrays with content" },
+  "fq-one-long-nested": { schema: "FamilyQuestionSchema", route: "family", build: () => fill(FQ[0] + "[", "0", "]" + FQ[1]), what: "options: [[0,0,...]], one nested array holding the rest" },
+  "fq-deep": { schema: "FamilyQuestionSchema", route: "family", build: () => deep(FQ[0], FQ[1]), what: "options: [[[[...]]]], nested as deep as fits" },
+  "fq-valid-oversize": { schema: "FamilyQuestionSchema", route: "family", build: () => fill(FQ[0], '""', FQ[1]), what: 'options: ["","",...], valid elements, far over max 8' },
+  "fq-long-strings": { schema: "FamilyQuestionSchema", route: "family", build: () => fill(FQ[0], s501, FQ[1]), what: "options: 501-character strings (each over max 500), far over max 8" },
+  // Quick Party lineup: plan.items is z.array(z.object({ gameId, official? }).strict()).min(1).max(8), inside a z.union
+  "pb-flat-invalid": { schema: "PartyBodySchema", route: "party", build: () => fill(PB[0], "0", PB[1]), what: "items: [0,0,0,...], every element the wrong type" },
+  "pb-empty-objects": { schema: "PartyBodySchema", route: "party", build: () => fill(PB[0], "{}", PB[1]), what: "items: [{},{},...], each missing gameId" },
+  "pb-three-issues": { schema: "PartyBodySchema", route: "party", build: () => fill(PB[0], '{"official":0,"x":0}', PB[1]), what: 'items: [{"official":0,"x":0},...], three issues per element' },
+  "pb-nested-empty": { schema: "PartyBodySchema", route: "party", build: () => fill(PB[0], "[]", PB[1]), what: "items: [[],[],...], nested empty arrays" },
+  "pb-nested-field": { schema: "PartyBodySchema", route: "party", build: () => fill(PB[0] + '{"gameId":[', "0", "]}" + PB[1]), what: 'items: [{"gameId":[0,0,...]}], one element whose field is a long array' },
+  "pb-deep": { schema: "PartyBodySchema", route: "party", build: () => deep(PB[0], PB[1]), what: "items: [[[[...]]]], nested as deep as fits" },
+  "pb-valid-oversize": { schema: "PartyBodySchema", route: "party", build: () => fill(PB[0], '{"gameId":"a"}', PB[1]), what: 'items: [{"gameId":"a"},...], valid elements, far over max 8' },
+  // Unbounded records: no per-entry issue is possible (string keys, unknown values)
+  "gs-record-keys": { schema: "GameSettingsSchema", route: "game-settings", build: () => fill('{"gameId":"jebena-rush","baseRevision":0,"settings":{', '"k":0', "}}"), what: "settings: an object with thousands of keys", keysUnique: true },
+  "in-payload-keys": { schema: "IntentSchema", route: "ws", build: () => fill('{"intent":{"kind":"intent","schemaVersion":1,"clientEventId":"00000000-0000-4000-8000-000000000000","roomId":"r","gameInstanceId":null,"action":"a","payload":{', '"k":0', "}}}"), what: "intent payload: an object with thousands of keys", keysUnique: true, unwrap: "intent" },
+  "in-payload-array": { schema: "IntentSchema", route: "ws", build: () => fill('{"intent":{"kind":"intent","schemaVersion":1,"clientEventId":"00000000-0000-4000-8000-000000000000","roomId":"r","gameInstanceId":null,"action":"a","payload":[', "0", "]}}"), what: "intent payload: an array (a record expected)", unwrap: "intent" },
+  // Not reachable: the synthetic schema measured in Beta R1 (D-2), for comparison only
+  "synthetic-r1": { schema: "synthetic", route: null, build: () => fill("[", "0", "]"), what: "Beta R1's measurement: z.array(z.string()).max(8) on the whole body (no route uses it)" },
+};
+
+/** Make "k" keys unique: "k0","k1",... while staying under the cap. */
+export function buildBody(id) {
+  const v = VARIANTS[id];
+  if (!v.keysUnique) return v.build();
+  const { body } = v.build();
+  const head = body.slice(0, body.indexOf('"k":0'));
+  const tail = body.slice(body.lastIndexOf('"k":0') + 5);
+  const parts = [];
+  let len = Buffer.byteLength(head) + Buffer.byteLength(tail);
+  for (let i = 0; ; i++) {
+    const p = `"k${i}":0`;
+    const add = Buffer.byteLength(p) + (parts.length ? 1 : 0);
+    if (len + add > CAP) break;
+    parts.push(p); len += add;
+  }
+  return { body: head + parts.join(",") + tail, elements: parts.length };
+}

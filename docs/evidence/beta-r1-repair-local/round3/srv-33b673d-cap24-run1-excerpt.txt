@@ -1,0 +1,40 @@
+# The first 24 MB run on 33b673d (unmitigated). Its file was overwritten by run 2 (srv-33b673d-cap24-run2.out.txt),
+# so this is the part printed in the session (the first 3,000 bytes and the tail), copied verbatim.
+# The server died during the first worst-case batch (fq-flat-invalid), after the "valid use" mark. The driver of
+# that time had no handler for a dead server and crashed on the closed connection ("fetch failed: other side
+# closed"), so the server's own output wasn't printed. Run 2 added that handler and captured V8's "Reached heap limit".
+zod exposure through the server on 33b673d (unmitigated); old space capped at 24 MB; node v22.23.4; server pid 2471; 2026-11-15T23:27:16.140Z
+  [after start and setup] heapUsed now 12134 kB, peak sampled 13737 kB; heapTotal peak 21312 kB; RSS now 80472 kB, peak (VmHWM) 80472 kB
+valid questions (10): 10 requests, statuses {"200":10}, latency p50 5.1 ms, p95 7.3 ms, max 7.3 ms, response 1249 bytes at most
+  [valid use] heapUsed now 13137 kB, peak sampled 13136 kB; heapTotal peak 21568 kB; RSS now 80928 kB, peak (VmHWM) 80928 kB
+node:internal/deps/undici/undici:15456
+      Error.captureStackTrace(err);
+            ^
+
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:15456:13
+    at async post (file:///tmp/.../scratchpad/zx/srv.mjs:46:85)
+    at async file:///tmp/.../scratchpad/zx/srv.mjs:77:41 {
+  [cause]: SocketError: other side closed
+      at Socket.<anonymous> (node:internal/deps/undici/undici:6569:28)
+      at Socket.emit (node:events:531:35)
+      at endReadableNT (node:internal/streams/readable:1698:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:89:21) {
+    code: 'UND_ERR_SOCKET',
+    socket: {
+      localAddress: '127.0.0.1',
+      localPort: 35222,
+      remoteAddress: '127.0.0.1',
+      remotePort: 45909,
+      remoteFamily: 'IPv4',
+      timeout: undefined,
+      bytesWritten: 1255897,
+      bytesRead: 13938
+    },
+    [Symbol(undici.error.UND_ERR)]: true,
+    [Symbol(undici.error.UND_ERR_SOCKET)]: true
+  }
+}
+
+Node.js v22.23.4
+# driver exit 1. An estimate from the bytes written on that connection (1,255,897): it failed at about the 19th worst-case body (65,536 bytes each). Run 2 failed later, at request 115 (the 103rd worst-case body): at this cap the failure point depends on when V8 collects.

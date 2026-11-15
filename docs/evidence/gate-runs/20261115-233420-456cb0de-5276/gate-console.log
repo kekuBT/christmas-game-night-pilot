@@ -1,0 +1,47 @@
+Mchezo gate targeted | run 20261115-233420-456cb0de-5276
+  revision 456cb0de3bfea99b2c47234e5729eb6b03b53efc (clean tree) | fingerprint 3f0293c0a47f (628 files)
+  plan     8 steps: 1 fast/build, 6 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  251 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 220 run(s))
+  estimate this run: 2–6m (low-confidence) · the same steps one after another: about 5m 10s · longest step check-session-flow ~2m 53s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-beta-gate-https
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr3t1/test-results/20261115-233420-456cb0de-5276
+        start build-web on w1 (usually 5s)
+[ 1/8] PASS         5.1s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/8] PASS           1s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:36415 (pid 5399, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr3t1/test-results/20261115-233420-456cb0de-5276/server-data/w1)
+  server   w2 http://localhost:43603 (pid 5400, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr3t1/test-results/20261115-233420-456cb0de-5276/server-data/w2)
+  server   w3 http://localhost:38835 (pid 5401, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr3t1/test-results/20261115-233420-456cb0de-5276/server-data/w3)
+        start check-session-flow on w1 (usually 2m 53s)
+        start check-family-questions on w2 (usually 50s)
+        start check-quick-party on w3 (usually 46s)
+[ 3/8] PASS        48.6s  check-quick-party  w3
+        start check-release-package on w3 (usually 16s)
+── progress  3/8 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-session-flow 53s (w1), check-family-questions 53s (w2), check-release-package 4s (w3)
+   remaining 1–5m · total 2–6m · done around 23:36–23:39 UTC (low-confidence)
+[ 4/8] PASS        53.7s  check-family-questions  w2
+        start check-beta-gate-https on w2 (usually 16s)
+[ 5/8] PASS        17.8s  check-release-package  w3
+        start check-beta-gate on w3 (usually 3s)
+[ 6/8] PASS         2.4s  check-beta-gate  w3
+[ 7/8] PASS        16.2s  check-beta-gate-https  w2
+── progress  7/8 done · 7 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-session-flow 1m 53s (w1)
+   remaining 0–4m · total 2–6m · done around 23:36–23:39 UTC (low-confidence)
+── progress  7/8 done · 7 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-session-flow 2m 53s (w1)
+   remaining 0–3m · total 3–6m · done around 23:37–23:39 UTC (low-confidence)
+[ 8/8] PASS       182.7s  check-session-flow  w1
+
+PASSED (exit 0) | targeted | run 20261115-233420-456cb0de-5276
+  8 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 3m 10s · step time 5m 28s (sum) · 3 workers, 57% busy · 1.73× the same steps run one after another
+           predicted 2–6m (about 3m 03s, low-confidence) → actual 3m 10s (+4%)
+           longest  check-session-flow 3m 03s, check-family-questions 54s, check-quick-party 49s · the longest step is 96% of the wall time
+           machine  CPU mean 24%, peak 91% · memory available ≥ 13953 MB · load peak 3.72
+           contention ×1.054 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr3t1/test-results/20261115-233420-456cb0de-5276/report.json
