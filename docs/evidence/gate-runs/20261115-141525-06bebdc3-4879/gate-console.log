@@ -1,0 +1,48 @@
+Mchezo gate targeted | run 20261115-141525-06bebdc3-4879
+  revision 06bebdc313f1336dd2aa0d89704776ee4d8da45d (clean tree) | fingerprint 0727452dff83 (614 files)
+  plan     9 steps: 1 fast/build, 7 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  224 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 196 run(s))
+  estimate this run: 2–6m (measured) · the same steps one after another: about 8m 51s · longest step check-cup-team-games ~2m 18s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216rt1/test-results/20261115-141525-06bebdc3-4879
+        start build-web on w1 (usually 5s)
+[ 1/9] PASS         5.9s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/9] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:45403 (pid 5021, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216rt1/test-results/20261115-141525-06bebdc3-4879/server-data/w1)
+  server   w2 http://localhost:33025 (pid 5022, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216rt1/test-results/20261115-141525-06bebdc3-4879/server-data/w2)
+  server   w3 http://localhost:39005 (pid 5023, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216rt1/test-results/20261115-141525-06bebdc3-4879/server-data/w3)
+        start check-cup-team-games on w1 (usually 2m 18s)
+        start check-split-clues on w2 (usually 1m 44s)
+        start check-themes-seasonal on w3 (usually 1m 39s)
+── progress  2/9 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-cup-team-games 52s (w1), check-split-clues 52s (w2), check-themes-seasonal 52s (w3)
+   remaining 1–5m · total 2–6m · done around 14:18–14:21 UTC (measured)
+[ 3/9] PASS       107.1s  check-themes-seasonal  w3
+        start check-split-clues-content on w3 (usually 1m 30s)
+[ 4/9] PASS       111.7s  check-split-clues  w2
+        start check-content-variety on w2 (usually 1m 05s)
+── progress  4/9 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-cup-team-games 1m 52s (w1), check-split-clues-content 5s (w3), check-content-variety 0s (w2)
+   remaining 1–3m · total 3–5m · done around 14:18–14:20 UTC (measured)
+[ 5/9] PASS       149.7s  check-cup-team-games  w1
+        start check-lobby-mode on w1 (usually 20s)
+[ 6/9] PASS        20.6s  check-lobby-mode  w1
+        start check-official-practice on w1 (usually 11s)
+── progress  6/9 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-split-clues-content 1m 05s (w3), check-content-variety 1m 00s (w2), check-official-practice 2s (w1)
+   remaining 0–2m · total 3–5m · done around 14:18–14:20 UTC (measured)
+[ 7/9] PASS        68.5s  check-content-variety  w2
+[ 8/9] PASS        10.6s  check-official-practice  w1
+[ 9/9] PASS        96.1s  check-split-clues-content  w3
+
+PASSED (exit 0) | targeted | run 20261115-141525-06bebdc3-4879
+  9 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 3m 32s · step time 9m 31s (sum) · 3 workers, 90% busy · 2.69× the same steps run one after another
+           predicted 2–6m (about 3m 20s, measured) → actual 3m 32s (+6%)
+           longest  check-cup-team-games 2m 30s, check-split-clues 1m 52s, check-themes-seasonal 1m 47s · the longest step is 71% of the wall time
+           machine  CPU mean 32%, peak 91% · memory available ≥ 13622 MB · load peak 2.95
+           contention ×1.073 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216rt1/test-results/20261115-141525-06bebdc3-4879/report.json

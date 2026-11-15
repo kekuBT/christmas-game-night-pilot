@@ -42,3 +42,14 @@ About **3 h**.
 | Wording | 5 min |
 | Checks and gates | 30 min |
 | Docs and report | 30 min |
+
+## What was built (`06bebdc`; D-S1216R-01)
+As planned, with one detail settled during the work: a raw official-capable label is demoted to provisional before the test mode is consulted. So in test mode such a puzzle gets the test mode's truthfully labelled record like any provisional one, never approval from its label. The other steps went as planned; evidence is in `docs/evidence/stage1216r-local/README.md`.
+
+## Estimate vs actual
+- **Estimate:** about 3 h, written at 9:05 a.m. ET before the work.
+- **Actual:** about 25 minutes, from the review at 9:04 to about 9:30 a.m. ET.
+  - **Implementation:** 9:05 to 9:14: R1 tests first (6 failing), the fix, R2, the wording.
+  - **Driver cleanup checks:** within that window.
+  - **Gates:** 9:15 to 9:20; docs and report after.
+- **Why under:** the fix is a small change in one place (the loader and `officialEligible`). Both test paths already existed (the room and the fixture library), and no full gate was needed.

@@ -2038,3 +2038,16 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **The shared plan (Up next):** the host's plan is stored as chosen, but every projection shows a plan for Official Split Clues as Practice while the Cup can't play it Official (for example after an Official game used the last approved puzzles). So the TV never announces "Split Clues · Official" when the lobby says Practice only.
   - **Freezing:** the six puzzles are chosen at the start and frozen at the briefing (id, pack, version, hash). Play re-checks them; a puzzle changed in between ends the briefing ("content-changed"), and usage is recorded when play begins. Reloads, reconnects and later edits never alter a game in progress.
   - **Alternative rejected:** a client-only gate. A forged request would bypass it; the driver forges one and gets the 409.
+
+## Stage 12.16-R: repairs from review 6895557386
+**Authorization:** the owner's review on #41, comment 6895557386 (2026-11-15, 9:04 a.m. ET; D-WF-01). Spec: `docs/stage12/stage1216r.md`. Same branch and PR (#41), stacked on #40. Nothing is merged or deployed, and no puzzle is approved.
+
+- **D-S1216R-01 For Split Clues, only an approval record approves.**
+  - **The rule:** a Split Clues puzzle is approved only by a record in `content/approvals.json` at its exact current content hash. That is a person's record (`npm run content:approve`), or in the test-only mode the record it makes, labelled "TEST MODE (not a human review)" and refused in production.
+  - **Raw labels:** a raw pack label (`approved`, `legacy`, `verified-computed`) approves nothing. The loader reports it (`npm run content:check` fails) and treats the puzzle as provisional, so Practice still uses it.
+  - **Stale, missing and rejected:** a stale record (the puzzle edited since) or a missing one approves nothing, and `rejected` stays rejected even with a matching record.
+  - **Where it is enforced:** `officialEligible` also checks the record, not only the status. Selection, the lobby's `officialContent`, the shared plan, the server's start and the briefing-to-play re-check all go through it, so they agree.
+  - **Scope:** `RECORD_ONLY_APPROVAL` in `src/content/registry.ts` holds `split-clues` only. Other games keep their established label rules: legacy items carried over from before approvals, and computed answers (`verified-computed`).
+  - **Alternatives rejected:**
+    - **Dropping legacy and computed statuses everywhere:** it changes other games' established policy, which this repair isn't for.
+    - **Refusing to load a Split Clues item with an official-capable label:** it would silently shrink the Practice pool. Reporting the label and demoting the item keeps Practice and fails the content check.

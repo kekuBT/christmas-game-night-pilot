@@ -2987,7 +2987,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Kept as follow-ups:** real devices, dependency advisories, Relay teams of 7 or more, and unreviewed team-game content.
   - **Product note:** the team sheet's "players' average" sentence should say how a game built for teams in a Cup scores, the next time that screen changes.
 
-## Stage 12.16: Split Clues content readiness (completed; awaiting review)
+## Stage 12.16: Split Clues content readiness (review 6895557386: changes required; repaired in 12.16-R below)
 - **Brief:** the owner's handoff 6892660460 on #40. Bring Split Clues into the content review and eligibility machinery, gate Official on approved puzzles, freeze content at the briefing, and inventory all 51 puzzles. Bounded: no other packs, no new game.
 - **Branch:** `claude/stage12-16-split-clues-content`, from #40's head `8798e38`.
 - **Spec and estimate:** `docs/stage12/stage1216.md`, about 8 h 30 min, written before the work.
@@ -3006,3 +3006,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **External blockers:** none. Nothing merged, deployed or exposed; no paid resource.
 - **Next:** the owner's review on #41. Puzzle approvals are the owner's (or an editor's) to make.
 - **Risk:** Split Clues can't be Official in any real Cup until six year-round puzzles are approved. Difficulty is a placeholder, so official difficulty balancing does nothing for Split Clues yet.
+
+## Stage 12.16-R: repairs from review 6895557386 (completed; awaiting review)
+- **Brief:** R1, raw pack labels and stale hashes must not approve Split Clues puzzles; R2, temporary trees and servers cleaned up in the unit tests and the driver; the inventory's "not used officially" wording. Plan and estimate (about 3 h, written at 9:05 a.m. ET): `docs/stage12/stage1216r.md`.
+- **Done (`06bebdc`):**
+  - **R1:** `RECORD_ONLY_APPROVAL` and the loader and eligibility checks in `src/content/registry.ts` (D-S1216R-01). Six new tests in `tests/stage1216-split-clues-content.test.ts` failed before the fix and pass after it; two more pinned behaviour that was already right.
+  - **R2:** the test file removes its trees (it left 42 per run before). `scripts/check-split-clues-content.mjs` owns and releases its servers and copies; verified with two injected failures and the ordinary run.
+  - **Wording:** the inventory is regenerated with the new wording and each puzzle's approval record.
+- **Gates on `06bebdc`:** targeted `20261115-141525-06bebdc3-4879` PASSED (9/9; split-clues-content 30/0) and fast `20261115-141904-06bebdc3-6995` PASSED (5/5; unit 1998/1998). No full gate: the shared-code change is scoped to `split-clues`.
+- **Evidence:** `docs/evidence/stage1216r-local/README.md`.
+- **Next:** the owner's confirmation of the repairs on #41. Puzzle approvals remain the owner's (or an editor's).
+- **Risk:** none known beyond Stage 12.16's: no puzzle is approved, and difficulty is a placeholder.
