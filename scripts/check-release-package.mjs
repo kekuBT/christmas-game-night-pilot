@@ -6,6 +6,8 @@
 //      code opens it; a room is created and played into
 //   L  one writer: a second server on the same data is refused; SIGTERM stops cleanly and frees the lock; after a
 //      kill -9 the next start takes the stale lock over; the room survives both restarts
+//   D  the data tool from the release: backup refused while the server runs, then backup, verify, restore into a new
+//      folder and serve it; retention is a dry run by default
 //   R  refusals: the content test mode, a missing/relative/inside-the-release data dir, no public origin, no or a
 //      short access code; each exits 2 with a reason, and none writes anything
 // Usage: node scripts/check-release-package.mjs   (starts its own servers; MCHEZO_RELEASE_ALLOW_DIRTY=1 for a local try)
@@ -107,7 +109,24 @@ try {
   s1 = await start(rel, env, "S4");
   const back2 = await fetch(`http://localhost:${s1.port}/rooms/${room.body.roomId}/projection?audience=tv`, { headers: { cookie } });
   check("L the next start takes the stale lock over, and the room survives the crash", !!s1.port && /took over a stale lock/.test(s1.p.out) && back2.status === 200, s1.p.out.trim().split("\n")[0]);
+  const tool = (...a) => { try { return { code: 0, out: execFileSync(process.execPath, ["dist/server/datatool.js", ...a], { cwd: rel, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }) }; } catch (e) { return { code: e.status, out: `${e.stdout ?? ""}${e.stderr ?? ""}` }; } };
+  const bk = tool("backup", "--data", data, "--out", join(tmp("bk"), "b"));
+  check("D a backup is refused while the server runs (stop it between sessions)", bk.code === 1 && /Stop it first/.test(bk.out), bk.out.trim());
   await stop(s1.p);
+
+  // ---- D ---- the data tool, from the release on plain node
+  const backupDir = join(tmp("bk2"), "backup");
+  const b = tool("backup", "--data", data, "--out", backupDir);
+  check("D with the server stopped: backup OK, verified", b.code === 0 && /^backup OK: 1 room\(s\)/.test(b.out), b.out.trim());
+  const restored = join(tmp("rs"), "data");
+  const r = tool("restore", "--backup", backupDir, "--into", restored);
+  check("D restore into a new folder: OK", r.code === 0 && /^restore OK/.test(r.out), r.out.trim());
+  const s5 = await start(rel, { ...env, MCHEZO_DATA_DIR: restored }, "S5");
+  const fromBackup = await fetch(`http://localhost:${s5.port}/rooms/${room.body.roomId}/projection?audience=tv`, { headers: { cookie } });
+  check("D a server on the restored folder serves the same room", fromBackup.status === 200, String(fromBackup.status));
+  await stop(s5.p);
+  const pr = tool("prune", "--data", data, "--older-than-days", "30");
+  check("D retention is a dry run by default and finds nothing recent to archive", pr.code === 0 && /0 room\(s\) older than 30 days; dry run/.test(pr.out), pr.out.trim());
 
   // ---- R ----
   const refusals = [

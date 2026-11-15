@@ -1,0 +1,45 @@
+// Beta R1 evidence: rollback compatibility. This release and the previous one take turns on one data folder.
+// Usage: node rollback-compat.mjs <newTree> <oldTree>
+import { spawn } from "node:child_process";
+import { mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+const [newTree, oldTree] = process.argv.slice(2);
+const data = mkdtempSync(join(tmpdir(), "mz-rollback-"));
+let ok = true;
+const say = (pass, msg) => { console.log(`${pass ? "PASS" : "FAIL"} ${msg}`); if (!pass) ok = false; };
+function start(tree, label) {
+  const child = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { cwd: tree, env: { PATH: process.env.PATH, HOME: process.env.HOME, PORT: "0", MCHEZO_DATA_DIR: data }, stdio: ["ignore", "pipe", "pipe"] });
+  let out = "";
+  child.stdout.on("data", (d) => { out += d; }); child.stderr.on("data", (d) => { out += d; });
+  return new Promise((resolve, reject) => {
+    const t = setInterval(() => { const m = /on http:\/\/localhost:(\d+)/.exec(out); if (m) { clearInterval(t); resolve({ base: `http://localhost:${m[1]}`, stop: () => new Promise((r) => { child.once("exit", (c) => r(c)); child.kill("SIGTERM"); }), log: () => out }); } }, 100);
+    child.once("exit", (c) => { clearInterval(t); reject(new Error(`${label} exited ${c}: ${out.slice(-400)}`)); });
+  });
+}
+const api = async (base, path, body, token) => { const r = await fetch(base + path, { method: body ? "POST" : "GET", headers: { "content-type": "application/json", ...(token ? { "x-session-token": token } : {}) }, body: body ? JSON.stringify(body) : undefined }); return { status: r.status, body: await r.json().catch(() => ({})) }; };
+const tv = async (base, roomId) => (await api(base, `/rooms/${roomId}/projection?audience=tv`)).body;
+try {
+  let s = await start(newTree, "new");
+  const room = (await api(s.base, "/rooms", { name: "Rollback night", kind: "casual" })).body;
+  const host = (await api(s.base, "/rooms/join-by-code", { joinCode: room.joinCode, displayName: "Keku", asHost: true, hostClaimToken: room.hostClaimToken })).body;
+  await api(s.base, "/rooms/join-by-code", { joinCode: room.joinCode, displayName: "Amina" });
+  const game = await api(s.base, `/rooms/${room.roomId}/games`, { gameId: "math-mayhem", official: false }, host.sessionToken);
+  say(game.status === 201, `new release: a casual room with 2 players and a game (start ${game.status})`);
+  console.log(`  new release wrote: ${readdirSync(data).sort().join(", ")}`);
+  console.log(`  new release stop: exit ${await s.stop()}`);
+  s = await start(oldTree, "old");
+  const t1 = await tv(s.base, room.roomId);
+  say(t1.roomId === room.roomId && (t1.players ?? []).length === 2 && (t1.games ?? []).length === 1, `previous release (1955c28) reads it: ${(t1.players ?? []).length} players, ${(t1.games ?? []).length} game; the unknown server.lock is ignored`);
+  const j = await api(s.base, "/rooms/join-by-code", { joinCode: room.joinCode, displayName: "Baraka" });
+  say(j.status === 201, `previous release writes to it (a third player joins: ${j.status})`);
+  console.log(`  previous release stop: exit ${await s.stop()}`);
+  s = await start(newTree, "new again");
+  const t2 = await tv(s.base, room.roomId);
+  say((t2.players ?? []).length === 3 && (t2.games ?? []).length === 1, `this release reads what the previous one wrote: ${(t2.players ?? []).length} players, ${(t2.games ?? []).length} game`);
+  say(!/NOT LOADED|quarantine|moved .* to/.test(s.log()), "no file was refused or quarantined on any start");
+  console.log(`  this release stop: exit ${await s.stop()}`);
+} catch (e) { say(false, String(e)); }
+rmSync(data, { recursive: true, force: true });
+console.log(ok ? "ROLLBACK COMPAT PASSED" : "ROLLBACK COMPAT FAILED");
+process.exit(ok ? 0 : 1);
