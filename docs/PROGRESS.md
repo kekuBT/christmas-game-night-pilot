@@ -3094,7 +3094,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Targeted:** `20261115-220845-8b02b394-22816` PASSED, 9/9.
   - **Fast:** `20261115-220948-8b02b394-24641` PASSED, unit 2039/2039.
   - **No full gate,** with the reason in the evidence README.
-- **Estimate vs actual:** about 4 h estimated; about 40 min actual.
+- **Estimate vs actual:** about 4 h estimated; about 35 min actual.
 - **Failures:**
   - **Local, while building the HTTPS check:** runs 1–3 failed on the sandbox's outbound proxy, then at B-13. Run 4 was the B-13 reproduction, and run 5 failed on my `ws` client's DNS. Run 6 passed.
   - **R3 fault injections:** each failed explicitly, as intended.

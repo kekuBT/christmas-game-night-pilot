@@ -145,7 +145,7 @@ About **7 h 30 min**.
 
 **Second round, estimate vs actual:**
 - **Estimate:** about 4 h, written at 4:48 p.m. ET.
-- **Actual:** about 40 min of wall clock, from the review at 4:43 p.m. to the report at about 5:20 p.m. ET.
+- **Actual:** about 35 min of wall clock, from the review at 4:43 p.m. to the report at about 5:15 p.m. ET.
   - **R3:** 4:49 to 4:57 p.m.
   - **R4 and B-13:** 4:57 to 5:08 p.m.
   - **The gates:** 5:08 to 5:11 p.m.
