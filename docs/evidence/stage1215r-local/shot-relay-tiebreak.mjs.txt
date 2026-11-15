@@ -100,6 +100,13 @@ try {
   await shot(resultsPage, THREE ? "relay-tiebreak-3teams-cup-results-390" : process.env.CUP ? "relay-tiebreak-cup-results-390" : "relay-tiebreak-results-390");
   await sleep(1500);
   console.log("tv:", await tv.getByTestId("tv-winner").innerText());
-  await shot(tv, process.env.CUP ? "relay-tiebreak-cup-tv-final-1920" : "relay-tiebreak-tv-final-1920");
+  // Review 6890761957: the TV's final standings go by team place, each player with its team.
+  const tvRows = await tv.getByTestId("tv-last-standings").locator("li").evaluateAll((els) => els.map((e) => [e.getAttribute("data-rank"), e.querySelector(".mz-tvlist__name")?.textContent ?? ""]));
+  console.log("tv standings:", JSON.stringify(tvRows));
+  // Two runners on each team here (the review's room had 2, 1, 1): Coral's two 1st, Sun's two 2nd, Mint's two 3rd.
+  if (THREE) check("the TV's final standings: 1, 1 (Team Coral), 2, 2 (Team Sun), 3, 3 (Team Mint)", JSON.stringify(tvRows.map(([r]) => r)) === JSON.stringify(["1", "1", "2", "2", "3", "3"]) && ["Team Coral", "Team Coral", "Team Sun", "Team Sun", "Team Mint", "Team Mint"].every((t, i) => tvRows[i]?.[1].includes(t)), JSON.stringify(tvRows));
+  await shot(tv, THREE ? "relay-tiebreak-3teams-cup-tv-final-1920" : process.env.CUP ? "relay-tiebreak-cup-tv-final-1920" : "relay-tiebreak-tv-final-1920");
   if (process.env.CUP) { const t = (await tvProj(roomId)).games.find((x) => x.id === gid); console.log("cupPlacement:", JSON.stringify(t.cupPlacement)); console.log("quip:", await amina.locator("main").innerText().then((x) => x.split("\n").slice(0, 6).join(" | "))); }
 } finally { await browser.close(); }
+console.log(failures === 0 ? "SHOT RUN: checks passed" : `SHOT RUN: ${failures} FAILED`);
+process.exit(failures === 0 ? 0 : 1);

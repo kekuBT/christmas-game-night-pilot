@@ -2964,7 +2964,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **TV final standings:** a game built for teams lists each player at their team's place from the server's team results, with the team named. Before, the 150/50/50 case read 1, 1, 3, 3; now it reads 1, 1, 2, 3. A true tie still shares a place; individual games still rank by points.
   - **Historical mode:** after "Make it a Family Cup", the lobby's "Last game" card, the results comment and the results screens give a game's mode as played (`casualGameIds`). A casual game stays Casual, including after a reload.
   - **Reproduced first:** the updated drivers on a build of `cfaf412` fail (`check-cup-team-games` 1, `check-one-path` 3); on the repair they pass 27/0 and 70/0. Unit tests: 1960/1960.
-  - **Gates:** on `de26509`, targeted `20261115-071221-de265098-5268` PASSED 15/15 and fast `20261115-071657-de265098-7750` PASSED 5/5 (unit 1960/1960). No full gate ran, as the review asked.
+  - **Rendered coverage (`a82ea44`):** the review asked for rendered coverage, and the first pass had pure tests for most cases. `apps/web/src/components/mchezo/TvFinal.test.tsx` renders the real TV final: 150/50/50 reads 1, 1, 2, 3, which on `cfaf412` rendered 1, 1, 3, 3. It also covers a true tie, the individual fallback and the three mode labels. `check-one-path` gains Official, and Practice through a reload, after the change.
+  - **Gates:**
+    - on `de26509`: targeted `20261115-071221-de265098-5268` PASSED 15/15; fast `20261115-071657-de265098-7750` PASSED 5/5 (unit 1960/1960);
+    - **on `a82ea44` (tested SHA):** targeted `20261115-072853-a82ea449-16515` PASSED 15/15 (one-path 74 checks); fast `20261115-073324-a82ea449-18915` PASSED 5/5 (unit 1966/1966);
+    - no full gate ran, as the review asked.
   - **Links:** the three earlier reports' malformed repository links were replaced with plain paths at their commits.
-  - **Time:** about 20 minutes. No estimate was written before the work, an omission.
+  - **Time:** about 40 minutes. No estimate was written before the work, an omission.
   - **Next:** the reviewer's re-review. Nothing is merged or deployed.

@@ -1,0 +1,30 @@
+Mchezo gate fast | run 20261115-073324-a82ea449-18915
+  revision a82ea449caf5fb24c58180ffbe2308e22576e887 (clean tree) | fingerprint 5077bfbd218e (612 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  211 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.05 for 3 worker(s) (measured, 185 run(s))
+  estimate this run: 0–2m (measured) · the same steps one after another: about 1m 39s · longest step unit-tests ~48s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.05 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rf4/test-results/20261115-073324-a82ea449-18915
+        start typecheck-server on w1 (usually 13s)
+        start typecheck-web on w2 (usually 13s)
+        start lint on w3 (usually 19s)
+[ 1/5] PASS        14.1s  typecheck-server  w1
+        start unit-tests on w1 (usually 48s)
+[ 2/5] PASS        14.7s  typecheck-web  w2
+        start build-web on w2 (usually 7s)
+[ 3/5] PASS        21.1s  lint  w3
+[ 4/5] PASS         7.5s  build-web  w2
+── progress  4/5 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   unit-tests 46s (w1)
+   remaining 15–50s · total 1–2m · done around 07:34–07:35 UTC (measured)
+[ 5/5] PASS        54.1s  unit-tests  w1
+
+PASSED (exit 0) | fast | run 20261115-073324-a82ea449-18915
+  5 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 08s · step time 1m 52s (sum) · 3 workers, 54% busy · 1.65× the same steps run one after another
+           predicted 0–2m (about 51s, measured) → actual 1m 08s (+33%)
+           longest  unit-tests 54s, lint 21s, typecheck-web 15s · the longest step is 80% of the wall time
+           machine  CPU mean 74%, peak 100% · memory available ≥ 13793 MB · load peak 4.36
+           contention ×1.128 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rf4/test-results/20261115-073324-a82ea449-18915/report.json

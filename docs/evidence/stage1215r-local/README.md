@@ -78,3 +78,23 @@ No full gate ran on `cfaf412`, as the review asked.
 | `20261115-071657-de265098-7750` | `de26509` | fast | **PASSED** (exit 0) | 5/5 (unit 1960/1960) | 1 min 15 s |
 
 No full gate ran on `de26509`, as the review asked. The screenshots `tv-final-standings-by-team-1920` and `lobby-last-game-casual-after-cup-390` come from `check-cup-team-games-r6` and `check-one-path-r6`.
+
+### Rendered coverage for the review's cases (`a82ea44`)
+
+The review asked for rendered coverage of the TV's final standings (150/50/50 at places 1, 2, 3; a true tie; the individual-game fallback) and of Casual, Practice and Official through the change and a reload. The runs above rendered one team case and Casual only, so this commit adds the rest. No behaviour changed: `TvFinal` is only exported for the test.
+
+| Log | Revision (worktree state) | Result | What it showed |
+|---|---|---|---|
+| `r6-tvfinal-render-before-cfaf412.log` | the new `TvFinal.test.tsx`, unchanged, on `cfaf412` with only `export` added to `TvFinal` | **3 FAIL** of 6 | The rendered list on the old code. Relay 150/50/50 at places 1, 2, 3 reads **1, 1, 3, 3**, the reviewer's screen. A true tie reads 1, 1, 3, 3. A team game placed by score names no team and ranks the last player 4th, not their team's 3rd. The 3 that pass are unchanged behaviour: an individual game, a game played as teams, and the TV's mode label, which was already right. |
+| (no log) the same test | `a82ea44` | 6/6 | 1, 1, 2, 3 with Team Coral, Team Coral, Team Sun, Team Mint; 1, 1, 2, 2 for the tie; points ranking for the two per-player cases; the TV label Casual, Practice and Official as played. |
+| `unit-suite-r6b.log` | same | 1966/1966 | Both typechecks and the whole repo's lint clean. |
+| `check-one-path-r6b.log` | + built | 74/0 | After the change: "LAST GAME · MATH MAYHEM · CASUAL" (host and guest, and after a reload), "· OFFICIAL" after an official game, "· PRACTICE" after a practice game, still Practice after a reload. The server has it as practice, not one of the casual games. |
+| `shot-relay-3teams-r6-run1.log` (local screenshot run, `shot-relay-tiebreak.mjs.txt`, testing-only `MCHEZO_LIFECYCLE_SCALE=0.1`; not a gate driver) | `a82ea44`, built | ran; **my new check FAILED** | The review's three-team Official Relay: Coral home 150; Sun and Mint 50 each, Sun's last leg first. The TV listed 1, 1 (Team Coral), 2, 2 (Team Sun), 3, 3 (Team Mint), which is right. My check expected the review's four players (1, 1, 2, 3), but this run seats two runners on each team. The fault was in the check's expectation, not the screen. |
+| `shot-relay-3teams-r6-run2.log` | same, the check corrected | ran; check passed | The same list, now checked: 1, 1, 2, 2, 3, 3, each with its team. Cup placement 100, 100, 50, 50, 0, 0. The screenshot `relay-tiebreak-3teams-cup-tv-final-1920` is from this run. |
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261115-072853-a82ea449-16515` | `a82ea44` | targeted (13 drivers) | **PASSED** (exit 0) | 15/15 (one-path 74, cup-team-games 27 checks) | 4 min 22 s |
+| `20261115-073324-a82ea449-18915` | `a82ea44` | fast | **PASSED** (exit 0) | 5/5 (unit 1966/1966) | 1 min 08 s |
+
+No full gate ran on `a82ea44` or `de26509`, as the review asked. The tested SHA for this round is `a82ea44`; the `de26509` runs above are that revision's own, not combined with these.

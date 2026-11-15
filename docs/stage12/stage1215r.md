@@ -194,14 +194,31 @@ Evidence for every run is in `docs/evidence/gate-runs/`; local runs, failures in
 
 **Estimate:** none was written before this round's work began, an omission. The earlier rounds each had one. The actual time is recorded with the gates below.
 
-**Gates on `de26509` (one run on one revision each):**
+**Rendered coverage, added after the first gates (`a82ea44`):** the review asked for the TV's final standings rendered in three cases and the labels through the change and a reload. The drivers above rendered one team case (Tug of War) and Casual; the other cases were pure-helper tests. `apps/web/src/components/mchezo/TvFinal.test.tsx` now renders the real TV final screen with `react-dom/server` and reads its list back:
+- the review's Relay (150/50/50 at places 1, 2, 3) reads 1, 1, 2, 3 by team;
+- a true tie shares a place;
+- a team game placed by score ranks by its team results;
+- an individual game and a game played as teams rank by points;
+- the label reads Casual, Practice or Official as the game was played.
+
+On `cfaf412` the same test renders 1, 1, 3, 3 (the reviewer's screen) and fails its three team cases. `check-one-path` gains Official after an official game, and Practice after a practice game and a reload. `TvFinal` is only exported; nothing else changed.
+
+**Gates on `de26509` (one run on one revision each; superseded by `a82ea44` below):**
 
 | Run | Level | Verdict | Steps | Wall |
 |---|---|---|---|---|
 | `20261115-071221-de265098-5268` | targeted (13 drivers: cup-team-games, one-path, tv-show, results, relay, team-huddle, tug-of-war, know-your-rivals, game-night-flow, cup-party, official-practice, lifecycle, night-card) | **PASSED** (exit 0) | 15/15 (cup-team-games 27, one-path 70 checks) | 4 min 29 s |
 | `20261115-071657-de265098-7750` | fast | **PASSED** (exit 0) | 5/5 (unit 1960/1960) | 1 min 15 s |
 
-- **No full gate ran on `de26509`,** as the review asked ("do not rerun unchanged historical full suites"). The full checkpoint pass stays `c27e242`'s alone.
-- **No run failed or was cancelled.**
-- **Actual time:** about 20 minutes, from the review at 1:58 a.m. ET to the fast gate's verdict at 2:18 a.m. ET.
+**Gates on `a82ea44`, the tested SHA for this round:**
+
+| Run | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|
+| `20261115-072853-a82ea449-16515` | targeted (the same 13 drivers) | **PASSED** (exit 0) | 15/15 (one-path 74, cup-team-games 27 checks) | 4 min 22 s |
+| `20261115-073324-a82ea449-18915` | fast | **PASSED** (exit 0) | 5/5 (unit 1966/1966) | 1 min 08 s |
+
+- **No full gate ran on `de26509` or `a82ea44`,** as the review asked ("do not rerun unchanged historical full suites"). The full checkpoint pass stays `c27e242`'s alone.
+- **No gate run failed or was cancelled.** One local screenshot run did fail, on my own check's wrong expectation (`docs/evidence/stage1215r-local/README.md`).
+- **The reviewer's screen, locally:** a local run with the testing-only time scale played the review's three-team Official Relay. The TV's list reads 1, 1 (Team Coral), 2, 2 (Team Sun), 3, 3 (Team Mint), as `relay-tiebreak-3teams-cup-tv-final-1920` shows.
+- **Actual time:** about 40 minutes, from the review at 1:58 a.m. ET to the screenshot run at about 2:37 a.m. ET. The first repair's gates passed at 2:18; the rendered coverage the review asked for took the rest.
 - **Also corrected:** the link repair itself happened at about 2:15 a.m. ET, not 2:25 as I first wrote in the three edit notes; those notes now say 2:15.
