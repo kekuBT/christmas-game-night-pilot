@@ -274,7 +274,9 @@ describe("Stage 8.3: the server's public files and /health (§3.1, §3.3)", () =
     const res = await fetch(base + "/health");
     expect(res.status).toBe(200);
     expect(res.headers.get("cache-control")).toBe("no-store");
-    expect(await res.json()).toEqual({ ok: true });
+    // Beta R1 (B-04, docs/beta/beta-r1-blockers.md §6): /health also names the build revision ("dev" with no
+    // release.json): which build is running, never any room, player or setting.
+    expect(await res.json()).toEqual({ ok: true, revision: "dev" });
     expect((await fetch(base + "/health", { method: "POST" })).status).not.toBe(200);
   });
 

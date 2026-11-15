@@ -38,6 +38,14 @@ import { normalizeOrigin, type AccessOptions } from "./access.js";
 const port = Number(process.env.PORT ?? 3000);
 const production = process.env.NODE_ENV === "production";
 const refuse = (why: string): never => { console.error(why); process.exit(2); };
+// Test-only settings are refused first, whatever else is set: they are the most dangerous thing to find on a real
+// night (provisional content treated as approved, shortened timers, a different content library), so their reason
+// is the one printed.
+if (production) {
+  if (process.env.MCHEZO_CONTENT_TEST_MODE) refuse("MCHEZO_CONTENT_TEST_MODE is for tests only and is not allowed in production.");
+  if (process.env.MCHEZO_LIFECYCLE_SCALE) refuse("MCHEZO_LIFECYCLE_SCALE is for tests only and is not allowed in production.");
+  if (process.env.MCHEZO_CONTENT_DIR) refuse("MCHEZO_CONTENT_DIR is for tests only and is not allowed in production.");
+}
 // The release's root: two levels above this file (src/server under tsx, dist/server when built).
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const dataDir = resolve(process.env.MCHEZO_DATA_DIR || join(appRoot, "data"));
@@ -68,15 +76,7 @@ if (existsSync(releaseFile)) {
   try { revision = String((JSON.parse(readFileSync(releaseFile, "utf8")) as { revision?: unknown }).revision ?? revision); } catch { refuse(`release.json is unreadable: ${releaseFile}`); }
 }
 const scaleRaw = process.env.MCHEZO_LIFECYCLE_SCALE;
-if (process.env.MCHEZO_CONTENT_TEST_MODE && process.env.NODE_ENV === "production") {
-  console.error("MCHEZO_CONTENT_TEST_MODE is for tests only and is not allowed in production.");
-  process.exit(2);
-}
 if (process.env.MCHEZO_CONTENT_TEST_MODE) console.log("TEST MODE: provisional content treated as approved (not a human review)");
-if (scaleRaw && process.env.NODE_ENV === "production") {
-  console.error("MCHEZO_LIFECYCLE_SCALE is for tests only and is not allowed in production.");
-  process.exit(2);
-}
 const lifecycleScale = scaleRaw ? Number(scaleRaw) : undefined;
 if (lifecycleScale !== undefined && !(lifecycleScale > 0)) {
   console.error(`MCHEZO_LIFECYCLE_SCALE must be a positive number, got "${scaleRaw}".`);
@@ -84,10 +84,6 @@ if (lifecycleScale !== undefined && !(lifecycleScale > 0)) {
 }
 if (lifecycleScale !== undefined) console.log(`TEST MODE: game time limits scaled by ${lifecycleScale}`);
 const contentDir = process.env.MCHEZO_CONTENT_DIR;
-if (contentDir && process.env.NODE_ENV === "production") {
-  console.error("MCHEZO_CONTENT_DIR is for tests only and is not allowed in production.");
-  process.exit(2);
-}
 let content: ContentLibrary | undefined;
 if (contentDir) {
   content = loadContent(contentDir, { testApproveProvisional: contentTestMode() });
