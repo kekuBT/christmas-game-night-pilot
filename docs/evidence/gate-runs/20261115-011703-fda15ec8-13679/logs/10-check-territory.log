@@ -1,0 +1,39 @@
+$ node scripts/check-territory.mjs http://localhost:43263
+# timeout 600s | worker w3 | server http://localhost:43263 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215t2/test-results/20261115-011703-fda15ec8-13679/server-data/w3)
+
+[+5.4s] PASS A the briefing explains Territory
+[+5.6s] PASS A the TV shows a four-team scoreboard
+[+5.6s] PASS A each team starts on its home corner (A1, A3, E3, E1)
+[+5.6s] PASS B question 1 is on the TV
+[+5.7s] PASS B every phone shows the same question
+[+5.7s] PASS B a teammate sees who answered for the team, and can't answer again
+[+5.7s] PASS B another team's phone doesn't show it
+[+5.7s] PASS B the TV shows Coral has answered, not what
+[+5.7s] PASS B no right answer and no team's choice in the TV's data or another team's
+[+5.9s] PASS B the TV fits above its footer (question) — {"ok":true,"bottom":734,"foot":980,"right":1772}
+[+6.4s] PASS C the question closed early once every team answered — ["team-coral","team-sun"]
+[+6.6s] PASS C Coral's phone offers the three cells next to its home
+[+6.6s] PASS C a wrong team's phone says so
+[+6.7s] PASS C Coral's pick shows on its phones
+[+6.7s] PASS C picks stay hidden: other teams' phones and the TV don't show Coral's
+[+6.7s] PASS C Sun's phones show Sun's own pick
+[+6.7s] PASS C the TV shows the answer and who's picking
+[+6.9s] PASS C the TV fits above its footer (claim) — {"ok":true,"bottom":752,"foot":980,"right":1772}
+[+16.5s] PASS C A2 went to Coral (answered first); Sun's claim moved to B3, the nearest free cell — [{"teamId":"team-coral","cell":1,"from":null,"auto":false,"extra":false},{"teamId":"team-sun","cell":5,"from":null,"auto":true,"extra":false,"wanted":1}]
+[+16.5s] PASS C the board and the last-round line on the TV and phones
+[+16.9s] PASS D Coral may steal Sun's B3
+[+16.9s] PASS D the steal is picked
+[+26.7s] PASS D Coral took B3 from Sun — [{"teamId":"team-coral","cell":5,"from":"team-sun","auto":false,"extra":false}]
+[+26.7s] PASS D the TV says so
+[+37.1s] PASS E Iris is the catch-up team — [{"teamId":"team-coral","score":45},{"teamId":"team-sun","score":30},{"teamId":"team-mint","score":30},{"teamId":"team-iris","score":15}]
+[+37.3s] PASS E Iris's phone says it gets an extra cell
+[+47.1s] PASS E Iris got two cells, one the catch-up extra — [{"teamId":"team-iris","cell":13,"from":null,"auto":true,"extra":false},{"teamId":"team-iris","cell":9,"from":null,"auto":true,"extra":true}]
+[+88.0s] PASS F the game finished with team results for four teams — [["team-coral",1,105],["team-sun",2,60],["team-iris",3,45],["team-mint",4,30]]
+[+88.0s] PASS F every player scored their team's points
+[+88.0s] PASS F phones: the results, the final board, eight rounds and the team results card
+[+88.0s] PASS F the TV leads with the team result
+[+88.7s] PASS F 320 px: the results have no sideways scroll
+[+88.9s] TERRITORY PASSED
+[+88.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":9,"pages":9,"peakOpenPages":9}
+
+# PASS (exit 0) in 88.9s | cpu 6.5s, peak memory 310 MB

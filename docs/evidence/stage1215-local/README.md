@@ -46,3 +46,16 @@ The targeted (26/26) and fast gates passed on `f52309c`; the full gate `20261115
 | `check-team-draw-r1.log` | same | 45/0 | With the self-check. |
 | `check-f5-r1.log` | same | 36/0 | The day playlist without the seven, which it logs. |
 | `e2e-chromium-r1.log` | same | 15/15 ("E2E ALL PASSED") | The e2e player prints `OK`, not `PASS`, lines. It logs the seven as played by their own drivers. |
+
+## The full gate on `fda15ec` failed too, and what changed
+
+Targeted (21/21) and fast (5/5, unit 1929/1929) passed on `fda15ec`. The full gate `20261115-012817-fda15ec8-20702` **FAILED**: 105 passed, 1 failed.
+- **The failure:** `check-split-clues`, "the TV shows the puzzle's kind but no clue and not the answer".
+- **The cause, a second false positive of the same kind, in my Stage 12.10 driver:** the puzzle dealt was `sc-023`, answer "Tea", and the driver checked that the TV's text doesn't *contain* "Tea". "Team Coral" does.
+- **Not a leak:** the same run's check of the TV's data (no clue, not the answer) passed.
+- **The fix:** the answer is looked for as a whole word, with the teams' names taken out first, plus a self-check for this run's case.
+- **Audit:** I looked through every team-game driver for the same pattern (a negative "contains" check that a team's name or colour could satisfy). Only Split Clues and Team Draw had it, and both are fixed.
+
+| Log | Revision (worktree state) | Result | What it showed |
+|---|---|---|---|
+| `check-split-clues-r1.log` | `fda15ec` + the Split Clues fix | 27/0 | With the self-check. Lint clean. |

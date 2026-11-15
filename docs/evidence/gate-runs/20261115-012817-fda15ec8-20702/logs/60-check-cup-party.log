@@ -1,0 +1,35 @@
+$ node scripts/check-cup-party.mjs http://localhost:32869
+# timeout 600s | worker w3 | server http://localhost:32869 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215full2/test-results/20261115-012817-fda15ec8-20702/server-data/w3)
+
+[+4.7s] PASS A Cup host: a Quick Party entry that plans today's games
+[+4.7s] PASS A guest: no Quick Party controls
+[+4.7s] PASS A server: a Family Cup with an empty lineup — {"revision":0,"lineup":null}
+[+4.8s] PASS B the planner is the Cup's: Official or Practice
+[+4.8s] PASS B group size starts at who is here (2)
+[+5.3s] PASS B a lineup for one is all Practice (an official game needs two), with no Official switch — Official games need at least 2 players, so a lineup for 1 is all Practice.
+[+5.7s] PASS B Math Mayhem is first in the lineup
+[+5.7s] PASS B every game that can count starts Official; a practice-only game says Practice only — [{"id":"math-mayhem","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"trivia","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"pattern-pulse","tag":"SPAN","pressed":null,"text":"Practice only"},{"id":"closest-wins","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"word-connections","tag":"BUTTON","pressed":"true","text":"Official"},{"id":"geography","tag":"BUTTON","pressed":"true","text":"Official"}]
+[+5.7s] PASS B the lineup's second game can count — ["math-mayhem","trivia","pattern-pulse","closest-wins","word-connections","geography"]
+[+5.8s] PASS B the host switched it to Practice
+[+6.6s] PASS B no sideways scroll at 320 px with the mode switches
+[+6.7s] PASS C server: the saved lineup's modes are the planner's — [{"gameId":"math-mayhem","official":true,"started":false,"status":"pending"},{"gameId":"trivia","official":false,"started":false,"status":"pending"},{"gameId":"pattern-pulse","official":false,"started":false,"status":"pending"},{"gameId":"closest-wins","official":true,"started":false,"status":"pending"},{"gameId":"word-connections","official":true,"started":false,"status":"pending"},{"gameId":"geography","official":true,"started":false,"status":"pending"}]
+[+6.7s] PASS C host lobby: each row says its mode
+[+6.7s] PASS C guest lobby: the same modes
+[+6.7s] PASS C Start says the mode and the place in the lineup — Start Math Mayhem · Official · game 1 of 6
+[+6.8s] PASS C TV: the lineup with each game's mode
+[+6.8s] PASS C TV: a long lineup shows three games and says how many more
+[+6.8s] PASS C TV: the Family Cup card is whole, above the director's buttons — {"cupCard":{"x":999.21875,"y":726.71875,"width":848.78125,"height":179.484375},"director":{"x":1687.765625,"y":989,"width":160.234375,"height":52}}
+[+7.5s] PASS D the lineup's first game started as an official game — [["math-mayhem",true,"playing"]]
+[+28.1s] PASS D host results: What's next names the next game and its mode
+[+28.1s] PASS D a Cup's What's next has no Play again and no break
+[+28.1s] PASS D guest results: up next with its mode
+[+28.6s] PASS D server: the official game finished and counted toward the Cup — {"champ":[{"playerId":"player-1","dayScores":[50],"counted":[50],"qualifyingDays":1,"base":50,"participationBonus":0,"finaleBonus":0,"total":50,"eligible":false,"countedDailyWins":1,"countedMedian":50},{"playerId":"player-2","dayScores":[50],"counted":[50],"qualifyingDays":1,"base":50,"participationBonus":0,"finaleBonus":0,"total":50,"eligible":false,"countedDailyWins":1,"countedMedian":50}],"next":1}
+[+28.7s] PASS E the second game started as Practice
+[+28.7s] PASS E nothing counted from it: the Cup standings are unchanged
+[+30.7s] PASS F the casual planner has no mode switches
+[+32.4s] PASS F after the upgrade, the lineup's games that can count are Official
+[+32.4s] PASS F Start follows: Official · game 1
+[+32.5s] CUP PARTY ALL PASSED
+[+32.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":3}
+
+# PASS (exit 0) in 32.5s | cpu 4.5s, peak memory 268 MB
