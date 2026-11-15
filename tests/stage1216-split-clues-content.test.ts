@@ -297,3 +297,23 @@ describe("the review inventory (docs/stage12/stage1216-split-clues-inventory.md)
     expect(doc).toContain(approved === 0 ? "**No puzzle is approved**" : `**${approved} of `);
   });
 });
+
+describe("the shared plan (Up next) follows the Official gate (D-S1216-04)", () => {
+  it("a plan for Official Split Clues shows as Practice on every screen while the Cup has too few approved puzzles", async () => {
+    const { Harness } = await import("./helpers/harness.js");
+    for (const [lib, official] of [[loadContent(), false], [loadContent(undefined, { testApproveProvisional: true }), true]] as const) {
+      const h = new Harness(undefined, { content: lib });
+      try {
+        await h.start();
+        await h.createRoom("Plan");
+        const host = await h.join("Host", { host: true });
+        const guest = await h.join("Guest");
+        expect((await h.post(`/rooms/${h.roomId}/plan`, { gameId: "split-clues", official: true }, host.token)).status).toBe(200);
+        for (const p of [await h.projection(host), await h.projection(guest), await h.tv()]) expect(p["upNext"]).toEqual({ gameId: "split-clues", official });
+        // Other games' plans are untouched.
+        await h.post(`/rooms/${h.roomId}/plan`, { gameId: "trivia", official: true }, host.token);
+        expect((await h.tv())["upNext"]).toEqual({ gameId: "trivia", official: true });
+      } finally { await h.dispose(); }
+    }
+  });
+});

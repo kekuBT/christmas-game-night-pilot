@@ -219,6 +219,9 @@ try {
   check("B it finished Official, with team results and Cup placements", finB?.status === "finished" && finB.official === true && (finB.teamResults?.length ?? 0) >= 2 && !!finB.cupPlacement, JSON.stringify({ status: finB?.status, official: finB?.official, teams: finB?.teamResults?.map((t) => [t.teamId, t.rank]) }));
   const backB = (await rb.ok(`/rooms/${rb.roomId}/projection?audience=player`, { token: rb.seats[0].token })).officialContent?.["split-clues"];
   check("B afterwards the lobby view says the approved puzzles are used up (0 of 6), never reusing them", backB?.available === 0 && backB?.needed === 6, JSON.stringify(backB));
+  // The host's plan was Official Split Clues; with no approved puzzle left, every screen shows it as Practice.
+  check("B the shared plan now says Split Clues · Practice (it can no longer be Official here)", JSON.stringify((await rb.tvProj()).upNext) === JSON.stringify({ gameId: "split-clues", official: false }), JSON.stringify((await rb.tvProj()).upNext));
+  await soon("B the TV's Next up line says Practice, not Official", async () => { const t = await text(tv.getByTestId("tv-next")); return /Split Clues/.test(t) && /Practice/.test(t) && !/Official/.test(t); });
   await sleep(600);
   await shot(tv, "tv-final-official-1920");
   await soon("B the host's phone shows the results, as Official", async () => /official/i.test(await text(rb.host.locator("main"))));
