@@ -59,3 +59,19 @@ Targeted (21/21) and fast (5/5, unit 1929/1929) passed on `fda15ec`. The full ga
 | Log | Revision (worktree state) | Result | What it showed |
 |---|---|---|---|
 | `check-split-clues-r1.log` | `fda15ec` + the Split Clues fix | 27/0 | With the self-check. Lint clean. |
+
+## Gates (one run on one revision each)
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261115-000446-f52309c4-13191` | `f52309c` | targeted (cup-team-games, lifecycle, teams, official-practice, one-path, cup-party, cup-memory, tv-show, tug-of-war, team-huddle, relay, split-clues, team-draw, territory, know-your-rivals, results, warm-ivory, library, library-nav, briefing, quick-party, session-flow, leaderboard, a11y-surfaces) | **PASSED** (exit 0) | 26/26 | 10 min 20 s |
+| `20261115-001513-f52309c4-17835` | `f52309c` | fast | **PASSED** (exit 0) | 5/5 (unit 1928/1928) | 1 min 14 s |
+| `20261115-001634-f52309c4-21676` | `f52309c` | full | **FAILED** (exit 1) | 103/106: `check-f5`, `e2e-chromium`, `check-team-draw` | 40 min 13 s |
+| `20261115-011703-fda15ec8-13679` | `fda15ec` | targeted (f5, team-draw, cup-team-games, lifecycle, teams, official-practice, one-path, cup-party, tv-show, tug-of-war, team-huddle, relay, split-clues, territory, know-your-rivals, results, library, briefing, session-flow) | **PASSED** (exit 0) | 21/21 | 9 min 50 s |
+| `20261115-012700-fda15ec8-16909` | `fda15ec` | fast | **PASSED** (exit 0) | 5/5 (unit 1929/1929) | 1 min 09 s |
+| `20261115-012817-fda15ec8-20702` | `fda15ec` | full | **FAILED** (exit 1) | 105/106: `check-split-clues` | 39 min 46 s |
+| `20261115-021126-bcf14064-7970` | `bcf1406` | targeted (split-clues, team-draw, f5, cup-team-games, team-huddle, relay, territory, tug-of-war, know-your-rivals, teams, lifecycle, official-practice, tv-show, results) | **PASSED** (exit 0) | 16/16 | 7 min 40 s |
+| `20261115-021913-bcf14064-10614` | `bcf1406` | fast | **PASSED** (exit 0) | 5/5 (unit 1929/1929) | 1 min 05 s |
+| `20261115-022026-bcf14064-14451` | `bcf1406` | full (checkpoint) | **PASSED** (exit 0) | 106/106 | 39 min 39 s |
+
+No other gate ran on this stage. The tested SHA is `bcf1406`; the green claim rests on its full run alone.

@@ -84,3 +84,26 @@ The owner already approved how team games count, in the Cup rules of 2026-11-04 
 ## 6. Estimate
 
 About 3 hours, written before the work began: the scoring engine already has the team channel; the work is the ranking by team, the format default, the Cup room's teams and the screens.
+
+**Actual:** about 3 h 40 min of wall-clock time, from the first look at the Cup code (about 6:19 p.m. ET) to the full gate's verdict (10:00 p.m. ET).
+- **Building:** about 41 minutes, to the first candidate `f52309c` (7:00 p.m.).
+- **The rest:** three rounds of gates. Two full gates failed (below), and each needed a driver fix and a new run.
+
+## 7. Gates (one run on one revision each)
+
+Evidence for every run is in `docs/evidence/gate-runs/`; the failures are explained in `docs/evidence/stage1215-local/README.md`.
+
+| Revision | Gate | Run | Verdict |
+|---|---|---|---|
+| `f52309c` | targeted | `20261115-000446-f52309c4-13191` | PASSED, 26/26 |
+| `f52309c` | fast | `20261115-001513-f52309c4-17835` | PASSED, 5/5 (unit 1928/1928) |
+| `f52309c` | full | `20261115-001634-f52309c4-21676` | **FAILED**, 103/106: `check-f5` and `e2e-chromium` (the generic every-game drivers met the seven team games), `check-team-draw` (a false positive: the word "sun" and Team Sun) |
+| `fda15ec` | targeted | `20261115-011703-fda15ec8-13679` | PASSED, 21/21 |
+| `fda15ec` | fast | `20261115-012700-fda15ec8-16909` | PASSED, 5/5 (unit 1929/1929) |
+| `fda15ec` | full | `20261115-012817-fda15ec8-20702` | **FAILED**, 105/106: `check-split-clues` (a false positive: the answer "Tea" and "Team Coral") |
+| `bcf1406` | targeted | `20261115-021126-bcf14064-7970` | PASSED, 16/16 |
+| `bcf1406` | fast | `20261115-021913-bcf14064-10614` | PASSED, 5/5 (unit 1929/1929) |
+| **`bcf1406`** | **full (checkpoint)** | `20261115-022026-bcf14064-14451` | **PASSED** (exit 0, 106/106, 39 min 39 s, no retries) |
+
+**Tested SHA: `bcf1406`.** The earlier runs aren't combined with it: each verdict is its own run on its own revision.
+

@@ -2899,3 +2899,34 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Estimate vs actual:** no estimate was written down (an omission); about 25 minutes of building (3:30 to 3:54 p.m. ET), gates 6:16 to 7:05 p.m. ET.
 - **Owner decisions:** team scoring in a Family Cup (D-S127-03) was answered by the owner at 6:12 p.m. ET; see Stage 12.15.
 - **Next:** Stage 12.15 (the games built for teams in a Family Cup).
+
+## Stage 12.15: the games built for teams in a Family Cup (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner in chat on 2026-11-14: "Also this both can be added for casuals and cups". It was sent about 1:22 p.m. ET and reached me at 3:57 p.m. ET. The owner's answers at 6:12 p.m. ET were "All 7 team games" and "Yes, count it". This answers D-S127-03.
+- **Base:** `d1c7217` (Stage 12.14's tested commit). Branch `claude/stage12-15-team-games-cup`, draft PR stacked on #38. 12.14's docs head `c52aef5` is merged in (docs only).
+- **Spec:** `docs/stage12/stage1215.md`. Decision D-S1215-01; D-S127-03 is marked answered.
+- **Built:**
+  - **Which games:** Team Huddle, Relay, Split Clues, Team Draw, Territory, Tug of War and Know Your Rivals play in casual rooms and Family Cups, Official or Practice. They are never picked automatically. Charades stays practice-only.
+  - **How they count:** the owner-approved Cup rules of 2026-11-04. A team game ranks its teams (midrank 0–100), and every member gets the team's placement. A day is 75% individual and 25% team. The engine used to rank a team game's players, which was wrong with uneven teams; the seven now rank teams, and legacy Charades results are unchanged.
+  - **Which Cups:** new Cups use the Family Cup format (`combined-75-25`) again. Individual Family Cups keep theirs; there, team games are practice, with the reason given.
+  - **Teams:** the night's teams can be made in a Cup room, and only team games use them there.
+  - **Screens:**
+    - the server sends each official game's placements, and the Cup screen shows them with a note;
+    - results say Official, Practice or Casual, and their comment is about the teams;
+    - TV medals for team games go by team.
+- **Tests:**
+  - `tests/stage1215-cup-team-games.test.ts` (13);
+  - updated: `cup-integrity`, `d3-briefing`, `manifest`, `qualification`, `stage127-teams`;
+  - new driver `scripts/check-cup-team-games.mjs` (22 checks);
+  - `check-lifecycle` expects the Family Cup's name;
+  - `check-f5` and `e2e-browser` name the seven as played by their own drivers;
+  - `check-team-draw` and `check-split-clues` no longer mistake team names for the hidden word or answer.
+- **Unit suite:** 1929/1929 (the fast gate's unit-tests step on `bcf1406`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `f52309c`: targeted PASSED, fast PASSED, full **FAILED** (103/106). The generic every-game drivers met the team games, and Team Draw's driver had a false positive.
+  - `fda15ec`: targeted PASSED, fast PASSED, full **FAILED** (105/106). Split Clues' driver had a false positive.
+  - `bcf1406`: targeted `20261115-021126-bcf14064-7970` PASSED 16/16; fast `20261115-021913-bcf14064-10614` PASSED 5/5; **full (checkpoint) `20261115-022026-bcf14064-14451` PASSED** (exit 0, 106/106, 39 min 39 s, no retries).
+- **Tested SHA:** `bcf1406`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage1215-screenshots/`, `docs/evidence/stage1215-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** about 3 hours estimated; about 3 h 40 min actual (6:19 to 10:00 p.m. ET). That was 41 minutes of building, then three rounds of gates.
+- **Owner decisions open:** the content of the seven games' own packs (Split Clues, Team Draw, Know Your Rivals) has no official review step; Trivia's pool has one.
+- **Next:** owner review of the stack (#25 onward). Nothing is merged or deployed.
