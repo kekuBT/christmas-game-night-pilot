@@ -13,7 +13,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { FeedbackLine, GameHeader } from "../../ui/mchezo/components/GameKit.js";
 import { Keycap, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
 import { SendNote } from "./SendNote.js";
-import { ORDINAL, TeamLabel, TeamScoreboard, ordinal, teamDef, useServerNow, type TeamScoreRow } from "./TeamGameKit.js";
+import { ORDINAL, TeamLabel, TeamScoreboard, ordinal, teamDef, useServerNow, type TeamScoreRow, teamGameModeLine } from "./TeamGameKit.js";
 import { TEAM_SHAPE } from "./Teams.js";
 import type { TeamDef } from "../../../../../src/shared/teams.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
@@ -176,7 +176,7 @@ export function MchezoTugOfWarResults({ game, publicGame, playerId, title, onBac
       {next}
       <GameHeader title={title} objective="Every bout" accent={3} />
       <BoutList game={game} bouts={st.bouts ?? []} mine={st.myTeamId} testId="mz-tug-recap" />
-      <p className="mz-foot" data-testid="mz-tug-howscore">Each bout: 100, 75, 55, 40 by pull per player (right answers ÷ the team’s players); a team far behind pulls ×1.2. Everyone scores their team’s points. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
+      <p className="mz-foot" data-testid="mz-tug-howscore">Each bout: 100, 75, 55, 40 by pull per player (right answers ÷ the team’s players); a team far behind pulls ×1.2. Everyone scores their team’s points. {teamGameModeLine(casual, game.official ?? publicGame?.official)}</p>
       <OutcomeSummary gameId="tug-of-war" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>

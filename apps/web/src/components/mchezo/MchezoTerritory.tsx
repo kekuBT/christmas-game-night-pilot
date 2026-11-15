@@ -13,7 +13,7 @@ import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
 import { FeedbackLine, GameHeader } from "../../ui/mchezo/components/GameKit.js";
 import { Keycap, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
 import { SendNote } from "./SendNote.js";
-import { ORDINAL, TeamLabel, TeamScoreboard, ordinal, teamDef, type TeamScoreRow } from "./TeamGameKit.js";
+import { ORDINAL, TeamLabel, TeamScoreboard, ordinal, teamDef, type TeamScoreRow, teamGameModeLine } from "./TeamGameKit.js";
 import { TEAM_SHAPE } from "./Teams.js";
 import { TERRITORY_CELLS, cellName, hexCentre } from "../../../../../src/shared/territoryBoard.js";
 import type { TeamDef } from "../../../../../src/shared/teams.js";
@@ -199,7 +199,7 @@ export function MchezoTerritoryResults({ game, publicGame, playerId, title, onBa
           </li>
         ))}
       </ol>
-      <p className="mz-foot" data-testid="mz-tt-howscore">10 points per cell, plus 5 per cell in your team’s biggest joined land. Everyone scores their team’s points. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
+      <p className="mz-foot" data-testid="mz-tt-howscore">10 points per cell, plus 5 per cell in your team’s biggest joined land. Everyone scores their team’s points. {teamGameModeLine(casual, game.official ?? publicGame?.official)}</p>
       <OutcomeSummary gameId="territory" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>

@@ -43,6 +43,13 @@ export const TEAM_PLAY_GAMES: ReadonlySet<string> = new Set([
 export const TEAM_NATIVE_GAMES: ReadonlySet<string> = new Set(["team-huddle", "relay", "charades", "split-clues", "team-draw", "territory", "tug-of-war", "know-your-rivals"]);
 
 /**
+ * Stage 12.15 (D-S1215-01; docs/CHAMPIONSHIP_RULES.md): the games built for teams whose Cup placement ranks the teams
+ * (every member gets the team's placement). Charades isn't one: it is practice-only, and a Charades result recorded
+ * before Sprint 3 keeps the player ranking it was computed with (D-S3-07).
+ */
+export const TEAM_RANKED_GAMES: ReadonlySet<string> = new Set(["team-huddle", "relay", "split-clues", "team-draw", "territory", "tug-of-war", "know-your-rivals"]);
+
+/**
  * Stage 12.10 (D-S1210-01): the fewest players a team may have in a game built for teams. The five games of Stages
  * 12.10–12.14 need 2 (a teammate to talk to, a drawer and a guesser); 12.8–12.9's games work with 1 and keep that.
  */

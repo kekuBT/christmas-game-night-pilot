@@ -16,7 +16,8 @@
 //  B. Closest Wins: a question whose 4 s run out moves on for everyone
 //     without waiting for silent players.
 //  C. Lobby: Impostor is labelled practice-only, the Official mode is
-//     disabled, and Start starts practice. The Cup is the Individual Family Cup.
+//     disabled, and Start starts practice. The Cup is the Family Cup (Stage 12.15: new Cups count 75% individual
+//     and 25% team games, the owner-approved format; it was the Individual Family Cup from Sprint 3 until then).
 //  D. A tab that sends no protocol version (as one loaded before Sprint 3)
 //     shows "refresh", can still play Math, and is marked untimed.
 // Usage: node scripts/check-lifecycle.mjs
@@ -126,7 +127,7 @@ try {
   await joinRoom(cal, "Cal", code);
 
   // ---- C. Lobby labels (before any game) ----
-  await expectSoon("C. the lobby names the Individual Family Cup", async () => /Individual Family Cup/.test(await ada.evaluate(() => document.body.innerText)));
+  await expectSoon("C. the lobby names the Family Cup (75% individual, 25% team since Stage 12.15)", async () => { const t = await ada.evaluate(() => document.body.innerText); return /counts toward the Family Cup/.test(t) && !/Individual Family Cup/.test(t); });
   await ada.getByTestId("choose-game").click();
   const impostorItem = ada.getByTestId("select-game-impostor");
   check("C. the game list marks Impostor practice only", /Practice only/.test(await text(impostorItem)));

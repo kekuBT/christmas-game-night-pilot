@@ -1758,7 +1758,7 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - the sum of scores: the bigger team would always win;
     - counting a player who sat out as 0: one person stepping away would sink their team.
-- **D-S127-03 A Family Cup stays individual (a provisional default).**
+- **D-S127-03 A Family Cup stays individual (a provisional default).** *Answered by the owner on 2026-11-14: team games count in a Family Cup. See D-S1215-01.*
   - Teams can't be made in a Cup room, and Cup scoring is untouched.
   - Team scoring in a Cup is an owner decision (AGENTS.md: material product choices get provisional defaults; owner sign-off before official championship use).
 
@@ -1936,3 +1936,32 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **Guessing your own team too:** you already know part of the answer.
     - **Showing answers as they come in:** later players would feel watched and could follow the crowd.
     - **Requiring three per team for privacy:** the night's teams of two couldn't play it. Light questions, "Rather not say" and an honest briefing are the safeguard instead.
+
+## Stage 12.15: team games in a Family Cup
+**Authorization:** the owner, directly in chat on 2026-11-14: "Also this both can be added for casuals and cups" (sent about 1:22 p.m. ET, reached me at 3:57 p.m. ET). The owner's answers at 6:12 p.m. ET were "All 7 team games", and "Yes, count it" (the host picks Official or Practice like any Cup game; Official counts in the Cup standings, every player getting their team's result). Spec: `docs/stage12/stage1215.md`. Branch `claude/stage12-15-team-games-cup`, stacked on Stage 12.14. Nothing is merged or deployed.
+
+- **D-S1215-01 The seven games built for teams count in a Family Cup, under the owner-approved Cup rules.**
+  - **Which games:** Team Huddle, Relay, Split Clues, Team Draw, Territory, Tug of War and Know Your Rivals.
+    - They play in casual rooms and Family Cups, Official or Practice in a Cup.
+    - Still never picked automatically: Quick Party, Shuffle and Home's featured game leave them out.
+    - Charades stays practice-only: its scoring isn't redesigned.
+  - **How they count:** the owner-approved rules of 2026-11-04 (`docs/CHAMPIONSHIP_RULES.md`), not a new rule.
+    - A team game's competitors are its teams: midrank 0–100 by team result, and every member gets the team's placement, whatever the team's size.
+    - A day is 75% individual and 25% team (the "Family Cup" format); a day with one kind uses that kind at 100%.
+    - The engine used to rank a team game's players, which with uneven teams gave the wrong numbers (75 and 12.5 instead of 100 and 0). The seven games now rank teams. A Charades result recorded before Sprint 3 keeps its old numbers (D-S3-07).
+  - **Which Cups:** new Cups use the Family Cup format again.
+    - The temporary Individual Family Cup (D-S3-07) existed because no team game could count fairly.
+    - A Cup already created as an Individual Family Cup keeps its format (a Cup's rules never change). There, team games play as practice, with the reason given (start and lineup are refused as Official).
+  - **Teams in a Cup:** the host can make the night's teams in a Cup room, and a casual room made into a Cup keeps them.
+    - In a Cup, only the games built for teams use them.
+    - "Play as teams" for per-player games stays a casual-room feature: team scoring for those games in a Cup wasn't asked about.
+  - **Screens:**
+    - the server sends each official game's placements (`cupPlacement`), and the Cup screen shows those;
+    - results say Official/Practice/Casual correctly, and their one-line comment is about the teams;
+    - TV medals in a game built for teams go by team place (a display fault since 12.8: a second team with a winning team of 2+ ahead got no medal).
+  - **Alternatives rejected:**
+    - **Counting a team game like an individual game** (each player ranked by their team-derived score, inside the individual average): it contradicts the approved rule (teams are the competitors; team games are the 25% share), and with uneven teams the ranks depend on team size.
+    - **A new format for "individual + team games at equal weight":** the owner already approved 75/25, and inventing a weighting would be a new scoring rule without approval.
+    - **Converting existing Individual Family Cups to the new format:** a Cup's rules never change while it runs (D-S3-07).
+    - **"Play as teams" for every game in a Cup:** not asked for, and it would change how individual games count.
+

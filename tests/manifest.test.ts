@@ -37,11 +37,13 @@ describe("the shipped manifests", () => {
     }
   });
 
-  it("every original game supports practice and official play; Stage 5's, Stage 9.1's and Stage 9.3's new games are practice-only", () => {
+  it("every original game supports practice and official play; Stage 5's, Stage 9.1's and Stage 9.3's new games are practice-only; Stage 12.15's team games can count", () => {
     // Stage 5: new games launch practice-only until the owner approves their
     // Cup scoring; the manifest and the server's policy must agree. Stage 9.1:
     // Jebena Rush too (casual rooms only).
-    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush", "spectrum", "family-questions", "team-huddle", "relay", "split-clues", "team-draw", "territory", "tug-of-war", "know-your-rivals"];
+    // Stage 12.15 (D-S1215-01, the owner's answer of 2026-11-14): the seven games built for teams can be Official in a
+    // Family Cup.
+    const STAGE5_PRACTICE_ONLY = ["majority-rules", "pattern-pulse", "draw-guess", "jebena-rush", "spectrum", "family-questions"];
     for (const m of GAME_MANIFESTS) {
       expect(m.features.practice).toBe(true);
       expect(m.features.official).toBe(!STAGE5_PRACTICE_ONLY.includes(m.id));

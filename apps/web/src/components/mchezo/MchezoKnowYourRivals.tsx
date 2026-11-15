@@ -12,7 +12,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { FeedbackLine, GameHeader } from "../../ui/mchezo/components/GameKit.js";
 import { Keycap, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
 import { SendNote } from "./SendNote.js";
-import { TeamLabel, TeamScoreboard, teamDef, type TeamScoreRow } from "./TeamGameKit.js";
+import { TeamLabel, TeamScoreboard, teamDef, type TeamScoreRow, teamGameModeLine } from "./TeamGameKit.js";
 import { TeamMark } from "./Teams.js";
 import type { TeamDef } from "../../../../../src/shared/teams.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
@@ -196,7 +196,7 @@ export function MchezoKnowYourRivalsResults({ game, publicGame, playerId, title,
       {next}
       <GameHeader title={title} objective="Every question, every team" accent={4} />
       <RoundList game={game} rounds={st.rounds ?? []} mine={st.myTeamId} testId="mz-kyr-recap" />
-      <p className="mz-foot" data-testid="mz-kyr-howscore">Up to 30 points for each other team you guessed: exact scores 30, less the further off. Only each team’s totals were ever shown. Everyone scores their team’s points. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
+      <p className="mz-foot" data-testid="mz-kyr-howscore">Up to 30 points for each other team you guessed: exact scores 30, less the further off. Only each team’s totals were ever shown. Everyone scores their team’s points. {teamGameModeLine(casual, game.official ?? publicGame?.official)}</p>
       <OutcomeSummary gameId="know-your-rivals" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>

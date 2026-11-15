@@ -15,7 +15,7 @@ import { FeedbackLine, GameHeader } from "../../ui/mchezo/components/GameKit.js"
 import { Keycap, OutcomeSummary, useMchezo } from "../../ui/mchezo/index.js";
 import { SendNote } from "./SendNote.js";
 import { DrawBoard, DrawPad, Letters, type DrawPadActions, type DrawPiece } from "./MchezoDraw.js";
-import { ORDINAL, TeamLabel, TeamScoreboard, ordinal, teamDef, useServerNow, type TeamScoreRow } from "./TeamGameKit.js";
+import { ORDINAL, TeamLabel, TeamScoreboard, ordinal, teamDef, useServerNow, type TeamScoreRow, teamGameModeLine } from "./TeamGameKit.js";
 import { TeamMark } from "./Teams.js";
 import type { TeamDef } from "../../../../../src/shared/teams.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
@@ -260,7 +260,7 @@ export function MchezoTeamDrawResults({ game, publicGame, players, playerId, tit
           </li>
         ))}
       </ol>
-      <p className="mz-foot" data-testid="mz-td-howscore">100, 75, 55, 40 by the order teams get the word, and +25 catch-up for a team alone in last place and 100 or more behind. Everyone scores their team’s points. {casual ? "Casual game: just for fun." : "Practice game: no Cup points."}</p>
+      <p className="mz-foot" data-testid="mz-td-howscore">100, 75, 55, 40 by the order teams get the word, and +25 catch-up for a team alone in last place and 100 or more behind. Everyone scores their team’s points. {teamGameModeLine(casual, game.official ?? publicGame?.official)}</p>
       <OutcomeSummary gameId="team-draw" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />
       <Keycap block onClick={onBackToLobby} data-testid="show-back-to-lobby">Back to lobby</Keycap>

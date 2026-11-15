@@ -65,6 +65,8 @@ export interface PublicGame extends LifecycleFields {
   id: string;
   gameId: string;
   official: boolean;
+  /** Stage 12.15 (D-S1215-01): a finished game that feeds the Cup: each player's 0–100 placement, as the server counts it. */
+  cupPlacement?: Record<string, number>;
   status: GameStatus;
   /** Stage 8.2: the content this solo or casual game was started with (absent in a Cup). */
   season?: SessionSeason;

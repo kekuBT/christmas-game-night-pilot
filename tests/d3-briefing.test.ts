@@ -483,6 +483,13 @@ describe("D3 S3 + S6: restarts keep the briefing, its content and its timing", (
 });
 
 describe("D3: after T_play, every game plays exactly as it does under version 1", () => {
+  // Stage 12.15: the games built for teams record their own clock times in their state (when play, a turn or a bout
+  // began). Under version 2 those are T_play, 5 s later; shifting every clock time back by those 5 s must give exactly
+  // version 1's state. (A time is any number at or after T0; nothing else in a game's state is that large.)
+  const unshift = (v: unknown, by: number): unknown =>
+    typeof v === "number" ? (v >= T0 ? v - by : v)
+      : Array.isArray(v) ? v.map((x) => unshift(x, by))
+        : v && typeof v === "object" ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, unshift(x, by)])) : v;
   // Timing versions 1 and 2 are a Cup's; a casual-only game (Stage 9.1) never plays in a Cup.
   for (const desc of GAME_REGISTRY.filter((d) => !d.casualOnly)) {
     it(`${desc.id}: same seed, same initial play state, deadlines shifted to T_play`, () => {
@@ -504,14 +511,14 @@ describe("D3: after T_play, every game plays exactly as it does under version 1"
       const live = v2.games.get(b.id) as GameInstance;
       expect(live.status).toBe("playing");
       expect(live.playStartedAt).toBe(T0 + 5_000);
-      expect(JSON.stringify(live.extra)).toBe(JSON.stringify(a.extra));
+      expect(JSON.stringify(unshift(live.extra, 5_000))).toBe(JSON.stringify(a.extra));
       expect(JSON.stringify(live.questions)).toBe(JSON.stringify(a.questions));
       expect(live.deadlineAt! - live.playStartedAt!).toBe(a.deadlineAt! - a.startedAt!);
       if (a.phaseDeadlineAt !== undefined) expect(live.phaseDeadlineAt! - live.playStartedAt!).toBe(a.phaseDeadlineAt - a.startedAt!);
       else expect(live.phaseDeadlineAt).toBeUndefined();
       const pa = (v1.engine.project("player", v1.ids[1]!)["myGames"] as Json[])[0]!;
       const pb = (v2.project("player", v1.ids[1]!)["myGames"] as Json[])[0]!;
-      expect(JSON.stringify(pb["state"])).toBe(JSON.stringify(pa["state"]));
+      expect(JSON.stringify(unshift(pb["state"], 5_000))).toBe(JSON.stringify(pa["state"]));
     });
   }
 });

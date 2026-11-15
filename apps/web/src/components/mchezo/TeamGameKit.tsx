@@ -54,4 +54,13 @@ export function TeamScoreboard({ game, totals, mine, status, tv, testId, label =
 }
 
 export const ORDINAL = ["1st", "2nd", "3rd", "4th", "5th"];
+
+/**
+ * Stage 12.15 (D-S1215-01): how a finished team game counted, for its results. A team game can be Official in a Family
+ * Cup now, so "not casual" no longer means "practice".
+ */
+export function teamGameModeLine(casual: boolean, official: boolean | undefined): string {
+  if (casual) return "Casual game: just for fun.";
+  return official ? "Official game: it counts toward the Cup as a team game, and your team’s place counts for everyone on it." : "Practice game: no Cup points.";
+}
 export const ordinal = (n: number) => ORDINAL[n - 1] ?? `${n}th`;

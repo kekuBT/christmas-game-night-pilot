@@ -1,0 +1,33 @@
+PASS 2 players: the winner is named — Ada wins Trivia Showdown
+PASS 2 players: the winner's phone celebrates
+PASS 2 players: the winner's card says 1st of 2 — You came 1st of 21200 ptsThat was you. Enjoy it quietly. Or loudly.
+PASS 2 players: the other phone shows the same headline and line
+PASS 2 players: no celebration for 2nd
+PASS 2 players: 2nd of 2 — You came 2nd of 20 ptsNo points this time. The next game is a fresh start.
+PASS 2 players: 2nd of 2 is never 'middle of the pack' (S3-RES-04) — You came 2nd of 20 ptsNo points this time. The next game is a fresh start.
+PASS 2 players: the standings list both players — {"rows":["Ada","You"],"toggle":null,"expanded":null,"count":null}
+PASS the celebration never takes a tap
+PASS the celebration is over within about a second
+PASS refresh: same headline, same line
+PASS 3 players: last place reads 3rd of 3 — You came 3rd of 3120 ptsSomeone has to make the podium look good.
+PASS 3 players: the kicker says Official
+PASS 3 players: the middle reads 2nd of 3
+PASS 3-way tie: named as a tie — 3-way tie for first
+PASS 3-way tie: identical headline and line on all three phones
+PASS 3-way tie: each phone says 'tied for 1st of 4'
+PASS dropped out: told without blame — You came 3rd of 30 ptsYou missed this one. Your seat's still warm.
+PASS dropped out: Ada's standings list all 3 players, Cal included — ["You","Bea","Cal"]
+PASS dropped out: Bea's standings list all 3 players, Cal included — ["Ada","You","Cal"]
+PASS practice: the kicker says Practice
+PASS practice: the line says it's practice
+PASS 2nd of 2 with points: the runner-up line, not 'middle of the pack' — You came 2nd of 2240 ptsSecond in a head-to-head. Next game's a clean slate.
+PASS 10 players, long names, 375px: no sideways scrolling
+PASS 10 players, long names, 390px: no sideways scrolling
+PASS 10 players, long names, 430px: no sideways scrolling
+PASS 10 players: the standings start as a preview that says how many are shown — {"rows":["Bartholomew Otieno","Keku","You"],"toggle":"Show all 10 players","expanded":"false","count":"Showing 3 of 10 players"}
+PASS 10 players: your own row is in the preview — ["Bartholomew Otieno","Keku","You"]
+PASS 10 players: Show all lists all 10, and says it is expanded — {"rows":10,"expanded":"true","over":false}
+PASS 10 players: the full list fits 375px without sideways scrolling
+PASS 10 players: a two-way tie at the top is named — Bartholomew Otieno and Keku tie for first
+PASS reduced motion: no celebration, even for a winner
+RESULTS ALL PASSED
