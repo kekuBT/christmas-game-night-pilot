@@ -32,7 +32,8 @@ tar -czf ../cgn-<sha>.tgz -C ../cgn-<sha> .
 sha256sum ../cgn-<sha>.tgz                       # record it with the release note
 ```
 
-The package holds the compiled server, the built web app, `content/` (no pilot batches, no approvals unless the repository has them), the two package files and `release.json`. `scripts/check-release-package.mjs` proves this on every gate run.
+- **What the package holds:** the compiled server, the built web app, `content/` (no pilot batches, and no approvals unless the repository has them), the two package files and `release.json`. `scripts/check-release-package.mjs` proves this on every gate run.
+- **It isn't byte-for-byte reproducible:** `release.json` records the build time, and the tarball the files' times. Two builds of one SHA have different hashes (the drill's logs show it). That is why the host gets the same file that was checked, by its recorded hash, never a rebuild.
 
 ## Promoting it (on the host, between sessions)
 
@@ -82,7 +83,8 @@ curl -s https://<host>/health                    # the previous revision
 
 - **Keep the previous release folder until the new one has run a game night.**
 - **Data compatibility is shown before each promotion.**
-  - For this branch, `1955c28` reads and writes what this branch writes, both ways (`docs/evidence/beta-r1-local/rollback-compat-*.txt`), and a packaged promote-then-roll-back drill passed (`release-drill-*.txt`).
+  - For this branch, `1955c28` reads and writes what this branch writes, both ways (`docs/evidence/beta-r1-local/rollback-compat-*.txt`).
+  - The steps on this page ran as a drill on this machine with real packages (`release-drill.mjs.txt`; run 4 passed on `fe9319e`, with `8dfe323` as the previous release). It covered pack, install, stop, back up, switch, start, play, roll back, and restore into a new folder. Not run in the drill: systemd, Caddy, a real host and real phones.
   - Each later release needs the same check against the release it replaces.
 - **If a release ever changes the saved format so the previous one can't read it,** rolling back means restoring the pre-deploy backup into a **new** folder and pointing `MCHEZO_DATA_DIR` at it. That loses what was played since the deploy, so the release note must say so before the owner approves.
 

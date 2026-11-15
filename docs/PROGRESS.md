@@ -3018,7 +3018,30 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** the owner's confirmation of the repairs on #41. Puzzle approvals remain the owner's (or an editor's).
 - **Risk:** none known beyond Stage 12.16's: no puzzle is approved, and difficulty is a placeholder.
 
-## Beta R1: readiness and a portable production package (in progress)
+## Beta R1: readiness and a portable production package (built and tested locally; gates and report below)
 - **Brief:** the owner's priority update 6896572377 on #42 (2026-11-15, 10:05 a.m. ET). It allows deployment conditionally, after readiness clearance, at $0; it allows no spending, stack merge, disabled games or weakened checks. This slice is the readiness work; ChatGPT owns host selection.
 - **Base:** #41's head `1955c28` (the latest cleared candidate). Stage 12.17 (#42, not yet cleared) is not in this base.
 - **Branch:** `claude/beta-r1-readiness`. **Spec and estimate:** `docs/beta/beta-r1.md` (about 9 h, written at 11:50 a.m. ET).
+- **Done (commits `ffec293`, `8dfe323`, `255a5c9`, `5ee2e78`, `fe9319e`):**
+  - **The launch blocker matrix** (`docs/beta/beta-r1-blockers.md`): dependencies, secrets and fixtures, HTTP and WebSocket, data, logs and external requests, and packaging.
+  - **Eight fixes:** B-01 to B-08, each with a failing test or a reproduction first. The most serious was B-06: one malformed WebSocket frame ended the server on `1955c28`.
+  - **The package:** plain node, only `ws` and `zod` installed, `release.json` holding the revision, and `/health` naming it.
+  - **The data:** outside the release; one writer; backup, verify, restore and prune that never delete or overwrite; a full disk tested.
+  - **Rollback:** compatibility with `1955c28` both ways, and a packaged promote, roll back and restore drill (run 4 passed; runs 1 to 3 failed and are kept).
+  - **The docs:** `docs/beta/beta-r1-architecture.md` and `docs/beta/beta-r1-release.md`.
+- **Tests:**
+  - `tests/beta-r1.test.ts` (17) and `tests/beta-r1-data.test.ts` (6).
+  - `scripts/check-release-package.mjs` (36 checks locally, run 6).
+  - The drill script is in the evidence.
+- **Failures on the way** (all in `docs/evidence/beta-r1-local/README.md`):
+  - release-check run 1: its own package count;
+  - an interim test run: the cap without the socket listener;
+  - drill runs 1 to 3: B-08, the drill's own check, and a quoting slip.
+- **External blockers:**
+  - no host chosen (ChatGPT's choice);
+  - the owner's private Codespace audit;
+  - real phones (everything so far is Chromium emulation);
+  - the provider pages for the host research weren't reachable from this session.
+- **Next:** the targeted, fast and one full gate on the final SHA; then the completed report on #43.
+- **Risk:** the beta gate is new code on every request. It is off by default, so every existing driver runs as before; the full gate is the proof.
+

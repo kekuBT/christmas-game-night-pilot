@@ -2051,3 +2051,57 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - **Dropping legacy and computed statuses everywhere:** it changes other games' established policy, which this repair isn't for.
     - **Refusing to load a Split Clues item with an official-capable label:** it would silently shrink the Practice pool. Reporting the label and demoting the item keeps Practice and fails the content check.
+
+## Beta R1: readiness and a portable production package
+**Authorization:** the owner's priority update on #42, comment 6896572377 (2026-11-15, 10:05 a.m. ET; D-WF-01): deployment only conditionally, after readiness clearance, at $0. Plan: `docs/beta/beta-r1.md`. Matrix: `docs/beta/beta-r1-blockers.md`. Architecture: `docs/beta/beta-r1-architecture.md`. Process: `docs/beta/beta-r1-release.md`. Branch `claude/beta-r1-readiness`, stacked on #41's `1955c28`. Nothing is merged, deployed or provisioned; no host is chosen; no approval is manufactured.
+
+- **D-BR1-01 One package, built once from the cleared SHA, on plain node.**
+  - **What it is:** `scripts/release/pack.mjs` compiles `src/` only (`tsconfig.build.json`), builds the web app, and copies `content/` (without the editorial pilot batches) and the package files. It writes `release.json` with the revision, and refuses a dirty tree or an output folder inside the repository.
+  - **Install and start:** `npm ci --omit=dev` installs `ws` and `zod` only. Every build tool moved to `devDependencies`, with no version change. `npm start` runs `node dist/server/serve.js`.
+  - **Promotion:** the host gets the same tarball, by its recorded hash, and never rebuilds: builds aren't byte-for-byte reproducible, because the build time is recorded.
+  - **Alternatives rejected:**
+    - **`tsx` in production:** a development dependency, with the TypeScript toolchain on the host.
+    - **A container image:** it needs a registry, which depends on the host, and the host is ChatGPT's choice. The package fits in an image later unchanged.
+- **D-BR1-02 The family's data lives outside the release, written by one process.**
+  - **The data directory:** production refuses a missing, relative or inside-the-release `MCHEZO_DATA_DIR`.
+  - **The lock:** `server.lock` holds the owner's pid. A second live server is refused. A stale lock is taken over: a dead pid, an unreadable file, or this very pid (pid 1 in a container on every start).
+  - **B-08, found by the release drill:** the lock creates the directory first, private (0700), so a fresh host's first start works.
+  - **Not protected:** two hosts sharing a network volume, which is unsupported.
+  - **Alternatives rejected:**
+    - **`flock`:** needs a native addon in Node.
+    - **No lock:** a double start silently overwrites rooms that the other process holds in memory.
+- **D-BR1-03 A private-beta gate in the server, covering HTTP and WebSocket (provisional default).**
+  - **How it works:**
+    - One shared code from the environment, at least 12 characters, required in production unless `MCHEZO_PUBLIC_ACCESS=open` is set on purpose.
+    - The right code sets a 30-day cookie that holds an HMAC of the code: HttpOnly, SameSite=Lax, and Secure over HTTPS.
+    - Every page, API call and WebSocket handshake needs the cookie; only `/health` and the gate are open.
+    - Wrong codes are limited to 10 per address per 15 minutes.
+    - Changing the code signs every device out.
+  - **Provisional:** who may enter the beta, and how, is the owner's choice; the single shared code is a provisional default.
+  - **Alternatives rejected:**
+    - **Basic auth at the proxy:** proxy-specific, poorly handled by installed web apps and WebSocket handshakes on phones, and untested here.
+    - **Personal accounts:** a product change outside this slice.
+- **D-BR1-04 Request and socket hardening from the matrix:**
+  - **B-01:** WebSocket messages are capped at 64 KiB, like HTTP bodies.
+  - **B-06:** every server socket has an `error` listener, so one malformed frame closes that socket, never the process. This was the most serious finding, reproduced on `1955c28`.
+  - **B-02:** security headers on every response.
+  - **B-03:** a foreign `Origin` gets 403 when `MCHEZO_PUBLIC_ORIGIN` is set (required in production).
+  - **B-05:** behind `MCHEZO_TRUST_PROXY` hops, the client address is the entry our proxy appended.
+  - **B-07:** production with a trusted proxy requires `MCHEZO_LISTEN_HOST`, so nothing reaches the server around the proxy.
+  - **Defaults:** every setting is off by default, so local play, tests and browser checks are unchanged.
+- **D-BR1-05 zod 3's advisory is an accepted, bounded risk for the gated beta.**
+  - **The advisory:** GHSA-mrhx-c7xc-m3w5 (high), which affects every version below 4.6.6; only the major upgrade fixes it.
+  - **The bound:** with every body and message capped at 64 KiB, the measured worst case is +10 to 12 MB of heap and about 50 to 60 ms per request.
+  - **To remove it:** a separate zod 4 migration with its own full gate.
+  - **Alternative rejected:** migrating here. It touches every schema, in a readiness slice whose point is a small, reviewable change.
+- **D-BR1-06 The family's data is kept safe by hand, and nothing deletes it.**
+  - **The tool:** `datatool` (compiled into the package) has backup, verify, restore and prune.
+  - **Backup:** made into a new private folder with a SHA-256 manifest; refused while a server runs, unless asked.
+  - **Restore:** verifies everything first, and only into an empty folder; it never overwrites.
+  - **Prune:** a dry run unless `--apply`, at least 7 days, never while a server runs. It moves rooms into `data/archive/`, never deletes.
+  - **Provisional:** the runbook's 60 days and 14 backups are provisional defaults for the owner to set.
+  - **Alternative rejected:** automatic retention in the server. The brief asks for bounded retention without deleting owner data, and a person deciding is the safe reading.
+- **D-BR1-07 No host is chosen here.**
+  - **What the app needs:** one always-on Node 22 process, a persistent disk, WebSockets, HTTPS and a stable name.
+  - **What is written:** the host options found at $0, with their account requirements (some need a card or a domain), are listed for ChatGPT's selection. They come from search results, because the providers' pages weren't reachable from this session.
+  - **Not done:** no account, trial, card, domain or public port was created or requested.

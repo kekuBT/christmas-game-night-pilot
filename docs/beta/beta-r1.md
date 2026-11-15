@@ -1,5 +1,7 @@
 # Beta R1: readiness and a portable production package
 
+**Status (2026-11-15):** built and tested locally. The results are in `docs/beta/beta-r1-blockers.md`, `docs/beta/beta-r1-architecture.md`, `docs/beta/beta-r1-release.md` and `docs/evidence/beta-r1-local/README.md`; the gates and the completed report are on #43.
+
 **Authorization:** the owner's priority update on #42, comment 6896572377 (2026-11-15, 10:05 a.m. ET; D-WF-01). It authorizes deployment **conditionally, after readiness clearance**, within the unchanged $0 / no paid AI constraints. It does not authorize spending, merging the stack, disabling games, or weakening score, content or privacy checks. ChatGPT owns host selection and coordinates the deployment; this slice is the readiness work and its report. Acknowledged in 6897903253 (#42).
 
 **Base:** #41's head `1955c28fd907f9f3f05a82a440b2436e09119de8`, the latest independently cleared candidate (Stage 12.16-R, cleared by review 6896200767). Stage 12.17 (#42) is **not** in this base: it isn't cleared yet. Branch `claude/beta-r1-readiness`, one stacked draft PR on #41, linking #5 and 6896572377.
