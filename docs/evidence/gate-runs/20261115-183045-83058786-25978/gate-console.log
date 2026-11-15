@@ -1,0 +1,47 @@
+Mchezo gate targeted | run 20261115-183045-83058786-25978
+  revision 830587860e461d8a6d94c92ba33befd672a21f11 (clean tree) | fingerprint c6ac64941f93 (622 files)
+  plan     11 steps: 1 fast/build, 9 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  238 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 207 run(s))
+  estimate this run: 0–3m (low-confidence) · the same steps one after another: about 3m 28s · longest step check-quick-party ~47s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-beta-gate
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t3/test-results/20261115-183045-83058786-25978
+        start build-web on w1 (usually 7s)
+[ 1/11] PASS         5.9s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/11] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:43205 (pid 26111, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t3/test-results/20261115-183045-83058786-25978/server-data/w1)
+  server   w2 http://localhost:34627 (pid 26112, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t3/test-results/20261115-183045-83058786-25978/server-data/w2)
+  server   w3 http://localhost:37405 (pid 26113, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t3/test-results/20261115-183045-83058786-25978/server-data/w3)
+        start check-quick-party on w1 (usually 47s)
+        start check-one-path on w2 (usually 39s)
+        start check-cup-party on w3 (usually 31s)
+[ 3/11] PASS        35.3s  check-cup-party  w3
+        start check-lobby-mode on w3 (usually 20s)
+[ 4/11] PASS        42.1s  check-one-path  w2
+        start check-readiness on w2 (usually 19s)
+[ 5/11] PASS        49.9s  check-quick-party  w1
+        start check-lobby-fixes on w1 (usually 17s)
+── progress  5/11 done · 5 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-lobby-mode 17s (w3), check-readiness 10s (w2), check-lobby-fixes 3s (w1)
+   remaining 19–51s · total 1–2m · done around 18:32–18:32 UTC (low-confidence)
+[ 6/11] PASS        23.1s  check-lobby-mode  w3
+        start check-release-package on w3 (usually 14s)
+[ 7/11] PASS        20.3s  check-readiness  w2
+        start check-official-practice on w2 (usually 11s)
+[ 8/11] PASS        18.7s  check-lobby-fixes  w1
+        start check-beta-gate on w1 (usually 3s)
+[ 9/11] PASS         3.7s  check-beta-gate  w1
+[10/11] PASS        11.6s  check-official-practice  w2
+[11/11] PASS        18.8s  check-release-package  w3
+
+PASSED (exit 0) | targeted | run 20261115-183045-83058786-25978
+  11 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 25s · step time 3m 50s (sum) · 3 workers, 90% busy · 2.71× the same steps run one after another
+           predicted 0–3m (about 1m 15s, low-confidence) → actual 1m 25s (+13%)
+           longest  check-quick-party 50s, check-one-path 42s, check-cup-party 35s · the longest step is 59% of the wall time
+           machine  CPU mean 57%, peak 95% · memory available ≥ 13619 MB · load peak 3.94
+           contention ×1.088 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t3/test-results/20261115-183045-83058786-25978/report.json

@@ -36,7 +36,11 @@
 | `unit-all-after-fast-gate-fix.log` | `a91f3d1`'s tree | 158 files, 2021/2021 | The whole suite after the fast-gate fix (below). |
 | `repro-lobby-reload-race.mjs.txt`, `repro-lobby-reload-race-1955c28.out.txt` | `1955c28` (the cleared base) | **3/3 wrong** with `/games` delayed 1.5 s; 3/3 right without | **B-09:** on a reload where the game list comes after the room's state, the host's lobby shows Official while the plan, the guests and the TV say Practice. |
 | `check-lobby-mode-before-b09-fix.log` | `529a966` + the new check | **FAIL** | The new slow-list reload check: "Start Math Mayhem · Official". |
-| `check-lobby-mode-after-b09-fix.log`, `repro-lobby-reload-race-fixed-tree.out.txt` | the fix | ALL LOBBY/HOME CHECKS PASSED; 6/6 Practice | |
+| `check-lobby-mode-after-b09-fix.log`, `repro-lobby-reload-race-fixed-tree.out.txt` | `8305878`'s tree (the first fix) | ALL LOBBY/HOME CHECKS PASSED; 6/6 Practice | **The first fix was wrong.** It also applied Practice at once for any game, and `check-f5` in the full gate on `8305878` caught it (below). These two runs didn't test that case. |
+| `check-lobby-mode-guard-on-8305878.log` | `8305878` + the new guard | **2 FAIL** | The new check: after a practice-only pick (Impostor), the host's next game (Trivia) showed "Start Trivia Showdown · Practice", and the guest saw Practice too. |
+| `check-lobby-mode-corrected-fix.log`, `repro-lobby-reload-race-corrected-tree.out.txt` | the correction | ALL LOBBY/HOME CHECKS PASSED (guard, reload and slow-list reload); 6/6 Practice | |
+| `check-f5-corrected-run1-server-without-gate-test-mode.log` | the correction | **FAIL at Category Sprint** | **My own setup:** I started the server for this local run without the content test mode the gate's shared servers use. A Cup's Official Category Sprint needs approved content, so its start was refused and the driver waited for a briefing. Caption Clash passed. |
+| `check-f5-corrected-run2.log` | the correction, with the gate's server settings | F5 ALL PASSED (36/36) | |
 | `beta-r1-tests-current.log` | `255a5c9-dirty` | 22/22, no errors | `tests/beta-r1.test.ts` and `tests/beta-r1-data.test.ts` before B-08. |
 
 ## Data (§4)
@@ -75,6 +79,9 @@
 | `20261115-174026-529a9669-30512` | `529a966` | targeted (beta-gate, release-package, install-builds, tv-entry, spectator) | PASSED (exit 0) | 7/7 |
 | `20261115-174154-529a9669-31926` | `529a966` | fast | PASSED (exit 0) | 5/5 |
 | `20261115-174314-529a9669-3501` | `529a966` | full | **FAILED (exit 1)** | **108/109.** `check-lobby-mode`: after the host's reload the lobby said "Start Math Mayhem · Official" instead of Practice. **Root cause:** B-09, a race already in the base, reproduced deterministically on `1955c28`. Fixed next. |
+| `20261115-183045-83058786-25978` | `8305878` | targeted (lobby-mode, lobby-fixes, one-path, official-practice, quick-party, cup-party, readiness, beta-gate, release-package) | PASSED (exit 0) | |
+| `20261115-183219-83058786-27966` | `8305878` | fast | PASSED (exit 0) | |
+| `20261115-183350-83058786-32167` | `8305878` | full | **CANCELLED (exit 130), with 1 FAIL** | **`check-f5` failed:** after Impostor (practice-only), Caption Clash was offered as Practice. **Root cause:** my first B-09 fix. I stopped the run there; 6 steps passed, 3 were cancelled and 99 didn't run. Corrected next. |
 
 The gates on the final code revision are listed in the completed report on #43, and added here after they ran.
 

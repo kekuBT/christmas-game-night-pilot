@@ -1,0 +1,32 @@
+$ node scripts/check-f5.mjs http://localhost:35725
+# timeout 1500s | worker w2 | server http://localhost:35725 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/test-results/20261115-183350-83058786-32167/server-data/w2)
+
+[+5.7s] PASS lobby roster: 4 players joined
+[+5.8s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games; casual-only, not in a Cup: jebena-rush, spectrum, family-questions; built for teams, played by their own drivers: team-huddle, relay, split-clues, team-draw, territory, tug-of-war, know-your-rivals)
+[+7.0s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+20.5s] OK impostor: finished
+[+20.5s] PASS day playlist: impostor finished without sticking
+[+50.9s] FAIL caption-clash: locator.click: Timeout 30000ms exceeded.
+[+50.9s] Call log:
+[+50.9s]   - waiting for locator('[data-testid="start-official-caption-clash"]')
+[+50.9s] 
+[+51.0s]   DIAG player=Alex game=impostor(game-1) server=finished phase=- deadlineIn=256s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Lobby" clock="" | type=server-ended-client-behind
+[+51.0s]   DIAG player=Sam game=impostor(game-1) server=finished phase=- deadlineIn=256s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6YBMJZ Playing as Sam · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+51.0s]   DIAG player=Jo game=impostor(game-1) server=finished phase=- deadlineIn=256s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6YBMJZ Playing as Jo · Room: Game night Lobby & Games Championship " clock="" shownOutcome=completed | type=finished-and-shown
+[+51.0s]   DIAG player=Kim game=impostor(game-1) server=finished phase=- deadlineIn=256s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6YBMJZ Playing as Kim · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+51.0s] FAIL day playlist: caption-clash finished without sticking — locator.click: Timeout 30000ms exceeded.
+[+51.0s] Call log:
+[+51.0s]   - waiting for locator('[data-testid="start-official-caption-clash"]')
+[+51.0s] 
+[+51.0s] FAIL day playlist: all games finished in one room — 1/14 finished
+[+51.0s] FAIL ledger holds one game-finished event per playlist game — 1/14 finish events
+[+51.0s] FAIL TV projection marks every playlist game finished — caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess
+[+52.9s] FAIL championship standings list all 4 players after full day
+[+82.9s] FATAL: locator.innerText: Timeout 30000ms exceeded.
+[+82.9s] Call log:
+[+82.9s]   - waiting for getByTestId('cup-games')
+[+82.9s] 
+[+83.0s] F5 FAILED: 6/9 failed
+[+83.0s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# FAIL (exit 1) in 83s | cpu 3.9s, peak memory 275 MB

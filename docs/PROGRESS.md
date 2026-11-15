@@ -3047,6 +3047,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **The gate page overflowed phones,** as my screenshots showed. I stopped the full gate on `a91f3d1` (CANCELLED), fixed the page in `529a966`, and added `scripts/check-beta-gate.mjs`, which failed first and passes now.
   - **Every run is listed** in `docs/evidence/beta-r1-local/README.md`.
 - **The full gate on `529a966` FAILED (108/109) in `check-lobby-mode`:** B-09, a host-reload race that was already in the base, reproduced on `1955c28`. Fixed in the web app's plan-restore effect, with a slow-list reload check that failed first.
-- **Next:** targeted, fast and one full gate on the fix's SHA, then the completed report on #43. The same race is in #42's base: port the fix into the 12.17 repair.
+- **The first B-09 fix (`8305878`) was wrong:** it applied Practice at once even for a practice-only game. `check-f5` caught it in the full gate on `8305878`, which I stopped. Corrected: the plan's mode applies only for a game that can count, and the effect runs again when the list arrives. A new lobby-mode guard failed on `8305878` and passes now; `check-f5` passes 36/36 locally with the gate's server settings.
+- **Next:** targeted, fast and one full gate on the correction's SHA, then the completed report on #43. The same race is in #42's base: port the corrected fix into the 12.17 repair.
 - **Risk:** the beta gate is new code on every request. It is off by default, so every existing driver runs as before; the full gate is the proof.
 

@@ -190,6 +190,16 @@ try {
       }
       return g.evaluate(() => ({ name: document.querySelector(".mz-upnext__name")?.textContent ?? "", mode: document.querySelector('[data-testid="up-next-mode"]')?.textContent ?? "", note: document.querySelector('[data-testid="dock-guest-note"]')?.textContent ?? "" }));
     };
+    // Beta R1 (B-09 guard): looking at a practice-only game in between never changes the host's Official choice for the
+    // next game (the first B-09 fix did, and check-f5's day playlist caught it: Impostor, then Caption Clash as Practice).
+    await h.getByTestId("choose-game").click();
+    await h.getByTestId("select-game-impostor").click();
+    await sleep(800); // the plan goes to the server and back
+    await h.getByTestId("choose-game").click();
+    await h.getByTestId("select-game-trivia").click();
+    let back = "";
+    for (let i = 0; i < 25 && back !== "Start Trivia Showdown · Official"; i++) { back = (await h.getByTestId("lobby-dock").locator(".mz-key").first().innerText()).trim(); if (back !== "Start Trivia Showdown · Official") await sleep(200); }
+    check("host: a practice-only pick in between leaves the next game Official (the default, unchanged)", back === "Start Trivia Showdown · Official", back);
     let t = await guestSees((x) => x.name === "Trivia Showdown" && /Official/.test(x.mode));
     check("guest: sees the host's game and that it's Official", t.name === "Trivia Showdown" && /Official · counts toward/.test(t.mode) && /Official, counts toward/.test(t.note), JSON.stringify(t));
     await h.getByTestId("mode-practice").click();

@@ -1,0 +1,22 @@
+$ node scripts/check-beta-gate.mjs http://localhost:43205
+# timeout 600s | worker w1 | server http://localhost:43205 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t3/test-results/20261115-183045-83058786-25978/server-data/w1)
+
+[+1.9s] PASS G1 320px: a page load without the cookie gets the gate (401)
+[+1.9s] PASS G1 320px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":320,"width":320,"left":13,"right":307}
+[+2.0s] PASS G1 320px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+[+2.2s] PASS G2 320px: a wrong code is refused with a plain message, and the page still fits — {"scroll":320,"width":320,"left":13,"right":307}
+[+2.4s] PASS G1 390px: a page load without the cookie gets the gate (401)
+[+2.4s] PASS G1 390px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":390,"width":390,"left":16,"right":374}
+[+2.4s] PASS G1 390px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+[+2.6s] PASS G2 390px: a wrong code is refused with a plain message, and the page still fits — {"scroll":390,"width":390,"left":16,"right":374}
+[+2.8s] PASS G3 the right code returns to the page that was asked for, query kept — http://localhost:34479/?join=ABCD
+[+2.9s] PASS G3 the beta cookie is HttpOnly and SameSite=Lax (Secure only over https), and isn't the code — true/Lax/false
+[+3.2s] PASS G3 the app loads after the gate
+[+3.3s] PASS G4 with the cookie: the API creates a room and a live WebSocket opens — {"status":201,"roomId":"room-mwi68thl-121956","ws":"open, live update received"}
+[+3.5s] PASS G4 without the cookie: the API refuses (401 BETA_ACCESS_REQUIRED) and the WebSocket is refused — {"status":401,"code":"BETA_ACCESS_REQUIRED","ws":"refused"}
+[+3.5s] PASS the server never printed the access code
+[+3.7s] cleanup: server stopped (0); data dir removed
+[+3.7s] BETA GATE PASSED
+[+3.7s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":2}
+
+# PASS (exit 0) in 3.7s | cpu 1.8s, peak memory 330 MB
