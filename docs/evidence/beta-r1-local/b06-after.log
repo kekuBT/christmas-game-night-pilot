@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ✓ tests/beta-r1.test.ts (13 tests) 277ms
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  16:58:01
+   Duration  1.71s (transform 812ms, setup 0ms, collect 1.10s, tests 277ms, environment 0ms, prepare 62ms)
+
