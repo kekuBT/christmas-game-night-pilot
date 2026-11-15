@@ -2967,8 +2967,10 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Rendered coverage (`a82ea44`):** the review asked for rendered coverage, and the first pass had pure tests for most cases. `apps/web/src/components/mchezo/TvFinal.test.tsx` renders the real TV final: 150/50/50 reads 1, 1, 2, 3, which on `cfaf412` rendered 1, 1, 3, 3. It also covers a true tie, the individual fallback and the three mode labels. `check-one-path` gains Official, and Practice through a reload, after the change.
   - **Gates:**
     - on `de26509`: targeted `20261115-071221-de265098-5268` PASSED 15/15; fast `20261115-071657-de265098-7750` PASSED 5/5 (unit 1960/1960);
-    - **on `a82ea44` (tested SHA):** targeted `20261115-072853-a82ea449-16515` PASSED 15/15 (one-path 74 checks); fast `20261115-073324-a82ea449-18915` PASSED 5/5 (unit 1966/1966);
+    - on `a82ea44`: targeted `20261115-072853-a82ea449-16515` PASSED 15/15 (one-path 74 checks); fast `20261115-073324-a82ea449-18915` PASSED 5/5 (unit 1966/1966);
+    - **on `57f698f` (tested SHA):** targeted `20261115-074546-57f698fe-27948` PASSED 16/16 (one-path 78 checks); fast `20261115-075116-57f698fe-30431` PASSED 5/5 (unit 1966/1966);
     - no full gate ran, as the review asked.
+  - **One more consumer (`57f698f`):** a casual game's results screen stays casual after the change. Before, a guest still on it saw the old screen's "Practice game".
+  - **Next:** the reviewer's independent confirmation and phone-layout audit. Nothing is merged or deployed.
   - **Links:** the three earlier reports' malformed repository links were replaced with plain paths at their commits.
-  - **Time:** about 40 minutes. No estimate was written before the work, an omission.
-  - **Next:** the reviewer's re-review. Nothing is merged or deployed.
+  - **Time:** about 55 minutes. No estimate was written before the work, an omission.

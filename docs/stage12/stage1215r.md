@@ -210,7 +210,7 @@ On `cfaf412` the same test renders 1, 1, 3, 3 (the reviewer's screen) and fails 
 | `20261115-071221-de265098-5268` | targeted (13 drivers: cup-team-games, one-path, tv-show, results, relay, team-huddle, tug-of-war, know-your-rivals, game-night-flow, cup-party, official-practice, lifecycle, night-card) | **PASSED** (exit 0) | 15/15 (cup-team-games 27, one-path 70 checks) | 4 min 29 s |
 | `20261115-071657-de265098-7750` | fast | **PASSED** (exit 0) | 5/5 (unit 1960/1960) | 1 min 15 s |
 
-**Gates on `a82ea44`, the tested SHA for this round:**
+**Gates on `a82ea44` (superseded by `57f698f` below):**
 
 | Run | Level | Verdict | Steps | Wall |
 |---|---|---|---|---|
@@ -220,5 +220,19 @@ On `cfaf412` the same test renders 1, 1, 3, 3 (the reviewer's screen) and fails 
 - **No full gate ran on `de26509` or `a82ea44`,** as the review asked ("do not rerun unchanged historical full suites"). The full checkpoint pass stays `c27e242`'s alone.
 - **No gate run failed or was cancelled.** One local screenshot run did fail, on my own check's wrong expectation (`docs/evidence/stage1215r-local/README.md`).
 - **The reviewer's screen, locally:** a local run with the testing-only time scale played the review's three-team Official Relay. The TV's list reads 1, 1 (Team Coral), 2, 2 (Team Sun), 3, 3 (Team Mint), as `relay-tiebreak-3teams-cup-tv-final-1920` shows.
-- **Actual time:** about 40 minutes, from the review at 1:58 a.m. ET to the screenshot run at about 2:37 a.m. ET. The first repair's gates passed at 2:18; the rendered coverage the review asked for took the rest.
+**One more consumer of the label (`57f698f`):** the review asked me to check the label's other consumers, and one remained.
+- **The fault:** the casual results screen, used for games without a results screen of their own such as Math Mayhem, was chosen by the room's current kind. A guest still on a casual game's results when the host made the room a Cup saw the old screen, "Practice game — does not count toward the Family Cup.", under a "Casual" heading, also after a reload.
+- **The fix:** that screen is now chosen by how the game was played.
+- **Evidence:** a scratch script and `check-one-path`'s new D2 steps show the fault on `a82ea44`'s build and pass with the fix.
+
+**Gates on `57f698f`, the tested SHA for this round:**
+
+| Run | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|
+| `20261115-074546-57f698fe-27948` | targeted (the 13 drivers + session-flow) | **PASSED** (exit 0) | 16/16 (one-path 78 checks) | 5 min 22 s |
+| `20261115-075116-57f698fe-30431` | fast | **PASSED** (exit 0) | 5/5 (unit 1966/1966) | 1 min 11 s |
+
+- **Actual time:** about 55 minutes, from the review at 1:58 a.m. ET to the last fast gate's verdict at 2:52 a.m. ET.
+  - **The first repair:** its gates had passed by 2:18.
+  - **The rest:** the rendered coverage the review asked for, and the consumer check that found the results screen.
 - **Also corrected:** the link repair itself happened at about 2:15 a.m. ET, not 2:25 as I first wrote in the three edit notes; those notes now say 2:15.

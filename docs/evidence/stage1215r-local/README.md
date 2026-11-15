@@ -98,3 +98,24 @@ The review asked for rendered coverage of the TV's final standings (150/50/50 at
 | `20261115-073324-a82ea449-18915` | `a82ea44` | fast | **PASSED** (exit 0) | 5/5 (unit 1966/1966) | 1 min 08 s |
 
 No full gate ran on `a82ea44` or `de26509`, as the review asked. The tested SHA for this round is `a82ea44`; the `de26509` runs above are that revision's own, not combined with these.
+
+### One more consumer of the label (`57f698f`)
+
+The review asked me to check the label's other consumers. One remained: the casual results screen for games without a results screen of their own (Math Mayhem) was chosen by the room's current kind.
+
+| Log | Revision (worktree state) | Result | What it showed |
+|---|---|---|---|
+| `r6c-repro-results-after-cup-a82ea44.log` (scratch script `repro-results-after-cup.mjs.txt`, not a gate driver) | a build of `a82ea44` | **2 FAIL** of 3 | Amina stays on a casual Math Mayhem game's results while the host makes the room a Cup. Her screen turns into the old one: "MATH MAYHEM · CASUAL" above "Practice game — does not count toward the Family Cup.", and still does after a reload. (An earlier run of the script made a Cup room by mistake: `POST /rooms` without `kind: "casual"`. That run tested nothing and isn't kept.) |
+| `r6c-check-one-path-before-a82ea44.log` | the updated driver (new D2 steps) on a build of `a82ea44` | 76 pass, **2 FAIL** | The guest's casual results disappear after the change, and after a reload. |
+| `r6c-repro-results-after-cup-fixed.log` | `57f698f`, built | 3/3 | Casual results before, after and after a reload; no old screen. |
+| `check-one-path-r6c.log` | same | 78/0 | "MATH MAYHEM · CASUAL … Just for fun." after the change and after a reload; the server has it among the casual games. |
+| `unit-suite-r6c.log` | same | 1966/1966 | Both typechecks and the whole repo's lint clean. |
+
+Screenshots: `results-after-cup-before-a82ea44-390` (the old screen, cropped) and `results-after-cup-casual-390` (repaired).
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261115-074546-57f698fe-27948` | `57f698f` | targeted (14 drivers: the 13 above + session-flow) | **PASSED** (exit 0) | 16/16 (one-path 78, cup-team-games 27, session-flow 72 checks) | 5 min 22 s |
+| `20261115-075116-57f698fe-30431` | `57f698f` | fast | **PASSED** (exit 0) | 5/5 (unit 1966/1966) | 1 min 11 s |
+
+**The tested SHA for the third round is `57f698f`.** The `de26509` and `a82ea44` runs belong to those revisions alone and aren't combined with these. No full gate ran on any of the three, as the review asked.

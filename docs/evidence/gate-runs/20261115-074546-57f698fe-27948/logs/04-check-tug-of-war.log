@@ -1,0 +1,31 @@
+$ node scripts/check-tug-of-war.mjs http://localhost:41977
+# timeout 600s | worker w2 | server http://localhost:41977 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt5/test-results/20261115-074546-57f698fe-27948/server-data/w2)
+
+[+6.3s] PASS A the briefing explains Tug of War
+[+6.5s] PASS A the TV shows the star (three rope ends) and a three-team scoreboard
+[+6.6s] PASS A every phone starts on the same sum
+[+6.6s] PASS B a phone has its own sum and never its answer
+[+6.6s] PASS B the TV's data has no sum and no answer
+[+6.7s] PASS C a right answer moves Keku on to the next sum
+[+6.9s] PASS C a wrong answer freezes Keku and greys that option
+[+8.8s] PASS C the freeze ends by itself
+[+8.9s] PASS D the pull is per player: Sun 4.0 (8 right, 2 players), Coral 2.0 (6 right, 3 players) — [{"teamId":"team-coral","right":6,"size":3,"mult":1,"pull":2},{"teamId":"team-sun","right":8,"size":2,"mult":1,"pull":4},{"teamId":"team-mint","right":0,"size":2,"mult":1,"pull":0}]
+[+9.0s] PASS D the TV's knot leans to Sun, and says so
+[+9.0s] PASS D a phone shows the same lean
+[+9.0s] PASS D the knot moved toward Sun's side — 0.4,0
+[+9.1s] PASS D the TV fits above its footer (pulling) — {"ok":true,"bottom":829,"foot":980}
+[+46.6s] PASS E bout 1: Sun 1st, Coral 2nd, Mint 3rd (100/75/55) — {"team-coral":[2,75],"team-sun":[1,100],"team-mint":[3,55]}
+[+46.7s] PASS E the TV and a phone show the result
+[+52.5s] PASS F Mint (alone last, 45 behind) is the catch-up team for bout 2 — [{"teamId":"team-coral","score":75},{"teamId":"team-sun","score":100},{"teamId":"team-mint","score":55}]
+[+52.6s] PASS F Mint's phones say it pulls ×1.2
+[+52.7s] PASS F the TV shows Mint's ×1.2 pull
+[+92.6s] PASS F Mint wins bout 2 with the catch-up pull (2.4 against Sun's 2.0) — [{"teamId":"team-coral","right":1,"size":3,"mult":1,"pull":0.3,"place":3,"points":55},{"teamId":"team-sun","right":4,"size":2,"mult":1,"pull":2,"place":2,"points":75},{"teamId":"team-mint","right":4,"size":2,"mult":1.2,"pull":2.4,"place":1,"points":100}]
+[+144.6s] PASS G the game finished with team results for three teams — [["team-sun",1,250],["team-coral",2,230],["team-mint",3,210]]
+[+144.6s] PASS G every player scored their team's points
+[+144.7s] PASS G phones: the results, three bouts and the team results card
+[+144.7s] PASS G the TV leads with the team result
+[+145.4s] PASS G 320 px: the results have no sideways scroll
+[+145.5s] TUG OF WAR PASSED
+[+145.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":8,"pages":8,"peakOpenPages":8}
+
+# PASS (exit 0) in 145.5s | cpu 6.8s, peak memory 298 MB
