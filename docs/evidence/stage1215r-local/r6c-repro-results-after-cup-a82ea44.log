@@ -1,0 +1,10 @@
+room kind at start: casual
+Amina's results BEFORE the change: MATH MAYHEM · CASUAL Keku wins Math Mayhem K Keku Just for fun. Bragging rights only. You came 2nd of 2 240 pts Second in a head-to-head. Next game's a clean slate. WHAT’S NEXT Next game: Everyday content Keku picks what’s next. MATH MAYHEM Final standings 1 Keku Answered 10 of 10 questions 600 2 Amina (you) Answered 10 of 10 questions 240 Everyone finished. You: Answered 10 of 10 questions Casual
+room kind after: cup
+Amina's results AFTER the change: Mchezo Code: 2CKTTR Playing as Amina · Room: Repro Lobby & Games Championship TV Dashboard Memory Book Reconnect Saved. MATH MAYHEM · CASUAL Keku wins Math Mayhem K Keku Just for fun. Bragging rights only. You came 2nd of 2 240 pts Second in a head-to-head. Next game's a clean slate. 🏆 RESULTS Math Mayhem Keku wins this game! Keku: 600 points — Answered 10 of 10 questions Amina: 240 points — Answered 10 of 10 questions Everyone finished. Practice game — does not count toward the Family Cup. Answers 112 − 13 = ? Answer: 99 You: 99 ✓ 9 × 6 = ? Answer: 54 You: 54 ✓ 112 − 19 = ? Answer: 93 You: 9
+Amina's results AFTER a reload: Mchezo Code: 2CKTTR Playing as Amina · Room: Repro Lobby & Games Championship TV Dashboard Memory Book Reconnect MATH MAYHEM · CASUAL Keku wins Math Mayhem K Keku Just for fun. Bragging rights only. You came 2nd of 2 240 pts Second in a head-to-head. Next game's a clean slate. 🏆 RESULTS Math Mayhem Keku wins this game! Keku: 600 points — Answered 10 of 10 questions Amina: 240 points — Answered 10 of 10 questions Everyone finished. Practice game — does not count toward the Family Cup. Answers 112 − 13 = ? Answer: 99 You: 99 ✓ 9 × 6 = ? Answer: 54 You: 54 ✓ 112 − 19 = ? Answer: 93 You: 96 ✗ 10%
+legacy results card (show-results) before/after: 0 1
+PASS before: the casual game's results say Casual, never Practice — {"practice":false,"casual":true}
+FAIL after: the casual game's results say Casual, never Practice — {"practice":true,"casual":true}
+FAIL after reload: the casual game's results say Casual, never Practice — {"practice":true,"casual":true}
+REPRO: 2 FAILED

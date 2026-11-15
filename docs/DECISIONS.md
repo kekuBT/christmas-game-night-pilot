@@ -2010,4 +2010,5 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
 - **D-S1215R-06 (review 6890761957) One source for places and for a game's mode.**
   - **The TV's final standings:** for a game built for teams, each player is listed at their team's place from the server's team results (never re-ranked from points), with the team named. Individual games and per-player games played "as teams" keep ranking by points, because their players' own points are real.
   - **The Casual / Practice / Official label:** wherever a finished game is labelled (the lobby's "Last game", the results comment, the results screens), the label is the game's mode as it was played, from `casualGameIds`. It is never the room's current kind.
+  - **Which results screen:** a casual game's results stay the casual results screen after the room becomes a Cup (they turned into the old screen's "Practice game"). What's next on that screen still follows the room as it is now.
   - **Alternative rejected:** storing a mode on each game (a data migration for a display label the server already derives).

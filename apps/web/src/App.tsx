@@ -2670,8 +2670,10 @@ export function App() {
     if (show) return show;
   }
 
-  // Stage 7.2: a casual room's game without its own results screen gets the casual one (never the old shell).
-  if (view === "lobby" && showPhase === "results" && latestFinished && proj?.roomKind === "casual") {
+  // Stage 7.2: a casual game without its own results screen gets the casual one (never the old shell).
+  // Review 6890761957 (D-S1215R-06): "casual" is how the game was played, so a casual game's results stay casual after
+  // the room becomes a Family Cup (before, they turned into the old shell's "Practice game"). What's next follows the room.
+  if (view === "lobby" && showPhase === "results" && latestFinished && playedCasual(latestFinished.id)) {
     return (
       <MchezoProvider theme={theme} {...resultsMotion}>
         <CasualResults
