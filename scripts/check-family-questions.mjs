@@ -7,6 +7,8 @@
 //      and crowns a great question; the host skips one, which is never revealed; results and the TV's review
 //   D  moderation: the host removes a writer's unplayed questions without reading them
 //   E  layout: the write sheet at 320 px has no sideways scroll
+//   F  (Stage 12.15-R, review 6888718011 R3) a second game whose LAST question the host skips: the finished game's
+//      data (TV and every phone) and every screen carry nothing of it; the skip marker and the played rounds stay
 // Usage: node scripts/check-family-questions.mjs <baseUrl>   (the gate passes its server)
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { PROTOCOL_HEADERS } from "./lib/protocol.mjs";
@@ -232,6 +234,43 @@ try {
   check("D Baraka keeps only his played question (marked played)", removedMine.length === 1 && removedMine[0].played === true, JSON.stringify(removedMine.map((q) => q.played)));
   const notHost = await call(`/rooms/${roomId}/family/author/${hostSeat.playerId}/remove`, { token: aminaSeat.token, body: {} });
   check("D a player who isn't the host can't remove anyone's questions (403)", notHost.status === 403);
+
+  // ---- F. The last question skipped (Stage 12.15-R) ----
+  for (const [seat, tag] of [[aminaSeat, "L1"], [barakaSeat, "L2"], [hostSeat, "L3"]]) {
+    await api(`/rooms/${roomId}/family`, { token: seat.token, body: { kind: "choice", prompt: `Which town CANARY-${tag} did Shosho visit?`, options: [`Nanyuki CANARY-${tag}`, `Voi CANARY-${tag}`], correctIndex: 0 } });
+  }
+  for (const p of [host, amina, baraka]) { const b = p.getByRole("button", { name: "Back to lobby" }); if (await b.count()) await b.first().click(); }
+  const { gameId: gid2 } = await api(`/rooms/${roomId}/games`, { token: hostSeat.token, body: { gameId: "family-questions", official: false } });
+  for (const s of [hostSeat, aminaSeat, barakaSeat]) await intent(roomId, s, gid2, "briefing-ready", { ready: true });
+  const pub2 = async () => (await tvProj(roomId)).games.find((g) => g.id === gid2);
+  let lastPrompt = null;
+  for (let r = 0; r < 3; r++) {
+    const st = await soon(`F question ${r + 1} is open`, async () => { const g = await pub2(); return g?.status === "playing" && g.state.phase === "answer" && g.state.round === r ? g.state : null; }, 30000);
+    if (!st) break;
+    if (r === 2) {
+      lastPrompt = st.prompt;
+      await intent(roomId, hostSeat, gid2, "family-skip", { round: r });
+      break;
+    }
+    // Everyone answers (the writer's own is refused); then the reveal's 8 s run out.
+    for (const s of [hostSeat, aminaSeat, barakaSeat]) await call(`/rooms/${roomId}/intents`, { token: s.token, body: { intent: { kind: "intent", schemaVersion: 1, clientEventId: crypto.randomUUID(), roomId, gameInstanceId: gid2, action: "family-answer", payload: { round: r, choice: 0 } } } });
+  }
+  const fin2 = await soon("F the host skipped the last question: the game finishes at once", async () => { const g = await pub2(); return g?.status === "finished" ? g : null; }, 15000);
+  const tag = /CANARY-L\d/.exec(lastPrompt ?? "")?.[0] ?? "§none§";
+  check("F the skipped question was the last one, and had a canary", /CANARY-L\d/.test(lastPrompt ?? ""), lastPrompt ?? "");
+  check("F the finished game's top level has no prompt, answers or kind, and says skipped", !!fin2 && fin2.state.prompt === undefined && fin2.state.options === undefined && fin2.state.kind === undefined && fin2.state.skipped === true, JSON.stringify(fin2?.state && { prompt: fin2.state.prompt, skipped: fin2.state.skipped }));
+  check("F its rounds: two played (with their questions), the last {skipped: true}", fin2?.state.rounds?.length === 3 && JSON.stringify(fin2.state.rounds[2]) === '{"skipped":true}' && fin2.state.rounds.slice(0, 2).every((x) => /CANARY-L\d/.test(x.prompt ?? "")));
+  check("F the TV's whole room data has nothing of the skipped question", !JSON.stringify(await tvProj(roomId)).includes(tag));
+  const writerOf = { L1: aminaSeat.playerId, L2: barakaSeat.playerId, L3: hostSeat.playerId }[tag.slice(7)];
+  for (const [seat, name] of [[hostSeat, "Keku"], [aminaSeat, "Amina"], [barakaSeat, "Baraka"]]) {
+    const proj = await myProj(roomId, seat);
+    const views = [...(proj.games ?? []), ...(proj.myGames ?? [])].filter((g) => g.id === gid2);
+    // The writer's own question list is theirs to see; nobody's view of the game, and no one else's data at all, has it.
+    check(`F ${name}'s phone: the game's data has nothing of it${seat.playerId === writerOf ? " (their own list keeps their question)" : ", nor anything else"}`, views.length > 0 && views.every((v) => !JSON.stringify(v).includes(tag)) && (seat.playerId === writerOf || !JSON.stringify(proj).includes(tag)));
+  }
+  await soon("F the phones' results show the skip and nothing of the question", async () => /Skipped by the host/.test(await amina.getByTestId("mz-fq-results").innerText()) && !(await text(amina)).includes(tag) && !(await text(baraka)).includes(tag));
+  await sleep(1200);
+  check("F the TV's screen has nothing of it", !(await text(tv)).includes(tag));
 } catch (e) {
   check("driver ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
 } finally {

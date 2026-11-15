@@ -1,4 +1,4 @@
-import type { RoomTeams } from "../../../../../../src/shared/teams.js";
+import { teamWinnerLine, type RoomTeams, type TeamResultRow } from "../../../../../../src/shared/teams.js";
 /**
  * Stage 5 (S5-A): what the TV may know.
  *
@@ -121,10 +121,17 @@ export function tvModeFor(latest: PublicGame | undefined, choice: TvChoice): TvM
  * Stage 9.3: the headline for any finished game. A cooperative game has one
  * team result (outcome.team) and never a winner; every other game keeps its
  * winner line from the recorded scores.
+ * Stage 12.15-R (review 6888718011, R6): a game played by teams is told by its
+ * teams, from the server's team results ("Team Sun wins", "Team Coral and Team
+ * Sun tie for first", "Every team tied"), the wording its results screen and the
+ * TV's final use, never as teammates "tied for first". The lobby, the TV's
+ * recaps and the night card all use this one line.
  */
-export function resultLine(game: { rawScores?: Record<string, number>; outcome?: { team?: { total: number; max: number } } }, nameOf: (id: string) => string): string {
+export function resultLine(game: { rawScores?: Record<string, number>; outcome?: { team?: { total: number; max: number } } | null; teamResults?: readonly TeamResultRow[] }, nameOf: (id: string) => string): string {
   const team = game.outcome?.team;
   if (team) return `Team result: ${team.total} out of ${team.max}`;
+  const byTeam = game.teamResults ? teamWinnerLine(game.teamResults) : null;
+  if (byTeam) return byTeam;
   return winnerLine(game.rawScores, nameOf);
 }
 

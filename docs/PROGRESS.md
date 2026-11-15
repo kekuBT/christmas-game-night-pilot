@@ -2930,3 +2930,54 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Estimate vs actual:** about 3 hours estimated; about 3 h 40 min actual (6:19 to 10:00 p.m. ET). That was 41 minutes of building, then three rounds of gates.
 - **Owner decisions open:** the content of the seven games' own packs (Split Clues, Team Draw, Know Your Rivals) has no official review step; Trivia's pool has one.
 - **Next:** owner review of the stack (#25 onward). Nothing is merged or deployed.
+
+## Stage 12.15-R: repairs from review 6888718011 and two follow-up reviews (built and gated; awaiting re-review)
+- **Brief:** the owner's review and handoff on #39 (comment 6888718011, about 10:43 p.m. ET on 2026-11-14) gave a changes-required verdict with six findings and asked for a bounded, stacked repair PR. I acknowledged it with an estimate on #39 (6888781319).
+- **Base:** #39's head `1eafe41` (tested source `bcf1406`). Branch `claude/stage12-15r-team-game-repairs`, draft PR #40 stacked on #39.
+- **Spec:** `docs/stage12/stage1215r.md`. Decisions D-S1215R-01 to 04.
+- **Repaired:**
+  - **R1, Relay participation (P1):** a runner's chances are their own turns; wrong answers count as actions. A fully active team of 2–5 qualifies; an idle runner doesn't.
+  - **R2, Know Your Rivals (P2):** guessing is mutual; a team where everyone opted out sits that round's guessing out.
+  - **R3, Family Questions (P2):** a skipped question is never described in any view after the skip.
+  - **R4, Relay's TV freeze (P2):** one clock predicate, plus a room tick at the freeze's end.
+  - **R5, Relay's tiebreak (P2):** each lane records its last leg's time. Relay's places are recorded at the finish and drive team results, medals, the heading and comment, and the Cup placement.
+  - **R6, recaps (P2):** the lobby, the TV's recaps and the night card name the team.
+  - **Found on the way:** an Official game's comment could say "tied" for teams level on points but placed apart.
+- **Tests:**
+  - new: `tests/stage1215r-relay.test.ts` (12), `stage1215r-repairs.test.ts` (9) and `stage1215r-recaps.test.ts` (6). On #39's source, 20 of the 27 fail; the rest are compatibility guards and coverage;
+  - updated: `stage1214-know-your-rivals` (3 tests asserted the old rule);
+  - drivers `check-relay`, `check-know-your-rivals`, `check-family-questions` and `check-cup-team-games` extended.
+- **Gates:** targeted `20261115-042304-c27e2420-14931` PASSED 24/24; fast `20261115-043238-c27e2420-18729` PASSED 5/5 (unit 1956/1956); **full (checkpoint) `20261115-043355-c27e2420-22664` PASSED** (exit 0, 106/106, 39 min 37 s, no retries).
+- **Tested SHA:** `c27e242`. The head after it is docs and evidence only.
+- **Estimate vs actual:** about 5 h estimated; about 1 h 30 min actual (10:43 p.m. to 12:13 a.m. ET).
+- **Limits:**
+  - in a Relay team of 7 or more, a runner can get a single turn, below the Cup's 2-action minimum;
+  - R5's equal-legs results screen isn't a gate driver: it needs the 4-minute limit, so it was shown in a local run with the testing-only time scale;
+  - real phones not tried.
+- **Next:** re-review and the reviewer's independent private-site audit (blocked on the reviewer's own sign-in). Nothing is merged or deployed.
+- **Second round (review 6889824884, 12:35 a.m. ET on 2026-11-15):** two presentation repairs on #40.
+  - **Know Your Rivals:** neutral sit-out wording ("Nobody on … picked either answer"), never "Rather not say" for an idle team.
+  - **Relay:** the Official tiebreak comment appears only for the winner's own tie on points.
+  - **Gates:** on `cfaf412`, targeted `20261115-054306-cfaf4122-1429` PASSED 12/12 and fast `20261115-054732-cfaf4122-3438` PASSED 5/5 (unit 1958/1958). The full checkpoint pass stays with `c27e242`; no full gate ran on `cfaf412`, as the review asked.
+  - **Time:** about 15 minutes (estimate about 1 h).
+- **Third round (review 6890761957, 1:58 a.m. ET on 2026-11-15, the reviewer's first independent live audit):** two presentation repairs on #40 (D-S1215R-06).
+  - **TV final standings:** a game built for teams lists each player at their team's place from the server's team results, with the team named. Before, the 150/50/50 case read 1, 1, 3, 3; now it reads 1, 1, 2, 3. A true tie still shares a place; individual games still rank by points.
+  - **Historical mode:** after "Make it a Family Cup", the lobby's "Last game" card, the results comment and the results screens give a game's mode as played (`casualGameIds`). A casual game stays Casual, including after a reload.
+  - **Reproduced first:** the updated drivers on a build of `cfaf412` fail (`check-cup-team-games` 1, `check-one-path` 3); on the repair they pass 27/0 and 70/0. Unit tests: 1960/1960.
+  - **Rendered coverage (`a82ea44`):** the review asked for rendered coverage, and the first pass had pure tests for most cases. `apps/web/src/components/mchezo/TvFinal.test.tsx` renders the real TV final: 150/50/50 reads 1, 1, 2, 3, which on `cfaf412` rendered 1, 1, 3, 3. It also covers a true tie, the individual fallback and the three mode labels. `check-one-path` gains Official, and Practice through a reload, after the change.
+  - **Gates:**
+    - on `de26509`: targeted `20261115-071221-de265098-5268` PASSED 15/15; fast `20261115-071657-de265098-7750` PASSED 5/5 (unit 1960/1960);
+    - on `a82ea44`: targeted `20261115-072853-a82ea449-16515` PASSED 15/15 (one-path 74 checks); fast `20261115-073324-a82ea449-18915` PASSED 5/5 (unit 1966/1966);
+    - **on `57f698f` (tested SHA):** targeted `20261115-074546-57f698fe-27948` PASSED 16/16 (one-path 78 checks); fast `20261115-075116-57f698fe-30431` PASSED 5/5 (unit 1966/1966);
+    - no full gate ran, as the review asked.
+  - **One more consumer (`57f698f`):** a casual game's results screen stays casual after the change. Before, a guest still on it saw the old screen's "Practice game".
+  - **Next:** the reviewer's independent confirmation and phone-layout audit. Nothing is merged or deployed.
+  - **Links:** the three earlier reports' malformed repository links were replaced with plain paths at their commits.
+  - **Time:** about 55 minutes. No estimate was written before the work, an omission.
+- **Fourth round (review 6892025042, 3:59 a.m. ET, the reviewer's recovery review):**
+  - **Confirmed:** the casual-label repair, independently.
+  - **Repaired:** in a Family Cup lobby the host's "Make teams" / "Edit teams" opened nothing, because the teams sheet only rendered in casual rooms. It now opens in a Cup too (`5698e02`); the server and its checks are unchanged.
+  - **The driver:** `check-cup-team-games` sets the teams up with the rendered controls, no longer over the API. It also covers a casual room with teams that becomes a Cup, and guests without controls. It fails on `57f698f`'s build and passes 45/0 with the fix.
+  - **Gates on `5698e02` (tested SHA):** targeted `20261115-091040-5698e029-4911` PASSED 18/18; fast `20261115-091647-5698e029-7809` PASSED 5/5 (unit 1966/1966). No full gate ran.
+  - **Time:** estimate about 1 h 30 min (committed first, `f924da1`); actual about 20 minutes.
+  - **Next:** the reviewer's confirmation, the normal-clock Official Relay/TV journey and the phone-layout audit. Nothing is merged or deployed.

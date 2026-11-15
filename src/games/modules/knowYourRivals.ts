@@ -6,13 +6,16 @@
  *    has answered. Nobody, not even a teammate, ever sees another player's own answer.
  *  - GUESS (25 s): each team guesses, for every OTHER team, how many of that team's players picked the first option
  *    (out of those who answered). Any teammate can set the team's guesses; any teammate can lock them. It closes early
- *    once every team has locked. A team's guesses stay within the team until the reveal.
- *    When nobody in any team answered (everyone said "Rather not say"), there is nothing to guess: straight to the reveal.
+ *    once every team in the guessing has locked. A team's guesses stay within the team until the reveal.
+ *    Stage 12.15-R (D-S1215R-02): guessing is mutual. The teams in a round's guessing are those where at least one
+ *    player answered (picked one of the two); they guess each other. A team where everyone said "Rather not say" sits
+ *    that round's guessing out: it isn't guessed and doesn't guess, so nobody scores on it and it scores nothing that
+ *    round. Fewer than two teams in the guessing: there is nothing to guess, straight to the reveal.
  *  - REVEAL (8 s): each team's totals ("Team Sun: 2 Tea, 1 Coffee"), never who picked what, and every team's points.
  *
  * Points per rival guessed: 30 for the exact number, less the further off (30 × (1 − miss ÷ the rival's answers)), never
- * below 0. A rival where nobody answered isn't guessed. Every team guesses every other team, so all teams have the same
- * number of guesses whatever their size. Catch-up (the team kit): a team alone in last place and RIVALS_CATCH_UP_GAP+
+ * below 0. Every team in the guessing guesses every other team in it, so all of them have the same number of guesses
+ * whatever their size: equal accuracy, equal points. Catch-up (the team kit): a team alone in last place and RIVALS_CATCH_UP_GAP+
  * behind gets +15 in a round where it scores. Every player scores their team's points.
  */
 import type { SessionSeason } from "../../shared/season.js";
@@ -32,7 +35,13 @@ export type RivalsChoice = "a" | "b" | "pass";
 export interface RivalsGuess { value: number; by: string }
 export interface RivalsTeamCount { teamId: string; answered: number; a: number; b: number; passed: number }
 export interface RivalsGuessResult { teamId: string; target: string; guess: number | null; actual: number; size: number; points: number }
-export interface RivalsRoundResult { counts: RivalsTeamCount[]; guesses: RivalsGuessResult[]; points: { teamId: string; points: number; bonus: number }[] }
+export interface RivalsRoundResult {
+  counts: RivalsTeamCount[];
+  guesses: RivalsGuessResult[];
+  points: { teamId: string; points: number; bonus: number }[];
+  /** Stage 12.15-R (D-S1215R-02): teams that sat this round's guessing out (nobody there answered). Absent before it. */
+  sitOut?: string[];
+}
 
 export interface RivalsState {
   players: string[];
@@ -84,12 +93,22 @@ export function rivalsTotals(s: RivalsState, upto?: number): Record<string, numb
   return out;
 }
 
+/**
+ * Stage 12.15-R (D-S1215R-02): the teams in a round's guessing: those where at least one player answered (picked one
+ * of the two). They guess each other, and only each other.
+ */
+export function guessingTeams(s: RivalsState, round: number): string[] {
+  return teamIdsInGame(s.teams, s.players).filter((t) => teamCount(s, round, t).answered > 0);
+}
+
 function score(s: RivalsState, r: number): RivalsRoundResult {
   const ids = teamIdsInGame(s.teams, s.players);
   const counts = ids.map((t) => teamCount(s, r, t));
+  const guessing = new Set(guessingTeams(s, r));
   const guesses: RivalsGuessResult[] = [];
   for (const t of ids) for (const c of counts) {
-    if (c.teamId === t || c.answered === 0) continue;
+    // Mutual: a pair is scored only when both teams are in the guessing.
+    if (c.teamId === t || !guessing.has(t) || !guessing.has(c.teamId)) continue;
     const g = s.guesses[r]?.[t]?.[c.teamId]?.value ?? null;
     guesses.push({ teamId: t, target: c.teamId, guess: g, actual: c.a, size: c.answered, points: guessPoints(g, c.a, c.answered) });
   }
@@ -97,7 +116,7 @@ function score(s: RivalsState, r: number): RivalsRoundResult {
     const p = guesses.filter((g) => g.teamId === t).reduce((n, g) => n + g.points, 0);
     return { teamId: t, points: p, bonus: s.catchUp[r] === t && p > 0 ? RIVALS_POINTS.catchUp : 0 };
   });
-  return { counts, guesses, points };
+  return { counts, guesses, points, sitOut: ids.filter((t) => !guessing.has(t)) };
 }
 
 function startRound(s: RivalsState, at: number): void {
@@ -111,10 +130,9 @@ function toReveal(s: RivalsState): void {
   s.phase = "reveal";
 }
 
-/** The answers are in: on to the guesses, or straight to the totals when no team answered (nothing to guess). */
+/** The answers are in: on to the guesses, or straight to the totals when fewer than two teams answered (nothing to guess). */
 function toGuess(s: RivalsState): void {
-  const ids = teamIdsInGame(s.teams, s.players);
-  if (ids.some((t) => teamCount(s, s.round, t).answered > 0)) s.phase = "guess";
+  if (guessingTeams(s, s.round).length >= 2) s.phase = "guess";
   else toReveal(s);
 }
 
@@ -148,10 +166,13 @@ export const knowYourRivalsModule: GameModule<RivalsState> & { onPlayStart(s: Ri
       return { ok: true };
     }
     if (s.phase !== "guess") return { ok: false, reason: "PHASE_CLOSED" };
+    // A team where nobody answered sits this round's guessing out (D-S1215R-02).
+    const guessing = guessingTeams(s, s.round);
+    if (!guessing.includes(team)) return { ok: false, reason: "SITTING_OUT" };
     if (s.locked[s.round]?.[team]) return { ok: false, reason: "TEAM_LOCKED" };
     if (action === "rivals-lock") {
       (s.locked[s.round] ??= {})[team] = actorId;
-      if (teamIdsInGame(s.teams, s.players).every((t) => s.locked[s.round]?.[t])) toReveal(s);
+      if (guessing.every((t) => s.locked[s.round]?.[t])) toReveal(s);
       return { ok: true };
     }
     const target = payload["target"];
@@ -209,7 +230,9 @@ export const knowYourRivalsModule: GameModule<RivalsState> & { onPlayStart(s: Ri
     if (s.phase === "answer") return { ...base, answered: inGame.filter((p) => ans[p] !== undefined).length, of: inGame.length };
     if (s.phase === "guess") {
       // How many answered in each team is public (it bounds the guesses); what they picked is not.
-      return { ...base, sizes: ids.map((t) => ({ teamId: t, answered: teamCount(s, r, t).answered })), teamStatus: ids.map((t) => ({ teamId: t, locked: !!s.locked[r]?.[t] })) };
+      // Stage 12.15-R: and which teams are in the guessing (the others sit it out this round).
+      const guessing = new Set(guessingTeams(s, r));
+      return { ...base, sizes: ids.map((t) => ({ teamId: t, answered: teamCount(s, r, t).answered })), teamStatus: ids.map((t) => ({ teamId: t, locked: !!s.locked[r]?.[t], guessing: guessing.has(t) })) };
     }
     const recap = (i: number) => ({ prompt: s.questions[i]!.prompt, a: s.questions[i]!.a, b: s.questions[i]!.b, ...s.results[i]! });
     return { ...base, result: s.results[r] ? recap(r) : null, ...(s.phase === "finished" ? { rounds: s.questions.map((_, i) => i).filter((i) => s.results[i]).map(recap) } : {}) };

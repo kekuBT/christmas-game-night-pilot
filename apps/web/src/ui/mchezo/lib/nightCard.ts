@@ -7,6 +7,7 @@
  * recorded scores, the night's medal table (lib/medals.ts), and in a Family Cup its day, standings and champion. Never
  * Memory Book notes, answers, Family Questions, the room code or anything private to one phone.
  */
+import type { TeamResultRow } from "../../../../../../src/shared/teams.js";
 import { medalTable, type MedalGame } from "./medals.js";
 import { resultLine } from "./tvfeed.js";
 
@@ -14,6 +15,8 @@ export interface NightCardGame extends MedalGame {
   gameId: string;
   rawScores?: Record<string, number>;
   outcome?: { team?: { total: number; max: number } } | null;
+  /** Stage 12.15-R (R6): a team game's results, so its line names the team (never teammates as tied players). */
+  teamResults?: readonly TeamResultRow[];
 }
 
 export interface NightCardInput {
@@ -63,7 +66,7 @@ export function nightCardFacts(input: NightCardInput): NightCardFacts | null {
     // A Family Cup's card tells its standings instead: medals are a casual night's story (D-S121-05).
     medals: input.cup ? [] : table.rows.slice(0, NIGHT_CARD_LIMITS.medals).map((r) => ({ name: input.nameOf(r.playerId), gold: r.gold, silver: r.silver, bronze: r.bronze })),
     moreMedalRows: input.cup ? 0 : Math.max(0, table.rows.length - NIGHT_CARD_LIMITS.medals),
-    games: finished.slice(-NIGHT_CARD_LIMITS.games).map((g) => ({ title: input.titleOf(g.gameId), line: resultLine({ rawScores: g.rawScores, ...(g.outcome ? { outcome: g.outcome } : {}) }, input.nameOf) })),
+    games: finished.slice(-NIGHT_CARD_LIMITS.games).map((g) => ({ title: input.titleOf(g.gameId), line: resultLine({ rawScores: g.rawScores, ...(g.outcome ? { outcome: g.outcome } : {}), ...(g.teamResults ? { teamResults: g.teamResults } : {}) }, input.nameOf) })),
     moreGames: Math.max(0, finished.length - NIGHT_CARD_LIMITS.games),
   };
   if (input.cup) {

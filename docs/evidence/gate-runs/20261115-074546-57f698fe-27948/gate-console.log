@@ -1,0 +1,68 @@
+Mchezo gate targeted | run 20261115-074546-57f698fe-27948
+  revision 57f698fe9d65bce12e65ffa930201aca33fc66e6 (clean tree) | fingerprint 9ae5e8219942 (612 files)
+  plan     16 steps: 1 fast/build, 14 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  212 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.05 for 3 worker(s) (measured, 186 run(s))
+  estimate this run: 3–9m (measured) · the same steps one after another: about 14m 16s · longest step check-session-flow ~2m 52s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.05 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt5/test-results/20261115-074546-57f698fe-27948
+        start build-web on w1 (usually 6s)
+[ 1/16] PASS         5.1s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/16] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:33459 (pid 28066, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt5/test-results/20261115-074546-57f698fe-27948/server-data/w1)
+  server   w2 http://localhost:41977 (pid 28067, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt5/test-results/20261115-074546-57f698fe-27948/server-data/w2)
+  server   w3 http://localhost:40239 (pid 28068, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt5/test-results/20261115-074546-57f698fe-27948/server-data/w3)
+        start check-session-flow on w1 (usually 2m 52s)
+        start check-tug-of-war on w2 (usually 2m 16s)
+        start check-cup-team-games on w3 (usually 2m 15s)
+── progress  2/16 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-session-flow 53s (w1), check-tug-of-war 53s (w2), check-cup-team-games 53s (w3)
+   remaining 3–9m · total 4–10m · done around 07:49–07:54 UTC (measured)
+── progress  2/16 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-session-flow 1m 53s (w1), check-tug-of-war 1m 53s (w2), check-cup-team-games 1m 53s (w3)
+   remaining 2–8m · total 4–10m · done around 07:50–07:54 UTC (measured)
+[ 3/16] PASS       145.5s  check-tug-of-war  w2
+        start check-lifecycle on w2 (usually 2m 02s)
+[ 4/16] PASS       145.7s  check-cup-team-games  w3
+        start check-know-your-rivals on w3 (usually 54s)
+── progress  4/16 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-session-flow 2m 53s (w1), check-lifecycle 27s (w2), check-know-your-rivals 27s (w3)
+   remaining 1–5m · total 4–8m · done around 07:50–07:53 UTC (measured)
+[ 5/16] PASS       185.9s  check-session-flow  w1
+        start check-team-huddle on w1 (usually 53s)
+[ 6/16] PASS          78s  check-know-your-rivals  w3
+        start check-results on w3 (usually 48s)
+── progress  6/16 done · 6 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-lifecycle 1m 27s (w2), check-team-huddle 47s (w1), check-results 9s (w3)
+   remaining 0–3m · total 4–7m · done around 07:50–07:52 UTC (measured)
+[ 7/16] PASS        55.4s  check-team-huddle  w1
+        start check-one-path on w1 (usually 32s)
+[ 8/16] PASS        49.9s  check-results  w3
+        start check-cup-party on w3 (usually 31s)
+[ 9/16] PASS         129s  check-lifecycle  w2
+        start check-relay on w2 (usually 24s)
+[10/16] PASS        40.5s  check-one-path  w1
+        start check-tv-show on w1 (usually 12s)
+── progress  10/16 done · 10 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-cup-party 19s (w3), check-relay 18s (w2), check-tv-show 11s (w1)
+   remaining 15–47s · total 5–6m · done around 07:51–07:51 UTC (measured)
+[11/16] PASS        11.9s  check-tv-show  w1
+        start check-game-night-flow on w1 (usually 11s)
+[12/16] PASS        25.3s  check-relay  w2
+        start check-official-practice on w2 (usually 10s)
+[13/16] PASS          10s  check-game-night-flow  w1
+        start check-night-card on w1 (usually 8s)
+[14/16] PASS        33.5s  check-cup-party  w3
+[15/16] PASS        11.9s  check-official-practice  w2
+[16/16] PASS        10.5s  check-night-card  w1
+
+PASSED (exit 0) | targeted | run 20261115-074546-57f698fe-27948
+  16 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 5m 22s · step time 15m 39s (sum) · 3 workers, 97% busy · 2.92× the same steps run one after another
+           predicted 3–9m (about 5m 04s, measured) → actual 5m 22s (+6%)
+           longest  check-session-flow 3m 06s, check-cup-team-games 2m 26s, check-tug-of-war 2m 26s · the longest step is 58% of the wall time
+           machine  CPU mean 28%, peak 100% · memory available ≥ 13550 MB · load peak 4.22
+           contention ×1.069 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt5/test-results/20261115-074546-57f698fe-27948/report.json

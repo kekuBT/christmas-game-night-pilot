@@ -2,7 +2,9 @@
 //   A  the night's teams (Coral: Keku and Amina; Sun: Baraka and Wanjiru); Relay starts; the TV shows the lanes
 //   B  the runner answers; the teammate sees the same sum and "help out loud"; a right answer passes the baton
 //   C  privacy: once Coral is a leg ahead, Sun's phones and the TV never show Coral's sum
-//   D  a wrong answer freezes the runner and greys the option out; after the freeze the right answer still counts
+//   D  a wrong answer freezes the runner and greys the option out; after the freeze the right answer still counts.
+//      Stage 12.15-R (D-S1215R-04): the TV's lane says "(frozen)" during the freeze and stops when it ends, with no
+//      other answer (it used to stay frozen until the next answer)
 //   E  a runner who doesn't answer in 20 s is passed over on the same sum
 //   F  the rest of the race over the API; results: the team results card on phones, the winning team on the TV; 320 px
 // Usage: node scripts/check-relay.mjs <baseUrl>   (the gate passes its server)
@@ -119,7 +121,10 @@ try {
   await soon("D a wrong answer freezes the runner, counting down from at most 3", async () => { const m = /Frozen: (\d+)/.exec(await runner2.getByTestId("mz-rl-frozen").innerText()); return !!m && Number(m[1]) >= 1 && Number(m[1]) <= 3; });
   check("D the wrong option is greyed out", await runner2.getByTestId(`mz-rl-option-${wrong}`).isDisabled());
   await shot(runner2, "frozen-390");
+  await soon("D (12.15-R) the TV's lane says the runner is frozen", async () => /\(frozen\)/.test(await tv.getByTestId("tv-rl-lanes-team-coral").innerText()), 3000);
   await soon("D the freeze ends", async () => (await runner2.getByTestId("mz-rl-frozen").count()) === 0, 8000);
+  await soon("D (12.15-R) the TV's lane stops saying frozen when the freeze ends, with no other answer", async () =>
+    !/\(frozen\)/.test(await tv.getByTestId("tv-rl-lanes-team-coral").innerText()) && (await lane("team-coral")).frozen === false && (await lane("team-coral")).legs === 1, 3000);
   await runner2.getByTestId(`mz-rl-option-${rightIndex(st1)}`).click();
   await soon("D after the freeze, the right answer passes the baton", async () => (await lane("team-coral")).legs === 2);
 

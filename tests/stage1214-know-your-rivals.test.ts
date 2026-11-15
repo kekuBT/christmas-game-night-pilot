@@ -122,7 +122,7 @@ describe("Know Your Rivals (pure)", () => {
     expect(act(s, ZAWADI, "rivals-lock")).toMatchObject({ ok: true });
     expect(pv(s, KEKU)["lockedBy"]).toBe(ZAWADI);
     expect(pv(s, BARAKA)["lockedBy"]).toBeUndefined();
-    expect(tv(s)["teamStatus"]).toEqual([{ teamId: CORAL, locked: true }, { teamId: SUN, locked: false }]);
+    expect(tv(s)["teamStatus"]).toEqual([{ teamId: CORAL, locked: true, guessing: true }, { teamId: SUN, locked: false, guessing: true }]);
     expect(act(s, KEKU, "rivals-guess", { target: SUN, value: 0 })).toMatchObject({ ok: false, reason: "TEAM_LOCKED" });
     expect(act(s, KEKU, "rivals-lock")).toMatchObject({ ok: false, reason: "TEAM_LOCKED" });
     expect(s.phase).toBe("guess");
@@ -161,13 +161,15 @@ describe("Know Your Rivals (pure)", () => {
     expect(m.scores(s, ps)).toMatchObject({ c1: 30, c3: 30, s2: 20, m2: 0 });
   });
 
-  it("\"Rather not say\": not counted; a team where nobody answered isn't guessed; if nobody answers at all, no guessing", () => {
+  it("\"Rather not say\": not counted; a team where nobody answered sits the guessing out (12.15-R); if nobody answers at all, no guessing", () => {
     const s = game();
     answerAll(s, { [KEKU]: "a", [AMINA]: "a", [ZAWADI]: "b", [BARAKA]: "pass", [WANJIRU]: "pass" });
-    expect(s.phase).toBe("guess");
-    expect(act(s, KEKU, "rivals-guess", { target: SUN, value: 0 })).toMatchObject({ ok: false, reason: "NOBODY_ANSWERED" });
-    m.expirePhase(s, ctx());
-    expect(s.results[0]!.guesses.map((g) => g.target)).toEqual([CORAL]);
+    // Stage 12.15-R (D-S1215R-02): only Coral answered, so there is nobody for Coral to guess and Sun guesses nobody.
+    // (Before it, Sun still guessed Coral and could score while nobody could score on Sun.)
+    expect(s.phase).toBe("reveal");
+    expect(act(s, KEKU, "rivals-guess", { target: SUN, value: 0 })).toMatchObject({ ok: false, reason: "PHASE_CLOSED" });
+    expect(s.results[0]!.guesses).toEqual([]);
+    expect(s.results[0]!.sitOut).toEqual([SUN]);
     expect(s.results[0]!.counts.find((c) => c.teamId === SUN)).toEqual({ teamId: SUN, answered: 0, a: 0, b: 0, passed: 2 });
     m.expirePhase(s, ctx());
     expect(s).toMatchObject({ round: 1, phase: "answer" });
@@ -308,7 +310,10 @@ describe("Know Your Rivals in the room", () => {
     const g = engine.startGame(k, "know-your-rivals", { official: false, seed: 4 });
     for (const p of ids) send(p, g.id, "briefing-ready", { ready: true });
     const st = engine.games.get(g.id)!.extra as RivalsState;
+    // One player on each team answers (12.15-R: with only one team's answers there would be nothing to guess).
+    const rival = ids.find((p) => st.teams.members[p] !== st.teams.members[k])!;
     expect(send(k, g.id, "rivals-answer", { round: 0, choice: "a" }).accepted).toBe(true);
+    expect(send(rival, g.id, "rivals-answer", { round: 0, choice: "b" }).accepted).toBe(true);
     t += RIVALS_ANSWER_MS - 1000; engine.tick();
     expect(st.phase).toBe("answer");
     t += 2000; engine.tick();

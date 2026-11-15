@@ -10,6 +10,11 @@
  *  - The race ends when every team has finished (or at the game's deadline, which the room owns).
  *  - Places: most legs, then the earlier finish of the last leg. Score: RELAY_POINTS.leg per leg, plus a finishing bonus
  *    for the first three teams to finish. Every player scores their team's points (team-derived).
+ *    Stage 12.15-R (D-S1215R-03): every lane records when it completed its last leg (`lastLegAt`), so lanes still out
+ *    when time runs out are placed too; the places are the game's result (teamPlaces), the points don't change.
+ *  - Stage 12.15-R (D-S1215R-01): a runner's chances are their own turns. Participation counts the turns that ended
+ *    (a right answer, or the turn's time ran out) and those the runner answered in (right or wrong); every answer is an
+ *    action. A turn still open when the game ends counts only if the runner answered in it.
  *
  * Times come from the server clock: the race starts at onPlayStart (the briefing's end), never at init.
  */
@@ -37,10 +42,22 @@ export interface RelayLane {
   frozenUntil?: number;
   /** Options tried and wrong on the current leg (greyed out). */
   wrong: number[];
-  /** When the team completed its last leg. */
+  /** When the team completed its twelfth leg. */
   finishedAt?: number;
   /** Who ran each completed leg. */
   ranBy: string[];
+  /** Stage 12.15-R (D-S1215R-03): when the team completed its latest leg (any leg). Absent in a race saved before it. */
+  lastLegAt?: number;
+  /**
+   * Stage 12.15-R (D-S1215R-01): per runner, their turns that ended (answered right, or their time ran out), the turns
+   * they answered in (right or wrong), and every answer they gave. Absent in a race saved before Stage 12.15-R: its
+   * participation is then counted the old way.
+   */
+  turnsEnded?: Record<string, number>;
+  turnsAnswered?: Record<string, number>;
+  answersBy?: Record<string, number>;
+  /** The current runner has already answered (wrong) in this turn. */
+  turnAnswered?: boolean;
 }
 
 export interface RelayState {
@@ -78,9 +95,18 @@ export function relayLaneScore(s: RelayState, l: RelayLane): number {
   return l.legs * RELAY_POINTS.leg + (place >= 0 ? (RELAY_POINTS.finish[place] ?? 0) : 0);
 }
 
-/** Places (1-based, shared on a tie): most legs, then the earlier finish. */
+/** Is the lane's runner frozen at `now`? The one test both the TV's lanes and the runner's phone use (D-S1215R-04). */
+export function relayFrozen(l: RelayLane, now: number): boolean {
+  return l.frozenUntil !== undefined && now < l.frozenUntil;
+}
+
+/**
+ * Places (1-based, shared on a tie): most legs, then whoever completed their last leg first (D-S1215R-03), finished or
+ * not. Equal legs at the same instant, or no legs at all, share a place. A race saved before lastLegAt existed only
+ * knows the twelfth leg's time.
+ */
 export function relayPlaces(s: RelayState): Record<string, number> {
-  const key = (l: RelayLane) => [-l.legs, l.finishedAt ?? Number.MAX_SAFE_INTEGER] as const;
+  const key = (l: RelayLane) => [-l.legs, l.legs > 0 ? (l.lastLegAt ?? l.finishedAt ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER] as const;
   const sorted = [...s.lanes].sort((a, b) => key(a)[0] - key(b)[0] || key(a)[1] - key(b)[1]);
   const out: Record<string, number> = {};
   sorted.forEach((l, i) => {
@@ -90,10 +116,23 @@ export function relayPlaces(s: RelayState): Record<string, number> {
   return out;
 }
 
+/** The current runner's turn ends (answered right, or their time ran out): record it for participation. */
+function endTurn(l: RelayLane, runner: string | undefined, answered: boolean): void {
+  if (runner === undefined || !l.turnsEnded) return;
+  l.turnsEnded[runner] = (l.turnsEnded[runner] ?? 0) + 1;
+  if (answered) l.turnsAnswered![runner] = (l.turnsAnswered![runner] ?? 0) + 1;
+  l.turnAnswered = false;
+}
+
 function passBaton(l: RelayLane, now: number): void {
   l.runner = (l.runner + 1) % Math.max(1, l.runners.length);
   l.turnStartedAt = now;
   l.frozenUntil = undefined;
+}
+
+function countAnswer(l: RelayLane, runner: string): void {
+  if (!l.answersBy) return;
+  l.answersBy[runner] = (l.answersBy[runner] ?? 0) + 1;
 }
 
 export const relayModule: GameModule<RelayState> & { onPlayStart(s: RelayState, ctx: ModuleContext): void } = {
@@ -103,7 +142,7 @@ export const relayModule: GameModule<RelayState> & { onPlayStart(s: RelayState, 
   init({ players, teams, relay }) {
     const t = teams ?? { list: [], members: {} };
     const lanes: RelayLane[] = t.list
-      .map((team) => ({ teamId: team.id, runners: players.filter((p) => t.members[p] === team.id), legs: 0, runner: 0, turnStartedAt: null, wrong: [], ranBy: [] }))
+      .map((team) => ({ teamId: team.id, runners: players.filter((p) => t.members[p] === team.id), legs: 0, runner: 0, turnStartedAt: null, wrong: [], ranBy: [], turnsEnded: {}, turnsAnswered: {}, answersBy: {}, turnAnswered: false }))
       .filter((l) => l.runners.length > 0);
     return { players: [...players], teams: t, questions: [...(relay ?? [])], lanes, startedAt: null, finishOrder: [] };
   },
@@ -121,18 +160,22 @@ export const relayModule: GameModule<RelayState> & { onPlayStart(s: RelayState, 
     if (l.legs >= RELAY_LEGS) return { ok: false, reason: "FINISHED" };
     if (runnerOf(l) !== actorId) return { ok: false, reason: "NOT_YOUR_LEG" };
     if (Number(payload["leg"]) !== l.legs) return { ok: false, reason: "STALE_LEG" };
-    if (l.frozenUntil !== undefined && ctx.now < l.frozenUntil) return { ok: false, reason: "FROZEN" };
+    if (relayFrozen(l, ctx.now)) return { ok: false, reason: "FROZEN" };
     const q = s.questions[l.legs];
     const choice = payload["choice"];
     if (!q || typeof choice !== "number" || !Number.isInteger(choice) || choice < 0 || choice >= q.options.length) return { ok: false, reason: "INVALID_PAYLOAD" };
     if (l.wrong.includes(choice)) return { ok: false, reason: "ALREADY_TRIED" };
+    countAnswer(l, actorId);
     if (choice !== q.correctIndex) {
       l.wrong.push(choice);
+      l.turnAnswered = true;
       l.frozenUntil = ctx.now + Math.round(RELAY_FREEZE_MS * (s.scaleAtStart ?? scale(ctx)));
       return { ok: true, result: { right: false } };
     }
+    endTurn(l, actorId, true);
     l.ranBy.push(actorId);
     l.legs += 1;
+    l.lastLegAt = ctx.now;
     l.wrong = [];
     if (l.legs >= RELAY_LEGS) {
       l.finishedAt = ctx.now;
@@ -149,14 +192,20 @@ export const relayModule: GameModule<RelayState> & { onPlayStart(s: RelayState, 
   phase: () => null,
   expirePhase: () => {},
   dueAt(s) {
-    // The next instant a runner's turn passes on (with the time scale recorded at the start).
-    const due = s.lanes.map((l) => turnEndsAt(l, s.scaleAtStart ?? 1)).filter((t): t is number => t !== undefined);
+    // The next instant a runner's turn passes on (with the time scale recorded at the start), or a freeze ends: the
+    // room ticks then, so the TV's lane stops saying "frozen" at the same instant the runner's phone does (D-S1215R-04).
+    const due = s.lanes.flatMap((l) => [turnEndsAt(l, s.scaleAtStart ?? 1), l.legs < RELAY_LEGS ? l.frozenUntil : undefined]).filter((t): t is number => t !== undefined);
     return due.length ? Math.min(...due) : undefined;
   },
   advance(s, ctx) {
     for (const l of s.lanes) {
+      if (l.frozenUntil !== undefined && ctx.now >= l.frozenUntil) l.frozenUntil = undefined;
       const end = turnEndsAt(l, s.scaleAtStart ?? 1);
-      if (end !== undefined && ctx.now >= end) passBaton(l, end);
+      if (end !== undefined && ctx.now >= end) {
+        // Their time ran out: a turn they had, answered (wrong) or not.
+        endTurn(l, runnerOf(l), l.turnAnswered === true);
+        passBaton(l, end);
+      }
     }
   },
   finished: (s) => s.lanes.length > 0 && s.lanes.every((l) => l.legs >= RELAY_LEGS),
@@ -170,19 +219,29 @@ export const relayModule: GameModule<RelayState> & { onPlayStart(s: RelayState, 
   },
   participation(s, players) {
     const participation = Object.fromEntries(players.map((p) => {
-      const ran = s.lanes.reduce((n, l) => n + l.ranBy.filter((x) => x === p).length, 0);
-      return [p, { done: ran, of: RELAY_LEGS, actions: ran }];
+      const l = laneOf(s, p);
+      if (l && !l.turnsEnded) {
+        // A race saved before Stage 12.15-R has no turn record: counted as it was then (legs run, of all the legs).
+        const ran = l.ranBy.filter((x) => x === p).length;
+        return [p, { done: ran, of: RELAY_LEGS, actions: ran }];
+      }
+      if (!l) return [p, { done: 0, of: 0, actions: 0 }];
+      // A turn still open at the end counts only if they answered in it: the end cut it short, not them.
+      const open = runnerOf(l) === p && l.turnAnswered === true ? 1 : 0;
+      return [p, { done: (l.turnsAnswered?.[p] ?? 0) + open, of: (l.turnsEnded?.[p] ?? 0) + open, actions: l.answersBy?.[p] ?? 0 }];
     }));
     return { participation };
   },
+  // Stage 12.15-R (D-S1215R-03): the game's own placing of its teams (legs, then the last leg's time).
+  teamPlaces: (s) => relayPlaces(s),
   anyAction: (s) => s.lanes.some((l) => l.legs > 0 || l.wrong.length > 0),
-  publicView(s) {
+  publicView(s, ctx) {
     const places = relayPlaces(s);
     // Lanes only: progress, the runner and the finish. Never a sum.
     return {
       legsTotal: RELAY_LEGS,
       started: s.startedAt !== null,
-      lanes: s.lanes.map((l) => ({ teamId: l.teamId, legs: l.legs, runnerId: runnerOf(l) ?? null, frozen: l.frozenUntil !== undefined, finished: l.legs >= RELAY_LEGS, place: l.legs >= RELAY_LEGS || s.finishOrder.length === s.lanes.length ? places[l.teamId] : undefined, score: relayLaneScore(s, l) })),
+      lanes: s.lanes.map((l) => ({ teamId: l.teamId, legs: l.legs, runnerId: runnerOf(l) ?? null, frozen: relayFrozen(l, ctx.now), finished: l.legs >= RELAY_LEGS, place: l.legs >= RELAY_LEGS || s.finishOrder.length === s.lanes.length ? places[l.teamId] : undefined, score: relayLaneScore(s, l) })),
       finishOrder: [...s.finishOrder],
     };
   },
@@ -199,7 +258,7 @@ export const relayModule: GameModule<RelayState> & { onPlayStart(s: RelayState, 
       runnerId: runnerOf(l) ?? null,
       myTurn: runnerOf(l) === actorId,
       ...(q ? { prompt: q.prompt, options: q.options, wrong: [...l.wrong] } : {}),
-      ...(l.frozenUntil !== undefined && ctx.now < l.frozenUntil ? { frozenUntil: l.frozenUntil } : {}),
+      ...(relayFrozen(l, ctx.now) ? { frozenUntil: l.frozenUntil } : {}),
       // The whole freeze and turn at this game's time scale, so a phone's countdown never shows more than them.
       freezeMs: Math.round(RELAY_FREEZE_MS * (s.scaleAtStart ?? 1)),
       turnMs: Math.round(RELAY_TURN_MS * (s.scaleAtStart ?? 1)),

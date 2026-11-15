@@ -1965,3 +1965,50 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **Converting existing Individual Family Cups to the new format:** a Cup's rules never change while it runs (D-S3-07).
     - **"Play as teams" for every game in a Cup:** not asked for, and it would change how individual games count.
 
+
+## Stage 12.15-R: repairs from review 6888718011
+**Authorization:** the owner's review and handoff on #39, comment 6888718011 (2026-11-14, about 10:43 p.m. ET; D-WF-01). Spec: `docs/stage12/stage1215r.md`. Branch `claude/stage12-15r-team-game-repairs`, PR #40, stacked on #39. Nothing is merged or deployed.
+
+- **D-S1215R-01 Relay: a runner's chances are their own turns.**
+  - **The rule:** each time the baton reaches a runner is a turn.
+    - `of`: their turns that ended (a right answer, or their 20 s ran out). A turn still open at the game's end counts only if they answered in it.
+    - `done`: the turns they answered in, right or wrong.
+    - `actions`: every answer, wrong ones included (the qualification contract's "answers … wrong ones included").
+  - **What it fixes:** a fully active team of 3 or more failed Cup qualification. Each runner was counted against all 12 legs: 4/12, under half. An idle runner's turns run out and count against them alone.
+  - **Unchanged:** each Cup's stored policy. A Relay saved before this has no turn record and keeps its old count; Relay was casual-only before the unmerged Stage 12.15, so no official Relay result exists.
+  - **Limit:** in a team of 7 or more, a runner can get a single turn (12 legs), below the policy's 2-action minimum. Teams of 2–6 can always reach it.
+  - **Alternatives rejected:**
+    - **The team's legs as `done` for every runner:** credits idle runners for teammates' legs.
+    - **Lowering the minimum for Relay:** changes the Cup's stored policy, which isn't this repair's to change.
+- **D-S1215R-02 Know Your Rivals: guessing is mutual.**
+  - **The rule:** in a round, the teams where at least one player answered guess each other, and only each other. A team where everyone said "Rather not say" neither guesses nor is guessed; fewer than two such teams means no guessing, straight to the reveal.
+  - **The opt-out:** unconditional and never pressed for. It still counts as an action for qualification.
+  - **Feedback:** neutral, on the phones, the TV and the reveal ("… said "Rather not say" this time, so there were no guesses for or about that team"), plus one line in the briefing.
+  - **What follows:** with three or more teams, the others still score on each other that round.
+  - **Alternatives rejected:**
+    - **Scoring nothing for anyone in a round where any team opted out:** one team could cancel everyone's round.
+    - **Making up a count for the team that opted out:** an invented answer.
+    - **Pressing players to answer:** against the unconditional opt-out.
+- **D-S1215R-03 Relay's places are its result everywhere.**
+  - **The ranking:** legs, then the time of the last completed leg (`lastLegAt`, recorded for every leg). Equal legs at the same instant, or no legs, share a place.
+  - **One ranking everywhere:** the room records the places at the finish (`outcome.teamPlaces`). Team results, medals, the results heading and comment, and the Cup's team placement follow them.
+  - **Unchanged:** points; no bonus is added. Equal points with different places can happen only for unfinished teams with equal legs, and the results say so.
+  - **Other team games:** still placed by score. A game recorded without places, or with a damaged record, is placed by score as before.
+  - **Alternative rejected:** a hidden tiebreak bonus point, which would invent scoring.
+- **D-S1215R-04 One clock for Relay's freeze.**
+  - **The predicate:** the TV's lanes and the runner's phone use the same test (`now < frozenUntil`).
+  - **The tick:** the freeze's end is a module due time, so the room ticks then and clears it. The TV stops showing "(frozen)" without waiting for another answer.
+- **Also repaired (no new rule):**
+  - **Family Questions:** a skipped question is never described again in any view (R3).
+  - **Recaps:** the lobby's last game, the TV's recaps and the night card take a team game's line from its team results (R6).
+- **D-S1215R-05 (review 6889824884) Plain facts, never an attributed reason or an unrelated winner.**
+  - **Know Your Rivals:** a team that sat a round's guessing out is described as "Nobody on … picked either answer". The records can't always say why (an idle team and a team that opted out look the same in older results), and naming a choice nobody made would be false.
+  - **Relay's tiebreak comment:** it speaks only of the winner's own tie on points, and names the team it's level with.
+  - **Alternatives rejected:**
+    - **Separate wording for "everyone said Rather not say":** needs each team's size on every screen, and would single out a privacy choice.
+    - **A comment for any tie lower down:** the lanes' line already explains it from the tied lanes.
+- **D-S1215R-06 (review 6890761957) One source for places and for a game's mode.**
+  - **The TV's final standings:** for a game built for teams, each player is listed at their team's place from the server's team results (never re-ranked from points), with the team named. Individual games and per-player games played "as teams" keep ranking by points, because their players' own points are real.
+  - **The Casual / Practice / Official label:** wherever a finished game is labelled (the lobby's "Last game", the results comment, the results screens), the label is the game's mode as it was played, from `casualGameIds`. It is never the room's current kind.
+  - **Which results screen:** a casual game's results stay the casual results screen after the room becomes a Cup (they turned into the old screen's "Practice game"). What's next on that screen still follows the room as it is now.
+  - **Alternative rejected:** storing a mode on each game (a data migration for a display label the server already derives).

@@ -1,0 +1,11 @@
+{"legs":[["team-coral",12,true],["team-sun",5,false],["team-mint",5,false]],"teamResults":[["Team Coral",1,150],["Team Sun",2,50],["Team Mint",3,50]]}
+phone: ▲ | Team Coral | 🏁 Home: 1st | 12/12 | ● | Team Sun | Time ran out: 5 of 12 legs · 2nd | 5/12 | ■ | Team Mint | Time ran out: 5 of 12 legs · 3rd | 5/12
+tiebreak: Team Sun and Team Mint both ran 5 legs; Team Sun finished its last leg first.
+headline: Team Coral wins Relay
+hero: RELAY · OFFICIAL | Team Coral wins Relay | K | Keku | A | Amina |  | Team Coral won by a comfortable margin. Very comfortable.
+tv: Team Coral wins
+tv standings: [["1","Amina · Team Coral"],["1","Keku · Team Coral"],["2","Baraka · Team Sun"],["2","Wanjiru · Team Sun"],["3","Juma · Team Mint"],["3","Neema · Team Mint"]]
+FAIL the TV's final standings: 1, 1 (Team Coral), 2 (Team Sun), 3 (Team Mint) — [["1","Amina · Team Coral"],["1","Keku · Team Coral"],["2","Baraka · Team Sun"],["2","Wanjiru · Team Sun"],["3","Juma · Team Mint"],["3","Neema · Team Mint"]]
+cupPlacement: {"player-1":100,"player-2":100,"player-3":50,"player-4":50,"player-5":0,"player-6":0}
+quip: RELAY · OFFICIAL | Team Coral wins Relay | K | Keku | A | Amina
+SHOT RUN: 1 FAILED

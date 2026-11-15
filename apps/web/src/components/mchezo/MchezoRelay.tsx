@@ -14,8 +14,9 @@ import { serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { Option } from "./MchezoFamily.js";
 import { TeamMark } from "./Teams.js";
 import { teamGameModeLine } from "./TeamGameKit.js";
+import { relayTiebreakLine } from "../../ui/mchezo/lib/teamLines.js";
 import { SendNote } from "./SendNote.js";
-import type { TeamDef } from "../../../../../src/shared/teams.js";
+import type { TeamDef, TeamResultRow } from "../../../../../src/shared/teams.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
 interface RelayLaneView { teamId: string; legs: number; runnerId: string | null; frozen: boolean; finished: boolean; place?: number; score: number }
@@ -36,12 +37,16 @@ function useNow(): number {
   return now;
 }
 
+const ordinal = (n: number) => ORDINAL[n - 1] ?? `${n}th`;
+
 /**
  * Each team's lane: its mark and name, legs done (a bar and words), who's running, and its place once home.
- * `over`: the race has ended (results, review). A team still out when time ran out shows its legs, never a runner.
+ * `over`: the race has ended (results, review). A team still out when time ran out shows its legs, never a runner, and
+ * (Stage 12.15-R) its place from the server's team results.
  */
-export function RelayLanes({ game, view, nameOf, mine, testId, tv, over }: { game: { teams?: { list: TeamDef[] } }; view: RelayGameView; nameOf: (id: string) => string; mine?: string; testId: string; tv?: boolean; over?: boolean }) {
+export function RelayLanes({ game, view, nameOf, mine, testId, tv, over }: { game: { teams?: { list: TeamDef[] }; teamResults?: TeamResultRow[] }; view: RelayGameView; nameOf: (id: string) => string; mine?: string; testId: string; tv?: boolean; over?: boolean }) {
   const total = view.legsTotal ?? 12;
+  const rankOf = (id: string) => game.teamResults?.find((r) => r.teamId === id)?.rank ?? null;
   return (
     <ul className={`mz-rl-lanes${tv ? " mz-rl-lanes--tv" : ""}`} data-testid={testId}>
       {(view.lanes ?? []).map((l) => {
@@ -51,7 +56,7 @@ export function RelayLanes({ game, view, nameOf, mine, testId, tv, over }: { gam
             {def && <TeamMark color={def.color} />}
             <span className="mz-rl-lane__text">
               <b>{def?.name ?? "A team"}</b>
-              <span>{l.finished ? `🏁 Home: ${ORDINAL[(l.place ?? 1) - 1] ?? `${l.place}th`}` : over ? `Time ran out: ${l.legs} of ${total} legs` : l.runnerId ? `${nameOf(l.runnerId)} is running${l.frozen ? " (frozen)" : ""}` : ""}</span>
+              <span>{l.finished ? `🏁 Home: ${ordinal(l.place ?? 1)}` : over ? `Time ran out: ${l.legs} of ${total} legs${rankOf(l.teamId) ? ` · ${ordinal(rankOf(l.teamId)!)}` : ""}` : l.runnerId ? `${nameOf(l.runnerId)} is running${l.frozen ? " (frozen)" : ""}` : ""}</span>
             </span>
             <span className="mz-rl-lane__legs" aria-label={`${l.legs} of ${total} legs`}>{l.legs}/{total}</span>
             <span className="mz-rl-lane__bar" aria-hidden="true"><span style={{ width: `${Math.round((l.legs / total) * 100)}%` }} /></span>
@@ -152,6 +157,10 @@ export function MchezoRelayResults({ game, publicGame, players, playerId, title,
       {next}
       <GameHeader title={title} objective="Who got home first?" accent={3} />
       <RelayLanes game={game} view={st} nameOf={nameOf} mine={st.myTeamId} testId="mz-rl-final-lanes" over />
+      {(() => {
+        const line = relayTiebreakLine(st.lanes ?? [], game.teamResults ?? publicGame?.teamResults, (id) => teamDef(game, id)?.name ?? "A team");
+        return line ? <p className="mz-foot" data-testid="mz-rl-tiebreak">{line}</p> : null;
+      })()}
       <p className="mz-foot" data-testid="mz-rl-howscore">10 points per leg, and 30, 20 or 10 for the first three teams home. Every player scores their team’s points. {teamGameModeLine(casual, game.official ?? publicGame?.official)}</p>
       <OutcomeSummary gameId="relay" outcome={game.outcome} official={publicGame?.official ?? game.official} youId={playerId} />
       <div className="mz-grow" />

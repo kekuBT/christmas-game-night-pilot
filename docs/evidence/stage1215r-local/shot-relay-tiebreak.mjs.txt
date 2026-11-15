@@ -1,0 +1,112 @@
+// Stage 12.15-R (R5): a local screenshot run only (NOT a gate driver): Relay with the testing-only time scale, two
+// lanes out with equal legs at the time limit; Sun completed its last leg first.
+import { launchChromium } from "./lib/driver-env.mjs";
+import { solveMath } from "./lib/math-solve.mjs";
+import { PROTOCOL_HEADERS } from "./lib/protocol.mjs";
+const BASE = process.argv[2] ?? "http://localhost:3461";
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let failures = 0;
+function check(name, ok, detail = "") { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; }
+async function soon(label, fn, timeout = 15000) {
+  const end = Date.now() + timeout; let last;
+  while (Date.now() < end) { try { const v = await fn(); if (v) { check(label, true); return v; } } catch (e) { last = e; } await sleep(200); }
+  check(label, false, `not within ${timeout}ms${last ? ` (${String(last.message ?? last).split("\n")[0]})` : ""}`); return null;
+}
+async function until(fn, timeout = 30000) {
+  const end = Date.now() + timeout;
+  while (Date.now() < end) { try { const v = await fn(); if (v) return v; } catch { /* retry */ } await sleep(200); }
+  return null;
+}
+async function api(path, { token, body } = {}) {
+  const headers = { "content-type": "application/json", ...PROTOCOL_HEADERS };
+  if (token) headers["x-session-token"] = token;
+  const r = await fetch(`${BASE}${path}`, { method: body ? "POST" : "GET", headers, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (r.status >= 400) throw new Error(`${path}: ${r.status} ${JSON.stringify(j)}`);
+  return j;
+}
+const seatOf = (page) => page.evaluate(() => ({ roomId: sessionStorage.getItem("cgn_roomId"), playerId: sessionStorage.getItem("cgn_playerId"), token: sessionStorage.getItem("cgn_token") }));
+const intent = (roomId, seat, gid, action, payload) =>
+  api(`/rooms/${roomId}/intents`, { token: seat.token, body: { intent: { kind: "intent", schemaVersion: 1, clientEventId: crypto.randomUUID(), roomId, gameInstanceId: gid, action, payload } } });
+const tvProj = (roomId) => api(`/rooms/${roomId}/projection?audience=tv`);
+const myGame = async (roomId, seat, gid) => (await api(`/rooms/${roomId}/projection?audience=player`, { token: seat.token })).myGames.find((g) => g.id === gid);
+const shot = (page, name) => page.screenshot({ path: `${process.env.OUT}/${name}.png` });
+const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
+const rightIndex = (st) => st.options.findIndex((o) => Number(o) === solveMath(st.prompt));
+
+async function hostRoom(page, name) {
+  await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+  await page.getByTestId("home-host").click();
+  await page.getByPlaceholder("e.g. Auntie June").fill(name);
+  await page.getByRole("button", { name: "Host a game", exact: true }).click();
+  const chip = page.getByRole("button", { name: /^Share room code / });
+  await chip.waitFor({ timeout: 15000 });
+  let code = "";
+  for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) { code = ((await chip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim(); if (!/^[A-Z0-9]{6}$/.test(code)) await sleep(300); }
+  return code;
+}
+async function join(page, name, code) {
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
+  await page.getByPlaceholder("e.g. Auntie June").fill(name);
+  await page.locator(".mz-code__input").fill(code);
+  await page.getByRole("button", { name: "Join the game" }).click();
+  await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
+}
+const phone = (width = 390) => browser.newContext({ viewport: { width, height: 844 }, reducedMotion: "reduce" }).then((c) => c.newPage());
+const tvPage = async (code) => { const p = await (await browser.newContext({ viewport: { width: 1920, height: 1080 }, reducedMotion: "reduce" })).newPage(); await p.goto(`${BASE}/tv?code=${code}`, { waitUntil: "domcontentloaded" }); await p.getByTestId("tv-show").waitFor({ timeout: 20000 }); return p; };
+
+
+const browser = await launchChromium();
+try {
+  const host = await phone();
+  const code = await hostRoom(host, "Keku");
+  const amina = await phone(), baraka = await phone(), wanjiru = await phone(320);
+  await join(amina, "Amina", code); await join(baraka, "Baraka", code); await join(wanjiru, "Wanjiru", code);
+  const THREE = !!process.env.THREE;
+  const juma = THREE ? await phone() : null, neema = THREE ? await phone() : null;
+  if (THREE) { await join(juma, "Juma", code); await join(neema, "Neema", code); }
+  const tv = await tvPage(code);
+  const [k, a, b, w] = [await seatOf(host), await seatOf(amina), await seatOf(baraka), await seatOf(wanjiru)];
+  const j = THREE ? await seatOf(juma) : null, n = THREE ? await seatOf(neema) : null;
+  const roomId = k.roomId;
+  const seatById = { [k.playerId]: k, [a.playerId]: a, [b.playerId]: b, [w.playerId]: w, ...(THREE ? { [j.playerId]: j, [n.playerId]: n } : {}) };
+  await api(`/rooms/${roomId}/teams`, { token: k.token, body: { action: "make", count: THREE ? 3 : 2 } });
+  for (const [s, team] of [[k, "team-coral"], [a, "team-coral"], [b, "team-sun"], [w, "team-sun"], ...(THREE ? [[j, "team-mint"], [n, "team-mint"]] : [])]) await api(`/rooms/${roomId}/teams`, { token: k.token, body: { action: "move", playerId: s.playerId, teamId: team } });
+  if (process.env.CUP) await api(`/rooms/${roomId}/cup`, { token: k.token, body: {} });
+  const { gameId: gid } = await api(`/rooms/${roomId}/games`, { token: k.token, body: { gameId: "relay", official: !!process.env.CUP } });
+  for (const s of Object.values(seatById)) await intent(roomId, s, gid, "briefing-ready", { ready: true });
+  await until(async () => (await tvProj(roomId)).games.find((g) => g.id === gid)?.status === "playing");
+  const legOf = async (teamId) => {
+    const l = (await tvProj(roomId)).games.find((g) => g.id === gid).state.lanes.find((x) => x.teamId === teamId);
+    const st = (await myGame(roomId, seatById[l.runnerId], gid)).state;
+    await intent(roomId, seatById[l.runnerId], gid, "relay-answer", { leg: st.myLeg, choice: rightIndex(st) });
+  };
+  if (THREE) {
+    // The review's case: Coral runs home (12 legs); Sun and Mint run 5 each, Sun's fifth first.
+    for (let i = 0; i < 12; i++) { await legOf("team-coral"); await sleep(60); }
+    for (let i = 0; i < 5; i++) { await legOf("team-sun"); await sleep(150); await legOf("team-mint"); await sleep(150); }
+  } else for (let i = 0; i < 5; i++) { await legOf("team-sun"); await sleep(150); await legOf("team-coral"); await sleep(150); }
+  const fin = await until(async () => { const g = (await tvProj(roomId)).games.find((x) => x.id === gid); return g?.status === "finished" ? g : null; }, 60000);
+  console.log(JSON.stringify({ legs: fin.state.lanes.map((l) => [l.teamId, l.legs, l.finished]), teamResults: fin.teamResults.map((r) => [r.name, r.rank, r.score]) }));
+  await amina.getByTestId("mz-rl-tiebreak").waitFor({ timeout: 15000 });
+  await sleep(800);
+  console.log("phone:", (await amina.getByTestId("mz-rl-final-lanes").innerText()).replace(/\n/g, " | "));
+  console.log("tiebreak:", await amina.getByTestId("mz-rl-tiebreak").innerText());
+  console.log("headline:", await amina.getByTestId("results-headline").innerText());
+  const resultsPage = THREE ? baraka : amina;
+  await resultsPage.getByTestId("mz-rl-tiebreak").waitFor({ timeout: 15000 });
+  await sleep(500);
+  console.log("hero:", (await resultsPage.locator("main").innerText()).split("\n").slice(0, 8).join(" | "));
+  await shot(resultsPage, THREE ? "relay-tiebreak-3teams-cup-results-390" : process.env.CUP ? "relay-tiebreak-cup-results-390" : "relay-tiebreak-results-390");
+  await sleep(1500);
+  console.log("tv:", await tv.getByTestId("tv-winner").innerText());
+  // Review 6890761957: the TV's final standings go by team place, each player with its team.
+  const tvRows = await tv.getByTestId("tv-last-standings").locator("li").evaluateAll((els) => els.map((e) => [e.getAttribute("data-rank"), e.querySelector(".mz-tvlist__name")?.textContent ?? ""]));
+  console.log("tv standings:", JSON.stringify(tvRows));
+  // Two runners on each team here (the review's room had 2, 1, 1): Coral's two 1st, Sun's two 2nd, Mint's two 3rd.
+  if (THREE) check("the TV's final standings: 1, 1 (Team Coral), 2, 2 (Team Sun), 3, 3 (Team Mint)", JSON.stringify(tvRows.map(([r]) => r)) === JSON.stringify(["1", "1", "2", "2", "3", "3"]) && ["Team Coral", "Team Coral", "Team Sun", "Team Sun", "Team Mint", "Team Mint"].every((t, i) => tvRows[i]?.[1].includes(t)), JSON.stringify(tvRows));
+  await shot(tv, THREE ? "relay-tiebreak-3teams-cup-tv-final-1920" : process.env.CUP ? "relay-tiebreak-cup-tv-final-1920" : "relay-tiebreak-tv-final-1920");
+  if (process.env.CUP) { const t = (await tvProj(roomId)).games.find((x) => x.id === gid); console.log("cupPlacement:", JSON.stringify(t.cupPlacement)); console.log("quip:", await amina.locator("main").innerText().then((x) => x.split("\n").slice(0, 6).join(" | "))); }
+} finally { await browser.close(); }
+console.log(failures === 0 ? "SHOT RUN: checks passed" : `SHOT RUN: ${failures} FAILED`);
+process.exit(failures === 0 ? 0 : 1);

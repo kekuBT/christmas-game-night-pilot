@@ -9,10 +9,18 @@
 //      reduced motion and Pause show it at once.
 //   D. Make it a Family Cup from the host's room menu: same code and players, the host's chip, every guest's
 //      notice, the TV follows without reloading (Cup card, Day 1 of 7) and still calls the games before Casual.
+//      Review 6890761957: so do the phones' "Last game" card (it said Practice), on the host and a guest, and after a
+//      reload.
+//   D2. Back to a casual game night, one more casual game, then a Family Cup again while a guest is still on that
+//      game's results (review 6890761957): the guest's results stay the casual ones (they turned into the old screen's
+//      "Practice game"), also after a reload.
 //   E. Two official games: the TV's final shows the Cup standings "after this game", with ▲/▼ that match the
 //      server's standings before and after (the TV's own memory). A TV opened afterwards shows no arrows.
+//      Review 6890761957: the host's "Last game" card says Official.
 //   F. The host ends Day 1: the TV shows "Day 1 complete" and the server's own Day 1 winner(s); "Cup standings"
 //      shows the Cup podium on Day 2. Nothing private reaches the TV (no seat token in its page).
+//   G. Review 6890761957: a practice game in the Cup: the host's "Last game" card says Practice, and still does after
+//      a reload.
 // Usage: node scripts/check-one-path.mjs <baseUrl>   (the gate passes its server)
 import QRCode from "qrcode";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
@@ -243,6 +251,15 @@ try {
   const recent = await tv.getByTestId("tv-recent").innerText();
   check("D TV: the games before the Cup are still called Casual, never Practice", (recent.match(/Casual/g) ?? []).length === 2 && !/Practice/.test(recent), recent);
   await shot(tv, "after-tv-lobby-cup-1920");
+  // Review 6890761957: the phones' "Last game" card keeps the game's own mode too (it read "Practice" after the change).
+  for (const [who, page] of [["host", host], ["guest", guest]]) {
+    await soon(`D ${who}'s "Last game" card still says Casual, never Practice`, async () => { const k = await page.getByTestId("last-game-card").locator(".mz-kicker").innerText(); return /Casual/i.test(k) && !/Practice/i.test(k); });
+    console.log(`  (${who}'s card: ${(await page.getByTestId("last-game-card").locator(".mz-kicker").innerText().catch(() => "?")).replace(/\s+/g, " ")})`);
+  }
+  await guest.reload({ waitUntil: "domcontentloaded" });
+  await soon("D …and after a reload (the server keeps which games were casual)", async () => { const k = await guest.getByTestId("last-game-card").locator(".mz-kicker").innerText(); return /Casual/i.test(k) && !/Practice/i.test(k); }, 20000);
+  await guest.getByTestId("last-game-card").scrollIntoViewIfNeeded();
+  await guest.screenshot({ path: screenshotPath("docs/stage12/stage1215r-screenshots/lobby-last-game-casual-after-cup-390.png") });
 
   // ---- D2. Back to a casual game night, then a Family Cup again (Stage 12.2, D-S122-01) ----
   await openRoomMenu(host);
@@ -261,12 +278,25 @@ try {
   await shot122(guest, "guest-undone-notice-390");
   await soon("D2 TV follows: the medal table is back and the Cup card is gone", async () => (await tv.getByTestId("tv-medals").count()) === 1 && (await tv.getByTestId("tv-cup").count()) === 0);
   check("D2 no nudge in a room that has been a Cup", (await host.getByTestId("cup-nudge").count()) === 0);
+  // Review 6890761957: a guest still on a casual game's results when the room becomes a Cup. Those results stay the
+  // casual ones (before, they turned into the old screen's "Practice game — does not count toward the Family Cup.").
+  const gCasual3 = await playMath(roomId, seats, [4, 6, 2], false);
+  const casualResultsOk = async () => (await guest.getByTestId("casual-results").getAttribute("data-game-id")) === gCasual3 && (await guest.getByTestId("show-results").count()) === 0 && !/Practice/i.test(await guest.getByTestId("casual-results").innerText()) && /Casual/i.test(await guest.getByTestId("casual-results").innerText());
+  await soon("D2 guest: the casual game's casual results", casualResultsOk, 20000);
+  { const back = host.getByRole("button", { name: "Back to lobby" }); await back.first().waitFor({ timeout: 20000 }).catch(() => {}); if (await back.count()) await back.first().click(); }
   await openRoomMenu(host);
   await host.getByTestId("menu-make-cup").click();
   await host.getByTestId("make-cup-sheet").waitFor({ timeout: 15000 });
   await host.getByTestId("make-cup-confirm").click();
   await host.getByTestId("make-cup-sheet").waitFor({ state: "detached", timeout: 15000 });
   await soon("D2 …and a Family Cup again from the room menu", async () => (await host.locator(".mz-cupchip").count()) > 0 && (await tvProj(roomId)).roomKind === "cup");
+  await sleep(1500);
+  await soon("D2 guest, still on that game's results after the change: still the casual results, never 'Practice'", casualResultsOk, 20000);
+  console.log(`  (guest's results: ${(await guest.getByTestId("casual-results").innerText().catch(() => "?")).replace(/\s+/g, " ").slice(0, 160)})`);
+  await guest.reload({ waitUntil: "domcontentloaded" });
+  await soon("D2 …and after a reload", casualResultsOk, 20000);
+  check("D2 server: that game is one of the casual ones", ((await tvProj(roomId)).casualGameIds ?? []).includes(gCasual3));
+  await guest.getByTestId("show-back-to-lobby").click();
 
   // ---- E. Official games: Cup standings with movement ----
   await playMath(roomId, seats, [10, 5, 1], true);
@@ -278,6 +308,9 @@ try {
   const refused = await fetch(`${BASE}/rooms/${roomId}/casual`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": hostSeat.token, ...PROTOCOL_HEADERS }, body: "{}" });
   check("E once an official game has finished, going back is refused (409 OFFICIAL_GAME_PLAYED)", refused.status === 409 && (await refused.json()).code === "OFFICIAL_GAME_PLAYED");
   for (const p of [host]) { const back = p.getByRole("button", { name: "Back to lobby" }); await back.first().waitFor({ timeout: 15000 }).catch(() => {}); if (await back.count()) await back.first().click(); }
+  // Review 6890761957: the Cup's own official game is labelled Official (the casual ones before it stay Casual).
+  await soon(`E host's "Last game" card says Official after an official game`, async () => { const k = await host.getByTestId("last-game-card").locator(".mz-kicker").innerText(); return /Official/i.test(k) && !/Casual|Practice/i.test(k); });
+  console.log(`  (host's card: ${(await host.getByTestId("last-game-card").locator(".mz-kicker").innerText().catch(() => "?")).replace(/\s+/g, " ")})`);
   await openRoomMenu(host);
   check("E …and the room menu no longer offers it", (await host.getByTestId("menu-undo-cup").count()) === 0);
   await closeRoomMenu(host);
@@ -338,6 +371,18 @@ try {
     await tv.setViewportSize({ width: w, height: w === 768 ? 1024 : 720 });
     check(`F TV at ${w}px: no sideways scrolling`, await tv.evaluate(() => document.scrollingElement.scrollWidth <= innerWidth + 1));
   }
+
+  // ---- G. Review 6890761957: a practice game in the Cup is labelled Practice, and keeps it after a reload ----
+  const gPractice = await playMath(roomId, seats, [3, 2, 1], false);
+  const isPractice = async () => { const k = await host.getByTestId("last-game-card").locator(".mz-kicker").innerText(); return /Practice/i.test(k) && !/Casual|Official/i.test(k); };
+  for (const p of [host]) { const back = p.getByRole("button", { name: "Back to lobby" }); await back.first().waitFor({ timeout: 20000 }).catch(() => {}); if (await back.count()) await back.first().click(); }
+  await soon(`G host's "Last game" card says Practice after a practice game in the Cup`, isPractice, 20000);
+  console.log(`  (host's card: ${(await host.getByTestId("last-game-card").locator(".mz-kicker").innerText().catch(() => "?")).replace(/\s+/g, " ")})`);
+  await host.reload({ waitUntil: "domcontentloaded" });
+  await soon("G …and after a reload", isPractice, 20000);
+  const projG = await tvProj(roomId);
+  const g5 = projG.games.find((g) => g.id === gPractice);
+  check("G the server recorded it as a practice game, not one of the casual ones", g5?.status === "finished" && g5.official === false && !(projG.casualGameIds ?? []).includes(gPractice), JSON.stringify({ id: gPractice, status: g5?.status, official: g5?.official, casualGameIds: projG.casualGameIds }));
 } catch (e) {
   check("driver ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
 } finally {

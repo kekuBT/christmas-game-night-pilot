@@ -1,0 +1,18 @@
+PASS G casual: the host's Make teams opens the sheet
+PASS G casual: 2 teams made from the sheet
+PASS G made a Family Cup from the room menu, its teams kept
+FAIL G in the Cup, the host's Edit teams opens the sheet with the night's teams — not within 10000ms
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByTestId('teams-move-player-2-team-sun')[22m
+
+    at /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1215r/scripts/check-cup-team-games-g-only.tmp.mjs:108:66 {
+  log: [ "  - waiting for getByTestId('teams-move-player-2-team-sun')" ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.4

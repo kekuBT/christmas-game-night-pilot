@@ -1,0 +1,253 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1215
+
+ ❯ tests/stage1215r-relay.test.ts (12 tests | 10 failed) 73ms
+   × R1: a runner's chances are their own turns (D-S1215R-01) > pure: a fully active team of 3 against 2 — every runner answered every turn, so every runner took part fully 19ms
+     → expected { done: 4, of: 12, actions: 4 } to deeply equal { done: 4, of: 4, actions: 4 }
+   × R1: a runner's chances are their own turns (D-S1215R-01) > room: an Official Relay in a Cup with teams of 2 and 3, everyone active: every runner qualifies, before and after a restore 16ms
+     → expected [ 6, 6 ] to deeply equal [ 12, 12 ]
+   × R1: a runner's chances are their own turns (D-S1215R-01) > room: an Official Relay in a Cup with teams of 4 and 5, everyone active: every runner qualifies, before and after a restore 5ms
+     → expected [ 3, 3 ] to deeply equal [ 12, 12 ]
+   × R1: a runner's chances are their own turns (D-S1215R-01) > room: an Official Relay in a Cup with teams of 3 and 4, everyone active: every runner qualifies, before and after a restore 4ms
+     → expected [ 4, 4 ] to deeply equal [ 12, 12 ]
+   × R1: a runner's chances are their own turns (D-S1215R-01) > room: wrong answers are actions; an idle runner's turns run out and never count for them, whatever the team does 9ms
+     → expected { done: 6, of: 12, actions: 6 } to deeply equal { done: 6, of: 6, actions: 12 }
+   × R1: a runner's chances are their own turns (D-S1215R-01) > room: a race cut off by the time limit — a turn still open counts only if its runner answered in it 3ms
+     → expected { done: 2, of: 12, actions: 2 } to deeply equal { done: 2, of: 2, actions: 2 }
+   × R4: a freeze ends on the TV when it ends on the phone (D-S1215R-04) > pure: wrong at +1001 ms, frozen until +4001; at +4002 neither the lanes nor the runner's phone say frozen 2ms
+     → expected true to be false // Object.is equality
+   × R4: a freeze ends on the TV when it ends on the phone (D-S1215R-04) > room: the TV's lane stops saying frozen at the freeze's end with no other answer, and a reconnecting phone agrees 4ms
+     → expected 1800000004001 to be undefined
+   × R5: lanes still out at the end are placed by their last leg's time (D-S1215R-03) > pure: equal legs rank by the earlier last leg; the same instant or no legs share a place; finished races unchanged 2ms
+     → expected { 'team-coral': 1, 'team-sun': 1 } to deeply equal { 'team-sun': 1, 'team-coral': 2 }
+   × R5: lanes still out at the end are placed by their last leg's time (D-S1215R-03) > room: equal legs at the time limit — Sun got there first: Sun ranks first everywhere, points stay equal, and a restore keeps it 2ms
+     → expected undefined to deeply equal { 'team-sun': 1, 'team-coral': 2 }
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R1: a runner's chances are their own turns (D-S1215R-01) > pure: a fully active team of 3 against 2 — every runner answered every turn, so every runner took part fully
+AssertionError: expected { done: 4, of: 12, actions: 4 } to deeply equal { done: 4, of: 4, actions: 4 }
+
+- Expected
++ Received
+
+  Object {
+    "actions": 4,
+    "done": 4,
+-   "of": 4,
++   "of": 12,
+  }
+
+ ❯ tests/stage1215r-relay.test.ts:100:54
+     98|     expect(m.finished(s, { now, players, active: players, scale: 1 }))…
+     99|     const part = m.participation(s, players).participation;
+    100|     for (const p of ["k", "a", "z"]) expect(part[p]).toEqual({ done: 4…
+       |                                                      ^
+    101|     for (const p of ["b", "w"]) expect(part[p]).toEqual({ done: 6, of:…
+    102|     // Before the repair: { done: 4, of: 12 } for each of Coral's thre…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R1: a runner's chances are their own turns (D-S1215R-01) > room: an Official Relay in a Cup with teams of 2 and 3, everyone active: every runner qualifies, before and after a restore
+AssertionError: expected [ 6, 6 ] to deeply equal [ 12, 12 ]
+
+- Expected
++ Received
+
+  Array [
+-   12,
+-   12,
++   6,
++   6,
+  ]
+
+ ❯ tests/stage1215r-relay.test.ts:123:39
+    121|       const rec = participation(r)[p]!;
+    122|       expect(rec.of).toBeGreaterThanOrEqual(2);
+    123|       expect([rec.done, rec.actions]).toEqual([rec.of, rec.of]);
+       |                                       ^
+    124|     }
+    125|     expect(qualified(r.engine)).toEqual([...r.ids].sort());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R1: a runner's chances are their own turns (D-S1215R-01) > room: an Official Relay in a Cup with teams of 4 and 5, everyone active: every runner qualifies, before and after a restore
+AssertionError: expected [ 3, 3 ] to deeply equal [ 12, 12 ]
+
+- Expected
++ Received
+
+  Array [
+-   12,
+-   12,
++   3,
++   3,
+  ]
+
+ ❯ tests/stage1215r-relay.test.ts:123:39
+    121|       const rec = participation(r)[p]!;
+    122|       expect(rec.of).toBeGreaterThanOrEqual(2);
+    123|       expect([rec.done, rec.actions]).toEqual([rec.of, rec.of]);
+       |                                       ^
+    124|     }
+    125|     expect(qualified(r.engine)).toEqual([...r.ids].sort());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R1: a runner's chances are their own turns (D-S1215R-01) > room: an Official Relay in a Cup with teams of 3 and 4, everyone active: every runner qualifies, before and after a restore
+AssertionError: expected [ 4, 4 ] to deeply equal [ 12, 12 ]
+
+- Expected
++ Received
+
+  Array [
+-   12,
+-   12,
++   4,
++   4,
+  ]
+
+ ❯ tests/stage1215r-relay.test.ts:123:39
+    121|       const rec = participation(r)[p]!;
+    122|       expect(rec.of).toBeGreaterThanOrEqual(2);
+    123|       expect([rec.done, rec.actions]).toEqual([rec.of, rec.of]);
+       |                                       ^
+    124|     }
+    125|     expect(qualified(r.engine)).toEqual([...r.ids].sort());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R1: a runner's chances are their own turns (D-S1215R-01) > room: wrong answers are actions; an idle runner's turns run out and never count for them, whatever the team does
+AssertionError: expected { done: 6, of: 12, actions: 6 } to deeply equal { done: 6, of: 6, actions: 12 }
+
+- Expected
++ Received
+
+  Object {
+-   "actions": 12,
++   "actions": 6,
+    "done": 6,
+-   "of": 6,
++   "of": 12,
+  }
+
+ ❯ tests/stage1215r-relay.test.ts:149:21
+    147|     expect(r.game.status).toBe("finished");
+    148|     const part = participation(r);
+    149|     expect(part[k]).toEqual({ done: 6, of: 6, actions: 12 });
+       |                     ^
+    150|     expect(part[a]).toEqual({ done: 6, of: 6, actions: 6 });
+    151|     expect(part[z]).toEqual({ done: 0, of: zTurns, actions: 0 });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R1: a runner's chances are their own turns (D-S1215R-01) > room: a race cut off by the time limit — a turn still open counts only if its runner answered in it
+AssertionError: expected { done: 2, of: 12, actions: 2 } to deeply equal { done: 2, of: 2, actions: 2 }
+
+- Expected
++ Received
+
+  Object {
+    "actions": 2,
+    "done": 2,
+-   "of": 2,
++   "of": 12,
+  }
+
+ ❯ tests/stage1215r-relay.test.ts:168:21
+    166|     expect(r.game.status).toBe("finished");
+    167|     const part = participation(r);
+    168|     expect(part[k]).toEqual({ done: 2, of: 2, actions: 2 });
+       |                     ^
+    169|     expect(part[a]).toEqual({ done: 2, of: 2, actions: 2 });
+    170|     expect(part[z]).toEqual({ done: 2, of: 2, actions: 2 }); // one le…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R4: a freeze ends on the TV when it ends on the phone (D-S1215R-04) > pure: wrong at +1001 ms, frozen until +4001; at +4002 neither the lanes nor the runner's phone say frozen
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/stage1215r-relay.test.ts:194:43
+    192|     expect(laneView(T0 + 4000)["frozen"]).toBe(true);
+    193|     expect(m.playerView(s, k, ctx(T0 + 4000))["frozenUntil"]).toBe(T0 …
+    194|     expect(laneView(T0 + 4002)["frozen"]).toBe(false);
+       |                                           ^
+    195|     expect(m.playerView(s, k, ctx(T0 + 4002))["frozenUntil"]).toBeUnde…
+    196|     expect(((m.playerView(s, k, ctx(T0 + 4002))["lanes"] as Json[]).fi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R4: a freeze ends on the TV when it ends on the phone (D-S1215R-04) > room: the TV's lane stops saying frozen at the freeze's end with no other answer, and a reconnecting phone agrees
+AssertionError: expected 1800000004001 to be undefined
+
+- Expected: 
+undefined
+
++ Received: 
+1800000004001
+
+ ❯ tests/stage1215r-relay.test.ts:212:43
+    210|     expect(tvLane()["frozen"]).toBe(true);
+    211|     r.advance(RELAY_FREEZE_MS + 1);
+    212|     expect(r.laneOf(r.coral).frozenUntil).toBeUndefined();
+       |                                           ^
+    213|     expect(tvLane()["frozen"]).toBe(false);
+    214|     const phone = (r.engine.project(k)["games"] as Json[]).find((x) =>…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R5: lanes still out at the end are placed by their last leg's time (D-S1215R-03) > pure: equal legs rank by the earlier last leg; the same instant or no legs share a place; finished races unchanged
+AssertionError: expected { 'team-coral': 1, 'team-sun': 1 } to deeply equal { 'team-sun': 1, 'team-coral': 2 }
+
+- Expected
++ Received
+
+  Object {
+-   "team-coral": 2,
++   "team-coral": 1,
+    "team-sun": 1,
+  }
+
+ ❯ tests/stage1215r-relay.test.ts:228:32
+    226|       expect(one.answer(one.runner(one.lane("team-coral")), 0, (now +=…
+    227|     }
+    228|     expect(relayPlaces(one.s)).toEqual({ "team-sun": 1, "team-coral": …
+       |                                ^
+    229|     expect(m.teamPlaces!(one.s)).toEqual({ "team-sun": 1, "team-coral"…
+    230|     // The same instant: a shared place.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ FAIL  tests/stage1215r-relay.test.ts > R5: lanes still out at the end are placed by their last leg's time (D-S1215R-03) > room: equal legs at the time limit — Sun got there first: Sun ranks first everywhere, points stay equal, and a restore keeps it
+AssertionError: expected undefined to deeply equal { 'team-sun': 1, 'team-coral': 2 }
+
+- Expected: 
+Object {
+  "team-coral": 2,
+  "team-sun": 1,
+}
+
++ Received: 
+undefined
+
+ ❯ tests/stage1215r-relay.test.ts:249:40
+    247|     r.timeUp();
+    248|     expect(r.game.status).toBe("finished");
+    249|     expect(r.game.outcome!.teamPlaces).toEqual({ [r.sun]: 1, [r.coral]…
+       |                                        ^
+    250|     const check = (engine: RoomEngine) => {
+    251|       const g = tvGame(engine, r.g.id);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
+
+ Test Files  1 failed (1)
+      Tests  10 failed | 2 passed (12)
+   Start at  03:55:43
+   Duration  1.38s (transform 725ms, setup 0ms, collect 951ms, tests 73ms, environment 0ms, prepare 60ms)
+

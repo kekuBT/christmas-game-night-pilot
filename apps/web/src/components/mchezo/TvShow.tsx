@@ -30,6 +30,7 @@ import type { Ceremony, PublicGame, RegistryGame } from "../../types.js";
 
 /** One public sentence per game: how it works, never what the answers are. */
 import { TV_HINT } from "../../ui/mchezo/lib/tvHints.js";
+import { teamRankedStandings } from "../../ui/mchezo/lib/teamLines.js";
 import { chime, chimesPlayed, rememberSound, soundPreference } from "../../ui/mchezo/lib/tvSound.js";
 import { titleFor } from "../../ui/mchezo/lib/names.js";
 export { TV_HINT };
@@ -291,7 +292,8 @@ export function TvLive({ game, title, nameOf, casual }: { game: PublicGame; titl
 
 /* ------------------------------------------------------------- final */
 
-function TvFinal({ game, title, feed, nameOf, titleOf, cupBefore, paused }: { game: PublicGame; title: string; feed: TvFeed; nameOf: (id: string) => string; titleOf: (id: string) => string; cupBefore?: CupStanding[]; paused: boolean }) {
+/** A finished game's final screen on the TV. Exported for its rendered regression test (TvFinal.test.tsx). */
+export function TvFinal({ game, title, feed, nameOf, titleOf, cupBefore, paused }: { game: PublicGame; title: string; feed: TvFeed; nameOf: (id: string) => string; titleOf: (id: string) => string; cupBefore?: CupStanding[]; paused: boolean }) {
   // Stage 9.3: a cooperative game's final view is its one team result (no winner, no standings).
   if (game.outcome?.team) return <TvTeamFinal game={game} title={title} feed={feed} titleOf={titleOf} />;
   return <TvCompetitiveFinal game={game} title={title} feed={feed} nameOf={nameOf} titleOf={titleOf} cupBefore={cupBefore} paused={paused} />;
@@ -318,7 +320,9 @@ function TvTeamFinal({ game, title, feed, titleOf }: { game: PublicGame; title: 
 function TvCompetitiveFinal({ game, title, feed, nameOf, titleOf, cupBefore, paused }: { game: PublicGame; title: string; feed: TvFeed; nameOf: (id: string) => string; titleOf: (id: string) => string; cupBefore?: CupStanding[]; paused: boolean }) {
   const mz = useMemo(() => toMzPlayers(feed.players), [feed.players]);
   const scores = useMemo(() => Object.entries(game.rawScores ?? {}).map(([playerId, score]) => ({ playerId, score })), [game.rawScores]);
-  const ranked = rankStandings(scores, mz);
+  // Review 6890761957: a game built for teams lists its players by their team's place (the server's team results), not
+  // by points (Relay ranks equal points by the last leg's time); every other game ranks by points, as before.
+  const ranked = TEAM_NATIVE_GAMES.has(game.gameId) && game.teamResults ? teamRankedStandings(scores, mz, game.teamResults) : rankStandings(scores, mz);
   const next = feed.upNext;
   const flow = lineupLine(feed, titleOf);
   const podium = podiumOf(game);
@@ -340,8 +344,8 @@ function TvCompetitiveFinal({ game, title, feed, nameOf, titleOf, cupBefore, pau
             <ol className={`mz-tvlist${ranked.length > 6 ? " mz-tvlist--dense" : ""}`}>
               {ranked.map((r) => (
                 <li key={r.playerId} data-rank={r.rank}>
-                  <span className="mz-tvlist__rank">{r.rank}</span>
-                  <span className="mz-tvlist__name">{r.player.name}</span>
+                  <span className="mz-tvlist__rank">{r.rank || "–"}</span>
+                  <span className="mz-tvlist__name">{r.player.name}{(r as { teamName?: string }).teamName ? <span className="mz-tvlist__team"> · {(r as { teamName?: string }).teamName}</span> : null}</span>
                   <span className="mz-tvlist__val">{r.score.toLocaleString("en-US")}</span>
                 </li>
               ))}

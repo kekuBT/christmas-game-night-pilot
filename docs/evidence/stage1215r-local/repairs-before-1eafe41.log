@@ -1,0 +1,146 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1215
+
+ ❯ tests/stage1215r-repairs.test.ts (9 tests | 6 failed) 55ms
+   × R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > the review's case: Sun all say “Rather not say”, Coral answers A/B/B: nobody can guess, nobody scores (it was Sun 30, Coral 0) 13ms
+     → expected 'guess' to be 'reveal' // Object.is equality
+   × R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > three teams, Sun opts out: Coral and Mint guess each other and only each other; Sun can't guess or lock, and isn't waited for 5ms
+     → expected [ [ 'team-coral', undefined ], …(2) ] to deeply equal [ [ 'team-coral', true ], …(2) ]
+   × R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > several teams opt out, or all do: fewer than two teams in the guessing, so straight to the totals 1ms
+     → expected 'guess' to be 'reveal' // Object.is equality
+   × R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > partial answers keep a team in: one of Sun's two answered, so Sun guesses and is guessed (out of 1) 2ms
+     → expected undefined to deeply equal []
+   × R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > an Official game in a Cup, and its replay: the same rule each time; opting out never costs a player their Cup day 8ms
+     → expected true to be false // Object.is equality
+   × R3: a skipped Family Question is never described again > the last question skipped: the finished views keep the skip marker and earlier rounds, and nothing of it — after a reconnect and a restore too 10ms
+     → tv's game view: expected '{"id":"game-1","gameId":"family-quest…' not to contain 'CANARY-0'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage1215r-repairs.test.ts > R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > the review's case: Sun all say “Rather not say”, Coral answers A/B/B: nobody can guess, nobody scores (it was Sun 30, Coral 0)
+AssertionError: expected 'guess' to be 'reveal' // Object.is equality
+
+Expected: "reveal"
+Received: "guess"
+
+ ❯ tests/stage1215r-repairs.test.ts:37:23
+     35|     const g = rivals({ c1: CORAL, c2: CORAL, c3: CORAL, s1: SUN, s2: S…
+     36|     g.answer({ c1: "a", c2: "b", c3: "b", s1: "pass", s2: "pass" });
+     37|     expect(g.s.phase).toBe("reveal");
+       |                       ^
+     38|     expect(g.act("s1", "rivals-guess", { target: CORAL, value: 1 })).t…
+     39|     expect(g.points(0)).toEqual({ [CORAL]: 0, [SUN]: 0 });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/stage1215r-repairs.test.ts > R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > three teams, Sun opts out: Coral and Mint guess each other and only each other; Sun can't guess or lock, and isn't waited for
+AssertionError: expected [ [ 'team-coral', undefined ], …(2) ] to deeply equal [ [ 'team-coral', true ], …(2) ]
+
+- Expected
++ Received
+
+  Array [
+    Array [
+      "team-coral",
+-     true,
++     undefined,
+    ],
+    Array [
+      "team-sun",
+-     false,
++     undefined,
+    ],
+    Array [
+      "team-mint",
+-     true,
++     undefined,
+    ],
+  ]
+
+ ❯ tests/stage1215r-repairs.test.ts:48:107
+     46|     g.answer({ c1: "a", c2: "a", c3: "b", s1: "pass", s2: "pass", m1: …
+     47|     expect(g.s.phase).toBe("guess");
+     48|     expect((m.publicView(g.s, g.ctx())["teamStatus"] as Json[]).map((x…
+       |                                                                                                           ^
+     49|     expect(g.act("s1", "rivals-guess", { target: CORAL, value: 2 })).t…
+     50|     expect(g.act("s1", "rivals-lock")).toMatchObject({ ok: false, reas…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/stage1215r-repairs.test.ts > R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > several teams opt out, or all do: fewer than two teams in the guessing, so straight to the totals
+AssertionError: expected 'guess' to be 'reveal' // Object.is equality
+
+Expected: "reveal"
+Received: "guess"
+
+ ❯ tests/stage1215r-repairs.test.ts:66:23
+     64|     const g = rivals({ c1: CORAL, c2: CORAL, s1: SUN, s2: SUN, m1: MIN…
+     65|     g.answer({ c1: "a", c2: "b", s1: "pass", s2: "pass", m1: "pass", m…
+     66|     expect(g.s.phase).toBe("reveal");
+       |                       ^
+     67|     expect(g.s.results[0]!.sitOut).toEqual([SUN, MINT]);
+     68|     expect(Object.values(g.points(0))).toEqual([0, 0, 0]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/stage1215r-repairs.test.ts > R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > partial answers keep a team in: one of Sun's two answered, so Sun guesses and is guessed (out of 1)
+AssertionError: expected undefined to deeply equal []
+
+- Expected: 
+Array []
+
++ Received: 
+undefined
+
+ ❯ tests/stage1215r-repairs.test.ts:83:36
+     81|     g.next();
+     82|     expect(g.points(0)).toEqual({ [CORAL]: 30, [SUN]: 30 });
+     83|     expect(g.s.results[0]!.sitOut).toEqual([]);
+       |                                    ^
+     84|   });
+     85| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/stage1215r-repairs.test.ts > R2: Know Your Rivals' guessing is mutual (D-S1215R-02) > an Official game in a Cup, and its replay: the same rule each time; opting out never costs a player their Cup day
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ Object.play tests/stage1215r-repairs.test.ts:140:98
+    138|         for (const [i, c] of [[0, "a"], [1, "b"], [2, "pass"], [3, "pa…
+    139|         expect(st.phase).toBe("guess");
+    140|         expect(send(ids[2]!, g.id, "rivals-guess", { round, target: co…
+       |                                                                                                  ^
+    141|         expect(send(ids[0]!, g.id, "rivals-guess", { round, target: mi…
+    142|         expect(send(ids[4]!, g.id, "rivals-guess", { round, target: co…
+ ❯ tests/stage1215r-repairs.test.ts:157:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  tests/stage1215r-repairs.test.ts > R3: a skipped Family Question is never described again > the last question skipped: the finished views keep the skip marker and earlier rounds, and nothing of it — after a reconnect and a restore too
+AssertionError: tv's game view: expected '{"id":"game-1","gameId":"family-quest…' not to contain 'CANARY-0'
+
+Expected: "CANARY-0"
+Received: "{"id":"game-1","gameId":"family-questions","official":false,"status":"finished","season":"everyday","timedOut":false,"day":1,"deadlineAt":1800000600000,"lifecycle":{"model":"phased","officialEligible":false,"practiceOnlyReason":"Family Questions is practice-only: the family writes its own questions, so it is just for fun in casual rooms.","unit":"questions"},"outcome":{"reason":"completed","endedAt":1800000016002,"countsOfficially":false,"participation":{"player-1":{"done":2,"of":2,"actions":2},"player-2":{"done":1,"of":1,"actions":1},"player-3":{"done":1,"of":1,"actions":1}},"completedUnits":2,"totalUnits":3},"countsOfficially":false,"players":["player-1","player-2","player-3"],"submittedCount":3,"totalPlayers":3,"state":{"round":2,"roundCount":3,"phase":"finished","kind":"choice","prompt":"Where was Bibi born CANARY-0?","options":["Nairobi CANARY-0","Mombasa CANARY-0","Kisumu CANARY-0"],"done":0,"total":2,"skippedRounds":1,"result":{"skipped":true},"rounds":[{"prompt":"Where was Bibi born CANARY-1?","kind":"choice","options":["Nairobi CANARY-1","Mombasa CANARY-1","Kisumu CANARY-1"],"correctIndex":1,"counts":[0,2,0],"right":["player-1","player-3"],"askedBy":"player-2","askedByName":"Amina","greatQuestion":false},{"prompt":"Where was Bibi born CANARY-2?","kind":"choice","options":["Mombasa CANARY-2","Kisumu CANARY-2","Nairobi CANARY-2"],"correctIndex":0,"counts":[2,0,0],"right":["player-1","player-2"],"askedBy":"player-3","askedByName":"Baraka","greatQuestion":false},{"skipped":true}]},"rawScores":{"player-1":200,"player-2":100,"player-3":100},"timingVersion":2,"playStartedAt":1800000000000}"
+
+ ❯ Object.absent tests/stage1215r-repairs.test.ts:205:92
+    203|     const canary = canaryOf(r);
+    204|     for (const [who, proj] of audiences(e)) {
+    205|       for (const v of gameViews(proj)) expect(JSON.stringify(v), `${wh…
+       |                                                                                            ^
+    206|       // The writer's own question list ("mine") is theirs to see; eve…
+    207|       if (who !== authorOf(r)) expect(JSON.stringify(proj), `${who}'s …
+ ❯ tests/stage1215r-repairs.test.ts:221:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 3 passed (9)
+   Start at  04:03:15
+   Duration  1.18s (transform 601ms, setup 0ms, collect 795ms, tests 55ms, environment 0ms, prepare 69ms)
+

@@ -1,0 +1,865 @@
+{
+  "runId": "20261115-091040-5698e029-4911",
+  "level": "targeted",
+  "startedAt": "2026-11-15T09:10:40.833Z",
+  "finishedAt": "2026-11-15T09:16:38.923Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt6",
+  "git": {
+    "head": "5698e0293884f0411b87fbc7237566ff31d3314e",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "9206563ef4ca03d46dffb36fd10ec2f7ac7ed92c134d362de1a8512f7d81649d",
+    "files": 612
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15547
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.2 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261115-091040-5698e029-4911/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.8,
+      "log": "./logs/01-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 6,
+      "startOffsetSec": 0.1,
+      "endOffsetSec": 5.9,
+      "cpuSec": 9.9,
+      "peakRssMB": 494,
+      "machine": {
+        "memAvailMinMB": 15012,
+        "cpuSaturatedSec": 0,
+        "samples": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.8,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 5.9,
+      "endOffsetSec": 6.7,
+      "cpuSec": 0.2,
+      "peakRssMB": 70,
+      "machine": {
+        "memAvailMinMB": 15295,
+        "cpuSaturatedSec": 0,
+        "samples": 2
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-tug-of-war",
+      "kind": "browser",
+      "command": "node scripts/check-tug-of-war.mjs http://localhost:42827",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 146.3,
+      "log": "./logs/03-check-tug-of-war.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 136,
+      "startOffsetSec": 8,
+      "endOffsetSec": 154.3,
+      "cpuSec": 7.6,
+      "peakRssMB": 302,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13658,
+        "cpuSaturatedSec": 0,
+        "samples": 149
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 8,
+        "pages": 8,
+        "peakOpenPages": 8
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-cup-team-games",
+      "kind": "browser",
+      "command": "node scripts/check-cup-team-games.mjs http://localhost:35911",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 150.2,
+      "log": "./logs/04-check-cup-team-games.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 136,
+      "startOffsetSec": 8.1,
+      "endOffsetSec": 158.3,
+      "cpuSec": 7.6,
+      "peakRssMB": 296,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13658,
+        "cpuSaturatedSec": 0,
+        "samples": 154
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 9,
+        "pages": 9,
+        "peakOpenPages": 9
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-lifecycle",
+      "kind": "browser",
+      "command": "node scripts/check-lifecycle.mjs http://localhost:43015",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 130.6,
+      "log": "./logs/05-check-lifecycle.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 122,
+      "startOffsetSec": 8.1,
+      "endOffsetSec": 138.8,
+      "cpuSec": 7.2,
+      "peakRssMB": 361,
+      "roomsOnGateServer": 0,
+      "diag": [
+        "PASS H. diagnosis while waiting: server playing, deadline ahead, type waiting-on-players — DIAG player=Ada game=trivia(game-1) server=playing phase=- deadlineIn=18s phaseIn=- submitted=2/3 outcome=- | screen=\"ALL YOUR ANSWERS ARE IN A You B Reconnecting C Cal 1/3 have finished Everyone go\" clock=\"En",
+        "PASS H. diagnosis for an offline phone says the server is unreachable — DIAG player=Bea server=unavailable(page.evaluate: TypeError: Failed to fetch) | screen=\"Question 3 of 10\" clock=\"\" | type=server-unreachable",
+        "PASS H. diagnosis after the end: server finished with outcome deadline, Cal 0/10 — DIAG player=Cal game=trivia(game-1) server=finished phase=- deadlineIn=-1s phaseIn=- submitted=2/3 outcome=deadline mine=0/10 | screen=\"Question 1 of 10\" clock=\"\" shownOutcome=deadline | type=finished-and-shown"
+      ],
+      "machine": {
+        "memAvailMinMB": 13658,
+        "cpuSaturatedSec": 0,
+        "samples": 132
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 4,
+        "pages": 4,
+        "peakOpenPages": 4
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-split-clues",
+      "kind": "browser",
+      "command": "node scripts/check-split-clues.mjs http://localhost:43015",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 109.8,
+      "log": "./logs/06-check-split-clues.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 104,
+      "startOffsetSec": 138.8,
+      "endOffsetSec": 248.5,
+      "cpuSec": 7.4,
+      "peakRssMB": 301,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13181,
+        "cpuSaturatedSec": 0,
+        "samples": 115
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 8,
+        "pages": 8,
+        "peakOpenPages": 8
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-territory",
+      "kind": "browser",
+      "command": "node scripts/check-territory.mjs http://localhost:42827",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 90.2,
+      "log": "./logs/07-check-territory.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 84,
+      "startOffsetSec": 154.4,
+      "endOffsetSec": 244.6,
+      "cpuSec": 6.8,
+      "peakRssMB": 310,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13181,
+        "cpuSaturatedSec": 0,
+        "samples": 93
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 9,
+        "pages": 9,
+        "peakOpenPages": 9
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-team-draw",
+      "kind": "browser",
+      "command": "node scripts/check-team-draw.mjs http://localhost:35911",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 59.6,
+      "log": "./logs/08-check-team-draw.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 55,
+      "startOffsetSec": 158.3,
+      "endOffsetSec": 217.9,
+      "cpuSec": 6.4,
+      "peakRssMB": 319,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13181,
+        "cpuSaturatedSec": 0,
+        "samples": 60
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 10,
+        "pages": 10,
+        "peakOpenPages": 10
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-know-your-rivals",
+      "kind": "browser",
+      "command": "node scripts/check-know-your-rivals.mjs http://localhost:35911",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 76.4,
+      "log": "./logs/09-check-know-your-rivals.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 54,
+      "startOffsetSec": 217.9,
+      "endOffsetSec": 294.4,
+      "cpuSec": 6.5,
+      "peakRssMB": 310,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13479,
+        "cpuSaturatedSec": 0,
+        "samples": 79
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 8,
+        "pages": 8,
+        "peakOpenPages": 8
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-team-huddle",
+      "kind": "browser",
+      "command": "node scripts/check-team-huddle.mjs http://localhost:42827",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 56,
+      "log": "./logs/10-check-team-huddle.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 53,
+      "startOffsetSec": 244.6,
+      "endOffsetSec": 300.6,
+      "cpuSec": 4.5,
+      "peakRssMB": 291,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13666,
+        "cpuSaturatedSec": 0,
+        "samples": 60
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 5,
+        "pages": 5,
+        "peakOpenPages": 5
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-results",
+      "kind": "browser",
+      "command": "node scripts/check-results.mjs http://localhost:43015",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 51.6,
+      "log": "./logs/11-check-results.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 48,
+      "startOffsetSec": 248.6,
+      "endOffsetSec": 300.1,
+      "cpuSec": 7.4,
+      "peakRssMB": 379,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13938,
+        "cpuSaturatedSec": 0,
+        "samples": 53
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 17,
+        "pages": 17,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-one-path",
+      "kind": "browser",
+      "command": "node scripts/check-one-path.mjs http://localhost:35911",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 40.7,
+      "log": "./logs/12-check-one-path.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 32,
+      "startOffsetSec": 294.4,
+      "endOffsetSec": 335,
+      "cpuSec": 6.7,
+      "peakRssMB": 298,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13901,
+        "cpuSaturatedSec": 0,
+        "samples": 46
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-cup-party",
+      "kind": "browser",
+      "command": "node scripts/check-cup-party.mjs http://localhost:43015",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 33.8,
+      "log": "./logs/13-check-cup-party.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 31,
+      "startOffsetSec": 300.1,
+      "endOffsetSec": 334,
+      "cpuSec": 4.8,
+      "peakRssMB": 267,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13901,
+        "cpuSaturatedSec": 0,
+        "samples": 37
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 5,
+        "pages": 5,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-relay",
+      "kind": "browser",
+      "command": "node scripts/check-relay.mjs http://localhost:42827",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 25.3,
+      "log": "./logs/14-check-relay.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 24,
+      "startOffsetSec": 300.6,
+      "endOffsetSec": 326,
+      "cpuSec": 3.1,
+      "peakRssMB": 283,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13901,
+        "cpuSaturatedSec": 0,
+        "samples": 26
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 5,
+        "pages": 5,
+        "peakOpenPages": 5
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-teams",
+      "kind": "browser",
+      "command": "node scripts/check-teams.mjs http://localhost:42827",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 11.7,
+      "log": "./logs/15-check-teams.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 11,
+      "startOffsetSec": 326,
+      "endOffsetSec": 337.7,
+      "cpuSec": 4.2,
+      "peakRssMB": 292,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13964,
+        "cpuSaturatedSec": 0,
+        "samples": 15
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-game-night-flow",
+      "kind": "browser",
+      "command": "node scripts/check-game-night-flow.mjs http://localhost:42827",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 9.8,
+      "log": "./logs/16-check-game-night-flow.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 10,
+      "startOffsetSec": 337.8,
+      "endOffsetSec": 347.5,
+      "cpuSec": 3.8,
+      "peakRssMB": 369,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14874,
+        "cpuSaturatedSec": 0,
+        "samples": 11
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 3,
+        "pages": 3,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-official-practice",
+      "kind": "browser",
+      "command": "node scripts/check-official-practice.mjs http://localhost:42827",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 10.5,
+      "log": "./logs/17-check-official-practice.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 10,
+      "startOffsetSec": 347.5,
+      "endOffsetSec": 358,
+      "cpuSec": 6.6,
+      "peakRssMB": 393,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14033,
+        "cpuSaturatedSec": 0,
+        "samples": 12
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 5,
+        "pages": 5,
+        "peakOpenPages": 5
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-night-card",
+      "kind": "browser",
+      "command": "node scripts/check-night-card.mjs http://localhost:35911",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 10.3,
+      "log": "./logs/18-check-night-card.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 8,
+      "startOffsetSec": 347.6,
+      "endOffsetSec": 357.9,
+      "cpuSec": 4,
+      "peakRssMB": 296,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 14033,
+        "cpuSaturatedSec": 0,
+        "samples": 11
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 6
+      },
+      "failureKind": null
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 42827,
+      "pid": 5036,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt6/test-results/20261115-091040-5698e029-4911/server-data/w1",
+      "log": "./logs/server-w1.log"
+    },
+    {
+      "worker": "w2",
+      "port": 35911,
+      "pid": 5037,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt6/test-results/20261115-091040-5698e029-4911/server-data/w2",
+      "log": "./logs/server-w2.log"
+    },
+    {
+      "worker": "w3",
+      "port": 43015,
+      "pid": 5038,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt6/test-results/20261115-091040-5698e029-4911/server-data/w3",
+      "log": "./logs/server-w3.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 358,
+    "sumSec": 1019,
+    "utilisation": 0.95,
+    "perWorkerBusySec": {
+      "w1": 356,
+      "w2": 337,
+      "w3": 326
+    },
+    "predicted": {
+      "low": 252,
+      "mid": 327,
+      "high": 580,
+      "confidence": "measured"
+    },
+    "contentionRatio": 1.073,
+    "longest": [
+      {
+        "name": "check-cup-team-games",
+        "sec": 150.2
+      },
+      {
+        "name": "check-tug-of-war",
+        "sec": 146.3
+      },
+      {
+        "name": "check-lifecycle",
+        "sec": 130.6
+      },
+      {
+        "name": "check-split-clues",
+        "sec": 109.8
+      },
+      {
+        "name": "check-territory",
+        "sec": 90.2
+      }
+    ],
+    "backpressure": {
+      "waits": 2,
+      "seconds": 14
+    },
+    "system": {
+      "cpuPctMean": 27,
+      "cpuPctPeak": 96,
+      "memAvailMinMB": 13181,
+      "load1Peak": 5.21,
+      "cpuPctEvery10s": [
+        84,
+        13,
+        15,
+        8,
+        10,
+        7,
+        8,
+        6,
+        11,
+        5,
+        23,
+        5,
+        5,
+        34,
+        12,
+        79,
+        76,
+        9,
+        11,
+        10,
+        22,
+        9,
+        46,
+        22,
+        23,
+        10,
+        9,
+        6,
+        7,
+        9,
+        93,
+        29,
+        34,
+        61,
+        46,
+        1,
+        89
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 7.6,
+        "peakRssMB": 157
+      },
+      {
+        "worker": "w2",
+        "cpuSec": 8.9,
+        "peakRssMB": 158
+      },
+      {
+        "worker": "w3",
+        "cpuSec": 3.8,
+        "peakRssMB": 144
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 6,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "check-tug-of-war",
+        "phase": "browser",
+        "estSec": 136,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 4,
+        "name": "check-cup-team-games",
+        "phase": "browser",
+        "estSec": 136,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 5,
+        "name": "check-lifecycle",
+        "phase": "browser",
+        "estSec": 122,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 6,
+        "name": "check-split-clues",
+        "phase": "browser",
+        "estSec": 104,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 7,
+        "name": "check-territory",
+        "phase": "browser",
+        "estSec": 84,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 8,
+        "name": "check-team-draw",
+        "phase": "browser",
+        "estSec": 55,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 9,
+        "name": "check-know-your-rivals",
+        "phase": "browser",
+        "estSec": 54,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 10,
+        "name": "check-team-huddle",
+        "phase": "browser",
+        "estSec": 53,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 11,
+        "name": "check-results",
+        "phase": "browser",
+        "estSec": 48,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 12,
+        "name": "check-one-path",
+        "phase": "browser",
+        "estSec": 32,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 13,
+        "name": "check-cup-party",
+        "phase": "browser",
+        "estSec": 31,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 14,
+        "name": "check-relay",
+        "phase": "browser",
+        "estSec": 24,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 15,
+        "name": "check-teams",
+        "phase": "browser",
+        "estSec": 11,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 16,
+        "name": "check-game-night-flow",
+        "phase": "browser",
+        "estSec": 10,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 17,
+        "name": "check-official-practice",
+        "phase": "browser",
+        "estSec": 10,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 18,
+        "name": "check-night-card",
+        "phase": "browser",
+        "estSec": 8,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 251.8588,
+      "mid": 326.62447499999996,
+      "high": 580.18545,
+      "sequentialSec": 925.2500000000002,
+      "confidence": "measured",
+      "contention": 1.0554999999999999,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 42827,
+    "pid": 5036,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt6/test-results/20261115-091040-5698e029-4911/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1215rt6/test-results/20261115-091040-5698e029-4911/web-dist"
+  }
+}

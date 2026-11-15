@@ -200,4 +200,9 @@ export interface GameOutcome {
    * Present exactly when the game is cooperative; then no per-player score is projected.
    */
   team?: TeamResult;
+  /**
+   * Stage 12.15-R (D-S1215R-03): a game built for teams that places its teams by its own rule (Relay), recorded once at
+   * the finish: team id -> place. Absent: its teams are placed by their scores (every game recorded before it).
+   */
+  teamPlaces?: Record<string, number>;
 }

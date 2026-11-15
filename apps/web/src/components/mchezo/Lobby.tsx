@@ -71,7 +71,8 @@ export interface RoomLobbyProps {
   /** A short confirmation ("Reconnected to your player slot."). */
   message?: string;
   /** S5-B: the room's last finished game, for everyone, from recorded scores only. */
-  lastGame?: { title: string; mode: "official" | "practice"; headline: string; yourLine?: string };
+  /** Review 6890761957: the game's own mode when it was played (a casual game stays Casual after the room becomes a Cup). */
+  lastGame?: { title: string; mode: "official" | "practice" | "casual"; headline: string; yourLine?: string };
   /** Stage 6.1: a casual room (no Cup): its games are labelled Casual, whatever is up next. */
   casual?: boolean;
   /** S5-B: no game has finished in this room yet: say once how the night works. */
@@ -185,7 +186,7 @@ export function RoomLobby(p: RoomLobbyProps) {
       {p.shuffleNote && <p className="mz-foot mz-lobby__shuffle" data-testid="shuffle-result">{p.shuffleNote}</p>}
       {p.lastGame && (
         <section className="mz-lastgame" aria-label="Last game" data-testid="last-game-card">
-          <span className="mz-kicker">Last game · {p.lastGame.title} · {p.lastGame.mode === "official" ? "Official" : p.casual ? "Casual" : "Practice"}</span>
+          <span className="mz-kicker" data-testid="last-game-kicker">Last game · {p.lastGame.title} · {p.lastGame.mode === "official" ? "Official" : p.lastGame.mode === "casual" || p.casual ? "Casual" : "Practice"}</span>
           <p className="mz-lastgame__headline">{p.lastGame.headline}</p>
           {p.lastGame.yourLine && <p className="mz-lastgame__you" data-testid="last-game-you">{p.lastGame.yourLine}</p>}
         </section>
