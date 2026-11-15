@@ -1731,7 +1731,8 @@ export function App() {
     games: proj.games ?? [], nameOf, titleOf: (id) => titleFor(id, games), christmas: theme.id === "christmas", now: new Date(),
     ...(proj.roomKind === "cup" ? { cup: { day: proj.championshipDay ?? 1, standings: proj.cupFinished?.standings ?? proj.championship ?? [], champions: proj.cupFinished?.champions } } : {}),
   }) : null;
-  const upNextGame = catalog.find((g) => g.id === upNext?.id);
+  // Stage 12.16 (D-S1216-04): the card says "Practice only" too while the Cup lacks approved content for it.
+  const upNextGame = ((g) => (g && contentShort(upNext) ? { ...g, officialEligible: false } : g))(catalog.find((g) => g.id === upNext?.id));
   // Stage 7.1: Quick Party is for casual rooms (not solo). Stage 12.3 (D-S123-01): and Family Cups.
   const partyRoom = proj?.roomKind === "casual" || proj?.roomKind === "cup";
   const cupParty = proj?.roomKind === "cup";
