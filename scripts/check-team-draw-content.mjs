@@ -99,11 +99,20 @@ const scrubData = (j) => j.replace(/"color":"(coral|sun|mint|iris)"/gi, '"color"
 const wordRe = (w) => new RegExp(`\\b${w.replace(/[^a-z ]/gi, "").replace(/ /g, "\\s+")}\\b`, "i");
 const sigOf = (pieces) => `${(pieces ?? []).length}:${(pieces ?? []).reduce((n, x) => n + x.p.length / 2, 0)}`;
 const LINE = { pieces: [{ s: 1, c: 1, w: 1, p: [120, 200, 500, 520, 880, 300] }] };
+/**
+ * A mouse stroke across the drawer's pad, in two halves. The phone sends a drawing in batches every 320 ms while it is
+ * drawn (SEND_EVERY_MS in apps/web/src/components/mchezo/MchezoDraw.tsx): the first half reaches the server during the
+ * pause, and the second goes out on the next tick after the pen lifts. So this stroke always arrives in two batches, the
+ * case behind the full gate 20261115-151309-0c30d04e-25404's failure: a quick stroke that happened to straddle a tick
+ * (likelier under load), with the check comparing against the server's drawing read before the second batch landed.
+ */
 async function stroke(p) {
   const box = await p.getByTestId("mz-dg-board").boundingBox();
   await p.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.3);
   await p.mouse.down();
-  await p.mouse.move(box.x + box.width * 0.8, box.y + box.height * 0.7, { steps: 12 });
+  await p.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.5, { steps: 6 });
+  await sleep(450);
+  await p.mouse.move(box.x + box.width * 0.8, box.y + box.height * 0.7, { steps: 6 });
   await p.mouse.up();
 }
 
@@ -291,7 +300,10 @@ try {
     const drawerA = rb.pageOf(r0.teams[tA].drawer);
     await stroke(drawerA);
     const guesserA = r0.teams[tA].mates[0], guesserB = r0.teams[tB].mates[0];
-    const serverSig = await until(async () => { const v = await rb.myState(guesserA, gb.id); return (v?.pieces ?? []).length ? sigOf(v.pieces) : null; }, 10000);
+    // The drawing has settled when the server's copy stops changing for longer than three send intervals.
+    const serverSigNow = async () => sigOf((await rb.myState(guesserA, gb.id))?.pieces);
+    const serverSig = await until(async () => { const a = await serverSigNow(); if (a === "0:0") return null; await sleep(1000); return (await serverSigNow()) === a ? a : null; }, 15000);
+    check("B the two-part stroke reached the server in two or more batches, then settled", !!serverSig && Number(serverSig.split(":")[0]) >= 2, String(serverSig));
     await soon("B team A's guesser sees exactly the server's drawing of their own team", async () => (await rb.pageOf(guesserA).getByTestId("mz-td-board").getAttribute("data-sig")) === serverSig);
     check("B team B's guesser sees an empty page (their own team's, not team A's)", (await rb.pageOf(guesserB).getByTestId("mz-td-board").getAttribute("data-sig")) === "0:0");
     const tvData = scrubData(JSON.stringify((await rb.tvProj()).games.find((g) => g.id === gb.id)));
@@ -301,7 +313,10 @@ try {
     // Reloads mid-round: the guesser gets their team's drawing back and still no word; the drawer keeps the pen and the word.
     const gp = rb.pageOf(guesserA);
     await gp.reload({ waitUntil: "domcontentloaded" });
-    await soon("B after a reload, team A's guesser gets their team's drawing back, and still no word", async () => (await gp.getByTestId("mz-td-board").getAttribute("data-sig")) === serverSig && !wordRe(w0).test(scrubText(await gp.locator("main").innerText())));
+    await soon("B after a reload, team A's guesser gets their team's drawing back, and still no word", async () => {
+      const shown = await gp.getByTestId("mz-td-board").getAttribute("data-sig");
+      return shown === serverSig && shown === (await serverSigNow()) && !wordRe(w0).test(scrubText(await gp.locator("main").innerText()));
+    });
     await shot(gp, `official-guesser-after-reload-${(await gp.viewportSize()).width}`);
     const dpB = rb.pageOf(r0.teams[tB].drawer);
     await dpB.reload({ waitUntil: "domcontentloaded" });
