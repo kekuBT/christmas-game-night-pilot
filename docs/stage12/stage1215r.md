@@ -252,9 +252,29 @@ On `cfaf412` the same test renders 1, 1, 3, 3 (the reviewer's screen) and fails 
 3. Focused tests, both typechecks, lint, the affected team and Cup drivers, then the targeted and fast gates. No full gate, as the review asks.
 4. Evidence, docs, and a new completed report.
 
-**Estimate (written before the work, at about 4:05 a.m. ET):** about 1 h 30 min.
+**Estimate (written before the work, committed at 4:00 a.m. ET in `f924da1`; the note first said "about 4:05"):** about 1 h 30 min.
 - **The repair:** a few minutes.
 - **The drivers:** about 45 minutes, most of the work.
 - **A before-run and the after-runs:** about 15 minutes.
 - **The gates:** about 10 minutes.
 - **Docs and the report:** about 20 minutes.
+
+**Done (`5698e02`):**
+- **The repair:** `App.tsx` renders the teams sheet for the host or a cohost in a casual room or a Family Cup. Every other sheet's condition already matched where its button appears.
+- **`check-cup-team-games`:**
+  - **A:** the teams are made with the rendered controls, no longer over the API: Make teams → Make 2 teams → Move → rename to "Coral Crew" and back → Done → Edit teams → reload → Edit teams. A guest has no controls.
+  - **G (new):** a casual room whose host made teams from the sheet becomes a Cup from the room menu. Edit teams opens, a move reaches the server, and after a reload it opens again. Guests have no controls.
+- **On `57f698f`'s build:**
+  - A fails: "the host's Make teams opens the teams sheet in the Cup lobby — not within 10000ms", and the driver stops there;
+  - G, run alone from a scratch copy of the driver, fails at "in the Cup, the host's Edit teams opens the sheet".
+- **With the fix:** 45/0; `check-teams` (casual) 24/0; unit 1966/1966; both typechecks and lint clean.
+
+**Gates on `5698e02`, the tested SHA for this round:**
+
+| Run | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|
+| `20261115-091040-5698e029-4911` | targeted (16 drivers) | **PASSED** (exit 0) | 18/18 (cup-team-games 45, teams 25, one-path 78 checks) | 5 min 58 s |
+| `20261115-091647-5698e029-7809` | fast | **PASSED** (exit 0) | 5/5 (unit 1966/1966) | 1 min 23 s |
+
+- **No full gate ran,** as the review asked. No gate run failed or was cancelled.
+- **Estimate vs actual:** estimated about 1 h 30 min. Actual about 20 minutes, from the review at 3:59 a.m. ET to the fast gate's verdict at 4:18 a.m. ET. The repair was a one-line condition, and the drivers took less time than allowed for.

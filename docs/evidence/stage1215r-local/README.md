@@ -119,3 +119,24 @@ Screenshots: `results-after-cup-before-a82ea44-390` (the old screen, cropped) an
 | `20261115-075116-57f698fe-30431` | `57f698f` | fast | **PASSED** (exit 0) | 5/5 (unit 1966/1966) | 1 min 11 s |
 
 **The tested SHA for the third round is `57f698f`.** The `de26509` and `a82ea44` runs belong to those revisions alone and aren't combined with these. No full gate ran on any of the three, as the review asked.
+
+## Fourth round: review 6892025042 (the teams sheet in a Family Cup)
+
+The estimate was committed before the work (`f924da1`, 4:00 a.m. ET).
+
+| Log | Revision (worktree state) | Result | What it showed |
+|---|---|---|---|
+| `r7-check-cup-team-games-before-57f698f.log` | the updated driver on a build of `57f698f` | 3 pass, **1 FAIL**, then the driver stops | "A the host's Make teams opens the teams sheet in the Cup lobby — not within 10000ms": the reviewer's finding. The next step's click then times out, ending the run. |
+| `r7-check-cup-team-games-section-g-only-before-57f698f.log` | section G alone (the driver's helpers and section G, copied into a scratch file that was then deleted) on the same build | 3 pass, **1 FAIL** | Casual: Make teams works. After the change to a Cup: "the host's Edit teams opens the sheet" fails. |
+| `check-cup-team-games-r7.log` | `5698e02`, built | 45/0 | A and G through the rendered controls, guests without controls, reloads. |
+| `check-teams-r7.log` | same | 24/0 | The casual teams flow, unchanged. |
+| `unit-suite-r7.log` | same | 1966/1966 | Both typechecks and the whole repo's lint clean. |
+
+Screenshots: `cup-teams-sheet-390` (the Cup lobby's sheet, mid-rename) and `cup-after-change-teams-sheet-390` (after a casual room with teams became a Cup).
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261115-091040-5698e029-4911` | `5698e02` | targeted (16 drivers: cup-team-games, teams, one-path, the team games, cup-party, official-practice, lifecycle, results, night-card, game-night-flow) | **PASSED** (exit 0) | 18/18 (cup-team-games 45, teams 25, one-path 78 checks) | 5 min 58 s |
+| `20261115-091647-5698e029-7809` | `5698e02` | fast | **PASSED** (exit 0) | 5/5 (unit 1966/1966) | 1 min 23 s |
+
+`check-teams` ran 25 checks here and 24 locally because one check runs only when the random split puts Amina off Team Coral; neither run failed. No full gate ran on `5698e02`, as the review asked.

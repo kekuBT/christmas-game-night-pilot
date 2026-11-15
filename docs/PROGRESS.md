@@ -2974,3 +2974,10 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Next:** the reviewer's independent confirmation and phone-layout audit. Nothing is merged or deployed.
   - **Links:** the three earlier reports' malformed repository links were replaced with plain paths at their commits.
   - **Time:** about 55 minutes. No estimate was written before the work, an omission.
+- **Fourth round (review 6892025042, 3:59 a.m. ET, the reviewer's recovery review):**
+  - **Confirmed:** the casual-label repair, independently.
+  - **Repaired:** in a Family Cup lobby the host's "Make teams" / "Edit teams" opened nothing, because the teams sheet only rendered in casual rooms. It now opens in a Cup too (`5698e02`); the server and its checks are unchanged.
+  - **The driver:** `check-cup-team-games` sets the teams up with the rendered controls, no longer over the API. It also covers a casual room with teams that becomes a Cup, and guests without controls. It fails on `57f698f`'s build and passes 45/0 with the fix.
+  - **Gates on `5698e02` (tested SHA):** targeted `20261115-091040-5698e029-4911` PASSED 18/18; fast `20261115-091647-5698e029-7809` PASSED 5/5 (unit 1966/1966). No full gate ran.
+  - **Time:** estimate about 1 h 30 min (committed first, `f924da1`); actual about 20 minutes.
+  - **Next:** the reviewer's confirmation, the normal-clock Official Relay/TV journey and the phone-layout audit. Nothing is merged or deployed.
