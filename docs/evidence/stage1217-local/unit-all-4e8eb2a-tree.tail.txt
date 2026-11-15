@@ -1,0 +1,8 @@
+ ✓ tests/motion.test.ts (4 tests) 5ms
+
+ Test Files  157 passed (157)
+      Tests  2032 passed (2032)
+   Start at  14:51:37
+   Duration  57.60s (transform 4.49s, setup 0ms, collect 28.82s, tests 105.33s, environment 50ms, prepare 11.46s)
+
+exit=0

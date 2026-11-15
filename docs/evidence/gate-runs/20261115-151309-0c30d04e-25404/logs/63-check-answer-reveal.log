@@ -1,0 +1,25 @@
+$ node scripts/check-answer-reveal.mjs http://localhost:37011
+# timeout 600s | worker w2 | server http://localhost:37011 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217full1/test-results/20261115-151309-0c30d04e-25404/server-data/w2)
+
+[+17.0s] PASS Geography: finished player sees no answers while Bea still plays
+[+17.0s] PASS Geography: TV shows no answers while Bea still plays
+[+17.0s] PASS Geography: Bea (mid-game) sees no answers
+[+25.6s] PASS Geography: results list every question — 8
+[+25.7s] PASS Geography: each answer matches the content pack — 8/8
+[+25.7s] PASS Geography: each explanation is shown — 8/8
+[+25.7s] PASS Geography: Bea sees her own choices marked
+[+25.7s] PASS Geography: answer list fits a 390px phone (no horizontal scroll)
+[+25.9s] PASS Geography: TV lists the answers after the game
+[+25.9s] PASS Geography: TV shows no player's choices
+[+31.1s] PASS Closest: no answer anywhere while question 1 is open
+[+31.2s] PASS Closest: after question 1 closes, phones show its answer (matches the pack) — 26 vs 26
+[+31.2s] PASS Closest: and the player's own guess
+[+31.2s] PASS Closest: Bea sees her own guess, not Ada's
+[+31.2s] PASS Closest: the explanation is shown
+[+31.2s] PASS Closest: question 2 is now open and its answer is not shown
+[+31.2s] PASS Closest: TV shows the last answer only — Last question: How many letters are in the English alphabet? — 26 letters
+[+31.2s] PASS Closest: TV shows nobody's guess — Last question: How many letters are in the English alphabet? — 26 letters
+[+31.4s] ANSWER REVEAL ALL PASSED
+[+31.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":3,"pages":3,"peakOpenPages":3}
+
+# PASS (exit 0) in 31.4s | cpu 3.8s, peak memory 267 MB

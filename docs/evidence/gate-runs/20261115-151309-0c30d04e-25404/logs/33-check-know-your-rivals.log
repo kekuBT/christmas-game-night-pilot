@@ -1,0 +1,55 @@
+$ node scripts/check-know-your-rivals.mjs http://localhost:32847
+# timeout 600s | worker w3 | server http://localhost:32847 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217full1/test-results/20261115-151309-0c30d04e-25404/server-data/w3)
+
+[+5.4s] PASS A the briefing explains Know Your Rivals (private answers, team totals only)
+[+5.5s] PASS A the game is on question 1 with a two-choice question — {"prompt":"Breakfast in bed or at the table?","a":"In bed","b":"At the table"}
+[+5.6s] PASS A every phone and the TV show the same question
+[+5.6s] PASS A the TV counts the answers: 0 of 7
+[+5.8s] PASS B Keku's phone shows his own answer
+[+5.9s] PASS B Keku can change it before everyone has answered
+[+6.1s] PASS B Neema (320 px) says "Rather not say"
+[+6.1s] PASS B the TV counts 2 of 7, and its data has no player and no answer
+[+6.2s] PASS B a teammate's phone (Amina, Zawadi) and a rival's (Baraka) never get Keku's answer
+[+6.2s] PASS B Keku's own phone has his answer
+[+6.2s] PASS B with one still to answer, still answering
+[+6.2s] PASS B everyone has answered: on to the guesses, early
+[+6.4s] PASS C Keku's phone shows a row for each rival (Sun 0–2, Mint 0–1: only who answered)
+[+6.5s] PASS C Amina's phone shows Coral's guess for Sun and who set it
+[+6.5s] PASS C Amina's phone says Mint is still to guess
+[+6.8s] PASS C Keku sees Amina's guess for Mint
+[+6.8s] PASS C Sun's phones never get Coral's guesses; the TV's data has no guesses — {}
+[+6.8s] PASS C Zawadi locked Coral's guesses: Keku's chips are locked and say who
+[+6.8s] PASS C the TV shows Coral's guesses locked, and the others still guessing
+[+7.0s] PASS C with one team still guessing, still guessing
+[+7.0s] PASS C every team has locked: the reveal, early
+[+7.0s] PASS D the points: Coral 60, Sun 30, Mint 50 — [{"teamId":"team-coral","points":60,"bonus":0},{"teamId":"team-sun","points":30,"bonus":0},{"teamId":"team-mint","points":50,"bonus":0}]
+[+7.0s] PASS D the totals are per team, never per player — [{"teamId":"team-coral","answered":3,"a":2,"b":1,"passed":0},{"teamId":"team-sun","answered":2,"a":1,"b":1,"passed":0},{"teamId":"team-mint","answered":1,"a":1,"b":0,"passed":1}]
+[+7.2s] PASS D the TV shows each team's totals in words
+[+7.3s] PASS D Keku's phone shows Coral's guesses and +60
+[+7.3s] PASS D the scores: Coral 60, Sun 30, Mint 50 on the TV
+[+7.5s] PASS D the TV fits above its footer (the reveal, three teams) — {"ok":true,"bottom":730,"foot":980}
+[+23.3s] PASS E Sun (alone in last place, 90 behind) is round 3's catch-up team — [{"teamId":"team-coral","score":120},{"teamId":"team-sun","score":30},{"teamId":"team-mint","score":110}]
+[+23.3s] PASS E Sun's phones say so
+[+23.5s] PASS E round 3: Sun scores 60 and gets the +15 catch-up — [{"teamId":"team-coral","points":0,"bonus":0},{"teamId":"team-sun","points":60,"bonus":15},{"teamId":"team-mint","points":0,"bonus":0}]
+[+23.7s] PASS E Sun's phones show the catch-up in the round's points
+[+31.7s] PASS G Sun's phone (Wanjiru) says Sun sits this round's guessing out, with no chips and no lock
+[+31.7s] PASS G Sun's guess is refused (it sits this round out)
+[+31.7s] PASS G the TV shows Sun sitting this one out
+[+31.7s] PASS G Coral's phone has no row of chips for Sun
+[+31.8s] PASS G Coral and Mint's locks closed the guessing without Sun
+[+31.8s] PASS G round 4: Coral 30 and Mint 30 (each guessed the other exactly), Sun 0; no guess about or by Sun — {"prompt":"A scary film or a funny film?","a":"Scary","b":"Funny","counts":[{"teamId":"team-coral","answered":3,"a":2,"b":1,"passed":0},{"teamId":"team-sun","answered":0,"a":0,"b":0,"passed":2},{"teamId":"team-mint","answered":2,"a":1,"b":1,"passed":0}],"guesses":[{"teamId":"team-coral","target":"team-mint","guess":1,"actual":1,"size":2,"points":30},{"teamId":"team-mint","target":"team-coral","guess":2,"actual":2,"size":3,"points":30}],"points":[{"teamId":"team-coral","points":30,"bonus":0},{"teamId":"team-sun","points":0,"bonus":0},{"teamId":"team-mint","points":30,"bonus":0}],"sitOut":["team-sun"]}
+[+31.9s] PASS G the reveal says so, on Sun's phone and the TV
+[+60.0s] PASS H Sun's phone: the neutral sit-out note, never "Rather not say"
+[+60.0s] PASS H Coral's phone: Sun's row is neutral too
+[+60.0s] PASS H Sun's count: nobody answered and nobody passed (it was idle) — [{"teamId":"team-coral","answered":3,"a":2,"b":1,"passed":0},{"teamId":"team-sun","answered":0,"a":0,"b":0,"passed":0},{"teamId":"team-mint","answered":2,"a":1,"b":1,"passed":0}]
+[+60.2s] PASS H the reveal's line on the TV and Sun's phone is neutral (no "Rather not say")
+[+76.3s] PASS F the game finished: Coral 240, Mint 230, Sun 180 — [["team-coral",1,240],["team-mint",2,230],["team-sun",3,180]]
+[+76.3s] PASS F every player scored their team's points
+[+76.3s] PASS F nobody's own answer is left in any view at the end
+[+76.3s] PASS F phones: the results, six questions and the team results card
+[+76.3s] PASS F the TV leads with the team result
+[+77.0s] PASS F 320 px: the results have no sideways scroll
+[+77.1s] KNOW YOUR RIVALS PASSED
+[+77.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":8,"pages":8,"peakOpenPages":8}
+
+# PASS (exit 0) in 77.1s | cpu 6.1s, peak memory 311 MB

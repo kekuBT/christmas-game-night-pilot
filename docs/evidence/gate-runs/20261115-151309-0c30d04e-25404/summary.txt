@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261115-151309-0c30d04e-25404
+  107 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-team-draw-content (w2) [functional]: FAIL B after a reload, team A's guesser gets their team's drawing back, and still no word — not within 15000ms
+  timing   wall 41m 41s · step time 1h 59m (sum) · 3 workers, 96% busy · 2.87× the same steps run one after another
+           predicted 29–69m (about 39m 18s, low-confidence) → actual 41m 41s (+6%)
+           longest  e2e-chromium 8m 27s, check-f5 7m 37s, check-leaderboard 6m 41s · the longest step is 20% of the wall time
+           machine  CPU mean 34%, peak 100% · memory available ≥ 13055 MB · load peak 8.04 · backpressure 15 wait(s), 109s
+           contention ×1.073 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217full1/test-results/20261115-151309-0c30d04e-25404/report.json

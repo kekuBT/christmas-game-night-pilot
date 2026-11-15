@@ -70,3 +70,9 @@ About **7 h 30 min**.
 - The shared history touches Draw & Guess as well.
 - Drivers that play Official Team Draw rely on the gate's test mode, which labels its records truthfully, so they should keep working.
 - A gate can fail on something else in the stack.
+
+## Estimate vs actual
+- **Estimated:** about 7 h 30 min, written at 9:39 a.m. ET.
+- **Actual:** about 2 h 15 min, from 9:39 a.m. to 11:55 a.m. ET. About 1 h 25 min of that was the two full gates (41 min each), and about 15 min was diagnosing and fixing the driver race the first full gate found.
+- **Why the estimate was high:** Stage 12.16 had built the machinery this stage reused (record-only approval, the projection, freezing, the driver's cleanup pattern), and the prompt list moved without changes. The estimate didn't discount for that reuse.
+
