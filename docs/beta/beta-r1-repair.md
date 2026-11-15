@@ -98,3 +98,43 @@ About **7 h 30 min**.
 - **One estimate risk didn't happen:** no existing test or driver was refused by the new lock. The only tests that changed were the ones that faked a running server with a lock file.
 - **Found along the way:** B-12 (backup ownership), by step U, on its third local run.
 
+
+## Second round: R3 and R4 (review 6901841738)
+**The review:** the owner's ChatGPT review of the first repair (report 6901467992, tested `23abfbc`). It found the R1–R2 repairs sound and asked for two validation repairs. #42 stays separate. Nothing is merged or deployed.
+
+**R3, the lock race test's child protocol (a test-harness defect, not a production one).**
+- **The defect:** in `tests/beta-r1r-lock.test.ts`, the race helper wrote END to every child once all had answered. A refused child (`tests/fixtures/lock-child.mts`) had already let go of stdin and exited. So a write could hit a closed pipe: an uncaught `write EPIPE` and a failed run, as the reviewer saw on Node 22.16.
+- **The repair:**
+  - END goes only to a confirmed live holder.
+  - The helper fails explicitly on an unexpected exit, a missing READY or outcome, a timeout or any pipe error. It never treats them as refusals and never ignores EPIPE.
+  - The exactly-one-holder, all-others-refused assertions and the cleanup stay.
+- **Validation:**
+  - a deterministic reproduction of the EPIPE with the real fixture, on `23abfbc`;
+  - repeated runs of the focused files after the repair, every run and exit status recorded.
+
+**R4, the gate through a configured production origin.**
+- **The gap:** `scripts/check-beta-gate.mjs` runs the development server over plain HTTP on localhost, with no public origin. It doesn't show the HTTPS, configured-origin behaviour the release needs.
+- **The repair:** a new check, `scripts/check-beta-gate-https.mjs`.
+  - **Setup:** the packed release on plain node in production, with `MCHEZO_PUBLIC_ORIGIN=https://beta.test:<port>`, a trusted proxy and a loopback listen address. In front of it, a local TLS proxy like Caddy's: a self-signed certificate made for the run, the `Host` and `Origin` kept, `X-Forwarded-For` appended, WebSocket upgrades passed through. Chromium resolves `beta.test` to the proxy.
+  - **What it shows:**
+    - correct-code entry that returns to the page asked for, its query included;
+    - a Secure, HttpOnly, SameSite cookie;
+    - clear wrong-code feedback;
+    - the API and a WSS socket working after entry;
+    - both refused without the cookie;
+    - foreign origins still refused;
+    - the gate page fitting at 320 and 390 px.
+  - **How:** browser-driven (Chromium over HTTPS), plus protocol-level requests for the foreign-origin cases.
+  - **Isolation:** private, $0, no host, no real credentials.
+- **Production origin checks are not loosened.** If the check finds a defect in production code, it is reproduced first, fixed, and a proportionate wider regression is run.
+
+**Gates:** focused repeated runs of the protocol tests, then a targeted gate (the release, beta and HTTPS checks) and a fast gate on one SHA, one after another. There is no full gate unless production code changes, as the review allows.
+
+**Estimate (written before the work, at 4:48 p.m. ET):** about **4 h**.
+
+| Part | Estimate |
+|---|---|
+| R3 reproduction, repair, repeated runs | 45 min |
+| R4 check (TLS proxy, packaged server, browser and protocol checks, screenshots) | 2 h |
+| Targeted and fast gates, evidence | 30 min |
+| Docs and report | 45 min |

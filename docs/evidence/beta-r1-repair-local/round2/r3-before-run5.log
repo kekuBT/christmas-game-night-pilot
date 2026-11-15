@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ✓ tests/beta-r1r-restore.test.ts (5 tests) 570ms
+   ✓ restore --owner: a private ownership transition > as root: the new folder and every file in it belong to the service user, still 0700 and 0600 467ms
+stdout | tests/beta-r1-data.test.ts > backup and restore into an isolated folder > a backup holds every room, its previous generation and the Memory Book; restored elsewhere, a server serves the same rooms
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-beta-data-restored-4S2RCf)
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-beta-data-src-nkWEz2)
+
+stdout | tests/beta-r1-data.test.ts > retention: bounded, manual, and nothing is deleted > lists old rooms in a dry run; --apply moves them into an archive (never while a server runs); recent rooms stay
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-beta-data-src-gecFyy)
+
+stderr | tests/beta-r1-data.test.ts > a full disk > a failed save answers 500 with a plain reason, never corrupts the saved room, keeps the server up, and saves again once space is back
+[persist] could not save room room-mwid67vk-858641: ENOSPC: no space left on device, write
+
+ ✓ tests/beta-r1-data.test.ts (6 tests) 1071ms
+   ✓ backup and restore into an isolated folder > a backup holds every room, its previous generation and the Memory Book; restored elsewhere, a server serves the same rooms 589ms
+ ✓ tests/beta-r1r-lock.test.ts (7 tests) 7873ms
+   ✓ overlapping starts: exactly one holder > eight starts at the same moment on a new directory, three rounds: one holds it, seven are refused 1607ms
+   ✓ overlapping starts: exactly one holder > eight starts at the same moment on a directory a crash left a lock record in, three rounds: one holds it 1347ms
+   ✓ overlapping starts: exactly one holder > four real servers started together on a new directory: one serves, three exit 2 naming it; SIGTERM then frees it 882ms
+   ✓ the tools hold the directory for their whole operation > backup, prune --apply, check and restore: a server started during each is refused, naming the tool; afterwards it starts 2256ms
+   ✓ the tools hold the directory for their whole operation > a running server refuses backup, prune --apply and check, naming it; restore never touches a used folder 337ms
+   ✓ crash and restart; a clean stop > after a kill -9 the next start takes over the record the crash left, and the room is still there 705ms
+   ✓ crash and restart; a clean stop > SIGTERM stops cleanly, removes the record and frees the directory: a backup and a new server can use it at once 737ms
+
+ Test Files  3 passed (3)
+      Tests  18 passed (18)
+   Start at  21:45:58
+   Duration  9.36s (transform 1.04s, setup 0ms, collect 3.35s, tests 9.51s, environment 1ms, prepare 259ms)
+

@@ -1,0 +1,44 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ❯ tests/beta-r1r-lock.test.ts (7 tests | 1 failed | 6 skipped) 553ms
+   × overlapping starts: exactly one holder > eight starts at the same moment on a new directory, three rounds: one holds it, seven are refused 551ms
+     → lock race: an error on a contender's pipe
+#0 pid 19813 exit {"code":0,"signal":null} pipe errors ["stdin: EPIPE write EPIPE"] said "READY\nACQ 19813 1794779604711.578\n"
+#1 pid 19814 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19814 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#2 pid 19820 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19820 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#3 pid 19821 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19821 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#4 pid 19832 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19832 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#5 pid 19833 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19833 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#6 pid 19838 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19838 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#7 pid 19848 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19848 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/beta-r1r-lock.test.ts > overlapping starts: exactly one holder > eight starts at the same moment on a new directory, three rounds: one holds it, seven are refused
+Error: lock race: an error on a contender's pipe
+#0 pid 19813 exit {"code":0,"signal":null} pipe errors ["stdin: EPIPE write EPIPE"] said "READY\nACQ 19813 1794779604711.578\n"
+#1 pid 19814 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19814 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#2 pid 19820 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19820 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#3 pid 19821 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19821 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#4 pid 19832 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19832 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#5 pid 19833 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19833 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#6 pid 19838 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19838 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+#7 pid 19848 exit {"code":0,"signal":null} pipe errors [] said "READY\nREFUSED 19848 Another server (pid 19813) is using this data directory (/tmp/mz-r1r-fresh-KpQV9L/data). Stop it first: one process writes a data directory at a time.\n"
+ ❯ fail tests/beta-r1r-lock.test.ts:75:41
+     73|     }
+     74|   };
+     75|   const fail = (why: string) => { throw new Error(`lock race: ${why}\n…
+       |                                         ^
+     76|   await phase("READY from every contender", (k) => /^READY$/m.test(k.o…
+     77|   if (kids.some((k) => k.exit !== undefined)) fail("a contender exited…
+ ❯ race tests/beta-r1r-lock.test.ts:89:50
+ ❯ tests/beta-r1r-lock.test.ts:99:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 skipped (7)
+   Start at  21:53:22
+   Duration  1.96s (transform 805ms, setup 0ms, collect 1.07s, tests 553ms, environment 0ms, prepare 64ms)
+

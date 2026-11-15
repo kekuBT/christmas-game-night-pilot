@@ -652,8 +652,12 @@ export class LocalServer {
   private async handleAccess(req: IncomingMessage, res: ServerResponse, url: URL): Promise<boolean> {
     if (this.access.foreignOrigin(req.headers.origin)) { this.send(res, 403, { error: "Requests from another site are not allowed.", code: "FOREIGN_ORIGIN" }); return true; }
     if (!this.access.gated) return false;
+    // Beta R1-R (B-13, review 6901841738 R4): gate pages use Referrer-Policy: same-origin, not the site-wide
+    // no-referrer. Under no-referrer a browser posts the code form with `Origin: null`, which the origin check above
+    // rightly refuses, so with a public origin set (production) nobody could enter. same-origin makes that post carry
+    // the page's own origin; a referrer still never goes to another site. The origin check is unchanged.
     const html = (status: number, body: string, extra: Record<string, string> = {}) => {
-      res.writeHead(status, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", ...extra });
+      res.writeHead(status, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "referrer-policy": "same-origin", ...extra });
       res.end(body);
     };
     if (url.pathname === "/beta" && req.method === "GET") { html(200, gatePage(safeNext(url.searchParams.get("next")), false)); return true; }

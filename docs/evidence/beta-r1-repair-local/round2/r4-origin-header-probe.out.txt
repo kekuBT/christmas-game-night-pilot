@@ -1,0 +1,10 @@
+Chromium (Playwright's headless shell), a page served over HTTPS at beta.test with each Referrer-Policy; the Origin header the server received:
+no-referrer  POST /fetch-post  Origin: "https://beta.test:40739"
+no-referrer  WS   /ws          Origin: "https://beta.test:40739"
+no-referrer  POST /form        Origin: "null"
+same-origin  POST /fetch-post  Origin: "https://beta.test:33793"
+same-origin  WS   /ws          Origin: "https://beta.test:33793"
+same-origin  POST /form        Origin: "https://beta.test:33793"
+(none)       POST /fetch-post  Origin: "https://beta.test:34885"
+(none)       WS   /ws          Origin: "https://beta.test:34885"
+(none)       POST /form        Origin: "https://beta.test:34885"

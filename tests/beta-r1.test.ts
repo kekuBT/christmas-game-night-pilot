@@ -167,6 +167,33 @@ describe("B-04: the beta gate covers pages, the API and WebSockets", () => {
   });
 });
 
+describe("B-13: the gate's own form works when the public origin is set (review 6901841738 R4)", () => {
+  // Found by check-beta-gate-https: with Referrer-Policy: no-referrer, a browser posts a form with `Origin: null`
+  // (the Fetch standard; Chromium does), so in production the code form was refused as another site (403
+  // FOREIGN_ORIGIN) and nobody could enter. Gate pages now use same-origin: a same-origin post carries the page's own
+  // origin, and the referrer still never goes to another site. The origin check itself is unchanged.
+  it("gate pages are served with Referrer-Policy: same-origin; every other response keeps no-referrer", async () => {
+    const h = await startedWith({ betaAccessCode: CODE, publicOrigin: ORIGIN });
+    const gate = await raw(h, "/?join=ABCD", { headers: { accept: "text/html" } });
+    expect([gate.status, gate.headers.get("referrer-policy")]).toEqual([401, "same-origin"]);
+    expect((await raw(h, "/beta")).headers.get("referrer-policy")).toBe("same-origin");
+    const wrong = await raw(h, "/beta/enter", { method: "POST", headers: { origin: ORIGIN, "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ code: "not-it", next: "/" }).toString() });
+    expect([wrong.status, wrong.headers.get("referrer-policy")]).toEqual([401, "same-origin"]);
+    for (const path of ["/health", "/games"]) expect([path, (await raw(h, path)).headers.get("referrer-policy")]).toEqual([path, "no-referrer"]);
+  });
+
+  it("the origin check is unchanged: the code form signs in with the page's origin; with Origin null, another site or http it is refused", async () => {
+    const h = await startedWith({ betaAccessCode: CODE, publicOrigin: ORIGIN });
+    const post = (origin: string) => raw(h, "/beta/enter", { method: "POST", headers: { origin, "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ code: CODE, next: "/" }).toString() });
+    const ok = await post(ORIGIN);
+    expect([ok.status, !!ok.headers.get("set-cookie")]).toEqual([303, true]);
+    for (const origin of ["null", "https://evil.test", "http://games.example.test"]) {
+      const r = await post(origin);
+      expect([origin, r.status, r.headers.get("set-cookie")]).toEqual([origin, 403, null]);
+    }
+  });
+});
+
 describe("B-05: per-device limits behind a reverse proxy", () => {
   const viaProxy = (h: Harness, client: string, spoof?: string) => raw(h, "/beta/enter", {
     method: "POST",

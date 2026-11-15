@@ -1,0 +1,11 @@
+--- blocked
+child said: REFUSED 6606 Another server (pid 6588) is using this data di
+writing END (child stdin destroyed: false)
+UNCAUGHT: EPIPE write EPIPE
+exit 3
+--- processed
+child exit event processed (code 0)
+child said: REFUSED 6644 Another server (pid 6637) is using this data di
+writing END (child stdin destroyed: true)
+no error
+exit 0

@@ -41,3 +41,29 @@
 - **No other gate ran on `23abfbc`,** and none failed or was stopped.
 - **Nothing overlapped them:** the gates ran one after another, and no other test, driver or drill ran while they did (the release drill finished before the first gate started).
 - **Logs and summaries:** `docs/evidence/gate-runs/<run id>/`.
+
+## Second round: R3 and R4 (review 6901841738), in `round2/`
+
+### R3: the lock race test's child protocol
+| File | Revision | Result | What it shows |
+|---|---|---|---|
+| `r3-before-run1..10.log`, `r3-before-runs-summary.txt` | `1da3b25` (`23abfbc`'s code) | 10/10 exit 0, no EPIPE | **The reviewer's failure didn't reproduce here** in 10 runs of the three focused files (Node 22.23). The reviewer saw two uncaught `write EPIPE` errors on Node 22.16. It is a timing window, below. |
+| `repro-epipe.mts.txt`, `repro-epipe-23abfbc.out.txt` | `1da3b25`'s fixture and helper logic | **`blocked`: UNCAUGHT EPIPE (exit 3)**; `processed`: no error | The window, made deterministic with the real fixture.<br>• **`blocked`:** a refused contender exits right after REFUSED. If END is written after it exited but before the parent processed the exit, the write hits a closed pipe and nothing handles the error.<br>• **`processed`:** once the exit is processed, Node has destroyed the stream and the write is dropped silently. That is why it is intermittent. |
+| `r3-after-run1..20.log`, `r3-after-runs-summary.txt` | the repaired tree | **20/20 exit 0**, 18/18 tests each, no EPIPE, no unhandled errors | The repaired protocol: END only to a confirmed live holder, and explicit failures. Each run covers 3 rounds of 8 starts on a new folder and 3 on a stale record, the maintenance, crash and SIGTERM cases, restore and the data tests. |
+| `r3-mutation-refusal-exits-1.log`, `-crash-before-ready.log`, `-holder-exits-early.log` | the repaired tree with a fault injected into the fixture (restored after) | **each FAILED explicitly** (exit 1, no unhandled error) | The helper fails, never passes or crashes:<br>• "a contender exited abnormally";<br>• "a contender exited before READY";<br>• "an error on a contender's pipe" (`stdin: EPIPE write EPIPE`, now caught and reported). |
+
+### R4: the gate through a configured production origin, over HTTPS
+| File | Revision | Result | What it shows |
+|---|---|---|---|
+| `r4-check-https-run1.log` | uncommitted tree | FAILED (1) | The first run: `ERR_CONNECTION_RESET`. Chromium sent `beta.test` to this sandbox's outbound proxy (`https_proxy`). |
+| `r4-check-https-run2.log` | same | FAILED (1) | With `--no-proxy-server`, the same failure: the flag didn't override the environment. |
+| `r4-check-https-run3.log` | same | FAILED (1) | The browser's environment without proxy variables: H1 passed at 320 px. Then the wrong-code page wasn't the gate page (the check crashed reading it), which led to B-13. |
+| `r4-origin-header-probe.out.txt` | (a probe page, no app code) | | Chromium over HTTPS, the Origin header received under each referrer policy. A form POST sends `"null"` under `no-referrer`, and the page's origin under `same-origin` or no policy. `fetch` and WebSocket always send the page's origin. |
+| `r4-check-https-run4-before-fix.log` | uncommitted tree, before the B-13 fix | **FAILED (11)** | The reproduction: the code form posts `Origin: "null"` → 403 `FOREIGN_ORIGIN` for the wrong and the right code. No cookie, so no app, API or socket after "entry". |
+| `r4-b13-tests-before-fix.log` | same | 1 FAIL, 1 pass | The B-13 header test fails (`no-referrer` on the gate page). The origin-unchanged test passes, as it must before and after. |
+| `r4-beta-r1-tests-after-fix.log` | with the fix | 23/23 | `tests/beta-r1.test.ts`, B-02 included. |
+| `r4-check-https-run5-after-fix.log` | with the fix | FAILED (6) | H1–H5 all pass. H6's WebSocket half failed because my `ws` client looked up `beta.test` in DNS. Its API and form halves already showed the right 403s. |
+| `r4-check-https-run6-after-fix.log` | with the fix | **HTTPS BETA GATE PASSED (28)** | Everything, H6's handshakes included. |
+| `r4-check-https-final-driver-on-1da3b25.log` | the final check against `1da3b25`'s packed release (no fix) | **FAILED (11)** | The same final check before the fix: B-13 as above. |
+| `docs/beta/screenshots/beta-gate-https-wrong-code-390-before-b13.png` | before | | What a family member saw after typing a code: the JSON refusal. |
+| `docs/beta/screenshots/beta-gate-https-{320,390,wrong-code-390,then-app-390}.png` | after | | The gate at 320 and 390 px over HTTPS, the wrong-code message, and the app after entry. |

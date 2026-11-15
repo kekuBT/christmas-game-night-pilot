@@ -3081,3 +3081,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** the owner's or ChatGPT's review of the repair report on #43. The beta stays held.
 - **Risk:** the lock's one condition (one network namespace) is documented, not enforced.
 
+## Beta R1-R, second round: R3 and R4 from review 6901841738 (in progress)
+- **Brief:** the owner's ChatGPT review of the first repair (report 6901467992). R3: the lock race test's child protocol. R4: a production-origin HTTPS gate check. #42 stays separate; the beta is held. Acknowledged in 6901900831.
+- **Estimate:** about 4 h, written at 4:48 p.m. ET (`docs/beta/beta-r1-repair.md`, "Second round").
+- **R3:**
+  - **Reproduced** deterministically (EPIPE in the parent's END write to an exited refused contender).
+  - **Repaired:** an explicit protocol (`tests/fixtures/lock-child.mts`, `tests/beta-r1r-lock.test.ts`; D-BR1R-06).
+  - **Runs:** 20 repeated runs passed, and 3 fault injections each failed explicitly.
+- **R4:** `scripts/check-beta-gate-https.mjs` (D-BR1R-05). It found **B-13**: in production the gate's form posted `Origin: null` under `no-referrer`, so nobody could enter. Fixed with `Referrer-Policy: same-origin` on gate pages only (`src/server/http.ts`; D-BR1R-04); the origin check is unchanged. B-13 tests are in `tests/beta-r1.test.ts`.
+- **Evidence:** `docs/evidence/beta-r1-repair-local/README.md` ("Second round").
+- **Next:** commit, then targeted (the HTTPS, beta and release checks, plus app smoke drivers) and fast gates on one SHA, then the report on #43.
+

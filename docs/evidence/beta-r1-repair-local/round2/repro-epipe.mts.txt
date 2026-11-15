@@ -1,0 +1,44 @@
+// Review 6901841738 R3: the race helper wrote END to every contender once all had answered. A refused contender
+// (tests/fixtures/lock-child.mts) exits right after REFUSED. If the parent writes END after that child exited but
+// before it has processed the exit, the write hits a closed pipe: an 'error' (EPIPE) on child.stdin, which the helper
+// didn't handle. This replays that window deterministically with the real fixture: the parent holds the lock (so the
+// child is refused), waits for REFUSED, then blocks its event loop for a moment (the child exits meanwhile, unprocessed)
+// and writes END, as the helper did. Mode "processed" waits normally first instead (the exit is seen; no error).
+// Usage: npx tsx repro-epipe.mts <worktree> blocked|processed
+import { spawn } from "node:child_process";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+const [wt, mode] = process.argv.slice(2);
+const { DataDirLock } = await import(join(wt!, "src/server/datalock.ts"));
+const dir = mkdtempSync(join(tmpdir(), "mz-epipe-"));
+const holder = new DataDirLock(dir, "server");
+await holder.acquire();
+const c = spawn(process.execPath, ["--import", "tsx", join(wt!, "tests", "fixtures", "lock-child.mts"), dir], { cwd: wt, stdio: ["pipe", "pipe", "pipe"] });
+let out = "";
+c.stdout!.on("data", (d) => { out += d; });
+c.once("exit", (code) => console.log(`child exit event processed (code ${code})`));
+process.on("uncaughtException", (e) => { console.log(`UNCAUGHT: ${(e as NodeJS.ErrnoException).code ?? ""} ${e.message}`); process.exit(3); });
+const until = async (re: RegExp) => { for (let i = 0; i < 400 && !re.test(out); i++) await new Promise((r) => setTimeout(r, 25)); };
+await until(/READY/);
+c.stdin!.write("GO\n");
+if (mode === "blocked") {
+  // Block inside the very callback that delivers REFUSED: the child exits while the parent can't process it.
+  await new Promise<void>((res) => c.stdout!.on("data", () => {
+    if (!/REFUSED/.test(out)) return;
+    const end = Date.now() + 1500; while (Date.now() < end) { /* the child exits; the parent doesn't see it yet */ }
+    console.log(`child said: ${out.trim().split("\n").pop()?.slice(0, 60)}`);
+    console.log(`writing END (child stdin destroyed: ${c.stdin!.destroyed})`);
+    c.stdin!.write("END\n"); // as the helper did: no error handler
+    res();
+  }));
+} else {
+  await until(/ACQ|REFUSED/);
+  await new Promise((r) => setTimeout(r, 1500));
+  console.log(`child said: ${out.trim().split("\n").pop()?.slice(0, 60)}`);
+  console.log(`writing END (child stdin destroyed: ${c.stdin!.destroyed})`);
+  c.stdin!.write("END\n");
+}
+await new Promise((r) => setTimeout(r, 500));
+await holder.release();
+console.log("no error");

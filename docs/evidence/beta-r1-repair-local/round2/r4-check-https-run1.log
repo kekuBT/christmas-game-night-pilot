@@ -1,0 +1,14 @@
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+PASS P the release is packed and installed (runtime packages only) — 1da3b2570d5e3d0e00287b7b3193d262d009a64f-dirty
+PASS T the packed server runs in production behind the TLS proxy, public origin https://beta.test:<port> — Listening on 127.0.0.1; public origin https://beta.test:36341.
+FAIL the check ran to the end — page.goto: net::ERR_CONNECTION_RESET at https://beta.test:36341/?join=ABCD | Call log: |   - navigating to "https://beta.test:36341/?join=ABCD", waiting until "load"
+--- server output ---
+Christmas Game Night server on http://localhost:38085 (web app at / after npm run build:web)
+Listening on 127.0.0.1; public origin https://beta.test:36341.
+
+cleanup: server stopped (0), proxy closed, 3 temporary dir(s) removed
+HTTPS BETA GATE FAILED: 1 failed

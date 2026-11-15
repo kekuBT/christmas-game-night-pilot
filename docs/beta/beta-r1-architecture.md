@@ -85,7 +85,7 @@ games.example.org {
 
 - **What it does:** Caddy obtains and renews the certificate itself (ports 80 and 443 reachable, DNS pointing at the host). It passes WebSocket upgrades through `reverse_proxy` with no extra setting, and sets `X-Forwarded-For`.
 - **No access log on purpose.** Session, spectator and recovery tokens travel in request headers (`X-Session-Token`, `X-Spectator-Token`, `X-Recovery-Request-Secret`, `Sec-WebSocket-Protocol`), and the beta cookie in `Cookie`. If a log is ever turned on, those headers must be filtered out of it first.
-- **What the server adds itself:** `nosniff`, `no-referrer`, `X-Frame-Options: DENY` and `frame-ancestors 'none'`. The proxy adds HSTS, since only it knows the site is HTTPS-only.
+- **What the server adds itself:** `nosniff`, `no-referrer` (`same-origin` on the beta gate's own pages, so its form posts carry the site's origin: B-13), `X-Frame-Options: DENY` and `frame-ancestors 'none'`. The proxy adds HSTS, since only it knows the site is HTTPS-only.
 
 ## Example: the service (systemd, not run here)
 

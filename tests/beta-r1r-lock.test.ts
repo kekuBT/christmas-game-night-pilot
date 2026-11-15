@@ -40,28 +40,57 @@ function startServer(dataDir: string): Promise<Started> {
 }
 const stop = (s: Started, signal: NodeJS.Signals = "SIGTERM") => new Promise<number | null>((res) => { if (s.child.exitCode !== null) { res(s.child.exitCode); return; } s.child.once("exit", (c) => res(c)); s.child.kill(signal); });
 
+interface Contender { c: ChildProcess; out: string; pipeErrors: string[]; exit?: { code: number | null; signal: NodeJS.Signals | null } }
+
 /**
- * `n` processes take the lock at the same moment (all are started and READY before GO goes to every one of them); the
- * holder keeps it until every other one has answered. Returns how many got it and the most holders at once.
+ * `n` processes take the lock at the same moment, by an explicit protocol (review 6901841738 R3;
+ * tests/fixtures/lock-child.mts): every contender is started and READY before GO goes to all of them; each answers ACQ
+ * or REFUSED; END goes only to a confirmed, still-running holder; then every contender must exit 0.
+ * Anything else fails the test with what each contender printed: an exit before READY or before an answer, a holder
+ * gone before END, an ERROR, a non-zero exit or a signal, a timeout, or any error on a pipe (an EPIPE included). Nothing
+ * is counted as a refusal unless the contender said REFUSED, and no pipe error is ignored.
+ * Returns how many held the lock and the most holders at once.
  */
 async function race(dir: string, n: number): Promise<{ acquired: number; maxAtOnce: number; refusals: string[] }> {
-  const kids = Array.from({ length: n }, () => {
+  const kids: Contender[] = Array.from({ length: n }, () => {
     const c = spawn(process.execPath, ["--import", "tsx", join("tests", "fixtures", "lock-child.mts"), dir], { cwd: ROOT, stdio: ["pipe", "pipe", "pipe"] });
     procs.push(c);
-    const k = { c, out: "", exit: new Promise<void>((r) => c.once("exit", () => r())) };
-    c.stdout!.on("data", (d) => { k.out += d; }); c.stderr!.on("data", (d) => { k.out += d; });
+    const k: Contender = { c, out: "", pipeErrors: [] };
+    c.stdout!.on("data", (d) => { k.out += d; });
+    c.stderr!.on("data", (d) => { k.out += d; });
+    for (const [name, stream] of [["stdin", c.stdin!], ["stdout", c.stdout!], ["stderr", c.stderr!]] as const) {
+      stream.on("error", (e: NodeJS.ErrnoException) => { k.pipeErrors.push(`${name}: ${e.code ?? ""} ${e.message}`); });
+    }
+    c.once("exit", (code, signal) => { k.exit = { code, signal }; });
     return k;
   });
-  const until = async (ok: () => boolean) => { for (let i = 0; i < 600 && !ok(); i++) await new Promise((r) => setTimeout(r, 50)); };
-  await until(() => kids.every((k) => /READY/.test(k.out) || k.c.exitCode !== null));
+  const describeAll = () => kids.map((k, i) => `#${i} pid ${k.c.pid} exit ${JSON.stringify(k.exit ?? null)} pipe errors ${JSON.stringify(k.pipeErrors)} said ${JSON.stringify(k.out.slice(-300))}`).join("\n");
+  const phase = async (label: string, done: (k: Contender) => boolean, ms = 30_000) => {
+    const end = Date.now() + ms;
+    while (!kids.every(done)) {
+      if (Date.now() > end) throw new Error(`lock race: timed out waiting for ${label}\n${describeAll()}`);
+      await new Promise((r) => setTimeout(r, 20));
+    }
+  };
+  const fail = (why: string) => { throw new Error(`lock race: ${why}\n${describeAll()}`); };
+  await phase("READY from every contender", (k) => /^READY$/m.test(k.out) || k.exit !== undefined);
+  if (kids.some((k) => k.exit !== undefined)) fail("a contender exited before READY");
   for (const k of kids) k.c.stdin!.write("GO\n");
-  await until(() => kids.every((k) => /ACQ|REFUSED/.test(k.out) || k.c.exitCode !== null));
-  for (const k of kids) k.c.stdin!.write("END\n");
-  await Promise.all(kids.map((k) => k.exit));
-  const outs = kids.map((k) => k.out);
-  const holds = outs.flatMap((o) => { const a = /ACQ \d+ ([\d.]+)/.exec(o), r = /REL \d+ ([\d.]+)/.exec(o); return a && r ? [[Number(a[1]), Number(r[1])] as const] : []; });
+  await phase("an answer (ACQ or REFUSED) from every contender", (k) => /^(ACQ|REFUSED|ERROR) /m.test(k.out) || k.exit !== undefined);
+  if (kids.some((k) => !/^(ACQ|REFUSED|ERROR) /m.test(k.out))) fail("a contender exited without answering");
+  if (kids.some((k) => /^ERROR /m.test(k.out))) fail("a contender failed with an error that is not a refusal");
+  const holders = kids.filter((k) => /^ACQ /m.test(k.out));
+  for (const h of holders) {
+    if (h.exit !== undefined) fail("a holder exited before END");
+    h.c.stdin!.write("END\n"); // only to a confirmed, still-running holder
+  }
+  await phase("every contender to exit", (k) => k.exit !== undefined);
+  if (kids.some((k) => k.exit!.code !== 0 || k.exit!.signal !== null)) fail("a contender exited abnormally");
+  if (kids.some((k) => k.pipeErrors.length > 0)) fail("an error on a contender's pipe");
+  if (holders.some((h) => !/^REL /m.test(h.out))) fail("a holder didn't report releasing the lock");
+  const holds = holders.map((h) => [Number(/^ACQ \d+ ([\d.]+)/m.exec(h.out)![1]), Number(/^REL \d+ ([\d.]+)/m.exec(h.out)![1])] as const);
   const maxAtOnce = Math.max(0, ...holds.map(([s]) => holds.filter(([s2, e2]) => s2 <= s && s < e2).length));
-  return { acquired: holds.length, maxAtOnce, refusals: outs.filter((o) => /REFUSED/.test(o)) };
+  return { acquired: holders.length, maxAtOnce, refusals: kids.filter((k) => /^REFUSED /m.test(k.out)).map((k) => k.out) };
 }
 
 describe("overlapping starts: exactly one holder", () => {

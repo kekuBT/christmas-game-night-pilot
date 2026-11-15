@@ -1,0 +1,17 @@
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+PASS P the release is packed and installed (runtime packages only) — 1da3b2570d5e3d0e00287b7b3193d262d009a64f-dirty
+PASS T the packed server runs in production behind the TLS proxy, public origin https://beta.test:<port> — Listening on 127.0.0.1; public origin https://beta.test:43297.
+PASS H1 320px: over HTTPS, a page load without the cookie gets the gate (401) at beta.test — https://beta.test:43297/?join=ABCD
+PASS H1 320px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":320,"width":320,"left":13,"right":307}
+PASS H1 320px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+FAIL the check ran to the end — page.evaluate: TypeError: Cannot read properties of null (reading 'getBoundingClientRect') |     at eval (eval at evaluate (:370:30), <anonymous>:2:48) |     at UtilityScript.evaluate (<anonymous>:372:16)
+--- server output ---
+Christmas Game Night server on http://localhost:35679 (web app at / after npm run build:web)
+Listening on 127.0.0.1; public origin https://beta.test:43297.
+
+cleanup: server stopped (0), proxy closed, 3 temporary dir(s) removed
+HTTPS BETA GATE FAILED: 1 failed

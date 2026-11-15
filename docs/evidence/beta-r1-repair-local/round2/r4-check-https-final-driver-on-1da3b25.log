@@ -1,0 +1,33 @@
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+PASS P the release is packed and installed (runtime packages only) — 1da3b2570d5e3d0e00287b7b3193d262d009a64f-dirty
+PASS T the packed server runs in production behind the TLS proxy, public origin https://beta.test:<port> — Listening on 127.0.0.1; public origin https://beta.test:37263.
+PASS H1 320px: over HTTPS, a page load without the cookie gets the gate (401) at beta.test — https://beta.test:37263/?join=ABCD
+PASS H1 320px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":320,"width":320,"left":13,"right":307}
+PASS H1 320px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+FAIL H2 320px: the code form posts with the page's own origin and is answered by the gate (401), not refused as another site — {"status":403,"code":"FOREIGN_ORIGIN","origin":"null"}
+FAIL H2 320px: a wrong code is refused with a plain message (role=alert), and the page still fits — {"scroll":320,"width":320,"left":-1,"right":null,"noGatePage":"{\"error\":\"Requests from another site are not allowed.\",\"code\":\"FOREIGN_ORIGIN\"}"}
+PASS H2 320px: no cookie is set, and the site is still gated
+PASS H1 390px: over HTTPS, a page load without the cookie gets the gate (401) at beta.test — https://beta.test:37263/?join=ABCD
+PASS H1 390px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":390,"width":390,"left":16,"right":374}
+PASS H1 390px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+FAIL H2 390px: the code form posts with the page's own origin and is answered by the gate (401), not refused as another site — {"status":403,"code":"FOREIGN_ORIGIN","origin":"null"}
+FAIL H2 390px: a wrong code is refused with a plain message (role=alert), and the page still fits — {"scroll":390,"width":390,"left":-1,"right":null,"noGatePage":"{\"error\":\"Requests from another site are not allowed.\",\"code\":\"FOREIGN_ORIGIN\"}"}
+PASS H2 390px: no cookie is set, and the site is still gated
+FAIL H3 the right code is accepted (303) on a post carrying the page's own origin — {"status":403,"code":"FOREIGN_ORIGIN","origin":"null"}
+FAIL H3 the right code returns to the page that was asked for, over HTTPS, query kept — https://beta.test:37263/beta/enter
+FAIL H3 the cookie is Secure, HttpOnly and SameSite=Lax, host-only for beta.test, and isn't the code — no cookie
+FAIL H3 the app loads after the gate
+FAIL H4 after entry: the same-origin API creates a room and a wss:// socket opens with a live update — {"status":401,"url":"wss://beta.test:37263/?roomId=…&audience=tv","ws":"refused"}
+FAIL H4 the app's own live connection is wss:// to the public origin, and the lobby loads — ["wss://beta.test:37263/?…"]
+PASS H5 a browser without the cookie: the API refuses (401 BETA_ACCESS_REQUIRED) and the wss:// socket is refused — {"status":401,"code":"BETA_ACCESS_REQUIRED","ws":"refused"}
+FAIL the check ran to the end — Error: H6 needs the beta cookie from H3, and there is none |     at file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtold/scripts/check-beta-gate-https.mjs:207:22 |     at runNextTicks (node:internal/process/task_queues:64:5)
+--- server output ---
+Christmas Game Night server on http://localhost:41001 (web app at / after npm run build:web)
+Listening on 127.0.0.1; public origin https://beta.test:37263.
+
+cleanup: server stopped (0), proxy closed, 3 temporary dir(s) removed
+HTTPS BETA GATE FAILED: 11 failed

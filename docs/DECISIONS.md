@@ -2125,4 +2125,16 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
 - **D-BR1R-03 The example unit sets `UMask=0077`.**
   - **Why:** the server writes its files with the process umask. The 0700 folder already keeps them private, and the umask makes the files themselves 0600 too.
   - **`check`:** it requires the folders to be private and every entry to belong to the service user; it doesn't require 0600 on files the server wrote.
+- **D-BR1R-04 The gate pages use `Referrer-Policy: same-origin`; everything else keeps `no-referrer`** (B-13, review 6901841738 R4).
+  - **Why:** under `no-referrer` a browser posts a form with `Origin: null`, which the origin check refuses. With `same-origin`, the same-origin code form carries its own origin, and no referrer ever reaches another site.
+  - **Unchanged:** the origin check. `null` and other origins stay refused.
+  - **Alternatives rejected:**
+    - **Accepting `Origin: null` on the code form:** it weakens the check the review asked to keep.
+    - **Using `Sec-Fetch-Site` instead:** older Safari doesn't send it.
+- **D-BR1R-05 A production-origin check runs in every gate** (`scripts/check-beta-gate-https.mjs`).
+  - **What it does:** the packed release behind a local TLS proxy that keeps `Host` and `Origin` (like the example Caddy), at `https://beta.test:<port>`, driven by Chromium. Foreign origins are checked at the protocol level.
+  - **Isolation:** it is private, $0 and on this machine only. The browser gets no outbound proxy settings, and the certificate is made for the run.
+- **D-BR1R-06 The lock race test speaks an explicit protocol.**
+  - **Holders only:** END goes only to a confirmed, live holder.
+  - **Explicit failures:** an unexpected exit, a missing READY or answer, an ERROR, a non-zero exit, a timeout or any pipe error fails the test with what each contender printed. Nothing counts as a refusal unless the contender said REFUSED.
 
