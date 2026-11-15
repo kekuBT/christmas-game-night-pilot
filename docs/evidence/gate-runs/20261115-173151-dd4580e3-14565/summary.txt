@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | fast | run 20261115-173151-dd4580e3-14565
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w1) [functional]: [31m[1m[7m FAIL [27m[22m[39m tests/lifecycle-scale.test.ts[2m > [22mtest-only lifecycle scale[2m > [22mis refused when NODE_ENV=production (the server does not start) | [31m[1m[7m FAIL [
+  timing   wall 1m 11s · step time 1m 55s (sum) · 3 workers, 54% busy · 1.62× the same steps run one after another
+           predicted 0–2m (about 56s, measured) → actual 1m 11s (+27%)
+           longest  unit-tests 57s, lint 22s, typecheck-web 14s · the longest step is 81% of the wall time
+           machine  CPU mean 76%, peak 99% · memory available ≥ 13767 MB · load peak 4.76
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1f1/test-results/20261115-173151-dd4580e3-14565/report.json

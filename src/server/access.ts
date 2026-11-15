@@ -124,7 +124,7 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 /** The gate page: self-contained (no scripts, no other files), so it works before the app's own files are reachable. */
 export function gatePage(next: string, failed: boolean): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Christmas Game Night · beta</title>
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#1b1530;color:#f6f1e7;font:16px/1.4 system-ui,sans-serif}
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#1b1530;color:#f6f1e7;font:16px/1.4 system-ui,sans-serif}
 main{width:min(92vw,360px);padding:24px;border-radius:16px;background:#2a2147}h1{font-size:22px;margin:0 0 8px}p{margin:0 0 16px;color:#d9d2c3}
 label{display:block;font-weight:600;margin-bottom:6px}input{box-sizing:border-box;width:100%;font-size:18px;padding:12px;border-radius:10px;border:1px solid #6c5fa0;background:#fff;color:#111}
 button{margin-top:14px;width:100%;min-height:48px;font-size:17px;font-weight:700;border:0;border-radius:12px;background:#ff6b4a;color:#111}.err{color:#ffb4a3;font-weight:600}</style></head>

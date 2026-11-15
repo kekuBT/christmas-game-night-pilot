@@ -1,0 +1,20 @@
+PASS G1 320px: a page load without the cookie gets the gate (401)
+FAIL G1 320px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":342,"width":320,"left":0,"right":342}
+PASS G1 320px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+FAIL G2 320px: a wrong code is refused with a plain message, and the page still fits — {"scroll":342,"width":320,"left":0,"right":342}
+PASS G1 390px: a page load without the cookie gets the gate (401)
+FAIL G1 390px: it fits the screen (no sideways scroll; the card is inside the viewport) — {"scroll":407,"width":390,"left":0,"right":407}
+PASS G1 390px: the code field is labelled, and the field and button are at least 44 px tall — field 47, button 48
+FAIL G2 390px: a wrong code is refused with a plain message, and the page still fits — {"scroll":407,"width":390,"left":0,"right":407}
+PASS G3 the right code returns to the page that was asked for, query kept — http://localhost:46409/?join=ABCD
+PASS G3 the beta cookie is HttpOnly and SameSite=Lax (Secure only over https), and isn't the code — true/Lax/false
+PASS G3 the app loads after the gate
+PASS G4 with the cookie: the API creates a room and a live WebSocket opens — {"status":201,"roomId":"room-mwi4cr6h-886369","ws":"open, live update received"}
+PASS G4 without the cookie: the API refuses (401 BETA_ACCESS_REQUIRED) and the WebSocket is refused — {"status":401,"code":"BETA_ACCESS_REQUIRED","ws":"refused"}
+PASS the server never printed the access code
+--- server output ---
+Christmas Game Night server on http://localhost:46409 (web app at / after npm run build:web)
+Phones on the same Wi-Fi: open http://192.0.2.2:46409 on the host device (not localhost), so the QR code works.
+
+cleanup: server stopped (0); data dir removed
+BETA GATE FAILED: 4 failed

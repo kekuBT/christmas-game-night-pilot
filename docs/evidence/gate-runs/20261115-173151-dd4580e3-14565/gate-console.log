@@ -1,0 +1,45 @@
+Mchezo gate fast | run 20261115-173151-dd4580e3-14565
+  revision dd4580e31d20b264b17b284faa5684942d3184a8 (clean tree) | fingerprint ad206b94e6f9 (621 files)
+  plan     5 steps: 5 fast/build, 0 browser drivers · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  232 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 204 run(s))
+  estimate this run: 0–2m (measured) · the same steps one after another: about 1m 47s · longest step unit-tests ~53s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1f1/test-results/20261115-173151-dd4580e3-14565
+        start typecheck-server on w1 (usually 14s)
+        start typecheck-web on w2 (usually 14s)
+        start lint on w3 (usually 20s)
+[ 1/5] PASS        13.3s  typecheck-server  w1
+        start unit-tests on w1 (usually 53s)
+[ 2/5] PASS        14.2s  typecheck-web  w2
+        start build-web on w2 (usually 5s)
+[ 3/5] PASS           8s  build-web  w2
+[ 4/5] PASS        22.4s  lint  w3
+── progress  4/5 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   unit-tests 47s (w1)
+   remaining 15–55s · total 1–2m · done around 17:33–17:33 UTC (measured)
+[ 5/5] FAIL        57.4s  unit-tests  w1  [31m[1m[7m FAIL [27m[22m[39m tests/lifecycle-scale.test.ts[2m > [22mtest-only lifecycle scale[2m > [22mis refused when NODE_ENV=production (the server
+      | 
+      | [36m [2m❯[22m tests/stage83-install.test.ts:[2m277:30[22m[39m
+      |     [90m275| [39m    [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)[33m;[39m
+      |     [90m276| [39m    [34mexpect[39m(res[33m.[39mheaders[33m.[39m[35mget[39m([32m"cache-control"[39m))[33m.[39m[34mtoBe[39m([32m"no-store"[39m)[33m;[39m
+      |     [90m277| [39m    [34mexpect[39m([35mawait[39m res[33m.[39m[34mjson[39m())[33m.[39m[34mtoEqual[39m({ ok[33m:[39m [35mtrue[39m })[33m;[39m
+      |     [90m   | [39m                             [31m^[39m
+      |     [90m278| [39m    [34mexpect[39m(([35mawait[39m [34mfetch[39m(base [33m+[39m [32m"/health"[39m[33m,[39m { method[33m:[39m [32m"POST"[39m }))[33m.[39mstatus)…
+      |     [90m279| [39m  })[33m;[39m
+      | 
+      | [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯[22m[39m
+      | 
+      | [2m Test Files [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m154 passed[39m[22m[90m (158)[39m
+      | [2m      Tests [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m2017 passed[39m[22m[90m (2021)[39m
+      | [2m   Start at [22m 17:32:05
+      | [2m   Duration [22m 56.86s[2m (transform 5.54s, setup 0ms, collect 30.75s, tests 100.96s, environment 37ms, prepare 11.32s)[22m
+
+FAILED (exit 1) | fast | run 20261115-173151-dd4580e3-14565
+  4 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      unit-tests (w1) [functional]: [31m[1m[7m FAIL [27m[22m[39m tests/lifecycle-scale.test.ts[2m > [22mtest-only lifecycle scale[2m > [22mis refused when NODE_ENV=production (the server does not start) | [31m[1m[7m FAIL [
+  timing   wall 1m 11s · step time 1m 55s (sum) · 3 workers, 54% busy · 1.62× the same steps run one after another
+           predicted 0–2m (about 56s, measured) → actual 1m 11s (+27%)
+           longest  unit-tests 57s, lint 22s, typecheck-web 14s · the longest step is 81% of the wall time
+           machine  CPU mean 76%, peak 99% · memory available ≥ 13767 MB · load peak 4.76
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1f1/test-results/20261115-173151-dd4580e3-14565/report.json
