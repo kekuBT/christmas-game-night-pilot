@@ -187,6 +187,16 @@ export const SplitCluesItem = z.object({
 }).strict();
 export const CharadesItem = z.object({ ...BaseItem, prompt: text(60) }).strict();
 
+/**
+ * Stage 12.17 (D-S1217-01): a drawing prompt, in the pool Team Draw and Draw & Guess share (content id "draw-prompts",
+ * a pool rather than a game, as "trivia" is for Team Huddle). `alts` are other names a guess may use for the same thing.
+ */
+export const DrawPromptItem = z.object({
+  ...BaseItem,
+  word: text(40),
+  alts: z.array(text(40)).min(1).max(8).optional(),
+}).strict();
+
 export const ITEM_SCHEMAS = {
   "trivia": TriviaItem,
   "who-said-that": WhoSaidItem,
@@ -199,6 +209,7 @@ export const ITEM_SCHEMAS = {
   "impostor": ImpostorItem,
   "charades": CharadesItem,
   "split-clues": SplitCluesItem,
+  "draw-prompts": DrawPromptItem,
 } as const;
 export type ContentGameId = keyof typeof ITEM_SCHEMAS;
 export const CONTENT_GAMES = Object.keys(ITEM_SCHEMAS) as ContentGameId[];

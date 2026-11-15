@@ -63,7 +63,8 @@ export function itemHash(gameId: string, item: AnyItem | Record<string, unknown>
  * (`approved`, `legacy`, `verified-computed`) approves nothing for them: the loader reports it and treats the item as
  * provisional. Other games keep their established label rules (legacy items, computed answers).
  */
-export const RECORD_ONLY_APPROVAL: ReadonlySet<string> = new Set(["split-clues"]);
+// Stage 12.17 (D-S1217-02): the drawing prompts too (an Official Team Draw game deals only approved prompts).
+export const RECORD_ONLY_APPROVAL: ReadonlySet<string> = new Set(["split-clues", "draw-prompts"]);
 
 export function officialEligible(li: LoadedItem, today: string): boolean {
   if (li.item.eligibility !== "official") return false;

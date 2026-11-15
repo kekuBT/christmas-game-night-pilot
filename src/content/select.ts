@@ -181,6 +181,9 @@ export function selectContent(req: SelectionRequest): SelectionResult {
         // Stage 12.16 (D-S1216-04): Split Clues says what counts there, in the host's words.
         message: req.gameId === "split-clues"
           ? `Split Clues counts only with puzzles a person has approved, and this Cup has ${fresh.length} unused approved puzzle${fresh.length === 1 ? "" : "s"} (an official game needs ${req.count}). Play it as Practice instead: Practice also uses puzzles that are not approved yet.`
+          // Stage 12.17 (D-S1217-02): Team Draw needs one approved, unused drawing prompt per round.
+          : req.gameId === "draw-prompts"
+          ? `Team Draw counts only with drawing words a person has approved, and this Cup has ${fresh.length} unused approved word${fresh.length === 1 ? "" : "s"} (this game has ${req.count} rounds: one word each). Play it as Practice instead: Practice also uses words that are not approved yet.`
           : `Not enough unused approved content left in this Cup for an official game (${fresh.length} left, ${req.count} needed). Play it as practice, or approve more content.`,
       };
     }

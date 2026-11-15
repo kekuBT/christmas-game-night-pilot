@@ -35,6 +35,18 @@ export interface SplitPuzzle {
   season?: ItemSeason;
 }
 
+/**
+ * Stage 12.17 (D-S1217-01): a drawing prompt as Team Draw and Draw & Guess play it. Declared here (not in a module) for
+ * the same reason as SplitPuzzle. The prompts live in the content library (content/packs/draw-prompts.json, one pool
+ * both games share) and reach a game through init: `drawPool` for the usual dealing, `drawDealt` for an Official Team
+ * Draw game's prompts chosen by the content selection.
+ */
+export interface DrawPrompt {
+  id: string; word: string; alts?: string[];
+  /** A Christmas-only prompt (dealt in Christmas sessions and Cups, never in Everyday ones); absent = year-round. */
+  season?: ItemSeason;
+}
+
 export interface ModuleContext {
   /** Server time of this event (a deadline instant when a deadline is processed). */
   now: number;
@@ -72,6 +84,8 @@ export interface GameModule<S = unknown> {
     /** Stage 12.12: Territory's questions (from the Trivia pool, like Team Huddle's). */ quiz?: readonly HuddleQuestion[];
     /** Stage 12.9: Relay's sums (the same for every team). */ relay?: readonly RelayQuestion[];
     /** Stage 12.16: Split Clues' puzzles, chosen by the room's content selection (approval, season, usage). */ split?: readonly SplitPuzzle[];
+    /** Stage 12.17: the shared drawing prompt pool (every non-rejected prompt, in pack order) for the usual dealing. */ drawPool?: readonly DrawPrompt[];
+    /** Stage 12.17: an Official Team Draw game's prompts, chosen by the room's content selection (exact-hash approvals). */ drawDealt?: readonly DrawPrompt[];
     /**
      * Stage 12.10 (D-S1210-01): content ids this room has already played in this game, oldest first (from contentIds()
      * of its earlier games), so a module can deal unplayed content first. Absent: nothing played yet.

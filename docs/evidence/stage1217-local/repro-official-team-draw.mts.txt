@@ -1,0 +1,21 @@
+// Stage 12.17 evidence: does an Official Team Draw game start in a Family Cup with the shipped (unapproved) prompts?
+// Usage: npx tsx repro-official-team-draw.mts <tree>   (no content test mode: the library is loaded as shipped)
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
+const tree = process.argv[2]!;
+const imp = (p: string) => import(pathToFileURL(join(tree, p)).href);
+const { RoomEngine } = await imp("src/server/room.ts");
+const { loadContent } = await imp("src/content/registry.ts");
+const lib = loadContent(join(tree, "content"));
+const engine = new RoomEngine("Family Cup", { kind: "cup", timing: 2 });
+let t = 1_800_000_000_000; engine.clock = () => t;
+engine.content = lib;
+const host = engine.join("Keku", { asHost: true }).player.id;
+for (const n of ["Amina", "Baraka", "Wanjiru"]) engine.join(n);
+const drawItems = lib.byGame.get("draw-prompts") ?? [];
+const out: Record<string, unknown> = { tree, drawPromptsInLibrary: drawItems.length, approvedDrawPrompts: drawItems.filter((x: { status: string }) => x.status === "approved").length, officialContentView: (engine.project("player", host) as Record<string, unknown>)["officialContent"] };
+try {
+  const g = engine.startGame(host, "team-draw", { official: true, seed: 5 });
+  out["result"] = { official: g.official, status: g.status, prompts: (g.extra as { prompts: { id: string }[] }).prompts.map((p) => p.id), pendingContent: g.pendingContent ?? null };
+} catch (e) { out["result"] = { refused: (e as Error).constructor.name, code: (e as { code?: string }).code, message: (e as Error).message }; }
+console.log(JSON.stringify(out, null, 1));

@@ -19,7 +19,8 @@
 
 ## Plan
 1. **One canonical prompt pool in the content library:**
-   - **The packs:** content id `draw-prompts`, a pool rather than a game, as `trivia` is for Team Huddle. The 70 prompts move unchanged (ids, words, alternatives, seasons) into `content/packs/draw-prompts-everyday.json` and `draw-prompts-christmas.json`. They are generated from the TypeScript list, and a test pins them to its fingerprint.
+   - **The pack:** content id `draw-prompts`, a pool rather than a game, as `trivia` is for Team Huddle. The 70 prompts move unchanged (ids, words, alternatives, seasons) into `content/packs/draw-prompts.json`. They are generated from the TypeScript list, and a test pins them to its fingerprint.
+   - **Changed during the work:** one pack, not the two (Everyday and Christmas) planned. Every game deals by shuffling the list's own order with its seed, and the Christmas prompts sit among the year-round ones (`dg-002`…`dg-004`). One pack in that order keeps every seed dealing exactly as before; two packs would have changed the order.
    - **The shared fields:** `difficulty` 2 (a placeholder; the list has none), a category, `source: original-creative`, `review.status: provisional`, `eligibility: official`.
    - **The adapter:** a typed server-side one gives both modules the same prompt objects, so the pool is never cloned. The modules get their prompts through `init`, as Split Clues does.
 2. **Official Team Draw needs record-only approval:**

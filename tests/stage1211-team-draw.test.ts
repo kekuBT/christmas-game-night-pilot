@@ -10,7 +10,10 @@ import {
   TEAM_DRAW_LOCK_MS, TEAM_DRAW_MAX_GUESSES, TEAM_DRAW_POINTS, TEAM_DRAW_TAKEOVER_MS, passTarget, takeoverAt, teamDrawModule as m, teamDrawRoundCount, type TeamDrawState,
 } from "../src/games/modules/teamDraw.js";
 import { DRAW_LIMITS, drawModule, drawPromptsFor, type DrawState } from "../src/games/modules/draw.js";
-import { DRAW_PROMPTS } from "../src/games/modules/packs/draw-prompts.js";
+// Stage 12.17: the prompts live in the content library; this is the shared pool the games deal from (pack order).
+import { drawPromptPool } from "../src/content/materialize.js";
+import { loadContent } from "../src/content/registry.js";
+const DRAW_PROMPTS = drawPromptPool(loadContent());
 import { moduleRng, seededShuffle, type ModuleContext } from "../src/games/modules/types.js";
 import { RoomEngine } from "../src/server/room.js";
 
@@ -22,7 +25,7 @@ const T0 = 3_000_000;
 const ctx = (now: number, ps: readonly string[] = players): ModuleContext => ({ now, players: ps, active: ps, scale: 1 });
 const view = (s: TeamDrawState, p: string, now: number) => m.playerView(s, p, ctx(now)) as Record<string, unknown>;
 function game(seed = 7, t: GameTeams = teams, ps: string[] = players): TeamDrawState {
-  const s = m.init({ players: ps, seed, teams: t, season: "everyday" });
+  const s = m.init({ players: ps, seed, teams: t, season: "everyday", drawPool: DRAW_PROMPTS });
   m.onPlayStart(s, ctx(T0, ps));
   return s;
 }
@@ -237,9 +240,9 @@ describe("Team Draw (pure)", () => {
 
 describe("the drawing games share one word history (D-S1211-01)", () => {
   it("drawPromptsFor deals unplayed words first, and with nothing to avoid deals exactly as before", () => {
-    for (const seed of [1, 9]) expect(drawPromptsFor(undefined, moduleRng(seed), [])).toEqual(seededShuffle(DRAW_PROMPTS, moduleRng(seed)));
-    const played = drawPromptsFor("everyday", moduleRng(4)).slice(0, 10).map((p) => p.id);
-    const next = drawPromptsFor("everyday", moduleRng(4), played);
+    for (const seed of [1, 9]) expect(drawPromptsFor(DRAW_PROMPTS, undefined, moduleRng(seed), [])).toEqual(seededShuffle(DRAW_PROMPTS, moduleRng(seed)));
+    const played = drawPromptsFor(DRAW_PROMPTS, "everyday", moduleRng(4)).slice(0, 10).map((p) => p.id);
+    const next = drawPromptsFor(DRAW_PROMPTS, "everyday", moduleRng(4), played);
     const firstPart = next.slice(0, next.length - played.length).map((p) => p.id);
     expect(firstPart.some((id) => played.includes(id))).toBe(false);
     expect(next.slice(-played.length).map((p) => p.id)).toEqual(played);
@@ -247,12 +250,12 @@ describe("the drawing games share one word history (D-S1211-01)", () => {
 
   it("Draw & Guess lists the words it dealt (swaps included) and avoids played ones", () => {
     const ps = ["a", "b", "c"];
-    const s = drawModule.init({ players: ps, seed: 2, season: "everyday" }) as DrawState;
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: ps, seed: 2, season: "everyday" }) as DrawState;
     expect(drawModule.contentIds(s)).toEqual(s.prompts.slice(0, 3).map((p) => p.id));
     drawModule.intent(s, s.turns[0]!.drawer, "draw-swap", {}, { now: 1, players: ps, active: ps, scale: 1 });
     expect(drawModule.contentIds(s)).toHaveLength(4);
     const avoid = drawModule.contentIds(s);
-    const again = drawModule.init({ players: ps, seed: 2, season: "everyday", avoid }) as DrawState;
+    const again = drawModule.init({ drawPool: DRAW_PROMPTS, players: ps, seed: 2, season: "everyday", avoid }) as DrawState;
     expect(again.prompts.some((p) => avoid.includes(p.id))).toBe(false);
   });
 });

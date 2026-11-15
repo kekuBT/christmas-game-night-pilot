@@ -29,6 +29,7 @@ function answerOf(li: LoadedItem): string {
     case "impostor": return `${it["word"]} (${it["hintCategory"]})`;
     case "caption-clash": case "charades": return "—";
     case "split-clues": return [String(it["answer"]), ...((it["alts"] as string[] | undefined) ?? [])].join(" / ");
+    case "draw-prompts": return [String(it["word"]), ...((it["alts"] as string[] | undefined) ?? [])].join(" / ");
     default: return String(it["answer"] ?? "");
   }
 }

@@ -1,0 +1,1 @@
+{"total":70,"christmas":["dg-002","dg-003","dg-004"],"withAlts":15,"digest":"165c7ad5d7273910a34a559395098f2096dba3a552479c345135d39443a0b0f0"}

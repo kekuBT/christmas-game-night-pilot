@@ -5,7 +5,7 @@
  * game in progress or a finished result.
  */
 import { seededRng } from "../shared/rng.js";
-import type { LoadedItem } from "./registry.js";
+import type { ContentLibrary, LoadedItem } from "./registry.js";
 import type { ContentGameId, ItemOf } from "./schema.js";
 import type { TriviaQuestion } from "../games/trivia.js";
 import type { WhoSaidQuestion } from "../games/whosaid.js";
@@ -18,7 +18,8 @@ import type { ConnectionsBoard } from "../games/connections.js";
 import { initImpostor } from "../games/impostor.js";
 import { initCharades } from "../games/charades.js";
 import type { GameTeams } from "../shared/teams.js";
-import type { SplitPuzzle } from "../games/modules/splitClues.js";
+import type { DrawPrompt, SplitPuzzle } from "../games/modules/types.js";
+import { TEAM_DRAW_ROUNDS } from "../games/modules/teamDraw.js";
 
 /** How many items one game uses. Charades uses one prompt per player turn (plus passes). */
 export const ITEMS_PER_GAME: Record<ContentGameId, number> = {
@@ -33,6 +34,8 @@ export const ITEMS_PER_GAME: Record<ContentGameId, number> = {
   "impostor": 1,
   "charades": 12,
   "split-clues": 6,
+  // Stage 12.17: an Official Team Draw game takes one prompt per round (3–5, from its final teams); this is the most.
+  "draw-prompts": TEAM_DRAW_ROUNDS.max,
 };
 
 function shuffle<T>(xs: T[], rng: () => number): T[] {
@@ -127,6 +130,9 @@ export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { s
     case "split-clues":
       // Stage 12.16: the puzzles, copied (the module's state keeps them for the game's whole life).
       return { puzzles: items.map((li) => splitPuzzleOf(li)) };
+    case "draw-prompts":
+      // Stage 12.17: an Official Team Draw game's prompts, in the order chosen (copied, like Split Clues' puzzles).
+      return { prompts: items.map((li) => drawPromptOf(li)) };
   }
 }
 
@@ -135,4 +141,19 @@ export function splitPuzzleOf(li: LoadedItem): SplitPuzzle {
   const it = as<"split-clues">(li);
   const c = it.clues;
   return { id: it.id, kind: it.kind, answer: it.answer, ...(it.alts ? { alts: [...it.alts] } : {}), clues: [c[0]!, c[1]!, c[2]!, c[3]!, c[4]!, c[5]!], ...(it.season ? { season: it.season } : {}) };
+}
+
+/** Stage 12.17 (D-S1217-01): a drawing prompt as the games play it (a full copy: later pack edits never reach a game). */
+export function drawPromptOf(li: LoadedItem): DrawPrompt {
+  const it = as<"draw-prompts">(li);
+  return { id: it.id, word: it.word, ...(it.alts ? { alts: [...it.alts] } : {}), ...(it.season ? { season: it.season } : {}) };
+}
+
+/**
+ * Stage 12.17 (D-S1217-01): the one shared prompt pool, as Practice, casual Team Draw and Draw & Guess deal from it:
+ * every prompt that isn't rejected, in the pack's own order (each game shuffles that order with its seed, so the order
+ * is kept as it was in the TypeScript list).
+ */
+export function drawPromptPool(lib: ContentLibrary): DrawPrompt[] {
+  return (lib.byGame.get("draw-prompts") ?? []).filter((li) => li.status !== "rejected").map(drawPromptOf);
 }

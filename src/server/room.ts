@@ -22,8 +22,10 @@ import { qualifies, QualificationPolicySchema, type GameParticipationRecord, typ
 import { CupRecordSchema, describePolicy, newCupRecord, restoreCupRecord, type CupRecord, type CupTiming } from "./cup.js";
 import { contentLibrary, officialEligible, practiceUsable, type ContentLibrary, type LoadedItem } from "../content/registry.js";
 import { recordUsage, selectContent, type SelectionRequest, type UsageHistory } from "../content/select.js";
-import { ITEMS_PER_GAME, materialize } from "../content/materialize.js";
+import { ITEMS_PER_GAME, drawPromptPool, materialize } from "../content/materialize.js";
 import type { SplitPuzzle } from "../games/modules/splitClues.js";
+import type { DrawPrompt } from "../games/modules/types.js";
+import { teamDrawRoundCount } from "../games/modules/teamDraw.js";
 import { CONTENT_GAMES, type ContentGameId } from "../content/schema.js";
 import { seededRng } from "../shared/rng.js";
 import type { ConnectionsBoard } from "../games/connections.js";
@@ -1030,13 +1032,16 @@ export class RoomEngine {
     // Stage 12.8 (D-S128-02): Team Huddle's questions come from the Trivia pool, used up the same way; Stage 12.12:
     // Territory's too (TRIVIA_TEAM_GAMES: how many questions each takes).
     const quizRounds = TRIVIA_TEAM_GAMES[gameId];
-    const contentGameId = quizRounds !== undefined ? "trivia" : gameId;
+    // Stage 12.17 (D-S1217-02): an Official Team Draw game's prompts come from the library's shared drawing pool, one
+    // approved, unused prompt per round; any other Team Draw or Draw & Guess game deals from that pool by its own rules.
+    const drawOfficial = gameId === "team-draw" && (opts.official ?? false);
+    const contentGameId = quizRounds !== undefined ? "trivia" : drawOfficial ? "draw-prompts" : gameId;
     // Stage 12.16 (D-S1216-01): Split Clues' puzzles come from the content library in every room, whatever the Cup's
     // origin, so an Official game deals only approved puzzles everywhere (it never had a pre-library bank to keep).
-    if ((this._cup.origin === "created" || contentGameId === "split-clues") && (CONTENT_GAMES as string[]).includes(contentGameId)) {
+    if ((this._cup.origin === "created" || contentGameId === "split-clues" || drawOfficial) && (CONTENT_GAMES as string[]).includes(contentGameId)) {
       const cg = contentGameId as ContentGameId;
       const mode = (opts.official ?? false) ? "official" : "practice";
-      const need = quizRounds !== undefined ? quizRounds : cg === "charades" ? Math.max(ITEMS_PER_GAME.charades, playerIds.length * 4) : ITEMS_PER_GAME[cg];
+      const need = quizRounds !== undefined ? quizRounds : cg === "charades" ? Math.max(ITEMS_PER_GAME.charades, playerIds.length * 4) : cg === "draw-prompts" ? teamDrawRoundCount(nativeTeams!, playerIds) : ITEMS_PER_GAME[cg];
       // E2 v3: Category Sprint eligibility and matcher are frozen here, at
       // game start, from the Cup's own rules (absent on older Cups = v1).
       const sprintRules = cg === "category-sprint" ? this._cup.categorySprint : undefined;
@@ -1103,7 +1108,7 @@ export class RoomEngine {
                           ? { roundIndex: 0, submissions: {} }
                           : gameId === "charades"
                             ? initCharades(playerIds, undefined, nativeTeams)
-                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}), ...(gameId === "territory" ? { quiz: triviaQuiz(selected?.extra, seed, TERRITORY_ROUNDS) } : {}), ...(gameId === "relay" ? { relay: relayQuestions(seed) } : {}), ...(gameId === "split-clues" ? { split: (selected?.extra as { puzzles?: SplitPuzzle[] } | undefined)?.puzzles ?? [] } : {}), ...(avoid && avoid.length ? { avoid } : {}) }),
+                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}), ...(gameId === "territory" ? { quiz: triviaQuiz(selected?.extra, seed, TERRITORY_ROUNDS) } : {}), ...(gameId === "relay" ? { relay: relayQuestions(seed) } : {}), ...(gameId === "split-clues" ? { split: (selected?.extra as { puzzles?: SplitPuzzle[] } | undefined)?.puzzles ?? [] } : {}), ...(gameId === "team-draw" || gameId === "draw-guess" ? (drawOfficial ? { drawDealt: (selected?.extra as { prompts?: DrawPrompt[] } | undefined)?.prompts ?? [] } : { drawPool: drawPromptPool(this.content) }) : {}), ...(avoid && avoid.length ? { avoid } : {}) }),
     };
     // Stage 12.7 (D-S127-02): played as teams when the room has teams, the game can be, and at least two teams have
     // players in it; the teams are copied now (only this game's players), never read back from the room later.
@@ -2607,7 +2612,9 @@ export class RoomEngine {
   private selectionRequest(cg: ContentGameId, count: number, mode: "official" | "practice", at: number, season: SessionSeason | undefined, sprint?: SelectionRequest["sprint"]): SelectionRequest {
     return {
       lib: this.content, gameId: cg, count, mode, roomKind: this.kind, cupId: this._cup.cupId,
-      usage: cg === "split-clues" ? this.usageWithDealtIds(cg) : this.contentUsage,
+      // Stage 12.17 (D-S1217-04): the drawing pool's usage includes what every Team Draw and Draw & Guess game dealt
+      // (they share one history, swaps included), since Practice and casual games deal outside the selection.
+      usage: cg === "split-clues" ? this.usageWithDealtIds("split-clues", "dealt-before-stage-12.16") : cg === "draw-prompts" ? this.usageWithDealtIds("team-draw", "dealt-by-a-drawing-game") : this.contentUsage,
       seq: this.contentSeq, today: new Date(at).toISOString().slice(0, 10),
       ...(sprint ? { sprint } : {}), ...(season ? { season } : {}),
       ...(cg === "split-clues" && this.kind === "cup" ? { yearRoundOnly: true } : {}),
@@ -2620,11 +2627,11 @@ export class RoomEngine {
    * saved rooms are never rewritten. Each such id counts as used (so a Cup never deals as Official a puzzle it already
    * showed in practice) and as the oldest use (seq 0) when unused puzzles are ranked first.
    */
-  private usageWithDealtIds(gameId: string): UsageHistory {
+  private usageWithDealtIds(gameId: string, label: string): UsageHistory {
     const dealt = this.playedContentIds(gameId).filter((id) => !(this.contentUsage[id]?.length));
     if (dealt.length === 0) return this.contentUsage;
     const out: UsageHistory = { ...this.contentUsage };
-    for (const id of dealt) out[id] ??= [{ gameInstanceId: "dealt-before-stage-12.16", day: 1, mode: "practice", seq: 0 }];
+    for (const id of dealt) out[id] ??= [{ gameInstanceId: label, day: 1, mode: "practice", seq: 0 }];
     return out;
   }
 
@@ -2634,9 +2641,15 @@ export class RoomEngine {
    */
   officialContentView(now: number): Record<string, { available: number; needed: number; message?: string }> | undefined {
     if (this.kind !== "cup") return undefined;
-    const needed = ITEMS_PER_GAME["split-clues"];
-    const pick = selectContent(this.selectionRequest("split-clues", needed, "official", now, undefined));
-    return { "split-clues": pick.ok ? { available: needed, needed } : { available: pick.available, needed, message: pick.message } };
+    const view = (cg: ContentGameId, needed: number) => {
+      const pick = selectContent(this.selectionRequest(cg, needed, "official", now, undefined));
+      return pick.ok ? { available: needed, needed } : { available: pick.available, needed, message: pick.message };
+    };
+    // Stage 12.17 (D-S1217-02): Team Draw needs one prompt per round: 3–5, from the teams it would play with now (the
+    // roster and teams the server's start would use; two dealt teams' sizes don't depend on the seed).
+    const roster = this.readiness(now).wouldPlay;
+    const drawRounds = teamDrawRoundCount(this.teamsForTeamGame("team-draw", roster, 0), roster);
+    return { "split-clues": view("split-clues", ITEMS_PER_GAME["split-clues"]), "team-draw": view("draw-prompts", drawRounds) };
   }
 
   /**

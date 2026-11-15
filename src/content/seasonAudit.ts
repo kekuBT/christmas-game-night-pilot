@@ -9,7 +9,6 @@
  *
  * Server-only (it reads answers), like the rest of src/content.
  */
-import { DRAW_PROMPTS } from "../games/modules/packs/draw-prompts.js";
 import type { ContentLibrary } from "./registry.js";
 
 /** Words only Christmas has (winter, snow, presents, December and turkey are year-round on their own). */
@@ -25,7 +24,8 @@ export const REVIEWED_YEAR_ROUND: Readonly<Record<string, string>> = {
   "spr-s4-008": "things that are cold: the North Pole is one answer among many",
 };
 
-export interface SeasonAuditFinding { source: "pack" | "draw-prompts"; gameId: string; itemId: string; words: string[] }
+/** Stage 12.17: the drawing prompts are a library pack too ("draw-prompts"), so every finding comes from a pack. */
+export interface SeasonAuditFinding { source: "pack"; gameId: string; itemId: string; words: string[] }
 
 const wordsIn = (text: string): string[] => [...new Set((text.match(new RegExp(CHRISTMAS_WORDS.source, "gi")) ?? []).map((w) => w.toLowerCase()))];
 
@@ -38,11 +38,6 @@ export function seasonAuditFindings(lib: ContentLibrary): SeasonAuditFinding[] {
     void _r; void _s; void _i;
     const words = wordsIn(JSON.stringify(shown));
     if (words.length) out.push({ source: "pack", gameId: li.gameId, itemId: li.item.id, words });
-  }
-  for (const p of DRAW_PROMPTS) {
-    if (p.season !== undefined || p.id in REVIEWED_YEAR_ROUND) continue;
-    const words = wordsIn([p.word, ...(p.alts ?? [])].join(" "));
-    if (words.length) out.push({ source: "draw-prompts", gameId: "draw-guess", itemId: p.id, words });
   }
   return out.sort((a, b) => a.itemId.localeCompare(b.itemId));
 }

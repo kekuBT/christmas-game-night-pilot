@@ -23,9 +23,8 @@
 import type { SessionSeason } from "../../shared/season.js";
 import type { GameTeams } from "../../shared/teams.js";
 import { DRAW_LIMITS, drawPromptsFor, letterPattern, validPiece, type DrawPiece } from "./draw.js";
-import type { DrawPrompt } from "./packs/draw-prompts.js";
 import { answerMatches, catchUpTeam, teamIdsInGame, teamMembers } from "./teamKit.js";
-import { moduleRng, seededShuffle, type GameModule, type ModuleContext } from "./types.js";
+import { moduleRng, seededShuffle, type DrawPrompt, type GameModule, type ModuleContext } from "./types.js";
 import { TEAM_DRAW_TAKEOVER_MS } from "./team-draw-timing.js";
 export { TEAM_DRAW_MS, TEAM_DRAW_REVEAL_MS, TEAM_DRAW_TAKEOVER_MS } from "./team-draw-timing.js";
 
@@ -161,8 +160,8 @@ function movePen(tr: TeamDrawTeamRound, to: string, how: "pass" | "takeover", no
 }
 
 /** The words a game may deal: the session's season (Christmas words first in a Christmas session), unplayed first. */
-export function teamDrawPromptsFor(season: SessionSeason | undefined, rng: () => number, avoid: readonly string[] = []): DrawPrompt[] {
-  return drawPromptsFor(season, rng, avoid);
+export function teamDrawPromptsFor(pool: readonly DrawPrompt[], season: SessionSeason | undefined, rng: () => number, avoid: readonly string[] = []): DrawPrompt[] {
+  return drawPromptsFor(pool, season, rng, avoid);
 }
 
 const distinctStrokes = (pieces: readonly DrawPiece[]) => new Set(pieces.map((x) => x.s)).size;
@@ -172,12 +171,23 @@ export const teamDrawModule: GameModule<TeamDrawState> & { onPlayStart(s: TeamDr
   actions: ["team-draw-strokes", "team-draw-undo", "team-draw-clear", "team-draw-guess", "team-draw-pass", "team-draw-takeover"],
   // Draw & Guess and Team Draw deal from the same word pack: one no-repeat history (D-S1211-01).
   contentPool: "draw-prompts",
-  init({ players, seed, season, teams, avoid }) {
+  init({ players, seed, season, teams, avoid, drawPool, drawDealt }) {
     const rng = moduleRng(seed);
     const t: GameTeams = teams ?? { list: [], members: {} };
     const drawOrder: Record<string, string[]> = {};
     for (const id of teamIdsInGame(t, players)) drawOrder[id] = seededShuffle(teamMembers(t, players, id), rng);
-    const prompts = teamDrawPromptsFor(season, rng, avoid).slice(0, teamDrawRoundCount(t, players));
+    const rounds = teamDrawRoundCount(t, players);
+    // Stage 12.17 (D-S1217-02): an Official game plays exactly the prompts the room's content selection chose (one per
+    // round, each with an exact-hash approval); any other game deals from the shared pool by the usual rules.
+    let source: readonly DrawPrompt[];
+    if (drawDealt) {
+      if (drawDealt.length < rounds) throw new Error(`Team Draw needs ${rounds} chosen prompts; it got ${drawDealt.length}.`);
+      source = drawDealt;
+    } else {
+      if (!drawPool || drawPool.length === 0) throw new Error("Team Draw needs its prompts from the content library.");
+      source = teamDrawPromptsFor(drawPool, season, rng, avoid);
+    }
+    const prompts = source.slice(0, rounds).map((p) => ({ ...p, ...(p.alts ? { alts: [...p.alts] } : {}) }));
     return { players: [...players], teams: t, drawOrder, prompts, round: 0, phase: "draw", roundStartedAt: null, roundStarts: [], rounds: {} };
   },
   onPlayStart(s, ctx) {

@@ -1,0 +1,24 @@
+// Stage 12.17 scratch: generate content/packs/draw-prompts.json from the TypeScript list, unchanged and in order. Kept as evidence.
+import { writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+const wt = process.argv[2]!;
+const { DRAW_PROMPTS } = await import(`${wt}/src/games/modules/packs/draw-prompts.ts`);
+const item = (p: any) => ({
+  id: p.id,
+  difficulty: 2,
+  category: "drawing",
+  language: "en",
+  eligibility: "official",
+  review: { status: "provisional", notes: "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it." },
+  source: { kind: "original-creative" },
+  ...(p.season ? { season: p.season } : {}),
+  word: p.word,
+  ...(p.alts ? { alts: [...p.alts] } : {}),
+});
+// One pack, in the list's own order: every game deals by shuffling this order with its seed, so the order is kept exactly.
+const pack = { schemaVersion: 1, packId: "draw-prompts", gameId: "draw-prompts", version: "1.0.0", title: "Drawing prompts (Team Draw and Draw & Guess)", language: "en", items: DRAW_PROMPTS.map(item) };
+writeFileSync(`${wt}/content/packs/draw-prompts.json`, JSON.stringify(pack, null, 2) + "\n");
+// The fingerprint of what players see and guess, from the list (kept in the test that pins the move).
+const canon = (p: any) => JSON.stringify([p.id, p.word, p.alts ?? [], p.season ?? null]);
+const digest = createHash("sha256").update(DRAW_PROMPTS.map(canon).join("\n")).digest("hex");
+console.log(JSON.stringify({ total: DRAW_PROMPTS.length, christmas: DRAW_PROMPTS.filter((p: any) => p.season === "christmas").map((p: any) => p.id), withAlts: DRAW_PROMPTS.filter((p: any) => p.alts).length, digest }));
