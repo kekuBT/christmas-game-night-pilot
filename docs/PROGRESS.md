@@ -3017,3 +3017,8 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/evidence/stage1216r-local/README.md`.
 - **Next:** the owner's confirmation of the repairs on #41. Puzzle approvals remain the owner's (or an editor's).
 - **Risk:** none known beyond Stage 12.16's: no puzzle is approved, and difficulty is a placeholder.
+
+## Beta R1: readiness and a portable production package (in progress)
+- **Brief:** the owner's priority update 6896572377 on #42 (2026-11-15, 10:05 a.m. ET). It allows deployment conditionally, after readiness clearance, at $0; it allows no spending, stack merge, disabled games or weakened checks. This slice is the readiness work; ChatGPT owns host selection.
+- **Base:** #41's head `1955c28` (the latest cleared candidate). Stage 12.17 (#42, not yet cleared) is not in this base.
+- **Branch:** `claude/beta-r1-readiness`. **Spec and estimate:** `docs/beta/beta-r1.md` (about 9 h, written at 11:50 a.m. ET).
