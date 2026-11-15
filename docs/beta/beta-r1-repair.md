@@ -152,3 +152,26 @@ About **7 h 30 min**.
 - **Why it was faster:** the TLS proxy and the checks reused the existing gate and release check patterns.
 - **The two surprises:** the sandbox's outbound proxy and B-13. Each took one diagnostic run.
 
+
+## Third round: the zod advisory's real exposure (review 6903002137)
+**The review:** the owner's ChatGPT review confirmed R3 and R4/B-13 with no remaining finding. Its private journey audit is still blocked by Codespaces' forwarded `Origin` (ChatGPT's to solve). It asked me for one bounded task: a reproducible assessment of how exposed the app is to zod 3.25.76's advisory GHSA-mrhx-c7xc-m3w5 ("Zod can exhaust memory while validating oversized constrained collections"; high; fixed only in 4.6.6+). That replaces the earlier single measurement (D-2, D-BR1-05). #42 stays separate. Nothing is merged or deployed.
+
+**Plan:**
+1. **The map:** every zod schema that network input reaches (HTTP bodies, WebSocket intents and their payloads), with:
+   - its collections and constraints, nested ones included;
+   - the limits in front of it: the body and message caps, the beta gate, sessions, rate limits;
+   - what the server sends back from a failed parse (the issue list, or one message).
+2. **Measurement in a capped child process:** small heap limits (`--max-old-space-size`), never run alongside anything else. For each reachable collection schema, the worst inputs that fit the caps: long invalid arrays, nested invalid arrays, arrays over `.max()`. It records the issues produced, peak heap, time and response size. Through the real server too: an authenticated client at the cap, sequential and concurrent, watching the server's heap.
+3. **The verdict:**
+   - **If the memory can't be exhausted within the bounds,** the precise bounds and the residual dependency risk.
+   - **If it can,** the smallest compatibility-tested mitigation: for example, check a collection's length before zod walks it, or an upgrade path. Valid messages, scoring and rejections must be preserved. No `audit fix --force`, and no unrelated migration.
+4. **Focused checks;** broader gates only if production code or dependencies change. Then one new completed report.
+
+**Estimate (written before the work, at 6:15 p.m. ET):** about **2 h 30 min** for the assessment and report, plus about 1 h 30 min if a mitigation is needed.
+
+| Part | Estimate |
+|---|---|
+| The map (schemas, limits, error responses) | 40 min |
+| The capped measurements (isolated and through the server) | 50 min |
+| Verdict, docs, report | 1 h |
+| A mitigation, if one is needed, with its tests and gates | 1 h 30 min |

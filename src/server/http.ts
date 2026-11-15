@@ -19,6 +19,7 @@ import { isSessionSeason, SESSION_SEASONS, type SessionSeason } from "../shared/
 import { RoomStore, type RestoreReport } from "./persistence.js";
 import { FailureLimiter, PendingRecoveries } from "./recovery.js";
 import { AccessGuard, applySecurityHeaders, gatePage, safeNext, type AccessOptions } from "./access.js";
+import { boundedArray } from "./boundedArray.js";
 
 /** A change was applied in memory but could not be written to disk. */
 class PersistError extends Error {
@@ -148,11 +149,14 @@ export class LocalServer {
     z.object({ action: z.literal("play"), on: z.boolean() }).strict(),
     z.object({ action: z.literal("clear") }).strict(),
   ]);
-  /** Stage 12.5: a new Family Question (the room checks it with src/shared/familyPack.ts; this only bounds the shape). */
+  /**
+   * Stage 12.5: a new Family Question (the room checks it with src/shared/familyPack.ts; this only bounds the shape).
+   * Beta R1-R round 3: `options` checks its length before any element (boundedArray, GHSA-mrhx-c7xc-m3w5).
+   */
   static readonly FamilyQuestionSchema = z.object({
     kind: z.enum(["choice", "who"]),
     prompt: z.string().max(1000),
-    options: z.array(z.string().max(500)).max(8).optional(),
+    options: boundedArray(z.string().max(500), 8).optional(),
     correctIndex: z.number().int().min(0).max(7).optional(),
     answerPlayerId: z.string().min(1).max(128).optional(),
   }).strict();
@@ -164,7 +168,8 @@ export class LocalServer {
         expectedPlayers: z.number().int().min(1).max(10),
         budgetMinutes: z.union([z.literal(15), z.literal(30), z.literal(60)]),
         // Stage 12.3 (D-S123-01): `official` marks an item Official in a Family Cup's lineup (the room checks it).
-        items: z.array(z.object({ gameId: z.string().min(1).max(64), official: z.boolean().optional() }).strict()).min(1).max(8),
+        // Beta R1-R round 3: the length is checked before any item (boundedArray, GHSA-mrhx-c7xc-m3w5).
+        items: boundedArray(z.object({ gameId: z.string().min(1).max(64), official: z.boolean().optional() }).strict(), 8, 1),
       }).strict(),
     }).strict(),
     z.object({ baseRevision: z.number().int().min(0), clear: z.literal(true) }).strict(),
