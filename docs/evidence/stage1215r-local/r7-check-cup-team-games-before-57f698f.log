@@ -1,0 +1,18 @@
+PASS A the room is now a Family Cup: 75% individual, 25% team — {"format":"combined-75-25","label":"Family Cup","description":"Daily score: 75% individual games, 25% team games.","teamGamesCount":true,"cupId":"cup-mwhlwwhq-b0icam","qualifying":"A day counts if you really played at least one official game that day: at least 50% of it and at least 2 answers or moves (wrong answers count; sitting out doesn't)."}
+PASS A the host's Teams card is in the Cup lobby, with the Cup's wording
+PASS A a guest's phone has no team controls (no Make teams, no Edit teams)
+FAIL A the host's Make teams opens the teams sheet in the Cup lobby — not within 10000ms
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByTestId('teams-count-2')[22m
+
+    at /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1215r/scripts/check-cup-team-games.mjs:107:43 {
+  log: [ "  - waiting for getByTestId('teams-count-2')" ],
+  name: 'TimeoutError'
+}
+
+Node.js v22.23.4

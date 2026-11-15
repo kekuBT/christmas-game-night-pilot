@@ -1916,8 +1916,9 @@ export function App() {
           }}
         />
       )}
-      {/* Stage 12.7 (D-S127-01): the host's teams sheet. */}
-      {sheet === "teams" && isHostish && proj?.roomKind === "casual" && (
+      {/* Stage 12.7 (D-S127-01): the host's teams sheet. Review 6892025042: a Family Cup has teams too (D-S1215-01), so
+          the sheet opens there as well; before, the Cup lobby's "Make teams" / "Edit teams" opened nothing. */}
+      {sheet === "teams" && isHostish && (proj?.roomKind === "casual" || proj?.roomKind === "cup") && (
         <TeamsSheet teams={proj.teams} players={players} busy={teamsBusy} error={teamsErr || undefined} onClose={closeSheet}
           onMake={(count) => void teamsPost({ action: "make", count })}
           onMove={(playerId, teamId) => void teamsPost({ action: "move", playerId, teamId, ...(proj.teams ? { baseRevision: proj.teams.revision } : {}) })}
