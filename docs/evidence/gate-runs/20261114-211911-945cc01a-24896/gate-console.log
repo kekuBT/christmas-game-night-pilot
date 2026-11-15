@@ -1,0 +1,87 @@
+Mchezo gate targeted | run 20261114-211911-945cc01a-24896
+  revision 945cc01a07584cbe6eb8851cb3d80556fdbacab3 (clean tree) | fingerprint 0fb454140a48 (597 files)
+  plan     23 steps: 1 fast/build, 21 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 14.9 GB available)
+  history  188 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.05 for 3 worker(s) (measured, 162 run(s))
+  estimate this run: 4–13m (low-confidence) · the same steps one after another: about 17m 21s · longest step check-session-flow ~2m 52s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.05 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-tug-of-war
+  thin     only 1–2 samples for: check-territory
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1213t1/test-results/20261114-211911-945cc01a-24896
+        start build-web on w1 (usually 6s)
+[ 1/23] PASS         5.8s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/23] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:35289 (pid 25011, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1213t1/test-results/20261114-211911-945cc01a-24896/server-data/w1)
+  server   w2 http://localhost:42993 (pid 25012, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1213t1/test-results/20261114-211911-945cc01a-24896/server-data/w2)
+  server   w3 http://localhost:36047 (pid 25014, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1213t1/test-results/20261114-211911-945cc01a-24896/server-data/w3)
+        start check-session-flow on w1 (usually 2m 52s)
+        start check-split-clues on w2 (usually 1m 43s)
+        start check-briefing on w3 (usually 1m 29s)
+── progress  2/23 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-session-flow 52s (w1), check-split-clues 52s (w2), check-briefing 52s (w3)
+   remaining 3–12m · total 4–13m · done around 21:23–21:31 UTC (low-confidence)
+[ 3/23] PASS        95.2s  check-briefing  w3
+        start check-territory on w3 (usually 1m 24s)
+[ 4/23] PASS       110.9s  check-split-clues  w2
+        start check-warm-ivory on w2 (usually 1m 05s)
+── progress  4/23 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-session-flow 1m 52s (w1), check-territory 17s (w3), check-warm-ivory 1s (w2)
+   remaining 2–10m · total 4–12m · done around 21:24–21:30 UTC (low-confidence)
+── progress  4/23 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-session-flow 2m 52s (w1), check-territory 1m 17s (w3), check-warm-ivory 1m 01s (w2)
+   remaining 2–9m · total 5–12m · done around 21:24–21:30 UTC (low-confidence)
+[ 5/23] PASS        67.9s  check-warm-ivory  w2
+        start check-tug-of-war on w2 (no timing history)
+[ 6/23] PASS       182.3s  check-session-flow  w1
+        start check-team-draw on w1 (usually 56s)
+[ 7/23] PASS          89s  check-territory  w3
+        start check-math on w3 (usually 55s)
+── progress  7/23 done · 7 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-tug-of-war 53s (w2), check-team-draw 50s (w1), check-math 48s (w3)
+   remaining 1–6m · total 5–10m · done around 21:25–21:28 UTC (low-confidence)
+[ 8/23] PASS        60.2s  check-team-draw  w1
+        start check-team-huddle on w1 (usually 53s)
+[ 9/23] PASS        61.4s  check-math  w3
+        start check-math-network on w3 (usually 50s)
+── progress  9/23 done · 9 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-tug-of-war 1m 53s (w2), check-team-huddle 50s (w1), check-math-network 47s (w3)
+   remaining 1–5m · total 6–10m · done around 21:25–21:28 UTC (low-confidence)
+[10/23] PASS        51.9s  check-math-network  w3
+        start check-results on w3 (usually 48s)
+[11/23] PASS        55.7s  check-team-huddle  w1
+        start check-quick-party on w1 (usually 47s)
+[12/23] PASS         144s  check-tug-of-war  w2
+        start check-one-path on w2 (usually 33s)
+[13/23] PASS        51.7s  check-results  w3
+        start check-math-timing on w3 (usually 27s)
+── progress  13/23 done · 13 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-quick-party 54s (w1), check-one-path 29s (w2), check-math-timing 3s (w3)
+   remaining 0–2m · total 6–8m · done around 21:25–21:26 UTC (low-confidence)
+[14/23] PASS        33.5s  check-one-path  w2
+        start check-library-nav on w2 (usually 25s)
+[15/23] PASS        78.3s  check-quick-party  w1
+        start check-relay on w1 (usually 24s)
+[16/23] PASS        27.5s  check-math-timing  w3
+        start check-tv-show on w3 (usually 12s)
+[17/23] PASS        25.8s  check-library-nav  w2
+        start check-teams on w2 (usually 12s)
+[18/23] PASS        12.1s  check-tv-show  w3
+        start check-official-practice on w3 (usually 11s)
+[19/23] PASS        11.6s  check-teams  w2
+        start check-library on w2 (usually 6s)
+[20/23] PASS         9.9s  check-official-practice  w3
+        start check-a11y-surfaces on w3 (usually 3s)
+[21/23] PASS         6.6s  check-library  w2
+[22/23] PASS        24.8s  check-relay  w1
+[23/23] PASS         2.7s  check-a11y-surfaces  w3
+
+PASSED (exit 0) | targeted | run 20261114-211911-945cc01a-24896
+  23 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 6m 49s · step time 20m 09s (sum) · 3 workers, 98% busy · 2.96× the same steps run one after another
+           predicted 4–13m (about 6m 06s, low-confidence) → actual 6m 49s (+12%)
+           longest  check-session-flow 3m 02s, check-tug-of-war 2m 24s, check-split-clues 1m 51s · the longest step is 45% of the wall time
+           machine  CPU mean 31%, peak 89% · memory available ≥ 13433 MB · load peak 3.86
+           contention ×1.054 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1213t1/test-results/20261114-211911-945cc01a-24896/report.json

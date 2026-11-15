@@ -15,3 +15,13 @@
 | `check-library-n1213.log` | same | 22/0 | |
 | `check-relay-n1213.log` | same | 22/0 | Relay shares the sum generator. Its run overwrote `frozen-390.png` in the flat local screenshot folder, so Tug of War's driver was run again last. |
 | `check-tug-of-war-t2.log` | same | 24/0 | **The committed screenshots come from this run alone.** |
+
+## Gates (after the local runs; one run on one revision each)
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261114-211911-945cc01a-24896` | `945cc01` | targeted (tug-of-war, relay, math, math-timing, math-network, territory, team-draw, split-clues, team-huddle, teams, warm-ivory, briefing, official-practice, library, library-nav, tv-show, results, quick-party, one-path, session-flow, a11y-surfaces) | **PASSED** (exit 0) | 23/23 | 6 min 49 s |
+| `20261114-212608-945cc01a-28684` | `945cc01` | fast | **PASSED** (exit 0) | 5/5 (unit 1898/1898) | 1 min 10 s |
+| `20261114-212727-945cc01a-32475` | `945cc01` | full (checkpoint) | **PASSED** (exit 0) | 104/104 | 39 min 10 s |
+
+No other gate ran on this stage. Every step log is in `docs/evidence/gate-runs/<run>/logs/`. These ran while I built Know Your Rivals in another worktree (local drivers on their own servers and ports), so the wall times include that load.

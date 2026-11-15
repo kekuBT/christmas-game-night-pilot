@@ -2757,3 +2757,121 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - suggestion 6 was dropped;
   - video calls (suggestion 11) wait until after deployment, as directed.
   - Waiting on the owner's review of #25–#33.
+
+## Stage 12.10: the team kit, and Split Clues (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner, 2026-11-14 at 1:20 p.m. ET: "I like all of them add all of them … Do all of it in one go don't wait for me unless it's genuine blocker". Five games built for teams, one stage and one stacked draft PR each: 12.10 Split Clues, 12.11 Team Draw, 12.12 Territory, 12.13 Tug of War, 12.14 Know Your Rivals.
+- **Base:** `548c763` (Stage 12.9's head, PR #33). Branch `claude/stage12-10-split-clues`, draft PR #34 stacked on #33.
+- **Spec:** `docs/stage12/stage1210.md`. Decisions D-S1210-01 (the team kit) and D-S1210-02 (Split Clues).
+- **Built:**
+  - **The team kit (D-S1210-01), shared by the five games:**
+    - every team plays at once;
+    - a team needs at least 2 players: a night's team with only 1 player in the game joins the smallest other team (`fitTeamsForGame`), and the briefing says so on every phone;
+    - fair scoring for uneven teams (each game says how) and a +25 catch-up for a team alone in last place and 100+ behind;
+    - a 2–4-team scoreboard on phones and the TV (2 × 2 for 4 teams);
+    - no repeats in a night (`contentIds()` / `avoid`);
+    - a forgiving answer matcher (case, accents, an article, a plural, one typo in a long answer).
+  - **Split Clues (D-S1210-02, `src/games/modules/splitClues.ts`), new:**
+    - six puzzles, each with six clues dealt round each team (rotating);
+    - help at 30/45/60 s (the shape, all clues pooled, the first letter);
+    - any teammate types the team's answer; a wrong try is team-private and pauses the team 4 s; at most 15 tries;
+    - 100/75/55/40 by solve order; 38 Everyday and 13 Christmas puzzles;
+    - casual and practice only, 4–10 players.
+- **Tests:**
+  - `tests/stage1210-split-clues.test.ts` (16, checked on seeds 1–12);
+  - catalogue counts (20 games);
+  - new `scripts/check-split-clues.mjs` (26 checks: seven phones in four night's teams, one of them alone, and a TV).
+- **Found from screenshots before the gates:** the TV reveal's clue numbers were cut off, and its scoreboard ran under the footer. Both fixed.
+- **Unit suite:** 1863/1863 (the fast gate's unit-tests step on `675a41d`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `675a41d` targeted (split-clues + 14 drivers) `20261114-185257-675a41d1-11475`: PASSED, 17/17;
+  - `675a41d` fast `20261114-185824-675a41d1-14379`: PASSED, 5/5;
+  - **`675a41d` full (checkpoint) `20261114-185939-675a41d1-18106`: PASSED** (exit 0, 101/101, 38 min 28 s, no retries).
+- **Tested SHA:** `675a41d`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage1210-screenshots/`, `docs/evidence/stage1210-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** about 5 hours estimated; about 1 h 20 min actual (1:20 to 2:38 p.m. ET), gates included.
+- **Owner decisions open:** team scoring in a Family Cup (D-S127-03, provisional "no").
+- **Next:** Stage 12.11 (Team Draw).
+
+## Stage 12.11: Team Draw (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner's direction of 2026-11-14 at 1:20 p.m. ET (see Stage 12.10): five games built for teams. This is the second.
+- **Base:** `675a41d` (Stage 12.10's tested commit). Branch `claude/stage12-11-team-draw`, draft PR #35 stacked on #34. 12.10's docs head `3f54d13` is merged in (docs only).
+- **Spec:** `docs/stage12/stage1211.md`. Decisions D-S1211-01 (one drawing pad and word history) and D-S1211-02 (Team Draw).
+- **Built:**
+  - **Shared drawing pad and word history (D-S1211-01):**
+    - Draw & Guess's pad is now `DrawPad`, with the actions it sends as a parameter; Draw & Guess keeps its actions and test ids;
+    - modules can name a content pool (`contentPool`), so Draw & Guess and Team Draw share one no-repeat history;
+    - Draw & Guess lists the words it dealt and deals unplayed ones first. Its deal is unchanged when nothing was played.
+  - **Team Draw (D-S1211-02, `src/games/modules/teamDraw.ts`), new:**
+    - every team draws the same word at once; one drawer per team, in turn; 3–5 rounds;
+    - teammates guess from their own team's drawing only;
+    - wrong guesses stay in the team, pause it for 2 s and are capped at 15 per team per round;
+    - a drawer can pass the pen once, and a teammate can take an idle drawer's pen after 20 s, only while someone who hasn't seen the word is left to guess;
+    - 100/75/55/40 by solve order, +25 catch-up;
+    - the reveal shows every team's drawing side by side on phones and the TV.
+- **Tests:**
+  - `tests/stage1211-team-draw.test.ts` (14, checked on seeds 1–12);
+  - catalogue counts (21 games);
+  - new `scripts/check-team-draw.mjs` (44 checks: nine phones in four teams and a TV, including a TV gallery fit check).
+- **Found before the gates:** the TV reveal's team lines were under the footer. The root cause is that every game's TV panel is zoomed 1.6×, so `vh` and pixel sizes there are multiplied. The boards are now sized for the zoomed layout, and the new fit check (proven to fail on the old size) guards it.
+- **Unit suite:** 1878/1878 (the fast gate's unit-tests step on `9806d1d`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `9806d1d` targeted (team-draw, draw-guess, draw-sync + 15 drivers) `20261114-193826-9806d1dd-16124`: PASSED, 20/20;
+  - `9806d1d` fast `20261114-194400-9806d1dd-19710`: PASSED, 5/5;
+  - **`9806d1d` full (checkpoint) `20261114-194522-9806d1dd-23467`: PASSED** (exit 0, 102/102, 39 min 25 s, no retries).
+- **Tested SHA:** `9806d1d`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage1211-screenshots/`, `docs/evidence/stage1211-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** about 4 hours estimated; about 1 h 30 min actual (about 1:55 to 3:25 p.m. ET), gates included.
+- **Owner decisions open:** team scoring in a Family Cup (D-S127-03, provisional "no").
+- **Next:** Stage 12.12 (Territory).
+
+## Stage 12.12: Territory (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner's direction of 2026-11-14 at 1:20 p.m. ET (see Stage 12.10): five games built for teams. This is the third.
+- **Base:** `9806d1d` (Stage 12.11's tested commit). Branch `claude/stage12-12-territory`, draft PR #36 stacked on #35. 12.11's docs head `290e814` is merged in (docs only).
+- **Spec:** `docs/stage12/stage1212.md`. Decisions D-S1212-01 (the board) and D-S1212-02 (Territory).
+- **Built:**
+  - **The board (D-S1212-01, `src/shared/territoryBoard.ts`):** 19 hex cells named A1–E3, homes spread evenly for 2–4 teams, neighbours and joined regions, shared by the server and the screens.
+  - **Territory (D-S1212-02, `src/games/modules/territory.ts`), new:**
+    - 8 questions from the Trivia pool; one tap answers for the team; the question closes early once every team has answered;
+    - right teams claim a cell next to their land, or steal one; picks stay hidden and resolve in answer order;
+    - 10 per cell plus 5 per cell in the biggest joined land; catch-up gives one extra cell (30+ behind).
+  - **Shared:** Team Huddle's Trivia-pool path is now `triviaQuiz` in `room.ts`, used by both.
+- **Tests:**
+  - `tests/stage1212-territory.test.ts` (10);
+  - catalogue counts (22 games);
+  - new `scripts/check-territory.mjs` (32 checks: eight phones in four teams and a TV, including a TV fit check).
+- **Unit suite:** 1889/1889 (the fast gate's unit-tests step on `e92dae9`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `e92dae9` targeted `20261114-202618-e92dae9c-23806`: PASSED, 22/22;
+  - `e92dae9` fast `20261114-203212-e92dae9c-27750`: PASSED, 5/5;
+  - `e92dae9` full `20261114-203324-e92dae9c-31480`: **FAILED** (exit 1): the disk was full (`ENOSPC` in `build-web`), an infrastructure failure. Old gate clones now get deleted after each run;
+  - **`e92dae9` full (checkpoint) `20261114-204033-e92dae9c-638`: PASSED** (exit 0, 103/103, 38 min 31 s, no retries).
+- **Tested SHA:** `e92dae9`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage1212-screenshots/`, `docs/evidence/stage1212-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** about 4 hours estimated; about 1 h 40 min actual (about 2:38 to 4:19 p.m. ET), gates included.
+- **Owner decisions:** team scoring in a Family Cup (D-S127-03) was answered by the owner later the same day; see Stage 12.15.
+- **Next:** Stage 12.13 (Tug of War).
+
+## Stage 12.13: Tug of War (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner's direction of 2026-11-14 at 1:20 p.m. ET (see Stage 12.10): five games built for teams. This is the fourth.
+- **Base:** `e92dae9` (Stage 12.12's tested commit). Branch `claude/stage12-13-tug-of-war`, draft PR #37 stacked on #36. 12.12's docs head `6c67aa1` is merged in (docs only).
+- **Spec:** `docs/stage12/stage1213.md`. Decision D-S1213-01.
+- **Built:** Tug of War (`src/games/modules/tugOfWar.ts`), new:
+  - three 40 s bouts; every player answers the same seeded sums on their own phone;
+  - a right answer is one pull; a wrong one freezes you for 2 s;
+  - a team's pull is its right answers per player, so team size doesn't decide it;
+  - a rope for two teams, a knot in a star for three or four, with the lean in words;
+  - 100/75/55/40 per bout; catch-up ×1.2 for a team alone in last place and 40+ behind (the game's own gap).
+- **Tests:**
+  - `tests/stage1213-tug-of-war.test.ts` (8);
+  - catalogue counts (23 games);
+  - new `scripts/check-tug-of-war.mjs` (24 checks: seven phones in three uneven teams and a TV, including a TV fit check).
+- **Unit suite:** 1898/1898 (the fast gate's unit-tests step on `945cc01`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `945cc01` targeted `20261114-211911-945cc01a-24896`: PASSED, 23/23;
+  - `945cc01` fast `20261114-212608-945cc01a-28684`: PASSED, 5/5;
+  - **`945cc01` full (checkpoint) `20261114-212727-945cc01a-32475`: PASSED** (exit 0, 104/104, 39 min 10 s, no retries).
+- **Tested SHA:** `945cc01`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage1213-screenshots/`, `docs/evidence/stage1213-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** about 3 hours estimated; about 25 minutes of building (about 3:07 to 3:28 p.m. ET), then the gates, which waited behind Territory's and gave their verdict at 5:07 p.m.
+- **Owner decisions:** team scoring in a Family Cup (D-S127-03) was answered by the owner later the same day; see Stage 12.15.
+- **Next:** Stage 12.14 (Know Your Rivals).

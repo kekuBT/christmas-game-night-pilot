@@ -16,3 +16,16 @@
 | `check-library-n1212.log` | same | 22/0 | |
 | `check-territory-t3.log` | same | 32/0 | **From the screenshot:** the team's chosen answer was dimmed with the other disabled options. Now it stays at full strength and the others fade (Territory's CSS only). |
 | `check-territory-t4.log` | + that | 32/0 | **The committed screenshots come from this run alone.** The drivers above ran before this CSS-only change to Territory's answer buttons, which no other screen uses. |
+
+## Gates (after the local runs; one run on one revision each)
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261114-202618-e92dae9c-23806` | `e92dae9` | targeted (territory, team-huddle, answer-reveal, content-variety, content-look, team-draw, split-clues, relay, teams, warm-ivory, briefing, official-practice, library, library-nav, tv-show, results, quick-party, one-path, session-flow, a11y-surfaces) | **PASSED** (exit 0) | 22/22 | 5 min 49 s |
+| `20261114-203212-e92dae9c-27750` | `e92dae9` | fast | **PASSED** (exit 0) | 5/5 (unit 1889/1889) | 1 min 06 s |
+| `20261114-203324-e92dae9c-31480` | `e92dae9` | full | **FAILED** (exit 1): infrastructure, disk full | 2 passed, `build-web` failed with `ENOSPC`; the gate then crashed writing its own log, so no summary | under 1 min |
+| `20261114-204033-e92dae9c-638` | `e92dae9` | full (checkpoint) | **PASSED** (exit 0) | 103/103 | 38 min 31 s |
+
+**The failed full gate:** each gate clones the revision and builds into the clone, and I had kept the earlier clones (100–400 MB each), so the disk filled. Every step log the run wrote is in its folder. Since then each clone is deleted once its evidence is copied. A gate that crashes on a full disk still exits non-zero, but it leaves no `summary.txt`; that is a gap in the gate's reporting, not fixed here.
+
+No other gate ran on this stage. The re-run ran while I built Tug of War and Know Your Rivals in other worktrees (local drivers on their own servers and ports), so its wall time includes that load.

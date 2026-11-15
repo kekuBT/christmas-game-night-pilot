@@ -16,3 +16,13 @@
 | `check-warm-ivory-n1210w1.log` | + W8 allows Split Clues' cards (added before running, following the pattern of 12.8 and 12.9; each element must still reuse a base style) | 199/0 | Home's featured game did not change: Split Clues is kept out of the featured rotation. |
 | `check-team-huddle-n1210h1.log` | same | 28/0 | The briefing's teams section changed (the "plays with" line), so the 12.8 driver was run again. |
 | `check-split-clues-s3.log` | same | 26/0 | **The committed screenshots come from this run alone.** The local screenshot folder is flat, so the other runs overwrite each other's files. |
+
+## Gates (after the local runs; one run on one revision each)
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261114-185257-675a41d1-11475` | `675a41d` | targeted (split-clues, team-huddle, relay, teams, warm-ivory, briefing, official-practice, library, library-nav, tv-show, results, quick-party, one-path, session-flow, a11y-surfaces) | **PASSED** (exit 0) | 17/17 | 4 min 38 s |
+| `20261114-185824-675a41d1-14379` | `675a41d` | fast | **PASSED** (exit 0) | 5/5 (unit 1863/1863) | 1 min 10 s |
+| `20261114-185939-675a41d1-18106` | `675a41d` | full (checkpoint) | **PASSED** (exit 0) | 101/101 | 38 min 28 s |
+
+No other gate ran on this stage. Every step log is in `docs/evidence/gate-runs/<run>/logs/`.

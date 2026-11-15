@@ -1,0 +1,14 @@
+$ node scripts/check-content-look.mjs http://localhost:36725
+# timeout 600s | worker w2 | server http://localhost:36725 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1211full/test-results/20261114-194522-9806d1dd-23467/server-data/w2)
+
+[+1.2s] PASS A Christmas host: the Host screen says the questions start as Christmas ones
+[+2.4s] PASS A the room deals Christmas content from the start
+[+2.4s] PASS A the host can still switch it to Everyday
+[+3.7s] PASS B auto host: no line, and the room deals Everyday content
+[+5.4s] PASS C a guest with the Christmas look joining an Everyday room changes nothing
+[+6.7s] PASS B Everyday host: no line, and the room deals Everyday content
+[+6.7s] PASS A the Christmas host's room code is real
+[+6.8s] CONTENT LOOK ALL PASSED
+[+6.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 6.8s | cpu 2s, peak memory 268 MB

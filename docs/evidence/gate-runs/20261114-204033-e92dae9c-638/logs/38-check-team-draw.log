@@ -1,0 +1,52 @@
+$ node scripts/check-team-draw.mjs http://localhost:46743
+# timeout 600s | worker w2 | server http://localhost:46743 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1212full2/test-results/20261114-204033-e92dae9c-638/server-data/w2)
+
+[+6.4s] PASS A the game plays with the night's four teams
+[+6.5s] PASS A the briefing explains Team Draw
+[+6.7s] PASS A the TV shows a four-team scoreboard
+[+6.7s] PASS A three rounds: the biggest team's size — 3
+[+6.7s] PASS B every team has a drawer with the same word — {"team-coral":"teapot","team-sun":"teapot","team-mint":"teapot","team-iris":"teapot"}
+[+6.8s] PASS B only the drawers' phones show the word
+[+6.8s] PASS B the TV shows no word and its data has neither the word nor any drawing
+[+7.0s] PASS C Coral's drawer is offered to pass the pen
+[+7.0s] PASS C a team of 2 is not offered a pass
+[+7.0s] PASS C the pen moved to a Coral teammate — Amina
+[+7.1s] PASS C the new drawer's phone shows the word
+[+7.1s] PASS C the passer can't guess: they've seen the word
+[+7.1s] PASS C the team hears who has the pen
+[+7.1s] PASS D a team can't guess before its drawer draws
+[+8.2s] PASS D the mouse strokes reached the server
+[+8.2s] PASS D Coral's guesser sees exactly the server's drawing
+[+8.2s] PASS D another team's guesser sees an empty page (its own team's)
+[+8.2s] PASS D the TV shows Coral's strokes as a count only
+[+8.3s] PASS E the guess box opens once there's a drawing
+[+8.6s] PASS E the team's box pauses
+[+8.6s] PASS E the drawer and the passer see the wrong guess
+[+8.6s] PASS E no other team's phone and not the TV shows it
+[+10.7s] PASS E the pause ends by itself
+[+10.7s] PASS F Coral's guesser shows the finished drawing
+[+11.0s] PASS F Coral got it 2nd, on the phone
+[+11.0s] PASS F places 1, 2, 3, 4 by solve order, 100 / 75 / 55 / 40 — {"team-coral":[2,75],"team-sun":[3,55],"team-mint":[1,100],"team-iris":[4,40]}
+[+11.1s] PASS F the reveal on a phone: the word and every team's drawing
+[+11.1s] PASS F Coral's drawing in the gallery is the drawing its guessers saw — 2:26
+[+11.1s] PASS F the reveal on the TV: the word, four drawings, each team's result
+[+11.1s] PASS F the TV's gallery fits: every team's line is above the footer — [true,true,true,true]
+[+20.2s] PASS G round 2 began
+[+20.2s] PASS G no take-over before 20 s
+[+40.3s] PASS G after 20 s without drawing, a teammate is offered the pen
+[+40.3s] PASS G a team of 2 is never offered it
+[+40.5s] PASS G the taker's phone now draws, with the word
+[+40.5s] PASS G the idle drawer hears it and can't guess
+[+40.9s] PASS G the taker's drawing reaches the server
+[+50.2s] PASS H round 3 began
+[+59.4s] PASS H the game finished with team results for four teams — [["team-coral",1,275],["team-mint",2,210],["team-sun",3,205],["team-iris",4,120]]
+[+59.4s] PASS H every player scored their team's points
+[+59.4s] PASS H no drawing and no wrong guess is kept once the game is over
+[+59.5s] PASS H phones: the results, a team-led heading, the team results card and three rounds
+[+59.5s] PASS H the TV leads with the team result
+[+60.3s] PASS H 320 px: the results have no sideways scroll
+[+60.3s] note: words teapot / cookie; teams team-coral=Keku+Amina+Zawadi team-sun=Baraka+Wanjiru team-mint=Juma+Neema team-iris=Imani+Musa
+[+60.4s] TEAM DRAW PASSED
+[+60.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":10,"pages":10,"peakOpenPages":10}
+
+# PASS (exit 0) in 60.4s | cpu 6.8s, peak memory 322 MB
