@@ -1,7 +1,8 @@
 // Beta R1 (docs/beta/beta-r1.md §2-§3): the release package, proved from a clean runtime install. No browser.
 //   P  pack the checked-out revision (scripts/release/pack.mjs) into a temporary folder; it holds only what runs
 //   I  npm ci --omit=dev: only the runtime packages (ws, zod) are installed; no build or test tooling
-//   S  start it as production (plain node, NODE_ENV=production, data outside the release, beta gate on, one proxy,
+//   S  start it as production (plain node, NODE_ENV=production, a data dir outside the release that doesn't exist yet
+//      and is created private, beta gate on, one proxy,
 //      listening on 127.0.0.1 only): this machine's network address is refused; /health names the revision and
 //      nothing else; the app is behind the gate (pages, API, WebSocket); the right code opens it; a room is created
 //      and played into
@@ -73,11 +74,13 @@ try {
   check("I the runtime install is ws and zod only", JSON.stringify(installed) === JSON.stringify(["ws", "zod"]), JSON.stringify(installed));
 
   // ---- S ----
-  const data = tmp("data");
+  // A fresh host: the data directory doesn't exist yet (B-08: the first start used to crash on it).
+  const data = join(tmp("data"), "var-lib-cgn");
   const env = { NODE_ENV: "production", MCHEZO_DATA_DIR: data, MCHEZO_PUBLIC_ORIGIN: ORIGIN, MCHEZO_BETA_ACCESS_CODE: CODE, MCHEZO_TRUST_PROXY: "1", MCHEZO_LISTEN_HOST: "127.0.0.1" };
   let s1 = await start(rel, env, "S1");
   check("S the package starts on plain node in production", !!s1.port, s1.port ? `port ${s1.port}` : s1.p.out.slice(-300));
   check("S its output never shows the access code", !s1.p.out.includes(CODE));
+  check("S a first start creates the missing data directory, private (0700)", existsSync(data) && (statSync(data).mode & 0o777) === 0o700, existsSync(data) ? (statSync(data).mode & 0o777).toString(8) : "missing");
   const base = `http://127.0.0.1:${s1.port}`;
   // Behind the proxy the server answers on loopback only, so nobody reaches it around the proxy (and forges its
   // X-Forwarded-For). Tried from this machine's own network address, when it has one.

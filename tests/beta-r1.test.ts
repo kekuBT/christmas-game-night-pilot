@@ -7,7 +7,7 @@ import { WebSocket } from "ws";
 import { Harness } from "./helpers/harness.js";
 import { AccessGuard } from "../src/server/access.js";
 import { DataDirLock } from "../src/server/datalock.js";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -203,6 +203,17 @@ describe("one writer per data directory (DataDirLock)", () => {
     writeFileSync(join(d, "server.lock"), JSON.stringify({ pid: process.ppid }));
     expect(() => new DataDirLock(d).acquire()).toThrowError(new RegExp(`Another server \\(pid ${process.ppid}\\)`));
     expect(JSON.parse(readFileSync(join(d, "server.lock"), "utf8")).pid).toBe(process.ppid); // untouched
+  });
+  it("B-08: a first start on a data directory that doesn't exist yet creates it (private) and takes the lock", () => {
+    // Found by the release drill: the lock opened server.lock before anything created the directory, so a fresh
+    // host's first start crashed with ENOENT. Before the lock, the room store created the directory itself.
+    const parent = dir();
+    const d = join(parent, "var", "lib", "cgn");
+    const lock = new DataDirLock(d);
+    expect(lock.acquire()).toBeUndefined();
+    expect(statSync(d).mode & 0o777).toBe(0o700);
+    expect(JSON.parse(readFileSync(lock.path, "utf8")).pid).toBe(process.pid);
+    lock.release();
   });
   it("takes over a stale lock (a dead process, or an unreadable file)", () => {
     for (const stale of [JSON.stringify({ pid: 2147483646 }), "not json"]) {

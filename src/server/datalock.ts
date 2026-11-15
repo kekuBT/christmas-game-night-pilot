@@ -7,9 +7,9 @@
  * often pid 1 on every start, so the previous container's lock names "us". This protects one host; two hosts sharing a
  * network volume are not supported (docs/beta/beta-r1-architecture.md).
  */
-import { closeSync, openSync, readFileSync, unlinkSync, writeSync } from "node:fs";
+import { closeSync, mkdirSync, openSync, readFileSync, unlinkSync, writeSync } from "node:fs";
 import { hostname } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 export class DataDirLocked extends Error {
   constructor(readonly path: string, readonly pid: number) {
@@ -28,6 +28,9 @@ export class DataDirLock {
 
   /** Take the lock, or throw DataDirLocked. Returns a note when a stale lock was taken over. */
   acquire(): string | undefined {
+    // B-08 (found by the release drill): a fresh host's first start names a directory that doesn't exist yet. The
+    // lock comes before the room store, which used to create it, so create it here: private, like the data in it.
+    mkdirSync(dirname(this.path), { recursive: true, mode: 0o700 });
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
         const fd = openSync(this.path, "wx");
