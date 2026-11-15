@@ -172,3 +172,36 @@ Evidence for every run is in `docs/evidence/gate-runs/`; local runs, failures in
 | `cfaf412` | fast | `20261115-054732-cfaf4122-3438` | PASSED (exit 0), 5/5; unit 1958/1958 |
 
 **Tested SHA for the second round: `cfaf412`.** As the review asked, no full gate ran on it. The full checkpoint pass (`20261115-043355-c27e2420-22664`) belongs to `c27e242` alone. `cfaf412` changes the copy in three web files, one pure helper (`lib/teamLines.ts`), the briefing line, tests and one driver; no scoring or lifecycle code changed.
+
+## Third round: review 6890761957 (the reviewer's independent live audit)
+
+**Authorization:** the owner's review and handoff on #40, comment 6890761957 (2026-11-15, 1:58 a.m. ET; D-WF-01).
+- **The audit:** the reviewer's first live audit, on a private preview of `cfaf412` in desktop Chromium. It confirmed the earlier repairs, and found two presentation faults.
+- **Also asked for:** the malformed evidence links in the earlier reports repaired.
+
+1. **The TV's final standings lost Relay's tiebreak.**
+   - **The fault:** the generic list ranked a team game's players by their points. Coral 150, Sun 50, Mint 50 with places 1, 2, 3 showed Coral's players 1, 1 and Sun's and Mint's 3, 3, while the team card beside it was right.
+   - **Now:** for a game built for teams, the list gives every player their team's place from the server's team results (`teamRankedStandings`, `lib/teamLines.ts`) and names the team.
+   - **Kept:** a true tie between teams still shares a place, and a team that didn't score comes last with a dash.
+   - **Unchanged:** individual games and per-player games played "as teams" (whose players' own points are real) rank by points, as before.
+2. **"Make it a Family Cup" relabelled the casual game before it as Practice.**
+   - **The fault:** the lobby's "Last game" card chose its label from the room's current kind.
+   - **Now:** the card, the results comment and the results screens' wording take a game's mode as it was played (`gameModeWord` with the server's `casualGameIds`, which the TV already used). A casual game stays Casual after the change and after a reload; a later Practice game is Practice and an Official one Official.
+   - **Unchanged:** no game data is migrated and no scoring changes.
+3. **The links:** links to repository files are stored with their targets wrapped in backticks (and image embeds lose their `!`). Only links to comments and pull requests come through intact.
+   - **Repaired:** the three earlier reports (#39: 6888310568; #40: 6889631930, 6889961653) now give each file as its repository path at the commit, with a dated edit note.
+   - **New reports:** they do the same.
+
+**Estimate:** none was written before this round's work began, an omission. The earlier rounds each had one. The actual time is recorded with the gates below.
+
+**Gates on `de26509` (one run on one revision each):**
+
+| Run | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|
+| `20261115-071221-de265098-5268` | targeted (13 drivers: cup-team-games, one-path, tv-show, results, relay, team-huddle, tug-of-war, know-your-rivals, game-night-flow, cup-party, official-practice, lifecycle, night-card) | **PASSED** (exit 0) | 15/15 (cup-team-games 27, one-path 70 checks) | 4 min 29 s |
+| `20261115-071657-de265098-7750` | fast | **PASSED** (exit 0) | 5/5 (unit 1960/1960) | 1 min 15 s |
+
+- **No full gate ran on `de26509`,** as the review asked ("do not rerun unchanged historical full suites"). The full checkpoint pass stays `c27e242`'s alone.
+- **No run failed or was cancelled.**
+- **Actual time:** about 20 minutes, from the review at 1:58 a.m. ET to the fast gate's verdict at 2:18 a.m. ET.
+- **Also corrected:** the link repair itself happened at about 2:15 a.m. ET, not 2:25 as I first wrote in the three edit notes; those notes now say 2:15.

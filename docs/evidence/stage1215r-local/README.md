@@ -60,3 +60,21 @@ No other gate ran on this stage. The tested SHA is `c27e242`; the green claim re
 | `20261115-054732-cfaf4122-3438` | `cfaf412` | fast | **PASSED** (exit 0) | 5/5 (unit 1958/1958) | 1 min 06 s |
 
 No full gate ran on `cfaf412`, as the review asked.
+
+## Third round: review 6890761957
+
+| Log | Revision (worktree state) | Result | What it showed |
+|---|---|---|---|
+| `r6-check-cup-team-games-before-cfaf412.log` | the updated driver on a build of `cfaf412` | 26 pass, **1 FAIL** | The TV's final standings didn't show team places 1, 1, 2, 2, 2 within 15 s. The log records only that timeout. The old list ranks by points with shared places, which for these teams gives Sun's two 1, 1 and Coral's three 3, 3, 3. That is the review's finding, and the unit tests show it in the 150/50/50 case. |
+| `r6-check-one-path-before-cfaf412.log` | the updated driver on a build of `cfaf412` (the run that names the card's text) | 67 pass, **3 FAIL** | After "Make it a Family Cup", both phones' card read "LAST GAME · MATH MAYHEM · PRACTICE"; so did a reload. (A first run on that build also failed these 3, but only because it looked for a test id this repair adds; the driver now reads the existing card.) |
+| (no log) the new tests | + the repairs | 9/9 in `stage1215r-recaps.test.ts` | `teamRankedStandings`: 150/50/50 is 1, 1, 2, 3; a true tie; an unscored team; the individual fallback. The history label through the change and a restored room. (The label's helper was already right; the fault was the lobby not using it, which the drivers show.) |
+| `unit-suite-r6.log` | same | 1960/1960 | Both typechecks and lint clean. |
+| `check-cup-team-games-r6.log` | + built | 27/0 | The TV's standings: 1, 1 (Team Sun), 2, 2, 2 (Team Coral). |
+| `check-one-path-r6.log` | same | 70/0 | "LAST GAME · MATH MAYHEM · CASUAL" on the host and a guest after the change, and after a reload. |
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261115-071221-de265098-5268` | `de26509` | targeted (13 drivers) | **PASSED** (exit 0) | 15/15 (cup-team-games 27, one-path 70 checks) | 4 min 29 s |
+| `20261115-071657-de265098-7750` | `de26509` | fast | **PASSED** (exit 0) | 5/5 (unit 1960/1960) | 1 min 15 s |
+
+No full gate ran on `de26509`, as the review asked. The screenshots `tv-final-standings-by-team-1920` and `lobby-last-game-casual-after-cup-390` come from `check-cup-team-games-r6` and `check-one-path-r6`.

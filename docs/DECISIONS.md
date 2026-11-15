@@ -2007,3 +2007,7 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - **Separate wording for "everyone said Rather not say":** needs each team's size on every screen, and would single out a privacy choice.
     - **A comment for any tie lower down:** the lanes' line already explains it from the tied lanes.
+- **D-S1215R-06 (review 6890761957) One source for places and for a game's mode.**
+  - **The TV's final standings:** for a game built for teams, each player is listed at their team's place from the server's team results (never re-ranked from points), with the team named. Individual games and per-player games played "as teams" keep ranking by points, because their players' own points are real.
+  - **The Casual / Practice / Official label:** wherever a finished game is labelled (the lobby's "Last game", the results comment, the results screens), the label is the game's mode as it was played, from `casualGameIds`. It is never the room's current kind.
+  - **Alternative rejected:** storing a mode on each game (a data migration for a display label the server already derives).

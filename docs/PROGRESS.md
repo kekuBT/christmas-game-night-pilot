@@ -2931,7 +2931,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Owner decisions open:** the content of the seven games' own packs (Split Clues, Team Draw, Know Your Rivals) has no official review step; Trivia's pool has one.
 - **Next:** owner review of the stack (#25 onward). Nothing is merged or deployed.
 
-## Stage 12.15-R: repairs from review 6888718011 (built and gated; awaiting re-review)
+## Stage 12.15-R: repairs from review 6888718011 and two follow-up reviews (built and gated; awaiting re-review)
 - **Brief:** the owner's review and handoff on #39 (comment 6888718011, about 10:43 p.m. ET on 2026-11-14) gave a changes-required verdict with six findings and asked for a bounded, stacked repair PR. I acknowledged it with an estimate on #39 (6888781319).
 - **Base:** #39's head `1eafe41` (tested source `bcf1406`). Branch `claude/stage12-15r-team-game-repairs`, draft PR #40 stacked on #39.
 - **Spec:** `docs/stage12/stage1215r.md`. Decisions D-S1215R-01 to 04.
@@ -2960,3 +2960,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Relay:** the Official tiebreak comment appears only for the winner's own tie on points.
   - **Gates:** on `cfaf412`, targeted `20261115-054306-cfaf4122-1429` PASSED 12/12 and fast `20261115-054732-cfaf4122-3438` PASSED 5/5 (unit 1958/1958). The full checkpoint pass stays with `c27e242`; no full gate ran on `cfaf412`, as the review asked.
   - **Time:** about 15 minutes (estimate about 1 h).
+- **Third round (review 6890761957, 1:58 a.m. ET on 2026-11-15, the reviewer's first independent live audit):** two presentation repairs on #40 (D-S1215R-06).
+  - **TV final standings:** a game built for teams lists each player at their team's place from the server's team results, with the team named. Before, the 150/50/50 case read 1, 1, 3, 3; now it reads 1, 1, 2, 3. A true tie still shares a place; individual games still rank by points.
+  - **Historical mode:** after "Make it a Family Cup", the lobby's "Last game" card, the results comment and the results screens give a game's mode as played (`casualGameIds`). A casual game stays Casual, including after a reload.
+  - **Reproduced first:** the updated drivers on a build of `cfaf412` fail (`check-cup-team-games` 1, `check-one-path` 3); on the repair they pass 27/0 and 70/0. Unit tests: 1960/1960.
+  - **Gates:** on `de26509`, targeted `20261115-071221-de265098-5268` PASSED 15/15 and fast `20261115-071657-de265098-7750` PASSED 5/5 (unit 1960/1960). No full gate ran, as the review asked.
+  - **Links:** the three earlier reports' malformed repository links were replaced with plain paths at their commits.
+  - **Time:** about 20 minutes. No estimate was written before the work, an omission.
+  - **Next:** the reviewer's re-review. Nothing is merged or deployed.
