@@ -67,3 +67,14 @@
 | `r4-check-https-final-driver-on-1da3b25.log` | the final check against `1da3b25`'s packed release (no fix) | **FAILED (11)** | The same final check before the fix: B-13 as above. |
 | `docs/beta/screenshots/beta-gate-https-wrong-code-390-before-b13.png` | before | | What a family member saw after typing a code: the JSON refusal. |
 | `docs/beta/screenshots/beta-gate-https-{320,390,wrong-code-390,then-app-390}.png` | after | | The gate at 320 and 390 px over HTTPS, the wrong-code message, and the app after entry. |
+
+### Gates for the second round (one run on one revision each, both on `8b02b39`)
+| Run | Kind | Verdict | What ran |
+|---|---|---|---|
+| `20261115-220845-8b02b394-22816` | targeted | **PASSED (exit 0)**, 9/9 steps, 57 s | build-web, preflight, `check-beta-gate-https` (28 checks, HTTPS BETA GATE PASSED), `check-beta-gate`, `check-release-package` (step U included), `check-one-path`, `check-lobby-mode`, `check-readiness`, `check-official-practice` |
+| `20261115-220948-8b02b394-24641` | fast | **PASSED (exit 0)**, 79 s | typecheck, lint, the web build and every unit test: 160 files, 2039/2039 (the two B-13 tests included), no EPIPE or unhandled error |
+
+- **No other gate ran on `8b02b39`,** and none failed or was stopped.
+- **One after another,** with no other test or driver running during them.
+- **No full gate:** production code changed in one place only, a response header on the gate's own pages. Those pages are served only with an access code configured, which no other driver configures. They are covered by both gate checks and the B-13 tests. The release check, the app smoke drivers and every unit test ran too.
+

@@ -138,3 +138,17 @@ About **7 h 30 min**.
 | R4 check (TLS proxy, packaged server, browser and protocol checks, screenshots) | 2 h |
 | Targeted and fast gates, evidence | 30 min |
 | Docs and report | 45 min |
+
+**Second round, done:**
+- **Tested code:** `8b02b39`. Targeted `20261115-220845-8b02b394-22816` and fast `20261115-220948-8b02b394-24641` both PASSED.
+- **B-13 found and fixed:** a production code change (a gate-page header), explained in D-BR1R-04.
+
+**Second round, estimate vs actual:**
+- **Estimate:** about 4 h, written at 4:48 p.m. ET.
+- **Actual:** about 40 min of wall clock, from the review at 4:43 p.m. to the report at about 5:20 p.m. ET.
+  - **R3:** 4:49 to 4:57 p.m.
+  - **R4 and B-13:** 4:57 to 5:08 p.m.
+  - **The gates:** 5:08 to 5:11 p.m.
+- **Why it was faster:** the TLS proxy and the checks reused the existing gate and release check patterns.
+- **The two surprises:** the sandbox's outbound proxy and B-13. Each took one diagnostic run.
+

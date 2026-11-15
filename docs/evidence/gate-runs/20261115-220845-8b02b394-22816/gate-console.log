@@ -1,0 +1,40 @@
+Mchezo gate targeted | run 20261115-220845-8b02b394-22816
+  revision 8b02b3947a8ebf4418d7dab17e8c4a2450bd0c81 (clean tree) | fingerprint 3bf8815adac3 (626 files)
+  plan     9 steps: 1 fast/build, 7 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  249 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 218 run(s))
+  estimate this run: 0–6m (low-confidence) · the same steps one after another: about 2m 54s · longest step check-beta-gate-https ~1m 00s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-beta-gate-https
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr2t1/test-results/20261115-220845-8b02b394-22816
+        start build-web on w1 (usually 6s)
+[ 1/9] PASS           5s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/9] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:36631 (pid 22959, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr2t1/test-results/20261115-220845-8b02b394-22816/server-data/w1)
+  server   w2 http://localhost:35405 (pid 22960, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr2t1/test-results/20261115-220845-8b02b394-22816/server-data/w2)
+  server   w3 http://localhost:35207 (pid 22969, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr2t1/test-results/20261115-220845-8b02b394-22816/server-data/w3)
+        start check-beta-gate-https on w1 (no timing history)
+        start check-one-path on w2 (usually 38s)
+        start check-lobby-mode on w3 (usually 21s)
+[ 3/9] PASS        18.5s  check-beta-gate-https  w1
+        start check-readiness on w1 (usually 19s)
+[ 4/9] PASS        25.9s  check-lobby-mode  w3
+        start check-release-package on w3 (usually 16s)
+[ 5/9] PASS        20.4s  check-readiness  w1
+        start check-official-practice on w1 (usually 11s)
+[ 6/9] PASS        44.3s  check-one-path  w2
+        start check-beta-gate on w2 (usually 3s)
+[ 7/9] PASS         3.4s  check-beta-gate  w2
+[ 8/9] PASS        23.2s  check-release-package  w3
+[ 9/9] PASS        11.4s  check-official-practice  w1
+
+PASSED (exit 0) | targeted | run 20261115-220845-8b02b394-22816
+  9 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 57s · step time 2m 33s (sum) · 3 workers, 89% busy · 2.68× the same steps run one after another
+           predicted 0–6m (about 1m 04s, low-confidence) → actual 57s (-11%)
+           longest  check-one-path 44s, check-lobby-mode 26s, check-release-package 23s · the longest step is 78% of the wall time
+           machine  CPU mean 70%, peak 94% · memory available ≥ 13787 MB · load peak 3.61
+           contention ×1.157 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brr2t1/test-results/20261115-220845-8b02b394-22816/report.json
