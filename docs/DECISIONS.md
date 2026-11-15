@@ -2076,3 +2076,19 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **The rule:** Practice, casual and Draw & Guess games deal outside the content selection, so they leave no usage records. Every earlier drawing game's dealt ids (the modules' `contentIds`, which include a Draw & Guess swap's word in and word out) are merged into the usage an Official selection reads, as practice uses at sequence 0, as D-S1216-03 does for Split Clues. Official games are recorded when play begins.
   - **What it protects:** a Cup never deals as Official a word it already showed, in either game.
   - **Alternative rejected:** recording usage for Practice drawing games too: it would change the existing practice dealing for no gain in the Official check.
+
+## Stage 12.17-R: repair from review 6898755998
+**Authorization:** the owner's review on #42, comment 6898755998 (2026-11-15; D-WF-01), finding R1. Spec: `docs/stage12/stage1217r.md`. Same branch and PR (#42), stacked on `1955c28`. Queued behind Beta R1 (#43), as the review asked. Nothing is merged or deployed, and no prompt is approved.
+
+- **D-S1217R-01 A drawing game starts only with a dealable prompt for every turn or round.**
+  - **The supply:** what a start may deal is the library's non-rejected prompts this content mode allows (`drawPromptSupply`). That is year-round only in Everyday; all of them at Christmas and in a Cup game (no season).
+  - **What's needed:** one per turn or round. Draw & Guess needs `min(players, 6)`, and Practice or casual Team Draw needs its round count. Before anything is created, the room refuses a smaller supply with the existing content-shortage result (409 `CONTENT_EXHAUSTED`), with available, needed and a plain reason.
+  - **The reason's suggestion:** it suggests Christmas content only when Christmas would have enough.
+  - **What a refusal leaves:** no game, no usage history, no score, no session change and no spent game number. The lobby is unchanged, so the host can pick another game or switch content and start again.
+  - **Backstop:** both modules' `init` refuse too few dealt prompts, so no path can start a turn without its word.
+  - **Swaps:** they stay bounded by what is left over. With exactly enough prompts there is no swap, and the game still ends normally.
+  - **Unchanged:** an Official Team Draw keeps its exact-record selection, freeze and shared history.
+  - **Alternatives rejected:**
+    - **Shortening the game to the words available:** fewer turns than players changes who draws, a game rule, without the host asking.
+    - **Dealing a word twice:** a repeated word in one game is a giveaway.
+    - **Hiding the game in the lobby:** the review asked for a visible refusal and a recoverable lobby. A pre-emptive lobby notice can follow if the owner wants one.

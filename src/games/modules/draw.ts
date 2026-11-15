@@ -163,6 +163,18 @@ export function drawPromptsFor(pool: readonly DrawPrompt[], season: SessionSeaso
   return [...deal(allowed.filter((p) => p.season !== undefined)), ...deal(allowed.filter((p) => p.season === undefined))];
 }
 
+/**
+ * Stage 12.17-R (review 6898755998, D-S1217R-01): how many prompts a game in this content mode may deal from `pool`
+ * (the library's non-rejected prompts): the year-round ones in Everyday; all of them at Christmas and in a Cup game (no
+ * season). A drawing game needs one per turn or round; swaps only ever use what is left over.
+ */
+export function drawPromptSupply(pool: readonly DrawPrompt[], season: SessionSeason | undefined): number {
+  return season === undefined ? pool.length : pool.filter((p) => seasonAllows(season, p.season)).length;
+}
+
+/** Draw & Guess's turns for this many players (one each, at most six). */
+export const drawTurnCount = (players: number): number => Math.min(players, DRAW_MAX_TURNS);
+
 export const drawModule: GameModule<DrawState> & { contentIds(s: DrawState): string[] } = {
   id: "draw-guess",
   actions: ["draw-strokes", "draw-undo", "draw-clear", "draw-swap", "draw-guess"],
@@ -174,8 +186,12 @@ export const drawModule: GameModule<DrawState> & { contentIds(s: DrawState): str
     if (!drawPool || drawPool.length === 0) throw new Error("Draw & Guess needs its prompts from the content library.");
     const rng = moduleRng(seed);
     const order = seededShuffle(players, rng);
-    const turnCount = Math.min(order.length, DRAW_MAX_TURNS);
-    const prompts = drawPromptsFor(drawPool, season, rng, avoid).slice(0, turnCount * (1 + DRAW_LIMITS.swapsPerTurn)).map((p) => ({ ...p, ...(p.alts ? { alts: [...p.alts] } : {}) }));
+    const turnCount = drawTurnCount(order.length);
+    const dealable = drawPromptsFor(drawPool, season, rng, avoid);
+    // Stage 12.17-R (D-S1217R-01): one prompt per turn, counted after the content mode's filter. The room refuses such a
+    // start first, with a reason; this is the backstop, so no path can start a turn without its word.
+    if (dealable.length < turnCount) throw new Error(`Draw & Guess needs ${turnCount} prompts for ${turnCount} turns; only ${dealable.length} can be dealt.`);
+    const prompts = dealable.slice(0, turnCount * (1 + DRAW_LIMITS.swapsPerTurn)).map((p) => ({ ...p, ...(p.alts ? { alts: [...p.alts] } : {}) }));
     const turns: DrawTurn[] = Array.from({ length: turnCount }, (_, i) => ({
       drawer: order[i]!, promptIdx: i, swaps: 0, pieces: [], points: 0, correct: [], guessCounts: {}, skipped: [], recent: [],
     }));

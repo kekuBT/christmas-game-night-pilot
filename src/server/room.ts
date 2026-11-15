@@ -26,6 +26,7 @@ import { ITEMS_PER_GAME, drawPromptPool, materialize } from "../content/material
 import type { SplitPuzzle } from "../games/modules/splitClues.js";
 import type { DrawPrompt } from "../games/modules/types.js";
 import { teamDrawRoundCount } from "../games/modules/teamDraw.js";
+import { drawPromptSupply, drawTurnCount } from "../games/modules/draw.js";
 import { CONTENT_GAMES, type ContentGameId } from "../content/schema.js";
 import { seededRng } from "../shared/rng.js";
 import type { ConnectionsBoard } from "../games/connections.js";
@@ -1016,6 +1017,12 @@ export class RoomEngine {
     if (familyPick && familyPick.length < FAMILY_ROUNDS_MIN) {
       throw new StartRefused("FAMILY_TOO_FEW", `Family Questions needs at least ${FAMILY_ROUNDS_MIN} questions ready to play; ${familyPick.length === 0 ? "none are" : familyPick.length === 1 ? "1 is" : `${familyPick.length} are`}. Everyone can write some in the lobby.`, readiness, { ready: familyPick.length, needed: FAMILY_ROUNDS_MIN });
     }
+    // Stage 12.17-R (review 6898755998, D-S1217R-01): a drawing game needs one prompt per turn or round from the prompts
+    // this start may deal (the library's non-rejected prompts this content mode allows), checked before anything is
+    // created: too few is refused with a reason, leaving no game, history or score. An Official Team Draw is checked by
+    // its exact-record selection below instead.
+    const drawShort = this.drawingShortage(gameId, playerIds, season, opts.official ?? false);
+    if (drawShort) throw new ContentShortage(drawShort.message, drawShort.available, drawShort.needed);
     const id = `game-${this.nextGame++}`;
     // Secure per-session seed by default. Explicit seeds are for controlled
     // tests only; the old default of 42 made hidden-role assignment predictable.
@@ -3056,6 +3063,20 @@ export class RoomEngine {
    * Stage 12.10 (D-S1210-01): a game that needs at least 2 per team (TEAM_GAME_MIN_SIZE) moves the players of a
    * smaller team to the smallest other teams; when fewer than two teams would remain, it deals two of its own.
    */
+  /** Stage 12.17-R (D-S1217R-01): why a Draw & Guess or non-Official Team Draw start can't deal a prompt per turn, if so. */
+  private drawingShortage(gameId: string, playerIds: readonly string[], season: SessionSeason | undefined, official: boolean): { message: string; available: number; needed: number } | undefined {
+    if (gameId !== "draw-guess" && !(gameId === "team-draw" && !official)) return undefined;
+    const needed = gameId === "draw-guess" ? drawTurnCount(playerIds.length) : teamDrawRoundCount(this.teamsForTeamGame("team-draw", playerIds, 0), playerIds);
+    const pool = drawPromptPool(this.content);
+    const available = drawPromptSupply(pool, season);
+    if (available >= needed) return undefined;
+    const title = gameId === "draw-guess" ? "Draw & Guess" : "Team Draw";
+    const per = gameId === "draw-guess" ? `one for each of the ${needed} turns` : `one for each of the ${needed} rounds`;
+    const words = `${available === 0 ? "no" : `only ${available}`}${season ? ` ${SEASON_LABEL[season]}` : ""} drawing word${available === 1 ? "" : "s"}`;
+    const instead = season === "everyday" && drawPromptSupply(pool, "christmas") >= needed ? "Choose another game, or switch to Christmas content." : "Choose another game.";
+    return { available, needed, message: `${title} needs ${needed} drawing words (${per}), and there ${available === 1 ? "is" : "are"} ${words} to deal, so nothing started. ${instead}` };
+  }
+
   private teamsForTeamGame(gameId: string, playerIds: readonly string[], seed: number): GameTeams {
     const minSize = TEAM_GAME_MIN_SIZE[gameId] ?? 1;
     // Stage 12.15 (D-S1215-01): a Family Cup's teams play its team games too.

@@ -186,6 +186,8 @@ export const teamDrawModule: GameModule<TeamDrawState> & { onPlayStart(s: TeamDr
     } else {
       if (!drawPool || drawPool.length === 0) throw new Error("Team Draw needs its prompts from the content library.");
       source = teamDrawPromptsFor(drawPool, season, rng, avoid);
+      // Stage 12.17-R (D-S1217R-01): one prompt per round, after the content mode's filter (the room refuses first).
+      if (source.length < rounds) throw new Error(`Team Draw needs ${rounds} prompts for ${rounds} rounds; only ${source.length} can be dealt.`);
     }
     const prompts = source.slice(0, rounds).map((p) => ({ ...p, ...(p.alts ? { alts: [...p.alts] } : {}) }));
     return { players: [...players], teams: t, drawOrder, prompts, round: 0, phase: "draw", roundStartedAt: null, roundStarts: [], rounds: {} };
