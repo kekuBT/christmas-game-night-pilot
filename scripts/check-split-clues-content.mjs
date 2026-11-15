@@ -180,7 +180,9 @@ try {
   // ---- B: an isolated fixture with six approved puzzles ----
   const approved = [...EVERYDAY].slice(0, 6);
   const fx = fixtureContent(approved);
-  check("B the fixture is a temporary copy; the shipped approvals file has no Split Clues approval", !fx.dir.startsWith(ROOT) && !readFileSync(join(ROOT, "content", existsSync(join(ROOT, "content", "approvals.json")) ? "approvals.json" : "packs/split-clues-everyday.json"), "utf8").includes("TEST FIXTURE"));
+  const shippedApprovals = () => { const f = join(ROOT, "content", "approvals.json"); return existsSync(f) ? readFileSync(f, "utf8") : ""; };
+  const shippedBefore = shippedApprovals();
+  check("B the fixture is a temporary copy outside the repository, approving exactly the six at their hashes; the shipped content has no Split Clues approval", !fx.dir.startsWith(ROOT) && approved.every((id) => /^[0-9a-f]{16}$/.test(fx.hashes[id])) && !/"sc-\d{3}"/.test(shippedBefore), `shipped approvals file: ${shippedBefore ? "present" : "none"}`);
   const B = await startServer("B", { MCHEZO_CONTENT_DIR: fx.dir });
   const rb = await cupRoom(B.base);
   const tv = await (await browser.newContext({ viewport: { width: 1920, height: 1080 }, reducedMotion: "reduce" })).newPage();
@@ -224,6 +226,7 @@ try {
   for (const p of rb.pages) await p.context().close();
   B.stop();
   rmSync(fx.dir, { recursive: true, force: true });
+  check("B the shipped approvals are unchanged after the fixture run", shippedApprovals() === shippedBefore);
 } catch (e) {
   check("the driver ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
 } finally {

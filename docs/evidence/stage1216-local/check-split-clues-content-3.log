@@ -1,0 +1,25 @@
+PASS A: the server runs without the content test mode
+PASS A the Cup lobby says Split Clues is Practice only, and why (no approved puzzles)
+  (the note: Practice only: Split Clues counts only with puzzles a person has approved, and this Cup has 0 unused approved puzzles (an official game needs 6). Play it as Practice instead: practice uses every puzzle.)
+PASS A Official is disabled; Practice is the start
+PASS A the server's lobby view: 0 of 6, with the reason (counts only) — {"available":0,"needed":6,"message":"Split Clues counts only with puzzles a person has approved, and this Cup has 0 unused approved puzzles (an official game needs 6). Play it as Practice instead: practice uses every puzzle."}
+PASS A a forged Official start by the host is refused (409, the same reason), and nothing starts — {"status":409,"body":{"error":"Split Clues counts only with puzzles a person has approved, and this Cup has 0 unused approved puzzles (an official game needs 6). Play it as Practice instead: practice uses every puzzle.","code":"CONTENT_EXHAUSTED","available":0,"needed":6}}
+PASS A a guest's Official start is refused — 400 {"error":"Only host/cohost can start a game"}
+PASS A at 320 px the host's lobby says the same
+PASS A 320 px: no sideways scroll
+PASS A Practice from the lobby starts, as Practice — {"official":false,"status":"briefing"}
+PASS A the practice game played all six puzzles to the end, year-round ones only (a Cup) — ["sc-001","sc-011","sc-015","sc-024","sc-038","sc-027"]
+PASS A nothing counted: the Cup standings are as before
+PASS B the fixture is a temporary copy; the shipped approvals file has no Split Clues approval
+PASS B: the server runs without the content test mode
+PASS B with six approved puzzles, Official is offered: enabled, no practice-only note
+PASS B the host's start is Official and says it counts toward the Family Cup
+PASS B the game started as Official — {"official":true,"status":"briefing"}
+PASS B the TV's briefing says Official
+PASS B a guest's reload mid-round gives back exactly their own clues — 3 clue(s)
+PASS B …on the reloaded phone, too
+PASS B while solving, the TV (screen and data) shows no clue and no answer of any approved puzzle
+PASS B the Official game dealt exactly the six approved puzzles — ["sc-004","sc-003","sc-005","sc-002","sc-001","sc-006"]
+PASS B it finished Official, with team results and Cup placements — {"status":"finished","official":true,"teams":[["team-coral",1],["team-sun",2]]}
+PASS B afterwards the lobby view says the approved puzzles are used up (0 of 6), never reusing them — {"available":0,"needed":6,"message":"Split Clues counts only with puzzles a person has approved, and this Cup has 0 unused approved puzzles (an official game needs 6). Play it as Practice instead: practice uses every puzzle."}
+SPLIT CLUES CONTENT PASSED

@@ -279,3 +279,19 @@ describe("the room (D-S1216-02..04)", () => {
     }
   });
 });
+
+describe("the review inventory (docs/stage12/stage1216-split-clues-inventory.md)", () => {
+  it("lists every puzzle with its current approval hash, so an edit without a regenerated inventory is caught", () => {
+    const doc = readFileSync(new URL("../docs/stage12/stage1216-split-clues-inventory.md", import.meta.url), "utf8");
+    const lib = loadContent();
+    const listed = [...doc.matchAll(/^### (sc-\d{3}) · /gm)].map((m) => m[1]);
+    expect([...listed].sort()).toEqual([...EVERYDAY_IDS, ...XMAS_IDS].sort());
+    for (const li of lib.byGame.get("split-clues") ?? []) {
+      const block = doc.slice(doc.indexOf(`### ${li.item.id} · `)).split("\n### ")[0]!;
+      expect(block, li.item.id).toContain(`**Approval hash** \`${li.hash}\``);
+      for (const c of (li.item as unknown as Item).clues) expect(block, li.item.id).toContain(c);
+    }
+    const approved = (lib.byGame.get("split-clues") ?? []).filter((li) => li.status === "approved").length;
+    expect(doc).toContain(approved === 0 ? "**No puzzle is approved**" : `**${approved} of `);
+  });
+});
