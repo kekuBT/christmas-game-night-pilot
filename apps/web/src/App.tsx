@@ -46,8 +46,8 @@ import { SaveMemory } from "./components/mchezo/SaveMemory.js";
 import { SAVE_MEMORY_GAMES, saveMemoryFacts } from "./ui/mchezo/lib/saveMemory.js";
 import { cupContinuity } from "./components/mchezo/CiniCups.js";
 import { MchezoSpectrum, MchezoSpectrumResults, SpectrumReview, SpectrumTv, SpectrumTvFinal, TeamResultsHero } from "./components/mchezo/MchezoSpectrum.js";
-import { lineupLine, tvFeedFrom, winnerLine } from "./ui/mchezo/lib/tvfeed.js";
-import { ordinal } from "./ui/mchezo/lib/standings.js";
+import { lineupLine, tvFeedFrom } from "./ui/mchezo/lib/tvfeed.js";
+import { lastGameSummary } from "./ui/mchezo/lib/lastGame.js";
 import { CaptionTv, MchezoCaption, MchezoCaptionResults } from "./components/mchezo/MchezoCaption.js";
 import { MchezoGeography } from "./components/mchezo/MchezoGeography.js";
 import { MchezoMath } from "./components/mchezo/MchezoMath.js";
@@ -1584,7 +1584,12 @@ export function App() {
       // game's teammates look "tied for first" ("Tied for first. Diplomacy wins."); only an Official game (a Cup's team
       // game) picks from these lines, Casual and Practice have their own.
       const teamScores = Object.fromEntries(teamRows.filter((r) => r.score !== null).map((r) => [r.teamId, r.score!] as const));
-      const teamQuip = resultsStory({ gameInstanceId: g.id, title, official, casual: proj?.roomKind === "casual", scores: teamScores, nameOf: (id) => teamRows.find((r) => r.teamId === id)?.name ?? "A team" }).quip;
+      // Stage 12.15-R (D-S1215R-03): Relay places teams level on points by who completed their last leg first; its
+      // comment then says so rather than picking a "tied" line from the equal points.
+      const levelButPlaced = teamRows.some((r) => r.score !== null && teamRows.some((o) => o !== r && o.score === r.score && o.rank !== r.rank));
+      const teamQuip = levelButPlaced && official && top.length === 1
+        ? `Level on points; ${top[0]!.name} got there first.`
+        : resultsStory({ gameInstanceId: g.id, title, official, casual: proj?.roomKind === "casual", scores: teamScores, nameOf: (id) => teamRows.find((r) => r.teamId === id)?.name ?? "A team" }).quip;
       story = {
         ...story,
         quip: teamQuip,
@@ -2029,24 +2034,8 @@ export function App() {
     const roomGames = proj?.games ?? [];
     const gameOn = roomGames.some((g) => g.status === "playing" || g.status === "briefing");
     const lastDone = gameOn ? undefined : roomGames.filter((g) => g.status === "finished").at(-1);
-    const lastGame = lastDone ? (() => {
-      // Stage 9.3: a cooperative game is summarised by its one team result, never a winner or a place.
-      const team = lastDone.outcome?.team;
-      if (team) {
-        const inIt = !!playerId && lastDone.players.includes(playerId);
-        return { title: titleFor(lastDone.gameId, games), mode: lastDone.official ? "official" as const : "practice" as const, headline: `Team result: ${team.total} out of ${team.max}`, yourLine: inIt ? "You played on the team." : "You weren’t in this one." };
-      }
-      const scores = lastDone.rawScores ?? {};
-      const mineScore = playerId ? scores[playerId] : undefined;
-      const n = Object.keys(scores).length;
-      const rank = mineScore === undefined ? 0 : 1 + Object.values(scores).filter((v) => v > mineScore).length;
-      const tied = mineScore !== undefined && Object.values(scores).filter((v) => v === mineScore).length > 1;
-      const yourLine = !playerId || !lastDone.players.includes(playerId) ? "You weren’t in this one."
-        : mineScore === undefined ? undefined
-        : n <= 1 ? `You played solo: ${mineScore} points.`
-        : `You ${tied ? "tied for" : "came"} ${ordinal(rank)} of ${n} · ${mineScore} points.`;
-      return { title: titleFor(lastDone.gameId, games), mode: lastDone.official ? "official" as const : "practice" as const, headline: winnerLine(scores, nameOf), yourLine };
-    })() : undefined;
+    // Stage 9.3: a cooperative game by its one team result; Stage 12.15-R (R6): a team game by its teams (lib/lastGame.ts).
+    const lastGame = lastDone ? { title: titleFor(lastDone.gameId, games), mode: lastDone.official ? "official" as const : "practice" as const, ...lastGameSummary(lastDone, playerId, nameOf) } : undefined;
     return (
       <MchezoProvider theme={theme} {...motion}>
         <RoomLobby

@@ -102,6 +102,13 @@ export interface GameModule<S = unknown> {
    * internal compatibility copy. Required for a cooperative game.
    */
   teamResult?(s: S): TeamResult;
+  /**
+   * Stage 12.15-R (D-S1215R-03): a game built for teams whose own rules place its teams other than by points (Relay:
+   * legs, then who completed their last leg first). Team id -> place (1-based, shared on a tie). The room records it
+   * at the finish (outcome.teamPlaces); team results, medals and the Cup's team placement then follow it. Absent:
+   * teams are placed by their scores.
+   */
+  teamPlaces?(s: S): Record<string, number>;
   /** Totals from everything completed so far (the final scores once finished). */
   scores(s: S, players: readonly string[]): Record<string, number>;
   participation(s: S, players: readonly string[]): { participation: Record<string, Participation>; completedUnits?: number; totalUnits?: number };

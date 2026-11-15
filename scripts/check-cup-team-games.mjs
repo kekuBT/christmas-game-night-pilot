@@ -9,12 +9,16 @@
 //      this game, Sun first
 //   E  the Cup screen (320 px): the game's placements are the server's (Baraka 100, Wanjiru 100, Coral 0) and the note
 //      explains team placement and the 75/25 day
+//   F  (Stage 12.15-R, review 6888718011 R6) the recaps name the team: the lobby's last game ("Team Sun wins"; "Your
+//      team, Team Sun, won"; Coral "came 2nd of 2"), the TV's lobby list and the night card, never teammates "tied for
+//      first"
 // The Individual Family Cup's refusal can't be reached from a browser any more (every new Cup is a Family Cup); it is
 // covered by tests/stage1215-cup-team-games.test.ts.
 // Usage: node scripts/check-cup-team-games.mjs <baseUrl>   (the gate passes its server)
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { PROTOCOL_HEADERS } from "./lib/protocol.mjs";
 import { solveMath } from "./lib/math-solve.mjs";
+import { openRoomMenu } from "./lib/room-nav.mjs";
 
 const BASE = process.argv[2] ?? "http://localhost:3461";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -44,6 +48,7 @@ const intent = (roomId, seat, gid, action, payload) =>
 const tvProj = (roomId) => api(`/rooms/${roomId}/projection?audience=tv`);
 const myGame = async (roomId, seat, gid) => (await api(`/rooms/${roomId}/projection?audience=player`, { token: seat.token })).myGames.find((g) => g.id === gid);
 const shot = async (page, name) => { await page.mouse.move(1, 1); await page.screenshot({ path: screenshotPath(`docs/stage12/stage1215-screenshots/${name}.png`) }); };
+const shotR = async (page, name) => { await page.mouse.move(1, 1); await page.screenshot({ path: screenshotPath(`docs/stage12/stage1215r-screenshots/${name}.png`) }); };
 const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
 const text = async (loc) => ((await loc.count()) ? await loc.first().innerText() : "");
 
@@ -156,6 +161,23 @@ try {
   await wan.getByTestId("cup-games").scrollIntoViewIfNeeded();
   await shot(wan, "cup-screen-320");
   check("E 320 px: the Cup screen has no sideways scroll", await noSideScroll(wan));
+
+  // ---- F ---- (Stage 12.15-R R6: the recaps name the team)
+  const baraka = pageOf[b.playerId];
+  for (const p of [host, baraka]) { const back = p.getByTestId("show-back-to-lobby"); if (await back.count()) await back.first().click(); }
+  await soon("F Baraka's lobby: the last game is Sun's win, and his team's", async () => {
+    const card = await text(baraka.getByTestId("last-game-card"));
+    return /Team Sun wins/.test(card) && /Your team, Team Sun, won · \d+ points\./.test(await text(baraka.getByTestId("last-game-you"))) && !/tie for first/i.test(card);
+  });
+  await soon("F Keku's lobby: his team came 2nd of 2", async () => /Your team, Team Coral, came 2nd of 2 · \d+ points\./.test(await text(host.getByTestId("last-game-you"))));
+  await baraka.getByTestId("last-game-card").scrollIntoViewIfNeeded();
+  await shotR(baraka, "lobby-last-game-320");
+  await tv.getByTestId("tv-dir-lobby").click();
+  await soon("F the TV's lobby list names the winning team, not teammates", async () => { const t = await text(tv.getByTestId("tv-recent")); return /Tug of War[\s\S]*Team Sun wins/.test(t) && !/tie for first/i.test(t); });
+  await openRoomMenu(baraka);
+  await baraka.getByTestId("menu-night-card").click();
+  await baraka.getByTestId("night-card-sheet").waitFor({ timeout: 10000 });
+  await soon("F the night card's words name the team: \"Tug of War: Team Sun wins\"", async () => { const t = (await baraka.getByTestId("night-card-text").textContent()) ?? ""; return /Tug of War: Team Sun wins/.test(t) && !/tie for first/i.test(t); });
 } finally {
   await browser.close();
 }

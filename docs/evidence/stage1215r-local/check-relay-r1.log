@@ -1,0 +1,25 @@
+PASS A the briefing names the teams
+PASS A the TV shows a lane per team
+PASS B the runner's phone says it's their leg
+PASS B the teammate sees the same sum and is told to help
+PASS B the runner's leg line: leg 1 of 12, the baton passes in at most 20 s
+PASS B a right answer passes the baton (Coral leg 1, the other runner)
+PASS C Sun is still on leg 0
+PASS C Baraka's phone never shows Coral's next sum — 70 ÷ 10 = ?
+PASS C Wanjiru's phone never shows Coral's next sum — 70 ÷ 10 = ?
+PASS C the TV's data has no sum, option or answer
+PASS D a wrong answer freezes the runner, counting down from at most 3
+PASS D the wrong option is greyed out
+PASS D (12.15-R) the TV's lane says the runner is frozen
+PASS D the freeze ends
+PASS D (12.15-R) the TV's lane stops saying frozen when the freeze ends, with no other answer
+PASS D after the freeze, the right answer passes the baton
+PASS E a Sun runner who doesn't answer in 20 s is passed over on the same sum
+PASS E the game clock counts down: under 3:45 left after the pass
+PASS F the race finished with Coral home first — ["team-coral","team-sun"]
+PASS F every player scored their team's points — {"player-1":150,"player-2":150,"player-3":140,"player-4":140}
+PASS F phones: the results with the team results card and a team-led heading
+PASS F the TV leads with the winning team
+PASS F the team results show points, not an average (phone and TV)
+PASS F 320 px: the results have no sideways scroll
+check-relay: all passed

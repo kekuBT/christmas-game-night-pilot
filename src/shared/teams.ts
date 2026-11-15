@@ -136,15 +136,21 @@ export interface TeamResultRow {
  * One game's team results, best first. A member counts when they took part (`tookPart`, usually: answered at least
  * once); a member who sat it out entirely doesn't pull their team's average down. Ties share a rank. Pure.
  */
-export function teamResults(teams: GameTeams, rawScores: Record<string, number> | undefined, tookPart: (playerId: string) => boolean): TeamResultRow[] {
+export function teamResults(teams: GameTeams, rawScores: Record<string, number> | undefined, tookPart: (playerId: string) => boolean, places?: Readonly<Record<string, number>>): TeamResultRow[] {
   const rows: TeamResultRow[] = teams.list.map((t) => {
     const members = Object.entries(teams.members).filter(([, tid]) => tid === t.id).map(([pid]) => pid).sort();
     const counted = members.filter((p) => typeof rawScores?.[p] === "number" && tookPart(p));
     const score = counted.length === 0 ? null : Math.round(counted.reduce((s, p) => s + (rawScores![p] ?? 0), 0) / counted.length);
     return { teamId: t.id, name: t.name, color: t.color, members, counted, score, rank: null };
   });
-  const scored = rows.filter((r) => r.score !== null).sort((a, b) => b.score! - a.score! || teams.list.findIndex((t) => t.id === a.teamId) - teams.list.findIndex((t) => t.id === b.teamId));
-  scored.forEach((r, i) => { r.rank = i > 0 && scored[i - 1]!.score === r.score ? scored[i - 1]!.rank : i + 1; });
+  const order = (id: string) => teams.list.findIndex((t) => t.id === id);
+  const scoredRows = rows.filter((r) => r.score !== null);
+  // Stage 12.15-R (D-S1215R-03): a game that places its teams by its own rule (Relay: legs, then the last leg's time)
+  // ranks them by those places; every other game by score. Same place (or same score): same rank.
+  const byPlace = places !== undefined && scoredRows.every((r) => Number.isFinite(places[r.teamId]));
+  const key = (r: TeamResultRow) => (byPlace ? places![r.teamId]! : -r.score!);
+  const scored = scoredRows.sort((a, b) => key(a) - key(b) || b.score! - a.score! || order(a.teamId) - order(b.teamId));
+  scored.forEach((r, i) => { r.rank = i > 0 && key(scored[i - 1]!) === key(r) ? scored[i - 1]!.rank : i + 1; });
   return [...scored, ...rows.filter((r) => r.score === null)];
 }
 

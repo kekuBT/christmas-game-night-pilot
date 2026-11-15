@@ -16,20 +16,23 @@ import { TeamLabel, TeamScoreboard, teamDef, type TeamScoreRow, teamGameModeLine
 import { TeamMark } from "./Teams.js";
 import type { TeamDef } from "../../../../../src/shared/teams.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
+import { sitOutLine } from "../../ui/mchezo/lib/teamLines.js";
 
 interface KyrCount { teamId: string; answered: number; a: number; b: number; passed: number }
 interface KyrGuess { teamId: string; target: string; guess: number | null; actual: number; size: number; points: number }
-interface KyrResult { prompt?: string; a?: string; b?: string; counts: KyrCount[]; guesses: KyrGuess[]; points: { teamId: string; points: number; bonus: number }[] }
+interface KyrResult { prompt?: string; a?: string; b?: string; counts: KyrCount[]; guesses: KyrGuess[]; points: { teamId: string; points: number; bonus: number }[]; sitOut?: string[] }
 export interface KyrView {
   round?: number; roundCount?: number; phase?: "answer" | "guess" | "reveal" | "finished"; teamTotals?: TeamScoreRow[]; catchUp?: string;
   question?: { prompt: string; a: string; b: string }; answered?: number; of?: number;
-  sizes?: { teamId: string; answered: number }[]; teamStatus?: { teamId: string; locked: boolean }[];
+  sizes?: { teamId: string; answered: number }[]; teamStatus?: { teamId: string; locked: boolean; guessing?: boolean }[];
   result?: KyrResult | null; rounds?: KyrResult[];
   myTeamId?: string; myTotal?: number; myAnswer?: "a" | "b" | "pass"; teamGuesses?: Record<string, { value: number; by: string }>; lockedBy?: string;
 }
 type Game = { teams?: { list: TeamDef[] } };
 type NameOf = (id?: string | null) => string;
 const teamName = (game: Game, id?: string | null) => teamDef(game, id)?.name ?? "A team";
+/** Stage 12.15-R (D-S1215R-02): the teams that sat a round's guessing out (lib/teamLines.ts). */
+const sitOut = (game: Game, r: KyrResult) => sitOutLine(r, (t) => teamName(game, t));
 
 /** One team's totals: a two-part bar and the numbers in words. */
 function CountBar({ game, c, a, b, testId, mine }: { game: Game; c: KyrCount; a: string; b: string; testId: string; mine?: string }) {
@@ -48,7 +51,10 @@ function CountBar({ game, c, a, b, testId, mine }: { game: Game; c: KyrCount; a:
 
 const statusOf = (st: KyrView) => (teamId: string): ReactNode => {
   if (st.phase === "answer") return st.catchUp === teamId ? "Catch-up: +15 if you score this round" : null;
-  if (st.phase === "guess") return st.teamStatus?.find((x) => x.teamId === teamId)?.locked ? "✓ Guesses locked" : "Guessing…";
+  if (st.phase === "guess") {
+    const ts = st.teamStatus?.find((x) => x.teamId === teamId);
+    return ts?.guessing === false ? "Sitting this one out" : ts?.locked ? "✓ Guesses locked" : "Guessing…";
+  }
   if ((st.phase === "reveal" || st.phase === "finished") && st.result) {
     const p = st.result.points.find((x) => x.teamId === teamId);
     return p ? `+${p.points + p.bonus} this round${p.bonus ? ` (with +${p.bonus} catch-up)` : ""}` : null;
@@ -105,13 +111,29 @@ export function MchezoKnowYourRivals({ game, players, playerId, title, intent, e
           </section>
         )}
         {myPts && <p className="mz-mr-mine" data-testid="mz-kyr-mine">Your team: +{myPts.points + myPts.bonus} this round{myPts.bonus ? ` (with +${myPts.bonus} catch-up)` : ""}.</p>}
+        {sitOut(game, r) && <p className="mz-foot" data-testid="mz-kyr-sitout">{sitOut(game, r)}</p>}
         {scores}
         <p className="mz-foot">{round < of ? "The next question is coming up." : "That was the last question."}</p>
       </main>
     );
   }
 
+  if (st.phase === "guess" && q && st.teamStatus?.find((x) => x.teamId === st.myTeamId)?.guessing === false) {
+    // Stage 12.15-R (D-S1215R-02): nobody on this team answered, so it sits this round's guessing out. Plainly, no pressure.
+    return (
+      <main className="mz-screen" aria-label={`${title}: question ${round} of ${of}, the other teams are guessing`} data-testid="mz-kyr-sitting-out">
+        <GameHeader title={title} objective="Know your rivals" accent={4} />
+        <TeamLabel game={game} teamId={st.myTeamId} testId="mz-kyr-myteam" />
+        <p className="mz-mr-round">Question {round} of {of}</p>
+        <h2 className="mz-mr-prompt mz-kyr-prompt">{q.prompt}</h2>
+        <FeedbackLine testId="mz-kyr-sitout-note">Your team said “Rather not say” to this one, so you sit out this round’s guessing: nobody guesses your team, and your team guesses nobody. The next question is a fresh start.</FeedbackLine>
+        {scores}
+      </main>
+    );
+  }
+
   if (st.phase === "guess" && q) {
+    const guessingIds = new Set((st.teamStatus ?? []).filter((x) => x.guessing !== false).map((x) => x.teamId));
     const rivals = (st.sizes ?? []).filter((x) => x.teamId !== st.myTeamId);
     const locked = !!st.lockedBy;
     const missing = rivals.filter((r) => r.answered > 0 && !st.teamGuesses?.[r.teamId]).map((r) => r.teamId);
@@ -127,8 +149,8 @@ export function MchezoKnowYourRivals({ game, players, playerId, title, intent, e
             const g = st.teamGuesses?.[r.teamId];
             return (
               <li key={r.teamId} className={`mz-kyr-row mz-team--${def?.color ?? "coral"}`} data-testid={`mz-kyr-row-${r.teamId}`}>
-                <span className="mz-kyr-row__head">{def && <TeamMark color={def.color} />}<b>{def?.name ?? "A team"}</b><span>{r.answered ? `of the ${r.answered} who answered` : "nobody answered"}</span></span>
-                {r.answered > 0 && (
+                <span className="mz-kyr-row__head">{def && <TeamMark color={def.color} />}<b>{def?.name ?? "A team"}</b><span>{r.answered ? `of the ${r.answered} who answered` : "said “Rather not say”: no guess this round"}</span></span>
+                {r.answered > 0 && guessingIds.has(r.teamId) && (
                   <span className="mz-kyr-chips" role="group" aria-label={`How many of ${def?.name ?? "that team"} picked ${q.a}`}>
                     {Array.from({ length: r.answered + 1 }, (_, v) => (
                       <button key={v} type="button" className={`mz-kyr-chip${g?.value === v ? " is-on" : ""}`} aria-pressed={g?.value === v} data-testid={`mz-kyr-pick-${r.teamId}-${v}`}
@@ -219,6 +241,7 @@ export function KnowYourRivalsTv({ game, title }: { game: PublicGame; title: str
         {st.phase === "answer" && <p className="mz-tvshow-line" data-testid="tv-kyr-progress"><b>{st.answered ?? 0} of {st.of ?? 0}</b> answered. Nobody sees your answer, only your team’s total.</p>}
         {st.phase === "guess" && <p className="mz-tvshow-line" data-testid="tv-kyr-progress">Each team guesses: how many of the other teams picked <b>{q?.a}</b>?</p>}
         {reveal && q && <ul className="mz-kyr-counts mz-kyr-counts--tv" data-testid="tv-kyr-counts">{st.result!.counts.map((c) => <CountBar key={c.teamId} game={game} c={c} a={q.a} b={q.b} testId={`tv-kyr-count-${c.teamId}`} />)}</ul>}
+        {reveal && sitOut(game, st.result!) && <p className="mz-tvshow-line mz-tvshow-line--muted" data-testid="tv-kyr-sitout">{sitOut(game, st.result!)}</p>}
       </div>
       <TeamScoreboard game={game} totals={st.teamTotals ?? []} status={statusOf(st)} tv testId="tv-kyr-scores" />
     </section>

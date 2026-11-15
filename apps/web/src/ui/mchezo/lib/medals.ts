@@ -57,7 +57,8 @@ export function placesOf(rawScores: Record<string, number> | undefined): PlacedS
 export function placesOfGame(g: MedalGame): PlacedScore[] {
   const teams = TEAM_NATIVE_GAMES.has(g.gameId) ? (g.teamResults ?? []).filter((t) => t.score !== null && t.rank !== null) : [];
   if (teams.length < 2) return placesOf(g.rawScores);
-  const allTied = teams.every((t) => t.score === teams[0]!.score);
+  // Every team shares first place (by rank: Relay ranks equal points by the last leg's time, D-S1215R-03).
+  const allTied = teams.every((t) => t.rank === 1);
   const rows: PlacedScore[] = [];
   for (const t of [...teams].sort((a, b) => a.rank! - b.rank!)) {
     const medal: Medal | null = allTied || t.score! <= 0 ? null : t.rank === 1 ? "gold" : t.rank === 2 ? "silver" : t.rank === 3 ? "bronze" : null;

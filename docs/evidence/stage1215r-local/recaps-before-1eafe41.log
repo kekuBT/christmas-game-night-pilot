@@ -1,0 +1,67 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1215
+
+ ❯ tests/stage1215r-recaps.test.ts (4 tests | 4 failed) 43ms
+   × R6: a team game is told by its teams in the lobby, the TV's recaps and the night card > resultLine: the team wins or ties; individual and cooperative games unchanged 11ms
+     → expected 'Baraka and Wanjiru tie for first' to be 'Team Sun wins' // Object.is equality
+   × R6: a team game is told by its teams in the lobby, the TV's recaps and the night card > the lobby's last game: your team's place, never teammates as tied players; individual and cooperative unchanged 9ms
+     → Failed to load url ../apps/web/src/ui/mchezo/lib/lastGame.js (resolved id: ../apps/web/src/ui/mchezo/lib/lastGame.js) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1215/tests/stage1215r-recaps.test.ts. Does the file exist?
+   × R6: a team game is told by its teams in the lobby, the TV's recaps and the night card > the night card names the winning team, in its text and on the picture's game lines 20ms
+     → expected [ { title: 'Relay', …(1) } ] to deeply equal [ { title: 'Relay', …(1) } ]
+   × R6: a team game is told by its teams in the lobby, the TV's recaps and the night card > room: a finished Relay's projection gives the TV's recap, the lobby and the night card the team line 2ms
+     → Failed to load url ../apps/web/src/ui/mchezo/lib/lastGame.js (resolved id: ../apps/web/src/ui/mchezo/lib/lastGame.js) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1215/tests/stage1215r-recaps.test.ts. Does the file exist?
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/stage1215r-recaps.test.ts > R6: a team game is told by its teams in the lobby, the TV's recaps and the night card > resultLine: the team wins or ties; individual and cooperative games unchanged
+AssertionError: expected 'Baraka and Wanjiru tie for first' to be 'Team Sun wins' // Object.is equality
+
+Expected: "Team Sun wins"
+Received: "Baraka and Wanjiru tie for first"
+
+ ❯ tests/stage1215r-recaps.test.ts:28:37
+     26|   it("resultLine: the team wins or ties; individual and cooperative ga…
+     27|     const win = { rawScores: { k: 140, a: 140, b: 150, w: 150 }, teamR…
+     28|     expect(resultLine(win, nameOf)).toBe("Team Sun wins");
+       |                                     ^
+     29|     // Before: "Baraka and Wanjiru tie for first".
+     30|     expect(resultLine({ rawScores: win.rawScores }, nameOf)).toBe("Bar…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/stage1215r-recaps.test.ts > R6: a team game is told by its teams in the lobby, the TV's recaps and the night card > the lobby's last game: your team's place, never teammates as tied players; individual and cooperative unchanged
+ FAIL  tests/stage1215r-recaps.test.ts > R6: a team game is told by its teams in the lobby, the TV's recaps and the night card > room: a finished Relay's projection gives the TV's recap, the lobby and the night card the team line
+Error: Failed to load url ../apps/web/src/ui/mchezo/lib/lastGame.js (resolved id: ../apps/web/src/ui/mchezo/lib/lastGame.js) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1215/tests/stage1215r-recaps.test.ts. Does the file exist?
+ ❯ loadAndTransform ../../../../../../home/user/christmas-game-night-pilot/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51969:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/stage1215r-recaps.test.ts > R6: a team game is told by its teams in the lobby, the TV's recaps and the night card > the night card names the winning team, in its text and on the picture's game lines
+AssertionError: expected [ { title: 'Relay', …(1) } ] to deeply equal [ { title: 'Relay', …(1) } ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+-     "line": "Team Sun wins",
++     "line": "Baraka and Wanjiru tie for first",
+      "title": "Relay",
+    },
+  ]
+
+ ❯ tests/stage1215r-recaps.test.ts:64:25
+     62|       nameOf, titleOf: () => "Relay", christmas: false, now: new Date(…
+     63|     })!;
+     64|     expect(facts.games).toEqual([{ title: "Relay", line: "Team Sun win…
+       |                         ^
+     65|     expect(nightCardText(facts)).toContain("Relay: Team Sun wins");
+     66|     expect(nightCardText(facts)).not.toContain("tie for first");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  04:03:17
+   Duration  1.23s (transform 687ms, setup 0ms, collect 885ms, tests 43ms, environment 0ms, prepare 60ms)
+

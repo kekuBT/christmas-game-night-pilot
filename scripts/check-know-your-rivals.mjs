@@ -12,6 +12,9 @@
 //      scores and gets +15
 //   F  rounds 4–6 over the API; results: six questions, the team results card, the TV final; 320 px; no answer of
 //      anyone's left in any view
+//   G  (Stage 12.15-R, D-S1215R-02) in round 4 everyone on Sun says "Rather not say": Sun's phones say it sits the
+//      guessing out (no chips, no lock); Sun can't guess; the TV says "Sitting this one out"; Coral and Mint's locks
+//      close the phase without Sun; the reveal says there were no guesses for or about Team Sun; Sun scores 0
 // Usage: node scripts/check-know-your-rivals.mjs <baseUrl>   (the gate passes its server)
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { PROTOCOL_HEADERS } from "./lib/protocol.mjs";
@@ -45,6 +48,8 @@ const tvProj = (roomId) => api(`/rooms/${roomId}/projection?audience=tv`);
 const myGame = async (roomId, seat, gid) => (await api(`/rooms/${roomId}/projection?audience=player`, { token: seat.token })).myGames.find((g) => g.id === gid);
 // The mouse is moved off the page first: a button under the last click would show its hover style.
 const shot = async (page, name) => { await page.mouse.move(1, 1); await page.screenshot({ path: screenshotPath(`docs/stage12/stage1214-screenshots/${name}.png`) }); };
+// Stage 12.15-R's screenshots (the round where a team sits the guessing out).
+const shotR = async (page, name) => { await page.mouse.move(1, 1); await page.screenshot({ path: screenshotPath(`docs/stage12/stage1215r-screenshots/${name}.png`) }); };
 const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
 const text = async (loc) => ((await loc.count()) ? await loc.first().innerText() : "");
 const tvFits = (tv) => tv.evaluate(() => {
@@ -172,14 +177,16 @@ try {
   // ---- E ----
   const roundOn = (r, phase = "answer") => until(async () => { const g = await tvGame(); return g.state.round === r && g.state.phase === phase ? g.state : null; }, 20000);
   // Answer, then guess (only `guessers` guess, every rival exactly), then everyone locks.
-  const playRound = async (r, guessers) => {
+  const playRound = async (r, guessers, { sunPasses = false, beforeLocks } = {}) => {
     await roundOn(r);
-    const picks = [[k, "a"], [a, "b"], [z, "a"], [b, "b"], [w, "b"], [j, "a"], [n, "b"]];
+    const picks = [[k, "a"], [a, "b"], [z, "a"], [b, sunPasses ? "pass" : "b"], [w, sunPasses ? "pass" : "b"], [j, "a"], [n, "b"]];
     for (const [s, c] of picks) await intent(roomId, s, gid, "rivals-answer", { round: r, choice: c });
     await roundOn(r, "guess");
     const exact = { [CORAL]: 2, [SUN]: 0, [MINT]: 1 };
-    for (const [s, team] of guessers) for (const t of [CORAL, SUN, MINT].filter((x) => x !== team)) await intent(roomId, s, gid, "rivals-guess", { round: r, target: t, value: exact[t] });
-    for (const s of [k, b, j]) await intent(roomId, s, gid, "rivals-lock", { round: r });
+    const inGuessing = sunPasses ? [CORAL, MINT] : [CORAL, SUN, MINT];
+    for (const [s, team] of guessers) for (const t of inGuessing.filter((x) => x !== team)) await intent(roomId, s, gid, "rivals-guess", { round: r, target: t, value: exact[t] });
+    if (beforeLocks) await beforeLocks();
+    for (const s of sunPasses ? [k, j] : [k, b, j]) await intent(roomId, s, gid, "rivals-lock", { round: r });
     return roundOn(r, "reveal");
   };
   // Round 2: Coral and Mint guess both rivals exactly (+60 each); Sun guesses nothing. Totals 120 / 30 / 110.
@@ -194,13 +201,32 @@ try {
   check("E round 3: Sun scores 60 and gets the +15 catch-up", sunPts?.points === 60 && sunPts?.bonus === 15, JSON.stringify(s3?.result?.points));
   await soon("E Sun's phones show the catch-up in the round's points", async () => /\+75 this round \(with \+15 catch-up\)/.test(await text(pageOf[b.playerId].getByTestId("mz-kyr-mine"))));
 
+  // ---- G ---- (round 4: Sun keeps its answers to itself)
+  const sunPhone = pageOf[w.playerId];
+  const s4 = await playRound(3, [[k, CORAL], [j, MINT]], { sunPasses: true, beforeLocks: async () => {
+    await soon("G Sun's phone (Wanjiru) says Sun sits this round's guessing out, with no chips and no lock", async () =>
+      (await sunPhone.getByTestId("mz-kyr-sitting-out").count()) === 1 && /sit out this round’s guessing/.test(await text(sunPhone.getByTestId("mz-kyr-sitout-note")))
+      && (await sunPhone.locator("[data-testid^='mz-kyr-pick-']").count()) === 0 && (await sunPhone.getByTestId("mz-kyr-lock").count()) === 0);
+    let refused;
+    try { refused = (await intent(roomId, b, gid, "rivals-guess", { round: 3, target: CORAL, value: 2 })).accepted === false; } catch { refused = true; }
+    check("G Sun's guess is refused (it sits this round out)", refused);
+    await soon("G the TV shows Sun sitting this one out", async () => /Sitting this one out/.test(await text(tv.getByTestId(`tv-kyr-scores-${SUN}`))));
+    await soon("G Coral's phone has no row of chips for Sun", async () => (await host.locator("[data-testid^='mz-kyr-pick-team-sun-']").count()) === 0 && /no guess this round/.test(await text(host.getByTestId("mz-kyr-row-team-sun"))));
+    await shotR(sunPhone, "kyr-sitting-out-390");
+  } });
+  check("G Coral and Mint's locks closed the guessing without Sun", s4?.phase === "reveal");
+  const p4 = Object.fromEntries((s4?.result?.points ?? []).map((p) => [p.teamId, p.points + p.bonus]));
+  check("G round 4: Coral 30 and Mint 30 (each guessed the other exactly), Sun 0; no guess about or by Sun", p4[CORAL] === 30 && p4[MINT] === 30 && p4[SUN] === 0 && (s4?.result?.guesses ?? []).every((g) => g.teamId !== SUN && g.target !== SUN) && JSON.stringify(s4?.result?.sitOut) === JSON.stringify([SUN]), JSON.stringify(s4?.result));
+  await soon("G the reveal says so, on Sun's phone and the TV", async () => /Team Sun said “Rather not say” this time, so there were no guesses for or about that team/.test(await text(sunPhone.getByTestId("mz-kyr-sitout"))) && /no guesses for or about that team/.test(await text(tv.getByTestId("tv-kyr-sitout"))));
+  await shotR(tv, "kyr-tv-sitout-1920");
+
   // ---- F ----
-  for (let r = 3; r < 6; r++) await playRound(r, [[k, CORAL], [b, SUN], [j, MINT]]);
+  for (let r = 4; r < 6; r++) await playRound(r, [[k, CORAL], [b, SUN], [j, MINT]]);
   const fin = await until(async () => { const g = await tvGame(); return g.status === "finished" ? g : null; }, 30000);
   const teamOf = { [k.playerId]: CORAL, [a.playerId]: CORAL, [z.playerId]: CORAL, [b.playerId]: SUN, [w.playerId]: SUN, [j.playerId]: MINT, [n.playerId]: MINT };
   const score = (t) => fin?.teamResults?.find((r) => r.teamId === t)?.score;
-  // Coral 60+60+0+180 = 300; Sun 30+0+75+180 = 285; Mint 50+60+0+180 = 290.
-  check("F the game finished: Coral 300, Mint 290, Sun 285", score(CORAL) === 300 && score(MINT) === 290 && score(SUN) === 285, JSON.stringify(fin?.teamResults?.map((r) => [r.teamId, r.rank, r.score])));
+  // Coral 60+60+0+30+120 = 270; Sun 30+0+75+0+120 = 225; Mint 50+60+0+30+120 = 260.
+  check("F the game finished: Coral 270, Mint 260, Sun 225", score(CORAL) === 270 && score(MINT) === 260 && score(SUN) === 225, JSON.stringify(fin?.teamResults?.map((r) => [r.teamId, r.rank, r.score])));
   check("F every player scored their team's points", !!fin && seats.every((s) => fin.rawScores[s.playerId] === fin.teamResults.find((r) => r.teamId === teamOf[s.playerId])?.score));
   check("F nobody's own answer is left in any view at the end", !JSON.stringify(fin.state).includes("myAnswer") && !(await viewOf(k)).myAnswer && seats.every((s) => !JSON.stringify(fin.state).includes(s.playerId)));
   await soon("F phones: the results, six questions and the team results card", async () => (await host.getByTestId("mz-kyr-results").count()) === 1 && (await host.getByTestId("mz-kyr-recap-round").count()) === 6 && /A team game/i.test(await text(host.getByTestId("team-results"))));

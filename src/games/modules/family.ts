@@ -195,7 +195,10 @@ export const familyModule: GameModule<FamilyState> & {
     const done = eligible.filter((pid) => doneThisRound(s, pid)).length;
     // While a question is open: the question, its options and a count. Never an answer, and never who asked (the
     // asker is part of the reveal).
-    const base: Record<string, unknown> = { round: r, roundCount: s.questions.length, phase: s.phase, kind: q.kind, prompt: q.prompt, options: q.options, done, total: eligible.length, skippedRounds: s.hostSkipped.length };
+    // Stage 12.15-R (review 6888718011, R3): a question the host skipped is never described again, at any level of any
+    // view: when the game ends on a skipped question (the last one skipped), the top level carries none of it.
+    const skippedHere = s.phase !== "answer" && s.hostSkipped.includes(r);
+    const base: Record<string, unknown> = { round: r, roundCount: s.questions.length, phase: s.phase, ...(skippedHere ? { skipped: true } : { kind: q.kind, prompt: q.prompt, options: q.options }), done, total: eligible.length, skippedRounds: s.hostSkipped.length };
     if (s.phase === "answer") return base;
     const reveal = (i: number) => {
       const qi = s.questions[i]!;

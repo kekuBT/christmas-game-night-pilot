@@ -2746,6 +2746,7 @@ export class RoomEngine {
     let part: ReturnType<RoomEngine["participationOf"]>;
     let nobodyPlayed: boolean;
     let team: TeamResult | undefined;
+    let teamPlaces: Record<string, number> | undefined;
     try {
       if (scores !== undefined) finalScores = scores;
       else if (game.gameId === "math-mayhem") finalScores = { ...game.rawScores }; // already scored live, per answer
@@ -2759,6 +2760,8 @@ export class RoomEngine {
         team = moduleFor(game.gameId)?.teamResult?.(game.extra);
         if (!team || !Number.isFinite(team.total) || team.total < 0 || team.total > team.max) throw new Error("a cooperative game has no valid team result");
       }
+      // Stage 12.15-R (D-S1215R-03): a game that places its teams by its own rule (Relay) records the places once.
+      if (game.teams) teamPlaces = moduleFor(game.gameId)?.teamPlaces?.(game.extra);
       // Stage 9.2: a module may drop private state it no longer needs (Jebena's last rejected try).
       moduleFor(game.gameId)?.onFinish?.(game.extra, this.moduleCtx(game, at));
     } catch (err) {
@@ -2782,6 +2785,7 @@ export class RoomEngine {
         ? { note: "Nobody answered before time ran out, so there is no result to count." } : {}),
       ...part,
       ...(team ? { team } : {}),
+      ...(teamPlaces ? { teamPlaces } : {}),
     };
     if (team) {
       // Stage 9.3: one team event, never a per-player score: the per-player copies stay internal.
@@ -3085,7 +3089,7 @@ export class RoomEngine {
   private teamFacts(g: GameInstance): Record<string, unknown> {
     if (!g.teams) return {};
     const done = (p: string) => (g.outcome?.participation?.[p]?.done ?? 0) > 0 || (g.rawScores?.[p] ?? 0) > 0;
-    return { teams: g.teams, ...(g.status === "finished" ? { teamResults: teamResults(g.teams, g.rawScores, done) } : {}) };
+    return { teams: g.teams, ...(g.status === "finished" ? { teamResults: teamResults(g.teams, g.rawScores, done, recordedTeamPlaces(g)) } : {}) };
   }
 
   /**
@@ -3341,6 +3345,10 @@ export class RoomEngine {
         sums.set(t, s);
       }
       const teamScore = new Map([...sums].map(([t, s]) => [t, s.total / s.n] as const));
+      // Stage 12.15-R (D-S1215R-03): a game that places its teams by its own rule (Relay: legs, then the last leg's time)
+      // is ranked by those places, recorded at its finish; higher is better, so a place counts as its negative.
+      const places = recordedTeamPlaces(g);
+      if (places) for (const t of teamScore.keys()) teamScore.set(t, -places[t]!);
       const all = [...teamScore.values()];
       if (all.length < 2) return null;
       for (const pid of Object.keys(g.rawScores)) {
@@ -4148,6 +4156,22 @@ export class RoomEngine {
 }
 
 /** Stage 7.1: a saved Quick Party lineup, if it is whole and valid; otherwise none. */
+/**
+ * Stage 12.15-R (D-S1215R-03): the team places a finished game recorded (Relay), when they are whole: a finite place
+ * >= 1 for every team in the game. Anything else (a game recorded before them, or a damaged record) means none, and
+ * the teams are placed by their scores, as before.
+ */
+function recordedTeamPlaces(g: GameInstance): Record<string, number> | undefined {
+  const places = g.outcome?.teamPlaces;
+  if (!places || typeof places !== "object" || !g.teams) return undefined;
+  const ids = new Set(Object.values(g.teams.members));
+  for (const t of ids) {
+    const v = (places as Record<string, unknown>)[t];
+    if (typeof v !== "number" || !Number.isFinite(v) || v < 1) return undefined;
+  }
+  return places;
+}
+
 function restoreSession(raw: unknown, kind: RoomKind): SessionState {
   const r = (raw && typeof raw === "object" ? raw : {}) as { onBreak?: unknown; breakSince?: unknown; revision?: unknown; ops?: unknown };
   const revision = typeof r.revision === "number" && Number.isInteger(r.revision) && r.revision >= 0 ? r.revision : 0;
