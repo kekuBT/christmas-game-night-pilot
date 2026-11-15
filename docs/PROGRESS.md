@@ -3042,6 +3042,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the owner's private Codespace audit;
   - real phones (everything so far is Chromium emulation);
   - the provider pages for the host research weren't reachable from this session.
-- **Next:** the targeted, fast and one full gate on the final SHA; then the completed report on #43.
+- **After `dd4580e`:**
+  - **The fast gate on `dd4580e` FAILED:** 4 unit tests. The production refusals had come before the test-only ones, and the Stage 8.3 `/health` test was exact. I hadn't run the whole unit suite after `8dfe323`. Fixed in `a91f3d1`, where the test-only settings are refused first; the whole suite passes 2021/2021.
+  - **The gate page overflowed phones,** as my screenshots showed. I stopped the full gate on `a91f3d1` (CANCELLED), fixed the page in `529a966`, and added `scripts/check-beta-gate.mjs`, which failed first and passes now.
+  - **Every run is listed** in `docs/evidence/beta-r1-local/README.md`.
+- **The full gate on `529a966` FAILED (108/109) in `check-lobby-mode`:** B-09, a host-reload race that was already in the base, reproduced on `1955c28`. Fixed in the web app's plan-restore effect, with a slow-list reload check that failed first.
+- **Next:** targeted, fast and one full gate on the fix's SHA, then the completed report on #43. The same race is in #42's base: port the fix into the 12.17 repair.
 - **Risk:** the beta gate is new code on every request. It is off by default, so every existing driver runs as before; the full gate is the proof.
 

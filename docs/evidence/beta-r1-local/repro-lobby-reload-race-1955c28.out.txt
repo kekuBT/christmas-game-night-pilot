@@ -1,0 +1,10 @@
+server (no revision field); /games delayed 0 ms on the host's reload
+run 0: host sees "Start Math Mayhem · Practice" | guest sees "Practice · no Cup points"
+run 1: host sees "Start Math Mayhem · Practice" | guest sees "Practice · no Cup points"
+run 2: host sees "Start Math Mayhem · Practice" | guest sees "Practice · no Cup points"
+RESULT: 3/3 reloads keep Practice
+server (no revision field); /games delayed 1500 ms on the host's reload
+run 0: host sees "Start Math Mayhem · Official" | guest sees "Practice · no Cup points"
+run 1: host sees "Start Math Mayhem · Official" | guest sees "Practice · no Cup points"
+run 2: host sees "Start Math Mayhem · Official" | guest sees "Practice · no Cup points"
+RESULT: 3/3 reloads show the host a different mode than the plan (Practice)

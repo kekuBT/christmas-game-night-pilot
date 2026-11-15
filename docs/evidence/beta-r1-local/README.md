@@ -30,6 +30,13 @@
 | `b06-after.log` | `ffec293` | 13/13, no errors | |
 | `repro-direct-around-proxy.mts.txt`, `repro-b07-255a5c9.out.txt` | `255a5c9` | **gap** | **B-07:** with a trusted proxy and the server listening on every interface, 15 wrong access codes sent straight to the server's network address, each claiming another address, all got 401. The limit never triggered. |
 | `repro-b07-fixed-tree-127.0.0.1.out.txt` | `5ee2e78`'s tree | refused | With `MCHEZO_LISTEN_HOST=127.0.0.1`, the same requests get `ECONNREFUSED`. |
+| `gate-page-before-fix-390.png`, `gate-page-before-fix-wrong-code-390.png` | `a91f3d1` | **overflow** | My own screenshots of the new gate page: the card was 360 px plus 24 px padding a side, without `border-box`, so it ran off the right edge. |
+| `check-beta-gate-before-fix.log` | `a91f3d1` + the new driver | **4 FAIL**, 10 pass | `scripts/check-beta-gate.mjs`: the card is 342 px wide at 320 and 407 px at 390. Everything else passed: the gate covers pages, the API and the WebSocket, and the join link survives it. |
+| `check-beta-gate-after-fix.log` | `529a966`'s tree | BETA GATE PASSED (14) | `box-sizing: border-box`. The screenshots in `docs/beta/screenshots/` come from this run (Chromium emulation). |
+| `unit-all-after-fast-gate-fix.log` | `a91f3d1`'s tree | 158 files, 2021/2021 | The whole suite after the fast-gate fix (below). |
+| `repro-lobby-reload-race.mjs.txt`, `repro-lobby-reload-race-1955c28.out.txt` | `1955c28` (the cleared base) | **3/3 wrong** with `/games` delayed 1.5 s; 3/3 right without | **B-09:** on a reload where the game list comes after the room's state, the host's lobby shows Official while the plan, the guests and the TV say Practice. |
+| `check-lobby-mode-before-b09-fix.log` | `529a966` + the new check | **FAIL** | The new slow-list reload check: "Start Math Mayhem · Official". |
+| `check-lobby-mode-after-b09-fix.log`, `repro-lobby-reload-race-fixed-tree.out.txt` | the fix | ALL LOBBY/HOME CHECKS PASSED; 6/6 Practice | |
 | `beta-r1-tests-current.log` | `255a5c9-dirty` | 22/22, no errors | `tests/beta-r1.test.ts` and `tests/beta-r1-data.test.ts` before B-08. |
 
 ## Data (§4)
@@ -57,6 +64,18 @@
 | `release-check-local-run5.log` | `255a5c9-dirty` | PASSED (35) | Adds the B-07 checks (refused from this machine's network address; the start refused without a listen address). |
 | `release-check-local-run6.log` | `fe9319e` (clean) | PASSED (36) | Adds the fresh-host start (B-08). |
 
-## Gates (one run on one revision each)
+## Gates (one run on one revision each, failures and cancellations included)
 
-Listed in the completed report on #43 and added here in a docs-only commit after the runs.
+| Run | Revision | Level | Verdict | Notes |
+|---|---|---|---|---|
+| `20261115-173021-dd4580e3-12827` | `dd4580e` | targeted (release-package, double-start, restart, ws-reconnect, recovery, spectator, install-builds, tv-entry, errors) | PASSED (exit 0) | 11/11; release-package from a fresh clone |
+| `20261115-173151-dd4580e3-14565` | `dd4580e` | fast | **FAILED (exit 1)** | **4 unit tests.** Three older tests expected their test-only setting's refusal, but production now refused first for the data directory, origin or code. The fourth pinned `/health` to `{ ok: true }`. **Root cause, in my own process:** I hadn't run the whole unit suite after `8dfe323`. Fixed in `a91f3d1`. |
+| `20261115-173526-a91f3d1a-22396` | `a91f3d1` | fast | PASSED (exit 0) | 5/5; unit 2021/2021 |
+| `20261115-173658-a91f3d1a-26438` | `a91f3d1` | full | **CANCELLED (exit 130)** | I stopped it after 4 steps, when the gate-page screenshots showed the overflow; it left nothing running. |
+| `20261115-174026-529a9669-30512` | `529a966` | targeted (beta-gate, release-package, install-builds, tv-entry, spectator) | PASSED (exit 0) | 7/7 |
+| `20261115-174154-529a9669-31926` | `529a966` | fast | PASSED (exit 0) | 5/5 |
+| `20261115-174314-529a9669-3501` | `529a966` | full | **FAILED (exit 1)** | **108/109.** `check-lobby-mode`: after the host's reload the lobby said "Start Math Mayhem · Official" instead of Practice. **Root cause:** B-09, a race already in the base, reproduced deterministically on `1955c28`. Fixed next. |
+
+The gates on the final code revision are listed in the completed report on #43, and added here after they ran.
+
+`529a966`'s commit message says this README already listed these runs. It didn't: that edit failed its anchor check and landed in the next, docs-only commit.

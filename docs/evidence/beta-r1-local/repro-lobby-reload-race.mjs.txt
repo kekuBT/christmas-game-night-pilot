@@ -1,0 +1,53 @@
+// The host's lobby after a reload: does the plan's mode (Practice) come back when the game list (/games) arrives
+// AFTER the room's state? The driver check-lobby-mode reads the same label; here /games is delayed on purpose.
+// Usage (from the tree to test, after npm run build:web): node <this> <delayMs> [runs]
+import { spawn } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createRequire } from "node:module";
+const { chromium } = createRequire(join(process.cwd(), "package.json"))("playwright");
+const [delayMs = "0", runs = "3"] = process.argv.slice(2);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const data = mkdtempSync(join(tmpdir(), "mz-repro-lobby-"));
+const env = { ...process.env, PORT: "0", MCHEZO_DATA_DIR: data }; delete env.NODE_ENV;
+const child = spawn(process.execPath, ["--import", "tsx", "src/server/serve.ts"], { cwd: process.cwd(), env, stdio: ["ignore", "pipe", "pipe"] });
+let out = ""; child.stdout.on("data", (d) => { out += d; }); child.stderr.on("data", (d) => { out += d; });
+let port; for (let i = 0; i < 120 && !port; i++) { const m = /on http:\/\/localhost:(\d+)/.exec(out); if (m) port = Number(m[1]); else await sleep(250); }
+const BASE = `http://localhost:${port}`;
+const api = async (path, body) => { const r = await fetch(`${BASE}${path}`, { method: body ? "POST" : "GET", headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined }); return r.json(); };
+const browser = await chromium.launch({ executablePath: process.env.MCHEZO_CHROMIUM_PATH || undefined });
+const rev = (await (await fetch(`${BASE}/health`)).json());
+const results = [];
+for (let run = 0; run < Number(runs); run++) {
+  const room = await api("/rooms", { name: "Race" });
+  const host = await api(`/rooms/${room.roomId}/join`, { displayName: "Keku", asHost: true, hostClaimToken: room.hostClaimToken });
+  const guest = await api("/rooms/join-by-code", { joinCode: room.joinCode, displayName: "Amina" });
+  const seat = async (s) => {
+    const page = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+    await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
+    await page.evaluate((x) => { sessionStorage.setItem("cgn_roomId", x.roomId); sessionStorage.setItem("cgn_playerId", x.playerId); sessionStorage.setItem("cgn_token", x.token); }, { roomId: room.roomId, playerId: s.playerId, token: s.recoveryToken });
+    await page.goto(`${BASE}/room`, { waitUntil: "domcontentloaded" });
+    await page.getByTestId("lobby-dock").waitFor({ timeout: 15000 });
+    return page;
+  };
+  const g = await seat(guest);
+  const h = await seat(host);
+  await h.getByTestId("mode-practice").click();
+  await h.getByTestId("choose-game").click();
+  await h.getByTestId("select-game-math-mayhem").click();
+  await sleep(800);
+  if (Number(delayMs) > 0) await h.route((url) => url.pathname === "/games", async (r) => { await sleep(Number(delayMs)); await r.continue(); });
+  await h.reload({ waitUntil: "domcontentloaded" });
+  await h.getByTestId("lobby-dock").waitFor({ timeout: 15000 });
+  await sleep(Number(delayMs) + 2500);
+  const label = (await h.getByTestId("lobby-dock").locator(".mz-key").first().innerText()).trim();
+  const guestMode = await g.evaluate(() => document.querySelector('[data-testid="up-next-mode"]')?.textContent ?? "");
+  results.push({ run, label, guestMode });
+  await h.context().close(); await g.context().close();
+}
+console.log(`server ${rev.revision ?? "(no revision field)"}; /games delayed ${delayMs} ms on the host's reload`);
+for (const r of results) console.log(`run ${r.run}: host sees "${r.label}" | guest sees "${r.guestMode}"`);
+const wrong = results.filter((r) => r.label !== "Start Math Mayhem · Practice").length;
+console.log(wrong ? `RESULT: ${wrong}/${results.length} reloads show the host a different mode than the plan (Practice)` : `RESULT: ${results.length}/${results.length} reloads keep Practice`);
+await browser.close(); child.kill("SIGTERM"); await sleep(500); rmSync(data, { recursive: true, force: true });

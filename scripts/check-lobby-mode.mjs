@@ -209,6 +209,15 @@ try {
     check("host reload: still Math Mayhem · Practice", hs === "Start Math Mayhem · Practice", hs);
     t = await guestSees((x) => x.name === "Math Mayhem");
     check("guest after the host's reload: unchanged", t.name === "Math Mayhem" && /Practice/.test(t.mode), JSON.stringify(t));
+    // Beta R1 (B-09): the same reload when the game list arrives after the room's state (a slow phone network, or a
+    // busy server: a full gate caught it). The host's mode must still follow the plan, never fall back to Official.
+    await h.route((url) => new URL(url).pathname === "/games", async (r) => { await sleep(1500); await r.continue(); });
+    await h.reload({ waitUntil: "domcontentloaded" });
+    await h.getByTestId("lobby-dock").waitFor({ timeout: 15000 });
+    hs = "";
+    for (let i = 0; i < 40 && hs !== "Start Math Mayhem · Practice"; i++) { hs = (await h.getByTestId("lobby-dock").locator(".mz-key").first().innerText()).trim(); if (hs !== "Start Math Mayhem · Practice") await sleep(250); }
+    check("host reload with a slow game list: still Math Mayhem · Practice (the plan's mode, not the default)", hs === "Start Math Mayhem · Practice", hs);
+    await h.unroute((url) => new URL(url).pathname === "/games");
     // Starting still works as before, in the mode shown.
     await h.getByTestId("start-practice-math-mayhem").click();
     let started;

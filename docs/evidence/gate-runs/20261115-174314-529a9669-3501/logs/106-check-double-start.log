@@ -1,0 +1,9 @@
+$ node scripts/check-double-start.mjs http://localhost:37197
+# timeout 600s | worker w3 | server http://localhost:37197 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full2/test-results/20261115-174314-529a9669-3501/server-data/w3)
+
+[+5.3s] PASS double-click sends exactly one start request — saw 1
+[+5.3s] PASS projection holds exactly one game — saw 1
+[+5.4s] DOUBLE-START ALL PASSED
+[+5.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":2,"peakOpenPages":2}
+
+# PASS (exit 0) in 5.4s | cpu 1.6s, peak memory 253 MB
