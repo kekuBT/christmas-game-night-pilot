@@ -463,3 +463,21 @@ describe("over HTTP: the refusal and the shared plan (D-S1216-04 applied to Team
     }
   });
 });
+
+describe("the review inventory (docs/stage12/stage1217-draw-prompts-inventory.md)", () => {
+  it("lists every prompt with its current approval hash and accepted words, so an edit without a regenerated inventory is caught", () => {
+    const doc = readFileSync(new URL("../docs/stage12/stage1217-draw-prompts-inventory.md", import.meta.url), "utf8");
+    const lib = loadContent();
+    const listed = [...doc.matchAll(/^### (dg-\d{3}) · /gm)].map((m) => m[1]);
+    expect([...listed].sort()).toEqual([...ALL_IDS].sort());
+    for (const x of lib.byGame.get("draw-prompts") ?? []) {
+      const block = doc.slice(doc.indexOf(`### ${x.item.id} · `)).split("\n### ")[0]!;
+      const it = x.item as unknown as Item;
+      expect(block, it.id).toContain(`**Approval hash** \`${x.hash}\``);
+      expect(block, it.id).toContain(`**Accepted** ${[it.word, ...(it.alts ?? [])].map((a) => `"${a}"`).join(", ")}`);
+      expect(block, it.id).toContain(`**Season** ${it.season ?? "year-round"}`);
+    }
+    const approved = (lib.byGame.get("draw-prompts") ?? []).filter((x) => x.status === "approved").length;
+    expect(doc).toContain(approved === 0 ? "**No prompt is approved**" : `**${approved} of `);
+  });
+});
