@@ -1,5 +1,10 @@
 # Beta R1-R: repairs from review 6900450343 (R1, R2)
 
+**Status (2026-11-15):** completed.
+- **Tested code:** `23abfbc`.
+- **Gates:** targeted, fast and full all PASSED on it.
+- **Evidence:** `docs/evidence/beta-r1-repair-local/README.md`. The completed report is on #43.
+
 **Review:** the owner's ChatGPT review on #43, comment 6900450343 (2026-11-15; D-WF-01). It asked for changes on tested `92a3722` (head `1430f06`). The beta is held, and no unrelated milestone is assigned.
 
 **Branch:** same branch and PR (`claude/beta-r1-readiness`, #43). #42 stays separate. Nothing is merged or deployed. No host, account or paid resource is used.
@@ -83,3 +88,13 @@ About **7 h 30 min**.
 **Risks:**
 - Tests and drivers that start several servers on one folder, or in one process, may now be refused. Each will be checked and named, not loosened.
 - An abstract socket is per network namespace, so a sandboxed unit would not share it. This is documented and checked in the runbook.
+
+## Estimate vs actual
+- **Estimate:** about 7 h 30 min, written at 3:05 p.m. ET.
+- **Actual:** about 1 h 20 min of wall clock, from the review at about 3:01 p.m. ET to the report at about 4:20 p.m. ET.
+  - **The repair and its evidence:** 3:05 to 3:30 p.m. That was the reproductions, the lock, the tools, the tests, step U, the docs, the commit and the packaged drill.
+  - **The gates, one after another:** 3:29 to 4:12 p.m., 41 minutes of it the full gate.
+- **Why it was so much faster:** both repairs were small in code. The kernel exclusion removed the recovery protocol the estimate allowed for. Step U reused the release check's existing structure, and the gates passed first time.
+- **One estimate risk didn't happen:** no existing test or driver was refused by the new lock. The only tests that changed were the ones that faked a running server with a lock file.
+- **Found along the way:** B-12 (backup ownership), by step U, on its third local run.
+

@@ -3058,7 +3058,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** the Stage 12.17-R repair on #42 (review 6898755998), queued behind this checkpoint.
 - **Risk:** the beta gate is new code on every request. It is off by default, so every existing driver runs as before; the full gate is the proof.
 
-## Beta R1-R: repairs from review 6900450343 (in progress)
+## Beta R1-R: repairs from review 6900450343 (completed)
 - **Brief:** the owner's ChatGPT review on #43 (changes requested). Repair only R1 and R2 in this slice; #42 stays separate. The beta is held, and no other milestone is assigned. ChatGPT keeps the private preview's recovery and the interactive gate.
 - **Spec and estimate:** `docs/beta/beta-r1-repair.md` (about 7 h 30 min, written at 3:05 p.m. ET).
 - **R1, one process per data directory:**
@@ -3070,6 +3070,14 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Runbook:** first install, rollback with no previous package, restore under `cgn`. The example unit has `UMask=0077` (D-BR1R-03).
   - **Tested:** `tests/beta-r1r-restore.test.ts`, and release check step U with real local users, from the package.
   - **Found by step U (B-12):** run as root, backups and restores kept the data's owner (`copyFileSync`). Fixed: the tool writes its own copies.
-- **Evidence so far:** `docs/evidence/beta-r1-repair-local/README.md` (every run, failures included).
-- **Next:** commit, the packaged release drill, then targeted, fast and full gates on one SHA, and a new completed report on #43.
+- **Tested code:** `23abfbc`.
+  - **Targeted:** `20261115-202859-23abfbc4-28428` PASSED, 8/8.
+  - **Fast:** `20261115-202956-23abfbc4-30041` PASSED, unit 2037/2037.
+  - **Full:** `20261115-203120-23abfbc4-2269` PASSED, 109/109.
+- **The packaged release drill:** run 5, `92a3722` to `23abfbc`, PASSED.
+- **Evidence:** `docs/evidence/beta-r1-repair-local/README.md` (every run, failures included). Estimate about 7 h 30 min; actual about 1 h 20 min.
+- **Failures:** none in the gates. Locally, release check runs 1–3 failed while step U was being built: a drill mistake, then B-12.
+- **External blockers:** ChatGPT's private browser audit (preview access), the host, real phones, the owner's sign-off.
+- **Next:** the owner's or ChatGPT's review of the repair report on #43. The beta stays held.
+- **Risk:** the lock's one condition (one network namespace) is documented, not enforced.
 

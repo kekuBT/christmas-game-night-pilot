@@ -1,0 +1,26 @@
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+PASS PREV: packed from a clean checkout of 92a3722, tarball sha256 b74bcaca90e58fc8…, release.json revision matches — revision 92a3722b2dcf61076cc09636bd63e01777c91a3d
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+PASS NEW: packed from a clean checkout of 23abfbc, tarball sha256 21b4e94a64655fc5…, release.json revision matches — revision 23abfbc49697212ce1bd7e7cf8dbdabd597bf209
+PASS PREV runs from releases/<sha> through `current`, data outside it — {"ok":true,"revision":"92a3722b2dcf61076cc09636bd63e01777c91a3d"}
+PASS PREV: a room with two players — Amina,Keku
+PASS deploy 1/4: stop PREV (SIGTERM, exit 0, lock freed)
+PASS deploy 2/4: back up with the server stopped (NEW's tool) — backup OK: 1 room(s), 0 Memory Book(s), 2 file(s), verified
+PASS deploy 3/4: switch `current` to NEW and start: /health names NEW — {"ok":true,"revision":"23abfbc49697212ce1bd7e7cf8dbdabd597bf209"}
+PASS deploy 4/4: the restore line reports the room, nothing not loaded — [restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-drill-zU8ab6/var-lib-cgn)
+PASS NEW: play goes on (a third player joins)
+PASS rollback 1/3: stop NEW (exit 0)
+PASS rollback 2/3: `current` back to PREV: /health names PREV — {"ok":true,"revision":"92a3722b2dcf61076cc09636bd63e01777c91a3d"}
+PASS rollback 3/3: PREV reads what NEW wrote (three players), nothing quarantined — Amina,Baraka,Keku | [restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-drill-zU8ab6/var-lib-cgn)
+PASS restore drill: the pre-deploy backup, restored into a new folder, serves the room as it was (two players) — restore OK: 1 room(s), 0 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data /tmp/mz-release-drill-zU8ab6/restore-drill | Amina,Keku
+PASS the live data was never touched by the restore (still three players on disk)
+cleanup: 4 server(s) stopped; nothing left on disk
+RELEASE DRILL PASSED

@@ -24,6 +24,20 @@
 | `release-check-local-run4.log` | same, with the B-12 fix | **PASSED (59)** | Every step, including U, with the two local users removed afterwards. |
 | `beta-tests-repaired-tree.log` | repaired tree | 4 files, 39/39 | `tests/beta-r1.test.ts`, `beta-r1-data.test.ts`, `beta-r1r-lock.test.ts`, `beta-r1r-restore.test.ts`. |
 
-## Gates (one run on one revision each)
+## The packaged release drill
 
-Listed in the completed report on #43, and added here after they ran.
+| File | Revisions | Result | What it shows |
+|---|---|---|---|
+| `release-drill-run5.log` (script: `docs/evidence/beta-r1-local/release-drill.mjs.txt`, unchanged) | PREV `92a3722`, NEW `23abfbc` | **RELEASE DRILL PASSED (14)** | Both packed from clean checkouts and installed with `npm ci --omit=dev`. PREV live; stop; NEW's tool backs up; switch `current` to NEW; the room restored and played into; roll back to PREV, which reads what NEW wrote; the pre-deploy backup restored into a new folder and served. `92a3722` stands in for "the previous release": `1955c28` has no `pack.mjs`, and nothing has been deployed. |
+
+## Gates (one run on one revision each, all on `23abfbc`)
+
+| Run | Kind | Verdict | What ran |
+|---|---|---|---|
+| `20261115-202859-23abfbc4-28428` | targeted | **PASSED (exit 0)**, 8/8 steps, 51 s | build-web, preflight, `check-release-package` (59 checks, step U included; both local users removed), `check-beta-gate`, `check-one-path`, `check-lobby-mode`, `check-readiness`, `check-official-practice` |
+| `20261115-202956-23abfbc4-30041` | fast | **PASSED (exit 0)**, 78 s | typecheck, lint, the web build and every unit test: 160 files, 2037/2037 |
+| `20261115-203120-23abfbc4-2269` | full | **PASSED (exit 0)**, 109/109 steps, 40 m 59 s | every step and every browser driver, unit 2037/2037, `check-release-package` passed again (step U: 20 checks) |
+
+- **No other gate ran on `23abfbc`,** and none failed or was stopped.
+- **Nothing overlapped them:** the gates ran one after another, and no other test, driver or drill ran while they did (the release drill finished before the first gate started).
+- **Logs and summaries:** `docs/evidence/gate-runs/<run id>/`.
