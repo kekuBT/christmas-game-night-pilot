@@ -68,6 +68,8 @@ export interface ServerOptions {
   newCupTiming?: 1 | 2;
   /** Beta R1 (B-03..B-05): public origin, beta access code and trusted proxies. Nothing set: open, as before. */
   access?: AccessOptions;
+  /** Beta R1: the release's revision (a git SHA), shown by /health. Default "dev". */
+  revision?: string;
 }
 
 interface SocketMeta {
@@ -262,6 +264,7 @@ export class LocalServer {
     },
   });
   private access: AccessGuard;
+  private readonly revision: string;
   /** Beta R1 (B-04): wrong beta access codes, per client address. */
   private betaCodeFailures: FailureLimiter;
   private sockets = new Set<{ ws: WebSocket; meta: SocketMeta }>();
@@ -286,6 +289,7 @@ export class LocalServer {
   constructor(opts: ServerOptions = {}) {
     this.clock = opts.clock ?? Date.now;
     this.access = new AccessGuard(opts.access ?? {});
+    this.revision = opts.revision ?? "dev";
     this.betaCodeFailures = new FailureLimiter(10, 15 * 60_000, this.clock);
     this.contentLib = opts.content;
     this.newCupTiming = opts.newCupTiming ?? 2;
@@ -858,7 +862,7 @@ export class LocalServer {
       }
       // Stage 8.3: "can this device reach the game server?" No data, never cached.
       if ((req.method === "GET" || req.method === "HEAD") && url.pathname === "/health") {
-        this.send(res, 200, { ok: true });
+        this.send(res, 200, { ok: true, revision: this.revision }); // Beta R1: which release answers; nothing about rooms or players
         return;
       }
       // Stage 2: client routes (/join, /host, /room/cup, /library/...) get the

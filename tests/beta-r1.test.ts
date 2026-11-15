@@ -6,6 +6,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import { Harness } from "./helpers/harness.js";
 import { AccessGuard } from "../src/server/access.js";
+import { DataDirLock } from "../src/server/datalock.js";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const harnesses: Harness[] = [];
 afterEach(async () => { for (const h of harnesses.splice(0)) await h.dispose(); });
@@ -179,5 +183,32 @@ describe("B-05: per-device limits behind a reverse proxy", () => {
     for (let i = 0; i < 10; i++) await viaProxy(h, "203.0.113.1", `198.51.100.${i}`); // a different spoofed entry each time
     expect((await viaProxy(h, "203.0.113.1")).status).toBe(429);
     expect((await viaProxy(h, "203.0.113.2")).status).toBe(401);
+  });
+});
+
+describe("one writer per data directory (DataDirLock)", () => {
+  const dirs: string[] = [];
+  afterEach(() => { for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true }); });
+  const dir = () => { const d = mkdtempSync(join(tmpdir(), "mz-beta-lock-")); dirs.push(d); return d; };
+  it("takes a free directory, and releases it", () => {
+    const d = dir();
+    const lock = new DataDirLock(d);
+    expect(lock.acquire()).toBeUndefined();
+    expect(JSON.parse(readFileSync(lock.path, "utf8")).pid).toBe(process.pid);
+    lock.release();
+    expect(existsSync(lock.path)).toBe(false);
+  });
+  it("refuses a directory another live process holds, naming it", () => {
+    const d = dir();
+    writeFileSync(join(d, "server.lock"), JSON.stringify({ pid: process.ppid }));
+    expect(() => new DataDirLock(d).acquire()).toThrowError(new RegExp(`Another server \\(pid ${process.ppid}\\)`));
+    expect(JSON.parse(readFileSync(join(d, "server.lock"), "utf8")).pid).toBe(process.ppid); // untouched
+  });
+  it("takes over a stale lock (a dead process, or an unreadable file)", () => {
+    for (const stale of [JSON.stringify({ pid: 2147483646 }), "not json"]) {
+      const d = dir();
+      writeFileSync(join(d, "server.lock"), stale);
+      expect(new DataDirLock(d).acquire()).toMatch(/took over a stale lock/);
+    }
   });
 });
