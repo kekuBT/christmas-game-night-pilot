@@ -119,14 +119,15 @@ export function MchezoKnowYourRivals({ game, players, playerId, title, intent, e
   }
 
   if (st.phase === "guess" && q && st.teamStatus?.find((x) => x.teamId === st.myTeamId)?.guessing === false) {
-    // Stage 12.15-R (D-S1215R-02): nobody on this team answered, so it sits this round's guessing out. Plainly, no pressure.
+    // Stage 12.15-R (D-S1215R-02): nobody on this team picked either answer (all "Rather not say", the time ran out, or a
+    // mix), so it sits this round's guessing out. Plainly, never saying why (review 6889824884), no pressure.
     return (
       <main className="mz-screen" aria-label={`${title}: question ${round} of ${of}, the other teams are guessing`} data-testid="mz-kyr-sitting-out">
         <GameHeader title={title} objective="Know your rivals" accent={4} />
         <TeamLabel game={game} teamId={st.myTeamId} testId="mz-kyr-myteam" />
         <p className="mz-mr-round">Question {round} of {of}</p>
         <h2 className="mz-mr-prompt mz-kyr-prompt">{q.prompt}</h2>
-        <FeedbackLine testId="mz-kyr-sitout-note">Your team said “Rather not say” to this one, so you sit out this round’s guessing: nobody guesses your team, and your team guesses nobody. The next question is a fresh start.</FeedbackLine>
+        <FeedbackLine testId="mz-kyr-sitout-note">Nobody on your team picked either answer this time, so you sit out this round’s guessing: nobody guesses your team, and your team guesses nobody. The next question is a fresh start.</FeedbackLine>
         {scores}
       </main>
     );
@@ -149,7 +150,7 @@ export function MchezoKnowYourRivals({ game, players, playerId, title, intent, e
             const g = st.teamGuesses?.[r.teamId];
             return (
               <li key={r.teamId} className={`mz-kyr-row mz-team--${def?.color ?? "coral"}`} data-testid={`mz-kyr-row-${r.teamId}`}>
-                <span className="mz-kyr-row__head">{def && <TeamMark color={def.color} />}<b>{def?.name ?? "A team"}</b><span>{r.answered ? `of the ${r.answered} who answered` : "said “Rather not say”: no guess this round"}</span></span>
+                <span className="mz-kyr-row__head">{def && <TeamMark color={def.color} />}<b>{def?.name ?? "A team"}</b><span>{r.answered ? `of the ${r.answered} who answered` : "nobody picked either answer: no guess this round"}</span></span>
                 {r.answered > 0 && guessingIds.has(r.teamId) && (
                   <span className="mz-kyr-chips" role="group" aria-label={`How many of ${def?.name ?? "that team"} picked ${q.a}`}>
                     {Array.from({ length: r.answered + 1 }, (_, v) => (

@@ -48,6 +48,7 @@ import { cupContinuity } from "./components/mchezo/CiniCups.js";
 import { MchezoSpectrum, MchezoSpectrumResults, SpectrumReview, SpectrumTv, SpectrumTvFinal, TeamResultsHero } from "./components/mchezo/MchezoSpectrum.js";
 import { lineupLine, tvFeedFrom } from "./ui/mchezo/lib/tvfeed.js";
 import { lastGameSummary } from "./ui/mchezo/lib/lastGame.js";
+import { teamTiebreakQuip } from "./ui/mchezo/lib/teamLines.js";
 import { CaptionTv, MchezoCaption, MchezoCaptionResults } from "./components/mchezo/MchezoCaption.js";
 import { MchezoGeography } from "./components/mchezo/MchezoGeography.js";
 import { MchezoMath } from "./components/mchezo/MchezoMath.js";
@@ -1584,12 +1585,12 @@ export function App() {
       // game's teammates look "tied for first" ("Tied for first. Diplomacy wins."); only an Official game (a Cup's team
       // game) picks from these lines, Casual and Practice have their own.
       const teamScores = Object.fromEntries(teamRows.filter((r) => r.score !== null).map((r) => [r.teamId, r.score!] as const));
-      // Stage 12.15-R (D-S1215R-03): Relay places teams level on points by who completed their last leg first; its
-      // comment then says so rather than picking a "tied" line from the equal points.
-      const levelButPlaced = teamRows.some((r) => r.score !== null && teamRows.some((o) => o !== r && o.score === r.score && o.rank !== r.rank));
-      const teamQuip = levelButPlaced && official && top.length === 1
-        ? `Level on points; ${top[0]!.name} got there first.`
-        : resultsStory({ gameInstanceId: g.id, title, official, casual: proj?.roomKind === "casual", scores: teamScores, nameOf: (id) => teamRows.find((r) => r.teamId === id)?.name ?? "A team" }).quip;
+      // Stage 12.15-R (D-S1215R-03; review 6889824884): when the winning team is level on points with another but placed
+      // ahead of it (Relay's last-leg tiebreak), the comment says so, naming those two; a tie further down leaves the
+      // usual comment, which only describes the winner's margin (lib/teamLines.ts).
+      const tiebreakQuip = official ? teamTiebreakQuip(teamRows) : null;
+      const teamQuip = tiebreakQuip
+        ?? resultsStory({ gameInstanceId: g.id, title, official, casual: proj?.roomKind === "casual", scores: teamScores, nameOf: (id) => teamRows.find((r) => r.teamId === id)?.name ?? "A team" }).quip;
       story = {
         ...story,
         quip: teamQuip,

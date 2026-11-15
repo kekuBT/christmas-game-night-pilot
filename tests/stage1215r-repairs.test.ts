@@ -41,6 +41,23 @@ describe("R2: Know Your Rivals' guessing is mutual (D-S1215R-02)", () => {
     expect(g.s.results[0]!.sitOut).toEqual([SUN]);
   });
 
+  it("a team that answers nothing at all (the clock runs out) sits out the same way, and nothing says it chose \"Rather not say\" (review 6889824884)", async () => {
+    const { sitOutLine } = await import("../apps/web/src/ui/mchezo/lib/teamLines.js");
+    const g = rivals({ c1: CORAL, c2: CORAL, s1: SUN, s2: SUN, m1: MINT, m2: MINT }, 3);
+    g.answer({ c1: "a", c2: "b", m1: "a", m2: "a" });
+    expect(g.s.phase).toBe("answer");
+    g.next(); // the answer clock runs out
+    expect(g.s.phase).toBe("guess");
+    expect(g.act("c1", "rivals-lock")).toMatchObject({ ok: true });
+    expect(g.act("m1", "rivals-lock")).toMatchObject({ ok: true });
+    const res = g.s.results[0]!;
+    expect(res.counts.find((c) => c.teamId === SUN)).toEqual({ teamId: SUN, answered: 0, a: 0, b: 0, passed: 0 });
+    expect(res.sitOut).toEqual([SUN]);
+    const line = sitOutLine(res, (t) => ({ [CORAL]: "Team Coral", [SUN]: "Team Sun", [MINT]: "Team Mint" })[t]!);
+    expect(line).toBe("Nobody on Team Sun picked either answer this time, so there were no guesses for or about that team.");
+    expect(line).not.toMatch(/Rather not say/);
+  });
+
   it("three teams, Sun opts out: Coral and Mint guess each other and only each other; Sun can't guess or lock, and isn't waited for", () => {
     const g = rivals({ c1: CORAL, c2: CORAL, c3: CORAL, s1: SUN, s2: SUN, m1: MINT, m2: MINT }, 3);
     g.answer({ c1: "a", c2: "a", c3: "b", s1: "pass", s2: "pass", m1: "a", m2: "b" });

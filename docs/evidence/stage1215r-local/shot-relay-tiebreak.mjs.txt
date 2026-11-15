@@ -62,22 +62,30 @@ try {
   const code = await hostRoom(host, "Keku");
   const amina = await phone(), baraka = await phone(), wanjiru = await phone(320);
   await join(amina, "Amina", code); await join(baraka, "Baraka", code); await join(wanjiru, "Wanjiru", code);
+  const THREE = !!process.env.THREE;
+  const juma = THREE ? await phone() : null, neema = THREE ? await phone() : null;
+  if (THREE) { await join(juma, "Juma", code); await join(neema, "Neema", code); }
   const tv = await tvPage(code);
   const [k, a, b, w] = [await seatOf(host), await seatOf(amina), await seatOf(baraka), await seatOf(wanjiru)];
+  const j = THREE ? await seatOf(juma) : null, n = THREE ? await seatOf(neema) : null;
   const roomId = k.roomId;
-  const seatById = { [k.playerId]: k, [a.playerId]: a, [b.playerId]: b, [w.playerId]: w };
-  await api(`/rooms/${roomId}/teams`, { token: k.token, body: { action: "make", count: 2 } });
-  for (const [s, team] of [[k, "team-coral"], [a, "team-coral"], [b, "team-sun"], [w, "team-sun"]]) await api(`/rooms/${roomId}/teams`, { token: k.token, body: { action: "move", playerId: s.playerId, teamId: team } });
+  const seatById = { [k.playerId]: k, [a.playerId]: a, [b.playerId]: b, [w.playerId]: w, ...(THREE ? { [j.playerId]: j, [n.playerId]: n } : {}) };
+  await api(`/rooms/${roomId}/teams`, { token: k.token, body: { action: "make", count: THREE ? 3 : 2 } });
+  for (const [s, team] of [[k, "team-coral"], [a, "team-coral"], [b, "team-sun"], [w, "team-sun"], ...(THREE ? [[j, "team-mint"], [n, "team-mint"]] : [])]) await api(`/rooms/${roomId}/teams`, { token: k.token, body: { action: "move", playerId: s.playerId, teamId: team } });
   if (process.env.CUP) await api(`/rooms/${roomId}/cup`, { token: k.token, body: {} });
   const { gameId: gid } = await api(`/rooms/${roomId}/games`, { token: k.token, body: { gameId: "relay", official: !!process.env.CUP } });
-  for (const s of [k, a, b, w]) await intent(roomId, s, gid, "briefing-ready", { ready: true });
+  for (const s of Object.values(seatById)) await intent(roomId, s, gid, "briefing-ready", { ready: true });
   await until(async () => (await tvProj(roomId)).games.find((g) => g.id === gid)?.status === "playing");
   const legOf = async (teamId) => {
     const l = (await tvProj(roomId)).games.find((g) => g.id === gid).state.lanes.find((x) => x.teamId === teamId);
     const st = (await myGame(roomId, seatById[l.runnerId], gid)).state;
     await intent(roomId, seatById[l.runnerId], gid, "relay-answer", { leg: st.myLeg, choice: rightIndex(st) });
   };
-  for (let i = 0; i < 5; i++) { await legOf("team-sun"); await sleep(150); await legOf("team-coral"); await sleep(150); }
+  if (THREE) {
+    // The review's case: Coral runs home (12 legs); Sun and Mint run 5 each, Sun's fifth first.
+    for (let i = 0; i < 12; i++) { await legOf("team-coral"); await sleep(60); }
+    for (let i = 0; i < 5; i++) { await legOf("team-sun"); await sleep(150); await legOf("team-mint"); await sleep(150); }
+  } else for (let i = 0; i < 5; i++) { await legOf("team-sun"); await sleep(150); await legOf("team-coral"); await sleep(150); }
   const fin = await until(async () => { const g = (await tvProj(roomId)).games.find((x) => x.id === gid); return g?.status === "finished" ? g : null; }, 60000);
   console.log(JSON.stringify({ legs: fin.state.lanes.map((l) => [l.teamId, l.legs, l.finished]), teamResults: fin.teamResults.map((r) => [r.name, r.rank, r.score]) }));
   await amina.getByTestId("mz-rl-tiebreak").waitFor({ timeout: 15000 });
@@ -85,7 +93,11 @@ try {
   console.log("phone:", (await amina.getByTestId("mz-rl-final-lanes").innerText()).replace(/\n/g, " | "));
   console.log("tiebreak:", await amina.getByTestId("mz-rl-tiebreak").innerText());
   console.log("headline:", await amina.getByTestId("results-headline").innerText());
-  await shot(amina, process.env.CUP ? "relay-tiebreak-cup-results-390" : "relay-tiebreak-results-390");
+  const resultsPage = THREE ? baraka : amina;
+  await resultsPage.getByTestId("mz-rl-tiebreak").waitFor({ timeout: 15000 });
+  await sleep(500);
+  console.log("hero:", (await resultsPage.locator("main").innerText()).split("\n").slice(0, 8).join(" | "));
+  await shot(resultsPage, THREE ? "relay-tiebreak-3teams-cup-results-390" : process.env.CUP ? "relay-tiebreak-cup-results-390" : "relay-tiebreak-results-390");
   await sleep(1500);
   console.log("tv:", await tv.getByTestId("tv-winner").innerText());
   await shot(tv, process.env.CUP ? "relay-tiebreak-cup-tv-final-1920" : "relay-tiebreak-tv-final-1920");

@@ -1,0 +1,49 @@
+PASS A the briefing explains Know Your Rivals (private answers, team totals only)
+PASS A the game is on question 1 with a two-choice question — {"prompt":"Mango or pineapple?","a":"Mango","b":"Pineapple"}
+PASS A every phone and the TV show the same question
+PASS A the TV counts the answers: 0 of 7
+PASS B Keku's phone shows his own answer
+PASS B Keku can change it before everyone has answered
+PASS B Neema (320 px) says "Rather not say"
+PASS B the TV counts 2 of 7, and its data has no player and no answer
+PASS B a teammate's phone (Amina, Zawadi) and a rival's (Baraka) never get Keku's answer
+PASS B Keku's own phone has his answer
+PASS B with one still to answer, still answering
+PASS B everyone has answered: on to the guesses, early
+PASS C Keku's phone shows a row for each rival (Sun 0–2, Mint 0–1: only who answered)
+PASS C Amina's phone shows Coral's guess for Sun and who set it
+PASS C Amina's phone says Mint is still to guess
+PASS C Keku sees Amina's guess for Mint
+PASS C Sun's phones never get Coral's guesses; the TV's data has no guesses — {}
+PASS C Zawadi locked Coral's guesses: Keku's chips are locked and say who
+PASS C the TV shows Coral's guesses locked, and the others still guessing
+PASS C with one team still guessing, still guessing
+PASS C every team has locked: the reveal, early
+PASS D the points: Coral 60, Sun 30, Mint 50 — [{"teamId":"team-coral","points":60,"bonus":0},{"teamId":"team-sun","points":30,"bonus":0},{"teamId":"team-mint","points":50,"bonus":0}]
+PASS D the totals are per team, never per player — [{"teamId":"team-coral","answered":3,"a":2,"b":1,"passed":0},{"teamId":"team-sun","answered":2,"a":1,"b":1,"passed":0},{"teamId":"team-mint","answered":1,"a":1,"b":0,"passed":1}]
+PASS D the TV shows each team's totals in words
+PASS D Keku's phone shows Coral's guesses and +60
+PASS D the scores: Coral 60, Sun 30, Mint 50 on the TV
+PASS D the TV fits above its footer (the reveal, three teams) — {"ok":true,"bottom":730,"foot":980}
+PASS E Sun (alone in last place, 90 behind) is round 3's catch-up team — [{"teamId":"team-coral","score":120},{"teamId":"team-sun","score":30},{"teamId":"team-mint","score":110}]
+PASS E Sun's phones say so
+PASS E round 3: Sun scores 60 and gets the +15 catch-up — [{"teamId":"team-coral","points":0,"bonus":0},{"teamId":"team-sun","points":60,"bonus":15},{"teamId":"team-mint","points":0,"bonus":0}]
+PASS E Sun's phones show the catch-up in the round's points
+PASS G Sun's phone (Wanjiru) says Sun sits this round's guessing out, with no chips and no lock
+PASS G Sun's guess is refused (it sits this round out)
+PASS G the TV shows Sun sitting this one out
+PASS G Coral's phone has no row of chips for Sun
+PASS G Coral and Mint's locks closed the guessing without Sun
+PASS G round 4: Coral 30 and Mint 30 (each guessed the other exactly), Sun 0; no guess about or by Sun — {"prompt":"Holiday: relax or explore?","a":"Relax","b":"Explore","counts":[{"teamId":"team-coral","answered":3,"a":2,"b":1,"passed":0},{"teamId":"team-sun","answered":0,"a":0,"b":0,"passed":2},{"teamId":"team-mint","answered":2,"a":1,"b":1,"passed":0}],"guesses":[{"teamId":"team-coral","target":"team-mint","guess":1,"actual":1,"size":2,"points":30},{"teamId":"team-mint","target":"team-coral","guess":2,"actual":2,"size":3,"points":30}],"points":[{"teamId":"team-coral","points":30,"bonus":0},{"teamId":"team-sun","points":0,"bonus":0},{"teamId":"team-mint","points":30,"bonus":0}],"sitOut":["team-sun"]}
+PASS G the reveal says so, on Sun's phone and the TV
+PASS H Sun's phone: the neutral sit-out note, never "Rather not say"
+PASS H Coral's phone: Sun's row is neutral too
+PASS H Sun's count: nobody answered and nobody passed (it was idle) — [{"teamId":"team-coral","answered":3,"a":2,"b":1,"passed":0},{"teamId":"team-sun","answered":0,"a":0,"b":0,"passed":0},{"teamId":"team-mint","answered":2,"a":1,"b":1,"passed":0}]
+PASS H the reveal's line on the TV and Sun's phone is neutral (no "Rather not say")
+PASS F the game finished: Coral 240, Mint 230, Sun 180 — [["team-coral",1,240],["team-mint",2,230],["team-sun",3,180]]
+PASS F every player scored their team's points
+PASS F nobody's own answer is left in any view at the end
+PASS F phones: the results, six questions and the team results card
+PASS F the TV leads with the team result
+PASS F 320 px: the results have no sideways scroll
+KNOW YOUR RIVALS PASSED

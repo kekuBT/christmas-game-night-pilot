@@ -180,7 +180,7 @@ const RULES: Record<string, { objective: string; steps: string[] }> = {
       "Six light \"this or that\" questions about yourself, like \"Tea or coffee?\". Pick one on your own phone, or \"Rather not say\".",
       "Nobody sees your answer, not even your team: only each team's totals are ever shown.",
       "Then, together, your team guesses how many of each other team picked the first option. Any teammate can set it; one locks it in.",
-      "If everyone on a team says \"Rather not say\", that team sits the round's guessing out: nobody guesses it, and it guesses nobody.",
+      "If nobody on a team picks either answer (\"Rather not say\", or the time runs out), that team sits the round's guessing out: nobody guesses it, and it guesses nobody.",
       "Up to 30 points for each team you guess: exact scores 30, less the further off. Everyone scores their team's points.",
     ],
   },

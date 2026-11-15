@@ -3,7 +3,11 @@
  * they are unit-tested (tests/stage1215r-recaps.test.ts).
  *  - Relay (D-S1215R-03): teams still out at the time limit with the same legs, ranked apart by who completed their last
  *    leg first.
- *  - Know Your Rivals (D-S1215R-02): the teams that sat a round's guessing out (nobody there answered), neutrally.
+ *  - Know Your Rivals (D-S1215R-02): the teams that sat a round's guessing out (nobody there picked either answer),
+ *    neutrally. Review 6889824884: "nobody picked either answer" is true whether they all said "Rather not say", let the
+ *    time run out, or a mix, so it never attributes a choice nobody made.
+ *  - An Official game's comment when the winning team is level on points with another but placed ahead of it (Relay's
+ *    last-leg tiebreak): it names the winner and the team it's level with, never a tie further down the table.
  */
 import type { TeamResultRow } from "../../../../../../src/shared/teams.js";
 
@@ -25,9 +29,26 @@ export function relayTiebreakLine(lanes: readonly RelayLaneFacts[], ranks: reado
 
 export interface RivalsRoundFacts { counts: readonly { teamId: string; answered: number }[]; sitOut?: readonly string[] }
 
-/** The teams that sat a round's guessing out, in plain words; null when none did. Older results have no sitOut list: their counts tell the same. */
+/**
+ * The teams that sat a round's guessing out, in plain words; null when none did. Older results have no sitOut list:
+ * their counts tell the same. Neutral (review 6889824884): it says nobody there picked either answer, never why.
+ */
 export function sitOutLine(r: RivalsRoundFacts, teamName: (teamId: string) => string): string | null {
   const ids = r.sitOut ?? r.counts.filter((c) => c.answered === 0).map((c) => c.teamId);
   if (ids.length === 0) return null;
-  return `${listNames(ids.map(teamName))} said “Rather not say” this time, so there were no guesses for or about ${ids.length === 1 ? "that team" : "those teams"}.`;
+  return `Nobody on ${listNames(ids.map(teamName))} picked either answer this time, so there were no guesses for or about ${ids.length === 1 ? "that team" : "those teams"}.`;
+}
+
+/**
+ * The comment for an Official team game whose winner is level on points with another team but placed ahead of it
+ * (Relay: the earlier last leg). Null otherwise: a shared first place, a tie further down the table, or unequal points
+ * (the usual comments describe those correctly). Ranks are the server's.
+ */
+export function teamTiebreakQuip(rows: readonly Pick<TeamResultRow, "name" | "score" | "rank">[]): string | null {
+  const scored = rows.filter((r) => r.score !== null && r.rank !== null);
+  const top = scored.filter((r) => r.rank === 1);
+  if (top.length !== 1) return null;
+  const w = top[0]!;
+  const level = scored.filter((r) => r !== w && r.score === w.score);
+  return level.length === 0 ? null : `Level on points with ${listNames(level.map((r) => r.name))}; ${w.name} got there first.`;
 }

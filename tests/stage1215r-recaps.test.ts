@@ -28,16 +28,39 @@ describe("the screens' own lines (Relay's tiebreak, Know Your Rivals' sit-out)",
     expect(relayTiebreakLine([lane(CORAL, 5), lane(SUN, 4)], [row(CORAL, 1), row(SUN, 2)], teamName)).toBeNull();
     expect(relayTiebreakLine([lane(CORAL, 12, true), lane(SUN, 12, true)], [row(CORAL, 1), row(SUN, 2)], teamName)).toBeNull();
   });
-  it("Know Your Rivals: the reveal names the teams that sat the guessing out, neutrally", async () => {
+  it("Know Your Rivals: the reveal names the teams that sat the guessing out, neutrally, never saying why (review 6889824884)", async () => {
     const { sitOutLine: line } = await import("../apps/web/src/ui/mchezo/lib/teamLines.js");
     const sitOutLine = (_g: unknown, r: Parameters<typeof line>[0]) => line(r, teamName);
     const game = null;
-    const count = (teamId: string, answered: number) => ({ teamId, answered, a: answered, b: 0, passed: answered ? 0 : 2 });
-    expect(sitOutLine(game, { counts: [count(CORAL, 2), count(SUN, 0)], sitOut: [SUN] })).toBe("Team Sun said “Rather not say” this time, so there were no guesses for or about that team.");
-    expect(sitOutLine(game, { counts: [count(CORAL, 2), count(SUN, 0), count(MINT, 0)], sitOut: [SUN, MINT] })).toBe("Team Sun and Team Mint said “Rather not say” this time, so there were no guesses for or about those teams.");
-    expect(sitOutLine(game, { counts: [count(CORAL, 2), count(SUN, 1)], sitOut: [] })).toBeNull();
-    // A result saved before 12.15-R has no sitOut: its counts say the same.
-    expect(sitOutLine(game, { counts: [count(CORAL, 2), count(SUN, 0)] })).toMatch(/^Team Sun said/);
+    // passed: how many said "Rather not say"; the rest of a team that didn't answer let the time run out.
+    const count = (teamId: string, answered: number, passed = 0) => ({ teamId, answered, a: answered, b: 0, passed });
+    const neutral = "Nobody on Team Sun picked either answer this time, so there were no guesses for or about that team.";
+    // All "Rather not say", all timed out (the review's case: {answered 0, passed 0}), and a mix: the same neutral line.
+    for (const sun of [count(SUN, 0, 2), count(SUN, 0, 0), count(SUN, 0, 1)]) {
+      const l = sitOutLine(game, { counts: [count(CORAL, 2), sun], sitOut: [SUN] });
+      expect(l).toBe(neutral);
+      expect(l).not.toMatch(/Rather not say/);
+    }
+    expect(sitOutLine(game, { counts: [count(CORAL, 2), count(SUN, 0), count(MINT, 0, 2)], sitOut: [SUN, MINT] })).toBe("Nobody on Team Sun and Team Mint picked either answer this time, so there were no guesses for or about those teams.");
+    expect(sitOutLine(game, { counts: [count(CORAL, 2), count(SUN, 1, 1)], sitOut: [] })).toBeNull();
+    // A result saved before 12.15-R has no sitOut list: its counts say the same, in the same neutral words.
+    expect(sitOutLine(game, { counts: [count(CORAL, 2), count(SUN, 0)] })).toBe(neutral);
+  });
+
+  it("an Official game's tiebreak comment: only when the winner is level on points with a team it's placed ahead of (review 6889824884)", async () => {
+    const { teamTiebreakQuip } = await import("../apps/web/src/ui/mchezo/lib/teamLines.js");
+    const row = (name: string, score: number | null, rank: number | null) => ({ name, score, rank });
+    // First place decided by the tiebreak: names the winner and the team it's level with.
+    expect(teamTiebreakQuip([row("Team Sun", 50, 1), row("Team Coral", 50, 2)])).toBe("Level on points with Team Coral; Team Sun got there first.");
+    expect(teamTiebreakQuip([row("Team Sun", 50, 1), row("Team Coral", 50, 2), row("Team Mint", 50, 3)])).toBe("Level on points with Team Coral and Team Mint; Team Sun got there first.");
+    // The review's case: a clear winner (Coral 150), Sun and Mint level further down: no tiebreak comment (it said
+    // "Level on points; Team Coral got there first", naming an unrelated winner).
+    expect(teamTiebreakQuip([row("Team Coral", 150, 1), row("Team Sun", 50, 2), row("Team Mint", 50, 3)])).toBeNull();
+    // A true tie for first (the same place), and ordinary unequal points: none either.
+    expect(teamTiebreakQuip([row("Team Sun", 50, 1), row("Team Coral", 50, 1)])).toBeNull();
+    expect(teamTiebreakQuip([row("Team Sun", 60, 1), row("Team Coral", 50, 2)])).toBeNull();
+    // A team that didn't score is left out.
+    expect(teamTiebreakQuip([row("Team Sun", 0, 1), row("Team Coral", null, null)])).toBeNull();
   });
 });
 
