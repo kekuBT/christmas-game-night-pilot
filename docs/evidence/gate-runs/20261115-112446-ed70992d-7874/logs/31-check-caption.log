@@ -1,0 +1,55 @@
+$ node scripts/check-caption.mjs http://localhost:43295
+# timeout 600s | worker w1 | server http://localhost:43295 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216full2/test-results/20261115-112446-ed70992d-7874/server-data/w1)
+
+[+6.6s] PASS the briefing explains the game
+[+7.3s] PASS everyone sees the same scene — The sofa reveals what it has found down the back
+[+7.3s] PASS no horizontal overflow at 390px (write)
+[+7.3s] PASS no horizontal overflow at 390px (write)
+[+7.3s] PASS no horizontal overflow at 320px (write)
+[+7.3s] PASS no horizontal overflow at 360px (write)
+[+7.3s] PASS character counter counts down
+[+7.8s] PASS Bea's caption is in and shown back to her
+[+7.8s] PASS a double submit sends one caption — 1
+[+8.1s] PASS after a reload Bea still sees her caption, not an empty box
+[+8.4s] PASS keyboard: Cal submits with Tab + Enter
+[+8.6s] PASS vote cards show no names (anonymous) — “Error 404: punchline not found” | “Grandpa's new ringtone” | YOURS — YOU CAN’T VOTE FOR IT | “When the robot laughs at its own joke” | “Beep boop, that's a knock-knock joke”
+[+8.6s] PASS Bea's own caption is marked Yours and disabled
+[+8.6s] PASS Bea can vote for the other three
+[+8.6s] PASS vote cards are at least 44px tall at 320px — 67.39169311523438
+[+10.9s] PASS TV shows the scene and the captions
+[+10.9s] PASS TV never shows who wrote what
+[+11.1s] PASS a vote is confirmed on the card
+[+31.4s] PASS round 2 starts on time without Dee's vote
+[+31.4s] PASS round 2 shows last round's favourite (no names)
+[+78.0s] PASS results reach every phone
+[+78.0s] PASS results credit the winning caption's author — CAPTION CLASH · OFFICIAL
+[+78.0s] Bea wins Caption Clash
+[+78.0s] B
+[+78.0s] Bea
+[+78.0s] 
+[+78.0s] Top of the table: Bea. Modesty optional.
+[+78.0s] 
+[+78.0s] You came 3rd of 4
+[+78.0s] 175 pts
+[+78.0s] Solid middle of the pack. Room to climb.
+[+78.0s] CAPTION CLASH
+[+78.0s] The room’s favourites
+[+78.0s] 
+[+78.0s] Round 1: The sofa reveals what it has found down the back
+[+78.0s] 
+[+78.0s] “Grandpa's new ringtone”
+[+78.0s] by Cal
+[+78.0s] 2
+[+78.0s] VOTES
+[+78.0s] 
+[+78.0s] PASS results explain points (25 per caption, 100 per vote)
+[+78.0s] PASS results show participation
+[+78.1s] PASS no horizontal overflow on results at 320px
+[+78.1s] PASS the TV results still show no author names
+[+78.6s] PASS back in the lobby
+[+78.8s] PASS another Caption Clash starts with new scenes — 201
+[+79.4s] PASS the new game's first scene differs
+[+79.5s] CAPTION ALL PASSED
+[+79.5s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":5,"pages":5,"peakOpenPages":5}
+
+# PASS (exit 0) in 79.5s | cpu 7.2s, peak memory 393 MB

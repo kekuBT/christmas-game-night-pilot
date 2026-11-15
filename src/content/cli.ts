@@ -28,11 +28,13 @@ function answerOf(li: LoadedItem): string {
     case "category-sprint": return `${(it["answers"] as string[]).length} answers: ${(it["answers"] as string[]).join(", ")}`;
     case "impostor": return `${it["word"]} (${it["hintCategory"]})`;
     case "caption-clash": case "charades": return "—";
+    case "split-clues": return [String(it["answer"]), ...((it["alts"] as string[] | undefined) ?? [])].join(" / ");
     default: return String(it["answer"] ?? "");
   }
 }
 function questionOf(li: LoadedItem): string {
   const it = li.item as Record<string, unknown>;
+  if (li.gameId === "split-clues") return `${String(it["kind"])}: ${(it["clues"] as string[]).join(" · ")}`;
   const q = String(it["prompt"] ?? it["quote"] ?? it["event"] ?? it["name"] ?? it["word"] ?? "(board)");
   const opts = (it["options"] ?? it["speakers"]) as string[] | undefined;
   return opts ? `${q} [${opts.join(" / ")}]` : q;

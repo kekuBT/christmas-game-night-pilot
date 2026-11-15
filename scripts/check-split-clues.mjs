@@ -9,7 +9,7 @@
 // The answers are secret in every projection, so the driver loads the puzzle pack (through tsx, as the server runs) and
 // finds each puzzle from the clues a team holds, the way check-relay solves its sums.
 // Usage: node scripts/check-split-clues.mjs <baseUrl>   (the gate passes its server)
-import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
 import { PROTOCOL_HEADERS } from "./lib/protocol.mjs";
 
@@ -44,8 +44,8 @@ const shot = (page, name) => page.screenshot({ path: screenshotPath(`docs/stage1
 const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
 const text = async (loc) => ((await loc.count()) ? await loc.first().innerText() : "");
 
-// The puzzle pack, loaded the way the server loads it.
-const PUZZLES = JSON.parse(execFileSync(process.execPath, ["--import", "tsx", "-e", "import('./src/games/modules/packs/split-clues.ts').then((m) => process.stdout.write(JSON.stringify(m.SPLIT_PUZZLES)))"], { encoding: "utf8" }));
+// The puzzles, from the content packs the server loads (Stage 12.16: content/packs/split-clues-*.json).
+const PUZZLES = ["split-clues-everyday.json", "split-clues-christmas.json"].flatMap((f) => JSON.parse(readFileSync(new URL(`../content/packs/${f}`, import.meta.url), "utf8")).items);
 /** The one puzzle whose clues include every clue given (a team's clues). */
 const puzzleFrom = (clues) => { const found = PUZZLES.filter((p) => clues.every((c) => p.clues.includes(c))); return found.length === 1 ? found[0] : null; };
 

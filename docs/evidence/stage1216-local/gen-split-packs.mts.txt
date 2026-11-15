@@ -1,0 +1,28 @@
+// Stage 12.16 scratch: generate content/packs/split-clues-*.json from the TypeScript bank, unchanged. Kept as evidence.
+import { writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+const wt = process.argv[2]!;
+const { SPLIT_PUZZLES } = await import(`${wt}/src/games/modules/packs/split-clues.ts`);
+const category = (kind: string) => kind.replace(/^(A|An) /, "").toLowerCase();
+const item = (p: any) => ({
+  id: p.id,
+  difficulty: 2,
+  category: category(p.kind),
+  language: "en",
+  eligibility: "official",
+  review: { status: "provisional", notes: "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it." },
+  source: { kind: "original-creative" },
+  ...(p.season ? { season: p.season } : {}),
+  kind: p.kind,
+  answer: p.answer,
+  ...(p.alts ? { alts: [...p.alts] } : {}),
+  clues: [...p.clues],
+});
+const pack = (packId: string, title: string, list: any[]) => ({ schemaVersion: 1, packId, gameId: "split-clues", version: "1.0.0", title, language: "en", items: list.map(item) });
+const everyday = SPLIT_PUZZLES.filter((p: any) => !p.season), xmas = SPLIT_PUZZLES.filter((p: any) => p.season === "christmas");
+writeFileSync(`${wt}/content/packs/split-clues-everyday.json`, JSON.stringify(pack("split-clues-everyday", "Split Clues: Everyday", everyday), null, 2) + "\n");
+writeFileSync(`${wt}/content/packs/split-clues-christmas.json`, JSON.stringify(pack("split-clues-christmas", "Split Clues: Christmas", xmas), null, 2) + "\n");
+// The fingerprint of what players see and answer, from the bank (kept in the test that pins the move).
+const canon = (p: any) => JSON.stringify([p.id, p.kind, p.answer, p.alts ?? [], [...p.clues], p.season ?? null]);
+const digest = createHash("sha256").update(SPLIT_PUZZLES.map(canon).join("\n")).digest("hex");
+console.log(JSON.stringify({ everyday: everyday.length, christmas: xmas.length, total: SPLIT_PUZZLES.length, digest, ids: SPLIT_PUZZLES.map((p: any) => p.id) }));

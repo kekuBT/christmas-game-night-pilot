@@ -32,6 +32,8 @@ const CHRISTMAS_ITEMS = [
   "spr-s4-015", "spr-legacy-3",
   "cls-k-27",
   "year-s4-043", "year-s4-044", "year-s4-045",
+  // Stage 12.16: Split Clues' 13 Christmas puzzles, moved unchanged from the module's bank into the library.
+  "sc-101", "sc-102", "sc-103", "sc-104", "sc-105", "sc-106", "sc-107", "sc-108", "sc-109", "sc-110", "sc-111", "sc-112", "sc-113",
 ].sort();
 const CHRISTMAS_PROMPTS = ["dg-002", "dg-003", "dg-004"];
 
@@ -78,7 +80,7 @@ describe("the season tag (§3.2)", () => {
       if (season) tagged += 1;
       expect(li.hash).toBe(before(li.gameId, untagged));
     }
-    expect(tagged).toBe(42);
+    expect(tagged).toBe(42 + 13); // Stage 12.16: + Split Clues' 13 Christmas puzzles
     // Everything players see is still in the hash.
     const one = shipped.items.get("con-s4-03")!;
     expect(itemHash(one.gameId, { ...(one.item as object), category: "Changed" })).not.toBe(one.hash);

@@ -1,0 +1,10 @@
+import { answerMatches } from "../wt1216/src/games/modules/teamKit.ts";
+const cases: [string[], string][] = [
+  [["Reindeer"], "Caribou"], [["Reindeer"], "Reindeers"], [["Snowman", "Snow man"], "Snowmen"], [["Santa", "Santa Claus", "Father Christmas", "Saint Nicholas", "St Nicholas"], "St. Nicholas"],
+  [["Matatu", "Matatus"], "Minibus"], [["Rain"], "Rains"], [["Rain"], "Rainfall"], [["Clock"], "Alarm clock"], [["Clock"], "Watch"],
+  [["Christmas tree", "Xmas tree", "Fir tree"], "Tree"], [["Christmas tree", "Xmas tree", "Fir tree"], "Pine tree"], [["Carol", "Carols", "Christmas carol", "Christmas carols"], "Hymn"],
+  [["Chapati", "Chapatti", "Chapo"], "Roti"], [["Umbrella"], "Brolly"], [["Piano"], "Keyboard"], [["Cracker", "Christmas cracker", "Crackers"], "Bon-bon"],
+  [["Football", "Soccer"], "Association football"], [["Advent calendar", "Advent"], "Calendar"], [["Volcano"], "Vesuvius"], [["Olympics", "Olympic Games", "The Olympics"], "Olympic"],
+  [["Moon", "The moon"], "Full moon"], [["Nile", "River Nile", "The Nile"], "Nile River"], [["Sahara", "Sahara Desert", "The Sahara"], "Desert"], [["Mobile phone", "Phone", "Mobile", "Cell phone", "Cellphone", "Smartphone"], "Simu"],
+];
+for (const [a, t] of cases) console.log(`${answerMatches(a, t) ? "ACCEPTED" : "refused "}  ${t.padEnd(22)} for ${a[0]}`);

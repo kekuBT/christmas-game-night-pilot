@@ -1,0 +1,32 @@
+$ node scripts/check-teams.mjs http://localhost:42405
+# timeout 600s | worker w2 | server http://localhost:42405 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216full2/test-results/20261115-112446-ed70992d-7874/server-data/w2)
+
+[+4.0s] PASS A host: a Teams card offering Make teams
+[+4.0s] PASS A a guest has no Teams card before there are teams
+[+4.2s] PASS B two teams of two
+[+4.2s] PASS B the sheet shows Amina with a move button
+[+4.3s] PASS B the teams: Keku and Amina on Coral, Baraka and Wanjiru on Sun
+[+4.4s] PASS B renamed: The Lions
+[+4.5s] PASS C Amina's lobby: "You're on The Lions"
+[+4.5s] PASS C Baraka's lobby: "You're on Team Sun"
+[+4.5s] PASS C the TV lists the teams and their players
+[+7.2s] PASS D the game copied the teams at its start — {"list":[{"id":"team-coral","name":"The Lions","color":"coral"},{"id":"team-sun","name":"Team Sun","color":"sun"}],"members":{"player-1":"team-coral","player-2":"team-coral","player-3":"team-sun","player-4":"team-sun"}}
+[+7.2s] PASS D each team's score is its players' average — [["The Lions",720,1],["Team Sun",600,2]]
+[+7.3s] PASS D phone results: the team results under the heading, with the winner
+[+7.3s] PASS D your own team is marked on your phone
+[+7.3s] PASS D the TV leads with the winning team
+[+8.5s] PASS E the host's card offers playing individually
+[+8.7s] PASS E paused for everyone
+[+11.4s] PASS E the paused game has no teams and no team results
+[+11.4s] PASS E its phone results are up, with no team card
+[+11.9s] PASS E back to teams
+[+12.5s] PASS F the newcomer joins a team
+[+12.5s] PASS F the TV counts tonight's team wins
+[+13.1s] PASS G the lobby with the Teams card fits 320 px
+[+13.5s] PASS G the teams sheet fits 320 px
+[+13.6s] PASS H no teams for everyone
+[+13.6s] PASS H a finished team game keeps its team results
+[+13.7s] check-teams: all checks passed
+[+13.7s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":6}
+
+# PASS (exit 0) in 13.7s | cpu 4s, peak memory 298 MB

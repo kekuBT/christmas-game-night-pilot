@@ -1,0 +1,24 @@
+refused   Caribou                for Reindeer
+ACCEPTED  Reindeers              for Reindeer
+ACCEPTED  Snowmen                for Snowman
+ACCEPTED  St. Nicholas           for Santa
+refused   Minibus                for Matatu
+ACCEPTED  Rains                  for Rain
+refused   Rainfall               for Rain
+refused   Alarm clock            for Clock
+refused   Watch                  for Clock
+refused   Tree                   for Christmas tree
+refused   Pine tree              for Christmas tree
+refused   Hymn                   for Carol
+refused   Roti                   for Chapati
+refused   Brolly                 for Umbrella
+refused   Keyboard               for Piano
+refused   Bon-bon                for Cracker
+refused   Association football   for Football
+refused   Calendar               for Advent calendar
+refused   Vesuvius               for Volcano
+ACCEPTED  Olympic                for Olympics
+refused   Full moon              for Moon
+refused   Nile River             for Nile
+refused   Desert                 for Sahara
+refused   Simu                   for Mobile phone

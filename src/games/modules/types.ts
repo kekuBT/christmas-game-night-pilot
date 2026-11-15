@@ -18,6 +18,22 @@ import type { FamilyGameQuestion } from "./family.js";
 import type { HuddleQuestion } from "./teamHuddle.js";
 import type { RelayQuestion } from "./relay.js";
 import type { GameTeams } from "../../shared/teams.js";
+import type { ItemSeason } from "../../shared/season.js";
+
+
+/**
+ * Stage 12.16 (D-S1216-01): a Split Clues puzzle as the game plays it. Declared here, not in splitClues.ts, so this
+ * file (which the web app's code reaches) never imports a module that leads to a content bank. The puzzles live in the
+ * content library (content/packs/split-clues-*.json), chosen by the room's content selection and handed to init.
+ */
+export interface SplitPuzzle {
+  id: string;
+  kind: string;
+  answer: string;
+  alts?: string[];
+  clues: readonly [string, string, string, string, string, string];
+  season?: ItemSeason;
+}
 
 export interface ModuleContext {
   /** Server time of this event (a deadline instant when a deadline is processed). */
@@ -55,6 +71,7 @@ export interface GameModule<S = unknown> {
     /** Stage 12.8: a game built for teams gets its teams (the night's, or two dealt for it) and, for Team Huddle, its questions. */ teams?: GameTeams; huddle?: readonly HuddleQuestion[];
     /** Stage 12.12: Territory's questions (from the Trivia pool, like Team Huddle's). */ quiz?: readonly HuddleQuestion[];
     /** Stage 12.9: Relay's sums (the same for every team). */ relay?: readonly RelayQuestion[];
+    /** Stage 12.16: Split Clues' puzzles, chosen by the room's content selection (approval, season, usage). */ split?: readonly SplitPuzzle[];
     /**
      * Stage 12.10 (D-S1210-01): content ids this room has already played in this game, oldest first (from contentIds()
      * of its earlier games), so a module can deal unplayed content first. Absent: nothing played yet.

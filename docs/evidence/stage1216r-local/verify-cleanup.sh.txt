@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Stage 12.16-R (R2): run check-split-clues-content with an injected failure (or none) and report what it left behind.
+# Usage: verify-cleanup.sh <worktree> <inject: server-start|after-A-start|none> <log>
+set -u
+wt=$1; inject=$2; log=$3
+count_dirs() { ls -d /tmp/mz-s1216-A-* /tmp/mz-s1216-B-* /tmp/mz-s1216-fixture-* 2>/dev/null | wc -l; }
+count_servers() { local n=0; for d in /proc/[0-9]*; do [ -r $d/environ ] || continue; tr '\0' '\n' 2>/dev/null < $d/environ 2>/dev/null | grep -q '^MCHEZO_DATA_DIR=/tmp/mz-s1216-' && n=$((n+1)); done; echo $n; }
+d0=$(count_dirs); s0=$(count_servers)
+cd "$wt"
+if [ "$inject" = none ]; then env -u MCHEZO_S1216_INJECT_FAIL MCHEZO_SCREENSHOT_DIR=/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s1216/shots-r MCHEZO_CHROMIUM_PATH=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell timeout 900 node scripts/check-split-clues-content.mjs > "$log" 2>&1
+else MCHEZO_S1216_INJECT_FAIL=$inject MCHEZO_SCREENSHOT_DIR=/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s1216/shots-r MCHEZO_CHROMIUM_PATH=/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell timeout 900 node scripts/check-split-clues-content.mjs > "$log" 2>&1; fi
+code=$?
+sleep 1
+d1=$(count_dirs); s1=$(count_servers)
+echo "inject=$inject exit=$code | driver temp dirs before=$d0 after=$d1 (new: $((d1-d0))) | this driver's servers running before=$s0 after=$s1 (new: $((s1-s0)))"

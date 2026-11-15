@@ -214,7 +214,13 @@ export class LocalServer {
     // Stage 10.5 (D-S105-02): members' projections carry the book's revision (so the poll and every push deliver it);
     // the TV's and spectators' never do.
     const member = engineAudience !== "tv" && !!who;
-    const base = { ...room.project(engineAudience, actorId, { clientProtocol }), rev: this.revOf(room.id), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(plan ? { upNext: plan } : {}), ...(member ? { memoryRevision: this.bookRevision(room.id) } : {}) };
+    const projected = room.project(engineAudience, actorId, { clientProtocol });
+    // Stage 12.16 (D-S1216-04): a plan says Official only while that game can start Official in this Cup. Once its
+    // approved content runs out (or was never there), every screen shows the plan as Practice, as the host's lobby does;
+    // the stored plan is unchanged and the start itself is refused on its own.
+    const short = plan?.official ? (projected["officialContent"] as Record<string, { available: number; needed: number }> | undefined)?.[plan.gameId] : undefined;
+    const upNext = plan && short && short.available < short.needed ? { ...plan, official: false } : plan;
+    const base = { ...projected, rev: this.revOf(room.id), reactions: recent, reactionsMuted: this.reactionsMuted.get(room.id) ?? false, nudgedBy, ...(upNext ? { upNext } : {}), ...(member ? { memoryRevision: this.bookRevision(room.id) } : {}) };
     // Host-assisted recovery requests: host/cohost only. Shows the seat and
     // the match code to compare; never the requester's secret.
     const me = actorId ? room.players.get(actorId) : undefined;

@@ -1,0 +1,6 @@
+FAIL the driver ran to the end — Error: A: the server did not start (exit code 2): MCHEZO_LIFECYCLE_SCALE must be a positive number, got "not-a-number".  |     at startServer (file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1216/scripts/check-split-clues-content.mjs:73:20) |     at async file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1216/scripts/check-split-clues-content.mjs:161:13
+--- server A output (last 2000 characters) ---
+MCHEZO_LIFECYCLE_SCALE must be a positive number, got "not-a-number".
+
+cleanup: 1 server(s) stopped, 1 temporary dir(s) removed; still running: none; left on disk: none
+SPLIT CLUES CONTENT FAILED: 1 failed

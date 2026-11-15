@@ -1,0 +1,7 @@
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected { gameId: 'split-clues', …(1) } to deeply equal { gameId: 'split-clues', …(1) }
+- Expected
++ Received
+-   "official": false,
++   "official": true,
+      Tests  1 failed | 23 skipped (24)

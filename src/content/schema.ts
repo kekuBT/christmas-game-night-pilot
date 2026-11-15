@@ -171,6 +171,20 @@ export const ConnectionsItem = z.object({
   redHerrings: z.string().max(300).optional(),
 }).strict();
 export const ImpostorItem = z.object({ ...BaseItem, word: text(30), hintCategory: text(30) }).strict();
+/**
+ * Stage 12.16 (D-S1216-01): a Split Clues puzzle. One answer, six clues: each clue alone is weak, together they point
+ * to one answer, and every teammate holds different clues. `kind` is shown to everyone ("An animal"); `alts` are other
+ * answers accepted (the game's matcher also ignores case, accents, punctuation, a leading "a/an/the", a plural and one
+ * typo in an answer of 7+ letters). A clue must never contain the answer (lint error). All of it is in the content hash,
+ * so editing a clue, the answer or an alternative voids an approval.
+ */
+export const SplitCluesItem = z.object({
+  ...BaseItem,
+  kind: text(40),
+  answer: text(40),
+  alts: z.array(text(40)).min(1).max(8).optional(),
+  clues: z.array(text(120)).length(6),
+}).strict();
 export const CharadesItem = z.object({ ...BaseItem, prompt: text(60) }).strict();
 
 export const ITEM_SCHEMAS = {
@@ -184,6 +198,7 @@ export const ITEM_SCHEMAS = {
   "word-connections": ConnectionsItem,
   "impostor": ImpostorItem,
   "charades": CharadesItem,
+  "split-clues": SplitCluesItem,
 } as const;
 export type ContentGameId = keyof typeof ITEM_SCHEMAS;
 export const CONTENT_GAMES = Object.keys(ITEM_SCHEMAS) as ContentGameId[];

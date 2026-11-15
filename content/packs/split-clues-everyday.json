@@ -1,0 +1,970 @@
+{
+  "schemaVersion": 1,
+  "packId": "split-clues-everyday",
+  "gameId": "split-clues",
+  "version": "1.0.0",
+  "title": "Split Clues: Everyday",
+  "language": "en",
+  "items": [
+    {
+      "id": "sc-001",
+      "difficulty": 2,
+      "category": "place",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A place",
+      "answer": "Kilimanjaro",
+      "alts": [
+        "Mount Kilimanjaro",
+        "Mt Kilimanjaro"
+      ],
+      "clues": [
+        "Climbers walk through rainforest on the way up.",
+        "It's in Tanzania.",
+        "There's snow at the top, close to the equator.",
+        "Volcanoes made it.",
+        "Its highest point is Uhuru Peak.",
+        "From far away it looks flat on top."
+      ]
+    },
+    {
+      "id": "sc-002",
+      "difficulty": 2,
+      "category": "animal",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "An animal",
+      "answer": "Giraffe",
+      "clues": [
+        "It eats leaves from thorny trees.",
+        "Its tongue can be dark purple.",
+        "It sleeps only a few minutes at a time.",
+        "No two have the same pattern of patches.",
+        "It has as many neck bones as you do.",
+        "It spreads its front legs wide to drink."
+      ]
+    },
+    {
+      "id": "sc-003",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A thing",
+      "answer": "Umbrella",
+      "clues": [
+        "You open it, then close it again.",
+        "It has a handle.",
+        "Some fold up small enough for a bag.",
+        "It has thin metal ribs.",
+        "Two people can share one.",
+        "Opening it indoors is said to be bad luck."
+      ]
+    },
+    {
+      "id": "sc-004",
+      "difficulty": 2,
+      "category": "food",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A food",
+      "answer": "Chapati",
+      "alts": [
+        "Chapatti",
+        "Chapo"
+      ],
+      "clues": [
+        "It's made from flour, water and oil.",
+        "It's rolled out flat and round.",
+        "It's cooked in a pan, not an oven.",
+        "People tear it by hand to scoop up stew.",
+        "It came to East Africa from India.",
+        "In Kenya it's a favourite at celebrations."
+      ]
+    },
+    {
+      "id": "sc-005",
+      "difficulty": 2,
+      "category": "building",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A building",
+      "answer": "Lighthouse",
+      "clues": [
+        "It's tall and round.",
+        "It stands by the sea.",
+        "At night its light turns or flashes.",
+        "It keeps ships away from rocks.",
+        "You climb a spiral staircase to the top.",
+        "Some once had a keeper living inside."
+      ]
+    },
+    {
+      "id": "sc-006",
+      "difficulty": 2,
+      "category": "musical instrument",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A musical instrument",
+      "answer": "Piano",
+      "clues": [
+        "Most have 88 of something.",
+        "Some are 'grand', some are 'upright'.",
+        "Inside, little hammers hit strings.",
+        "It has pedals for your feet.",
+        "It's black and white.",
+        "You play it sitting on a stool."
+      ]
+    },
+    {
+      "id": "sc-007",
+      "difficulty": 2,
+      "category": "animal",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "An animal",
+      "answer": "Elephant",
+      "clues": [
+        "It flaps its ears to keep cool.",
+        "Its babies are called calves.",
+        "The oldest female leads the family.",
+        "It can sense sounds through its feet.",
+        "It's the largest animal on land.",
+        "It uses its nose like a hand."
+      ]
+    },
+    {
+      "id": "sc-008",
+      "difficulty": 2,
+      "category": "river",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A river",
+      "answer": "Nile",
+      "alts": [
+        "River Nile",
+        "The Nile"
+      ],
+      "clues": [
+        "It flows north.",
+        "It runs through Egypt.",
+        "One of its sources is Lake Victoria.",
+        "It has a White branch and a Blue branch.",
+        "It ends in a delta on the Mediterranean.",
+        "It's one of the longest in the world."
+      ]
+    },
+    {
+      "id": "sc-009",
+      "difficulty": 2,
+      "category": "sport",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A sport",
+      "answer": "Football",
+      "alts": [
+        "Soccer"
+      ],
+      "clues": [
+        "Eleven players on each side.",
+        "Only one player on each side may use their hands.",
+        "A match has two halves.",
+        "The referee can show yellow and red cards.",
+        "Its World Cup is every four years.",
+        "You can't be offside in your own half."
+      ]
+    },
+    {
+      "id": "sc-010",
+      "difficulty": 2,
+      "category": "fruit",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A fruit",
+      "answer": "Pineapple",
+      "clues": [
+        "It's spiky on the outside.",
+        "It has a crown of leaves.",
+        "Its inside is yellow and juicy.",
+        "It can make your tongue tingle.",
+        "Each one takes over a year to grow.",
+        "Some people put it on pizza."
+      ]
+    },
+    {
+      "id": "sc-011",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A thing",
+      "answer": "Bicycle",
+      "alts": [
+        "Bike",
+        "Cycle",
+        "Push bike"
+      ],
+      "clues": [
+        "It has a chain.",
+        "It has two wheels.",
+        "It has pedals.",
+        "You steer it with handlebars.",
+        "It needs no fuel.",
+        "Learners may use small extra wheels."
+      ]
+    },
+    {
+      "id": "sc-012",
+      "difficulty": 2,
+      "category": "something in nature",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "Something in nature",
+      "answer": "Rainbow",
+      "clues": [
+        "You see it with the sun behind you.",
+        "It needs rain or spray.",
+        "It's shaped like an arc.",
+        "It has seven colours, from red to violet.",
+        "You can never reach its end.",
+        "Stories say there's gold at the end."
+      ]
+    },
+    {
+      "id": "sc-013",
+      "difficulty": 2,
+      "category": "bird",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A bird",
+      "answer": "Ostrich",
+      "clues": [
+        "It can't fly.",
+        "It lays the biggest eggs of any living bird.",
+        "It can run at about 70 km/h.",
+        "It has two toes on each foot.",
+        "It's the tallest bird.",
+        "People wrongly say it buries its head in sand."
+      ]
+    },
+    {
+      "id": "sc-014",
+      "difficulty": 2,
+      "category": "drink",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A drink",
+      "answer": "Coffee",
+      "clues": [
+        "Its beans are roasted.",
+        "Kenya and Ethiopia are famous for growing it.",
+        "An espresso is one way to serve it.",
+        "It keeps people awake.",
+        "Its plant has red berries called cherries.",
+        "In Ethiopia it's poured from a jebena."
+      ]
+    },
+    {
+      "id": "sc-015",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A thing",
+      "answer": "Mobile phone",
+      "alts": [
+        "Phone",
+        "Mobile",
+        "Cell phone",
+        "Cellphone",
+        "Smartphone"
+      ],
+      "clues": [
+        "It needs charging.",
+        "It has a SIM card.",
+        "M-Pesa runs on it.",
+        "It can take photos.",
+        "Most have a touch screen now.",
+        "You can put it on silent."
+      ]
+    },
+    {
+      "id": "sc-016",
+      "difficulty": 2,
+      "category": "animal",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "An animal",
+      "answer": "Zebra",
+      "clues": [
+        "It lives on the savannah.",
+        "It travels with wildebeest in the great migration.",
+        "It's related to the horse.",
+        "Its stripes may confuse biting flies.",
+        "No two have the same pattern.",
+        "It's black and white."
+      ]
+    },
+    {
+      "id": "sc-017",
+      "difficulty": 2,
+      "category": "building",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A building",
+      "answer": "Pyramid",
+      "alts": [
+        "Pyramids",
+        "Great Pyramid"
+      ],
+      "clues": [
+        "It has a square base.",
+        "Its sides are triangles.",
+        "The most famous are near Cairo.",
+        "Some were built as tombs for kings.",
+        "It's made of huge stone blocks.",
+        "It comes to a point at the top."
+      ]
+    },
+    {
+      "id": "sc-018",
+      "difficulty": 2,
+      "category": "fruit",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A fruit",
+      "answer": "Mango",
+      "clues": [
+        "It has one big flat seed.",
+        "It's sweet and juicy.",
+        "It can be green, yellow or red.",
+        "It's India's national fruit.",
+        "Its tree can live for over a hundred years.",
+        "Some eat it with chilli and salt."
+      ]
+    },
+    {
+      "id": "sc-019",
+      "difficulty": 2,
+      "category": "something in the sky",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "Something in the sky",
+      "answer": "Moon",
+      "alts": [
+        "The moon"
+      ],
+      "clues": [
+        "It has no light of its own.",
+        "It pulls on the sea and makes tides.",
+        "People first walked on it in 1969.",
+        "It has craters.",
+        "It always shows us the same side.",
+        "Sometimes it's full, sometimes a crescent."
+      ]
+    },
+    {
+      "id": "sc-020",
+      "difficulty": 2,
+      "category": "animal",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "An animal",
+      "answer": "Lion",
+      "clues": [
+        "It sleeps up to 20 hours a day.",
+        "It lives in a group called a pride.",
+        "The females do most of the hunting.",
+        "Its roar carries for kilometres.",
+        "The males have a mane.",
+        "People call it the king of the jungle."
+      ]
+    },
+    {
+      "id": "sc-021",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A thing",
+      "answer": "Toothbrush",
+      "clues": [
+        "You use it twice a day.",
+        "It has bristles.",
+        "Dentists say to change it every three months.",
+        "Some are electric.",
+        "It goes with paste.",
+        "It lives in the bathroom."
+      ]
+    },
+    {
+      "id": "sc-022",
+      "difficulty": 2,
+      "category": "event",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "An event",
+      "answer": "Olympics",
+      "alts": [
+        "Olympic Games",
+        "The Olympics"
+      ],
+      "clues": [
+        "It happens every four years.",
+        "Its flag has five coloured rings.",
+        "A flame is carried a long way before it starts.",
+        "Kenyan runners win many medals there.",
+        "It began in ancient Greece.",
+        "Winners get gold medals."
+      ]
+    },
+    {
+      "id": "sc-023",
+      "difficulty": 2,
+      "category": "drink",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A drink",
+      "answer": "Tea",
+      "alts": [
+        "Chai"
+      ],
+      "clues": [
+        "Kenya grows a lot of it around Kericho.",
+        "It's made from dried leaves.",
+        "Many have it with milk and sugar.",
+        "It comes in bags.",
+        "It's brewed in a pot.",
+        "Some like it with ginger or masala spices."
+      ]
+    },
+    {
+      "id": "sc-024",
+      "difficulty": 2,
+      "category": "bird",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A bird",
+      "answer": "Penguin",
+      "clues": [
+        "It can't fly.",
+        "It swims very well.",
+        "It lives in the southern half of the world.",
+        "Some huddle together through the winter.",
+        "It looks like it's wearing a suit.",
+        "It waddles."
+      ]
+    },
+    {
+      "id": "sc-025",
+      "difficulty": 2,
+      "category": "something in nature",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "Something in nature",
+      "answer": "Volcano",
+      "clues": [
+        "It can be active, dormant or extinct.",
+        "It may smoke.",
+        "Mount Kenya is an old one.",
+        "Its melted rock is called lava.",
+        "It has a crater.",
+        "Pompeii was buried by one."
+      ]
+    },
+    {
+      "id": "sc-026",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A thing",
+      "answer": "Clock",
+      "clues": [
+        "It has a face.",
+        "It has hands.",
+        "Big Ben's tower has a famous one.",
+        "It ticks.",
+        "Some have a cuckoo.",
+        "Some ring an alarm."
+      ]
+    },
+    {
+      "id": "sc-027",
+      "difficulty": 2,
+      "category": "food",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A food",
+      "answer": "Honey",
+      "clues": [
+        "It doesn't go off.",
+        "It's sticky and sweet.",
+        "It's made from nectar.",
+        "It's stored in combs.",
+        "It's golden.",
+        "Some people stir it into tea."
+      ]
+    },
+    {
+      "id": "sc-028",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A thing",
+      "answer": "Passport",
+      "clues": [
+        "It has your photo.",
+        "It collects stamps.",
+        "You show it at airports.",
+        "It has an expiry date.",
+        "It shows your nationality.",
+        "It's a small booklet."
+      ]
+    },
+    {
+      "id": "sc-029",
+      "difficulty": 2,
+      "category": "animal",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "An animal",
+      "answer": "Cheetah",
+      "clues": [
+        "It's a big cat.",
+        "It can't roar.",
+        "It has black 'tear lines' on its face.",
+        "It hunts in the daytime.",
+        "It's the fastest land animal.",
+        "It has spots."
+      ]
+    },
+    {
+      "id": "sc-030",
+      "difficulty": 2,
+      "category": "weather",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "Weather",
+      "answer": "Rain",
+      "clues": [
+        "Kenya has long ones and short ones.",
+        "It falls from clouds.",
+        "Farmers wait for it.",
+        "It can come with thunder.",
+        "It fills dams.",
+        "You might need an umbrella."
+      ]
+    },
+    {
+      "id": "sc-031",
+      "difficulty": 2,
+      "category": "place",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A place",
+      "answer": "Library",
+      "clues": [
+        "It's quiet.",
+        "You need a card to borrow.",
+        "Things are sorted by number on shelves.",
+        "You bring things back by a date.",
+        "It's full of books.",
+        "You can read there for free."
+      ]
+    },
+    {
+      "id": "sc-032",
+      "difficulty": 2,
+      "category": "place",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A place",
+      "answer": "Hospital",
+      "clues": [
+        "It's open all night.",
+        "It has wards.",
+        "Ambulances arrive there.",
+        "Nurses work there.",
+        "Many babies are born there.",
+        "It has an emergency room."
+      ]
+    },
+    {
+      "id": "sc-033",
+      "difficulty": 2,
+      "category": "vehicle",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A vehicle",
+      "answer": "Matatu",
+      "alts": [
+        "Matatus"
+      ],
+      "clues": [
+        "It's a minibus.",
+        "It often plays loud music.",
+        "Many are painted with bright art.",
+        "It carries passengers in Kenya.",
+        "A conductor calls out the route.",
+        "Its name comes from the Swahili for three."
+      ]
+    },
+    {
+      "id": "sc-034",
+      "difficulty": 2,
+      "category": "bird",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A bird",
+      "answer": "Flamingo",
+      "clues": [
+        "It's pink because of what it eats.",
+        "It often stands on one leg.",
+        "Lake Nakuru is famous for it.",
+        "It eats with its head upside down.",
+        "It has a long neck.",
+        "It lives in large flocks."
+      ]
+    },
+    {
+      "id": "sc-035",
+      "difficulty": 2,
+      "category": "game",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A game",
+      "answer": "Chess",
+      "clues": [
+        "It's played on 64 squares.",
+        "Each side has 16 pieces.",
+        "The horse-shaped piece moves in an L.",
+        "A pawn can become a queen.",
+        "The game ends with checkmate.",
+        "Players often use a clock."
+      ]
+    },
+    {
+      "id": "sc-036",
+      "difficulty": 2,
+      "category": "tree",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A tree",
+      "answer": "Baobab",
+      "clues": [
+        "It can store water in its trunk.",
+        "It can live for over a thousand years.",
+        "Its fruit is dry, with a powdery inside.",
+        "It loses its leaves in the dry season.",
+        "Its trunk can be wider than a car.",
+        "It's sometimes called the upside-down tree."
+      ]
+    },
+    {
+      "id": "sc-037",
+      "difficulty": 2,
+      "category": "place",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "A place",
+      "answer": "Sahara",
+      "alts": [
+        "Sahara Desert",
+        "The Sahara"
+      ],
+      "clues": [
+        "It's in Africa.",
+        "Camels cross it.",
+        "It has huge sand dunes.",
+        "It's the largest hot desert.",
+        "It gets very cold at night.",
+        "It stretches from the Atlantic to the Red Sea."
+      ]
+    },
+    {
+      "id": "sc-038",
+      "difficulty": 2,
+      "category": "animal",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "kind": "An animal",
+      "answer": "Spider",
+      "clues": [
+        "It has eight legs.",
+        "It spins silk.",
+        "Some are venomous.",
+        "It isn't an insect.",
+        "It catches flies.",
+        "Anansi is a famous one in stories."
+      ]
+    }
+  ]
+}
