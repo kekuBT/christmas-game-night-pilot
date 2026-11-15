@@ -26,9 +26,14 @@ import { normalizeOrigin, type AccessOptions } from "./access.js";
 //                        never logged); every page, API call and socket needs it
 //   MCHEZO_TRUST_PROXY      reverse proxies in front that append X-Forwarded-For (e.g. 1)
 //   MCHEZO_BUILD_REVISION   the revision /health reports when there is no release.json
+//   MCHEZO_LISTEN_HOST      the address to listen on (default: every interface, so phones on the
+//                        Wi-Fi reach a computer in development). Behind a proxy on the same machine:
+//                        127.0.0.1, so nobody reaches the server around the proxy.
 // With NODE_ENV=production the server refuses to start without an absolute
 // MCHEZO_DATA_DIR outside this release, without MCHEZO_PUBLIC_ORIGIN, and without
 // MCHEZO_BETA_ACCESS_CODE (unless MCHEZO_PUBLIC_ACCESS=open is set on purpose).
+// Behind a proxy (MCHEZO_TRUST_PROXY) production also requires MCHEZO_LISTEN_HOST: a client reaching the
+// server directly could otherwise claim any address in X-Forwarded-For, and skip HTTPS.
 // One server per data directory: a second one is refused (server.lock).
 const port = Number(process.env.PORT ?? 3000);
 const production = process.env.NODE_ENV === "production";
@@ -54,6 +59,8 @@ try {
   if (access.trustProxyHops !== undefined && !(Number.isInteger(access.trustProxyHops) && access.trustProxyHops >= 0 && access.trustProxyHops <= 3)) throw new Error(`MCHEZO_TRUST_PROXY must be 0 to 3, got "${process.env.MCHEZO_TRUST_PROXY}".`);
   if (access.betaAccessCode !== undefined && access.betaAccessCode.length < 12) throw new Error("MCHEZO_BETA_ACCESS_CODE must be at least 12 characters.");
 } catch (e) { refuse((e as Error).message); }
+const listenHost = process.env.MCHEZO_LISTEN_HOST || undefined;
+if (production && access!.trustProxyHops && !listenHost) refuse("Behind a proxy (MCHEZO_TRUST_PROXY) MCHEZO_LISTEN_HOST must be set to where only the proxy reaches the server (127.0.0.1 when it runs on this machine). Otherwise a client connecting directly could claim any address and skip HTTPS.");
 // Which release this is: release.json (written by scripts/release/pack.mjs), else the environment, else "dev".
 let revision = process.env.MCHEZO_BUILD_REVISION || "dev";
 const releaseFile = join(appRoot, "release.json");
@@ -103,7 +110,7 @@ const server = new LocalServer({
   lifecycleScale,
   ...(content ? { content } : {}),
 });
-const actual = await server.listen(port);
+const actual = await server.listen(port, listenHost);
 // The test gate and drivers parse this exact line to learn the real port.
 console.log(`Christmas Game Night server on http://localhost:${actual} (web app at / after npm run build:web)`);
 // Phones can't use "localhost". Print this computer's home-network addresses
@@ -115,7 +122,10 @@ const lan = Object.values(networkInterfaces()).flat()
 // forwarding (docs/CODESPACES_PREVIEW.md), not the Wi-Fi.
 const codespace = process.env["CODESPACE_NAME"];
 const forwardDomain = process.env["GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN"];
-if (codespace && forwardDomain) {
+if (production) {
+  // Reached through the public origin only; the Wi-Fi hint below is for a computer at home.
+  console.log(`Listening on ${listenHost ?? "every interface"}; public origin ${access!.publicOrigin ?? "(not set)"}.`);
+} else if (codespace && forwardDomain) {
   console.log(`Codespaces preview (private: only your signed-in GitHub account can open it): https://${codespace}-${actual}.${forwardDomain}/`);
 } else {
   console.log(lan.length

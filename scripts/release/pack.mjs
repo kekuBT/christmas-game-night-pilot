@@ -3,7 +3,7 @@
 //   node scripts/release/pack.mjs --out <dir> [--allow-dirty]
 //
 // The folder holds only what runs: the compiled server (dist/), the built web app (apps/web/dist/), the content library
-// (content/), package.json and package-lock.json, and release.json (the revision it was built from). No tests, scripts,
+// (content/, without the editorial pilot batches), package.json and package-lock.json, and release.json (the revision it was built from). No tests, scripts,
 // docs, data, node_modules or secrets. Install and start it with:
 //
 //   npm ci --omit=dev --ignore-scripts      (installs ws and zod only)
@@ -32,7 +32,9 @@ mkdirSync(out, { recursive: true });
 const t0 = Date.now();
 run(bin("tsc"), ["-p", "tsconfig.build.json", "--outDir", join(out, "dist")]);
 run(bin("vite"), ["build", "--config", "apps/web/vite.config.ts", "--outDir", join(out, "apps", "web", "dist"), "--emptyOutDir", "--logLevel", "warn"]);
-cpSync(join(ROOT, "content"), join(out, "content"), { recursive: true });
+// content/pilot holds editorial review batches that nothing loads at run time; they stay in the repository.
+const NOT_SHIPPED = [join(ROOT, "content", "pilot")];
+cpSync(join(ROOT, "content"), join(out, "content"), { recursive: true, filter: (src) => !NOT_SHIPPED.some((d) => src === d || src.startsWith(d + "/")) });
 for (const f of ["package.json", "package-lock.json"]) cpSync(join(ROOT, f), join(out, f));
 const release = { revision: dirty ? `${sha}-dirty` : sha, builtAt: new Date().toISOString(), node: process.version };
 writeFileSync(join(out, "release.json"), JSON.stringify(release, null, 2) + "\n");

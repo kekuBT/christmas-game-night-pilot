@@ -1,19 +1,20 @@
 // Beta R1 (docs/beta/beta-r1.md §2-§3): the release package, proved from a clean runtime install. No browser.
 //   P  pack the checked-out revision (scripts/release/pack.mjs) into a temporary folder; it holds only what runs
 //   I  npm ci --omit=dev: only the runtime packages (ws, zod) are installed; no build or test tooling
-//   S  start it as production (plain node, NODE_ENV=production, data outside the release, beta gate on, one proxy):
-//      /health names the revision and nothing else; the app is behind the gate (pages, API, WebSocket); the right
-//      code opens it; a room is created and played into
+//   S  start it as production (plain node, NODE_ENV=production, data outside the release, beta gate on, one proxy,
+//      listening on 127.0.0.1 only): this machine's network address is refused; /health names the revision and
+//      nothing else; the app is behind the gate (pages, API, WebSocket); the right code opens it; a room is created
+//      and played into
 //   L  one writer: a second server on the same data is refused; SIGTERM stops cleanly and frees the lock; after a
 //      kill -9 the next start takes the stale lock over; the room survives both restarts
 //   D  the data tool from the release: backup refused while the server runs, then backup, verify, restore into a new
 //      folder and serve it; retention is a dry run by default
 //   R  refusals: the content test mode, a missing/relative/inside-the-release data dir, no public origin, no or a
-//      short access code; each exits 2 with a reason, and none writes anything
+//      short access code, a trusted proxy with no listen address; each exits 2 with a reason, and none writes anything
 // Usage: node scripts/check-release-package.mjs   (starts its own servers; MCHEZO_RELEASE_ALLOW_DIRTY=1 for a local try)
 import { execFileSync, spawn } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { networkInterfaces, tmpdir } from "node:os";
 import { join } from "node:path";
 import { WebSocket } from "ws";
 
@@ -58,6 +59,11 @@ try {
   const files = walk(rel);
   check("P no tests, scripts, docs, data, env files or source maps of tests in it", !files.some((f) => /(^|\/)(tests?|scripts|docs|data|node_modules)\/|\.test\.js$|(^|\/)\.env/.test(f)), files.filter((f) => /(^|\/)(tests?|scripts|docs|data)\//.test(f)).slice(0, 5).join(", "));
   check("P the server entry, the built app and the content are there", existsSync(join(rel, "dist/server/serve.js")) && existsSync(join(rel, "apps/web/dist/index.html")) && existsSync(join(rel, "content/packs")));
+  check("P no approval records and no editorial pilot batches are shipped", !existsSync(join(rel, "content/approvals.json")) && !existsSync(join(rel, "content/pilot")));
+  // Secrets: private keys, cloud and GitHub tokens, and assignments of a literal to something named like a secret.
+  const SECRET = /-----BEGIN [A-Z ]*PRIVATE KEY-----|\bAKIA[0-9A-Z]{16}\b|\bgh[pousr]_[A-Za-z0-9]{30,}|\bsk-[A-Za-z0-9_-]{20,}|\bxox[abpr]-[A-Za-z0-9-]{10,}|\b(?:api[_-]?key|secret|password|access[_-]?token)\s*[:=]\s*["'][^"'\s]{12,}["']/i;
+  const leaks = files.filter((f) => !f.endsWith(".png") && !f.endsWith(".woff2") && SECRET.test(readFileSync(join(rel, f), "utf8")));
+  check("P no secret-shaped strings in any shipped file", leaks.length === 0, leaks.slice(0, 5).join(", "));
 
   // ---- I ----
   execFileSync("npm", ["ci", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund", "--prefer-offline"], { cwd: rel, stdio: ["ignore", "inherit", "inherit"] });
@@ -68,11 +74,18 @@ try {
 
   // ---- S ----
   const data = tmp("data");
-  const env = { NODE_ENV: "production", MCHEZO_DATA_DIR: data, MCHEZO_PUBLIC_ORIGIN: ORIGIN, MCHEZO_BETA_ACCESS_CODE: CODE, MCHEZO_TRUST_PROXY: "1" };
+  const env = { NODE_ENV: "production", MCHEZO_DATA_DIR: data, MCHEZO_PUBLIC_ORIGIN: ORIGIN, MCHEZO_BETA_ACCESS_CODE: CODE, MCHEZO_TRUST_PROXY: "1", MCHEZO_LISTEN_HOST: "127.0.0.1" };
   let s1 = await start(rel, env, "S1");
   check("S the package starts on plain node in production", !!s1.port, s1.port ? `port ${s1.port}` : s1.p.out.slice(-300));
   check("S its output never shows the access code", !s1.p.out.includes(CODE));
-  const base = `http://localhost:${s1.port}`;
+  const base = `http://127.0.0.1:${s1.port}`;
+  // Behind the proxy the server answers on loopback only, so nobody reaches it around the proxy (and forges its
+  // X-Forwarded-For). Tried from this machine's own network address, when it has one.
+  const outside = Object.values(networkInterfaces()).flat().find((a) => a && a.family === "IPv4" && !a.internal)?.address;
+  if (outside) {
+    const r = await fetch(`http://${outside}:${s1.port}/health`).then((x) => `answered ${x.status}`, (e) => e?.cause?.code ?? String(e));
+    check("S listening on 127.0.0.1 only: this machine's network address is refused", r === "ECONNREFUSED", `${outside}: ${r}`);
+  } else console.log("NOT CHECKED S listening on 127.0.0.1 only: this machine has no network address to try from");
   const health = await (await fetch(`${base}/health`)).json();
   check("S /health names the revision and nothing else", JSON.stringify(health) === JSON.stringify({ ok: true, revision: release.revision }), JSON.stringify(health));
   const gate = await fetch(`${base}/`, { headers: { accept: "text/html" }, redirect: "manual" });
@@ -89,7 +102,7 @@ try {
   const joined = await api("/rooms/join-by-code", { joinCode: room.body.joinCode, displayName: "Keku", asHost: true, hostClaimToken: room.body.hostClaimToken });
   check("S a room is created and joined through the gate", room.status === 201 && joined.status === 201, `${room.status}/${joined.status}`);
   const ws = (headers) => new Promise((resolve) => {
-    const w = new WebSocket(`ws://localhost:${s1.port}/?roomId=${room.body.roomId}&audience=tv`, { headers });
+    const w = new WebSocket(`ws://127.0.0.1:${s1.port}/?roomId=${room.body.roomId}&audience=tv`, { headers });
     w.once("open", () => { w.close(); resolve("open"); });
     w.once("unexpected-response", (_q, r) => resolve(r.statusCode));
     w.once("error", () => {});
@@ -102,12 +115,12 @@ try {
   const code1 = await stop(s1.p);
   check("L SIGTERM stops it cleanly and frees the lock", code1 === 0 && !existsSync(join(data, "server.lock")), `exit ${code1}`);
   s1 = await start(rel, env, "S3");
-  const back = await fetch(`http://localhost:${s1.port}/rooms/${room.body.roomId}/projection?audience=tv`, { headers: { cookie } });
+  const back = await fetch(`http://127.0.0.1:${s1.port}/rooms/${room.body.roomId}/projection?audience=tv`, { headers: { cookie } });
   check("L after a restart the room is back, and the beta cookie still works", back.status === 200 && (await back.json()).roomId === room.body.roomId, String(back.status));
   await stop(s1.p, "SIGKILL");
   check("L a kill -9 leaves a stale lock behind", existsSync(join(data, "server.lock")));
   s1 = await start(rel, env, "S4");
-  const back2 = await fetch(`http://localhost:${s1.port}/rooms/${room.body.roomId}/projection?audience=tv`, { headers: { cookie } });
+  const back2 = await fetch(`http://127.0.0.1:${s1.port}/rooms/${room.body.roomId}/projection?audience=tv`, { headers: { cookie } });
   check("L the next start takes the stale lock over, and the room survives the crash", !!s1.port && /took over a stale lock/.test(s1.p.out) && back2.status === 200, s1.p.out.trim().split("\n")[0]);
   const tool = (...a) => { try { return { code: 0, out: execFileSync(process.execPath, ["dist/server/datatool.js", ...a], { cwd: rel, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }) }; } catch (e) { return { code: e.status, out: `${e.stdout ?? ""}${e.stderr ?? ""}` }; } };
   const bk = tool("backup", "--data", data, "--out", join(tmp("bk"), "b"));
@@ -122,7 +135,7 @@ try {
   const r = tool("restore", "--backup", backupDir, "--into", restored);
   check("D restore into a new folder: OK", r.code === 0 && /^restore OK/.test(r.out), r.out.trim());
   const s5 = await start(rel, { ...env, MCHEZO_DATA_DIR: restored }, "S5");
-  const fromBackup = await fetch(`http://localhost:${s5.port}/rooms/${room.body.roomId}/projection?audience=tv`, { headers: { cookie } });
+  const fromBackup = await fetch(`http://127.0.0.1:${s5.port}/rooms/${room.body.roomId}/projection?audience=tv`, { headers: { cookie } });
   check("D a server on the restored folder serves the same room", fromBackup.status === 200, String(fromBackup.status));
   await stop(s5.p);
   const pr = tool("prune", "--data", data, "--older-than-days", "30");
@@ -137,6 +150,7 @@ try {
     ["no public origin", { ...env, MCHEZO_PUBLIC_ORIGIN: "" }, /MCHEZO_PUBLIC_ORIGIN must be set/],
     ["no access code", { ...env, MCHEZO_BETA_ACCESS_CODE: "" }, /MCHEZO_BETA_ACCESS_CODE must be set/],
     ["a short access code", { ...env, MCHEZO_BETA_ACCESS_CODE: "short" }, /at least 12 characters/],
+    ["a trusted proxy with no listen address", { ...env, MCHEZO_LISTEN_HOST: "" }, /MCHEZO_LISTEN_HOST must be set/],
   ];
   for (const [why, e, re] of refusals) {
     const r = await start(rel, e, `R-${why}`);

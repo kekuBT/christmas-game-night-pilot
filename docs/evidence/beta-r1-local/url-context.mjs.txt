@@ -1,0 +1,18 @@
+// Print where each external host appears in the shipped code, with 70 characters either side.
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+const root = process.argv[2];
+const walk = (d) => readdirSync(d).flatMap((f) => { const x = join(d, f); return statSync(x).isDirectory() ? walk(x) : [x]; });
+const hosts = ["cdnjs.cloudflare.com", "games.example.org", "github.com", "hertzen.com", "mchezo.invalid", "opensource.org", "react.dev", "www.cs.cmu.edu", "www.fpdf.org", "www.myersdaily.org", "www.phpied.com", "www.w3.org"];
+for (const f of walk(root).filter((f) => /\/(dist)\/.*\.(js|html|css|json)$/.test(f))) {
+  const s = readFileSync(f, "utf8");
+  for (const h of hosts) {
+    let i = -1, n = 0;
+    while ((i = s.indexOf(h, i + 1)) >= 0 && n < 3) { n++; console.log(`[${h}] ${f.slice(root.length + 1)}: …${s.slice(Math.max(0, i - 70), i + h.length + 70).replace(/\s+/g, " ")}…`); }
+  }
+}
+console.log("\n## outbound request calls in the server code (dist/): fetch, http(s).request/get, net.connect, dns");
+for (const f of walk(join(root, "dist"))) {
+  const s = readFileSync(f, "utf8");
+  for (const m of s.matchAll(/\b(fetch\(|https?\.(request|get)\(|net\.connect|createConnection|dns\.)/g)) console.log(`${f.slice(root.length + 1)}: ${s.slice(Math.max(0, m.index - 60), m.index + 60).replace(/\s+/g, " ")}`);
+}

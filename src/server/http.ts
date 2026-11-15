@@ -522,12 +522,14 @@ export class LocalServer {
     return typeof expected === "string" && typeof token === "string" && token.length > 0 && hashToken(token) === expected;
   }
 
-  async listen(port = 0): Promise<number> {
+  /** Listen on `port` (0: a free one), on `host` when given (Beta R1: 127.0.0.1 behind a proxy), else every interface. */
+  async listen(port = 0, host?: string): Promise<number> {
     return new Promise((resolve) => {
-      this.http.listen(port, () => {
+      const ready = () => {
         const addr = this.http.address();
         resolve(typeof addr === "object" && addr ? addr.port : port);
-      });
+      };
+      if (host) this.http.listen(port, host, ready); else this.http.listen(port, ready);
     });
   }
 

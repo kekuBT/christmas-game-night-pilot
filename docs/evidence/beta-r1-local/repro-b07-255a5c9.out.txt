@@ -1,0 +1,3 @@
+tree /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt255; listen host (none: every interface); port 45759; trying 192.0.2.2 directly
+15 wrong codes sent straight to the server, each claiming a new address: 401 401 401 401 401 401 401 401 401 401 401 401 401 401 401
+RESULT: GAP — reachable directly, and the 10-per-15-minutes limit never triggered
