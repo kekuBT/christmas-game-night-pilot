@@ -2875,3 +2875,27 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Estimate vs actual:** about 3 hours estimated; about 25 minutes of building (about 3:07 to 3:28 p.m. ET), then the gates, which waited behind Territory's and gave their verdict at 5:07 p.m.
 - **Owner decisions:** team scoring in a Family Cup (D-S127-03) was answered by the owner later the same day; see Stage 12.15.
 - **Next:** Stage 12.14 (Know Your Rivals).
+
+## Stage 12.14: Know Your Rivals (owner-directed; built and gated; awaiting review)
+- **Brief:** the owner's direction of 2026-11-14 at 1:20 p.m. ET (see Stage 12.10): five games built for teams. This is the fifth and last.
+- **Base:** `945cc01` (Stage 12.13's tested commit). Branch `claude/stage12-14-know-your-rivals`, draft PR #38 stacked on #37. 12.13's docs head `9003d2b` is merged in (docs only).
+- **Spec:** `docs/stage12/stage1214.md`. Decision D-S1214-01.
+- **Built:** Know Your Rivals (`src/games/modules/knowYourRivals.ts`), new:
+  - six light "this or that" questions about yourself (54 original, 12 for Christmas);
+  - everyone answers privately, or "Rather not say"; each team guesses how many of each other team picked the first option; the reveal shows each team's totals, never who picked what;
+  - 30 points per rival for an exact guess, less the further off; catch-up +15 (60+ behind);
+  - privacy: a player's answer is never in anyone else's view; a team's guesses stay on its phones until the reveal.
+- **Tests:**
+  - `tests/stage1214-know-your-rivals.test.ts` (10);
+  - catalogue counts (24 games);
+  - new `scripts/check-know-your-rivals.mjs` (37 checks: seven phones in three uneven teams and a TV, including privacy in every view and a TV fit check).
+- **Unit suite:** 1909/1909 (the fast gate's unit-tests step on `d1c7217`).
+- **Gates (one run on one revision each; evidence in `docs/evidence/gate-runs/`):**
+  - `d1c7217` targeted `20261114-231635-d1c72173-363`: PASSED, 22/22;
+  - `d1c7217` fast `20261114-232326-d1c72173-4680`: PASSED, 5/5;
+  - **`d1c7217` full (checkpoint) `20261114-232442-d1c72173-8548`: PASSED** (exit 0, 105/105, 39 min 57 s, no retries).
+- **Tested SHA:** `d1c7217`. The head after it is docs and evidence only.
+- **Evidence:** `docs/stage12/stage1214-screenshots/`, `docs/evidence/stage1214-local/`, `docs/evidence/gate-runs/`.
+- **Estimate vs actual:** no estimate was written down (an omission); about 25 minutes of building (3:30 to 3:54 p.m. ET), gates 6:16 to 7:05 p.m. ET.
+- **Owner decisions:** team scoring in a Family Cup (D-S127-03) was answered by the owner at 6:12 p.m. ET; see Stage 12.15.
+- **Next:** Stage 12.15 (the games built for teams in a Family Cup).

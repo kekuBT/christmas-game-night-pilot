@@ -1,0 +1,34 @@
+$ node scripts/check-split-clues.mjs http://localhost:44009
+# timeout 600s | worker w3 | server http://localhost:44009 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1214t1/test-results/20261114-231635-d1c72173-363/server-data/w3)
+
+[+6.0s] PASS A Iris had 1 player, so Neema plays with another team (and the game has three teams) — [{"playerId":"player-7","from":"team-iris","to":"team-coral"}]
+[+6.3s] PASS A Neema's briefing says she plays with another team this game
+[+6.3s] PASS A everyone else's briefing says so too
+[+6.7s] PASS A the TV shows a three-team scoreboard
+[+6.9s] PASS B every phone shows exactly the clues the server dealt it
+[+6.9s] PASS B each team's phones hold all six clues between them
+[+6.9s] PASS B the puzzle is known to the driver from its clues — sc-028
+[+6.9s] PASS B the TV shows the puzzle's kind but no clue and not the answer
+[+6.9s] PASS B the TV's data has no clue and not the answer
+[+7.4s] PASS C a teammate sees the wrong try
+[+7.4s] PASS C the team's answer box pauses
+[+7.4s] PASS C another team's phone never shows the try
+[+7.4s] PASS C the TV never shows the try
+[+11.3s] PASS C the pause ends by itself
+[+36.9s] PASS D at 30 s every phone and the TV show the answer's shape
+[+51.9s] PASS D at 45 s every phone shows its team's six clues
+[+66.9s] PASS D at 60 s the first letter
+[+67.2s] PASS E the team that solved it second sees its place
+[+67.2s] PASS E places 1, 2, 3 by solve order, 100 / 75 / 55 — {"team-coral":[2,75],"team-sun":[1,100],"team-mint":[3,55]}
+[+67.3s] PASS E the reveal on a phone: the answer, all six clues and each team's result
+[+67.3s] PASS E the reveal on the TV
+[+110.0s] PASS F the game finished with team results for three teams — [["team-coral",1,575],["team-sun",2,475],["team-mint",3,405]]
+[+110.0s] PASS F every player scored their team's points
+[+110.1s] PASS F phones: the results, a team-led heading and the team results card
+[+110.1s] PASS F the TV leads with the team result
+[+110.8s] PASS F 320 px: the results have no sideways scroll
+[+110.8s] note: teams team-coral=Keku+Amina+Neema team-sun=Baraka+Wanjiru team-mint=Zawadi+Juma
+[+110.9s] SPLIT CLUES PASSED
+[+110.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":8,"pages":8,"peakOpenPages":8}
+
+# PASS (exit 0) in 110.9s | cpu 6.1s, peak memory 297 MB
