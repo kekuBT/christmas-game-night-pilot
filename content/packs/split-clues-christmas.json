@@ -1,0 +1,371 @@
+{
+  "schemaVersion": 1,
+  "packId": "split-clues-christmas",
+  "gameId": "split-clues",
+  "version": "1.0.0",
+  "title": "Split Clues: Christmas",
+  "language": "en",
+  "items": [
+    {
+      "id": "sc-101",
+      "difficulty": 2,
+      "category": "animal",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "An animal",
+      "answer": "Reindeer",
+      "clues": [
+        "It pulls a sleigh.",
+        "It has antlers.",
+        "Both males and females grow antlers.",
+        "It lives in the far north.",
+        "Rudolph is one.",
+        "In North America it's called a caribou."
+      ]
+    },
+    {
+      "id": "sc-102",
+      "difficulty": 2,
+      "category": "something you make",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "Something you make",
+      "answer": "Snowman",
+      "alts": [
+        "Snow man"
+      ],
+      "clues": [
+        "It melts.",
+        "It has a carrot nose.",
+        "It's built, not born.",
+        "It may wear a scarf.",
+        "Its eyes can be lumps of coal.",
+        "Frosty is a famous one."
+      ]
+    },
+    {
+      "id": "sc-103",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A thing",
+      "answer": "Stocking",
+      "alts": [
+        "Christmas stocking",
+        "Stockings"
+      ],
+      "clues": [
+        "It's hung up on Christmas Eve.",
+        "It's shaped like a big sock.",
+        "It's filled with small gifts.",
+        "It may have your name on it.",
+        "It hangs by the fireplace.",
+        "Some families put an orange at the bottom."
+      ]
+    },
+    {
+      "id": "sc-104",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A thing",
+      "answer": "Christmas tree",
+      "alts": [
+        "Xmas tree",
+        "Fir tree"
+      ],
+      "clues": [
+        "It stays green all year.",
+        "It gets a star or an angel on top.",
+        "It's covered in lights.",
+        "Presents go under it.",
+        "It drops needles.",
+        "It can be real or plastic."
+      ]
+    },
+    {
+      "id": "sc-105",
+      "difficulty": 2,
+      "category": "plant",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A plant",
+      "answer": "Mistletoe",
+      "clues": [
+        "It grows on other trees.",
+        "It has white berries.",
+        "People hang it in doorways.",
+        "Standing under it may get you a kiss.",
+        "Its berries are poisonous.",
+        "It's a plant used at Christmas."
+      ]
+    },
+    {
+      "id": "sc-106",
+      "difficulty": 2,
+      "category": "food",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A food",
+      "answer": "Gingerbread",
+      "alts": [
+        "Gingerbread man",
+        "Gingerbread house"
+      ],
+      "clues": [
+        "It's spicy and sweet.",
+        "It's baked.",
+        "It can be built into a house.",
+        "It can be shaped like a person.",
+        "'Run, run, as fast as you can' is from its story.",
+        "It's decorated with icing."
+      ]
+    },
+    {
+      "id": "sc-107",
+      "difficulty": 2,
+      "category": "song",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A song",
+      "answer": "Carol",
+      "alts": [
+        "Carols",
+        "Christmas carol",
+        "Christmas carols"
+      ],
+      "clues": [
+        "It's sung.",
+        "Singers go door to door with them.",
+        "'Silent Night' is one.",
+        "Choirs sing them in church.",
+        "It's a festive song.",
+        "Charles Dickens put one in a story's title."
+      ]
+    },
+    {
+      "id": "sc-108",
+      "difficulty": 2,
+      "category": "person",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A person",
+      "answer": "Santa",
+      "alts": [
+        "Santa Claus",
+        "Father Christmas",
+        "Saint Nicholas",
+        "St Nicholas"
+      ],
+      "clues": [
+        "He has a big white beard.",
+        "He lives at the North Pole.",
+        "He checks a list twice.",
+        "He comes down the chimney.",
+        "He wears red.",
+        "He says 'Ho ho ho'."
+      ]
+    },
+    {
+      "id": "sc-109",
+      "difficulty": 2,
+      "category": "place",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A place",
+      "answer": "Bethlehem",
+      "clues": [
+        "It's a town.",
+        "It's south of Jerusalem.",
+        "Its name means 'house of bread'.",
+        "A star is said to have shone over it.",
+        "In the Christmas story, Jesus was born there.",
+        "A carol calls it a 'little town'."
+      ]
+    },
+    {
+      "id": "sc-110",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A thing",
+      "answer": "Cracker",
+      "alts": [
+        "Christmas cracker",
+        "Crackers"
+      ],
+      "clues": [
+        "Two people pull it.",
+        "It goes bang.",
+        "There's a paper crown inside.",
+        "It has a bad joke inside.",
+        "It's wrapped like a giant sweet.",
+        "It's set on the table for Christmas dinner."
+      ]
+    },
+    {
+      "id": "sc-111",
+      "difficulty": 2,
+      "category": "sweet",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A sweet",
+      "answer": "Candy cane",
+      "alts": [
+        "Candycane"
+      ],
+      "clues": [
+        "It's shaped like a hook.",
+        "It's red and white.",
+        "It tastes of peppermint.",
+        "It can hang on a tree.",
+        "It's hard and sweet.",
+        "It looks like a walking stick."
+      ]
+    },
+    {
+      "id": "sc-112",
+      "difficulty": 2,
+      "category": "thing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A thing",
+      "answer": "Advent calendar",
+      "alts": [
+        "Advent"
+      ],
+      "clues": [
+        "It counts down.",
+        "It has little doors.",
+        "You open one each day.",
+        "Some have chocolates inside.",
+        "It starts on the first of December.",
+        "It ends on Christmas Eve."
+      ]
+    },
+    {
+      "id": "sc-113",
+      "difficulty": 2,
+      "category": "decoration",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 12.10 original, not human-reviewed. Counts in a Family Cup only after a human approves this exact item (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.16): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "kind": "A decoration",
+      "answer": "Wreath",
+      "clues": [
+        "It's round.",
+        "It hangs on a door.",
+        "It's made of evergreen branches.",
+        "It may have a bow.",
+        "It has a hole in the middle.",
+        "Some hold four candles for Advent."
+      ]
+    }
+  ]
+}

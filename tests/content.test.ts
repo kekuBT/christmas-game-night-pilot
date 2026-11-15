@@ -31,7 +31,7 @@ describe("the shipped content", () => {
     expect(issues.filter((i) => i.level === "error")).toEqual([]);
   });
   it("covers every content-driven game", () => {
-    expect([...lib.byGame.keys()].sort()).toEqual(["caption-clash", "category-sprint", "charades", "closest-wins", "geography", "guess-the-year", "impostor", "trivia", "who-said-that", "word-connections"]);
+    expect([...lib.byGame.keys()].sort()).toEqual(["caption-clash", "category-sprint", "charades", "closest-wins", "geography", "guess-the-year", "impostor", "split-clues", "trivia", "who-said-that", "word-connections"]);
   });
   it("nothing authored is official without a human or a computation behind it", () => {
     for (const li of lib.items.values()) {

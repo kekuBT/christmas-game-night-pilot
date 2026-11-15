@@ -21,8 +21,9 @@ import { formatInfo, type CompetitionFormat } from "../scoring/format.js";
 import { qualifies, QualificationPolicySchema, type GameParticipationRecord, type QualificationPolicy } from "../scoring/qualification.js";
 import { CupRecordSchema, describePolicy, newCupRecord, restoreCupRecord, type CupRecord, type CupTiming } from "./cup.js";
 import { contentLibrary, officialEligible, practiceUsable, type ContentLibrary, type LoadedItem } from "../content/registry.js";
-import { recordUsage, selectContent, type UsageHistory } from "../content/select.js";
+import { recordUsage, selectContent, type SelectionRequest, type UsageHistory } from "../content/select.js";
 import { ITEMS_PER_GAME, materialize } from "../content/materialize.js";
+import type { SplitPuzzle } from "../games/modules/splitClues.js";
 import { CONTENT_GAMES, type ContentGameId } from "../content/schema.js";
 import { seededRng } from "../shared/rng.js";
 import type { ConnectionsBoard } from "../games/connections.js";
@@ -1030,7 +1031,9 @@ export class RoomEngine {
     // Territory's too (TRIVIA_TEAM_GAMES: how many questions each takes).
     const quizRounds = TRIVIA_TEAM_GAMES[gameId];
     const contentGameId = quizRounds !== undefined ? "trivia" : gameId;
-    if (this._cup.origin === "created" && (CONTENT_GAMES as string[]).includes(contentGameId)) {
+    // Stage 12.16 (D-S1216-01): Split Clues' puzzles come from the content library in every room, whatever the Cup's
+    // origin, so an Official game deals only approved puzzles everywhere (it never had a pre-library bank to keep).
+    if ((this._cup.origin === "created" || contentGameId === "split-clues") && (CONTENT_GAMES as string[]).includes(contentGameId)) {
       const cg = contentGameId as ContentGameId;
       const mode = (opts.official ?? false) ? "official" : "practice";
       const need = quizRounds !== undefined ? quizRounds : cg === "charades" ? Math.max(ITEMS_PER_GAME.charades, playerIds.length * 4) : ITEMS_PER_GAME[cg];
@@ -1040,7 +1043,7 @@ export class RoomEngine {
       const sprintSel = sprintRules && mode === "official" ? { players: playerIds.length, sizePolicy: sprintRules.sizePolicy } : undefined;
       // Stage 7.4: the room's kind decides the rules (a Cup protects its
       // official content; casual and solo rooms deal unused content first).
-      const pick = selectContent({ lib: this.content, gameId: cg, count: need, mode, roomKind: this.kind, cupId: this._cup.cupId, usage: this.contentUsage, seq: this.contentSeq, today: new Date(startedAt).toISOString().slice(0, 10), ...(sprintSel ? { sprint: sprintSel } : {}), ...(season ? { season } : {}) });
+      const pick = selectContent(this.selectionRequest(cg, need, mode, startedAt, season, sprintSel));
       if (!pick.ok) throw new ContentShortage(pick.message, pick.available, pick.needed, pick.reason === "no-suitable-category" ? "NO_SUITABLE_CATEGORY" : "CONTENT_EXHAUSTED");
       selected = {
         extra: materialize(cg, pick.items, { seed, playerIds, sprintAnswerRules: this._cup.categorySprint?.answerRules ?? 1, ...(sprintRules ? { sprint: { matcherVersion: sprintRules.matcher, ...(sprintSel ? { eligibility: sprintSel } : {}) } } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}) }),
@@ -1078,7 +1081,8 @@ export class RoomEngine {
       lifecycleVersion: 1,
       day: this.championshipDay,
       seed,
-      extra: selected && quizRounds === undefined ? selected.extra
+      // A content game's state is its materialised content; a module (Split Clues) gets its content through init.
+      extra: selected && quizRounds === undefined && !moduleFor(gameId) ? selected.extra
         : gameId === "impostor"
           ? initImpostor(playerIds, seed)
           : gameId === "caption-clash"
@@ -1099,7 +1103,7 @@ export class RoomEngine {
                           ? { roundIndex: 0, submissions: {} }
                           : gameId === "charades"
                             ? initCharades(playerIds, undefined, nativeTeams)
-                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}), ...(gameId === "territory" ? { quiz: triviaQuiz(selected?.extra, seed, TERRITORY_ROUNDS) } : {}), ...(gameId === "relay" ? { relay: relayQuestions(seed) } : {}), ...(avoid && avoid.length ? { avoid } : {}) }),
+                            : moduleFor(gameId)?.init({ players: playerIds, seed, ...(season ? { season } : {}), ...(settings ? { settings } : {}), ...(familyPick ? { family: familyPick } : {}), ...(nativeTeams ? { teams: nativeTeams } : {}), ...(gameId === "team-huddle" ? { huddle: huddleQuestions(selected?.extra, seed) } : {}), ...(gameId === "territory" ? { quiz: triviaQuiz(selected?.extra, seed, TERRITORY_ROUNDS) } : {}), ...(gameId === "relay" ? { relay: relayQuestions(seed) } : {}), ...(gameId === "split-clues" ? { split: (selected?.extra as { puzzles?: SplitPuzzle[] } | undefined)?.puzzles ?? [] } : {}), ...(avoid && avoid.length ? { avoid } : {}) }),
     };
     // Stage 12.7 (D-S127-02): played as teams when the room has teams, the game can be, and at least two teams have
     // players in it; the teams are copied now (only this game's players), never read back from the room later.
@@ -2596,6 +2600,46 @@ export class RoomEngine {
   }
 
   /**
+   * The content selection request for a new game of `cg` (one place, so the lobby's availability and the start agree).
+   * Stage 12.16 (D-S1216-02, D-S1216-03): Split Clues in a Cup deals year-round puzzles only (as before Stage 12.16:
+   * a Cup has no session season), and reads usage that includes the puzzles its earlier games dealt from the old bank.
+   */
+  private selectionRequest(cg: ContentGameId, count: number, mode: "official" | "practice", at: number, season: SessionSeason | undefined, sprint?: SelectionRequest["sprint"]): SelectionRequest {
+    return {
+      lib: this.content, gameId: cg, count, mode, roomKind: this.kind, cupId: this._cup.cupId,
+      usage: cg === "split-clues" ? this.usageWithDealtIds(cg) : this.contentUsage,
+      seq: this.contentSeq, today: new Date(at).toISOString().slice(0, 10),
+      ...(sprint ? { sprint } : {}), ...(season ? { season } : {}),
+      ...(cg === "split-clues" && this.kind === "cup" ? { yearRoundOnly: true } : {}),
+    };
+  }
+
+  /**
+   * Stage 12.16 (D-S1216-03): this room's content usage plus the ids its earlier games of `gameId` dealt that the usage
+   * doesn't record (Split Clues games before Stage 12.16 dealt from a bank, outside the library). Derived each time:
+   * saved rooms are never rewritten. Each such id counts as used (so a Cup never deals as Official a puzzle it already
+   * showed in practice) and as the oldest use (seq 0) when unused puzzles are ranked first.
+   */
+  private usageWithDealtIds(gameId: string): UsageHistory {
+    const dealt = this.playedContentIds(gameId).filter((id) => !(this.contentUsage[id]?.length));
+    if (dealt.length === 0) return this.contentUsage;
+    const out: UsageHistory = { ...this.contentUsage };
+    for (const id of dealt) out[id] ??= [{ gameInstanceId: "dealt-before-stage-12.16", day: 1, mode: "practice", seq: 0 }];
+    return out;
+  }
+
+  /**
+   * Stage 12.16 (D-S1216-04): whether an Official Split Clues game could start in this Cup now, for the lobby: the same
+   * selection the start runs (nothing recorded). Absent outside a Cup. The server refuses the start on its own anyway.
+   */
+  officialContentView(now: number): Record<string, { available: number; needed: number; message?: string }> | undefined {
+    if (this.kind !== "cup") return undefined;
+    const needed = ITEMS_PER_GAME["split-clues"];
+    const pick = selectContent(this.selectionRequest("split-clues", needed, "official", now, undefined));
+    return { "split-clues": pick.ok ? { available: needed, needed } : { available: pick.available, needed, message: pick.message } };
+  }
+
+  /**
    * Stage 12.10 (D-S1210-01): the content ids this room's games of `gameId` have dealt (their module's contentIds),
    * oldest game first, so a new game can deal what the room hasn't played yet. Games still in their briefing aren't
    * counted (a cancelled briefing leaves no game).
@@ -3883,6 +3927,9 @@ export class RoomEngine {
       ...(this.kind === "casual" || this.kind === "cup" ? { party: this.partyView(), session: this.sessionView() } : this.kind === "solo" ? { session: this.sessionView() } : {}),
       // Stage 8.2: what this solo or casual session deals (public; never a device's look).
       ...(this.kind !== "cup" ? { contentSeason: this.contentSeason } : {}),
+      // Stage 12.16 (D-S1216-04): whether an Official Split Clues game can start in this Cup now, and if not why
+      // (counts and a reason only: never an item). The lobby offers Practice instead; the server refuses on its own.
+      ...(this.kind === "cup" ? { officialContent: this.officialContentView(now) } : {}),
       // Stage 9.1 (§8): each settings game's lobby choice (Jebena Rush's hearts), shown to everyone.
       ...(this.kind === "casual" ? { lobbySettings: this.lobbySettingsView() } : {}),
       // Stage 8.2 (feedback 6795825877, 4): why the latest briefing ended without

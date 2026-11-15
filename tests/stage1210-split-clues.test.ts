@@ -6,12 +6,21 @@ import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { fitTeamsForGame, newTeamList, type GameTeams } from "../src/shared/teams.js";
 import { answerMatches, catchUpTeam, dealAvoiding, editDistance } from "../src/games/modules/teamKit.js";
-import { SPLIT_HELP_MS, SPLIT_LOCK_MS, SPLIT_MAX_TRIES, SPLIT_POINTS, SPLIT_ROUNDS, cluesHeld, dealSeat, splitCluesModule as m, splitPuzzlesFor, type SplitState } from "../src/games/modules/splitClues.js";
-import { SPLIT_PUZZLES } from "../src/games/modules/packs/split-clues.js";
+import { SPLIT_HELP_MS, SPLIT_LOCK_MS, SPLIT_MAX_TRIES, SPLIT_POINTS, SPLIT_ROUNDS, cluesHeld, dealSeat, splitCluesModule as m, type SplitState } from "../src/games/modules/splitClues.js";
+import { loadContent } from "../src/content/registry.js";
+import { splitPuzzleOf } from "../src/content/materialize.js";
+import { selectContent } from "../src/content/select.js";
 import { normalizeGuess } from "../src/games/modules/draw.js";
 import type { ModuleContext } from "../src/games/modules/types.js";
 import { moduleRng } from "../src/games/modules/types.js";
 import { RoomEngine } from "../src/server/room.js";
+
+// Stage 12.16: the puzzles live in the content library (content/packs/split-clues-*.json).
+const LIB = loadContent();
+const SPLIT_PUZZLES = (LIB.byGame.get("split-clues") ?? []).map(splitPuzzleOf);
+const EVERYDAY = SPLIT_PUZZLES.filter((p) => !p.season);
+/** Six puzzles dealt as init used to deal them before Stage 12.16 (seeded, Everyday), for the module's own tests. */
+const deal = (seed: number) => dealAvoiding(EVERYDAY, moduleRng(seed), []).slice(0, SPLIT_ROUNDS);
 
 const [CORAL, SUN, MINT] = newTeamList(3) as [GameTeams["list"][number], GameTeams["list"][number], GameTeams["list"][number]];
 
@@ -74,10 +83,14 @@ describe("the Split Clues puzzles", () => {
     }
   });
 
-  it("an Everyday session never gets a Christmas puzzle; a Christmas session gets the Christmas ones first", () => {
-    expect(splitPuzzlesFor("everyday", moduleRng(3)).some((p) => p.season)).toBe(false);
-    const xmas = splitPuzzlesFor("christmas", moduleRng(3));
-    expect(xmas.slice(0, 13).every((p) => p.season === "christmas")).toBe(true);
+  it("an Everyday session never gets a Christmas puzzle; a Christmas session gets the Christmas ones first (Stage 12.16: by content selection)", () => {
+    const pick = (season: "everyday" | "christmas", seq: number, usage = {}) => {
+      const r = selectContent({ lib: LIB, gameId: "split-clues", count: SPLIT_ROUNDS, mode: "practice", roomKind: "casual", cupId: "c", usage, seq, today: "2026-11-15", season });
+      if (!r.ok) throw new Error(r.message);
+      return r.items;
+    };
+    for (let seq = 0; seq < 20; seq++) expect(pick("everyday", seq).some((li) => li.item.season)).toBe(false);
+    expect(pick("christmas", 3).every((li) => li.item.season === "christmas")).toBe(true);
   });
 });
 
@@ -87,7 +100,7 @@ const teams: GameTeams = { list: newTeamList(2), members: { k: "team-coral", a: 
 const T0 = 2_000_000;
 const ctx = (now: number): ModuleContext => ({ now, players, active: players, scale: 1 });
 function game(seed = 5): SplitState {
-  const s = m.init({ players, seed, teams, season: "everyday" });
+  const s = m.init({ players, seed, teams, season: "everyday", split: deal(seed) });
   m.onPlayStart(s, ctx(T0));
   return s;
 }
@@ -110,7 +123,7 @@ describe("Split Clues (pure)", () => {
     }
     // A team of 7: everyone holds one clue, and all six are held.
     const big: GameTeams = { list: newTeamList(2), members: Object.fromEntries(["p1", "p2", "p3", "p4", "p5", "p6", "p7", "q1", "q2"].map((p) => [p, p.startsWith("p") ? "team-coral" : "team-sun"])) };
-    const s7 = m.init({ players: Object.keys(big.members), seed: 2, teams: big, season: "everyday" });
+    const s7 = m.init({ players: Object.keys(big.members), seed: 2, teams: big, season: "everyday", split: deal(2) });
     const held7 = ["p1", "p2", "p3", "p4", "p5", "p6", "p7"].map((p) => cluesHeld(s7, 0, p));
     expect(held7.every((h) => h.length === 1)).toBe(true);
     expect(new Set(held7.flat()).size).toBe(6);
@@ -201,7 +214,7 @@ describe("Split Clues (pure)", () => {
     const s = game();
     expect(m.abstain(s, "k", ctx(T0)).ok).toBe(false);
     expect(m.contentIds(s)).toEqual(s.puzzles.map((p) => p.id));
-    expect(m.intent(m.init({ players, seed: 1, teams, season: "everyday" }), "k", "split-guess", { round: 0, text: "x" }, ctx(T0))).toMatchObject({ ok: false, reason: "PHASE_CLOSED" });
+    expect(m.intent(m.init({ players, seed: 1, teams, season: "everyday", split: deal(1) }), "k", "split-guess", { round: 0, text: "x" }, ctx(T0))).toMatchObject({ ok: false, reason: "PHASE_CLOSED" });
   });
 });
 

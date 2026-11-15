@@ -27,6 +27,7 @@ function jaccard(a: Set<string>, b: Set<string>): number {
 function promptOf(li: LoadedItem): string {
   const it = li.item as Record<string, unknown>;
   if (li.gameId === "word-connections") return (it["groups"] as { words: string[] }[]).flatMap((g) => g.words).sort().join(" ");
+  if (li.gameId === "split-clues") return (it["clues"] as string[]).join(" ");
   return String(it["prompt"] ?? it["quote"] ?? it["event"] ?? it["name"] ?? it["word"] ?? "");
 }
 
@@ -85,7 +86,7 @@ export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
       if (gameId === "trivia" && !String(it["prompt"]).trim().endsWith("?")) add(li, "warn", "format", "trivia prompts should be questions ending in '?'");
       const p = promptOf(li);
       if (/\b(not|never|except)\b/i.test(p) && gameId !== "word-connections") add(li, "warn", "negative-wording", "negative wording (NOT/never/except): check it reads clearly under time pressure");
-      if (p.length > 140) add(li, "warn", "long-prompt", `prompt is ${p.length} characters: hard to read on a phone in time`);
+      if (p.length > 140 && gameId !== "split-clues") add(li, "warn", "long-prompt", `prompt is ${p.length} characters: hard to read on a phone in time`);
       // Facts that can change.
       if (li.item.timeSensitive && li.item.timeSensitive.reviewBy < today) add(li, "warn", "stale", `time-sensitive fact past its review date (${li.item.timeSensitive.reviewBy}): no longer used officially`);
       if (!li.item.timeSensitive && TIME_WORDS.test(`${p} ${String(it["explanation"] ?? "")}`) && li.item.eligibility === "official") add(li, "warn", "maybe-time-sensitive", "wording suggests a fact that can change; add timeSensitive or rephrase");
@@ -131,6 +132,19 @@ export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
         }
       }
       if (gameId === "impostor" && norm(String(it["word"])) === norm(String(it["hintCategory"]))) add(li, "error", "word-is-category", "the secret word must differ from its category hint");
+      // Stage 12.16 (D-S1216-01): a Split Clues clue must never name its answer; six different clues, each short enough to read.
+      if (gameId === "split-clues") {
+        const sc = li.item as ItemOf<"split-clues">;
+        const names = [sc.answer, ...(sc.alts ?? [])].map(norm);
+        for (const [i, c] of sc.clues.entries()) {
+          const words = ` ${norm(c)} `;
+          const hit = names.find((n) => n && words.includes(` ${n} `));
+          if (hit) add(li, "error", "clue-gives-answer", `clue ${i + 1} ("${c}") contains the answer "${hit}"`);
+          if (c.length > 60) add(li, "warn", "long-clue", `clue ${i + 1} is ${c.length} characters: hard to read on a phone in time`);
+        }
+        if (new Set(sc.clues.map(norm)).size !== sc.clues.length) add(li, "error", "duplicate-clues", "the six clues must all be different");
+        if (sc.alts?.some((a) => norm(a) === norm(sc.answer))) add(li, "warn", "alt-repeats-answer", "an alternative answer is the same as the answer");
+      }
       if (gameId === "geography" && it["mode"] === "flag" && !li.item.accessibility) add(li, "warn", "accessibility", "flag questions rely on colour/emoji: describe a text alternative");
     }
     // Near-duplicates within a game.

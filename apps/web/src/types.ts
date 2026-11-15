@@ -208,6 +208,8 @@ export interface Projection {
   /** Stage 12.1 (D-S121-02): when this casual room became a Family Cup, and the games it played while casual. */
   cupSince?: { at: number; seq: number };
   casualGameIds?: string[];
+  /** Stage 12.16: a Cup's Official content availability per content-gated game (Split Clues): counts and a reason only. */
+  officialContent?: Record<string, { available: number; needed: number; message?: string }>;
   /** Stage 12.2 (D-S122-01): when this room went back from a Family Cup to a casual game night, and its game count then. */
   cupUndone?: { at: number; seq: number; games: number };
   /** Stage 12.4 (D-S124-01, provisional rules): a finished Family Cup's record (public). */

@@ -76,6 +76,11 @@ export interface SelectionRequest {
    * selection never reads seasons: neither is ever filled in by default.
    */
   season?: SessionSeason;
+  /**
+   * Stage 12.16 (D-S1216-02): deal year-round items only (no season tag). Split Clues in a Cup: a Cup has no session
+   * season, and its Split Clues has always dealt Everyday puzzles. Read only for a Cup (other rooms filter by season).
+   */
+  yearRoundOnly?: boolean;
 }
 
 export type SelectionResult =
@@ -147,7 +152,8 @@ function stratified(pool: LoadedItem[], count: number, rng: () => number): Loade
 }
 
 export function selectContent(req: SelectionRequest): SelectionResult {
-  const listed = (req.lib.byGame.get(req.gameId) ?? []).slice().sort((a, b) => a.item.id.localeCompare(b.item.id));
+  const listed = (req.lib.byGame.get(req.gameId) ?? []).slice().sort((a, b) => a.item.id.localeCompare(b.item.id))
+    .filter((li) => !(req.yearRoundOnly && req.roomKind === "cup" && li.item.season !== undefined));
   const all = listed.filter(answerEnterable);
   const unenterable = listed.length - all.length;
   const excludedNote = unenterable ? [`${unenterable} item(s) skipped: answer can't be entered with this game's input`] : [];
@@ -172,7 +178,10 @@ export function selectContent(req: SelectionRequest): SelectionResult {
     if (fresh.length < req.count) {
       return {
         ok: false, reason: "insufficient-content", available: fresh.length, needed: req.count,
-        message: `Not enough unused approved content left in this Cup for an official game (${fresh.length} left, ${req.count} needed). Play it as practice, or approve more content.`,
+        // Stage 12.16 (D-S1216-04): Split Clues says what counts there, in the host's words.
+        message: req.gameId === "split-clues"
+          ? `Split Clues counts only with puzzles a person has approved, and this Cup has ${fresh.length} unused approved puzzle${fresh.length === 1 ? "" : "s"} (an official game needs ${req.count}). Play it as Practice instead: practice uses every puzzle.`
+          : `Not enough unused approved content left in this Cup for an official game (${fresh.length} left, ${req.count} needed). Play it as practice, or approve more content.`,
       };
     }
     const items = stratified(fresh, req.count, rng);

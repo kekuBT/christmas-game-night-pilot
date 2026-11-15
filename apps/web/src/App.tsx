@@ -1070,7 +1070,10 @@ export function App() {
   // Stage 12.15 (D-S1215-01): a team game counts in a Family Cup, but not in an Individual Family Cup (made before
   // Stage 12.15, whose rules never change): the server refuses it as official there, so the lobby offers Practice.
   const teamGamesDontCount = proj?.competition?.teamGamesCount === false;
-  const canCountHere = (g: RegistryGame | undefined): boolean => !!g && g.lifecycle?.officialEligible !== false && !(teamGamesDontCount && TEAM_NATIVE_GAMES.has(g.id));
+  // Stage 12.16 (D-S1216-04): a game whose Official content needs approval (Split Clues) counts only while the Cup has
+  // enough approved, unused content for a whole game; the server says so (and refuses an Official start on its own).
+  const contentShort = (g: RegistryGame | undefined) => { const c = g ? proj?.officialContent?.[g.id] : undefined; return c && c.available < c.needed ? c : undefined; };
+  const canCountHere = (g: RegistryGame | undefined): boolean => !!g && g.lifecycle?.officialEligible !== false && !(teamGamesDontCount && TEAM_NATIVE_GAMES.has(g.id)) && !contentShort(g);
   const serverPlan = proj?.upNext;
   const localPlan = (() => {
     const g = games.find((x) => x.id === upNextId) ?? games[0];
@@ -1626,7 +1629,9 @@ export function App() {
   // Practice-only games (Impostor, Charades) can't count: the server refuses
   // them as official, so the lobby starts them as practice and says why.
   const upNextPracticeOnly = !!upNext && !canCountHere(upNext);
-  const upNextPracticeReason = upNext?.lifecycle?.officialEligible === false ? upNext.lifecycle?.practiceOnlyReason : "This Family Cup counts individual games only, so team games are practice here.";
+  const upNextPracticeReason = upNext?.lifecycle?.officialEligible === false ? upNext.lifecycle?.practiceOnlyReason
+    : contentShort(upNext) ? (contentShort(upNext)!.message ?? `${upNext!.title} needs approved content to count.`)
+    : "This Family Cup counts individual games only, so team games are practice here.";
   // Stage 6.1: a casual room has no Cup, so every game in it is just for fun
   // (the server refuses official starts there). Rooms without a kind are Cups.
   const casualRoom = proj?.roomKind === "casual" || proj?.roomKind === "solo";

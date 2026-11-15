@@ -17,12 +17,10 @@
  * wrong tries go to its own players only. Before the reveal the TV and other teams see only each team's status (solving,
  * solved and its place, how many tries), never a clue or the answer; future puzzles never leave the server.
  */
-import type { SessionSeason } from "../../shared/season.js";
 import type { GameTeams } from "../../shared/teams.js";
-import { SPLIT_PUZZLES, type SplitPuzzle } from "./packs/split-clues.js";
 import { letterPattern } from "./draw.js";
-import { answerMatches, catchUpTeam, dealAvoiding, teamIdsInGame, teamMembers } from "./teamKit.js";
-import { moduleRng, seededShuffle, type GameModule, type ModuleContext } from "./types.js";
+import { answerMatches, catchUpTeam, teamIdsInGame, teamMembers } from "./teamKit.js";
+import { moduleRng, seededShuffle, type GameModule, type ModuleContext, type SplitPuzzle } from "./types.js";
 
 import { SPLIT_HELP_MS } from "./split-clues-timing.js";
 export { SPLIT_HELP_MS, SPLIT_REVEAL_MS, SPLIT_SOLVE_MS } from "./split-clues-timing.js";
@@ -32,6 +30,9 @@ export const SPLIT_LOCK_MS = 4_000;
 export const SPLIT_MAX_TRIES = 15;
 export const SPLIT_TRY_LENGTH = 40;
 export const SPLIT_POINTS = { place: [100, 75, 55, 40], catchUp: 25 } as const;
+
+/** Stage 12.16: a puzzle as the game plays it (declared in types.ts; see there). */
+export type { SplitPuzzle } from "./types.js";
 
 export interface SplitTry { by: string; text: string }
 export interface SplitTeamRound {
@@ -65,13 +66,6 @@ export interface SplitState {
 }
 
 const sc = (s: SplitState) => (s.scaleAtStart && s.scaleAtStart > 0 ? s.scaleAtStart : 1);
-
-/** The puzzles for a game: the session's season (Christmas puzzles first in a Christmas session), unplayed first. */
-export function splitPuzzlesFor(season: SessionSeason | undefined, rng: () => number, avoid: readonly string[] = []): SplitPuzzle[] {
-  const everyday = SPLIT_PUZZLES.filter((p) => p.season === undefined);
-  if (season !== "christmas") return dealAvoiding(everyday, rng, avoid);
-  return [...dealAvoiding(SPLIT_PUZZLES.filter((p) => p.season === "christmas"), rng, avoid), ...dealAvoiding(everyday, rng, avoid)];
-}
 
 /** The order the six clues are dealt in for a round (seeded, the same for every team). */
 export function clueOrder(s: SplitState, round: number): number[] {
@@ -137,9 +131,11 @@ export function shapeLine(answer: string): string {
 export const splitCluesModule: GameModule<SplitState> & { onPlayStart(s: SplitState, ctx: ModuleContext): void; contentIds(s: SplitState): string[] } = {
   id: "split-clues",
   actions: ["split-guess"],
-  init({ players, seed, season, teams, avoid }) {
-    const rng = moduleRng(seed);
-    const puzzles = splitPuzzlesFor(season, rng, avoid).slice(0, SPLIT_ROUNDS);
+  init({ players, seed, teams, split }) {
+    // Stage 12.16: the room chose these through the content library (an Official game only approved puzzles). A
+    // game is never dealt from anywhere else, so a missing hand-off fails loudly instead of dealing unreviewed content.
+    if (!split || split.length < SPLIT_ROUNDS) throw new Error(`Split Clues needs its ${SPLIT_ROUNDS} puzzles from the content library.`);
+    const puzzles = split.slice(0, SPLIT_ROUNDS).map((p) => ({ ...p, ...(p.alts ? { alts: [...p.alts] } : {}), clues: [...p.clues] as unknown as SplitPuzzle["clues"] }));
     return { players: [...players], teams: teams ?? { list: [], members: {} }, puzzles, seed, round: 0, phase: "solve", roundStartedAt: null, roundStarts: [], help: 0, rounds: {} };
   },
   onPlayStart(s, ctx) {

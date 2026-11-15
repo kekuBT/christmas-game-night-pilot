@@ -18,6 +18,7 @@ import type { ConnectionsBoard } from "../games/connections.js";
 import { initImpostor } from "../games/impostor.js";
 import { initCharades } from "../games/charades.js";
 import type { GameTeams } from "../shared/teams.js";
+import type { SplitPuzzle } from "../games/modules/splitClues.js";
 
 /** How many items one game uses. Charades uses one prompt per player turn (plus passes). */
 export const ITEMS_PER_GAME: Record<ContentGameId, number> = {
@@ -31,6 +32,7 @@ export const ITEMS_PER_GAME: Record<ContentGameId, number> = {
   "word-connections": 1,
   "impostor": 1,
   "charades": 12,
+  "split-clues": 6,
 };
 
 function shuffle<T>(xs: T[], rng: () => number): T[] {
@@ -122,5 +124,15 @@ export function materialize(gameId: ContentGameId, items: LoadedItem[], ctx: { s
     }
     case "charades":
       return initCharades(ctx.playerIds, items.map((li) => as<"charades">(li).prompt), ctx.teams);
+    case "split-clues":
+      // Stage 12.16: the puzzles, copied (the module's state keeps them for the game's whole life).
+      return { puzzles: items.map((li) => splitPuzzleOf(li)) };
   }
+}
+
+/** Stage 12.16: a Split Clues item as the module plays it (a full copy: later pack edits never reach a game). */
+export function splitPuzzleOf(li: LoadedItem): SplitPuzzle {
+  const it = as<"split-clues">(li);
+  const c = it.clues;
+  return { id: it.id, kind: it.kind, answer: it.answer, ...(it.alts ? { alts: [...it.alts] } : {}), clues: [c[0]!, c[1]!, c[2]!, c[3]!, c[4]!, c[5]!], ...(it.season ? { season: it.season } : {}) };
 }
