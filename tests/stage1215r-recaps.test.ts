@@ -135,3 +135,65 @@ describe("R6: a team game is told by its teams in the lobby, the TV's recaps and
     expect(nightCardFacts({ games: [{ id: g.id, gameId: "relay", status: "finished", ...tvg }], nameOf: pname, titleOf: () => "Relay", christmas: false, now: new Date() })!.games[0]!.line).toBe(`${winnerName} wins`);
   });
 });
+
+describe("review 6890761957: TV final standings by team place; a game's mode as it was played", () => {
+  const P = (id: string, name: string) => ({ id, name, avatar: { color: "sun" as const, initial: name[0]! } });
+  const players = [P("h", "Host"), P("s", "Sunny"), P("c", "Coralie"), P("m", "Minty")];
+
+  it("a game built for teams lists players by their team's place: 150/50/50 is 1, 1 (Coral), 2 (Sun), 3 (Mint), not 1, 1, 3, 3", async () => {
+    const { teamRankedStandings } = await import("../apps/web/src/ui/mchezo/lib/teamLines.js");
+    const scores = [{ playerId: "h", score: 150 }, { playerId: "c", score: 150 }, { playerId: "s", score: 50 }, { playerId: "m", score: 50 }];
+    const rows = [
+      { teamId: CORAL, name: "Team Coral", members: ["h", "c"], rank: 1 },
+      { teamId: SUN, name: "Team Sun", members: ["s"], rank: 2 },
+      { teamId: MINT, name: "Team Mint", members: ["m"], rank: 3 },
+    ];
+    const ranked = teamRankedStandings(scores, players as never, rows);
+    expect(ranked.map((r) => [r.playerId, r.rank, r.teamName])).toEqual([["c", 1, "Team Coral"], ["h", 1, "Team Coral"], ["s", 2, "Team Sun"], ["m", 3, "Team Mint"]]);
+    // A true tie between teams shares the place.
+    const tie = teamRankedStandings(scores, players as never, [{ ...rows[0]!, rank: 1 }, { ...rows[1]!, rank: 2 }, { ...rows[2]!, rank: 2 }]);
+    expect(tie.map((r) => r.rank)).toEqual([1, 1, 2, 2]);
+    // A team that didn't score comes last, unranked (0, shown as a dash).
+    const unscored = teamRankedStandings(scores, players as never, [rows[0]!, rows[1]!, { ...rows[2]!, rank: null }]);
+    expect(unscored.at(-1)).toMatchObject({ playerId: "m", rank: 0 });
+    // Individual games (no team results), or a player on no team: ranked by points, as before.
+    const { rankStandings } = await import("../apps/web/src/ui/mchezo/lib/standings.js");
+    expect(teamRankedStandings(scores, players as never, undefined)).toEqual(rankStandings(scores, players as never));
+    expect(teamRankedStandings(scores, players as never, rows.slice(0, 2)).map((r) => r.rank)).toEqual([1, 1, 3, 3]);
+  });
+
+  it("a casual game stays Casual after the room becomes a Family Cup, through a refresh; later Practice and Official games keep theirs", async () => {
+    const { gameModeWord } = await import("../apps/web/src/ui/mchezo/lib/tvfeed.js");
+    let t = 1_800_000_000_000;
+    const engine = new RoomEngine("Night", { kind: "casual", timing: 1 });
+    engine.clock = () => t;
+    const ids = [engine.join("Keku", { asHost: true }).player.id];
+    for (const n of ["Amina", "Baraka"]) ids.push(engine.join(n).player.id);
+    const send = (pid: string, gid: string, action: string, payload: Json = {}) =>
+      engine.submitIntent({ kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: engine.id, gameInstanceId: gid, action, payload }, pid);
+    const playTrivia = (official: boolean) => {
+      const g = engine.startGame(ids[0]!, "trivia", { official, seed: 5 });
+      const game = engine.games.get(g.id)!;
+      for (const p of ids) send(p, g.id, "briefing-ready", { ready: true });
+      const qs = (game.extra as { questions: { id: string; correctIndex: number }[] }).questions;
+      for (const p of ids) for (const q of qs) { t += 200; send(p, g.id, "trivia-answer", { questionId: q.id, chosenIndex: q.correctIndex }); }
+      expect(game.status).toBe("finished");
+      return g.id;
+    };
+    const label = (e: RoomEngine, gid: string) => {
+      const proj = e.project("player", ids[1]!) as { roomKind: string; casualGameIds?: string[]; games: { id: string; official?: boolean }[] };
+      return gameModeWord(proj.games.find((g) => g.id === gid)!, { casual: proj.roomKind === "casual", casualGameIds: proj.casualGameIds });
+    };
+    const casualGame = playTrivia(false);
+    expect(label(engine, casualGame)).toBe("Casual");
+    engine.upgradeToCup(ids[0]!);
+    // The review's case: the game played before is still Casual (it was "Practice" in the lobby's last game).
+    expect(label(engine, casualGame)).toBe("Casual");
+    const practice = playTrivia(false);
+    const official = playTrivia(true);
+    expect([label(engine, practice), label(engine, official)]).toEqual(["Practice", "Official"]);
+    // A refresh or reconnect is a fresh projection of the saved room.
+    const again = RoomEngine.fromJSON(JSON.parse(JSON.stringify(engine.toJSON())) as Json);
+    expect([label(again, casualGame), label(again, practice), label(again, official)]).toEqual(["Casual", "Practice", "Official"]);
+  });
+});

@@ -10,6 +10,8 @@
  *    last-leg tiebreak): it names the winner and the team it's level with, never a tie further down the table.
  */
 import type { TeamResultRow } from "../../../../../../src/shared/teams.js";
+import type { Player, RankedEntry, ScoreEntry } from "../types.js";
+import { rankStandings } from "./standings.js";
 
 const listNames = (names: readonly string[]) => names.length <= 1 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 
@@ -51,4 +53,27 @@ export function teamTiebreakQuip(rows: readonly Pick<TeamResultRow, "name" | "sc
   const w = top[0]!;
   const level = scored.filter((r) => r !== w && r.score === w.score);
   return level.length === 0 ? null : `Level on points with ${listNames(level.map((r) => r.name))}; ${w.name} got there first.`;
+}
+
+/**
+ * Review 6890761957: a final standings list for a game built for teams. Its members' scores are copies of their team's
+ * points, so ranking them by points would lose the team's own placing (Relay ranks equal points by the last leg's
+ * time). Each member gets their team's rank from the server's team results, and the rows are ordered by that rank,
+ * then by team, then by name; a team that didn't score comes last, unranked. Every other game (and a game played "as
+ * teams", whose players' own scores are real) keeps the usual ranking by points.
+ */
+export function teamRankedStandings(
+  scores: readonly ScoreEntry[],
+  players: readonly Player[],
+  teamRows: readonly Pick<TeamResultRow, "teamId" | "name" | "members" | "rank">[] | undefined,
+): (RankedEntry & { teamName?: string })[] {
+  const byPoints = rankStandings(scores, players);
+  if (!teamRows || teamRows.length === 0) return byPoints;
+  const teamOf = new Map<string, { rank: number | null; name: string; order: number }>();
+  teamRows.forEach((t, i) => { for (const m of t.members) teamOf.set(m, { rank: t.rank, name: t.name, order: i }); });
+  if (byPoints.some((r) => !teamOf.has(r.playerId))) return byPoints; // not every row is on a team: nothing to map
+  const unranked = Number.MAX_SAFE_INTEGER;
+  const rows = byPoints.map((r) => { const t = teamOf.get(r.playerId)!; return { ...r, rank: t.rank ?? unranked, teamName: t.name, order: t.order }; });
+  rows.sort((a, b) => a.rank - b.rank || a.order - b.order || a.player.name.localeCompare(b.player.name) || a.playerId.localeCompare(b.playerId));
+  return rows.map((r) => ({ playerId: r.playerId, score: r.score, player: r.player, rank: r.rank === unranked ? 0 : r.rank, teamName: r.teamName }));
 }

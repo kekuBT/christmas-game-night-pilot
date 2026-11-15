@@ -9,6 +9,8 @@
 //      this game, Sun first
 //   E  the Cup screen (320 px): the game's placements are the server's (Baraka 100, Wanjiru 100, Coral 0) and the note
 //      explains team placement and the 75/25 day
+//   D+ (review 6890761957) the TV's final standings list Tug of War's players by their team's place (Sun 1, 1; Coral
+//      2, 2, 2), with the team named, not re-ranked by points
 //   F  (Stage 12.15-R, review 6888718011 R6) the recaps name the team: the lobby's last game ("Team Sun wins"; "Your
 //      team, Team Sun, won"; Coral "came 2nd of 2"), the TV's lobby list and the night card, never teammates "tied for
 //      first"
@@ -146,6 +148,11 @@ try {
     const t = await text(tv.getByTestId("tv-final-cup"));
     return /after this game/i.test(t) && /^\s*1\s+(Baraka|Wanjiru)\s+100 pts[\s\S]*1\s+(Baraka|Wanjiru)\s+100 pts/m.test(t);
   });
+  await soon("D+ the TV's final standings go by team place: Sun's two 1st, Coral's three 2nd (not 3rd), each with its team", async () => {
+    const rows = await tv.getByTestId("tv-last-standings").locator("li").evaluateAll((els) => els.map((e) => [e.getAttribute("data-rank"), e.textContent ?? ""]));
+    return JSON.stringify(rows.map((r) => r[0])) === JSON.stringify(["1", "1", "2", "2", "2"]) && rows.slice(0, 2).every((r) => /Team Sun/.test(r[1])) && rows.slice(2).every((r) => /Team Coral/.test(r[1]));
+  });
+  await shotR(tv, "tv-final-standings-by-team-1920");
   await sleep(500);
   await shot(host, "cup-results-390");
   await shot(tv, "tv-cup-final-1920");

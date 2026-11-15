@@ -46,7 +46,7 @@ import { SaveMemory } from "./components/mchezo/SaveMemory.js";
 import { SAVE_MEMORY_GAMES, saveMemoryFacts } from "./ui/mchezo/lib/saveMemory.js";
 import { cupContinuity } from "./components/mchezo/CiniCups.js";
 import { MchezoSpectrum, MchezoSpectrumResults, SpectrumReview, SpectrumTv, SpectrumTvFinal, TeamResultsHero } from "./components/mchezo/MchezoSpectrum.js";
-import { lineupLine, tvFeedFrom } from "./ui/mchezo/lib/tvfeed.js";
+import { gameModeWord, lineupLine, tvFeedFrom } from "./ui/mchezo/lib/tvfeed.js";
 import { lastGameSummary } from "./ui/mchezo/lib/lastGame.js";
 import { teamTiebreakQuip } from "./ui/mchezo/lib/teamLines.js";
 import { CaptionTv, MchezoCaption, MchezoCaptionResults } from "./components/mchezo/MchezoCaption.js";
@@ -1523,6 +1523,12 @@ export function App() {
   // after a game finished stays in the lobby instead of landing on its
   // results as "Did not answer · 0 points" (the server never scored them).
   const latestFinished = myGames.filter((g) => g.status === "finished" && g.participant !== false).slice(-1)[0];
+  // Review 6890761957: a game's mode as it was played. A game played while the room was casual stays Casual after the
+  // room becomes a Family Cup (the server keeps casualGameIds), through a refresh or a reconnect too.
+  const playedCasual = (gameInstanceId: string) => proj?.roomKind === "casual" || (proj?.casualGameIds ?? []).includes(gameInstanceId);
+  const historyMode = (g: { id: string; official?: boolean }) => gameModeWord(g, { casual: proj?.roomKind === "casual", casualGameIds: proj?.casualGameIds }).toLowerCase() as "official" | "casual" | "practice";
+  // The results screens' own wording ("Casual game", "Practice game") follows the game shown, not the room's current kind.
+  const resultsMotion = { ...motion, casual: latestFinished ? playedCasual(latestFinished.id) : motion.casual };
   // Stage 5: one failure line for every game screen that has no inline one,
   // shown only for the game the failed action was for, cleared by the next send.
   // Stage 5.1 (2C): a send whose reply was lost but which the server lists
@@ -1569,7 +1575,7 @@ export function App() {
     const scores = pub?.rawScores ?? g.rawScores ?? {};
     const teamRows = pub?.teamResults ?? g.teamResults;
     let story = resultsStory({
-      gameInstanceId: g.id, title, official, casual: proj?.roomKind === "casual", scores, nameOf,
+      gameInstanceId: g.id, title, official, casual: playedCasual(g.id), scores, nameOf,
       youId: playerId ?? undefined,
       yourParticipation: playerId ? g.outcome?.participation[playerId] : undefined,
       youSatOut: g.abstained === true,
@@ -1590,7 +1596,7 @@ export function App() {
       // usual comment, which only describes the winner's margin (lib/teamLines.ts).
       const tiebreakQuip = official ? teamTiebreakQuip(teamRows) : null;
       const teamQuip = tiebreakQuip
-        ?? resultsStory({ gameInstanceId: g.id, title, official, casual: proj?.roomKind === "casual", scores: teamScores, nameOf: (id) => teamRows.find((r) => r.teamId === id)?.name ?? "A team" }).quip;
+        ?? resultsStory({ gameInstanceId: g.id, title, official, casual: playedCasual(g.id), scores: teamScores, nameOf: (id) => teamRows.find((r) => r.teamId === id)?.name ?? "A team" }).quip;
       story = {
         ...story,
         quip: teamQuip,
@@ -2036,7 +2042,9 @@ export function App() {
     const gameOn = roomGames.some((g) => g.status === "playing" || g.status === "briefing");
     const lastDone = gameOn ? undefined : roomGames.filter((g) => g.status === "finished").at(-1);
     // Stage 9.3: a cooperative game by its one team result; Stage 12.15-R (R6): a team game by its teams (lib/lastGame.ts).
-    const lastGame = lastDone ? { title: titleFor(lastDone.gameId, games), mode: lastDone.official ? "official" as const : "practice" as const, ...lastGameSummary(lastDone, playerId, nameOf) } : undefined;
+    // Review 6890761957: the game's own mode when it was played (gameModeWord: a game played before the room became a Cup
+    // stays Casual, through a refresh too: the server keeps casualGameIds).
+    const lastGame = lastDone ? { title: titleFor(lastDone.gameId, games), mode: historyMode(lastDone), ...lastGameSummary(lastDone, playerId, nameOf) } : undefined;
     return (
       <MchezoProvider theme={theme} {...motion}>
         <RoomLobby
@@ -2201,7 +2209,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && connectionsFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoConnectionsResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Word Connections"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2216,7 +2224,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && jebenaFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoJebenaResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Jebena Rush"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} save={saveMemoryFor(latestFinished, publicFinished)} />
       </MchezoProvider>
     );
@@ -2231,7 +2239,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && spectrumFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoSpectrumResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Spectrum"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} save={saveMemoryFor(latestFinished, publicFinished)} />
       </MchezoProvider>
     );
@@ -2255,7 +2263,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && familyFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoFamilyResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Family Questions"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2270,7 +2278,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && rivalsFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoKnowYourRivalsResults game={latestFinished} publicGame={publicFinished} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Know Your Rivals"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2285,7 +2293,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && tugFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoTugOfWarResults game={latestFinished} publicGame={publicFinished} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Tug of War"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2300,7 +2308,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && territoryFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoTerritoryResults game={latestFinished} publicGame={publicFinished} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Territory"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2315,7 +2323,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && teamDrawFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoTeamDrawResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Team Draw"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2330,7 +2338,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && splitFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoSplitCluesResults game={latestFinished} publicGame={publicFinished} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Split Clues"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2345,7 +2353,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && relayFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoRelayResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Relay"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2360,7 +2368,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && huddleFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoHuddleResults game={latestFinished} publicGame={publicFinished} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Team Huddle"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2383,21 +2391,21 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && drawFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoDrawResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Draw & Guess"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }
   if (view === "lobby" && showPhase === "results" && pulseFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoPulseResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Pattern Pulse"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
   }
   if (view === "lobby" && showPhase === "results" && majorityFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoMajorityResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Majority Rules"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2425,7 +2433,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && captionFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <MchezoCaptionResults game={latestFinished} publicGame={publicFinished} players={players} playerId={playerId ?? ""} title={games.find((x) => x.id === latestFinished.gameId)?.title ?? "Caption Clash"} onBackToLobby={() => dismissResults(latestFinished.id)} hero={resultsHero(latestFinished, publicFinished)} next={nextPanel(latestFinished)} />
       </MchezoProvider>
     );
@@ -2554,7 +2562,7 @@ export function App() {
   }
   if (view === "lobby" && showPhase === "results" && triviaFinished && latestFinished) {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         {/* Stage 3: the headline first, above the outcome and the reveal. */}
         {resultsHero(latestFinished, publicFinished)}
         {nextPanel(latestFinished) /* Stage 7.2: right under the result heading (review 6778921208) */}
@@ -2665,7 +2673,7 @@ export function App() {
   // Stage 7.2: a casual room's game without its own results screen gets the casual one (never the old shell).
   if (view === "lobby" && showPhase === "results" && latestFinished && proj?.roomKind === "casual") {
     return (
-      <MchezoProvider theme={theme} {...motion}>
+      <MchezoProvider theme={theme} {...resultsMotion}>
         <CasualResults
           game={latestFinished}
           publicGame={publicFinished}
@@ -2699,7 +2707,7 @@ export function App() {
       <ShowWaiting game={publicPlaying} title={titleFor(playingGame.gameId, games)} />
       <p className="muted">The game stays visible below — when the next phase starts, this banner goes away on its own.</p>
     </>}
-    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={titleFor(latestFinished.gameId, games)} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={theme} {...motion} as="bare">{resultsHero(latestFinished, publicFinished)}{/* Stage 12.3: a Family Cup running a lineup says what's next here too (nothing otherwise). */}{nextPanel(latestFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
+    {view === "lobby" && showPhase === "results" && latestFinished && <><ShowResults game={latestFinished} title={titleFor(latestFinished.gameId, games)} nameOf={nameOf} games={games} official={publicFinished?.official} youId={playerId ?? undefined} onBack={() => dismissResults(latestFinished.id)} review={latestFinished.status === "finished" ? reviewRows(latestFinished, latestFinished, publicFinished) : undefined} hero={<MchezoProvider theme={theme} {...resultsMotion} as="bare">{resultsHero(latestFinished, publicFinished)}{/* Stage 12.3: a Family Cup running a lineup says what's next here too (nothing otherwise). */}{nextPanel(latestFinished)}</MchezoProvider>} /><Reactions proj={proj} post={post} canMute={!!(me?.isHost || me?.isCohost)} /></>}
       {showGamePanel && playingGame && <GameClock game={playingGame} />}
       {showGamePanel && playingGame && <GamePanel key={draftKey(playingGame)} game={playingGame} title={games.find((x) => x.id === playingGame.gameId)?.title ?? "This game"} players={players} nameOf={nameOf} intent={intent} />}
       {/* S5-F: the older panel (Category Sprint, Who Said That?, Impostor, Charades) says so beside the game when a send fails; typed text stays in its box. */}

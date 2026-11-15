@@ -9,6 +9,8 @@
 //      reduced motion and Pause show it at once.
 //   D. Make it a Family Cup from the host's room menu: same code and players, the host's chip, every guest's
 //      notice, the TV follows without reloading (Cup card, Day 1 of 7) and still calls the games before Casual.
+//      Review 6890761957: so do the phones' "Last game" card (it said Practice), on the host and a guest, and after a
+//      reload.
 //   E. Two official games: the TV's final shows the Cup standings "after this game", with ▲/▼ that match the
 //      server's standings before and after (the TV's own memory). A TV opened afterwards shows no arrows.
 //   F. The host ends Day 1: the TV shows "Day 1 complete" and the server's own Day 1 winner(s); "Cup standings"
@@ -243,6 +245,15 @@ try {
   const recent = await tv.getByTestId("tv-recent").innerText();
   check("D TV: the games before the Cup are still called Casual, never Practice", (recent.match(/Casual/g) ?? []).length === 2 && !/Practice/.test(recent), recent);
   await shot(tv, "after-tv-lobby-cup-1920");
+  // Review 6890761957: the phones' "Last game" card keeps the game's own mode too (it read "Practice" after the change).
+  for (const [who, page] of [["host", host], ["guest", guest]]) {
+    await soon(`D ${who}'s "Last game" card still says Casual, never Practice`, async () => { const k = await page.getByTestId("last-game-card").locator(".mz-kicker").innerText(); return /Casual/i.test(k) && !/Practice/i.test(k); });
+    console.log(`  (${who}'s card: ${(await page.getByTestId("last-game-card").locator(".mz-kicker").innerText().catch(() => "?")).replace(/\s+/g, " ")})`);
+  }
+  await guest.reload({ waitUntil: "domcontentloaded" });
+  await soon("D …and after a reload (the server keeps which games were casual)", async () => { const k = await guest.getByTestId("last-game-card").locator(".mz-kicker").innerText(); return /Casual/i.test(k) && !/Practice/i.test(k); }, 20000);
+  await guest.getByTestId("last-game-card").scrollIntoViewIfNeeded();
+  await guest.screenshot({ path: screenshotPath("docs/stage12/stage1215r-screenshots/lobby-last-game-casual-after-cup-390.png") });
 
   // ---- D2. Back to a casual game night, then a Family Cup again (Stage 12.2, D-S122-01) ----
   await openRoomMenu(host);
