@@ -70,3 +70,12 @@
 ## 4. Estimate
 
 About 3 hours (the sum generator, the kit and the scoreboard exist; the rope is new).
+
+**Actual:** about 25 minutes of building, from the first file (about 3:07 p.m. ET) to the tested commit `945cc01` (3:28 p.m.). The gates then waited in line behind Territory's full gate and ran from 4:19 to 5:07 p.m., so the verdict came about 2 hours after the start.
+
+## 5. Gates (one run on one revision each)
+
+All three on `945cc01`; evidence in `docs/evidence/gate-runs/`:
+- **targeted** (tug-of-war, relay, math, math-timing, math-network and 16 more drivers) `20261114-211911-945cc01a-24896`: PASSED, 23/23, 6 min 49 s;
+- **fast** `20261114-212608-945cc01a-28684`: PASSED, 5/5 (unit tests 1898/1898), 1 min 10 s;
+- **full (checkpoint)** `20261114-212727-945cc01a-32475`: **PASSED** (exit 0, 104/104, 39 min 10 s, no retries).

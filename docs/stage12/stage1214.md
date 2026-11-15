@@ -76,4 +76,12 @@
 ## 4. Estimate and actual
 
 - **Estimate:** none was written down before work began. That was an omission: 12.10–12.13 each had one.
-- **Actual:** started about 3:30 p.m. ET, after 12.13's commit (3:28 p.m. ET). The code was committed about an hour later; the gates came after that.
+- **Actual:** about 25 minutes of building, from about 3:30 p.m. ET (after 12.13's commit at 3:28) to the tested commit `d1c7217` (3:54 p.m.). The gates ran from 6:16 to 7:05 p.m. ET.
+  - **Why the gap:** I queued them behind Tug of War's gates, then stopped that queue before it started, because the chain would have hit the 2-hour limit for a background job. The session's worker then restarted, and I started them by hand at 6:16 p.m.
+
+## 5. Gates (one run on one revision each)
+
+All three on `d1c7217`; evidence in `docs/evidence/gate-runs/`:
+- **targeted** (know-your-rivals, territory, tug-of-war and 17 more drivers) `20261114-231635-d1c72173-363`: PASSED, 22/22, 6 min 43 s;
+- **fast** `20261114-232326-d1c72173-4680`: PASSED, 5/5 (unit tests 1909/1909), 1 min 08 s;
+- **full (checkpoint)** `20261114-232442-d1c72173-8548`: **PASSED** (exit 0, 105/105, 39 min 57 s, no retries).

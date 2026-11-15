@@ -1,0 +1,41 @@
+Mchezo gate full | run 20261114-203324-e92dae9c-31480
+  revision e92dae9cccb7f18fa76caae227446a25d750ce20 (clean tree) | fingerprint 3ee03e3dd3ae (591 files)
+  plan     103 steps: 5 fast/build, 96 browser drivers, 2 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 14.9 GB available)
+  history  187 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.05 for 3 worker(s) (measured, 161 run(s))
+  estimate this run: 27–64m (low-confidence) · the same steps one after another: about 1h 42m · longest step e2e-chromium ~7m 55s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.05 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-territory
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1212full/test-results/20261114-203324-e92dae9c-31480
+        start typecheck-server on w1 (usually 8s)
+        wait  typecheck-web: load 4.5 > 4 CPUs
+[ 1/103] PASS         7.9s  typecheck-server  w1
+        start typecheck-web on w1 (usually 13s)
+        wait  lint: load 4.2 > 4 CPUs
+        start lint on w2 (usually 18s)
+        start unit-tests on w3 (usually 48s)
+[ 2/103] PASS         9.1s  typecheck-web  w1
+        start build-web on w1 (usually 6s)
+[ 3/103] FAIL         6.6s  build-web  w1  exit 1
+      | [31mx[39m Build failed in 6.15s
+      | [31merror during build:
+      | [31mENOSPC: no space left on device, mkdir '/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1212full/test-results/20261114-203324-e92dae9c-31480/web-dist'[31m
+      |     at Object.mkdirSync (node:fs:1370:26)
+      |     at copyDir (file:///home/user/christmas-game-night-pilot/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:17087:15)
+      |     at prepareOutDir (file:///home/user/christmas-game-night-pilot/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:65764:7)
+      |     at build (file:///home/user/christmas-game-night-pilot/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:65711:7)
+      |     at async CAC.<anonymous> (file:///home/user/christmas-game-night-pilot/node_modules/vite/dist/node/cli.js:829:5)[39m
+node:events:497
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: ENOSPC: no space left on device, write
+Emitted 'error' event on WriteStream instance at:
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21) {
+  errno: -28,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+
+Node.js v22.23.4

@@ -106,3 +106,12 @@
 ## 5. Estimate
 
 About 4 hours (Split Clues' kit is reused; the drawing pad already existed).
+
+**Actual:** about 1 h 30 min of wall-clock time, from the start of the pad refactor (about 1:55 p.m. ET) to the full gate's verdict (3:25 p.m. ET). The tested commit `9806d1d` was made at 2:35 p.m.
+
+## 6. Gates (one run on one revision each)
+
+All three on `9806d1d`; evidence in `docs/evidence/gate-runs/`:
+- **targeted** (team-draw, draw-guess, draw-sync and 15 drivers) `20261114-193826-9806d1dd-16124`: PASSED, 20/20, 5 min 29 s;
+- **fast** `20261114-194400-9806d1dd-19710`: PASSED, 5/5 (unit tests 1878/1878), 1 min 16 s;
+- **full (checkpoint)** `20261114-194522-9806d1dd-23467`: **PASSED** (exit 0, 102/102, 39 min 25 s, no retries).

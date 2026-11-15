@@ -16,3 +16,13 @@
 | `check-teams-n1214.log` | same | 24/0 | |
 | `unit-suite-1.log` | same | 1909/1909 | |
 | (no log) both typechecks again | same | **1 error** | In my test: `m.finished(s)` without its context argument (Vitest doesn't typecheck). Fixed; the test file 10/10 again. |
+
+## Gates (after the local runs; one run on one revision each)
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261114-231635-d1c72173-363` | `d1c7217` | targeted (know-your-rivals, territory, tug-of-war, team-draw, split-clues, team-huddle, relay, teams, warm-ivory, briefing, official-practice, library, library-nav, tv-show, results, quick-party, one-path, session-flow, a11y-surfaces, content-variety) | **PASSED** (exit 0) | 22/22 | 6 min 43 s |
+| `20261114-232326-d1c72173-4680` | `d1c7217` | fast | **PASSED** (exit 0) | 5/5 (unit 1909/1909) | 1 min 08 s |
+| `20261114-232442-d1c72173-8548` | `d1c7217` | full (checkpoint) | **PASSED** (exit 0) | 105/105 | 39 min 57 s |
+
+No other gate ran on this stage. A queued chain for these gates was stopped by me before it started (it would have hit the 2-hour limit for a background job); it ran nothing. The full gate ran while I built Stage 12.15 in another worktree (local drivers on their own servers and ports), so its wall time includes that load.

@@ -115,3 +115,12 @@ The five games come as five stages, one stacked draft PR each, so each stays rev
 ## 5. Estimate
 
 About 5 hours.
+
+**Actual:** about 1 h 20 min of wall-clock time, from the owner's message (1:20 p.m. ET) to the full gate's verdict (2:38 p.m. ET). The tested commit `675a41d` was made at 1:52 p.m.; the three gates took the rest. The estimate was far too high because the team model, the briefing and the results card already existed from Stages 12.7–12.9.
+
+## 6. Gates (one run on one revision each)
+
+All three on `675a41d`; evidence in `docs/evidence/gate-runs/`:
+- **targeted** (split-clues and 14 drivers) `20261114-185257-675a41d1-11475`: PASSED, 17/17, 4 min 38 s;
+- **fast** `20261114-185824-675a41d1-14379`: PASSED, 5/5 (unit tests 1863/1863), 1 min 10 s;
+- **full (checkpoint)** `20261114-185939-675a41d1-18106`: **PASSED** (exit 0, 101/101, 38 min 28 s, no retries).
