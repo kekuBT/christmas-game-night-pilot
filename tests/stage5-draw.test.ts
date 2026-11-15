@@ -9,7 +9,10 @@ import { describe, expect, it } from "vitest";
 import {
   DRAW_LIMITS, DRAW_MAX_TURNS, drawModule, drawTurnPoints, guessMatches, letterPattern, normalizeGuess, type DrawState,
 } from "../src/games/modules/draw.js";
-import { DRAW_PROMPTS } from "../src/games/modules/packs/draw-prompts.js";
+// Stage 12.17: the prompts live in the content library; this is the shared pool the games deal from (pack order).
+import { drawPromptPool } from "../src/content/materialize.js";
+import { loadContent } from "../src/content/registry.js";
+const DRAW_PROMPTS = drawPromptPool(loadContent());
 import { RoomEngine } from "../src/server/room.js";
 
 type Json = Record<string, unknown>;
@@ -44,16 +47,16 @@ describe("Draw & Guess: guessing", () => {
 
 describe("Draw & Guess module", () => {
   it("rotation: min(players, 6) turns, everyone draws once in a room of 6 or fewer; same seed, same game", () => {
-    const s = drawModule.init({ players: P, seed: 4 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 4 });
     expect(s.turns).toHaveLength(4);
     expect(new Set(s.turns.map((t) => t.drawer))).toEqual(new Set(P));
-    expect(drawModule.init({ players: P, seed: 4 })).toEqual(s);
+    expect(drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 4 })).toEqual(s);
     const ten = Array.from({ length: 10 }, (_, i) => `p${i}`);
-    expect(drawModule.init({ players: ten, seed: 1 }).turns).toHaveLength(DRAW_MAX_TURNS);
+    expect(drawModule.init({ drawPool: DRAW_PROMPTS, players: ten, seed: 1 }).turns).toHaveLength(DRAW_MAX_TURNS);
   });
 
   it("privacy: the word only in the drawer's own view while drawing; everyone else gets the drawing and the letter pattern", () => {
-    const s = drawModule.init({ players: P, seed: 2 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 2 });
     const drawer = s.turns[0]!.drawer;
     const guesser = P.find((p) => p !== drawer)!;
     const w = word(s);
@@ -69,7 +72,7 @@ describe("Draw & Guess module", () => {
   });
 
   it("a wrong guess is counted, never stored; right guesses score 100/80/60 in order and the drawer 50 each", () => {
-    const s = drawModule.init({ players: P, seed: 3 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 3 });
     const t = s.turns[0]!;
     const [g1, g2, g3] = P.filter((p) => p !== t.drawer);
     expect(drawModule.intent(s, t.drawer, "draw-guess", { text: word(s) }, ctx())).toEqual({ ok: false, reason: "DRAWER_CANNOT_GUESS" });
@@ -88,7 +91,7 @@ describe("Draw & Guess module", () => {
   });
 
   it("limits: bad pieces, too much in one message, too many messages, too long a guess, too many guesses", () => {
-    const s = drawModule.init({ players: P, seed: 5 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 5 });
     const t = s.turns[0]!;
     const g = P.find((p) => p !== t.drawer)!;
     const bad = [{ s: 1, c: 9, w: 0, p: [0, 0] }, { s: 1, c: 0, w: 0, p: [0, 1001] }, { s: 1, c: 0, w: 0, p: [1, 2, 3] }, { s: -1, c: 0, w: 0, p: [0, 0] }];
@@ -96,7 +99,7 @@ describe("Draw & Guess module", () => {
     expect(drawModule.intent(s, t.drawer, "draw-strokes", { pieces: [piece(1, DRAW_LIMITS.pointsPerMessage + 1)] }, ctx(10_000))).toEqual({ ok: false, reason: "PAYLOAD_TOO_LARGE" });
     expect(drawModule.intent(s, g, "draw-strokes", { pieces: [piece()] }, ctx())).toEqual({ ok: false, reason: "NOT_YOUR_TURN" });
     // The rate window: 16 messages in 2 s, then refused until the window moves on.
-    const r = drawModule.init({ players: P, seed: 5 });
+    const r = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 5 });
     const d = r.turns[0]!.drawer;
     for (let i = 0; i < DRAW_LIMITS.messagesPer2s; i++) expect(drawModule.intent(r, d, "draw-strokes", { pieces: [piece(i)] }, ctx(i * 10)).ok).toBe(true);
     expect(drawModule.intent(r, d, "draw-strokes", { pieces: [piece(99)] }, ctx(500))).toEqual({ ok: false, reason: "RATE_LIMITED" });
@@ -107,7 +110,7 @@ describe("Draw & Guess module", () => {
   });
 
   it("the drawing has a per-turn ceiling", () => {
-    const s = drawModule.init({ players: P, seed: 6 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 6 });
     const d = s.turns[0]!.drawer;
     let n = 0, t = 0;
     while (n + 400 <= DRAW_LIMITS.pointsPerTurn) { expect(drawModule.intent(s, d, "draw-strokes", { pieces: [piece(n, 400)] }, ctx(t)).ok).toBe(true); n += 400; t += 1000; }
@@ -115,7 +118,7 @@ describe("Draw & Guess module", () => {
   });
 
   it("undo removes the whole latest stroke (all its pieces); clear empties; a swap only before drawing", () => {
-    const s = drawModule.init({ players: P, seed: 7 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 7 });
     const t = s.turns[0]!;
     const first = word(s);
     expect(drawModule.intent(s, t.drawer, "draw-swap", {}, ctx())).toEqual({ ok: true });
@@ -131,7 +134,7 @@ describe("Draw & Guess module", () => {
   });
 
   it("phases: draw → reveal → next drawer; time running out closes a turn with what was guessed; the last reveal finishes", () => {
-    const s = drawModule.init({ players: P, seed: 8 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 8 });
     for (let i = 0; i < s.turns.length; i++) {
       expect(drawModule.phase(s)).toEqual({ key: `${i}:draw`, kind: "draw" });
       drawModule.expirePhase(s, ctx());
@@ -143,7 +146,7 @@ describe("Draw & Guess module", () => {
   });
 
   it("skipping a turn and the drawer giving up both end the turn; right guesses before a give-up still score", () => {
-    const s = drawModule.init({ players: P, seed: 9 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 9 });
     const t = s.turns[0]!;
     const [g1, g2, g3] = P.filter((p) => p !== t.drawer);
     drawModule.intent(s, g1!, "draw-guess", { text: word(s) }, ctx());
@@ -158,21 +161,21 @@ describe("Draw & Guess module", () => {
 
 describe("Draw & Guess: review fixes", () => {
   it("no swap once anything was drawn (even if cleared) or anyone guessed", () => {
-    const s = drawModule.init({ players: P, seed: 11 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 11 });
     const t = s.turns[0]!;
     const g = P.find((p) => p !== t.drawer)!;
     drawModule.intent(s, t.drawer, "draw-strokes", { pieces: [piece()] }, ctx(0));
     drawModule.intent(s, t.drawer, "draw-clear", {}, ctx(100));
     expect(drawModule.intent(s, t.drawer, "draw-swap", {}, ctx(200))).toEqual({ ok: false, reason: "SWAP_NOT_AVAILABLE" });
     expect(drawModule.playerView(s, t.drawer, { now: 0, scale: 1 })["canSwap"]).toBe(false);
-    const s2 = drawModule.init({ players: P, seed: 11 });
+    const s2 = drawModule.init({ drawPool: DRAW_PROMPTS, players: P, seed: 11 });
     const t2 = s2.turns[0]!;
     drawModule.intent(s2, g, "draw-guess", { text: "something else" }, ctx(0));
     expect(drawModule.intent(s2, t2.drawer, "draw-swap", {}, ctx(10))).toEqual({ ok: false, reason: "SWAP_NOT_AVAILABLE" });
   });
 
   it("who sat out stays private: no skip count, no 'passed' in any public view", () => {
-    const s = drawModule.init({ players: ["a", "b", "c"], seed: 12 });
+    const s = drawModule.init({ drawPool: DRAW_PROMPTS, players: ["a", "b", "c"], seed: 12 });
     const t = s.turns[0]!;
     const [g1] = ["a", "b", "c"].filter((p) => p !== t.drawer);
     drawModule.abstain(s, g1!, ctx(0, ["a", "b", "c"]));

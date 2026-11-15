@@ -24,9 +24,12 @@
  * it; the drawer 50 for each player who got it. A turn nobody guessed
  * scores nothing for anyone.
  */
-import { DRAW_PROMPTS, type DrawPrompt } from "./packs/draw-prompts.js";
 import { seasonAllows, type SessionSeason } from "../../shared/season.js";
-import { dealAvoiding, moduleRng, seededShuffle, type GameModule, type ModuleContext } from "./types.js";
+import { dealAvoiding, moduleRng, seededShuffle, type DrawPrompt, type GameModule, type ModuleContext } from "./types.js";
+
+// Stage 12.17 (D-S1217-01): the prompts live in the content library (content/packs/draw-prompts.json); the room hands
+// them to init. The type stays importable from here.
+export type { DrawPrompt } from "./types.js";
 
 export const DRAW_MAX_TURNS = 6;
 export const DRAW_GUESS_POINTS = [100, 80, 60] as const;
@@ -148,14 +151,29 @@ function closedTurns(s: DrawState): number[] {
  *
  * Stage 12.11 (D-S1211-01): `avoid` (the words this room's Draw & Guess and Team Draw games already dealt, oldest
  * first) puts unplayed words first in each part; with nothing to avoid the deal is exactly as before.
+ *
+ * Stage 12.17 (D-S1217-01): `pool` is the content library's shared prompt pool (every non-rejected prompt, in the
+ * pack's order, which is the TypeScript list's order), so a seed deals exactly what it dealt before.
  */
-export function drawPromptsFor(season: SessionSeason | undefined, rng: () => number, avoid: readonly string[] = []): DrawPrompt[] {
+export function drawPromptsFor(pool: readonly DrawPrompt[], season: SessionSeason | undefined, rng: () => number, avoid: readonly string[] = []): DrawPrompt[] {
   const deal = (xs: readonly DrawPrompt[]) => (avoid.length ? dealAvoiding(xs, rng, avoid) : seededShuffle(xs, rng));
-  if (season === undefined) return deal(DRAW_PROMPTS);
-  const allowed = DRAW_PROMPTS.filter((p) => seasonAllows(season, p.season));
+  if (season === undefined) return deal(pool);
+  const allowed = pool.filter((p) => seasonAllows(season, p.season));
   if (season === "everyday") return deal(allowed);
   return [...deal(allowed.filter((p) => p.season !== undefined)), ...deal(allowed.filter((p) => p.season === undefined))];
 }
+
+/**
+ * Stage 12.17-R (review 6898755998, D-S1217R-01): how many prompts a game in this content mode may deal from `pool`
+ * (the library's non-rejected prompts): the year-round ones in Everyday; all of them at Christmas and in a Cup game (no
+ * season). A drawing game needs one per turn or round; swaps only ever use what is left over.
+ */
+export function drawPromptSupply(pool: readonly DrawPrompt[], season: SessionSeason | undefined): number {
+  return season === undefined ? pool.length : pool.filter((p) => seasonAllows(season, p.season)).length;
+}
+
+/** Draw & Guess's turns for this many players (one each, at most six). */
+export const drawTurnCount = (players: number): number => Math.min(players, DRAW_MAX_TURNS);
 
 export const drawModule: GameModule<DrawState> & { contentIds(s: DrawState): string[] } = {
   id: "draw-guess",
@@ -164,11 +182,16 @@ export const drawModule: GameModule<DrawState> & { contentIds(s: DrawState): str
   contentPool: "draw-prompts",
   /** The words dealt: every turn's, and any swapped in (a drawer saw the one swapped out too). */
   contentIds: (s) => s.prompts.slice(0, Math.min(s.reserve, s.prompts.length)).map((p) => p.id),
-  init({ players, seed, season, avoid }) {
+  init({ players, seed, season, avoid, drawPool }) {
+    if (!drawPool || drawPool.length === 0) throw new Error("Draw & Guess needs its prompts from the content library.");
     const rng = moduleRng(seed);
     const order = seededShuffle(players, rng);
-    const turnCount = Math.min(order.length, DRAW_MAX_TURNS);
-    const prompts = drawPromptsFor(season, rng, avoid).slice(0, turnCount * (1 + DRAW_LIMITS.swapsPerTurn));
+    const turnCount = drawTurnCount(order.length);
+    const dealable = drawPromptsFor(drawPool, season, rng, avoid);
+    // Stage 12.17-R (D-S1217R-01): one prompt per turn, counted after the content mode's filter. The room refuses such a
+    // start first, with a reason; this is the backstop, so no path can start a turn without its word.
+    if (dealable.length < turnCount) throw new Error(`Draw & Guess needs ${turnCount} prompts for ${turnCount} turns; only ${dealable.length} can be dealt.`);
+    const prompts = dealable.slice(0, turnCount * (1 + DRAW_LIMITS.swapsPerTurn)).map((p) => ({ ...p, ...(p.alts ? { alts: [...p.alts] } : {}) }));
     const turns: DrawTurn[] = Array.from({ length: turnCount }, (_, i) => ({
       drawer: order[i]!, promptIdx: i, swaps: 0, pieces: [], points: 0, correct: [], guessCounts: {}, skipped: [], recent: [],
     }));

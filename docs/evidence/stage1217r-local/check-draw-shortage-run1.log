@@ -1,0 +1,17 @@
+PASS the server runs the test-only library without the content test mode
+PASS the host's Up next is Draw & Guess with Everyday content
+PASS Start is refused, and the host sees why: 3 words needed, only 1 Everyday, with the way out
+PASS nothing started: the server holds no game
+PASS the host is still in the lobby (no briefing)
+PASS guest 1 is still in the lobby
+PASS guest 2 is still in the lobby
+PASS the refusal fits at 390 px
+PASS at 320 px the refusal shows and the page fits
+PASS still no game after the second refusal
+PASS the content is now Christmas
+PASS the retry starts: the briefing opens for the host
+PASS the briefing opens for guest 1
+PASS the briefing opens for guest 2
+PASS the server holds exactly one game, Draw & Guess, with Christmas content
+cleanup: server stopped; 2 temporary dir(s) removed
+DRAW SHORTAGE CHECKS PASSED

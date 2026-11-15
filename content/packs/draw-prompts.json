@@ -1,0 +1,1114 @@
+{
+  "schemaVersion": 1,
+  "packId": "draw-prompts",
+  "gameId": "draw-prompts",
+  "version": "1.0.0",
+  "title": "Drawing prompts (Team Draw and Draw & Guess)",
+  "language": "en",
+  "items": [
+    {
+      "id": "dg-001",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "snowman",
+      "alts": [
+        "snow man"
+      ]
+    },
+    {
+      "id": "dg-002",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "word": "reindeer"
+    },
+    {
+      "id": "dg-003",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "word": "candy cane"
+    },
+    {
+      "id": "dg-004",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "season": "christmas",
+      "word": "gingerbread house"
+    },
+    {
+      "id": "dg-005",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "mitten",
+      "alts": [
+        "glove"
+      ]
+    },
+    {
+      "id": "dg-006",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "scarf"
+    },
+    {
+      "id": "dg-007",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "sled",
+      "alts": [
+        "sledge",
+        "toboggan"
+      ]
+    },
+    {
+      "id": "dg-008",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "fireplace"
+    },
+    {
+      "id": "dg-009",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "present",
+      "alts": [
+        "gift",
+        "parcel"
+      ]
+    },
+    {
+      "id": "dg-010",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "bell"
+    },
+    {
+      "id": "dg-011",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "candle"
+    },
+    {
+      "id": "dg-012",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "cookie",
+      "alts": [
+        "biscuit"
+      ]
+    },
+    {
+      "id": "dg-013",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "teapot"
+    },
+    {
+      "id": "dg-014",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "umbrella"
+    },
+    {
+      "id": "dg-015",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "bicycle",
+      "alts": [
+        "bike"
+      ]
+    },
+    {
+      "id": "dg-016",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "rocket"
+    },
+    {
+      "id": "dg-017",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "lighthouse"
+    },
+    {
+      "id": "dg-018",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "octopus"
+    },
+    {
+      "id": "dg-019",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "giraffe"
+    },
+    {
+      "id": "dg-020",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "cactus"
+    },
+    {
+      "id": "dg-021",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "sandcastle",
+      "alts": [
+        "sand castle"
+      ]
+    },
+    {
+      "id": "dg-022",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "volcano"
+    },
+    {
+      "id": "dg-023",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "rainbow"
+    },
+    {
+      "id": "dg-024",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "kite"
+    },
+    {
+      "id": "dg-025",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "robot"
+    },
+    {
+      "id": "dg-026",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "castle"
+    },
+    {
+      "id": "dg-027",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "pizza"
+    },
+    {
+      "id": "dg-028",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "banana"
+    },
+    {
+      "id": "dg-029",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "guitar"
+    },
+    {
+      "id": "dg-030",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "drum"
+    },
+    {
+      "id": "dg-031",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "crown"
+    },
+    {
+      "id": "dg-032",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "anchor"
+    },
+    {
+      "id": "dg-033",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "penguin"
+    },
+    {
+      "id": "dg-034",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "owl"
+    },
+    {
+      "id": "dg-035",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "snail"
+    },
+    {
+      "id": "dg-036",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "butterfly"
+    },
+    {
+      "id": "dg-037",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "spider web",
+      "alts": [
+        "cobweb",
+        "web"
+      ]
+    },
+    {
+      "id": "dg-038",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "hot air balloon",
+      "alts": [
+        "balloon"
+      ]
+    },
+    {
+      "id": "dg-039",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "tent"
+    },
+    {
+      "id": "dg-040",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "campfire",
+      "alts": [
+        "fire",
+        "bonfire"
+      ]
+    },
+    {
+      "id": "dg-041",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "igloo"
+    },
+    {
+      "id": "dg-042",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "ice cream",
+      "alts": [
+        "ice cream cone"
+      ]
+    },
+    {
+      "id": "dg-043",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "cupcake"
+    },
+    {
+      "id": "dg-044",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "toothbrush"
+    },
+    {
+      "id": "dg-045",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "glasses",
+      "alts": [
+        "spectacles"
+      ]
+    },
+    {
+      "id": "dg-046",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "ladder"
+    },
+    {
+      "id": "dg-047",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "key"
+    },
+    {
+      "id": "dg-048",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "clock"
+    },
+    {
+      "id": "dg-049",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "moon"
+    },
+    {
+      "id": "dg-050",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "sun"
+    },
+    {
+      "id": "dg-051",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "tree"
+    },
+    {
+      "id": "dg-052",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "house"
+    },
+    {
+      "id": "dg-053",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "fish"
+    },
+    {
+      "id": "dg-054",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "cat"
+    },
+    {
+      "id": "dg-055",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "dog"
+    },
+    {
+      "id": "dg-056",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "boat",
+      "alts": [
+        "ship"
+      ]
+    },
+    {
+      "id": "dg-057",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "train"
+    },
+    {
+      "id": "dg-058",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "airplane",
+      "alts": [
+        "aeroplane",
+        "plane"
+      ]
+    },
+    {
+      "id": "dg-059",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "car"
+    },
+    {
+      "id": "dg-060",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "flower"
+    },
+    {
+      "id": "dg-061",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "apple"
+    },
+    {
+      "id": "dg-062",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "football",
+      "alts": [
+        "soccer ball",
+        "ball"
+      ]
+    },
+    {
+      "id": "dg-063",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "hat"
+    },
+    {
+      "id": "dg-064",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "shoe"
+    },
+    {
+      "id": "dg-065",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "elephant"
+    },
+    {
+      "id": "dg-066",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "lion"
+    },
+    {
+      "id": "dg-067",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "mountain"
+    },
+    {
+      "id": "dg-068",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "bridge"
+    },
+    {
+      "id": "dg-069",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "windmill"
+    },
+    {
+      "id": "dg-070",
+      "difficulty": 2,
+      "category": "drawing",
+      "language": "en",
+      "eligibility": "official",
+      "review": {
+        "status": "provisional",
+        "notes": "Stage 5 original, not human-reviewed. Counts in an Official Team Draw game only after a human approves this exact prompt (content/approvals.json). Difficulty 2 is a placeholder (Stage 12.17): an editor sets it."
+      },
+      "source": {
+        "kind": "original-creative"
+      },
+      "word": "telescope"
+    }
+  ]
+}

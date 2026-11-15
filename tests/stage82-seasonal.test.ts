@@ -13,7 +13,9 @@ import { recordUsage, selectContent, type UsageHistory } from "../src/content/se
 import { REVIEWED_YEAR_ROUND, seasonAuditFindings } from "../src/content/seasonAudit.js";
 import { ITEMS_PER_GAME } from "../src/content/materialize.js";
 import { drawPromptsFor } from "../src/games/modules/draw.js";
-import { DRAW_PROMPTS } from "../src/games/modules/packs/draw-prompts.js";
+// Stage 12.17: the prompts live in the content library; this is the shared pool the games deal from (pack order).
+import { drawPromptPool } from "../src/content/materialize.js";
+const DRAW_PROMPTS = drawPromptPool(loadContent());
 import { moduleRng, seededShuffle } from "../src/games/modules/types.js";
 import { LocalServer } from "../src/server/http.js";
 import { RoomEngine, type SessionAttempt } from "../src/server/room.js";
@@ -34,6 +36,8 @@ const CHRISTMAS_ITEMS = [
   "year-s4-043", "year-s4-044", "year-s4-045",
   // Stage 12.16: Split Clues' 13 Christmas puzzles, moved unchanged from the module's bank into the library.
   "sc-101", "sc-102", "sc-103", "sc-104", "sc-105", "sc-106", "sc-107", "sc-108", "sc-109", "sc-110", "sc-111", "sc-112", "sc-113",
+  // Stage 12.17: the drawing prompts' three Christmas words, moved unchanged from the module's list into the library.
+  "dg-002", "dg-003", "dg-004",
 ].sort();
 const CHRISTMAS_PROMPTS = ["dg-002", "dg-003", "dg-004"];
 
@@ -80,7 +84,7 @@ describe("the season tag (§3.2)", () => {
       if (season) tagged += 1;
       expect(li.hash).toBe(before(li.gameId, untagged));
     }
-    expect(tagged).toBe(42 + 13); // Stage 12.16: + Split Clues' 13 Christmas puzzles
+    expect(tagged).toBe(42 + 13 + 3); // Stage 12.16: + Split Clues' 13 Christmas puzzles; Stage 12.17: + 3 Christmas drawing prompts
     // Everything players see is still in the hash.
     const one = shipped.items.get("con-s4-03")!;
     expect(itemHash(one.gameId, { ...(one.item as object), category: "Changed" })).not.toBe(one.hash);
@@ -171,13 +175,13 @@ describe("selection (§3.3)", () => {
 
 describe("Draw & Guess prompts (§3.3)", () => {
   it("a Cup game (no season) deals exactly as before Stage 8.2", () => {
-    for (const seed of [1, 7, 42, 99]) expect(drawPromptsFor(undefined, moduleRng(seed))).toEqual(seededShuffle(DRAW_PROMPTS, moduleRng(seed)));
+    for (const seed of [1, 7, 42, 99]) expect(drawPromptsFor(DRAW_PROMPTS, undefined, moduleRng(seed))).toEqual(seededShuffle(DRAW_PROMPTS, moduleRng(seed)));
   });
   it("Everyday: the 67 year-round prompts only; Christmas: its three Christmas prompts first", () => {
     for (const seed of [1, 7, 42]) {
-      const every = drawPromptsFor("everyday", moduleRng(seed));
+      const every = drawPromptsFor(DRAW_PROMPTS, "everyday", moduleRng(seed));
       expect([every.length, every.some((p) => p.season)]).toEqual([67, false]);
-      const xmas = drawPromptsFor("christmas", moduleRng(seed));
+      const xmas = drawPromptsFor(DRAW_PROMPTS, "christmas", moduleRng(seed));
       expect([xmas.length, new Set(xmas.slice(0, 3).map((p) => p.id))]).toEqual([70, new Set(CHRISTMAS_PROMPTS)]);
     }
   });

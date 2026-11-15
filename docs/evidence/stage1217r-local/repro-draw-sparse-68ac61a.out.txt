@@ -1,0 +1,3 @@
+init: 3 turns, 1 prompt(s)
+turn 2, phase draw
+publicView THREW: TypeError: Cannot read properties of undefined (reading 'word')

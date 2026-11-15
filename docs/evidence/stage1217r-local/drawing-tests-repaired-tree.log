@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt1217
+
+stdout | tests/stage82-seasonal.test.ts > over HTTP (§3.4) > a host sets a casual room's content; a guest is refused; a bad value or a Cup is refused; the projection and a restart keep it
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-s82-http-K2fqQF)
+
+ ✓ tests/stage82-seasonal.test.ts (40 tests) 802ms
+ ✓ tests/stage1211-team-draw.test.ts (14 tests) 96ms
+ ✓ tests/stage5-draw.test.ts (17 tests) 288ms
+ ✓ tests/stage1215-cup-team-games.test.ts (13 tests) 129ms
+ ✓ tests/stage1217-team-draw-content.test.ts (35 tests) 2950ms
+   ✓ seasons (D-S1217-03, provisional) > casual rooms keep the session's rules: Everyday never deals Christmas; Christmas deals its three first 350ms
+ ✓ tests/manifest.test.ts (23 tests) 21ms
+ ✓ tests/content.test.ts (14 tests) 48ms
+ ✓ tests/stage1217r-drawing-supply.test.ts (11 tests) 813ms
+   ✓ over HTTP: the lobby gets a plain refusal and can try again > 409 CONTENT_EXHAUSTED with the reason; then, with enough words, the same start succeeds 366ms
+ ✓ tests/m3.test.ts (7 tests) 179ms
+ ✓ tests/stage51-copy.test.ts (6 tests) 6ms
+ ✓ tests/stage51-persistence.test.ts (2 tests) 140ms
+ ✓ tests/stage62-solo-shelf.test.ts (26 tests) 16020ms
+   ✓ the solo session across games, and a join whose reply was lost > a join the server accepted but whose reply was lost: Try again gives that room up and makes exactly one new one 2033ms
+   ✓ the solo session across games, and a join whose reply was lost > only a definite answer gives the room up: a timeout or 5xx on the retried join keeps it, with no new room 4030ms
+   ✓ the solo session across games, and a join whose reply was lost > the fallback itself failing: at most one new room per Start, whatever goes wrong 8073ms
+   ✓ the solo session across games, and a join whose reply was lost > the whole Start, fallback included, ends within its time budget 1403ms
+
+ Test Files  12 passed (12)
+      Tests  208 passed (208)
+   Start at  18:35:26
+   Duration  17.50s (transform 1.52s, setup 0ms, collect 5.03s, tests 21.49s, environment 4ms, prepare 862ms)
+

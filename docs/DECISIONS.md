@@ -2051,3 +2051,44 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - **Dropping legacy and computed statuses everywhere:** it changes other games' established policy, which this repair isn't for.
     - **Refusing to load a Split Clues item with an official-capable label:** it would silently shrink the Practice pool. Reporting the label and demoting the item keeps Practice and fails the content check.
+
+## Stage 12.17: Team Draw content readiness
+**Authorization:** the owner's review and handoff on #41, comment 6896200767 (2026-11-15, 9:36 a.m. ET; D-WF-01). Spec: `docs/stage12/stage1217.md`. Inventory: `docs/stage12/stage1217-draw-prompts-inventory.md`. Branch `claude/stage12-17-team-draw-content`, PR #42, stacked on #41. Nothing is merged or deployed, and no prompt is approved.
+
+- **D-S1217-01 The drawing prompts are one library pool, shared by both drawing games.**
+  - **The move:** the 70 prompts left `src/games/modules/packs/draw-prompts.ts` (deleted) for one pack, `content/packs/draw-prompts.json`, generated from the list in its own order. A test pins every id, word, alternative and season to the list's fingerprint.
+  - **One pack, not two:** every game deals by shuffling the list's order with its seed, and the three Christmas prompts sit among the year-round ones (`dg-002`…`dg-004`). One pack in that order keeps every seed dealing exactly what it dealt before; an Everyday pack and a Christmas pack would have reordered it. The spec planned two; it records the change.
+  - **The schema:** the shared item fields plus `word` and `alts` (1–8). Lint refuses duplicated alternatives and warns on an alternative that repeats the word.
+  - **Review status:** every prompt ships `provisional`, `eligibility: "official"`, `source: original-creative`, `difficulty` 2 (a placeholder: the list had none).
+  - **The identity:** content id `draw-prompts` is a pool, not a game (as `trivia` is for Team Huddle). `drawPromptPool` gives both modules the same prompt objects from the loaded library (rejected prompts left out), through `init`; neither module has a bank of its own. `DrawPrompt` is declared in `src/games/modules/types.ts`, so the web app's imports never reach content.
+  - **Alternative rejected:** a separate pack per game, which would split the shared history and need two approvals for one word.
+- **D-S1217-02 An Official Team Draw game deals only approved, unused prompts: one per round.**
+  - **Approval:** `draw-prompts` joins `RECORD_ONLY_APPROVAL` (D-S1216R-01). Only a record at the prompt's exact hash approves it; raw labels, missing, revoked and stale records approve nothing, and `rejected` stays rejected.
+  - **The count:** the game has 3 to 5 rounds, the biggest team's size in the final roster (`teamDrawRoundCount`, unchanged). An Official start needs that many approved prompts this Cup hasn't dealt; the teams are the ones the start would use (the night's teams, or two dealt ones whose sizes don't depend on the seed).
+  - **Where it is enforced:** the Cup projection (`officialContent["team-draw"]`, for the lobby and the shared plan), the server's start (HTTP 409 `CONTENT_EXHAUSTED`, nothing created) and the briefing-to-play re-check. The chosen ids, pack version and hashes are frozen at the briefing; usage is recorded when play begins; a running game keeps its own copy.
+  - **A shortage:** the reason names the count and the rounds, and offers Practice. The game is never shortened, switched to Practice by itself, or filled with unapproved prompts.
+  - **Not touched:** Practice and casual Team Draw, and Draw & Guess (Practice-only), deal every non-rejected prompt by their existing rules. The UI, scoring, timing, pen handoff and takeover are unchanged; the lobby already showed any game's `officialContent` entry.
+- **D-S1217-03 (provisional, for the owner) A Cup's Team Draw keeps dealing every prompt, Christmas included.**
+  - **Why:** Team Draw in a Cup has always dealt the whole list; Split Clues kept its Cup to year-round puzzles (D-S1216-02) because that was its own existing rule. Each keeps what it did.
+  - **What follows:** approved Christmas prompts count toward an Official Team Draw game. Casual rooms keep their session's season rules (Everyday never deals Christmas; Christmas deals its prompts first).
+  - **Open:** whether a Cup outside December should deal Christmas prompts is the owner's call. Changing it means both the Official selection (`yearRoundOnly`, as Split Clues) and the Cup's Practice dealing (`drawPromptsFor` with no season deals the whole list).
+- **D-S1217-04 One history for both drawing games, swaps included.**
+  - **The rule:** Practice, casual and Draw & Guess games deal outside the content selection, so they leave no usage records. Every earlier drawing game's dealt ids (the modules' `contentIds`, which include a Draw & Guess swap's word in and word out) are merged into the usage an Official selection reads, as practice uses at sequence 0, as D-S1216-03 does for Split Clues. Official games are recorded when play begins.
+  - **What it protects:** a Cup never deals as Official a word it already showed, in either game.
+  - **Alternative rejected:** recording usage for Practice drawing games too: it would change the existing practice dealing for no gain in the Official check.
+
+## Stage 12.17-R: repair from review 6898755998
+**Authorization:** the owner's review on #42, comment 6898755998 (2026-11-15; D-WF-01), finding R1. Spec: `docs/stage12/stage1217r.md`. Same branch and PR (#42), stacked on `1955c28`. Queued behind Beta R1 (#43), as the review asked. Nothing is merged or deployed, and no prompt is approved.
+
+- **D-S1217R-01 A drawing game starts only with a dealable prompt for every turn or round.**
+  - **The supply:** what a start may deal is the library's non-rejected prompts this content mode allows (`drawPromptSupply`). That is year-round only in Everyday; all of them at Christmas and in a Cup game (no season).
+  - **What's needed:** one per turn or round. Draw & Guess needs `min(players, 6)`, and Practice or casual Team Draw needs its round count. Before anything is created, the room refuses a smaller supply with the existing content-shortage result (409 `CONTENT_EXHAUSTED`), with available, needed and a plain reason.
+  - **The reason's suggestion:** it suggests Christmas content only when Christmas would have enough.
+  - **What a refusal leaves:** no game, no usage history, no score, no session change and no spent game number. The lobby is unchanged, so the host can pick another game or switch content and start again.
+  - **Backstop:** both modules' `init` refuse too few dealt prompts, so no path can start a turn without its word.
+  - **Swaps:** they stay bounded by what is left over. With exactly enough prompts there is no swap, and the game still ends normally.
+  - **Unchanged:** an Official Team Draw keeps its exact-record selection, freeze and shared history.
+  - **Alternatives rejected:**
+    - **Shortening the game to the words available:** fewer turns than players changes who draws, a game rule, without the host asking.
+    - **Dealing a word twice:** a repeated word in one game is a giveaway.
+    - **Hiding the game in the lobby:** the review asked for a visible refusal and a recoverable lobby. A pre-emptive lobby notice can follow if the owner wants one.

@@ -1,0 +1,40 @@
+Mchezo gate targeted | run 20261115-160310-0ccf93c5-14288
+  revision 0ccf93c509004b862bd70f889b6c79651b520145 (clean tree) | fingerprint 3958ed6d706e (616 files)
+  plan     6 steps: 1 fast/build, 4 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  229 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 201 run(s))
+  estimate this run: 1–4m (low-confidence) · the same steps one after another: about 4m 23s · longest step check-team-draw-content ~1m 23s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: build-web, check-team-draw-content
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217t2/test-results/20261115-160310-0ccf93c5-14288
+        start build-web on w1 (usually 8s)
+[ 1/6] PASS         5.4s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/6] PASS         0.8s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:38213 (pid 14407, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217t2/test-results/20261115-160310-0ccf93c5-14288/server-data/w1)
+  server   w2 http://localhost:39875 (pid 14408, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217t2/test-results/20261115-160310-0ccf93c5-14288/server-data/w2)
+  server   w3 http://localhost:35707 (pid 14409, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217t2/test-results/20261115-160310-0ccf93c5-14288/server-data/w3)
+        start check-team-draw-content on w1 (usually 1m 23s)
+        start check-draw-guess on w2 (usually 1m 05s)
+        start check-team-draw on w3 (usually 55s)
+── progress  2/6 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-team-draw-content 52s (w1), check-draw-guess 52s (w2), check-team-draw 52s (w3)
+   remaining 0–3m · total 1–4m · done around 16:04–16:06 UTC (low-confidence)
+[ 3/6] PASS        61.3s  check-team-draw  w3
+        start check-draw-sync on w3 (usually 51s)
+[ 4/6] PASS        71.3s  check-draw-guess  w2
+[ 5/6] PASS        94.8s  check-team-draw-content  w1
+── progress  5/6 done · 5 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-draw-sync 51s (w3)
+   remaining 15–44s · total 2–3m · done around 16:05–16:05 UTC (low-confidence)
+[ 6/6] PASS          55s  check-draw-sync  w3
+
+PASSED (exit 0) | targeted | run 20261115-160310-0ccf93c5-14288
+  6 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 2m 05s · step time 4m 49s (sum) · 3 workers, 77% busy · 2.31× the same steps run one after another
+           predicted 1–4m (about 1m 53s, low-confidence) → actual 2m 05s (+11%)
+           longest  check-team-draw-content 1m 35s, check-draw-guess 1m 11s, check-team-draw 1m 01s · the longest step is 76% of the wall time
+           machine  CPU mean 27%, peak 94% · memory available ≥ 13224 MB · load peak 2.57
+           contention ×1.101 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217t2/test-results/20261115-160310-0ccf93c5-14288/report.json

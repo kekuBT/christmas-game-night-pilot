@@ -1,0 +1,12 @@
+// Review 6898755998 R1, as the reviewer reproduced it: Draw & Guess with three players and one usable Everyday prompt.
+// Usage (from a checkout): npx tsx <this> <tree>
+import { join } from "node:path";
+const tree = process.argv[2]!;
+const { drawModule } = await import(join(tree, "src/games/modules/draw.ts"));
+try {
+  const s = drawModule.init({ players: ["a", "b", "c"], seed: 42, season: "everyday", drawPool: [{ id: "draw-one", word: "kite" }] });
+  console.log(`init: ${s.turns.length} turns, ${s.prompts.length} prompt(s)`);
+  s.phase = "reveal"; drawModule.expirePhase(s); // to turn 2
+  console.log(`turn ${s.turn + 1}, phase ${s.phase}`);
+  try { drawModule.publicView(s); console.log("publicView: ok"); } catch (e) { console.log(`publicView THREW: ${(e as Error).constructor.name}: ${(e as Error).message}`); }
+} catch (e) { console.log(`init refused: ${(e as Error).message}`); }

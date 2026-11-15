@@ -145,6 +145,12 @@ export function lintLibrary(lib: ContentLibrary, today: string): LintIssue[] {
         if (new Set(sc.clues.map(norm)).size !== sc.clues.length) add(li, "error", "duplicate-clues", "the six clues must all be different");
         if (sc.alts?.some((a) => norm(a) === norm(sc.answer))) add(li, "warn", "alt-repeats-answer", "an alternative answer is the same as the answer");
       }
+      // Stage 12.17: a drawing prompt's alternatives must differ from its word and from each other.
+      if (gameId === "draw-prompts") {
+        const dp = li.item as ItemOf<"draw-prompts">;
+        if (dp.alts?.some((a) => norm(a) === norm(dp.word))) add(li, "warn", "alt-repeats-answer", "an alternative is the same as the word");
+        if (dp.alts && new Set(dp.alts.map(norm)).size !== dp.alts.length) add(li, "error", "duplicate-alts", "two alternatives are the same");
+      }
       if (gameId === "geography" && it["mode"] === "flag" && !li.item.accessibility) add(li, "warn", "accessibility", "flag questions rely on colour/emoji: describe a text alternative");
     }
     // Near-duplicates within a game.

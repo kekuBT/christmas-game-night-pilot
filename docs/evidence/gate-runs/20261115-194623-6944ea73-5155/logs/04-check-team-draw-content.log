@@ -1,0 +1,67 @@
+$ node scripts/check-team-draw-content.mjs http://localhost:41037
+# timeout 600s | worker w2 | server http://localhost:41037 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1217rt1/test-results/20261115-194623-6944ea73-5155/server-data/w2)
+
+[+1.3s] PASS A: the server runs without the content test mode
+[+5.3s] PASS A the host's lobby says Team Draw is Practice only, and why (no approved words)
+[+5.3s]   (the note: Practice only: Team Draw counts only with drawing words a person has approved, and this Cup has 0 unused approved words (this game has 3 rounds: one word each). Play it as Practice instead: Practice also uses words that are not approved yet.)
+[+5.3s] PASS A Official is disabled; Practice is the start
+[+5.3s] PASS A the server's lobby view: 0 of 3 (four players, two teams of two), with the reason; counts only — {"available":0,"needed":3,"message":"Team Draw counts only with drawing words a person has approved, and this Cup has 0 unused approved words (this game has 3 rounds: one word each). Play it as Practice instead: Practice also uses words that are not approved yet."}
+[+5.3s] PASS A the shared plan is Team Draw · Practice for everyone — {"gameId":"team-draw","official":false}
+[+5.3s] PASS A a guest's lobby (320 px) agrees: Team Draw up next, Practice only · no Cup points, waiting for a Practice start
+[+5.3s] PASS A guests can't choose or start a game
+[+5.4s] PASS A the TV says the same: Up next Team Draw · Practice
+[+5.7s] PASS A 320 px guest lobby: no sideways scroll
+[+5.7s] PASS A a forged Official start by the host is refused (409, the same reason), and nothing starts — {"status":409,"body":{"error":"Team Draw counts only with drawing words a person has approved, and this Cup has 0 unused approved words (this game has 3 rounds: one word each). Play it as Practice instead: Practice also uses words that are not approved yet.","code":"CONTENT_EXHAUSTED","available":0,"needed":3}}
+[+5.7s] PASS A a guest's Official start is refused — 400 {"error":"Only host/cohost can start a game"}
+[+6.5s] PASS A at 320 px the host's lobby says the same, with Official disabled
+[+6.7s] PASS A 320 px: no sideways scroll
+[+7.3s] PASS A at 1440 px the host's lobby says the same, with Official disabled
+[+7.4s] PASS A 1440 px: no sideways scroll
+[+7.5s] PASS A Practice from the lobby starts, as Practice — {"official":false,"status":"briefing"}
+[+7.5s] PASS A round 1: every team's drawer has the same word, from the pack — ["windmill","windmill"]
+[+7.6s] PASS A the drawer's phone shows the word
+[+35.1s] PASS A the practice game played three rounds to the end, three different words — ["windmill","train","football"]
+[+35.1s] PASS A it ended as Practice: nothing counted, the Cup standings are as before
+[+35.1s] PASS A the host's phone shows the practice game's results, as Practice
+[+35.9s] PASS B the fixture is a temporary copy outside the repository, approving exactly the five at their hashes; the shipped content has no drawing-prompt approval — shipped approvals file: none
+[+36.4s] PASS B: the server runs without the content test mode
+[+39.6s] PASS B with five approved words (3 rounds), Official is offered: enabled, no practice-only note
+[+39.6s] PASS B the server's lobby view: enough for 3 rounds (six players, two teams of three) — {"available":3,"needed":3}
+[+39.6s] PASS B the host's start is Official
+[+39.6s] PASS B the TV's Up next says Official
+[+39.7s] PASS B the game started as Official — {"official":true,"status":"briefing"}
+[+40.0s] PASS B the TV's briefing says Official
+[+40.1s] PASS B round 1: both drawers have the same word, one of the approved five — lighthouse
+[+40.2s] PASS B only the drawers' phones show the word
+[+43.1s] PASS B the two-part stroke reached the server in two or more batches, then settled — 3:15
+[+43.1s] PASS B team A's guesser sees exactly the server's drawing of their own team
+[+43.1s] PASS B team B's guesser sees an empty page (their own team's, not team A's)
+[+43.1s] PASS B the TV (screen and data) has neither the word nor any drawing
+[+43.5s] PASS B after a reload, team A's guesser gets their team's drawing back, and still no word
+[+43.9s] PASS B after a reload, team B's drawer still has the pen and the word
+[+43.9s] PASS B team A's guess box is open
+[+44.1s] PASS B team A got it, on the phone
+[+53.3s] PASS B no take-over before 20 s
+[+73.2s] PASS B after 20 s without drawing, a teammate is offered the pen
+[+73.5s] PASS B the taker's phone now draws, with the word
+[+73.5s] PASS B the idle drawer hears it and can't guess
+[+92.0s] PASS B the Official game dealt three different approved words — ["lighthouse","candle","teapot"]
+[+92.0s] PASS B it finished Official, with team results and Cup placements — {"status":"finished","official":true,"teams":[["team-coral",1,300],["team-sun",2,225]]}
+[+92.0s] PASS B every player scored their team's points
+[+92.0s] PASS B the host's phone shows the results, as Official
+[+92.0s] PASS B the TV leads with the team result
+[+92.0s] PASS B afterwards the lobby view: 2 unused approved words for 3 rounds, with the reason — {"available":2,"needed":3,"message":"Team Draw counts only with drawing words a person has approved, and this Cup has 2 unused approved words (this game has 3 rounds: one word each). Play it as Practice instead: Practice also uses words that are not approved yet."}
+[+92.1s] PASS B the shared plan now says Team Draw · Practice (it can no longer be Official here) — {"gameId":"team-draw","official":false}
+[+92.1s] PASS B the TV's Next up line says Practice, not Official
+[+92.9s] PASS B back in the lobby, the host sees Practice only: 2 unused approved words
+[+93.1s] PASS B the next game starts as Practice — {"official":false,"status":"briefing"}
+[+93.1s] PASS B the host can cancel it from the briefing
+[+93.2s] PASS B the cancel says it goes back to the lobby, with nothing scored or used up
+[+93.3s] PASS B cancelled: no game left in its briefing, and the host is back in the lobby
+[+93.4s] PASS B the shipped approvals are unchanged after the fixture run
+[+93.4s] note: practice words windmill, train, football; official words lighthouse, candle, teapot
+[+93.4s] cleanup: 2 server(s) stopped, 3 temporary dir(s) removed; still running: none; left on disk: none
+[+93.4s] TEAM DRAW CONTENT PASSED
+[+93.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":14,"pages":14,"peakOpenPages":7}
+
+# PASS (exit 0) in 93.4s | cpu 10.9s, peak memory 443 MB

@@ -1,0 +1,22 @@
+{
+ "tree": "$SP/wt1217",
+ "drawPromptsInLibrary": 70,
+ "approvedDrawPrompts": 0,
+ "officialContentView": {
+  "split-clues": {
+   "available": 0,
+   "needed": 6,
+   "message": "Split Clues counts only with puzzles a person has approved, and this Cup has 0 unused approved puzzles (an official game needs 6). Play it as Practice instead: Practice also uses puzzles that are not approved yet."
+  },
+  "team-draw": {
+   "available": 0,
+   "needed": 3,
+   "message": "Team Draw counts only with drawing words a person has approved, and this Cup has 0 unused approved words (this game has 3 rounds: one word each). Play it as Practice instead: Practice also uses words that are not approved yet."
+  }
+ },
+ "result": {
+  "refused": "ContentShortage",
+  "code": "CONTENT_EXHAUSTED",
+  "message": "Team Draw counts only with drawing words a person has approved, and this Cup has 0 unused approved words (this game has 3 rounds: one word each). Play it as Practice instead: Practice also uses words that are not approved yet."
+ }
+}
