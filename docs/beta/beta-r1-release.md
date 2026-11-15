@@ -35,6 +35,40 @@ sha256sum ../cgn-<sha>.tgz                       # record it with the release no
 - **What the package holds:** the compiled server, the built web app, `content/` (no pilot batches, and no approvals unless the repository has them), the two package files and `release.json`. `scripts/check-release-package.mjs` proves this on every gate run.
 - **It isn't byte-for-byte reproducible:** `release.json` records the build time, and the tarball the files' times. Two builds of one SHA have different hashes (the drill's logs show it). That is why the host gets the same file that was checked, by its recorded hash, never a rebuild.
 
+## First install (no previous package)
+
+On a host that has never run the game. As root (or with `sudo`), between sessions, once the owner has approved the revision. The service and its settings are in `docs/beta/beta-r1-architecture.md`.
+
+```
+# 1. The service user and its folders: the data belongs to it, the backups to root, both private
+useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+install -d -m 0700 -o cgn -g cgn /var/lib/christmas-game-night
+install -d -m 0700 /var/backups/christmas-game-night
+install -d -m 0755 /opt/christmas-game-night/releases
+
+# 2. The settings: readable by root and the service only (they hold the access code)
+install -d -m 0750 -g cgn /etc/christmas-game-night
+install -m 0640 -g cgn /dev/null /etc/christmas-game-night/env    # then edit: NODE_ENV=production, MCHEZO_DATA_DIR,
+                                                                  # MCHEZO_PUBLIC_ORIGIN, MCHEZO_BETA_ACCESS_CODE,
+                                                                  # MCHEZO_TRUST_PROXY=1, MCHEZO_LISTEN_HOST=127.0.0.1, PORT
+
+# 3. The package: as in "Promoting it", step 1 (hash, unpack, npm ci --omit=dev), then
+ln -sfn /opt/christmas-game-night/releases/<sha> /opt/christmas-game-night/current
+
+# 4. Check the (empty) data folder as the service user, then the unit, then start
+cd /opt/christmas-game-night/current
+sudo -u cgn node dist/server/datatool.js check --data /var/lib/christmas-game-night   # "check OK: 0 room(s) ..."
+install -m 0644 christmas-game-night.service /etc/systemd/system/   # the unit from the architecture page
+systemctl daemon-reload && systemctl enable --now christmas-game-night
+
+# 5. Check, as after any promotion
+curl -s https://<host>/health                    # {"ok":true,"revision":"<sha>"}
+journalctl -u christmas-game-night -n 20         # "[restore] 0 room(s) restored"
+```
+
+- **Then:** one phone through the gate, and the first backup after the first game night (below).
+- **Rolling back a first install:** there is no previous package. See "Rolling back", below.
+
 ## Promoting it (on the host, between sessions)
 
 ```
@@ -46,7 +80,8 @@ cd /opt/christmas-game-night/releases/<sha> && npm ci --omit=dev --ignore-script
 # 2. Maintenance: stop the server (it saves, closes the sockets and frees its lock)
 systemctl stop christmas-game-night
 
-# 3. Back up, with the server stopped, using the NEW release's tool
+# 3. Back up, with the server stopped, using the NEW release's tool (as root: the backup is root's, 0700/0600).
+#    The tool holds the data folder while it copies: a server started meanwhile is refused (systemd retries).
 node dist/server/datatool.js backup --data /var/lib/christmas-game-night \
      --out /var/backups/christmas-game-night/$(date -u +%Y%m%dT%H%MZ)-before-<sha>
 
@@ -81,6 +116,18 @@ systemctl start christmas-game-night
 curl -s https://<host>/health                    # the previous revision
 ```
 
+### When there is no previous package (the first install)
+There is nothing to switch back to, and the data stays where it is.
+
+```
+systemctl disable --now christmas-game-night     # stop it, and keep it stopped
+ls -la /var/lib/christmas-game-night             # the data is untouched: never delete it
+```
+
+- **The site:** it shows the proxy's error, or the maintenance page below, until a corrected package is reviewed, approved and installed with the steps in "Promoting it".
+- **If the data itself is in doubt:** restore the latest backup into a **new** folder for the service user, as in "Restore" below. Point `MCHEZO_DATA_DIR` at it only after `check` passes as `cgn`. The old folder is kept.
+- **The release folder can stay:** `/opt/christmas-game-night/releases/<sha>` changes nothing while the service is stopped. Removing it is optional.
+
 - **Keep the previous release folder until the new one has run a game night.**
 - **Data compatibility is shown before each promotion.**
   - For this branch, `1955c28` reads and writes what this branch writes, both ways (`docs/evidence/beta-r1-local/rollback-compat-*.txt`).
@@ -94,23 +141,36 @@ curl -s https://<host>/health                    # the previous revision
   - before every deploy (above, with the server stopped);
   - after each game night, between sessions.
   - `--allow-running` is possible: every file is still whole, but a room and its Memory Book may be a moment apart.
-- **Where backups go:** `/var/backups/christmas-game-night/` (root, 0700; the tool writes 0700 folders and 0600 files). A second copy goes off the host, somewhere the owner chooses and keeps private.
+- **Where backups go:** `/var/backups/christmas-game-night/` (root, 0700). The tool writes 0700 folders and 0600 files that belong to whoever runs it (root), whoever owns the data. A second copy goes off the host, somewhere the owner chooses and keeps private.
   - Never in git (`backups/` is ignored), never in a release folder, never under anything the proxy serves.
   - Backups hold the family's names, rooms and Memory Book.
 - **How many to keep:** at least the backup before each of the last three deploys, and the last 14 after game nights. Deleting older ones is a person's decision.
-- **A restore drill before the beta opens, then monthly:**
+- **Restore, always under the service user** (Beta R1-R, review 6900450343 R2). A restore made as root belongs to root, and the service, which runs as `cgn`, can't read it. `check` and the server both refuse such a folder and say why.
+  - **The steps:** restore with `--owner`, which hands the new folder to `cgn` (still 0700 and 0600), then run `check` as `cgn`.
+  - **Where:** never into the live folder. `restore` refuses a folder that isn't empty, and it holds the new folder while it writes.
 
   ```
+  cd /opt/christmas-game-night/current
   node dist/server/datatool.js verify  --backup <backup>
-  node dist/server/datatool.js restore --backup <backup> --into /tmp/cgn-restore-drill   # refuses a non-empty folder
-  NODE_ENV=production MCHEZO_DATA_DIR=/tmp/cgn-restore-drill MCHEZO_PUBLIC_ORIGIN=https://<host> \
+  node dist/server/datatool.js restore --backup <backup> --into /var/lib/christmas-game-night-restored-<date> --owner cgn
+  sudo -u cgn node dist/server/datatool.js check --data /var/lib/christmas-game-night-restored-<date>
+  # to serve it: stop the service, set MCHEZO_DATA_DIR to the new folder (and add it to ReadWritePaths= in the
+  # unit, then systemctl daemon-reload), start, check /health and the restore line. The old folder is kept.
+  ```
+
+- **A restore drill before the beta opens, then monthly,** into a drill folder, run as the service user:
+
+  ```
+  node dist/server/datatool.js restore --backup <backup> --into /var/lib/cgn-restore-drill --owner cgn
+  sudo -u cgn node dist/server/datatool.js check --data /var/lib/cgn-restore-drill
+  sudo -u cgn env NODE_ENV=production MCHEZO_DATA_DIR=/var/lib/cgn-restore-drill MCHEZO_PUBLIC_ORIGIN=https://<host> \
     MCHEZO_BETA_ACCESS_CODE=<code> MCHEZO_LISTEN_HOST=127.0.0.1 PORT=3999 node dist/server/serve.js
   ```
 
-  Check that the rooms load, stop the server, and remove the drill copy.
+  Check that the rooms and Memory Books load, stop the server, and remove the drill copy (`rm -r /var/lib/cgn-restore-drill`). The release check runs these steps with real local users on every gate (step U).
 - **Room retention:**
   - Once a month, run `datatool prune --data /var/lib/christmas-game-night --older-than-days 60`. It is a dry run that lists rooms idle for 60 days.
-  - With `--apply`, only with the server stopped and after a backup, it moves them into `data/archive/<time>/`. Archived rooms aren't loaded or served.
+  - With `--apply`, after a backup, it moves them into `data/archive/<time>/`. Archived rooms aren't loaded or served. It holds the data folder while it works, so it refuses while the server runs, and a server can't start meanwhile.
   - Deleting an archive is the owner's decision. Nothing deletes family data by itself.
 - **A full disk:**
   - A save that fails answers the phone with "could not be saved to disk" (HTTP 500). The last saved state stays intact, and the server keeps running.

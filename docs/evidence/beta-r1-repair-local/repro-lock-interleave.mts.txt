@@ -1,0 +1,22 @@
+// Review 6900450343 R1, the source-confirmed interleaving, replayed step by step against <worktree>/src/server/datalock.ts.
+// Start A does what acquire() does (open "wx", then write its pid) but pauses between the two; start B runs acquire().
+// Usage: npx tsx repro-lock-interleave.mts <worktree>
+import { closeSync, mkdtempSync, openSync, readFileSync, writeSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+const wt = process.argv[2]!;
+const { DataDirLock } = await import(join(wt, "src/server/datalock.ts"));
+const d = mkdtempSync(join(tmpdir(), "mz-lock-interleave-"));
+const lockPath = join(d, "server.lock");
+// A: the exclusive create succeeds...
+const fdA = openSync(lockPath, "wx");
+console.log("A: created server.lock exclusively (empty, pid not written yet)");
+// ...B starts now.
+let bHolds = false;
+try { const note = await new DataDirLock(d).acquire(); bHolds = true; console.log(`B: acquire() returned ${JSON.stringify(note)}: B holds the lock`); }
+catch (e) { console.log(`B: refused: ${(e as Error).message}`); }
+// A carries on: writes its pid and believes it holds the lock.
+writeSync(fdA, JSON.stringify({ pid: 4242424, host: "A" })); closeSync(fdA);
+console.log("A: wrote its pid and closed: A believes it holds the lock");
+console.log(`server.lock now names: ${readFileSync(lockPath, "utf8")}`);
+console.log(bHolds ? "RESULT: BOTH A AND B HOLD THE DATA DIRECTORY" : "RESULT: only A holds the data directory");

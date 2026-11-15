@@ -3058,3 +3058,18 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Next:** the Stage 12.17-R repair on #42 (review 6898755998), queued behind this checkpoint.
 - **Risk:** the beta gate is new code on every request. It is off by default, so every existing driver runs as before; the full gate is the proof.
 
+## Beta R1-R: repairs from review 6900450343 (in progress)
+- **Brief:** the owner's ChatGPT review on #43 (changes requested). Repair only R1 and R2 in this slice; #42 stays separate. The beta is held, and no other milestone is assigned. ChatGPT keeps the private preview's recovery and the interactive gate.
+- **Spec and estimate:** `docs/beta/beta-r1-repair.md` (about 7 h 30 min, written at 3:05 p.m. ET).
+- **R1, one process per data directory:**
+  - **Reproduced on `92a3722`:** the interleaving, and 8 simultaneous starts giving 2–3 holders in 15/15 rounds (5 holders at most, with a stale lock).
+  - **Repaired:** a Linux abstract-socket exclusion held for the process's life; `server.lock` is a record only; the tools hold the lock for their whole run (`src/server/datalock.ts`, `datatool.ts`, `serve.ts`; D-BR1R-01).
+  - **Tested:** `tests/beta-r1r-lock.test.ts` (7, with real processes), the updated `tests/beta-r1.test.ts` lock tests, release check step L.
+- **R2, restore under the service user:**
+  - **Repaired:** `restore --owner`; `datatool check` run as the service user; the server refuses a folder it can't fully use (D-BR1R-02).
+  - **Runbook:** first install, rollback with no previous package, restore under `cgn`. The example unit has `UMask=0077` (D-BR1R-03).
+  - **Tested:** `tests/beta-r1r-restore.test.ts`, and release check step U with real local users, from the package.
+  - **Found by step U (B-12):** run as root, backups and restores kept the data's owner (`copyFileSync`). Fixed: the tool writes its own copies.
+- **Evidence so far:** `docs/evidence/beta-r1-repair-local/README.md` (every run, failures included).
+- **Next:** commit, the packaged release drill, then targeted, fast and full gates on one SHA, and a new completed report on #43.
+

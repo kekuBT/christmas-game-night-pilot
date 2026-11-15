@@ -106,6 +106,7 @@ RestartSec=5
 KillSignal=SIGTERM
 TimeoutStopSec=20
 NoNewPrivileges=true
+UMask=0077
 ProtectSystem=strict
 ProtectHome=true
 PrivateTmp=true
@@ -116,8 +117,16 @@ WantedBy=multi-user.target
 ```
 
 - **The release folders** (`/opt/christmas-game-night/releases/<sha>/`) belong to root. The service user can read them but not write them; `current` is a link to the release in use.
-- **The data directory** belongs to the service user (mode 0700) and is the only place it can write.
-- **Stop and restart:** SIGTERM closes the server gracefully and frees the lock. After a crash, `Restart=on-failure` starts it again, and it takes the stale lock over (release check step L).
+- **The data directory** belongs to the service user (mode 0700) and is the only place it can write. `UMask=0077` makes the files the server writes private too (0600); the folder's 0700 already keeps them from other users.
+- **One process per data directory** (Beta R1-R, review 6900450343 R1; `src/server/datalock.ts`):
+  - **How it works:** the server, a backup, an archive run, a restore and a data check each hold the folder's lock for as long as they run. The lock is a Linux abstract Unix socket named after the folder, so the kernel releases it when the process ends, however it ends.
+  - **What it refuses:** a second server, or a server started during a backup, is refused (exit 2) with the reason. `server.lock` in the folder only records who holds it.
+  - **One condition:** the service and the tools must run in the host's network namespace, which is systemd's default. Don't add `PrivateNetwork=`, `JoinsNamespaceOf=` or `RestrictAddressFamilies=` without `AF_UNIX` to this unit: the tool, run from a shell, would no longer see the server's lock.
+  - **Linux only:** production refuses to start off Linux.
+- **Stop and restart:**
+  - SIGTERM closes the server gracefully and frees the lock.
+  - After a crash, the kernel has already freed the lock. `Restart=on-failure` starts the server again, and it replaces the record the crash left (release check step L).
+  - A start refused because a backup is running exits 2, and systemd retries every 5 seconds until the backup is done.
 
 ## Restricted admin access
 

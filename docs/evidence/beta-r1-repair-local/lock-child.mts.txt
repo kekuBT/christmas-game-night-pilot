@@ -1,0 +1,17 @@
+// One "server start" for repro-lock-race: waits for a shared start time, acquires the data directory lock from
+// <worktree>/src/server/datalock.ts, and if it gets it, holds it for <holdMs> and releases. Prints ACQ/REL lines.
+import { join } from "node:path";
+const [wt, dir, startAt, holdMs] = process.argv.slice(2);
+const { DataDirLock } = await import(join(wt!, "src/server/datalock.ts"));
+const lock = new DataDirLock(dir!);
+while (Date.now() < Number(startAt)) { /* spin to the shared start */ }
+try {
+  await lock.acquire();
+  const t0 = performance.timeOrigin + performance.now();
+  console.log(`ACQ ${process.pid} ${t0.toFixed(3)}`);
+  const end = Date.now() + Number(holdMs);
+  while (Date.now() < end) await new Promise((r) => setTimeout(r, 5));
+  const t1 = performance.timeOrigin + performance.now();
+  await lock.release();
+  console.log(`REL ${process.pid} ${t1.toFixed(3)}`);
+} catch (e) { console.log(`REFUSED ${process.pid} ${String((e as Error).message).slice(0, 80)}`); }

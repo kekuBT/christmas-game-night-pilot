@@ -7,7 +7,7 @@ import { WebSocket } from "ws";
 import { Harness } from "./helpers/harness.js";
 import { AccessGuard } from "../src/server/access.js";
 import { DataDirLock } from "../src/server/datalock.js";
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -187,39 +187,81 @@ describe("B-05: per-device limits behind a reverse proxy", () => {
 });
 
 describe("one writer per data directory (DataDirLock)", () => {
+  // Beta R1-R (review 6900450343 R1): the exclusion is a Linux abstract socket held for the process's life; server.lock
+  // is only a record. Process-level races (many starts at once, crash, SIGTERM, the tools) are in beta-r1r-lock.test.ts.
   const dirs: string[] = [];
-  afterEach(() => { for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true }); });
+  const held: DataDirLock[] = [];
+  afterEach(async () => { for (const l of held.splice(0)) await l.release(); for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true }); });
   const dir = () => { const d = mkdtempSync(join(tmpdir(), "mz-beta-lock-")); dirs.push(d); return d; };
-  it("takes a free directory, and releases it", () => {
+  const take = async (d: string, role?: "server" | "backup") => { const l = new DataDirLock(d, role); held.push(l); return [l, await l.acquire()] as const; };
+  it("takes a free directory with a record of who holds it, and releases both", async () => {
     const d = dir();
-    const lock = new DataDirLock(d);
-    expect(lock.acquire()).toBeUndefined();
-    expect(JSON.parse(readFileSync(lock.path, "utf8")).pid).toBe(process.pid);
-    lock.release();
+    const [lock, note] = await take(d);
+    expect(note).toBeUndefined();
+    expect(JSON.parse(readFileSync(lock.path, "utf8"))).toMatchObject({ pid: process.pid, role: "server" });
+    await lock.release();
     expect(existsSync(lock.path)).toBe(false);
+    const [again] = await take(d); // free again
+    expect(again.held).toBe(true);
   });
-  it("refuses a directory another live process holds, naming it", () => {
+  it("refuses a directory someone holds, naming them, and leaves their record alone", async () => {
     const d = dir();
-    writeFileSync(join(d, "server.lock"), JSON.stringify({ pid: process.ppid }));
-    expect(() => new DataDirLock(d).acquire()).toThrowError(new RegExp(`Another server \\(pid ${process.ppid}\\)`));
-    expect(JSON.parse(readFileSync(join(d, "server.lock"), "utf8")).pid).toBe(process.ppid); // untouched
+    const [first] = await take(d, "backup");
+    const record = readFileSync(first.path, "utf8");
+    await expect(new DataDirLock(d).acquire()).rejects.toThrowError(new RegExp(`^A backup \\(datatool backup\\) \\(pid ${process.pid}\\) is using this data directory .* Wait for it to finish`));
+    expect(readFileSync(first.path, "utf8")).toBe(record);
   });
-  it("B-08: a first start on a data directory that doesn't exist yet creates it (private) and takes the lock", () => {
+  it("the review's interleaving: a holder whose record is still empty (or garbage) is still the holder", async () => {
+    // On 92a3722 the record WAS the lock: an empty file (created, pid not yet written) read as stale and was taken.
+    const d = dir();
+    const [first] = await take(d);
+    for (const partial of ["", "{\"pid\":"]) {
+      writeFileSync(first.path, partial);
+      await expect(new DataDirLock(d).acquire()).rejects.toThrowError(/^Another process is using this data directory/);
+    }
+  });
+  it("the same directory reached by another path (a symbolic link) is the same directory", async () => {
+    const d = dir();
+    const link = join(dir(), "link");
+    symlinkSync(d, link);
+    await take(d);
+    await expect(new DataDirLock(link).acquire()).rejects.toThrowError(/^Another server/);
+    const [other] = await take(dir()); // a different directory is independent
+    expect(other.held).toBe(true);
+  });
+  it("B-08: a first start on a data directory that doesn't exist yet creates it (private) and takes the lock", async () => {
     // Found by the release drill: the lock opened server.lock before anything created the directory, so a fresh
     // host's first start crashed with ENOENT. Before the lock, the room store created the directory itself.
     const parent = dir();
     const d = join(parent, "var", "lib", "cgn");
-    const lock = new DataDirLock(d);
-    expect(lock.acquire()).toBeUndefined();
+    const [lock, note] = await take(d);
+    expect(note).toBeUndefined();
     expect(statSync(d).mode & 0o777).toBe(0o700);
     expect(JSON.parse(readFileSync(lock.path, "utf8")).pid).toBe(process.pid);
-    lock.release();
   });
-  it("takes over a stale lock (a dead process, or an unreadable file)", () => {
-    for (const stale of [JSON.stringify({ pid: 2147483646 }), "not json"]) {
+  it("a record left behind by a crash (a dead process, a live but unrelated pid, or an unreadable file) is replaced", async () => {
+    for (const stale of [JSON.stringify({ pid: 2147483646 }), JSON.stringify({ pid: process.ppid }), "not json"]) {
       const d = dir();
       writeFileSync(join(d, "server.lock"), stale);
-      expect(new DataDirLock(d).acquire()).toMatch(/took over a stale lock/);
+      const [lock, note] = await take(d);
+      expect(note).toMatch(/took over a stale lock left by a process that is no longer running/);
+      expect(JSON.parse(readFileSync(lock.path, "utf8")).pid).toBe(process.pid);
     }
   });
+  it("release removes only its own record", async () => {
+    const d = dir();
+    const [lock] = await take(d);
+    writeFileSync(lock.path, JSON.stringify({ pid: 1, token: "someone-else" }));
+    await lock.release();
+    expect(JSON.parse(readFileSync(lock.path, "utf8")).token).toBe("someone-else");
+  });
+  it("off Linux (a developer's computer) only the record is checked: a live holder is refused, a dead one replaced", async () => {
+    const d = dir();
+    writeFileSync(join(d, "server.lock"), JSON.stringify({ pid: process.ppid, role: "server" }));
+    await expect(new DataDirLock(d, "server", { platform: "darwin" }).acquire()).rejects.toThrowError(new RegExp(`Another server \\(pid ${process.ppid}\\)`));
+    writeFileSync(join(d, "server.lock"), JSON.stringify({ pid: 2147483646 }));
+    const l = new DataDirLock(d, "server", { platform: "darwin" }); held.push(l);
+    expect(await l.acquire()).toMatch(/not enforced: start only one server per data directory/);
+  });
 });
+

@@ -1,0 +1,4 @@
+fresh: 15 rounds of 8 simultaneous starts; rounds with more than one holder at once: 15
+  per round (starts that got the lock / most holders at once): 3/3 3/3 2/2 2/2 3/3 2/2 3/3 3/3 3/3 2/2 3/3 3/3 3/3 2/2 2/2
+stale: 15 rounds of 8 simultaneous starts; rounds with more than one holder at once: 7
+  per round (starts that got the lock / most holders at once): 2/2 1/1 1/1 1/1 2/2 3/3 1/1 1/1 2/2 2/2 1/1 3/3 1/1 1/1 5/5

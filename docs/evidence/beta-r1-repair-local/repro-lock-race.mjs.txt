@@ -1,0 +1,41 @@
+// Review 6900450343 R1: many server starts at the same moment on one data directory, counting how often more than
+// one holds the lock at the same time. Two cases: a fresh directory (first start) and one with a stale lock (a crash).
+// Usage: node repro-lock-race.mjs <worktree> <rounds> <processes>
+import { spawn, spawnSync } from "node:child_process";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+const [wt, roundsArg, nArg] = process.argv.slice(2);
+const rounds = Number(roundsArg ?? 20), n = Number(nArg ?? 8);
+const here = dirname(fileURLToPath(import.meta.url));
+const tsx = join(wt, "node_modules/tsx/dist/cli.mjs");
+const deadPid = () => { const p = spawnSync(process.execPath, ["-e", "0"]); return p.pid; };
+function runRound(kind) {
+  const dir = mkdtempSync(join(tmpdir(), `mz-lock-race-${kind}-`));
+  if (kind === "stale") writeFileSync(join(dir, "server.lock"), JSON.stringify({ pid: deadPid(), host: "crashed" }));
+  const startAt = Date.now() + 2500;
+  return Promise.all(Array.from({ length: n }, () => new Promise((resolve) => {
+    const c = spawn(process.execPath, [tsx, join(here, "lock-child.mts"), wt, dir, String(startAt), "300"], { stdio: ["ignore", "pipe", "pipe"] });
+    let out = ""; c.stdout.on("data", (d) => { out += d; }); c.stderr.on("data", (d) => { out += d; });
+    c.on("exit", () => resolve(out));
+  }))).then((outs) => {
+    rmSync(dir, { recursive: true, force: true });
+    const holds = [];
+    for (const o of outs) {
+      const a = /ACQ (\d+) ([\d.]+)/.exec(o), r = /REL (\d+) ([\d.]+)/.exec(o);
+      if (a && r) holds.push([Number(a[2]), Number(r[2])]);
+      else if (!/REFUSED/.test(o)) console.log(`unexpected child output: ${o.slice(0, 200)}`);
+    }
+    // The most holders at any one moment.
+    let max = 0;
+    for (const [s] of holds) max = Math.max(max, holds.filter(([s2, e2]) => s2 <= s && s < e2).length);
+    return { acquired: holds.length, maxConcurrent: max };
+  });
+}
+for (const kind of ["fresh", "stale"]) {
+  let bad = 0; const per = [];
+  for (let i = 0; i < rounds; i++) { const r = await runRound(kind); per.push(`${r.acquired}/${r.maxConcurrent}`); if (r.maxConcurrent > 1) bad++; }
+  console.log(`${kind}: ${rounds} rounds of ${n} simultaneous starts; rounds with more than one holder at once: ${bad}`);
+  console.log(`  per round (starts that got the lock / most holders at once): ${per.join(" ")}`);
+}

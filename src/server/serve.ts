@@ -4,7 +4,7 @@ import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { contentTestMode, loadContent, type ContentLibrary } from "../content/registry.js";
 import { LocalServer } from "./http.js";
-import { DataDirLock, DataDirLocked } from "./datalock.js";
+import { DataDirLock, DataDirLocked, DataDirUnusable, dataDirAccessProblems } from "./datalock.js";
 import { normalizeOrigin, type AccessOptions } from "./access.js";
 
 // Configuration (all optional):
@@ -34,7 +34,8 @@ import { normalizeOrigin, type AccessOptions } from "./access.js";
 // MCHEZO_BETA_ACCESS_CODE (unless MCHEZO_PUBLIC_ACCESS=open is set on purpose).
 // Behind a proxy (MCHEZO_TRUST_PROXY) production also requires MCHEZO_LISTEN_HOST: a client reaching the
 // server directly could otherwise claim any address in X-Forwarded-For, and skip HTTPS.
-// One server per data directory: a second one is refused (server.lock).
+// One process per data directory: a second server, or a server during a datatool backup, archive or restore, is
+// refused (src/server/datalock.ts). Production runs on Linux only: the exclusion is a Linux abstract socket.
 const port = Number(process.env.PORT ?? 3000);
 const production = process.env.NODE_ENV === "production";
 const refuse = (why: string): never => { console.error(why); process.exit(2); };
@@ -55,6 +56,7 @@ if (production) {
   const rel = relative(appRoot, dataDir);
   if (rel === "" || (!rel.startsWith("..") && !isAbsolute(rel))) refuse(`MCHEZO_DATA_DIR (${dataDir}) is inside the release (${appRoot}). Put the data outside it, e.g. on its own volume.`);
   if (!process.env.MCHEZO_PUBLIC_ORIGIN) refuse("In production MCHEZO_PUBLIC_ORIGIN must be set to the site's public origin, e.g. https://games.example.org.");
+  if (process.platform !== "linux") refuse(`In production the server runs on one Linux host (this is ${process.platform}): its one-process-per-data-directory guarantee uses a Linux kernel facility.`);
   if (!process.env.MCHEZO_BETA_ACCESS_CODE && process.env.MCHEZO_PUBLIC_ACCESS !== "open") refuse("In production MCHEZO_BETA_ACCESS_CODE must be set (the private beta's access code), or MCHEZO_PUBLIC_ACCESS=open set on purpose.");
 }
 let access: AccessOptions;
@@ -90,13 +92,19 @@ if (contentDir) {
   for (const p of content.problems) console.error(`[content] ${p.file}${p.itemId ? ` ${p.itemId}` : ""}: ${p.message}`);
   console.log(`TEST MODE: content loaded from ${contentDir} (${content.items.size} items), not the shipped library`);
 }
-const lock = new DataDirLock(dataDir);
+const lock = new DataDirLock(dataDir, "server");
 try {
-  const note = lock.acquire();
+  const note = await lock.acquire();
   if (note) console.warn(`[data] ${note} (${lock.path})`);
 } catch (e) {
-  if (e instanceof DataDirLocked) refuse(e.message);
+  if (e instanceof DataDirLocked || e instanceof DataDirUnusable) refuse(e.message);
   throw e;
+}
+// Beta R1-R (review 6900450343 R2): before any room is loaded, every data file must be readable and writable by this
+// user. A restore left owned by another user would otherwise start "fine" with the family's rooms not loaded.
+{
+  const problems = dataDirAccessProblems(dataDir);
+  if (problems.length) { await lock.release(); refuse(new DataDirUnusable(dataDir, problems).message); }
 }
 const server = new LocalServer({
   dataDir,
@@ -135,7 +143,7 @@ async function shutdown(signal: string): Promise<void> {
   closing = true;
   console.log(`received ${signal}, closing server`);
   await server.close();
-  lock.release();
+  await lock.release();
   process.exit(0);
 }
 process.on("SIGTERM", () => void shutdown("SIGTERM"));

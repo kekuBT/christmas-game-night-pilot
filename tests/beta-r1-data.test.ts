@@ -10,6 +10,7 @@ import { Harness } from "./helpers/harness.js";
 import { LocalServer } from "../src/server/http.js";
 import { RoomStore } from "../src/server/persistence.js";
 import { backup, prune, restore, verify } from "../src/server/datatool.js";
+import { DataDirLock } from "../src/server/datalock.js";
 
 const dirs: string[] = [];
 const harnesses: Harness[] = [];
@@ -45,14 +46,14 @@ describe("backup and restore into an isolated folder", () => {
   it("a backup holds every room, its previous generation and the Memory Book; restored elsewhere, a server serves the same rooms", async () => {
     const { dataDir, roomIds } = await familyData();
     const out = fresh("backup");
-    const m = backup(dataDir, out);
+    const m = await backup(dataDir, out);
     expect([m.rooms, m.books, m.serverWasRunning]).toEqual([2, 1, false]);
     expect(m.files.map((f) => f.name)).toEqual(expect.arrayContaining([`${roomIds[0]}.json`, `${roomIds[0]}.json.prev`, `${roomIds[0]}.book.json`, `${roomIds[1]}.json`]));
     // Private: the folder 0700, every file 0600.
     expect(statSync(out).mode & 0o777).toBe(0o700);
     for (const f of m.files) expect([f.name, statSync(join(out, f.name)).mode & 0o777]).toEqual([f.name, 0o600]);
     const into = fresh("restored");
-    restore(out, into);
+    await restore(out, into);
     expect(await roomsServedFrom(into)).toEqual([...roomIds].sort());
     expect(JSON.parse(readFileSync(join(into, `${roomIds[0]}.book.json`), "utf8")).entries[0].text).toBe("Amina's comeback");
     // The original is untouched.
@@ -61,21 +62,25 @@ describe("backup and restore into an isolated folder", () => {
 
   it("a backup refuses while a server is using the data (unless asked), and never goes inside the data folder", async () => {
     const { dataDir } = await familyData();
-    writeFileSync(join(dataDir, "server.lock"), JSON.stringify({ pid: process.ppid }));
-    expect(() => backup(dataDir, fresh("b1"))).toThrowError(/is using .* Stop it first/);
-    const m = backup(dataDir, fresh("b2"), { allowRunning: true });
-    expect([m.serverWasRunning, m.files.some((f) => f.name === "server.lock")]).toEqual([true, false]);
-    expect(() => backup(dataDir, join(dataDir, "inside"))).toThrowError(/outside the data directory/);
+    const server = new DataDirLock(dataDir, "server"); // a running server holds the directory
+    await server.acquire();
+    try {
+      await expect(backup(dataDir, fresh("b1"))).rejects.toThrowError(/^A server \(pid \d+\) is using .* Stop it first/);
+      const m = await backup(dataDir, fresh("b2"), { allowRunning: true });
+      expect([m.serverWasRunning, m.files.some((f) => f.name === "server.lock")]).toEqual([true, false]);
+    } finally { await server.release(); }
+    await expect(backup(dataDir, join(dataDir, "inside"))).rejects.toThrowError(/outside the data directory/);
+    expect(existsSync(join(dataDir, "server.lock"))).toBe(false); // the backup's own lock record is gone afterwards
   });
 
   it("restore checks everything before copying: a changed byte, a missing file or a bad room is refused, naming it", async () => {
     const { dataDir, roomIds } = await familyData();
     const out = fresh("backup");
-    backup(dataDir, out);
+    await backup(dataDir, out);
     const file = join(out, `${roomIds[1]}.json`);
     const good = readFileSync(file, "utf8");
     writeFileSync(file, good.replace("Garden Night", "Garden Nite"));
-    expect(() => restore(out, fresh("r1"))).toThrowError(new RegExp(`${roomIds[1]}\\.json does not match the manifest`));
+    await expect(restore(out, fresh("r1"))).rejects.toThrowError(new RegExp(`${roomIds[1]}\\.json does not match the manifest`));
     rmSync(file);
     expect(() => verify(out)).toThrowError(/is missing from the backup/);
     writeFileSync(file, good);
@@ -85,10 +90,10 @@ describe("backup and restore into an isolated folder", () => {
   it("restore never overwrites: a folder with anything in it is refused", async () => {
     const { dataDir } = await familyData();
     const out = fresh("backup");
-    backup(dataDir, out);
+    await backup(dataDir, out);
     const into = tmp("occupied");
     writeFileSync(join(into, "keep.txt"), "the family's");
-    expect(() => restore(out, into)).toThrowError(/not empty: restore goes into a new folder/);
+    await expect(restore(out, into)).rejects.toThrowError(/not empty: restore goes into a new folder/);
     expect(readdirSync(into)).toEqual(["keep.txt"]);
   });
 });
@@ -100,18 +105,19 @@ describe("retention: bounded, manual, and nothing is deleted", () => {
     const snap = JSON.parse(readFileSync(old, "utf8")) as Record<string, unknown>;
     writeFileSync(old, JSON.stringify({ ...snap, savedAt: new Date(Date.now() - 90 * 86_400_000).toISOString() }));
     const before = readdirSync(dataDir).sort();
-    const dry = prune(dataDir, 60);
+    const dry = await prune(dataDir, 60);
     expect(dry.candidates.map((c) => c.roomId)).toEqual([roomIds[0]]);
     expect(dry.candidates[0]!.files).toEqual(expect.arrayContaining([`${roomIds[0]}.json`, `${roomIds[0]}.book.json`]));
     expect(readdirSync(dataDir).sort()).toEqual(before); // dry run: nothing moved
-    writeFileSync(join(dataDir, "server.lock"), JSON.stringify({ pid: process.ppid }));
-    expect(() => prune(dataDir, 60, { apply: true })).toThrowError(/stop it before archiving/);
-    rmSync(join(dataDir, "server.lock"));
-    const done = prune(dataDir, 60, { apply: true });
+    const server = new DataDirLock(dataDir, "server");
+    await server.acquire();
+    await expect(prune(dataDir, 60, { apply: true })).rejects.toThrowError(/^A server \(pid \d+\) is using .* stop it before archiving/);
+    await server.release();
+    const done = await prune(dataDir, 60, { apply: true });
     expect(existsSync(old)).toBe(false);
     expect(readdirSync(done.archivedTo!)).toEqual(expect.arrayContaining([`${roomIds[0]}.json`, `${roomIds[0]}.book.json`]));
     expect(await roomsServedFrom(dataDir)).toEqual([roomIds[1]]);
-    expect(() => prune(dataDir, 3)).toThrowError(/at least 7/);
+    await expect(prune(dataDir, 3)).rejects.toThrowError(/at least 7/);
   });
 });
 

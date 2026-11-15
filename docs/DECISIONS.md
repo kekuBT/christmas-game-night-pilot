@@ -2105,3 +2105,24 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **What the app needs:** one always-on Node 22 process, a persistent disk, WebSockets, HTTPS and a stable name.
   - **What is written:** the host options found at $0, with their account requirements (some need a card or a domain), are listed for ChatGPT's selection. They come from search results, because the providers' pages weren't reachable from this session.
   - **Not done:** no account, trial, card, domain or public port was created or requested.
+
+## Beta R1-R (review 6900450343, R1 and R2; docs/beta/beta-r1-repair.md)
+- **D-BR1R-01 The data folder's exclusion is held by the kernel for the process's life.**
+  - **The mechanism:** an exclusive Linux abstract Unix socket named after the folder's device and inode. Its bind is the one atomic step that decides the holder, and the kernel releases it when the process ends, however it ends.
+  - **`server.lock`:** a record only, written by the holder.
+  - **Who holds it:** the server, a backup without a running server, `prune --apply`, `check`, and a restore (on its new folder), each for its whole run.
+  - **Scope:** one Linux host, one network namespace. Production refuses to start off Linux. Off Linux (a developer's computer) only the record is checked, best effort, with a printed note.
+  - **Unchanged:** the data format.
+  - **Alternatives rejected:**
+    - **`flock`:** not in Node, and a native module or a helper process would add a dependency or a second lifetime.
+    - **A link-created lock file with a recovery guard:** it fails closed, but a crash inside recovery needs a person, and pid reuse can block a start.
+- **D-BR1R-02 A restore is handed to the service user on purpose, and checked as that user.**
+  - **`restore --owner <user>`:** it chowns only what it created, keeping 0700 and 0600, while it still holds the folder.
+  - **`check`:** run as the service user before a server uses the folder.
+  - **The server:** it refuses a folder it can't fully read and write before loading anything.
+  - **Copies:** the tools write their own copies, so a copy belongs to whoever ran the tool (root's backups are root's).
+  - **Alternative rejected:** restoring as the service user from a staging copy. It needs a second, readable copy of the family's data, and the service could then alter backups.
+- **D-BR1R-03 The example unit sets `UMask=0077`.**
+  - **Why:** the server writes its files with the process umask. The 0700 folder already keeps them private, and the umask makes the files themselves 0600 too.
+  - **`check`:** it requires the folders to be private and every entry to belong to the service user; it doesn't require 0600 on files the server wrote.
+

@@ -1,0 +1,118 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt92a
+
+ ❯ tests/beta-r1r-lock.test.ts (7 tests | 5 failed) 4623ms
+   × overlapping starts: exactly one holder > eight starts at the same moment on a new directory, three rounds: one holds it, seven are refused 557ms
+     → expected [ 2, 2, 6 ] to deeply equal [ 1, 1, 7 ]
+   × overlapping starts: exactly one holder > eight starts at the same moment on a directory a crash left a lock record in, three rounds: one holds it 426ms
+     → expected [ 3, 3, 5 ] to deeply equal [ 1, 1, 7 ]
+   ✓ overlapping starts: exactly one holder > four real servers started together on a new directory: one serves, three exit 2 naming it; SIGTERM then frees it 1751ms
+   × the tools hold the directory for their whole operation > backup, prune --apply, check and restore: a server started during each is refused, naming the tool; afterwards it starts 156ms
+     → check is not a function
+   × the tools hold the directory for their whole operation > a running server refuses backup, prune --apply and check, naming it; restore never touches a used folder 338ms
+     → A server (pid 27015) is using /tmp/mz-r1r-data-u2j2cU. Stop it first (between sessions), or pass --allow-running: each file is still copied whole, but a room and its Memory Book may then be a moment apart.
+   × crash and restart; a clean stop > after a kill -9 the next start takes over the record the crash left, and the room is still there 696ms
+     → expected 'TEST MODE: provisional content treate…' to match /took over a stale lock left by a proc…/
+   ✓ crash and restart; a clean stop > SIGTERM stops cleanly, removes the record and frees the directory: a backup and a new server can use it at once 696ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/beta-r1r-lock.test.ts > overlapping starts: exactly one holder > eight starts at the same moment on a new directory, three rounds: one holds it, seven are refused
+AssertionError: expected [ 2, 2, 6 ] to deeply equal [ 1, 1, 7 ]
+
+- Expected
++ Received
+
+  Array [
+-   1,
+-   1,
+-   7,
++   2,
++   2,
++   6,
+  ]
+
+ ❯ tests/beta-r1r-lock.test.ts:71:60
+     69|     for (let round = 0; round < 3; round++) {
+     70|       const r = await race(join(tmp("fresh"), "data"), 8);
+     71|       expect([r.acquired, r.maxAtOnce, r.refusals.length]).toEqual([1,…
+       |                                                            ^
+     72|       for (const o of r.refusals) expect(o).toMatch(/is using this dat…
+     73|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/beta-r1r-lock.test.ts > overlapping starts: exactly one holder > eight starts at the same moment on a directory a crash left a lock record in, three rounds: one holds it
+AssertionError: expected [ 3, 3, 5 ] to deeply equal [ 1, 1, 7 ]
+
+- Expected
++ Received
+
+  Array [
+-   1,
+-   1,
+-   7,
++   3,
++   3,
++   5,
+  ]
+
+ ❯ tests/beta-r1r-lock.test.ts:82:60
+     80|       writeFileSync(join(d, "server.lock"), JSON.stringify({ pid: dead…
+     81|       const r = await race(d, 8);
+     82|       expect([r.acquired, r.maxAtOnce, r.refusals.length]).toEqual([1,…
+       |                                                            ^
+     83|     }
+     84|   }, 60_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/beta-r1r-lock.test.ts > the tools hold the directory for their whole operation > backup, prune --apply, check and restore: a server started during each is refused, naming the tool; afterwards it starts
+TypeError: check is not a function
+ ❯ tests/beta-r1r-lock.test.ts:126:11
+    124|     const pr = await prune(dataDir, 60, { apply: true, onLocked: trySe…
+    125|     expect(pr.archivedTo).toBeTruthy();
+    126|     await check(dataDir, { onLocked: tryServer("check", dataDir) });
+       |           ^
+    127|     const { dataDir: other } = await someData();
+    128|     const b2 = join(tmp("bk"), "b2");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/beta-r1r-lock.test.ts > the tools hold the directory for their whole operation > a running server refuses backup, prune --apply and check, naming it; restore never touches a used folder
+Error: A server (pid 27015) is using /tmp/mz-r1r-data-u2j2cU. Stop it first (between sessions), or pass --allow-running: each file is still copied whole, but a room and its Memory Book may then be a moment apart.
+ ❯ Module.backup src/server/datatool.ts:69:58
+
+ ❯ tests/beta-r1r-lock.test.ts:151:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/beta-r1r-lock.test.ts > crash and restart; a clean stop > after a kill -9 the next start takes over the record the crash left, and the room is still there
+AssertionError: expected 'TEST MODE: provisional content treate…' to match /took over a stale lock left by a proc…/
+
+- Expected: 
+/took over a stale lock left by a process that is no longer running \(pid 27022, server\)/
+
++ Received: 
+"TEST MODE: provisional content treated as approved (not a human review)
+[data] took over a stale lock left by a server that is no longer running (/tmp/mz-r1r-crash-L77NdI/data/server.lock)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-r1r-crash-L77NdI/data)
+Christmas Game Night server on http://localhost:33577 (web app at / after npm run build:web)
+Phones on the same Wi-Fi: open http://192.0.2.2:33577 on the host device (not localhost), so the QR code works.
+"
+
+ ❯ tests/beta-r1r-lock.test.ts:171:22
+    169|     const s2 = await startServer(d);
+    170|     expect(s2.port).toBeGreaterThan(0);
+    171|     expect(s2.out()).toMatch(new RegExp(`took over a stale lock left b…
+       |                      ^
+    172|     expect((await fetch(`http://localhost:${s2.port}/rooms/${room.room…
+    173|     expect(JSON.parse(readFileSync(join(d, "server.lock"), "utf8")).pi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 2 passed (7)
+   Start at  20:25:11
+   Duration  5.83s (transform 687ms, setup 0ms, collect 927ms, tests 4.62s, environment 0ms, prepare 57ms)
+
