@@ -79,3 +79,22 @@ About **8 h 30 min**.
 **Risk:**
 - A gate can fail on something else in the stack.
 - Existing drivers that start Official Split Clues rely on the gate's test mode. They keep working, because test mode treats provisional items as approved. I'll check they don't depend on the TypeScript bank directly.
+
+## What was built (decisions D-S1216-01..04 in `docs/DECISIONS.md`)
+
+Steps 1–8 above, with these additions and changes found on the way:
+- **A Cup deals year-round puzzles only (D-S1216-02).** The plan said "season: unchanged" without saying what a Cup gets. The old code dealt a Cup Everyday puzzles only (a Cup has no session season), and the library's selection would have mixed Christmas puzzles in. The rule keeps the old behaviour, in Official and Practice alike, so approved Christmas puzzles never count toward an Official game's six.
+- **The difficulty placeholder matters more than planned.** Official selection keeps the pool's difficulty mix, so with every puzzle at 2 that balancing does nothing for Split Clues until an editor sets real values. Flagged in the inventory.
+- **The inventory is generated** (`scripts/content-quality/split-clues-inventory.ts`) from the loaded library, with a probe of the real answer matcher per puzzle. A unit test fails if a puzzle changes and the inventory isn't regenerated.
+- **The lobby's Up next card** says "Practice only" for Split Clues while the Cup can't play it Official, as well as the reason under the Official/Practice choice.
+- **The refusal's last sentence** first said "practice uses every puzzle". In a Cup that isn't true (year-round only), so it now says "Practice also uses puzzles that are not approved yet."
+- **The driver** forges an Official start as the host (409, the same reason) and as a guest (refused), and checks the shipped content has no approvals file before and after the fixture run.
+- **A pre-existing gate failure, fixed here:** the first full gate (on `e822bbf`) found `check-warm-ivory` W8 failing since `de26509` (Stage 12.15-R round 3). The lobby's "Last game" kicker had gained its own test id, which moved one span's style key without changing a colour. It reproduced on #40's head `8798e38`. `ed70992` lists the rename as an intended change (driver only; the style must still match the base build). See `docs/evidence/stage1216-local/README.md`.
+- **The TV's Next up line, found in the full gate's screenshots:** after the fixture's Official game used the last approved puzzles, the TV still said "Next up: Split Clues · Official", because the host's stored plan said so. `a1032ad` projects such a plan as Practice on every screen (D-S1216-04), with a unit test that fails without it and two driver checks.
+
+## Estimate vs actual
+- **Estimate:** about 8 h 30 min (above, written at 5:01 a.m. ET before the work).
+- **Actual:** about 3 h, from 5:01 to about 8:00 a.m. ET.
+  - **Implementation:** 32 minutes, 5:02 to 5:34 a.m.: library, room, lobby, tests, driver and inventory.
+  - **Gates:** most of the rest, three full runs of about 40 minutes each. The first found the `check-warm-ivory` failure from #40; the second's screenshots showed the TV's Next up line. Each fix took a few minutes.
+- **Why under:** the content library already had hash-bound approvals, freezing at the briefing and the Official refusal for other games, so Split Clues mostly needed wiring.

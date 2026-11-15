@@ -1,0 +1,226 @@
+{
+  "runId": "20261115-112145-8798e38e-6333",
+  "level": "targeted",
+  "startedAt": "2026-11-15T11:21:45.685Z",
+  "finishedAt": "2026-11-15T11:23:00.268Z",
+  "exitCode": 1,
+  "verdict": "FAILED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi0",
+  "git": {
+    "head": "8798e38ed7e80ed219f3eb657d6c52671aca762c",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "9206563ef4ca03d46dffb36fd10ec2f7ac7ed92c134d362de1a8512f7d81649d",
+    "files": 612
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15493
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.1 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261115-112145-8798e38e-6333/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.5,
+      "log": "./logs/01-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 6,
+      "startOffsetSec": 0.3,
+      "endOffsetSec": 5.8,
+      "cpuSec": 9.6,
+      "peakRssMB": 526,
+      "machine": {
+        "memAvailMinMB": 14920,
+        "cpuSaturatedSec": 0,
+        "samples": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.7,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 5.9,
+      "endOffsetSec": 6.6,
+      "cpuSec": 0.6,
+      "peakRssMB": 118,
+      "machine": {
+        "memAvailMinMB": 15189,
+        "cpuSaturatedSec": 0,
+        "samples": 2
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-warm-ivory",
+      "kind": "browser",
+      "command": "node scripts/check-warm-ivory.mjs http://localhost:37865",
+      "status": "FAIL",
+      "exitCode": 1,
+      "durationSec": 67,
+      "log": "./logs/03-check-warm-ivory.log",
+      "detail": "FAIL W8 Everyday lobby-320: every element kind's computed colours equal the base build's (d4dc408) — 115 kinds; new 1, missing 1; 9 intended element change(s) (Stage 12.1, 12.4–12.14), each reusing a base style e.g. last-game-kicker>span.mz-kicker=>rgb(247, 241, 232)|rgba(0, 0, 0, 0)|none|0px none rgb(247, 241, 232)|0px rgb(247, 241, 232)|none rgb(247, 241, 232)|none|rgb(0, 0, 0)|none|1 | missing e.g. last-game-card>span.mz-kicker=>rgb(247, 241, 232)|rgba(0, 0, 0, 0)|none|0px none rgb(247, 241, 232)|0px rgb(247, 241, 232)|none rgb(247, 241, 232)|none|rgb(0, 0, 0)|none|1 | FAIL W8 Everyday menu-320: every element kind's computed colours equal the base build's (d4dc408) — 214 kinds; new 1, missing 1; 28 intended element change(s) (Stage 12.1, 12.4–12.14), each reusing a base style e.g. last-game-kicker>span.mz-kicker=>rgb(247, 241, 232)|rgba(0, 0, 0, 0)|none|0px none rgb(247, 241, 232)|0px rgb(247, 241, 232)|none rgb(247, 241, 232)|none|rgb(0, 0, 0)|none|1 | missing e.g. last-game-card>span.mz-kicker=>rgb(247, 241, 232)|rgba(0, 0, 0, 0)|none|0px none rgb(247, 241, 232)|0px rgb(247, 241, 232)|none rgb(247, 241, 232)|none|rgb(0, 0, 0)|none|1 | FAIL W8 Everyday lobby-guest-320: every element kind's computed colours equal the base build's (d4dc408) — 86 kinds; new 1, missing 1; 5 intended element change(s) (Stage 12.1, 12.4–12.14), each reusing a base style e.g. last-game-kicker>span.mz-kicker=>rgb(247, 241, 232)|rgba(0, 0, 0, 0)|none|0px none rgb(247, 241, 232)|0px rgb(247, 241, 232)|none rgb(247, 241, 232)|none|rgb(0, 0, 0)|none|1 | missing e.g. last-game-card>span.mz-kicker=>rgb(247, 241, 232)|rgba(0, 0, 0, 0)|none|0px none rgb(247, 241, 232)|0px rgb(247, 241, 232)|none rgb(247, 241, 232)|none|rgb(0, 0, 0)|none|1",
+      "worker": 1,
+      "estSec": 64,
+      "startOffsetSec": 7.4,
+      "endOffsetSec": 74.4,
+      "cpuSec": 11.3,
+      "peakRssMB": 393,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14858,
+        "cpuSaturatedSec": 0,
+        "samples": 67
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 21,
+        "pages": 22,
+        "peakOpenPages": 3
+      },
+      "failureKind": "functional"
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 37865,
+      "pid": 6453,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi0/test-results/20261115-112145-8798e38e-6333/server-data/w1",
+      "log": "./logs/server-w1.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 75,
+    "sumSec": 73,
+    "utilisation": 0.33,
+    "perWorkerBusySec": {
+      "w1": 73
+    },
+    "predicted": {
+      "low": 52,
+      "mid": 67,
+      "high": 117,
+      "confidence": "measured"
+    },
+    "contentionRatio": null,
+    "longest": [
+      {
+        "name": "check-warm-ivory",
+        "sec": 67
+      },
+      {
+        "name": "build-web",
+        "sec": 5.5
+      },
+      {
+        "name": "browser-preflight",
+        "sec": 0.7
+      }
+    ],
+    "backpressure": {
+      "waits": 0,
+      "seconds": 0
+    },
+    "system": {
+      "cpuPctMean": 16,
+      "cpuPctPeak": 56,
+      "memAvailMinMB": 14858,
+      "load1Peak": 2.76,
+      "cpuPctEvery10s": [
+        40,
+        17,
+        8,
+        10,
+        5,
+        14,
+        9
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 1.5,
+        "peakRssMB": 144
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 6,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "check-warm-ivory",
+        "phase": "browser",
+        "estSec": 64,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 51.982385,
+      "mid": 67.39460000000001,
+      "high": 117.38317500000001,
+      "sequentialSec": 69.8,
+      "confidence": "measured",
+      "contention": 1.058,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 37865,
+    "pid": 6453,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi0/test-results/20261115-112145-8798e38e-6333/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi0/test-results/20261115-112145-8798e38e-6333/web-dist"
+  }
+}

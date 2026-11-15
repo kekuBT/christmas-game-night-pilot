@@ -1,0 +1,862 @@
+{
+  "runId": "20261115-103318-3b1a2ef5-11023",
+  "level": "targeted",
+  "startedAt": "2026-11-15T10:33:18.351Z",
+  "finishedAt": "2026-11-15T10:39:01.919Z",
+  "exitCode": 0,
+  "verdict": "PASSED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216t1",
+  "git": {
+    "head": "3b1a2ef54b5b2a2cf2ff24a33938acefaec25401",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "8d297cb9cc4b2c77fc4e34562606740206f4122f6d45fbe8150ccb7ab24c6b94",
+    "files": 614
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15450
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.1 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261115-103318-3b1a2ef5-11023/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.4,
+      "log": "./logs/01-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 5,
+      "startOffsetSec": 0.1,
+      "endOffsetSec": 5.4,
+      "cpuSec": 9.6,
+      "peakRssMB": 552,
+      "machine": {
+        "memAvailMinMB": 14904,
+        "cpuSaturatedSec": 0,
+        "samples": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.6,
+      "log": "./logs/02-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 5.5,
+      "endOffsetSec": 6.1,
+      "machine": {
+        "memAvailMinMB": 15223,
+        "cpuSaturatedSec": 0,
+        "samples": 1
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-cup-team-games",
+      "kind": "browser",
+      "command": "node scripts/check-cup-team-games.mjs http://localhost:36769",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 150,
+      "log": "./logs/03-check-cup-team-games.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 136,
+      "startOffsetSec": 7.4,
+      "endOffsetSec": 157.4,
+      "cpuSec": 7.6,
+      "peakRssMB": 373,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13212,
+        "cpuSaturatedSec": 0,
+        "samples": 153
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 9,
+        "pages": 9,
+        "peakOpenPages": 9
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-lifecycle",
+      "kind": "browser",
+      "command": "node scripts/check-lifecycle.mjs http://localhost:39565",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 131.3,
+      "log": "./logs/04-check-lifecycle.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 122,
+      "startOffsetSec": 7.4,
+      "endOffsetSec": 138.7,
+      "cpuSec": 7.1,
+      "peakRssMB": 378,
+      "roomsOnGateServer": 0,
+      "diag": [
+        "PASS H. diagnosis while waiting: server playing, deadline ahead, type waiting-on-players — DIAG player=Ada game=trivia(game-1) server=playing phase=- deadlineIn=18s phaseIn=- submitted=2/3 outcome=- | screen=\"ALL YOUR ANSWERS ARE IN A You B Reconnecting C Cal 1/3 have finished Everyone go\" clock=\"En",
+        "PASS H. diagnosis for an offline phone says the server is unreachable — DIAG player=Bea server=unavailable(page.evaluate: TypeError: Failed to fetch) | screen=\"Question 3 of 10\" clock=\"\" | type=server-unreachable",
+        "PASS H. diagnosis after the end: server finished with outcome deadline, Cal 0/10 — DIAG player=Cal game=trivia(game-1) server=finished phase=- deadlineIn=-1s phaseIn=- submitted=2/3 outcome=deadline mine=0/10 | screen=\"Question 1 of 10\" clock=\"\" shownOutcome=deadline | type=finished-and-shown"
+      ],
+      "machine": {
+        "memAvailMinMB": 13212,
+        "cpuSaturatedSec": 0,
+        "samples": 133
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 4,
+        "pages": 4,
+        "peakOpenPages": 4
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-split-clues",
+      "kind": "browser",
+      "command": "node scripts/check-split-clues.mjs http://localhost:39805",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 111.2,
+      "log": "./logs/05-check-split-clues.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 104,
+      "startOffsetSec": 7.4,
+      "endOffsetSec": 118.7,
+      "cpuSec": 6.7,
+      "peakRssMB": 305,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13212,
+        "cpuSaturatedSec": 0,
+        "samples": 112
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 8,
+        "pages": 8,
+        "peakOpenPages": 8
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-themes-seasonal",
+      "kind": "browser",
+      "command": "node scripts/check-themes-seasonal.mjs http://localhost:39805",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 103.7,
+      "log": "./logs/06-check-themes-seasonal.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 99,
+      "startOffsetSec": 118.7,
+      "endOffsetSec": 222.4,
+      "cpuSec": 15.5,
+      "peakRssMB": 358,
+      "roomsOnGateServer": 6,
+      "machine": {
+        "memAvailMinMB": 14007,
+        "cpuSaturatedSec": 0,
+        "samples": 108
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 30,
+        "pages": 31,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-content-variety",
+      "kind": "browser",
+      "command": "node scripts/check-content-variety.mjs http://localhost:39565",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 68.7,
+      "log": "./logs/07-check-content-variety.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 65,
+      "startOffsetSec": 138.7,
+      "endOffsetSec": 207.4,
+      "cpuSec": 11.6,
+      "peakRssMB": 377,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 14007,
+        "cpuSaturatedSec": 0,
+        "samples": 71
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 8,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-split-clues-content",
+      "kind": "browser",
+      "command": "node scripts/check-split-clues-content.mjs http://localhost:36769",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 96.6,
+      "log": "./logs/08-check-split-clues-content.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 60,
+      "startOffsetSec": 157.4,
+      "endOffsetSec": 254,
+      "cpuSec": 9.7,
+      "peakRssMB": 479,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14056,
+        "cpuSaturatedSec": 0,
+        "samples": 99
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 11,
+        "pages": 11,
+        "peakOpenPages": 5
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-results",
+      "kind": "browser",
+      "command": "node scripts/check-results.mjs http://localhost:39565",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 52.3,
+      "log": "./logs/09-check-results.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 48,
+      "startOffsetSec": 207.5,
+      "endOffsetSec": 259.8,
+      "cpuSec": 7.1,
+      "peakRssMB": 368,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14056,
+        "cpuSaturatedSec": 0,
+        "samples": 55
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 17,
+        "pages": 17,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-quick-party",
+      "kind": "browser",
+      "command": "node scripts/check-quick-party.mjs http://localhost:39805",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 51.3,
+      "log": "./logs/10-check-quick-party.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 47,
+      "startOffsetSec": 222.4,
+      "endOffsetSec": 273.7,
+      "cpuSec": 6.2,
+      "peakRssMB": 267,
+      "roomsOnGateServer": 3,
+      "machine": {
+        "memAvailMinMB": 13993,
+        "cpuSaturatedSec": 0,
+        "samples": 54
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 5
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-one-path",
+      "kind": "browser",
+      "command": "node scripts/check-one-path.mjs http://localhost:36769",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 42.4,
+      "log": "./logs/11-check-one-path.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 33,
+      "startOffsetSec": 254,
+      "endOffsetSec": 296.4,
+      "cpuSec": 7.7,
+      "peakRssMB": 287,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13933,
+        "cpuSaturatedSec": 0,
+        "samples": 48
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-cup-party",
+      "kind": "browser",
+      "command": "node scripts/check-cup-party.mjs http://localhost:39565",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 34.9,
+      "log": "./logs/12-check-cup-party.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 31,
+      "startOffsetSec": 259.8,
+      "endOffsetSec": 294.6,
+      "cpuSec": 4.6,
+      "peakRssMB": 270,
+      "roomsOnGateServer": 2,
+      "machine": {
+        "memAvailMinMB": 13933,
+        "cpuSaturatedSec": 0,
+        "samples": 37
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 5,
+        "pages": 5,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-lobby-mode",
+      "kind": "browser",
+      "command": "node scripts/check-lobby-mode.mjs http://localhost:39805",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 22.4,
+      "log": "./logs/13-check-lobby-mode.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 19,
+      "startOffsetSec": 273.8,
+      "endOffsetSec": 296.2,
+      "cpuSec": 7.8,
+      "peakRssMB": 365,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 13933,
+        "cpuSaturatedSec": 0,
+        "samples": 24
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 18,
+        "pages": 18,
+        "peakOpenPages": 2
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-tv-show",
+      "kind": "browser",
+      "command": "node scripts/check-tv-show.mjs http://localhost:36769",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 11.8,
+      "log": "./logs/14-check-tv-show.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 12,
+      "startOffsetSec": 296.4,
+      "endOffsetSec": 308.2,
+      "cpuSec": 4.4,
+      "peakRssMB": 392,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14820,
+        "cpuSaturatedSec": 0,
+        "samples": 12
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-teams",
+      "kind": "browser",
+      "command": "node scripts/check-teams.mjs http://localhost:36769",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 10.6,
+      "log": "./logs/15-check-teams.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 11,
+      "startOffsetSec": 308.2,
+      "endOffsetSec": 318.9,
+      "cpuSec": 4.2,
+      "peakRssMB": 296,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 14629,
+        "cpuSaturatedSec": 0,
+        "samples": 12
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 6,
+        "pages": 6,
+        "peakOpenPages": 6
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-game-night-flow",
+      "kind": "browser",
+      "command": "node scripts/check-game-night-flow.mjs http://localhost:36769",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 9.9,
+      "log": "./logs/16-check-game-night-flow.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 10,
+      "startOffsetSec": 318.9,
+      "endOffsetSec": 328.8,
+      "cpuSec": 3.6,
+      "peakRssMB": 380,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14807,
+        "cpuSaturatedSec": 0,
+        "samples": 11
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 3,
+        "pages": 3,
+        "peakOpenPages": 3
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-official-practice",
+      "kind": "browser",
+      "command": "node scripts/check-official-practice.mjs http://localhost:36769",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 8.8,
+      "log": "./logs/17-check-official-practice.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 10,
+      "startOffsetSec": 328.8,
+      "endOffsetSec": 337.6,
+      "cpuSec": 6.6,
+      "peakRssMB": 403,
+      "roomsOnGateServer": 0,
+      "machine": {
+        "memAvailMinMB": 14550,
+        "cpuSaturatedSec": 0,
+        "samples": 10
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 5,
+        "pages": 5,
+        "peakOpenPages": 5
+      },
+      "failureKind": null
+    },
+    {
+      "name": "check-library",
+      "kind": "browser",
+      "command": "node scripts/check-library.mjs http://localhost:36769",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.9,
+      "log": "./logs/18-check-library.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 6,
+      "startOffsetSec": 337.6,
+      "endOffsetSec": 343.5,
+      "cpuSec": 1.8,
+      "peakRssMB": 259,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 14931,
+        "cpuSaturatedSec": 0,
+        "samples": 7
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 1,
+        "pages": 2,
+        "peakOpenPages": 2
+      },
+      "failureKind": null
+    }
+  ],
+  "notRun": [],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 36769,
+      "pid": 11156,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216t1/test-results/20261115-103318-3b1a2ef5-11023/server-data/w1",
+      "log": "./logs/server-w1.log"
+    },
+    {
+      "worker": "w2",
+      "port": 39565,
+      "pid": 11157,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216t1/test-results/20261115-103318-3b1a2ef5-11023/server-data/w2",
+      "log": "./logs/server-w2.log"
+    },
+    {
+      "worker": "w3",
+      "port": 39805,
+      "pid": 11158,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216t1/test-results/20261115-103318-3b1a2ef5-11023/server-data/w3",
+      "log": "./logs/server-w3.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 344,
+    "sumSec": 918,
+    "utilisation": 0.89,
+    "perWorkerBusySec": {
+      "w1": 342,
+      "w2": 287,
+      "w3": 289
+    },
+    "predicted": {
+      "low": 211,
+      "mid": 290,
+      "high": 591,
+      "confidence": "low-confidence"
+    },
+    "contentionRatio": 1.068,
+    "longest": [
+      {
+        "name": "check-cup-team-games",
+        "sec": 150
+      },
+      {
+        "name": "check-lifecycle",
+        "sec": 131.3
+      },
+      {
+        "name": "check-split-clues",
+        "sec": 111.2
+      },
+      {
+        "name": "check-themes-seasonal",
+        "sec": 103.7
+      },
+      {
+        "name": "check-split-clues-content",
+        "sec": 96.6
+      }
+    ],
+    "backpressure": {
+      "waits": 5,
+      "seconds": 43
+    },
+    "system": {
+      "cpuPctMean": 33,
+      "cpuPctPeak": 91,
+      "memAvailMinMB": 13212,
+      "load1Peak": 6.44,
+      "cpuPctEvery10s": [
+        77,
+        16,
+        15,
+        11,
+        16,
+        13,
+        9,
+        9,
+        9,
+        7,
+        11,
+        14,
+        30,
+        31,
+        23,
+        76,
+        49,
+        36,
+        31,
+        26,
+        33,
+        59,
+        43,
+        13,
+        13,
+        30,
+        49,
+        48,
+        79,
+        57,
+        38,
+        21,
+        1,
+        2,
+        69,
+        18
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 7.2,
+        "peakRssMB": 157
+      },
+      {
+        "worker": "w2",
+        "cpuSec": 2.6,
+        "peakRssMB": 144
+      },
+      {
+        "worker": "w3",
+        "cpuSec": 4.5,
+        "peakRssMB": 159
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "check-cup-team-games",
+        "phase": "browser",
+        "estSec": 136,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 4,
+        "name": "check-lifecycle",
+        "phase": "browser",
+        "estSec": 122,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 5,
+        "name": "check-split-clues",
+        "phase": "browser",
+        "estSec": 104,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 6,
+        "name": "check-themes-seasonal",
+        "phase": "browser",
+        "estSec": 99,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 7,
+        "name": "check-content-variety",
+        "phase": "browser",
+        "estSec": 65,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 8,
+        "name": "check-split-clues-content",
+        "phase": "browser",
+        "estSec": 60,
+        "estSource": "none",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 9,
+        "name": "check-results",
+        "phase": "browser",
+        "estSec": 48,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 10,
+        "name": "check-quick-party",
+        "phase": "browser",
+        "estSec": 47,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 11,
+        "name": "check-one-path",
+        "phase": "browser",
+        "estSec": 33,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 12,
+        "name": "check-cup-party",
+        "phase": "browser",
+        "estSec": 31,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 13,
+        "name": "check-lobby-mode",
+        "phase": "browser",
+        "estSec": 19,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 14,
+        "name": "check-tv-show",
+        "phase": "browser",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 15,
+        "name": "check-teams",
+        "phase": "browser",
+        "estSec": 11,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 16,
+        "name": "check-game-night-flow",
+        "phase": "browser",
+        "estSec": 10,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 17,
+        "name": "check-official-practice",
+        "phase": "browser",
+        "estSec": 10,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 18,
+        "name": "check-library",
+        "phase": "browser",
+        "estSec": 6,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 211.23668999999995,
+      "mid": 290.27337500000004,
+      "high": 591.4569375,
+      "sequentialSec": 818.5999999999999,
+      "confidence": "low-confidence",
+      "contention": 1.0565,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 36769,
+    "pid": 11156,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216t1/test-results/20261115-103318-3b1a2ef5-11023/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216t1/test-results/20261115-103318-3b1a2ef5-11023/web-dist"
+  }
+}

@@ -1,0 +1,10 @@
+
+FAILED (exit 1) | targeted | run 20261115-112145-8798e38e-6333
+  2 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-warm-ivory (w1) [functional]: FAIL W8 Everyday lobby-320: every element kind's computed colours equal the base build's (d4dc408) — 115 kinds; new 1, missing 1; 9 intended element change(s) (Stage 12.1, 12.4–12.14), each reusing a 
+  timing   wall 1m 15s · step time 1m 13s (sum) · 3 workers, 33% busy · 0.97× the same steps run one after another
+           predicted 0–2m (about 1m 07s, measured) → actual 1m 15s (+12%)
+           longest  check-warm-ivory 1m 07s, build-web 6s, browser-preflight 1s · the longest step is 89% of the wall time
+           machine  CPU mean 16%, peak 56% · memory available ≥ 14858 MB · load peak 2.76
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi0/test-results/20261115-112145-8798e38e-6333/report.json

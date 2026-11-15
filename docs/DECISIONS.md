@@ -2012,3 +2012,29 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **The Casual / Practice / Official label:** wherever a finished game is labelled (the lobby's "Last game", the results comment, the results screens), the label is the game's mode as it was played, from `casualGameIds`. It is never the room's current kind.
   - **Which results screen:** a casual game's results stay the casual results screen after the room becomes a Cup (they turned into the old screen's "Practice game"). What's next on that screen still follows the room as it is now.
   - **Alternative rejected:** storing a mode on each game (a data migration for a display label the server already derives).
+
+## Stage 12.16: Split Clues content readiness
+**Authorization:** the owner's review and handoff on #40, comment 6892660460 (2026-11-15, 4:58 a.m. ET; D-WF-01). Spec: `docs/stage12/stage1216.md`. Inventory: `docs/stage12/stage1216-split-clues-inventory.md`. Branch `claude/stage12-16-split-clues-content`, PR #41, stacked on #40. Nothing is merged or deployed, and no puzzle is approved.
+
+- **D-S1216-01 Split Clues' puzzles are library content, reviewed like any other.**
+  - **The move:** the 51 puzzles left the TypeScript bank (`src/games/modules/packs/split-clues.ts`, deleted) for two JSON packs, `content/packs/split-clues-everyday.json` (38) and `split-clues-christmas.json` (13), generated from the bank. A test pins every id, kind, answer, alternative, clue and season to the bank's own fingerprint.
+  - **The schema:** the shared item fields plus `kind`, `answer`, `alts` (1–8) and exactly six `clues`. Lint refuses a clue containing the answer or an alternative and two identical clues; it warns on a clue over 60 characters.
+  - **Review status:** every puzzle ships `provisional` with `eligibility: "official"`, so it is practice-only until a person approves its exact hash (`content/approvals.json`, written by `npm run content:approve`). Missing, stale (edited since approval) and rejected approvals are never treated as approved. Authorship, tests, the handoff and the test mode are not editorial approval.
+  - **The placeholders:** `difficulty` 2 and `category` from the kind, because the bank had neither. Official selection balances difficulty, so that balancing does nothing for Split Clues until an editor sets real values (flagged in the inventory).
+  - **The module:** it no longer reads a bank. The room's content selection chooses the six puzzles and hands them to `init` (as Team Huddle's questions are), and `init` refuses fewer than six. `SplitPuzzle` is declared in `src/games/modules/types.ts`, so the web app's imports never reach a content bank (`tests/stage91-bank-privacy.test.ts`).
+  - **Alternative rejected:** keeping the TypeScript bank with a review flag beside it. That would be a second approval system with no hash binding.
+- **D-S1216-02 In a Family Cup, Split Clues deals year-round puzzles only, in every mode.**
+  - **Why:** a Cup's games keep their full content and have no session season (Stage 8.2), so Christmas puzzles would otherwise mix into a Cup by chance. Before this stage the Cup dealt from the Everyday bank only; this keeps that.
+  - **What follows:** an Official Split Clues game in a Cup needs six approved year-round puzzles it hasn't used; approved Christmas puzzles never count there. Casual and solo rooms are unchanged: Everyday sessions get Everyday puzzles, Christmas sessions get their Christmas puzzles first.
+  - **Alternative rejected:** dealing Christmas puzzles in December Cups. That is a product choice for the owner, not a repair.
+- **D-S1216-03 Puzzles dealt before this stage still count as used.**
+  - **The rule:** Split Clues games before Stage 12.16 dealt from the bank and left no usage records. Their dealt ids (the module's `contentIds`) are merged into the usage this selection reads, as practice uses at sequence 0. This is derived on each selection; saved rooms are never rewritten.
+  - **What it protects:** no-repeat in a night, and a Cup never deals as Official a puzzle it already showed (practice included).
+  - **Alternative rejected:** a data migration writing usage into saved rooms (a write to every room for something derivable).
+- **D-S1216-04 The Official gate is the server's, and the lobby shows it.**
+  - **The server:** an Official Split Clues start without six eligible unused puzzles is refused with HTTP 409 (`CONTENT_EXHAUSTED`) and a plain reason. Nothing is created; no provisional puzzle is substituted; the game is never shortened or switched to Practice.
+  - **The projection:** a Cup's projection carries `officialContent["split-clues"]` (`available`, `needed`, `message`): counts and the reason only, never a puzzle. It is the same selection the start runs, as a dry run that records nothing.
+  - **The lobby:** Official is disabled for Split Clues with the reason under the choice ("Practice only: …"), the Up next card says "Practice only", and Start becomes "Start Split Clues · Practice". The host can still change the game.
+  - **The shared plan (Up next):** the host's plan is stored as chosen, but every projection shows a plan for Official Split Clues as Practice while the Cup can't play it Official (for example after an Official game used the last approved puzzles). So the TV never announces "Split Clues · Official" when the lobby says Practice only.
+  - **Freezing:** the six puzzles are chosen at the start and frozen at the briefing (id, pack, version, hash). Play re-checks them; a puzzle changed in between ends the briefing ("content-changed"), and usage is recorded when play begins. Reloads, reconnects and later edits never alter a game in progress.
+  - **Alternative rejected:** a client-only gate. A forged request would bypass it; the driver forges one and gets the 409.

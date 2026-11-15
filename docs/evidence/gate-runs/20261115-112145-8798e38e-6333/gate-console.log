@@ -1,0 +1,43 @@
+Mchezo gate targeted | run 20261115-112145-8798e38e-6333
+  revision 8798e38ed7e80ed219f3eb657d6c52671aca762c (clean tree) | fingerprint 9206563ef4ca (612 files)
+  plan     3 steps: 1 fast/build, 1 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  219 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 193 run(s))
+  estimate this run: 0–2m (measured) · the same steps one after another: about 1m 10s · longest step check-warm-ivory ~1m 04s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi0/test-results/20261115-112145-8798e38e-6333
+        start build-web on w1 (usually 6s)
+[ 1/3] PASS         5.5s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/3] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:37865 (pid 6453, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi0/test-results/20261115-112145-8798e38e-6333/server-data/w1)
+        start check-warm-ivory on w1 (usually 1m 04s)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-warm-ivory 53s (w1)
+   remaining 15–65s · total 1–3m · done around 11:23–11:23 UTC (measured)
+[ 3/3] FAIL          67s  check-warm-ivory  w1  FAIL W8 Everyday lobby-320: every element kind's computed colours equal the base build's (d4dc408) — 115 kinds; new 1, missing 1; 9 intended element change(s) (
+      | PASS W1 memory at 1280 px: every text element reads (4.5:1, large 3:1) — 30 text elements, lowest 6.24:1, 1 disabled or faded (exempt)
+      | PASS W2 memory at 1280 px: every control stands out from what's behind it (3:1) — 6 controls, weakest 4.03:1
+      | PASS W3 memory at 1280 px: no dark page, card or panel
+      | PASS W5 memory at 1280 px: nothing animates with Animations Off — 0 running
+      | PASS W2 the focus ring after Tab is visible and stands out (3:1, at least 2 px) — memory-back 3px 5.06:1; room-menu 3px 5.06:1; TEXTAREA 3px 7.11:1; SUMMARY 3px 5.56:1
+      | PASS W2 a disabled key looks different from the same key enabled (its fill differs) — disabled rgb(239, 230, 214), enabled rgb(163, 37, 58)
+      | PASS W6 Memory Book: Christmas -> Everyday -> Christmas from the room menu keeps the unsent draft (no reload) — {"mid":["everyday","A draft that survives a change of look"],"end":["christmas","A draft that survives a change of look"]}
+      | PASS W7 Christmas PDF: ivory page, cranberry title, the approved note, not the pending one — christmas-memory-book-LDBQKY-2026-11-15.pdf
+      | PASS W7 Christmas share image: its background is the ivory ground (247, 241, 230) — [247,241,230]
+      | PASS W7 Everyday PDF: unchanged (no page fill, no coloured title) — mchezo-memory-book-LDBQKY-2026-11-15.pdf
+      | PASS W7 after a revoke, a fresh Christmas PDF leaves the revoked note out and keeps the approved one — christmas-memory-book-LDBQKY-2026-11-15.pdf
+      | PASS W6 a game in progress: another tab's look change re-themes it, with no reload and the same question — {"before":["christmas","Question 2 of 10"],"after":["everyday","Question 2 of 10"]}
+      | 
+      | 6 check(s) FAILED
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":21,"pages":22,"peakOpenPages":3}
+
+FAILED (exit 1) | targeted | run 20261115-112145-8798e38e-6333
+  2 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-warm-ivory (w1) [functional]: FAIL W8 Everyday lobby-320: every element kind's computed colours equal the base build's (d4dc408) — 115 kinds; new 1, missing 1; 9 intended element change(s) (Stage 12.1, 12.4–12.14), each reusing a 
+  timing   wall 1m 15s · step time 1m 13s (sum) · 3 workers, 33% busy · 0.97× the same steps run one after another
+           predicted 0–2m (about 1m 07s, measured) → actual 1m 15s (+12%)
+           longest  check-warm-ivory 1m 07s, build-web 6s, browser-preflight 1s · the longest step is 89% of the wall time
+           machine  CPU mean 16%, peak 56% · memory available ≥ 14858 MB · load peak 2.76
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi0/test-results/20261115-112145-8798e38e-6333/report.json

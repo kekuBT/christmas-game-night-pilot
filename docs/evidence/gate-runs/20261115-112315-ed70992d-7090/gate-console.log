@@ -1,0 +1,27 @@
+Mchezo gate targeted | run 20261115-112315-ed70992d-7090
+  revision ed70992dd9b56e4d673e33e806e650cb7cb95207 (clean tree) | fingerprint 00b9689ba99d (614 files)
+  plan     3 steps: 1 fast/build, 1 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  220 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 193 run(s))
+  estimate this run: 0–2m (measured) · the same steps one after another: about 1m 10s · longest step check-warm-ivory ~1m 04s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi1/test-results/20261115-112315-ed70992d-7090
+        start build-web on w1 (usually 5s)
+[ 1/3] PASS         5.3s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/3] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:45029 (pid 7211, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi1/test-results/20261115-112315-ed70992d-7090/server-data/w1)
+        start check-warm-ivory on w1 (usually 1m 04s)
+── progress  2/3 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-warm-ivory 53s (w1)
+   remaining 15–65s · total 1–3m · done around 11:24–11:25 UTC (measured)
+[ 3/3] PASS        66.9s  check-warm-ivory  w1
+
+PASSED (exit 0) | targeted | run 20261115-112315-ed70992d-7090
+  3 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 1m 14s · step time 1m 13s (sum) · 3 workers, 33% busy · 0.99× the same steps run one after another
+           predicted 0–2m (about 1m 07s, measured) → actual 1m 14s (+10%)
+           longest  check-warm-ivory 1m 07s, build-web 5s, browser-preflight 1s · the longest step is 90% of the wall time
+           machine  CPU mean 16%, peak 56% · memory available ≥ 14880 MB · load peak 1.5
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216wi1/test-results/20261115-112315-ed70992d-7090/report.json

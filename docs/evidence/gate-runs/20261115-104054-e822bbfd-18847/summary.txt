@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261115-104054-e822bbfd-18847
+  106 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-warm-ivory (w2) [functional]: FAIL W8 Everyday lobby-320: every element kind's computed colours equal the base build's (d4dc408) — 115 kinds; new 1, missing 1; 9 intended element change(s) (Stage 12.1, 12.4–12.14), each reusing a 
+  timing   wall 40m 25s · step time 1h 57m (sum) · 3 workers, 97% busy · 2.90× the same steps run one after another
+           predicted 29–69m (about 38m 41s, low-confidence) → actual 40m 25s (+4%)
+           longest  e2e-chromium 8m 22s, check-f5 7m 34s, check-leaderboard 6m 37s · the longest step is 21% of the wall time
+           machine  CPU mean 34%, peak 100% · memory available ≥ 13008 MB · load peak 4.69 · backpressure 17 wait(s), 69s
+           contention ×1.068 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/s1216full1/test-results/20261115-104054-e822bbfd-18847/report.json
