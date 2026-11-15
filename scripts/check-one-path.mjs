@@ -13,8 +13,11 @@
 //      reload.
 //   E. Two official games: the TV's final shows the Cup standings "after this game", with ▲/▼ that match the
 //      server's standings before and after (the TV's own memory). A TV opened afterwards shows no arrows.
+//      Review 6890761957: the host's "Last game" card says Official.
 //   F. The host ends Day 1: the TV shows "Day 1 complete" and the server's own Day 1 winner(s); "Cup standings"
 //      shows the Cup podium on Day 2. Nothing private reaches the TV (no seat token in its page).
+//   G. Review 6890761957: a practice game in the Cup: the host's "Last game" card says Practice, and still does after
+//      a reload.
 // Usage: node scripts/check-one-path.mjs <baseUrl>   (the gate passes its server)
 import QRCode from "qrcode";
 import { launchChromium, screenshotPath } from "./lib/driver-env.mjs";
@@ -289,6 +292,9 @@ try {
   const refused = await fetch(`${BASE}/rooms/${roomId}/casual`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": hostSeat.token, ...PROTOCOL_HEADERS }, body: "{}" });
   check("E once an official game has finished, going back is refused (409 OFFICIAL_GAME_PLAYED)", refused.status === 409 && (await refused.json()).code === "OFFICIAL_GAME_PLAYED");
   for (const p of [host]) { const back = p.getByRole("button", { name: "Back to lobby" }); await back.first().waitFor({ timeout: 15000 }).catch(() => {}); if (await back.count()) await back.first().click(); }
+  // Review 6890761957: the Cup's own official game is labelled Official (the casual ones before it stay Casual).
+  await soon(`E host's "Last game" card says Official after an official game`, async () => { const k = await host.getByTestId("last-game-card").locator(".mz-kicker").innerText(); return /Official/i.test(k) && !/Casual|Practice/i.test(k); });
+  console.log(`  (host's card: ${(await host.getByTestId("last-game-card").locator(".mz-kicker").innerText().catch(() => "?")).replace(/\s+/g, " ")})`);
   await openRoomMenu(host);
   check("E …and the room menu no longer offers it", (await host.getByTestId("menu-undo-cup").count()) === 0);
   await closeRoomMenu(host);
@@ -349,6 +355,18 @@ try {
     await tv.setViewportSize({ width: w, height: w === 768 ? 1024 : 720 });
     check(`F TV at ${w}px: no sideways scrolling`, await tv.evaluate(() => document.scrollingElement.scrollWidth <= innerWidth + 1));
   }
+
+  // ---- G. Review 6890761957: a practice game in the Cup is labelled Practice, and keeps it after a reload ----
+  const gPractice = await playMath(roomId, seats, [3, 2, 1], false);
+  const isPractice = async () => { const k = await host.getByTestId("last-game-card").locator(".mz-kicker").innerText(); return /Practice/i.test(k) && !/Casual|Official/i.test(k); };
+  for (const p of [host]) { const back = p.getByRole("button", { name: "Back to lobby" }); await back.first().waitFor({ timeout: 20000 }).catch(() => {}); if (await back.count()) await back.first().click(); }
+  await soon(`G host's "Last game" card says Practice after a practice game in the Cup`, isPractice, 20000);
+  console.log(`  (host's card: ${(await host.getByTestId("last-game-card").locator(".mz-kicker").innerText().catch(() => "?")).replace(/\s+/g, " ")})`);
+  await host.reload({ waitUntil: "domcontentloaded" });
+  await soon("G …and after a reload", isPractice, 20000);
+  const projG = await tvProj(roomId);
+  const g5 = projG.games.find((g) => g.id === gPractice);
+  check("G the server recorded it as a practice game, not one of the casual ones", g5?.status === "finished" && g5.official === false && !(projG.casualGameIds ?? []).includes(gPractice), JSON.stringify({ id: gPractice, status: g5?.status, official: g5?.official, casualGameIds: projG.casualGameIds }));
 } catch (e) {
   check("driver ran to the end", false, String(e?.stack ?? e).split("\n").slice(0, 3).join(" | "));
 } finally {

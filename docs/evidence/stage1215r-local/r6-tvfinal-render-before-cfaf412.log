@@ -1,0 +1,107 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wt-old-r6
+
+ ❯ apps/web/src/components/mchezo/TvFinal.test.tsx (6 tests | 3 failed) 77ms
+   × review 6890761957: the TV's final standings, rendered > Relay 150/50/50 with places Coral 1, Sun 2, Mint 3: the list reads 1, 1, 2, 3 by team, never 1, 1, 3, 3 51ms
+     → expected [ '1', '1', '3', '3' ] to deeply equal [ '1', '1', '2', '3' ]
+   × review 6890761957: the TV's final standings, rendered > a true tie between teams still shares a place: Sun and Mint level with no tiebreak are 2, 2 5ms
+     → expected [ '1', '1', '3', '3' ] to deeply equal [ '1', '1', '2', '2' ]
+   × review 6890761957: the TV's final standings, rendered > a game built for teams placed by score (no places recorded) ranks by its team results too 5ms
+     → expected [ [ '1', '' ], [ '1', '' ], …(2) ] to deeply equal [ [ '1', 'Team Sun' ], …(3) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/web/src/components/mchezo/TvFinal.test.tsx > review 6890761957: the TV's final standings, rendered > Relay 150/50/50 with places Coral 1, Sun 2, Mint 3: the list reads 1, 1, 2, 3 by team, never 1, 1, 3, 3
+AssertionError: expected [ '1', '1', '3', '3' ] to deeply equal [ '1', '1', '2', '3' ]
+
+- Expected
++ Received
+
+  Array [
+    "1",
+    "1",
+-   "2",
++   "3",
+    "3",
+  ]
+
+ ❯ apps/web/src/components/mchezo/TvFinal.test.tsx:57:37
+     55|     const game = gameOf({ gameId: "relay", official: true, rawScores, …
+     56|     const { rows } = standings(game, feedOf({ cup: true }));
+     57|     expect(rows.map((r) => r.rank)).toEqual(["1", "1", "2", "3"]);
+       |                                     ^
+     58|     expect(rows.map((r) => r.dataRank)).toEqual(["1", "1", "2", "3"]);
+     59|     expect(rows.map((r) => [r.name, r.team, r.points])).toEqual([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  apps/web/src/components/mchezo/TvFinal.test.tsx > review 6890761957: the TV's final standings, rendered > a true tie between teams still shares a place: Sun and Mint level with no tiebreak are 2, 2
+AssertionError: expected [ '1', '1', '3', '3' ] to deeply equal [ '1', '1', '2', '2' ]
+
+- Expected
++ Received
+
+  Array [
+    "1",
+    "1",
+-   "2",
+-   "2",
++   "3",
++   "3",
+  ]
+
+ ❯ apps/web/src/components/mchezo/TvFinal.test.tsx:71:37
+     69|     const game = gameOf({ gameId: "relay", rawScores, teams: TEAMS, te…
+     70|     const { rows } = standings(game);
+     71|     expect(rows.map((r) => r.rank)).toEqual(["1", "1", "2", "2"]);
+       |                                     ^
+     72|     expect(rows.map((r) => r.team)).toEqual(["Team Coral", "Team Coral…
+     73|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  apps/web/src/components/mchezo/TvFinal.test.tsx > review 6890761957: the TV's final standings, rendered > a game built for teams placed by score (no places recorded) ranks by its team results too
+AssertionError: expected [ [ '1', '' ], [ '1', '' ], …(2) ] to deeply equal [ [ '1', 'Team Sun' ], …(3) ]
+
+- Expected
++ Received
+
+  Array [
+    Array [
+      "1",
+-     "Team Sun",
++     "",
+    ],
+    Array [
+      "1",
+-     "Team Coral",
++     "",
+    ],
+    Array [
+      "1",
+-     "Team Coral",
++     "",
+    ],
+    Array [
+-     "3",
+-     "Team Mint",
++     "4",
++     "",
+    ],
+  ]
+
+ ❯ apps/web/src/components/mchezo/TvFinal.test.tsx:80:47
+     78|     const game = gameOf({ gameId: "tug-of-war", rawScores, teams: TEAM…
+     79|     const { rows } = standings(game);
+     80|     expect(rows.map((r) => [r.rank, r.team])).toEqual([["1", "Team Sun…
+       |                                               ^
+     81|   });
+     82| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 3 passed (6)
+   Start at  07:24:48
+   Duration  1.25s (transform 550ms, setup 0ms, collect 815ms, tests 77ms, environment 0ms, prepare 89ms)
+

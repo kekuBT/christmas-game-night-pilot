@@ -292,7 +292,8 @@ export function TvLive({ game, title, nameOf, casual }: { game: PublicGame; titl
 
 /* ------------------------------------------------------------- final */
 
-function TvFinal({ game, title, feed, nameOf, titleOf, cupBefore, paused }: { game: PublicGame; title: string; feed: TvFeed; nameOf: (id: string) => string; titleOf: (id: string) => string; cupBefore?: CupStanding[]; paused: boolean }) {
+/** A finished game's final screen on the TV. Exported for its rendered regression test (TvFinal.test.tsx). */
+export function TvFinal({ game, title, feed, nameOf, titleOf, cupBefore, paused }: { game: PublicGame; title: string; feed: TvFeed; nameOf: (id: string) => string; titleOf: (id: string) => string; cupBefore?: CupStanding[]; paused: boolean }) {
   // Stage 9.3: a cooperative game's final view is its one team result (no winner, no standings).
   if (game.outcome?.team) return <TvTeamFinal game={game} title={title} feed={feed} titleOf={titleOf} />;
   return <TvCompetitiveFinal game={game} title={title} feed={feed} nameOf={nameOf} titleOf={titleOf} cupBefore={cupBefore} paused={paused} />;
