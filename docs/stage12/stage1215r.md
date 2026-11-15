@@ -145,3 +145,30 @@ Evidence for every run is in `docs/evidence/gate-runs/`; local runs, failures in
 | **`c27e242`** | **full (checkpoint)** | `20261115-043355-c27e2420-22664` | **PASSED** (exit 0, 106/106, 39 min 37 s, no retries) |
 
 **Tested SHA: `c27e242`.** No other gate ran on this stage.
+
+## Second round: review 6889824884 (two presentation repairs)
+
+**Authorization:** the owner's review and handoff on #40, comment 6889824884 (2026-11-15, 12:35 a.m. ET; D-WF-01).
+- **Verdict:** changes required.
+- **Asked for:** two bounded wording and selection repairs, with checks scaled to them, a new completed report, and the earlier full-gate evidence kept (no rerun of `c27e242`).
+
+1. **Know Your Rivals called an idle team's silence a privacy choice.** A team where nobody answered at all (the clock ran out: `{answered 0, passed 0}`) was described as having said "Rather not say": on the reveal, the guess-phase phone note and the rivals' rows.
+   - **Now:** every surface says "Nobody on Team Sun picked either answer this time…". That is true whether they all said "Rather not say", let the time run out, or a mix, and it is true for older records too. It never says why.
+   - **The briefing:** "If nobody on a team picks either answer ("Rather not say", or the time runs out)…".
+   - **Unchanged:** the scoring rule and the unconditional opt-out.
+2. **An Official Relay's tiebreak comment named an unrelated winner.** The old check fired on any equal-points pair placed apart and then named the overall winner. Example: Coral home with 150, Sun and Mint level on 50 further down, and it read "Level on points; Team Coral got there first."
+   - **Now:** `teamTiebreakQuip` (`lib/teamLines.ts`) gives the comment only when the winning team is level on points with a team placed below it, and names both: "Level on points with Team Coral; Team Sun got there first."
+   - **Other cases:** a tie further down, a true shared first place and unequal points keep the usual comment, which describes only the winner's margin.
+   - **Where the lower tie is explained:** the lanes' line ("Team Sun and Team Mint both ran 5 legs; Team Sun finished its last leg first.") already uses the tied lanes themselves.
+
+**Estimate:** about 1 h (wording, a pure function, tests, a driver round, screenshots, a targeted and a fast gate).
+**Actual:** about 15 minutes, from the review's arrival (12:35 a.m. ET) to the fast gate's verdict (12:48 a.m. ET).
+
+**Gates for the second round (one run on one revision each):**
+
+| Revision | Gate | Run | Verdict |
+|---|---|---|---|
+| `cfaf412` | targeted (know-your-rivals, relay, cup-team-games, results, team-huddle, tug-of-war, split-clues, briefing, night-card, game-night-flow) | `20261115-054306-cfaf4122-1429` | PASSED (exit 0), 12/12, 4 min 19 s |
+| `cfaf412` | fast | `20261115-054732-cfaf4122-3438` | PASSED (exit 0), 5/5; unit 1958/1958 |
+
+**Tested SHA for the second round: `cfaf412`.** As the review asked, no full gate ran on it. The full checkpoint pass (`20261115-043355-c27e2420-22664`) belongs to `c27e242` alone. `cfaf412` changes the copy in three web files, one pure helper (`lib/teamLines.ts`), the briefing line, tests and one driver; no scoring or lifecycle code changed.

@@ -2955,3 +2955,8 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - R5's equal-legs results screen isn't a gate driver: it needs the 4-minute limit, so it was shown in a local run with the testing-only time scale;
   - real phones not tried.
 - **Next:** re-review and the reviewer's independent private-site audit (blocked on the reviewer's own sign-in). Nothing is merged or deployed.
+- **Second round (review 6889824884, 12:35 a.m. ET on 2026-11-15):** two presentation repairs on #40.
+  - **Know Your Rivals:** neutral sit-out wording ("Nobody on … picked either answer"), never "Rather not say" for an idle team.
+  - **Relay:** the Official tiebreak comment appears only for the winner's own tie on points.
+  - **Gates:** on `cfaf412`, targeted `20261115-054306-cfaf4122-1429` PASSED 12/12 and fast `20261115-054732-cfaf4122-3438` PASSED 5/5 (unit 1958/1958). The full checkpoint pass stays with `c27e242`; no full gate ran on `cfaf412`, as the review asked.
+  - **Time:** about 15 minutes (estimate about 1 h).

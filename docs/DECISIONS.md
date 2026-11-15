@@ -2001,3 +2001,9 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
 - **Also repaired (no new rule):**
   - **Family Questions:** a skipped question is never described again in any view (R3).
   - **Recaps:** the lobby's last game, the TV's recaps and the night card take a team game's line from its team results (R6).
+- **D-S1215R-05 (review 6889824884) Plain facts, never an attributed reason or an unrelated winner.**
+  - **Know Your Rivals:** a team that sat a round's guessing out is described as "Nobody on … picked either answer". The records can't always say why (an idle team and a team that opted out look the same in older results), and naming a choice nobody made would be false.
+  - **Relay's tiebreak comment:** it speaks only of the winner's own tie on points, and names the team it's level with.
+  - **Alternatives rejected:**
+    - **Separate wording for "everyone said Rather not say":** needs each team's size on every screen, and would single out a privacy choice.
+    - **A comment for any tie lower down:** the lanes' line already explains it from the tied lanes.

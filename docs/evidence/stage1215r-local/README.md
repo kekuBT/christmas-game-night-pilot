@@ -43,3 +43,20 @@ The screenshots in `docs/stage12/stage1215r-screenshots/` come from `check-know-
 | `20261115-043355-c27e2420-22664` | `c27e242` | full (checkpoint) | **PASSED** (exit 0) | 106/106 (relay 24, know-your-rivals 44, family-questions 103, cup-team-games 26 checks) | 39 min 37 s |
 
 No other gate ran on this stage. The tested SHA is `c27e242`; the green claim rests on its full run alone.
+
+## Second round: review 6889824884
+
+| Log | Revision (worktree state) | Result | What it showed |
+|---|---|---|---|
+| `r5-before-c27e242.log` | the new tests, unchanged, on `c27e242` | **3 FAIL** of 17 | Two reproduce the idle team's "Rather not say" wording (the review's case: `{answered 0, passed 0}`). The third fails because `teamTiebreakQuip` doesn't exist there: the old comment logic was inline in `App.tsx`, and in the review's case it gave "Level on points; Team Coral got there first." |
+| (no log) those tests | `c27e242` + the two repairs | 17/17 | Typecheck and lint clean. |
+| `check-know-your-rivals-r5.log` | + the idle round in the driver, built | 48/0 | Round 5: Sun answers nothing, the answer clock runs out, and every line is neutral. |
+| `check-cup-team-games-r5.log` | same | 26/0 | |
+| (no log) the local screenshot runs (`shot-relay-tiebreak.mjs.txt`, testing-only time scale) | same | ran | **Two teams level on points:** "Level on points with Team Coral; Team Sun got there first."<br>**The review's three teams** (Coral home 150; Sun and Mint 50 each, Sun's last leg first): the usual comment for Coral's win; the lanes say "Team Sun and Team Mint both ran 5 legs; Team Sun finished its last leg first."; Cup placement 100/50/0. |
+
+| Run | Revision | Level | Verdict | Steps | Wall |
+|---|---|---|---|---|---|
+| `20261115-054306-cfaf4122-1429` | `cfaf412` | targeted (10 drivers) | **PASSED** (exit 0) | 12/12 (know-your-rivals 48 checks) | 4 min 19 s |
+| `20261115-054732-cfaf4122-3438` | `cfaf412` | fast | **PASSED** (exit 0) | 5/5 (unit 1958/1958) | 1 min 06 s |
+
+No full gate ran on `cfaf412`, as the review asked.
