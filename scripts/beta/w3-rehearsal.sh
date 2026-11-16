@@ -13,6 +13,12 @@ mkdir -p "$WK"; WK=$(cd "$WK" && pwd)
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 HTTPS=18443; HTTPP=18480; BACK=18080; ORIGIN="https://localhost:$HTTPS"; NAME=w3-svc
 proxy_pid=""
+# Listening sockets on the harness's ports, read from /proc (no ss/netstat dependency: either may be missing).
+listeners() {
+  awk -v want=" $HTTPS $HTTPP $BACK " 'FNR > 1 && $4 == "0A" { n = split($2, a, ":"); p = 0; h = toupper(a[n]);
+    for (i = 1; i <= length(h); i++) p = p * 16 + index("0123456789ABCDEF", substr(h, i, 1)) - 1;
+    if (index(want, " " p " ")) c++ } END { print c + 0 }' $(ls /proc/net/tcp /proc/net/tcp6 2>/dev/null)
+}
 cleanup() {
   [ -n "$proxy_pid" ] && { kill "$proxy_pid" 2>/dev/null; wait "$proxy_pid" 2>/dev/null; }
   proxy_pid=""
@@ -30,6 +36,7 @@ docker exec -i "$NAME" cgn-authorize /var/data/cgn-w1 "$ORIGIN" 1 < "$WK/code" |
 node "$ROOT/scripts/beta/render-like-proxy.mjs" --https-port $HTTPS --http-port $HTTPP --backend "127.0.0.1:$BACK" --cert "$WK/cert.pem" --key "$WK/key.pem" --hops 1 > "$WK/proxy.log" 2>&1 &
 proxy_pid=$!
 for _ in $(seq 1 40); do grep -q LISTENING "$WK/proxy.log" && break; sleep 0.25; done
+echo "   listeners on $HTTPS/$HTTPP/$BACK while running (positive control for the cleanup check; expect 3 or more): $(listeners)"
 echo "-- the rehearsal (bounded: timeout 600 s, and the driver's own --max-minutes)"
 timeout 600 node "$ROOT/scripts/beta/w3-rehearsal.mjs" --origin "$ORIGIN" --code-file "$WK/code" --evidence "$WK/evidence" "$@" > "$WK/w3.log" 2>&1
 rc=$?
@@ -38,7 +45,7 @@ echo "   driver exit: $rc"
 cleanup
 echo "-- cleanup"
 left_c=$(docker ps -aq --filter "name=^${NAME}$" | wc -l)
-left_l=$( (ss -ltn 2>/dev/null || netstat -ltn 2>/dev/null) | grep -cE "[:.](${HTTPS}|${HTTPP}|${BACK})\b" || true)
+left_l=$(listeners)
 left_p=$(pgrep -fc "w3-rehearsal.mjs|render-like-proxy.mjs --https-port $HTTPS" || true)
 echo "   container left: $left_c; listeners left on $HTTPS/$HTTPP/$BACK: $left_l; processes left: $left_p (the throwaway data folder lived in the removed container)"
 CODE=$(cat "$WK/code")
