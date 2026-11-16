@@ -29,7 +29,8 @@ describe("LockedAnswer (R5)", () => {
   it("a nonfinal answer leads with carrying on: Next question before the room's progress", () => {
     const { html, text, buttons } = render();
     expect(html).toContain('aria-label="Answer locked in"');
-    expect(buttons).toContain("Next question");
+    // Next question, then Trivia's TV shortcut (kept, in the room's section).
+    expect(buttons).toEqual(["Next question", "TV stage"]);
     const next = html.indexOf(">Next question<");
     const ring = html.indexOf('class="mz-wait"');
     expect(next).toBeGreaterThan(0);

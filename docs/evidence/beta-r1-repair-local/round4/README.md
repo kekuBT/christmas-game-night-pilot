@@ -37,3 +37,26 @@ Logs are in `sweep-working-tree/`.
 | check-mchezo | 43/43 |
 | check-answer-race | 9/9 |
 | check-solo | 80/80 |
+
+## The gates, and the one that failed
+Each gate ran from a fresh clone of the exact commit (`scripts/gate.mjs`, three workers). Their summaries, reports and logs are in `docs/evidence/gate-runs/<run id>/`.
+
+| Run | Commit | Verdict |
+|---|---|---|
+| targeted `20261116-022947-5525dedb-4704` | `5525ded` (the repair) | **FAILED (exit 1), 11/12.** One check in the new driver: "320x480 T the LOCKED IN stamp stays clear of the long answer — 61px²". Every other check of all 12 steps passed, check-locked-answer's other checks included. |
+| targeted `20261116-024127-34996cf4-7748` | `34996cf` (driver fix only; product identical to `5525ded`) | **PASSED (exit 0), 12/12:** check-locked-answer, answer-helper, math, geography, audit-fixes, mchezo, answer-race, solo, session-flow and tv-lifecycle, plus the build and the browser preflight. |
+| full (see below) | `34996cf` | (filled in when it finishes) |
+
+**Why the first targeted run failed, measured before changing anything:** `stamp-probe.mjs.txt` and `stamp-probe-after-gate-failure.out.txt`.
+- **The probe:** the same build at 320×480, four locks. It sets the 80-character answer and samples the stamp and answer every 40 ms for 1.4 s.
+- **What it found:** overlap only while the stamp's slam animation runs (8 of 35 samples, about 0.3 s, up to 4,291 px², the stamp 102 px tall at 1.8×). **0 px² at rest** in every lock.
+- **So:** the driver measured mid-animation, while the gate loaded the machine. The existing A-01 check (check-audit-fixes) measures after the stamp lands for the same reason.
+- **The fix, driver only (`34996cf`):** after each lock and after setting the long answer, wait until the stamp's animation is no longer running. The local rerun is `after-local-run4-settled-stamp.log`: 136/136, 0 px² at 320 and 390.
+
+**Screenshots from the tested candidate:** `after-34996cf/`, taken by the passing targeted run's check-locked-answer.
+- the nonfinal and final screens at 320×480, 390×844 and 1440×900;
+- an 80-character answer at 320 and 390;
+- 150% and 200% zoom;
+- Geography and Math Mayhem at 320;
+- the sat-out ring;
+- the journey: the TV playing (Reveal withheld), the host's final screen, the guest's results (time ran out), the TV's finished review, and the TV after Play again.

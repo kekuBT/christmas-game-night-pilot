@@ -1,0 +1,21 @@
+$ node scripts/check-f5.mjs http://localhost:36425
+# timeout 1500s | worker w2 | server http://localhost:36425 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full/test-results/20261116-024847-34996cf4-10213/server-data/w2)
+
+[+7.2s] PASS lobby roster: 4 players joined
+[+7.2s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games; casual-only, not in a Cup: jebena-rush, spectrum, family-questions; built for teams, played by their own drivers: team-huddle, relay, split-clues, team-draw, territory, tug-of-war, know-your-rivals)
+[+9.0s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+20.4s] OK impostor: finished
+[+20.4s] PASS day playlist: impostor finished without sticking
+[+22.0s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+30.1s] FAIL caption-clash: locator.count: Target page, context or browser has been closed
+[+30.1s]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+30.1s]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+30.1s]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+30.1s]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+30.1s] FAIL day playlist: caption-clash finished without sticking — locator.count: Target page, context or browser has been closed
+[+30.1s] FAIL day playlist: all games finished in one room — 1/14 finished
+[+30.1s] FATAL: page.evaluate: Target page, context or browser has been closed
+[+30.1s] F5 FAILED: 3/7 failed
+[+30.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# CANCELLED (exit 1) in 30.2s | cpu 3.8s, peak memory 276 MB

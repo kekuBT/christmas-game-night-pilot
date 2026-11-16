@@ -25,6 +25,9 @@
 //        Next question is reached by scrolling the screen and works
 // C. The same screen in Geography and Math Mayhem at 320×480 (L1–L4, F), and
 //    the shared ring's sat-out caller (Trivia's "Sit this game out") for L3.
+//    M  Math Mayhem: the next prompt and its speed clock begin only through
+//       the existing open flow after Next question, visibility guard included
+//       (scope answer 6905044291)
 // B. A journey on this driver's OWN server with MCHEZO_LIFECYCLE_SCALE=0.2, a
 //    test-only setting that makes every time limit 5× shorter (Trivia's 6 min
 //    → 72 s; the deadline is still the server's own, with no host action).
@@ -316,6 +319,11 @@ try {
   for (const gameId of ["geography", "math-mayhem"]) {
     const vp = { width: 320, height: 480 };
     const hCtx = await browser.newContext({ viewport: vp });
+    // M: the host's page can report itself hidden, as check-math-timing does (the visibility guard's input).
+    await hCtx.addInitScript(() => {
+      Object.defineProperty(document, "visibilityState", { configurable: true, get: () => (window.__mzHidden ? "hidden" : "visible") });
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => !!window.__mzHidden });
+    });
     const gCtx = await browser.newContext({ viewport: vp });
     const h = await hCtx.newPage();
     const g = await gCtx.newPage();
@@ -328,8 +336,37 @@ try {
     const m = await measure(h);
     await h.screenshot({ path: pathJoin(SHOTS, `${gameId}-nonfinal-host-320x480.png`) });
     nonfinalChecks(`${gameId} 320x480`, "host", m);
-    await h.getByRole("button", { name: "Next question" }).click();
-    check(`${gameId} 320x480 host L1 Next question opens question 2`, (await questionNumber(h)) === 2);
+    if (gameId === "math-mayhem") {
+      // M (scope answer 6905044291): Math's next prompt and its speed clock begin only through the existing
+      // open flow after Next question, visibility guard included. The player's own projection (current
+      // protocol) shows a question's prompt only once it has been opened, and the server times from that open.
+      const mine = () => h.evaluate(async () => {
+        const r = await fetch(`/rooms/${sessionStorage.getItem("cgn_roomId")}/projection?audience=player`, { headers: { "x-session-token": sessionStorage.getItem("cgn_token") ?? "", "x-mchezo-protocol": "5" } });
+        const g = ((await r.json()).myGames ?? []).filter((x) => x.gameId === "math-mayhem").at(-1);
+        return { q2: g?.questions?.[1]?.id, q2Opened: g?.questions?.[1]?.prompt !== undefined, times: g?.myAnswerTimes ?? {} };
+      });
+      check("math-mayhem M on the locked screen, question 2 is not opened", !(await mine()).q2Opened);
+      await sleep(3500); // longer than the open retry (OPEN_RETRY_MS, 3 s)
+      check("math-mayhem M still not opened 3.5 s later (nothing opens it from the locked screen)", !(await mine()).q2Opened);
+      await h.evaluate(() => { window.__mzHidden = true; document.dispatchEvent(new Event("visibilitychange")); });
+      await h.getByRole("button", { name: "Next question" }).click();
+      await sleep(3500);
+      check("math-mayhem M after Next question on a hidden page, question 2 is still not opened (the visibility guard)", !(await mine()).q2Opened && (await h.locator("h1.mz-question").count()) === 0);
+      await h.evaluate(() => { window.__mzHidden = false; document.dispatchEvent(new Event("visibilitychange")); });
+      await soon("math-mayhem M once the page is shown, question 2 opens and its prompt appears", async () => (await mine()).q2Opened && (await h.locator("h1.mz-question").count()) === 1, 10000);
+      const shownAt = Date.now();
+      await h.locator(".mz-slab:not([disabled])").first().click();
+      await h.locator(AFTER_LOCK).first().waitFor({ timeout: 15000 });
+      const after = await mine();
+      const ms = after.times?.[after.q2];
+      check("math-mayhem M question 2's time runs from that open, not from the lock or Next (the 7 s before it don't count)", typeof ms === "number" && ms < 3000 && ms <= Date.now() - shownAt + 1500, `${ms} ms timed; ${Date.now() - shownAt} ms since the prompt appeared`);
+      await settled(h);
+      await h.getByRole("button", { name: "Next question" }).click();
+      check(`${gameId} 320x480 host L1 Next question opens question 3`, (await questionNumber(h)) === 3);
+    } else {
+      await h.getByRole("button", { name: "Next question" }).click();
+      check(`${gameId} 320x480 host L1 Next question opens question 2`, (await questionNumber(h)) === 2);
+    }
     check(`${gameId} 320x480 host F setup: the rest answered, ending on the final screen`, await finishAll(h));
     const f = await measure(h);
     await h.screenshot({ path: pathJoin(SHOTS, `${gameId}-final-host-320x480.png`) });

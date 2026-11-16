@@ -283,3 +283,25 @@ The times come from the runs' own timestamps (the isolated sweep started at 6:23
   - **The shared answer helper:** now treats a locked view without Next question as a failure.
   - **`check-math`, `check-geography` and `check-audit-fixes`:** they expect the final screen, not the old keycap.
   - **The helper's self-test:** it models the new final screen and adds the failure case.
+
+### Checks
+- **`scripts/check-locked-answer.mjs`:** 136 checks in Chromium emulation.
+  - **The layout,** in Casual Trivia at 320×480, 390×844 and 1440×900, for host and guest. The guest's name is the 24-character maximum.
+    - Next question is enabled, inside the first screen, uncovered at its centre, and opens the next question.
+    - It comes before the ring, and nothing says to wait for everyone.
+    - No seat token or label overlaps any text or control, and there is no sideways scroll.
+  - **The last answer:** no enabled continuation, and "All your answers are in".
+  - **An 80-character answer** (the content schema's limit) at 320 and 390.
+  - **150% and 200% zoom:** Next question is reachable by scrolling and works; nothing overlaps.
+  - **Geography and Math Mayhem** at 320×480, and the sat-out ring.
+  - **A journey with host 390×844, guest 320×480 and a TV spectator,** on the driver's own server with the test-only 0.2 clock scale (Trivia's 6 minutes become 72 s):
+    - **The TV during play:** no answers in its projection or on screen, Reveal included.
+    - **Lock and advance,** independently for each player.
+    - **A guest reload on the locked view:** the same seat, resumed at question 2.
+    - **The host finishes:** no continuation control, and a reload keeps "All your answers are in".
+    - **The server's deadline ends the game:** time ran out, and the guest's 2 answers are scored alone.
+    - **The TV's finished review.**
+    - **Play again:** both seats kept, nobody ready, and the TV on the new game with no answers.
+- **`LockedAnswer.test.tsx`:** 6 tests on the rendered structure.
+- **The existing drivers the change touches,** run on the working tree: 242/242 checks over seven drivers (`round4/README.md`).
+- **Typecheck and lint:** exit 0.
