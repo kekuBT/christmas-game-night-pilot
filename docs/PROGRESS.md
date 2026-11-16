@@ -3549,3 +3549,10 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - static checks: only the fixture and docs changed since `4f08c1a`, runtime unchanged, eslint clean, secret scan empty.
 - **Evidence:** `docs/evidence/beta-r4-w2/repair3/`.
 - **Next:** ChatGPT's verification. Deployment stays on hold.
+
+## Beta R4: W3 reconnect drill preparation (handoff 6929226094; in progress)
+- **Review 6929226094:** W2 preparation cleared for local readiness. Render W1/W2 and physical-device acceptance haven't run, and deployment stays on hold.
+- **The handoff:** W3 reconnect drill preparation, as one unmerged draft PR stacked on #44 at `2e2257c`:
+  - an operator runbook (host, guest and TV in one active Trivia round; physical iPhone Safari and Android Chrome background and foreground, lock and unlock, and a Wi-Fi to mobile data switch);
+  - one focused local rehearsal against the pinned runtime.
+- **Acknowledged** in 6929252910, at 4:05 p.m. ET, with a 3 h estimate.
