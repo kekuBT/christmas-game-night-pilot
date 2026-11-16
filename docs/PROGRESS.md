@@ -3434,3 +3434,36 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - the real proxy count;
   - Render's build-host architecture (the age pin assumes `amd64`);
   - Docker Hub pulls during Render's build.
+
+## Beta R4: the package accepted; W2 preparation and the operator documents (review 6921505856; #44)
+- **Review 6921505856:** accepted #43's Render package within its scope. It is not a target-host or launch clearance.
+  - ChatGPT independently ran the production-pin gate on the ORIGINAL audited archive (`a693c543…`) and passed it.
+  - It also ran the W1 boundary and reconnect checks locally, and a private Firefox journey.
+  - **The same comment's handoff:** W2 preparation and document reconciliation, as one stacked PR. Acknowledged in 6921534073, at 10:58 a.m. ET, with a 3-hour estimate. The PR is **#44**, on #43 at `46f7ff0`.
+- **Done:**
+  - **The documents (`be5be26`):** the package README, `render.yaml`'s header, `render-w1.md` and the proposal's current status now say:
+    - the owner's **existing**, otherwise-empty workspace, with its Hobby plan still to verify;
+    - the **selected** private off-provider destination, with access verified;
+    - transfer, receipt, restore and the owner's `age` key still pending.
+
+    Revision 5's text is kept as history.
+  - **`scripts/beta/w2-load.mjs`:** the W2 workload against an operator-supplied `https://` target.
+    - **The load:** 2 rooms × 10 players + a TV each. Trivia, then Draw & Guess with paced strokes, plus Memory Book notes.
+    - **The measurements:** counts sent, acknowledged, rejected, unacknowledged, retried and persisted (read back); acknowledgement median, p95 and max.
+    - **Room isolation:** canary and name scans, and cross-room token probes.
+    - **Also:** socket counts, the target's identifiers, and redacted evidence.
+    - **The run fails** on a missing acknowledgement, a missing read-back, a leak, or a target failure.
+    - **Nothing is deleted:** the app has no supported room-deletion path.
+  - **`scripts/beta/w2-disk-check.mjs`:** local only.
+  - **`scripts/beta/w2-selftest.sh`:** V1–V4.
+  - **The proxy's fault options:** off by default.
+  - **`docs/beta/render-w2.md`:** the steps, the checks, and the gap analysis.
+- **Evidence:** `docs/evidence/beta-r4-w2/`.
+  - **Trials:** 4. Trial 1 correctly failed when the local target was down. Trials 2 and 3 failed on my own read-back bugs: the Trivia answers' location, and per-room player ids. Trial 4 passed.
+  - **Self-test 1:** 6/6.
+- **Not done:** no runtime change (`7097ac2`), no deploy-script change, no account operation, no target-host run, no Render metrics, no full gate rerun.
+- **Next:** the final runs on the committed files, then the report on #44. W2 on Render follows W1, with ChatGPT.
+- **Risk:**
+  - Render's latency and limits are unknown.
+  - The run's rooms stay in the throwaway folder (no deletion path).
+  - Persisted means read back from the running server; a restart is W4.

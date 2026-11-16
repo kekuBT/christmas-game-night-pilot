@@ -108,7 +108,7 @@ Record every value tried and both results. The local self-test shows why both te
 - **Any failure:** what, when, the raw output, and the decision taken (stop, or the count change).
 
 **W1 passes when** every step above passed with the final proxy count, and the count is recorded with both tests' results.
-- **Only then does W2 start.** W2–W8 need their own windows.
+- **Only then does W2 start** ([render-w2.md](render-w2.md)). W2–W8 need their own windows.
 - **Real family data needs W1–W8 and the go/no-go.**
 
 ## Still pending, and not part of W1
