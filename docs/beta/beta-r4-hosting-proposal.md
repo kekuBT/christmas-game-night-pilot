@@ -1,11 +1,15 @@
-# Beta R4: independent cloud hosting, a proposal (handoffs 6916543972, 6916659110, 6916722530; reviews 6917441687, 6918277617)
+# Beta R4: independent cloud hosting, a proposal (handoffs 6916543972, 6916659110, 6916722530; reviews 6917441687, 6918277617, 6918922306)
 
 **Planning only.** Nothing was created, deployed, configured or bought, and no runtime changed.
 - **Bases:** docs `d554b800e51ae78a9ca205d12a2d6622eb7795f9`; pinned runtime `7097ac2bb062925bb296a129f4771f1e68fd522d`, with the audited archive's SHA-256 `a693c543…3a5131`.
 - **Who decides:** ChatGPT owns the final route recommendation and the owner-facing cost approval. The owner decides.
 - **The requirement:** an independently hosted full website, with no dependency on a home computer. It supersedes the home-route (H1) prerequisite.
-- **Revision 4 (this one), for review 6918277617:** the backup's failure handling and the hold's ownership, repaired. That review reproduced both defects; the repair is in [round4/](../evidence/beta-r4-hosting/backup-drill/round4/README.md).
-  - **Every step is checked, with no pipeline,** and a failure leaves no archive and no success behind.
+- **Revision 5 (this one), for review 6918922306:** a run killed outright after its files exist.
+  - **The fix:** each run now records what it may create before creating it, and every process it starts carries its token. Reconciliation (automatic at the start of every backup, or `cgn-backup reconcile`) removes an abandoned run's recorded files once none of its processes lives. It never touches a running run or any path no record lists.
+  - **Two corrections:** revision 4's "a failure leaves nothing behind" held only for failures the script itself observes; and the entrypoint now keeps the hold while a dead owner's copy still runs.
+  - **Evidence:** [round5/](../evidence/beta-r4-hosting/backup-drill/round5/README.md).
+- **Revision 4, for review 6918277617:** the backup's failure handling and the hold's ownership, repaired. That review reproduced both defects; the repair is in [round4/](../evidence/beta-r4-hosting/backup-drill/round4/README.md).
+  - **Every step is checked, with no pipeline,** and a failure the script observes leaves no archive and no success behind. *(A run killed outright: see revision 5.)*
   - **The hold is exclusive and owned,** and a dead owner's hold is released within about a second.
   - **Success has two stages:** `BACKUP_OK` means the archive is on the Render disk; **`RECEIPT_OK`** (`cgn-receive`) means the independent copy off Render was received and verified. A deploy or restore requires `RECEIPT_OK`.
 - **Revision 3, for review 6917441687:**
@@ -73,14 +77,16 @@ The copy is therefore one state of the folder. Nothing is inferred from comparin
 **How, on Render: the proposed deploy-side slice** (short shell scripts, not in the runtime: three in the image, and `cgn-receive` where the copy is received; [the scripts](../evidence/beta-r4-hosting/backup-drill/README.md#the-proposed-deploy-side-slice)):
 - **`cgn-entrypoint`** is the container's first process. It runs the unchanged server, passes Render's `SIGTERM` on to it, and keeps the instance up while a backup holds the server stopped.
   - **The hold** is a folder in an ephemeral folder, so an instance restart always clears it.
-  - **A dead owner:** if the hold's owner is gone (the backup killed, the SSH session lost), the entrypoint releases it within about a second and the server starts again.
+  - **A dead owner:** if the hold's owner is gone (the backup killed, the SSH session lost), the entrypoint releases the hold once no process the owner started still runs. That means within about a second, or, if its copy still runs, once the copy ends (bounded by the copy's 30 s limit). Then the server starts again. The killed run's files are left for reconciliation.
   - **A server exit without a hold** ends the container, so Render restarts the instance as it would without the script.
 - **`cgn-backup`**, run over SSH between sessions with **maintenance mode on** (public traffic refused):
   - **Checks first, before anything stops:** the owner's public key, the folders and the tools.
   - **Takes the hold atomically and owns it.** `mkdir` fails if any hold exists; the hold records this run's pid and a random token. Only its owner releases it, on every exit path including hang-up, interrupt and terminate. The backup's names are chosen and checked only while holding, so a run never removes another run's files.
   - **Then the backup:** `SIGTERM`, wait (10 s limit), copy under the lock (30 s limit), `datatool verify`, the manifest check. Then release the hold; the entrypoint restarts the server.
   - **Then, reading only the copy:** a checksum list over the whole copy; a tar written to a file and listed back; encryption to the owner's `age` public key; the hash; publish by rename. **Every step's own status is checked, with no pipeline.**
-  - **It prints `BACKUP_OK <file> sha256=…` only after all of that.** On any failure, everything the run created in the backup folder is removed.
+  - **It prints `BACKUP_OK <file> sha256=…` only after all of that.** On any failure the script observes, everything the run created in the backup folder is removed.
+  - **Before creating anything, it records the exact paths it may create,** in a run record in the backup folder, with its token and pid. Every process it starts carries the token. The record goes away with the run's own cleanup, or just before `BACKUP_OK`.
+  - **It reconciles first.** At the start of every backup (or alone, as `cgn-backup reconcile`), still under the hold, a record whose run has no live process is abandoned: exactly its listed paths are removed. A run with a live process, and any path no record lists, are left alone.
 - **`cgn-receive`**, where the copy is received off Render (the owner's device). It prints **`RECEIPT_OK`** only if all of these hold:
   - the archive's SHA-256 is the one in the `BACKUP_OK` line;
   - it decrypts with the owner's key;
@@ -91,12 +97,13 @@ The copy is therefore one state of the folder. Nothing is inferred from comparin
 - **Two stages.** `BACKUP_OK` only says the archive is complete on the Render disk. **A deploy, a restore and a data-folder change each require `RECEIPT_OK` for a backup from the same window.** That proves the independent copy exists off Render and is readable.
 - **The expected hash** given to `cgn-receive` comes from the `BACKUP_OK` line seen in the SSH session, never from the archive's folder.
 - **A failure before the stop** changes nothing.
-- **A failure after the stop or after the release** releases the hold (if still held), and removes everything the run created: no archive, no `.part`, no checksum list, no copy. That covers the copy, verify, the archive, the encryption, the hash and the publish. The server restarts on the same, untouched data.
+- **A failure the script observes, after the stop or after the release** (the copy, verify, the archive, the encryption, the hash, the publish, or a `HUP`, `INT` or `TERM`): the hold is released (if still held), and everything the run created is removed: no archive, no `.part`, no checksum list, no copy. The server restarts on the same, untouched data.
 - **A second backup** is refused while one holds, and can never release another run's hold.
 - **An abandoned session:**
   - **A hang-up or interrupt** releases the hold at once, through the script's own trap.
-  - **A run killed outright** leaves a hold whose owner is gone; the entrypoint releases it within about a second.
-  - **If an orphaned copy still holds the data lock,** the server refuses to start, the entrypoint exits, and Render restarts the instance.
+  - **A run killed outright can't clean up after itself.** Its hold is released once none of its processes lives: within about a second, or after its still-running copy ends (bounded by the copy's time limit). The server then starts.
+  - **Its files stay** (the copy, and from the encryption stage on also the checksum list, the temporary plaintext tar and a partial archive) **until reconciliation removes exactly the paths its record lists.** That is automatic at the start of the next backup, or `cgn-backup reconcile`.
+  - **No promotion happens first:** every deploy, restore or data-folder change needs a fresh backup's `RECEIPT_OK`, and every backup reconciles before anything else. The plaintext left meanwhile is as private as the data folder beside it.
 - **A server that doesn't stop within 10 s:** no backup, and the hold is released. The pending `SIGTERM` then stops the server, and the platform restarts the instance.
 - **An instance restart mid-backup** clears the hold, and the server starts on boot. Nothing from the interrupted run is ever verified.
 
@@ -128,6 +135,14 @@ The copy is therefore one state of the folder. Nothing is inferred from comparin
   - a server that doesn't stop.
 - **The checker's own negatives:** three deliberately damaged backups, each caught.
 - **The final run on the committed files:** see the evidence README.
+
+**Round 5's evidence** ([round5/](../evidence/beta-r4-hosting/backup-drill/round5/README.md)):
+- **The review's case, reproduced on the revision 4 scripts.** A run killed at a copy checkpoint (a room file and a manifest written) or at an encryption checkpoint (plaintext tar and partial archive written) gave no `BACKUP_OK`, but its files survived, and nothing could remove them.
+- **On the repaired scripts:**
+  - **killed at each checkpoint** (the shell alone, or its whole process group): reconciliation is refused or deferred while the copy or encryption still lives, then removes exactly that run's files;
+  - **the server** comes back within the bound;
+  - **a neighbouring successful backup** survives byte for byte;
+  - **a healthy backup** still encrypting is reported as running, and left alone.
 
 **Round 4's evidence** ([round4/](../evidence/beta-r4-hosting/backup-drill/round4/README.md)):
 - **The review's defects, reproduced on the revision 3 scripts:**

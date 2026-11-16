@@ -2,6 +2,12 @@
 
 Evidence for [the proposal](../../../../beta/beta-r4-hosting-proposal.md). Disposable local data only: no Render, no account, no network beyond localhost. The runtime is unchanged at `7097ac2bb062925bb296a129f4771f1e68fd522d`; each log's header shows the runtime diff.
 
+> **Correction (review 6918922306; see [round5/](../round5/README.md)).** Two statements below held only for failures the script itself observes:
+> - "on any failure, everything this run created is removed";
+> - H3's "nothing left".
+>
+> H3 killed the backup before any copy existed. A run killed outright (`SIGKILL`) can't run its own cleanup, so once its files exist they stay until **reconciliation** (added in round 5). Also, the entrypoint now keeps the hold while a process the dead owner started still runs.
+
 ## What the review found, reproduced first
 On the scripts as committed at `6aad6d5` ([focused.sh.txt](focused.sh.txt), run against them: [repro-old-run1.log](repro-old-run1.log), [repro-old-run2.log](repro-old-run2.log)):
 
@@ -17,14 +23,14 @@ On the scripts as committed at `6aad6d5` ([focused.sh.txt](focused.sh.txt), run 
 - **`cgn-backup`: every step checked, no pipeline.**
   - **The steps, each with its own status checked:** copy, verify, manifest check, checksum list (cross-checked against the manifest's count), the tar written to a file, the tar listed and every file found in it, encryption from that file, hash, publish by rename, removal of the temporary plaintext tar.
   - **`BACKUP_OK` only after all of them.**
-  - **On any failure,** everything this run created in the backup folder is removed: no archive, no `.part`, no checksum list, no copy.
+  - **On any failure the script observes** (a failed step, `HUP`, `INT`, `TERM`), everything this run created in the backup folder is removed: no archive, no `.part`, no checksum list, no copy. *(A run killed outright is the exception: see the correction above.)*
 - **The hold is exclusive and owned:**
   - **Taken atomically:** `mkdir` fails if any hold exists. It records the run's pid and a random token.
   - **Released only by its owner:** the token must match. That holds on every exit path, `HUP`, `INT` and `TERM` included.
   - **The backup's names** (from a per-second stamp) are chosen and checked only while holding. A run that finds them taken stops before claiming them, so it can never remove another run's files.
   - **Consistency still rests on the data lock,** not the hold: `datatool backup` without `--allow-running` refuses while any process holds the lock.
 - **Bounded recovery (`cgn-entrypoint`):**
-  - **A hold whose owner pid is gone** is released within about a second, and the server starts again.
+  - **A hold whose owner pid is gone** is released within about a second, and the server starts again. *(Round 5: only once no process the owner started still runs.)*
   - **A hold that never recorded an owner** is stale after 10 s.
   - **An instance restart** clears the hold in any case.
 - **Two stages of success:**

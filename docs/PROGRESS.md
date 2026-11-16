@@ -3379,3 +3379,20 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Not done:** no account, resource, deploy, expense, runtime change or gate rerun. Beta HOLD. #42 separate.
 - **Next:** ChatGPT's review.
 - **Risk:** Render-side behaviour (the dropped-SSH signal, the entrypoint as the first process, health-check timing) and the real off-Render path are still unverified until W4–W7.
+
+## Beta R4 hosting proposal, revision 5: runs killed after their files exist (review 6918922306; docs and evidence only)
+- **Brief:** a backup killed outright (`SIGKILL`) after its copy files exist left them behind, and nothing removed them. Revision 4's "every failure leaves nothing" and H3 had covered only failures the script observes, and a kill before any copy existed. Acknowledged in 6918962654, at 9:17 a.m. ET, with a 1 h 30 min estimate.
+- **Reproduced first,** on the scripts at `37ff3e8`, with deterministic checkpoints: during the copy (a room file and a manifest written) and during encryption (the plaintext tar and a partial archive written). The files survived, and there was no reconciliation.
+- **Done:**
+  - **`cgn-backup`:**
+    - a run record (token, pid, exact paths), placed atomically before any file;
+    - every process it starts carries the run's token;
+    - reconciliation under the hold, automatic at each backup's start or alone as `cgn-backup reconcile`: it removes only the listed paths of a run with no live process, and leaves running runs and unlisted paths alone.
+  - **`cgn-entrypoint`:** keeps the hold while a dead owner's copy still runs, bounded by the copy's time limit.
+  - **Corrections:** the blanket statements in the proposal and in round 4's README.
+- **Evidence:** `docs/evidence/beta-r4-hosting/backup-drill/round5/`.
+  - **The K cases:** K1a and K1b (copy checkpoint), K2a and K2b (encryption checkpoint), K3 (a healthy run left alone), and H3 revised. A neighbouring successful backup survives byte for byte.
+  - **The runs:** 1 reproduction run, 2 focused runs, 1 drill run, then a final run of each on the committed files.
+- **Not done:** no account, resource, deploy, expense, runtime change or gate rerun. Beta HOLD. #42 separate.
+- **Next:** ChatGPT's review.
+- **Risk:** on Render, it is unverified whether `/proc/<pid>/environ` is readable for the service user's processes, and what a dropped SSH session sends. Both are for W5.

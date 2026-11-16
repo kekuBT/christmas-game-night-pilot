@@ -1,13 +1,16 @@
 #!/bin/sh
-# cgn-entrypoint: PROPOSED deploy file for the Render route (Beta R4, reviews 6917441687 and 6918277617). Not part of
-# the runtime.
+# cgn-entrypoint: PROPOSED deploy file for the Render route (Beta R4, reviews 6917441687, 6918277617 and 6918922306).
+# Not part of the runtime.
 # PID 1 in the container. It runs the unchanged game server, passes Render's SIGTERM on to it, and keeps the
 # container up (and with it the disk and SSH) while cgn-backup has stopped the server on purpose.
 #
 # - The hold is a folder made by cgn-backup in an ephemeral folder (CGN_RUN_DIR, /tmp/cgn by default), recording its
 #   owner's pid. An instance restart always clears it, so a hold never outlives a restart: the server starts on boot.
-# - A hold whose owner is gone (the backup killed outright, the SSH session lost) is stale: this script releases it
-#   within about a second, and the server starts again. A hold with no recorded owner is stale after 10 s.
+# - A hold whose owner is gone (the backup killed outright, the SSH session lost) is stale once no process carries the
+#   owner's run token any more (a copy started by the dead owner runs on until it ends or reaches its time limit, and
+#   the server must not restart under it). Then this script releases the hold within about a second, and the server
+#   starts again. A hold with no recorded owner is stale after 10 s. Files a killed run left are not removed here:
+#   the next cgn-backup (or `cgn-backup reconcile`) reconciles them.
 # - A server exit WITHOUT a hold ends the container with the server's exit code, so Render restarts the instance, as it
 #   would without this script.
 # - Render's SIGTERM (a deploy, a restart, a shutdown) is passed to the server, which closes every socket and releases
@@ -35,11 +38,27 @@ else
 fi
 mkdir -p "$RUN"
 child=0
-# True when the hold exists but its owner is gone (or never recorded itself within 10 s).
+# True if any process carries the run token in its environment (CGN_BACKUP_RUN, set by cgn-backup for everything it runs).
+token_alive() {
+  for e in /proc/[0-9]*/environ; do
+    { tr '\0' '\n' < "$e"; } 2>/dev/null | grep -qx "CGN_BACKUP_RUN=$1" && return 0
+  done
+  return 1
+}
+# True when the hold exists but its owner is gone and nothing it started still runs (or it never recorded itself).
+waiting_note=""
 stale_hold() {
   [ -d "$RUN/hold" ] || return 1
-  hp=$(cat "$RUN/hold/pid" 2>/dev/null)
-  if [ -n "$hp" ]; then kill -0 "$hp" 2>/dev/null && return 1; return 0; fi
+  hp=$(cat "$RUN/hold/pid" 2>/dev/null); ht=$(cat "$RUN/hold/owner" 2>/dev/null)
+  if [ -n "$hp" ]; then
+    kill -0 "$hp" 2>/dev/null && return 1
+    if [ -n "$ht" ] && token_alive "$ht"; then
+      [ "$waiting_note" = "$ht" ] || echo "cgn-entrypoint: the hold's owner (pid $hp) is gone, but a process it started still runs: waiting" >&2
+      waiting_note=$ht
+      return 1
+    fi
+    return 0
+  fi
   made=$(stat -c %Y "$RUN/hold" 2>/dev/null) || return 1
   [ $(( $(date +%s) - made )) -ge 10 ]
 }
