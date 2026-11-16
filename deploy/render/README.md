@@ -2,7 +2,15 @@
 
 **Status: prepared and checked locally. Nothing is deployed.** No Render account was used, no service exists, and nothing was bought.
 - **What the owner approved:** the Render setup in [the proposal](../../docs/beta/beta-r4-hosting-proposal.md): Starter + a 1 GB disk, a $7.25/month baseline with usage overages disclosed, and a public URL behind the access gate.
-- **Still pending:** the account connection (ChatGPT is coordinating it), the backup destination and the owner's key, and the real-device and network steps.
+- **Current status** (2026-11-16, from handoff 6919813048 as edited and review 6921505856):
+  - **The account:** connected. The owner chose their **existing** workspace, and the connector found no services, databases or Key Value instances in it. **Its plan still has to be verified as Hobby.** On Pro the baseline would be $32.25/month, which is outside the approval.
+  - **The off-provider backup destination:** selected by the owner (a private folder). ChatGPT verified access and owner-only sharing. Its link isn't in this repository.
+  - **Still pending:**
+    - the Hobby-plan check;
+    - the transfer, receipt (`RECEIPT_OK`) and restore checks with throwaway data (W5, W6);
+    - the owner's `age` key pair;
+    - the real-device and network steps.
+- **History:** the package was first written (at `405f06f`) for "a new Hobby workspace" and a destination still to be chosen. The requirement behind the workspace wording is unchanged: nothing else is in the workspace.
 - **The runtime is unchanged:** `7097ac2bb062925bb296a129f4771f1e68fd522d`. This folder only packages the audited archive of it.
 - **W1:** how to run it is in [render-w1.md](../../docs/beta/render-w1.md); the local evidence is in [beta-r4-render-package](../../docs/evidence/beta-r4-render-package/README.md).
 
@@ -53,11 +61,11 @@ The accepted proposal puts these files and the audited archive in a **private de
 **Alternative:** build from this repository with Root Directory / Docker context `deploy/render`. That puts the archive in this repository on a deploy branch. It is the owner's choice, and isn't recommended.
 
 ## The exact Render configuration
-For the dashboard (or the MCP integration, where it can), or `render.yaml`. **One service, in a NEW Hobby workspace that holds nothing else.**
+For the dashboard (or the MCP integration, where it can), or `render.yaml`. **One service, in a Hobby workspace that holds nothing else:** the owner's existing, otherwise-empty workspace, once its plan is verified.
 
 | Setting | Value | Why |
 |---|---|---|
-| Workspace | a **new Hobby workspace**, holding only this service | The private network spans a workspace and region, and a Hobby workspace can't block it. `0.0.0.0:10000` is then reachable only through Render's proxy. |
+| Workspace | **the owner's existing workspace** (otherwise empty, as the connector showed on 2026-11-16). It must be on **Hobby** (to be verified) and hold **only this service**. | The private network spans a workspace and region, and a Hobby workspace can't block it. `0.0.0.0:10000` is then reachable only through Render's proxy. |
 | Service type, runtime | Web Service, **Docker**, from the private deploy repository and branch | |
 | Dockerfile path / Docker context | `./Dockerfile` / `.` (the repository root) | |
 | Docker command | **empty** | The image's exec-form CMD keeps `cgn-entrypoint` as PID 1, which `SIGTERM` handling and the hold need. |
@@ -93,7 +101,8 @@ Source: Render's MCP server documentation and its README, both read 2026-11-16 (
 
 | Control | Through the integration | Dashboard fallback needed |
 |---|---|---|
-| Create the **new Hobby workspace** | No (it only lists and selects workspaces) | **Yes** |
+| Select the owner's **existing** workspace, and check that it lists no other service | Yes (`list_workspaces`, `select_workspace`, `list_services`) | — |
+| Verify that workspace's **plan** (Hobby, not Pro) | No billing tool is documented | **Yes** (billing settings) |
 | Payment method, plan, billing, **pipeline spend limit** | No | **Yes** |
 | Create the Docker web service (repository, branch, Dockerfile path, context, plan `starter`, region, auto-deploy `no`) | Yes (`create_web_service`) | — |
 | Attach the **1 GB disk at `/var/data`** | **No** (`create_web_service` has no disk option, and nothing updates one) | **Yes**, or a Blueprint |
