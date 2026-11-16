@@ -1,0 +1,94 @@
+TAP version 13
+# Subtest: refused with zero network activity: the old fault option --plant-leak
+ok 1 - refused with zero network activity: the old fault option --plant-leak
+  ---
+  duration_ms: 399.6373
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: the old fault option --self-test-probe-origin
+ok 2 - refused with zero network activity: the old fault option --self-test-probe-origin
+  ---
+  duration_ms: 381.323703
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: a proxy fault option given to the runner
+ok 3 - refused with zero network activity: a proxy fault option given to the runner
+  ---
+  duration_ms: 371.688272
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --rooms 1
+ok 4 - refused with zero network activity: --rooms 1
+  ---
+  duration_ms: 378.516269
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --rooms=1
+ok 5 - refused with zero network activity: --rooms=1
+  ---
+  duration_ms: 373.432424
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --players 4
+ok 6 - refused with zero network activity: --players 4
+  ---
+  duration_ms: 375.745256
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --notes 1
+ok 7 - refused with zero network activity: --notes 1
+  ---
+  duration_ms: 375.925068
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: --expect-revision
+ok 8 - refused with zero network activity: --expect-revision
+  ---
+  duration_ms: 379.211998
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: a zero --max-minutes
+ok 9 - refused with zero network activity: a zero --max-minutes
+  ---
+  duration_ms: 388.142464
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: an http:// origin
+ok 10 - refused with zero network activity: an http:// origin
+  ---
+  duration_ms: 376.208639
+  type: 'test'
+  ...
+# Subtest: refused with zero network activity: an origin that is not a URL
+ok 11 - refused with zero network activity: an origin that is not a URL
+  ---
+  duration_ms: 389.663668
+  type: 'test'
+  ...
+# Subtest: control: the second listener does see a redirect that IS followed
+ok 12 - control: the second listener does see a redirect that IS followed
+  ---
+  duration_ms: 449.296695
+  type: 'test'
+  ...
+# Subtest: an authenticated HTTP redirect to another origin is not followed (the run fails, zero connections there)
+ok 13 - an authenticated HTTP redirect to another origin is not followed (the run fails, zero connections there)
+  ---
+  duration_ms: 562.701159
+  type: 'test'
+  ...
+# Subtest: a socket handshake redirect to another origin is not followed (the run fails, zero connections there)
+ok 14 - a socket handshake redirect to another origin is not followed (the run fails, zero connections there)
+  ---
+  duration_ms: 20647.150129
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 26142.902244

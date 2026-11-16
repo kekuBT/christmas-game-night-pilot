@@ -3524,3 +3524,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **What it shows on the old runner (`403b53e`):** 4 of the 14 tests fail.
   - **`scripts/beta/w2-selftest.sh`:** V4, V6 and V7 now use the proxy's faults; V8 is the new regression.
 - **My own bug, caught by the dev run:** rewriting the proxy's response handler dropped the status-and-headers line, so every run aborted at preflight. Restored and rerun.
+- **Final 1, on `8a39295` (superseded):** W2 13/13, W1 18/18 and static passed. But its secret scan flagged the fake fixture cookie in the new test. I made the fixtures dotted values (`bb3040d`) and reran.
+- **Final runs** on a clean checkout of the tested commit `bb3040d038eda8778ae0ea24efb603d1fdda94c6`:
+  - the W2 self-test **PASSED, 13/13** (V8 14/14);
+  - the W1 self-test **PASSED, 18/18**;
+  - the static checks passed, with the secret scan empty.
+- **Evidence:** `docs/evidence/beta-r4-w2/README.md` (Repair 2) and `docs/evidence/beta-r4-w2/repair2/`.
+- **Not done:** no runtime change (`7097ac2`), no deploy-file change, no account operation, no target-host run. Deployment stays on hold.
+- **Next:** ChatGPT's confirmation of the fix.

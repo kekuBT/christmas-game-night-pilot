@@ -1,0 +1,136 @@
+# FINAL W1 self-test (regression: the proxy's request handler changed; its new faults --fault-cross-room and --plant-leak are off by default) on the committed files: clean checkout of bb3040d038eda8778ae0ea24efb603d1fdda94c6; image cgn-render:check
+== w1-selftest 2026-11-16T18:33:20Z, image cgn-render:check (sha256:7b53109a7d69), checker 2d8b308e8e0ab727, proxy 06b1738ccd75d5f8
+-- S1: the right setup (one proxy hop, MCHEZO_TRUST_PROXY=1)
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://cgn-w1.test:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+      FAIL closed: GET /health gets 503 (maintenance), and nothing from the app (no gate page, no cookie) — status 200
+      FAIL closed: GET / gets 503 (maintenance), and nothing from the app (no gate page, no cookie) — status 401
+      FAIL closed: GET /beta gets 503 (maintenance), and nothing from the app (no gate page, no cookie) — status 200
+      W1 CLOSED FAILED
+PASS S1-closed closed, while the service is open: the checker said FAILED, as it must
+      PASS 2 http:// redirects to https:// on the same host and path — status 308, location https://cgn-w1.test:18443/health?w1=1
+      PASS 2 the TLS certificate verifies, and /health is 200 with the expected revision and nothing else — status 200, {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+      PASS 2 security headers: nosniff, X-Frame-Options DENY, frame-ancestors 'none' — {"nosniff":"nosniff","frame":"DENY","csp":"frame-ancestors 'none'"}
+      PASS 1 no cookie: a page load gets the gate page (401) — status 401
+      PASS 1 no cookie: the API answers 401 BETA_ACCESS_REQUIRED — status 401, BETA_ACCESS_REQUIRED
+      PASS 1 the right code at the gate: 303 and a cookie — status 303
+      PASS 2 the cookie is Secure, HttpOnly, SameSite=Lax, Path=/, host-only (no Domain), and isn't the code — attributes: Path=/, HttpOnly, SameSite=Lax, Max-Age, Secure
+      PASS 1 control: with the cookie and the right Origin, the API creates a room (201) — status 201
+      PASS 1 no cookie: the WebSocket handshake is refused (401) — 401
+      PASS 1 control: with the cookie and the right Origin, wss:// opens and a live projection of that room arrives — open:projection, room matches
+      PASS 1 control: the code form with the right Origin signs in again (303 + cookie) — status 303
+      PASS 1 foreign Origin https://evil.example, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+      PASS 1 foreign Origin http://cgn-w1.test:18443, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+      PASS 1 foreign Origin https://cgn-w1.test:18444, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+      PASS 1 foreign Origin null, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+      W1 BOUNDARY PASSED
+PASS S1-boundary boundary: the checker said PASSED, as it must
+      room room-mwjlqbxz-627975: 4 sockets open (W1 Host, W1 Player A, W1 Player B, TV).
+      NOW trigger the manual deploy (or the dashboard restart). Waiting up to 90 s for the sockets to close and come back.
+      W1 Host: back after 2.2 s (2 tries); room restored with its 3 players
+      W1 Player A: back after 2.2 s (2 tries); room restored with its 3 players
+      W1 Player B: back after 2.2 s (2 tries); room restored with its 3 players
+      TV: back after 2.2 s (2 tries); room restored with its 3 players
+      PASS 4 every socket was closed by the deploy or restart — W1 Host: closed; W1 Player A: closed; W1 Player B: closed; TV: closed
+      PASS 4 every socket reconnected and got a projection of the same room with the same three players — W1 Host: 2.2 s; W1 Player A: 2.2 s; W1 Player B: 2.2 s; TV: 2.2 s
+      W1 RECONNECT PASSED
+PASS S1-reconnect reconnect across a restart (docker restart: SIGTERM, then start): the checker said PASSED, as it must
+      attempts: 1:401 2:401 3:401 4:401 5:401 6:401 7:401 8:401 9:401 10:401 11:429 12:429 13:429 14:429
+      PASS 3 forgery: every attempt before the first 429 got 401 (a wrong code, refused) — 401,401,401,401,401,401,401,401,401,401
+      PASS 3 forgery: a 429 came by the 11th attempt, and every later one got 429 too, though each forged a different address: the limit counts this client's real address, so the proxy count is NOT TOO HIGH — first 429 at attempt 11
+      W1 FORGERY PASSED
+PASS S1-forgery forgery: the checker said PASSED, as it must
+      PASS 3 separation: from another network, right after forgery, the right code gets 303 and a cookie (not 429): addresses are told apart, so the proxy count is NOT TOO LOW — status 303
+      PASS 3 separation: the API then answers 200 with that cookie — status 200
+      W1 SEPARATION PASSED
+PASS S1-separation separation from another address (127.0.0.2): the checker said PASSED, as it must
+      attempts: 1:429
+      INCONCLUSIVE: the first attempt already got 429; this address is still limited from an earlier run. Wait 15 minutes, or redeploy, then run forgery again.
+      W1 FORGERY INCONCLUSIVE
+PASS S1-forgery-again forgery again at once (this address is still limited): the checker said INCONCLUSIVE, as it must
+-- S2: the count too HIGH (one hop, MCHEZO_TRUST_PROXY=2): a client's forged entry is trusted
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://cgn-w1.test:18443 trust_proxy=2 (the access code is kept only as a salted hash)
+      attempts: 1:401 2:401 3:401 4:401 5:401 6:401 7:401 8:401 9:401 10:401 11:401 12:401 13:401 14:401
+      PASS 3 forgery: every attempt before the first 429 got 401 (a wrong code, refused) — 401,401,401,401,401,401,401,401,401,401,401,401,401,401
+      FAIL 3 forgery: a 429 came by the 11th attempt, and every later one got 429 too, though each forged a different address: the limit counts this client's real address, so the proxy count is NOT TOO HIGH — no 429 at all
+      W1 FORGERY FAILED
+PASS S2-forgery forgery: the checker said FAILED, as it must
+-- S3: the count too LOW (MCHEZO_TRUST_PROXY unset): everyone shares the proxy's address
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://cgn-w1.test:18443 trust_proxy=unset (the access code is kept only as a salted hash)
+      attempts: 1:401 2:401 3:401 4:401 5:401 6:401 7:401 8:401 9:401 10:401 11:429 12:429 13:429 14:429
+      PASS 3 forgery: every attempt before the first 429 got 401 (a wrong code, refused) — 401,401,401,401,401,401,401,401,401,401
+      PASS 3 forgery: a 429 came by the 11th attempt, and every later one got 429 too, though each forged a different address: the limit counts this client's real address, so the proxy count is NOT TOO HIGH — first 429 at attempt 11
+      W1 FORGERY PASSED
+PASS S3-forgery forgery (passes: it can't see this fault): the checker said PASSED, as it must
+      FAIL 3 separation: from another network, right after forgery, the right code gets 303 and a cookie (not 429): addresses are told apart, so the proxy count is NOT TOO LOW — status 429 (every client shares one address: the count is too low, or this device is on the same network)
+      W1 SEPARATION FAILED
+PASS S3-separation separation: the checker said FAILED, as it must
+-- S4: a two-hop chain with MCHEZO_TRUST_PROXY=1: the inner proxy's address is shared
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://cgn-w1.test:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+      attempts: 1:401 2:401 3:401 4:401 5:401 6:401 7:401 8:401 9:401 10:401 11:429 12:429 13:429 14:429
+      PASS 3 forgery: every attempt before the first 429 got 401 (a wrong code, refused) — 401,401,401,401,401,401,401,401,401,401
+      PASS 3 forgery: a 429 came by the 11th attempt, and every later one got 429 too, though each forged a different address: the limit counts this client's real address, so the proxy count is NOT TOO HIGH — first 429 at attempt 11
+      W1 FORGERY PASSED
+PASS S4-forgery forgery (passes: it can't see this fault): the checker said PASSED, as it must
+      FAIL 3 separation: from another network, right after forgery, the right code gets 303 and a cookie (not 429): addresses are told apart, so the proxy count is NOT TOO LOW — status 429 (every client shares one address: the count is too low, or this device is on the same network)
+      W1 SEPARATION FAILED
+PASS S4-separation separation: the checker said FAILED, as it must
+-- S5: the same two-hop chain with MCHEZO_TRUST_PROXY=2: right again
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://cgn-w1.test:18443 trust_proxy=2 (the access code is kept only as a salted hash)
+      attempts: 1:401 2:401 3:401 4:401 5:401 6:401 7:401 8:401 9:401 10:401 11:429 12:429 13:429 14:429
+      PASS 3 forgery: every attempt before the first 429 got 401 (a wrong code, refused) — 401,401,401,401,401,401,401,401,401,401
+      PASS 3 forgery: a 429 came by the 11th attempt, and every later one got 429 too, though each forged a different address: the limit counts this client's real address, so the proxy count is NOT TOO HIGH — first 429 at attempt 11
+      W1 FORGERY PASSED
+PASS S5-forgery forgery: the checker said PASSED, as it must
+      PASS 3 separation: from another network, right after forgery, the right code gets 303 and a cookie (not 429): addresses are told apart, so the proxy count is NOT TOO LOW — status 303
+      PASS 3 separation: the API then answers 200 with that cookie — status 200
+      W1 SEPARATION PASSED
+PASS S5-separation separation: the checker said PASSED, as it must
+-- S6: maintenance mode on
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://cgn-w1.test:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+      PASS closed: GET /health gets 503 (maintenance), and nothing from the app (no gate page, no cookie) — status 503
+      PASS closed: GET / gets 503 (maintenance), and nothing from the app (no gate page, no cookie) — status 503
+      PASS closed: GET /beta gets 503 (maintenance), and nothing from the app (no gate page, no cookie) — status 503
+      W1 CLOSED PASSED
+PASS S6-closed closed: the checker said PASSED, as it must
+      FAIL 2 http:// redirects to https:// on the same host and path — status 503, location 
+      FAIL 2 the TLS certificate verifies, and /health is 200 with the expected revision and nothing else — status 503, <h1>Service under maintenance</h1>
+      FAIL 2 security headers: nosniff, X-Frame-Options DENY, frame-ancestors 'none' — {}
+      FAIL 1 no cookie: a page load gets the gate page (401) — status 503
+      FAIL 1 no cookie: the API answers 401 BETA_ACCESS_REQUIRED — status 503, undefined
+      FAIL 1 the right code at the gate: 303 and a cookie — status 503
+      FAIL 2 the cookie is Secure, HttpOnly, SameSite=Lax, Path=/, host-only (no Domain), and isn't the code — attributes: 
+      FAIL the boundary checks ran to the end — no cookie from the gate: the rest of the boundary checks need it
+      W1 BOUNDARY FAILED
+PASS S6-boundary boundary: the checker said FAILED, as it must
+-- S7: no http->https redirect (the http check pointed at the server itself)
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://cgn-w1.test:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+      FAIL 2 http:// redirects to https:// on the same host and path — status 200, location 
+      PASS 2 the TLS certificate verifies, and /health is 200 with the expected revision and nothing else — status 200, {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+      PASS 2 security headers: nosniff, X-Frame-Options DENY, frame-ancestors 'none' — {"nosniff":"nosniff","frame":"DENY","csp":"frame-ancestors 'none'"}
+      PASS 1 no cookie: a page load gets the gate page (401) — status 401
+      PASS 1 no cookie: the API answers 401 BETA_ACCESS_REQUIRED — status 401, BETA_ACCESS_REQUIRED
+      PASS 1 the right code at the gate: 303 and a cookie — status 303
+      PASS 2 the cookie is Secure, HttpOnly, SameSite=Lax, Path=/, host-only (no Domain), and isn't the code — attributes: Path=/, HttpOnly, SameSite=Lax, Max-Age, Secure
+      PASS 1 control: with the cookie and the right Origin, the API creates a room (201) — status 201
+      PASS 1 no cookie: the WebSocket handshake is refused (401) — 401
+      PASS 1 control: with the cookie and the right Origin, wss:// opens and a live projection of that room arrives — open:projection, room matches
+      PASS 1 control: the code form with the right Origin signs in again (303 + cookie) — status 303
+      PASS 1 foreign Origin https://evil.example, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+      PASS 1 foreign Origin http://cgn-w1.test:18443, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+      PASS 1 foreign Origin https://cgn-w1.test:18444, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+      PASS 1 foreign Origin null, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403 — 403 FOREIGN_ORIGIN / 403 no cookie / 403
+      W1 BOUNDARY FAILED
+PASS S7 boundary without a redirect: FAILED on that check alone
+-- S8: the service stopped and never restarted
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://cgn-w1.test:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+      room room-mwjlqw0o-246440: 4 sockets open (W1 Host, W1 Player A, W1 Player B, TV).
+      NOW trigger the manual deploy (or the dashboard restart). Waiting up to 25 s for the sockets to close and come back.
+      PASS 4 every socket was closed by the deploy or restart — W1 Host: closed; W1 Player A: closed; W1 Player B: closed; TV: closed
+      FAIL 4 every socket reconnected and got a projection of the same room with the same three players — W1 Host: not back; W1 Player A: not back; W1 Player B: not back; TV: not back
+      W1 RECONNECT FAILED
+PASS S8-reconnect reconnect: the checker said FAILED, as it must
+PASS the access code appears in no log and no evidence file
+
+passed 18, failed 0
+W1 SELFTEST PASSED
+exit 0

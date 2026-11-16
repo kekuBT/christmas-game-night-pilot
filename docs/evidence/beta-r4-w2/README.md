@@ -43,6 +43,32 @@ The redirect tests passed there as well. The old runner already used `redirect: 
 | The new regression on the new runner | The runner repair | PASSED, 14/14 | (rerun inside every self-test below, as V8) |
 | Self-test, dev run 1 | The proxy's new faults | **FAILED, 2/12. My own bug:** rewriting the proxy's response handler dropped the line that copies the backend's status and headers, so every response went out as a bare 200. The gate's 303 lost its cookie, and every run aborted at preflight. I stopped the run after V9, restored the line, and reran. | [repair2/dev/w2-selftest-dev1-broken-proxy.log](repair2/dev/w2-selftest-dev1-broken-proxy.log) |
 | Self-test, dev run 2 | The proxy's response line restored | **PASSED, 13/13:**<ul><li>V4 was caught (the proxy planted one note, HTTP 201);</li><li>V6 and V7 were inconclusive (the proxy learned 20 tokens and faulted 6 cross-room requests and handshakes: 503, then UND_ERR_SOCKET and ECONNRESET);</li><li>V8 passed, 14/14.</li></ul> | [repair2/dev/w2-selftest-dev2.log](repair2/dev/w2-selftest-dev2.log) |
+| Final 1, **superseded** | A clean checkout of `8a39295` | W2 self-test PASSED 13/13, W1 self-test PASSED 18/18, static checks passed. **Superseded, by my own reading of its static log:** the secret scan flagged one line. It was the fake fixture cookie in `w2-args-selftest.mjs` (`cgn_beta=fakecookie…`), not a real secret. The fixture values are now dotted strings that the scan can't mistake for a real cookie (`bb3040d`). | [repair2/superseded-8a39295/](repair2/superseded-8a39295/) (logs only) |
+| **Final 2: W2 self-test** | **A clean checkout of `bb3040d038eda8778ae0ea24efb603d1fdda94c6`** | **PASSED, 13/13.** See below. | [repair2/final/w2-selftest-final.log](repair2/final/w2-selftest-final.log), the 8 evidence files in [repair2/final/w2-evidence/](repair2/final/w2-evidence/), [V8's log](repair2/final/w2-args-selftest-V8.log), the disk-check logs, the proxy logs |
+| **Final 2: W1 self-test** | The same checkout. A regression run, because the proxy's request handler changed; its new faults are off by default. | **PASSED, 18/18** | [repair2/final/w1-selftest-final.log](repair2/final/w1-selftest-final.log) |
+| **Final 2: static checks** | The same checkout | **Passed every step,** with the secret scan empty:<ul><li>no runtime file differs from `7097ac2`;</li><li>the deploy files are unchanged apart from `render.yaml`'s already-reviewed comment line from `be5be26`;</li><li>eslint and shell syntax pass;</li><li>vitest collects 0 tests under `scripts/beta`;</li><li>33 links, none missing.</li></ul> | [repair2/final/static-final.log](repair2/final/static-final.log) |
+
+**Final 2, W2 self-test, case by case:**
+- **U:** 37/37.
+- **V1:** PASSED, all 16 checks:
+  - 200/200 answers, 96/96 stroke messages, 108/108 guesses, 10/10 notes and 40/40 Ready taps, each acknowledged and read back, with 0 malformed replies;
+  - 22/22 sockets with their own room's projection, and 22/22 open at the end;
+  - both directions refused by the app (401 "Session token required" twice, then close 1008).
+
+  The disk check then PASSED item by item.
+- **The negatives, each failing on its own check alone:**
+  - **V2:** stroke acknowledgements.
+  - **V3:** stroke read-back.
+  - **V4:** passive isolation. The proxy planted one note (HTTP 201), and room B's Memory Book read showed room A's canary.
+  - **V5:** stroke read-back, plus the disk check on the drawing alone.
+  - **V6:** active isolation. The proxy learned 20 tokens and answered 6 cross-room requests and handshakes with 503, so every leg was inconclusive.
+  - **V7:** active isolation, with the same 6 reset: UND_ERR_SOCKET on the reads and ECONNRESET on the socket.
+  - **V9:** stroke acknowledgements, with malformed replies counted.
+- **V8:** 14/14:
+  - 11 refused-option cases, each with exit 2, no code-file read, no evidence, and 0 connections at both listeners;
+  - the control;
+  - HTTP and socket redirects not followed, with 0 connections at the second origin.
+- **The secret scan:** no code or cookie in any log or evidence file.
 
 ## Repair for review 6922818863: the W2 checker can no longer pass on nothing
 **The review's three blocking findings were all in the checker**, not in the app. All three are fixed, and each has a test that fails on the old behaviour.
