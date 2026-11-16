@@ -156,13 +156,25 @@ const measure = (page, { keepScroll = false } = {}) => page.evaluate(({ AFTER_LO
   };
 }, { AFTER_LOCK, keepScroll });
 
-/** Tap an open answer and wait for the screen that follows a lock. */
+/**
+ * Tap an open answer and wait for the screen that follows a lock, settled: the LOCKED IN stamp's
+ * 0.55 s "slam" (it starts at 1.8× its size) has landed, as check-audit-fixes' A-01 measures it.
+ * Measured mid-slam it covers the answer for about 0.3 s by design (stamp-probe evidence, round 4);
+ * targeted run 20261116-022947-5525dedb-4704 failed on exactly that before this wait existed.
+ */
+async function settled(page) {
+  await page.waitForFunction(() => {
+    const s = document.querySelector(".mz-lockcard__stamp");
+    return !!s && s.getAnimations().every((a) => a.playState !== "running");
+  }, null, { timeout: 5000 });
+  await sleep(250); // let the ring's count settle before measuring
+}
 async function lockOne(page, index = 0) {
   const slab = page.locator(".mz-slab:not([disabled])").nth(index);
   await slab.waitFor({ timeout: 20000 });
   await slab.click();
   await page.locator(AFTER_LOCK).first().waitFor({ timeout: 15000 });
-  await sleep(250); // let the ring's count settle before measuring
+  await settled(page);
 }
 const questionNumber = async (page) => {
   const t = await page.locator(".mz-qhead .mz-muted").first().innerText({ timeout: 15000 }).catch(() => "");
@@ -252,6 +264,7 @@ try {
     // T: the longest supported answer in the rendered card.
     if (size.phone) {
       await g.evaluate((t) => { document.querySelector(".mz-lockcard__answer").textContent = t; }, LONG_ANSWER);
+      await settled(g);
       const m = await measure(g);
       await g.screenshot({ path: pathJoin(SHOTS, `trivia-nonfinal-long-answer-${size.tag}.png`) });
       const n = m.next;

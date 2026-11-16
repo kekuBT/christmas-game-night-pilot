@@ -1,0 +1,11 @@
+
+FAILED (exit 1) | targeted | run 20261116-022947-5525dedb-4704
+  11 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-locked-answer (w1) [functional]: FAIL 320x480 T the LOCKED IN stamp stays clear of the long answer — 61px²
+  timing   wall 6m 40s · step time 18m 52s (sum) · 3 workers, 94% busy · 2.83× the same steps run one after another
+           predicted 4–12m (about 5m 55s, low-confidence) → actual 6m 40s (+13%)
+           longest  check-audit-fixes 3m 54s, check-session-flow 3m 05s, check-locked-answer 2m 38s · the longest step is 59% of the wall time
+           machine  CPU mean 30%, peak 87% · memory available ≥ 13481 MB · load peak 3.6
+           contention ×1.062 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t1/test-results/20261116-022947-5525dedb-4704/report.json
