@@ -1,4 +1,4 @@
-== focused negatives started 2026-11-16T13:57:20Z; scripts in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/r4r4
+== focused negatives started 2026-11-16T13:57:20Z; scripts in <scratch>/r4r4
 == repo a4fbd51a55bfc3dfb99e8d6e08e9e6b8103370e0 (0 uncommitted paths); runtime vs 7097ac2: 0 files differ
 == scripts: b77c398e3fa6 cgn-authorize.sh; 92a33174c17e cgn-backup.sh; 3aad70c9ef7c cgn-entrypoint.sh; 2fb3fe903f28 cgn-receive.sh; 
    seeded 3 rooms

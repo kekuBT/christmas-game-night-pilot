@@ -71,6 +71,8 @@ The helpers it uses are round 3's, unchanged: [play](../play.mjs.txt), [monitor]
 | **Final, focused** | **The committed files, on a clean tree** | see the log | [focused-final.log](focused-final.log) |
 | **Final, drill** | **The committed files, on a clean tree** | see the log | [drill-final.log](drill-final.log) |
 
+**One edit to the logs:** in the focused and reproduction logs, the header line naming the scripts' folder had my local scratch path; it is replaced with `<scratch>`. Nothing else was changed.
+
 ## To reproduce
 Build the server (`npm run build`). In a new folder, assemble, dropping `.txt` from each name:
 - `deploy/cgn-*.sh` from [../deploy/](../README.md#the-proposed-deploy-side-slice);
