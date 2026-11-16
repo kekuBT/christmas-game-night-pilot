@@ -1,0 +1,40 @@
+{
+  "tool": "scripts/beta/w1-check.mjs",
+  "mode": "separation",
+  "origin": "https://cgn-w1.test:18443",
+  "startedAt": "2026-11-16T15:30:40.704Z",
+  "trustProxy": "unset",
+  "localAddress": "127.0.0.2",
+  "connect": "127.0.0.1:18443",
+  "requests": [
+    {
+      "label": "enter from the second network",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 429,
+      "setCookie": null,
+      "location": null,
+      "ms": 49,
+      "at": "2026-11-16T15:30:40.705Z"
+    }
+  ],
+  "checks": [
+    {
+      "name": "3 separation: from another network, right after forgery, the right code gets 303 and a cookie (not 429): addresses are told apart, so the proxy count is NOT TOO LOW",
+      "ok": false,
+      "detail": "status 429 (every client shares one address: the count is too low, or this device is on the same network)",
+      "at": "2026-11-16T15:30:40.755Z"
+    }
+  ],
+  "separation": {
+    "status": 429,
+    "cookie": false
+  },
+  "finishedAt": "2026-11-16T15:30:40.755Z",
+  "verdict": "FAILED"
+}

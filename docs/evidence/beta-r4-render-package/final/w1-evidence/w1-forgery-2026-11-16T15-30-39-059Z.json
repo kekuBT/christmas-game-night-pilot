@@ -1,0 +1,338 @@
+{
+  "tool": "scripts/beta/w1-check.mjs",
+  "mode": "forgery",
+  "origin": "https://cgn-w1.test:18443",
+  "startedAt": "2026-11-16T15:30:39.059Z",
+  "trustProxy": "2",
+  "localAddress": null,
+  "connect": "127.0.0.1:18443",
+  "requests": [
+    {
+      "label": "wrong code 1, forged X-Forwarded-For 203.0.113.11",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.11"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 47,
+      "at": "2026-11-16T15:30:39.059Z"
+    },
+    {
+      "label": "wrong code 2, forged X-Forwarded-For 203.0.113.22",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.22"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 8,
+      "at": "2026-11-16T15:30:39.106Z"
+    },
+    {
+      "label": "wrong code 3, forged X-Forwarded-For 203.0.113.33",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.33"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:39.115Z"
+    },
+    {
+      "label": "wrong code 4, forged X-Forwarded-For 203.0.113.44",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.44"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:39.121Z"
+    },
+    {
+      "label": "wrong code 5, forged X-Forwarded-For 203.0.113.55",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.55"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 7,
+      "at": "2026-11-16T15:30:39.127Z"
+    },
+    {
+      "label": "wrong code 6, forged X-Forwarded-For 203.0.113.66",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.66"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:39.134Z"
+    },
+    {
+      "label": "wrong code 7, forged X-Forwarded-For 203.0.113.77",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.77"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 7,
+      "at": "2026-11-16T15:30:39.140Z"
+    },
+    {
+      "label": "wrong code 8, forged X-Forwarded-For 203.0.113.88",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.88"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:39.147Z"
+    },
+    {
+      "label": "wrong code 9, forged X-Forwarded-For 203.0.113.99",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.99"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 8,
+      "at": "2026-11-16T15:30:39.153Z"
+    },
+    {
+      "label": "wrong code 10, forged X-Forwarded-For 203.0.113.110",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.110"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 10,
+      "at": "2026-11-16T15:30:39.161Z"
+    },
+    {
+      "label": "wrong code 11, forged X-Forwarded-For 203.0.113.121",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.121"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 5,
+      "at": "2026-11-16T15:30:39.171Z"
+    },
+    {
+      "label": "wrong code 12, forged X-Forwarded-For 203.0.113.132",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.132"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 5,
+      "at": "2026-11-16T15:30:39.176Z"
+    },
+    {
+      "label": "wrong code 13, forged X-Forwarded-For 203.0.113.143",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.143"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 5,
+      "at": "2026-11-16T15:30:39.182Z"
+    },
+    {
+      "label": "wrong code 14, forged X-Forwarded-For 203.0.113.154",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.154"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 5,
+      "at": "2026-11-16T15:30:39.187Z"
+    }
+  ],
+  "checks": [
+    {
+      "name": "3 forgery: every attempt before the first 429 got 401 (a wrong code, refused)",
+      "ok": true,
+      "detail": "401,401,401,401,401,401,401,401,401,401,401,401,401,401",
+      "at": "2026-11-16T15:30:39.193Z"
+    },
+    {
+      "name": "3 forgery: a 429 came by the 11th attempt, and every later one got 429 too, though each forged a different address: the limit counts this client's real address, so the proxy count is NOT TOO HIGH",
+      "ok": false,
+      "detail": "no 429 at all",
+      "at": "2026-11-16T15:30:39.193Z"
+    }
+  ],
+  "forgery": [
+    {
+      "i": 1,
+      "forged": "203.0.113.11",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 2,
+      "forged": "203.0.113.22",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 3,
+      "forged": "203.0.113.33",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 4,
+      "forged": "203.0.113.44",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 5,
+      "forged": "203.0.113.55",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 6,
+      "forged": "203.0.113.66",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 7,
+      "forged": "203.0.113.77",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 8,
+      "forged": "203.0.113.88",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 9,
+      "forged": "203.0.113.99",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 10,
+      "forged": "203.0.113.110",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 11,
+      "forged": "203.0.113.121",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 12,
+      "forged": "203.0.113.132",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 13,
+      "forged": "203.0.113.143",
+      "status": 401,
+      "retryAfter": null
+    },
+    {
+      "i": 14,
+      "forged": "203.0.113.154",
+      "status": 401,
+      "retryAfter": null
+    }
+  ],
+  "forgeryEarlierFailures": null,
+  "finishedAt": "2026-11-16T15:30:39.193Z",
+  "verdict": "FAILED"
+}

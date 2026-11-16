@@ -1,0 +1,38 @@
+{
+  "tool": "scripts/beta/w1-check.mjs",
+  "mode": "forgery",
+  "origin": "https://cgn-w1.test:18443",
+  "startedAt": "2026-11-16T15:30:37.857Z",
+  "trustProxy": "1",
+  "localAddress": null,
+  "connect": "127.0.0.1:18443",
+  "requests": [
+    {
+      "label": "wrong code 1, forged X-Forwarded-For 203.0.113.11",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443",
+        "x-forwarded-for: 203.0.113.11"
+      ],
+      "status": 429,
+      "setCookie": null,
+      "location": null,
+      "ms": 35,
+      "at": "2026-11-16T15:30:37.858Z"
+    }
+  ],
+  "checks": [],
+  "forgery": [
+    {
+      "i": 1,
+      "forged": "203.0.113.11",
+      "status": 429,
+      "retryAfter": "900"
+    }
+  ],
+  "finishedAt": "2026-11-16T15:30:37.894Z",
+  "verdict": "INCONCLUSIVE"
+}

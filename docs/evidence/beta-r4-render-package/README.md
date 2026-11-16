@@ -69,12 +69,16 @@ The package's own files were the same for image-check runs 1–3: only the harne
 | W1 self-test 1 | First run | **FAILED, 15/17.** `closed` had posted a wrong code to the open service, so `forgery`'s 10th attempt already got 429. `reconnect` ran after `forgery`, from the locked address. | [dev-logs/w1-selftest-run1.log](dev-logs/w1-selftest-run1.log) |
 | W1 self-test 2 | `closed` uses GET only (it never counts as a wrong code). `forgery` passes if a 429 comes by the 11th attempt and only 429s follow, and it reports earlier failures. Order: boundary, reconnect, forgery, separation. | **FAILED, 14/18.** After the restart the guard refused to start, exit 78: data existed, and the self-test had never run `cgn-authorize`. Everything after it got 502. | [dev-logs/w1-selftest-run2.log](dev-logs/w1-selftest-run2.log) |
 | W1 self-test 3 | The self-test authorizes the throwaway configuration after each start, as W1 Step 0 now requires | PASSED, 18/18 | [dev-logs/w1-selftest-run3.log](dev-logs/w1-selftest-run3.log) |
+| **Final, image checks** | **The committed files:** a clean checkout of `405f06f924813516416243570fe1692f5120ca31`, the harness taken from that commit | **PASSED, 30/30** | [final/image-checks-final.log](final/image-checks-final.log); every build's log in [final/builds/](final/builds/) |
+| **Final, W1 self-test** | The same checkout; the image from the final image checks | **PASSED, 18/18** | [final/w1-selftest-final.log](final/w1-selftest-final.log); the checker's evidence files in [final/w1-evidence/](final/w1-evidence/) |
+| Final, static checks, run 1 | The same checkout | **Incomplete:** step 2 (repack) refused, because my `node_modules` link counted as an untracked file, so `pack.mjs` saw a dirty tree. Steps 3–6 passed. | [final/static-final-run1.log](final/static-final-run1.log) |
+| **Final, static checks, run 2** | The link excluded locally (`.git/info/exclude`, not committed). git status clean. | **Passed every step:**<ul><li>no runtime file differs from `7097ac2`;</li><li>a repack of this commit has the 144 pinned files, digest `fe6d74f8…`, identical to `pins/release-7097ac2.inventory.sha256`;</li><li>the three scripts and `cgn-receive` are byte for byte the round-5 files;</li><li>eslint and shell syntax pass;</li><li>30 relative links, none missing;</li><li>the secret scan finds only the expected throwaway-code writers.</li></ul> | [final/static-final.log](final/static-final.log) |
 
 **Two findings from these runs changed the W1 steps:**
 - `cgn-authorize` must run before any restart or redeploy;
 - `forgery` must come after `boundary` and `reconnect`.
 
-**One edit to the logs:** my local scratch path is replaced with `<scratch>`. Nothing else was changed.
+**One edit to the logs and evidence files:** my local scratch path is replaced with `<scratch>`. Nothing else was changed. The throwaway codes of the final runs appear in none of these files (checked).
 
 ## To reproduce
 1. In a folder outside the repository, put the four `harness/*.txt` files (dropping `.txt`) and the two local-CA Dockerfiles.

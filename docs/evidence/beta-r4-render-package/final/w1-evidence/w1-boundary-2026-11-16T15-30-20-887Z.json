@@ -1,0 +1,325 @@
+{
+  "tool": "scripts/beta/w1-check.mjs",
+  "mode": "boundary",
+  "origin": "https://cgn-w1.test:18443",
+  "startedAt": "2026-11-16T15:30:20.887Z",
+  "trustProxy": null,
+  "localAddress": null,
+  "connect": "127.0.0.1:18443",
+  "requests": [
+    {
+      "label": "http redirect",
+      "method": "GET",
+      "scheme": "http",
+      "path": "/health?w1=1",
+      "sentHeaders": [],
+      "status": 308,
+      "setCookie": null,
+      "location": "https://cgn-w1.test:18443/health?w1=1",
+      "ms": 17,
+      "at": "2026-11-16T15:30:20.888Z"
+    },
+    {
+      "label": "health",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/health",
+      "sentHeaders": [],
+      "status": 200,
+      "setCookie": null,
+      "location": null,
+      "ms": 39,
+      "at": "2026-11-16T15:30:20.907Z"
+    },
+    {
+      "label": "page, no cookie",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/",
+      "sentHeaders": [
+        "accept: text/html"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 8,
+      "at": "2026-11-16T15:30:20.946Z"
+    },
+    {
+      "label": "api, no cookie",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/games",
+      "sentHeaders": [],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:20.954Z"
+    },
+    {
+      "label": "enter, right origin",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 303,
+      "setCookie": "<present>",
+      "location": "/",
+      "ms": 9,
+      "at": "2026-11-16T15:30:20.960Z"
+    },
+    {
+      "label": "create room",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/rooms",
+      "sentHeaders": [
+        "content-type: application/json",
+        "cookie: <redacted>",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 201,
+      "setCookie": null,
+      "location": null,
+      "ms": 11,
+      "at": "2026-11-16T15:30:20.970Z"
+    },
+    {
+      "label": "enter again, right origin (control)",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 303,
+      "setCookie": "<present>",
+      "location": "/",
+      "ms": 8,
+      "at": "2026-11-16T15:30:21.001Z"
+    },
+    {
+      "label": "api, Origin https://evil.example",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/rooms",
+      "sentHeaders": [
+        "content-type: application/json",
+        "cookie: <redacted>",
+        "origin: https://evil.example"
+      ],
+      "status": 403,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:21.009Z"
+    },
+    {
+      "label": "code form, Origin https://evil.example",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://evil.example"
+      ],
+      "status": 403,
+      "setCookie": null,
+      "location": null,
+      "ms": 7,
+      "at": "2026-11-16T15:30:21.015Z"
+    },
+    {
+      "label": "api, Origin http://cgn-w1.test:18443",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/rooms",
+      "sentHeaders": [
+        "content-type: application/json",
+        "cookie: <redacted>",
+        "origin: http://cgn-w1.test:18443"
+      ],
+      "status": 403,
+      "setCookie": null,
+      "location": null,
+      "ms": 7,
+      "at": "2026-11-16T15:30:21.027Z"
+    },
+    {
+      "label": "code form, Origin http://cgn-w1.test:18443",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: http://cgn-w1.test:18443"
+      ],
+      "status": 403,
+      "setCookie": null,
+      "location": null,
+      "ms": 7,
+      "at": "2026-11-16T15:30:21.034Z"
+    },
+    {
+      "label": "api, Origin https://cgn-w1.test:18444",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/rooms",
+      "sentHeaders": [
+        "content-type: application/json",
+        "cookie: <redacted>",
+        "origin: https://cgn-w1.test:18444"
+      ],
+      "status": 403,
+      "setCookie": null,
+      "location": null,
+      "ms": 15,
+      "at": "2026-11-16T15:30:21.047Z"
+    },
+    {
+      "label": "code form, Origin https://cgn-w1.test:18444",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18444"
+      ],
+      "status": 403,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:21.062Z"
+    },
+    {
+      "label": "api, Origin null",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/rooms",
+      "sentHeaders": [
+        "content-type: application/json",
+        "cookie: <redacted>",
+        "origin: null"
+      ],
+      "status": 403,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:21.076Z"
+    },
+    {
+      "label": "code form, Origin null",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: null"
+      ],
+      "status": 403,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:21.082Z"
+    }
+  ],
+  "checks": [
+    {
+      "name": "2 http:// redirects to https:// on the same host and path",
+      "ok": true,
+      "detail": "status 308, location https://cgn-w1.test:18443/health?w1=1",
+      "at": "2026-11-16T15:30:20.907Z"
+    },
+    {
+      "name": "2 the TLS certificate verifies, and /health is 200 with the expected revision and nothing else",
+      "ok": true,
+      "detail": "status 200, {\"ok\":true,\"revision\":\"7097ac2bb062925bb296a129f4771f1e68fd522d\"}",
+      "at": "2026-11-16T15:30:20.946Z"
+    },
+    {
+      "name": "2 security headers: nosniff, X-Frame-Options DENY, frame-ancestors 'none'",
+      "ok": true,
+      "detail": "{\"nosniff\":\"nosniff\",\"frame\":\"DENY\",\"csp\":\"frame-ancestors 'none'\"}",
+      "at": "2026-11-16T15:30:20.946Z"
+    },
+    {
+      "name": "1 no cookie: a page load gets the gate page (401)",
+      "ok": true,
+      "detail": "status 401",
+      "at": "2026-11-16T15:30:20.954Z"
+    },
+    {
+      "name": "1 no cookie: the API answers 401 BETA_ACCESS_REQUIRED",
+      "ok": true,
+      "detail": "status 401, BETA_ACCESS_REQUIRED",
+      "at": "2026-11-16T15:30:20.960Z"
+    },
+    {
+      "name": "1 the right code at the gate: 303 and a cookie",
+      "ok": true,
+      "detail": "status 303",
+      "at": "2026-11-16T15:30:20.969Z"
+    },
+    {
+      "name": "2 the cookie is Secure, HttpOnly, SameSite=Lax, Path=/, host-only (no Domain), and isn't the code",
+      "ok": true,
+      "detail": "attributes: Path=/, HttpOnly, SameSite=Lax, Max-Age, Secure",
+      "at": "2026-11-16T15:30:20.969Z"
+    },
+    {
+      "name": "1 control: with the cookie and the right Origin, the API creates a room (201)",
+      "ok": true,
+      "detail": "status 201",
+      "at": "2026-11-16T15:30:20.981Z"
+    },
+    {
+      "name": "1 no cookie: the WebSocket handshake is refused (401)",
+      "ok": true,
+      "detail": "401",
+      "at": "2026-11-16T15:30:20.989Z"
+    },
+    {
+      "name": "1 control: with the cookie and the right Origin, wss:// opens and a live projection of that room arrives",
+      "ok": true,
+      "detail": "open:projection, room matches",
+      "at": "2026-11-16T15:30:21.001Z"
+    },
+    {
+      "name": "1 control: the code form with the right Origin signs in again (303 + cookie)",
+      "ok": true,
+      "detail": "status 303",
+      "at": "2026-11-16T15:30:21.009Z"
+    },
+    {
+      "name": "1 foreign Origin https://evil.example, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403",
+      "ok": true,
+      "detail": "403 FOREIGN_ORIGIN / 403 no cookie / 403",
+      "at": "2026-11-16T15:30:21.027Z"
+    },
+    {
+      "name": "1 foreign Origin http://cgn-w1.test:18443, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403",
+      "ok": true,
+      "detail": "403 FOREIGN_ORIGIN / 403 no cookie / 403",
+      "at": "2026-11-16T15:30:21.047Z"
+    },
+    {
+      "name": "1 foreign Origin https://cgn-w1.test:18444, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403",
+      "ok": true,
+      "detail": "403 FOREIGN_ORIGIN / 403 no cookie / 403",
+      "at": "2026-11-16T15:30:21.076Z"
+    },
+    {
+      "name": "1 foreign Origin null, with a valid cookie: API 403 FOREIGN_ORIGIN, code form 403 with no cookie, WebSocket 403",
+      "ok": true,
+      "detail": "403 FOREIGN_ORIGIN / 403 no cookie / 403",
+      "at": "2026-11-16T15:30:21.094Z"
+    }
+  ],
+  "finishedAt": "2026-11-16T15:30:21.094Z",
+  "verdict": "PASSED"
+}

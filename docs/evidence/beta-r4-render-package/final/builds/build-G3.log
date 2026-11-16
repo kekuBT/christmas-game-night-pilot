@@ -1,0 +1,69 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.82kB done
+#1 DONE 0.0s
+
+#2 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] load metadata for local/cgn-test-node-ca:22.16.0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 447B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] local/cgn-test-node-ca:22.16.0
+#5 resolve docker.io/local/cgn-test-node-ca:22.16.0
+#5 resolve docker.io/local/cgn-test-node-ca:22.16.0 0.6s done
+#5 DONE 0.6s
+
+#5 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] local/cgn-test-node-ca:22.16.0
+#5 CACHED
+
+#4 [internal] load build context
+#4 transferring context: 1.23MB 0.0s done
+#4 DONE 0.0s
+
+#6 [gate 1/5] COPY pins/ /gate/pins/
+#6 DONE 0.0s
+
+#7 [gate 2/5] COPY cgn-artifact-gate.sh cgn-entrypoint.sh cgn-backup.sh cgn-authorize.sh /gate/
+#7 DONE 0.0s
+
+#8 [gate 3/5] COPY artifact/ /gate/artifact/
+#8 DONE 0.0s
+
+#9 [gate 4/5] RUN sh /gate/cgn-artifact-gate.sh gate /gate /out/app
+#9 0.088 cgn-entrypoint.sh: OK
+#9 0.088 cgn-backup.sh: OK
+#9 0.088 cgn-authorize.sh: OK
+#9 0.096 mchezo-7097ac2.tgz: OK
+#9 0.103 artifact-gate: archive: e882e314cdb59793babee35a72dbcd93aac9e13b0a1c7767e2642069fa9cc9a7 (the pinned SHA-256)
+#9 0.185 artifact-gate: listing: 163 entries, files and folders only, no absolute path, no '..', no duplicate
+#9 0.253 artifact-gate: inventory: 144 files, SHA-256 fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c (the pinned one)
+#9 0.276 release.json names the revision 1111111111111111111111111111111111111111, not 7097ac2bb062925bb296a129f4771f1e68fd522d
+#9 0.279 ARTIFACT_GATE_FAILED: release.json is not the pinned release
+#9 ERROR: process "/bin/sh -c sh /gate/cgn-artifact-gate.sh gate /gate /out/app" did not complete successfully: exit code: 1
+------
+ > [gate 4/5] RUN sh /gate/cgn-artifact-gate.sh gate /gate /out/app:
+0.088 cgn-entrypoint.sh: OK
+0.088 cgn-backup.sh: OK
+0.088 cgn-authorize.sh: OK
+0.096 mchezo-7097ac2.tgz: OK
+0.103 artifact-gate: archive: e882e314cdb59793babee35a72dbcd93aac9e13b0a1c7767e2642069fa9cc9a7 (the pinned SHA-256)
+0.185 artifact-gate: listing: 163 entries, files and folders only, no absolute path, no '..', no duplicate
+0.253 artifact-gate: inventory: 144 files, SHA-256 fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c (the pinned one)
+0.276 release.json names the revision 1111111111111111111111111111111111111111, not 7097ac2bb062925bb296a129f4771f1e68fd522d
+0.279 ARTIFACT_GATE_FAILED: release.json is not the pinned release
+------
+Dockerfile:23
+--------------------
+  21 |     COPY cgn-artifact-gate.sh cgn-entrypoint.sh cgn-backup.sh cgn-authorize.sh /gate/
+  22 |     COPY artifact/ /gate/artifact/
+  23 | >>> RUN sh /gate/cgn-artifact-gate.sh gate /gate /out/app
+  24 |     
+  25 |     # --- The runtime image: the pinned Node 22.16.0 slim image, the verified release (read-only, owned by root), the
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c sh /gate/cgn-artifact-gate.sh gate /gate /out/app" did not complete successfully: exit code: 1

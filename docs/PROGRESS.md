@@ -3423,6 +3423,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - no audited archive here (a local rebuild with a test pin; the production pin refuses it);
   - the historical full game gate not rerun.
   - Beta HOLD for real users until W1–W8 and the go/no-go. #42 separate.
+- **Final runs** on a clean checkout of the tested commit `405f06f924813516416243570fe1692f5120ca31`:
+  - image checks: **PASSED, 30/30**;
+  - W1 self-test: **PASSED, 18/18**;
+  - static checks: **passed** on run 2. Run 1 was incomplete: my `node_modules` link made the repack see a dirty tree.
+  - **No runtime drift:** a repack of the commit has the pinned 144-file inventory.
 - **Next:** ChatGPT's review. Then the account and the deploy repository (ChatGPT), and W1 per `docs/beta/render-w1.md`.
 - **Risk:** unverified until W1 Step 0:
   - the disk mount's ownership (a root-owned mount fails closed);

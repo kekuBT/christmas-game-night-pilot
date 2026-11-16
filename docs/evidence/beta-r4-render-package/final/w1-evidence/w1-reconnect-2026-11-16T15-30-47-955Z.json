@@ -1,0 +1,139 @@
+{
+  "tool": "scripts/beta/w1-check.mjs",
+  "mode": "reconnect",
+  "origin": "https://cgn-w1.test:18443",
+  "startedAt": "2026-11-16T15:30:47.955Z",
+  "trustProxy": null,
+  "localAddress": null,
+  "connect": "127.0.0.1:18443",
+  "requests": [
+    {
+      "label": "enter",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 303,
+      "setCookie": "<present>",
+      "location": "/",
+      "ms": 60,
+      "at": "2026-11-16T15:30:47.956Z"
+    },
+    {
+      "label": "create room",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/rooms",
+      "sentHeaders": [
+        "content-type: application/json",
+        "cookie: <redacted>",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 201,
+      "setCookie": null,
+      "location": null,
+      "ms": 15,
+      "at": "2026-11-16T15:30:48.017Z"
+    },
+    {
+      "label": "join W1 Host",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/rooms/join-by-code",
+      "sentHeaders": [
+        "content-type: application/json",
+        "cookie: <redacted>",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 201,
+      "setCookie": null,
+      "location": null,
+      "ms": 10,
+      "at": "2026-11-16T15:30:48.032Z"
+    },
+    {
+      "label": "join W1 Player A",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/rooms/join-by-code",
+      "sentHeaders": [
+        "content-type: application/json",
+        "cookie: <redacted>",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 201,
+      "setCookie": null,
+      "location": null,
+      "ms": 10,
+      "at": "2026-11-16T15:30:48.042Z"
+    },
+    {
+      "label": "join W1 Player B",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/rooms/join-by-code",
+      "sentHeaders": [
+        "content-type: application/json",
+        "cookie: <redacted>",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 201,
+      "setCookie": null,
+      "location": null,
+      "ms": 11,
+      "at": "2026-11-16T15:30:48.052Z"
+    }
+  ],
+  "checks": [
+    {
+      "name": "4 every socket was closed by the deploy or restart",
+      "ok": true,
+      "detail": "W1 Host: closed; W1 Player A: closed; W1 Player B: closed; TV: closed",
+      "at": "2026-11-16T15:31:14.267Z"
+    },
+    {
+      "name": "4 every socket reconnected and got a projection of the same room with the same three players",
+      "ok": false,
+      "detail": "W1 Host: not back; W1 Player A: not back; W1 Player B: not back; TV: not back",
+      "at": "2026-11-16T15:31:14.268Z"
+    }
+  ],
+  "reconnect": {
+    "roomId": "room-mwjf7ja3-890375",
+    "sockets": [
+      {
+        "name": "W1 Host",
+        "closed": true,
+        "downS": null,
+        "tries": 7,
+        "roomRestored": false
+      },
+      {
+        "name": "W1 Player A",
+        "closed": true,
+        "downS": null,
+        "tries": 7,
+        "roomRestored": false
+      },
+      {
+        "name": "W1 Player B",
+        "closed": true,
+        "downS": null,
+        "tries": 7,
+        "roomRestored": false
+      },
+      {
+        "name": "TV",
+        "closed": true,
+        "downS": null,
+        "tries": 7,
+        "roomRestored": false
+      }
+    ]
+  },
+  "finishedAt": "2026-11-16T15:31:14.268Z",
+  "verdict": "FAILED"
+}

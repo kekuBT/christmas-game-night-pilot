@@ -1,0 +1,73 @@
+{
+  "tool": "scripts/beta/w1-check.mjs",
+  "mode": "closed",
+  "origin": "https://cgn-w1.test:18443",
+  "startedAt": "2026-11-16T15:30:20.667Z",
+  "trustProxy": null,
+  "localAddress": null,
+  "connect": "127.0.0.1:18443",
+  "requests": [
+    {
+      "label": "closed GET /health",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/health",
+      "sentHeaders": [],
+      "status": 200,
+      "setCookie": null,
+      "location": null,
+      "ms": 61,
+      "at": "2026-11-16T15:30:20.668Z"
+    },
+    {
+      "label": "closed GET /",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/",
+      "sentHeaders": [
+        "accept: text/html"
+      ],
+      "status": 401,
+      "setCookie": null,
+      "location": null,
+      "ms": 10,
+      "at": "2026-11-16T15:30:20.730Z"
+    },
+    {
+      "label": "closed GET /beta",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/beta",
+      "sentHeaders": [
+        "accept: text/html"
+      ],
+      "status": 200,
+      "setCookie": null,
+      "location": null,
+      "ms": 9,
+      "at": "2026-11-16T15:30:20.740Z"
+    }
+  ],
+  "checks": [
+    {
+      "name": "closed: GET /health gets 503 (maintenance), and nothing from the app (no gate page, no cookie)",
+      "ok": false,
+      "detail": "status 200",
+      "at": "2026-11-16T15:30:20.730Z"
+    },
+    {
+      "name": "closed: GET / gets 503 (maintenance), and nothing from the app (no gate page, no cookie)",
+      "ok": false,
+      "detail": "status 401",
+      "at": "2026-11-16T15:30:20.740Z"
+    },
+    {
+      "name": "closed: GET /beta gets 503 (maintenance), and nothing from the app (no gate page, no cookie)",
+      "ok": false,
+      "detail": "status 200",
+      "at": "2026-11-16T15:30:20.750Z"
+    }
+  ],
+  "finishedAt": "2026-11-16T15:30:20.750Z",
+  "verdict": "FAILED"
+}

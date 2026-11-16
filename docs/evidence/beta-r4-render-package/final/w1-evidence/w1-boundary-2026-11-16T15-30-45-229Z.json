@@ -1,0 +1,128 @@
+{
+  "tool": "scripts/beta/w1-check.mjs",
+  "mode": "boundary",
+  "origin": "https://cgn-w1.test:18443",
+  "startedAt": "2026-11-16T15:30:45.229Z",
+  "trustProxy": null,
+  "localAddress": null,
+  "connect": "127.0.0.1:18443",
+  "requests": [
+    {
+      "label": "http redirect",
+      "method": "GET",
+      "scheme": "http",
+      "path": "/health?w1=1",
+      "sentHeaders": [],
+      "status": 503,
+      "setCookie": null,
+      "location": null,
+      "ms": 17,
+      "at": "2026-11-16T15:30:45.230Z"
+    },
+    {
+      "label": "health",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/health",
+      "sentHeaders": [],
+      "status": 503,
+      "setCookie": null,
+      "location": null,
+      "ms": 35,
+      "at": "2026-11-16T15:30:45.248Z"
+    },
+    {
+      "label": "page, no cookie",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/",
+      "sentHeaders": [
+        "accept: text/html"
+      ],
+      "status": 503,
+      "setCookie": null,
+      "location": null,
+      "ms": 5,
+      "at": "2026-11-16T15:30:45.284Z"
+    },
+    {
+      "label": "api, no cookie",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/games",
+      "sentHeaders": [],
+      "status": 503,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:45.289Z"
+    },
+    {
+      "label": "enter, right origin",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 503,
+      "setCookie": null,
+      "location": null,
+      "ms": 6,
+      "at": "2026-11-16T15:30:45.296Z"
+    }
+  ],
+  "checks": [
+    {
+      "name": "2 http:// redirects to https:// on the same host and path",
+      "ok": false,
+      "detail": "status 503, location ",
+      "at": "2026-11-16T15:30:45.248Z"
+    },
+    {
+      "name": "2 the TLS certificate verifies, and /health is 200 with the expected revision and nothing else",
+      "ok": false,
+      "detail": "status 503, <h1>Service under maintenance</h1>",
+      "at": "2026-11-16T15:30:45.284Z"
+    },
+    {
+      "name": "2 security headers: nosniff, X-Frame-Options DENY, frame-ancestors 'none'",
+      "ok": false,
+      "detail": "{}",
+      "at": "2026-11-16T15:30:45.284Z"
+    },
+    {
+      "name": "1 no cookie: a page load gets the gate page (401)",
+      "ok": false,
+      "detail": "status 503",
+      "at": "2026-11-16T15:30:45.289Z"
+    },
+    {
+      "name": "1 no cookie: the API answers 401 BETA_ACCESS_REQUIRED",
+      "ok": false,
+      "detail": "status 503, undefined",
+      "at": "2026-11-16T15:30:45.295Z"
+    },
+    {
+      "name": "1 the right code at the gate: 303 and a cookie",
+      "ok": false,
+      "detail": "status 503",
+      "at": "2026-11-16T15:30:45.302Z"
+    },
+    {
+      "name": "2 the cookie is Secure, HttpOnly, SameSite=Lax, Path=/, host-only (no Domain), and isn't the code",
+      "ok": false,
+      "detail": "attributes: ",
+      "at": "2026-11-16T15:30:45.302Z"
+    },
+    {
+      "name": "the boundary checks ran to the end",
+      "ok": false,
+      "detail": "no cookie from the gate: the rest of the boundary checks need it",
+      "at": "2026-11-16T15:30:45.302Z"
+    }
+  ],
+  "finishedAt": "2026-11-16T15:30:45.302Z",
+  "verdict": "FAILED"
+}
