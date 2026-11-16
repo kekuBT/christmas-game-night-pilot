@@ -3316,3 +3316,21 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **Sources:** official, from the providers' documentation repositories at pinned commits. Their websites are blocked in this session; Render, Koyeb, Railway, Google Cloud, Oracle, AWS and Deno are listed as not verified.
 - **Not done:** no account, resource, deploy, DNS change, port, charge, implementation change or gate rerun. Beta HOLD. #42 separate.
 - **Next:** ChatGPT's route recommendation. Then the owner's decisions: the route, a card on file, a public URL behind the access code, the account and region, the operator, and the off-host backup place. Then an execution approval for a cloud validation app with throwaway data.
+
+## Beta R4 hosting proposal, revision 2: Render first (handoffs 6916659110 and 6916722530; docs only)
+- **Brief:** ChatGPT asked me to challenge the Fly.io recommendation with code and provider evidence (6916659110). The owner then asked to prioritize a paid Render web service with a persistent disk, if the evidence confirms the fit (6916722530). Acknowledged in 6916746119, with a 1 h estimate.
+- **Done:** `docs/beta/beta-r4-hosting-proposal.md`, revision 2.
+  - **The recommendation:** the pinned server unchanged on one Render **Starter** web service (512 MB, 0.5 CPU, $7/month), with a **1 GB disk at `/var/data`** ($0.25/month) and `MCHEZO_DATA_DIR=/var/data/cgn`. **$7.25/month** on a Hobby workspace; $32.25 if the existing workspace is on Pro.
+  - **Overages:** bandwidth past 5 GB at $0.15/GB; build minutes past 500 (a $0 spend limit makes builds stop instead); domains past 2 at $0.25 each.
+  - **The challenge, from the code:**
+    - Render requires `0.0.0.0`, which replaces B-07 and needs review.
+    - The off-host backup must use `datatool backup --allow-running`: Render's disk is reachable only from the running instance.
+    - A rollback restores the old deploy's environment variables, including the access code.
+    - The trust-proxy count needs a new method.
+  - **Fly.io** stays as the cheaper alternative. Supabase stays optional.
+- **Evidence:** `docs/evidence/beta-r4-hosting/`.
+  - **Load runs:** two local runs, three scenarios each. Peak memory 95.5 MB at 220 sockets; CPU under 1 CPU-second per step.
+  - **Render's own pages:** read at the logged times, with their hashes.
+- **Not done:** no account, resource, deploy, DNS change, port, charge, implementation change or gate rerun. Beta HOLD. #42 separate.
+- **Next:** ChatGPT's recommendation and the owner-facing cost approval. Then the owner's decisions and an execution approval for the validation list in the proposal.
+- **Risk:** the measurements ran on this session's machine without answers; the real instance, the disk's ownership and the proxy count are unverified.

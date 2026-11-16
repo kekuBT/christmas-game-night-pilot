@@ -1,0 +1,13 @@
+== 2026-11-16T12:48:24Z; tree 5b38cbb25e7c87e7f2299a4b3c49839dde45fb4b (runtime files identical to 7097ac2: 0 differ); 4 CPUs; v22.23.4
+family-night idle after start: rss 77.5 MB (peak 77.5 MB), sockets 0
+family-night rooms joined, all sockets open: rss 81.9 MB (peak 81.9 MB), sockets 22
+family-night game started in 2/2 rooms: rss 93.8 MB (peak 95.4 MB), sockets 22
+family-night after 60 s of heartbeats: rss 78.4 MB (peak 95.4 MB), sockets 22
+busy-night idle after start: rss 74.5 MB (peak 74.5 MB), sockets 0
+busy-night rooms joined, all sockets open: rss 82 MB (peak 82 MB), sockets 55
+busy-night game started in 5/5 rooms: rss 90 MB (peak 92.5 MB), sockets 55
+busy-night after 60 s of heartbeats: rss 76.2 MB (peak 92.5 MB), sockets 55
+stress idle after start: rss 77 MB (peak 77 MB), sockets 0
+stress rooms joined, all sockets open: rss 88.2 MB (peak 88.6 MB), sockets 220
+stress game started in 20/20 rooms: rss 94.9 MB (peak 94.9 MB), sockets 220
+stress after 60 s of heartbeats: rss 80.9 MB (peak 95.5 MB), sockets 220

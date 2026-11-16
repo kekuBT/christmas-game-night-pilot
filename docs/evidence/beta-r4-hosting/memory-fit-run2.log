@@ -1,0 +1,19 @@
+# memory-fit-v2 run 2, started 2026-11-16T12:55:31Z
+# tree 5b38cbb25e7c87e7f2299a4b3c49839dde45fb4b, uncommitted paths: 0; runtime vs 7097ac2: 0 changed-file lines
+# node v22.23.4, 4 CPUs, CLK_TCK 100, dist built from this tree
+family-night idle, 5 s after start: rss 75.9 MB (peak 75.9 MB), cpu 0.01 s over 5 s, sockets 0
+family-night rooms joined, all sockets open: rss 79.8 MB (peak 79.8 MB), cpu 0.08 s over 1.2 s, sockets 22
+family-night game started in 2/2 rooms: rss 82.9 MB (peak 82.9 MB), cpu 0.17 s over 2.1 s, sockets 22
+family-night after 60 s of heartbeats: rss 76.2 MB (peak 82.9 MB), cpu 0.08 s over 60 s, sockets 22
+RESULT {"label":"family-night","rooms":2,"playersPerRoom":10,"node":"v22.23.4","steps":[{"step":"idle, 5 s after start","rssMB":75.9,"peakMB":75.9,"cpuS":0.01,"wallS":5,"sockets":0},{"step":"rooms joined, all sockets open","rssMB":79.8,"peakMB":79.8,"cpuS":0.08,"wallS":1.2,"sockets":22},{"step":"game started in 2/2 rooms","rssMB":82.9,"peakMB":82.9,"cpuS":0.17,"wallS":2.1,"sockets":22},{"step":"after 60 s of heartbeats","rssMB":76.2,"peakMB":82.9,"cpuS":0.08,"wallS":60,"sockets":22}],"gamesStarted":2,"startRefusals":[]}
+busy-night idle, 5 s after start: rss 76.6 MB (peak 76.6 MB), cpu 0 s over 5 s, sockets 0
+busy-night rooms joined, all sockets open: rss 74.5 MB (peak 80.3 MB), cpu 0.3 s over 17 s, sockets 55
+busy-night game started in 5/5 rooms: rss 80.2 MB (peak 82 MB), cpu 0.16 s over 3.3 s, sockets 55
+busy-night after 60 s of heartbeats: rss 80.2 MB (peak 82 MB), cpu 0.05 s over 60 s, sockets 55
+RESULT {"label":"busy-night","rooms":5,"playersPerRoom":10,"node":"v22.23.4","steps":[{"step":"idle, 5 s after start","rssMB":76.6,"peakMB":76.6,"cpuS":0,"wallS":5,"sockets":0},{"step":"rooms joined, all sockets open","rssMB":74.5,"peakMB":80.3,"cpuS":0.3,"wallS":17,"sockets":55},{"step":"game started in 5/5 rooms","rssMB":80.2,"peakMB":82,"cpuS":0.16,"wallS":3.3,"sockets":55},{"step":"after 60 s of heartbeats","rssMB":80.2,"peakMB":82,"cpuS":0.05,"wallS":60,"sockets":55}],"gamesStarted":5,"startRefusals":[]}
+stress idle, 5 s after start: rss 74.4 MB (peak 74.5 MB), cpu 0 s over 5 s, sockets 0
+stress rooms joined, all sockets open: rss 82.9 MB (peak 83.5 MB), cpu 0.63 s over 2.2 s, sockets 220
+stress game started in 20/20 rooms: rss 87.4 MB (peak 88.9 MB), cpu 0.23 s over 2.2 s, sockets 220
+stress after 60 s of heartbeats: rss 78.8 MB (peak 88.9 MB), cpu 0.24 s over 60 s, sockets 220
+RESULT {"label":"stress","rooms":20,"playersPerRoom":10,"node":"v22.23.4","steps":[{"step":"idle, 5 s after start","rssMB":74.4,"peakMB":74.5,"cpuS":0,"wallS":5,"sockets":0},{"step":"rooms joined, all sockets open","rssMB":82.9,"peakMB":83.5,"cpuS":0.63,"wallS":2.2,"sockets":220},{"step":"game started in 20/20 rooms","rssMB":87.4,"peakMB":88.9,"cpuS":0.23,"wallS":2.2,"sockets":220},{"step":"after 60 s of heartbeats","rssMB":78.8,"peakMB":88.9,"cpuS":0.24,"wallS":60,"sockets":220}],"gamesStarted":20,"startRefusals":[]}
+# finished 2026-11-16T12:59:16Z, exit 0

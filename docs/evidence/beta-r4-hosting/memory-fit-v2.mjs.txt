@@ -1,0 +1,93 @@
+// Beta R4 (handoff 6916722530): how much memory and CPU does the pinned server use for a family game night?
+// Starts dist/server/serve.js (built from a tree whose runtime files equal 7097ac2) on a throwaway data folder,
+// then for each scenario: R rooms, each with a host + P players over WebSocket + 1 TV spectator, a game started in each
+// room, and a minute of heartbeats. Reads the server's resident memory (VmRSS, VmHWM) and its CPU time (utime + stime)
+// from /proc at each step; cpuS is CPU-seconds since the previous step, over wallS seconds of wall clock.
+//   node memory-fit.mjs <repo root> <rooms> <playersPerRoom> <label>
+import { spawn } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { createRequire } from "node:module";
+
+const [root, roomsArg, playersArg, label] = process.argv.slice(2);
+const require = createRequire(join(root, "package.json"));
+const WebSocket = require("ws");
+const ROOMS = Number(roomsArg), PLAYERS = Number(playersArg);
+const port = 39000 + Math.floor(Math.random() * 900);
+const base = `http://127.0.0.1:${port}`;
+const data = mkdtempSync(join(tmpdir(), "cgn-mem-"));
+const server = spawn(process.execPath, ["dist/server/serve.js"], {
+  cwd: root, env: { ...process.env, PORT: String(port), MCHEZO_DATA_DIR: data, MCHEZO_LISTEN_HOST: "127.0.0.1", NODE_ENV: "" },
+  stdio: ["ignore", "pipe", "pipe"],
+});
+let log = ""; server.stdout.on("data", (d) => { log += d; }); server.stderr.on("data", (d) => { log += d; });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const mem = () => {
+  const s = readFileSync(`/proc/${server.pid}/status`, "utf8");
+  const kb = (k) => Number((s.match(new RegExp(`${k}:\\s+(\\d+)`)) ?? [0, 0])[1]);
+  const f = readFileSync(`/proc/${server.pid}/stat`, "utf8").split(") ")[1].split(" ");
+  const cpu = (Number(f[11]) + Number(f[12])) / TICKS; // utime + stime, in clock ticks
+  return { rssMB: +(kb("VmRSS") / 1024).toFixed(1), peakMB: +(kb("VmHWM") / 1024).toFixed(1), cpu };
+};
+const TICKS = 100; // getconf CLK_TCK on the measuring machine
+let last = { cpu: 0, t: Date.now() };
+async function post(path, body, token) {
+  const r = await fetch(base + path, { method: "POST", headers: { "content-type": "application/json", ...(token ? { "x-session-token": token } : {}) }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(`${path} ${r.status} ${JSON.stringify(j).slice(0, 160)}`);
+  return j;
+}
+const sockets = [];
+function connect(roomId, audience, protocol) {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/?roomId=${roomId}&audience=${audience}`, [protocol]);
+    let first = false;
+    ws.on("message", () => { if (!first) { first = true; resolve(ws); } });
+    ws.on("error", reject);
+    setTimeout(() => { if (!first) reject(new Error(`no first message for ${audience} in ${roomId}`)); }, 10_000);
+    sockets.push(ws);
+  });
+}
+const out = { label, rooms: ROOMS, playersPerRoom: PLAYERS, node: process.version, steps: [] };
+const step = (name) => {
+  const m = mem(), now = Date.now();
+  const cpuS = +(m.cpu - last.cpu).toFixed(2), wallS = +((now - last.t) / 1000).toFixed(1);
+  last = { cpu: m.cpu, t: now };
+  out.steps.push({ step: name, rssMB: m.rssMB, peakMB: m.peakMB, cpuS, wallS, sockets: sockets.length });
+  console.log(`${label} ${name}: rss ${m.rssMB} MB (peak ${m.peakMB} MB), cpu ${cpuS} s over ${wallS} s, sockets ${sockets.length}`);
+};
+try {
+  for (let i = 0; i < 100; i++) { try { const r = await fetch(base + "/health"); if (r.ok) break; } catch {} await sleep(100); }
+  await sleep(500); last = { cpu: mem().cpu, t: Date.now() }; await sleep(5000); step("idle, 5 s after start");
+  const hosts = [];
+  for (let r = 0; r < ROOMS; r++) {
+    const room = await post("/rooms", { name: `Load ${r}`, kind: "casual" });
+    const host = await post(`/rooms/${room.roomId}/join`, { displayName: `Host${r}`, asHost: true, hostClaimToken: room.hostClaimToken });
+    await connect(room.roomId, "player", `cgn-session-${host.sessionToken}`);
+    for (let p = 1; p < PLAYERS; p++) {
+      const pl = await post("/rooms/join-by-code", { joinCode: room.joinCode, displayName: `P${r}-${p}` });
+      await connect(room.roomId, "player", `cgn-session-${pl.sessionToken}`);
+    }
+    const tv = await post("/rooms/spectate-by-code", { joinCode: room.joinCode });
+    const specToken = tv.spectatorToken ?? tv.token;
+    await connect(room.roomId, "spectator", `cgn-spectator-${specToken}`);
+    hosts.push({ roomId: room.roomId, token: host.sessionToken });
+  }
+  await sleep(1000); step("rooms joined, all sockets open");
+  let started = 0, refused = [];
+  for (const h of hosts) {
+    try { await post(`/rooms/${h.roomId}/games`, { gameId: "trivia", official: false }, h.token); started++; }
+    catch (e) { refused.push(String(e.message).slice(0, 120)); }
+  }
+  out.gamesStarted = started; out.startRefusals = refused.slice(0, 3);
+  await sleep(2000); step(`game started in ${started}/${hosts.length} rooms`);
+  await sleep(60_000); step("after 60 s of heartbeats");
+  if (global.gc) global.gc();
+} catch (e) {
+  out.error = String(e.message ?? e); console.log("ERROR", out.error); console.log(log.slice(-800));
+} finally {
+  for (const ws of sockets) try { ws.close(); } catch {}
+  server.kill("SIGTERM");
+  console.log("RESULT " + JSON.stringify(out));
+}
