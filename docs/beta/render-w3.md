@@ -67,10 +67,10 @@ These are taken from the local rehearsal, then rounded up, with margin for a pho
 
 | Measure | Rehearsal (local, Chromium) | **W3 budget on a phone** |
 |---|---|---|
-| The banner after the network drops | about 0.01 s when the page is told it's offline; **8.5 s** on a silent drop, via the app's 8-second staleness watchdog | **within 15 s** |
-| The host shows the seat away | about 0.02 s (told offline); 8.6 s (silent) | within 20 s (informational) |
-| Usable after the phone's network is back | 0.07 s (told it's online); 0.6 s (silent). By design at most about 10 s: the app's reconnect back-off is capped at 10 s. | **within 15 s** |
-| The host shows the seat back | the same as usable, about 0.07–0.6 s | within 15 s |
+| The banner after the network drops | about 0.01 s when the page is told it's offline; **8.5–8.7 s** on a silent drop, via the app's 8-second staleness watchdog | **within 15 s** |
+| The host shows the seat away | about 0.02 s (told offline); 8.6–8.7 s (silent) | within 20 s (informational) |
+| Usable after the phone's network is back | 0.07 s (told it's online); 0.6–0.8 s (silent). By design at most about 10 s: the app's reconnect back-off is capped at 10 s. | **within 15 s** |
+| The host shows the seat back | the same as usable, about 0.07–0.8 s | within 15 s |
 | An interrupted submission shown in, after the network is back | 0.2 s | within 15 s |
 
 Measure from the moment **the phone's own network** is back (Wi-Fi joined, or mobile data bars showing; airplane mode off), not from the moment the switch was flipped.

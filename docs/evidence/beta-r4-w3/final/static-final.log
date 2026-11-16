@@ -1,0 +1,28 @@
+# FINAL static checks on the clean checkout of df4f2cf591c88446a86fa22004b926fac9a68c45 (status 0 lines), 2026-11-16T21:23:22Z
+## 1. everything changed since #44's head 2e2257c (expect: the W3 files, PROGRESS)
+ docs/PROGRESS.md                                   |  27 ++
+ docs/beta/render-w3.md                             | 132 ++++++++
+ docs/evidence/beta-r4-w3/README.md                 |  40 +++
+ docs/evidence/beta-r4-w3/dev/trial1.log            |  10 +
+ .../dev/trial2-w3-20261116T210936-079db6.json      | 148 +++++++++
+ docs/evidence/beta-r4-w3/dev/trial2.log            |  34 +++
+ .../dev/trial3-w3-20261116T211225-bcabc0.json      | 148 +++++++++
+ docs/evidence/beta-r4-w3/dev/trial3.log            |  34 +++
+ .../dev/trial4-w3-20261116T211416-89014f.json      | 169 +++++++++++
+ docs/evidence/beta-r4-w3/dev/trial4.log            |  38 +++
+ scripts/beta/w3-rehearsal.mjs                      | 335 +++++++++++++++++++++
+ scripts/beta/w3-rehearsal.sh                       |  56 ++++
+ 12 files changed, 1171 insertions(+)
+## 2. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 3. deploy files changed since #44's head 2e2257c (empty = unchanged)
+(end)
+## 4. shared beta helpers changed since 2e2257c (empty = unchanged)
+(end)
+## 5. lint and shell syntax
+eslint scripts/beta: exit 0
+shell syntax: ok
+## 6. relative links in the changed documents
+links: 6 missing: 0
+## 7. secret scan of the changes since 2e2257c (private keys, age secret keys, access-code assignments, cookie values, Drive links, scratch paths)
+(end of secret scan)

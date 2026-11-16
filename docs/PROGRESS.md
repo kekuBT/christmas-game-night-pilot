@@ -3550,7 +3550,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/evidence/beta-r4-w2/repair3/`.
 - **Next:** ChatGPT's verification. Deployment stays on hold.
 
-## Beta R4: W3 reconnect drill preparation (handoff 6929226094; in progress)
+## Beta R4: W3 reconnect drill preparation (handoff 6929226094; complete, tested `df4f2cf`)
 - **Review 6929226094:** W2 preparation cleared for local readiness. Render W1/W2 and physical-device acceptance haven't run, and deployment stays on hold.
 - **The handoff:** W3 reconnect drill preparation, as one unmerged draft PR stacked on #44 at `2e2257c`:
   - an operator runbook (host, guest and TV in one active Trivia round; physical iPhone Safari and Android Chrome background and foreground, lock and unlock, and a Wi-Fi to mobile data switch);
@@ -3575,4 +3575,12 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - R4, an interrupted submission with the network up;
     - R5, all answers once and the score consistent.
 - **Dev trials:** trial 1 failed on infrastructure (the Chromium build); trial 2 failed on 8 of my own driver bugs; trials 3 and 4 passed. No runtime defect was found.
+- **Before the finals:** the harness's "listeners left" check couldn't fail here (no `ss` or `netstat`). It now reads `/proc/net/tcp`, with a positive control (`df4f2cf`).
+- **Finals on a clean checkout of `df4f2cf`:**
+  - the rehearsal: **PASSED** twice, runs `20261116T212125-a5d041` and `20261116T212224-5e0187`;
+  - the static checks: passed.
+
+  Evidence: `docs/evidence/beta-r4-w3/`.
+- **Next:** the owner's or ChatGPT's review. The native C1–C4 checks on Render need an owner-approved window and two physical phones.
+- **Risk:** the rehearsal simulates the network. Real Safari and Chrome suspension, and a real network handoff, are untested until C1–C4 run.
 - **Not done:** no runtime or deploy change, no native device, no hosting operation.

@@ -38,3 +38,27 @@ The clients were Chromium pages (`chrome-headless-shell` 153, through `MCHEZO_CH
 | Trial 3 | Those fixed | **PASSED**, every check | [dev/trial3.log](dev/trial3.log) and its JSON |
 | Trial 4 | Added R2b, the silent outage, with manual socket forwarding so traffic can stop while the socket stays open | **PASSED**, every check. The silent outage: the watchdog noticed after 8.5 s; usable 0.57 s after the path returned. | [dev/trial4.log](dev/trial4.log) and its JSON |
 | Harness review, before the finals (`e89ce48`) | (no run) | **A defect in my harness: its "listeners left" check couldn't fail.** It counted the output of `ss` or `netstat`, and this machine has neither, so it always read 0. Trials 1–4 therefore didn't prove that no listener was left; their container and process checks did run.<br>**Fixed** before the finals: the harness reads `/proc/net/tcp` (and `tcp6` where present) itself. It also prints the same count while the service and proxy are up, as a positive control. Checked by hand: 0 when idle, 2 with two test listeners on the harness's ports, and an unrelated port not counted. | — |
+| **Final 1** | A clean checkout of the tested commit `df4f2cf` | **PASSED (harness exit 0),** every check. Run `20261116T212125-a5d041`. Positive control: 3 listeners while running, then 0 left; no container or process left; no file holding the code or a cookie. | [final/final1.log](final/final1.log) and [its JSON](final/final1-w3-20261116T212125-a5d041.json) |
+| **Final 2** | The same checkout, run again | **PASSED (harness exit 0),** every check. Run `20261116T212224-5e0187`. The same cleanup and secret results. | [final/final2.log](final/final2.log) and [its JSON](final/final2-w3-20261116T212224-5e0187.json) |
+| **Final, static checks** | The same checkout | **Passed every step:**<ul><li>changes since #44's head `2e2257c` are only the W3 files and PROGRESS;</li><li>no runtime file differs from `7097ac2`;</li><li>no deploy file, and none of the shared driver helpers or W1/W2 tools, differs from `2e2257c`;</li><li>eslint and shell syntax pass;</li><li>6 links, none missing;</li><li>the secret scan finds nothing.</li></ul> | [final/static-final.log](final/static-final.log) |
+
+## The finals' measurements
+| Measure | Final 1 | Final 2 |
+|---|---|---|
+| R2, told offline: banner | shown during the outage | shown during the outage |
+| R2: the host saw the guest away | 24 ms | 23 ms |
+| R2, after the network returned: socket / host sees the guest back / phone usable | 4 / 64 / 69 ms | 3 / 65 / 70 ms |
+| R2b, silent: the watchdog's banner | 8738 ms | 8735 ms |
+| R2b, after the path returned: socket / host / usable | 611 / 666 / 671 ms | 597 / 833 / 838 ms |
+| R3: the phone shows the interrupted answer in, after the network returned | 209 ms | 207 ms |
+| R4: the phone's own retry shows the answer in | 1122 ms | 1119 ms |
+| R5: points vs the score of the recorded answers | 120 = 120 | 360 = 360 |
+
+Each run's points differ because the guest's answers are chosen at random. The rule checked is the same: the points equal the score of the recorded answers, with every answer recorded once.
+
+## Limits
+- **Not a phone, and not Render.** These are Chromium pages on one machine, against the packaged image behind a local TLS proxy.
+- **The interruptions are simulated by the test,** not a real radio or network handoff, and not Safari's or Chrome's own suspension of a background or locked page. Those are the runbook's C1–C4, which stay **pending**.
+- **Only the guest's network is interrupted.** The host and the TV stay connected, as in the runbook.
+- **The browser** is `chrome-headless-shell` 153 (build 1243), through `MCHEZO_CHROMIUM_PATH`, because the build the pinned Playwright expects (1248) isn't installed here.
+- **The host's answers** go through the API, so that the round finishes quickly. The guest's go through the UI.
