@@ -227,3 +227,59 @@ Evidence: `docs/evidence/beta-r1-repair-local/round3/README.md`.
 | **Total** | about 2 h 30 min, plus 1 h 30 min for a mitigation | **about 28 min** (6:15 p.m. to 6:43 p.m. ET, the docs commit) |
 
 The times come from the runs' own timestamps (the isolated sweep started at 6:23, the first test run at 6:30, the fix was committed at 6:34, the gates ran 6:34 to 6:39). The estimate assumed the map and the measurements would be slower than they were: the schemas are few and live in one file, and the earlier rounds' harness patterns carried over.
+
+
+## Fourth round: continuing Trivia on small screens (review 6904986723, R5)
+**The review:** ChatGPT's independent private audit of `456cb0d` worked through route B: Firefox ESR in a private noVNC desktop, with TLS validation and its content sandbox on. It covered the gate; host, guest and TV in Casual Trivia; reloads; a real timeout; and a rematch. It found one product defect (B-15) and asked for a bounded presentation repair. The verdict is **HOLD, repair requested**: not a clearance. #42 stays separate.
+
+**The finding (R5):**
+- **The order:** after a nonfinal locked answer, the screen showed "Waiting for everyone" and a tall ring before the enabled Next question. Yet each player goes at their own pace against one deadline.
+- **At 320×480:** Next question was below the first screen.
+- **At 390×844, and at 320 scrolled:** the lower player label lay on the paragraph under the ring.
+
+**What was asked:**
+- **A nonfinal answer:** Next question and independent-progress wording before the room's progress, inside the first 320×480 and 390×844 screen at normal text size, with long supported answers too. No auto-advance and no waiting for everyone.
+- **The final answer:** truthful completion guidance, with no misleading enabled control.
+- **The labels:** no collisions, with the shared ring's other callers checked and enlarged text still readable and scrollable.
+- **Unchanged:** deadlines, scoring, answer immutability, counts-only progress, private projections and no early reveal.
+- **The checks:** reproduce first; a browser regression that measures visibility, interaction and overlap; the journeys; then one full gate on the clean candidate.
+
+**Estimate (written before the work, at 8:44 p.m. ET; acknowledgement 6905027233):** about **4 h**.
+
+| Part | Estimate |
+|---|---|
+| Reproduce first, with a failing focused browser check | 35 min |
+| The repair | 45 min |
+| The regression check completed (sizes, long text, enlarged text, journeys, TV, the ring's callers), screenshots | 60 min |
+| Focused checks, then the targeted and fast gates | 25 min |
+| One full gate on the clean candidate | 45 min (wall) |
+| Evidence, docs, report | 35 min |
+
+### Reproduced first
+`scripts/check-locked-answer.mjs`, first version, ran against the unchanged candidate (`f93e9cb`, product `456cb0d`). It was built from that tree and served by its dev server. **28 checks failed:**
+- **Next question, 320×480:** at 705–761 px on a 480 px screen, and covered at its centre.
+- **The order:** at every size it came after the ring, and the screen said "Waiting for everyone".
+- **The lower seat's label** lay on the paragraph under the ring: 1,323 px² (320), 1,070 px² (390) and 949 px² (1440) on the host's screen; 303–422 px² for "You" on the guest's.
+- **After the last answer:** an enabled "Waiting for the game to finish" remained.
+
+**Two earlier runs of that check failed on my own driver errors,** and are kept as evidence:
+- a duplicate `join` name;
+- a 32-character name, where the join form allows 24.
+
+### The repair (B-15, D-BR1R-12)
+- **`apps/web/src/components/mchezo/LockedAnswer.tsx`:** one locked-answer view for Trivia, Geography and Math Mayhem. Each game had a copy of the same branch.
+  - **A nonfinal answer:**
+    1. a compact card, "Question N of M · your answer" with LOCKED IN;
+    2. a game's own note;
+    3. "Keep going — you don't need to wait for anyone. N questions left.", **Next question** and the time left;
+    4. then "How the room is doing", the same counts-only ring.
+  - **The last answer:** labelled "All your answers are in", with the card, the room's wait and **no continuation control**.
+- **`mchezo.css`:**
+  - **The compact card:** smaller padding, answer size and stamp.
+  - **The keep-going block.**
+  - **The ring:** `.mz-wait` keeps 46 px under itself for the bottom seat's token and label, for every caller.
+- **Not changed:** no server code, projection, scoring or timing. Nothing auto-advances. Math Mayhem still opens and times the next question only when Next question is tapped.
+- **The drivers:**
+  - **The shared answer helper:** now treats a locked view without Next question as a failure.
+  - **`check-math`, `check-geography` and `check-audit-fixes`:** they expect the final screen, not the old keycap.
+  - **The helper's self-test:** it models the new final screen and adds the failure case.

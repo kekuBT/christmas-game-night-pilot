@@ -1,0 +1,12 @@
+server pid 2068 port 46281 web <scratchpad>/r5/web-after
+PASS old helper on a slow app returns silently with questions unanswered — answered 0 of 3, no error raised
+PASS new helper on the same slow app answers every question — answered 3
+PASS an answer that is never confirmed fails loudly — Cal: after answering question 1 of 3 (option 0); the answer was not confirmed — still {"kind":"question","n":1,"of":3} after 1500ms
+  DIAG player=Cal server=unavailable(page.evaluate: SecurityError: Failed to read the 'sessionStorage' property from 'Window': Access is denied for this document.) | screen="Question 1 of 3" clock="" | type=server-unreachable
+PASS the failure names the player, the question and the stuck state
+PASS the failure carries a lifecycle diagnosis line —   DIAG player=Cal server=unavailable(page.evaluate: SecurityError: Failed to read the 'sessionStorage' property from 'Window': Access is denied for this document.) | screen="Question 1 of 3" clock="" | type=server-unreachable
+PASS a normal flow answers all questions and ends on the waiting ring
+PASS a locked view with no Next question fails loudly (R5) — Fay: the locked view has no Next question (the last answer should show "All your answers are in")
+PASS limit stops after exactly n answers ("answer 2, then the phone dies")
+ANSWER HELPER ALL PASSED
+driver check-answer-helper rc=0 10s

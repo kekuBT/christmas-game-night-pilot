@@ -2180,3 +2180,18 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     3. The owner's own computer and browser.
   - **The first step:** read-only diagnostics in the Codespace decide which applies.
   - **Alternative rejected:** `--no-sandbox`, a privileged container, or `CAP_SYS_ADMIN` without owner approval.
+- **D-BR1R-12 After a locked answer, carrying on comes first; after the last one there is nothing to continue** (review 6904986723, R5; B-15).
+  - **The finding:** in Casual Trivia the locked-answer screen put "Waiting for everyone" and the tall ring before Next question. At 320×480 the enabled control sat below the first screen (705–761 px), and the lower seat's name label lay on the paragraph under the ring at every size. That told a player to wait when each player goes at their own pace against one deadline.
+  - **The decision:** one shared locked-answer view, `apps/web/src/components/mchezo/LockedAnswer.tsx`, for Trivia, Geography and Math Mayhem, which all had a copy of the same branch. Its order:
+    1. a compact confirmation card ("Question N of M · your answer", LOCKED IN);
+    2. a game's own note (Math Mayhem's answer time);
+    3. "Keep going — you don't need to wait for anyone. N questions left.", the enabled **Next question** and the game's time left;
+    4. then "How the room is doing": the same counts-only ring, set apart below.
+  - **The last answer:** the screen is labelled "All your answers are in". It keeps the card and the room's wait, with no continuation control. The old enabled "Waiting for the game to finish" keycap is gone; after a reload the existing "All your answers are in" view shows, as before.
+  - **The shared ring:** `.mz-wait` keeps 46 px under itself for the bottom seat's token and label. Every caller gets the same room.
+  - **Unchanged:** the server's deadline, scoring, answer immutability, counts-only progress, private projections and the post-finish reveal. Nothing auto-advances; the next question (and Math Mayhem's per-question timing) still opens only on Next question.
+  - **The drivers:** the shared answer helper and four drivers stop expecting the old keycap. A locked view without Next question now fails loudly instead of being clicked through.
+  - **Alternatives rejected:**
+    - A sticky Next question over the old layout: it still says to wait, and it covers content at enlarged text.
+    - Auto-advancing: excluded by the review.
+    - Fixing Trivia alone: it would leave the same defect in Geography and Math Mayhem.

@@ -1,0 +1,8 @@
+check-answer-helper rc=0 fails=0 passes=8 driver check-answer-helper rc=0 10s
+check-math rc=0 fails=0 passes=28 driver check-math rc=0 58s
+check-geography rc=0 fails=0 passes=24 driver check-geography rc=0 36s
+check-audit-fixes rc=0 fails=0 passes=50 driver check-audit-fixes rc=0 236s
+check-mchezo rc=0 fails=0 passes=43 driver check-mchezo rc=0 115s
+check-answer-race rc=0 fails=0 passes=9 driver check-answer-race rc=0 25s
+check-solo rc=0 fails=0 passes=80 driver check-solo rc=0 152s
+DONE

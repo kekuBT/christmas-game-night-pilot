@@ -1,0 +1,10 @@
+server pid 494 port 43593 web <scratchpad>/r5/web-before
+FAIL check-locked-answer journey crashed — locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('heading', { name: 'You’re in, Wilhelmina Featherstonehaugh-Kim.' }) to be visible[22m
+
+    at join (<scratchpad>/wtb1/scripts/check-locked-answer.mjs:49:68)
+    at async file://<scratchpad>/wtb1/scripts/check-locked-answer.mjs:129:5
+
+LOCKED ANSWER CHECK FAILED (1)
+driver check-locked-answer rc=1 19s

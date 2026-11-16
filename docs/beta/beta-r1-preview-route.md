@@ -1,6 +1,16 @@
 # Beta R1-R: a private route for the audit preview (handoff 6903638660)
 
 **Status:** an investigation and one proposed procedure, with the probe repaired for review 6903845075. The beta stays on HOLD.
+
+**Update (review 6904986723): route B works, through Firefox ESR, and was used for the independent audit.**
+- **How the reviewer ran it** on `456cb0d`, in the existing Codespace with no rebuild:
+  - a private noVNC desktop;
+  - Firefox ESR in disposable host, guest and TV profiles;
+  - the app and TLS proxy on loopback, with TLS validation on (a session CA trusted only in those profiles).
+- **The sandbox:** Firefox reported Seccomp-BPF and content process sandboxing at level 6, without user namespaces. That is option 1 of the sandbox section below, not Chromium's namespace sandbox.
+- **What the audit found:** one product defect, B-15 (continuing Trivia on small screens), repaired in the fourth round of `docs/beta/beta-r1-repair.md`.
+- **Route A** stays unvalidated: the real forwarder's probe returned `INCOMPLETE`.
+- **No further preview-infrastructure repair was requested.**
 - **The audit stays on hold** until an authorized private route has been **validated in the Codespace** with the original protections intact. Those are the exact-origin check, the beta gate, TLS validation in the browser, private visibility and synthetic data.
 - **The probe is evidence, not proof:** it covers only the traffic it observed.
 - **Not changed:** no product source and no production guard.

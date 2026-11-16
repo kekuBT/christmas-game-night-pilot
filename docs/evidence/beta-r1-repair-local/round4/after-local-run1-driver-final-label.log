@@ -1,0 +1,24 @@
+server pid 975 port 34317 web <scratchpad>/r5/web-after
+PASS 320x480 setup: a two-player Casual Trivia game starts — {"status":201}
+PASS 320x480 host L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true},"viewport":[320,480]}
+PASS 320x480 host L1 nothing covers it (the element at its centre is the button) — {"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true}
+PASS 320x480 host L2 it comes before the room's progress — true
+PASS 320x480 host L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER John Glenn LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 6:00
+PASS 320x480 host L3 no seat token or label overlaps text or a control — []
+PASS 320x480 host L4 no sideways scroll
+PASS 320x480 guest L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true},"viewport":[320,480]}
+PASS 320x480 guest L1 nothing covers it (the element at its centre is the button) — {"top":186,"bottom":242,"left":15,"right":305,"enabled":true,"hitIsButton":true}
+PASS 320x480 guest L2 it comes before the room's progress — true
+PASS 320x480 guest L2 nothing says to wait for everyone — QUESTION 1 OF 10 · YOUR ANSWER John Glenn LOCKED IN Keep going — you don’t need to wait for anyone. 9 questions left. Next question Time left in this game: 6:00
+PASS 320x480 guest L3 no seat token or label overlaps text or a control — []
+PASS 320x480 guest L4 no sideways scroll
+PASS 320x480 host L1 Next question opens question 2
+FAIL check-locked-answer journey crashed — locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('main[aria-label="Answer locked in"]') to be visible[22m
+
+    at lockOne (<scratchpad>/wtb1/scripts/check-locked-answer.mjs:106:30)
+    at async file://<scratchpad>/wtb1/scripts/check-locked-answer.mjs:157:9
+
+LOCKED ANSWER CHECK FAILED (1)
+driver check-locked-answer rc=1 33s
