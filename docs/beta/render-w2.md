@@ -3,7 +3,13 @@
 **Status: prepared, not run on any target.** W2 runs only after W1 has passed ([render-w1.md](render-w1.md)), inside an owner-approved window, against the validation install with its **throwaway** data folder and **throwaway** access code.
 - **Who runs it:** ChatGPT runs it and collects Render's own graphs. Claude doesn't operate the account.
 - **What W2 is:** the proposal's W2: "Live play at family scale: 2 rooms × 10 phones + a TV each … a full Trivia game with every phone answering, then a drawing game with strokes, plus Memory Book saves."
-- **The tool:** `scripts/beta/w2-load.mjs`, tested locally only ([evidence](../evidence/beta-r4-w2/README.md)). That proves the tool, not Render.
+- **The tool:** `scripts/beta/w2-load.mjs`, judged by `scripts/beta/w2-verdict.mjs`, and tested locally only ([evidence](../evidence/beta-r4-w2/README.md)). That proves the tool, not Render.
+- **Repaired after review 6922818863.** The first version could pass when its checks had proved nothing:
+  - a probe that got a 5xx, a timeout or a transport error counted as refused;
+  - a one-room run (`--rooms 1`) passed W2;
+  - the drawing was compared by piece count only.
+
+  All three are fixed, and each now has a test that fails on its own check.
 
 ## What existed, and what was added (the gap analysis)
 | Existing helper | What it already did | Why it isn't W2 by itself |
@@ -15,11 +21,11 @@
 
 **`w2-load.mjs` reuses `play.mjs`'s patterns** (the gate, room setup, intents with idempotent retries, the notes) and `w1-check.mjs`'s target handling and redaction. It adds only what was missing:
 - an explicit `https://`/`wss://` target;
-- 10 players per room;
+- **a fixed workload** of 10 players per room, with the expected counts for `7097ac2` enforced;
 - Draw & Guess, with strokes paced under the server's own limit;
-- **read-back** of every acknowledged action from the authoritative state;
+- **read-back** of every acknowledged action from the authoritative state, the drawing batch by batch;
 - acknowledgement percentiles;
-- the room-isolation checks;
+- the room-isolation checks, where only the app's own denial counts as refused;
 - the target's identifiers;
 - redacted evidence.
 
@@ -37,32 +43,50 @@ node scripts/beta/w2-load.mjs --origin https://<service>.onrender.com --code-fil
 ```
 - **It takes about 75 s** locally: Trivia about 12 s, then six drawing turns of a few seconds plus the 8 s reveal. On Render, network latency adds to that.
 - **It stops itself:** at `--max-minutes 20`, and gives up on any one action after `--ack-timeout-s 30`.
+- **The workload is fixed:** 2 rooms × 10 players + a TV each, and 5 notes per room.
+  - There is no smaller or "smoke" mode.
+  - `--rooms`, `--players`, `--notes` and any unknown option are refused (exit 2) before anything is created.
+- **The answer:**
+  - `W2 PASSED` (exit 0) is the only pass.
+  - `W2 FAILED` is exit 1.
+  - `--plant-leak` and `--self-test-probe-origin` are self-test options. A run with either never prints `W2 PASSED`: at best it ends with `W2 NOT ACCEPTED` (exit 3).
 - **The `--label` values** are recorded as given, for the record only. Never put a secret in one.
 - **While it runs, the operator records Render's CPU and memory for the service**, from the dashboard's Metrics, or the integration's `get_metrics` for the window's start and end. Then the peaks. **The tool can't see them, and nothing local is a Render measurement.**
 
 ## What it checks, and what fails the run
+Every check runs on every run, and each is a separate line, so a failure names its own check.
+
 | Check | Fails the run when |
 |---|---|
 | **Preflight** | `/health` isn't 200 with revision `7097ac2…`, or the gate doesn't admit the code |
 | **Setup** | The rooms, the 20 seats and the 2 TVs can't be created, or the 22 sockets don't open |
-| **Each game** | Trivia or Draw & Guess doesn't finish |
-| **Acknowledged** (Ready taps, 200 answers, about 96 stroke messages, 108 guesses, 10 notes) | Any action is rejected (`accepted: false`), or isn't acknowledged within the time limit, retries included |
-| **Persisted** (read back with a fresh request) | Anything acknowledged isn't in the authoritative state:<ul><li>answers: each player's own Trivia answers;</li><li>strokes: the turn's drawing, counted piece by piece;</li><li>guesses: the turn's correct guessers;</li><li>notes: the room's Memory Book.</li></ul> |
-| **Rooms isolated, passively** | Any WebSocket message or HTTP body read for one room contains another room's canary, room id or a player name |
-| **Rooms isolated, actively** | One room's host token is accepted on the other room's projection, Memory Book or socket |
-| **Sockets** | Any socket isn't open at the end. Disconnects and reconnects are counted and reported. |
+| **The workload** | It isn't exactly the one specified:<ul><li>2 rooms (A and B), each with 10 players, a TV and 11 sockets;</li><li>Trivia finished with 10 questions in each room;</li><li>Draw & Guess finished with 6 turns in each room.</li></ul> |
+| **Acknowledged**, per room (20 Ready taps, 100 answers, 48 stroke messages, 54 guesses, 5 notes) | Any of these happens:<ul><li>fewer were sent than expected;</li><li>an action was rejected (`accepted: false`);</li><li>no **well-formed** acknowledgement arrived within the time limit, retries included.</li></ul>A well-formed acknowledgement is HTTP 200 with a boolean `accepted` for an intent, and 200/201 with the saved entry (its id and exactly the note's text) for a note. Anything else is retried, and is counted under "malformed replies". |
+| **Persisted** (read back with a fresh request) | Anything acknowledged isn't in the authoritative state:<ul><li>answers: each player's own Trivia answer, with that choice;</li><li>strokes: **each acknowledged message's own pieces**, in the right room and turn. That means its stroke ids, in order, with a digest of the normalized pieces (`{s, c, w, p}`, as the server stores them), nothing duplicated, and no stored piece that the run didn't send;</li><li>guesses: the turn's correct guessers;</li><li>notes: the room's Memory Book.</li></ul> |
+| **Rooms isolated, passively** | Either of these happens:<ul><li>any WebSocket message or HTTP body read for one room contains the other room's canary, room id or a player name;</li><li>any of the 22 sockets never received a projection of its own room, which would make the scan vacuous.</li></ul> |
+| **Rooms isolated, actively** | Each direction (A's host token on room B, and B's on room A) must be probed exactly once, and every leg must be **refused by the app itself**:<ul><li>the projection and the Memory Book must each answer 401 with the app's body `{"error":"Session token required"}`;</li><li>the socket must close with 1008 and that same reason, before any message.</li></ul>Any of these fails the run as inconclusive, not as a refusal: a 5xx, a 404 or other wrong resource, the gate's or an edge's 401, a timeout, a transport error, or any message on the socket. A 200, or the other room's projection, fails it as access. |
+| **Sockets** | Any of the 22 sockets isn't open at the end. Disconnects and reconnects are counted and reported. |
 
-**What "persisted" means here:** read back from the running server, which saves every change synchronously before answering. It does not prove the data survived a restart; that is W4. Locally, `scripts/beta/w2-disk-check.mjs` also matched every acknowledged action against the files on disk. On Render the disk isn't readable from outside.
+**What "persisted" means here:** read back from the running server, which saves every change synchronously before answering. It does not prove the data survived a restart; that is W4.
+
+**Locally,** `scripts/beta/w2-disk-check.mjs` also matches every acknowledged action against the files on disk, item by item:
+- each answer for its player and question, with its choice;
+- each stroke message's own pieces, batch by batch, with the same match as the run;
+- each guesser among the turn's correct guessers;
+- each note's exact text.
+
+On Render the disk isn't readable from outside.
 
 **Cleanup:** the app has no supported way to delete a room, so the run deletes nothing. Its two rooms stay in the throwaway folder `/var/data/cgn-w1`. That folder is retired when the real folder is authorized after the go/no-go, and the run touches nothing else.
 
 ## What to record (the W2 report)
 - **The tool's evidence:** the console output and `w2-evidence/w2-<run>.json`, verbatim. They record:
-  - per category: sent, acknowledged, rejected, unacknowledged, retried and persisted counts, and acknowledgement median, p95 and max;
-  - sockets: total, open at the end, unexpected closes, reconnects, errors and messages;
-  - room isolation: the passive hits and the active probes;
+  - per category: sent, acknowledged, rejected, unacknowledged, retried, malformed replies and persisted counts, and acknowledgement median, p95 and max;
+  - each check, with its per-room detail;
+  - sockets: total, open at the end, with their own room's projection, unexpected closes, reconnects, errors and messages;
+  - room isolation: the passive hits and, for each probe leg, exactly what came back;
   - the target's `/health` revision and the operator labels;
-  - the tool's own SHA-256 and Node version.
+  - the SHA-256 of the tool and of its verdict module, and the Node version.
 
   **Before sharing, search the files for the code; it must not appear.** The tool redacts the code, the cookie, all tokens and the join codes.
 - **Render's CPU and memory peaks** for the window, with how they were read (dashboard or connector), as **operator evidence**.

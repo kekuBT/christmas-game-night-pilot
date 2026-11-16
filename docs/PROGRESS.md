@@ -3468,3 +3468,28 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - Render's latency and limits are unknown.
   - The run's rooms stay in the throwaway folder (no deletion path).
   - Persisted means read back from the running server; a restart is W4.
+
+## Beta R4: the W2 checker repaired (review 6922818863; #44)
+- **Review 6922818863:** the W2 runner needs repair before acceptance. Three blocking findings, all in the checker, none in the app:
+  1. **Transport errors counted as refusals.** A probe that got 503/502/timeout or 500/503/error counted as "refused".
+  2. **The workload wasn't enforced.** `--rooms 1` printed `W2 PASSED`, with both isolation checks passing on zero pairs.
+  3. **The drawing was compared by count only.** Substituted or repeated pieces of the same count passed.
+- **Acknowledged** in 6922848709, at 11:46 a.m. ET, with a 1 h 45 min estimate.
+- **Reproduced first,** on the unchanged `b38c892` tool: `--rooms 1` exited 0 with `W2 PASSED`.
+- **Done:**
+  - **`scripts/beta/w2-verdict.mjs` (new):** the verdict as pure functions, shared by the run, the disk check and the tests.
+    - A probe leg counts as refused only on the app's own denial: 401 `{"error":"Session token required"}`, and the socket closed 1008 with that reason before any message. Anything else is inconclusive, and the run fails.
+    - The workload is fixed and enforced per room: 2 × (10 + TV), 10 questions, 6 turns, and exactly 20/100/48/54/5 Ready taps, answers, stroke messages, guesses and notes. Every socket must see its own room's projection, and both probe directions must be present.
+    - A malformed success response isn't an acknowledgement.
+    - The drawing is matched batch by batch: stroke ids in order, the digest of the normalized pieces, no duplicates, nothing nobody sent.
+  - **`scripts/beta/w2-verdict-selftest.mjs` (new):** 37 focused `node:test` cases. It is not named `*.test.mjs`, so vitest doesn't collect it.
+  - **`scripts/beta/w2-load.mjs`:**
+    - `--rooms`, `--players`, `--notes`, `--expect-revision` and unknown options are refused (exit 2).
+    - The pieces are distinct per room, turn and message.
+    - The probes never abort the run and record each leg exactly.
+    - Self-test options never print `W2 PASSED` (at best exit 3).
+  - **`scripts/beta/w2-disk-check.mjs`:** item by item, with the same batch matcher.
+  - **`scripts/beta/render-like-proxy.mjs`:** `--mutate-every` (off by default). A body it rewrites gets the right content length.
+  - **`scripts/beta/w2-selftest.sh`:** adds U and V5–V8. V5 is the right count with the wrong pieces (run and disk); V6 and V7 are faulted probes (503, then a closed port); V8 is a reduced or unknown option.
+  - **`docs/beta/render-w2.md`:** the checks and the wording now match what is checked.
+- **Not done:** no runtime change (`7097ac2`), no deploy-file change (`46f7ff0`), no account operation, no target-host run, no Render metrics.

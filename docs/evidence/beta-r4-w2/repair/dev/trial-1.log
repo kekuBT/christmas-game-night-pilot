@@ -1,0 +1,35 @@
+== trial 2026-11-16T16:57:51Z, tool b38c892 60eefafd941e4e91, clean: 6 changed files
+      AUTHORIZED data_dir=/var/data/cgn-w1 public_origin=https://localhost:18443 trust_proxy=1 (the access code is kept only as a salted hash)
+-- trial: <scratch>/wtb1 cgn-render:check <scratch>/w2r/trial-1
+      [0.1s] preflight: /health 200, revision 7097ac2bb062925bb296a129f4771f1e68fd522d; the gate admitted the throwaway code (run 20261116T165752-83350c)
+      [0.5s] setup: 2 rooms × 10 players + a TV each; 22 sockets open over wss://
+      [0.7s] trivia: playing in every room (10 and 10 questions); answering
+      [11.9s] trivia: A finished, B finished; answers read back
+      [73.8s] draw & guess: A finished (6 turns), B finished (6 turns); strokes, guesses and notes read back
+      
+      --- summary ---
+      ready  sent 40, acknowledged 40, rejected 0, unacknowledged 0, retried 0, malformed answers 0; ack median 84 ms, p95 122 ms, max 137 ms
+      answer sent 200, acknowledged 200, rejected 0, unacknowledged 0, retried 0, malformed answers 0, persisted 200; ack median 9 ms, p95 14 ms, max 22 ms
+      stroke sent 96, acknowledged 96, rejected 0, unacknowledged 0, retried 0, malformed answers 0, persisted 96; ack median 10 ms, p95 13 ms, max 15 ms
+      guess  sent 108, acknowledged 108, rejected 0, unacknowledged 0, retried 0, malformed answers 0, persisted 108; ack median 46 ms, p95 99 ms, max 109 ms
+      note   sent 10, acknowledged 10, rejected 0, unacknowledged 0, retried 0, malformed answers 0, persisted 10; ack median 6 ms, p95 22 ms, max 22 ms
+      sockets 22: open at the end 22, with a projection of their own room 22, unexpected closes 0, reconnects 0, errors 0, messages received 5597
+      PASS workload: 2 rooms × 10 players + a TV each (22 sockets) — 2 room(s): A 10 players, 1 TV, 11 sockets; B 10 players, 1 TV, 11 sockets
+      PASS workload: Trivia finished with 10 questions in every room — A: finished, 10 questions; B: finished, 10 questions
+      PASS workload: Draw & Guess finished with 6 turns in every room — A: finished, 6 turns; B: finished, 6 turns
+      PASS ready: every expected Ready acknowledged (20 per room) — A: 20/20 acknowledged, 20 sent, 0 rejected, 0 unacknowledged; B: 20/20 acknowledged, 20 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every action acknowledged and accepted (100 per room) — A: 100/100 acknowledged, 100 sent, 0 rejected, 0 unacknowledged; B: 100/100 acknowledged, 100 sent, 0 rejected, 0 unacknowledged
+      PASS answer: every acknowledged action read back from the authoritative state — A: 100/100; B: 100/100
+      PASS stroke: every action acknowledged and accepted (48 per room) — A: 48/48 acknowledged, 48 sent, 0 rejected, 0 unacknowledged; B: 48/48 acknowledged, 48 sent, 0 rejected, 0 unacknowledged
+      PASS stroke: every acknowledged action read back from the authoritative state — A: 48/48; B: 48/48; stored pieces nobody sent: 0
+      PASS guess: every action acknowledged and accepted (54 per room) — A: 54/54 acknowledged, 54 sent, 0 rejected, 0 unacknowledged; B: 54/54 acknowledged, 54 sent, 0 rejected, 0 unacknowledged
+      PASS guess: every acknowledged action read back from the authoritative state — A: 54/54; B: 54/54
+      PASS note: every action acknowledged and accepted (5 per room) — A: 5/5 acknowledged, 5 sent, 0 rejected, 0 unacknowledged; B: 5/5 acknowledged, 5 sent, 0 rejected, 0 unacknowledged
+      PASS note: every acknowledged action read back from the authoritative state — A: 5/5; B: 5/5
+      PASS rooms isolated: no other room's canary, room id or player name in any socket message or HTTP body — 0 hits
+      PASS every socket received a projection for its own room (22) — 22/22
+      PASS rooms isolated: one room's host token is refused by the app on the other room's projection, Memory Book and socket (both directions) — room B host → room A: refused (projection 401 "Session token required"; memory 401 "Session token required"; socket closed 1008 "Session token required"); room A host → room B: refused (projection 401 "Session token required"; memory 401 "Session token required"; socket closed 1008 "Session token required")
+      PASS every socket open at the end (22) — 22/22
+      W2 PASSED
+exit 0
+code in logs/evidence: 0 file(s)
