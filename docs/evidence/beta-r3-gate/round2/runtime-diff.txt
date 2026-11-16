@@ -1,0 +1,16 @@
+== 2026-11-16T08:31Z; git diff --name-only 7097ac2bb062925bb296a129f4771f1e68fd522d b7f0bf710b3c74bf425f5a0ec061e291fda01545 -- . ':!docs'
+runtime files changed: 0
+
+== this round: git diff --stat bd8f44597558fceb0e661e34e4323f863eafd1a7 b7f0bf710b3c74bf425f5a0ec061e291fda01545
+ docs/DECISIONS.md                                  |  21 ++
+ docs/beta/beta-r1-release.md                       | 194 +++++++----
+ docs/evidence/beta-r3-gate/README.md               |   2 +
+ docs/evidence/beta-r3-gate/round2/README.md        |  86 +++++
+ .../beta-r3-gate/round2/gate-fixtures2-run1.log    | 352 ++++++++++++++++++++
+ .../beta-r3-gate/round2/gate-fixtures2-run2.log    | 362 +++++++++++++++++++++
+ .../beta-r3-gate/round2/gate-fixtures2.sh.txt      | 304 +++++++++++++++++
+ .../beta-r3-gate/round2/gate-mutations2-run1.log   |  88 +++++
+ .../beta-r3-gate/round2/gate-mutations2.sh.txt     |  63 ++++
+ .../beta-r3-gate/round2/repro-old-run1.log         |  51 +++
+ docs/evidence/beta-r3-gate/trace.md                |  24 +-
+ 11 files changed, 1473 insertions(+), 74 deletions(-)

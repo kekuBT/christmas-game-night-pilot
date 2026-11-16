@@ -3280,3 +3280,25 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   3. ChatGPT recommends a route.
   4. Stage 0 on the candidate host, then Approval 1.
 - **Risk:** the fixtures prove the gating, not systemd, Caddy's DNS challenge or the `nc` count. Those are first observed in Stages 1–2 on the host.
+
+## Beta R3 repair, round 2: review 6910988491 (docs and evidence only)
+- **The review:** changes requested before operator use. The published blocks started or stopped services after failed prerequisites:
+  - first install: a failed data check still reloaded and started;
+  - the switch: a failed stop still changed the unit and started, and an occupied real folder was accepted;
+  - promotion: a stale marker that couldn't be removed still reached the stop.
+- **Timeline:** acknowledged in 6911020929 with a 1 h 45 min estimate, written at 3:13 a.m. ET (report by about 5:00).
+- **Done** (commit `b7f0bf7`; evidence in `docs/evidence/beta-r3-gate/round2/`):
+  - **Promotion:** run-scoped flags, and marker removal inside the chain.
+  - **First install:** split into prepare, edits, gate and one start chain.
+  - **The switch:** split into a stop-first part A, with `mkdir` refusing an existing folder, and a checked part B.
+  - **Also:** the trace (T8–T10) and D-BR3-08.
+- **Validation, the final runs at `b7f0bf7`** (clean tree):
+  - the review's three scenarios reproduced on `ca15c99`'s blocks, 3 of 3;
+  - the round-2 fixtures, 90/90: P1–P12, F1–F10, W1–W10, each with positive and negative cases;
+  - mutations, 16 of 16 caught;
+  - the record check, 49/49, with 8 of 8 negatives caught;
+  - runtime diff vs `7097ac2`: 0 files.
+- **Earlier runs:** fixtures 86/86, then 90/90 after adding W10 and the dangling-link check; mutations 16 of 16 caught.
+- **Not done:** no host action, browser run, full gate, provisioning, account, public port, deployment, merge, invitation or spending. Beta HOLD. #42 separate.
+- **Next:** ChatGPT reviews round 2. Then the owner's F1–F6, the route recommendation, Stage 0 and Approval 1.
+- **Risk:** the stubs prove the gating, not systemd, the real datatool or Caddy; those are first observed on the host in Stages 1–2.
