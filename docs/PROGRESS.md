@@ -3489,7 +3489,11 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
     - The probes never abort the run and record each leg exactly.
     - Self-test options never print `W2 PASSED` (at best exit 3).
   - **`scripts/beta/w2-disk-check.mjs`:** item by item, with the same batch matcher.
-  - **`scripts/beta/render-like-proxy.mjs`:** `--mutate-every` (off by default). A body it rewrites gets the right content length.
-  - **`scripts/beta/w2-selftest.sh`:** adds U and V5–V8. V5 is the right count with the wrong pieces (run and disk); V6 and V7 are faulted probes (503, then a closed port); V8 is a reduced or unknown option.
+  - **`scripts/beta/render-like-proxy.mjs`:** `--mutate-every` and `--empty-ack-every` (both off by default). A body it rewrites gets the right content length.
+  - **`scripts/beta/w2-selftest.sh`:** adds U and V5–V9:
+    - V5: the right count with the wrong pieces (run and disk);
+    - V6 and V7: faulted probes (503, then a closed port);
+    - V8: a reduced or unknown option;
+    - V9: an empty 200 `{}` as the acknowledgement.
   - **`docs/beta/render-w2.md`:** the checks and the wording now match what is checked.
 - **Not done:** no runtime change (`7097ac2`), no deploy-file change (`46f7ff0`), no account operation, no target-host run, no Render metrics.

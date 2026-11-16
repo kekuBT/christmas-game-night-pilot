@@ -15,6 +15,8 @@
 #   V6  FAULTED isolation probes are not refusals: the probes go to an edge in maintenance mode (503 on every read and
 #       handshake), and the run must fail on the active isolation check alone;
 #   V7  the same with TRANSPORT errors: the probes go to a closed port;
+#   V9  a MALFORMED success is not an acknowledgement: the proxy answers every 10th stroke message (and its retries)
+#       with 200 and an empty {} without forwarding it (the old tool read a missing "accepted" as true);
 #   V8  a REDUCED workload is refused before anything is created: --rooms 1, --players 4, --notes 1, and an unknown option;
 #   and that no log or evidence file holds the access code or the beta cookie.
 # Each negative must fail on exactly its own check. It proves the tool, not Render.
@@ -81,7 +83,7 @@ if [ $rc = 0 ]; then ok "V1 what was acknowledged is on disk"; else bad V1-disk 
 echo "-- V2: a dropped acknowledgement (every 10th stroke message, and its retries, get 502)"
 RUNID=V2; proxy --hops 1 --fault-action draw-strokes --fail-intent-every 10
 load V2 --ack-timeout-s 6; rc=$?
-if [ $rc = 1 ] && has V2 '^FAIL stroke: every action acknowledged and accepted' && [ "$(fails V2)" = 1 ]; then ok "V2 FAILED on the unacknowledged strokes alone"; else bad V2 "expected exactly the stroke acknowledgement check to fail (exit $rc, $(fails V2) FAIL lines)"; fi
+if [ $rc = 1 ] && has V2 '^FAIL stroke: every action acknowledged and accepted' && has V2 '^stroke .* malformed replies 0,' && [ "$(fails V2)" = 1 ]; then ok "V2 FAILED on the unacknowledged strokes alone"; else bad V2 "expected exactly the stroke acknowledgement check to fail (exit $rc, $(fails V2) FAIL lines)"; fi
 
 echo "-- V3: a fake acknowledgement (every 10th stroke message is answered accepted without reaching the server)"
 RUNID=V3; proxy --hops 1 --fault-action draw-strokes --fake-ack-every 10
@@ -115,6 +117,12 @@ RUNID=V7; proxy --hops 1
 load V7 --self-test-probe-origin "https://localhost:$CLOSED"; rc=$?
 if [ $rc = 1 ] && has V7 "^FAIL rooms isolated: one room's host token is refused by the app" && has V7 'inconclusive (projection transport' && [ "$(fails V7)" = 1 ]; then ok "V7 FAILED on the active isolation check alone (a transport error is not a refusal)"; else bad V7 "expected exactly the active isolation check to fail (exit $rc, $(fails V7) FAIL lines)"; fi
 stop_proxy
+
+echo "-- V9: a malformed success (200 with an empty {} for every 10th stroke message and its retries, not forwarded)"
+RUNID=V9; proxy --hops 1 --fault-action draw-strokes --empty-ack-every 10
+load V9 --ack-timeout-s 6; rc=$?
+stop_proxy
+if [ $rc = 1 ] && has V9 '^FAIL stroke: every action acknowledged and accepted' && grep -qE '^stroke .* malformed replies [1-9]' "$WK/V9.log" && [ "$(fails V9)" = 1 ]; then ok "V9 FAILED on the stroke acknowledgements alone (an empty 200 is not an acknowledgement)"; else bad V9 "expected exactly the stroke acknowledgement check to fail, with malformed replies counted (exit $rc, $(fails V9) FAIL lines)"; fi
 
 echo "-- V8: a reduced or unknown workload option is refused before anything is created"
 v8ok=1

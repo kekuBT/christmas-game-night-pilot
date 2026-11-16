@@ -14,6 +14,8 @@
 //                           clientEventId: the action is never acknowledged (a dropped acknowledgement);
 //   --fake-ack-every N      every Nth such request (and its retries) gets 200 {"accepted":true} WITHOUT being forwarded:
 //                           acknowledged but never applied, so the read-back must catch it.
+//   --empty-ack-every N     (review 6922818863) every Nth such request (and its retries) gets 200 with an EMPTY JSON
+//                           object {} and is NOT forwarded: a success status that is not a well-formed acknowledgement.
 //   --mutate-every N        (review 6922818863) every Nth such request (and its retries) IS forwarded, but with one
 //                           coordinate of its first drawing piece moved by 1: the server accepts it, the piece count is
 //                           right, and only a batch-by-batch read-back of the pieces themselves can catch it.
@@ -31,7 +33,7 @@ const maintenance = argv.includes("--maintenance");
 const key = readFileSync(opt("key")), cert = readFileSync(opt("cert"));
 const xff = (req) => [req.headers["x-forwarded-for"], req.socket.remoteAddress?.replace(/^::ffff:/, ""), ...(hops === 2 ? ["10.9.9.9"] : [])].filter(Boolean).join(", ");
 const busy = (res) => { res.writeHead(503, { "content-type": "text/html" }); res.end("<h1>Service under maintenance</h1>"); };
-const faultAction = opt("fault-action"), failEvery = Number(opt("fail-intent-every", "0")), fakeEvery = Number(opt("fake-ack-every", "0")), mutateEvery = Number(opt("mutate-every", "0"));
+const faultAction = opt("fault-action"), failEvery = Number(opt("fail-intent-every", "0")), fakeEvery = Number(opt("fake-ack-every", "0")), mutateEvery = Number(opt("mutate-every", "0")), emptyEvery = Number(opt("empty-ack-every", "0"));
 const faulted = new Set(); let faultCount = 0; let faultsApplied = 0;
 const forward = (req, res, body) => {
   const headers = { ...req.headers, "x-forwarded-for": xff(req), "x-forwarded-proto": "https", ...(body !== undefined ? { "content-length": String(Buffer.byteLength(body)) } : {}) };
@@ -45,7 +47,7 @@ const forward = (req, res, body) => {
 
 const edge = https.createServer({ key, cert }, (req, res) => {
   if (maintenance) return busy(res);
-  if (!(faultAction && (failEvery || fakeEvery || mutateEvery) && req.method === "POST" && /^\/rooms\/[^/]+\/intents$/.test(req.url))) return forward(req, res);
+  if (!(faultAction && (failEvery || fakeEvery || mutateEvery || emptyEvery) && req.method === "POST" && /^\/rooms\/[^/]+\/intents$/.test(req.url))) return forward(req, res);
   const chunks = [];
   req.on("data", (c) => chunks.push(c));
   req.on("end", () => {
@@ -54,7 +56,7 @@ const edge = https.createServer({ key, cert }, (req, res) => {
     const intent = parsed?.intent ?? {};
     if (intent.action !== faultAction) return forward(req, res, body);
     const id = String(intent.clientEventId);
-    if (!faulted.has(id) && ++faultCount % (failEvery || fakeEvery || mutateEvery) === 0) faulted.add(id);
+    if (!faulted.has(id) && ++faultCount % (failEvery || fakeEvery || mutateEvery || emptyEvery) === 0) faulted.add(id);
     if (!faulted.has(id)) return forward(req, res, body);
     faultsApplied++;
     if (mutateEvery) {
@@ -62,6 +64,7 @@ const edge = https.createServer({ key, cert }, (req, res) => {
       if (piece && Array.isArray(piece.p) && piece.p.length > 1) piece.p[1] = piece.p[1] < 1000 ? piece.p[1] + 1 : piece.p[1] - 1;
       return forward(req, res, JSON.stringify(parsed));
     }
+    if (emptyEvery) { res.writeHead(200, { "content-type": "application/json" }); res.end("{}"); return; }
     if (failEvery) { res.writeHead(502, { "content-type": "text/plain" }); res.end("injected: dropped"); return; }
     res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify({ accepted: true }));
   });
@@ -86,6 +89,6 @@ const plain = http.createServer((req, res) => {
 });
 await new Promise((r) => edge.listen(httpsPort, "127.0.0.1", r));
 await new Promise((r) => plain.listen(httpPort, "127.0.0.1", r));
-console.log(`render-like-proxy LISTENING https=${httpsPort} http=${httpPort} backend=${bHost}:${bPort} hops=${hops}${maintenance ? " MAINTENANCE" : ""}${faultAction ? ` FAULT ${failEvery ? `fail-every=${failEvery}` : fakeEvery ? `fake-ack-every=${fakeEvery}` : `mutate-every=${mutateEvery}`} action=${faultAction}` : ""}`);
+console.log(`render-like-proxy LISTENING https=${httpsPort} http=${httpPort} backend=${bHost}:${bPort} hops=${hops}${maintenance ? " MAINTENANCE" : ""}${faultAction ? ` FAULT ${failEvery ? `fail-every=${failEvery}` : fakeEvery ? `fake-ack-every=${fakeEvery}` : emptyEvery ? `empty-ack-every=${emptyEvery}` : `mutate-every=${mutateEvery}`} action=${faultAction}` : ""}`);
 const stop = () => { if (faultAction) console.log(`render-like-proxy: ${faulted.size} intent(s) faulted, ${faultsApplied} request(s) answered by the fault`); edge.close(); plain.close(); process.exit(0); };
 process.on("SIGTERM", stop); process.on("SIGINT", stop);

@@ -151,7 +151,8 @@ async function act(category, room, label, send, judge) {
         rec.ackMs = Date.now() - t; rec.result = r.body?.result;
         return rec;
       }
-      rec.malformed++; rec.lastError = `HTTP ${r.status}${r.status === 200 || r.status === 201 ? " without a well-formed acknowledgement" : ""}`;
+      // "Malformed" counts only a SUCCESS status whose body isn't a well-formed acknowledgement; a 502 is just a failure.
+      if (r.status === 200 || r.status === 201) { rec.malformed++; rec.lastError = `HTTP ${r.status} without a well-formed acknowledgement`; } else rec.lastError = `HTTP ${r.status}`;
     } catch (e) { rec.lastError = String(e?.cause?.code ?? e?.name ?? e?.message ?? e).slice(0, 80); }
     if (Date.now() - t > ACK_MS || overTime()) return rec;
     await sleep(300);
