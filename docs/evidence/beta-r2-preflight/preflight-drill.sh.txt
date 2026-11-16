@@ -22,8 +22,8 @@ if getent passwd cgn >/dev/null; then echo "REFUSED: a user named cgn already ex
 if getent group cgn >/dev/null; then echo "REFUSED: a group named cgn already exists here; this drill won't touch it"; exit 2; fi
 if [ -e "$P" ]; then echo "REFUSED: $P already exists"; exit 2; fi
 
-# What this run created, recorded as it happens. Cleanup removes only these, also after a partial failure, an early
-# exit, SIGTERM or SIGINT.
+# What this run created, recorded only when its own creation step succeeds. Cleanup removes only these, also after a
+# partial failure, an early exit, SIGTERM or SIGINT.
 OWN_USER=0; OWN_GROUP=0; OWN_PREFIX=0
 cleanup() {
   for p in $SRV_PID $RESTORED_PID $CADDY_PID; do kill "$p" 2>/dev/null; done; sleep 1
@@ -58,12 +58,15 @@ TOP=$(cd "$REL" && npm ls --omit=dev --depth=0 --parseable 2>/dev/null | tail -n
 chown -R root:root "$REL"; chmod -R go-w "$REL"
 
 step "B. First install: the service user, private folders, settings, check, start"
-useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn; R=$?
-# Both were absent at the start (refused otherwise), so whatever exists now was created by this run, even if useradd
-# failed halfway (for example after creating the group).
-getent passwd cgn >/dev/null && OWN_USER=1; getent group cgn >/dev/null && OWN_GROUP=1
-check "B1 the service user" $R "useradd exit $R; created: user $OWN_USER, group $OWN_GROUP"
-[ $R = 0 ] || { echo "the service user couldn't be created: stopping the drill"; exit 1; }
+# Review 6908557588: ownership comes only from this run's own confirmed creation steps, never from what exists
+# afterwards (another run may have taken the name since the startup checks). This is the two-step equivalent of the
+# runbook's `useradd --user-group`: groupadd and useradd each fail atomically (exit 9) on a name already taken, so
+# exit 0 means this run created it.
+groupadd --system cgn; RG=$?
+if [ $RG = 0 ]; then OWN_GROUP=1; else echo "REFUSED: groupadd exit $RG: the cgn group was taken after the startup checks; it isn't this run's"; check "B1 the service group" 1 "groupadd exit $RG"; exit 2; fi
+useradd --system --no-create-home --shell /usr/sbin/nologin -g cgn cgn; RU=$?
+if [ $RU = 0 ]; then OWN_USER=1; else echo "REFUSED: useradd exit $RU: the cgn user was taken after the startup checks, or couldn't be created; it isn't this run's"; check "B1 the service user" 1 "useradd exit $RU; created: group $OWN_GROUP, user 0"; exit 2; fi
+check "B1 the service user" 0 "groupadd exit 0, useradd exit 0; created: user $OWN_USER, group $OWN_GROUP"
 install -d -m 0755 "$P/var" "$P/var/lib" "$P/var/backups" "$P/etc"
 install -d -m 0700 -o cgn -g cgn "$P/var/lib/christmas-game-night"
 install -d -m 0700 "$P/var/backups/christmas-game-night"

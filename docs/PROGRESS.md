@@ -3233,3 +3233,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **The fix (D-BR2-06):** refusals first; ownership tracked per resource; cleanup limited to what the run created.
   - **Proved by:** a safety check, 14/14, and a full run, 42/42.
   - **Also:** the blocker matrix now records ChatGPT's private Firefox R5 audit of `7097ac2`, through the TV's finished reveal and the start of the rematch. Native iPhone Safari, Android Chrome and the target host are still pending.
+- **Review 6908557588 (changes requested on `d275a0f`)** was acknowledged in 6908580291 with a 30 min estimate, written at 12:53 a.m. ET.
+  - **The finding:** a `cgn` taken by another run after the startup checks would still be claimed and deleted.
+  - **The fix (D-BR2-07):** ownership only from this run's own successful `groupadd` and `useradd`.
+  - **Proved by:** a safety check, 24/24 with two late-collision cases, and a full run, 42/42.

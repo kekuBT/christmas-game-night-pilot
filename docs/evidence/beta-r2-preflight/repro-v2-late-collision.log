@@ -1,0 +1,14 @@
+# Reproduction of review 6908557588 with the SECOND version of preflight-drill.sh (as published at d275a0f).
+# 'Another run' creates the cgn user and group while this run prepares the package (after its startup checks).
+# userdel/groupdel are logging-only stubs: nothing is deleted.
+the other run created: uid=996(cgn) gid=995(cgn) groups=995(cgn)
+[1]+  Exit 1                  PATH="$W/stubs:$PATH" bash $SP/r2/drill/preflight-drill.v2-race.sh $ARGS > $W/drill.log 2>&1
+v2 exit: 1
+FAIL B1 the service user — useradd exit 9; created: user 1, group 1
+the service user couldn't be created: stopping the drill
+cleanup: removed only what this run created (user 1, group 1, prefix 1)
+deletion attempts recorded by the stubs:
+userdel cgn
+groupdel cgn
+the other run's identity after: uid=996(cgn) gid=995(cgn) groups=995(cgn)
+fixture removed by the check: no cgn user / no cgn group

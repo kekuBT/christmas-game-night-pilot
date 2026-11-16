@@ -1,0 +1,51 @@
+== S1: an existing cgn user, without a cgn group
+REFUSED: a user named cgn already exists here; this drill won't touch it
+PASS S1 the drill refuses (exit 2) — exit 2
+PASS S1 no deletion attempted
+PASS S1 the existing user is intact (same uid) — uid 996
+PASS S1 no folder made
+
+== S2: an existing cgn group, without a cgn user
+REFUSED: a group named cgn already exists here; this drill won't touch it
+PASS S2 the drill refuses (exit 2) — exit 2
+PASS S2 no deletion attempted
+PASS S2 the existing group is intact (same gid)
+
+== S3: this run's groupadd succeeds, then useradd fails
+REFUSED: useradd exit 1: the cgn user was taken after the startup checks, or couldn't be created; it isn't this run's
+FAIL B1 the service user — useradd exit 1; created: group 1, user 0
+cleanup: removed only what this run created (user 0, group 1, prefix 1)
+PASS S3 the drill refuses at the failed service user (exit 2) — exit 2
+PASS S3 the only deletion is the group this run created — groupdel cgn;
+PASS S3 nothing left behind — user:no group:no prefixes:0 procs:0
+
+== S4: SIGTERM mid-run, with the service user created and the server running
+PASS B7 the start line
+cleanup: removed only what this run created (user 1, group 1, prefix 1)
+PASS S4 SIGTERM ends the drill (exit 143), with the server running before — exit 143; 1 server(s) as cgn before
+PASS S4 cleanup ran, for what this run created
+PASS S4 deletions: only cgn, which this run created — userdel cgn;
+PASS S4 nothing left behind — user:no group:no prefixes:0 procs:0
+
+== S5: another run creates the cgn user and group during this run's package preparation
+REFUSED: groupadd exit 9: the cgn group was taken after the startup checks; it isn't this run's
+FAIL B1 the service group — groupadd exit 9
+cleanup: removed only what this run created (user 0, group 0, prefix 1)
+PASS S5 the drill refuses the late name (exit 2) — exit 2
+PASS S5 no deletion attempted
+PASS S5 the other run's user and group are intact — uid=996(cgn) gid=995(cgn) groups=995(cgn)
+PASS S5 cleanup claims only this run's folder
+PASS S5 the run's folder and processes are gone
+
+== S6: another run creates only a cgn user during this run's package preparation
+REFUSED: useradd exit 9: the cgn user was taken after the startup checks, or couldn't be created; it isn't this run's
+FAIL B1 the service user — useradd exit 9; created: group 1, user 0
+cleanup: removed only what this run created (user 0, group 1, prefix 1)
+PASS S6 the drill refuses the late name (exit 2) — exit 2
+PASS S6 the only deletion is the group this run created — groupdel cgn;
+PASS S6 the other run's user is intact — uid=996(cgn) gid=65534(nogroup) groups=65534(nogroup)
+PASS S6 cleanup claims only this run's group and folder
+PASS S5/S6 nothing left behind after removing the other run's fixtures — user:no group:no prefixes:0 procs:0
+
+drill safety check: 24 passed, 0 failed
+DRILL SAFETY CHECK PASSED

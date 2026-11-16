@@ -96,7 +96,7 @@ Each line is observable before anything is installed. **Who:** the owner, or the
 
 **The drill script is for a disposable machine only.** Never run it on the beta host.
 - **Its refusal:** it won't start where a `cgn` user, a `cgn` group or its folder already exists.
-- **Its cleanup:** it deletes only what that run created (review 6908455526, D-BR2-06).
+- **Its cleanup:** it deletes only what that run itself created, confirmed by its own successful `groupadd`, `useradd` and `mkdir` (reviews 6908455526 and 6908557588; D-BR2-06, D-BR2-07).
 
 ### Sources (official, read 2026-11-16)
 - **Caddy documentation**, `caddyserver/website` at `c33ee8b`:

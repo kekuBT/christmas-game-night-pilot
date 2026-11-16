@@ -2261,3 +2261,10 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - Deleting the old version: it would hide what runs 1–4 actually ran.
     - Using a randomly named service user: the drill exists to rehearse the runbook's own `cgn` steps.
+- **D-BR2-07 The rehearsal claims an identity only from its own successful creation step** (review 6908557588; refines D-BR2-06).
+  - **The defect:** the D-BR2-06 version inferred ownership from what existed after `useradd`. Another run taking `cgn` after the startup checks would be claimed and deleted. Reproduced in `repro-v2-late-collision.log`.
+  - **The fix:** `groupadd --system cgn`, then `useradd --system … -g cgn cgn`, each marking ownership only on exit 0. A taken name (exit 9) becomes a refusal, and the other run's identities are kept. It is the two-step equivalent of the runbook's `useradd --user-group`.
+  - **Proved by:** the safety check, now 24/24 with the late-collision cases (user and group; user only), and a full run, 42/42.
+  - **Alternatives rejected:**
+    - Per-run random names: the drill rehearses the runbook's own `cgn` steps.
+    - A lock file between runs: it protects only runs that use the lock, and a confirmed creation step protects against any other creator.
