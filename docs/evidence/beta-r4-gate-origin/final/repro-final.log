@@ -1,0 +1,12 @@
+# FINAL gate-origin reproduction on a clean checkout of 8baa35dc7c02b1a492d63f216bd36ddb510bd04d (status 0 lines), 2026-11-16T23:12:31Z
+# command: node scripts/beta/gate-origin-repro.mjs --image cgn-render:check --evidence <scratch>/gate/final/ev
+# image: sha256:7b53109a7d69; containers before: 0
+AS EXPECTED case A (origin-preserving forwarder; public origin = the URL's (the release architecture)): admitted; gate Referrer-Policy as received ["same-origin"]; Origin sent by the browser "https://preview.test:18443", received by the app "https://preview.test:18443"; POST 303; app loaded: true; cookie Secure=true HttpOnly=true SameSite=Lax; wrong code first: 401, alert "That code didn’t work. Check it and try again.", cookie set: false
+AS EXPECTED case B (Codespaces-like forwarder (F1 rewrite); public origin = the URL's (the reviewer's configuration)): FOREIGN_ORIGIN; gate Referrer-Policy as received ["same-origin"]; Origin sent by the browser "https://preview.test:18443", received by the app "https://localhost:18443"; POST 403; app loaded: false
+AS EXPECTED case C (the same forwarder; public origin = the rewritten value (route A)): admitted; gate Referrer-Policy as received ["same-origin"]; Origin sent by the browser "https://preview.test:18443", received by the app "https://localhost:18443"; POST 303; app loaded: true; cookie Secure=true HttpOnly=true SameSite=Lax
+AS EXPECTED case D (origin-preserving forwarder that appends Referrer-Policy: no-referrer (the no-referrer hypothesis)): FOREIGN_ORIGIN; gate Referrer-Policy as received ["same-origin","no-referrer"]; Origin sent by the browser "null", received by the app "null"; POST 403; app loaded: false
+evidence: <scratch>/gate/final/ev/gate-origin-20261116T231231-9d088f.json
+containers of this run left: 0; code in the evidence: no
+GATE ORIGIN REPRO AS EXPECTED (run 20261116T231231-9d088f)
+exit: 0
+# containers after: 0

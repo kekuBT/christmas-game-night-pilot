@@ -1,0 +1,17 @@
+# FINAL static checks on the clean checkout of 8baa35dc7c02b1a492d63f216bd36ddb510bd04d (status 1 lines), 2026-11-16T23:13:16Z
+## 1. everything changed since #45's reviewed head e16dbdd
+ docs/PROGRESS.md                                   |  11 +
+ docs/evidence/beta-r4-gate-origin/README.md        |  58 ++++++
+ .../beta-r4-gate-origin/dev/run1-docker-down.log   |   4 +
+ .../run2-gate-origin-20261116T230940-45534d.json   | 229 +++++++++++++++++++++
+ docs/evidence/beta-r4-gate-origin/dev/run2.log     |   7 +
+ scripts/beta/gate-origin-repro.mjs                 | 174 ++++++++++++++++
+ 6 files changed, 483 insertions(+)
+## 2. runtime files changed since 7097ac2 (empty = unchanged)
+(end)
+## 3. deploy files changed since 2e2257c (empty = unchanged)
+(end)
+## 4. lint
+eslint scripts/beta: exit 0
+## 5. secret scan of the changes since e16dbdd
+(end of secret scan)

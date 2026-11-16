@@ -1,0 +1,229 @@
+{
+ "tool": "scripts/beta/gate-origin-repro.mjs",
+ "run": "20261116T231231-9d088f",
+ "image": "cgn-render:check",
+ "url": "https://preview.test:18443",
+ "cases": [
+  {
+   "id": "A",
+   "what": "origin-preserving forwarder; public origin = the URL's (the release architecture)",
+   "mode": "preserve",
+   "publicOrigin": "https://preview.test:18443",
+   "expect": "admitted",
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "container": "38e222de44ae",
+   "gate": {
+    "status": 401,
+    "referrerPolicyAsReceived": [
+     "same-origin"
+    ],
+    "formShown": true
+   },
+   "wrongCode": {
+    "status": 401,
+    "alert": "That code didn’t work. Check it and try again.",
+    "cookieSet": false,
+    "gateStillShown": true
+   },
+   "rightCode": {
+    "postStatus": 303,
+    "finalPath": "/",
+    "appLoaded": true,
+    "pageText": "mchezo FEATURED TODAY Geography Challenge 2–10 players · about 7 min PARTY GAMES All 24 games › Impostor 4–10 players · ",
+    "cookie": {
+     "secure": true,
+     "httpOnly": true,
+     "sameSite": "Lax",
+     "hostOnly": true
+    }
+   },
+   "formPostsAsSentByBrowser": [
+    {
+     "origin": "https://preview.test:18443",
+     "secFetchSite": "same-origin",
+     "mode": "navigate"
+    },
+    {
+     "origin": "https://preview.test:18443",
+     "secFetchSite": "same-origin",
+     "mode": "navigate"
+    }
+   ],
+   "formPostsAsForwarded": [
+    {
+     "method": "POST",
+     "path": "/beta/enter",
+     "originFromBrowser": "https://preview.test:18443",
+     "originToApp": "https://preview.test:18443",
+     "secFetchSite": "same-origin",
+     "status": 401
+    },
+    {
+     "method": "POST",
+     "path": "/beta/enter",
+     "originFromBrowser": "https://preview.test:18443",
+     "originToApp": "https://preview.test:18443",
+     "secFetchSite": "same-origin",
+     "status": 303
+    }
+   ],
+   "outcome": "admitted"
+  },
+  {
+   "id": "B",
+   "what": "Codespaces-like forwarder (F1 rewrite); public origin = the URL's (the reviewer's configuration)",
+   "mode": "rewrite",
+   "publicOrigin": "https://preview.test:18443",
+   "expect": "FOREIGN_ORIGIN",
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "container": "75fff52ebbae",
+   "gate": {
+    "status": 401,
+    "referrerPolicyAsReceived": [
+     "same-origin"
+    ],
+    "formShown": true
+   },
+   "rightCode": {
+    "postStatus": 403,
+    "finalPath": "/beta/enter",
+    "appLoaded": false,
+    "pageText": "{\"error\":\"Requests from another site are not allowed.\",\"code\":\"FOREIGN_ORIGIN\"}",
+    "cookie": null
+   },
+   "formPostsAsSentByBrowser": [
+    {
+     "origin": "https://preview.test:18443",
+     "secFetchSite": "same-origin",
+     "mode": "navigate"
+    }
+   ],
+   "formPostsAsForwarded": [
+    {
+     "method": "POST",
+     "path": "/beta/enter",
+     "originFromBrowser": "https://preview.test:18443",
+     "originToApp": "https://localhost:18443",
+     "secFetchSite": "same-origin",
+     "status": 403
+    }
+   ],
+   "outcome": "FOREIGN_ORIGIN"
+  },
+  {
+   "id": "C",
+   "what": "the same forwarder; public origin = the rewritten value (route A)",
+   "mode": "rewrite",
+   "publicOrigin": "https://localhost:18443",
+   "expect": "admitted",
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "container": "6a38b546d55b",
+   "gate": {
+    "status": 401,
+    "referrerPolicyAsReceived": [
+     "same-origin"
+    ],
+    "formShown": true
+   },
+   "rightCode": {
+    "postStatus": 303,
+    "finalPath": "/",
+    "appLoaded": true,
+    "pageText": "mchezo FEATURED TODAY Geography Challenge 2–10 players · about 7 min PARTY GAMES All 24 games › Impostor 4–10 players · ",
+    "cookie": {
+     "secure": true,
+     "httpOnly": true,
+     "sameSite": "Lax",
+     "hostOnly": true
+    }
+   },
+   "formPostsAsSentByBrowser": [
+    {
+     "origin": "https://preview.test:18443",
+     "secFetchSite": "same-origin",
+     "mode": "navigate"
+    }
+   ],
+   "formPostsAsForwarded": [
+    {
+     "method": "POST",
+     "path": "/beta/enter",
+     "originFromBrowser": "https://preview.test:18443",
+     "originToApp": "https://localhost:18443",
+     "secFetchSite": "same-origin",
+     "status": 303
+    }
+   ],
+   "outcome": "admitted"
+  },
+  {
+   "id": "D",
+   "what": "origin-preserving forwarder that appends Referrer-Policy: no-referrer (the no-referrer hypothesis)",
+   "mode": "no-referrer",
+   "publicOrigin": "https://preview.test:18443",
+   "expect": "FOREIGN_ORIGIN",
+   "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+   "container": "32a3a7f1347e",
+   "gate": {
+    "status": 401,
+    "referrerPolicyAsReceived": [
+     "same-origin",
+     "no-referrer"
+    ],
+    "formShown": true
+   },
+   "rightCode": {
+    "postStatus": 403,
+    "finalPath": "/beta/enter",
+    "appLoaded": false,
+    "pageText": "{\"error\":\"Requests from another site are not allowed.\",\"code\":\"FOREIGN_ORIGIN\"}",
+    "cookie": null
+   },
+   "formPostsAsSentByBrowser": [
+    {
+     "origin": "null",
+     "secFetchSite": "same-origin",
+     "mode": "navigate"
+    }
+   ],
+   "formPostsAsForwarded": [
+    {
+     "method": "POST",
+     "path": "/beta/enter",
+     "originFromBrowser": "null",
+     "originToApp": "null",
+     "secFetchSite": "same-origin",
+     "status": 403
+    }
+   ],
+   "outcome": "FOREIGN_ORIGIN"
+  }
+ ],
+ "verdicts": [
+  {
+   "id": "A",
+   "ok": true,
+   "outcome": "admitted",
+   "expected": "admitted"
+  },
+  {
+   "id": "B",
+   "ok": true,
+   "outcome": "FOREIGN_ORIGIN",
+   "expected": "FOREIGN_ORIGIN"
+  },
+  {
+   "id": "C",
+   "ok": true,
+   "outcome": "admitted",
+   "expected": "admitted"
+  },
+  {
+   "id": "D",
+   "ok": true,
+   "outcome": "FOREIGN_ORIGIN",
+   "expected": "FOREIGN_ORIGIN"
+  }
+ ],
+ "browser": "chromium 153.0.8010.12"
+}

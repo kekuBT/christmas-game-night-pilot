@@ -1,0 +1,14 @@
+# FINAL gate unit tests on a clean checkout of 8baa35dc7c02b1a492d63f216bd36ddb510bd04d, 2026-11-16T23:13:13Z
+# command: npx vitest run tests/beta-r1.test.ts
+
+ RUN  v2.1.9 <scratch>/gate/final/repo
+
+ ✓ tests/beta-r1.test.ts (23 tests) 764ms
+   ✓ one writer per data directory (DataDirLock) > the review's interleaving: a holder whose record is still empty (or garbage) is still the holder 414ms
+
+ Test Files  1 passed (1)
+      Tests  23 passed (23)
+   Start at  23:13:14
+   Duration  2.22s (transform 825ms, setup 0ms, collect 1.10s, tests 764ms, environment 0ms, prepare 89ms)
+
+exit: 0

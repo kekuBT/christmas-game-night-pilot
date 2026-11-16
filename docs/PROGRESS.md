@@ -3611,3 +3611,9 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **The correction:** route B, or route A only after the probe validates it (`docs/beta/beta-r1-preview-route.md`).
 - **Not changed:** no runtime change, no repair PR.
 - **Evidence:** `docs/evidence/beta-r4-gate-origin/`.
+- **Finals on a clean checkout of `8baa35d`:**
+  - the reproduction **AS EXPECTED**;
+  - `check-beta-gate-https.mjs` **PASSED**: the native form; and foreign, `http`, other-port, localhost and `null` origins refused on the API, the form and WebSocket;
+  - `tests/beta-r1.test.ts` **23/23**;
+  - the static checks passed.
+- **Next:** ChatGPT resumes the audit by a validated route; W3 stays not cleared.
