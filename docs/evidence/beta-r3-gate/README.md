@@ -64,7 +64,9 @@ Docs and evidence only. No host action, browser run or full-gate rerun. The runt
 | **Final** | **Mutations on the committed docs** | see the log | [gate-mutations-final.log](gate-mutations-final.log) |
 | **Final** | **The record check** ([check-r3-record.mjs.txt](check-r3-record.mjs.txt), now 49 checks) and its 8 negatives ([record-negatives.sh.txt](record-negatives.sh.txt)) | see the logs | [record-check-final.out.txt](record-check-final.out.txt), [record-negatives-final.out.txt](record-negatives-final.out.txt) |
 
-Runs 1–7 and M1 ran on the uncommitted working tree as it was then. Only the final runs bind to the committed docs.
+Runs 1–7 and M1 ran on the uncommitted working tree as it was then. Only the final runs bind to the committed docs: each final log's first line names the commit, `ca15c999b822c722b35a21df1be6fa775ab9c4e6`, with 0 uncommitted paths.
+
+**One edit to the final logs:** my local checkout path in their header lines is replaced with `<repo checkout>`. Nothing else was changed.
 
 ## To reproduce
 ```

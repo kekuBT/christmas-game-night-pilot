@@ -3256,3 +3256,27 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   1. The owner answers F1–F6.
   2. ChatGPT recommends a route.
   3. Approval 1 for private target-host validation.
+
+## Beta R3 repair: review 6909578563 (docs and evidence only)
+- **The review:** changes requested on the release instructions. Two items:
+  1. one order: read-only preflight before any host change, with explicit approval boundaries;
+  2. the archive checksum as a command precondition.
+- **Timeline:** acknowledged in 6909605566 with a 45 min estimate, written at 1:53 a.m. ET. Status sent at 2:57 a.m. ET (6910726832), answering 6910697772, with a revised finish of about 3:50 a.m. ET.
+- **Done** (commit `ca15c99`; evidence in `docs/evidence/beta-r3-gate/`):
+  - **The runbook's "The order of execution":** Stages 0–4, with the checks that need the running isolated preview named. H1 is the only route available under this handoff; H2–H4 are unavailable. There is no public-port exception.
+  - **"Promoting it", step 1, the artifact gate:** `sha256sum --check --strict` against the full pinned hash, chained with the unpack, revision, inventory and package checks. A verified marker gates stop, backup, switch, link and start.
+  - **The trace found seven gaps in Stage 1 and Stage 4 (T1–T7).** "First install" used the real data folder; the unit's `ReadWritePaths=` and the missing unit file; `MCHEZO_TRUST_PROXY` preset before V2; Approval 1 not naming host software; and others. All fixed: First install runs from `DATA=/var/lib/cgn-validation`, and the Stage 4 switch is a gated block.
+  - **Aligned:** the draft record, the template and §7, to R1–R8, V1–V3 and the throwaway folder. D-BR3-05 to D-BR3-07.
+- **Validation, the final runs at `ca15c99`** (clean tree):
+  - fixtures 42/42: the gate G1–G8, the first install F1–F4, the switch W1–W2;
+  - mutations: 7 of 7 caught;
+  - the record check, 49/49, with 8 of 8 negatives caught;
+  - runtime diff vs `7097ac2`: 0 files.
+- **Every earlier run** is listed in the evidence README. Fixture runs 1–2 FAILED, because the package check counted the empty dev-scope folders npm leaves; that is fixed in the harness. One mutation attempt was cut off by a worker restart before it ran.
+- **Not done:** no host action, browser run, full gate, provisioning, account, public port, deployment, merge, invitation or spending. Beta HOLD. #42 separate.
+- **Next:**
+  1. ChatGPT reviews this repair.
+  2. The owner answers F1–F6.
+  3. ChatGPT recommends a route.
+  4. Stage 0 on the candidate host, then Approval 1.
+- **Risk:** the fixtures prove the gating, not systemd, Caddy's DNS challenge or the `nc` count. Those are first observed in Stages 1–2 on the host.
