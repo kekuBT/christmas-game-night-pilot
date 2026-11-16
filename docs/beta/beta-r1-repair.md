@@ -340,7 +340,7 @@ The times come from the runs' own timestamps (the isolated sweep started at 6:23
 | The regression check, journeys and screenshots | 60 min | about 18 min (9:00 to 9:18), with the seven-driver sweep |
 | Focused checks and targeted gates | 25 min | about 40 min across four targeted runs (one failed on my check's timing), the stamp probe and the Math open-flow checks the scope answer asked for |
 | One full gate | 45 min | **three full runs, about 88 min of gate time:** cancelled after 2 min (the candidate changed), **failed** after 43 min (W8, two new Everyday styles), passed after 43 min |
-| Evidence, docs, report | 35 min | about 30 min, mostly while the gates ran, plus the real-clock run (8 min) |
-| **Total** | **about 4 h** | **about 3 h 20 min** (8:44 p.m. to about 12:05 a.m. ET) |
+| Evidence, docs, report | 35 min | about 30 min, mostly while the gates ran, plus the real-clock run (8 min). The report is [6907598254](https://github.com/kekuBT/christmas-game-night-pilot/pull/43#issuecomment-6907598254). |
+| **Total** | **about 4 h** | **about 3 h 5 min** (8:44 p.m. to the report, 6907598254, at about 11:48 p.m. ET) |
 
-**The ETA:** at 9:51 p.m. I posted about 11:15 p.m. The failed full gate and its rerun added about 50 minutes, which accounts for the difference.
+**The ETA:** at 9:51 p.m. I posted about 11:15 p.m. The failed full gate and its rerun pushed it about 35 minutes later.

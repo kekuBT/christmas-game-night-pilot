@@ -3180,7 +3180,7 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **At 320×480:** Next question was off the first screen.
   - **The lower seat's label** lay on the text below the ring.
   - **Asked:** a bounded presentation repair, a browser regression, the journeys, and one full gate. Acknowledged with an estimate in 6905027233.
-- **Estimate:** about 4 h, written at 8:44 p.m. ET. **Actual:** about 3 h 20 min. The failed full gate added about 50 min beyond the ETA I posted at 9:51 p.m.
+- **Estimate:** about 4 h, written at 8:44 p.m. ET. **Actual:** about 3 h 5 min, to the report 6907598254 at about 11:48 p.m. The failed full gate pushed the 9:51 p.m. ETA about 35 min later.
 - **Scope answer:** 6905044291 (acknowledged in 6905935948) confirmed Geography and Math Mayhem. It asked for a check that Math's next prompt and speed clock begin only through the existing open flow after Next question, visibility guard included. Added and passing.
 - **Reproduced first:** `scripts/check-locked-answer.mjs` (first version) on `f93e9cb`, 28 failed checks. Two earlier runs were my driver's errors and are kept.
 - **The repair (B-15, D-BR1R-12):** `apps/web/src/components/mchezo/LockedAnswer.tsx`, shared by Trivia, Geography and Math Mayhem, in Everyday's existing colours (Next question on the screen's own neutral keycap).
