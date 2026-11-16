@@ -1,4 +1,4 @@
-# Beta R4 W2 preparation: local evidence for the W2 workload tool (handoff 6921505856, repaired for reviews 6922818863 and 6924352924)
+# Beta R4 W2 preparation: local evidence for the W2 workload tool (handoff 6921505856, repaired for reviews 6922818863, 6924352924 and 6927653761)
 
 **Where it ran:** this session's machine. The target was the packaged image from `deploy/render` (`cgn-render:check`, built in [the package evidence](../beta-r4-render-package/README.md) from a local rebuild of `7097ac2`), with these settings:
 - production mode, the throwaway data folder `/var/data/cgn-w1`;
@@ -7,6 +7,31 @@
 - behind `scripts/beta/render-like-proxy.mjs`: TLS for `localhost` with a per-run certificate, and an appended `X-Forwarded-For`.
 
 No Render, no account, no real data. **This is protocol and load evidence from synthetic clients, on one machine.** It is not Render (no Render CPU or memory figures), not a browser and not a native device. W2 on Render is ChatGPT's, after W1: see [render-w2.md](../../beta/render-w2.md), which also has the gap analysis.
+
+## Repair 3 for review 6927653761: the boundary test's fixture owns its sockets
+**The finding:** on the pinned Node 22.16.0, the boundary test's socket-redirect case failed with an uncaught `read ECONNRESET`. The fixture's fake target answered each socket handshake with 307 on the upgraded TLS socket, but that socket had no `error` handler. When the runner dropped the handshake and its connection was reset, the fixture raised an uncaught exception. This is a fault in the test fixture only: the runner follows no redirect, and the zero-connection assertion held.
+
+**Why I hadn't seen it:** this machine runs Node 22.23.4. There the unchanged test passed 14/14 in 8 runs in a row and in 3 concurrent runs under CPU load. The reproduction and the validation below therefore use the **pinned Node 22.16.0** image (`node:22.16.0-bookworm@sha256:71bcbb3b…`), with no network and the checkout mounted read-only ([the wrapper](repair3/pinned-node.sh.txt)).
+
+**The repair: `scripts/beta/w2-args-selftest.mjs` only.** No change to the runner, the proxy, the verdict or the app.
+- **Every socket the fixture accepts gets its own `error` handler.** That includes the counting listeners, the fake target's raw and TLS connections, and **explicitly every upgraded socket**.
+  - An expected peer reset (ECONNRESET or EPIPE) is counted.
+  - Any other socket error is kept, and fails the test.
+  - There is no process-wide suppressor.
+- **Every listener, accepted socket and child process is tracked.** One teardown destroys the sockets, closes the listeners and stops any child left running.
+- **3 new cases:**
+  - **A peer reset on the upgraded socket:** a client resets the connection right after the 307. The fixture must count at least one handled reset, with no unexpected error and 0 connections to the second origin.
+  - **An unexpected socket error** is kept and reported, not swallowed.
+  - **Teardown:** no listener, socket or child process is left open (checked with `process.getActiveResourcesInfo()`), and no fixture saw an unexpected error.
+- **The existing 14 cases and their zero-network assertions are unchanged.**
+
+### Repair 3's runs, in order
+| Run | Source | Node | Verdict | Evidence |
+|---|---|---|---|---|
+| Reproduction: full suite, then the isolated case | unchanged `4f08c1a` | 22.16.0 (pinned) | **Full suite FAILED 13/14; isolated case FAILED 0/1.** Both with `failureType: 'uncaughtException'`, `read ECONNRESET`, reported as asynchronous activity after the test ended. | [repair3/before/boundary-before-node-22.16.0.log](repair3/before/boundary-before-node-22.16.0.log) |
+| Dev: isolated case, then full suite | working tree | 22.16.0 (pinned) | PASSED: isolated 1/1 (440 handshakes answered with 307, 50 peer resets handled by the fixture); full 17/17 | [repair3/dev/boundary-dev-node-22.16.0.log](repair3/dev/boundary-dev-node-22.16.0.log) |
+| Dev | working tree | 22.23.4 (this machine) | PASSED 17/17 | (console) |
+| Dev: the new peer-reset case made strict (at least 1 handled reset), repeated | working tree | 22.16.0 ×5 and 22.23.4 ×3 | PASSED every time; exactly 1 reset handled in each run | (console) |
 
 ## Repair 2 for review 6924352924: the runner stays on its one origin
 **The finding:** two of the runner's self-test options could make `w2-load.mjs` act outside its fixed workload. `--self-test-probe-origin` sent the authenticated probes, carrying a host token and the gate cookie, to another origin. `--plant-leak` made the runner write an extra note. The guard against a pass came only after those requests.

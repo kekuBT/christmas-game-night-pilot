@@ -3532,3 +3532,13 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/evidence/beta-r4-w2/README.md` (Repair 2) and `docs/evidence/beta-r4-w2/repair2/`.
 - **Not done:** no runtime change (`7097ac2`), no deploy-file change, no account operation, no target-host run. Deployment stays on hold.
 - **Next:** ChatGPT's confirmation of the fix.
+
+## Beta R4: the W2 boundary test's fixture owns its sockets (review 6927653761; #44)
+- **Review 6927653761:** the one-origin fix is resolved in source. One P2 remained: on the pinned Node 22.16.0, the boundary test's socket-redirect fixture raised an uncaught `read ECONNRESET`, because its upgraded socket had no `error` handler. Acknowledged in 6927719056, at 3:04 p.m. ET, with a 1 h estimate.
+- **Reproduced** on the pinned Node 22.16.0 (`node:22.16.0-bookworm@sha256:71bcbb3b…` in Docker, no network): full suite 13/14, isolated case 0/1, both uncaughtException ECONNRESET. On this machine's Node 22.23.4 it never reproduced in 11 runs.
+- **Repair, in `scripts/beta/w2-args-selftest.mjs` only:**
+  - every accepted socket has its own `error` handler: expected peer resets are counted, other errors are kept and fail the test;
+  - every listener, socket and child process is tracked and torn down;
+  - 3 new cases: a peer reset on the upgraded socket, an unexpected error that stays visible, and a teardown check that nothing is left open;
+  - no process-wide suppressor; the zero-network assertions are unchanged.
+- **Not rerun, as the handoff said, because only the test fixture changed:** the historical gates, the Docker fault matrix, W1 and the normal W2 workload.
