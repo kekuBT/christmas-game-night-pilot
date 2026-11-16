@@ -2268,3 +2268,17 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - Per-run random names: the drill rehearses the runbook's own `cgn` steps.
     - A lock file between runs: it protects only runs that use the lock, and a confirmed creation step protects against any other creator.
+
+## Beta R3: a decision-ready release record (handoff 6909443770; docs and evidence only)
+- **D-BR3-01 The pinned artifact is the audited archive `a693c543…3a5131`.**
+  - **The source:** ChatGPT's verification in the private review Codespace. It read the tar without extracting it, matched the 144-file inventory `fe6d74f8…`, and checked `release.json` (`7097ac2`, Node v22.16.0).
+  - **On the host:** that hash is what is checked before unpacking.
+  - **My three rebuilds** stay separate files. Their matching inventory shows the runnable files are the same, not that a rebuild is the audited archive.
+- **D-BR3-02 Two separate owner approvals** (the runbook's "Two approvals before anyone is invited"):
+  - **Approval 1:** private target-host validation of the pinned artifact, after the route is chosen;
+  - **Approval 2:** invitations and go, after the go/no-go record has host and real-device evidence with no blocker, the owner's sign-off and ChatGPT's review.
+  - **Neither implies the other.** A new artifact needs both again.
+  - **Not evidence for either:** the local rehearsal and the private Firefox audit.
+- **D-BR3-03 The draft go/no-go record fills only evidenced fields.** Everything that needs the host, a phone or the owner is PENDING, and the default is NO-GO.
+  - **Enforced by** `check-r3-record.mjs`, which fails on a fabricated result, a disagreeing hash or a filled host field.
+- **D-BR3-04 The route decision needs six owner facts (F1–F6), not another survey.** ChatGPT recommends once they are known, and the owner chooses.

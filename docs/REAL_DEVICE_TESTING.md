@@ -311,7 +311,10 @@ Earlier device checklists ([DEVICE_ACCEPTANCE_CHECKLIST.md](DEVICE_ACCEPTANCE_CH
 
 ## 7. Beta launch checks: real phones and the host (Beta R2)
 
-**When:** after the owner approves executing the beta (handoff [6908014247](https://github.com/kekuBT/christmas-game-night-pilot/pull/43#issuecomment-6908014247)), on the chosen host, before anyone else is invited. Sections 1–6 test a development server on the home Wi-Fi. This section tests **the exact production package** (`7097ac2`, recorded in [`docs/beta/release-7097ac2.md`](beta/release-7097ac2.md)) **through the intended HTTPS proxy**, at the real address, with the real access code.
+**When:** after the owner's **Approval 1** (private target-host validation; the runbook's [two approvals](beta/beta-r1-release.md#two-approvals-before-anyone-is-invited-beta-r3)), on the chosen host, before anyone else is invited.
+- **What these checks feed:** **Approval 2,** for invitations.
+- **The handoffs:** [6908014247](https://github.com/kekuBT/christmas-game-night-pilot/pull/43#issuecomment-6908014247) and [6909443770](https://github.com/kekuBT/christmas-game-night-pilot/pull/43#issuecomment-6909443770).
+- **The draft record** for the pinned artifact: [beta-go-no-go-DRAFT-7097ac2.md](device-testing/beta-go-no-go-DRAFT-7097ac2.md). Sections 1–6 test a development server on the home Wi-Fi. This section tests **the exact production package** (`7097ac2`, recorded in [`docs/beta/release-7097ac2.md`](beta/release-7097ac2.md)) **through the intended HTTPS proxy**, at the real address, with the real access code.
 
 **What it never does:** change the package, hide or remove a game, or use the beta's data for anything but the beta. The playable catalog stays exactly as shipped. Results go into the go/no-go record: copy [`device-testing/BETA_GO_NO_GO_TEMPLATE.md`](device-testing/BETA_GO_NO_GO_TEMPLATE.md) to `device-testing/beta-go-no-go-YYYY-MM-DD.md` (no access code, no family data in it).
 
@@ -353,7 +356,7 @@ Run these with the release runbook ([`docs/beta/beta-r1-release.md`](beta/beta-r
   - **Stop:** keep the service stopped if anything is at risk, and keep the data.
   - **Report:** open an issue without the code or family data.
   - **Then:** the AGENTS.md safety rule applies: a failing test, then a fix, then a new review.
-- **Who decides:** the owner signs the record. ChatGPT reviews it. Claude can't run any of these checks (no access to the host or the phones) and can only review the records posted.
+- **Who decides:** the owner signs the record, and that sign-off is **Approval 2**. ChatGPT reviews it. Claude can't run any of these checks (no access to the host or the phones) and can only review the records posted.
 
 ### 7.4 Pending checks, with their evidence and who can do them
 

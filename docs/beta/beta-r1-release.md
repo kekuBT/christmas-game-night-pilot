@@ -98,6 +98,51 @@ Each line is observable before anything is installed. **Who:** the owner, or the
 - **Its refusal:** it won't start where a `cgn` user, a `cgn` group or its folder already exists.
 - **Its cleanup:** it deletes only what that run itself created, confirmed by its own successful `groupadd`, `useradd` and `mkdir` (reviews 6908455526 and 6908557588; D-BR2-06, D-BR2-07).
 
+### Deciding the route: what is still needed from the owner (Beta R3)
+**No new survey.** The options and their sources are above. ChatGPT makes the route recommendation once these facts are known, and the owner chooses.
+
+**The owner's facts, each a short answer:**
+
+| # | Question | What it decides |
+|---|---|---|
+| F1 | **Where are the players?** All on the home Wi-Fi on game nights, or some remote? | H1 (LAN only) is possible only if everyone is at home. |
+| F2 | **Is there an always-on Linux machine** the owner already has and may use (at home), or an already-authorized $0 VM? Which, and what Node version can it run? | H1–H3 need the home machine; H4 needs the VM. Production refuses non-Linux. |
+| F3 | **Is a domain already owned?** If so, which DNS provider runs it (Cloudflare, or another with an API)? | H1 needs the DNS API for a public certificate; H2 needs the domain on Cloudflare. With no domain, H3. |
+| F4 | **Is a third party in the path acceptable?** Cloudflare (H2) handles the decrypted traffic. | Whether H2 stays an option |
+| F5 | **Where does the off-host backup copy go?** A private place the owner already has (an external drive, private storage). | Preflight P4 and host check H3 |
+| F6 | **Who runs the host steps,** with shell access? | The runbook's operator, and §7's host checks |
+
+**Already verified:** these don't need the owner.
+- **The app's needs:** one Node 22 process on Linux; a persistent private disk; HTTPS with WebSockets; a stable hostname (the architecture page).
+- **One HTTPS origin, with the access gate on HTTP and WebSocket and a loopback backend:**
+  - checked in the gate's HTTPS check;
+  - checked again through Caddy 2.6.2 in the local rehearsal.
+- **One data writer:** the kernel-held lock, plus the datatool's refusals (release check).
+- **Caddy, Let's Encrypt and Cloudflare facts:** from official docs at pinned commits (above).
+- **Tailscale's Funnel prerequisites:** HTTPS on the tailnet and the `funnel` node attribute, from its source code.
+
+**Unknown until checked on the owner's own accounts and pages** (preflight P5–P7):
+- Tailscale's plan terms, Funnel's limits and WebSocket behaviour;
+- Cloudflare's plan terms and retention;
+- a VM account's allowance, idle rules and billing;
+- the home router's DNS behaviour for a private address;
+- the domain's renewal.
+
+**What doesn't change, whichever route:** one HTTPS origin; the access gate on HTTP and WebSocket; the backend on 127.0.0.1 only; one data writer; and separate private release, data and backup folders.
+
+### Two approvals before anyone is invited (Beta R3)
+Execution has two separate boundaries. Each needs the owner's own explicit approval, and the first never implies the second.
+
+| | **Approval 1: private target-host validation** | **Approval 2: invitations and go** |
+|---|---|---|
+| **When** | After the route is chosen (F1–F6, ChatGPT's recommendation, the owner's choice) | After every row of the go/no-go record has evidence |
+| **What it allows** | **On the chosen host, privately:** installing the pinned artifact (SHA-256 `a693c543…3a5131`, release record [release-7097ac2.md](release-7097ac2.md)) with the steps on this page. Then the preflight P1–P9, the route proof, host checks H1–H6, and phone checks P1–P8 with the owner's own testers. | **Inviting the family** to the beta at that address |
+| **What it doesn't allow** | Inviting anyone; a different artifact; a public port beyond the chosen route; any new account, trial or spending without its own approval | Changing the artifact. Any new release needs both approvals again. |
+| **Evidence it needs** | The route decision, recorded | The completed go/no-go record ([draft](../device-testing/beta-go-no-go-DRAFT-7097ac2.md); [template](../device-testing/BETA_GO_NO_GO_TEMPLATE.md)), with no blocker. Then the owner's sign-off and ChatGPT's review. |
+| **If something fails** | Stop. Keep the data and use the stop steps: "Rolling back", including "When there is no previous package". Record it as no-go. | §7.3's no-go triggers ([REAL_DEVICE_TESTING.md](../REAL_DEVICE_TESTING.md#73-go-or-no-go)), and "Rolling back" |
+
+**Not evidence for either approval:** the local rehearsal and the private Firefox audit. They are listed in the draft record as earlier evidence, not as host or device checks.
+
 ### Sources (official, read 2026-11-16)
 - **Caddy documentation**, `caddyserver/website` at `c33ee8b`:
   - [automatic-https.md](https://github.com/caddyserver/website/blob/c33ee8b02a245045bc18c406a1aa0e06cd1fb772/src/docs/markdown/automatic-https.md): the public-certificate requirements, the local CA, the DNS challenge, `.ts.net`;

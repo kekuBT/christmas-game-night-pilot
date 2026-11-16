@@ -3237,3 +3237,22 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
   - **The finding:** a `cgn` taken by another run after the startup checks would still be claimed and deleted.
   - **The fix (D-BR2-07):** ownership only from this run's own successful `groupadd` and `useradd`.
   - **Proved by:** a safety check, 24/24 with two late-collision cases, and a full run, 42/42.
+
+## Beta R3: a decision-ready release record, handoff 6909443770 (completed; docs and evidence only)
+- **The handoff:** ChatGPT cleared R2 and verified the audited archive: SHA-256 `a693c543…3a5131`, with the 144-file inventory matching. Acknowledged with a 40 min estimate in 6909477051 at 1:45 a.m. ET.
+- **Done:**
+  - **The pinned artifact** in `docs/beta/release-7097ac2.md`.
+  - **A draft go/no-go record,** `docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md`: evidenced fields only, everything else PENDING, NO-GO by default.
+  - **The runbook's "Deciding the route":** the owner's facts F1–F6.
+  - **The runbook's "Two approvals before anyone is invited."**
+  - **§7** tied to the two approvals. D-BR3-01 to D-BR3-04.
+- **Validation** (`docs/evidence/beta-r3-record/`):
+  - the record check, 40/40, plus 3 negative cases that fail as they should;
+  - the link check, passed;
+  - 0 runtime files changed.
+  - No rehearsal or gate was rerun.
+- **Not done:** no host selection, provisioning, account, public port, deployment, merge, invitation or spending. Beta HOLD. #42 separate.
+- **Next:**
+  1. The owner answers F1–F6.
+  2. ChatGPT recommends a route.
+  3. Approval 1 for private target-host validation.
