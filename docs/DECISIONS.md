@@ -2309,3 +2309,24 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Approval 1** names the host software Stage 0 may find missing: Node 22, and for H1, Caddy with the DNS module.
   - **The Stage 4 switch** is one gated block. It starts only when the settings and the unit both name the new, empty real folder.
   - **Alternative rejected:** a systemd drop-in for the data path. It is one more file to keep in step, and the gate checks the unit line directly.
+- **D-BR3-08 Every operator block fails closed when run as a whole** (review 6910988491; reproduced first on the blocks published at `ca15c99`).
+  - **The rule:** a printed `STOP` is never the only safeguard. Each later step reads this run's flags or one `&&` chain, so it refuses by itself.
+  - **Promotion:**
+    - `VERIFIED`, `STOPPED` and `BACKUP_OK` are reset at the start of every run.
+    - The chain begins by removing any old marker and checking it is gone.
+    - Stopping needs `VERIFIED`; backing up needs a successful stop; switching needs all three.
+    - Step 1 sets no data-folder variable (the backup uses `LIVE_DATA`), so running it inside the first install can't redirect that install's `DATA`.
+  - **First install:** split into prepare, the operator's edits, the artifact gate and start.
+    - The settings file is never truncated.
+    - The start is one chain: this run's verification, the link, the settings naming the throwaway folder exactly once, the data check, the unit line and the reload.
+  - **The switch:** split around the operator's settings edit.
+    - Part A changes nothing unless the stop succeeded, and makes the real folder with `mkdir`, which refuses any existing folder and leaves it as it is.
+    - Part B starts only after these checks: part A's flags, the settings naming the new folder once, the access-code line changed (compared by hash, never printed), the folder still empty, the unit line, and the reload.
+    - On refusal the service stays stopped and nothing is deleted.
+  - **Proved by** `docs/evidence/beta-r3-gate/round2/`:
+    - the review's three scenarios reproduced on the old blocks;
+    - the new blocks run against fixtures with logging stubs for the privileged commands, positive and negative per path;
+    - 16 mutations, each removing one guard and caught by its own case.
+  - **Alternatives rejected:**
+    - `set -e` in the blocks: it doesn't stop on failures inside `if` conditions or `&&` lists, and it would end the operator's interactive shell.
+    - One long script: the operator's settings edit has to happen by hand between the parts, and the code mustn't pass through a script's arguments or logs.

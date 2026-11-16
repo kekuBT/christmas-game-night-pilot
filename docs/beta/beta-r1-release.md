@@ -108,12 +108,12 @@ Observing and reading only: nothing is installed, configured, opened, created or
    - for H1, Caddy built with the DNS provider's module, its narrowly scoped DNS token in a private file, and the DNS record from R7.
 
    Nothing beyond that.
-2. **"First install", steps 0–5, as written.** It uses:
+2. **"First install", parts 1–5, as written.** It uses:
    - the throwaway data folder `DATA=/var/lib/cgn-validation`, never the beta's;
    - a throwaway `MCHEZO_BETA_ACCESS_CODE` that nobody in the family will be given;
    - no `MCHEZO_TRUST_PROXY` until V2.
 
-   Its step 3 is the artifact gate ("Promoting it", step 1): it must print `VERIFIED`. On `STOP`, stop and record a no-go.
+   Its part 3 is the artifact gate ("Promoting it", step 1): it must print `VERIFIED`. Its part 4 starts the service only if this run's verification, the link, the settings, the data check, the unit and the reload all succeeded. On any `STOP`, stop and record a no-go.
 3. **The proxy in front** (for H1, Caddy as in the architecture page's example, with the DNS challenge). It is then the running isolated preview.
 
 #### Stage 2: the route checks (on the running isolated preview)
@@ -142,24 +142,48 @@ Observing and reading only: nothing is installed, configured, opened, created or
 
 #### Stage 4: go/no-go, Approval 2, then the switch
 1. **Complete the go/no-go record** with no blocker. Then the owner's sign-off and ChatGPT's review: that is Approval 2.
-2. **After Approval 2 only,** switch to a new, empty data folder and the real code:
+2. **After Approval 2 only,** switch to a new, empty data folder and the real code, in one shell, as root.
+   - **Part A** stops the service. Only after a successful stop does it create the new real data folder, and only if nothing is there yet: an existing folder, empty or not, is refused and left exactly as it is.
 
-   ```
-   # >>> switch (begin)
-   systemctl stop christmas-game-night
-   DATA=/var/lib/christmas-game-night
-   install -d -m 0700 -o cgn -g cgn "$DATA"          # new and empty: the validation rooms stay behind
-   # edit /etc/christmas-game-night/env: MCHEZO_DATA_DIR=<$DATA> and the real MCHEZO_BETA_ACCESS_CODE
-   sed -i "s#^ReadWritePaths=.*#ReadWritePaths=$DATA#" /etc/systemd/system/christmas-game-night.service
-   systemctl daemon-reload
-   if grep -qx "MCHEZO_DATA_DIR=$DATA" /etc/christmas-game-night/env \
-      && grep -qx "ReadWritePaths=$DATA" /etc/systemd/system/christmas-game-night.service
-   then systemctl start christmas-game-night
-   else echo "STOP: the settings or the unit don't name $DATA. Don't start or invite."; fi
-   # <<< switch (end)
-   ```
+     ```
+     # >>> switch, stop and prepare (begin)
+     ENVFILE=/etc/christmas-game-night/env
+     DATA=/var/lib/christmas-game-night
+     STOPPED=; PREPARED=
+     OLD_CODE=$(grep '^MCHEZO_BETA_ACCESS_CODE=' "$ENVFILE" | sha256sum | cut -c1-64)   # a hash of the line; no code printed
+     if systemctl stop christmas-game-night; then STOPPED=1
+     else echo "STOP: the service didn't stop. Nothing was changed; record a no-go."; fi
+     if [ -z "$STOPPED" ]; then :
+     elif mkdir -m 0700 "$DATA" && chown cgn:cgn "$DATA"; then PREPARED=1
+     else echo "STOP: $DATA already exists or couldn't be made. It is left as it is; don't start or invite."; fi
+     # <<< switch, stop and prepare (end)
+     ```
+   - **Then edit the settings file by hand:** `MCHEZO_DATA_DIR=/var/lib/christmas-game-night`, exactly once, and the real `MCHEZO_BETA_ACCESS_CODE` in place of the throwaway one. Don't print either code.
+   - **Part B** starts the service only if all of these hold:
+     - part A stopped and prepared in this shell;
+     - the settings name the new folder exactly once;
+     - the access-code line changed (compared by hash);
+     - the new folder is still empty;
+     - the unit names the folder, and the reload succeeded.
 
-   Then check `/health` and P1 on one phone. Remove the throwaway folder (`rm -r /var/lib/cgn-validation`) once nothing in it is needed.
+     ```
+     # >>> switch, start (begin)
+     UNIT=/etc/systemd/system/christmas-game-night.service
+     NEW_CODE=$(grep '^MCHEZO_BETA_ACCESS_CODE=' "$ENVFILE" | sha256sum | cut -c1-64)
+     if [ -n "$STOPPED" ] && [ -n "$PREPARED" ] \
+        && [ "$(grep -c '^MCHEZO_DATA_DIR=' "$ENVFILE")" = 1 ] && grep -qx "MCHEZO_DATA_DIR=$DATA" "$ENVFILE" \
+        && [ "$(grep -c '^MCHEZO_BETA_ACCESS_CODE=' "$ENVFILE")" = 1 ] && [ "$NEW_CODE" != "$OLD_CODE" ] \
+        && [ -d "$DATA" ] && [ -z "$(ls -A "$DATA")" ] \
+        && sed -i "s#^ReadWritePaths=.*#ReadWritePaths=$DATA#" "$UNIT" && grep -qx "ReadWritePaths=$DATA" "$UNIT" \
+        && systemctl daemon-reload
+     then systemctl start christmas-game-night && echo "SWITCHED to $DATA"
+     else echo "STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go."; fi
+     # <<< switch, start (end)
+     ```
+   - **On any STOP:** nothing is deleted. The service stays stopped, and the throwaway folder and any existing real folder are kept.
+     - To bring the validation instance back for another look: put the throwaway settings back, set `ReadWritePaths=/var/lib/cgn-validation` if part B changed it, then `systemctl daemon-reload` and `systemctl start`.
+     - A retry of part A needs a new real folder: one that part A made and part B refused is empty and can be removed with `rmdir`.
+   - **After `SWITCHED`:** check `/health` and P1 on one phone. Remove the throwaway folder (`rm -r /var/lib/cgn-validation`) once nothing in it is needed.
 3. **Then invite the family.**
 
 **Run as a drill here:** this machine played the runbook with the real package, a real service user and Caddy 2.6.2 in front. It used a local CA, because a public certificate can't be had from here: `docs/evidence/beta-r2-preflight/`. Not run here: a real host, a public certificate, systemd as PID 1, any of the four routes, and real phones.
@@ -263,41 +287,60 @@ On a host that has never run the game. As root (or with `sudo`), between session
 - **When:** in Stage 1 of "The order of execution", after the read-only preflight and the owner's Approval 1, with the throwaway data folder and code that Stage 1 names.
 - **Where the service and its settings are:** `docs/beta/beta-r1-architecture.md`.
 
-```
-# >>> first install (begin)
-# 0. This install's data folder. Stage 1 uses the THROWAWAY one; only Stage 4, after Approval 2, switches to
-#    /var/lib/christmas-game-night.
-DATA=/var/lib/cgn-validation
+**1. Prepare** (the user, the folders and an empty settings file):
 
-# 1. The service user and its folders: the data belongs to it, the backups to root, both private
+```
+# >>> first install, prepare (begin)
+# This install's data folder is the THROWAWAY one. Only Stage 4, after Approval 2, switches to the real one.
+DATA=/var/lib/cgn-validation
+OPT=/opt/christmas-game-night
+BACKUPS=/var/backups/christmas-game-night
+SETTINGS=/etc/christmas-game-night; ENVFILE="$SETTINGS/env"
+# The service user and its folders: the data belongs to it, the backups to root, both private.
 useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
 install -d -m 0700 -o cgn -g cgn "$DATA"
-install -d -m 0700 /var/backups/christmas-game-night
-install -d -m 0755 /opt/christmas-game-night/releases
+install -d -m 0700 "$BACKUPS"
+install -d -m 0755 "$OPT/releases"
+# The settings: readable by root and the service only (they hold the access code). An existing file is kept.
+install -d -m 0750 -g cgn "$SETTINGS"
+[ -e "$ENVFILE" ] || install -m 0640 -g cgn /dev/null "$ENVFILE"
+# <<< first install, prepare (end)
+```
 
-# 2. The settings: readable by root and the service only (they hold the access code)
-install -d -m 0750 -g cgn /etc/christmas-game-night
-install -m 0640 -g cgn /dev/null /etc/christmas-game-night/env    # then edit: NODE_ENV=production, MCHEZO_DATA_DIR=<$DATA>,
-                                                                  # MCHEZO_PUBLIC_ORIGIN, the THROWAWAY MCHEZO_BETA_ACCESS_CODE,
-                                                                  # MCHEZO_LISTEN_HOST=127.0.0.1, PORT. Leave MCHEZO_TRUST_PROXY
-                                                                  # out: Stage 2's V2 counts it.
+**2. The operator's edits**, by hand:
+- **The settings file** `/etc/christmas-game-night/env`:
+  - `NODE_ENV=production`;
+  - `MCHEZO_DATA_DIR=/var/lib/cgn-validation`, exactly once;
+  - `MCHEZO_PUBLIC_ORIGIN`;
+  - the **throwaway** `MCHEZO_BETA_ACCESS_CODE`;
+  - `MCHEZO_LISTEN_HOST=127.0.0.1` and `PORT`.
 
-# 3. The package: run only "Promoting it", step 1 (the artifact gate), in this shell. It must print VERIFIED.
-#    If it printed STOP, stop here. Then link it, only with the verified marker:
-if [ -f "$MARK" ]; then ln -sfn "$REL" "$OPT/current"; else echo "STOP: not verified. Don't link or start."; fi
+  Leave `MCHEZO_TRUST_PROXY` out: Stage 2's V2 counts it. Don't print or paste the code into anything that keeps a log.
+- **The unit:** it isn't in the package. Write the architecture page's unit to `/etc/systemd/system/christmas-game-night.service` (mode 0644).
 
-# 4. Check the (empty) data folder as the service user, then the unit, then start.
-#    The unit isn't in the package: write the architecture page's unit to /etc/systemd/system/christmas-game-night.service
-#    (mode 0644). Its ReadWritePaths= must name this install's data folder, or the service can't write there:
-cd /opt/christmas-game-night/current && sudo -u cgn node dist/server/datatool.js check --data "$DATA"   # "check OK: 0 room(s) ..."
-sed -i "s#^ReadWritePaths=.*#ReadWritePaths=$DATA#" /etc/systemd/system/christmas-game-night.service
-systemctl daemon-reload
-if [ -f "$MARK" ] && grep -qx "ReadWritePaths=$DATA" /etc/systemd/system/christmas-game-night.service
+**3. The artifact gate:** in the same shell, run "Promoting it", step 1, from `SHA=` up to (not including) `# 2. Maintenance`. It sets `VERIFIED` only if everything verified in this run.
+
+**4. Start:** in the same shell. Each check runs only if the one before it succeeded, and the service starts only if all of them did:
+
+```
+# >>> first install, start (begin)
+DATA=/var/lib/cgn-validation
+ENVFILE=/etc/christmas-game-night/env
+UNIT=/etc/systemd/system/christmas-game-night.service
+if [ -n "$VERIFIED" ] && [ -f "$MARK" ] \
+   && ln -sfn "$REL" "$OPT/current" \
+   && [ "$(grep -c '^MCHEZO_DATA_DIR=' "$ENVFILE")" = 1 ] && grep -qx "MCHEZO_DATA_DIR=$DATA" "$ENVFILE" \
+   && (cd "$OPT/current" && sudo -u cgn node dist/server/datatool.js check --data "$DATA") \
+   && sed -i "s#^ReadWritePaths=.*#ReadWritePaths=$DATA#" "$UNIT" && grep -qx "ReadWritePaths=$DATA" "$UNIT" \
+   && systemctl daemon-reload
 then systemctl enable --now christmas-game-night
-else echo "STOP: not verified, or the unit doesn't name $DATA. Don't start."; fi
-# <<< first install (end)
+else echo "STOP: not verified in this run, or the link, the settings, the data check, the unit or the reload failed. Not started; record a no-go."; fi
+# <<< first install, start (end)
+```
 
-# 5. Check, as after any promotion
+**5. Check,** as after any promotion:
+
+```
 curl -s https://<host>/health                    # {"ok":true,"revision":"<sha>"}
 journalctl -u christmas-game-night -n 20         # "Christmas Game Night server on http://localhost:3000 ..." and
                                                  # "Listening on 127.0.0.1; public origin https://<host>."
@@ -312,46 +355,60 @@ journalctl -u christmas-game-night -n 20         # "Christmas Game Night server 
 
 **The artifact gate** (review 6909578563).
 - **Where the values come from:** the release record for the revision (for `7097ac2`: [release-7097ac2.md](release-7097ac2.md)). That means the audited archive's full SHA-256 and its inventory digest, never a rebuild's.
-- **What the gate does:** every later command runs only if the one before it passed. A wrong or missing archive, a wrong revision, a wrong inventory or unexpected packages print `STOP` and leave no "verified" marker.
-- **What the marker controls:** steps 2–4 refuse to stop, back up or switch without it. Step 4 also requires this run's backup to have succeeded.
-- **The demonstration:** this block, extracted from this page, was run against disposable test files (`docs/evidence/beta-r3-gate/`).
+- **What the gate does:** every later command runs only if the one before it passed, starting with removing any marker an earlier attempt left.
+  - A marker that can't be removed, a wrong or missing archive, a wrong revision, a wrong inventory or unexpected packages print `STOP`.
+  - On any of those, no `VERIFIED` is set for this run.
+- **What controls the later steps:** this run's flags, never a marker on disk alone (review 6910988491).
+  - Step 2 stops the server only with `VERIFIED`, and sets `STOPPED` only if the stop succeeded.
+  - Step 3 backs up only with `STOPPED`.
+  - Step 4 switches and starts only with `VERIFIED`, `STOPPED` and `BACKUP_OK`.
+  - So a printed `STOP` is never the only safeguard: when the block is run as a whole, the later steps refuse by themselves.
+- **The demonstration:** this block, the first install's and the switch's, extracted from this page, were run against disposable test files (`docs/evidence/beta-r3-gate/`, and `docs/evidence/beta-r3-gate/round2/` for review 6910988491).
 - **Run it in one shell, as root,** with the audited archive copied to the host unchanged.
 
 ```
 # >>> promote (begin)
-# 1. Verify, then unpack and install: each step runs only if the one before it passed.
+# 1. Verify, then unpack and install. Each step runs only if the one before it passed, starting with removing any
+#    marker an earlier attempt left. VERIFIED is set only by a complete chain in THIS run, and steps 2-4 require it:
+#    a marker on disk alone never reaches a service command. (Step 1 sets no data-folder variable.)
 SHA=7097ac2bb062925bb296a129f4771f1e68fd522d
 EXPECTED_SHA256=a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131
 EXPECTED_INVENTORY=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c
 ARCHIVE=./mchezo-7097ac2.tgz
 OPT=/opt/christmas-game-night
 REL="$OPT/releases/$SHA"; MARK="$OPT/verified-$SHA"
-rm -f "$MARK"
-if printf '%s  %s\n' "$EXPECTED_SHA256" "$ARCHIVE" | sha256sum --check --strict --quiet \
+VERIFIED=; STOPPED=; BACKUP_OK=
+if rm -f "$MARK" && [ ! -e "$MARK" ] \
+   && printf '%s  %s\n' "$EXPECTED_SHA256" "$ARCHIVE" | sha256sum --check --strict --quiet \
    && mkdir "$REL" \
    && tar -xzf "$ARCHIVE" -C "$REL" \
    && grep -q "\"revision\": \"$SHA\"" "$REL/release.json" \
    && [ "$(cd "$REL" && LC_ALL=C find . -type f ! -path ./release.json ! -path './node_modules/*' -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64)" = "$EXPECTED_INVENTORY" ] \
    && (cd "$REL" && npm ci --omit=dev --ignore-scripts --no-audit --no-fund) \
-   && [ "$(cd "$REL" && npm ls --omit=dev --depth=0 --parseable | tail -n +2 | xargs -n1 basename | sort | tr '\n' ' ')" = "ws zod " ]
-then touch "$MARK" && echo "VERIFIED $SHA: ready to switch"
-else echo "STOP: the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go."
+   && [ "$(cd "$REL" && npm ls --omit=dev --depth=0 --parseable | tail -n +2 | xargs -n1 basename | sort | tr '\n' ' ')" = "ws zod " ] \
+   && touch "$MARK"
+then VERIFIED=1; echo "VERIFIED $SHA: ready to switch"
+else echo "STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go."
 fi
 
-# 2. Maintenance: stop the server (it saves, closes the sockets and frees its lock). Only for a verified release.
-if [ -f "$MARK" ]; then systemctl stop christmas-game-night; else echo "STOP: not verified; the server keeps running."; fi
+# 2. Maintenance: stop the server (it saves, closes the sockets and frees its lock). Only for a release verified in
+#    this run; STOPPED is set only if the stop succeeded.
+LIVE_DATA=/var/lib/christmas-game-night; BACKUPS=/var/backups/christmas-game-night
+if [ -z "$VERIFIED" ]; then echo "STOP: not verified in this run; the server keeps running."
+elif systemctl stop christmas-game-night; then STOPPED=1
+else echo "STOP: the server didn't stop. Don't back up or switch; record a no-go."; fi
 
 # 3. Back up, with the server stopped, using the NEW release's tool (as root: the backup is root's, 0700/0600).
 #    The tool holds the data folder while it copies: a server started meanwhile is refused (systemd retries).
-BACKUP_OK=
-if [ ! -f "$MARK" ]; then echo "STOP: not verified."
-elif (cd "$REL" && node dist/server/datatool.js backup --data /var/lib/christmas-game-night \
-     --out /var/backups/christmas-game-night/$(date -u +%Y%m%dT%H%MZ)-before-$SHA); then BACKUP_OK=1
+if [ -z "$STOPPED" ]; then echo "STOP: not verified and stopped in this run; no backup."
+elif (cd "$REL" && node dist/server/datatool.js backup --data "$LIVE_DATA" \
+     --out "$BACKUPS/$(date -u +%Y%m%dT%H%MZ)-before-$SHA"); then BACKUP_OK=1
 else echo "STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release."; fi
 
-# 4. Switch and start: only with this release's verified marker and this run's backup.
-if [ -f "$MARK" ] && [ -n "$BACKUP_OK" ]; then ln -sfn "$REL" "$OPT/current" && systemctl start christmas-game-night
-else echo "STOP: $SHA isn't verified, or there is no backup. Don't switch."; fi
+# 4. Switch and start: only after this run's verification, stop and backup.
+if [ -n "$VERIFIED" ] && [ -n "$STOPPED" ] && [ -n "$BACKUP_OK" ] && [ -f "$MARK" ]
+then ln -sfn "$REL" "$OPT/current" && systemctl start christmas-game-night
+else echo "STOP: not verified, stopped and backed up in this run. Don't switch."; fi
 # <<< promote (end)
 
 # 5. Check
@@ -359,7 +416,8 @@ curl -s https://<host>/health                    # {"ok":true,"revision":"<sha>"
 journalctl -u christmas-game-night -n 20         # "[restore] N room(s) restored, 0 not loaded"
 ```
 
-- **If any step printed `STOP`:** don't continue.
+- **If any step printed `STOP`:** don't continue. The later steps of the block have already refused.
+  - **If the stop succeeded but the backup didn't:** the previous release is still linked. `systemctl start christmas-game-night` restarts it.
   - **Keep** the unpacked folder, if there is one, for inspection.
   - **Record** a no-go.
   - **Don't** delete or overwrite the archive.

@@ -1,5 +1,7 @@
 # Beta R3 repair: the order of execution and the artifact gate (review 6909578563)
 
+**Round 2** (review 6910988491: failed prerequisites must stop the later steps, even when a block is run as a whole) is in [round2/](round2/README.md). This folder is round 1, kept as it ran at `ca15c99`. Its harness targets the round-1 blocks, which round 2 replaced.
+
 Docs and evidence only. No host action, browser run or full-gate rerun. The runtime is unchanged at `7097ac2bb062925bb296a129f4771f1e68fd522d` ([runtime-diff.txt](runtime-diff.txt)).
 
 ## What the review asked, and where it is

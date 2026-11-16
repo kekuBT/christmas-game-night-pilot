@@ -1,0 +1,304 @@
+#!/bin/bash
+# Beta R3, round 2 (review 6910988491): run the runbook's PUBLISHED blocks against disposable fixtures.
+#   bash gate-fixtures2.sh <repo root> [<docs root>]          the current blocks; every case must pass
+#   REPRO_OLD=<sha> bash gate-fixtures2.sh <repo root>         the review's three scenarios on the blocks at <sha>
+#
+# What is changed in the published text (each case prints the diff):
+#   - absolute paths under /opt/, /var/lib/, /var/backups/ and /etc/ move under the case's own folder;
+#   - EXPECTED_SHA256 and EXPECTED_INVENTORY become the fixture archive's (the fixture's release.json carries 7097ac2).
+# Commands that need root, a real user or systemd are shell functions defined before the blocks (the prelude, printed):
+#   systemctl logs SENTINEL-STOP / SENTINEL-START / SENTINEL-ENABLE / "STUB daemon-reload", with exit codes set per
+#   case (RC_STOP, RC_RELOAD); useradd and chown log only; install drops its -o/-g owner flags; sudo -u runs the
+#   command as is; rm fails only where a case sets RM_FAILS.
+# The fixture package ships a stand-in dist/server/datatool.js: "check" fails on a file named BAD in the folder,
+# "backup" fails when FIXTURE_BACKUP_FAILS is set and otherwise logs SENTINEL-BACKUP.
+set -uo pipefail
+REPO=$1; DOCS=${2:-$1}
+W=$(mktemp -d); trap 'command rm -rf "$W"' EXIT
+FAIL=0; PASS=0
+check() { if [ "$2" = 0 ]; then echo "PASS $1${3:+ — $3}"; PASS=$((PASS+1)); else echo "FAIL $1${3:+ — $3}"; FAIL=$((FAIL+1)); fi; }
+
+if [ -n "${REPRO_OLD:-}" ]; then
+  git -C "$REPO" show "$REPRO_OLD:docs/beta/beta-r1-release.md" > "$W/runbook.md"
+  git -C "$REPO" show "$REPRO_OLD:docs/beta/beta-r1-architecture.md" > "$W/architecture.md"
+  echo "== REPRO mode: the blocks published at $REPRO_OLD"
+else
+  cp "$DOCS/docs/beta/beta-r1-release.md" "$W/runbook.md"; cp "$DOCS/docs/beta/beta-r1-architecture.md" "$W/architecture.md"
+  echo "== docs under test: $DOCS — commit $(git -C "$DOCS" rev-parse HEAD 2>/dev/null || echo '(not a git checkout: a mutated copy)'), $(git -C "$DOCS" status --porcelain 2>/dev/null | wc -l) uncommitted path(s); runbook sha256 $(sha256sum "$W/runbook.md" | cut -c1-16)…"
+fi
+
+# A block, verbatim, between its markers (an indented block loses only its own indentation).
+python3 - "$W/runbook.md" "$W" <<'PY'
+import re, sys
+md, out = sys.argv[1], sys.argv[2]
+lines = open(md).read().split("\n")
+blocks, cur, ind = {}, None, 0
+for l in lines:
+    m = re.match(r"^( *)# >>> (.+) \(begin\)$", l)
+    if m: cur, ind = m.group(2), len(m.group(1)); blocks[cur] = []
+    if cur is not None:
+        blocks[cur].append(l[ind:] if l[:ind].strip() == "" else l)
+        if re.match(r"^ *# <<< " + re.escape(cur) + r" \(end\)$", l): cur = None
+for name, b in blocks.items():
+    open(f"{out}/block-{name.replace(' ', '_').replace(',', '')}.sh", "w").write("\n".join(b) + "\n")
+print("== blocks found: " + "; ".join(f"{n} ({len(b)} lines)" for n, b in blocks.items()))
+PY
+# The architecture page's unit, as published.
+awk '/^\[Unit\]$/{f=1} f{print} /^WantedBy=multi-user.target$/{f=0}' "$W/architecture.md" > "$W/unit.published"
+
+# The prelude: stubs for what needs root, a real user or systemd.
+cat > "$W/prelude.sh" <<'EOF'
+systemctl() {
+  case "$1" in
+    stop) echo "SENTINEL-STOP"; return "${RC_STOP:-0}";;
+    start) echo "SENTINEL-START"; return 0;;
+    enable) echo "SENTINEL-ENABLE $*"; return 0;;
+    daemon-reload) echo "STUB daemon-reload"; return "${RC_RELOAD:-0}";;
+    *) echo "STUB systemctl $*";;
+  esac; }
+useradd() { echo "STUB useradd $*"; }
+chown() { echo "STUB chown $*"; }
+sudo() { if [ "$1" = "-u" ]; then shift 2; fi; "$@"; }
+install() { local a=(); while [ $# -gt 0 ]; do case "$1" in -o|-g) shift 2;; *) a+=("$1"); shift;; esac; done; command install "${a[@]}"; }
+rm() { if [ -n "${RM_FAILS:-}" ]; then echo "STUB rm $* -> exit 1 (this case)"; return 1; fi; command rm "$@"; }
+EOF
+echo; echo "== the prelude (stubs), in full:"; sed 's/^/    /' "$W/prelude.sh"
+
+# Fixture packages, shaped like the real one, with the stand-in tools.
+REV=7097ac2bb062925bb296a129f4771f1e68fd522d
+mkpkg() { # $1 dir, $2 revision, $3 extra file (optional)
+  mkdir -p "$1/dist/server" "$1/content"
+  printf '{\n  "revision": "%s",\n  "builtAt": "2026-11-16T00:00:00.000Z",\n  "node": "v22.16.0"\n}\n' "$2" > "$1/release.json"
+  git -C "$REPO" show 7097ac2:package.json > "$1/package.json"
+  git -C "$REPO" show 7097ac2:package-lock.json > "$1/package-lock.json"
+  echo 'console.log("fixture server")' > "$1/dist/server/serve.js"
+  cat > "$1/dist/server/datatool.js" <<'JS'
+// FIXTURE stand-in, not the real tool. check: fails on a file named BAD; backup: fails if FIXTURE_BACKUP_FAILS.
+import fs from "node:fs";
+const [cmd, ...a] = process.argv.slice(2);
+const arg = (n) => a[a.indexOf(n) + 1];
+if (cmd === "check") {
+  const d = arg("--data");
+  if (!fs.existsSync(d) || fs.existsSync(`${d}/BAD`)) { console.error(`check FAILED (fixture): ${d}`); process.exit(1); }
+  console.log(`check OK: 0 room(s) (fixture) in ${d}`);
+} else if (cmd === "backup") {
+  if (process.env.FIXTURE_BACKUP_FAILS) { console.error("backup FAILED (fixture)"); process.exit(1); }
+  fs.mkdirSync(arg("--out"), { recursive: true }); console.log(`SENTINEL-BACKUP ${arg("--out")}`);
+} else { console.error(`unknown command ${cmd}`); process.exit(2); }
+JS
+  echo '{"fixture":true}' > "$1/content/fixture.json"
+  [ -n "${3:-}" ] && echo extra > "$1/$3"; true
+}
+inventory() { (cd "$1" && LC_ALL=C find . -type f ! -path ./release.json ! -path './node_modules/*' -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64); }
+mkpkg "$W/good" "$REV"; tar -czf "$W/good.tgz" -C "$W/good" .
+mkpkg "$W/badrev" "2222222222222222222222222222222222222222"; tar -czf "$W/badrev.tgz" -C "$W/badrev" .
+mkpkg "$W/extra" "$REV" "dist/server/unexpected.js"; tar -czf "$W/extra.tgz" -C "$W/extra" .
+(cd "$W/good" && tar --mtime='2020-01-01 00:00:00' -czf "$W/repack.tgz" .)
+cp "$W/good.tgz" "$W/bad.tgz"; printf 'x' >> "$W/bad.tgz"
+GOOD_SHA256=$(sha256sum "$W/good.tgz" | cut -c1-64); GOOD_INV=$(inventory "$W/good")
+echo; echo "fixture: good.tgz sha256 $GOOD_SHA256, inventory $GOOD_INV"
+
+# Make a case's script: the prelude, then the given parts, with the printed substitutions applied.
+mkscript() { # $1 case dir, $2 expected sha256, $3 expected inventory, rest: part files
+  local d=$1 exp=$2 inv=$3; shift 3
+  python3 - "$d" "$exp" "$inv" "$W/prelude.sh" "$@" <<'PY'
+import re, sys
+d, exp, inv, prelude, *parts = sys.argv[1:]
+out = [open(prelude).read(), "# ---- the published blocks, with the printed substitutions ----"]
+for p in parts:
+    s = open(p).read()
+    s = re.sub(r"(?<![\w.~/-])/(opt|var/lib|var/backups|etc)/", lambda m: f"{d}/{m.group(1)}/", s)
+    s = re.sub(r"^EXPECTED_SHA256=[0-9a-f]{64}$", f"EXPECTED_SHA256={exp}", s, flags=re.M)
+    s = re.sub(r"^EXPECTED_INVENTORY=[0-9a-f]{64}$", f"EXPECTED_INVENTORY={inv}", s, flags=re.M)
+    out.append(s)
+open(f"{d}/run.sh", "w").write("\n".join(out))
+PY
+}
+runit() { # $1 case dir, rest: env assignments
+  local d=$1; shift
+  (cd "$d/host" && env "$@" bash "$d/run.sh") > "$d/out.log" 2>&1
+  sed 's/^/    /' "$d/out.log" | grep -v "added [0-9]* packages" | grep -v "^    $"; true
+}
+newcase() { local d="$W/case-$1"; mkdir -p "$d/host" "$d/opt/christmas-game-night/releases" "$d/var/lib" "$d/var/backups" "$d/etc/systemd/system"; echo "$d"; }
+nosentinel() { ! grep -q "^SENTINEL-" "$1/out.log"; }
+has() { grep -q "$2" "$1/out.log"; }
+OPTD=opt/christmas-game-night
+
+B_PROMOTE="$W/block-promote.sh"
+awk '/^# 2\. Maintenance/{exit} {print}' "$B_PROMOTE" > "$W/step1.sh"
+
+if [ -n "${REPRO_OLD:-}" ]; then
+  # ------------------------------------------------------------------ the review's three scenarios on the old blocks
+  echo; echo "== R1 (old promote): a stale marker that rm can't remove, and the archive missing"
+  D=$(newcase R1); touch "$D/$OPTD/verified-$REV"
+  mkscript "$D" "$GOOD_SHA256" "$GOOD_INV" "$B_PROMOTE"; echo "--- output"; runit "$D" RM_FAILS=1
+  has "$D" "^SENTINEL-STOP"; check "R1 DEFECT REPRODUCED: the old block printed STOP yet reached systemctl stop" $?
+
+  echo; echo "== R2 (old first install): the data check fails"
+  D=$(newcase R2); mkdir -p "$D/var/lib/cgn-validation"; touch "$D/var/lib/cgn-validation/BAD"
+  python3 -c "
+import re,sys; s=open('$W/block-first_install.sh').read(); a=open('$W/step1.sh').read()
+anchor='if [ -f \"\$MARK\" ]; then ln -sfn'; assert anchor in s; s=s.replace(anchor, a+anchor,1)
+open('$W/old-first.sh','w').write(s)"
+  sed "s#^ReadWritePaths=.*#ReadWritePaths=/var/lib/christmas-game-night#" "$W/unit.published" | sed "s#/var/lib/#$D/var/lib/#" > "$D/etc/systemd/system/christmas-game-night.service"
+  cp "$W/good.tgz" "$D/host/mchezo-7097ac2.tgz"
+  mkscript "$D" "$GOOD_SHA256" "$GOOD_INV" "$W/old-first.sh"; echo "--- output"; runit "$D"
+  has "$D" "check FAILED" && has "$D" "^STUB daemon-reload" && has "$D" "^SENTINEL-ENABLE"; check "R2 DEFECT REPRODUCED: the data check failed, yet daemon-reload and enable --now ran" $?
+
+  echo; echo "== R3 (old switch): the stop fails and the real folder already holds a room"
+  D=$(newcase R3); mkdir -p "$D/var/lib/christmas-game-night" "$D/etc/christmas-game-night"; echo '{"room":"fixture"}' > "$D/var/lib/christmas-game-night/room-OLD1.json"
+  printf 'MCHEZO_DATA_DIR=%s\nMCHEZO_BETA_ACCESS_CODE=real-code-fixture-B\n' "$D/var/lib/christmas-game-night" > "$D/etc/christmas-game-night/env"
+  sed "s#^ReadWritePaths=.*#ReadWritePaths=$D/var/lib/cgn-validation#" "$W/unit.published" > "$D/etc/systemd/system/christmas-game-night.service"
+  mkscript "$D" "$GOOD_SHA256" "$GOOD_INV" "$W/block-switch.sh"; echo "--- output"; runit "$D" RC_STOP=1
+  has "$D" "^SENTINEL-STOP" && grep -qx "ReadWritePaths=$D/var/lib/christmas-game-night" "$D/etc/systemd/system/christmas-game-night.service" && has "$D" "^STUB daemon-reload" && has "$D" "^SENTINEL-START"
+  check "R3 DEFECT REPRODUCED: the stop failed, yet the unit was changed, reloaded and started on the occupied folder" $?
+  echo; echo "repro: $PASS reproduced, $FAIL not reproduced"
+  [ $FAIL = 0 ] && echo "ALL THREE DEFECTS REPRODUCED ON $REPRO_OLD" || echo "NOT ALL DEFECTS REPRODUCED"
+  exit $FAIL
+fi
+
+# ====================================================================== promotion (the whole promote block)
+for b in promote "first install, prepare" "first install, start" "switch, stop and prepare" "switch, start"; do
+  f="$W/block-$(echo "$b" | tr ' ' '_' | tr -d ',').sh"; [ -s "$f" ]; check "the runbook has the block \"$b\"" $?
+done
+grep -q 'sha256sum --check --strict' "$B_PROMOTE"; check "the promote block checks the full hash with sha256sum --check --strict" $?
+! grep -q 'MCHEZO_TRUST_PROXY=1' "$W/block-first_install_prepare.sh" "$W/block-first_install_start.sh"; check "the first install doesn't preset MCHEZO_TRUST_PROXY" $?
+! grep -qE '^(DATA|LIVE_DATA)=' "$W/step1.sh"; check "promote step 1 sets no data-folder variable (so the first install's DATA stays)" $?
+grep -qx 'ReadWritePaths=/var/lib/christmas-game-night' "$W/unit.published"; check "the published unit names the real folder (so the first install must change it)" $?
+
+pcase() { # $1 name, $2 label, $3 archive ("" = missing), $4 expected sha256, $5 setup ("" | stale), rest: env
+  local name=$1 label=$2 arch=$3 exp=$4 setup=$5; shift 5
+  echo; echo "== $name: $label"
+  D=$(newcase "$name"); [ -n "$arch" ] && cp "$arch" "$D/host/mchezo-7097ac2.tgz"
+  [ "$setup" = stale ] && touch "$D/$OPTD/verified-$REV"
+  mkscript "$D" "$exp" "$GOOD_INV" "$B_PROMOTE"
+  [ "$name" = P1 ] && { echo "--- the substitutions (published block vs P1's script)"; diff <(cat "$B_PROMOTE") <(sed -n '/^# ---- the published blocks/,$p' "$D/run.sh" | tail -n +2) | sed 's/^/    /'; }
+  echo "--- output"; runit "$D" "$@"
+}
+REL="$OPTD/releases/$REV"
+pcase P1 "the correct archive" "$W/good.tgz" "$GOOD_SHA256" ""
+has "$D" "^VERIFIED $REV" && has "$D" "^SENTINEL-STOP" && has "$D" "^SENTINEL-BACKUP" && has "$D" "^SENTINEL-START"; check "P1 VERIFIED, then stop, backup and start" $?
+[ "$(readlink "$D/$OPTD/current")" = "$D/$REL" ]; check "P1 current points to the verified release" $?
+NMD="$D/$REL/node_modules"
+NM="$(find "$NMD" -mindepth 2 -maxdepth 3 -name package.json | sed "s#^$NMD/##; s#/package.json\$##" | grep -v '/node_modules/' | sort | tr '\n' ' ')"
+[ "$NM" = "ws zod " ] && [ "$(find "$NMD" -mindepth 1 -maxdepth 1 -name '@*' -type d -exec find {} -type f \; | wc -l)" = 0 ]; check "P1 npm ci installed ws and zod only (the dev scope folders npm leaves are empty)" $? "packages: $NM"
+for spec in "P2|wrong bytes (one byte appended)|$W/bad.tgz|$GOOD_SHA256|" \
+            "P3|missing archive||$GOOD_SHA256|" \
+            "P4|THE REVIEW'S CASE: a stale marker rm can't remove, and the archive missing||$GOOD_SHA256|stale|RM_FAILS=1" \
+            "P5|a stale marker rm can't remove, with the CORRECT archive|$W/good.tgz|$GOOD_SHA256|stale|RM_FAILS=1" \
+            "P6|a stale marker (removable), then wrong bytes|$W/bad.tgz|$GOOD_SHA256|stale|" \
+            "P7|wrong revision in release.json (its own hash pinned)|$W/badrev.tgz|$(sha256sum "$W/badrev.tgz" | cut -c1-64)||" \
+            "P8|an unexpected extra file (its own hash pinned, the real inventory expected)|$W/extra.tgz|$(sha256sum "$W/extra.tgz" | cut -c1-64)||" \
+            "P9|a rebuild-like archive: the same files repacked (other hash, same revision and inventory)|$W/repack.tgz|$GOOD_SHA256||" \
+            "P10|flags left set by an earlier run in this shell (VERIFIED=1 STOPPED=1 BACKUP_OK=1), archive missing||$GOOD_SHA256||VERIFIED=1 STOPPED=1 BACKUP_OK=1"; do
+  IFS='|' read -r name label arch exp setup envs <<< "$spec"
+  # shellcheck disable=SC2086
+  pcase "$name" "$label" "$arch" "$exp" "$setup" $envs
+  has "$D" "^STOP: the old marker" && ! has "$D" "^VERIFIED"; check "$name STOP at step 1, no VERIFIED" $?
+  nosentinel "$D" && [ ! -e "$D/$OPTD/current" ] && [ ! -L "$D/$OPTD/current" ]; check "$name no stop, backup or start, and nothing switched" $? "$(grep -c '^SENTINEL-' "$D/out.log") sentinel(s)"
+done
+for n in P2 P3 P4 P5 P9; do [ ! -e "$W/case-$n/$REL" ]; check "$n nothing unpacked" $?; done
+pcase P11 "the correct archive, but the maintenance stop fails" "$W/good.tgz" "$GOOD_SHA256" "" RC_STOP=1
+has "$D" "^VERIFIED" && has "$D" "^SENTINEL-STOP" && has "$D" "^STOP: the server didn't stop"; check "P11 verified; the stop was tried and failed" $?
+! has "$D" "^SENTINEL-BACKUP" && ! has "$D" "^SENTINEL-START" && [ ! -e "$D/$OPTD/current" ]; check "P11 no backup, no switch, no start" $?
+pcase P12 "the correct archive, but the backup fails" "$W/good.tgz" "$GOOD_SHA256" "" FIXTURE_BACKUP_FAILS=1
+has "$D" "^SENTINEL-STOP" && has "$D" "^STOP: no backup" && ! has "$D" "^SENTINEL-START" && [ ! -e "$D/$OPTD/current" ]; check "P12 stopped; no backup, so no switch and no start" $?
+
+# ====================================================================== first install (prepare, edit, step 1, start)
+mkedit() { # $1 case dir, $2 MCHEZO_DATA_DIR line(s) (\n-separated), $3 unit source
+  cat > "$1/edit.sh" <<EOF
+# ---- (fixture: the operator's edits by hand: the settings file and the unit) ----
+printf '%b' 'NODE_ENV=production\n$2\nMCHEZO_PUBLIC_ORIGIN=https://beta.test\nMCHEZO_BETA_ACCESS_CODE=throwaway-fixture-A1\nMCHEZO_LISTEN_HOST=127.0.0.1\nPORT=3000\n' > "\$ENVFILE"
+cp "$3" /etc/systemd/system/christmas-game-night.service
+EOF
+}
+fcase() { # $1 name, $2 label, $3 archive, $4 data-dir lines, $5 unit source, $6 setup, rest: env
+  local name=$1 label=$2 arch=$3 lines=$4 unit=$5 setup=$6; shift 6
+  echo; echo "== $name: first install, $label"
+  D=$(newcase "$name"); [ -n "$arch" ] && cp "$arch" "$D/host/mchezo-7097ac2.tgz"
+  case $setup in bad) mkdir -p "$D/var/lib/cgn-validation"; touch "$D/var/lib/cgn-validation/BAD";; stale) touch "$D/$OPTD/verified-$REV";; esac
+  mkedit "$D" "$lines" "$unit"
+  mkscript "$D" "$GOOD_SHA256" "$GOOD_INV" "$W/block-first_install_prepare.sh" "$D/edit.sh" "$W/step1.sh" "$W/block-first_install_start.sh"
+  echo "--- output"; runit "$D" "$@"
+}
+grep -v '^ReadWritePaths=' "$W/unit.published" > "$W/unit.norwp"
+OK_LINE='MCHEZO_DATA_DIR=/var/lib/cgn-validation'
+UNITF=etc/systemd/system/christmas-game-night.service
+fcase F1 "the correct archive" "$W/good.tgz" "$OK_LINE" "$W/unit.published" ""
+has "$D" "^VERIFIED" && [ "$(readlink "$D/$OPTD/current")" = "$D/$REL" ] && has "$D" "check OK" && has "$D" "^STUB daemon-reload" && has "$D" "^SENTINEL-ENABLE"; check "F1 VERIFIED, linked, data checked, reloaded, started" $?
+grep -qx "ReadWritePaths=$D/var/lib/cgn-validation" "$D/$UNITF" && [ ! -e "$D/var/lib/christmas-game-night" ]; check "F1 the unit names the throwaway folder; the real folder was never created" $?
+for spec in "F2|wrong bytes|$W/bad.tgz|$OK_LINE|$W/unit.published|" \
+            "F3|missing archive||$OK_LINE|$W/unit.published|" \
+            "F4|the unit has no ReadWritePaths= line|$W/good.tgz|$OK_LINE|$W/unit.norwp|" \
+            "F5|THE REVIEW'S CASE: the data check fails|$W/good.tgz|$OK_LINE|$W/unit.published|bad" \
+            "F6|the settings name the REAL folder|$W/good.tgz|MCHEZO_DATA_DIR=/var/lib/christmas-game-night|$W/unit.published|" \
+            "F7|the settings name the data folder twice|$W/good.tgz|$OK_LINE\\\\nMCHEZO_DATA_DIR=/var/lib/christmas-game-night|$W/unit.published|" \
+            "F8|daemon-reload fails|$W/good.tgz|$OK_LINE|$W/unit.published||RC_RELOAD=1" \
+            "F9|a stale marker rm can't remove|$W/good.tgz|$OK_LINE|$W/unit.published|stale|RM_FAILS=1"; do
+  IFS='|' read -r name label arch lines unit setup envs <<< "$spec"
+  # shellcheck disable=SC2086
+  fcase "$name" "$label" "$arch" "$lines" "$unit" "$setup" $envs
+  has "$D" "^STOP: not verified in this run, or the link" && ! has "$D" "^SENTINEL-"; check "$name not started (no enable, no other sentinel)" $?
+done
+for n in F2 F3 F9; do [ ! -e "$W/case-$n/$OPTD/current" ] && [ ! -L "$W/case-$n/$OPTD/current" ] && ! grep -q "^STUB daemon-reload" "$W/case-$n/out.log"; check "$n nothing linked, no reload" $?; done
+! grep -q "^STUB daemon-reload" "$W/case-F5/out.log" && grep -q "check FAILED" "$W/case-F5/out.log"; check "F5 the failed check stops it before the unit and the reload" $?
+! grep -q "check OK\|check FAILED" "$W/case-F6/out.log"; check "F6 a settings file naming the real folder stops it before any data check" $?
+grep -q "^STUB daemon-reload" "$W/case-F8/out.log"; check "F8 the reload was tried and failed, and nothing started" $?
+echo; echo "== F10: the prepare block keeps an existing settings file"
+D=$(newcase F10); mkdir -p "$D/etc/christmas-game-night"; printf 'MCHEZO_DATA_DIR=/kept\n' > "$D/etc/christmas-game-night/env"
+mkscript "$D" "$GOOD_SHA256" "$GOOD_INV" "$W/block-first_install_prepare.sh"; echo "--- output"; runit "$D"
+grep -qx "MCHEZO_DATA_DIR=/kept" "$D/etc/christmas-game-night/env"; check "F10 the existing settings file is untouched" $?
+
+# ====================================================================== the switch (part A, edit, part B)
+CODE_A=throwaway-fixture-A1; CODE_B=real-fixture-B2-never-printed
+wcase() { # $1 name, $2 label, $3 setup (""|occupied|emptyexists), $4 edit (good|nodata|nocode|twice), rest: env
+  local name=$1 label=$2 setup=$3 edit=$4; shift 4
+  echo; echo "== $name: switch, $label"
+  D=$(newcase "$name"); mkdir -p "$D/var/lib/cgn-validation" "$D/etc/christmas-game-night"
+  echo '{"room":"validation"}' > "$D/var/lib/cgn-validation/room-VAL1.json"
+  printf 'NODE_ENV=production\nMCHEZO_DATA_DIR=%s\nMCHEZO_BETA_ACCESS_CODE=%s\n' "$D/var/lib/cgn-validation" "$CODE_A" > "$D/etc/christmas-game-night/env"
+  sed "s#^ReadWritePaths=.*#ReadWritePaths=$D/var/lib/cgn-validation#" "$W/unit.published" > "$D/$UNITF"
+  case $setup in occupied) mkdir -p "$D/var/lib/christmas-game-night"; echo '{"room":"existing"}' > "$D/var/lib/christmas-game-night/room-OLD1.json";;
+                 emptyexists) mkdir -p "$D/var/lib/christmas-game-night";; esac
+  local real="/var/lib/christmas-game-night"
+  case $edit in
+    good) printf 'sed -i -e "s#^MCHEZO_DATA_DIR=.*#MCHEZO_DATA_DIR=%s#" -e "s#^MCHEZO_BETA_ACCESS_CODE=.*#MCHEZO_BETA_ACCESS_CODE=%s#" "$ENVFILE"\n' "$real" "$CODE_B" ;;
+    nodata) printf 'sed -i -e "s#^MCHEZO_BETA_ACCESS_CODE=.*#MCHEZO_BETA_ACCESS_CODE=%s#" "$ENVFILE"\n' "$CODE_B" ;;
+    nocode) printf 'sed -i -e "s#^MCHEZO_DATA_DIR=.*#MCHEZO_DATA_DIR=%s#" "$ENVFILE"\n' "$real" ;;
+    late) printf 'sed -i -e "s#^MCHEZO_DATA_DIR=.*#MCHEZO_DATA_DIR=%s#" -e "s#^MCHEZO_BETA_ACCESS_CODE=.*#MCHEZO_BETA_ACCESS_CODE=%s#" "$ENVFILE"; echo "{}" > "%s/room-LATE.json"\n' "$real" "$CODE_B" "$real" ;;
+    twice) printf 'sed -i -e "s#^MCHEZO_BETA_ACCESS_CODE=.*#MCHEZO_BETA_ACCESS_CODE=%s#" "$ENVFILE"; echo "MCHEZO_DATA_DIR=%s" >> "$ENVFILE"\n' "$CODE_B" "$real" ;;
+  esac | { echo "# ---- (fixture: the operator's edit by hand: $edit) ----"; cat; } > "$D/edit.sh"
+  mkscript "$D" "$GOOD_SHA256" "$GOOD_INV" "$W/block-switch_stop_and_prepare.sh" "$D/edit.sh" "$W/block-switch_start.sh"
+  echo "--- output"; runit "$D" "$@"
+}
+unit_is() { grep -qx "ReadWritePaths=$1" "$D/$UNITF"; }
+val_intact() { [ "$(cat "$D/var/lib/cgn-validation/room-VAL1.json")" = '{"room":"validation"}' ]; }
+wcase W1 "settings edited to the new folder and the real code" "" good
+has "$D" "^SENTINEL-STOP" && [ -d "$D/var/lib/christmas-game-night" ] && has "$D" "^STUB daemon-reload" && has "$D" "^SENTINEL-START" && has "$D" "^SWITCHED"; check "W1 stopped, new folder made, reloaded, started" $?
+unit_is "$D/var/lib/christmas-game-night" && val_intact; check "W1 the unit names the new folder; the validation room is kept" $?
+for spec in "W2|the settings still name the throwaway folder||nodata|" \
+            "W3|THE REVIEW'S CASE: the stop fails, and the real folder already holds a room|occupied|good|RC_STOP=1" \
+            "W4|the stop fails (no real folder yet)||good|RC_STOP=1" \
+            "W5|the real folder already exists and holds a room (the stop succeeds)|occupied|good|" \
+            "W6|the real folder already exists, empty|emptyexists|good|" \
+            "W7|the access code wasn't replaced||nocode|" \
+            "W8|the settings name a data folder twice||twice|" \
+            "W9|daemon-reload fails||good|RC_RELOAD=1" \
+            "W10|a file appeared in the new folder between part A and part B||late|"; do
+  IFS='|' read -r name label setup edit envs <<< "$spec"
+  # shellcheck disable=SC2086
+  wcase "$name" "$label" "$setup" "$edit" $envs
+  ! has "$D" "^SENTINEL-START" && ! has "$D" "^SWITCHED" && has "$D" "^STOP: not stopped and prepared in this run"; check "$name not started" $?
+  val_intact; check "$name the validation room is kept" $?
+  case $name in W9) ;; *) unit_is "$D/var/lib/cgn-validation"; check "$name the unit is unchanged" $?;; esac
+done
+for n in W3 W5; do [ "$(cat "$W/case-$n/var/lib/christmas-game-night/room-OLD1.json")" = '{"room":"existing"}' ] && [ "$(ls -A "$W/case-$n/var/lib/christmas-game-night" | wc -l)" = 1 ]; check "$n the existing real folder is left exactly as it was" $?; done
+[ ! -e "$W/case-W4/var/lib/christmas-game-night" ] && ! grep -q "^STUB chown" "$W/case-W4/out.log"; check "W4 a failed stop changes nothing: no folder, no chown" $?
+! grep -q "^STUB daemon-reload" "$W/case-W3/out.log" "$W/case-W4/out.log"; check "W3/W4 no reload after a failed stop" $?
+grep -q "^STUB daemon-reload" "$W/case-W9/out.log"; check "W9 the reload was tried and failed, and nothing started" $?
+[ -e "$W/case-W10/var/lib/christmas-game-night/room-LATE.json" ]; check "W10 the late file is kept" $?
+! grep -l -e "$CODE_A" -e "$CODE_B" "$W"/case-W*/out.log >/dev/null; check "W1–W10 neither access code appears in any output" $?
+
+echo; echo "fixtures (round 2): $PASS passed, $FAIL failed"
+[ $FAIL = 0 ] && echo "ROUND 2 FIXTURES PASSED" || echo "ROUND 2 FIXTURES FAILED"
+exit $FAIL
