@@ -19,6 +19,8 @@ import { fileURLToPath } from "node:url";
 import { PINNED_REVISION } from "./w2-verdict.mjs";
 
 const LOAD = join(dirname(fileURLToPath(import.meta.url)), "w2-load.mjs");
+// Fixture values, deliberately not shaped like a real cookie or code (the repository's secret scans must stay clean).
+const FAKE_COOKIE = "fake.cookie.for.this.test", FAKE_CODE = "fake.code.for.this.test";
 const dir = mkdtempSync(join(tmpdir(), "w2-args-"));
 const servers = [];
 const listen = (srv) => new Promise((r) => srv.listen(0, "127.0.0.1", () => { servers.push(srv); r(srv.address().port); }));
@@ -41,7 +43,7 @@ before(() => {
   const r = spawnSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", join(dir, "key.pem"), "-out", join(dir, "cert.pem"), "-days", "1", "-subj", "/CN=localhost", "-addext", "subjectAltName=DNS:localhost"], { stdio: "ignore" });
   assert.equal(r.status, 0, "openssl could not make the fake target's certificate");
   cert = readFileSync(join(dir, "cert.pem")); key = readFileSync(join(dir, "key.pem"));
-  writeFileSync(join(dir, "code"), "fake-throwaway-code-0123456789\n", { mode: 0o600 });
+  writeFileSync(join(dir, "code"), `${FAKE_CODE}\n`, { mode: 0o600 });
 });
 after(() => { for (const s of servers) s.close(); rmSync(dir, { recursive: true, force: true }); });
 
@@ -93,7 +95,7 @@ async function fakeTarget(mode, secondPort) {
     req.resume();
     req.on("end", () => {
       if (req.method === "GET" && req.url === "/health") return json(200, { ok: true, revision: PINNED_REVISION });
-      if (req.method === "POST" && req.url === "/beta/enter") { res.writeHead(303, { location: "/", "set-cookie": "cgn_beta=fakecookie0123456789; Path=/; HttpOnly" }); return res.end(); }
+      if (req.method === "POST" && req.url === "/beta/enter") { res.writeHead(303, { location: "/", "set-cookie": `cgn_beta=${FAKE_COOKIE}; Path=/; HttpOnly` }); return res.end(); }
       if (mode === "http") { res.writeHead(307, { location: to(req.url) }); return res.end(); }
       if (req.method === "POST" && req.url === "/rooms") { rooms++; return json(201, { roomId: `room-fake${rooms}`, joinCode: `JOINFAKE${rooms}`, hostClaimToken: `claim-fake-${rooms}-000000` }); }
       if (req.method === "POST" && /^\/rooms\/room-fake\d+\/join$/.test(req.url)) { seats++; return json(200, { sessionToken: `tok-fake-${seats}-000000`, playerId: "player-1" }); }
@@ -123,7 +125,8 @@ test("an authenticated HTTP redirect to another origin is not followed (the run 
   assert.match(r.out, /preflight: \/health 200/);
   assert.match(r.out, /run aborted: POST \/rooms answered 307/);
   assert.equal(second.n, 0, "the runner followed the redirect to the second origin");
-  assert.doesNotMatch(readFileSync(join(dir, "ev-http", readdirSync(join(dir, "ev-http"))[0]), "utf8"), /fakecookie0123456789|fake-throwaway-code/);
+  const evidence = readFileSync(join(dir, "ev-http", readdirSync(join(dir, "ev-http"))[0]), "utf8");
+  assert.ok(!evidence.includes(FAKE_COOKIE) && !evidence.includes(FAKE_CODE), "the evidence holds the fixture cookie or code");
 });
 test("a socket handshake redirect to another origin is not followed (the run fails, zero connections there)", async () => {
   const second = await counter();
