@@ -1,0 +1,122 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 DONE 0.0s
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.67kB done
+#1 DONE 0.0s
+
+#2 [context golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6] load metadata for local/cgn-test-golang-ca:1.24.4
+#2 DONE 0.0s
+
+#3 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] load metadata for local/cgn-test-node-ca:22.16.0
+#3 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/node:22.16.0-bookworm-slim@sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34
+#4 DONE 0.0s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 447B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 DONE 0.0s
+
+#7 [runtime  1/10] FROM docker.io/library/node:22.16.0-bookworm-slim@sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34
+#7 resolve docker.io/library/node:22.16.0-bookworm-slim@sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34 0.0s done
+#7 DONE 0.1s
+
+#8 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] local/cgn-test-node-ca:22.16.0
+#8 resolve docker.io/local/cgn-test-node-ca:22.16.0
+#8 resolve docker.io/local/cgn-test-node-ca:22.16.0 1.0s done
+#8 DONE 1.0s
+
+#7 [runtime  1/10] FROM docker.io/library/node:22.16.0-bookworm-slim@sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34
+#7 extracting sha256:dad67da3f26bce15939543965e09c4059533b025f707aad72ed3d3f3a09c66f8
+#7 ...
+
+#6 [internal] load build context
+#6 transferring context: 1.23MB 0.0s done
+#6 DONE 0.0s
+
+#9 [context golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6] local/cgn-test-golang-ca:1.24.4
+#9 resolve docker.io/local/cgn-test-golang-ca:1.24.4 1.0s done
+#9 DONE 1.0s
+
+#8 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] local/cgn-test-node-ca:22.16.0
+#8 DONE 1.0s
+
+#10 [gate 1/5] COPY pins/ /gate/pins/
+#10 DONE 0.1s
+
+#11 [age 1/3] COPY pins/age.sha256 /pins/age.sha256
+#11 DONE 0.1s
+
+#12 [gate 2/5] COPY cgn-artifact-gate.sh cgn-entrypoint.sh cgn-backup.sh cgn-authorize.sh /gate/
+#12 DONE 0.1s
+
+#13 [gate 3/5] COPY artifact/ /gate/artifact/
+#13 DONE 0.0s
+
+#14 [age 2/3] RUN go install filippo.io/age/cmd/age@v1.2.1  && cd /go/bin && sha256sum -c --strict /pins/age.sha256  && ./age --version
+#14 0.187 go: downloading filippo.io/age v1.2.1
+#14 0.428 go: downloading golang.org/x/crypto v0.24.0
+#14 0.429 go: downloading golang.org/x/term v0.21.0
+#14 0.659 go: downloading filippo.io/edwards25519 v1.1.0
+#14 0.667 go: downloading golang.org/x/sys v0.21.0
+#14 ...
+
+#15 [gate 4/5] RUN sh /gate/cgn-artifact-gate.sh gate /gate /out/app
+#15 0.106 cgn-entrypoint.sh: OK
+#15 0.106 cgn-backup.sh: OK
+#15 0.106 cgn-authorize.sh: OK
+#15 0.114 mchezo-7097ac2.tgz: OK
+#15 0.123 artifact-gate: archive: e57380943f7bf8c0e9e83da565b4fcc4eb4d2f3ec0a3802ea5a9acb2ce95fe52 (the pinned SHA-256)
+#15 0.227 artifact-gate: listing: 163 entries, files and folders only, no absolute path, no '..', no duplicate
+#15 0.344 artifact-gate: inventory: 144 files, SHA-256 fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c (the pinned one)
+#15 0.388 artifact-gate: release.json: revision 7097ac2bb062925bb296a129f4771f1e68fd522d, node v22.16.0, built 2026-11-16T05:22:33.807Z
+#15 1.698 
+#15 1.698 added 2 packages in 1s
+#15 1.701 npm notice
+#15 1.701 npm notice New major version of npm available! 10.9.2 -> 12.2.2
+#15 1.701 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+#15 1.701 npm notice To update run: npm install -g npm@12.2.2
+#15 1.701 npm notice
+#15 1.770 ARTIFACT_GATE_FAILED: node_modules holds: .package-lock.json @babel @cacheable @esbuild @eslint @eslint-community @fontsource-variable @humanfs @humanwhocodes @jridgewell @keyv @napi-rs @rolldown @rollup @types @typescript-eslint @vitejs @vitest ws zod (expected exactly ws and zod)
+#15 ERROR: process "/bin/sh -c sh /gate/cgn-artifact-gate.sh gate /gate /out/app" did not complete successfully: exit code: 1
+
+#7 [runtime  1/10] FROM docker.io/library/node:22.16.0-bookworm-slim@sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34
+#7 extracting sha256:dad67da3f26bce15939543965e09c4059533b025f707aad72ed3d3f3a09c66f8 1.7s done
+#7 extracting sha256:9d6aefa8c9bbec07defc52b35b25c4238a485881251b31d74cf91aa6b60156c6 0.0s done
+#7 extracting sha256:32106569f4b871cbcc375743a505d013b694ca1b4b0876e3a8093ca29f193d51 1.8s done
+#7 extracting sha256:40361bc5801b31cff2081770d009a16902e9f5aafd4d72b13c047796eb1efae5 done
+#7 DONE 3.6s
+
+#16 [runtime  2/10] COPY --from=age /go/bin/age /usr/local/bin/age
+#16 CANCELED
+
+#14 [age 2/3] RUN go install filippo.io/age/cmd/age@v1.2.1  && cd /go/bin && sha256sum -c --strict /pins/age.sha256  && ./age --version
+#14 CANCELED
+------
+ > [gate 4/5] RUN sh /gate/cgn-artifact-gate.sh gate /gate /out/app:
+0.344 artifact-gate: inventory: 144 files, SHA-256 fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c (the pinned one)
+0.388 artifact-gate: release.json: revision 7097ac2bb062925bb296a129f4771f1e68fd522d, node v22.16.0, built 2026-11-16T05:22:33.807Z
+1.698 
+1.698 added 2 packages in 1s
+1.701 npm notice
+1.701 npm notice New major version of npm available! 10.9.2 -> 12.2.2
+1.701 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+1.701 npm notice To update run: npm install -g npm@12.2.2
+1.701 npm notice
+1.770 ARTIFACT_GATE_FAILED: node_modules holds: .package-lock.json @babel @cacheable @esbuild @eslint @eslint-community @fontsource-variable @humanfs @humanwhocodes @jridgewell @keyv @napi-rs @rolldown @rollup @types @typescript-eslint @vitejs @vitest ws zod (expected exactly ws and zod)
+------
+Dockerfile:23
+--------------------
+  21 |     COPY cgn-artifact-gate.sh cgn-entrypoint.sh cgn-backup.sh cgn-authorize.sh /gate/
+  22 |     COPY artifact/ /gate/artifact/
+  23 | >>> RUN sh /gate/cgn-artifact-gate.sh gate /gate /out/app
+  24 |     
+  25 |     # --- The runtime image: the pinned Node 22.16.0 slim image, the verified release (read-only, owned by root), the
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c sh /gate/cgn-artifact-gate.sh gate /gate /out/app" did not complete successfully: exit code: 1

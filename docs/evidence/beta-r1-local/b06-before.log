@@ -1,0 +1,57 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ✓ tests/beta-r1.test.ts (13 tests) 250ms
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+RangeError: Max payload size exceeded
+ ❯ Receiver.haveLength ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/receiver.js:442:28
+ ❯ Receiver.getPayloadLength64 ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/receiver.js:429:10
+ ❯ Receiver.startLoop ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/receiver.js:184:16
+ ❯ Receiver._write ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/receiver.js:117:10
+ ❯ writeOrBuffer node:internal/streams/writable:572:12
+ ❯ _write node:internal/streams/writable:501:10
+ ❯ Receiver.Writable.write node:internal/streams/writable:510:10
+ ❯ Socket.socketOnData ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/websocket.js:1393:35
+ ❯ Socket.emit node:events:519:28
+ ❯ addChunk node:internal/streams/readable:561:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'WS_ERR_UNSUPPORTED_MESSAGE_LENGTH' }
+This error originated in "tests/beta-r1.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "a TV socket (no session) sending an oversized message is closed with 1009 before the server parses it". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯⎯ Uncaught Exception ⎯⎯⎯⎯⎯
+Error: Invalid WebSocket frame: invalid UTF-8 sequence
+ ❯ Receiver.dataMessage ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/receiver.js:620:28
+ ❯ Receiver.getData ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/receiver.js:532:10
+ ❯ Receiver.startLoop ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/receiver.js:190:16
+ ❯ Receiver._write ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/receiver.js:117:10
+ ❯ writeOrBuffer node:internal/streams/writable:572:12
+ ❯ _write node:internal/streams/writable:501:10
+ ❯ Receiver.Writable.write node:internal/streams/writable:510:10
+ ❯ Socket.socketOnData ../../../../../../home/user/christmas-game-night-pilot/node_modules/ws/lib/websocket.js:1393:35
+ ❯ Socket.emit node:events:519:28
+ ❯ addChunk node:internal/streams/readable:561:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'WS_ERR_INVALID_UTF8' }
+This error originated in "tests/beta-r1.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "a TV socket (no session) sending invalid UTF-8 is closed with 1007; the server keeps serving". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+     Errors  2 errors
+   Start at  16:57:48
+   Duration  1.80s (transform 883ms, setup 0ms, collect 1.20s, tests 250ms, environment 0ms, prepare 77ms)
+

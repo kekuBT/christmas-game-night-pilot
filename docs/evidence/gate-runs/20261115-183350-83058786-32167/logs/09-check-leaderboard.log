@@ -1,0 +1,25 @@
+$ node scripts/check-leaderboard.mjs http://localhost:44105
+# timeout 1800s | worker w3 | server http://localhost:44105 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/test-results/20261115-183350-83058786-32167/server-data/w3)
+
+[+69.2s] PASS all tied: every player shares rank 1
+[+69.2s] PASS all tied: TV leaderboard matches server — tv=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240 TV:5:0 | server=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240 TV:5:0
+[+69.2s] PASS all tied: phone rows match server — visible=Ada:1:240 Bea:1:240 Cal:1:240 Dee:1:240
+[+69.2s] PASS first game: no movement note without a previous game — note=0
+[+131.2s] PASS pair ties: Ada=Bea and Cal=Dee share ranks, pairs differ — Ada:1 Bea:1 Cal:3 Dee:3 TV:5
+[+131.2s] PASS pair ties: TV leaderboard matches server — tv=Ada:1:600 Bea:1:600 Cal:3:360 Dee:3:360 TV:5:0 | server=Ada:1:600 Bea:1:600 Cal:3:360 Dee:3:360 TV:5:0
+[+131.2s] PASS pair ties: phone rows match server — visible=Ada:1:600 Bea:1:600
+[+132.2s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":5,"peakOpenPages":5}
+[+132.2s] node:internal/modules/run_main:123
+[+132.2s]     triggerUncaughtException(
+[+132.2s]     ^
+[+132.2s] 
+[+132.2s] locator.waitFor: Target page, context or browser has been closed
+[+132.2s]     at passBriefing (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/scripts/lib/briefing.mjs:15:57)
+[+132.2s]     at playGame (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/scripts/check-leaderboard.mjs:179:11)
+[+132.2s]     at async file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/scripts/check-leaderboard.mjs:251:39 {
+[+132.2s]   log: []
+[+132.2s] }
+[+132.2s] 
+[+132.2s] Node.js v22.23.4
+
+# CANCELLED (exit 1) in 132.3s | cpu 8.8s, peak memory 267 MB

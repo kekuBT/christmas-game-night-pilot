@@ -1,0 +1,17 @@
+== 2026-11-16T08:31Z; tree b7f0bf710b3c74bf425f5a0ec061e291fda01545 plus this commit's uncommitted evidence and PROGRESS; checker: docs/evidence/beta-r2-preflight/check-doc-links.mjs.txt
+== node check-doc-links.mjs <repo checkout> docs/beta/beta-r1-release.md docs/evidence/beta-r3-gate/trace.md docs/evidence/beta-r3-gate/README.md docs/evidence/beta-r3-gate/round2/README.md
+checked 74 links and paths in 4 file(s); 12 external link(s) listed, not fetched
+  external: https://github.com/caddyserver/website/blob/c33ee8b02a245045bc18c406a1aa0e06cd1fb772/src/docs/markdown/automatic-https.md
+  external: https://github.com/caddyserver/website/blob/c33ee8b02a245045bc18c406a1aa0e06cd1fb772/src/docs/markdown/caddyfile/directives/reverse_proxy.md
+  external: https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/fundamentals/reference/http-headers.mdx
+  external: https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/network/websockets.mdx
+  external: https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/tunnel/get-started/index.mdx
+  external: https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/tunnel/get-started/quick-tunnels/index.mdx
+  external: https://github.com/cloudflare/cloudflare-docs/blob/2a6ef7a61fe2efc78971fa497438526117ef849c/src/content/docs/tunnel/index.mdx
+  external: https://github.com/kekuBT/christmas-game-night-pilot/pull/43#issuecomment-6908014247
+  external: https://github.com/letsencrypt/website/blob/c5aba6d794bfabcbbcea2319db9d65734c382461/content/en/docs/challenge-types.md
+  external: https://github.com/nodejs/release#release-schedule
+  external: https://github.com/tailscale/tailscale/blob/6e16dac9e9beec391730423198b3115eb3422efe/ipn/serve.go
+  external: https://nodejs.org/en/about/previous-releases
+DOC LINKS PASSED
+exit=0

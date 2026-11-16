@@ -1,0 +1,43 @@
+PASS the committed inventory's digest is the recorded one
+PASS the committed inventory lists 144 files
+PASS the release record states the runtime SHA
+PASS the draft go/no-go record states the same runtime SHA
+PASS the release record states the audited archive SHA-256
+PASS the draft go/no-go record states the same audited archive SHA-256
+PASS the release record states the inventory digest
+PASS the draft go/no-go record states the same inventory digest
+PASS the runbook's approvals pin the same archive
+PASS the release record keeps the audited archive distinct from the rebuilds
+PASS draft: "Inventory digest, seen on the host" is PENDING — | Inventory digest, seen **on the host** | **PENDING:** no host yet | H1 |
+PASS draft: "Archive SHA-256, seen on the host" is PENDING — | Archive SHA-256, seen **on the host** | **PENDING** | H1 |
+PASS draft: "/health on the host" is PENDING — | `/health` **on the host** after the start | **PENDING:** no host yet | H1 |
+PASS draft: "Node on the host" is PENDING — | Node on the host (`node -v`) | **PENDING** | preflight P2 |
+PASS draft: "Host route chosen" is PENDING — | Host route chosen (H1–H4) and its name | **PENDING:** the owner's facts (runbo
+PASS draft: "Preflight P1–P9" is PENDING — | Preflight P1–P9 completed on (date), by | **PENDING** | — |
+PASS draft: "MCHEZO_TRUST_PROXY" is PENDING — | `MCHEZO_TRUST_PROXY` value and how it was counted | **PENDING:** the route pro
+PASS draft: "Backup folder name" is PENDING — | Backup folder name, and where the off-host copy is | **PENDING** | H3 |
+PASS draft: check P1 is PENDING — | P1 gate | PENDING | PENDING | — | |
+PASS draft: check P2 is PENDING — | P2 invite by QR | PENDING | PENDING | — | |
+PASS draft: check P3 is PENDING — | P3 manual join | PENDING | PENDING | — | |
+PASS draft: check P4 is PENDING — | P4 TV watches | — | — | PENDING | |
+PASS draft: check P5 is PENDING — | P5 reconnect | PENDING | PENDING | — | |
+PASS draft: check P6 is PENDING — | P6 small-screen lock and continue | PENDING | PENDING | — 
+PASS draft: check P7 is PENDING — | P7 TV privacy through a rematch | — | — | PENDING | The Fi
+PASS draft: check P8 is PENDING — | P8 reload mid-game | PENDING | PENDING | — | |
+PASS draft: check H1 is PENDING — | H1 revision | PENDING | |
+PASS draft: check H2 is PENDING — | H2 restart with persistence | PENDING | (rehearsed locally
+PASS draft: check H3 is PENDING — | H3 independent backup | PENDING | (rehearsed locally only)
+PASS draft: check H4 is PENDING — | H4 restore into an isolated folder | PENDING | (rehearsed 
+PASS draft: check H5 is PENDING — | H5 stop with no previous release | PENDING | (rehearsed lo
+PASS draft: check H6 is PENDING — | H6 no way around the proxy | PENDING | |
+PASS draft: device "iPhone" is PENDING
+PASS draft: device "Android" is PENDING
+PASS draft: device "TV or laptop" is PENDING
+PASS draft: no result marks anywhere (✅ ❌ ⚠️)
+PASS draft: the decision is NO-GO by default, both approvals PENDING
+PASS draft: owner sign-off and ChatGPT review PENDING
+PASS draft: the rehearsal and the Firefox audit are marked as not substitutes
+PASS draft: says it carries no secrets or family data
+
+R3 record check: 40 passed, 0 failed
+R3 RECORD CHECK PASSED

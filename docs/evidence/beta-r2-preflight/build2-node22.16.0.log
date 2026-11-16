@@ -1,0 +1,17 @@
+node v22.16.0, npm 10.9.2
+HEAD 7097ac2bb062925bb296a129f4771f1e68fd522d
+0
+
+added 253 packages in 5s
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+release 7097ac2bb062925bb296a129f4771f1e68fd522d packed into <scratchpad>/r2/build2/cgn-7097ac2bb062925bb296a129f4771f1e68fd522d in 12.4 s
+{
+  "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+  "builtAt": "2026-11-16T05:22:33.807Z",
+  "node": "v22.16.0"
+}
+e57380943f7bf8c0e9e83da565b4fcc4eb4d2f3ec0a3802ea5a9acb2ce95fe52  ../cgn-7097ac2bb062925bb296a129f4771f1e68fd522d.tgz

@@ -1,0 +1,58 @@
+$ node scripts/check-f5.mjs http://localhost:38623
+# timeout 1500s | worker w2 | server http://localhost:38623 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full2/test-results/20261115-174314-529a9669-3501/server-data/w2)
+
+[+5.5s] PASS lobby roster: 4 players joined
+[+5.5s] day playlist: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (14 games; casual-only, not in a Cup: jebena-rush, spectrum, family-questions; built for teams, played by their own drivers: team-huddle, relay, split-clues, team-draw, territory, tug-of-war, know-your-rivals)
+[+6.7s] PASS TV projection leak-free while impostor playing — no forbidden keys
+[+18.1s] OK impostor: finished
+[+18.1s] PASS day playlist: impostor finished without sticking
+[+19.3s] PASS TV projection leak-free while caption-clash playing — no forbidden keys
+[+51.6s] OK caption-clash: finished
+[+51.6s] PASS day playlist: caption-clash finished without sticking
+[+53.2s] PASS TV projection leak-free while trivia playing — no forbidden keys
+[+95.7s] OK trivia: finished
+[+95.7s] PASS day playlist: trivia finished without sticking
+[+97.3s] PASS TV projection leak-free while word-connections playing — no forbidden keys
+[+120.4s] OK word-connections: finished
+[+120.4s] PASS day playlist: word-connections finished without sticking
+[+121.5s] PASS TV projection leak-free while who-said-that playing — no forbidden keys
+[+136.3s] OK who-said-that: finished
+[+136.3s] PASS day playlist: who-said-that finished without sticking
+[+137.4s] PASS TV projection leak-free while guess-the-year playing — no forbidden keys
+[+167.5s] OK guess-the-year: finished
+[+167.5s] PASS day playlist: guess-the-year finished without sticking
+[+168.6s] PASS TV projection leak-free while closest-wins playing — no forbidden keys
+[+192.0s] OK closest-wins: finished
+[+192.0s] PASS day playlist: closest-wins finished without sticking
+[+193.2s] PASS TV projection leak-free while category-sprint playing — no forbidden keys
+[+204.1s] OK category-sprint: finished
+[+204.1s] PASS day playlist: category-sprint finished without sticking
+[+205.4s] PASS TV projection leak-free while charades playing — no forbidden keys
+[+215.1s] OK charades: finished
+[+215.1s] PASS day playlist: charades finished without sticking
+[+216.3s] PASS TV projection leak-free while geography playing — no forbidden keys
+[+250.6s] OK geography: finished
+[+250.6s] PASS day playlist: geography finished without sticking
+[+252.2s] PASS TV projection leak-free while math-mayhem playing — no forbidden keys
+[+294.4s] OK math-mayhem: finished
+[+294.4s] PASS day playlist: math-mayhem finished without sticking
+[+295.7s] PASS TV projection leak-free while majority-rules playing — no forbidden keys
+[+358.9s] OK majority-rules: finished
+[+358.9s] PASS day playlist: majority-rules finished without sticking
+[+360.2s] PASS TV projection leak-free while pattern-pulse playing — no forbidden keys
+[+407.7s] OK pattern-pulse: finished
+[+407.7s] PASS day playlist: pattern-pulse finished without sticking
+[+409.0s] PASS TV projection leak-free while draw-guess playing — no forbidden keys
+[+450.9s] OK draw-guess: finished
+[+450.9s] PASS day playlist: draw-guess finished without sticking
+[+450.9s] PASS day playlist: all games finished in one room — 14/14 finished
+[+450.9s] PASS ledger holds one game-finished event per playlist game — 14/14 finish events
+[+450.9s] PASS TV projection marks every playlist game finished — all finished
+[+452.9s] PASS championship standings list all 4 players after full day
+[+452.9s] PASS championship per-game breakdown present after full day
+[+454.4s] PASS TV shows the 5 most recent finished games — all 5 listed
+[+456.8s] PASS Memory Book export contains the full-day entry
+[+456.9s] F5 ALL PASSED (36/36)
+[+456.9s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# PASS (exit 0) in 456.9s | cpu 26.4s, peak memory 285 MB

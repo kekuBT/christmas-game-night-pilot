@@ -4,7 +4,9 @@
 //     answers 1 of 3 and returns silently; the new helper answers all 3;
 //   - an app that never confirms an answer: the new helper throws, naming
 //     the player, the question and the state it was stuck in;
-//   - a normal flow ends on the waiting ring with every question answered.
+//   - a normal flow ends on the waiting ring with every question answered;
+//   - Beta R1-R (R5): the last answer goes straight to "All your answers are
+//     in"; a locked view with no Next question fails loudly.
 // Needs a browser but no server (the base URL argument is ignored).
 import { launchChromium } from "./lib/driver-env.mjs";
 import { AnswerStuckError, answerKitQuestions } from "./lib/answer.mjs";
@@ -15,17 +17,19 @@ function check(name, ok, detail = "") {
   if (!ok) failures++;
 }
 
-/** A tiny stand-in for the kit's question flow. confirmMs < 0 = never confirms. */
-const fakeApp = (confirmMs, count = 3) => `<!doctype html><body><div id="app"></div><script>
+/** A tiny stand-in for the kit's question flow. confirmMs < 0 = never confirms. brokenFinal = the old final keycap-less locked view. */
+const fakeApp = (confirmMs, count = 3, brokenFinal = false) => `<!doctype html><body><div id="app"></div><script>
   let q = 1; const answers = [];
   const render = (html) => { document.getElementById("app").innerHTML = html; };
   const question = () => render('<main class="mz-screen" aria-label="Question ' + q + ' of ${count}">' +
     [0,1,2,3].map(i => '<button class="mz-slab" onclick="tap(' + i + ')">Option ' + i + '</button>').join("") + '</main>');
-  const locked = () => render('<main class="mz-screen" aria-label="Answer locked in"><button onclick="next()">' + (answers.length < ${count} ? 'Next question' : 'Waiting for the game to finish') + '</button></main>');
+  const locked = () => render('<main class="mz-screen" aria-label="Answer locked in"><button onclick="next()">Next question</button></main>');
+  const lockedNoNext = () => render('<main class="mz-screen" aria-label="Answer locked in"><p>Locked in</p></main>');
   // Uppercased by CSS like the real kit kicker (innerText returns "ALL YOUR ANSWERS ARE IN").
-  const waiting = () => render('<main class="mz-screen" aria-label="Waiting"><p style="text-transform:uppercase">All your answers are in</p></main>');
-  window.tap = (i) => { if (${confirmMs} < 0) return; setTimeout(() => { answers.push(i); locked(); }, ${confirmMs}); };
-  window.next = () => { if (answers.length >= ${count}) return waiting(); q++; question(); };
+  // R5: the app shows this straight after the last answer (no continuation control).
+  const waiting = () => render('<main class="mz-screen" aria-label="All your answers are in"><p style="text-transform:uppercase">All your answers are in</p></main>');
+  window.tap = (i) => { if (${confirmMs} < 0) return; setTimeout(() => { answers.push(i); if (answers.length < ${count}) locked(); else if (${brokenFinal}) lockedNoNext(); else waiting(); }, ${confirmMs}); };
+  window.next = () => { q++; question(); };
   window.answered = () => answers.length;
   question();
 </script></body>`;
@@ -70,6 +74,11 @@ try {
   const m = await answerKitQuestions(page, { player: "Dee", choose: (q) => q % 4 });
   const ended = await page.evaluate(() => /all your answers are in/i.test(document.body.innerText));
   check("a normal flow answers all questions and ends on the waiting ring", m === 3 && ended);
+
+  await fresh(fakeApp(50, 3, true));
+  let err2 = null;
+  try { await answerKitQuestions(page, { player: "Fay", choose: () => 0, timeout: 1500 }); } catch (e) { err2 = e; }
+  check("a locked view with no Next question fails loudly (R5)", err2 instanceof AnswerStuckError && /Fay: the locked view has no Next question/.test(err2.message), String(err2?.message ?? "no error").split("\n")[0]);
 
   await fresh(fakeApp(50, 5));
   const partial = await answerKitQuestions(page, { player: "Eli", choose: () => 2, limit: 2 });

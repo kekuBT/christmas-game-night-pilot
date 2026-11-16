@@ -1,0 +1,19 @@
+// Review 6900450343 R1 on the repaired lock: the same moment as repro-lock-interleave.mts (A owns the directory but its
+// record is still empty), replayed through the real lock: A acquires, its record is emptied to the state "bound, pid
+// not written yet", and B tries. Usage: npx tsx repro-lock-interleave-repaired.mts <worktree>
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+const wt = process.argv[2]!;
+const { DataDirLock } = await import(join(wt, "src/server/datalock.ts"));
+const d = mkdtempSync(join(tmpdir(), "mz-lock-interleave-"));
+const a = new DataDirLock(d, "server");
+await a.acquire();
+writeFileSync(a.path, "");
+console.log("A: holds the directory; its record is empty (pid not written yet)");
+let bHolds = false;
+try { await new DataDirLock(d, "server").acquire(); bHolds = true; console.log("B: acquired"); }
+catch (e) { console.log(`B: refused: ${(e as Error).message}`); }
+console.log(`server.lock now: ${JSON.stringify(readFileSync(a.path, "utf8"))}`);
+console.log(bHolds ? "RESULT: BOTH A AND B HOLD THE DATA DIRECTORY" : "RESULT: only A holds the data directory");
+await a.release();

@@ -1,0 +1,61 @@
+// Beta R2: check the release docs' links and named paths against the repository tree.
+//   node check-doc-links.mjs <repo root> <doc.md>...
+// - every relative Markdown link [x](path[#anchor]) resolves to a file or folder, and its anchor to a heading (GitHub slugs);
+// - every in-page anchor [x](#anchor) resolves to a heading in the same file;
+// - every backticked repository path (docs/, scripts/, src/, apps/, content/, tests/, .github/) without a placeholder exists.
+// External links (http, https, mailto) are listed, not fetched.
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { dirname, join, relative, resolve } from "node:path";
+
+const [root, ...docs] = process.argv.slice(2);
+let failures = 0, checked = 0;
+// Paths the docs name on purpose although they don't exist yet (each doc says so where it names them).
+const INTENTIONALLY_ABSENT = new Map([["content/approvals.json", "written by npm run content:approve; no item is approved yet"]]);
+const external = new Set();
+const fail = (msg) => { console.log(`FAIL ${msg}`); failures++; };
+const slug = (h) => h.trim().toLowerCase().replace(/<[^>]+>/g, "").replace(/[`*_~]/g, "").replace(/[^\p{L}\p{N}\s-]/gu, "").replace(/\s/g, "-");
+const anchorsOf = (file) => {
+  const seen = new Map(), out = new Set();
+  let fence = false;
+  for (const line of readFileSync(file, "utf8").split("\n")) {
+    if (/^\s*```/.test(line)) { fence = !fence; continue; }
+    const m = !fence && /^(#{1,6})\s+(.*)$/.exec(line);
+    if (!m) continue;
+    const base = slug(m[2].replace(/\[([^\]]*)\]\([^)]*\)/g, "$1"));
+    const n = seen.get(base) ?? 0; seen.set(base, n + 1);
+    out.add(n ? `${base}-${n}` : base);
+  }
+  return out;
+};
+for (const doc of docs) {
+  const file = resolve(root, doc);
+  const text = readFileSync(file, "utf8");
+  let fence = false;
+  const lines = text.split("\n");
+  lines.forEach((line, i) => {
+    if (/^\s*```/.test(line)) { fence = !fence; return; }
+    if (fence) return;
+    const where = `${doc}:${i + 1}`;
+    for (const m of line.matchAll(/\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)) {
+      const target = m[1];
+      if (/^(https?:|mailto:)/.test(target)) { external.add(target); continue; }
+      checked++;
+      const [p, anchor] = target.split("#");
+      const dest = p ? resolve(dirname(file), decodeURIComponent(p)) : file;
+      if (!existsSync(dest)) { fail(`${where} link to a missing path: ${target}`); continue; }
+      if (anchor && statSync(dest).isFile() && dest.endsWith(".md") && !anchorsOf(dest).has(anchor)) fail(`${where} link to a missing heading: ${target}`);
+    }
+    for (const m of line.matchAll(/`((?:docs|scripts|src|apps|content|tests|\.github)\/[^`\s]*)`/g)) {
+      const p = m[1];
+      if (/[<>*{}]|\.\.\.|…/.test(p)) continue; // a placeholder or a pattern
+      checked++;
+      const clean = p.replace(/[),.;:]+$/, "");
+      if (INTENTIONALLY_ABSENT.has(clean)) { if (existsSync(join(root, clean))) fail(`${where} ${clean} now exists: drop it from INTENTIONALLY_ABSENT`); continue; }
+      if (!existsSync(join(root, clean))) fail(`${where} names a missing repository path: ${p}`);
+    }
+  });
+}
+console.log(`checked ${checked} links and paths in ${docs.length} file(s); ${external.size} external link(s) listed, not fetched`);
+for (const e of [...external].sort()) console.log(`  external: ${e}`);
+console.log(failures ? `DOC LINKS FAILED (${failures})` : "DOC LINKS PASSED");
+process.exit(failures ? 1 : 0);

@@ -1,0 +1,93 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ❯ tests/beta-r1r-zod.test.ts (7 tests | 4 failed) 983ms
+   × the zod collections network input reaches (GHSA-mrhx-c7xc-m3w5) > no network-facing schema has a collection zod would walk in full, issue by issue, before a limit applies 11ms
+     → expected [ …(2) ] to deeply equal []
+   × an over-long array is refused before any element is read > Family Questions: 32,000 options of the wrong type → one too_big issue, no element read 58ms
+     → expected 32000 to be +0 // Object.is equality
+   × an over-long array is refused before any element is read > Quick Party: 32,000 lineup items of the wrong type → refused, no element read, a handful of issues 50ms
+     → expected 32000 to be +0 // Object.is equality
+   × an over-long array is refused before any element is read > the worst bodies that fit the 64 KiB cap now build one or a few issues, not 32,000 49ms
+     → expected 32748 to be less than or equal to 4
+   ✓ compatibility: the same answers as before on everything else > Quick Party: 4,000 generated bodies around the limits get the same verdict and the same parsed value 425ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/beta-r1r-zod.test.ts > the zod collections network input reaches (GHSA-mrhx-c7xc-m3w5) > no network-facing schema has a collection zod would walk in full, issue by issue, before a limit applies
+AssertionError: expected [ …(2) ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   "FamilyQuestionSchema.options (array)",
++   "PartyBodySchema|0.plan.items (array)",
++ ]
+
+ ❯ tests/beta-r1r-zod.test.ts:58:85
+     56|   it("no network-facing schema has a collection zod would walk in full…
+     57|     const found = Object.entries(NETWORK_SCHEMAS).flatMap(([name, s]) …
+     58|     expect(found.filter((c) => c.walkedInFull).map((c) => `${c.path} (…
+       |                                                                                     ^
+     59|     // The inventory itself (docs/beta/beta-r1-blockers.md D-2): a new…
+     60|     expect(found.map((c) => `${c.path} ${c.kind}`).sort()).toEqual([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/beta-r1r-zod.test.ts > an over-long array is refused before any element is read > Family Questions: 32,000 options of the wrong type → one too_big issue, no element read
+AssertionError: expected 32000 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 32000
+
+ ❯ tests/beta-r1r-zod.test.ts:82:23
+     80|     const r = LocalServer.FamilyQuestionSchema.safeParse({ kind: "choi…
+     81|     expect(r.success).toBe(false);
+     82|     expect(a.reads()).toBe(0);
+       |                       ^
+     83|     expect(r.error!.issues).toMatchObject([{ code: "too_big", path: ["…
+     84|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/beta-r1r-zod.test.ts > an over-long array is refused before any element is read > Quick Party: 32,000 lineup items of the wrong type → refused, no element read, a handful of issues
+AssertionError: expected 32000 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 32000
+
+ ❯ tests/beta-r1r-zod.test.ts:89:23
+     87|     const r = LocalServer.PartyBodySchema.safeParse({ baseRevision: 0,…
+     88|     expect(r.success).toBe(false);
+     89|     expect(a.reads()).toBe(0);
+       |                       ^
+     90|     const issues = allIssues(r.error!);
+     91|     expect(issues.length).toBeLessThanOrEqual(4);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/beta-r1r-zod.test.ts > an over-long array is refused before any element is read > the worst bodies that fit the 64 KiB cap now build one or a few issues, not 32,000
+AssertionError: expected 32748 to be less than or equal to 4
+ ❯ tests/beta-r1r-zod.test.ts:106:42
+    104|       const r = schema.safeParse(JSON.parse(body));
+    105|       expect(r.success).toBe(false);
+    106|       expect(allIssues(r.error!).length).toBeLessThanOrEqual(4);
+       |                                          ^
+    107|     }
+    108|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 3 passed (7)
+   Start at  23:31:30
+   Duration  2.24s (transform 724ms, setup 0ms, collect 952ms, tests 983ms, environment 0ms, prepare 61ms)
+

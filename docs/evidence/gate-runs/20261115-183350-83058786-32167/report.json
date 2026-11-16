@@ -1,0 +1,1813 @@
+{
+  "runId": "20261115-183350-83058786-32167",
+  "level": "full",
+  "startedAt": "2026-11-15T18:33:50.629Z",
+  "finishedAt": "2026-11-15T18:37:43.968Z",
+  "exitCode": 130,
+  "verdict": "CANCELLED",
+  "repo": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3",
+  "git": {
+    "head": "830587860e461d8a6d94c92ba33befd672a21f11",
+    "branch": "HEAD",
+    "dirty": []
+  },
+  "fingerprint": {
+    "hash": "c6ac64941f931c4745da32d3c671a89e83671a849c754639d48eeeb2549b25d6",
+    "files": 622
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "machine": {
+    "cpus": 4,
+    "memAvailMB": 15405
+  },
+  "workers": 3,
+  "workersWhy": "auto: 4 CPUs, 15.0 GB available",
+  "browser": {
+    "version": "153.0.8010.12",
+    "executable": "/opt/pw-browsers/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell",
+    "source": "MCHEZO_CHROMIUM_PATH",
+    "build": "chrome-headless-shell"
+  },
+  "steps": [
+    {
+      "name": "typecheck-server",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 8.2,
+      "log": "./logs/01-typecheck-server.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 13,
+      "startOffsetSec": 0.3,
+      "endOffsetSec": 8.4,
+      "cpuSec": 17.1,
+      "peakRssMB": 603,
+      "machine": {
+        "memAvailMinMB": 14808,
+        "cpuSaturatedSec": 0,
+        "samples": 9
+      },
+      "failureKind": null
+    },
+    {
+      "name": "typecheck-web",
+      "kind": "check",
+      "command": "node ./node_modules/typescript/bin/tsc -p apps/web/tsconfig.json --noEmit",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 13.3,
+      "log": "./logs/02-typecheck-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 13,
+      "startOffsetSec": 8.4,
+      "endOffsetSec": 21.7,
+      "cpuSec": 16.8,
+      "peakRssMB": 468,
+      "machine": {
+        "memAvailMinMB": 13873,
+        "cpuSaturatedSec": 0,
+        "samples": 14
+      },
+      "failureKind": null
+    },
+    {
+      "name": "lint",
+      "kind": "check",
+      "command": "node ./node_modules/eslint/bin/eslint.js .",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 18.7,
+      "log": "./logs/03-lint.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 20,
+      "startOffsetSec": 10.4,
+      "endOffsetSec": 29.1,
+      "cpuSec": 23.8,
+      "peakRssMB": 710,
+      "machine": {
+        "memAvailMinMB": 13873,
+        "cpuSaturatedSec": 0,
+        "samples": 20
+      },
+      "failureKind": null
+    },
+    {
+      "name": "unit-tests",
+      "kind": "check",
+      "command": "node ./node_modules/vitest/vitest.mjs run",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 57.8,
+      "log": "./logs/04-unit-tests.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 53,
+      "startOffsetSec": 10.4,
+      "endOffsetSec": 68.2,
+      "cpuSec": 68.3,
+      "peakRssMB": 722,
+      "machine": {
+        "memAvailMinMB": 13873,
+        "cpuSaturatedSec": 0,
+        "samples": 60
+      },
+      "failureKind": null
+    },
+    {
+      "name": "build-web",
+      "kind": "check",
+      "command": "node ./node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts --outDir ./test-results/20261115-183350-83058786-32167/web-dist --emptyOutDir --logLevel warn",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 5.1,
+      "log": "./logs/05-build-web.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 7,
+      "startOffsetSec": 68.2,
+      "endOffsetSec": 73.4,
+      "cpuSec": 9.2,
+      "peakRssMB": 468,
+      "machine": {
+        "memAvailMinMB": 14854,
+        "cpuSaturatedSec": 0,
+        "samples": 7
+      },
+      "failureKind": null
+    },
+    {
+      "name": "browser-preflight",
+      "kind": "infra",
+      "command": "node --input-type=module -e const m = await import('./scripts/lib/driver-env.mjs'); const exe = m.chromiumExecutable(); const b = await m.launchChromium(); console.log(JSON.stringify({ version: b.version(), executable: exe.path, source: exe.source })); await b.close();",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationSec": 0.6,
+      "log": "./logs/06-browser-preflight.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 1,
+      "startOffsetSec": 73.4,
+      "endOffsetSec": 74,
+      "machine": {
+        "memAvailMinMB": 15036,
+        "cpuSaturatedSec": 0,
+        "samples": 1
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 0,
+        "pages": 0,
+        "peakOpenPages": 0
+      },
+      "failureKind": null
+    },
+    {
+      "name": "e2e-chromium",
+      "kind": "browser",
+      "command": "node scripts/e2e-browser.mjs http://localhost:43915 --browser=chromium --games=all",
+      "status": "CANCELLED",
+      "exitCode": 1,
+      "durationSec": 158.5,
+      "log": "./logs/07-e2e-chromium.log",
+      "detail": "",
+      "worker": 1,
+      "estSec": 471,
+      "startOffsetSec": 74.6,
+      "endOffsetSec": 233,
+      "cpuSec": 4.9,
+      "peakRssMB": 275,
+      "roomsOnGateServer": 1,
+      "diag": [
+        "[chromium]   DIAG player=Alex game=impostor(game-1) server=finished phase=- deadlineIn=253s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Lobby\" clock=\"\" | type=server-ended-client-behind",
+        "[chromium]   DIAG player=Sam game=impostor(game-1) server=finished phase=- deadlineIn=253s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Mchezo Code: 6AZNL8 Playing as Sam · Room: Game night Lobby & Games Championship\" clock=\"\" shownOutcome=completed | type=finished-and-shown",
+        "[chromium]   DIAG player=Jo game=impostor(game-1) server=finished phase=- deadlineIn=253s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Mchezo Code: 6AZNL8 Playing as Jo · Room: Game night Lobby & Games Championship \" clock=\"\" shownOutcome=completed | type=finished-and-shown",
+        "[chromium]   DIAG player=Kim game=impostor(game-1) server=finished phase=- deadlineIn=253s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Mchezo Code: 6AZNL8 Playing as Kim · Room: Game night Lobby & Games Championship\" clock=\"\" shownOutcome=completed | type=finished-and-shown",
+        "[chromium]   DIAG player=Alex game=impostor(game-1) server=finished phase=- deadlineIn=223s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Lobby\" clock=\"\" | type=server-ended-client-behind",
+        "[chromium]   DIAG player=Sam game=impostor(game-1) server=finished phase=- deadlineIn=223s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Mchezo Code: 6AZNL8 Playing as Sam · Room: Game night Lobby & Games Championship\" clock=\"\" shownOutcome=completed | type=finished-and-shown"
+      ],
+      "machine": {
+        "memAvailMinMB": 13740,
+        "cpuSaturatedSec": 0,
+        "samples": 162
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 4,
+        "pages": 4,
+        "peakOpenPages": 4
+      },
+      "failureKind": "cancelled"
+    },
+    {
+      "name": "check-f5",
+      "kind": "browser",
+      "command": "node scripts/check-f5.mjs http://localhost:35725",
+      "status": "FAIL",
+      "exitCode": 1,
+      "durationSec": 83,
+      "log": "./logs/08-check-f5.log",
+      "detail": "FAIL caption-clash: locator.click: Timeout 30000ms exceeded. | FAIL day playlist: caption-clash finished without sticking — locator.click: Timeout 30000ms exceeded. | FAIL day playlist: all games finished in one room — 1/14 finished | FAIL ledger holds one game-finished event per playlist game — 1/14 finish events | FAIL TV projection marks every playlist game finished — caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess | FAIL championship standings list all 4 players after full day",
+      "worker": 2,
+      "estSec": 428,
+      "startOffsetSec": 100.6,
+      "endOffsetSec": 183.6,
+      "cpuSec": 3.9,
+      "peakRssMB": 275,
+      "roomsOnGateServer": 1,
+      "diag": [
+        "DIAG player=Alex game=impostor(game-1) server=finished phase=- deadlineIn=256s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Lobby\" clock=\"\" | type=server-ended-client-behind",
+        "DIAG player=Sam game=impostor(game-1) server=finished phase=- deadlineIn=256s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Mchezo Code: 6YBMJZ Playing as Sam · Room: Game night Lobby & Games Championship\" clock=\"\" shownOutcome=completed | type=finished-and-shown",
+        "DIAG player=Jo game=impostor(game-1) server=finished phase=- deadlineIn=256s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Mchezo Code: 6YBMJZ Playing as Jo · Room: Game night Lobby & Games Championship \" clock=\"\" shownOutcome=completed | type=finished-and-shown",
+        "DIAG player=Kim game=impostor(game-1) server=finished phase=- deadlineIn=256s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen=\"Mchezo Code: 6YBMJZ Playing as Kim · Room: Game night Lobby & Games Championship\" clock=\"\" shownOutcome=completed | type=finished-and-shown"
+      ],
+      "machine": {
+        "memAvailMinMB": 13740,
+        "cpuSaturatedSec": 0,
+        "samples": 84
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 4,
+        "pages": 4,
+        "peakOpenPages": 4
+      },
+      "failureKind": "functional"
+    },
+    {
+      "name": "check-leaderboard",
+      "kind": "browser",
+      "command": "node scripts/check-leaderboard.mjs http://localhost:44105",
+      "status": "CANCELLED",
+      "exitCode": 1,
+      "durationSec": 132.3,
+      "log": "./logs/09-check-leaderboard.log",
+      "detail": "",
+      "worker": 3,
+      "estSec": 374,
+      "startOffsetSec": 100.6,
+      "endOffsetSec": 232.9,
+      "cpuSec": 8.8,
+      "peakRssMB": 267,
+      "roomsOnGateServer": 1,
+      "machine": {
+        "memAvailMinMB": 13740,
+        "cpuSaturatedSec": 0,
+        "samples": 134
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 2,
+        "pages": 5,
+        "peakOpenPages": 5
+      },
+      "failureKind": "cancelled"
+    },
+    {
+      "name": "check-game-night",
+      "kind": "browser",
+      "command": "node scripts/check-game-night.mjs http://localhost:35725",
+      "status": "CANCELLED",
+      "exitCode": 1,
+      "durationSec": 49.4,
+      "log": "./logs/10-check-game-night.log",
+      "detail": "",
+      "worker": 2,
+      "estSec": 303,
+      "startOffsetSec": 183.7,
+      "endOffsetSec": 233,
+      "cpuSec": 5.4,
+      "peakRssMB": 271,
+      "roomsOnGateServer": 1,
+      "diag": [
+        "DIAG player=Cal server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen=\"(page unavailable: page.evaluate: Target page, context or browser has been closed)\" clock=\"\" | type=server-unreachable"
+      ],
+      "machine": {
+        "memAvailMinMB": 13971,
+        "cpuSaturatedSec": 0,
+        "samples": 51
+      },
+      "browserUse": {
+        "browsers": 1,
+        "contexts": 1,
+        "pages": 7,
+        "peakOpenPages": 7
+      },
+      "failureKind": "cancelled"
+    }
+  ],
+  "notRun": [
+    {
+      "name": "check-audit-fixes",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-mobile-everyday",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-session-flow",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-solo-shelf",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-pulse-timing",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-lifecycle",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-solo",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-cup-team-games",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tug-of-war",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-jebena-rush",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-lifecycle",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-install",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-mchezo",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-spectrum",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-split-clues",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-caption",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-themes-seasonal",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-split-clues-content",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-briefing",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-territory",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-reveal",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-know-your-rivals",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-draw-guess",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-book-live",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-content-variety",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-warm-ivory",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-stage2",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-math",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-pattern-pulse",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-majority-rules",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-team-draw",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-spectator",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-host-handover",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-connections",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-team-huddle",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-casual",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-draw-sync",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-family-questions",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-f4",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-math-network",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-results",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-reveal",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-quick-party",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-input-isolation",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-multiplayer",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-spectator",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-one-path",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-outage",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-caption-4p",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-install-builds",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-geography",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-cup-party",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-answer-reveal",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-ten-players",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-mobile",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-action-ack",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-math-timing",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-contrast",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-library-nav",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-m6",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-answer-race",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-relay",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-entry",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-poll-body-stall",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-send-failures",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-lobby-mode",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-moments",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-start-helper",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-year",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-readiness",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-abstain",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-lobby-fixes",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-stage4-details",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-release-package",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-viewports",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-cup-memory",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-show",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-recovery",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-teams",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-official-practice",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-sessions",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-game-night-flow",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-progress",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-answer-helper",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-night-card",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-closest",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-content-look",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-ws-reconnect",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-library",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-reduced-motion",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-shuffle",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-errors",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-tv-dashboard",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-history-links",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-studio",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-double-start",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-beta-gate",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-a11y-surfaces",
+      "reason": "run cancelled"
+    },
+    {
+      "name": "check-restart",
+      "reason": "run cancelled"
+    }
+  ],
+  "notes": [],
+  "servers": [
+    {
+      "worker": "w1",
+      "port": 43915,
+      "pid": 3772,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/test-results/20261115-183350-83058786-32167/server-data/w1",
+      "log": "./logs/server-w1.log"
+    },
+    {
+      "worker": "w2",
+      "port": 35725,
+      "pid": 3773,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/test-results/20261115-183350-83058786-32167/server-data/w2",
+      "log": "./logs/server-w2.log"
+    },
+    {
+      "worker": "w3",
+      "port": 44105,
+      "pid": 3774,
+      "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/test-results/20261115-183350-83058786-32167/server-data/w3",
+      "log": "./logs/server-w3.log"
+    }
+  ],
+  "timing": {
+    "wallSec": 233,
+    "sumSec": 527,
+    "utilisation": 0.75,
+    "perWorkerBusySec": {
+      "w1": 186,
+      "w2": 151,
+      "w3": 190
+    },
+    "predicted": null,
+    "contentionRatio": 0.921,
+    "longest": [
+      {
+        "name": "e2e-chromium",
+        "sec": 158.5
+      },
+      {
+        "name": "check-leaderboard",
+        "sec": 132.3
+      },
+      {
+        "name": "check-f5",
+        "sec": 83
+      },
+      {
+        "name": "unit-tests",
+        "sec": 57.8
+      },
+      {
+        "name": "check-game-night",
+        "sec": 49.4
+      }
+    ],
+    "backpressure": {
+      "waits": 4,
+      "seconds": 83
+    },
+    "system": {
+      "cpuPctMean": 40,
+      "cpuPctPeak": 98,
+      "memAvailMinMB": 13740,
+      "load1Peak": 6.3,
+      "cpuPctEvery10s": [
+        62,
+        93,
+        87,
+        81,
+        65,
+        92,
+        86,
+        97,
+        8,
+        6,
+        57,
+        18,
+        18,
+        23,
+        11,
+        13,
+        10,
+        13,
+        32,
+        35,
+        20,
+        13,
+        18,
+        37
+      ]
+    },
+    "serverUse": [
+      {
+        "worker": "w1",
+        "cpuSec": 1.4,
+        "peakRssMB": 111
+      },
+      {
+        "worker": "w2",
+        "cpuSec": 1.7,
+        "peakRssMB": 99
+      },
+      {
+        "worker": "w3",
+        "cpuSec": 2.1,
+        "peakRssMB": 94
+      }
+    ],
+    "historicalSequentialWallSec": 4669
+  },
+  "plan": {
+    "steps": [
+      {
+        "index": 1,
+        "name": "typecheck-server",
+        "phase": "fast",
+        "estSec": 13,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 2,
+        "name": "typecheck-web",
+        "phase": "fast",
+        "estSec": 13,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 3,
+        "name": "lint",
+        "phase": "fast",
+        "estSec": 20,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 4,
+        "name": "unit-tests",
+        "phase": "fast",
+        "estSec": 53,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 5,
+        "name": "build-web",
+        "phase": "build",
+        "estSec": 7,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 6,
+        "name": "browser-preflight",
+        "phase": "browser",
+        "estSec": 1,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 7,
+        "name": "e2e-chromium",
+        "phase": "browser",
+        "estSec": 471,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 8,
+        "name": "check-f5",
+        "phase": "browser",
+        "estSec": 428,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 9,
+        "name": "check-leaderboard",
+        "phase": "browser",
+        "estSec": 374,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 10,
+        "name": "check-game-night",
+        "phase": "browser",
+        "estSec": 303,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 11,
+        "name": "check-audit-fixes",
+        "phase": "browser",
+        "estSec": 219,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 12,
+        "name": "check-mobile-everyday",
+        "phase": "browser",
+        "estSec": 176,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 13,
+        "name": "check-session-flow",
+        "phase": "browser",
+        "estSec": 173,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 14,
+        "name": "check-solo-shelf",
+        "phase": "browser",
+        "estSec": 161,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 15,
+        "name": "check-pulse-timing",
+        "phase": "browser",
+        "estSec": 151,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 16,
+        "name": "check-tv-lifecycle",
+        "phase": "browser",
+        "estSec": 143,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 17,
+        "name": "check-solo",
+        "phase": "browser",
+        "estSec": 142,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 18,
+        "name": "check-cup-team-games",
+        "phase": "browser",
+        "estSec": 138,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 19,
+        "name": "check-tug-of-war",
+        "phase": "browser",
+        "estSec": 135,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 20,
+        "name": "check-jebena-rush",
+        "phase": "browser",
+        "estSec": 122,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 21,
+        "name": "check-lifecycle",
+        "phase": "browser",
+        "estSec": 121,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 22,
+        "name": "check-install",
+        "phase": "browser",
+        "estSec": 121,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 23,
+        "name": "check-mchezo",
+        "phase": "browser",
+        "estSec": 111,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 24,
+        "name": "check-spectrum",
+        "phase": "browser",
+        "estSec": 108,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 25,
+        "name": "check-split-clues",
+        "phase": "browser",
+        "estSec": 103,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 26,
+        "name": "check-caption",
+        "phase": "browser",
+        "estSec": 102,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 27,
+        "name": "check-themes-seasonal",
+        "phase": "browser",
+        "estSec": 100,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 28,
+        "name": "check-split-clues-content",
+        "phase": "browser",
+        "estSec": 90,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 29,
+        "name": "check-briefing",
+        "phase": "browser",
+        "estSec": 89,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 30,
+        "name": "check-territory",
+        "phase": "browser",
+        "estSec": 84,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 31,
+        "name": "check-tv-reveal",
+        "phase": "browser",
+        "estSec": 81,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 32,
+        "name": "check-know-your-rivals",
+        "phase": "browser",
+        "estSec": 72,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 33,
+        "name": "check-draw-guess",
+        "phase": "browser",
+        "estSec": 65,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 34,
+        "name": "check-book-live",
+        "phase": "browser",
+        "estSec": 64,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 35,
+        "name": "check-content-variety",
+        "phase": "browser",
+        "estSec": 64,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 36,
+        "name": "check-warm-ivory",
+        "phase": "browser",
+        "estSec": 64,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 37,
+        "name": "check-stage2",
+        "phase": "browser",
+        "estSec": 60,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 38,
+        "name": "check-math",
+        "phase": "browser",
+        "estSec": 57,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 39,
+        "name": "check-pattern-pulse",
+        "phase": "browser",
+        "estSec": 57,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 40,
+        "name": "check-majority-rules",
+        "phase": "browser",
+        "estSec": 56,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 41,
+        "name": "check-team-draw",
+        "phase": "browser",
+        "estSec": 56,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 42,
+        "name": "check-spectator",
+        "phase": "browser",
+        "estSec": 55,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 43,
+        "name": "check-host-handover",
+        "phase": "browser",
+        "estSec": 55,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 44,
+        "name": "check-connections",
+        "phase": "browser",
+        "estSec": 54,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 45,
+        "name": "check-team-huddle",
+        "phase": "browser",
+        "estSec": 52,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 46,
+        "name": "check-casual",
+        "phase": "browser",
+        "estSec": 52,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 47,
+        "name": "check-draw-sync",
+        "phase": "browser",
+        "estSec": 51,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 48,
+        "name": "check-family-questions",
+        "phase": "browser",
+        "estSec": 50,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 49,
+        "name": "check-f4",
+        "phase": "browser",
+        "estSec": 50,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 50,
+        "name": "check-math-network",
+        "phase": "browser",
+        "estSec": 49,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 51,
+        "name": "check-results",
+        "phase": "browser",
+        "estSec": 49,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 52,
+        "name": "check-reveal",
+        "phase": "browser",
+        "estSec": 47,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 53,
+        "name": "check-quick-party",
+        "phase": "browser",
+        "estSec": 46,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 54,
+        "name": "check-input-isolation",
+        "phase": "browser",
+        "estSec": 46,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 55,
+        "name": "check-multiplayer",
+        "phase": "browser",
+        "estSec": 46,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 56,
+        "name": "check-tv-spectator",
+        "phase": "browser",
+        "estSec": 44,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 57,
+        "name": "check-one-path",
+        "phase": "browser",
+        "estSec": 39,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 58,
+        "name": "check-tv-outage",
+        "phase": "browser",
+        "estSec": 39,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 59,
+        "name": "check-caption-4p",
+        "phase": "browser",
+        "estSec": 38,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 60,
+        "name": "check-install-builds",
+        "phase": "browser",
+        "estSec": 36,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 61,
+        "name": "check-geography",
+        "phase": "browser",
+        "estSec": 36,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 62,
+        "name": "check-cup-party",
+        "phase": "browser",
+        "estSec": 32,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 63,
+        "name": "check-answer-reveal",
+        "phase": "browser",
+        "estSec": 32,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 64,
+        "name": "check-ten-players",
+        "phase": "browser",
+        "estSec": 29,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 65,
+        "name": "check-mobile",
+        "phase": "browser",
+        "estSec": 28,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 66,
+        "name": "check-action-ack",
+        "phase": "browser",
+        "estSec": 27,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 67,
+        "name": "check-math-timing",
+        "phase": "browser",
+        "estSec": 26,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 68,
+        "name": "check-contrast",
+        "phase": "browser",
+        "estSec": 26,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 69,
+        "name": "check-library-nav",
+        "phase": "browser",
+        "estSec": 25,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 70,
+        "name": "check-m6",
+        "phase": "browser",
+        "estSec": 24,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 71,
+        "name": "check-answer-race",
+        "phase": "browser",
+        "estSec": 24,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 72,
+        "name": "check-relay",
+        "phase": "browser",
+        "estSec": 24,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 73,
+        "name": "check-tv-entry",
+        "phase": "browser",
+        "estSec": 22,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 74,
+        "name": "check-poll-body-stall",
+        "phase": "browser",
+        "estSec": 21,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 75,
+        "name": "check-send-failures",
+        "phase": "browser",
+        "estSec": 21,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 76,
+        "name": "check-lobby-mode",
+        "phase": "browser",
+        "estSec": 20,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 77,
+        "name": "check-tv-moments",
+        "phase": "browser",
+        "estSec": 20,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 78,
+        "name": "check-start-helper",
+        "phase": "browser",
+        "estSec": 19,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 79,
+        "name": "check-year",
+        "phase": "browser",
+        "estSec": 19,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 80,
+        "name": "check-readiness",
+        "phase": "browser",
+        "estSec": 19,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 81,
+        "name": "check-abstain",
+        "phase": "browser",
+        "estSec": 18,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 82,
+        "name": "check-lobby-fixes",
+        "phase": "browser",
+        "estSec": 17,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 83,
+        "name": "check-stage4-details",
+        "phase": "browser",
+        "estSec": 16,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 84,
+        "name": "check-release-package",
+        "phase": "browser",
+        "estSec": 15,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 85,
+        "name": "check-viewports",
+        "phase": "browser",
+        "estSec": 15,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 86,
+        "name": "check-cup-memory",
+        "phase": "browser",
+        "estSec": 14,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 87,
+        "name": "check-tv-show",
+        "phase": "browser",
+        "estSec": 13,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 88,
+        "name": "check-recovery",
+        "phase": "browser",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 89,
+        "name": "check-teams",
+        "phase": "browser",
+        "estSec": 12,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 90,
+        "name": "check-official-practice",
+        "phase": "browser",
+        "estSec": 11,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 91,
+        "name": "check-sessions",
+        "phase": "browser",
+        "estSec": 10,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 92,
+        "name": "check-game-night-flow",
+        "phase": "browser",
+        "estSec": 9,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 93,
+        "name": "check-progress",
+        "phase": "browser",
+        "estSec": 9,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 94,
+        "name": "check-answer-helper",
+        "phase": "browser",
+        "estSec": 9,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 95,
+        "name": "check-night-card",
+        "phase": "browser",
+        "estSec": 8,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 96,
+        "name": "check-closest",
+        "phase": "browser",
+        "estSec": 8,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 97,
+        "name": "check-content-look",
+        "phase": "browser",
+        "estSec": 7,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 98,
+        "name": "check-ws-reconnect",
+        "phase": "browser",
+        "estSec": 6,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 99,
+        "name": "check-library",
+        "phase": "browser",
+        "estSec": 6,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 100,
+        "name": "check-reduced-motion",
+        "phase": "browser",
+        "estSec": 6,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 101,
+        "name": "check-shuffle",
+        "phase": "browser",
+        "estSec": 6,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 102,
+        "name": "check-errors",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 103,
+        "name": "check-tv-dashboard",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 104,
+        "name": "check-history-links",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 105,
+        "name": "check-studio",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 106,
+        "name": "check-double-start",
+        "phase": "browser",
+        "estSec": 5,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 107,
+        "name": "check-beta-gate",
+        "phase": "browser",
+        "estSec": 3,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 108,
+        "name": "check-a11y-surfaces",
+        "phase": "browser",
+        "estSec": 3,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      },
+      {
+        "index": 109,
+        "name": "check-restart",
+        "phase": "browser",
+        "estSec": 2,
+        "estSource": "measured",
+        "weight": 1,
+        "exclusive": false
+      }
+    ],
+    "predicted": {
+      "low": 1786.0242099999996,
+      "mid": 2338.201,
+      "high": 4082.9943375000007,
+      "sequentialSec": 6617.400000000002,
+      "confidence": "measured",
+      "contention": 1.06,
+      "contentionSource": "measured"
+    }
+  },
+  "server": {
+    "port": 43915,
+    "pid": 3772,
+    "dataDir": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/test-results/20261115-183350-83058786-32167/server-data/w1",
+    "webDist": "/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/test-results/20261115-183350-83058786-32167/web-dist"
+  }
+}

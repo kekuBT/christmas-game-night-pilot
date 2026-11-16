@@ -1,0 +1,10 @@
+#!/bin/bash
+# LOCAL TEST: build the image from a context. Only the two BUILD stages' base images are replaced, by local copies that add
+# this sandbox's TLS-inspection CA (their downloads go through it); the runtime stage uses the exact pinned image.
+# Usage: build.sh <context dir> <tag>   (extra docker build args may follow)
+set -uo pipefail
+CTX=$1; TAG=$2; shift 2
+exec docker buildx build --builder default --network host --progress plain \
+  --build-context "docker.io/library/golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6=docker-image://local/cgn-test-golang-ca:1.24.4" \
+  --build-context "docker.io/library/node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716=docker-image://local/cgn-test-node-ca:22.16.0" \
+  -t "$TAG" "$@" "$CTX"

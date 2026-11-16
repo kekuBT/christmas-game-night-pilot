@@ -1,0 +1,63 @@
+#!/bin/bash
+# Beta R3, round 2 (review 6910988491): the round-2 harness's own negative runs. Each mutation removes ONE guard from a
+# copy of the runbook; the harness must then fail, in the case written for that guard.
+#   bash gate-mutations2.sh <repo root> <gate-fixtures2.sh>
+set -uo pipefail
+REPO=$1; HARNESS=$2
+M=$(mktemp -d); trap 'rm -rf "$M"' EXIT
+echo "== mutating copies of: $REPO — commit $(git -C "$REPO" rev-parse HEAD), $(git -C "$REPO" status --porcelain | wc -l) uncommitted path(s)"
+CAUGHT=0; MISSED=0
+mut() { # $1 name, $2 what it removes, $3 the case that must fail, $4 old text, $5 new text
+  local d="$M/$1"; mkdir -p "$d/docs/beta"
+  cp "$REPO/docs/beta/beta-r1-release.md" "$REPO/docs/beta/beta-r1-architecture.md" "$d/docs/beta/"
+  python3 -c "
+import sys; p=sys.argv[1]; s=open(p).read(); o=sys.argv[2]; n=sys.argv[3]
+assert s.count(o)==1, 'mutation target not found exactly once: '+repr(o)
+open(p,'w').write(s.replace(o,n))" "$d/docs/beta/beta-r1-release.md" "$4" "$5" || { echo "== M-$1: TARGET NOT FOUND"; MISSED=$((MISSED+1)); return; }
+  local out rc; out=$(bash "$HARNESS" "$REPO" "$d" 2>&1); rc=$?
+  echo "== M-$1: $2"
+  echo "   harness: exit $rc; $(echo "$out" | grep -E '^fixtures \(round 2\):')"
+  echo "$out" | grep '^FAIL' | cut -c1-150 | sed 's/^/     /'
+  if [ "$rc" -ne 0 ] && echo "$out" | grep -q "^FAIL $3 "; then echo "   CAUGHT: $3 failed, as it should"; CAUGHT=$((CAUGHT+1))
+  else echo "   NOT CAUGHT: expected a FAIL in $3"; MISSED=$((MISSED+1)); fi
+}
+NL=$'\n'
+# Promotion
+mut rmchain "marker removal no longer part of the chain" P5 \
+  'if rm -f "$MARK" && [ ! -e "$MARK" ] \' 'rm -f "$MARK"; if true \'
+mut runflag "step 2 trusts the marker on disk instead of this run's VERIFIED" P4 \
+  'if [ -z "$VERIFIED" ]; then echo "STOP: not verified in this run; the server keeps running."' \
+  'if [ ! -f "$MARK" ]; then echo "STOP: not verified in this run; the server keeps running."'
+mut flagreset "the flags are no longer reset at the start of the run" P10 \
+  'VERIFIED=; STOPPED=; BACKUP_OK=' ':'
+mut stopflag "a failed maintenance stop still counts as stopped" P11 \
+  'elif systemctl stop christmas-game-night; then STOPPED=1' 'elif systemctl stop christmas-game-night || true; then STOPPED=1'
+mut backupflag "the switch no longer requires this run's backup" P12 \
+  'if [ -n "$VERIFIED" ] && [ -n "$STOPPED" ] && [ -n "$BACKUP_OK" ] && [ -f "$MARK" ]' 'if [ -n "$VERIFIED" ] && [ -n "$STOPPED" ] && [ -f "$MARK" ]'
+# First install
+mut filink "the first install links without this run's verification" F9 \
+  'if [ -n "$VERIFIED" ] && [ -f "$MARK" ] \' 'if true \'
+mut fienv "the first install no longer checks the settings' data folder" F6 \
+  "${NL}"'   && [ "$(grep -c '"'"'^MCHEZO_DATA_DIR='"'"' "$ENVFILE")" = 1 ] && grep -qx "MCHEZO_DATA_DIR=$DATA" "$ENVFILE" \' "${NL}"'   && true \'
+mut ficheck "the first install no longer requires the data check" F5 \
+  '   && (cd "$OPT/current" && sudo -u cgn node dist/server/datatool.js check --data "$DATA") \' '   && { (cd "$OPT/current" && sudo -u cgn node dist/server/datatool.js check --data "$DATA"); true; } \'
+mut fiunit "the first install no longer checks the unit's ReadWritePaths= line" F4 \
+  "${NL}"'   && sed -i "s#^ReadWritePaths=.*#ReadWritePaths=$DATA#" "$UNIT" && grep -qx "ReadWritePaths=$DATA" "$UNIT" \' "${NL}"'   && sed -i "s#^ReadWritePaths=.*#ReadWritePaths=$DATA#" "$UNIT" \'
+mut fireload "the first install ignores a failed reload" F8 \
+  "${NL}"'   && systemctl daemon-reload'"${NL}"'then systemctl enable --now' "${NL}"'   && { systemctl daemon-reload; true; }'"${NL}"'then systemctl enable --now'
+# The switch
+mut swstop "the switch carries on after a failed stop" W4 \
+  ' if systemctl stop christmas-game-night; then STOPPED=1' ' if systemctl stop christmas-game-night || true; then STOPPED=1'
+mut swnew "the switch accepts an existing folder" W6 \
+  'elif mkdir -m 0700 "$DATA" && chown' 'elif mkdir -p -m 0700 "$DATA" && chown'
+mut swenv "the switch no longer checks the settings' data folder" W2 \
+  "${NL}"'        && [ "$(grep -c '"'"'^MCHEZO_DATA_DIR='"'"' "$ENVFILE")" = 1 ] && grep -qx "MCHEZO_DATA_DIR=$DATA" "$ENVFILE" \' "${NL}"'        && true \'
+mut swcode "the switch no longer requires a new access code" W7 \
+  ' && [ "$NEW_CODE" != "$OLD_CODE" ] \' ' \'
+mut swempty "the switch no longer requires the new folder to be empty" W10 \
+  '        && [ -d "$DATA" ] && [ -z "$(ls -A "$DATA")" ] \' '        && [ -d "$DATA" ] \'
+mut swreload "the switch ignores a failed reload" W9 \
+  "${NL}"'        && systemctl daemon-reload'"${NL}"'     then systemctl start' "${NL}"'        && { systemctl daemon-reload; true; }'"${NL}"'     then systemctl start'
+echo; echo "mutations (round 2): $CAUGHT caught, $MISSED not caught"
+[ "$MISSED" = 0 ] && echo "ALL ROUND 2 MUTATIONS CAUGHT" || echo "SOME ROUND 2 MUTATIONS NOT CAUGHT"
+exit "$MISSED"

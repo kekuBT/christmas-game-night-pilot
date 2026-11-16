@@ -1,0 +1,16 @@
+file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/beta/release-drill.mjs:89
+  check("rollback 3/3: PREV reads what NEW wrote (three players), nothing quarantined", (await names(c, roomId)) === "Amina,Baraka,Keku" && /\[restore\] 1 room\(s\) restored, 0 not loaded/.test(s.p.out) && !/NOT LOADED|to .*quarantine/.test(s.p.out), `${await names(c, roomId)} | ${(s.p.out.match(/\[restore\][^
+                                                                                                                                                                                                                                                                                                         ^
+
+SyntaxError: Invalid regular expression: missing /
+    at compileSourceTextModule (node:internal/modules/esm/utils:346:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:110:18)
+    at #translate (node:internal/modules/esm/loader:559:20)
+    at afterLoad (node:internal/modules/esm/loader:612:29)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:617:12)
+    at #createModuleJob (node:internal/modules/esm/loader:640:36)
+    at #getJobFromResolveResult (node:internal/modules/esm/loader:353:34)
+    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:321:41)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:680:25)
+
+Node.js v22.23.4

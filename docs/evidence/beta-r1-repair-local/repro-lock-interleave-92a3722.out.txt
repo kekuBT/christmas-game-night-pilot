@@ -1,0 +1,5 @@
+A: created server.lock exclusively (empty, pid not written yet)
+B: acquire() returned "took over a stale lock left by a server that is no longer running": B holds the lock
+A: wrote its pid and closed: A believes it holds the lock
+server.lock now names: {"pid":11457,"host":"vm","startedAt":"2026-11-15T20:05:28.685Z"}
+RESULT: BOTH A AND B HOLD THE DATA DIRECTORY

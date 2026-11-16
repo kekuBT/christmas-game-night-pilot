@@ -1,0 +1,115 @@
+== the block extracted from docs/beta/beta-r1-release.md: 34 lines, sha256 7e539b89d3952e6e…
+PASS the extracted block uses sha256sum --check --strict
+fixture: good.tgz sha256 a7ac80d4ed5faece03658f863b5677529767299af123a46de8bd0b803275f31e, inventory b71dd2947faf2c1d07347d3a6b77700c656e3178d5fcb262774b031dc3522b5f
+
+== the substitutions (diff of the published block vs case G1's)
+--- G1: output
+    VERIFIED 1111111111111111111111111111111111111111: ready to switch
+    SENTINEL-STOP
+    SENTINEL-BACKUP
+    SENTINEL-START
+    3,7c3,7
+    < SHA=7097ac2bb062925bb296a129f4771f1e68fd522d
+    < EXPECTED_SHA256=a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131
+    < EXPECTED_INVENTORY=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c
+    < ARCHIVE=./mchezo-7097ac2.tgz
+    < OPT=/opt/christmas-game-night
+    ---
+    > SHA=1111111111111111111111111111111111111111
+    > EXPECTED_SHA256=a7ac80d4ed5faece03658f863b5677529767299af123a46de8bd0b803275f31e
+    > EXPECTED_INVENTORY=b71dd2947faf2c1d07347d3a6b77700c656e3178d5fcb262774b031dc3522b5f
+    > ARCHIVE=/tmp/tmp.d0mjgmPrfD/case-G1/host/mchezo-7097ac2.tgz
+    > OPT=/tmp/tmp.d0mjgmPrfD/case-G1/opt
+    22c22
+    < if [ -f "$MARK" ]; then systemctl stop christmas-game-night; else echo "STOP: not verified; the server keeps running."; fi
+    ---
+    > if [ -f "$MARK" ]; then echo SENTINEL-STOP; else echo "STOP: not verified; the server keeps running."; fi
+    27,28c27
+    < if [ -f "$MARK" ] && (cd "$REL" && node dist/server/datatool.js backup --data /var/lib/christmas-game-night \
+    <      --out /var/backups/christmas-game-night/$(date -u +%Y%m%dT%H%MZ)-before-$SHA); then BACKUP_OK=1
+    ---
+    > if [ -f "$MARK" ] && (echo SENTINEL-BACKUP); then BACKUP_OK=1
+    32c31
+    < if [ -f "$MARK" ] && [ -n "$BACKUP_OK" ]; then ln -sfn "$REL" "$OPT/current" && systemctl start christmas-game-night
+    ---
+    > if [ -f "$MARK" ] && [ -n "$BACKUP_OK" ]; then ln -sfn "$REL" "$OPT/current" && echo SENTINEL-START
+
+== G1: the correct archive
+PASS G1 VERIFIED
+PASS G1 the verified marker exists
+PASS G1 reaches stop, backup and the start sentinel
+PASS G1 current points to the verified release — /tmp/tmp.d0mjgmPrfD/case-G1/opt/releases/1111111111111111111111111111111111111111
+PASS G1 npm ci installed ws and zod only (packages with a package.json) — packages: ws zod 
+PASS G1 the dev-package scope folders npm leaves are empty — 17 empty scope folder(s), 0 file(s)
+
+== G2: wrong bytes (one byte appended)
+--- G2: output
+    /tmp/tmp.d0mjgmPrfD/case-G2/host/mchezo-7097ac2.tgz: FAILED
+    sha256sum: WARNING: 1 computed checksum did NOT match
+    STOP: the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified; the server keeps running.
+    STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release.
+    STOP: 1111111111111111111111111111111111111111 isn't verified, or there is no backup. Don't switch.
+PASS G2 prints STOP at the gate
+PASS G2 leaves no verified marker
+PASS G2 reaches no sentinel (no stop, backup or start) — 0 sentinel(s)
+PASS G2 switches nothing
+
+== G3: missing archive
+--- G3: output
+    sha256sum: /tmp/tmp.d0mjgmPrfD/case-G3/host/mchezo-7097ac2.tgz: No such file or directory
+    /tmp/tmp.d0mjgmPrfD/case-G3/host/mchezo-7097ac2.tgz: FAILED open or read
+    sha256sum: WARNING: 1 listed file could not be read
+    STOP: the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified; the server keeps running.
+    STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release.
+    STOP: 1111111111111111111111111111111111111111 isn't verified, or there is no backup. Don't switch.
+PASS G3 prints STOP at the gate
+PASS G3 leaves no verified marker
+PASS G3 reaches no sentinel (no stop, backup or start) — 0 sentinel(s)
+PASS G3 switches nothing
+
+== G4: wrong revision in release.json (its own hash pinned)
+--- G4: output
+    STOP: the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified; the server keeps running.
+    STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release.
+    STOP: 1111111111111111111111111111111111111111 isn't verified, or there is no backup. Don't switch.
+PASS G4 prints STOP at the gate
+PASS G4 leaves no verified marker
+PASS G4 reaches no sentinel (no stop, backup or start) — 0 sentinel(s)
+PASS G4 switches nothing
+
+== G5: an unexpected extra file (its own hash pinned, the real inventory expected)
+--- G5: output
+    STOP: the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified; the server keeps running.
+    STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release.
+    STOP: 1111111111111111111111111111111111111111 isn't verified, or there is no backup. Don't switch.
+PASS G5 prints STOP at the gate
+PASS G5 leaves no verified marker
+PASS G5 reaches no sentinel (no stop, backup or start) — 0 sentinel(s)
+PASS G5 switches nothing
+PASS G2/G3 nothing is unpacked when the checksum fails
+
+== G6: a stale marker from an earlier attempt, then wrong bytes
+--- G6: output
+    /tmp/tmp.d0mjgmPrfD/case-G6/host/mchezo-7097ac2.tgz: FAILED
+    sha256sum: WARNING: 1 computed checksum did NOT match
+    STOP: the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified; the server keeps running.
+    STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release.
+    STOP: 1111111111111111111111111111111111111111 isn't verified, or there is no backup. Don't switch.
+PASS G6 the stale marker is cleared first; no sentinel, no switch
+
+== G7: the correct archive, but the backup fails
+--- G7: output
+    VERIFIED 1111111111111111111111111111111111111111: ready to switch
+    SENTINEL-STOP
+    STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release.
+    STOP: 1111111111111111111111111111111111111111 isn't verified, or there is no backup. Don't switch.
+PASS G7 verified and stopped for maintenance
+PASS G7 no backup: no switch, no start sentinel
+
+artifact gate fixtures: 27 passed, 0 failed
+ARTIFACT GATE FIXTURES PASSED

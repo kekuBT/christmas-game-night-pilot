@@ -1,0 +1,66 @@
+Mchezo gate targeted | run 20261116-024127-34996cf4-7748
+  revision 34996cf4b6b876959379c2e1485500348afd962b (clean tree) | fingerprint df7b65dca3c3 (634 files)
+  plan     12 steps: 1 fast/build, 10 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  254 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 223 run(s))
+  estimate this run: 4–12m (low-confidence) · the same steps one after another: about 16m 17s · longest step check-audit-fixes ~3m 39s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-locked-answer
+  thin     only 1–2 samples for: browser-preflight
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t2/test-results/20261116-024127-34996cf4-7748
+        start build-web on w1 (usually 5s)
+[ 1/12] PASS         5.4s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/12] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:36929 (pid 7870, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t2/test-results/20261116-024127-34996cf4-7748/server-data/w1)
+  server   w2 http://localhost:35299 (pid 7871, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t2/test-results/20261116-024127-34996cf4-7748/server-data/w2)
+  server   w3 http://localhost:40687 (pid 7872, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t2/test-results/20261116-024127-34996cf4-7748/server-data/w3)
+        start check-audit-fixes on w1 (usually 3m 39s)
+        start check-session-flow on w2 (usually 2m 53s)
+        start check-tv-lifecycle on w3 (usually 2m 23s)
+── progress  2/12 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-audit-fixes 53s (w1), check-session-flow 53s (w2), check-tv-lifecycle 52s (w3)
+   remaining 3–12m · total 4–13m · done around 02:45–02:53 UTC (low-confidence)
+── progress  2/12 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-audit-fixes 1m 53s (w1), check-session-flow 1m 53s (w2), check-tv-lifecycle 1m 52s (w3)
+   remaining 2–11m · total 4–13m · done around 02:45–02:53 UTC (low-confidence)
+[ 3/12] PASS       150.3s  check-tv-lifecycle  w3
+        start check-solo on w3 (usually 2m 21s)
+── progress  3/12 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-audit-fixes 2m 53s (w1), check-session-flow 2m 53s (w2), check-solo 22s (w3)
+   remaining 1–10m · total 4–13m · done around 02:46–02:53 UTC (low-confidence)
+[ 4/12] PASS       182.4s  check-session-flow  w2
+        start check-mchezo on w2 (usually 1m 51s)
+── progress  4/12 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-audit-fixes 3m 53s (w1), check-solo 1m 22s (w3), check-mchezo 50s (w2)
+   remaining 1–8m · total 5–12m · done around 02:46–02:53 UTC (low-confidence)
+[ 5/12] PASS       233.3s  check-audit-fixes  w1
+        wait  check-locked-answer: load 4.1 > 4 CPUs
+        start check-locked-answer on w1 (no timing history)
+── progress  5/12 done · 5 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-solo 2m 22s (w3), check-mchezo 1m 50s (w2), check-locked-answer 57s (w1)
+   remaining 0–5m · total 6–10m · done around 02:47–02:50 UTC (low-confidence)
+[ 6/12] PASS       116.9s  check-mchezo  w2
+        start check-math on w2 (usually 55s)
+[ 7/12] PASS       149.4s  check-solo  w3
+        start check-geography on w3 (usually 36s)
+[ 8/12] PASS        37.8s  check-geography  w3
+        start check-answer-race on w3 (usually 24s)
+── progress  8/12 done · 8 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-locked-answer 1m 57s (w1), check-math 53s (w2), check-answer-race 15s (w3)
+   remaining 0–4m · total 6–10m · done around 02:47–02:50 UTC (low-confidence)
+[ 9/12] PASS        58.3s  check-math  w2
+        start check-answer-helper on w2 (usually 9s)
+[10/12] PASS        25.9s  check-answer-race  w3
+[11/12] PASS        10.3s  check-answer-helper  w2
+[12/12] PASS       177.2s  check-locked-answer  w1
+
+PASSED (exit 0) | targeted | run 20261116-024127-34996cf4-7748
+  12 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 7m 00s · step time 19m 08s (sum) · 3 workers, 91% busy · 2.73× the same steps run one after another
+           predicted 4–12m (about 5m 55s, low-confidence) → actual 7m 00s (+18%)
+           longest  check-audit-fixes 3m 53s, check-session-flow 3m 02s, check-locked-answer 2m 57s · the longest step is 56% of the wall time
+           machine  CPU mean 27%, peak 91% · memory available ≥ 13465 MB · load peak 5.14 · backpressure 1 wait(s), 2s
+           contention ×1.058 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t2/test-results/20261116-024127-34996cf4-7748/report.json

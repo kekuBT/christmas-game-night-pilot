@@ -1,0 +1,117 @@
+
+CANCELLED (exit 130) | full | run 20261116-024847-34996cf4-10213
+  6 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 3 cancelled, 102 not run
+  CANCELLED e2e-chromium (w1) [cancelled]
+            [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been cl
+  CANCELLED check-f5 (w2) [cancelled]
+            DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock=
+  CANCELLED check-leaderboard (w3) [cancelled]
+  NOT RUN   check-game-night: run cancelled
+  NOT RUN   check-audit-fixes: run cancelled
+  NOT RUN   check-mobile-everyday: run cancelled
+  NOT RUN   check-session-flow: run cancelled
+  NOT RUN   check-locked-answer: run cancelled
+  NOT RUN   check-solo-shelf: run cancelled
+  NOT RUN   check-pulse-timing: run cancelled
+  NOT RUN   check-tv-lifecycle: run cancelled
+  NOT RUN   check-solo: run cancelled
+  NOT RUN   check-cup-team-games: run cancelled
+  NOT RUN   check-tug-of-war: run cancelled
+  NOT RUN   check-jebena-rush: run cancelled
+  NOT RUN   check-lifecycle: run cancelled
+  NOT RUN   check-install: run cancelled
+  NOT RUN   check-mchezo: run cancelled
+  NOT RUN   check-spectrum: run cancelled
+  NOT RUN   check-split-clues: run cancelled
+  NOT RUN   check-caption: run cancelled
+  NOT RUN   check-themes-seasonal: run cancelled
+  NOT RUN   check-split-clues-content: run cancelled
+  NOT RUN   check-briefing: run cancelled
+  NOT RUN   check-territory: run cancelled
+  NOT RUN   check-tv-reveal: run cancelled
+  NOT RUN   check-know-your-rivals: run cancelled
+  NOT RUN   check-draw-guess: run cancelled
+  NOT RUN   check-book-live: run cancelled
+  NOT RUN   check-warm-ivory: run cancelled
+  NOT RUN   check-content-variety: run cancelled
+  NOT RUN   check-stage2: run cancelled
+  NOT RUN   check-pattern-pulse: run cancelled
+  NOT RUN   check-majority-rules: run cancelled
+  NOT RUN   check-team-draw: run cancelled
+  NOT RUN   check-spectator: run cancelled
+  NOT RUN   check-math: run cancelled
+  NOT RUN   check-host-handover: run cancelled
+  NOT RUN   check-connections: run cancelled
+  NOT RUN   check-team-huddle: run cancelled
+  NOT RUN   check-casual: run cancelled
+  NOT RUN   check-draw-sync: run cancelled
+  NOT RUN   check-family-questions: run cancelled
+  NOT RUN   check-f4: run cancelled
+  NOT RUN   check-math-network: run cancelled
+  NOT RUN   check-results: run cancelled
+  NOT RUN   check-reveal: run cancelled
+  NOT RUN   check-quick-party: run cancelled
+  NOT RUN   check-input-isolation: run cancelled
+  NOT RUN   check-multiplayer: run cancelled
+  NOT RUN   check-tv-spectator: run cancelled
+  NOT RUN   check-tv-outage: run cancelled
+  NOT RUN   check-one-path: run cancelled
+  NOT RUN   check-caption-4p: run cancelled
+  NOT RUN   check-install-builds: run cancelled
+  NOT RUN   check-geography: run cancelled
+  NOT RUN   check-answer-reveal: run cancelled
+  NOT RUN   check-cup-party: run cancelled
+  NOT RUN   check-mobile: run cancelled
+  NOT RUN   check-ten-players: run cancelled
+  NOT RUN   check-action-ack: run cancelled
+  NOT RUN   check-math-timing: run cancelled
+  NOT RUN   check-contrast: run cancelled
+  NOT RUN   check-library-nav: run cancelled
+  NOT RUN   check-m6: run cancelled
+  NOT RUN   check-answer-race: run cancelled
+  NOT RUN   check-relay: run cancelled
+  NOT RUN   check-tv-entry: run cancelled
+  NOT RUN   check-lobby-mode: run cancelled
+  NOT RUN   check-poll-body-stall: run cancelled
+  NOT RUN   check-send-failures: run cancelled
+  NOT RUN   check-tv-moments: run cancelled
+  NOT RUN   check-start-helper: run cancelled
+  NOT RUN   check-year: run cancelled
+  NOT RUN   check-readiness: run cancelled
+  NOT RUN   check-abstain: run cancelled
+  NOT RUN   check-lobby-fixes: run cancelled
+  NOT RUN   check-release-package: run cancelled
+  NOT RUN   check-beta-gate-https: run cancelled
+  NOT RUN   check-stage4-details: run cancelled
+  NOT RUN   check-viewports: run cancelled
+  NOT RUN   check-cup-memory: run cancelled
+  NOT RUN   check-teams: run cancelled
+  NOT RUN   check-recovery: run cancelled
+  NOT RUN   check-tv-show: run cancelled
+  NOT RUN   check-official-practice: run cancelled
+  NOT RUN   check-sessions: run cancelled
+  NOT RUN   check-game-night-flow: run cancelled
+  NOT RUN   check-answer-helper: run cancelled
+  NOT RUN   check-progress: run cancelled
+  NOT RUN   check-night-card: run cancelled
+  NOT RUN   check-closest: run cancelled
+  NOT RUN   check-content-look: run cancelled
+  NOT RUN   check-ws-reconnect: run cancelled
+  NOT RUN   check-library: run cancelled
+  NOT RUN   check-reduced-motion: run cancelled
+  NOT RUN   check-shuffle: run cancelled
+  NOT RUN   check-tv-dashboard: run cancelled
+  NOT RUN   check-errors: run cancelled
+  NOT RUN   check-studio: run cancelled
+  NOT RUN   check-history-links: run cancelled
+  NOT RUN   check-double-start: run cancelled
+  NOT RUN   check-a11y-surfaces: run cancelled
+  NOT RUN   check-beta-gate: run cancelled
+  NOT RUN   check-restart: run cancelled
+  timing   wall 1m 59s · step time 3m 51s (sum) · 3 workers, 65% busy · 1.94× the same steps run one after another
+           longest  unit-tests 1m 10s, e2e-chromium 30s, check-f5 30s · the longest step is 59% of the wall time
+           machine  CPU mean 68%, peak 99% · memory available ≥ 13745 MB · load peak 4.16
+           contention ×1.308 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full/test-results/20261116-024847-34996cf4-10213/report.json

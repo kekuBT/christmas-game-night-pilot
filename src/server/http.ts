@@ -18,6 +18,8 @@ import { hashToken } from "../shared/protocol.js";
 import { isSessionSeason, SESSION_SEASONS, type SessionSeason } from "../shared/season.js";
 import { RoomStore, type RestoreReport } from "./persistence.js";
 import { FailureLimiter, PendingRecoveries } from "./recovery.js";
+import { AccessGuard, applySecurityHeaders, gatePage, safeNext, type AccessOptions } from "./access.js";
+import { boundedArray } from "./boundedArray.js";
 
 /** A change was applied in memory but could not be written to disk. */
 class PersistError extends Error {
@@ -65,6 +67,10 @@ export interface ServerOptions {
    * (every Cup created before D3) pass 1 (decision D-UX-09).
    */
   newCupTiming?: 1 | 2;
+  /** Beta R1 (B-03..B-05): public origin, beta access code and trusted proxies. Nothing set: open, as before. */
+  access?: AccessOptions;
+  /** Beta R1: the release's revision (a git SHA), shown by /health. Default "dev". */
+  revision?: string;
 }
 
 interface SocketMeta {
@@ -93,6 +99,9 @@ export const WS_SESSION_REPLACED = 4001;
  */
 /** Stage 10.4 (D-S104-05): how long close() waits for clients to say goodbye before cutting them off. */
 const SHUTDOWN_GRACE_MS = 1500;
+
+/** The largest HTTP request body or WebSocket message the server accepts (64 KiB; Beta R1 B-01 for WebSockets). */
+export const MAX_MESSAGE_BYTES = 64 * 1024;
 
 export class LocalServer {
   rooms = new Map<string, RoomEngine>();
@@ -140,11 +149,14 @@ export class LocalServer {
     z.object({ action: z.literal("play"), on: z.boolean() }).strict(),
     z.object({ action: z.literal("clear") }).strict(),
   ]);
-  /** Stage 12.5: a new Family Question (the room checks it with src/shared/familyPack.ts; this only bounds the shape). */
+  /**
+   * Stage 12.5: a new Family Question (the room checks it with src/shared/familyPack.ts; this only bounds the shape).
+   * Beta R1-R round 3: `options` checks its length before any element (boundedArray, GHSA-mrhx-c7xc-m3w5).
+   */
   static readonly FamilyQuestionSchema = z.object({
     kind: z.enum(["choice", "who"]),
     prompt: z.string().max(1000),
-    options: z.array(z.string().max(500)).max(8).optional(),
+    options: boundedArray(z.string().max(500), 8).optional(),
     correctIndex: z.number().int().min(0).max(7).optional(),
     answerPlayerId: z.string().min(1).max(128).optional(),
   }).strict();
@@ -156,7 +168,8 @@ export class LocalServer {
         expectedPlayers: z.number().int().min(1).max(10),
         budgetMinutes: z.union([z.literal(15), z.literal(30), z.literal(60)]),
         // Stage 12.3 (D-S123-01): `official` marks an item Official in a Family Cup's lineup (the room checks it).
-        items: z.array(z.object({ gameId: z.string().min(1).max(64), official: z.boolean().optional() }).strict()).min(1).max(8),
+        // Beta R1-R round 3: the length is checked before any item (boundedArray, GHSA-mrhx-c7xc-m3w5).
+        items: boundedArray(z.object({ gameId: z.string().min(1).max(64), official: z.boolean().optional() }).strict(), 8, 1),
       }).strict(),
     }).strict(),
     z.object({ baseRevision: z.number().int().min(0), clear: z.literal(true) }).strict(),
@@ -242,7 +255,23 @@ export class LocalServer {
   }
   private store: RoomStore;
   private http = createServer((req, res) => void this.handleHttp(req, res));
-  private wss = new WebSocketServer({ server: this.http });
+  // Beta R1 (B-01): a WebSocket message is capped like an HTTP body. Without it the library's default (100 MiB) let any
+  // socket, a public TV socket included, make the server buffer and JSON.parse a huge message; over the cap the socket
+  // is closed with 1009 before anything is parsed. The web app sends nothing over its socket.
+  private wss = new WebSocketServer({
+    server: this.http,
+    maxPayload: MAX_MESSAGE_BYTES,
+    // Beta R1 (B-03, B-04): the same origin and beta-access rules as HTTP, checked in the handshake.
+    verifyClient: (info: { origin: string; req: IncomingMessage }, cb: (ok: boolean, code?: number, message?: string) => void) => {
+      if (this.access.foreignOrigin(info.origin || undefined)) { cb(false, 403, "Forbidden"); return; }
+      if (!this.access.hasAccess(info.req)) { cb(false, 401, "Beta access required"); return; }
+      cb(true);
+    },
+  });
+  private access: AccessGuard;
+  private readonly revision: string;
+  /** Beta R1 (B-04): wrong beta access codes, per client address. */
+  private betaCodeFailures: FailureLimiter;
   private sockets = new Set<{ ws: WebSocket; meta: SocketMeta }>();
 
   private webDistDir: string;
@@ -264,6 +293,9 @@ export class LocalServer {
 
   constructor(opts: ServerOptions = {}) {
     this.clock = opts.clock ?? Date.now;
+    this.access = new AccessGuard(opts.access ?? {});
+    this.revision = opts.revision ?? "dev";
+    this.betaCodeFailures = new FailureLimiter(10, 15 * 60_000, this.clock);
     this.contentLib = opts.content;
     this.newCupTiming = opts.newCupTiming ?? 2;
     this.lifecycleScale = opts.lifecycleScale !== undefined && Number.isFinite(opts.lifecycleScale) && opts.lifecycleScale > 0 ? opts.lifecycleScale : 1;
@@ -495,12 +527,14 @@ export class LocalServer {
     return typeof expected === "string" && typeof token === "string" && token.length > 0 && hashToken(token) === expected;
   }
 
-  async listen(port = 0): Promise<number> {
+  /** Listen on `port` (0: a free one), on `host` when given (Beta R1: 127.0.0.1 behind a proxy), else every interface. */
+  async listen(port = 0, host?: string): Promise<number> {
     return new Promise((resolve) => {
-      this.http.listen(port, () => {
+      const ready = () => {
         const addr = this.http.address();
         resolve(typeof addr === "object" && addr ? addr.port : port);
-      });
+      };
+      if (host) this.http.listen(port, host, ready); else this.http.listen(port, ready);
     });
   }
 
@@ -531,15 +565,20 @@ export class LocalServer {
     await httpClosed;
   }
 
-  private async readBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+  /** The request body as text, at most MAX_MESSAGE_BYTES. */
+  private async readText(req: IncomingMessage): Promise<string> {
     const chunks: Buffer[] = [];
     let total = 0;
     for await (const chunk of req) {
       total += (chunk as Buffer).length;
-      if (total > 64 * 1024) throw new Error("PAYLOAD_TOO_LARGE");
+      if (total > MAX_MESSAGE_BYTES) throw new Error("PAYLOAD_TOO_LARGE");
       chunks.push(chunk as Buffer);
     }
-    const text = Buffer.concat(chunks).toString("utf-8");
+    return Buffer.concat(chunks).toString("utf-8");
+  }
+
+  private async readBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+    const text = await this.readText(req);
     if (!text) return {};
     try {
       return JSON.parse(text) as Record<string, unknown>;
@@ -611,13 +650,48 @@ export class LocalServer {
    * code): its seat list, recovery requests and recovery by code all answer
    * as if there were no such room.
    */
+  /**
+   * Beta R1 (B-03, B-04): refuse another site's requests, serve the beta gate, and keep everything but the health check
+   * and the gate behind the beta cookie when a code is configured. True when the request was answered here.
+   */
+  private async handleAccess(req: IncomingMessage, res: ServerResponse, url: URL): Promise<boolean> {
+    if (this.access.foreignOrigin(req.headers.origin)) { this.send(res, 403, { error: "Requests from another site are not allowed.", code: "FOREIGN_ORIGIN" }); return true; }
+    if (!this.access.gated) return false;
+    // Beta R1-R (B-13, review 6901841738 R4): gate pages use Referrer-Policy: same-origin, not the site-wide
+    // no-referrer. Under no-referrer a browser posts the code form with `Origin: null`, which the origin check above
+    // rightly refuses, so with a public origin set (production) nobody could enter. same-origin makes that post carry
+    // the page's own origin; a referrer still never goes to another site. The origin check is unchanged.
+    const html = (status: number, body: string, extra: Record<string, string> = {}) => {
+      res.writeHead(status, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "referrer-policy": "same-origin", ...extra });
+      res.end(body);
+    };
+    if (url.pathname === "/beta" && req.method === "GET") { html(200, gatePage(safeNext(url.searchParams.get("next")), false)); return true; }
+    if (url.pathname === "/beta/enter" && req.method === "POST") {
+      const addr = this.clientAddress(req);
+      const wait = this.betaCodeFailures.retryAfterMs(`beta:${addr}`);
+      const form = new URLSearchParams(await this.readText(req));
+      const next = safeNext(form.get("next"));
+      if (wait > 0) { html(429, gatePage(next, true), { "retry-after": String(Math.ceil(wait / 1000)) }); return true; }
+      if (!this.access.codeMatches(form.get("code") ?? "")) { this.betaCodeFailures.fail(`beta:${addr}`); html(401, gatePage(next, true)); return true; }
+      res.writeHead(303, { location: next, "set-cookie": this.access.setCookieHeader(), "cache-control": "no-store" });
+      res.end();
+      return true;
+    }
+    if (this.access.isOpenPath(url.pathname) || this.access.hasAccess(req)) return false;
+    // A page load gets the gate; anything else (the API, files) a plain refusal it can show.
+    if (req.method === "GET" && String(req.headers.accept ?? "").includes("text/html")) html(401, gatePage(safeNext(url.pathname + url.search), false));
+    else this.send(res, 401, { error: "This is a private beta: open the site and enter the access code first.", code: "BETA_ACCESS_REQUIRED" });
+    return true;
+  }
+
   private roomByJoinCode(code: unknown): RoomEngine | undefined {
     const c = String(code ?? "").trim().toUpperCase();
     return c ? [...this.rooms.values()].find((r) => r.joinCode.toUpperCase() === c && r.kind !== "solo") : undefined;
   }
 
-  private static clientAddress(req: IncomingMessage): string {
-    return req.socket.remoteAddress ?? "unknown";
+  /** Beta R1 (B-05): the client's address, through the trusted proxies only (AccessGuard.clientAddress). */
+  private clientAddress(req: IncomingMessage): string {
+    return this.access.clientAddress(req);
   }
 
   /**
@@ -658,7 +732,7 @@ export class LocalServer {
   /** Recovery routes that work WITHOUT a seat credential (the device lost it). Returns true if handled. */
   private async handleRecoveryWithoutSession(req: IncomingMessage, res: ServerResponse, parts: string[]): Promise<boolean> {
     if (req.method !== "POST" || parts[0] !== "rooms") return false;
-    const addr = LocalServer.clientAddress(req);
+    const addr = this.clientAddress(req);
 
     // Recover with a one-time code: POST /rooms/recover-by-code { joinCode, recoveryCode }
     if (parts.length === 2 && parts[1] === "recover-by-code") {
@@ -734,7 +808,9 @@ export class LocalServer {
   private async handleHttp(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const url = new URL(req.url ?? "/", "http://localhost");
     const parts = url.pathname.split("/").filter(Boolean);
+    applySecurityHeaders(res); // Beta R1 (B-02): on every response
     try {
+      if (await this.handleAccess(req, res, url)) return;
       if (req.method === "GET" && parts.length === 1 && parts[0] === "games") {
         // Each game with its lifecycle policy (time limits, practice-only), so
         // the lobby shows the same rules the server enforces.
@@ -797,7 +873,7 @@ export class LocalServer {
       }
       // Stage 8.3: "can this device reach the game server?" No data, never cached.
       if ((req.method === "GET" || req.method === "HEAD") && url.pathname === "/health") {
-        this.send(res, 200, { ok: true });
+        this.send(res, 200, { ok: true, revision: this.revision }); // Beta R1: which release answers; nothing about rooms or players
         return;
       }
       // Stage 2: client routes (/join, /host, /room/cup, /library/...) get the
@@ -1556,6 +1632,11 @@ export class LocalServer {
   }
 
   private handleWs(ws: WebSocket, req: IncomingMessage): void {
+    // Beta R1 (B-06): a client that breaks the protocol (invalid UTF-8, an oversized message, a bad opcode) makes the
+    // library emit "error" on this socket and then close it (1007, 1009, 1002). With no listener, that event was an
+    // uncaught exception that ended the whole server process; one malformed frame from a public TV socket was enough.
+    // The socket is already being closed, so there is nothing else to do; the payload is never logged.
+    ws.on("error", () => { /* handled: the library closes this socket */ });
     const url = new URL(req.url ?? "/", "http://localhost");
     const roomId = url.searchParams.get("roomId") ?? "";
     const requestedAudience = (url.searchParams.get("audience") ?? "player") as SocketMeta["audience"];

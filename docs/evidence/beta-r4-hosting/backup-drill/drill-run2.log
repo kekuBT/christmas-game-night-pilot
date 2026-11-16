@@ -1,0 +1,20 @@
+== drill started 2026-11-16T13:26:35Z; repo 852b955306ccd89dcb31ef752b69e08c12cbc3ed (0 uncommitted paths); node v22.23.4; age 1.1.1
+== runtime vs 7097ac2: 0 files differ
+== production mode: NODE_ENV=production, access code set (not printed), public origin http://127.0.0.1:41090, data /tmp/cgn-r4drill-QJZNDi/var/data/cgn
+== E1 the entrypoint starts the server
+PASS E1 /health 200 under cgn-entrypoint (pid 1277), server pid 1282
+PASS E1 production gate: the API refuses a request without the access cookie (401)
+== N1 a backup without --allow-running is refused while the server runs
+   datatool exit 1: A server (pid 1282) is using /tmp/cgn-r4drill-QJZNDi/var/data/cgn. Stop it first (between sessions), or pass --allow-running: each file is still copied whole, but a room and its Memory Book may then be a moment apart.
+PASS N1 refused (exit 1), nothing written
+== N3 a preflight failure stops nothing
+   cgn-backup exit 1: BACKUP_FAILED: CGN_BACKUP_RECIPIENT is not an age public key (age1...)
+PASS N3 BACKUP_FAILED before any stop: same server pid 1282 still serving, no hold, no BACKUP_OK
+== P1 a backup during live play: stop, locked copy, verify, restart, encrypt
+   cgn-backup: stopping the server (pid 1282)
+   cgn-backup: server stopped
+   backup OK: 2 room(s), 0 Memory Book(s), 4 file(s), verified
+   verify OK: 4 file(s) match the manifest of 2026-11-16T13:26:41.066Z
+   cgn-backup: hold released after 1 s; the entrypoint restarts the server
+   BACKUP_OK /tmp/cgn-r4drill-QJZNDi/var/data/backups/cgn-20261116T132640Z.tar.age sha256=70a578244c4a0ce9509293dae5968c73b0b5d6a8780c9b63a5348e69f1aa2b1a server_stopped_s=1
+   monitor: hold seen, server 1282 gone at +16 ms, 4 data files hashed, new server 1387 after 1004 ms

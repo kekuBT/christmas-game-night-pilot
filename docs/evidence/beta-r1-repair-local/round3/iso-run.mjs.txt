@@ -1,0 +1,38 @@
+// Runs every variant in its own capped child, one at a time, never two at once. Usage: node iso-run.mjs <repo> [label]
+// 1. Measurement: each variant 3 times at a 256 MB old-space cap (issues, time, heap); the median run is reported.
+// 2. Heap-limit sweep: the smallest old-space cap (MB, with a 1 MB semi-space so little hides in the young generation)
+//    at which the child finishes the validation. Below it the child dies with V8's heap-limit error.
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { VARIANTS } from "./variants.mjs";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const [repo, label = ""] = process.argv.slice(2);
+const child = (variant, oldMB, extra = []) => spawnSync(process.execPath, ["--expose-gc", `--max-old-space-size=${oldMB}`, ...extra, join(here, "iso-child.mjs"), repo, variant], { encoding: "utf8", timeout: 60_000, env: { PATH: process.env.PATH } });
+const CAPS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 24, 28, 32, 40, 48, 64];
+
+console.log(`zod exposure, isolated children ${label}; node ${process.version}; ${new Date().toISOString()}`);
+const rows = [];
+for (const id of Object.keys(VARIANTS)) {
+  const runs = [];
+  for (let i = 0; i < 3; i++) {
+    const r = child(id, 256);
+    if (r.status !== 0) { console.log(`${id}: measurement run FAILED (exit ${r.status}, signal ${r.signal}): ${r.stderr.slice(-400)}`); continue; }
+    runs.push(JSON.parse(r.stdout.trim().split("\n").pop()));
+  }
+  runs.sort((a, b) => a.ms - b.ms);
+  const m = runs[Math.floor(runs.length / 2)];
+  let minCap = null; const failedAt = [];
+  for (const cap of CAPS) {
+    const r = child(id, cap, ["--max-semi-space-size=1"]);
+    if (r.status === 0) { minCap = cap; break; }
+    failedAt.push(`${cap}:${r.signal ?? r.status}${/heap limit|out of memory/i.test(r.stderr) ? "/OOM" : ""}`);
+  }
+  const row = { id, ...m, msAll: runs.map((x) => x.ms), minOldSpaceMB: minCap, belowThat: failedAt.slice(-1)[0] ?? "(survived the smallest cap)" };
+  rows.push(row);
+  console.log(JSON.stringify(row));
+}
+const ctl = rows.find((r) => r.id === "control-valid");
+console.log("\nvariant | bytes | elements | top-level issues | nested issues | ms (median of 3) | heap after (MB) | retained (MB) | smallest old space (MB) | over the control");
+for (const r of rows) console.log(`${r.id} | ${r.bytes} | ${r.elements}${r.depth ? ` (depth ${r.depth})` : ""} | ${r.issues} | ${r.nestedIssues} | ${r.ms} | ${r.heapAfterMB} | ${r.retainedMB} | ${r.minOldSpaceMB} | ${r.minOldSpaceMB !== null && ctl?.minOldSpaceMB != null ? r.minOldSpaceMB - ctl.minOldSpaceMB : "?"}`);

@@ -1,0 +1,15 @@
+## N1: a fabricated device result (P1 marked ✅)
+FAIL draft: check P1 is PENDING — | P1 gate | ✅ | ✅ | — | |
+FAIL draft: no result marks anywhere (✅ ❌ ⚠️)
+R3 RECORD CHECK FAILED
+exit 1
+
+## N2: the draft disagrees on the archive hash (last digit changed)
+FAIL the draft go/no-go record states the same audited archive SHA-256
+R3 RECORD CHECK FAILED
+exit 1
+
+## N3: host /health filled in without a host
+FAIL draft: "/health on the host" is PENDING — | `/health` **on the host** after the start | {"ok":true} | H1 |
+R3 RECORD CHECK FAILED
+exit 1

@@ -1123,13 +1123,18 @@ export function App() {
       if (sheet === "party") closeSheet();
     }
   }, [proj?.party?.revision]);
+  const planGameKnown = games.some((g) => g.id === serverPlan?.gameId);
   useEffect(() => {
     if (!planner || !serverPlan) return;
     // Adopted from another host tab or the cohost: this tab didn't press a lineup control, so it is a plain pick here.
     if (serverPlan.gameId !== upNextId) { tabSet("mz_upnext", serverPlan.gameId); setUpNextIdRaw(serverPlan.gameId); tabSet("mz_upnext_src", "manual"); setUpNextSourceRaw("manual"); }
     const m = serverPlan.official ? "official" : "practice";
+    // Beta R1 (B-09): the plan's mode applies once its game is known (and only for a game that can count: a practice-only
+    // pick never changes the host's own Official/Practice choice), so this runs again when the game list arrives. On a
+    // reload where the list came after the room's state (a slow network, a busy server), it never ran with the game known:
+    // the host kept the default, Official, while the plan, the guests and the TV said Practice.
     if (m !== gameMode && canCountHere(games.find((g) => g.id === serverPlan.gameId))) setGameModeRaw(m);
-  }, [planner, serverPlan?.gameId, serverPlan?.official]);
+  }, [planner, serverPlan?.gameId, serverPlan?.official, planGameKnown]);
   /** TV / spectator screen for the Sprint 4 games (never answers or authors while playing). */
   /**
    * Stage 5 (S5-A): the live show, for the room's TV and for spectators. It

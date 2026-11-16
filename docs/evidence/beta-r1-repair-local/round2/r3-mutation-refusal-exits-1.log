@@ -1,0 +1,44 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ❯ tests/beta-r1r-lock.test.ts (7 tests | 1 failed | 6 skipped) 575ms
+   × overlapping starts: exactly one holder > eight starts at the same moment on a new directory, three rounds: one holds it, seven are refused 574ms
+     → lock race: a contender exited abnormally
+#0 pid 19309 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19309 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#1 pid 19310 exit {"code":0,"signal":null} pipe errors [] said "READY\nACQ 19310 1794779599749.846\nREL 19310 1794779599765.015\n"
+#2 pid 19311 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19311 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#3 pid 19318 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19318 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#4 pid 19324 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19324 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#5 pid 19335 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19335 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#6 pid 19336 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19336 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#7 pid 19346 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19346 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/beta-r1r-lock.test.ts > overlapping starts: exactly one holder > eight starts at the same moment on a new directory, three rounds: one holds it, seven are refused
+Error: lock race: a contender exited abnormally
+#0 pid 19309 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19309 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#1 pid 19310 exit {"code":0,"signal":null} pipe errors [] said "READY\nACQ 19310 1794779599749.846\nREL 19310 1794779599765.015\n"
+#2 pid 19311 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19311 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#3 pid 19318 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19318 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#4 pid 19324 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19324 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#5 pid 19335 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19335 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#6 pid 19336 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19336 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+#7 pid 19346 exit {"code":1,"signal":null} pipe errors [] said "READY\nREFUSED 19346 Another server (pid 19310) is using this data directory (/tmp/mz-r1r-fresh-IoOJqD/data). Stop it first: one process writes a data directory at a time.\n"
+ ❯ fail tests/beta-r1r-lock.test.ts:75:41
+     73|     }
+     74|   };
+     75|   const fail = (why: string) => { throw new Error(`lock race: ${why}\n…
+       |                                         ^
+     76|   await phase("READY from every contender", (k) => /^READY$/m.test(k.o…
+     77|   if (kids.some((k) => k.exit !== undefined)) fail("a contender exited…
+ ❯ race tests/beta-r1r-lock.test.ts:88:72
+ ❯ tests/beta-r1r-lock.test.ts:99:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 skipped (7)
+   Start at  21:53:17
+   Duration  2.07s (transform 848ms, setup 0ms, collect 1.11s, tests 575ms, environment 0ms, prepare 76ms)
+

@@ -1,0 +1,23 @@
+// Beta R1 B-07: behind a proxy (trustProxyHops 1) the server trusts the last X-Forwarded-For entry. If the server is
+// also reachable directly (listening on every interface), a client can skip the proxy and claim a fresh address on
+// every request, so per-address limits never trigger. Usage (from a checkout): npx tsx <this> <tree> [listen-host]
+import { mkdtempSync, rmSync } from "node:fs";
+import { networkInterfaces, tmpdir } from "node:os";
+import { join } from "node:path";
+const [tree, host] = process.argv.slice(2);
+const { LocalServer } = await import(join(tree, "src/server/http.ts"));
+const dataDir = mkdtempSync(join(tmpdir(), "mz-repro-b07-"));
+const server = new LocalServer({ dataDir, heartbeatMs: null, lifecycleSweepMs: null, access: { betaAccessCode: "repro-code-123456", trustProxyHops: 1 } });
+const port: number = await server.listen(0, host);
+const outside = Object.values(networkInterfaces()).flat().find((a) => a && a.family === "IPv4" && !a.internal)!.address;
+console.log(`tree ${tree}; listen host ${host ?? "(none: every interface)"}; port ${port}; trying ${outside} directly`);
+const statuses: string[] = [];
+for (let i = 0; i < 15; i++) {
+  const r = await fetch(`http://${outside}:${port}/beta/enter`, { method: "POST", redirect: "manual", headers: { "content-type": "application/x-www-form-urlencoded", "x-forwarded-for": `10.0.0.${i}` }, body: "code=wrong-code-000000&next=/" })
+    .then((x) => String(x.status), (e) => e?.cause?.code ?? String(e));
+  statuses.push(r);
+}
+console.log(`15 wrong codes sent straight to the server, each claiming a new address: ${statuses.join(" ")}`);
+const limited = statuses.filter((s) => s === "429").length, refused = statuses.filter((s) => s === "ECONNREFUSED").length;
+console.log(refused === 15 ? "RESULT: not reachable around the proxy (connection refused)" : limited ? `RESULT: rate limit applied (${limited} x 429)` : "RESULT: GAP — reachable directly, and the 10-per-15-minutes limit never triggered");
+await server.close(); rmSync(dataDir, { recursive: true, force: true });

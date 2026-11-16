@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ✓ tests/beta-r1r-zod.test.ts (7 tests) 783ms
+   ✓ compatibility: the same answers as before on everything else > Quick Party: 4,000 generated bodies around the limits get the same verdict and the same parsed value 446ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  23:32:22
+   Duration  2.12s (transform 758ms, setup 0ms, collect 1.02s, tests 783ms, environment 0ms, prepare 62ms)
+

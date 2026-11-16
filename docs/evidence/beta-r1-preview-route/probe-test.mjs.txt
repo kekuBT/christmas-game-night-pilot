@@ -1,0 +1,42 @@
+// Runs scripts/preview/probe-forwarded-origin.mjs behind the local stand-in forwarder, once per forwarder behaviour,
+// with headless Chromium as the browser, and checks the probe's verdict for each. Usage: node probe-test.mjs <repo>
+import { spawn } from "node:child_process";
+import { readFileSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { chromium } from "playwright";
+import { makeCert, startForwarder } from "./fwd.mjs";
+
+const repo = process.argv[2];
+const expected = { "same-origin-only": "REWRITTEN_SAME_ORIGIN_ONLY", all: "UNSAFE", "http-only": "INCONSISTENT", none: "PRESERVED", "block-foreign": "INCOMPLETE" };
+const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !/_proxy$/i.test(k)));
+const tls = makeCert();
+const browser = await chromium.launch({ executablePath: process.env.MCHEZO_CHROMIUM_PATH, args: ["--host-resolver-rules=MAP *.app.test 127.0.0.1", "--no-proxy-server"], env });
+let failures = 0;
+for (const [mode, want] of Object.entries(expected)) {
+  const fwd = await startForwarder(mode, tls);
+  const out = join(mkdtempSync(join(tmpdir(), "probe-")), "report.json");
+  const T = `https://cs-3155.app.test:${fwd.port}`, O = `https://cs-3156.app.test:${fwd.port}`;
+  const probe = spawn(process.execPath, [join(repo, "scripts/preview/probe-forwarded-origin.mjs"), "--target-port", "3155", "--other-port", "3156", "--target-url", T, "--other-url", O, "--out", out], { cwd: repo, stdio: ["ignore", "pipe", "inherit"] });
+  await new Promise((r) => { let n = 0; probe.stdout.on("data", (d) => { n += (d.toString().match(/listening/g) ?? []).length; if (n >= 2) r(); }); });
+  const ctx = await browser.newContext({ ignoreHTTPSErrors: true });
+  try {
+    const p = await ctx.newPage();
+    // The other page's own "finished" line only tells us its script ended; the verdict never relies on it.
+    await p.goto(O + "/"); await p.waitForFunction(() => document.getElementById("out").textContent.includes("script finished"), null, { timeout: 30000 });
+    await p.goto(T + "/"); await p.waitForFunction(() => document.getElementById("out").textContent.includes("VERDICT"), null, { timeout: 30000 });
+  } finally {
+    await ctx.close();
+    probe.kill("SIGTERM"); await new Promise((r) => (probe.exitCode !== null ? r() : probe.on("exit", r)));
+  }
+  const rep = JSON.parse(readFileSync(out, "utf8"));
+  const ok = rep.verdict === want;
+  if (!ok) failures++;
+  console.log(`${ok ? "PASS" : "FAIL"} forwarder "${mode}": verdict ${rep.verdict} (expected ${want}) — ${rep.why}`);
+  if (fwd.log.some((e) => e.blockedAtForwarder)) console.log(`     the stand-in refused ${fwd.log.filter((e) => e.blockedAtForwarder).length} foreign requests before the probe saw them`);
+  for (const e of rep.entries) console.log(`     ${e.where.padEnd(6)} ${e.kind.padEnd(18)} origin=${e.origin === null ? "(none)" : JSON.stringify(e.origin)} host=${e.host} xfh=${e.xForwardedHost} sec-fetch-site=${e.secFetchSite} cookie=${e.cookiePresent}`);
+  await fwd.close();
+}
+await browser.close();
+console.log(failures ? `PROBE TEST FAILED (${failures})` : `PROBE TEST PASSED (${Object.keys(expected).length} forwarder behaviours, ${Object.keys(expected).length} verdicts)`);
+process.exit(failures ? 1 : 0);

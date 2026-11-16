@@ -1,0 +1,97 @@
+// Route A, end to end, against the LOCAL STAND-IN forwarder (fwd.mjs): the PACKED candidate in production behind it,
+// Chromium as the browser. Usage: node route-a-test.mjs <packed release dir>
+//   S0 control: public origin = the forwarded URL (as in the reviewer's preview), forwarder rewrites same-origin only
+//      → the gate's code form is refused 403 FOREIGN_ORIGIN (the reviewer's observation, reproduced)
+//   S1 route A: public origin = https://localhost:3153 (the value the forwarder gives same-origin requests),
+//      forwarder rewrites same-origin only → entry, /health, the API, the WebSocket all work; a page on another
+//      *.app.test origin (same site, so the Lax beta cookie IS sent) is refused: POST 403, WebSocket handshake 403
+//   S2 why the probe must pass first: route A with a forwarder that rewrites EVERY Origin → the other origin's POST
+//      creates a room (201) and its WebSocket opens (101): the origin check can no longer tell the two apart
+import { spawn } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import http from "node:http";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { chromium } from "playwright";
+import { makeCert, startForwarder } from "./fwd.mjs";
+
+const rel = process.argv[2];
+const CODE = "synthetic-preview-code-4417";
+const revision = JSON.parse(readFileSync(join(rel, "release.json"), "utf8")).revision;
+const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !/_proxy$/i.test(k)));
+const tls = makeCert();
+const browser = await chromium.launch({ executablePath: process.env.MCHEZO_CHROMIUM_PATH, args: ["--host-resolver-rules=MAP *.app.test 127.0.0.1", "--no-proxy-server"], env });
+let failures = 0;
+const check = (name, ok, detail = "") => { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// The other origin's page: a cross-origin POST and a WebSocket to the app, as any *.app.test page could send.
+const foreign = http.createServer((req, res) => {
+  const T = new URL(req.url, "http://x").searchParams.get("t");
+  res.writeHead(200, { "content-type": "text/html" });
+  res.end(`<!doctype html><pre id=o>running</pre><script>(async()=>{const o=document.getElementById("o");
+    try{await fetch("${T}/rooms",{method:"POST",mode:"no-cors",credentials:"include",body:JSON.stringify({kind:"casual",name:"from another origin"})});}catch(e){}
+    await new Promise(r=>{const s=new WebSocket("${T}".replace(/^http/,"ws")+"/?roomId=none&audience=tv");const t=setTimeout(r,4000);s.onopen=()=>{clearTimeout(t);s.close();r();};s.onerror=()=>{clearTimeout(t);r();};});
+    o.textContent="done";})();</script>`);
+});
+await new Promise((r) => foreign.listen(3154, "127.0.0.1", r));
+
+async function scenario(label, mode, publicOrigin) {
+  const fwd = await startForwarder(mode, tls);
+  const T = `https://cs-3153.app.test:${fwd.port}`, O = `https://cs-3154.app.test:${fwd.port}`;
+  const origin = publicOrigin === "forwarded" ? T : publicOrigin;
+  const data = join(mkdtempSync(join(tmpdir(), "route-a-")), "data");
+  const server = spawn(process.execPath, ["dist/server/serve.js"], { cwd: rel, stdio: ["ignore", "pipe", "pipe"], env: { PATH: process.env.PATH, HOME: process.env.HOME, PORT: "3153", NODE_ENV: "production", MCHEZO_LISTEN_HOST: "127.0.0.1", MCHEZO_DATA_DIR: data, MCHEZO_PUBLIC_ORIGIN: origin, MCHEZO_BETA_ACCESS_CODE: CODE } });
+  let out = ""; server.stdout.on("data", (d) => { out += d; }); server.stderr.on("data", (d) => { out += d; });
+  for (let i = 0; i < 160 && !/Listening on/.test(out) && server.exitCode === null; i++) await sleep(100);
+  console.log(`\n== ${label}: forwarder "${mode}", MCHEZO_PUBLIC_ORIGIN=${origin}\n   ${(out.match(/Listening on[^\n]*/) ?? [out.slice(-200)])[0]}`);
+  const ctx = await browser.newContext({ ignoreHTTPSErrors: true });
+  const page = await ctx.newPage();
+  await page.goto(T + "/");
+  await page.fill("input[name=code]", CODE);
+  const [resp] = await Promise.all([page.waitForResponse((r) => r.url().includes("/beta/enter")), page.press("input[name=code]", "Enter")]);
+  const entered = resp.status() === 303;
+  const result = { entered, gateStatus: resp.status() };
+  if (entered) {
+    await page.waitForLoadState("load");
+    const cookies = await ctx.cookies(T);
+    result.cookie = cookies.map((c) => `${c.name} secure=${c.secure} httpOnly=${c.httpOnly} sameSite=${c.sameSite}`).join("; ");
+    result.health = await page.evaluate(async () => (await (await fetch("/health")).json()).revision);
+    const room = await page.evaluate(async () => { const r = await fetch("/rooms", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: "casual" }) }); return { status: r.status, body: await r.json() }; });
+    result.roomStatus = room.status;
+    result.ws = await page.evaluate((id) => new Promise((res) => { const s = new WebSocket(location.origin.replace(/^http/, "ws") + `/?roomId=${id}&audience=tv`); const t = setTimeout(() => res("no message in 5 s"), 5000); s.onmessage = (m) => { clearTimeout(t); res(JSON.parse(m.data).kind); s.close(); }; s.onerror = () => { clearTimeout(t); res("error"); }; }), room.body.roomId);
+    const p2 = await ctx.newPage();
+    await p2.goto(`${O}/?t=${encodeURIComponent(T)}`);
+    await p2.waitForFunction(() => document.getElementById("o").textContent === "done", null, { timeout: 15000 });
+    const f = fwd.log.filter((e) => e.host.startsWith("cs-3153") && e.originIn === O);
+    result.foreignPost = f.find((e) => e.method === "POST")?.status ?? "did not arrive";
+    result.foreignWs = f.find((e) => e.method === "UPGRADE")?.status ?? "did not arrive";
+    result.foreignOriginsSeenByApp = [...new Set(f.map((e) => e.originOut))];
+  }
+  await ctx.close();
+  server.kill("SIGTERM"); await new Promise((r) => server.on("exit", r));
+  await fwd.close();
+  console.log("   " + JSON.stringify(result));
+  return result;
+}
+
+const s0 = await scenario("S0 control", "same-origin-only", "forwarded");
+check("S0 the forwarded URL as public origin: the code form is refused 403 (the reviewer's observation, reproduced)", !s0.entered && s0.gateStatus === 403, `gate ${s0.gateStatus}`);
+
+const s1 = await scenario("S1 route A", "same-origin-only", "https://localhost:3153");
+check("S1 entry through the gate's code form", s1.entered, `gate ${s1.gateStatus}`);
+check("S1 the cookie is Secure, HttpOnly, SameSite=Lax", /secure=true httpOnly=true sameSite=Lax/.test(s1.cookie ?? ""), s1.cookie);
+check("S1 /health names the candidate", s1.health === revision, s1.health);
+check("S1 the API: a room is created (201)", s1.roomStatus === 201, String(s1.roomStatus));
+check("S1 the WebSocket opens and gets the room", s1.ws === "projection", s1.ws);
+check("S1 another origin's POST is refused (403), its Origin passed through", s1.foreignPost === 403, `${s1.foreignPost}; the app saw ${JSON.stringify(s1.foreignOriginsSeenByApp)}`);
+check("S1 another origin's WebSocket handshake is refused (403)", s1.foreignWs === 403, String(s1.foreignWs));
+
+const s2 = await scenario("S2 route A, forwarder rewriting every Origin", "all", "https://localhost:3153");
+check("S2 (the danger the probe rules out) another origin's POST now creates a room", s2.foreignPost === 201, String(s2.foreignPost));
+check("S2 (the danger the probe rules out) another origin's WebSocket now opens", s2.foreignWs === 101, String(s2.foreignWs));
+
+foreign.close();
+await browser.close();
+console.log(failures ? `\nROUTE A TEST FAILED (${failures})` : "\nROUTE A TEST PASSED");
+process.exit(failures ? 1 : 0);

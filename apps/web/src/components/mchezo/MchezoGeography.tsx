@@ -39,7 +39,8 @@
 //   cleanup removes dead branches as more games migrate.
 import { satOutLabel, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { useState, type ReactNode } from "react";
-import { Keycap, MchezoWaiting, Stamp } from "../../ui/mchezo/index.js";
+import { MchezoWaiting } from "../../ui/mchezo/index.js";
+import { LockedAnswer } from "./LockedAnswer.js";
 import { QuestionScreen } from "../../ui/mchezo/index.js";
 import type { GameState, PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 import { asRecord } from "../../types.js";
@@ -92,20 +93,19 @@ export function MchezoGeography(deps: MchezoGeographyDeps) {
   const lockedQ = lastAnswered ? questions.find((x) => x.id === lastAnswered) : undefined;
   const lockedChoice = lockedQ ? myAnswers[lockedQ.id] : undefined;
   if (lockedQ && lockedChoice !== undefined) {
+    // R5 (Beta R1-R): the shared locked view; carrying on comes first.
     return (
-      <main className="mz-screen" aria-label="Answer locked in">
-        <section className="mz-lockcard" style={{ background: `var(--mz-answer-${lockedChoice % 4})`, color: "var(--mz-on-accent)" }}>
-          <span className="mz-kicker">Your answer</span>
-          <span className="mz-lockcard__answer">{lockedQ.options[lockedChoice]}</span>
-          <Stamp className="mz-lockcard__stamp">LOCKED IN</Stamp>
-        </section>
-        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} showClock />
-        <div style={{ padding: "0 16px 16px" }}>
-          <Keycap block variant="neutral" onClick={() => setLastAnswered(null)}>
-            {firstUnanswered ? "Next question" : "Waiting for the game to finish"}
-          </Keycap>
-        </div>
-      </main>
+      <LockedAnswer
+        answer={lockedQ.options[lockedChoice] ?? ""}
+        answerIndex={lockedChoice}
+        questionNumber={questions.indexOf(lockedQ) + 1}
+        questionCount={questions.length}
+        remaining={questions.filter((q) => myAnswers[q.id] === undefined).length}
+        onNext={() => setLastAnswered(null)}
+        players={players}
+        playerId={playerId}
+        publicGame={publicGame}
+      />
     );
   }
   // All answered: wait for the rest of the room (or the deadline/host skip).

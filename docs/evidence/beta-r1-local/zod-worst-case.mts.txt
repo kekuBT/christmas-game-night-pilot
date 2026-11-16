@@ -1,0 +1,17 @@
+// Beta R1 evidence: zod 3.25.76 (GHSA-mrhx-c7xc-m3w5) on the largest input the server accepts (64 KiB).
+import { z } from "zod";
+const cap = 64 * 1024;
+const n = Math.floor((cap - 2) / 2); // "[0,0,0,...]": two bytes per element
+const body = "[" + Array(n).fill("0").join(",") + "]";
+const input = JSON.parse(body) as unknown[];
+const schemas = { "array of strings, max 8": z.array(z.string()).max(8), "array of strings, unbounded": z.array(z.string()) };
+const mb = (x: number) => (x / 1048576).toFixed(1);
+for (const [name, s] of Object.entries(schemas)) {
+  global.gc?.();
+  const before = process.memoryUsage().heapUsed;
+  const t0 = performance.now();
+  const r = s.safeParse(input);
+  const ms = performance.now() - t0;
+  const peak = process.memoryUsage().heapUsed;
+  console.log(`${name}: body ${body.length} bytes, ${input.length} elements -> ${r.success ? "ok" : `${r.error.issues.length} issues`}, heap +${mb(peak - before)} MB, ${ms.toFixed(0)} ms`);
+}

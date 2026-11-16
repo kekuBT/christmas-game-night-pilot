@@ -1,0 +1,68 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 DONE 0.0s
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.82kB done
+#1 DONE 0.0s
+
+#2 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] load metadata for local/cgn-test-node-ca:22.16.0
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 447B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] local/cgn-test-node-ca:22.16.0
+#5 resolve docker.io/local/cgn-test-node-ca:22.16.0
+#5 resolve docker.io/local/cgn-test-node-ca:22.16.0 0.6s done
+#5 CACHED
+
+#4 [internal] load build context
+#4 transferring context: 1.23MB 0.0s done
+#4 DONE 0.0s
+
+#6 [gate 1/5] COPY pins/ /gate/pins/
+#6 DONE 0.0s
+
+#7 [gate 2/5] COPY cgn-artifact-gate.sh cgn-entrypoint.sh cgn-backup.sh cgn-authorize.sh /gate/
+#7 DONE 0.0s
+
+#8 [gate 3/5] COPY artifact/ /gate/artifact/
+#8 DONE 0.0s
+
+#9 [gate 4/5] RUN sh /gate/cgn-artifact-gate.sh gate /gate /out/app
+#9 0.093 cgn-entrypoint.sh: OK
+#9 0.093 cgn-backup.sh: OK
+#9 0.093 cgn-authorize.sh: OK
+#9 0.100 mchezo-7097ac2.tgz: OK
+#9 0.108 artifact-gate: archive: e57380943f7bf8c0e9e83da565b4fcc4eb4d2f3ec0a3802ea5a9acb2ce95fe52 (the pinned SHA-256)
+#9 0.183 artifact-gate: listing: 163 entries, files and folders only, no absolute path, no '..', no duplicate
+#9 0.258 artifact-gate: inventory: 144 files, SHA-256 fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c (the pinned one)
+#9 0.281 artifact-gate: release.json: revision 7097ac2bb062925bb296a129f4771f1e68fd522d, node v22.16.0, built 2026-11-16T05:22:33.807Z
+#9 1.247 
+#9 1.247 added 2 packages in 887ms
+#9 1.249 npm notice
+#9 1.249 npm notice New major version of npm available! 10.9.2 -> 12.2.2
+#9 1.249 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+#9 1.249 npm notice To update run: npm install -g npm@12.2.2
+#9 1.249 npm notice
+#9 1.357 artifact-gate: runtime packages: ws@8.22.1 zod@3.25.76, nothing else
+#9 1.373 ARTIFACT_GATE_OK archive=e57380943f7bf8c0e9e83da565b4fcc4eb4d2f3ec0a3802ea5a9acb2ce95fe52 revision=7097ac2bb062925bb296a129f4771f1e68fd522d inventory=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c deps="ws@8.22.1 zod@3.25.76"
+#9 DONE 1.4s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 0.5s done
+#10 exporting manifest sha256:e755011c0112a747d460e65cc4048cc6ed2208c4bb3002d4fb23ff2b40021e34 done
+#10 exporting config sha256:b0e6ed16cf344d88339c0d1c795697f6108708dc68fc56f0fcf129194b1bbb7b done
+#10 exporting attestation manifest sha256:050f2ce03ac95396c5ee85ca63b9ca642f03a5977e8ceeecfb871ba559087cc8 done
+#10 exporting manifest list sha256:d45f32c23cf9b5368a7540ae53ff312273549c991dfa0fde493168512e1a08fb done
+#10 naming to docker.io/library/cgn-render:neg-G9 done
+#10 unpacking to docker.io/library/cgn-render:neg-G9
+#10 unpacking to docker.io/library/cgn-render:neg-G9 0.2s done
+#10 DONE 0.7s

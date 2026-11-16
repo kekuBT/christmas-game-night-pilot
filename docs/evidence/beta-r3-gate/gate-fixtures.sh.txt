@@ -1,0 +1,230 @@
+#!/bin/bash
+# Beta R3 (review 6909578563): run the runbook's own artifact gate (the "promote" block, extracted verbatim from
+# docs/beta/beta-r1-release.md) against disposable fixtures; then its "first install" (Stage 1) and "switch" (Stage 4)
+# blocks, extracted the same way, with their own printed substitutions. Only these substitutions are made, and they are printed:
+#   - SHA, EXPECTED_SHA256, EXPECTED_INVENTORY, ARCHIVE, OPT -> the fixture's values and a throwaway folder;
+#   - `systemctl stop|start christmas-game-night` -> `echo SENTINEL-STOP|START` (harmless sentinels);
+#   - the datatool backup command -> `echo SENTINEL-BACKUP` (or `false`, for the backup-failure case).
+# The real npm registry is used for `npm ci` in the cases that reach it (ws and zod, as on a host).
+#   bash gate-fixtures.sh <repo root>
+set -uo pipefail
+REPO=$1
+DOCS=${2:-$1}   # the docs to test (a mutated copy, for the harness's own negative runs); packages still come from REPO's git
+W=$(mktemp -d); trap 'rm -rf "$W"' EXIT
+echo "== docs under test: $DOCS — commit $(git -C "$DOCS" rev-parse HEAD 2>/dev/null || echo '(not a git checkout: a mutated copy)'), $(git -C "$DOCS" status --porcelain 2>/dev/null | wc -l) uncommitted path(s); runbook sha256 $(sha256sum "$DOCS/docs/beta/beta-r1-release.md" | cut -c1-16)…"
+FAIL=0; PASS=0
+check() { if [ "$2" = 0 ]; then echo "PASS $1${3:+ — $3}"; PASS=$((PASS+1)); else echo "FAIL $1${3:+ — $3}"; FAIL=$((FAIL+1)); fi; }
+
+# The block, as published.
+awk '/^# >>> promote \(begin\)$/{f=1} f{print} /^# <<< promote \(end\)$/{f=0}' "$DOCS/docs/beta/beta-r1-release.md" > "$W/block.sh"
+echo "== the block extracted from docs/beta/beta-r1-release.md: $(wc -l < "$W/block.sh") lines, sha256 $(sha256sum "$W/block.sh" | cut -c1-16)…"
+grep -q 'sha256sum --check --strict' "$W/block.sh"; check "the extracted block uses sha256sum --check --strict" $?
+
+# Fixture packages: a release folder shaped like the real one (release.json, the real package files, a few files).
+FIXSHA=1111111111111111111111111111111111111111
+mkpkg() { # $1 dir, $2 revision, $3 extra file (optional)
+  mkdir -p "$1/dist/server" "$1/content"
+  printf '{\n  "revision": "%s",\n  "builtAt": "2026-11-16T00:00:00.000Z",\n  "node": "v22.16.0"\n}\n' "$2" > "$1/release.json"
+  git -C "$REPO" show 7097ac2:package.json > "$1/package.json"
+  git -C "$REPO" show 7097ac2:package-lock.json > "$1/package-lock.json"
+  echo 'console.log("fixture")' > "$1/dist/server/serve.js"
+  echo '{"fixture":true}' > "$1/content/fixture.json"
+  [ -n "${3:-}" ] && echo extra > "$1/$3"; true
+}
+inventory() { (cd "$1" && LC_ALL=C find . -type f ! -path ./release.json ! -path './node_modules/*' -print0 | LC_ALL=C sort -z | xargs -0 sha256sum | sha256sum | cut -c1-64); }
+mkpkg "$W/good" "$FIXSHA";                 tar -czf "$W/good.tgz" -C "$W/good" .
+mkpkg "$W/badrev" "2222222222222222222222222222222222222222"; tar -czf "$W/badrev.tgz" -C "$W/badrev" .
+mkpkg "$W/extra" "$FIXSHA" "dist/server/unexpected.js";       tar -czf "$W/extra.tgz" -C "$W/extra" .
+GOOD_SHA256=$(sha256sum "$W/good.tgz" | cut -c1-64); GOOD_INV=$(inventory "$W/good")
+echo "fixture: good.tgz sha256 $GOOD_SHA256, inventory $GOOD_INV"
+
+# Prepare one case: a throwaway OPT, the archive under the published name, the substituted block.
+run_case() { # $1 name, $2 archive source (or "" for missing), $3 expected sha256, $4 expected inventory, $5 backup cmd
+  local d="$W/case-$1"; mkdir -p "$d/opt/releases" "$d/host"
+  [ -n "$2" ] && cp "$2" "$d/host/mchezo-7097ac2.tgz"
+  python3 - "$W/block.sh" "$d/block.sh" "$FIXSHA" "$3" "$4" "$d/host/mchezo-7097ac2.tgz" "$d/opt" "$5" <<'PY'
+import sys
+src, dst, sha, exp, inv, archive, opt, backup = sys.argv[1:]
+s = open(src).read()
+subs = [
+  ("SHA=7097ac2bb062925bb296a129f4771f1e68fd522d\n", f"SHA={sha}\n"),
+  ("EXPECTED_SHA256=a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131\n", f"EXPECTED_SHA256={exp}\n"),
+  ("EXPECTED_INVENTORY=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c\n", f"EXPECTED_INVENTORY={inv}\n"),
+  ("ARCHIVE=./mchezo-7097ac2.tgz\n", f"ARCHIVE={archive}\n"),
+  ("OPT=/opt/christmas-game-night\n", f"OPT={opt}\n"),
+  ("then systemctl stop christmas-game-night;", "then echo SENTINEL-STOP;"),
+  ("&& systemctl start christmas-game-night\n", "&& echo SENTINEL-START\n"),
+  ('(cd "$REL" && node dist/server/datatool.js backup --data /var/lib/christmas-game-night \\\n     --out /var/backups/christmas-game-night/$(date -u +%Y%m%dT%H%MZ)-before-$SHA)', f"({backup})"),
+]
+for old, new in subs:
+    assert s.count(old) == 1, f"substitution target not found exactly once: {old!r}"
+    s = s.replace(old, new)
+open(dst, "w").write(s)
+PY
+  (cd "$d/host" && bash "$d/block.sh") > "$d/out.log" 2>&1
+  echo "--- $1: output"; sed 's/^/    /' "$d/out.log" | grep -v "^    $" | grep -v "added [0-9]* packages" ; true
+}
+sentinels() { grep -c "^SENTINEL-" "$1/out.log"; }
+
+echo; echo "== the substitutions (diff of the published block vs case G1's)"
+run_case G1 "$W/good.tgz" "$GOOD_SHA256" "$GOOD_INV" "echo SENTINEL-BACKUP"
+diff "$W/block.sh" "$W/case-G1/block.sh" | sed 's/^/    /'
+
+echo; echo "== G1: the correct archive"
+D=$W/case-G1
+grep -q "^VERIFIED $FIXSHA" "$D/out.log"; check "G1 VERIFIED" $?
+[ -f "$D/opt/verified-$FIXSHA" ]; check "G1 the verified marker exists" $?
+grep -q "^SENTINEL-STOP" "$D/out.log" && grep -q "^SENTINEL-BACKUP" "$D/out.log" && grep -q "^SENTINEL-START" "$D/out.log"; check "G1 reaches stop, backup and the start sentinel" $?
+[ "$(readlink "$D/opt/current")" = "$D/opt/releases/$FIXSHA" ]; check "G1 current points to the verified release" $? "$(readlink "$D/opt/current")"
+# A package is a folder with a package.json, one level down or two for a scope. npm also leaves EMPTY scope folders
+# (for example @babel) for omitted dev packages; they hold no files, which is checked separately.
+NMD="$D/opt/releases/$FIXSHA/node_modules"
+NM="$(find "$NMD" -mindepth 2 -maxdepth 3 -name package.json | sed "s#^$NMD/##; s#/package.json\$##" | grep -v '/node_modules/' | sort | tr '\n' ' ')"
+[ "$NM" = "ws zod " ]; check "G1 npm ci installed ws and zod only (packages with a package.json)" $? "packages: $NM"
+SCOPEFILES=$(find "$NMD" -mindepth 1 -maxdepth 1 -name '@*' -type d -exec find {} -type f \; | wc -l)
+[ "$SCOPEFILES" = 0 ]; check "G1 the dev-package scope folders npm leaves are empty" $? "$(find "$NMD" -mindepth 1 -maxdepth 1 -name '@*' -type d | wc -l) empty scope folder(s), $SCOPEFILES file(s)"
+
+for spec in "G2|wrong bytes (one byte appended)|bad" "G3|missing archive|missing" "G4|wrong revision in release.json (its own hash pinned)|badrev" "G5|an unexpected extra file (its own hash pinned, the real inventory expected)|extra"; do
+  IFS='|' read -r name label kind <<< "$spec"
+  echo; echo "== $name: $label"
+  case $kind in
+    bad) cp "$W/good.tgz" "$W/bad.tgz"; printf 'x' >> "$W/bad.tgz"; run_case "$name" "$W/bad.tgz" "$GOOD_SHA256" "$GOOD_INV" "echo SENTINEL-BACKUP" ;;
+    missing) run_case "$name" "" "$GOOD_SHA256" "$GOOD_INV" "echo SENTINEL-BACKUP" ;;
+    badrev) run_case "$name" "$W/badrev.tgz" "$(sha256sum "$W/badrev.tgz" | cut -c1-64)" "$GOOD_INV" "echo SENTINEL-BACKUP" ;;
+    extra) run_case "$name" "$W/extra.tgz" "$(sha256sum "$W/extra.tgz" | cut -c1-64)" "$GOOD_INV" "echo SENTINEL-BACKUP" ;;
+  esac
+  D=$W/case-$name
+  grep -q "^STOP: the archive" "$D/out.log"; check "$name prints STOP at the gate" $?
+  [ ! -e "$D/opt/verified-$FIXSHA" ]; check "$name leaves no verified marker" $?
+  [ "$(sentinels "$D")" = 0 ]; check "$name reaches no sentinel (no stop, backup or start)" $? "$(sentinels "$D") sentinel(s)"
+  [ ! -e "$D/opt/current" ]; check "$name switches nothing" $?
+done
+[ ! -e "$W/case-G2/opt/releases/$FIXSHA" ] && [ ! -e "$W/case-G3/opt/releases/$FIXSHA" ]; check "G2/G3 nothing is unpacked when the checksum fails" $?
+
+echo; echo "== G6: a stale marker from an earlier attempt, then wrong bytes"
+cp "$W/good.tgz" "$W/bad6.tgz"; printf 'y' >> "$W/bad6.tgz"
+mkdir -p "$W/case-G6/opt"; touch "$W/case-G6/opt/verified-$FIXSHA"
+run_case G6 "$W/bad6.tgz" "$GOOD_SHA256" "$GOOD_INV" "echo SENTINEL-BACKUP"
+D=$W/case-G6
+[ ! -e "$D/opt/verified-$FIXSHA" ] && [ "$(sentinels "$D")" = 0 ] && [ ! -e "$D/opt/current" ]; check "G6 the stale marker is cleared first; no sentinel, no switch" $?
+
+echo; echo "== G8: a rebuild-like archive: the same files repacked (different SHA-256, the SAME revision and inventory)"
+mkdir -p "$W/repack"; (cd "$W/good" && tar --mtime='2020-01-01 00:00:00' -czf "$W/repack.tgz" .)
+REPACK_SHA256=$(sha256sum "$W/repack.tgz" | cut -c1-64); REPACK_INV=$(mkdir -p "$W/repack-x" && tar -xzf "$W/repack.tgz" -C "$W/repack-x" && inventory "$W/repack-x")
+[ "$REPACK_SHA256" != "$GOOD_SHA256" ] && [ "$REPACK_INV" = "$GOOD_INV" ]; check "G8 precondition: the hashes differ, the inventories match" $? "sha256 ${REPACK_SHA256:0:16}… vs ${GOOD_SHA256:0:16}…, inventory ${REPACK_INV:0:16}… vs ${GOOD_INV:0:16}…"
+run_case G8 "$W/repack.tgz" "$GOOD_SHA256" "$GOOD_INV" "echo SENTINEL-BACKUP"
+D=$W/case-G8
+grep -q "^STOP: the archive" "$D/out.log" && [ ! -e "$D/opt/verified-$FIXSHA" ] && [ "$(sentinels "$D")" = 0 ] && [ ! -e "$D/opt/current" ] && [ ! -e "$D/opt/releases/$FIXSHA" ]; check "G8 only the archive hash stops it: STOP, nothing unpacked, no marker, no sentinel, no switch" $?
+
+echo; echo "== G7: the correct archive, but the backup fails"
+run_case G7 "$W/good.tgz" "$GOOD_SHA256" "$GOOD_INV" "false"
+D=$W/case-G7
+grep -q "^VERIFIED" "$D/out.log" && grep -q "^SENTINEL-STOP" "$D/out.log"; check "G7 verified and stopped for maintenance" $?
+grep -q "^STOP: no backup" "$D/out.log" && ! grep -q "^SENTINEL-START" "$D/out.log" && [ ! -e "$D/opt/current" ]; check "G7 no backup: no switch, no start sentinel" $?
+
+# ---------------------------------------------------------------------------------------------------------------
+# Stage 1 runs "First install" (its step 3 is the artifact gate above), and Stage 4 runs "the switch". Both blocks are
+# extracted verbatim too; host-only commands become no-ops and the service commands become sentinels (diffs printed).
+awk '/^# >>> first install \(begin\)$/{f=1} f{print} /^# <<< first install \(end\)$/{f=0}' "$DOCS/docs/beta/beta-r1-release.md" > "$W/first.sh"
+awk '/^ *# >>> switch \(begin\)$/{f=1} f{sub(/^   /,""); print} /^ *# <<< switch \(end\)$/{f=0}' "$DOCS/docs/beta/beta-r1-release.md" > "$W/switch.sh"
+awk '/^# >>> promote \(begin\)$/{f=1} /^# 2\. Maintenance/{f=0} f{print}' "$DOCS/docs/beta/beta-r1-release.md" > "$W/step1.sh"
+echo; echo "== the first-install block: $(wc -l < "$W/first.sh") lines; the switch block: $(wc -l < "$W/switch.sh") lines; promote step 1: $(wc -l < "$W/step1.sh") lines"
+[ -s "$W/first.sh" ] && [ -s "$W/switch.sh" ] && grep -q '^DATA=/var/lib/cgn-validation$' "$W/first.sh"; check "the first-install block starts from the throwaway data folder" $?
+! grep -q 'MCHEZO_TRUST_PROXY=1' "$W/first.sh"; check "the first-install block doesn't preset MCHEZO_TRUST_PROXY" $?
+
+# The architecture page's unit, as published (the operator writes it; it isn't in the package).
+awk '/^\[Unit\]$/{f=1} f{print} /^WantedBy=multi-user.target$/{f=0}' "$DOCS/docs/beta/beta-r1-architecture.md" > "$W/unit.published"
+grep -qx 'ReadWritePaths=/var/lib/christmas-game-night' "$W/unit.published"; check "the published unit names the real data folder (so the first install must change it)" $?
+
+first_case() { # $1 name, $2 archive source ("" = missing), $3 unit file to start from
+  local d="$W/fi-$1"; mkdir -p "$d/opt" "$d/host" "$d/var/lib"
+  [ -n "$2" ] && cp "$2" "$d/host/mchezo-7097ac2.tgz"; cp "$3" "$d/unit.service"
+  python3 - "$W/step1.sh" "$W/first.sh" "$d/run.sh" "$FIXSHA" "$GOOD_SHA256" "$GOOD_INV" "$d" <<'PY'
+import sys
+step1, first, dst, sha, exp, inv, d = sys.argv[1:]
+a = open(step1).read(); b = open(first).read()
+for old, new in [("SHA=7097ac2bb062925bb296a129f4771f1e68fd522d\n", f"SHA={sha}\n"),
+                 ("EXPECTED_SHA256=a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131\n", f"EXPECTED_SHA256={exp}\n"),
+                 ("EXPECTED_INVENTORY=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c\n", f"EXPECTED_INVENTORY={inv}\n"),
+                 ("ARCHIVE=./mchezo-7097ac2.tgz\n", f"ARCHIVE={d}/host/mchezo-7097ac2.tgz\n"),
+                 ("OPT=/opt/christmas-game-night\n", f"OPT={d}/opt\n")]:
+    assert a.count(old) == 1, old; a = a.replace(old, new)
+subs = [("DATA=/var/lib/cgn-validation\n", f"DATA={d}/var/lib/cgn-validation\n"),
+        ("useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn\n", ": useradd\n"),
+        ('install -d -m 0700 -o cgn -g cgn "$DATA"\n', 'mkdir -m 0700 "$DATA"\n'),
+        ("install -d -m 0700 /var/backups/christmas-game-night\n", ": backups folder\n"),
+        ("install -d -m 0755 /opt/christmas-game-night/releases\n", f"mkdir -p {d}/opt/releases\n"),
+        ("install -d -m 0750 -g cgn /etc/christmas-game-night\n", ": settings folder\n"),
+        ("install -m 0640 -g cgn /dev/null /etc/christmas-game-night/env", ": settings file"),
+        ('cd /opt/christmas-game-night/current && sudo -u cgn node dist/server/datatool.js check --data "$DATA"',
+         f'cd {d}/opt/current && echo "datatool check --data $DATA"'),
+        ("/etc/systemd/system/christmas-game-night.service", f"{d}/unit.service"),
+        ("systemctl daemon-reload\n", ": daemon-reload\n"),
+        ("then systemctl enable --now christmas-game-night\n", "then echo SENTINEL-ENABLE\n")]
+for old, new in subs:
+    n = b.count(old); assert n >= 1, old; b = b.replace(old, new)
+# "run only Promoting it, step 1 ... in this shell": step 1 goes right before step 3's link line.
+anchor = 'if [ -f "$MARK" ]; then ln -sfn "$REL" "$OPT/current"'
+assert b.count(anchor) == 1
+open(dst + ".nostep1", "w").write(b)   # for the printed diff only
+b = b.replace(anchor, a + anchor)
+open(dst, "w").write(b)
+PY
+  (cd "$d/host" && bash "$d/run.sh") > "$d/out.log" 2>&1
+  echo "--- first install $1: output"; sed 's/^/    /' "$d/out.log" | grep -v "^    $" | grep -v "added [0-9]* packages"; true
+}
+echo; echo "== the first-install substitutions (diff of the published block vs case F1's script, step 1 inserted)"
+first_case F1 "$W/good.tgz" "$W/unit.published"
+diff "$W/first.sh" "$W/fi-F1/run.sh.nostep1" | sed 's/^/    /' 
+echo "    (plus promote step 1, $(wc -l < "$W/step1.sh") lines, inserted before step 3's link line)"
+D=$W/fi-F1
+grep -q "^VERIFIED $FIXSHA" "$D/out.log" && [ "$(readlink "$D/opt/current")" = "$D/opt/releases/$FIXSHA" ]; check "F1 first install, correct archive: VERIFIED and current linked" $?
+grep -qx "ReadWritePaths=$D/var/lib/cgn-validation" "$D/unit.service" && grep -q "^SENTINEL-ENABLE" "$D/out.log"; check "F1 the unit now names the throwaway folder, and the start sentinel is reached" $?
+grep -q "datatool check --data $D/var/lib/cgn-validation" "$D/out.log" && [ ! -e "$D/var/lib/christmas-game-night" ]; check "F1 only the throwaway data folder is created and checked" $?
+
+cp "$W/good.tgz" "$W/bad-f2.tgz"; printf 'z' >> "$W/bad-f2.tgz"
+for spec in "F2|wrong bytes|$W/bad-f2.tgz" "F3|missing archive|"; do
+  IFS='|' read -r name label src <<< "$spec"
+  echo; echo "== $name: first install, $label"
+  first_case "$name" "$src" "$W/unit.published"; D=$W/fi-$name
+  grep -q "^STOP: the archive" "$D/out.log" && grep -q "^STOP: not verified. Don't link or start." "$D/out.log"; check "$name prints STOP at the gate and at the link" $?
+  [ ! -e "$D/opt/current" ] && ! grep -q "^SENTINEL-" "$D/out.log"; check "$name links nothing and reaches no start sentinel" $?
+done
+
+echo; echo "== F4: first install, correct archive, but the unit has no ReadWritePaths= line to change"
+grep -v '^ReadWritePaths=' "$W/unit.published" > "$W/unit.norwp"
+first_case F4 "$W/good.tgz" "$W/unit.norwp"; D=$W/fi-F4
+grep -q "^VERIFIED" "$D/out.log" && grep -q "^STOP: not verified, or the unit doesn't name" "$D/out.log" && ! grep -q "^SENTINEL-ENABLE" "$D/out.log"; check "F4 no start without the unit naming the throwaway folder" $?
+
+switch_case() { # $1 name, $2 env MCHEZO_DATA_DIR value
+  local d="$W/sw-$1"; mkdir -p "$d/var/lib"
+  sed "s#^ReadWritePaths=.*#ReadWritePaths=/var/lib/cgn-validation#" "$W/unit.published" > "$d/unit.service"
+  printf 'NODE_ENV=production\nMCHEZO_DATA_DIR=%s\n' "$2" > "$d/env"
+  python3 - "$W/switch.sh" "$d/run.sh" "$d" <<'PY'
+import sys
+src, dst, d = sys.argv[1:]
+s = open(src).read()
+for old, new in [("systemctl stop christmas-game-night\n", "echo SENTINEL-STOP\n"),
+                 ("DATA=/var/lib/christmas-game-night\n", f"DATA={d}/var/lib/christmas-game-night\n"),
+                 ('install -d -m 0700 -o cgn -g cgn "$DATA"', 'mkdir -m 0700 "$DATA"'),
+                 ("/etc/christmas-game-night/env", f"{d}/env"),
+                 ("/etc/systemd/system/christmas-game-night.service", f"{d}/unit.service"),
+                 ("systemctl daemon-reload\n", ": daemon-reload\n"),
+                 ("then systemctl start christmas-game-night\n", "then echo SENTINEL-START\n")]:
+    assert s.count(old) >= 1, old; s = s.replace(old, new)
+open(dst, "w").write(s)
+PY
+  (bash "$d/run.sh") > "$d/out.log" 2>&1
+  echo "--- switch $1: output"; sed 's/^/    /' "$d/out.log"; true
+}
+echo; echo "== W1: the switch after Approval 2, settings edited to the real folder"
+switch_case W1 "$W/sw-W1/var/lib/christmas-game-night"; D=$W/sw-W1
+diff "$W/switch.sh" "$D/run.sh" | sed 's/^/    /'
+grep -q "^SENTINEL-START" "$D/out.log" && grep -qx "ReadWritePaths=$D/var/lib/christmas-game-night" "$D/unit.service" && [ -d "$D/var/lib/christmas-game-night" ]; check "W1 starts only with the settings and the unit naming the new real folder" $?
+echo; echo "== W2: the switch, but the settings still name the throwaway folder"
+switch_case W2 "/var/lib/cgn-validation"; D=$W/sw-W2
+grep -q "^STOP: the settings or the unit don't name" "$D/out.log" && ! grep -q "^SENTINEL-START" "$D/out.log"; check "W2 no start (and so no invitations) while the settings name the throwaway folder" $?
+
+echo; echo "artifact gate fixtures: $PASS passed, $FAIL failed"
+[ $FAIL = 0 ] && echo "ARTIFACT GATE FIXTURES PASSED" || echo "ARTIFACT GATE FIXTURES FAILED"
+exit $FAIL

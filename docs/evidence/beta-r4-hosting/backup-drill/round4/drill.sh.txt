@@ -1,0 +1,168 @@
+#!/bin/bash
+# Beta R4 backup drill (reviews 6917441687 and 6918277617): the proposed cgn-entrypoint, cgn-backup, cgn-authorize and
+# cgn-receive, run locally against the UNCHANGED server in production mode, on disposable data, with live play. The
+# independent copy is "received" in a separate folder standing in for the owner's device, and the restore uses THAT copy.
+# No Render, no network beyond localhost. (The injected-failure negatives are in focused.sh.)
+#   bash drill.sh <repo root, built> <drill dir holding the scripts>
+# Every case prints PASS or FAIL; the last line is the verdict, and the exit code is non-zero on any FAIL.
+set -u
+APP=$(cd "$1" && pwd); D=$(cd "$2" && pwd)
+T=$(mktemp -d /tmp/cgn-r4drill-XXXXXX)
+DISK="$T/var/data"; mkdir -p "$DISK" "$T/owner" "$T/offsite"
+PORT=$((41000 + RANDOM % 900)); BASE="http://127.0.0.1:$PORT"
+fails=0; passes=0
+pass() { echo "PASS $*"; passes=$((passes + 1)); }
+fail() { echo "FAIL $*"; fails=$((fails + 1)); }
+expect() { if [ "$1" = 0 ]; then pass "$2"; else fail "$2"; fi; }
+health() { curl -s -o /dev/null -w '%{http_code}' -m 2 "$BASE/health" 2>/dev/null; }
+wait_health() { for _ in $(seq 1 100); do [ "$(health)" = 200 ] && return 0; sleep 0.1; done; return 1; }
+echo "== drill started $(date -u +%FT%TZ); repo $(git -C "$APP" rev-parse HEAD) ($(git -C "$APP" status --porcelain | wc -l) uncommitted paths); node $(node -v); age $(age --version)"
+echo "== runtime vs 7097ac2: $(git -C "$APP" diff --name-only 7097ac2bb062925bb296a129f4771f1e68fd522d -- src package.json package-lock.json tsconfig.json tsconfig.build.json | wc -l) files differ"
+age-keygen -o "$T/owner/key.txt" 2>/dev/null
+PUB=$(age-keygen -y "$T/owner/key.txt")
+export NODE_ENV=production PORT MCHEZO_DATA_DIR="$DISK/cgn" MCHEZO_PUBLIC_ORIGIN="$BASE" MCHEZO_LISTEN_HOST=127.0.0.1
+export MCHEZO_BETA_ACCESS_CODE="drill-only-access-code-$RANDOM$RANDOM"
+export CGN_RUN_DIR="$T/run" CGN_APP_DIR="$APP" CGN_BACKUP_ROOT="$DISK/backups" CGN_BACKUP_RECIPIENT="$PUB" CGN_AUTHORIZED_CONFIG="$DISK/cgn-authorized.conf"
+authorize() { printf '%s' "$MCHEZO_BETA_ACCESS_CODE" | sh "$D/deploy/cgn-authorize.sh" "$1" "$MCHEZO_PUBLIC_ORIGIN" unset; }
+refused_start() { env "$@" timeout 15 sh "$D/deploy/cgn-entrypoint.sh" > "$T/refused.log" 2>&1; echo $?; }
+start_entry() { sh "$D/deploy/cgn-entrypoint.sh" >> "$T/entrypoint.log" 2>&1 & ENTRY=$!; wait_health; }
+echo "== production mode: NODE_ENV=production, access code set (not printed), public origin $BASE, data $MCHEZO_DATA_DIR"
+
+echo "== E1 the entrypoint starts the server"
+start_entry; expect $? "E1 /health 200 under cgn-entrypoint (pid $ENTRY), server pid $(cat "$T/run/server.pid")"
+curl -s -o /dev/null -w '%{http_code}' "$BASE/rooms" -X POST -H 'content-type: application/json' -d '{}' | grep -q 401
+expect $? "E1 production gate: the API refuses a request without the access cookie (401)"
+grep -q "WARNING first install" "$T/entrypoint.log"; expect $? "E1 with no data and no authorized configuration, the entrypoint starts and says it is a first install"
+echo "== A1 the owner's configuration is recorded (after the acceptance checks)"
+out=$(authorize "$MCHEZO_DATA_DIR"); echo "   $out"
+[ "$(stat -c %a "$CGN_AUTHORIZED_CONFIG")" = 600 ] && ! grep -q -F "$MCHEZO_BETA_ACCESS_CODE" "$CGN_AUTHORIZED_CONFIG" && echo "$out" | grep -q '^AUTHORIZED'
+expect $? "A1 recorded privately (mode 600); the access code itself is not in it"
+
+echo "== N1 a backup without --allow-running is refused while the server runs"
+out=$(cd "$APP" && node dist/server/datatool.js backup --data "$MCHEZO_DATA_DIR" --out "$T/n1" 2>&1); rc=$?
+echo "   datatool exit $rc: $out"
+[ $rc -ne 0 ] && echo "$out" | grep -q "is using" && [ ! -e "$T/n1" ]; expect $? "N1 refused (exit $rc), nothing written"
+
+echo "== N3 a preflight failure stops nothing"
+pid0=$(cat "$T/run/server.pid")
+out=$(CGN_BACKUP_RECIPIENT=not-a-key sh "$D/deploy/cgn-backup.sh" 2>&1); rc=$?
+echo "   cgn-backup exit $rc: $out"
+[ $rc -ne 0 ] && echo "$out" | grep -q BACKUP_FAILED && ! echo "$out" | grep -q BACKUP_OK && [ "$(cat "$T/run/server.pid")" = "$pid0" ] && kill -0 "$pid0" && [ ! -e "$T/run/hold" ] && [ "$(health)" = 200 ]
+expect $? "N3 BACKUP_FAILED before any stop: same server pid $pid0 still serving, no hold, no BACKUP_OK"
+
+echo "== P1 a backup during live play: stop, locked copy, verify, restart, encrypt"
+node "$D/play.mjs" "$BASE" "$MCHEZO_BETA_ACCESS_CODE" 2 5 "$T/play.json" "$APP" > "$T/play.log" 2>&1 & PLAY=$!
+for _ in $(seq 1 200); do grep -q "Trivia playing" "$T/play.log" 2>/dev/null && break; sleep 0.1; done
+sleep 4
+node "$D/monitor.mjs" "$T/run" "$MCHEZO_DATA_DIR" "$T/monitor.json" > "$T/monitor.log" 2>&1 & MON=$!
+sleep 0.2
+# As from an SSH session that lacks the service's environment: the script reads both values from the running server.
+out=$(env -u MCHEZO_DATA_DIR -u CGN_BACKUP_RECIPIENT sh "$D/deploy/cgn-backup.sh" 2>&1); rc=$?
+echo "$out" | sed 's/^/   /'
+wait $MON; cat "$T/monitor.log" | sed 's/^/   /'
+wait $PLAY; prc=$?; cat "$T/play.log" | sed 's/^/   /'
+okline=$(echo "$out" | grep '^BACKUP_OK') ; archive=$(echo "$okline" | awk '{print $2}')
+[ $rc -eq 0 ] && [ -n "$okline" ] && [ -s "$archive" ]; expect $? "P1 cgn-backup exit $rc with BACKUP_OK and an archive"
+[ $prc -eq 0 ]; expect $? "P1 live play finished without errors (exit $prc)"
+sha=$(echo "$okline" | sed 's/.*sha256=\([0-9a-f]*\).*/\1/'); [ "$(sha256sum "$archive" | cut -d' ' -f1)" = "$sha" ]; expect $? "P1 the archive's SHA-256 matches the BACKUP_OK line"
+stamp=$(basename "$archive" .tar.age); stamp=${stamp#cgn-}
+code=$(node -e "const r=require('$T/play.json').rooms[0];console.log(r.joinCode)")
+! grep -a -q -e "$code" -e '"answers"' -e 'christmas-game-night-backup' "$archive"; expect $? "P1 the archive holds no plaintext (no join code, no field names)"
+age -d -i <(age-keygen 2>/dev/null) "$archive" > /dev/null 2>&1; [ $? -ne 0 ]; expect $? "P1 another key can't decrypt it"
+# The owner's side: decrypt, unpack, verify, check. (On Render the copy leaves with scp; here it is a local file.)
+echo "== RC the independent copy: the archive leaves the instance, then cgn-receive checks it where it was received"
+cp "$archive" "$T/offsite/"   # stands in for scp -s off Render, the upload to private storage and the fetch back
+OFF="$T/offsite/$(basename "$archive")"; mkdir "$T/recv"
+out=$(sh "$D/deploy/cgn-receive.sh" "$OFF" "$sha" "$T/owner/key.txt" "$T/recv" 2>&1); rc=$?; echo "   $out"
+[ $rc -eq 0 ] && echo "$out" | grep -q '^RECEIPT_OK' && [ -f "$T/recv/$stamp/manifest.json" ]; expect $? "RC RECEIPT_OK for the received copy (exit $rc)"
+REC="$T/recv/$stamp"
+(cd "$APP" && node dist/server/datatool.js verify --backup "$REC") | sed 's/^/   /'; expect ${PIPESTATUS[0]} "RC datatool verify on the received copy"
+node "$D/check.mjs" "$T/play.json" "$T/monitor.json" "$REC" "$MCHEZO_DATA_DIR" | sed 's/^/   /'; expect ${PIPESTATUS[0]} "P1 consistency checks on the received copy (below the line above)"
+receipt_refused() { # $1 case, $2 archive, $3 expected hash, $4 key, $5 expected reason
+  local w; w=$(mktemp -d "$T/rn-XXXX"); local o; o=$(sh "$D/deploy/cgn-receive.sh" "$2" "$3" "$4" "$w" 2>&1); local r=$?
+  echo "   $o"; [ $r -ne 0 ] && echo "$o" | grep -q "RECEIPT_FAILED: $5" && ! echo "$o" | grep -q RECEIPT_OK; expect $? "$1 (exit $r)"; }
+receipt_refused "RN1 a hash that isn't the BACKUP_OK one is refused" "$OFF" "$(printf '%064d' 0)" "$T/owner/key.txt" "the archive's SHA-256"
+cp "$OFF" "$T/offsite/corrupt.tar.age"; printf '\x00' | dd of="$T/offsite/corrupt.tar.age" bs=1 seek=300 conv=notrunc 2>/dev/null
+receipt_refused "RN2 a damaged archive (with its own hash given) fails decryption" "$T/offsite/corrupt.tar.age" "$(sha256sum < "$T/offsite/corrupt.tar.age" | cut -d' ' -f1)" "$T/owner/key.txt" "decryption failed"
+age-keygen -o "$T/other.key" 2>/dev/null
+receipt_refused "RN3 another key can't receive it" "$OFF" "$sha" "$T/other.key" "decryption failed"
+mkdir "$T/forge" && age -d -i "$T/owner/key.txt" "$OFF" | tar -x -C "$T/forge" && f=$(ls "$T/forge/$stamp" | grep '^room-.*\.json$' | head -1) && printf ' ' >> "$T/forge/$stamp/$f" \
+  && tar -C "$T/forge" -cf "$T/forge.tar" "$stamp" "$stamp.SHA256SUMS" && age -r "$CGN_BACKUP_RECIPIENT" -o "$T/offsite/forged.tar.age" "$T/forge.tar"
+receipt_refused "RN4 a re-encrypted archive with a changed file (and its own hash given) fails the checksum list" "$T/offsite/forged.tar.age" "$(sha256sum < "$T/offsite/forged.tar.age" | cut -d' ' -f1)" "$T/owner/key.txt" "a file doesn't match its checksum"
+for m in drop-acked add-later flip-byte; do
+  rm -rf "$T/mut" && cp -r "$REC" "$T/mut"
+  node "$D/mutate.mjs" "$m" "$T/play.json" "$T/monitor.json" "$T/mut"
+  node "$D/check.mjs" "$T/play.json" "$T/monitor.json" "$T/mut" "$MCHEZO_DATA_DIR" > "$T/mut.log" 2>&1; mrc=$?
+  grep '^FAIL' "$T/mut.log" | sed 's/^/   caught: /'
+  [ $mrc -ne 0 ]; expect $? "C-$m the checker fails on a backup damaged this way (exit $mrc)"
+done
+pid1=$(cat "$T/run/server.pid"); [ "$pid1" != "$pid0" ] && [ "$(health)" = 200 ]; expect $? "P1 the entrypoint restarted the server (pid $pid0 -> $pid1); /health 200"
+grep -q "server stopped for a backup" "$T/entrypoint.log"; expect $? "P1 the entrypoint held the server during the backup"
+
+echo "== N4 a failure after the stop: the copy times out"
+before=$(ls "$CGN_BACKUP_ROOT" | sort)
+out=$(CGN_BACKUP_LIMIT_S=0.001 sh "$D/deploy/cgn-backup.sh" 2>&1); rc=$?
+echo "$out" | sed 's/^/   /'
+wait_health
+new=$(comm -13 <(echo "$before") <(ls "$CGN_BACKUP_ROOT" | sort) | tr '\n' ' ')
+[ $rc -ne 0 ] && echo "$out" | grep -q "BACKUP_FAILED: datatool backup failed or timed out" && ! echo "$out" | grep -q BACKUP_OK && [ ! -e "$T/run/hold" ] && [ "$(health)" = 200 ] && [ -z "$new" ]
+expect $? "N4 BACKUP_FAILED (exit $rc), no BACKUP_OK, hold released, server back (/health 200), nothing new left in the backup folder [$new]"
+
+echo "== R restore the RECEIVED copy (after RECEIPT_OK) into a NEW folder, check it, then switch the server to it (re-authorized first)"
+mkdir -p "$DISK/incoming" && cp -r "$REC" "$DISK/incoming/"   # stands in for scp -s back to the instance
+(cd "$APP" && node dist/server/datatool.js verify --backup "$DISK/incoming/$stamp") | sed 's/^/   /'; expect ${PIPESTATUS[0]} "R datatool verify of the uploaded copy on the instance, before anything is restored"
+(cd "$APP" && node dist/server/datatool.js restore --backup "$DISK/incoming/$stamp" --into "$DISK/cgn-restored-$stamp") | sed 's/^/   /'; expect ${PIPESTATUS[0]} "R datatool restore into a new folder"
+(cd "$APP" && node dist/server/datatool.js check --data "$DISK/cgn-restored-$stamp") | sed 's/^/   /'; expect ${PIPESTATUS[0]} "R datatool check of the restored folder"
+node -e "
+const {createHash}=require('crypto'),fs=require('fs'),m=require('$REC/manifest.json');
+const bad=m.files.filter(f=>createHash('sha256').update(fs.readFileSync('$DISK/cgn-restored-$stamp/'+f.name)).digest('hex')!==f.sha256);
+console.log('   restored files matching the manifest: '+(m.files.length-bad.length)+'/'+m.files.length); process.exit(bad.length?1:0)"; expect $? "R every restored file equals the backup"
+echo "   $(authorize "$DISK/cgn-restored-$stamp")"
+kill -TERM "$ENTRY"; wait "$ENTRY"; erc=$?
+grep -q "stopped on request" "$T/entrypoint.log" && [ $erc -eq 0 ] && [ "$(health)" != 200 ]; expect $? "R SIGTERM to the entrypoint (as Render sends it) stops the server gracefully (exit $erc)"
+OLD_DATA="$MCHEZO_DATA_DIR"; export MCHEZO_DATA_DIR="$DISK/cgn-restored-$stamp"
+start_entry; expect $? "R the server starts on the restored folder (as a changed MCHEZO_DATA_DIR and a redeploy would)"
+tail -5 "$T/entrypoint.log" | grep -q "matches the authorized configuration"; expect $? "R the entrypoint confirmed the authorized configuration"
+node -e "
+const p=require('$T/play.json');
+(async()=>{const r0=await fetch('$BASE/beta/enter',{method:'POST',redirect:'manual',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code:process.env.MCHEZO_BETA_ACCESS_CODE,next:'/'})});
+const ck=(r0.headers.get('set-cookie')||'').split(';')[0]; let bad=0;
+for(const room of p.rooms){const r=await fetch('$BASE/rooms/'+room.roomId+'/projection?audience=player',{headers:{cookie:ck,'x-session-token':room.hostToken}});
+ const j=await r.json(); const g=(j.myGames||[]).find(x=>x.gameId==='trivia'); console.log('   room '+room.roomId+': '+r.status+', trivia '+(g&&g.status)); if(r.status!==200||!g) bad++;}
+process.exit(bad?1:0)})()"; expect $? "R each room comes back on the restored server, and its host's saved session still works"
+
+echo "== G the rollback guard: an old environment fails closed"
+kill -TERM "$ENTRY"; wait "$ENTRY"
+rc=$(refused_start MCHEZO_DATA_DIR="$OLD_DATA"); sed 's/^/   /' "$T/refused.log"
+[ "$rc" = 78 ] && grep -q "not the authorized data folder" "$T/refused.log" && [ "$(health)" != 200 ]; expect $? "G1 a deploy with the previous data folder (as a one-click rollback would bring back) refuses to start (exit $rc)"
+rc=$(refused_start MCHEZO_BETA_ACCESS_CODE="an-older-access-code-1"); sed 's/^/   /' "$T/refused.log"
+[ "$rc" = 78 ] && grep -q "access code is not the authorized one" "$T/refused.log" && [ "$(health)" != 200 ]; expect $? "G2 a deploy with an older access code refuses to start (exit $rc)"
+rc=$(refused_start MCHEZO_TRUST_PROXY=2); sed 's/^/   /' "$T/refused.log"
+[ "$rc" = 78 ] && grep -q "not the authorized proxy count" "$T/refused.log"; expect $? "G3 a deploy with another proxy count refuses to start (exit $rc)"
+mv "$CGN_AUTHORIZED_CONFIG" "$CGN_AUTHORIZED_CONFIG.aside"
+rc=$(refused_start); sed 's/^/   /' "$T/refused.log"
+[ "$rc" = 78 ] && grep -q "no authorized configuration is recorded" "$T/refused.log"; expect $? "G4 data present but no record: refuses to start (exit $rc)"
+mv "$CGN_AUTHORIZED_CONFIG.aside" "$CGN_AUTHORIZED_CONFIG"
+
+echo "== N2 a server can't start while the backup holds the lock"
+node "$D/lock-holder.mjs" "$APP" "$MCHEZO_DATA_DIR" > "$T/holder.log" 2>&1 & HOLDER=$!
+for _ in $(seq 1 50); do grep -q HOLDING "$T/holder.log" && break; sleep 0.1; done
+out=$(cd "$APP" && timeout 20 node dist/server/serve.js 2>&1); rc=$?
+echo "   serve.js exit $rc: $(echo "$out" | tail -1)"
+[ $rc -ne 0 ] && [ $rc -ne 124 ] && [ "$(health)" != 200 ]; expect $? "N2 the server refused to start (exit $rc) while the lock was held"
+kill -TERM "$HOLDER"; wait "$HOLDER"
+
+echo "== N5 a server that doesn't stop: no backup, and the instance restarts"
+start_entry
+pid=$(cat "$T/run/server.pid"); kill -STOP "$pid"
+out=$(sh "$D/deploy/cgn-backup.sh" 2>&1); rc=$?
+echo "$out" | sed 's/^/   /'
+[ $rc -ne 0 ] && echo "$out" | grep -q "did not stop within 10 s" && ! echo "$out" | grep -q BACKUP_OK && [ ! -e "$T/run/hold" ]; expect $? "N5 BACKUP_FAILED after 10 s, no BACKUP_OK, hold released"
+kill -CONT "$pid"; wait "$ENTRY"; erc=$?
+tail -2 "$T/entrypoint.log" | sed 's/^/   /'
+grep -q "with no hold; exiting so the platform restarts" "$T/entrypoint.log"; expect $? "N5 the pending SIGTERM then stopped the server, and the entrypoint exited ($erc) for the platform to restart the instance"
+
+echo "== entrypoint log"; sed 's/^/   /' "$T/entrypoint.log"
+rm -rf "$T"
+echo "== drill finished $(date -u +%FT%TZ): $passes passed, $fails failed"
+if [ $fails -eq 0 ]; then echo "DRILL PASSED (exit 0)"; exit 0; else echo "DRILL FAILED (exit 1)"; exit 1; fi

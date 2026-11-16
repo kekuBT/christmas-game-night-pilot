@@ -47,7 +47,8 @@
 import { satOutLabel, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { useEffect, useState } from "react";
 import { usePageVisible } from "../../ui/mchezo/lib/visibility.js";
-import { Keycap, MchezoWaiting, Stamp } from "../../ui/mchezo/index.js";
+import { MchezoWaiting } from "../../ui/mchezo/index.js";
+import { LockedAnswer } from "./LockedAnswer.js";
 import { QuestionScreen } from "../../ui/mchezo/index.js";
 import type { PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 
@@ -126,25 +127,27 @@ export function MchezoMath(deps: MchezoMathDeps) {
   // not landed yet (answer not in myAnswers), fall through to the question
   // view — the next poll shows the locked view.
   if (lockedQ && lockedShowing) {
+    // R5 (Beta R1-R): the shared locked view; carrying on comes first. The
+    // next question is still opened (and timed) only once Next question is tapped.
     return (
-      <main className="mz-screen" aria-label="Answer locked in">
-        <section className="mz-lockcard" style={{ background: `var(--mz-answer-${lockedChoice % 4})`, color: "var(--mz-on-accent)" }}>
-          <span className="mz-kicker">Your answer</span>
-          <span className="mz-lockcard__answer">{String(lockedQ.options?.[lockedChoice] ?? "")}</span>
-          <Stamp className="mz-lockcard__stamp">LOCKED IN</Stamp>
-        </section>
-        {game.myAnswerTimes?.[lockedQ.id] !== undefined && (
-          <p className="mz-foot" data-testid="mz-math-elapsed" style={{ padding: "0 16px", margin: "8px 0 0" }}>
+      <LockedAnswer
+        answer={String(lockedQ.options?.[lockedChoice] ?? "")}
+        answerIndex={lockedChoice}
+        questionNumber={questions.indexOf(lockedQ) + 1}
+        questionCount={questions.length}
+        remaining={questions.filter((q) => myAnswers[q.id] === undefined || myAnswers[q.id] === null).length}
+        onNext={() => setLastAnswered(null)}
+        players={players}
+        playerId={playerId}
+        publicGame={publicGame}
+        solo={deps.solo}
+        nextTestId="mz-math-next"
+        note={game.myAnswerTimes?.[lockedQ.id] !== undefined && (
+          <p className="mz-foot" data-testid="mz-math-elapsed" style={{ padding: "0 4px", margin: "8px 0 0" }}>
             Answered in {(game.myAnswerTimes[lockedQ.id]! / 1000).toFixed(1)} s — timed by the game from when it sent this question to your phone (+20 within 5 s, +10 within 10 s, if correct).
           </p>
         )}
-        {!deps.solo && <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} showClock />}
-        <div style={{ padding: "0 16px 16px" }}>
-          <Keycap block variant="neutral" data-testid="mz-math-next" onClick={() => setLastAnswered(null)}>
-            {firstUnanswered ? "Next question" : "Waiting for the game to finish"}
-          </Keycap>
-        </div>
-      </main>
+      />
     );
   }
   // All answered: wait for the rest of the room (or the deadline/host skip).

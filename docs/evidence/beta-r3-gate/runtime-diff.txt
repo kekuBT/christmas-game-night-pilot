@@ -1,0 +1,24 @@
+== 2026-11-16T08:02Z; git diff --name-only 7097ac2bb062925bb296a129f4771f1e68fd522d ca15c999b822c722b35a21df1be6fa775ab9c4e6 -- . ':!docs'
+runtime files changed: 0
+
+== this repair: git diff --stat d5ba6898c8f296b9ff93e38d5b1d647523027789 ca15c999b822c722b35a21df1be6fa775ab9c4e6
+ docs/DECISIONS.md                                  |  27 +++
+ docs/REAL_DEVICE_TESTING.md                        |  11 +-
+ docs/beta/beta-r1-release.md                       | 241 +++++++++++++++------
+ docs/device-testing/BETA_GO_NO_GO_TEMPLATE.md      |   5 +-
+ docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md |  13 +-
+ docs/evidence/beta-r3-gate/README.md               |  80 +++++++
+ docs/evidence/beta-r3-gate/check-r3-record.mjs.txt |  53 +++++
+ docs/evidence/beta-r3-gate/gate-fixtures-run1.log  | 114 ++++++++++
+ docs/evidence/beta-r3-gate/gate-fixtures-run2.log  | 114 ++++++++++
+ docs/evidence/beta-r3-gate/gate-fixtures-run3.log  | 115 ++++++++++
+ docs/evidence/beta-r3-gate/gate-fixtures-run4.log  | 115 ++++++++++
+ docs/evidence/beta-r3-gate/gate-fixtures-run5.log  | 219 +++++++++++++++++++
+ docs/evidence/beta-r3-gate/gate-fixtures-run6.log  | 228 +++++++++++++++++++
+ docs/evidence/beta-r3-gate/gate-fixtures-run7.log  | 239 ++++++++++++++++++++
+ docs/evidence/beta-r3-gate/gate-fixtures.sh.txt    | 230 ++++++++++++++++++++
+ docs/evidence/beta-r3-gate/gate-mutations-run1.log |  64 ++++++
+ docs/evidence/beta-r3-gate/gate-mutations.sh.txt   |  44 ++++
+ docs/evidence/beta-r3-gate/record-negatives.sh.txt |  30 +++
+ docs/evidence/beta-r3-gate/trace.md                |  46 ++++
+ 19 files changed, 1913 insertions(+), 75 deletions(-)

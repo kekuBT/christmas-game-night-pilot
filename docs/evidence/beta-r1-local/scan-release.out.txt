@@ -1,0 +1,50 @@
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+## pattern self-check
+pem: matches
+aws: matches
+gh: matches
+sk: matches
+assign: matches
+benign: no match
+
+## release.json
+{
+  "revision": "255a5c9166fa64bf97585654ca69574496b6232c-dirty",
+  "builtAt": "2026-11-15T17:14:11.308Z",
+  "node": "v22.23.4"
+}
+
+## package contents: 144 files
+  21  apps/web/dist
+  24  content/packs
+  10  content/reference
+  86  dist
+   1  package-lock.json
+   1  package.json
+   1  release.json
+
+## secret-shaped strings in the package: 0
+
+## secret-shaped strings in the 10692 tracked files: 0
+
+## tracked files with sensitive-looking names: 0
+
+## external URLs in shipped code (dist/ and apps/web/dist/), with the files that hold them
+cdnjs.cloudflare.com  <-  apps/web/dist/assets/index-DbYJ93KZ.js
+games.example.org  <-  dist/server/serve.js
+github.com  <-  apps/web/dist/assets/index-DbYJ93KZ.js, apps/web/dist/assets/index.es-DBT85dpB.js, apps/web/dist/assets/purify.es-CAi2OJFm.js
+hertzen.com  <-  apps/web/dist/assets/html2canvas.esm-CBrSDip1.js
+html2canvas.hertzen.com  <-  apps/web/dist/assets/html2canvas.esm-CBrSDip1.js
+jspdf.default.namespaceuri  <-  apps/web/dist/assets/index-DbYJ93KZ.js
+mchezo.invalid  <-  apps/web/dist/sw.js
+opensource.org  <-  apps/web/dist/assets/index-DbYJ93KZ.js
+react.dev  <-  apps/web/dist/assets/index-DbYJ93KZ.js
+www.cs.cmu.edu  <-  apps/web/dist/assets/index-DbYJ93KZ.js
+www.fpdf.org  <-  apps/web/dist/assets/index-DbYJ93KZ.js
+www.myersdaily.org  <-  apps/web/dist/assets/index-DbYJ93KZ.js
+www.phpied.com  <-  apps/web/dist/assets/index-DbYJ93KZ.js
+www.w3.org  <-  apps/web/dist/assets/html2canvas.esm-CBrSDip1.js, apps/web/dist/assets/index-DbYJ93KZ.js, apps/web/dist/assets/purify.es-CAi2OJFm.js

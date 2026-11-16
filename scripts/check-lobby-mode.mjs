@@ -190,6 +190,16 @@ try {
       }
       return g.evaluate(() => ({ name: document.querySelector(".mz-upnext__name")?.textContent ?? "", mode: document.querySelector('[data-testid="up-next-mode"]')?.textContent ?? "", note: document.querySelector('[data-testid="dock-guest-note"]')?.textContent ?? "" }));
     };
+    // Beta R1 (B-09 guard): looking at a practice-only game in between never changes the host's Official choice for the
+    // next game (the first B-09 fix did, and check-f5's day playlist caught it: Impostor, then Caption Clash as Practice).
+    await h.getByTestId("choose-game").click();
+    await h.getByTestId("select-game-impostor").click();
+    await sleep(800); // the plan goes to the server and back
+    await h.getByTestId("choose-game").click();
+    await h.getByTestId("select-game-trivia").click();
+    let back = "";
+    for (let i = 0; i < 25 && back !== "Start Trivia Showdown · Official"; i++) { back = (await h.getByTestId("lobby-dock").locator(".mz-key").first().innerText()).trim(); if (back !== "Start Trivia Showdown · Official") await sleep(200); }
+    check("host: a practice-only pick in between leaves the next game Official (the default, unchanged)", back === "Start Trivia Showdown · Official", back);
     let t = await guestSees((x) => x.name === "Trivia Showdown" && /Official/.test(x.mode));
     check("guest: sees the host's game and that it's Official", t.name === "Trivia Showdown" && /Official · counts toward/.test(t.mode) && /Official, counts toward/.test(t.note), JSON.stringify(t));
     await h.getByTestId("mode-practice").click();
@@ -209,6 +219,15 @@ try {
     check("host reload: still Math Mayhem · Practice", hs === "Start Math Mayhem · Practice", hs);
     t = await guestSees((x) => x.name === "Math Mayhem");
     check("guest after the host's reload: unchanged", t.name === "Math Mayhem" && /Practice/.test(t.mode), JSON.stringify(t));
+    // Beta R1 (B-09): the same reload when the game list arrives after the room's state (a slow phone network, or a
+    // busy server: a full gate caught it). The host's mode must still follow the plan, never fall back to Official.
+    await h.route((url) => new URL(url).pathname === "/games", async (r) => { await sleep(1500); await r.continue(); });
+    await h.reload({ waitUntil: "domcontentloaded" });
+    await h.getByTestId("lobby-dock").waitFor({ timeout: 15000 });
+    hs = "";
+    for (let i = 0; i < 40 && hs !== "Start Math Mayhem · Practice"; i++) { hs = (await h.getByTestId("lobby-dock").locator(".mz-key").first().innerText()).trim(); if (hs !== "Start Math Mayhem · Practice") await sleep(250); }
+    check("host reload with a slow game list: still Math Mayhem · Practice (the plan's mode, not the default)", hs === "Start Math Mayhem · Practice", hs);
+    await h.unroute((url) => new URL(url).pathname === "/games");
     // Starting still works as before, in the mode shown.
     await h.getByTestId("start-practice-math-mayhem").click();
     let started;

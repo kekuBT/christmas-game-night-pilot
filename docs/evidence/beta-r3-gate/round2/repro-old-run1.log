@@ -1,0 +1,51 @@
+== REPRO mode: the blocks published at ca15c999b822c722b35a21df1be6fa775ab9c4e6
+== blocks found: switch (12 lines); first install (32 lines); promote (35 lines)
+
+== the prelude (stubs), in full:
+    systemctl() {
+      case "$1" in
+        stop) echo "SENTINEL-STOP"; return "${RC_STOP:-0}";;
+        start) echo "SENTINEL-START"; return 0;;
+        enable) echo "SENTINEL-ENABLE $*"; return 0;;
+        daemon-reload) echo "STUB daemon-reload"; return "${RC_RELOAD:-0}";;
+        *) echo "STUB systemctl $*";;
+      esac; }
+    useradd() { echo "STUB useradd $*"; }
+    chown() { echo "STUB chown $*"; }
+    sudo() { if [ "$1" = "-u" ]; then shift 2; fi; "$@"; }
+    install() { local a=(); while [ $# -gt 0 ]; do case "$1" in -o|-g) shift 2;; *) a+=("$1"); shift;; esac; done; command install "${a[@]}"; }
+    rm() { if [ -n "${RM_FAILS:-}" ]; then echo "STUB rm $* -> exit 1 (this case)"; return 1; fi; command rm "$@"; }
+
+fixture: good.tgz sha256 579b884ed0b46a4a495ed4bede850f997f1c360a39b2ff323b540bce86c39d7a, inventory 452484199276ad00b82da3f77e83a71dffc3f262cd7e19d832ebe926e2d2f63d
+
+== R1 (old promote): a stale marker that rm can't remove, and the archive missing
+--- output
+    STUB rm -f /tmp/tmp.tzPU0Ai6iS/case-R1/opt/christmas-game-night/verified-7097ac2bb062925bb296a129f4771f1e68fd522d -> exit 1 (this case)
+    sha256sum: ./mchezo-7097ac2.tgz: No such file or directory
+    ./mchezo-7097ac2.tgz: FAILED open or read
+    sha256sum: WARNING: 1 listed file could not be read
+    STOP: the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    SENTINEL-STOP
+    /tmp/tmp.tzPU0Ai6iS/case-R1/run.sh: line 43: cd: /tmp/tmp.tzPU0Ai6iS/case-R1/opt/christmas-game-night/releases/7097ac2bb062925bb296a129f4771f1e68fd522d: No such file or directory
+    STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release.
+    STOP: 7097ac2bb062925bb296a129f4771f1e68fd522d isn't verified, or there is no backup. Don't switch.
+PASS R1 DEFECT REPRODUCED: the old block printed STOP yet reached systemctl stop
+
+== R2 (old first install): the data check fails
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    check FAILED (fixture): /tmp/tmp.tzPU0Ai6iS/case-R2/var/lib/cgn-validation
+    STUB daemon-reload
+    SENTINEL-ENABLE enable --now christmas-game-night
+PASS R2 DEFECT REPRODUCED: the data check failed, yet daemon-reload and enable --now ran
+
+== R3 (old switch): the stop fails and the real folder already holds a room
+--- output
+    SENTINEL-STOP
+    STUB daemon-reload
+    SENTINEL-START
+PASS R3 DEFECT REPRODUCED: the stop failed, yet the unit was changed, reloaded and started on the occupied folder
+
+repro: 3 reproduced, 0 not reproduced
+ALL THREE DEFECTS REPRODUCED ON ca15c999b822c722b35a21df1be6fa775ab9c4e6

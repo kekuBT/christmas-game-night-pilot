@@ -1,0 +1,80 @@
+// A LOCAL STAND-IN for the Codespaces port forwarder, for testing only. It is not GitHub's forwarder and proves nothing
+// about it; it lets the probe and route A be exercised under each behaviour the real one might have.
+// TLS on 127.0.0.1 (a certificate made for the run, for *.app.test); https://cs-<port>.app.test:<p>/ goes to
+// 127.0.0.1:<port> with Host: localhost:<port>, X-Forwarded-Host (the public host), X-Forwarded-Proto: https,
+// X-Forwarded-For appended. Origin, by mode:
+//   same-origin-only  an Origin equal to the public URL's origin becomes https://localhost:<port>; others unchanged
+//                     (the behaviour community reports describe; the scheme as ChatGPT measured on 3153)
+//   all               every Origin becomes https://localhost:<port>
+//   http-only         like same-origin-only, but WebSocket upgrades keep their Origin
+//   none              unchanged
+//   block-foreign     like same-origin-only, but a request whose Origin isn't the public URL's own is refused at the
+//                     forwarder (403, never reaches the app): comparison requests never arrive
+import https from "node:https";
+import http from "node:http";
+import net from "node:net";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+export function makeCert() {
+  const dir = mkdtempSync(join(tmpdir(), "fwd-tls-"));
+  execFileSync("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", join(dir, "key.pem"), "-out", join(dir, "cert.pem"), "-days", "1", "-subj", "/CN=app.test", "-addext", "subjectAltName=DNS:*.app.test"], { stdio: "ignore" });
+  return { key: readFileSync(join(dir, "key.pem")), cert: readFileSync(join(dir, "cert.pem")) };
+}
+
+export function startForwarder(mode, tls) {
+  const log = [];
+  let port = 0;
+  const route = (req) => {
+    const host = String(req.headers.host ?? "");
+    const m = /^cs-(\d+)\.app\.test(?::\d+)?$/.exec(host);
+    if (!m) return null;
+    const backend = Number(m[1]);
+    const origin = req.headers.origin;
+    const publicOrigin = `https://${host}`;
+    const rewrite = (isUpgrade) => {
+      if (!origin || mode === "none") return origin;
+      if (mode === "all") return `https://localhost:${backend}`;
+      if (mode === "http-only" && isUpgrade) return origin;
+      return origin === publicOrigin ? `https://localhost:${backend}` : origin;
+    };
+    return { host, backend, origin, rewrite };
+  };
+  const headersFor = (req, r, isUpgrade) => {
+    const h = { ...req.headers, host: `localhost:${r.backend}`, "x-forwarded-host": r.host, "x-forwarded-proto": "https", "x-forwarded-for": [req.headers["x-forwarded-for"], req.socket.remoteAddress].filter(Boolean).join(", ") };
+    const o = r.rewrite(isUpgrade);
+    if (o === undefined) delete h.origin; else h.origin = o;
+    return h;
+  };
+  const blocked = (r) => mode === "block-foreign" && r.origin && r.origin !== `https://${r.host}`;
+  const server = https.createServer(tls, (req, res) => {
+    const r = route(req);
+    if (!r) { res.writeHead(404); res.end(); return; }
+    if (blocked(r)) { log.push({ host: r.host, method: req.method, path: req.url, originIn: r.origin, originOut: null, status: 403, blockedAtForwarder: true }); res.writeHead(403); res.end(); return; }
+    const headers = headersFor(req, r, false);
+    const up = http.request({ host: "127.0.0.1", port: r.backend, method: req.method, path: req.url, headers }, (b) => {
+      log.push({ host: r.host, method: req.method, path: req.url, originIn: r.origin ?? null, originOut: headers.origin ?? null, status: b.statusCode });
+      res.writeHead(b.statusCode ?? 502, b.headers); b.pipe(res);
+    });
+    up.on("error", () => { res.writeHead(502); res.end(); });
+    req.pipe(up);
+  });
+  server.on("upgrade", (req, socket, head) => {
+    const r = route(req);
+    if (!r) { socket.destroy(); return; }
+    if (blocked(r)) { log.push({ host: r.host, method: "UPGRADE", path: req.url, originIn: r.origin, originOut: null, status: 403, blockedAtForwarder: true }); socket.end("HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n"); return; }
+    const headers = headersFor(req, r, true);
+    const b = net.connect(r.backend, "127.0.0.1", () => {
+      b.write(`${req.method} ${req.url} HTTP/1.1\r\n` + Object.entries(headers).map(([k, v]) => `${k}: ${v}`).join("\r\n") + "\r\n\r\n");
+      if (head?.length) b.write(head);
+      let first = true;
+      b.on("data", (d) => { if (first) { first = false; log.push({ host: r.host, method: "UPGRADE", path: req.url, originIn: r.origin ?? null, originOut: headers.origin ?? null, status: Number(/^HTTP\/1\.1 (\d+)/.exec(d.toString("latin1"))?.[1] ?? 0) }); } });
+      b.pipe(socket); socket.pipe(b);
+    });
+    b.on("error", () => socket.destroy());
+    socket.on("error", () => b.destroy());
+  });
+  return new Promise((resolve) => server.listen(0, "127.0.0.1", () => { port = server.address().port; resolve({ port, log, close: () => new Promise((r) => { server.closeAllConnections?.(); server.close(() => r()); }) }); }));
+}

@@ -1,0 +1,53 @@
+// Beta R3 (handoff 6909443770): the release record and the draft go/no-go record agree, and the draft fabricates nothing.
+//   node check-r3-record.mjs <repo root>
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const root = process.argv[2];
+const read = (p) => readFileSync(join(root, p), "utf8");
+let failures = 0, passes = 0;
+const check = (name, ok, detail = "") => { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); ok ? passes++ : failures++; };
+
+const RUNTIME = "7097ac2bb062925bb296a129f4771f1e68fd522d";
+const ARCHIVE = "a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131";
+const INVENTORY = "fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c";
+const record = read("docs/beta/release-7097ac2.md");
+const draft = read("docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md");
+const runbook = read("docs/beta/beta-r1-release.md");
+const inv = readFileSync(join(root, "docs/beta/release-7097ac2.inventory.sha256"));
+
+check("the committed inventory's digest is the recorded one", createHash("sha256").update(inv).digest("hex") === INVENTORY);
+check("the committed inventory lists 144 files", inv.toString().trim().split("\n").length === 144);
+for (const [label, v] of [["runtime SHA", RUNTIME], ["audited archive SHA-256", ARCHIVE], ["inventory digest", INVENTORY]]) {
+  check(`the release record states the ${label}`, record.includes(v));
+  check(`the draft go/no-go record states the same ${label}`, draft.includes(v));
+}
+check("the runbook's approvals pin the same archive", runbook.includes("a693c543") && /Two approvals before anyone is invited/.test(runbook));
+check("the release record keeps the audited archive distinct from the rebuilds", /These three archives are not the promotion artifact/.test(record) && /doesn't make any rebuild the audited archive/.test(record));
+
+// Every field that needs the host, a phone or the owner is PENDING in the draft.
+const row = (label) => draft.split("\n").find((l) => l.startsWith(`| ${label}`)) ?? "";
+for (const label of ["Inventory digest, seen **on the host**", "Archive SHA-256, seen **on the host**", "`/health` **on the host**", "Node on the host", "Host route chosen", "Read-only preflight R1–R8", "Approval 1 (private validation", "Isolated staging", "Route checks V1–V3", "`MCHEZO_TRUST_PROXY`", "Backup folder name"]) {
+  check(`draft: "${label.replace(/\*|`/g, "")}" is PENDING`, row(label).includes("PENDING"), row(label).slice(0, 80));
+}
+for (const id of ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "H1", "H2", "H3", "H4", "H5", "H6"]) {
+  const r = row(id);
+  check(`draft: check ${id} is PENDING`, r.includes("PENDING") && !/✅|❌|⚠️/.test(r), r.slice(0, 60));
+}
+for (const dev of ["iPhone", "Android", "TV or laptop"]) check(`draft: device "${dev}" is PENDING`, row(dev).includes("PENDING"));
+check("draft: no result marks anywhere (✅ ❌ ⚠️)", !/✅|❌|⚠️/.test(draft));
+check("draft: the decision is NO-GO by default, both approvals PENDING", /NO-GO \(default\)/.test(draft) && /Approval 1[^\n]*\*\*PENDING/.test(draft) && /Approval 2[^\n]*\*\*PENDING/.test(draft));
+check("draft: owner sign-off and ChatGPT review PENDING", /Owner's sign-off[^\n]*PENDING/.test(draft) && /ChatGPT's review[^\n]*PENDING/.test(draft));
+check("draft: the rehearsal and the Firefox audit are marked as not substitutes", /none of it replaces a row below/.test(draft) && /\*\*not\*\* native iPhone Safari or Android Chrome/.test(draft));
+check("draft: says it carries no secrets or family data", /Never written here/.test(draft));
+// Review 6909578563: one order, preflight before any host change, no public exposure, an artifact gate.
+check("runbook: the order of execution puts the read-only preflight before Approval 1 and installation", runbook.indexOf("**0. Read-only preflight**") > 0 && runbook.indexOf("**0. Read-only preflight**") < runbook.indexOf("**Approval 1**") && runbook.indexOf("**Approval 1**") < runbook.indexOf("**1. Isolated staging**"));
+check("runbook: no public-port exception remains", !/a public port beyond the chosen route/.test(runbook) && /any public port or public exposure/.test(runbook));
+check("runbook: H2–H4 are recorded as unavailable under this handoff", (runbook.match(/\*\*Unavailable\*\*: needs a separate explicit owner decision/g) ?? []).length === 3);
+check("runbook: the gate checks the full pinned hash with --check --strict", runbook.includes("EXPECTED_SHA256=a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131") && /sha256sum --check --strict/.test(runbook));
+check("runbook: no ungated 'sha256sum <archive>' print-only step remains", !/^sha256sum cgn-<sha>\.tgz/m.test(runbook));
+check("draft: the route checks and isolated staging rows are PENDING and need the host or the running preview", /Isolated staging[^\n]*PENDING:\*\* needs the host/.test(draft) && /Route checks V1–V3[^\n]*needs the running isolated preview/.test(draft));
+console.log(`\nR3 record check: ${passes} passed, ${failures} failed`);
+console.log(failures ? "R3 RECORD CHECK FAILED" : "R3 RECORD CHECK PASSED");
+process.exit(failures ? 1 : 0);

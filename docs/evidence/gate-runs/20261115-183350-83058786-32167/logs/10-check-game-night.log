@@ -1,0 +1,22 @@
+$ node scripts/check-game-night.mjs http://localhost:35725
+# timeout 900s | worker w2 | server http://localhost:35725 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/test-results/20261115-183350-83058786-32167/server-data/w2)
+
+[+9.1s] PASS cohost granted via the room menu
+[+9.9s] PASS spectator does not consume a player slot — players=6 spectators=1
+[+13.3s] PASS spectator sees no correct answers while playing
+[+13.3s] PASS spectator has no answer controls
+[+49.3s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":1,"pages":7,"peakOpenPages":7}
+[+49.3s] file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/scripts/lib/answer.mjs:26
+[+49.3s]   return new AnswerStuckError(`${message}\n  ${diag}`);
+[+49.3s]          ^
+[+49.3s] 
+[+49.3s] AnswerStuckError: Cal: could not tap option 0 on question 6 of 10 — page now {"kind":"unknown"} (locator.click: Target page, context or browser has been closed | Browser logs: | )
+[+49.3s]   DIAG player=Cal server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+49.3s]     at stuck (file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/scripts/lib/answer.mjs:26:10)
+[+49.3s]     at async answerKitQuestions (file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/scripts/lib/answer.mjs:86:13)
+[+49.3s]     at async answerAllTrivia (file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/scripts/check-game-night.mjs:131:3)
+[+49.3s]     at async file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/scripts/check-game-night.mjs:214:3
+[+49.3s] 
+[+49.3s] Node.js v22.23.4
+
+# CANCELLED (exit 1) in 49.4s | cpu 5.4s, peak memory 271 MB

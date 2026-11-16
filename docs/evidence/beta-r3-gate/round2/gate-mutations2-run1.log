@@ -1,0 +1,88 @@
+== mutating copies of: <repo checkout> — commit bd8f44597558fceb0e661e34e4323f863eafd1a7, 1 uncommitted path(s)
+== M-rmchain: marker removal no longer part of the chain
+   harness: exit 5; fixtures (round 2): 85 passed, 5 failed
+     FAIL P5 STOP at step 1, no VERIFIED
+     FAIL P5 no stop, backup or start, and nothing switched — 3 sentinel(s)
+     FAIL P5 nothing unpacked
+     FAIL F9 not started (no enable, no other sentinel)
+     FAIL F9 nothing linked, no reload
+   CAUGHT: P5 failed, as it should
+== M-runflag: step 2 trusts the marker on disk instead of this run's VERIFIED
+   harness: exit 2; fixtures (round 2): 88 passed, 2 failed
+     FAIL P4 no stop, backup or start, and nothing switched — 1 sentinel(s)
+     FAIL P5 no stop, backup or start, and nothing switched — 1 sentinel(s)
+   CAUGHT: P4 failed, as it should
+== M-flagreset: the flags are no longer reset at the start of the run
+   harness: exit 1; fixtures (round 2): 89 passed, 1 failed
+     FAIL P10 no stop, backup or start, and nothing switched — 1 sentinel(s)
+   CAUGHT: P10 failed, as it should
+== M-stopflag: a failed maintenance stop still counts as stopped
+   harness: exit 2; fixtures (round 2): 88 passed, 2 failed
+     FAIL P11 verified; the stop was tried and failed
+     FAIL P11 no backup, no switch, no start
+   CAUGHT: P11 failed, as it should
+== M-backupflag: the switch no longer requires this run's backup
+   harness: exit 1; fixtures (round 2): 89 passed, 1 failed
+     FAIL P12 stopped; no backup, so no switch and no start
+   CAUGHT: P12 failed, as it should
+== M-filink: the first install links without this run's verification
+   harness: exit 3; fixtures (round 2): 87 passed, 3 failed
+     FAIL F2 nothing linked, no reload
+     FAIL F3 nothing linked, no reload
+     FAIL F9 nothing linked, no reload
+   CAUGHT: F9 failed, as it should
+== M-fienv: the first install no longer checks the settings' data folder
+   harness: exit 3; fixtures (round 2): 87 passed, 3 failed
+     FAIL F6 not started (no enable, no other sentinel)
+     FAIL F7 not started (no enable, no other sentinel)
+     FAIL F6 a settings file naming the real folder stops it before any data check
+   CAUGHT: F6 failed, as it should
+== M-ficheck: the first install no longer requires the data check
+   harness: exit 2; fixtures (round 2): 88 passed, 2 failed
+     FAIL F5 not started (no enable, no other sentinel)
+     FAIL F5 the failed check stops it before the unit and the reload
+   CAUGHT: F5 failed, as it should
+== M-fiunit: the first install no longer checks the unit's ReadWritePaths= line
+   harness: exit 1; fixtures (round 2): 89 passed, 1 failed
+     FAIL F4 not started (no enable, no other sentinel)
+   CAUGHT: F4 failed, as it should
+== M-fireload: the first install ignores a failed reload
+   harness: exit 1; fixtures (round 2): 89 passed, 1 failed
+     FAIL F8 not started (no enable, no other sentinel)
+   CAUGHT: F8 failed, as it should
+== M-swstop: the switch carries on after a failed stop
+   harness: exit 4; fixtures (round 2): 86 passed, 4 failed
+     FAIL W4 not started
+     FAIL W4 the unit is unchanged
+     FAIL W4 a failed stop changes nothing: no folder, no chown
+     FAIL W3/W4 no reload after a failed stop
+   CAUGHT: W4 failed, as it should
+== M-swnew: the switch accepts an existing folder
+   harness: exit 2; fixtures (round 2): 88 passed, 2 failed
+     FAIL W6 not started
+     FAIL W6 the unit is unchanged
+   CAUGHT: W6 failed, as it should
+== M-swenv: the switch no longer checks the settings' data folder
+   harness: exit 4; fixtures (round 2): 86 passed, 4 failed
+     FAIL W2 not started
+     FAIL W2 the unit is unchanged
+     FAIL W8 not started
+     FAIL W8 the unit is unchanged
+   CAUGHT: W2 failed, as it should
+== M-swcode: the switch no longer requires a new access code
+   harness: exit 2; fixtures (round 2): 88 passed, 2 failed
+     FAIL W7 not started
+     FAIL W7 the unit is unchanged
+   CAUGHT: W7 failed, as it should
+== M-swempty: the switch no longer requires the new folder to be empty
+   harness: exit 2; fixtures (round 2): 88 passed, 2 failed
+     FAIL W10 not started
+     FAIL W10 the unit is unchanged
+   CAUGHT: W10 failed, as it should
+== M-swreload: the switch ignores a failed reload
+   harness: exit 1; fixtures (round 2): 89 passed, 1 failed
+     FAIL W9 not started
+   CAUGHT: W9 failed, as it should
+
+mutations (round 2): 16 caught, 0 not caught
+ALL ROUND 2 MUTATIONS CAUGHT

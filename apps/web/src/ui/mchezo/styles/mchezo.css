@@ -234,7 +234,21 @@
 .mz-lockcard__answer { font-weight: 800; font-size: clamp(30px, 10vw, 40px); line-height: 1.05; overflow-wrap: anywhere; padding-right: 0; }
 /* A-01: the stamp sits below the answer, never over it (a long answer used to run under it). */
 .mz-lockcard__stamp { align-self: flex-end; }
-.mz-wait { position: relative; width: min(78%, 300px); aspect-ratio: 1; margin: 30px auto 0; }
+/* Beta R1-R (R5): after a nonfinal answer the screen leads with carrying on (LockedAnswer.tsx), so the
+   confirmation is compact: it must leave Next question inside a 320×480 screen, long answers included. */
+.mz-lockcard--compact { min-height: 0; border-radius: 18px; padding: 12px 14px; gap: 6px; }
+.mz-lockcard--compact .mz-kicker { font-size: 12px; }
+.mz-lockcard--compact .mz-lockcard__answer { font-size: clamp(22px, 7vw, 30px); line-height: 1.1; }
+.mz-lockcard--compact .mz-lockcard__stamp { font-size: 12px; padding: 4px 10px; border-width: 2px; }
+.mz-locked__go { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.mz-locked__go .mz-game-clock { text-align: center; }
+.mz-locked__lead { margin: 0; text-align: center; font-size: 16px; font-weight: 700; line-height: 1.35; color: var(--mz-text); text-wrap: balance; }
+/* The room's progress is secondary: set apart below the action by space alone (no new colour on Everyday, W8). */
+.mz-locked__room { margin-top: 28px; }
+/* R5: the bottom seat's token and its name label hang below the ring (token centre at 94%, then
+   half a token and a label), so the ring keeps room under itself; the label used to sit on the
+   paragraph below. Every caller of the shared waiting ring gets the same room. */
+.mz-wait { position: relative; width: min(78%, 300px); aspect-ratio: 1; margin: 30px auto 46px; }
 .mz-wait__ring { position: absolute; inset: 0; width: 100%; height: 100%; }
 .mz-wait__track { fill: none; stroke: var(--mz-surface-2); stroke-width: 2.2; }
 .mz-wait__fill { fill: none; stroke: var(--mz-answer-3); stroke-width: 2.2; stroke-linecap: round; transition: stroke-dashoffset .45s ease; }

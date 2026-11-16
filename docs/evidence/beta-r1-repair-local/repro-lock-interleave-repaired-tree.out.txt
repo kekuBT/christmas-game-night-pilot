@@ -1,0 +1,4 @@
+A: holds the directory; its record is empty (pid not written yet)
+B: refused: Another process is using this data directory (/tmp/mz-lock-interleave-Z3hcQO). Stop it first: one process writes a data directory at a time.
+server.lock now: ""
+RESULT: only A holds the data directory

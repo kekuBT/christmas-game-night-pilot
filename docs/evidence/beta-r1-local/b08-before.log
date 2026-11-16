@@ -1,0 +1,27 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ❯ tests/beta-r1.test.ts (17 tests | 1 failed | 16 skipped) 11ms
+   × one writer per data directory (DataDirLock) > B-08: a first start on a data directory that doesn't exist yet creates it (private) and takes the lock 9ms
+     → ENOENT: no such file or directory, open '/tmp/mz-beta-lock-XijKkD/var/lib/cgn/server.lock'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/beta-r1.test.ts > one writer per data directory (DataDirLock) > B-08: a first start on a data directory that doesn't exist yet creates it (private) and takes the lock
+Error: ENOENT: no such file or directory, open '/tmp/mz-beta-lock-XijKkD/var/lib/cgn/server.lock'
+ ❯ DataDirLock.acquire src/server/datalock.ts:33:20
+     31|     for (let attempt = 0; attempt < 2; attempt++) {
+     32|       try {
+     33|         const fd = openSync(this.path, "wx");
+       |                    ^
+     34|         try { writeSync(fd, JSON.stringify({ pid: process.pid, host: h…
+     35|         this.held = true;
+ ❯ tests/beta-r1.test.ts:213:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 skipped (17)
+   Start at  17:25:47
+   Duration  1.31s (transform 760ms, setup 0ms, collect 1.01s, tests 11ms, environment 0ms, prepare 62ms)
+

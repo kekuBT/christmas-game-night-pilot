@@ -1,0 +1,5 @@
+data:   nobody(65534) 644 <tmp>/data/room-x.book.json
+backup OK: 0 room(s), 1 Memory Book(s), 1 file(s), verified
+backup: root(0) 700 folder; nobody(65534) 600 <tmp>/b/room-x.book.json
+restore OK: 0 room(s), 1 Memory Book(s) restored and verified. Start a server with MCHEZO_DATA_DIR set to that folder.
+restore: root(0) 700 folder; nobody(65534) 600 <tmp>/r/room-x.book.json

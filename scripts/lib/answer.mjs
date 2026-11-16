@@ -11,9 +11,10 @@
 //
 // States (from the app's own accessible labels/text):
 //   question  <main aria-label="Question N of M"> with enabled answer slabs
-//   locked    <main aria-label="Answer locked in"> ("Next question" /
-//             "Waiting for the game to finish")
-//   waiting   "All your answers are in" / "You sat this one out" ring
+//   locked    <main aria-label="Answer locked in"> with "Next question"
+//             (Beta R1-R, R5: a nonfinal answer only; there is always a Next)
+//   waiting   "All your answers are in" (straight after the last answer, or
+//             after a reload) / "You sat this one out" ring
 //   finished  results ("Back to lobby") or the staged reveal
 import { lifecycleDiagnosis } from "./diagnose.mjs";
 
@@ -67,11 +68,8 @@ export async function answerKitQuestions(page, { player, choose, timeout = 20000
     const st = await waitForState(page, (s) => s.kind !== "other", { timeout, player, context: "waiting for a question, the locked view, the waiting ring or results" });
     if (st.kind === "finished" || st.kind === "waiting") return answered;
     if (st.kind === "locked") {
-      if (!st.next) {
-        await page.getByRole("button", { name: "Waiting for the game to finish" }).click();
-        await waitForState(page, (s) => s.kind === "waiting" || s.kind === "finished", { timeout, player, context: "after 'Waiting for the game to finish'" });
-        return answered;
-      }
+      // R5: the locked view follows a nonfinal answer only and always offers Next question.
+      if (!st.next) throw await stuck(page, player, `${player}: the locked view has no Next question (the last answer should show "All your answers are in")`);
       await page.getByRole("button", { name: "Next question" }).click();
       await waitForState(page, (s) => s.kind !== "locked" && s.kind !== "other", { timeout, player, context: "after 'Next question'" });
       continue;

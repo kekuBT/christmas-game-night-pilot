@@ -3017,3 +3017,420 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Evidence:** `docs/evidence/stage1216r-local/README.md`.
 - **Next:** the owner's confirmation of the repairs on #41. Puzzle approvals remain the owner's (or an editor's).
 - **Risk:** none known beyond Stage 12.16's: no puzzle is approved, and difficulty is a placeholder.
+
+## Beta R1: readiness and a portable production package (completed: full gate PASSED on 92a3722; report on #43)
+- **Brief:** the owner's priority update 6896572377 on #42 (2026-11-15, 10:05 a.m. ET). It allows deployment conditionally, after readiness clearance, at $0; it allows no spending, stack merge, disabled games or weakened checks. This slice is the readiness work; ChatGPT owns host selection.
+- **Base:** #41's head `1955c28` (the latest cleared candidate). Stage 12.17 (#42, not yet cleared) is not in this base.
+- **Branch:** `claude/beta-r1-readiness`. **Spec and estimate:** `docs/beta/beta-r1.md` (about 9 h, written at 11:50 a.m. ET).
+- **Done (commits `ffec293`, `8dfe323`, `255a5c9`, `5ee2e78`, `fe9319e`):**
+  - **The launch blocker matrix** (`docs/beta/beta-r1-blockers.md`): dependencies, secrets and fixtures, HTTP and WebSocket, data, logs and external requests, and packaging.
+  - **Eight fixes:** B-01 to B-08, each with a failing test or a reproduction first. The most serious was B-06: one malformed WebSocket frame ended the server on `1955c28`.
+  - **The package:** plain node, only `ws` and `zod` installed, `release.json` holding the revision, and `/health` naming it.
+  - **The data:** outside the release; one writer; backup, verify, restore and prune that never delete or overwrite; a full disk tested.
+  - **Rollback:** compatibility with `1955c28` both ways, and a packaged promote, roll back and restore drill (run 4 passed; runs 1 to 3 failed and are kept).
+  - **The docs:** `docs/beta/beta-r1-architecture.md` and `docs/beta/beta-r1-release.md`.
+- **Tests:**
+  - `tests/beta-r1.test.ts` (17) and `tests/beta-r1-data.test.ts` (6).
+  - `scripts/check-release-package.mjs` (36 checks locally, run 6).
+  - The drill script is in the evidence.
+- **Failures on the way** (all in `docs/evidence/beta-r1-local/README.md`):
+  - release-check run 1: its own package count;
+  - an interim test run: the cap without the socket listener;
+  - drill runs 1 to 3: B-08, the drill's own check, and a quoting slip.
+- **External blockers:**
+  - no host chosen (ChatGPT's choice);
+  - the owner's private Codespace audit;
+  - real phones (everything so far is Chromium emulation);
+  - the provider pages for the host research weren't reachable from this session.
+- **After `dd4580e`:**
+  - **The fast gate on `dd4580e` FAILED:** 4 unit tests. The production refusals had come before the test-only ones, and the Stage 8.3 `/health` test was exact. I hadn't run the whole unit suite after `8dfe323`. Fixed in `a91f3d1`, where the test-only settings are refused first; the whole suite passes 2021/2021.
+  - **The gate page overflowed phones,** as my screenshots showed. I stopped the full gate on `a91f3d1` (CANCELLED), fixed the page in `529a966`, and added `scripts/check-beta-gate.mjs`, which failed first and passes now.
+  - **Every run is listed** in `docs/evidence/beta-r1-local/README.md`.
+- **The full gate on `529a966` FAILED (108/109) in `check-lobby-mode`:** B-09, a host-reload race that was already in the base, reproduced on `1955c28`. Fixed in the web app's plan-restore effect, with a slow-list reload check that failed first.
+- **The first B-09 fix (`8305878`) was wrong:** it applied Practice at once even for a practice-only game. `check-f5` caught it in the full gate on `8305878`, which I stopped. Corrected: the plan's mode applies only for a game that can count, and the effect runs again when the list arrives. A new lobby-mode guard failed on `8305878` and passes now; `check-f5` passes 36/36 locally with the gate's server settings.
+- **The gates on `92a3722` (the tested code):**
+  - targeted `20261115-185319-92a3722b-7063`: PASSED;
+  - fast `20261115-190112-92a3722b-9509`: PASSED (unit 2021/2021);
+  - **full `20261115-190235-92a3722b-13639`: PASSED (exit 0), 109/109.**
+- **The completed report** is on #43.
+- **Still open:** a host (ChatGPT's choice), the owner's Codespace audit, real phones, and running the release steps on the real host.
+- **The same B-09 race is in #42's base.** It is fixed on #43 in code #42 doesn't touch, so the two combine without a conflict.
+- **Next:** the Stage 12.17-R repair on #42 (review 6898755998), queued behind this checkpoint.
+- **Risk:** the beta gate is new code on every request. It is off by default, so every existing driver runs as before; the full gate is the proof.
+
+## Beta R1-R: repairs from review 6900450343 (completed)
+- **Brief:** the owner's ChatGPT review on #43 (changes requested). Repair only R1 and R2 in this slice; #42 stays separate. The beta is held, and no other milestone is assigned. ChatGPT keeps the private preview's recovery and the interactive gate.
+- **Spec and estimate:** `docs/beta/beta-r1-repair.md` (about 7 h 30 min, written at 3:05 p.m. ET).
+- **R1, one process per data directory:**
+  - **Reproduced on `92a3722`:** the interleaving, and 8 simultaneous starts giving 2–3 holders in 15/15 rounds (5 holders at most, with a stale lock).
+  - **Repaired:** a Linux abstract-socket exclusion held for the process's life; `server.lock` is a record only; the tools hold the lock for their whole run (`src/server/datalock.ts`, `datatool.ts`, `serve.ts`; D-BR1R-01).
+  - **Tested:** `tests/beta-r1r-lock.test.ts` (7, with real processes), the updated `tests/beta-r1.test.ts` lock tests, release check step L.
+- **R2, restore under the service user:**
+  - **Repaired:** `restore --owner`; `datatool check` run as the service user; the server refuses a folder it can't fully use (D-BR1R-02).
+  - **Runbook:** first install, rollback with no previous package, restore under `cgn`. The example unit has `UMask=0077` (D-BR1R-03).
+  - **Tested:** `tests/beta-r1r-restore.test.ts`, and release check step U with real local users, from the package.
+  - **Found by step U (B-12):** run as root, backups and restores kept the data's owner (`copyFileSync`). Fixed: the tool writes its own copies.
+- **Tested code:** `23abfbc`.
+  - **Targeted:** `20261115-202859-23abfbc4-28428` PASSED, 8/8.
+  - **Fast:** `20261115-202956-23abfbc4-30041` PASSED, unit 2037/2037.
+  - **Full:** `20261115-203120-23abfbc4-2269` PASSED, 109/109.
+- **The packaged release drill:** run 5, `92a3722` to `23abfbc`, PASSED.
+- **Evidence:** `docs/evidence/beta-r1-repair-local/README.md` (every run, failures included). Estimate about 7 h 30 min; actual about 1 h 15 min.
+- **Failures:** none in the gates. Locally, release check runs 1–3 failed while step U was being built: a drill mistake, then B-12.
+- **External blockers:** ChatGPT's private browser audit (preview access), the host, real phones, the owner's sign-off.
+- **Next:** the owner's or ChatGPT's review of the repair report on #43. The beta stays held.
+- **Risk:** the lock's one condition (one network namespace) is documented, not enforced.
+
+## Beta R1-R, second round: R3 and R4 from review 6901841738 (completed)
+- **Brief:** the owner's ChatGPT review of the first repair (report 6901467992). R3: the lock race test's child protocol. R4: a production-origin HTTPS gate check. #42 stays separate; the beta is held. Acknowledged in 6901900831.
+- **Estimate:** about 4 h, written at 4:48 p.m. ET (`docs/beta/beta-r1-repair.md`, "Second round").
+- **R3:**
+  - **Reproduced** deterministically (EPIPE in the parent's END write to an exited refused contender).
+  - **Repaired:** an explicit protocol (`tests/fixtures/lock-child.mts`, `tests/beta-r1r-lock.test.ts`; D-BR1R-06).
+  - **Runs:** 20 repeated runs passed, and 3 fault injections each failed explicitly.
+- **R4:** `scripts/check-beta-gate-https.mjs` (D-BR1R-05). It found **B-13**: in production the gate's form posted `Origin: null` under `no-referrer`, so nobody could enter. Fixed with `Referrer-Policy: same-origin` on gate pages only (`src/server/http.ts`; D-BR1R-04); the origin check is unchanged. B-13 tests are in `tests/beta-r1.test.ts`.
+- **Evidence:** `docs/evidence/beta-r1-repair-local/README.md` ("Second round").
+- **Tested code:** `8b02b39`.
+  - **Targeted:** `20261115-220845-8b02b394-22816` PASSED, 9/9.
+  - **Fast:** `20261115-220948-8b02b394-24641` PASSED, unit 2039/2039.
+  - **No full gate,** with the reason in the evidence README.
+- **Estimate vs actual:** about 4 h estimated; about 35 min actual.
+- **Failures:**
+  - **Local, while building the HTTPS check:** runs 1–3 failed on the sandbox's outbound proxy, then at B-13. Run 4 was the B-13 reproduction, and run 5 failed on my `ws` client's DNS. Run 6 passed.
+  - **R3 fault injections:** each failed explicitly, as intended.
+  - **Gates:** no failures.
+- **External blockers:** ChatGPT's private browser audit (preview access), the host, real phones, the owner's sign-off.
+- **Next:** the review of the second-round report on #43. The beta stays held.
+
+
+## Beta R1-R, third round: zod's advisory where network input reaches it, review 6903002137 (completed)
+- **Brief:** the owner's ChatGPT review confirmed R3 and R4/B-13. It asked for a bounded, reproducible exposure assessment of zod 3.25.76's GHSA-mrhx-c7xc-m3w5, and a mitigation if the exposure is reachable. Acknowledged in 6903020160. #42 stays separate; the beta is held.
+- **Estimate:** about 2 h 30 min, plus 1 h 30 min if a mitigation is needed. It was written at 6:15 p.m. ET (`docs/beta/beta-r1-repair.md`, "Third round").
+- **Found:** two arrays any seat holder reaches, Family Questions `options` and the lineup's `items`. At the 64 KiB cap, zod 3 built about 32,700 issues per request: about 14 MB of live heap and 50–90 ms. A server with a 24 MB old space died on one request, and a flood stalled everyone (**B-14**).
+- **Fixed:** `src/server/boundedArray.ts` checks the length before any element (D-BR1R-07), and is used by both schemas in `src/server/http.ts`. `tests/beta-r1r-zod.test.ts` adds the guard (D-BR1R-08), the element-read counts, 8,000 generated compatibility bodies and the routes.
+- **Evidence:** `docs/evidence/beta-r1-repair-local/round3/README.md`, with every run, failures included.
+- **Tested code:** `456cb0d`.
+  - **Targeted:** `20261115-233420-456cb0de-5276` PASSED, 8/8.
+  - **Fast:** `20261115-233744-456cb0de-6799` PASSED, unit 2046/2046.
+  - **No full gate,** with the reason in the evidence README.
+- **Failures:**
+  - **The unmitigated server at 24 MB died twice,** as found.
+  - **The driver's own errors:** its first trial was wrong (20 questions against a limit of 15), and the first 24 MB run's driver crashed on the dead server before printing the server's output.
+  - **The new tests' first run had two test bugs,** fixed before run 2.
+  - **Gates:** no failures.
+- **Residual risk:** zod 3 itself is unchanged and `npm audit` still lists the advisory. The records are walked in full (about 10 ms, no issues). The zod 4 migration remains a separate slice.
+- **External blockers:** ChatGPT's private browser audit (Codespaces' forwarded origin), the host, real phones, the owner's sign-off.
+- **Next:** the review of the third-round report on #43. The beta stays held.
+
+## Beta R1-R: a private route for the audit preview, handoff 6903638660 (completed, proposal and local tests)
+- **Brief:** a bounded technical unblock. The reviewer's private Codespaces preview reaches the app with `Origin: https://localhost:3153`, so the production check refuses the gate (6903475177). Find a supported $0 private route that preserves the check, report what was tested versus proposed, and touch no reviewer workspace. Acknowledged in 6903666254. The beta stays on HOLD.
+- **Estimate:** about 2 h 10 min, written at 7:08 p.m. ET.
+- **Delivered:**
+  - **The procedure:** `docs/beta/beta-r1-preview-route.md`. Route A configures the forwarder's rewrite of the app's own origin, conditional on the probe; route B is the fallback; D-BR1R-09.
+  - **The probe:** `scripts/preview/probe-forwarded-origin.mjs`. It is not a gate driver and not product source.
+  - **The evidence:** `docs/evidence/beta-r1-preview-route/README.md`.
+- **Tested here, against a local stand-in forwarder:**
+  - **The probe:** four forwarder behaviours give four verdicts.
+  - **Route A:** with the packed `456cb0d` in production, 10/10. That covers the reviewer's 403 reproduced, entry, API, WebSocket and the refusal of a sibling origin, plus the unsafe case if every Origin were rewritten.
+- **Not tested:**
+  - **GitHub's real forwarder:** that needs the probe run in the Codespace, which only the reviewer can do.
+  - **Route B.**
+- **Failures:** the first probe-test run failed on my harness's own setup (the wrong browser build); rerun with the gates' Chromium.
+- **No product source changed,** so no gate ran. Lint on the new script passed.
+- **Next:** the reviewer runs step 1 (the probe) in the Codespace, then the audit, if route A applies.
+
+## Beta R1-R: the preview probe repaired, review 6903845075 (completed; diagnostic and docs only)
+- **Brief:** the probe's verdict passed partial and Origin-less records: missing comparison requests were read as "stopped by the forwarder", and the page's `done` marker as evidence. Fail closed, test offline, document the scope and a fallback that keeps the browser's Origin and TLS validation. No product source or gate changes. Acknowledged in 6903864088.
+- **Estimate:** about 1 h 15 min, written at 7:20 p.m. ET.
+- **Done:**
+  - **The probe:** `scripts/preview/probe-forwarded-origin.mjs`, with a pure exported `classify()` and types in `.d.mts`. Importing it starts nothing.
+  - **The tests:** `tests/preview-probe-verdict.test.ts`, 16/16.
+  - **The docs:** `docs/beta/beta-r1-preview-route.md` has the evidence rules, the audit on hold, and route B with TLS validation intact.
+  - **The record:** D-BR1R-10 and the evidence README.
+- **Runs:**
+  - **The first probe's classifier,** replayed: the review's three false passes reproduce.
+  - **The repaired classifier:** they fail closed.
+  - **The stand-in:** 5/5, including a forwarder that blocks foreign requests (`INCOMPLETE`).
+  - **Route B's browser half,** with real certificate validation: 7/7, including the control.
+- **Failures:** one harness run timed out (stale wait text) and left a probe running; it was stopped, and the harness was fixed.
+- **No product source changed,** so no gate ran. Typecheck and lint exit 0.
+- **Next:**
+  - **The reviewer:** reviews the repaired probe; with authorization, runs step 1 in the Codespace.
+  - **Route B:** needs its prerequisites authorized.
+
+## Beta R1-R: the audit browser's sandbox, handoff 6904212784 (completed; environment answer, docs and evidence only)
+- **Brief:** the reviewer's route-B attempt in the Codespace stopped at Chromium's sandbox: "No usable sandbox!", then the setuid helper's "Operation not permitted". Say whether my run had the sandbox; give a no-rebuild procedure that keeps it, or the minimum approval. Acknowledged in 6904366977.
+- **Estimate:** about 1 h, written at 7:58 p.m. ET.
+- **Found:**
+  - **My route-B browser run had no OS sandbox:** Playwright's `--no-sandbox` default, as root (R1, R2).
+  - **Chromium sandboxes as a non-root user when user namespaces exist** (R3).
+  - **Without them it fails** exactly as in the Codespace (R4b).
+- **Proposed:**
+  - **First:** read-only diagnostics in the Codespace.
+  - **Option 1:** Firefox ESR's seccomp-BPF sandbox (reduced, no rebuild, untested here).
+  - **Option 2:** Chromium's full sandbox after an owner-approved container change and rebuild.
+  - **Option 3:** the owner's own browser.
+  - **Recorded as** D-BR1R-11; `docs/beta/beta-r1-preview-route.md`.
+- **Invalid runs:** three, because a whole-VM sysctl was refused. They are kept and labelled; R4b and R5b replaced them with a per-namespace limit.
+- **No product source changed, and no gate ran.**
+- **Next:** the reviewer runs the diagnostics and chooses an option. Option 2 needs the owner's approval first.
+
+## Beta R1-R, fourth round: continuing Trivia on small screens, review 6904986723 (R5; completed)
+- **Brief:** ChatGPT's independent private audit of `456cb0d` (Firefox ESR through route B) found that after a nonfinal locked answer, "Waiting for everyone" and the ring came before Next question.
+  - **At 320×480:** Next question was off the first screen.
+  - **The lower seat's label** lay on the text below the ring.
+  - **Asked:** a bounded presentation repair, a browser regression, the journeys, and one full gate. Acknowledged with an estimate in 6905027233.
+- **Estimate:** about 4 h, written at 8:44 p.m. ET. **Actual:** about 3 h 5 min, to the report 6907598254 at about 11:48 p.m. The failed full gate pushed the 9:51 p.m. ETA about 35 min later.
+- **Scope answer:** 6905044291 (acknowledged in 6905935948) confirmed Geography and Math Mayhem. It asked for a check that Math's next prompt and speed clock begin only through the existing open flow after Next question, visibility guard included. Added and passing.
+- **Reproduced first:** `scripts/check-locked-answer.mjs` (first version) on `f93e9cb`, 28 failed checks. Two earlier runs were my driver's errors and are kept.
+- **The repair (B-15, D-BR1R-12):** `apps/web/src/components/mchezo/LockedAnswer.tsx`, shared by Trivia, Geography and Math Mayhem, in Everyday's existing colours (Next question on the screen's own neutral keycap).
+  - **A nonfinal answer:** a compact card, "keep going", Next question and the time left, then the room's progress.
+  - **The last answer:** "All your answers are in", with no continuation control.
+  - **`.mz-wait`:** keeps room under the ring.
+  - **Presentation only.**
+- **The drivers:** the answer helper and four drivers stop expecting the old final keycap.
+- **The tests:** `LockedAnswer.test.tsx` (6), and the new browser check (141 checks, including Math's open flow and visibility guard: sizes, long text, zoom, Geography, Math, the sat-out ring, and the host/guest/TV journey on a 0.2-scaled clock).
+- **The gates:**
+  - **Targeted `20261116-022947-5525dedb-4704` on `5525ded`: FAILED, 11/12.** The new check measured the stamp mid-animation (probe: 0 px² at rest). Driver fixed in `34996cf`.
+  - **Targeted `20261116-024127-34996cf4-7748` on `34996cf`: PASSED, 12/12.**
+  - **Full `20261116-024847-34996cf4-10213` on `34996cf`: CANCELLED** by me after 2 min. Scope answer 6905044291 (acknowledged in 6905935948) added a Math open-flow check, which changed the candidate.
+  - **Targeted `20261116-025541-c955613d-16045` on `c955613`: PASSED, 8/8.**
+  - **Full `20261116-025903-c955613d-17498` on `c955613`: FAILED, 110/111.** check-warm-ivory W8 found two new Everyday styles on the locked screen: my orange Next question and a divider. Fixed in `7097ac2`: the neutral keycap and spacing, with `W8_INTENDED` for the re-keyed elements.
+  - **Targeted `20261116-034821-7097ac2b-7629` on `7097ac2` (the final candidate): PASSED, 8/8.**
+  - **Full `20261116-035311-7097ac2b-9479` on `7097ac2`: PASSED (exit 0), 111/111, unit 2068/2068.**
+  - **Real clock:** check-locked-answer with Trivia's real 6-minute deadline, on the clean `7097ac2` clone: 141/141.
+- **The tested candidate:** `7097ac2`; only docs and evidence follow it.
+- **Not done:** no merge, deployment, public port or spending. Beta HOLD.
+- **Next:** ChatGPT verifies the repair independently and runs the remaining private acceptance checks. Owner sign-off remains a release condition.
+- **Update:** cleared by ChatGPT's private Firefox audit of `7097ac2` (review 6908014247). It covered the TV through the finished reveal and the start of the rematch, and Geography and Math at 320×480. Native devices and the host are still pending (Beta R2).
+
+## Beta R2: release preflight, handoff 6908014247 (completed; docs and evidence only)
+- **The handoff:** ChatGPT cleared R5 (Firefox audit of `7097ac2`) and asked for a launch-readiness slice: a promotion artifact record, a $0 host preflight on official terms, and real-device and host checks with a go/no-go record. Acknowledged with an estimate in 6908050072 at 12:18 a.m. ET.
+- **Estimate:** about 4 h 20 min, written at 12:18 a.m. ET. **Actual:** see the completed report on #43.
+- **Runtime unchanged:** `7097ac2`. Its full gate `20261116-035311-7097ac2b-9479` (PASSED, exit 0, 111/111) is reused. The head delta from `7097ac2` is docs and evidence only.
+- **Item 1, the artifact:** `docs/beta/release-7097ac2.md` and `release-7097ac2.inventory.sha256`.
+  - **Built three times** from fresh clones (Node v22.16.0 twice, from the checksum-verified official download; v22.23.4 once): three different archive hashes, **one** 144-file inventory, digest `fe6d74f8…a61c`.
+  - **The audited archive** in the review Codespace wasn't reachable. Its hash is left for its holder, with the commands to verify it against the inventory.
+- **Item 2, the host:** the release runbook's new "Preflight" section.
+  - **The comparison:** four viable $0 routes, from official Caddy, Let's Encrypt and Cloudflare documentation at pinned commits and Tailscale's code. Tailscale's site, Oracle, Google Cloud and AWS couldn't be read from here; they are listed as facts to confirm.
+  - **The checklist:** P1–P9, a one-time route proof, and a measured proxy count (Caddy 2.6.2's handling checked here).
+- **Item 3, the checks:** `docs/REAL_DEVICE_TESTING.md` §7 and `docs/device-testing/BETA_GO_NO_GO_TEMPLATE.md`.
+  - **The phones:** P1–P8.
+  - **The host:** H1–H6.
+  - **The record:** go/no-go, plus the pending checks with their evidence and who can do them.
+- **Validation:** `docs/evidence/beta-r2-preflight/`.
+  - **The preflight drill:** the runbook's commands, with a real service user, the real package and Caddy 2.6.2 in front (local CA).
+    - Run 1: invalid, my driver's errors.
+    - Run 2: two checks proved nothing; not counted.
+    - **Run 3: PASSED, 42/42.**
+    - Run 4: a negative run, which failed as it should (exit 2).
+  - **The link and path check:** passed, 105 in 8 files.
+- **Doc defects found and fixed:** the first-install restore line, and the settings file's mode on the architecture page.
+- **Not done:** no provisioning, merge, deployment, public port or spending. Beta HOLD. #42 separate.
+- **Next:** ChatGPT reviews the preflight with the owner, and the audited archive's hash is recorded. After the owner's explicit execution approval: the route proof, then §7 on real phones and the host.
+- **Review 6908455526 (changes requested on `30ea026`)** was acknowledged in 6908492572 with a 1 h estimate, written at 12:47 a.m. ET.
+  - **The finding:** the drill's EXIT trap came before its `cgn` check, so a refusal would delete an existing `cgn` user and group. Reproduced with logging stubs.
+  - **The fix (D-BR2-06):** refusals first; ownership tracked per resource; cleanup limited to what the run created.
+  - **Proved by:** a safety check, 14/14, and a full run, 42/42.
+  - **Also:** the blocker matrix now records ChatGPT's private Firefox R5 audit of `7097ac2`, through the TV's finished reveal and the start of the rematch. Native iPhone Safari, Android Chrome and the target host are still pending.
+- **Review 6908557588 (changes requested on `d275a0f`)** was acknowledged in 6908580291 with a 30 min estimate, written at 12:53 a.m. ET.
+  - **The finding:** a `cgn` taken by another run after the startup checks would still be claimed and deleted.
+  - **The fix (D-BR2-07):** ownership only from this run's own successful `groupadd` and `useradd`.
+  - **Proved by:** a safety check, 24/24 with two late-collision cases, and a full run, 42/42.
+
+## Beta R3: a decision-ready release record, handoff 6909443770 (completed; docs and evidence only)
+- **The handoff:** ChatGPT cleared R2 and verified the audited archive: SHA-256 `a693c543…3a5131`, with the 144-file inventory matching. Acknowledged with a 40 min estimate in 6909477051 at 1:45 a.m. ET.
+- **Done:**
+  - **The pinned artifact** in `docs/beta/release-7097ac2.md`.
+  - **A draft go/no-go record,** `docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md`: evidenced fields only, everything else PENDING, NO-GO by default.
+  - **The runbook's "Deciding the route":** the owner's facts F1–F6.
+  - **The runbook's "Two approvals before anyone is invited."**
+  - **§7** tied to the two approvals. D-BR3-01 to D-BR3-04.
+- **Validation** (`docs/evidence/beta-r3-record/`):
+  - the record check, 40/40, plus 3 negative cases that fail as they should;
+  - the link check, passed;
+  - 0 runtime files changed.
+  - No rehearsal or gate was rerun.
+- **Not done:** no host selection, provisioning, account, public port, deployment, merge, invitation or spending. Beta HOLD. #42 separate.
+- **Next:**
+  1. The owner answers F1–F6.
+  2. ChatGPT recommends a route.
+  3. Approval 1 for private target-host validation.
+
+## Beta R3 repair: review 6909578563 (docs and evidence only)
+- **The review:** changes requested on the release instructions. Two items:
+  1. one order: read-only preflight before any host change, with explicit approval boundaries;
+  2. the archive checksum as a command precondition.
+- **Timeline:** acknowledged in 6909605566 with a 45 min estimate, written at 1:53 a.m. ET. Status sent at 2:57 a.m. ET (6910726832), answering 6910697772, with a revised finish of about 3:50 a.m. ET.
+- **Done** (commit `ca15c99`; evidence in `docs/evidence/beta-r3-gate/`):
+  - **The runbook's "The order of execution":** Stages 0–4, with the checks that need the running isolated preview named. H1 is the only route available under this handoff; H2–H4 are unavailable. There is no public-port exception.
+  - **"Promoting it", step 1, the artifact gate:** `sha256sum --check --strict` against the full pinned hash, chained with the unpack, revision, inventory and package checks. A verified marker gates stop, backup, switch, link and start.
+  - **The trace found seven gaps in Stage 1 and Stage 4 (T1–T7).** "First install" used the real data folder; the unit's `ReadWritePaths=` and the missing unit file; `MCHEZO_TRUST_PROXY` preset before V2; Approval 1 not naming host software; and others. All fixed: First install runs from `DATA=/var/lib/cgn-validation`, and the Stage 4 switch is a gated block.
+  - **Aligned:** the draft record, the template and §7, to R1–R8, V1–V3 and the throwaway folder. D-BR3-05 to D-BR3-07.
+- **Validation, the final runs at `ca15c99`** (clean tree):
+  - fixtures 42/42: the gate G1–G8, the first install F1–F4, the switch W1–W2;
+  - mutations: 7 of 7 caught;
+  - the record check, 49/49, with 8 of 8 negatives caught;
+  - runtime diff vs `7097ac2`: 0 files.
+- **Every earlier run** is listed in the evidence README. Fixture runs 1–2 FAILED, because the package check counted the empty dev-scope folders npm leaves; that is fixed in the harness. One mutation attempt was cut off by a worker restart before it ran.
+- **Not done:** no host action, browser run, full gate, provisioning, account, public port, deployment, merge, invitation or spending. Beta HOLD. #42 separate.
+- **Next:**
+  1. ChatGPT reviews this repair.
+  2. The owner answers F1–F6.
+  3. ChatGPT recommends a route.
+  4. Stage 0 on the candidate host, then Approval 1.
+- **Risk:** the fixtures prove the gating, not systemd, Caddy's DNS challenge or the `nc` count. Those are first observed in Stages 1–2 on the host.
+
+## Beta R3 repair, round 2: review 6910988491 (docs and evidence only)
+- **The review:** changes requested before operator use. The published blocks started or stopped services after failed prerequisites:
+  - first install: a failed data check still reloaded and started;
+  - the switch: a failed stop still changed the unit and started, and an occupied real folder was accepted;
+  - promotion: a stale marker that couldn't be removed still reached the stop.
+- **Timeline:** acknowledged in 6911020929 with a 1 h 45 min estimate, written at 3:13 a.m. ET (report by about 5:00).
+- **Done** (commit `b7f0bf7`; evidence in `docs/evidence/beta-r3-gate/round2/`):
+  - **Promotion:** run-scoped flags, and marker removal inside the chain.
+  - **First install:** split into prepare, edits, gate and one start chain.
+  - **The switch:** split into a stop-first part A, with `mkdir` refusing an existing folder, and a checked part B.
+  - **Also:** the trace (T8–T10) and D-BR3-08.
+- **Validation, the final runs at `b7f0bf7`** (clean tree):
+  - the review's three scenarios reproduced on `ca15c99`'s blocks, 3 of 3;
+  - the round-2 fixtures, 90/90: P1–P12, F1–F10, W1–W10, each with positive and negative cases;
+  - mutations, 16 of 16 caught;
+  - the record check, 49/49, with 8 of 8 negatives caught;
+  - runtime diff vs `7097ac2`: 0 files.
+- **Earlier runs:** fixtures 86/86, then 90/90 after adding W10 and the dangling-link check; mutations 16 of 16 caught.
+- **Not done:** no host action, browser run, full gate, provisioning, account, public port, deployment, merge, invitation or spending. Beta HOLD. #42 separate.
+- **Next:** ChatGPT reviews round 2. Then the owner's F1–F6, the route recommendation, Stage 0 and Approval 1.
+- **Risk:** the stubs prove the gating, not systemd, the real datatool or Caddy; those are first observed on the host in Stages 1–2.
+
+## Beta R3 cleared; Beta R4 hosting proposal (handoffs 6911597448 and 6916543972; docs only)
+- **Cleared:** ChatGPT cleared the Beta R3 operator repair for release preparation (6911597448), on docs `b7f0bf7`, head `d554b80`.
+- **R4, as first handed off:** a home-route (H1) preflight. I acknowledged it in 6911606286 and waited for route facts.
+- **R4, corrected (6916543972):** the owner wants an independently hosted full website, with no home computer.
+  - **Acknowledged:** in 6916559594, at 7:34 a.m. ET, with a 1 h 30 min estimate.
+- **Done:** `docs/beta/beta-r4-hosting-proposal.md`.
+  - **The recommendation:** the pinned server unchanged on Fly.io, as one always-on Machine with one volume.
+    - It needs a card on file; the expected bill is $0 under Fly's under-$5 waiver. It is not a free tier: about $3.84 per 30 days at list price.
+  - **Supabase:** not used now. Its free plan doesn't host rooms (Edge Functions run 150 s), pauses after a week inactive, and has no automatic backups.
+  - **Cloudflare Durable Objects:** kept as the only free-plan stateful option found. It would be a large port.
+  - **Sources:** official, from the providers' documentation repositories at pinned commits. Their websites are blocked in this session; Render, Koyeb, Railway, Google Cloud, Oracle, AWS and Deno are listed as not verified.
+- **Not done:** no account, resource, deploy, DNS change, port, charge, implementation change or gate rerun. Beta HOLD. #42 separate.
+- **Next:** ChatGPT's route recommendation. Then the owner's decisions: the route, a card on file, a public URL behind the access code, the account and region, the operator, and the off-host backup place. Then an execution approval for a cloud validation app with throwaway data.
+
+## Beta R4 hosting proposal, revision 2: Render first (handoffs 6916659110 and 6916722530; docs only)
+- **Brief:** ChatGPT asked me to challenge the Fly.io recommendation with code and provider evidence (6916659110). The owner then asked to prioritize a paid Render web service with a persistent disk, if the evidence confirms the fit (6916722530). Acknowledged in 6916746119, with a 1 h estimate.
+- **Done:** `docs/beta/beta-r4-hosting-proposal.md`, revision 2.
+  - **The recommendation:** the pinned server unchanged on one Render **Starter** web service (512 MB, 0.5 CPU, $7/month), with a **1 GB disk at `/var/data`** ($0.25/month) and `MCHEZO_DATA_DIR=/var/data/cgn`. **$7.25/month** on a Hobby workspace; $32.25 if the existing workspace is on Pro.
+  - **Overages:** bandwidth past 5 GB at $0.15/GB; build minutes past 500 (a $0 spend limit makes builds stop instead); domains past 2 at $0.25 each.
+  - **The challenge, from the code:**
+    - Render requires `0.0.0.0`, which replaces B-07 and needs review.
+    - The off-host backup must use `datatool backup --allow-running`: Render's disk is reachable only from the running instance.
+    - A rollback restores the old deploy's environment variables, including the access code.
+    - The trust-proxy count needs a new method.
+  - **Fly.io** stays as the cheaper alternative. Supabase stays optional.
+- **Evidence:** `docs/evidence/beta-r4-hosting/`.
+  - **Load runs:** two local runs, three scenarios each. Peak memory 95.5 MB at 220 sockets; CPU under 1 CPU-second per step.
+  - **Render's own pages:** read at the logged times, with their hashes.
+- **Not done:** no account, resource, deploy, DNS change, port, charge, implementation change or gate rerun. Beta HOLD. #42 separate.
+- **Next:** ChatGPT's recommendation and the owner-facing cost approval. Then the owner's decisions and an execution approval for the validation list in the proposal.
+- **Risk:** the measurements ran on this session's machine without answers; the real instance, the disk's ownership and the proxy count are unverified.
+
+## Beta R4 hosting proposal, revision 3: a stopped-writer backup, ingress and rollback rules (review 6917441687; docs and evidence only)
+- **Brief:** ChatGPT kept Render preferred, and blocked the operator plan.
+  - **Blocking:** two matching file lists don't prove a consistent backup. Enforce quiescence, with fail-closed rules, encrypted private storage, access and retention; demonstrate it locally; propose the smallest slice if the tools aren't enough.
+  - **Also:** make ingress and rollback acceptance explicit; separate the baseline from a cap; add a production-mode validation workload.
+  - **Acknowledged** in 6917502657, at 8:16 a.m. ET, with a 3 h estimate. I withdrew revision 2's "take it twice" claim.
+- **Done:** `docs/beta/beta-r4-hosting-proposal.md`, revision 3.
+  - **The backup:** the server exits (graceful `SIGTERM`), then `datatool backup` runs without `--allow-running` and holds the lock for the whole copy; `verify`; `serverWasRunning: false`; then encryption to the owner's `age` public key. `BACKUP_OK` only if every step passed; every failure path is fail-closed.
+  - **The smallest slice:** Render's disk is reachable only from the running instance, so stopping the server needs a container entrypoint that keeps the instance up. Three proposed deploy-side shell scripts, not deployed: `cgn-entrypoint`, `cgn-backup`, `cgn-authorize`.
+  - **Ingress:** a new dedicated Hobby workspace, because Render's private network spans a workspace and region and can't be blocked on Hobby. `MCHEZO_TRUST_PROXY` only picks the address the wrong-code limits count; it is settled by a forgery test and a separation test on the paid service itself.
+  - **Rollback:** no one-click rollback; roll back by a revert-commit deploy. **The guard:** the entrypoint refuses (exit 78) unless the environment matches the configuration recorded on the disk, so a rollback to old environment values fails closed.
+  - **Cost:** $7.25/month baseline; Render has no overall cap; bandwidth overage is uncapped; a Pro workspace would add $25.
+  - **Validation workload W1–W8**, for a later approval.
+- **Evidence:** `docs/evidence/beta-r4-hosting/backup-drill/`.
+  - **The drill:** the unchanged server in production mode under the proposed scripts, with live play (answers and Memory Book notes).
+  - **The cases:** the backup and its consistency checks; the checker's own negatives; the failure cases N1–N5; restore; the rollback guard G1–G4.
+  - **Runs:** 7 in development (run 2 timed out; run 5 failed and exposed a checker gap, then fixed), then a final run on the committed files.
+- **Not done:** no account, resource, deploy, exposure, charge, runtime change or gate rerun. Beta HOLD. #42 queued as is.
+- **Next:** ChatGPT's review and the owner's approvals, as listed in the proposal.
+- **Risk:** the drill is local; Render-side behaviour (the entrypoint as first process, the SSH user and environment, health-check timing, disk ownership) is unverified until W4–W7.
+
+## Beta R4 hosting proposal, revision 4: the backup's failure handling and hold ownership (review 6918277617; docs and evidence only)
+- **Brief:** ChatGPT found two blocking defects in the proposed `cgn-backup`.
+  - **The archive:** `tar | age` checked only the encryptor, so a failed archiver still gave `BACKUP_OK`.
+  - **The hold:** it was taken in two steps and released unconditionally, so one run could release another's.
+  - **Also asked for:** a bounded recovery for abandoned sessions, and verified receipt of the off-Render copy before any destructive step.
+  - **Acknowledged** in 6918312651, at 8:50 a.m. ET, with a 2 h 30 min estimate.
+- **Reproduced first,** on the scripts as committed at `6aad6d5`: a failed archiver and a failed hash each gave `BACKUP_OK`; overlapping runs let a server start mid-backup; an abandoned or hung-up session left the server down.
+- **Done:**
+  - **`cgn-backup`:**
+    - every step's status is checked, with no pipeline;
+    - on any failure, everything the run created is removed;
+    - the hold is taken atomically with `mkdir`, owns a pid and token, and is released only by its owner, on every exit path;
+    - the backup's names are chosen and checked only while holding.
+  - **`cgn-entrypoint`:** releases a hold whose owner is gone, within about a second.
+  - **New `cgn-receive`:** `RECEIPT_OK` for the off-Render copy (hash, decrypt, checksum list).
+  - **The rule:** a deploy, restore or data-folder change requires `RECEIPT_OK`.
+  - **The proposal and the evidence READMEs** are updated.
+- **Evidence:** `docs/evidence/beta-r4-hosting/backup-drill/round4/`.
+  - **The focused negatives:** P0, X1–X4, H0–H5.
+  - **The full drill:** receipt, four receipt negatives, and a restore of the received copy.
+  - **Runs:** 2 reproduction runs (7 failures each, as expected), 2 focused runs (the second added H0 and H5, after I found my first repair let a same-second run remove another's files), 1 drill run, then a final run of each on the committed files.
+- **Not done:** no account, resource, deploy, expense, runtime change or gate rerun. Beta HOLD. #42 separate.
+- **Next:** ChatGPT's review.
+- **Risk:** Render-side behaviour (the dropped-SSH signal, the entrypoint as the first process, health-check timing) and the real off-Render path are still unverified until W4–W7.
+
+## Beta R4 hosting proposal, revision 5: runs killed after their files exist (review 6918922306; docs and evidence only)
+- **Brief:** a backup killed outright (`SIGKILL`) after its copy files exist left them behind, and nothing removed them. Revision 4's "every failure leaves nothing" and H3 had covered only failures the script observes, and a kill before any copy existed. Acknowledged in 6918962654, at 9:17 a.m. ET, with a 1 h 30 min estimate.
+- **Reproduced first,** on the scripts at `37ff3e8`, with deterministic checkpoints: during the copy (a room file and a manifest written) and during encryption (the plaintext tar and a partial archive written). The files survived, and there was no reconciliation.
+- **Done:**
+  - **`cgn-backup`:**
+    - a run record (token, pid, exact paths), placed atomically before any file;
+    - every process it starts carries the run's token;
+    - reconciliation under the hold, automatic at each backup's start or alone as `cgn-backup reconcile`: it removes only the listed paths of a run with no live process, and leaves running runs and unlisted paths alone.
+  - **`cgn-entrypoint`:** keeps the hold while a dead owner's copy still runs, bounded by the copy's time limit.
+  - **Corrections:** the blanket statements in the proposal and in round 4's README.
+- **Evidence:** `docs/evidence/beta-r4-hosting/backup-drill/round5/`.
+  - **The K cases:** K1a and K1b (copy checkpoint), K2a and K2b (encryption checkpoint), K3 (a healthy run left alone), and H3 revised. A neighbouring successful backup survives byte for byte.
+  - **The runs:** 1 reproduction run, 2 focused runs, 1 drill run, then a final run of each on the committed files.
+- **Not done:** no account, resource, deploy, expense, runtime change or gate rerun. Beta HOLD. #42 separate.
+- **Next:** ChatGPT's review.
+- **Risk:** on Render, it is unverified whether `/proc/<pid>/environ` is readable for the service user's processes, and what a dropped SSH session sends. Both are for W5.
+
+## Beta R4: revision 5 accepted; the Render package and W1 preparation (review 6919662222; handoff 6919813048)
+- **Review 6919662222** accepted revision 5's backup-reconciliation repair, after ChatGPT's own shell checks and a private browser check. No repeat repair and no gate requested.
+- **Handoff 6919813048:** the owner approved the Render route ("Proceed with that Render setup using my existing account"): Starter + 1 GB disk, the $7.25/month baseline with overages disclosed, and the access-gated public URL.
+  - **The approval covers that setup only:** no plan upgrades, unrelated resources, merges or unrestricted launch.
+  - **The account connection is ChatGPT's**, and not yet confirmed.
+  - **The backup destination is not selected;** Google Drive is proposed.
+  - **Acknowledged** in 6919880607, at 9:53 a.m. ET, with a 6½-hour estimate.
+- **Done** (no runtime change; docs, deploy files and tools only):
+  - **`deploy/render/`:**
+    - **`Dockerfile`:** three stages, every base pinned by digest, no `ARG`. age v1.2.1 is built from source with a pinned binary hash. The runtime is the pinned Node 22.16.0 slim image, non-root `cgn`, with `/app` read-only.
+    - **`cgn-artifact-gate.sh`:** the archive's SHA-256; its entries; the 144-file inventory; `release.json`; Node; `npm ci`; exactly `ws` and `zod`. It runs at build time, again on the finished image, and over SSH.
+    - **The three reviewed `cgn-*` scripts, byte-identical**, plus `operator/cgn-receive.sh`.
+    - **`pins/`**, a `.dockerignore` allowlist, and a candidate `render.yaml`.
+    - **`README.md`:** the pinned inventory; the exact Render configuration; what the Render integration (MCP) can't do, which needs the dashboard.
+  - **`scripts/beta/`:** `w1-check.mjs` (W1 modes `closed`, `boundary`, `forgery`, `separation` and `reconnect`, with redacted evidence JSON), `render-like-proxy.mjs` and `w1-selftest.sh`.
+  - **`docs/beta/render-w1.md`:** the W1 steps (Step 0 on the instance, the window, the order, what to record, and failure handling).
+- **Evidence:** `docs/evidence/beta-r4-render-package/`, covering image checks B0, G1–G12 and C1–C11, the W1 self-test S1–S8, and every run in order, failures included.
+- **Findings that changed the plan:**
+  - npm 10 leaves empty scope folders after `--omit=dev`, so the gate now checks files rather than folders.
+  - Once data exists, the instance won't restart until `cgn-authorize` has run, as designed. So W1 Step 0 authorizes the throwaway configuration before any restart.
+  - `forgery` locks the tester's address, so it runs after `boundary` and `reconnect`.
+- **Not done:**
+  - no Render account use, service, deploy, expense, or real data;
+  - no audited archive here (a local rebuild with a test pin; the production pin refuses it);
+  - the historical full game gate not rerun.
+  - Beta HOLD for real users until W1–W8 and the go/no-go. #42 separate.
+- **Final runs** on a clean checkout of the tested commit `405f06f924813516416243570fe1692f5120ca31`:
+  - image checks: **PASSED, 30/30**;
+  - W1 self-test: **PASSED, 18/18**;
+  - static checks: **passed** on run 2. Run 1 was incomplete: my `node_modules` link made the repack see a dirty tree.
+  - **No runtime drift:** a repack of the commit has the pinned 144-file inventory.
+- **Next:** ChatGPT's review. Then the account and the deploy repository (ChatGPT), and W1 per `docs/beta/render-w1.md`.
+- **Risk:** unverified until W1 Step 0:
+  - the disk mount's ownership (a root-owned mount fails closed);
+  - the real proxy count;
+  - Render's build-host architecture (the age pin assumes `amd64`);
+  - Docker Hub pulls during Render's build.

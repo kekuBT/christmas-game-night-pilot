@@ -1,0 +1,61 @@
+// Beta R1-R round 3 (review 6903002137): every zod collection that network input reaches.
+// Walks the schemas the HTTP routes and the WebSocket intent path parse (LocalServer's static schemas and
+// IntentSchema), from the built server (dist/), and lists every array, set, map, record and tuple in them with
+// its constraints. Usage: node inventory.mjs <repo>
+import { pathToFileURL } from "node:url";
+import { join } from "node:path";
+
+const repo = process.argv[2];
+const { LocalServer } = await import(pathToFileURL(join(repo, "dist/server/http.js")).href);
+const { IntentSchema } = await import(pathToFileURL(join(repo, "dist/shared/protocol.js")).href);
+
+const roots = Object.fromEntries(Object.entries(LocalServer).filter(([, v]) => v && v._def && typeof v.safeParse === "function"));
+roots.IntentSchema = IntentSchema;
+
+const checksOf = (def) => (def.minLength || def.maxLength || def.exactLength)
+  ? [def.minLength && `min ${def.minLength.value}`, def.maxLength && `max ${def.maxLength.value}`, def.exactLength && `length ${def.exactLength.value}`].filter(Boolean).join(", ")
+  : "no length limit";
+const name = (s) => s._def.typeName;
+
+function walk(s, path, out, seen = new Set()) {
+  if (!s || !s._def || seen.has(s)) return;
+  seen.add(s);
+  const d = s._def;
+  switch (d.typeName) {
+    case "ZodObject": {
+      const shape = d.shape();
+      for (const [k, v] of Object.entries(shape)) walk(v, `${path}.${k}`, out, seen);
+      if (d.catchall && d.catchall._def.typeName !== "ZodNever") walk(d.catchall, `${path}.*`, out, seen);
+      out.push({ path, kind: "object", detail: `${Object.keys(shape).length} keys, unknown keys: ${d.unknownKeys}` });
+      break;
+    }
+    case "ZodArray": out.push({ path, kind: "ARRAY", detail: `${checksOf(d)}; element: ${name(d.type)}` }); walk(d.type, `${path}[]`, out, seen); break;
+    case "ZodSet": out.push({ path, kind: "SET", detail: `${d.minSize ? `min ${d.minSize.value}` : ""} ${d.maxSize ? `max ${d.maxSize.value}` : ""}` }); walk(d.valueType, `${path}<>`, out, seen); break;
+    case "ZodMap": out.push({ path, kind: "MAP", detail: "" }); walk(d.keyType, `${path}<k>`, out, seen); walk(d.valueType, `${path}<v>`, out, seen); break;
+    case "ZodRecord": out.push({ path, kind: "RECORD", detail: `key: ${name(d.keyType)}, value: ${name(d.valueType)}, no size limit` }); walk(d.keyType, `${path}{k}`, out, seen); walk(d.valueType, `${path}{v}`, out, seen); break;
+    case "ZodTuple": out.push({ path, kind: "TUPLE", detail: `${d.items.length} items${d.rest ? ", with rest" : ""}` }); d.items.forEach((x, i) => walk(x, `${path}[${i}]`, out, seen)); if (d.rest) walk(d.rest, `${path}[...]`, out, seen); break;
+    case "ZodUnion": d.options.forEach((o, i) => walk(o, `${path}|${i}`, out, seen)); out.push({ path, kind: "union", detail: `${d.options.length} options` }); break;
+    case "ZodDiscriminatedUnion": [...d.options].forEach((o, i) => walk(o, `${path}|${i}`, out, seen)); out.push({ path, kind: "discriminatedUnion", detail: `${d.options.length} options on "${d.discriminator}"` }); break;
+    case "ZodOptional": case "ZodNullable": case "ZodDefault": case "ZodReadonly": case "ZodCatch": case "ZodBranded": walk(d.innerType ?? d.type, path, out, seen); break;
+    case "ZodEffects": walk(d.schema, path, out, seen); out.push({ path, kind: "effects", detail: d.effect.type }); break;
+    case "ZodPipeline":
+      if (d.in.description === "length checked before any element" && d.out._def.typeName === "ZodArray") {
+        out.push({ path, kind: "ARRAY", detail: `${checksOf(d.out._def)}; element: ${name(d.out._def.type)}; LENGTH CHECKED FIRST (boundedArray)` });
+        walk(d.out._def.type, `${path}[]`, out, seen);
+      } else { walk(d.in, `${path}(in)`, out, seen); walk(d.out, `${path}(out)`, out, seen); out.push({ path, kind: "pipeline", detail: "" }); }
+      break;
+    case "ZodLazy": out.push({ path, kind: "LAZY", detail: "recursive schema" }); break;
+    case "ZodIntersection": walk(d.left, `${path}&L`, out, seen); walk(d.right, `${path}&R`, out, seen); break;
+    default: break; // scalars: string, number, boolean, enum, literal, unknown, any
+  }
+}
+
+let collections = 0;
+for (const [root, schema] of Object.entries(roots)) {
+  const out = [];
+  walk(schema, root, out);
+  const coll = out.filter((x) => /^[A-Z]+$/.test(x.kind));
+  collections += coll.length;
+  console.log(`${root}: ${coll.length ? coll.map((c) => `${c.kind} ${c.path} (${c.detail})`).join("; ") : "no collections"}`);
+}
+console.log(`\n${Object.keys(roots).length} network-facing schemas, ${collections} collections in them.`);

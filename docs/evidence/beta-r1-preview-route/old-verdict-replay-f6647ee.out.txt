@@ -1,0 +1,3 @@
+f6647ee classifier, case 1 three agreeing own samples + done, zero comparison: REWRITTEN_SAME_ORIGIN_ONLY (ownOrigin "https://localhost:3153")
+f6647ee classifier, case 2 one comparison sample, two missing: REWRITTEN_SAME_ORIGIN_ONLY (ownOrigin "https://localhost:3153")
+f6647ee classifier, case 3 three own samples with no Origin header: REWRITTEN_SAME_ORIGIN_ONLY (ownOrigin null)

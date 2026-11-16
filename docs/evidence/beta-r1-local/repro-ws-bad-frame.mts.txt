@@ -1,0 +1,22 @@
+// Beta R1 evidence: does one malformed WebSocket frame from a public TV socket crash the server process?
+// Usage: npx tsx repro-ws-bad-frame.mts <tree>
+import { join } from "node:path";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { pathToFileURL } from "node:url";
+const tree = process.argv[2]!;
+const { LocalServer } = await import(pathToFileURL(join(tree, "src/server/http.ts")).href);
+const { WebSocket } = await import(pathToFileURL(join(tree, "node_modules/ws/wrapper.mjs")).href);
+process.on("uncaughtException", (e) => { console.log(`SERVER PROCESS: uncaughtException ${(e as Error).name}: ${(e as Error).message} (in production this ends the process)`); process.exit(3); });
+const server = new LocalServer({ dataDir: mkdtempSync(join(tmpdir(), "mz-beta-repro-")), heartbeatMs: null, lifecycleSweepMs: null });
+const port = await server.listen(0);
+const r = await fetch(`http://localhost:${port}/rooms`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: "R" }) });
+const { roomId } = await r.json() as { roomId: string };
+const ws = new WebSocket(`ws://localhost:${port}/?roomId=${roomId}&audience=tv`);
+await new Promise((res) => ws.once("message", res));
+console.log("TV socket open (no session). Sending one text frame that is not valid UTF-8...");
+ws.send(Buffer.from([0xff, 0xfe, 0xfd]), { binary: false });
+await new Promise((res) => setTimeout(res, 1500));
+console.log("SERVER PROCESS: still running after 1.5 s");
+await server.close();
+process.exit(0);

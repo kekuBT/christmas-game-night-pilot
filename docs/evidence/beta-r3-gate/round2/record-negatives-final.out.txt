@@ -1,0 +1,31 @@
+== 2026-11-16T08:31Z; tree b7f0bf710b3c74bf425f5a0ec061e291fda01545, 0 uncommitted path(s); script: docs/evidence/beta-r3-gate/record-negatives.sh.txt (copied as committed)
+N-order: exit 1
+    FAIL runbook: the order of execution puts the read-only preflight before Approval 1 and installation
+    CAUGHT
+N-pubport: exit 1
+    FAIL runbook: no public-port exception remains
+    CAUGHT
+N-unavail: exit 1
+    FAIL runbook: H2–H4 are recorded as unavailable under this handoff
+    CAUGHT
+N-hash: exit 1
+    FAIL runbook: the gate checks the full pinned hash with --check --strict
+    CAUGHT
+N-route: exit 1
+    FAIL draft: "Route checks V1–V3" is PENDING — | Route checks V1–V3 (TLS, proxy count, WebSockets) | done | Stage 2 |
+    FAIL draft: the route checks and isolated staging rows are PENDING and need the host or the running preview
+    CAUGHT
+N-staging: exit 1
+    FAIL draft: "Isolated staging" is PENDING — | Isolated staging: the artifact gate printed `VERIFIED` (with throwaway data an
+    FAIL draft: the route checks and isolated staging rows are PENDING and need the host or the running preview
+    CAUGHT
+N-approval1: exit 1
+    FAIL draft: "Approval 1 (private validation" is PENDING — | Approval 1 (private validation of the pinned artifact on the selected route) |
+    CAUGHT
+N-r1r8: exit 1
+    FAIL draft: "Read-only preflight R1–R8" is PENDING — | Read-only preflight R1–R8 completed on (date), by | 2026-11-16 | Stage 0 |
+    CAUGHT
+
+record negatives: 8 caught, 0 not caught
+ALL RECORD NEGATIVES CAUGHT
+exit=0

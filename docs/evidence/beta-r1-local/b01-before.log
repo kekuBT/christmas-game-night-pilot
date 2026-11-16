@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ❯ tests/beta-r1.test.ts (2 tests | 1 failed) 3170ms
+   × B-01: WebSocket messages are capped like HTTP bodies (64 KiB) > a TV socket (no session) sending an oversized message is closed with 1009 before the server parses it 3151ms
+     → expected 'open' to be 1009 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/beta-r1.test.ts > B-01: WebSocket messages are capped like HTTP bodies (64 KiB) > a TV socket (no session) sending an oversized message is closed with 1009 before the server parses it
+AssertionError: expected 'open' to be 1009 // Object.is equality
+
+- Expected: 
+1009
+
++ Received: 
+"open"
+
+ ❯ tests/beta-r1.test.ts:37:26
+     35|     const closed = closeOf(ws, 3000);
+     36|     ws.send(`{"intent":${JSON.stringify("x".repeat(100 * 1024))}}`);
+     37|     expect(await closed).toBe(1009); // "message too big"
+       |                          ^
+     38|     // The server is unharmed: a new socket and HTTP still work.
+     39|     const again = await tvSocket(h);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  16:53:27
+   Duration  4.52s (transform 794ms, setup 0ms, collect 1.04s, tests 3.17s, environment 0ms, prepare 74ms)
+

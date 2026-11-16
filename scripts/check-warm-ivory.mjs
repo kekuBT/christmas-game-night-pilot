@@ -71,6 +71,16 @@ const W8_INTENDED = {
     // Stage 12.7 (D-S127-01): the host's Teams card ("Make teams"); a guest sees none until there are teams.
     "teams-card>", "teams-make>"] },
   "lobby-guest": { added: ["last-game-kicker>span.mz-kicker"], removed: ["last-game-card>span.mz-kicker"], addedPrefixes: ["family-card>", "family-write>", "family-card-mine>"] },
+  // Beta R1-R, R5 (D-BR1R-12): the locked-answer screen is the shared LockedAnswer view. Its parts gained test ids
+  // (the screen, the card, the keep-going line, Next question, the room's progress), so the same elements' keys moved
+  // from no test id to these. Order changed, colours didn't: each new key must still reuse a style this screen had.
+  locked: {
+    added: [],
+    removed: [">main.mz-screen", ">section.mz-lockcard", ">span.mz-kicker", ">span.mz-lockcard__answer", ">span.mz-lockcard__stamp.mz-stamp",
+      ">button.mz-key.mz-key--block.mz-key--lg.mz-key--neutral", ">p.mz-kicker", ">p.mz-foot", ">div.mz-wait", ">div.mz-wait__center", ">svg.", ">circle.",
+      ">span.mz-wait__seat", ">span.mz-token", ">span.mz-token.mz-token--you", ">span.mz-seat__name", ">span.mz-wait__count", ">small."],
+    addedPrefixes: ["mz-locked>", "mz-lockcard>", "mz-locked-lead>", "mz-next-question>", "mz-locked-room>"],
+  },
 };
 /**
  * A cover's gradient is referenced by an id React generates in render order (`url("#mzcov-_r_2_")`). A new game's cover
@@ -377,7 +387,7 @@ try {
       // On a failure, every difference (up to 40 each way), so the log alone says what changed.
       if (added.length || gone.length) for (const [sign, xs] of [["+", added], ["-", gone]]) for (const x of xs.slice(0, 40)) console.log(`  W8 ${screen} ${sign} ${x.slice(0, 400)}`);
       check(`W8 Everyday ${screen}: every element kind's computed colours equal the base build's (d4dc408)`, was.size > 0 && added.length === 0 && gone.length === 0,
-        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4–12.14), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
+        was.size === 0 ? "no baseline for this screen" : `${now.length} kinds; new ${added.length}, missing ${gone.length}${allowed ? `; ${allowed} intended element change(s) (Stage 12.1, 12.4–12.14, Beta R1-R R5), each reusing a base style` : ""}${added.length ? ` e.g. ${added[0].slice(0, 240)}` : ""}${gone.length ? ` | missing e.g. ${gone[0].slice(0, 240)}` : ""}`);
     }
   }
 

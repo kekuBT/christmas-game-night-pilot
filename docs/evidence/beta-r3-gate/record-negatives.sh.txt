@@ -1,0 +1,30 @@
+#!/bin/bash
+# Beta R3 (review 6909578563): negative cases for check-r3-record.mjs. Each one changes ONE thing in a copy of the docs
+# that the review's repair must rule out; the record check must then exit non-zero, naming the matching check.
+#   bash record-negatives.sh <repo root> <check-r3-record.mjs>
+set -uo pipefail
+REPO=$1; CHECK=$2
+N=$(mktemp -d); trap 'rm -rf "$N"' EXIT
+CAUGHT=0; MISSED=0
+neg() { # $1 name, $2 file, $3 old, $4 new, $5 a fragment of the FAIL line expected
+  local d="$N/$1"; mkdir -p "$d/docs/beta" "$d/docs/device-testing"
+  cp "$REPO"/docs/beta/release-7097ac2.md "$REPO"/docs/beta/release-7097ac2.inventory.sha256 "$REPO"/docs/beta/beta-r1-release.md "$d/docs/beta/"
+  cp "$REPO"/docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md "$d/docs/device-testing/"
+  python3 -c "
+import sys; p=sys.argv[1]; s=open(p).read(); o=sys.argv[2]; n=sys.argv[3]
+assert s.count(o)>=1, 'target missing: '+o; open(p,'w').write(s.replace(o,n,1))" "$d/$2" "$3" "$4" || { echo "N-$1: TARGET NOT FOUND"; MISSED=$((MISSED+1)); return; }
+  local out rc; out=$(node "$CHECK" "$d" 2>&1); rc=$?
+  echo "N-$1: exit $rc"; echo "$out" | grep '^FAIL' | cut -c1-150 | sed 's/^/    /'
+  if [ $rc -ne 0 ] && echo "$out" | grep '^FAIL' | grep -qF "$5"; then echo "    CAUGHT"; CAUGHT=$((CAUGHT+1)); else echo "    NOT CAUGHT (expected: $5)"; MISSED=$((MISSED+1)); fi
+}
+neg order docs/beta/beta-r1-release.md "**0. Read-only preflight**" "**0. Preflight**" "read-only preflight before Approval 1"
+neg pubport docs/beta/beta-r1-release.md "any public port or public exposure" "a public port beyond the chosen route" "no public-port exception"
+neg unavail docs/beta/beta-r1-release.md "**Unavailable**: needs a separate explicit owner decision" "Available" "H2–H4 are recorded as unavailable"
+neg hash docs/beta/beta-r1-release.md "sha256sum --check --strict" "sha256sum" "the full pinned hash with --check --strict"
+neg route docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md "| Route checks V1–V3 (TLS, proxy count, WebSockets) | **PENDING:** needs the running isolated preview" "| Route checks V1–V3 (TLS, proxy count, WebSockets) | done" "Route checks V1–V3"
+neg staging docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md "| Isolated staging: the artifact gate printed \`VERIFIED\` (with throwaway data and code) | **PENDING:** needs the host" "| Isolated staging: the artifact gate printed \`VERIFIED\` (with throwaway data and code) | VERIFIED" "Isolated staging"
+neg approval1 docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md "| Approval 1 (private validation of the pinned artifact on the selected route) | **PENDING**" "| Approval 1 (private validation of the pinned artifact on the selected route) | given" "Approval 1 (private validation"
+neg r1r8 docs/device-testing/beta-go-no-go-DRAFT-7097ac2.md "| Read-only preflight R1–R8 completed on (date), by | **PENDING**" "| Read-only preflight R1–R8 completed on (date), by | 2026-11-16" "Read-only preflight R1–R8"
+echo; echo "record negatives: $CAUGHT caught, $MISSED not caught"
+[ "$MISSED" = 0 ] && echo "ALL RECORD NEGATIVES CAUGHT" || echo "SOME RECORD NEGATIVES NOT CAUGHT"
+exit "$MISSED"

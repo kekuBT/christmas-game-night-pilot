@@ -1,0 +1,39 @@
+PASS forwarder "same-origin-only": verdict REWRITTEN_SAME_ORIGIN_ONLY (expected REWRITTEN_SAME_ORIGIN_ONLY) — the target's own fetch POST, form POST and WebSocket all arrived as "https://localhost:3155"; each comparison transport arrived as "https://cs-3156.app.test:42623" and none with "https://localhost:3155". This covers only the traffic observed in this run.
+     target xorigin-fetch-post origin="https://cs-3156.app.test:42623" host=localhost:3155 xfh=cs-3155.app.test:42623 sec-fetch-site=same-site cookie=false
+     target xorigin-form-post  origin="https://cs-3156.app.test:42623" host=localhost:3155 xfh=cs-3155.app.test:42623 sec-fetch-site=same-site cookie=false
+     target xorigin-ws         origin="https://cs-3156.app.test:42623" host=localhost:3155 xfh=cs-3155.app.test:42623 sec-fetch-site=null cookie=false
+     other  done               origin="https://localhost:3156" host=localhost:3156 xfh=cs-3156.app.test:42623 sec-fetch-site=same-origin cookie=false
+     target fetch-post         origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:42623 sec-fetch-site=same-origin cookie=false
+     target form-post          origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:42623 sec-fetch-site=same-origin cookie=false
+     target ws                 origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:42623 sec-fetch-site=null cookie=false
+PASS forwarder "all": verdict UNSAFE (expected UNSAFE) — a comparison fetch POST arrived with the target's own value "https://localhost:3155": the check couldn't tell them apart
+     target xorigin-fetch-post origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:45789 sec-fetch-site=same-site cookie=false
+     target xorigin-form-post  origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:45789 sec-fetch-site=same-site cookie=false
+     target xorigin-ws         origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:45789 sec-fetch-site=null cookie=false
+     other  done               origin="https://localhost:3156" host=localhost:3156 xfh=cs-3156.app.test:45789 sec-fetch-site=same-origin cookie=false
+     target fetch-post         origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:45789 sec-fetch-site=same-origin cookie=false
+     target form-post          origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:45789 sec-fetch-site=same-origin cookie=false
+     target ws                 origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:45789 sec-fetch-site=null cookie=false
+PASS forwarder "http-only": verdict INCONSISTENT (expected INCONSISTENT) — the target's own requests arrived with different Origins: "https://localhost:3155", "https://cs-3155.app.test:41751"
+     target xorigin-fetch-post origin="https://cs-3156.app.test:41751" host=localhost:3155 xfh=cs-3155.app.test:41751 sec-fetch-site=same-site cookie=false
+     target xorigin-form-post  origin="https://cs-3156.app.test:41751" host=localhost:3155 xfh=cs-3155.app.test:41751 sec-fetch-site=same-site cookie=false
+     target xorigin-ws         origin="https://cs-3156.app.test:41751" host=localhost:3155 xfh=cs-3155.app.test:41751 sec-fetch-site=null cookie=false
+     other  done               origin="https://localhost:3156" host=localhost:3156 xfh=cs-3156.app.test:41751 sec-fetch-site=same-origin cookie=false
+     target fetch-post         origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:41751 sec-fetch-site=same-origin cookie=false
+     target form-post          origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:41751 sec-fetch-site=same-origin cookie=false
+     target ws                 origin="https://cs-3155.app.test:41751" host=localhost:3155 xfh=cs-3155.app.test:41751 sec-fetch-site=null cookie=false
+PASS forwarder "none": verdict PRESERVED (expected PRESERVED) — the target's own fetch POST, form POST and WebSocket all arrived as the forwarded origin "https://cs-3155.app.test:38809", and each comparison transport arrived as "https://cs-3156.app.test:38809"
+     target xorigin-fetch-post origin="https://cs-3156.app.test:38809" host=localhost:3155 xfh=cs-3155.app.test:38809 sec-fetch-site=same-site cookie=false
+     target xorigin-form-post  origin="https://cs-3156.app.test:38809" host=localhost:3155 xfh=cs-3155.app.test:38809 sec-fetch-site=same-site cookie=false
+     target xorigin-ws         origin="https://cs-3156.app.test:38809" host=localhost:3155 xfh=cs-3155.app.test:38809 sec-fetch-site=null cookie=false
+     other  done               origin="https://cs-3156.app.test:38809" host=localhost:3156 xfh=cs-3156.app.test:38809 sec-fetch-site=same-origin cookie=false
+     target fetch-post         origin="https://cs-3155.app.test:38809" host=localhost:3155 xfh=cs-3155.app.test:38809 sec-fetch-site=same-origin cookie=false
+     target form-post          origin="https://cs-3155.app.test:38809" host=localhost:3155 xfh=cs-3155.app.test:38809 sec-fetch-site=same-origin cookie=false
+     target ws                 origin="https://cs-3155.app.test:38809" host=localhost:3155 xfh=cs-3155.app.test:38809 sec-fetch-site=null cookie=false
+PASS forwarder "block-foreign": verdict INCOMPLETE (expected INCOMPLETE) — no comparison request carrying "https://cs-3156.app.test:45847" was observed for fetch POST: nothing observed; form POST: nothing observed; WebSocket: nothing observed. A request that didn't arrive is not evidence that the forwarder stopped it.
+     the stand-in refused 3 foreign requests before the probe saw them
+     other  done               origin="https://localhost:3156" host=localhost:3156 xfh=cs-3156.app.test:45847 sec-fetch-site=same-origin cookie=false
+     target fetch-post         origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:45847 sec-fetch-site=same-origin cookie=false
+     target form-post          origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:45847 sec-fetch-site=same-origin cookie=false
+     target ws                 origin="https://localhost:3155" host=localhost:3155 xfh=cs-3155.app.test:45847 sec-fetch-site=null cookie=false
+PROBE TEST PASSED (5 forwarder behaviours, 5 verdicts)

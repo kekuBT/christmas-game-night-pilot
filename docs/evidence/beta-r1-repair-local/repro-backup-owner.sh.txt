@@ -1,0 +1,14 @@
+#!/bin/bash
+# Review 6900450343 R2 follow-up (found by the drill): run as root, does a backup keep the data files' owner?
+# Usage: bash repro-backup-owner.sh <worktree>   (as root)
+set -e
+WT=$1; T=$(mktemp -d); D=$T/data; mkdir -m 700 $D
+cd $WT
+npx tsx -e "import {RoomStore} from './src/server/persistence.ts'; new RoomStore('$D').saveBook('room-x',{entries:[],revision:1})"
+chown -R 65534:65534 $D
+echo "data:   $(stat -c '%U(%u) %a %n' $D/room-x.book.json)"
+npx tsx src/server/datatool.ts backup --data $D --out $T/b | tail -1
+echo "backup: $(stat -c '%U(%u) %a' $T/b) folder; $(stat -c '%U(%u) %a %n' $T/b/room-x.book.json)"
+npx tsx src/server/datatool.ts restore --backup $T/b --into $T/r | tail -1
+echo "restore: $(stat -c '%U(%u) %a' $T/r) folder; $(stat -c '%U(%u) %a %n' $T/r/room-x.book.json)"
+rm -rf $T

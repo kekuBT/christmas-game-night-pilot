@@ -11,12 +11,13 @@
 // PlayerTokens that carry only offline badges.
 import { satOutLabel, serverNowEstimate } from "../../ui/mchezo/lib/lifecycle.js";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { AnswerDistribution, AnswerGrid, Keycap, MchezoWaiting, PhoneScreen, ResultCard, Stamp, StandingsList } from "../../ui/mchezo/index.js";
+import { AnswerDistribution, AnswerGrid, MchezoWaiting, PhoneScreen, ResultCard, StandingsList } from "../../ui/mchezo/index.js";
 import { GameIntroScreen, QuestionScreen } from "../../ui/mchezo/index.js";
 import { clampStep, rankStandings, revealSteps, stepLabel } from "../../ui/mchezo/index.js";
 import type { GameState, PlayerGame, PublicGame, PublicPlayer } from "../../types.js";
 import { asRecord } from "../../types.js";
 import { toMzPlayers } from "./adapters.js";
+import { LockedAnswer } from "./LockedAnswer.js";
 
 export interface MchezoTriviaDeps {
   game: PlayerGame;
@@ -94,20 +95,20 @@ export function MchezoTriviaPlay(deps: MchezoTriviaDeps) {
   const lockedQ = lastAnswered ? questions.find((x) => x.id === lastAnswered) : undefined;
   const lockedChoice = lockedQ ? myAnswers[lockedQ.id] : undefined;
   if (lockedQ && lockedChoice !== undefined) {
+    // R5: carrying on comes first; after the last answer there is nothing to continue to.
     return (
-      <main className="mz-screen" aria-label="Answer locked in">
-        <section className="mz-lockcard" style={{ background: `var(--mz-answer-${lockedChoice % 4})`, color: "var(--mz-on-accent)" }}>
-          <span className="mz-kicker">Your answer</span>
-          <span className="mz-lockcard__answer">{lockedQ.options[lockedChoice]}</span>
-          <Stamp className="mz-lockcard__stamp">LOCKED IN</Stamp>
-        </section>
-        <MchezoWaiting label="Waiting for everyone" players={players} playerId={playerId} publicGame={publicGame} onTv={onTv} showClock />
-        <div style={{ padding: "0 16px 16px" }}>
-          <Keycap block variant="neutral" onClick={() => setLastAnswered(null)}>
-            {firstUnanswered ? "Next question" : "Waiting for the game to finish"}
-          </Keycap>
-        </div>
-      </main>
+      <LockedAnswer
+        answer={lockedQ.options[lockedChoice] ?? ""}
+        answerIndex={lockedChoice}
+        questionNumber={questions.indexOf(lockedQ) + 1}
+        questionCount={questions.length}
+        remaining={questions.filter((q) => myAnswers[q.id] === undefined).length}
+        onNext={() => setLastAnswered(null)}
+        players={players}
+        playerId={playerId}
+        publicGame={publicGame}
+        onTv={onTv}
+      />
     );
   }
   // All answered: wait for the rest of the room (or the deadline/host skip).

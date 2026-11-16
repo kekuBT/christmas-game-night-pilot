@@ -1,0 +1,59 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.82kB done
+#1 DONE 0.0s
+
+#2 [context golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6] load metadata for local/cgn-test-golang-ca:1.24.4
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 447B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [context golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6] local/cgn-test-golang-ca:1.24.4
+#5 resolve docker.io/local/cgn-test-golang-ca:1.24.4
+#5 resolve docker.io/local/cgn-test-golang-ca:1.24.4 0.6s done
+#5 DONE 0.6s
+
+#5 [context golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6] local/cgn-test-golang-ca:1.24.4
+#5 CACHED
+
+#4 [internal] load build context
+#4 transferring context: 140B done
+#4 DONE 0.0s
+
+#6 [age 1/3] COPY pins/age.sha256 /pins/age.sha256
+#6 DONE 0.0s
+
+#7 [age 2/3] RUN go install filippo.io/age/cmd/age@v1.2.1  && cd /go/bin && sha256sum -c --strict /pins/age.sha256  && ./age --version
+#7 0.129 go: downloading filippo.io/age v1.2.1
+#7 0.254 go: downloading golang.org/x/crypto v0.24.0
+#7 0.254 go: downloading golang.org/x/term v0.21.0
+#7 0.435 go: downloading filippo.io/edwards25519 v1.1.0
+#7 0.435 go: downloading golang.org/x/sys v0.21.0
+#7 9.985 sha256sum: WARNING: 1 computed checksum did NOT match
+#7 9.985 age: FAILED
+#7 ERROR: process "/bin/sh -c go install filippo.io/age/cmd/age@v1.2.1  && cd /go/bin && sha256sum -c --strict /pins/age.sha256  && ./age --version" did not complete successfully: exit code: 1
+------
+ > [age 2/3] RUN go install filippo.io/age/cmd/age@v1.2.1  && cd /go/bin && sha256sum -c --strict /pins/age.sha256  && ./age --version:
+0.129 go: downloading filippo.io/age v1.2.1
+0.254 go: downloading golang.org/x/crypto v0.24.0
+0.254 go: downloading golang.org/x/term v0.21.0
+0.435 go: downloading filippo.io/edwards25519 v1.1.0
+0.435 go: downloading golang.org/x/sys v0.21.0
+9.985 sha256sum: WARNING: 1 computed checksum did NOT match
+9.985 age: FAILED
+------
+Dockerfile:14
+--------------------
+  13 |     COPY pins/age.sha256 /pins/age.sha256
+  14 | >>> RUN go install filippo.io/age/cmd/age@v1.2.1 \
+  15 | >>>  && cd /go/bin && sha256sum -c --strict /pins/age.sha256 \
+  16 | >>>  && ./age --version
+  17 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c go install filippo.io/age/cmd/age@v1.2.1  && cd /go/bin && sha256sum -c --strict /pins/age.sha256  && ./age --version" did not complete successfully: exit code: 1

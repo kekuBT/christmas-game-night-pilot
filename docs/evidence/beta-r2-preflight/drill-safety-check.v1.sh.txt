@@ -1,0 +1,63 @@
+# The first version of the safety check (4 cases), kept with its log drill-safety-check-run1.log. Superseded by drill-safety-check.sh.txt.
+#!/bin/bash
+# Review 6908455526: a focused safety check of preflight-drill.sh's refusals and cleanup, in a disposable container.
+# userdel and groupdel are replaced on PATH by logging wrappers (which then run the real tool), so every deletion the
+# drill attempts is recorded. The check itself refuses to start if a cgn user or group exists, and removes only the
+# fixtures it made.
+#   S1 an existing cgn USER (no cgn group): the drill refuses, exits 2, attempts no deletion; the user is intact
+#   S2 an existing cgn GROUP (no user): the drill refuses, exits 2, attempts no deletion; the group is intact
+#   S3 a partial failure: useradd creates the group, then fails: the drill stops (exit 1) and deletes only that group
+#   S4 SIGTERM mid-run (the service user exists and the server runs): cleanup removes the run's user, group, folder and
+#      processes, and nothing else
+#   bash drill-safety-check.sh <the drill's six arguments>
+set -uo pipefail
+DRILL=$(cd "$(dirname "$0")" && pwd)/preflight-drill.sh
+FAIL=0; PASS=0
+check() { if [ "$2" = 0 ]; then echo "PASS $1${3:+ — $3}"; PASS=$((PASS+1)); else echo "FAIL $1${3:+ — $3}"; FAIL=$((FAIL+1)); fi; }
+if getent passwd cgn >/dev/null || getent group cgn >/dev/null; then echo "REFUSED: a cgn user or group exists; this check won't touch it"; exit 2; fi
+W=$(mktemp -d); STUBS=$W/stubs; mkdir -p "$STUBS"; LOG=$W/deletions.log; : > "$LOG"
+for t in userdel groupdel; do
+  printf '#!/bin/bash\necho "%s $*" >> %s\nexec /usr/sbin/%s "$@"\n' "$t" "$LOG" "$t" > "$STUBS/$t"; chmod +x "$STUBS/$t"
+done
+drills_before=$(ls -d /srv/cgn-r2-drill-* 2>/dev/null | wc -l)
+leftovers() { echo "user:$(getent passwd cgn >/dev/null && echo yes || echo no) group:$(getent group cgn >/dev/null && echo yes || echo no) prefixes:$(( $(ls -d /srv/cgn-r2-drill-* 2>/dev/null | wc -l) - drills_before )) procs:$(pgrep -f 'cgn-r2-drill' | wc -l)"; }
+
+echo "== S1: an existing cgn user, without a cgn group"
+useradd --system --no-create-home --shell /usr/sbin/nologin -N -g nogroup cgn; UID_BEFORE=$(id -u cgn)
+: > "$LOG"; OUT=$(PATH="$STUBS:$PATH" bash "$DRILL" "$@" 2>&1); R=$?; echo "$OUT" | tail -3
+[ $R = 2 ] && echo "$OUT" | grep -q "REFUSED: a user named cgn"; check "S1 the drill refuses (exit 2)" $? "exit $R"
+[ ! -s "$LOG" ]; check "S1 no deletion attempted" $? "$(cat "$LOG")"
+[ "$(id -u cgn 2>/dev/null)" = "$UID_BEFORE" ]; check "S1 the existing user is intact (same uid)" $? "uid $(id -u cgn 2>/dev/null)"
+[ "$(( $(ls -d /srv/cgn-r2-drill-* 2>/dev/null | wc -l) - drills_before ))" = 0 ]; check "S1 no folder made" $?
+/usr/sbin/userdel cgn; getent group cgn >/dev/null && /usr/sbin/groupdel cgn
+
+echo; echo "== S2: an existing cgn group, without a cgn user"
+groupadd --system cgn; GID_BEFORE=$(getent group cgn | cut -d: -f3)
+: > "$LOG"; OUT=$(PATH="$STUBS:$PATH" bash "$DRILL" "$@" 2>&1); R=$?; echo "$OUT" | tail -3
+[ $R = 2 ] && echo "$OUT" | grep -q "REFUSED: a group named cgn"; check "S2 the drill refuses (exit 2)" $? "exit $R"
+[ ! -s "$LOG" ]; check "S2 no deletion attempted" $? "$(cat "$LOG")"
+[ "$(getent group cgn | cut -d: -f3)" = "$GID_BEFORE" ]; check "S2 the existing group is intact (same gid)" $?
+/usr/sbin/groupdel cgn
+
+echo; echo "== S3: useradd creates the group, then fails"
+printf '#!/bin/bash\n/usr/sbin/groupadd --system cgn\necho "useradd stub: created the group, now failing" >&2\nexit 1\n' > "$STUBS/useradd"; chmod +x "$STUBS/useradd"
+: > "$LOG"; OUT=$(PATH="$STUBS:$PATH" bash "$DRILL" "$@" 2>&1); R=$?; echo "$OUT" | grep -E "B1|stopping|cleanup:"
+rm "$STUBS/useradd"
+[ $R = 1 ] && echo "$OUT" | grep -q "stopping the drill"; check "S3 the drill stops at the failed service user (exit 1)" $? "exit $R"
+[ "$(cat "$LOG")" = "groupdel cgn" ]; check "S3 the only deletion is the group this run created" $? "$(tr '\n' ';' < "$LOG")"
+[ "$(leftovers)" = "user:no group:no prefixes:0 procs:0" ]; check "S3 nothing left behind" $? "$(leftovers)"
+
+echo; echo "== S4: SIGTERM mid-run, with the service user created and the server running"
+: > "$LOG"; PATH="$STUBS:$PATH" bash "$DRILL" "$@" > "$W/s4.log" 2>&1 & DPID=$!
+for i in $(seq 1 600); do grep -q "^PASS B7" "$W/s4.log" && break; sleep 0.1; done
+SEEN="$(pgrep -u cgn -f 'dist/server/serve.js' | wc -l) server(s) as cgn"
+kill -TERM $DPID; wait $DPID; R=$?; grep -E "^PASS B7|cleanup:" "$W/s4.log"
+[ $R = 143 ]; check "S4 SIGTERM ends the drill (exit 143), with the server running before" $? "exit $R; $SEEN before"
+grep -q "cleanup: removed only what this run created (user 1, group 1, prefix 1)" "$W/s4.log"; check "S4 cleanup ran, for what this run created" $?
+grep -qx "userdel cgn" "$LOG" && ! grep -vqxE "(userdel|groupdel) cgn" "$LOG"; check "S4 deletions: only cgn, which this run created" $? "$(tr '\n' ';' < "$LOG")"
+sleep 1; [ "$(leftovers)" = "user:no group:no prefixes:0 procs:0" ]; check "S4 nothing left behind" $? "$(leftovers)"
+
+rm -rf "$W"
+echo; echo "drill safety check: $PASS passed, $FAIL failed"
+[ $FAIL = 0 ] && echo "DRILL SAFETY CHECK PASSED" || echo "DRILL SAFETY CHECK FAILED"
+exit $FAIL

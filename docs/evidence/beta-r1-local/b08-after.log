@@ -1,0 +1,21 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+stdout | tests/beta-r1-data.test.ts > backup and restore into an isolated folder > a backup holds every room, its previous generation and the Memory Book; restored elsewhere, a server serves the same rooms
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-beta-data-restored-mZD5M3)
+[restore] 2 room(s) restored, 0 not loaded (data: /tmp/mz-beta-data-src-4QEKBp)
+
+ ✓ tests/beta-r1.test.ts (17 tests) 293ms
+stdout | tests/beta-r1-data.test.ts > retention: bounded, manual, and nothing is deleted > lists old rooms in a dry run; --apply moves them into an archive (never while a server runs); recent rooms stay
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-beta-data-src-OtZRks)
+
+stderr | tests/beta-r1-data.test.ts > a full disk > a failed save answers 500 with a plain reason, never corrupts the saved room, keeps the server up, and saves again once space is back
+[persist] could not save room room-mwi3vt0p-652015: ENOSPC: no space left on device, write
+
+ ✓ tests/beta-r1-data.test.ts (6 tests) 324ms
+
+ Test Files  2 passed (2)
+      Tests  23 passed (23)
+   Start at  17:25:57
+   Duration  1.69s (transform 822ms, setup 0ms, collect 2.09s, tests 617ms, environment 0ms, prepare 122ms)
+

@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261116-025903-c955613d-17498
+  110 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-warm-ivory (w3) [functional]: FAIL W8 Everyday locked-320: every element kind's computed colours equal the base build's (d4dc408) — 32 kinds; new 24, missing 20 e.g. mz-lockcard>section.mz-lockcard.mz-lockcard--compact=>rgb(22, 17
+  timing   wall 42m 51s · step time 2h 03m (sum) · 3 workers, 96% busy · 2.88× the same steps run one after another
+           predicted 30–71m (about 40m 08s, low-confidence) → actual 42m 51s (+7%)
+           longest  e2e-chromium 8m 19s, check-f5 7m 36s, check-leaderboard 6m 27s · the longest step is 19% of the wall time
+           machine  CPU mean 32%, peak 100% · memory available ≥ 13010 MB · load peak 6.26 · backpressure 12 wait(s), 102s
+           contention ×1.059 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full2/test-results/20261116-025903-c955613d-17498/report.json

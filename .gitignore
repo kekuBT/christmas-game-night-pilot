@@ -5,3 +5,7 @@ data-device-test/
 .DS_Store
 test-results/
 __pycache__/
+
+# Beta R1: backups hold the family's data and are never committed (docs/beta/beta-r1-release.md)
+backups/
+*.cgn-backup/

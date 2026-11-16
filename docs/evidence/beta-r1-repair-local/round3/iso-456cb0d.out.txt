@@ -1,0 +1,41 @@
+zod exposure, isolated children on the mitigated tree; node v22.23.4; 2026-11-15T23:32:46.993Z
+{"id":"control-valid","bytes":80,"elements":2,"success":true,"issues":0,"nestedIssues":0,"codes":{},"ms":1.4,"heapAfterMB":0.05,"retainedMB":0.03,"rssMB":76.76,"msAll":[1.4,1.4,1.4],"minOldSpaceMB":12,"belowThat":"11:SIGABRT/OOM"}
+{"id":"fq-flat-invalid","bytes":65536,"elements":32747,"success":false,"issues":1,"nestedIssues":0,"codes":{"too_big":1},"ms":1.5,"heapAfterMB":0.06,"retainedMB":0.04,"rssMB":77.43,"msAll":[1.4,1.5,1.6],"minOldSpaceMB":13,"belowThat":"12:SIGABRT/OOM"}
+{"id":"fq-nested-empty","bytes":65535,"elements":21831,"success":false,"issues":1,"nestedIssues":0,"codes":{"too_big":1},"ms":1.4,"heapAfterMB":0.06,"retainedMB":0.04,"rssMB":79.51,"msAll":[1.4,1.4,1.5],"minOldSpaceMB":13,"belowThat":"12:SIGABRT/OOM"}
+{"id":"fq-nested-one","bytes":65534,"elements":16373,"success":false,"issues":1,"nestedIssues":0,"codes":{"too_big":1},"ms":1.4,"heapAfterMB":0.06,"retainedMB":0.04,"rssMB":77.83,"msAll":[1.4,1.4,2.1],"minOldSpaceMB":13,"belowThat":"12:SIGABRT/OOM"}
+{"id":"fq-one-long-nested","bytes":65536,"elements":32746,"success":false,"issues":1,"nestedIssues":0,"codes":{"invalid_type":1},"ms":1.9,"heapAfterMB":0.06,"retainedMB":0.04,"rssMB":76.83,"msAll":[1.6,1.9,2.3],"minOldSpaceMB":12,"belowThat":"11:SIGABRT/OOM"}
+{"id":"fq-deep","bytes":65535,"elements":1,"depth":32746,"success":false,"issues":1,"nestedIssues":0,"codes":{"invalid_type":1},"ms":1.6,"heapAfterMB":0.06,"retainedMB":0.04,"rssMB":78.5,"msAll":[1.5,1.6,1.6],"minOldSpaceMB":13,"belowThat":"12:SIGABRT/OOM"}
+{"id":"fq-valid-oversize","bytes":65535,"elements":21831,"success":false,"issues":1,"nestedIssues":0,"codes":{"too_big":1},"ms":1.5,"heapAfterMB":0.06,"retainedMB":0.04,"rssMB":76.59,"msAll":[1.5,1.5,2.5],"minOldSpaceMB":12,"belowThat":"11:SIGABRT/OOM"}
+{"id":"fq-long-strings","bytes":65058,"elements":129,"success":false,"issues":1,"nestedIssues":0,"codes":{"too_big":1},"ms":1.4,"heapAfterMB":0.06,"retainedMB":0.04,"rssMB":75.46,"msAll":[1.4,1.4,1.8],"minOldSpaceMB":12,"belowThat":"11:SIGABRT/OOM"}
+{"id":"pb-flat-invalid","bytes":65536,"elements":32730,"success":false,"issues":1,"nestedIssues":3,"codes":{"invalid_union":1},"ms":2.4,"heapAfterMB":0.09,"retainedMB":0.06,"rssMB":76.66,"msAll":[1.8,2.4,2.4],"minOldSpaceMB":12,"belowThat":"11:SIGABRT/OOM"}
+{"id":"pb-empty-objects","bytes":65536,"elements":21820,"success":false,"issues":1,"nestedIssues":3,"codes":{"invalid_union":1},"ms":2.3,"heapAfterMB":0.09,"retainedMB":0.06,"rssMB":78.34,"msAll":[1.9,2.3,2.3],"minOldSpaceMB":13,"belowThat":"12:SIGABRT/OOM"}
+{"id":"pb-three-issues","bytes":65533,"elements":3117,"success":false,"issues":1,"nestedIssues":3,"codes":{"invalid_union":1},"ms":1.8,"heapAfterMB":0.09,"retainedMB":0.06,"rssMB":77.88,"msAll":[1.7,1.8,1.9],"minOldSpaceMB":12,"belowThat":"11:SIGABRT/OOM"}
+{"id":"pb-nested-empty","bytes":65536,"elements":21820,"success":false,"issues":1,"nestedIssues":3,"codes":{"invalid_union":1},"ms":1.9,"heapAfterMB":0.09,"retainedMB":0.06,"rssMB":78.93,"msAll":[1.8,1.9,2],"minOldSpaceMB":12,"belowThat":"11:SIGABRT/OOM"}
+{"id":"pb-nested-field","bytes":65535,"elements":32723,"success":false,"issues":1,"nestedIssues":3,"codes":{"invalid_union":1},"ms":2.2,"heapAfterMB":0.1,"retainedMB":0.07,"rssMB":75.61,"msAll":[2.1,2.2,2.3],"minOldSpaceMB":13,"belowThat":"12:SIGABRT/OOM"}
+{"id":"pb-deep","bytes":65535,"elements":1,"depth":32729,"success":false,"issues":1,"nestedIssues":3,"codes":{"invalid_union":1},"ms":1.8,"heapAfterMB":0.09,"retainedMB":0.06,"rssMB":79.83,"msAll":[1.8,1.8,2.2],"minOldSpaceMB":13,"belowThat":"12:SIGABRT/OOM"}
+{"id":"pb-valid-oversize","bytes":65536,"elements":4364,"success":false,"issues":1,"nestedIssues":3,"codes":{"invalid_union":1},"ms":1.7,"heapAfterMB":0.09,"retainedMB":0.06,"rssMB":78.83,"msAll":[1.7,1.7,2.3],"minOldSpaceMB":12,"belowThat":"11:SIGABRT/OOM"}
+{"id":"gs-record-keys","bytes":65534,"elements":6659,"success":true,"issues":0,"nestedIssues":0,"codes":{},"ms":11.7,"heapAfterMB":4.5,"retainedMB":0.46,"rssMB":78.88,"msAll":[9.1,11.7,12.3],"minOldSpaceMB":13,"belowThat":"12:SIGABRT/OOM"}
+{"id":"in-payload-keys","bytes":65531,"elements":6648,"success":true,"issues":0,"nestedIssues":0,"codes":{},"ms":8.5,"heapAfterMB":4.5,"retainedMB":0.46,"rssMB":82.05,"msAll":[8.1,8.5,9.3],"minOldSpaceMB":14,"belowThat":"13:SIGABRT/OOM"}
+{"id":"in-payload-array","bytes":65535,"elements":32687,"success":false,"issues":1,"nestedIssues":0,"codes":{"invalid_type":1},"ms":1.8,"heapAfterMB":0.06,"retainedMB":0.03,"rssMB":79.16,"msAll":[1.4,1.8,1.8],"minOldSpaceMB":12,"belowThat":"11:SIGABRT/OOM"}
+{"id":"synthetic-r1","bytes":65535,"elements":32767,"success":false,"issues":32768,"nestedIssues":0,"codes":{"too_big":1,"invalid_type":32767},"ms":40.7,"heapAfterMB":11.62,"retainedMB":7.88,"rssMB":94.07,"msAll":[38.7,40.7,55.2],"minOldSpaceMB":20,"belowThat":"18:SIGABRT/OOM"}
+
+variant | bytes | elements | top-level issues | nested issues | ms (median of 3) | heap after (MB) | retained (MB) | smallest old space (MB) | over the control
+control-valid | 80 | 2 | 0 | 0 | 1.4 | 0.05 | 0.03 | 12 | 0
+fq-flat-invalid | 65536 | 32747 | 1 | 0 | 1.5 | 0.06 | 0.04 | 13 | 1
+fq-nested-empty | 65535 | 21831 | 1 | 0 | 1.4 | 0.06 | 0.04 | 13 | 1
+fq-nested-one | 65534 | 16373 | 1 | 0 | 1.4 | 0.06 | 0.04 | 13 | 1
+fq-one-long-nested | 65536 | 32746 | 1 | 0 | 1.9 | 0.06 | 0.04 | 12 | 0
+fq-deep | 65535 | 1 (depth 32746) | 1 | 0 | 1.6 | 0.06 | 0.04 | 13 | 1
+fq-valid-oversize | 65535 | 21831 | 1 | 0 | 1.5 | 0.06 | 0.04 | 12 | 0
+fq-long-strings | 65058 | 129 | 1 | 0 | 1.4 | 0.06 | 0.04 | 12 | 0
+pb-flat-invalid | 65536 | 32730 | 1 | 3 | 2.4 | 0.09 | 0.06 | 12 | 0
+pb-empty-objects | 65536 | 21820 | 1 | 3 | 2.3 | 0.09 | 0.06 | 13 | 1
+pb-three-issues | 65533 | 3117 | 1 | 3 | 1.8 | 0.09 | 0.06 | 12 | 0
+pb-nested-empty | 65536 | 21820 | 1 | 3 | 1.9 | 0.09 | 0.06 | 12 | 0
+pb-nested-field | 65535 | 32723 | 1 | 3 | 2.2 | 0.1 | 0.07 | 13 | 1
+pb-deep | 65535 | 1 (depth 32729) | 1 | 3 | 1.8 | 0.09 | 0.06 | 13 | 1
+pb-valid-oversize | 65536 | 4364 | 1 | 3 | 1.7 | 0.09 | 0.06 | 12 | 0
+gs-record-keys | 65534 | 6659 | 0 | 0 | 11.7 | 4.5 | 0.46 | 13 | 1
+in-payload-keys | 65531 | 6648 | 0 | 0 | 8.5 | 4.5 | 0.46 | 14 | 2
+in-payload-array | 65535 | 32687 | 1 | 0 | 1.8 | 0.06 | 0.03 | 12 | 0
+synthetic-r1 | 65535 | 32767 | 32768 | 0 | 40.7 | 11.62 | 7.88 | 20 | 8

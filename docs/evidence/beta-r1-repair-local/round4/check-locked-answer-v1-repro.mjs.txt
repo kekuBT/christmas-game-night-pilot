@@ -1,0 +1,179 @@
+// Beta R1-R, R5 (review 6904986723): after a player locks a NONFINAL answer in
+// Trivia, carrying on must be obvious on a small screen. Measured in the real
+// app (Chromium emulation at the stated CSS sizes, not real phones):
+//   L1  the enabled Next question action is fully inside the INITIAL viewport,
+//       not covered (the element at its centre is the button), and it works
+//   L2  it comes before the room's progress (the ring), and nothing on the
+//       screen tells the player to wait for everyone
+//   L3  no seat token or name label overlaps any text or control
+//   L4  no sideways scroll
+//   F   after the FINAL answer: a truthful "all your answers are in" message
+//       and no enabled continuation control
+// Sizes: 320×480, 390×844 (phones), 1440×900 (desktop).
+// Usage: node scripts/check-locked-answer.mjs <baseUrl>   (the gate passes its server)
+import { launchChromium, screenshotDir } from "./lib/driver-env.mjs";
+import { passBriefing } from "./lib/briefing.mjs";
+import { mkdirSync } from "node:fs";
+import { join as pathJoin } from "node:path";
+
+const BASE = process.argv[2] ?? "http://localhost:3471";
+const SHOTS = screenshotDir("test-results/screenshots/locked-answer");
+mkdirSync(SHOTS, { recursive: true });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let failures = 0;
+function check(name, ok, detail = "") { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; }
+
+// 24 characters, the longest name the join form takes (Home.tsx maxLength; the server allows 32).
+const LONG_NAME = "Bartholomew Featherstone";
+const LOCKED = 'main[aria-label="Answer locked in"]';
+
+async function host(page, name) {
+  await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" });
+  await page.getByTestId("home-host").click();
+  await page.getByPlaceholder("e.g. Auntie June").fill(name);
+  await page.getByRole("button", { name: "Host a game" }).click();
+  const chip = page.getByRole("button", { name: /^Share room code / });
+  await chip.waitFor({ timeout: 15000 });
+  let code = "";
+  for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) {
+    code = ((await chip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim();
+    if (!/^[A-Z0-9]{6}$/.test(code)) await sleep(300);
+  }
+  return code;
+}
+async function join(page, name, code) {
+  await page.goto(`${BASE}/join`, { waitUntil: "domcontentloaded" });
+  await page.getByPlaceholder("e.g. Auntie June").fill(name);
+  await page.locator(".mz-code__input").fill(code);
+  await page.getByRole("button", { name: "Join the game" }).click();
+  await page.getByRole("heading", { name: `You’re in, ${name}.` }).waitFor({ timeout: 15000 });
+}
+/** A call from the page with its own seat. */
+const api = (page, method, path, body) => page.evaluate(async ({ method, path, body }) => {
+  const roomId = sessionStorage.getItem("cgn_roomId");
+  const r = await fetch(path.replace(":room", roomId), { method, headers: { "content-type": "application/json", "x-session-token": sessionStorage.getItem("cgn_token") ?? "" }, ...(body ? { body: JSON.stringify(body) } : {}) });
+  return { status: r.status, body: await r.json().catch(() => ({})) };
+}, { method, path, body });
+const myRoom = async (page) => (await api(page, "GET", "/rooms/:room/projection?audience=player")).body;
+
+/** Everything L1–L4 and F need, measured on the locked view as first shown (scrolled to the top). */
+const measure = (page) => page.evaluate((LOCKED) => {
+  window.scrollTo(0, 0);
+  const main = document.querySelector(LOCKED);
+  if (!main) return { missing: true };
+  const rect = (el) => el.getBoundingClientRect();
+  const area = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+  const buttons = [...main.querySelectorAll("button")].map((b) => ({ el: b, text: b.innerText.trim(), enabled: !b.disabled && b.getAttribute("aria-disabled") !== "true" }));
+  const nextEl = buttons.find((b) => /^Next question$/i.test(b.text));
+  let next = null;
+  if (nextEl) {
+    const b = rect(nextEl.el);
+    const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    next = { top: Math.round(b.top), bottom: Math.round(b.bottom), left: Math.round(b.left), right: Math.round(b.right), enabled: nextEl.enabled, hitIsButton: !!hit && (hit === nextEl.el || nextEl.el.contains(hit)) };
+  }
+  const ring = main.querySelector(".mz-wait");
+  const nextBeforeRing = nextEl && ring ? !!(nextEl.el.compareDocumentPosition(ring) & Node.DOCUMENT_POSITION_FOLLOWING) : nextEl ? true : null;
+  // Seats: the token and its name label, each checked against every text block and control outside the ring.
+  const seats = [...main.querySelectorAll(".mz-wait__seat")];
+  const blocks = [...main.querySelectorAll("p, h1, h2, h3, .mz-kicker, button, .mz-lockcard, [role=timer], [role=status]")].filter((el) => !el.closest(".mz-wait"));
+  const collisions = [];
+  for (const s of seats) {
+    for (const part of [s.firstElementChild, s.querySelector(".mz-seat__name")].filter(Boolean)) {
+      const pr = rect(part);
+      for (const bl of blocks) {
+        const a = area(pr, rect(bl));
+        if (a > 1) collisions.push({ seat: (s.querySelector(".mz-seat__name")?.textContent ?? "").slice(0, 24), part: part.classList.contains("mz-seat__name") ? "label" : "token", block: (bl.innerText || bl.className).replace(/\s+/g, " ").slice(0, 48), px2: Math.round(a) });
+      }
+    }
+  }
+  const enabledOther = buttons.filter((b) => b.enabled && !/^TV stage$/i.test(b.text)).map((b) => b.text);
+  return {
+    innerWidth, innerHeight,
+    next, nextBeforeRing,
+    tellsToWait: /waiting for everyone/i.test(main.innerText),
+    collisions,
+    sideways: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+    enabledOther,
+    text: main.innerText.replace(/\s+/g, " ").slice(0, 400),
+  };
+}, LOCKED);
+
+/** Tap the first open answer and wait for the locked view. */
+async function lockOne(page) {
+  const slab = page.locator(".mz-slab:not([disabled])").first();
+  await slab.waitFor({ timeout: 20000 });
+  await slab.click();
+  await page.locator(LOCKED).waitFor({ timeout: 15000 });
+  await sleep(250); // let the ring's count settle before measuring
+}
+const questionNumber = async (page) => {
+  const t = await page.locator(".mz-qhead .mz-muted").first().innerText({ timeout: 15000 }).catch(() => "");
+  return Number((/Question (\d+) of/.exec(t) ?? [])[1] ?? NaN);
+};
+
+const SIZES = [
+  { tag: "320x480", width: 320, height: 480, phone: true },
+  { tag: "390x844", width: 390, height: 844, phone: true },
+  { tag: "1440x900", width: 1440, height: 900, phone: false },
+];
+
+const browser = await launchChromium();
+try {
+  for (const size of SIZES) {
+    const vp = { width: size.width, height: size.height };
+    const hCtx = await browser.newContext({ viewport: vp });
+    const gCtx = await browser.newContext({ viewport: vp });
+    const h = await hCtx.newPage();
+    const g = await gCtx.newPage();
+    const code = await host(h, "Keku");
+    await join(g, LONG_NAME, code);
+    const room = await myRoom(h);
+    const start = await api(h, "POST", "/rooms/:room/games", { gameId: "trivia", official: false, roster: room.readiness?.wouldPlay, attempt: { id: `locked-${size.tag}-${Date.now()}`, sessionRevision: room.session?.revision } });
+    check(`${size.tag} setup: a two-player Casual Trivia game starts`, start.status === 201 || start.status === 200, JSON.stringify({ status: start.status, err: start.body?.error }));
+    await passBriefing([h, g]);
+
+    // Nonfinal: the host locks question 1 (the guest's long name is the lower seat on the host's ring).
+    for (const [who, p] of [["host", h], ["guest", g]]) {
+      await lockOne(p);
+      const m = await measure(p);
+      await p.screenshot({ path: pathJoin(SHOTS, `locked-nonfinal-${who}-${size.tag}.png`) });
+      const n = m.next;
+      check(`${size.tag} ${who} L1 Next question is enabled and fully inside the initial viewport`, !!n && n.enabled && n.top >= 0 && n.bottom <= m.innerHeight && n.left >= 0 && n.right <= m.innerWidth, JSON.stringify({ next: n, viewport: [m.innerWidth, m.innerHeight] }));
+      check(`${size.tag} ${who} L1 nothing covers it (the element at its centre is the button)`, !!n && n.hitIsButton, JSON.stringify(n));
+      check(`${size.tag} ${who} L2 it comes before the room's progress`, m.nextBeforeRing === true, String(m.nextBeforeRing));
+      check(`${size.tag} ${who} L2 nothing says to wait for everyone`, !m.tellsToWait, m.text.slice(0, 160));
+      check(`${size.tag} ${who} L3 no seat token or label overlaps text or a control`, m.collisions.length === 0, JSON.stringify(m.collisions));
+      check(`${size.tag} ${who} L4 no sideways scroll`, !m.sideways);
+    }
+    // L1: it works — the next question opens.
+    if (await h.getByRole("button", { name: "Next question" }).isEnabled().catch(() => false)) {
+      await h.getByRole("button", { name: "Next question" }).click();
+      check(`${size.tag} host L1 Next question opens question 2`, (await questionNumber(h)) === 2);
+    } else check(`${size.tag} host L1 Next question opens question 2`, false, "no enabled Next question");
+
+    // Final: the host answers the rest; after the last one, no enabled continuation.
+    if (size.phone) {
+      for (let q = 2; q <= 10; q++) {
+        await lockOne(h);
+        if (q < 10) {
+          const nx = h.getByRole("button", { name: "Next question" });
+          await nx.scrollIntoViewIfNeeded();
+          await nx.click();
+        }
+      }
+      const f = await measure(h);
+      await h.screenshot({ path: pathJoin(SHOTS, `locked-final-host-${size.tag}.png`), fullPage: true });
+      check(`${size.tag} F after the final answer there is no enabled continuation control`, !f.next && f.enabledOther.length === 0, JSON.stringify({ next: f.next, enabled: f.enabledOther }));
+      check(`${size.tag} F it says truthfully that all their answers are in`, /all (of )?your answers are in|answered all/i.test(f.text), f.text.slice(0, 200));
+      check(`${size.tag} F no seat token or label overlaps text or a control`, f.collisions.length === 0, JSON.stringify(f.collisions));
+    }
+    await hCtx.close();
+    await gCtx.close();
+  }
+} catch (e) {
+  check("check-locked-answer journey crashed", false, String(e?.stack ?? e).slice(0, 600));
+} finally {
+  await browser.close();
+}
+console.log(failures ? `\nLOCKED ANSWER CHECK FAILED (${failures})` : "\nLOCKED ANSWER CHECK PASSED");
+process.exit(failures ? 1 : 0);

@@ -1,0 +1,80 @@
+Mchezo gate targeted | run 20261116-022947-5525dedb-4704
+  revision 5525dedb2858427dc4b77ea6823d39e1e6529e3d (clean tree) | fingerprint 9993a5cd7353 (634 files)
+  plan     12 steps: 1 fast/build, 10 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.1 GB available)
+  history  253 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 222 run(s))
+  estimate this run: 4–12m (low-confidence) · the same steps one after another: about 16m 17s · longest step check-audit-fixes ~3m 39s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  unknown  no timing history for 1 step(s), assumed ~60s each: check-locked-answer
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t1/test-results/20261116-022947-5525dedb-4704
+        start build-web on w1 (usually 5s)
+[ 1/12] PASS         6.1s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/12] PASS         0.9s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:45587 (pid 4825, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t1/test-results/20261116-022947-5525dedb-4704/server-data/w1)
+  server   w2 http://localhost:43811 (pid 4826, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t1/test-results/20261116-022947-5525dedb-4704/server-data/w2)
+  server   w3 http://localhost:35771 (pid 4827, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t1/test-results/20261116-022947-5525dedb-4704/server-data/w3)
+        start check-audit-fixes on w1 (usually 3m 39s)
+        start check-session-flow on w2 (usually 2m 53s)
+        start check-tv-lifecycle on w3 (usually 2m 23s)
+── progress  2/12 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-audit-fixes 52s (w1), check-session-flow 52s (w2), check-tv-lifecycle 52s (w3)
+   remaining 3–12m · total 4–13m · done around 02:34–02:41 UTC (low-confidence)
+── progress  2/12 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-audit-fixes 1m 52s (w1), check-session-flow 1m 52s (w2), check-tv-lifecycle 1m 52s (w3)
+   remaining 2–11m · total 4–13m · done around 02:34–02:41 UTC (low-confidence)
+[ 3/12] PASS       151.9s  check-tv-lifecycle  w3
+        start check-solo on w3 (usually 2m 22s)
+── progress  3/12 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-audit-fixes 2m 52s (w1), check-session-flow 2m 52s (w2), check-solo 20s (w3)
+   remaining 1–10m · total 4–13m · done around 02:34–02:41 UTC (low-confidence)
+[ 4/12] PASS       184.6s  check-session-flow  w2
+        start check-mchezo on w2 (usually 1m 51s)
+── progress  4/12 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-audit-fixes 3m 52s (w1), check-solo 1m 20s (w3), check-mchezo 47s (w2)
+   remaining 1–8m · total 5–12m · done around 02:35–02:41 UTC (low-confidence)
+[ 5/12] PASS       234.3s  check-audit-fixes  w1
+        start check-locked-answer on w1 (no timing history)
+── progress  5/12 done · 5 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-solo 2m 20s (w3), check-mchezo 1m 47s (w2), check-locked-answer 57s (w1)
+   remaining 1–5m · total 6–10m · done around 02:35–02:39 UTC (low-confidence)
+[ 6/12] PASS       148.6s  check-solo  w3
+        start check-math on w3 (usually 55s)
+[ 7/12] PASS       117.1s  check-mchezo  w2
+        start check-geography on w2 (usually 36s)
+[ 8/12] PASS        37.4s  check-geography  w2
+        start check-answer-race on w2 (usually 24s)
+── progress  8/12 done · 8 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-locked-answer 1m 57s (w1), check-math 51s (w3), check-answer-race 12s (w2)
+   remaining 0–4m · total 6–10m · done around 02:36–02:39 UTC (low-confidence)
+[ 9/12] PASS        57.2s  check-math  w3
+        start check-answer-helper on w3 (usually 9s)
+[10/12] PASS        25.8s  check-answer-race  w2
+[11/12] PASS        10.3s  check-answer-helper  w3
+[12/12] FAIL       157.6s  check-locked-answer  w1  FAIL 320x480 T the LOCKED IN stamp stays clear of the long answer — 61px²
+      | PASS B4 the server ended it at its deadline — {"status":"finished","outcome":{"reason":"deadline","endedAt":1794796585480,"countsOfficially":false,"participation":{"player-1":{"done":10,"of":10,"actions":10},"player-2":{"done":2,"of":10,"actions":2}}}}
+      | PASS B4 the guest scored only their 2 answers (0, 120 or 240) — {"player-1":240,"player-2":120}
+      | PASS B4 the guest's results say time ran out — TRIVIA SHOWDOWN · CASUAL Keku wins Trivia Showdown K Keku Just for fun. Bragging rights only. You came 2nd of 2 120 pts Second in a head-to-head. Next game's a clean slate. WHAT’S NEXT Next game: Ever
+      | PASS B5 the TV shows the finished game
+      | PASS B6 the host has Play again
+      | PASS B6 host: the new game's briefing (seat kept)
+      | PASS B6 guest: the new game's briefing (seat kept)
+      | PASS B6 a new Trivia game in its briefing — [["trivia","finished"],["trivia","briefing"]]
+      | PASS B6 readiness reset: nobody is ready yet
+      | PASS B6 the TV follows to the new game
+      | PASS B6 the new game's TV projection carries no answers — playing
+      | PASS B6 the TV shows no answer for the new game
+      | 
+      | LOCKED ANSWER CHECK FAILED (1)
+      | MCHEZO_DRIVER_STATS {"browsers":1,"contexts":19,"pages":19,"peakOpenPages":3}
+
+FAILED (exit 1) | targeted | run 20261116-022947-5525dedb-4704
+  11 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-locked-answer (w1) [functional]: FAIL 320x480 T the LOCKED IN stamp stays clear of the long answer — 61px²
+  timing   wall 6m 40s · step time 18m 52s (sum) · 3 workers, 94% busy · 2.83× the same steps run one after another
+           predicted 4–12m (about 5m 55s, low-confidence) → actual 6m 40s (+13%)
+           longest  check-audit-fixes 3m 54s, check-session-flow 3m 05s, check-locked-answer 2m 38s · the longest step is 59% of the wall time
+           machine  CPU mean 30%, peak 87% · memory available ≥ 13481 MB · load peak 3.6
+           contention ×1.062 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t1/test-results/20261116-022947-5525dedb-4704/report.json

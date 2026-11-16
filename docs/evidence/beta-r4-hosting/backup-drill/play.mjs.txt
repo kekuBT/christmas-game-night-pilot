@@ -1,0 +1,137 @@
+// Beta R4 backup drill (review 6917441687): live play against the production-mode server while it is stopped for a
+// backup and restarted. Enters the access gate, opens R rooms (a host, P-1 more players and a TV each, all over
+// WebSocket with the gate cookie), starts Trivia, readies everyone, then each player answers one question about every
+// second over HTTP intents, while each host adds a Memory Book note about every 1.2 s (so rooms AND Memory Books
+// change during the backup). A failed attempt is retried with the SAME clientEventId / requestId (idempotent).
+// Sockets reconnect.
+//   node play.mjs <base> <code> <rooms> <players> <out.json>
+// out.json: every answer with its first-attempt time, ack time and attempts; sockets with their reconnect counts;
+// the rooms' ids, join codes and host tokens (to check the restored server later).
+import { randomUUID } from "node:crypto";
+import { writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { join } from "node:path";
+
+const [base, code, roomsArg, playersArg, outFile, root] = process.argv.slice(2);
+const WebSocket = createRequire(join(root, "package.json"))("ws");
+const ROOMS = Number(roomsArg), PLAYERS = Number(playersArg);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let cookie = "";
+const out = { startedAt: Date.now(), rooms: [], answers: [], notes: [], sockets: [], errors: [] };
+
+async function enterGate() {
+  const r = await fetch(base + "/beta/enter", { method: "POST", redirect: "manual", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ code, next: "/" }) });
+  const sc = r.headers.get("set-cookie") ?? "";
+  if (r.status !== 303 || !sc.startsWith("cgn_beta=")) throw new Error(`gate: ${r.status}`);
+  cookie = sc.split(";")[0];
+}
+async function call(method, path, body, token) {
+  const r = await fetch(base + path, { method, headers: { cookie, "content-type": "application/json", ...(token ? { "x-session-token": token } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) });
+  const j = await r.json().catch(() => ({}));
+  return { status: r.status, body: j };
+}
+async function must(method, path, body, token) {
+  const r = await call(method, path, body, token);
+  if (r.status >= 300) throw new Error(`${method} ${path} ${r.status} ${JSON.stringify(r.body).slice(0, 120)}`);
+  return r.body;
+}
+function socket(roomId, audience, protocol, label) {
+  const rec = { label, opens: 0, reconnects: 0, open: false, closedAt: [] };
+  out.sockets.push(rec);
+  let stopped = false;
+  const open = () => {
+    const ws = new WebSocket(`${base.replace("http", "ws")}/?roomId=${roomId}&audience=${audience}`, [protocol], { headers: { cookie } });
+    ws.on("open", () => { rec.opens++; if (rec.opens > 1) rec.reconnects++; rec.open = true; });
+    ws.on("message", () => {});
+    ws.on("error", () => {});
+    ws.on("close", () => { rec.open = false; rec.closedAt.push(Date.now()); if (!stopped) setTimeout(open, 300); });
+    rec.ws = ws;
+  };
+  open();
+  return { stop: () => { stopped = true; try { rec.ws.close(); } catch {} } };
+}
+
+const socks = [];
+try {
+  await enterGate();
+  const players = [];
+  for (let r = 0; r < ROOMS; r++) {
+    const room = await must("POST", "/rooms", { name: `Drill ${r}`, kind: "casual" });
+    const host = await must("POST", `/rooms/${room.roomId}/join`, { displayName: `Host${r}`, asHost: true, hostClaimToken: room.hostClaimToken });
+    const seats = [{ name: `Host${r}`, token: host.sessionToken, playerId: host.playerId }];
+    for (let p = 1; p < PLAYERS; p++) {
+      const pl = await must("POST", "/rooms/join-by-code", { joinCode: room.joinCode, displayName: `P${r}-${p}` });
+      seats.push({ name: `P${r}-${p}`, token: pl.sessionToken, playerId: pl.playerId });
+    }
+    for (const s of seats) socks.push(socket(room.roomId, "player", `cgn-session-${s.token}`, `${s.name}`));
+    const tv = await must("POST", "/rooms/spectate-by-code", { joinCode: room.joinCode });
+    socks.push(socket(room.roomId, "spectator", `cgn-spectator-${tv.spectatorToken ?? tv.token}`, `TV${r}`));
+    // A warm-up Trivia game, played to the end, so the Memory Book has a finished game to cite.
+    const intentOf = (gid, action, payload) => ({ intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: room.roomId, gameInstanceId: gid, action, payload } });
+    const w = await must("POST", `/rooms/${room.roomId}/games`, { gameId: "trivia", official: false }, host.sessionToken);
+    for (const s of seats) await must("POST", `/rooms/${room.roomId}/intents`, intentOf(w.gameId, "briefing-ready", { ready: true }), s.token);
+    const wp = await must("GET", `/rooms/${room.roomId}/projection?audience=player`, undefined, host.sessionToken);
+    const wqs = wp.myGames.find((x) => x.status === "playing").state.questions.map((q) => q.id);
+    for (const s of seats) for (const q of wqs) await must("POST", `/rooms/${room.roomId}/intents`, intentOf(w.gameId, "trivia-answer", { questionId: q, chosenIndex: 0 }), s.token);
+    const g = await must("POST", `/rooms/${room.roomId}/games`, { gameId: "trivia", official: false }, host.sessionToken);
+    for (const s of seats) await must("POST", `/rooms/${room.roomId}/intents`, { intent: { kind: "intent", schemaVersion: 1, clientEventId: randomUUID(), roomId: room.roomId, gameInstanceId: g.gameId, action: "briefing-ready", payload: { ready: true } } }, s.token);
+    const proj = await must("GET", `/rooms/${room.roomId}/projection?audience=player`, undefined, host.sessionToken);
+    const questions = proj.myGames.find((x) => x.status === "playing").state.questions.map((q) => q.id);
+    out.rooms.push({ roomId: room.roomId, joinCode: room.joinCode, hostToken: host.sessionToken, warmGameId: w.gameId, gameId: g.gameId, questions, players: seats.map((s) => s.playerId) });
+    for (const s of seats) players.push({ ...s, roomId: room.roomId, gameId: g.gameId, questions });
+  }
+  out.playStartedAt = Date.now();
+  console.log(`play: ${ROOMS} rooms x ${PLAYERS} players + TV; a warm-up Trivia finished in each; a second Trivia playing; ${socks.length} sockets`);
+  // Each host adds 10 Memory Book notes, one about every 1.2 s, retrying a failed attempt with the same requestId.
+  const hosts = out.rooms.map((r) => ({ roomId: r.roomId, token: r.hostToken, warmGameId: r.warmGameId }));
+  const notesDone = Promise.all(hosts.map(async (h, r) => {
+    for (let n = 0; n < 10; n++) {
+      const rec = { roomId: h.roomId, text: `drill note r${r}-n${n} ${randomUUID()}`, requestId: randomUUID(), firstAttemptAt: Date.now(), attempts: 0 };
+      out.notes.push(rec);
+      for (;;) {
+        rec.attempts++;
+        try {
+          const res = await call("POST", `/rooms/${h.roomId}/memory`, { text: rec.text, day: 1, requestId: rec.requestId, fromGame: h.warmGameId }, h.token);
+          if (res.status === 200 || res.status === 201) { rec.ackAt = Date.now(); rec.status = res.status; break; }
+          rec.lastError = `HTTP ${res.status} ${JSON.stringify(res.body).slice(0, 80)}`;
+        } catch (e) { rec.lastError = String(e.cause?.code ?? e.message); }
+        if (Date.now() - rec.firstAttemptAt > 60_000) { out.errors.push(`gave up on note ${rec.text}: ${rec.lastError}`); break; }
+        await sleep(250);
+      }
+      await sleep(1200);
+    }
+  }));
+  // Each player answers its questions in order, one about every second, retrying a failed attempt with the same id.
+  await Promise.all(players.map(async (pl, i) => {
+    await sleep(i * 37);
+    for (const qid of pl.questions) {
+      const rec = { roomId: pl.roomId, playerId: pl.playerId, questionId: qid, clientEventId: randomUUID(), firstAttemptAt: Date.now(), attempts: 0 };
+      out.answers.push(rec);
+      for (;;) {
+        rec.attempts++;
+        try {
+          const r = await call("POST", `/rooms/${pl.roomId}/intents`, { intent: { kind: "intent", schemaVersion: 1, clientEventId: rec.clientEventId, roomId: pl.roomId, gameInstanceId: pl.gameId, action: "trivia-answer", payload: { questionId: qid, chosenIndex: (i + qid.length) % 4 } } }, pl.token);
+          if (r.status === 200) { rec.ackAt = Date.now(); rec.accepted = r.body.accepted; rec.reason = r.body.reason; break; }
+          rec.lastError = `HTTP ${r.status}`;
+        } catch (e) { rec.lastError = String(e.cause?.code ?? e.message); }
+        if (Date.now() - rec.firstAttemptAt > 60_000) { out.errors.push(`gave up on ${pl.name} ${qid}`); break; }
+        await sleep(250);
+      }
+      await sleep(800 + ((i * 131) % 400));
+    }
+  }));
+  await notesDone;
+  await sleep(1500); // let every socket settle after the restart
+  out.openAtEnd = out.sockets.filter((s) => s.open).length;
+  out.finishedAt = Date.now();
+} catch (e) {
+  out.errors.push(String(e.message ?? e));
+} finally {
+  for (const s of socks) s.stop();
+  out.sockets = out.sockets.map(({ ws, ...rest }) => rest);
+  writeFileSync(outFile, JSON.stringify(out, null, 1));
+  const acked = out.answers.filter((a) => a.ackAt).length, retried = out.answers.filter((a) => a.attempts > 1).length;
+  console.log(`play: ${out.notes.filter((n) => n.ackAt).length}/${out.notes.length} Memory Book notes acknowledged (${out.notes.filter((n) => n.attempts > 1).length} needed a retry)`);
+  console.log(`play: ${acked}/${out.answers.length} answers acknowledged (${retried} needed a retry); sockets reconnected: ${out.sockets.filter((s) => s.reconnects > 0).length}/${out.sockets.length}; open at the end: ${out.openAtEnd ?? 0}; errors: ${out.errors.length}`);
+  process.exit(out.errors.length ? 1 : 0);
+}

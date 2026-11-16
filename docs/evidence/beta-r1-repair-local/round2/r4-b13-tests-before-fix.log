@@ -1,0 +1,4 @@
+   × B-13: the gate's own form works when the public origin is set (review 6901841738 R4) > gate pages are served with Referrer-Policy: same-origin; every other response keeps no-referrer 45ms
+     → expected [ 401, 'no-referrer' ] to deeply equal [ 401, 'same-origin' ]
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 1 passed | 21 skipped (23)

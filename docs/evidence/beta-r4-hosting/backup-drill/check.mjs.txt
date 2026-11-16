@@ -1,0 +1,77 @@
+// Beta R4 backup drill: the consistency checks for one backup taken during live play.
+//   node check.mjs <play.json> <monitor.json> <backup folder (decrypted)> <live data folder after play>
+// monitor.json: { stoppedAt, stoppedHashes, restartedAt } recorded by the drill's monitor while the hold was in place:
+//   stoppedAt     the first moment the hold existed AND the server process was gone
+//   stoppedHashes SHA-256 of every data file at that moment
+//   restartedAt   the first moment a new server process was recorded after the hold ended
+import { createHash } from "node:crypto";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
+
+const [playFile, monFile, backupDir, liveDir] = process.argv.slice(2);
+const play = JSON.parse(readFileSync(playFile, "utf8"));
+const mon = JSON.parse(readFileSync(monFile, "utf8"));
+const manifest = JSON.parse(readFileSync(join(backupDir, "manifest.json"), "utf8"));
+let failures = 0;
+const check = (ok, what) => { console.log(`${ok ? "PASS" : "FAIL"} ${what}`); if (!ok) failures++; };
+
+// The answers each saved room holds: roomId -> playerId -> Set(questionId).
+function answersIn(dir) {
+  const byRoom = new Map();
+  for (const name of readdirSync(dir).filter((n) => /^room-.*\.json$/.test(n))) {
+    const room = JSON.parse(readFileSync(join(dir, name), "utf8"));
+    const roomId = room.id ?? room.roomId ?? name.slice(0, -5);
+    const found = new Map();
+    const walk = (o) => {
+      if (!o || typeof o !== "object") return;
+      if (o.answers && typeof o.answers === "object" && !Array.isArray(o.answers)) {
+        for (const [pid, qs] of Object.entries(o.answers)) if (qs && typeof qs === "object") for (const q of Object.keys(qs)) {
+          if (!found.has(pid)) found.set(pid, new Set());
+          found.get(pid).add(q);
+        }
+      }
+      for (const v of Object.values(o)) walk(v);
+    };
+    walk(room);
+    byRoom.set(roomId, found);
+  }
+  return byRoom;
+}
+const has = (m, a) => m.get(a.roomId)?.get(a.playerId)?.has(a.questionId) ?? false;
+// The Memory Book notes a folder holds: the text of every saved file but the manifest (each note's text is unique).
+const textOf = (dir) => readdirSync(dir).filter((n) => n.endsWith(".json") && n !== "manifest.json").map((n) => readFileSync(join(dir, n), "utf8")).join("\n");
+const notePresent = (txt, n) => txt.includes(JSON.stringify(n.text).slice(1, -1));
+
+const backup = answersIn(backupDir), live = answersIn(liveDir);
+check(manifest.serverWasRunning === false, `the manifest records a stopped server (serverWasRunning: ${manifest.serverWasRunning})`);
+// The files actually in the copy, hashed here (not taken from the manifest), so a changed byte can't pass.
+const copied = Object.fromEntries(manifest.files.map((f) => [f.name, createHash("sha256").update(readFileSync(join(backupDir, f.name))).digest("hex")]));
+const extra = readdirSync(backupDir).filter((n) => n !== "manifest.json" && !(n in copied) && n !== "quarantine");
+check(extra.length === 0 && manifest.files.every((f) => copied[f.name] === f.sha256), `every file in the copy matches its manifest entry, and the copy holds nothing else (${extra.length} extra)`);
+const stopped = Object.fromEntries(Object.entries(mon.stoppedHashes).filter(([n]) => n !== "server.lock"));
+const same = JSON.stringify(Object.keys(copied).sort()) === JSON.stringify(Object.keys(stopped).sort()) && Object.keys(copied).every((n) => copied[n] === stopped[n]);
+check(same, `the copy's files are exactly the data folder as it was once the server had stopped (${Object.keys(copied).length} files, every SHA-256 equal)`);
+
+const before = play.answers.filter((a) => a.ackAt && a.ackAt < mon.stoppedAt);
+const after = play.answers.filter((a) => a.firstAttemptAt > mon.restartedAt);
+const between = play.answers.filter((a) => a.ackAt && a.ackAt >= mon.stoppedAt && a.ackAt <= mon.restartedAt);
+check(before.length > 0 && after.length > 0, `play was live on both sides of the backup: ${before.length} answers acknowledged before the stop, ${after.length} first sent after the restart`);
+check(before.every((a) => has(backup, a)), `every answer acknowledged before the stop is in the backup (${before.filter((a) => has(backup, a)).length}/${before.length})`);
+check(after.every((a) => !has(backup, a)), `no answer first sent after the restart is in the backup (${after.filter((a) => has(backup, a)).length} found)`);
+check(between.length === 0, `no answer was acknowledged while the server was stopped (${between.length})`);
+const acked = play.answers.filter((a) => a.ackAt);
+check(acked.length === play.answers.length && acked.every((a) => has(live, a)), `after play, every one of the ${play.answers.length} answers was acknowledged and is in the live data (${acked.filter((a) => has(live, a)).length})`);
+const retried = play.answers.filter((a) => a.attempts > 1);
+const outcomes = {}; for (const a of retried) { const k = a.accepted ? "accepted" : `refused ${a.reason}`; outcomes[k] = (outcomes[k] ?? 0) + 1; }
+check(retried.length > 0 && retried.every((a) => a.ackAt), `every answer retried across the stop (${retried.length}) got a definite reply after the restart: ${JSON.stringify(outcomes)}`);
+const bTxt = textOf(backupDir), lTxt = textOf(liveDir), notes = play.notes ?? [];
+const nBefore = notes.filter((n) => n.ackAt && n.ackAt < mon.stoppedAt), nAfter = notes.filter((n) => n.firstAttemptAt > mon.restartedAt);
+check(manifest.books > 0 && nBefore.length > 0 && nAfter.length > 0, `Memory Books changed on both sides of the backup too: ${manifest.books} book file(s) in the copy; ${nBefore.length} notes acknowledged before the stop, ${nAfter.length} first sent after the restart`);
+check(nBefore.every((n) => notePresent(bTxt, n)), `every Memory Book note acknowledged before the stop is in the backup (${nBefore.filter((n) => notePresent(bTxt, n)).length}/${nBefore.length})`);
+check(nAfter.every((n) => !notePresent(bTxt, n)), `no note first sent after the restart is in the backup (${nAfter.filter((n) => notePresent(bTxt, n)).length} found)`);
+check(notes.length > 0 && notes.every((n) => n.ackAt && notePresent(lTxt, n)), `after play, every one of the ${notes.length} notes was acknowledged and is in the live data`);
+const socks = play.sockets;
+check(socks.every((s) => s.reconnects >= 1) && play.openAtEnd === socks.length, `every socket (${socks.length}) dropped at the stop, reconnected after the restart (reconnects: ${socks.map((s) => s.reconnects).join(",")}) and was open at the end (${play.openAtEnd})`);
+check((mon.restartedAt - mon.stoppedAt) < 10_000, `the server was down for ${mon.restartedAt - mon.stoppedAt} ms (limit 10 s; Render restarts an instance after 60 s of failed health checks)`);
+console.log(failures ? `CHECK FAILED (${failures})` : "CHECK PASSED");
+process.exit(failures ? 1 : 0);

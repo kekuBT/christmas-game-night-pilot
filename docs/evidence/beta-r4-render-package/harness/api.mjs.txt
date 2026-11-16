@@ -1,0 +1,36 @@
+// LOCAL TEST helper for image-checks.sh: a few API calls against a container's published port. Secrets come from files
+// and are never printed.
+//   node api.mjs enter <base> <code file> <cookie file>        sign in at the gate; writes the cookie header to the file
+//   node api.mjs mkroom <base> <cookie file> <room file>       creates a room, joins its host; writes {roomId, token}
+//   node api.mjs proj <base> <cookie file> <room file>         prints the room's name and players from a projection
+import { readFileSync, writeFileSync } from "node:fs";
+const [cmd, base, a, b] = process.argv.slice(2);
+const read = (f) => readFileSync(f, "utf8").trim();
+const out = (o) => console.log(JSON.stringify(o));
+if (cmd === "enter") {
+  const r = await fetch(`${base}/beta/enter`, { method: "POST", redirect: "manual", headers: { "content-type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ code: read(a), next: "/" }) });
+  const sc = r.headers.get("set-cookie") ?? "";
+  const m = /^(cgn_beta=[^;]+)/.exec(sc);
+  if (m) writeFileSync(b, m[1], { mode: 0o600 });
+  out({ status: r.status, cookie: !!m, flags: sc.split(";").slice(1).map((s) => s.trim().split("=")[0]).sort() });
+  process.exit(r.status === 303 && m ? 0 : 1);
+}
+if (cmd === "mkroom") {
+  const h = { "content-type": "application/json", cookie: read(a) };
+  const c = await fetch(`${base}/rooms`, { method: "POST", headers: h, body: JSON.stringify({ name: "Image check room", kind: "casual" }) });
+  const room = await c.json();
+  const j = await fetch(`${base}/rooms/join-by-code`, { method: "POST", headers: h, body: JSON.stringify({ joinCode: room.joinCode, displayName: "Ada", asHost: true, hostClaimToken: room.hostClaimToken }) });
+  const host = await j.json();
+  writeFileSync(b, JSON.stringify({ roomId: room.roomId, token: host.sessionToken }), { mode: 0o600 });
+  out({ create: c.status, join: j.status, roomId: room.roomId });
+  process.exit(c.status === 201 && j.status === 201 ? 0 : 1);
+}
+if (cmd === "proj") {
+  const room = JSON.parse(read(b));
+  const r = await fetch(`${base}/rooms/${room.roomId}/projection?audience=player`, { headers: { cookie: read(a), "x-session-token": room.token } });
+  const p = await r.json().catch(() => ({}));
+  out({ status: r.status, roomId: p.roomId ?? p.id ?? null, name: p.name ?? null, players: (p.players ?? []).map((x) => x.displayName) });
+  process.exit(r.status === 200 ? 0 : 1);
+}
+console.error("usage: see the header");
+process.exit(2);

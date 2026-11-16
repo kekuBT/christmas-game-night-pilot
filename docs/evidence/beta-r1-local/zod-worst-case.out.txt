@@ -1,0 +1,2 @@
+array of strings, max 8: body 65535 bytes, 32767 elements -> 32768 issues, heap +10.0 MB, 62 ms
+array of strings, unbounded: body 65535 bytes, 32767 elements -> 32767 issues, heap +12.0 MB, 47 ms

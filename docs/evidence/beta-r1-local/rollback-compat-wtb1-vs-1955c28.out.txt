@@ -1,0 +1,10 @@
+PASS new release: a casual room with 2 players and a game (start 201)
+  new release wrote: room-mwi3besp-568930.json, room-mwi3besp-568930.json.prev, server.lock
+  new release stop: exit 0
+PASS previous release (1955c28) reads it: 2 players, 1 game; the unknown server.lock is ignored
+PASS previous release writes to it (a third player joins: 201)
+  previous release stop: exit 0
+PASS this release reads what the previous one wrote: 3 players, 1 game
+PASS no file was refused or quarantined on any start
+  this release stop: exit 0
+ROLLBACK COMPAT PASSED

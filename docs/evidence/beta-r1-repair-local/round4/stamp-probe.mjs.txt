@@ -1,0 +1,40 @@
+// Probe: how the LOCKED IN stamp's box relates to an 80-character answer over time after a lock, at 320x480.
+// Samples every 40 ms for 1.4 s after injecting the long answer at different delays after the lock.
+import { createRequire } from "node:module";
+const require = createRequire(process.argv[3] + "/package.json");
+const { chromium } = require("playwright");
+const BASE = process.argv[2];
+const LONG = "The Great Exhibition of the Works of Industry of All Nations, Hyde Park, London.";
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const browser = await chromium.launch({ executablePath: process.env.MCHEZO_CHROMIUM_PATH });
+async function host(page, name) {
+  await page.goto(`${BASE}/`); await page.getByTestId("home-host").click();
+  await page.getByPlaceholder("e.g. Auntie June").fill(name); await page.getByRole("button", { name: "Host a game" }).click();
+  const chip = page.getByRole("button", { name: /^Share room code / }); await chip.waitFor();
+  let code = ""; for (let i = 0; i < 30 && !/^[A-Z0-9]{6}$/.test(code); i++) { code = ((await chip.getAttribute("aria-label")) ?? "").replace("Share room code ", "").trim(); await sleep(200); }
+  return code;
+}
+const vp = { viewport: { width: 320, height: 480 } };
+const h = await (await browser.newContext(vp)).newPage(); const g = await (await browser.newContext(vp)).newPage();
+const code = await host(h, "Keku");
+await g.goto(`${BASE}/join`); await g.getByPlaceholder("e.g. Auntie June").fill("Amina"); await g.locator(".mz-code__input").fill(code); await g.getByRole("button", { name: "Join the game" }).click(); await g.getByRole("heading", { name: "You’re in, Amina." }).waitFor();
+const start = await h.evaluate(async () => { const id = sessionStorage.getItem("cgn_roomId"), t = sessionStorage.getItem("cgn_token"); const p = await (await fetch(`/rooms/${id}/projection?audience=player`, { headers: { "x-session-token": t } })).json(); const r = await fetch(`/rooms/${id}/games`, { method: "POST", headers: { "content-type": "application/json", "x-session-token": t }, body: JSON.stringify({ gameId: "trivia", official: false, roster: p.readiness?.wouldPlay, attempt: { id: "probe-" + Date.now(), sessionRevision: p.session?.revision } }) }); return r.status; });
+for (const p of [h, g]) { await p.getByTestId("briefing").waitFor(); await p.getByTestId("briefing-ready").click(); }
+for (let q = 0; q < 4; q++) {
+  await g.locator(".mz-slab:not([disabled])").first().waitFor(); await g.locator(".mz-slab:not([disabled])").first().click();
+  await g.locator('main[aria-label="Answer locked in"]').waitFor();
+  const t0 = Date.now();
+  const samples = await g.evaluate(async (LONG) => {
+    document.querySelector(".mz-lockcard__answer").textContent = LONG;
+    const out = []; const s = document.querySelector(".mz-lockcard__stamp"), a = document.querySelector(".mz-lockcard__answer");
+    const area = (x, y) => Math.max(0, Math.min(x.right, y.right) - Math.max(x.left, y.left)) * Math.max(0, Math.min(x.bottom, y.bottom) - Math.max(x.top, y.top));
+    const start = performance.now();
+    while (performance.now() - start < 1400) { const anim = s.getAnimations().map((x) => x.playState).join(","); out.push([Math.round(performance.now() - start), Math.round(area(a.getBoundingClientRect(), s.getBoundingClientRect())), anim || "none", Math.round(s.getBoundingClientRect().height)]); await new Promise((r) => setTimeout(r, 40)); }
+    return out;
+  }, LONG);
+  const nonzero = samples.filter((x) => x[1] > 1);
+  console.log(`lock ${q + 1}: started ${Date.now() - t0}ms after the locked view; overlap>1px² in ${nonzero.length}/${samples.length} samples; while animating: ${nonzero.filter((x) => x[2] === "running").length}; at rest (last sample): ${JSON.stringify(samples.at(-1))}; max ${Math.max(...samples.map((x) => x[1]))}px²; first samples ${JSON.stringify(samples.slice(0, 4))}`);
+  await g.getByRole("button", { name: "Next question" }).click();
+}
+console.log("start status", start);
+await browser.close();

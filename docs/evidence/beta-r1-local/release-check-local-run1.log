@@ -1,0 +1,78 @@
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+release ffec29379f9189d7488f42254ac265b867ed325e-dirty packed into /tmp/mz-release-pkg-tX1Tvl in 9.8 s
+PASS P release.json names the checked-out revision — ffec29379f9189d7488f42254ac265b867ed325e-dirty
+PASS P the package holds only what runs — ["apps","content","dist","package-lock.json","package.json","release.json"]
+PASS P no tests, scripts, docs, data, env files or source maps of tests in it
+PASS P the server entry, the built app and the content are there
+
+added 2 packages in 1s
+FAIL I the runtime install is ws and zod only — ["@babel","@cacheable","@esbuild","@eslint","@eslint-community","@fontsource-variable","@humanfs","@humanwhocodes","@jridgewell","@keyv","@napi-rs","@rolldown","@rollup","@types","@typescript-eslint","@vitejs","@vitest","ws","zod"]
+PASS S the package starts on plain node in production — port 37375
+PASS S its output never shows the access code
+PASS S /health names the revision and nothing else — {"ok":true,"revision":"ffec29379f9189d7488f42254ac265b867ed325e-dirty"}
+PASS S the app is behind the gate
+PASS S the right code opens it (a Secure, HttpOnly cookie, since the public origin is https)
+PASS S with the cookie: the built app and its files are served — /assets/index-DbYJ93KZ.js
+PASS S a room is created and joined through the gate — 201/201
+PASS S live updates are gated too: a WebSocket without the cookie is refused, with it it opens
+PASS L a second server on the same data is refused, with the reason — Another server (pid 8377) is using this data directory (/tmp/mz-release-data-1mK0nk/server.lock). Stop it first: one server writes a data directory.
+PASS L SIGTERM stops it cleanly and frees the lock — exit 0
+PASS L after a restart the room is back, and the beta cookie still works — 200
+PASS L a kill -9 leaves a stale lock behind
+PASS L the next start takes the stale lock over, and the room survives the crash — [data] took over a stale lock left by a server that is no longer running (/tmp/mz-release-data-1mK0nk/server.lock)
+PASS R refused: the content test mode (exit 2, with the reason) — MCHEZO_CONTENT_TEST_MODE is for tests only and is not allowed in production.
+PASS R refused: no data dir (exit 2, with the reason) — In production MCHEZO_DATA_DIR must be an absolute path outside the release, so an update or rollback never touches the family's data.
+PASS R refused: a relative data dir (exit 2, with the reason) — In production MCHEZO_DATA_DIR must be an absolute path outside the release, so an update or rollback never touches the family's data.
+PASS R refused: a data dir inside the release (exit 2, with the reason) — MCHEZO_DATA_DIR (/tmp/mz-release-pkg-tX1Tvl/data) is inside the release (/tmp/mz-release-pkg-tX1Tvl). Put the data outside it, e.g. on its own volume.
+PASS R refused: no public origin (exit 2, with the reason) — In production MCHEZO_PUBLIC_ORIGIN must be set to the site's public origin, e.g. https://games.example.org.
+PASS R refused: no access code (exit 2, with the reason) — In production MCHEZO_BETA_ACCESS_CODE must be set (the private beta's access code), or MCHEZO_PUBLIC_ACCESS=open set on purpose.
+PASS R refused: a short access code (exit 2, with the reason) — MCHEZO_BETA_ACCESS_CODE must be at least 12 characters.
+PASS R no refused start wrote into the release
+--- S1 output ---
+Christmas Game Night server on http://localhost:37375 (web app at / after npm run build:web)
+Phones on the same Wi-Fi: open http://192.0.2.2:37375 on the host device (not localhost), so the QR code works.
+received SIGTERM, closing server
+
+--- S2 output ---
+Another server (pid 8377) is using this data directory (/tmp/mz-release-data-1mK0nk/server.lock). Stop it first: one server writes a data directory.
+
+--- S3 output ---
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-data-1mK0nk)
+Christmas Game Night server on http://localhost:35485 (web app at / after npm run build:web)
+Phones on the same Wi-Fi: open http://192.0.2.2:35485 on the host device (not localhost), so the QR code works.
+
+--- S4 output ---
+[data] took over a stale lock left by a server that is no longer running (/tmp/mz-release-data-1mK0nk/server.lock)
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-data-1mK0nk)
+Christmas Game Night server on http://localhost:44481 (web app at / after npm run build:web)
+Phones on the same Wi-Fi: open http://192.0.2.2:44481 on the host device (not localhost), so the QR code works.
+received SIGTERM, closing server
+
+--- R-the content test mode output ---
+MCHEZO_CONTENT_TEST_MODE is for tests only and is not allowed in production.
+
+--- R-no data dir output ---
+In production MCHEZO_DATA_DIR must be an absolute path outside the release, so an update or rollback never touches the family's data.
+
+--- R-a relative data dir output ---
+In production MCHEZO_DATA_DIR must be an absolute path outside the release, so an update or rollback never touches the family's data.
+
+--- R-a data dir inside the release output ---
+MCHEZO_DATA_DIR (/tmp/mz-release-pkg-tX1Tvl/data) is inside the release (/tmp/mz-release-pkg-tX1Tvl). Put the data outside it, e.g. on its own volume.
+
+--- R-no public origin output ---
+In production MCHEZO_PUBLIC_ORIGIN must be set to the site's public origin, e.g. https://games.example.org.
+
+--- R-no access code output ---
+In production MCHEZO_BETA_ACCESS_CODE must be set (the private beta's access code), or MCHEZO_PUBLIC_ACCESS=open set on purpose.
+
+--- R-a short access code output ---
+MCHEZO_BETA_ACCESS_CODE must be at least 12 characters.
+
+cleanup: 11 process(es) stopped, 2 temporary dir(s) removed; still running: none; left on disk: none
+RELEASE PACKAGE FAILED: 1 failed
+exit=1

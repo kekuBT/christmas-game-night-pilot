@@ -1,0 +1,31 @@
+$ node scripts/check-teams.mjs http://localhost:46423
+# timeout 600s | worker w3 | server http://localhost:46423 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brrfull1/test-results/20261115-203120-23abfbc4-2269/server-data/w3)
+
+[+3.2s] PASS A host: a Teams card offering Make teams
+[+3.2s] PASS A a guest has no Teams card before there are teams
+[+3.4s] PASS B two teams of two
+[+3.4s] PASS B the teams: Keku and Amina on Coral, Baraka and Wanjiru on Sun
+[+3.5s] PASS B renamed: The Lions
+[+3.6s] PASS C Amina's lobby: "You're on The Lions"
+[+3.6s] PASS C Baraka's lobby: "You're on Team Sun"
+[+3.6s] PASS C the TV lists the teams and their players
+[+6.5s] PASS D the game copied the teams at its start — {"list":[{"id":"team-coral","name":"The Lions","color":"coral"},{"id":"team-sun","name":"Team Sun","color":"sun"}],"members":{"player-1":"team-coral","player-2":"team-coral","player-3":"team-sun","player-4":"team-sun"}}
+[+6.5s] PASS D each team's score is its players' average — [["The Lions",720,1],["Team Sun",600,2]]
+[+6.6s] PASS D phone results: the team results under the heading, with the winner
+[+6.6s] PASS D your own team is marked on your phone
+[+6.7s] PASS D the TV leads with the winning team
+[+8.1s] PASS E the host's card offers playing individually
+[+8.3s] PASS E paused for everyone
+[+11.8s] PASS E the paused game has no teams and no team results
+[+11.8s] PASS E its phone results are up, with no team card
+[+12.1s] PASS E back to teams
+[+12.8s] PASS F the newcomer joins a team
+[+12.9s] PASS F the TV counts tonight's team wins
+[+13.5s] PASS G the lobby with the Teams card fits 320 px
+[+13.9s] PASS G the teams sheet fits 320 px
+[+14.2s] PASS H no teams for everyone
+[+14.2s] PASS H a finished team game keeps its team results
+[+14.4s] check-teams: all checks passed
+[+14.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":6}
+
+# PASS (exit 0) in 14.4s | cpu 4.2s, peak memory 296 MB

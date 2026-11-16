@@ -1,0 +1,5 @@
+data:   nobody(65534) 644 <tmp>/data/room-x.book.json
+backup OK: 0 room(s), 1 Memory Book(s), 1 file(s), verified
+backup: root(0) 700 folder; root(0) 600 <tmp>/b/room-x.book.json
+restore OK: 0 room(s), 1 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data <tmp>/r
+restore: root(0) 700 folder; root(0) 600 <tmp>/r/room-x.book.json

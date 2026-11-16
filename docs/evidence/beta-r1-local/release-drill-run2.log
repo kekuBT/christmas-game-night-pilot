@@ -1,0 +1,49 @@
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+PASS PREV: packed from a clean checkout of 8dfe323, tarball sha256 04d9d93d380c016f…, release.json revision matches — revision 8dfe323e438e691916c32c0edc76fc25142016fd
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+PASS NEW: packed from a clean checkout of fe9319e, tarball sha256 0ece4e4bdc0b5e5a…, release.json revision matches — revision fe9319e94e1a39a18787f0c4f8fc95991555c5ec
+PASS PREV runs from releases/<sha> through `current`, data outside it — {"ok":true,"revision":"8dfe323e438e691916c32c0edc76fc25142016fd"}
+PASS PREV: a room with two players — Amina,Keku
+PASS deploy 1/4: stop PREV (SIGTERM, exit 0, lock freed)
+PASS deploy 2/4: back up with the server stopped (NEW's tool) — backup OK: 1 room(s), 0 Memory Book(s), 2 file(s), verified
+PASS deploy 3/4: switch `current` to NEW and start: /health names NEW — {"ok":true,"revision":"fe9319e94e1a39a18787f0c4f8fc95991555c5ec"}
+PASS deploy 4/4: the restore line reports the room, nothing not loaded — [restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-drill-pdTS4C/var-lib-cgn)
+PASS NEW: play goes on (a third player joins)
+PASS rollback 1/3: stop NEW (exit 0)
+PASS rollback 2/3: `current` back to PREV: /health names PREV — {"ok":true,"revision":"8dfe323e438e691916c32c0edc76fc25142016fd"}
+FAIL rollback 3/3: PREV reads what NEW wrote (three players), nothing quarantined — Amina,Baraka,Keku
+PASS restore drill: the pre-deploy backup, restored into a new folder, serves the room as it was (two players) — restore OK: 1 room(s), 0 Memory Book(s) restored and verified. Start a server with MCHEZO_DATA_DIR set to that folder. | Amina,Keku
+PASS the live data was never touched by the restore (still three players on disk)
+--- prev-1 ---
+Christmas Game Night server on http://localhost:44779 (web app at / after npm run build:web)
+Phones on the same Wi-Fi: open http://192.0.2.2:44779 on the host device (not localhost), so the QR code works.
+received SIGTERM, closing server
+
+--- new-1 ---
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-drill-pdTS4C/var-lib-cgn)
+Christmas Game Night server on http://localhost:37891 (web app at / after npm run build:web)
+Listening on 127.0.0.1; public origin https://beta.example.test.
+received SIGTERM, closing server
+
+--- prev-2 ---
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-drill-pdTS4C/var-lib-cgn)
+Christmas Game Night server on http://localhost:38497 (web app at / after npm run build:web)
+Phones on the same Wi-Fi: open http://192.0.2.2:38497 on the host device (not localhost), so the QR code works.
+received SIGTERM, closing server
+
+--- new-restore ---
+[restore] 1 room(s) restored, 0 not loaded (data: /tmp/mz-release-drill-pdTS4C/restore-drill)
+Christmas Game Night server on http://localhost:40537 (web app at / after npm run build:web)
+Listening on 127.0.0.1; public origin https://beta.example.test.
+received SIGTERM, closing server
+
+cleanup: 4 server(s) stopped; nothing left on disk
+RELEASE DRILL FAILED: 1

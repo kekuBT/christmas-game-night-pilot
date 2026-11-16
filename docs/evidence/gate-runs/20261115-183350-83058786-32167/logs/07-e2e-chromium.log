@@ -1,0 +1,95 @@
+$ node scripts/e2e-browser.mjs http://localhost:43915 --browser=chromium --games=all
+# timeout 1800s | worker w1 | server http://localhost:43915 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full3/test-results/20261115-183350-83058786-32167/server-data/w1)
+
+[+0.6s] casual-only, not played here: jebena-rush, spectrum, family-questions
+[+0.6s] built for teams, played by their own drivers: team-huddle, relay, split-clues, team-draw, territory, tug-of-war, know-your-rivals
+[+0.6s] games: impostor, caption-clash, trivia, word-connections, who-said-that, guess-the-year, closest-wins, category-sprint, charades, geography, math-mayhem, majority-rules, pattern-pulse, draw-guess (registry order, 14 total)
+[+2.8s] [chromium] room code 6AZNL8
+[+5.1s] [chromium] lobby roster: 4 players joined
+[+21.6s] [chromium] OK impostor: finished
+[+52.9s] [chromium] FAIL caption-clash: locator.click: Timeout 30000ms exceeded.
+[+52.9s] Call log:
+[+52.9s]   - waiting for locator('[data-testid="start-official-caption-clash"]')
+[+52.9s] 
+[+52.9s] [chromium]   DIAG player=Alex game=impostor(game-1) server=finished phase=- deadlineIn=253s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Lobby" clock="" | type=server-ended-client-behind
+[+52.9s] [chromium]   DIAG player=Sam game=impostor(game-1) server=finished phase=- deadlineIn=253s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Sam · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+52.9s] [chromium]   DIAG player=Jo game=impostor(game-1) server=finished phase=- deadlineIn=253s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Jo · Room: Game night Lobby & Games Championship " clock="" shownOutcome=completed | type=finished-and-shown
+[+52.9s] [chromium]   DIAG player=Kim game=impostor(game-1) server=finished phase=- deadlineIn=253s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Kim · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+83.4s] [chromium] FAIL trivia: locator.click: Timeout 30000ms exceeded.
+[+83.4s] Call log:
+[+83.4s]   - waiting for locator('[data-testid="start-official-trivia"]')
+[+83.4s] 
+[+83.4s] [chromium]   DIAG player=Alex game=impostor(game-1) server=finished phase=- deadlineIn=223s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Lobby" clock="" | type=server-ended-client-behind
+[+83.4s] [chromium]   DIAG player=Sam game=impostor(game-1) server=finished phase=- deadlineIn=223s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Sam · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+83.4s] [chromium]   DIAG player=Jo game=impostor(game-1) server=finished phase=- deadlineIn=223s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Jo · Room: Game night Lobby & Games Championship " clock="" shownOutcome=completed | type=finished-and-shown
+[+83.4s] [chromium]   DIAG player=Kim game=impostor(game-1) server=finished phase=- deadlineIn=223s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Kim · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+113.8s] [chromium] FAIL word-connections: locator.click: Timeout 30000ms exceeded.
+[+113.8s] Call log:
+[+113.8s]   - waiting for locator('[data-testid="start-official-word-connections"]')
+[+113.8s] 
+[+113.9s] [chromium]   DIAG player=Alex game=impostor(game-1) server=finished phase=- deadlineIn=192s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Lobby" clock="" | type=server-ended-client-behind
+[+113.9s] [chromium]   DIAG player=Sam game=impostor(game-1) server=finished phase=- deadlineIn=192s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Sam · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+113.9s] [chromium]   DIAG player=Jo game=impostor(game-1) server=finished phase=- deadlineIn=192s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Jo · Room: Game night Lobby & Games Championship " clock="" shownOutcome=completed | type=finished-and-shown
+[+113.9s] [chromium]   DIAG player=Kim game=impostor(game-1) server=finished phase=- deadlineIn=192s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Kim · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+144.0s] [chromium] FAIL who-said-that: locator.click: Timeout 30000ms exceeded.
+[+144.0s] Call log:
+[+144.0s]   - waiting for locator('[data-testid="start-official-who-said-that"]')
+[+144.0s] 
+[+144.0s] [chromium]   DIAG player=Alex game=impostor(game-1) server=finished phase=- deadlineIn=162s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Lobby" clock="" | type=server-ended-client-behind
+[+144.0s] [chromium]   DIAG player=Sam game=impostor(game-1) server=finished phase=- deadlineIn=162s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Sam · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+144.0s] [chromium]   DIAG player=Jo game=impostor(game-1) server=finished phase=- deadlineIn=162s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Jo · Room: Game night Lobby & Games Championship " clock="" shownOutcome=completed | type=finished-and-shown
+[+144.0s] [chromium]   DIAG player=Kim game=impostor(game-1) server=finished phase=- deadlineIn=162s phaseIn=- submitted=4/4 outcome=completed mine=0/0 | screen="Mchezo Code: 6AZNL8 Playing as Kim · Room: Game night Lobby & Games Championship" clock="" shownOutcome=completed | type=finished-and-shown
+[+158.4s] [chromium] FAIL guess-the-year: locator.click: Target page, context or browser has been closed
+[+158.4s] Call log:
+[+158.4s]   - waiting for locator('[data-testid="start-official-guess-the-year"]')
+[+158.4s] 
+[+158.4s] [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium] FAIL closest-wins: locator.click: Target page, context or browser has been closed
+[+158.4s] [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium] FAIL category-sprint: locator.click: Target page, context or browser has been closed
+[+158.4s] [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium] FAIL charades: locator.click: Target page, context or browser has been closed
+[+158.4s] [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium] FAIL geography: locator.click: Target page, context or browser has been closed
+[+158.4s] [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium] FAIL math-mayhem: locator.click: Target page, context or browser has been closed
+[+158.4s] [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium] FAIL majority-rules: locator.click: Target page, context or browser has been closed
+[+158.4s] [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium] FAIL pattern-pulse: locator.click: Target page, context or browser has been closed
+[+158.4s] [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium] FAIL draw-guess: locator.click: Target page, context or browser has been closed
+[+158.4s] [chromium]   DIAG player=Alex server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Sam server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Jo server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium]   DIAG player=Kim server=unavailable(page.evaluate: Target page, context or browser has been closed) | screen="(page unavailable: page.evaluate: Target page, context or browser has been closed)" clock="" | type=server-unreachable
+[+158.4s] [chromium] FAIL views: locator.count: Target page, context or browser has been closed
+[+158.4s] [chromium] 1/15 passed
+[+158.4s] E2E FAILED: 14 item(s)
+[+158.4s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":4,"pages":4,"peakOpenPages":4}
+
+# CANCELLED (exit 1) in 158.5s | cpu 4.9s, peak memory 275 MB

@@ -1,0 +1,31 @@
+$ node scripts/check-night-card.mjs http://localhost:35709
+# timeout 600s | worker w1 | server http://localhost:35709 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full2/test-results/20261116-025903-c955613d-17498/server-data/w1)
+
+[+1.9s] PASS A before any game, the menu has no night card
+[+3.5s] PASS B the card's title, and its games and players — "Our game night\nMonday, November 16, 2026\n2 games · 3 players\nMedals: Amina 🥇🥈, Keku 🥇🥈, Baraka 🥉🥉\nMath Mayhem: Keku wins\nMath Mayhem: Amina wins"
+[+3.5s] PASS B the date the card was made — Monday, November 16, 2026
+[+3.5s] PASS B the medal table: Keku and Amina a gold and a silver each, Baraka two bronzes — "Our game night\nMonday, November 16, 2026\n2 games · 3 players\nMedals: Amina 🥇🥈, Keku 🥇🥈, Baraka 🥉🥉\nMath Mayhem: Keku wins\nMath Mayhem: Amina wins"
+[+3.5s] PASS B each game's result, oldest first — "Our game night\nMonday, November 16, 2026\n2 games · 3 players\nMedals: Amina 🥇🥈, Keku 🥇🥈, Baraka 🥉🥉\nMath Mayhem: Keku wins\nMath Mayhem: Amina wins"
+[+3.5s] PASS B never the room code
+[+3.6s] PASS B the picture is 1080×1350, and its description is the same facts — {"w":1080,"h":1350}
+[+3.6s] PASS C the Everyday picture: the Everyday ground and the coral band — #16111D #FF6B4A
+[+3.6s] PASS C without Web Share, there's no Share button, only Save
+[+3.6s] PASS C the file is named for the night and the date, never the room code — mchezo-game-night-2026-11-16.png
+[+3.7s] PASS C it's a PNG of 1080×1350 — 126935 bytes
+[+3.7s] PASS C the sheet says where it went
+[+4.0s] PASS D a phone that can share pictures gets Share…
+[+4.1s] PASS D the share sheet got the picture: one PNG with the night's name
+[+4.1s] PASS D …and the sheet says so
+[+4.3s] PASS E the Christmas look's title; every other fact is the same — "Our Christmas game night\nMonday, November 16, 2026\n2 games · 3 players\nMedals: Amina 🥇🥈, Keku 🥇🥈, Baraka 🥉🥉\nMath Mayhem: Keku wins\nMath Mayhem: Amina wins"
+[+4.3s] PASS E the Christmas picture: the ivory ground and the cranberry band — #F7F1E6 #A3253A
+[+4.8s] PASS E closing the share sheet isn't an error
+[+5.4s] PASS H the sheet fits 320 px (no sideways scroll)
+[+5.5s] PASS D a share that fails says so, and points to Save
+[+5.5s] PASS F the lobby's 'That's the night!' offers the card
+[+5.6s] PASS F …and opens it
+[+7.6s] PASS G a Family Cup's card: its title and day — "Our Family Cup\nMonday, November 16, 2026 · Day 1 of 7\n1 game · 2 players\nStandings: Keku 100, Amina 0\nMath Mayhem: Keku wins"
+[+7.6s] PASS G its standings, with points, instead of medals — "Our Family Cup\nMonday, November 16, 2026 · Day 1 of 7\n1 game · 2 players\nStandings: Keku 100, Amina 0\nMath Mayhem: Keku wins"
+[+7.8s] check-night-card: all checks passed
+[+7.8s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":6,"pages":6,"peakOpenPages":6}
+
+# PASS (exit 0) in 7.8s | cpu 3.7s, peak memory 308 MB

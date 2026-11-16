@@ -1,0 +1,15 @@
+# inventory on 33b673d (unmitigated), built from a clean clone
+PlanSchema: no collections
+TeamsSchema: no collections
+FamilyQuestionSchema: ARRAY FamilyQuestionSchema.options (max 8; element: ZodString)
+PartyBodySchema: ARRAY PartyBodySchema|0.plan.items (min 1, max 8; element: ZodObject)
+AttemptSchema: no collections
+BreakSchema: no collections
+SeasonSchema: no collections
+GameSettingsSchema: RECORD GameSettingsSchema.settings (key: ZodString, value: ZodUnknown, no size limit)
+HostSchema: no collections
+PartyStartSchema: no collections
+CreateRoomSchema: no collections
+IntentSchema: RECORD IntentSchema.payload (key: ZodString, value: ZodUnknown, no size limit)
+
+12 network-facing schemas, 4 collections in them.

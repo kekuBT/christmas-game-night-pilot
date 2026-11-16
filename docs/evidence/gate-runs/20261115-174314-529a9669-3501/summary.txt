@@ -1,0 +1,12 @@
+
+FAILED (exit 1) | full | run 20261115-174314-529a9669-3501
+  108 passed, 1 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  FAIL      check-lobby-mode (w1) [functional]: FAIL host reload: still Math Mayhem · Practice — Start Math Mayhem · Official
+  timing   wall 42m 02s · step time 2h 00m (sum) · 3 workers, 95% busy · 2.86× the same steps run one after another
+           predicted 29–69m (about 38m 59s, low-confidence) → actual 42m 02s (+8%)
+           longest  e2e-chromium 8m 28s, check-f5 7m 37s, check-leaderboard 6m 41s · the longest step is 20% of the wall time
+           machine  CPU mean 32%, peak 100% · memory available ≥ 12948 MB · load peak 5.9 · backpressure 12 wait(s), 127s
+           contention ×1.07 (median step time vs its sequential median)
+           baseline sequential full gate: about 1h 17m (mean of recorded sequential passes)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full2/test-results/20261115-174314-529a9669-3501/report.json

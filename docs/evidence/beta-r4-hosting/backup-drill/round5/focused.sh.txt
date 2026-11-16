@@ -1,0 +1,272 @@
+#!/bin/bash
+# Beta R4 reviews 6918277617 and 6918922306: focused negatives for the proposed backup scripts, with failures injected by
+# command stubs.
+#   bash focused.sh <repo root, built> <folder holding deploy/cgn-*.sh>
+# Runs the UNCHANGED server in production mode under deploy/cgn-entrypoint.sh, on disposable data, then:
+#   P0  a normal backup                                   -> BACKUP_OK, an archive, the server back
+#   X1  the archiver fails (partial output, exit 2), the encryptor succeeds
+#   X2  the encryptor fails (partial output, exit 1)
+#   X3  hashing the archive fails
+#   X4  publishing the archive (the rename) fails
+#       X1-X4 must each give BACKUP_FAILED, no BACKUP_OK, NO archive and nothing else new in the backup folder, the hold
+#       released and the server back.
+#   H1  a second backup started while the first holds the server: refused, without releasing the first one's hold
+#   H2  a second backup takes the hold after the first released it but while the first is still encrypting: the first
+#       one's exit must not release the second one's hold, and no server may run while the second one holds
+#   H3  an abandoned session (the backup killed with SIGKILL while it holds, its copy step delayed 6 s): the server must
+#       come back within 10 s, and after reconciliation nothing may be left
+#   H4  an interrupted session (SIGHUP to its process group while it holds): released at once, server back, no archive
+#   H0  two backups started at the same instant, 5 times: exactly one takes the hold each time
+#   H5  a second backup with the same per-second stamp, after the first released but while it still encrypts: refused
+#       without removing any of the first one's files
+#   K1  killed outright AFTER the copy's files exist (a stub copy has written a room file and a manifest, then waits):
+#       a) the shell alone, b) its whole process group. The copy runs on under `timeout` (its own process group) until
+#       the copy limit. Must: no BACKUP_OK; the server back within the copy limit + 6 s; reconciliation refused or
+#       deferred while the copy lives, then removes exactly that run's files; P0's backup intact.
+#   K2  killed outright AFTER the temporary archive exists (a stub encryptor has written a partial archive, then waits):
+#       a) the shell alone (the encryptor lives on: reconciliation must leave the files until it ends), b) the group.
+#   K3  reconciliation while a healthy backup is still encrypting: that run is left alone and still ends BACKUP_OK.
+# Stubs (in a folder put first on PATH for one backup run only) wrap tar, age, sha256sum, mv, timeout and date; CGN_STUB
+# picks the failure, a delay, or a fixed backup stamp. The verdict is the last line; the exit code is non-zero on any FAIL.
+set -u
+APP=$(cd "$1" && pwd); D=$(cd "$2" && pwd)
+T=$(mktemp -d /tmp/cgn-r4focus-XXXXXX)
+DISK="$T/var/data"; mkdir -p "$DISK" "$T/stubs"
+PORT=$((42000 + RANDOM % 900)); BASE="http://127.0.0.1:$PORT"
+fails=0; passes=0
+pass() { echo "PASS $*"; passes=$((passes + 1)); }
+fail() { echo "FAIL $*"; fails=$((fails + 1)); }
+expect() { if [ "$1" = 0 ]; then pass "$2"; else fail "$2"; fi; }
+health() { curl -s -o /dev/null -w '%{http_code}' -m 2 "$BASE/health" 2>/dev/null; }
+wait_health() { for _ in $(seq 1 ${1:-100}); do [ "$(health)" = 200 ] && return 0; sleep 0.1; done; return 1; }
+ms() { date +%s%3N; }
+stamp_lines() { while IFS= read -r l; do printf '%s %s\n' "$(ms)" "$l"; done; }
+echo "== focused negatives started $(date -u +%FT%TZ); scripts in $D"
+echo "== repo $(git -C "$APP" rev-parse HEAD) ($(git -C "$APP" status --porcelain | wc -l) uncommitted paths); runtime vs 7097ac2: $(git -C "$APP" diff --name-only 7097ac2bb062925bb296a129f4771f1e68fd522d -- src package.json package-lock.json tsconfig.json tsconfig.build.json | wc -l) files differ"
+echo "== scripts: $(cd "$D/deploy" && sha256sum cgn-*.sh | awk '{printf "%s %s; ", substr($1,1,12), $2}')"
+
+# --- the stubs ----------------------------------------------------------------------------------------------------
+REAL_PATH="$PATH"
+for name in tar age sha256sum mv timeout date node; do
+  cat > "$T/stubs/$name" <<'STUB'
+#!/bin/sh
+# Test stub: behaves like the real command unless CGN_STUB names a failure or a delay for it.
+name=$(basename "$0")
+real=$(PATH="$CGN_REAL_PATH" command -v "$name")
+mode=" ${CGN_STUB:-} "
+after() { a=""; want=$1; shift; for x in "$@"; do if [ "$a" = "$want" ]; then printf '%s' "$x"; return; fi; a=$x; done; }
+case "$mode" in *" $name-slow="*) s=${mode#*" $name-slow="}; s=${s%% *}; sleep "$s";; esac
+case "$name:$mode" in
+  node:*" node-copy-hang "*)
+    case " $* " in *" backup "*)
+      out=$(after --out "$@"); data=$(after --data "$@")
+      mkdir -p "$out" && f=$(ls "$data" | grep '^room-.*\.json$' | head -1) && cp "$data/$f" "$out/$f" && printf '{"partial": true}\n' > "$out/manifest.json"
+      : > "${CGN_CHECKPOINT:-/dev/null}"; exec sleep 30;;
+    esac;;
+  age:*" age-hang "*)
+    o=$(after -o "$@"); [ -n "$o" ] && printf 'partial' > "$o"
+    : > "${CGN_CHECKPOINT:-/dev/null}"; exec sleep 30;;
+  tar:*" tar-fail "*)
+    f=$(after -cf "$@")
+    if [ "$f" = "-" ]; then "$real" "$@" | head -c 700; else "$real" "$@"; truncate -s 700 "$f" 2>/dev/null; fi
+    echo "tar: (stub) simulated failure after partial output" >&2; exit 2;;
+  age:*" age-fail "*)
+    o=$(after -o "$@"); [ -n "$o" ] && printf 'partial' > "$o"
+    echo "age: (stub) simulated encryption failure" >&2; exit 1;;
+  sha256sum:*" sha256sum-fail "*)
+    for x in "$@"; do case "$x" in *.part|*.tar.age) echo "sha256sum: (stub) simulated failure" >&2; exit 1;; esac; done;;
+  date:*" date-fixed="*)
+    for x in "$@"; do if [ "$x" = "+%Y%m%dT%H%M%SZ" ]; then f=${mode#*" date-fixed="}; echo "${f%% *}"; exit 0; fi; done;;
+  mv:*" mv-fail "*)
+    for x in "$@"; do case "$x" in *.tar.age) echo "mv: (stub) simulated failure" >&2; exit 1;; esac; done;;
+esac
+exec "$real" "$@"
+STUB
+  chmod +x "$T/stubs/$name"
+done
+backup() { env PATH="$T/stubs:$REAL_PATH" CGN_REAL_PATH="$REAL_PATH" CGN_STUB="${STUB:-}" sh "$D/deploy/cgn-backup.sh"; }
+
+# --- production-mode server under the entrypoint --------------------------------------------------------------------
+age-keygen -o "$T/owner.key" 2>/dev/null
+export NODE_ENV=production PORT MCHEZO_DATA_DIR="$DISK/cgn" MCHEZO_PUBLIC_ORIGIN="$BASE" MCHEZO_LISTEN_HOST=127.0.0.1
+export MCHEZO_BETA_ACCESS_CODE="focused-only-code-$RANDOM$RANDOM"
+export CGN_RUN_DIR="$T/run" CGN_APP_DIR="$APP" CGN_BACKUP_ROOT="$DISK/backups" CGN_BACKUP_RECIPIENT="$(age-keygen -y "$T/owner.key")" CGN_AUTHORIZED_CONFIG="$DISK/cgn-authorized.conf"
+ENTRY=0
+start_entry() { sh "$D/deploy/cgn-entrypoint.sh" >> "$T/entrypoint.log" 2>&1 & ENTRY=$!; wait_health; }
+ensure_up() { if [ "$(health)" != 200 ]; then wait_health 50 || { kill -0 "$ENTRY" 2>/dev/null || start_entry; }; fi; }
+start_entry || { echo "the server didn't start"; cat "$T/entrypoint.log"; exit 1; }
+# Some data to back up: a room with players.
+node -e "
+(async()=>{const b='$BASE';const r0=await fetch(b+'/beta/enter',{method:'POST',redirect:'manual',headers:{'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code:process.env.MCHEZO_BETA_ACCESS_CODE,next:'/'})});
+const ck=(r0.headers.get('set-cookie')||'').split(';')[0];const post=async(p,x)=>(await fetch(b+p,{method:'POST',headers:{cookie:ck,'content-type':'application/json'},body:JSON.stringify(x)})).json();
+for(let i=0;i<3;i++){const room=await post('/rooms',{name:'F'+i,kind:'casual'});await post('/rooms/'+room.roomId+'/join',{displayName:'H',asHost:true,hostClaimToken:room.hostClaimToken});await post('/rooms/join-by-code',{joinCode:room.joinCode,displayName:'B'});}
+console.log('   seeded 3 rooms');})()"
+listing() { ls -A "$CGN_BACKUP_ROOT" 2>/dev/null | LC_ALL=C sort; }
+new_entries() { comm -13 <(echo "$1") <(listing) | tr '\n' ' '; }
+no_hold() { [ ! -e "$CGN_RUN_DIR/hold" ]; }
+
+echo "== P0 a normal backup"
+before=$(listing); out=$(STUB="" backup 2>&1); rc=$?; echo "$out" | sed 's/^/   /'
+ensure_up
+new=$(new_entries "$before")
+[ $rc -eq 0 ] && echo "$out" | grep -q '^BACKUP_OK' && ls "$CGN_BACKUP_ROOT"/cgn-*.tar.age >/dev/null 2>&1 && no_hold && [ "$(health)" = 200 ]
+expect $? "P0 BACKUP_OK (exit $rc), an archive, no hold, server back; new entries: $new"
+
+for c in "X1 tar-fail the archiver fails after partial output, the encryptor succeeds" "X2 age-fail the encryptor fails after partial output" "X3 sha256sum-fail hashing the archive fails" "X4 mv-fail publishing the archive fails"; do
+  set -- $c; id=$1; mode=$2; shift 2; what="$*"
+  echo "== $id $what"
+  sleep 1.1   # a new second: the backup stamp is per second
+  before=$(listing); out=$(STUB="$mode" backup 2>&1); rc=$?; echo "$out" | sed 's/^/   /'
+  ensure_up
+  new=$(new_entries "$before")
+  [ $rc -ne 0 ] && echo "$out" | grep -q 'BACKUP_FAILED' && ! echo "$out" | grep -q 'BACKUP_OK' && [ -z "$new" ] && no_hold && [ "$(health)" = 200 ]
+  expect $? "$id BACKUP_FAILED (exit $rc), no BACKUP_OK, nothing new left in the backup folder [${new}], no hold, server back"
+done
+
+echo "== H0 two backups started at the same instant, 5 times: exactly one takes the hold each time"
+h0ok=0
+for r in 1 2 3 4 5; do
+  sleep 1.1; ensure_up
+  STUB="" backup > "$T/h0a.log" 2>&1 & A=$!
+  STUB="" backup > "$T/h0b.log" 2>&1 & B=$!
+  wait $A; ra=$?; wait $B; rb=$?
+  oks=$(cat "$T/h0a.log" "$T/h0b.log" | grep -c '^BACKUP_OK'); held=$(cat "$T/h0a.log" "$T/h0b.log" | grep -c 'another backup holds')
+  why=$(cat "$T/h0a.log" "$T/h0b.log" | grep -o 'BACKUP_FAILED: .*' | head -1)
+  echo "   round $r: exits $ra/$rb, BACKUP_OK x$oks, refused by the hold x$held ($why)"
+  [ "$oks" -eq 1 ] && [ "$held" -eq 1 ] && no_hold && h0ok=$((h0ok + 1))
+done
+ensure_up
+[ "$h0ok" -eq 5 ]; expect $? "H0 in all 5 rounds, one BACKUP_OK and one refusal by the hold, and no hold left ($h0ok/5)"
+
+echo "== H1 a second backup while the first holds"
+sleep 1.1
+STUB="timeout-slow=3" backup > "$T/h1a.log" 2>&1 & A=$!
+for _ in $(seq 1 100); do grep -q "server stopped" "$T/h1a.log" && break; sleep 0.05; done
+out=$(STUB="" backup 2>&1); brc=$?; echo "   B: $out"
+held_after_b=no; [ -e "$CGN_RUN_DIR/hold" ] && held_after_b=yes
+up_during=$(health)
+wait $A; arc=$?; sed 's/^/   A: /' "$T/h1a.log"; ensure_up
+[ $brc -ne 0 ] && echo "$out" | grep -q 'another backup holds' && [ "$held_after_b" = yes ] && [ "$up_during" != 200 ] && [ $arc -eq 0 ] && grep -q '^BACKUP_OK' "$T/h1a.log" && no_hold
+expect $? "H1 B refused by the hold itself (exit $brc); A's hold still in place after B exited ($held_after_b), server still stopped ($up_during); A then BACKUP_OK (exit $arc)"
+
+echo "== H2 a second backup takes the hold while the first is still encrypting"
+sleep 1.1
+: > "$T/watch.log"
+( while :; do h=0; [ -e "$CGN_RUN_DIR/hold" ] && h=1; s=0; p=$(cat "$CGN_RUN_DIR/server.pid" 2>/dev/null); [ -n "$p" ] && kill -0 "$p" 2>/dev/null && s=1; echo "$(ms) $h $s"; sleep 0.02; done ) >> "$T/watch.log" & W=$!
+STUB="age-slow=4" backup 2>&1 | stamp_lines > "$T/h2a.log" & A=$!
+for _ in $(seq 1 200); do grep -q "hold released" "$T/h2a.log" && break; sleep 0.05; done
+wait_health 50
+STUB="timeout-slow=4" backup 2>&1 | stamp_lines > "$T/h2b.log" & B=$!
+wait $A; wait $B; kill $W; ensure_up
+sed 's/^/   A: /' "$T/h2a.log"; sed 's/^/   B: /' "$T/h2b.log"
+bs=$(grep -m1 "server stopped" "$T/h2b.log" | cut -d' ' -f1); br=$(grep -m1 "hold released" "$T/h2b.log" | cut -d' ' -f1); ae=$(tail -1 "$T/h2a.log" | cut -d' ' -f1)
+be=${br:-$(tail -1 "$T/h2b.log" | cut -d' ' -f1)}   # B's hold ends at its release, or at its last line if it never released
+viol=$(awk -v s="${bs:-0}" -v e="${be:-0}" '$1>s && $1<e && $3==1' "$T/watch.log" | wc -l)
+echo "   B stopped the server at ${bs:-?}, A ended at ${ae:-?}, B released at ${br:-never} (its hold ends at ${be:-?}); samples with a live server inside B's hold: $viol"
+[ -n "$bs" ] && [ -n "$br" ] && [ "${ae:-0}" -gt "$bs" ] && [ "${ae:-0}" -lt "$br" ] && [ "$viol" -eq 0 ] && grep -q 'BACKUP_OK' "$T/h2a.log" && grep -q 'BACKUP_OK' "$T/h2b.log" && no_hold
+expect $? "H2 A ended inside B's hold, yet no server ran until B released it; both BACKUP_OK"
+
+echo "== H5 a second backup in the same second, after the first released but while it still encrypts"
+sleep 1.1; ensure_up
+FIXED="20991231T235959Z"
+STUB="age-slow=3 date-fixed=$FIXED" backup > "$T/h5a.log" 2>&1 & A=$!
+for _ in $(seq 1 200); do grep -q "hold released" "$T/h5a.log" && break; sleep 0.05; done
+wait_health 50
+out=$(STUB="date-fixed=$FIXED" backup 2>&1); brc=$?; echo "   B: $out"
+wait $A; arc=$?; sed 's/^/   A: /' "$T/h5a.log"; ensure_up
+sum=$(grep '^BACKUP_OK' "$T/h5a.log" | sed 's/.*sha256=\([0-9a-f]*\).*/\1/')
+[ $brc -ne 0 ] && echo "$out" | grep -q "already exists" && [ $arc -eq 0 ] && [ -d "$CGN_BACKUP_ROOT/$FIXED" ] && [ -f "$CGN_BACKUP_ROOT/$FIXED.SHA256SUMS" ] && [ "$(sha256sum < "$CGN_BACKUP_ROOT/cgn-$FIXED.tar.age" | cut -d' ' -f1)" = "$sum" ] && no_hold
+expect $? "H5 B refused (exit $brc) without touching A's files; A BACKUP_OK (exit $arc) with its copy, checksum list and archive intact"
+
+echo "== H3 an abandoned session: the backup killed outright while it holds"
+sleep 1.1
+before=$(listing)
+STUB="timeout-slow=6" setsid sh -c 'exec env PATH="$0:$1" CGN_REAL_PATH="$1" CGN_STUB="$2" sh "$3"' "$T/stubs" "$REAL_PATH" "timeout-slow=6" "$D/deploy/cgn-backup.sh" > "$T/h3.log" 2>&1 & K=$!
+for _ in $(seq 1 100); do grep -q "server stopped" "$T/h3.log" && break; sleep 0.05; done
+t0=$(ms); kill -KILL "$K"
+back=no; for _ in $(seq 1 100); do [ "$(health)" = 200 ] && back=yes && break; sleep 0.1; done; t1=$(ms)
+sed 's/^/   /' "$T/h3.log"; tail -3 "$T/entrypoint.log" | sed 's/^/   entrypoint: /'
+if [ "$back" != yes ]; then echo "   (not back after 10 s: the hold is removed by hand so the remaining cases can run)"; rm -rf "$CGN_RUN_DIR/hold"; wait_health 50; fi
+sleep 6.5   # let the orphaned (delayed) copy step finish or be refused
+r=$(env PATH="$REAL_PATH" sh "$D/deploy/cgn-backup.sh" reconcile 2>&1); echo "   reconcile: $(echo "$r" | tr '\n' ' ')"
+new=$(new_entries "$before"); pkill -f "cgn-r4focus.*stubs/timeout" 2>/dev/null
+[ "$back" = yes ] && ! grep -q BACKUP_OK "$T/h3.log" && no_hold && [ "$(health)" = 200 ] && echo "$r" | grep -q '^RECONCILED' && [ -z "$new" ]
+expect $? "H3 server back $((t1 - t0)) ms after the session was killed ($back); no BACKUP_OK, no hold; after reconciliation nothing left in the backup folder [${new}]"
+ensure_up
+
+echo "== H4 an interrupted session: SIGHUP to the session's process group while it holds"
+sleep 1.1
+before=$(listing)
+setsid sh -c 'exec env PATH="$0:$1" CGN_REAL_PATH="$1" CGN_STUB="$2" sh "$3"' "$T/stubs" "$REAL_PATH" "timeout-slow=6" "$D/deploy/cgn-backup.sh" > "$T/h4.log" 2>&1 & K=$!
+for _ in $(seq 1 100); do grep -q "server stopped" "$T/h4.log" && break; sleep 0.05; done
+t0=$(ms); kill -HUP -- "-$K"
+back=no; for _ in $(seq 1 100); do [ "$(health)" = 200 ] && back=yes && break; sleep 0.1; done; t1=$(ms)
+wait $K 2>/dev/null; sed 's/^/   /' "$T/h4.log"
+if [ "$back" != yes ]; then echo "   (not back after 10 s: the hold is removed by hand)"; rm -rf "$CGN_RUN_DIR/hold"; wait_health 50; fi
+new=$(new_entries "$before")
+[ "$back" = yes ] && ! grep -q BACKUP_OK "$T/h4.log" && no_hold && [ -z "$new" ]
+expect $? "H4 server back $((t1 - t0)) ms after the hang-up ($back); no BACKUP_OK, no hold, nothing left in the backup folder [${new}]"
+ensure_up
+
+# --- K: runs killed outright after their files exist, and reconciliation ------------------------------------------
+NEIGH=$(ls "$CGN_BACKUP_ROOT" | grep '^cgn-.*\.tar\.age$' | head -1); NSTAMP=${NEIGH#cgn-}; NSTAMP=${NSTAMP%.tar.age}
+nsum() { (cd "$CGN_BACKUP_ROOT" && cat "$NEIGH" "$NSTAMP.SHA256SUMS" 2>/dev/null; find "$NSTAMP" -type f 2>/dev/null | LC_ALL=C sort | xargs cat 2>/dev/null) | sha256sum | cut -c1-16; }
+N0=$(nsum); echo "== K: the neighbouring successful backup is $NEIGH (fingerprint $N0)"
+reconcile() { env PATH="$REAL_PATH" sh "$D/deploy/cgn-backup.sh" reconcile 2>&1; }
+ck_pids() { local e p out=""; for e in /proc/[0-9]*/environ; do p=${e#/proc/}; p=${p%/environ}; { tr '\0' '\n' < "$e"; } 2>/dev/null | grep -qx "CGN_CHECKPOINT=$1" && out="$out $p"; done; echo $out; }
+run_k() { # $1 id, $2 stub mode, $3 kill: shell|group, $4 copy limit
+  local id=$1 mode=$2 how=$3 lim=$4 ck="$T/ckpt-$1" log="$T/$1.log"
+  sleep 1.1; ensure_up; local before; before=$(listing); rm -f "$ck"
+  setsid env PATH="$T/stubs:$REAL_PATH" CGN_REAL_PATH="$REAL_PATH" CGN_STUB="$mode" CGN_CHECKPOINT="$ck" CGN_BACKUP_LIMIT_S="$lim" sh "$D/deploy/cgn-backup.sh" > "$log" 2>&1 & local K=$!
+  for _ in $(seq 1 200); do [ -e "$ck" ] && break; sleep 0.05; done
+  local at; at=$(new_entries "$before")
+  echo "   $id at the checkpoint, new in the backup folder: [$at]"
+  local t0; t0=$(ms)
+  if [ "$how" = group ]; then kill -KILL -- "-$K"; else kill -KILL "$K"; fi
+  sleep 0.3
+  local r1; r1=$(reconcile); echo "   $id reconcile at once: $(echo "$r1" | tr '\n' ' ')"
+  local left1; left1=$(new_entries "$before")
+  local back=no; for _ in $(seq 1 $(( (lim + 6) * 10 ))); do [ "$(health)" = 200 ] && back=yes && break; sleep 0.1; done; local t1; t1=$(ms)
+  # Any process the killed run left (the copy under `timeout`, or the encryptor stub) carries this case's checkpoint path
+  # in its environment. The copy ends by its own limit; the encryptor stub would sleep 30 s, so it is ended here.
+  for _ in $(seq 1 $(( (lim + 2) * 10 ))); do [ -z "$(ck_pids "$ck")" ] && break; sleep 0.1; done
+  local still; still=$(ck_pids "$ck"); [ -n "$still" ] && { echo "   $id ending the run's leftover processes: $still"; kill -KILL $still 2>/dev/null; sleep 0.3; }
+  local r2; r2=$(reconcile); echo "   $id reconcile after: $(echo "$r2" | tr '\n' ' ')"
+  local left2; left2=$(new_entries "$before")
+  sed 's/^/   '"$id"' backup: /' "$log"
+  echo "   $id left after the first reconcile: [$left1]; after the second: [$left2]; server back after $((t1 - t0)) ms ($back)"
+  K_AT="$at"; K_LEFT1="$left1"; K_LEFT2="$left2"; K_BACK="$back"; K_MS=$((t1 - t0)); K_R1="$r1"; K_R2="$r2"; K_LOG="$log"
+}
+for spec in "K1a node-copy-hang shell 8" "K1b node-copy-hang group 8" "K2a age-hang shell 3" "K2b age-hang group 3"; do
+  set -- $spec; id=$1
+  echo "== $id killed outright at the $([ "$2" = node-copy-hang ] && echo copy || echo encryption) checkpoint ($3)"
+  run_k "$@"
+  case $2 in node-copy-hang) want="manifest";; age-hang) want=".part";; esac
+  had_files=no; echo "$K_AT" | grep -q . && had_files=yes
+  [ "$had_files" = yes ] && ! grep -q BACKUP_OK "$K_LOG" && [ "$K_BACK" = yes ] && echo "$K_R2" | grep -q '^RECONCILED' && [ -z "$K_LEFT2" ] && no_hold && [ "$(nsum)" = "$N0" ]
+  expect $? "$id files existed at the checkpoint ($had_files); no BACKUP_OK; server back in $K_MS ms; the run's files removed by reconciliation [left: ${K_LEFT2}]; no hold; neighbour intact"
+  if [ "$1" = K2a ]; then
+    echo "$K_R1" | grep -q 'still running' && [ -n "$K_LEFT1" ]; expect $? "K2a while the encryptor still ran, reconciliation left the run's files [${K_LEFT1}]"
+  fi
+  if [ "$1" = K1a ] || [ "$1" = K1b ]; then
+    { echo "$K_R1" | grep -q -e 'another backup holds' -e 'still running'; } && [ -n "$K_LEFT1" ]; expect $? "$id while the copy still ran, reconciliation was refused or deferred and the files stayed [${K_LEFT1}]"
+  fi
+done
+ensure_up
+
+echo "== K3 reconciliation while a healthy backup is still encrypting"
+sleep 1.1; ensure_up
+STUB="age-slow=3" backup > "$T/k3a.log" 2>&1 & A=$!
+for _ in $(seq 1 200); do grep -q "hold released" "$T/k3a.log" && break; sleep 0.05; done
+r=$(reconcile); echo "   reconcile: $(echo "$r" | tr '\n' ' ')"
+wait $A; arc=$?; sed 's/^/   A: /' "$T/k3a.log"
+asum=$(grep '^BACKUP_OK' "$T/k3a.log" | sed 's/.*sha256=\([0-9a-f]*\).*/\1/'); arch=$(grep '^BACKUP_OK' "$T/k3a.log" | awk '{print $2}')
+echo "$r" | grep -q 'still running' && [ $arc -eq 0 ] && [ -n "$arch" ] && [ "$(sha256sum < "$arch" | cut -d' ' -f1)" = "$asum" ] && [ "$(nsum)" = "$N0" ] && no_hold
+expect $? "K3 the running backup was left alone (reported still running), then BACKUP_OK (exit $arc) with its archive intact; neighbour intact"
+ensure_up
+
+echo "== entrypoint log"; sed 's/^/   /' "$T/entrypoint.log"
+kill -TERM "$ENTRY" 2>/dev/null; wait "$ENTRY" 2>/dev/null
+pkill -f "$T" 2>/dev/null; sleep 0.5; rm -rf "$T"
+echo "== focused negatives finished $(date -u +%FT%TZ): $passes passed, $fails failed"
+if [ $fails -eq 0 ]; then echo "FOCUSED PASSED (exit 0)"; exit 0; else echo "FOCUSED FAILED (exit 1)"; exit 1; fi

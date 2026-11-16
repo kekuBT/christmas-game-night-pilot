@@ -1,0 +1,20 @@
+$ node scripts/check-leaderboard.mjs http://localhost:41795
+# timeout 1800s | worker w3 | server http://localhost:41795 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full/test-results/20261116-024847-34996cf4-10213/server-data/w3)
+
+[+30.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":2,"pages":5,"peakOpenPages":5}
+[+30.1s] node:internal/modules/run_main:123
+[+30.1s]     triggerUncaughtException(
+[+30.1s]     ^
+[+30.1s] 
+[+30.1s] page.waitForTimeout: Target page, context or browser has been closed
+[+30.1s]     at waitForState (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full/scripts/lib/answer.mjs:53:16)
+[+30.1s]     at async answerKitQuestions (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full/scripts/lib/answer.mjs:68:16)
+[+30.1s]     at async answerCorrect (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full/scripts/check-leaderboard.mjs:56:3)
+[+30.1s]     at async playGame (/tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full/scripts/check-leaderboard.mjs:183:38)
+[+30.1s]     at async file:///tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5full/scripts/check-leaderboard.mjs:220:45 {
+[+30.1s]   log: []
+[+30.1s] }
+[+30.1s] 
+[+30.1s] Node.js v22.23.4
+
+# CANCELLED (exit 1) in 30.1s | cpu 3.7s, peak memory 269 MB

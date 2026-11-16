@@ -1,0 +1,31 @@
+== S1: an existing cgn user, without a cgn group
+REFUSED: a user named cgn already exists here; this drill won't touch it
+PASS S1 the drill refuses (exit 2) — exit 2
+PASS S1 no deletion attempted
+PASS S1 the existing user is intact (same uid) — uid 996
+PASS S1 no folder made
+
+== S2: an existing cgn group, without a cgn user
+REFUSED: a group named cgn already exists here; this drill won't touch it
+PASS S2 the drill refuses (exit 2) — exit 2
+PASS S2 no deletion attempted
+PASS S2 the existing group is intact (same gid)
+
+== S3: useradd creates the group, then fails
+FAIL B1 the service user — useradd exit 1; created: user 0, group 1
+the service user couldn't be created: stopping the drill
+cleanup: removed only what this run created (user 0, group 1, prefix 1)
+PASS S3 the drill stops at the failed service user (exit 1) — exit 1
+PASS S3 the only deletion is the group this run created — groupdel cgn;
+PASS S3 nothing left behind — user:no group:no prefixes:0 procs:0
+
+== S4: SIGTERM mid-run, with the service user created and the server running
+PASS B7 the start line
+cleanup: removed only what this run created (user 1, group 1, prefix 1)
+PASS S4 SIGTERM ends the drill (exit 143), with the server running before — exit 143; 1 server(s) as cgn before
+PASS S4 cleanup ran, for what this run created
+PASS S4 deletions: only cgn, which this run created — userdel cgn;
+PASS S4 nothing left behind — user:no group:no prefixes:0 procs:0
+
+drill safety check: 14 passed, 0 failed
+DRILL SAFETY CHECK PASSED

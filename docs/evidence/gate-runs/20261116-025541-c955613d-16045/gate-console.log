@@ -1,0 +1,47 @@
+Mchezo gate targeted | run 20261116-025541-c955613d-16045
+  revision c955613d0897fd498e76e4b4d98dcda307308d38 (clean tree) | fingerprint 4b8cbe3dbead (634 files)
+  plan     8 steps: 1 fast/build, 6 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  256 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 225 run(s))
+  estimate this run: 2–7m (low-confidence) · the same steps one after another: about 7m 20s · longest step check-locked-answer ~2m 48s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  thin     only 1–2 samples for: check-locked-answer
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t3/test-results/20261116-025541-c955613d-16045
+        start build-web on w1 (usually 5s)
+[ 1/8] PASS           6s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/8] PASS         0.7s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:46273 (pid 16174, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t3/test-results/20261116-025541-c955613d-16045/server-data/w1)
+  server   w2 http://localhost:44619 (pid 16175, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t3/test-results/20261116-025541-c955613d-16045/server-data/w2)
+  server   w3 http://localhost:40087 (pid 16176, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t3/test-results/20261116-025541-c955613d-16045/server-data/w3)
+        start check-locked-answer on w1 (usually 2m 48s)
+        start check-solo on w2 (usually 2m 21s)
+        start check-math on w3 (usually 55s)
+── progress  2/8 done · 2 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-locked-answer 52s (w1), check-solo 52s (w2), check-math 52s (w3)
+   remaining 1–6m · total 2–7m · done around 02:57–03:02 UTC (low-confidence)
+[ 3/8] PASS        61.7s  check-math  w3
+        start check-geography on w3 (usually 36s)
+[ 4/8] PASS        38.1s  check-geography  w3
+        start check-math-timing on w3 (usually 26s)
+── progress  4/8 done · 4 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-locked-answer 1m 52s (w1), check-solo 1m 52s (w2), check-math-timing 12s (w3)
+   remaining 0–5m · total 2–7m · done around 02:57–03:02 UTC (low-confidence)
+[ 5/8] PASS        28.2s  check-math-timing  w3
+        start check-answer-helper on w3 (usually 9s)
+[ 6/8] PASS        10.1s  check-answer-helper  w3
+[ 7/8] PASS       151.5s  check-solo  w2
+── progress  7/8 done · 7 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-locked-answer 2m 52s (w1)
+   remaining 0–4m · total 3–7m · done around 02:59–03:02 UTC (low-confidence)
+[ 8/8] PASS       182.9s  check-locked-answer  w1
+
+PASSED (exit 0) | targeted | run 20261116-025541-c955613d-16045
+  8 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 3m 11s · step time 7m 59s (sum) · 3 workers, 83% busy · 2.51× the same steps run one after another
+           predicted 2–7m (about 2m 58s, low-confidence) → actual 3m 11s (+7%)
+           longest  check-locked-answer 3m 03s, check-solo 2m 32s, check-math 1m 02s · the longest step is 96% of the wall time
+           machine  CPU mean 23%, peak 88% · memory available ≥ 14290 MB · load peak 1.63
+           contention ×1.092 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/r5t3/test-results/20261116-025541-c955613d-16045/report.json

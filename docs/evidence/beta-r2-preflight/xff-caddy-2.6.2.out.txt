@@ -1,0 +1,13 @@
+# Caddy 2.6.2 (Ubuntu 24.04 package caddy_2.6.2-6ubuntu0.24.04.3, sha256 3a71aa97c7d85ea7a285717601306bf45d6f701073875ab689e893fabf6a819c), 2026-11-16 ~05:45 UTC
+# Site: beta.test:18444 { bind 127.0.0.1; tls internal; reverse_proxy 127.0.0.1:3911 } with nc -l 127.0.0.1 3911 as the backend.
+# Request: curl -H 'X-Forwarded-For: 203.0.113.7' https://beta.test:18444/proxy-count-test (from 127.0.0.1, certificate verified against Caddy's root)
+# What nc received (the curl then timed out, exit 28, as expected with no backend answer):
+GET /proxy-count-test HTTP/1.1
+Host: beta.test:18444
+User-Agent: curl/8.5.0
+Accept: */*
+X-Forwarded-For: 127.0.0.1
+X-Forwarded-Host: beta.test:18444
+X-Forwarded-Proto: https
+Accept-Encoding: gzip
+

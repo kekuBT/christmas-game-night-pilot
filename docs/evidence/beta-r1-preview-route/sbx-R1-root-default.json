@@ -1,0 +1,128 @@
+{
+ "mode": "default",
+ "uid": 0,
+ "launched": true,
+ "processes": [
+  {
+   "type": "browser",
+   "noSandboxFlag": true,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "browser",
+   "noSandboxFlag": false,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "zygote",
+   "noSandboxFlag": true,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "zygote",
+   "noSandboxFlag": true,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "browser",
+   "noSandboxFlag": false,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "gpu-process",
+   "noSandboxFlag": true,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "utility",
+   "noSandboxFlag": true,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "utility",
+   "noSandboxFlag": true,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "renderer",
+   "noSandboxFlag": true,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "renderer",
+   "noSandboxFlag": true,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "renderer",
+   "noSandboxFlag": true,
+   "uid": "0",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  }
+ ]
+}

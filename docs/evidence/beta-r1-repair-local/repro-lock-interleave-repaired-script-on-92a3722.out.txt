@@ -1,0 +1,4 @@
+A: holds the directory; its record is empty (pid not written yet)
+B: acquired
+server.lock now: "{\"pid\":27242,\"host\":\"vm\",\"startedAt\":\"2026-11-15T20:26:52.302Z\"}"
+RESULT: BOTH A AND B HOLD THE DATA DIRECTORY

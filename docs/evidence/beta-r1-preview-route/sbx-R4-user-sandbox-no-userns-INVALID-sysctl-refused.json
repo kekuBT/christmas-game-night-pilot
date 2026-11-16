@@ -1,0 +1,139 @@
+{
+ "mode": "sandbox",
+ "uid": 65534,
+ "launched": true,
+ "processes": [
+  {
+   "type": "renderer",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "2",
+   "seccompFilters": "1",
+   "userNs": "user:[4026532319]",
+   "pidNs": "pid:[4026532264]",
+   "ownUserNs": true,
+   "ownPidNs": true
+  },
+  {
+   "type": "renderer",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "2",
+   "seccompFilters": "1",
+   "userNs": "user:[4026532319]",
+   "pidNs": "pid:[4026532265]",
+   "ownUserNs": true,
+   "ownPidNs": true
+  },
+  {
+   "type": "renderer",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "2",
+   "seccompFilters": "1",
+   "userNs": "user:[4026532319]",
+   "pidNs": "pid:[4026532321]",
+   "ownUserNs": true,
+   "ownPidNs": true
+  },
+  {
+   "type": "browser",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "browser",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "browser",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "zygote",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "zygote",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026532319]",
+   "pidNs": "pid:[4026532267]",
+   "ownUserNs": true,
+   "ownPidNs": true
+  },
+  {
+   "type": "zygote",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026532319]",
+   "pidNs": "pid:[4026532267]",
+   "ownUserNs": true,
+   "ownPidNs": true
+  },
+  {
+   "type": "gpu-process",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "utility",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "0",
+   "seccompFilters": "0",
+   "userNs": "user:[4026531837]",
+   "pidNs": "pid:[4026531836]",
+   "ownUserNs": false,
+   "ownPidNs": false
+  },
+  {
+   "type": "utility",
+   "noSandboxFlag": false,
+   "uid": "65534",
+   "seccomp": "2",
+   "seccompFilters": "1",
+   "userNs": "user:[4026532319]",
+   "pidNs": "pid:[4026532320]",
+   "ownUserNs": true,
+   "ownPidNs": true
+  }
+ ]
+}

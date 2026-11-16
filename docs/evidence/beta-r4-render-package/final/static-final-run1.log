@@ -1,0 +1,27 @@
+# FINAL static checks on the committed files: clean checkout of 405f06f924813516416243570fe1692f5120ca31, 2026-11-16T15:31:29Z
+## 1. runtime files: git diff --stat 7097ac2bb062925bb296a129f4771f1e68fd522d HEAD -- src apps content package.json package-lock.json tsconfig.json tsconfig.build.json scripts/release vite/web config (empty = unchanged)
+(end of diff)
+## 2. pack this commit (node v22.23.4) and compute its inventory
+The working tree has uncommitted changes; commit them, or pass --allow-dirty for a local try.
+cat: <scratch>/r4final/pack/release.json: No such file or directory
+/bin/bash: line 11: cd: <scratch>/r4final/pack: No such file or directory
+inventory files: 0, digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cmp: EOF on <scratch>/r4final/inv.txt which is empty
+## 3. the reviewed scripts
+cgn-entrypoint.sh: OK
+cgn-backup.sh: OK
+cgn-authorize.sh: OK
+cgn-entrypoint.sh = the round-5 evidence file, byte for byte
+cgn-backup.sh = the round-5 evidence file, byte for byte
+cgn-authorize.sh = the round-5 evidence file, byte for byte
+cgn-receive.sh = the round-5 evidence file
+## 4. lint (the gate's eslint config) on the new scripts
+eslint scripts/beta: exit 0
+shell syntax: ok
+## 5. relative links in the new and changed documents
+links: 30 missing: 0
+## 6. no secret material committed
+HEAD:docs/evidence/beta-r4-render-package/harness/image-checks.sh.txt:123:( umask 077; printf 'MCHEZO_BETA_ACCESS_CODE=%s\n' "$CODE" > "$SECRETS/code.env" )
+HEAD:docs/evidence/beta-r4-render-package/harness/image-checks.sh.txt:158:guard C8b "an older access code exits 78" -e MCHEZO_BETA_ACCESS_CODE=an-older-code-0000000000
+HEAD:scripts/beta/w1-selftest.sh:51:( umask 077; od -An -N18 -tx1 /dev/urandom | tr -d ' \n' > "$WK/code"; printf 'MCHEZO_BETA_ACCESS_CODE=%s\n' "$(cat "$WK/code")" > "$WK/code.env" )
+(end of secret scan)

@@ -1,0 +1,132 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.82kB done
+#1 DONE 0.0s
+
+#2 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] load metadata for local/cgn-test-node-ca:22.16.0
+#2 DONE 0.0s
+
+#3 [context golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6] load metadata for local/cgn-test-golang-ca:1.24.4
+#3 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/node:22.16.0-bookworm-slim@sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34
+#4 DONE 0.0s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 447B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 DONE 0.0s
+
+#7 [runtime  1/10] FROM docker.io/library/node:22.16.0-bookworm-slim@sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34
+#7 resolve docker.io/library/node:22.16.0-bookworm-slim@sha256:048ed02c5fd52e86fda6fbd2f6a76cf0d4492fd6c6fee9e2c463ed5108da0e34 0.0s done
+#7 CACHED
+
+#8 [context golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6] local/cgn-test-golang-ca:1.24.4
+#8 resolve docker.io/local/cgn-test-golang-ca:1.24.4
+#8 ...
+
+#9 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] local/cgn-test-node-ca:22.16.0
+#9 resolve docker.io/local/cgn-test-node-ca:22.16.0 0.6s done
+#9 DONE 0.6s
+
+#9 [context node:22.16.0-bookworm@sha256:71bcbb3b215b3fa84b5b167585675072f4c270855e37a599803f1a58141a0716] local/cgn-test-node-ca:22.16.0
+#9 CACHED
+
+#8 [context golang:1.24.4-bookworm@sha256:10f549dc8489597aa7ed2b62008199bb96717f52a8e8434ea035d5b44368f8a6] local/cgn-test-golang-ca:1.24.4
+#8 resolve docker.io/local/cgn-test-golang-ca:1.24.4 0.6s done
+#8 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 1.23MB 0.0s done
+#6 DONE 0.0s
+
+#10 [age 1/3] COPY pins/age.sha256 /pins/age.sha256
+#10 DONE 0.1s
+
+#11 [gate 1/5] COPY pins/ /gate/pins/
+#11 DONE 0.1s
+
+#12 [gate 2/5] COPY cgn-artifact-gate.sh cgn-entrypoint.sh cgn-backup.sh cgn-authorize.sh /gate/
+#12 DONE 0.0s
+
+#13 [age 2/3] RUN go install filippo.io/age/cmd/age@v1.2.1  && cd /go/bin && sha256sum -c --strict /pins/age.sha256  && ./age --version
+#13 ...
+
+#14 [gate 3/5] COPY artifact/ /gate/artifact/
+#14 DONE 0.0s
+
+#15 [gate 4/5] RUN sh /gate/cgn-artifact-gate.sh gate /gate /out/app
+#15 0.093 cgn-entrypoint.sh: OK
+#15 0.093 cgn-backup.sh: OK
+#15 0.093 cgn-authorize.sh: OK
+#15 0.106 mchezo-7097ac2.tgz: OK
+#15 0.114 artifact-gate: archive: e57380943f7bf8c0e9e83da565b4fcc4eb4d2f3ec0a3802ea5a9acb2ce95fe52 (the pinned SHA-256)
+#15 0.190 artifact-gate: listing: 163 entries, files and folders only, no absolute path, no '..', no duplicate
+#15 0.253 artifact-gate: inventory: 144 files, SHA-256 fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c (the pinned one)
+#15 0.287 artifact-gate: release.json: revision 7097ac2bb062925bb296a129f4771f1e68fd522d, node v22.16.0, built 2026-11-16T05:22:33.807Z
+#15 1.423 
+#15 1.423 added 2 packages in 1s
+#15 1.425 npm notice
+#15 1.425 npm notice New major version of npm available! 10.9.2 -> 12.2.2
+#15 1.425 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+#15 1.425 npm notice To update run: npm install -g npm@12.2.2
+#15 1.425 npm notice
+#15 1.530 artifact-gate: runtime packages: ws@8.22.1 zod@3.25.76, nothing else
+#15 1.542 ARTIFACT_GATE_OK archive=e57380943f7bf8c0e9e83da565b4fcc4eb4d2f3ec0a3802ea5a9acb2ce95fe52 revision=7097ac2bb062925bb296a129f4771f1e68fd522d inventory=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c deps="ws@8.22.1 zod@3.25.76"
+#15 DONE 1.6s
+
+#13 [age 2/3] RUN go install filippo.io/age/cmd/age@v1.2.1  && cd /go/bin && sha256sum -c --strict /pins/age.sha256  && ./age --version
+#13 0.164 go: downloading filippo.io/age v1.2.1
+#13 0.304 go: downloading golang.org/x/crypto v0.24.0
+#13 0.304 go: downloading golang.org/x/term v0.21.0
+#13 0.359 go: downloading filippo.io/edwards25519 v1.1.0
+#13 0.495 go: downloading golang.org/x/sys v0.21.0
+#13 11.49 age: OK
+#13 11.49 v1.2.1
+#13 DONE 11.6s
+
+#16 [runtime  2/10] COPY --from=age /go/bin/age /usr/local/bin/age
+#16 DONE 0.0s
+
+#17 [runtime  3/10] COPY --from=gate /out/app /app
+#17 DONE 0.2s
+
+#18 [runtime  4/10] COPY --from=gate /gate/pins/ /usr/local/share/cgn/pins/
+#18 DONE 0.0s
+
+#19 [runtime  5/10] COPY --from=gate /gate/cgn-artifact-gate.sh /usr/local/share/cgn/cgn-artifact-gate.sh
+#19 DONE 0.0s
+
+#20 [runtime  6/10] COPY --from=gate /gate/cgn-entrypoint.sh /usr/local/bin/cgn-entrypoint
+#20 DONE 0.0s
+
+#21 [runtime  7/10] COPY --from=gate /gate/cgn-backup.sh /usr/local/bin/cgn-backup
+#21 DONE 0.0s
+
+#22 [runtime  8/10] COPY --from=gate /gate/cgn-authorize.sh /usr/local/bin/cgn-authorize
+#22 DONE 0.0s
+
+#23 [runtime  9/10] RUN set -eu  && chmod 0755 /usr/local/bin/age /usr/local/bin/cgn-entrypoint /usr/local/bin/cgn-backup /usr/local/bin/cgn-authorize /usr/local/share/cgn/cgn-artifact-gate.sh  && sh /usr/local/share/cgn/cgn-artifact-gate.sh installed /app  && [ "$(age --version)" = "v1.2.1" ]  && for c in age tar sha256sum timeout mv find grep od sed tr stat date cut ls sleep mkdir rm; do command -v "$c" >/dev/null || { echo "missing $c" >&2; exit 1; }; done  && groupadd --gid 10001 cgn  && useradd --uid 10001 --gid cgn --home-dir /home/cgn --create-home --shell /bin/bash cgn  && usermod -p '*' cgn  && install -d -m 0700 -o cgn -g cgn /home/cgn/.ssh  && install -d -m 0700 -o cgn -g cgn /var/data  && [ -z "$(find /app -perm /022 ! -type l | head -1)" ] && [ -z "$(find /app ! -user root | head -1)" ]
+#23 0.160 artifact-gate: inventory: 144 files, SHA-256 fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c (the pinned one)
+#23 0.189 artifact-gate: release.json: revision 7097ac2bb062925bb296a129f4771f1e68fd522d, node v22.16.0, built 2026-11-16T05:22:33.807Z
+#23 0.243 artifact-gate: runtime packages: ws@8.22.1 zod@3.25.76, nothing else
+#23 0.248 INSTALLED_OK revision=7097ac2bb062925bb296a129f4771f1e68fd522d inventory=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c deps="ws@8.22.1 zod@3.25.76" node=v22.16.0
+#23 DONE 0.3s
+
+#24 [runtime 10/10] WORKDIR /app
+#24 DONE 0.0s
+
+#25 exporting to image
+#25 exporting layers
+#25 exporting layers 0.5s done
+#25 exporting manifest sha256:74417c4eb0eb877fb16609467ce45309d9ab8ad94e38710f5a9317661db62598 done
+#25 exporting config sha256:b1aeb7b14e7931f0f9c2db8623baaa65647669d884d649660777dda4b0932c41 done
+#25 exporting attestation manifest sha256:3ecbeba66f6bd8937dc4674455d5345f57a2d667feb7a6353afdf1d51b0a28d3 done
+#25 exporting manifest list sha256:b21a4ee4d9c99f7fd015795fa92f2d481ebe9421749a6101c164470d0e49c48e done
+#25 naming to docker.io/library/cgn-render:g12 done
+#25 unpacking to docker.io/library/cgn-render:g12
+#25 unpacking to docker.io/library/cgn-render:g12 0.3s done
+#25 DONE 0.8s

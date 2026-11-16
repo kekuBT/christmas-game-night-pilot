@@ -1,0 +1,37 @@
+Mchezo gate targeted | run 20261115-202859-23abfbc4-28428
+  revision 23abfbc49697212ce1bd7e7cf8dbdabd597bf209 (clean tree) | fingerprint 20e54e527846 (625 files)
+  plan     8 steps: 1 fast/build, 6 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  246 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 215 run(s))
+  estimate this run: 31–78s (measured) · the same steps one after another: about 1m 54s · longest step check-one-path ~39s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brrt1/test-results/20261115-202859-23abfbc4-28428
+        start build-web on w1 (usually 6s)
+[ 1/8] PASS         5.5s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/8] PASS         0.8s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:45177 (pid 28545, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brrt1/test-results/20261115-202859-23abfbc4-28428/server-data/w1)
+  server   w2 http://localhost:45775 (pid 28546, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brrt1/test-results/20261115-202859-23abfbc4-28428/server-data/w2)
+  server   w3 http://localhost:44775 (pid 28547, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brrt1/test-results/20261115-202859-23abfbc4-28428/server-data/w3)
+        start check-one-path on w1 (usually 39s)
+        start check-lobby-mode on w2 (usually 21s)
+        start check-readiness on w3 (usually 19s)
+[ 3/8] PASS        21.3s  check-readiness  w3
+        start check-release-package on w3 (usually 15s)
+[ 4/8] PASS        25.2s  check-lobby-mode  w2
+        start check-official-practice on w2 (usually 11s)
+[ 5/8] PASS        12.5s  check-official-practice  w2
+        start check-beta-gate on w2 (usually 3s)
+[ 6/8] PASS         2.6s  check-beta-gate  w2
+[ 7/8] PASS        42.7s  check-one-path  w1
+[ 8/8] PASS        21.5s  check-release-package  w3
+
+PASSED (exit 0) | targeted | run 20261115-202859-23abfbc4-28428
+  8 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 51s · step time 2m 12s (sum) · 3 workers, 87% busy · 2.59× the same steps run one after another
+           predicted 32–77s (about 41s, measured) → actual 51s (+24%)
+           longest  check-one-path 43s, check-lobby-mode 25s, check-release-package 22s · the longest step is 84% of the wall time
+           machine  CPU mean 66%, peak 97% · memory available ≥ 13411 MB · load peak 3.39
+           contention ×1.152 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/brrt1/test-results/20261115-202859-23abfbc4-28428/report.json

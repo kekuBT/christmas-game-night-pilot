@@ -1,0 +1,131 @@
+== drill started 2026-11-16T13:36:40Z; repo 852b955306ccd89dcb31ef752b69e08c12cbc3ed (0 uncommitted paths); node v22.23.4; age 1.1.1
+== runtime vs 7097ac2: 0 files differ
+== production mode: NODE_ENV=production, access code set (not printed), public origin http://127.0.0.1:41842, data /tmp/cgn-r4drill-8xZMZm/var/data/cgn
+== E1 the entrypoint starts the server
+PASS E1 /health 200 under cgn-entrypoint (pid 2905), server pid 2911
+PASS E1 production gate: the API refuses a request without the access cookie (401)
+PASS E1 with no data and no authorized configuration, the entrypoint starts and says it is a first install
+== A1 the owner's configuration is recorded (after the acceptance checks)
+   AUTHORIZED data_dir=/tmp/cgn-r4drill-8xZMZm/var/data/cgn public_origin=http://127.0.0.1:41842 trust_proxy=unset (the access code is kept only as a salted hash)
+PASS A1 recorded privately (mode 600); the access code itself is not in it
+== N1 a backup without --allow-running is refused while the server runs
+   datatool exit 1: A server (pid 2911) is using /tmp/cgn-r4drill-8xZMZm/var/data/cgn. Stop it first (between sessions), or pass --allow-running: each file is still copied whole, but a room and its Memory Book may then be a moment apart.
+PASS N1 refused (exit 1), nothing written
+== N3 a preflight failure stops nothing
+   cgn-backup exit 1: BACKUP_FAILED: CGN_BACKUP_RECIPIENT is not an age public key (age1...)
+PASS N3 BACKUP_FAILED before any stop: same server pid 2911 still serving, no hold, no BACKUP_OK
+== P1 a backup during live play: stop, locked copy, verify, restart, encrypt
+   cgn-backup: stopping the server (pid 2911)
+   cgn-backup: server stopped
+   backup OK: 2 room(s), 2 Memory Book(s), 6 file(s), verified
+   verify OK: 6 file(s) match the manifest of 2026-11-16T13:36:46.513Z
+   cgn-backup: hold released after 0 s; the entrypoint restarts the server
+   BACKUP_OK /tmp/cgn-r4drill-8xZMZm/var/data/backups/cgn-20261116T133646Z.tar.age sha256=86ff095a191a79b8eb9d628920107ed7860b9177ee55a20f04dde01ee71e0989 server_stopped_s=0
+   monitor: hold seen, server 2911 gone at +21 ms, 6 data files hashed, new server 3041 after 1006 ms
+   play: 2 rooms x 5 players + TV; a warm-up Trivia finished in each; a second Trivia playing; 12 sockets
+   play: 20/20 Memory Book notes acknowledged (2 needed a retry)
+   play: 100/100 answers acknowledged (10 needed a retry); sockets reconnected: 12/12; open at the end: 12; errors: 0
+PASS P1 cgn-backup exit 0 with BACKUP_OK and an archive
+PASS P1 live play finished without errors (exit 0)
+PASS P1 the archive's SHA-256 matches the BACKUP_OK line
+PASS P1 the archive holds no plaintext (no join code, no field names)
+PASS P1 another key can't decrypt it
+PASS P1 the owner's key decrypts and unpacks it
+   verify OK: 6 file(s) match the manifest of 2026-11-16T13:36:46.513Z
+PASS P1 datatool verify on the owner's copy
+   PASS the manifest records a stopped server (serverWasRunning: false)
+   PASS the copy is exactly the data folder as it was once the server had stopped (6 files, every SHA-256 equal)
+   PASS play was live on both sides of the backup: 45 answers acknowledged before the stop, 45 first sent after the restart
+   PASS every answer acknowledged before the stop is in the backup (45/45)
+   PASS no answer first sent after the restart is in the backup (0 found)
+   PASS no answer was acknowledged while the server was stopped (0)
+   PASS after play, every one of the 100 answers was acknowledged and is in the live data (100)
+   PASS every answer retried across the stop (10) got a definite reply after the restart: {"accepted":10}
+   PASS Memory Books changed on both sides of the backup too: 2 book file(s) in the copy; 8 notes acknowledged before the stop, 10 first sent after the restart
+   PASS every Memory Book note acknowledged before the stop is in the backup (8/8)
+   PASS no note first sent after the restart is in the backup (0 found)
+   PASS after play, every one of the 20 notes was acknowledged and is in the live data
+   PASS every socket (12) dropped at the stop, reconnected after the restart (reconnects: 1,1,1,1,1,1,1,1,1,1,1,1) and was open at the end (12)
+   PASS the server was down for 1006 ms (limit 10 s; Render restarts an instance after 60 s of failed health checks)
+   CHECK PASSED
+PASS P1 consistency checks (below the line above)
+   mutated: removed player-1's answer to trv-lite-047
+   caught: FAIL every answer acknowledged before the stop is in the backup (44/45)
+PASS C-drop-acked the checker fails on a backup damaged this way (exit 1)
+   mutated: added player-1's later answer to trv-geog-029
+   caught: FAIL no answer first sent after the restart is in the backup (1 found)
+PASS C-add-later the checker fails on a backup damaged this way (exit 1)
+   mutated: one space added to room-mwjb4sh8-564365.book.json
+FAIL C-flip-byte the checker fails on a backup damaged this way (exit 0)
+PASS P1 the entrypoint restarted the server (pid 2911 -> 3041); /health 200
+PASS P1 the entrypoint held the server during the backup
+== N4 a failure after the stop: the copy times out
+   cgn-backup: stopping the server (pid 3041)
+   cgn-backup: server stopped
+   BACKUP_FAILED: datatool backup failed or timed out
+PASS N4 BACKUP_FAILED (exit 1), no BACKUP_OK, hold released, server back (/health 200); new entries: 
+PASS N4 no partial copy was left
+PASS N4 no archive was made
+== R restore the owner's copy into a NEW folder, check it, then switch the server to it (re-authorized first)
+   restore OK: 2 room(s), 2 Memory Book(s) restored and verified. Next, as the user the server runs as: datatool check --data /tmp/cgn-r4drill-8xZMZm/var/data/cgn-restored-20261116T133646Z
+PASS R datatool restore into a new folder
+   check OK: 2 room(s), 2 Memory Book(s); owned by this user (uid 0) and private; the lock and a test write worked. A server run by this user can use it.
+PASS R datatool check of the restored folder
+   restored files matching the manifest: 6/6
+PASS R every restored file equals the backup
+   AUTHORIZED data_dir=/tmp/cgn-r4drill-8xZMZm/var/data/cgn-restored-20261116T133646Z public_origin=http://127.0.0.1:41842 trust_proxy=unset (the access code is kept only as a salted hash)
+PASS R SIGTERM to the entrypoint (as Render sends it) stops the server gracefully (exit 0)
+PASS R the server starts on the restored folder (as a changed MCHEZO_DATA_DIR and a redeploy would)
+PASS R the entrypoint confirmed the authorized configuration
+   room room-mwjb4sh8-564365: 200, trivia finished
+   room room-mwjb4squ-295511: 200, trivia finished
+PASS R each room comes back on the restored server, and its host's saved session still works
+== G the rollback guard: an old environment fails closed
+   cgn-entrypoint: REFUSED: MCHEZO_DATA_DIR is not the authorized data folder (a rollback brings back old environment values)
+PASS G1 a deploy with the previous data folder (as a one-click rollback would bring back) refuses to start (exit 78)
+   cgn-entrypoint: REFUSED: the access code is not the authorized one
+PASS G2 a deploy with an older access code refuses to start (exit 78)
+   cgn-entrypoint: REFUSED: MCHEZO_TRUST_PROXY is not the authorized proxy count
+PASS G3 a deploy with another proxy count refuses to start (exit 78)
+   cgn-entrypoint: REFUSED: data exists in /tmp/cgn-r4drill-8xZMZm/var/data/cgn-restored-20261116T133646Z but no authorized configuration is recorded at /tmp/cgn-r4drill-8xZMZm/var/data/cgn-authorized.conf
+PASS G4 data present but no record: refuses to start (exit 78)
+== N2 a server can't start while the backup holds the lock
+   serve.js exit 2: A backup (datatool backup) (pid 3379) is using this data directory (/tmp/cgn-r4drill-8xZMZm/var/data/cgn-restored-20261116T133646Z). Wait for it to finish: one process writes a data directory at a time.
+PASS N2 the server refused to start (exit 2) while the lock was held
+== N5 a server that doesn't stop: no backup, and the instance restarts
+   cgn-backup: stopping the server (pid 3424)
+   BACKUP_FAILED: the server did not stop within 10 s
+PASS N5 BACKUP_FAILED after 10 s, no BACKUP_OK, hold released
+   received SIGTERM, closing server
+   cgn-entrypoint: server exited (0) with no hold; exiting so the platform restarts the instance
+PASS N5 the pending SIGTERM then stopped the server, and the entrypoint exited (0) for the platform to restart the instance
+== entrypoint log
+   cgn-entrypoint: WARNING first install: no authorized configuration yet and no data; run cgn-authorize after the acceptance checks
+   Christmas Game Night server on http://localhost:41842 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:41842.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   [restore] 2 room(s) restored, 0 not loaded (data: /tmp/cgn-r4drill-8xZMZm/var/data/cgn)
+   Christmas Game Night server on http://localhost:41842 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:41842.
+   received SIGTERM, closing server
+   cgn-entrypoint: server stopped for a backup (exit 0); holding until the backup ends
+   [restore] 2 room(s) restored, 0 not loaded (data: /tmp/cgn-r4drill-8xZMZm/var/data/cgn)
+   Christmas Game Night server on http://localhost:41842 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:41842.
+   received SIGTERM, closing server
+   cgn-entrypoint: stopped on request
+   cgn-entrypoint: the environment matches the authorized configuration
+   [restore] 2 room(s) restored, 0 not loaded (data: /tmp/cgn-r4drill-8xZMZm/var/data/cgn-restored-20261116T133646Z)
+   Christmas Game Night server on http://localhost:41842 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:41842.
+   received SIGTERM, closing server
+   cgn-entrypoint: stopped on request
+   cgn-entrypoint: the environment matches the authorized configuration
+   [restore] 2 room(s) restored, 0 not loaded (data: /tmp/cgn-r4drill-8xZMZm/var/data/cgn-restored-20261116T133646Z)
+   Christmas Game Night server on http://localhost:41842 (web app at / after npm run build:web)
+   Listening on 127.0.0.1; public origin http://127.0.0.1:41842.
+   received SIGTERM, closing server
+   cgn-entrypoint: server exited (0) with no hold; exiting so the platform restarts the instance
+== drill finished 2026-11-16T13:37:09Z: 35 passed, 1 failed
+DRILL FAILED (exit 1)

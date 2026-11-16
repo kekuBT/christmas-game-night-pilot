@@ -1,0 +1,116 @@
+prefix /srv/cgn-r2-drill-20261116T054917Z · node v22.16.0 · npm 10.9.2 · caddy 2.6.2 · revision 7097ac2bb062925bb296a129f4771f1e68fd522d
+
+== A. The artifact: verify the recorded hash, unpack, inventory, runtime install
+cgn-7097ac2bb062925bb296a129f4771f1e68fd522d.tgz: OK
+PASS A1 sha256sum matches the recorded hash
+PASS A2 unpacked into releases/<sha>
+{
+  "revision": "7097ac2bb062925bb296a129f4771f1e68fd522d",
+  "builtAt": "2026-11-16T05:21:48.125Z",
+  "node": "v22.16.0"
+}
+PASS A3 release.json names the revision, no -dirty — 7097ac2bb062925bb296a129f4771f1e68fd522d
+PASS A4 the file inventory's digest matches the recorded one — fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c
+added 2 packages in 892ms
+PASS A5 npm ci --omit=dev --ignore-scripts — exit 0
+PASS A6 only ws and zod installed — +-- ws@8.22.1 `-- zod@3.25.76  
+
+== B. First install: the service user, private folders, settings, check, start
+PASS B1 the service user — useradd exit 0; created: user 1, group 1
+700 cgn:cgn /srv/cgn-r2-drill-20261116T054917Z/var/lib/christmas-game-night
+700 root:root /srv/cgn-r2-drill-20261116T054917Z/var/backups/christmas-game-night
+750 root:cgn /srv/cgn-r2-drill-20261116T054917Z/etc/christmas-game-night
+640 root:cgn /srv/cgn-r2-drill-20261116T054917Z/etc/christmas-game-night/env
+PASS B2 data 0700 cgn, backups 0700 root, settings 0640 root:cgn
+PASS B3 another user can't read the settings (they hold the code)
+PASS B4 current -> releases/<sha>
+check OK: 0 room(s), 0 Memory Book(s); owned by this user (uid 996) and private; the lock and a test write worked. A server run by this user can use it.
+PASS B5 datatool check as cgn on the empty folder — check OK: 0 room(s), 0 Memory Book(s); owned by this user (uid 996) and private; the lock and a test write worked. A server run by this user can use it.
+PASS B6 the server starts as cgn (production settings accepted)
+Christmas Game Night server on http://localhost:3907 (web app at / after npm run build:web)
+Listening on 127.0.0.1; public origin https://beta.test:18443.
+PASS B7 the start line
+PASS B8 an empty first install prints no [restore] line (the runbook used to promise '0 room(s) restored')
+awk: cannot open "/proc/net/tcp6" (No such file or directory)
+listening sockets on 3907: 0100007F:0F43 
+PASS B9 the server listens on 127.0.0.1 only (/proc/net/tcp) — 0100007F:0F43 
+
+== C. The HTTPS proxy: the runbook's Caddy site block, with a local CA because this name isn't public
+{"level":"info","ts":1794808161.5361037,"logger":"tls.cache.maintenance","msg":"stopped background certificate maintenance","cache":"0xc000242700"}
+Valid configuration
+PASS C1 caddy validate accepts the runbook's example site block (+ maintenance page)
+{"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+PASS C2 Caddy serves https://beta.test:18443, its certificate verified against its own root (curl exit 0, the expected body) — curl exit 0
+health: HTTP 200 {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+PASS /health over HTTPS (certificate verified) names the revision, and nothing else — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+PASS the proxy adds HSTS — max-age=31536000
+PASS without the cookie the API is refused (401 BETA_ACCESS_REQUIRED) — HTTP 401
+PASS a wrong code is refused (401) and sets no cookie — HTTP 401
+PASS the right code: 303 back to the page asked for, a Secure HttpOnly cookie that isn't the code — HTTP 303 → /?join=ABCD
+PASS with the cookie the app page loads — HTTP 200
+PASS a foreign Origin is refused even with the cookie (403) — HTTP 403
+PASS a room is created through the proxy — HTTP 201
+PASS host and guest join — 201/201
+PASS the room has both players — Guest Drill,Host Drill
+PASS a wss:// socket through the proxy opens and gets a live message — first message 1432 bytes
+client play: PASSED
+PASS C3 through the proxy: /health, HSTS, the gate, a room, wss://
+
+== D. Restart with persistence
+PASS D1 SIGTERM stops it cleanly (exit 0) — exit 0
+PASS D2 the lock record is gone
+Christmas Game Night is updating. Back in a few minutes. HTTP 503
+PASS D3 while stopped, the proxy's maintenance page (503) — Christmas Game Night is updating. Back in a few minutes. HTTP 503
+600 cgn room-mwiufsza-630524.json
+600 cgn room-mwiufsza-630524.json.prev
+PASS D4 every data file belongs to cgn and is private (UMask 0077)
+PASS D5 started again
+[restore] 1 room(s) restored, 0 not loaded (data: /srv/cgn-r2-drill-20261116T054917Z/var/lib/christmas-game-night)
+PASS D6 the restore line: 1 room restored, 0 not loaded
+health: HTTP 200 {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+PASS /health over HTTPS (certificate verified) names the revision, and nothing else — {"ok":true,"revision":"7097ac2bb062925bb296a129f4771f1e68fd522d"}
+PASS the proxy adds HSTS — max-age=31536000
+PASS after the restart, the same room with both players (cookie still valid) — Guest Drill,Host Drill
+PASS after the restart, wss:// opens again — first message 1542 bytes
+client after-restart: PASSED
+PASS D7 the room and the cookie survive the restart
+
+== E. Backup (server stopped, as root) and restore into an isolated folder as the service user
+PASS E1 stopped for the backup
+backup OK: 1 room(s), 0 Memory Book(s), 2 file(s), verified
+PASS E2 backup OK, 1 room
+PASS E3 the backup is root's, 0700/0600 — 700 root
+PASS E4 the service user can't read the backup
+verify OK: 2 file(s) match the manifest of 2026-11-16T05:49:23.005Z
+PASS E5 verify
+restore OK: 1 room(s), 0 Memory Book(s) restored and verified, owned by cgn. Next, as the user the server runs as: datatool check --data /srv/cgn-r2-drill-20261116T054917Z/var/lib/christmas-game-night-restored-20261116
+PASS E6 restore into a new folder with --owner cgn
+check OK: 1 room(s), 0 Memory Book(s); owned by this user (uid 996) and private; the lock and a test write worked. A server run by this user can use it.
+PASS E7 check as cgn on the restored folder
+/srv/cgn-r2-drill-20261116T054917Z/var/lib/christmas-game-night is not empty: restore goes into a new folder and never overwrites data.
+PASS E8 restore refuses the live (non-empty) folder — exit 1
+[restore] 1 room(s) restored, 0 not loaded (data: /srv/cgn-r2-drill-20261116T054917Z/var/lib/christmas-game-night-restored-20261116)
+PASS E9 the restore drill's server (port 3999, as cgn) loads the room
+PASS E10 the drill server stops cleanly
+PASS E11 the drill copy is removed
+PASS E12 the live data is byte-for-byte unchanged by backup and restore
+
+== F. First-install stop (no previous package to roll back to)
+PASS F1 running again before the stop
+PASS F2 stopped and kept stopped (the runbook's 'systemctl disable --now')
+total 16
+drwx------ 2 cgn  cgn  4096 Nov 16 05:49 .
+drwxr-xr-x 3 root root 4096 Nov 16 05:49 ..
+-rw------- 1 cgn  cgn  1833 Nov 16 05:49 room-mwiufsza-630524.json
+-rw------- 1 cgn  cgn  1443 Nov 16 05:49 room-mwiufsza-630524.json.prev
+PASS F3 the data is untouched
+Christmas Game Night is updating. Back in a few minutes. HTTP 503
+PASS F4 the site shows the maintenance page while stopped
+
+== G. The service unit from the architecture page (syntax only: no systemd as PID 1 here)
+christmas-game-night.service: Command /usr/bin/node is not executable: No such file or directory
+PASS G1 systemd-analyze verify: no complaint other than the host paths this machine lacks — exit 1, other lines: 0
+
+preflight drill: 42 passed, 0 failed
+PREFLIGHT DRILL PASSED
+cleanup: removed only what this run created (user 1, group 1, prefix 1)

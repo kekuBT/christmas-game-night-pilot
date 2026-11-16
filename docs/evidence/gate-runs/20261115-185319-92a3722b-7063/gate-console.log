@@ -1,0 +1,66 @@
+Mchezo gate targeted | run 20261115-185319-92a3722b-7063
+  revision 92a3722b2dcf61076cc09636bd63e01777c91a3d (clean tree) | fingerprint d38a195b117d (622 files)
+  plan     12 steps: 1 fast/build, 10 browser drivers, 1 other (E2E, fixtures, preflight) · 3 workers (auto: 4 CPUs, 15.0 GB available)
+  history  241 local run(s) in /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/bench/timing-history.jsonl + committed baseline (2026-11-10) · contention ×1.06 for 3 worker(s) (measured, 210 run(s))
+  estimate this run: 5–14m (measured) · the same steps one after another: about 10m 37s · longest step check-f5 ~7m 08s
+  method   each step's median (p10–p90 for the range) over up to 10 earlier sequential runs, ×1.06 contention, replayed through the scheduler (exclusive steps first, then longest first)
+  results  /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t4/test-results/20261115-185319-92a3722b-7063
+        start build-web on w1 (usually 6s)
+[ 1/12] PASS         5.3s  build-web  w1
+        start browser-preflight on w1 (usually 1s)
+[ 2/12] PASS         0.6s  browser-preflight  w1
+  browser  chrome-headless-shell 153.0.8010.12 (MCHEZO_CHROMIUM_PATH)
+  server   w1 http://localhost:38243 (pid 7196, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t4/test-results/20261115-185319-92a3722b-7063/server-data/w1)
+  server   w2 http://localhost:38161 (pid 7197, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t4/test-results/20261115-185319-92a3722b-7063/server-data/w2)
+  server   w3 http://localhost:40741 (pid 7198, data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t4/test-results/20261115-185319-92a3722b-7063/server-data/w3)
+        start check-f5 on w1 (usually 7m 08s)
+        start check-quick-party on w2 (usually 46s)
+        start check-one-path on w3 (usually 39s)
+[ 3/12] PASS        41.1s  check-one-path  w3
+        start check-cup-party on w3 (usually 32s)
+── progress  3/12 done · 3 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 1m 00s
+   running   check-f5 53s (w1), check-quick-party 53s (w2), check-cup-party 11s (w3)
+   remaining 4–13m · total 5–14m · done around 18:59–19:06 UTC (measured)
+[ 4/12] PASS        32.9s  check-cup-party  w3
+        start check-lobby-mode on w3 (usually 20s)
+[ 5/12] PASS        81.1s  check-quick-party  w2
+        start check-readiness on w2 (usually 19s)
+[ 6/12] PASS        24.7s  check-lobby-mode  w3
+        start check-lobby-fixes on w3 (usually 17s)
+[ 7/12] PASS        20.4s  check-readiness  w2
+        start check-release-package on w2 (usually 15s)
+── progress  7/12 done · 7 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 2m 00s
+   running   check-f5 1m 53s (w1), check-lobby-fixes 14s (w3), check-release-package 11s (w2)
+   remaining 3–12m · total 5–14m · done around 18:59–19:06 UTC (measured)
+[ 8/12] PASS        15.5s  check-release-package  w2
+        start check-official-practice on w2 (usually 11s)
+[ 9/12] PASS        18.3s  check-lobby-fixes  w3
+        start check-beta-gate on w3 (usually 3s)
+[10/12] PASS         2.7s  check-beta-gate  w3
+[11/12] PASS         9.8s  check-official-practice  w2
+── progress  11/12 done · 11 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 3m 00s
+   running   check-f5 2m 53s (w1)
+   remaining 2–11m · total 5–14m · done around 18:59–19:06 UTC (measured)
+── progress  11/12 done · 11 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 4m 00s
+   running   check-f5 3m 53s (w1)
+   remaining 1–10m · total 5–14m · done around 18:59–19:06 UTC (measured)
+── progress  11/12 done · 11 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 5m 00s
+   running   check-f5 4m 53s (w1)
+   remaining 0–9m · total 5–14m · done around 18:59–19:06 UTC (measured)
+── progress  11/12 done · 11 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 6m 00s
+   running   check-f5 5m 53s (w1)
+   remaining 0–8m · total 6–14m · done around 19:00–19:06 UTC (measured)
+── progress  11/12 done · 11 passed, 0 failed, 0 timed out, 0 cancelled · elapsed 7m 00s
+   running   check-f5 6m 53s (w1)
+   remaining 1–7m · total 8–14m · done around 19:01–19:06 UTC (measured)
+[12/12] PASS       456.3s  check-f5  w1
+
+PASSED (exit 0) | targeted | run 20261115-185319-92a3722b-7063
+  12 passed, 0 failed, 0 timed out, 0 infrastructure, 0 invalid, 0 cancelled, 0 not run
+  timing   wall 7m 44s · step time 11m 49s (sum) · 3 workers, 51% busy · 1.53× the same steps run one after another
+           predicted 5–14m (about 7m 33s, measured) → actual 7m 44s (+2%)
+           longest  check-f5 7m 36s, check-quick-party 1m 21s, check-one-path 41s · the longest step is 98% of the wall time
+           machine  CPU mean 22%, peak 86% · memory available ≥ 13690 MB · load peak 4.2
+           contention ×1.062 (median step time vs its sequential median)
+           retries  none (the gate never retries a step)
+  report /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t4/test-results/20261115-185319-92a3722b-7063/report.json

@@ -1,0 +1,51 @@
+$ node scripts/check-release-package.mjs http://localhost:39861
+# timeout 600s | worker w1 | server http://localhost:39861 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1t1/test-results/20261115-173021-dd4580e3-12827/server-data/w1)
+
+[+13.7s] [33m
+[+13.7s] (!) Some chunks are larger than 500 kB after minification. Consider:
+[+13.7s] - Using dynamic import() to code-split the application
+[+13.7s] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[+13.7s] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[+13.7s] release dd4580e31d20b264b17b284faa5684942d3184a8 packed into /tmp/mz-release-pkg-1rEuov in 13.5 s
+[+13.7s] PASS P release.json names the checked-out revision — dd4580e31d20b264b17b284faa5684942d3184a8
+[+13.7s] PASS P the package holds only what runs — ["apps","content","dist","package-lock.json","package.json","release.json"]
+[+13.7s] PASS P no tests, scripts, docs, data, env files or source maps of tests in it
+[+13.7s] PASS P the server entry, the built app and the content are there
+[+13.7s] PASS P no approval records and no editorial pilot batches are shipped
+[+13.8s] PASS P no secret-shaped strings in any shipped file
+[+14.5s] 
+[+14.5s] added 2 packages in 689ms
+[+14.5s] PASS I the runtime install is ws and zod only — ["ws","zod"]
+[+14.7s] PASS S the package starts on plain node in production — port 44209
+[+14.7s] PASS S its output never shows the access code
+[+14.7s] PASS S a first start creates the missing data directory, private (0700) — 700
+[+14.8s] PASS S listening on 127.0.0.1 only: this machine's network address is refused — 192.0.2.2: ECONNREFUSED
+[+14.8s] PASS S /health names the revision and nothing else — {"ok":true,"revision":"dd4580e31d20b264b17b284faa5684942d3184a8"}
+[+14.8s] PASS S the app is behind the gate
+[+14.8s] PASS S the right code opens it (a Secure, HttpOnly cookie, since the public origin is https)
+[+14.8s] PASS S with the cookie: the built app and its files are served — /assets/index-DbYJ93KZ.js
+[+14.8s] PASS S a room is created and joined through the gate — 201/201
+[+14.8s] PASS S live updates are gated too: a WebSocket without the cookie is refused, with it it opens
+[+15.0s] PASS L a second server on the same data is refused, with the reason — Another server (pid 13323) is using this data directory (/tmp/mz-release-data-vBK1uJ/var-lib-cgn/server.lock). Stop it first: one server writes a data directory.
+[+15.0s] PASS L SIGTERM stops it cleanly and frees the lock — exit 0
+[+15.2s] PASS L after a restart the room is back, and the beta cookie still works — 200
+[+15.2s] PASS L a kill -9 leaves a stale lock behind
+[+15.5s] PASS L the next start takes the stale lock over, and the room survives the crash — [data] took over a stale lock left by a server that is no longer running (/tmp/mz-release-data-vBK1uJ/var-lib-cgn/server.lock)
+[+15.6s] PASS D a backup is refused while the server runs (stop it between sessions) — A server (pid 13348) is using /tmp/mz-release-data-vBK1uJ/var-lib-cgn. Stop it first (between sessions), or pass --allow-running: each file is still copied whole, but a room and its Memory Book may then be a moment apart.
+[+15.6s] PASS D with the server stopped: backup OK, verified — backup OK: 1 room(s), 0 Memory Book(s), 2 file(s), verified
+[+15.8s] PASS D restore into a new folder: OK — restore OK: 1 room(s), 0 Memory Book(s) restored and verified. Start a server with MCHEZO_DATA_DIR set to that folder.
+[+16.0s] PASS D a server on the restored folder serves the same room — 200
+[+16.1s] PASS D retention is a dry run by default and finds nothing recent to archive — 0 room(s) older than 30 days; dry run, nothing moved (add --apply)
+[+16.2s] PASS R refused: the content test mode (exit 2, with the reason) — MCHEZO_CONTENT_TEST_MODE is for tests only and is not allowed in production.
+[+16.4s] PASS R refused: no data dir (exit 2, with the reason) — In production MCHEZO_DATA_DIR must be an absolute path outside the release, so an update or rollback never touches the family's data.
+[+16.6s] PASS R refused: a relative data dir (exit 2, with the reason) — In production MCHEZO_DATA_DIR must be an absolute path outside the release, so an update or rollback never touches the family's data.
+[+16.7s] PASS R refused: a data dir inside the release (exit 2, with the reason) — MCHEZO_DATA_DIR (/tmp/mz-release-pkg-1rEuov/data) is inside the release (/tmp/mz-release-pkg-1rEuov). Put the data outside it, e.g. on its own volume.
+[+16.9s] PASS R refused: no public origin (exit 2, with the reason) — In production MCHEZO_PUBLIC_ORIGIN must be set to the site's public origin, e.g. https://games.example.org.
+[+17.1s] PASS R refused: no access code (exit 2, with the reason) — In production MCHEZO_BETA_ACCESS_CODE must be set (the private beta's access code), or MCHEZO_PUBLIC_ACCESS=open set on purpose.
+[+17.3s] PASS R refused: a short access code (exit 2, with the reason) — MCHEZO_BETA_ACCESS_CODE must be at least 12 characters.
+[+17.4s] PASS R refused: a trusted proxy with no listen address (exit 2, with the reason) — Behind a proxy (MCHEZO_TRUST_PROXY) MCHEZO_LISTEN_HOST must be set to where only the proxy reaches the server (127.0.0.1 when it runs on this machine). Otherwis
+[+17.4s] PASS R no refused start wrote into the release
+[+17.5s] cleanup: 13 process(es) stopped, 5 temporary dir(s) removed; still running: none; left on disk: none
+[+17.5s] RELEASE PACKAGE PASSED
+
+# PASS (exit 0) in 17.5s | cpu 19.6s, peak memory 668 MB

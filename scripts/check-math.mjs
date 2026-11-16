@@ -99,28 +99,21 @@ async function answerAll(page, picks) {
       }
       landed = await Promise.race([
         page.locator('main[aria-label="Answer locked in"]').waitFor({ timeout: 10000 }).then(() => "locked"),
+        // R5 (Beta R1-R): the last answer goes straight to "All your answers are in", with no continuation control.
+        page.locator('main[aria-label="All your answers are in"]').waitFor({ timeout: 10000 }).then(() => "waiting"),
         page.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 10000 }).then(() => "finished"),
       ]).catch(() => null);
     }
-    if (landed === "finished") return;
+    if (landed === "finished" || landed === "waiting") return;
     if (!landed) {
       const text = await page.evaluate(() => document.body.innerText.slice(0, 300));
       throw new Error(`no locked view after answering question ${i + 1}; page shows: ${JSON.stringify(text)}`);
     }
+    // A nonfinal locked view always offers Next question (R5); its absence is a failure, not a skip.
     const next = page.getByRole("button", { name: "Next question" });
-    if (await next.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await next.click();
-      await sleep(300);
-    } else {
-      // Last question: clear the locked view. Either the waiting ring
-      // appears ("All your answers are in") or, if this was the last
-      // answer the game needed, the results appear ("Back to lobby").
-      await page.getByRole("button", { name: "Waiting for the game to finish" }).click();
-      await Promise.race([
-        page.getByText("All your answers are in").waitFor({ timeout: 15000 }).then(() => "waiting"),
-        page.getByRole("button", { name: "Back to lobby" }).waitFor({ timeout: 15000 }).then(() => "results"),
-      ]);
-    }
+    if (!(await next.isVisible({ timeout: 2000 }).catch(() => false))) throw new Error(`the locked view after question ${i + 1} has no Next question`);
+    await next.click();
+    await sleep(300);
   }
 }
 

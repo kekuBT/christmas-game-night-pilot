@@ -2051,3 +2051,282 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
   - **Alternatives rejected:**
     - **Dropping legacy and computed statuses everywhere:** it changes other games' established policy, which this repair isn't for.
     - **Refusing to load a Split Clues item with an official-capable label:** it would silently shrink the Practice pool. Reporting the label and demoting the item keeps Practice and fails the content check.
+
+## Beta R1: readiness and a portable production package
+**Authorization:** the owner's priority update on #42, comment 6896572377 (2026-11-15, 10:05 a.m. ET; D-WF-01): deployment only conditionally, after readiness clearance, at $0. Plan: `docs/beta/beta-r1.md`. Matrix: `docs/beta/beta-r1-blockers.md`. Architecture: `docs/beta/beta-r1-architecture.md`. Process: `docs/beta/beta-r1-release.md`. Branch `claude/beta-r1-readiness`, stacked on #41's `1955c28`. Nothing is merged, deployed or provisioned; no host is chosen; no approval is manufactured.
+
+- **D-BR1-01 One package, built once from the cleared SHA, on plain node.**
+  - **What it is:** `scripts/release/pack.mjs` compiles `src/` only (`tsconfig.build.json`), builds the web app, and copies `content/` (without the editorial pilot batches) and the package files. It writes `release.json` with the revision, and refuses a dirty tree or an output folder inside the repository.
+  - **Install and start:** `npm ci --omit=dev` installs `ws` and `zod` only. Every build tool moved to `devDependencies`, with no version change. `npm start` runs `node dist/server/serve.js`.
+  - **Promotion:** the host gets the same tarball, by its recorded hash, and never rebuilds: builds aren't byte-for-byte reproducible, because the build time is recorded.
+  - **Alternatives rejected:**
+    - **`tsx` in production:** a development dependency, with the TypeScript toolchain on the host.
+    - **A container image:** it needs a registry, which depends on the host, and the host is ChatGPT's choice. The package fits in an image later unchanged.
+- **D-BR1-02 The family's data lives outside the release, written by one process.**
+  - **The data directory:** production refuses a missing, relative or inside-the-release `MCHEZO_DATA_DIR`.
+  - **The lock:** `server.lock` holds the owner's pid. A second live server is refused. A stale lock is taken over: a dead pid, an unreadable file, or this very pid (pid 1 in a container on every start).
+  - **B-08, found by the release drill:** the lock creates the directory first, private (0700), so a fresh host's first start works.
+  - **Not protected:** two hosts sharing a network volume, which is unsupported.
+  - **Alternatives rejected:**
+    - **`flock`:** needs a native addon in Node.
+    - **No lock:** a double start silently overwrites rooms that the other process holds in memory.
+- **D-BR1-03 A private-beta gate in the server, covering HTTP and WebSocket (provisional default).**
+  - **How it works:**
+    - One shared code from the environment, at least 12 characters, required in production unless `MCHEZO_PUBLIC_ACCESS=open` is set on purpose.
+    - The right code sets a 30-day cookie that holds an HMAC of the code: HttpOnly, SameSite=Lax, and Secure over HTTPS.
+    - Every page, API call and WebSocket handshake needs the cookie; only `/health` and the gate are open.
+    - Wrong codes are limited to 10 per address per 15 minutes.
+    - Changing the code signs every device out.
+  - **Provisional:** who may enter the beta, and how, is the owner's choice; the single shared code is a provisional default.
+  - **Alternatives rejected:**
+    - **Basic auth at the proxy:** proxy-specific, poorly handled by installed web apps and WebSocket handshakes on phones, and untested here.
+    - **Personal accounts:** a product change outside this slice.
+- **D-BR1-04 Request and socket hardening from the matrix:**
+  - **B-01:** WebSocket messages are capped at 64 KiB, like HTTP bodies.
+  - **B-06:** every server socket has an `error` listener, so one malformed frame closes that socket, never the process. This was the most serious finding, reproduced on `1955c28`.
+  - **B-02:** security headers on every response.
+  - **B-03:** a foreign `Origin` gets 403 when `MCHEZO_PUBLIC_ORIGIN` is set (required in production).
+  - **B-05:** behind `MCHEZO_TRUST_PROXY` hops, the client address is the entry our proxy appended.
+  - **B-07:** production with a trusted proxy requires `MCHEZO_LISTEN_HOST`, so nothing reaches the server around the proxy.
+  - **Defaults:** every setting is off by default, so local play, tests and browser checks are unchanged.
+- **D-BR1-05 zod 3's advisory is an accepted, bounded risk for the gated beta.**
+  - **The advisory:** GHSA-mrhx-c7xc-m3w5 (high), which affects every version below 4.6.6; only the major upgrade fixes it.
+  - **The bound:** with every body and message capped at 64 KiB, the measured worst case is +10 to 12 MB of heap and about 50 to 60 ms per request.
+  - **To remove it:** a separate zod 4 migration with its own full gate.
+  - **Alternative rejected:** migrating here. It touches every schema, in a readiness slice whose point is a small, reviewable change.
+  - **Revised by D-BR1R-07 (review 6903002137):** this measured a schema no route uses. The real exposure was reachable by any seat holder, and is now mitigated; the migration is still the way to remove the advisory.
+- **D-BR1-06 The family's data is kept safe by hand, and nothing deletes it.**
+  - **The tool:** `datatool` (compiled into the package) has backup, verify, restore and prune.
+  - **Backup:** made into a new private folder with a SHA-256 manifest; refused while a server runs, unless asked.
+  - **Restore:** verifies everything first, and only into an empty folder; it never overwrites.
+  - **Prune:** a dry run unless `--apply`, at least 7 days, never while a server runs. It moves rooms into `data/archive/`, never deletes.
+  - **Provisional:** the runbook's 60 days and 14 backups are provisional defaults for the owner to set.
+  - **Alternative rejected:** automatic retention in the server. The brief asks for bounded retention without deleting owner data, and a person deciding is the safe reading.
+- **D-BR1-07 No host is chosen here.**
+  - **What the app needs:** one always-on Node 22 process, a persistent disk, WebSockets, HTTPS and a stable name.
+  - **What is written:** the host options found at $0, with their account requirements (some need a card or a domain), are listed for ChatGPT's selection. They come from search results, because the providers' pages weren't reachable from this session.
+  - **Not done:** no account, trial, card, domain or public port was created or requested.
+
+## Beta R1-R (review 6900450343, R1 and R2; docs/beta/beta-r1-repair.md)
+- **D-BR1R-01 The data folder's exclusion is held by the kernel for the process's life.**
+  - **The mechanism:** an exclusive Linux abstract Unix socket named after the folder's device and inode. Its bind is the one atomic step that decides the holder, and the kernel releases it when the process ends, however it ends.
+  - **`server.lock`:** a record only, written by the holder.
+  - **Who holds it:** the server, a backup without a running server, `prune --apply`, `check`, and a restore (on its new folder), each for its whole run.
+  - **Scope:** one Linux host, one network namespace. Production refuses to start off Linux. Off Linux (a developer's computer) only the record is checked, best effort, with a printed note.
+  - **Unchanged:** the data format.
+  - **Alternatives rejected:**
+    - **`flock`:** not in Node, and a native module or a helper process would add a dependency or a second lifetime.
+    - **A link-created lock file with a recovery guard:** it fails closed, but a crash inside recovery needs a person, and pid reuse can block a start.
+- **D-BR1R-02 A restore is handed to the service user on purpose, and checked as that user.**
+  - **`restore --owner <user>`:** it chowns only what it created, keeping 0700 and 0600, while it still holds the folder.
+  - **`check`:** run as the service user before a server uses the folder.
+  - **The server:** it refuses a folder it can't fully read and write before loading anything.
+  - **Copies:** the tools write their own copies, so a copy belongs to whoever ran the tool (root's backups are root's).
+  - **Alternative rejected:** restoring as the service user from a staging copy. It needs a second, readable copy of the family's data, and the service could then alter backups.
+- **D-BR1R-03 The example unit sets `UMask=0077`.**
+  - **Why:** the server writes its files with the process umask. The 0700 folder already keeps them private, and the umask makes the files themselves 0600 too.
+  - **`check`:** it requires the folders to be private and every entry to belong to the service user; it doesn't require 0600 on files the server wrote.
+- **D-BR1R-04 The gate pages use `Referrer-Policy: same-origin`; everything else keeps `no-referrer`** (B-13, review 6901841738 R4).
+  - **Why:** under `no-referrer` a browser posts a form with `Origin: null`, which the origin check refuses. With `same-origin`, the same-origin code form carries its own origin, and no referrer ever reaches another site.
+  - **Unchanged:** the origin check. `null` and other origins stay refused.
+  - **Alternatives rejected:**
+    - **Accepting `Origin: null` on the code form:** it weakens the check the review asked to keep.
+    - **Using `Sec-Fetch-Site` instead:** older Safari doesn't send it.
+- **D-BR1R-05 A production-origin check runs in every gate** (`scripts/check-beta-gate-https.mjs`).
+  - **What it does:** the packed release behind a local TLS proxy that keeps `Host` and `Origin` (like the example Caddy), at `https://beta.test:<port>`, driven by Chromium. Foreign origins are checked at the protocol level.
+  - **Isolation:** it is private, $0 and on this machine only. The browser gets no outbound proxy settings, and the certificate is made for the run.
+- **D-BR1R-06 The lock race test speaks an explicit protocol.**
+  - **Holders only:** END goes only to a confirmed, live holder.
+  - **Explicit failures:** an unexpected exit, a missing READY or answer, an ERROR, a non-zero exit, a timeout or any pipe error fails the test with what each contender printed. Nothing counts as a refusal unless the contender said REFUSED.
+- **D-BR1R-07 A network-facing array checks its length before zod reads any element** (B-14, D-2, review 6903002137).
+  - **What:** `boundedArray(element, max, min?)` (`src/server/boundedArray.ts`) is `z.unknown()` with a fatal `too_big` check on an over-long array, piped into the same `z.array(element).min(min).max(max)` as before. zod 3's pipeline doesn't run the second step when the first fails, so no element is read. Family Questions `options` and the lineup's `items` use it.
+  - **Why:** zod 3 walks every element and records an issue for each bad one before `.max()` applies, and it has no fix. At the 64 KiB cap that was about 32,700 issues, about 14 MB of live heap and 50–90 ms per request, from any seat holder.
+  - **Unchanged:** what passes, what it parses to, which requests are refused and the 400 they get (8,000 generated bodies against the previous schemas; the routes through the server).
+  - **Alternatives rejected:**
+    - **zod 4 now:** the supported fix, but a major migration across every schema. The review asked for no unrelated migration, so it stays a separate slice.
+    - **A length check in each route before `safeParse`:** it does the same, but it lives outside the schema, where a new route could forget it.
+    - **A smaller body cap:** it bounds the cost but doesn't remove the mechanism, and at 64 KiB the cap alone allowed the crash above.
+- **D-BR1R-08 A test fails if a network-facing schema gains a collection zod would walk in full.**
+  - **What:** `tests/beta-r1r-zod.test.ts` walks every static schema on `LocalServer` and `IntentSchema`, and fails on:
+    - a plain `z.array`;
+    - a set, map, tuple, intersection or recursive schema;
+    - a record whose keys or values can fail.
+  - **The inventory:** it also pins the current list of collections, so a new one has to be reviewed.
+  - **Why:** the exposure came from two ordinary-looking schemas, and the next one would look ordinary too.
+- **D-BR1R-09 The audit preview's route: configure the forwarder's rewrite of the app's own origin, only after a probe shows nothing else is rewritten to it** (handoff 6903638660; `docs/beta/beta-r1-preview-route.md`).
+  - **What:** the packed candidate runs with `MCHEZO_PUBLIC_ORIGIN` set to the exact value GitHub's forwarder gives the app's own requests (e.g. `https://localhost:3153`). No product source changes.
+  - **The precondition:** `scripts/preview/probe-forwarded-origin.mjs` must report `REWRITTEN_SAME_ORIGIN_ONLY` (or `PRESERVED`) in that Codespace, at the start of each audit session. Under `UNSAFE` or `INCONSISTENT`, the route is not used.
+  - **Why:** every `*.app.github.dev` URL is the same site, so `SameSite=Lax` doesn't separate them. The exact-origin check is the only defense, and it stays meaningful only if foreign Origins reach the app as themselves.
+  - **Alternatives rejected:**
+    - **A preview-only adapter trusting `X-Forwarded-Host` or `Sec-Fetch-Site`:** the first is on every request; the second is absent on WebSocket handshakes in Chromium.
+    - **Allowing localhost origins broadly, or replacing Origin blindly:** it would accept the sibling-origin attack shown in S2.
+    - **`gh codespace ports forward`:** it forwards to the machine running `gh`, not the reviewer's cloud browser.
+  - **The fallback:** route B, a browser inside the Codespace with only its display forwarded. Proposed, not tested here.
+- **D-BR1R-10 The preview probe counts only positive, attributed evidence** (review 6903845075; revises D-BR1R-09's precondition).
+  - **What it needs to pass:**
+    - the target's own fetch POST, form POST and WebSocket, each observed with a valid https Origin, all the same value;
+    - **and**, for each transport, a comparison request observed carrying the comparison page's own origin.
+  - **Refusals:** a comparison request with no Origin or the own value (`UNSAFE`); own values that differ (`INCONSISTENT`); an own Origin that is missing, invalid or not https (`UNSUITABLE`).
+  - **`INCOMPLETE`:** anything missing or unattributed.
+  - **What it is not:** the page's completion marker is a hint only. A request that didn't arrive proves nothing.
+  - **What a pass is:** evidence for review, covering only the traffic observed. The audit stays on hold until a route has been validated in the Codespace with the original protections intact.
+  - **The fallback:** route B keeps the browser's own Origin, and TLS validation through a session CA trusted only in that browser's NSS database. Its browser half is tested here; the remote desktop needs authorization first.
+- **D-BR1R-11 The audit browser keeps an OS sandbox; where Chromium can't have one, the choice is the owner's** (handoff 6904212784).
+  - **The correction:** my route-B browser-half test (D-BR1R-10), like every gate driver, ran Chromium **without** its OS sandbox: Playwright's `--no-sandbox` default, run as root. It tested TLS validation and Origin, not the browser sandbox.
+  - **Measured:** Chromium sandboxes only with unprivileged user namespaces, or with a setuid helper that has `CAP_SYS_ADMIN`. With user namespaces denied it fails exactly as in the Codespace. There is no seccomp-only mode, and `--no-sandbox` is excluded.
+  - **The options** (`docs/beta/beta-r1-preview-route.md`):
+    1. Firefox ESR, whose seccomp-BPF content sandbox remains without user namespaces. Reduced, no rebuild, sourced but not tested here.
+    2. Chromium's full sandbox once the owner approves a container change that permits user namespaces, plus a rebuild.
+    3. The owner's own computer and browser.
+  - **The first step:** read-only diagnostics in the Codespace decide which applies.
+  - **Alternative rejected:** `--no-sandbox`, a privileged container, or `CAP_SYS_ADMIN` without owner approval.
+- **D-BR1R-12 After a locked answer, carrying on comes first; after the last one there is nothing to continue** (review 6904986723, R5; B-15).
+  - **The finding:** in Casual Trivia the locked-answer screen put "Waiting for everyone" and the tall ring before Next question. At 320×480 the enabled control sat below the first screen (705–761 px), and the lower seat's name label lay on the paragraph under the ring at every size. That told a player to wait when each player goes at their own pace against one deadline.
+  - **The decision:** one shared locked-answer view, `apps/web/src/components/mchezo/LockedAnswer.tsx`, for Trivia, Geography and Math Mayhem, which all had a copy of the same branch. Its order:
+    1. a compact confirmation card ("Question N of M · your answer", LOCKED IN);
+    2. a game's own note (Math Mayhem's answer time);
+    3. "Keep going — you don't need to wait for anyone. N questions left.", the enabled **Next question** and the game's time left;
+    4. then "How the room is doing": the same counts-only ring, set apart below.
+  - **The last answer:** the screen is labelled "All your answers are in". It keeps the card and the room's wait, with no continuation control. The old enabled "Waiting for the game to finish" keycap is gone; after a reload the existing "All your answers are in" view shows, as before.
+  - **The shared ring:** `.mz-wait` keeps 46 px under itself for the bottom seat's token and label. Every caller gets the same room.
+  - **Unchanged:** the server's deadline, scoring, answer immutability, counts-only progress, private projections and the post-finish reveal. Nothing auto-advances. The next question, and Math Mayhem's per-question timing, still opens only through each game's existing open flow after Next question (checked in the browser, visibility guard included).
+  - **Shared rendering only** (scope answer 6905044291): each game keeps its submission, lock, progression and results, and passes its own parts in:
+    - **Math:** its answer-time line, its solo mode and its `mz-math-next` test id;
+    - **Trivia:** its TV shortcut.
+    Solo Math's last answer now reads "All your answers are in." in place of the old keycap; the solo flow is otherwise unchanged.
+  - **The drivers:** the shared answer helper and four drivers stop expecting the old keycap. A locked view without Next question now fails loudly instead of being clicked through.
+  - **No new colour on Everyday** (full gate `20261116-025903-c955613d-17498`, W8). The first version gave Next question the orange brand keycap and a divider line above the room's progress. Those were the screen's only two new styles. They are back to the screen's own neutral keycap, and spacing alone sets the room apart.
+  - **W8_INTENDED** in `check-warm-ivory.mjs` lists the locked screen's re-keyed elements (it gained test ids). Under the guard's rule, each must still reuse a style the base screen had: 44 such changes, 0 new styles, 0 missing.
+  - **Alternatives rejected:**
+    - A sticky Next question over the old layout: it still says to wait, and it covers content at enlarged text.
+    - Re-recording the Everyday baseline: it would accept the two new styles without a review. Keeping the screen's own styles keeps W8's promise.
+    - Auto-advancing: excluded by the review.
+    - Fixing Trivia alone: it would leave the same defect in Geography and Math Mayhem.
+
+## Beta R2: release preflight (handoff 6908014247; docs and evidence only)
+
+- **D-BR2-01 The promotion artifact is the audited archive, identified by its own hash; a reviewer checks its contents against a recorded file inventory** (`docs/beta/release-7097ac2.md`).
+  - **The problem:** the audited archive sits in the private review Codespace, which this session can't reach. `pack.mjs` writes the build time into `release.json`, and `tar` the files' times, so no rebuild can reproduce the archive's hash.
+  - **The decision:**
+    - **Recorded:** the runtime SHA `7097ac2`, Node v22.16.0, and a 144-file inventory of every package file except `release.json`. The inventory's digest is `fe6d74f8…a61c`, the same in three builds from fresh clones under two Node 22 versions.
+    - **Left blank:** the audited archive's SHA-256, for its holder to recompute.
+    - **On the host:** the host gets that archive, checked by its hash, and the unpacked release is checked against the inventory before `current` is switched.
+  - **If the archive is lost:** a rebuild is recorded as a different file, with its own hash. Whether a matching inventory is enough, or a short private re-check is needed, is the owner's call.
+  - **Alternatives rejected:**
+    - Recording my rebuild's hash as the release: it isn't the audited file.
+    - Making the build reproducible byte for byte: that changes `pack.mjs`, a runtime-release change outside this docs-only slice.
+- **D-BR2-02 Host comparison: only already-authorized or owner-provided $0 routes, on official sources, with a provisional recommendation** (the runbook's "Preflight").
+  - **The options:**
+    - **H1:** LAN only, with a domain the owner already has and a DNS-challenge certificate;
+    - **H2:** a Cloudflare named Tunnel, with a domain already on Cloudflare;
+    - **H3:** Tailscale Funnel;
+    - **H4:** a $0 VM the owner already has.
+    Each is compared on compute, TLS and WebSockets, participant access, who is in the path, disk and backups, the proxy count, quotas and billing, and the owner-dependent facts.
+  - **The sources:** facts are stated only from the providers' official documentation sources, read at pinned commits, or from Tailscale's own code. The pages unreachable from this session (Tailscale's site, Oracle, Google Cloud, AWS) become "to confirm" rows, not facts.
+  - **The recommendation:** it depends on two owner facts, an always-on Linux machine and a domain already owned:
+    - **H1** when everyone plays at home;
+    - **H2** with a Cloudflare domain and remote players, accepting that Cloudflare sees the decrypted traffic;
+    - **H3** with no domain, once Tailscale's terms and WebSocket behaviour are confirmed.
+  - **Who decides:** ChatGPT reviews this with the owner. Execution needs the owner's explicit approval.
+  - **Alternatives rejected:**
+    - Keeping R1's search-result table as the basis: the handoff asks for official terms.
+    - Asking for this session's network to be widened to reach the blocked sites: an approval request for a fact the owner or ChatGPT can confirm from a normal browser.
+- **D-BR2-03 The proxy count is measured, not assumed.** The runbook's step sends a fake `X-Forwarded-For` through the real route to `nc`, and sets `MCHEZO_TRUST_PROXY` to the number of entries the route itself wrote, when the first of them is the client's real address.
+  - **The evidence:** Caddy 2.6.2 was checked here. It drops a client-sent value and writes the connecting address.
+  - **When that can't be shown:** the setting stays unset, which is safe: the per-device limits then count everyone together.
+- **D-BR2-04 Two doc defects found by the drill are corrected.**
+  - **The restore line:** an empty first install prints no `[restore]` line (the server prints it only when a room loaded or failed). The runbook had promised `0 room(s) restored`.
+  - **The settings file's mode:** the architecture page said 0600 root-only, against the runbook's 0640 root:`cgn`. It now states the runbook's mode, the one the drill ran.
+  - **No code changed:** both are documentation corrections.
+- **D-BR2-05 Beta launch checks are written for real phones and the host, with a go/no-go record**:
+  - `docs/REAL_DEVICE_TESTING.md` §7;
+  - `docs/device-testing/BETA_GO_NO_GO_TEMPLATE.md`.
+
+  **What they cover:**
+  - **The phones:** an iPhone with Safari and an Android phone with Chrome against the exact package through the real HTTPS address. That means the gate, invite by QR, manual join, the TV, reconnects, small-screen lock and continue, TV privacy through a rematch, and a reload.
+  - **The host:** the revision, a restart with persistence, an independent backup, an isolated restore, the first-install stop, and no route around the proxy.
+  - **Who does each pending check:** each is paired with its evidence and the person who can do it. Claude can't run them.
+  - **The catalog:** the playable catalog is unchanged.
+- **D-BR2-06 The rehearsal script refuses before it can clean up, and cleans up only what it created** (review 6908455526).
+  - **The defect:** the first `preflight-drill.sh` installed its EXIT trap before the `cgn` check, so a refusal would delete an existing `cgn` user and group. Reproduced with logging stubs in `repro-v1-unsafe-cleanup.log`.
+  - **What it didn't harm:** in runs 1–4 no `cgn` existed beforehand on this machine.
+  - **The fix:**
+    - the user, group and prefix refusals come first, with no trap;
+    - ownership is recorded per resource, including after a partial `useradd` failure;
+    - cleanup is limited to owned resources and its own processes;
+    - a failed service-user step ends the run;
+    - SIGTERM and SIGINT go through the same cleanup.
+  - **Proved by** `drill-safety-check.sh` (14/14: existing user, existing group, partial failure, SIGTERM mid-run) and a full run (42/42).
+  - **The record:** the unsafe version and its logs stay as history, marked do-not-run.
+  - **Alternatives rejected:**
+    - Deleting the old version: it would hide what runs 1–4 actually ran.
+    - Using a randomly named service user: the drill exists to rehearse the runbook's own `cgn` steps.
+- **D-BR2-07 The rehearsal claims an identity only from its own successful creation step** (review 6908557588; refines D-BR2-06).
+  - **The defect:** the D-BR2-06 version inferred ownership from what existed after `useradd`. Another run taking `cgn` after the startup checks would be claimed and deleted. Reproduced in `repro-v2-late-collision.log`.
+  - **The fix:** `groupadd --system cgn`, then `useradd --system … -g cgn cgn`, each marking ownership only on exit 0. A taken name (exit 9) becomes a refusal, and the other run's identities are kept. It is the two-step equivalent of the runbook's `useradd --user-group`.
+  - **Proved by:** the safety check, now 24/24 with the late-collision cases (user and group; user only), and a full run, 42/42.
+  - **Alternatives rejected:**
+    - Per-run random names: the drill rehearses the runbook's own `cgn` steps.
+    - A lock file between runs: it protects only runs that use the lock, and a confirmed creation step protects against any other creator.
+
+## Beta R3: a decision-ready release record (handoff 6909443770; docs and evidence only)
+- **D-BR3-01 The pinned artifact is the audited archive `a693c543…3a5131`.**
+  - **The source:** ChatGPT's verification in the private review Codespace. It read the tar without extracting it, matched the 144-file inventory `fe6d74f8…`, and checked `release.json` (`7097ac2`, Node v22.16.0).
+  - **On the host:** that hash is what is checked before unpacking.
+  - **My three rebuilds** stay separate files. Their matching inventory shows the runnable files are the same, not that a rebuild is the audited archive.
+- **D-BR3-02 Two separate owner approvals** (the runbook's "Two approvals before anyone is invited"):
+  - **Approval 1:** private target-host validation of the pinned artifact, after the route is chosen;
+  - **Approval 2:** invitations and go, after the go/no-go record has host and real-device evidence with no blocker, the owner's sign-off and ChatGPT's review.
+  - **Neither implies the other.** A new artifact needs both again.
+  - **Not evidence for either:** the local rehearsal and the private Firefox audit.
+- **D-BR3-03 The draft go/no-go record fills only evidenced fields.** Everything that needs the host, a phone or the owner is PENDING, and the default is NO-GO.
+  - **Enforced by** `check-r3-record.mjs`, which fails on a fabricated result, a disagreeing hash or a filled host field.
+- **D-BR3-04 The route decision needs six owner facts (F1–F6), not another survey.** ChatGPT recommends once they are known, and the owner chooses.
+- **D-BR3-05 One order of execution, and routes available only within this handoff** (review 6909578563; the runbook's "The order of execution").
+  - **The stages:**
+    - 0: read-only preflight R1–R8;
+    - Approval 1;
+    - 1: isolated staging;
+    - 2: route checks V1–V3;
+    - 3: host and device checks;
+    - 4: go/no-go, then Approval 2, then the switch and invitations.
+  - **The rules:** each stage starts only when the one before it is recorded, and any failure is a no-go. The checks that need the running isolated preview are named per stage and stay PENDING until observed there.
+  - **Routes:** H1 (LAN only) is the only route available under this handoff. H2–H4 need public exposure, new provisioning or possibly spending, so they are recorded as unavailable; making one available needs a separate, explicit owner decision. Approval 1 allows no public port or public exposure: the earlier "a public port beyond the chosen route" wording is gone.
+  - **Alternative rejected:** keeping H2–H4 selectable with a warning. The handoff excludes exposure, provisioning and spending, and an option the operator may not take shouldn't look like one.
+- **D-BR3-06 The archive checksum is a command precondition** (the runbook's "Promoting it", step 1).
+  - **The gate:** `sha256sum --check --strict` against the full pinned SHA-256 is the first link of one `&&` chain: unpack, `release.json`'s revision, the inventory digest, `npm ci`, then exactly `ws` and `zod`.
+  - **The marker:** only a complete chain writes `verified-<sha>`, outside the release folder so the inventory is unaffected. Any failure prints `STOP` and leaves no marker, and a stale marker is removed first.
+  - **What the marker gates:** stopping the server, the backup, the switch (which also needs this run's backup), and the first install's link and start.
+  - **Proved by** `docs/evidence/beta-r3-gate/`:
+    - **fixtures from the runbook's own blocks:** a correct archive reaches the sentinels; a wrong, missing, wrong-revision, extra-file or repacked archive never does.
+    - **mutation runs:** each guard removed in a copy of the runbook makes its own case fail.
+  - **Rebuilds stay distinct:** a rebuild has the same inventory but a different hash, so the gate refuses it (fixture G8).
+  - **Alternative rejected:** a separate "compare the printed hash by eye" step. It doesn't stop the commands after it.
+- **D-BR3-07 The isolated install uses its own data folder, end to end** (found by tracing the new order; review 6909578563 item 1).
+  - **First install** now runs from one `DATA=/var/lib/cgn-validation`. Before, its commands created and checked the real folder, and the unit's `ReadWritePaths=` named only the real folder, so a service pointed at the throwaway folder couldn't write under `ProtectSystem=strict`.
+  - **The unit** isn't in the package. The operator writes it from the architecture page, sets `ReadWritePaths=` to `$DATA`, and the start is gated on that line.
+  - **`MCHEZO_TRUST_PROXY`** is left out until V2 counts the proxies on the running preview.
+  - **Approval 1** names the host software Stage 0 may find missing: Node 22, and for H1, Caddy with the DNS module.
+  - **The Stage 4 switch** is one gated block. It starts only when the settings and the unit both name the new, empty real folder.
+  - **Alternative rejected:** a systemd drop-in for the data path. It is one more file to keep in step, and the gate checks the unit line directly.
+- **D-BR3-08 Every operator block fails closed when run as a whole** (review 6910988491; reproduced first on the blocks published at `ca15c99`).
+  - **The rule:** a printed `STOP` is never the only safeguard. Each later step reads this run's flags or one `&&` chain, so it refuses by itself.
+  - **Promotion:**
+    - `VERIFIED`, `STOPPED` and `BACKUP_OK` are reset at the start of every run.
+    - The chain begins by removing any old marker and checking it is gone.
+    - Stopping needs `VERIFIED`; backing up needs a successful stop; switching needs all three.
+    - Step 1 sets no data-folder variable (the backup uses `LIVE_DATA`), so running it inside the first install can't redirect that install's `DATA`.
+  - **First install:** split into prepare, the operator's edits, the artifact gate and start.
+    - The settings file is never truncated.
+    - The start is one chain: this run's verification, the link, the settings naming the throwaway folder exactly once, the data check, the unit line and the reload.
+  - **The switch:** split around the operator's settings edit.
+    - Part A changes nothing unless the stop succeeded, and makes the real folder with `mkdir`, which refuses any existing folder and leaves it as it is.
+    - Part B starts only after these checks: part A's flags, the settings naming the new folder once, the access-code line changed (compared by hash, never printed), the folder still empty, the unit line, and the reload.
+    - On refusal the service stays stopped and nothing is deleted.
+  - **Proved by** `docs/evidence/beta-r3-gate/round2/`:
+    - the review's three scenarios reproduced on the old blocks;
+    - the new blocks run against fixtures with logging stubs for the privileged commands, positive and negative per path;
+    - 16 mutations, each removing one guard and caught by its own case.
+  - **Alternatives rejected:**
+    - `set -e` in the blocks: it doesn't stop on failures inside `if` conditions or `&&` lists, and it would end the operator's interactive shell.
+    - One long script: the operator's settings edit has to happen by hand between the parts, and the code mustn't pass through a script's arguments or logs.

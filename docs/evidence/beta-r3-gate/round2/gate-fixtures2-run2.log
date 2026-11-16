@@ -1,0 +1,362 @@
+== docs under test: <repo checkout> — commit bd8f44597558fceb0e661e34e4323f863eafd1a7, 1 uncommitted path(s); runbook sha256 52fbed4c73143844…
+== blocks found: switch, stop and prepare (11 lines); switch, start (12 lines); first install, prepare (15 lines); first install, start (13 lines); promote (43 lines)
+
+== the prelude (stubs), in full:
+    systemctl() {
+      case "$1" in
+        stop) echo "SENTINEL-STOP"; return "${RC_STOP:-0}";;
+        start) echo "SENTINEL-START"; return 0;;
+        enable) echo "SENTINEL-ENABLE $*"; return 0;;
+        daemon-reload) echo "STUB daemon-reload"; return "${RC_RELOAD:-0}";;
+        *) echo "STUB systemctl $*";;
+      esac; }
+    useradd() { echo "STUB useradd $*"; }
+    chown() { echo "STUB chown $*"; }
+    sudo() { if [ "$1" = "-u" ]; then shift 2; fi; "$@"; }
+    install() { local a=(); while [ $# -gt 0 ]; do case "$1" in -o|-g) shift 2;; *) a+=("$1"); shift;; esac; done; command install "${a[@]}"; }
+    rm() { if [ -n "${RM_FAILS:-}" ]; then echo "STUB rm $* -> exit 1 (this case)"; return 1; fi; command rm "$@"; }
+
+fixture: good.tgz sha256 92744e6b694671ac62608639e71773fac6412b93fc3b4548de3300a03800c006, inventory 452484199276ad00b82da3f77e83a71dffc3f262cd7e19d832ebe926e2d2f63d
+PASS the runbook has the block "promote"
+PASS the runbook has the block "first install, prepare"
+PASS the runbook has the block "first install, start"
+PASS the runbook has the block "switch, stop and prepare"
+PASS the runbook has the block "switch, start"
+PASS the promote block checks the full hash with sha256sum --check --strict
+PASS the first install doesn't preset MCHEZO_TRUST_PROXY
+PASS promote step 1 sets no data-folder variable (so the first install's DATA stays)
+PASS the published unit names the real folder (so the first install must change it)
+
+== P1: the correct archive
+--- the substitutions (published block vs P1's script)
+    6,7c6,7
+    < EXPECTED_SHA256=a693c5433d8dd8c17368e9c02fd8092b316d67b6e62ac9c0070a60b99c3a5131
+    < EXPECTED_INVENTORY=fe6d74f8df7280a52102f70ab1d356428e810dfa614f45b53a60596d8e89a61c
+    ---
+    > EXPECTED_SHA256=92744e6b694671ac62608639e71773fac6412b93fc3b4548de3300a03800c006
+    > EXPECTED_INVENTORY=452484199276ad00b82da3f77e83a71dffc3f262cd7e19d832ebe926e2d2f63d
+    9c9
+    < OPT=/opt/christmas-game-night
+    ---
+    > OPT=/tmp/tmp.OzPMGTVq0V/case-P1/opt/christmas-game-night
+    27c27
+    < LIVE_DATA=/var/lib/christmas-game-night; BACKUPS=/var/backups/christmas-game-night
+    ---
+    > LIVE_DATA=/tmp/tmp.OzPMGTVq0V/case-P1/var/lib/christmas-game-night; BACKUPS=/tmp/tmp.OzPMGTVq0V/case-P1/var/backups/christmas-game-night
+--- output
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    SENTINEL-STOP
+    SENTINEL-BACKUP /tmp/tmp.OzPMGTVq0V/case-P1/var/backups/christmas-game-night/20261116T0820Z-before-7097ac2bb062925bb296a129f4771f1e68fd522d
+    SENTINEL-START
+PASS P1 VERIFIED, then stop, backup and start
+PASS P1 current points to the verified release
+PASS P1 npm ci installed ws and zod only (the dev scope folders npm leaves are empty) — packages: ws zod 
+
+== P2: wrong bytes (one byte appended)
+--- output
+    ./mchezo-7097ac2.tgz: FAILED
+    sha256sum: WARNING: 1 computed checksum did NOT match
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run; the server keeps running.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P2 STOP at step 1, no VERIFIED
+PASS P2 no stop, backup or start, and nothing switched — 0 sentinel(s)
+
+== P3: missing archive
+--- output
+    sha256sum: ./mchezo-7097ac2.tgz: No such file or directory
+    ./mchezo-7097ac2.tgz: FAILED open or read
+    sha256sum: WARNING: 1 listed file could not be read
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run; the server keeps running.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P3 STOP at step 1, no VERIFIED
+PASS P3 no stop, backup or start, and nothing switched — 0 sentinel(s)
+
+== P4: THE REVIEW'S CASE: a stale marker rm can't remove, and the archive missing
+--- output
+    STUB rm -f /tmp/tmp.OzPMGTVq0V/case-P4/opt/christmas-game-night/verified-7097ac2bb062925bb296a129f4771f1e68fd522d -> exit 1 (this case)
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run; the server keeps running.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P4 STOP at step 1, no VERIFIED
+PASS P4 no stop, backup or start, and nothing switched — 0 sentinel(s)
+
+== P5: a stale marker rm can't remove, with the CORRECT archive
+--- output
+    STUB rm -f /tmp/tmp.OzPMGTVq0V/case-P5/opt/christmas-game-night/verified-7097ac2bb062925bb296a129f4771f1e68fd522d -> exit 1 (this case)
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run; the server keeps running.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P5 STOP at step 1, no VERIFIED
+PASS P5 no stop, backup or start, and nothing switched — 0 sentinel(s)
+
+== P6: a stale marker (removable), then wrong bytes
+--- output
+    ./mchezo-7097ac2.tgz: FAILED
+    sha256sum: WARNING: 1 computed checksum did NOT match
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run; the server keeps running.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P6 STOP at step 1, no VERIFIED
+PASS P6 no stop, backup or start, and nothing switched — 0 sentinel(s)
+
+== P7: wrong revision in release.json (its own hash pinned)
+--- output
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run; the server keeps running.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P7 STOP at step 1, no VERIFIED
+PASS P7 no stop, backup or start, and nothing switched — 0 sentinel(s)
+
+== P8: an unexpected extra file (its own hash pinned, the real inventory expected)
+--- output
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run; the server keeps running.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P8 STOP at step 1, no VERIFIED
+PASS P8 no stop, backup or start, and nothing switched — 0 sentinel(s)
+
+== P9: a rebuild-like archive: the same files repacked (other hash, same revision and inventory)
+--- output
+    ./mchezo-7097ac2.tgz: FAILED
+    sha256sum: WARNING: 1 computed checksum did NOT match
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run; the server keeps running.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P9 STOP at step 1, no VERIFIED
+PASS P9 no stop, backup or start, and nothing switched — 0 sentinel(s)
+
+== P10: flags left set by an earlier run in this shell (VERIFIED=1 STOPPED=1 BACKUP_OK=1), archive missing
+--- output
+    sha256sum: ./mchezo-7097ac2.tgz: No such file or directory
+    ./mchezo-7097ac2.tgz: FAILED open or read
+    sha256sum: WARNING: 1 listed file could not be read
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run; the server keeps running.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P10 STOP at step 1, no VERIFIED
+PASS P10 no stop, backup or start, and nothing switched — 0 sentinel(s)
+PASS P2 nothing unpacked
+PASS P3 nothing unpacked
+PASS P4 nothing unpacked
+PASS P5 nothing unpacked
+PASS P9 nothing unpacked
+
+== P11: the correct archive, but the maintenance stop fails
+--- output
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    SENTINEL-STOP
+    STOP: the server didn't stop. Don't back up or switch; record a no-go.
+    STOP: not verified and stopped in this run; no backup.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P11 verified; the stop was tried and failed
+PASS P11 no backup, no switch, no start
+
+== P12: the correct archive, but the backup fails
+--- output
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    SENTINEL-STOP
+    backup FAILED (fixture)
+    STOP: no backup. Don't switch; 'systemctl start christmas-game-night' restarts the previous release.
+    STOP: not verified, stopped and backed up in this run. Don't switch.
+PASS P12 stopped; no backup, so no switch and no start
+
+== F1: first install, the correct archive
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    check OK: 0 room(s) (fixture) in /tmp/tmp.OzPMGTVq0V/case-F1/var/lib/cgn-validation
+    STUB daemon-reload
+    SENTINEL-ENABLE enable --now christmas-game-night
+PASS F1 VERIFIED, linked, data checked, reloaded, started
+PASS F1 the unit names the throwaway folder; the real folder was never created
+
+== F2: first install, wrong bytes
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    ./mchezo-7097ac2.tgz: FAILED
+    sha256sum: WARNING: 1 computed checksum did NOT match
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run, or the link, the settings, the data check, the unit or the reload failed. Not started; record a no-go.
+PASS F2 not started (no enable, no other sentinel)
+
+== F3: first install, missing archive
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    sha256sum: ./mchezo-7097ac2.tgz: No such file or directory
+    ./mchezo-7097ac2.tgz: FAILED open or read
+    sha256sum: WARNING: 1 listed file could not be read
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run, or the link, the settings, the data check, the unit or the reload failed. Not started; record a no-go.
+PASS F3 not started (no enable, no other sentinel)
+
+== F4: first install, the unit has no ReadWritePaths= line
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    check OK: 0 room(s) (fixture) in /tmp/tmp.OzPMGTVq0V/case-F4/var/lib/cgn-validation
+    STOP: not verified in this run, or the link, the settings, the data check, the unit or the reload failed. Not started; record a no-go.
+PASS F4 not started (no enable, no other sentinel)
+
+== F5: first install, THE REVIEW'S CASE: the data check fails
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    check FAILED (fixture): /tmp/tmp.OzPMGTVq0V/case-F5/var/lib/cgn-validation
+    STOP: not verified in this run, or the link, the settings, the data check, the unit or the reload failed. Not started; record a no-go.
+PASS F5 not started (no enable, no other sentinel)
+
+== F6: first install, the settings name the REAL folder
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    STOP: not verified in this run, or the link, the settings, the data check, the unit or the reload failed. Not started; record a no-go.
+PASS F6 not started (no enable, no other sentinel)
+
+== F7: first install, the settings name the data folder twice
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    STOP: not verified in this run, or the link, the settings, the data check, the unit or the reload failed. Not started; record a no-go.
+PASS F7 not started (no enable, no other sentinel)
+
+== F8: first install, daemon-reload fails
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    VERIFIED 7097ac2bb062925bb296a129f4771f1e68fd522d: ready to switch
+    check OK: 0 room(s) (fixture) in /tmp/tmp.OzPMGTVq0V/case-F8/var/lib/cgn-validation
+    STUB daemon-reload
+    STOP: not verified in this run, or the link, the settings, the data check, the unit or the reload failed. Not started; record a no-go.
+PASS F8 not started (no enable, no other sentinel)
+
+== F9: first install, a stale marker rm can't remove
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+    STUB rm -f /tmp/tmp.OzPMGTVq0V/case-F9/opt/christmas-game-night/verified-7097ac2bb062925bb296a129f4771f1e68fd522d -> exit 1 (this case)
+    STOP: the old marker, the archive, its revision, its inventory or its packages didn't verify. Don't switch; record a no-go.
+    STOP: not verified in this run, or the link, the settings, the data check, the unit or the reload failed. Not started; record a no-go.
+PASS F9 not started (no enable, no other sentinel)
+PASS F2 nothing linked, no reload
+PASS F3 nothing linked, no reload
+PASS F9 nothing linked, no reload
+PASS F5 the failed check stops it before the unit and the reload
+PASS F6 a settings file naming the real folder stops it before any data check
+PASS F8 the reload was tried and failed, and nothing started
+
+== F10: the prepare block keeps an existing settings file
+--- output
+    STUB useradd --system --no-create-home --shell /usr/sbin/nologin --user-group cgn
+PASS F10 the existing settings file is untouched
+
+== W1: switch, settings edited to the new folder and the real code
+--- output
+    SENTINEL-STOP
+    STUB chown cgn:cgn /tmp/tmp.OzPMGTVq0V/case-W1/var/lib/christmas-game-night
+    STUB daemon-reload
+    SENTINEL-START
+    SWITCHED to /tmp/tmp.OzPMGTVq0V/case-W1/var/lib/christmas-game-night
+PASS W1 stopped, new folder made, reloaded, started
+PASS W1 the unit names the new folder; the validation room is kept
+
+== W2: switch, the settings still name the throwaway folder
+--- output
+    SENTINEL-STOP
+    STUB chown cgn:cgn /tmp/tmp.OzPMGTVq0V/case-W2/var/lib/christmas-game-night
+    STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go.
+PASS W2 not started
+PASS W2 the validation room is kept
+PASS W2 the unit is unchanged
+
+== W3: switch, THE REVIEW'S CASE: the stop fails, and the real folder already holds a room
+--- output
+    SENTINEL-STOP
+    STOP: the service didn't stop. Nothing was changed; record a no-go.
+    STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go.
+PASS W3 not started
+PASS W3 the validation room is kept
+PASS W3 the unit is unchanged
+
+== W4: switch, the stop fails (no real folder yet)
+--- output
+    SENTINEL-STOP
+    STOP: the service didn't stop. Nothing was changed; record a no-go.
+    STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go.
+PASS W4 not started
+PASS W4 the validation room is kept
+PASS W4 the unit is unchanged
+
+== W5: switch, the real folder already exists and holds a room (the stop succeeds)
+--- output
+    SENTINEL-STOP
+    mkdir: cannot create directory '/tmp/tmp.OzPMGTVq0V/case-W5/var/lib/christmas-game-night': File exists
+    STOP: /tmp/tmp.OzPMGTVq0V/case-W5/var/lib/christmas-game-night already exists or couldn't be made. It is left as it is; don't start or invite.
+    STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go.
+PASS W5 not started
+PASS W5 the validation room is kept
+PASS W5 the unit is unchanged
+
+== W6: switch, the real folder already exists, empty
+--- output
+    SENTINEL-STOP
+    mkdir: cannot create directory '/tmp/tmp.OzPMGTVq0V/case-W6/var/lib/christmas-game-night': File exists
+    STOP: /tmp/tmp.OzPMGTVq0V/case-W6/var/lib/christmas-game-night already exists or couldn't be made. It is left as it is; don't start or invite.
+    STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go.
+PASS W6 not started
+PASS W6 the validation room is kept
+PASS W6 the unit is unchanged
+
+== W7: switch, the access code wasn't replaced
+--- output
+    SENTINEL-STOP
+    STUB chown cgn:cgn /tmp/tmp.OzPMGTVq0V/case-W7/var/lib/christmas-game-night
+    STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go.
+PASS W7 not started
+PASS W7 the validation room is kept
+PASS W7 the unit is unchanged
+
+== W8: switch, the settings name a data folder twice
+--- output
+    SENTINEL-STOP
+    STUB chown cgn:cgn /tmp/tmp.OzPMGTVq0V/case-W8/var/lib/christmas-game-night
+    STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go.
+PASS W8 not started
+PASS W8 the validation room is kept
+PASS W8 the unit is unchanged
+
+== W9: switch, daemon-reload fails
+--- output
+    SENTINEL-STOP
+    STUB chown cgn:cgn /tmp/tmp.OzPMGTVq0V/case-W9/var/lib/christmas-game-night
+    STUB daemon-reload
+    STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go.
+PASS W9 not started
+PASS W9 the validation room is kept
+
+== W10: switch, a file appeared in the new folder between part A and part B
+--- output
+    SENTINEL-STOP
+    STUB chown cgn:cgn /tmp/tmp.OzPMGTVq0V/case-W10/var/lib/christmas-game-night
+    STOP: not stopped and prepared in this run, or the settings, the new code, the empty folder, the unit or the reload didn't check out. The service stays stopped; record a no-go.
+PASS W10 not started
+PASS W10 the validation room is kept
+PASS W10 the unit is unchanged
+PASS W3 the existing real folder is left exactly as it was
+PASS W5 the existing real folder is left exactly as it was
+PASS W4 a failed stop changes nothing: no folder, no chown
+PASS W3/W4 no reload after a failed stop
+PASS W9 the reload was tried and failed, and nothing started
+PASS W10 the late file is kept
+PASS W1–W10 neither access code appears in any output
+
+fixtures (round 2): 90 passed, 0 failed
+ROUND 2 FIXTURES PASSED

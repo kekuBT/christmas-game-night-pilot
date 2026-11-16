@@ -1,0 +1,9 @@
+# Node v22.16.0 for the builds, from the official download, checked against the official checksums (2026-11-16 ~05:19 UTC)
+$ curl -O https://nodejs.org/dist/v22.16.0/SHASUMS256.txt; curl -O https://nodejs.org/dist/v22.16.0/node-v22.16.0-linux-x64.tar.xz
+$ grep ' node-v22.16.0-linux-x64.tar.xz$' SHASUMS256.txt
+f4cb75bb036f0d0eddf6b79d9596df1aaab9ddccd6a20bf489be5abe9467e84e  node-v22.16.0-linux-x64.tar.xz
+$ sha256sum -c
+node-v22.16.0-linux-x64.tar.xz: OK
+$ node -v
+v22.16.0
+# Note: SHASUMS256.txt.sig was downloaded, but its GPG signature was not verified (no release keys imported here).

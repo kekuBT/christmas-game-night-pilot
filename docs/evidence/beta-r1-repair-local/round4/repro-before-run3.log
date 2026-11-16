@@ -1,0 +1,52 @@
+server pid 620 port 37303 web <scratchpad>/r5/web-before
+PASS 320x480 setup: a two-player Casual Trivia game starts — {"status":201}
+FAIL 320x480 host L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":705,"bottom":761,"left":31,"right":289,"enabled":true,"hitIsButton":false},"viewport":[320,480]}
+FAIL 320x480 host L1 nothing covers it (the element at its centre is the button) — {"top":705,"bottom":761,"left":31,"right":289,"enabled":true,"hitIsButton":false}
+FAIL 320x480 host L2 it comes before the room's progress — false
+FAIL 320x480 host L2 nothing says to wait for everyone — YOUR ANSWER 7 LOCKED IN WAITING FOR EVERYONE K You BF Bartholomew 0/2 have finished Everyone goes at their own pace. 0 of 2 have finished; 1 of 2 has started. T
+FAIL 320x480 host L3 no seat token or label overlaps text or a control — [{"seat":"Bartholomew","part":"label","block":"Everyone goes at their own pace. 0 of 2 have fin","px2":1323}]
+PASS 320x480 host L4 no sideways scroll
+FAIL 320x480 guest L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":705,"bottom":761,"left":31,"right":289,"enabled":true,"hitIsButton":false},"viewport":[320,480]}
+FAIL 320x480 guest L1 nothing covers it (the element at its centre is the button) — {"top":705,"bottom":761,"left":31,"right":289,"enabled":true,"hitIsButton":false}
+FAIL 320x480 guest L2 it comes before the room's progress — false
+FAIL 320x480 guest L2 nothing says to wait for everyone — YOUR ANSWER 7 LOCKED IN WAITING FOR EVERYONE K Keku BF You 0/2 have finished Everyone goes at their own pace. 0 of 2 have finished; 2 of 2 have started. The rev
+FAIL 320x480 guest L3 no seat token or label overlaps text or a control — [{"seat":"You","part":"label","block":"Everyone goes at their own pace. 0 of 2 have fin","px2":422}]
+PASS 320x480 guest L4 no sideways scroll
+PASS 320x480 host L1 Next question opens question 2
+FAIL 320x480 F after the final answer there is no enabled continuation control — {"next":null,"enabled":["Waiting for the game to finish"]}
+FAIL 320x480 F it says truthfully that all their answers are in — YOUR ANSWER Andromeda LOCKED IN WAITING FOR EVERYONE K You BF Bartholomew 1/2 have finished Everyone goes at their own pace. 1 of 2 has finished; 2 of 2 have started. The reveal plays right here when 
+FAIL 320x480 F no seat token or label overlaps text or a control — [{"seat":"Bartholomew","part":"label","block":"Everyone goes at their own pace. 1 of 2 has fini","px2":1323}]
+PASS 390x844 setup: a two-player Casual Trivia game starts — {"status":201}
+PASS 390x844 host L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":734,"bottom":794,"left":34,"right":356,"enabled":true,"hitIsButton":true},"viewport":[390,844]}
+PASS 390x844 host L1 nothing covers it (the element at its centre is the button) — {"top":734,"bottom":794,"left":34,"right":356,"enabled":true,"hitIsButton":true}
+FAIL 390x844 host L2 it comes before the room's progress — false
+FAIL 390x844 host L2 nothing says to wait for everyone — YOUR ANSWER 8 LOCKED IN WAITING FOR EVERYONE K You BF Bartholomew 0/2 have finished Everyone goes at their own pace. 0 of 2 have finished; 1 of 2 has started. T
+FAIL 390x844 host L3 no seat token or label overlaps text or a control — [{"seat":"Bartholomew","part":"label","block":"Everyone goes at their own pace. 0 of 2 have fin","px2":1070}]
+PASS 390x844 host L4 no sideways scroll
+PASS 390x844 guest L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":734,"bottom":794,"left":34,"right":356,"enabled":true,"hitIsButton":true},"viewport":[390,844]}
+PASS 390x844 guest L1 nothing covers it (the element at its centre is the button) — {"top":734,"bottom":794,"left":34,"right":356,"enabled":true,"hitIsButton":true}
+FAIL 390x844 guest L2 it comes before the room's progress — false
+FAIL 390x844 guest L2 nothing says to wait for everyone — YOUR ANSWER 8 LOCKED IN WAITING FOR EVERYONE K Keku BF You 0/2 have finished Everyone goes at their own pace. 0 of 2 have finished; 2 of 2 have started. The rev
+FAIL 390x844 guest L3 no seat token or label overlaps text or a control — [{"seat":"You","part":"label","block":"Everyone goes at their own pace. 0 of 2 have fin","px2":341}]
+PASS 390x844 guest L4 no sideways scroll
+PASS 390x844 host L1 Next question opens question 2
+FAIL 390x844 F after the final answer there is no enabled continuation control — {"next":null,"enabled":["Waiting for the game to finish"]}
+FAIL 390x844 F it says truthfully that all their answers are in — YOUR ANSWER Bishop LOCKED IN WAITING FOR EVERYONE K You BF Bartholomew 1/2 have finished Everyone goes at their own pace. 1 of 2 has finished; 2 of 2 have started. The reveal plays right here when the
+FAIL 390x844 F no seat token or label overlaps text or a control — [{"seat":"Bartholomew","part":"label","block":"Everyone goes at their own pace. 1 of 2 has fini","px2":1070}]
+PASS 1440x900 setup: a two-player Casual Trivia game starts — {"status":201}
+PASS 1440x900 host L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":758,"bottom":818,"left":516,"right":924,"enabled":true,"hitIsButton":true},"viewport":[1440,900]}
+PASS 1440x900 host L1 nothing covers it (the element at its centre is the button) — {"top":758,"bottom":818,"left":516,"right":924,"enabled":true,"hitIsButton":true}
+FAIL 1440x900 host L2 it comes before the room's progress — false
+FAIL 1440x900 host L2 nothing says to wait for everyone — YOUR ANSWER 60 LOCKED IN WAITING FOR EVERYONE K You BF Bartholomew 0/2 have finished Everyone goes at their own pace. 0 of 2 have finished; 1 of 2 has started. 
+FAIL 1440x900 host L3 no seat token or label overlaps text or a control — [{"seat":"Bartholomew","part":"label","block":"Everyone goes at their own pace. 0 of 2 have fin","px2":949}]
+PASS 1440x900 host L4 no sideways scroll
+PASS 1440x900 guest L1 Next question is enabled and fully inside the initial viewport — {"next":{"top":758,"bottom":818,"left":516,"right":924,"enabled":true,"hitIsButton":true},"viewport":[1440,900]}
+PASS 1440x900 guest L1 nothing covers it (the element at its centre is the button) — {"top":758,"bottom":818,"left":516,"right":924,"enabled":true,"hitIsButton":true}
+FAIL 1440x900 guest L2 it comes before the room's progress — false
+FAIL 1440x900 guest L2 nothing says to wait for everyone — YOUR ANSWER 60 LOCKED IN WAITING FOR EVERYONE K Keku BF You 0/2 have finished Everyone goes at their own pace. 0 of 2 have finished; 2 of 2 have started. The re
+FAIL 1440x900 guest L3 no seat token or label overlaps text or a control — [{"seat":"You","part":"label","block":"Everyone goes at their own pace. 0 of 2 have fin","px2":303}]
+PASS 1440x900 guest L4 no sideways scroll
+PASS 1440x900 host L1 Next question opens question 2
+
+LOCKED ANSWER CHECK FAILED (28)
+driver check-locked-answer rc=1 38s

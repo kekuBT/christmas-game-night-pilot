@@ -1,0 +1,5 @@
+lock 1: started 1421ms after the locked view; overlap>1px² in 8/35 samples; while animating: 8; at rest (last sample): [1374,0,"finished",37]; max 4290px²; first samples [[1,4214,"running",102],[41,4247,"running",103],[81,4272,"running",103],[122,4285,"running",103]]
+lock 2: started 1423ms after the locked view; overlap>1px² in 8/35 samples; while animating: 8; at rest (last sample): [1374,0,"finished",37]; max 4289px²; first samples [[0,4214,"running",102],[40,4261,"running",103],[81,4279,"running",103],[121,4289,"running",103]]
+lock 3: started 1417ms after the locked view; overlap>1px² in 8/35 samples; while animating: 8; at rest (last sample): [1373,0,"finished",37]; max 4289px²; first samples [[0,4214,"running",102],[41,4247,"running",103],[81,4279,"running",103],[121,4289,"running",103]]
+lock 4: started 1419ms after the locked view; overlap>1px² in 8/35 samples; while animating: 8; at rest (last sample): [1374,0,"finished",37]; max 4291px²; first samples [[0,4214,"running",102],[41,4247,"running",103],[81,4279,"running",103],[121,4289,"running",103]]
+start status 201

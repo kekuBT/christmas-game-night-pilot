@@ -1,0 +1,52 @@
+$ node scripts/check-cup-team-games.mjs http://localhost:42773
+# timeout 600s | worker w3 | server http://localhost:42773 (data /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/s52/clones/br1full4/test-results/20261115-190235-92a3722b-13639/server-data/w3)
+
+[+3.7s] PASS A the room is now a Family Cup: 75% individual, 25% team — {"format":"combined-75-25","label":"Family Cup","description":"Daily score: 75% individual games, 25% team games.","teamGamesCount":true,"cupId":"cup-mwi7xbi8-1r45vx","qualifying":"A day counts if you really played at least one official game that day: at least 50% of it and at least 2 answers or moves (wrong answers count; sitting out doesn't)."}
+[+3.7s] PASS A the host's Teams card is in the Cup lobby, with the Cup's wording
+[+3.8s] PASS A a guest's phone has no team controls (no Make teams, no Edit teams)
+[+3.9s] PASS A the host's Make teams opens the teams sheet in the Cup lobby
+[+3.9s] PASS A "Make 2 teams" from the sheet: the server has 2 teams with all 5 players
+[+4.8s] PASS A moved from the sheet: Coral Keku, Amina, Zawadi; Sun Baraka, Wanjiru — {"player-1":"team-coral","player-2":"team-coral","player-4":"team-sun","player-3":"team-coral","player-5":"team-sun"}
+[+4.9s] PASS A a rename from the sheet reaches the server and a guest's card
+[+4.9s] PASS A …and back to Team Coral
+[+5.0s] PASS A Done closes the sheet
+[+5.0s] PASS A Edit teams opens it again, with the teams as set
+[+5.3s] PASS A after the host's reload, Edit teams still opens the sheet with the same teams
+[+5.4s] PASS A a guest still has no team controls and no sheet
+[+5.4s] PASS A Wanjiru's phone (320 px) shows she's on Team Sun
+[+5.4s] PASS A in a Cup there is no "play the next games individually" switch
+[+5.5s] PASS B Tug of War can be Official in the Cup: Official is enabled, no practice-only note
+[+5.6s] PASS B the host's start is Official, and says it counts toward the Family Cup
+[+5.6s] PASS B a guest's lobby says Tug of War will be Official
+[+5.7s] PASS B the game started as Official — {"official":true,"status":"briefing"}
+[+5.7s] PASS B it plays with the Cup's teams — {"player-1":"team-coral","player-2":"team-coral","player-3":"team-coral","player-4":"team-sun","player-5":"team-sun"}
+[+45.7s] PASS C bout 1: Sun wins (2.0 per player against 1.0) — [{"teamId":"team-coral","right":3,"size":3,"mult":1,"pull":1,"place":2,"points":75},{"teamId":"team-sun","right":4,"size":2,"mult":1,"pull":2,"place":1,"points":100}]
+[+91.9s] PASS C bout 2: Sun wins (2.0 per player against 1.0) — [{"teamId":"team-coral","right":3,"size":3,"mult":1,"pull":1,"place":2,"points":75},{"teamId":"team-sun","right":4,"size":2,"mult":1,"pull":2,"place":1,"points":100}]
+[+137.7s] PASS C bout 3: Sun wins (2.0 per player against 1.0) — [{"teamId":"team-coral","right":3,"size":3,"mult":1.2,"pull":1.2,"place":2,"points":75},{"teamId":"team-sun","right":4,"size":2,"mult":1,"pull":2,"place":1,"points":100}]
+[+143.8s] PASS D the game finished and counts officially — {"status":"finished","counts":true}
+[+143.8s] PASS D placed by team: Sun's players 100, Coral's 0 — {"player-1":0,"player-2":0,"player-3":0,"player-4":100,"player-5":100}
+[+143.8s] PASS D the standings are the team placements — {"player-1":0,"player-2":0,"player-3":0,"player-4":100,"player-5":100}
+[+143.8s] PASS D Baraka's day score is 100 (a day with only a team game uses the team average) — {"playerId":"player-4","dayScores":[100],"counted":[100],"qualifyingDays":1,"base":100,"participationBonus":0,"finaleBonus":0,"total":100,"eligible":false,"countedDailyWins":1,"countedMedian":100}
+[+143.8s] PASS D Keku's results say it was Official, as a team game
+[+143.8s] PASS D the results' comment is about the teams, not teammates "tied for first"
+[+143.8s] PASS D the TV's final shows the Family Cup after this game, Sun first
+[+143.9s] PASS D+ the TV's final standings go by team place: Sun's two 1st, Coral's three 2nd (not 3rd), each with its team
+[+145.1s] PASS E the Cup screen lists Tug of War with the server's team placements
+[+145.1s] PASS E the note explains team placement and the 75/25 day
+[+145.2s] PASS E 320 px: the Cup screen has no sideways scroll
+[+145.3s] PASS F Baraka's lobby: the last game is Sun's win, and his team's
+[+145.3s] PASS F Keku's lobby: his team came 2nd of 2
+[+145.4s] PASS F the TV's lobby list names the winning team, not teammates
+[+145.6s] PASS F the night card's words name the team: "Tug of War: Team Sun wins"
+[+147.1s] PASS G casual: the host's Make teams opens the sheet
+[+147.2s] PASS G casual: 2 teams made from the sheet
+[+147.4s] PASS G made a Family Cup from the room menu, its teams kept
+[+147.5s] PASS G in the Cup, the host's Edit teams opens the sheet with the night's teams
+[+147.5s] PASS G a move from the sheet reaches the server
+[+147.9s] PASS G after a reload, Edit teams opens it again, Juma where he was moved
+[+147.9s] PASS G guests in the Cup have no team controls and no sheet
+[+147.9s] PASS G a guest sees which team he's on
+[+148.1s] CUP TEAM GAMES PASSED
+[+148.1s] MCHEZO_DRIVER_STATS {"browsers":1,"contexts":9,"pages":9,"peakOpenPages":9}
+
+# PASS (exit 0) in 148.1s | cpu 7.8s, peak memory 293 MB

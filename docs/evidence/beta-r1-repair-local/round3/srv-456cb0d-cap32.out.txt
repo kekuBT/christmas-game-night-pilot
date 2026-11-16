@@ -1,0 +1,23 @@
+zod exposure through the server on the mitigated tree; old space capped at 32 MB; node v22.23.4; server pid 5069; 2026-11-15T23:33:40.157Z
+  [after start and setup] heapUsed now 12168 kB, peak sampled 13812 kB; heapTotal peak 21312 kB; RSS now 79588 kB, peak (VmHWM) 79588 kB
+valid questions (10): 10 requests, statuses {"200":10}, latency p50 4.7 ms, p95 7.7 ms, max 7.7 ms, response 1249 bytes at most
+  [valid use] heapUsed now 13193 kB, peak sampled 13192 kB; heapTotal peak 21568 kB; RSS now 80052 kB, peak (VmHWM) 80052 kB
+sequential fq-flat-invalid x100: 100 requests, statuses {"400":100}, latency p50 2.1 ms, p95 4.8 ms, max 6.7 ms, response 91 bytes at most
+  [sequential fq-flat-invalid] heapUsed now 17731 kB, peak sampled 19379 kB; heapTotal peak 35016 kB; RSS now 88760 kB, peak (VmHWM) 88808 kB
+sequential fq-nested-empty x100: 100 requests, statuses {"400":100}, latency p50 4.2 ms, p95 7.5 ms, max 10.4 ms, response 91 bytes at most
+  [sequential fq-nested-empty] heapUsed now 12179 kB, peak sampled 20799 kB; heapTotal peak 53712 kB; RSS now 115876 kB, peak (VmHWM) 116148 kB
+sequential pb-flat-invalid x100: 100 requests, statuses {"400":100}, latency p50 2.5 ms, p95 5 ms, max 8.3 ms, response 106 bytes at most
+  [sequential pb-flat-invalid] heapUsed now 11970 kB, peak sampled 13420 kB; heapTotal peak 47728 kB; RSS now 115960 kB, peak (VmHWM) 117528 kB
+sequential pb-nested-empty x100: 100 requests, statuses {"400":100}, latency p50 4 ms, p95 7.4 ms, max 8.3 ms, response 106 bytes at most
+  [sequential pb-nested-empty] heapUsed now 12250 kB, peak sampled 15112 kB; heapTotal peak 49152 kB; RSS now 115460 kB, peak (VmHWM) 117528 kB
+sequential pb-empty-objects x100: 100 requests, statuses {"400":100}, latency p50 3.9 ms, p95 7.1 ms, max 9.7 ms, response 106 bytes at most
+  [sequential pb-empty-objects] heapUsed now 12792 kB, peak sampled 17204 kB; heapTotal peak 50432 kB; RSS now 115888 kB, peak (VmHWM) 117528 kB
+concurrent 16 clients x 25 (wall 600 ms, 666.8 requests/s): 400 requests, statuses {"400":400}, latency p50 17.8 ms, p95 40.1 ms, max 169.1 ms, response 106 bytes at most
+  bystander GET /health during it: 9 requests, statuses {"200":9}, latency p50 17.1 ms, p95 36.5 ms, max 36.5 ms, response 0 bytes at most
+  [concurrent] heapUsed now 12665 kB, peak sampled 33833 kB; heapTotal peak 66608 kB; RSS now 91204 kB, peak (VmHWM) 138376 kB
+after: valid question 200, valid lineup 200 ({"ok":true,"party":{"revision":1,"lineup":{"expectedPlayers":2,"budgetMinutes":3...), /health 200
+after: the room's Family Questions view (host projection 200): {"ready":11,"needed":3,"writers":[{"playerId":"player-1","count":11}]}
+  [after] heapUsed now 11748 kB, peak sampled 11747 kB; heapTotal peak 46144 kB; RSS now 91232 kB, peak (VmHWM) 138376 kB
+GC: 210 collections traced; the largest heap V8 saw when it started one: 33.3 MB (old space cap 32 MB)
+server exit: {"code":0,"signal":null}; OOM in its output: false
+SERVER EXPOSURE RUN PASSED: every worst-case body refused with 400, the server stayed up under a 32 MB old space, valid requests worked afterwards

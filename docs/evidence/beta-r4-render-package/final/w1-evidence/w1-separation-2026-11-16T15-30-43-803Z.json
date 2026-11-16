@@ -1,0 +1,60 @@
+{
+  "tool": "scripts/beta/w1-check.mjs",
+  "mode": "separation",
+  "origin": "https://cgn-w1.test:18443",
+  "startedAt": "2026-11-16T15:30:43.803Z",
+  "trustProxy": "2",
+  "localAddress": "127.0.0.2",
+  "connect": "127.0.0.1:18443",
+  "requests": [
+    {
+      "label": "enter from the second network",
+      "method": "POST",
+      "scheme": "https",
+      "path": "/beta/enter",
+      "sentHeaders": [
+        "content-type: application/x-www-form-urlencoded",
+        "origin: https://cgn-w1.test:18443"
+      ],
+      "status": 303,
+      "setCookie": "<present>",
+      "location": "/",
+      "ms": 36,
+      "at": "2026-11-16T15:30:43.803Z"
+    },
+    {
+      "label": "api with the new cookie",
+      "method": "GET",
+      "scheme": "https",
+      "path": "/games",
+      "sentHeaders": [
+        "cookie: <redacted>"
+      ],
+      "status": 200,
+      "setCookie": null,
+      "location": null,
+      "ms": 9,
+      "at": "2026-11-16T15:30:43.840Z"
+    }
+  ],
+  "checks": [
+    {
+      "name": "3 separation: from another network, right after forgery, the right code gets 303 and a cookie (not 429): addresses are told apart, so the proxy count is NOT TOO LOW",
+      "ok": true,
+      "detail": "status 303",
+      "at": "2026-11-16T15:30:43.840Z"
+    },
+    {
+      "name": "3 separation: the API then answers 200 with that cookie",
+      "ok": true,
+      "detail": "status 200",
+      "at": "2026-11-16T15:30:43.849Z"
+    }
+  ],
+  "separation": {
+    "status": 303,
+    "cookie": true
+  },
+  "finishedAt": "2026-11-16T15:30:43.849Z",
+  "verdict": "PASSED"
+}

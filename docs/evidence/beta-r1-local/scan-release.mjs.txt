@@ -1,0 +1,36 @@
+// Beta R1 evidence: what the release package holds, secret-shaped strings in it and in the tracked tree, and every
+// external URL in the shipped code. Usage: node scan-release.mjs <repo> <empty-out-dir>
+import { execFileSync } from "node:child_process";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+const [repo, out] = process.argv.slice(2);
+execFileSync(process.execPath, ["scripts/release/pack.mjs", "--out", out, ...(process.env.ALLOW_DIRTY ? ["--allow-dirty"] : [])], { cwd: repo, stdio: ["ignore", "ignore", "inherit"] });
+const walk = (d) => readdirSync(d).flatMap((f) => { const x = join(d, f); return statSync(x).isDirectory() ? walk(x) : [x]; });
+const files = walk(out).map((f) => f.slice(out.length + 1)).sort();
+const SECRET = /-----BEGIN [A-Z ]*PRIVATE KEY-----|\bAKIA[0-9A-Z]{16}\b|\bgh[pousr]_[A-Za-z0-9]{30,}|\bsk-[A-Za-z0-9_-]{20,}|\bxox[abpr]-[A-Za-z0-9-]{10,}|\b(?:api[_-]?key|secret|password|access[_-]?token)\s*[:=]\s*["'][^"'\s]{12,}["']/i;
+// The pattern itself, checked on samples (so a silent regex mistake can't pass the scan).
+const samples = { pem: "-----BEGIN RSA PRIVATE KEY-----", aws: "AKIAABCDEFGHIJKLMNOP", gh: "ghp_" + "a".repeat(36), sk: "sk-" + "b".repeat(24), assign: 'apiKey = "abcdefghijklmnop"', benign: "const password = input.value;" };
+console.log("## pattern self-check");
+for (const [k, v] of Object.entries(samples)) console.log(`${k}: ${SECRET.test(v) ? "matches" : "no match"}`);
+console.log(`\n## release.json\n${readFileSync(join(out, "release.json"), "utf8").trim()}`);
+const byTop = {};
+for (const f of files) { const top = f.split("/").slice(0, f.startsWith("apps/") ? 3 : (f.startsWith("content/") ? 2 : 1)).join("/"); byTop[top] = (byTop[top] ?? 0) + 1; }
+console.log(`\n## package contents: ${files.length} files`);
+for (const [k, n] of Object.entries(byTop)) console.log(`${String(n).padStart(4)}  ${k}`);
+const leaks = files.filter((f) => !/\.(png|woff2?|ico|webp)$/.test(f) && SECRET.test(readFileSync(join(out, f), "utf8")));
+console.log(`\n## secret-shaped strings in the package: ${leaks.length}`); for (const l of leaks) console.log(l);
+const tracked = execFileSync("git", ["ls-files"], { cwd: repo, encoding: "utf8" }).split("\n").filter(Boolean);
+const tLeaks = tracked.filter((f) => !/\.(png|jpe?g|woff2?|ico|webp|pdf)$/.test(f)).filter((f) => { try { return SECRET.test(readFileSync(join(repo, f), "utf8")); } catch { return false; } });
+console.log(`\n## secret-shaped strings in the ${tracked.length} tracked files: ${tLeaks.length}`); for (const l of tLeaks) console.log(l);
+const sensitiveNames = tracked.filter((f) => /(^|\/)\.env|\.pem$|\.key$|\.p12$|id_rsa|(^|\/)data\/|backup/i.test(f));
+console.log(`\n## tracked files with sensitive-looking names: ${sensitiveNames.length}`); for (const l of sensitiveNames) console.log(l);
+console.log("\n## external URLs in shipped code (dist/ and apps/web/dist/), with the files that hold them");
+const urls = new Map();
+for (const f of files.filter((f) => /^(dist|apps\/web\/dist)\/.*\.(js|html|css|json|webmanifest)$/.test(f))) {
+  for (const m of readFileSync(join(out, f), "utf8").matchAll(/(?:https?:)?\/\/[a-z0-9.-]+\.[a-z]{2,}(?:\/[^\s"'`)<>\\]*)?/gi)) {
+    const u = m[0]; if (/^\/\/(?:localhost|127\.0\.0\.1)/.test(u)) continue;
+    const host = u.replace(/^(?:https?:)?\/\//, "").split("/")[0];
+    if (!urls.has(host)) urls.set(host, new Set()); urls.get(host).add(f);
+  }
+}
+for (const [h, fs] of [...urls.entries()].sort()) console.log(`${h}  <-  ${[...fs].join(", ")}`);

@@ -1,0 +1,24 @@
+
+== S0 control: forwarder "same-origin-only", MCHEZO_PUBLIC_ORIGIN=https://cs-3153.app.test:44863
+   Listening on 127.0.0.1; public origin https://cs-3153.app.test:44863.
+   {"entered":false,"gateStatus":403}
+PASS S0 the forwarded URL as public origin: the code form is refused 403 (the reviewer's observation, reproduced) — gate 403
+
+== S1 route A: forwarder "same-origin-only", MCHEZO_PUBLIC_ORIGIN=https://localhost:3153
+   Listening on 127.0.0.1; public origin https://localhost:3153.
+   {"entered":true,"gateStatus":303,"cookie":"cgn_beta secure=true httpOnly=true sameSite=Lax","health":"456cb0de3bfea99b2c47234e5729eb6b03b53efc","roomStatus":201,"ws":"projection","foreignPost":403,"foreignWs":403,"foreignOriginsSeenByApp":["https://cs-3154.app.test:46237"]}
+PASS S1 entry through the gate's code form — gate 303
+PASS S1 the cookie is Secure, HttpOnly, SameSite=Lax — cgn_beta secure=true httpOnly=true sameSite=Lax
+PASS S1 /health names the candidate — 456cb0de3bfea99b2c47234e5729eb6b03b53efc
+PASS S1 the API: a room is created (201) — 201
+PASS S1 the WebSocket opens and gets the room — projection
+PASS S1 another origin's POST is refused (403), its Origin passed through — 403; the app saw ["https://cs-3154.app.test:46237"]
+PASS S1 another origin's WebSocket handshake is refused (403) — 403
+
+== S2 route A, forwarder rewriting every Origin: forwarder "all", MCHEZO_PUBLIC_ORIGIN=https://localhost:3153
+   Listening on 127.0.0.1; public origin https://localhost:3153.
+   {"entered":true,"gateStatus":303,"cookie":"cgn_beta secure=true httpOnly=true sameSite=Lax","health":"456cb0de3bfea99b2c47234e5729eb6b03b53efc","roomStatus":201,"ws":"projection","foreignPost":201,"foreignWs":101,"foreignOriginsSeenByApp":["https://localhost:3153"]}
+PASS S2 (the danger the probe rules out) another origin's POST now creates a room — 201
+PASS S2 (the danger the probe rules out) another origin's WebSocket now opens — 101
+
+ROUTE A TEST PASSED

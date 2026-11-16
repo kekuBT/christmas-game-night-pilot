@@ -1,5 +1,7 @@
 # Real-device acceptance test: Mchezo on real phones
 
+> **For the private beta (Beta R2):** the launch checks are in [§7](#7-beta-launch-checks-real-phones-and-the-host-beta-r2). They test the production package through the real HTTPS address and record a go/no-go. Sections 1–6 below are the earlier development-server run on the home Wi-Fi.
+
 **Goal:** one real game session on real iPhones and Android phones, on your home Wi-Fi, that feels smooth and fun, with every problem written down so it can be fixed.
 
 **Cost:** nothing. The app runs on your own computer and the phones reach it over your Wi-Fi. There is no deployment, tunnel, public address or external service. If home Wi-Fi turns out not to work (see "If phones can't connect"), stop and tell me: I'll present the alternatives and ask before using any of them.
@@ -304,3 +306,66 @@ Earlier device checklists ([DEVICE_ACCEPTANCE_CHECKLIST.md](DEVICE_ACCEPTANCE_CH
 - whether it is fun.
 
 *Note:* inside the cloud sandbox where this was prepared, browser WebSockets to a non-localhost address are refused by the sandbox's own network proxy. With the proxy taken out of the path they connect normally. This is a property of that sandbox, not of the app or of a home network.
+
+---
+
+## 7. Beta launch checks: real phones and the host (Beta R2)
+
+**When:** after the owner's **Approval 1** (private target-host validation; the runbook's [two approvals](beta/beta-r1-release.md#two-approvals-before-anyone-is-invited-beta-r3)), on the chosen host, against the **isolated validation install** (throwaway data folder and access code; runbook Stage 1), before anyone else is invited.
+- **What these checks feed:** **Approval 2,** for invitations.
+- **The handoffs:** [6908014247](https://github.com/kekuBT/christmas-game-night-pilot/pull/43#issuecomment-6908014247) and [6909443770](https://github.com/kekuBT/christmas-game-night-pilot/pull/43#issuecomment-6909443770).
+- **The draft record** for the pinned artifact: [beta-go-no-go-DRAFT-7097ac2.md](device-testing/beta-go-no-go-DRAFT-7097ac2.md). Sections 1–6 test a development server on the home Wi-Fi. This section tests **the exact production package** (`7097ac2`, recorded in [`docs/beta/release-7097ac2.md`](beta/release-7097ac2.md)) **through the intended HTTPS proxy**, at the real address, with the real access code.
+
+**What it never does:** change the package, hide or remove a game, or use the beta's data for anything but the beta. The playable catalog stays exactly as shipped. Results go into the go/no-go record: copy [`device-testing/BETA_GO_NO_GO_TEMPLATE.md`](device-testing/BETA_GO_NO_GO_TEMPLATE.md) to `device-testing/beta-go-no-go-YYYY-MM-DD.md` (no access code, no family data in it).
+
+**Devices:** at least one **iPhone with Safari** and one **Android phone with Chrome**, on their normal settings, plus the TV (or a laptop as the TV). For each one, record the model, the OS and browser versions, and its network (home Wi-Fi or mobile data).
+
+### 7.1 On the phones
+
+| # | Do this | Pass if |
+|---|---|---|
+| P1 | **The gate.** On each phone, open `https://<host>/`. Enter a wrong code, then the right one. | No certificate warning. The wrong code gets "That code didn't work…" and stays on the gate. The right one opens the app. |
+| P2 | **Invite by QR.** The host (iPhone) taps **Host a game**, then Invite. The Android phone scans the QR with its camera; the iPhone does the same from another host's room, or the roles are swapped. | The phone lands on the gate if it hasn't entered the code yet, and after the code on the join screen with the room code filled in. |
+| P3 | **Manual join.** A phone types the 6-character code in **Join a game**. | It joins the same room, and the name appears once. |
+| P4 | **The TV.** The TV opens `https://<host>/tv` and types the room code. | It watches without taking a seat. |
+| P5 | **Reconnect.** During a game, lock one phone for 30 s, then unlock it. Switch another to a different app and back. Toggle airplane mode on one for 10 s. | Each comes back to the same seat and the live game, with no second seat. A "reconnecting" note may show briefly. |
+| P6 | **Small-screen lock and continue.** Play Casual **Everyday Trivia** with both phones. On the smaller one, lock an answer. | **Next question** is on screen before the room's progress, with no scrolling, and opens the next question. After the last answer: "All your answers are in", and no Next question. |
+| P7 | **TV privacy, through a rematch.** Watch the TV during P6, then at the end, then after **Play again**. | During play, the TV shows no answer, and no correct answer before the round ends. At the end it shows the review and scores matching the phones. After Play again, both seats are kept, readiness resets, and the TV again shows no answers. |
+| P8 | **A reload mid-game.** Reload one phone during a question. | Same seat, same question, and its earlier answers are kept. |
+
+**For every row, record:** ✅, ❌ or ⚠️; the time; the room code (it is not secret once the night is over); and, for any ❌ or ⚠️, a screenshot or screen recording plus what you expected and what happened. Severity follows section 5. **Any Blocker is a no-go.**
+
+### 7.2 On the host
+Run these with the release runbook ([`docs/beta/beta-r1-release.md`](beta/beta-r1-release.md)) open: its commands are the ones to use. Who runs them: the owner, or the person they name, with shell access to the host.
+
+| # | Check | Pass if | Evidence to keep |
+|---|---|---|---|
+| H1 | **The revision.** On the host: the artifact gate's output (runbook "Promoting it", step 1, run in Stage 1). It checks the archive's full SHA-256, `release.json`, the inventory digest and the installed packages, and prints `VERIFIED` or `STOP`. For the record, also `sha256sum` the archive. From a phone's network: `curl -s https://<host>/health`. | The gate printed `VERIFIED 7097ac2…`; the archive's hash is the audited one (`a693c543…3a5131`); `/health` says `{"ok":true,"revision":"7097ac2…"}` | The gate's output, the hash and the `/health` line |
+| H2 | **Restart with persistence.** After P1–P8, with the room still there, wait for a quiet moment and run `systemctl restart christmas-game-night`. | `[restore] 1 room(s) restored, 0 not loaded` (or the real count) in `journalctl`. The phones reconnect to the same room by themselves; the TV too. | The restore line; a note of what the phones showed |
+| H3 | **An independent backup.** Stop the service, `datatool backup --data <the data folder in use>` into `/var/backups/christmas-game-night/`, `datatool verify`, start it again. On the isolated preview the folder is `/var/lib/cgn-validation`; name the backup `validation-<date>`. Then copy the backup folder to the off-host place named in read-only check R4. | `backup OK` and `verify OK`. The off-host copy has the same files: `(cd <backup folder> && find . -type f -exec sha256sum {} + \| sort \| sha256sum)` gives the same value on both sides. | The tool's lines; both values |
+| H4 | **Restore into an isolated folder,** as the service user: the runbook's restore drill, using `restore --owner cgn`, `check` as `cgn`, the drill server on port 3999, then removing the drill copy. | `restore OK`; `check OK: N room(s)`; the drill server logs the same rooms; the live data folder is untouched | The tool's lines and the drill server's restore line |
+| H5 | **The stop with no previous release** (first install). Agree a 2-minute window with the family: `systemctl stop christmas-game-night`, open the site on a phone, then `systemctl start christmas-game-night`. A later release instead rehearses the runbook's rollback, to the release it replaces. | While stopped: the proxy's error or the maintenance page, and the data folder in use untouched (`ls -la`; on the isolated preview, `/var/lib/cgn-validation`). After the start: `/health` gives the same revision, and the room is still there. | What the phone showed; the `ls -la` |
+| H6 | **No public way around the proxy.** From a phone on mobile data, try `http://<host's public address>:3000/health`. Skip this for H1, LAN only, and use the home Wi-Fi instead. | It fails to connect: the server listens on 127.0.0.1 only | The phone's error |
+
+### 7.3 Go or no-go
+- **Go:** every row in 7.1 and 7.2 passes or has an accepted ⚠️ with a note, and the record names:
+  - the audited archive's SHA-256;
+  - the host route chosen in the preflight;
+  - the backup location.
+- **No-go:** any ❌ in P1, P5–P8 or H1–H4. Also a certificate warning, an answer shown on the TV during play, or a lost seat or score.
+  - **Stop:** keep the service stopped if anything is at risk, and keep the data.
+  - **Report:** open an issue without the code or family data.
+  - **Then:** the AGENTS.md safety rule applies: a failing test, then a fix, then a new review.
+- **Who decides:** the owner signs the record, and that sign-off is **Approval 2**. ChatGPT reviews it. Claude can't run any of these checks (no access to the host or the phones) and can only review the records posted.
+
+### 7.4 Pending checks, with their evidence and who can do them
+
+| Check | Evidence | Who can perform it |
+|---|---|---|
+| The audited archive's SHA-256 | `sha256sum` of `/workspaces/mchezo-r5-review-7097ac2/mchezo-7097ac2.tgz` and its inventory digest | Whoever holds the review Codespace (ChatGPT's audit environment, or the owner) |
+| The host and route choice, and the read-only preflight R1–R8 | The completed Stage 0 table (runbook, "The order of execution") and the account pages read | The owner, with ChatGPT reviewing |
+| The artifact gate and route checks V1–V3 | `VERIFIED` from the gated block, then V1–V3 on the running isolated preview | The owner or the person with host access |
+| The route proof (one test room on a throwaway install) | `/health`, the proxy count, and a second phone joining live | The owner or the person they name |
+| P1–P8 on an iPhone (Safari) and an Android phone (Chrome) | This section's rows, screenshots, device table | The owner and family members, at the real address |
+| H1–H6 on the host | The outputs listed above | The owner or the person with host access |
+| The go/no-go record | `device-testing/beta-go-no-go-YYYY-MM-DD.md` | The owner signs; ChatGPT reviews |
