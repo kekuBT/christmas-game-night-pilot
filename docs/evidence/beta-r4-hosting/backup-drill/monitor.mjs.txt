@@ -1,0 +1,40 @@
+// Beta R4 backup drill: watches one cgn-backup run from outside.
+//   node monitor.mjs <run dir> <data dir> <out.json>
+// Records the first moment the hold exists AND the server process is gone (stoppedAt), the SHA-256 of every data file
+// at that moment (the same selection as datatool's backup: top-level *.json and *.json.prev except temporary files, and
+// quarantine/*), and the first moment a new server process is recorded after the hold ends (restartedAt).
+import { createHash } from "node:crypto";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+const [run, data, outFile] = process.argv.slice(2);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
+const pidFile = join(run, "server.pid"), hold = join(run, "hold");
+const readPid = () => { try { return Number(readFileSync(pidFile, "utf8").trim()) || 0; } catch { return 0; } };
+function hashes() {
+  const out = {};
+  for (const name of readdirSync(data).sort()) {
+    const p = join(data, name);
+    if (name === "server.lock" || name.includes(".tmp-") || name === "archive") continue;
+    if (statSync(p).isDirectory()) {
+      if (name === "quarantine") for (const q of readdirSync(p).sort()) out[`quarantine/${q}`] = createHash("sha256").update(readFileSync(join(p, q))).digest("hex");
+      continue;
+    }
+    if (/\.json(\.prev)?$/.test(name)) out[name] = createHash("sha256").update(readFileSync(p)).digest("hex");
+  }
+  return out;
+}
+const firstPid = readPid();
+const deadline = Date.now() + 120_000;
+const res = { firstPid };
+while (!existsSync(hold)) { if (Date.now() > deadline) throw new Error("no hold appeared"); await sleep(5); }
+res.holdSeenAt = Date.now();
+while (alive(firstPid)) { if (Date.now() > deadline) throw new Error("the server never stopped"); await sleep(5); }
+res.stoppedAt = Date.now();
+res.stoppedHashes = hashes();
+while (existsSync(hold) || readPid() === 0 || readPid() === firstPid || !alive(readPid())) { if (Date.now() > deadline) throw new Error("no restart"); await sleep(5); }
+res.restartedAt = Date.now();
+res.newPid = readPid();
+writeFileSync(outFile, JSON.stringify(res, null, 1));
+console.log(`monitor: hold seen, server ${firstPid} gone at +${res.stoppedAt - res.holdSeenAt} ms, ${Object.keys(res.stoppedHashes).length} data files hashed, new server ${res.newPid} after ${res.restartedAt - res.stoppedAt} ms`);

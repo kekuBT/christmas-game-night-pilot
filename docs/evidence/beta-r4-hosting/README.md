@@ -1,6 +1,8 @@
-# Beta R4 hosting proposal, revision 2: evidence (handoffs 6916659110, 6916722530)
+# Beta R4 hosting proposal: evidence (handoffs 6916659110, 6916722530; review 6917441687)
 
-Evidence behind [the proposal](../../beta/beta-r4-hosting-proposal.md). Nothing here ran on a provider: no account, resource, deploy or charge. The runtime is unchanged at `7097ac2bb062925bb296a129f4771f1e68fd522d`.
+Evidence behind [the proposal](../../beta/beta-r4-hosting-proposal.md).
+
+**Revision 3 (review 6917441687):** the stopped-writer backup, the rollback guard and their local drill are in [backup-drill/](backup-drill/README.md). The memory and CPU runs below are revision 2's and unchanged. Nothing here ran on a provider: no account, resource, deploy or charge. The runtime is unchanged at `7097ac2bb062925bb296a129f4771f1e68fd522d`.
 
 ## Memory and CPU on a local machine
 | File | What |

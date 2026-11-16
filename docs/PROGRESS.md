@@ -3334,3 +3334,23 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Not done:** no account, resource, deploy, DNS change, port, charge, implementation change or gate rerun. Beta HOLD. #42 separate.
 - **Next:** ChatGPT's recommendation and the owner-facing cost approval. Then the owner's decisions and an execution approval for the validation list in the proposal.
 - **Risk:** the measurements ran on this session's machine without answers; the real instance, the disk's ownership and the proxy count are unverified.
+
+## Beta R4 hosting proposal, revision 3: a stopped-writer backup, ingress and rollback rules (review 6917441687; docs and evidence only)
+- **Brief:** ChatGPT kept Render preferred, and blocked the operator plan.
+  - **Blocking:** two matching file lists don't prove a consistent backup. Enforce quiescence, with fail-closed rules, encrypted private storage, access and retention; demonstrate it locally; propose the smallest slice if the tools aren't enough.
+  - **Also:** make ingress and rollback acceptance explicit; separate the baseline from a cap; add a production-mode validation workload.
+  - **Acknowledged** in 6917502657, at 8:16 a.m. ET, with a 3 h estimate. I withdrew revision 2's "take it twice" claim.
+- **Done:** `docs/beta/beta-r4-hosting-proposal.md`, revision 3.
+  - **The backup:** the server exits (graceful `SIGTERM`), then `datatool backup` runs without `--allow-running` and holds the lock for the whole copy; `verify`; `serverWasRunning: false`; then encryption to the owner's `age` public key. `BACKUP_OK` only if every step passed; every failure path is fail-closed.
+  - **The smallest slice:** Render's disk is reachable only from the running instance, so stopping the server needs a container entrypoint that keeps the instance up. Three proposed deploy-side shell scripts, not deployed: `cgn-entrypoint`, `cgn-backup`, `cgn-authorize`.
+  - **Ingress:** a new dedicated Hobby workspace, because Render's private network spans a workspace and region and can't be blocked on Hobby. `MCHEZO_TRUST_PROXY` only picks the address the wrong-code limits count; it is settled by a forgery test and a separation test on the paid service itself.
+  - **Rollback:** no one-click rollback; roll back by a revert-commit deploy. **The guard:** the entrypoint refuses (exit 78) unless the environment matches the configuration recorded on the disk, so a rollback to old environment values fails closed.
+  - **Cost:** $7.25/month baseline; Render has no overall cap; bandwidth overage is uncapped; a Pro workspace would add $25.
+  - **Validation workload W1–W8**, for a later approval.
+- **Evidence:** `docs/evidence/beta-r4-hosting/backup-drill/`.
+  - **The drill:** the unchanged server in production mode under the proposed scripts, with live play (answers and Memory Book notes).
+  - **The cases:** the backup and its consistency checks; the checker's own negatives; the failure cases N1–N5; restore; the rollback guard G1–G4.
+  - **Runs:** 7 in development (run 2 timed out; run 5 failed and exposed a checker gap, then fixed), then a final run on the committed files.
+- **Not done:** no account, resource, deploy, exposure, charge, runtime change or gate rerun. Beta HOLD. #42 queued as is.
+- **Next:** ChatGPT's review and the owner's approvals, as listed in the proposal.
+- **Risk:** the drill is local; Render-side behaviour (the entrypoint as first process, the SSH user and environment, health-check timing, disk ownership) is unverified until W4–W7.

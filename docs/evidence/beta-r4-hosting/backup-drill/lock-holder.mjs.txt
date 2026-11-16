@@ -1,0 +1,9 @@
+// Beta R4 backup drill: holds a data folder's lock the way `datatool backup` does, until SIGTERM.
+//   node lock-holder.mjs <repo root> <data dir>
+const [root, data] = process.argv.slice(2);
+const { DataDirLock } = await import(`${root}/dist/server/datalock.js`);
+const lock = new DataDirLock(data, "backup");
+await lock.acquire();
+console.log("HOLDING");
+process.on("SIGTERM", async () => { await lock.release(); console.log("RELEASED"); process.exit(0); });
+setInterval(() => {}, 1000);

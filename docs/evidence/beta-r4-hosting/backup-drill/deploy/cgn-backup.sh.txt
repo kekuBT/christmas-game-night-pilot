@@ -1,0 +1,78 @@
+#!/bin/sh
+# cgn-backup: PROPOSED deploy file for the Render route (Beta R4, review 6917441687). Not part of the runtime.
+# A backup of the game data taken with the writer STOPPED, verified, then encrypted to the owner's public key.
+# Run over SSH on the instance, between sessions, with Render's maintenance mode on (public traffic refused).
+#
+# The consistency rule: the server process has EXITED (its SIGTERM handler runs between event-loop turns, and every
+# save is synchronous inside a turn, so no save is half done), and `datatool backup` (without --allow-running) holds
+# the data folder's lock for the whole copy: it refuses if any process still holds it, and no server can start until
+# it ends. The copy is therefore one state of the folder, with no writer at all. The manifest must record
+# serverWasRunning: false.
+#
+# Fail-closed rules:
+# - Prints "BACKUP_OK <file> sha256=<hash>" ONLY after the copy, `datatool verify`, the manifest check and the
+#   encryption all succeeded. Anything else prints BACKUP_FAILED and exits non-zero; no step after it may count on a
+#   backup (a deploy, a restore, a data-folder change all require this run's BACKUP_OK).
+# - Checks everything it can BEFORE stopping the server (tools, the recipient key, the folders, a running server).
+# - The hold is released on every exit path (trap), so the entrypoint restarts the server; the data folder itself is
+#   only ever read.
+# - A partial copy left by a failure has no verified manifest, so `datatool verify` refuses it.
+set -eu
+RUN=${CGN_RUN_DIR:-/tmp/cgn}
+APP=${CGN_APP_DIR:-/app}
+DATA=${MCHEZO_DATA_DIR:-}
+ROOT=${CGN_BACKUP_ROOT:-/var/data/backups}
+RECIPIENT=${CGN_BACKUP_RECIPIENT:-}
+LIMIT=${CGN_BACKUP_LIMIT_S:-30}
+fail() { echo "BACKUP_FAILED: $*" >&2; exit 1; }
+# An SSH session may not carry the service's environment: read what is missing from the running server instead.
+from_server() { [ -s "$RUN/server.pid" ] && tr '\0' '\n' < "/proc/$(cat "$RUN/server.pid")/environ" 2>/dev/null | sed -n "s/^$1=//p"; }
+[ -n "$DATA" ] || DATA=$(from_server MCHEZO_DATA_DIR || true)
+[ -n "$RECIPIENT" ] || RECIPIENT=$(from_server CGN_BACKUP_RECIPIENT || true)
+
+# 0. Preflight: nothing has stopped yet.
+[ -n "$DATA" ] || fail "MCHEZO_DATA_DIR is not set"
+[ -d "$DATA" ] || fail "no data folder at $DATA"
+case "$RECIPIENT" in age1*) ;; *) fail "CGN_BACKUP_RECIPIENT is not an age public key (age1...)";; esac
+command -v age >/dev/null 2>&1 || fail "age is not installed"
+command -v timeout >/dev/null 2>&1 || fail "timeout is not installed"
+[ ! -e "$RUN/hold" ] || fail "a hold already exists ($RUN/hold): another backup may be running"
+[ -s "$RUN/server.pid" ] || fail "no running server recorded in $RUN/server.pid (is cgn-entrypoint PID 1?)"
+pid=$(cat "$RUN/server.pid")
+kill -0 "$pid" 2>/dev/null || fail "the recorded server (pid $pid) isn't running"
+mkdir -p "$ROOT" || fail "cannot create $ROOT"
+chmod 700 "$ROOT" || fail "cannot make $ROOT private"
+STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+OUT="$ROOT/$STAMP"
+ARCHIVE="$ROOT/cgn-$STAMP.tar.age"
+[ ! -e "$OUT" ] && [ ! -e "$ARCHIVE" ] || fail "$OUT or $ARCHIVE already exists"
+
+# 1. Hold, then stop the server gracefully. From here the entrypoint will not restart it.
+: > "$RUN/hold"
+trap 'rm -f "$RUN/hold"' EXIT
+t0=$(date +%s)
+echo "cgn-backup: stopping the server (pid $pid)"
+kill -TERM "$pid" 2>/dev/null || fail "could not signal the server (pid $pid)"
+i=0
+while kill -0 "$pid" 2>/dev/null; do
+  i=$((i + 1)); [ "$i" -le 100 ] || fail "the server did not stop within 10 s"
+  sleep 0.1
+done
+echo "cgn-backup: server stopped"
+
+# 2. Copy under the data lock, then verify. No --allow-running: a live writer makes it refuse.
+cd "$APP" || fail "no app folder at $APP"
+timeout "$LIMIT" node dist/server/datatool.js backup --data "$DATA" --out "$OUT" || fail "datatool backup failed or timed out"
+node dist/server/datatool.js verify --backup "$OUT" || fail "datatool verify failed"
+grep -q '"serverWasRunning": false' "$OUT/manifest.json" || fail "the manifest does not record a stopped server"
+
+# 3. Release the hold: the entrypoint restarts the server. The rest reads only the copy.
+rm -f "$RUN/hold"
+t1=$(date +%s)
+echo "cgn-backup: hold released after $((t1 - t0)) s; the entrypoint restarts the server"
+
+# 4. Encrypt to the owner's public key. Only the owner's private key, kept off Render, can read the result.
+tar -C "$ROOT" -cf - "$STAMP" | age -r "$RECIPIENT" -o "$ARCHIVE.part" || fail "encryption failed"
+mv "$ARCHIVE.part" "$ARCHIVE" || fail "could not finish $ARCHIVE"
+sum=$(sha256sum "$ARCHIVE" | cut -d' ' -f1)
+echo "BACKUP_OK $ARCHIVE sha256=$sum server_stopped_s=$((t1 - t0))"

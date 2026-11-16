@@ -1,0 +1,35 @@
+// Beta R4 backup drill: the checker's own negatives. Damages a COPY of a decrypted backup in one way, so check.mjs
+// must fail on it.
+//   node mutate.mjs <drop-acked|add-later|flip-byte> <play.json> <monitor.json> <backup copy>
+//   drop-acked  removes one answer that was acknowledged before the stop (an older state than the stop)
+//   add-later   adds one answer that was first sent after the restart (a state from the future)
+//   flip-byte   adds one space to a saved file (not the folder as it was at the stop)
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+const [kind, playFile, monFile, dir] = process.argv.slice(2);
+const play = JSON.parse(readFileSync(playFile, "utf8"));
+const mon = JSON.parse(readFileSync(monFile, "utf8"));
+const roomFile = (roomId) => readdirSync(dir).find((n) => n === `${roomId}.json`);
+function edit(roomId, fn) {
+  const f = join(dir, roomFile(roomId));
+  const room = JSON.parse(readFileSync(f, "utf8"));
+  let done = false;
+  const walk = (o) => { if (done || !o || typeof o !== "object") return; if (o.answers && typeof o.answers === "object" && !Array.isArray(o.answers) && fn(o.answers)) { done = true; return; } for (const v of Object.values(o)) walk(v); };
+  walk(room);
+  if (!done) throw new Error(`nothing to change in ${f}`);
+  writeFileSync(f, JSON.stringify(room));
+}
+if (kind === "drop-acked") {
+  const a = play.answers.find((x) => x.ackAt && x.ackAt < mon.stoppedAt);
+  edit(a.roomId, (ans) => (ans[a.playerId]?.[a.questionId] !== undefined ? (delete ans[a.playerId][a.questionId], true) : false));
+  console.log(`   mutated: removed ${a.playerId}'s answer to ${a.questionId}`);
+} else if (kind === "add-later") {
+  const a = play.answers.find((x) => x.firstAttemptAt > mon.restartedAt);
+  edit(a.roomId, (ans) => (ans[a.playerId] && ans[a.playerId][a.questionId] === undefined ? ((ans[a.playerId][a.questionId] = 0), true) : false));
+  console.log(`   mutated: added ${a.playerId}'s later answer to ${a.questionId}`);
+} else if (kind === "flip-byte") {
+  const f = readdirSync(dir).find((n) => n.endsWith(".book.json"));
+  writeFileSync(join(dir, f), readFileSync(join(dir, f), "utf8") + " ");
+  console.log(`   mutated: one space added to ${f}`);
+} else throw new Error(`unknown mutation ${kind}`);
