@@ -62,3 +62,69 @@ Each run's points differ because the guest's answers are chosen at random. The r
 - **Only the guest's network is interrupted.** The host and the TV stay connected, as in the runbook.
 - **The browser** is `chrome-headless-shell` 153 (build 1243), through `MCHEZO_CHROMIUM_PATH`, because the build the pinned Playwright expects (1248) isn't installed here.
 - **The host's answers** go through the API, so that the round finishes quickly. The guest's go through the UI.
+
+## Repair for review 6930033578: harness isolation, and rendered evidence
+**The review's two blocking findings**, both confirmed at `d630a94`:
+1. **`w3-rehearsal.sh` wasn't isolated.**
+   - It used the fixed name `w3-svc`, ran `docker rm -f -v w3-svc` before `docker run`, and again in cleanup, whatever happened.
+   - It carried on after failed startup steps.
+2. **R2's and R5's "host and TV" checks didn't look at the host's screen.**
+   - R2 compared two fresh API reads of the TV projection.
+   - R5 checked the TV's text, plus another API read.
+
+### The reproduction, before any change
+**`scripts/beta/w3-harness-selftest.sh --mock-only` against the reviewed wrapper `d630a94`:** 10 checks passed and **26 failed** ([before/mock-selftest-on-d630a94.log](repair/before/mock-selftest-on-d630a94.log)).
+- **The setup:** a mock `docker`, `curl` and `node` on `PATH` record every call, with a pre-existing container named `w3-svc` in the mock's state. Nothing real was started.
+- **In all five cases** (a failed `docker run`, a missing image, a container exiting before ready, a wrong revision, a failed authorization), the old wrapper:
+  - deleted the pre-existing `w3-svc` before `docker run`;
+  - then authorized (`docker exec`);
+  - started the proxy and the driver (`node`);
+  - removed by the shared name twice more.
+- **M1's recorded calls:**
+  1. `docker rm -f -v w3-svc`, which removed the pre-existing container;
+  2. `docker run` (failed);
+  3. 80 health probes;
+  4. `docker exec … cgn-authorize`;
+  5. `node render-like-proxy.mjs`;
+  6. `node w3-rehearsal.mjs`;
+  7. `docker rm -f -v w3-svc`;
+  8. `docker rm -f -v w3-svc`.
+
+### What changed
+- **`scripts/beta/w3-rehearsal.sh`:**
+  - **Identity:** a run id, a unique container name `w3-svc-<run id>`, and the label `w3.owner=<run id>`.
+  - **Removal:** only the container ID this run's `docker run` returned (or, after a failed `docker run`, one carrying this run's label), and only after reading that label back. Nothing is deleted in advance.
+  - **Port preflight:** if any of 18443, 18480 or 18080 is already listening, nothing starts.
+  - **Every startup step checked,** each before the next:
+    1. the image;
+    2. `docker run`;
+    3. readiness (`/health`, with the container still running);
+    4. the `/health` revision equal to the pin `7097ac2…`;
+    5. `cgn-authorize`;
+    6. the proxy listening;
+    7. 3 listeners.
+
+    A failure stops the run before authorization or any browser work.
+  - **Owned processes:** the processes it starts carry `W3_OWNER=<run id>` in their environment, and cleanup stops only those.
+  - **Private files:** the code, its env file and the TLS key live in a private `mktemp -d` (mode 700), removed on exit. The work directory, its per-run logs and the evidence are kept.
+  - **Cleanup** runs on success, failure, SIGINT and SIGTERM, and runs twice: the second pass must find nothing.
+- **`scripts/beta/w3-rehearsal.mjs`:**
+  - **R2, rendered:** the host's phase from its own page (its question screen) and the TV's from its own page (`Featured question (Q1 of 10) · each phone goes at its own pace` in its top bar), each checked, then both against the server's status.
+  - **R5, rendered:** the host's, the guest's and the TV's own pages must each show the finished round, with every player's recorded score in their standings (the phone's Standings step, the TV's Leaderboard). The server-record checks (10 answers once, and the score from the recorded answers) stay separate and are labelled API.
+  - **API labels:** presence ("away", "back") is labelled an API observation. The host's API calls go through the context's request client, outside the page.
+  - **`--control stale-host`:** freezes the host's page before R5; the host's rendered R5 check must then fail.
+- **`scripts/beta/w3-harness-selftest.sh` (new):** M1–M5 with the mock; D1–D6 with real Docker, a sentinel `w3-svc` container and a look-alike sentinel process.
+- **`docs/beta/render-w3.md`:**
+  - during a round, presence shows only on a waiting phone (not on a question screen or the TV);
+  - how to read the final standings on the TV (Leaderboard) and on the phones (Standings);
+  - the presence rows of the budget are now informational;
+  - the rehearsal section describes the isolation and the controls.
+
+### Every run of the repair, in order
+| Run | Code | Verdict | Evidence |
+|---|---|---|---|
+| Reproduction | the reviewed wrapper at `d630a94`, mock only | **FAILED as expected:** 10 passed, 26 failed (above) | [before/mock-selftest-on-d630a94.log](repair/before/mock-selftest-on-d630a94.log) |
+| Mock self-test, dev 1 | the repaired wrapper, working tree | PASSED 36/36 | [dev/mock-selftest-dev1.log](repair/dev/mock-selftest-dev1.log) |
+| Rehearsal, dev trial 1 | working tree | **FAILED, 5 checks. My driver's selectors, not the app:**<ul><li>Trivia's spectator TV is its own stage (top bar and leaderboard), not the generic TV show I first read;</li><li>a finished Trivia phone shows a step-through review whose Standings are one tap away.</li></ul>The harness side passed: its own container removed, the second cleanup a no-op, nothing left, the secret scan empty. | [dev/trial1.log](repair/dev/trial1.log) and its JSON |
+| Rehearsal, dev trial 2 | working tree, the selectors fixed | PASSED, every check, the rendered R2 and R5 included. The two players tied (480–480), because both answered option 0, so I made the host answer option 1. | [dev/trial2.log](repair/dev/trial2.log) and its JSON |
+| Full self-test, dev 1 | working tree | **PASSED 93/93:**<ul><li>M1–M5;</li><li>D1 a passing run beside both sentinels;</li><li>D2 a port conflict, where the unrelated listener got 0 connections;</li><li>D3 never ready;</li><li>D4 a wrong revision;</li><li>D5 a SIGTERM during the browser work: exit 143, nothing of its own left;</li><li>D6 the stale-host control: exactly one check failed, the host's rendered R5 check.</li></ul>D1 and D6 tied again (0–0 and 240–240). | [dev/selftest-dev1.log](repair/dev/selftest-dev1.log) |
