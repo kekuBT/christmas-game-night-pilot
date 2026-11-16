@@ -55,22 +55,22 @@
 ## Sources (official, read at pinned commits of the providers' own documentation repositories)
 The providers' websites were not reachable from this session (blocked: `supabase.com`, `fly.io`, `render.com`, `www.koyeb.com`, `railway.com`, `docs.cloud.google.com`, `docs.oracle.com`, `aws.amazon.com`, `developers.cloudflare.com`, `docs.deno.com`). Their official documentation repositories on GitHub were readable:
 - **Fly.io**, [superfly/docs @ 0408586](https://github.com/superfly/docs/tree/040858621eea858652b156a71ffe6472e3af724b):
-  - `about/pricing.mdx`: no free tier for new organizations; the Machine and volume prices.
-  - `about/free-waiver.mdx`: under $5 waived; personal org, Pay As You Go, card on file.
-  - `about/free-trial.mdx`: a $1 credit for 7 days; trial Machines stop after 5 minutes.
-  - `volumes/overview.mdx`: one server per volume, no replication, the snapshot policy.
-  - `networking/websockets.mdx`: idle connections stay open; 1012 on a restart or auto-stop.
-  - `reference/configuration.mdx`: `SIGINT` by default.
-  - `networking/request-headers.mdx`: `Fly-Client-IP`, `X-Forwarded-For`.
+  - [about/pricing.mdx](https://github.com/superfly/docs/blob/040858621eea858652b156a71ffe6472e3af724b/about/pricing.mdx): no free tier for new organizations; the Machine and volume prices.
+  - [about/free-waiver.mdx](https://github.com/superfly/docs/blob/040858621eea858652b156a71ffe6472e3af724b/about/free-waiver.mdx): under $5 waived; personal org, Pay As You Go, card on file.
+  - [about/free-trial.mdx](https://github.com/superfly/docs/blob/040858621eea858652b156a71ffe6472e3af724b/about/free-trial.mdx): a $1 credit for 7 days; trial Machines stop after 5 minutes.
+  - [volumes/overview.mdx](https://github.com/superfly/docs/blob/040858621eea858652b156a71ffe6472e3af724b/volumes/overview.mdx): one server per volume, no replication, the snapshot policy.
+  - [networking/websockets.mdx](https://github.com/superfly/docs/blob/040858621eea858652b156a71ffe6472e3af724b/networking/websockets.mdx): idle connections stay open; 1012 on a restart or auto-stop.
+  - [reference/configuration.mdx](https://github.com/superfly/docs/blob/040858621eea858652b156a71ffe6472e3af724b/reference/configuration.mdx): `SIGINT` by default.
+  - [networking/request-headers.mdx](https://github.com/superfly/docs/blob/040858621eea858652b156a71ffe6472e3af724b/networking/request-headers.mdx): `Fly-Client-IP`, `X-Forwarded-For`.
 - **Supabase**, [supabase/supabase @ 311e2c7](https://github.com/supabase/supabase/tree/311e2c721c1e3dc613cb5161f101eaf68ebe5b27):
-  - `apps/docs/content/guides/functions/limits.mdx`: 150 s Free, 400 s paid; 2 s CPU.
-  - `apps/docs/content/guides/platform/backups.mdx`: daily backups from Pro; free projects should export their own.
-  - `packages/shared-data/plans.ts`: Free, 500 MB, paused after 1 week inactive, 2 active projects; Pro $25/month.
-  - `apps/docs/content/guides/realtime/limits.mdx`: 200 concurrent connections on Free.
+  - [apps/docs/content/guides/functions/limits.mdx](https://github.com/supabase/supabase/blob/311e2c721c1e3dc613cb5161f101eaf68ebe5b27/apps/docs/content/guides/functions/limits.mdx): 150 s Free, 400 s paid; 2 s CPU.
+  - [apps/docs/content/guides/platform/backups.mdx](https://github.com/supabase/supabase/blob/311e2c721c1e3dc613cb5161f101eaf68ebe5b27/apps/docs/content/guides/platform/backups.mdx): daily backups from Pro; free projects should export their own.
+  - [packages/shared-data/plans.ts](https://github.com/supabase/supabase/blob/311e2c721c1e3dc613cb5161f101eaf68ebe5b27/packages/shared-data/plans.ts): Free, 500 MB, paused after 1 week inactive, 2 active projects; Pro $25/month.
+  - [apps/docs/content/guides/realtime/limits.mdx](https://github.com/supabase/supabase/blob/311e2c721c1e3dc613cb5161f101eaf68ebe5b27/apps/docs/content/guides/realtime/limits.mdx): 200 concurrent connections on Free.
 - **Cloudflare**, [cloudflare/cloudflare-docs @ ada7e33](https://github.com/cloudflare/cloudflare-docs/tree/ada7e3355579070344a6893e8285ec357b7ff65d):
-  - `src/content/partials/durable-objects/do-plans-note.mdx`: SQLite-backed Durable Objects on Free.
-  - `src/content/partials/durable-objects/durable-objects-pricing.mdx`: the Free plan's daily limits.
-  - `src/content/docs/durable-objects/platform/pricing.mdx`: past a Free limit, operations fail.
+  - [src/content/partials/durable-objects/do-plans-note.mdx](https://github.com/cloudflare/cloudflare-docs/blob/ada7e3355579070344a6893e8285ec357b7ff65d/src/content/partials/durable-objects/do-plans-note.mdx): SQLite-backed Durable Objects on Free.
+  - [src/content/partials/durable-objects/durable-objects-pricing.mdx](https://github.com/cloudflare/cloudflare-docs/blob/ada7e3355579070344a6893e8285ec357b7ff65d/src/content/partials/durable-objects/durable-objects-pricing.mdx): the Free plan's daily limits.
+  - [src/content/docs/durable-objects/platform/pricing.mdx](https://github.com/cloudflare/cloudflare-docs/blob/ada7e3355579070344a6893e8285ec357b7ff65d/src/content/docs/durable-objects/platform/pricing.mdx): past a Free limit, operations fail.
 
 **Not verified here** (their official pages were blocked, and no official docs repository was found): Render, Koyeb, Railway, Google Cloud (Cloud Run, the e2-micro VM), Oracle Cloud Always Free, AWS and Deno Deploy. If ChatGPT wants them compared, their official pages need to be read where they are reachable. Nothing above relies on them.
 
