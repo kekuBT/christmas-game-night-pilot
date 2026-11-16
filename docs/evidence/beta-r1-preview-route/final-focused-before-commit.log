@@ -1,0 +1,13 @@
+
+ RUN  v2.1.9 /tmp/claude-0/-home-user-christmas-game-night-pilot/c8f4dd86-aef3-5b12-8dce-261f52d89a59/scratchpad/wtb1
+
+ ✓ tests/preview-probe-verdict.test.ts (16 tests) 15ms
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  00:33:39
+   Duration  453ms (transform 63ms, setup 0ms, collect 88ms, tests 15ms, environment 0ms, prepare 78ms)
+
+vitest exit 0
+tsc exit 0
+eslint exit 0

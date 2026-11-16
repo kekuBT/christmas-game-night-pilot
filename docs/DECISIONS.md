@@ -2162,3 +2162,12 @@ Handoff 6813167965 (with the Stage 9.2 clearance). Spec: `docs/stage9/stage93.md
     - **Allowing localhost origins broadly, or replacing Origin blindly:** it would accept the sibling-origin attack shown in S2.
     - **`gh codespace ports forward`:** it forwards to the machine running `gh`, not the reviewer's cloud browser.
   - **The fallback:** route B, a browser inside the Codespace with only its display forwarded. Proposed, not tested here.
+- **D-BR1R-10 The preview probe counts only positive, attributed evidence** (review 6903845075; revises D-BR1R-09's precondition).
+  - **What it needs to pass:**
+    - the target's own fetch POST, form POST and WebSocket, each observed with a valid https Origin, all the same value;
+    - **and**, for each transport, a comparison request observed carrying the comparison page's own origin.
+  - **Refusals:** a comparison request with no Origin or the own value (`UNSAFE`); own values that differ (`INCONSISTENT`); an own Origin that is missing, invalid or not https (`UNSUITABLE`).
+  - **`INCOMPLETE`:** anything missing or unattributed.
+  - **What it is not:** the page's completion marker is a hint only. A request that didn't arrive proves nothing.
+  - **What a pass is:** evidence for review, covering only the traffic observed. The audit stays on hold until a route has been validated in the Codespace with the original protections intact.
+  - **The fallback:** route B keeps the browser's own Origin, and TLS validation through a session CA trusted only in that browser's NSS database. Its browser half is tested here; the remote desktop needs authorization first.

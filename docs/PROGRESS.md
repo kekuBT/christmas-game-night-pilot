@@ -3138,3 +3138,22 @@ Evidence is in `docs/evidence/gate-runs/` and `docs/evidence/stage72-local/`. Th
 - **Failures:** the first probe-test run failed on my harness's own setup (the wrong browser build); rerun with the gates' Chromium.
 - **No product source changed,** so no gate ran. Lint on the new script passed.
 - **Next:** the reviewer runs step 1 (the probe) in the Codespace, then the audit, if route A applies.
+
+## Beta R1-R: the preview probe repaired, review 6903845075 (completed; diagnostic and docs only)
+- **Brief:** the probe's verdict passed partial and Origin-less records: missing comparison requests were read as "stopped by the forwarder", and the page's `done` marker as evidence. Fail closed, test offline, document the scope and a fallback that keeps the browser's Origin and TLS validation. No product source or gate changes. Acknowledged in 6903864088.
+- **Estimate:** about 1 h 15 min, written at 7:20 p.m. ET.
+- **Done:**
+  - **The probe:** `scripts/preview/probe-forwarded-origin.mjs`, with a pure exported `classify()` and types in `.d.mts`. Importing it starts nothing.
+  - **The tests:** `tests/preview-probe-verdict.test.ts`, 16/16.
+  - **The docs:** `docs/beta/beta-r1-preview-route.md` has the evidence rules, the audit on hold, and route B with TLS validation intact.
+  - **The record:** D-BR1R-10 and the evidence README.
+- **Runs:**
+  - **The first probe's classifier,** replayed: the review's three false passes reproduce.
+  - **The repaired classifier:** they fail closed.
+  - **The stand-in:** 5/5, including a forwarder that blocks foreign requests (`INCOMPLETE`).
+  - **Route B's browser half,** with real certificate validation: 7/7, including the control.
+- **Failures:** one harness run timed out (stale wait text) and left a probe running; it was stopped, and the harness was fixed.
+- **No product source changed,** so no gate ran. Typecheck and lint exit 0.
+- **Next:**
+  - **The reviewer:** reviews the repaired probe; with authorization, runs step 1 in the Codespace.
+  - **Route B:** needs its prerequisites authorized.

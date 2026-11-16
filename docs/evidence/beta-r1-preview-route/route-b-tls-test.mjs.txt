@@ -1,0 +1,81 @@
+// Route B's browser half, with TLS validation INTACT: Chromium on the same machine as the packed candidate (production),
+// through a TLS proxy whose certificate is issued by a CA made for this run. The CA is trusted only in an NSS database
+// under a throwaway HOME given to this browser; nothing ignores certificate errors (no ignoreHTTPSErrors, no
+// --ignore-certificate-errors*). No forwarder rewrites anything, so the browser's own Origin reaches the app.
+//   B0 control: the same browser setup with an EMPTY NSS database → the page fails with a certificate error
+//   B1 with the run's CA trusted: the gate, entry, cookie flags, /health, the API and the WebSocket all work, with the
+//      production origin check configured to the browser's real origin
+// The remote-desktop half (noVNC) is not tested here. Usage: node route-b-tls-test.mjs <packed release dir>
+import { execFileSync, spawn } from "node:child_process";
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { chromium } from "playwright";
+import { startForwarder } from "./fwd.mjs";
+
+const rel = process.argv[2];
+const CODE = "synthetic-preview-code-4417";
+const revision = JSON.parse(readFileSync(join(rel, "release.json"), "utf8")).revision;
+const dir = mkdtempSync(join(tmpdir(), "route-b-"));
+const sh = (cmd, args, opts = {}) => execFileSync(cmd, args, { stdio: ["ignore", "pipe", "pipe"], ...opts });
+let failures = 0;
+const check = (name, ok, detail = "") => { console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`); if (!ok) failures++; };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// A CA for this run, and a server certificate for *.app.test issued by it.
+sh("openssl", ["req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", join(dir, "ca.key"), "-out", join(dir, "ca.pem"), "-days", "1", "-subj", "/CN=route-b run CA", "-addext", "basicConstraints=critical,CA:TRUE", "-addext", "keyUsage=critical,keyCertSign,cRLSign"]);
+sh("openssl", ["req", "-newkey", "rsa:2048", "-nodes", "-keyout", join(dir, "srv.key"), "-out", join(dir, "srv.csr"), "-subj", "/CN=*.app.test"]);
+writeFileSync(join(dir, "ext.cnf"), "subjectAltName=DNS:*.app.test\nbasicConstraints=CA:FALSE\nextendedKeyUsage=serverAuth\nkeyUsage=digitalSignature,keyEncipherment\n");
+sh("openssl", ["x509", "-req", "-in", join(dir, "srv.csr"), "-CA", join(dir, "ca.pem"), "-CAkey", join(dir, "ca.key"), "-CAcreateserial", "-out", join(dir, "srv.pem"), "-days", "1", "-extfile", join(dir, "ext.cnf")]);
+const tls = { key: readFileSync(join(dir, "srv.key")), cert: readFileSync(join(dir, "srv.pem")) };
+
+// Two throwaway HOMEs for the browser: one with the run CA trusted in its NSS database, one empty (the control).
+const home = (name, trustCa) => {
+  const h = join(dir, name); const db = join(h, ".pki", "nssdb"); mkdirSync(db, { recursive: true });
+  sh("certutil", ["-d", `sql:${db}`, "-N", "--empty-password"]);
+  if (trustCa) sh("certutil", ["-d", `sql:${db}`, "-A", "-t", "C,,", "-n", "route-b-run-ca", "-i", join(dir, "ca.pem")]);
+  return h;
+};
+const trusted = home("home-trusted", true), empty = home("home-empty", false);
+console.log(`run CA trusted in ${trusted}/.pki/nssdb: ${sh("certutil", ["-d", `sql:${trusted}/.pki/nssdb`, "-L"]).toString().trim().split("\n").pop()}`);
+
+const fwd = await startForwarder("none", tls); // a plain TLS proxy: nothing rewritten
+const T = `https://cs-3153.app.test:${fwd.port}`;
+const server = spawn(process.execPath, ["dist/server/serve.js"], { cwd: rel, stdio: ["ignore", "pipe", "pipe"], env: { PATH: process.env.PATH, HOME: process.env.HOME, PORT: "3153", NODE_ENV: "production", MCHEZO_LISTEN_HOST: "127.0.0.1", MCHEZO_DATA_DIR: join(dir, "data"), MCHEZO_PUBLIC_ORIGIN: T, MCHEZO_BETA_ACCESS_CODE: CODE } });
+let out = ""; server.stdout.on("data", (d) => { out += d; }); server.stderr.on("data", (d) => { out += d; });
+for (let i = 0; i < 160 && !/Listening on/.test(out); i++) await sleep(100);
+console.log(`   ${(out.match(/Listening on[^\n]*/) ?? [out.slice(-200)])[0]}`);
+
+const launch = (h) => chromium.launch({ executablePath: process.env.MCHEZO_CHROMIUM_PATH, args: ["--host-resolver-rules=MAP *.app.test 127.0.0.1", "--no-proxy-server"], env: { PATH: process.env.PATH, HOME: h } });
+
+// B0: no trust → certificate error
+{
+  const b = await launch(empty); const ctx = await b.newContext(); const p = await ctx.newPage();
+  let err = ""; try { await p.goto(T + "/"); } catch (e) { err = String(e.message).split("\n")[0]; }
+  check("B0 control: with an empty trust store the page is refused with a certificate error", /ERR_CERT/.test(err), err);
+  await b.close();
+}
+// B1: run CA trusted → the full path works with validation on and the browser's own Origin
+{
+  const b = await launch(trusted); const ctx = await b.newContext(); const p = await ctx.newPage();
+  await p.goto(T + "/");
+  await p.fill("input[name=code]", CODE);
+  const [resp] = await Promise.all([p.waitForResponse((r) => r.url().includes("/beta/enter")), p.press("input[name=code]", "Enter")]);
+  check("B1 the code form is accepted (303) with the production origin check set to the browser's real origin", resp.status() === 303, `gate ${resp.status()}`);
+  await p.waitForLoadState("load");
+  const c = (await ctx.cookies(T)).find((x) => x.name === "cgn_beta");
+  check("B1 the cookie is Secure, HttpOnly, SameSite=Lax", !!c && c.secure && c.httpOnly && c.sameSite === "Lax", c ? `secure=${c.secure} httpOnly=${c.httpOnly} sameSite=${c.sameSite}` : "none");
+  const health = await p.evaluate(async () => (await (await fetch("/health")).json()).revision);
+  check("B1 /health names the candidate", health === revision, health);
+  const room = await p.evaluate(async () => { const r = await fetch("/rooms", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ kind: "casual" }) }); return { status: r.status, body: await r.json() }; });
+  check("B1 the API: a room is created (201)", room.status === 201, String(room.status));
+  const ws = await p.evaluate((id) => new Promise((res) => { const s = new WebSocket(location.origin.replace(/^http/, "ws") + `/?roomId=${id}&audience=tv`); const t = setTimeout(() => res("no message in 5 s"), 5000); s.onmessage = (m) => { clearTimeout(t); res(JSON.parse(m.data).kind); s.close(); }; s.onerror = () => { clearTimeout(t); res("error"); }; }), room.body.roomId);
+  check("B1 the WebSocket opens and gets the room", ws === "projection", ws);
+  const seen = [...new Set(fwd.log.filter((e) => e.originIn).map((e) => e.originIn))];
+  check("B1 every Origin the app received was the browser's own (nothing rewritten)", seen.length === 1 && seen[0] === T, JSON.stringify(seen));
+  await b.close();
+}
+server.kill("SIGTERM"); await new Promise((r) => server.on("exit", r));
+await fwd.close();
+console.log(failures ? `\nROUTE B TLS TEST FAILED (${failures})` : "\nROUTE B TLS TEST PASSED");
+process.exit(failures ? 1 : 0);

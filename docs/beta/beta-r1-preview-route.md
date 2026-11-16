@@ -1,6 +1,8 @@
 # Beta R1-R: a private route for the audit preview (handoff 6903638660)
 
-**Status:** an investigation and one proposed procedure. The beta stays on HOLD.
+**Status:** an investigation and one proposed procedure, with the probe repaired for review 6903845075. The beta stays on HOLD.
+- **The audit stays on hold** until an authorized private route has been **validated in the Codespace** with the original protections intact. Those are the exact-origin check, the beta gate, TLS validation in the browser, private visibility and synthetic data.
+- **The probe is evidence, not proof:** it covers only the traffic it observed.
 - **Not changed:** no product source and no production guard.
 - **Not touched:** no reviewer workspace, no public port, no tunnel account, no paid resource and no deployment.
 
@@ -56,18 +58,26 @@ ln -s <packed release>/node_modules node_modules          # for its one import, 
 node probe.mjs --target-port 3153 --other-port 3156 --out /workspaces/mchezo-evidence-beta-456cb0d/forwarded-origin-probe.json
 ```
 1. **Check visibility:** in the Codespace's Ports panel, **3153 and 3156 must both show Private**, which is the default.
-2. **Open the other port's page:** `https://<codespace>-3156.app.github.dev/`, in the cloud browser. It sends a POST, a form post and a WebSocket to 3153 **from another origin**, then shows "done".
+2. **Open the other port's page:** `https://<codespace>-3156.app.github.dev/`, in the cloud browser. It sends a fetch POST, a form POST and a WebSocket to 3153 **from another origin**, then says its script finished. That line only tells you the page is done. It is **not** evidence of what arrived; scripts finish on timeouts and errors too.
 3. **Open the target page:** `https://<codespace>-3153.app.github.dev/`. It sends the same three from its own origin, then shows the verdict.
 4. **Stop the probe:** Ctrl-C. The report stays in `--out`.
+
+**The evidence rules** (a pure function, `classify()`, tested offline in `tests/preview-probe-verdict.test.ts`). The verdict counts **only what arrived at the target**:
+- **Absence proves nothing:** a request that never arrived is missing evidence, never proof that the forwarder stopped it.
+- **The completion line is never evidence.**
+- **What a pass needs, both of:**
+  - **The app's own side:** its fetch POST, form POST and WebSocket all observed, each with a **valid https Origin**, all the same value.
+  - **The comparison side:** for **each** of the three transports, at least one comparison request observed **carrying the comparison page's own origin**.
 
 **Decide from the verdict:**
 | Verdict | Meaning | Next |
 |---|---|---|
-| `REWRITTEN_SAME_ORIGIN_ONLY` | The app's own form post, fetch and WebSocket all arrived with one value, the report's `ownOrigin`. The other origin's requests arrived as themselves, or never reached the app. | Step 2, with `MCHEZO_PUBLIC_ORIGIN` = `ownOrigin`, exactly as printed. |
-| `PRESERVED` | Same-origin requests keep the forwarded URL's own origin. | Step 2 with the forwarded URL itself. That contradicts 6903475177, so look at the report first. |
-| `UNSAFE` | A foreign request arrived with the app's own value, or with none. | **Stop route A.** Use route B. |
-| `INCONSISTENT` | The app's own requests arrived with different values, e.g. the WebSocket not rewritten like the POST. No single origin fits. | **Stop route A.** Use route B. |
-| `INCOMPLETE` | A step is missing; the report names it. | Repeat steps 2–3. |
+| `REWRITTEN_SAME_ORIGIN_ONLY` | Both pass conditions met. The own value, the report's `ownOrigin`, isn't the forwarded URL's origin, and no comparison request carried it. | Evidence for review of route A. Step 2, with `MCHEZO_PUBLIC_ORIGIN` = `ownOrigin`, exactly as printed. |
+| `PRESERVED` | Both pass conditions met, and the own value **is** the forwarded URL's origin. | Step 2 with the forwarded URL itself. That contradicts 6903475177, so look at the report first. |
+| `UNSAFE` *(refusal)* | A comparison request arrived with **no** Origin, or with the app's own value. The check couldn't refuse it. | **Stop route A.** Use route B. |
+| `INCONSISTENT` *(refusal)* | The app's own requests arrived with different values, e.g. the WebSocket not rewritten like the POST. No single origin fits. | **Stop route A.** Use route B. |
+| `UNSUITABLE` *(refusal)* | An own request arrived with no Origin, or one that isn't a valid https origin. An `http://localhost:…` value would drop the cookie's `Secure` flag. Or the own value equals the comparison origin. | **Stop route A.** Use route B. |
+| `INCOMPLETE` | Something required wasn't observed (named). Comparison requests carrying another value (e.g. `"null"`) are unattributed: they neither pass nor refuse. | Repeat steps 2–3 once. If the comparison requests still don't arrive (the forwarder may well refuse cross-origin requests to a private port), **route A can't be validated: use route B.** |
 
 ### Step 2: start the packed candidate (about 5 min)
 From the packed release directory:
@@ -117,9 +127,10 @@ I have no access to the Codespace, GitHub's forwarder or the cloud browser. So I
 - `http-only`: WebSockets not rewritten;
 - `none`: nothing rewritten.
 
-Headless Chromium played the browser.
+A fifth behaviour, `block-foreign`, refuses foreign requests at the forwarder, so the comparison requests never arrive. Headless Chromium played the browser.
 
-- **The probe:** each of the four behaviours gets the right verdict.
+- **The probe after the repair:** each of the five behaviours gets the right verdict. In particular, `block-foreign` gives `INCOMPLETE`; the first version of the probe would have passed it.
+- **The classifier offline:** 16/16. The review's three false passes reproduce on the first version (`f6647ee`) and now fail closed.
 - **Route A** with the **packed `456cb0d`** in production:
   - **S0 reproduces 6903475177:** with the forwarded URL as the public origin, the code form gets 403.
   - **S1, route A with `same-origin-only`:**
@@ -127,20 +138,43 @@ Headless Chromium played the browser.
     - **The sibling origin is refused:** its POST and WebSocket get 403, its Origin passed through unchanged.
   - **S2, route A with `all`:** the sibling page's POST **creates a room (201)** and its WebSocket **opens (101)**. That is why step 1 is a hard precondition.
 
-## Route B (fallback if the probe says UNSAFE or INCONSISTENT): the browser inside the Codespace
-**A proposal, not tested here.** Run the browser inside the Codespace and forward only its display.
-- **The display:** the devcontainer `desktop-lite` feature provides a light desktop and a noVNC web client on a port (6080 by default). It stays **private**, and the cloud browser opens `https://<codespace>-6080.app.github.dev/`.
-- **The browser inside:** in that desktop, the Codespace's own Chromium opens the packed candidate through a local TLS proxy, exactly as `scripts/check-beta-gate-https.mjs` does:
-  - public origin `https://beta.test:<port>`;
-  - `--host-resolver-rules`;
-  - the run's certificate trusted for that browser only.
-- **What is genuine:** the Origin, because no forwarder sits between that browser and the app. The forwarder carries only pixels. The production check runs unchanged.
-- **Already covered by the gates:** the in-machine half (packed production server, TLS proxy, Chromium on the same machine) runs in every gate as `check-beta-gate-https` (28 checks; it passed in targeted `20261115-233420-456cb0de-5276`).
-- **Not tested:** the desktop and noVNC display path.
-- **Its costs:**
-  - **A change to the Codespace:** adding the feature means rebuilding its container (or installing the packages by hand). That is the reviewer's environment, so it is the reviewer's call.
-  - **Clumsy interaction:** everything goes through a remote desktop.
-  - **Layouts:** phone sizes come from window size or device emulation.
+## Route B (the fallback when route A can't be validated): the browser inside the Codespace
+**It preserves the browser's original Origin and its TLS validation.** The browser runs inside the Codespace, next to the app, and only its display is forwarded.
+
+- **Where:** the packed candidate, a local TLS proxy and Chromium, all inside the Codespace.
+- **Its own origin:** Chromium opens `https://beta.test:<port>`, mapped to the proxy with `--host-resolver-rules`, and the app is configured with that exact origin. **No forwarder sits between the browser and the app,** so the app checks the browser's genuine Origin.
+- **TLS validation stays on.** A CA made for the session issues the proxy's certificate for `beta.test`. The CA is trusted **only** in an NSS database under a throwaway `HOME` given to that browser (`certutil -A -t "C,,"`). There is no `--ignore-certificate-errors`, no SPKI list and no `ignoreHTTPSErrors`; a certificate the browser can't validate is refused.
+- **The display:** a remote desktop with a noVNC client on a **private** port (e.g. 6080), opened by the cloud browser as `https://<codespace>-6080.app.github.dev/` with the owner's sign-in. The forwarder carries pixels and input, not the app's requests.
+
+**Tested here: the browser half** (`docs/evidence/beta-r1-preview-route/route-b-tls-run1.out.txt`), with the packed `456cb0d` in production and Chromium on the same machine. No certificate errors are ignored.
+- **B0, the control:** with an empty trust store the page is refused, `ERR_CERT_AUTHORITY_INVALID`.
+- **B1, with the session CA trusted in the browser's NSS database:**
+  - **Entry:** the code form gets 303.
+  - **The cookie:** `Secure`, `HttpOnly`, `SameSite=Lax`.
+  - **The candidate:** `/health` = `456cb0d`.
+  - **The app works:** the API (201) and the WebSocket (projection).
+  - **The Origin:** every one the app received was the browser's own, nothing rewritten.
+- **Also in every gate:** the packed server, a TLS proxy and Chromium on one machine are `check-beta-gate-https`. That run trusts its certificate with `ignoreHTTPSErrors`, which is why B1 was added.
+
+**Not tested here:** the remote desktop and noVNC display path, and the Codespace itself.
+
+**Prerequisites** (all in the reviewer's Codespace, $0, no new account or public port):
+- **A remote desktop with a web client:**
+  - **Option 1, the devcontainer feature `ghcr.io/devcontainers/features/desktop-lite`:** it needs a container rebuild.
+  - **Option 2, the same packages installed into the running container:** a VNC server, noVNC and a window manager. They are gone after a rebuild.
+
+  Neither is requested by review 6903845075 ("no rebuild of the active Codespace or new resource"). **Both need the owner's or reviewer's authorization first.**
+- **The tools:**
+  - a Chromium the remote desktop can run (Playwright's, or another);
+  - `openssl` and `certutil` (Debian/Ubuntu `libnss3-tools`).
+- **Ports:** the noVNC port stays **Private**. The app and the proxy listen on 127.0.0.1 only and are never forwarded.
+
+**Its exact limitations:**
+- **Interaction:** everything goes through a remote desktop (canvas clicks and typing), so it's slower.
+- **Several devices** are separate browser profiles (separate `HOME`s, each with the CA trusted) or windows on one desktop.
+- **Phone layouts** come from window size or device emulation, not a phone.
+- **No touch hardware,** and real phones remain untested.
+- **What the session CA covers:** it's trusted only by that browser profile and only for the session. Delete its database and key afterwards.
 
 ## Not recommended, and why
 - **`gh codespace ports forward`, or VS Code desktop's forwarding:**
@@ -156,10 +190,12 @@ Headless Chromium played the browser.
 ## Tested here vs proposed
 | | Tested here | Proposed only |
 |---|---|---|
-| The probe's verdicts under four forwarder behaviours | yes, against the stand-in | |
+| The probe's classifier, offline (the review's three false passes, refusals, `INCOMPLETE`, complete passes) | yes, 16/16 | |
+| The probe's verdicts under five forwarder behaviours, including one that blocks foreign requests | yes, against the stand-in | |
 | Route A with the packed `456cb0d` in production, its entry, API, WebSocket and the refusal of a sibling origin | yes, against the stand-in | |
 | GitHub's forwarder actually behaving as reported (F1) | **no: needs step 1 in the Codespace** | yes |
-| Route B (desktop-lite and noVNC) | only its in-machine half (`check-beta-gate-https`) | yes |
+| Route B's browser half, with TLS validation intact (session CA in an isolated NSS database) | yes, against the packed `456cb0d` | |
+| Route B's remote desktop and noVNC | | yes (prerequisites need authorization) |
 | F2 (GitHub's docs) and F3 (the live suffix list) | read through search summaries and `tldts` | |
 
 **Blocked for me:**
@@ -167,8 +203,8 @@ Headless Chromium played the browser.
 - **Primary sources:** reading `docs.github.com` and `publicsuffix.org` directly. They don't resolve from this session.
 
 ## ETA for the reviewer
-- **Route A:** step 1 about 10 min, steps 2 and 3 about 10 min, then the audit as planned.
-- **Route B,** if needed: about 45–60 min to add the desktop and set up the in-Codespace browser. That's a guess: it depends on the rebuild.
+- **Route A:** step 1 about 10 min, steps 2 and 3 about 10 min, then the audit as planned. This only applies if step 1 passes.
+- **Route B,** if needed and authorized: about 45–60 min to add the remote desktop and set up the in-Codespace browser with the session CA. That's a guess that depends on how the desktop is added.
 
 ## Estimate vs actual
 **Estimated:** about 2 h 10 min (written at 7:08 p.m. ET).
@@ -178,3 +214,12 @@ Headless Chromium played the browser.
 **The research went faster:** three of the primary sources weren't reachable from this session, so most of it came down to one verified report and the bundled suffix list.
 
 **The probe and the route-A test** went faster than planned because they reuse the packing and TLS patterns of `check-beta-gate-https`.
+
+## The repair for review 6903845075: estimate vs actual
+**Estimated:** about 1 h 15 min (written at 7:20 p.m. ET).
+
+**Actual: about 14 min** (7:20 to 7:34 p.m. ET, the commit). Then the report.
+
+**One extra run:** the harness timed out once on stale wait text and was rerun.
+
+**One extra test:** route B's browser half with a session CA, added so the fallback's TLS validation is tested rather than assumed.

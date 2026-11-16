@@ -8,6 +8,8 @@
 //   all               every Origin becomes https://localhost:<port>
 //   http-only         like same-origin-only, but WebSocket upgrades keep their Origin
 //   none              unchanged
+//   block-foreign     like same-origin-only, but a request whose Origin isn't the public URL's own is refused at the
+//                     forwarder (403, never reaches the app): comparison requests never arrive
 import https from "node:https";
 import http from "node:http";
 import net from "node:net";
@@ -46,9 +48,11 @@ export function startForwarder(mode, tls) {
     if (o === undefined) delete h.origin; else h.origin = o;
     return h;
   };
+  const blocked = (r) => mode === "block-foreign" && r.origin && r.origin !== `https://${r.host}`;
   const server = https.createServer(tls, (req, res) => {
     const r = route(req);
     if (!r) { res.writeHead(404); res.end(); return; }
+    if (blocked(r)) { log.push({ host: r.host, method: req.method, path: req.url, originIn: r.origin, originOut: null, status: 403, blockedAtForwarder: true }); res.writeHead(403); res.end(); return; }
     const headers = headersFor(req, r, false);
     const up = http.request({ host: "127.0.0.1", port: r.backend, method: req.method, path: req.url, headers }, (b) => {
       log.push({ host: r.host, method: req.method, path: req.url, originIn: r.origin ?? null, originOut: headers.origin ?? null, status: b.statusCode });
@@ -60,6 +64,7 @@ export function startForwarder(mode, tls) {
   server.on("upgrade", (req, socket, head) => {
     const r = route(req);
     if (!r) { socket.destroy(); return; }
+    if (blocked(r)) { log.push({ host: r.host, method: "UPGRADE", path: req.url, originIn: r.origin, originOut: null, status: 403, blockedAtForwarder: true }); socket.end("HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\n\r\n"); return; }
     const headers = headersFor(req, r, true);
     const b = net.connect(r.backend, "127.0.0.1", () => {
       b.write(`${req.method} ${req.url} HTTP/1.1\r\n` + Object.entries(headers).map(([k, v]) => `${k}: ${v}`).join("\r\n") + "\r\n\r\n");

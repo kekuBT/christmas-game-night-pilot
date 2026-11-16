@@ -1,0 +1,16 @@
+// Replays the classifier of f6647ee (its verdict() function, extracted verbatim) on the review's fixtures: in-memory
+// records only, no requests. Usage: node old-verdict-replay.mjs <probe-f6647ee.mjs.txt>
+import { readFileSync } from "node:fs";
+const src = readFileSync(process.argv[2], "utf8");
+const body = src.slice(src.indexOf("function verdict() {"), src.indexOf("function report()"));
+const TARGET_ORIGIN = "https://cs-3153.app.github.dev";
+const SAME = ["fetch-post", "form-post", "ws"], FOREIGN = ["xorigin-fetch-post", "xorigin-form-post", "xorigin-ws"];
+const run = (entries) => new Function("entries", "TARGET_ORIGIN", "SAME", "FOREIGN", `${body}; return verdict();`)(entries, TARGET_ORIGIN, SAME, FOREIGN);
+const own = (origin) => SAME.map((kind) => ({ where: "target", kind, origin }));
+const done = { where: "other", kind: "done", origin: "https://cs-3156.app.github.dev" };
+const cases = {
+  "1 three agreeing own samples + done, zero comparison": [...own("https://localhost:3153"), done],
+  "2 one comparison sample, two missing": [...own("https://localhost:3153"), { where: "target", kind: "xorigin-fetch-post", origin: "https://cs-3156.app.github.dev" }, done],
+  "3 three own samples with no Origin header": [...own(null), done],
+};
+for (const [name, entries] of Object.entries(cases)) { const r = run(entries); console.log(`f6647ee classifier, case ${name}: ${r.verdict} (ownOrigin ${JSON.stringify(r.ownOrigin ?? null)})`); }

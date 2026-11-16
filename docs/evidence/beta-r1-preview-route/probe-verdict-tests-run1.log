@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 <scratchpad>/wtb1
+
+ ✓ tests/preview-probe-verdict.test.ts (16 tests) 10ms
+
+ Test Files  1 passed (1)
+      Tests  16 passed (16)
+   Start at  00:23:05
+   Duration  455ms (transform 77ms, setup 0ms, collect 95ms, tests 10ms, environment 0ms, prepare 83ms)
+

@@ -1,0 +1,11 @@
+run CA trusted in /tmp/route-b-XXXX/home-trusted/.pki/nssdb: route-b-run-ca                                               C,,
+   Listening on 127.0.0.1; public origin https://cs-3153.app.test:35731.
+PASS B0 control: with an empty trust store the page is refused with a certificate error — page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://cs-3153.app.test:35731/
+PASS B1 the code form is accepted (303) with the production origin check set to the browser's real origin — gate 303
+PASS B1 the cookie is Secure, HttpOnly, SameSite=Lax — secure=true httpOnly=true sameSite=Lax
+PASS B1 /health names the candidate — 456cb0de3bfea99b2c47234e5729eb6b03b53efc
+PASS B1 the API: a room is created (201) — 201
+PASS B1 the WebSocket opens and gets the room — projection
+PASS B1 every Origin the app received was the browser's own (nothing rewritten) — ["https://cs-3153.app.test:35731"]
+
+ROUTE B TLS TEST PASSED
